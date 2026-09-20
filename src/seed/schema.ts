@@ -372,3 +372,10 @@ export interface Seed {
   certs: Cert[];
   subjects: Subject[];
 }
+
+/**
+ * The shape the browser sees. The unit checklists are served separately (see
+ * scripts/lib/vite-plugin-seed.ts), so a resource carries only the count, which is all a progress bar needs.
+ */
+export type AppResource = Omit<Resource, 'units'> & { unitCount: number };
+export type AppSeed = Omit<Seed, 'resources'> & { resources: AppResource[] };

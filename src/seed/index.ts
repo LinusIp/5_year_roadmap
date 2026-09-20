@@ -6,20 +6,22 @@
  * `unitCount`, which is all a progress bar needs.
  */
 import seed from 'virtual:atlas-seed';
-import type { Resource, Seed, Unit } from './schema.ts';
-
-export type AppResource = Omit<Resource, 'units'> & { unitCount: number };
-export type AppSeed = Omit<Seed, 'resources'> & { resources: AppResource[] };
+import type { Unit } from './schema.ts';
 
 export { seed };
 export type * from './schema.ts';
 
 let cache: Record<string, Unit[]> | null = null;
 
+/** Every checklist, loading the chunk on first use. */
+export async function loadAllUnits(): Promise<Record<string, Unit[]>> {
+  cache ??= (await import('virtual:atlas-units')).default;
+  return cache;
+}
+
 /** The unit checklist of one resource, loading the checklist chunk on first use. */
 export async function loadUnits(resourceId: string): Promise<Unit[]> {
-  cache ??= (await import('virtual:atlas-units')).default;
-  return cache[resourceId] ?? [];
+  return (await loadAllUnits())[resourceId] ?? [];
 }
 
 /** The checklists already in memory, or null before the first `loadUnits`. Lets a render avoid a flash. */
