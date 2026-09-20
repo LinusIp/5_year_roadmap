@@ -1,0 +1,86 @@
+# The phase table of the brief. `focus` is the table cell for each lane and is shown as that
+# lane's heading; the items themselves live in plan.yaml.
+# Stage 1 (years 1-3) is software. Stage 2 (years 4-5) is electrical and mechanical engineering.
+- id: y1-p0
+  year: 1
+  stage: 1
+  title: In flight
+  start: 2026-09-21
+  end: 2027-01-31
+  goal: Finish what is already running (ML Zoomcamp, 30 Days of Python, the Hugging Face courses, linear algebra, DSA) and ship small things every week.
+  focus:
+    A: Small finished games in the engine already learned; one game jam
+    B: "Python: 30 Days of Python, then small CLI tools"
+    C: ML Zoomcamp, plus the Hugging Face LLM Course and Agents Course
+    D: "Weekly mini-builds. Monthly: Zoomcamp midterm deployed, a Python CLI tracker, a RAG chatbot over own notes, Zoomcamp capstone + an agent with tools"
+    E: MIT 18.06 Linear Algebra + the current DSA course
+
+- id: y1-p1
+  year: 1
+  stage: 1
+  title: Fluency + CS core
+  start: 2027-02-01
+  end: 2027-08-31
+  goal: Become fluent in C and comfortable in C++, finish algorithms properly, and build neural networks from scratch.
+  focus:
+    A: Games in C with raylib/SDL, then start LearnOpenGL (last two months)
+    B: "C (CS50x, Beej's Guide, K&R), then C++ basics (learncpp.com)"
+    C: "Missing Semester, MIT 6.006 Algorithms, Karpathy Zero to Hero, fast.ai, begin CS:APP"
+    D: "micrograd + MNIST from scratch, Pong/Breakout in C, a shell in C, an image classifier on HF Spaces, Git in Python, first LearnOpenGL scene, nanoGPT reproduction"
+    E: MIT 18.01/18.02 Calculus; MIT 8.01 Classical Mechanics
+
+- id: y2
+  year: 2
+  stage: 1
+  title: Systems + rendering
+  start: 2027-09-01
+  end: 2028-08-31
+  goal: Understand the machine from the operating system to the database, and own a renderer and a 2D physics engine.
+  focus:
+    A: "LearnOpenGL complete, Ray Tracing in One Weekend, tinyrenderer, 2D rigid-body engine, OpenGL mini-engine, begin Vulkan"
+    B: Modern C++ in depth, then Rust (The Book, Rustlings)
+    C: "CMU 15-213/CS:APP labs, MIT 6.1810 Operating Systems, CMU 15-445 Databases, networking essentials (CS144 selected labs), Designing Data-Intensive Applications"
+    D: "Software rasterizer, path tracer, malloc + cache simulator, 2D rigid-body engine, xv6 write-up, buffer pool + B+tree, OpenGL mini-engine, Redis in Rust, LSM store, HTTP server, Vulkan model viewer, rate limiter + job queue"
+    E: MIT 18.03 Differential Equations; MIT 8.02 Electricity & Magnetism
+
+- id: y3
+  year: 3
+  stage: 1
+  title: Scalable systems + AI engineering + engines
+  start: 2028-09-01
+  end: 2029-08-31
+  goal: Build and operate distributed systems, train and serve language models, and finish stage 1 with an own 3D simulation engine.
+  focus:
+    A: "Vulkan (vulkan-tutorial, vkguide), compute shaders, 3D rigid-body engine (GJK/EPA, constraints), XPBD cloth/soft bodies, Stage 1 capstone: own 3D sim engine v1"
+    B: Rust in depth, then Go, then CUDA basics
+    C: "MIT 6.5840 Distributed Systems (all labs), system-design-primer + Kubernetes + cloud, Stanford CS224n, CS336 LM from Scratch, LLM Zoomcamp + MLOps Zoomcamp"
+    D: "Raft, sharded KV store, a URL shortener scaled on Kubernetes, 3D rigid bodies, a Kafka event pipeline, a transformer LM from scratch, Vulkan compute particles, LoRA fine-tune + evals, a production ML service, CUDA kernels, XPBD cloth; Stage 1 capstone"
+    E: Probability (MIT 6.041 / Stat 110); MIT 8.03 Vibrations & Waves; MIT 8.04 Quantum Physics I (stretch)
+
+- id: y4
+  year: 4
+  stage: 2
+  title: Electrical engineering
+  start: 2029-09-01
+  end: 2030-08-31
+  goal: Design, simulate, fabricate and measure real circuits and firmware; simulate everything studied before building it.
+  focus:
+    A: "Simulators for what is studied: SPICE-like circuit solver (modified nodal analysis), signal/DSP visualiser, multibody dynamics in own engine, GPU fluids"
+    B: Embedded C and embedded Rust on STM32/ESP32; Verilog/SystemVerilog on a low-cost FPGA
+    C: "MIT 6.002 Circuits & Electronics, MIT 6.003 Signals & Systems, MIT 6.004 Computation Structures, embedded systems (UT Austin), power electronics intro, control theory (Brian Douglas + MIT 2.004 / 6.302)"
+    D: "Lab time: breadboard, oscilloscope/logic analyser, KiCad. Measured circuits, own SPICE-like solver, a KiCad PCB, bare-metal STM32, FFT analyser, embedded Rust node, FPGA UART + VGA, RISC-V CPU, motor control, inverted pendulum, battery device, DAQ board"
+    E: "MIT 8.03 / 8.04 leftovers; MIT 3.091 or 5.111 chemistry; engineering math refresh (18.03, 18.06 applied)"
+
+- id: y5
+  year: 5
+  stage: 2
+  title: Mechanical engineering + mechatronics
+  start: 2030-09-01
+  end: 2031-08-31
+  goal: Design a machine in CAD, simulate it as a digital twin in the own engine, then build and control it.
+  focus:
+    A: "FEM solver (beams, then 2D elasticity), simple CFD, robot arm/vehicle simulator; final capstone: a machine designed in CAD, simulated in own engine, then built and controlled"
+    B: MATLAB/Octave + scientific Python (NumPy/SciPy/SymPy); CAD scripting; ROS 2 (C++/Python)
+    C: "MIT 2.001 Mechanics & Materials, MIT 2.003 Dynamics & Control, MIT 2.005 Thermal-Fluids, MIT 2.008 Design & Manufacturing, Northwestern Modern Robotics, MIT 6.832 Underactuated Robotics"
+    D: "CAD (SolidWorks/Fusion/Onshape/FreeCAD), 3D printing and machining basics. CAD part set, beam calculator, FEM solver, a mechanism, 2D CFD, a thermal model, a robot arm simulated then built with ROS 2, a learned simulator; final capstone"
+    E: MIT 5.60 Thermodynamics; quantum computing intro (IBM Quantum Learning); MIT 8.05 (stretch)

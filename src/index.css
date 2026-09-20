@@ -1,0 +1,256 @@
+@import "tailwindcss";
+
+/*
+ * Theme. Dark is the default; <html data-theme="light"> switches. Every colour in the app is one
+ * of the tokens below. The chart colours are the validated reference palette of the data-viz
+ * method (categorical slots in fixed order, a one-hue ordinal ramp for the heatmap, reserved
+ * status colours); both heatmap ramps pass the ordinal checks against their surface.
+ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --raised: #242422;
+  --line: #2c2c2a;
+  --line-strong: #383835;
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --ink-3: #94928b;
+  --accent: #3987e5;
+  --accent-text: #6da7ec;
+  --accent-fill: #256abf;
+  --accent-wash: rgba(57, 135, 229, 0.14);
+  --on-accent: #ffffff;
+
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #008300;
+  --series-7: #9085e9;
+  --series-8: #e66767;
+
+  /* Heatmap: level 0 recedes into the surface, level 4 is the brightest step. */
+  --heat-0: #242422;
+  --heat-1: #184f95;
+  --heat-2: #2a78d6;
+  --heat-3: #6da7ec;
+  --heat-4: #b7d3f6;
+
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+  --good-text: #3fc53f;
+  --warning-text: #fab219;
+  --serious-text: #ec835a;
+  --critical-text: #f08a8a;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --raised: #f1f0ec;
+  --line: #e1e0d9;
+  --line-strong: #c3c2b7;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --ink-3: #6b6a65;
+  --accent: #2a78d6;
+  --accent-text: #1c5cab;
+  --accent-fill: #256abf;
+  --accent-wash: rgba(42, 120, 214, 0.1);
+  --on-accent: #ffffff;
+
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #4a3aa7;
+  --series-8: #e34948;
+
+  --heat-0: #ebeae5;
+  --heat-1: #86b6ef;
+  --heat-2: #3987e5;
+  --heat-3: #1c5cab;
+  --heat-4: #0d366b;
+
+  --good-text: #006300;
+  --warning-text: #7a5200;
+  --serious-text: #9c3f17;
+  --critical-text: #a82323;
+}
+
+@theme inline {
+  --color-*: initial;
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-accent-fill: var(--accent-fill);
+  --color-accent-wash: var(--accent-wash);
+  --color-on-accent: var(--on-accent);
+  --color-good: var(--good);
+  --color-warning: var(--warning);
+  --color-serious: var(--serious);
+  --color-critical: var(--critical);
+  --color-good-text: var(--good-text);
+  --color-warning-text: var(--warning-text);
+  --color-serious-text: var(--serious-text);
+  --color-critical-text: var(--critical-text);
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-series-3: var(--series-3);
+  --color-series-4: var(--series-4);
+  --color-series-5: var(--series-5);
+  --color-series-6: var(--series-6);
+  --color-series-7: var(--series-7);
+  --color-series-8: var(--series-8);
+  --color-heat-0: var(--heat-0);
+  --color-heat-1: var(--heat-1);
+  --color-heat-2: var(--heat-2);
+  --color-heat-3: var(--heat-3);
+  --color-heat-4: var(--heat-4);
+
+  /* System fonts only: the app makes no network requests, so it loads no web fonts. */
+  --font-sans: system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
+}
+
+@layer base {
+  html {
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+  body {
+    min-height: 100dvh;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-weight: 600;
+    letter-spacing: -0.011em;
+    text-wrap: balance;
+  }
+  ::selection {
+    background: var(--accent-wash);
+  }
+  /* One focus treatment everywhere, shown for keyboard users only. */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  button, [role="button"], summary, select, label[for] {
+    cursor: pointer;
+  }
+  button:disabled, [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-line-strong bg-surface px-3 text-sm font-medium text-ink;
+    min-height: 2.25rem;
+    transition: background-color 120ms, border-color 120ms, opacity 120ms;
+  }
+  .btn:hover:not(:disabled) {
+    background: var(--raised);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+  }
+  .btn-primary {
+    @apply border-transparent bg-accent-fill text-on-accent;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent);
+  }
+  .btn-ghost {
+    @apply border-transparent bg-transparent text-ink-2;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--raised);
+    color: var(--ink);
+  }
+  .btn-danger {
+    @apply border-critical text-critical-text;
+  }
+  .btn-sm {
+    @apply rounded-md px-2 text-xs;
+    min-height: 1.75rem;
+  }
+  /* Icon-only buttons keep a 36px hit target even when the glyph is small. */
+  .btn-icon {
+    @apply px-0;
+    width: 2.25rem;
+  }
+  .input {
+    @apply w-full rounded-lg border border-line-strong bg-page px-3 text-sm text-ink;
+    min-height: 2.25rem;
+  }
+  .input::placeholder {
+    color: var(--ink-3);
+  }
+  textarea.input {
+    @apply py-2;
+    min-height: 4.5rem;
+    resize: vertical;
+  }
+  .label {
+    @apply mb-1 block text-xs font-medium text-ink-2;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line px-2 text-xs text-ink-2;
+    min-height: 1.5rem;
+    white-space: nowrap;
+  }
+  .kbd {
+    @apply rounded border border-line-strong bg-raised px-1.5 font-mono text-[0.6875rem] text-ink-2;
+  }
+  .eyebrow {
+    @apply text-[0.6875rem] font-semibold uppercase tracking-wider text-ink-3;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    @apply sr-only;
+  }
+}

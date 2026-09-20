@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+test-results/
+playwright-report/
+reports/
+*.local
+.DS_Store
+Thumbs.db
+
+# Backups exported from the app hold your private logs. Keep them out of the app repo.
+atlas-backup-*.json
+learning-log/
+
+# Local agent/editor configuration (machine-specific paths)
+.claude/

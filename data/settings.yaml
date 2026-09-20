@@ -1,0 +1,44 @@
+# Defaults for everything editable under Settings. The app never hard-codes these:
+# a fresh install starts from this file, and the user's changes are stored on top of it.
+blocks:
+  - id: A
+    name: Gamedev / Graphics / Simulation
+    minutes: 120
+    days: [0, 1, 2, 3, 4, 5, 6]
+    summary: Two hours, every day, non-negotiable.
+  - id: B
+    name: Languages
+    minutes: 60
+    days: [0, 1, 2, 3, 4, 5, 6]
+    summary: One hour, every day.
+  - id: C
+    name: Core track
+    minutes: 120
+    days: [0, 1, 2, 3, 4, 5, 6]
+    summary: ML Zoomcamp for the first four months, then the rotating core track of the roadmap.
+  - id: D
+    name: Projects / hands-on
+    minutes: 120
+    days: [0, 1, 2, 3, 4, 5, 6]
+    summary: The current weekly mini-build and monthly project. In stage 2 this is lab, PCB, CAD and build time.
+  - id: E
+    name: Math & physics
+    minutes: 60
+    days: [0, 1, 2, 3, 4, 5, 6]
+    summary: The prerequisites of stage 2, running from day one.
+
+# On this weekday the content of `block` is replaced; its minutes still count towards the day.
+review:
+  day: 0
+  block: D
+  title: Weekly review + paper reading
+
+weekStartsOn: 1                         # 1 = Monday, so the Sunday review closes the week
+heatmapThresholds: [1, 120, 300, 420]   # minutes for levels 1-4: 1-119, 120-299, 300-419, 420+
+streak:
+  minMinutes: 60                        # a day counts towards the streak from this many minutes
+  freezesPerMonth: 2                    # freeze days that do not break the streak
+  autoFreeze: true                      # spend a freeze automatically on a missed day when it saves the streak
+backupReminderDays: 30
+paperCadence: { fromYear: 2, perWeek: 1 }
+forecast: { paceWindowDays: 28 }
