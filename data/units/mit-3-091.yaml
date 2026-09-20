@@ -1,0 +1,65 @@
+# Units of "mit-3-091". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- section: "Structure of the Atom"
+  items:
+    - { id: 1-introduction-to-solid-state-chemistry, title: "1. Introduction to Solid State Chemistry", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/structure-of-the-atom/1-introduction-to-solid-state-chemistry/" }
+    - { id: 2-the-periodic-table, title: "2. The Periodic Table", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/structure-of-the-atom/2-periodic-table/" }
+    - { id: 3-atomic-models-rutherford-bohr, title: "3. Atomic Models: Rutherford & Bohr", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/structure-of-the-atom/3-atomic-models/" }
+    - { id: 4-matter-energy-interactions-atomic-spectra, title: "4. Matter/Energy Interactions: Atomic Spectra", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/structure-of-the-atom/4-matter-energy-interactions/" }
+    - { id: 5-electron-shell-model-quantum-numbers, title: "5. Electron Shell Model & Quantum Numbers", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/structure-of-the-atom/5-electron-shell-model-quantum-numbers/" }
+    - { id: 6-particle-wave-duality, title: "6. Particle-Wave Duality", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/structure-of-the-atom/6-particle-wave-duality/" }
+    - { id: 7-the-aufbau-principle-photoelectron-spectroscop, title: "7. The Aufbau Principle; Photoelectron Spectroscopy", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/structure-of-the-atom/7--the-aufbau-principle-photoelectron-spectroscopy/" }
+    - { id: self-assessment-structure-of-the-atom, title: "Self-Assessment: Structure of the Atom", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/structure-of-the-atom/self-assessment-structure-of-the-atom/" }
+- section: "Bonding and Molecules"
+  items:
+    - { id: 8-ionic-crystals-born-haber-cycle, title: "8. Ionic Crystals; Born-Haber Cycle", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/bonding-and-molecules/8--ionic-crystals-born-haber-cycle/" }
+    - { id: 9-drawing-lewis-structures, title: "9. Drawing Lewis Structures", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/bonding-and-molecules/9--drawing-lewis-structures/" }
+    - { id: 10-hybridized-molecular-orbitals-paramagnetism, title: "10. Hybridized & Molecular Orbitals; Paramagnetism", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/bonding-and-molecules/10--hybridized-molecular-orbitals-paramagnetism/" }
+    - { id: 11-the-shapes-of-molecules, title: "11. The Shapes of Molecules", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/bonding-and-molecules/11--the-shapes-of-molecules/" }
+    - { id: 12-intermolecular-forces, title: "12. Intermolecular Forces", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/bonding-and-molecules/12--intermolecular-forces/" }
+    - { id: self-assessment-bonding-and-molecules, title: "Self-Assessment: Bonding and Molecules", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/bonding-and-molecules/self-assessment/" }
+- section: "Electronic Materials"
+  items:
+    - { id: 13-band-theory-of-solids, title: "13. Band Theory of Solids", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/electronic-materials/13-band-theory-of-solids/" }
+    - { id: 14-semiconductors, title: "14. Semiconductors", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/electronic-materials/14-semiconductors/" }
+    - { id: self-assessment-electronic-materials, title: "Self-Assessment: Electronic Materials", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/electronic-materials/self-assessment-electronic-materials/" }
+- section: "Crystalline Materials"
+  items:
+    - { id: 15-introduction-to-crystallography, title: "15. Introduction to Crystallography", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/crystalline-materials/15-introduction-to-crystallography/" }
+    - { id: 16-crystallographic-notation-x-rays, title: "16. Crystallographic Notation & X-Rays", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/crystalline-materials/16-crystallographic-notation-x-rays/" }
+    - { id: 17-x-ray-emission-absorption, title: "17. X-Ray Emission & Absorption", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/crystalline-materials/17-x-ray-emission-absorption/" }
+    - { id: 18-x-ray-diffraction-techniques, title: "18. X-Ray Diffraction Techniques", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/crystalline-materials/18-x-ray-diffraction-techniques/" }
+    - { id: 19-point-line-defects, title: "19. Point & Line Defects", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/crystalline-materials/19-point-and-line-defects/" }
+    - { id: 20-line-interface-bulk-defects, title: "20. Line, Interface & Bulk Defects", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/crystalline-materials/20-line-interface-and-bulk-defects/" }
+    - { id: self-assessment-crystalline-materials, title: "Self-Assessment: Crystalline Materials", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/crystalline-materials/self-assessment-crystalline-materials/" }
+- section: "Amorphous Materials"
+  items:
+    - { id: 21-introduction-to-glasses, title: "21. Introduction to Glasses", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/amorphous-materials/21-introduction-to-glasses/" }
+    - { id: 22-engineering-glass-properties-introduction-to, title: "22. Engineering Glass Properties; Introduction to Kinetics", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/amorphous-materials/22--engineering-glass-properties-introduction-to-kinetics/" }
+    - { id: self-assessment-amorphous-materials, title: "Self-Assessment: Amorphous Materials", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/amorphous-materials/self-assessment-amorphous-materials/" }
+- section: "Reactions and Kinetics"
+  items:
+    - { id: 23-reaction-rates, title: "23. Reaction Rates", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/reactions-and-kinetics/23-reaction-rates/" }
+    - { id: 24-diffusion, title: "24. Diffusion", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/reactions-and-kinetics/24-diffusion/" }
+    - { id: self-assessment-reactions-and-kinetics, title: "Self-Assessment: Reactions and Kinetics", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/reactions-and-kinetics/self-assessment-reactions-and-kinetics/" }
+- section: "Aqueous Solutions"
+  items:
+    - { id: 25-introduction-to-aqueous-solutions, title: "25. Introduction to Aqueous Solutions", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/aqueous-solutions/25-introduction-to-aqueous-solutions/" }
+    - { id: 26-acids-bases, title: "26. Acids & Bases", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/aqueous-solutions/26-acids-and-bases/" }
+    - { id: self-assessment-aqueous-solutions, title: "Self-Assessment: Aqueous Solutions", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/aqueous-solutions/self-assessment-aqueous-solutions/" }
+- section: "Organic Materials"
+  items:
+    - { id: 27-introduction-to-organic-chemistry, title: "27. Introduction to Organic Chemistry", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/organic-materials/27-introduction-to-organic-chemistry/" }
+    - { id: 28-polymers-structure-composition, title: "28. Polymers: Structure & Composition", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/organic-materials/28-polymers-structure-composition/" }
+    - { id: 29-polymers-synthesis-properties-applications, title: "29. Polymers: Synthesis, Properties & Applications", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/organic-materials/29-polymers-synthesis-properties-applications/" }
+    - { id: 30-biochemistry-amino-acids, title: "30. Biochemistry: Amino Acids", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/organic-materials/30-amino-acids/" }
+    - { id: 31-biochemistry-protein-structure, title: "31. Biochemistry: Protein Structure", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/organic-materials/31-protein-structure/" }
+    - { id: 32-biochemistry-lipids-nucleic-acids-dna, title: "32. Biochemistry: Lipids, Nucleic Acids & DNA", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/organic-materials/32-lipids-nucleic-acids-dna/" }
+    - { id: self-assessment-organic-materials, title: "Self-Assessment: Organic Materials", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/organic-materials/self-assessment-organic-materials/" }
+- section: "Solid Solutions"
+  items:
+    - { id: 33-unary-phase-diagrams, title: "33. Unary Phase Diagrams", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/solid-solutions/33-unary-phase-diagrams/" }
+    - { id: 34-binary-phase-diagrams-complete-solubility, title: "34. Binary Phase Diagrams: Complete Solubility", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/solid-solutions/34-binary-phase-diagrams-complete-solubility/" }
+    - { id: 35-binary-phase-diagrams-limited-solubility, title: "35. Binary Phase Diagrams: Limited Solubility", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/solid-solutions/35-binary-phase-diagrams-limited-solubility/" }
+    - { id: self-assessment-solid-solutions, title: "Self-Assessment: Solid Solutions", url: "https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/pages/solid-solutions/self-assessment-solid-solutions/" }

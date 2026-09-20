@@ -1,0 +1,13 @@
+# Units of "hf-agents-course". Titles and links were read from the official page:
+#   https://raw.githubusercontent.com/huggingface/agents-course/main/units/en/_toctree.yml
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: unit-1, title: "Unit 1. Introduction to Agents", url: "https://huggingface.co/learn/agents-course/unit1/introduction" }
+- { id: unit-2, title: "Unit 2. Frameworks for AI Agents", url: "https://huggingface.co/learn/agents-course/unit2/introduction" }
+- { id: unit-2-1-the-smolagents-framework, title: "Unit 2.1 The smolagents framework", url: "https://huggingface.co/learn/agents-course/unit2/smolagents/introduction" }
+- { id: unit-2-2-the-llamaindex-framework, title: "Unit 2.2 The LlamaIndex framework", url: "https://huggingface.co/learn/agents-course/unit2/llama-index/introduction" }
+- { id: unit-2-3-the-langgraph-framework, title: "Unit 2.3 The LangGraph framework", url: "https://huggingface.co/learn/agents-course/unit2/langgraph/introduction" }
+- { id: unit-3, title: "Unit 3. Use Case for Agentic RAG", url: "https://huggingface.co/learn/agents-course/unit3/agentic-rag/introduction" }
+- { id: unit-4, title: "Unit 4. Final Project - Create, Test, and Certify Your Agent", url: "https://huggingface.co/learn/agents-course/unit4/introduction" }
+- { id: bonus-unit-1-fine-tuning-an-llm-for-function-cal, title: "Bonus Unit 1. Fine-tuning an LLM for Function-calling", url: "https://huggingface.co/learn/agents-course/bonus-unit1/introduction" }
+- { id: bonus-unit-2-agent-observability-and-evaluation, title: "Bonus Unit 2. Agent Observability and Evaluation", url: "https://huggingface.co/learn/agents-course/bonus-unit2/introduction" }
+- { id: bonus-unit-3-agents-in-games-with-pokemon, title: "Bonus Unit 3. Agents in Games with Pokemon", url: "https://huggingface.co/learn/agents-course/bonus-unit3/introduction" }

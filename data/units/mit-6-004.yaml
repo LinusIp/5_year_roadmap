@@ -1,0 +1,24 @@
+# Units of "mit-6-004". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: 1-basics-of-information, title: "1 Basics of Information", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c1/" }
+- { id: 2-the-digital-abstraction, title: "2 The Digital Abstraction", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c2/" }
+- { id: 3-cmos, title: "3 CMOS", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c3/" }
+- { id: 4-combinational-logic, title: "4 Combinational Logic", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c4/" }
+- { id: 5-sequential-logic, title: "5 Sequential Logic", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c5/" }
+- { id: 6-finite-state-machines, title: "6 Finite State Machines", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c6/" }
+- { id: 7-performance-measures, title: "7 Performance Measures", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c7/" }
+- { id: 8-design-tradeoffs, title: "8 Design Tradeoffs", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c8/" }
+- { id: 9-designing-an-instruction-set, title: "9 Designing an Instruction Set", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c9/" }
+- { id: 10-assembly-language-models-of-computation, title: "10 Assembly Language, Models of Computation", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c10/" }
+- { id: 11-compilers, title: "11 Compilers", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c11/" }
+- { id: 12-procedures-and-stacks, title: "12 Procedures and Stacks", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c12/" }
+- { id: 13-building-the-beta, title: "13 Building the Beta", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c13/" }
+- { id: 14-caches-and-the-memory-hierarchy, title: "14 Caches and the Memory Hierarchy", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c14/" }
+- { id: 15-pipelining-the-beta, title: "15 Pipelining the Beta", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c15/" }
+- { id: 16-virtual-memory, title: "16 Virtual Memory", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c16/" }
+- { id: 17-virtualizing-the-processor, title: "17 Virtualizing the Processor", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c17/" }
+- { id: 18-devices-and-interrupts, title: "18 Devices and Interrupts", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c18/" }
+- { id: 19-concurrency-and-synchronization, title: "19 Concurrency and Synchronization", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c19/" }
+- { id: 20-system-level-communication, title: "20 System-level Communication", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c20/" }
+- { id: 21-parallel-processing, title: "21 Parallel Processing", url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c21/" }

@@ -1,0 +1,88 @@
+# Units of "mit-8-01". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- section: "Review: Vectors"
+  items:
+    - { id: lesson-0, title: "Lesson 0: Vectors [0.1 - 0.6]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/review-vectors/0-1-vectors-vs--scalars/" }
+- section: "Week 1: Kinematics"
+  items:
+    - { id: 1-1-coordinate-systems-and-unit-vectors-in-1d-po, title: "1.1 Coordinate Systems and Unit Vectors in 1D Position Vector in 1D", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-1-kinematics/1-1-coordinate-systems-and-unit-vectors-in-1d-position-vector-in-1d/" }
+    - { id: lesson-2, title: "Lesson 2: 1D Kinematics - Acceleration [2.1-2.5]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-1-kinematics/2-1-introduction-to-acceleration/" }
+    - { id: 3-1-coordinate-system-and-position-vector-in-2d, title: "3.1 Coordinate System and Position Vector in 2D", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-1-kinematics/3-1-coordinate-system-and-position-vector-in-2d/" }
+    - { id: ps-1-1-three-questions-before-starting, title: "PS.1.1 Three Questions Before Starting", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-1-kinematics/ps.1.1-three-questions-before-starting/" }
+    - { id: problem-set-1, title: "Problem Set 1", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-1-kinematics/problem-set-1/" }
+- section: "Week 2: Newton's Laws"
+  items:
+    - { id: lesson-4, title: "Lesson 4: Newton's Laws of Motion [4.1-4.4]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-2-newtons-laws/4-1-newtons-first-and-second-laws/" }
+    - { id: 5-1-universal-law-of-gravitation, title: "5.1 Universal Law of Gravitation", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-2-newtons-laws/5-1-universal-law-of-gravitation/" }
+    - { id: lesson-6, title: "Lesson 6: Contact Forces [6.1-6.2]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-2-newtons-laws/6-1-contact-forces/" }
+    - { id: lesson-7, title: "Lesson 7: Tension and Springs [7.1-7.4]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-2-newtons-laws/7-1-pushing-pulling-and-tension/" }
+    - { id: dd-1-1-friction-at-the-nanoscale, title: "DD.1.1 Friction at the Nanoscale", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-2-newtons-laws/dd-1-1-friction-at-the-nanoscale/" }
+    - { id: week-2, title: "Week 2 Worked Examples [PS.2.1-PS.2.3]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-2-newtons-laws/ps-2-1-worked-example-sliding-block/" }
+    - { id: problem-set-2, title: "Problem Set 2", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-2-newtons-laws/problem-set-2/" }
+- section: "Week 3: Circular Motion"
+  items:
+    - { id: lesson-8, title: "Lesson 8: Circular Motion - Position and Velocity [8.1-8.3]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-3-circular-motion/8-1-polar-coordinates/" }
+    - { id: lesson-9, title: "Lesson 9: Uniform Circular Motion [9.1-9.3]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-3-circular-motion/9-1-uniform-circular-motion/" }
+    - { id: lesson-10, title: "Lesson 10: Circular Motion – Acceleration [10.1-10.4]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-3-circular-motion/10-1-circular-motion-2013-acceleration/" }
+    - { id: lesson-11, title: "Lesson 11: Newton's 2nd Law and Circular Motion [11.1-11.3]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-3-circular-motion/11-1-newtons-2nd-law-and-circular-motion/" }
+    - { id: ps-3-1-worked-example-orbital-circular-motion, title: "PS.3.1 Worked Example - Orbital Circular Motion", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-3-circular-motion/ps-3-1-worked-example-orbital-circular-motion/" }
+    - { id: problem-set-3, title: "Problem Set 3", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-3-circular-motion/problem-set-3/" }
+- section: "Week 4: Drag Forces, Constraints and Continuous Systems"
+  items:
+    - { id: 12-1-pulley-problems-part-i-set-up-the-equations, title: "12.1 Pulley Problems - Part I, Set up the Equations", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-4-drag-forces-constraints-and-continuous-systems/12-1-pulley-problems-part-i-set-up-the-equations/" }
+    - { id: lesson-13, title: "Lesson 13: Massive Rope [13.1-13.6]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-4-drag-forces-constraints-and-continuous-systems/13-1-rope-hanging-between-trees/" }
+    - { id: lesson-14, title: "Lesson 14: Resistive Forces [14.1-14.3]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-4-drag-forces-constraints-and-continuous-systems/14-1-intro-to-resistive-forces/" }
+    - { id: problem-set-4, title: "Problem Set 4", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-4-drag-forces-constraints-and-continuous-systems/problem-set-4/" }
+- section: "Week 5: Momentum and Impulse"
+  items:
+    - { id: lesson-15, title: "Lesson 15: Momentum and Impulse [15.1-15.5]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-5-momentum-and-impulse/15-1-momentum-and-impulse/" }
+    - { id: lesson-16, title: "Lesson 16: Conservation of Momentum [16.1-16.2]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-5-momentum-and-impulse/16-1-conservation-of-momentum/" }
+    - { id: lesson-17, title: "Lesson 17: Center of Mass and Motion [17.1-17.7]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-5-momentum-and-impulse/17-1-definition-of-the-center-of-mass/" }
+    - { id: problem-set-5, title: "Problem Set 5", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-5-momentum-and-impulse/problem-set-5/" }
+- section: "Week 6: Continuous Mass Transfer"
+  items:
+    - { id: lesson-18, title: "Lesson 18: Relative Velocity and Recoil [18.1-18.4]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-6-continuous-mass-transfer/18-1-relative-velocity/" }
+    - { id: lesson-19, title: "Lesson 19: Continuous Mass Transfer [19.1-19.7]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-6-continuous-mass-transfer/19-1-rocket-problem-1-set-up-the-problem/" }
+    - { id: week-6, title: "Week 6 Worked Examples [PS.6.1-PS.6.2]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-6-continuous-mass-transfer/ps-6-1-rocket-sled-problem/" }
+    - { id: problem-set-6, title: "Problem Set 6", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-6-continuous-mass-transfer/problem-set-6/" }
+- section: "Week 7: Kinetic Energy and Work"
+  items:
+    - { id: lesson-20, title: "Lesson 20: Kinetic Energy and Work in 1D [20.1-20.6]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-7-kinetic-energy-and-work/20-1-kinetic-energy/" }
+    - { id: lesson-21, title: "Lesson 21: Kinetic Energy and Work in 2D and 3D [21.1-21.6]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-7-kinetic-energy-and-work/21-1-scalar-product-properties/" }
+    - { id: lesson-22, title: "Lesson 22: Conservative and Non-Conservative Forces [22.1-22.5]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-7-kinetic-energy-and-work/22-1-path-independence-gravity/" }
+    - { id: ps-7-1-worked-example-collision-and-sliding-on-a, title: "PS.7.1 Worked Example - Collision and Sliding on a Rough Surface", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-7-kinetic-energy-and-work/ps-7-1-worked-example-collision-and-sliding-on-a-rough-surface/" }
+    - { id: problem-set-7, title: "Problem Set 7", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-7-kinetic-energy-and-work/problem-set-7/" }
+- section: "Week 8: Potential Energy and Energy Conservation"
+  items:
+    - { id: lesson-23, title: "Lesson 23: Potential Energy [23.1-23.5]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-8-potential-energy-and-energy-conservation/23-1-introduction-to-potential-energy/" }
+    - { id: 24-1-mechanical-energy-and-energy-conservation, title: "24.1 Mechanical Energy and Energy Conservation", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-8-potential-energy-and-energy-conservation/24-1-mechanical-energy-and-energy-conservation/" }
+    - { id: lesson-25, title: "Lesson 25: Potential Energy Diagrams [25.1-25.3]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-8-potential-energy-and-energy-conservation/25-1-force-is-the-derivative-of-potential/" }
+    - { id: problem-set-8, title: "Problem Set 8", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-8-potential-energy-and-energy-conservation/problem-set-8/" }
+- section: "Week 9: Collision Theory"
+  items:
+    - { id: lesson-26, title: "Lesson 26: Types of Collision [26.1-26.3]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-9-collision-theory/26-1-momentum-in-collisions/" }
+    - { id: 27-1-worked-example-elastic-1d-collision, title: "27.1 Worked Example: Elastic 1D Collision", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-9-collision-theory/27-1-worked-example-elastic-1d-collision/" }
+    - { id: deep-dive-center-of-mass-reference-frame-dd-2-1, title: "Deep Dive: Center of Mass Reference Frame [DD.2.1-DD.2.7]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-9-collision-theory/dd-2-1-position-in-the-cm-frame/" }
+    - { id: problem-set-9, title: "Problem Set 9", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-9-collision-theory/problem-set-9/" }
+- section: "Week 10: Rotational Motion"
+  items:
+    - { id: lesson-28, title: "Lesson 28: Motion of a Rigid Body [28.1-28.3]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-10-rotational-motion/28-1-rigid-bodies/" }
+    - { id: lesson-29, title: "Lesson 29: Moment of Inertia [29.1-29.6]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-10-rotational-motion/29-1-kinetic-energy-of-rotation/" }
+    - { id: 30-1-introduction-to-torque-and-rotational-dynam, title: "30.1 Introduction to Torque and Rotational Dynamics", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-10-rotational-motion/30-1-introduction-to-torque-and-rotational-dynamics/" }
+    - { id: 31-1-relationship-between-torque-and-angular-acc, title: "31.1 Relationship between Torque and Angular Acceleration", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-10-rotational-motion/31-1-relationship-between-torque-and-angular-acceleration/" }
+    - { id: ps-10-1-blocks-and-massive-pulley, title: "PS.10.1 Blocks and Massive Pulley", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-10-rotational-motion/ps-10-1-blocks-and-massive-pulley/" }
+    - { id: problem-set-10, title: "Problem Set 10", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-10-rotational-motion/problem-set-10/" }
+- section: "Week 11: Angular Momentum"
+  items:
+    - { id: lesson-32, title: "Lesson 32: Angular Momentum of a Point Particle [32.1-32.4]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-11-angular-momentum/32-1-angular-momentum-for-a-point-particle/" }
+    - { id: 33-1-worked-example-angular-momentum-of-2-rotati, title: "33.1 Worked Example - Angular Momentum of 2 Rotating Point Particles", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-11-angular-momentum/33-1-worked-example-angular-momentum-of-2-rotating-point-particles/" }
+    - { id: 34-1-torque-causes-angular-momentum-to-change-po, title: "34.1 Torque Causes Angular Momentum to Change - Point Particle", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-11-angular-momentum/34-1-torque-causes-angular-momentum-to-change-point-particle/" }
+    - { id: problem-set-11, title: "Problem Set 11", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-11-angular-momentum/problem-set-11/" }
+- section: "Week 12: Rotations and Translation - Rolling"
+  items:
+    - { id: lesson-35, title: "Lesson 35: Rolling Kinematics [35.1-35.5]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-12-rotations-and-translation-rolling/35-1-translation-and-rotation-of-a-wheel/" }
+    - { id: lesson-36, title: "Lesson 36: Rolling Dynamics [36.1-36.5]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-12-rotations-and-translation-rolling/36-1-friction-on-a-rolling-wheel/" }
+    - { id: lesson-37, title: "Lesson 37: Rolling Kinetic Energy & Angular Momentum [37.1-37.4]", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-12-rotations-and-translation-rolling/37-1-kinetic-energy-of-translation-and-rotation/" }
+    - { id: dd-3-1-gyroscopes-1-free-body-diagrams-torque-an, title: "DD.3.1 Gyroscopes 1 - Free Body Diagrams, Torque, and Rotating Vectors", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-12-rotations-and-translation-rolling/dd-3-1-gyroscopes-1-free-body-diagrams-torque-and-rotating-vectors/" }
+    - { id: problem-set-12, title: "Problem Set 12", url: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/pages/week-12-rotations-and-translation-rolling/problem-set-12/" }

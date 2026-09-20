@@ -1,0 +1,8 @@
+# Units of "mit-6-5840". Titles and links were read from the official page:
+#   https://pdos.csail.mit.edu/6.824/schedule.html
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: lab-1, title: "Lab 1: MapReduce", url: "https://pdos.csail.mit.edu/6.824/labs/lab-mr.html" }
+- { id: lab-2, title: "Lab 2: Key/Value server", url: "https://pdos.csail.mit.edu/6.824/labs/lab-kvsrv1.html" }
+- { id: lab-3, title: "Lab 3: Raft", url: "https://pdos.csail.mit.edu/6.824/labs/lab-raft1.html" }
+- { id: lab-4, title: "Lab 4: KV Raft", url: "https://pdos.csail.mit.edu/6.824/labs/lab-kvraft1.html" }
+- { id: lab-5, title: "Lab 5: Sharded KV", url: "https://pdos.csail.mit.edu/6.824/labs/lab-shard1.html" }

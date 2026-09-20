@@ -1,0 +1,38 @@
+# Units of "mit-18-06". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/video_galleries/video-lectures/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: lecture-1, title: "Lecture 1: The geometry of linear equations", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-1-the-geometry-of-linear-equations/" }
+- { id: lecture-2, title: "Lecture 2: Elimination with matrices", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-2-elimination-with-matrices/" }
+- { id: lecture-3, title: "Lecture 3: Multiplication and inverse matrices", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-3-multiplication-and-inverse-matrices/" }
+- { id: lecture-4, title: "Lecture 4: Factorization into A = LU", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-4-factorization-into-a-lu/" }
+- { id: lecture-5, title: "Lecture 5: Transposes, permutations, spaces R^n", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-5-transposes-permutations-spaces-r-n/" }
+- { id: lecture-6, title: "Lecture 6: Column space and nullspace", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-6-column-space-and-nullspace/" }
+- { id: lecture-7, title: "Lecture 7: Solving Ax = 0: pivot variables, special solutions", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-7-solving-ax-0-pivot-variables-special-solutions/" }
+- { id: lecture-8, title: "Lecture 8: Solving Ax = b: row reduced form R", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-8-solving-ax-b-row-reduced-form-r/" }
+- { id: lecture-9, title: "Lecture 9: Independence, basis, and dimension", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-9-independence-basis-and-dimension/" }
+- { id: lecture-10, title: "Lecture 10: The four fundamental subspaces", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-10-the-four-fundamental-subspaces/" }
+- { id: lecture-11, title: "Lecture 11: Matrix spaces; rank 1; small world graphs", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-11-matrix-spaces-rank-1-small-world-graphs/" }
+- { id: lecture-12, title: "Lecture 12: Graphs, networks, incidence matrices", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-12-graphs-networks-incidence-matrices/" }
+- { id: lecture-13, title: "Lecture 13: Quiz 1 review", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-13-quiz-1-review/" }
+- { id: lecture-14, title: "Lecture 14: Orthogonal vectors and subspaces", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-14-orthogonal-vectors-and-subspaces/" }
+- { id: lecture-15, title: "Lecture 15: Projections onto subspaces", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-15-projections-onto-subspaces/" }
+- { id: lecture-16, title: "Lecture 16: Projection matrices and least squares", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-16-projection-matrices-and-least-squares/" }
+- { id: lecture-17, title: "Lecture 17: Orthogonal matrices and Gram-Schmidt", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-17-orthogonal-matrices-and-gram-schmidt/" }
+- { id: lecture-18, title: "Lecture 18: Properties of determinants", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-18-properties-of-determinants/" }
+- { id: lecture-19, title: "Lecture 19: Determinant formulas and cofactors", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-19-determinant-formulas-and-cofactors/" }
+- { id: lecture-20, title: "Lecture 20: Cramer's rule, inverse matrix, and volume", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-20-cramers-rule-inverse-matrix-and-volume/" }
+- { id: lecture-21, title: "Lecture 21: Eigenvalues and eigenvectors", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-21-eigenvalues-and-eigenvectors/" }
+- { id: lecture-22, title: "Lecture 22: Diagonalization and powers of A", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-22-diagonalization-and-powers-of-a/" }
+- { id: lecture-23, title: "Lecture 23: Differential equations and exp(At)", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-23-differential-equations-and-exp-at/" }
+- { id: lecture-24, title: "Lecture 24: Markov matrices; fourier series", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-24-markov-matrices-fourier-series/" }
+- { id: lecture-24b, title: "Lecture 24b: Quiz 2 review", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-24b-quiz-2-review/" }
+- { id: lecture-25, title: "Lecture 25: Symmetric matrices and positive definiteness", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-25-symmetric-matrices-and-positive-definiteness/" }
+- { id: lecture-26, title: "Lecture 26: Complex matrices; fast fourier transform", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-26-complex-matrices-fast-fourier-transform/" }
+- { id: lecture-27, title: "Lecture 27: Positive definite matrices and minima", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-27-positive-definite-matrices-and-minima/" }
+- { id: lecture-28, title: "Lecture 28: Similar matrices and Jordan form", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-28-similar-matrices-and-jordan-form/" }
+- { id: lecture-29, title: "Lecture 29: Singular value decomposition", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-29-singular-value-decomposition/" }
+- { id: lecture-30, title: "Lecture 30: Linear transformations and their matrices", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-30-linear-transformations-and-their-matrices/" }
+- { id: lecture-31, title: "Lecture 31: Change of basis; image compression", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-31-change-of-basis-image-compression/" }
+- { id: lecture-32, title: "Lecture 32: Quiz 3 review", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-32-quiz-3-review/" }
+- { id: lecture-33, title: "Lecture 33: Left and right inverses; pseudoinverse", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-33-left-and-right-inverses-pseudoinverse/" }
+- { id: lecture-34, title: "Lecture 34: Final course review", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-34-final-course-review/" }

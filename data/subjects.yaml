@@ -1,2 +1,222 @@
-# Filled in milestone 2.
-[]
+# The credential map: one row per subject. Every subject has a portfolio milestone; where a credible
+# certificate exists it is listed in `certs` (defined in certs.yaml), otherwise `certNote` says why not.
+# `npm run validate:data` fails if anything on the roadmap points at a subject that has no row here.
+
+- id: python
+  title: Python
+  tracks: [languages]
+  certs: [cert-fcc-scientific-python, cert-pcep, cert-pcap]
+  milestones:
+    - { id: ms-python-cli, title: "Published CLI tool with tests and CI", projects: [m02] }
+
+- id: c-cpp
+  title: C / C++
+  tracks: [languages]
+  certs: [cert-cpa, cert-cpp]
+  certNote: "C++ Institute CPA/CPP are optional: they carry little weight in industry."
+  milestones:
+    - { id: ms-shell-in-c, title: "Shell in C", projects: [m07] }
+    - { id: ms-rasterizer-cpp, title: "Software rasterizer in C++", projects: [m12] }
+
+- id: rust-go
+  title: Rust / Go
+  tracks: [languages]
+  certNote: "No official certificate exists for either language."
+  milestones:
+    - { id: ms-redis-rust, title: "Redis clone in Rust", projects: [m19] }
+    - { id: ms-raft-kv-go, title: "Raft key-value store in Go", projects: [m24, m25] }
+
+- id: algorithms
+  title: Algorithms and data structures
+  tracks: [swe]
+  certs: [cert-stanford-algorithms]
+  certNote: "The Stanford Algorithms Specialization certificate is optional."
+  milestones:
+    - { id: ms-150-problems, title: "150 solved problems, in a public repo" }
+    - { id: ms-ds-library, title: "Own data-structures library with tests and benchmarks" }
+
+- id: machine-learning
+  title: Machine learning
+  tracks: [ai]
+  certs: [cert-ml-zoomcamp, cert-aws-mle-associate, cert-gcp-pmle]
+  milestones:
+    - { id: ms-deployed-ml-service, title: "Deployed ML service with monitoring", projects: [m01, m32] }
+
+- id: deep-learning
+  title: Deep learning / LLMs / agents
+  tracks: [ai]
+  certs: [cert-hf-agents, cert-nvidia-dli, cert-deeplearning-ai]
+  milestones:
+    - { id: ms-lm-from-scratch, title: "Language model from scratch", projects: [m11, m29] }
+    - { id: ms-finetune-evals, title: "Fine-tune with an eval harness", projects: [m31] }
+    - { id: ms-agent-with-evals, title: "Agent with evals", projects: [m04] }
+
+- id: linux-os
+  title: Linux / operating systems
+  tracks: [systems]
+  certs: [cert-lfcs]
+  milestones:
+    - { id: ms-xv6-writeup, title: "xv6 labs write-up", projects: [m16] }
+
+- id: databases
+  title: Databases
+  tracks: [systems]
+  certNote: "No database certificate is worth paying for."
+  milestones:
+    - { id: ms-bustub, title: "BusTub labs (buffer pool, B+tree)", projects: [m17] }
+    - { id: ms-lsm-store, title: "Own LSM key-value store", projects: [m20] }
+
+- id: networking
+  title: Networking
+  tracks: [systems]
+  certs: [cert-ccna, cert-network-plus]
+  certNote: "Cisco CCNA or CompTIA Network+: optional, take at most one."
+  milestones:
+    - { id: ms-tcp-stack, title: "TCP stack (the CS144 labs)" }
+
+- id: cloud
+  title: Cloud
+  tracks: [systems]
+  certs: [cert-aws-cloud-practitioner, cert-aws-saa, cert-aws-developer, cert-aws-devops-pro]
+  milestones:
+    - { id: ms-aws-iac-app, title: "Multi-service app on AWS with infrastructure as code", projects: [m32] }
+
+- id: containers-iac
+  title: Containers / orchestration / IaC
+  tracks: [systems]
+  certs: [cert-ckad, cert-cka, cert-terraform-associate]
+  milestones:
+    - { id: ms-k8s-load-test, title: "Service scaled on Kubernetes with a load-test report", projects: [m26] }
+
+- id: system-design
+  title: System design / distributed systems
+  tracks: [systems]
+  certNote: "No certificate exists; the AWS Solutions Architect + CKA pair is the market signal."
+  milestones:
+    - { id: ms-6-5840-labs, title: "MIT 6.5840 labs", projects: [m24, m25] }
+    - { id: ms-design-docs, title: "Five written design docs", projects: [m23] }
+    - { id: ms-url-shortener-case-study, title: "Scaled URL-shortener case study", projects: [m26] }
+
+- id: data-engineering
+  title: Data engineering
+  tracks: [systems, ai]
+  certs: [cert-de-zoomcamp]
+  milestones:
+    - { id: ms-streaming-pipeline, title: "Streaming pipeline project", projects: [m28] }
+
+- id: gamedev
+  title: Game development
+  tracks: [gamedev]
+  certs: [cert-unity-associate-programmer, cert-unity-professional-programmer]
+  certNote: "Only if you stay on Unity."
+  milestones:
+    - { id: ms-three-shipped-games, title: "Three shipped games", projects: [a-small-game-1, a-small-game-2, a-small-game-3] }
+    - { id: ms-game-jam, title: "One game jam", projects: [a-game-jam] }
+
+- id: graphics
+  title: Graphics (OpenGL / Vulkan)
+  tracks: [graphics]
+  certNote: "No graphics certificate exists."
+  milestones:
+    - { id: ms-opengl-mini-engine, title: "OpenGL mini-engine", projects: [m18] }
+    - { id: ms-vulkan-renderer, title: "Vulkan renderer", projects: [m22, m30] }
+    - { id: ms-shader-reel, title: "Shader reel" }
+
+- id: simulation
+  title: Physics engines / simulation
+  tracks: [simulation]
+  certNote: "No simulation certificate exists."
+  milestones:
+    - { id: ms-2d-engine, title: "2D rigid-body engine", projects: [m15] }
+    - { id: ms-3d-engine, title: "3D rigid-body engine", projects: [m27] }
+    - { id: ms-cloth-fluids, title: "Cloth, soft bodies and fluids", projects: [m34, a-gpu-fluids] }
+    - { id: ms-stage-1-capstone, title: "Stage 1 capstone: own 3D simulation engine v1", projects: [cap-stage-1] }
+
+- id: gpu
+  title: GPU programming
+  tracks: [ai, graphics]
+  certs: [cert-nvidia-dli-cuda]
+  milestones:
+    - { id: ms-cuda-kernels, title: "Benchmarked CUDA kernels repo", projects: [m33] }
+
+- id: math-physics
+  title: Math, physics and chemistry prerequisites
+  tracks: [math, physics, chem]
+  certs: [cert-mitx-math-physics]
+  certNote: "MITx certificates are paid and offered for only some of the courses; all are optional."
+  milestones:
+    - { id: ms-problem-set-notebooks, title: "Problem-set notebook repo" }
+
+- id: circuits
+  title: Circuits and electronics
+  tracks: [ee]
+  certs: [cert-mitx-6002x]
+  milestones:
+    - { id: ms-three-pcbs, title: "Three designed, fabricated and tested PCBs", projects: [m38, m46, m47] }
+
+- id: signals-control
+  title: Signals / control
+  tracks: [controls, ee]
+  certs: [cert-matlab-associate, cert-coursera-dsp]
+  milestones:
+    - { id: ms-spice-solver, title: "Own SPICE-like solver", projects: [m37] }
+    - { id: ms-inverted-pendulum, title: "Inverted pendulum controller", projects: [m45] }
+
+- id: embedded
+  title: Embedded systems
+  tracks: [embedded]
+  certs: [cert-embedded-shape-the-world, cert-arm-education]
+  milestones:
+    - { id: ms-bare-metal-stm32, title: "Bare-metal STM32 firmware", projects: [m39] }
+    - { id: ms-embedded-rust-driver, title: "Embedded Rust driver", projects: [m41] }
+
+- id: fpga
+  title: Digital design / FPGA
+  tracks: [embedded, ee]
+  certNote: "No standard certificate exists."
+  milestones:
+    - { id: ms-cpu-on-fpga, title: "CPU on FPGA (RISC-V subset)", projects: [m43] }
+
+- id: instrumentation
+  title: Instrumentation
+  tracks: [ee, embedded]
+  certs: [cert-ni-clad]
+  certNote: "NI LabVIEW CLAD: only if you end up using LabVIEW."
+  milestones:
+    - { id: ms-daq-rig, title: "Data-acquisition rig", projects: [m47] }
+
+- id: cad
+  title: CAD and manufacturing
+  tracks: [mech]
+  certs: [cert-cswa, cert-cswp, cert-autodesk-fusion]
+  certNote: "Choose one path once you have chosen a CAD package: SolidWorks (CSWA then CSWP) or Autodesk (Fusion)."
+  milestones:
+    - { id: ms-cad-parts, title: "Ten modelled parts and two assemblies with drawings", projects: [m48] }
+
+- id: mechanics-fea-cfd
+  title: Mechanics / FEA / CFD
+  tracks: [mech, simulation]
+  certs: [cert-ansys-innovation, cert-cornell-simulations]
+  milestones:
+    - { id: ms-fem-solver, title: "Own FEM solver validated against an open solver", projects: [m50] }
+
+- id: robotics
+  title: Robotics / mechatronics
+  tracks: [robotics]
+  certs: [cert-modern-robotics]
+  milestones:
+    - { id: ms-final-capstone, title: "Final capstone: a designed, simulated, built and controlled machine", projects: [cap-final] }
+
+- id: quantum
+  title: Quantum computing
+  tracks: [physics]
+  certs: [cert-qiskit]
+  milestones:
+    - { id: ms-qiskit-notebooks, title: "Qiskit notebook series" }
+
+- id: fe-licence
+  title: General engineering licence
+  kind: licence
+  tracks: [ee, mech, career]
+  certs: [cert-fe-exam]
+  certNote: "Investigate before committing: the FE exam normally expects an accredited engineering degree, and the rules differ by country and licensing board."

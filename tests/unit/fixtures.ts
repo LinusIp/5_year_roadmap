@@ -34,8 +34,10 @@ export function minimalSeed(): RawSeed {
         backupReminderDays: 30,
         paperCadence: { fromYear: 2, perWeek: 1 },
         forecast: { paceWindowDays: 28 },
+        weeklyBuildHours: 4,
       },
     }],
+    units: [],
     phases: [{
       file: 'data/phases.yaml',
       data: [

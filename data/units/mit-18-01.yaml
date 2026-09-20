@@ -1,0 +1,30 @@
+# Units of "mit-18-01". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- section: "1. Differentiation"
+  items:
+    - { id: part-a-definition-and-basic-rules, title: "Part A: Definition and Basic Rules", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/1.-differentiation/part-a-definition-and-basic-rules/" }
+    - { id: part-b-implicit-differentiation-and-inverse-func, title: "Part B: Implicit Differentiation and Inverse Functions", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/1.-differentiation/part-b-implicit-differentiation-and-inverse-functions/" }
+    - { id: exam-1, title: "Exam 1", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/1.-differentiation/exam-1/" }
+- section: "2. Applications of Differentiation"
+  items:
+    - { id: part-a-approximation-and-curve-sketching, title: "Part A: Approximation and Curve Sketching", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-2-applications-of-differentiation/part-a-approximation-and-curve-sketching/" }
+    - { id: part-b-optimization-related-rates-and-newton-s-m, title: "Part B: Optimization, Related Rates and Newton's Method", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-2-applications-of-differentiation/part-b-optimization-related-rates-and-newtons-method/" }
+    - { id: part-c-mean-value-theorem-antiderivatives-and-di, title: "Part C: Mean Value Theorem, Antiderivatives and Differential Equations", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-2-applications-of-differentiation/part-c-mean-value-theorem-antiderivatives-and-differential-equations/" }
+    - { id: exam-2, title: "Exam 2", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-2-applications-of-differentiation/exam-2/" }
+- section: "3. The Definite Integral and its Applications"
+  items:
+    - { id: part-a-definition-of-the-definite-integral-and-f, title: "Part A: Definition of the Definite Integral and First Fundamental Theorem", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-3-the-definite-integral-and-its-applications/part-a-definition-of-the-definite-integral-and-first-fundamental-theorem/" }
+    - { id: part-b-second-fundamental-theorem-areas-volumes, title: "Part B: Second Fundamental Theorem, Areas, Volumes", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-3-the-definite-integral-and-its-applications/part-b-second-fundamental-theorem-areas-volumes/" }
+    - { id: part-c-average-value-probability-and-numerical-i, title: "Part C: Average Value, Probability and Numerical Integration", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-3-the-definite-integral-and-its-applications/part-c-average-value-probability-and-numerical-integration/" }
+    - { id: exam-3, title: "Exam 3", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-3-the-definite-integral-and-its-applications/exam-3/" }
+- section: "4. Techniques of Integration"
+  items:
+    - { id: part-a-trigonometric-powers-trigonometric-substi, title: "Part A: Trigonometric Powers, Trigonometric Substitution and Completing the Square", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-4-techniques-of-integration/part-a-trigonometric-powers-trigonometric-substitution-and-completing-the-square/" }
+    - { id: part-b-partial-fractions-integration-by-parts-ar, title: "Part B: Partial Fractions, Integration by Parts, Arc Length, and Surface Area", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-4-techniques-of-integration/part-b-partial-fractions-integration-by-parts-arc-length-and-surface-area/" }
+    - { id: part-c-parametric-equations-and-polar-coordinate, title: "Part C: Parametric Equations and Polar Coordinates", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-4-techniques-of-integration/part-c-parametric-equations-and-polar-coordinates/" }
+    - { id: exam-4, title: "Exam 4", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-4-techniques-of-integration/exam-4/" }
+- section: "5. Exploring the Infinite"
+  items:
+    - { id: part-a-l-hospital-s-rule-and-improper-integrals, title: "Part A: L'Hospital's Rule and Improper Integrals", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-5-exploring-the-infinite/part-a-lhospitals-rule-and-improper-integrals/" }
+    - { id: part-b-taylor-series, title: "Part B: Taylor Series", url: "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/pages/unit-5-exploring-the-infinite/part-b-taylor-series/" }

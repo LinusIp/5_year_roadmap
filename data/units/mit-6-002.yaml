@@ -1,0 +1,29 @@
+# Units of "mit-6-002". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/video_galleries/video-lectures/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: lecture-1, title: "Lecture 1: Introduction and Lumped Abstraction", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-1/" }
+- { id: lecture-2, title: "Lecture 2: Basic Circuit Analysis Method", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-2/" }
+- { id: lecture-3, title: "Lecture 3: Superposition, Thévenin and Norton", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-3/" }
+- { id: lecture-4, title: "Lecture 4: The Digital Abstraction", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-4/" }
+- { id: lecture-5, title: "Lecture 5: Inside the Digital Gate", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-5/" }
+- { id: lecture-6, title: "Lecture 6: Nonlinear Analysis", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-6/" }
+- { id: lecture-7, title: "Lecture 7: Incremental Analysis", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-7/" }
+- { id: lecture-8, title: "Lecture 8: Dependent Sources and Amplifiers", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-8/" }
+- { id: lecture-9, title: "Lecture 9: Mosfet Amplifier Large Signal Analysis (part 1)", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-9-part-1/" }
+- { id: lecture-9-mosfet-amplifier-large-signal-analysis-part-2, title: "Lecture 9: Mosfet Amplifier Large Signal Analysis (part 2)", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-9-part-2/" }
+- { id: lecture-10, title: "Lecture 10: Amplifiers - Small Signal Model", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-10/" }
+- { id: lecture-11, title: "Lecture 11: Small Signal Circuits", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-11/" }
+- { id: lecture-12, title: "Lecture 12: Capacitors and First-Order Systems", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-12/" }
+- { id: lecture-13, title: "Lecture 13: Digital Circuit Speed", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-13/" }
+- { id: lecture-14, title: "Lecture 14: State and Memory", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-14/" }
+- { id: lecture-15, title: "Lecture 15: Second-Order Systems (part 1)", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-15-part-1/" }
+- { id: lecture-15-second-order-systems-part-2, title: "Lecture 15: Second-Order Systems (part 2)", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-15-part-2/" }
+- { id: lecture-16, title: "Lecture 16: Sinusoidal Steady State", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-16/" }
+- { id: lecture-17, title: "Lecture 17: The Impedance Model", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-17/" }
+- { id: lecture-18, title: "Lecture 18: Filters", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-18/" }
+- { id: lecture-19, title: "Lecture 19: The Operational Amplifier Abstraction", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-19/" }
+- { id: lecture-20, title: "Lecture 20: Operational Amplifier Circuits", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-20/" }
+- { id: lecture-21, title: "Lecture 21: Op Amps Positive Feedback", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-21/" }
+- { id: lecture-22, title: "Lecture 22: Energy and Power", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-22/" }
+- { id: lecture-23, title: "Lecture 23: Energy, CMOS", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-23/" }
+- { id: lecture-25, title: "Lecture 25: Violating the Abstraction Barrier", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/resources/lecture-25/" }

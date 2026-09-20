@@ -1,2 +1,560 @@
-# Filled in milestone 2.
-[]
+# Certifications. Every card was checked on the vendor's own site on the date in `lastVerified`:
+# the name as the vendor writes it, whether it is still offered, and the price where the page states one.
+# `cost: null` means the vendor's page did not state a price that day; it never means "free".
+# mode: committed = on the plan, optional = only if useful, investigate = check eligibility/availability first.
+# The TensorFlow Developer Certificate is discontinued and deliberately absent (validate:data rejects it).
+
+# ---------------------------------------------------------------- year 1
+- id: cert-fcc-scientific-python
+  title: "freeCodeCamp: Scientific Computing with Python certification"
+  vendor: freeCodeCamp
+  subject: python
+  url: https://www.freecodecamp.org/learn/scientific-computing-with-python/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "Free"
+  targetYear: 1
+  targetQuarter: 2026-Q4
+  prepResources: [fcc-scientific-computing-python]
+  mode: committed
+
+- id: cert-ml-zoomcamp
+  title: "DataTalksClub Machine Learning Zoomcamp certificate"
+  vendor: DataTalksClub
+  subject: machine-learning
+  url: https://github.com/DataTalksClub/machine-learning-zoomcamp
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "Free"
+  targetYear: 1
+  targetQuarter: 2027-Q1
+  prepResources: [ml-zoomcamp]
+  mode: committed
+  notes: "Earned by submitting the projects of a live cohort and reviewing peers' work; see the repository README for the current cohort's deadlines."
+
+- id: cert-hf-agents
+  title: "Hugging Face AI Agents Course certificate"
+  vendor: Hugging Face
+  subject: deep-learning
+  url: https://huggingface.co/learn/agents-course/unit0/introduction
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "Free"
+  targetYear: 1
+  targetQuarter: 2027-Q1
+  prepResources: [hf-agents-course, hf-llm-course]
+  mode: committed
+  notes: "The course introduction describes the certification process; the final project (unit 4) earns the certificate of completion."
+
+- id: cert-pcep
+  title: "PCEP: Certified Entry-Level Python Programmer (exam PCEP-30-02)"
+  vendor: Python Institute
+  subject: python
+  url: https://pythoninstitute.org/pcep
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "From $69 (exam); from $86 with a retake"
+  targetYear: 1
+  targetQuarter: 2027-Q2
+  prepResources: [30-days-of-python, automate-the-boring-stuff]
+  mode: committed
+  notes: "PCEP-30-03 was listed as 'in development' on the vendor page."
+
+# ---------------------------------------------------------------- year 2
+- id: cert-pcap
+  title: "PCAP: Certified Associate Python Programmer (exam PCAP-31-03)"
+  vendor: Python Institute
+  subject: python
+  url: https://pythoninstitute.org/pcap
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "From $295 (exam); from $345 with a retake"
+  targetYear: 2
+  targetQuarter: 2027-Q4
+  prepResources: [fluent-python]
+  mode: committed
+  notes: "PCAP-31-04 was listed as 'in development' on the vendor page."
+
+- id: cert-lfcs
+  title: "Linux Foundation Certified System Administrator (LFCS)"
+  vendor: The Linux Foundation
+  subject: linux-os
+  url: https://training.linuxfoundation.org/certification/linux-foundation-certified-sysadmin-lfcs/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "$445 (exam only); $645 bundled with the LFS207 course"
+  targetYear: 2
+  targetQuarter: 2028-Q2
+  prepResources: [missing-semester, mit-6-1810]
+  mode: committed
+  notes: "The Linux Foundation discounts its exams heavily several times a year; do not pay list price."
+
+- id: cert-unity-associate-programmer
+  title: "Unity Certified Associate: Programmer"
+  vendor: Unity
+  subject: gamedev
+  url: https://unity.com/products/unity-certifications
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 2
+  targetQuarter: 2028-Q1
+  mode: optional
+  notes: "Only if you stay on Unity. Unity's page lists the certification but no price."
+
+- id: cert-aws-cloud-practitioner
+  title: "AWS Certified Cloud Practitioner"
+  vendor: Amazon Web Services
+  subject: cloud
+  url: https://aws.amazon.com/certification/certified-cloud-practitioner/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "100 USD"
+  targetYear: 2
+  targetQuarter: 2028-Q3
+  prepResources: [aws-skill-builder]
+  mode: optional
+  notes: "Optional warm-up before the Solutions Architect exam."
+
+- id: cert-stanford-algorithms
+  title: "Stanford Algorithms Specialization certificate"
+  vendor: Coursera (Stanford)
+  subject: algorithms
+  url: https://www.coursera.org/specializations/algorithms
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 2
+  targetQuarter: 2027-Q4
+  prepResources: [mit-6-006]
+  mode: optional
+  notes: "Paid through a Coursera subscription; the page shows the price only after sign-in. The courses can be audited for free."
+
+- id: cert-cpa
+  title: "CPA: C++ Certified Associate Programmer (exam CPA-21-02)"
+  vendor: C++ Institute
+  subject: c-cpp
+  url: https://cppinstitute.org/cpa
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "From USD 325 (exam); from USD 375 with a retake"
+  targetYear: 2
+  targetQuarter: 2028-Q2
+  prepResources: [learncpp]
+  mode: optional
+  notes: "Low industry weight: the portfolio milestones matter more."
+
+- id: cert-cpp
+  title: "CPP: C++ Certified Professional Programmer"
+  vendor: C++ Institute
+  subject: c-cpp
+  url: https://cppinstitute.org/cpp
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "From USD 325 (exam); from USD 375 with a retake"
+  targetYear: 3
+  targetQuarter: 2028-Q4
+  prepResources: [effective-modern-cpp]
+  mode: optional
+
+- id: cert-mitx-math-physics
+  title: "MITx course certificates for the math and physics prerequisites (where offered)"
+  vendor: MIT Learn (MITx)
+  subject: math-physics
+  url: https://learn.mit.edu/c/unit/mitx
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "Per course; on the pages checked: Calculus 1A and 1B $100 each, Introduction to Mechanics $49 per part, 8.05x Mastering Quantum Mechanics $99"
+  targetYear: 2
+  targetQuarter: 2028-Q1
+  prepResources: [mit-18-01, mit-8-01]
+  mode: optional
+  notes: "MITx has moved from edX to MIT Learn. Several of the plan's courses are listed there without a certificate (18.02, 18.03, 8.02)."
+
+- id: cert-ccna
+  title: "Cisco Certified Network Associate (CCNA, exam 200-301)"
+  vendor: Cisco
+  subject: networking
+  url: https://www.cisco.com/site/us/en/learn/training-certifications/exams/ccna.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 2
+  targetQuarter: 2028-Q3
+  prepResources: [stanford-cs144]
+  mode: optional
+  notes: "Optional. Cisco's exam page states no price; it is shown when scheduling with Pearson VUE."
+
+- id: cert-network-plus
+  title: "CompTIA Network+ (exam N10-009)"
+  vendor: CompTIA
+  subject: networking
+  url: https://www.comptia.org/en-us/certifications/network/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 2
+  targetQuarter: 2028-Q3
+  prepResources: [stanford-cs144]
+  mode: optional
+  notes: "Optional alternative to CCNA. CompTIA estimates that N10-009 retires in 2027, so expect a newer exam code by the time you sit it."
+
+# ---------------------------------------------------------------- year 3
+- id: cert-unity-professional-programmer
+  title: "Unity Certified Professional: Programmer"
+  vendor: Unity
+  subject: gamedev
+  url: https://unity.com/products/unity-certifications
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 3
+  targetQuarter: 2028-Q4
+  mode: optional
+  notes: "Only if you stay on Unity."
+
+- id: cert-terraform-associate
+  title: "HashiCorp Certified: Terraform Associate"
+  vendor: HashiCorp
+  subject: containers-iac
+  url: https://developer.hashicorp.com/certifications/infrastructure-automation
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "$70.50 USD, plus locally applicable taxes and fees"
+  targetYear: 3
+  targetQuarter: 2029-Q1
+  mode: committed
+
+- id: cert-aws-saa
+  title: "AWS Certified Solutions Architect - Associate"
+  vendor: Amazon Web Services
+  subject: cloud
+  url: https://aws.amazon.com/certification/certified-solutions-architect-associate/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "150 USD"
+  targetYear: 3
+  targetQuarter: 2029-Q1
+  prepResources: [aws-skill-builder, system-design-primer]
+  mode: committed
+  validityYears: 3
+
+- id: cert-de-zoomcamp
+  title: "DataTalksClub Data Engineering Zoomcamp certificate"
+  vendor: DataTalksClub
+  subject: data-engineering
+  url: https://github.com/DataTalksClub/data-engineering-zoomcamp
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "Free"
+  targetYear: 3
+  targetQuarter: 2029-Q1
+  prepResources: [de-zoomcamp]
+  mode: optional
+
+- id: cert-ckad
+  title: "Certified Kubernetes Application Developer (CKAD)"
+  vendor: The Linux Foundation / CNCF
+  subject: containers-iac
+  url: https://training.linuxfoundation.org/certification/certified-kubernetes-application-developer-ckad/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "$445 (exam only); $645 bundled with the LFD259 course"
+  targetYear: 3
+  targetQuarter: 2029-Q2
+  prepResources: [kubernetes-tutorials]
+  mode: committed
+
+- id: cert-cka
+  title: "Certified Kubernetes Administrator (CKA)"
+  vendor: The Linux Foundation / CNCF
+  subject: containers-iac
+  url: https://training.linuxfoundation.org/certification/certified-kubernetes-administrator-cka/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "$445 (exam only); $645 bundled with the LFS258 course"
+  targetYear: 3
+  targetQuarter: 2029-Q2
+  prepResources: [kubernetes-the-hard-way]
+  mode: committed
+
+- id: cert-nvidia-dli-cuda
+  title: "NVIDIA DLI: Fundamentals of Accelerated Computing with CUDA C/C++ (certificate of competency)"
+  vendor: NVIDIA Deep Learning Institute
+  subject: gpu
+  url: "https://learn.nvidia.com/courses/course-detail?course_id=course-v1:DLI+C-AC-01+V1"
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 3
+  targetQuarter: 2029-Q2
+  prepResources: [pmpp-book, gpu-mode-lectures]
+  mode: committed
+  notes: "Reached through NVIDIA's own redirect from its course catalogue. The self-paced price field was blank on the page; public instructor-led workshops were listed at $200."
+
+- id: cert-nvidia-dli
+  title: "NVIDIA Deep Learning Institute certificates (deep learning courses)"
+  vendor: NVIDIA Deep Learning Institute
+  subject: deep-learning
+  url: https://www.nvidia.com/en-us/training/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 3
+  targetQuarter: 2029-Q3
+  mode: optional
+
+- id: cert-deeplearning-ai
+  title: "DeepLearning.AI Deep Learning Specialization certificate"
+  vendor: Coursera (DeepLearning.AI)
+  subject: deep-learning
+  url: https://www.coursera.org/specializations/deep-learning
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 3
+  targetQuarter: 2029-Q3
+  mode: optional
+  notes: "Audit the courses; pay only if a certificate is needed."
+
+- id: cert-aws-mle-associate
+  title: "AWS Certified Machine Learning Engineer - Associate"
+  vendor: Amazon Web Services
+  subject: machine-learning
+  url: https://aws.amazon.com/certification/certified-machine-learning-engineer-associate/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "$150 USD"
+  targetYear: 3
+  targetQuarter: 2029-Q3
+  prepResources: [mlops-zoomcamp, aws-skill-builder]
+  mode: committed
+  notes: "Take this one or Google's Professional ML Engineer, not both. AWS is replacing exam MLA-C01 with MLA-C02 (beta from September 2026), so prepare against the newer exam guide."
+
+- id: cert-gcp-pmle
+  title: "Google Cloud Professional Machine Learning Engineer"
+  vendor: Google Cloud
+  subject: machine-learning
+  url: https://cloud.google.com/learn/certification/machine-learning-engineer
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "$200 (plus tax where applicable)"
+  targetYear: 3
+  targetQuarter: 2029-Q3
+  prepResources: [mlops-zoomcamp]
+  mode: optional
+  notes: "Alternative to the AWS ML Engineer certification."
+
+- id: cert-aws-developer
+  title: "AWS Certified Developer - Associate"
+  vendor: Amazon Web Services
+  subject: cloud
+  url: https://aws.amazon.com/certification/certified-developer-associate/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "150 USD"
+  targetYear: 3
+  targetQuarter: 2029-Q3
+  prepResources: [aws-skill-builder]
+  mode: optional
+  notes: "After Solutions Architect, take this or DevOps Engineer. AWS is replacing exam DVA-C02 with DVA-C03 (last day for C02: 2026-12-01)."
+
+- id: cert-aws-devops-pro
+  title: "AWS Certified DevOps Engineer - Professional"
+  vendor: Amazon Web Services
+  subject: cloud
+  url: https://aws.amazon.com/certification/certified-devops-engineer-professional/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "300 USD"
+  targetYear: 3
+  targetQuarter: 2029-Q3
+  prepResources: [aws-skill-builder]
+  mode: optional
+
+# ---------------------------------------------------------------- year 4
+- id: cert-mitx-6002x
+  title: "MITx 6.002x Circuits and Electronics certificates"
+  vendor: MITx
+  subject: circuits
+  url: null
+  urlVerified: false
+  searchHint: "MITx Circuits and Electronics 6.002x certificate MIT Learn"
+  cost: null
+  targetYear: 4
+  targetQuarter: 2030-Q1
+  prepResources: [mit-6-002]
+  mode: investigate
+  notes: "Could not be verified on 2026-09-20: the edX XSeries page for 6.002x redirects to a generic listing, and MIT Learn (where MITx moved) still points at that dead edX address. Check again nearer the time; the free OCW course is unaffected."
+
+- id: cert-embedded-shape-the-world
+  title: "edX verified certificate: UT Austin Embedded Systems - Shape the World"
+  vendor: edX (UTAustinX)
+  subject: embedded
+  url: https://www.edx.org/learn/embedded-systems/the-university-of-texas-at-austin-embedded-systems-shape-the-world-microcontroller-input-output
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 4
+  targetQuarter: 2030-Q1
+  prepResources: [ut-embedded-shape-the-world]
+  mode: committed
+  notes: "Two courses (Microcontroller Input/Output, Multi-Threaded Interfacing), each with its own paid certificate track; edX shows the price after sign-in."
+
+- id: cert-arm-education
+  title: "Arm Education course certificates"
+  vendor: edX (Arm Education)
+  subject: embedded
+  url: https://www.edx.org/school/armeducation
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 4
+  targetQuarter: 2030-Q2
+  mode: optional
+
+- id: cert-matlab-associate
+  title: "MathWorks Certified MATLAB Associate"
+  vendor: MathWorks
+  subject: signals-control
+  url: https://www.mathworks.com/learn/training/certification.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 4
+  targetQuarter: 2030-Q2
+  prepResources: [matlab-onramp]
+  mode: committed
+  notes: "1.5 hours, 50 multiple-choice questions, online or at a test centre. The programme page states no price."
+
+- id: cert-coursera-dsp
+  title: "EPFL Digital Signal Processing specialization certificate"
+  vendor: Coursera (EPFL)
+  subject: signals-control
+  url: https://www.coursera.org/specializations/digital-signal-processing
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 4
+  targetQuarter: 2030-Q3
+  prepResources: [mit-6-003, dspguide]
+  mode: optional
+  notes: "Stands for 'Coursera control/DSP course certificates' in the brief; any comparable course certificate fills the same slot."
+
+- id: cert-ni-clad
+  title: "NI Certified LabVIEW Associate Developer (CLAD)"
+  vendor: NI
+  subject: instrumentation
+  url: https://www.ni.com/en/shop/services/education-services/certification-program.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 4
+  targetQuarter: 2030-Q3
+  mode: optional
+  notes: "Only if LabVIEW is actually used for the data-acquisition rig."
+
+# ---------------------------------------------------------------- year 5
+- id: cert-cswa
+  title: "SOLIDWORKS Design Associate (CSWA)"
+  vendor: Dassault Systemes SOLIDWORKS
+  subject: cad
+  url: https://www.solidworks.com/certifications/cswa-design-associate
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 5
+  targetQuarter: 2030-Q4
+  mode: committed
+  notes: "SOLIDWORKS now calls the CSWA 'Design Associate'. Choose one CAD path: this one or Autodesk's."
+
+- id: cert-cswp
+  title: "SOLIDWORKS Design Professional (CSWP)"
+  vendor: Dassault Systemes SOLIDWORKS
+  subject: cad
+  url: https://www.solidworks.com/certifications/solidworks-design-professional
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 5
+  targetQuarter: 2031-Q2
+  mode: committed
+
+- id: cert-autodesk-fusion
+  title: "Autodesk certification (Fusion): Certified Associate, then Certified Professional"
+  vendor: Autodesk
+  subject: cad
+  url: https://www.autodesk.com/certification/overview
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "Autodesk Certified Associate $150.00 (USD); Certified Professional $200.00 (USD); Certified Expert $250.00 (USD)"
+  targetYear: 5
+  targetQuarter: 2030-Q4
+  mode: optional
+  notes: "Alternative to the SOLIDWORKS path. Autodesk's current tiers are Associate, Professional and Expert; the 'Certified User' name in the brief is no longer on the overview page."
+
+- id: cert-modern-robotics
+  title: "Northwestern Modern Robotics specialization certificate"
+  vendor: Coursera (Northwestern)
+  subject: robotics
+  url: https://www.coursera.org/specializations/modernrobotics
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 5
+  targetQuarter: 2031-Q1
+  prepResources: [modern-robotics]
+  mode: committed
+  notes: "Paid through a Coursera subscription; six courses."
+
+- id: cert-ansys-innovation
+  title: "Ansys Innovation Courses badges"
+  vendor: Ansys
+  subject: mechanics-fea-cfd
+  url: https://innovation.ansys.com/public/learning/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 5
+  targetQuarter: 2031-Q1
+  mode: committed
+  notes: "courses.ansys.com now redirects to the Ansys Innovation Space learning pages."
+
+- id: cert-cornell-simulations
+  title: "edX: Cornell - A Hands-on Introduction to Engineering Simulations"
+  vendor: edX (CornellX)
+  subject: mechanics-fea-cfd
+  url: https://www.edx.org/learn/engineering/cornell-university-a-hands-on-introduction-to-engineering-simulations
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 5
+  targetQuarter: 2030-Q4
+  mode: optional
+
+- id: cert-qiskit
+  title: "IBM Certified Quantum Computation using Qiskit v2.X Developer - Associate"
+  vendor: IBM
+  subject: quantum
+  url: https://www.ibm.com/training/certification/ibm-certified-quantum-computation-using-qiskit-v2x-developer-associate-C9008400
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "Up to $200 per exam depending on location (IBM Quantum blog)"
+  targetYear: 5
+  targetQuarter: 2031-Q2
+  prepResources: [ibm-quantum-learning]
+  mode: optional
+  notes: "Still offered, in a new form: IBM retired the Qiskit v0.2X developer certification on 2025-09-30 and replaced it with this v2.X exam. IBM's quantum learning platform refused connections from this machine, so check that you can reach the study material."
+
+- id: cert-fe-exam
+  title: "NCEES FE exam (Electrical and Computer, or Mechanical)"
+  vendor: NCEES
+  subject: fe-licence
+  url: https://ncees.org/exams/fe-exam/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: "$225 exam fee, payable to NCEES"
+  targetYear: 5
+  targetQuarter: 2031-Q3
+  mode: investigate
+  notes: "Not a committed goal. Check eligibility first: the FE exam normally expects an accredited engineering degree, and the rules differ by country and licensing board."

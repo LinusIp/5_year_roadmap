@@ -1,0 +1,28 @@
+# Units of "fastai-practical-dl". Titles and links were read from the official page:
+#   https://course.fast.ai/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: lesson-1, title: "Lesson 1: Getting started", url: "https://course.fast.ai/Lessons/lesson1.html" }
+- { id: lesson-2, title: "Lesson 2: Deployment", url: "https://course.fast.ai/Lessons/lesson2.html" }
+- { id: lesson-3, title: "Lesson 3: Neural net foundations", url: "https://course.fast.ai/Lessons/lesson3.html" }
+- { id: lesson-4, title: "Lesson 4: Natural Language (NLP)", url: "https://course.fast.ai/Lessons/lesson4.html" }
+- { id: lesson-5, title: "Lesson 5: From-scratch model", url: "https://course.fast.ai/Lessons/lesson5.html" }
+- { id: lesson-6, title: "Lesson 6: Random forests", url: "https://course.fast.ai/Lessons/lesson6.html" }
+- { id: lesson-7, title: "Lesson 7: Collaborative filtering", url: "https://course.fast.ai/Lessons/lesson7.html" }
+- { id: lesson-8, title: "Lesson 8: Convolutions (CNNs)", url: "https://course.fast.ai/Lessons/lesson8.html" }
+- { id: lesson-9, title: "Lesson 9: Stable Diffusion", url: "https://course.fast.ai/Lessons/lesson9.html" }
+- { id: lesson-10, title: "Lesson 10: Diving Deeper", url: "https://course.fast.ai/Lessons/lesson10.html" }
+- { id: lesson-11, title: "Lesson 11: Matrix multiplication", url: "https://course.fast.ai/Lessons/lesson11.html" }
+- { id: lesson-12, title: "Lesson 12: Mean shift clustering", url: "https://course.fast.ai/Lessons/lesson12.html" }
+- { id: lesson-13, title: "Lesson 13: Backpropagation & MLP", url: "https://course.fast.ai/Lessons/lesson13.html" }
+- { id: lesson-14, title: "Lesson 14: Backpropagation", url: "https://course.fast.ai/Lessons/lesson14.html" }
+- { id: lesson-15, title: "Lesson 15: Autoencoders", url: "https://course.fast.ai/Lessons/lesson15.html" }
+- { id: lesson-16, title: "Lesson 16: The Learner framework", url: "https://course.fast.ai/Lessons/lesson16.html" }
+- { id: lesson-17, title: "Lesson 17: Initialization/normalization", url: "https://course.fast.ai/Lessons/lesson17.html" }
+- { id: lesson-18, title: "Lesson 18: Accelerated SGD & ResNets", url: "https://course.fast.ai/Lessons/lesson18.html" }
+- { id: lesson-19, title: "Lesson 19: DDPM and Dropout", url: "https://course.fast.ai/Lessons/lesson19.html" }
+- { id: lesson-20, title: "Lesson 20: Mixed Precision", url: "https://course.fast.ai/Lessons/lesson20.html" }
+- { id: lesson-21, title: "Lesson 21: DDIM", url: "https://course.fast.ai/Lessons/lesson21.html" }
+- { id: lesson-22, title: "Lesson 22: Karras et al (2022)", url: "https://course.fast.ai/Lessons/lesson22.html" }
+- { id: lesson-23, title: "Lesson 23: Super-resolution", url: "https://course.fast.ai/Lessons/lesson23.html" }
+- { id: lesson-24, title: "Lesson 24: Attention & transformers", url: "https://course.fast.ai/Lessons/lesson24.html" }
+- { id: lesson-25, title: "Lesson 25: Latent diffusion", url: "https://course.fast.ai/Lessons/lesson25.html" }

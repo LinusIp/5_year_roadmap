@@ -1,0 +1,295 @@
+# Programming languages: block B, one hour every day.
+# GLSL/HLSL and CUDA are covered under graphics and AI; SQL and Bash under CMU 15-445 and the Missing Semester.
+
+- id: 30-days-of-python
+  title: "30 Days of Python (Asabeneh Yetayeh)"
+  provider: GitHub
+  type: tutorial
+  url: https://github.com/Asabeneh/30-Days-Of-Python
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intro
+  cost: free
+  estHours: 60
+  subject: python
+  summary: "In progress when the plan starts. Tick off the days already done and Today picks up at the next one."
+
+- id: automate-the-boring-stuff
+  title: "Automate the Boring Stuff with Python (Al Sweigart)"
+  provider: No Starch Press (free online)
+  type: book
+  url: https://automatetheboringstuff.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intro
+  cost: free
+  estHours: 40
+  subject: python
+  summary: "The 'small CLI tools' half of the first phase: every chapter ends in a script worth keeping."
+
+- id: fcc-scientific-computing-python
+  title: "freeCodeCamp: Scientific Computing with Python (certification course)"
+  provider: freeCodeCamp
+  type: course
+  url: https://www.freecodecamp.org/learn/scientific-computing-with-python/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intro
+  cost: free
+  estHours: 40
+  subject: python
+  summary: "Five certification projects; finishing them earns the free certificate of the Python row."
+
+- id: fluent-python
+  title: "Fluent Python, 2nd edition (Luciano Ramalho)"
+  provider: O'Reilly
+  type: book
+  url: https://www.fluentpython.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: advanced
+  cost: paid
+  estHours: 60
+  prerequisites: [30-days-of-python]
+  subject: python
+
+- id: beej-c
+  title: "Beej's Guide to C Programming"
+  provider: Brian 'Beej' Hall
+  type: book
+  url: https://beej.us/guide/bgc/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intro
+  cost: free
+  estHours: 40
+  subject: c-cpp
+
+- id: kr-c
+  title: "The C Programming Language, 2nd edition (Kernighan and Ritchie)"
+  provider: Prentice Hall
+  type: book
+  url: https://www.cs.princeton.edu/~bwk/cbook.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intermediate
+  cost: paid
+  estHours: 60
+  subject: c-cpp
+  summary: "Do the exercises: they are the point of the book."
+
+- id: modern-c
+  title: "Modern C (Jens Gustedt)"
+  provider: Inria (free)
+  type: book
+  url: https://gustedt.gitlabpages.inria.fr/modern-c/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  subject: c-cpp
+
+- id: learncpp
+  title: "learncpp.com"
+  provider: learncpp.com
+  type: tutorial
+  url: https://www.learncpp.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intro
+  cost: free
+  estHours: 100
+  subject: c-cpp
+
+- id: tour-of-cpp
+  title: "A Tour of C++, 3rd edition (Bjarne Stroustrup)"
+  provider: Addison-Wesley
+  type: book
+  url: https://www.stroustrup.com/tour3.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intermediate
+  cost: paid
+  estHours: 30
+  prerequisites: [learncpp]
+  subject: c-cpp
+
+- id: effective-modern-cpp
+  title: "Effective Modern C++ (Scott Meyers)"
+  provider: O'Reilly
+  type: book
+  url: https://www.aristeia.com/EMC++.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: advanced
+  cost: paid
+  estHours: 50
+  prerequisites: [learncpp]
+  subject: c-cpp
+
+- id: cppcon-back-to-basics
+  title: "CppCon: Back to Basics talks"
+  provider: CppCon
+  type: lectures
+  url: https://www.youtube.com/@CppCon/playlists
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intermediate
+  cost: free
+  estHours: 40
+  prerequisites: [learncpp]
+  subject: c-cpp
+  summary: "The channel's playlists page; pick the 'Back to Basics' playlist of the latest year."
+
+- id: cpp-core-guidelines
+  title: "C++ Core Guidelines"
+  provider: isocpp
+  type: article
+  url: https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: advanced
+  cost: free
+  estHours: 0
+  reference: true
+  subject: c-cpp
+
+- id: rust-book
+  title: "The Rust Programming Language ('the book')"
+  provider: rust-lang.org
+  type: book
+  url: https://doc.rust-lang.org/book/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intermediate
+  cost: free
+  estHours: 60
+  subject: rust-go
+
+- id: rustlings
+  title: "Rustlings"
+  provider: rust-lang
+  type: repo
+  url: https://github.com/rust-lang/rustlings
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intro
+  cost: free
+  estHours: 20
+  subject: rust-go
+  summary: "Small exercises to do chapter by chapter alongside the book."
+
+- id: rust-by-example
+  title: "Rust by Example"
+  provider: rust-lang.org
+  type: tutorial
+  url: https://doc.rust-lang.org/rust-by-example/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intro
+  cost: free
+  estHours: 20
+  subject: rust-go
+
+- id: rust-for-rustaceans
+  title: "Rust for Rustaceans (Jon Gjengset)"
+  provider: No Starch Press
+  type: book
+  url: https://rust-for-rustaceans.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: advanced
+  cost: paid
+  estHours: 50
+  prerequisites: [rust-book]
+  subject: rust-go
+
+- id: crust-of-rust
+  title: "Jon Gjengset: Crust of Rust"
+  provider: Jon Gjengset
+  type: lectures
+  url: https://www.youtube.com/playlist?list=PLqbS7AVVErFiWDOAVrPt7aYmnuuOLYvOa
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: advanced
+  cost: free
+  estHours: 40
+  prerequisites: [rust-book]
+  subject: rust-go
+
+- id: zero2prod
+  title: "Zero To Production in Rust (Luca Palmieri)"
+  provider: zero2prod.com
+  type: book
+  url: https://www.zero2prod.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages, systems]
+  level: advanced
+  cost: paid
+  estHours: 60
+  prerequisites: [rust-book]
+  subject: rust-go
+  stretch: true
+  summary: "Paid and optional: backend development in Rust, end to end."
+
+- id: tour-of-go
+  title: "A Tour of Go"
+  provider: go.dev
+  type: tutorial
+  url: https://go.dev/tour/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intro
+  cost: free
+  estHours: 10
+  subject: rust-go
+  summary: "Placed first in year 3 because the MIT 6.5840 labs are written in Go."
+
+- id: learn-go-with-tests
+  title: "Learn Go with Tests (Chris James)"
+  provider: quii
+  type: book
+  url: https://quii.gitbook.io/learn-go-with-tests
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intermediate
+  cost: free
+  estHours: 40
+  prerequisites: [tour-of-go]
+  subject: rust-go
+
+- id: sqlbolt
+  title: "SQLBolt: interactive SQL lessons"
+  provider: sqlbolt.com
+  type: tutorial
+  url: https://sqlbolt.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages, systems]
+  level: intro
+  cost: free
+  estHours: 5
+  subject: databases
+  summary: "An evening of SQL before the CMU 15-445 homework."

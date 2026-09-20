@@ -14,3 +14,4 @@ learning-log/
 
 # Local agent/editor configuration (machine-specific paths)
 .claude/
+reports/

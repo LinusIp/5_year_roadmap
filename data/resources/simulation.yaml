@@ -1,0 +1,113 @@
+# Physics simulation: rigid bodies, collision detection, cloth, fluids, learned simulators.
+
+- id: catto-box2d-publications
+  title: "Erin Catto: GDC talks and Box2D publications (with the Box2D source)"
+  provider: box2d.org
+  type: article
+  url: https://box2d.org/publications/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [simulation]
+  level: advanced
+  cost: free
+  estHours: 30
+  subject: simulation
+  summary: "Sequential impulses, soft constraints, continuous collision. The theory behind the 2D rigid-body engine of project 15."
+
+- id: millington-game-physics
+  title: "Game Physics Engine Development, 2nd edition (Ian Millington)"
+  provider: CRC Press
+  type: book
+  url: https://www.routledge.com/Game-Physics-Engine-Development-How-to-Build-a-Robust-Commercial-Grade-Physics-Engine-for-your-Game/Millington/p/book/9780123819765
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [simulation, gamedev]
+  level: intermediate
+  cost: paid
+  estHours: 80
+  subject: simulation
+
+- id: gaffer-on-games
+  title: "Gaffer On Games: integration basics, fix your timestep, networked physics"
+  provider: Glenn Fiedler
+  type: article
+  url: https://gafferongames.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [simulation, gamedev, systems]
+  level: intermediate
+  cost: free
+  estHours: 10
+  subject: simulation
+
+- id: witkin-baraff-pbm
+  title: "Witkin and Baraff: Physically Based Modeling (SIGGRAPH course notes)"
+  provider: Pixar / CMU
+  type: article
+  url: https://www.cs.cmu.edu/~baraff/sigcourse/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [simulation, math]
+  level: advanced
+  cost: free
+  estHours: 40
+  prerequisites: [mit-18-03]
+  subject: simulation
+
+- id: ericson-rtcd
+  title: "Real-Time Collision Detection (Christer Ericson)"
+  provider: CRC Press
+  type: book
+  url: https://realtimecollisiondetection.net/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [simulation]
+  level: advanced
+  cost: paid
+  estHours: 80
+  subject: simulation
+  summary: "Broadphase, GJK, EPA: the theory behind the 3D rigid bodies of project 27."
+
+- id: ten-minute-physics
+  title: "Ten Minute Physics (Matthias Muller)"
+  provider: Matthias Muller
+  type: lectures
+  url: https://matthias-research.github.io/pages/tenMinutePhysics/index.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [simulation]
+  level: intermediate
+  cost: free
+  estHours: 40
+  subject: simulation
+  summary: "Position-based dynamics, XPBD, cloth, soft bodies and fluids in short tutorials with code."
+
+- id: bridson-fluid-sim
+  title: "Fluid Simulation for Computer Graphics (Robert Bridson)"
+  provider: CRC Press
+  type: book
+  url: https://www.cs.ubc.ca/~rbridson/fluidsimulation/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [simulation]
+  level: advanced
+  cost: paid
+  estHours: 80
+  prerequisites: [mit-18-03]
+  subject: simulation
+  summary: "The book behind the GPU fluids of year 4. The page also carries the free SIGGRAPH course notes."
+
+- id: pbdl-book
+  title: "Physics-Based Deep Learning (physicsbaseddeeplearning.org)"
+  provider: Thuerey group, TUM
+  type: book
+  url: https://physicsbaseddeeplearning.org/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [simulation, ai]
+  level: advanced
+  cost: free
+  estHours: 60
+  subject: simulation
+  stretch: true
+  summary: "Differentiable and learned simulators; the reading for project 56."

@@ -60,3 +60,35 @@ what was chosen, why, and what it would take to change. Newest first within each
   Playwright's own Chromium in CI. No browser download is needed on the development machine.
 - **Unit tests run in `Asia/Tashkent` (UTC+5).** A regression to UTC-based day boundaries then fails
   loudly, because 00:30 local time is still "yesterday" in UTC.
+
+## The curriculum (milestone 2)
+
+- **Block A carries the study, block D carries the builds.** The brief lists the same engine work twice: in
+  block A ("2D rigid-body engine", "OpenGL mini-engine") and again as numbered monthly projects, which belong
+  to block D. Planning each build in both lanes would double its hours. So block A holds the courses, books
+  and lecture series of graphics, simulation and gamedev, and block D holds the builds. A capstone is the one
+  exception: it spans both lanes and states its share of the hours in each (`hours:` in `plan.yaml`), the only
+  case where the validator allows an item to appear twice.
+- **Five capstones, not two.** The brief names the Stage 1 capstone (35) and the final capstone (57-59) but
+  also asks for "every year a capstone". Years 1, 2 and 4 got one each, written in the same spirit: an arcade
+  game in C whose opponent you trained, a networked physics sandbox, and an instrumented control rig with a
+  digital twin. They are the most editable thing in `/data`.
+- **Two items moved a phase later than the brief's table.** K&R C moved from Y1-P1 to Y2 (block B there came
+  to 142% of its hours) and MIT 8.01 from Y1-P1 to Y2 (block E came to 175%). Both still precede everything
+  that needs them. Four lanes are still over budget: Y1-P0 block E at 120%, and block D in years 2 to 5 at
+  110-122%, because that is what the brief's own project list comes to. The forecast surfaces it and the
+  re-plan button is the remedy; nothing was quietly dropped to make the numbers look right.
+- **Stage 2 projects that need no hardware say so** with `parts: []` rather than by leaving the field out, so
+  "nothing to buy" is a statement in the data and a genuinely missing parts list still warns.
+- **Weekly mini-builds are never on the plan.** They are a pool of 135 cards that "Pick my next project" draws
+  from; `validate:data` rejects a weekly card that appears in `plan.yaml`.
+- **Units are fetched, not typed.** `npm run fetch:units` reads each course's own syllabus page
+  (`scripts/lib/unit-sources.ts` records which page and how to read it) and writes
+  `data/units/<resource-id>.yaml`. Only titles and links are taken; no course content is copied. The files are
+  committed and safe to edit by hand, as long as unit ids stay stable, because progress is stored against them.
+- **The unit checklists load separately.** They are two fifths of the payload and are only needed once an item
+  is opened, so the Vite plugin emits them as `virtual:atlas-units` and the app imports that dynamically.
+  Every resource keeps a `unitCount`, which is all a progress bar needs.
+- **Alternatives are kept, not chosen for you.** Where the brief says "X *or* Y" (MIT 6.041 or Stat 110, 3.091
+  or 5.111, CCNA or Network+, SolidWorks or Autodesk, 2.004 or 6.302), both are in the library, one is on the
+  roadmap, and the other says in its summary that it is the alternative.

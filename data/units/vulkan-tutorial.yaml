@@ -1,0 +1,59 @@
+# Units of "vulkan-tutorial". Titles and links were read from the official page:
+#   https://vulkan-tutorial.com/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- section: "Overview"
+  items:
+    - { id: overview, title: "Overview", url: "https://vulkan-tutorial.com/Overview" }
+- section: "Development environment"
+  items:
+    - { id: development-environment, title: "Development environment", url: "https://vulkan-tutorial.com/Development_environment" }
+- section: "Drawing a triangle"
+  items:
+    - { id: setup, title: "Setup", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Setup/Base_code" }
+    - { id: instance, title: "Instance", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Setup/Instance" }
+    - { id: validation-layers, title: "Validation layers", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Setup/Validation_layers" }
+    - { id: physical-devices-and-queue-families, title: "Physical devices and queue families", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Setup/Physical_devices_and_queue_families" }
+    - { id: logical-device-and-queues, title: "Logical device and queues", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Setup/Logical_device_and_queues" }
+    - { id: presentation, title: "Presentation", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Presentation/Window_surface" }
+    - { id: swap-chain, title: "Swap chain", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Presentation/Swap_chain" }
+    - { id: image-views, title: "Image views", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Presentation/Image_views" }
+    - { id: graphics-pipeline-basics, title: "Graphics pipeline basics", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Graphics_pipeline_basics/Introduction" }
+    - { id: shader-modules, title: "Shader modules", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Graphics_pipeline_basics/Shader_modules" }
+    - { id: fixed-functions, title: "Fixed functions", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Graphics_pipeline_basics/Fixed_functions" }
+    - { id: render-passes, title: "Render passes", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Graphics_pipeline_basics/Render_passes" }
+    - { id: conclusion, title: "Conclusion", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Graphics_pipeline_basics/Conclusion" }
+    - { id: drawing, title: "Drawing", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Framebuffers" }
+    - { id: command-buffers, title: "Command buffers", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Command_buffers" }
+    - { id: rendering-and-presentation, title: "Rendering and presentation", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation" }
+    - { id: frames-in-flight, title: "Frames in flight", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Frames_in_flight" }
+    - { id: swap-chain-recreation, title: "Swap chain recreation", url: "https://vulkan-tutorial.com/Drawing_a_triangle/Swap_chain_recreation" }
+- section: "Vertex buffers"
+  items:
+    - { id: vertex-input-description, title: "Vertex input description", url: "https://vulkan-tutorial.com/Vertex_buffers/Vertex_input_description" }
+    - { id: vertex-buffer-creation, title: "Vertex buffer creation", url: "https://vulkan-tutorial.com/Vertex_buffers/Vertex_buffer_creation" }
+    - { id: staging-buffer, title: "Staging buffer", url: "https://vulkan-tutorial.com/Vertex_buffers/Staging_buffer" }
+    - { id: index-buffer, title: "Index buffer", url: "https://vulkan-tutorial.com/Vertex_buffers/Index_buffer" }
+- section: "Uniform buffers"
+  items:
+    - { id: descriptor-set-layout-and-buffer, title: "Descriptor set layout and buffer", url: "https://vulkan-tutorial.com/Uniform_buffers/Descriptor_set_layout_and_buffer" }
+    - { id: descriptor-pool-and-sets, title: "Descriptor pool and sets", url: "https://vulkan-tutorial.com/Uniform_buffers/Descriptor_pool_and_sets" }
+- section: "Texture mapping"
+  items:
+    - { id: images, title: "Images", url: "https://vulkan-tutorial.com/Texture_mapping/Images" }
+    - { id: image-view-and-sampler, title: "Image view and sampler", url: "https://vulkan-tutorial.com/Texture_mapping/Image_view_and_sampler" }
+    - { id: combined-image-sampler, title: "Combined image sampler", url: "https://vulkan-tutorial.com/Texture_mapping/Combined_image_sampler" }
+- section: "Depth buffering"
+  items:
+    - { id: depth-buffering, title: "Depth buffering", url: "https://vulkan-tutorial.com/Depth_buffering" }
+- section: "Loading models"
+  items:
+    - { id: loading-models, title: "Loading models", url: "https://vulkan-tutorial.com/Loading_models" }
+- section: "Generating Mipmaps"
+  items:
+    - { id: generating-mipmaps, title: "Generating Mipmaps", url: "https://vulkan-tutorial.com/Generating_Mipmaps" }
+- section: "Multisampling"
+  items:
+    - { id: multisampling, title: "Multisampling", url: "https://vulkan-tutorial.com/Multisampling" }
+- section: "Compute Shader"
+  items:
+    - { id: compute-shader, title: "Compute Shader", url: "https://vulkan-tutorial.com/Compute_Shader" }

@@ -13,6 +13,10 @@ export default defineConfig({
   build: {
     target: 'es2022',
     sourcemap: false,
+    // The curriculum ships inside the bundle: that is the point of a local-first app with no backend.
+    // The unit checklists are already split out (scripts/lib/vite-plugin-seed.ts); this limit is set just
+    // above what the rest of the seed plus React, Dexie and Zod come to, so real growth still warns.
+    chunkSizeWarningLimit: 700,
   },
   server: { port: 5173, strictPort: false },
   preview: { port: 4173, strictPort: true },

@@ -5,7 +5,7 @@
 import { z } from 'zod';
 import {
   BLOCK_IDS, CertSchema, PaperSchema, PaperSourceSchema, PhaseSchema, PlanPhaseInputSchema,
-  ProjectSchema, ResourceSchema, SettingsDefaultsSchema, SubjectSchema, TRACK_IDS, TrackSchema,
+  ProjectSchema, ResourceSchema, SettingsDefaultsSchema, SubjectSchema, TRACK_IDS, TrackSchema, UnitsInput,
 } from './schema.ts';
 import type {
   Cert, Paper, PaperSource, Phase, PlanItem, PlanPhaseInput, Project, Resource, Seed,
@@ -19,7 +19,7 @@ export interface RawFile {
 }
 
 export const SEED_KINDS = [
-  'tracks', 'settings', 'phases', 'resources', 'plan', 'projects', 'papers', 'paperSources', 'certs', 'subjects',
+  'tracks', 'settings', 'phases', 'resources', 'units', 'plan', 'projects', 'papers', 'paperSources', 'certs', 'subjects',
 ] as const;
 export type SeedKind = (typeof SEED_KINDS)[number];
 export type RawSeed = Record<SeedKind, RawFile[]>;
@@ -112,7 +112,7 @@ function flattenPlan(inputs: { item: PlanPhaseInput; file: string }[], errors: s
         if (!ref) return; // already reported by the schema
         const planItem: PlanItem = {
           // Stable across reordering and across moves between phases: derived from what is planned, not where.
-          id: entry.id ?? 'plan.' + ref,
+          id: entry.id ?? 'plan.' + ref + (entry.hours !== undefined ? '.' + block.toLowerCase() : ''),
           phaseId: item.phase,
           block,
           order: (index + 1) * 10,
@@ -120,6 +120,7 @@ function flattenPlan(inputs: { item: PlanPhaseInput; file: string }[], errors: s
         if (entry.resource) planItem.resourceId = entry.resource;
         if (entry.project) planItem.projectId = entry.project;
         if (entry.note) planItem.note = entry.note;
+        if (entry.hours !== undefined) planItem.hours = entry.hours;
         plan.push(planItem);
       });
     }
@@ -225,6 +226,31 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
     if (item.subject && !subjectIds.has(item.subject)) errors.push(file + ' (id: ' + item.id + '): subject "' + item.subject + '" has no row in data/subjects.yaml');
     if (item.reference && item.estHours > 0) warnings.push(file + ' (id: ' + item.id + '): reference works normally carry estHours: 0');
   }
+  /* ---- units files: data/units/<resource-id>.yaml */
+  for (const { file, data } of raw.units) {
+    const id = file.split('/').pop()!.replace(/\.yaml$/, '');
+    const target = resourceById.get(id);
+    if (!target) {
+      errors.push(file + ': no resource has the id "' + id + '"');
+      continue;
+    }
+    if (target.units) {
+      errors.push(file + ': resource "' + id + '" already lists its units inline');
+      continue;
+    }
+    const res = UnitsInput.safeParse(data);
+    if (!res.success) {
+      for (const issue of res.error.issues) errors.push(file + ': ' + describeIssue(issue));
+      continue;
+    }
+    const seenUnits = new Set<string>();
+    for (const u of res.data) {
+      if (seenUnits.has(u.id)) errors.push(file + ': duplicate unit id "' + u.id + '"');
+      seenUnits.add(u.id);
+    }
+    target.units = res.data;
+  }
+
   const cycle = findPrerequisiteCycle(resourceList);
   if (cycle) errors.push('data/resources: prerequisite cycle ' + cycle.join(' -> '));
 
@@ -243,7 +269,7 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
       stage = 1;
     }
     if (item.subject && !subjectIds.has(item.subject)) errors.push(file + ' (id: ' + item.id + '): subject "' + item.subject + '" has no row in data/subjects.yaml');
-    if (stage === 2 && item.cadence !== 'weekly' && !item.parts) warnings.push(file + ' (id: ' + item.id + '): stage 2 project without a `parts` list');
+    if (stage === 2 && item.cadence !== 'weekly' && !item.parts) warnings.push(file + ' (id: ' + item.id + '): stage 2 project with no `parts` field. List what to have on the bench, or `parts: []` if it needs none.');
     projectList.push({ ...item, stage });
   }
   const projectById = new Map(projectList.map((p) => [p.id, p]));
@@ -277,8 +303,15 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
     if (!phaseById.has(item.phaseId)) errors.push(planFile + ': phase "' + item.phaseId + '" is not defined in data/phases.yaml');
     if (planIds.has(item.id)) errors.push(planFile + ': duplicate plan item id "' + item.id + '"');
     planIds.add(item.id);
-    if (plannedRefs.has(ref)) errors.push(planFile + ': "' + ref + '" is planned twice (' + plannedRefs.get(ref)!.phaseId + ' and ' + item.phaseId + ')');
-    plannedRefs.set(ref, item);
+    const earlier = plannedRefs.get(ref);
+    if (earlier) {
+      // One build may draw on two blocks (a capstone is Block A's subject and Block D's project), but only
+      // when each lane states its share of the hours, in the same phase.
+      const split = Boolean(item.projectId) && item.hours !== undefined && earlier.hours !== undefined && earlier.block !== item.block && earlier.phaseId === item.phaseId;
+      if (!split) errors.push(planFile + ': "' + ref + '" is planned twice (' + earlier.phaseId + ' and ' + item.phaseId + '); only a project may be, in two lanes of one phase, with `hours` on both');
+    } else {
+      plannedRefs.set(ref, item);
+    }
 
     const target = item.resourceId ? resourceById.get(item.resourceId) : projectById.get(item.projectId!);
     if (!target) {
@@ -306,7 +339,8 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
   }
 
   for (const p of projectList) {
-    if (p.cadence !== 'weekly' && !plannedRefs.has(p.id)) warnings.push('data/projects: ' + p.cadence + ' project "' + p.id + '" is not on the plan');
+    const mustBePlanned = p.cadence === 'capstone' || p.number !== undefined;
+    if (mustBePlanned && !plannedRefs.has(p.id)) errors.push('data/projects: ' + p.cadence + ' project "' + p.id + '" is not on the plan');
   }
 
   /* ---- certs and the credential map */

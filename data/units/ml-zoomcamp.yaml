@@ -1,0 +1,13 @@
+# Units of "ml-zoomcamp". Titles and links were read from the official page:
+#   https://raw.githubusercontent.com/DataTalksClub/machine-learning-zoomcamp/master/README.md
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: module-1, title: "Module 1: Introduction to Machine Learning", url: "https://github.com/DataTalksClub/machine-learning-zoomcamp/tree/master/01-intro/" }
+- { id: module-2, title: "Module 2: Machine Learning for Regression", url: "https://github.com/DataTalksClub/machine-learning-zoomcamp/tree/master/02-regression/" }
+- { id: module-3, title: "Module 3: Machine Learning for Classification", url: "https://github.com/DataTalksClub/machine-learning-zoomcamp/tree/master/03-classification/" }
+- { id: module-4, title: "Module 4: Evaluation Metrics for Classification", url: "https://github.com/DataTalksClub/machine-learning-zoomcamp/tree/master/04-evaluation/" }
+- { id: module-5, title: "Module 5: Deploying Machine Learning Models", url: "https://github.com/DataTalksClub/machine-learning-zoomcamp/tree/master/05-deployment/" }
+- { id: module-6, title: "Module 6: Decision Trees and Ensemble Learning", url: "https://github.com/DataTalksClub/machine-learning-zoomcamp/tree/master/06-trees/" }
+- { id: midterm-project, title: "Midterm Project", url: "https://github.com/DataTalksClub/machine-learning-zoomcamp/tree/master/projects/" }
+- { id: module-8, title: "Module 8: Neural Networks and Deep Learning", url: "https://github.com/DataTalksClub/machine-learning-zoomcamp/tree/master/08-deep-learning/" }
+- { id: module-9, title: "Module 9: Serverless Deep Learning", url: "https://github.com/DataTalksClub/machine-learning-zoomcamp/tree/master/09-serverless/" }
+- { id: module-10, title: "Module 10: Kubernetes and TensorFlow Serving", url: "https://github.com/DataTalksClub/machine-learning-zoomcamp/tree/master/10-kubernetes/" }

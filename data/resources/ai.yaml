@@ -1,0 +1,354 @@
+# AI and ML engineering.
+
+- id: ml-zoomcamp
+  title: "DataTalksClub Machine Learning Zoomcamp"
+  provider: DataTalksClub
+  type: course
+  url: https://github.com/DataTalksClub/machine-learning-zoomcamp
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 160
+  subject: machine-learning
+  summary: "In progress when the plan starts. The midterm and capstone are monthly projects 1 and 4."
+
+- id: hf-llm-course
+  title: "Hugging Face LLM Course"
+  provider: Hugging Face
+  type: course
+  url: https://huggingface.co/learn/llm-course
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 50
+  subject: deep-learning
+  summary: "In progress when the plan starts."
+
+- id: hf-agents-course
+  title: "Hugging Face AI Agents Course"
+  provider: Hugging Face
+  type: course
+  url: https://huggingface.co/learn/agents-course
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 40
+  subject: deep-learning
+  summary: "In progress when the plan starts. Unit 4 is the certified final project (monthly project 4)."
+
+- id: hf-deep-rl-course
+  title: "Hugging Face Deep Reinforcement Learning Course"
+  provider: Hugging Face
+  type: course
+  url: https://huggingface.co/learn/deep-rl-course
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 60
+  subject: deep-learning
+  stretch: true
+
+- id: hf-diffusion-course
+  title: "Hugging Face Diffusion Models Course"
+  provider: Hugging Face
+  type: course
+  url: https://huggingface.co/learn/diffusion-course
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 30
+  subject: deep-learning
+  stretch: true
+
+- id: hf-mcp-course
+  title: "Hugging Face Model Context Protocol (MCP) Course"
+  provider: Hugging Face
+  type: course
+  url: https://huggingface.co/learn/mcp-course
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 20
+  subject: deep-learning
+  stretch: true
+
+- id: karpathy-zero-to-hero
+  title: "Andrej Karpathy: Neural Networks, Zero to Hero"
+  provider: Andrej Karpathy
+  type: lectures
+  url: https://karpathy.ai/zero-to-hero.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 40
+  prerequisites: [30-days-of-python]
+  subject: deep-learning
+
+- id: fastai-practical-dl
+  title: "fast.ai: Practical Deep Learning for Coders"
+  provider: fast.ai
+  type: course
+  url: https://course.fast.ai/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 80
+  prerequisites: [30-days-of-python]
+  subject: deep-learning
+
+- id: stanford-cs229
+  title: "Stanford CS229 Machine Learning"
+  provider: Stanford
+  type: course
+  url: https://cs229.stanford.edu/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai, math]
+  level: advanced
+  cost: free
+  estHours: 150
+  prerequisites: [mit-18-06, mit-6-041]
+  subject: machine-learning
+  stretch: true
+
+- id: stanford-cs231n
+  title: "Stanford CS231n Deep Learning for Computer Vision"
+  provider: Stanford
+  type: course
+  url: https://cs231n.stanford.edu/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: advanced
+  cost: free
+  estHours: 120
+  prerequisites: [mit-18-06]
+  subject: deep-learning
+  stretch: true
+
+- id: stanford-cs224n
+  title: "Stanford CS224n Natural Language Processing with Deep Learning"
+  provider: Stanford
+  type: course
+  url: https://web.stanford.edu/class/cs224n/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: advanced
+  cost: free
+  estHours: 120
+  prerequisites: [mit-18-06, karpathy-zero-to-hero]
+  subject: deep-learning
+
+- id: stanford-cs336
+  title: "Stanford CS336 Language Modeling from Scratch"
+  provider: Stanford
+  type: course
+  url: https://cs336.stanford.edu/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: advanced
+  cost: free
+  estHours: 200
+  prerequisites: [stanford-cs224n]
+  subject: deep-learning
+
+- id: stanford-cs25
+  title: "Stanford CS25 Transformers United (seminar)"
+  provider: Stanford
+  type: lectures
+  url: https://web.stanford.edu/class/cs25/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: advanced
+  cost: free
+  estHours: 20
+  subject: deep-learning
+  stretch: true
+
+- id: mit-6-s191
+  title: "MIT 6.S191 Introduction to Deep Learning"
+  provider: MIT
+  type: course
+  url: https://introtodeeplearning.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intro
+  cost: free
+  estHours: 25
+  subject: deep-learning
+  stretch: true
+
+- id: mit-6-5940
+  title: "MIT 6.5940 TinyML and Efficient Deep Learning Computing (Fall 2024)"
+  provider: MIT HAN Lab
+  type: course
+  url: https://hanlab.mit.edu/courses/2024-fall-65940
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai, embedded]
+  level: advanced
+  cost: free
+  estHours: 80
+  subject: deep-learning
+  stretch: true
+
+- id: berkeley-cs285
+  title: "UC Berkeley CS 285 Deep Reinforcement Learning"
+  provider: UC Berkeley
+  type: course
+  url: https://rail.eecs.berkeley.edu/deeprlcourse/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai, robotics]
+  level: advanced
+  cost: free
+  estHours: 120
+  subject: deep-learning
+  stretch: true
+
+- id: berkeley-llm-agents
+  title: "UC Berkeley Large Language Model Agents MOOC (Fall 2024)"
+  provider: UC Berkeley
+  type: course
+  url: https://llmagents-learning.org/f24
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: advanced
+  cost: free
+  estHours: 40
+  subject: deep-learning
+  stretch: true
+
+- id: fsdl
+  title: "Full Stack Deep Learning (course and LLM bootcamp)"
+  provider: The Full Stack
+  type: course
+  url: https://fullstackdeeplearning.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai, swe]
+  level: intermediate
+  cost: free
+  estHours: 50
+  subject: machine-learning
+  stretch: true
+
+- id: llm-zoomcamp
+  title: "DataTalksClub LLM Zoomcamp"
+  provider: DataTalksClub
+  type: course
+  url: https://github.com/DataTalksClub/llm-zoomcamp
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 100
+  prerequisites: [ml-zoomcamp]
+  subject: deep-learning
+
+- id: mlops-zoomcamp
+  title: "DataTalksClub MLOps Zoomcamp"
+  provider: DataTalksClub
+  type: course
+  url: https://github.com/DataTalksClub/mlops-zoomcamp
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai, systems]
+  level: intermediate
+  cost: free
+  estHours: 100
+  prerequisites: [ml-zoomcamp]
+  subject: machine-learning
+
+- id: deep-learning-book
+  title: "Deep Learning (Goodfellow, Bengio, Courville)"
+  provider: MIT Press (free online)
+  type: book
+  url: https://www.deeplearningbook.org/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: advanced
+  cost: free
+  estHours: 0
+  reference: true
+  subject: deep-learning
+
+- id: udl-book
+  title: "Understanding Deep Learning (Simon Prince)"
+  provider: MIT Press (free PDF)
+  type: book
+  url: https://udlbook.github.io/udlbook/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  subject: deep-learning
+
+- id: d2l
+  title: "Dive into Deep Learning (d2l.ai)"
+  provider: d2l.ai
+  type: book
+  url: https://d2l.ai/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  subject: deep-learning
+
+- id: pmpp-book
+  title: "Programming Massively Parallel Processors, 4th edition (Hwu, Kirk, El Hajj)"
+  provider: Elsevier
+  type: book
+  url: https://shop.elsevier.com/books/programming-massively-parallel-processors/hwu/978-0-323-91231-0
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai, graphics, languages]
+  level: advanced
+  cost: paid
+  estHours: 70
+  prerequisites: [learncpp]
+  subject: gpu
+  summary: "The CUDA part of block B in year 3, read together with the GPU MODE lectures."
+
+- id: gpu-mode-lectures
+  title: "GPU MODE lecture series"
+  provider: GPU MODE
+  type: lectures
+  url: https://github.com/gpu-mode/lectures
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai, graphics]
+  level: advanced
+  cost: free
+  estHours: 30
+  prerequisites: [learncpp]
+  subject: gpu

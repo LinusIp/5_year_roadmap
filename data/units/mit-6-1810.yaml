@@ -1,0 +1,12 @@
+# Units of "mit-6-1810". Titles and links were read from the official page:
+#   https://pdos.csail.mit.edu/6.1810/2025/schedule.html
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: lab-utilities, title: "Lab Utilities", url: "https://pdos.csail.mit.edu/6.1810/2025/labs/util.html" }
+- { id: lab-system-calls, title: "Lab System calls", url: "https://pdos.csail.mit.edu/6.1810/2025/labs/syscall.html" }
+- { id: lab-page-tables, title: "Lab Page tables", url: "https://pdos.csail.mit.edu/6.1810/2025/labs/pgtbl.html" }
+- { id: lab-traps, title: "Lab Traps", url: "https://pdos.csail.mit.edu/6.1810/2025/labs/traps.html" }
+- { id: lab-copy-on-write, title: "Lab Copy on-write", url: "https://pdos.csail.mit.edu/6.1810/2025/labs/cow.html" }
+- { id: lab-network-driver, title: "Lab network driver", url: "https://pdos.csail.mit.edu/6.1810/2025/labs/net.html" }
+- { id: lab-lock, title: "Lab Lock", url: "https://pdos.csail.mit.edu/6.1810/2025/labs/lock.html" }
+- { id: lab-file-system, title: "Lab File system", url: "https://pdos.csail.mit.edu/6.1810/2025/labs/fs.html" }
+- { id: lab-mmap, title: "Lab mmap", url: "https://pdos.csail.mit.edu/6.1810/2025/labs/mmap.html" }

@@ -1,0 +1,203 @@
+# Meta-roadmaps and idea sources. Consulted, never "completed": all are references with no scheduled hours.
+# `career` is the track for things that serve the plan as a whole.
+
+- id: teachyourselfcs
+  title: "Teach Yourself Computer Science"
+  provider: Oz Nova and Myles Byrne
+  type: repo
+  url: https://teachyourselfcs.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, career]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "Meta-roadmap: nine subjects, one book and one lecture series each."
+
+- id: ossu-computer-science
+  title: "OSSU Computer Science"
+  provider: Open Source Society University
+  type: repo
+  url: https://github.com/ossu/computer-science
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, career]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "Meta-roadmap: a free self-taught CS degree."
+
+- id: roadmap-sh-backend
+  title: "roadmap.sh: Backend Developer roadmap"
+  provider: roadmap.sh
+  type: repo
+  url: https://roadmap.sh/backend
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, career]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+
+- id: roadmap-sh-devops
+  title: "roadmap.sh: DevOps roadmap"
+  provider: roadmap.sh
+  type: repo
+  url: https://roadmap.sh/devops
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems, career]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+
+- id: roadmap-sh-system-design
+  title: "roadmap.sh: System Design roadmap"
+  provider: roadmap.sh
+  type: repo
+  url: https://roadmap.sh/system-design
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems, career]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+
+- id: roadmap-sh-ai-engineer
+  title: "roadmap.sh: AI Engineer roadmap"
+  provider: roadmap.sh
+  type: repo
+  url: https://roadmap.sh/ai-engineer
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai, career]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+
+- id: mlabonne-llm-course
+  title: "mlabonne/llm-course: roadmaps and notebooks for getting into LLMs"
+  provider: Maxime Labonne
+  type: repo
+  url: https://github.com/mlabonne/llm-course
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai, career]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+
+- id: build-your-own-x
+  title: "codecrafters-io/build-your-own-x"
+  provider: GitHub
+  type: repo
+  url: https://github.com/codecrafters-io/build-your-own-x
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, career]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "Every category has a project card in the pool, linked to its section of this list."
+
+- id: project-based-learning
+  title: "practical-tutorials/project-based-learning"
+  provider: GitHub
+  type: repo
+  url: https://github.com/practical-tutorials/project-based-learning
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, career]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+
+- id: karan-projects
+  title: "karan/Projects: practical projects to solve in any language"
+  provider: GitHub
+  type: repo
+  url: https://github.com/karan/Projects
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, career]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+
+- id: app-ideas
+  title: "florinpop17/app-ideas"
+  provider: GitHub
+  type: repo
+  url: https://github.com/florinpop17/app-ideas
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, career]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+
+- id: cs-video-courses
+  title: "Developer-Y/cs-video-courses"
+  provider: GitHub
+  type: repo
+  url: https://github.com/Developer-Y/cs-video-courses
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, career]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+
+- id: awesome-courses
+  title: "prakhar1989/awesome-courses"
+  provider: GitHub
+  type: repo
+  url: https://github.com/prakhar1989/awesome-courses
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, career]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+
+- id: advent-of-code
+  title: "Advent of Code"
+  provider: Eric Wastl
+  type: repo
+  url: https://adventofcode.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, languages]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "One day's puzzle in the language of the month is a standing weekly mini-build."
+
+- id: gamedevhq
+  title: "GameDevHQ: Unity game development course"
+  provider: GameDevHQ
+  type: course
+  url: https://gamedevhq.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [gamedev]
+  level: intro
+  cost: paid
+  estHours: 0
+  reference: true
+  subject: gamedev
+  summary: "Finished before the plan starts. Kept so that the games of the first phase have their origin on record."

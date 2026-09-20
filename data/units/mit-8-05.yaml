@@ -1,0 +1,29 @@
+# Units of "mit-8-05". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/video_galleries/video-lectures/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: lecture-1, title: "Lecture 1: Wave Mechanics", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-1-wave-mechanics/" }
+- { id: lecture-2, title: "Lecture 2: Wave Mechanics (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-2-wave-mechanics-cont/" }
+- { id: lecture-3, title: "Lecture 3: Wave Mechanics (cont.) and Stern-Gerlach Experiment", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-3-wave-mechanics-cont/" }
+- { id: lecture-4, title: "Lecture 4: Spin One-half, Bras, Kets, and Operators", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-4-spin-one-half-bras-kets-and-operators/" }
+- { id: lecture-5, title: "Lecture 5: Linear Algebra: Vector Spaces and Operators", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-5-linear-algebra-vector-spaces-and-operators/" }
+- { id: lecture-6, title: "Lecture 6: Linear Algebra: Vector Spaces and Operators (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-6-linear-algebra-vector-spaces-and-operators-cont/" }
+- { id: lecture-7, title: "Lecture 7: Linear Algebra: Vector Spaces and Operators (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-7-linear-algebra-vector-spaces-and-operators-cont/" }
+- { id: lecture-8, title: "Lecture 8: Linear Algebra: Vector Spaces and Operators (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-8-linear-algebra-vector-spaces-and-operators-cont/" }
+- { id: lecture-9, title: "Lecture 9: Dirac's Bra and Ket Notation", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-9-diracs-bra-and-ket-notation/" }
+- { id: lecture-10, title: "Lecture 10: Uncertainty Principle and Compatible Observables", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-10-uncertainty-principle-and-compatible-observables/" }
+- { id: lecture-11, title: "Lecture 11: Uncertainty Principle and Compatible Observables (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-11-uncertainty-principle-and-compatible-observables-cont/" }
+- { id: lecture-12, title: "Lecture 12: Quantum Dynamics", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-12-quantum-dynamics/" }
+- { id: lecture-13, title: "Lecture 13: Quantum Dynamics (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-13-quantum-dynamics-cont/" }
+- { id: lecture-14, title: "Lecture 14: Quantum Dynamics (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-14-quantum-dynamics-cont/" }
+- { id: lecture-15, title: "Lecture 15: Quantum Dynamics (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-15-quantum-dynamics-cont/" }
+- { id: lecture-16, title: "Lecture 16: Quantum Dynamics (cont.) and Two State Systems", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-16-quantum-dynamics-cont/" }
+- { id: lecture-17, title: "Lecture 17: Two State Systems (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-17-two-state-systems-cont/" }
+- { id: lecture-18, title: "Lecture 18: Two State Systems (cont.), Multiparticle States and Tensor Products", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-18-two-state-systems-cont/" }
+- { id: lecture-19, title: "Lecture 19: Multiparticle States and Tensor Products (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-19-multiparticle-states-and-tensor-products-cont/" }
+- { id: lecture-20, title: "Lecture 20: Multiparticle States and Tensor Products (cont.) and Angular Momentum", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-20-multiparticle-states-and-tensor-products-cont/" }
+- { id: lecture-21, title: "Lecture 21: Angular Momentum (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-21-angular-momentum-cont/" }
+- { id: lecture-22, title: "Lecture 22: Angular Momentum (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-22-angular-momentum-cont/" }
+- { id: lecture-23, title: "Lecture 23: Angular Momentum (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-23-angular-momentum-cont/" }
+- { id: lecture-24, title: "Lecture 24: Addition of Angular Momentum", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-24-addition-of-angular-momentum/" }
+- { id: lecture-25, title: "Lecture 25: Addition of Angular Momentum (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-25-addition-of-angular-momentum-cont/" }
+- { id: lecture-26, title: "Lecture 26: Addition of Angular Momentum (cont.)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/resources/lecture-26-addition-of-angular-momentum-cont/" }

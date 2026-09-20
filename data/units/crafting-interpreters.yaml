@@ -1,0 +1,36 @@
+# Units of "crafting-interpreters". Titles and links were read from the official page:
+#   https://craftinginterpreters.com/contents.html
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: introduction, title: "Introduction", url: "https://craftinginterpreters.com/introduction.html" }
+- { id: a-map-of-the-territory, title: "A Map of the Territory", url: "https://craftinginterpreters.com/a-map-of-the-territory.html" }
+- { id: the-lox-language, title: "The Lox Language", url: "https://craftinginterpreters.com/the-lox-language.html" }
+- { id: scanning, title: "Scanning", url: "https://craftinginterpreters.com/scanning.html" }
+- { id: representing-code, title: "Representing Code", url: "https://craftinginterpreters.com/representing-code.html" }
+- { id: parsing-expressions, title: "Parsing Expressions", url: "https://craftinginterpreters.com/parsing-expressions.html" }
+- { id: evaluating-expressions, title: "Evaluating Expressions", url: "https://craftinginterpreters.com/evaluating-expressions.html" }
+- { id: statements-and-state, title: "Statements and State", url: "https://craftinginterpreters.com/statements-and-state.html" }
+- { id: control-flow, title: "Control Flow", url: "https://craftinginterpreters.com/control-flow.html" }
+- { id: functions, title: "Functions", url: "https://craftinginterpreters.com/functions.html" }
+- { id: resolving-and-binding, title: "Resolving and Binding", url: "https://craftinginterpreters.com/resolving-and-binding.html" }
+- { id: classes, title: "Classes", url: "https://craftinginterpreters.com/classes.html" }
+- { id: inheritance, title: "Inheritance", url: "https://craftinginterpreters.com/inheritance.html" }
+- { id: chunks-of-bytecode, title: "Chunks of Bytecode", url: "https://craftinginterpreters.com/chunks-of-bytecode.html" }
+- { id: a-virtual-machine, title: "A Virtual Machine", url: "https://craftinginterpreters.com/a-virtual-machine.html" }
+- { id: scanning-on-demand, title: "Scanning on Demand", url: "https://craftinginterpreters.com/scanning-on-demand.html" }
+- { id: compiling-expressions, title: "Compiling Expressions", url: "https://craftinginterpreters.com/compiling-expressions.html" }
+- { id: types-of-values, title: "Types of Values", url: "https://craftinginterpreters.com/types-of-values.html" }
+- { id: strings, title: "Strings", url: "https://craftinginterpreters.com/strings.html" }
+- { id: hash-tables, title: "Hash Tables", url: "https://craftinginterpreters.com/hash-tables.html" }
+- { id: global-variables, title: "Global Variables", url: "https://craftinginterpreters.com/global-variables.html" }
+- { id: local-variables, title: "Local Variables", url: "https://craftinginterpreters.com/local-variables.html" }
+- { id: jumping-back-and-forth, title: "Jumping Back and Forth", url: "https://craftinginterpreters.com/jumping-back-and-forth.html" }
+- { id: calls-and-functions, title: "Calls and Functions", url: "https://craftinginterpreters.com/calls-and-functions.html" }
+- { id: closures, title: "Closures", url: "https://craftinginterpreters.com/closures.html" }
+- { id: garbage-collection, title: "Garbage Collection", url: "https://craftinginterpreters.com/garbage-collection.html" }
+- { id: classes-and-instances, title: "Classes and Instances", url: "https://craftinginterpreters.com/classes-and-instances.html" }
+- { id: methods-and-initializers, title: "Methods and Initializers", url: "https://craftinginterpreters.com/methods-and-initializers.html" }
+- { id: superclasses, title: "Superclasses", url: "https://craftinginterpreters.com/superclasses.html" }
+- { id: optimization, title: "Optimization", url: "https://craftinginterpreters.com/optimization.html" }
+- { id: appendix-i-lox-grammar, title: "Appendix I: Lox Grammar", url: "https://craftinginterpreters.com/appendix-i.html" }
+- { id: appendix-ii-generated-syntax-tree-classes, title: "Appendix II: Generated Syntax Tree Classes", url: "https://craftinginterpreters.com/appendix-ii.html" }
+- { id: first-part-ldquo-welcome-rdquo-rarr, title: "First Part: &ldquo;Welcome&rdquo; &rarr;", url: "https://craftinginterpreters.com/welcome.html" }

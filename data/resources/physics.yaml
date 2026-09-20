@@ -1,0 +1,234 @@
+# Physics (including quantum) and chemistry. Block E carries these from day one because the stage 2
+# engineering courses list them as prerequisites.
+
+- id: mit-8-01
+  title: "MIT 8.01SC Classical Mechanics (Fall 2016)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [physics]
+  level: intro
+  cost: free
+  estHours: 130
+  prerequisites: [mit-18-01]
+  subject: math-physics
+
+- id: mit-8-02
+  title: "MIT 8.02 Physics II: Electricity and Magnetism (Spring 2007)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2007/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [physics, ee]
+  level: intro
+  cost: free
+  estHours: 130
+  prerequisites: [mit-8-01, mit-18-02]
+  subject: math-physics
+  summary: "Class slides, problem solving and experiments; no lecture videos in this edition. MITx publishes the same course in three parts on MIT Learn (8.02.1x to 8.02.3x, no certificate)."
+
+- id: mit-8-03
+  title: "MIT 8.03SC Physics III: Vibrations and Waves (Fall 2016)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/8-03sc-physics-iii-vibrations-and-waves-fall-2016/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [physics]
+  level: intermediate
+  cost: free
+  estHours: 130
+  prerequisites: [mit-8-02, mit-18-03]
+  subject: math-physics
+
+- id: mit-8-04
+  title: "MIT 8.04 Quantum Physics I (Barton Zwiebach, Spring 2016)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [physics]
+  level: advanced
+  cost: free
+  estHours: 130
+  prerequisites: [mit-8-03, mit-18-03, mit-18-06]
+  subject: math-physics
+  stretch: true
+
+- id: mit-8-04-adams
+  title: "MIT 8.04 Quantum Physics I (Allan Adams, Spring 2013)"
+  provider: MIT OCW
+  type: lectures
+  url: https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2013/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [physics]
+  level: advanced
+  cost: free
+  estHours: 0
+  reference: true
+  subject: math-physics
+  summary: "The other recorded version of 8.04. Pick whichever lecturer suits you; the hours are counted once, on the Zwiebach edition."
+
+- id: mit-8-05
+  title: "MIT 8.05 Quantum Physics II (Fall 2013)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [physics]
+  level: advanced
+  cost: free
+  estHours: 130
+  prerequisites: [mit-8-04]
+  subject: math-physics
+  stretch: true
+
+- id: mit-8-06
+  title: "MIT 8.06 Quantum Physics III (Spring 2018)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/8-06-quantum-physics-iii-spring-2018/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [physics]
+  level: advanced
+  cost: free
+  estHours: 130
+  prerequisites: [mit-8-05]
+  subject: math-physics
+  stretch: true
+
+- id: susskind-classical-mechanics
+  title: "Leonard Susskind: The Theoretical Minimum, Classical Mechanics (Fall 2011)"
+  provider: Stanford Continuing Studies
+  type: lectures
+  url: https://theoreticalminimum.com/courses/classical-mechanics/2011/fall
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [physics]
+  level: intermediate
+  cost: free
+  estHours: 30
+  subject: math-physics
+  summary: "Lagrangians and Hamiltonians: the formulation the simulation and robotics work uses later."
+
+- id: susskind-quantum-mechanics
+  title: "Leonard Susskind: The Theoretical Minimum, Quantum Mechanics (Winter 2012)"
+  provider: Stanford Continuing Studies
+  type: lectures
+  url: https://theoreticalminimum.com/courses/quantum-mechanics/2012/winter
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [physics]
+  level: intermediate
+  cost: free
+  estHours: 30
+  subject: math-physics
+
+- id: feynman-lectures
+  title: "The Feynman Lectures on Physics (online edition)"
+  provider: Caltech
+  type: book
+  url: https://www.feynmanlectures.caltech.edu/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [physics]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  subject: math-physics
+  summary: "The full text, free online from Caltech. The site answers scripts with a bot challenge, so `npm run check:links` reports 403 for it; it was verified in a browser."
+
+- id: ibm-quantum-learning
+  title: "IBM Quantum Learning (Qiskit courses)"
+  provider: IBM
+  type: course
+  url: null
+  urlVerified: false
+  searchHint: "IBM Quantum Learning Basics of quantum information"
+  tracks: [physics]
+  level: intermediate
+  cost: free
+  estHours: 40
+  prerequisites: [mit-18-06]
+  subject: quantum
+  summary: "Not verified: on 2026-09-20 IBM Quantum Platform answered 'our security rules have blocked you' from this machine, in a script and in a browser. Check that it opens for you before relying on it."
+
+- id: nielsen-chuang
+  title: "Quantum Computation and Quantum Information (Nielsen and Chuang)"
+  provider: Cambridge University Press
+  type: book
+  url: https://www.cambridge.org/highereducation/books/quantum-computation-and-quantum-information/01E10196D0A682A6AEFFEA52D53BE9AE
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [physics]
+  level: advanced
+  cost: paid
+  estHours: 0
+  reference: true
+  subject: quantum
+
+- id: mitx-8-370
+  title: "MITx 8.370.1x Quantum Information Science I, Part 1"
+  provider: MIT Open Learning Library
+  type: course
+  url: https://openlearninglibrary.mit.edu/courses/course-v1:MITx+8.370.1x+1T2018/about
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [physics]
+  level: advanced
+  cost: free
+  estHours: 40
+  prerequisites: [mit-18-06]
+  subject: quantum
+  stretch: true
+  summary: "The archived MITx course (no certificate). Parts 2 and 3 sit next to it in the Open Learning Library."
+
+- id: mit-3-091
+  title: "MIT 3.091SC Introduction to Solid State Chemistry (Fall 2010)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [chem]
+  level: intro
+  cost: free
+  estHours: 100
+  subject: math-physics
+  summary: "The chemistry course of year 4. MIT 5.111 is the alternative: take one."
+
+- id: mit-5-111
+  title: "MIT 5.111SC Principles of Chemical Science (Fall 2014)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [chem]
+  level: intro
+  cost: free
+  estHours: 100
+  subject: math-physics
+  summary: "Alternative to MIT 3.091."
+
+- id: mit-5-60
+  title: "MIT 5.60 Thermodynamics and Kinetics (Spring 2008)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/5-60-thermodynamics-kinetics-spring-2008/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [chem, physics]
+  level: intermediate
+  cost: free
+  estHours: 100
+  prerequisites: [mit-18-02]
+  subject: math-physics

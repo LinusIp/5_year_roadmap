@@ -1,0 +1,15 @@
+# Units of "hf-llm-course". Titles and links were read from the official page:
+#   https://raw.githubusercontent.com/huggingface/course/main/chapters/en/_toctree.yml
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: 1-transformer-models, title: "1. Transformer models", url: "https://huggingface.co/learn/llm-course/chapter1/1" }
+- { id: 2-using-transformers, title: "2. Using 🤗 Transformers", url: "https://huggingface.co/learn/llm-course/chapter2/1" }
+- { id: 3-fine-tuning-a-pretrained-model, title: "3. Fine-tuning a pretrained model", url: "https://huggingface.co/learn/llm-course/chapter3/1" }
+- { id: 4-sharing-models-and-tokenizers, title: "4. Sharing models and tokenizers", url: "https://huggingface.co/learn/llm-course/chapter4/1" }
+- { id: 5-the-datasets-library, title: "5. The 🤗 Datasets library", url: "https://huggingface.co/learn/llm-course/chapter5/1" }
+- { id: 6-the-tokenizers-library, title: "6. The 🤗 Tokenizers library", url: "https://huggingface.co/learn/llm-course/chapter6/1" }
+- { id: 7-classical-nlp-tasks, title: "7. Classical NLP tasks", url: "https://huggingface.co/learn/llm-course/chapter7/1" }
+- { id: 8-how-to-ask-for-help, title: "8. How to ask for help", url: "https://huggingface.co/learn/llm-course/chapter8/1" }
+- { id: 9-building-and-sharing-demos, title: "9. Building and sharing demos", url: "https://huggingface.co/learn/llm-course/chapter9/1" }
+- { id: 10-curate-high-quality-datasets, title: "10. Curate high-quality datasets", url: "https://huggingface.co/learn/llm-course/chapter10/1" }
+- { id: 11-fine-tune-large-language-models, title: "11. Fine-tune Large Language Models", url: "https://huggingface.co/learn/llm-course/chapter11/1" }
+- { id: 12-build-reasoning-models, title: "12. Build Reasoning Models", url: "https://huggingface.co/learn/llm-course/chapter12/1" }

@@ -1,0 +1,48 @@
+# Units of "mit-5-111". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- section: "Unit I : THE ATOM"
+  items:
+    - { id: lecture-1, title: "Lecture 1: The Importance of Chemical Principles", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-i-the-atom/lecture-1/" }
+    - { id: lecture-2, title: "Lecture 2: Atomic Structure", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-i-the-atom/lecture-2/" }
+    - { id: lecture-3, title: "Lecture 3: Wave-Particle Duality of Light", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-i-the-atom/lecture-3-wave-particle-duality-of-light/" }
+    - { id: lecture-4, title: "Lecture 4: Wave-Particle Duality of Matter; Schrödinger Equation", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-i-the-atom/lecture-4-wave-particle-duality-of-matter-schrodinger-equation/" }
+    - { id: lecture-5, title: "Lecture 5: Hydrogen Atom Energy Levels", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-i-the-atom/lecture-5/" }
+    - { id: lecture-6, title: "Lecture 6: Hydrogen Atom Wavefunctions (Orbitals)", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-i-the-atom/lecture-6-hydrogen-atom-wavefunctions-orbitals/" }
+    - { id: lecture-7, title: "Lecture 7: Multi-electron Atoms", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-i-the-atom/lecture-7/" }
+- section: "Unit II: CHEMICAL BONDING & STRUCTURE"
+  items:
+    - { id: lecture-8, title: "Lecture 8: The Periodic Table and Periodic Trends", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-ii-chemical-bonding-structure/lecture-8/" }
+    - { id: lecture-9, title: "Lecture 9: Periodic Table; Ionic and Covalent Bonds", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-ii-chemical-bonding-structure/lecture-9-periodic-table-ionic-and-covalent-bonds/" }
+    - { id: lecture-10, title: "Lecture 10: Introduction to Lewis Structures", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-ii-chemical-bonding-structure/lecture-10/" }
+    - { id: lecture-11, title: "Lecture 11: Lewis Structures: Breakdown of the Octet Rule", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-ii-chemical-bonding-structure/lecture-11/" }
+    - { id: lecture-12, title: "Lecture 12: The Shapes of Molecules: VSEPR Theory", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-ii-chemical-bonding-structure/lecture-12-the-shapes-of-molecules-vsepr-theory/" }
+    - { id: lecture-13, title: "Lecture 13: Molecular Orbital Theory", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-ii-chemical-bonding-structure/lecture-13/" }
+    - { id: lecture-14, title: "Lecture 14: Valence Bond Theory and Hybridization", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-ii-chemical-bonding-structure/lecture-14/" }
+- section: "Unit III: THERMODYNAMICS & CHEMICAL EQUILIBRIUM"
+  items:
+    - { id: lecture-15, title: "Lecture 15: Thermodynamics: Bond and Reaction Enthalpies", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iii-thermodynamics-chemical-equilibrium/lecture-15/" }
+    - { id: lecture-16, title: "Lecture 16: Thermodynamics: Gibbs Free Energy and Entropy", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iii-thermodynamics-chemical-equilibrium/lecture-16/" }
+    - { id: lecture-17, title: "Lecture 17: Thermodynamics: Now What Happens When You Heat It Up?", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iii-thermodynamics-chemical-equilibrium/lecture-17-thermodynamics-now-what-happens-when-you-heat-it-up/" }
+    - { id: lecture-18, title: "Lecture 18: Introduction to Chemical Equilibrium", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iii-thermodynamics-chemical-equilibrium/lecture-18-introduction-to-chemical-equilibrium/" }
+    - { id: lecture-19, title: "Lecture 19: Chemical Equilibrium: Le Châtelier’s Principle", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iii-thermodynamics-chemical-equilibrium/lecture-19/" }
+    - { id: lecture-20, title: "Lecture 20: Solubility and Acid-Base Equilibrium", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iii-thermodynamics-chemical-equilibrium/lecture-20-solubility-and-acid-base-equilibrium/" }
+    - { id: lecture-21, title: "Lecture 21: Acid-Base Equilibrium: Is MIT Water Safe to Drink?", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iii-thermodynamics-chemical-equilibrium/lecture-21/" }
+    - { id: lecture-22, title: "Lecture 22: Acid-Base Equilibrium: Salt Solutions and Buffers", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iii-thermodynamics-chemical-equilibrium/lecture-22/" }
+    - { id: lecture-23, title: "Lecture 23: Acid-Base Titrations Part I", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iii-thermodynamics-chemical-equilibrium/lecture-23/" }
+    - { id: lecture-24, title: "Lecture 24: Acid-Base Titrations Part II", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iii-thermodynamics-chemical-equilibrium/lecture-24-acid-base-titrations-part-ii/" }
+- section: "Unit IV: TRANSITION METALS & OXIDATION-REDUCTION REACTIONS"
+  items:
+    - { id: lecture-25, title: "Lecture 25: Oxidation-Reduction and Electrochemical Cells", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iv-transition-metals-oxidation-reduction-reactions/lecture-25/" }
+    - { id: lecture-26, title: "Lecture 26: Chemical and Biological Oxidations", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iv-transition-metals-oxidation-reduction-reactions/lecture-26-chemical-and-biological-oxidations/" }
+    - { id: lecture-27, title: "Lecture 27: Introduction to Transition Metals", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iv-transition-metals-oxidation-reduction-reactions/lecture-27-introduction-to-transition-metals/" }
+    - { id: lecture-28, title: "Lecture 28: Transition Metals: Crystal Field Theory Part I", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iv-transition-metals-oxidation-reduction-reactions/lecture-28/" }
+    - { id: lecture-29, title: "Lecture 29: Transition Metals: Crystal Field Theory Part II", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-iv-transition-metals-oxidation-reduction-reactions/lecture-29/" }
+- section: "Unit V: CHEMICAL KINETICS"
+  items:
+    - { id: lecture-30, title: "Lecture 30: Kinetics: Rate Laws", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-v-chemical-kinetics/lecture-30/" }
+    - { id: lecture-31, title: "Lecture 31: Nuclear Chemistry and Chemical Kinetics", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-v-chemical-kinetics/lecture-31/" }
+    - { id: lecture-32, title: "Lecture 32: Kinetics: Reaction Mechanisms", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-v-chemical-kinetics/lecture-32/" }
+    - { id: lecture-33, title: "Lecture 33: Kinetics and Temperature", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-v-chemical-kinetics/lecture-33/" }
+    - { id: lecture-34, title: "Lecture 34: Kinetics: Catalysts", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-v-chemical-kinetics/lecture-34-kinetics-catalysts/" }
+    - { id: lecture-35, title: "Lecture 35: Applying Chemical Principles", url: "https://ocw.mit.edu/courses/5-111sc-principles-of-chemical-science-fall-2014/pages/unit-v-chemical-kinetics/lecture-35/" }

@@ -6,8 +6,8 @@ with each. "Verified" means it was run, not assumed.
 | # | Milestone | Status |
 |---|---|---|
 | 1 | Scaffold | **done** |
-| 2 | Data | next |
-| 3 | Today + logging | |
+| 2 | Data | **done** |
+| 3 | Today + logging | next |
 | 4 | Heatmap + streaks | |
 | 5 | Roadmap | |
 | 6 | Library, Papers, Certifications | |
@@ -31,9 +31,6 @@ Built:
 - Zod schemas for the curriculum (`src/seed/schema.ts`), the cross-file validator
   (`src/seed/validate.ts`), the YAML loader, `npm run validate:data`, and the Vite plugin that serves the
   validated curriculum to the app.
-- Real `data/tracks.yaml`, `data/settings.yaml` and `data/phases.yaml`. The other files are empty lists
-  until milestone 2, so the brief's content quotas are switched off by one constant
-  (`REQUIRE_COMPLETE` in `scripts/lib/load-seed.ts`) and switched on with the data.
 - Generated service worker + web manifest + icons (registration is wired in milestone 8).
 - CI (`.github/workflows/ci.yml`): validate data, typecheck, unit tests, build, Playwright smoke tests.
   Deploy (`deploy.yml`): build and publish to GitHub Pages on every push to `main`.
@@ -48,3 +45,46 @@ Verified on this machine:
 
 Needs you, once: in the GitHub repository, **Settings > Pages > Build and deployment > Source = "GitHub
 Actions"**. Until that is set, the deploy workflow fails at its last step.
+
+## Milestone 2 — Data
+
+The whole curriculum of the brief is now in `/data`, as YAML that the app reads and you can edit.
+
+| | |
+|---|---|
+| Phases | 6 (Y1-P0, Y1-P1, Y2, Y3, Y4, Y5), covering 2026-09-21 to 2031-08-31 with no gap |
+| Resources | 191 courses, books, lecture series and repositories |
+| Plan items | 183 across five lanes and six phases |
+| Projects | 220: 5 capstones, 56 numbered monthly builds, 9 block A builds, 19 spare build-your-own-x cards, and 135 weekly mini-builds (41 of them stage 2) |
+| Papers | 42 in four groups, plus 14 places to find more |
+| Certifications | 41 cards |
+| Credential map | 28 subjects, every one with a certificate or a portfolio milestone, most with both |
+| Unit checklists | 968 lecture, chapter and lab rows across 38 courses |
+
+How the links were handled (brief, section 7):
+
+- Every URL in `/data` was fetched and its page title compared with the resource before it was written
+  down. Where that could not be done, the entry has `url: null`, a `searchHint` and a note saying what
+  happened. Four entries are in that state: IBM Quantum Learning (the platform refuses this machine), MIT
+  2.006 (not on OCW or MIT Learn), the MITx 6.002x certificate (the edX page no longer resolves) and
+  Shadertoy (bot challenge).
+- `npm run check:links` checks all 1,211 URLs, including every unit link. 1,208 answer 200. The three that
+  answer 403 — nandland.com, realtimerendering.com and the Feynman Lectures — are bot challenges; each was
+  opened in a browser and its card says so. The check never fails the build.
+- The 968 unit rows were read from the courses' own syllabus pages by `npm run fetch:units`, not typed out.
+- Certification names, prices and availability were read off each vendor's page; `cost: null` means the
+  vendor did not publish a price there. Worth knowing: IBM retired the Qiskit v0.2X certification on
+  2025-09-30 and replaced it with the v2.X exam; MITx has moved from edX to MIT Learn and the 6.002x
+  certificate page no longer resolves (that card is marked "investigate"); AWS is mid-rotation on two exam
+  versions; SOLIDWORKS now calls the CSWA "Design Associate"; Autodesk's tiers are Associate, Professional
+  and Expert. The discontinued TensorFlow Developer Certificate is absent, and `validate:data` rejects it
+  if anyone adds it back.
+
+Verified on this machine:
+
+- `npm run validate:data`: valid, 0 errors, 0 warnings.
+- `npm test`: 38 unit tests pass, 12 of them asserting the brief's own promises against the real
+  curriculum — the stage split, credential coverage, the three cadences, prerequisite order, and that no
+  unverified link is stored.
+- `npm run build` passes. The bundle is 594 kB (172 kB gzipped); the 968 unit rows are split into a chunk
+  that loads only when an item is opened.

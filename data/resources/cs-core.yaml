@@ -1,0 +1,241 @@
+# CS foundations and software engineering.
+# MIT renumbered its courses in 2022; titles carry both numbers where that applies.
+
+- id: cs50x
+  title: "Harvard CS50x: Introduction to Computer Science"
+  provider: Harvard
+  type: course
+  url: https://cs50.harvard.edu/x/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, languages]
+  level: intro
+  cost: free
+  estHours: 100
+  subject: c-cpp
+  summary: "Weeks 1 to 5 are the C part of block B; the later weeks (Python, SQL, web) are revision by then."
+
+- id: missing-semester
+  title: "MIT: The Missing Semester of Your CS Education"
+  provider: MIT CSAIL
+  type: course
+  url: https://missing.csail.mit.edu/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe]
+  level: intro
+  cost: free
+  estHours: 20
+  subject: linux-os
+  summary: "Shell, editors, Git, debugging, packaging. Also the Bash part of the languages list."
+
+- id: current-dsa-course
+  title: "Current algorithms and data structures course (the one already in progress)"
+  provider: "(fill in)"
+  type: course
+  url: null
+  urlVerified: false
+  searchHint: "Open this item in the Library and set the title and link of the DSA course you are taking"
+  tracks: [swe]
+  level: intro
+  cost: free
+  estHours: 40
+  subject: algorithms
+  summary: "Placeholder. The brief names the course only as 'an algorithms and data structures course', so its link is left for you to fill in. 40 h is the assumed remainder."
+
+- id: mit-6-006
+  title: "MIT 6.006 (now 6.1210) Introduction to Algorithms (Spring 2020)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe]
+  level: intermediate
+  cost: free
+  estHours: 120
+  subject: algorithms
+
+- id: mit-6-046j
+  title: "MIT 6.046J (now 6.1220J) Design and Analysis of Algorithms (Spring 2015)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2015/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe]
+  level: advanced
+  cost: free
+  estHours: 120
+  prerequisites: [mit-6-006]
+  subject: algorithms
+  stretch: true
+
+- id: skiena-adm
+  title: "The Algorithm Design Manual (Steven Skiena)"
+  provider: Springer
+  type: book
+  url: https://www.algorist.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe]
+  level: intermediate
+  cost: paid
+  estHours: 0
+  reference: true
+  subject: algorithms
+
+- id: neetcode-roadmap
+  title: "NeetCode roadmap (practice problems by pattern)"
+  provider: NeetCode
+  type: tutorial
+  url: https://neetcode.io/roadmap
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, career]
+  level: intermediate
+  cost: free
+  estHours: 100
+  subject: algorithms
+  summary: "The 150-problem count of the algorithms portfolio milestone comes from here. Done in weekly mini-builds, five problems at a time."
+
+- id: cmu-15-213
+  title: "CMU 15-213 Introduction to Computer Systems (lectures with the CS:APP book)"
+  provider: CMU
+  type: course
+  url: https://www.cs.cmu.edu/~213/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: intermediate
+  cost: free
+  estHours: 100
+  prerequisites: [cs50x]
+  subject: linux-os
+  summary: "Started at the end of year 1. The book (Bryant and O'Hallaron, 3rd edition) is paid; the lectures and labs are free."
+
+- id: csapp-labs
+  title: "CS:APP labs (data, bomb, attack, architecture, cache, performance, shell, malloc, proxy)"
+  provider: CMU
+  type: course
+  url: https://csapp.cs.cmu.edu/3e/labs.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: intermediate
+  cost: free
+  estHours: 60
+  prerequisites: [cmu-15-213]
+  subject: linux-os
+  units:
+    - { id: datalab, title: "Data Lab", url: "https://csapp.cs.cmu.edu/3e/datalab.pdf" }
+    - { id: bomblab, title: "Bomb Lab", url: "https://csapp.cs.cmu.edu/3e/bomblab.pdf" }
+    - { id: attacklab, title: "Attack Lab", url: "https://csapp.cs.cmu.edu/3e/attacklab.pdf" }
+    - { id: archlab, title: "Architecture Lab", url: "https://csapp.cs.cmu.edu/3e/archlab.pdf" }
+    - { id: cachelab, title: "Cache Lab", url: "https://csapp.cs.cmu.edu/3e/cachelab.pdf" }
+    - { id: perflab, title: "Performance Lab", url: "https://csapp.cs.cmu.edu/3e/perflab.pdf" }
+    - { id: shlab, title: "Shell Lab", url: "https://csapp.cs.cmu.edu/3e/shlab.pdf" }
+    - { id: malloclab, title: "Malloc Lab", url: "https://csapp.cs.cmu.edu/3e/malloclab.pdf" }
+    - { id: proxylab, title: "Proxy Lab", url: "https://csapp.cs.cmu.edu/3e/proxylab.pdf" }
+
+- id: nand2tetris
+  title: "Nand2Tetris, parts I and II"
+  provider: Nisan and Schocken
+  type: course
+  url: https://www.nand2tetris.org/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems, embedded]
+  level: intro
+  cost: free
+  estHours: 90
+  subject: fpga
+  summary: "From NAND gates to a computer, a compiler and an operating system. Also the warm-up for MIT 6.004 in year 4."
+
+- id: mit-6-1810
+  title: "MIT 6.1810 (formerly 6.S081) Operating System Engineering (xv6)"
+  provider: MIT PDOS
+  type: course
+  url: https://pdos.csail.mit.edu/6.1810/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: advanced
+  cost: free
+  estHours: 150
+  prerequisites: [csapp-labs]
+  subject: linux-os
+  summary: "The units are the xv6 labs. The Fall 2023 edition is also archived on MIT OCW."
+
+- id: ostep
+  title: "Operating Systems: Three Easy Pieces (Arpaci-Dusseau)"
+  provider: University of Wisconsin
+  type: book
+  url: https://pages.cs.wisc.edu/~remzi/OSTEP/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  subject: linux-os
+  summary: "The free textbook to read alongside 6.1810."
+
+- id: cmu-15-445
+  title: "CMU 15-445/645 Database Systems (BusTub projects)"
+  provider: CMU
+  type: course
+  url: https://15445.courses.cs.cmu.edu/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: advanced
+  cost: free
+  estHours: 150
+  prerequisites: [cmu-15-213]
+  subject: databases
+  summary: "The homework is also the SQL practice of the languages list."
+
+- id: stanford-cs144
+  title: "Stanford CS144 Introduction to Computer Networking (selected labs)"
+  provider: Stanford
+  type: course
+  url: https://cs144.stanford.edu/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: advanced
+  cost: free
+  estHours: 120
+  prerequisites: [cmu-15-213]
+  subject: networking
+
+- id: crafting-interpreters
+  title: "Crafting Interpreters (Robert Nystrom)"
+  provider: craftinginterpreters.com
+  type: book
+  url: https://craftinginterpreters.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe, languages]
+  level: intermediate
+  cost: free
+  estHours: 80
+  subject: c-cpp
+  summary: "Not on the roadmap by default: a tree-walk interpreter in Java, then a bytecode VM in C. Add it to a lane when you want it."
+
+- id: fcc-youtube
+  title: "freeCodeCamp full-length courses on YouTube (Git, Linux, Docker, SQL)"
+  provider: freeCodeCamp
+  type: lectures
+  url: https://www.youtube.com/c/Freecodecamp
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [swe]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  subject: linux-os
+  summary: "Pick per need."

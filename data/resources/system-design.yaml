@@ -1,0 +1,154 @@
+# System design, distributed and scalable systems, cloud and data engineering.
+
+- id: ddia
+  title: "Designing Data-Intensive Applications (Martin Kleppmann)"
+  provider: O'Reilly
+  type: book
+  url: https://dataintensive.net/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: advanced
+  cost: paid
+  estHours: 80
+  prerequisites: [cmu-15-445]
+  subject: system-design
+
+- id: mit-6-5840
+  title: "MIT 6.5840 (formerly 6.824) Distributed Systems: lectures and all labs"
+  provider: MIT PDOS
+  type: course
+  url: https://pdos.csail.mit.edu/6.824/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: advanced
+  cost: free
+  estHours: 200
+  prerequisites: [mit-6-1810]
+  subject: system-design
+  summary: "The units are the labs: MapReduce, key/value server, Raft, KV Raft, sharded KV. The labs are in Go: do A Tour of Go (10 h, block B) first. Most of the systems papers in the reading queue are assigned here."
+
+- id: system-design-primer
+  title: "The System Design Primer (donnemartin)"
+  provider: GitHub
+  type: repo
+  url: https://github.com/donnemartin/system-design-primer
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems, career]
+  level: intermediate
+  cost: free
+  estHours: 40
+  subject: system-design
+
+- id: kleppmann-distributed-systems
+  title: "Martin Kleppmann: Distributed Systems lecture series (Cambridge, Concurrent and Distributed Systems)"
+  provider: University of Cambridge
+  type: lectures
+  url: https://www.cl.cam.ac.uk/teaching/2122/ConcDisSys/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: intermediate
+  cost: free
+  estHours: 20
+  subject: system-design
+  summary: "Course page with the lecture notes; the videos are linked from it."
+
+- id: bytebytego
+  title: "ByteByteGo / System Design Interview, volumes 1 and 2 (Alex Xu)"
+  provider: ByteByteGo
+  type: book
+  url: https://bytebytego.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems, career]
+  level: intermediate
+  cost: paid
+  estHours: 40
+  subject: system-design
+  stretch: true
+  summary: "Paid and optional."
+
+- id: google-sre-book
+  title: "Site Reliability Engineering (the Google SRE book)"
+  provider: Google
+  type: book
+  url: https://sre.google/books/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: intermediate
+  cost: free
+  estHours: 40
+  subject: system-design
+
+- id: docker-get-started
+  title: "Docker: official getting-started guides"
+  provider: Docker
+  type: tutorial
+  url: https://docs.docker.com/get-started/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: intro
+  cost: free
+  estHours: 10
+  subject: containers-iac
+
+- id: kubernetes-tutorials
+  title: "Kubernetes: official tutorials"
+  provider: Kubernetes
+  type: tutorial
+  url: https://kubernetes.io/docs/tutorials/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: intermediate
+  cost: free
+  estHours: 15
+  prerequisites: [docker-get-started]
+  subject: containers-iac
+
+- id: kubernetes-the-hard-way
+  title: "Kubernetes the Hard Way (Kelsey Hightower)"
+  provider: GitHub
+  type: tutorial
+  url: https://github.com/kelseyhightower/kubernetes-the-hard-way
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems]
+  level: advanced
+  cost: free
+  estHours: 15
+  prerequisites: [kubernetes-tutorials]
+  subject: containers-iac
+
+- id: aws-skill-builder
+  title: "AWS Skill Builder (free digital training; the prep for the AWS certifications)"
+  provider: Amazon Web Services
+  type: course
+  url: https://skillbuilder.aws/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems, career]
+  level: intermediate
+  cost: free
+  estHours: 60
+  subject: cloud
+  summary: "The 'cloud' step of year 3. Work through the Solutions Architect learning plan while building project 32 on AWS."
+
+- id: de-zoomcamp
+  title: "DataTalksClub Data Engineering Zoomcamp"
+  provider: DataTalksClub
+  type: course
+  url: https://github.com/DataTalksClub/data-engineering-zoomcamp
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [systems, ai]
+  level: intermediate
+  cost: free
+  estHours: 120
+  subject: data-engineering
+  summary: "Not on the roadmap by default; it is the certificate of the data engineering row and pairs with project 28."

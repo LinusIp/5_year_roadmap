@@ -1,0 +1,77 @@
+# Units of "learnopengl". Titles and links were read from the official page:
+#   https://learnopengl.com/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- section: "Getting started"
+  items:
+    - { id: opengl, title: "OpenGL", url: "https://learnopengl.com/Getting-started/OpenGL" }
+    - { id: creating-a-window, title: "Creating a window", url: "https://learnopengl.com/Getting-started/Creating-a-window" }
+    - { id: hello-window, title: "Hello Window", url: "https://learnopengl.com/Getting-started/Hello-Window" }
+    - { id: hello-triangle, title: "Hello Triangle", url: "https://learnopengl.com/Getting-started/Hello-Triangle" }
+    - { id: shaders, title: "Shaders", url: "https://learnopengl.com/Getting-started/Shaders" }
+    - { id: textures, title: "Textures", url: "https://learnopengl.com/Getting-started/Textures" }
+    - { id: transformations, title: "Transformations", url: "https://learnopengl.com/Getting-started/Transformations" }
+    - { id: coordinate-systems, title: "Coordinate Systems", url: "https://learnopengl.com/Getting-started/Coordinate-Systems" }
+    - { id: camera, title: "Camera", url: "https://learnopengl.com/Getting-started/Camera" }
+    - { id: review, title: "Review", url: "https://learnopengl.com/Getting-started/Review" }
+- section: "Lighting"
+  items:
+    - { id: colors, title: "Colors", url: "https://learnopengl.com/Lighting/Colors" }
+    - { id: basic-lighting, title: "Basic Lighting", url: "https://learnopengl.com/Lighting/Basic-Lighting" }
+    - { id: materials, title: "Materials", url: "https://learnopengl.com/Lighting/Materials" }
+    - { id: lighting-maps, title: "Lighting maps", url: "https://learnopengl.com/Lighting/Lighting-maps" }
+    - { id: light-casters, title: "Light casters", url: "https://learnopengl.com/Lighting/Light-casters" }
+    - { id: multiple-lights, title: "Multiple lights", url: "https://learnopengl.com/Lighting/Multiple-lights" }
+    - { id: lighting-review, title: "Review", url: "https://learnopengl.com/Lighting/Review" }
+- section: "Model Loading"
+  items:
+    - { id: assimp, title: "Assimp", url: "https://learnopengl.com/Model-Loading/Assimp" }
+    - { id: mesh, title: "Mesh", url: "https://learnopengl.com/Model-Loading/Mesh" }
+    - { id: model, title: "Model", url: "https://learnopengl.com/Model-Loading/Model" }
+- section: "Advanced OpenGL"
+  items:
+    - { id: depth-testing, title: "Depth testing", url: "https://learnopengl.com/Advanced-OpenGL/Depth-testing" }
+    - { id: stencil-testing, title: "Stencil testing", url: "https://learnopengl.com/Advanced-OpenGL/Stencil-testing" }
+    - { id: blending, title: "Blending", url: "https://learnopengl.com/Advanced-OpenGL/Blending" }
+    - { id: face-culling, title: "Face culling", url: "https://learnopengl.com/Advanced-OpenGL/Face-culling" }
+    - { id: framebuffers, title: "Framebuffers", url: "https://learnopengl.com/Advanced-OpenGL/Framebuffers" }
+    - { id: cubemaps, title: "Cubemaps", url: "https://learnopengl.com/Advanced-OpenGL/Cubemaps" }
+    - { id: advanced-data, title: "Advanced Data", url: "https://learnopengl.com/Advanced-OpenGL/Advanced-Data" }
+    - { id: advanced-glsl, title: "Advanced GLSL", url: "https://learnopengl.com/Advanced-OpenGL/Advanced-GLSL" }
+    - { id: geometry-shader, title: "Geometry Shader", url: "https://learnopengl.com/Advanced-OpenGL/Geometry-Shader" }
+    - { id: instancing, title: "Instancing", url: "https://learnopengl.com/Advanced-OpenGL/Instancing" }
+    - { id: anti-aliasing, title: "Anti Aliasing", url: "https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing" }
+- section: "Advanced Lighting"
+  items:
+    - { id: advanced-lighting, title: "Advanced Lighting", url: "https://learnopengl.com/Advanced-Lighting/Advanced-Lighting" }
+    - { id: gamma-correction, title: "Gamma Correction", url: "https://learnopengl.com/Advanced-Lighting/Gamma-Correction" }
+    - { id: shadow-mapping, title: "Shadow Mapping", url: "https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping" }
+    - { id: point-shadows, title: "Point Shadows", url: "https://learnopengl.com/Advanced-Lighting/Shadows/Point-Shadows" }
+    - { id: normal-mapping, title: "Normal Mapping", url: "https://learnopengl.com/Advanced-Lighting/Normal-Mapping" }
+    - { id: parallax-mapping, title: "Parallax Mapping", url: "https://learnopengl.com/Advanced-Lighting/Parallax-Mapping" }
+    - { id: hdr, title: "HDR", url: "https://learnopengl.com/Advanced-Lighting/HDR" }
+    - { id: bloom, title: "Bloom", url: "https://learnopengl.com/Advanced-Lighting/Bloom" }
+    - { id: deferred-shading, title: "Deferred Shading", url: "https://learnopengl.com/Advanced-Lighting/Deferred-Shading" }
+    - { id: ssao, title: "SSAO", url: "https://learnopengl.com/Advanced-Lighting/SSAO" }
+- section: "PBR"
+  items:
+    - { id: theory, title: "Theory", url: "https://learnopengl.com/PBR/Theory" }
+    - { id: lighting, title: "Lighting", url: "https://learnopengl.com/PBR/Lighting" }
+    - { id: diffuse-irradiance, title: "Diffuse irradiance", url: "https://learnopengl.com/PBR/IBL/Diffuse-irradiance" }
+    - { id: specular-ibl, title: "Specular IBL", url: "https://learnopengl.com/PBR/IBL/Specular-IBL" }
+- section: "In Practice"
+  items:
+    - { id: debugging, title: "Debugging", url: "https://learnopengl.com/In-Practice/Debugging" }
+    - { id: text-rendering, title: "Text Rendering", url: "https://learnopengl.com/In-Practice/Text-Rendering" }
+    - { id: breakout, title: "Breakout", url: "https://learnopengl.com/In-Practice/2D-Game/Breakout" }
+    - { id: setting-up, title: "Setting up", url: "https://learnopengl.com/In-Practice/2D-Game/Setting-up" }
+    - { id: rendering-sprites, title: "Rendering Sprites", url: "https://learnopengl.com/In-Practice/2D-Game/Rendering-Sprites" }
+    - { id: levels, title: "Levels", url: "https://learnopengl.com/In-Practice/2D-Game/Levels" }
+    - { id: ball, title: "Ball", url: "https://learnopengl.com/In-Practice/2D-Game/Collisions/Ball" }
+    - { id: collision-detection, title: "Collision detection", url: "https://learnopengl.com/In-Practice/2D-Game/Collisions/Collision-detection" }
+    - { id: collision-resolution, title: "Collision resolution", url: "https://learnopengl.com/In-Practice/2D-Game/Collisions/Collision-resolution" }
+    - { id: particles, title: "Particles", url: "https://learnopengl.com/In-Practice/2D-Game/Particles" }
+    - { id: postprocessing, title: "Postprocessing", url: "https://learnopengl.com/In-Practice/2D-Game/Postprocessing" }
+    - { id: powerups, title: "Powerups", url: "https://learnopengl.com/In-Practice/2D-Game/Powerups" }
+    - { id: audio, title: "Audio", url: "https://learnopengl.com/In-Practice/2D-Game/Audio" }
+    - { id: render-text, title: "Render text", url: "https://learnopengl.com/In-Practice/2D-Game/Render-text" }
+    - { id: final-thoughts, title: "Final thoughts", url: "https://learnopengl.com/In-Practice/2D-Game/Final-thoughts" }

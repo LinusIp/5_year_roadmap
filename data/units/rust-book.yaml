@@ -1,0 +1,25 @@
+# Units of "rust-book". Titles and links were read from the official page:
+#   https://raw.githubusercontent.com/rust-lang/book/main/src/SUMMARY.md
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: chapter-0, title: "Chapter 0: Introduction", url: "https://doc.rust-lang.org/book/ch00-00-introduction.html" }
+- { id: chapter-1, title: "Chapter 1: Getting Started", url: "https://doc.rust-lang.org/book/ch01-00-getting-started.html" }
+- { id: chapter-2, title: "Chapter 2: Programming a Guessing Game", url: "https://doc.rust-lang.org/book/ch02-00-guessing-game-tutorial.html" }
+- { id: chapter-3, title: "Chapter 3: Common Programming Concepts", url: "https://doc.rust-lang.org/book/ch03-00-common-programming-concepts.html" }
+- { id: chapter-4, title: "Chapter 4: Understanding Ownership", url: "https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html" }
+- { id: chapter-5, title: "Chapter 5: Using Structs to Structure Related Data", url: "https://doc.rust-lang.org/book/ch05-00-structs.html" }
+- { id: chapter-6, title: "Chapter 6: Enums and Pattern Matching", url: "https://doc.rust-lang.org/book/ch06-00-enums.html" }
+- { id: chapter-7, title: "Chapter 7: Packages, Crates, and Modules", url: "https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html" }
+- { id: chapter-8, title: "Chapter 8: Common Collections", url: "https://doc.rust-lang.org/book/ch08-00-common-collections.html" }
+- { id: chapter-9, title: "Chapter 9: Error Handling", url: "https://doc.rust-lang.org/book/ch09-00-error-handling.html" }
+- { id: chapter-10, title: "Chapter 10: Generic Types, Traits, and Lifetimes", url: "https://doc.rust-lang.org/book/ch10-00-generics.html" }
+- { id: chapter-11, title: "Chapter 11: Writing Automated Tests", url: "https://doc.rust-lang.org/book/ch11-00-testing.html" }
+- { id: chapter-12, title: "Chapter 12: An I/O Project: Building a Command Line Program", url: "https://doc.rust-lang.org/book/ch12-00-an-io-project.html" }
+- { id: chapter-13, title: "Chapter 13: Functional Language Features: Iterators and Closures", url: "https://doc.rust-lang.org/book/ch13-00-functional-features.html" }
+- { id: chapter-14, title: "Chapter 14: More about Cargo and Crates.io", url: "https://doc.rust-lang.org/book/ch14-00-more-about-cargo.html" }
+- { id: chapter-15, title: "Chapter 15: Smart Pointers", url: "https://doc.rust-lang.org/book/ch15-00-smart-pointers.html" }
+- { id: chapter-16, title: "Chapter 16: Fearless Concurrency", url: "https://doc.rust-lang.org/book/ch16-00-concurrency.html" }
+- { id: chapter-17, title: "Chapter 17: Fundamentals of Asynchronous Programming: Async, Await, Futures, and Streams", url: "https://doc.rust-lang.org/book/ch17-00-async-await.html" }
+- { id: chapter-18, title: "Chapter 18: Object Oriented Programming Features", url: "https://doc.rust-lang.org/book/ch18-00-oop.html" }
+- { id: chapter-19, title: "Chapter 19: Patterns and Matching", url: "https://doc.rust-lang.org/book/ch19-00-patterns.html" }
+- { id: chapter-20, title: "Chapter 20: Advanced Features", url: "https://doc.rust-lang.org/book/ch20-00-advanced-features.html" }
+- { id: chapter-21, title: "Chapter 21: Final Project: Building a Multithreaded Web Server", url: "https://doc.rust-lang.org/book/ch21-00-final-project-a-web-server.html" }

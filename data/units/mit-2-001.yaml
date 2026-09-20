@@ -1,0 +1,46 @@
+# Units of "mit-2-001". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/2-001-mechanics-materials-i-fall-2006/pages/lecture-notes/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- section: "Part 1: Statics - Elements of Equilibrium"
+  items:
+    - { id: lecture-1, title: "Lecture 1: Course Outline, Review of Forces and Moments, Introduction to Equilibrium" }
+    - { id: lecture-2, title: "Lecture 2: Forces, Moments, Equilibrium" }
+    - { id: lecture-3, title: "Lecture 3: Applying the Equations of Equilibrium, Planar Trusses" }
+    - { id: lecture-4, title: "Lecture 4: Friction" }
+- section: "Part 2: Forces and Moments Transmitted by Slender Members"
+  items:
+    - { id: lecture-5, title: "Lecture 5: Shear Force and Bending Moment Diagrams" }
+    - { id: lecture-6, title: "Lecture 6: Shear Force and Bending Moment Diagrams (cont.)" }
+- section: "Part 3: Mechanics of Deformable Bodies - Introduction"
+  items:
+    - { id: lecture-7, title: "Lecture 7: Force-deformation Relationships and Static Indeterminacy" }
+    - { id: lecture-8, title: "Lecture 8: Finishing up Static Indeterminacy; Uniaxial Loading and Material Properties" }
+    - { id: lecture-9, title: "Lecture 9: Trusses and Their Deformations" }
+    - { id: lecture-10, title: "Lecture 10: Statically Determinate and Indeterminate Trusses" }
+    - { id: lecture-11, title: "Lecture 11: Quiz 1" }
+- section: "Part 4: Force-Stress-Equilibrium"
+  items:
+    - { id: lecture-12, title: "Lecture 12: Multiaxial Stress" }
+    - { id: lecture-13, title: "Lecture 13: Multiaxial Stress and Strain" }
+- section: "Part 5: Displacement - Strain"
+  items:
+    - { id: lecture-14, title: "Lecture 14: Multiaxial Strain and Multiaxial Stress-strain Relationships" }
+- section: "Part 6: Linear Elasticity - Material Behavior"
+  items:
+    - { id: lecture-15, title: "Lecture 15: Stress-strain-temperature Relationships and Thin-walled Pressure Vessels" }
+    - { id: lecture-16, title: "Lecture 16: Stress Transformations and Principal Stress" }
+    - { id: lecture-17, title: "Lecture 17: Stress and Strain Transformations" }
+    - { id: lecture-18, title: "Lecture 18: Failure of Materials and Examples" }
+    - { id: lecture-19, title: "Lecture 19: Quiz 2" }
+- section: "Part 7: Bending: Stress and Strains; Deflections"
+  items:
+    - { id: lecture-20, title: "Lecture 20: Pure Bending" }
+    - { id: lecture-21, title: "Lecture 21: Moment-curvature Relationship" }
+    - { id: lecture-22, title: "Lecture 22: Beam Deflection" }
+    - { id: lecture-23, title: "Lecture 23: Symmetry, Superposition, and Statically Indeterminate Beams" }
+- section: "Part 8: Torsion; Energy Methods"
+  items:
+    - { id: lecture-24, title: "Lecture 24: Torsion and Twisting" }
+    - { id: lecture-25, title: "Lecture 25: Torsion Examples" }
+    - { id: lecture-26, title: "Lecture 26: Energy Methods" }
+    - { id: lecture-27, title: "Lecture 27: Examples" }

@@ -1,0 +1,333 @@
+# Mechanical engineering, robotics and the scientific-computing tools of year 5.
+
+- id: mit-2-001
+  title: "MIT 2.001 Mechanics and Materials I (Fall 2006)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/2-001-mechanics-materials-i-fall-2006/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech]
+  level: intermediate
+  cost: free
+  estHours: 130
+  prerequisites: [mit-8-01, mit-18-02]
+  subject: mechanics-fea-cfd
+
+- id: mit-2-002
+  title: "MIT 2.002 Mechanics and Materials II (Spring 2004)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/2-002-mechanics-and-materials-ii-spring-2004/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech]
+  level: advanced
+  cost: free
+  estHours: 120
+  prerequisites: [mit-2-001]
+  subject: mechanics-fea-cfd
+  stretch: true
+
+- id: mit-2-003
+  title: "MIT 2.003SC Engineering Dynamics (Fall 2011)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech, controls]
+  level: intermediate
+  cost: free
+  estHours: 130
+  prerequisites: [mit-8-01, mit-18-03]
+  subject: mechanics-fea-cfd
+  summary: "Newtonian and Lagrangian dynamics, vibration. The formulation used by the robot arm simulator of project 54."
+
+- id: mit-2-005
+  title: "MITx 2.005.1x Thermal-Fluids Engineering 1: Basics of Thermodynamics and Hydrostatics"
+  provider: MIT Learn (MITx)
+  type: course
+  url: "https://learn.mit.edu/courses/course-v1:MITxT+2.005.1x"
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech, physics]
+  level: intermediate
+  cost: audit-free
+  estHours: 130
+  prerequisites: [mit-18-02, mit-18-03]
+  subject: mechanics-fea-cfd
+  summary: "MIT 2.005 is not on OpenCourseWare. MITx publishes its first part on MIT Learn, free to audit (the certificate track was listed at $88 to $89 on 2026-09-20); parts 2 and 3 were not listed."
+
+- id: mit-2-006
+  title: "MIT 2.006 Thermal-Fluids Engineering II"
+  provider: MIT
+  type: course
+  url: null
+  urlVerified: false
+  searchHint: "MIT 2.006 Thermal-Fluids Engineering II course materials"
+  tracks: [mech, physics]
+  level: advanced
+  cost: free
+  estHours: 120
+  prerequisites: [mit-2-005]
+  subject: mechanics-fea-cfd
+  stretch: true
+  summary: "Not found on OpenCourseWare or MIT Learn on 2026-09-20."
+
+- id: mit-2-008
+  title: "MIT 2.008 Design and Manufacturing II (Spring 2025)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/2-008-design-and-manufacturing-ii-spring-2025/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech]
+  level: intermediate
+  cost: free
+  estHours: 80
+  subject: cad
+
+- id: mit-2-007
+  title: "MIT 2.007 Design and Manufacturing I (Spring 2009): course materials"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/2-007-design-and-manufacturing-i-spring-2009/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech, robotics]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  subject: cad
+
+- id: mit-2-086
+  title: "MIT 2.086 Numerical Computation for Mechanical Engineers (Fall 2014)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/2-086-numerical-computation-for-mechanical-engineers-fall-2014/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech, math, languages]
+  level: intermediate
+  cost: free
+  estHours: 80
+  prerequisites: [mit-18-03, mit-18-06]
+  subject: mechanics-fea-cfd
+  summary: "Taught in MATLAB (GNU Octave runs most of it): the MATLAB/Octave part of block B in year 5."
+
+- id: fish-belytschko-fem
+  title: "A First Course in Finite Elements (Fish and Belytschko)"
+  provider: Wiley
+  type: book
+  url: https://www.wiley.com/en-us/A+First+Course+in+Finite+Elements-p-9780470035801
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech, simulation]
+  level: advanced
+  cost: paid
+  estHours: 60
+  prerequisites: [mit-18-03, mit-18-06]
+  subject: mechanics-fea-cfd
+  summary: "The theory behind the FEM solver of block A and project 50."
+
+- id: bangerth-dealii-lectures
+  title: "Wolfgang Bangerth: finite element video lectures (deal.II), selected"
+  provider: Colorado State University
+  type: lectures
+  url: https://www.math.colostate.edu/~bangerth/videos.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech, simulation]
+  level: advanced
+  cost: free
+  estHours: 30
+  subject: mechanics-fea-cfd
+  stretch: true
+
+- id: cfd-python-12-steps
+  title: "Lorena Barba: CFD Python, 12 Steps to Navier-Stokes"
+  provider: Barba Group
+  type: tutorial
+  url: https://github.com/barbagroup/CFDPython
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech, simulation]
+  level: intermediate
+  cost: free
+  estHours: 40
+  prerequisites: [mit-18-03]
+  subject: mechanics-fea-cfd
+  summary: "The first half of project 52."
+
+- id: modern-robotics
+  title: "Northwestern: Modern Robotics (Coursera specialization and the free book)"
+  provider: Coursera (Northwestern)
+  type: course
+  url: https://www.coursera.org/specializations/modernrobotics
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [robotics]
+  level: advanced
+  cost: audit-free
+  estHours: 120
+  prerequisites: [mit-18-06, mit-2-003]
+  subject: robotics
+  summary: "Six courses. The book, videos and software are free at hades.mech.northwestern.edu/index.php/Modern_Robotics."
+
+- id: mit-6-832-underactuated
+  title: "MIT 6.832 Underactuated Robotics (Russ Tedrake): online notes and lectures"
+  provider: MIT CSAIL
+  type: course
+  url: https://underactuated.csail.mit.edu/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [robotics, controls, simulation]
+  level: advanced
+  cost: free
+  estHours: 150
+  prerequisites: [mit-18-06, mit-2-003]
+  subject: robotics
+
+- id: ros2-tutorials
+  title: "ROS 2 official tutorials (Jazzy)"
+  provider: Open Robotics
+  type: tutorial
+  url: https://docs.ros.org/en/jazzy/Tutorials.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [robotics, languages]
+  level: intermediate
+  cost: free
+  estHours: 60
+  subject: robotics
+  summary: "The site shows scripts a bot check, so `npm run check:links` reports it as failing; it was verified in a browser."
+
+- id: articulated-robotics
+  title: "Articulated Robotics: build a mobile robot with ROS 2"
+  provider: Josh Newans
+  type: tutorial
+  url: https://articulatedrobotics.xyz/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [robotics]
+  level: intermediate
+  cost: free
+  estHours: 40
+  prerequisites: [ros2-tutorials]
+  subject: robotics
+
+- id: onshape-learning-center
+  title: "Onshape Learning Center"
+  provider: PTC Onshape
+  type: course
+  url: https://learn.onshape.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech]
+  level: intro
+  cost: free
+  estHours: 40
+  subject: cad
+  summary: "Stands in for 'vendor tutorials for the chosen CAD' until you choose one (SolidWorks, Fusion, Onshape or FreeCAD)."
+
+- id: freecad-docs
+  title: "FreeCAD documentation: getting started"
+  provider: FreeCAD
+  type: tutorial
+  url: https://wiki.freecad.org/Getting_started
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  subject: cad
+  summary: "The wiki shows scripts a bot check, so `npm run check:links` reports it as failing; it was verified in a browser."
+
+- id: cadquery-docs
+  title: "CadQuery documentation (CAD scripting in Python)"
+  provider: CadQuery
+  type: tutorial
+  url: https://cadquery.readthedocs.io/en/latest/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech, languages]
+  level: intermediate
+  cost: free
+  estHours: 30
+  subject: cad
+  summary: "The 'CAD scripting' part of block B in year 5."
+
+- id: brunton-databook
+  title: "Steve Brunton: Data-Driven Science and Engineering (book and lectures)"
+  provider: Brunton and Kutz
+  type: lectures
+  url: https://www.databookuw.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [controls, ai, math]
+  level: advanced
+  cost: free
+  estHours: 40
+  prerequisites: [mit-18-06]
+  subject: signals-control
+  stretch: true
+  summary: "Links machine learning, dynamics and control."
+
+- id: matlab-onramp
+  title: "MATLAB Onramp"
+  provider: MathWorks
+  type: tutorial
+  url: https://matlabacademy.mathworks.com/details/matlab-onramp/gettingstarted
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages, controls]
+  level: intro
+  cost: free
+  estHours: 10
+  subject: signals-control
+
+- id: gnu-octave
+  title: "GNU Octave"
+  provider: GNU
+  type: repo
+  url: https://octave.org/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  subject: signals-control
+  summary: "The free MATLAB-compatible interpreter."
+
+- id: scientific-python-lectures
+  title: "Scientific Python Lectures (NumPy, SciPy, Matplotlib)"
+  provider: scientific-python.org
+  type: tutorial
+  url: https://lectures.scientific-python.org/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages, math]
+  level: intermediate
+  cost: free
+  estHours: 50
+  prerequisites: [30-days-of-python]
+  subject: python
+
+- id: sympy-tutorial
+  title: "SymPy introductory tutorial"
+  provider: SymPy
+  type: tutorial
+  url: https://docs.sympy.org/latest/tutorials/intro-tutorial/index.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages, math]
+  level: intro
+  cost: free
+  estHours: 10
+  subject: python

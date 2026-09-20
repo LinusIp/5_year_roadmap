@@ -1,0 +1,323 @@
+# Graphics: OpenGL, Vulkan, rendering, shaders, engine architecture. Also the game-development tools of block A.
+
+- id: learnopengl
+  title: "LearnOpenGL (Joey de Vries)"
+  provider: learnopengl.com
+  type: tutorial
+  url: https://learnopengl.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: intermediate
+  cost: free
+  estHours: 120
+  subject: graphics
+  summary: "Started in the last two months of year 1, completed at the start of year 2. Monthly project 10 is its first finished scene. Needs working C++, which block B is teaching at the same time, so it is not listed as a formal prerequisite."
+
+- id: rtiow
+  title: "Ray Tracing in One Weekend: the book series (Peter Shirley and others)"
+  provider: raytracing.github.io
+  type: book
+  url: https://raytracing.github.io/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: intermediate
+  cost: free
+  estHours: 40
+  subject: graphics
+  units:
+    - { id: in-one-weekend, title: "Ray Tracing in One Weekend", url: "https://raytracing.github.io/books/RayTracingInOneWeekend.html" }
+    - { id: the-next-week, title: "Ray Tracing: The Next Week", url: "https://raytracing.github.io/books/RayTracingTheNextWeek.html" }
+    - { id: the-rest-of-your-life, title: "Ray Tracing: The Rest of Your Life", url: "https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html" }
+
+- id: tinyrenderer
+  title: "tinyrenderer: a brief computer graphics / rendering course (ssloy)"
+  provider: GitHub
+  type: tutorial
+  url: https://github.com/ssloy/tinyrenderer
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: intermediate
+  cost: free
+  estHours: 30
+  subject: graphics
+  summary: "A software rasterizer from nothing. Monthly project 12 is your own version of it."
+
+- id: scratchapixel
+  title: "Scratchapixel"
+  provider: scratchapixel.com
+  type: article
+  url: https://www.scratchapixel.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics, math]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  subject: graphics
+
+- id: cmu-15-462
+  title: "CMU 15-462/662 Computer Graphics"
+  provider: CMU
+  type: course
+  url: https://www.cs.cmu.edu/~15462/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics, math]
+  level: advanced
+  cost: free
+  estHours: 100
+  prerequisites: [mit-18-06]
+  subject: graphics
+  stretch: true
+  summary: "One of three university courses to choose from for the theory behind the OpenGL mini-engine (with Utah CS 6610 and UC Davis ECS 175)."
+
+- id: ucdavis-ecs175
+  title: "UC Davis ECS 175 Computer Graphics (Ken Joy, Fall 2009 lectures)"
+  provider: UC Davis
+  type: lectures
+  url: https://www.youtube.com/playlist?list=PL_w_qWAQZtAZhtzPI5pkAtcUVgmzdAP8g
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: intermediate
+  cost: free
+  estHours: 60
+  subject: graphics
+  stretch: true
+
+- id: utah-cs4600
+  title: "University of Utah CS 4600 Introduction to Computer Graphics (Cem Yuksel, Fall 2020)"
+  provider: University of Utah
+  type: lectures
+  url: https://graphics.cs.utah.edu/courses/cs4600/fall2020/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: intro
+  cost: free
+  estHours: 60
+  subject: graphics
+  stretch: true
+
+- id: utah-cs6610
+  title: "University of Utah CS 5610/6610 Interactive Computer Graphics (Cem Yuksel, Spring 2021)"
+  provider: University of Utah
+  type: lectures
+  url: https://graphics.cs.utah.edu/courses/cs6610/spring2021/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: intermediate
+  cost: free
+  estHours: 80
+  prerequisites: [learnopengl]
+  subject: graphics
+  summary: "The lecture course behind the OpenGL mini-engine of year 2: shadows, reflections, tessellation, GPU pipelines."
+
+- id: vulkan-tutorial
+  title: "Vulkan Tutorial (vulkan-tutorial.com)"
+  provider: Alexander Overvoorde
+  type: tutorial
+  url: https://vulkan-tutorial.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: advanced
+  cost: free
+  estHours: 70
+  prerequisites: [learnopengl]
+  subject: graphics
+  summary: "Begun at the end of year 2 (monthly project 22 is its triangle turned into a model viewer)."
+
+- id: vkguide
+  title: "Vulkan Guide (vkguide.dev)"
+  provider: vkguide.dev
+  type: tutorial
+  url: https://vkguide.dev/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: advanced
+  cost: free
+  estHours: 50
+  prerequisites: [vulkan-tutorial]
+  subject: graphics
+  summary: "Engine-shaped Vulkan, including the compute-shader chapters used for the particle system of project 30."
+
+- id: khronos-vulkan-samples
+  title: "Khronos Vulkan Samples"
+  provider: Khronos Group
+  type: repo
+  url: https://github.com/KhronosGroup/Vulkan-Samples
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: advanced
+  cost: free
+  estHours: 30
+  prerequisites: [vkguide]
+  subject: graphics
+
+- id: khronos-vulkan-tutorial
+  title: "Khronos Vulkan Tutorial (the official one)"
+  provider: Khronos Group
+  type: tutorial
+  url: https://docs.vulkan.org/tutorial/latest/00_Introduction.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: advanced
+  cost: free
+  estHours: 0
+  reference: true
+  subject: graphics
+  summary: "The maintained successor of vulkan-tutorial.com. Use it in place of the original if you prefer; the hours are counted once."
+
+- id: pbr-book
+  title: "Physically Based Rendering: From Theory to Implementation (pbr-book.org)"
+  provider: Pharr, Jakob, Humphreys
+  type: book
+  url: https://pbr-book.org/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: advanced
+  cost: free
+  estHours: 0
+  reference: true
+  subject: graphics
+  summary: "Reference, and a stretch read for year 5."
+
+- id: rtr4
+  title: "Real-Time Rendering, 4th edition (resources page)"
+  provider: Akenine-Moller, Haines, Hoffman
+  type: book
+  url: https://www.realtimerendering.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: advanced
+  cost: paid
+  estHours: 0
+  reference: true
+  subject: graphics
+  summary: "The book's resource page, a standing index of real-time rendering material. The site answers scripts with a bot challenge, so `npm run check:links` reports 403 for it; it was verified in a browser."
+
+- id: book-of-shaders
+  title: "The Book of Shaders"
+  provider: Patricio Gonzalez Vivo and Jen Lowe
+  type: tutorial
+  url: https://thebookofshaders.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics]
+  level: intro
+  cost: free
+  estHours: 20
+  subject: graphics
+  summary: "GLSL, a chapter at a time. Feeds the shader reel of the graphics portfolio milestone."
+
+- id: iq-articles
+  title: "Inigo Quilez: articles"
+  provider: iquilezles.org
+  type: article
+  url: https://iquilezles.org/articles/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [graphics, math]
+  level: advanced
+  cost: free
+  estHours: 0
+  reference: true
+  subject: graphics
+
+- id: shadertoy
+  title: "Shadertoy"
+  provider: Shadertoy
+  type: repo
+  url: null
+  urlVerified: false
+  searchHint: "Shadertoy"
+  tracks: [graphics]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  subject: graphics
+  summary: "Not verified: the site answered every request with a bot challenge on 2026-09-20."
+
+- id: game-engine-architecture
+  title: "Game Engine Architecture (Jason Gregory)"
+  provider: CRC Press
+  type: book
+  url: https://www.gameenginebook.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [gamedev, graphics]
+  level: advanced
+  cost: paid
+  estHours: 80
+  subject: graphics
+
+- id: handmade-hero
+  title: "Handmade Hero: episode guide (selected episodes)"
+  provider: Molly Rocket
+  type: lectures
+  url: https://guide.handmadehero.org/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [gamedev, languages]
+  level: advanced
+  cost: free
+  estHours: 0
+  reference: true
+  subject: gamedev
+  summary: "Optional."
+
+- id: raylib
+  title: "raylib: cheatsheet and examples"
+  provider: raylib
+  type: tutorial
+  url: https://www.raylib.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [gamedev, languages]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  subject: gamedev
+  summary: "The library for the games in C of year 1."
+
+- id: sdl
+  title: "SDL (Simple DirectMedia Layer)"
+  provider: libsdl.org
+  type: tutorial
+  url: https://www.libsdl.org/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [gamedev, languages]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  subject: gamedev
+
+- id: itch-jams
+  title: "itch.io game jams calendar"
+  provider: itch.io
+  type: repo
+  url: https://itch.io/jams
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [gamedev]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  subject: gamedev
+  summary: "Where to find the game jam of the first phase."

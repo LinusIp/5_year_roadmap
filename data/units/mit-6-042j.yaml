@@ -1,0 +1,28 @@
+# Units of "mit-6-042j". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/video_galleries/video-lectures/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: lecture-1, title: "Lecture 1: Introduction and Proofs", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-1-introduction-and-proofs/" }
+- { id: lecture-2, title: "Lecture 2: Induction", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-2-induction/" }
+- { id: lecture-3, title: "Lecture 3: Strong Induction", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-3-strong-induction/" }
+- { id: lecture-4, title: "Lecture 4: Number Theory I", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-4-number-theory-i/" }
+- { id: lecture-5, title: "Lecture 5: Number Theory II", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-5-number-theory-ii/" }
+- { id: lecture-6, title: "Lecture 6: Graph Theory and Coloring", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-6-graph-theory-and-coloring/" }
+- { id: lecture-7, title: "Lecture 7: Matching Problems", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-7-matching-problems/" }
+- { id: lecture-8, title: "Lecture 8: Graph Theory II: Minimum Spanning Trees", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-8-graph-theory-ii-minimum-spanning-trees/" }
+- { id: lecture-9, title: "Lecture 9: Communication Networks", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-9-communication-networks/" }
+- { id: lecture-10, title: "Lecture 10: Graph Theory III", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-10-graph-theory-iii/" }
+- { id: lecture-11, title: "Lecture 11: Relations, Partial Orders, and Scheduling", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-11-relations-partial-orders-and-scheduling/" }
+- { id: lecture-12, title: "Lecture 12: Sums", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-12-sums/" }
+- { id: lecture-13, title: "Lecture 13: Sums and Asymptotics", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-13-sums-and-asymptotics/" }
+- { id: lecture-14, title: "Lecture 14: Divide and Conquer Recurrences", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-14-divide-and-conquer-recurrences/" }
+- { id: lecture-15, title: "Lecture 15: Linear Recurrences", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-15-linear-recurrences/" }
+- { id: lecture-16, title: "Lecture 16: Counting Rules I", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-16-counting-rules-i/" }
+- { id: lecture-17, title: "Lecture 17: Counting Rules II", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-17-counting-rules-ii/" }
+- { id: lecture-18, title: "Lecture 18: Probability Introduction", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-18-probability-introduction/" }
+- { id: lecture-19, title: "Lecture 19: Conditional Probability", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-19-conditional-probability/" }
+- { id: lecture-20, title: "Lecture 20: Independence", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-20-independence/" }
+- { id: lecture-21, title: "Lecture 21: Random Variables", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-21-random-variables/" }
+- { id: lecture-22, title: "Lecture 22: Expectation I", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-22-expectation-i/" }
+- { id: lecture-23, title: "Lecture 23: Expectation II", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-23-expectation-ii/" }
+- { id: lecture-24, title: "Lecture 24: Large Deviations", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-24-large-deviations/" }
+- { id: lecture-25, title: "Lecture 25: Random Walks", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/lecture-25-random-walks/" }

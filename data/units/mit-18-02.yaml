@@ -1,0 +1,28 @@
+# Units of "mit-18-02". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- section: "1. Vectors and Matrices"
+  items:
+    - { id: part-a-vectors-determinants-and-planes, title: "Part A: Vectors, Determinants and Planes", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/1.-vectors-and-matrices/part-a-vectors-determinants-and-planes/" }
+    - { id: part-b-matrices-and-systems-of-equations, title: "Part B: Matrices and Systems of Equations", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/1.-vectors-and-matrices/part-b-matrices-and-systems-of-equations/" }
+    - { id: part-c-parametric-equations-for-curves, title: "Part C: Parametric Equations for Curves", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/1.-vectors-and-matrices/part-c-parametric-equations-for-curves/" }
+    - { id: exam-1, title: "Exam 1", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/1.-vectors-and-matrices/exam-1/" }
+- section: "2. Partial Derivatives"
+  items:
+    - { id: part-a-functions-of-two-variables-tangent-approx, title: "Part A: Functions of Two Variables, Tangent Approximation and Optimization", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/2.-partial-derivatives/part-a-functions-of-two-variables-tangent-approximation-and-optimization/" }
+    - { id: part-b-chain-rule-gradient-and-directional-deriv, title: "Part B: Chain Rule, Gradient and Directional Derivatives", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/2.-partial-derivatives/part-b-chain-rule-gradient-and-directional-derivatives/" }
+    - { id: part-c-lagrange-multipliers-and-constrained-diff, title: "Part C: Lagrange Multipliers and Constrained Differentials", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/2.-partial-derivatives/part-c-lagrange-multipliers-and-constrained-differentials/" }
+    - { id: exam-2, title: "Exam 2", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/2.-partial-derivatives/exam-2/" }
+- section: "3. Double Integrals and Line Integrals in the Plane"
+  items:
+    - { id: part-a-double-integrals, title: "Part A: Double Integrals", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/3.-double-integrals-and-line-integrals-in-the-plane/part-a-double-integrals/" }
+    - { id: part-b-vector-fields-and-line-integrals, title: "Part B: Vector Fields and Line Integrals", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/3.-double-integrals-and-line-integrals-in-the-plane/part-b-vector-fields-and-line-integrals/" }
+    - { id: part-c-green-s-theorem, title: "Part C: Green's Theorem", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/3.-double-integrals-and-line-integrals-in-the-plane/part-c-greens-theorem/" }
+    - { id: exam-3, title: "Exam 3", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/3.-double-integrals-and-line-integrals-in-the-plane/exam-3/" }
+- section: "4. Triple Integrals and Surface Integrals in 3-Space"
+  items:
+    - { id: part-a-triple-integrals, title: "Part A: Triple Integrals", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/4.-triple-integrals-and-surface-integrals-in-3-space/part-a-triple-integrals/" }
+    - { id: part-b-flux-and-the-divergence-theorem, title: "Part B: Flux and the Divergence Theorem", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/4.-triple-integrals-and-surface-integrals-in-3-space/part-b-flux-and-the-divergence-theorem/" }
+    - { id: part-c-line-integrals-and-stokes-theorem, title: "Part C: Line Integrals and Stokes' Theorem", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/4.-triple-integrals-and-surface-integrals-in-3-space/part-c-line-integrals-and-stokes-theorem/" }
+    - { id: exam-4, title: "Exam 4", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/4.-triple-integrals-and-surface-integrals-in-3-space/exam-4/" }
+    - { id: physics-applications, title: "Physics Applications", url: "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/pages/4.-triple-integrals-and-surface-integrals-in-3-space/physics-applications/" }

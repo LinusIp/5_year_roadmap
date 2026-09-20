@@ -1,0 +1,41 @@
+# Units of "learn-go-with-tests". Titles and links were read from the official page:
+#   https://raw.githubusercontent.com/quii/learn-go-with-tests/main/SUMMARY.md
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: install-go, title: "Install Go", url: "https://github.com/quii/learn-go-with-tests/blob/main/install-go.md" }
+- { id: hello-world, title: "Hello, World", url: "https://github.com/quii/learn-go-with-tests/blob/main/hello-world.md" }
+- { id: integers, title: "Integers", url: "https://github.com/quii/learn-go-with-tests/blob/main/integers.md" }
+- { id: iteration, title: "Iteration", url: "https://github.com/quii/learn-go-with-tests/blob/main/iteration.md" }
+- { id: arrays-and-slices, title: "Arrays and slices", url: "https://github.com/quii/learn-go-with-tests/blob/main/arrays-and-slices.md" }
+- { id: structs-methods-interfaces, title: "Structs, methods & interfaces", url: "https://github.com/quii/learn-go-with-tests/blob/main/structs-methods-and-interfaces.md" }
+- { id: pointers-errors, title: "Pointers & errors", url: "https://github.com/quii/learn-go-with-tests/blob/main/pointers-and-errors.md" }
+- { id: maps, title: "Maps", url: "https://github.com/quii/learn-go-with-tests/blob/main/maps.md" }
+- { id: dependency-injection, title: "Dependency Injection", url: "https://github.com/quii/learn-go-with-tests/blob/main/dependency-injection.md" }
+- { id: mocking, title: "Mocking", url: "https://github.com/quii/learn-go-with-tests/blob/main/mocking.md" }
+- { id: concurrency, title: "Concurrency", url: "https://github.com/quii/learn-go-with-tests/blob/main/concurrency.md" }
+- { id: select, title: "Select", url: "https://github.com/quii/learn-go-with-tests/blob/main/select.md" }
+- { id: reflection, title: "Reflection", url: "https://github.com/quii/learn-go-with-tests/blob/main/reflection.md" }
+- { id: sync, title: "Sync", url: "https://github.com/quii/learn-go-with-tests/blob/main/sync.md" }
+- { id: context, title: "Context", url: "https://github.com/quii/learn-go-with-tests/blob/main/context.md" }
+- { id: intro-to-property-based-tests, title: "Intro to property based tests", url: "https://github.com/quii/learn-go-with-tests/blob/main/roman-numerals.md" }
+- { id: maths, title: "Maths", url: "https://github.com/quii/learn-go-with-tests/blob/main/math.md" }
+- { id: reading-files, title: "Reading files", url: "https://github.com/quii/learn-go-with-tests/blob/main/reading-files.md" }
+- { id: templating, title: "Templating", url: "https://github.com/quii/learn-go-with-tests/blob/main/html-templates.md" }
+- { id: generics, title: "Generics", url: "https://github.com/quii/learn-go-with-tests/blob/main/generics.md" }
+- { id: revisiting-arrays-and-slices-with-generics, title: "Revisiting arrays and slices with generics", url: "https://github.com/quii/learn-go-with-tests/blob/main/revisiting-arrays-and-slices-with-generics.md" }
+- { id: introduction-to-acceptance-tests, title: "Introduction to acceptance tests", url: "https://github.com/quii/learn-go-with-tests/blob/main/intro-to-acceptance-tests.md" }
+- { id: scaling-acceptance-tests, title: "Scaling acceptance tests", url: "https://github.com/quii/learn-go-with-tests/blob/main/scaling-acceptance-tests.md" }
+- { id: working-without-mocks, title: "Working without mocks", url: "https://github.com/quii/learn-go-with-tests/blob/main/working-without-mocks.md" }
+- { id: refactoring-checklist, title: "Refactoring Checklist", url: "https://github.com/quii/learn-go-with-tests/blob/main/refactoring-checklist.md" }
+- { id: intro, title: "Intro", url: "https://github.com/quii/learn-go-with-tests/blob/main/app-intro.md" }
+- { id: http-server, title: "HTTP server", url: "https://github.com/quii/learn-go-with-tests/blob/main/http-server.md" }
+- { id: json-routing-and-embedding, title: "JSON, routing and embedding", url: "https://github.com/quii/learn-go-with-tests/blob/main/json.md" }
+- { id: io-and-sorting, title: "IO and sorting", url: "https://github.com/quii/learn-go-with-tests/blob/main/io.md" }
+- { id: command-line-package-structure, title: "Command line & package structure", url: "https://github.com/quii/learn-go-with-tests/blob/main/command-line.md" }
+- { id: time, title: "Time", url: "https://github.com/quii/learn-go-with-tests/blob/main/time.md" }
+- { id: revisiting-time-with-testing-synctest, title: "Revisiting time, with testing/synctest", url: "https://github.com/quii/learn-go-with-tests/blob/main/revisiting-time-with-synctest.md" }
+- { id: websockets, title: "WebSockets", url: "https://github.com/quii/learn-go-with-tests/blob/main/websockets.md" }
+- { id: os-exec, title: "OS Exec", url: "https://github.com/quii/learn-go-with-tests/blob/main/os-exec.md" }
+- { id: error-types, title: "Error types", url: "https://github.com/quii/learn-go-with-tests/blob/main/error-types.md" }
+- { id: context-aware-reader, title: "Context-aware Reader", url: "https://github.com/quii/learn-go-with-tests/blob/main/context-aware-reader.md" }
+- { id: revisiting-http-handlers, title: "Revisiting HTTP Handlers", url: "https://github.com/quii/learn-go-with-tests/blob/main/http-handlers-revisited.md" }
+- { id: why-unit-tests-and-how-to-make-them-work-for-you, title: "Why unit tests and how to make them work for you", url: "https://github.com/quii/learn-go-with-tests/blob/main/why.md" }

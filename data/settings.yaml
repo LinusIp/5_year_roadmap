@@ -42,3 +42,5 @@ streak:
 backupReminderDays: 30
 paperCadence: { fromYear: 2, perWeek: 1 }
 forecast: { paceWindowDays: 28 }
+
+weeklyBuildHours: 4                     # of the projects block, per week, goes to the weekly mini-build

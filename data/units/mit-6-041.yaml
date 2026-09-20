@@ -1,0 +1,38 @@
+# Units of "mit-6-041". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- section: "Unit I: Probability Models And Discrete Random Variables"
+  items:
+    - { id: lecture-1, title: "Lecture 1: Probability Models and Axioms", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-i/lecture-1/" }
+    - { id: lecture-2, title: "Lecture 2: Conditioning and Bayes' Rule", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-i/lecture-2/" }
+    - { id: lecture-3, title: "Lecture 3: Independence", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-i/lecture-3/" }
+    - { id: lecture-4, title: "Lecture 4: Counting", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-i/lecture-4/" }
+    - { id: lecture-5, title: "Lecture 5: Discrete Random Variables; Probability Mass Functions; Expectations", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-i/lecture-5/" }
+    - { id: lecture-6, title: "Lecture 6: Discrete Random Variable Examples; Joint PMFs", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-i/lecture-6/" }
+    - { id: lecture-7, title: "Lecture 7: Multiple Discrete Random Variables", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-i/lecture-7/" }
+    - { id: quiz-1, title: "Quiz 1", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-i/quiz-1/" }
+- section: "Unit II: General Random Variables"
+  items:
+    - { id: lecture-8, title: "Lecture 8: Continuous Random Variables", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-ii/lecture-8/" }
+    - { id: lecture-9, title: "Lecture 9: Multiple Continuous Random Variables", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-ii/lecture-9/" }
+    - { id: lecture-10, title: "Lecture 10: Continuous Bayes' Rule; Derived Distributions", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-ii/lecture-10/" }
+    - { id: lecture-11, title: "Lecture 11: Derived Distributions; Convolution; Covariance and Correlation", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-ii/lecture-11/" }
+    - { id: lecture-12, title: "Lecture 12: Iterated Expectations; Sum of a Random Number of Random Variables", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-ii/lecture-12/" }
+    - { id: quiz-2, title: "Quiz 2", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-ii/quiz-2/" }
+- section: "Unit III: Random Processes"
+  items:
+    - { id: lecture-13, title: "Lecture 13: Bernoulli Process", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iii/lecture-13/" }
+    - { id: lecture-14, title: "Lecture 14: Poisson Process - I", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iii/lecture-14/" }
+    - { id: lecture-15, title: "Lecture 15: Poisson Process - II", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iii/lecture-15/" }
+    - { id: lecture-16, title: "Lecture 16: Markov Chains - I", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iii/lecture-16/" }
+    - { id: lecture-17, title: "Lecture 17: Markov Chains - II", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iii/lecture-17/" }
+    - { id: lecture-18, title: "Lecture 18: Markov Chains - III", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iii/lecture-18/" }
+- section: "Unit IV: Laws Of Large Numbers And Inference"
+  items:
+    - { id: lecture-19, title: "Lecture 19: Weak Law of Large Numbers", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iv/lecture-19/" }
+    - { id: lecture-20, title: "Lecture 20: Central Limit Theorem", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iv/lecture-20/" }
+    - { id: lecture-21, title: "Lecture 21: Bayesian Statistical Inference - I", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iv/lecture-21/" }
+    - { id: lecture-22, title: "Lecture 22: Bayesian Statistical Inference - II", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iv/lecture-22/" }
+    - { id: lecture-23, title: "Lecture 23 Classical Statistical Inference - I", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iv/lecture-23/" }
+    - { id: lecture-24, title: "Lecture 24: Classical Inference - II", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iv/lecture-24/" }
+    - { id: lecture-25, title: "Lecture 25: Classical Inference - III", url: "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/pages/unit-iv/lecture-25/" }

@@ -15,6 +15,7 @@ export const SEED_SOURCES: Record<SeedKind, string> = {
   settings: 'settings.yaml',
   phases: 'phases.yaml',
   resources: 'resources/',
+  units: 'units/',
   plan: 'plan.yaml',
   projects: 'projects/',
   papers: 'papers.yaml',
@@ -71,10 +72,10 @@ export function readRawSeed(dataDir: string = DATA_DIR): { raw: RawSeed; errors:
 }
 
 /**
- * Milestone 1 ships the scaffold with a skeleton /data, so the brief's content quotas
- * (100+ weekly cards, a capstone per year, ...) are switched on in milestone 2 with the data.
+ * Also enforce the brief's content quotas (all sixteen tracks, a phase per year, a capstone per year,
+ * a weekly pool of 100+ cards). On since milestone 2 put the real curriculum in /data.
  */
-export const REQUIRE_COMPLETE = false;
+export const REQUIRE_COMPLETE = true;
 
 export function loadSeed(dataDir: string = DATA_DIR, options: ValidateOptions = { requireComplete: REQUIRE_COMPLETE }): ValidationResult {
   const { raw, errors: readErrors } = readRawSeed(dataDir);

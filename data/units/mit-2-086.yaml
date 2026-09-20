@@ -1,0 +1,25 @@
+# Units of "mit-2-086". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/2-086-numerical-computation-for-mechanical-engineers-fall-2014/pages/calendar/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- section: "Unit I: (Numerical) Calculus—Interpolation, Integration, Differentiation"
+  items:
+    - { id: week-1, title: "Week 1: The MATLAB Environment" }
+    - { id: week-2, title: "Week 2: Syntax. Scripts" }
+    - { id: week-3, title: "Week 3: Single-Index Arrays. Plot" }
+- section: "Unit II: Probability; Statistical Estimation; Monte-Carlo Methods"
+  items:
+    - { id: week-4, title: "Week 4: Functions" }
+    - { id: week-5, title: "Week 5: Random Sampling (rand, randn, randi). Norminv and finv" }
+    - { id: week-6, title: "Week 6: Double-Index Arrays" }
+- section: "Unit III: (Numerical) Linear Algebra I—Matrices and Vectors, Least-Squares; Regression"
+  items:
+    - { id: week-7, title: "Week 7: Matrix and Vector Operations" }
+    - { id: week-8, title: "Week 8: (evil) inv. Backslash Operator (Least-Squares)" }
+- section: "Unit IV: Numerical Ordinary Differential Equations (ODEs); Eigenproblems"
+  items:
+    - { id: week-10, title: "Week 10: Passing Functions (Handles). Anonymous Functions" }
+    - { id: week-11, title: "Week 11: ode45 and ode23s. eig." }
+- section: "Unit V: (Numerical) Linear Algebra II—Linear Systems; Nonlinear Systems"
+  items:
+    - { id: week-12, title: "Week 12: Sparse Matrix Operations" }
+    - { id: week-13, title: "Week 13: fsolve" }

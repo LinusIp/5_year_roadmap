@@ -1,0 +1,135 @@
+# Block A builds: the gamedev / graphics / simulation work that is a build rather than a course, and that is
+# not one of the numbered monthly projects (those live in block D). They use the `monthly` cadence card style.
+
+- id: a-small-game-1
+  title: "Finish a small game (1 of 3)"
+  cadence: monthly
+  tracks: [gamedev]
+  phaseId: y1-p0
+  estHours: 70
+  subject: gamedev
+  brief: "Take one small idea to 'finished' in the engine you already know: menu, one complete loop of play, an ending, sound, a build that runs on someone else's machine. Scope it so it fits in five weeks of two hours a day."
+  acceptance:
+    - "Playable from start to end without the editor: title screen, play, win or lose, restart"
+    - "A downloadable or web build published on itch.io"
+    - "Public repository with a README and a list of what was cut to ship it"
+  skills: ["scoping", "game loop", "finishing"]
+
+- id: a-small-game-2
+  title: "Finish a small game (2 of 3): a different genre"
+  cadence: monthly
+  tracks: [gamedev]
+  phaseId: y1-p0
+  estHours: 70
+  subject: gamedev
+  brief: "A second finished game in a genre that forces new problems on you: if the first was an action game, make a puzzle or a management game."
+  acceptance:
+    - "A complete game with saved progress or a level sequence"
+    - "Published build and repository"
+    - "A one-page post-mortem: what took longest, what you would cut next time"
+  skills: ["UI", "save data", "level design"]
+
+- id: a-game-jam
+  title: "One game jam"
+  cadence: monthly
+  tracks: [gamedev]
+  phaseId: y1-p0
+  estHours: 48
+  subject: gamedev
+  brief: "Enter a public game jam and submit on time. The constraint is the point: a theme you did not choose and a deadline you cannot move."
+  acceptance:
+    - "A submission entered before the jam's deadline"
+    - "You rated other entries and read the comments on yours"
+    - "Repository and a short note on what the time limit taught you"
+  source: "itch.io game jams calendar"
+  sourceUrl: https://itch.io/jams
+  skills: ["working to a deadline", "rapid prototyping"]
+
+- id: a-small-game-3
+  title: "Finish a small game (3 of 3): polish"
+  cadence: monthly
+  tracks: [gamedev]
+  phaseId: y1-p0
+  estHours: 70
+  subject: gamedev
+  brief: "The third game is about feel: screen shake, particles, audio feedback, tuned difficulty, a settings menu. Small scope, high finish."
+  acceptance:
+    - "Five people who are not you have played it and you changed something because of what you saw"
+    - "Published build, repository and a 30-second trailer or GIF"
+  skills: ["game feel", "playtesting", "audio"]
+
+- id: a-games-in-c
+  title: "Two small games in C with raylib or SDL"
+  cadence: monthly
+  tracks: [gamedev, languages]
+  phaseId: y1-p1
+  estHours: 140
+  subject: gamedev
+  brief: "Leave the engine behind. Write two small games in plain C on raylib or SDL, owning the main loop, the entity storage, the collision checks and the asset loading yourself. Monthly project 6 (Pong or Breakout) is the warm-up; these go further: a platformer or a top-down shooter."
+  acceptance:
+    - "Two complete games, each under a few thousand lines of C, building with one command on a clean machine"
+    - "No engine and no game framework beyond raylib or SDL; fixed-timestep update loop"
+    - "Memory checked with a sanitizer or Valgrind: no leaks, no invalid reads"
+  source: "raylib examples"
+  sourceUrl: https://www.raylib.com/
+  skills: ["C", "memory management", "game architecture without an engine"]
+
+- id: a-dsp-visualiser
+  title: "Signal and DSP visualiser"
+  cadence: monthly
+  tracks: [simulation, controls, graphics]
+  phaseId: y4
+  estHours: 80
+  subject: signals-control
+  brief: "A desktop tool in your own renderer that shows what 6.003 teaches: signals in time and frequency, filters being designed and applied, poles and zeros being dragged while the response updates."
+  acceptance:
+    - "Live FFT and spectrogram of generated signals and of audio input"
+    - "FIR and IIR filter design with the magnitude and phase response drawn, applied to a signal in real time"
+    - "A draggable pole-zero plot that drives the impulse and frequency responses"
+  skills: ["FFT", "filter design", "real-time plotting"]
+  parts: []   # nothing to buy: this one runs on the computer you already have
+
+- id: a-multibody-dynamics
+  title: "Multibody dynamics in your own engine"
+  cadence: monthly
+  tracks: [simulation, mech]
+  phaseId: y4
+  estHours: 150
+  subject: simulation
+  brief: "Extend the Stage 1 engine from game physics to engineering dynamics: articulated bodies with joints and motors, solved accurately enough to predict a real mechanism. This is what the inverted pendulum (project 45) and the year 4 capstone are simulated in."
+  acceptance:
+    - "Revolute and prismatic joints with limits and motors; a double pendulum conserves energy to a stated tolerance"
+    - "A cart-pole model whose response matches the analytical linearisation near upright"
+    - "Parameters (masses, inertias, friction) loaded from a file so that a real rig can be described"
+  skills: ["constrained dynamics", "numerical integration", "model validation"]
+  parts: []   # nothing to buy: this one runs on the computer you already have
+
+- id: a-gpu-fluids
+  title: "GPU fluids"
+  cadence: monthly
+  tracks: [simulation, graphics]
+  phaseId: y4
+  estHours: 150
+  subject: simulation
+  brief: "A grid-based or particle-based fluid solver running in compute shaders, rendered in your own engine. Start from Stable Fluids in 2D, then move to 3D smoke or a FLIP/PBF liquid."
+  acceptance:
+    - "A 2D Stable Fluids solver on the GPU with interactive forces"
+    - "A 3D solver (smoke or liquid) running in real time at a stated resolution, with frame-time measurements"
+    - "A write-up of the pressure solve and of what limited performance"
+  skills: ["compute shaders", "Navier-Stokes discretisation", "GPU profiling"]
+  parts: []   # nothing to buy: this one runs on the computer you already have
+
+- id: a-vehicle-simulator
+  title: "Vehicle or mobile-robot simulator"
+  cadence: monthly
+  tracks: [simulation, robotics, mech]
+  phaseId: y5
+  estHours: 120
+  subject: simulation
+  brief: "The 'vehicle' half of the year 5 simulators (the robot arm is project 54): a wheeled vehicle or differential-drive robot with tyre or wheel-ground models, sensors and a controller in the loop, in your own engine."
+  acceptance:
+    - "A vehicle model with suspension or a differential-drive robot with wheel slip, validated against a hand calculation"
+    - "Simulated sensors (IMU, encoders, a range sensor) with noise"
+    - "A path-following controller that runs unchanged against the simulator and, later, a real robot"
+  skills: ["vehicle dynamics", "sensor models", "hardware-in-the-loop interfaces"]
+  parts: []   # nothing to buy: this one runs on the computer you already have

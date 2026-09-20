@@ -1,0 +1,390 @@
+# Monthly projects 36-56 (Stage 2: electrical, then mechanical). Numbers 57-59 are the final capstone
+# (capstones.yaml). Every card states its `parts`: what to have on the bench, or an empty list when the
+# work is all at the computer. Prices move too fast to seed; each card has a budget field for you to fill in.
+
+# ------------------------------------------------------------ Y4 Electrical engineering
+- id: m36
+  number: 36
+  title: "Lab bench setup and ten classic circuits, measured against simulation"
+  cadence: monthly
+  tracks: [ee]
+  phaseId: y4
+  estHours: 35
+  subject: circuits
+  brief: "Set up a bench, then build ten textbook circuits, predict each in LTspice or ngspice, measure it, and explain every disagreement."
+  acceptance:
+    - "A working bench: supply, multimeter, oscilloscope or USB scope, function generator, breadboards"
+    - "Ten circuits (dividers, RC and RLC filters, diode rectifier, BJT and MOSFET switches, common-emitter amplifier, op-amp inverting and non-inverting stages, comparator with hysteresis, 555 astable)"
+    - "For each: schematic, simulated and measured plots on the same axes, and an explanation of the difference"
+  skills: ["measurement technique", "SPICE", "reading datasheets"]
+  parts:
+    - "Bench power supply, digital multimeter, oscilloscope (a 2-channel USB scope is enough), function generator or a scope with one built in"
+    - "Breadboards, jumper wire, resistor and capacitor kits, inductors, diodes, BJTs, MOSFETs, op-amps (LM358, TL072), NE555"
+
+- id: m37
+  number: 37
+  title: "Own SPICE-like DC and transient solver"
+  cadence: monthly
+  tracks: [ee, simulation]
+  phaseId: y4
+  estHours: 40
+  subject: signals-control
+  brief: "A circuit simulator built on modified nodal analysis: parse a netlist, stamp the matrix, solve DC operating points with Newton-Raphson and transients with an implicit integrator."
+  acceptance:
+    - "Netlist parser for R, C, L, independent sources, diodes and a MOSFET model"
+    - "DC operating point and transient analysis; results agree with ngspice on the circuits of project 36 within a stated tolerance"
+    - "A plot viewer in your own renderer"
+  source: "MIT 6.002; modified nodal analysis"
+  skills: ["modified nodal analysis", "Newton-Raphson", "stiff integration"]
+  parts: []   # nothing to buy: this one runs on the computer you already have
+
+- id: m38
+  number: 38
+  title: "Audio amplifier or power supply on a self-designed KiCad PCB"
+  cadence: monthly
+  tracks: [ee]
+  phaseId: y4
+  estHours: 40
+  subject: circuits
+  brief: "Your first board: schematic, layout, fabrication, assembly, bring-up and measurement. An audio amplifier or a bench power supply: both are forgiving and both are measurable."
+  acceptance:
+    - "KiCad project with schematic, layout, design-rule check clean, and fabrication outputs"
+    - "Board fabricated, assembled by you and brought up in stages"
+    - "Measured performance (gain and distortion, or regulation and ripple) against the design targets"
+  skills: ["KiCad", "PCB layout", "soldering", "bring-up"]
+  parts:
+    - "PCB fabrication order (a five-board prototype run), components from the bill of materials"
+    - "Soldering iron with a fine tip, solder, flux, tweezers, solder wick; hot air helps for surface-mount parts"
+    - "Dummy load or speaker, heat sink"
+
+- id: m39
+  number: 39
+  title: "Bare-metal STM32: GPIO, UART, I2C and SPI drivers without the HAL"
+  cadence: monthly
+  tracks: [embedded]
+  phaseId: y4
+  estHours: 40
+  subject: embedded
+  brief: "From the reset vector up: startup code, linker script, clock setup and peripheral drivers written against the reference manual, with no vendor HAL."
+  acceptance:
+    - "Own startup file and linker script; the board boots into your main()"
+    - "Interrupt-driven UART with ring buffers, I2C and SPI drivers talking to real sensors"
+    - "Register access through your own typed layer; a logic-analyser capture of each bus in the README"
+  source: "UT Austin Embedded Systems; Phil's Lab"
+  skills: ["reference manuals", "interrupts", "linker scripts", "logic analysers"]
+  parts:
+    - "STM32 Nucleo or Discovery board with an on-board ST-LINK"
+    - "Logic analyser (an 8-channel USB one is enough), USB-serial adapter"
+    - "I2C and SPI breakout sensors (IMU, temperature, a small display)"
+
+- id: m40
+  number: 40
+  title: "DSP: real-time FFT spectrum analyser on a microcontroller"
+  cadence: monthly
+  tracks: [embedded, controls]
+  phaseId: y4
+  estHours: 35
+  subject: signals-control
+  brief: "Sample audio with the ADC and DMA, window it, run an FFT in fixed or floating point, and show the spectrum on a display, all within a hard real-time budget."
+  acceptance:
+    - "Timer-triggered ADC with DMA; no samples dropped (proved with a test tone)"
+    - "Windowed FFT with the processing time per frame measured on a GPIO pin"
+    - "Spectrum on an LCD or OLED at 20 frames per second or more"
+  skills: ["sampling theory", "DMA", "fixed-point arithmetic", "real-time budgets"]
+  parts:
+    - "STM32 board with an FPU (F4 or G4 family), electret or MEMS microphone breakout with preamp"
+    - "SPI LCD or I2C OLED display"
+
+- id: m41
+  number: 41
+  title: "Embedded Rust sensor node with telemetry to the year 3 backend"
+  cadence: monthly
+  tracks: [embedded, languages, systems]
+  phaseId: y4
+  estHours: 35
+  subject: embedded
+  brief: "A sensor node written in Rust (embedded-hal, no_std), reporting over Wi-Fi or a serial gateway into the event pipeline you built in project 28."
+  acceptance:
+    - "A driver crate for one sensor written against embedded-hal traits, with host-side tests"
+    - "Firmware on an ESP32 or STM32 using an async or RTIC executor"
+    - "Readings arrive in the Kafka pipeline and appear on its dashboard"
+  source: "The Embedded Rust Book"
+  sourceUrl: https://docs.rust-embedded.org/book/
+  skills: ["no_std Rust", "embedded-hal", "MQTT or HTTP on a microcontroller"]
+  parts:
+    - "ESP32 development board (or STM32 with a Wi-Fi module)"
+    - "Environmental sensor breakout (BME280 or similar)"
+
+- id: m42
+  number: 42
+  title: "FPGA: UART and a VGA or HDMI pattern generator"
+  cadence: monthly
+  tracks: [embedded]
+  phaseId: y4
+  estHours: 35
+  subject: fpga
+  brief: "First real hardware description: a UART you can type into, and a video timing generator that draws patterns on a monitor."
+  acceptance:
+    - "UART transmitter and receiver with a testbench (simulation waveforms in the README)"
+    - "VGA or HDMI timing at 640x480, drawing test patterns and a sprite moved from the UART"
+    - "Timing constraints met; resource usage reported"
+  source: "Project F; nandland"
+  sourceUrl: https://projectf.io/
+  skills: ["Verilog or SystemVerilog", "testbenches", "timing constraints"]
+  parts:
+    - "Low-cost FPGA board (iCE40, ECP5 or Artix-7 class) with a VGA or HDMI output, or a PMOD adapter for one"
+    - "Monitor and cable"
+
+- id: m43
+  number: 43
+  title: "RISC-V subset CPU on the FPGA, running your own C program"
+  cadence: monthly
+  tracks: [embedded, systems]
+  phaseId: y4
+  estHours: 40
+  subject: fpga
+  brief: "An RV32I core of your own design, from a single-cycle datapath to a pipeline, running code compiled with GCC."
+  acceptance:
+    - "Passes the RV32I instruction tests in simulation"
+    - "Runs on the FPGA with memory-mapped UART and GPIO"
+    - "A C program of yours, compiled with riscv-gcc and your own linker script, prints over the UART"
+  source: "MIT 6.004; build-your-own-x: Processor"
+  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-processor
+  skills: ["CPU design", "pipelining", "toolchains"]
+  parts:
+    - "The FPGA board of project 42"
+
+- id: m44
+  number: 44
+  title: "DC or BLDC motor driver with PID speed control"
+  cadence: monthly
+  tracks: [ee, controls, embedded]
+  phaseId: y4
+  estHours: 40
+  subject: signals-control
+  brief: "Drive a motor properly: an H-bridge or three-phase bridge, current sensing, an encoder, and a speed loop designed from a model you identified."
+  acceptance:
+    - "Motor parameters identified from measurements (resistance, inductance, back-EMF constant, inertia)"
+    - "PID speed loop designed on the model; measured step response against the predicted one"
+    - "Current limit and stall protection that you have tested on purpose"
+  skills: ["power stages", "PWM", "system identification", "PID tuning"]
+  parts:
+    - "Brushed DC motor with encoder (or a small BLDC with Hall sensors), motor driver IC or discrete MOSFET bridge with gate driver"
+    - "Current-sense resistor and amplifier, bench supply with current limit, flyback protection"
+
+- id: m45
+  number: 45
+  title: "Inverted pendulum: simulate in your own engine, then build and control"
+  cadence: monthly
+  tracks: [controls, simulation, embedded]
+  phaseId: y4
+  estHours: 40
+  subject: signals-control
+  brief: "The classic. Model the cart-pole, design an LQR controller on the linearised model, prove it in your own multibody simulation, then make the real one stand up."
+  acceptance:
+    - "Nonlinear model in your engine; LQR (and a swing-up, if you get there) working in simulation"
+    - "The physical pendulum balances for a minute and recovers from a tap"
+    - "Simulated and measured trajectories overlaid, with the model error discussed"
+  source: "Steve Brunton's Control Bootcamp"
+  skills: ["state-space control", "LQR", "sensor filtering", "sim-to-real"]
+  parts:
+    - "Linear rail or belt-driven cart (a 3D-printer axis works), the motor and driver of project 44"
+    - "Rotary encoder for the pendulum angle, limit switches, microcontroller board"
+
+- id: m46
+  number: 46
+  title: "Battery-powered device with a power budget and an enclosure"
+  cadence: monthly
+  tracks: [ee, embedded, mech]
+  phaseId: y4
+  estHours: 35
+  subject: circuits
+  brief: "Make something that runs for weeks on a battery: choose the cell, write the power budget, design for sleep, measure the real consumption, and put it in an enclosure you designed."
+  acceptance:
+    - "A power budget spreadsheet made before the design, and the measured numbers next to it afterwards"
+    - "Sleep current measured in microamps; battery life estimated and then tested for at least a week"
+    - "Charging and protection circuitry; a printed enclosure that fits the board first time or a note on why it did not"
+  skills: ["low-power design", "battery management", "enclosure design"]
+  parts:
+    - "Li-ion or LiPo cell with protection, charger IC or module, low-quiescent regulator"
+    - "Microcontroller with good sleep modes, current-measurement tool (a precision shunt, or a power profiler)"
+    - "PCB fabrication run, 3D-printed enclosure"
+
+- id: m47
+  number: 47
+  title: "Mixed-signal data-acquisition board"
+  cadence: monthly
+  tracks: [ee, embedded]
+  phaseId: y4
+  estHours: 40
+  subject: instrumentation
+  brief: "A board that measures the real world well: an analogue front end, anti-aliasing, a proper ADC, clean layout, and a host tool that records and plots. It becomes the instrument for the year 5 experiments."
+  acceptance:
+    - "Analogue front end with gain and an anti-aliasing filter designed for a stated bandwidth"
+    - "External ADC over SPI; noise floor and effective number of bits measured"
+    - "Mixed-signal layout rules applied and explained (grounding, return paths, decoupling)"
+    - "Host software that streams, records and plots"
+  skills: ["analogue front ends", "ADCs", "mixed-signal layout", "noise measurement"]
+  parts:
+    - "Precision ADC (16-bit or better), instrumentation or low-noise op-amps, voltage reference"
+    - "Microcontroller with USB, PCB fabrication run, shielded cabling and connectors"
+
+# ------------------------------------------------------------ Y5 Mechanical engineering + mechatronics
+- id: m48
+  number: 48
+  title: "CAD: ten parts and two assemblies with drawings, printed and measured against tolerance"
+  cadence: monthly
+  tracks: [mech]
+  phaseId: y5
+  estHours: 40
+  subject: cad
+  brief: "Learn CAD by making things you then hold: ten parts of rising difficulty, two assemblies with mates and motion, and drawings a machinist could work from."
+  acceptance:
+    - "Ten fully constrained parametric parts and two assemblies, with exploded views"
+    - "Dimensioned drawings with tolerances for every part"
+    - "All parts 3D-printed and measured with calipers; a table of nominal, measured and error, and what you changed in the model because of it"
+  skills: ["parametric modelling", "engineering drawings", "tolerances", "3D printing"]
+  parts:
+    - "Access to a 3D printer (FDM is enough) and filament"
+    - "Digital calipers"
+
+- id: m49
+  number: 49
+  title: "Statics and beam calculator, validated against hand calculations"
+  cadence: monthly
+  tracks: [mech, languages]
+  phaseId: y5
+  estHours: 25
+  subject: mechanics-fea-cfd
+  brief: "A small tool that does what 2.001 teaches: reactions, shear and moment diagrams, stresses and deflections for beams under arbitrary loads."
+  acceptance:
+    - "Point, distributed and moment loads on simply supported and cantilever beams"
+    - "Shear, moment, slope and deflection diagrams plotted"
+    - "Ten textbook problems solved by hand and by the tool, with the results side by side"
+  skills: ["statics", "beam theory", "SymPy or NumPy"]
+  parts: []   # nothing to buy: this one runs on the computer you already have
+
+- id: m50
+  number: 50
+  title: "1D and 2D FEM solver, validated against an open solver"
+  cadence: monthly
+  tracks: [mech, simulation]
+  phaseId: y5
+  estHours: 40
+  subject: mechanics-fea-cfd
+  brief: "Finite elements from the weak form up: bars and beams first, then 2D linear elasticity with triangles or quads, checked against CalculiX or FEniCS."
+  acceptance:
+    - "1D bar and Euler-Bernoulli beam elements reproducing analytical solutions"
+    - "2D plane-stress solver with mesh import, sparse assembly and a linear solve"
+    - "A plate-with-hole benchmark compared with an open solver and with the analytical stress concentration, including a mesh convergence plot"
+  source: "A First Course in Finite Elements"
+  skills: ["weak forms", "element assembly", "sparse linear algebra", "verification"]
+  parts: []   # nothing to buy: this one runs on the computer you already have
+
+- id: m51
+  number: 51
+  title: "Gearbox or linkage mechanism: design, simulate, print, test"
+  cadence: monthly
+  tracks: [mech, simulation]
+  phaseId: y5
+  estHours: 40
+  subject: cad
+  brief: "A mechanism with a job: a reduction gearbox or a four-bar linkage that traces a path. Designed in CAD, its motion and loads checked in simulation, printed, and tested to failure."
+  acceptance:
+    - "Kinematic design with the ratio or the coupler curve specified first"
+    - "Motion simulated in your own engine or the CAD package, and tooth or pin loads estimated"
+    - "Printed and assembled; efficiency or positional error measured; one part loaded until it fails, with the failure explained"
+  skills: ["mechanism design", "gear geometry", "design for printing", "testing"]
+  parts:
+    - "3D printer and filament (PETG or nylon for gears), bearings, shafts, fasteners"
+    - "A small motor and a way to measure torque (a lever arm and a scale is enough)"
+
+- id: m52
+  number: 52
+  title: "12 Steps to Navier-Stokes, then your own 2D CFD in your own renderer"
+  cadence: monthly
+  tracks: [mech, simulation]
+  phaseId: y5
+  estHours: 40
+  subject: mechanics-fea-cfd
+  brief: "Work through Lorena Barba's twelve steps in Python, then write the solver again in your own language and visualise it live in your own renderer."
+  acceptance:
+    - "All twelve steps completed as notebooks"
+    - "Lid-driven cavity and channel flow in your own solver, compared with published benchmark data"
+    - "Live visualisation (velocity, vorticity, streamlines) in your renderer"
+  source: "CFD Python: 12 Steps to Navier-Stokes"
+  sourceUrl: https://github.com/barbagroup/CFDPython
+  skills: ["finite differences", "pressure projection", "validation against benchmarks"]
+  parts: []   # nothing to buy: this one runs on the computer you already have
+
+- id: m53
+  number: 53
+  title: "Heat-sink thermal model against thermocouple measurements"
+  cadence: monthly
+  tracks: [mech, ee]
+  phaseId: y5
+  estHours: 30
+  subject: mechanics-fea-cfd
+  brief: "Predict the temperature of a heat sink with a lumped model and with your FEM solver, then measure it with the data-acquisition board of project 47."
+  acceptance:
+    - "A thermal resistance network and a transient prediction made before the experiment"
+    - "Thermocouples read by your own DAQ board; natural and forced convection cases"
+    - "Predicted and measured curves overlaid, with the convection coefficient you had to assume discussed"
+  skills: ["heat transfer", "thermal networks", "experimental method"]
+  parts:
+    - "Heat sink, power resistor or transistor as the heat source, thermal paste"
+    - "Type-K thermocouples with an amplifier (MAX31855 or similar) read by the project 47 board; a small fan"
+
+- id: m54
+  number: 54
+  title: "Two-DOF robot arm: kinematics, dynamics, simulation"
+  cadence: monthly
+  tracks: [robotics, simulation]
+  phaseId: y5
+  estHours: 40
+  subject: robotics
+  brief: "The arm on paper and in simulation before any metal: forward and inverse kinematics, the equations of motion from Lagrange, and trajectory tracking in your own engine."
+  acceptance:
+    - "Forward and inverse kinematics and the Jacobian, checked against the Modern Robotics library"
+    - "Equations of motion derived symbolically and simulated; energy behaves as it should"
+    - "Computed-torque or PD-with-gravity control tracking a trajectory in simulation"
+  source: "Modern Robotics, chapters 4-8"
+  skills: ["kinematics", "Lagrangian dynamics", "trajectory control"]
+  parts: []   # nothing to buy: this one runs on the computer you already have
+
+- id: m55
+  number: 55
+  title: "The same arm, built and driven with ROS 2"
+  cadence: monthly
+  tracks: [robotics, embedded]
+  phaseId: y5
+  estHours: 40
+  subject: robotics
+  brief: "Build the arm of project 54 and drive it from ROS 2: a URDF, ros2_control, your own hardware interface, and the trajectories you planned in simulation executed on the real thing."
+  acceptance:
+    - "URDF and ros2_control hardware interface for your motor controllers"
+    - "The simulated trajectories run on the hardware; tracking error measured"
+    - "Visualised in RViz next to the digital twin"
+  source: "ROS 2 tutorials; Articulated Robotics"
+  skills: ["ROS 2", "ros2_control", "URDF", "hardware interfaces"]
+  parts:
+    - "Two servos or geared motors with encoders, motor drivers, microcontroller board"
+    - "Printed links and base, bearings, fasteners, a power supply"
+
+- id: m56
+  number: 56
+  title: "Differentiable or learned simulator experiment on one of your mechanisms"
+  cadence: monthly
+  tracks: [simulation, ai, robotics]
+  phaseId: y5
+  estHours: 35
+  subject: simulation
+  brief: "Close the loop between stage 1 and stage 2: use NVIDIA Warp or Brax to identify the parameters of a mechanism you built, or to learn a controller for it, by differentiating through the simulation."
+  acceptance:
+    - "One of your mechanisms modelled in a differentiable simulator"
+    - "System identification or policy optimisation by gradient descent through the simulator"
+    - "The result tested on the hardware and compared with the hand-tuned baseline"
+  source: "Physics-Based Deep Learning"
+  sourceUrl: https://physicsbaseddeeplearning.org/
+  skills: ["differentiable simulation", "system identification", "sim-to-real"]
+  parts: []   # nothing to buy: this one runs on the computer you already have

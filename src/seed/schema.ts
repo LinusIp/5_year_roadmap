@@ -109,7 +109,7 @@ const UnitGroupSchema = z.strictObject({
 });
 
 /** YAML may nest units under `section` headings; the app always sees a flat list. */
-const UnitsInput = z.array(z.union([UnitGroupSchema, UnitSchema])).transform((entries): Unit[] => {
+export const UnitsInput = z.array(z.union([UnitGroupSchema, UnitSchema])).transform((entries): Unit[] => {
   const flat: Unit[] = [];
   for (const entry of entries) {
     if ('items' in entry) {
@@ -202,6 +202,8 @@ const PlanEntryInput = z
     project: Slug.optional(),
     id: Slug.optional(),
     note: Text.optional(),
+    /** Share of the item's hours carried by this lane. Only needed when a project is planned in two lanes. */
+    hours: z.number().positive().optional(),
   })
   .superRefine((v, ctx) => {
     if (Boolean(v.resource) === Boolean(v.project)) ctx.addIssue({ code: 'custom', message: 'needs exactly one of "resource" or "project"' });
@@ -228,6 +230,7 @@ export const PlanItemSchema = z.strictObject({
   projectId: Slug.optional(),
   order: z.number(),
   note: Text.optional(),
+  hours: z.number().positive().optional(),
 });
 export type PlanItem = z.infer<typeof PlanItemSchema>;
 
@@ -343,6 +346,8 @@ export const SettingsDefaultsSchema = z
     backupReminderDays: z.number().int().min(1),
     paperCadence: z.strictObject({ fromYear: z.literal([1, 2, 3, 4, 5]), perWeek: z.number().positive() }),
     forecast: z.strictObject({ paceWindowDays: z.number().int().min(7) }),
+    /** Hours of the projects block set aside each week for the weekly mini-build; the rest goes to the monthly project. */
+    weeklyBuildHours: z.number().min(0).max(40),
   })
   .superRefine((v, ctx) => {
     const ids = v.blocks.map((b) => b.id).join('');

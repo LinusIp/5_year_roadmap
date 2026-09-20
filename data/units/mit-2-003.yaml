@@ -1,0 +1,18 @@
+# Units of "mit-2-003". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: newton-s-laws-vectors-and-reference-frames, title: "Newton's Laws, Vectors, and Reference Frames", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/newton2019s-laws-vectors-and-reference-frames/" }
+- { id: velocity-acceleration-and-rotational-motion, title: "Velocity, Acceleration, and Rotational Motion", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/velocity-acceleration-and-rotational-motion/" }
+- { id: angular-momentum-and-torque, title: "Angular Momentum and Torque", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/angular-momentum-and-torque/" }
+- { id: free-body-diagrams-and-fictitious-forces, title: "Free Body Diagrams and Fictitious Forces", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/free-body-diagrams-and-fictitious-forces/" }
+- { id: quiz-1, title: "Quiz 1", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/quiz-1/" }
+- { id: angular-momentum-and-rotating-masses, title: "Angular Momentum and Rotating Masses", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/angular-momentum-and-rotating-masses/" }
+- { id: angular-momentum-and-motion-of-rotating-rigid-bo, title: "Angular Momentum and Motion of Rotating Rigid Bodies", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/angular-momentum-and-motion-of-rotating-rigid-bodies/" }
+- { id: finding-equations-of-motion-for-rigid-body-rotat, title: "Finding Equations of Motion for Rigid Body Rotation", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/finding-equations-of-motion-for-rigid-body-rotation/" }
+- { id: lagrange-equations, title: "Lagrange Equations", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/lagrange-equations/" }
+- { id: lagrange-equations-continued, title: "Lagrange Equations Continued", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/lagrange-equations-continued/" }
+- { id: quiz-review-lecture-quiz-2, title: "Quiz Review Lecture & Quiz 2", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/quiz-review-lecture-quiz-2/" }
+- { id: mechanical-vibration, title: "Mechanical Vibration", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/mechanical-vibration/" }
+- { id: reducing-problem-vibration-and-intro-to-multi-do, title: "Reducing Problem Vibration and Intro to Multi-DOF Vibration", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/reducing-problem-vibration-and-intro-to-multi-dof-vibration/" }
+- { id: vibration-of-multi-degree-of-freedom-systems, title: "Vibration of Multi-Degree-of-Freedom Systems", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/vibration-of-multi-degree-of-freedom-systems/" }
+- { id: vibration-analysis-by-mode-superposition, title: "Vibration Analysis by Mode Superposition", url: "https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/pages/vibration-analysis-by-mode-superposition/" }

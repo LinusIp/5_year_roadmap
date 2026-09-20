@@ -1,0 +1,14 @@
+# Units of "cs50x". Titles and links were read from the official page:
+#   https://cs50.harvard.edu/x/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: week-0, title: "Week 0", url: "https://cs50.harvard.edu/x/weeks/0/" }
+- { id: week-1, title: "Week 1", url: "https://cs50.harvard.edu/x/weeks/1/" }
+- { id: week-2, title: "Week 2", url: "https://cs50.harvard.edu/x/weeks/2/" }
+- { id: week-3, title: "Week 3", url: "https://cs50.harvard.edu/x/weeks/3/" }
+- { id: week-4, title: "Week 4", url: "https://cs50.harvard.edu/x/weeks/4/" }
+- { id: week-5, title: "Week 5", url: "https://cs50.harvard.edu/x/weeks/5/" }
+- { id: week-6, title: "Week 6", url: "https://cs50.harvard.edu/x/weeks/6/" }
+- { id: week-7, title: "Week 7", url: "https://cs50.harvard.edu/x/weeks/7/" }
+- { id: week-8, title: "Week 8", url: "https://cs50.harvard.edu/x/weeks/8/" }
+- { id: week-9, title: "Week 9", url: "https://cs50.harvard.edu/x/weeks/9/" }
+- { id: week-10, title: "Week 10", url: "https://cs50.harvard.edu/x/weeks/10/" }

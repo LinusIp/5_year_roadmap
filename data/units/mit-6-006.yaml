@@ -1,0 +1,35 @@
+# Units of "mit-6-006". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/video_galleries/lecture-videos/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: lecture-1, title: "Lecture 1: Algorithms and Computation", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-1-algorithms-and-computation/" }
+- { id: lecture-2, title: "Lecture 2: Data Structures and Dynamic Arrays", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-2-data-structures-and-dynamic-arrays/" }
+- { id: problem-session-1, title: "Problem Session 1", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/problem-session-1/" }
+- { id: lecture-3, title: "Lecture 3: Sets and Sorting", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-3-sets-and-sorting/" }
+- { id: lecture-4, title: "Lecture 4: Hashing", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-4-hashing/" }
+- { id: problem-session-2, title: "Problem Session 2", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/problem-session-2/" }
+- { id: lecture-5, title: "Lecture 5: Linear Sorting", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-5-linear-sorting/" }
+- { id: problem-session-3, title: "Problem Session 3", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/problem-session-3/" }
+- { id: lecture-6, title: "Lecture 6: Binary Trees, Part 1", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-6-binary-trees-part-1/" }
+- { id: lecture-7, title: "Lecture 7: Binary Trees, Part 2: AVL", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-7-binary-trees-part-2-avl/" }
+- { id: problem-session-4, title: "Problem Session 4", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/problem-session-4/" }
+- { id: lecture-8, title: "Lecture 8: Binary Heaps", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-8-binary-heaps/" }
+- { id: lecture-9, title: "Lecture 9: Breadth-First Search", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-9-breadth-first-search/" }
+- { id: quiz-1, title: "Quiz 1 Review", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/quiz-1-review/" }
+- { id: lecture-10, title: "Lecture 10: Depth-First Search", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-10-depth-first-search/" }
+- { id: lecture-11, title: "Lecture 11: Weighted Shortest Paths", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-11-weighted-shortest-paths/" }
+- { id: problem-session-5, title: "Problem Session 5", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/problem-session-5/" }
+- { id: lecture-12, title: "Lecture 12: Bellman-Ford", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-12-bellman-ford/" }
+- { id: lecture-13, title: "Lecture 13: Dijkstra", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-13-dijkstra/" }
+- { id: problem-session-7, title: "Problem Session 7", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/mit6_006s20_04_07_problem_session_7_mp4/" }
+- { id: lecture-14, title: "Lecture 14: APSP and Johnson", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-14-apsp-and-johnson/" }
+- { id: quiz-2, title: "Quiz 2 Review", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/quiz-2-review/" }
+- { id: lecture-15, title: "Lecture 15: Dynamic Programming, Part 1: SRTBOT, Fib, DAGs, Bowling", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-15-dynamic-programming-part-1-srtbot-fib-dags-bowling/" }
+- { id: lecture-16, title: "Lecture 16: Dynamic Programming, Part 2: LCS, LIS, Coins", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-16-dynamic-programming-part-2-lcs-lis-coins/" }
+- { id: problem-session-8, title: "Problem Session 8", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/mit6_006s20_04_17_problem_session_8_mp4/" }
+- { id: lecture-17, title: "Lecture 17: Dynamic Programming, Part 3: APSP, Parens, Piano", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-17-dynamic-programming-part-3-apsp-parens-piano/" }
+- { id: lecture-18, title: "Lecture 18: Dynamic Programming, Part 4: Rods, Subset Sum, Pseudopolynomial", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-18-dynamic-programming-part-4-rods-subset-sum-pseudopolynomial/" }
+- { id: lecture-19, title: "Lecture 19: Complexity", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-19-complexity/" }
+- { id: problem-session-9, title: "Problem Session 9", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/mit6_006s20_05_01_problem_session_9_mp4/" }
+- { id: quiz-3, title: "Quiz 3 Review", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/quiz-3-review/" }
+- { id: lecture-20, title: "Lecture 20: Course Review", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-20-course-review/" }
+- { id: lecture-21, title: "Lecture 21: Algorithms—Next Steps", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-21-algorithms2014next-steps/" }

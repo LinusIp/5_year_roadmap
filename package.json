@@ -16,7 +16,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "vite build && playwright test",
-    "icons": "node scripts/make-icons.ts"
+    "icons": "node scripts/make-icons.ts",
+    "check:links": "node scripts/check-links.ts",
+    "fetch:units": "node scripts/fetch-units.ts"
   },
   "dependencies": {
     "dexie": "^4.4.6",

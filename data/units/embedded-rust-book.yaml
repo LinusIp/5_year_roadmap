@@ -1,0 +1,14 @@
+# Units of "embedded-rust-book". Titles and links were read from the official page:
+#   https://raw.githubusercontent.com/rust-embedded/book/master/src/SUMMARY.md
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: introduction, title: "Introduction", url: "https://docs.rust-embedded.org/book/intro/index.html" }
+- { id: getting-started, title: "Getting started", url: "https://docs.rust-embedded.org/book/start/index.html" }
+- { id: peripherals, title: "Peripherals", url: "https://docs.rust-embedded.org/book/peripherals/index.html" }
+- { id: static-guarantees, title: "Static Guarantees", url: "https://docs.rust-embedded.org/book/static-guarantees/index.html" }
+- { id: portability, title: "Portability", url: "https://docs.rust-embedded.org/book/portability/index.html" }
+- { id: concurrency, title: "Concurrency", url: "https://docs.rust-embedded.org/book/concurrency/index.html" }
+- { id: collections, title: "Collections", url: "https://docs.rust-embedded.org/book/collections/index.html" }
+- { id: design-patterns, title: "Design Patterns", url: "https://docs.rust-embedded.org/book/design-patterns/index.html" }
+- { id: tips-for-embedded-c-developers, title: "Tips for embedded C developers", url: "https://docs.rust-embedded.org/book/c-tips/index.html" }
+- { id: interoperability, title: "Interoperability", url: "https://docs.rust-embedded.org/book/interoperability/index.html" }
+- { id: unsorted-topics, title: "Unsorted topics", url: "https://docs.rust-embedded.org/book/unsorted/index.html" }

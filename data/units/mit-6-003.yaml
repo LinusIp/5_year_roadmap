@@ -1,0 +1,28 @@
+# Units of "mit-6-003". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/video_galleries/lecture-videos/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- { id: lecture-1, title: "Lecture 1: Signals and Systems", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-1-signals-and-systems/" }
+- { id: lecture-2, title: "Lecture 2: Discrete-Time (DT) Systems", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-2-discrete-time-dt-systems/" }
+- { id: lecture-3, title: "Lecture 3: Feedback, Poles, and Fundamental Modes", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-3-feedback-poles-and-fundamental-modes/" }
+- { id: lecture-4, title: "Lecture 4: Continuous-Time (CT) Systems", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-4-continuous-time-ct-systems/" }
+- { id: lecture-5, title: "Lecture 5: Z Transform", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-5-z-transform/" }
+- { id: lecture-6, title: "Lecture 6: Laplace Transform", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-6-laplace-transform/" }
+- { id: lecture-7, title: "Lecture 7: Discrete Approximation of Continuous-Time Systems", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-7-discrete-approximation-of-continuous-time-systems/" }
+- { id: lecture-8, title: "Lecture 8: Convolution", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-8-convolution/" }
+- { id: lecture-9, title: "Lecture 9: Frequency Response", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-9-frequency-response/" }
+- { id: lecture-10, title: "Lecture 10: Feedback and Control", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-10-feedback-and-control/" }
+- { id: lecture-11, title: "Lecture 11: Continuous-Time (CT) Frequency Response and Bode Plot", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-11-continuous-time-ct-frequency-response-and-bode-plot/" }
+- { id: lecture-12, title: "Lecture 12: Continuous-Time (CT) Feedback and Control, Part 1", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-12-continuous-time-ct-feedback-and-control-part-1/" }
+- { id: lecture-13, title: "Lecture 13: Continuous-Time (CT) Feedback and Control, Part 2", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-13-continuous-time-ct-feedback-and-control-part-2/" }
+- { id: lecture-14, title: "Lecture 14: Fourier Representations", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-14-fourier-representations/" }
+- { id: lecture-15, title: "Lecture 15: Fourier Series", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-15-fourier-series/" }
+- { id: lecture-16, title: "Lecture 16: Fourier Transform", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-16-fourier-transform/" }
+- { id: lecture-17, title: "Lecture 17: Discrete-Time (DT) Frequency Representations", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-17-discrete-time-dt-frequency-representations/" }
+- { id: lecture-18, title: "Lecture 18: Discrete-Time (DT) Fourier Representations", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-18-discrete-time-dt-fourier-representations/" }
+- { id: lecture-19, title: "Lecture 19: Relations Among Fourier Representations", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-19-relations-among-fourier-representations/" }
+- { id: lecture-20, title: "Lecture 20: Applications of Fourier Transforms", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-20-applications-of-fourier-transforms/" }
+- { id: lecture-21, title: "Lecture 21: Sampling", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-21-sampling/" }
+- { id: lecture-22, title: "Lecture 22: Sampling and Quantization", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-22-sampling-and-quantization/" }
+- { id: lecture-23, title: "Lecture 23: Modulation, Part 1", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-23-modulation-part-1/" }
+- { id: lecture-24, title: "Lecture 24: Modulation, Part 2", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-24-modulation-part-2/" }
+- { id: lecture-25, title: "Lecture 25: Audio CD", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-25-audio-cd/" }

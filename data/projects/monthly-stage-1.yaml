@@ -1,0 +1,567 @@
+# Monthly projects 1-34 (Stage 1, software). Block D carries them in this order; number 35 is the
+# Stage 1 capstone (capstones.yaml). 20-40 hours each. A project is only `done` once its repo URL is filled in.
+# `sourceUrl` links were verified on 2026-09-20 (the build-your-own-x ones down to the category anchor).
+
+# ------------------------------------------------------------ Y1-P0 In flight
+- id: m01
+  number: 1
+  title: "ML Zoomcamp midterm project, deployed"
+  cadence: monthly
+  tracks: [ai]
+  phaseId: y1-p0
+  estHours: 30
+  subject: machine-learning
+  brief: "The Zoomcamp midterm: pick a dataset, train and compare models, and put the best one behind a web service that someone else can call."
+  acceptance:
+    - "Notebook with EDA, feature work and at least three models compared on a held-out set"
+    - "Training script and a prediction service packaged in Docker"
+    - "Deployed somewhere reachable, with the URL and a sample request in the README"
+    - "Meets the Zoomcamp's own review criteria"
+  source: "DataTalksClub ML Zoomcamp, projects"
+  skills: ["scikit-learn", "Flask or FastAPI", "Docker", "deployment"]
+
+- id: m02
+  number: 2
+  title: "CLI expense or habit tracker in Python, with tests"
+  cadence: monthly
+  tracks: [languages, swe]
+  phaseId: y1-p0
+  estHours: 25
+  subject: python
+  brief: "A command-line tool you will actually use: add, list, summarise and export entries, stored in SQLite or a plain file. Small, but finished like a real package."
+  acceptance:
+    - "Installable with pip (pyproject.toml, entry point) and documented with --help"
+    - "Unit tests with pytest covering the storage and the summaries"
+    - "CI on GitHub Actions running lint and tests on every push"
+    - "A tagged release"
+  skills: ["argparse or Typer", "pytest", "packaging", "GitHub Actions"]
+
+- id: m03
+  number: 3
+  title: "RAG chatbot over your own notes, on a local model"
+  cadence: monthly
+  tracks: [ai]
+  phaseId: y1-p0
+  estHours: 30
+  subject: deep-learning
+  brief: "Question answering over your own notes and course material with a model that runs on your machine: chunk, embed, retrieve, generate, cite."
+  acceptance:
+    - "Ingests a folder of Markdown or PDF notes into a vector index"
+    - "Answers cite the chunks they came from, and say so when nothing relevant was retrieved"
+    - "Runs fully offline with a local model (llama.cpp, Ollama or similar)"
+    - "A small evaluation set of 20 questions with retrieval hit rate reported"
+  skills: ["embeddings", "vector search", "prompting", "evaluation"]
+
+- id: m04
+  number: 4
+  title: "Zoomcamp capstone and a simple agent with tools"
+  cadence: monthly
+  tracks: [ai]
+  phaseId: y1-p0
+  estHours: 40
+  subject: deep-learning
+  brief: "Two deliverables that close the first phase: the ML Zoomcamp capstone, and the final project of the Hugging Face Agents course: an agent that uses tools to complete a task."
+  acceptance:
+    - "Zoomcamp capstone submitted and peer-reviewed"
+    - "An agent with at least three tools (search, code execution, file access or an API) that completes a multi-step task"
+    - "A set of 15 test tasks with pass or fail recorded, so the agent can be compared across changes"
+    - "Hugging Face Agents course certificate earned"
+  source: "Hugging Face Agents Course, unit 4"
+  skills: ["tool use", "agent loops", "evals"]
+
+# ------------------------------------------------------------ Y1-P1 Fluency + CS core
+- id: m05
+  number: 5
+  title: "micrograd clone and MNIST from scratch in NumPy"
+  cadence: monthly
+  tracks: [ai, math]
+  phaseId: y1-p1
+  estHours: 30
+  subject: deep-learning
+  brief: "Reverse-mode autodiff on scalars, written by you, then a multilayer perceptron in plain NumPy that learns MNIST. No deep learning framework."
+  acceptance:
+    - "A Value class with backward() whose gradients match numerical differentiation in tests"
+    - "An MLP trained with your own SGD reaches at least 97% test accuracy on MNIST"
+    - "Loss curves and a note on what each hyperparameter did"
+  source: "build-your-own-x: Neural Network"
+  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-neural-network
+  skills: ["backpropagation", "NumPy", "gradient checking"]
+
+- id: m06
+  number: 6
+  title: "Pong or Breakout in C with raylib"
+  cadence: monthly
+  tracks: [gamedev, languages]
+  phaseId: y1-p1
+  estHours: 20
+  subject: gamedev
+  brief: "Your first complete program in C that is not an exercise: a classic arcade game on raylib with a proper build."
+  acceptance:
+    - "Complete game with score, lives, sound and a pause screen"
+    - "Builds with make or CMake on a clean machine; no warnings with -Wall -Wextra"
+    - "No dynamic allocation leaks (checked with a sanitizer)"
+  source: "build-your-own-x: Game"
+  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-game
+  skills: ["C", "raylib", "Makefiles"]
+
+- id: m07
+  number: 7
+  title: "Build your own shell in C"
+  cadence: monthly
+  tracks: [systems, languages]
+  phaseId: y1-p1
+  estHours: 30
+  subject: c-cpp
+  brief: "A Unix shell: parsing, fork and exec, pipes, redirection, built-ins, job control and signals."
+  acceptance:
+    - "Runs pipelines of any length with input and output redirection"
+    - "Built-ins cd, exit, export, jobs, fg and bg; Ctrl-C and Ctrl-Z behave as in bash"
+    - "A test script that compares your shell's output with bash on 30 command lines"
+  source: "build-your-own-x: Shell"
+  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-shell
+  skills: ["processes", "file descriptors", "signals", "parsing"]
+
+- id: m08
+  number: 8
+  title: "Image classifier fine-tune with a Gradio demo on Hugging Face Spaces"
+  cadence: monthly
+  tracks: [ai]
+  phaseId: y1-p1
+  estHours: 20
+  subject: deep-learning
+  brief: "Collect a small dataset of your own, fine-tune a pretrained vision model on it, and publish a demo anyone can try."
+  acceptance:
+    - "A dataset you gathered and cleaned yourself, with a held-out test split"
+    - "Fine-tuned model with a confusion matrix and the failure cases shown"
+    - "A public Gradio app on Hugging Face Spaces"
+  source: "fast.ai, lessons 1-2"
+  skills: ["transfer learning", "data cleaning", "Gradio"]
+
+- id: m09
+  number: 9
+  title: "Build your own Git in Python"
+  cadence: monthly
+  tracks: [swe]
+  phaseId: y1-p1
+  estHours: 25
+  subject: python
+  brief: "Enough of Git to commit to a real repository: the object store, the index, trees, commits and refs."
+  acceptance:
+    - "init, hash-object, cat-file, add, write-tree, commit, log and checkout"
+    - "Objects are byte-compatible: real git can read a repository your tool wrote"
+    - "Tests that round-trip through real git"
+  source: "build-your-own-x: Git"
+  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-git
+  skills: ["content-addressed storage", "zlib", "file formats"]
+
+- id: m10
+  number: 10
+  title: "First LearnOpenGL scene: textured, lit, camera-controlled"
+  cadence: monthly
+  tracks: [graphics]
+  phaseId: y1-p1
+  estHours: 30
+  subject: graphics
+  brief: "The first scene that is yours rather than the tutorial's: several textured objects under Phong lighting with a fly camera."
+  acceptance:
+    - "Own shader, mesh and camera classes; nothing copy-pasted wholesale"
+    - "Directional, point and spot lights with material maps"
+    - "Runs at the display's refresh rate; a screenshot and a short clip in the README"
+  source: "LearnOpenGL: Getting started and Lighting"
+  sourceUrl: https://learnopengl.com/
+  skills: ["OpenGL", "GLSL", "linear algebra in practice"]
+
+- id: m11
+  number: 11
+  title: "nanoGPT reproduction on a small dataset"
+  cadence: monthly
+  tracks: [ai]
+  phaseId: y1-p1
+  estHours: 35
+  subject: deep-learning
+  brief: "Write a GPT from an empty file, following Karpathy's video but typing every line yourself, and train it on a corpus you chose."
+  acceptance:
+    - "Model, training loop and sampling code written by you in PyTorch"
+    - "Trained on a dataset of your choice; validation loss curve and samples at several checkpoints"
+    - "One ablation (context length, depth or width) with its effect measured"
+  source: "Karpathy: Let's build GPT"
+  skills: ["transformers", "PyTorch", "training loops"]
+
+# ------------------------------------------------------------ Y2 Systems + rendering
+- id: m12
+  number: 12
+  title: "Software rasterizer in C++"
+  cadence: monthly
+  tracks: [graphics, languages]
+  phaseId: y2
+  estHours: 35
+  subject: graphics
+  brief: "Triangles to pixels on the CPU: no graphics API, just a framebuffer you write to an image or a window."
+  acceptance:
+    - "Loads an OBJ model; perspective-correct texturing; z-buffer; back-face culling"
+    - "Programmable vertex and fragment stages written as C++ callables"
+    - "Renders a textured, lit model at a measured frame rate"
+  source: "build-your-own-x: 3D Renderer (tinyrenderer)"
+  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-3d-renderer
+  skills: ["rasterization", "barycentric coordinates", "C++"]
+
+- id: m13
+  number: 13
+  title: "Path tracer with a BVH"
+  cadence: monthly
+  tracks: [graphics]
+  phaseId: y2
+  estHours: 35
+  subject: graphics
+  brief: "Take the Ray Tracing in One Weekend renderer further: a bounding volume hierarchy, importance sampling, triangle meshes and multithreading."
+  acceptance:
+    - "BVH with a measured speed-up over brute force on a mesh of 100k triangles or more"
+    - "Diffuse, metal, dielectric and emissive materials; a Cornell box that converges"
+    - "Multithreaded tiles; render times reported"
+  source: "Ray Tracing in One Weekend series"
+  sourceUrl: https://raytracing.github.io/
+  skills: ["Monte Carlo integration", "acceleration structures", "multithreading"]
+
+- id: m14
+  number: 14
+  title: "malloc and a cache simulator (CS:APP labs, written up)"
+  cadence: monthly
+  tracks: [systems]
+  phaseId: y2
+  estHours: 35
+  subject: linux-os
+  brief: "The two CS:APP labs that change how you see a program: a dynamic memory allocator and a cache simulator, each with a write-up of the design decisions."
+  acceptance:
+    - "Allocator with an explicit or segregated free list, passing the lab's traces with a utilisation and throughput score you report"
+    - "Cache simulator matching the reference output on all traces, and a matrix transpose tuned for it"
+    - "A write-up explaining the design so that someone who has not done the lab can follow"
+  source: "CS:APP labs; build-your-own-x: Memory Allocator"
+  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-memory-allocator
+  skills: ["memory layout", "caches", "performance measurement"]
+
+- id: m15
+  number: 15
+  title: "2D rigid-body engine with SAT collision and a sandbox"
+  cadence: monthly
+  tracks: [simulation]
+  phaseId: y2
+  estHours: 40
+  subject: simulation
+  brief: "A 2D physics engine of your own: convex polygons and circles, separating-axis collision, a sequential-impulse solver, and a sandbox to throw things around in."
+  acceptance:
+    - "Stable stacking of ten boxes; friction and restitution"
+    - "Broadphase (grid or sweep-and-prune), SAT narrowphase with contact manifolds, warm starting"
+    - "Joints: at least distance and revolute"
+    - "An interactive sandbox, and a write-up of the solver"
+  source: "build-your-own-x: Physics Engine"
+  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-physics-engine
+  skills: ["collision detection", "constraint solving", "numerical stability"]
+
+- id: m16
+  number: 16
+  title: "xv6 labs write-up"
+  cadence: monthly
+  tracks: [systems]
+  phaseId: y2
+  estHours: 30
+  subject: linux-os
+  brief: "Turn the MIT 6.1810 labs into something a reader can learn from: what each lab asked, how xv6 does it, what you changed and why."
+  acceptance:
+    - "One article per lab completed, with the key diffs explained"
+    - "A diagram of xv6's address space and of the trap path, drawn by you"
+    - "Published (blog or repository) without posting complete lab solutions"
+  source: "MIT 6.1810 labs"
+  skills: ["kernel internals", "technical writing"]
+
+- id: m17
+  number: 17
+  title: "Buffer pool and B+tree (CMU 15-445 labs)"
+  cadence: monthly
+  tracks: [systems]
+  phaseId: y2
+  estHours: 40
+  subject: databases
+  brief: "The first two BusTub projects: a buffer pool manager with a replacement policy, and a concurrent B+tree index."
+  acceptance:
+    - "Buffer pool passes the course's local tests, including the concurrent ones"
+    - "B+tree with insert, delete, iterators and latch crabbing"
+    - "A benchmark of your own and a short design note (the course asks that solutions stay private)"
+  source: "CMU 15-445 projects"
+  skills: ["C++", "concurrency", "storage engines"]
+
+- id: m18
+  number: 18
+  title: "OpenGL mini-engine: model loading, shadows, PBR"
+  cadence: monthly
+  tracks: [graphics]
+  phaseId: y2
+  estHours: 40
+  subject: graphics
+  brief: "Everything LearnOpenGL taught, reorganised into an engine: a scene description, a renderer with passes, and assets loaded from disk."
+  acceptance:
+    - "glTF or OBJ loading through a library, with a scene file describing what to draw"
+    - "Shadow mapping, HDR with tone mapping, and a PBR metallic-roughness pipeline with image-based lighting"
+    - "A frame debugger capture explained pass by pass in the README"
+  source: "LearnOpenGL: Advanced Lighting and PBR"
+  sourceUrl: https://learnopengl.com/
+  skills: ["render passes", "PBR", "engine structure"]
+
+- id: m19
+  number: 19
+  title: "Build your own Redis in Rust"
+  cadence: monthly
+  tracks: [systems, languages]
+  phaseId: y2
+  estHours: 35
+  subject: rust-go
+  brief: "A Redis-compatible server in Rust: the RESP protocol, an async event loop, the core data types, expiry and persistence."
+  acceptance:
+    - "redis-cli and redis-benchmark work against it for strings, lists, hashes and sets"
+    - "Key expiry, and either RDB snapshots or an append-only file"
+    - "Throughput compared with real Redis on the same machine"
+  source: "build-your-own-x: Database"
+  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-database
+  skills: ["Rust", "async I/O", "protocol design"]
+
+- id: m20
+  number: 20
+  title: "LSM-tree key-value store with a write-ahead log"
+  cadence: monthly
+  tracks: [systems]
+  phaseId: y2
+  estHours: 40
+  subject: databases
+  brief: "A storage engine from the ground up: memtable, WAL, SSTables, compaction and crash recovery."
+  acceptance:
+    - "Put, get, delete and range scan; data survives kill -9 at any point (tested)"
+    - "Levelled or tiered compaction; Bloom filters on SSTables"
+    - "Write and read amplification measured and explained"
+  source: "Designing Data-Intensive Applications, chapter 3"
+  skills: ["storage engines", "crash consistency", "benchmarking"]
+
+- id: m21
+  number: 21
+  title: "HTTP server from raw sockets"
+  cadence: monthly
+  tracks: [systems]
+  phaseId: y2
+  estHours: 25
+  subject: networking
+  brief: "HTTP/1.1 on top of nothing but the sockets API: parsing, keep-alive, static files, and a concurrency model you chose on purpose."
+  acceptance:
+    - "Serves static files and a small dynamic route; keep-alive and chunked responses"
+    - "An event loop (epoll or kqueue) or a thread pool, with the choice justified by a load test"
+    - "Survives malformed requests from a fuzzer without crashing"
+  source: "build-your-own-x: Web Server"
+  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-web-server
+  skills: ["sockets", "HTTP", "event loops"]
+
+- id: m22
+  number: 22
+  title: "First Vulkan triangle, then a model viewer"
+  cadence: monthly
+  tracks: [graphics]
+  phaseId: y2
+  estHours: 40
+  subject: graphics
+  brief: "From the thousand-line triangle to something useful: a viewer that loads a textured model with depth, mipmaps and a resizable window."
+  acceptance:
+    - "Validation layers clean; swapchain recreation on resize"
+    - "Textured, depth-tested model with a camera"
+    - "A diagram of your frame: command buffers, synchronisation, descriptor sets"
+  source: "vulkan-tutorial.com"
+  sourceUrl: https://vulkan-tutorial.com/
+  skills: ["Vulkan", "GPU synchronisation", "memory management"]
+
+- id: m23
+  number: 23
+  title: "Design doc and implementation: a rate limiter and a job queue"
+  cadence: monthly
+  tracks: [systems, career]
+  phaseId: y2
+  estHours: 35
+  subject: system-design
+  brief: "Two small backend components, each started as a written design document: requirements, alternatives, data model, failure modes. Then built and measured against the document. They are the first two of the five design docs in the credential map."
+  acceptance:
+    - "Two design documents reviewed (by a person or a forum) before any code was written"
+    - "Rate limiter: token bucket or sliding window, correct across several instances"
+    - "Job queue: at-least-once delivery, retries with backoff, a dead-letter queue"
+    - "Load-test results compared with what the design predicted"
+  skills: ["design documents", "Redis", "idempotency", "load testing"]
+
+# ------------------------------------------------------------ Y3 Scalable systems + AI engineering + engines
+- id: m24
+  number: 24
+  title: "Raft (MIT 6.5840 labs)"
+  cadence: monthly
+  tracks: [systems]
+  phaseId: y3
+  estHours: 40
+  subject: system-design
+  brief: "The Raft labs: leader election, log replication, persistence and snapshots, passing the course's tests reliably."
+  acceptance:
+    - "All Raft lab tests pass 100 times in a row"
+    - "A write-up of the bugs that took longest to find (the course asks that code stay private)"
+  source: "MIT 6.5840 lab 3"
+  skills: ["consensus", "Go", "debugging distributed systems"]
+
+- id: m25
+  number: 25
+  title: "Sharded key-value store"
+  cadence: monthly
+  tracks: [systems]
+  phaseId: y3
+  estHours: 40
+  subject: system-design
+  brief: "The last 6.5840 labs: a fault-tolerant key-value service on Raft, then sharded across replica groups with live reconfiguration."
+  acceptance:
+    - "Linearizable KV service on your Raft, passing the lab tests"
+    - "Sharded KV with shard migration during reconfiguration, passing the lab tests"
+    - "A design note on how exactly-once semantics were achieved"
+  source: "MIT 6.5840 labs 4-5"
+  skills: ["linearizability", "sharding", "reconfiguration"]
+
+- id: m26
+  number: 26
+  title: "URL shortener, then scale it"
+  cadence: monthly
+  tracks: [systems]
+  phaseId: y3
+  estHours: 40
+  subject: containers-iac
+  brief: "Start with the simplest thing that works. Then load test it, find the bottleneck, and fix it, again and again: cache, queue, shard, and finally deploy on Kubernetes. The case study is the deliverable."
+  acceptance:
+    - "Baseline service with a load test and its saturation point"
+    - "Each scaling step (cache, async writes through a queue, sharded storage) with before and after numbers"
+    - "Deployed on Kubernetes with autoscaling, from manifests or Helm in the repository"
+    - "A written case study with the architecture diagrams at each stage"
+  skills: ["load testing", "caching", "Kubernetes", "capacity planning"]
+
+- id: m27
+  number: 27
+  title: "3D rigid bodies: broadphase, GJK/EPA and stacking"
+  cadence: monthly
+  tracks: [simulation]
+  phaseId: y3
+  estHours: 40
+  subject: simulation
+  brief: "The 2D engine's ideas in three dimensions: a dynamic BVH broadphase, GJK and EPA for convex shapes, contact manifolds that persist, and a solver that stacks."
+  acceptance:
+    - "GJK/EPA for boxes, spheres, capsules and convex hulls, with unit tests on known configurations"
+    - "Stable stack of ten boxes and a pyramid of fifty; sleeping bodies"
+    - "Debug drawing of contacts, normals and the BVH"
+  source: "Real-Time Collision Detection; Erin Catto's GDC talks"
+  skills: ["GJK and EPA", "inertia tensors", "contact persistence"]
+
+- id: m28
+  number: 28
+  title: "Event pipeline with Kafka, stream processing and an observability stack"
+  cadence: monthly
+  tracks: [systems]
+  phaseId: y3
+  estHours: 40
+  subject: data-engineering
+  brief: "Events in, aggregates out: producers, a Kafka topic, a stream processor with windows, a sink, and dashboards that show it is healthy."
+  acceptance:
+    - "Producers, partitioned topic, consumer group and a windowed aggregation with late-event handling"
+    - "Exactly-once or effectively-once output, demonstrated by killing a consumer mid-run"
+    - "Metrics, logs and traces (Prometheus, Grafana, OpenTelemetry) with one alert that fires when lag grows"
+  skills: ["Kafka", "stream processing", "observability"]
+
+- id: m29
+  number: 29
+  title: "Transformer language model from scratch, including the tokenizer"
+  cadence: monthly
+  tracks: [ai]
+  phaseId: y3
+  estHours: 40
+  subject: deep-learning
+  brief: "The Stanford CS336 spine: a byte-pair tokenizer, the model, the optimizer and the training loop, all yours, trained on a real corpus."
+  acceptance:
+    - "BPE tokenizer trained and tested against a reference implementation"
+    - "Transformer LM with your own AdamW and learning-rate schedule"
+    - "Trained to a reported perplexity; throughput and memory profiled"
+  source: "Stanford CS336, assignment 1"
+  skills: ["tokenization", "transformer internals", "profiling"]
+
+- id: m30
+  number: 30
+  title: "Vulkan compute particle system (one million particles)"
+  cadence: monthly
+  tracks: [graphics, simulation]
+  phaseId: y3
+  estHours: 35
+  subject: graphics
+  brief: "A million particles simulated in a compute shader and drawn without the data leaving the GPU."
+  acceptance:
+    - "Simulation and rendering share buffers; no per-frame readback"
+    - "One million particles at 60 fps or better on your GPU, with the frame time broken down"
+    - "Forces and a simple spatial interaction (a grid) in the compute pass"
+  source: "vkguide.dev compute chapters"
+  sourceUrl: https://vkguide.dev/
+  skills: ["compute shaders", "GPU buffers", "synchronisation"]
+
+- id: m31
+  number: 31
+  title: "LoRA fine-tune with an eval harness, served with vLLM or llama.cpp"
+  cadence: monthly
+  tracks: [ai]
+  phaseId: y3
+  estHours: 35
+  subject: deep-learning
+  brief: "Fine-tune an open model on a task you care about, prove it got better with an evaluation harness you wrote, and serve it."
+  acceptance:
+    - "A task-specific dataset with train, validation and test splits"
+    - "Eval harness comparing base, prompted and fine-tuned models on the same test set"
+    - "LoRA adapters merged or loaded at serve time; served with vLLM or llama.cpp with latency and throughput measured"
+  skills: ["PEFT", "evaluation design", "model serving"]
+
+- id: m32
+  number: 32
+  title: "Production ML service: CI/CD, monitoring, drift checks, infrastructure as code"
+  cadence: monthly
+  tracks: [ai, systems]
+  phaseId: y3
+  estHours: 40
+  subject: machine-learning
+  brief: "An ML model treated as a production system on AWS: reproducible training, automated deployment, monitoring of inputs and predictions, and all of the infrastructure in code."
+  acceptance:
+    - "Terraform (or CDK) creates the whole environment from nothing"
+    - "CI/CD pipeline: tests, image build, staged deploy, rollback"
+    - "Dashboards for latency, errors and data drift, with an alert on drift"
+    - "A runbook for the three most likely failures"
+  source: "MLOps Zoomcamp"
+  skills: ["Terraform", "CI/CD", "monitoring", "AWS"]
+
+- id: m33
+  number: 33
+  title: "CUDA kernels, benchmarked"
+  cadence: monthly
+  tracks: [ai, graphics]
+  phaseId: y3
+  estHours: 35
+  subject: gpu
+  brief: "A repository of kernels, each written naively and then optimised, with the speed-up measured and explained."
+  acceptance:
+    - "Matrix multiply (naive, tiled, with shared memory), reduction, prefix sum and a 2D convolution"
+    - "Each compared with cuBLAS or a library baseline; roofline position estimated"
+    - "One kernel exposed to PyTorch as a custom op"
+  source: "Programming Massively Parallel Processors; GPU MODE lectures"
+  skills: ["CUDA", "memory hierarchy", "performance analysis"]
+
+- id: m34
+  number: 34
+  title: "XPBD cloth and soft bodies"
+  cadence: monthly
+  tracks: [simulation]
+  phaseId: y3
+  estHours: 40
+  subject: simulation
+  brief: "Position-based dynamics in your 3D engine: cloth with stretch and bend constraints, tetrahedral soft bodies, and collision against the rigid world."
+  acceptance:
+    - "Cloth that drapes over rigid bodies, with self-collision at least attempted and its limits documented"
+    - "Volume-preserving soft bodies"
+    - "Stiffness independent of iteration count and time step (the point of XPBD), demonstrated"
+  source: "Ten Minute Physics; the XPBD paper"
+  sourceUrl: https://matthias-research.github.io/pages/tenMinutePhysics/index.html
+  skills: ["XPBD", "constraint design", "GPU or multithreaded solvers"]

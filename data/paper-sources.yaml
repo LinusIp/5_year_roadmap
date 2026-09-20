@@ -1,2 +1,15 @@
-# Filled in milestone 2.
-[]
+# Where to pull new papers and articles from once the seeded queue runs low.
+- { id: src-arxiv, title: "arXiv", url: "https://arxiv.org/", urlVerified: true, lastVerified: 2026-09-20, summary: "The preprint server itself; follow cs.LG, cs.CL, cs.GR and cs.DC." }
+- { id: src-hf-daily-papers, title: "Hugging Face Daily Papers", url: "https://huggingface.co/papers", urlVerified: true, lastVerified: 2026-09-20, summary: "A curated daily shortlist of ML papers." }
+- { id: src-morning-paper, title: "The Morning Paper (archive)", url: "https://blog.acolyer.org/", urlVerified: true, lastVerified: 2026-09-20, summary: "Adrian Colyer's summaries of systems and ML papers; no longer updated, still the best index of classics." }
+- { id: src-labml, title: "labml.ai annotated paper implementations", url: "https://nn.labml.ai/", urlVerified: true, lastVerified: 2026-09-20, summary: "Papers side by side with a PyTorch implementation: the fastest way from 'read' to 'implemented'." }
+- { id: src-lillog, title: "Lil'Log (Lilian Weng)", url: "https://lilianweng.github.io/", urlVerified: true, lastVerified: 2026-09-20, summary: "Long survey posts on one ML topic each." }
+- { id: src-the-gradient, title: "The Gradient", url: "https://thegradient.pub/", urlVerified: true, lastVerified: 2026-09-20 }
+- { id: src-distill, title: "Distill (archive)", url: "https://distill.pub/", urlVerified: true, lastVerified: 2026-09-20, summary: "On hiatus; the archive remains the standard for visual explanations." }
+- { id: src-jay-alammar, title: "Jay Alammar's illustrated guides", url: "https://jalammar.github.io/", urlVerified: true, lastVerified: 2026-09-20 }
+- { id: src-julia-evans, title: "Julia Evans' blog", url: "https://jvns.ca/", urlVerified: true, lastVerified: 2026-09-20, summary: "Systems, networking and debugging, explained from first principles." }
+- { id: src-high-scalability, title: "High Scalability", url: "https://highscalability.com/", urlVerified: true, lastVerified: 2026-09-20 }
+- { id: src-cloudflare-blog, title: "Cloudflare engineering blog", url: "https://blog.cloudflare.com/", urlVerified: true, lastVerified: 2026-09-20 }
+- { id: src-discord-blog, title: "Discord engineering blog", url: "https://discord.com/category/engineering", urlVerified: true, lastVerified: 2026-09-20 }
+- { id: src-netflix-blog, title: "Netflix TechBlog", url: "https://netflixtechblog.com/", urlVerified: true, lastVerified: 2026-09-20 }
+- { id: src-uber-blog, title: "Uber engineering blog", url: "https://www.uber.com/blog/engineering/", urlVerified: true, lastVerified: 2026-09-20 }

@@ -1,0 +1,327 @@
+# Electrical engineering: stage 2, year 4. The math and physics prerequisites are what block E has been
+# building since day one; the planner will not schedule these courses before them.
+
+- id: mit-6-002
+  title: "MIT 6.002 Circuits and Electronics (Anant Agarwal, Spring 2007)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ee]
+  level: intermediate
+  cost: free
+  estHours: 150
+  prerequisites: [mit-8-02, mit-18-03]
+  subject: circuits
+  summary: "26 video lectures, labs and problem sets. The MITx 6.002x series on edX no longer resolves (see the certification card)."
+
+- id: mit-6-003
+  title: "MIT 6.003 Signals and Systems (Fall 2011)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ee, controls]
+  level: intermediate
+  cost: free
+  estHours: 130
+  prerequisites: [mit-18-03]
+  subject: signals-control
+
+- id: mit-6-011
+  title: "MIT 6.011 Signals, Systems and Inference (Spring 2018)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/6-011-signals-systems-and-inference-spring-2018/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ee, controls]
+  level: advanced
+  cost: free
+  estHours: 120
+  prerequisites: [mit-6-003, mit-6-041]
+  subject: signals-control
+  stretch: true
+
+- id: mit-6-004
+  title: "MIT 6.004 Computation Structures (Spring 2017)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ee, embedded]
+  level: intermediate
+  cost: free
+  estHours: 130
+  subject: fpga
+  summary: "Digital design from gates to a pipelined processor. Nand2Tetris is the warm-up; project 43 (a RISC-V subset on an FPGA) is the payoff."
+
+- id: harris-ddca
+  title: "Digital Design and Computer Architecture (Harris and Harris): companion site"
+  provider: Harvey Mudd College
+  type: book
+  url: https://pages.hmc.edu/harris/ddca/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ee, embedded]
+  level: intermediate
+  cost: paid
+  estHours: 0
+  reference: true
+  subject: fpga
+
+- id: nandland
+  title: "Nandland: FPGA, VHDL and Verilog tutorials"
+  provider: Russell Merrick
+  type: tutorial
+  url: https://nandland.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [embedded]
+  level: intro
+  cost: free
+  estHours: 30
+  subject: fpga
+  summary: "FPGA, VHDL and Verilog from the beginning. The site answers scripts with a bot challenge, so `npm run check:links` reports 403 for it; it was verified in a browser."
+
+- id: getting-started-with-fpgas
+  title: "Getting Started with FPGAs (Russell Merrick)"
+  provider: No Starch Press
+  type: book
+  url: https://nostarch.com/gettingstartedwithfpgas
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [embedded]
+  level: intro
+  cost: paid
+  estHours: 40
+  subject: fpga
+
+- id: project-f
+  title: "Project F: FPGA graphics and maths in SystemVerilog"
+  provider: Will Green
+  type: tutorial
+  url: https://projectf.io/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [embedded, graphics]
+  level: intermediate
+  cost: free
+  estHours: 40
+  subject: fpga
+  summary: "The reading for project 42 (UART and a VGA/HDMI pattern generator)."
+
+- id: fpga4fun
+  title: "fpga4fun.com"
+  provider: fpga4fun
+  type: article
+  url: https://www.fpga4fun.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [embedded]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  subject: fpga
+
+- id: ut-embedded-shape-the-world
+  title: "UT Austin: Embedded Systems, Shape the World (Valvano and Yerraballi)"
+  provider: edX (UTAustinX)
+  type: course
+  url: https://www.edx.org/learn/embedded-systems/the-university-of-texas-at-austin-embedded-systems-shape-the-world-microcontroller-input-output
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [embedded]
+  level: intermediate
+  cost: audit-free
+  estHours: 100
+  prerequisites: [mit-6-002]
+  subject: embedded
+  summary: "Two edX courses: Microcontroller Input/Output, then Multi-Threaded Interfacing. The authors keep the free e-book at users.ece.utexas.edu/~valvano/Volume1/E-Book/."
+
+- id: making-embedded-systems
+  title: "Making Embedded Systems, 2nd edition (Elecia White)"
+  provider: O'Reilly
+  type: book
+  url: https://www.oreilly.com/library/view/making-embedded-systems/9781098151539/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [embedded]
+  level: intermediate
+  cost: paid
+  estHours: 40
+  subject: embedded
+
+- id: embedded-rust-book
+  title: "The Embedded Rust Book"
+  provider: rust-embedded
+  type: book
+  url: https://docs.rust-embedded.org/book/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [embedded, languages]
+  level: intermediate
+  cost: free
+  estHours: 40
+  prerequisites: [rust-book]
+  subject: embedded
+
+- id: phils-lab
+  title: "Phil's Lab: STM32 firmware and KiCad PCB design"
+  provider: Phil's Lab (YouTube)
+  type: lectures
+  url: https://www.youtube.com/@PhilsLab
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [embedded, ee]
+  level: intermediate
+  cost: free
+  estHours: 40
+  subject: embedded
+
+- id: art-of-electronics
+  title: "The Art of Electronics, 3rd edition (Horowitz and Hill)"
+  provider: Cambridge University Press
+  type: book
+  url: https://artofelectronics.net/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ee]
+  level: intermediate
+  cost: paid
+  estHours: 0
+  reference: true
+  subject: circuits
+
+- id: learning-the-art-of-electronics
+  title: "Learning the Art of Electronics: A Hands-On Lab Course (Hayes and Abrams)"
+  provider: Cambridge University Press
+  type: book
+  url: https://learningtheartofelectronics.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ee]
+  level: intermediate
+  cost: paid
+  estHours: 80
+  subject: circuits
+  summary: "The bench course. Its labs are a ready source of weekly mini-builds in year 4."
+
+- id: cu-boulder-power-electronics
+  title: "CU Boulder: Power Electronics specialization"
+  provider: Coursera
+  type: course
+  url: https://www.coursera.org/specializations/power-electronics
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ee]
+  level: advanced
+  cost: audit-free
+  estHours: 60
+  prerequisites: [mit-6-002]
+  subject: circuits
+
+- id: brian-douglas-control
+  title: "Brian Douglas: Control System Lectures"
+  provider: Brian Douglas (YouTube)
+  type: lectures
+  url: https://www.youtube.com/@BrianBDouglas
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [controls]
+  level: intro
+  cost: free
+  estHours: 25
+  prerequisites: [mit-18-03]
+  subject: signals-control
+
+- id: mit-2-004
+  title: "MIT 2.004 Dynamics and Control II (Spring 2008)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/2-004-dynamics-and-control-ii-spring-2008/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [controls, mech]
+  level: intermediate
+  cost: free
+  estHours: 35
+  prerequisites: [mit-18-03, mit-6-003]
+  subject: signals-control
+  summary: "MIT 6.302 Feedback Systems is the electrical-engineering flavoured alternative."
+
+- id: mit-6-302
+  title: "MIT 6.302 Feedback Systems (Spring 2007)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/6-302-feedback-systems-spring-2007/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [controls, ee]
+  level: advanced
+  cost: free
+  estHours: 0
+  reference: true
+  subject: signals-control
+  summary: "Alternative to MIT 2.004; the hours are counted once, on 2.004."
+
+- id: brunton-control-bootcamp
+  title: "Steve Brunton: Control Bootcamp"
+  provider: Steve Brunton (YouTube)
+  type: lectures
+  url: https://www.youtube.com/playlist?list=PLMrJAkhIeNNR20Mz-VpzgfQs5zrYi085m
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [controls]
+  level: advanced
+  cost: free
+  estHours: 20
+  prerequisites: [mit-18-06, mit-18-03]
+  subject: signals-control
+  summary: "State space, LQR and Kalman filtering: what the inverted pendulum of project 45 needs."
+
+- id: dspguide
+  title: "The Scientist and Engineer's Guide to Digital Signal Processing (Steven W. Smith)"
+  provider: dspguide.com (free online)
+  type: book
+  url: https://www.dspguide.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [controls, ee]
+  level: intermediate
+  cost: free
+  estHours: 40
+  subject: signals-control
+  summary: "The reading for the signal/DSP visualiser of block A and the FFT analyser of project 40."
+
+- id: think-dsp
+  title: "Think DSP (Allen Downey)"
+  provider: Green Tea Press (free)
+  type: book
+  url: https://greenteapress.com/wp/think-dsp/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [controls, languages]
+  level: intro
+  cost: free
+  estHours: 30
+  subject: signals-control
+
+- id: mit-6-013
+  title: "MIT 6.013 Electromagnetics and Applications (Spring 2009)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/6-013-electromagnetics-and-applications-spring-2009/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ee, physics]
+  level: advanced
+  cost: free
+  estHours: 120
+  prerequisites: [mit-8-02, mit-18-03]
+  subject: circuits
+  stretch: true

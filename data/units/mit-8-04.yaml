@@ -1,0 +1,33 @@
+# Units of "mit-8-04". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-1/
+# by scripts/fetch-units.ts on 2026-09-20. Safe to edit; keep ids stable (progress is stored against them).
+- section: "Part 1: Basic Concepts"
+  items:
+    - { id: lecture-1, title: "Lecture 1: An overview of quantum mechanics", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-1/" }
+    - { id: lecture-2, title: "Lecture 2: Overview of quantum mechanics (cont.). Interaction-free measurements", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-1/" }
+    - { id: lecture-3, title: "Lecture 3: Photoelectric effect, Compton scattering, and de Broglie wavelength", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-1/" }
+    - { id: lecture-4, title: "Lecture 4: de Broglie matter waves. Group velocity and stationary phase. Wave for a free particle", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-1/" }
+    - { id: lecture-5, title: "Lecture 5: Momentum operator, Schrödinger equation, and interpretation of the wavefunction", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-1/" }
+    - { id: lecture-6, title: "Lecture 6: Probability density and current. Hermitian conjugation", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-1/" }
+    - { id: lecture-7, title: "Lecture 7: Wavepackets and uncertainty. Time evolution and shape change time evolutions", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-1/" }
+    - { id: lecture-8, title: "Lecture 8: Uncovering momentum space. Expectation values and their time dependence", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-1/" }
+    - { id: lecture-9, title: "Lecture 9: Observables, Hermitian operators, measurement and uncertainty. Particle on a circle", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-1/" }
+- section: "Part 2: Quantum Physics in One-dimensional Potentials"
+  items:
+    - { id: lecture-10, title: "Lecture 10: Uncertainty (cont.). Stationary states. Particle on a circle", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-2/" }
+    - { id: lecture-11, title: "Lecture 11: Uncertainty (cont.). Stationary states. Particle on a circle", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-2/" }
+    - { id: lecture-12, title: "Lecture 12: Properties of 1D energy eigenstates. Qualitative properties of wavefunctions. Shooting method", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-2/" }
+    - { id: lecture-13, title: "Lecture 13: Delta function potential. Justifying the node theorem. Simple harmonic oscillator", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-2/" }
+    - { id: lecture-14, title: "Lecture 14: Simple harmonic oscillator II. Creation and annihilation operators", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-2/" }
+    - { id: lecture-15, title: "Lecture 15: Simple harmonic oscillator III. Scattering states and step potential", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-2/" }
+    - { id: lecture-16, title: "Lecture 16: Step potential reflection and transmission coefficients. Phase shift, wavepackets and time delay", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-2/" }
+    - { id: lecture-17, title: "Lecture 17: Ramsauer-Townsend effect. Scattering in 1D", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-2/" }
+    - { id: lecture-18, title: "Lecture 18: Scattering in 1D (cont.). Example. Levinson’s theorem", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-2/" }
+- section: "Part 3: One-dimensional Scattering, Angular Momentum and Central Potentials"
+  items:
+    - { id: lecture-19, title: "Lecture 19: Resonances and Breit-Wigner distribution. The complex k-plane", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-3/" }
+    - { id: lecture-20, title: "Lecture 20: Central potentials and angular momentum", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-3/" }
+    - { id: lecture-21, title: "Lecture 21: Legendre equation. Radial equation. Hydrogen atom 2-body problem", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-3/" }
+    - { id: lecture-22, title: "Lecture 22: Hydrogen atom (cont.). Differential equation, series solution and quantum numbers", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-3/" }
+    - { id: lecture-23, title: "Lecture 23: Spectrum for hydrogen. Virial theorem, circular orbits and eccentricity", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-3/" }
+    - { id: lecture-24, title: "Lecture 24: Hydrogen atom (conclusion). The simplest quantum system and emergent angular momentum", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/pages/video-lectures/part-3/" }
