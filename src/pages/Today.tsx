@@ -16,7 +16,8 @@ import { useOptimistic } from '../lib/useOptimistic.ts';
 import { loadAllUnits, seed } from '../seed/index.ts';
 import type { Unit } from '../seed/schema.ts';
 import type { BlockId, TrackId } from '../seed/schema.ts';
-import { Link } from '../router/router.tsx';
+import { isRealIsoDate } from '../seed/schema.ts';
+import { Link, useQueryParam } from '../router/router.tsx';
 
 const ENERGY_LABELS = ['Drained', 'Low', 'Even', 'Good', 'Sharp'];
 
@@ -47,7 +48,10 @@ function StatTile({ label, value, sub, tone }: { label: string; value: string; s
 }
 
 export function Today() {
-  const [date, setDate] = useState(() => todayDate());
+  // A date in the URL (from the heatmap's "Edit this day") opens that day; otherwise today.
+  const [dateParam, setDateParam] = useQueryParam('date');
+  const date = dateParam && isRealIsoDate(dateParam) ? dateParam : todayDate();
+  const setDate = (next: string): void => setDateParam(next === todayDate() ? null : next);
   const settings = useSettings(seed.settings);
   const states = useItemStates();
   const units = useUnits();

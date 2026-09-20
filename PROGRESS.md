@@ -8,8 +8,8 @@ with each. "Verified" means it was run, not assumed.
 | 1 | Scaffold | **done** |
 | 2 | Data | **done** |
 | 3 | Today + logging | **done** |
-| 4 | Heatmap + streaks | next |
-| 5 | Roadmap | |
+| 4 | Heatmap + streaks | **done** |
+| 5 | Roadmap | next |
 | 6 | Library, Papers, Certifications | |
 | 7 | Projects | |
 | 8 | Reviews + stats, export/import, backup reminder, PWA/offline | |
@@ -126,3 +126,34 @@ Verified on this machine:
   reload, a full day turning the streak on, and Sunday's review.
 - `npm run build` passes. Main chunk 723 kB (210 kB gzipped) plus the 191 kB unit chunk (29 kB gzipped),
   which now materialises because Today loads it.
+
+## Milestone 4 — Heatmap and streaks
+
+- **The grid**: one SVG rect per day, columns are weeks, 53 columns to a year, five intensity steps at the
+  thresholds from Settings (0, 1-119, 120-299, 300-419, 420+). Every cell is a real button, so the grid is
+  reachable by keyboard and reads its day and total to a screen reader.
+- **Year switcher** for 2026 to 2031, plus an all-five-years view that stacks one grid per year with that
+  year's totals. The first and last years are clipped to the plan, so 2026 starts on 21 September.
+- **Track filter**: sixteen chips, each with its track's colour. Filtering recounts the minutes, so a day
+  can drop from level 4 to level 1, and the cell's label still says what the whole day came to.
+- **Click a day** for its detail: minutes per block, the items touched, free-text entries, the reflection
+  and the energy rating, with a link that opens that day on Today for editing.
+- **Counters**: current streak (with an at-risk warning), longest streak, total logged, and freezes spent
+  this month out of the allowance.
+- **Freeze days** are drawn with a dashed outline rather than a colour, so they read as "held" rather than
+  as a small amount of work.
+- **Hours per track and per block** under the grid, each track in its own colour.
+
+The choice worth recording: the ramp is a single blue hue, not GitHub's green, because intensity encodes
+magnitude. Both ramps pass the ordinal checks against their own surface — monotone lightness, visible
+steps, and a lightest step that still clears 2:1. A track filter changes which minutes are counted, never
+the hue, so "more time" always reads the same way.
+
+Verified on this machine:
+
+- `npm test`: 97 unit tests, 16 of them new (grid geometry, week-start rows, intensity levels, the track
+  filter, freeze marking, month labels, the whole 1,806-day plan in one grid).
+- `npm run test:e2e`: 17 Playwright tests, 6 new — an empty state instead of a blank grid, 8 hours logged
+  turning a cell to the top intensity and the streak to 1, the day detail and its edit link, the track
+  filter, the stacked all-years view, and a freeze day's marking.
+- Looked at it with 100 days of generated logs, then cleared them.

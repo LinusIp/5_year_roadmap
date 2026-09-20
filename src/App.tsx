@@ -5,6 +5,7 @@ import { ThemeToggle } from './components/ThemeToggle.tsx';
 import { useSettings } from './db/settings.ts';
 import { applyTheme, watchSystemTheme } from './lib/theme.ts';
 import { ComingSoon } from './pages/ComingSoon.tsx';
+import { Activity } from './pages/Activity.tsx';
 import { Today } from './pages/Today.tsx';
 import { NotFound } from './pages/NotFound.tsx';
 import { matchPath } from './router/paths.ts';
@@ -18,7 +19,7 @@ interface RouteDef {
 
 const ROUTES: RouteDef[] = [
   { pattern: '/', render: () => <Today /> },
-  { pattern: '/activity', render: () => <ComingSoon title="Activity" lead="Every day of the five years, at a glance." icon="activity" milestone={4} /> },
+  { pattern: '/activity', render: () => <Activity /> },
   { pattern: '/roadmap', render: () => <ComingSoon title="Roadmap" lead="Five years, six phases, five lanes." icon="roadmap" milestone={5} /> },
   { pattern: '/library', render: () => <ComingSoon title="Library" lead="Every course, book, tutorial and repo in the plan." icon="library" milestone={6} /> },
   { pattern: '/papers', render: () => <ComingSoon title="Papers" lead="The reading queue." icon="papers" milestone={6} /> },
