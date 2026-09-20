@@ -7,8 +7,8 @@ with each. "Verified" means it was run, not assumed.
 |---|---|---|
 | 1 | Scaffold | **done** |
 | 2 | Data | **done** |
-| 3 | Today + logging | next |
-| 4 | Heatmap + streaks | |
+| 3 | Today + logging | **done** |
+| 4 | Heatmap + streaks | next |
 | 5 | Roadmap | |
 | 6 | Library, Papers, Certifications | |
 | 7 | Projects | |
@@ -88,3 +88,41 @@ Verified on this machine:
   unverified link is stored.
 - `npm run build` passes. The bundle is 594 kB (172 kB gzipped); the 968 unit rows are split into a chunk
   that loads only when an item is opened.
+
+## Milestone 3 — Today and logging
+
+Today answers the question the app exists for: what exactly do I do in my 8 hours today?
+
+- **Five block cards**, each showing the specific item that block is on, down to the next lecture,
+  chapter or lab: Block E to MIT 18.06 to "Lecture 1: The geometry of linear equations (1 of 35)". Each
+  lane is an ordered queue and a block is on its first unfinished item, so falling behind never makes
+  work disappear. When a lane runs out, the next phase's is pulled forward and the card says so.
+- **Logging**: a start/stop timer (one at a time, stored in the database so it survives a reload), typed
+  minutes that accept `90`, `1h30` or `1.5h`, a "done" toggle per block, and a "unit done" button that
+  ticks the current lecture and moves the card on to the next.
+- **Quick-add** for anything off the plan, with its own track, block and minutes.
+- **The day's numbers**: minutes logged against the 8-hour target, the week against 56 hours, the streak
+  with its at-risk warning, and blocks finished.
+- **End of day**: a one-line reflection, an energy rating of 1 to 5, and a freeze-day checkbox.
+- **Sundays** replace the projects block with the weekly review and paper reading, as the brief asks.
+- Any past day can be opened and edited with the arrows in the header.
+
+Two details worth recording:
+
+- **Every date is a local calendar date.** In UTC+5, `toISOString()` calls 00:30 on the 21st "the 20th",
+  which would file late-night work under the wrong day and break the streak. `src/lib/dates.ts` never
+  touches UTC, and the tests run in Asia/Tashkent so a regression fails loudly.
+- **Writes are shown before they land.** IndexedDB is fast but asynchronous, and a controlled checkbox
+  bound straight to a live query snaps back for a frame after every click. `useOptimistic` holds the value
+  the user chose until the stored one catches up.
+
+Verified on this machine:
+
+- `npm test`: 81 unit tests, 43 of them new — local dates and DST, the streak and freeze rules, heatmap
+  levels, and the scheduler against the real curriculum.
+- `npm run test:e2e`: 11 Playwright tests. The eight new ones drive the real UI with the clock pinned to
+  2026-09-21 in UTC+5 and check the brief's acceptance criteria: the five blocks and their items, logging
+  by hand and by timer, a unit tick moving the card on, the quick-add, a reflection and freeze surviving a
+  reload, a full day turning the streak on, and Sunday's review.
+- `npm run build` passes. Main chunk 723 kB (210 kB gzipped) plus the 191 kB unit chunk (29 kB gzipped),
+  which now materialises because Today loads it.
