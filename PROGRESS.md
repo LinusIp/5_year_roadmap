@@ -11,8 +11,8 @@ with each. "Verified" means it was run, not assumed.
 | 4 | Heatmap + streaks | **done** |
 | 5 | Roadmap | **done** |
 | 6 | Library, Papers, Certifications | **done** |
-| 7 | Projects | next |
-| 8 | Reviews + stats, export/import, backup reminder, PWA/offline | |
+| 7 | Projects | **done** |
+| 8 | Reviews + stats, export/import, backup reminder, PWA/offline | next |
 | 9 | Optional GitHub integration + `log:export` | |
 | 10 | Polish | |
 
@@ -236,3 +236,31 @@ Verified on this machine:
   horizontal scroll at 380 px on seven pages, the repository rule in both places, a paper moving through
   the queue, certificate status reaching the credential map, a milestone following its project, and a
   library item linking to its row in the map.
+
+## Milestone 7 — Projects
+
+- **The Projects page** lists all 220 projects under their cadence — capstones, the numbered monthly projects
+  (1 to 59, as the brief numbers them) and the 135 weekly mini-builds — with search over briefs, skills and
+  sources, and filters for cadence, stage, track and status.
+- **Pick my next project** suggests from the pool, preferring cards whose tracks match the current phase and
+  the current stage, so year 4 suggests bench work; each press walks further down the same ordered list, and
+  "Make it this week's" sets the card that Today's projects block carries.
+- **Shipping**: shipped counts per cadence, how many weeks, months and plan years had one, and a twelve-week
+  strip of weekly builds. "Shipped" means done, and done needs a repository link, so every shipped project
+  on this page has one, shown as a link beside it.
+- Each row shows acceptance criteria ticked, a "needs parts" badge on stage 2 builds that list parts, and
+  where it came from (build-your-own-x).
+- The project page itself (brief, criteria, repository, demo, write-up, parts and budget) and the done rule
+  shipped in milestone 6.
+
+Consolidated on the way: the fix for checkboxes snapping back for a frame after a click (the write to
+IndexedDB is asynchronous) existed in one component; the item page's checklist and acceptance criteria had
+the same flaw. All three now use one hook, `useOptimisticSet`.
+
+Verified on this machine:
+
+- `npm test`: 158 unit tests, 4 new (cadence adherence counts periods, not projects; plan years for
+  capstones; the twelve-week strip).
+- `npm run test:e2e`: 43 Playwright tests, 5 new — the three cadences and their numbering, filters and the
+  parts badge, pick-my-next reaching Today, shipping a weekly build only with a repository, and criteria
+  ticked on a project showing on the list.

@@ -5,6 +5,7 @@ import { Link } from '../router/router.tsx';
 import { removePlanItem } from '../db/edits.ts';
 import { setItemStatus, toggleUnit, useItemState } from '../db/state.ts';
 import { formatHours } from '../lib/dates.ts';
+import { useOptimisticSet } from '../lib/useOptimisticSet.ts';
 import { loadUnits } from '../seed/index.ts';
 import type { Unit } from '../seed/schema.ts';
 import type { ItemStatus } from '../db/types.ts';
@@ -40,17 +41,12 @@ function UnitList({ refId, unitsDone }: { refId: string; unitsDone: string[] }) 
     };
   }, [refId]);
 
-  // Ticks show at once and are reconciled with the database when it answers; the key keeps the reset
-  // from firing on every render, since the stored list arrives as a fresh array each time.
-  const doneKey = unitsDone.join('|');
-  const [pending, setPending] = useState<Map<string, boolean>>(() => new Map());
-  useEffect(() => setPending(new Map()), [doneKey]);
+  const ticks = useOptimisticSet(unitsDone);
 
   if (units === null) return <p className="py-2 text-xs text-ink-3">Loading the checklist…</p>;
   if (units.length === 0) return null;
 
-  const stored = new Set(unitsDone);
-  const isDone = (id: string): boolean => pending.get(id) ?? stored.has(id);
+  const isDone = ticks.has;
   let lastSection: string | undefined;
 
   return (
@@ -67,7 +63,7 @@ function UnitList({ refId, unitsDone }: { refId: string; unitsDone: string[] }) 
                 className="mt-0.5 size-3.5 shrink-0 accent-[var(--accent-fill)]"
                 checked={isDone(unit.id)}
                 onChange={() => {
-                  setPending((current) => new Map(current).set(unit.id, !isDone(unit.id)));
+                  ticks.flip(unit.id);
                   void toggleUnit(refId, unit.id);
                 }}
               />

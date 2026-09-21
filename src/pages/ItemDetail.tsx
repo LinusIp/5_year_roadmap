@@ -9,6 +9,7 @@ import { useAtlas } from '../hooks/useAtlas.ts';
 import type { Atlas } from '../hooks/useAtlas.ts';
 import { formatHours, formatRange } from '../lib/dates.ts';
 import { fractionDone } from '../lib/progress.ts';
+import { useOptimisticSet } from '../lib/useOptimisticSet.ts';
 import { hasRepo, repoLinkProblem, statusBlocker } from '../lib/projects.ts';
 import { loadUnits } from '../seed/index.ts';
 import type { AppResource, Project, Unit } from '../seed/schema.ts';
@@ -67,7 +68,7 @@ function StatusControl({ kind, refId, state }: { kind: 'resource' | 'project'; r
 }
 
 function Checklist({ refId, unitsDone, units }: { refId: string; unitsDone: string[]; units: { id: string; title: string; url?: string; section?: string }[] }) {
-  const done = new Set(unitsDone);
+  const ticks = useOptimisticSet(unitsDone);
   let lastSection: string | undefined;
   return (
     <ul className="space-y-0.5">
@@ -78,8 +79,16 @@ function Checklist({ refId, unitsDone, units }: { refId: string; unitsDone: stri
           <li key={unit.id}>
             {showSection && <p className="eyebrow mt-3">{unit.section}</p>}
             <label className="flex cursor-pointer items-start gap-2 rounded px-1.5 py-1 text-sm hover:bg-raised">
-              <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-[var(--accent-fill)]" checked={done.has(unit.id)} onChange={() => void toggleUnit(refId, unit.id)} />
-              <span className={done.has(unit.id) ? 'text-ink-3 line-through' : ''}>{unit.title}</span>
+              <input
+                type="checkbox"
+                className="mt-0.5 size-4 shrink-0 accent-[var(--accent-fill)]"
+                checked={ticks.has(unit.id)}
+                onChange={() => {
+                  ticks.flip(unit.id);
+                  void toggleUnit(refId, unit.id);
+                }}
+              />
+              <span className={ticks.has(unit.id) ? 'text-ink-3 line-through' : ''}>{unit.title}</span>
               {unit.url && (
                 <a href={unit.url} target="_blank" rel="noreferrer noopener" className="ml-auto shrink-0 text-ink-3 hover:text-accent-text" aria-label={'Open ' + unit.title}>
                   <Icon name="external" size={14} />
@@ -337,7 +346,7 @@ function ResourceView({ atlas, resource }: { atlas: Atlas; resource: AppResource
 
 function ProjectView({ atlas, project }: { atlas: Atlas; project: Project }) {
   const state = useItemState(project.id);
-  const ticked = new Set(state?.unitsDone ?? []);
+  const ticked = useOptimisticSet(state?.unitsDone ?? []);
   const save = (change: (s: UserItemState) => UserItemState): void => void editItemState(project.id, change);
   const setField = (key: 'repoUrl' | 'demoUrl' | 'writeUp' | 'partsNotes' | 'budget', value: string): void =>
     save((s) => {
@@ -374,7 +383,15 @@ function ProjectView({ atlas, project }: { atlas: Atlas; project: Project }) {
                 return (
                   <li key={id}>
                     <label className="flex cursor-pointer items-start gap-2 rounded px-1.5 py-1 text-sm hover:bg-raised">
-                      <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-[var(--accent-fill)]" checked={ticked.has(id)} onChange={() => void toggleUnit(project.id, id)} />
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 size-4 shrink-0 accent-[var(--accent-fill)]"
+                        checked={ticked.has(id)}
+                        onChange={() => {
+                          ticked.flip(id);
+                          void toggleUnit(project.id, id);
+                        }}
+                      />
                       <span className={ticked.has(id) ? 'text-ink-3 line-through' : ''}>{criterion}</span>
                     </label>
                   </li>
