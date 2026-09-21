@@ -12,8 +12,9 @@
  */
 import { normalizePath } from 'vite';
 import type { Plugin } from 'vite';
-import { DATA_DIR, loadSeedOrThrow } from './load-seed.ts';
-import type { Seed, Unit } from '../../src/seed/schema.ts';
+import { DATA_DIR, loadSeedOrThrow, splitSeed } from './load-seed.ts';
+
+export { splitSeed } from './load-seed.ts';
 
 const SEED_ID = 'virtual:atlas-seed';
 const UNITS_ID = 'virtual:atlas-units';
@@ -21,16 +22,6 @@ const RESOLVED = new Map([
   [SEED_ID, '\0' + SEED_ID],
   [UNITS_ID, '\0' + UNITS_ID],
 ]);
-
-export function splitSeed(seed: Seed): { app: unknown; units: Record<string, Unit[]> } {
-  const units: Record<string, Unit[]> = {};
-  const resources = seed.resources.map((resource) => {
-    const { units: list, ...rest } = resource;
-    if (list && list.length > 0) units[resource.id] = list;
-    return { ...rest, unitCount: list?.length ?? 0 };
-  });
-  return { app: { ...seed, resources }, units };
-}
 
 /** JSON.parse of a string literal starts up markedly faster than a large object literal. */
 function asModule(value: unknown): string {

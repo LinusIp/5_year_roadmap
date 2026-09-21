@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { parse, YAMLParseError } from 'yaml';
 import { SEED_KINDS, validateSeed } from '../../src/seed/validate.ts';
 import type { RawFile, RawSeed, SeedKind, ValidateOptions, ValidationResult } from '../../src/seed/validate.ts';
-import type { Seed } from '../../src/seed/schema.ts';
+import type { AppSeed, Seed, Unit } from '../../src/seed/schema.ts';
 
 /** Where each kind of seed data lives. A trailing slash means "every .yaml file in this folder". */
 export const SEED_SOURCES: Record<SeedKind, string> = {
@@ -90,4 +90,18 @@ export function loadSeedOrThrow(dataDir: string = DATA_DIR): Seed {
     throw new Error('The curriculum in /data is invalid (' + errors.length + ' problem' + (errors.length === 1 ? '' : 's') + '):\n  - ' + errors.join('\n  - '));
   }
   return seed;
+}
+
+/**
+ * The app's view of the curriculum: unit checklists split off, each resource keeping a `unitCount`. The Vite
+ * plugin serves the two halves as separate modules; the scripts use the same split.
+ */
+export function splitSeed(seed: Seed): { app: AppSeed; units: Record<string, Unit[]> } {
+  const units: Record<string, Unit[]> = {};
+  const resources = seed.resources.map((resource) => {
+    const { units: list, ...rest } = resource;
+    if (list && list.length > 0) units[resource.id] = list;
+    return { ...rest, unitCount: list?.length ?? 0 };
+  });
+  return { app: { ...seed, resources } as AppSeed, units };
 }

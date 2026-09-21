@@ -184,10 +184,24 @@ export type StoredSettings = z.infer<typeof StoredSettingsSchema>;
 export const MetaSchema = z.strictObject({ key: z.string().min(1), value: z.unknown() });
 export type Meta = z.infer<typeof MetaSchema>;
 
-/** Never exported. The GitHub token lives here and nowhere else. */
+/** One day of a GitHub contribution calendar, compact because a year of them is cached: date, count, level 0-4. */
+export type ContributionDay = [date: string, count: number, level: 0 | 1 | 2 | 3 | 4];
+
+export interface CachedCalendar {
+  /** Epoch milliseconds. */
+  fetchedAt: number;
+  days: ContributionDay[];
+}
+
+/**
+ * Local-only: never exported, and left alone by import and reset. The GitHub token lives here and nowhere
+ * else, with the calendars fetched with it, which go when the token goes.
+ */
 export interface Secret {
   id: 'github';
   token: string;
+  /** By "from..to", the range the Activity page asked for. */
+  calendars?: Record<string, CachedCalendar>;
 }
 
 /** The running timer, stored under meta key "timer" so that it survives a reload. */

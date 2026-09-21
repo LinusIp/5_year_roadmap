@@ -1,24 +1,27 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Icon } from '../components/Icon.tsx';
 import { Page } from '../components/Page.tsx';
 import { backupFileName, createBackup, importBackup, markBackedUp, resetAll, serialiseBackup } from '../db/backup.ts';
 import { db } from '../db/db.ts';
+import { checkGithub, connectGithub, disconnectGithub, useGithubConnected } from '../db/github.ts';
 import { defaultSettings, updateSettings } from '../db/settings.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { formatMinutes, today as todayDate } from '../lib/dates.ts';
+import { NEW_TOKEN_URL } from '../lib/github.ts';
 import { weeklyTargetMinutes } from '../lib/schedule.ts';
 import { heatLabel } from '../lib/streaks.ts';
 import { SettingsDefaultsSchema } from '../seed/schema.ts';
 import type { SettingsDefaults } from '../seed/schema.ts';
 import { seed } from '../seed/index.ts';
 import type { StoredSettings, Theme } from '../db/types.ts';
+import { useQueryParam } from '../router/router.tsx';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-function Section({ title, lead, children }: { title: string; lead?: string; children: React.ReactNode }) {
+function Section({ id, title, lead, children }: { id?: string; title: string; lead?: string; children: React.ReactNode }) {
   return (
-    <section className="card mb-4 p-4">
+    <section id={id} className="card mb-4 scroll-mt-4 p-4">
       <h2 className="text-sm font-semibold">{title}</h2>
       {lead && <p className="mt-0.5 text-sm text-ink-2">{lead}</p>}
       <div className="mt-3">{children}</div>
@@ -296,7 +299,8 @@ function Backup({ settings }: { settings: StoredSettings }) {
           disabled={confirmReset !== 'RESET'}
           onClick={() =>
             void resetAll().then(async () => {
-              await db.settings.put(defaultSettings(seed.settings));
+              // The token survives a reset, so the settings that go with it do too.
+              await db.settings.put({ ...defaultSettings(seed.settings), github: settings.github });
               setConfirmReset('');
               setMessage({ tone: 'good', text: 'Everything was reset.' });
             })
@@ -309,8 +313,122 @@ function Backup({ settings }: { settings: StoredSettings }) {
   );
 }
 
+function GitHub({ settings }: { settings: StoredSettings }) {
+  const connected = useGithubConnected();
+  const [token, setToken] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<{ tone: 'good' | 'bad'; text: string } | null>(null);
+  const linkClass = 'text-accent-text underline underline-offset-2';
+
+  const connect = async (): Promise<void> => {
+    setBusy(true);
+    const result = await connectGithub(seed.settings, token);
+    setBusy(false);
+    if (result.ok) {
+      setToken('');
+      setMessage({ tone: 'good', text: 'Your GitHub calendar is now on the Activity page.' });
+    } else {
+      setMessage({ tone: 'bad', text: result.message + ' The token was not saved.' });
+    }
+  };
+
+  const check = async (): Promise<void> => {
+    setBusy(true);
+    const result = await checkGithub(seed.settings);
+    setBusy(false);
+    setMessage(result.ok ? { tone: 'good', text: 'GitHub knows this token as @' + result.value.login + '.' } : { tone: 'bad', text: result.message });
+  };
+
+  return (
+    <Section id="github" title="GitHub" lead="Optional. Shows your real GitHub contribution calendar under the Atlas heatmap on the Activity page.">
+      {connected === undefined ? null : connected ? (
+        <>
+          <p className="text-sm">
+            Connected{settings.github.username ? ' as ' : '.'}
+            {settings.github.username && <span className="font-medium">@{settings.github.username}</span>}
+            {settings.github.username && '.'}
+          </p>
+          <label className="mt-3 flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4 accent-[var(--accent-fill)]"
+              checked={settings.github.showCalendar}
+              onChange={(e) => void updateSettings(seed.settings, (s) => ({ ...s, github: { ...s.github, showCalendar: e.target.checked } }))}
+            />
+            Show my GitHub calendar on the Activity page
+          </label>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" className="btn" disabled={busy} onClick={() => void check()}>
+              {busy ? 'Checking…' : 'Test the connection'}
+            </button>
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={() =>
+                void disconnectGithub(seed.settings).then(() => setMessage({ tone: 'good', text: 'The token was removed from this browser.' }))
+              }
+            >
+              Remove the token
+            </button>
+          </div>
+        </>
+      ) : (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void connect();
+          }}
+        >
+          <label className="block">
+            <span className="label">Personal access token</span>
+            <input
+              type="password"
+              className="input max-w-md"
+              autoComplete="off"
+              spellCheck={false}
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+            />
+          </label>
+          <p className="mt-1.5 text-xs text-ink-3">
+            <a href={NEW_TOKEN_URL} target="_blank" rel="noreferrer noopener" className={linkClass}>
+              Create a fine-grained token
+            </a>{' '}
+            and leave every permission off: reading your calendar needs none.
+          </p>
+          <button type="submit" className="btn btn-primary mt-3" disabled={!token.trim() || busy}>
+            {busy ? 'Checking…' : 'Connect'}
+          </button>
+        </form>
+      )}
+      {message && (
+        <p role="status" className={'mt-3 text-sm ' + (message.tone === 'good' ? 'text-good-text' : 'text-critical-text')}>
+          {message.text}
+        </p>
+      )}
+      <p className="mt-3 text-xs text-ink-3">
+        The token stays in this browser's IndexedDB. It is never exported, and it is sent to api.github.com and nowhere else.
+      </p>
+
+      <h3 className="mt-5 text-sm font-semibold">A public learning log</h3>
+      <p className="mt-1 text-sm text-ink-2">
+        To keep your GitHub graph green with honest work, export a backup, then run <code className="num whitespace-nowrap">npm run log:export</code> in the
+        Atlas folder. It writes one Markdown file per day with time logged, as <code className="num whitespace-nowrap">learning-log/YYYY/MM/DD.md</code>, for
+        you to commit to a public repository. Reflections stay out unless you add <code className="num whitespace-nowrap">--reflections</code>.
+      </p>
+    </Section>
+  );
+}
+
 export function Settings() {
   const atlas = useAtlas();
+  const [section] = useQueryParam('section');
+  const ready = atlas !== undefined;
+  // Links such as "Add it in Settings" on the Activity page land on the right section.
+  useEffect(() => {
+    if (ready && section) document.getElementById(section)?.scrollIntoView({ block: 'start' });
+  }, [ready, section]);
+
   if (!atlas) {
     return (
       <Page title="Settings">
@@ -324,6 +442,7 @@ export function Settings() {
       <HeatAndStreak settings={atlas.settings} />
       <Appearance settings={atlas.settings} />
       <Backup settings={atlas.settings} />
+      <GitHub settings={atlas.settings} />
       <p className="num text-xs text-ink-3">Today is {todayDate()}.</p>
     </Page>
   );

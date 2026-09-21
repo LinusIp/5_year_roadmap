@@ -13,8 +13,8 @@ with each. "Verified" means it was run, not assumed.
 | 6 | Library, Papers, Certifications | **done** |
 | 7 | Projects | **done** |
 | 8 | Reviews + stats, export/import, backup reminder, PWA/offline | **done** |
-| 9 | Optional GitHub integration + `log:export` | next |
-| 10 | Polish | |
+| 9 | Optional GitHub integration + `log:export` | **done** |
+| 10 | Polish | next |
 
 ## Milestone 1 — Scaffold
 
@@ -307,3 +307,40 @@ Verified on this machine:
   refusing a bad threshold, and export → reset → import restoring the same file byte for byte, through a
   real download and upload. They also cover a non-backup file changing nothing, the reminder and its snooze,
   and the app loading offline, including a lazily loaded page and a deep link.
+
+## Milestone 9 — GitHub integration and the learning log
+
+- **Your GitHub calendar under the Atlas heatmap.** Settings > GitHub takes a fine-grained token with no
+  permissions added. Atlas asks GitHub whose token it is before keeping it, so a refused token is never
+  saved. The Activity page then draws your real contributions over the same days, in the same columns and
+  with the same colour ramp, using GitHub's own levels. It adds a count of the days both calendars were
+  active. The calendar is cached for an hour and stays visible offline with its "updated" time.
+  Refresh re-asks at once, and years that have not started are never asked about.
+- **The token stays in this browser.** It lives in the local-only table that export skips and import and
+  reset leave alone, next to the calendars fetched with it. "Remove the token" deletes both. Components never
+  see it after it is typed in, and it is sent only to `api.github.com/graphql`, as a bearer header.
+- **`npm run log:export`** writes a public learning log from a backup: `learning-log/YYYY/MM/DD.md` for every
+  day with time logged, covering what was worked on per block and for how long, and what was finished,
+  read, earned and shipped (with the repository link). Reflections and energy ratings are left out unless
+  `--reflections` is given. With no file named, it takes the newest backup in the current folder, else in
+  Downloads. It validates the backup with the app's own checks, skips unchanged days, and never deletes: files
+  for days that no longer have time are listed. `learning-log/` is ignored here, meant to be its own public
+  repository, and the script prints the commands to make it one.
+
+On the way: the heatmap's grid layout and drawing became shared pieces, so the two calendars cannot drift
+apart. Also, the Activity page's day panel now shows the titles of items you added yourself instead of their
+ids.
+
+Verified on this machine:
+
+- `npm test`: 190 unit tests, 20 new. They cover the request's shape (endpoint, bearer header, whole days up
+  to today), each failure named plainly (refused token, rate limit, offline, GraphQL error, unexpected
+  answer), the grids lining up column for column for either week start, and a token stored only once
+  accepted. They also cover the hour-long cache with forced refresh and shared concurrent requests, a
+  disconnect winning over a request still in flight, and neither the token nor the calendars reaching a
+  backup. For the learning log: file paths, the exact Markdown of a day, reflections kept out by default,
+  the review block named on Sundays, custom item titles, and the script itself run on a real backup file.
+- `npm run test:e2e`: 54 Playwright tests, 3 new: every page visited with no token makes no request beyond
+  the app; connecting shows the calendar under the heatmap with the right counts, a backup keeps the token
+  out, removing it removes the calendar, and the only foreign requests were to GitHub's API with the token;
+  a refused token is not saved.

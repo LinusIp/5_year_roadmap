@@ -113,3 +113,26 @@ what was chosen, why, and what it would take to change. Newest first within each
   means, and a review should read the same a year later.
 - **The backup reminder counts from the first log, not from install.** With nothing logged there is nothing to
   lose, so it stays quiet.
+
+## GitHub and the learning log (milestone 9)
+
+- **The calendar is fetched as the token's owner (`viewer`), not by username.** There is no name to mistype.
+  The login GitHub returns is stored in settings, so it travels with a backup, but the token does not.
+- **A token is checked before it is stored.** A token GitHub refuses is never saved, so the app never holds a
+  credential that does not work.
+- **GitHub's levels, Atlas's layout.** The calendar uses GitHub's own quartile levels, because contributions
+  are not minutes and mapping one onto the other would invent precision. It is drawn with the Atlas grid over
+  the Atlas range and week start, in the same colour ramp, so a column means the same week in both.
+- **At most one request per plan year per hour**, and none for days that have not happened. The cache is
+  what makes the panel instant and keeps it readable offline. It lives with the token in the local-only
+  table and goes with it.
+- **The learning log is written from a backup.** The logs live in the browser, where a Node script cannot
+  reach them. The export is already the one way out, and the script reads it with the app's own validation.
+- **Public by default means reflections are opt-in.** The log is meant for a public repository.
+  Reflections and energy ratings are personal, so they need `--reflections`.
+- **Only days with time logged get a file.** A freeze day, or a note with no minutes, is not work, and the log
+  exists to show honest work.
+- **The script never deletes.** A file whose day lost its time is listed for the user to remove. Deleting
+  from what may be someone's published history is their call.
+- **Reset keeps the GitHub settings, as it keeps the token.** Otherwise Settings would show a token connected
+  to no account name.

@@ -62,61 +62,83 @@ function minutesOf(log: DayLog | undefined, tracks: Set<TrackId> | null): number
   return total;
 }
 
-export function buildGrid({ from, to, logs, thresholds, tracks, weekStartsOn = 1 }: GridOptions): HeatGrid {
-  const byDate = new Map(logs.map((log) => [log.date, log]));
-  const filter = tracks && tracks.length > 0 ? new Set(tracks) : null;
+/** Where one day sits in a grid of whole weeks: columns are weeks, rows are weekdays. */
+export interface GridSlot {
+  date: string;
+  column: number;
+  row: number;
+  /** True for a day outside the requested range: drawn as a gap, not a zero. */
+  outside: boolean;
+}
 
+export interface GridLayout {
+  slots: GridSlot[];
+  columns: number;
+  months: MonthLabel[];
+  start: string;
+  end: string;
+}
+
+/**
+ * Lays out the days from `from` to `to` in whole weeks. Any two grids over the same range and week start
+ * line up column for column, which is what lets the GitHub calendar sit under the Atlas one.
+ */
+export function layoutGrid(from: string, to: string, weekStartsOn: 0 | 1 = 1): GridLayout {
   // Pad to whole weeks so the grid is rectangular.
   const gridStart = startOfWeek(from, weekStartsOn);
   const gridEnd = addDays(startOfWeek(to, weekStartsOn), 6);
   const dayCount = daysBetween(gridStart, gridEnd) + 1;
 
-  const cells: HeatCell[] = [];
+  const slots: GridSlot[] = [];
   const months: MonthLabel[] = [];
-  let totalMinutes = 0;
-  let daysWithActivity = 0;
-  let maxMinutes = 0;
   let lastMonth = '';
-
   for (let i = 0; i < dayCount; i++) {
     const date = addDays(gridStart, i);
     const column = Math.floor(i / 7);
     const row = (weekday(date) - weekStartsOn + 7) % 7;
     const outside = date < from || date > to;
-    const log = byDate.get(date);
-    const minutes = outside ? 0 : minutesOf(log, filter);
-    const total = outside ? 0 : minutesOf(log, null);
+    slots.push({ date, column, row, outside });
+    // Label a month at the column where its first day of the week falls.
+    const month = date.slice(0, 7);
+    if (!outside && month !== lastMonth && row === 0) {
+      months.push({ column, label: monthName(Number(date.slice(5, 7)) - 1, true) });
+      lastMonth = month;
+    }
+  }
+  return { slots, columns: Math.ceil(dayCount / 7), months, start: gridStart, end: gridEnd };
+}
 
-    cells.push({
-      date,
-      minutes,
-      totalMinutes: total,
-      level: outside ? 0 : heatLevel(minutes, thresholds),
-      column,
-      row,
-      frozen: !outside && Boolean(log?.frozen),
-      outside,
-    });
+export function buildGrid({ from, to, logs, thresholds, tracks, weekStartsOn = 1 }: GridOptions): HeatGrid {
+  const byDate = new Map(logs.map((log) => [log.date, log]));
+  const filter = tracks && tracks.length > 0 ? new Set(tracks) : null;
+  const layout = layoutGrid(from, to, weekStartsOn);
 
-    if (!outside) {
+  let totalMinutes = 0;
+  let daysWithActivity = 0;
+  let maxMinutes = 0;
+  const cells = layout.slots.map((slot): HeatCell => {
+    const log = slot.outside ? undefined : byDate.get(slot.date);
+    const minutes = minutesOf(log, filter);
+    if (!slot.outside) {
       totalMinutes += minutes;
       if (minutes > 0) daysWithActivity++;
       maxMinutes = Math.max(maxMinutes, minutes);
-      // Label a month at the column where its first day of the week falls.
-      const month = date.slice(0, 7);
-      if (month !== lastMonth && row === 0) {
-        months.push({ column, label: monthName(Number(date.slice(5, 7)) - 1, true) });
-        lastMonth = month;
-      }
     }
-  }
+    return {
+      ...slot,
+      minutes,
+      totalMinutes: minutesOf(log, null),
+      level: slot.outside ? 0 : heatLevel(minutes, thresholds),
+      frozen: Boolean(log?.frozen),
+    };
+  });
 
   return {
     cells,
-    columns: Math.ceil(dayCount / 7),
-    months,
-    start: gridStart,
-    end: gridEnd,
+    columns: layout.columns,
+    months: layout.months,
+    start: layout.start,
+    end: layout.end,
     totalMinutes,
     daysWithActivity,
     maxMinutes,

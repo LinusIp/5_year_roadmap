@@ -1,25 +1,27 @@
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { GitHubCalendar } from '../components/GitHubCalendar.tsx';
 import { Heatmap, HeatmapYear } from '../components/Heatmap.tsx';
 import { Icon } from '../components/Icon.tsx';
 import { EmptyState, Page } from '../components/Page.tsx';
 import { TrackDot, trackColor } from '../components/TrackDot.tsx';
 import { db } from '../db/db.ts';
-import { useSettings } from '../db/settings.ts';
+import { useAtlas } from '../hooks/useAtlas.ts';
 import { addDays, formatHours, formatLong, formatMinutes, today as todayDate } from '../lib/dates.ts';
 import { dayDetail, minutesPerBlock, minutesPerTrack, planYears, yearRange } from '../lib/heatmap.ts';
 import { freezesSpentInMonth, streak } from '../lib/streaks.ts';
 import { seed } from '../seed/index.ts';
-import type { TrackId } from '../seed/schema.ts';
+import type { AppSeed, TrackId } from '../seed/schema.ts';
 import { Link, useQueryParam } from '../router/router.tsx';
 
 const ALL_YEARS = 'all';
 
-function titleOf(refId: string): string {
+/** Titles come from the curriculum with the user's edits, so items they added show their names. */
+function titleOf(refId: string, resolved: AppSeed): string {
   return (
-    seed.resources.find((r) => r.id === refId)?.title ??
-    seed.projects.find((p) => p.id === refId)?.title ??
-    seed.papers.find((p) => p.id === refId)?.title ??
+    resolved.resources.find((r) => r.id === refId)?.title ??
+    resolved.projects.find((p) => p.id === refId)?.title ??
+    resolved.papers.find((p) => p.id === refId)?.title ??
     refId
   );
 }
@@ -38,8 +40,7 @@ function Counter({ label, value, sub, icon }: { label: string; value: string; su
 }
 
 export function Activity() {
-  const settings = useSettings(seed.settings);
-  const logs = useLiveQuery(() => db.dayLogs.toArray(), []);
+  const atlas = useAtlas();
   const [yearParam, setYear] = useQueryParam('year');
   const [trackParam, setTrack] = useQueryParam('track');
   const [selected, setSelected] = useState<string>();
@@ -53,8 +54,10 @@ export function Activity() {
   const tracks: TrackId[] = trackParam ? [trackParam as TrackId] : [];
 
   const selectedLog = useLiveQuery(async () => (selected ? db.dayLogs.get(selected) : undefined), [selected]);
+  const logs = atlas?.logs;
+  const atlasDates = useMemo(() => (logs ?? []).filter((log) => log.entries.some((e) => e.minutes > 0)).map((log) => log.date), [logs]);
 
-  if (!settings || !logs) {
+  if (!atlas || !logs) {
     return (
       <Page title="Activity">
         <p className="text-sm text-ink-3">Loading…</p>
@@ -62,6 +65,7 @@ export function Activity() {
     );
   }
 
+  const settings = atlas.settings;
   const thresholds = settings.core.heatmapThresholds;
   const weekStartsOn = settings.core.weekStartsOn;
   const streakState = streak(logs, settings.core.streak, now);
@@ -185,6 +189,20 @@ export function Activity() {
             title={'Activity in ' + view}
           />
         )}
+
+        {settings.github.showCalendar &&
+          (view === ALL_YEARS ? (
+            <p className="mt-4 border-t border-line pt-3 text-xs text-ink-3">Pick a year to see your GitHub contributions under it.</p>
+          ) : (
+            <GitHubCalendar
+              from={range.from}
+              to={range.to}
+              year={view}
+              weekStartsOn={weekStartsOn}
+              username={settings.github.username}
+              atlasDates={atlasDates}
+            />
+          ))}
       </section>
 
       {detail && (
@@ -224,7 +242,7 @@ export function Activity() {
                 <ul className="mt-2 space-y-0.5 text-sm text-ink-2">
                   {detail.refIds.map((refId) => (
                     <li key={refId} className="truncate">
-                      {titleOf(refId)}
+                      {titleOf(refId, atlas.seed)}
                     </li>
                   ))}
                 </ul>
