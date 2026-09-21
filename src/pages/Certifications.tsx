@@ -71,7 +71,7 @@ function CertCard({ cert, onOpenPrep }: { cert: SubjectRow['certs'][number]; onO
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-xs text-ink-3">{cert.vendor}</p>
-          <h3 className="mt-0.5 font-medium leading-snug">{cert.title}</h3>
+          <h2 className="mt-0.5 font-medium leading-snug">{cert.title}</h2>
         </div>
         <span className={'chip shrink-0 ' + tone(cert.status)}>{CERT_STATUS[cert.status]}</span>
       </div>

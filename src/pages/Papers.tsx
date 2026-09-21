@@ -166,8 +166,16 @@ export function Papers() {
       </div>
 
       {results.length === 0 ? (
-        <EmptyState icon="papers" title="Nothing matches">
-          Try another filter.
+        <EmptyState
+          icon="papers"
+          title="Nothing matches"
+          action={
+            <button type="button" className="btn" onClick={() => [setQuery, setStatus, setGroup].forEach((set) => set(null))}>
+              Clear filters
+            </button>
+          }
+        >
+          Try fewer words, or a different filter.
         </EmptyState>
       ) : (
         <ul className="space-y-2">

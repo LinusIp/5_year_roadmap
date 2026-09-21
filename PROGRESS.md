@@ -14,7 +14,7 @@ with each. "Verified" means it was run, not assumed.
 | 7 | Projects | **done** |
 | 8 | Reviews + stats, export/import, backup reminder, PWA/offline | **done** |
 | 9 | Optional GitHub integration + `log:export` | **done** |
-| 10 | Polish | next |
+| 10 | Polish | **done** |
 
 ## Milestone 1 — Scaffold
 
@@ -344,3 +344,54 @@ Verified on this machine:
   the app; connecting shows the calendar under the heatmap with the right counts, a backup keeps the token
   out, removing it removes the calendar, and the only foreign requests were to GitHub's API with the token;
   a refused token is not saved.
+
+## Milestone 10 — Polish
+
+- **Keyboard shortcuts**:
+  - `t` goes to Today and `r` to the Roadmap.
+  - `/` focuses the page's own search, or goes to the Library and focuses its search.
+  - `l` opens the log form on Today with the cursor in it, from any page.
+  - `?` lists the shortcuts, as does a "Shortcuts" button in the sidebar.
+
+  They never fire while you type, with Ctrl, Alt or Cmd held, or while a dialog is open. Settings > Keyboard
+  turns them off (WCAG 2.1.4, for speech-input users).
+- **Accessibility pass**:
+  - Every page runs through axe (WCAG 2.2 A and AA, plus axe's best practices) in both themes, as part of the
+    e2e suite, and none has a violation.
+  - The audit found three real problems, now fixed. The roadmap lanes wrapped their list items in `div`s. Card
+    and review headings skipped a level. And two complementary landmarks shared a name. The sidebar is now the
+    page's header landmark.
+  - Beyond what axe can see, the heatmap was one tab stop per day, so getting past a year took 365 presses of
+    Tab. It is now one tab stop, with arrow keys for day and week, Home and End, and Enter to open a day.
+    Screen readers get those instructions.
+- **Empty states and edges**:
+  - A day before the plan starts, or after it ends, says so on Today instead of looking like any other day.
+  - Projects and Papers, like the Library, offer "Clear filters" when nothing matches.
+- **Layout**: a roadmap item's status control moved under its title, so titles no longer wrap into a narrow
+  column beside the widest status label.
+- **README**: screenshots, the shortcuts, and a step-by-step "adding a course" example that was checked against
+  the validator. `npm run screenshots` regenerates the screenshots. It builds eight weeks of demo history as a
+  backup file and imports it through Settings, into a throwaway browser.
+- **The last acceptance criterion with no test of its own** has one now: editing the YAML (a retitle, a new
+  estimate, a renamed and an added lecture, a reordered lane) and rebuilding leaves every stored row
+  byte-identical. Every log, status and ticked unit resolves against the new curriculum.
+
+Verified on this machine:
+
+- `npm test`: 191 unit tests (1 new: the curriculum edit).
+- `npm run test:e2e`: 62 Playwright tests, 8 new: the accessibility audit in each theme, every page at
+  380px with no console errors, the shortcuts, turning them off, the heatmap's keyboard model, the plan's edges,
+  and a way back from an empty search.
+
+## The brief's acceptance criteria
+
+| Criterion | Where it is shown |
+|---|---|
+| Fresh clone → `npm i && npm run dev` works; `npm run build` and `npm test` pass | CI (`.github/workflows/ci.yml`) on every push; checked on a fresh clone of the repository for milestone 10 |
+| On 2026-09-21, Today shows the five blocks with their exact items | `tests/e2e/today.spec.ts`: shows the five blocks with the exact item each is on |
+| Logging 8 h gives the top heatmap intensity and increments the streak | `tests/e2e/activity.spec.ts`: logging 8 hours lights the day up at the top intensity and counts the streak |
+| Marking units done updates item %, phase % and the forecast | `tests/e2e/roadmap.spec.ts`: ticking units updates the item, the lane and the phase; the forecast test after it |
+| Re-plan never drops items and never schedules before prerequisites | `tests/unit/replan.test.ts`, including property tests over random states; the e2e re-plan diff test |
+| Editing a YAML file and rebuilding keeps all logs and statuses | `tests/unit/curriculum-edit.test.ts` |
+| Export → reset → import restores the same state, byte for byte | `tests/unit/backup.test.ts`, and `tests/e2e/milestone8.spec.ts` through a real download and upload |
+| No network calls except the optional GitHub integration and the link checker | `tests/e2e/github.spec.ts`: every page visited without a token makes no request beyond the app; with one, only api.github.com |

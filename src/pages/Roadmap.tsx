@@ -140,7 +140,7 @@ function LaneView({ atlas, phase, lane, forecast, editing, onAdd }: LaneViewProp
       ) : (
         <ol className="space-y-1.5">
           {lane.items.map((item, index) => (
-            <div
+            <li
               key={item.planItem.id}
               {...dragProps(index)}
               className={
@@ -158,7 +158,7 @@ function LaneView({ atlas, phase, lane, forecast, editing, onAdd }: LaneViewProp
                 canMoveUp={index > 0}
                 canMoveDown={index < lane.items.length - 1}
               />
-            </div>
+            </li>
           ))}
         </ol>
       )}

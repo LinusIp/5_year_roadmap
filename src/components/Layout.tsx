@@ -24,7 +24,8 @@ function Wordmark() {
 function Sidebar({ footer }: { footer?: ReactNode }) {
   const { path } = useLocation();
   return (
-    <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-surface px-3 py-4 lg:flex">
+    // The site's header, laid out down the side: the name, the main navigation, and app-wide controls.
+    <header className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-surface px-3 py-4 lg:flex">
       <Wordmark />
       <nav aria-label="Main" className="mt-5 flex flex-1 flex-col gap-0.5 overflow-y-auto">
         {NAV_ITEMS.map((item) => (
@@ -35,7 +36,7 @@ function Sidebar({ footer }: { footer?: ReactNode }) {
         ))}
       </nav>
       {footer}
-    </aside>
+    </header>
   );
 }
 

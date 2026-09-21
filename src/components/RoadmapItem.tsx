@@ -104,7 +104,7 @@ export function RoadmapItem({ item, tracks, editing, onMove, canMoveUp, canMoveD
   const percent = Math.round(item.fraction * 100);
 
   return (
-    <li className="rounded-lg border border-line bg-surface">
+    <div className="rounded-lg border border-line bg-surface">
       <div className="flex items-start gap-2 p-2.5">
         <TrackDot track={track} size={7} />
         <div className="min-w-0 flex-1">
@@ -134,6 +134,24 @@ export function RoadmapItem({ item, tracks, editing, onMove, canMoveUp, canMoveD
                 <Icon name="lock" size={11} className="inline" /> blocked
               </span>
             )}
+            <select
+              className="input ml-auto h-7 w-auto px-1.5 text-xs"
+              style={{ minHeight: '1.75rem' }}
+              value={item.status}
+              aria-label={'Status of ' + item.title}
+              onChange={(e) => void setItemStatus(item.refId, e.target.value as ItemStatus)}
+            >
+              {STATUS_ORDER.map((status) => {
+                // The brief: a project is only done once its repository link is filled in.
+                const needsRepo = status === 'done' && item.kind === 'project' && !item.hasRepo;
+                return (
+                  <option key={status} value={status} disabled={needsRepo}>
+                    {STATUS_LABEL[status]}
+                    {needsRepo ? ' (add a repo link first)' : ''}
+                  </option>
+                );
+              })}
+            </select>
           </div>
 
           {percent > 0 && (
@@ -143,36 +161,16 @@ export function RoadmapItem({ item, tracks, editing, onMove, canMoveUp, canMoveD
           )}
         </div>
 
-        <div className="flex shrink-0 items-center gap-1">
-          {editing && onMove && (
-            <>
-              <button type="button" className="btn btn-ghost btn-icon btn-sm" onClick={() => onMove(-1)} disabled={!canMoveUp} aria-label={'Move ' + item.title + ' up'}>
-                <Icon name="arrowUp" size={13} />
-              </button>
-              <button type="button" className="btn btn-ghost btn-icon btn-sm" onClick={() => onMove(1)} disabled={!canMoveDown} aria-label={'Move ' + item.title + ' down'}>
-                <Icon name="arrowDown" size={13} />
-              </button>
-            </>
-          )}
-          <select
-            className="input h-7 w-auto px-1.5 text-xs"
-            style={{ minHeight: '1.75rem' }}
-            value={item.status}
-            aria-label={'Status of ' + item.title}
-            onChange={(e) => void setItemStatus(item.refId, e.target.value as ItemStatus)}
-          >
-            {STATUS_ORDER.map((status) => {
-              // The brief: a project is only done once its repository link is filled in.
-              const needsRepo = status === 'done' && item.kind === 'project' && !item.hasRepo;
-              return (
-                <option key={status} value={status} disabled={needsRepo}>
-                  {STATUS_LABEL[status]}
-                  {needsRepo ? ' (add a repo link first)' : ''}
-                </option>
-              );
-            })}
-          </select>
-        </div>
+        {editing && onMove && (
+          <div className="flex shrink-0 items-center gap-1">
+            <button type="button" className="btn btn-ghost btn-icon btn-sm" onClick={() => onMove(-1)} disabled={!canMoveUp} aria-label={'Move ' + item.title + ' up'}>
+              <Icon name="arrowUp" size={13} />
+            </button>
+            <button type="button" className="btn btn-ghost btn-icon btn-sm" onClick={() => onMove(1)} disabled={!canMoveDown} aria-label={'Move ' + item.title + ' down'}>
+              <Icon name="arrowDown" size={13} />
+            </button>
+          </div>
+        )}
       </div>
 
       {open && (
@@ -217,7 +215,7 @@ export function RoadmapItem({ item, tracks, editing, onMove, canMoveUp, canMoveD
           {item.unitCount > 0 && item.kind === 'resource' && <LiveUnitList refId={item.refId} />}
         </div>
       )}
-    </li>
+    </div>
   );
 }
 

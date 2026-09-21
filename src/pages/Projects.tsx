@@ -254,8 +254,16 @@ export function Projects() {
       </div>
 
       {groups.length === 0 ? (
-        <EmptyState icon="projects" title="Nothing matches">
-          Try another filter.
+        <EmptyState
+          icon="projects"
+          title="Nothing matches"
+          action={
+            <button type="button" className="btn" onClick={() => [setQuery, setCadence, setStage, setTrack, setStatus].forEach((set) => set(null))}>
+              Clear filters
+            </button>
+          }
+        >
+          Try fewer words, or a different filter.
         </EmptyState>
       ) : (
         groups.map((group) => (

@@ -2,13 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Icon } from '../components/Icon.tsx';
 import { Page } from '../components/Page.tsx';
+import { ShortcutList } from '../components/Shortcuts.tsx';
 import { backupFileName, createBackup, importBackup, markBackedUp, resetAll, serialiseBackup } from '../db/backup.ts';
 import { db } from '../db/db.ts';
 import { checkGithub, connectGithub, disconnectGithub, useGithubConnected } from '../db/github.ts';
 import { defaultSettings, updateSettings } from '../db/settings.ts';
+import { useMeta, writeMeta } from '../db/state.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { formatMinutes, today as todayDate } from '../lib/dates.ts';
 import { NEW_TOKEN_URL } from '../lib/github.ts';
+import { SHORTCUTS_META_KEY } from '../lib/shortcuts.ts';
+import { useOptimistic } from '../lib/useOptimistic.ts';
 import { weeklyTargetMinutes } from '../lib/schedule.ts';
 import { heatLabel } from '../lib/streaks.ts';
 import { SettingsDefaultsSchema } from '../seed/schema.ts';
@@ -213,6 +217,30 @@ function Appearance({ settings }: { settings: StoredSettings }) {
   );
 }
 
+function Keyboard() {
+  const stored = useMeta<boolean>(SHORTCUTS_META_KEY, true);
+  const [enabled, setEnabled] = useOptimistic(stored !== false);
+  return (
+    <Section id="keyboard" title="Keyboard" lead="Single keys that work anywhere in Atlas except while you type. Press ? to see them from any page.">
+      <ShortcutList />
+      <label className="mt-4 flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          className="size-4 accent-[var(--accent-fill)]"
+          checked={enabled}
+          disabled={stored === undefined}
+          onChange={(e) => {
+            setEnabled(e.target.checked);
+            void writeMeta(SHORTCUTS_META_KEY, e.target.checked);
+          }}
+        />
+        Use single-key shortcuts
+      </label>
+      <p className="mt-1 text-xs text-ink-3">Turn them off if you use speech input, or anything else that might press a letter by accident.</p>
+    </Section>
+  );
+}
+
 function Backup({ settings }: { settings: StoredSettings }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ tone: 'good' | 'bad'; text: string } | null>(null);
@@ -315,6 +343,7 @@ function Backup({ settings }: { settings: StoredSettings }) {
 
 function GitHub({ settings }: { settings: StoredSettings }) {
   const connected = useGithubConnected();
+  const [showCalendar, setShowCalendar] = useOptimistic(settings.github.showCalendar);
   const [token, setToken] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ tone: 'good' | 'bad'; text: string } | null>(null);
@@ -352,8 +381,12 @@ function GitHub({ settings }: { settings: StoredSettings }) {
             <input
               type="checkbox"
               className="size-4 accent-[var(--accent-fill)]"
-              checked={settings.github.showCalendar}
-              onChange={(e) => void updateSettings(seed.settings, (s) => ({ ...s, github: { ...s.github, showCalendar: e.target.checked } }))}
+              checked={showCalendar}
+              onChange={(e) => {
+                const on = e.target.checked;
+                setShowCalendar(on);
+                void updateSettings(seed.settings, (s) => ({ ...s, github: { ...s.github, showCalendar: on } }));
+              }}
             />
             Show my GitHub calendar on the Activity page
           </label>
@@ -441,6 +474,7 @@ export function Settings() {
       <Blocks settings={atlas.settings} />
       <HeatAndStreak settings={atlas.settings} />
       <Appearance settings={atlas.settings} />
+      <Keyboard />
       <Backup settings={atlas.settings} />
       <GitHub settings={atlas.settings} />
       <p className="num text-xs text-ink-3">Today is {todayDate()}.</p>

@@ -8,6 +8,19 @@ you log stays in your browser (IndexedDB) and can be exported to a single JSON f
 
 > Build status: see [PROGRESS.md](PROGRESS.md). Choices and assumptions: see [DECISIONS.md](DECISIONS.md).
 
+![Today: five blocks, each with the exact item and the next unit to do, and the time logged against it](docs/screenshots/today.png)
+
+<p>
+  <img src="docs/screenshots/activity.png" alt="Activity: a year of days as a heatmap, with streaks and hours per track" width="49%">
+  <img src="docs/screenshots/roadmap.png" alt="Roadmap: the current phase's five lanes, each with its items, progress and forecast" width="49%">
+</p>
+<p>
+  <img src="docs/screenshots/stats.png" alt="Stats: hours per track family by month, and completion by plan year" width="73%">
+  <img src="docs/screenshots/today-phone-light.png" alt="Today on a phone, in the light theme" width="25%">
+</p>
+
+The screenshots show eight weeks of made-up history; `npm run screenshots` regenerates them.
+
 ## Run it
 
 Requires Node 22.18 or newer (the scripts use Node's built-in TypeScript support).
@@ -26,7 +39,22 @@ npm run dev
 | `npm run validate:data` | Validates everything under `data/`. Fails on schema errors, duplicate ids, dangling references. |
 | `npm run check:links` | Requests every URL in `data/` and prints a report. Never fails the build. |
 | `npm run log:export` | Writes each logged day from a backup to `learning-log/YYYY/MM/DD.md` (see below). |
+| `npm run screenshots` | Builds, then regenerates the screenshots above from demo data in a throwaway browser. |
 | `npm run fetch:units` | Rebuilds the lecture and chapter checklists from the courses own syllabus pages. |
+
+## Keyboard
+
+| Key | Does |
+|---|---|
+| `t` | Go to Today |
+| `r` | Go to the Roadmap |
+| `/` | Search: the page's own search box, or the Library's |
+| `l` | Log time: opens the log form on Today, with the cursor in it |
+| `?` | List the shortcuts |
+
+They never fire while you type, or with Ctrl, Alt or Cmd held, and Settings > Keyboard turns them off, for
+anyone using speech input. In the heatmap, Tab lands on one day, the arrow keys move by a day or a week, and
+Enter opens it.
 
 ## Deploy
 
@@ -75,6 +103,47 @@ statuses and notes reference items by id, so editing the curriculum never loses 
 | `data/papers.yaml`, `data/paper-sources.yaml` | The reading queue, and where to find more |
 | `data/certs.yaml`, `data/subjects.yaml` | Certifications, and the credential map |
 | `data/settings.yaml` | The defaults a fresh install starts from |
+
+### Adding a course, step by step
+
+1. Describe it in the file of its track, for example `data/resources/math.yaml`:
+
+   ```yaml
+   - id: my-probability-book          # unique across resources, projects, papers and certs
+     title: "A probability book you picked"
+     provider: Its publisher
+     type: book                        # course, lectures, book, tutorial, article, paper, repo or cert
+     url: null                         # no link until you have opened it yourself...
+     urlVerified: false
+     searchHint: "the book's title and author"   # ...and meanwhile, what to search for
+     tracks: [math]
+     level: intro
+     cost: paid
+     estHours: 60
+     prerequisites: [mit-18-06]        # never scheduled before these
+     subject: math-physics             # its row in the credential map (data/subjects.yaml)
+     summary: "Why it is on the list, in one sentence."
+   ```
+
+   Once you have opened the page, set `url`, `urlVerified: true` and `lastVerified` to that day.
+
+2. Put it on the roadmap: add `- { resource: my-probability-book }` to a lane of a phase in
+   `data/plan.yaml`. The order of the list is the order of the lane.
+
+3. If it has chapters or lectures to tick off, list them in `data/units/my-probability-book.yaml`:
+
+   ```yaml
+   - { id: ch-1, title: "Chapter 1: Counting" }
+   - { id: ch-2, title: "Chapter 2: Conditional probability" }
+   ```
+
+   Progress is stored against these ids, so rename titles freely but keep the ids.
+
+4. Run `npm run validate:data`, then `npm run dev` to see it.
+
+A project works the same way in `data/projects/*.yaml`, with acceptance criteria instead of units. Anything
+you would rather not put in a file can be added from the app instead (Library > Add resource, or Roadmap > Edit >
+"Add to this lane"); those additions live in your browser and travel in backups.
 
 After an edit, run `npm run validate:data`. It fails on a schema error, a duplicate id, a dangling
 reference, a prerequisite cycle, an item planned before its prerequisite, or a roadmap item with no row in

@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { BackupReminder, UpdateBanner } from './components/Banners.tsx';
 import { Layout } from './components/Layout.tsx';
+import { KeyboardShortcuts, ShortcutsButton } from './components/Shortcuts.tsx';
 import { ThemeToggle } from './components/ThemeToggle.tsx';
 import { useSettings } from './db/settings.ts';
 import { applyTheme, watchSystemTheme } from './lib/theme.ts';
@@ -74,7 +75,12 @@ export function App() {
     }
   }
 
-  const themeToggle = settings ? <ThemeToggle settings={settings} core={seed.settings} /> : null;
+  const themeToggle = settings ? (
+    <div className="space-y-0.5">
+      <ShortcutsButton />
+      <ThemeToggle settings={settings} core={seed.settings} />
+    </div>
+  ) : null;
   const themeToggleCompact = settings ? <ThemeToggle settings={settings} core={seed.settings} compact /> : null;
 
   return (
@@ -82,6 +88,7 @@ export function App() {
       <UpdateBanner />
       <BackupReminder />
       <Suspense fallback={<PageLoading />}>{page}</Suspense>
+      <KeyboardShortcuts />
     </Layout>
   );
 }

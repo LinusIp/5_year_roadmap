@@ -136,3 +136,20 @@ what was chosen, why, and what it would take to change. Newest first within each
   from what may be someone's published history is their call.
 - **Reset keeps the GitHub settings, as it keeps the token.** Otherwise Settings would show a token connected
   to no account name.
+
+## Polish (milestone 10)
+
+- **Shortcuts are single keys, and can be turned off.** The brief asks for `t`, `r`, `/` and `l`. Single-
+  character shortcuts can be triggered by speech input, so WCAG 2.1.4 asks for a way to turn them off. The
+  switch is a `meta` row, so it needs no schema change and travels with backups.
+- **`/` finds the nearest search.** A page with a search box focuses it; any other page goes to the Library's,
+  the app's general search.
+- **`l` logs on the day in view.** From another page it opens Today; on Today it keeps the date you are
+  looking at, so a missed day can be filled in with the keyboard too.
+- **The accessibility audit is part of the tests.** axe runs on every page in both themes with WCAG 2.2 AA and
+  best-practice rules, and a violation fails the suite. That keeps the pass from being a one-off.
+- **The heatmap is one tab stop.** A year of days as separate tab stops is unusable from the keyboard.
+  Movement follows the grid: up and down are days, left and right are weeks.
+- **Screenshots come from a backup, not from code that reaches into the database.** The demo history goes in
+  through the same Import as a user's file and is checked by the same validation. The demo invents no links,
+  which is why its one finished-looking game is still in progress: done needs a repository.

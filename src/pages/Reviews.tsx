@@ -105,7 +105,7 @@ function WeekReview({ atlas, weekStart, review, open, onToggle }: { atlas: Atlas
       <button type="button" className="flex w-full items-center gap-3 p-4 text-left hover:bg-raised/40" onClick={onToggle} aria-expanded={open}>
         <Icon name={open ? 'chevronDown' : 'chevronRight'} size={16} className="text-ink-3" />
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold">Week of {formatRange(start, end)}</h3>
+          <h2 className="text-sm font-semibold">Week of {formatRange(start, end)}</h2>
           <p className="num text-xs text-ink-3">
             {formatHours(summary.totalMinutes)} logged · {summary.itemsFinished.length} finished
           </p>
@@ -202,9 +202,9 @@ function MonthReview({ atlas, monthStart, review, open, onToggle }: { atlas: Atl
       <button type="button" className="flex w-full items-center gap-3 p-4 text-left hover:bg-raised/40" onClick={onToggle} aria-expanded={open}>
         <Icon name={open ? 'chevronDown' : 'chevronRight'} size={16} className="text-ink-3" />
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold">
+          <h2 className="text-sm font-semibold">
             {monthName(date.getMonth())} {date.getFullYear()}
-          </h3>
+          </h2>
           <p className="num text-xs text-ink-3">
             {formatHours(summary.totalMinutes)} logged · project {shipped ? 'shipped' : 'not shipped'}
           </p>

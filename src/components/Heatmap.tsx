@@ -1,6 +1,6 @@
-import { useId, useMemo, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { dayName, formatMinutes, formatShort } from '../lib/dates.ts';
+import { addDays, dayName, formatMinutes, formatShort, today } from '../lib/dates.ts';
 import { buildGrid } from '../lib/heatmap.ts';
 import type { GridOptions, GridSlot, HeatCell, MonthLabel } from '../lib/heatmap.ts';
 import { heatLabel } from '../lib/streaks.ts';
@@ -58,69 +58,102 @@ export interface GridSvgProps<C extends GridCellView> {
  * A contribution grid, drawn as plain SVG: one rect per day, columns are weeks. Shared by the Atlas heatmap
  * and the GitHub calendar, so the two look alike and line up.
  *
- * With `onSelect`, every cell is a real button, reachable by keyboard and by a screen reader, with the day's
- * total in its accessible name. Intensity is a single-hue ordered ramp, so more reads as darker (light theme)
- * or brighter (dark theme) rather than as a different colour.
+ * With `onSelect`, every cell is a button with the day's total in its accessible name. The grid is one tab
+ * stop, not 365: Tab lands on the selected day (or today, or the first day) and the arrow keys move a day or a
+ * week, Home and End to the ends, Enter opens the day. Intensity is a single-hue ordered ramp, so more reads as
+ * darker (light theme) or brighter (dark theme) rather than as a different colour.
  */
 export function GridSvg<C extends GridCellView>({ cells, columns, months, title, weekStartsOn, label, onSelect, selected }: GridSvgProps<C>) {
   const labelId = useId();
+  const hintId = useId();
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [focused, setFocused] = useState<string>();
+  const days = useMemo(() => new Set(cells.filter((cell) => !cell.outside).map((cell) => cell.date)), [cells]);
+  const first = cells.find((cell) => !cell.outside)?.date;
+  const last = cells.findLast((cell) => !cell.outside)?.date;
+  const now = today();
+  const tabStop = [selected, focused, now, first].find((date) => date !== undefined && days.has(date));
+
+  const moveTo = (date: string | undefined): void => {
+    if (!date || !days.has(date)) return;
+    setFocused(date);
+    svgRef.current?.querySelector<SVGRectElement>('[data-date="' + date + '"]')?.focus();
+  };
+  const onKey = (event: React.KeyboardEvent, date: string): void => {
+    const target =
+      event.key === 'ArrowUp' ? addDays(date, -1)
+      : event.key === 'ArrowDown' ? addDays(date, 1)
+      : event.key === 'ArrowLeft' ? addDays(date, -7)
+      : event.key === 'ArrowRight' ? addDays(date, 7)
+      : event.key === 'Home' ? first
+      : event.key === 'End' ? last
+      : null;
+    if (target !== null) {
+      event.preventDefault();
+      moveTo(target);
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelect?.(date);
+    }
+  };
+
   const width = LEFT + columns * PITCH;
   const height = TOP + 7 * PITCH;
   const dayLabels = weekStartsOn === 1 ? ['M', 'T', 'W', 'T', 'F', 'S', 'S'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   return (
-    <svg role="group" aria-labelledby={labelId} width={width} height={height} viewBox={'0 0 ' + width + ' ' + height} className="max-w-none">
-      <title id={labelId}>{title}</title>
+    <>
+      <svg ref={svgRef} role="group" aria-labelledby={labelId} aria-describedby={onSelect ? hintId : undefined} width={width} height={height} viewBox={'0 0 ' + width + ' ' + height} className="max-w-none">
+        <title id={labelId}>{title}</title>
 
-      {months.map((month) => (
-        <text key={month.column + month.label} x={LEFT + month.column * PITCH} y={10} className="fill-[var(--ink-3)] text-[9px]">
-          {month.label}
-        </text>
-      ))}
+        {months.map((month) => (
+          <text key={month.column + month.label} x={LEFT + month.column * PITCH} y={10} className="fill-[var(--ink-3)] text-[9px]">
+            {month.label}
+          </text>
+        ))}
 
-      {[0, 2, 4].map((row) => (
-        <text key={row} x={0} y={TOP + row * PITCH + CELL - 2} className="fill-[var(--ink-3)] text-[9px]">
-          {dayLabels[row]}
-        </text>
-      ))}
+        {[0, 2, 4].map((row) => (
+          <text key={row} x={0} y={TOP + row * PITCH + CELL - 2} className="fill-[var(--ink-3)] text-[9px]">
+            {dayLabels[row]}
+          </text>
+        ))}
 
-      {cells.map((cell) => {
-        if (cell.outside) return null;
-        const isSelected = selected === cell.date;
-        const text = label(cell);
-        return (
-          <rect
-            key={cell.date}
-            x={LEFT + cell.column * PITCH}
-            y={TOP + cell.row * PITCH}
-            width={CELL}
-            height={CELL}
-            rx={2.5}
-            fill={LEVEL_FILL[cell.level]}
-            stroke={isSelected ? 'var(--ink)' : cell.frozen ? 'var(--accent-text)' : 'transparent'}
-            strokeWidth={isSelected ? 1.5 : cell.frozen ? 1 : 0}
-            strokeDasharray={cell.frozen && !isSelected ? '2 1.5' : undefined}
-            className={onSelect ? 'cursor-pointer outline-none focus-visible:stroke-[var(--accent)] focus-visible:[stroke-width:2]' : ''}
-            tabIndex={onSelect ? 0 : undefined}
-            role={onSelect ? 'button' : undefined}
-            aria-label={onSelect ? text : undefined}
-            onClick={onSelect ? () => onSelect(cell.date) : undefined}
-            onKeyDown={
-              onSelect
-                ? (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onSelect(cell.date);
-                    }
-                  }
-                : undefined
-            }
-          >
-            <title>{text}</title>
-          </rect>
-        );
-      })}
-    </svg>
+        {cells.map((cell) => {
+          if (cell.outside) return null;
+          const isSelected = selected === cell.date;
+          const text = label(cell);
+          return (
+            <rect
+              key={cell.date}
+              x={LEFT + cell.column * PITCH}
+              y={TOP + cell.row * PITCH}
+              width={CELL}
+              height={CELL}
+              rx={2.5}
+              fill={LEVEL_FILL[cell.level]}
+              stroke={isSelected ? 'var(--ink)' : cell.frozen ? 'var(--accent-text)' : 'transparent'}
+              strokeWidth={isSelected ? 1.5 : cell.frozen ? 1 : 0}
+              strokeDasharray={cell.frozen && !isSelected ? '2 1.5' : undefined}
+              className={onSelect ? 'cursor-pointer outline-none focus-visible:stroke-[var(--accent)] focus-visible:[stroke-width:2]' : ''}
+              data-date={cell.date}
+              tabIndex={onSelect ? (cell.date === tabStop ? 0 : -1) : undefined}
+              role={onSelect ? 'button' : undefined}
+              aria-label={onSelect ? text : undefined}
+              onClick={onSelect ? () => onSelect(cell.date) : undefined}
+              onFocus={onSelect ? () => setFocused(cell.date) : undefined}
+              onKeyDown={onSelect ? (e) => onKey(e, cell.date) : undefined}
+            >
+              <title>{text}</title>
+            </rect>
+          );
+        })}
+      </svg>
+      {onSelect && (
+        <p id={hintId} className="sr-only">
+          Arrow keys move by a day or a week, Home and End go to the first and last day, Enter opens the day.
+        </p>
+      )}
+    </>
   );
 }
 

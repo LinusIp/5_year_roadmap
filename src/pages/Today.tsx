@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { BlockCard } from '../components/BlockCard.tsx';
 import { Icon } from '../components/Icon.tsx';
@@ -12,6 +12,7 @@ import { addEntry, editLog, isBlockDone, minutesByBlock, minutesForRef, readLog,
 import { planForDay, suggestWeeklyBuild, weeklyTargetMinutes } from '../lib/schedule.ts';
 import type { ScheduledItem } from '../lib/schedule.ts';
 import { streak } from '../lib/streaks.ts';
+import { logTimeRequests } from '../lib/shortcuts.ts';
 import { useOptimistic } from '../lib/useOptimistic.ts';
 import { loadAllUnits, seed } from '../seed/index.ts';
 import type { Unit } from '../seed/schema.ts';
@@ -154,6 +155,7 @@ export function Today() {
         </div>
       }
     >
+      <PlanBounds date={date} />
       <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <StatTile
           label="Logged today"
@@ -211,10 +213,43 @@ export function Today() {
   );
 }
 
+/** A day outside the five years says so, rather than looking like any other day of the plan. */
+function PlanBounds({ date }: { date: string }) {
+  const start = seed.phases[0]!.start;
+  const end = seed.phases.at(-1)!.end;
+  if (date >= start && date <= end) return null;
+  return (
+    <p className="mb-4 flex items-start gap-2 rounded-lg border border-line bg-raised px-4 py-3 text-sm text-ink-2">
+      <Icon name="info" size={16} className="mt-0.5 shrink-0 text-ink-3" />
+      <span>
+        {date < start
+          ? 'The plan starts on ' + formatLong(start) + '. Below is its first day; anything you log before then is a head start.'
+          : 'The five years ended on ' + formatLong(end) + '. Below is what the last phase still has open; the Roadmap can re-plan it.'}
+      </span>
+    </p>
+  );
+}
+
 /* ------------------------------------------------------------------ quick add */
 
 function QuickAdd({ date }: { date: string }) {
   const [open, setOpen] = useState(false);
+  const [focusRequest, setFocusRequest] = useState(0);
+  const whatRef = useRef<HTMLInputElement>(null);
+
+  // The "l" shortcut: a request made on another page waits until Today is on screen.
+  useEffect(() => {
+    const take = (): void => {
+      if (!logTimeRequests.take()) return;
+      setOpen(true);
+      setFocusRequest((n) => n + 1);
+    };
+    take();
+    return logTimeRequests.listen(take);
+  }, []);
+  useEffect(() => {
+    if (focusRequest > 0) whatRef.current?.focus();
+  }, [focusRequest]);
   const [what, setWhat] = useState('');
   const [minutes, setMinutes] = useState('');
   const [track, setTrack] = useState<TrackId>('swe');
@@ -246,7 +281,7 @@ function QuickAdd({ date }: { date: string }) {
         <label className="block">
           <span className="label">What did you do?</span>
           {/* eslint-disable-next-line jsx-a11y/no-autofocus -- the form only exists once the user asks for it */}
-          <input className="input" value={what} onChange={(e) => setWhat(e.target.value)} placeholder="Read a paper, fixed the build…" autoFocus />
+          <input ref={whatRef} className="input" value={what} onChange={(e) => setWhat(e.target.value)} placeholder="Read a paper, fixed the build…" autoFocus />
         </label>
         <label className="block">
           <span className="label">Track</span>
