@@ -92,3 +92,24 @@ what was chosen, why, and what it would take to change. Newest first within each
 - **Alternatives are kept, not chosen for you.** Where the brief says "X *or* Y" (MIT 6.041 or Stat 110, 3.091
   or 5.111, CCNA or Network+, SolidWorks or Autodesk, 2.004 or 6.302), both are in the library, one is on the
   roadmap, and the other says in its summary that it is the alternative.
+
+## Backups, reviews and offline (milestone 8)
+
+- **Backups are canonical JSON.** Keys are sorted and rows come in key order, so a given state always serialises
+  to the same bytes. "Export, reset, import gives the same file" is then tested literally, and two backups
+  can be compared with `diff`.
+- **Import replaces; it does not merge.** Merging two histories has no right answer for a day logged in both.
+  The file is checked against the schemas first and written in one transaction, so a bad file changes nothing.
+- **The GitHub token never enters a backup**, and reset leaves it in place. Backup files get emailed and
+  committed. The token lives in its own table, which export skips.
+- **A new version waits for the user.** The service worker does not skip waiting on install. A banner offers
+  Reload, so code never changes under an open form or a running timer.
+- **The service worker ignores `Vary` when it reads its cache.** Every precached file has a content hash in its
+  name, so the header adds nothing. Honouring it broke offline start on any host that sends `Vary: Origin`,
+  because Vite loads every script and stylesheet with `crossorigin`.
+- **The monthly review suggests a re-plan but never applies it.** Re-planning stays one deliberate action on
+  the Roadmap, where its diff is shown first.
+- **A completed review keeps a snapshot of its numbers.** Plan edits and re-plans change what "the target"
+  means, and a review should read the same a year later.
+- **The backup reminder counts from the first log, not from install.** With nothing logged there is nothing to
+  lose, so it stays quiet.

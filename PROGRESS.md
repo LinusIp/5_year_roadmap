@@ -12,8 +12,8 @@ with each. "Verified" means it was run, not assumed.
 | 5 | Roadmap | **done** |
 | 6 | Library, Papers, Certifications | **done** |
 | 7 | Projects | **done** |
-| 8 | Reviews + stats, export/import, backup reminder, PWA/offline | next |
-| 9 | Optional GitHub integration + `log:export` | |
+| 8 | Reviews + stats, export/import, backup reminder, PWA/offline | **done** |
+| 9 | Optional GitHub integration + `log:export` | next |
 | 10 | Polish | |
 
 ## Milestone 1 — Scaffold
@@ -264,3 +264,46 @@ Verified on this machine:
 - `npm run test:e2e`: 43 Playwright tests, 5 new — the three cadences and their numbering, filters and the
   parts badge, pick-my-next reaching Today, shipping a weekly build only with a repository, and criteria
   ticked on a project showing on the list.
+
+## Milestone 8 — Reviews, stats, backups, offline
+
+- **Reviews** has two tabs. Every week since the plan started has an entry, newest first, filled in from the
+  logs: hours against the target, minutes per block, days logged, items finished, projects shipped and average
+  energy. Then the three questions (what worked, what didn't, what changes next week) and a link to that week's
+  paper. "Mark this week reviewed" stores the numbers as they stood, so a later plan edit never rewrites an old
+  review. The monthly review adds phase progress, a re-plan suggestion ("a re-plan from today would move N
+  items", computed but not applied), and "did a monthly project ship?", pre-answered from the projects and
+  editable.
+- **Stats**: totals, pace, streak and busiest block; hours per track family per month as stacked bars, with a
+  legend, a tooltip on hover or keyboard focus, and a table view of the same numbers; completion by plan
+  year; and cadence adherence (weeks, months and years that shipped a project).
+- **Settings** edits the block budgets (minutes a day, which days, the review day, the week start), the
+  heatmap levels, freezes and auto-freeze, and the theme. Every change goes through the schema `settings.yaml`
+  uses, so a value the app could not handle (a heatmap level below the one before it, a negative budget) is
+  refused with a message instead of saved.
+- **Export, reset, import.** Export writes `atlas-backup-YYYY-MM-DD.json`: every table except the GitHub token,
+  as canonical JSON (keys sorted, rows in key order), so the same data always gives the same bytes. Import
+  checks the whole file against the schemas before it touches anything, then replaces everything in one
+  transaction, so a wrong or damaged file changes nothing and says why. Reset asks you to type RESET.
+- **The backup reminder** appears once there is a month of history and no backup, then 30 days after each
+  backup (the interval is `backupReminderDays` in `settings.yaml`). "In a week" snoozes it.
+- **Offline and installable.** The service worker registers in production builds only, precaches all 32
+  build files on first visit and then serves them without the network. A new version downloads in the
+  background and waits; a banner offers Reload rather than swapping code under an open form.
+
+Found on the way: the service worker looked things up in its cache with the default Vary handling. The local
+preview server (and any host with CORS middleware) answers with `Vary: Origin`, and Vite marks every script
+and stylesheet `crossorigin`, so the page's requests carry an Origin header the precache requests did not.
+Each lookup missed and the app could not start offline, although the cache held every file. Every cached file
+has a content hash in its name, so the worker now ignores Vary. A unit test fails without that fix.
+
+Verified on this machine:
+
+- `npm test`: 170 unit tests, 12 new: the backup round trip byte for byte, canonical output, the token
+  staying out of backups and surviving reset and import, the four ways a file is rejected, the reminder's
+  rules, and the service worker serving crossorigin files when the host varies on Origin.
+- `npm run test:e2e`: 51 Playwright tests, 8 new. They cover the weekly review filling in and keeping its
+  answers, the monthly re-plan suggestion, the stats chart and its table view, settings driving Today and
+  refusing a bad threshold, and export → reset → import restoring the same file byte for byte, through a
+  real download and upload. They also cover a non-backup file changing nothing, the reminder and its snooze,
+  and the app loading offline, including a lazily loaded page and a deep link.

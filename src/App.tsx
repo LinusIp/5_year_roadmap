@@ -1,10 +1,10 @@
 import { Suspense, lazy, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { BackupReminder, UpdateBanner } from './components/Banners.tsx';
 import { Layout } from './components/Layout.tsx';
 import { ThemeToggle } from './components/ThemeToggle.tsx';
 import { useSettings } from './db/settings.ts';
 import { applyTheme, watchSystemTheme } from './lib/theme.ts';
-import { ComingSoon } from './pages/ComingSoon.tsx';
 import { NotFound } from './pages/NotFound.tsx';
 import { Today } from './pages/Today.tsx';
 import { matchPath } from './router/paths.ts';
@@ -22,6 +22,9 @@ const Library = lazy(() => import('./pages/Library.tsx').then((m) => ({ default:
 const ItemDetail = lazy(() => import('./pages/ItemDetail.tsx').then((m) => ({ default: m.ItemDetail })));
 const Papers = lazy(() => import('./pages/Papers.tsx').then((m) => ({ default: m.Papers })));
 const Projects = lazy(() => import('./pages/Projects.tsx').then((m) => ({ default: m.Projects })));
+const Reviews = lazy(() => import('./pages/Reviews.tsx').then((m) => ({ default: m.Reviews })));
+const Stats = lazy(() => import('./pages/Stats.tsx').then((m) => ({ default: m.Stats })));
+const Settings = lazy(() => import('./pages/Settings.tsx').then((m) => ({ default: m.Settings })));
 const Certifications = lazy(() => import('./pages/Certifications.tsx').then((m) => ({ default: m.Certifications })));
 
 interface RouteDef {
@@ -39,9 +42,9 @@ const ROUTES: RouteDef[] = [
   { pattern: '/papers', render: () => <Papers /> },
   { pattern: '/certs', render: () => <Certifications /> },
   { pattern: '/projects', render: () => <Projects /> },
-  { pattern: '/reviews', render: () => <ComingSoon title="Reviews" lead="Weekly and monthly reviews." icon="reviews" milestone={8} /> },
-  { pattern: '/stats', render: () => <ComingSoon title="Stats" lead="Hours, completion and cadence over time." icon="stats" milestone={8} /> },
-  { pattern: '/settings', render: () => <ComingSoon title="Settings" lead="Blocks, thresholds, streak rules, theme, backup." icon="settings" milestone={8} /> },
+  { pattern: '/reviews', render: () => <Reviews /> },
+  { pattern: '/stats', render: () => <Stats /> },
+  { pattern: '/settings', render: () => <Settings /> },
 ];
 
 function PageLoading() {
@@ -76,6 +79,8 @@ export function App() {
 
   return (
     <Layout sidebarFooter={themeToggle} mobileActions={themeToggleCompact}>
+      <UpdateBanner />
+      <BackupReminder />
       <Suspense fallback={<PageLoading />}>{page}</Suspense>
     </Layout>
   );

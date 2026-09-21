@@ -17,8 +17,11 @@ function boot(files: string[], version: string, existingCaches: string[] = []) {
     }),
     keys: async () => [...stored.keys()],
     delete: async (name: string) => stored.delete(name),
-    match: async (req: unknown, opts: { cacheName: string }) => {
+    // Like a host that sends "Vary: Origin": a request carrying an Origin header misses unless Vary is ignored.
+    match: async (req: unknown, opts: { cacheName: string; ignoreVary?: boolean }) => {
       const url = typeof req === 'string' ? req : (req as { url: string }).url;
+      const origin = typeof req === 'string' ? undefined : (req as { headers?: Record<string, string> }).headers?.origin;
+      if (origin && !opts.ignoreVary) return undefined;
       const cached = stored.get(opts.cacheName) ?? [];
       return cached.some((u) => url.endsWith(u.replace(/^\.\//, ''))) ? 'cached:' + url : undefined;
     },
@@ -75,6 +78,15 @@ describe('generated service worker', () => {
     })) as { value: string; responded: boolean };
     expect(res.responded).toBe(true);
     expect(res.value).toBe('cached:./index.html');
+  });
+
+  it('serves crossorigin scripts and stylesheets from the cache even when the host varies on Origin', async () => {
+    const sw = boot(files, 'v1');
+    await dispatch(sw.handlers.get('install'), {});
+    const res = (await dispatch(sw.handlers.get('fetch'), {
+      request: { method: 'GET', mode: 'cors', url: 'https://linusip.github.io/5_year_roadmap/assets/index-abc.js', headers: { origin: 'https://linusip.github.io' } },
+    })) as { value: string };
+    expect(res.value).toBe('cached:https://linusip.github.io/5_year_roadmap/assets/index-abc.js');
   });
 
   it('never intercepts cross-origin requests (the optional GitHub API call) or non-GET requests', async () => {
