@@ -9,8 +9,8 @@ with each. "Verified" means it was run, not assumed.
 | 2 | Data | **done** |
 | 3 | Today + logging | **done** |
 | 4 | Heatmap + streaks | **done** |
-| 5 | Roadmap | next |
-| 6 | Library, Papers, Certifications | |
+| 5 | Roadmap | **done** |
+| 6 | Library, Papers, Certifications | next |
 | 7 | Projects | |
 | 8 | Reviews + stats, export/import, backup reminder, PWA/offline | |
 | 9 | Optional GitHub integration + `log:export` | |
@@ -157,3 +157,38 @@ Verified on this machine:
   turning a cell to the top intensity and the streak to 1, the day detail and its edit link, the track
   filter, the stacked all-years view, and a freeze day's marking.
 - Looked at it with 100 days of generated logs, then cleared them.
+
+## Milestone 5 — Roadmap
+
+- **Timeline**: Stage 1 (software, years 1-3) and Stage 2 (electrical and mechanical, years 4-5), each phase
+  a card with its dates, goal, progress and forecast, opening onto five lanes. The phase containing today is
+  open and marked "Now".
+- **Lanes** show the phase-table focus, their own progress, and hours planned against hours available, with
+  over-budget lanes flagged rather than hidden.
+- **Items**: title, provider, hours, unit progress, status (to do, in progress, done, dropped), a "blocked"
+  mark while a prerequisite is unfinished, and a unit checklist that loads from its own chunk on first open.
+  Ticking a unit here moves Today on, and the other way round.
+- **Forecast**: at the pace of the last 28 days, when does each lane's remaining work finish, against the
+  phase's end? Verdicts are "on track", "N weeks behind", "N weeks early", and — when nothing has been logged
+  lately — "no hours logged lately" instead of a made-up date. Each phase shows its projected finish.
+- **Re-plan** lays the unfinished work out again from today and shows the diff first: every move, from which
+  phase to which, and why. It never drops an item, never places one before a phase holding its prerequisite,
+  fills each lane only up to the hours it has, and says plainly what will not fit before 31 August 2031.
+- **Editing**: drag to reorder a lane (or the arrow buttons, for the keyboard), add an item from the library
+  or a new one of your own, and take items off the roadmap. Edits are stored as patches over the curriculum,
+  never as copies of it, and Today schedules from the edited plan.
+
+A bug the tests caught on the way: re-planning moved items between phases but left the ones that stayed at
+their old positions, so an item moved in could share `order` 10 with one already there. It now emits those
+reorders too, and two property tests pin it down — no two items of a lane ever share a position after
+applying, and re-planning an already re-planned roadmap changes nothing.
+
+Verified on this machine:
+
+- `npm test`: 128 unit tests, 31 new — progress maths, the forecast verdicts, the re-planner's three rules
+  against the real curriculum, and the user layer over the seed (patches, removals, custom items, a patch
+  whose item has gone).
+- `npm run test:e2e`: 25 Playwright tests, 8 new — both stages and all six phases, unit ticks moving the
+  item, lane and phase bars and Today with them, a status change counting, the forecast appearing once hours
+  are logged, re-plan's diff → cancel → apply → no-op, reorder surviving a reload, an added item reaching
+  Today, and a removed item staying in the library.

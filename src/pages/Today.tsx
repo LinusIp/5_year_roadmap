@@ -18,6 +18,7 @@ import type { Unit } from '../seed/schema.ts';
 import type { BlockId, TrackId } from '../seed/schema.ts';
 import { isRealIsoDate } from '../seed/schema.ts';
 import { Link, useQueryParam } from '../router/router.tsx';
+import { useAtlas } from '../hooks/useAtlas.ts';
 
 const ENERGY_LABELS = ['Drained', 'Low', 'Even', 'Good', 'Sharp'];
 
@@ -63,7 +64,9 @@ export function Today() {
   const weekPick = useWeekPick(weekStart);
   const weekLogs = useLiveQuery(() => readLogs(weekStart, addDays(weekStart, 6)), [weekStart]);
 
-  const ctx = useMemo(() => ({ seed, states: states ?? new Map(), units }), [states, units]);
+  // The curriculum with the user's roadmap edits applied, so a reordered lane or an added item shows here.
+  const atlas = useAtlas();
+  const ctx = useMemo(() => ({ seed: atlas?.seed ?? seed, states: states ?? new Map(), units }), [atlas, states, units]);
   const plan = useMemo(
     () => (settings ? planForDay({ date, settings, weeklyPickId: weekPick?.projectId, ctx }) : null),
     [date, settings, weekPick, ctx],
@@ -100,7 +103,7 @@ export function Today() {
     }
   }, [plan, ctx, weekStart]);
 
-  if (!settings || !plan || !states) {
+  if (!settings || !plan || !states || !atlas) {
     return (
       <Page title="Today">
         <p className="text-sm text-ink-3">Loading your day…</p>

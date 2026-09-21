@@ -6,6 +6,7 @@ import { useSettings } from './db/settings.ts';
 import { applyTheme, watchSystemTheme } from './lib/theme.ts';
 import { ComingSoon } from './pages/ComingSoon.tsx';
 import { Activity } from './pages/Activity.tsx';
+import { Roadmap } from './pages/Roadmap.tsx';
 import { Today } from './pages/Today.tsx';
 import { NotFound } from './pages/NotFound.tsx';
 import { matchPath } from './router/paths.ts';
@@ -20,7 +21,7 @@ interface RouteDef {
 const ROUTES: RouteDef[] = [
   { pattern: '/', render: () => <Today /> },
   { pattern: '/activity', render: () => <Activity /> },
-  { pattern: '/roadmap', render: () => <ComingSoon title="Roadmap" lead="Five years, six phases, five lanes." icon="roadmap" milestone={5} /> },
+  { pattern: '/roadmap', render: () => <Roadmap /> },
   { pattern: '/library', render: () => <ComingSoon title="Library" lead="Every course, book, tutorial and repo in the plan." icon="library" milestone={6} /> },
   { pattern: '/papers', render: () => <ComingSoon title="Papers" lead="The reading queue." icon="papers" milestone={6} /> },
   { pattern: '/certs', render: () => <ComingSoon title="Certifications" lead="Certificates and portfolio milestones for every subject." icon="certs" milestone={6} /> },
