@@ -48,7 +48,7 @@ describe('progress', () => {
     const items = [
       itemProgress({ refId: 'a', estHours: 100, unitCount: 0, state: done('a') }),
       itemProgress({ refId: 'b', estHours: 60, unitCount: 0, state: undefined }),
-    ].map((p) => ({ ...p, planItem: { id: p.refId, phaseId: 'p', block: 'A' as const, order: 10 }, title: p.refId, kind: 'resource' as const, url: null, tracks: [], prerequisites: [], blockedBy: [], laneHours: p.estHours }));
+    ].map((p) => ({ ...p, planItem: { id: p.refId, phaseId: 'p', block: 'A' as const, order: 10 }, title: p.refId, kind: 'resource' as const, url: null, tracks: [], prerequisites: [], blockedBy: [], laneHours: p.estHours, hasRepo: false }));
     const lane = laneProgress('A', items, 200);
     expect(lane.totalHours).toBe(160);
     expect(lane.remainingHours).toBe(60);

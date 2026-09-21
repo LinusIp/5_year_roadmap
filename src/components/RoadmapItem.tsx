@@ -165,11 +165,16 @@ export function RoadmapItem({ item, tracks, editing, onMove, canMoveUp, canMoveD
             aria-label={'Status of ' + item.title}
             onChange={(e) => void setItemStatus(item.refId, e.target.value as ItemStatus)}
           >
-            {STATUS_ORDER.map((status) => (
-              <option key={status} value={status}>
-                {STATUS_LABEL[status]}
-              </option>
-            ))}
+            {STATUS_ORDER.map((status) => {
+              // The brief: a project is only done once its repository link is filled in.
+              const needsRepo = status === 'done' && item.kind === 'project' && !item.hasRepo;
+              return (
+                <option key={status} value={status} disabled={needsRepo}>
+                  {STATUS_LABEL[status]}
+                  {needsRepo ? ' (add a repo link first)' : ''}
+                </option>
+              );
+            })}
           </select>
         </div>
       </div>

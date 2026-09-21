@@ -9,6 +9,7 @@
 import type { AppSeed } from '../seed/schema.ts';
 import type { BlockId, PlanItem, Project } from '../seed/schema.ts';
 import type { ItemStatus, UserItemState } from '../db/types.ts';
+import { hasRepo } from './projects.ts';
 
 export interface ItemProgress {
   refId: string;
@@ -79,6 +80,8 @@ export interface PlanItemView extends ItemProgress {
   note?: string;
   /** The lane's share of a build that spans two blocks. */
   laneHours: number;
+  /** Projects only: whether a repository link is filled in, which "done" requires. */
+  hasRepo: boolean;
 }
 
 export function buildPlanItemView(
@@ -107,6 +110,7 @@ export function buildPlanItemView(
     prerequisites,
     blockedBy: prerequisites.filter((id) => (states.get(id)?.status ?? 'todo') !== 'done'),
     laneHours: estHours,
+    hasRepo: hasRepo(states.get(refId)),
   };
   if (resource?.provider) view.provider = resource.provider;
   if (resource?.type) view.type = resource.type;

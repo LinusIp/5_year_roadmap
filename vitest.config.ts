@@ -9,7 +9,7 @@ export default defineConfig({
   root: import.meta.dirname,
   plugins: [atlasSeed()],
   test: {
-    include: ['tests/unit/**/*.test.ts'],
+    include: ['tests/unit/**/*.test.ts', 'tests/unit/**/*.test.tsx'],
     environment: 'node',
     setupFiles: ['tests/unit/setup.ts'],
   },

@@ -10,8 +10,8 @@ with each. "Verified" means it was run, not assumed.
 | 3 | Today + logging | **done** |
 | 4 | Heatmap + streaks | **done** |
 | 5 | Roadmap | **done** |
-| 6 | Library, Papers, Certifications | next |
-| 7 | Projects | |
+| 6 | Library, Papers, Certifications | **done** |
+| 7 | Projects | next |
 | 8 | Reviews + stats, export/import, backup reminder, PWA/offline | |
 | 9 | Optional GitHub integration + `log:export` | |
 | 10 | Polish | |
@@ -192,3 +192,47 @@ Verified on this machine:
   item, lane and phase bars and Today with them, a status change counting, the forecast appearing once hours
   are logged, re-plan's diff → cancel → apply → no-op, reorder surviving a reload, an added item reaching
   Today, and a removed item staying in the library.
+
+## Milestone 6 — Library, Papers, Certifications
+
+- **Library**: all 191 resources and anything you add, with full-text search (titles, providers, summaries
+  and your own notes) and filters for type, track, provider, level, cost and status, all kept in the URL so
+  a filtered view can be bookmarked. Items without a verified link carry a "find link" badge.
+- **Item pages** (`/library/:id`), for resources and projects alike: status, the full unit checklist, notes
+  in Markdown, where the item sits on the roadmap, its prerequisites, the credential-map row it counts
+  towards, and editable estimated hours. Your own resources can be deleted; edits to seed resources can be
+  undone.
+- **Projects** show their brief, acceptance criteria as a checklist, repository, demo and write-up fields,
+  and for stage 2 builds the parts list and a budget field. **A project cannot be marked done until its
+  repository link is filled in** — on its page and in the Roadmap's status menu — and clearing the link
+  reopens it, so the rule keeps holding.
+- **Papers**: the reading queue with its four statuses, a three-sentence summary field that counts its
+  sentences, "key idea" and "what I would try", the one-a-week cadence from year 2, and the sources to find
+  more.
+- **Certifications**: cards by year with target quarter, the vendor's price, prep resources, exam link and
+  status; a credential link and expiry date once earned, with a renewal warning in the last 90 days. The FE
+  exam shows as "check eligibility first", never as a goal. The **credential map** puts every subject beside
+  its certificates and portfolio milestones; a milestone follows its linked projects until you set it.
+- **Markdown** is rendered by a 150-line renderer that returns React elements and never builds an HTML
+  string, so nothing typed into a note can inject markup; links are limited to http(s) and mailto.
+- **Pages load on demand**: every page except Today is its own chunk (3 to 28 kB), which brought the main
+  chunk back from 818 kB to 729 kB.
+
+Two real bugs the end-to-end tests caught:
+
+- The note preview sat inside a `<button>` (click to edit). Button content is presentational, so a note's
+  headings and links were invisible to screen readers, and a link inside a button is invalid HTML. The
+  preview is a plain block now; the Write tab switches back.
+- A notes field decided between preview and write before the item's state had arrived from IndexedDB, so
+  after a reload every saved note showed as raw Markdown. Editors now mount once their value is known. The
+  project budget field had the same flaw and got the same fix.
+
+Verified on this machine:
+
+- `npm test`: 154 unit tests, 26 new — the Markdown parser including injection attempts, search ranking,
+  the project done rule, the credential map, expiry warnings and the reading cadence.
+- `npm run test:e2e`: 38 Playwright tests, 13 new — search and filters in the URL, the find-link path,
+  Markdown notes surviving a reload and rendering safely, adding a resource, editable estimates, no
+  horizontal scroll at 380 px on seven pages, the repository rule in both places, a paper moving through
+  the queue, certificate status reaching the credential map, a milestone following its project, and a
+  library item linking to its row in the map.
