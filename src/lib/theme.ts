@@ -1,11 +1,11 @@
 import type { Theme } from '../db/types.ts';
 
 const STORAGE_KEY = 'atlas.theme';
-const SURFACE = { dark: '#0d0d0d', light: '#f9f9f7' } as const;
+const CANVAS = { dark: '#121417', light: '#f2f3f1' } as const;
 
 export function resolveTheme(theme: Theme): 'dark' | 'light' {
   if (theme !== 'system') return theme;
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
 /**
@@ -15,7 +15,7 @@ export function resolveTheme(theme: Theme): 'dark' | 'light' {
 export function applyTheme(theme: Theme): void {
   const resolved = resolveTheme(theme);
   document.documentElement.dataset.theme = resolved;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', SURFACE[resolved]);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', CANVAS[resolved]);
   try {
     localStorage.setItem(STORAGE_KEY, theme);
   } catch {

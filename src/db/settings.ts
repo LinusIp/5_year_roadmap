@@ -9,7 +9,7 @@ export function defaultSettings(core: SettingsDefaults): StoredSettings {
   return {
     id: 'app',
     core: structuredClone(core),
-    theme: 'dark',
+    theme: 'light',
     github: { username: '', showCalendar: false },
     backup: {},
   };

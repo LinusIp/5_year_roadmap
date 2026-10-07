@@ -83,7 +83,7 @@ function renderInline(nodes: Inline[], keyPrefix: string): ReactNode[] {
         return node.text;
       case 'code':
         return (
-          <code key={key} className="rounded bg-raised px-1 py-0.5 font-mono text-[0.85em]">
+          <code key={key} className="rounded-button bg-line px-1 font-mono">
             {node.text}
           </code>
         );
@@ -93,7 +93,7 @@ function renderInline(nodes: Inline[], keyPrefix: string): ReactNode[] {
         return <em key={key}>{renderInline(node.children, key)}</em>;
       case 'link':
         return (
-          <a key={key} href={node.href} target="_blank" rel="noreferrer noopener" className="text-accent-text underline underline-offset-2">
+          <a key={key} href={node.href} target="_blank" rel="noreferrer noopener" className="text-accent underline underline-offset-2">
             {renderInline(node.children, key)}
           </a>
         );
@@ -158,7 +158,7 @@ export function parseBlocks(source: string): Block[] {
 export function Markdown({ source, className }: { source: string; className?: string }) {
   const blocks = parseBlocks(source);
   return (
-    <div className={'space-y-2 text-sm leading-relaxed text-ink-2 ' + (className ?? '')}>
+    <div className={'space-y-2 ' + (className ?? '')}>
       {blocks.map((block, index) => {
         const key = 'b' + index;
         switch (block.kind) {
@@ -174,13 +174,13 @@ export function Markdown({ source, className }: { source: string; className?: st
             return <p key={key}>{renderInline(parseInline(block.text), key)}</p>;
           case 'quote':
             return (
-              <blockquote key={key} className="border-l-2 border-line-strong pl-3 italic">
+              <blockquote key={key} className="border-l-2 border-line pl-3 text-ink2">
                 {renderInline(parseInline(block.text), key)}
               </blockquote>
             );
           case 'code':
             return (
-              <pre key={key} className="overflow-x-auto rounded-lg bg-raised p-3 font-mono text-xs text-ink">
+              <pre key={key} className="overflow-x-auto rounded-button bg-line p-3 font-mono">
                 {block.text}
               </pre>
             );

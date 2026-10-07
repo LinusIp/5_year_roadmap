@@ -1,173 +1,153 @@
 @import "tailwindcss";
 
 /*
- * Theme. Dark is the default; <html data-theme="light"> switches. Every colour in the app is one
- * of the tokens below. The chart colours are the validated reference palette of the data-viz
- * method (categorical slots in fixed order, a one-hue ordinal ramp for the heatmap, reserved
- * status colours); both heatmap ramps pass the ordinal checks against their surface.
+ * The design system (brief, section 4.0): a paper planner on a quiet desk. Every colour, size, radius and
+ * font below comes from its token table, and Tailwind's own defaults for colour, type scale, radius, shadow,
+ * letter-spacing and animation are switched off, so nothing outside the system can be written by accident.
+ * Light is the default; <html data-theme="dark"> switches.
  */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root,
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --page: #0d0d0d;
-  --surface: #1a1a19;
-  --raised: #242422;
-  --line: #2c2c2a;
-  --line-strong: #383835;
-  --ink: #ffffff;
-  --ink-2: #c3c2b7;
-  --ink-3: #94928b;
-  --accent: #3987e5;
-  --accent-text: #6da7ec;
-  --accent-fill: #256abf;
-  --accent-wash: rgba(57, 135, 229, 0.14);
-  --on-accent: #ffffff;
-
-  --series-1: #3987e5;
-  --series-2: #d95926;
-  --series-3: #199e70;
-  --series-4: #c98500;
-  --series-5: #d55181;
-  --series-6: #008300;
-  --series-7: #9085e9;
-  --series-8: #e66767;
-
-  /* Heatmap: level 0 recedes into the surface, level 4 is the brightest step. */
-  --heat-0: #242422;
-  --heat-1: #184f95;
-  --heat-2: #2a78d6;
-  --heat-3: #6da7ec;
-  --heat-4: #b7d3f6;
-
-  --good: #0ca30c;
-  --warning: #fab219;
-  --serious: #ec835a;
-  --critical: #d03b3b;
-  --good-text: #3fc53f;
-  --warning-text: #fab219;
-  --serious-text: #ec835a;
-  --critical-text: #f08a8a;
-}
-
 :root[data-theme="light"] {
   color-scheme: light;
-  --page: #f9f9f7;
-  --surface: #fcfcfb;
-  --raised: #f1f0ec;
-  --line: #e1e0d9;
-  --line-strong: #c3c2b7;
-  --ink: #0b0b0b;
-  --ink-2: #52514e;
-  --ink-3: #6b6a65;
-  --accent: #2a78d6;
-  --accent-text: #1c5cab;
-  --accent-fill: #256abf;
-  --accent-wash: rgba(42, 120, 214, 0.1);
+  --canvas: #f2f3f1;
+  --surface: #ffffff;
+  --ink: #1b1f24;
+  --ink2: #5b636d;
+  --line: #e3e5e2;
+  --accent: #1f6f50;
+  --accent-soft: #e4f0ea;
   --on-accent: #ffffff;
+}
 
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  --series-3: #1baf7a;
-  --series-4: #eda100;
-  --series-5: #e87ba4;
-  --series-6: #008300;
-  --series-7: #4a3aa7;
-  --series-8: #e34948;
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #121417;
+  --surface: #1a1d21;
+  --ink: #e8eaec;
+  --ink2: #9aa3ad;
+  --line: #2a2e33;
+  --accent: #4fb388;
+  --accent-soft: #1e3a2e;
+  /* Dark text on the light-green fill: white on #4fb388 would fall below 4.5:1. */
+  --on-accent: #121417;
+}
 
-  --heat-0: #ebeae5;
-  --heat-1: #86b6ef;
-  --heat-2: #3987e5;
-  --heat-3: #1c5cab;
-  --heat-4: #0d366b;
-
-  --good-text: #006300;
-  --warning-text: #7a5200;
-  --serious-text: #9c3f17;
-  --critical-text: #a82323;
+:root {
+  /* Track colours: the heatmap's track filter and the roadmap's lane edges only, never Today. */
+  --track-ai: #4c6ef5;
+  --track-swe: #5c7cfa;
+  --track-systems: #7950f2;
+  --track-graphics: #f76707;
+  --track-simulation: #e8590c;
+  --track-gamedev: #fd7e14;
+  --track-languages: #0ca678;
+  --track-math: #1098ad;
+  --track-physics: #1c7ed6;
+  --track-ee: #f59f00;
+  --track-embedded: #e67700;
+  --track-controls: #d6336c;
+  --track-mech: #868e96;
+  --track-robotics: #ae3ec9;
+  --track-chem: #74b816;
+  --track-career: #495057;
 }
 
 @theme inline {
   --color-*: initial;
-  --color-page: var(--page);
+  --color-canvas: var(--canvas);
   --color-surface: var(--surface);
-  --color-raised: var(--raised);
-  --color-line: var(--line);
-  --color-line-strong: var(--line-strong);
   --color-ink: var(--ink);
-  --color-ink-2: var(--ink-2);
-  --color-ink-3: var(--ink-3);
+  --color-ink2: var(--ink2);
+  --color-line: var(--line);
   --color-accent: var(--accent);
-  --color-accent-text: var(--accent-text);
-  --color-accent-fill: var(--accent-fill);
-  --color-accent-wash: var(--accent-wash);
+  --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
-  --color-good: var(--good);
-  --color-warning: var(--warning);
-  --color-serious: var(--serious);
-  --color-critical: var(--critical);
-  --color-good-text: var(--good-text);
-  --color-warning-text: var(--warning-text);
-  --color-serious-text: var(--serious-text);
-  --color-critical-text: var(--critical-text);
-  --color-series-1: var(--series-1);
-  --color-series-2: var(--series-2);
-  --color-series-3: var(--series-3);
-  --color-series-4: var(--series-4);
-  --color-series-5: var(--series-5);
-  --color-series-6: var(--series-6);
-  --color-series-7: var(--series-7);
-  --color-series-8: var(--series-8);
-  --color-heat-0: var(--heat-0);
-  --color-heat-1: var(--heat-1);
-  --color-heat-2: var(--heat-2);
-  --color-heat-3: var(--heat-3);
-  --color-heat-4: var(--heat-4);
+  --color-transparent: transparent;
 
-  /* System fonts only: the app makes no network requests, so it loads no web fonts. */
-  --font-sans: system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  --font-mono: ui-monospace, "Cascadia Code", "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
+  /* One family, self-hosted (see DECISIONS.md), with system fonts behind it. */
+  --font-*: initial;
+  --font-sans: "Instrument Sans Variable", "Instrument Sans", system-ui, sans-serif;
+
+  /* The scale: 12 / 14 / 16 / 20 / 26 / 34. */
+  --text-*: initial;
+  --text-small: 0.75rem;
+  --text-small--line-height: 1.45;
+  --text-meta: 0.875rem;
+  --text-meta--line-height: 1.45;
+  --text-body: 1rem;
+  --text-body--line-height: 1.45;
+  --text-title: 1.25rem;
+  --text-title--line-height: 1.15;
+  --text-headline: 1.625rem;
+  --text-headline--line-height: 1.15;
+  --text-display: 2.125rem;
+  --text-display--line-height: 1.15;
+
+  --font-weight-*: initial;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* 12 px cards, 8 px buttons, 999 px pills. Nothing else. */
+  --radius-*: initial;
+  --radius-card: 12px;
+  --radius-button: 8px;
+  --radius-pill: 999px;
+
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --tracking-*: initial;
+  --animate-*: initial;
 }
 
 @layer base {
   html {
-    background: var(--page);
+    background: var(--canvas);
     color: var(--ink);
     font-family: var(--font-sans);
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    scrollbar-color: var(--line-strong) transparent;
   }
   body {
     min-height: 100dvh;
-    font-size: 0.9375rem;
-    line-height: 1.5;
+    font-size: var(--text-body);
+    line-height: 1.45;
+    /* Tabular figures for every number, so columns of hours line up. */
+    font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4 {
+  h1, h2, h3 {
     font-weight: 600;
-    letter-spacing: -0.011em;
     text-wrap: balance;
   }
   ::selection {
-    background: var(--accent-wash);
+    background: var(--accent-soft);
   }
-  /* One focus treatment everywhere, shown for keyboard users only. */
+  /* One focus treatment everywhere, visible in both themes. */
   :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
-    border-radius: 4px;
   }
   a {
     color: inherit;
     text-decoration: none;
   }
-  button, [role="button"], summary, select, label[for] {
+  button, [role="button"], summary, label[for] {
     cursor: pointer;
   }
   button:disabled, [aria-disabled="true"] {
     cursor: not-allowed;
+  }
+  /* The search field is a TextField like any other: no native clear button. */
+  input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  dialog::backdrop {
+    background: rgb(0 0 0 / 0.4);
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -180,77 +160,67 @@
 }
 
 @layer components {
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 12px;
+  /*
+   * The heatmap: an empty day is the hairline grey, then four steps from accentSoft to accent (the mockup's
+   * ramp). A track filter swaps --heat-color and --heat-base for the track's own.
+   */
+  .heat {
+    --heat-color: var(--accent);
+    --heat-base: var(--accent-soft);
   }
-  .btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-line-strong bg-surface px-3 text-sm font-medium text-ink;
-    min-height: 2.25rem;
-    transition: background-color 120ms, border-color 120ms, opacity 120ms;
+  .heat-0 { fill: var(--line); }
+  .heat-1 { fill: color-mix(in srgb, var(--heat-color) 14%, var(--heat-base)); }
+  .heat-2 { fill: color-mix(in srgb, var(--heat-color) 40%, var(--heat-base)); }
+  .heat-3 { fill: color-mix(in srgb, var(--heat-color) 72%, var(--heat-base)); }
+  .heat-4 { fill: var(--heat-color); }
+  .heat-swatch-0 { background: var(--line); }
+  .heat-swatch-1 { background: color-mix(in srgb, var(--heat-color) 14%, var(--heat-base)); }
+  .heat-swatch-2 { background: color-mix(in srgb, var(--heat-color) 40%, var(--heat-base)); }
+  .heat-swatch-3 { background: color-mix(in srgb, var(--heat-color) 72%, var(--heat-base)); }
+  .heat-swatch-4 { background: var(--heat-color); }
+
+  /* Markdown notes rendered in a sheet: plain type, the same scale. */
+  .prose-notes h1, .prose-notes h2, .prose-notes h3 {
+    font-size: var(--text-body);
+    font-weight: 600;
+    margin-top: 0.75rem;
   }
-  .btn:hover:not(:disabled) {
-    background: var(--raised);
+  .prose-notes p, .prose-notes ul, .prose-notes ol, .prose-notes pre {
+    margin-top: 0.5rem;
   }
-  .btn:disabled {
-    opacity: 0.5;
+  .prose-notes ul { list-style: disc; padding-left: 1.25rem; }
+  .prose-notes ol { list-style: decimal; padding-left: 1.25rem; }
+  .prose-notes a { color: var(--accent); text-decoration: underline; }
+  .prose-notes code { font-family: ui-monospace, monospace; }
+  .prose-notes pre { overflow-x: auto; }
+}
+
+/*
+ * The deck's "Take it" (section 4.0, Motion): the card moves into Today's Block D row in 300 ms while the rest
+ * of the screen swaps without a fade, then the row underlines with the accent line.
+ */
+.taken {
+  view-transition-name: taken-project;
+}
+::view-transition-group(taken-project) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+.taken-line {
+  transform-origin: left;
+  animation: taken-line 300ms cubic-bezier(0.2, 0.8, 0.2, 1) 300ms both;
+}
+@keyframes taken-line {
+  from {
+    transform: scaleX(0);
   }
-  .btn-primary {
-    @apply border-transparent bg-accent-fill text-on-accent;
-  }
-  .btn-primary:hover:not(:disabled) {
-    background: var(--accent);
-  }
-  .btn-ghost {
-    @apply border-transparent bg-transparent text-ink-2;
-  }
-  .btn-ghost:hover:not(:disabled) {
-    background: var(--raised);
-    color: var(--ink);
-  }
-  .btn-danger {
-    @apply border-critical text-critical-text;
-  }
-  .btn-sm {
-    @apply rounded-md px-2 text-xs;
-    min-height: 1.75rem;
-  }
-  /* Icon-only buttons keep a 36px hit target even when the glyph is small. */
-  .btn-icon {
-    @apply px-0;
-    width: 2.25rem;
-  }
-  .input {
-    @apply w-full rounded-lg border border-line-strong bg-page px-3 text-sm text-ink;
-    min-height: 2.25rem;
-  }
-  .input::placeholder {
-    color: var(--ink-3);
-  }
-  textarea.input {
-    @apply py-2;
-    min-height: 4.5rem;
-    resize: vertical;
-  }
-  .label {
-    @apply mb-1 block text-xs font-medium text-ink-2;
-  }
-  .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-line px-2 text-xs text-ink-2;
-    min-height: 1.5rem;
-    white-space: nowrap;
-  }
-  .kbd {
-    @apply rounded border border-line-strong bg-raised px-1.5 font-mono text-[0.6875rem] text-ink-2;
-  }
-  .eyebrow {
-    @apply text-[0.6875rem] font-semibold uppercase tracking-wider text-ink-3;
-  }
-  .num {
-    font-variant-numeric: tabular-nums;
-  }
-  .sr-only-focusable:not(:focus):not(:focus-within) {
-    @apply sr-only;
+}
+@media (prefers-reduced-motion: reduce) {
+  .taken-line {
+    animation: none;
   }
 }

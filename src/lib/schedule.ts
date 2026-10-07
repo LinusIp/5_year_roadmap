@@ -91,7 +91,7 @@ export function statusOf(refId: string, states: Map<string, UserItemState>): Ite
   return states.get(refId)?.status ?? 'todo';
 }
 
-function isOpen(refId: string, states: Map<string, UserItemState>): boolean {
+export function isOpen(refId: string, states: Map<string, UserItemState>): boolean {
   const status = statusOf(refId, states);
   return status !== 'done' && status !== 'dropped';
 }
@@ -203,9 +203,17 @@ export function weeklyBuildFor(
  * the user between one glance and the next; `skip` walks further down the same list.
  */
 export function suggestWeeklyBuild(phase: Phase | null, ctx: ScheduleContext, skip = 0): Project | null {
+  const ordered = weeklyPool(phase, ctx);
+  return ordered[skip % ordered.length] ?? null;
+}
+
+/**
+ * The unfinished weekly builds that fit a phase: the current stage, on a track the phase's lanes touch. When
+ * nothing matches it widens to the stage, then to every unfinished build.
+ */
+export function weeklyPool(phase: Phase | null, ctx: ScheduleContext): Project[] {
   const pool = ctx.seed.projects.filter((p) => p.cadence === 'weekly' && isOpen(p.id, ctx.states));
-  if (pool.length === 0) return null;
-  if (!phase) return pool[skip % pool.length] ?? null;
+  if (pool.length === 0 || !phase) return pool;
 
   const phaseTracks = new Set<TrackId>();
   for (const planItem of ctx.seed.plan.filter((i) => i.phaseId === phase.id)) {
@@ -216,8 +224,15 @@ export function suggestWeeklyBuild(phase: Phase | null, ctx: ScheduleContext, sk
   }
   const sameStage = pool.filter((p) => p.stage === phase.stage);
   const matching = sameStage.filter((p) => p.tracks.some((t) => phaseTracks.has(t)));
-  const ordered = matching.length > 0 ? matching : sameStage.length > 0 ? sameStage : pool;
-  return ordered[skip % ordered.length] ?? null;
+  return matching.length > 0 ? matching : sameStage.length > 0 ? sameStage : pool;
+}
+
+/** The unfinished monthly projects a phase carries: in its lanes, or assigned to it in the curriculum. */
+export function monthlyPool(phase: Phase | null, ctx: ScheduleContext): Project[] {
+  const open = ctx.seed.projects.filter((p) => p.cadence === 'monthly' && isOpen(p.id, ctx.states));
+  if (!phase) return open;
+  const inPhase = new Set(ctx.seed.plan.filter((i) => i.phaseId === phase.id && i.projectId).map((i) => i.projectId!));
+  return open.filter((p) => inPhase.has(p.id) || p.phaseId === phase.id);
 }
 
 /* ------------------------------------------------------------------ the day */

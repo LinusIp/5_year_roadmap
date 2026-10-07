@@ -70,6 +70,46 @@ export function nextOrder(plan: PlanItem[], phaseId: string, block: string): num
 }
 
 /**
+ * "Take it" from the project deck: the project becomes the next unfinished item of a lane. An appearance
+ * already in that lane moves up; one in another phase moves into this lane; a project with no appearance
+ * gets a new one (`add`). The lane is renumbered in tens, and only the items whose place changed are patched.
+ */
+export function takeIntoLane(
+  plan: PlanItem[],
+  isOpen: (refId: string) => boolean,
+  phaseId: string,
+  block: string,
+  projectId: string,
+): { patches: { id: string; patch: Partial<PlanItem> }[]; add?: Omit<PlanItem, 'id'> } {
+  const inLane = (i: PlanItem): boolean => i.phaseId === phaseId && i.block === block;
+  const lane = plan.filter(inLane).sort((a, b) => a.order - b.order);
+  const existing = lane.find((i) => i.projectId === projectId) ?? plan.find((i) => i.projectId === projectId);
+  const rest = lane.filter((i) => i !== existing);
+  const firstOpen = rest.findIndex((i) => isOpen(i.resourceId ?? i.projectId ?? ''));
+  const at = firstOpen < 0 ? rest.length : firstOpen;
+
+  if (existing && inLane(existing) && lane.indexOf(existing) <= lane.findIndex((i) => isOpen(i.resourceId ?? i.projectId ?? ''))) {
+    return { patches: [] };
+  }
+
+  const ordered: (PlanItem | null)[] = [...rest];
+  ordered.splice(at, 0, existing ?? null);
+  const patches: { id: string; patch: Partial<PlanItem> }[] = [];
+  let add: Omit<PlanItem, 'id'> | undefined;
+  ordered.forEach((item, index) => {
+    const order = (index + 1) * 10;
+    if (item === null) {
+      add = { phaseId, block: block as PlanItem['block'], projectId, order };
+    } else if (item === existing && !inLane(item)) {
+      patches.push({ id: item.id, patch: { phaseId, block: block as PlanItem['block'], order } });
+    } else if (item.order !== order) {
+      patches.push({ id: item.id, patch: { order } });
+    }
+  });
+  return add ? { patches, add } : { patches };
+}
+
+/**
  * Reorders a lane by moving one item to a new index, and returns the `order` each item should have.
  * Orders are renumbered in tens so a later insert does not need another renumber.
  */

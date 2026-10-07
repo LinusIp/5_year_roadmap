@@ -5,8 +5,8 @@ import { defaultSettings } from '../../src/db/settings.ts';
 import { budgetHoursBetween, fractionDone, itemProgress, laneProgress, phaseProgress } from '../../src/lib/progress.ts';
 import { describeVerdict, forecastPhase, paceForBlock, paceSummary } from '../../src/lib/forecast.ts';
 import { laneCapacity, replan, replanToPatches } from '../../src/lib/replan.ts';
-import { nextOrder, reorderLane, resolveSeed } from '../../src/lib/plan.ts';
-import type { AppSeed } from '../../src/seed/schema.ts';
+import { nextOrder, reorderLane, resolveSeed, takeIntoLane } from '../../src/lib/plan.ts';
+import type { AppSeed, PlanItem } from '../../src/seed/schema.ts';
 import type { DayLog, UserItemState } from '../../src/db/types.ts';
 
 const seed = splitSeed(loadSeedOrThrow()).app as AppSeed;
@@ -296,5 +296,36 @@ describe('the user layer over the seed', () => {
   it('appends after the end of a lane', () => {
     expect(nextOrder(seed.plan, 'y1-p0', 'E')).toBe(30);
     expect(nextOrder(seed.plan, 'y1-p0', 'Z')).toBe(10);
+  });
+});
+
+describe('taking a project from the deck', () => {
+  const item = (id: string, projectId: string, order: number, phaseId = 'p1'): PlanItem => ({ id, phaseId, block: 'D', projectId, order });
+  const plan = [item('a', 'done-one', 10), item('b', 'next-one', 20), item('c', 'later-one', 30), item('x', 'far-one', 10, 'p2')];
+  const open = (ref: string): boolean => ref !== 'done-one';
+
+  it('moves a project already in the lane in front of the next unfinished item', () => {
+    expect(takeIntoLane(plan, open, 'p1', 'D', 'later-one')).toEqual({
+      patches: [
+        { id: 'c', patch: { order: 20 } },
+        { id: 'b', patch: { order: 30 } },
+      ],
+    });
+  });
+
+  it('changes nothing when the project is already next', () => {
+    expect(takeIntoLane(plan, open, 'p1', 'D', 'next-one')).toEqual({ patches: [] });
+  });
+
+  it('moves an appearance from a later phase into this lane', () => {
+    const { patches, add } = takeIntoLane(plan, open, 'p1', 'D', 'far-one');
+    expect(add).toBeUndefined();
+    expect(patches).toContainEqual({ id: 'x', patch: { phaseId: 'p1', block: 'D', order: 20 } });
+    expect(patches).toContainEqual({ id: 'b', patch: { order: 30 } });
+  });
+
+  it('adds an appearance for a project the plan does not carry', () => {
+    const { add } = takeIntoLane(plan, open, 'p1', 'D', 'new-one');
+    expect(add).toEqual({ phaseId: 'p1', block: 'D', projectId: 'new-one', order: 20 });
   });
 });

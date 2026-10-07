@@ -1,5 +1,5 @@
 /**
- * Single-key shortcuts: t Today, r Roadmap, / search, l log time, ? the list of them.
+ * Single-key shortcuts: t Today, r the Plan (roadmap), / search, l log time, ? the list of them.
  *
  * They never fire while the user is typing, with Ctrl, Alt or Meta held (those belong to the browser and the
  * system), or while a dialog is open. Single-character shortcuts can also be turned off in Settings, which
@@ -9,8 +9,8 @@ export type ShortcutAction = 'today' | 'roadmap' | 'search' | 'log' | 'help';
 
 export const SHORTCUTS: readonly { key: string; action: ShortcutAction; label: string }[] = [
   { key: 't', action: 'today', label: 'Go to Today' },
-  { key: 'r', action: 'roadmap', label: 'Go to the Roadmap' },
-  { key: '/', action: 'search', label: "Search: this page's search box, or the Library's" },
+  { key: 'r', action: 'roadmap', label: 'Go to the Plan' },
+  { key: '/', action: 'search', label: 'Search the library' },
   { key: 'l', action: 'log', label: 'Log time on Today' },
   { key: '?', action: 'help', label: 'Show these shortcuts' },
 ];
