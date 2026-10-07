@@ -46,7 +46,7 @@
   title: "Martin Kleppmann: Distributed Systems lecture series (Cambridge, Concurrent and Distributed Systems)"
   provider: University of Cambridge
   type: lectures
-  url: https://www.cl.cam.ac.uk/teaching/2122/ConcDisSys/
+  url: https://www.youtube.com/playlist?list=PLeKd45zvjcDFUEv_ohr_HdUFe97RItdiB
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [systems]
@@ -152,3 +152,75 @@
   estHours: 120
   subject: data-engineering
   summary: "Not on the roadmap by default; it is the certificate of the data engineering row and pairs with project 28."
+
+# ---------------------------------------------------------------- the DevOps block of year 2 (added 2026-10-07)
+
+- id: lfs101-intro-linux
+  title: "Introduction to Linux (LFS101), Linux Foundation"
+  provider: Linux Foundation
+  type: course
+  url: https://training.linuxfoundation.org/training/introduction-to-linux/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [systems]
+  level: intro
+  cost: free
+  estHours: 40
+  subject: linux-os
+  summary: "The Linux Foundation's free introduction (60 hours of material by its own count), the groundwork for the LFCS exam."
+
+- id: github-actions-docs
+  title: "GitHub Actions: official documentation and quickstart (CI/CD)"
+  provider: GitHub
+  type: tutorial
+  url: https://docs.github.com/en/actions
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [systems, swe]
+  level: intro
+  cost: free
+  estHours: 10
+  subject: containers-iac
+  summary: "Continuous integration and delivery: build, test and deploy on every push, as this app's own repository does."
+
+- id: terraform-tutorials
+  title: "Terraform: official tutorials"
+  provider: HashiCorp
+  type: tutorial
+  url: https://developer.hashicorp.com/terraform/tutorials
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [systems]
+  level: intro
+  cost: free
+  estHours: 20
+  subject: containers-iac
+  summary: "Infrastructure as code: the Get Started collections (AWS, Docker and others), then the configuration language, modules and state. Leads to the Terraform Associate exam."
+
+- id: opentelemetry-docs
+  title: "OpenTelemetry: official documentation"
+  provider: OpenTelemetry
+  type: tutorial
+  url: https://opentelemetry.io/docs/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [systems]
+  level: intermediate
+  cost: free
+  estHours: 15
+  subject: containers-iac
+  summary: "The vendor-neutral standard for traces, metrics and logs: instrument a service and see where its time goes."
+
+- id: prometheus-docs
+  title: "Prometheus: official documentation and getting-started guide"
+  provider: Prometheus
+  type: tutorial
+  url: https://prometheus.io/docs/introduction/overview/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [systems]
+  level: intro
+  cost: free
+  estHours: 10
+  subject: containers-iac
+  summary: "Metrics and alerting for the services you run: the monitoring half of observability."

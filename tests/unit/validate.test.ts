@@ -106,6 +106,31 @@ describe('validateSeed', () => {
     expect(weekly).toMatch(/weekly mini-build; those are drawn from the pool/);
   });
 
+  it('lets an item be split over two lanes or two years, as long as every appearance states its hours', () => {
+    const raw = minimalSeed();
+    raw.plan[0]!.data = [
+      { phase: 'p1', lanes: { E: [{ resource: 'r1', hours: 30 }, { resource: 'r2' }], D: [{ project: 'proj1', hours: 20 }] } },
+      { phase: 'p2', lanes: { E: [{ resource: 'r1', hours: 50 }], A: [{ project: 'proj1', hours: 10 }] } },
+    ];
+    const result = validateSeed(raw, structural);
+    expect(result.errors).toEqual([]);
+    // The same lane in two years needs the phase in the id; different lanes keep the shorter id.
+    expect(result.seed!.plan.map((p) => p.id).sort()).toEqual(['plan.proj1.a', 'plan.proj1.d', 'plan.r1.p1.e', 'plan.r1.p2.e', 'plan.r2']);
+
+    const unstated = errorsOf((r) => {
+      r.plan[0]!.data = [
+        { phase: 'p1', lanes: { E: [{ resource: 'r1', hours: 30 }, { resource: 'r2' }], D: [{ project: 'proj1' }] } },
+        { phase: 'p2', lanes: { E: [{ resource: 'r1' }] } },
+      ];
+    });
+    expect(unstated).toMatch(/"r1" is planned twice \(p1 and p2\); an item may appear more than once only with `hours` on every appearance/);
+
+    const sameLane = errorsOf((r) => {
+      r.plan[0]!.data = [{ phase: 'p1', lanes: { E: [{ resource: 'r1', hours: 30 }, { resource: 'r2' }, { resource: 'r1', hours: 50 }], D: [{ project: 'proj1' }] } }];
+    });
+    expect(sameLane).toMatch(/never twice in one lane/);
+  });
+
   it('rejects overlapping phases and a stage that contradicts the year', () => {
     const overlapping = errorsOf((raw) => {
       list(raw.phases[0])[1]!.start = '2027-08-01';

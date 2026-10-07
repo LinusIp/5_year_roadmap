@@ -198,10 +198,10 @@
   summary: "The homework is also the SQL practice of the languages list."
 
 - id: stanford-cs144
-  title: "Stanford CS144 Introduction to Computer Networking (selected labs)"
+  title: "Stanford CS144 Introduction to Computer Networking (all labs)"
   provider: Stanford
   type: course
-  url: https://cs144.stanford.edu/
+  url: https://cs144.github.io/
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [systems]
@@ -239,3 +239,109 @@
   reference: true
   subject: linux-os
   summary: "Pick per need."
+
+# ---------------------------------------------------------------- courses added 2026-10-07
+
+- id: mit-6-172
+  title: "MIT 6.172 Performance Engineering of Software Systems (Fall 2018)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/6-172-performance-engineering-of-software-systems-fall-2018
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [swe, systems]
+  level: advanced
+  cost: free
+  estHours: 120
+  summary: "Making code fast, measured: work and span, caches, bit hacks, vectorisation and parallel programming. The CPU half of performance engineering."
+
+- id: cs106b
+  title: "Stanford CS106B Programming Abstractions (C++)"
+  provider: Stanford
+  type: course
+  url: https://web.stanford.edu/class/cs106b
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [swe, languages]
+  level: intro
+  cost: free
+  estHours: 80
+  summary: "Recursion, data structures and algorithm analysis, in C++."
+
+- id: cs61a
+  title: "Berkeley CS61A Structure and Interpretation of Computer Programs"
+  provider: UC Berkeley
+  type: course
+  url: https://www2.eecs.berkeley.edu/Courses/CS61A
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [swe, languages]
+  level: intro
+  cost: free
+  estHours: 100
+  summary: "Abstraction and the structure of programs, the SICP way."
+
+- id: cs61c
+  title: "Berkeley CS61C Great Ideas in Computer Architecture"
+  provider: UC Berkeley
+  type: course
+  url: https://www2.eecs.berkeley.edu/Courses/CS61C/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [systems, ee]
+  level: intermediate
+  cost: free
+  estHours: 100
+  summary: "C, RISC-V assembly, caches, parallelism and a CPU built from logic."
+
+- id: cs162
+  title: "Berkeley CS162 Operating Systems and System Programming"
+  provider: UC Berkeley
+  type: course
+  url: https://www2.eecs.berkeley.edu/Courses/CS162
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [systems]
+  level: intermediate
+  cost: free
+  estHours: 120
+  summary: "Processes, concurrency, memory, file systems and networking: an alternative to MIT 6.1810."
+
+- id: cs149
+  title: "Stanford CS149 Parallel Computing (Fall 2025)"
+  provider: Stanford
+  type: course
+  url: https://gfxcourses.stanford.edu/cs149/fall25
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [systems, graphics]
+  level: advanced
+  cost: free
+  estHours: 100
+  summary: "Parallel programming from SIMD and multicore CPUs to GPUs, judged by performance."
+
+- id: cmu-15-418
+  title: "CMU 15-418/618 Parallel Computer Architecture and Programming"
+  provider: CMU
+  type: course
+  url: https://www.cs.cmu.edu/~418/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [systems, graphics]
+  level: advanced
+  cost: free
+  estHours: 100
+  summary: "CMU's parallel computing course, the counterpart of Stanford CS149."
+
+- id: sicp
+  title: "Structure and Interpretation of Computer Programs (Abelson and Sussman, full text)"
+  provider: MIT Press
+  type: book
+  url: https://mitp-content-server.mit.edu/books/content/sectbyfn/books_pres_0/6515/sicp.zip/sicp.html
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [swe, languages]
+  level: intermediate
+  cost: free
+  estHours: 120
+  summary: "The classic, free online from MIT Press."

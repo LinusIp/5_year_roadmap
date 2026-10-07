@@ -84,12 +84,20 @@
       - { resource: rust-book }
       - { resource: rustlings }
       - { resource: rust-by-example }
+      - { resource: pmpp-book, hours: 30, note: "Chapters 1 to 6: CUDA basics" }
     C:
       - { resource: csapp-labs }
       - { resource: mit-6-1810 }
       - { resource: sqlbolt }
       - { resource: cmu-15-445 }
       - { resource: stanford-cs144 }
+      - { resource: lfs101-intro-linux, note: "DevOps block: Linux, towards the LFCS exam" }
+      - { resource: docker-get-started }
+      - { resource: github-actions-docs }
+      - { resource: terraform-tutorials }
+      - { resource: kubernetes-tutorials, note: "Towards the CKAD exam" }
+      - { resource: opentelemetry-docs }
+      - { resource: prometheus-docs }
       - { resource: ddia }
     D:
       - { project: m12 }
@@ -109,6 +117,7 @@
       - { resource: mit-8-01 }
       - { resource: mit-18-03 }
       - { resource: mit-8-02 }
+      - { resource: mit-6-041 }
 
 - phase: y3
   lanes:
@@ -118,26 +127,34 @@
       - { resource: ericson-rtcd }
       - { resource: witkin-baraff-pbm }
       - { resource: ten-minute-physics }
-      - { resource: cmu-15-462 }
+      - { resource: bridson-fluid-sim, note: "The theory for the GPU fluids" }
+      - { resource: mujoco-docs, note: "Robotics simulation: MuJoCo or Gazebo (Isaac Sim is in the library)" }
+      - { resource: gazebo-docs }
+      - { resource: ros2-tutorials }
+      - { resource: modern-robotics, note: "Kinematics, dynamics and control" }
+      - { resource: mit-6-832-underactuated }
       - { project: cap-stage-1, hours: 150 }
     B:
       - { resource: rust-for-rustaceans }
       - { resource: crust-of-rust }
       - { resource: tour-of-go, note: "Before the 6.5840 labs, which are written in Go" }
       - { resource: learn-go-with-tests }
-      - { resource: pmpp-book }
+      - { resource: pmpp-book, hours: 40, note: "The rest of the book: CUDA in depth" }
       - { resource: gpu-mode-lectures }
+      - { resource: triton-tutorials }
     C:
       - { resource: mit-6-5840 }
       - { resource: system-design-primer }
-      - { resource: docker-get-started }
-      - { resource: kubernetes-tutorials }
-      - { resource: kubernetes-the-hard-way }
-      - { resource: aws-skill-builder }
+      - { resource: kubernetes-the-hard-way, note: "A scaled service on Kubernetes, towards the CKA exam" }
+      - { resource: aws-skill-builder, note: "Towards AWS Solutions Architect - Associate" }
       - { resource: stanford-cs224n }
       - { resource: stanford-cs336 }
-      - { resource: llm-zoomcamp }
+      - { resource: llm-zoomcamp, note: "GenAI and agents" }
       - { resource: mlops-zoomcamp }
+      - { resource: hf-mcp-course }
+      - { resource: hf-diffusion-course }
+      - { resource: berkeley-llm-agents }
+      - { resource: berkeley-cs285, hours: 50, note: "Selected lectures" }
     D:
       - { project: m24 }
       - { project: m25 }
@@ -152,16 +169,16 @@
       - { project: m34 }
       - { project: cap-stage-1, hours: 100 }
     E:
-      - { resource: mit-6-041 }
+      - { resource: harvard-stat-110, hours: 40, note: "What 6.041 left out" }
       - { resource: mit-8-03 }
       - { resource: mit-8-04 }
+      - { resource: mit-18-085 }
 
 - phase: y4
   lanes:
     A:
       - { project: a-dsp-visualiser }
       - { project: a-multibody-dynamics }
-      - { resource: bridson-fluid-sim }
       - { project: a-gpu-fluids }
       - { project: cap-y4, hours: 60 }
     B:
@@ -215,15 +232,14 @@
       - { resource: sympy-tutorial }
       - { resource: onshape-learning-center }
       - { resource: cadquery-docs }
-      - { resource: ros2-tutorials }
-      - { resource: articulated-robotics }
+      - { resource: articulated-robotics, note: "ROS 2 (C++/Python) on real hardware" }
     C:
       - { resource: mit-2-001 }
       - { resource: mit-2-003 }
       - { resource: mit-2-005 }
       - { resource: mit-2-008 }
-      - { resource: modern-robotics }
-      - { resource: mit-6-832-underactuated }
+      - { resource: mit-2-12, note: "Hardware side: actuators, sensors, mechanism design" }
+      - { resource: mit-manipulation }
     D:
       - { project: m48 }
       - { project: m49 }

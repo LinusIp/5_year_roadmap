@@ -1,0 +1,7 @@
+# Units of "hf-mcp-course". Titles and links were read from the official page:
+#   https://raw.githubusercontent.com/huggingface/mcp-course/main/units/en/_toctree.yml
+# by scripts/fetch-units.ts on 2026-10-07. Safe to edit; keep ids stable (progress is stored against them).
+- { id: 1-introduction-to-model-context-protocol, title: "1. Introduction to Model Context Protocol", url: "https://huggingface.co/learn/mcp-course/en/unit1/introduction" }
+- { id: 2-use-case-end-to-end-mcp-application, title: "2. Use Case: End-to-End MCP Application", url: "https://huggingface.co/learn/mcp-course/en/unit2/introduction" }
+- { id: 3-advanced-mcp-development-custom-workflow-serve, title: "3. Advanced MCP Development: Custom Workflow Servers", url: "https://huggingface.co/learn/mcp-course/en/unit3/introduction" }
+- { id: 3-1-use-case-build-a-pull-request-agent-on-the-h, title: "3.1. Use Case: Build a Pull Request Agent on the Hub", url: "https://huggingface.co/learn/mcp-course/en/unit3_1/introduction" }

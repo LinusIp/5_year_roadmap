@@ -55,6 +55,7 @@ const Q804 = OCW + '8-04-quantum-physics-i-spring-2016/pages/video-lectures/';
 export const UNIT_SOURCES: UnitSource[] = [
   /* ---- mathematics */
   gallery('mit-18-06', '18-06-linear-algebra-spring-2010', undefined, { expect: 30 }),
+  gallery('mit-18-085', '18-085-computational-science-and-engineering-i-fall-2008', undefined, { expect: 20 }),
   nav('mit-18-01', '18-01sc-single-variable-calculus-fall-2010', { expect: 12 }),
   nav('mit-18-02', '18-02sc-multivariable-calculus-fall-2010', { expect: 12 }),
   nav('mit-18-03', '18-03sc-differential-equations-fall-2011', { expect: 20 }),
@@ -109,6 +110,7 @@ export const UNIT_SOURCES: UnitSource[] = [
   },
   { id: 'hf-llm-course', kind: 'hf-toctree', url: RAW + 'huggingface/course/main/chapters/en/_toctree.yml', base: 'https://huggingface.co/learn/llm-course/', skip: /^(0\. Setup|Course Events)/i, expect: 10 },
   { id: 'hf-agents-course', kind: 'hf-toctree', url: RAW + 'huggingface/agents-course/main/units/en/_toctree.yml', base: 'https://huggingface.co/learn/agents-course/', skip: /^(Live|When the next|Unit 0)/i, expect: 6 },
+  { id: 'hf-mcp-course', kind: 'hf-toctree', url: RAW + 'huggingface/mcp-course/main/units/en/_toctree.yml', base: 'https://huggingface.co/learn/mcp-course/en/', skip: /^(Live|Unit 0|0\. )/i, expect: 3 },
   { id: 'karpathy-zero-to-hero', kind: 'links', url: 'https://karpathy.ai/zero-to-hero.html', link: /youtu/, expect: 7, title: numbered('Video') },
   { id: 'fastai-practical-dl', kind: 'links', url: 'https://course.fast.ai/', link: /Lessons\/lesson\d+\.html$/, expect: 20, title: (t) => 'Lesson ' + t },
 
@@ -124,6 +126,7 @@ export const UNIT_SOURCES: UnitSource[] = [
   { id: 'vulkan-tutorial', kind: 'links', url: 'https://vulkan-tutorial.com/', link: /^\/(Overview|Development_environment|Drawing_a_triangle|Vertex_buffers|Uniform_buffers|Texture_mapping|Depth_buffering|Loading_models|Generating_Mipmaps|Multisampling|Compute_Shader)/, sectionFromPath: 0, skip: /^\s*(Drawing a triangle|Vertex buffers|Uniform buffers|Texture mapping)\s*$/i, expect: 25 },
 
   /* ---- languages */
+  { id: 'triton-tutorials', kind: 'links', url: 'https://triton-lang.org/main/getting-started/tutorials/index.html', link: /^\d{2}-[a-z0-9-]+\.html$/, expect: 8, title: numbered('Tutorial') },
   {
     id: '30-days-of-python',
     kind: 'markdown',
@@ -146,4 +149,20 @@ export const UNIT_SOURCES: UnitSource[] = [
   { id: 'mit-2-001', kind: 'ocw-table', url: OCW + '2-001-mechanics-materials-i-fall-2006/pages/lecture-notes/', expect: 20 },
   nav('mit-2-003', '2-003sc-engineering-dynamics-fall-2011', { flat: true, skip: NOT_A_UNIT, expect: 10 }),
   { id: 'mit-2-086', kind: 'ocw-table', url: OCW + '2-086-numerical-computation-for-mechanical-engineers-fall-2014/pages/calendar/', label: 'Week', expect: 10 },
+  {
+    id: 'mit-2-12',
+    kind: 'pattern',
+    // The lecture notes are paragraphs, one chapter each ("Chapter 6: Statics (PDF)"), not a table.
+    pattern: /<p>\s*(Chapter \d+:[^(<]+?)\s*\(<a href/g,
+    pages: [{ url: OCW + '2-12-introduction-to-robotics-fall-2005/pages/lecture-notes/' }],
+    expect: 8,
+  },
+  {
+    id: 'mit-manipulation',
+    kind: 'links',
+    url: 'https://manipulation.mit.edu/',
+    // The twelve chapters; the appendices (spatial algebra, Drake, DrakeGym, the station, misc) are reference.
+    link: /^(intro|robot|pick|pose|clutter|trajectories|mobile|force|segmentation|deep_perception|rl|tactile)\.html$/,
+    expect: 12,
+  },
 ];

@@ -47,7 +47,7 @@
   title: "Fluent Python, 2nd edition (Luciano Ramalho)"
   provider: O'Reilly
   type: book
-  url: https://www.fluentpython.com/
+  url: https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [languages]
@@ -143,7 +143,7 @@
   title: "CppCon: Back to Basics talks"
   provider: CppCon
   type: lectures
-  url: https://www.youtube.com/@CppCon/playlists
+  url: https://cppcon.org/b2b/
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [languages]
@@ -212,7 +212,7 @@
   title: "Rust for Rustaceans (Jon Gjengset)"
   provider: No Starch Press
   type: book
-  url: https://rust-for-rustaceans.com/
+  url: https://nostarch.com/rust-rustaceans
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [languages]
@@ -293,3 +293,33 @@
   estHours: 5
   subject: databases
   summary: "An evening of SQL before the CMU 15-445 homework."
+
+# ---------------------------------------------------------------- GPU programming (added 2026-10-07)
+
+- id: cuda-guide
+  title: "CUDA C++ Programming Guide"
+  provider: NVIDIA
+  type: book
+  url: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [languages, systems]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "The official reference for CUDA: the programming model, the memory hierarchy and every API. Read alongside PMPP."
+
+- id: triton-tutorials
+  title: "Triton: official tutorials (GPU kernels in Python)"
+  provider: OpenAI
+  type: tutorial
+  url: https://triton-lang.org/main/getting-started/tutorials/index.html
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [ai, languages]
+  level: advanced
+  cost: free
+  estHours: 25
+  subject: gpu
+  summary: "Write GPU kernels in Python: vector addition, fused softmax, matrix multiplication, dropout, layer normalisation."

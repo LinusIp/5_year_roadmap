@@ -60,10 +60,10 @@
   summary: "Digital design from gates to a pipelined processor. Nand2Tetris is the warm-up; project 43 (a RISC-V subset on an FPGA) is the payoff."
 
 - id: harris-ddca
-  title: "Digital Design and Computer Architecture (Harris and Harris): companion site"
-  provider: Harvey Mudd College
+  title: "Digital Design and Computer Architecture, RISC-V edition (Harris and Harris)"
+  provider: Elsevier
   type: book
-  url: https://pages.hmc.edu/harris/ddca/
+  url: https://shop.elsevier.com/books/digital-design-and-computer-architecture-risc-v-edition/harris/978-0-12-820064-3
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [ee, embedded]
@@ -229,7 +229,7 @@
   title: "Brian Douglas: Control System Lectures"
   provider: Brian Douglas (YouTube)
   type: lectures
-  url: https://www.youtube.com/@BrianBDouglas
+  url: https://www.youtube.com/user/ControlLectures
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [controls]
@@ -288,7 +288,7 @@
   title: "The Scientist and Engineer's Guide to Digital Signal Processing (Steven W. Smith)"
   provider: dspguide.com (free online)
   type: book
-  url: https://www.dspguide.com/
+  url: https://www.dspguide.com/pdfbook.htm
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [controls, ee]
@@ -325,3 +325,61 @@
   prerequisites: [mit-8-02, mit-18-03]
   subject: circuits
   stretch: true
+
+# ---------------------------------------------------------------- tools and books from Appendix A (added 2026-10-07)
+
+- id: kicad
+  title: "KiCad: open-source schematic and PCB design"
+  provider: KiCad
+  type: repo
+  url: https://www.kicad.org/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ee]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "The PCB tool for every board in year 4; its documentation is on the site."
+
+- id: ltspice
+  title: "LTspice: circuit simulator"
+  provider: Analog Devices
+  type: repo
+  url: https://www.analog.com/en/resources/design-tools-and-calculators/ltspice-simulator.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ee]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "The simulator for \"measured vs. simulated\" in project 36, and the yardstick for your own solver in project 37."
+
+- id: ngspice
+  title: "ngspice: open-source SPICE simulator"
+  provider: ngspice
+  type: repo
+  url: https://ngspice.sourceforge.io/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ee]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "The open-source alternative to LTspice, scriptable from the command line."
+
+- id: feedback-systems
+  title: "Feedback Systems (Åström and Murray, free PDF)"
+  provider: Caltech
+  type: book
+  url: https://www.cds.caltech.edu/~murray/amwiki/Second_Edition.html
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [controls, robotics]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "The control-theory textbook, free from the authors. A reference beside MIT 2.004 and the Brian Douglas lectures."

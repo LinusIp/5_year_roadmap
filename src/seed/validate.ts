@@ -103,6 +103,17 @@ function findPrerequisiteCycle(resources: Resource[]): string[] | null {
 function flattenPlan(inputs: { item: PlanPhaseInput; file: string }[], errors: string[]): PlanItem[] {
   const plan: PlanItem[] = [];
   const seenPhases = new Set<string>();
+  // An item split over the same lane of two phases (a book begun in one year and finished in the next) needs
+  // the phase in its id; everywhere else the block is enough, which keeps the ids of split capstones unchanged.
+  const lanesPerRef = new Map<string, number>();
+  for (const { item } of inputs) {
+    for (const block of BLOCK_IDS) {
+      for (const entry of item.lanes[block]) {
+        const ref = entry.resource ?? entry.project;
+        if (ref && entry.hours !== undefined) lanesPerRef.set(ref + '/' + block, (lanesPerRef.get(ref + '/' + block) ?? 0) + 1);
+      }
+    }
+  }
   for (const { item, file } of inputs) {
     if (seenPhases.has(item.phase)) errors.push(file + ': phase "' + item.phase + '" is listed twice');
     seenPhases.add(item.phase);
@@ -112,7 +123,7 @@ function flattenPlan(inputs: { item: PlanPhaseInput; file: string }[], errors: s
         if (!ref) return; // already reported by the schema
         const planItem: PlanItem = {
           // Stable across reordering and across moves between phases: derived from what is planned, not where.
-          id: entry.id ?? 'plan.' + ref + (entry.hours !== undefined ? '.' + block.toLowerCase() : ''),
+          id: entry.id ?? 'plan.' + ref + (entry.hours === undefined ? '' : ((lanesPerRef.get(ref + '/' + block) ?? 0) > 1 ? '.' + item.phase : '') + '.' + block.toLowerCase()),
           phaseId: item.phase,
           block,
           order: (index + 1) * 10,
@@ -305,10 +316,10 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
     planIds.add(item.id);
     const earlier = plannedRefs.get(ref);
     if (earlier) {
-      // One build may draw on two blocks (a capstone is Block A's subject and Block D's project), but only
-      // when each lane states its share of the hours, in the same phase.
-      const split = Boolean(item.projectId) && item.hours !== undefined && earlier.hours !== undefined && earlier.block !== item.block && earlier.phaseId === item.phaseId;
-      if (!split) errors.push(planFile + ': "' + ref + '" is planned twice (' + earlier.phaseId + ' and ' + item.phaseId + '); only a project may be, in two lanes of one phase, with `hours` on both');
+      // An item may be split: a capstone draws on two blocks of one phase, a book may begin in one year and finish
+      // in the next. Every appearance then states its share of the hours, so nothing is counted twice.
+      const split = item.hours !== undefined && earlier.hours !== undefined && !(earlier.block === item.block && earlier.phaseId === item.phaseId);
+      if (!split) errors.push(planFile + ': "' + ref + '" is planned twice (' + earlier.phaseId + ' and ' + item.phaseId + '); an item may appear more than once only with `hours` on every appearance, never twice in one lane');
     } else {
       plannedRefs.set(ref, item);
     }

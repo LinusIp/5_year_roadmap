@@ -395,3 +395,57 @@ Verified on this machine:
 | Editing a YAML file and rebuilding keeps all logs and statuses | `tests/unit/curriculum-edit.test.ts` |
 | Export → reset → import restores the same state, byte for byte | `tests/unit/backup.test.ts`, and `tests/e2e/milestone8.spec.ts` through a real download and upload |
 | No network calls except the optional GitHub integration and the link checker | `tests/e2e/github.spec.ts`: every page visited without a token makes no request beyond the app; with one, only api.github.com |
+
+## Brief update (2026-10-07)
+
+The brief came back with Appendix A (verified links, 23 more courses and books) and a reworked phase table
+for years 2, 3 and 5. A diff against the original showed nothing else changed.
+
+- **Roadmap, following the new table.**
+  - **Year 2** "Systems + rendering + DevOps":
+    - Block B ends with CUDA basics (PMPP, chapters 1 to 6).
+    - Block C gains a DevOps block between CS144 (now all labs) and DDIA: LFS101 towards LFCS, Docker, GitHub
+      Actions, Terraform, Kubernetes towards CKAD, OpenTelemetry and Prometheus.
+    - Block E takes 6.041.
+  - **Year 3** "Distributed systems + AI/GenAI + GPU + robotics + engines":
+    - Block A adds Bridson's fluids and robotics simulation: MuJoCo, Gazebo, the ROS 2 tutorials, Modern
+      Robotics and 6.832, the last three moved from year 5.
+    - Block B finishes PMPP and adds Triton.
+    - Block C keeps the scaled-Kubernetes and AWS track and adds the GenAI/agents block (HF MCP and
+      Diffusion, Berkeley's Advanced LLM Agents) and CS285 (selected).
+    - Block E is Stat 110 leftovers, 8.03, 8.04 (no longer stretch) and 18.085.
+    - The Stage 1 capstone now includes a simulated robot driven through ROS 2.
+  - **Year 5** block C ends with MIT 2.12 and 6.4210 Robotic Manipulation.
+- **Links.** Appendix A's link replaces ours for 33 resources, 5 papers and 7 certifications. The
+  exceptions are explained in DECISIONS.md. One of them matters beyond this app: the appendix's FreeCAD link
+  points at a lapsed domain that now shows a parking page.
+- **Catalogue.** 46 new resources: the 23 courses and books of the appendix's new section, the appendix
+  tools (KiCad, LTspice, ngspice, CalculiX, FEniCS, Warp, Brax), and the DevOps and robotics resources above.
+  The MITx Statistics and Data Science MicroMasters is a 42nd certification. Every link not in the appendix
+  was fetched and checked on 2026-10-07 (rule 7.1).
+- **Lecture checklists** for five newly planned courses were fetched from their official pages: 18.085 (50
+  units), 2.12 (8 chapters), Robotic Manipulation (12 chapters), Triton (10 tutorials) and the MCP course
+  (4 units).
+- **The planner** now lets any item be split over lanes or years when each appearance states its hours. The
+  validator previously allowed only capstones.
+
+| | Before | After |
+|---|---|---|
+| Resources | 191 | 237 |
+| Lecture checklists | 40 resources, 968 units | 45 resources, 1,052 units |
+| Roadmap items | 183 | 199 (12,148 h planned) |
+| Certifications | 41 | 42 |
+
+Verified on this machine:
+
+- `npm run validate:data` passes; `npm test`: 192 unit tests, 1 new (split items).
+- `npm run test:e2e`: 62 Playwright tests. Two were updated for the new phase titles, and the library test
+  now reads its total instead of pinning it.
+- All 93 added or changed links were requested.
+  - 82 loaded.
+  - FreeCAD (parked domain) and Ansys (a redirect to the old link) were reverted.
+  - The remaining 9 answer scripts with 403, 429 or a reset. That is how IBM, SourceForge, Cisco, O'Reilly,
+    Autodesk, Shadertoy, Harvard and Analog treat automated requests, and the appendix verified them in a
+    browser. `npm run check:links` will list them the same way.
+- Year 2 and year 3 checked in the built app: every lane matches the table, and the split and partial items
+  show their hours.

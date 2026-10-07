@@ -32,30 +32,30 @@
 - id: y2
   year: 2
   stage: 1
-  title: Systems + rendering
+  title: Systems + rendering + DevOps
   start: 2027-09-01
   end: 2028-08-31
-  goal: Understand the machine from the operating system to the database, and own a renderer and a 2D physics engine.
+  goal: Understand the machine from the operating system to the database, run software the way it runs in production, and own a renderer and a 2D physics engine.
   focus:
     A: "LearnOpenGL complete, Ray Tracing in One Weekend, tinyrenderer, 2D rigid-body engine, OpenGL mini-engine, begin Vulkan"
-    B: Modern C++ in depth, then Rust (The Book, Rustlings)
-    C: "CMU 15-213/CS:APP labs, MIT 6.1810 Operating Systems, CMU 15-445 Databases, networking essentials (CS144 selected labs), Designing Data-Intensive Applications"
+    B: "Modern C++ in depth, then Rust (The Book, Rustlings), then CUDA basics (PMPP ch. 1-6)"
+    C: "CMU 15-213/CS:APP labs, MIT 6.1810 Operating Systems, CMU 15-445 Databases, CS144 networking labs, DevOps block (Linux/LFCS, Docker, CI/CD, Terraform, Kubernetes/CKAD, observability), Designing Data-Intensive Applications"
     D: "Software rasterizer, path tracer, malloc + cache simulator, 2D rigid-body engine, xv6 write-up, buffer pool + B+tree, OpenGL mini-engine, Redis in Rust, LSM store, HTTP server, Vulkan model viewer, rate limiter + job queue"
-    E: MIT 18.03 Differential Equations; MIT 8.02 Electricity & Magnetism
+    E: MIT 18.03 Differential Equations; MIT 8.02 Electricity & Magnetism; MIT 6.041 Probability
 
 - id: y3
   year: 3
   stage: 1
-  title: Scalable systems + AI engineering + engines
+  title: Distributed systems + AI/GenAI + GPU + robotics + engines
   start: 2028-09-01
   end: 2029-08-31
-  goal: Build and operate distributed systems, train and serve language models, and finish stage 1 with an own 3D simulation engine.
+  goal: Build and operate distributed systems, train and serve language models and agents, write fast GPU code, simulate robots, and finish stage 1 with an own 3D simulation engine driving a robot through ROS 2.
   focus:
-    A: "Vulkan (vulkan-tutorial, vkguide), compute shaders, 3D rigid-body engine (GJK/EPA, constraints), XPBD cloth/soft bodies, Stage 1 capstone: own 3D sim engine v1"
-    B: Rust in depth, then Go, then CUDA basics
-    C: "MIT 6.5840 Distributed Systems (all labs), system-design-primer + Kubernetes + cloud, Stanford CS224n, CS336 LM from Scratch, LLM Zoomcamp + MLOps Zoomcamp"
+    A: "Vulkan (vulkan-tutorial, vkguide), compute shaders, 3D rigid-body engine (GJK/EPA, constraints), XPBD cloth/soft bodies + GPU fluids, robotics simulation (MuJoCo / Isaac Sim / Gazebo, ROS 2, Modern Robotics, MIT 6.832 Underactuated Robotics), Stage 1 capstone: own 3D sim engine v1 with a simulated robot controlled through ROS 2"
+    B: "Rust in depth, then Go (for 6.5840), then CUDA in depth: PMPP complete, GPU MODE lectures, kernels benchmarked, Triton"
+    C: "MIT 6.5840 Distributed Systems (all labs), system-design-primer + a scaled service on Kubernetes (CKA, AWS SAA), Stanford CS224n, CS336 LM from Scratch, GenAI/agents (LLM Zoomcamp, MLOps Zoomcamp, HF Agents/MCP/Diffusion courses, Berkeley LLM Agents), CS285 Deep RL (selected)"
     D: "Raft, sharded KV store, a URL shortener scaled on Kubernetes, 3D rigid bodies, a Kafka event pipeline, a transformer LM from scratch, Vulkan compute particles, LoRA fine-tune + evals, a production ML service, CUDA kernels, XPBD cloth; Stage 1 capstone"
-    E: Probability (MIT 6.041 / Stat 110); MIT 8.03 Vibrations & Waves; MIT 8.04 Quantum Physics I (stretch)
+    E: Stat 110 leftovers; MIT 8.03 Vibrations & Waves; MIT 8.04 Quantum Physics I; MIT 18.085 Computational Science
 
 - id: y4
   year: 4
@@ -81,6 +81,6 @@
   focus:
     A: "FEM solver (beams, then 2D elasticity), simple CFD, robot arm/vehicle simulator; final capstone: a machine designed in CAD, simulated in own engine, then built and controlled"
     B: MATLAB/Octave + scientific Python (NumPy/SciPy/SymPy); CAD scripting; ROS 2 (C++/Python)
-    C: "MIT 2.001 Mechanics & Materials, MIT 2.003 Dynamics & Control, MIT 2.005 Thermal-Fluids, MIT 2.008 Design & Manufacturing, Northwestern Modern Robotics, MIT 6.832 Underactuated Robotics"
+    C: "MIT 2.001 Mechanics & Materials, MIT 2.003 Dynamics & Control, MIT 2.005 Thermal-Fluids, MIT 2.008 Design & Manufacturing, MIT 2.12 / 6.4210 Robotic Manipulation (hardware side: actuators, sensors, mechanism design)"
     D: "CAD (SolidWorks/Fusion/Onshape/FreeCAD), 3D printing and machining basics. CAD part set, beam calculator, FEM solver, a mechanism, 2D CFD, a thermal model, a robot arm simulated then built with ROS 2, a learned simulator; final capstone"
     E: MIT 5.60 Thermodynamics; quantum computing intro (IBM Quantum Learning); MIT 8.05 (stretch)

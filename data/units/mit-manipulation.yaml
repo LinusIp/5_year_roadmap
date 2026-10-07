@@ -1,0 +1,15 @@
+# Units of "mit-manipulation". Titles and links were read from the official page:
+#   https://manipulation.mit.edu/
+# by scripts/fetch-units.ts on 2026-10-07. Safe to edit; keep ids stable (progress is stored against them).
+- { id: chapter-1, title: "Chapter 1: Introduction", url: "https://manipulation.mit.edu/intro.html" }
+- { id: chapter-2, title: "Chapter 2: Let's get you a robot", url: "https://manipulation.mit.edu/robot.html" }
+- { id: chapter-3, title: "Chapter 3: Basic Pick and Place", url: "https://manipulation.mit.edu/pick.html" }
+- { id: chapter-4, title: "Chapter 4: Geometric Pose Estimation", url: "https://manipulation.mit.edu/pose.html" }
+- { id: chapter-5, title: "Chapter 5: Bin Picking", url: "https://manipulation.mit.edu/clutter.html" }
+- { id: chapter-6, title: "Chapter 6: Motion Planning", url: "https://manipulation.mit.edu/trajectories.html" }
+- { id: chapter-7, title: "Chapter 7: Mobile Manipulation", url: "https://manipulation.mit.edu/mobile.html" }
+- { id: chapter-8, title: "Chapter 8: Manipulator Control", url: "https://manipulation.mit.edu/force.html" }
+- { id: chapter-9, title: "Chapter 9: Object Detection and Segmentation", url: "https://manipulation.mit.edu/segmentation.html" }
+- { id: chapter-10, title: "Chapter 10: Deep Perception for Manipulation", url: "https://manipulation.mit.edu/deep_perception.html" }
+- { id: chapter-11, title: "Chapter 11: Reinforcement Learning", url: "https://manipulation.mit.edu/rl.html" }
+- { id: chapter-12, title: "Chapter 12: Soft Robots and Tactile Sensing", url: "https://manipulation.mit.edu/tactile.html" }

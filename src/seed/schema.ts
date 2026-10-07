@@ -202,7 +202,10 @@ const PlanEntryInput = z
     project: Slug.optional(),
     id: Slug.optional(),
     note: Text.optional(),
-    /** Share of the item's hours carried by this lane. Only needed when a project is planned in two lanes. */
+    /**
+     * The hours this appearance carries. Needed when an item is split (a capstone over two lanes, a book over two
+     * years), and for part of a course, such as selected lectures.
+     */
     hours: z.number().positive().optional(),
   })
   .superRefine((v, ctx) => {

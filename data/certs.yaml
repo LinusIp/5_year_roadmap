@@ -90,17 +90,17 @@
   notes: "The Linux Foundation discounts its exams heavily several times a year; do not pay list price."
 
 - id: cert-unity-associate-programmer
-  title: "Unity Certified Associate: Programmer"
+  title: "Unity Certified Associate, then Professional: Programmer"
   vendor: Unity
   subject: gamedev
-  url: https://unity.com/products/unity-certifications
+  url: https://unity.com/products/unity-certifications/professional-programmer
   urlVerified: true
   lastVerified: 2026-09-20
   cost: null
   targetYear: 2
   targetQuarter: 2028-Q1
   mode: optional
-  notes: "Only if you stay on Unity. Unity's page lists the certification but no price."
+  notes: "Only if staying on Unity. Priced and booked through Pearson VUE."
 
 - id: cert-aws-cloud-practitioner
   title: "AWS Certified Cloud Practitioner"
@@ -175,10 +175,10 @@
   title: "Cisco Certified Network Associate (CCNA, exam 200-301)"
   vendor: Cisco
   subject: networking
-  url: https://www.cisco.com/site/us/en/learn/training-certifications/exams/ccna.html
+  url: https://www.cisco.com/site/us/en/learn/training-certifications/certifications/enterprise/ccna/index.html
   urlVerified: true
   lastVerified: 2026-09-20
-  cost: null
+  cost: "$400"
   targetYear: 2
   targetQuarter: 2028-Q3
   prepResources: [stanford-cs144]
@@ -189,7 +189,7 @@
   title: "CompTIA Network+ (exam N10-009)"
   vendor: CompTIA
   subject: networking
-  url: https://www.comptia.org/en-us/certifications/network/
+  url: https://www.comptia.org/certifications/network
   urlVerified: true
   lastVerified: 2026-09-20
   cost: null
@@ -197,7 +197,7 @@
   targetQuarter: 2028-Q3
   prepResources: [stanford-cs144]
   mode: optional
-  notes: "Optional alternative to CCNA. CompTIA estimates that N10-009 retires in 2027, so expect a newer exam code by the time you sit it."
+  notes: "Optional. About $369 when checked on 2026-09-20; CompTIA prices by region, so check the store before booking."
 
 # ---------------------------------------------------------------- year 3
 - id: cert-unity-professional-programmer
@@ -282,7 +282,7 @@
   title: "NVIDIA DLI: Fundamentals of Accelerated Computing with CUDA C/C++ (certificate of competency)"
   vendor: NVIDIA Deep Learning Institute
   subject: gpu
-  url: "https://learn.nvidia.com/courses/course-detail?course_id=course-v1:DLI+C-AC-01+V1"
+  url: https://www.nvidia.com/en-us/training/instructor-led-workshops/fundamentals-of-accelerated-computing-with-cuda/
   urlVerified: true
   lastVerified: 2026-09-20
   cost: null
@@ -308,7 +308,7 @@
   title: "DeepLearning.AI Deep Learning Specialization certificate"
   vendor: Coursera (DeepLearning.AI)
   subject: deep-learning
-  url: https://www.coursera.org/specializations/deep-learning
+  url: https://www.deeplearning.ai/
   urlVerified: true
   lastVerified: 2026-09-20
   cost: null
@@ -329,7 +329,7 @@
   targetQuarter: 2029-Q3
   prepResources: [mlops-zoomcamp, aws-skill-builder]
   mode: committed
-  notes: "Take this one or Google's Professional ML Engineer, not both. AWS is replacing exam MLA-C01 with MLA-C02 (beta from September 2026), so prepare against the newer exam guide."
+  notes: "Take this one or Google's Professional ML Engineer, not both. AWS offered exam MLA-C01 until 2026-09-28; its successor MLA-C02 opened as a $75 beta, so prepare against the newer exam guide and check the current price."
 
 - id: cert-gcp-pmle
   title: "Google Cloud Professional Machine Learning Engineer"
@@ -379,7 +379,7 @@
   subject: circuits
   url: null
   urlVerified: false
-  searchHint: "MITx Circuits and Electronics 6.002x certificate MIT Learn"
+  searchHint: "MITx 6.002x Circuits and Electronics edX"
   cost: null
   targetYear: 4
   targetQuarter: 2030-Q1
@@ -405,7 +405,7 @@
   title: "Arm Education course certificates"
   vendor: edX (Arm Education)
   subject: embedded
-  url: https://www.edx.org/school/armeducation
+  url: https://www.arm.com/resources/education
   urlVerified: true
   lastVerified: 2026-09-20
   cost: null
@@ -452,7 +452,7 @@
   targetYear: 4
   targetQuarter: 2030-Q3
   mode: optional
-  notes: "Only if LabVIEW is actually used for the data-acquisition rig."
+  notes: "Only if LabVIEW is actually used for the data-acquisition rig. Its status has been unclear since Emerson acquired NI; check before planning on it."
 
 # ---------------------------------------------------------------- year 5
 - id: cert-cswa
@@ -462,7 +462,7 @@
   url: https://www.solidworks.com/certifications/cswa-design-associate
   urlVerified: true
   lastVerified: 2026-09-20
-  cost: null
+  cost: "$99"
   targetYear: 5
   targetQuarter: 2030-Q4
   mode: committed
@@ -475,7 +475,7 @@
   url: https://www.solidworks.com/certifications/solidworks-design-professional
   urlVerified: true
   lastVerified: 2026-09-20
-  cost: null
+  cost: "$99"
   targetYear: 5
   targetQuarter: 2031-Q2
   mode: committed
@@ -484,7 +484,7 @@
   title: "Autodesk certification (Fusion): Certified Associate, then Certified Professional"
   vendor: Autodesk
   subject: cad
-  url: https://www.autodesk.com/certification/overview
+  url: https://www.autodesk.com/certification/design-manufacturing-certification
   urlVerified: true
   lastVerified: 2026-09-20
   cost: "Autodesk Certified Associate $150.00 (USD); Certified Professional $200.00 (USD); Certified Expert $250.00 (USD)"
@@ -513,7 +513,7 @@
   subject: mechanics-fea-cfd
   url: https://innovation.ansys.com/public/learning/
   urlVerified: true
-  lastVerified: 2026-09-20
+  lastVerified: 2026-10-07
   cost: null
   targetYear: 5
   targetQuarter: 2031-Q1
@@ -558,3 +558,16 @@
   targetQuarter: 2031-Q3
   mode: investigate
   notes: "Not a committed goal. Check eligibility first: the FE exam normally expects an accredited engineering degree, and the rules differ by country and licensing board."
+
+- id: cert-mitx-sds
+  title: "MITx MicroMasters Program in Statistics and Data Science"
+  vendor: MITx
+  subject: math-physics
+  url: https://micromasters.mit.edu/ds/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  cost: null
+  targetYear: 2
+  targetQuarter: 2028-Q3
+  mode: optional
+  notes: "Paid and optional. Its probability course follows MIT 6.041, which is on the plan in year 2."

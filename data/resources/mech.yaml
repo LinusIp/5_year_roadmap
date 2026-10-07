@@ -48,7 +48,7 @@
   title: "MITx 2.005.1x Thermal-Fluids Engineering 1: Basics of Thermodynamics and Hydrostatics"
   provider: MIT Learn (MITx)
   type: course
-  url: "https://learn.mit.edu/courses/course-v1:MITxT+2.005.1x"
+  url: https://mitxonline.mit.edu/courses/course-v1:MITxT+2.005.1x/
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [mech, physics]
@@ -162,32 +162,32 @@
   summary: "The first half of project 52."
 
 - id: modern-robotics
-  title: "Northwestern: Modern Robotics (Coursera specialization and the free book)"
-  provider: Coursera (Northwestern)
+  title: "Modern Robotics: Mechanics, Planning, and Control (Lynch and Park, free book)"
+  provider: Northwestern University
   type: course
-  url: https://www.coursera.org/specializations/modernrobotics
+  url: https://hades.mech.northwestern.edu/index.php/Modern_Robotics
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [robotics]
   level: advanced
   cost: audit-free
   estHours: 120
-  prerequisites: [mit-18-06, mit-2-003]
+  prerequisites: [mit-18-06, mit-8-01, mit-18-03]
   subject: robotics
-  summary: "Six courses. The book, videos and software are free at hades.mech.northwestern.edu/index.php/Modern_Robotics."
+  summary: "The free book with its lecture videos and software. The Coursera specialization built on it is the certificate (see Certifications)."
 
 - id: mit-6-832-underactuated
   title: "MIT 6.832 Underactuated Robotics (Russ Tedrake): online notes and lectures"
   provider: MIT CSAIL
   type: course
-  url: https://underactuated.csail.mit.edu/
+  url: https://underactuated.mit.edu/
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [robotics, controls, simulation]
   level: advanced
   cost: free
   estHours: 150
-  prerequisites: [mit-18-06, mit-2-003]
+  prerequisites: [mit-18-06, mit-18-03, modern-robotics]
   subject: robotics
 
 - id: ros2-tutorials
@@ -202,13 +202,13 @@
   cost: free
   estHours: 60
   subject: robotics
-  summary: "The site shows scripts a bot check, so `npm run check:links` reports it as failing; it was verified in a browser."
+  summary: "Jazzy is a long-term-support release; use whichever LTS is current when you start. The site shows scripts a bot check, so `npm run check:links` reports it as failing; it was verified in a browser."
 
 - id: articulated-robotics
   title: "Articulated Robotics: build a mobile robot with ROS 2"
   provider: Josh Newans
   type: tutorial
-  url: https://articulatedrobotics.xyz/
+  url: https://www.youtube.com/@ArticulatedRobotics
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [robotics]
@@ -238,7 +238,7 @@
   type: tutorial
   url: https://wiki.freecad.org/Getting_started
   urlVerified: true
-  lastVerified: 2026-09-20
+  lastVerified: 2026-10-07
   tracks: [mech]
   level: intro
   cost: free
@@ -265,7 +265,7 @@
   title: "Steve Brunton: Data-Driven Science and Engineering (book and lectures)"
   provider: Brunton and Kutz
   type: lectures
-  url: https://www.databookuw.com/
+  url: https://databookuw.com/
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [controls, ai, math]
@@ -331,3 +331,75 @@
   cost: free
   estHours: 10
   subject: python
+
+# ---------------------------------------------------------------- robotics, FEM tools and courses (added 2026-10-07)
+
+- id: mit-2-12
+  title: "MIT 2.12 Introduction to Robotics (Asada and Leonard, Fall 2005)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/2-12-introduction-to-robotics-fall-2005/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [robotics, mech]
+  level: intermediate
+  cost: free
+  estHours: 100
+  subject: robotics
+  summary: "Robot design and control from the hardware side: actuators and drives, mechanisms, kinematics, statics, dynamics and force control, with lecture notes, problem sets and projects."
+
+- id: mit-manipulation
+  title: "MIT 6.4210 Robotic Manipulation (Russ Tedrake, Drake notebooks)"
+  provider: MIT
+  type: course
+  url: https://manipulation.mit.edu/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [robotics, controls, simulation]
+  level: advanced
+  cost: free
+  estHours: 120
+  prerequisites: [modern-robotics]
+  subject: robotics
+  summary: "Perception, planning and control for robot arms, taught with notebooks that run in Drake."
+
+- id: dealii-tutorials
+  title: "deal.II tutorial programs"
+  provider: deal.II
+  type: tutorial
+  url: https://dealii.org/current/doxygen/deal.II/Tutorial.html
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech, math]
+  level: advanced
+  cost: free
+  estHours: 30
+  summary: "Finite-element programs worked step by step; pairs with Bangerth's video lectures."
+
+- id: calculix
+  title: "CalculiX: open-source finite-element solver"
+  provider: CalculiX
+  type: repo
+  url: https://www.calculix.de/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "One of the two open solvers to validate your own FEM solver against (project 50)."
+
+- id: fenics
+  title: "FEniCS: open-source finite-element platform"
+  provider: FEniCS Project
+  type: repo
+  url: https://fenicsproject.org/
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [mech, math]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "The other reference solver for project 50, scripted from Python."

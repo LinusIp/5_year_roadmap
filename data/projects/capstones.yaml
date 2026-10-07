@@ -34,21 +34,22 @@
   skills: ["C++ or Rust", "UDP netcode", "determinism and fixed timestep", "OpenGL", "systems measurement"]
 
 - id: cap-stage-1
-  title: "Stage 1 capstone: own 3D simulation engine v1 and a portfolio site"
+  title: "Stage 1 capstone: own 3D simulation engine v1 with a simulated robot on ROS 2, and a portfolio site"
   cadence: capstone
   number: 35
-  tracks: [simulation, graphics, career]
+  tracks: [simulation, graphics, robotics, career]
   phaseId: y3
   estHours: 250
   subject: simulation
-  brief: "Simulation engine v1: a Vulkan renderer with rigid and soft bodies, documentation and demo scenes. Alongside it, a portfolio site with write-ups of the three software years."
+  brief: "Simulation engine v1: a Vulkan renderer with rigid and soft bodies, documentation and demo scenes, and a simulated robot in it controlled through ROS 2. Alongside it, a portfolio site with write-ups of the three software years."
   acceptance:
     - "Vulkan renderer with a scene graph, PBR materials and shadows, driven by the engine's own frame loop"
     - "Rigid bodies (broadphase, GJK/EPA, stacking) and XPBD cloth or soft bodies running in the same world"
     - "At least five demo scenes, each reproducible from a command line, with frame-time numbers"
+    - "A simulated robot (an arm or a mobile base) in the engine, driven by ROS 2 nodes through a bridge you wrote, with its behaviour compared against MuJoCo or Gazebo"
     - "API documentation and an architecture write-up good enough for someone else to add a scene"
     - "A published portfolio site with a write-up for every Stage 1 monthly project worth showing"
-  skills: ["Vulkan", "engine architecture", "collision detection", "constraint solvers", "technical writing"]
+  skills: ["Vulkan", "engine architecture", "collision detection", "constraint solvers", "ROS 2", "technical writing"]
 
 - id: cap-y4
   title: "Year 4 capstone: an instrumented control rig with a digital twin"

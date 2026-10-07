@@ -1,0 +1,13 @@
+# Units of "triton-tutorials". Titles and links were read from the official page:
+#   https://triton-lang.org/main/getting-started/tutorials/index.html
+# by scripts/fetch-units.ts on 2026-10-07. Safe to edit; keep ids stable (progress is stored against them).
+- { id: tutorial-1-vector-addition, title: "Tutorial 1: Vector Addition", url: "https://triton-lang.org/main/getting-started/tutorials/01-vector-add.html" }
+- { id: tutorial-2-fused-softmax, title: "Tutorial 2: Fused Softmax", url: "https://triton-lang.org/main/getting-started/tutorials/02-fused-softmax.html" }
+- { id: tutorial-3-matrix-multiplication, title: "Tutorial 3: Matrix Multiplication", url: "https://triton-lang.org/main/getting-started/tutorials/03-matrix-multiplication.html" }
+- { id: tutorial-4-low-memory-dropout, title: "Tutorial 4: Low-Memory Dropout", url: "https://triton-lang.org/main/getting-started/tutorials/04-low-memory-dropout.html" }
+- { id: tutorial-5-layer-normalization, title: "Tutorial 5: Layer Normalization", url: "https://triton-lang.org/main/getting-started/tutorials/05-layer-norm.html" }
+- { id: tutorial-6-fused-attention, title: "Tutorial 6: Fused Attention", url: "https://triton-lang.org/main/getting-started/tutorials/06-fused-attention.html" }
+- { id: tutorial-7-libdevice-tl-extra-libdevice-function, title: "Tutorial 7: Libdevice ( tl.extra.libdevice ) function", url: "https://triton-lang.org/main/getting-started/tutorials/07-extern-functions.html" }
+- { id: tutorial-8-group-gemm, title: "Tutorial 8: Group GEMM", url: "https://triton-lang.org/main/getting-started/tutorials/08-grouped-gemm.html" }
+- { id: tutorial-9-persistent-matmul, title: "Tutorial 9: Persistent Matmul", url: "https://triton-lang.org/main/getting-started/tutorials/09-persistent-matmul.html" }
+- { id: tutorial-10-block-scaled-matrix-multiplication, title: "Tutorial 10: Block Scaled Matrix Multiplication", url: "https://triton-lang.org/main/getting-started/tutorials/10-block-scaled-matmul.html" }

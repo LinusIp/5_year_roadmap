@@ -142,8 +142,8 @@
 - id: math-physics
   title: Math, physics and chemistry prerequisites
   tracks: [math, physics, chem]
-  certs: [cert-mitx-math-physics]
-  certNote: "MITx certificates are paid and offered for only some of the courses; all are optional."
+  certs: [cert-mitx-math-physics, cert-mitx-sds]
+  certNote: "MITx certificates are paid and offered for only some of the courses; all are optional. The Statistics and Data Science MicroMasters bundles probability with statistics and machine learning."
   milestones:
     - { id: ms-problem-set-notebooks, title: "Problem-set notebook repo" }
 

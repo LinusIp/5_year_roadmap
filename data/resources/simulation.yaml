@@ -83,10 +83,10 @@
   summary: "Position-based dynamics, XPBD, cloth, soft bodies and fluids in short tutorials with code."
 
 - id: bridson-fluid-sim
-  title: "Fluid Simulation for Computer Graphics (Robert Bridson)"
-  provider: CRC Press
+  title: "Fluid Simulation for Computer Graphics, 2nd edition (Robert Bridson)"
+  provider: Routledge
   type: book
-  url: https://www.cs.ubc.ca/~rbridson/fluidsimulation/
+  url: https://www.routledge.com/Fluid-Simulation-for-Computer-Graphics/Bridson/p/book/9781482232837
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [simulation]
@@ -95,13 +95,13 @@
   estHours: 80
   prerequisites: [mit-18-03]
   subject: simulation
-  summary: "The book behind the GPU fluids of year 4. The page also carries the free SIGGRAPH course notes."
+  summary: "The book behind the GPU fluids: studied in year 3, built in years 3 and 4."
 
 - id: pbdl-book
   title: "Physics-Based Deep Learning (physicsbaseddeeplearning.org)"
   provider: Thuerey group, TUM
   type: book
-  url: https://physicsbaseddeeplearning.org/
+  url: https://www.physicsbaseddeeplearning.org/intro.html
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [simulation, ai]
@@ -111,3 +111,87 @@
   subject: simulation
   stretch: true
   summary: "Differentiable and learned simulators; the reading for project 56."
+
+# ---------------------------------------------------------------- robotics simulation (year 3) and simulation tools (added 2026-10-07)
+
+- id: mujoco-docs
+  title: "MuJoCo: official documentation"
+  provider: Google DeepMind
+  type: tutorial
+  url: https://mujoco.readthedocs.io/en/stable/overview.html
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [robotics, simulation]
+  level: intermediate
+  cost: free
+  estHours: 20
+  subject: robotics
+  summary: "Multi-joint dynamics with contact: the physics engine much of robotics research runs on, and a reference to measure your own engine against."
+
+- id: gazebo-docs
+  title: "Gazebo: official documentation"
+  provider: Open Robotics
+  type: tutorial
+  url: https://gazebosim.org/docs/latest/getstarted/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [robotics, simulation]
+  level: intermediate
+  cost: free
+  estHours: 20
+  subject: robotics
+  summary: "The robot simulator that pairs with ROS 2: spawn a robot, drive it from ROS 2 nodes, read its sensors."
+
+- id: isaac-sim
+  title: "NVIDIA Isaac Sim"
+  provider: NVIDIA
+  type: tutorial
+  url: https://developer.nvidia.com/isaac/sim
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [robotics, simulation]
+  level: advanced
+  cost: free
+  estHours: 30
+  subject: robotics
+  summary: "NVIDIA's GPU-accelerated robot simulator and synthetic-data generator: the alternative to MuJoCo and Gazebo. Check its hardware requirements before choosing it."
+
+- id: cyclone-physics
+  title: "Cyclone: the source code of Game Physics Engine Development"
+  provider: Ian Millington
+  type: repo
+  url: https://github.com/idmillington/cyclone-physics
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [simulation]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "The book's engine, complete: read it next to the chapters."
+
+- id: nvidia-warp
+  title: "NVIDIA Warp: GPU simulation in Python"
+  provider: NVIDIA
+  type: repo
+  url: https://github.com/NVIDIA/warp
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [simulation, ai]
+  level: advanced
+  cost: free
+  estHours: 20
+  summary: "Differentiable GPU kernels written in Python. One of the two options for the learned-simulator project of year 5."
+
+- id: brax
+  title: "Brax: differentiable physics in JAX"
+  provider: Google
+  type: repo
+  url: https://github.com/google/brax
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [simulation, ai]
+  level: advanced
+  cost: free
+  estHours: 20
+  summary: "A massively parallel physics engine for reinforcement learning. The other option for the learned-simulator project."

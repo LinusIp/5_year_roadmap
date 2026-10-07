@@ -153,3 +153,50 @@ what was chosen, why, and what it would take to change. Newest first within each
 - **Screenshots come from a backup, not from code that reaches into the database.** The demo history goes in
   through the same Import as a user's file and is checked by the same validation. The demo invents no links,
   which is why its one finished-looking game is still in progress: done needs a repository.
+
+## The brief of 2026-10-07
+
+The revised brief adds Appendix A (verified links for resources, papers and certifications, plus 23 more
+courses and books) and reshapes years 2, 3 and 5. Everything else in it is unchanged.
+
+- **Appendix links replace ours wherever they point at the same resource:** 33 resources, 5 papers and 7
+  certifications. Among them: 3Blue1Brown's own site instead of YouTube, PMPP's 5th edition, the RISC-V
+  edition of Harris and Harris, Bridson's 2nd edition, and the publishers' pages for Fluent Python and Rust for
+  Rustaceans.
+- **Seven links stay as they were, for reasons that outweigh the appendix:**
+  - MIT 18.01, 18.02, 18.03, 6.041 and 3.091 stay on OCW's Scholar ("SC") editions, and 2.086 and 6.1810 on
+    the offerings already linked. Their lecture checklists were fetched from those pages, and ticks are stored
+    against those lecture ids. The appendix links the classic editions of the same courses.
+  - FreeCAD: the appendix's `wiki.freecadweb.org` now resolves to a registrar's parking page. The project
+    moved to `freecad.org`, which is the link kept.
+  - Ansys: the appendix's `innovationspace.ansys.com/courses/` redirects to the link we already had, so the
+    destination stays.
+  - ROS 2: the appendix links the Kilted tutorials, a short-support release that ends before year 3. We keep
+    Jazzy, a long-term release. `docs.ros.org` blocks automated checks, so a newer LTS link could not be
+    verified.
+- **Where the appendix has no link but ours is verified, ours stays.** That applies to the NVIDIA DLI
+  certificates and NI CLAD. CLAD's card now notes that its status has been unclear since Emerson acquired NI.
+- **Ids stay as they are.** For 86 appendix rows the id differs from ours (51 with the same link, 35 the same
+  item under another link). Logs, statuses and ticked units reference our ids, and 30 Days of Python, one of
+  them, is in progress. New items take the appendix's ids.
+- **A companion is not the resource.** The appendix links Millington's book through its Cyclone source code,
+  so the code is its own library entry next to the book. The Theoretical Minimum stays as its two courses
+  rather than the series' home page; CSWA and CSWP stay two cards.
+- **Any item may now be split** (a book begun in year 2 and finished in year 3, as PMPP is), as long as every
+  appearance states its `hours`. Split ids keep the old form `plan.<ref>.<block>`; only the same lane in two
+  phases adds the phase (`plan.pmpp-book.y2.b`). Capstone ids are unchanged.
+- **"Selected" and "leftovers" are planned hours.** CS285 (selected) carries 50 h and Stat 110 leftovers 40 h,
+  through the same `hours` field.
+- **Robotics simulation plans MuJoCo and Gazebo.** The brief writes "MuJoCo / Isaac Sim / Gazebo" as a
+  choice. Gazebo pairs with ROS 2 and MuJoCo is the research standard. Isaac Sim is in the library: its page
+  states no hardware requirements, so nothing claims any.
+- **Robotics and control are now a bridge.** Robotics software is year 1-3 material in the new brief, so the
+  structural test lets robotics and controls appear in both stages, like simulation and graphics. Modern
+  Robotics and 6.832 depend on 8.01 and 18.03 now, not on 2.003, which stays in year 5.
+- **Over-budget lanes are left to the forecast and the re-plan, not trimmed by hand.** Year 3's core track
+  (134%) and robotics-heavy block A (115%), and year 2's block E (134%, where 8.01 already sat), are over.
+  The whole plan, at about 12,150 h against 14,000 h of budget, still fits, and the re-plan moves overflow into
+  the lighter lanes of years 4 and 5. The one cut: CMU 15-462, a stretch item the table never listed, left the
+  year 3 plan for the library.
+- **MIT 6.172 is in the library, not on the plan.** The brief now names performance engineering, but its
+  table does not place 6.172; year 3 block B (CUDA in depth) is where it would go.

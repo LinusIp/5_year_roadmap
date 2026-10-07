@@ -18,7 +18,7 @@
   title: "Hugging Face LLM Course"
   provider: Hugging Face
   type: course
-  url: https://huggingface.co/learn/llm-course
+  url: https://huggingface.co/learn/llm-course/chapter1/1
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [ai]
@@ -32,7 +32,7 @@
   title: "Hugging Face AI Agents Course"
   provider: Hugging Face
   type: course
-  url: https://huggingface.co/learn/agents-course
+  url: https://huggingface.co/learn/agents-course/unit0/introduction
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [ai]
@@ -46,7 +46,7 @@
   title: "Hugging Face Deep Reinforcement Learning Course"
   provider: Hugging Face
   type: course
-  url: https://huggingface.co/learn/deep-rl-course
+  url: https://huggingface.co/learn/deep-rl-course/unit0/introduction
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [ai]
@@ -60,7 +60,7 @@
   title: "Hugging Face Diffusion Models Course"
   provider: Hugging Face
   type: course
-  url: https://huggingface.co/learn/diffusion-course
+  url: https://huggingface.co/learn/diffusion-course/unit0/1
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [ai]
@@ -68,13 +68,12 @@
   cost: free
   estHours: 30
   subject: deep-learning
-  stretch: true
 
 - id: hf-mcp-course
   title: "Hugging Face Model Context Protocol (MCP) Course"
   provider: Hugging Face
   type: course
-  url: https://huggingface.co/learn/mcp-course
+  url: https://huggingface.co/learn/mcp-course/en/unit0/introduction
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [ai]
@@ -82,7 +81,6 @@
   cost: free
   estHours: 20
   subject: deep-learning
-  stretch: true
 
 - id: karpathy-zero-to-hero
   title: "Andrej Karpathy: Neural Networks, Zero to Hero"
@@ -160,7 +158,7 @@
   title: "Stanford CS336 Language Modeling from Scratch"
   provider: Stanford
   type: course
-  url: https://cs336.stanford.edu/
+  url: https://stanford-cs336.github.io/spring2025/
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [ai]
@@ -202,7 +200,7 @@
   title: "MIT 6.5940 TinyML and Efficient Deep Learning Computing (Fall 2024)"
   provider: MIT HAN Lab
   type: course
-  url: https://hanlab.mit.edu/courses/2024-fall-65940
+  url: https://efficientml.ai/
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [ai, embedded]
@@ -224,21 +222,20 @@
   cost: free
   estHours: 120
   subject: deep-learning
-  stretch: true
 
 - id: berkeley-llm-agents
-  title: "UC Berkeley Large Language Model Agents MOOC (Fall 2024)"
+  title: "UC Berkeley Advanced Large Language Model Agents MOOC (Spring 2025)"
   provider: UC Berkeley
   type: course
-  url: https://llmagents-learning.org/f24
+  url: https://llmagents-learning.org/sp25
   urlVerified: true
-  lastVerified: 2026-09-20
+  lastVerified: 2026-10-07
   tracks: [ai]
   level: advanced
   cost: free
   estHours: 40
   subject: deep-learning
-  stretch: true
+  summary: "The advanced follow-up to the Fall 2024 LLM Agents MOOC: reasoning, planning, tool use and agent safety."
 
 - id: fsdl
   title: "Full Stack Deep Learning (course and LLM bootcamp)"
@@ -325,10 +322,10 @@
   subject: deep-learning
 
 - id: pmpp-book
-  title: "Programming Massively Parallel Processors, 4th edition (Hwu, Kirk, El Hajj)"
+  title: "Programming Massively Parallel Processors, 5th edition (Hwu, Kirk)"
   provider: Elsevier
   type: book
-  url: https://shop.elsevier.com/books/programming-massively-parallel-processors/hwu/978-0-323-91231-0
+  url: https://shop.elsevier.com/books/programming-massively-parallel-processors/hwu/978-0-443-43900-1
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [ai, graphics, languages]
@@ -337,7 +334,7 @@
   estHours: 70
   prerequisites: [learncpp]
   subject: gpu
-  summary: "The CUDA part of block B in year 3, read together with the GPU MODE lectures."
+  summary: "CUDA from the ground up: chapters 1 to 6 in block B of year 2, the rest in year 3 with the GPU MODE lectures."
 
 - id: gpu-mode-lectures
   title: "GPU MODE lecture series"
@@ -352,3 +349,163 @@
   estHours: 30
   prerequisites: [learncpp]
   subject: gpu
+
+# ---------------------------------------------------------------- Appendix A and the courses added 2026-10-07
+
+- id: kaggle-learn
+  title: "Kaggle Learn: short hands-on courses"
+  provider: Kaggle
+  type: tutorial
+  url: https://www.kaggle.com/learn
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai]
+  level: intro
+  cost: free
+  estHours: 20
+  summary: "Bite-sized notebook courses: pandas, feature engineering, intro deep learning and more."
+
+- id: fcc-ml
+  title: "freeCodeCamp: Machine Learning with Python"
+  provider: freeCodeCamp
+  type: course
+  url: https://www.freecodecamp.org/learn/machine-learning-with-python
+  urlVerified: true
+  lastVerified: 2026-09-20
+  tracks: [ai, languages]
+  level: intro
+  cost: free
+  estHours: 60
+  summary: "A free curriculum with five projects and a free certification at the end."
+
+- id: mit-6-390
+  title: "MIT 6.390 Introduction to Machine Learning (formerly 6.036)"
+  provider: MIT
+  type: course
+  url: https://introml.mit.edu/spring26/info
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [ai, math]
+  level: intermediate
+  cost: free
+  estHours: 80
+  summary: "MIT's undergraduate introduction to machine learning."
+
+- id: cs230
+  title: "Stanford CS230 Deep Learning"
+  provider: Stanford
+  type: course
+  url: https://cs230.stanford.edu/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 60
+  summary: "Stanford's course on doing deep learning well: structuring projects, debugging models and shipping them."
+
+- id: cs224w
+  title: "Stanford CS224W Machine Learning with Graphs"
+  provider: Stanford
+  type: course
+  url: https://snap.stanford.edu/class/cs224w-2020/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [ai]
+  level: advanced
+  cost: free
+  estHours: 80
+  summary: "Graph neural networks and machine learning on graphs."
+
+- id: cmu-10-714
+  title: "CMU 10-414/714 Deep Learning Systems"
+  provider: CMU
+  type: course
+  url: null
+  urlVerified: false
+  searchHint: "CMU 10-714 Deep Learning Systems dlsyscourse"
+  tracks: [ai, systems]
+  level: advanced
+  cost: free
+  estHours: 100
+  summary: "Build a deep learning library from scratch: automatic differentiation, kernels and hardware acceleration."
+
+- id: cs188
+  title: "Berkeley CS188 Introduction to Artificial Intelligence"
+  provider: UC Berkeley
+  type: course
+  url: https://www2.eecs.berkeley.edu/Courses/CS188/index.html
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [ai]
+  level: intro
+  cost: free
+  estHours: 80
+  summary: "Search, games, probabilistic reasoning and reinforcement learning, with the Pac-Man projects."
+
+- id: ng-ml-spec
+  title: "Machine Learning Specialization (Andrew Ng)"
+  provider: Coursera
+  type: course
+  url: https://www.coursera.org/specializations/machine-learning-introduction
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [ai, math]
+  level: intro
+  cost: audit-free
+  estHours: 90
+  summary: "The beginner route into machine learning, free to audit."
+
+- id: cs50-ai
+  title: "CS50's Introduction to Artificial Intelligence with Python"
+  provider: Harvard
+  type: course
+  url: https://www.harvardonline.harvard.edu/course/cs50s-introduction-artificial-intelligence-python
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [ai, languages]
+  level: intro
+  cost: free
+  estHours: 70
+  summary: "Search, logic, probability, optimisation and machine learning, in Python, with projects."
+
+- id: spinning-up
+  title: "Spinning Up in Deep RL"
+  provider: OpenAI
+  type: tutorial
+  url: https://spinningup.openai.com/en/latest/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 40
+  summary: "Key concepts, the main algorithms and clean implementations: a companion to CS285."
+
+- id: slp3
+  title: "Speech and Language Processing, 3rd edition draft (Jurafsky and Martin)"
+  provider: Stanford
+  type: book
+  url: https://web.stanford.edu/~jurafsky/slp3/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [ai]
+  level: intermediate
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "The NLP textbook, free as a draft. A reference for CS224n."
+
+- id: prml
+  title: "Pattern Recognition and Machine Learning (Bishop, free PDF)"
+  provider: Microsoft Research
+  type: book
+  url: https://www.microsoft.com/en-us/research/?p=231646
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [ai, math]
+  level: advanced
+  cost: free
+  estHours: 0
+  reference: true
+  summary: "The probabilistic view of machine learning, free from Microsoft Research."

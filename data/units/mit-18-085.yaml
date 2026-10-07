@@ -1,0 +1,53 @@
+# Units of "mit-18-085". Titles and links were read from the official page:
+#   https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/video_galleries/video-lectures/
+# by scripts/fetch-units.ts on 2026-10-07. Safe to edit; keep ids stable (progress is stored against them).
+- { id: course-introduction, title: "Course Introduction", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/course-introduction/" }
+- { id: lecture-1, title: "Lecture 1: Four Special Matrices", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-1-four-special-matrices/" }
+- { id: recitation-1, title: "Recitation 1: Key Ideas of Linear Algebra", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-1-key-ideas-of-linear-algebra/" }
+- { id: lecture-2, title: "Lecture 2: Differential Eqns and Difference Eqns", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-2-differential-eqns-and-difference-eqns/" }
+- { id: lecture-3, title: "Lecture 3: Solving a Linear System", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-3-solving-a-linear-system/" }
+- { id: lecture-4, title: "Lecture 4: Delta Function Day", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-4-delta-function-day/" }
+- { id: recitation-2, title: "Recitation 2", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-2/" }
+- { id: lecture-5, title: "Lecture 5: Eigenvalues (Part 1)", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-5-eigenvalues-part-1/" }
+- { id: lecture-6, title: "Lecture 6: Eigen Values (part 2) and Positive Definite (part 1)", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-6-eigen-values-part-2-and-positive-definite-part-1/" }
+- { id: lecture-7, title: "Lecture 7: Positive Definite Day", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-7-positive-definite-day/" }
+- { id: lecture-8, title: "Lecture 8: Springs and Masses", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-8-springs-and-masses/" }
+- { id: recitation-3, title: "Recitation 3", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-3/" }
+- { id: lecture-9, title: "Lecture 9: Oscillation", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-9-oscillation/" }
+- { id: recitation-4, title: "Recitation 4", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-4/" }
+- { id: lecture-10, title: "Lecture 10: Finite Differences in Time", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-10-finite-differences-in-time/" }
+- { id: lecture-11, title: "Lecture 11: Least Squares (part 2)", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-11-least-squares-part-2/" }
+- { id: lecture-12, title: "Lecture 12: Graphs and Networks", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-12-graphs-and-networks/" }
+- { id: recitation-5, title: "Recitation 5", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-5/" }
+- { id: lecture-14, title: "Lecture 14: Exam Review", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-14-exam-review/" }
+- { id: lecture-13, title: "Lecture 13: Kirchhoff's Current Law", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-13-kirchhoffs-current-law/" }
+- { id: recitation-6, title: "Recitation 6", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-6/" }
+- { id: lecture-15, title: "Lecture 15: Trusses and A^(T)CA", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-15-trusses-and-a-t-ca/" }
+- { id: lecture-16, title: "Lecture 16: Trusses (part 2)", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-16-trusses-part-2/" }
+- { id: lecture-17, title: "Lecture 17: Finite Elements in 1D (part 1)", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-17-finite-elements-in-1d-part-1/" }
+- { id: recitation-7, title: "Recitation 7", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-7/" }
+- { id: lecture-18, title: "Lecture 18: Finite Elements in 1D (part 2)", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-18-finite-elements-in-1d-part-2/" }
+- { id: lecture-19, title: "Lecture 19: Quadratic/Cubic Elements", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-19-quadratic-cubic-elements/" }
+- { id: lecture-20, title: "Lecture 20: Element Matrices; 4th Order Bending Equations", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-20-element-matrices-4th-order-bending-equations/" }
+- { id: recitation-8, title: "Recitation 8", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-8/" }
+- { id: lecture-21, title: "Lecture 21: Boundary Conditions, Splines, Gradient, Divergence", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-21-boundary-conditions-splines-gradient-divergence/" }
+- { id: recitation-9, title: "Recitation 9", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-9/" }
+- { id: lecture-22, title: "Lecture 22: Gradient and Divergence", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-22-gradient-and-divergence/" }
+- { id: lecture-23, title: "Lecture 23: Laplace's Equation", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-23-laplaces-equation/" }
+- { id: lecture-25, title: "Lecture 25: Fast Poisson Solver (part 1)", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-25-fast-poisson-solver-part-1/" }
+- { id: lecture-24, title: "Lecture 24: Laplace's Equation (part 2)", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-24-laplaces-equation-part-2/" }
+- { id: lecture-27, title: "Lecture 27: Finite Elements in 2D (part 2)", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-27-finite-elements-in-2d-part-2/" }
+- { id: lecture-26, title: "Lecture 26: Fast Poisson Solver (part 2); Finite Elements in 2D", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-26-fast-poisson-solver-part-2-finite-elements-in-2d/" }
+- { id: recitation-10, title: "Recitation 10", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-10/" }
+- { id: lecture-28, title: "Lecture 28: Fourier Series (part 1)", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-28-fourier-series-part-1/" }
+- { id: lecture-29, title: "Lecture 29: Fourier Series (part 2)", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-29-fourier-series-part-2/" }
+- { id: recitation-11, title: "Recitation 11", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-11/" }
+- { id: lecture-30, title: "Lecture 30: Discrete Fourier Series", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-30-discrete-fourier-series/" }
+- { id: lecture-31, title: "Lecture 31: Fast Fourier Transform, Convolution", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-31-fast-fourier-transform-convolution/" }
+- { id: recitation-12, title: "Recitation 12", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-12/" }
+- { id: lecture-32, title: "Lecture 32: Convolution (part 2), Filtering", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-32-convolution-part-2-filtering/" }
+- { id: lecture-33, title: "Lecture 33: Filters, Fourier Integral Transform", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-33-filters-fourier-integral-transform/" }
+- { id: lecture-34, title: "Lecture 34: Fourier Integral Transform (part 2)", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-34-fourier-integral-transform-part-2/" }
+- { id: recitation-13, title: "Recitation 13", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/recitation-13/" }
+- { id: lecture-35, title: "Lecture 35: Convolution Equations: Deconvolution", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-35-convolution-equations-deconvolution/" }
+- { id: lecture-36, title: "Lecture 36: Sampling Theorem", url: "https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/resources/lecture-36-sampling-theorem/" }

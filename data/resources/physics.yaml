@@ -16,19 +16,19 @@
   subject: math-physics
 
 - id: mit-8-02
-  title: "MIT 8.02 Physics II: Electricity and Magnetism (Spring 2007)"
+  title: "MIT 8.02 Physics II: Electricity and Magnetism (Spring 2019)"
   provider: MIT OCW
   type: course
-  url: https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2007/
+  url: https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2019/
   urlVerified: true
-  lastVerified: 2026-09-20
+  lastVerified: 2026-10-07
   tracks: [physics, ee]
   level: intro
   cost: free
   estHours: 130
   prerequisites: [mit-8-01, mit-18-02]
   subject: math-physics
-  summary: "Class slides, problem solving and experiments; no lecture videos in this edition. MITx publishes the same course in three parts on MIT Learn (8.02.1x to 8.02.3x, no certificate)."
+  summary: "Three modules (electrostatics, magnetic fields and forces, Maxwell's equations) with lecture videos. MITx publishes the same course in three parts on MIT Learn (8.02.1x to 8.02.3x, no certificate)."
 
 - id: mit-8-03
   title: "MIT 8.03SC Physics III: Vibrations and Waves (Fall 2016)"
@@ -57,7 +57,6 @@
   estHours: 130
   prerequisites: [mit-8-03, mit-18-03, mit-18-06]
   subject: math-physics
-  stretch: true
 
 - id: mit-8-04-adams
   title: "MIT 8.04 Quantum Physics I (Allan Adams, Spring 2013)"
@@ -150,9 +149,9 @@
   title: "IBM Quantum Learning (Qiskit courses)"
   provider: IBM
   type: course
-  url: null
-  urlVerified: false
-  searchHint: "IBM Quantum Learning Basics of quantum information"
+  url: https://learning.quantum.ibm.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
   tracks: [physics]
   level: intermediate
   cost: free

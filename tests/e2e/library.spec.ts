@@ -11,12 +11,18 @@ test.beforeEach(async ({ page }) => {
 test.describe('library', () => {
   test('search and filters narrow the list, and live in the URL', async ({ page }) => {
     await page.goto('./#/library');
-    await expect(page.getByText(/^\d+ of 191$/)).toBeVisible();
+    // "N of total": read the total rather than pinning it, so a curriculum edit does not break the test.
+    const count = page.getByText(/^\d+ of \d+$/);
+    await expect(count).toBeVisible();
+    const total = Number((await count.textContent())!.split(' of ')[1]);
+    expect(total).toBeGreaterThan(200);
+    await expect(count).toHaveText(total + ' of ' + total);
 
     await page.getByRole('searchbox').fill('linear algebra');
     await expect(page).toHaveURL(/q=linear/);
     await expect(page.getByRole('link', { name: /MIT 18\.06 Linear Algebra/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /Rust Programming Language/ })).toBeHidden();
+    await expect(count).not.toHaveText(total + ' of ' + total);
 
     await page.getByRole('searchbox').fill('');
     await page.getByLabel('Track').selectOption('embedded');
@@ -24,7 +30,7 @@ test.describe('library', () => {
     await expect(page.getByRole('link', { name: /MIT 18\.06/ })).toBeHidden();
 
     await page.getByRole('button', { name: 'Clear filters' }).click();
-    await expect(page.getByText('191 of 191')).toBeVisible();
+    await expect(count).toHaveText(total + ' of ' + total);
   });
 
   test('an item without a verified link says so, and offers a search instead', async ({ page }) => {

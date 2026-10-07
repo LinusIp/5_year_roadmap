@@ -63,7 +63,7 @@
   title: "CMU 15-462/662 Computer Graphics"
   provider: CMU
   type: course
-  url: https://www.cs.cmu.edu/~15462/
+  url: https://15462.courses.cs.cmu.edu/spring2024/
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [graphics, math]
@@ -90,10 +90,10 @@
   stretch: true
 
 - id: utah-cs4600
-  title: "University of Utah CS 4600 Introduction to Computer Graphics (Cem Yuksel, Fall 2020)"
+  title: "Cem Yuksel: Introduction to Computer Graphics (University of Utah CS 4600, lecture videos)"
   provider: University of Utah
   type: lectures
-  url: https://graphics.cs.utah.edu/courses/cs4600/fall2020/
+  url: https://www.youtube.com/playlist?list=PLplnkTzzqsZTfYh4UbhLGpI5kGd5oW_Hh
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [graphics]
@@ -104,10 +104,10 @@
   stretch: true
 
 - id: utah-cs6610
-  title: "University of Utah CS 5610/6610 Interactive Computer Graphics (Cem Yuksel, Spring 2021)"
+  title: "Cem Yuksel: Interactive Computer Graphics (University of Utah CS 5610/6610, lecture videos)"
   provider: University of Utah
   type: lectures
-  url: https://graphics.cs.utah.edu/courses/cs6610/spring2021/
+  url: https://www.youtube.com/playlist?list=PLplnkTzzqsZS3R5DjmCQsqupu43oS9CFN
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [graphics]
@@ -239,9 +239,9 @@
   title: "Shadertoy"
   provider: Shadertoy
   type: repo
-  url: null
-  urlVerified: false
-  searchHint: "Shadertoy"
+  url: https://www.shadertoy.com/
+  urlVerified: true
+  lastVerified: 2026-09-20
   tracks: [graphics]
   level: intermediate
   cost: free
@@ -267,7 +267,7 @@
   title: "Handmade Hero: episode guide (selected episodes)"
   provider: Molly Rocket
   type: lectures
-  url: https://guide.handmadehero.org/
+  url: https://handmadehero.org/
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [gamedev, languages]
@@ -321,3 +321,31 @@
   reference: true
   subject: gamedev
   summary: "Where to find the game jam of the first phase."
+
+# ---------------------------------------------------------------- courses added 2026-10-07
+
+- id: mit-6-837
+  title: "MIT 6.837 Computer Graphics (Fall 2012)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/6-837-computer-graphics-fall-2012/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [graphics]
+  level: intermediate
+  cost: free
+  estHours: 100
+  summary: "Transformations, curves and surfaces, animation, ray tracing and rasterisation."
+
+- id: cs248
+  title: "Stanford CS248 Interactive Computer Graphics (Winter 2022)"
+  provider: Stanford
+  type: course
+  url: https://gfxcourses.stanford.edu/cs248/winter22
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [graphics]
+  level: intermediate
+  cost: free
+  estHours: 80
+  summary: "Rasterisation, geometry, materials and animation for real-time graphics."

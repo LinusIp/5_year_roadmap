@@ -22,7 +22,7 @@ test('shows both stages, all six phases, and opens the current one', async ({ pa
   await expect(page.getByRole('heading', { name: 'Stage 1 · Software' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Stage 2 · Electrical and mechanical' })).toBeVisible();
 
-  for (const title of ['In flight', 'Fluency + CS core', 'Systems + rendering', 'Scalable systems + AI engineering + engines', 'Electrical engineering', 'Mechanical engineering + mechatronics']) {
+  for (const title of ['In flight', 'Fluency + CS core', 'Systems + rendering + DevOps', 'Distributed systems + AI/GenAI + GPU + robotics + engines', 'Electrical engineering', 'Mechanical engineering + mechatronics']) {
     await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
   }
 

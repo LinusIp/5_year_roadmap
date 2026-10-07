@@ -32,8 +32,10 @@ describe('the real curriculum in /data', () => {
     // The brief's hard requirement. Graphics, simulation and gamedev are deliberately absent from both
     // lists: the brief makes the simulation and engine work the bridge between the stages ("simulate what
     // you study, then build it in hardware"), so those courses are expected on both sides of year 4.
+    // Robotics and control are the same kind of bridge since the brief of 2026-10-07: robotics software
+    // (ROS 2, simulators, control) belongs to years 1-3, the hardware side of it to years 4-5.
     const SOFTWARE = ['swe', 'systems', 'ai'];
-    const ENGINEERING = ['ee', 'embedded', 'mech', 'robotics', 'chem', 'controls'];
+    const ENGINEERING = ['ee', 'embedded', 'mech', 'chem'];
     const planOf = new Map(curriculum.plan.map((i) => [i.resourceId ?? i.projectId!, i]));
     const stageOf = new Map([...planOf].map(([id, i]) => [id, curriculum.phases.find((p) => p.id === i.phaseId)!.stage]));
 
@@ -45,7 +47,7 @@ describe('the real curriculum in /data', () => {
       // Block E carries the maths and physics that stage 2 depends on, from day one, so it is exempt.
       if (item.block === 'E') continue;
       const stage = stageOf.get(resource.id)!;
-      const isBridge = resource.tracks.some((t) => t === 'simulation' || t === 'graphics');
+      const isBridge = resource.tracks.some((t) => ['simulation', 'graphics', 'robotics', 'controls'].includes(t));
       const isEngineering = resource.tracks.some((t) => ENGINEERING.includes(t));
       const isSoftwareOnly = !isEngineering && !isBridge && resource.tracks.some((t) => SOFTWARE.includes(t));
       // A course that teaches engineering is never scheduled before year 4...

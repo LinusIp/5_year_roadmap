@@ -128,7 +128,9 @@ statuses and notes reference items by id, so editing the curriculum never loses 
    Once you have opened the page, set `url`, `urlVerified: true` and `lastVerified` to that day.
 
 2. Put it on the roadmap: add `- { resource: my-probability-book }` to a lane of a phase in
-   `data/plan.yaml`. The order of the list is the order of the lane.
+   `data/plan.yaml`. The order of the list is the order of the lane. To spread one item over two lanes or
+   two years (a book begun in year 2 and finished in year 3), list it in both places with `hours:` on each.
+   For part of a course ("selected lectures"), one entry with `hours:` is enough.
 
 3. If it has chapters or lectures to tick off, list them in `data/units/my-probability-book.yaml`:
 

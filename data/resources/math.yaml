@@ -20,7 +20,7 @@
   title: "3Blue1Brown: Essence of Linear Algebra"
   provider: 3Blue1Brown
   type: lectures
-  url: https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab
+  url: https://www.3blue1brown.com/topics/linear-algebra
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [math]
@@ -34,7 +34,7 @@
   title: "3Blue1Brown: Essence of Calculus"
   provider: 3Blue1Brown
   type: lectures
-  url: https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr
+  url: https://www.3blue1brown.com/lessons/essence-of-calculus/
   urlVerified: true
   lastVerified: 2026-09-20
   tracks: [math]
@@ -155,3 +155,33 @@
   estHours: 120
   subject: algorithms
   summary: "Proofs, induction, graphs, counting, probability. The Spring 2024 edition is on OCW under the new number 6.1200J."
+
+# ---------------------------------------------------------------- added 2026-10-07
+
+- id: mit-18-085
+  title: "MIT 18.085 Computational Science and Engineering I (Gilbert Strang, Fall 2008)"
+  provider: MIT OCW
+  type: course
+  url: https://ocw.mit.edu/courses/18-085-computational-science-and-engineering-i-fall-2008/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [math]
+  level: intermediate
+  cost: free
+  estHours: 110
+  prerequisites: [mit-18-06]
+  subject: math-physics
+  summary: "Applied linear algebra and differential equations as engineers use them, with video lectures: the bridge from 18.06 to simulation and stage 2."
+
+- id: cvxbook
+  title: "Convex Optimization (Boyd and Vandenberghe, free PDF)"
+  provider: Stanford
+  type: book
+  url: https://web.stanford.edu/~boyd/cvxbook/
+  urlVerified: true
+  lastVerified: 2026-10-07
+  tracks: [math, ai, controls]
+  level: advanced
+  cost: free
+  estHours: 100
+  summary: "The standard text on convex optimisation, free from the authors."
