@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { FIRST_DAY, open, pickStatus } from './helpers.ts';
+import { FIRST_DAY, open, pickStatus, reload } from './helpers.ts';
 
 test.use({ timezoneId: 'Asia/Tashkent' });
 
@@ -49,7 +49,7 @@ test.describe('library', () => {
     await expect(sheet.getByRole('link', { name: 'Strang' })).toHaveCount(0);
     await expect(sheet.getByText('<b>raw</b>', { exact: false })).toBeVisible();
 
-    await page.reload();
+    await reload(page);
     await expect(sheet.getByRole('heading', { name: 'Lecture 3' })).toBeVisible();
   });
 
@@ -84,7 +84,7 @@ test.describe('library', () => {
     await hours.fill('140');
     await hours.blur();
     await expect(sheet.getByRole('button', { name: 'Undo my edits to this resource' })).toBeVisible();
-    await page.reload();
+    await reload(page);
     await expect(hours).toHaveValue('140');
   });
 });
@@ -138,7 +138,7 @@ test.describe('papers', () => {
     await expect(page.getByRole('button', { name: /^Attention Is All You Need Vaswani/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /ResNet/ })).toBeHidden();
 
-    await page.reload();
+    await reload(page);
     await page.getByRole('button', { name: /^Attention Is All You Need Vaswani/ }).click();
     await expect(sheet.getByRole('textbox', { name: 'Summary in three sentences' })).toHaveValue(/^Recurrence is dropped/);
   });
@@ -154,7 +154,7 @@ test.describe('credentials', () => {
     await pickStatus(page, sheet.getByRole('button', { name: /^Status of PCEP/ }), 'Studying');
     await sheet.getByRole('button', { name: 'Close' }).click();
 
-    await page.reload();
+    await reload(page);
     await expect(page.getByRole('button', { name: /^Status of PCEP/ })).toHaveText('Studying');
   });
 

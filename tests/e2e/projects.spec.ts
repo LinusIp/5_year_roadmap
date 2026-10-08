@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { FIRST_DAY, open, pickStatus } from './helpers.ts';
+import { FIRST_DAY, open, pickStatus, reload } from './helpers.ts';
 
 test.use({ timezoneId: 'Asia/Tashkent' });
 
@@ -48,7 +48,7 @@ test('acceptance criteria tick off on the project and stay ticked', async ({ pag
   const sheet = page.getByRole('dialog');
   await sheet.getByRole('checkbox', { name: /Installable with pip/ }).click();
   await sheet.getByRole('checkbox', { name: /Unit tests with pytest/ }).click();
-  await page.reload();
+  await reload(page);
   await expect(sheet.getByRole('checkbox', { name: /Installable with pip/ })).toHaveAttribute('aria-checked', 'true');
   await expect(sheet.getByRole('checkbox', { name: /Unit tests with pytest/ })).toHaveAttribute('aria-checked', 'true');
 });

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { FIRST_DAY, laterRow, logTime, makeNow, nowCard, open, pickStatus } from './helpers.ts';
+import { FIRST_DAY, laterRow, logTime, makeNow, nowCard, open, pickStatus, reload } from './helpers.ts';
 
 test.use({ timezoneId: 'Asia/Tashkent' });
 
@@ -95,7 +95,7 @@ test('reorders a lane with the arrows and keeps the order', async ({ page }) => 
   await sheet.getByRole('button', { name: /Move .*CLI habit tracker.* up/ }).click();
   await expect(first).toContainText(/CLI habit tracker/);
 
-  await page.reload();
+  await reload(page);
   await expect(sheet.getByRole('listitem').first()).toContainText(/CLI habit tracker/);
 });
 

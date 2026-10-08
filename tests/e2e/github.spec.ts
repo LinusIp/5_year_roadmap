@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { FakeGithub } from '../fake-github.ts';
 import { serveGithub } from './github-route.ts';
-import { logTime, nowCard, open } from './helpers.ts';
+import { logTime, nowCard, open, reload } from './helpers.ts';
 
 /**
  * GitHub Sync and the calendar, against a stand-in for api.github.com (tests/fake-github.ts behind page.route),
@@ -134,7 +134,7 @@ test('a token or repository GitHub refuses is not saved, and nothing is written'
     'GitHub found no repository octo-learner/no-such-repo that this token can see. Check the name, and that the token was given access to it. The token was not saved.',
   );
 
-  await page.reload();
+  await reload(page);
   await expect(section.getByLabel('Personal access token')).toHaveValue('');
   await expect(section.getByRole('button', { name: 'Connect' })).toBeDisabled();
   await expect(section.getByRole('status')).toHaveText('Not backed up');

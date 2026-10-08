@@ -29,8 +29,51 @@ export const PAGES = [
   './#/no-such-page',
 ];
 
+/**
+ * Waits until every IndexedDB write the page has started is committed. A read transaction over every store
+ * queues behind any write already begun, so this returns exactly when they are done. The app writes behind an
+ * optimistic UI, so a test that reloads or navigates the moment after a click would otherwise race the write
+ * (it did, on CI's slower runner).
+ */
+export async function writesSettled(page: Page): Promise<void> {
+  if (!page.url().startsWith('http')) return;
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open('atlas');
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const database = request.result;
+          const stores = [...database.objectStoreNames];
+          if (stores.length === 0) {
+            database.close();
+            resolve();
+            return;
+          }
+          const tx = database.transaction(stores, 'readonly');
+          tx.oncomplete = () => {
+            database.close();
+            resolve();
+          };
+          tx.onerror = () => {
+            database.close();
+            reject(tx.error);
+          };
+          tx.objectStore(stores[0]!).count();
+        };
+      }),
+  );
+}
+
+/** Reloads once the page's writes are committed. */
+export async function reload(page: Page): Promise<void> {
+  await writesSettled(page);
+  await page.reload();
+}
+
 /** Opens a screen and waits until it has drawn its heading and finished loading. */
 export async function open(page: Page, path: string): Promise<void> {
+  await writesSettled(page);
   await page.goto(path);
   await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
   await expect(page.getByText(/^Loading/)).toHaveCount(0);
@@ -70,4 +113,5 @@ export async function pickStatus(page: Page, pill: Locator, status: string): Pro
   await pill.click({ button: 'right' });
   const list = page.getByRole('dialog', { name: /^Status of / }).last();
   await list.getByRole('button', { name: new RegExp('^' + status) }).click();
+  await writesSettled(page);
 }

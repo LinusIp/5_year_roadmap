@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { FIRST_DAY, open, pickStatus } from './helpers.ts';
+import { FIRST_DAY, open, pickStatus, reload } from './helpers.ts';
 
 /**
  * The brief of 2026-10-07: the five roadmap.sh roadmaps as checklists with coverage, the research cadence as a
@@ -25,7 +25,7 @@ test('a roadmap node ticked by hand counts, and stays ticked', async ({ page }) 
   await sheet.getByRole('checkbox', { name: 'Inference vs. Training' }).click();
   await expect(sheet.getByText(/^0 % · 1 of \d+ nodes, optional ones left out$/)).toBeVisible();
 
-  await page.reload();
+  await reload(page);
   await expect(sheet.getByRole('checkbox', { name: 'Inference vs. Training' })).toHaveAttribute('aria-checked', 'true');
   await sheet.getByRole('button', { name: 'Close' }).click();
   await expect(page.getByRole('button', { name: /^Inference Engineering 0 %/ })).toContainText(/1 of \d+ nodes/);
@@ -70,7 +70,7 @@ test('the quarterly review keeps its research question and is marked reviewed', 
   await sheet.getByRole('button', { name: 'Mark this quarter reviewed' }).click();
   await expect(sheet.getByText('Reviewed on 21 September.')).toBeVisible();
 
-  await page.reload();
+  await reload(page);
   await expect(question).toHaveValue('Does speculative decoding help more on code than on prose?');
   await sheet.getByRole('button', { name: 'Close' }).click();
   await expect(page.getByRole('button', { name: /^2026 Q3 0 h logged · a question asked Reviewed$/ })).toBeVisible();

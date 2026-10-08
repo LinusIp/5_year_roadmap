@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
-import { FIRST_DAY, logTime, makeNow, nowCard, open } from './helpers.ts';
+import { FIRST_DAY, logTime, makeNow, nowCard, open, reload } from './helpers.ts';
 
 test.use({ timezoneId: 'Asia/Tashkent' });
 
@@ -30,7 +30,7 @@ test.describe('reviews', () => {
     await expect(sheet.getByText('Reviewed on 21 September.')).toBeVisible();
     await expect(sheet.getByRole('link', { name: /Next week's build/ })).toHaveAttribute('href', /plan\/pick\?week=next/);
 
-    await page.reload();
+    await reload(page);
     await expect(sheet.getByRole('textbox', { name: 'What changes next week' })).toHaveValue('Projects first.');
   });
 
@@ -148,13 +148,13 @@ test.describe('offline', () => {
     await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
 
     await context.setOffline(true);
-    await page.reload();
+    await reload(page);
     await expect(page.locator('#now-title')).toBeVisible();
     // Lazily loaded screens come from the precache too, by link and by a fresh load of a deep link.
     await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Plan' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Plan' })).toBeVisible();
     await page.goto('./#/plan?view=credentials');
-    await page.reload();
+    await reload(page);
     await expect(page.getByRole('heading', { level: 1, name: 'Plan' })).toBeVisible();
     await context.setOffline(false);
   });

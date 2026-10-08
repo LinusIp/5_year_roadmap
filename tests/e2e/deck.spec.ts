@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { FIRST_DAY, laterRow, open } from './helpers.ts';
+import { FIRST_DAY, laterRow, open, reload } from './helpers.ts';
 
 /** The project deck (section 4.0, Motion): Shuffle, Skip, Take it, and what each leaves behind. */
 test.use({ timezoneId: 'Asia/Tashkent' });
@@ -35,7 +35,7 @@ test('shuffle slows down and lands, skip moves on, take it puts the build into B
   await expect(page.locator('.taken')).toContainText(taken);
 
   // The pick is stored: after a reload the projects block still carries it.
-  await page.reload();
+  await reload(page);
   await expect(laterRow(page, new RegExp(taken.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ' Weekly build'))).toBeVisible();
 });
 

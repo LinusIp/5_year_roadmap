@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { PAGES, open } from './helpers.ts';
+import { open, PAGES, reload } from './helpers.ts';
 
 /**
  * Smoke tests over the whole app: every screen and sheet passes an automated accessibility audit in both
@@ -94,7 +94,7 @@ test.describe('keyboard shortcuts', () => {
     await page.locator('main').focus();
     await page.keyboard.press('r');
     await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible();
-    await page.reload();
+    await reload(page);
     await expect(page.getByRole('switch', { name: 'Use single-key shortcuts' })).toHaveAttribute('aria-checked', 'false');
   });
 });

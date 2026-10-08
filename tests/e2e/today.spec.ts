@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { FIRST_DAY, laterRow, logTime, makeNow, nowCard, open } from './helpers.ts';
+import { FIRST_DAY, laterRow, logTime, makeNow, nowCard, open, reload } from './helpers.ts';
 
 /**
  * The acceptance criteria of the brief for Today, through the real UI against the production build. The
@@ -39,7 +39,7 @@ test('logs time by hand and keeps it across a reload', async ({ page }) => {
   await expect(page.getByText(/^1 h 30 m of 8 h today/)).toBeVisible();
   await expect(nowCard(page).getByText('Graphics · 1 h 30 m of 2 h')).toBeVisible();
 
-  await page.reload();
+  await reload(page);
   await expect(nowCard(page).getByText('Graphics · 1 h 30 m of 2 h')).toBeVisible();
 });
 
@@ -86,7 +86,7 @@ test('records a reflection, an energy rating and a freeze day', async ({ page })
   await sheet.getByRole('switch', { name: 'Use a freeze day' }).click();
   await expect(sheet.getByRole('switch', { name: 'Use a freeze day' })).toHaveAttribute('aria-checked', 'true');
 
-  await page.reload();
+  await reload(page);
   await page.getByRole('button', { name: /How was today\? Energy 4 of 5/ }).click();
   await expect(sheet.getByRole('textbox', { name: 'One line about today' })).toHaveValue('Linear algebra clicked.');
   await expect(sheet.getByRole('radio', { name: '4 of 5, Good' })).toHaveAttribute('aria-checked', 'true');
