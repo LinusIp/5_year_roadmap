@@ -24,6 +24,15 @@ export type Theme = (typeof THEMES)[number];
 
 const OptionalUrl = z.union([HttpUrl, z.literal('')]).optional();
 
+/**
+ * GitHub Sync (brief 4.10): every record carries when it last changed (ISO, this device's clock) and on which
+ * device, for the merge rules. Optional, so records and backups from before Sync stay valid.
+ */
+const Stamp = {
+  updatedAt: z.string().optional(),
+  deviceId: z.string().optional(),
+};
+
 export const DayLogEntrySchema = z.strictObject({
   block: BlockIdSchema,
   track: TrackIdSchema,
@@ -32,8 +41,19 @@ export const DayLogEntrySchema = z.strictObject({
   note: z.string().optional(),
   /** Set when the entry was created by a block's "done" toggle rather than a timer or typed minutes. */
   auto: z.boolean().optional(),
+  /** Stable within the day, so two devices' edits to the same day merge entry by entry. */
+  id: z.string().min(1).optional(),
+  ...Stamp,
 });
 export type DayLogEntry = z.infer<typeof DayLogEntrySchema>;
+
+/** An entry removed from a day: kept so another device's copy of it is not merged back in. */
+export const RemovedEntrySchema = z.strictObject({ id: z.string().min(1), at: z.string(), deviceId: z.string().optional() });
+export type RemovedEntry = z.infer<typeof RemovedEntrySchema>;
+
+/** The day-level fields, each merged on its own: a reflection written on one device survives a timer on another. */
+export const DAY_FIELDS = ['reflection', 'energy', 'frozen', 'frozenAuto', 'doneBlocks'] as const;
+export type DayField = (typeof DAY_FIELDS)[number];
 
 export const DayLogSchema = z.strictObject({
   date: IsoDate,
@@ -45,6 +65,11 @@ export const DayLogSchema = z.strictObject({
   frozenAuto: z.boolean().optional(),
   /** Blocks ticked "done" for the day. */
   doneBlocks: z.array(BlockIdSchema).optional(),
+  /** Entries removed from this day, for the merge. */
+  removed: z.array(RemovedEntrySchema).optional(),
+  /** When each day-level field last changed. */
+  fieldsAt: z.partialRecord(z.enum(DAY_FIELDS), z.string()).optional(),
+  ...Stamp,
 });
 export type DayLog = z.infer<typeof DayLogSchema>;
 
@@ -61,6 +86,7 @@ export const UserItemStateSchema = z.strictObject({
   budget: z.string().optional(),
   startedAt: IsoDate.optional(),
   doneAt: IsoDate.optional(),
+  ...Stamp,
 });
 export type UserItemState = z.infer<typeof UserItemStateSchema>;
 
@@ -73,6 +99,7 @@ export const PaperStateSchema = z.strictObject({
   notes: z.string().optional(),
   startedAt: IsoDate.optional(),
   readAt: IsoDate.optional(),
+  ...Stamp,
 });
 export type PaperState = z.infer<typeof PaperStateSchema>;
 
@@ -84,6 +111,7 @@ export const CertStateSchema = z.strictObject({
   earnedAt: IsoDate.optional(),
   expiresAt: IsoDate.optional(),
   notes: z.string().optional(),
+  ...Stamp,
 });
 export type CertState = z.infer<typeof CertStateSchema>;
 
@@ -92,6 +120,7 @@ export const MilestoneStateSchema = z.strictObject({
   status: z.enum(MILESTONE_STATUSES),
   url: OptionalUrl,
   notes: z.string().optional(),
+  ...Stamp,
 });
 export type MilestoneState = z.infer<typeof MilestoneStateSchema>;
 
@@ -101,6 +130,7 @@ export const CustomEntitySchema = z.strictObject({
   id: Slug,
   data: z.record(z.string(), z.unknown()),
   createdAt: IsoDate,
+  ...Stamp,
 });
 export type CustomEntity = z.infer<typeof CustomEntitySchema>;
 
@@ -111,6 +141,7 @@ export const OverrideSchema = z.strictObject({
   patch: z.record(z.string(), z.unknown()),
   /** Plan items only: taken off the roadmap. Nothing else can be removed; resources and projects are "dropped" instead. */
   removed: z.boolean().optional(),
+  ...Stamp,
 });
 export type Override = z.infer<typeof OverrideSchema>;
 
@@ -140,6 +171,7 @@ export const ReviewSchema = z.strictObject({
       daysCounted: z.number(),
     })
     .optional(),
+  ...Stamp,
 });
 export type Review = z.infer<typeof ReviewSchema>;
 
@@ -148,6 +180,7 @@ export const WeekPickSchema = z.strictObject({
   weekStart: IsoDate,
   projectId: z.string().min(1),
   pickedAt: IsoDate,
+  ...Stamp,
 });
 export type WeekPick = z.infer<typeof WeekPickSchema>;
 
@@ -171,6 +204,7 @@ export const ReplanRecordSchema = z.strictObject({
   /** Hours still to do on each unfinished plan item at that moment. */
   remaining: z.record(z.string(), z.number()),
   moves: z.array(ReplanMoveSchema),
+  ...Stamp,
 });
 export type ReplanRecord = z.infer<typeof ReplanRecordSchema>;
 
@@ -181,6 +215,7 @@ export const StoredSettingsSchema = z.strictObject({
   theme: z.enum(THEMES),
   github: z.strictObject({ username: z.string(), showCalendar: z.boolean() }),
   backup: z.strictObject({ lastBackupAt: IsoDate.optional(), snoozedUntil: IsoDate.optional() }),
+  ...Stamp,
 });
 export type StoredSettings = z.infer<typeof StoredSettingsSchema>;
 
@@ -205,6 +240,62 @@ export interface Secret {
   token: string;
   /** By "from..to", the range the Activity page asked for. */
   calendars?: Record<string, CachedCalendar>;
+}
+
+/**
+ * GitHub Sync, local-only like the token: never exported, never in the data repository.
+ *
+ * `config`: which repository, and who the commits are authored as. `cache`: the sha of every file as this
+ * device last saw it on GitHub, which is how a pull knows what changed and a push knows whether another device
+ * wrote first. `status`: what Settings and Today show.
+ */
+export interface SyncConfig {
+  id: 'config';
+  owner: string;
+  repo: string;
+  branch: string;
+  authorName: string;
+  authorEmail: string;
+  /** From GitHub's token-expiration header, for the renewal reminder. ISO date or undefined. */
+  tokenExpiresAt?: string;
+  /** False when GitHub says the repository is public: Settings warns. */
+  private: boolean;
+}
+
+export interface SyncCache {
+  id: 'cache';
+  /** The commit this device last pushed or pulled, and its tree. */
+  headSha?: string;
+  treeSha?: string;
+  /** Path to blob sha, as of headSha. */
+  files: Record<string, string>;
+}
+
+export type SyncPhase = 'idle' | 'syncing' | 'offline' | 'unauthorized' | 'rate-limited' | 'error';
+
+export interface SyncStatus {
+  id: 'status';
+  phase: SyncPhase;
+  /** Epoch milliseconds of the last successful sync. */
+  lastSyncAt?: number;
+  /** When a rate limit lifts, epoch milliseconds. */
+  retryAt?: number;
+  message?: string;
+  /** Files in the data repository that could not be read, by path, with why. */
+  problems?: Record<string, string>;
+}
+
+export type SyncRow = SyncConfig | SyncCache | SyncStatus | { id: 'device'; deviceId: string };
+
+/** A file waiting to be pushed. Its content is rendered when the flush runs, so many edits make one blob. */
+export interface OutboxEntry {
+  path: string;
+  /** Epoch milliseconds of the first change since the last push. */
+  queuedAt: number;
+  /** What changed, for the commit message: "mark 18.06 lecture 9 done". */
+  summary?: string;
+  /** Bumped on every change, so a flush clears only the entries that did not change again while it ran. */
+  seq: number;
 }
 
 /** The running timer, stored under meta key "timer" so that it survives a reload. */

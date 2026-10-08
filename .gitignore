@@ -15,3 +15,6 @@ learning-log/
 # Local agent/editor configuration (machine-specific paths)
 .claude/
 reports/
+
+# Throwaway scripts and notes for local work
+scratch/

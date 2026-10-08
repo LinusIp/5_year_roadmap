@@ -7,6 +7,7 @@ import type { AtlasDB } from '../db/db.ts';
 import type { BlockId, TrackId } from '../seed/schema.ts';
 import type { DayLog, DayLogEntry } from '../db/types.ts';
 import { monthKey, today } from './dates.ts';
+import { withSyncBookkeeping } from '../sync/daylog.ts';
 
 export function emptyLog(date: string): DayLog {
   return { date, entries: [] };
@@ -100,11 +101,19 @@ export function removeEntry(log: DayLog, index: number): DayLog {
   return { ...log, entries };
 }
 
-/** Sets the total minutes for one block and item, replacing whatever the timer accumulated. */
+/**
+ * Sets the total minutes for one block and item, replacing whatever the timer accumulated. The replacement keeps
+ * the id of the entry it replaces, so on another device it reads as that entry edited, not a second one.
+ */
 export function setBlockMinutes(log: DayLog, block: BlockId, track: TrackId, refId: string | undefined, minutes: number): DayLog {
-  const kept = log.entries.filter((e) => !(e.block === block && e.refId === refId && !e.note));
-  const next: DayLog = { ...log, entries: kept };
-  return minutes > 0 ? addEntry(next, { block, track, refId, minutes }) : next;
+  const matches = (e: DayLogEntry): boolean => e.block === block && e.refId === refId && !e.note;
+  const first = log.entries.find(matches);
+  const kept = log.entries.filter((e) => !matches(e));
+  if (minutes <= 0) return { ...log, entries: kept };
+  const entry: DayLogEntry = { block, track, minutes };
+  if (refId) entry.refId = refId;
+  if (first?.id) entry.id = first.id;
+  return { ...log, entries: [...kept, entry] };
 }
 
 export function toggleBlockDone(log: DayLog, block: BlockId): DayLog {
@@ -123,12 +132,15 @@ export async function readLogs(from: string, to: string, database: AtlasDB = db)
   return database.dayLogs.where('date').between(from, to, true, true).toArray();
 }
 
-/** Applies `change` to a day and stores the result, deleting the row when nothing is left on it. */
+/**
+ * Applies `change` to a day and stores the result, with the bookkeeping GitHub Sync merges by (entry ids,
+ * tombstones, field times). The row is deleted when nothing is left on it, unless it remembers a removed entry.
+ */
 export async function editLog(date: string, change: (log: DayLog) => DayLog, database: AtlasDB = db): Promise<DayLog> {
   return database.transaction('rw', database.dayLogs, async () => {
     const current = (await database.dayLogs.get(date)) ?? emptyLog(date);
-    const next = change(current);
-    if (isEmptyLog(next)) await database.dayLogs.delete(date);
+    const next = withSyncBookkeeping(current, change(current));
+    if (isEmptyLog(next) && !next.removed?.length) await database.dayLogs.delete(date);
     else await database.dayLogs.put(next);
     return next;
   });

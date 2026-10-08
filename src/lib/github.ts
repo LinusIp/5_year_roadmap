@@ -15,6 +15,8 @@ import type { HeatLevel } from './streaks.ts';
 export const GITHUB_GRAPHQL_URL = 'https://api.github.com/graphql';
 /** Where a fine-grained token is created, per GitHub's documentation. */
 export const NEW_TOKEN_URL = 'https://github.com/settings/personal-access-tokens/new';
+/** Where a repository is created. */
+export const NEW_REPO_URL = 'https://github.com/new';
 
 /** GitHub's own scale, in order: level 0 to 4. */
 const LEVELS = ['NONE', 'FIRST_QUARTILE', 'SECOND_QUARTILE', 'THIRD_QUARTILE', 'FOURTH_QUARTILE'] as const;

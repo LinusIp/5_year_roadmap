@@ -5,9 +5,11 @@
 import Dexie from 'dexie';
 import type { EntityTable, Table } from 'dexie';
 import type {
-  CertState, CustomEntity, DayLog, EntityKind, Meta, MilestoneState, Override, PaperState,
-  ReplanRecord, Review, Secret, StoredSettings, UserItemState, WeekPick,
+  CertState, CustomEntity, DayLog, EntityKind, Meta, MilestoneState, OutboxEntry, Override, PaperState,
+  ReplanRecord, Review, Secret, StoredSettings, SyncRow, UserItemState, WeekPick,
 } from './types.ts';
+import { newId } from '../sync/device.ts';
+import { markSilent, syncMiddleware } from '../sync/middleware.ts';
 
 export class AtlasDB extends Dexie {
   dayLogs!: EntityTable<DayLog, 'date'>;
@@ -23,6 +25,10 @@ export class AtlasDB extends Dexie {
   settings!: EntityTable<StoredSettings, 'id'>;
   meta!: EntityTable<Meta, 'key'>;
   secrets!: EntityTable<Secret, 'id'>;
+  /** GitHub Sync, local-only: files waiting to be pushed. */
+  outbox!: EntityTable<OutboxEntry, 'path'>;
+  /** GitHub Sync, local-only: the repository, the file cache, the status and this device's id. */
+  sync!: Table<SyncRow, SyncRow['id']>;
 
   constructor(name = 'atlas') {
     super(name);
@@ -41,6 +47,17 @@ export class AtlasDB extends Dexie {
       meta: 'key',
       secrets: 'id',
     });
+    // Version 2, GitHub Sync: the outbox and the sync state, and an id on every logged entry so two devices'
+    // edits to one day merge entry by entry.
+    this.version(2)
+      .stores({ outbox: 'path', sync: 'id' })
+      .upgrade(async (tx) => {
+        markSilent(tx);
+        await tx.table<DayLog, string>('dayLogs').toCollection().modify((log) => {
+          log.entries = log.entries.map((entry) => (entry.id ? entry : { ...entry, id: newId() }));
+        });
+      });
+    this.use(syncMiddleware(this));
   }
 }
 

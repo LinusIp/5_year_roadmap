@@ -3,13 +3,13 @@ import type { ReactNode } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { importBackup, resetAll } from '../db/backup.ts';
 import { db } from '../db/db.ts';
-import { checkGithub, connectGithub, disconnectGithub, useGithubConnected } from '../db/github.ts';
+import { disconnectGithub } from '../db/github.ts';
 import { defaultSettings, updateSettings } from '../db/settings.ts';
 import { useMeta, writeMeta } from '../db/state.ts';
 import type { StoredSettings, Theme } from '../db/types.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { dayName } from '../lib/dates.ts';
-import { NEW_TOKEN_URL } from '../lib/github.ts';
+import { NEW_REPO_URL, NEW_TOKEN_URL } from '../lib/github.ts';
 import { weeklyTargetMinutes } from '../lib/schedule.ts';
 import { SHORTCUTS_META_KEY } from '../lib/shortcuts.ts';
 import { heatLabel } from '../lib/streaks.ts';
@@ -17,6 +17,8 @@ import { useOptimistic } from '../lib/useOptimistic.ts';
 import { useQueryParam } from '../router/router.tsx';
 import { seed } from '../seed/index.ts';
 import { SettingsDefaultsSchema } from '../seed/schema.ts';
+import { syncEngine } from '../sync/engine.ts';
+import { statusText, tokenDaysLeft, useSyncView } from '../sync/status.ts';
 import type { SettingsDefaults } from '../seed/schema.ts';
 import { Button } from '../ui/Button.tsx';
 import { Chips } from '../ui/Chips.tsx';
@@ -321,7 +323,7 @@ function Backup({ settings }: { settings: StoredSettings }) {
 
       <div className="mt-6">
         <p className="text-body">Reset everything</p>
-        <p className="mt-1 text-meta text-ink2">Deletes every log, status, note, review and plan edit in this browser. The curriculum is untouched.</p>
+        <p className="mt-1 text-meta text-ink2">Deletes every log, status, note, review and plan edit in this browser. The curriculum is untouched. With Sync on, nothing is deleted on GitHub, and the next sync brings it all back.</p>
         <div className="mt-3 flex flex-wrap items-start gap-2">
           <TextField label="Type RESET to confirm" value={confirmReset} onChange={setConfirmReset} className="w-56" />
           <Button
@@ -329,8 +331,14 @@ function Backup({ settings }: { settings: StoredSettings }) {
             onClick={() => {
               if (confirmReset !== 'RESET') return;
               void resetAll().then(async () => {
-                // The token survives a reset, so the settings that go with it do too.
-                await db.settings.put({ ...defaultSettings(seed.settings), github: settings.github });
+                const sync = syncEngine();
+                if (sync && (await sync.config())) {
+                  // With Sync on, the next pull brings the repository's state back, settings included.
+                  void sync.syncNow({ force: true });
+                } else {
+                  // The token survives a reset, so the settings that go with it do too.
+                  await db.settings.put({ ...defaultSettings(seed.settings), github: settings.github });
+                }
                 setConfirmReset('');
                 setMessage('Everything was reset.');
               });
@@ -344,80 +352,188 @@ function Backup({ settings }: { settings: StoredSettings }) {
   );
 }
 
-function GitHub({ settings }: { settings: StoredSettings }) {
-  const connected = useGithubConnected();
+/** The link to a step of the setup, as a 44 px target of its own. */
+function StepLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a href={href} target="_blank" rel="noreferrer noopener" className="flex min-h-11 items-center gap-2 text-button font-medium text-accent">
+      <Icon name="external" size={16} />
+      {children}
+    </a>
+  );
+}
+
+/** A text field saved on blur, for the commit email and the token's expiry. */
+function SavedField({ label, value, hint, valid, problem, onSave }: { label: string; value: string; hint: string; valid: (v: string) => boolean; problem: string; onSave: (v: string) => void }) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const text = draft ?? value;
+  const bad = draft !== null && text.trim() !== '' && !valid(text.trim());
+  return (
+    <TextField
+      label={label}
+      value={text}
+      onChange={setDraft}
+      hint={hint}
+      error={bad ? problem : null}
+      onBlur={() => {
+        if (draft === null || bad) return;
+        if (draft.trim() !== value) onSave(draft.trim());
+        setDraft(null);
+      }}
+    />
+  );
+}
+
+/**
+ * Sync (brief 4.10): a private GitHub repository as the source of truth. Off, it shows the steps and the two
+ * fields it needs, and says once that nothing is backed up. On, one phrase says how sync stands.
+ */
+function Sync({ settings }: { settings: StoredSettings }) {
+  const view = useSyncView();
   const [showCalendar, setShowCalendar] = useOptimistic(settings.github.showCalendar);
+  const [repo, setRepo] = useState(settings.github.username ? settings.github.username + '/atlas-data' : '');
   const [token, setToken] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!view) return <Section id="sync" title="Sync" children={null} />;
+  const engine = syncEngine();
 
   const connect = async (): Promise<void> => {
-    if (!token.trim() || busy) return;
+    if (!repo.trim() || !token.trim() || busy || !engine) return;
     setBusy(true);
-    const result = await connectGithub(seed.settings, token);
+    setMessage('Connecting…');
+    const result = await engine.connect({ repo, token });
     setBusy(false);
     if (result.ok) {
       setToken('');
-      setMessage('Your GitHub calendar is now on Activity.');
+      setMessage(result.warning ?? 'Connected as @' + result.login + '. Your log and progress are in ' + repo.trim() + '.');
     } else setMessage(result.message + ' The token was not saved.');
   };
-  const check = async (): Promise<void> => {
-    setBusy(true);
-    const result = await checkGithub(seed.settings);
-    setBusy(false);
-    setMessage(result.ok ? 'GitHub knows this token as @' + result.value.login + '.' : result.message);
-  };
+
+  const calendarRow = (
+    <Row
+      title="Show my GitHub calendar on Activity"
+      meta={settings.github.username ? 'As @' + settings.github.username : 'From your GitHub account'}
+      toggle={{
+        on: showCalendar,
+        onChange: (on) => {
+          setShowCalendar(on);
+          void updateSettings(seed.settings, (s) => ({ ...s, github: { ...s.github, showCalendar: on } }));
+        },
+      }}
+    />
+  );
+
+  if (view.connected && view.config) {
+    const { config, status } = view;
+    const days = tokenDaysLeft(config);
+    const problems = Object.entries(status.problems ?? {});
+    return (
+      <Section id="sync" title="Sync">
+        <p role="status" className="text-body">
+          {statusText(view, now)}
+        </p>
+        {days !== null && days <= 14 && (
+          <p className="mt-1 text-meta text-ink">{days < 0 ? 'The token expired on ' + config.tokenExpiresAt + '.' : 'The token expires in ' + days + (days === 1 ? ' day' : ' days') + '. Create a new one and reconnect.'}</p>
+        )}
+        <RowList className="mt-3">
+          <Row
+            title={config.owner + '/' + config.repo}
+            meta={(config.private ? 'Private' : 'Public: make it private on GitHub') + ' · commits as ' + config.authorEmail}
+            href={'https://github.com/' + config.owner + '/' + config.repo}
+          />
+          {calendarRow}
+        </RowList>
+        {problems.length > 0 && (
+          <RowList label="Files Atlas could not read" className="mt-4">
+            {problems.map(([path, why]) => (
+              <Row key={path} title={path} meta={why} href={'https://github.com/' + config.owner + '/' + config.repo + '/blob/' + config.branch + '/' + path} />
+            ))}
+          </RowList>
+        )}
+        <div className="mt-4 space-y-3">
+          <SavedField
+            label="Commit email"
+            value={config.authorEmail}
+            hint="GitHub counts a commit on your graph when its email is on your account. The no-reply address always is."
+            valid={(v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)}
+            problem="That does not look like an email address."
+            onSave={(v) => void engine?.setAuthorEmail(v)}
+          />
+          <SavedField
+            label="Token expires on"
+            value={config.tokenExpiresAt ?? ''}
+            hint="Atlas reminds you two weeks before. Write it like 2027-01-06."
+            valid={(v) => /^\d{4}-\d{2}-\d{2}$/.test(v)}
+            problem="Write the date like 2027-01-06."
+            onSave={(v) => void engine?.setTokenExpiry(v || undefined)}
+          />
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button onClick={() => void engine?.syncNow({ force: true })} aria-disabled={status.phase === 'syncing' || undefined}>
+            Sync now
+          </Button>
+          <Button onClick={() => void engine?.disconnect().then(() => setMessage('Disconnected. Everything stays on this device and in the repository.'))}>Disconnect</Button>
+        </div>
+        {message && <p className="mt-3 text-meta text-ink">{message}</p>}
+        <p className="mt-3 text-meta text-ink2">
+          The token stays in this browser&apos;s IndexedDB, never in an export or the repository, and goes to api.github.com only. Anyone who can use this device can read it, so give it this one repository and 90 days.
+        </p>
+      </Section>
+    );
+  }
 
   return (
-    <Section id="github" title="GitHub">
-      {connected === undefined ? null : connected ? (
-        <>
-          <RowList>
-            <Row
-              title="Show my GitHub calendar on Activity"
-              meta={settings.github.username ? 'Connected as @' + settings.github.username : 'Connected'}
-              toggle={{
-                on: showCalendar,
-                onChange: (on) => {
-                  setShowCalendar(on);
-                  void updateSettings(seed.settings, (s) => ({ ...s, github: { ...s.github, showCalendar: on } }));
-                },
-              }}
-            />
-          </RowList>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button onClick={() => void check()} aria-disabled={busy || undefined}>
-              {busy ? 'Checking' : 'Test the connection'}
-            </Button>
-            <Button onClick={() => void disconnectGithub(seed.settings).then(() => setMessage('The token was removed from this browser.'))}>Remove the token</Button>
-          </div>
-        </>
-      ) : (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void connect();
-          }}
-        >
-          <p className="text-meta text-ink2">
-            Optional. Shows your real GitHub contribution calendar under the heatmap on Activity. The token needs every
-            permission off: reading your calendar needs none.
-          </p>
-          {/* A link of its own rather than inside the sentence, so it is a 44 px target. */}
-          <a href={NEW_TOKEN_URL} target="_blank" rel="noreferrer noopener" className="mb-1 flex min-h-11 items-center gap-2 text-button font-medium text-accent">
-            <Icon name="external" size={16} />
-            Create a fine-grained token
-          </a>
-          <TextField label="Personal access token" type="password" autoComplete="off" value={token} onChange={setToken} />
-          <Button className="mt-3" aria-disabled={!token.trim() || busy || undefined} onClick={() => void connect()}>
-            {busy ? 'Checking' : 'Connect'}
-          </Button>
-        </form>
-      )}
+    <Section id="sync" title="Sync">
+      <p role="status" className="text-body">
+        Not backed up
+      </p>
+      <p className="mt-1 text-meta text-ink2">
+        Everything lives in this browser only. Sync keeps it in a private GitHub repository you own: safe from a cleared browser, the same on every device, and each study session a commit on your contribution graph.
+      </p>
+      <ol className="mt-3 list-decimal space-y-1 pl-5 text-meta text-ink2">
+        <li>
+          Create a private repository named atlas-data.
+          <StepLink href={NEW_REPO_URL}>New repository</StepLink>
+        </li>
+        <li>
+          Create a fine-grained token: only that repository, Contents: read and write, 90 days.
+          <StepLink href={NEW_TOKEN_URL}>Create a fine-grained token</StepLink>
+        </li>
+        <li>Paste both here and connect. The first sync writes the layout and a README.</li>
+      </ol>
+      <form
+        className="mt-3 space-y-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void connect();
+        }}
+      >
+        <TextField label="Repository" hint="Owner and name, like your-name/atlas-data." value={repo} onChange={setRepo} autoComplete="off" />
+        <TextField label="Personal access token" type="password" autoComplete="off" value={token} onChange={setToken} />
+        <Button aria-disabled={!repo.trim() || !token.trim() || busy || undefined} onClick={() => void connect()}>
+          {busy ? 'Connecting' : 'Connect'}
+        </Button>
+      </form>
       {message && (
-        <p role="status" className="mt-3 text-meta text-ink">
+        <p role="alert" className="mt-3 text-meta text-ink">
           {message}
         </p>
+      )}
+      {view.calendarOnly && (
+        <>
+          <RowList className="mt-4" label="GitHub calendar">
+            {calendarRow}
+          </RowList>
+          <Button className="mt-3" onClick={() => void disconnectGithub(seed.settings).then(() => setMessage('The token was removed from this browser.'))}>
+            Remove the calendar token
+          </Button>
+        </>
       )}
       <p className="mt-3 text-meta text-ink2">The token stays in this browser&apos;s IndexedDB. It is never exported, and it is sent to api.github.com and nowhere else.</p>
     </Section>
@@ -444,7 +560,7 @@ export function Settings() {
           <Appearance settings={atlas.settings} />
           <Keyboard />
           <Backup settings={atlas.settings} />
-          <GitHub settings={atlas.settings} />
+          <Sync settings={atlas.settings} />
         </div>
       )}
     </Screen>

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AtlasDB } from '../../src/db/db.ts';
 import { backupDue, canonical, collectBackup, createBackup, importBackup, markBackedUp, parseBackup, resetAll, serialiseBackup } from '../../src/db/backup.ts';
 import { defaultSettings } from '../../src/db/settings.ts';
@@ -60,11 +60,14 @@ describe('backup', () => {
   });
 
   it('writes canonical JSON, so the order fields were written in does not matter', async () => {
+    // Both writes at the same moment, so their sync stamps match too.
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-09-21T10:00:00Z') });
     await database.dayLogs.put({ date: '2026-09-21', entries: [{ minutes: 60, block: 'A', track: 'gamedev' }], energy: 3 });
     const a = serialiseBackup(await createBackup(new Date(0), database));
     await database.dayLogs.clear();
     await database.dayLogs.put({ energy: 3, entries: [{ track: 'gamedev', block: 'A', minutes: 60 }], date: '2026-09-21' });
     const b = serialiseBackup(await createBackup(new Date(0), database));
+    vi.useRealTimers();
     expect(b).toBe(a);
     expect(canonical({ b: 1, a: { d: 1, c: undefined, b: 2 } })).toEqual({ a: { b: 2, d: 1 }, b: 1 });
   });
