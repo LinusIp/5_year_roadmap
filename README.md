@@ -3,8 +3,9 @@
 A local-first personal learning platform for one five-year plan (2026-09-21 to 2031-08-31). It answers
 one question every morning: **what exactly do I do in my 8 hours today?**
 
-No backend, no account, and no network calls unless you turn on the optional GitHub calendar. Everything
-you log stays in your browser (IndexedDB) and can be exported to a single JSON file.
+No backend and no account. Everything you log is kept in your browser (IndexedDB), and with the optional
+GitHub Sync also in a private repository you own, where each study session becomes a commit. Without it, the
+app makes no network calls at all, and everything can still be exported to a single JSON file.
 
 > Build status: see [PROGRESS.md](PROGRESS.md). Choices and assumptions: see [DECISIONS.md](DECISIONS.md).
 
@@ -40,6 +41,7 @@ npm run dev
 | `npm run log:export` | Writes each logged day from a backup to `learning-log/YYYY/MM/DD.md` (see below). |
 | `npm run screenshots` | Builds, then redraws the screenshots above (the screenshot test's baselines in `screenshots/`) from demo data. |
 | `npm run fetch:units` | Rebuilds the lecture and chapter checklists from the courses own syllabus pages. |
+| `npm run test:sync -- --repo owner/name` | Runs GitHub Sync against the real GitHub, by hand (see below). Never in CI. |
 
 ## Keyboard
 
@@ -60,32 +62,79 @@ Enter opens it.
 Pushing to `main` builds and deploys to GitHub Pages (`.github/workflows/deploy.yml`). One-time setup in
 the repository: **Settings > Pages > Build and deployment > Source = "GitHub Actions"**.
 
-## GitHub (optional)
+## GitHub Sync (optional)
 
-Both halves are off until you use them.
+Off until you connect it. With it on, a private GitHub repository is where your log and progress live, and the
+browser keeps a copy that works offline. Clearing the browser or changing devices loses nothing, and every
+study session is a commit on your contribution graph.
 
-**Your GitHub calendar beside the Atlas one.** In Settings > GitHub, paste a
-[fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) with no
-permissions added: reading your contribution calendar needs none. Atlas checks it with GitHub, then keeps
-it in this browser's IndexedDB. It is never exported, never written to the repository, and sent only to
-`api.github.com`. The Activity page then draws your contributions under the Atlas heatmap, over the same
-days and in the same columns, and counts the days both were active. The calendar is cached for an hour and
-stays visible offline.
+<p>
+  <img src="screenshots/settings-sync-off-light.png" alt="Settings, Sync, before connecting: Not backed up, three steps, and the repository and token fields" width="45%">
+  <img src="screenshots/settings-sync-on-light.png" alt="Settings, Sync, connected: Synced just now, the repository, the calendar switch, the commit email and the token's expiry" width="45%">
+</p>
 
-**A public learning log.** To keep your GitHub graph green with honest work, export a backup (Settings >
-Export everything), then run:
+**Setting it up** (Settings > Sync):
+
+1. [Create a private repository](https://github.com/new) named `atlas-data`. Leave it empty or add a README.
+2. [Create a fine-grained personal access token](https://github.com/settings/personal-access-tokens/new):
+   - Repository access: only select repositories, then `atlas-data`.
+   - Permissions: Contents, read and write. Nothing else.
+   - Expiration: 90 days.
+3. Paste the repository (`your-name/atlas-data`) and the token into Settings > Sync, then Connect. Atlas checks
+   both with GitHub, then runs the first sync. An empty repository gets a README and the whole layout. A
+   repository another device already uses is merged with what this browser has.
+4. Type the token's expiry date into "Token expires on". GitHub shows it on the token's page but does not let
+   the app read it. Atlas reminds you two weeks before.
+
+On another device, connect the same repository: the first sync brings everything over.
+
+**What ends up in the repository.** Plain JSON and Markdown, readable on GitHub and editable by hand; the
+README that Atlas writes into it explains each file.
+
+| Path | What is in it |
+|---|---|
+| `state/items.json` | Status, ticked units, notes and links of every course, book, project, paper, certificate and milestone |
+| `state/plan.json` | Your plan edits, items of your own, re-plans and picked builds |
+| `state/settings.json` | Blocks, thresholds, streak rules and theme. Never the token. |
+| `log/YYYY/MM/YYYY-MM-DD.json` and `.md` | One day, and its human-readable twin |
+| `reviews/` | Weekly, monthly and quarterly reviews |
+| `projects/` | Each project's write-up, links and checklist |
+| `research/` | Your research reports. Atlas never writes here. |
+
+**How it behaves.**
+
+- Every change is saved in the browser first, so the app never waits for the network.
+- Changes go to GitHub in one commit per sync: 3 seconds after a block or item is marked done, a timer stops or
+  a review is saved; otherwise 60 seconds after the last change; and when you leave the page. Commit messages
+  read like `log: 2026-10-07 · 8 h 10 m · 5/5 blocks`.
+- Atlas checks GitHub when it opens and every 5 minutes while it is on screen.
+- When two devices changed the same day, their entries are merged, and the later edit of each entry wins.
+  Settings and plan edits keep the newer version, with a short notice.
+- Offline, changes wait. Settings says how many ("Offline, 3 changes waiting"), and so does a quiet line at the
+  foot of Today when they have been waiting a while. There are no banners.
+- Commits are authored with your GitHub no-reply address, so they count on your graph; Settings can change it.
+- **Disconnect** forgets the token and the repository, and keeps everything in the browser and on GitHub.
+  **Reset everything**, with Sync on, clears only this browser; the next sync brings it back.
+
+**The token** stays in this browser's IndexedDB. It is never exported, never written to either repository, and
+sent only to `api.github.com`. Anyone who can use the device could read it, which is why it should reach only
+this one repository and expire after 90 days. The calendar switch in Settings > Sync uses the same token to draw
+your real GitHub contribution calendar under the Atlas heatmap on Activity.
+
+**Checking it against the real GitHub.** `npm run test:sync` runs one full cycle with two in-memory devices:
+connect, write, flush, a second device pulls, both edit the same day, merge. It works on a throwaway branch of a
+repository you name, which it creates and deletes, and reads the token from the environment:
 
 ```bash
-npm run log:export
+ATLAS_SYNC_TOKEN=github_pat_... npm run test:sync -- --repo your-name/atlas-sync-test
 ```
 
-It reads the newest `atlas-backup-*.json` in this folder or in your Downloads folder (or the file you name),
-and writes one Markdown file per day with time logged: `learning-log/YYYY/MM/DD.md`, with what you worked
-on, for how long, and what you finished and shipped. Reflections and energy ratings stay out unless you add
-`--reflections`. Days without time get no file, and unchanged days are not rewritten, so each commit shows
-only what is new. `learning-log/` is ignored by this repository: make it a repository of its own (the script
-prints the commands) and push it to a public one. `--out <folder>` writes somewhere else, such as a clone you
-already have.
+Use a throwaway repository with at least one commit, and a token for that repository only. `--fake` runs the
+same cycle against the in-memory GitHub of the tests, and `--keep` leaves the branch for a look at its commits.
+
+**Without Sync**, Settings says "Not backed up", once, and nowhere else. Export a file now and then (Settings >
+Export everything). `npm run log:export` still turns a backup into a public Markdown learning log
+(`learning-log/YYYY/MM/DD.md`, reflections left out unless you add `--reflections`).
 
 ## Editing the curriculum
 
