@@ -9,12 +9,15 @@
  *   - The GitHub token never leaves the browser: it lives in a table that is neither exported nor cleared by
  *     an import, so a backup committed to a public repository cannot leak it.
  */
+import Dexie from 'dexie';
 import { db, EXPORTED_TABLES } from './db.ts';
 import type { AtlasDB, ExportedTable } from './db.ts';
 import { canonical, parseBackup } from './backup-file.ts';
 import { BACKUP_FORMAT_VERSION } from './types.ts';
 import type { BackupData, BackupFile } from './types.ts';
 import { today } from '../lib/dates.ts';
+import { syncEngine } from '../sync/engine.ts';
+import { markSilent } from '../sync/middleware.ts';
 
 export { backupFileName, canonical, parseBackup, serialiseBackup } from './backup-file.ts';
 
@@ -42,10 +45,15 @@ export async function markBackedUp(date: string = today(), database: AtlasDB = d
 
 export type ImportResult = { ok: true; counts: Record<ExportedTable, number> } | { ok: false; errors: string[] };
 
-/** Replaces all user state with the backup's, in one transaction. Nothing changes if any part fails. */
+/**
+ * Replaces all user state with the backup's, in one transaction. Nothing changes if any part fails. The rows go
+ * in exactly as they are in the file (no sync stamps), and with Sync on, every file is queued so GitHub gets the
+ * restored state on the next flush.
+ */
 export async function restoreBackup(file: BackupFile, database: AtlasDB = db): Promise<Record<ExportedTable, number>> {
   const counts = {} as Record<ExportedTable, number>;
   await database.transaction('rw', EXPORTED_TABLES.map((t) => database.table(t)), async () => {
+    markSilent(Dexie.currentTransaction);
     for (const table of EXPORTED_TABLES) {
       await database.table(table).clear();
       const rows = file.data[table];
@@ -60,16 +68,30 @@ export async function importBackup(text: string, database: AtlasDB = db): Promis
   const parsed = parseBackup(text);
   if (!parsed.ok) return parsed;
   try {
-    return { ok: true, counts: await restoreBackup(parsed.file, database) };
+    const counts = await restoreBackup(parsed.file, database);
+    // With Sync on, the restored state goes to GitHub too.
+    const sync = syncEngine();
+    if (sync && database === db && (await sync.config())) {
+      await sync.queueEverything();
+      void sync.syncNow();
+    }
+    return { ok: true, counts };
   } catch (err) {
     return { ok: false, errors: ['The import failed and nothing was changed: ' + (err instanceof Error ? err.message : String(err))] };
   }
 }
 
-/** Deletes every log, status, note and edit. The curriculum is untouched, and so is the GitHub token. */
+/**
+ * Deletes every log, status, note and edit on this device. The curriculum is untouched, and so is the GitHub
+ * token. With Sync on, nothing is deleted on GitHub: the outbox and the file cache are cleared, so the next pull
+ * brings the data repository's state back to this device.
+ */
 export async function resetAll(database: AtlasDB = db): Promise<void> {
-  await database.transaction('rw', EXPORTED_TABLES.map((t) => database.table(t)), async () => {
+  await database.transaction('rw', [...EXPORTED_TABLES.map((t) => database.table(t)), database.outbox, database.sync], async () => {
+    markSilent(Dexie.currentTransaction);
     for (const table of EXPORTED_TABLES) await database.table(table).clear();
+    await database.outbox.clear();
+    await database.sync.delete('cache');
   });
 }
 

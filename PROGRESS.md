@@ -17,7 +17,7 @@ with each. "Verified" means it was run, not assumed.
 | 10 | Polish | **done** |
 | – | Redesign (section 4.0, to the mockups) | **done** |
 | – | Brief update of 2026-10-08: research cadence, roadmap.sh roadmaps, new phase table | **done** |
-| – | GitHub Sync (section 4.10) | not started |
+| – | GitHub Sync (section 4.10) | **done** |
 
 ## Milestone 1 — Scaffold
 
@@ -544,3 +544,60 @@ Verified on this machine:
   6 were updated for the new curriculum.
 - `npm run test:e2e`: 77 Playwright tests. 13 are new: the research features, the UI acceptance checks and the
   screenshot test. 21 were updated for the new names and wording.
+
+## GitHub Sync (section 4.10)
+
+A private GitHub repository is now where the log and progress live, with IndexedDB as the offline copy and the
+write queue. Built in the brief's order:
+
+1. **Token setup in Settings.** Settings > Sync replaces the old GitHub section. Off, it says "Not backed up"
+   (the only place that phrase appears), lists three steps with links, and asks for the repository and a
+   fine-grained token. Connect checks both with GitHub before anything is saved, warns about a public
+   repository, and runs the first sync.
+2. **Repository layout and first sync.** An empty repository gets a README explaining the files, then the
+   layout: `state/items.json`, `state/plan.json`, `state/settings.json`, one JSON file per day under `log/`
+   with a Markdown twin, `reviews/` and `projects/`. A repository another device uses is merged with this one.
+3. **Outbox and one commit per flush.** Every write is stamped with `updatedAt` and `deviceId` and queues the
+   files it touches. A flush renders them and makes one commit through the Git Data API, authored with the
+   user's no-reply address so it counts on the contribution graph. It runs 3 seconds after a block or item is
+   done, a timer stops or a review is saved; otherwise 60 seconds after the last change; and on leaving the
+   page. Never two at once.
+4. **Pull and merge.** On opening, every 5 minutes while visible, and before every push, the branch head is
+   compared with the last one seen, and only changed files are fetched. Days merge entry by entry, with
+   tombstones for removals and a time per day-level field; item states merge record by record; settings and
+   plan keep the newer version, with a notice.
+5. **Status line.** One phrase in Settings ("Synced 2 min ago", "Syncing", "Offline, 3 changes waiting",
+   "Token invalid — reconnect"), and a quiet line on Today only when changes are stuck or the token is about to
+   expire.
+6. **Contribution calendar.** The calendar switch moved into Settings > Sync and uses the same token.
+7. **Tests.** Merge rules, the outbox, the commit builder and two devices sharing one repository, against an
+   in-memory Git that speaks GitHub's REST API (`tests/fake-github.ts`); the Settings flow end to end in the
+   browser; and `npm run test:sync`, the same cycle against the real GitHub, by hand.
+
+Checked against the real api.github.com: its CORS rules allow everything Sync sends from the browser
+(`Authorization`, `Content-Type`, `X-GitHub-Api-Version`; `PATCH`, `PUT`, `POST`). They do not expose the
+token-expiry header, so the expiry date is typed into Settings (DECISIONS.md).
+
+Verified on this machine:
+
+- `npm run build` passes (`validate:data`, typecheck, production build).
+- `npm test`: 222 unit tests. 19 are new for Sync: the merge rules (same day on two devices, removal against
+  edit, clock skew and ties, item states), the outbox (stamps and queue, offline then online, no double flush,
+  a change during a flush), the commit builder (one commit, the right tree, the right author, the brief's
+  messages), two devices through one repository (first sync, merged day, removal, settings conflict, a new
+  device taking the repository's settings, reset, rate limit and refused token, an unreadable file), and when
+  flushes happen.
+- `npm run test:e2e`: 78 Playwright tests. The three GitHub tests were rewritten for Sync (no request leaves
+  the app without a token and "Not backed up" shows only in Settings; connect, first sync, a flush when a block
+  is done, the expiry reminder, the calendar, no token in a backup or the repository, disconnect; a refused
+  token and an unknown repository save nothing). One is new: screenshots of the Sync section, off and
+  connected, which the README shows. CI runs 74 of them: the four screenshot comparisons are local only.
+- `npm run test:sync -- --fake`: every check passes, including one commit per flush and the throwaway branch
+  deleted afterwards.
+
+Not verified: `npm run test:sync` against the real GitHub. It needs a fine-grained token and a throwaway
+repository, which only the account owner can provide:
+
+```bash
+ATLAS_SYNC_TOKEN=github_pat_... npm run test:sync -- --repo your-name/atlas-sync-test
+```

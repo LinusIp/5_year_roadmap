@@ -156,6 +156,67 @@ what was chosen, why, and what it would take to change. Newest first within each
   through the same Import as a user's file and is checked by the same validation. The demo invents no links,
   which is why its one finished-looking game is still in progress: done needs a repository.
 
+## GitHub Sync (section 4.10)
+
+- **One token for Sync and the calendar.** The brief has the calendar use "the same token", so the calendar
+  switch moved into Settings > Sync. A calendar-only token saved before Sync keeps working, with a button to
+  remove it.
+- **The token's expiry is typed in.** The brief asks for a renewal reminder. GitHub sends the expiry in a
+  `GitHub-Authentication-Token-Expiration` header, but its CORS `Access-Control-Expose-Headers` list leaves it
+  out (checked against api.github.com on 2026-10-08, both on a plain response and on a preflight), so a page
+  cannot read it. Settings has a "Token expires on" field instead. The reminder shows in Settings two weeks
+  ahead and on Today's foot one week ahead. The code still reads the header, and fills the field by itself if
+  GitHub ever exposes it.
+- **The outbox holds file paths, not file contents.** The brief describes queue entries as `{path, content,
+  baseSha}`. Here content is rendered when the flush runs, so twenty ticks of one checklist make one blob, and
+  the base sha lives in one cache of the repository's tree. Each entry has a sequence number, so a flush clears
+  only the entries that did not change again while it ran.
+- **Stamps are added in one place.** A Dexie middleware stamps `updatedAt` and `deviceId` on every write to a
+  synced table and queues the files it touches, so no screen has to remember to. Imports and pulls write
+  "silently": no stamps, no queue.
+- **The Git Data API for every commit but the first.** It cannot write to an empty repository, so an empty one
+  first gets its README through the contents API, alone. After that, a flush is blobs, one tree, one commit and
+  a fast-forward of the branch. If another device moved the branch in between, the sync starts again from the
+  pull, up to three times.
+- **A pull reads one tree and only the files whose sha changed.** The brief polls `state/` and the current
+  month of `log/`. One recursive tree listing covers the whole repository at the same cost, so a day edited on
+  another device last month arrives too. Requests skip the browser's HTTP cache, so a poll never sees a branch
+  head older than the one just pushed.
+- **Merging a day needs more than `updatedAt` per entry.** Entries get ids. A removed entry leaves a tombstone
+  with a time, so "removed here, edited there" goes to whichever happened later; tombstones older than 60 days
+  are dropped. Each day-level field (reflection, energy, freeze, done blocks) records when it changed, so a
+  reflection written on the phone survives a timer stopped on the laptop. Ties go to the larger device id, so
+  both devices pick the same winner. A skewed clock can make an older edit of one entry win; it never loses an
+  entry only one side has.
+- **On a device's first sync, the repository wins for settings and plan.** Otherwise a new phone would push
+  its defaults over the settings it came to fetch. Item states still merge record by record.
+- **Reset, with Sync on, resets this device only.** Nothing is deleted on GitHub: the next sync brings it all
+  back. Deleting the data on GitHub is a job for GitHub. An import, with Sync on, replaces the repository's
+  state with the file's on the next flush, which is what "Replace" says; the old state stays in Git history.
+- **Commits are authored with the no-reply address** (`id+login@users.noreply.github.com`), which GitHub
+  always counts on the contribution graph, unless the token may read the account's emails, in which case the
+  primary verified one. Settings can change it.
+- **Generated files are only written.** The Markdown twin of each day and the project pages are rebuilt from
+  the JSON. Reviews are Markdown with the record as JSON front matter (valid YAML), so they read back exactly.
+  The day twins include reflections and energy: the data repository is private, unlike the public learning log.
+- **Project pages are named by project id** (`projects/w-c-ring-buffer.md`), not by title, so a curriculum edit
+  that renames a project does not rename its file.
+- **What stays on the device:** the timer, the keyboard-shortcut switch (the `meta` table), the token, the
+  calendar cache and the sync state. None of it is in a backup or the repository.
+- **A file Atlas cannot read is reported, not retried.** It is named in Settings and fetched again only when it
+  changes on GitHub. A day file deleted on GitHub is deleted on the device too, unless the device has edits to
+  it waiting.
+- **Failures stay quiet.** A rate limit pauses sync until `X-RateLimit-Reset` or `Retry-After`. A refused token
+  stops automatic syncs until "Sync now" or a reconnect. Offline, changes wait. Each is one phrase in Settings,
+  and a quiet line on Today when changes cannot go out or have waited over two minutes.
+- **`npm run test:sync` works on a throwaway branch** of a repository the user names, created from its default
+  branch and deleted afterwards, pass or fail. It refuses an empty repository, because the first commit of a
+  repository cannot be cleaned up. It refuses to run when `CI` is set, and reads the token from the
+  environment only. `--fake` runs the same cycle against the in-memory GitHub of the tests.
+- **The tests' GitHub is a small in-memory Git** (`tests/fake-github.ts`): real blob shas, made-up tree and
+  commit shas, a branch that moves only by fast-forward, and api.github.com's real CORS headers in the browser
+  tests, so the expiry header is hidden there as it is in production.
+
 ## The redesign (section 4.0) and the mockups
 
 The redesign prompt and `Atlas Mockups.html` arrived together, and the user's instruction was that the UI must
@@ -195,9 +256,8 @@ be the same as the mockups. Where the two disagree, the mockups win, and each su
   catalogue's titles are "DataTalksClub Machine Learning Zoomcamp" and "MIT 18.06 Linear Algebra (Gilbert
   Strang, Spring 2010)". Resources may carry a `short` name, used on Today, Plan and the Library; sheets and
   search keep the full title.
-- **The backup reminder is gone from Today.** The 2026-10-07 brief removed it. Settings still says when the
-  last export was. The brief's "Not backed up" line belongs to GitHub Sync, which shows it once in Settings
-  when sync is off, and arrives with it.
+- **The backup reminder is gone from Today.** The 2026-10-07 brief removed it. With Sync off, Settings says
+  "Not backed up", once, as the brief asks, and still says when the last export was.
 
 ## The brief of 2026-10-08 (21:20)
 
@@ -210,8 +270,9 @@ be the same as the mockups. Where the two disagree, the mockups win, and each su
   quarterly questions, the lab notebook, OSS pull requests) show under Projects > Research once their phase
   has begun; before that, one row names the first of them. Reviews gains a Quarterly tab that records the
   quarter's research question and a link to its two-page report.
-- **The research report lives in the user's data repository.** The brief asks for reports in `research/` in the
-  data repo. Until GitHub Sync exists, the quarterly review stores a link to wherever the report is.
+- **The research report lives in the user's data repository, written by the user.** The brief asks for
+  reports in `research/` in the data repo. Atlas never writes there; the quarterly review stores a link to the
+  report, wherever it is.
 - **Roadmap nodes are ticked by hand or by finished items.** A node is checked when it is ticked on its
   roadmap's sheet, or when a done resource or project `covers` it. Nodes covered by a done item cannot be
   unticked by hand; un-finishing the item unticks them. Manual ticks are stored as an item state keyed

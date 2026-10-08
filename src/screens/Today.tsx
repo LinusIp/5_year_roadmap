@@ -32,6 +32,7 @@ import { NotesField } from './parts/NotesField.tsx';
 import { PickerSheet } from './parts/PickerSheet.tsx';
 import { takenProject } from './parts/taken.ts';
 import { blockShort, dateTitle, nameOf, partOf, span, unitDetail } from './parts/text.ts';
+import { todayLine, tokenDaysLeft, useSyncView } from '../sync/status.ts';
 
 type SheetName = 'log' | 'date' | 'day' | 'note' | null;
 
@@ -97,6 +98,7 @@ export function Today() {
   const settings = atlas?.settings;
   const weekStart = useMemo(() => startOfWeek(date, settings?.core.weekStartsOn ?? 1), [date, settings]);
   const weekPick = useWeekPick(weekStart);
+  const syncView = useSyncView();
 
   const [chosen, setChosen] = useState<BlockId | null>(null);
   const [expanded, setExpanded] = useState(false);
@@ -167,6 +169,11 @@ export function Today() {
 
   const reviewDay = settings.core.review.day;
   const isReviewDay = weekday(date) === reviewDay;
+  // GitHub Sync's one quiet line: changes that cannot go out, or a token about to expire. Nothing otherwise.
+  const tokenDays = syncView?.connected ? tokenDaysLeft(syncView.config, now) : null;
+  const syncLine =
+    todayLine(syncView) ??
+    (tokenDays !== null && tokenDays <= 7 ? (tokenDays < 0 ? 'The GitHub token has expired' : 'The GitHub token expires in ' + tokenDays + (tokenDays === 1 ? ' day' : ' days')) : null);
   const hour = new Date().getHours();
   const showDayRow = !isToday || blocks.every(done) || hour >= 22;
 
@@ -438,6 +445,12 @@ export function Today() {
       {!isReviewDay && (
         <Link to="/reviews" className="mt-1 flex min-h-11 items-center text-meta text-ink2">
           Weekly review on {dayName(addDays(date, (reviewDay - weekday(date) + 7) % 7))}
+        </Link>
+      )}
+
+      {syncLine && (
+        <Link to="/settings?section=sync" className="flex min-h-11 items-center text-meta text-ink2">
+          {syncLine}
         </Link>
       )}
 

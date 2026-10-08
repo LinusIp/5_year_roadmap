@@ -71,7 +71,7 @@ describe('editing the curriculum', () => {
     const progress = itemProgress({ refId: course.id, estHours: course.estHours, unitCount: course.unitCount, state: await database.itemStates.get('mit-18-06') });
     expect(progress).toMatchObject({ status: 'active', unitsDone: 2, unitCount: originalUnits + 1, estHours: 140 });
     expect(rebuilt.seed!.resources.find((r) => r.id === 'mit-18-06')!.units!.find((u) => u.id === 'lecture-1')!.title).toBe('Lecture 1: Geometry of linear equations');
-    expect((await database.dayLogs.get('2026-09-21'))!.entries).toEqual([{ block: 'E', track: 'math', refId: 'mit-18-06', minutes: 90 }]);
+    expect((await database.dayLogs.get('2026-09-21'))!.entries).toMatchObject([{ block: 'E', track: 'math', refId: 'mit-18-06', minutes: 90 }]);
     expect((await database.itemStates.get('30-days-of-python'))!.status).toBe('active');
     // The lane took the new order, and the plan item kept its id, so edits made to it in the app still apply.
     const lane = app.plan.filter((p) => p.phaseId === 'y1-p0' && p.block === 'E').sort((a, b) => a.order - b.order);
