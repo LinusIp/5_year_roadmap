@@ -1,11 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import type { Page, Route } from '@playwright/test';
-import { logTime, open } from './helpers.ts';
+import { FakeGithub } from '../fake-github.ts';
+import { logTime, nowCard, open } from './helpers.ts';
 
 /**
- * The optional GitHub integration, against a stand-in for api.github.com (page.route), so the tests never
- * reach the real one. Also the brief's rule that nothing else leaves the machine.
+ * GitHub Sync and the calendar, against a stand-in for api.github.com (tests/fake-github.ts behind page.route),
+ * so the tests never reach the real one. Also the brief's rule that nothing else leaves the machine, and that
+ * "Not backed up" shows once, in Settings.
  */
 const DAY = '2026-09-24T09:00:00+05:00';
 const TOKEN = 'github_pat_e2e_0123456789';
@@ -28,95 +30,161 @@ function watchForeignRequests(page: Page, baseURL: string | undefined): string[]
   return foreign;
 }
 
-const CORS = { 'Access-Control-Allow-Origin': '*' };
+/**
+ * The CORS headers api.github.com sends (checked against the real API on 2026-10-08). The token-expiration
+ * header is not in the expose list, so the page cannot read it, here as there.
+ */
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE',
+  'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-GitHub-Api-Version',
+  'Access-Control-Expose-Headers': 'ETag, Link, Location, Retry-After, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset',
+};
 
-/** Answers like GitHub: who the token belongs to, and a calendar with three active days. */
-async function fakeGithub(page: Page, options: { accept: boolean }): Promise<string[]> {
+const CALENDAR_DAYS = [
+  { date: '2026-09-20', contributionCount: 2, contributionLevel: 'FIRST_QUARTILE' },
+  { date: '2026-09-21', contributionCount: 5, contributionLevel: 'SECOND_QUARTILE' },
+  { date: '2026-09-22', contributionCount: 0, contributionLevel: 'NONE' },
+  { date: '2026-09-23', contributionCount: 9, contributionLevel: 'FOURTH_QUARTILE' },
+  { date: '2026-09-24', contributionCount: 2, contributionLevel: 'FIRST_QUARTILE' },
+];
+
+/** Serves the fake: its REST routes, and a GraphQL endpoint for the calendar. Returns every Authorization header seen. */
+async function serveGithub(page: Page, fake: FakeGithub): Promise<string[]> {
   const authorizations: string[] = [];
-  await page.route('https://api.github.com/graphql', async (route: Route) => {
+  await page.route('https://api.github.com/**', async (route: Route) => {
     const request = route.request();
-    authorizations.push(request.headers()['authorization'] ?? '');
-    if (!options.accept) {
-      await route.fulfill({ status: 401, headers: CORS, json: { message: 'Bad credentials' } });
+    const auth = request.headers()['authorization'];
+    if (auth) authorizations.push(auth);
+    if (request.method() === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers: CORS });
       return;
     }
-    const body = request.postDataJSON() as { query: string };
-    if (!body.query.includes('contributionsCollection')) {
-      await route.fulfill({ headers: CORS, json: { data: { viewer: { login: 'octo-learner' } } } });
+    if (request.url() === 'https://api.github.com/graphql') {
+      if (auth !== 'bearer ' + fake.token) {
+        await route.fulfill({ status: 401, headers: CORS, json: { message: 'Bad credentials' } });
+        return;
+      }
+      const body = request.postDataJSON() as { query: string };
+      const viewer = body.query.includes('contributionsCollection')
+        ? { login: fake.owner, contributionsCollection: { contributionCalendar: { weeks: [{ contributionDays: CALENDAR_DAYS }] } } }
+        : { login: fake.owner };
+      await route.fulfill({ headers: CORS, json: { data: { viewer } } });
       return;
     }
-    const days = [
-      { date: '2026-09-20', contributionCount: 2, contributionLevel: 'FIRST_QUARTILE' },
-      { date: '2026-09-21', contributionCount: 5, contributionLevel: 'SECOND_QUARTILE' },
-      { date: '2026-09-22', contributionCount: 0, contributionLevel: 'NONE' },
-      { date: '2026-09-23', contributionCount: 9, contributionLevel: 'FOURTH_QUARTILE' },
-      { date: '2026-09-24', contributionCount: 2, contributionLevel: 'FIRST_QUARTILE' },
-    ];
-    await route.fulfill({
-      headers: CORS,
-      json: { data: { viewer: { login: 'octo-learner', contributionsCollection: { contributionCalendar: { weeks: [{ contributionDays: days }] } } } } },
-    });
+    const raw = request.postData();
+    const r = await fake.handle(request.method(), request.url(), raw ? JSON.parse(raw) : undefined, request.headers());
+    await route.fulfill({ status: r.status, headers: { ...r.headers, ...CORS }, body: JSON.stringify(r.json ?? null) });
   });
   return authorizations;
 }
 
-test('without a token, no page ever makes a request beyond the app itself', async ({ page, baseURL }) => {
+test('without a token, no page ever makes a request beyond the app itself, and only Settings says "Not backed up"', async ({ page, baseURL }) => {
   const foreign = watchForeignRequests(page, baseURL);
   const pages = ['./', './#/activity', './#/plan', './#/plan?view=projects', './#/plan?view=papers', './#/plan?view=credentials', './#/plan/pick', './#/library', './#/library/mit-18-06', './#/reviews', './#/stats', './#/settings'];
-  for (const path of pages) await open(page, path);
-  await expect(page.getByRole('heading', { name: 'GitHub', exact: true })).toBeVisible();
+  for (const path of pages) {
+    await open(page, path);
+    await expect(page.getByText('Not backed up', { exact: true })).toHaveCount(path === './#/settings' ? 1 : 0);
+  }
+  await expect(page.getByRole('heading', { name: 'Sync', exact: true })).toBeVisible();
   expect(foreign).toEqual([]);
 });
 
-test('connecting GitHub puts the real calendar under the Atlas heatmap, and the token stays out of backups', async ({ page, baseURL }) => {
+test('connecting Sync writes the log to the repository as the user, flushes when a block is done, and keeps the token to itself', async ({ page, baseURL }) => {
   const foreign = watchForeignRequests(page, baseURL);
-  const authorizations = await fakeGithub(page, { accept: true });
+  const fake = new FakeGithub({ owner: 'octo-learner', repo: 'atlas-data', token: TOKEN, userId: 4242, name: 'Octo Learner', tokenExpiry: '2026-12-23' });
+  const authorizations = await serveGithub(page, fake);
 
   await open(page, './');
   await logTime(page, '120');
 
   await open(page, './#/settings');
-  const section = page.locator('section#github');
+  const section = page.locator('section#sync');
+  await expect(section.getByRole('status')).toHaveText('Not backed up');
+  await section.getByRole('textbox', { name: 'Repository' }).fill('octo-learner/atlas-data');
   await section.getByLabel('Personal access token').fill(TOKEN);
   await section.getByRole('button', { name: 'Connect' }).click();
-  await expect(section.getByRole('status')).toHaveText('Your GitHub calendar is now on Activity.');
-  await expect(section.getByText('Connected as @octo-learner', { exact: true })).toBeVisible();
-  expect(authorizations).toEqual(['bearer ' + TOKEN]);
+  await expect(section.getByText('Connected as @octo-learner. Your log and progress are in octo-learner/atlas-data.')).toBeVisible();
+  await expect(section.getByRole('status')).toHaveText('Synced just now');
 
+  // The first sync: a README, then the layout, authored with the no-reply address so GitHub counts it.
+  expect(Object.keys(fake.files()).sort()).toEqual([
+    'README.md',
+    'log/2026/09/2026-09-24.json',
+    'log/2026/09/2026-09-24.md',
+    // Logging time started the game, so it has a project page.
+    'projects/a-small-game-1.md',
+    'state/items.json',
+    'state/plan.json',
+    'state/settings.json',
+  ]);
+  expect(JSON.parse(fake.files()['log/2026/09/2026-09-24.json']!).entries[0].minutes).toBe(120);
+  expect(fake.files()['projects/a-small-game-1.md']).toMatch(/^# One finished small game[\s\S]*Status: active[\s\S]*## Done when\n\n- \[ \] /);
+  expect(fake.log().map((c) => c.message.split('\n')[0])).toEqual([expect.stringMatching(/^log: 2026-09-24 · 2 h · 0\/\d blocks$/), 'Atlas: set up the data repository']);
+  expect(fake.log()[0]!.author).toMatchObject({ name: 'Octo Learner', email: '4242+octo-learner@users.noreply.github.com' });
+
+  // GitHub does not let the page read the token's expiry, so it is typed in; the reminder follows it.
+  const expiry = section.getByRole('textbox', { name: 'Token expires on' });
+  await expect(expiry).toHaveValue('');
+  await expiry.fill('2026-10-01');
+  await expiry.blur();
+  await expect(section.getByText('The token expires in 7 days. Create a new one and reconnect.')).toBeVisible();
+
+  // A block marked done goes to GitHub 3 seconds later, in its own commit.
+  await open(page, './');
+  await expect(page.getByRole('link', { name: 'The GitHub token expires in 7 days' })).toBeVisible();
+  await nowCard(page).getByRole('button', { name: 'Mark done' }).click();
+  await page.clock.fastForward(4_000);
+  await expect.poll(() => fake.log()[0]!.message.split('\n')[0]).toMatch(/^log: 2026-09-24 · 2 h · 1\/\d blocks$/);
+  expect(fake.log()).toHaveLength(3);
+
+  // The calendar comes with the same token.
+  await open(page, './#/settings');
+  await section.getByRole('switch', { name: 'Show my GitHub calendar on Activity' }).click();
   await open(page, './#/activity');
   const calendar = page.getByRole('region', { name: 'GitHub @octo-learner' });
-  await expect(calendar.getByRole('group', { name: 'GitHub contributions in 2026' })).toBeVisible();
-  // The whole calendar year, like the Atlas heatmap's above it.
   await expect(calendar.getByText('18 contributions on 4 days · both on 1 of 1 Atlas day')).toBeVisible();
-  await expect(calendar.getByRole('status')).toHaveText(/^Updated 24 Sep, 09:0\d\.$/);
 
-  // A backup carries the login and the switch, never the token.
+  // Neither a backup nor the repository holds the token.
   await open(page, './#/settings');
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Export everything' }).click()]);
   const backup = readFileSync((await download.path())!, 'utf8');
   expect(backup).toContain('"username": "octo-learner"');
   expect(backup).not.toContain(TOKEN);
+  for (const content of Object.values(fake.files())) expect(content).not.toContain(TOKEN);
 
-  // Removing the token removes the calendar.
-  await page.locator('section#github').getByRole('button', { name: 'Remove the token' }).click();
-  await expect(page.locator('section#github').getByLabel('Personal access token')).toBeVisible();
+  // Disconnecting forgets the token and the repository; the calendar goes with them.
+  await section.getByRole('button', { name: 'Disconnect' }).click();
+  await expect(section.getByRole('status')).toHaveText('Not backed up');
   await open(page, './#/activity');
   await expect(page.getByRole('region', { name: /^GitHub/ })).toHaveCount(0);
 
-  // The only requests that left the app went to GitHub's API, and each carried the token.
-  expect(foreign.filter((request) => request.startsWith('POST ')).length).toBeGreaterThan(0);
-  expect(new Set(foreign.map((request) => request.split(' ')[1]))).toEqual(new Set(['https://api.github.com/graphql']));
-  expect(new Set(authorizations)).toEqual(new Set(['bearer ' + TOKEN]));
+  // Everything that left the app went to GitHub's API, with the token.
+  expect(new Set(foreign.map((request) => new URL(request.split(' ')[1]!).origin))).toEqual(new Set(['https://api.github.com']));
+  expect(new Set(authorizations)).toEqual(new Set(['Bearer ' + TOKEN, 'bearer ' + TOKEN]));
 });
 
-test('a token GitHub refuses is not saved', async ({ page }) => {
-  await fakeGithub(page, { accept: false });
+test('a token or repository GitHub refuses is not saved, and nothing is written', async ({ page }) => {
+  const fake = new FakeGithub({ owner: 'octo-learner', repo: 'atlas-data', token: TOKEN });
+  await serveGithub(page, fake);
   await open(page, './#/settings');
-  const section = page.locator('section#github');
+  const section = page.locator('section#sync');
+
+  await section.getByRole('textbox', { name: 'Repository' }).fill('octo-learner/atlas-data');
   await section.getByLabel('Personal access token').fill('github_pat_revoked');
   await section.getByRole('button', { name: 'Connect' }).click();
-  await expect(section.getByRole('status')).toHaveText('GitHub did not accept the token. It may have expired or been revoked. The token was not saved.');
+  await expect(section.getByRole('alert')).toHaveText('GitHub did not accept the token. It may have expired or been revoked. The token was not saved.');
+
+  await section.getByRole('textbox', { name: 'Repository' }).fill('octo-learner/no-such-repo');
+  await section.getByLabel('Personal access token').fill(TOKEN);
+  await section.getByRole('button', { name: 'Connect' }).click();
+  await expect(section.getByRole('alert')).toHaveText(
+    'GitHub found no repository octo-learner/no-such-repo that this token can see. Check the name, and that the token was given access to it. The token was not saved.',
+  );
+
   await page.reload();
-  await expect(page.locator('section#github').getByLabel('Personal access token')).toHaveValue('');
-  await expect(page.locator('section#github').getByRole('button', { name: 'Connect' })).toBeDisabled();
+  await expect(section.getByLabel('Personal access token')).toHaveValue('');
+  await expect(section.getByRole('button', { name: 'Connect' })).toBeDisabled();
+  await expect(section.getByRole('status')).toHaveText('Not backed up');
+  expect(fake.files()).toEqual({});
 });

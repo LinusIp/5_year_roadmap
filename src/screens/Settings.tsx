@@ -401,13 +401,15 @@ function Sync({ settings }: { settings: StoredSettings }) {
   }, []);
 
   if (!view) return <Section id="sync" title="Sync" children={null} />;
-  const engine = syncEngine();
+  // Looked up when used, not at render: the engine starts a moment after the first screen draws.
+  const engine = { get current() { return syncEngine(); } };
 
   const connect = async (): Promise<void> => {
-    if (!repo.trim() || !token.trim() || busy || !engine) return;
+    const sync = engine.current;
+    if (!repo.trim() || !token.trim() || busy || !sync) return;
     setBusy(true);
     setMessage('Connecting…');
-    const result = await engine.connect({ repo, token });
+    const result = await sync.connect({ repo, token });
     setBusy(false);
     if (result.ok) {
       setToken('');
@@ -463,22 +465,22 @@ function Sync({ settings }: { settings: StoredSettings }) {
             hint="GitHub counts a commit on your graph when its email is on your account. The no-reply address always is."
             valid={(v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)}
             problem="That does not look like an email address."
-            onSave={(v) => void engine?.setAuthorEmail(v)}
+            onSave={(v) => void engine.current?.setAuthorEmail(v)}
           />
           <SavedField
             label="Token expires on"
             value={config.tokenExpiresAt ?? ''}
-            hint="Atlas reminds you two weeks before. Write it like 2027-01-06."
+            hint="GitHub shows it on the token's page but does not tell the app. Atlas reminds you two weeks before. Write it like 2027-01-06."
             valid={(v) => /^\d{4}-\d{2}-\d{2}$/.test(v)}
             problem="Write the date like 2027-01-06."
-            onSave={(v) => void engine?.setTokenExpiry(v || undefined)}
+            onSave={(v) => void engine.current?.setTokenExpiry(v || undefined)}
           />
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Button onClick={() => void engine?.syncNow({ force: true })} aria-disabled={status.phase === 'syncing' || undefined}>
+          <Button onClick={() => void engine.current?.syncNow({ force: true })} aria-disabled={status.phase === 'syncing' || undefined}>
             Sync now
           </Button>
-          <Button onClick={() => void engine?.disconnect().then(() => setMessage('Disconnected. Everything stays on this device and in the repository.'))}>Disconnect</Button>
+          <Button onClick={() => void engine.current?.disconnect().then(() => setMessage('Disconnected. Everything stays on this device and in the repository.'))}>Disconnect</Button>
         </div>
         {message && <p className="mt-3 text-meta text-ink">{message}</p>}
         <p className="mt-3 text-meta text-ink2">
