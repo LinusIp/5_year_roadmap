@@ -595,9 +595,25 @@ Verified on this machine:
 - `npm run test:sync -- --fake`: every check passes, including one commit per flush and the throwaway branch
   deleted afterwards.
 
-Not verified: `npm run test:sync` against the real GitHub. It needs a fine-grained token and a throwaway
-repository, which only the account owner can provide:
+### Against the real GitHub (2026-10-08)
 
-```bash
-ATLAS_SYNC_TOKEN=github_pat_... npm run test:sync -- --repo your-name/atlas-sync-test
-```
+`npm run test:sync -- --repo LinusIp/atlas-sync-test` was run against github.com, in a private repository
+made for it with one README commit. The token was the account's existing GitHub CLI credential, passed to the
+script through `ATLAS_SYNC_TOKEN` only, never printed or written down. All 13 checks passed on the first run,
+so nothing needed fixing:
+
+- connect opened the repository, and the first sync wrote the day;
+- a second device connected and pulled the day and the course state;
+- both devices edited the same day before syncing, and both ended with all three entries and the reflection,
+  as did the repository;
+- three flushes made three commits, each authored as `138181706+LinusIp@users.noreply.github.com`: the token
+  could not read the account's emails, so Atlas used the no-reply address, which GitHub counts on the graph;
+- the throwaway branch was deleted afterwards. A separate listing of the repository's branches showed only
+  `main`.
+
+The credential was a classic OAuth token (scopes `repo`, `workflow`, `gist`, `read:org`), not the
+fine-grained one the app asks for. The requests are the same with either kind. Every call Sync makes to the
+repository is a Git data or contents call, which GitHub gates on the Contents permission, plus repository
+metadata, which every fine-grained token can read; a fine-grained token itself was not used in this run. The
+test repository could not be deleted with this credential, which lacks the `delete_repo` scope; it is safe to
+delete by hand.
