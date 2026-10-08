@@ -48,7 +48,8 @@ export class FakeGithub {
   readonly blobs = new Map<string, string>();
   readonly trees = new Map<string, Map<string, string>>();
   readonly commits = new Map<string, FakeCommit>();
-  head: string | null = null;
+  /** Branch name to commit sha. */
+  readonly refs = new Map<string, string>();
   readonly requests: string[] = [];
   /** Runs just before a branch update is applied: lets a test push as "another device" in between. */
   beforeRefUpdate: (() => void) | undefined;
@@ -72,23 +73,34 @@ export class FakeGithub {
     return createHash('sha1').update(prefix + this.counter).digest('hex');
   }
 
+  /** The head of `main`, the branch Atlas uses unless told otherwise. */
+  get head(): string | null {
+    return this.refs.get('main') ?? null;
+  }
+
+  set head(sha: string | null) {
+    if (sha) this.refs.set('main', sha);
+    else this.refs.delete('main');
+  }
+
   private putBlob(content: string): string {
     const sha = FakeGithub.blobSha(content);
     this.blobs.set(sha, content);
     return sha;
   }
 
-  /** The files at the branch head, path to content. */
-  files(): Record<string, string> {
-    if (!this.head) return {};
-    const tree = this.trees.get(this.commits.get(this.head)!.tree)!;
+  /** The files at a branch's head, path to content. */
+  files(branch = 'main'): Record<string, string> {
+    const head = this.refs.get(branch);
+    if (!head) return {};
+    const tree = this.trees.get(this.commits.get(head)!.tree)!;
     return Object.fromEntries([...tree].map(([path, sha]) => [path, this.blobs.get(sha)!]));
   }
 
-  /** Commits from the head back, newest first. */
-  log(): FakeCommit[] {
+  /** A branch's commits from its head back, newest first. */
+  log(branch = 'main'): FakeCommit[] {
     const out: FakeCommit[] = [];
-    for (let sha = this.head; sha; sha = this.commits.get(sha)!.parents[0] ?? null) out.push(this.commits.get(sha)!);
+    for (let sha = this.refs.get(branch) ?? null; sha; sha = this.commits.get(sha)!.parents[0] ?? null) out.push(this.commits.get(sha)!);
     return out;
   }
 
@@ -146,13 +158,31 @@ export class FakeGithub {
 
     if (rest === '' && method === 'GET') return this.ok({ private: this.options.private ?? true, default_branch: 'main', permissions: { push: true } });
 
-    if (rest === '/git/ref/heads/main' && method === 'GET') {
-      return this.head ? this.ok({ ref: 'refs/heads/main', object: { sha: this.head, type: 'commit' } }) : this.error(409, 'Git Repository is empty.');
+    let m = /^\/git\/ref\/heads\/(.+)$/.exec(rest);
+    if (m && method === 'GET') {
+      const branch = decodeURIComponent(m[1]!);
+      if (this.refs.size === 0) return this.error(409, 'Git Repository is empty.');
+      const sha = this.refs.get(branch);
+      return sha ? this.ok({ ref: 'refs/heads/' + branch, object: { sha, type: 'commit' } }) : this.error(404, 'Not Found');
     }
-    let m = /^\/git\/commits\/([0-9a-f]+)$/.exec(rest);
+    if (rest === '/git/refs' && method === 'POST') {
+      const ref = String(data.ref);
+      if (!ref.startsWith('refs/heads/') || !this.commits.has(String(data.sha))) return this.error(422, 'Invalid request');
+      const branch = ref.slice('refs/heads/'.length);
+      if (this.refs.has(branch)) return this.error(422, 'Reference already exists');
+      this.refs.set(branch, String(data.sha));
+      return this.ok({ ref, object: { sha: data.sha } }, 201);
+    }
+    m = /^\/git\/refs\/heads\/(.+)$/.exec(rest);
+    if (m && method === 'DELETE') {
+      const branch = decodeURIComponent(m[1]!);
+      if (!this.refs.delete(branch)) return this.error(422, 'Reference does not exist');
+      return { status: 204, headers: {} };
+    }
+    m = /^\/git\/commits\/([0-9a-f]+)$/.exec(rest);
     if (m && method === 'GET') {
       const commit = this.commits.get(m[1]!);
-      return commit ? this.ok({ sha: commit.sha, tree: { sha: commit.tree } }) : this.error(404, 'Not Found');
+      return commit ? this.ok({ sha: commit.sha, tree: { sha: commit.tree }, message: commit.message, author: commit.author, parents: commit.parents.map((sha) => ({ sha })) }) : this.error(404, 'Not Found');
     }
     m = /^\/git\/trees\/([0-9a-f]+)$/.exec(rest);
     if (m && method === 'GET') {
@@ -168,7 +198,7 @@ export class FakeGithub {
       return this.ok({ sha: m[1], content: base64, encoding: 'base64' });
     }
     if (rest === '/git/blobs' && method === 'POST') {
-      if (!this.head) return this.error(409, 'Git Repository is empty.');
+      if (this.refs.size === 0) return this.error(409, 'Git Repository is empty.');
       return this.ok({ sha: this.putBlob(String(data.content)) }, 201);
     }
     if (rest === '/git/trees' && method === 'POST') {
@@ -186,14 +216,17 @@ export class FakeGithub {
       this.commits.set(sha, { sha, tree: String(data.tree), parents: data.parents as string[], message: String(data.message), author: data.author as FakeCommit['author'] });
       return this.ok({ sha }, 201);
     }
-    if (rest === '/git/refs/heads/main' && method === 'PATCH') {
+    m = /^\/git\/refs\/heads\/(.+)$/.exec(rest);
+    if (m && method === 'PATCH') {
+      const branch = decodeURIComponent(m[1]!);
       this.beforeRefUpdate?.();
       this.beforeRefUpdate = undefined;
       const commit = this.commits.get(String(data.sha));
       if (!commit) return this.error(422, 'Object does not exist');
-      if (data.force !== true && commit.parents[0] !== this.head) return this.error(422, 'Update is not a fast forward');
-      this.head = commit.sha;
-      return this.ok({ ref: 'refs/heads/main', object: { sha: commit.sha } });
+      if (!this.refs.has(branch)) return this.error(422, 'Reference does not exist');
+      if (data.force !== true && commit.parents[0] !== this.refs.get(branch)) return this.error(422, 'Update is not a fast forward');
+      this.refs.set(branch, commit.sha);
+      return this.ok({ ref: 'refs/heads/' + branch, object: { sha: commit.sha } });
     }
     m = /^\/contents\/(.+)$/.exec(rest);
     if (m && method === 'PUT') {

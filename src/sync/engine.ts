@@ -113,7 +113,8 @@ export class SyncEngine {
 
   /* ---------------------------------------------------------------- connect */
 
-  async connect(input: { repo: string; token: string }): Promise<ConnectResult> {
+  /** `branch` is for `npm run test:sync`, which works on a throwaway branch; the app uses the default one. */
+  async connect(input: { repo: string; token: string; branch?: string }): Promise<ConnectResult> {
     const m = /^\s*([A-Za-z0-9-]+)\/([A-Za-z0-9._-]+)\s*$/.exec(input.repo);
     if (!m) return { ok: false, message: 'Write the repository as owner/name, for example octocat/atlas-data.' };
     const token = input.token.trim();
@@ -129,7 +130,7 @@ export class SyncEngine {
       const email = (await client.getPrimaryEmail()) ?? user.id + '+' + user.login + '@users.noreply.github.com';
       const existing = await this.db.secrets.get('github');
       await this.db.secrets.put(existing?.token === token ? existing : { id: 'github', token });
-      const config: SyncConfig = { id: 'config', owner, repo, branch: info.defaultBranch, authorName: user.name || user.login, authorEmail: email, private: info.private };
+      const config: SyncConfig = { id: 'config', owner, repo, branch: input.branch ?? info.defaultBranch, authorName: user.name || user.login, authorEmail: email, private: info.private };
       if (client.tokenExpiresAt) config.tokenExpiresAt = client.tokenExpiresAt;
       await this.db.sync.put(config);
       await this.db.sync.delete('cache');

@@ -209,6 +209,16 @@ export class GithubClient {
     await this.request('PATCH', this.repoPath('/git/refs/heads/' + encodePath(branch)), { sha, force: false });
   }
 
+  /** Creates a branch at `sha`. Used by `npm run test:sync` for its throwaway branch. */
+  async createRef(branch: string, sha: string): Promise<void> {
+    await this.request('POST', this.repoPath('/git/refs'), { ref: 'refs/heads/' + branch, sha });
+  }
+
+  /** Deletes a branch. */
+  async deleteRef(branch: string): Promise<void> {
+    await this.request('DELETE', this.repoPath('/git/refs/heads/' + encodePath(branch)));
+  }
+
   /** The first commit of an empty repository: the Git Data API cannot write to one. Returns the commit sha. */
   async createFirstFile(path: string, content: string, message: string, author: Author, branch: string): Promise<string> {
     const json = await this.request<{ commit: { sha: string } }>('PUT', this.repoPath('/contents/' + encodePath(path)), {
