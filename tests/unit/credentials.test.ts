@@ -88,10 +88,10 @@ describe('the credential map', () => {
 describe('the reading cadence', () => {
   const settings = seed.settings.paperCadence;
 
-  it('does not start before year 2', () => {
+  it('starts with Foundations II, the second phase of year 1', () => {
     const status = cadenceStatus(seed.phases, settings, new Map(), '2026-09-21', 1);
     expect(status.active).toBe(false);
-    expect(status.startsOn).toBe('2027-09-01');
+    expect(status.startsOn).toBe('2027-02-01');
   });
 
   it('expects one paper a week once it has started, and counts what was read', () => {

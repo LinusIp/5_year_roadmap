@@ -294,7 +294,7 @@ describe('the user layer over the seed', () => {
   });
 
   it('appends after the end of a lane', () => {
-    expect(nextOrder(seed.plan, 'y1-p0', 'E')).toBe(30);
+    expect(nextOrder(seed.plan, 'y1-p0', 'E')).toBe(50);
     expect(nextOrder(seed.plan, 'y1-p0', 'Z')).toBe(10);
   });
 });

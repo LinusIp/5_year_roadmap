@@ -16,6 +16,7 @@
 
 - id: mit-6-5840
   title: "MIT 6.5840 (formerly 6.824) Distributed Systems: lectures and all labs"
+  short: "6.5840 Distributed Systems"
   provider: MIT PDOS
   type: course
   url: https://pdos.csail.mit.edu/6.824/

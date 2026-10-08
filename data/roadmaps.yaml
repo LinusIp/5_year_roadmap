@@ -1,0 +1,763 @@
+# The five roadmap.sh roadmaps the user follows (brief, "Roadmap tracks"). Node labels come from the PDFs the user
+# supplied; ids are slugs of the labels. Each section names the phase that teaches it. `optional: true` marks nodes
+# the coverage rule leaves out: vendor-specific enterprise items, engine-specific nodes, and long lists of
+# interchangeable tools where one is enough. A roadmap is "mastered" at 90 % of its other nodes plus a done
+# credential-map row (`subject`).
+
+- id: inference-engineering
+  title: Inference Engineering
+  url: https://roadmap.sh/inference-engineering
+  priority: 1
+  subject: deep-learning
+  note: Part 1 (models and performance, techniques, engines, quantization, benchmarking) in year 2; part 2 (production, scaling, parallelism, routing, hardware, beyond-LLM inference) in year 3.
+  sections:
+    - title: Introduction
+      phaseId: y2
+      nodes:
+        - Inference vs. Training
+        - Open vs Closed Models
+        - Shared vs. Dedicated Inf.
+        - The Inference Stack
+        - Time to First Token
+        - Tokens Per Second
+        - Inter-Token Latency
+        - Latency vs. Throughput
+        - Latency Percentiles
+        - End-to-End Metrics
+        - Real-Time Factor
+        - Prefill & Decode Phases
+        - Online vs. Offline Inf.
+        - Asynchronous Inference
+        - AI-Native Applications
+        - Consumer vs. B2B
+        - Reasoning Models
+        - Model Selection
+        - Model Evaluation
+        - Fine-Tuning
+        - Distillation
+    - title: Models and performance
+      phaseId: y2
+      nodes:
+        - Neural Networks
+        - Encoder-Decoder Arch.
+        - Transformer Blocks
+        - Attention Mechanism
+        - KV Cache
+        - Mixture of Experts (MoE)
+        - Diffusion Models
+        - Image Generation Arch.
+        - Few-Step Image Generation
+        - Video Generation Models
+        - Ops:Byte Ratio
+        - Arithmetic Intensity
+        - Roofline Model
+        - LLM Bottlenecks
+        - Image & Video Bottlenecks
+        - FlashAttention
+        - PagedAttention
+        - Attention Variants
+    - title: Software
+      phaseId: y2
+      nodes:
+        - CUDA
+        - Writing Custom Kernels
+        - Kernel Selection & Fusion
+        - C++
+        - PyTorch
+        - Transformers & Diffusers
+        - safetensors
+        - ONNX Runtime
+        - TensorRT
+        - vLLM
+        - SGLang
+        - TensorRT-LLM
+        - NVIDIA Dynamo
+        - ModelOpt
+    - title: Benchmarking and profiling
+      phaseId: y2
+      nodes:
+        - Performance Benchmarking
+        - Profiling Performance
+        - AIPerf
+        - Genai-bench
+        - Locust
+    - title: Inference techniques
+      phaseId: y2
+      nodes:
+        - Post-Training Quantization
+        - Quantization-Aware Training
+        - Quantization Approaches
+        - Measuring Quality Impact
+        - Draft-Target Decoding
+        - EAGLE
+        - N-gram
+        - Speculation Algorithms
+        - Caching Approaches
+        - KV Cache Storage
+        - Cache-Aware Routing
+        - Long Context Handling
+    - title: Hardware
+      phaseId: y3
+      nodes:
+        - Compute
+        - Memory
+        - Instances & Interconnects
+        - Sizing & Procurement
+        - Hopper
+        - Blackwell
+        - Grace & Vera
+        - Other Accelerators
+        - Desktop Inference
+        - Mobile Inference
+    - title: Model parallelism
+      phaseId: y3
+      nodes:
+        - Tensor Parallelism
+        - Expert Parallelism
+        - Pipeline Parallelism
+        - Multi-Node Inference
+        - Disaggregation
+    - title: Inference beyond LLMs
+      phaseId: y3
+      nodes:
+        - Vision Language Models
+        - Video Processing for VLMs
+        - Omni-Modal Models
+        - Embedding Models
+        - BERT-style models
+        - LLM-based models
+        - Embedding Model Inference
+        - Voice Activity Detection
+        - Auto. Speech Recognition
+        - Text-to-Speech (TTS)
+        - Streaming TTS
+        - Speech-to-Speech Models
+        - Image Generation Inference
+        - Video Generation Inference
+    - title: Production
+      phaseId: y3
+      nodes:
+        - Containerization
+        - Docker
+        - Kubernetes
+        - Dependency Management
+        - NIMs
+        - Continuous Batching
+        - Request Queueing
+        - Cold Starts
+        - Scale to Zero
+        - Autoscaling
+        - Indep. Component Scaling
+        - Routing & Load Balancing
+        - LoRA-Aware Routing
+        - Geo-Aware Load Balancing
+        - GPU Procurement
+        - Capacity Management
+        - Cost Estimation
+        - Multi-Cloud
+        - Security and Compliance
+        - Zero-Downtime Deplo.
+        - Observability
+        - Testing & Deployment
+
+- id: ai-engineer
+  title: AI Engineer
+  url: https://roadmap.sh/ai-engineer
+  priority: 1
+  subject: deep-learning
+  note: The applied half of priority 1. The basics in year 1; agents in Foundations II; multimodal work in year 2.
+  sections:
+    - title: Introduction
+      phaseId: y1-p0
+      nodes:
+        - What is an AI Engineer?
+        - AI Engineer vs ML Engineer
+        - LLMs
+        - Inference
+        - Training
+        - Embeddings
+        - Vector Databases
+        - RAG
+        - Prompt Engineering
+        - AI Agents
+        - AI vs AGI
+        - Roles and Responsibilities
+        - Impact on Product Development
+    - title: Pre-trained models
+      phaseId: y1-p0
+      nodes:
+        - Benefits of Pre-trained Models
+        - Limitations and Considerations
+        - Open AI Models
+        - Capabilities / Context Length
+        - Cut-off Dates / Knowledge
+        - Anthropic's Claude
+        - Google's Gemini
+        - Hugging Face Models
+        - { label: Azure AI, optional: true }
+        - { label: AWS Sagemaker, optional: true }
+        - { label: Mistral AI, optional: true }
+        - { label: Cohere, optional: true }
+    - title: The OpenAI platform
+      phaseId: y1-p0
+      nodes:
+        - OpenAI API
+        - Chat Completions API
+        - Writing Prompts
+        - Open AI Playground
+        - Fine-tuning
+        - Maximum Tokens
+        - Token Counting
+        - Pricing Considerations
+    - title: AI safety and ethics
+      phaseId: y1-p0
+      nodes:
+        - Prompt Injection Attacks
+        - Bias and Fairness
+        - Security and Privacy Concerns
+        - Conducting adversarial testing
+        - OpenAI Moderation API
+        - Adding end-user IDs in prompts
+        - Robust prompt engineering
+        - Know your Customers / Usecases
+        - Constraining outputs and inputs
+    - title: Open-source AI
+      phaseId: y1-p0
+      nodes:
+        - Open vs Closed Source Models
+        - Popular Open Source Models
+        - Hugging Face Hub
+        - Hugging Face Tasks
+        - Inference SDK
+        - Transformers.js
+        - Ollama
+        - Ollama Models
+        - Ollama SDK
+    - title: Embeddings and vector databases
+      phaseId: y1-p0
+      nodes:
+        - What are Embeddings
+        - Semantic Search
+        - Recommendation Systems
+        - Anomaly Detection
+        - Data Classification
+        - Open AI Embeddings API
+        - Open-Source Embeddings
+        - Sentence Transformers
+        - Indexing Embeddings
+        - Performing Similarity Search
+        - Chroma
+        - { label: Pinecone, optional: true }
+        - { label: Weaviate, optional: true }
+        - { label: FAISS, optional: true }
+        - { label: LanceDB, optional: true }
+        - { label: Qdrant, optional: true }
+        - { label: Supabase, optional: true }
+        - { label: MongoDB Atlas, optional: true }
+    - title: RAG
+      phaseId: y1-p0
+      nodes:
+        - RAG Usecases
+        - RAG vs Fine-tuning
+        - Chunking
+        - Embedding
+        - Vector Database
+        - Retrieval Process
+        - Generation
+        - Using SDKs Directly
+        - Langchain
+        - Llama Index
+        - { label: Open AI Assistant API, optional: true }
+        - { label: Replicate, optional: true }
+    - title: AI agents
+      phaseId: y1-p1
+      nodes:
+        - Agents Usecases
+        - ReAct Prompting
+        - Manual Implementation
+        - OpenAI Functions / Tools
+        - Building AI Agents
+    - title: Multimodal AI
+      phaseId: y2
+      nodes:
+        - Image Understanding
+        - Image Generation
+        - Video Understanding
+        - Audio Processing
+        - Text-to-Speech
+        - Speech-to-Text
+        - OpenAI Vision API
+        - DALL-E API
+        - Whisper API
+        - LangChain for Multimodal Apps
+        - LlamaIndex for Multimodal Apps
+    - title: Development tools
+      phaseId: y1-p0
+      nodes:
+        - AI Code Editors
+        - Code Completion Tools
+
+- id: ai-agents
+  title: AI Agents
+  url: https://roadmap.sh/ai-agents
+  priority: 1
+  subject: deep-learning
+  note: In full in Foundations II.
+  sections:
+    - title: Prerequisites
+      phaseId: y1-p1
+      nodes:
+        - Git and Terminal Usage
+        - REST API Knowledge
+        - Basic Backend Development
+    - title: LLM fundamentals
+      phaseId: y1-p1
+      nodes:
+        - Transformer Models and LLMs
+        - Tokenization
+        - Context Windows
+        - Token Based Pricing
+        - Temperature
+        - Frequency Penalty
+        - Presence Penalty
+        - Top-p
+        - Stopping Criteria
+        - Max Length
+        - Open Weight Models
+        - Closed Weight Models
+        - Model Families and Licences
+        - Streamed vs Unstreamed Responses
+        - Reasoning vs Standard Models
+        - Fine-tuning vs Prompt Engineering
+        - Embeddings and Vector Search
+        - Understand the Basics of RAG
+        - Pricing of Common Models
+    - title: AI agents 101
+      phaseId: y1-p1
+      nodes:
+        - What are AI Agents?
+        - What are Tools?
+        - Agent Loop
+        - Perception / User Input
+        - Reason and Plan
+        - Acting / Tool Invocation
+        - Observation & Reflection
+        - { label: Personal assistant, optional: true }
+        - { label: Code generation, optional: true }
+        - { label: Data analysis, optional: true }
+        - { label: Web Scraping / Crawling, optional: true }
+        - { label: NPC / Game AI, optional: true }
+    - title: Prompt engineering
+      phaseId: y1-p1
+      nodes:
+        - What is Prompt Engineering
+        - Be specific in what you want
+        - Provide additional context
+        - Use relevant technical terms
+        - Use Examples in your Prompt
+        - Iterate and Test your Prompts
+        - Specify Length, format etc
+    - title: Tools and actions
+      phaseId: y1-p1
+      nodes:
+        - Tool Definition
+        - Name and Description
+        - Input / Output Schema
+        - Error Handling
+        - Usage Examples
+        - Web Search
+        - Code Execution / REPL
+        - Database Queries
+        - API Requests
+        - Email / Slack / SMS
+        - File System Access
+    - title: Model Context Protocol
+      phaseId: y1-p1
+      nodes:
+        - MCP Hosts
+        - MCP Client
+        - MCP Servers
+        - Core Components
+        - Creating MCP Servers
+        - Local Desktop
+        - Remote / Cloud
+    - title: Agent memory
+      phaseId: y1-p1
+      nodes:
+        - What is Agent Memory?
+        - Short Term Memory
+        - Long Term Memory
+        - Within Prompt
+        - Vector DB / SQL / Custom
+        - Episodic vs Semantic Memory
+        - RAG and Vector Databases
+        - User Profile Storage
+        - Summarization / Compression
+        - Forgetting / Aging Strategies
+    - title: Agent architectures
+      phaseId: y1-p1
+      nodes:
+        - ReAct (Reason + Act)
+        - Chain of Thought (CoT)
+        - RAG Agent
+        - Planner Executor
+        - DAG Agents
+        - Tree-of-Thought
+    - title: Building agents
+      phaseId: y1-p1
+      nodes:
+        - Direct LLM API calls
+        - Implementing the agent loop
+        - Parsing model output
+        - Error & Rate-limit handling
+        - OpenAI Functions Calling
+        - Gemini Function Calling
+        - Anthropic Tool Use
+        - OpenAI Assistant API
+        - { label: Langchain, optional: true }
+        - { label: LlamaIndex, optional: true }
+        - { label: Haystack, optional: true }
+        - { label: AutoGen, optional: true }
+        - { label: CrewAI, optional: true }
+        - { label: Smol Depot, optional: true }
+    - title: Evaluation and testing
+      phaseId: y1-p1
+      nodes:
+        - Metrics to Track
+        - Unit Testing for Individual Tools
+        - Integration Testing for Flows
+        - Human in the Loop Evaluation
+        - Ragas
+        - DeepEval
+        - { label: LangSmith, optional: true }
+    - title: Debugging and monitoring
+      phaseId: y1-p1
+      nodes:
+        - Structured logging & tracing
+        - LangFuse
+        - { label: Helicone, optional: true }
+        - { label: openllmetry, optional: true }
+    - title: Security and ethics
+      phaseId: y1-p1
+      nodes:
+        - Prompt Injection / Jailbreaks
+        - Tool sandboxing / Permissioning
+        - Data Privacy + PII Redaction
+        - Bias & Toxicity Guardrails
+        - Safety + Red Team Testing
+
+- id: software-architect
+  title: Software Architect
+  url: https://roadmap.sh/software-architect
+  priority: 2
+  subject: system-design
+  note: Foundations in year 2 (patterns, SOLID, DDD, networks, databases, CI/CD, containers); the rest in full in year 3. Vendor-specific enterprise items are optional.
+  sections:
+    - title: Understand the basics
+      phaseId: y2
+      nodes:
+        - What is Software Architecture
+        - What is a Software Architect
+        - Application Architecture
+        - Solution Architecture
+        - Enterprise Architecture
+    - title: Technical skills
+      phaseId: y2
+      nodes:
+        - Python
+        - Go
+        - JavaScript / TypeScript
+        - { label: Java / Kotlin / Scala, optional: true }
+        - { label: Ruby, optional: true }
+        - { label: .NET Framework Based, optional: true }
+    - title: Patterns and design principles
+      phaseId: y2
+      nodes:
+        - OOP
+        - MVC, MVP, MVVM
+        - CQRS, Eventual Consistency
+        - Actors
+        - ACID, CAP Theorem
+        - SOLID
+        - TDD
+        - DDD
+    - title: Tools
+      phaseId: y2
+      nodes:
+        - Git
+        - GitHub
+        - { label: Slack, optional: true }
+        - { label: Trello, optional: true }
+        - { label: Atlassian Tools, optional: true }
+    - title: Networks
+      phaseId: y2
+      nodes:
+        - OSI
+        - TCP/IP Model
+        - HTTP, HTTPS
+        - Proxies
+        - Firewalls
+    - title: Working with data
+      phaseId: y2
+      nodes:
+        - SQL Databases
+        - NoSQL Databases
+        - ETL, Datawarehouses
+        - Datawarehouse Principles
+        - Analytics
+        - { label: Apache Spark, optional: true }
+        - { label: Hadoop, optional: true }
+    - title: APIs and integrations
+      phaseId: y2
+      nodes:
+        - gRPC
+        - GraphQL
+        - REST
+        - Messaging Queues
+        - { label: "ESB, SOAP", optional: true }
+        - { label: "BPM, BPEL", optional: true }
+    - title: Operations knowledge
+      phaseId: y2
+      nodes:
+        - Infrastructure as Code
+        - Cloud Providers
+        - Serverless Concepts
+        - Linux / Unix
+        - Service Mesh
+        - CI / CD
+        - Containers
+        - Cloud Design Patterns
+    - title: Responsibilities
+      phaseId: y3
+      nodes:
+        - Tech Decisions
+        - Design & Architecture Decisions
+        - Requirements Elicitation
+        - Documentation
+        - Enforcing Standards
+        - Collaborate with Others
+        - Consult & Coach Developers
+    - title: Important skills
+      phaseId: y3
+      nodes:
+        - Design & Architecture
+        - Decision Making
+        - Simplifying Things
+        - How to Code
+        - Communication
+        - Estimate and Evaluate
+        - Balance
+        - Consult & Coach
+        - Marketing Skills
+    - title: Architecture
+      phaseId: y3
+      nodes:
+        - Serverless
+        - Client / Server
+        - Layered
+        - Distributed Systems
+        - Service Oriented
+        - Microservices
+    - title: Security
+      phaseId: y3
+      nodes:
+        - Hashing Algorithms
+        - PKI
+        - OWASP
+        - Auth Strategies
+    - title: Web and mobile
+      phaseId: y3
+      nodes:
+        - Functional Programming
+        - React, Vue, Angular
+        - SPA, SSR, SSG
+        - Microfrontends
+        - W3C and WHATWG
+        - Reactive Programming
+    - title: Frameworks, management and agile
+      phaseId: y3
+      nodes:
+        - UML
+        - Kanban
+        - Scrum
+        - { label: TOGAF, optional: true }
+        - { label: BABOK, optional: true }
+        - { label: IAF, optional: true }
+        - { label: PMI, optional: true }
+        - { label: ITIL, optional: true }
+        - { label: Prince2, optional: true }
+        - { label: RUP, optional: true }
+        - { label: LeSS, optional: true }
+        - { label: SaFE, optional: true }
+        - { label: XP, optional: true }
+    - title: Enterprise software
+      phaseId: y3
+      nodes:
+        - { label: MS Dynamics, optional: true }
+        - { label: "SAP ERP, HANA, Business Objects", optional: true }
+        - { label: EMC DMS, optional: true }
+        - { label: IBM BPM, optional: true }
+        - { label: Salesforce, optional: true }
+
+- id: game-developer
+  title: Game Developer
+  url: https://roadmap.sh/game-developer
+  priority: 3
+  subject: graphics
+  note: Used for its mathematics, physics, graphics, graphics-API and game-AI nodes, inside Block A. Engine-specific nodes are optional.
+  sections:
+    - title: Game mathematics
+      phaseId: y1-p0
+      nodes:
+        - Linear Algebra
+        - Vector
+        - Matrix
+        - Geometry
+        - Linear Transformation
+        - Affine Space
+        - Affine Transformation
+        - Orientation
+        - Quaternion
+        - Euler Angle
+        - Curve
+        - Spline
+        - Hermite
+        - Bezier
+        - Catmull-Rom
+        - Projection
+        - Perspective
+        - Orthogonal
+    - title: Game engines and languages
+      phaseId: y1-p1
+      nodes:
+        - C/C++
+        - Rust
+        - Python
+        - { label: C#, optional: true }
+        - { label: GDScript, optional: true }
+        - { label: Godot, optional: true }
+        - { label: Unreal Engine, optional: true }
+        - { label: Unity 3D, optional: true }
+        - { label: Native, optional: true }
+    - title: Computer graphics
+      phaseId: y1-p1
+      nodes:
+        - Ray Tracing
+        - Rasterization
+        - Graphics Pipeline
+        - Sampling
+        - Shader
+        - Rendering Equation
+        - Reflection
+        - Diffuse
+        - Specular
+        - Mapping
+        - Texture
+        - Bump
+        - Parallax
+        - Horizon
+        - Computer Animation
+        - Color
+        - Visual Perception
+        - Tone Reproduction
+    - title: Game physics
+      phaseId: y2
+      nodes:
+        - Dynamics
+        - Center of Mass
+        - Moment of Inertia
+        - Acceleration
+        - Joints
+        - Force
+        - Restitution
+        - Angular Velocity
+        - Buoyancy
+        - Linear Velocity
+        - Friction
+        - Collision Detection
+        - Narrow Phase
+        - Broad Phase
+        - Convexity
+        - Convex
+        - Concave
+        - Convex Hull
+        - Convex Decomposition
+        - Intersection
+        - SAT
+        - GJK
+        - EPA
+        - Bounding Volume
+        - AABB
+        - OBB
+        - Spatial Partitioning
+        - Sort & Sweep
+        - BVH
+        - DBVT
+        - CCD
+    - title: Lighting and shadow
+      phaseId: y2
+      nodes:
+        - Shadow Map
+        - 2D
+        - Cube
+        - Cascaded
+        - Light Source
+        - Directional
+        - Point
+        - Spot
+        - Infinite
+        - Stencil Shadow
+    - title: Visibility and occlusion
+      phaseId: y2
+      nodes:
+        - Occluder
+        - Culling
+        - Clipping
+        - Fog
+        - Frustum
+        - Light
+        - Shadow
+        - Polygon
+        - Polyhedron
+    - title: Graphics API
+      phaseId: y2
+      nodes:
+        - OpenGL
+        - GLSL
+        - Vulkan
+        - SPIR-V
+        - { label: DirectX, optional: true }
+        - { label: HLSL, optional: true }
+        - { label: WebGL, optional: true }
+        - { label: OpenGL ES, optional: true }
+        - { label: Metal, optional: true }
+    - title: Game AI
+      phaseId: y3
+      nodes:
+        - Decision Tree
+        - State Machine
+        - Behavior Tree
+        - Fuzzy Logic
+        - Markov System
+        - Goal Oriented Behavior
+        - Movement
+        - Board Game
+        - Minimax
+        - AB Pruning
+        - MCTS
+        - Naive Bayes Classifier
+        - Decision Tree Learning
+        - Artificial Neural Network
+        - Reinforcement Learning
+    - title: Advanced rendering
+      phaseId: y3
+      nodes:
+        - Real-time Ray Tracing
+        - Vulkan Ray Tracing
+        - OptiX
+        - Physically-Based Rendering
+        - Translucency & Transparency
+        - Conservation of Energy
+        - Metallicity
+        - Microsurface Scattering
+        - { label: DirectX Ray Tracing, optional: true }

@@ -1,66 +1,106 @@
-# The phase table of the brief. `focus` is the table cell for each lane and is shown as that
-# lane's heading; the items themselves live in plan.yaml.
-# Stage 1 (years 1-3) is software. Stage 2 (years 4-5) is electrical and mechanical engineering.
+# The phase table of the brief (2026-10-07). `focus` is the table cell for each lane and is shown as that
+# lane's heading; the items themselves live in plan.yaml. `theme` is the year's theme, shown as the phase's
+# subtitle; `topics` is the short list on its row in Plan; `map` is its card on the five-year map.
+# Stage 1 (years 1-3) is software: year 1 foundations, year 2 building, year 3 scale and research.
+# Stage 2 (years 4-5) is electrical and mechanical engineering.
 - id: y1-p0
   year: 1
   stage: 1
-  title: In flight
+  title: Foundations I — in flight
+  theme: Year 1 · Foundations
+  topics: Python, ML Zoomcamp, linear algebra, LearnOpenGL
   start: 2026-09-21
   end: 2027-01-31
-  goal: Finish what is already running (ML Zoomcamp, 30 Days of Python, the Hugging Face courses, linear algebra, DSA) and ship small things every week.
+  goal: Finish what is already running (ML Zoomcamp, 30 Days of Python, the Hugging Face courses, linear algebra, DSA), close the game loop with one finished game, and start graphics and AI engineering.
   focus:
-    A: Small finished games in the engine already learned; one game jam
-    B: "Python: 30 Days of Python, then small CLI tools"
-    C: ML Zoomcamp, plus the Hugging Face LLM Course and Agents Course
-    D: "Weekly mini-builds. Monthly: Zoomcamp midterm deployed, a Python CLI tracker, a RAG chatbot over own notes, Zoomcamp capstone + an agent with tools"
-    E: MIT 18.06 Linear Algebra + the current DSA course
+    A: "Finish one small game (close the GameDevHQ loop), then LearnOpenGL part 1 (Getting started, Lighting), then game maths: vectors, matrices, transforms, quaternions"
+    B: "Python: 30 Days of Python, then Automate the Boring Stuff projects, then start C with CS50x weeks 1-5"
+    C: "ML Zoomcamp (+ HF LLM Course, HF Agents Course); AI Engineer roadmap basics: OpenAI/Anthropic APIs, embeddings, vector search, RAG, Ollama and open models, prompt engineering, safety"
+    D: "Weekly mini-builds. Monthly: Zoomcamp midterm deployed, a CLI habit tracker on PyPI, a RAG chatbot with an eval set, Zoomcamp capstone + a tool-using agent, one finished small game"
+    E: MIT 18.06 Linear Algebra; the current DSA course; 3Blue1Brown linear algebra and calculus
+  map:
+    A: Finish one small game → LearnOpenGL part 1 → game maths (vectors, matrices, quaternions)
+    B: Python (30 Days, Automate) → start C (CS50x)
+    C: "ML Zoomcamp · HF LLM + Agents · AI Engineer basics: APIs, embeddings, RAG, Ollama"
+    E: 18.06 linear algebra · DSA · 3Blue1Brown
+    ships: Zoomcamp capstone · RAG over your notes with evals · CLI tool on PyPI · one finished game
+    credentials: ML Zoomcamp, HF certificates, PCEP
 
 - id: y1-p1
   year: 1
   stage: 1
-  title: Fluency + CS core
+  title: Foundations II — fluency
+  theme: Year 1 · Foundations
+  topics: C, C++, 6.006, deep learning, agents
   start: 2027-02-01
   end: 2027-08-31
-  goal: Become fluent in C and comfortable in C++, finish algorithms properly, and build neural networks from scratch.
+  goal: Become fluent in C, comfortable in C++ and PyTorch, finish algorithms properly, build neural networks from scratch, and work through the AI Agents roadmap.
   focus:
-    A: Games in C with raylib/SDL, then start LearnOpenGL (last two months)
-    B: "C (CS50x, Beej's Guide, K&R), then C++ basics (learncpp.com)"
-    C: "Missing Semester, MIT 6.006 Algorithms, Karpathy Zero to Hero, fast.ai, begin CS:APP"
-    D: "micrograd + MNIST from scratch, Pong/Breakout in C, a shell in C, an image classifier on HF Spaces, Git in Python, first LearnOpenGL scene, nanoGPT reproduction"
-    E: MIT 18.01/18.02 Calculus; MIT 8.01 Classical Mechanics
+    A: "LearnOpenGL complete (model loading, advanced lighting, PBR), then Ray Tracing in One Weekend, then tinyrenderer (software rasterizer)"
+    B: "C (Beej's Guide, K&R, Modern C), then C++ (learncpp.com, A Tour of C++), then PyTorch fluency (d2l.ai selected)"
+    C: "Missing Semester, MIT 6.006 Algorithms (complete), Karpathy Zero to Hero, fast.ai, CS231n (CNNs, backprop, optimisation), Mathematics for ML, the AI Agents roadmap in full (agent loop, tool calling, MCP, memory, evals, observability, guardrails), begin CS:APP (chapters 1-3)"
+    D: "micrograd + MNIST from scratch, Pong/Breakout in C, a shell in C, Git in Python, an image classifier on HF Spaces, nanoGPT, a multi-tool agent with MCP and evals, a lit OpenGL scene, a software rasterizer"
+    E: MIT 18.01 / 18.02 Calculus, then MIT 8.01 Classical Mechanics
+  map:
+    A: LearnOpenGL complete → Ray Tracing in One Weekend → tinyrenderer
+    B: C (K&R, Beej) → C++ (learncpp) → PyTorch
+    C: "Missing Semester · 6.006 complete · Karpathy · fast.ai · CS231n core · Math for ML · AI Agents roadmap in full · CS:APP ch. 1–3"
+    E: 18.01/18.02 calculus → 8.01 mechanics
+    ships: micrograd + MNIST · shell in C · own Git · nanoGPT · agent with MCP + evals · lit OpenGL scene · software rasterizer
+    credentials: PCAP, freeCodeCamp ML, HF Agents
 
 - id: y2
   year: 2
   stage: 1
-  title: Systems + rendering + DevOps
+  title: Building — everything from scratch
+  theme: Year 2 · Building
+  topics: CS:APP, xv6, databases, CUDA, inference, Vulkan
   start: 2027-09-01
   end: 2028-08-31
-  goal: Understand the machine from the operating system to the database, run software the way it runs in production, and own a renderer and a 2D physics engine.
+  goal: Build every core system from scratch (OS labs, a database, TCP, engines, an inference server, GPU kernels), run software the way it runs in production, and start a research habit of one reimplementation a month.
   focus:
-    A: "LearnOpenGL complete, Ray Tracing in One Weekend, tinyrenderer, 2D rigid-body engine, OpenGL mini-engine, begin Vulkan"
-    B: "Modern C++ in depth, then Rust (The Book, Rustlings), then CUDA basics (PMPP ch. 1-6)"
-    C: "CMU 15-213/CS:APP labs, MIT 6.1810 Operating Systems, CMU 15-445 Databases, CS144 networking labs, DevOps block (Linux/LFCS, Docker, CI/CD, Terraform, Kubernetes/CKAD, observability), Designing Data-Intensive Applications"
-    D: "Software rasterizer, path tracer, malloc + cache simulator, 2D rigid-body engine, xv6 write-up, buffer pool + B+tree, OpenGL mini-engine, Redis in Rust, LSM store, HTTP server, Vulkan model viewer, rate limiter + job queue"
-    E: MIT 18.03 Differential Equations; MIT 8.02 Electricity & Magnetism; MIT 6.041 Probability
+    A: "OpenGL mini-engine (deferred, shadows, PBR, model loading), then a 2D rigid-body engine (SAT, impulses, joints), then Vulkan (vulkan-tutorial, vkguide), compute shaders, 3D collision (GJK/EPA, BVH)"
+    B: "Modern C++ in depth (Effective Modern C++, concurrency), then CUDA (PMPP complete, GPU MODE lectures), then Triton, then Rust (The Book, Rustlings)"
+    C: "Systems: CMU 15-213/CS:APP all labs, MIT 6.1810 OS (xv6 labs), CMU 15-445 Databases (bustub), CS144 (TCP lab). DevOps: Linux/LFCS, Docker, CI/CD, Terraform, Kubernetes (CKAD), Prometheus/Grafana. Inference part 1: CS336 assignments 1-2, prefill/decode, KV cache, PagedAttention, FlashAttention, continuous batching, quantization (GPTQ/AWQ/SmoothQuant), speculative decoding, vLLM / SGLang / TensorRT-LLM / llama.cpp internals, benchmarking (TTFT, ITL, TPS, percentiles), roofline, Nsight profiling"
+    D: "Systems builds (CS:APP labs, xv6, buffer pool + B+tree, TCP, Redis in Rust, LSM store, a database from scratch, a Kubernetes service), inference builds (tokenizer + transformer, an inference server, a 3-engine benchmark, GPTQ/AWQ study, speculative decoding, CUDA GEMM, Triton attention, the vLLM explainer), graphics builds (path tracer, 2D engine, OpenGL mini-engine, Vulkan particles), first reproductions and research report"
+    E: MIT 18.03 Differential Equations, then MIT 6.041 Probability, then MIT 18.065 Matrix Methods, then MIT 8.02 Electricity & Magnetism
+  map:
+    A: OpenGL mini-engine (PBR, shadows) → 2D rigid-body engine → Vulkan → compute shaders → GJK/EPA, BVH
+    B: Modern C++ → CUDA (PMPP, GPU MODE) → Triton → Rust
+    C: "Systems: CS:APP labs, xv6, 15-445, CS144 · DevOps: Linux, Docker, CI, Terraform, Kubernetes · Inference I: CS336 asg 1–2, KV cache, PagedAttention, FlashAttention, batching, quantization, speculative decoding, vLLM/SGLang/TRT-LLM internals, benchmarking, roofline · research starts: 1 reimplementation a month"
+    E: 18.03 → 6.041 probability → 18.065 → 8.02
+    ships: Inference server from scratch · 3-engine benchmark · GPTQ/AWQ study · speculative decoding · tensor-core GEMM · Triton attention · Redis in Rust · own database · TCP · path tracer · 2D engine · k8s service · DDPM on CIFAR
+    credentials: LFCS, CKAD, Terraform, NVIDIA DLI CUDA
 
 - id: y3
   year: 3
   stage: 1
-  title: Distributed systems + AI/GenAI + GPU + robotics + engines
+  title: Scale + research
+  theme: Year 3 · Scale and research
+  topics: 6.5840, inference at scale, diffusion, world models
   start: 2028-09-01
   end: 2029-08-31
-  goal: Build and operate distributed systems, train and serve language models and agents, write fast GPU code, simulate robots, and finish stage 1 with an own 3D simulation engine driving a robot through ROS 2.
+  goal: Operate systems and inference at scale, learn generative modelling and world models, publish research on data from your own engine, and finish stage 1 with a sim engine that is also a research instrument.
   focus:
-    A: "Vulkan (vulkan-tutorial, vkguide), compute shaders, 3D rigid-body engine (GJK/EPA, constraints), XPBD cloth/soft bodies + GPU fluids, robotics simulation (MuJoCo / Isaac Sim / Gazebo, ROS 2, Modern Robotics, MIT 6.832 Underactuated Robotics), Stage 1 capstone: own 3D sim engine v1 with a simulated robot controlled through ROS 2"
-    B: "Rust in depth, then Go (for 6.5840), then CUDA in depth: PMPP complete, GPU MODE lectures, kernels benchmarked, Triton"
-    C: "MIT 6.5840 Distributed Systems (all labs), system-design-primer + a scaled service on Kubernetes (CKA, AWS SAA), Stanford CS224n, CS336 LM from Scratch, GenAI/agents (LLM Zoomcamp, MLOps Zoomcamp, HF Agents/MCP/Diffusion courses, Berkeley LLM Agents), CS285 Deep RL (selected)"
-    D: "Raft, sharded KV store, a URL shortener scaled on Kubernetes, 3D rigid bodies, a Kafka event pipeline, a transformer LM from scratch, Vulkan compute particles, LoRA fine-tune + evals, a production ML service, CUDA kernels, XPBD cloth; Stage 1 capstone"
-    E: Stat 110 leftovers; MIT 8.03 Vibrations & Waves; MIT 8.04 Quantum Physics I; MIT 18.085 Computational Science
+    A: "3D rigid-body engine (constraints, stacking), XPBD cloth/soft bodies, GPU fluids (Vulkan compute), Vulkan ray tracing + PBR, robotics sim (MuJoCo / Isaac Sim, ROS 2, Modern Robotics basics); the capstone engine as a research instrument: datasets from your own simulator, world models trained on them, served by your own inference stack"
+    B: "Rust in depth (Rust for Rustaceans, async), then Go (for 6.5840), then custom CUDA kernels (fused attention, GEMM, MoE routing), then JAX (for research code)"
+    C: "Q1-Q2 scalable systems: MIT 6.5840 (all labs), DDIA, the Software Architect roadmap core (DDD, CQRS/event sourcing, microservices, messaging, service mesh, cloud design patterns, security, ADRs). Q2-Q3 inference part 2: tensor/pipeline/expert parallelism, multi-node, disaggregated prefill/decode, cache-aware routing, autoscaling, cost and GPU procurement, image/video/speech inference. Q3-Q4 generative AI + world models: Stanford CS236, HF Diffusion course, DDPM, DDIM, latent diffusion, classifier-free guidance, flow matching, DiT, video diffusion; world models: Ha & Schmidhuber, PlaNet, Dreamer v1-v3, MuZero, JEPA / V-JEPA, Genie, GAIA-1, NVIDIA Cosmos, GNS, PINNs; CS285 model-based RL lectures"
+    D: "Scale builds (Raft, sharded KV, a scaled service, Kafka pipeline, tensor-parallel and disaggregated serving, cache-aware router, streaming VLM/Whisper, edge inference, the inference capstone), generative and world-model builds (DDPM to DiT from scratch, latent diffusion, flow matching study, DreamerV3, GNS, the research capstone, OSS PRs), graphics builds (3D rigid bodies, XPBD, GPU fluids, Vulkan RT, a simulated arm over ROS 2); Stage 1 capstone"
+    E: Harvard Stat 110, then MIT 8.03 Vibrations & Waves, then MIT 8.04 Quantum Physics I, then MIT 18.085 Computational Science, then Boyd Convex Optimization (chapters 1-5)
+  map:
+    A: 3D engine (constraints) → XPBD cloth → GPU fluids → Vulkan RT → robotics sim (MuJoCo, ROS 2) → engine as research instrument
+    B: Rust depth → Go → custom CUDA kernels → JAX
+    C: "Q1–2 scalable systems: 6.5840, DDIA, architecture core · Q2–3 inference II: parallelism, multi-node, disaggregation, routing, autoscaling, cost · Q3–4 generative AI + world models: CS236, diffusion → flow matching → DiT → video; Dreamer, JEPA, Genie, GNS, PINNs · quarterly research reports, lab notebook"
+    E: Stat 110 → 8.03 → 8.04 quantum → 18.085 → Boyd ch. 1–5
+    ships: Raft + sharded KV · scaled service on k8s · tensor-parallel + disaggregated serving · cache-aware router · own serving stack vs vLLM · DDPM→flow matching→DiT from scratch · DreamerV3 + GNS reimplementations · world model on your engine, served on your stack, workshop paper · sim engine v1
+    credentials: CKA, AWS SAA, AWS/Google ML Engineer, 1 paper or 3 OSS PRs
 
 - id: y4
   year: 4
   stage: 2
   title: Electrical engineering
+  theme: Year 4 · Electrical engineering
+  topics: 6.002, 6.003, embedded, FPGA, control
   start: 2029-09-01
   end: 2030-08-31
   goal: Design, simulate, fabricate and measure real circuits and firmware; simulate everything studied before building it.
@@ -70,11 +110,20 @@
     C: "MIT 6.002 Circuits & Electronics, MIT 6.003 Signals & Systems, MIT 6.004 Computation Structures, embedded systems (UT Austin), power electronics intro, control theory (Brian Douglas + MIT 2.004 / 6.302)"
     D: "Lab time: breadboard, oscilloscope/logic analyser, KiCad. Measured circuits, own SPICE-like solver, a KiCad PCB, bare-metal STM32, FFT analyser, embedded Rust node, FPGA UART + VGA, RISC-V CPU, motor control, inverted pendulum, battery device, DAQ board"
     E: "MIT 8.03 / 8.04 leftovers; MIT 3.091 or 5.111 chemistry; engineering math refresh (18.03, 18.06 applied)"
+  map:
+    A: "Simulators for what you study: SPICE-like solver, DSP visualiser, multibody dynamics in your engine"
+    B: Embedded C + embedded Rust (STM32, ESP32) · Verilog on FPGA
+    C: 6.002 circuits · 6.003 signals · 6.004 digital · embedded systems · power electronics · control theory (2.004 / 6.302, Brunton)
+    E: 8.03/8.04 leftovers · 3.091 or 5.111 chemistry · engineering math refresh
+    ships: 10 measured circuits · own SPICE solver · amplifier on your own PCB · bare-metal STM32 drivers · FFT analyser · RISC-V CPU on FPGA · motor PID · inverted pendulum (sim → hardware)
+    credentials: MITx 6.002x, embedded-systems cert, MATLAB Associate
 
 - id: y5
   year: 5
   stage: 2
   title: Mechanical engineering + mechatronics
+  theme: Year 5 · Mechanical engineering
+  topics: 2.001, 2.003, CAD, FEM, robotics
   start: 2030-09-01
   end: 2031-08-31
   goal: Design a machine in CAD, simulate it as a digital twin in the own engine, then build and control it.
@@ -84,3 +133,10 @@
     C: "MIT 2.001 Mechanics & Materials, MIT 2.003 Dynamics & Control, MIT 2.005 Thermal-Fluids, MIT 2.008 Design & Manufacturing, MIT 2.12 / 6.4210 Robotic Manipulation (hardware side: actuators, sensors, mechanism design)"
     D: "CAD (SolidWorks/Fusion/Onshape/FreeCAD), 3D printing and machining basics. CAD part set, beam calculator, FEM solver, a mechanism, 2D CFD, a thermal model, a robot arm simulated then built with ROS 2, a learned simulator; final capstone"
     E: MIT 5.60 Thermodynamics; quantum computing intro (IBM Quantum Learning); MIT 8.05 (stretch)
+  map:
+    A: FEM solver (beams → 2D elasticity) · 2D CFD · robot-arm simulator · digital twin in your engine
+    B: MATLAB/Octave · SciPy/SymPy · CAD scripting · ROS 2
+    C: 2.001 mechanics & materials · 2.003 dynamics · 2.005 thermal-fluids · 2.008 design & manufacturing · robotic manipulation
+    E: 5.60 thermodynamics · quantum computing intro · 8.05 (stretch)
+    ships: "CAD parts + assemblies, printed and measured · validated FEM solver · gearbox · 2-DOF arm (sim, then ROS 2 hardware) · final capstone: a machine designed, simulated, built with own PCB + firmware, controlled, documented"
+    credentials: CSWA → CSWP (or Autodesk), Modern Robotics, Ansys badges, Qiskit

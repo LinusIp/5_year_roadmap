@@ -22,6 +22,7 @@ export const SEED_SOURCES: Record<SeedKind, string> = {
   paperSources: 'paper-sources.yaml',
   certs: 'certs.yaml',
   subjects: 'subjects.yaml',
+  roadmaps: 'roadmaps.yaml',
 };
 
 export const REPO_ROOT = join(import.meta.dirname, '..', '..');

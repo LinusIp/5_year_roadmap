@@ -1,94 +1,180 @@
-# Yearly capstones. The brief names two (the Stage 1 capstone, number 35, and the final capstone,
-# numbers 57-59). Years 1, 2 and 4 need one too, so three were added here in the same spirit: each pulls
-# that year's blocks into one shipped thing. Edit or replace them freely (see DECISIONS.md).
-# A capstone draws on two blocks, so plan.yaml lists it in lane A and in lane D with a share of the hours each.
+# Capstones. The brief numbers four: the inference capstone (46), the research capstone (53), the Stage 1
+# capstone (60) and the final capstone (82-84). Years 1, 2 and 4 have a yearly capstone too, written here in
+# the same spirit: each pulls that year's blocks into one shipped thing. Edit or replace them freely.
+# A capstone may draw on two blocks: plan.yaml then lists it in both lanes with a share of the hours each.
 
 - id: cap-y1
   title: "Year 1 capstone: an arcade game in C with an opponent you trained"
   cadence: capstone
-  tracks: [gamedev, languages, ai]
+  tracks:
+    - gamedev
+    - languages
+    - ai
   phaseId: y1-p1
   estHours: 100
   subject: gamedev
-  brief: "A complete, polished arcade game written in C with raylib, whose computer opponent is a small neural network you trained yourself and run inside the game with your own C inference code."
+  brief: A complete, polished arcade game written in C with raylib, whose computer opponent is a small neural network you trained yourself and run inside the game with your own C inference code.
   acceptance:
     - "The game is finished: menu, game loop, win and lose states, sound, a build anyone can download and run"
-    - "The opponent's network is trained by your own code (NumPy or PyTorch), exported, and evaluated by inference code you wrote in C"
-    - "A difficulty setting that really changes how the opponent plays"
-    - "Public repository with a README, a short gameplay video and a write-up of what the network learned"
-  skills: ["C", "raylib", "game loop and state machines", "training a small network", "inference from scratch"]
-
+    - The opponent's network is trained by your own code (NumPy or PyTorch), exported, and evaluated by inference code you wrote in C
+    - A difficulty setting that really changes how the opponent plays
+    - Public repository with a README, a short gameplay video and a write-up of what the network learned
+  skills:
+    - C
+    - raylib
+    - game loop and state machines
+    - training a small network
+    - inference from scratch
 - id: cap-y2
   title: "Year 2 capstone: a networked physics sandbox"
   cadence: capstone
-  tracks: [simulation, graphics, systems]
+  tracks:
+    - simulation
+    - graphics
+    - systems
   phaseId: y2
   estHours: 140
   subject: simulation
   brief: "Your 2D rigid-body engine, drawn by your OpenGL renderer, shared between two players over netcode you wrote: an authoritative server, client-side prediction and reconciliation."
   acceptance:
-    - "Two clients interact with the same stack of bodies over a real network connection and stay in sync"
-    - "Fixed-timestep simulation, snapshot interpolation, and prediction with reconciliation on the local player"
-    - "Survives 150 ms of added latency and 5% packet loss (tested with a network conditioner) without visible divergence"
+    - Two clients interact with the same stack of bodies over a real network connection and stay in sync
+    - Fixed-timestep simulation, snapshot interpolation, and prediction with reconciliation on the local player
+    - Survives 150 ms of added latency and 5% packet loss (tested with a network conditioner) without visible divergence
     - "A design document and a write-up with measurements: bandwidth per client, tick rate, worst-case correction"
-  skills: ["C++ or Rust", "UDP netcode", "determinism and fixed timestep", "OpenGL", "systems measurement"]
-
-- id: cap-stage-1
-  title: "Stage 1 capstone: own 3D simulation engine v1 with a simulated robot on ROS 2, and a portfolio site"
+  skills:
+    - C++ or Rust
+    - UDP netcode
+    - determinism and fixed timestep
+    - OpenGL
+    - systems measurement
+- id: cap-inference
+  number: 46
+  title: "Inference capstone: your own serving stack, end to end, benchmarked against vLLM"
   cadence: capstone
-  number: 35
-  tracks: [simulation, graphics, robotics, career]
+  tracks:
+    - ai
+    - systems
+  phaseId: y3
+  estHours: 120
+  subject: deep-learning
+  brief: "The inference work of years 2 and 3 as one stack you built: a server with paged KV cache and continuous batching, speculative decoding, quantized models, a cache-aware router and autoscaling, deployed and published with honest benchmarks against vLLM."
+  acceptance:
+    - Serves an open model through your own server, router and autoscaler, deployed on Kubernetes
+    - Paged KV cache, continuous batching, speculative decoding and quantized weights, each switchable
+    - "Benchmarked against vLLM on the same hardware: TTFT, ITL, throughput, p99 and cost per million tokens"
+    - Public repository, documentation and a write-up with the benchmark method
+  skills:
+    - inference serving
+    - GPU systems
+    - benchmarking
+  covers:
+    - inference-engineering/continuous-batching
+    - inference-engineering/autoscaling
+    - inference-engineering/cost-estimation
+    - inference-engineering/testing-and-deployment
+- id: cap-research
+  number: 53
+  title: "Research capstone: a world model trained on your engine's data, served by your stack, written up as a workshop paper"
+  cadence: capstone
+  tracks:
+    - ai
+    - simulation
+  phaseId: y3
+  estHours: 150
+  subject: research
+  brief: "Year 3's threads in one piece of research: a world model trained on data from your own 3D engine, evaluated against the engine's ground-truth physics, served through your own inference stack, and written up as a 6-8 page workshop paper."
+  acceptance:
+    - A dataset generated by your 3D engine through its Python bindings
+    - A world model trained on it and evaluated against the engine's ground truth over increasing horizons
+    - Served through your inference stack, with latency reported
+    - A 6-8 page workshop-style paper, arXiv-ready, reviewed by two people you asked online
+  skills:
+    - world models
+    - research
+    - scientific writing
+- id: cap-stage-1
+  title: "Stage 1 capstone: sim engine v1, with a Vulkan renderer, a GPU solver and Python bindings for dataset generation"
+  cadence: capstone
+  number: 60
+  tracks:
+    - simulation
+    - graphics
+    - robotics
+    - career
   phaseId: y3
   estHours: 250
   subject: simulation
-  brief: "Simulation engine v1: a Vulkan renderer with rigid and soft bodies, documentation and demo scenes, and a simulated robot in it controlled through ROS 2. Alongside it, a portfolio site with write-ups of the three software years."
+  brief: "Everything from Block A in one engine you can show and use: a Vulkan renderer, a GPU physics solver for rigid and soft bodies and fluids, Python bindings that generate datasets for your research, documentation and demo scenes."
   acceptance:
-    - "Vulkan renderer with a scene graph, PBR materials and shadows, driven by the engine's own frame loop"
-    - "Rigid bodies (broadphase, GJK/EPA, stacking) and XPBD cloth or soft bodies running in the same world"
-    - "At least five demo scenes, each reproducible from a command line, with frame-time numbers"
-    - "A simulated robot (an arm or a mobile base) in the engine, driven by ROS 2 nodes through a bridge you wrote, with its behaviour compared against MuJoCo or Gazebo"
-    - "API documentation and an architecture write-up good enough for someone else to add a scene"
-    - "A published portfolio site with a write-up for every Stage 1 monthly project worth showing"
-  skills: ["Vulkan", "engine architecture", "collision detection", "constraint solvers", "ROS 2", "technical writing"]
-
+    - Vulkan renderer with a scene graph, PBR materials and shadows, driven by the engine's own frame loop
+    - Rigid bodies (broadphase, GJK/EPA, stacking) and XPBD cloth or soft bodies running in the same world
+    - At least five demo scenes, each reproducible from a command line, with frame-time numbers
+    - A simulated robot (an arm or a mobile base) in the engine, driven by ROS 2 nodes through a bridge you wrote, with its behaviour compared against MuJoCo or Gazebo
+    - API documentation and an architecture write-up good enough for someone else to add a scene
+    - A published portfolio site with a write-up for every Stage 1 monthly project worth showing
+  skills:
+    - Vulkan
+    - engine architecture
+    - collision detection
+    - constraint solvers
+    - ROS 2
+    - technical writing
 - id: cap-y4
   title: "Year 4 capstone: an instrumented control rig with a digital twin"
   cadence: capstone
-  tracks: [ee, embedded, controls, simulation]
+  tracks:
+    - ee
+    - embedded
+    - controls
+    - simulation
   phaseId: y4
   estHours: 160
   subject: signals-control
-  brief: "A small electromechanical rig (a reaction-wheel pendulum or a ball-and-beam) driven by your own PCB and bare-metal firmware, with a simulation of the whole system, circuit and mechanics, in your own solvers. Measured and simulated responses are laid over each other."
+  brief: A small electromechanical rig (a reaction-wheel pendulum or a ball-and-beam) driven by your own PCB and bare-metal firmware, with a simulation of the whole system, circuit and mechanics, in your own solvers. Measured and simulated responses are laid over each other.
   acceptance:
     - "Self-designed, fabricated and tested PCB: power stage, current sensing, microcontroller, debug header"
-    - "Bare-metal firmware with a fixed-rate control loop and telemetry streamed to a host"
-    - "The circuit is simulated in your SPICE-like solver and the mechanics in your own engine; step responses agree with the bench within a stated tolerance"
-    - "A controller designed on the model and then tuned on the hardware, with both sets of plots in the write-up"
-  skills: ["KiCad", "power electronics", "bare-metal C or Rust", "state-space control", "system identification"]
+    - Bare-metal firmware with a fixed-rate control loop and telemetry streamed to a host
+    - The circuit is simulated in your SPICE-like solver and the mechanics in your own engine; step responses agree with the bench within a stated tolerance
+    - A controller designed on the model and then tuned on the hardware, with both sets of plots in the write-up
+  skills:
+    - KiCad
+    - power electronics
+    - bare-metal C or Rust
+    - state-space control
+    - system identification
   parts:
-    - "Microcontroller board (STM32 Nucleo or similar) and a debugger"
-    - "Brushed or BLDC motor with encoder, motor driver components, current-sense amplifier"
-    - "IMU or angle sensor, bench power supply, oscilloscope or logic analyser"
-    - "One PCB fabrication run, connectors, 3D-printed or machined frame"
-
+    - Microcontroller board (STM32 Nucleo or similar) and a debugger
+    - Brushed or BLDC motor with encoder, motor driver components, current-sense amplifier
+    - IMU or angle sensor, bench power supply, oscilloscope or logic analyser
+    - One PCB fabrication run, connectors, 3D-printed or machined frame
 - id: cap-final
   title: "Final capstone: a machine designed in CAD, simulated as a digital twin, built and controlled"
   cadence: capstone
-  number: 57
-  tracks: [robotics, mech, embedded, simulation]
+  number: 82
+  tracks:
+    - robotics
+    - mech
+    - embedded
+    - simulation
   phaseId: y5
   estHours: 300
   subject: robotics
   brief: "One machine, end to end: a small CNC plotter, a self-balancing robot or a quadruped leg. Designed in CAD, simulated as a digital twin in your own engine, built with your own PCB and firmware, controlled, documented and published. Takes the last three monthly slots of the plan (57 to 59)."
   acceptance:
-    - "Complete CAD model with drawings and a bill of materials; printed and machined parts measured against their tolerances"
-    - "A digital twin in your own engine whose predicted motion is compared with the real machine's, with the error reported"
-    - "Own PCB and firmware; the control loop runs on the machine, not on a laptop"
+    - Complete CAD model with drawings and a bill of materials; printed and machined parts measured against their tolerances
+    - A digital twin in your own engine whose predicted motion is compared with the real machine's, with the error reported
+    - Own PCB and firmware; the control loop runs on the machine, not on a laptop
     - "The machine performs its task repeatably on video: plots a drawing, balances through a push, or tracks a foot trajectory"
     - "Everything published: CAD, PCB, firmware, simulation, and a write-up that someone could rebuild it from"
-  skills: ["CAD and drawings", "design for manufacturing", "PCB and firmware", "dynamics and control", "ROS 2", "documentation"]
+  skills:
+    - CAD and drawings
+    - design for manufacturing
+    - PCB and firmware
+    - dynamics and control
+    - ROS 2
+    - documentation
   parts:
-    - "Motors or servos with drivers and encoders, sized from the simulation"
+    - Motors or servos with drivers and encoders, sized from the simulation
     - "Structural parts: 3D-printer filament, aluminium stock or extrusion, fasteners, bearings, belts or lead screws"
-    - "Own controller PCB (one or two fabrication runs), power supply or battery pack with protection"
-    - "Sensors (IMU, limit switches, encoders) and wiring"
+    - Own controller PCB (one or two fabrication runs), power supply or battery pack with protection
+    - Sensors (IMU, limit switches, encoders) and wiring

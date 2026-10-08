@@ -25,7 +25,7 @@ export const ITEM_STATUSES: { value: ItemStatus; label: string }[] = [
   { value: 'dropped', label: 'Dropped' },
 ];
 
-const CADENCE: Record<Project['cadence'], string> = { weekly: 'Weekly build', monthly: 'Monthly project', capstone: 'Capstone' };
+const CADENCE: Record<Project['cadence'], string> = { weekly: 'Weekly build', monthly: 'Monthly project', research: 'Research', capstone: 'Capstone' };
 
 /** A status pill for a resource or project, with the rule that a project is only done once it has a repository. */
 export function ItemStatusPill({ kind, refId, title, state }: { kind: 'resource' | 'project'; refId: string; title: string; state: UserItemState | undefined }) {

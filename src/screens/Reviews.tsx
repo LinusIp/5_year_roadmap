@@ -7,7 +7,7 @@ import type { Atlas } from '../hooks/useAtlas.ts';
 import { formatRange, monthName, today as todayDate } from '../lib/dates.ts';
 import { buildPlanItemView, laneProgress, phaseProgress } from '../lib/progress.ts';
 import { replan } from '../lib/replan.ts';
-import { monthRange, monthsSoFar, summarise, weekRange, weeksSoFar, WEEKLY_PROMPTS } from '../lib/reviews.ts';
+import { monthRange, monthsSoFar, quarterOf, quarterRange, quartersSoFar, summarise, weekRange, weeksSoFar, WEEKLY_PROMPTS } from '../lib/reviews.ts';
 import type { PeriodSummary } from '../lib/reviews.ts';
 import { activePhase, lane } from '../lib/schedule.ts';
 import { useQueryParam } from '../router/router.tsx';
@@ -18,6 +18,7 @@ import { Screen } from '../ui/Screen.tsx';
 import { SegmentedControl } from '../ui/SegmentedControl.tsx';
 import { Sheet } from '../ui/Sheet.tsx';
 import { TextField } from '../ui/TextField.tsx';
+import { LinkField } from './parts/ItemSheet.tsx';
 import { blockShort, longDate, plural, shortTitle, span } from './parts/text.ts';
 
 async function saveReview(id: string, base: Omit<Review, 'id'>, change: (r: Review) => Review): Promise<void> {
@@ -68,14 +69,14 @@ function Prompt({ label, hint, value, onSave }: { label: string; hint: string; v
   );
 }
 
-function PromptFields({ id, base, review, period }: { id: string; base: Omit<Review, 'id'>; review: Review | undefined; period: 'week' | 'month' }) {
+function PromptFields({ id, base, review, period }: { id: string; base: Omit<Review, 'id'>; review: Review | undefined; period: 'week' | 'month' | 'quarter' }) {
   return (
     <div className="space-y-3">
       {WEEKLY_PROMPTS.map((prompt) => (
         <Prompt
           key={prompt.key}
-          label={period === 'week' ? prompt.label : prompt.label.replace('next week', 'next month')}
-          hint={period === 'week' ? prompt.placeholder : prompt.placeholder.replace('week', 'month')}
+          label={period === 'week' ? prompt.label : prompt.label.replace('next week', 'next ' + period)}
+          hint={period === 'week' ? prompt.placeholder : prompt.placeholder.replace('week', period)}
           value={review?.[prompt.key]}
           onSave={(v) =>
             void saveReview(id, base, (r) => {
@@ -211,7 +212,72 @@ function MonthSheet({ atlas, monthStart, review, onClose }: { atlas: Atlas; mont
   );
 }
 
-/** Reviews: the weeks and months so far, newest first; one opens in a sheet with its numbers already filled in. */
+/**
+ * The quarterly review is the research cadence's: the quarter's numbers, the research cards shipped, the question
+ * the quarter asked and the link to its two-page report.
+ */
+function QuarterSheet({ atlas, quarterStart, review, onClose }: { atlas: Atlas; quarterStart: string | null; review: Review | undefined; onClose: () => void }) {
+  const range = quarterStart ? quarterRange(quarterStart) : null;
+  const summary = range ? summarise(range.start, range.end, atlas.logs, atlas.seed, atlas.states, atlas.settings) : null;
+  const id = range ? 'quarter:' + quarterOf(range.start) : '';
+  const base = { kind: 'quarter' as const, periodStart: range?.start ?? '' };
+  const titleOf = (refId: string): string => atlas.seed.projects.find((p) => p.id === refId)?.title ?? refId;
+  const active = atlas.seed.projects.filter((p) => p.cadence === 'research' && atlas.states.get(p.id)?.status === 'active');
+  const [question, setQuestion] = useState<string | null>(null);
+  const setField = (key: 'question' | 'reportUrl', v: string): void =>
+    void saveReview(id, base, (r) => {
+      const next = { ...r };
+      if (v.trim()) next[key] = v.trim();
+      else delete next[key];
+      return next;
+    });
+  return (
+    <Sheet
+      open={range !== null}
+      title={range ? quarterOf(range.start).replace('-', ' ') : ''}
+      onClose={onClose}
+      footer={
+        range && !review?.completedAt ? (
+          <Button variant="filled" onClick={() => void saveReview(id, base, (r) => ({ ...r, completedAt: todayDate() }))}>
+            Mark this quarter reviewed
+          </Button>
+        ) : undefined
+      }
+    >
+      {range && summary && (
+        <div key={id} className="space-y-5">
+          <Numbers summary={summary} atlas={atlas} />
+          <RowList label="Research">
+            {summary.shipped.research.map((refId) => (
+              <Row key={refId} title={shortTitle(titleOf(refId))} meta="Shipped this quarter" to={'/library/' + refId} />
+            ))}
+            {active.map((p) => (
+              <Row key={p.id} title={shortTitle(p.title)} meta="In progress" to={'/library/' + p.id} />
+            ))}
+            {summary.shipped.research.length === 0 && active.length === 0 && <Row title="No research card this quarter" meta="Projects, then Research" to="/plan?view=projects" />}
+          </RowList>
+          <TextField
+            label="This quarter's research question"
+            multiline
+            rows={2}
+            hint="Hypothesis, experiment, result. A negative result counts."
+            value={question ?? review?.question ?? ''}
+            onChange={setQuestion}
+            onBlur={() => {
+              if (question !== null && question !== (review?.question ?? '')) setField('question', question);
+              setQuestion(null);
+            }}
+          />
+          <LinkField label="Report" value={review?.reportUrl} onSave={(v) => setField('reportUrl', v)} />
+          <PromptFields id={id} base={base} review={review} period="quarter" />
+          {review?.completedAt && <p className="text-meta text-ink2">Reviewed on {longDate(review.completedAt)}.</p>}
+        </div>
+      )}
+    </Sheet>
+  );
+}
+
+/** Reviews: the weeks, months and quarters so far, newest first; one opens in a sheet with its numbers already filled in. */
 export function Reviews() {
   const atlas = useAtlas();
   const reviews = useLiveQuery(async () => new Map((await db.reviews.toArray()).map((r) => [r.id, r])), []);
@@ -231,26 +297,49 @@ export function Reviews() {
   const firstLog = atlas.logs.map((l) => l.date).sort()[0];
   const from = firstLog && firstLog < planStart ? firstLog : planStart;
   const weekStartsOn = atlas.settings.core.weekStartsOn;
-  const monthly = tab === 'month';
+  const period = tab === 'month' || tab === 'quarter' ? tab : 'week';
+  const monthly = period === 'month';
   const weeks = weeksSoFar(from, asOf < from ? from : asOf, weekStartsOn);
   const months = monthsSoFar(from, asOf < from ? from : asOf);
   const openWeek = openParam?.startsWith('week:') ? openParam.slice(5) : null;
   const openMonth = openParam?.startsWith('month:') ? openParam.slice(6) + '-01' : null;
+  const quarters = quartersSoFar(from, asOf < from ? from : asOf);
+  const quarterMatch = /^quarter:(\d{4})-Q([1-4])$/.exec(openParam ?? '');
+  const openQuarter = quarterMatch ? quarterMatch[1] + '-' + String((Number(quarterMatch[2]) - 1) * 3 + 1).padStart(2, '0') + '-01' : null;
 
   return (
     <Screen title="Reviews">
-      <Header title="Reviews" sub="Sunday closes the week; the first days of a month close the month. The numbers fill themselves in." />
-      <SegmentedControl
-        label="Review period"
-        value={monthly ? 'month' : 'week'}
-        onChange={(v) => setTab(v === 'month' ? 'month' : null)}
-        options={[
-          { value: 'week', label: 'Weekly' },
-          { value: 'month', label: 'Monthly' },
-        ]}
-      />
+      <Header title="Reviews" sub="Sunday closes the week, the first days of a month close the month, and each quarter closes with research. The numbers fill themselves in." />
+      <div className="mt-5">
+        <SegmentedControl
+          label="Review period"
+          value={period}
+          onChange={(v) => setTab(v === 'week' ? null : v)}
+          options={[
+            { value: 'week', label: 'Weekly' },
+            { value: 'month', label: 'Monthly' },
+            { value: 'quarter', label: 'Quarterly' },
+          ]}
+        />
+      </div>
       <RowList className="mt-5">
-        {monthly
+        {period === 'quarter'
+          ? quarters.map((q) => {
+              const id = 'quarter:' + quarterOf(q);
+              const { start, end } = quarterRange(q);
+              const summary = summarise(start, end, atlas.logs, atlas.seed, atlas.states, atlas.settings);
+              const review = reviews.get(id);
+              return (
+                <Row
+                  key={id}
+                  title={quarterOf(q).replace('-', ' ')}
+                  meta={span(summary.totalMinutes) + ' logged · ' + (summary.shipped.research.length ? plural(summary.shipped.research.length, 'research card') + ' shipped' : review?.question ? 'a question asked' : 'no research shipped')}
+                  trailing={review?.completedAt ? 'Reviewed' : asOf >= start && asOf <= end ? 'This quarter' : undefined}
+                  onClick={() => setOpen(id, { replace: false })}
+                />
+              );
+            })
+          : monthly
           ? months.map((m) => {
               const id = 'month:' + m.slice(0, 7);
               const { start, end } = monthRange(m);
@@ -285,6 +374,7 @@ export function Reviews() {
       </RowList>
       <WeekSheet atlas={atlas} weekStart={openWeek} review={openWeek ? reviews.get('week:' + openWeek) : undefined} onClose={() => setOpen(null)} />
       <MonthSheet atlas={atlas} monthStart={openMonth} review={openMonth ? reviews.get('month:' + openMonth.slice(0, 7)) : undefined} onClose={() => setOpen(null)} />
+      <QuarterSheet atlas={atlas} quarterStart={openQuarter} review={openQuarter ? reviews.get('quarter:' + quarterOf(openQuarter)) : undefined} onClose={() => setOpen(null)} />
     </Screen>
   );
 }

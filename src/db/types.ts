@@ -117,14 +117,17 @@ export type Override = z.infer<typeof OverrideSchema>;
 const MinutesByBlock = z.strictObject({ A: z.number(), B: z.number(), C: z.number(), D: z.number(), E: z.number() });
 
 export const ReviewSchema = z.strictObject({
-  /** "week:2026-09-21" (the week's first day) or "month:2026-09". */
-  id: z.string().regex(/^(week:\d{4}-\d{2}-\d{2}|month:\d{4}-\d{2})$/),
-  kind: z.enum(['week', 'month']),
+  /** "week:2026-09-21" (the week's first day), "month:2026-09" or "quarter:2027-Q3". */
+  id: z.string().regex(/^(week:\d{4}-\d{2}-\d{2}|month:\d{4}-\d{2}|quarter:\d{4}-Q[1-4])$/),
+  kind: z.enum(['week', 'month', 'quarter']),
   periodStart: IsoDate,
   completedAt: IsoDate.optional(),
   worked: z.string().optional(),
   didnt: z.string().optional(),
   changes: z.string().optional(),
+  /** Quarterly review: the research question of the quarter, and the link to its two-page report in research/. */
+  question: z.string().optional(),
+  reportUrl: OptionalUrl,
   /** Monthly review: was a project shipped this month? Pre-filled from project states, editable. */
   projectShipped: z.boolean().optional(),
   /** The auto-filled numbers as they stood when the review was completed. */

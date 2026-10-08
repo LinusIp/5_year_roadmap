@@ -10,10 +10,10 @@ test.beforeEach(async ({ page }) => {
 test.describe('library', () => {
   test('search and filters narrow the list, and live in the URL', async ({ page }) => {
     await open(page, './#/library');
-    const search = page.getByRole('searchbox', { name: 'Search courses, books, papers' });
+    const search = page.getByRole('searchbox', { name: 'Search the library' });
     await search.fill('linear algebra');
     await expect(page).toHaveURL(/q=linear/);
-    await expect(page.getByRole('button', { name: /^MIT 18\.06 Linear Algebra/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^18\.06 Linear Algebra/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /^The Rust Programming Language/ })).toBeHidden();
 
     await search.fill('');
@@ -21,7 +21,7 @@ test.describe('library', () => {
     await page.getByRole('dialog', { name: 'Track' }).getByRole('button', { name: 'Embedded' }).click();
     await expect(page).toHaveURL(/track=embedded/);
     await expect(page.getByRole('button', { name: /Embedded Rust Book/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /^MIT 18\.06/ })).toBeHidden();
+    await expect(page.getByRole('button', { name: /^18\.06/ })).toBeHidden();
 
     await page.getByRole('button', { name: /^Courses \d+$/ }).click();
     await expect(page).toHaveURL(/type=course/);
@@ -92,14 +92,14 @@ test.describe('library', () => {
 test.describe('projects', () => {
   test('a project can only be marked done once its repository link is in', async ({ page }) => {
     await open(page, './#/library/m02');
-    const sheet = page.getByRole('dialog', { name: /CLI expense or habit tracker/ });
-    const pill = sheet.getByRole('button', { name: /^Status of CLI expense/ });
+    const sheet = page.getByRole('dialog', { name: /CLI habit tracker/ });
+    const pill = sheet.getByRole('button', { name: /^Status of CLI habit/ });
 
     // A tap skips Done while it is not allowed; the full list says why.
     await pill.click();
     await expect(pill).toHaveText('Active');
     await pill.click({ button: 'right' });
-    const list = page.getByRole('dialog', { name: /^Status of CLI expense/ });
+    const list = page.getByRole('dialog', { name: /^Status of CLI habit/ });
     await list.getByRole('button', { name: /^Done/ }).click();
     await expect(list.getByRole('alert')).toHaveText(/only done once its repository link is filled in/);
     await list.getByRole('button', { name: 'Close' }).click();

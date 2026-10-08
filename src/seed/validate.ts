@@ -5,10 +5,10 @@
 import { z } from 'zod';
 import {
   BLOCK_IDS, CertSchema, PaperSchema, PaperSourceSchema, PhaseSchema, PlanPhaseInputSchema,
-  ProjectSchema, ResourceSchema, SettingsDefaultsSchema, SubjectSchema, TRACK_IDS, TrackSchema, UnitsInput,
+  ProjectSchema, ResourceSchema, ROADMAP_IDS, RoadmapSchema, SettingsDefaultsSchema, SubjectSchema, TRACK_IDS, TrackSchema, UnitsInput,
 } from './schema.ts';
 import type {
-  Cert, Paper, PaperSource, Phase, PlanItem, PlanPhaseInput, Project, Resource, Seed,
+  Cert, Paper, PaperSource, Phase, PlanItem, PlanPhaseInput, Project, Resource, Roadmap, RoadmapNode, Seed,
   SettingsDefaults, Subject, Track,
 } from './schema.ts';
 
@@ -19,7 +19,7 @@ export interface RawFile {
 }
 
 export const SEED_KINDS = [
-  'tracks', 'settings', 'phases', 'resources', 'units', 'plan', 'projects', 'papers', 'paperSources', 'certs', 'subjects',
+  'tracks', 'settings', 'phases', 'resources', 'units', 'plan', 'projects', 'papers', 'paperSources', 'certs', 'subjects', 'roadmaps',
 ] as const;
 export type SeedKind = (typeof SEED_KINDS)[number];
 export type RawSeed = Record<SeedKind, RawFile[]>;
@@ -33,6 +33,17 @@ export interface ValidationResult {
 /** Minimum size of the weekly mini-build pool, and of its stage 2 share (brief, section 6). */
 export const MIN_WEEKLY_PROJECTS = 100;
 export const MIN_WEEKLY_STAGE2 = 30;
+
+/** A roadmap node's id: "Ops:Byte Ratio" -> "ops-byte-ratio", "Mixture of Experts (MoE)" -> "mixture-of-experts-moe". */
+export function nodeSlug(label: string): string {
+  return label
+    .toLowerCase()
+    .replace(/\+\+/g, 'pp')
+    .replace(/#/g, 'sharp')
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
 function describeIssue(issue: z.core.$ZodIssue): string {
   const path = issue.path.length ? issue.path.map(String).join('.') + ': ' : '';
@@ -179,6 +190,7 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
   const paperSources = parseList(raw.paperSources, PaperSourceSchema, errors);
   const certs = parseList(raw.certs, CertSchema, errors);
   const subjects = parseList(raw.subjects, SubjectSchema, errors);
+  const roadmapInputs = parseList(raw.roadmaps, RoadmapSchema, errors);
 
   let settings: SettingsDefaults | null = null;
   if (raw.settings.length !== 1) {
@@ -393,6 +405,39 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
     if (row && !row.item.certs.includes(item.id)) errors.push(file + ' (id: ' + item.id + '): not listed under subject "' + item.subject + '" in data/subjects.yaml');
   }
 
+  if (settings?.paperCadence.fromPhase && !phaseById.has(settings.paperCadence.fromPhase)) {
+    errors.push('data/settings.yaml: paperCadence.fromPhase "' + settings.paperCadence.fromPhase + '" is not a phase');
+  }
+
+  /* ---- roadmap.sh tracks: node ids are slugs of their labels; items point at them with `covers` */
+  findDuplicates('roadmap', roadmapInputs, errors);
+  const roadmaps: Roadmap[] = [];
+  for (const { item, file } of roadmapInputs) {
+    if (!subjectIds.has(item.subject)) errors.push(file + ' (id: ' + item.id + '): subject "' + item.subject + '" has no row in data/subjects.yaml');
+    const seen = new Set<string>();
+    const sections = item.sections.map((section) => {
+      if (!phaseById.has(section.phaseId)) errors.push(file + ' (id: ' + item.id + '): section "' + section.title + '" names phase "' + section.phaseId + '", which is not a phase');
+      const nodes = section.nodes.map((node): RoadmapNode => {
+        const label = typeof node === 'string' ? node : node.label;
+        const id = nodeSlug(label);
+        if (seen.has(id)) errors.push(file + ' (id: ' + item.id + '): two nodes share the id "' + id + '"; give one a different label');
+        seen.add(id);
+        return { id, label, optional: typeof node !== 'string' };
+      });
+      return { title: section.title, phaseId: section.phaseId, nodes };
+    });
+    roadmaps.push({ ...item, sections });
+  }
+  if (requireComplete) {
+    for (const id of ROADMAP_IDS) if (!roadmaps.some((r) => r.id === id)) errors.push('data/roadmaps.yaml: roadmap "' + id + '" is missing');
+  }
+  const nodeKeys = new Set(roadmaps.flatMap((r) => r.sections.flatMap((s) => s.nodes.map((n) => r.id + '/' + n.id))));
+  const checkCovers = (file: string, id: string, covers: string[] | undefined): void => {
+    for (const key of covers ?? []) if (!nodeKeys.has(key)) errors.push(file + ' (id: ' + id + '): covers "' + key + '", which is not a node of data/roadmaps.yaml');
+  };
+  for (const { item, file } of resources) checkCovers(file, item.id, item.covers);
+  for (const { item, file } of projects) checkCovers(file, item.id, item.covers);
+
   if (errors.length > 0 || !settings) return { seed: null, errors, warnings };
 
   const seed: Seed = {
@@ -406,6 +451,7 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
     paperSources: paperSources.map((p): PaperSource => p.item),
     certs: certs.map((c): Cert => c.item),
     subjects: subjects.map((s): Subject => s.item),
+    roadmaps,
   };
   return { seed, errors, warnings };
 }

@@ -20,6 +20,7 @@ const Reviews = lazy(() => import('./screens/Reviews.tsx').then((m) => ({ defaul
 const Stats = lazy(() => import('./screens/Stats.tsx').then((m) => ({ default: m.Stats })));
 const Settings = lazy(() => import('./screens/Settings.tsx').then((m) => ({ default: m.Settings })));
 const NotFound = lazy(() => import('./screens/NotFound.tsx').then((m) => ({ default: m.NotFound })));
+const PhaseMap = lazy(() => import('./screens/PhaseMap.tsx').then((m) => ({ default: m.PhaseMap })));
 const PickProject = lazy(() => import('./screens/PickProject.tsx').then((m) => ({ default: m.PickProject })));
 const DevComponents = lazy(() => import('./screens/DevComponents.tsx').then((m) => ({ default: m.DevComponents })));
 
@@ -33,6 +34,7 @@ const ROUTES: RouteDef[] = [
   { pattern: '/activity', render: () => <Activity /> },
   { pattern: '/plan', render: () => <Plan /> },
   { pattern: '/plan/pick', render: () => <PickProject /> },
+  { pattern: '/plan/map', render: () => <PhaseMap /> },
   { pattern: '/library', render: () => <Library /> },
   { pattern: '/library/:id', render: (p) => <Library openId={p.id!} /> },
   { pattern: '/reviews', render: () => <Reviews /> },

@@ -1,0 +1,203 @@
+# Generative AI and world models (year 3), added for the brief of 2026-10-07. Links checked 2026-10-08.
+
+- id: stanford-cs236
+  title: Deep Generative Models (Stanford CS236)
+  provider: Stanford University
+  type: course
+  url: https://deepgenerativemodels.github.io/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 80
+  prerequisites: []
+  subject: deep-learning
+  summary: VAEs, GANs, normalizing flows, autoregressive and energy models, score matching and diffusion.
+  covers:
+    - inference-engineering/diffusion-models
+- id: mit-6-s978
+  title: Deep Generative Models (MIT 6.S978)
+  provider: MIT
+  type: course
+  url: https://mit-6s978.github.io/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 40
+  prerequisites: []
+  subject: deep-learning
+  summary: Kaiming He's course on the modern generative model families.
+- id: lilian-weng-diffusion
+  title: What are Diffusion Models?
+  provider: Lilian Weng
+  type: article
+  url: https://lilianweng.github.io/posts/2021-07-11-diffusion-models/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 2
+  prerequisites: []
+  subject: deep-learning
+  summary: The derivations behind DDPM, score matching and guidance in one place.
+- id: annotated-diffusion
+  title: The Annotated Diffusion Model
+  provider: Hugging Face
+  type: article
+  url: https://huggingface.co/blog/annotated-diffusion
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 3
+  prerequisites: []
+  subject: deep-learning
+  summary: DDPM implemented line by line in PyTorch, next to the paper.
+- id: yang-song-score
+  title: Generative Modeling by Estimating Gradients of the Data Distribution
+  provider: Yang Song
+  type: article
+  url: https://yang-song.net/blog/2021/score/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 2
+  prerequisites: []
+  subject: deep-learning
+  summary: Score-based generative modelling and SDEs, from the author.
+- id: sander-dieleman-blog
+  title: Sander Dieleman's blog
+  provider: Sander Dieleman
+  type: article
+  url: https://sander.ai/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 6
+  prerequisites: []
+  subject: deep-learning
+  summary: "Long essays on diffusion: guidance, noise schedules, perspectives on what diffusion is."
+- id: fastai-part-2
+  title: From Deep Learning Foundations to Stable Diffusion
+  provider: fast.ai
+  type: course
+  url: https://course.fast.ai/Lessons/part2.html
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 40
+  prerequisites: []
+  subject: deep-learning
+  summary: "Part 2 of the fast.ai course: rebuild the pieces of Stable Diffusion from scratch."
+- id: diffusers-repo
+  title: huggingface/diffusers
+  provider: Hugging Face
+  type: repo
+  url: https://github.com/huggingface/diffusers
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 6
+  prerequisites: []
+  subject: deep-learning
+  summary: The reference library for diffusion pipelines; worth reading as code.
+  covers:
+    - inference-engineering/transformers-and-diffusers
+- id: denoising-diffusion-pytorch
+  title: lucidrains/denoising-diffusion-pytorch
+  provider: Phil Wang
+  type: repo
+  url: https://github.com/lucidrains/denoising-diffusion-pytorch
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 3
+  prerequisites: []
+  subject: deep-learning
+  summary: A compact DDPM implementation to read before writing your own.
+- id: facebookresearch-dit
+  title: facebookresearch/DiT
+  provider: Meta AI
+  type: repo
+  url: https://github.com/facebookresearch/DiT
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 3
+  prerequisites: []
+  subject: deep-learning
+  summary: The official diffusion-transformer code.
+- id: dreamerv3-code
+  title: danijar/dreamerv3
+  provider: Danijar Hafner
+  type: repo
+  url: https://github.com/danijar/dreamerv3
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - robotics
+  level: advanced
+  cost: free
+  estHours: 4
+  prerequisites: []
+  subject: deep-learning
+  summary: The official DreamerV3 implementation in JAX.
+- id: mujoco-playground
+  title: google-deepmind/mujoco_playground
+  provider: Google DeepMind
+  type: repo
+  url: https://github.com/google-deepmind/mujoco_playground
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - robotics
+    - simulation
+  level: advanced
+  cost: free
+  estHours: 4
+  prerequisites: []
+  subject: robotics
+  summary: GPU-accelerated environments on MuJoCo MJX for robot learning.
+- id: jepa-code
+  title: facebookresearch/jepa
+  provider: Meta AI
+  type: repo
+  url: https://github.com/facebookresearch/jepa
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 3
+  prerequisites: []
+  subject: deep-learning
+  summary: "The V-JEPA code: self-supervised video representations by prediction in latent space."

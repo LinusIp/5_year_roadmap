@@ -11,8 +11,9 @@ import { ItemStatusPill } from '../parts/ItemSheet.tsx';
 import { plural, shortTitle } from '../parts/text.ts';
 
 /**
- * Projects: three stacks, this week's build, this month's project and the capstones, each a list. What is
- * shipped folds into one row with a count; "Pick a project" opens the deck.
+ * Projects: four stacks, this week's build, this month's project, research and the capstones, each a list. What
+ * is shipped folds into one row with a count; "Pick a project" opens the deck. Research cards show once their
+ * phase has begun; before that, one row names the first of them.
  */
 export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atlas; phase: Phase | null; weekly: Project | null; onOpenItem: (id: string) => void }) {
   const [showDone, setShowDone] = useState<string | null>(null);
@@ -26,6 +27,10 @@ export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atla
   const laned = phase ? lane(seed, phase.id, 'D').map((i) => seed.projects.find((p) => p.id === i.projectId)).filter((p): p is Project => p?.cadence === 'monthly') : [];
   const monthly = [...laned, ...seed.projects.filter((p) => p.cadence === 'monthly' && phase && p.phaseId === phase.id && !laned.includes(p))];
   const capstones = seed.projects.filter((p) => p.cadence === 'capstone');
+  const phaseStart = (id: string | undefined): string => seed.phases.find((ph) => ph.id === id)?.start ?? '9999';
+  const research = seed.projects.filter((p) => p.cadence === 'research').sort((a, b) => phaseStart(a.phaseId).localeCompare(phaseStart(b.phaseId)) || (a.number ?? 999) - (b.number ?? 999));
+  const researchNow = research.filter((p) => phaseStart(p.phaseId) <= (phase?.start ?? asOf));
+  const firstResearch = research.find(open);
   const weeklyDone = seed.projects.filter((p) => p.cadence === 'weekly' && states.get(p.id)?.status === 'done');
 
   const [w, m, c] = (['weekly', 'monthly', 'capstone'] as const).map((cadence) => adherence(seed.projects, states, cadence, planStart, asOf, settings.core.weekStartsOn));
@@ -68,6 +73,18 @@ export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atla
         {monthly.filter(open).map((p, i) => projectRow(p, (i === 0 ? 'Next in Block D · ' : '') + (p.number !== undefined ? 'No. ' + p.number + ' · ' : '') + hoursOn(p.id) + ' of ' + p.estHours + ' h'))}
         {monthly.filter(open).length === 0 && <Row title="Every monthly project of this phase is shipped" meta="Pick one from the deck" to="/plan/pick?cadence=monthly" />}
         {doneRow('monthly', monthly.filter((p) => !open(p)), 'monthly project')}
+      </RowList>
+
+      <RowList label="Research">
+        {researchNow.filter(open).map((p) => projectRow(p, (p.number !== undefined ? 'No. ' + p.number + ' · ' : '') + hoursOn(p.id) + ' of ' + p.estHours + ' h'))}
+        {researchNow.filter(open).length === 0 && firstResearch && (
+          <Row
+            title={'Research starts in year ' + (seed.phases.find((ph) => ph.id === firstResearch.phaseId)?.year ?? 2)}
+            meta={'First: ' + shortTitle(firstResearch.title)}
+            onClick={() => onOpenItem(firstResearch.id)}
+          />
+        )}
+        {doneRow('research', research.filter((p) => !open(p)), 'research card')}
       </RowList>
 
       <RowList label="Capstones">

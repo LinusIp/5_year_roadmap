@@ -63,7 +63,7 @@ test.describe('keyboard shortcuts', () => {
 
     // Today has no search of its own, so "/" goes to the Library's.
     await page.keyboard.press('/');
-    const search = page.getByRole('searchbox', { name: 'Search courses, books, papers' });
+    const search = page.getByRole('searchbox', { name: 'Search the library' });
     await expect(search).toBeFocused();
     await page.keyboard.type('rust');
     await expect(search).toHaveValue('rust');

@@ -3,7 +3,7 @@ import { useCertStates, useMilestoneStates } from '../db/credentials.ts';
 import { usePaperStates, useWeekPick } from '../db/state.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { useUnits } from '../hooks/useUnits.ts';
-import { startOfWeek, today as todayDate } from '../lib/dates.ts';
+import { daysBetween, startOfWeek, today as todayDate } from '../lib/dates.ts';
 import { weeklyBuildFor } from '../lib/schedule.ts';
 import { useQueryParam } from '../router/router.tsx';
 import type { BlockId } from '../seed/schema.ts';
@@ -11,7 +11,7 @@ import { Header } from '../ui/Header.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { SegmentedControl } from '../ui/SegmentedControl.tsx';
 import { ItemSheet } from './parts/ItemSheet.tsx';
-import { longDate, shortTitle } from './parts/text.ts';
+import { longDate, nameOf } from './parts/text.ts';
 import { CredentialsView } from './plan/CredentialsView.tsx';
 import { LaneSheet } from './plan/LaneSheet.tsx';
 import { buildModel, currentPhase } from './plan/model.ts';
@@ -57,7 +57,10 @@ export function Plan() {
   }
 
   const phase = currentPhase(atlas, asOf);
-  const sub = phase ? 'Year ' + phase.year + ' · ' + phase.title + ' · ends ' + longDate(phase.end) : 'The five years are done';
+  // "ends 31 January", as in the mockup: the year is only written when the end is more than a year away.
+  const endsIn = phase ? daysBetween(asOf, phase.end) : 0;
+  const ends = phase ? (endsIn < 365 ? longDate(phase.end).replace(/ \d{4}$/, '') : longDate(phase.end)) : '';
+  const sub = phase ? 'Year ' + phase.year + ' · ' + phase.title + ' · ends ' + ends : 'The five years are done';
   const weekly = weeklyBuildFor(phase, weekPick?.projectId, { seed: atlas.seed, states: atlas.states });
   const weeklyProject = weekly ? (atlas.seed.projects.find((p) => p.id === weekly.refId) ?? null) : null;
 
@@ -69,7 +72,7 @@ export function Plan() {
   return (
     <Screen title="Plan">
       <Header title="Plan" sub={sub} />
-      <div className="mb-5">
+      <div className="mt-5">
         <SegmentedControl label="View" value={view} onChange={(v) => setView(v === 'timeline' ? null : v)} options={VIEWS} />
       </div>
 
@@ -79,14 +82,18 @@ export function Plan() {
           model={model}
           currentId={phase?.id ?? null}
           units={units}
-          weekly={weekly ? shortTitle(weekly.title) : null}
+          weekly={weekly ? nameOf(weekly) : null}
           onLane={(phaseId, block) => setLane(phaseId + '.' + block, { replace: false })}
           onReplan={() => setReplanOpen(true)}
         />
       )}
-      {view === 'projects' && <ProjectsView atlas={atlas} phase={phase} weekly={weeklyProject} onOpenItem={openItem} />}
-      {view === 'papers' && paperStates && <PapersView atlas={atlas} states={paperStates} />}
-      {view === 'credentials' && certStates && milestoneStates && <CredentialsView atlas={atlas} certStates={certStates} milestoneStates={milestoneStates} onOpenItem={openItem} />}
+      {view !== 'timeline' && (
+        <div className="mt-6">
+          {view === 'projects' && <ProjectsView atlas={atlas} phase={phase} weekly={weeklyProject} onOpenItem={openItem} />}
+          {view === 'papers' && paperStates && <PapersView atlas={atlas} states={paperStates} />}
+          {view === 'credentials' && certStates && milestoneStates && <CredentialsView atlas={atlas} certStates={certStates} milestoneStates={milestoneStates} onOpenItem={openItem} />}
+        </div>
+      )}
 
       <LaneSheet atlas={atlas} phase={laneModel?.phase ?? null} lane={itemParam ? null : lane} units={units} onClose={() => setLane(null)} onOpenItem={openItem} />
       <ItemSheet atlas={atlas} id={itemParam} onClose={() => setItem(null)} />

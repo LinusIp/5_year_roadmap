@@ -16,10 +16,11 @@ export function criteriaUnits(acceptance: string[]): ChecklistUnit[] {
 }
 
 /**
- * Sub-units (lectures, chapters, labs, acceptance criteria) as rows with a check circle. A unit with a link
+ * Sub-units (lectures, chapters, labs, acceptance criteria) as rows with a checkbox; `compact` is Today's
+ * 44 px version with regular-weight titles. A unit with a link
  * opens it from its title; the circle ticks it. A tick shows at once and is stored behind it.
  */
-export function Checklist({ refId, units, done, label, plain }: { refId: string; units: ChecklistUnit[]; done: string[]; label?: string; plain?: boolean }) {
+export function Checklist({ refId, units, done, label, plain, compact }: { refId: string; units: ChecklistUnit[]; done: string[]; label?: string; plain?: boolean; compact?: boolean }) {
   const ticks = useOptimisticSet(done);
   let lastSection: string | undefined;
   return (
@@ -36,6 +37,8 @@ export function Checklist({ refId, units, done, label, plain }: { refId: string;
             )}
             <Row
               title={unit.title}
+              height={compact ? 44 : 56}
+              plainTitle={compact}
               href={unit.url}
               check={{
                 checked: ticks.has(unit.id),

@@ -17,7 +17,7 @@ export interface PeriodSummary {
   /** Ids of resources and projects finished in the period (by their doneAt date). */
   itemsFinished: string[];
   /** Projects finished in the period, by cadence. */
-  shipped: { weekly: string[]; monthly: string[]; capstone: string[] };
+  shipped: { weekly: string[]; monthly: string[]; research: string[]; capstone: string[] };
   averageEnergy: number | null;
 }
 
@@ -57,7 +57,7 @@ export function summarise(
   }
 
   const itemsFinished: string[] = [];
-  const shipped: PeriodSummary['shipped'] = { weekly: [], monthly: [], capstone: [] };
+  const shipped: PeriodSummary['shipped'] = { weekly: [], monthly: [], research: [], capstone: [] };
   for (const [refId, state] of states) {
     if (state.status !== 'done' || !state.doneAt || state.doneAt < start || state.doneAt > end) continue;
     itemsFinished.push(refId);
@@ -108,6 +108,29 @@ export function monthsSoFar(from: string, asOf: string, limit = 12): string[] {
   while (month >= first && out.length < limit) {
     out.push(month);
     month = startOfMonth(addDays(month, -1));
+  }
+  return out;
+}
+
+/** "2027-Q1" for any day of January to March 2027. */
+export function quarterOf(date: string): string {
+  return date.slice(0, 4) + '-Q' + (Math.floor((Number(date.slice(5, 7)) - 1) / 3) + 1);
+}
+
+export function quarterRange(date: string): { start: string; end: string } {
+  const month = Math.floor((Number(date.slice(5, 7)) - 1) / 3) * 3 + 1;
+  const start = date.slice(0, 4) + '-' + String(month).padStart(2, '0') + '-01';
+  return { start, end: endOfMonth(start.slice(0, 5) + String(month + 2).padStart(2, '0') + '-01') };
+}
+
+/** The quarters from `from` to `asOf`, newest first, as their first days. */
+export function quartersSoFar(from: string, asOf: string, limit = 8): string[] {
+  const out: string[] = [];
+  let quarter = quarterRange(asOf).start;
+  const first = quarterRange(from).start;
+  while (quarter >= first && out.length < limit) {
+    out.push(quarter);
+    quarter = quarterRange(addDays(quarter, -1)).start;
   }
   return out;
 }

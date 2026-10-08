@@ -3,6 +3,7 @@ import { editCertState, editMilestoneState, setCertStatus, setMilestoneStatus } 
 import type { CertState, CertStatus, MilestoneState, MilestoneStatus } from '../../db/types.ts';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { credentialRows, describeQuarter, expiryWarnings } from '../../lib/credentials.ts';
+import { roadmapCoverage } from '../../lib/roadmaps.ts';
 import type { MilestoneView, SubjectRow } from '../../lib/credentials.ts';
 import { today } from '../../lib/dates.ts';
 import { useQueryParam } from '../../router/router.tsx';
@@ -14,6 +15,7 @@ import { TextField } from '../../ui/TextField.tsx';
 import { LinkField } from '../parts/ItemSheet.tsx';
 import { StatusPill } from '../parts/StatusPill.tsx';
 import { plural, shortTitle } from '../parts/text.ts';
+import { RoadmapSheet, RoadmapsList } from './RoadmapsSection.tsx';
 
 const CERT_STATUSES: { value: CertStatus; label: string }[] = [
   { value: 'investigating', label: 'Investigating' },
@@ -141,8 +143,9 @@ function MilestoneSheet({ milestone, subject, onClose, onOpenItem }: { milestone
 }
 
 /**
- * Credentials: every subject ends in a certificate, a portfolio milestone, or both. Certificates and milestones
- * are two lists with status pills; a subject from the Library narrows both.
+ * Credentials: every subject ends in a certificate, a portfolio milestone, or both. The roadmap.sh roadmaps come
+ * first, since each is mastered through a credential row; then certificates and milestones, two lists with status
+ * pills. A subject from the Library narrows all three.
  */
 export function CredentialsView({
   atlas,
@@ -159,7 +162,10 @@ export function CredentialsView({
   const [year, setYear] = useQueryParam('year');
   const [certId, setCertId] = useQueryParam('cert');
   const [milestoneId, setMilestoneId] = useQueryParam('milestone');
+  const [roadmapId, setRoadmapId] = useQueryParam('roadmap');
   const rows = credentialRows(atlas.seed, certStates, milestoneStates, atlas.states);
+  const coverage = roadmapCoverage(atlas.seed, atlas.states, rows);
+  const roadmapsInScope = subjectId ? coverage.filter((c) => c.roadmap.subject === subjectId) : coverage;
   const subject = rows.find((r) => r.subject.id === subjectId)?.subject;
   const inScope = subject ? rows.filter((r) => r.subject.id === subject.id) : rows;
   const allCerts = rows.flatMap((r) => r.certs);
@@ -179,6 +185,8 @@ export function CredentialsView({
         {allCerts.filter((c) => c.status === 'earned').length} of {plural(allCerts.filter((c) => c.mode === 'committed').length, 'certificate')} earned ·{' '}
         {allMilestones.filter((m) => m.status === 'done').length} of {plural(allMilestones.length, 'milestone')} done
       </p>
+
+      {!year && roadmapsInScope.length > 0 && <RoadmapsList coverage={roadmapsInScope} onOpen={(id) => setRoadmapId(id, { replace: false })} />}
 
       {warnings.length > 0 && (
         <RowList label="Renewal due">
@@ -224,6 +232,7 @@ export function CredentialsView({
       )}
 
       <CertSheet atlas={atlas} cert={openCert} onClose={() => setCertId(null)} />
+      <RoadmapSheet atlas={atlas} coverage={coverage.find((c) => c.roadmap.id === roadmapId) ?? null} onClose={() => setRoadmapId(null)} />
       <MilestoneSheet milestone={openMilestone?.m ?? null} subject={openMilestone?.subject ?? ''} onClose={() => setMilestoneId(null)} onOpenItem={onOpenItem} />
     </div>
   );

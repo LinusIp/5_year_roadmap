@@ -1,0 +1,188 @@
+# Doing research: the research cadence of the brief of 2026-10-07. Links checked 2026-10-08.
+
+- id: hamming-you-and-your-research
+  title: You and Your Research
+  provider: Richard Hamming
+  type: article
+  url: https://www.cs.virginia.edu/~robins/YouAndYourResearch.html
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - career
+  level: intro
+  cost: free
+  estHours: 1
+  prerequisites: []
+  subject: research
+  summary: "Why some people do important work: the famous talk."
+- id: karpathy-phd-guide
+  title: A Survival Guide to a PhD
+  provider: Andrej Karpathy
+  type: article
+  url: https://karpathy.github.io/2016/09/07/phd/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - career
+  level: intro
+  cost: free
+  estHours: 1
+  prerequisites: []
+  subject: research
+  summary: "Choosing problems, writing papers, giving talks: practical advice that applies outside a PhD."
+- id: schulman-research-guide
+  title: An Opinionated Guide to ML Research
+  provider: John Schulman
+  type: article
+  url: http://joschu.net/blog/opinionated-guide-ml-research.html
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - career
+    - ai
+  level: intro
+  cost: free
+  estHours: 1
+  prerequisites: []
+  subject: research
+  summary: Problem selection, idea-driven against goal-driven research, keeping a notebook.
+- id: nielsen-principles
+  title: Principles of Effective Research
+  provider: Michael Nielsen
+  type: article
+  url: https://web.archive.org/web/20231204201947/https://michaelnielsen.org/blog/principles-of-effective-research/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - career
+  level: intro
+  cost: free
+  estHours: 1
+  prerequisites: []
+  subject: research
+  summary: Self-development, problem creation and problem solving as the three parts of research. The original page is gone; this is the Internet Archive copy.
+- id: steinhardt-research-taste
+  title: Research as a Stochastic Decision Process
+  provider: Jacob Steinhardt
+  type: article
+  url: https://cs.stanford.edu/~jsteinhardt/ResearchasaStochasticDecisionProcess.html
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - career
+  level: intro
+  cost: free
+  estHours: 1
+  prerequisites: []
+  subject: research
+  summary: How to order the risky parts of a project so that it fails fast or succeeds.
+- id: raschka-ahead-of-ai
+  title: Ahead of AI (reading lists and research summaries)
+  provider: Sebastian Raschka
+  type: article
+  url: https://magazine.sebastianraschka.com/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: intro
+  cost: free
+  estHours: 4
+  prerequisites: []
+  subject: research
+  summary: Curated reading lists and monthly summaries of new LLM research.
+- id: hf-papers
+  title: Papers with Code, now Hugging Face Papers
+  provider: Hugging Face
+  type: tutorial
+  url: https://huggingface.co/papers/trending
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: intro
+  cost: free
+  estHours: 0
+  prerequisites: []
+  subject: research
+  summary: "paperswithcode.com now redirects here: trending papers with their code and models."
+  reference: true
+- id: alphaxiv
+  title: alphaXiv
+  provider: alphaXiv
+  type: tutorial
+  url: https://www.alphaxiv.org/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: intro
+  cost: free
+  estHours: 0
+  prerequisites: []
+  subject: research
+  summary: arXiv with discussion threads on each paper.
+  reference: true
+- id: zotero
+  title: Zotero
+  provider: Corporation for Digital Scholarship
+  type: repo
+  url: https://www.zotero.org/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - career
+  level: intro
+  cost: free
+  estHours: 0
+  prerequisites: []
+  subject: research
+  summary: "A reference manager for the paper queue: PDFs, notes and citations."
+  reference: true
+- id: wandb
+  title: Weights & Biases
+  provider: Weights & Biases
+  type: repo
+  url: https://wandb.ai/site
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: intro
+  cost: free
+  estHours: 0
+  prerequisites: []
+  subject: research
+  summary: "Experiment tracking for the lab notebook: runs, metrics, artefacts and reports."
+  reference: true
+- id: keshav-how-to-read
+  title: How to Read a Paper
+  provider: S. Keshav
+  type: article
+  url: https://web.stanford.edu/class/ee384m/Handouts/HowtoReadPaper.pdf
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - career
+  level: intro
+  cost: free
+  estHours: 1
+  prerequisites: []
+  subject: research
+  summary: The three-pass method for reading research papers.
+- id: ml-reproducibility-challenge
+  title: ML Reproducibility Challenge
+  provider: ML Reproducibility Challenge
+  type: tutorial
+  url: https://reproml.org/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: intermediate
+  cost: free
+  estHours: 0
+  prerequisites: []
+  subject: research
+  summary: A yearly community challenge to reproduce published ML papers; a good venue for a reproduction.
+  reference: true

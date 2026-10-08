@@ -7,10 +7,11 @@ test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date(FIRST_DAY) });
 });
 
-test('Projects shows three stacks: this week, this month with the brief numbering, and the capstones', async ({ page }) => {
+test('Projects shows four stacks: this week, this month with the brief numbering, research and the capstones', async ({ page }) => {
   await open(page, './#/plan?view=projects');
   await expect(page.getByRole('heading', { name: 'This week' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'This month' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Research' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Capstones' })).toBeVisible();
   await expect(page.getByRole('button', { name: /^ML Zoomcamp midterm project, deployed Next in Block D · No\. 1/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /^Stage 1 capstone/ })).toBeVisible();

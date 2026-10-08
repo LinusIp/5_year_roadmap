@@ -12,6 +12,8 @@ const PORT = 4173;
  */
 export default defineConfig({
   testDir: 'tests/e2e',
+  // The screenshot test's baselines live at the top of the repository, where the redesign asked for them.
+  snapshotPathTemplate: 'screenshots/{arg}{ext}',
   timeout: 30_000,
   expect: { timeout: 7_000 },
   fullyParallel: true,

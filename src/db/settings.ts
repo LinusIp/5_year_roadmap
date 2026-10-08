@@ -15,8 +15,32 @@ export function defaultSettings(core: SettingsDefaults): StoredSettings {
   };
 }
 
+/**
+ * Settings saved before a curriculum renamed a block still carry the old default name (and its summary). A block
+ * whose name is one of the defaults' former names takes the new name and summary; a name the user chose is kept.
+ */
+export function withCurrentBlockNames(stored: StoredSettings, core: SettingsDefaults): StoredSettings {
+  let changed = false;
+  const blocks = stored.core.blocks.map((block) => {
+    const fresh = core.blocks.find((b) => b.id === block.id);
+    if (!fresh || !fresh.formerNames?.includes(block.name)) return block;
+    changed = true;
+    return { ...block, name: fresh.name, summary: fresh.summary, formerNames: fresh.formerNames };
+  });
+  return changed ? { ...stored, core: { ...stored.core, blocks } } : stored;
+}
+
+/** The paper cadence of earlier curricula, never edited by the user, gives way to the current default. */
+export function withCurrentPaperCadence(stored: StoredSettings, core: SettingsDefaults): StoredSettings {
+  const cadence = stored.core.paperCadence;
+  const untouchedOldDefault = cadence.fromPhase === undefined && cadence.fromYear === 2 && cadence.perWeek === 1;
+  if (!untouchedOldDefault || core.paperCadence.fromPhase === undefined) return stored;
+  return { ...stored, core: { ...stored.core, paperCadence: { ...core.paperCadence } } };
+}
+
 export async function readSettings(core: SettingsDefaults, database: AtlasDB = db): Promise<StoredSettings> {
-  return (await database.settings.get('app')) ?? defaultSettings(core);
+  const stored = await database.settings.get('app');
+  return stored ? withCurrentPaperCadence(withCurrentBlockNames(stored, core), core) : defaultSettings(core);
 }
 
 export async function updateSettings(

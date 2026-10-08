@@ -52,5 +52,6 @@ export function minimalSeed(): RawSeed {
     paperSources: [{ file: 'data/paper-sources.yaml', data: [] }],
     certs: [{ file: 'data/certs.yaml', data: [] }],
     subjects: [{ file: 'data/subjects.yaml', data: [{ id: 'maths', title: 'Maths', tracks: ['math'], certNote: 'none exist', milestones: [{ id: 'ms-notebook', title: 'Problem-set notebook', projects: ['proj1'] }] }] }],
+    roadmaps: [],
   };
 }

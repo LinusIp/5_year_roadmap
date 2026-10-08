@@ -36,7 +36,7 @@ describe('the schedule', () => {
     expect(plan.isReviewDay).toBe(false); // 2026-09-21 is a Monday
     expect(plan.targetMinutes).toBe(480); // the 8-hour budget
 
-    expect(byBlock.get('A')!.item!.title).toMatch(/Finish a small game/);
+    expect(byBlock.get('A')!.item!.title).toMatch(/One finished small game/);
     expect(byBlock.get('B')!.item!.title).toMatch(/30 Days of Python/);
     expect(byBlock.get('B')!.item!.nextUnit).toMatchObject({ position: 1, title: expect.stringContaining('Day 1') });
     expect(byBlock.get('C')!.item!.title).toMatch(/Machine Learning Zoomcamp/);
@@ -77,7 +77,7 @@ describe('the schedule', () => {
     const plan = planForDay({ date: FIRST_DAY, settings, ctx });
     expect(plan.blocks.find((b) => b.id === 'E')!.item!.title).toMatch(/algorithms and data structures/i);
 
-    const dropped = context([done('mit-18-06'), { refId: 'current-dsa-course', status: 'dropped', unitsDone: [] }]);
+    const dropped = context([done('mit-18-06'), { refId: 'current-dsa-course', status: 'dropped', unitsDone: [] }, done('3b1b-linear-algebra'), done('3b1b-calculus')]);
     const next = nextInLane('y1-p0', 'E', dropped);
     // Nothing left in this phase's lane E, so it reaches into the next phase.
     expect(next!.fromLaterPhase).toBe(true);
@@ -90,7 +90,7 @@ describe('the schedule', () => {
     const block = planForDay({ date: FIRST_DAY, settings, ctx }).blocks.find((b) => b.id === 'B')!;
     expect(block.kind).toBe('item');
     expect(block.item!.note).toMatch(/Pulled forward/);
-    expect(block.item!.title).toMatch(/CS50x/); // the first item of the next phase's lane B
+    expect(block.item!.title).toMatch(/Beej/); // the first item of the next phase's lane B
   });
 
   it('replaces the projects block with the review on Sundays', () => {

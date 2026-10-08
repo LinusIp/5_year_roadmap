@@ -59,7 +59,8 @@ export function PickProject() {
     const track = seed.tracks.find((t) => t.id === p.tracks[0])?.name ?? p.tracks[0]!;
     return {
       id: p.id,
-      kind: [monthly ? 'Monthly project' : 'Weekly build', part, p.estHours + ' h'].filter(Boolean).join(' · '),
+      // The cadence's range, as the mockup writes it, rather than one estimate.
+      kind: [monthly ? 'Monthly project' : 'Weekly build', part, monthly ? '20–40 h' : '2–6 h'].filter(Boolean).join(' · '),
       title: shortTitle(p.title),
       brief: p.brief,
       footer: [track, p.source ? 'from ' + p.source : null].filter(Boolean).join(' · '),
@@ -95,15 +96,17 @@ export function PickProject() {
   return (
     <Screen title="Pick a project">
       <Header title="Pick a project" sub={plural(pool.length, noun) + (everyPhase ? ' left' : ' fit this phase')} actions={close} />
-      <Chips
-        label="Projects"
-        items={[
-          { key: 'weekly', label: 'Weekly', pressed: !monthly, onClick: () => setCadence(null) },
-          { key: 'monthly', label: 'Monthly', pressed: monthly, onClick: () => setCadence('monthly') },
-          { key: 'phase', label: 'This phase', pressed: !everyPhase, onClick: () => setScope(everyPhase ? null : 'all') },
-        ]}
-      />
-      <div className="mt-6">
+      <div className="mt-3">
+        <Chips
+          label="Projects"
+          items={[
+            { key: 'weekly', label: 'Weekly', pressed: !monthly, onClick: () => setCadence(null) },
+            { key: 'monthly', label: 'Monthly', pressed: monthly, onClick: () => setCadence('monthly') },
+            { key: 'phase', label: 'This phase', pressed: !everyPhase, onClick: () => setScope(everyPhase ? null : 'all') },
+          ]}
+        />
+      </div>
+      <div className="mt-9">
         {cards.length === 0 ? (
           <EmptyState>{everyPhase ? 'Every ' + noun + ' is done.' : 'Every ' + noun + ' for this phase is done.'}</EmptyState>
         ) : (

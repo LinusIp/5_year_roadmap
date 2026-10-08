@@ -1,0 +1,137 @@
+# The roadmap.sh roadmaps as library items, and the year 1-3 additions of the brief of 2026-10-07. Links checked 2026-10-08.
+
+- id: roadmap-ai-engineer
+  title: AI Engineer roadmap
+  provider: roadmap.sh
+  type: tutorial
+  url: https://roadmap.sh/ai-engineer
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: intro
+  cost: free
+  estHours: 30
+  prerequisites: []
+  subject: deep-learning
+  summary: "The applied half of priority 1: APIs, embeddings, vector search, RAG, open models and Ollama, prompting, safety. Its checklist is under Plan > Credentials > Roadmaps."
+- id: roadmap-ai-agents
+  title: AI Agents roadmap
+  provider: roadmap.sh
+  type: tutorial
+  url: https://roadmap.sh/ai-agents
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: intermediate
+  cost: free
+  estHours: 40
+  prerequisites: []
+  subject: deep-learning
+  summary: The agent loop, tool calling, MCP, memory, architectures, evals, observability and guardrails, in full.
+- id: roadmap-software-architect
+  title: Software Architect roadmap
+  provider: roadmap.sh
+  type: tutorial
+  url: https://roadmap.sh/software-architect
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - swe
+    - systems
+  level: advanced
+  cost: free
+  estHours: 40
+  prerequisites: []
+  subject: system-design
+  summary: "Priority 2: patterns, DDD, CQRS, microservices, messaging, cloud design patterns, security and the soft skills of the role."
+- id: roadmap-inference-engineering
+  title: Inference Engineering roadmap
+  provider: roadmap.sh
+  type: tutorial
+  url: https://roadmap.sh/inference-engineering
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - systems
+  level: advanced
+  cost: free
+  estHours: 0
+  prerequisites: []
+  subject: deep-learning
+  summary: "Priority 1: the map the year 2 and year 3 inference work follows."
+  reference: true
+- id: roadmap-game-developer
+  title: Game Developer roadmap
+  provider: roadmap.sh
+  type: tutorial
+  url: https://roadmap.sh/game-developer
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - graphics
+    - gamedev
+  level: advanced
+  cost: free
+  estHours: 0
+  prerequisites: []
+  subject: graphics
+  summary: Used for its mathematics, physics, graphics and game-AI nodes, inside Block A.
+  reference: true
+- id: gamemath-3d-primer
+  title: 3D Math Primer for Graphics and Game Development
+  short: "3D Math Primer"
+  provider: Fletcher Dunn and Ian Parberry
+  type: book
+  url: https://gamemath.com/book/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - math
+    - graphics
+  level: intro
+  cost: free
+  estHours: 30
+  prerequisites: []
+  subject: graphics
+  summary: Vectors, matrices, transforms, orientation and quaternions, written for graphics programmers. Free online.
+  covers:
+    - game-developer/vector
+    - game-developer/matrix
+    - game-developer/linear-transformation
+    - game-developer/orientation
+    - game-developer/quaternion
+    - game-developer/euler-angle
+- id: boyd-convex-optimization
+  title: Convex Optimization
+  provider: Stephen Boyd and Lieven Vandenberghe
+  type: book
+  url: https://web.stanford.edu/~boyd/cvxbook/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - math
+  level: advanced
+  cost: free
+  estHours: 60
+  prerequisites: []
+  subject: math-physics
+  summary: "Chapters 1-5: convex sets and functions, convex problems, duality. Free online."
+- id: jax-docs
+  title: JAX documentation
+  provider: Google
+  type: tutorial
+  url: https://docs.jax.dev/en/latest/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - languages
+  level: intermediate
+  cost: free
+  estHours: 20
+  prerequisites: []
+  subject: deep-learning
+  summary: "NumPy on accelerators with grad, jit and vmap: the language of much research code."

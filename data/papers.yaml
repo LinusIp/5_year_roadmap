@@ -51,3 +51,508 @@
 - { id: paper-learning-to-simulate, title: "Learning to Simulate Complex Physics with Graph Networks", authors: "Sanchez-Gonzalez et al.", year: 2020, url: "https://arxiv.org/abs/2002.09405", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation, ai], group: graphics-sim }
 - { id: paper-nerf, title: "NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis", authors: "Mildenhall et al.", year: 2020, url: "https://arxiv.org/abs/2003.08934", urlVerified: true, lastVerified: 2026-09-20, tracks: [graphics, ai], group: graphics-sim }
 - { id: paper-3dgs, title: "3D Gaussian Splatting for Real-Time Radiance Field Rendering", authors: "Kerbl, Kopanas, Leimkuhler, Drettakis", year: 2023, url: "https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/", urlVerified: true, lastVerified: 2026-09-20, tracks: [graphics, ai], group: graphics-sim }
+
+# Inference, generative models and world models: added for the brief of 2026-10-07, links checked 2026-10-08.
+- id: flashattention
+  title: "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness"
+  authors: Dao, Fu, Ermon, Rudra, Ré
+  year: 2022
+  url: https://arxiv.org/abs/2205.14135
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: flashattention-2
+  title: "FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning"
+  authors: Dao
+  year: 2023
+  url: https://arxiv.org/abs/2307.08691
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: flashattention-3
+  title: "FlashAttention-3: Fast and Accurate Attention with Asynchrony and Low-precision"
+  authors: Shah, Bikshandi, Zhang, Thakkar, Ramani, Dao
+  year: 2024
+  url: https://arxiv.org/abs/2407.08608
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: pagedattention
+  title: Efficient Memory Management for Large Language Model Serving with PagedAttention (vLLM)
+  authors: Kwon et al.
+  year: 2023
+  url: https://arxiv.org/abs/2309.06180
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: orca
+  title: "Orca: A Distributed Serving System for Transformer-Based Generative Models"
+  authors: Yu, Jeong, Kim, Kim, Chun
+  year: 2022
+  url: https://www.usenix.org/conference/osdi22/presentation/yu
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+  note: "Iteration-level scheduling: the origin of continuous batching"
+- id: speculative-decoding-leviathan
+  title: Fast Inference from Transformers via Speculative Decoding
+  authors: Leviathan, Kalman, Matias
+  year: 2023
+  url: https://arxiv.org/abs/2211.17192
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: speculative-sampling-chen
+  title: Accelerating Large Language Model Decoding with Speculative Sampling
+  authors: Chen, Borgeaud, Irving, Lespiau, Sifre, Jumper
+  year: 2023
+  url: https://arxiv.org/abs/2302.01318
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: eagle
+  title: "EAGLE: Speculative Sampling Requires Rethinking Feature Uncertainty"
+  authors: Li, Wei, Zhang, Zhang
+  year: 2024
+  url: https://arxiv.org/abs/2401.15077
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: medusa
+  title: "Medusa: Simple LLM Inference Acceleration Framework with Multiple Decoding Heads"
+  authors: Cai et al.
+  year: 2024
+  url: https://arxiv.org/abs/2401.10774
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: gptq
+  title: "GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers"
+  authors: Frantar, Ashkboos, Hoefler, Alistarh
+  year: 2022
+  url: https://arxiv.org/abs/2210.17323
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: awq
+  title: "AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration"
+  authors: Lin et al.
+  year: 2023
+  url: https://arxiv.org/abs/2306.00978
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: smoothquant
+  title: "SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models"
+  authors: Xiao, Lin, Seznec, Wu, Demouth, Han
+  year: 2022
+  url: https://arxiv.org/abs/2211.10438
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: llm-int8
+  title: "LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale"
+  authors: Dettmers, Lewis, Belkada, Zettlemoyer
+  year: 2022
+  url: https://arxiv.org/abs/2208.07339
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: distserve
+  title: "DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving"
+  authors: Zhong et al.
+  year: 2024
+  url: https://arxiv.org/abs/2401.09670
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: splitwise
+  title: "Splitwise: Efficient Generative LLM Inference Using Phase Splitting"
+  authors: Patel et al.
+  year: 2023
+  url: https://arxiv.org/abs/2311.18677
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: mooncake
+  title: "Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving"
+  authors: Qin et al.
+  year: 2024
+  url: https://arxiv.org/abs/2407.00079
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: sglang-radixattention
+  title: "SGLang: Efficient Execution of Structured Language Model Programs (RadixAttention)"
+  authors: Zheng et al.
+  year: 2023
+  url: https://arxiv.org/abs/2312.07104
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: inference
+- id: roofline
+  title: "Roofline: An Insightful Visual Performance Model for Multicore Architectures"
+  authors: Williams, Waterman, Patterson
+  year: 2009
+  url: null
+  urlVerified: false
+  searchHint: "Roofline: An Insightful Visual Performance Model for Multicore Architectures"
+  tracks:
+    - ai
+  group: inference
+- id: ddpm
+  title: Denoising Diffusion Probabilistic Models
+  authors: Ho, Jain, Abbeel
+  year: 2020
+  url: https://arxiv.org/abs/2006.11239
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: ddim
+  title: Denoising Diffusion Implicit Models
+  authors: Song, Meng, Ermon
+  year: 2020
+  url: https://arxiv.org/abs/2010.02502
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: improved-ddpm
+  title: Improved Denoising Diffusion Probabilistic Models
+  authors: Nichol, Dhariwal
+  year: 2021
+  url: https://arxiv.org/abs/2102.09672
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: score-sde
+  title: Score-Based Generative Modeling through Stochastic Differential Equations
+  authors: Song et al.
+  year: 2021
+  url: https://arxiv.org/abs/2011.13456
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: classifier-free-guidance
+  title: Classifier-Free Diffusion Guidance
+  authors: Ho, Salimans
+  year: 2022
+  url: https://arxiv.org/abs/2207.12598
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: latent-diffusion
+  title: High-Resolution Image Synthesis with Latent Diffusion Models (Stable Diffusion)
+  authors: Rombach, Blattmann, Lorenz, Esser, Ommer
+  year: 2022
+  url: https://arxiv.org/abs/2112.10752
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: flow-matching
+  title: Flow Matching for Generative Modeling
+  authors: Lipman, Chen, Ben-Hamu, Nickel, Le
+  year: 2023
+  url: https://arxiv.org/abs/2210.02747
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: rectified-flow
+  title: "Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow"
+  authors: Liu, Gong, Liu
+  year: 2022
+  url: https://arxiv.org/abs/2209.03003
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: dit
+  title: Scalable Diffusion Models with Transformers (DiT)
+  authors: Peebles, Xie
+  year: 2023
+  url: https://arxiv.org/abs/2212.09748
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: consistency-models
+  title: Consistency Models
+  authors: Song, Dhariwal, Chen, Sutskever
+  year: 2023
+  url: https://arxiv.org/abs/2303.01469
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: stable-video-diffusion
+  title: "Stable Video Diffusion: Scaling Latent Video Diffusion Models to Large Datasets"
+  authors: Blattmann et al.
+  year: 2023
+  url: https://arxiv.org/abs/2311.15127
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: sora-report
+  title: Video generation models as world simulators (Sora technical report)
+  authors: OpenAI
+  year: 2024
+  url: null
+  urlVerified: false
+  searchHint: Video generation models as world simulators (Sora technical report)
+  tracks:
+    - ai
+  group: generative
+- id: imagen-video
+  title: "Imagen Video: High Definition Video Generation with Diffusion Models"
+  authors: Ho et al.
+  year: 2022
+  url: https://arxiv.org/abs/2210.02303
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: movie-gen
+  title: "Movie Gen: A Cast of Media Foundation Models"
+  authors: Polyak et al. (Meta)
+  year: 2024
+  url: https://arxiv.org/abs/2410.13720
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: world-models
+  title: World Models
+  authors: Ha, Schmidhuber
+  year: 2018
+  url: https://arxiv.org/abs/1803.10122
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: planet
+  title: Learning Latent Dynamics for Planning from Pixels (PlaNet)
+  authors: Hafner et al.
+  year: 2019
+  url: https://arxiv.org/abs/1811.04551
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: dreamer
+  title: "Dream to Control: Learning Behaviors by Latent Imagination (Dreamer)"
+  authors: Hafner, Lillicrap, Ba, Norouzi
+  year: 2020
+  url: https://arxiv.org/abs/1912.01603
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: dreamerv2
+  title: Mastering Atari with Discrete World Models (DreamerV2)
+  authors: Hafner, Lillicrap, Norouzi, Ba
+  year: 2021
+  url: https://arxiv.org/abs/2010.02193
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: dreamerv3
+  title: Mastering Diverse Domains through World Models (DreamerV3)
+  authors: Hafner, Pasukonis, Ba, Lillicrap
+  year: 2023
+  url: https://arxiv.org/abs/2301.04104
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: muzero
+  title: Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model (MuZero)
+  authors: Schrittwieser et al.
+  year: 2020
+  url: https://arxiv.org/abs/1911.08265
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: lecun-jepa
+  title: A Path Towards Autonomous Machine Intelligence (JEPA)
+  authors: LeCun
+  year: 2022
+  url: null
+  urlVerified: false
+  searchHint: A Path Towards Autonomous Machine Intelligence (JEPA)
+  tracks:
+    - ai
+  group: generative
+- id: i-jepa
+  title: Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture (I-JEPA)
+  authors: Assran et al.
+  year: 2023
+  url: https://arxiv.org/abs/2301.08243
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: v-jepa
+  title: Revisiting Feature Prediction for Learning Visual Representations from Video (V-JEPA)
+  authors: Bardes et al.
+  year: 2024
+  url: https://arxiv.org/abs/2404.08471
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: genie
+  title: "Genie: Generative Interactive Environments"
+  authors: Bruce et al.
+  year: 2024
+  url: https://arxiv.org/abs/2402.15391
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: genie-2
+  title: "Genie 2: A large-scale foundation world model"
+  authors: Google DeepMind
+  year: 2024
+  url: https://deepmind.google/blog/genie-2-a-large-scale-foundation-world-model/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: gaia-1
+  title: "GAIA-1: A Generative World Model for Autonomous Driving"
+  authors: Hu et al. (Wayve)
+  year: 2023
+  url: https://arxiv.org/abs/2309.17080
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: cosmos
+  title: Cosmos World Foundation Model Platform for Physical AI
+  authors: NVIDIA
+  year: 2025
+  url: https://arxiv.org/abs/2501.03575
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: unisim
+  title: Learning Interactive Real-World Simulators (UniSim)
+  authors: Yang et al.
+  year: 2023
+  url: https://arxiv.org/abs/2310.06114
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: meshgraphnets
+  title: Learning Mesh-Based Simulation with Graph Networks (MeshGraphNets)
+  authors: Pfaff, Fortunato, Sanchez-Gonzalez, Battaglia
+  year: 2021
+  url: https://arxiv.org/abs/2010.03409
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - simulation
+    - ai
+  group: graphics-sim
+- id: fourier-neural-operator
+  title: Fourier Neural Operator for Parametric Partial Differential Equations
+  authors: Li et al.
+  year: 2021
+  url: https://arxiv.org/abs/2010.08895
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - simulation
+    - ai
+  group: graphics-sim
+- id: td-mpc2
+  title: "TD-MPC2: Scalable, Robust World Models for Continuous Control"
+  authors: Hansen, Su, Wang
+  year: 2024
+  url: https://arxiv.org/abs/2310.16828
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative
+- id: diamond
+  title: "Diffusion for World Modeling: Visual Details Matter in Atari (DIAMOND)"
+  authors: Alonso et al.
+  year: 2024
+  url: https://arxiv.org/abs/2405.12399
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  group: generative

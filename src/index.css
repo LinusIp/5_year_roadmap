@@ -19,6 +19,15 @@
   --accent: #1f6f50;
   --accent-soft: #e4f0ea;
   --on-accent: #ffffff;
+  /* The mockup's heatmap ramp between the empty grey and accent, and its colour for a lane that is behind. */
+  --ramp-1: #c6e0d1;
+  --ramp-2: #8fc3a6;
+  --ramp-3: #4e9a72;
+  --behind: #d6336c;
+  /* The five-year map: its timeline rail and the stage 2 band. */
+  --rail: #c9ccc8;
+  --stage2-soft: #fff4e0;
+  --stage2-ink: #8a5c00;
 }
 
 :root[data-theme="dark"] {
@@ -32,6 +41,13 @@
   --accent-soft: #1e3a2e;
   /* Dark text on the light-green fill: white on #4fb388 would fall below 4.5:1. */
   --on-accent: #121417;
+  --ramp-1: color-mix(in srgb, var(--accent) 22%, var(--accent-soft));
+  --ramp-2: color-mix(in srgb, var(--accent) 48%, var(--accent-soft));
+  --ramp-3: color-mix(in srgb, var(--accent) 74%, var(--accent-soft));
+  --behind: #f06595;
+  --rail: #3a3f45;
+  --stage2-soft: #3a2f14;
+  --stage2-ink: #f2c66d;
 }
 
 :root {
@@ -64,18 +80,36 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
+  --color-behind: var(--behind);
+  --color-rail: var(--rail);
+  --color-stage2-soft: var(--stage2-soft);
+  --color-stage2-ink: var(--stage2-ink);
+  --color-white: #ffffff;
   --color-transparent: transparent;
 
   /* One family, self-hosted (see DECISIONS.md), with system fonts behind it. */
   --font-*: initial;
   --font-sans: "Instrument Sans Variable", "Instrument Sans", system-ui, sans-serif;
 
-  /* The scale: 12 / 14 / 16 / 20 / 26 / 34. */
+  /*
+   * The scale: 12 / 14 / 16 / 20 / 26 / 34, plus the mockup's own sizes: 15 for buttons and links, 24 for a
+   * deck card's title, and 13 / 18 / 30 on the wide five-year map.
+   */
   --text-*: initial;
   --text-small: 0.75rem;
   --text-small--line-height: 1.45;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.4;
   --text-meta: 0.875rem;
-  --text-meta--line-height: 1.45;
+  --text-meta--line-height: 1.3;
+  --text-button: 0.9375rem;
+  --text-button--line-height: 1.45;
+  --text-lead: 1.125rem;
+  --text-lead--line-height: 1.2;
+  --text-card: 1.5rem;
+  --text-card--line-height: 1.15;
+  --text-hero: 1.875rem;
+  --text-hero--line-height: 1.15;
   --text-body: 1rem;
   --text-body--line-height: 1.45;
   --text-title: 1.25rem;
@@ -90,10 +124,13 @@
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
 
-  /* 12 px cards, 8 px buttons, 999 px pills. Nothing else. */
+  /* 12 px cards, 8 px buttons, 999 px pills; the mockup adds 16 px deck cards, 6 px segments and bands, 2 px cells. */
   --radius-*: initial;
   --radius-card: 12px;
+  --radius-deck: 16px;
   --radius-button: 8px;
+  --radius-segment: 6px;
+  --radius-cell: 2px;
   --radius-pill: 999px;
 
   --shadow-*: initial;
@@ -166,17 +203,19 @@
    */
   .heat {
     --heat-color: var(--accent);
-    --heat-base: var(--accent-soft);
+    --heat-1: var(--ramp-1);
+    --heat-2: var(--ramp-2);
+    --heat-3: var(--ramp-3);
   }
   .heat-0 { fill: var(--line); }
-  .heat-1 { fill: color-mix(in srgb, var(--heat-color) 14%, var(--heat-base)); }
-  .heat-2 { fill: color-mix(in srgb, var(--heat-color) 40%, var(--heat-base)); }
-  .heat-3 { fill: color-mix(in srgb, var(--heat-color) 72%, var(--heat-base)); }
+  .heat-1 { fill: var(--heat-1); }
+  .heat-2 { fill: var(--heat-2); }
+  .heat-3 { fill: var(--heat-3); }
   .heat-4 { fill: var(--heat-color); }
   .heat-swatch-0 { background: var(--line); }
-  .heat-swatch-1 { background: color-mix(in srgb, var(--heat-color) 14%, var(--heat-base)); }
-  .heat-swatch-2 { background: color-mix(in srgb, var(--heat-color) 40%, var(--heat-base)); }
-  .heat-swatch-3 { background: color-mix(in srgb, var(--heat-color) 72%, var(--heat-base)); }
+  .heat-swatch-1 { background: var(--heat-1); }
+  .heat-swatch-2 { background: var(--heat-2); }
+  .heat-swatch-3 { background: var(--heat-3); }
   .heat-swatch-4 { background: var(--heat-color); }
 
   /* Markdown notes rendered in a sheet: plain type, the same scale. */

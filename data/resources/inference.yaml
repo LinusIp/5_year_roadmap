@@ -1,0 +1,365 @@
+# AI inference engineering (priority 1), added for the brief of 2026-10-07. Links checked 2026-10-08.
+
+- id: vllm-docs
+  title: vLLM documentation and source
+  provider: vLLM project
+  type: tutorial
+  url: https://docs.vllm.ai/en/latest/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - systems
+  level: advanced
+  cost: free
+  estHours: 20
+  prerequisites: []
+  subject: deep-learning
+  summary: "How the most used open serving engine works and how to run it: PagedAttention, continuous batching, the scheduler, quantization support."
+  covers:
+    - inference-engineering/vllm
+    - inference-engineering/pagedattention
+    - inference-engineering/continuous-batching
+- id: sglang-docs
+  title: SGLang documentation
+  provider: SGLang project
+  type: tutorial
+  url: https://docs.sglang.io/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - systems
+  level: advanced
+  cost: free
+  estHours: 10
+  prerequisites: []
+  subject: deep-learning
+  summary: A fast serving framework built around RadixAttention prefix caching and structured generation.
+  covers:
+    - inference-engineering/sglang
+    - inference-engineering/caching-approaches
+- id: tensorrt-llm-docs
+  title: TensorRT-LLM documentation
+  provider: NVIDIA
+  type: tutorial
+  url: https://nvidia.github.io/TensorRT-LLM/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - systems
+  level: advanced
+  cost: free
+  estHours: 15
+  prerequisites: []
+  subject: deep-learning
+  summary: "NVIDIA's library for compiling and serving LLMs on its GPUs: in-flight batching, quantization, multi-GPU."
+  covers:
+    - inference-engineering/tensorrt-llm
+    - inference-engineering/tensorrt
+- id: llama-cpp
+  title: llama.cpp
+  provider: ggml.org
+  type: repo
+  url: https://github.com/ggml-org/llama.cpp
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - systems
+  level: advanced
+  cost: free
+  estHours: 10
+  prerequisites: []
+  subject: deep-learning
+  summary: Inference in plain C/C++ on CPUs and consumer GPUs; the GGUF format and its quantization schemes.
+  covers:
+    - inference-engineering/desktop-inference
+- id: onnx-runtime-docs
+  title: ONNX Runtime documentation
+  provider: Microsoft
+  type: tutorial
+  url: https://onnxruntime.ai/docs/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 8
+  prerequisites: []
+  subject: deep-learning
+  summary: A cross-platform runtime for ONNX models, from servers to phones, with graph optimisations and execution providers.
+  covers:
+    - inference-engineering/onnx-runtime
+- id: nvidia-dynamo
+  title: NVIDIA Dynamo
+  provider: NVIDIA
+  type: repo
+  url: https://github.com/ai-dynamo/dynamo
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - systems
+  level: advanced
+  cost: free
+  estHours: 8
+  prerequisites: []
+  subject: deep-learning
+  summary: "A distributed inference framework: disaggregated prefill and decode, KV-aware routing, multi-node serving."
+  covers:
+    - inference-engineering/nvidia-dynamo
+    - inference-engineering/disaggregation
+- id: nvidia-modelopt
+  title: NVIDIA Model Optimizer (ModelOpt)
+  provider: NVIDIA
+  type: repo
+  url: https://github.com/NVIDIA/Model-Optimizer
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 6
+  prerequisites: []
+  subject: deep-learning
+  summary: Quantization, sparsity and distillation tooling that feeds TensorRT-LLM and vLLM.
+  covers:
+    - inference-engineering/modelopt
+    - inference-engineering/quantization-aware-training
+- id: nvidia-nim-docs
+  title: NVIDIA NIM documentation
+  provider: NVIDIA
+  type: tutorial
+  url: https://docs.nvidia.com/nim/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - systems
+  level: advanced
+  cost: free
+  estHours: 0
+  prerequisites: []
+  subject: deep-learning
+  summary: "Prebuilt inference microservices: what they package and how they deploy."
+  reference: true
+  covers:
+    - inference-engineering/nims
+- id: nsight-compute-docs
+  title: Nsight Systems and Nsight Compute documentation
+  provider: NVIDIA
+  type: tutorial
+  url: https://docs.nvidia.com/nsight-compute/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - systems
+  level: advanced
+  cost: free
+  estHours: 8
+  prerequisites: []
+  subject: gpu
+  summary: The profilers for whole-application timelines (Systems) and single-kernel analysis (Compute).
+  covers:
+    - inference-engineering/profiling-performance
+- id: ultra-scale-playbook
+  title: The Ultra-Scale Playbook
+  provider: Hugging Face (Nanotron)
+  type: book
+  url: https://huggingface.co/spaces/nanotron/ultrascale-playbook
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - systems
+  level: advanced
+  cost: free
+  estHours: 15
+  prerequisites: []
+  subject: deep-learning
+  summary: Training-side, but the clearest account of data, tensor, pipeline and expert parallelism and what they cost.
+  covers:
+    - inference-engineering/tensor-parallelism
+    - inference-engineering/pipeline-parallelism
+    - inference-engineering/expert-parallelism
+- id: cmu-10-414
+  title: Deep Learning Systems (CMU 10-414/714)
+  provider: Carnegie Mellon University
+  type: course
+  url: https://dlsyscourse.org/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - systems
+  level: advanced
+  cost: free
+  estHours: 80
+  prerequisites: []
+  subject: deep-learning
+  summary: "Build a deep learning framework from the ground up: automatic differentiation, kernels on CPU and GPU, models."
+- id: nvidia-dli-cuda
+  title: Fundamentals of Accelerated Computing with CUDA C/C++
+  provider: NVIDIA Deep Learning Institute
+  type: course
+  url: null
+  urlVerified: false
+  searchHint: Fundamentals of Accelerated Computing with CUDA C/C++ NVIDIA Deep Learning Institute
+  tracks:
+    - systems
+  level: advanced
+  cost: paid
+  estHours: 8
+  prerequisites: []
+  subject: gpu
+  summary: "The DLI course and certificate for CUDA basics: kernels, memory management, streams, profiling."
+- id: siboehm-cuda-matmul
+  title: How to Optimize a CUDA Matmul Kernel for cuBLAS-like Performance
+  provider: Simon Boehm
+  type: article
+  url: https://siboehm.com/articles/22/CUDA-MMM
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - systems
+  level: advanced
+  cost: free
+  estHours: 3
+  prerequisites: []
+  subject: gpu
+  summary: From a naive kernel to near-cuBLAS speed, one optimisation at a time.
+  covers:
+    - inference-engineering/writing-custom-kernels
+- id: horace-he-brrr
+  title: Making Deep Learning Go Brrrr From First Principles
+  provider: Horace He
+  type: article
+  url: https://horace.io/brrr_intro.html
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - systems
+  level: advanced
+  cost: free
+  estHours: 1
+  prerequisites: []
+  subject: gpu
+  summary: "Compute, memory bandwidth and overhead: the three things that bound a deep learning workload."
+  covers:
+    - inference-engineering/llm-bottlenecks
+- id: hazy-gpus-go-brrr
+  title: GPUs Go Brrr
+  provider: Hazy Research (Stanford)
+  type: article
+  url: https://hazyresearch.stanford.edu/blog/2024-05-12-tk
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - systems
+  level: advanced
+  cost: free
+  estHours: 1
+  prerequisites: []
+  subject: gpu
+  summary: What it takes to keep an H100 busy, and the ThunderKittens approach to kernels.
+- id: scaling-book
+  title: How to Scale Your Model (the Scaling Book)
+  provider: Google DeepMind
+  type: book
+  url: https://jax-ml.github.io/scaling-book/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+    - systems
+  level: advanced
+  cost: free
+  estHours: 15
+  prerequisites: []
+  subject: deep-learning
+  summary: "How to think about accelerators: rooflines, sharding, and the arithmetic of training and serving transformers."
+  covers:
+    - inference-engineering/roofline-model
+    - inference-engineering/arithmetic-intensity
+- id: databricks-inference-best-practices
+  title: "LLM Inference Performance Engineering: Best Practices"
+  provider: Databricks
+  type: article
+  url: https://www.databricks.com/blog/llm-inference-performance-engineering-best-practices
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 1
+  prerequisites: []
+  subject: deep-learning
+  summary: The metrics that matter for serving (TTFT, TPOT, throughput) and how hardware and batching move them.
+- id: nvidia-inference-optimization
+  title: "Mastering LLM Techniques: Inference Optimization"
+  provider: NVIDIA Technical Blog
+  type: article
+  url: https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 1
+  prerequisites: []
+  subject: deep-learning
+  summary: A survey of batching, KV caching, parallelism, quantization and speculative decoding.
+- id: kipply-inference-arithmetic
+  title: Transformer Inference Arithmetic
+  provider: kipply
+  type: article
+  url: https://kipp.ly/p/transformer-inference-arithmetic
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 2
+  prerequisites: []
+  subject: deep-learning
+  summary: "Back-of-the-envelope latency and memory for transformer inference: FLOPs, bytes and the KV cache."
+  covers:
+    - inference-engineering/ops-byte-ratio
+- id: batching-effects-gpt
+  title: Dissecting Batching Effects in GPT Inference
+  provider: Lequn Chen
+  type: article
+  url: https://le.qun.ch/en/blog/2023/05/13/transformer-batching/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 1
+  prerequisites: []
+  subject: deep-learning
+  summary: Measurements of how batch size changes latency and throughput for each part of a transformer.
+- id: lilian-weng-inference
+  title: Large Transformer Model Inference Optimization
+  provider: Lilian Weng
+  type: article
+  url: https://lilianweng.github.io/posts/2023-01-10-inference-optimization/
+  urlVerified: true
+  lastVerified: 2026-10-08
+  tracks:
+    - ai
+  level: advanced
+  cost: free
+  estHours: 2
+  prerequisites: []
+  subject: deep-learning
+  summary: Distillation, quantization, pruning, sparsity and architectural tricks for faster inference.

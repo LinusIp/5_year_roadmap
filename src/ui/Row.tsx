@@ -19,8 +19,8 @@ export interface RowProps {
   href?: string;
   /** For rows that open content in place. */
   expanded?: boolean;
-  /** A leading 20 px circle that fills with accent and a tick. */
-  check?: { checked: boolean; onChange: (checked: boolean) => void; label?: string };
+  /** A leading 20 px box that fills with accent and a tick; a ticked row's title turns ink2. */
+  check?: { checked: boolean; onChange: (checked: boolean) => void; label?: string; disabled?: boolean };
   /** A trailing 36 x 20 switch, named by the row's title. */
   toggle?: { on: boolean; onChange: (on: boolean) => void; disabled?: boolean };
   /** Pickers: a leading radio dot, filled for the chosen option. */
@@ -28,13 +28,23 @@ export interface RowProps {
   /** Content shown under the row when it is expanded. */
   children?: ReactNode;
   className?: string;
+  /**
+   * The mockup's min-height for the row's content, which sits inside 8 to 10 px of padding: 56 on Today (a 76 px
+   * row), 48 on Activity, 52 for phases, 60 in the Library; 44 is a checklist item with no padding.
+   */
+  height?: 44 | 48 | 52 | 56 | 60;
+  /** Keep the title to one line, ending in an ellipsis (the Library). */
+  truncate?: boolean;
+  /** A checklist item's title is regular weight, as in the mockup. */
+  plainTitle?: boolean;
 }
 
-function CheckCircle({ checked }: { checked: boolean }) {
+/** The mockup's checkbox: a 20 px box with softened corners, filled with accent and a tick when done. */
+function CheckBox({ checked }: { checked: boolean }) {
   return (
     <span
       className={
-        'grid size-5 place-items-center rounded-pill border ' +
+        'grid size-5 place-items-center rounded-[4px] border-[1.5px] ' +
         (checked ? 'border-accent bg-accent text-on-accent' : 'border-ink2 text-transparent')
       }
     >
@@ -76,21 +86,25 @@ export function Switch({ on, onChange, labelledBy, label, disabled }: { on: bool
  * text, and at most one of a check circle, a switch or a radio dot. Rows are separated by a hairline from
  * their list, never boxed one by one.
  */
-export function Row({ title, meta, trailing, action, edge, onClick, to, href, expanded, check, toggle, selected, children, className = '' }: RowProps) {
+const HEIGHT = { 44: 'min-h-11', 48: 'min-h-16 py-2', 52: 'min-h-17 py-2', 56: 'min-h-19 py-2.5', 60: 'min-h-20 py-2.5' } as const;
+
+export function Row({ title, meta, trailing, action, edge, onClick, to, href, expanded, check, toggle, selected, children, className = '', height = 56, truncate, plainTitle }: RowProps) {
   const titleId = useId();
+  const titleClass =
+    'block text-body leading-[1.3] ' + (plainTitle ? 'font-normal' : 'font-medium') + (check?.checked ? ' text-ink2' : '') + (truncate ? ' truncate' : '');
   const body = (
     <>
       {selected !== undefined && <RadioDot selected={selected} />}
-      <span className="min-w-0 flex-1">
-        <span id={titleId} className="block text-body font-medium">
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span id={titleId} className={titleClass}>
           {title}
         </span>
-        {meta && <span className="block truncate text-meta text-ink2">{meta}</span>}
+        {meta && <span className="block truncate text-meta leading-[1.3] text-ink2">{meta}</span>}
       </span>
       {trailing !== undefined && trailing !== null && <span className="shrink-0 text-meta text-ink2">{trailing}</span>}
     </>
   );
-  const mainClass = 'flex min-h-11 min-w-0 flex-1 items-center gap-3 py-2.5 text-left';
+  const mainClass = 'flex min-w-0 flex-1 items-center gap-3 text-left ' + HEIGHT[height];
 
   let main: ReactNode;
   if (to) {
@@ -126,10 +140,11 @@ export function Row({ title, meta, trailing, action, edge, onClick, to, href, ex
             aria-checked={check.checked}
             aria-label={check.label}
             aria-labelledby={check.label ? undefined : titleId}
-            onClick={() => check.onChange(!check.checked)}
-            className="-ml-3 grid size-11 shrink-0 place-items-center"
+            aria-disabled={check.disabled || undefined}
+            onClick={() => !check.disabled && check.onChange(!check.checked)}
+            className={'-ml-3 -mr-1 grid size-11 shrink-0 place-items-center' + (check.disabled ? ' cursor-default' : '')}
           >
-            <CheckCircle checked={check.checked} />
+            <CheckBox checked={check.checked} />
           </button>
         )}
         {main}

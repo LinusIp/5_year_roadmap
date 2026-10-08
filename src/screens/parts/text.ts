@@ -17,13 +17,14 @@ export function longDate(date: string): string {
   return d + ' ' + monthName(m - 1) + (today().slice(0, 4) === String(y) ? '' : ' ' + y);
 }
 
-/** 200 -> "3 h 20 m", 45 -> "45 m", 480 -> "8 h", 0 -> "0 m". */
+/** As the mockup writes durations: 200 -> "3 h 20 m", 485 -> "8 h 05 m", 45 -> "45 m", 480 -> "8 h", 0 -> "0 h". */
 export function span(minutes: number): string {
   const total = Math.max(0, Math.round(minutes));
   const h = Math.floor(total / 60);
   const m = total % 60;
+  if (total === 0) return '0 h';
   if (h === 0) return m + ' m';
-  return m === 0 ? h + ' h' : h + ' h ' + m + ' m';
+  return m === 0 ? h + ' h' : h + ' h ' + String(m).padStart(2, '0') + ' m';
 }
 
 /** Whole hours for large totals: 24720 -> "412 h". */
@@ -41,6 +42,11 @@ export function shortTitle(title: string): string {
     .replace(/\s*\([^)]*\)\s*$/, '')
     .trim();
   return short || title;
+}
+
+/** What a list calls an item: its short name if it has one, else its title without the parenthetical detail. */
+export function nameOf(item: { title: string; short?: string }): string {
+  return item.short ?? shortTitle(item.title);
 }
 
 /** "Finish a small game (1 of 3)" -> "part 1 of 3"; null for titles without a part number. */

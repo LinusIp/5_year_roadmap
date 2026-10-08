@@ -15,6 +15,9 @@ with each. "Verified" means it was run, not assumed.
 | 8 | Reviews + stats, export/import, backup reminder, PWA/offline | **done** |
 | 9 | Optional GitHub integration + `log:export` | **done** |
 | 10 | Polish | **done** |
+| – | Redesign (section 4.0, to the mockups) | **done** |
+| – | Brief update of 2026-10-08: research cadence, roadmap.sh roadmaps, new phase table | **done** |
+| – | GitHub Sync (section 4.10) | not started |
 
 ## Milestone 1 — Scaffold
 
@@ -449,3 +452,95 @@ Verified on this machine:
     browser. `npm run check:links` will list them the same way.
 - Year 2 and year 3 checked in the built app: every lane matches the table, and the split and partial items
   show their hours.
+
+## Redesign (section 4.0)
+
+Every screen was rebuilt on the redesign's component set, to the eight frames of `Atlas Mockups.html`: Today
+(resting and running), Activity, Plan with its four views, Library, Settings, Reviews, Stats, the project
+deck, the shared item sheet, and the five-year map. Where the redesign prompt and the mockups disagree, the
+mockups win; DECISIONS.md lists each case.
+
+- **Mockup fidelity** was checked by screenshot against each frame at 390 x 844: gutters, row heights (76 px
+  on Today, 64 on Activity, 69 for phases, 80 in the Library), the 36 px chips and segments, button sizes,
+  icon strokes, the heatmap's thirty weeks and green ramp, lane colours and the pink "behind" line.
+- **The five-year map** is new, at Plan > Timeline > Five-year map: stage bands, the timeline rail and one
+  card per phase with each lane's work, what ships and the credentials.
+- **Lists use short names** ("ML Zoomcamp", "18.06 Linear Algebra"), from a new optional `short` field on
+  resources. 37 resources have one.
+- **Screenshots** of Today, Activity, Plan and Library in both themes, and of the five-year map, are in
+  `screenshots/`. They are the baselines of `tests/e2e/screenshots.spec.ts` and the README's pictures.
+
+### UI acceptance checks
+
+Measured by `tests/e2e/ui-acceptance.spec.ts` in the production build on a 390 x 844 viewport, and by
+Lighthouse 13 in Edge.
+
+| Check | Result |
+|---|---|
+| Today fits one screen with nothing expanded | Passes. It did not at first: Today was 860 px tall. The 14 px line height now follows the mockups, and the bottom padding equals the tab bar's height. |
+| Exactly one filled button on Today | Passes: Start, or Stop while a timer runs. |
+| No more than three font sizes per screen | Not met, by design. The mockups set Today in five sizes; DECISIONS.md explains. Every screen draws only from the mockups' scale (table below). |
+| Tap targets of at least 44 px | Passes on Today, Activity, Plan, Library and Settings. Two were too small and are fixed: the Now title (30 px tall) and the "Create a fine-grained token" link (36 px). The heatmap's day cells are the exception, drawn at the mockup's size. |
+| Focus rings visible | Passes: a 2 px outline on the focused control. |
+| ink2 on surface at least 4.5:1 | 6.09:1 in the light theme, 6.62:1 in the dark. |
+| Lighthouse accessibility at least 95 | 100 on Today, Activity, Plan, Credentials, Library, Reviews and Settings. |
+| axe, WCAG 2.2 AA and best practice | No violations on 21 pages and sheets, in both themes. It found one more along the way: the stage 2 band on the map measured 4.47:1, now 5.3:1. |
+
+| Screen | Font sizes in use (px) |
+|---|---|
+| Today | 12, 14, 15, 16, 26 |
+| Activity | 12, 14, 15, 16 |
+| Plan | 12, 14, 16 |
+| Library | 12, 14, 16 |
+| Settings | 12, 14, 16 |
+
+## Brief update (2026-10-08, 21:20)
+
+The brief was re-sent with a new priority order (inference, then architecture, then graphics), a fourth
+project cadence, the five roadmap.sh roadmaps and a new phase table. A diff against the previous version
+guided the changes.
+
+- **Phase table.** The phases are now "Foundations I — in flight", "Foundations II — fluency", "Building —
+  everything from scratch" and "Scale + research", then the two stage 2 years. Each phase shows its year's
+  theme as its subtitle. `plan.yaml` was rewritten lane by lane to the table.
+- **Blocks.** Block A is "Graphics / rendering / simulation". Block C carries AI inference and engineering
+  first, alternating with software architecture. Saved settings with the old names are brought up to date
+  when read.
+- **Projects** are renumbered 1 to 84, with the inference capstone (46), the research capstone (53), the
+  Stage 1 capstone (60) and the final capstone (82). 35 projects are new: 27 monthly ones, the two capstones
+  and six research cards. Among them are an inference server, a three-engine benchmark, speculative decoding,
+  tensor parallelism, disaggregated serving, DDPM, latent diffusion, flow matching, a DiT, DreamerV3 and a
+  graph-network simulator. Ten older projects gave way to them.
+- **Research.** A fourth cadence with its own cards: reproductions, the first quarterly report, five seeded
+  research questions, a lab notebook and three merged OSS pull requests. They show under Projects > Research,
+  and Reviews has a Quarterly tab that records the quarter's question and a link to its report. The credential
+  map has a Research row.
+- **Roadmaps.** The five roadmap.sh roadmaps are in `data/roadmaps.yaml`, from the PDFs the user supplied:
+  553 nodes in sections, each section with the phase that teaches it. Plan > Credentials opens with them:
+  coverage, a sheet per roadmap to tick nodes, and nodes ticked automatically when an item that `covers` them
+  is done. 39 resources and projects cover nodes. A roadmap is mastered at 90 % of its non-optional nodes with
+  its credential row done.
+- **Catalogue.** New resources for inference engineering, generative AI and world models, research practice,
+  and the roadmap foundations, and 50 papers. Every new link was fetched and its page title checked on
+  2026-10-08 before it was stored. The few a script could not verify (a bot check or a 403) are stored with a
+  search hint instead of a link.
+- **Paper a week** now starts with Foundations II, in February 2027.
+- **Fixed on the way:** Modern C had 0 hours, and the re-plan could number a moved item onto the position of an
+  item that stayed put. Both are fixed, and the second has a unit test.
+
+| | Before | After |
+|---|---|---|
+| Resources | 237 | 291 |
+| Papers | 42 | 92 |
+| Projects | 220 | 245 |
+| Roadmap items | 199 | 231 (12,431 h planned) |
+| Credential-map rows | 28 | 29 |
+| roadmap.sh roadmaps | none | 5, with 553 nodes |
+
+Verified on this machine:
+
+- `npm run validate:data` passes, and so does `npm run typecheck`.
+- `npm test`: 203 unit tests. 7 are new: roadmap coverage, the mastered rule, quarters, and the re-plan fix.
+  6 were updated for the new curriculum.
+- `npm run test:e2e`: 77 Playwright tests. 13 are new: the research features, the UI acceptance checks and the
+  screenshot test. 21 were updated for the new names and wording.

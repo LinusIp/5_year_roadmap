@@ -128,6 +128,10 @@ export function replan({ seed, settings, states, asOf }: ReplanInput): ReplanRes
 
     let cursor = 0;
     const orderInPhase = target.map(() => 0);
+    // Items that stay where they are (finished, or with no hours) keep their positions: numbering skips them.
+    const taken = target.map(
+      (phase) => new Set(seed.plan.filter((i) => i.block === block && i.phaseId === phase.id && remainingHoursOf(i, seed, states) <= 0).map((i) => i.order)),
+    );
 
     for (const item of queue) {
       const refId = item.resourceId ?? item.projectId!;
@@ -153,7 +157,8 @@ export function replan({ seed, settings, states, asOf }: ReplanInput): ReplanRes
       const noRoom = used[slot]! + hours > capacity[slot]!;
 
       used[slot] = used[slot]! + hours;
-      orderInPhase[slot] = (orderInPhase[slot] ?? 0) + 10;
+      do orderInPhase[slot] = (orderInPhase[slot] ?? 0) + 10;
+      while (taken[slot]!.has(orderInPhase[slot]!));
       const toPhase = target[slot]!;
       landedIn.set(refId, phaseIndex.get(toPhase.id)!);
       cursor = Math.max(cursor, slot);

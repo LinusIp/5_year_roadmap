@@ -49,13 +49,17 @@ export function Activity() {
   const planEnd = seed.phases.at(-1)!.end;
   const years = planYears(planStart, planEnd);
   const currentYear = Number(now.slice(0, 4));
+  const allYears = yearParam === 'all';
   const year = yearParam && years.includes(Number(yearParam)) ? Number(yearParam) : years.includes(currentYear) ? currentYear : years[0]!;
+  // As in the mockup, the chips reach two years ahead; the rest of the plan is under "All years".
+  const yearChips = years.filter((y) => y <= Math.max(currentYear, years[0]!) + 2);
   // The whole calendar year, like GitHub's: days before the plan or still ahead are simply empty.
   const range = { from: year + '-01-01', to: year + '-12-31' };
   const track = seed.tracks.find((t) => t.id === trackParam);
   const color = track ? 'var(--track-' + track.id + ')' : undefined;
   const weekStartsOn = settings.core.weekStartsOn;
-  const grid = buildGrid({ from: range.from, to: range.to, logs, thresholds: settings.core.heatmapThresholds, tracks: track ? [track.id as TrackId] : [], weekStartsOn });
+  const gridFor = (y: number) =>
+    buildGrid({ from: y + '-01-01', to: y + '-12-31', logs, thresholds: settings.core.heatmapThresholds, tracks: track ? [track.id as TrackId] : [], weekStartsOn });
 
   const rules = settings.core.streak;
   const streakState = streak(logs, rules, now);
@@ -77,7 +81,7 @@ export function Activity() {
     const done = scheduled.filter((b) => isBlockDone(log, b.id)).length;
     const blocks = done + ' of ' + scheduled.length + ' blocks done';
     const meta = log?.frozen ? 'Freeze day' : reviewedOn.has(date) ? 'Review written · ' + done + ' of ' + scheduled.length : blocks;
-    const title = date === now ? 'Today' : date === addDays(now, -1) ? 'Yesterday' : dateTitle(date).split(' ')[0]!;
+    const title = date === now ? 'Today' : dateTitle(date).split(' ')[0]!;
     return { title, meta, minutes: totalMinutes(log) };
   };
 
@@ -88,37 +92,43 @@ export function Activity() {
         sub={hours(logged) + ' logged · longest streak ' + plural(streakState.longest, 'day') + ' · ' + plural(freezesLeft, 'freeze') + ' left this month'}
       />
 
-      <section aria-labelledby="heatmap-year" className="rounded-card bg-surface p-4">
-        <div className="mb-3 flex items-baseline justify-between gap-2">
-          <h2 id="heatmap-year" className="text-meta font-medium">
-            {year}
-            {track ? ' · ' + track.name : ''}
-          </h2>
-          <HeatLegend color={color} />
-        </div>
-        <Heatmap
-          cells={grid.cells}
-          columns={grid.columns}
-          months={grid.months}
-          title={'Time logged in ' + year + (track ? ' on ' + track.name : '')}
-          label={cellLabel}
-          onSelect={setOpen}
-          selected={open ?? undefined}
-          color={color}
-        />
-      </section>
+      {(allYears ? years : [year]).map((y, index) => {
+        const grid = gridFor(y);
+        return (
+          <section key={y} aria-labelledby={'heatmap-' + y} className={(index === 0 ? 'mt-6' : 'mt-3') + ' flex flex-col gap-3 rounded-card bg-surface p-4'}>
+            <div className="flex items-center justify-between gap-2">
+              <h2 id={'heatmap-' + y} className="text-meta font-medium">
+                {y}
+                {track ? ' · ' + track.name : ''}
+              </h2>
+              {index === 0 && <HeatLegend color={color} />}
+            </div>
+            <Heatmap
+              cells={grid.cells}
+              columns={grid.columns}
+              months={grid.months}
+              title={'Time logged in ' + y + (track ? ' on ' + track.name : '')}
+              label={cellLabel}
+              onSelect={setOpen}
+              selected={open ?? undefined}
+              color={color}
+            />
+          </section>
+        );
+      })}
 
       <div className="mt-3">
         <Chips
           label="Year and track"
           items={[
-            ...years.map((y) => ({ key: String(y), label: String(y), pressed: y === year, onClick: () => setYear(y === currentYear ? null : String(y)) })),
-            { key: 'track', label: track ? track.name : 'Track', pressed: Boolean(track), onClick: () => setPickingTrack(true) },
+            ...yearChips.map((y) => ({ key: String(y), label: String(y), pressed: !allYears && y === year, onClick: () => setYear(y === currentYear ? null : String(y)) })),
+            { key: 'all', label: 'All years', pressed: allYears, onClick: () => setYear(allYears ? null : 'all') },
+            { key: 'track', label: track ? track.name : 'By track', pressed: Boolean(track), end: true, onClick: () => setPickingTrack(true) },
           ]}
         />
       </div>
 
-      {settings.github.showCalendar && (
+      {settings.github.showCalendar && !allYears && (
         <div className="mt-4">
           <GithubCalendar from={range.from} to={range.to} year={String(year)} weekStartsOn={weekStartsOn} username={settings.github.username} atlasDates={atlasDates} />
         </div>
@@ -127,17 +137,17 @@ export function Activity() {
       {logged === 0 ? (
         <EmptyState action={<Button to="/">Go to Today</Button>}>Nothing logged yet. Log an hour on Today and the first square lights up.</EmptyState>
       ) : (
-        <RowList flat label="Last 7 days" className="mt-7">
+        <RowList flat label="Last 7 days" className="mt-6">
           {lastWeek.map((date) => {
             const row = dayRow(date);
-            return <Row key={date} title={row.title} meta={row.meta} trailing={span(row.minutes)} onClick={() => setOpen(date)} />;
+            return <Row key={date} height={48} title={row.title} meta={row.meta} trailing={span(row.minutes)} onClick={() => setOpen(date)} />;
           })}
         </RowList>
       )}
 
-      <RowList flat className="mt-7">
-        <Row title="Weekly reviews" meta="What worked, what didn't, what changes" to="/reviews" />
-        <Row title="Stats" meta="Hours per track and block, pace against the plan" to="/stats" />
+      <RowList flat className="mt-6">
+        <Row height={48} title="Weekly reviews" meta="What worked, what didn't, what changes" to="/reviews" />
+        <Row height={48} title="Stats" meta="Hours per track and block, pace against the plan" to="/stats" />
       </RowList>
 
       <DaySheet date={open} title={open ? dateTitle(open) : ''} onClose={() => setOpen(null)} seed={seed} blocks={settings.core.blocks} />

@@ -100,7 +100,10 @@ export function PapersView({ atlas, states }: { atlas: Atlas; states: Map<string
 
   const sentence = cadence.active
     ? cadence.read + ' read of ' + cadence.expected + ' expected · ' + (cadence.behindBy > 0 ? cadence.behindBy + ' behind' : 'on pace') + (cadence.readThisWeek ? '' : ' · nothing read this week yet')
-    : 'One paper a week starts with year ' + settings.core.paperCadence.fromYear + (cadence.startsOn ? ' on ' + longDate(cadence.startsOn) : '') + '. Reading before then is a head start.';
+    : 'One paper a week starts with ' +
+      (seed.phases.find((p) => p.id === settings.core.paperCadence.fromPhase)?.title ?? 'year ' + settings.core.paperCadence.fromYear) +
+      (cadence.startsOn ? ' on ' + longDate(cadence.startsOn) : '') +
+      '. Reading before then is a head start.';
 
   return (
     <div className="space-y-5">

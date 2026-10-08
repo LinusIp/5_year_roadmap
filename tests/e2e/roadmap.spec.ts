@@ -8,39 +8,40 @@ test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date(FIRST_DAY) });
 });
 
-/** A lane row on the Timeline, by its block's short name ("Math · 1 h"). */
+/** A lane row on the Timeline, by its lane's name ("Math and physics · 1 h"). */
 function lane(page: Page, name: string) {
   return page.getByRole('button', { name: new RegExp('^' + name + ' · \\d') }).first();
 }
 
 test('the current phase shows its five lanes, and the other phases open in place', async ({ page }) => {
   await open(page, './#/plan');
-  await expect(page.getByText('Year 1 · In flight · ends 31 January 2027')).toBeVisible();
-  for (const name of ['Gamedev', 'Languages', 'Core', 'Projects', 'Math']) await expect(lane(page, name)).toBeVisible();
-  await expect(lane(page, 'Math')).toContainText('MIT 18.06 Linear Algebra, lecture 1 of 35');
+  // The phase's end is under a year away, so it drops the year.
+  await expect(page.getByText('Year 1 · Foundations I — in flight · ends 31 January')).toBeVisible();
+  for (const name of ['Graphics', 'Languages', 'Core', 'Projects', 'Math and physics']) await expect(lane(page, name)).toBeVisible();
+  await expect(lane(page, 'Math and physics')).toContainText('18.06 Linear Algebra, lecture 1 of 35');
 
   const later = page.getByRole('button', { name: /^Electrical engineering/ });
   await expect(later).toHaveAttribute('aria-expanded', 'false');
   await later.click();
   await expect(later).toHaveAttribute('aria-expanded', 'true');
-  await expect(page.getByRole('button', { name: /^Gamedev · 2 h/ })).toHaveCount(2);
+  await expect(page.getByRole('button', { name: /^Graphics · 2 h/ })).toHaveCount(2);
 });
 
 test('ticking units in an item updates the lane and drives Today', async ({ page }) => {
   await open(page, './#/plan');
-  await lane(page, 'Math').click();
+  await lane(page, 'Math and physics').click();
   const laneSheet = page.getByRole('dialog', { name: /^Block E · Math/ });
-  await laneSheet.getByRole('button', { name: /^MIT 18\.06 Linear Algebra/ }).click();
+  await laneSheet.getByRole('button', { name: /^18\.06 Linear Algebra/ }).click();
 
   const item = page.getByRole('dialog', { name: /MIT 18\.06 Linear Algebra/ });
   for (const title of ['Lecture 1: The geometry of linear equations', 'Lecture 2: Elimination with matrices', 'Lecture 3: Multiplication and inverse matrices']) {
     await item.getByRole('checkbox', { name: title }).click();
   }
   await item.getByRole('button', { name: 'Close' }).click();
-  await expect(laneSheet.getByRole('button', { name: /^MIT 18\.06 Linear Algebra .*lecture 4 of 35/ })).toBeVisible();
+  await expect(laneSheet.getByRole('button', { name: /^18\.06 Linear Algebra .*lecture 4 of 35/ })).toBeVisible();
 
   await open(page, './');
-  await expect(laterRow(page, /MIT 18\.06 Linear Algebra Math · lecture 4, factorization into A = LU/)).toBeVisible();
+  await expect(laterRow(page, /18\.06 Linear Algebra Math · lecture 4, factorization into A = LU/)).toBeVisible();
 });
 
 test('marking an item done moves Today on to the next item in the lane', async ({ page }) => {
@@ -54,16 +55,16 @@ test('marking an item done moves Today on to the next item in the lane', async (
 
 test('the forecast reads as a verdict once the lane has hours and progress', async ({ page }) => {
   await open(page, './#/plan');
-  await expect(lane(page, 'Math')).toContainText('Not started');
+  await expect(lane(page, 'Math and physics')).toContainText('Not started');
 
   await open(page, './');
-  await makeNow(page, /MIT 18\.06 Linear Algebra/);
+  await makeNow(page, /18\.06 Linear Algebra/);
   await logTime(page, '60');
   await page.locator('#now-title').click();
   await nowCard(page).getByRole('checkbox', { name: 'Lecture 1: The geometry of linear equations' }).click();
 
   await open(page, './#/plan');
-  await expect(lane(page, 'Math')).toContainText(/On track|weeks? (behind|early)|No hours logged lately/);
+  await expect(lane(page, 'Math and physics')).toContainText(/On track|weeks? (behind|early)|No hours logged lately/);
 });
 
 test('re-plan shows a diff first, applies only when asked, and is then a no-op', async ({ page }) => {
@@ -91,11 +92,11 @@ test('reorders a lane with the arrows and keeps the order', async ({ page }) => 
   await expect(first).toContainText(/Zoomcamp midterm/);
 
   await sheet.getByRole('button', { name: 'Edit' }).click();
-  await sheet.getByRole('button', { name: /Move .*CLI expense or habit tracker.* up/ }).click();
-  await expect(first).toContainText(/CLI expense or habit tracker/);
+  await sheet.getByRole('button', { name: /Move .*CLI habit tracker.* up/ }).click();
+  await expect(first).toContainText(/CLI habit tracker/);
 
   await page.reload();
-  await expect(sheet.getByRole('listitem').first()).toContainText(/CLI expense or habit tracker/);
+  await expect(sheet.getByRole('listitem').first()).toContainText(/CLI habit tracker/);
 });
 
 test('an item of your own added to a lane reaches Today', async ({ page }) => {
@@ -112,7 +113,7 @@ test('an item of your own added to a lane reaches Today', async ({ page }) => {
   await expect(laneSheet.getByRole('button', { name: /^Distributed systems reading group/ })).toBeVisible();
 
   // Finish everything ahead of it in lane C, and Today's block C is on the new item.
-  for (const title of ['Machine Learning Zoomcamp', 'Hugging Face LLM Course', 'Hugging Face AI Agents Course']) {
+  for (const title of ['Machine Learning Zoomcamp', 'Hugging Face LLM Course', 'Hugging Face AI Agents Course', 'AI Engineer roadmap']) {
     await pickStatus(page, laneSheet.getByRole('button', { name: new RegExp('^Status of .*' + title) }), 'Done');
   }
   await open(page, './');
@@ -123,11 +124,11 @@ test('taking an item off the plan keeps it in the library', async ({ page }) => 
   await open(page, './#/plan?lane=y1-p0.B');
   const laneSheet = page.getByRole('dialog', { name: /^Block B · Languages/ });
   await laneSheet.getByRole('button', { name: 'Edit' }).click();
-  await laneSheet.getByRole('button', { name: /^Take freeCodeCamp: Scientific Computing with Python.* off the plan/ }).click();
-  await expect(laneSheet.getByRole('button', { name: /^freeCodeCamp: Scientific Computing/ })).toHaveCount(0);
+  await laneSheet.getByRole('button', { name: /^Take Automate the Boring Stuff.* off the plan/ }).click();
+  await expect(laneSheet.getByRole('button', { name: /^Automate the Boring Stuff/ })).toHaveCount(0);
 
   await laneSheet.getByRole('button', { name: 'Add to this lane' }).click();
   const add = page.getByRole('dialog', { name: /^Add to Block B/ });
-  await add.getByRole('searchbox', { name: 'Search' }).fill('Scientific Computing');
-  await expect(add.getByRole('button', { name: /^freeCodeCamp: Scientific Computing with Python/ })).toBeVisible();
+  await add.getByRole('searchbox', { name: 'Search' }).fill('Automate the Boring');
+  await expect(add.getByRole('button', { name: /^Automate the Boring Stuff/ })).toBeVisible();
 });

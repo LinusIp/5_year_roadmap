@@ -74,6 +74,15 @@ export async function toggleUnit(refId: string, unitId: string, database: AtlasD
   );
 }
 
+/** Ticks or unticks a roadmap.sh node by hand. The state's status stays "todo": a roadmap is never "done". */
+export async function toggleRoadmapNode(roadmapId: string, nodeId: string, database: AtlasDB = db): Promise<void> {
+  await editItemState(
+    'roadmap:' + roadmapId,
+    (state) => ({ ...state, unitsDone: state.unitsDone.includes(nodeId) ? state.unitsDone.filter((u) => u !== nodeId) : [...state.unitsDone, nodeId] }),
+    database,
+  );
+}
+
 /* ------------------------------------------------------------------ papers */
 
 export function usePaperStates(): Map<string, PaperState> | undefined {

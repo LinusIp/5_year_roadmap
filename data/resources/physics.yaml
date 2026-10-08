@@ -3,6 +3,7 @@
 
 - id: mit-8-01
   title: "MIT 8.01SC Classical Mechanics (Fall 2016)"
+  short: "8.01 Classical Mechanics"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/
@@ -17,6 +18,7 @@
 
 - id: mit-8-02
   title: "MIT 8.02 Physics II: Electricity and Magnetism (Spring 2019)"
+  short: "8.02 Electricity and Magnetism"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2019/
@@ -32,6 +34,7 @@
 
 - id: mit-8-03
   title: "MIT 8.03SC Physics III: Vibrations and Waves (Fall 2016)"
+  short: "8.03 Vibrations and Waves"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/8-03sc-physics-iii-vibrations-and-waves-fall-2016/
@@ -46,6 +49,7 @@
 
 - id: mit-8-04
   title: "MIT 8.04 Quantum Physics I (Barton Zwiebach, Spring 2016)"
+  short: "8.04 Quantum Physics I"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/

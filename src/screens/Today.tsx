@@ -31,7 +31,7 @@ import { LogTimeSheet } from './parts/LogTimeSheet.tsx';
 import { NotesField } from './parts/NotesField.tsx';
 import { PickerSheet } from './parts/PickerSheet.tsx';
 import { takenProject } from './parts/taken.ts';
-import { blockShort, dateTitle, partOf, shortTitle, span, unitDetail } from './parts/text.ts';
+import { blockShort, dateTitle, nameOf, partOf, span, unitDetail } from './parts/text.ts';
 
 type SheetName = 'log' | 'date' | 'day' | 'note' | null;
 
@@ -193,8 +193,8 @@ export function Today() {
       if (block.id === 'D') return { title: 'No project this week', meta: 'Pick one', to: '/plan/pick?from=today' };
       return { title: block.emptyReason ?? 'Nothing planned', meta: name };
     }
-    if (blockItem === block.weeklyBuild) return { title: shortTitle(blockItem.title), meta: 'Weekly build · ' + hoursOn(blockItem.refId) + ' of ' + blockItem.estHours + ' h done' };
-    return { title: shortTitle(blockItem.title), meta: [name, detailOf(blockItem)].filter(Boolean).join(' · ') };
+    if (blockItem === block.weeklyBuild) return { title: nameOf(blockItem), meta: 'Weekly build · ' + hoursOn(blockItem.refId) + ' of ' + blockItem.estHours + ' h done' };
+    return { title: nameOf(blockItem), meta: [name, detailOf(blockItem)].filter(Boolean).join(' · ') };
   };
 
   const start = (): void => {
@@ -258,11 +258,11 @@ export function Today() {
         ? nowBlock.weeklyBuild
         : nowBlock.item
       : undefined;
-  const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item ? shortTitle(item.title) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
+  const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item ? nameOf(item) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
   const metaLine = nowBlock
     ? [blockShort(nowBlock.def.name), span(nowMinutes) + ' of ' + span(nowBlock.targetMinutes), detailOf(item), nowDone ? 'done' : null].filter(Boolean).join(' · ')
     : '';
-  const linkClass = 'inline-flex min-h-11 items-center gap-2 text-body font-medium text-accent';
+  const linkClass = 'inline-flex min-h-11 items-center gap-2 text-button font-medium text-accent';
 
   return (
     <Screen title="Today">
@@ -299,10 +299,10 @@ export function Today() {
         />
       </div>
 
-      {outside && <p className="-mt-2 mb-4 text-meta text-ink2">{outside}</p>}
+      {outside && <p className="mt-2 text-meta text-ink2">{outside}</p>}
 
       {updateReady && (
-        <RowList flat className="mb-5">
+        <RowList flat className="mt-5">
           <Row title="A new version of Atlas is ready" trailing="Reload" onClick={applyUpdate} />
         </RowList>
       )}
@@ -310,47 +310,41 @@ export function Today() {
       {nothingPlanned ? (
         <EmptyState action={<Button to="/plan">Open Plan</Button>}>Nothing scheduled. Open Plan to pick what you&apos;re learning.</EmptyState>
       ) : !nowBlock ? (
-        <section aria-label="Now" className="rounded-card bg-surface p-5">
+        <section aria-label="Now" className="mt-7 flex flex-col gap-1.5 rounded-card bg-surface p-5">
           <p className="text-meta text-ink2">Now</p>
-          <p className="mt-1 text-headline font-semibold">All five blocks are done.</p>
-          <p className="mt-1.5 text-meta text-ink2">{span(logged)} logged today.</p>
+          <p className="text-headline font-semibold">All five blocks are done.</p>
+          <p className="text-meta text-ink2">{span(logged)} logged today.</p>
         </section>
       ) : (
-        <section aria-labelledby="now-title" className={'rounded-card bg-surface p-5' + (taken && item?.refId === taken.id ? ' taken' : '')}>
+        <section aria-labelledby="now-title" className={'mt-7 flex flex-col gap-1.5 rounded-card bg-surface p-5' + (taken && item?.refId === taken.id ? ' taken' : '')}>
           <p className="text-meta text-ink2">{nowRunning ? 'Now · running' : 'Now'}</p>
-          <h2 className="mt-1">
-            <button id="now-title" type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className="text-left text-headline font-semibold">
+          <h2 className="text-headline">
+            <button id="now-title" type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className="-my-2 block w-full py-2 text-left text-headline font-semibold">
               {headline}
             </button>
           </h2>
-          <p className="mt-1.5 text-meta text-ink2">{metaLine}</p>
-          <div className="mt-3">
+          <p className="text-meta text-ink2">{metaLine}</p>
+          <div className="mt-2.5">
             <ProgressLine value={nowBlock.targetMinutes > 0 ? nowMinutes / nowBlock.targetMinutes : 0} label={'Time on ' + blockShort(nowBlock.def.name) + ' today'} />
           </div>
 
           {expanded && (
             <div className="mt-4">
               {item?.brief && <p className="mb-2 text-body text-ink2">{item.brief}</p>}
-              {resource?.summary && <p className="mb-2 text-body text-ink2">{resource.summary}</p>}
               {item?.note && <p className="mb-2 text-meta text-ink2">{item.note}</p>}
-              {item && allUnits.length > 0 && <Checklist plain refId={item.refId} units={unitWindow(allUnits, unitsDone)} done={unitsDone} />}
+              {item && allUnits.length > 0 && <Checklist plain compact refId={item.refId} units={unitWindow(allUnits, unitsDone)} done={unitsDone} />}
               <div className="flex flex-col items-start">
                 {item?.url ? (
                   <a href={item.url} target="_blank" rel="noreferrer noopener" className={linkClass}>
-                    <Icon name="external" size={18} />
+                    <Icon name="external" size={16} />
                     {item.kind === 'project' ? 'Open the source' : resource?.type === 'book' ? 'Open the book' : 'Open course'}
                   </a>
                 ) : item?.searchHint ? (
                   <a href={'https://duckduckgo.com/?q=' + encodeURIComponent(item.searchHint)} target="_blank" rel="noreferrer noopener" className={linkClass}>
-                    <Icon name="search" size={18} />
+                    <Icon name="search" size={16} />
                     Find a link
                   </a>
                 ) : null}
-                {item && (
-                  <Link to={'/library/' + item.refId} className={linkClass}>
-                    All details
-                  </Link>
-                )}
                 {otherD && (
                   <button type="button" className={linkClass} onClick={() => setMonthlyFirst((v) => !v)}>
                     {otherD === nowBlock.weeklyBuild ? 'Work on the weekly build instead' : 'Work on the monthly project instead'}
@@ -375,7 +369,7 @@ export function Today() {
             </div>
           )}
 
-          <div className="mt-4 flex items-center gap-2">
+          <div className={(expanded ? 'mt-1.5' : 'mt-3.5') + ' flex items-center gap-2'}>
             {primary}
             {expanded && item ? (
               <Button onClick={() => setSheet('note')}>Add a note</Button>
@@ -442,7 +436,7 @@ export function Today() {
       )}
 
       {!isReviewDay && (
-        <Link to="/reviews" className="mt-2 flex min-h-11 items-center text-meta text-ink2">
+        <Link to="/reviews" className="mt-1 flex min-h-11 items-center text-meta text-ink2">
           Weekly review on {dayName(addDays(date, (reviewDay - weekday(date) + 7) % 7))}
         </Link>
       )}
@@ -475,7 +469,7 @@ export function Today() {
         <DayFields date={date} />
       </Sheet>
 
-      <Sheet open={sheet === 'note'} title={item ? 'Notes on ' + shortTitle(item.title) : 'Notes'} onClose={() => setSheet(null)}>
+      <Sheet open={sheet === 'note'} title={item ? 'Notes on ' + nameOf(item) : 'Notes'} onClose={() => setSheet(null)}>
         {item && (
           <NotesField
             label="Notes"

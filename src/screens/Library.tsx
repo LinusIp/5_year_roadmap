@@ -16,33 +16,29 @@ import { Header } from '../ui/Header.tsx';
 import { Button } from '../ui/Button.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
-import { TextField } from '../ui/TextField.tsx';
+import { SearchField } from '../ui/TextField.tsx';
 import { AddResourceSheet } from './library/AddResourceSheet.tsx';
 import { ItemSheet } from './parts/ItemSheet.tsx';
 import { PickerSheet } from './parts/PickerSheet.tsx';
-import { partOf, plural, shortTitle, unitShort } from './parts/text.ts';
+import { plural, shortTitle, unitShort } from './parts/text.ts';
 import { PaperSheet } from './plan/PapersView.tsx';
 
+/** The mockup's five kinds; lecture series, tutorials and certificate courses count as courses, repositories as tools. */
 const TYPE_CHIPS: { key: string; label: string }[] = [
   { key: 'course', label: 'Courses' },
   { key: 'book', label: 'Books' },
   { key: 'paper', label: 'Papers' },
   { key: 'article', label: 'Articles' },
-  { key: 'lectures', label: 'Lectures' },
-  { key: 'tutorial', label: 'Tutorials' },
-  { key: 'repo', label: 'Repositories' },
-  { key: 'cert', label: 'Certifications' },
-  { key: 'project', label: 'Projects' },
+  { key: 'tool', label: 'Tools' },
 ];
+const KIND_OF_TYPE: Record<string, string> = { course: 'course', lectures: 'course', tutorial: 'course', cert: 'course', book: 'book', paper: 'paper', article: 'article', repo: 'tool' };
 const STATUS_CHIPS: { key: ItemStatus; label: string }[] = [
   { key: 'active', label: 'Active' },
-  { key: 'todo', label: 'To do' },
+  { key: 'todo', label: 'Not started' },
   { key: 'done', label: 'Done' },
-  { key: 'dropped', label: 'Dropped' },
 ];
 const PAPER_AS_ITEM: Record<PaperStatus, ItemStatus> = { queued: 'todo', reading: 'active', read: 'done', implemented: 'done' };
 const PAPER_LABEL: Record<PaperStatus, string> = { queued: '', reading: 'Reading', read: 'Read', implemented: 'Implemented' };
-const CADENCE: Record<string, string> = { weekly: 'Weekly build', monthly: 'Monthly project', capstone: 'Capstone' };
 const PAGE = 60;
 
 interface Entry {
@@ -95,30 +91,14 @@ function buildEntries(atlas: Atlas, units: Record<string, Unit[]> | undefined, p
     return {
       kind: 'resource',
       id: r.id,
-      title: shortTitle(r.title),
+      title: r.short ?? shortTitle(r.title),
       body: [r.title, r.provider, r.summary ?? '', r.tracks.join(' '), r.type, state?.notes ?? ''].join(' '),
-      type: r.type,
+      type: KIND_OF_TYPE[r.type] ?? 'course',
       tracks: r.tracks,
       status,
       meta: [r.provider, r.estHours > 0 ? r.estHours + ' h' : null, progressOf(r.id, state?.unitsDone ?? [], units)].filter(Boolean).join(' · '),
       trailing: trailingFor(r.id, status),
       sortKey: sortFor(r.id, status, r.title),
-    };
-  });
-  const projects: Entry[] = seed.projects.map((p) => {
-    const state = states.get(p.id);
-    const status = state?.status ?? 'todo';
-    return {
-      kind: 'project',
-      id: p.id,
-      title: shortTitle(p.title),
-      body: [p.title, p.brief, p.skills.join(' '), p.source ?? '', p.tracks.join(' '), state?.notes ?? ''].join(' '),
-      type: 'project',
-      tracks: p.tracks,
-      status,
-      meta: [CADENCE[p.cadence], partOf(p.title), p.estHours + ' h'].filter(Boolean).join(' · '),
-      trailing: trailingFor(p.id, status),
-      sortKey: sortFor(p.id, status, p.title),
     };
   });
   const papers: Entry[] = seed.papers.map((p) => {
@@ -137,7 +117,7 @@ function buildEntries(atlas: Atlas, units: Record<string, Unit[]> | undefined, p
       sortKey: (status === 'active' ? '0' : status === 'todo' ? '2' : '3') + p.title.toLowerCase(),
     };
   });
-  return [...resources, ...projects, ...papers];
+  return [...resources, ...papers];
 }
 
 /**
@@ -193,12 +173,12 @@ export function Library({ openId }: { openId?: string }) {
       <Header
         title="Library"
         sub={plural(seed.resources.length, 'resource') + ' · ' + plural(queued, 'paper') + ' queued · ' + plural(certsPlanned, 'credential') + ' planned'}
-        actions={<Button variant="icon" icon="plus" label="Add a resource" onClick={() => setAdding(true)} />}
       />
 
-      <TextField
-        label="Search courses, books, papers"
-        type="search"
+      <SearchField
+        className="mt-5"
+        label="Search the library"
+        placeholder="Search courses, books, papers"
         searchBox
         value={text}
         onChange={(v) => {
@@ -208,22 +188,21 @@ export function Library({ openId }: { openId?: string }) {
         }}
       />
 
-      <div className="mt-3 space-y-2">
+      <div className="mt-3">
         <Chips
           label="Type"
-          items={TYPE_CHIPS.map((chip) => ({
-            key: chip.key,
-            label: chip.label,
-            count: entries.filter((e) => e.type === chip.key).length,
-            pressed: type === chip.key,
-            onClick: () => setType(type === chip.key ? null : chip.key),
-          })).filter((chip) => chip.count > 0)}
+          items={TYPE_CHIPS.map((chip) => {
+            const count = entries.filter((e) => e.type === chip.key).length;
+            return { key: chip.key, label: chip.label, count: count > 0 ? count : undefined, pressed: type === chip.key, onClick: () => setType(type === chip.key ? null : chip.key) };
+          })}
         />
+      </div>
+      <div className="mt-2">
         <Chips
-          label="Track and status"
+          label="Status and track"
           items={[
-            { key: 'track', label: trackName ?? 'Track', pressed: Boolean(trackName), onClick: () => setPickingTrack(true) },
             ...STATUS_CHIPS.map((chip) => ({ key: chip.key, label: chip.label, pressed: status === chip.key, onClick: () => setStatus(status === chip.key ? null : chip.key) })),
+            { key: 'track', label: trackName ?? 'Track', pressed: Boolean(trackName), chevron: true, onClick: () => setPickingTrack(true) },
           ]}
         />
       </div>
@@ -233,11 +212,23 @@ export function Library({ openId }: { openId?: string }) {
       ) : (
         <RowList flat className="mt-5" label={query || type || track || status ? plural(results.length, 'match', 'matches') : undefined}>
           {results.slice(0, shown).map((entry) => (
-            <Row key={entry.kind + entry.id} title={entry.title} meta={entry.meta} trailing={entry.trailing ? <span className={entry.status === 'active' ? 'text-accent' : ''}>{entry.trailing}</span> : undefined} onClick={() => open(entry)} />
+            <Row
+              key={entry.kind + entry.id}
+              height={60}
+              truncate
+              title={entry.title}
+              meta={entry.meta}
+              trailing={entry.trailing ? <span className={entry.status === 'active' ? 'text-accent' : ''}>{entry.trailing}</span> : undefined}
+              onClick={() => open(entry)}
+            />
           ))}
-          {results.length > shown && <Row title={'Show ' + Math.min(PAGE, results.length - shown) + ' more'} meta={results.length - shown + ' not shown yet'} onClick={() => setShown((n) => n + PAGE)} />}
+          {results.length > shown && <Row height={60} title={'Show ' + Math.min(PAGE, results.length - shown) + ' more'} meta={results.length - shown + ' not shown yet'} onClick={() => setShown((n) => n + PAGE)} />}
         </RowList>
       )}
+
+      <Button className="mt-5" icon="plus" onClick={() => setAdding(true)}>
+        Add a resource
+      </Button>
 
       <ItemSheet atlas={atlas} id={openId ?? null} onClose={() => navigate('/library' + (keep ? '?' + keep : ''))} />
       <PaperSheet paper={paperId ? (seed.papers.find((p) => p.id === paperId) ?? null) : null} state={paperId ? paperStates.get(paperId) : undefined} onClose={() => setPaperId(null)} />

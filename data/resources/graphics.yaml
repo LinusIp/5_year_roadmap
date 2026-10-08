@@ -16,6 +16,7 @@
 
 - id: rtiow
   title: "Ray Tracing in One Weekend: the book series (Peter Shirley and others)"
+  short: "Ray Tracing in One Weekend"
   provider: raytracing.github.io
   type: book
   url: https://raytracing.github.io/
@@ -33,6 +34,7 @@
 
 - id: tinyrenderer
   title: "tinyrenderer: a brief computer graphics / rendering course (ssloy)"
+  short: "tinyrenderer"
   provider: GitHub
   type: tutorial
   url: https://github.com/ssloy/tinyrenderer

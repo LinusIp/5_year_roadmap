@@ -23,17 +23,25 @@ interface HeatmapProps<C extends HeatmapCell> {
   color?: string;
 }
 
-const CELL = 9;
+/** Weeks across the card at once, as in the mockup; earlier weeks of the year are a sideways scroll away. */
+const WEEKS_SHOWN = 30;
+const CELL_H = 9;
 const GAP = 2.5;
-const PITCH = CELL + GAP;
-const MONTH_ROW = 20; // month names sit under the grid
-const MIN_LABEL_GAP = 30;
+const MONTH_ROW = 22; // month names sit under the grid
+const MIN_LABEL_GAP = 28;
+
+/** The ramp for a track's colour: the same four steps, mixed from the track colour instead of accent. */
+export function trackRamp(color: string | undefined): CSSProperties | undefined {
+  if (!color) return undefined;
+  const mix = (share: number): string => 'color-mix(in srgb, ' + color + ' ' + share + '%, var(--surface))';
+  return { '--heat-color': color, '--heat-1': mix(22), '--heat-2': mix(48), '--heat-3': mix(74) } as CSSProperties;
+}
 
 /**
- * Days as an SVG grid of 9 px squares, columns are weeks, month names underneath. Empty days are the
- * hairline grey, then four greens up to accent. When the year is wider than the screen the grid scrolls
- * sideways and opens on this week. With `onSelect` it is one tab stop: the arrows move by a day or a
- * week, Home and End go to the ends, Enter opens the day.
+ * Days as an SVG grid, columns are weeks, month names underneath. Thirty weeks fill the card's width, so a
+ * cell is about 9 px; empty days are the hairline grey, then four greens up to accent. The grid opens on this
+ * week and scrolls sideways to the rest of the year. With `onSelect` it is one tab stop: the arrows move by a
+ * day or a week, Home and End go to the ends, Enter opens the day.
  */
 export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, label, onSelect, selected, color }: HeatmapProps<C>) {
   const titleId = useId();
@@ -41,30 +49,43 @@ export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, 
   const box = useRef<HTMLDivElement>(null);
   const svg = useRef<SVGSVGElement>(null);
   const [focused, setFocused] = useState<string>();
-  const width = columns * PITCH - GAP;
-  const height = 7 * PITCH - GAP + MONTH_ROW;
+  const [boxWidth, setBoxWidth] = useState(326);
 
-  // Open with this week (or the last week, for a year that is over) near the right edge, two weeks of room
-  // after it so the current month's name is not cut.
+  // The cell width follows the card: thirty columns and their gaps fill it exactly.
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el) return undefined;
+    const measure = (): void => setBoxWidth(el.clientWidth || 326);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  const cellW = Math.max(6, (boxWidth - (WEEKS_SHOWN - 1) * GAP) / WEEKS_SHOWN);
+  const pitch = cellW + GAP;
+  const width = columns * pitch - GAP;
+  const height = 7 * (CELL_H + GAP) - GAP + MONTH_ROW;
+
+  // Open with this week (or the last week, for a year that is over) at the right edge.
   const anchor = cells.find((c) => c.date === today())?.column ?? columns - 1;
   useLayoutEffect(() => {
     const el = box.current;
-    if (el) el.scrollLeft = Math.max(0, (anchor + 3) * PITCH - el.clientWidth);
-  }, [anchor]);
+    if (el) el.scrollLeft = Math.max(0, (anchor + 1) * pitch - GAP - el.clientWidth);
+  }, [anchor, pitch]);
 
   // When two month names would touch, the later one stays: the first month of a range is often a sliver.
   const shownMonths = useMemo(() => {
     const out: MonthLabel[] = [];
     let nextX = Infinity;
     for (const month of [...months].reverse()) {
-      const x = month.column * PITCH;
-      if (nextX - x >= MIN_LABEL_GAP && x + 22 <= width) {
+      const x = month.column * pitch;
+      if (nextX - x >= MIN_LABEL_GAP && x + 20 <= width) {
         out.unshift(month);
         nextX = x;
       }
     }
     return out;
-  }, [months, width]);
+  }, [months, width, pitch]);
 
   const days = useMemo(() => new Set(cells.filter((c) => !c.outside).map((c) => c.date)), [cells]);
   const first = cells.find((c) => !c.outside)?.date;
@@ -96,13 +117,9 @@ export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, 
     }
   };
 
-  const style = color
-    ? ({ '--heat-color': color, '--heat-base': 'color-mix(in srgb, ' + color + ' 12%, var(--surface))' } as CSSProperties)
-    : undefined;
-
   return (
     <div ref={box} className="w-full overflow-x-auto">
-      <svg ref={svg} role="group" aria-labelledby={titleId} aria-describedby={onSelect ? hintId : undefined} width={width} height={height} className="heat block" style={style}>
+      <svg ref={svg} role="group" aria-labelledby={titleId} aria-describedby={onSelect ? hintId : undefined} width={width} height={height} className="heat block" style={trackRamp(color)}>
         <title id={titleId}>{title}</title>
         {cells.map((cell) => {
           if (cell.outside) return null;
@@ -112,10 +129,11 @@ export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, 
             <rect
               key={cell.date}
               data-date={cell.date}
-              x={cell.column * PITCH}
-              y={cell.row * PITCH}
-              width={CELL}
-              height={CELL}
+              x={cell.column * pitch}
+              y={cell.row * (CELL_H + GAP)}
+              width={cellW}
+              height={CELL_H}
+              rx={2}
               className={'heat-' + cell.level + (onSelect ? ' cursor-pointer outline-none focus-visible:stroke-[var(--ink)] focus-visible:[stroke-width:2]' : '')}
               stroke={isSelected ? 'var(--ink)' : cell.frozen ? 'var(--ink2)' : undefined}
               strokeWidth={isSelected ? 1.5 : cell.frozen ? 1 : undefined}
@@ -130,11 +148,17 @@ export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, 
             </rect>
           );
         })}
-        {shownMonths.map((month) => (
-          <text key={month.column + month.label} x={month.column * PITCH} y={7 * PITCH - GAP + 16} className="fill-ink2 text-small">
-            {month.label}
-          </text>
-        ))}
+        {shownMonths.map((month) => {
+          // The current month's name would run past the week the grid opens on; it ends there instead.
+          const x = month.column * pitch;
+          const edge = (anchor + 1) * pitch - GAP;
+          const atEdge = x <= edge && x + 22 > edge;
+          return (
+            <text key={month.column + month.label} x={atEdge ? edge : x} textAnchor={atEdge ? 'end' : 'start'} y={7 * (CELL_H + GAP) - GAP + 17} className="fill-ink2 text-small">
+              {month.label}
+            </text>
+          );
+        })}
       </svg>
       {onSelect && (
         <p id={hintId} className="sr-only">
@@ -147,12 +171,11 @@ export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, 
 
 /** "Less ■■■■■ More": the five steps, in the same colours as the grid. */
 export function HeatLegend({ color }: { color?: string }) {
-  const style = color ? ({ '--heat-color': color, '--heat-base': 'color-mix(in srgb, ' + color + ' 12%, var(--surface))' } as CSSProperties) : undefined;
   return (
-    <span className="heat inline-flex items-center gap-1.5 text-small text-ink2" style={style} aria-hidden="true">
+    <span className="heat inline-flex items-center gap-1.5 text-small text-ink2" style={trackRamp(color)} aria-hidden="true">
       Less
       {[0, 1, 2, 3, 4].map((level) => (
-        <span key={level} className={'inline-block size-2.5 heat-swatch-' + level} />
+        <span key={level} className={'inline-block size-2.5 rounded-cell heat-swatch-' + level} />
       ))}
       More
     </span>

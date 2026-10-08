@@ -46,11 +46,13 @@ what was chosen, why, and what it would take to change. Newest first within each
   colour-blind readers), so tracks are grouped into eight families that share one of eight categorical
   colours, assigned in a fixed order that was validated for colour-vision-deficiency separation. The
   track's name always accompanies its colour.
-- **The heatmap is one blue ramp, not GitHub green.** Intensity encodes magnitude, which calls for a
-  single-hue ordered ramp. Both ramps (light and dark theme) pass the ordinal checks: monotone lightness,
-  visible steps, and a lightest step that still clears 2:1 against its surface. A track filter changes
-  which minutes are counted, not the ramp's hue.
-- **System fonts only.** The app makes no network requests, so it loads no web fonts.
+- **The heatmap is one green ramp, the accent's, as the mockups draw it** (it was blue before the
+  redesign). Intensity encodes magnitude, so it stays a single-hue ordered ramp: empty days are the hairline
+  grey, then three mixes of the accent, then the accent. A track filter recolours the same four steps in the
+  track's colour and counts only that track's minutes.
+- **Instrument Sans, self-hosted.** The mockups set it. It ships in the bundle
+  (`@fontsource-variable/instrument-sans`) and is precached with the app, so the app still makes no font
+  requests and works offline. Before the redesign the app used system fonts.
 - **All text tokens meet WCAG AA** (4.5:1) on every surface they are used on, in both themes; measured,
   not estimated.
 
@@ -153,6 +155,81 @@ what was chosen, why, and what it would take to change. Newest first within each
 - **Screenshots come from a backup, not from code that reaches into the database.** The demo history goes in
   through the same Import as a user's file and is checked by the same validation. The demo invents no links,
   which is why its one finished-looking game is still in progress: done needs a repository.
+
+## The redesign (section 4.0) and the mockups
+
+The redesign prompt and `Atlas Mockups.html` arrived together, and the user's instruction was that the UI must
+be the same as the mockups. Where the two disagree, the mockups win, and each such case is listed here.
+
+- **Square checkboxes.** Section 4.0 describes check circles; every mockup frame draws a 20 px box with
+  softened corners. The box is what ships.
+- **Five font sizes on Today, not three.** The spec allows three sizes per screen. The mockup's Today uses five:
+  26 px for the Now title, 16 for the date and row titles, 15 for buttons, 14 for meta lines and 12 for the tab
+  labels. The acceptance test now checks that every screen draws only from the mockups' scale (12, 13, 14, 15,
+  16, 18, 24, 26 and 30 px) and that Today uses no more than its five. The measured sizes are in PROGRESS.md.
+- **Line heights follow the mockups.** The mockups set 14 px text at the font's normal line height, about 1.3.
+  Atlas had 1.45, which made Today 16 px taller than a 390 x 844 screen. The meta size now uses 1.3, as rows
+  already did, and Today fits again.
+- **Chips are 36 px pills inside 44 px targets.** The mockup draws 36 px chips; the spec asks for 44 px tap
+  targets. Each chip is a 44 px button whose visible pill is 36 px.
+- **No letter-spacing.** The mockups tighten the large titles by 0.01 em. The design system's rule against
+  `tracking-*` stayed, and at these sizes the difference is under half a pixel.
+- **The heatmap's day cells are smaller than 44 px.** Thirty weeks fill the card, as in the mockup, so a cell is
+  about 9 px. The grid is one tab stop with arrow keys, and the last seven days open from 48 px rows under it.
+  The tap-target test leaves the grid out for that reason.
+- **The stage 2 band's text is a shade darker than the mockup's** (#8a5c00 instead of #9a6700) in the light
+  theme. The mockup's colour measures 4.47:1 on its band; the darker one passes 4.5:1.
+- **The five-year map is its own page,** at `#/plan/map`, opened from "Five-year map" under the Timeline. The
+  mockups draw it at desktop width; on a phone it scrolls sideways inside its frame, and the page itself never
+  does.
+- **Roadmaps sit at the top of Credentials,** not in a fifth segment. The brief asks for Plan > Roadmaps, and
+  the mockups' segmented control has four segments, which is all that fits on a phone. A roadmap is mastered
+  through its credential row, so Credentials is where it belongs.
+- **The Library lists resources and papers, not projects.** The mockup's Library has no projects; they live in
+  Plan > Projects and open from there.
+- **Screenshot baselines are compared locally, not in CI.** `tests/e2e/screenshots.spec.ts` compares Today,
+  Activity, Plan and Library in both themes, and the five-year map, with `screenshots/`. The pictures are drawn
+  by Edge on Windows, and Linux renders the same text a pixel differently, so CI skips the comparison while
+  every other test runs there. `npm run screenshots` redraws them.
+- **Names in lists come from `short`.** The mockups say "ML Zoomcamp" and "18.06 Linear Algebra" where the
+  catalogue's titles are "DataTalksClub Machine Learning Zoomcamp" and "MIT 18.06 Linear Algebra (Gilbert
+  Strang, Spring 2010)". Resources may carry a `short` name, used on Today, Plan and the Library; sheets and
+  search keep the full title.
+- **The backup reminder is gone from Today.** The 2026-10-07 brief removed it. Settings still says when the
+  last export was. The brief's "Not backed up" line belongs to GitHub Sync, which shows it once in Settings
+  when sync is off, and arrives with it.
+
+## The brief of 2026-10-08 (21:20)
+
+- **Projects keep their ids and take the new numbers.** The brief renumbers the projects 1 to 84. Logs and
+  statuses reference ids such as `m01`, so ids stay and `number` changes. New projects take descriptive ids
+  (`m-inference-server`). Four game projects, the old GPU fluids project and five monthly projects of years 2
+  and 3 (`m21`, `m23`, `m30` to `m32`) gave way to the new list. Anything saved against those ids stays in the
+  database and in backups, but no screen shows it.
+- **Research is a fourth cadence with its own stack and a quarterly review.** Research cards (reproductions,
+  quarterly questions, the lab notebook, OSS pull requests) show under Projects > Research once their phase
+  has begun; before that, one row names the first of them. Reviews gains a Quarterly tab that records the
+  quarter's research question and a link to its two-page report.
+- **The research report lives in the user's data repository.** The brief asks for reports in `research/` in the
+  data repo. Until GitHub Sync exists, the quarterly review stores a link to wherever the report is.
+- **Roadmap nodes are ticked by hand or by finished items.** A node is checked when it is ticked on its
+  roadmap's sheet, or when a done resource or project `covers` it. Nodes covered by a done item cannot be
+  unticked by hand; un-finishing the item unticks them. Manual ticks are stored as an item state keyed
+  `roadmap:<id>`, so they travel in backups with no schema change.
+- **Mastered means 90 % of the non-optional nodes and a done credential row.** A row is done when one of its
+  certificates is earned or all of its milestones are done. The percent rounds down, so 89.9 % never reads
+  as 90 %.
+- **Optional nodes are the ones the brief calls optional:** vendor-specific enterprise items (SAP, Salesforce,
+  TOGAF), engine-specific nodes (Unity, Unreal, Godot), and long lists of interchangeable tools where one is
+  enough.
+- **Modern C is studied now, not just a reference.** The new table puts it in year 1's lane B, so it has 40
+  hours instead of 0. A zero-hour item in a lane had also exposed a re-plan bug: the planner numbered a moved
+  item onto the position of an item that stayed. The planner now skips positions that items staying put
+  still hold, and a unit test covers it.
+- **The paper cadence starts with Foundations II** (February 2027), as the brief now says, through a new
+  `fromPhase` setting. Saved settings from before are brought up to date when read.
+- **`npm run log:export` stays, but nothing points at it.** The brief dropped the learning log in favour of
+  GitHub Sync. The script still works for anyone who used it.
 
 ## The brief of 2026-10-07
 

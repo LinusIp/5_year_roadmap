@@ -1,567 +1,1347 @@
-# Monthly projects 1-34 (Stage 1, software). Block D carries them in this order; number 35 is the
-# Stage 1 capstone (capstones.yaml). 20-40 hours each. A project is only `done` once its repo URL is filled in.
+# Monthly and research projects 1-60 (Stage 1, software), as numbered by the brief of 2026-10-07. Block D carries
+# them in this order. Number 5 (one finished small game) is in block-a.yaml; 46, 53 and 60 are capstones in
+# capstones.yaml. 20-40 hours each. A project is only `done` once its repo URL is filled in.
 # `sourceUrl` links were verified on 2026-09-20 (the build-your-own-x ones down to the category anchor).
+# `covers` lists the roadmap.sh nodes a project practises (data/roadmaps.yaml).
 
-# ------------------------------------------------------------ Y1-P0 In flight
+# ------------------------------------------------------------ Y1-P0 Foundations I: in flight. Number 5, one finished small game, is a-small-game-1 in block-a.yaml (carried in lane A).
 - id: m01
   number: 1
-  title: "ML Zoomcamp midterm project, deployed"
+  title: ML Zoomcamp midterm project, deployed
   cadence: monthly
-  tracks: [ai]
+  tracks:
+    - ai
   phaseId: y1-p0
   estHours: 30
   subject: machine-learning
   brief: "The Zoomcamp midterm: pick a dataset, train and compare models, and put the best one behind a web service that someone else can call."
   acceptance:
-    - "Notebook with EDA, feature work and at least three models compared on a held-out set"
-    - "Training script and a prediction service packaged in Docker"
-    - "Deployed somewhere reachable, with the URL and a sample request in the README"
-    - "Meets the Zoomcamp's own review criteria"
-  source: "DataTalksClub ML Zoomcamp, projects"
-  skills: ["scikit-learn", "Flask or FastAPI", "Docker", "deployment"]
-
+    - Notebook with EDA, feature work and at least three models compared on a held-out set
+    - Training script and a prediction service packaged in Docker
+    - Deployed somewhere reachable, with the URL and a sample request in the README
+    - Meets the Zoomcamp's own review criteria
+  source: DataTalksClub ML Zoomcamp, projects
+  skills:
+    - scikit-learn
+    - Flask or FastAPI
+    - Docker
+    - deployment
 - id: m02
   number: 2
-  title: "CLI expense or habit tracker in Python, with tests"
+  title: CLI habit tracker in Python, tests and CI, on PyPI
   cadence: monthly
-  tracks: [languages, swe]
+  tracks:
+    - languages
+    - swe
   phaseId: y1-p0
   estHours: 25
   subject: python
-  brief: "A command-line tool you will actually use: add, list, summarise and export entries, stored in SQLite or a plain file. Small, but finished like a real package."
+  brief: "A command-line habit tracker you will actually use: add, list, summarise and export entries, stored in SQLite or a plain file. Small, but finished like a real package and published."
   acceptance:
-    - "Installable with pip (pyproject.toml, entry point) and documented with --help"
-    - "Unit tests with pytest covering the storage and the summaries"
-    - "CI on GitHub Actions running lint and tests on every push"
-    - "A tagged release"
-  skills: ["argparse or Typer", "pytest", "packaging", "GitHub Actions"]
-
+    - Installable with pip (pyproject.toml, entry point) and documented with --help
+    - Unit tests with pytest covering the storage and the summaries
+    - CI on GitHub Actions running lint and tests on every push, and publishing tagged releases
+    - A release on PyPI that a stranger can install and use
+  skills:
+    - argparse or Typer
+    - pytest
+    - packaging
+    - GitHub Actions
 - id: m03
   number: 3
-  title: "RAG chatbot over your own notes, on a local model"
+  title: RAG chatbot over your own notes with a local model and a 30-question eval set
   cadence: monthly
-  tracks: [ai]
+  tracks:
+    - ai
   phaseId: y1-p0
   estHours: 30
   subject: deep-learning
   brief: "Question answering over your own notes and course material with a model that runs on your machine: chunk, embed, retrieve, generate, cite."
   acceptance:
-    - "Ingests a folder of Markdown or PDF notes into a vector index"
-    - "Answers cite the chunks they came from, and say so when nothing relevant was retrieved"
-    - "Runs fully offline with a local model (llama.cpp, Ollama or similar)"
-    - "A small evaluation set of 20 questions with retrieval hit rate reported"
-  skills: ["embeddings", "vector search", "prompting", "evaluation"]
-
+    - Ingests a folder of Markdown or PDF notes into a vector index
+    - Answers cite the chunks they came from, and say so when nothing relevant was retrieved
+    - Runs fully offline with a local model (llama.cpp, Ollama or similar)
+    - An evaluation set of 30 questions, with retrieval hit rate and answer quality reported
+  skills:
+    - embeddings
+    - vector search
+    - prompting
+    - evaluation
+  covers:
+    - ai-engineer/rag
+    - ai-engineer/chunking
+    - ai-engineer/embedding
+    - ai-engineer/vector-database
+    - ai-engineer/retrieval-process
+    - ai-engineer/generation
+    - ai-engineer/ollama
+    - ai-engineer/semantic-search
+    - ai-engineer/open-source-embeddings
+    - ai-engineer/chroma
 - id: m04
   number: 4
-  title: "Zoomcamp capstone and a simple agent with tools"
+  title: Zoomcamp capstone and a tool-using agent (HF Agents final)
   cadence: monthly
-  tracks: [ai]
+  tracks:
+    - ai
   phaseId: y1-p0
   estHours: 40
   subject: deep-learning
   brief: "Two deliverables that close the first phase: the ML Zoomcamp capstone, and the final project of the Hugging Face Agents course: an agent that uses tools to complete a task."
   acceptance:
-    - "Zoomcamp capstone submitted and peer-reviewed"
-    - "An agent with at least three tools (search, code execution, file access or an API) that completes a multi-step task"
-    - "A set of 15 test tasks with pass or fail recorded, so the agent can be compared across changes"
-    - "Hugging Face Agents course certificate earned"
-  source: "Hugging Face Agents Course, unit 4"
-  skills: ["tool use", "agent loops", "evals"]
+    - Zoomcamp capstone submitted and peer-reviewed
+    - An agent with at least three tools (search, code execution, file access or an API) that completes a multi-step task
+    - A set of 15 test tasks with pass or fail recorded, so the agent can be compared across changes
+    - Hugging Face Agents course certificate earned
+  source: Hugging Face Agents Course, unit 4
+  skills:
+    - tool use
+    - agent loops
+    - evals
 
-# ------------------------------------------------------------ Y1-P1 Fluency + CS core
+# ------------------------------------------------------------ Y1-P1 Foundations II: fluency (projects 6-14)
 - id: m05
-  number: 5
-  title: "micrograd clone and MNIST from scratch in NumPy"
+  number: 6
+  title: micrograd clone and MNIST from scratch in NumPy
   cadence: monthly
-  tracks: [ai, math]
+  tracks:
+    - ai
+    - math
   phaseId: y1-p1
   estHours: 30
   subject: deep-learning
-  brief: "Reverse-mode autodiff on scalars, written by you, then a multilayer perceptron in plain NumPy that learns MNIST. No deep learning framework."
+  brief: Reverse-mode autodiff on scalars, written by you, then a multilayer perceptron in plain NumPy that learns MNIST. No deep learning framework.
   acceptance:
-    - "A Value class with backward() whose gradients match numerical differentiation in tests"
-    - "An MLP trained with your own SGD reaches at least 97% test accuracy on MNIST"
-    - "Loss curves and a note on what each hyperparameter did"
+    - A Value class with backward() whose gradients match numerical differentiation in tests
+    - An MLP trained with your own SGD reaches at least 97% test accuracy on MNIST
+    - Loss curves and a note on what each hyperparameter did
+    - MNIST test accuracy of at least 97 %, with the training curve
   source: "build-your-own-x: Neural Network"
   sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-neural-network
-  skills: ["backpropagation", "NumPy", "gradient checking"]
-
+  skills:
+    - backpropagation
+    - NumPy
+    - gradient checking
 - id: m06
-  number: 6
-  title: "Pong or Breakout in C with raylib"
+  number: 7
+  title: Pong or Breakout in C with raylib, fixed timestep
   cadence: monthly
-  tracks: [gamedev, languages]
+  tracks:
+    - gamedev
+    - languages
   phaseId: y1-p1
   estHours: 20
   subject: gamedev
   brief: "Your first complete program in C that is not an exercise: a classic arcade game on raylib with a proper build."
   acceptance:
-    - "Complete game with score, lives, sound and a pause screen"
-    - "Builds with make or CMake on a clean machine; no warnings with -Wall -Wextra"
-    - "No dynamic allocation leaks (checked with a sanitizer)"
+    - Complete game with score, lives, sound and a pause screen
+    - Builds with make or CMake on a clean machine; no warnings with -Wall -Wextra
+    - No dynamic allocation leaks (checked with a sanitizer)
+    - "A fixed-timestep game loop: the simulation runs the same at any frame rate"
   source: "build-your-own-x: Game"
   sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-game
-  skills: ["C", "raylib", "Makefiles"]
-
+  skills:
+    - C
+    - raylib
+    - Makefiles
 - id: m07
-  number: 7
-  title: "Build your own shell in C"
+  number: 8
+  title: "Build your own shell in C: pipes, redirects, jobs"
   cadence: monthly
-  tracks: [systems, languages]
+  tracks:
+    - systems
+    - languages
   phaseId: y1-p1
   estHours: 30
   subject: c-cpp
   brief: "A Unix shell: parsing, fork and exec, pipes, redirection, built-ins, job control and signals."
   acceptance:
-    - "Runs pipelines of any length with input and output redirection"
-    - "Built-ins cd, exit, export, jobs, fg and bg; Ctrl-C and Ctrl-Z behave as in bash"
-    - "A test script that compares your shell's output with bash on 30 command lines"
+    - Runs pipelines of any length with input and output redirection
+    - Built-ins cd, exit, export, jobs, fg and bg; Ctrl-C and Ctrl-Z behave as in bash
+    - A test script that compares your shell's output with bash on 30 command lines
   source: "build-your-own-x: Shell"
   sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-shell
-  skills: ["processes", "file descriptors", "signals", "parsing"]
-
-- id: m08
-  number: 8
-  title: "Image classifier fine-tune with a Gradio demo on Hugging Face Spaces"
-  cadence: monthly
-  tracks: [ai]
-  phaseId: y1-p1
-  estHours: 20
-  subject: deep-learning
-  brief: "Collect a small dataset of your own, fine-tune a pretrained vision model on it, and publish a demo anyone can try."
-  acceptance:
-    - "A dataset you gathered and cleaned yourself, with a held-out test split"
-    - "Fine-tuned model with a confusion matrix and the failure cases shown"
-    - "A public Gradio app on Hugging Face Spaces"
-  source: "fast.ai, lessons 1-2"
-  skills: ["transfer learning", "data cleaning", "Gradio"]
-
+  skills:
+    - processes
+    - file descriptors
+    - signals
+    - parsing
 - id: m09
   number: 9
-  title: "Build your own Git in Python"
+  title: Build your own Git in Python
   cadence: monthly
-  tracks: [swe]
+  tracks:
+    - swe
   phaseId: y1-p1
   estHours: 25
   subject: python
   brief: "Enough of Git to commit to a real repository: the object store, the index, trees, commits and refs."
   acceptance:
-    - "init, hash-object, cat-file, add, write-tree, commit, log and checkout"
+    - init, hash-object, cat-file, add, write-tree, commit, log and checkout
     - "Objects are byte-compatible: real git can read a repository your tool wrote"
-    - "Tests that round-trip through real git"
+    - Tests that round-trip through real git
   source: "build-your-own-x: Git"
   sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-git
-  skills: ["content-addressed storage", "zlib", "file formats"]
-
-- id: m10
+  skills:
+    - content-addressed storage
+    - zlib
+    - file formats
+- id: m08
   number: 10
-  title: "First LearnOpenGL scene: textured, lit, camera-controlled"
+  title: Image classifier fine-tune with a Gradio demo on Hugging Face Spaces
   cadence: monthly
-  tracks: [graphics]
+  tracks:
+    - ai
+  phaseId: y1-p1
+  estHours: 20
+  subject: deep-learning
+  brief: Collect a small dataset of your own, fine-tune a pretrained vision model on it, and publish a demo anyone can try.
+  acceptance:
+    - A dataset you gathered and cleaned yourself, with a held-out test split
+    - Fine-tuned model with a confusion matrix and the failure cases shown
+    - A public Gradio app on Hugging Face Spaces
+  source: fast.ai, lessons 1-2
+  skills:
+    - transfer learning
+    - data cleaning
+    - Gradio
+- id: m11
+  number: 11
+  title: nanoGPT reproduction on a small dataset
+  cadence: monthly
+  tracks:
+    - ai
+  phaseId: y1-p1
+  estHours: 35
+  subject: deep-learning
+  brief: Write a GPT from an empty file, following Karpathy's video but typing every line yourself, and train it on a corpus you chose.
+  acceptance:
+    - Model, training loop and sampling code written by you in PyTorch
+    - Trained on a dataset of your choice; validation loss curve and samples at several checkpoints
+    - One ablation (context length, depth or width) with its effect measured
+  source: "Karpathy: Let's build GPT"
+  skills:
+    - transformers
+    - PyTorch
+    - training loops
+- cadence: monthly
+  id: m-agent-mcp
+  number: 12
+  title: Multi-tool agent with an MCP server, evals and tracing
+  tracks:
+    - ai
+  phaseId: y1-p1
+  estHours: 35
+  subject: deep-learning
+  brief: An agent that does a real task for you (research a topic, triage your notes, plan a study week) with tools you wrote, one of them served by your own MCP server, measured with an eval set and traced end to end.
+  acceptance:
+    - The agent loop is written by hand, with at least three tools, one served by an MCP server you wrote
+    - An eval set of at least 25 tasks scored with Ragas or DeepEval, with the scores in the README
+    - "Every run traced in LangFuse or OpenLLMetry: prompts, tool calls, latency and cost"
+    - "Guardrails: tool permissions and a refusal path for prompt injection in retrieved text, with a test for each"
+  skills:
+    - agent loop
+    - tool calling
+    - MCP
+    - evals
+    - tracing
+  covers:
+    - ai-agents/agent-loop
+    - ai-agents/implementing-the-agent-loop
+    - ai-agents/tool-definition
+    - ai-agents/mcp-servers
+    - ai-agents/creating-mcp-servers
+    - ai-agents/mcp-client
+    - ai-agents/ragas
+    - ai-agents/deepeval
+    - ai-agents/langfuse
+    - ai-agents/structured-logging-and-tracing
+    - ai-agents/metrics-to-track
+    - ai-agents/prompt-injection-jailbreaks
+    - ai-agents/tool-sandboxing-permissioning
+- id: m10
+  number: 13
+  title: First lit, textured OpenGL scene with a camera
+  cadence: monthly
+  tracks:
+    - graphics
   phaseId: y1-p1
   estHours: 30
   subject: graphics
   brief: "The first scene that is yours rather than the tutorial's: several textured objects under Phong lighting with a fly camera."
   acceptance:
-    - "Own shader, mesh and camera classes; nothing copy-pasted wholesale"
-    - "Directional, point and spot lights with material maps"
-    - "Runs at the display's refresh rate; a screenshot and a short clip in the README"
+    - Own shader, mesh and camera classes; nothing copy-pasted wholesale
+    - Directional, point and spot lights with material maps
+    - Runs at the display's refresh rate; a screenshot and a short clip in the README
   source: "LearnOpenGL: Getting started and Lighting"
   sourceUrl: https://learnopengl.com/
-  skills: ["OpenGL", "GLSL", "linear algebra in practice"]
-
-- id: m11
-  number: 11
-  title: "nanoGPT reproduction on a small dataset"
-  cadence: monthly
-  tracks: [ai]
-  phaseId: y1-p1
-  estHours: 35
-  subject: deep-learning
-  brief: "Write a GPT from an empty file, following Karpathy's video but typing every line yourself, and train it on a corpus you chose."
-  acceptance:
-    - "Model, training loop and sampling code written by you in PyTorch"
-    - "Trained on a dataset of your choice; validation loss curve and samples at several checkpoints"
-    - "One ablation (context length, depth or width) with its effect measured"
-  source: "Karpathy: Let's build GPT"
-  skills: ["transformers", "PyTorch", "training loops"]
-
-# ------------------------------------------------------------ Y2 Systems + rendering
+  skills:
+    - OpenGL
+    - GLSL
+    - linear algebra in practice
 - id: m12
-  number: 12
-  title: "Software rasterizer in C++"
+  number: 14
+  title: Software rasterizer in C++ (tinyrenderer)
   cadence: monthly
-  tracks: [graphics, languages]
-  phaseId: y2
+  tracks:
+    - graphics
+    - languages
+  phaseId: y1-p1
   estHours: 35
   subject: graphics
   brief: "Triangles to pixels on the CPU: no graphics API, just a framebuffer you write to an image or a window."
   acceptance:
-    - "Loads an OBJ model; perspective-correct texturing; z-buffer; back-face culling"
-    - "Programmable vertex and fragment stages written as C++ callables"
-    - "Renders a textured, lit model at a measured frame rate"
+    - Loads an OBJ model; perspective-correct texturing; z-buffer; back-face culling
+    - Programmable vertex and fragment stages written as C++ callables
+    - Renders a textured, lit model at a measured frame rate
   source: "build-your-own-x: 3D Renderer (tinyrenderer)"
   sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-3d-renderer
-  skills: ["rasterization", "barycentric coordinates", "C++"]
+  skills:
+    - rasterization
+    - barycentric coordinates
+    - C++
 
-- id: m13
-  number: 13
-  title: "Path tracer with a BVH"
-  cadence: monthly
-  tracks: [graphics]
-  phaseId: y2
-  estHours: 35
-  subject: graphics
-  brief: "Take the Ray Tracing in One Weekend renderer further: a bounding volume hierarchy, importance sampling, triangle meshes and multithreading."
-  acceptance:
-    - "BVH with a measured speed-up over brute force on a mesh of 100k triangles or more"
-    - "Diffuse, metal, dielectric and emissive materials; a Cornell box that converges"
-    - "Multithreaded tiles; render times reported"
-  source: "Ray Tracing in One Weekend series"
-  sourceUrl: https://raytracing.github.io/
-  skills: ["Monte Carlo integration", "acceleration structures", "multithreading"]
-
+# ------------------------------------------------------------ Y2 Building: systems (projects 15-22)
 - id: m14
-  number: 14
-  title: "malloc and a cache simulator (CS:APP labs, written up)"
+  number: 15
+  title: CS:APP malloc, shell and proxy labs, written up
   cadence: monthly
-  tracks: [systems]
+  tracks:
+    - systems
   phaseId: y2
   estHours: 35
   subject: linux-os
   brief: "The two CS:APP labs that change how you see a program: a dynamic memory allocator and a cache simulator, each with a write-up of the design decisions."
   acceptance:
-    - "Allocator with an explicit or segregated free list, passing the lab's traces with a utilisation and throughput score you report"
-    - "Cache simulator matching the reference output on all traces, and a matrix transpose tuned for it"
-    - "A write-up explaining the design so that someone who has not done the lab can follow"
+    - Allocator with an explicit or segregated free list, passing the lab's traces with a utilisation and throughput score you report
+    - Cache simulator matching the reference output on all traces, and a matrix transpose tuned for it
+    - A write-up explaining the design so that someone who has not done the lab can follow
   source: "CS:APP labs; build-your-own-x: Memory Allocator"
   sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-memory-allocator
-  skills: ["memory layout", "caches", "performance measurement"]
-
-- id: m15
-  number: 15
-  title: "2D rigid-body engine with SAT collision and a sandbox"
-  cadence: monthly
-  tracks: [simulation]
-  phaseId: y2
-  estHours: 40
-  subject: simulation
-  brief: "A 2D physics engine of your own: convex polygons and circles, separating-axis collision, a sequential-impulse solver, and a sandbox to throw things around in."
-  acceptance:
-    - "Stable stacking of ten boxes; friction and restitution"
-    - "Broadphase (grid or sweep-and-prune), SAT narrowphase with contact manifolds, warm starting"
-    - "Joints: at least distance and revolute"
-    - "An interactive sandbox, and a write-up of the solver"
-  source: "build-your-own-x: Physics Engine"
-  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-physics-engine
-  skills: ["collision detection", "constraint solving", "numerical stability"]
-
+  skills:
+    - memory layout
+    - caches
+    - performance measurement
 - id: m16
   number: 16
-  title: "xv6 labs write-up"
+  title: xv6 labs write-up
   cadence: monthly
-  tracks: [systems]
+  tracks:
+    - systems
   phaseId: y2
   estHours: 30
   subject: linux-os
   brief: "Turn the MIT 6.1810 labs into something a reader can learn from: what each lab asked, how xv6 does it, what you changed and why."
   acceptance:
-    - "One article per lab completed, with the key diffs explained"
-    - "A diagram of xv6's address space and of the trap path, drawn by you"
-    - "Published (blog or repository) without posting complete lab solutions"
-  source: "MIT 6.1810 labs"
-  skills: ["kernel internals", "technical writing"]
-
+    - One article per lab completed, with the key diffs explained
+    - A diagram of xv6's address space and of the trap path, drawn by you
+    - Published (blog or repository) without posting complete lab solutions
+  source: MIT 6.1810 labs
+  skills:
+    - kernel internals
+    - technical writing
 - id: m17
   number: 17
-  title: "Buffer pool and B+tree (CMU 15-445 labs)"
+  title: Buffer pool and B+tree (CMU 15-445 labs)
   cadence: monthly
-  tracks: [systems]
+  tracks:
+    - systems
   phaseId: y2
   estHours: 40
   subject: databases
   brief: "The first two BusTub projects: a buffer pool manager with a replacement policy, and a concurrent B+tree index."
   acceptance:
-    - "Buffer pool passes the course's local tests, including the concurrent ones"
-    - "B+tree with insert, delete, iterators and latch crabbing"
-    - "A benchmark of your own and a short design note (the course asks that solutions stay private)"
-  source: "CMU 15-445 projects"
-  skills: ["C++", "concurrency", "storage engines"]
-
-- id: m18
+    - Buffer pool passes the course's local tests, including the concurrent ones
+    - B+tree with insert, delete, iterators and latch crabbing
+    - A benchmark of your own and a short design note (the course asks that solutions stay private)
+  source: CMU 15-445 projects
+  skills:
+    - C++
+    - concurrency
+    - storage engines
+- cadence: monthly
+  id: m-cs144-tcp
   number: 18
-  title: "OpenGL mini-engine: model loading, shadows, PBR"
-  cadence: monthly
-  tracks: [graphics]
+  title: TCP implementation (CS144 labs)
+  tracks:
+    - systems
   phaseId: y2
   estHours: 40
-  subject: graphics
-  brief: "Everything LearnOpenGL taught, reorganised into an engine: a scene description, a renderer with passes, and assets loaded from disk."
+  subject: networking
+  brief: "Stanford CS144's labs end to end: a byte stream, a reassembler, a TCP receiver and sender, then the network interface and router, until your TCP talks to real servers."
   acceptance:
-    - "glTF or OBJ loading through a library, with a scene file describing what to draw"
-    - "Shadow mapping, HDR with tone mapping, and a PBR metallic-roughness pipeline with image-based lighting"
-    - "A frame debugger capture explained pass by pass in the README"
-  source: "LearnOpenGL: Advanced Lighting and PBR"
-  sourceUrl: https://learnopengl.com/
-  skills: ["render passes", "PBR", "engine structure"]
-
+    - All CS144 checkpoints pass their test suites
+    - Your stack fetches a web page from a real server over your own TCP
+    - Retransmission, flow control and the receive window explained in a write-up, with a captured trace
+    - Public write-up (lab code kept private if the course asks)
+  source: Stanford CS144
+  skills:
+    - TCP
+    - C++
+    - networking
 - id: m19
   number: 19
-  title: "Build your own Redis in Rust"
+  title: Build your own Redis in Rust
   cadence: monthly
-  tracks: [systems, languages]
+  tracks:
+    - systems
+    - languages
   phaseId: y2
   estHours: 35
   subject: rust-go
   brief: "A Redis-compatible server in Rust: the RESP protocol, an async event loop, the core data types, expiry and persistence."
   acceptance:
-    - "redis-cli and redis-benchmark work against it for strings, lists, hashes and sets"
-    - "Key expiry, and either RDB snapshots or an append-only file"
-    - "Throughput compared with real Redis on the same machine"
+    - redis-cli and redis-benchmark work against it for strings, lists, hashes and sets
+    - Key expiry, and either RDB snapshots or an append-only file
+    - Throughput compared with real Redis on the same machine
   source: "build-your-own-x: Database"
   sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-database
-  skills: ["Rust", "async I/O", "protocol design"]
-
+  skills:
+    - Rust
+    - async I/O
+    - protocol design
 - id: m20
   number: 20
-  title: "LSM-tree key-value store with a write-ahead log"
+  title: LSM-tree key-value store with a write-ahead log
   cadence: monthly
-  tracks: [systems]
+  tracks:
+    - systems
   phaseId: y2
   estHours: 40
   subject: databases
   brief: "A storage engine from the ground up: memtable, WAL, SSTables, compaction and crash recovery."
   acceptance:
-    - "Put, get, delete and range scan; data survives kill -9 at any point (tested)"
-    - "Levelled or tiered compaction; Bloom filters on SSTables"
-    - "Write and read amplification measured and explained"
-  source: "Designing Data-Intensive Applications, chapter 3"
-  skills: ["storage engines", "crash consistency", "benchmarking"]
-
-- id: m21
+    - Put, get, delete and range scan; data survives kill -9 at any point (tested)
+    - Levelled or tiered compaction; Bloom filters on SSTables
+    - Write and read amplification measured and explained
+  source: Designing Data-Intensive Applications, chapter 3
+  skills:
+    - storage engines
+    - crash consistency
+    - benchmarking
+- cadence: monthly
+  id: m-db-from-scratch
   number: 21
-  title: "HTTP server from raw sockets"
-  cadence: monthly
-  tracks: [systems]
+  title: A sqlite-style database from scratch
+  tracks:
+    - systems
   phaseId: y2
-  estHours: 25
-  subject: networking
-  brief: "HTTP/1.1 on top of nothing but the sockets API: parsing, keep-alive, static files, and a concurrency model you chose on purpose."
+  estHours: 40
+  subject: databases
+  brief: "Follow 'Let's Build a Simple Database' and keep going: a REPL, a pager, an on-disk B-tree and a small SQL subset, with your own tests."
   acceptance:
-    - "Serves static files and a small dynamic route; keep-alive and chunked responses"
-    - "An event loop (epoll or kqueue) or a thread pool, with the choice justified by a load test"
-    - "Survives malformed requests from a fuzzer without crashing"
-  source: "build-your-own-x: Web Server"
-  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-web-server
-  skills: ["sockets", "HTTP", "event loops"]
-
-- id: m22
+    - Persists to a single file through a pager with fixed-size pages
+    - A B-tree with leaf and internal node splits, checked by randomised tests
+    - CREATE TABLE, INSERT and SELECT with WHERE on a small schema
+    - Inserts and lookups benchmarked against SQLite on the same data, with the numbers in the README
+  source: "cstack: Let's Build a Simple Database"
+  skills:
+    - B-trees
+    - paging
+    - C
+    - parsing
+- cadence: monthly
+  id: m-k8s-service
   number: 22
-  title: "First Vulkan triangle, then a model viewer"
+  title: A service on Kubernetes with CI/CD, Terraform, Prometheus and Grafana
+  tracks:
+    - systems
+    - swe
+  phaseId: y2
+  estHours: 35
+  subject: containers-iac
+  brief: "Take one of your services (the inference server works well) to production standards: infrastructure in Terraform, a CI/CD pipeline, a Kubernetes deployment with health checks, metrics and dashboards, and a deploy that drops no requests."
+  acceptance:
+    - Cluster and supporting infrastructure created from Terraform, destroyed and recreated from scratch once
+    - CI/CD builds, tests and deploys on every merge to main
+    - Prometheus scrapes the service; a Grafana dashboard shows latency percentiles, errors and saturation
+    - A rolling deploy under load with zero failed requests, shown by a load-test report
+  skills:
+    - Kubernetes
+    - Terraform
+    - CI/CD
+    - Prometheus
+    - Grafana
+  covers:
+    - inference-engineering/containerization
+    - inference-engineering/kubernetes
+    - inference-engineering/zero-downtime-deplo
+    - inference-engineering/observability
+    - software-architect/infrastructure-as-code
+    - software-architect/ci-cd
+    - software-architect/containers
+
+# ------------------------------------------------------------ Y2 Building: inference (projects 23-30)
+- id: m29
+  number: 23
+  title: "CS336 assignments 1-2: BPE tokenizer, transformer and a training run"
   cadence: monthly
-  tracks: [graphics]
+  tracks:
+    - ai
+  phaseId: y2
+  estHours: 40
+  subject: deep-learning
+  brief: "Stanford CS336's first two assignments: a byte-pair-encoding tokenizer, a transformer language model built from its parts, and a real training run on a small corpus."
+  acceptance:
+    - A byte-pair-encoding tokenizer trained on your corpus, tested against a reference implementation
+    - A transformer language model written from components (attention, MLP, norms, embeddings), no high-level model classes
+    - A training run with logged loss curves, and generated samples in the README
+    - Passes the public CS336 assignment tests
+  source: Stanford CS336, assignment 1
+  skills:
+    - tokenization
+    - transformer internals
+    - profiling
+  covers:
+    - inference-engineering/transformer-blocks
+    - inference-engineering/attention-mechanism
+    - ai-agents/tokenization
+- cadence: monthly
+  id: m-inference-server
+  number: 24
+  title: "Inference server from scratch in PyTorch: KV cache, continuous batching, streaming"
+  tracks:
+    - ai
+    - systems
+  phaseId: y2
+  estHours: 40
+  subject: deep-learning
+  brief: "A small model served by code you wrote: a KV cache, a scheduler that batches requests continuously as they arrive and finish, and token streaming to clients."
+  acceptance:
+    - Generates with a KV cache, with the speed-up over recomputing attention measured
+    - "Continuous batching: new requests join running batches; throughput measured against static batching"
+    - Streams tokens over HTTP and reports time to first token and inter-token latency
+    - A load test at three concurrency levels with p50/p99 latency and tokens per second in the README
+  skills:
+    - PyTorch
+    - KV cache
+    - scheduling
+    - streaming
+  covers:
+    - inference-engineering/kv-cache
+    - inference-engineering/continuous-batching
+    - inference-engineering/prefill-and-decode-phases
+    - inference-engineering/time-to-first-token
+    - inference-engineering/inter-token-latency
+    - inference-engineering/tokens-per-second
+    - inference-engineering/request-queueing
+    - inference-engineering/latency-percentiles
+- cadence: monthly
+  id: m-engine-benchmark
+  number: 25
+  title: One 7B model benchmarked across llama.cpp, vLLM and TensorRT-LLM
+  tracks:
+    - ai
+    - systems
+  phaseId: y2
+  estHours: 30
+  subject: deep-learning
+  brief: "Serve the same 7B model three ways and measure them honestly: time to first token, inter-token latency, tokens per second and p99 under load, and cost per million tokens on the hardware you used."
+  acceptance:
+    - The same model and prompts served by llama.cpp, vLLM and TensorRT-LLM
+    - TTFT, ITL, TPS and p50/p99 at several concurrency levels, measured with one benchmark tool
+    - Cost per million tokens worked out from the hardware price and the measured throughput
+    - A written comparison with charts and a recommendation for two different workloads
+  skills:
+    - vLLM
+    - TensorRT-LLM
+    - llama.cpp
+    - benchmarking
+  covers:
+    - inference-engineering/vllm
+    - inference-engineering/tensorrt-llm
+    - inference-engineering/performance-benchmarking
+    - inference-engineering/locust
+    - inference-engineering/latency-vs-throughput
+    - inference-engineering/cost-estimation
+    - inference-engineering/end-to-end-metrics
+- cadence: monthly
+  id: m-quant-study
+  number: 26
+  title: "GPTQ and AWQ quantization study: quality against speed"
+  tracks:
+    - ai
+  phaseId: y2
+  estHours: 30
+  subject: deep-learning
+  brief: "Quantize one model with GPTQ and AWQ at several bit widths and measure what you lose and what you gain: perplexity and task evals against latency, memory and throughput."
+  acceptance:
+    - The same model quantized with GPTQ and AWQ at 8 and 4 bits
+    - Perplexity on a held-out set and at least two task evals for every variant
+    - Memory, latency and throughput for every variant on the same hardware
+    - A write-up with a quality-against-speed chart and when each method is worth it
+  skills:
+    - quantization
+    - evaluation
+    - benchmarking
+  covers:
+    - inference-engineering/post-training-quantization
+    - inference-engineering/quantization-approaches
+    - inference-engineering/measuring-quality-impact
+- cadence: monthly
+  id: m-spec-decoding
+  number: 27
+  title: Speculative decoding from scratch, compared with EAGLE
+  tracks:
+    - ai
+  phaseId: y2
+  estHours: 30
+  subject: deep-learning
+  brief: Implement draft-target speculative decoding yourself, measure acceptance rate and speed-up, then compare with an EAGLE implementation on the same models.
+  acceptance:
+    - Draft-target speculative decoding written by you, reproducing the target model's distribution (tested)
+    - Acceptance rate and speed-up reported across draft sizes and prompt types
+    - The same measurements for an EAGLE implementation
+    - A write-up on when speculation helps and when it does not
+  skills:
+    - speculative decoding
+    - sampling
+    - PyTorch
+  covers:
+    - inference-engineering/draft-target-decoding
+    - inference-engineering/eagle
+    - inference-engineering/speculation-algorithms
+- id: m33
+  number: 28
+  title: "CUDA GEMM: naive, tiled, tensor cores, with a roofline plot"
+  cadence: monthly
+  tracks:
+    - ai
+    - graphics
+  phaseId: y2
+  estHours: 35
+  subject: gpu
+  brief: Matrix multiply three ways in CUDA, each correct against cuBLAS, placed on a roofline for your GPU and profiled until you can say what limits each one.
+  acceptance:
+    - Naive, shared-memory tiled and tensor-core GEMM kernels, each correct against cuBLAS
+    - GFLOP/s for every kernel at several sizes, against cuBLAS
+    - A roofline plot for your GPU with every kernel placed on it
+    - Profiled in Nsight Compute, with the bottleneck of each kernel explained
+  source: Programming Massively Parallel Processors; GPU MODE lectures
+  skills:
+    - CUDA
+    - memory hierarchy
+    - performance analysis
+  covers:
+    - inference-engineering/cuda
+    - inference-engineering/writing-custom-kernels
+    - inference-engineering/roofline-model
+    - inference-engineering/arithmetic-intensity
+    - inference-engineering/ops-byte-ratio
+    - inference-engineering/profiling-performance
+- cadence: monthly
+  id: m-triton-attention
+  number: 29
+  title: Fused attention kernel in Triton, benchmarked against FlashAttention
+  tracks:
+    - ai
+    - systems
+  phaseId: y2
+  estHours: 30
+  subject: gpu
+  brief: Write a fused attention forward pass in Triton, check it against PyTorch, and benchmark it against FlashAttention across sequence lengths.
+  acceptance:
+    - A fused attention kernel in Triton matching PyTorch to tolerance
+    - Benchmarked against FlashAttention and plain PyTorch attention across sequence lengths and head sizes
+    - Memory traffic and arithmetic intensity worked out for each implementation
+    - A write-up on tiling, online softmax and where your kernel loses time
+  skills:
+    - Triton
+    - attention
+    - GPU memory hierarchy
+  covers:
+    - inference-engineering/flashattention
+    - inference-engineering/kernel-selection-and-fusion
+    - inference-engineering/attention-variants
+- cadence: monthly
+  id: m-vllm-explainer
+  number: 30
+  title: Read vLLM's scheduler and PagedAttention source, and write the explainer
+  tracks:
+    - ai
+    - systems
+  phaseId: y2
+  estHours: 20
+  subject: deep-learning
+  brief: Read how vLLM schedules requests and pages the KV cache, trace one request through the code, and write the explainer you wish you had found.
+  acceptance:
+    - One request traced from the API entry point through the scheduler to the kernels, with file and function references
+    - PagedAttention's block tables and copy-on-write explained with your own diagrams
+    - Preemption and swapping shown with an experiment
+    - Published as a blog post or a long README
+  skills:
+    - reading large codebases
+    - vLLM
+    - technical writing
+  covers:
+    - inference-engineering/pagedattention
+    - inference-engineering/kv-cache-storage
+
+# ------------------------------------------------------------ Y2 Building: graphics (projects 31-34)
+- id: m13
+  number: 31
+  title: Path tracer with a BVH
+  cadence: monthly
+  tracks:
+    - graphics
+  phaseId: y2
+  estHours: 35
+  subject: graphics
+  brief: "Take the Ray Tracing in One Weekend renderer further: a bounding volume hierarchy, importance sampling, triangle meshes and multithreading."
+  acceptance:
+    - BVH with a measured speed-up over brute force on a mesh of 100k triangles or more
+    - Diffuse, metal, dielectric and emissive materials; a Cornell box that converges
+    - Multithreaded tiles; render times reported
+  source: Ray Tracing in One Weekend series
+  sourceUrl: https://raytracing.github.io/
+  skills:
+    - Monte Carlo integration
+    - acceleration structures
+    - multithreading
+- id: m15
+  number: 32
+  title: "2D rigid-body engine: SAT, impulses, joints and a sandbox"
+  cadence: monthly
+  tracks:
+    - simulation
+  phaseId: y2
+  estHours: 40
+  subject: simulation
+  brief: "A 2D physics engine of your own: convex polygons and circles, separating-axis collision, a sequential-impulse solver, and a sandbox to throw things around in."
+  acceptance:
+    - Stable stacking of ten boxes; friction and restitution
+    - Broadphase (grid or sweep-and-prune), SAT narrowphase with contact manifolds, warm starting
+    - "Joints: at least distance and revolute"
+    - An interactive sandbox, and a write-up of the solver
+  source: "build-your-own-x: Physics Engine"
+  sourceUrl: https://github.com/codecrafters-io/build-your-own-x#build-your-own-physics-engine
+  skills:
+    - collision detection
+    - constraint solving
+    - numerical stability
+- id: m18
+  number: 33
+  title: "OpenGL mini-engine: deferred shading, shadows, PBR, glTF loading"
+  cadence: monthly
+  tracks:
+    - graphics
   phaseId: y2
   estHours: 40
   subject: graphics
-  brief: "From the thousand-line triangle to something useful: a viewer that loads a textured model with depth, mipmaps and a resizable window."
+  brief: "Everything LearnOpenGL taught, reorganised into an engine: a scene description, a renderer with passes, and assets loaded from disk."
   acceptance:
-    - "Validation layers clean; swapchain recreation on resize"
-    - "Textured, depth-tested model with a camera"
-    - "A diagram of your frame: command buffers, synchronisation, descriptor sets"
-  source: "vulkan-tutorial.com"
-  sourceUrl: https://vulkan-tutorial.com/
-  skills: ["Vulkan", "GPU synchronisation", "memory management"]
-
-- id: m23
-  number: 23
-  title: "Design doc and implementation: a rate limiter and a job queue"
+    - glTF or OBJ loading through a library, with a scene file describing what to draw
+    - Shadow mapping, HDR with tone mapping, and a PBR metallic-roughness pipeline with image-based lighting
+    - A frame debugger capture explained pass by pass in the README
+  source: "LearnOpenGL: Advanced Lighting and PBR"
+  sourceUrl: https://learnopengl.com/
+  skills:
+    - render passes
+    - PBR
+    - engine structure
+- id: m22
+  number: 34
+  title: Vulkan model viewer, then a compute particle system (one million particles)
   cadence: monthly
-  tracks: [systems, career]
+  tracks:
+    - graphics
   phaseId: y2
-  estHours: 35
-  subject: system-design
-  brief: "Two small backend components, each started as a written design document: requirements, alternatives, data model, failure modes. Then built and measured against the document. They are the first two of the five design docs in the credential map."
+  estHours: 40
+  subject: graphics
+  brief: From the first triangle to a model viewer with a camera and textures, then a compute-shader particle system that keeps a million particles at interactive frame rates.
   acceptance:
-    - "Two design documents reviewed (by a person or a forum) before any code was written"
-    - "Rate limiter: token bucket or sliding window, correct across several instances"
-    - "Job queue: at-least-once delivery, retries with backoff, a dead-letter queue"
-    - "Load-test results compared with what the design predicted"
-  skills: ["design documents", "Redis", "idempotency", "load testing"]
+    - "A Vulkan model viewer: loads a glTF model, textures, a camera, resizable window, validation layers clean"
+    - A compute-shader particle system with one million particles above 60 frames a second on your GPU
+    - Frame time measured with and without the particle pass, with the numbers in the README
+    - Public repository with a short video
+  source: vulkan-tutorial.com
+  sourceUrl: https://vulkan-tutorial.com/
+  skills:
+    - Vulkan
+    - GPU synchronisation
+    - memory management
 
-# ------------------------------------------------------------ Y3 Scalable systems + AI engineering + engines
+# ------------------------------------------------------------ Y2 Research starts (projects 35-36): the research cadence, see the brief
+- cadence: research
+  id: m-reproductions
+  number: 35
+  title: "Three reproductions: Attention Is All You Need, a FlashAttention microbenchmark, DDPM on CIFAR-10"
+  tracks:
+    - ai
+  phaseId: y2
+  estHours: 40
+  subject: research
+  brief: "Reproduce the headline result of three papers from the queue, at small scale: a translation transformer, the FlashAttention speed-up, and DDPM samples on CIFAR-10."
+  acceptance:
+    - Attention Is All You Need trained on a small translation set, with BLEU against a baseline
+    - FlashAttention's memory and speed advantage reproduced in a microbenchmark
+    - DDPM trained on CIFAR-10, with samples and FID reported
+    - "Each reproduction written up: what matched, what did not, and why"
+  skills:
+    - reproducing papers
+    - experiment design
+    - PyTorch
+- cadence: research
+  id: m-research-report-1
+  number: 36
+  title: The first quarterly research report
+  tracks:
+    - ai
+  phaseId: y2
+  estHours: 30
+  subject: research
+  brief: Pick one research question (seeds are in the research cards), state a hypothesis, run the experiment, and write a two-page report. Negative results count.
+  acceptance:
+    - A hypothesis and a prediction written down before the experiment
+    - An experiment that could prove the hypothesis wrong, with code and data in the repository
+    - A two-page report in research/ in the data repo, negative results included
+    - Read and commented on by at least one person you asked
+  skills:
+    - hypotheses
+    - experiments
+    - scientific writing
+
+# ------------------------------------------------------------ Y3 Scale (projects 37-46; 46 is the inference capstone, in capstones.yaml)
 - id: m24
-  number: 24
-  title: "Raft (MIT 6.5840 labs)"
+  number: 37
+  title: Raft (MIT 6.5840 labs)
   cadence: monthly
-  tracks: [systems]
+  tracks:
+    - systems
   phaseId: y3
   estHours: 40
   subject: system-design
   brief: "The Raft labs: leader election, log replication, persistence and snapshots, passing the course's tests reliably."
   acceptance:
-    - "All Raft lab tests pass 100 times in a row"
-    - "A write-up of the bugs that took longest to find (the course asks that code stay private)"
-  source: "MIT 6.5840 lab 3"
-  skills: ["consensus", "Go", "debugging distributed systems"]
-
+    - All Raft lab tests pass 100 times in a row
+    - A write-up of the bugs that took longest to find (the course asks that code stay private)
+  source: MIT 6.5840 lab 3
+  skills:
+    - consensus
+    - Go
+    - debugging distributed systems
 - id: m25
-  number: 25
-  title: "Sharded key-value store"
+  number: 38
+  title: Sharded, linearisable key-value store
   cadence: monthly
-  tracks: [systems]
+  tracks:
+    - systems
   phaseId: y3
   estHours: 40
   subject: system-design
   brief: "The last 6.5840 labs: a fault-tolerant key-value service on Raft, then sharded across replica groups with live reconfiguration."
   acceptance:
-    - "Linearizable KV service on your Raft, passing the lab tests"
-    - "Sharded KV with shard migration during reconfiguration, passing the lab tests"
-    - "A design note on how exactly-once semantics were achieved"
-  source: "MIT 6.5840 labs 4-5"
-  skills: ["linearizability", "sharding", "reconfiguration"]
-
+    - Linearizable KV service on your Raft, passing the lab tests
+    - Sharded KV with shard migration during reconfiguration, passing the lab tests
+    - A design note on how exactly-once semantics were achieved
+  source: MIT 6.5840 labs 4-5
+  skills:
+    - linearizability
+    - sharding
+    - reconfiguration
 - id: m26
-  number: 26
-  title: "URL shortener, then scale it"
+  number: 39
+  title: "URL shortener, then scale it: load test, cache, queue, shard, autoscale on Kubernetes"
   cadence: monthly
-  tracks: [systems]
+  tracks:
+    - systems
   phaseId: y3
   estHours: 40
   subject: containers-iac
   brief: "Start with the simplest thing that works. Then load test it, find the bottleneck, and fix it, again and again: cache, queue, shard, and finally deploy on Kubernetes. The case study is the deliverable."
   acceptance:
-    - "Baseline service with a load test and its saturation point"
-    - "Each scaling step (cache, async writes through a queue, sharded storage) with before and after numbers"
-    - "Deployed on Kubernetes with autoscaling, from manifests or Helm in the repository"
-    - "A written case study with the architecture diagrams at each stage"
-  skills: ["load testing", "caching", "Kubernetes", "capacity planning"]
-
-- id: m27
-  number: 27
-  title: "3D rigid bodies: broadphase, GJK/EPA and stacking"
-  cadence: monthly
-  tracks: [simulation]
-  phaseId: y3
-  estHours: 40
-  subject: simulation
-  brief: "The 2D engine's ideas in three dimensions: a dynamic BVH broadphase, GJK and EPA for convex shapes, contact manifolds that persist, and a solver that stacks."
-  acceptance:
-    - "GJK/EPA for boxes, spheres, capsules and convex hulls, with unit tests on known configurations"
-    - "Stable stack of ten boxes and a pyramid of fifty; sleeping bodies"
-    - "Debug drawing of contacts, normals and the BVH"
-  source: "Real-Time Collision Detection; Erin Catto's GDC talks"
-  skills: ["GJK and EPA", "inertia tensors", "contact persistence"]
-
+    - Baseline service with a load test and its saturation point
+    - Each scaling step (cache, async writes through a queue, sharded storage) with before and after numbers
+    - Deployed on Kubernetes with autoscaling, from manifests or Helm in the repository
+    - A written case study with the architecture diagrams at each stage
+  skills:
+    - load testing
+    - caching
+    - Kubernetes
+    - capacity planning
 - id: m28
-  number: 28
-  title: "Event pipeline with Kafka, stream processing and an observability stack"
+  number: 40
+  title: Event pipeline with Kafka, stream processing and an observability stack
   cadence: monthly
-  tracks: [systems]
+  tracks:
+    - systems
   phaseId: y3
   estHours: 40
   subject: data-engineering
   brief: "Events in, aggregates out: producers, a Kafka topic, a stream processor with windows, a sink, and dashboards that show it is healthy."
   acceptance:
-    - "Producers, partitioned topic, consumer group and a windowed aggregation with late-event handling"
-    - "Exactly-once or effectively-once output, demonstrated by killing a consumer mid-run"
-    - "Metrics, logs and traces (Prometheus, Grafana, OpenTelemetry) with one alert that fires when lag grows"
-  skills: ["Kafka", "stream processing", "observability"]
-
-- id: m29
-  number: 29
-  title: "Transformer language model from scratch, including the tokenizer"
-  cadence: monthly
-  tracks: [ai]
-  phaseId: y3
-  estHours: 40
-  subject: deep-learning
-  brief: "The Stanford CS336 spine: a byte-pair tokenizer, the model, the optimizer and the training loop, all yours, trained on a real corpus."
-  acceptance:
-    - "BPE tokenizer trained and tested against a reference implementation"
-    - "Transformer LM with your own AdamW and learning-rate schedule"
-    - "Trained to a reported perplexity; throughput and memory profiled"
-  source: "Stanford CS336, assignment 1"
-  skills: ["tokenization", "transformer internals", "profiling"]
-
-- id: m30
-  number: 30
-  title: "Vulkan compute particle system (one million particles)"
-  cadence: monthly
-  tracks: [graphics, simulation]
-  phaseId: y3
-  estHours: 35
-  subject: graphics
-  brief: "A million particles simulated in a compute shader and drawn without the data leaving the GPU."
-  acceptance:
-    - "Simulation and rendering share buffers; no per-frame readback"
-    - "One million particles at 60 fps or better on your GPU, with the frame time broken down"
-    - "Forces and a simple spatial interaction (a grid) in the compute pass"
-  source: "vkguide.dev compute chapters"
-  sourceUrl: https://vkguide.dev/
-  skills: ["compute shaders", "GPU buffers", "synchronisation"]
-
-- id: m31
-  number: 31
-  title: "LoRA fine-tune with an eval harness, served with vLLM or llama.cpp"
-  cadence: monthly
-  tracks: [ai]
-  phaseId: y3
-  estHours: 35
-  subject: deep-learning
-  brief: "Fine-tune an open model on a task you care about, prove it got better with an evaluation harness you wrote, and serve it."
-  acceptance:
-    - "A task-specific dataset with train, validation and test splits"
-    - "Eval harness comparing base, prompted and fine-tuned models on the same test set"
-    - "LoRA adapters merged or loaded at serve time; served with vLLM or llama.cpp with latency and throughput measured"
-  skills: ["PEFT", "evaluation design", "model serving"]
-
-- id: m32
-  number: 32
-  title: "Production ML service: CI/CD, monitoring, drift checks, infrastructure as code"
-  cadence: monthly
-  tracks: [ai, systems]
-  phaseId: y3
-  estHours: 40
-  subject: machine-learning
-  brief: "An ML model treated as a production system on AWS: reproducible training, automated deployment, monitoring of inputs and predictions, and all of the infrastructure in code."
-  acceptance:
-    - "Terraform (or CDK) creates the whole environment from nothing"
-    - "CI/CD pipeline: tests, image build, staged deploy, rollback"
-    - "Dashboards for latency, errors and data drift, with an alert on drift"
-    - "A runbook for the three most likely failures"
-  source: "MLOps Zoomcamp"
-  skills: ["Terraform", "CI/CD", "monitoring", "AWS"]
-
-- id: m33
-  number: 33
-  title: "CUDA kernels, benchmarked"
-  cadence: monthly
-  tracks: [ai, graphics]
+    - Producers, partitioned topic, consumer group and a windowed aggregation with late-event handling
+    - Exactly-once or effectively-once output, demonstrated by killing a consumer mid-run
+    - Metrics, logs and traces (Prometheus, Grafana, OpenTelemetry) with one alert that fires when lag grows
+  skills:
+    - Kafka
+    - stream processing
+    - observability
+- cadence: monthly
+  id: m-tensor-parallel
+  number: 41
+  title: Tensor-parallel inference across two GPUs, by hand (NCCL)
+  tracks:
+    - ai
+    - systems
   phaseId: y3
   estHours: 35
   subject: gpu
-  brief: "A repository of kernels, each written naively and then optimised, with the speed-up measured and explained."
+  brief: "Split a transformer's layers across two GPUs yourself: column- and row-parallel linear layers, NCCL all-reduce, and the numbers that show when it pays off."
   acceptance:
-    - "Matrix multiply (naive, tiled, with shared memory), reduction, prefix sum and a 2D convolution"
-    - "Each compared with cuBLAS or a library baseline; roofline position estimated"
-    - "One kernel exposed to PyTorch as a custom op"
-  source: "Programming Massively Parallel Processors; GPU MODE lectures"
-  skills: ["CUDA", "memory hierarchy", "performance analysis"]
+    - Column- and row-parallel linear layers with NCCL collectives, matching single-GPU outputs
+    - Latency and throughput on one and two GPUs at several batch sizes
+    - Communication time measured separately from compute
+    - A write-up on when tensor parallelism helps and when pipeline parallelism would be better
+  skills:
+    - NCCL
+    - distributed inference
+    - PyTorch
+  covers:
+    - inference-engineering/tensor-parallelism
+    - inference-engineering/pipeline-parallelism
+    - inference-engineering/multi-node-inference
+    - inference-engineering/instances-and-interconnects
+- cadence: monthly
+  id: m-disaggregated
+  number: 42
+  title: Disaggregated prefill and decode prototype with KV transfer
+  tracks:
+    - ai
+    - systems
+  phaseId: y3
+  estHours: 40
+  subject: deep-learning
+  brief: Run prefill and decode on separate workers and move the KV cache between them, then measure what that does to time to first token and inter-token latency under mixed load.
+  acceptance:
+    - Separate prefill and decode workers with the KV cache transferred between them
+    - TTFT and ITL under a mixed workload, against a colocated baseline
+    - Transfer cost measured and explained
+    - A write-up comparing your design with DistServe or Splitwise
+  skills:
+    - disaggregated serving
+    - KV transfer
+    - scheduling
+  covers:
+    - inference-engineering/disaggregation
+    - inference-engineering/kv-cache-storage
+    - inference-engineering/indep-component-scaling
+- cadence: monthly
+  id: m-cache-router
+  number: 43
+  title: Cache-aware router in Go or Rust in front of vLLM replicas, with autoscaling
+  tracks:
+    - systems
+    - ai
+  phaseId: y3
+  estHours: 40
+  subject: system-design
+  brief: A router that sends each request to the replica most likely to have its prefix cached, scales replicas with load, and proves it with a benchmark against round-robin.
+  acceptance:
+    - Prefix-cache-aware routing across at least three vLLM replicas
+    - Autoscaling on queue depth, including scale to zero for idle replicas
+    - Cache hit rate, TTFT and cost against round-robin routing under a realistic workload
+    - A design doc with the trade-offs you made
+  skills:
+    - Go or Rust
+    - load balancing
+    - autoscaling
+  covers:
+    - inference-engineering/cache-aware-routing
+    - inference-engineering/routing-and-load-balancing
+    - inference-engineering/autoscaling
+    - inference-engineering/scale-to-zero
+    - inference-engineering/cold-starts
+- cadence: monthly
+  id: m-streaming-inference
+  number: 44
+  title: Streaming VLM or Whisper inference service
+  tracks:
+    - ai
+  phaseId: y3
+  estHours: 30
+  subject: deep-learning
+  brief: "Serve a vision-language model or Whisper with streaming output, measured the way the modality needs: real-time factor for speech, time to first token for images."
+  acceptance:
+    - A streaming service for a vision-language model or for Whisper
+    - Real-time factor (speech) or TTFT and throughput (images), measured under load
+    - Batching that respects the modality, explained
+    - Deployed with a small demo client
+  skills:
+    - multimodal inference
+    - streaming
+  covers:
+    - inference-engineering/vision-language-models
+    - inference-engineering/auto-speech-recognition
+    - inference-engineering/real-time-factor
+- cadence: monthly
+  id: m-edge-inference
+  number: 45
+  title: "Edge inference: an int4 model on a laptop or phone, measured"
+  tracks:
+    - ai
+  phaseId: y3
+  estHours: 25
+  subject: deep-learning
+  brief: "Quantize a model to int4 and run it where there is no data centre: a laptop or a phone, with llama.cpp or ONNX Runtime, measured for speed, memory and battery."
+  acceptance:
+    - An int4 model running on a laptop or a phone with llama.cpp or ONNX Runtime
+    - Tokens per second, memory and energy (or battery drain) measured
+    - Quality checked against the full-precision model on a small eval
+    - A write-up on what fits on which device
+  skills:
+    - quantization
+    - llama.cpp
+    - ONNX Runtime
+  covers:
+    - inference-engineering/desktop-inference
+    - inference-engineering/mobile-inference
+    - inference-engineering/onnx-runtime
 
-- id: m34
-  number: 34
-  title: "XPBD cloth and soft bodies"
+# ------------------------------------------------------------ Y3 Generative AI and world models (projects 47-54; 53 is the research capstone, in capstones.yaml)
+- cadence: monthly
+  id: m-ddpm-scratch
+  number: 47
+  title: DDPM, DDIM and classifier-free guidance from scratch
+  tracks:
+    - ai
+  phaseId: y3
+  estHours: 35
+  subject: deep-learning
+  brief: "Build diffusion from the paper: the forward noising process, a U-Net denoiser, DDPM sampling, then DDIM and classifier-free guidance on top."
+  acceptance:
+    - DDPM training and sampling on a small image dataset, written from the paper
+    - DDIM sampling with the quality-against-steps trade-off measured
+    - Classifier-free guidance with samples across guidance scales
+    - FID or another sample-quality metric reported
+  skills:
+    - diffusion models
+    - U-Net
+    - PyTorch
+  covers:
+    - inference-engineering/diffusion-models
+    - inference-engineering/few-step-image-generation
+- cadence: monthly
+  id: m-latent-diffusion
+  number: 48
+  title: Latent diffusion on a small dataset with your own VAE
+  tracks:
+    - ai
+  phaseId: y3
+  estHours: 35
+  subject: deep-learning
+  brief: "Train a VAE, then a diffusion model in its latent space: the recipe behind Stable Diffusion, at a size your GPU can train."
+  acceptance:
+    - A VAE with reconstruction quality reported
+    - A diffusion model trained in the latent space, with samples
+    - Compute and quality compared with pixel-space diffusion from project 47
+    - Public repository with a write-up
+  skills:
+    - VAEs
+    - latent diffusion
+  covers:
+    - inference-engineering/image-generation-arch
+- cadence: monthly
+  id: m-flow-matching
+  number: 49
+  title: "Flow matching against DDPM at equal compute: a report"
+  tracks:
+    - ai
+  phaseId: y3
+  estHours: 30
+  subject: deep-learning
+  brief: Train flow matching and DDPM with the same network and the same compute budget, and report which wins, by how much, and why.
+  acceptance:
+    - Flow matching and DDPM trained with the same architecture and compute budget
+    - Sample quality against sampling steps for both
+    - Results repeated over seeds, with spread reported
+    - A short report in the style of a workshop paper
+  skills:
+    - flow matching
+    - experiment design
+- cadence: monthly
+  id: m-dit-engine
+  number: 50
+  title: A small DiT trained on frames rendered by your engine
+  tracks:
+    - ai
+    - graphics
+  phaseId: y3
+  estHours: 35
+  subject: deep-learning
+  brief: "Render a dataset with your own engine and train a small diffusion transformer on it: the first time your simulator feeds a generative model."
+  acceptance:
+    - A dataset of at least 50,000 frames rendered by your engine, with a script that regenerates it
+    - A diffusion transformer trained on it, with samples
+    - "Scaling: quality at two model sizes"
+    - Public repository with the dataset generator and a write-up
+  skills:
+    - DiT
+    - synthetic data
+    - transformers
+  covers:
+    - inference-engineering/video-generation-models
+- cadence: monthly
+  id: m-dreamerv3
+  number: 51
+  title: DreamerV3 reimplementation on a MuJoCo task
+  tracks:
+    - ai
+    - robotics
+  phaseId: y3
+  estHours: 40
+  subject: deep-learning
+  brief: "Reimplement DreamerV3: a world model that learns the dynamics of a MuJoCo task, and an agent that learns to act inside the model."
+  acceptance:
+    - World model, actor and critic written by you, following the paper
+    - Learning curves on a MuJoCo task against the published numbers
+    - Imagined rollouts visualised next to real ones
+    - A write-up of what you had to change to make it work
+  skills:
+    - model-based RL
+    - world models
+    - JAX or PyTorch
+  covers:
+    - game-developer/reinforcement-learning
+- cadence: monthly
+  id: m-gns
+  number: 52
+  title: GNS reimplementation on data from your 2D engine, with a generalisation study
+  tracks:
+    - ai
+    - simulation
+  phaseId: y3
+  estHours: 35
+  subject: simulation
+  brief: Train a graph-network simulator on trajectories from your own 2D physics engine, then test how far it generalises to scenes it never saw.
+  acceptance:
+    - Trajectories generated by your 2D engine, with the generator in the repository
+    - A graph-network simulator trained to predict them
+    - Rollout error against ground truth, in and out of the training distribution (more objects, new shapes)
+    - A report on where it breaks
+  skills:
+    - graph networks
+    - learned simulators
+- cadence: research
+  id: m-oss-prs
+  number: 54
+  title: Three merged pull requests to vLLM, SGLang, diffusers or MuJoCo
+  tracks:
+    - ai
+    - swe
+  phaseId: y3
+  estHours: 40
+  subject: research
+  brief: "Contribute to the tools you have been studying: three non-trivial pull requests, reviewed and merged, to one of the major open-source projects of the field."
+  acceptance:
+    - Three merged pull requests that change behaviour or performance (not typo fixes)
+    - Each one links an issue and includes tests
+    - At least one discussed with maintainers before you started
+    - Listed with links in the portfolio
+  skills:
+    - open source
+    - code review
+
+# ------------------------------------------------------------ Y3 Graphics (projects 55-59; 60 is the Stage 1 capstone, in capstones.yaml)
+- id: m27
+  number: 55
+  title: "3D rigid bodies: broadphase, GJK/EPA, stacking and constraints"
   cadence: monthly
-  tracks: [simulation]
+  tracks:
+    - simulation
+  phaseId: y3
+  estHours: 40
+  subject: simulation
+  brief: "The 2D engine's ideas in three dimensions: a dynamic BVH broadphase, GJK and EPA for convex shapes, contact manifolds that persist, and a solver that stacks."
+  acceptance:
+    - GJK/EPA for boxes, spheres, capsules and convex hulls, with unit tests on known configurations
+    - Stable stack of ten boxes and a pyramid of fifty; sleeping bodies
+    - Debug drawing of contacts, normals and the BVH
+  source: Real-Time Collision Detection; Erin Catto's GDC talks
+  skills:
+    - GJK and EPA
+    - inertia tensors
+    - contact persistence
+- id: m34
+  number: 56
+  title: XPBD cloth and soft bodies
+  cadence: monthly
+  tracks:
+    - simulation
   phaseId: y3
   estHours: 40
   subject: simulation
   brief: "Position-based dynamics in your 3D engine: cloth with stretch and bend constraints, tetrahedral soft bodies, and collision against the rigid world."
   acceptance:
-    - "Cloth that drapes over rigid bodies, with self-collision at least attempted and its limits documented"
-    - "Volume-preserving soft bodies"
-    - "Stiffness independent of iteration count and time step (the point of XPBD), demonstrated"
-  source: "Ten Minute Physics; the XPBD paper"
+    - Cloth that drapes over rigid bodies, with self-collision at least attempted and its limits documented
+    - Volume-preserving soft bodies
+    - Stiffness independent of iteration count and time step (the point of XPBD), demonstrated
+  source: Ten Minute Physics; the XPBD paper
   sourceUrl: https://matthias-research.github.io/pages/tenMinutePhysics/index.html
-  skills: ["XPBD", "constraint design", "GPU or multithreaded solvers"]
+  skills:
+    - XPBD
+    - constraint design
+    - GPU or multithreaded solvers
+- cadence: monthly
+  id: m-gpu-fluid
+  number: 57
+  title: GPU fluid (SPH or FLIP) in Vulkan compute
+  tracks:
+    - simulation
+    - graphics
+  phaseId: y3
+  estHours: 40
+  subject: simulation
+  brief: "A fluid that runs on the GPU in your own Vulkan engine: SPH or FLIP in compute shaders, rendered in real time."
+  acceptance:
+    - SPH or FLIP fluid running in Vulkan compute shaders
+    - At least 100,000 particles at interactive frame rates
+    - A validation scene (dam break) compared with a reference
+    - Public repository with a video
+  skills:
+    - fluid simulation
+    - Vulkan compute
+- cadence: monthly
+  id: m-vulkan-rt
+  number: 58
+  title: Vulkan ray tracing and PBR demo
+  tracks:
+    - graphics
+  phaseId: y3
+  estHours: 35
+  subject: graphics
+  brief: "Hardware ray tracing in your engine: acceleration structures, ray-traced shadows and reflections, and a physically based material model."
+  acceptance:
+    - Acceleration structures built and updated for a dynamic scene
+    - Ray-traced shadows and reflections with a physically based material model
+    - Frame time against the rasterized path
+    - Public repository with a video
+  skills:
+    - Vulkan ray tracing
+    - PBR
+  covers:
+    - game-developer/real-time-ray-tracing
+    - game-developer/vulkan-ray-tracing
+    - game-developer/physically-based-rendering
+- cadence: monthly
+  id: m-sim-arm-ros
+  number: 59
+  title: A simulated robot arm in your engine, controlled over ROS 2
+  tracks:
+    - robotics
+    - simulation
+  phaseId: y3
+  estHours: 35
+  subject: robotics
+  brief: "A robot arm simulated by your own engine and driven by ROS 2 nodes: inverse kinematics, a trajectory, and a pick-and-place task."
+  acceptance:
+    - The arm simulated in your engine and exposed to ROS 2 (joint states in, commands out)
+    - Inverse kinematics and a smooth trajectory controller
+    - A pick-and-place task completed reliably
+    - Public repository with a video
+  skills:
+    - ROS 2
+    - kinematics
+    - control
+
+# ------------------------------------------------------------ Research cards (unnumbered): the research cadence of the brief, drawn on in Block D and the Sunday review
+- cadence: research
+  id: q-specdec-code-prose
+  title: "Research question: Does speculative decoding help more on code than on prose at equal acceptance rate"
+  tracks:
+    - ai
+  phaseId: y2
+  estHours: 30
+  subject: research
+  brief: Does speculative decoding help more on code than on prose at equal acceptance rate? Hypothesis, experiment, result, two-page report; a negative result counts.
+  acceptance:
+    - A hypothesis and a prediction written down before the experiment
+    - An experiment that could prove the hypothesis wrong, with code and data in the repository
+    - A two-page report in research/ in the data repo
+    - Discussed in the quarterly review
+  skills:
+    - experiment design
+    - scientific writing
+- cadence: research
+  id: q-kv-quant-long-context
+  title: "Research question: How does KV-cache quantization degrade long-context retrieval"
+  tracks:
+    - ai
+  phaseId: y2
+  estHours: 30
+  subject: research
+  brief: How does KV-cache quantization degrade long-context retrieval? Hypothesis, experiment, result, two-page report; a negative result counts.
+  acceptance:
+    - A hypothesis and a prediction written down before the experiment
+    - An experiment that could prove the hypothesis wrong, with code and data in the repository
+    - A two-page report in research/ in the data repo
+    - Discussed in the quarterly review
+  skills:
+    - experiment design
+    - scientific writing
+- cadence: research
+  id: q-world-model-2d
+  title: "Research question: Can a 50 M-parameter world model trained on your 2D engine predict one second of rigid-body motion within tolerance"
+  tracks:
+    - ai
+  phaseId: y3
+  estHours: 30
+  subject: research
+  brief: Can a 50 M-parameter world model trained on your 2D engine predict one second of rigid-body motion within tolerance? Hypothesis, experiment, result, two-page report; a negative result counts.
+  acceptance:
+    - A hypothesis and a prediction written down before the experiment
+    - An experiment that could prove the hypothesis wrong, with code and data in the repository
+    - A two-page report in research/ in the data repo
+    - Discussed in the quarterly review
+  skills:
+    - experiment design
+    - scientific writing
+- cadence: research
+  id: q-flow-vs-ddpm-frames
+  title: "Research question: Does flow matching beat DDPM at equal compute on your simulator's rendered frames"
+  tracks:
+    - ai
+  phaseId: y3
+  estHours: 30
+  subject: research
+  brief: Does flow matching beat DDPM at equal compute on your simulator's rendered frames? Hypothesis, experiment, result, two-page report; a negative result counts.
+  acceptance:
+    - A hypothesis and a prediction written down before the experiment
+    - An experiment that could prove the hypothesis wrong, with code and data in the repository
+    - A two-page report in research/ in the data repo
+    - Discussed in the quarterly review
+  skills:
+    - experiment design
+    - scientific writing
+- cadence: research
+  id: q-gns-object-counts
+  title: "Research question: How far does a GNS-style simulator generalise to object counts it never saw"
+  tracks:
+    - ai
+  phaseId: y3
+  estHours: 30
+  subject: research
+  brief: How far does a GNS-style simulator generalise to object counts it never saw? Hypothesis, experiment, result, two-page report; a negative result counts.
+  acceptance:
+    - A hypothesis and a prediction written down before the experiment
+    - An experiment that could prove the hypothesis wrong, with code and data in the repository
+    - A two-page report in research/ in the data repo
+    - Discussed in the quarterly review
+  skills:
+    - experiment design
+    - scientific writing
+- cadence: research
+  id: r-lab-notebook
+  title: A lab notebook for every research day
+  tracks:
+    - ai
+  phaseId: y3
+  estHours: 10
+  subject: research
+  brief: "From year 3, every Block D day on a research card gets an entry: what ran, what broke, what changed. Keep it in the card's notes or in research/ in the data repo."
+  acceptance:
+    - An entry for every research day of a quarter
+    - Each entry links the run, commit or data it talks about
+    - Read back at each quarterly review
+  skills:
+    - research habits

@@ -1,30 +1,31 @@
-# The roadmap: which items sit in which lane of which phase, in order.
+# The roadmap: which items sit in which lane of which phase, in order (the phase table of the brief of 2026-10-07).
 # Ids and ordering are derived from this file, so reordering a list reorders the lane.
 #
-# Two conventions:
+# Conventions:
 #   * Block A carries the study (courses, books, lecture series) and block D carries the builds, because
-#     the brief lists the same engine work in both. A capstone spans both lanes and states its `hours`
-#     share in each; nothing else may appear twice.
-#   * Weekly mini-builds are never listed here: they are drawn from the pool by "Pick my next project".
+#     the brief lists the same engine work in both. A capstone may span two lanes and states its `hours`
+#     share in each; an item split across phases (LearnOpenGL) does the same. Nothing else appears twice.
+#   * `hours` on a single appearance is the part of an item a phase uses ("CS50x weeks 1-5").
+#   * Weekly mini-builds and unnumbered research cards are never listed here: they are drawn from the pool.
 #
-# Where the brief's phase table exceeded a lane's hour budget, the overflow moved to the next phase
-# (K&R to Y2, 8.01 to Y2); see DECISIONS.md. Lanes that still run over show up in the forecast.
+# Year 2 and year 3 are denser than their lanes' hours: the brief puts a great deal in them. The forecast shows
+# which lanes run over, and Re-plan can spread them; see DECISIONS.md.
 
 - phase: y1-p0
   lanes:
     A:
-      - { project: a-small-game-1 }
-      - { project: a-small-game-2 }
-      - { project: a-game-jam }
-      - { project: a-small-game-3 }
+      - { project: a-small-game-1, note: "Close the GameDevHQ loop with one finished game" }
+      - { resource: learnopengl, hours: 40, note: "Part 1: Getting started and Lighting" }
+      - { resource: gamemath-3d-primer, note: "Game maths: vectors, matrices, transforms, quaternions" }
     B:
       - { resource: 30-days-of-python }
-      - { resource: automate-the-boring-stuff, note: "The small CLI tools of the phase" }
-      - { resource: fcc-scientific-computing-python }
+      - { resource: automate-the-boring-stuff, note: "Its projects become the small CLI tools of the phase" }
+      - { resource: cs50x, hours: 50, note: "Weeks 1-5: start C" }
     C:
       - { resource: ml-zoomcamp }
       - { resource: hf-llm-course }
       - { resource: hf-agents-course }
+      - { resource: roadmap-ai-engineer, note: "The basics: APIs, embeddings, vector search, RAG, Ollama, prompting, safety" }
     D:
       - { project: m01 }
       - { project: m02 }
@@ -33,153 +34,186 @@
     E:
       - { resource: mit-18-06 }
       - { resource: current-dsa-course, note: "Finish the course already in progress" }
+      - { resource: 3b1b-linear-algebra }
+      - { resource: 3b1b-calculus }
 
 - phase: y1-p1
   lanes:
     A:
-      - { project: a-games-in-c }
-      - { resource: learnopengl, note: "Begun in the last two months of the phase" }
+      - { resource: learnopengl, hours: 80, note: "Complete: model loading, advanced lighting, PBR" }
+      - { resource: rtiow }
+      - { resource: tinyrenderer }
       - { project: cap-y1, hours: 60 }
     B:
-      - { resource: cs50x }
       - { resource: beej-c }
+      - { resource: kr-c }
+      - { resource: modern-c }
       - { resource: learncpp }
+      - { resource: tour-of-cpp }
+      - { resource: d2l, hours: 40, note: "PyTorch fluency: selected chapters" }
     C:
       - { resource: missing-semester }
       - { resource: mit-6-006 }
       - { resource: karpathy-zero-to-hero }
       - { resource: fastai-practical-dl }
-      - { resource: cmu-15-213, note: "Begin CS:APP; the labs follow in year 2" }
+      - { resource: stanford-cs231n, hours: 40, note: "CNNs, backprop and optimisation lectures" }
+      - { resource: mml-book }
+      - { resource: roadmap-ai-agents, note: "In full: agent loop, tool calling, MCP, memory, evals, observability, guardrails" }
+      - { resource: cmu-15-213, hours: 30, note: "Begin CS:APP: chapters 1-3; the labs follow in year 2" }
     D:
       - { project: m05 }
       - { project: m06 }
       - { project: m07 }
-      - { project: m08 }
       - { project: m09 }
-      - { project: m10 }
+      - { project: m08 }
       - { project: m11 }
+      - { project: m-agent-mcp }
+      - { project: m10 }
+      - { project: m12 }
       - { project: cap-y1, hours: 40 }
     E:
       - { resource: mit-18-01 }
       - { resource: mit-18-02 }
+      - { resource: mit-8-01 }
 
 - phase: y2
   lanes:
     A:
-      - { resource: rtiow }
-      - { resource: tinyrenderer }
-      - { resource: millington-game-physics }
+      - { resource: utah-cs6610, note: "OpenGL mini-engine: deferred shading, shadows, PBR, model loading" }
+      - { resource: millington-game-physics, note: "2D rigid-body engine: SAT, impulses, joints" }
       - { resource: catto-box2d-publications }
       - { resource: gaffer-on-games }
-      - { resource: utah-cs6610 }
+      - { resource: vulkan-tutorial }
+      - { resource: vkguide, note: "Then compute shaders" }
+      - { resource: ericson-rtcd, note: "3D collision: GJK/EPA, BVH" }
       - { resource: game-engine-architecture }
-      - { resource: book-of-shaders }
-      - { resource: vulkan-tutorial, note: "Begun at the end of the year" }
       - { project: cap-y2, hours: 80 }
     B:
-      - { resource: kr-c, note: "C revision alongside CS:APP" }
-      - { resource: tour-of-cpp }
-      - { resource: effective-modern-cpp }
+      - { resource: effective-modern-cpp, note: "Modern C++ in depth, concurrency" }
       - { resource: cppcon-back-to-basics }
+      - { resource: pmpp-book, note: "CUDA: the whole book" }
+      - { resource: gpu-mode-lectures }
+      - { resource: triton-tutorials }
       - { resource: rust-book }
       - { resource: rustlings }
       - { resource: rust-by-example }
-      - { resource: pmpp-book, hours: 30, note: "Chapters 1 to 6: CUDA basics" }
     C:
-      - { resource: csapp-labs }
+      - { resource: csapp-labs, note: "Systems: CS:APP, all labs" }
       - { resource: mit-6-1810 }
       - { resource: sqlbolt }
       - { resource: cmu-15-445 }
       - { resource: stanford-cs144 }
-      - { resource: lfs101-intro-linux, note: "DevOps block: Linux, towards the LFCS exam" }
+      - { resource: lfs101-intro-linux, note: "DevOps: Linux, towards the LFCS exam" }
       - { resource: docker-get-started }
       - { resource: github-actions-docs }
       - { resource: terraform-tutorials }
       - { resource: kubernetes-tutorials, note: "Towards the CKAD exam" }
+      - { resource: prometheus-docs, note: "Prometheus and Grafana" }
       - { resource: opentelemetry-docs }
-      - { resource: prometheus-docs }
-      - { resource: ddia }
+      - { resource: stanford-cs336, hours: 90, note: "Inference part 1: assignments 1-2" }
+      - { resource: vllm-docs }
+      - { resource: sglang-docs }
+      - { resource: tensorrt-llm-docs }
+      - { resource: llama-cpp }
+      - { resource: nsight-compute-docs }
     D:
-      - { project: m12 }
-      - { project: m13 }
       - { project: m14 }
-      - { project: m15 }
       - { project: m16 }
       - { project: m17 }
-      - { project: m18 }
+      - { project: m-cs144-tcp }
       - { project: m19 }
       - { project: m20 }
-      - { project: m21 }
+      - { project: m-db-from-scratch }
+      - { project: m-k8s-service }
+      - { project: m29 }
+      - { project: m-inference-server }
+      - { project: m-engine-benchmark }
+      - { project: m-quant-study }
+      - { project: m-spec-decoding }
+      - { project: m33 }
+      - { project: m-triton-attention }
+      - { project: m-vllm-explainer }
+      - { project: m13 }
+      - { project: m15 }
+      - { project: m18 }
       - { project: m22 }
-      - { project: m23 }
+      - { project: m-reproductions }
+      - { project: m-research-report-1 }
       - { project: cap-y2, hours: 60 }
     E:
-      - { resource: mit-8-01 }
       - { resource: mit-18-03 }
-      - { resource: mit-8-02 }
       - { resource: mit-6-041 }
+      - { resource: mit-18-065 }
+      - { resource: mit-8-02 }
 
 - phase: y3
   lanes:
     A:
-      - { resource: vkguide }
-      - { resource: khronos-vulkan-samples }
-      - { resource: ericson-rtcd }
+      - { resource: ten-minute-physics, note: "3D rigid bodies with constraints, XPBD cloth and soft bodies" }
       - { resource: witkin-baraff-pbm }
-      - { resource: ten-minute-physics }
       - { resource: bridson-fluid-sim, note: "The theory for the GPU fluids" }
-      - { resource: mujoco-docs, note: "Robotics simulation: MuJoCo or Gazebo (Isaac Sim is in the library)" }
-      - { resource: gazebo-docs }
+      - { resource: khronos-vulkan-samples, note: "Vulkan ray tracing and PBR" }
+      - { resource: mujoco-docs, note: "Robotics simulation: MuJoCo (Isaac Sim is in the library)" }
       - { resource: ros2-tutorials }
-      - { resource: modern-robotics, note: "Kinematics, dynamics and control" }
-      - { resource: mit-6-832-underactuated }
+      - { resource: modern-robotics, note: "The basics: kinematics, dynamics and control" }
       - { project: cap-stage-1, hours: 150 }
     B:
-      - { resource: rust-for-rustaceans }
+      - { resource: rust-for-rustaceans, note: "Rust in depth, async" }
       - { resource: crust-of-rust }
       - { resource: tour-of-go, note: "Before the 6.5840 labs, which are written in Go" }
       - { resource: learn-go-with-tests }
-      - { resource: pmpp-book, hours: 40, note: "The rest of the book: CUDA in depth" }
-      - { resource: gpu-mode-lectures }
-      - { resource: triton-tutorials }
+      - { resource: jax-docs, note: "For research code" }
     C:
-      - { resource: mit-6-5840 }
+      - { resource: mit-6-5840, note: "Q1-Q2 scalable systems" }
+      - { resource: ddia }
       - { resource: system-design-primer }
-      - { resource: kubernetes-the-hard-way, note: "A scaled service on Kubernetes, towards the CKA exam" }
+      - { resource: roadmap-software-architect, note: "The core: DDD, CQRS, microservices, messaging, service mesh, cloud patterns, security, ADRs" }
+      - { resource: kubernetes-the-hard-way, note: "Towards the CKA exam" }
       - { resource: aws-skill-builder, note: "Towards AWS Solutions Architect - Associate" }
-      - { resource: stanford-cs224n }
-      - { resource: stanford-cs336 }
-      - { resource: llm-zoomcamp, note: "GenAI and agents" }
-      - { resource: mlops-zoomcamp }
-      - { resource: hf-mcp-course }
+      - { resource: ultra-scale-playbook, note: "Q2-Q3 inference part 2: parallelism" }
+      - { resource: nvidia-dynamo, note: "Disaggregated prefill and decode, KV-aware routing" }
+      - { project: cap-inference, hours: 60 }
+      - { resource: stanford-cs236, note: "Q3-Q4 generative AI" }
       - { resource: hf-diffusion-course }
-      - { resource: berkeley-llm-agents }
-      - { resource: berkeley-cs285, hours: 50, note: "Selected lectures" }
+      - { resource: berkeley-cs285, hours: 30, note: "Model-based RL lectures" }
+      - { project: cap-research, hours: 75 }
     D:
       - { project: m24 }
       - { project: m25 }
       - { project: m26 }
-      - { project: m27 }
       - { project: m28 }
-      - { project: m29 }
-      - { project: m30 }
-      - { project: m31 }
-      - { project: m32 }
-      - { project: m33 }
+      - { project: m-tensor-parallel }
+      - { project: m-disaggregated }
+      - { project: m-cache-router }
+      - { project: m-streaming-inference }
+      - { project: m-edge-inference }
+      - { project: cap-inference, hours: 60 }
+      - { project: m-ddpm-scratch }
+      - { project: m-latent-diffusion }
+      - { project: m-flow-matching }
+      - { project: m-dit-engine }
+      - { project: m-dreamerv3 }
+      - { project: m-gns }
+      - { project: cap-research, hours: 75 }
+      - { project: m-oss-prs }
+      - { project: m27 }
       - { project: m34 }
+      - { project: m-gpu-fluid }
+      - { project: m-vulkan-rt }
+      - { project: m-sim-arm-ros }
       - { project: cap-stage-1, hours: 100 }
     E:
       - { resource: harvard-stat-110, hours: 40, note: "What 6.041 left out" }
       - { resource: mit-8-03 }
       - { resource: mit-8-04 }
       - { resource: mit-18-085 }
+      - { resource: boyd-convex-optimization, hours: 30, note: "Chapters 1-5" }
 
 - phase: y4
   lanes:
     A:
       - { project: a-dsp-visualiser }
       - { project: a-multibody-dynamics }
-      - { project: a-gpu-fluids }
       - { project: cap-y4, hours: 60 }
     B:
       - { resource: embedded-rust-book }
@@ -214,7 +248,6 @@
       - { project: cap-y4, hours: 100 }
     E:
       - { resource: mit-3-091 }
-      - { resource: mit-18-065, note: "The engineering math refresh" }
       - { resource: susskind-classical-mechanics }
 
 - phase: y5

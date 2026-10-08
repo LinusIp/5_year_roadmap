@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date(FIRST_DAY) });
 });
 
-/** Logs a full day against Today's Now item (a Gamedev project), which is how the heatmap gets something to draw. */
+/** Logs a full day against Today's Now item (the Block A game), which is how the heatmap gets something to draw. */
 async function logEightHours(page: Page): Promise<void> {
   await open(page, './');
   await logTime(page, '480');
@@ -20,7 +20,10 @@ test('an empty year says so, with the year chips under the grid', async ({ page 
   await expect(page.getByRole('heading', { level: 1, name: 'Activity' })).toBeVisible();
   await expect(page.getByText(/^Nothing logged yet/)).toBeVisible();
   await expect(page.getByRole('button', { name: '2026', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByRole('button', { name: '2031', exact: true })).toBeVisible();
+  // As in the mockup, the chips reach two years ahead; the rest is under All years.
+  await expect(page.getByRole('button', { name: '2028', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '2029', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'All years', exact: true })).toBeVisible();
 });
 
 test('8 hours light the day up at the top step, and the sentence counts it', async ({ page }) => {
@@ -40,7 +43,7 @@ test('a day opens in a sheet where its entries can be corrected', async ({ page 
   await page.getByRole('button', { name: 'Monday 21 September: 8 h' }).click();
   const sheet = page.getByRole('dialog', { name: 'Monday 21 September' });
   await expect(sheet.getByText('Block A · Game development')).toBeVisible();
-  await sheet.getByRole('button', { name: 'Remove 8 h of Finish a small game' }).click();
+  await sheet.getByRole('button', { name: 'Remove 8 h of One finished small game' }).click();
   await expect(sheet.getByText('Nothing logged.')).toBeVisible();
 });
 
@@ -48,7 +51,7 @@ test('the track filter counts only that track', async ({ page }) => {
   await logEightHours(page);
   await open(page, './#/activity');
 
-  await page.getByRole('button', { name: 'Track', exact: true }).click();
+  await page.getByRole('button', { name: 'By track', exact: true }).click();
   await page.getByRole('dialog', { name: 'Track' }).getByRole('button', { name: 'Mathematics' }).click();
   await expect(page).toHaveURL(/track=math/);
   await expect(page.getByRole('button', { name: 'Monday 21 September: nothing logged, 8 h on all tracks' })).toBeVisible();

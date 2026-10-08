@@ -2,6 +2,7 @@
 
 - id: ml-zoomcamp
   title: "DataTalksClub Machine Learning Zoomcamp"
+  short: "ML Zoomcamp"
   provider: DataTalksClub
   type: course
   url: https://github.com/DataTalksClub/machine-learning-zoomcamp
@@ -16,6 +17,7 @@
 
 - id: hf-llm-course
   title: "Hugging Face LLM Course"
+  short: "LLM Course"
   provider: Hugging Face
   type: course
   url: https://huggingface.co/learn/llm-course/chapter1/1
@@ -30,6 +32,7 @@
 
 - id: hf-agents-course
   title: "Hugging Face AI Agents Course"
+  short: "Agents Course"
   provider: Hugging Face
   type: course
   url: https://huggingface.co/learn/agents-course/unit0/introduction
@@ -84,7 +87,8 @@
 
 - id: karpathy-zero-to-hero
   title: "Andrej Karpathy: Neural Networks, Zero to Hero"
-  provider: Andrej Karpathy
+  short: "Neural Networks: Zero to Hero"
+  provider: "Karpathy"
   type: lectures
   url: https://karpathy.ai/zero-to-hero.html
   urlVerified: true
@@ -98,6 +102,7 @@
 
 - id: fastai-practical-dl
   title: "fast.ai: Practical Deep Learning for Coders"
+  short: "Practical Deep Learning for Coders"
   provider: fast.ai
   type: course
   url: https://course.fast.ai/
@@ -127,6 +132,7 @@
 
 - id: stanford-cs231n
   title: "Stanford CS231n Deep Learning for Computer Vision"
+  short: "CS231n"
   provider: Stanford
   type: course
   url: https://cs231n.stanford.edu/
@@ -156,6 +162,7 @@
 
 - id: stanford-cs336
   title: "Stanford CS336 Language Modeling from Scratch"
+  short: "CS336 LM from Scratch"
   provider: Stanford
   type: course
   url: https://stanford-cs336.github.io/spring2025/
@@ -309,6 +316,7 @@
 
 - id: d2l
   title: "Dive into Deep Learning (d2l.ai)"
+  short: "Dive into Deep Learning"
   provider: d2l.ai
   type: book
   url: https://d2l.ai/

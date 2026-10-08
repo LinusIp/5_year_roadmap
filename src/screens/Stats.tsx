@@ -15,8 +15,8 @@ import { Screen } from '../ui/Screen.tsx';
 import { blockShort, hours, plural } from './parts/text.ts';
 import { StackedBars } from './stats/StackedBars.tsx';
 
-const CADENCE = { weekly: 'Weekly builds', monthly: 'Monthly projects', capstone: 'Capstones' } as const;
-const PERIOD = { weekly: 'week', monthly: 'month', capstone: 'plan year' } as const;
+const CADENCE = { weekly: 'Weekly builds', monthly: 'Monthly projects', research: 'Research', capstone: 'Capstones' } as const;
+const PERIOD = { weekly: 'week', monthly: 'month', research: 'quarter', capstone: 'plan year' } as const;
 
 /** Stats: hours per track family by month, completion by year, cadences, and where the hours went. */
 export function Stats() {
@@ -57,7 +57,7 @@ export function Stats() {
       {total === 0 ? (
         <EmptyState action={<Button to="/">Go to Today</Button>}>The charts fill in as you log time.</EmptyState>
       ) : (
-        <section className="rounded-card bg-surface p-4">
+        <section className="mt-6 rounded-card bg-surface p-4">
           <StackedBars
             title="Hours per track family, by month"
             series={model.fams.map((f) => ({ key: f.slot, name: f.name, color: 'var(--track-' + f.tracks[0] + ')' }))}

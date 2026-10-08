@@ -15,8 +15,13 @@ export const BLOCK_IDS = ['A', 'B', 'C', 'D', 'E'] as const;
 export const RESOURCE_TYPES = ['course', 'lectures', 'book', 'tutorial', 'article', 'paper', 'repo', 'cert'] as const;
 export const LEVELS = ['intro', 'intermediate', 'advanced'] as const;
 export const COSTS = ['free', 'audit-free', 'paid'] as const;
-export const CADENCES = ['weekly', 'monthly', 'capstone'] as const;
-export const PAPER_GROUPS = ['classics', 'llm', 'systems', 'graphics-sim'] as const;
+/** The brief's four cadences: a weekly mini-build, a monthly project, research (a reimplementation, a quarterly question, a paper), a yearly capstone. */
+export const CADENCES = ['weekly', 'monthly', 'research', 'capstone'] as const;
+export const PAPER_GROUPS = ['classics', 'llm', 'systems', 'graphics-sim', 'inference', 'generative'] as const;
+export const ROADMAP_IDS = ['inference-engineering', 'ai-engineer', 'ai-agents', 'software-architect', 'game-developer'] as const;
+
+/** A roadmap.sh node an item teaches: "inference-engineering/kv-cache". */
+const NodeRef = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must look like roadmap-id/node-id');
 export const CERT_MODES = ['committed', 'optional', 'investigate'] as const;
 
 export type TrackId = (typeof TRACK_IDS)[number];
@@ -150,6 +155,8 @@ export const ResourceSchema = z
   .strictObject({
     id: Slug,
     title: Text,
+    /** The name lists show, when the full title is long: "ML Zoomcamp" for "DataTalksClub Machine Learning Zoomcamp". */
+    short: Text.optional(),
     provider: Text,
     type: z.enum(RESOURCE_TYPES),
     ...linkFields,
@@ -166,6 +173,8 @@ export const ResourceSchema = z
     stretch: z.boolean().optional(),
     /** A reference work: consulted, not completed. Carries no scheduled hours. */
     reference: z.boolean().optional(),
+    /** roadmap.sh nodes this resource teaches; finishing it ticks them. */
+    covers: z.array(NodeRef).optional(),
   })
   .superRefine((v, ctx) => {
     checkLink(v, ctx);
@@ -187,6 +196,21 @@ export const PhaseSchema = z
     goal: Text,
     /** The phase-table cell for each lane, shown as that lane's heading. */
     focus: BlockFocus,
+    /** The year's theme, shown as the phase's subtitle: "Year 1 · Foundations". */
+    theme: Text.optional(),
+    /** A few names that say what the phase is about, for its row on Plan: "C, C++, 6.006, deep learning". */
+    topics: Text.optional(),
+    /** The five-year map's card: one line per lane (D's work is what ships), what ships, and the credentials. */
+    map: z
+      .strictObject({
+        A: Text,
+        B: Text,
+        C: Text,
+        E: Text,
+        ships: Text,
+        credentials: Text,
+      })
+      .optional(),
   })
   .superRefine((v, ctx) => {
     if (v.end < v.start) ctx.addIssue({ code: 'custom', path: ['end'], message: 'must not be before start' });
@@ -254,6 +278,8 @@ export const ProjectSchema = z.strictObject({
   /** The running number the brief gives each monthly project, 1 to 59. */
   number: z.number().int().min(1).optional(),
   skills: z.array(Text).default([]),
+  /** roadmap.sh nodes this project practises; shipping it ticks them. */
+  covers: z.array(NodeRef).optional(),
   subject: Slug.optional(),
   /** Stage 2 builds need physical hardware: what to have on the bench. The budget is a user field. */
   parts: z.array(Text).optional(),
@@ -319,6 +345,43 @@ export const SubjectSchema = z.strictObject({
 });
 export type Subject = z.infer<typeof SubjectSchema>;
 
+/* ------------------------------------------------------------------ roadmap.sh tracks */
+
+/** A node is its label; `{ label, optional: true }` marks one the coverage rule leaves out (vendor-specific, engine-specific). */
+const RoadmapNodeInput = z.union([Text, z.strictObject({ label: Text, optional: z.literal(true) })]);
+
+export const RoadmapSchema = z.strictObject({
+  id: z.enum(ROADMAP_IDS),
+  title: Text,
+  url: HttpUrl,
+  /** 1 = inference and AI engineering, 2 = software architecture, 3 = graphics (the brief's priority order). */
+  priority: z.literal([1, 2, 3]),
+  /** The credential-map row whose done state, with 90 % of the nodes, makes the roadmap "mastered". */
+  subject: Slug,
+  note: Text.optional(),
+  sections: z
+    .array(
+      z.strictObject({
+        title: Text,
+        /** The phase that teaches this part of the roadmap. */
+        phaseId: Slug,
+        nodes: z.array(RoadmapNodeInput).min(1),
+      }),
+    )
+    .min(1),
+});
+export type RoadmapInput = z.infer<typeof RoadmapSchema>;
+
+export interface RoadmapNode {
+  /** The slug of the label, unique within its roadmap. */
+  id: string;
+  label: string;
+  optional: boolean;
+}
+export interface Roadmap extends Omit<RoadmapInput, 'sections'> {
+  sections: { title: string; phaseId: string; nodes: RoadmapNode[] }[];
+}
+
 /* ------------------------------------------------------------------ settings defaults */
 
 const Weekday = z.number().int().min(0).max(6);
@@ -330,6 +393,8 @@ export const BlockDefSchema = z.strictObject({
   /** 0 = Sunday, 6 = Saturday. */
   days: z.array(Weekday).min(1),
   summary: Text,
+  /** Names this block had in earlier curricula: settings that still carry one are brought up to date. */
+  formerNames: z.array(Text).optional(),
 });
 export type BlockDef = z.infer<typeof BlockDefSchema>;
 
@@ -347,7 +412,8 @@ export const SettingsDefaultsSchema = z
       autoFreeze: z.boolean(),
     }),
     backupReminderDays: z.number().int().min(1),
-    paperCadence: z.strictObject({ fromYear: z.literal([1, 2, 3, 4, 5]), perWeek: z.number().positive() }),
+    /** One paper a week from the first phase of `fromYear`, or from `fromPhase` when it is set (the research cadence starts in Foundations II). */
+    paperCadence: z.strictObject({ fromYear: z.literal([1, 2, 3, 4, 5]), fromPhase: Slug.optional(), perWeek: z.number().positive() }),
     forecast: z.strictObject({ paceWindowDays: z.number().int().min(7) }),
     /** Hours of the projects block set aside each week for the weekly mini-build; the rest goes to the monthly project. */
     weeklyBuildHours: z.number().min(0).max(40),
@@ -374,6 +440,7 @@ export interface Seed {
   paperSources: PaperSource[];
   certs: Cert[];
   subjects: Subject[];
+  roadmaps: Roadmap[];
 }
 
 /**

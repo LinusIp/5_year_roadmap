@@ -21,6 +21,7 @@ import type { SettingsDefaults } from '../seed/schema.ts';
 import { Button } from '../ui/Button.tsx';
 import { Chips } from '../ui/Chips.tsx';
 import { Header } from '../ui/Header.tsx';
+import { Icon } from '../ui/Icon.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { SegmentedControl } from '../ui/SegmentedControl.tsx';
@@ -398,13 +399,15 @@ function GitHub({ settings }: { settings: StoredSettings }) {
             void connect();
           }}
         >
-          <p className="mb-3 text-meta text-ink2">
-            Optional. Shows your real GitHub contribution calendar under the heatmap on Activity.{' '}
-            <a href={NEW_TOKEN_URL} target="_blank" rel="noreferrer noopener" className="text-accent">
-              Create a fine-grained token
-            </a>{' '}
-            with every permission off: reading your calendar needs none.
+          <p className="text-meta text-ink2">
+            Optional. Shows your real GitHub contribution calendar under the heatmap on Activity. The token needs every
+            permission off: reading your calendar needs none.
           </p>
+          {/* A link of its own rather than inside the sentence, so it is a 44 px target. */}
+          <a href={NEW_TOKEN_URL} target="_blank" rel="noreferrer noopener" className="mb-1 flex min-h-11 items-center gap-2 text-button font-medium text-accent">
+            <Icon name="external" size={16} />
+            Create a fine-grained token
+          </a>
           <TextField label="Personal access token" type="password" autoComplete="off" value={token} onChange={setToken} />
           <Button className="mt-3" aria-disabled={!token.trim() || busy || undefined} onClick={() => void connect()}>
             {busy ? 'Checking' : 'Connect'}
@@ -435,7 +438,7 @@ export function Settings() {
     <Screen title="Settings">
       <Header title="Settings" sub="Everything here starts from data/settings.yaml and is yours to change." />
       {atlas && (
-        <div className="[&>section:first-child]:mt-0">
+        <div className="[&>section:first-child]:mt-6">
           <Blocks settings={atlas.settings} />
           <HeatAndStreak settings={atlas.settings} />
           <Appearance settings={atlas.settings} />

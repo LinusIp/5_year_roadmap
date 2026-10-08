@@ -19,7 +19,7 @@
     "icons": "node scripts/make-icons.ts",
     "check:links": "node scripts/check-links.ts",
     "log:export": "node scripts/log-export.ts",
-    "screenshots": "vite build && node scripts/screenshots.ts",
+    "screenshots": "vite build && playwright test tests/e2e/screenshots.spec.ts --update-snapshots",
     "fetch:units": "node scripts/fetch-units.ts"
   },
   "dependencies": {

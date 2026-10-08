@@ -40,7 +40,7 @@
   tracks: [ai]
   certs: [cert-ml-zoomcamp, cert-aws-mle-associate, cert-gcp-pmle]
   milestones:
-    - { id: ms-deployed-ml-service, title: "Deployed ML service with monitoring", projects: [m01, m32] }
+    - { id: ms-deployed-ml-service, title: "Deployed ML service with monitoring", projects: [m01, m-k8s-service] }
 
 - id: deep-learning
   title: Deep learning / LLMs / agents
@@ -48,7 +48,7 @@
   certs: [cert-hf-agents, cert-nvidia-dli, cert-deeplearning-ai]
   milestones:
     - { id: ms-lm-from-scratch, title: "Language model from scratch", projects: [m11, m29] }
-    - { id: ms-finetune-evals, title: "Fine-tune with an eval harness", projects: [m31] }
+    - { id: ms-finetune-evals, title: "A model served and measured: three-engine benchmark and a quantization study", projects: [m-engine-benchmark, m-quant-study] }
     - { id: ms-agent-with-evals, title: "Agent with evals", projects: [m04] }
 
 - id: linux-os
@@ -79,7 +79,7 @@
   tracks: [systems]
   certs: [cert-aws-cloud-practitioner, cert-aws-saa, cert-aws-developer, cert-aws-devops-pro]
   milestones:
-    - { id: ms-aws-iac-app, title: "Multi-service app on AWS with infrastructure as code", projects: [m32] }
+    - { id: ms-aws-iac-app, title: "A service on Kubernetes with infrastructure as code and monitoring", projects: [m-k8s-service] }
 
 - id: containers-iac
   title: Containers / orchestration / IaC
@@ -94,7 +94,7 @@
   certNote: "No certificate exists; the AWS Solutions Architect + CKA pair is the market signal."
   milestones:
     - { id: ms-6-5840-labs, title: "MIT 6.5840 labs", projects: [m24, m25] }
-    - { id: ms-design-docs, title: "Five written design docs", projects: [m23] }
+    - { id: ms-design-docs, title: "Five written design docs", projects: [m26, m-cache-router] }
     - { id: ms-url-shortener-case-study, title: "Scaled URL-shortener case study", projects: [m26] }
 
 - id: data-engineering
@@ -110,8 +110,7 @@
   certs: [cert-unity-associate-programmer, cert-unity-professional-programmer]
   certNote: "Only if you stay on Unity."
   milestones:
-    - { id: ms-three-shipped-games, title: "Three shipped games", projects: [a-small-game-1, a-small-game-2, a-small-game-3] }
-    - { id: ms-game-jam, title: "One game jam", projects: [a-game-jam] }
+    - { id: ms-three-shipped-games, title: "One finished game, shipped", projects: [a-small-game-1] }
 
 - id: graphics
   title: Graphics (OpenGL / Vulkan)
@@ -119,7 +118,7 @@
   certNote: "No graphics certificate exists."
   milestones:
     - { id: ms-opengl-mini-engine, title: "OpenGL mini-engine", projects: [m18] }
-    - { id: ms-vulkan-renderer, title: "Vulkan renderer", projects: [m22, m30] }
+    - { id: ms-vulkan-renderer, title: "Vulkan renderer", projects: [m22, m-vulkan-rt] }
     - { id: ms-shader-reel, title: "Shader reel" }
 
 - id: simulation
@@ -129,7 +128,7 @@
   milestones:
     - { id: ms-2d-engine, title: "2D rigid-body engine", projects: [m15] }
     - { id: ms-3d-engine, title: "3D rigid-body engine", projects: [m27] }
-    - { id: ms-cloth-fluids, title: "Cloth, soft bodies and fluids", projects: [m34, a-gpu-fluids] }
+    - { id: ms-cloth-fluids, title: "Cloth, soft bodies and fluids", projects: [m34, m-gpu-fluid] }
     - { id: ms-stage-1-capstone, title: "Stage 1 capstone: own 3D simulation engine v1", projects: [cap-stage-1] }
 
 - id: gpu
@@ -220,3 +219,14 @@
   tracks: [ee, mech, career]
   certs: [cert-fe-exam]
   certNote: "Investigate before committing: the FE exam normally expects an accredited engineering degree, and the rules differ by country and licensing board."
+
+# The research cadence of the brief of 2026-10-07: none of it is certified; the artefacts are the credential.
+- id: research
+  title: Research (inference, generative AI, world models)
+  tracks: [ai]
+  certNote: "None: the artefact is the credential"
+  milestones:
+    - { id: ms-research-reports, title: "Six quarterly research reports", projects: [m-research-report-1, q-specdec-code-prose, q-kv-quant-long-context, q-world-model-2d, q-flow-vs-ddpm-frames, q-gns-object-counts] }
+    - { id: ms-research-paper, title: "One workshop-style paper or three merged PRs to a major OSS project", projects: [m-oss-prs, cap-research] }
+    - { id: ms-research-capstone, title: "The year 3 research capstone", projects: [cap-research] }
+

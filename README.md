@@ -8,18 +8,17 @@ you log stays in your browser (IndexedDB) and can be exported to a single JSON f
 
 > Build status: see [PROGRESS.md](PROGRESS.md). Choices and assumptions: see [DECISIONS.md](DECISIONS.md).
 
-![Today: five blocks, each with the exact item and the next unit to do, and the time logged against it](docs/screenshots/today.png)
-
 <p>
-  <img src="docs/screenshots/activity.png" alt="Activity: a year of days as a heatmap, with streaks and hours per track" width="49%">
-  <img src="docs/screenshots/roadmap.png" alt="Roadmap: the current phase's five lanes, each with its items, progress and forecast" width="49%">
-</p>
-<p>
-  <img src="docs/screenshots/stats.png" alt="Stats: hours per track family by month, and completion by plan year" width="73%">
-  <img src="docs/screenshots/today-phone-light.png" alt="Today on a phone, in the light theme" width="25%">
+  <img src="screenshots/today-light.png" alt="Today: the one block to do now, large, and the other four as a list" width="24%">
+  <img src="screenshots/plan-light.png" alt="Plan: the current phase's five lanes, each with its item, progress line and forecast" width="24%">
+  <img src="screenshots/activity-dark.png" alt="Activity in the dark theme: the year's heatmap and the last seven days" width="24%">
+  <img src="screenshots/library-light.png" alt="Library: search, filters, and every course, book and paper with its status" width="24%">
 </p>
 
-The screenshots show eight weeks of made-up history; `npm run screenshots` regenerates them.
+![The five-year map: six phases on a timeline, with each lane's work, what ships and the credentials](screenshots/map-light.png)
+
+The screenshots show eight weeks of made-up history. They are also the baselines of a screenshot test, and
+`npm run screenshots` redraws them after a change to the UI.
 
 ## Run it
 
@@ -39,7 +38,7 @@ npm run dev
 | `npm run validate:data` | Validates everything under `data/`. Fails on schema errors, duplicate ids, dangling references. |
 | `npm run check:links` | Requests every URL in `data/` and prints a report. Never fails the build. |
 | `npm run log:export` | Writes each logged day from a backup to `learning-log/YYYY/MM/DD.md` (see below). |
-| `npm run screenshots` | Builds, then regenerates the screenshots above from demo data in a throwaway browser. |
+| `npm run screenshots` | Builds, then redraws the screenshots above (the screenshot test's baselines in `screenshots/`) from demo data. |
 | `npm run fetch:units` | Rebuilds the lecture and chapter checklists from the courses own syllabus pages. |
 
 ## Keyboard
@@ -47,7 +46,7 @@ npm run dev
 | Key | Does |
 |---|---|
 | `t` | Go to Today |
-| `r` | Go to the Roadmap |
+| `r` | Go to the Plan |
 | `/` | Search: the page's own search box, or the Library's |
 | `l` | Log time: opens the log form on Today, with the cursor in it |
 | `?` | List the shortcuts |
@@ -102,6 +101,7 @@ statuses and notes reference items by id, so editing the curriculum never loses 
 | `data/projects/*.yaml` | Capstones, monthly builds and the weekly mini-build pool |
 | `data/papers.yaml`, `data/paper-sources.yaml` | The reading queue, and where to find more |
 | `data/certs.yaml`, `data/subjects.yaml` | Certifications, and the credential map |
+| `data/roadmaps.yaml` | The five roadmap.sh roadmaps, as sections of nodes, each section with the phase that teaches it |
 | `data/settings.yaml` | The defaults a fresh install starts from |
 
 ### Adding a course, step by step
@@ -123,6 +123,8 @@ statuses and notes reference items by id, so editing the curriculum never loses 
      prerequisites: [mit-18-06]        # never scheduled before these
      subject: math-physics             # its row in the credential map (data/subjects.yaml)
      summary: "Why it is on the list, in one sentence."
+     short: "Probability"              # optional: the name lists show when the title is long
+     covers: [ai-engineer/embeddings]  # optional: roadmap.sh nodes it ticks when done
    ```
 
    Once you have opened the page, set `url`, `urlVerified: true` and `lastVerified` to that day.
@@ -144,8 +146,12 @@ statuses and notes reference items by id, so editing the curriculum never loses 
 4. Run `npm run validate:data`, then `npm run dev` to see it.
 
 A project works the same way in `data/projects/*.yaml`, with acceptance criteria instead of units. Anything
-you would rather not put in a file can be added from the app instead (Library > Add resource, or Roadmap > Edit >
-"Add to this lane"); those additions live in your browser and travel in backups.
+you would rather not put in a file can be added from the app instead (Library > Add a resource, or Plan > a
+lane > Edit > "Add to this lane"); those additions live in your browser and travel in backups.
+
+A roadmap.sh node's id is the slug of its label in `data/roadmaps.yaml`: "Ops:Byte Ratio" is
+`ops-byte-ratio`. An item that `covers` a node ticks it on Plan > Credentials > Roadmaps once the item is done.
+Nodes marked `optional: true` (vendor-specific or engine-specific ones) are left out of the coverage percent.
 
 After an edit, run `npm run validate:data`. It fails on a schema error, a duplicate id, a dangling
 reference, a prerequisite cycle, an item planned before its prerequisite, or a roadmap item with no row in
@@ -153,5 +159,6 @@ the credential map. Two rules are worth knowing up front:
 
 - **ids must be unique across resources, projects, papers and certs**, because a log entry references them
   without saying which kind it means;
+- **a `covers` entry must name a real node**, written `roadmap-id/node-id`;
 - **a URL is either verified or absent.** Set `url: null` with a `searchHint` rather than writing down a
   link you have not opened; the app then shows the item with a "find link" badge.

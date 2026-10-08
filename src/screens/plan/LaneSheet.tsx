@@ -9,7 +9,7 @@ import { ProgressLine } from '../../ui/ProgressLine.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { Sheet } from '../../ui/Sheet.tsx';
 import { ItemStatusPill } from '../parts/ItemSheet.tsx';
-import { blockShort, shortTitle } from '../parts/text.ts';
+import { blockShort, nameOf, shortTitle } from '../parts/text.ts';
 import { AddToLaneSheet } from './AddToLaneSheet.tsx';
 import { itemDetail } from './model.ts';
 
@@ -87,7 +87,7 @@ export function LaneSheet({
                   return (
                     <Row
                       key={item.planItem.id}
-                      title={shortTitle(item.title)}
+                      title={nameOf(item)}
                       meta={meta}
                       onClick={editing ? undefined : () => onOpenItem(item.refId)}
                       action={

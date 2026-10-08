@@ -26,7 +26,7 @@ export function cadenceStatus(
   asOf: string,
   weekStartsOn: 0 | 1,
 ): CadenceStatus {
-  const start = phases.find((p) => p.year === cadence.fromYear)?.start ?? null;
+  const start = (cadence.fromPhase ? phases.find((p) => p.id === cadence.fromPhase) : phases.find((p) => p.year === cadence.fromYear))?.start ?? null;
   const readDates = [...states.values()]
     .filter((s) => (s.status === 'read' || s.status === 'implemented') && s.readAt)
     .map((s) => s.readAt!);

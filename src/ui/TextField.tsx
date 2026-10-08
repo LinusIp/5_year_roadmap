@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import type { KeyboardEvent, Ref } from 'react';
+import { Icon } from './Icon.tsx';
 
 export interface TextFieldProps {
   label: string;
@@ -92,6 +93,31 @@ export function TextField({ label, value, onChange, type = 'text', multiline, ro
           {hint}
         </p>
       )}
+    </div>
+  );
+}
+
+/**
+ * The Library's search, as in the mockup: a magnifier inside the field and a placeholder that says what can be
+ * found. The field's name is a visually hidden label, so the placeholder never has to stand in for it.
+ */
+export function SearchField({ label, placeholder, value, onChange, searchBox, className = '' }: { label: string; placeholder: string; value: string; onChange: (value: string) => void; searchBox?: boolean; className?: string }) {
+  const id = useId();
+  return (
+    <div className={'relative flex items-center ' + className}>
+      <Icon name="search" size={18} className="pointer-events-none absolute left-3.5 text-ink2" />
+      <label htmlFor={id} className="sr-only">
+        {label}
+      </label>
+      <input
+        id={id}
+        type="search"
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        data-search-box={searchBox ? '' : undefined}
+        className="h-11 w-full rounded-button border border-line bg-surface pl-[42px] pr-3.5 text-body text-ink outline-none placeholder:text-ink2 focus:border-accent"
+      />
     </div>
   );
 }

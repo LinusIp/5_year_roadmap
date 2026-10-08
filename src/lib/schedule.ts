@@ -29,6 +29,8 @@ export interface ScheduledItem {
   refId: string;
   kind: ScheduledKind;
   title: string;
+  /** A resource's short name for lists, when it has one. */
+  short?: string;
   provider?: string;
   /** The track the block's minutes are logged against by default. */
   track: TrackId;
@@ -119,6 +121,7 @@ function describeResource(resource: AppResource, state: UserItemState | undefine
     unitCount: resource.unitCount,
   };
   if (resource.searchHint) item.searchHint = resource.searchHint;
+  if (resource.short) item.short = resource.short;
   if (note) item.note = note;
 
   const list = ctx.units?.[resource.id];

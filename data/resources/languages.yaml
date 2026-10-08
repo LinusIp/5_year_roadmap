@@ -3,7 +3,7 @@
 
 - id: 30-days-of-python
   title: "30 Days of Python (Asabeneh Yetayeh)"
-  provider: GitHub
+  provider: "Asabeneh Yetayeh"
   type: tutorial
   url: https://github.com/Asabeneh/30-Days-Of-Python
   urlVerified: true
@@ -17,6 +17,7 @@
 
 - id: automate-the-boring-stuff
   title: "Automate the Boring Stuff with Python (Al Sweigart)"
+  short: "Automate the Boring Stuff"
   provider: No Starch Press (free online)
   type: book
   url: https://automatetheboringstuff.com/
@@ -72,6 +73,7 @@
 
 - id: kr-c
   title: "The C Programming Language, 2nd edition (Kernighan and Ritchie)"
+  short: "K&R C"
   provider: Prentice Hall
   type: book
   url: https://www.cs.princeton.edu/~bwk/cbook.html
@@ -94,8 +96,7 @@
   tracks: [languages]
   level: intermediate
   cost: free
-  estHours: 0
-  reference: true
+  estHours: 40
   subject: c-cpp
 
 - id: learncpp
@@ -113,6 +114,7 @@
 
 - id: tour-of-cpp
   title: "A Tour of C++, 3rd edition (Bjarne Stroustrup)"
+  short: "A Tour of C++"
   provider: Addison-Wesley
   type: book
   url: https://www.stroustrup.com/tour3.html

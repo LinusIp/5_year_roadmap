@@ -26,6 +26,7 @@ const lines: [string, string | number][] = [
   ['papers', seed.papers.length],
   ['certifications', seed.certs.length],
   ['credential-map rows', seed.subjects.length],
+  ['roadmap.sh roadmaps', seed.roadmaps.length + ' (' + seed.roadmaps.reduce((n, r) => n + r.sections.reduce((m, s) => m + s.nodes.length, 0), 0) + ' nodes)'],
 ];
 console.log('/data is valid');
 for (const [label, value] of lines) console.log('  ' + label.padEnd(20) + value);

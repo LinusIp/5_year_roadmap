@@ -75,7 +75,7 @@ describe('editing the curriculum', () => {
     expect((await database.itemStates.get('30-days-of-python'))!.status).toBe('active');
     // The lane took the new order, and the plan item kept its id, so edits made to it in the app still apply.
     const lane = app.plan.filter((p) => p.phaseId === 'y1-p0' && p.block === 'E').sort((a, b) => a.order - b.order);
-    expect(lane.map((p) => p.resourceId)).toEqual(['current-dsa-course', 'mit-18-06']);
+    expect(lane.map((p) => p.resourceId)).toEqual(['current-dsa-course', 'mit-18-06', '3b1b-linear-algebra', '3b1b-calculus']);
     expect(lane[1]!.id).toBe('plan.mit-18-06');
   });
 });

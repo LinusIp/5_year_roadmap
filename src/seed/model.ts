@@ -34,7 +34,7 @@ export interface Phase { id: string; year: 1 | 2 | 3 | 4 | 5; title: string; sta
 export interface PlanItem { id: string; phaseId: string; block: BlockId; resourceId?: string; projectId?: string; order: number; }
 
 export interface Project {
-  id: string; title: string; cadence: 'weekly' | 'monthly' | 'capstone';
+  id: string; title: string; cadence: 'weekly' | 'monthly' | 'research' | 'capstone';
   tracks: TrackId[]; brief: string; acceptance: string[]; source?: string; estHours: number; phaseId?: string;
 }
 

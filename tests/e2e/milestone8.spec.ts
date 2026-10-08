@@ -11,7 +11,7 @@ test.describe('reviews', () => {
 
   test('the weekly review fills in its numbers and keeps the three answers', async ({ page }) => {
     await open(page, './');
-    await makeNow(page, /MIT 18\.06 Linear Algebra/);
+    await makeNow(page, /18\.06 Linear Algebra/);
     await logTime(page, '90');
 
     await open(page, './#/reviews');
@@ -74,7 +74,7 @@ test.describe('settings', () => {
 
   test('block minutes drive Today, and a bad threshold is refused', async ({ page }) => {
     await open(page, './#/settings');
-    await page.getByRole('button', { name: /^Block A · Gamedev/ }).click();
+    await page.getByRole('button', { name: /^Block A · Graphics/ }).click();
     const sheet = page.getByRole('dialog', { name: 'Block A' });
     await sheet.getByRole('textbox', { name: 'Minutes a day' }).fill('180');
     await sheet.getByRole('textbox', { name: 'Minutes a day' }).blur();
@@ -82,8 +82,8 @@ test.describe('settings', () => {
     await expect(page.getByText('Blocks · about 9 h a day, 63 h a week')).toBeVisible();
 
     await open(page, './');
-    await expect(page.getByText(/^0 m of 9 h today/)).toBeVisible();
-    await expect(nowCard(page).getByText(/0 m of 3 h/)).toBeVisible();
+    await expect(page.getByText(/^0 h of 9 h today/)).toBeVisible();
+    await expect(nowCard(page).getByText(/0 h of 3 h/)).toBeVisible();
 
     await open(page, './#/settings');
     const level2 = page.getByRole('textbox', { name: 'Level 2 from, min' });
@@ -95,7 +95,7 @@ test.describe('settings', () => {
   test('export, reset, then import restores everything, byte for byte', async ({ page }) => {
     await page.clock.setFixedTime(new Date('2026-09-21T22:30:00+05:00'));
     await open(page, './');
-    await makeNow(page, /MIT 18\.06 Linear Algebra/);
+    await makeNow(page, /18\.06 Linear Algebra/);
     await logTime(page, '75');
     await page.locator('#now-title').click();
     await nowCard(page).getByRole('checkbox', { name: 'Lecture 1: The geometry of linear equations' }).click();
@@ -114,7 +114,7 @@ test.describe('settings', () => {
     await page.getByRole('button', { name: 'Reset everything' }).click();
     await expect(page.getByText('Everything was reset.')).toBeVisible();
     await open(page, './');
-    await expect(page.getByText(/^0 m of 8 h today/)).toBeVisible();
+    await expect(page.getByText(/^0 h of 8 h today/)).toBeVisible();
 
     await open(page, './#/settings');
     await page.getByLabel('Backup file to import').setInputFiles((await firstDownload.path())!);

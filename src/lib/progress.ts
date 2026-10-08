@@ -66,6 +66,8 @@ export function itemProgress({ refId, estHours, unitCount, state }: ProgressInpu
 export interface PlanItemView extends ItemProgress {
   planItem: PlanItem;
   title: string;
+  /** A resource's short name for lists, when it has one. */
+  short?: string;
   kind: 'resource' | 'project';
   provider?: string;
   type?: string;
@@ -112,6 +114,7 @@ export function buildPlanItemView(
     laneHours: estHours,
     hasRepo: hasRepo(states.get(refId)),
   };
+  if (resource?.short) view.short = resource.short;
   if (resource?.provider) view.provider = resource.provider;
   if (resource?.type) view.type = resource.type;
   if (resource?.searchHint) view.searchHint = resource.searchHint;

@@ -143,14 +143,14 @@ export function Deck({ cards, onTake, hint }: DeckProps) {
 
   return (
     <div>
-      <div className={'relative h-[330px]' + (n > 1 ? ' touch-pan-y' : '')}>
+      <div className={'relative h-[340px]' + (n > 1 ? ' touch-pan-y' : '')}>
         {stack.map((position) => {
           const i = position - top;
           const card = current(position);
           const isTop = i === 0;
           let transform = 'translateY(' + i * 10 + 'px) scale(' + (1 - i * 0.04) + ')';
-          // Opaque, so a card in flight never shows the text of the ones further back; the fourth fades in.
-          let opacity = i === VISIBLE - 1 ? 0 : 1;
+          // As in the mockup: each card further back is a little fainter, and the fourth fades in from nothing.
+          let opacity = i === VISIBLE - 1 ? 0 : 1 - i * 0.12;
           let transition = reduce ? 'none' : shuffling ? SWAP : SETTLE;
           if (isTop && leaving) {
             transform = 'translateX(-440px) rotate(' + (reduce ? 0 : -14) + 'deg)';
@@ -172,14 +172,14 @@ export function Deck({ cards, onTake, hint }: DeckProps) {
               onPointerMove={isTop ? onPointerMove : undefined}
               onPointerUp={isTop ? onPointerUp : undefined}
               onPointerCancel={isTop ? () => ((dragStart.current = null), setDrag(null)) : undefined}
-              className="absolute inset-x-0 top-0 flex h-[300px] flex-col gap-2 rounded-card border border-line bg-surface p-5 select-none"
+              className="absolute inset-x-0 top-0 flex h-[300px] flex-col gap-2 rounded-deck border border-line bg-surface p-[22px] select-none"
               style={{ zIndex: VISIBLE - i, transform, opacity, transition, willChange: 'transform' }}
             >
               <p className="text-meta text-ink2">{card.kind}</p>
-              <h2 id={isTop ? 'deck-top-title' : undefined} className="text-headline font-semibold">
+              <h2 id={isTop ? 'deck-top-title' : undefined} className="text-card font-semibold">
                 {card.title}
               </h2>
-              <p className="line-clamp-4 text-body text-ink2">{card.brief}</p>
+              <p className="line-clamp-5 text-button text-ink2">{card.brief}</p>
               <p className="mt-auto truncate text-meta text-ink2">{card.footer}</p>
             </article>
           );
@@ -187,17 +187,17 @@ export function Deck({ cards, onTake, hint }: DeckProps) {
       </div>
 
       <div className="mt-6 flex items-center gap-2">
-        <Button variant="filled" icon="shuffle" onClick={shuffle} aria-disabled={n < 2 || undefined}>
+        <Button variant="filled" size="lg" icon="shuffle" onClick={shuffle} aria-disabled={n < 2 || undefined}>
           {shuffling ? 'Shuffling' : shuffled ? 'Shuffle again' : 'Shuffle'}
         </Button>
-        <Button onClick={skip} aria-disabled={busy || n < 2 || undefined}>
+        <Button size="lg" onClick={skip} aria-disabled={busy || n < 2 || undefined}>
           Skip
         </Button>
-        <Button className="ml-auto" onClick={take} aria-disabled={busy || undefined}>
+        <Button size="lg" className="ml-auto" onClick={take} aria-disabled={busy || undefined}>
           Take it
         </Button>
       </div>
-      <p className="mt-4 text-meta text-ink2">{hint}</p>
+      <p className="mt-5 text-meta text-ink2">{hint}</p>
       <p className="sr-only" aria-live="polite">
         {announce}
       </p>
