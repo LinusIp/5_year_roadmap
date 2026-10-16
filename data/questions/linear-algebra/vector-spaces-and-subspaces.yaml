@@ -1,0 +1,283 @@
+subject: linear-algebra
+topic: vector-spaces-and-subspaces
+questions:
+  - id: la-sub-001
+    difficulty: 1
+    type: mc
+    prompt: |
+      Which of these subsets of $\mathbb{R}^2$ is a **subspace**?
+    options:
+      - "The line $y = 2x$"
+      - "The line $y = 2x + 1$"
+      - "The first quadrant $\\{(x, y) : x \\ge 0,\\ y \\ge 0\\}$"
+      - "The union of the $x$-axis and the $y$-axis"
+    answer: 0
+    hints:
+      - 'A subspace must contain $\mathbf{0}$ and be closed under addition and under multiplication by every real number (including negative ones).'
+    solution: |
+      - $y = 2x$ is a line through the origin: sums and multiples of points on it stay on it. **Subspace.**
+      - $y = 2x + 1$ misses $(0, 0)$.
+      - The first quadrant is not closed under multiplication by $-1$: $(1, 1) \mapsto (-1, -1)$.
+      - The two axes are not closed under addition: $(1, 0) + (0, 1) = (1, 1)$ is on neither axis.
+    verify: "[i for i, (s, c) in enumerate([(2, 0), (2, 1)]) if 0 == s*0 + c][0]"
+    covers: [mit-18-06/lecture-5]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: la-sub-002
+    difficulty: 2
+    type: mc
+    prompt: |
+      Is the set of all vectors $(x, y, z)$ in $\mathbb{R}^3$ with ${{a}}x {{signed: b}}y {{signed: c}}z = {{d}}$ a subspace of $\mathbb{R}^3$?
+    params:
+      a: { int: [-4, 4], not: [0] }
+      b: { int: [-4, 4], not: [0] }
+      c: { int: [-4, 4], not: [0] }
+      d: { int: [1, 6] }
+    options:
+      - "No: it does not contain the zero vector"
+      - "Yes: it is a plane"
+      - "Yes: the sum of two solutions is again a solution"
+      - "No: it is a plane, and planes are never subspaces"
+    answer: 0
+    hints:
+      - 'Does $(0, 0, 0)$ satisfy the equation?'
+    solution: |
+      Plugging in $(0, 0, 0)$ gives $0 \ne {{d}}$, so the zero vector is not in the set and it cannot be a subspace.
+      (It is a plane, but one that does not pass through the origin. Planes **through the origin**, with right-hand side $0$, are subspaces.)
+      The sum of two solutions satisfies the equation with right-hand side ${{2*d}}$, not ${{d}}$, so it is not closed under addition either.
+    verify: "0 if a*0 + b*0 + c*0 != d else 1"
+    covers: [mit-18-06/lecture-5]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: la-sub-003
+    difficulty: 2
+    type: matrix
+    prompt: |
+      Let $A = {{A}}$. Compute $A^{\mathsf T}A$.
+
+      Enter it as `[[a, b, c], [d, e, f], [g, h, i]]`.
+    params:
+      a11: { int: [-3, 3] }
+      a12: { int: [-3, 3] }
+      a13: { int: [-3, 3] }
+      a21: { int: [-3, 3] }
+      a22: { int: [-3, 3] }
+      a23: { int: [-3, 3] }
+    let:
+      A: "[[a11, a12, a13], [a21, a22, a23]]"
+      AtA: "transpose(A)*A"
+    answer: AtA
+    hints:
+      - '$A^{\mathsf T}$ is $3 \times 2$ (rows of $A$ become columns), so $A^{\mathsf T}A$ is $3 \times 3$.'
+      - 'Entry $(i, j)$ of $A^{\mathsf T}A$ is (column $i$ of $A$) $\cdot$ (column $j$ of $A$).'
+    solution: |
+      $A^{\mathsf T} = {{transpose(A)}}$, and entry $(i, j)$ of $A^{\mathsf T}A$ is the dot product of columns $i$ and $j$ of $A$:
+      $$ A^{\mathsf T}A = {{AtA}}. $$
+      It is symmetric, as every $A^{\mathsf T}A$ is: $(A^{\mathsf T}A)^{\mathsf T} = A^{\mathsf T}(A^{\mathsf T})^{\mathsf T} = A^{\mathsf T}A$.
+    verify: "Matrix([[a11, a12, a13], [a21, a22, a23]]).T*Matrix([[a11, a12, a13], [a21, a22, a23]])"
+    covers: [mit-18-06/lecture-5]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: la-sub-004
+    difficulty: 1
+    type: numeric
+    prompt: |
+      How many different ${{n}} \times {{n}}$ permutation matrices are there?
+    params:
+      n: { int: [2, 6] }
+    answer: "factorial(n)"
+    hints:
+      - 'A permutation matrix is the identity with its rows reordered. How many orders of ${{n}}$ rows are there?'
+    solution: |
+      Row 1 of $P$ can be any of the ${{n}}$ rows of $I$, row 2 any of the remaining ${{n - 1}}$, and so on, giving
+      $$ {{n}}! = {{factorial(n)}} $$
+      permutation matrices (including $I$ itself).
+    verify: "len(list(__import__('itertools').permutations(range(n))))"
+    covers: [mit-18-06/lecture-5]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: la-sub-005
+    difficulty: 2
+    type: matrix
+    prompt: |
+      $P = {{P}}$ is a permutation matrix. Find $P^{-1}$.
+
+      Enter it as `[[a, b, c, d], [e, f, g, h], [i, j, k, l], [m, n, o, p]]`.
+    params:
+      k: { int: [1, 4] }
+    let:
+      perm: "[[2, 3, 1, 4], [3, 1, 4, 2], [4, 1, 2, 3], [2, 4, 1, 3]][k, :]"
+      P: "identity(4)[perm, :]"
+    answer: "transpose(P)"
+    hints:
+      - 'For every permutation matrix, $P^{-1} = P^{\mathsf T}$.'
+    solution: |
+      The rows of $P$ are distinct unit vectors, so $(PP^{\mathsf T})_{ij} = (\text{row } i) \cdot (\text{row } j)$ is $1$ when $i = j$ and $0$ otherwise:
+      $PP^{\mathsf T} = I$. Hence
+      $$ P^{-1} = P^{\mathsf T} = {{transpose(P)}}. $$
+      $P^{\mathsf T}$ puts the rows back where they came from.
+    verify: "Matrix([[1 if j == [[2, 3, 1, 4], [3, 1, 4, 2], [4, 1, 2, 3], [2, 4, 1, 3]][k - 1][i] - 1 else 0 for j in range(4)] for i in range(4)]).inv()"
+    covers: [mit-18-06/lecture-5]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: la-sub-006
+    difficulty: 3
+    type: mc
+    prompt: |
+      Which of these is a subspace of the vector space of all $3 \times 3$ real matrices?
+    options:
+      - "All upper triangular matrices"
+      - "All invertible matrices"
+      - "All singular matrices"
+      - "All matrices whose $(1, 1)$ entry is $1$"
+    answer: 0
+    hints:
+      - 'Check each set for the zero matrix, closure under addition and closure under scalar multiples.'
+      - 'For the singular matrices, try adding two simple singular matrices.'
+    solution: |
+      - Upper triangular matrices: the zero matrix is one, and sums and multiples of upper triangular matrices are upper triangular. **Subspace.**
+      - Invertible matrices: the zero matrix is not invertible (and $I + (-I) = 0$).
+      - Singular matrices: $\operatorname{diag}(1, 0, 0) + \operatorname{diag}(0, 1, 1) = I$ is invertible, so the set is not closed under addition.
+      - $(1, 1)$ entry equal to $1$: the zero matrix is missing.
+    verify: "0 if (diag(1, 0, 0) + diag(0, 1, 1)).det() != 0 and (Matrix([[1, 2, 3], [0, 4, 5], [0, 0, 6]]) + Matrix([[1, 1, 1], [0, 1, 1], [0, 0, 1]])).is_upper else 1"
+    covers: [mit-18-06/lecture-5]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: la-sub-007
+    difficulty: 3
+    type: vector
+    prompt: |
+      The planes ${{a1}}x {{signed: a2}}y {{signed: a3}}z = 0$ and ${{b1}}x {{signed: b2}}y {{signed: b3}}z = 0$ are subspaces of $\mathbb{R}^3$, and so is their intersection, a line through the origin.
+      Give a non-zero vector along that line.
+
+      Enter it as a list such as `1, 2, 3` (any non-zero multiple is accepted).
+    params:
+      a1: { int: [-3, 3], not: [0] }
+      a2: { int: [-3, 3] }
+      a3: { int: [-3, 3] }
+      b1: { int: [-3, 3] }
+      b2: { int: [-3, 3], not: [0] }
+      b3: { int: [-3, 3] }
+    let:
+      n1: "[a1, a2, a3]"
+      n2: "[b1, b2, b3]"
+      d: "cross(n1, n2)"
+    require: ["norm(d) > 0"]
+    answer: d
+    upToScale: true
+    hints:
+      - 'A vector on the line satisfies both equations: it is perpendicular to both normal vectors ${{row: n1}}$ and ${{row: n2}}$.'
+      - 'The cross product of the two normals is perpendicular to both. (Or solve the $2 \times 3$ system by elimination.)'
+    solution: |
+      The intersection is the null space of $\begin{bmatrix} {{a1}} & {{a2}} & {{a3}} \\ {{b1}} & {{b2}} & {{b3}} \end{bmatrix}$:
+      the vectors perpendicular to both normals $\mathbf{n}_1 = {{row: n1}}$ and $\mathbf{n}_2 = {{row: n2}}$. One such vector is
+      $$ \mathbf{n}_1 \times \mathbf{n}_2 = {{d}}. $$
+      Check: $\mathbf{n}_1 \cdot \mathbf{d} = {{dot(n1, d)}}$ and $\mathbf{n}_2 \cdot \mathbf{d} = {{dot(n2, d)}}$. Every multiple of it is on the line too.
+    verify: "list(Matrix([[a1, a2, a3], [b1, b2, b3]]).nullspace()[0])"
+    covers: [mit-18-06/lecture-5]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: la-sub-008
+    difficulty: 3
+    type: proof
+    prompt: |
+      $V$ and $W$ are subspaces of $\mathbb{R}^n$. Prove that their intersection $V \cap W$ is also a subspace.
+    hints:
+      - 'Check the three requirements: $\mathbf{0} \in V \cap W$, closure under addition, closure under scalar multiplication.'
+    solution: |
+      - $\mathbf{0} \in V$ and $\mathbf{0} \in W$ because both are subspaces, so $\mathbf{0} \in V \cap W$.
+      - If $\mathbf{x}, \mathbf{y} \in V \cap W$, then $\mathbf{x} + \mathbf{y} \in V$ (as $V$ is a subspace containing both) and likewise $\mathbf{x} + \mathbf{y} \in W$; so $\mathbf{x} + \mathbf{y} \in V \cap W$.
+      - If $\mathbf{x} \in V \cap W$ and $c \in \mathbb{R}$, then $c\mathbf{x} \in V$ and $c\mathbf{x} \in W$, so $c\mathbf{x} \in V \cap W$.
+
+      Hence $V \cap W$ is a subspace. (For example, two planes through the origin in $\mathbb{R}^3$ meet in a line through the origin, or coincide.)
+    covers: [mit-18-06/lecture-5]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: la-sub-009
+    difficulty: 4
+    type: mc
+    prompt: |
+      $V$ and $W$ are subspaces of $\mathbb{R}^n$. When is their **union** $V \cup W$ (vectors in $V$ or in $W$) a subspace?
+    options:
+      - "Exactly when one of them contains the other"
+      - "Always"
+      - "Exactly when $V \\cap W = \\{\\mathbf{0}\\}$"
+      - "Exactly when $V$ and $W$ have the same dimension"
+    answer: 0
+    hints:
+      - 'Think of two different lines through the origin in $\mathbb{R}^2$.'
+      - 'Suppose $\mathbf{v} \in V$ is not in $W$ and $\mathbf{w} \in W$ is not in $V$. Where can $\mathbf{v} + \mathbf{w}$ lie?'
+    solution: |
+      If $V \subseteq W$ the union is $W$, a subspace (and similarly if $W \subseteq V$).
+
+      Otherwise pick $\mathbf{v} \in V \setminus W$ and $\mathbf{w} \in W \setminus V$. If $\mathbf{v} + \mathbf{w}$ were in $V$, then
+      $\mathbf{w} = (\mathbf{v} + \mathbf{w}) - \mathbf{v} \in V$, a contradiction; if it were in $W$, then $\mathbf{v} \in W$, again a contradiction.
+      So $\mathbf{v} + \mathbf{w} \notin V \cup W$ and the union is not closed under addition.
+      Two different lines through the origin show that neither "same dimension" nor "$V \cap W = \{\mathbf{0}\}$" is enough.
+    verify: "0 if Matrix([[1, 0], [0, 1]]).rank() == 2 else 1"
+    covers: [mit-18-06/lecture-5]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: la-sub-010
+    difficulty: 3
+    type: numeric
+    prompt: |
+      The symmetric ${{n}} \times {{n}}$ matrices ($S^{\mathsf T} = S$) form a subspace of all ${{n}} \times {{n}}$ matrices.
+      How many entries can you choose freely when writing down a symmetric ${{n}} \times {{n}}$ matrix (that is, what is the dimension of this subspace)?
+    params:
+      n: { int: [2, 7] }
+    answer: "n*(n + 1)/2"
+    hints:
+      - 'Once you choose the entries on and above the diagonal, symmetry fixes the rest.'
+      - 'Count: ${{n}}$ on the diagonal, plus the entries strictly above it.'
+    solution: |
+      The entries on or above the diagonal can be anything; each entry below is then forced ($s_{ji} = s_{ij}$).
+      There are ${{n}}$ diagonal entries and $\frac{ {{n}}({{n}} - 1)}{2} = {{n*(n - 1)/2}}$ above, so
+      $$ {{n}} + {{n*(n - 1)/2}} = \frac{ {{n}} \cdot {{n + 1}} }{2} = {{n*(n + 1)/2}}. $$
+      The matrices $E_{ii}$ and $E_{ij} + E_{ji}$ ($i < j$) form a basis.
+    verify: "Matrix([list(Matrix(n, n, lambda i, j: 1 if (i, j) in [(p, q), (q, p)] else 0)) for p in range(n) for q in range(n)]).rank()"
+    covers: [mit-18-06/lecture-5]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: la-sub-011
+    difficulty: 4
+    type: proof
+    prompt: |
+      $V$ and $W$ are subspaces of $\mathbb{R}^n$. Show that their sum $V + W = \{\mathbf{v} + \mathbf{w} : \mathbf{v} \in V,\ \mathbf{w} \in W\}$ is a subspace,
+      and that it is the **smallest** subspace containing both $V$ and $W$.
+    hints:
+      - 'For closure, add two elements $\mathbf{v}_1 + \mathbf{w}_1$ and $\mathbf{v}_2 + \mathbf{w}_2$ and regroup.'
+      - 'For "smallest": any subspace containing $V$ and $W$ must contain every $\mathbf{v} + \mathbf{w}$. Why?'
+    solution: |
+      **Subspace.** $\mathbf{0} = \mathbf{0} + \mathbf{0} \in V + W$. If $\mathbf{x}_1 = \mathbf{v}_1 + \mathbf{w}_1$ and $\mathbf{x}_2 = \mathbf{v}_2 + \mathbf{w}_2$, then
+      $$ \mathbf{x}_1 + \mathbf{x}_2 = (\mathbf{v}_1 + \mathbf{v}_2) + (\mathbf{w}_1 + \mathbf{w}_2), \qquad c\,\mathbf{x}_1 = (c\mathbf{v}_1) + (c\mathbf{w}_1), $$
+      and the bracketed vectors lie in $V$ and $W$ because those are subspaces. So $V + W$ is closed under both operations.
+
+      **Contains $V$ and $W$.** $\mathbf{v} = \mathbf{v} + \mathbf{0} \in V + W$ and $\mathbf{w} = \mathbf{0} + \mathbf{w} \in V + W$.
+
+      **Smallest.** If $S$ is any subspace with $V \subseteq S$ and $W \subseteq S$, then for $\mathbf{v} \in V$, $\mathbf{w} \in W$ both lie in $S$, and $S$ is closed under addition,
+      so $\mathbf{v} + \mathbf{w} \in S$. Hence $V + W \subseteq S$.
+    covers: [mit-18-06/lecture-5]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6

@@ -1,0 +1,384 @@
+subject: calculus
+topic: directional-derivatives-and-tangent-planes
+questions:
+  - id: calc-dirder-001
+    difficulty: 1
+    type: mc
+    prompt: |
+      At a point $P$ where $\nabla f(P) \ne \mathbf{0}$, in which direction does $f$ increase fastest?
+    options:
+      - "In the direction of $\\nabla f(P)$."
+      - "In the direction of $-\\nabla f(P)$."
+      - "Perpendicular to $\\nabla f(P)$, along the level curve."
+      - "Along the coordinate axis whose partial derivative is largest."
+    answer: 0
+    hints:
+      - 'For a unit vector $\mathbf{u}$, $D_{\mathbf{u}}f = \nabla f\cdot\mathbf{u} = |\nabla f|\cos\theta$.'
+    solution: |
+      $D_{\mathbf{u}}f(P) = \nabla f(P)\cdot\mathbf{u} = |\nabla f(P)|\cos\theta$, where $\theta$ is the angle between $\mathbf{u}$ and $\nabla f(P)$.
+      It is largest when $\cos\theta = 1$, i.e. $\mathbf{u}$ points along $\nabla f(P)$, and the largest rate is $|\nabla f(P)|$.
+      Along the level curve the rate is $0$, and along $-\nabla f$ the function decreases fastest.
+    verify: "0 if simplify((2*cos(t) + 3*sin(t)).subs(t, atan2(3, 2)) - maximum(2*cos(t) + 3*sin(t), t, Interval(0, 2*pi))) == 0 else 1"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: calc-dirder-002
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Let $f(x, y) = {{a}}x^2 {{signed: b}}xy$. Find the directional derivative of $f$ at $({{p}}, {{q}})$ in the direction of the vector
+      $\mathbf{v} = \langle {{v1}}, {{v2}} \rangle$. Give it to 4 significant figures.
+    params:
+      a: { int: [-3, 4], not: [0, 1, -1] }
+      b: { int: [-4, 4], not: [0, 1, -1] }
+      p: { int: [-3, 3] }
+      q: { int: [-3, 3] }
+      v1: { int: [-4, 4] }
+      v2: { int: [-4, 4], not: [0] }
+    let:
+      fx: "2*a*p + b*q"
+      fy: "b*p"
+      len: "sqrt(v1^2 + v2^2)"
+    require: ["fx*v1 + fy*v2 != 0"]
+    answer: "(fx*v1 + fy*v2) / len"
+    hints:
+      - 'Use a **unit** vector: $\mathbf{u} = \mathbf{v}/|\mathbf{v}|$, with $|\mathbf{v}| = \sqrt{ {{v1^2 + v2^2}} }$.'
+      - '$D_{\mathbf{u}}f = \nabla f\cdot\mathbf{u}$, and $\nabla f = \langle {{2*a}}x {{signed: b}}y,\ {{b}}x \rangle$.'
+    solution: |
+      $\nabla f = \langle {{2*a}}x {{signed: b}}y,\ {{b}}x \rangle$, so $\nabla f({{p}}, {{q}}) = \langle {{fx}}, {{fy}} \rangle$.
+      The unit vector is $\mathbf{u} = \dfrac{\langle {{v1}}, {{v2}} \rangle}{\sqrt{ {{v1^2 + v2^2}} }}$. Then
+      $$D_{\mathbf{u}}f({{p}}, {{q}}) = \frac{({{fx}})({{v1}}) + ({{fy}})({{v2}})}{\sqrt{ {{v1^2 + v2^2}} }} = \frac{ {{fx*v1 + fy*v2}} }{\sqrt{ {{v1^2 + v2^2}} }} \approx {{(fx*v1 + fy*v2) / len}}.$$
+    verify: "(lambda s: diff((a*x**2 + b*x*y).subs({x: p + s*v1/sqrt(v1**2 + v2**2), y: q + s*v2/sqrt(v1**2 + v2**2)}), s).subs(s, 0))(Symbol('s'))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-dirder-003
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Let $f(x, y) = x^2y {{signed: a}}y^2 {{signed: b}}x$. What is the maximum rate of increase of $f$ at $({{p}}, {{q}})$?
+      Give it to 4 significant figures.
+    params:
+      a: { int: [-3, 3], not: [0, 1, -1] }
+      b: { int: [-5, 5], not: [0] }
+      p: { int: [-3, 3] }
+      q: { int: [-3, 3] }
+    let:
+      gx: "2*p*q + b"
+      gy: "p^2 + 2*a*q"
+    require: ["gx^2 + gy^2 > 0"]
+    answer: "sqrt(gx^2 + gy^2)"
+    hints:
+      - 'The maximum of $D_{\mathbf{u}}f$ over unit vectors $\mathbf{u}$ is $|\nabla f|$.'
+      - '$\nabla f = \langle 2xy {{signed: b}},\ x^2 {{signed: 2*a}}y \rangle$.'
+    solution: |
+      $\nabla f = \langle 2xy {{signed: b}},\ x^2 {{signed: 2*a}}y \rangle$, so $\nabla f({{p}}, {{q}}) = \langle {{gx}}, {{gy}} \rangle$.
+      The maximum rate of increase is attained in the direction of the gradient and equals
+      $$|\nabla f({{p}}, {{q}})| = \sqrt{ {{gx^2}} + {{gy^2}} } = \sqrt{ {{gx^2 + gy^2}} } \approx {{sqrt(gx^2 + gy^2)}}.$$
+    verify: "(lambda gx, gy: maximum(gx*cos(t) + gy*sin(t), t, Interval(0, 2*pi)))(diff(x**2*y + a*y**2 + b*x, x).subs({x: p, y: q}), diff(x**2*y + a*y**2 + b*x, y).subs({x: p, y: q}))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-dirder-004
+    difficulty: 2
+    type: expression
+    prompt: |
+      Find the tangent plane to the graph of $f(x, y) = x^2 {{signed: a}}xy {{signed: b}}y^2$ at the point above $({{p}}, {{q}})$.
+      Write it as $z = \dots$ and enter the right-hand side as an expression in $x$ and $y$, such as `4x - 2y + 3`.
+    params:
+      a: { int: [-3, 3], not: [0, 1, -1] }
+      b: { int: [-3, 3], not: [0, 1, -1] }
+      p: { int: [-2, 2] }
+      q: { int: [-2, 2] }
+    let:
+      f0: "p^2 + a*p*q + b*q^2"
+      fx: "2*p + a*q"
+      fy: "a*p + 2*b*q"
+    answer: "f0 + fx*(x - p) + fy*(y - q)"
+    vars: [x, y]
+    hints:
+      - 'The tangent plane is $z = f(p, q) + f_x(p, q)(x - p) + f_y(p, q)(y - q)$.'
+      - '$f({{p}}, {{q}}) = {{f0}}$, $f_x = 2x {{signed: a}}y$, $f_y = {{a}}x {{signed: 2*b}}y$.'
+    solution: |
+      $f({{p}}, {{q}}) = {{f0}}$, $f_x = 2x {{signed: a}}y$ and $f_y = {{a}}x {{signed: 2*b}}y$, so $f_x({{p}}, {{q}}) = {{fx}}$ and $f_y({{p}}, {{q}}) = {{fy}}$.
+      $$z = {{f0}} + ({{fx}})(x {{signed: -p}}) + ({{fy}})(y {{signed: -q}}) = {{fx}}x {{signed: fy}}y {{signed: f0 - fx*p - fy*q}}.$$
+    verify: "(lambda h: series((x**2 + a*x*y + b*y**2).subs({x: p + h*(x - p), y: q + h*(y - q)}, simultaneous=True), h, 0, 2).removeO().subs(h, 1))(Symbol('h'))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-dirder-005
+    difficulty: 2
+    type: mc
+    prompt: |
+      At a point $P$, $\nabla f(P) = \langle 3, 4 \rangle$. What is the smallest possible value of $D_{\mathbf{u}}f(P)$ over all unit vectors $\mathbf{u}$?
+    options:
+      - "$-5$"
+      - "$0$"
+      - "$-7$"
+      - "$-4$"
+    answer: 0
+    hints:
+      - '$D_{\mathbf{u}}f = |\nabla f|\cos\theta$. What is the smallest value of $\cos\theta$?'
+    solution: |
+      $D_{\mathbf{u}}f(P) = |\nabla f(P)|\cos\theta$ with $|\nabla f(P)| = \sqrt{9 + 16} = 5$. The minimum, at $\theta = \pi$ (that is,
+      $\mathbf{u} = -\nabla f/|\nabla f| = \langle -\tfrac35, -\tfrac45 \rangle$), is $-5$.
+    verify: "[-5, 0, -7, -4].index(minimum(3*cos(t) + 4*sin(t), t, Interval(0, 2*pi)))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: calc-dirder-006
+    difficulty: 3
+    type: vector
+    prompt: |
+      Find a normal vector to the surface $x^2 + {{a}}y^2 + {{b}}z^2 = {{K}}$ at the point $({{x0}}, {{y0}}, {{z0}})$.
+      Enter it as a list such as `2, -4, 6`; any non-zero multiple is accepted.
+    params:
+      a: { int: [2, 4] }
+      b: { int: [2, 5] }
+      x0: { int: [-3, 3] }
+      y0: { int: [-3, 3] }
+      z0: { int: [1, 3] }
+    let:
+      K: "x0^2 + a*y0^2 + b*z0^2"
+    answer: "[2*x0, 2*a*y0, 2*b*z0]"
+    upToScale: true
+    hints:
+      - 'The surface is a level surface $F(x, y, z) = {{K}}$ of $F = x^2 + {{a}}y^2 + {{b}}z^2$.'
+      - 'The gradient $\nabla F$ is perpendicular to level surfaces.'
+    solution: |
+      With $F = x^2 + {{a}}y^2 + {{b}}z^2$, the surface is the level set $F = {{K}}$, and $\nabla F = \langle 2x, {{2*a}}y, {{2*b}}z \rangle$ is normal to it.
+      At $({{x0}}, {{y0}}, {{z0}})$:
+      $$\nabla F = \langle {{2*x0}}, {{2*a*y0}}, {{2*b*z0}} \rangle$$
+      (any non-zero multiple, such as $\langle {{x0}}, {{a*y0}}, {{b*z0}} \rangle$, is also normal).
+    verify: "(lambda Z: [-diff(Z, x).subs({x: x0, y: y0}), -diff(Z, y).subs({x: x0, y: y0}), 1])(sqrt((x0**2 + a*y0**2 + b*z0**2 - x**2 - a*y**2)/b))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-dirder-007
+    difficulty: 3
+    type: vector
+    prompt: |
+      The point $P({{p}}, {{q}}, {{r}})$ lies on the surface $xy + yz {{signed: a}}xz = {{K}}$. The tangent plane at $P$ has an equation
+      $Ax + By + Cz = D$. Enter the four coefficients as a list `A, B, C, D` (any non-zero multiple of them is accepted).
+    params:
+      a: { int: [2, 4] }
+      p: { int: [-3, 3] }
+      q: { int: [-3, 3] }
+      r: { int: [-3, 3] }
+    let:
+      K: "p*q + q*r + a*p*r"
+      A: "q + a*r"
+      B: "p + r"
+      C: "q + a*p"
+    require: ["C != 0", "A != 0 or B != 0"]
+    answer: "[A, B, C, A*p + B*q + C*r]"
+    upToScale: true
+    hints:
+      - 'Let $F(x, y, z) = xy + yz {{signed: a}}xz$. The normal to the tangent plane is $\nabla F(P)$.'
+      - '$\nabla F = \langle y {{signed: a}}z,\ x + z,\ y {{signed: a}}x \rangle$; then $D = \nabla F(P)\cdot P$.'
+    solution: |
+      With $F = xy + yz {{signed: a}}xz$, $\nabla F = \langle y {{signed: a}}z,\ x + z,\ y {{signed: a}}x \rangle$, so
+      $\nabla F({{p}}, {{q}}, {{r}}) = \langle {{A}}, {{B}}, {{C}} \rangle$. The tangent plane through $P$ with this normal is
+      $${{A}}(x {{signed: -p}}) + ({{B}})(y {{signed: -q}}) + ({{C}})(z {{signed: -r}}) = 0
+        \quad\Longleftrightarrow\quad {{A}}x {{signed: B}}y {{signed: C}}z = {{A*p + B*q + C*r}}.$$
+    verify: "(lambda Z: [-diff(Z, x).subs({x: p, y: q}), -diff(Z, y).subs({x: p, y: q}), 1, (-diff(Z, x)*p - diff(Z, y)*q).subs({x: p, y: q}) + r])((p*q + q*r + a*p*r - x*y)/(y + a*x))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: calc-dirder-008
+    difficulty: 3
+    type: numeric
+    prompt: |
+      Let $f(x, y, z) = {{a}}xy + yz^2 {{signed: b}}xz$. Find the rate of change of $f$ at $P({{p1}}, {{p2}}, {{p3}})$ in the direction
+      from $P$ towards $Q({{q1}}, {{q2}}, {{q3}})$. Give it to 4 significant figures.
+    params:
+      a: { int: [-3, 3], not: [0, 1, -1] }
+      b: { int: [-3, 3], not: [0, 1, -1] }
+      p1: { int: [-2, 2] }
+      p2: { int: [-2, 2] }
+      p3: { int: [-2, 2] }
+      q1: { int: [-2, 2] }
+      q2: { int: [-2, 2] }
+      q3: { int: [-2, 2] }
+    let:
+      g: "[a*p2 + b*p3, a*p1 + p3^2, 2*p2*p3 + b*p1]"
+      w: "[q1 - p1, q2 - p2, q3 - p3]"
+    require: ["norm(w) > 0"]
+    answer: "dot(g, w) / norm(w)"
+    hints:
+      - 'The direction is $\overrightarrow{PQ} = {{row: w}}$; divide by its length to get a unit vector.'
+      - '$\nabla f = \langle {{a}}y {{signed: b}}z,\ {{a}}x + z^2,\ 2yz {{signed: b}}x \rangle$.'
+    solution: |
+      $\nabla f = \langle {{a}}y {{signed: b}}z,\ {{a}}x + z^2,\ 2yz {{signed: b}}x \rangle$, so $\nabla f(P) = {{row: g}}$.
+      $\overrightarrow{PQ} = {{row: w}}$ has length $\sqrt{ {{dot(w, w)}} }$. Hence
+      $$D_{\mathbf{u}}f(P) = \frac{\nabla f(P)\cdot\overrightarrow{PQ}}{|\overrightarrow{PQ}|} = \frac{ {{dot(g, w)}} }{\sqrt{ {{dot(w, w)}} }} \approx {{dot(g, w) / norm(w)}}.$$
+    verify: "(lambda s, L: diff((a*x*y + y*z**2 + b*x*z).subs({x: p1 + s*(q1 - p1)/L, y: p2 + s*(q2 - p2)/L, z: p3 + s*(q3 - p3)/L}), s).subs(s, 0))(Symbol('s'), sqrt((q1 - p1)**2 + (q2 - p2)**2 + (q3 - p3)**2))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-dirder-009
+    difficulty: 3
+    type: vector
+    prompt: |
+      Let $f(x, y) = {{a}}x^2y {{signed: b}}y$. Find a direction $\mathbf{v}$ at $({{p}}, {{q}})$ in which the rate of change of $f$ is zero.
+      Enter it as a list such as `3, -1`; any non-zero multiple is accepted.
+    params:
+      a: { int: [-3, 3], not: [0, 1, -1] }
+      b: { int: [-5, 5], not: [0] }
+      p: { int: [-3, 3] }
+      q: { int: [-3, 3] }
+    let:
+      fx: "2*a*p*q"
+      fy: "a*p^2 + b"
+    require: ["fx^2 + fy^2 > 0"]
+    answer: "[-fy, fx]"
+    upToScale: true
+    hints:
+      - '$D_{\mathbf{u}}f = \nabla f\cdot\mathbf{u}$ is zero exactly when $\mathbf{u}$ is perpendicular to $\nabla f$.'
+      - 'A vector perpendicular to $\langle A, B \rangle$ is $\langle -B, A \rangle$.'
+    solution: |
+      $\nabla f = \langle {{2*a}}xy,\ {{a}}x^2 {{signed: b}} \rangle$, so $\nabla f({{p}}, {{q}}) = \langle {{fx}}, {{fy}} \rangle$. The rate of change
+      is zero in the directions perpendicular to the gradient, i.e. tangent to the level curve through the point:
+      $$\mathbf{v} = \langle {{-fy}}, {{fx}} \rangle \quad (\text{or its negative}).$$
+    verify: "Matrix([[diff(a*x**2*y + b*y, x).subs({x: p, y: q}), diff(a*x**2*y + b*y, y).subs({x: p, y: q})]]).nullspace()[0]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-dirder-010
+    difficulty: 4
+    type: vector
+    prompt: |
+      At a point $P$, a differentiable function $f$ has directional derivative ${{frac: (3*g1 + 4*g2)/5}}$ in the direction of
+      $\mathbf{u} = \langle \tfrac35, \tfrac45 \rangle$ and ${{frac: (5*g1 - 12*g2)/13}}$ in the direction of $\mathbf{w} = \langle \tfrac{5}{13}, -\tfrac{12}{13} \rangle$.
+      Find $\nabla f(P)$. Enter it as a list such as `2, -3`.
+    params:
+      g1: { int: [-5, 5] }
+      g2: { int: [-5, 5] }
+    answer: "[g1, g2]"
+    hints:
+      - 'Write $\nabla f(P) = \langle A, B \rangle$. Each directional derivative gives one linear equation: $D_{\mathbf{u}}f = \nabla f\cdot\mathbf{u}$.'
+      - '$\tfrac35A + \tfrac45B = {{frac: (3*g1 + 4*g2)/5}}$ and $\tfrac{5}{13}A - \tfrac{12}{13}B = {{frac: (5*g1 - 12*g2)/13}}$.'
+    solution: |
+      Let $\nabla f(P) = \langle A, B \rangle$. Then
+      $$3A + 4B = {{3*g1 + 4*g2}}, \qquad 5A - 12B = {{5*g1 - 12*g2}}$$
+      (each equation multiplied by its denominator). Multiply the first by $3$ and add: $14A = {{3*(3*g1 + 4*g2) + 5*g1 - 12*g2}}$, so $A = {{g1}}$;
+      then $4B = {{3*g1 + 4*g2}} - 3({{g1}})$ gives $B = {{g2}}$. So $\nabla f(P) = \langle {{g1}}, {{g2}} \rangle$.
+    verify: "(lambda A, B: (lambda s: [s[A], s[B]])(solve([Rational(3, 5)*A + Rational(4, 5)*B - Rational(3*g1 + 4*g2, 5), Rational(5, 13)*A - Rational(12, 13)*B - Rational(5*g1 - 12*g2, 13)], [A, B])))(Symbol('A'), Symbol('B'))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: calc-dirder-011
+    difficulty: 4
+    type: vector
+    prompt: |
+      The sphere $x^2 + y^2 + z^2 = {{K}}$ and the plane ${{a}}x {{signed: b}}y {{signed: c}}z = {{D}}$ both pass through $P({{p}}, {{q}}, {{r}})$.
+      Find a direction vector for the tangent line to their curve of intersection at $P$.
+      Enter it as a list such as `1, 2, -1`; any non-zero multiple is accepted.
+    params:
+      a: { int: [-3, 3], not: [0, 1, -1] }
+      b: { int: [-3, 3], not: [0, 1, -1] }
+      c: { int: [-3, 3], not: [0, 1, -1] }
+      p: { int: [-3, 3] }
+      q: { int: [-3, 3] }
+      r: { int: [-3, 3] }
+    let:
+      K: "p^2 + q^2 + r^2"
+      D: "a*p + b*q + c*r"
+      T: "cross([2*p, 2*q, 2*r], [a, b, c])"
+    require: ["norm(T) > 0"]
+    answer: "T"
+    upToScale: true
+    hints:
+      - 'The tangent line lies in the tangent plane of each surface, so it is perpendicular to both normals.'
+      - 'The normals are $\nabla F = \langle 2x, 2y, 2z \rangle$ for the sphere and $\langle {{a}}, {{b}}, {{c}} \rangle$ for the plane; take their cross product.'
+    solution: |
+      At $P$ the sphere has normal $\nabla F = \langle {{2*p}}, {{2*q}}, {{2*r}} \rangle$ and the plane has normal $\langle {{a}}, {{b}}, {{c}} \rangle$.
+      The tangent line to the intersection is perpendicular to both, so it points along
+      $$\langle {{2*p}}, {{2*q}}, {{2*r}} \rangle \times \langle {{a}}, {{b}}, {{c}} \rangle = {{row: T}}.$$
+    verify: "Matrix([[p, q, r], [a, b, c]]).nullspace()[0]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: calc-dirder-012
+    difficulty: 4
+    type: vector
+    prompt: |
+      At which point of the surface $z = x^2 + {{a}}y^2$ is the tangent plane parallel to the plane ${{A}}x {{signed: B}}y - z = 0$?
+      Enter the point as a list `x, y, z`.
+    params:
+      a: { int: [2, 4] }
+      x0: { int: [-3, 3] }
+      y0: { int: [-3, 3] }
+    let:
+      A: "2*x0"
+      B: "2*a*y0"
+    answer: "[x0, y0, x0^2 + a*y0^2]"
+    hints:
+      - 'The tangent plane to $z = f(x, y)$ has normal $\langle f_x, f_y, -1 \rangle$.'
+      - 'Parallel planes have parallel normals: set $\langle 2x, {{2*a}}y, -1 \rangle = \langle {{A}}, {{B}}, -1 \rangle$.'
+    solution: |
+      The tangent plane at $(x, y, f(x, y))$ has normal $\langle f_x, f_y, -1 \rangle = \langle 2x, {{2*a}}y, -1 \rangle$, and the given plane has normal
+      $\langle {{A}}, {{B}}, -1 \rangle$. Both have $-1$ as third component, so they are parallel exactly when they are equal:
+      $2x = {{A}}$ and ${{2*a}}y = {{B}}$, giving $x = {{x0}}$, $y = {{y0}}$, and $z = ({{x0}})^2 + {{a}}({{y0}})^2 = {{x0^2 + a*y0^2}}$.
+      The point is $({{x0}}, {{y0}}, {{x0^2 + a*y0^2}})$.
+    verify: "(lambda s: [s[x], s[y], (x**2 + a*y**2).subs(s)])(solve([diff(x**2 + a*y**2, x) - 2*x0, diff(x**2 + a*y**2, y) - 2*a*y0], [x, y]))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-dirder-013
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Use the linear approximation of $f(x, y) = \sqrt{x^2 + y^2}$ at $({{A}}, {{B}})$ to estimate $\sqrt{({{A + dx}})^2 + ({{B + dy}})^2}$.
+      Give the value of the linear approximation to 4 decimal places.
+    params:
+      k: { choice: [1, 2, 3, 4] }
+      dx: { choice: [-0.05, -0.03, -0.02, 0.02, 0.03, 0.05] }
+      dy: { choice: [-0.05, -0.03, -0.02, 0.02, 0.03, 0.05] }
+    let:
+      A: "[3, 5, 6, 8][k]"
+      B: "[4, 12, 8, 15][k]"
+      C: "[5, 13, 10, 17][k]"
+    answer: "C + (A*dx + B*dy) / C"
+    tolerance: { abs: 0.0002 }
+    hints:
+      - '$f({{A}}, {{B}}) = {{C}}$, and $f_x = \dfrac{x}{\sqrt{x^2 + y^2}}$, $f_y = \dfrac{y}{\sqrt{x^2 + y^2}}$.'
+      - '$f(a + \Delta x, b + \Delta y) \approx f(a, b) + f_x\,\Delta x + f_y\,\Delta y$.'
+    solution: |
+      $f({{A}}, {{B}}) = \sqrt{ {{A^2}} + {{B^2}} } = {{C}}$, $f_x({{A}}, {{B}}) = \frac{ {{A}} }{ {{C}} }$, $f_y({{A}}, {{B}}) = \frac{ {{B}} }{ {{C}} }$. With $\Delta x = {{dx}}$, $\Delta y = {{dy}}$:
+      $$f \approx {{C}} + \frac{ {{A}} }{ {{C}} }({{dx}}) + \frac{ {{B}} }{ {{C}} }({{dy}}) = {{C}} + \frac{ {{A*dx + B*dy}} }{ {{C}} } \approx {{C + (A*dx + B*dy)/C}}.$$
+    verify: "(lambda h, A, B: series(sqrt((A + h*dx)**2 + (B + h*dy)**2), h, 0, 2).removeO().subs(h, 1))(Symbol('h'), [3, 5, 6, 8][k - 1], [4, 12, 8, 15][k - 1])"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-dirder-014
+    difficulty: 3
+    type: proof
+    prompt: |
+      Let $f$ be differentiable at $P$ with $\nabla f(P) \ne \mathbf{0}$. Prove that the maximum of $D_{\mathbf{u}}f(P)$ over all unit vectors
+      $\mathbf{u}$ is $|\nabla f(P)|$, attained only for $\mathbf{u} = \nabla f(P)/|\nabla f(P)|$.
+    hints:
+      - 'Start from $D_{\mathbf{u}}f(P) = \nabla f(P)\cdot\mathbf{u}$.'
+      - 'Use $\mathbf{a}\cdot\mathbf{b} = |\mathbf{a}||\mathbf{b}|\cos\theta$ (or the Cauchy–Schwarz inequality) with $|\mathbf{u}| = 1$.'
+    solution: |
+      Since $f$ is differentiable, $D_{\mathbf{u}}f(P) = \nabla f(P)\cdot\mathbf{u}$. With $\theta$ the angle between $\nabla f(P)$ and $\mathbf{u}$ and $|\mathbf{u}| = 1$,
+      $$D_{\mathbf{u}}f(P) = |\nabla f(P)|\,|\mathbf{u}|\cos\theta = |\nabla f(P)|\cos\theta \le |\nabla f(P)|.$$
+      Equality holds iff $\cos\theta = 1$, i.e. $\theta = 0$: $\mathbf{u}$ points the same way as $\nabla f(P)$, and being a unit vector,
+      $\mathbf{u} = \nabla f(P)/|\nabla f(P)|$. For that $\mathbf{u}$, $D_{\mathbf{u}}f(P) = \nabla f(P)\cdot\nabla f(P)/|\nabla f(P)| = |\nabla f(P)|$,
+      so the bound is attained. $\blacksquare$
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5

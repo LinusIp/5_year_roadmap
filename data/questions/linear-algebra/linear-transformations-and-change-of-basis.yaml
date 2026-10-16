@@ -1,0 +1,352 @@
+subject: linear-algebra
+topic: linear-transformations-and-change-of-basis
+questions:
+  - id: la-lt-001
+    difficulty: 1
+    type: mc
+    prompt: |
+      Which of these maps $T: \mathbb{R}^2 \to \mathbb{R}^2$ is **linear**? (Write $\mathbf{v} = (v_1, v_2)$.)
+    options:
+      - "$T(\\mathbf{v}) = (2v_1 - v_2,\\; 3v_1)$"
+      - "$T(\\mathbf{v}) = \\mathbf{v} + (1, 0)$"
+      - "$T(\\mathbf{v}) = (v_1v_2,\\; v_2)$"
+      - "$T(\\mathbf{v}) = (|v_1|,\\; v_2)$"
+    answer: 0
+    hints:
+      - 'A linear map satisfies $T(c\mathbf{v} + d\mathbf{w}) = cT(\mathbf{v}) + dT(\mathbf{w})$; in particular $T(\mathbf{0}) = \mathbf{0}$.'
+    solution: |
+      $(2v_1 - v_2, 3v_1)$ is $A\mathbf{v}$ with $A = \begin{bmatrix} 2 & -1 \\ 3 & 0 \end{bmatrix}$, and every matrix map is linear.
+
+      The others fail: the shift sends $\mathbf{0}$ to $(1, 0) \ne \mathbf{0}$; $v_1v_2$ is quadratic, so doubling $\mathbf{v}$ quadruples it;
+      and $|v_1|$ gives $T(-\mathbf{v}) \ne -T(\mathbf{v})$ when $v_1 \ne 0$.
+    verify: "0"
+    covers: [mit-18-06/lecture-30, game-developer/linear-transformation]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+  - id: la-lt-002
+    difficulty: 1
+    type: matrix
+    prompt: |
+      In a 2D game, a sprite is first **rotated counterclockwise by ${{th}}°$** about the origin and then **stretched** by ${{a}}$ horizontally and ${{b}}$ vertically.
+      What is the $2 \times 2$ matrix of the combined transformation? Enter it as `[[1, 2], [3, 4]]`.
+    params:
+      th: { choice: [90, 180, 270] }
+      a: { int: [2, 4] }
+      b: { int: [1, 3] }
+    let:
+      co: "round(cos(th * pi / 180))"
+      si: "round(sin(th * pi / 180))"
+      R: "[[co, -si], [si, co]]"
+      D: "diag([a, b])"
+      M: "D * R"
+    answer: M
+    hints:
+      - 'Rotation by $\theta$ has matrix $\begin{bmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{bmatrix}$; the stretch is $\begin{bmatrix} {{a}} & 0 \\ 0 & {{b}} \end{bmatrix}$.'
+      - 'The rotation acts first, so it sits on the **right**: $M = DR$.'
+    solution: |
+      The rotation by ${{th}}°$ is $R = {{R}}$ (its columns are where $(1, 0)$ and $(0, 1)$ land). The stretch is $D = {{D}}$.
+      Applying $R$ first and then $D$ means $\mathbf{v} \mapsto D(R\mathbf{v})$, so
+      $$M = DR = {{D}}{{R}} = {{M}}.$$
+      (The other order, $RD$, would stretch along the original axes before turning, a different transformation.)
+    verify: "diag(a, b) * Matrix([[cos(th*pi/180), -sin(th*pi/180)], [sin(th*pi/180), cos(th*pi/180)]])"
+    covers: [mit-18-06/lecture-30, game-developer/linear-transformation]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+  - id: la-lt-003
+    difficulty: 2
+    type: matrix
+    prompt: |
+      A linear map $T: \mathbb{R}^2 \to \mathbb{R}^2$ sends $\mathbf{v}_1 = {{row: v1}}$ to ${{row: w1}}$ and $\mathbf{v}_2 = {{row: v2}}$ to ${{row: w2}}$.
+      What is its standard matrix $A$ (so that $T(\mathbf{x}) = A\mathbf{x}$)? Enter it as `[[1, 2], [3, 4]]`.
+    params:
+      m: { int: [-2, 2] }
+      n: { int: [-2, 2] }
+      a11: { int: [-3, 3] }
+      a12: { int: [-3, 3] }
+      a21: { int: [-3, 3] }
+      a22: { int: [-3, 3] }
+    let:
+      V: "[[1, m], [n, 1 + m*n]]"
+      Vi: "[[1 + m*n, -m], [-n, 1]]"
+      A: "[[a11, a12], [a21, a22]]"
+      W: "A * V"
+      v1: "[1, n]"
+      v2: "[m, 1 + m*n]"
+      w1: "A * v1"
+      w2: "A * v2"
+    require: ["m != 0 or n != 0"]
+    answer: A
+    hints:
+      - 'In matrix form, $A\begin{bmatrix} \mathbf{v}_1 & \mathbf{v}_2 \end{bmatrix} = \begin{bmatrix} T(\mathbf{v}_1) & T(\mathbf{v}_2) \end{bmatrix}$, i.e. $AV = W$.'
+      - '$V = {{V}}$ has determinant $1$, so $V^{-1} = {{Vi}}$.'
+    solution: |
+      Put the inputs and outputs in columns: $V = {{V}}$ and $W = {{W}}$. Linearity gives $AV = W$, so
+      $$A = WV^{-1} = {{W}}{{Vi}} = {{A}}.$$
+      Check: $A{{row: v1}}^T = {{row: w1}}^T$.
+    verify: "Matrix([[a11*1 + a12*n, a11*m + a12*(1 + m*n)], [a21*1 + a22*n, a21*m + a22*(1 + m*n)]]) * Matrix([[1, m], [n, 1 + m*n]]).inv()"
+    covers: [mit-18-06/lecture-30, game-developer/linear-transformation]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+  - id: la-lt-004
+    difficulty: 2
+    type: vector
+    prompt: |
+      Find the coordinates $(c_1, c_2)$ of $\mathbf{v} = {{v}}$ in the basis $\mathbf{b}_1 = {{row: b1}}$, $\mathbf{b}_2 = {{row: b2}}$, so that
+      $\mathbf{v} = c_1\mathbf{b}_1 + c_2\mathbf{b}_2$. Enter them as a list such as `2, -1`.
+    params:
+      m: { int: [-2, 2] }
+      n: { int: [-2, 2] }
+      c1: { int: [-3, 3] }
+      c2: { int: [-3, 3] }
+    let:
+      b1: "[1, n]"
+      b2: "[m, 1 + m*n]"
+      B: "[[1, m], [n, 1 + m*n]]"
+      Bi: "[[1 + m*n, -m], [-n, 1]]"
+      v: "c1*b1 + c2*b2"
+    require: ["m != 0 or n != 0", "c1 != 0 or c2 != 0"]
+    answer: "[c1, c2]"
+    hints:
+      - 'Solve $B\mathbf{c} = \mathbf{v}$ where the columns of $B$ are the basis vectors.'
+      - '$\det B = 1$, so $B^{-1} = {{Bi}}$.'
+    solution: |
+      With $B = {{B}}$ (columns $\mathbf{b}_1, \mathbf{b}_2$), the coordinates solve $B\mathbf{c} = \mathbf{v}$:
+      $$\mathbf{c} = B^{-1}\mathbf{v} = {{Bi}}{{v}} = {{[c1, c2]}}.$$
+      Check: ${{c1}}{{row: b1}} {{signed: c2}}{{row: b2}} = {{row: v}}$.
+    verify: "Matrix([[1, m], [n, 1 + m*n]]).LUsolve(c1*Matrix([1, n]) + c2*Matrix([m, 1 + m*n]))"
+    covers: [mit-18-06/lecture-31]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+  - id: la-lt-005
+    difficulty: 3
+    type: matrix
+    prompt: |
+      $T(\mathbf{x}) = A\mathbf{x}$ with $A = {{A}}$. What is the matrix of $T$ with respect to the basis $\mathbf{m}_1 = {{row: [1, n]}}$, $\mathbf{m}_2 = {{row: [m, 1 + m*n]}}$
+      (used for both input and output)? Enter it as `[[1, 2], [3, 4]]`.
+    params:
+      m: { int: [-2, 2] }
+      n: { int: [-2, 2] }
+      a11: { int: [-3, 3] }
+      a12: { int: [-3, 3] }
+      a21: { int: [-3, 3] }
+      a22: { int: [-3, 3] }
+    let:
+      M: "[[1, m], [n, 1 + m*n]]"
+      Mi: "[[1 + m*n, -m], [-n, 1]]"
+      A: "[[a11, a12], [a21, a22]]"
+      B: "Mi * A * M"
+    require: ["m != 0 or n != 0"]
+    answer: B
+    hints:
+      - 'Column $j$ of the new matrix holds the coordinates of $T(\mathbf{m}_j)$ in the basis $\mathbf{m}_1, \mathbf{m}_2$.'
+      - 'All together: $B = M^{-1}AM$ with $M = {{M}}$ and $M^{-1} = {{Mi}}$.'
+    solution: |
+      Translate in, apply $A$, translate back: $B = M^{-1}AM$, where $M = {{M}}$ has the basis vectors as columns.
+      $$AM = {{A * M}}, \qquad B = M^{-1}(AM) = {{Mi}}{{A * M}} = {{B}}.$$
+      Column 1 says $T(\mathbf{m}_1) = {{B[1, 1]}}\,\mathbf{m}_1 {{signed: B[2, 1]}}\,\mathbf{m}_2$. $B$ is similar to $A$: same trace ${{a11 + a22}}$ and determinant ${{a11*a22 - a12*a21}}$.
+    verify: "(lambda M, A: Matrix.hstack(*[M.LUsolve(A * M[:, j]) for j in range(2)]))(Matrix([[1, m], [n, 1 + m*n]]), Matrix([[a11, a12], [a21, a22]]))"
+    covers: [mit-18-06/lecture-31, mit-18-06/lecture-28]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+  - id: la-lt-006
+    difficulty: 2
+    type: mc
+    prompt: |
+      $B = M^{-1}AM$ for some invertible $M$ (so $A$ and $B$ are **similar**). Which of these do $A$ and $B$ **not** necessarily share?
+    options:
+      - "Their eigenvectors"
+      - "Their eigenvalues"
+      - "Their trace"
+      - "Their determinant"
+    answer: 0
+    hints:
+      - 'If $B\mathbf{x} = \lambda\mathbf{x}$, what does $A$ do to $M\mathbf{x}$?'
+    solution: |
+      Similar matrices have the same characteristic polynomial, so the same eigenvalues, trace and determinant.
+      Eigenvectors move: if $B\mathbf{x} = \lambda\mathbf{x}$ then $A(M\mathbf{x}) = MB\mathbf{x} = \lambda M\mathbf{x}$, so the eigenvector of $A$ is $M\mathbf{x}$, not $\mathbf{x}$.
+    verify: "0"
+    covers: [mit-18-06/lecture-28]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+  - id: la-lt-007
+    difficulty: 3
+    type: matrix
+    prompt: |
+      Let $V$ be the space of polynomials of degree at most 2, with basis $1, x, x^2$. Find the matrix of $T(p) = {{a}}\,p' {{signed: c}}\,p$
+      in this basis. Enter it as `[[1, 2, 3], [4, 5, 6], [7, 8, 9]]`.
+    params:
+      a: { int: [-3, 3], not: [0] }
+      c: { int: [-3, 3], not: [0] }
+    let:
+      M: "[[c, a, 0], [0, c, 2*a], [0, 0, c]]"
+    answer: M
+    hints:
+      - 'Column $j$ is $T$ applied to the $j$-th basis polynomial, written in coordinates $(1, x, x^2)$.'
+      - '$T(x^2) = {{a}}\cdot 2x {{signed: c}}x^2$.'
+    solution: |
+      Apply $T$ to each basis polynomial and record its coordinates as a column:
+      - $T(1) = {{a}}\cdot 0 {{signed: c}}\cdot 1 = {{c}}$, coordinates $({{c}}, 0, 0)$;
+      - $T(x) = {{a}}\cdot 1 {{signed: c}}x$, coordinates $({{a}}, {{c}}, 0)$;
+      - $T(x^2) = {{2*a}}x {{signed: c}}x^2$, coordinates $(0, {{2*a}}, {{c}})$.
+
+      $$[T] = {{M}}.$$
+      It is upper triangular because differentiation lowers the degree.
+    verify: "Matrix([[Poly(a*diff(x**j, x) + c*x**j, x).coeff_monomial(x**i) for j in range(3)] for i in range(3)])"
+    covers: [mit-18-06/lecture-30]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+  - id: la-lt-008
+    difficulty: 3
+    type: matrix
+    prompt: |
+      Find the matrix that **reflects** the plane across the line through the origin in the direction ${{row: [p, q]}}$.
+      Enter it with decimals (to 3 places), as `[[0.1, 0.2], [0.3, 0.4]]`.
+    params:
+      k: { int: [1, 5] }
+      sg: { choice: [1, -1] }
+    let:
+      T: "[[3, 4], [4, 3], [5, 12], [12, 5], [1, 1]]"
+      p: "T[k, 1]"
+      q: "sg*T[k, 2]"
+      nn: "p^2 + q^2"
+      H: "[[p^2 - q^2, 2*p*q], [2*p*q, q^2 - p^2]] / nn"
+    answer: H
+    tolerance: { abs: 0.002 }
+    hints:
+      - 'Reflection = $2P - I$, where $P = \dfrac{\mathbf{a}\mathbf{a}^T}{\mathbf{a}^T\mathbf{a}}$ projects onto the line through $\mathbf{a} = {{row: [p, q]}}$.'
+      - '$\mathbf{a}^T\mathbf{a} = {{nn}}$ and $\mathbf{a}\mathbf{a}^T = {{[[p^2, p*q], [p*q, q^2]]}}$.'
+    solution: |
+      A point $\mathbf{v}$ splits into its projection $P\mathbf{v}$ on the line and the rest; reflecting keeps $P\mathbf{v}$ and flips the rest:
+      $H\mathbf{v} = P\mathbf{v} - (\mathbf{v} - P\mathbf{v})$, so $H = 2P - I$. With $P = \tfrac{1}{ {{nn}} }{{[[p^2, p*q], [p*q, q^2]]}}$,
+      $$H = \frac{1}{ {{nn}} }{{[[p^2 - q^2, 2*p*q], [2*p*q, q^2 - p^2]]}} \approx {{H}}.$$
+      Check: $H{{row: [p, q]}}^T = {{row: [p, q]}}^T$ (the line is fixed), $H^2 = I$, and $\det H = -1$.
+    verify: "(lambda L: Matrix.hstack(*[Matrix(Point(*e).reflect(L)) for e in [(1, 0), (0, 1)]]))(Line(Point(0, 0), Point([[3, 4], [4, 3], [5, 12], [12, 5], [1, 1]][k - 1][0], sg*[[3, 4], [4, 3], [5, 12], [12, 5], [1, 1]][k - 1][1])))"
+    covers: [mit-18-06/lecture-30, game-developer/linear-transformation]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+  - id: la-lt-009
+    difficulty: 4
+    type: multipart
+    prompt: |
+      Let $A = {{A}}$.
+    params:
+      l: { int: [-3, 3] }
+      m: { int: [-2, 2] }
+      n: { int: [-2, 2] }
+    let:
+      S: "[[1, m], [n, 1 + m*n]]"
+      Si: "[[1 + m*n, -m], [-n, 1]]"
+      J: "[[l, 1], [0, l]]"
+      A: "S * J * Si"
+      B: "A - l*identity(2)"
+    require: ["m != 0 or n != 0"]
+    parts:
+      - prompt: "(a) What is the eigenvalue of $A$ (it is repeated)?"
+        type: numeric
+        answer: l
+        verify: "list((lambda S: S * Matrix([[l, 1], [0, l]]) * S.inv())(Matrix([[1, m], [n, 1 + m*n]])).eigenvals().keys())[0]"
+      - prompt: "(b) How many linearly independent eigenvectors does $A$ have?"
+        type: numeric
+        answer: 1
+        verify: "sum(len(vs) for (val, mult, vs) in (lambda S: S * Matrix([[l, 1], [0, l]]) * S.inv())(Matrix([[1, m], [n, 1 + m*n]])).eigenvects())"
+      - prompt: "(c) What is the Jordan form $J$ of $A$ (with any $1$ above the diagonal)? Enter it as `[[1, 2], [3, 4]]`."
+        type: matrix
+        answer: J
+        verify: "(lambda S: S * Matrix([[l, 1], [0, l]]) * S.inv())(Matrix([[1, m], [n, 1 + m*n]])).jordan_form()[1]"
+    hints:
+      - '$\operatorname{tr}A = {{2*l}}$ and $\det A = {{l^2}}$: the characteristic polynomial is a perfect square.'
+      - 'Find the rank of $A - {{l}}I$.'
+      - 'A $2 \times 2$ matrix with a repeated eigenvalue and only one eigenvector is similar to $\begin{bmatrix} \lambda & 1 \\ 0 & \lambda \end{bmatrix}$.'
+    solution: |
+      (a) $\det(A - \lambda I) = \lambda^2 - {{2*l}}\lambda + {{l^2}} = (\lambda - ({{l}}))^2$, so $\lambda = {{l}}$ twice.
+
+      (b) $A - ({{l}})I = {{B}}$ is not the zero matrix, so it has rank 1 and its null space is a line: only **one** independent eigenvector
+      (a multiple of ${{row: [1, n]}}$).
+
+      (c) $A$ is not diagonalisable (otherwise it would be similar to ${{l}}I$, and only ${{l}}I$ itself is). Its Jordan form has a single block:
+      $$J = {{J}}, \qquad A = SJS^{-1} \text{ with } S = {{S}}.$$
+    covers: [mit-18-06/lecture-28]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8
+  - id: la-lt-010
+    difficulty: 3
+    type: proof
+    prompt: |
+      Suppose $B = M^{-1}AM$ with $M$ invertible. Prove that $A$ and $B$ have the same characteristic polynomial, and hence the same eigenvalues, trace and determinant.
+    hints:
+      - 'Write $B - \lambda I = M^{-1}(A - \lambda I)M$.'
+      - 'Take determinants and use $\det(M^{-1}) = 1/\det M$.'
+    solution: |
+      Since $M^{-1}(\lambda I)M = \lambda I$,
+      $$B - \lambda I = M^{-1}AM - M^{-1}(\lambda I)M = M^{-1}(A - \lambda I)M.$$
+      Taking determinants, for every $\lambda$,
+      $$\det(B - \lambda I) = \det(M^{-1})\det(A - \lambda I)\det M = \det(A - \lambda I).$$
+      Equal characteristic polynomials have equal roots (the eigenvalues, with multiplicity), equal coefficient of $\lambda^{n-1}$ (giving the trace,
+      up to sign) and equal constant term (the determinant, at $\lambda = 0$).
+    covers: [mit-18-06/lecture-28]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+  - id: la-lt-011
+    difficulty: 4
+    type: numeric
+    prompt: |
+      On the space of polynomials of degree at most ${{n}}$, define $T(p)(x) = p({{a}}x {{signed: b}})$. What is the **trace** of $T$
+      (the trace of its matrix in any basis)?
+    params:
+      n: { int: [2, 3] }
+      a: { choice: [2, 3, -2, -3] }
+      b: { int: [-2, 2], not: [0] }
+    answer: "(a^(n + 1) - 1) / (a - 1)"
+    hints:
+      - 'Use the basis $1, x, \dots, x^{ {{n}} }$. Column $j$ holds the coefficients of $({{a}}x {{signed: b}})^j$.'
+      - 'The matrix is upper triangular. What is the coefficient of $x^j$ in $({{a}}x {{signed: b}})^j$?'
+    solution: |
+      In the basis $1, x, \dots, x^{ {{n}} }$, $T(x^j) = ({{a}}x {{signed: b}})^j$ has degree $j$, so the matrix is upper triangular and its diagonal entry in column $j$
+      is the leading coefficient $({{a}})^j$. The trace is
+      $$\sum_{j=0}^{ {{n}} }({{a}})^j = \frac{({{a}})^{ {{n + 1}} } - 1}{ {{a}} - 1} = {{(a^(n + 1) - 1) / (a - 1)}}.$$
+      The shift ${{b}}$ only affects entries above the diagonal. Since similar matrices share their trace, the answer does not depend on the basis.
+    verify: "Matrix([[Poly((a*x + b)**j, x).coeff_monomial(x**i) for j in range(n + 1)] for i in range(n + 1)]).trace()"
+    covers: [mit-18-06/lecture-30, mit-18-06/lecture-31]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+  - id: la-lt-012
+    difficulty: 5
+    type: numeric
+    prompt: |
+      Let $A = {{A}}$ and let $T$ act on the 4-dimensional space of $2 \times 2$ matrices by $T(X) = AX$. What is $\det T$?
+    params:
+      a: { int: [-3, 3] }
+      b: { int: [-3, 3] }
+      c: { int: [-3, 3] }
+      d: { int: [-3, 3] }
+    let:
+      A: "[[a, b], [c, d]]"
+      dA: "a*d - b*c"
+    require: ["a*d - b*c != 0"]
+    answer: "(a*d - b*c)^2"
+    hints:
+      - 'Use the basis $E_{11}, E_{12}, E_{21}, E_{22}$ and compute $AE_{ij}$.'
+      - '$T$ acts on each **column** of $X$ separately, by $A$.'
+      - 'Reorder the basis as $E_{11}, E_{21}, E_{12}, E_{22}$: the matrix becomes block diagonal.'
+    solution: |
+      $AX$ multiplies each column of $X$ by $A$. Order the basis column by column: $E_{11}, E_{21}$ (first column) then $E_{12}, E_{22}$ (second column).
+      In that basis
+      $$[T] = \begin{bmatrix} A & 0 \\ 0 & A \end{bmatrix},$$
+      a block-diagonal $4 \times 4$ matrix, so $\det T = (\det A)^2 = ({{dA}})^2 = {{dA^2}}$.
+      (The determinant of a linear map does not depend on the basis, because changing basis replaces $[T]$ by a similar matrix.)
+    verify: "Matrix.hstack(*[(Matrix([[a, b], [c, d]]) * Matrix(2, 2, lambda i, j: 1 if 2*i + j == k else 0)).reshape(4, 1) for k in range(4)]).det()"
+    covers: [mit-18-06/lecture-30, mit-18-06/lecture-31]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8

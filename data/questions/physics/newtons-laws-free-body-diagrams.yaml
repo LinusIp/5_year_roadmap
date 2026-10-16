@@ -1,0 +1,369 @@
+subject: physics
+topic: newtons-laws-free-body-diagrams
+questions:
+  - id: phys-newton-001
+    difficulty: 1
+    type: numeric
+    prompt: |
+      A net force of {{F}} N acts on a {{m}} kg crate. What is the magnitude of its acceleration? Give a value with units.
+    params:
+      F: { int: [5, 120] }
+      m: { real: [1, 20], step: 0.5 }
+    answer: "F / m"
+    units: "m/s^2"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'Newton''s second law: $F_\text{net} = ma$.'
+    solution: |
+      $a = \dfrac{F_\text{net}}{m} = \dfrac{ {{F}}\,\text{N} }{ {{m}}\,\text{kg} } \approx {{F/m}}\,\text{m/s}^2$.
+    verify: "solve(Eq(m*Symbol('acc'), F), Symbol('acc'))[0]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: phys-newton-002
+    difficulty: 1
+    type: mc
+    prompt: |
+      A book rests on a table. By Newton's third law, which force is the partner of the Earth's gravitational pull on the book?
+    options:
+      - 'The book''s gravitational pull on the Earth'
+      - 'The table''s upward normal force on the book'
+      - 'The book''s downward push on the table'
+      - 'The Earth''s gravitational pull on the table'
+    answer: 0
+    hints:
+      - 'Third-law partners act on *different* objects and are of the *same type*.'
+      - 'Swap the roles: if A pulls B gravitationally, the partner is B pulling A gravitationally.'
+    solution: |
+      "Earth pulls book (gravity)" pairs with "book pulls Earth (gravity)": equal in size, opposite in direction, same type of force, acting on the other body.
+      The normal force from the table is also equal and opposite to the book's weight here, but that is Newton's *second* law with zero acceleration: both forces act on the book, they are different types, and they stop being equal if the table accelerates. Its own third-law partner is the book pushing down on the table.
+    verify: "(lambda f, opts: opts.index((f[1], f[0], f[2])))(('earth', 'book', 'gravity'), [('book', 'earth', 'gravity'), ('table', 'book', 'contact'), ('book', 'table', 'contact'), ('earth', 'table', 'gravity')])"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: phys-newton-003
+    difficulty: 2
+    type: numeric
+    prompt: |
+      A {{m}} kg person stands on a bathroom scale in a lift. The lift's acceleration is {{a}} m/s² **{{s > 0 ? "upward" : "downward"}}**. What does the scale read, i.e. how large is the normal force on the person? Take $g = 9.8\,\text{m/s}^2$ and give a value with units.
+    params:
+      m: { int: [50, 100] }
+      a: { real: [0.5, 3], step: 0.5 }
+      s: { choice: [1, -1] }
+    let:
+      g: 9.8
+    answer: "m * (g + s * a)"
+    units: "N"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'Draw the free-body diagram: the normal force $N$ up, the weight $mg$ down.'
+      - 'Take up as positive: $N - mg = ma_y$, with $a_y = {{s*a}}\,\text{m/s}^2$.'
+    solution: |
+      Two forces act on the person: $N$ upward and $mg$ downward. With up positive, $a_y = {{s*a}}\,\text{m/s}^2$ and
+      $$N - mg = ma_y \;\Rightarrow\; N = m(g + a_y) = {{m}}(9.8 {{signed: s*a}}) \approx {{m*(g + s*a)}}\,\text{N}.$$
+      The scale reads {{s > 0 ? "more" : "less"}} than the person's weight of {{m*g}} N.
+    verify: "solve(Eq(Symbol('n') - m*9.8, m*s*a), Symbol('n'))[0]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: phys-newton-004
+    difficulty: 2
+    type: vector
+    prompt: |
+      Three horizontal forces act on a {{m}} kg puck on frictionless ice: $\vec F_1 = {{row: [f1x, f1y]}}\,\text{N}$, $\vec F_2 = {{row: [f2x, f2y]}}\,\text{N}$ and $\vec F_3 = {{row: [f3x, f3y]}}\,\text{N}$. Find the puck's acceleration in m/s², as components `ax, ay`.
+    params:
+      m: { choice: [0.5, 1, 2, 4, 5] }
+      f1x: { int: [-10, 10] }
+      f1y: { int: [-10, 10] }
+      f2x: { int: [-10, 10] }
+      f2y: { int: [-10, 10] }
+      f3x: { int: [-10, 10] }
+      f3y: { int: [-10, 10] }
+    answer: "([f1x, f1y] + [f2x, f2y] + [f3x, f3y]) / m"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'Add the forces component by component to get the net force.'
+      - 'Then $\vec a = \vec F_\text{net}/m$.'
+    solution: |
+      $\vec F_\text{net} = {{row: [f1x + f2x + f3x, f1y + f2y + f3y]}}\,\text{N}$, so
+      $\vec a = \vec F_\text{net}/m = {{row: [f1x + f2x + f3x, f1y + f2y + f3y] / m}}\,\text{m/s}^2$.
+    verify: "list(np.linalg.solve(m*np.eye(2), np.array([f1x, f1y]) + np.array([f2x, f2y]) + np.array([f3x, f3y])))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: phys-newton-005
+    difficulty: 2
+    type: multipart
+    prompt: |
+      A {{m}} kg box on a frictionless floor is pulled by a rope with tension {{T}} N directed {{th}}° above the horizontal. Take $g = 9.8\,\text{m/s}^2$.
+    params:
+      m: { int: [5, 30] }
+      T: { int: [10, 80] }
+      th: { int: [10, 50] }
+    let:
+      g: 9.8
+      rad: "th * pi / 180"
+    require: ["T * sin(rad) < 0.8 * m * g"]
+    parts:
+      - prompt: "(a) What is the box's acceleration? Give a value with units."
+        type: numeric
+        answer: "T * cos(rad) / m"
+        units: "m/s^2"
+        tolerance: { rel: 0.01 }
+        verify: "solve([Eq(T*math.cos(math.radians(th)), m*Symbol('acc')), Eq(Symbol('n') + T*math.sin(math.radians(th)) - m*Rational(49, 5), 0)], [Symbol('acc'), Symbol('n')])[Symbol('acc')]"
+      - prompt: "(b) What is the normal force from the floor on the box?"
+        type: numeric
+        answer: "m * g - T * sin(rad)"
+        units: "N"
+        tolerance: { rel: 0.01 }
+        verify: "solve([Eq(T*math.cos(math.radians(th)), m*Symbol('acc')), Eq(Symbol('n') + T*math.sin(math.radians(th)) - m*Rational(49, 5), 0)], [Symbol('acc'), Symbol('n')])[Symbol('n')]"
+    hints:
+      - 'Free-body diagram: weight down, normal force up, tension along the rope.'
+      - 'Horizontally only $T\cos\theta$ acts. Vertically there is no acceleration.'
+    solution: |
+      (a) Horizontally: $T\cos\theta = ma$, so $a = \dfrac{ {{T}}\cos{{th}}^\circ}{ {{m}} } \approx {{T*cos(rad)/m}}\,\text{m/s}^2$.
+
+      (b) Vertically: $N + T\sin\theta - mg = 0$, so $N = {{m*g}} - {{T*sin(rad)}} \approx {{m*g - T*sin(rad)}}\,\text{N}$. The rope's upward pull makes the normal force smaller than the weight.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: phys-newton-006
+    difficulty: 3
+    type: multipart
+    prompt: |
+      An Atwood machine: masses $m_1 = {{m1}}\,\text{kg}$ and $m_2 = {{m2}}\,\text{kg}$ hang from the two ends of a light string over a light, frictionless pulley. Take $g = 9.8\,\text{m/s}^2$.
+    params:
+      m1: { real: [1, 5], step: 0.5 }
+      m2: { real: [1.5, 8], step: 0.5 }
+    require: ["m2 > m1"]
+    let:
+      g: 9.8
+    parts:
+      - prompt: "(a) What is the magnitude of the acceleration of the masses? Give a value with units."
+        type: numeric
+        answer: "(m2 - m1) * g / (m1 + m2)"
+        units: "m/s^2"
+        tolerance: { rel: 0.01 }
+        verify: "np.linalg.solve([[-m1, 1], [m2, 1]], [m1*9.8, m2*9.8])[0]"
+      - prompt: "(b) Using your acceleration from (a), what is the tension in the string?"
+        type: numeric
+        answer: "m1 * (g + part1)"
+        units: "N"
+        tolerance: { rel: 0.01 }
+        verify: "np.linalg.solve([[-m1, 1], [m2, 1]], [m1*9.8, m2*9.8])[1]"
+    hints:
+      - 'Draw a free-body diagram for each mass. The string has one tension $T$ throughout.'
+      - '$m_1$ accelerates up: $T - m_1 g = m_1 a$. $m_2$ accelerates down: $m_2 g - T = m_2 a$.'
+      - 'Add the two equations to eliminate $T$.'
+    solution: |
+      For $m_1$ (up positive): $T - m_1 g = m_1 a$. For $m_2$ (down positive): $m_2 g - T = m_2 a$.
+
+      (a) Adding: $(m_2 - m_1)g = (m_1 + m_2)a$, so $a = \dfrac{ ({{m2}} - {{m1}})(9.8) }{ {{m1 + m2}} } \approx {{(m2 - m1)*g/(m1 + m2)}}\,\text{m/s}^2$.
+
+      (b) $T = m_1(g + a) \approx {{m1}}(9.8 + {{(m2 - m1)*g/(m1 + m2)}}) \approx {{m1*(g + (m2 - m1)*g/(m1 + m2))}}\,\text{N}$, between the two weights {{m1*g}} N and {{m2*g}} N.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: phys-newton-007
+    difficulty: 3
+    type: numeric
+    prompt: |
+      Two blocks sit side by side on a frictionless floor: $m_1 = {{m1}}\,\text{kg}$ on the left touching $m_2 = {{m2}}\,\text{kg}$ on the right. A horizontal force of {{F}} N pushes $m_1$ to the right. How large is the contact force between the blocks? Give a value with units.
+    params:
+      m1: { int: [1, 10] }
+      m2: { int: [1, 10] }
+      F: { int: [5, 60] }
+    let:
+      a: "F / (m1 + m2)"
+    answer: "m2 * a"
+    units: "N"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'Both blocks share the same acceleration. Find it from the whole system.'
+      - 'Then draw the free-body diagram of $m_2$ alone: the only horizontal force on it is the contact force.'
+    solution: |
+      Whole system: $a = \dfrac{F}{m_1 + m_2} = \dfrac{ {{F}} }{ {{m1 + m2}} } \approx {{a}}\,\text{m/s}^2$.
+      On $m_2$ alone, the contact force $P$ is the only horizontal force: $P = m_2 a \approx {{m2}} \times {{a}} \approx {{m2*a}}\,\text{N}$.
+      (Check on $m_1$: $F - P = m_1 a$.) The contact force is less than $F$: it only has to accelerate $m_2$.
+    verify: "np.linalg.solve([[m1, 1], [m2, -1]], [F, 0])[1]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: phys-newton-008
+    difficulty: 3
+    type: numeric
+    prompt: |
+      A {{M}} kg block on a frictionless horizontal table is tied to a string that runs over a light pulley at the table's edge to a hanging {{m}} kg mass. The system is released from rest. With $g = 9.8\,\text{m/s}^2$, what is the magnitude of the acceleration? Give a value with units.
+    params:
+      M: { real: [1, 10], step: 0.5 }
+      m: { real: [0.5, 5], step: 0.5 }
+    let:
+      g: 9.8
+    answer: "m * g / (M + m)"
+    units: "m/s^2"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'Write Newton''s second law for each body along its own direction of motion.'
+      - 'Block: $T = Ma$. Hanging mass: $mg - T = ma$.'
+    solution: |
+      Block on the table: $T = Ma$. Hanging mass (down positive): $mg - T = ma$. Adding,
+      $$mg = (M + m)a \;\Rightarrow\; a = \frac{mg}{M + m} = \frac{ {{m}} \times 9.8}{ {{M + m}} } \approx {{m*g/(M + m)}}\,\text{m/s}^2.$$
+      Only the hanging weight drives the system, but it has to accelerate both masses.
+    verify: "np.linalg.solve([[M, -1], [m, 1]], [0, m*9.8])[0]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: phys-newton-009
+    difficulty: 2
+    type: mc
+    prompt: |
+      A ball has been thrown straight up and is still rising. Ignoring air resistance, which forces act on it?
+    options:
+      - 'Only its weight, downward'
+      - 'Its weight downward and the force of the throw upward'
+      - 'An upward force larger than its weight, since it is moving up'
+      - 'No forces at all while it moves freely'
+    answer: 0
+    hints:
+      - 'A force needs something touching the ball (or a field acting on it). What touches the ball after release?'
+      - 'Is the ball speeding up or slowing down on the way up? What does that say about the net force?'
+    solution: |
+      After release, nothing touches the ball; only gravity acts. Its acceleration is $g$ downward (it slows on the way up), so the net force is $mg$ downward, which is exactly its weight. The "force of the throw" acted only while the hand was in contact; the ball keeps moving up because of its velocity, not because of a force.
+    verify: "(lambda yy, mass: 0 if mass*diff(yy, t, 2) == -mass*Rational(49, 5) else 1)(12*t - Rational(49, 10)*t**2, 2)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: phys-newton-010
+    difficulty: 4
+    type: numeric
+    prompt: |
+      A {{m}} kg traffic light hangs at rest from two cables. The left cable makes {{th1}}° with the horizontal and the right cable makes {{th2}}° with the horizontal. With $g = 9.8\,\text{m/s}^2$, what is the tension in the **left** cable? Give a value with units.
+    params:
+      m: { real: [5, 30], step: 0.5 }
+      th1: { int: [20, 70] }
+      th2: { int: [20, 70] }
+    let:
+      g: 9.8
+      a1: "th1 * pi / 180"
+      a2: "th2 * pi / 180"
+    answer: "m * g * cos(a2) / sin(a1 + a2)"
+    units: "N"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'The light is in equilibrium: the horizontal and vertical components of the net force are both zero.'
+      - 'Horizontal: $T_1\cos\theta_1 = T_2\cos\theta_2$. Vertical: $T_1\sin\theta_1 + T_2\sin\theta_2 = mg$.'
+      - 'Eliminate $T_2$ and use $\sin\theta_1\cos\theta_2 + \cos\theta_1\sin\theta_2 = \sin(\theta_1 + \theta_2)$.'
+    solution: |
+      Equilibrium: $T_1\cos\theta_1 = T_2\cos\theta_2$ and $T_1\sin\theta_1 + T_2\sin\theta_2 = mg$.
+      Substituting $T_2 = T_1\cos\theta_1/\cos\theta_2$ into the second equation and multiplying by $\cos\theta_2$:
+      $$T_1(\sin\theta_1\cos\theta_2 + \cos\theta_1\sin\theta_2) = mg\cos\theta_2 \;\Rightarrow\; T_1 = \frac{mg\cos\theta_2}{\sin(\theta_1 + \theta_2)}.$$
+      With $mg = {{m*g}}\,\text{N}$: $T_1 = \dfrac{ {{m*g}}\cos{{th2}}^\circ}{\sin{{th1 + th2}}^\circ} \approx {{m*g*cos(a2)/sin(a1 + a2)}}\,\text{N}$.
+    verify: "np.linalg.solve([[-math.cos(math.radians(th1)), math.cos(math.radians(th2))], [math.sin(math.radians(th1)), math.sin(math.radians(th2))]], [0, m*9.8])[0]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: phys-newton-011
+    difficulty: 4
+    type: numeric
+    prompt: |
+      A uniform rope of mass {{mr}} kg is tied to a {{M}} kg block on a frictionless floor. You pull the free end of the rope horizontally with a force of {{F}} N, so that rope and block accelerate together. What is the tension at the **midpoint** of the rope? Give a value with units.
+    params:
+      mr: { real: [0.5, 4], step: 0.5 }
+      M: { int: [2, 20] }
+      F: { int: [10, 100] }
+    let:
+      a: "F / (M + mr)"
+    answer: "(M + mr / 2) * a"
+    units: "N"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'Rope and block share one acceleration; find it from the whole system.'
+      - 'Now take as your "body" everything behind the midpoint: the block plus half of the rope.'
+      - 'The only horizontal force on that body is the tension at the midpoint.'
+    solution: |
+      Whole system: $a = \dfrac{F}{M + m_r} = \dfrac{ {{F}} }{ {{M + mr}} } \approx {{a}}\,\text{m/s}^2$.
+      The block plus the rear half of the rope has mass $M + m_r/2 = {{M + mr/2}}\,\text{kg}$ and is pulled only by the tension at the midpoint:
+      $$T_\text{mid} = \left(M + \tfrac{m_r}{2}\right)a \approx {{M + mr/2}} \times {{a}} \approx {{(M + mr/2)*a}}\,\text{N}.$$
+      The tension falls from {{F}} N at your hand to $Ma \approx {{M*a}}\,\text{N}$ at the block: a massive rope must accelerate itself too.
+    verify: "solve([Eq(F, (M + mr)*Symbol('acc')), Eq(Symbol('Tm'), (M + mr/2)*Symbol('acc'))], [Symbol('acc'), Symbol('Tm')])[Symbol('Tm')]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: phys-newton-012
+    difficulty: 4
+    type: proof
+    prompt: |
+      In an Atwood machine with masses $m_1 < m_2$ on a light string over a light frictionless pulley, derive the acceleration $a$ and the tension $T$, and show that $m_1 g < T < m_2 g$. Explain physically why $T$ must lie between the two weights.
+    hints:
+      - 'Write Newton''s second law for each mass, taking the direction each one actually moves as positive.'
+      - 'Add the equations to find $a$, then substitute back.'
+      - 'Compare $T$ with $m_1 g$ using $T = m_1(g + a)$, and with $m_2 g$ using $T = m_2(g - a)$.'
+    solution: |
+      $m_1$ rises: $T - m_1 g = m_1 a$. $m_2$ falls: $m_2 g - T = m_2 a$. Adding gives
+      $$a = \frac{(m_2 - m_1)g}{m_1 + m_2}, \qquad T = m_1(g + a) = \frac{2m_1m_2\,g}{m_1 + m_2}.$$
+      Since $m_2 > m_1$, $0 < a < g$. Then $T = m_1(g + a) > m_1 g$ and $T = m_2(g - a) < m_2 g$.
+
+      Physically: $m_1$ accelerates upward, so the net force on it is up and the string must pull harder than its weight; $m_2$ accelerates downward, so its weight must exceed the string's pull.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: phys-newton-013
+    difficulty: 5
+    type: numeric
+    prompt: |
+      A {{M}} kg block sits on a frictionless horizontal table. Strings run from its left and right sides over light pulleys at the table's edges to hanging masses $m_1 = {{m1}}\,\text{kg}$ (left) and $m_2 = {{m2}}\,\text{kg}$ (right). The system is released from rest. With $g = 9.8\,\text{m/s}^2$, find the tension in the **left** string. Give a value with units.
+    params:
+      M: { int: [1, 10] }
+      m1: { real: [0.5, 4], step: 0.5 }
+      m2: { real: [1, 6], step: 0.5 }
+    require: ["m2 > m1"]
+    let:
+      g: 9.8
+      a: "(m2 - m1) * g / (M + m1 + m2)"
+    answer: "m1 * (g + a)"
+    units: "N"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'Which way does the system move? Take that direction as positive for all three bodies.'
+      - '$m_1$: $T_1 - m_1 g = m_1 a$. Block: $T_2 - T_1 = Ma$. $m_2$: $m_2 g - T_2 = m_2 a$.'
+      - 'Add all three to eliminate both tensions.'
+    solution: |
+      The heavier $m_2$ falls, the block slides right and $m_1$ rises, all with the same $a$:
+      $$T_1 - m_1 g = m_1 a, \qquad T_2 - T_1 = Ma, \qquad m_2 g - T_2 = m_2 a.$$
+      Adding: $(m_2 - m_1)g = (M + m_1 + m_2)a$, so $a = \dfrac{ ({{m2}} - {{m1}})(9.8)}{ {{M + m1 + m2}} } \approx {{a}}\,\text{m/s}^2$.
+      Then $T_1 = m_1(g + a) \approx {{m1}}(9.8 + {{a}}) \approx {{m1*(g + a)}}\,\text{N}$ (and $T_2 = m_2(g - a) \approx {{m2*(g - a)}}\,\text{N}$).
+    verify: "np.linalg.solve([[m1, -1, 0], [M, 1, -1], [m2, 0, 1]], [-m1*9.8, 0, m2*9.8])[1]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 7
+
+  - id: phys-newton-014
+    difficulty: 3
+    type: estimate
+    prompt: |
+      Estimate the average upward force the floor exerts on you while you push off for the highest vertical jump you can make from a crouch. Give a value with units.
+    answer: "70 * 9.8 * (1 + 0.5 / 0.4)"
+    units: "N"
+    factor: 2
+    hints:
+      - 'Guess your mass, how far your centre of mass moves while your feet push (crouch to toes), and how high you rise after leaving the floor.'
+      - 'During push-off the net force $(F - mg)$ acts over the push distance $d$ and must supply the speed to rise a height $h$: $(F - mg)d = mgh$.'
+    solution: |
+      Take $m \approx 70\,\text{kg}$, a push-off distance $d \approx 0.4\,\text{m}$ and a rise $h \approx 0.5\,\text{m}$ after take-off.
+      The take-off speed satisfies $v^2 = 2gh$, and during push-off $v^2 = 2\,\dfrac{F - mg}{m}\,d$. Equating, $F = mg\left(1 + \dfrac{h}{d}\right) \approx 690 \times 2.25 \approx 1500\,\text{N}$, about twice your weight.
+    verify: "solve(Eq((Symbol('F') - 70*9.8)*0.4, 70*9.8*0.5), Symbol('F'))[0]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4

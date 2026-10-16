@@ -40,3 +40,280 @@ questions:
     source: Original
     license: CC BY-NC-SA 4.0
     estMinutes: 5
+
+  - id: calc-der-003
+    difficulty: 1
+    type: expression
+    prompt: |
+      Differentiate $f(x) = {{a}}x^{ {{n}} } {{signed: b}}x {{signed: c}}$.
+
+      Type an expression in $x$, such as `4x^2 + 1`.
+    params:
+      a: { int: [2, 7] }
+      n: { int: [3, 6] }
+      b: { int: [-9, 9], not: [-1, 0, 1] }
+      c: { int: [-9, 9], not: [0] }
+    answer: "a*n*x^(n-1) + b"
+    vars: [x]
+    hints:
+      - "Differentiate term by term."
+      - "Power rule: $\\frac{d}{dx}x^n = nx^{n-1}$; the derivative of a constant is $0$."
+    solution: |
+      Term by term, with the power rule:
+      $$f'(x) = {{a}}\cdot{{n}}\,x^{ {{n - 1}} } {{signed: b}} + 0 = {{a*n}}x^{ {{n - 1}} } {{signed: b}}.$$
+    verify: "diff(a*x**n + b*x + c, x)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: calc-der-004
+    difficulty: 1
+    type: mc
+    prompt: "What is the slope of the line tangent to $y = x^2$ at the point where $x = {{c}}$?"
+    params:
+      c: { int: [3, 6] }
+    options:
+      - "${{2*c}}$"
+      - "${{c^2}}$"
+      - "$2$"
+      - "${{c}}$"
+    answer: 0
+    hints:
+      - "The slope of the tangent line at $x = c$ is $f'(c)$."
+      - "$\\frac{d}{dx}x^2 = 2x$."
+    solution: "The slope is the derivative at ${{c}}$: $f'(x) = 2x$, so $f'({{c}}) = {{2*c}}$."
+    verify: "[2*c, c**2, 2, c].index(diff(x**2, x).subs(x, c))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: calc-der-005
+    difficulty: 2
+    type: expression
+    prompt: |
+      Differentiate $f(x) = \dfrac{x^2}{x + {{a}}}$ and simplify the numerator.
+
+      Type an expression in $x$, such as `(x^2 + 3)/(x - 1)^2`.
+    params:
+      a: { int: [1, 6] }
+    answer: "(x^2 + 2*a*x) / (x + a)^2"
+    vars: [x]
+    domain: [0.5, 3]
+    hints:
+      - "Quotient rule: $\\left(\\frac{u}{v}\\right)' = \\frac{u'v - uv'}{v^2}$."
+      - "Here $u = x^2$, $v = x + {{a}}$, so $u' = 2x$ and $v' = 1$."
+    solution: |
+      By the quotient rule with $u = x^2$, $v = x + {{a}}$:
+      $$f'(x) = \frac{2x(x + {{a}}) - x^2 \cdot 1}{(x + {{a}})^2} = \frac{x^2 + {{2*a}}x}{(x + {{a}})^2}.$$
+    verify: "diff(x**2/(x + a), x)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-der-006
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Let $f(x) = {{a}}x^2 {{signed: b}}x$. Using the **definition** of the derivative,
+      $$f'({{c}}) = \lim_{h \to 0} \frac{f({{c}} + h) - f({{c}})}{h},$$
+      compute $f'({{c}})$.
+    params:
+      a: { int: [2, 5] }
+      b: { int: [-7, 7], not: [-1, 0, 1] }
+      c: { int: [-3, 4], not: [0] }
+    answer: "2*a*c + b"
+    hints:
+      - "Expand $f({{c}} + h) = {{a}}({{c}} + h)^2 {{signed: b}}({{c}} + h)$."
+      - "After subtracting $f({{c}})$, every remaining term has a factor of $h$."
+    solution: |
+      $$f({{c}} + h) - f({{c}}) = {{a}}\bigl(2\cdot({{c}})h + h^2\bigr) {{signed: b}}h = ({{2*a*c + b}})h + {{a}}h^2.$$
+      Dividing by $h$ gives ${{2*a*c + b}} + {{a}}h$, which tends to ${{2*a*c + b}}$ as $h \to 0$.
+    verify: "limit((a*(c + Symbol('h'))**2 + b*(c + Symbol('h')) - a*c**2 - b*c)/Symbol('h'), Symbol('h'), 0)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-der-007
+    difficulty: 2
+    type: expression
+    prompt: |
+      Differentiate $f(x) = {{a}}\sqrt{x} + \dfrac{ {{b}} }{x^2}$ for $x > 0$.
+
+      Type an expression in $x$; write $\sqrt{x}$ as `sqrt(x)`, e.g. `1/sqrt(x) + 5/x^4`.
+    params:
+      a: { int: [2, 8] }
+      b: { int: [2, 9] }
+    answer: "a / (2*sqrt(x)) - 2*b / x^3"
+    vars: [x]
+    domain: [0.5, 3]
+    hints:
+      - "Rewrite with exponents: $\\sqrt{x} = x^{1/2}$ and $\\frac{1}{x^2} = x^{-2}$."
+      - "Then use the power rule on each term."
+    solution: |
+      $f(x) = {{a}}x^{1/2} + {{b}}x^{-2}$, so
+      $$f'(x) = \frac{ {{a}} }{2}x^{-1/2} - {{2*b}}x^{-3} = \frac{ {{a}} }{2\sqrt{x}} - \frac{ {{2*b}} }{x^3}.$$
+    verify: "diff(a*sqrt(x) + b/x**2, x)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: calc-der-008
+    difficulty: 3
+    type: expression
+    prompt: |
+      Differentiate $f(x) = (x^2 + {{a}})\tan x$.
+
+      Type an expression in $x$; you may write $\sec^2 x$ as `sec(x)^2` or `1/cos(x)^2`.
+    params:
+      a: { int: [1, 9] }
+    answer: "2*x*tan(x) + (x^2 + a)*sec(x)^2"
+    vars: [x]
+    domain: [0.1, 1.2]
+    hints:
+      - "Product rule with $u = x^2 + {{a}}$ and $v = \\tan x$."
+      - "$\\frac{d}{dx}\\tan x = \\sec^2 x$."
+    solution: |
+      $$f'(x) = (x^2 + {{a}})'\tan x + (x^2 + {{a}})(\tan x)' = 2x\tan x + (x^2 + {{a}})\sec^2 x.$$
+    verify: "diff((x**2 + a)*tan(x), x)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-der-009
+    difficulty: 2
+    type: numeric
+    prompt: "Let $f(x) = {{a}}x^4 {{signed: b}}x^3$. What is $f''({{c}})$?"
+    params:
+      a: { int: [2, 4] }
+      b: { int: [-6, 6], not: [-1, 0, 1] }
+      c: { int: [-2, 3], not: [0] }
+    answer: "12*a*c^2 + 6*b*c"
+    hints:
+      - "Differentiate twice."
+      - "$f'(x) = {{4*a}}x^3 {{signed: 3*b}}x^2$."
+    solution: |
+      $f'(x) = {{4*a}}x^3 {{signed: 3*b}}x^2$ and $f''(x) = {{12*a}}x^2 {{signed: 6*b}}x$.
+      So $f''({{c}}) = {{12*a}}({{c}})^2 {{signed: 6*b}}({{c}}) = {{12*a*c^2 + 6*b*c}}$.
+    verify: "diff(a*x**4 + b*x**3, x, 2).subs(x, c)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: calc-der-010
+    difficulty: 3
+    type: mc
+    prompt: "Let $f(x) = |x {{signed: -c}}|$. At $x = {{c}}$, $f$ is:"
+    params:
+      c: { int: [-5, 5], not: [0] }
+    options:
+      - "continuous but not differentiable"
+      - "differentiable but not continuous"
+      - "both continuous and differentiable"
+      - "neither continuous nor differentiable"
+    answer: 0
+    hints:
+      - "Is there a jump in the graph at $x = {{c}}$? Is there a corner?"
+      - "Compare the slopes just to the left and just to the right of ${{c}}$."
+    solution: |
+      $\lim_{x \to {{c}}} |x {{signed: -c}}| = 0 = f({{c}})$, so $f$ is continuous there. But the difference quotient
+      $\frac{f(x) - f({{c}})}{x - ({{c}})} = \frac{|x {{signed: -c}}|}{x {{signed: -c}}}$ tends to $1$ from the right and to $-1$ from the left,
+      so the derivative does not exist: the graph has a corner. (A differentiable function is always continuous,
+      so "differentiable but not continuous" can never happen.)
+    verify: "(0 if limit(Abs(x - c), x, c) == 0 else 3) if limit(Abs(x - c)/(x - c), x, c, '+') != limit(Abs(x - c)/(x - c), x, c, '-') else 2"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: calc-der-011
+    difficulty: 4
+    type: multipart
+    prompt: |
+      Let
+      $$f(x) = \begin{cases} x^2 & x \le {{c}} \\ mx + q & x > {{c}} \end{cases}$$
+      Choose $m$ and $q$ so that $f$ is differentiable at $x = {{c}}$.
+    params:
+      c: { int: [-4, 4], not: [0] }
+    parts:
+      - prompt: "(a) What must $m$ be?"
+        type: numeric
+        answer: "2*c"
+        verify: "limit((x**2 - c**2)/(x - c), x, c, '-')"
+      - prompt: "(b) Using your $m$, what must $q$ be?"
+        type: numeric
+        answer: "c^2 - part1*c"
+        verify: "solve(Eq(part1*c + Symbol('q'), c**2), Symbol('q'))[0]"
+    hints:
+      - "Differentiable implies continuous, so you need two conditions at $x = {{c}}$: the values match and the slopes match."
+      - "The slope of $x^2$ at $x = {{c}}$ is $2 \\cdot ({{c}})$."
+    solution: |
+      (a) The right-hand derivative is $m$; the left-hand derivative is $\frac{d}{dx}x^2 = 2x$ at $x = {{c}}$, i.e. ${{2*c}}$.
+      So $m = {{2*c}}$.
+
+      (b) Continuity at ${{c}}$: $m\cdot({{c}}) + q = ({{c}})^2 = {{c^2}}$, so $q = {{c^2}} - ({{2*c}})({{c}}) = {{-c^2}}$.
+      (The line $y = {{2*c}}x {{signed: -c^2}}$ is exactly the tangent line to $y = x^2$ at $x = {{c}}$.)
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: calc-der-012
+    difficulty: 4
+    type: proof
+    prompt: |
+      Prove the product rule: if $u$ and $v$ are differentiable at $x$, then $(uv)'(x) = u'(x)v(x) + u(x)v'(x)$.
+      Work from the definition of the derivative.
+    hints:
+      - "Write the difference quotient $\\frac{u(x+h)v(x+h) - u(x)v(x)}{h}$."
+      - "Add and subtract $u(x+h)v(x)$ in the numerator."
+      - "You will need $u(x + h) \\to u(x)$; why is $u$ continuous at $x$?"
+    solution: |
+      Add and subtract $u(x+h)v(x)$:
+      $$\frac{u(x+h)v(x+h) - u(x)v(x)}{h} = u(x+h)\,\frac{v(x+h) - v(x)}{h} + v(x)\,\frac{u(x+h) - u(x)}{h}.$$
+      As $h \to 0$: $\frac{v(x+h)-v(x)}{h} \to v'(x)$ and $\frac{u(x+h)-u(x)}{h} \to u'(x)$ by definition. Also
+      $u(x+h) \to u(x)$, because a function differentiable at $x$ is continuous there:
+      $u(x+h) - u(x) = h \cdot \frac{u(x+h)-u(x)}{h} \to 0 \cdot u'(x) = 0$.
+      By the limit laws the whole expression tends to $u(x)v'(x) + v(x)u'(x)$. $\blacksquare$
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8
+
+  - id: calc-der-013
+    difficulty: 4
+    type: numeric
+    prompt: |
+      A line through the origin is tangent to the parabola $y = x^2 + {{q}}$ at a point with $x > 0$.
+      What is the slope of this line?
+    params:
+      q: { choice: [1, 4, 9, 16, 25] }
+    answer: "2*sqrt(q)"
+    hints:
+      - "Call the point of tangency $(s, s^2 + {{q}})$ and write the tangent line there."
+      - "The tangent line is $y = s^2 + {{q}} + 2s(x - s)$. Require it to pass through $(0, 0)$."
+    solution: |
+      At $x = s$ the tangent line is $y = s^2 + {{q}} + 2s(x - s)$. It passes through the origin when
+      $0 = s^2 + {{q}} - 2s^2$, i.e. $s^2 = {{q}}$, so $s = {{sqrt(q)}}$.
+      The slope is $f'(s) = 2s = {{2*sqrt(q)}}$.
+    verify: "(lambda s: [diff(x**2 + q, x).subs(x, r) for r in solve((x**2 + q - diff(x**2 + q, x)*x).subs(x, s), s) if r > 0][0])(Symbol('s'))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: calc-der-014
+    difficulty: 3
+    type: numeric
+    prompt: "Let $f(x) = x^{ {{m}} }$. What is $f^{({{k}})}({{c}})$, the value at $x = {{c}}$ of the derivative of order ${{k}}$?"
+    params:
+      m: { int: [4, 7] }
+      k: { int: [2, 3] }
+      c: { int: [1, 2] }
+    answer: "factorial(m) / factorial(m - k) * c^(m - k)"
+    hints:
+      - "Each differentiation brings the current exponent down as a factor and lowers it by one."
+      - "After ${{k}}$ derivatives the coefficient is ${{m}} \\cdot {{m - 1}} \\cdots$, with ${{k}}$ factors in all."
+    solution: |
+      Differentiating $x^{ {{m}} }$ ${{k}}$ times gives
+      $$f^{({{k}})}(x) = \frac{ {{m}}! }{ {{m - k}}! }\,x^{ {{m - k}} } = {{factorial(m)/factorial(m - k)}}\,x^{ {{m - k}} }.$$
+      At $x = {{c}}$: ${{factorial(m)/factorial(m - k)}} \cdot {{c}}^{ {{m - k}} } = {{factorial(m)/factorial(m - k)*c^(m - k)}}$.
+    verify: "diff(x**m, x, k).subs(x, c)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2

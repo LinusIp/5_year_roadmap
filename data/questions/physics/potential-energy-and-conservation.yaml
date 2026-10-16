@@ -1,0 +1,376 @@
+subject: physics
+topic: potential-energy-and-conservation
+questions:
+  - id: phys-energy-001
+    difficulty: 1
+    type: numeric
+    prompt: |
+      You lift a {{m}} kg box from the floor onto a shelf {{h}} m higher. By how much does its gravitational potential energy increase? Take $g = 9.8\,\text{m/s}^2$ and give a value with units.
+    params:
+      m: { real: [0.5, 30], step: 0.5 }
+      h: { real: [0.5, 3], step: 0.1 }
+    let:
+      g: 9.8
+    answer: "m * g * h"
+    units: "J"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'Near the Earth''s surface, $\Delta U = mg\,\Delta h$.'
+    solution: |
+      $\Delta U = mg\,\Delta h = {{m}} \times 9.8 \times {{h}} \approx {{m*g*h}}\,\text{J}$, equal to the work you do lifting it slowly.
+    verify: "integrate(m*9.8, (y, 0, h))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: phys-energy-002
+    difficulty: 1
+    type: numeric
+    prompt: |
+      An apple falls from rest from a branch {{h}} m above the ground. Using conservation of energy (ignore air resistance, $g = 9.8\,\text{m/s}^2$), how fast is it moving when it reaches the ground? Give a value with units.
+    params:
+      h: { real: [1, 10], step: 0.5 }
+    let:
+      g: 9.8
+    answer: "sqrt(2 * g * h)"
+    units: "m/s"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'Potential energy lost equals kinetic energy gained.'
+      - '$mgh = \tfrac12 mv^2$.'
+    solution: |
+      $mgh = \tfrac12 mv^2$, so $v = \sqrt{2gh} = \sqrt{2 \times 9.8 \times {{h}}} \approx {{sqrt(2*g*h)}}\,\text{m/s}$. The mass cancels.
+    verify: "9.8*max(np.roots([4.9, 0, -h]))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: phys-energy-003
+    difficulty: 1
+    type: mc
+    prompt: |
+      Which of these forces is **not** conservative?
+    options:
+      - 'Kinetic friction'
+      - 'Gravity near the Earth''s surface'
+      - 'The force of an ideal spring'
+      - 'The Sun''s gravitational pull on a planet'
+    answer: 0
+    hints:
+      - 'A force is conservative if the work it does around any closed path is zero.'
+      - 'Slide a block out and back along a rough floor. What is the sign of friction''s work on each leg?'
+    solution: |
+      Kinetic friction always opposes the motion, so it does negative work on both the outward and the return leg of a round trip: the total is not zero, and no potential energy can be defined for it. Gravity (uniform or $1/r^2$) and an ideal spring do zero net work around any closed path, so each has a potential energy: $mgy$, $-GMm/r$, $\tfrac12 kx^2$.
+    verify: "(lambda loops: [abs(w) > 1e-12 for w in loops].index(True))([integrate(-0.5, (x, 0, 1)) + integrate(0.5, (x, 1, 0)), integrate(-9.8, (y, 0, 1)) + integrate(-9.8, (y, 1, 0)), integrate(-3*x, (x, 0, 1)) + integrate(-3*x, (x, 1, 0)), integrate(-5/x**2, (x, 1, 2)) + integrate(-5/x**2, (x, 2, 1))])"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: phys-energy-004
+    difficulty: 2
+    type: numeric
+    prompt: |
+      A cart rolls without friction along a roller-coaster track. At a point {{h1}} m above the ground it moves at {{v1}} m/s. How fast is it moving at a point {{h2}} m above the ground? Take $g = 9.8\,\text{m/s}^2$ and give a value with units.
+    params:
+      h1: { real: [2, 30], step: 0.5 }
+      h2: { real: [0, 30], step: 0.5 }
+      v1: { real: [0, 10], step: 0.5 }
+    let:
+      g: 9.8
+      v2sq: "v1^2 + 2 * g * (h1 - h2)"
+    require: ["v2sq > 1", "abs(h1 - h2) >= 1"]
+    answer: "sqrt(v2sq)"
+    units: "m/s"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'With no friction, $K + U$ is the same at every point of the track.'
+      - '$\tfrac12 mv_1^2 + mgh_1 = \tfrac12 mv_2^2 + mgh_2$. The shape of the track does not matter.'
+    solution: |
+      $\tfrac12 mv_1^2 + mgh_1 = \tfrac12 mv_2^2 + mgh_2$, so
+      $$v_2 = \sqrt{v_1^2 + 2g(h_1 - h_2)} = \sqrt{ {{v1}}^2 + 2(9.8)({{h1 - h2}})} \approx {{sqrt(v2sq)}}\,\text{m/s}.$$
+    verify: "max(solve(Eq(v1**2/2 + 9.8*h1, Symbol('u')**2/2 + 9.8*h2), Symbol('u')))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: phys-energy-005
+    difficulty: 2
+    type: numeric
+    prompt: |
+      A {{m}} kg block slides at {{v}} m/s across a frictionless floor into a horizontal spring with $k = {{k}}\,\text{N/m}$. How far is the spring compressed when the block momentarily stops? Give a value with units.
+    params:
+      m: { real: [0.5, 5], step: 0.5 }
+      v: { real: [1, 6], step: 0.5 }
+      k: { int: [100, 2000] }
+    answer: "v * sqrt(m / k)"
+    units: "m"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'All the kinetic energy is stored in the spring at maximum compression.'
+      - '$\tfrac12 mv^2 = \tfrac12 kx^2$.'
+    solution: |
+      $\tfrac12 mv^2 = \tfrac12 kx^2$, so $x = v\sqrt{m/k} = {{v}}\sqrt{ {{m}}/{{k}} } \approx {{v*sqrt(m/k)}}\,\text{m}$ ($\approx {{100*v*sqrt(m/k)}}$ cm).
+    verify: "max(solve(Eq(m*v**2/2, k*Symbol('s')**2/2), Symbol('s')))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: phys-energy-006
+    difficulty: 2
+    type: numeric
+    prompt: |
+      A pendulum bob on a string {{L}} m long is pulled aside until the string makes {{th}}° with the vertical and released from rest. Ignoring air resistance ($g = 9.8\,\text{m/s}^2$), how fast is the bob moving at the lowest point? Give a value with units.
+    params:
+      L: { real: [0.3, 3], step: 0.1 }
+      th: { int: [10, 90] }
+    let:
+      g: 9.8
+      drop: "L * (1 - cos(th * pi / 180))"
+    answer: "sqrt(2 * g * drop)"
+    units: "m/s"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'The tension is always perpendicular to the motion, so it does no work.'
+      - 'The bob starts a height $L(1 - \cos\theta)$ above the lowest point.'
+    solution: |
+      The tension does no work, so mechanical energy is conserved. The bob drops $h = L(1 - \cos\theta) = {{L}}(1 - \cos{{th}}^\circ) \approx {{drop}}\,\text{m}$, and
+      $v = \sqrt{2gh} = \sqrt{2 \times 9.8 \times {{drop}}} \approx {{sqrt(2*g*drop)}}\,\text{m/s}$.
+    verify: "max(solve(Eq(Symbol('u')**2/2, 9.8*((-L*math.cos(math.radians(th))) - (-L))), Symbol('u')))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: phys-energy-007
+    difficulty: 3
+    type: numeric
+    prompt: |
+      A sled starts from rest at the top of a straight slope {{h}} m high, inclined at {{th}}°. The coefficient of kinetic friction is {{mu}}. Using energy (with $g = 9.8\,\text{m/s}^2$), find its speed at the bottom. Give a value with units.
+    params:
+      h: { real: [2, 20], step: 0.5 }
+      th: { int: [15, 50] }
+      mu: { real: [0.05, 0.4], step: 0.05 }
+    let:
+      g: 9.8
+      rad: "th * pi / 180"
+    require: ["tan(rad) > mu + 0.1"]
+    answer: "sqrt(2 * g * h * (1 - mu / tan(rad)))"
+    units: "m/s"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'Friction does negative work $-\mu_k mg\cos\theta \times L$, where $L = h/\sin\theta$ is the length of the slope.'
+      - '$mgh - \mu_k mg\cos\theta\,\dfrac{h}{\sin\theta} = \tfrac12 mv^2$.'
+    solution: |
+      The slope is $L = h/\sin\theta \approx {{h/sin(rad)}}\,\text{m}$ long, and friction $\mu_k mg\cos\theta$ does work $-\mu_k mg\cos\theta\,L = -\mu_k mgh/\tan\theta$. Energy:
+      $$\tfrac12 mv^2 = mgh - \frac{\mu_k mgh}{\tan\theta} \;\Rightarrow\; v = \sqrt{2gh\left(1 - \frac{\mu_k}{\tan\theta}\right)} \approx {{sqrt(2*g*h*(1 - mu/tan(rad)))}}\,\text{m/s}.$$
+    verify: "math.sqrt(2*np.linalg.solve([[1, 0], [mu, 1]], [9.8*math.cos(math.radians(th)), 9.8*math.sin(math.radians(th))])[1]*h/math.sin(math.radians(th)))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: phys-energy-008
+    difficulty: 3
+    type: multipart
+    prompt: |
+      A toy gun fires a {{m}} g ball straight up. Its spring ($k = {{k}}\,\text{N/m}$) is compressed by {{xc}} cm before firing. Ignore air resistance and friction, and take $g = 9.8\,\text{m/s}^2$.
+    params:
+      m: { int: [10, 50] }
+      k: { int: [100, 600] }
+      xc: { int: [1, 5] }
+    let:
+      g: 9.8
+      E: "k * (xc / 100)^2 / 2"
+    parts:
+      - prompt: "(a) How much energy is stored in the compressed spring? Give a value with units."
+        type: numeric
+        answer: E
+        units: "J"
+        tolerance: { rel: 0.01 }
+        verify: "integrate(k*x, (x, 0, Rational(xc, 100)))"
+      - prompt: "(b) Using your answer to (a), how high above its starting (compressed) position does the ball rise?"
+        type: numeric
+        answer: "part1 / ((m / 1000) * g)"
+        units: "m"
+        tolerance: { rel: 0.01 }
+        verify: "solve(Eq(k*Rational(xc, 100)**2/2, Rational(m, 1000)*9.8*Symbol('H')), Symbol('H'))[0]"
+    hints:
+      - 'Spring energy: $\tfrac12 kx^2$, with $x$ in metres.'
+      - 'At the top all of it has become gravitational potential energy $mgH$ (mass in kg).'
+    solution: |
+      (a) $E = \tfrac12 kx^2 = \tfrac12 \times {{k}} \times ({{xc/100}})^2 \approx {{E}}\,\text{J}$.
+
+      (b) $mgH = E$ with $m = {{m/1000}}\,\text{kg}$: $H = \dfrac{E}{mg} \approx \dfrac{ {{E}} }{ {{m/1000}} \times 9.8} \approx {{E/((m/1000)*g)}}\,\text{m}$.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: phys-energy-009
+    difficulty: 3
+    type: numeric
+    prompt: |
+      A small cart rolls without friction down a ramp and round a vertical loop-the-loop of radius {{R}} m. From what minimum height above the bottom of the loop must it start from rest to stay on the track at the top of the loop? Take $g = 9.8\,\text{m/s}^2$ and give a value with units.
+    params:
+      R: { real: [0.5, 10], step: 0.5 }
+    answer: "2.5 * R"
+    units: "m"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'At the top, the track can only push down. The cart just stays on when the normal force there is zero and gravity alone gives the centripetal force.'
+      - 'So $v_\text{top}^2 = gR$. Then use energy between the start and the top, which is $2R$ above the bottom.'
+    solution: |
+      At the top, $N + mg = mv^2/R$ with $N \ge 0$, so $v_\text{top}^2 \ge gR$. Energy from the start (height $H$, at rest) to the top (height $2R$):
+      $$mgH = mg(2R) + \tfrac12 mv_\text{top}^2 \ge 2mgR + \tfrac12 mgR \;\Rightarrow\; H_{\min} = \tfrac52 R = 2.5 \times {{R}} = {{2.5*R}}\,\text{m}.$$
+    verify: "solve([Eq(Symbol('w'), 9.8*R), Eq(9.8*Symbol('H'), 9.8*2*R + Symbol('w')/2)], [Symbol('w'), Symbol('H')])[Symbol('H')]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: phys-energy-010
+    difficulty: 3
+    type: numeric
+    prompt: |
+      A particle moving along the $x$ axis has potential energy $U(x) = {{A}}x^3 - {{B}}x$ (joules, with $x$ in metres). What is the force on it at $x = {{x0}}\,\text{m}$? Give a signed value with units (positive means in the $+x$ direction).
+    params:
+      A: { int: [2, 5] }
+      B: { int: [1, 20] }
+      x0: { real: [-3, 3], step: 0.5 }
+    let:
+      F: "-(3 * A * x0^2 - B)"
+    require: ["abs(F) > 0.5"]
+    answer: F
+    units: "N"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'For a conservative force in one dimension, $F = -\dfrac{dU}{dx}$.'
+      - '$\dfrac{dU}{dx} = {{3*A}}x^2 - {{B}}$.'
+    solution: |
+      $F(x) = -\dfrac{dU}{dx} = -\left({{3*A}}x^2 - {{B}}\right)$. At $x = {{x0}}$: $F = -({{3*A}} \times {{x0^2}} - {{B}}) = {{F}}\,\text{N}$,
+      pointing in the {{F > 0 ? "+x" : "−x"}} direction (downhill on the graph of $U$).
+    verify: "-diff(A*x**3 - B*x, x).subs(x, x0)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: phys-energy-011
+    difficulty: 4
+    type: multipart
+    prompt: |
+      A particle on the $x$ axis has potential energy $U(x) = {{A}}x^4 - {{B}}x^2$ (joules, with $x$ in metres).
+    params:
+      A: { int: [2, 4] }
+      B: { int: [2, 12] }
+    let:
+      xs: "sqrt(B / (2 * A))"
+    parts:
+      - prompt: "(a) At what positive $x$ is there a stable equilibrium? Give a value with units."
+        type: numeric
+        answer: xs
+        units: "m"
+        tolerance: { rel: 0.01 }
+        verify: "max(s for s in solve(diff(A*x**4 - B*x**2, x), x) if diff(A*x**4 - B*x**2, x, 2).subs(x, s) > 0)"
+      - prompt: "(b) Using your answer to (a), what is the potential energy there?"
+        type: numeric
+        answer: "A * part1^4 - B * part1^2"
+        units: "J"
+        tolerance: { rel: 0.01 }
+        verify: "min((A*x**4 - B*x**2).subs(x, s) for s in solve(diff(A*x**4 - B*x**2, x), x))"
+    hints:
+      - 'Equilibria are where $F = -dU/dx = 0$.'
+      - '$U''(x) = {{4*A}}x^3 - {{2*B}}x = 2x({{2*A}}x^2 - {{B}})$.'
+      - 'Stable means a minimum of $U$: $U''''(x) > 0$.'
+    solution: |
+      (a) $U'(x) = {{4*A}}x^3 - {{2*B}}x = 2x({{2*A}}x^2 - {{B}})$, which vanishes at $x = 0$ and $x = \pm\sqrt{ {{B}}/{{2*A}} }$.
+      $U''(x) = {{12*A}}x^2 - {{2*B}}$ is negative at $0$ (a hilltop, unstable) and positive at $x = \sqrt{ {{B}}/{{2*A}} } \approx {{xs}}\,\text{m}$, a stable minimum.
+
+      (b) $U = {{A}}x^4 - {{B}}x^2$ there equals $-\dfrac{B^2}{4A} = -\dfrac{ {{B^2}} }{ {{4*A}} } \approx {{A*xs^4 - B*xs^2}}\,\text{J}$, the bottom of the right-hand well.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: phys-energy-012
+    difficulty: 4
+    type: numeric
+    prompt: |
+      A {{m}} kg mass is attached to the lower end of a vertical spring ($k = {{k}}\,\text{N/m}$) that is at its natural length, and released from rest. Ignoring air resistance ($g = 9.8\,\text{m/s}^2$), how far does it fall before it momentarily stops? Give a value with units.
+    params:
+      m: { real: [0.2, 5], step: 0.1 }
+      k: { int: [20, 500] }
+    let:
+      g: 9.8
+    answer: "2 * m * g / k"
+    units: "m"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'At the lowest point the speed is zero again, so the kinetic energy is zero at both ends.'
+      - 'Gravitational energy lost, $mgd$, equals spring energy gained, $\tfrac12 kd^2$.'
+    solution: |
+      Between release and the lowest point $K = 0$ at both ends, so $mgd = \tfrac12 kd^2$, giving (for $d \ne 0$)
+      $$d = \frac{2mg}{k} = \frac{2 \times {{m}} \times 9.8}{ {{k}} } \approx {{2*m*g/k}}\,\text{m}.$$
+      That is twice the equilibrium stretch $mg/k$: the mass overshoots and oscillates about equilibrium.
+    verify: "max(solve(Eq(m*9.8*Symbol('s'), k*Symbol('s')**2/2), Symbol('s')))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: phys-energy-013
+    difficulty: 4
+    type: proof
+    prompt: |
+      A particle of mass $m$ moves along the $x$ axis under a single force $F(x) = -\dfrac{dU}{dx}$. Show that the mechanical energy $E = \tfrac12 mv^2 + U(x)$ does not change with time.
+    hints:
+      - 'Differentiate $E$ with respect to $t$, using the chain rule on $U(x(t))$.'
+      - 'Use $m\,\dfrac{dv}{dt} = F$ and $\dfrac{dx}{dt} = v$.'
+    solution: |
+      $$\frac{dE}{dt} = mv\frac{dv}{dt} + \frac{dU}{dx}\frac{dx}{dt} = v\left(m\frac{dv}{dt}\right) + v\,\frac{dU}{dx} = v\,F + v\left(-F\right) = 0.$$
+      So $E$ is constant along the motion: the work the force does, $\int F\,dx = -\Delta U$, is exactly the gain in kinetic energy.
+      If a non-conservative force $F_\text{nc}$ (such as friction) also acts, the same computation gives $\dfrac{dE}{dt} = F_\text{nc}v$, its power.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: phys-energy-014
+    difficulty: 5
+    type: numeric
+    prompt: |
+      A small block sits on top of a smooth (frictionless) fixed hemisphere of radius {{R}} m and is given a horizontal speed of {{v0}} m/s. It slides down the curved surface and at some point leaves it. How high above the hemisphere's centre (its flat base) is the block when it leaves the surface? Take $g = 9.8\,\text{m/s}^2$ and give a value with units.
+    params:
+      R: { real: [0.5, 5], step: 0.5 }
+      v0: { real: [0.5, 3], step: 0.5 }
+    let:
+      g: 9.8
+      c: "(v0^2 / (g * R) + 2) / 3"
+    require: ["v0^2 < 0.9 * g * R"]
+    answer: "R * c"
+    units: "m"
+    tolerance: { rel: 0.01 }
+    hints:
+      - 'Describe the position by the angle $\theta$ from the vertical; the height above the centre is $R\cos\theta$.'
+      - 'Radially: $mg\cos\theta - N = mv^2/R$. The block leaves when $N = 0$.'
+      - 'Energy: $v^2 = v_0^2 + 2gR(1 - \cos\theta)$.'
+    solution: |
+      At angle $\theta$ from the top, the radial equation is $mg\cos\theta - N = \dfrac{mv^2}{R}$, and energy gives $v^2 = v_0^2 + 2gR(1 - \cos\theta)$.
+      The block leaves when $N = 0$: $gR\cos\theta = v_0^2 + 2gR - 2gR\cos\theta$, so
+      $$\cos\theta = \frac{1}{3}\left(\frac{v_0^2}{gR} + 2\right) \approx {{c}}, \qquad h = R\cos\theta \approx {{R*c}}\,\text{m}.$$
+      Starting (almost) from rest it leaves at $h = \tfrac23 R$, whatever the radius or $g$.
+    verify: "R*solve([Eq(9.8*Symbol('c'), Symbol('w')/R), Eq(Symbol('w'), v0**2 + 2*9.8*R*(1 - Symbol('c')))], [Symbol('c'), Symbol('w')])[Symbol('c')]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8
+
+  - id: phys-energy-015
+    difficulty: 3
+    type: estimate
+    prompt: |
+      Estimate the minimum energy you must supply (the work against gravity alone) to climb the stairs to the top of a 30-storey building. Give a value with units.
+    answer: "70 * 9.8 * 30 * 3"
+    units: "J"
+    factor: 2
+    hints:
+      - 'Guess your mass and the height of one storey.'
+      - 'The work against gravity is $mgh$.'
+    solution: |
+      With $m \approx 70\,\text{kg}$ and about $3\,\text{m}$ per storey, $h \approx 90\,\text{m}$ and $mgh \approx 70 \times 9.8 \times 90 \approx 6\times10^4\,\text{J}$, about 15 food kilocalories.
+      Your body actually burns four or five times that, because muscles are only about 20–25 % efficient.
+    verify: "integrate(70*9.8, (y, 0, 90))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3

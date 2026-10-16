@@ -8,6 +8,7 @@ import { parse } from 'yaml';
 import { z } from 'zod';
 import { PracticeSubjectSchema, TopicFileSchema } from '../../src/seed/questions.ts';
 import type { BankQuestion, PracticeSubject, QuestionBank } from '../../src/seed/questions.ts';
+import type { Seed } from '../../src/seed/schema.ts';
 import { DATA_DIR } from './load-seed.ts';
 
 export interface BankResult {
@@ -97,4 +98,31 @@ export function loadQuestions(dataDir: string = DATA_DIR, options: { requireQuot
     }
   }
   return { bank: errors.length > 0 ? null : { subjects, questions }, errors, warnings, stats };
+}
+
+/**
+ * Checks the bank against the curriculum: a subject's `follows` resource exists and has the units its topics name,
+ * and every `covers` entry is a unit of a resource ("mit-18-06/lecture-21") or a roadmap.sh node.
+ */
+export function checkBankAgainstSeed(bank: QuestionBank, seed: Seed): string[] {
+  const errors: string[] = [];
+  const units = new Map(seed.resources.map((r) => [r.id, new Set((r.units ?? []).map((u) => u.id))]));
+  const nodes = new Set(seed.roadmaps.flatMap((r) => r.sections.flatMap((s) => s.nodes.map((n) => r.id + '/' + n.id))));
+  const known = (ref: string): boolean => {
+    if (nodes.has(ref)) return true;
+    const [res, unit] = ref.split('/') as [string, string];
+    return units.get(res)?.has(unit) ?? false;
+  };
+  for (const subject of bank.subjects) {
+    const follows = subject.follows ? units.get(subject.follows) : undefined;
+    if (subject.follows && !follows) errors.push('data/questions/topics.yaml: ' + subject.id + ' follows "' + subject.follows + '", which is not a resource');
+    for (const topic of subject.topics) {
+      for (const u of topic.units ?? []) if (follows && !follows.has(u)) errors.push('data/questions/topics.yaml: ' + subject.id + '/' + topic.id + ' names unit "' + u + '", which ' + subject.follows + ' does not have');
+      for (const c of topic.covers ?? []) if (!nodes.has(c)) errors.push('data/questions/topics.yaml: ' + subject.id + '/' + topic.id + ' covers "' + c + '", which is not a roadmap node');
+    }
+  }
+  for (const q of bank.questions) {
+    for (const c of q.covers) if (!known(c)) errors.push('data/questions/' + q.subject + '/' + q.topic + '.yaml: ' + q.id + ' covers "' + c + '", which is neither a unit of a resource nor a roadmap node');
+  }
+  return errors;
 }

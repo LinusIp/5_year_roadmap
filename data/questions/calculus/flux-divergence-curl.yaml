@@ -1,0 +1,347 @@
+subject: calculus
+topic: flux-divergence-curl
+questions:
+  - id: calc-flux-001
+    difficulty: 1
+    type: numeric
+    prompt: |
+      Compute the divergence of $\mathbf{F}(x, y, z) = \langle {{a}}x, {{b}}y, {{c}}z \rangle$.
+    params:
+      a: { int: [-5, 5], not: [0, 1, -1] }
+      b: { int: [-5, 5], not: [0, 1, -1] }
+      c: { int: [-5, 5], not: [0, 1, -1] }
+    answer: "a + b + c"
+    hints:
+      - '$\operatorname{div}\mathbf{F} = \dfrac{\partial P}{\partial x} + \dfrac{\partial Q}{\partial y} + \dfrac{\partial R}{\partial z}$.'
+    solution: |
+      $$\operatorname{div}\mathbf{F} = \frac{\partial}{\partial x}({{a}}x) + \frac{\partial}{\partial y}({{b}}y) + \frac{\partial}{\partial z}({{c}}z) = {{a}} + ({{b}}) + ({{c}}) = {{a + b + c}}.$$
+      It is constant: every small box loses (or gains) fluid at the same rate per unit volume.
+    verify: "(lambda V: (lambda N: V.divergence(a*N.x*N.i + b*N.y*N.j + c*N.z*N.k))(V.CoordSys3D('N')))(__import__('sympy.vector', fromlist=['CoordSys3D']))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: calc-flux-002
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Let $\mathbf{F} = \langle {{a}}x^2y,\ {{b}}yz,\ {{c}}xz^2 \rangle$. Compute $\operatorname{div}\mathbf{F}$ at the point $({{p}}, {{q}}, {{r}})$.
+    params:
+      a: { int: [-3, 3], not: [0, 1, -1] }
+      b: { int: [-3, 3], not: [0, 1, -1] }
+      c: { int: [-3, 3], not: [0, 1, -1] }
+      p: { int: [-2, 2] }
+      q: { int: [-2, 2] }
+      r: { int: [-2, 2] }
+    answer: "2*a*p*q + b*r + 2*c*p*r"
+    hints:
+      - 'Differentiate each component with respect to its own variable: $P$ in $x$, $Q$ in $y$, $R$ in $z$.'
+      - '$\operatorname{div}\mathbf{F} = {{2*a}}xy {{signed: b}}z {{signed: 2*c}}xz$.'
+    solution: |
+      $$\operatorname{div}\mathbf{F} = \frac{\partial}{\partial x}({{a}}x^2y) + \frac{\partial}{\partial y}({{b}}yz) + \frac{\partial}{\partial z}({{c}}xz^2) = {{2*a}}xy {{signed: b}}z {{signed: 2*c}}xz .$$
+      At $({{p}}, {{q}}, {{r}})$: ${{2*a}}({{p}})({{q}}) {{signed: b}}({{r}}) {{signed: 2*c}}({{p}})({{r}}) = {{2*a*p*q + b*r + 2*c*p*r}}$.
+    verify: "(lambda V: (lambda N: V.divergence(a*N.x**2*N.y*N.i + b*N.y*N.z*N.j + c*N.x*N.z**2*N.k).subs({N.x: p, N.y: q, N.z: r}))(V.CoordSys3D('N')))(__import__('sympy.vector', fromlist=['CoordSys3D']))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: calc-flux-003
+    difficulty: 2
+    type: mc
+    prompt: |
+      For every twice continuously differentiable vector field $\mathbf{F}$ and function $f$ on $\mathbb{R}^3$, which of these is **always** zero?
+    options:
+      - "$\\operatorname{div}(\\operatorname{curl}\\mathbf{F})$"
+      - "$\\operatorname{curl}\\mathbf{F}$"
+      - "$\\operatorname{div}(\\nabla f)$"
+      - "$\\nabla(\\operatorname{div}\\mathbf{F})$"
+    answer: 0
+    hints:
+      - 'Write out $\operatorname{div}(\operatorname{curl}\mathbf{F})$ in components and use $f_{xy} = f_{yx}$ (Clairaut).'
+      - '$\operatorname{div}(\nabla f) = f_{xx} + f_{yy} + f_{zz}$ is the Laplacian, which is not zero for $f = x^2$.'
+    solution: |
+      $\operatorname{div}(\operatorname{curl}\mathbf{F}) = (R_y - Q_z)_x + (P_z - R_x)_y + (Q_x - P_y)_z$, and the six second derivatives cancel in pairs
+      by equality of mixed partials, so it is always $0$. (Likewise $\operatorname{curl}(\nabla f) = \mathbf{0}$.)
+      The others are not identically zero: $\mathbf{F} = \langle -y, x, 0 \rangle$ has curl $\langle 0, 0, 2 \rangle$; $f = x^2$ has
+      $\operatorname{div}\nabla f = 2$; $\mathbf{F} = \langle x^2, 0, 0 \rangle$ has $\nabla(\operatorname{div}\mathbf{F}) = \langle 2, 0, 0 \rangle$.
+    verify: "(lambda C, D, G: (lambda F, f: [simplify(v) == 0 for v in [D(C(F)), sum(w**2 for w in C(F)), D(G(f)), sum(w**2 for w in G(D(F)))]].index(True))([x**2*y, y*z**3, x*z*exp(y)], x**2*y*z + z**3))(lambda F: [diff(F[2], y) - diff(F[1], z), diff(F[0], z) - diff(F[2], x), diff(F[1], x) - diff(F[0], y)], lambda F: diff(F[0], x) + diff(F[1], y) + diff(F[2], z), lambda f: [diff(f, x), diff(f, y), diff(f, z)])"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: calc-flux-004
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Find the flux of the constant field $\mathbf{F} = \langle {{a}}, {{b}} \rangle$ across the segment from $(0, 0)$ to $({{p}}, {{q}})$, with the
+      normal $\mathbf{n}$ pointing to the **right** of the direction of travel, i.e. $\displaystyle\int_C \mathbf{F}\cdot\mathbf{n}\, ds$ with $\mathbf{n}\,ds = \langle dy, -dx \rangle$.
+    params:
+      a: { int: [-5, 5], not: [0] }
+      b: { int: [-5, 5], not: [0] }
+      p: { int: [-4, 4] }
+      q: { int: [-4, 4] }
+    require: ["a*q - b*p != 0"]
+    answer: "a*q - b*p"
+    hints:
+      - '$\int_C \mathbf{F}\cdot\mathbf{n}\,ds = \int_C P\,dy - Q\,dx$.'
+      - 'On the segment, $\int dx = {{p}}$ and $\int dy = {{q}}$.'
+    solution: |
+      With $\mathbf{n}\,ds = \langle dy, -dx \rangle$, the flux is $\int_C P\,dy - Q\,dx$. For the constant field and the straight segment,
+      $\int_C dx = {{p}}$ and $\int_C dy = {{q}}$, so
+      $$\text{flux} = ({{a}})({{q}}) - ({{b}})({{p}}) = {{a*q - b*p}}.$$
+      (A positive value means $\mathbf{F}$ crosses the segment from left to right.)
+    verify: "(lambda X, Y: integrate(a*diff(Y, t) - b*diff(X, t), (t, 0, 1)))(p*t, q*t)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-flux-005
+    difficulty: 2
+    type: vector
+    prompt: |
+      Let $\mathbf{F} = \langle {{a}}y^2,\ {{b}}xz,\ {{c}}xy \rangle$. Compute $\operatorname{curl}\mathbf{F}$ at $({{p}}, {{q}}, {{r}})$.
+      Enter it as a list such as `1, -2, 3`.
+    params:
+      a: { int: [-3, 3], not: [0, 1, -1] }
+      b: { int: [-3, 3], not: [0, 1, -1] }
+      c: { int: [-3, 3], not: [0, 1, -1] }
+      p: { int: [-2, 2] }
+      q: { int: [-2, 2] }
+      r: { int: [-2, 2] }
+    answer: "[(c - b)*p, -c*q, b*r - 2*a*q]"
+    hints:
+      - '$\operatorname{curl}\mathbf{F} = \langle R_y - Q_z,\ P_z - R_x,\ Q_x - P_y \rangle$.'
+      - '$R_y = {{c}}x$, $Q_z = {{b}}x$, $P_z = 0$, $R_x = {{c}}y$, $Q_x = {{b}}z$, $P_y = {{2*a}}y$.'
+    solution: |
+      With $P = {{a}}y^2$, $Q = {{b}}xz$, $R = {{c}}xy$:
+      $$\operatorname{curl}\mathbf{F} = \langle {{c}}x - ({{b}})x,\ 0 - ({{c}})y,\ {{b}}z - ({{2*a}})y \rangle.$$
+      At $({{p}}, {{q}}, {{r}})$: $\operatorname{curl}\mathbf{F} = \langle {{(c - b)*p}}, {{-c*q}}, {{b*r - 2*a*q}} \rangle$.
+    verify: "(lambda V: (lambda N: (lambda w: [w.dot(N.i).subs({N.x: p, N.y: q, N.z: r}), w.dot(N.j).subs({N.x: p, N.y: q, N.z: r}), w.dot(N.k).subs({N.x: p, N.y: q, N.z: r})])(V.curl(a*N.y**2*N.i + b*N.x*N.z*N.j + c*N.x*N.y*N.k)))(V.CoordSys3D('N')))(__import__('sympy.vector', fromlist=['CoordSys3D']))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-flux-006
+    difficulty: 3
+    type: numeric
+    prompt: |
+      Find the outward flux of $\mathbf{F} = \langle {{a}}x, {{b}}y, {{c}}z \rangle$ through the sphere $x^2 + y^2 + z^2 = {{R^2}}$.
+      Give it to 4 significant figures.
+    params:
+      a: { int: [-3, 5], not: [0] }
+      b: { int: [-3, 5], not: [0] }
+      c: { int: [-3, 5], not: [0] }
+      R: { int: [1, 3] }
+    require: ["a + b + c != 0"]
+    answer: "(a + b + c) * 4 * pi * R^3 / 3"
+    hints:
+      - 'Divergence theorem: the flux equals $\iiint_B \operatorname{div}\mathbf{F}\,dV$ over the ball.'
+      - '$\operatorname{div}\mathbf{F} = {{a + b + c}}$ is constant, and the ball has volume $\frac43\pi\cdot{{R^3}}$.'
+    solution: |
+      By the divergence theorem,
+      $$\oiint_S \mathbf{F}\cdot\mathbf{n}\,dS = \iiint_B \operatorname{div}\mathbf{F}\,dV = ({{a}} + ({{b}}) + ({{c}}))\cdot\frac{4\pi\cdot{{R^3}}}{3} = \frac{ {{4*(a + b + c)*R^3}}\pi}{3} \approx {{(a + b + c)*4*pi*R^3/3}}.$$
+      (Directly: $\mathbf{n} = \langle x, y, z \rangle/{{R}}$, so $\mathbf{F}\cdot\mathbf{n} = ({{a}}x^2 + {{b}}y^2 + {{c}}z^2)/{{R}}$, and by symmetry
+      $\oiint x^2\,dS = \oiint y^2\,dS = \oiint z^2\,dS = \frac{4\pi\cdot{{R^4}}}{3}$.)
+    verify: "(lambda ph: integrate((a*(R*sin(ph)*cos(t))**2 + b*(R*sin(ph)*sin(t))**2 + c*(R*cos(ph))**2)/R*R**2*sin(ph), (ph, 0, pi), (t, 0, 2*pi)))(Symbol('ph'))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-flux-007
+    difficulty: 3
+    type: numeric
+    prompt: |
+      Let $S$ be the part of the plane $z = {{a}}x {{signed: b}}y$ above the square $0 \le x \le {{L}}$, $0 \le y \le {{L}}$, oriented upward.
+      Find the flux of the constant field $\mathbf{F} = \langle {{p}}, {{q}}, {{s}} \rangle$ through $S$.
+    params:
+      a: { int: [-3, 3], not: [0, 1, -1] }
+      b: { int: [-3, 3], not: [0, 1, -1] }
+      L: { int: [1, 3] }
+      p: { int: [-4, 4] }
+      q: { int: [-4, 4] }
+      s: { int: [-4, 4] }
+    require: ["s - p*a - q*b != 0"]
+    answer: "L^2 * (s - p*a - q*b)"
+    hints:
+      - 'For a graph $z = f(x, y)$ oriented upward, $\mathbf{n}\,dS = \langle -f_x, -f_y, 1 \rangle\,dx\,dy$.'
+      - 'Here $\mathbf{n}\,dS = \langle {{-a}}, {{-b}}, 1 \rangle\,dx\,dy$, a constant vector.'
+    solution: |
+      For the graph of $f = {{a}}x {{signed: b}}y$, $\mathbf{n}\,dS = \langle -f_x, -f_y, 1 \rangle\,dA = \langle {{-a}}, {{-b}}, 1 \rangle\,dA$. Then
+      $$\iint_S \mathbf{F}\cdot\mathbf{n}\,dS = \iint_{[0,{{L}}]^2} \big(({{p}})({{-a}}) + ({{q}})({{-b}}) {{signed: s}}\big)\,dA = ({{s - p*a - q*b}})\cdot{{L^2}} = {{L^2*(s - p*a - q*b)}}.$$
+    verify: "Matrix([1, 0, a]).cross(Matrix([0, 1, b])).dot(Matrix([p, q, s])) * integrate(1, (x, 0, L), (y, 0, L))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-flux-008
+    difficulty: 3
+    type: numeric
+    prompt: |
+      Let $\mathbf{F} = \langle {{p}}x^2 + yz,\ {{q}}y^2 + xz,\ {{s}}z^2 + xy \rangle$ and let $S$ be the boundary of the box
+      $[0, {{a}}] \times [0, {{b}}] \times [0, {{c}}]$, oriented outward. Use the divergence theorem to find the flux of $\mathbf{F}$ through $S$.
+    params:
+      p: { int: [-3, 3], not: [0, 1, -1] }
+      q: { int: [-3, 3], not: [0, 1, -1] }
+      s: { int: [-3, 3], not: [0, 1, -1] }
+      a: { int: [1, 3] }
+      b: { int: [1, 3] }
+      c: { int: [1, 3] }
+    answer: "a*b*c*(p*a + q*b + s*c)"
+    hints:
+      - '$\operatorname{div}\mathbf{F} = {{2*p}}x {{signed: 2*q}}y {{signed: 2*s}}z$: the terms $yz$, $xz$, $xy$ do not contribute.'
+      - '$\iiint_B x\,dV = \frac{ {{a^2}} }{2}\cdot{{b}}\cdot{{c}}$, and similarly for $y$ and $z$.'
+    solution: |
+      $\operatorname{div}\mathbf{F} = {{2*p}}x {{signed: 2*q}}y {{signed: 2*s}}z$. Over the box,
+      $$\iiint_B \operatorname{div}\mathbf{F}\,dV = {{2*p}}\cdot\frac{ {{a^2}} }{2}\cdot{{b*c}} + ({{2*q}})\cdot\frac{ {{b^2}} }{2}\cdot{{a*c}} + ({{2*s}})\cdot\frac{ {{c^2}} }{2}\cdot{{a*b}}
+        = {{a*b*c}}\,({{p*a}} + ({{q*b}}) + ({{s*c}})) = {{a*b*c*(p*a + q*b + s*c)}}.$$
+    verify: "(lambda P, Q, S: integrate(P.subs(x, a) - P.subs(x, 0), (y, 0, b), (z, 0, c)) + integrate(Q.subs(y, b) - Q.subs(y, 0), (x, 0, a), (z, 0, c)) + integrate(S.subs(z, c) - S.subs(z, 0), (x, 0, a), (y, 0, b)))(p*x**2 + y*z, q*y**2 + x*z, s*z**2 + x*y)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: calc-flux-009
+    difficulty: 4
+    type: numeric
+    prompt: |
+      Let $\mathbf{F} = \langle -{{p}}y,\ {{q}}x,\ z^2 \rangle$ and let $C$ be the circle $x^2 + y^2 = {{R^2}}$ in the plane $z = {{h}}$, counterclockwise as seen
+      from above. Use Stokes' theorem to compute $\oint_C \mathbf{F}\cdot d\mathbf{r}$. Give it to 4 significant figures.
+    params:
+      p: { int: [1, 4] }
+      q: { int: [1, 4] }
+      R: { int: [1, 3] }
+      h: { int: [-2, 2] }
+    answer: "(p + q) * pi * R^2"
+    hints:
+      - 'Stokes: $\oint_C \mathbf{F}\cdot d\mathbf{r} = \iint_S (\operatorname{curl}\mathbf{F})\cdot\mathbf{n}\,dS$ for any surface $S$ bounded by $C$; take the flat disk, with $\mathbf{n} = \mathbf{k}$.'
+      - '$\operatorname{curl}\mathbf{F} = \langle 0, 0, {{q}} + {{p}} \rangle$.'
+    solution: |
+      $\operatorname{curl}\mathbf{F} = \langle R_y - Q_z,\ P_z - R_x,\ Q_x - P_y \rangle = \langle 0, 0, {{q}} + {{p}} \rangle$. Take $S$ to be the disk of radius ${{R}}$ in the
+      plane $z = {{h}}$, with upward normal $\mathbf{k}$ (matching the counterclockwise orientation by the right-hand rule):
+      $$\oint_C \mathbf{F}\cdot d\mathbf{r} = \iint_S {{p + q}}\,dS = {{p + q}}\cdot{{R^2}}\pi \approx {{(p + q)*pi*R^2}}.$$
+    verify: "(lambda X, Y, Z: integrate(-p*Y*diff(X, t) + q*X*diff(Y, t) + Z**2*diff(Z, t), (t, 0, 2*pi)))(R*cos(t), R*sin(t), h + 0*t)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: calc-flux-010
+    difficulty: 4
+    type: numeric
+    prompt: |
+      Let $\mathbf{F} = \langle {{a}}x, {{b}}y, {{c}}z^2 \rangle$ and let $S$ be the closed surface of the solid cylinder $x^2 + y^2 \le {{R^2}}$, $0 \le z \le {{h}}$
+      (side, top and bottom), oriented outward. Find the flux of $\mathbf{F}$ through $S$. Give it to 4 significant figures.
+    params:
+      a: { int: [1, 4] }
+      b: { int: [1, 4] }
+      c: { int: [-3, 3], not: [0] }
+      R: { int: [1, 3] }
+      h: { int: [1, 3] }
+    answer: "(a + b) * pi * R^2 * h + c * pi * R^2 * h^2"
+    hints:
+      - 'Divergence theorem: $\operatorname{div}\mathbf{F} = {{a}} + {{b}} {{signed: 2*c}}z$.'
+      - 'In cylindrical coordinates, $\iiint z\,dV = \pi\cdot{{R^2}}\cdot\frac{ {{h^2}} }{2}$.'
+    solution: |
+      $\operatorname{div}\mathbf{F} = {{a + b}} {{signed: 2*c}}z$. Over the cylinder $D$ (volume $\pi\cdot{{R^2}}\cdot{{h}}$):
+      $$\iiint_D ({{a + b}} {{signed: 2*c}}z)\,dV = {{a + b}}\cdot\pi\cdot{{R^2*h}} + ({{2*c}})\cdot\pi\cdot{{R^2}}\cdot\frac{ {{h^2}} }{2}
+        = \pi\,({{(a + b)*R^2*h}} {{signed: c*R^2*h^2}}) \approx {{(a + b)*pi*R^2*h + c*pi*R^2*h^2}}.$$
+    verify: "integrate((a*R*cos(t)*cos(t) + b*R*sin(t)*sin(t))*R, (t, 0, 2*pi), (z, 0, h)) + c*h**2*pi*R**2 - c*0**2*pi*R**2"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: calc-flux-011
+    difficulty: 3
+    type: mc
+    prompt: |
+      Which of these vector fields has **both** zero divergence and zero curl everywhere?
+    options:
+      - "$\\langle x, -y, 0 \\rangle$"
+      - "$\\langle y, -x, 0 \\rangle$"
+      - "$\\langle x, y, 0 \\rangle$"
+      - "$\\langle y, x, z \\rangle$"
+    answer: 0
+    hints:
+      - 'Compute $\operatorname{div}$ and the $\mathbf{k}$-component of the curl, $Q_x - P_y$, for each.'
+    solution: |
+      - $\langle x, -y, 0 \rangle$: $\operatorname{div} = 1 - 1 = 0$, $\operatorname{curl} = \langle 0, 0, 0 - 0 \rangle = \mathbf{0}$. ✓ (It is $\nabla\big(\tfrac{x^2 - y^2}{2}\big)$ with harmonic potential.)
+      - $\langle y, -x, 0 \rangle$: $\operatorname{div} = 0$ but $\operatorname{curl} = \langle 0, 0, -2 \rangle$ (a rotation).
+      - $\langle x, y, 0 \rangle$: $\operatorname{curl} = \mathbf{0}$ but $\operatorname{div} = 2$ (a source).
+      - $\langle y, x, z \rangle$: $\operatorname{curl} = \mathbf{0}$ but $\operatorname{div} = 1$.
+    verify: "(lambda C, D: [all(simplify(w) == 0 for w in C(F) + [D(F)]) for F in [[x, -y, 0*x], [y, -x, 0*x], [x, y, 0*x], [y, x, z]]].index(True))(lambda F: [diff(F[2], y) - diff(F[1], z), diff(F[0], z) - diff(F[2], x), diff(F[1], x) - diff(F[0], y)], lambda F: diff(F[0], x) + diff(F[1], y) + diff(F[2], z))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-flux-012
+    difficulty: 4
+    type: multipart
+    prompt: |
+      Let $\mathbf{F} = \langle {{a}}x, {{b}}y, {{c}}z \rangle$ and let $S$ be the upper hemisphere $x^2 + y^2 + z^2 = {{R^2}}$, $z \ge 0$, oriented upward (away from the origin).
+    params:
+      a: { int: [2, 4] }
+      b: { int: [2, 4] }
+      c: { int: [2, 4] }
+      R: { int: [1, 3] }
+    parts:
+      - prompt: "(a) What is $\\operatorname{div}\\mathbf{F}$?"
+        type: numeric
+        answer: "a + b + c"
+        verify: "diff(a*x, x) + diff(b*y, y) + diff(c*z, z)"
+      - prompt: "(b) Using (a), find the flux of $\\mathbf{F}$ through $S$. Give it to 4 significant figures."
+        type: numeric
+        answer: "part1 * 2 * pi * R^3 / 3"
+        verify: "(lambda ph: integrate((a*(R*sin(ph)*cos(t))**2 + b*(R*sin(ph)*sin(t))**2 + c*(R*cos(ph))**2)/R*R**2*sin(ph), (ph, 0, pi/2), (t, 0, 2*pi)))(Symbol('ph'))"
+    hints:
+      - 'Close $S$ with the flat disk $D$: $z = 0$, $x^2 + y^2 \le {{R^2}}$, oriented downward. Then apply the divergence theorem to the half-ball.'
+      - 'On $D$, $\mathbf{F}\cdot(-\mathbf{k}) = -{{c}}z = 0$, so the disk contributes nothing.'
+    solution: |
+      **(a)** $\operatorname{div}\mathbf{F} = {{a}} + {{b}} + {{c}} = {{a + b + c}}$.
+
+      **(b)** $S$ together with the disk $D$ ($z = 0$, normal $-\mathbf{k}$) bounds the half-ball $H$ of volume $\frac23\pi\cdot{{R^3}}$. On $D$,
+      $\mathbf{F}\cdot(-\mathbf{k}) = -{{c}}z = 0$, so
+      $$\iint_S \mathbf{F}\cdot\mathbf{n}\,dS = \iiint_H \operatorname{div}\mathbf{F}\,dV - 0 = {{a + b + c}}\cdot\frac{2\pi\cdot{{R^3}}}{3} \approx {{(a + b + c)*2*pi*R^3/3}}.$$
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: calc-flux-013
+    difficulty: 5
+    type: numeric
+    prompt: |
+      Let $\mathbf{F} = {{k}}\,\dfrac{\langle x, y, z \rangle}{(x^2 + y^2 + z^2)^{3/2}}$ (an inverse-square field) and let $S$ be the surface of the cube
+      $[-{{a}}, {{a}}]^3$, oriented outward. Find the flux of $\mathbf{F}$ through $S$. Give it to 4 significant figures.
+    params:
+      k: { int: [1, 5] }
+      a: { int: [1, 3] }
+    answer: "4 * pi * k"
+    hints:
+      - 'Check that $\operatorname{div}\mathbf{F} = 0$ away from the origin, but $\mathbf{F}$ is undefined at the origin, which is inside the cube.'
+      - 'Cut out a small sphere around the origin: the flux through the cube equals the flux through any sphere centred at the origin.'
+      - 'On the sphere of radius $\varepsilon$, $\mathbf{F}\cdot\mathbf{n} = {{k}}/\varepsilon^2$ and the area is $4\pi\varepsilon^2$.'
+    solution: |
+      A computation gives $\operatorname{div}\mathbf{F} = 0$ for $(x, y, z) \ne \mathbf{0}$. Let $B_\varepsilon$ be a small ball around the origin inside the cube.
+      The divergence theorem applies to the region between the sphere $\partial B_\varepsilon$ and the cube, where $\mathbf{F}$ is smooth:
+      $$\oiint_{\text{cube}} \mathbf{F}\cdot\mathbf{n}\,dS - \oiint_{\partial B_\varepsilon} \mathbf{F}\cdot\mathbf{n}\,dS = \iiint 0\,dV = 0 .$$
+      On the sphere, $\mathbf{n} = \mathbf{r}/\varepsilon$ and $\mathbf{F}\cdot\mathbf{n} = {{k}}/\varepsilon^2$, so its flux is ${{k}}/\varepsilon^2\cdot4\pi\varepsilon^2 = 4\pi\cdot{{k}}$.
+      Hence the flux through the cube is $4\pi\cdot{{k}} \approx {{4*pi*k}}$, independent of the cube's size (Gauss's law).
+    verify: "(lambda mp: 6 * mp.quad(lambda Y: k*a * 2*a / ((Y**2 + a**2) * mp.sqrt(Y**2 + 2*a**2)), [-a, a]))(__import__('mpmath'))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8
+
+  - id: calc-flux-014
+    difficulty: 3
+    type: proof
+    prompt: |
+      Let $\mathbf{F} = \langle P, Q, R \rangle$ have continuous second partial derivatives. Prove that $\operatorname{div}(\operatorname{curl}\mathbf{F}) = 0$.
+    hints:
+      - '$\operatorname{curl}\mathbf{F} = \langle R_y - Q_z,\ P_z - R_x,\ Q_x - P_y \rangle$.'
+      - 'Take the divergence and group the six terms in pairs; use Clairaut''s theorem.'
+    solution: |
+      $$\operatorname{div}(\operatorname{curl}\mathbf{F}) = \frac{\partial}{\partial x}(R_y - Q_z) + \frac{\partial}{\partial y}(P_z - R_x) + \frac{\partial}{\partial z}(Q_x - P_y)
+        = (R_{yx} - R_{xy}) + (P_{zy} - P_{yz}) + (Q_{xz} - Q_{zx}).$$
+      Since the second partials are continuous, Clairaut's theorem gives $R_{yx} = R_{xy}$, $P_{zy} = P_{yz}$ and $Q_{xz} = Q_{zx}$, so each bracket is $0$
+      and $\operatorname{div}(\operatorname{curl}\mathbf{F}) = 0$. $\blacksquare$
+      (Consequence: a field with non-zero divergence, such as $\langle x, y, z \rangle$, cannot be the curl of another field.)
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
