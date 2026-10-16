@@ -3,7 +3,7 @@
  *
  *   README.md
  *   state/items.json       item, paper, certificate and milestone states
- *   state/plan.json        plan edits: overrides, items of your own, re-plans, weekly picks
+ *   state/plan.json        plan edits: patches, items of your own, re-plans, weekly picks
  *   state/settings.json    blocks, thresholds, streak rules, theme (never the token)
  *   log/2026/10/2026-10-07.json   one day
  *   log/2026/10/2026-10-07.md     its human-readable twin, generated
@@ -21,7 +21,7 @@ export const SETTINGS_PATH = 'state/settings.json';
 /** The tables whose records go to the data repository. `meta` (timer, shortcuts) stays on the device. */
 export const SYNCED_TABLES = [
   'dayLogs', 'itemStates', 'paperStates', 'certStates', 'milestoneStates', 'customEntities', 'overrides',
-  'reviews', 'weekPicks', 'replans', 'settings',
+  'reviews', 'weekPicks', 'replans', 'planPatches', 'settings',
 ] as const;
 export type SyncedTable = (typeof SYNCED_TABLES)[number];
 
@@ -87,6 +87,7 @@ export function pathsForRecord(table: SyncedTable, key: unknown, record: unknown
     case 'overrides':
     case 'weekPicks':
     case 'replans':
+    case 'planPatches':
       return [PLAN_PATH];
     case 'settings':
       return [SETTINGS_PATH];

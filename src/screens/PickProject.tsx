@@ -1,4 +1,5 @@
-import { addCustomEntity, patchMany, slugifyId } from '../db/edits.ts';
+import { addPlanEdit, slugifyId } from '../db/edits.ts';
+import type { NewPlanPatch } from '../db/types.ts';
 import { setWeekPick } from '../db/state.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { addDays, startOfWeek, today } from '../lib/dates.ts';
@@ -71,11 +72,12 @@ export function PickProject() {
     if (monthly) {
       if (!phase) return;
       const { patches, add } = takeIntoLane(seed.plan, (id) => isOpen(id, states), phase.id, 'D', card.id);
-      if (patches.length > 0) await patchMany('planItem', patches);
+      const edit: NewPlanPatch[] = patches.map((p) => ({ op: 'move', planItemId: p.id, order: p.patch.order!, ...(p.patch.phaseId ? { phaseId: p.patch.phaseId } : {}), ...(p.patch.block ? { block: p.patch.block } : {}) }));
       if (add) {
-        const id = slugifyId(card.id, new Set(seed.plan.map((i) => i.id)), 'plan');
-        await addCustomEntity('planItem', id, { ...add, id });
+        const id = slugifyId(card.id, new Set([...seed.plan, ...(seed.dropped ?? [])].map((i) => i.id)), 'plan');
+        edit.push({ op: 'add', item: { ...add, id } });
       }
+      await addPlanEdit(edit, 'Took ' + card.title);
     } else {
       await setWeekPick(startOfWeek(nextWeek ? addDays(now, 7) : now, settings.core.weekStartsOn), card.id);
     }

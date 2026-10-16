@@ -25,14 +25,18 @@ export const ROADMAP_IDS = ['inference-engineering', 'ai-engineer', 'ai-agents',
 const NodeRef = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must look like roadmap-id/node-id');
 export const CERT_MODES = ['committed', 'optional', 'investigate'] as const;
 
-export type TrackId = (typeof TRACK_IDS)[number];
+/** One of the sixteen tracks, or a track the user created (`my-…`). */
+export type TrackId = (typeof TRACK_IDS)[number] | `my-${string}`;
+export type SeedTrackId = (typeof TRACK_IDS)[number];
 /** A block's id: A to E by default, P for Practice, any short capitalised id for a block the user adds. */
 export type BlockId = string;
 export type SeedBlockId = (typeof BLOCK_IDS)[number];
 export type ResourceType = (typeof RESOURCE_TYPES)[number];
 export type Cadence = (typeof CADENCES)[number];
 
-export const TrackIdSchema = z.enum(TRACK_IDS);
+export const CustomTrackIdSchema = z.string().regex(/^my-[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must look like my-something') as unknown as z.ZodType<`my-${string}`>;
+export const TrackIdSchema = z.union([z.enum(TRACK_IDS), CustomTrackIdSchema]);
+export const SeedTrackIdSchema = z.enum(TRACK_IDS);
 export const BlockIdSchema = z.string().regex(/^[A-Z][A-Z0-9]{0,7}$/, 'must be a block id: a capital letter, then up to 7 capitals or digits');
 export const SeedBlockIdSchema = z.enum(BLOCK_IDS);
 
@@ -143,6 +147,8 @@ function checkUniqueUnitIds(units: Unit[] | undefined, ctx: z.RefinementCtx): vo
 
 export const TrackSchema = z.strictObject({
   id: TrackIdSchema,
+  /** Set on a track the user created in the app. */
+  source: z.literal('user').optional(),
   name: Text,
   /**
    * Colour family. Sixteen tracks are too many to tell apart by hue, so tracks share the eight
@@ -477,6 +483,18 @@ export const StoredCoreSchema = SettingsDefaultsObject.extend({
 });
 export type StoredCore = z.infer<typeof StoredCoreSchema>;
 
+/* ------------------------------------------------------------------ goals */
+
+/** "Ship my inference server by 30 June 2028": a date, and the items or roadmap nodes it depends on. */
+export const GoalSchema = z.strictObject({
+  id: Slug,
+  title: Text,
+  date: IsoDate,
+  /** Resource or project ids, or roadmap nodes (`roadmap/node`). */
+  links: z.array(z.string().min(1)).default([]),
+});
+export type Goal = z.infer<typeof GoalSchema>;
+
 /* ------------------------------------------------------------------ the seed */
 
 export interface Seed {
@@ -498,4 +516,11 @@ export interface Seed {
  * scripts/lib/vite-plugin-seed.ts), so a resource carries only the count, which is all a progress bar needs.
  */
 export type AppResource = Omit<Resource, 'units'> & { unitCount: number };
-export type AppSeed = Omit<Seed, 'resources'> & { resources: AppResource[] };
+export type AppSeed = Omit<Seed, 'resources'> & {
+  resources: AppResource[];
+  /** Set once the user's plan edits are applied (src/lib/plan.ts): items taken off the plan, restorable. */
+  dropped?: PlanItem[];
+  goals?: Goal[];
+  /** Plan edits that name something the curriculum no longer has, reported once in Settings. */
+  patchProblems?: string[];
+};

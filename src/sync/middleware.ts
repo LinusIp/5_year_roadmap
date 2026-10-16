@@ -97,6 +97,7 @@ const TABLE_SUMMARY: Partial<Record<SyncedTable, string>> = {
   overrides: 'update the plan',
   weekPicks: "pick the week's build",
   replans: 're-plan',
+  planPatches: 'edit the plan',
   settings: 'update settings',
 };
 

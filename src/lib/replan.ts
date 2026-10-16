@@ -12,7 +12,7 @@
  */
 import { plannedOver } from './day-plan.ts';
 import type { AppSeed, BlockId, Phase, PlanItem } from '../seed/schema.ts';
-import type { StoredSettings, UserItemState } from '../db/types.ts';
+import type { NewPlanPatch, StoredSettings, UserItemState } from '../db/types.ts';
 import { itemProgress } from './progress.ts';
 
 export interface ReplanMove {
@@ -215,11 +215,11 @@ export function replan({ seed, settings, states, asOf }: ReplanInput): ReplanRes
   return { moves, reorders, lanes, pastPlanEnd, unchanged };
 }
 
-/** Everything a re-plan changes, as plan-item patches ready to store as overrides. */
-export function replanToPatches(result: Pick<ReplanResult, 'moves' | 'reorders'>): { id: string; patch: Record<string, unknown> }[] {
+/** Everything a re-plan changes, as move patches: one edit, one undo. */
+export function replanToPatches(result: Pick<ReplanResult, 'moves' | 'reorders'>): NewPlanPatch[] {
   return [
-    ...result.moves.map((move) => ({ id: move.planItemId, patch: { phaseId: move.toPhaseId, order: move.toOrder } })),
-    ...result.reorders.map((r) => ({ id: r.planItemId, patch: { order: r.order } })),
+    ...result.moves.map((move): NewPlanPatch => ({ op: 'move', planItemId: move.planItemId, phaseId: move.toPhaseId, order: move.toOrder })),
+    ...result.reorders.map((r): NewPlanPatch => ({ op: 'move', planItemId: r.planItemId, order: r.order })),
   ];
 }
 

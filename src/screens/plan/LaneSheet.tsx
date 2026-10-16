@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { patchMany, removePlanItem } from '../../db/edits.ts';
+import { addPlanEdit, removePlanItem } from '../../db/edits.ts';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { reorderLane } from '../../lib/plan.ts';
 import type { LaneProgress } from '../../lib/progress.ts';
@@ -47,7 +47,13 @@ export function LaneSheet({
       from,
       to,
     );
-    if (reordered.length > 0) void patchMany('planItem', reordered.map((r) => ({ id: r.id, patch: { order: r.order } })));
+    const moving = lane.items[from];
+    if (reordered.length > 0 && moving) {
+      void addPlanEdit(
+        reordered.map((r) => ({ op: 'move', planItemId: r.id, order: r.order })),
+        'Moved ' + shortTitle(moving.title) + (to < from ? ' up' : ' down'),
+      );
+    }
   };
   const close = (): void => {
     setEditing(false);
@@ -101,7 +107,7 @@ export function LaneSheet({
                               aria-disabled={index === lane.items.length - 1 || undefined}
                               onClick={() => index < lane.items.length - 1 && move(index, index + 1)}
                             />
-                            <Button variant="icon" icon="x" label={'Take ' + item.title + ' off the plan'} onClick={() => void removePlanItem(item.planItem.id)} />
+                            <Button variant="icon" icon="x" label={'Take ' + item.title + ' off the plan'} onClick={() => void removePlanItem(item.planItem.id, 'Dropped ' + shortTitle(item.title))} />
                           </span>
                         ) : (
                           <ItemStatusPill kind={item.kind} refId={item.refId} title={item.title} state={atlas.states.get(item.refId)} />

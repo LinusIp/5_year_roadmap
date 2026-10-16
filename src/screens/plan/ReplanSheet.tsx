@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { patchMany } from '../../db/edits.ts';
+import { addPlanEdit } from '../../db/edits.ts';
 import type { StoredSettings, UserItemState } from '../../db/types.ts';
 import { formatLong } from '../../lib/dates.ts';
 import { describeReason, replan, replanToPatches } from '../../lib/replan.ts';
@@ -25,7 +25,7 @@ export function ReplanSheet({ open, onClose, seed, settings, states, asOf }: { o
     if (!result) return;
     setApplying(true);
     try {
-      await patchMany('planItem', replanToPatches(result));
+      await addPlanEdit(replanToPatches(result), 'Re-planned ' + plural(result.moves.length, 'item'));
       onClose();
     } finally {
       setApplying(false);

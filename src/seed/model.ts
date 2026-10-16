@@ -7,9 +7,10 @@
  * The schemas may add optional fields; they may never drop or retype a field below.
  */
 
+/** The brief's sixteen tracks; the flexibility brief adds tracks the user creates (`my-…`). */
 export type TrackId =
   | 'ai' | 'swe' | 'systems' | 'graphics' | 'simulation' | 'gamedev'
-  | 'languages' | 'math' | 'physics' | 'ee' | 'embedded' | 'controls' | 'mech' | 'robotics' | 'chem' | 'career';
+  | 'languages' | 'math' | 'physics' | 'ee' | 'embedded' | 'controls' | 'mech' | 'robotics' | 'chem' | 'career' | `my-${string}`;
 
 /** The brief had 'A' | 'B' | 'C' | 'D' | 'E'. The flexibility brief made blocks open-ended: A-E stay the defaults. */
 export type BlockId = string;

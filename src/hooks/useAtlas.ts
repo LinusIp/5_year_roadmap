@@ -6,13 +6,13 @@
 import { useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db.ts';
-import { useCustomEntities, useOverrides } from '../db/edits.ts';
+import { useCustomEntities, useOverrides, usePlanPatches } from '../db/edits.ts';
 import { useSettings } from '../db/settings.ts';
 import { useItemStates } from '../db/state.ts';
 import { resolveSeed } from '../lib/plan.ts';
 import { seed as rawSeed } from '../seed/index.ts';
 import type { AppSeed } from '../seed/schema.ts';
-import type { DayLog, StoredSettings, UserItemState } from '../db/types.ts';
+import type { DayLog, PlanPatch, StoredSettings, UserItemState } from '../db/types.ts';
 
 export interface Atlas {
   /** The curriculum with the user's patches and additions applied. */
@@ -22,6 +22,8 @@ export interface Atlas {
   settings: StoredSettings;
   states: Map<string, UserItemState>;
   logs: DayLog[];
+  /** The plan edits, for Undo. */
+  patches: PlanPatch[];
 }
 
 /** `undefined` while the first reads are in flight. Pages render a short loading line. */
@@ -30,15 +32,16 @@ export function useAtlas(): Atlas | undefined {
   const states = useItemStates();
   const overrides = useOverrides();
   const customs = useCustomEntities();
+  const patches = usePlanPatches();
   const logs = useLiveQuery(() => db.dayLogs.toArray(), []);
 
   const resolved = useMemo(
-    () => (overrides && customs ? resolveSeed(rawSeed, overrides, customs) : null),
-    [overrides, customs],
+    () => (overrides && customs && patches ? resolveSeed(rawSeed, overrides, customs, patches) : null),
+    [overrides, customs, patches],
   );
 
   return useMemo(() => {
-    if (!settings || !states || !logs || !resolved) return undefined;
-    return { seed: resolved, original: rawSeed, settings, states, logs };
-  }, [settings, states, logs, resolved]);
+    if (!settings || !states || !logs || !resolved || !patches) return undefined;
+    return { seed: resolved, original: rawSeed, settings, states, logs, patches };
+  }, [settings, states, logs, resolved, patches]);
 }

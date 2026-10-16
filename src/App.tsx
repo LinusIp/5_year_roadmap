@@ -6,6 +6,7 @@ import { matchPath } from './router/paths.ts';
 import { navigate, useLocation } from './router/router.tsx';
 import { KeyboardShortcuts } from './screens/Shortcuts.tsx';
 import { SyncNotice } from './screens/parts/SyncNotice.tsx';
+import { UndoToast } from './screens/parts/UndoToast.tsx';
 import { Today } from './screens/Today.tsx';
 import { seed } from './seed/index.ts';
 
@@ -105,6 +106,7 @@ export function App() {
       <Suspense fallback={<Loading />}>{page}</Suspense>
       <KeyboardShortcuts />
       <SyncNotice />
+      <UndoToast />
     </>
   );
 }

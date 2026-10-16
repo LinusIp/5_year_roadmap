@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { addCustomEntity, slugifyId } from '../../db/edits.ts';
+import { addCustomEntity, addPlanEdit, slugifyId } from '../../db/edits.ts';
 import { parseDuration, today } from '../../lib/dates.ts';
 import { nextOrder } from '../../lib/plan.ts';
 import type { AppSeed, BlockId, TrackId } from '../../seed/schema.ts';
@@ -61,7 +61,8 @@ export function AddToLaneSheet({ open, onClose, seed, phaseId, block, title }: {
       }
       const isResource = seed.resources.some((r) => r.id === picked);
       const planId = slugifyId(picked, taken, 'plan');
-      await addCustomEntity('planItem', planId, { id: planId, phaseId, block, order, ...(isResource ? { resourceId: picked } : { projectId: picked }) });
+      const title = seed.resources.find((r) => r.id === picked)?.title ?? seed.projects.find((p) => p.id === picked)?.title ?? picked;
+      await addPlanEdit([{ op: 'add', item: { id: planId, phaseId, block, order, ...(isResource ? { resourceId: picked } : { projectId: picked }) } }], 'Added ' + title);
       close();
       return;
     }
@@ -103,7 +104,7 @@ export function AddToLaneSheet({ open, onClose, seed, phaseId, block, title }: {
       prerequisites: [],
     });
     const planId = slugifyId(id, taken, 'plan');
-    await addCustomEntity('planItem', planId, { id: planId, phaseId, block, order, resourceId: id });
+    await addPlanEdit([{ op: 'add', item: { id: planId, phaseId, block, order, resourceId: id } }], 'Added ' + name.trim());
     close();
   };
 

@@ -4,7 +4,7 @@ import { splitSeed } from '../../scripts/lib/vite-plugin-seed.ts';
 import { defaultSettings } from '../../src/db/settings.ts';
 import { credentialRows } from '../../src/lib/credentials.ts';
 import { replan, replanToPatches } from '../../src/lib/replan.ts';
-import { resolveSeed } from '../../src/lib/plan.ts';
+import { resolveSeed, stampPatches } from '../../src/lib/plan.ts';
 import { quarterOf, quarterRange, quartersSoFar } from '../../src/lib/reviews.ts';
 import { roadmapCoverage, roadmapStateId } from '../../src/lib/roadmaps.ts';
 import type { AppSeed } from '../../src/seed/schema.ts';
@@ -87,7 +87,7 @@ describe('re-planning around items that stay put', () => {
     const settings = defaultSettings(seed.settings);
     const states = new Map([['kr-c', done('kr-c')]]);
     const result = replan({ seed, settings, states, asOf: '2026-09-21' });
-    const applied = resolveSeed(seed, replanToPatches(result).map((p) => ({ kind: 'planItem' as const, id: p.id, patch: p.patch })), []);
+    const applied = resolveSeed(seed, [], [], stampPatches(replanToPatches(result), 'Re-plan'));
     const seen = new Set<string>();
     for (const item of applied.plan) {
       const key = item.phaseId + '/' + item.block + '/' + item.order;

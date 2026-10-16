@@ -6,7 +6,7 @@
  * flat, self-describing JSON document so that another app ("Horizon") can read an export.
  */
 import { z } from 'zod';
-import { BlockIdSchema, DayTemplateSchema, HttpUrl, IsoDate, Slug, StoredCoreSchema, TrackIdSchema } from '../seed/schema.ts';
+import { BlockIdSchema, DayTemplateSchema, GoalSchema, HttpUrl, IsoDate, PlanItemSchema, Slug, StoredCoreSchema, Text, TrackIdSchema } from '../seed/schema.ts';
 import type { SettingsDefaults } from '../seed/schema.ts';
 
 export const ITEM_STATUSES = ['todo', 'active', 'done', 'dropped'] as const;
@@ -147,6 +147,59 @@ export const OverrideSchema = z.strictObject({
 export type Override = z.infer<typeof OverrideSchema>;
 
 /** Minutes per block. Reviews written before blocks were open-ended have exactly A to E. */
+/* ------------------------------------------------------------------ plan edits */
+
+const PatchBase = {
+  id: z.string().min(1),
+  /** When the edit was made (ISO); patches apply in this order, then by id. */
+  at: z.string().min(1),
+  /** One user action: the unit of undo. A re-plan or a reorder is several patches in one group. */
+  group: z.string().min(1),
+  /** What the toast and the undo list say: "Moved CS231n to Year 2". */
+  label: z.string().optional(),
+  ...Stamp,
+};
+
+const PhaseEdit = {
+  title: Text.optional(),
+  start: IsoDate.optional(),
+  end: IsoDate.optional(),
+  goal: Text.optional(),
+  /** A lane's focus text, by block. */
+  focus: z.record(BlockIdSchema, Text).optional(),
+};
+
+/**
+ * One edit to the plan, applied over the curriculum in order (src/lib/plan.ts). The curriculum itself is never
+ * changed, so an update to /data still flows in and the edits survive it.
+ */
+export const PlanPatchSchema = z.discriminatedUnion('op', [
+  /** A new appearance of a resource or project in a lane. */
+  z.strictObject({ ...PatchBase, op: z.literal('add'), item: PlanItemSchema }),
+  /** Taken off the plan, shown under "Dropped" with Restore. */
+  z.strictObject({ ...PatchBase, op: z.literal('drop'), planItemId: z.string().min(1) }),
+  z.strictObject({ ...PatchBase, op: z.literal('restore'), planItemId: z.string().min(1) }),
+  /** A new position, and optionally another phase or lane. */
+  z.strictObject({ ...PatchBase, op: z.literal('move'), planItemId: z.string().min(1), phaseId: Slug.optional(), block: BlockIdSchema.optional(), order: z.number() }),
+  /** The same place in the plan, another resource or project (an alternative). */
+  z.strictObject({ ...PatchBase, op: z.literal('swap'), planItemId: z.string().min(1), resourceId: Slug.optional(), projectId: Slug.optional() }),
+  z.strictObject({ ...PatchBase, op: z.literal('editPhase'), phaseId: Slug, ...PhaseEdit }),
+  /** A phase of the user's, after another one. */
+  z.strictObject({
+    ...PatchBase,
+    op: z.literal('addPhase'),
+    after: Slug,
+    phase: z.strictObject({ id: Slug, title: Text, start: IsoDate, end: IsoDate, goal: Text, focus: z.record(BlockIdSchema, Text).optional() }),
+  }),
+  /** A track of the user's (resources, projects and papers of the user's live with customEntities). */
+  z.strictObject({ ...PatchBase, op: z.literal('custom'), kind: z.literal('track'), data: z.record(z.string(), z.unknown()), remove: z.boolean().optional() }),
+  z.strictObject({ ...PatchBase, op: z.literal('goal'), goal: GoalSchema, remove: z.boolean().optional() }),
+]);
+export type PlanPatch = z.infer<typeof PlanPatchSchema>;
+export type PlanPatchOp = PlanPatch['op'];
+/** A patch before it is stored: id, time and group are added by addPlanEdit. */
+export type NewPlanPatch = PlanPatch extends infer P ? (P extends PlanPatch ? Omit<P, 'id' | 'at' | 'group' | 'label' | 'updatedAt' | 'deviceId'> : never) : never;
+
 const MinutesByBlock = z.record(BlockIdSchema, z.number());
 
 export const ReviewSchema = z.strictObject({
@@ -443,6 +496,8 @@ export const BackupDataSchema = z.strictObject({
   reviews: z.array(ReviewSchema),
   weekPicks: z.array(WeekPickSchema),
   replans: z.array(ReplanRecordSchema),
+  /** Plan edits (flexibility brief). Absent from backups made before it. */
+  planPatches: z.array(PlanPatchSchema).default([]),
   settings: z.array(StoredSettingsSchema),
   meta: z.array(MetaSchema),
 });

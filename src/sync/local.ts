@@ -6,7 +6,7 @@ import { currentSettings } from '../lib/settings.ts';
 import Dexie from 'dexie';
 import type { AtlasDB } from '../db/db.ts';
 import type {
-  CertState, CustomEntity, DayLog, MilestoneState, Override, PaperState, ReplanRecord, Review, StoredSettingsInput,
+  CertState, CustomEntity, DayLog, MilestoneState, Override, PaperState, PlanPatch, ReplanRecord, Review, StoredSettingsInput,
   UserItemState, WeekPick,
 } from '../db/types.ts';
 import { renderDayMarkdown, titleIndex } from '../lib/day-markdown.ts';
@@ -29,13 +29,14 @@ export interface LocalState {
   reviews: Review[];
   weekPicks: WeekPick[];
   replans: ReplanRecord[];
+  planPatches: PlanPatch[];
   settings: StoredSettingsInput[];
 }
 
 export async function readLocal(database: AtlasDB): Promise<LocalState> {
   return database.transaction(
     'r',
-    [database.dayLogs, database.itemStates, database.paperStates, database.certStates, database.milestoneStates, database.customEntities, database.overrides, database.reviews, database.weekPicks, database.replans, database.settings],
+    [database.dayLogs, database.itemStates, database.paperStates, database.certStates, database.milestoneStates, database.customEntities, database.overrides, database.reviews, database.weekPicks, database.replans, database.planPatches, database.settings],
     async () => ({
       dayLogs: await database.dayLogs.toArray(),
       itemStates: await database.itemStates.toArray(),
@@ -47,6 +48,7 @@ export async function readLocal(database: AtlasDB): Promise<LocalState> {
       reviews: await database.reviews.toArray(),
       weekPicks: await database.weekPicks.toArray(),
       replans: await database.replans.toArray(),
+      planPatches: await database.planPatches.toArray(),
       settings: await database.settings.toArray(),
     }),
   );
@@ -57,7 +59,7 @@ export function itemsOf(local: LocalState): ItemsData {
 }
 
 export function planOf(local: LocalState): PlanData {
-  return { overrides: local.overrides, customEntities: local.customEntities, replans: local.replans, weekPicks: local.weekPicks };
+  return { overrides: local.overrides, customEntities: local.customEntities, replans: local.replans, weekPicks: local.weekPicks, patches: local.planPatches };
 }
 
 /** Every file the device's records make, for a first sync or after an import. */
@@ -136,7 +138,7 @@ export async function writeItems(database: AtlasDB, data: ItemsData): Promise<vo
 }
 
 export async function writePlan(database: AtlasDB, data: PlanData): Promise<void> {
-  await silently(database, [database.overrides, database.customEntities, database.replans, database.weekPicks], async () => {
+  await silently(database, [database.overrides, database.customEntities, database.replans, database.weekPicks, database.planPatches], async () => {
     await database.overrides.clear();
     await database.overrides.bulkPut(data.overrides);
     await database.customEntities.clear();
@@ -145,6 +147,8 @@ export async function writePlan(database: AtlasDB, data: PlanData): Promise<void
     await database.replans.bulkPut(data.replans);
     await database.weekPicks.clear();
     await database.weekPicks.bulkPut(data.weekPicks);
+    await database.planPatches.clear();
+    await database.planPatches.bulkPut(data.patches);
   });
 }
 
