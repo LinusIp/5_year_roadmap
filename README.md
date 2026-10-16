@@ -93,6 +93,12 @@ old templates are kept for the days they applied to. Schedule, pace and layout t
 
 **Calendar** (the tab between Plan and Library) is where the plan's days are seen and changed, like a calendar app.
 
+<p>
+  <img src="screenshots/calendar-light.png" alt="Calendar's month: past days that counted in blue, today in ice, dots for the blocks planned ahead" width="32%">
+  <img src="screenshots/calendar-day-light.png" alt="A day in Calendar: the blocks on a time grid at their times, the current-time line across today" width="32%">
+  <img src="screenshots/calendar-event-sheet-light.png" alt="A block's sheet: start time, length, what it works on, every weekday, skip, edit logged time and move" width="32%">
+</p>
+
 - **Month**: a grid from your week's first day. A past day that counted is blue and has a small pill in the
   heatmap's colour for the time logged; a day that should have had time and has none is pressed in; today is ice.
   Future days show a dot per planned block, a short label on another template ("Uni", "Exam", "Rest"), and a flag
