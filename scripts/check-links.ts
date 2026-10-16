@@ -8,8 +8,10 @@
  *   --titles   GET every page and print its <title>, to confirm a link still points at the right thing
  *   --only x   restrict to URLs or ids containing x
  *   --json     also write reports/links.json
+ *   --candidates file.json   also check proposed links ({ "resource-id": ["https://…", …] }) for resources that
+ *              have none yet, so a link is only ever added after this run fetched it and its title was confirmed
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadSeedOrThrow, REPO_ROOT } from './lib/load-seed.ts';
 
@@ -32,6 +34,8 @@ const wantTitles = args.includes('--titles');
 const wantJson = args.includes('--json');
 const onlyIndex = args.indexOf('--only');
 const only = onlyIndex >= 0 ? (args[onlyIndex + 1] ?? '') : '';
+const candidatesIndex = args.indexOf('--candidates');
+const candidatesFile = candidatesIndex >= 0 ? args[candidatesIndex + 1] : undefined;
 
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
 const TIMEOUT_MS = 25_000;
@@ -54,6 +58,10 @@ function collectTargets(): Target[] {
   for (const p of seed.papers) add(p.url, 'paper:' + p.id);
   for (const s of seed.paperSources) add(s.url, 'source:' + s.id);
   for (const c of seed.certs) add(c.url, 'cert:' + c.id);
+  if (candidatesFile) {
+    const candidates = JSON.parse(readFileSync(join(REPO_ROOT, candidatesFile), 'utf8')) as Record<string, string[]>;
+    for (const [id, urls] of Object.entries(candidates)) for (const url of urls) add(url, 'candidate:' + id);
+  }
   return [...byUrl.entries()]
     .map(([url, refs]) => ({ url, refs }))
     .filter((t) => !only || t.url.includes(only) || t.refs.some((r) => r.includes(only)));

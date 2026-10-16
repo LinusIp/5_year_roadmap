@@ -516,7 +516,9 @@ it left open; `briefs/PLAN.md` records how the three briefs of that day fit toge
   repository to be done; a challenge does not.
 - **The monthly queue** is the cases taken from the Deck, active, listed in Plan › Projects next to the month's
   projects and shown in Block D. Cases are not added to the plan's lanes: plan edits name curriculum items only.
-- **The Deck** keeps the curriculum's cards first (its tests and habits) and adds the catalogue's after them. A topic
+- **The Deck** keeps the curriculum's cards first (its tests and habits) and adds the catalogue's after them. Its Weekly
+  tier is builds only: Take it fills Block D, which a challenge cannot (CI caught a shuffled weekly challenge being
+  "taken" into a challenge screen). The week's medium challenge comes with the weekly slot; all are in the Library. A topic
   or domain chip narrows to the catalogue. "Earlier" means a phase before the current one; challenges have no phase
   and are always in.
 - **Library › Projects** is a sixth type chip. Projects (the curriculum's and the catalogue's) sort after resources

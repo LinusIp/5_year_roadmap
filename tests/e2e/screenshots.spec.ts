@@ -10,10 +10,11 @@ import { open } from './helpers.ts';
  * the five-year map on a desktop, compared with the pictures committed in /screenshots. Eight weeks of demo
  * history are imported first, so the screens have something to show.
  *
- * `npm run screenshots` redraws the baselines after a UI change. They are drawn by Edge on Windows; Linux
- * renders text differently, so CI skips the comparison (DECISIONS.md).
+ * The baselines are drawn on CI's Linux (Chromium from `npx playwright install`), and CI compares against them on
+ * every run. To redraw them after a UI change, commit an empty `screenshots/.redraw` to the pull request's branch:
+ * the `screenshots` job in .github/workflows/ci.yml redraws them all and pushes them. `npm run screenshots` redraws
+ * them locally, but text renders differently on other systems, so a local redraw is for looking, not committing.
  */
-test.skip(Boolean(process.env.CI), 'The baselines are drawn by Edge on Windows; CI renders text differently');
 test.use({ timezoneId: 'Asia/Tashkent', serviceWorkers: 'block' });
 
 const PHONE = [

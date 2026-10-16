@@ -43,16 +43,20 @@ export interface DeckFilter {
   scope: Scope;
 }
 
-/** The Deck's catalogue cards for a tier, group and scope, open ones only, in a stable order. */
+/**
+ * The Deck's catalogue cards for a tier, group and scope, open ones only, in a stable order. Daily is the easy
+ * challenges, Monthly the cases, and Weekly the builds only: taking a weekly card puts it into Block D, which only a
+ * build can fill; the week's medium challenge comes with the weekly slot, and every challenge is in the Library.
+ */
 export function deckEntries(entries: readonly CatalogueEntry[], filter: DeckFilter, ctx: { phases: readonly Phase[]; current: Phase | null; states: Map<string, UserItemState>; solved: ReadonlySet<string> }): CatalogueEntry[] {
   return entries
-    .filter((e) => e.cadence === filter.tier && (!filter.group || e.group === filter.group) && inScope(e, filter.scope, ctx.phases, ctx.current) && isOpenEntry(e, ctx.states, ctx.solved))
+    .filter((e) => e.cadence === filter.tier && !(filter.tier === 'weekly' && e.kind === 'challenge') && (!filter.group || e.group === filter.group) && inScope(e, filter.scope, ctx.phases, ctx.current) && isOpenEntry(e, ctx.states, ctx.solved))
     .sort((a, b) => (a.kind === b.kind ? a.id.localeCompare(b.id) : a.kind === 'build' || (a.kind === 'case' && b.kind === 'challenge') ? -1 : 1));
 }
 
 /** The groups a tier offers, for its chips: topics for challenges, domains for builds and cases. */
 export function groupsOf(entries: readonly CatalogueEntry[], tier: CatalogueCadence): string[] {
-  return [...new Set(entries.filter((e) => e.cadence === tier).map((e) => e.group))].sort();
+  return [...new Set(entries.filter((e) => e.cadence === tier && !(tier === 'weekly' && e.kind === 'challenge')).map((e) => e.group))].sort();
 }
 
 export const HOUR_BUCKETS = [

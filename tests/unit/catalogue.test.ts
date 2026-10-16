@@ -235,10 +235,10 @@ describe('Deck and Library filters', () => {
   const current = phases.find((p) => p.id === 'y2')!;
   const ctx = { phases, current, states: new Map<string, UserItemState>(), solved: new Set<string>() };
 
-  it('Daily is easy challenges, Weekly medium builds and challenges, Monthly cases', () => {
+  it('Daily is easy challenges, Weekly medium builds (Take it fills Block D), Monthly cases', () => {
     const tiers = (tier: 'daily' | 'weekly' | 'monthly') => new Set(deckEntries(entries, { tier, scope: 'all' }, ctx).map((e) => e.kind + ':' + e.difficulty));
     expect(tiers('daily')).toEqual(new Set(['challenge:easy']));
-    expect(tiers('weekly')).toEqual(new Set(['build:medium', 'challenge:medium']));
+    expect(tiers('weekly')).toEqual(new Set(['build:medium']));
     expect(tiers('monthly')).toEqual(new Set(['case:advanced']));
   });
 

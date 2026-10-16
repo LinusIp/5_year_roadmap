@@ -27,7 +27,7 @@ const BACK: Record<string, string> = { today: '/', reviews: '/reviews' };
 
 /**
  * "Pick a project": the deck of projects, by tier. Daily is the catalogue's easy challenges; Weekly the
- * curriculum's weekly builds that fit the phase, then the catalogue's medium builds and challenges; Monthly the
+ * curriculum's weekly builds that fit the phase, then the catalogue's medium builds; Monthly the
  * curriculum's monthly projects, then the catalogue's real cases. A topic or domain chip and This phase / Earlier /
  * Everything narrow it down. Taking a weekly build makes it this week's (or, from the Sunday review, next week's)
  * build in Block D; a monthly project becomes the next item of the Block D lane; a case joins the monthly queue; a
@@ -146,7 +146,7 @@ export function PickProject() {
       : monthly
         ? 'Skip flicks the card away. Take it makes it the next project in Block D.'
         : 'Skip flicks the card away. Take it puts it into Block D this week.';
-  const groupNoun = tier === 'daily' ? 'Topic' : tier === 'weekly' ? 'Topic or domain' : 'Domain';
+  const groupNoun = tier === 'daily' ? 'Topic' : 'Domain';
 
   return (
     <Screen title="Pick a project">
