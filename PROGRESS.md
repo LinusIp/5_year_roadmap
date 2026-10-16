@@ -758,3 +758,6 @@ Verified on this machine (Linux, Chromium 140):
   reload; Start with; two devices); `tests/e2e/tech-doc.spec.ts` (Deck, Library, Plan, Today with the timer running,
   a milestone ticked from the doc, scroll memory, keyboard, two devices). New baselines: `practice-start-light.png`,
   `tech-doc-today-light.png`.
+- Lighthouse accessibility 100 on `/`, `/practice`, `/practice?subject=physics`, `/plan/pick` (weekly and monthly),
+  `/library/ai-hybrid-retrieval-benchmark`, `/library/m-inference-server`, `/plan?view=projects` and
+  `/settings?section=practice`.
