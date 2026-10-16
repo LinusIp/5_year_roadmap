@@ -23,6 +23,7 @@ import { loadQuestionBank, loadUnits } from '../seed/index.ts';
 import type { QuestionBank } from '../seed/questions.ts';
 import { Button } from '../ui/Button.tsx';
 import { Header } from '../ui/Header.tsx';
+import { StatusIcon, SubjectIcon } from '../ui/glyphs.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { TextField } from '../ui/TextField.tsx';
@@ -30,7 +31,7 @@ import { plural, span } from './parts/text.ts';
 
 /** KaTeX, with MathML alongside the drawing so screen readers read the maths. */
 const renderMath: MathRenderer = (tex, display, key) => (
-  <span key={key} className={display ? 'block overflow-x-auto py-1 text-center' : ''} dangerouslySetInnerHTML={{ __html: katex.renderToString(tex, { displayMode: display, throwOnError: false, output: 'htmlAndMathml', strict: 'ignore' }) }} />
+  <span key={key} className={display ? 'math-block' : ''} dangerouslySetInnerHTML={{ __html: katex.renderToString(tex, { displayMode: display, throwOnError: false, output: 'htmlAndMathml', strict: 'ignore' }) }} />
 );
 
 function Maths({ source, className }: { source: string; className?: string }) {
@@ -171,7 +172,7 @@ function QuestionScreen({
         Question {index + 1}
       </h2>
       <div className="rounded-card bg-surface p-5 text-body">
-        <Maths source={question.prompt} />
+        <Maths source={question.prompt} className="doc-text" />
       </div>
 
       {question.parts.map((part, i) => {
@@ -209,8 +210,8 @@ function QuestionScreen({
 
       {showSolution && (
         <div className="rounded-card bg-surface p-5 text-body" aria-label="Solution" role="region">
-          <p className="mb-2 text-meta text-ink2">Solution</p>
-          <Maths source={question.solution} />
+          <h3 className="section-label">Solution</h3>
+          <Maths source={question.solution} className="doc-text" />
           {reading.length > 0 && (
             <p className="mt-3 text-meta text-ink2">
               More on this topic:{' '}
@@ -241,7 +242,7 @@ function QuestionScreen({
       <div className="flex flex-wrap items-center gap-2">
         {primary}
         {!answered && !attempt.revealed && attempt.hints < question.hints.length && (
-          <Button onClick={() => setAttempt((a) => ({ ...a, hints: a.hints + 1 }))}>{attempt.hints === 0 ? 'Hint' : 'Another hint'}</Button>
+          <Button icon="hint" onClick={() => setAttempt((a) => ({ ...a, hints: a.hints + 1 }))}>{attempt.hints === 0 ? 'Hint' : 'Another hint'}</Button>
         )}
         {!answered && !attempt.revealed && !proof && (
           <Button variant="icon" onClick={() => setAttempt((a) => ({ ...a, revealed: true }))}>
@@ -521,9 +522,15 @@ export function Practice() {
             {progress.map((p) => (
               <Row
                 key={p.subject}
+                icon={<SubjectIcon subject={p.subject} />}
                 title={subjectOf(p.subject)?.short ?? p.subject}
                 meta={plural(p.total, 'question') + ' · ~' + p.estMinutes + ' min'}
-                trailing={statusText(p)}
+                trailing={
+                  <>
+                    <StatusIcon status={p.status === 'done' ? 'done' : p.status === 'partial' ? 'active' : 'todo'} />
+                    {statusText(p)}
+                  </>
+                }
                 to={'/practice?subject=' + p.subject}
               />
             ))}

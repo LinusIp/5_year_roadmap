@@ -109,7 +109,7 @@ function renderInline(nodes: Inline[], keyPrefix: string, math?: MathRenderer): 
         return math ? math(node.tex, node.display, key) : (node.display ? '$$' : '$') + node.tex + (node.display ? '$$' : '$');
       case 'code':
         return (
-          <code key={key} className="rounded-button bg-line px-1 font-mono">
+          <code key={key} className="rounded-button bg-soft px-1 font-mono">
             {node.text}
           </code>
         );
@@ -195,7 +195,7 @@ export function Markdown({ source, className, options = {}, math }: { source: st
   const blocks = parseBlocks(source, options);
   const inline = (text: string, key: string): ReactNode[] => renderInline(parseInline(text, options), key, math);
   return (
-    <div className={'space-y-2 ' + (className ?? '')}>
+    <div className={'space-y-3 ' + (className ?? '')}>
       {blocks.map((block, index) => {
         const key = 'b' + index;
         switch (block.kind) {
@@ -217,7 +217,7 @@ export function Markdown({ source, className, options = {}, math }: { source: st
             );
           case 'code':
             return (
-              <pre key={key} className="overflow-x-auto rounded-button bg-line p-3 font-mono">
+              <pre key={key} className="doc-block">
                 {block.text}
               </pre>
             );

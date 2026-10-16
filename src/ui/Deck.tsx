@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { Button } from './Button.tsx';
+import { DifficultyDots, KindIcon } from './glyphs.tsx';
+import type { Difficulty } from '../seed/catalogue.ts';
 
 export interface DeckCard {
   id: string;
   /** "Weekly build · 5 h": the line above the title. */
   kind: string;
+  /** The kind of project, for its icon, and its difficulty, for the dots. */
+  type?: 'challenge' | 'build' | 'case';
+  difficulty?: Difficulty;
   title: string;
   brief: string;
   /** "Languages · from build-your-own-x": the line at the foot of the card. */
@@ -185,8 +190,12 @@ export function Deck({ cards, onTake, hint, onOpen }: DeckProps) {
               className="absolute inset-x-0 top-0 flex h-[300px] flex-col gap-2 rounded-deck border border-line bg-surface p-[22px] select-none"
               style={{ zIndex: VISIBLE - i, transform, opacity, transition, willChange: 'transform' }}
             >
-              <p className="text-meta text-ink2">{card.kind}</p>
-              <h2 id={isTop ? 'deck-top-title' : undefined} className="text-card font-semibold">
+              <p className="flex items-center gap-2 text-meta text-ink2">
+                {card.type && <KindIcon kind={card.type} />}
+                <span className="min-w-0 truncate">{card.kind}</span>
+                {card.difficulty && <DifficultyDots difficulty={card.difficulty} />}
+              </p>
+              <h2 id={isTop ? 'deck-top-title' : undefined} className="line-clamp-2 text-card font-semibold">
                 {isTop && onOpen ? (
                   <button
                     type="button"

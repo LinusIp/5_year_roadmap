@@ -17,15 +17,15 @@ import { NotesField } from './NotesField.tsx';
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="text-body font-medium">{title}</h3>
-      <div className="mt-1 text-body text-ink2">{children}</div>
+      <h3 className="section-label">{title}</h3>
+      <div className="doc-text text-body">{children}</div>
     </div>
   );
 }
 
 function List({ items }: { items: string[] }) {
   return (
-    <ul className="list-disc space-y-0.5 pl-5">
+    <ul className="list-disc space-y-1 pl-5">
       {items.map((x) => (
         <li key={x}>{x}</li>
       ))}
@@ -62,9 +62,9 @@ export function CatalogueBody({ atlas, item, taking }: { atlas: Atlas; item: Cat
   const [copied, setCopied] = useState<string | null>(null);
   if (item.kind === 'challenge') {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         <p className="text-meta text-ink2">{['Challenge', item.difficulty, item.estMinutes + ' min', groupLabel(item.topic)].join(' · ')}</p>
-        <p className="text-body text-ink2">{item.statement}</p>
+        <p className="doc-text text-body text-ink2">{item.statement}</p>
         <Button variant="filled" to={'/challenge/' + item.id}>
           Open the challenge
         </Button>
@@ -112,7 +112,7 @@ export function CatalogueBody({ atlas, item, taking }: { atlas: Atlas; item: Cat
         <p className="text-meta text-ink2">
           {[KIND_LABEL[item.kind] + ' · ' + item.difficulty, groupLabel(item.domain), phase ? 'Year ' + phase.year + ' · ' + phase.title : null, 'level ' + item.level, item.estHours + ' h'].filter(Boolean).join(' · ')}
         </p>
-        <p className="mt-2 text-body text-ink2">{item.kind === 'case' ? item.scenario : item.goal}</p>
+        <p className="doc-text mt-2 text-body text-ink2">{item.kind === 'case' ? item.scenario : item.goal}</p>
         <div className="mt-3">
           <ProgressLine value={fractionDone(status, ticked, steps)} label={'Progress on ' + item.title} />
           <p className="mt-1.5 text-meta text-ink2">
@@ -141,7 +141,7 @@ export function CatalogueBody({ atlas, item, taking }: { atlas: Atlas; item: Cat
       </div>
 
       {item.kind === 'case' ? (
-        <div className="space-y-4">
+        <div className="space-y-6">
           <Section title="Requirements">
             <List items={item.functional} />
           </Section>
@@ -171,7 +171,7 @@ export function CatalogueBody({ atlas, item, taking }: { atlas: Atlas; item: Cat
           </Section>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           <Checklist label={'Approach · ' + item.approach.length + ' steps'} refId={item.id} units={item.approach.map((x, i) => ({ id: stepId(i), title: i + 1 + '. ' + x }))} done={state?.unitsDone ?? []} />
           <Section title="Stack">
             <p>{item.stack}</p>
@@ -180,10 +180,10 @@ export function CatalogueBody({ atlas, item, taking }: { atlas: Atlas; item: Cat
       )}
 
       {item.kind === 'case' && (
-        <Checklist label={'Milestones · ' + item.estHours + ' h'} refId={item.id} units={item.milestones.map((m) => ({ id: m.id, title: m.title + ' (' + m.hours + ' h)' }))} done={state?.unitsDone ?? []} />
+        <Checklist label={'Milestones · ' + item.estHours + ' h'} refId={item.id} units={item.milestones.map((m, i) => ({ id: m.id, title: i + 1 + '. ' + m.title + ' (' + m.hours + ' h)' }))} done={state?.unitsDone ?? []} />
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         {item.kind === 'case' && item.deliverables.length > 0 && (
           <Section title="Deliverables">
             <List items={item.deliverables} />
@@ -215,7 +215,7 @@ export function CatalogueBody({ atlas, item, taking }: { atlas: Atlas; item: Cat
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-meta font-normal text-ink2">Ship it</h3>
+        <h3 className="section-label">Ship it</h3>
         <LinkField label="Repository" value={state?.repoUrl} onSave={setRepo} />
         <NotesField label="Notes" value={state?.notes} onSave={setNotes} />
       </div>

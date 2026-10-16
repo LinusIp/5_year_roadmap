@@ -18,6 +18,7 @@ import type { Unit } from '../seed/schema.ts';
 import { Chips } from '../ui/Chips.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
+import { DifficultyDots, KindIcon, StatusIcon } from '../ui/glyphs.tsx';
 import { Button } from '../ui/Button.tsx';
 import { Row } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
@@ -204,7 +205,7 @@ function VirtualList<T>({ items, keyOf, render, label }: { items: T[]; keyOf: (i
   const [start, end] = [Math.min(range[0], items.length), Math.min(Math.max(range[1], 40), items.length)];
   return (
     <section className="mt-5">
-      {label && <h2 className="mb-1.5 text-meta font-normal text-ink2">{label}</h2>}
+      {label && <h2 className="section-label">{label}</h2>}
       <ul ref={ref} className="divide-y divide-line border-y border-line" style={{ paddingTop: start * rowHeight, paddingBottom: (items.length - end) * rowHeight }}>
         {items.slice(start, end).map((item) => (
           <ListKey key={keyOf(item)}>{render(item)}</ListKey>
@@ -380,9 +381,25 @@ export function Library({ openId }: { openId?: string }) {
             <Row
               height={60}
               truncate
+              icon={entry.project ? <KindIcon kind={entry.project.kind === 'curriculum' ? (entry.project.group === 'weekly' ? 'build' : 'case') : entry.project.kind} /> : undefined}
               title={entry.title}
-              meta={entry.meta}
-              trailing={entry.trailing ? <span className={entry.status === 'active' ? 'text-accent' : ''}>{entry.trailing}</span> : undefined}
+              meta={
+                entry.project?.difficulty ? (
+                  <>
+                    <DifficultyDots difficulty={entry.project.difficulty} /> {entry.meta}
+                  </>
+                ) : (
+                  entry.meta
+                )
+              }
+              trailing={
+                entry.trailing ? (
+                  <>
+                    <StatusIcon status={entry.status === 'done' ? 'done' : entry.status === 'active' ? 'active' : 'todo'} />
+                    <span className={entry.status === 'active' ? 'text-accent' : ''}>{entry.trailing}</span>
+                  </>
+                ) : undefined
+              }
               onClick={() => open(entry)}
             />
           )}

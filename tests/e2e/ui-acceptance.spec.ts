@@ -4,8 +4,8 @@ import { FIRST_DAY, open } from './helpers.ts';
 
 /**
  * The redesign's acceptance checks for the UI, measured in the production build on a 390 x 844 phone:
- * Today fits one screen, one filled button, the type scale, 44 px tap targets, visible focus rings and ink2
- * contrast on surface in both themes. Results are recorded in PROGRESS.md.
+ * Today fits one screen, one filled button, the type scale, 44 px tap targets, visible focus rings, ink2 at 5:1
+ * and the block icons at 3:1 in both themes. Results are recorded in PROGRESS.md.
  */
 test.use({ timezoneId: 'Asia/Tashkent', viewport: { width: 390, height: 844 } });
 
@@ -21,8 +21,11 @@ const SCREENS: [string, string][] = [
   ['Settings', './#/settings'],
 ];
 
-/** Every size the mockup's eight frames use: tab 12, label 13, meta 14, button 15, body 16, lead 18, card 24, headline 26, hero 30. */
-const TYPE_SCALE = [12, 13, 14, 15, 16, 18, 24, 26, 30];
+/**
+ * The type scale since the polish of pull request #3: tab 12, section label 13, meta and button 15, body 17, lead 18,
+ * card 24, headline 26, hero 30 (body was 16 and meta 14 before).
+ */
+const TYPE_SCALE = [12, 13, 15, 17, 18, 24, 26, 30];
 
 /** Distinct font sizes of the visible text on the page, in px. */
 async function fontSizes(page: Page): Promise<number[]> {
@@ -108,11 +111,11 @@ test('the keyboard focus ring is visible', async ({ page }) => {
 });
 
 for (const theme of ['light', 'dark'] as const) {
-  test('ink2 on surface is at least 4.5:1, ' + theme + ' theme', async ({ page }) => {
+  test('ink2 is at least 5:1 on surface, canvas and a pressed chip, ' + theme + ' theme', async ({ page }) => {
     await open(page, './#/settings');
     await page.getByRole('radio', { name: theme === 'dark' ? 'Dark' : 'Light' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-    const ratio = await page.evaluate(() => {
+    const ratios = await page.evaluate(() => {
       const probe = document.createElement('div');
       document.body.append(probe);
       const rgb = (token: string): number[] => {
@@ -126,12 +129,19 @@ for (const theme of ['light', 'dark'] as const) {
         };
         return 0.2126 * lin(r!) + 0.7152 * lin(g!) + 0.0722 * lin(b!);
       };
-      const a = luminance(rgb('--ink2'));
-      const b = luminance(rgb('--surface'));
+      const contrast = (fg: string, bg: string): number => {
+        const a = luminance(rgb(fg));
+        const b = luminance(rgb(bg));
+        return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      };
+      const out: Record<string, number> = {};
+      for (const bg of ['--surface', '--canvas', '--accent-soft']) out['ink2 on ' + bg] = contrast('--ink2', bg);
+      // The block icons on Today: 3:1 or better wherever a block's row or card sits.
+      for (const block of ['A', 'B', 'C', 'D', 'E', 'P']) for (const bg of ['--surface', '--canvas']) out['block ' + block + ' on ' + bg] = contrast('--block-' + block, bg);
       probe.remove();
-      return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      return out;
     });
-    console.log(theme + ' ink2 on surface ' + ratio.toFixed(2));
-    expect(ratio).toBeGreaterThanOrEqual(4.5);
+    console.log(theme + ' ' + JSON.stringify(Object.fromEntries(Object.entries(ratios).map(([k, v]) => [k, Number(v.toFixed(2))]))));
+    for (const [what, ratio] of Object.entries(ratios)) expect(ratio, what).toBeGreaterThanOrEqual(what.startsWith('ink2') ? 5 : 3);
   });
 }

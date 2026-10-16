@@ -89,7 +89,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(sheet.getByRole('timer')).toHaveText(/^Running · 3:0\d$/);
     await page.screenshot({ path: 'test-results/tech-doc-over-today.png' });
 
-    const milestone = sheet.getByRole('checkbox', { name: /^One-page design/ });
+    const milestone = sheet.getByRole('checkbox', { name: /^1\. One-page design/ });
     await milestone.click();
     await expect(milestone).toBeChecked();
     await expect(page.getByText(/· 1 of \d+ ticked/)).toBeAttached();
@@ -114,7 +114,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(nowCard(page).getByText('Now · running')).toBeVisible();
     await expect(nowCard(page).getByText(/1 of \d+ ticked$/)).toBeVisible();
     await page.locator('#now-title').click();
-    await expect(page.getByRole('dialog', { name: GAME }).getByRole('checkbox', { name: /^One-page design/ })).toBeChecked();
+    await expect(page.getByRole('dialog', { name: GAME }).getByRole('checkbox', { name: /^1\. One-page design/ })).toBeChecked();
   });
 
   test('a Later today project row opens its doc; "Work on it now" makes it Now; a build’s steps tick from the doc', async ({ page }) => {
@@ -173,7 +173,7 @@ test('a milestone ticked in the doc reaches a second device', async ({ browser }
   await connect(a);
   await open(a, './');
   await a.locator('#now-title').click();
-  await a.getByRole('dialog', { name: GAME }).getByRole('checkbox', { name: /^One-page design/ }).click();
+  await a.getByRole('dialog', { name: GAME }).getByRole('checkbox', { name: /^1\. One-page design/ }).click();
   await writesSettled(a);
   await open(a, './#/settings?section=sync');
   await a.locator('section#sync').getByRole('button', { name: 'Sync now' }).click();
@@ -184,5 +184,5 @@ test('a milestone ticked in the doc reaches a second device', async ({ browser }
   await open(b, './');
   await expect(nowCard(b).getByText(/1 of \d+ ticked$/)).toBeVisible();
   await b.locator('#now-title').click();
-  await expect(b.getByRole('dialog', { name: GAME }).getByRole('checkbox', { name: /^One-page design/ })).toBeChecked();
+  await expect(b.getByRole('dialog', { name: GAME }).getByRole('checkbox', { name: /^1\. One-page design/ })).toBeChecked();
 });

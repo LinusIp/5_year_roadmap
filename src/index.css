@@ -28,6 +28,15 @@
   --rail: #c9ccc8;
   --stage2-soft: #fff4e0;
   --stage2-ink: #8a5c00;
+  /* Code and formula blocks: a soft panel on surface and on canvas alike. */
+  --soft: #ecefeb;
+  /* A block's icon on Today, in its track's colour, 3:1 or better on surface and canvas. */
+  --block-A: #e8590c;
+  --block-B: #099268;
+  --block-C: #4c6ef5;
+  --block-D: #7950f2;
+  --block-E: #0c8599;
+  --block-P: #1c7ed6;
 }
 
 :root[data-theme="dark"] {
@@ -35,7 +44,8 @@
   --canvas: #121417;
   --surface: #1a1d21;
   --ink: #e8eaec;
-  --ink2: #9aa3ad;
+  /* 5:1 or better on surface, canvas and accentSoft (a pressed chip): 7.6, 8.3 and 5.6. */
+  --ink2: #a7afb8;
   --line: #2a2e33;
   --accent: #4fb388;
   --accent-soft: #1e3a2e;
@@ -48,6 +58,13 @@
   --rail: #3a3f45;
   --stage2-soft: #3a2f14;
   --stage2-ink: #f2c66d;
+  --soft: #23272c;
+  --block-A: #ff922b;
+  --block-B: #20c997;
+  --block-C: #748ffc;
+  --block-D: #9775fa;
+  --block-E: #22b8cf;
+  --block-P: #4dabf7;
 }
 
 :root {
@@ -84,24 +101,27 @@
   --color-rail: var(--rail);
   --color-stage2-soft: var(--stage2-soft);
   --color-stage2-ink: var(--stage2-ink);
+  --color-soft: var(--soft);
   --color-white: #ffffff;
   --color-transparent: transparent;
 
   /* One family, self-hosted (see DECISIONS.md), with system fonts behind it. */
   --font-*: initial;
   --font-sans: "Instrument Sans Variable", "Instrument Sans", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
   /*
-   * The scale: 12 / 14 / 16 / 20 / 26 / 34, plus the mockup's own sizes: 15 for buttons and links, 24 for a
-   * deck card's title, and 13 / 18 / 30 on the wide five-year map.
+   * The scale: 12 / 13 / 15 / 17 / 20 / 26 / 34, plus the mockup's own sizes: 15 for buttons and links, 24 for a
+   * deck card's title, and 18 / 30 on the wide five-year map. Body 17 and meta 15 (the polish of pull request #3,
+   * up from 16 and 14) for easier reading; 13 medium is the section label. Paragraphs run at 1.5, rows at 1.3.
    */
   --text-*: initial;
   --text-small: 0.75rem;
   --text-small--line-height: 1.45;
   --text-label: 0.8125rem;
-  --text-label--line-height: 1.4;
-  --text-meta: 0.875rem;
-  --text-meta--line-height: 1.3;
+  --text-label--line-height: 1.3;
+  --text-meta: 0.9375rem;
+  --text-meta--line-height: 1.4;
   --text-button: 0.9375rem;
   --text-button--line-height: 1.45;
   --text-lead: 1.125rem;
@@ -110,8 +130,8 @@
   --text-card--line-height: 1.15;
   --text-hero: 1.875rem;
   --text-hero--line-height: 1.15;
-  --text-body: 1rem;
-  --text-body--line-height: 1.45;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.5;
   --text-title: 1.25rem;
   --text-title--line-height: 1.15;
   --text-headline: 1.625rem;
@@ -151,7 +171,7 @@
   body {
     min-height: 100dvh;
     font-size: var(--text-body);
-    line-height: 1.45;
+    line-height: 1.5;
     /* Tabular figures for every number, so columns of hours line up. */
     font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
@@ -217,6 +237,40 @@
   .heat-swatch-2 { background: var(--heat-2); }
   .heat-swatch-3 { background: var(--heat-3); }
   .heat-swatch-4 { background: var(--heat-color); }
+
+  /*
+   * A tech doc's or a challenge's reading text: about 65 characters a line at 1.5. Code and formulas sit in a soft
+   * panel with 16 px of padding.
+   */
+  .doc-text {
+    max-width: 65ch;
+    line-height: 1.5;
+  }
+  .doc-block {
+    background: var(--soft);
+    border-radius: var(--radius-button);
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    line-height: 1.5;
+  }
+  .math-block {
+    display: block;
+    background: var(--soft);
+    border-radius: var(--radius-button);
+    padding: 1rem;
+    overflow-x: auto;
+    text-align: center;
+  }
+  /* A section label: 13 px medium, 24 px of space above its section and 8 px below. */
+  .section-label {
+    font-size: var(--text-label);
+    line-height: 1.3;
+    font-weight: 500;
+    color: var(--ink2);
+    margin-bottom: 0.5rem;
+  }
 
   /* Markdown notes rendered in a sheet: plain type, the same scale. */
   .prose-notes h1, .prose-notes h2, .prose-notes h3 {

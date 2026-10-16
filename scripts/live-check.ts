@@ -64,6 +64,27 @@ try {
     await page.getByRole('heading', { level: 1 }).first().waitFor({ timeout: 30_000 });
     step('renders ' + hash);
   }
+
+  // The features of the last pull requests, on the live site: the Practice start screen (inside the practice
+  // period), a tech doc opened by a tap on a Deck card with Take it in it, and the icons on Today.
+  await page.goto(new URL('#/practice', url).href);
+  const physics = page.getByRole('main').getByRole('link', { name: /^Physics / });
+  const outside = page.getByText(/^No daily set today/);
+  await physics.or(outside).first().waitFor({ timeout: 30_000 });
+  step((await physics.count()) > 0 ? 'Practice opens on its start screen: ' + (await page.getByRole('main').getByRole('listitem').allInnerTexts()).map((t) => t.replace(/\s+/g, ' ')).join(' | ') : 'Practice is outside its period today');
+  await page.goto(new URL('#/plan/pick?cadence=monthly&scope=all', url).href);
+  await page.locator('#deck-top-title').waitFor({ timeout: 30_000 });
+  const title = (await page.locator('#deck-top-title').innerText()).trim();
+  await page.locator('#deck-top-title').click();
+  await page.getByRole('dialog', { name: title }).getByRole('button', { name: 'Take it' }).waitFor({ timeout: 30_000 });
+  step('a tap on the Deck card opens its tech doc, with Take it: ' + title);
+  await page.keyboard.press('Escape');
+  await page.goto(new URL('#/', url).href);
+  await page.locator('#now-title, main h2').first().waitFor({ timeout: 30_000 });
+  const icons = await page.locator('main svg.lucide').count();
+  if (icons === 0) throw new Error('Today shows no icons');
+  step('Today shows its icons (' + icons + ')');
+
   if (errors.length > 0) throw new Error('page errors: ' + errors.join(' | '));
   console.log('\nLive check passed.');
 } catch (err) {

@@ -27,6 +27,7 @@ import { Button } from '../ui/Button.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
 import { Icon } from '../ui/Icon.tsx';
+import { BlockIcon, KindIcon } from '../ui/glyphs.tsx';
 import { ProgressLine } from '../ui/ProgressLine.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
@@ -236,9 +237,10 @@ export function Today() {
   const weeklyPick: ChallengePick | null =
     isToday && isSlotDay(date, settings.core.catalogue.weeklyDays) && catalogue && challengeEvents ? weeklyChallenge({ entries: catalogue, events: challengeEvents, weekStart, blockLanguage }) : null;
   const activeCase = catalogue?.find((e) => e.kind === 'case' && atlas.states.get(e.id)?.status === 'active');
-  type ExtraRow = { key: string; title: string; meta: string; to?: string; doc?: string; trailing: string };
+  type ExtraRow = { key: string; kind: 'challenge' | 'case'; title: string; meta: string; to?: string; doc?: string; trailing: string };
   const challengeRow = (label: string, pick: ChallengePick, query: string): ExtraRow => ({
     key: label,
+    kind: 'challenge',
     title: label + ' · ' + pick.challenge.title,
     meta: pick.solved
       ? 'Solved'
@@ -252,7 +254,7 @@ export function Today() {
     if (id === 'D' && weeklyPick) rows.push(challengeRow('Weekly challenge', weeklyPick, ''));
     if (id === 'D' && activeCase) {
       const ticked = atlas.states.get(activeCase.id)?.unitsDone.length ?? 0;
-      rows.push({ key: 'Monthly case', title: 'Monthly case · ' + activeCase.title, meta: 'Advanced · ' + ticked + ' of ' + (activeCase.steps ?? 0) + ' milestones ticked · ' + activeCase.hours + ' h', doc: activeCase.id, trailing: hoursOn(activeCase.id) + ' h' });
+      rows.push({ key: 'Monthly case', kind: 'case', title: 'Monthly case · ' + activeCase.title, meta: 'Advanced · ' + ticked + ' of ' + (activeCase.steps ?? 0) + ' milestones ticked · ' + activeCase.hours + ' h', doc: activeCase.id, trailing: hoursOn(activeCase.id) + ' h' });
     }
     return rows;
   };
@@ -266,6 +268,7 @@ export function Today() {
   const extraRow = (row: ExtraRow) => (
     <Row
       key={row.key}
+      icon={<KindIcon kind={row.kind} />}
       title={row.title}
       meta={layout.view === 'compact' ? undefined : row.meta}
       trailing={row.trailing}
@@ -396,9 +399,15 @@ export function Today() {
             </button>
           }
           sub={
-            layout.stats
-              ? [span(logged) + ' of ' + span(plan.targetMinutes) + ' today', templateNote, streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet'].filter(Boolean).join(' · ')
-              : undefined
+            layout.stats ? (
+              // The stats line: the clock for time, the flame for the streak, and the only place the flame shows.
+              <span className="inline-flex flex-wrap items-center gap-x-1.5">
+                <Icon name="clock" size={16} />
+                <span>{span(logged) + ' of ' + span(plan.targetMinutes) + ' today' + (templateNote ? ' · ' + templateNote : '') + ' · '}</span>
+                {streakState.current > 0 && <Icon name="flame" size={16} />}
+                <span>{streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet'}</span>
+              </span>
+            ) : undefined
           }
           actions={
             <>
@@ -424,46 +433,52 @@ export function Today() {
       )}
 
       {restDay ? (
-        <section aria-label="Now" className="mt-7 flex flex-col gap-1.5 rounded-card bg-surface p-5">
-          <p className="text-meta text-ink2">Now</p>
+        <section aria-label="Now" className="mt-6 flex flex-col gap-1.5 rounded-card bg-surface p-5">
+          <p className="section-label mb-0">Now</p>
           <p className="text-headline font-semibold">A rest day.</p>
           <p className="text-meta text-ink2">Nothing is planned, and the streak is safe.{logged > 0 ? ' ' + span(logged) + ' logged anyway.' : ''}</p>
         </section>
       ) : nothingPlanned ? (
         <EmptyState action={<Button to="/plan">Open Plan</Button>}>Nothing scheduled. Open Plan to pick what you&apos;re learning.</EmptyState>
       ) : !nowBlock ? (
-        <section aria-label="Now" className="mt-7 flex flex-col gap-1.5 rounded-card bg-surface p-5">
-          <p className="text-meta text-ink2">Now</p>
+        <section aria-label="Now" className="mt-6 flex flex-col gap-1.5 rounded-card bg-surface p-5">
+          <p className="section-label mb-0">Now</p>
           <p className="text-headline font-semibold">All five blocks are done.</p>
           <p className="text-meta text-ink2">{span(logged)} logged today.</p>
         </section>
       ) : (
-        <section aria-labelledby="now-title" className={'mt-7 flex flex-col gap-1.5 rounded-card bg-surface p-5' + (taken && item?.refId === taken.id ? ' taken' : '')}>
-          <div className="flex items-center justify-between">
-            <p className="text-meta text-ink2">{nowRunning ? 'Now · running' : 'Now'}</p>
+        <section aria-labelledby="now-title" className={'mt-6 flex flex-col gap-1.5 rounded-card bg-surface p-5' + (taken && item?.refId === taken.id ? ' taken' : '')}>
+          <div className="flex items-center justify-between gap-2">
+            <p className="section-label mb-0 flex items-center gap-2">
+              <BlockIcon block={nowBlock.id} />
+              {nowRunning ? 'Now · running' : 'Now'}
+            </p>
             {!expanded && (
               // Mark done sits on the card's first line, so the actions row keeps room for Tech doc.
               <Button
-                className="-my-3 -mr-1.5"
+                className="-my-3 -mr-2"
+                size="sm"
+                variant="icon"
                 icon="check"
-                label={nowDone ? 'Mark not done' : 'Mark done'}
                 aria-pressed={nowDone}
                 onClick={() => {
                   void editLog(date, (current) => toggleBlockDone(current, nowBlock.id));
                   setChosen(null);
                   setExpanded(false);
                 }}
-              />
+              >
+                {nowDone ? 'Mark not done' : 'Mark done'}
+              </Button>
             )}
           </div>
           <h2 className="text-headline">
             {isProject && item ? (
               // A project's title opens its tech doc; everything else unfolds in place.
-              <button id="now-title" type="button" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })} className="-my-2 block w-full py-2 text-left text-headline font-semibold">
+              <button id="now-title" type="button" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })} className="-my-2 line-clamp-2 w-full py-2 text-left text-headline font-semibold">
                 {headline}
               </button>
             ) : (
-              <button id="now-title" type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className="-my-2 block w-full py-2 text-left text-headline font-semibold">
+              <button id="now-title" type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className="-my-2 line-clamp-2 w-full py-2 text-left text-headline font-semibold">
                 {headline}
               </button>
             )}
@@ -522,7 +537,7 @@ export function Today() {
               !primaryLogs && <Button onClick={() => setSheet('log')}>Log time</Button>
             )}
             {isProject && item && (
-              <Button variant="icon" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })}>
+              <Button variant="icon" icon="doc" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })}>
                 Tech doc
               </Button>
             )}
@@ -535,7 +550,7 @@ export function Today() {
       )}
 
       {!nothingPlanned && layout.later && (later.length > 0 || leadingExtras.length > 0) && (
-        <RowList flat label="Later today" className="mt-7">
+        <RowList flat label="Later today" className="mt-6">
           {leadingExtras.map(extraRow)}
           {later.flatMap((block) => {
             const row = rowFor(block);
@@ -544,6 +559,7 @@ export function Today() {
               <Row
                 key={block.id}
                 className={isTaken ? 'taken' : ''}
+                icon={<BlockIcon block={block.id} />}
                 title={row.title}
                 meta={layout.view === 'compact' ? undefined : [row.meta, extrasNote(block.id)].filter(Boolean).join(' · ')}
                 trailing={span(block.targetMinutes)}

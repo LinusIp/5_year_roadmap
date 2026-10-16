@@ -118,7 +118,7 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
     <div className="space-y-6">
       <div>
         <p className="text-meta text-ink2">{[resource.provider, resource.type, resource.cost === 'audit-free' ? 'free to audit' : resource.cost].join(' · ')}</p>
-        {resource.summary && <p className="mt-2 text-body text-ink2">{resource.summary}</p>}
+        {resource.summary && <p className="doc-text mt-2 text-body text-ink2">{resource.summary}</p>}
         {resource.url === null && resource.searchHint && <p className="mt-2 text-meta text-ink2">No checked link yet. Search for “{resource.searchHint}”.</p>}
         <div className="mt-4 flex items-center gap-2">
           {resource.url ? (
@@ -221,7 +221,7 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
         <p className="text-meta text-ink2">
           {[CADENCE[project.cadence] + (project.number !== undefined ? ' ' + project.number : ''), phase?.title, project.estHours + ' h'].filter(Boolean).join(' · ')}
         </p>
-        <p className="mt-2 text-body text-ink2">{project.brief}</p>
+        <p className="doc-text mt-2 text-body text-ink2">{project.brief}</p>
         <div className="mt-4 flex items-center gap-2">
           {project.sourceUrl && (
             <Button href={project.sourceUrl} icon="external">
@@ -240,7 +240,7 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
       <ProjectDocView seed={atlas.seed} projectId={project.id} doc={doc} done={state?.unitsDone ?? []} />
 
       <div className="space-y-3">
-        <h3 className="text-meta font-normal text-ink2">Ship it</h3>
+        <h3 className="section-label">Ship it</h3>
         <LinkField label="Repository" value={state?.repoUrl} onSave={(v) => setField('repoUrl', v)} />
         <LinkField label="Demo, video or page" value={state?.demoUrl} onSave={(v) => setField('demoUrl', v)} />
         <NotesField label="Write-up" value={state?.writeUp} onSave={(v) => setField('writeUp', v)} />
@@ -249,8 +249,8 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
 
       {project.stage === 2 && (
         <div className="space-y-3">
-          <h3 className="text-meta font-normal text-ink2">Parts and budget</h3>
-          {doc?.sections['Parts and budget'] && <Markdown source={doc.sections['Parts and budget']} className="text-body text-ink2" />}
+          <h3 className="section-label">Parts and budget</h3>
+          {doc?.sections['Parts and budget'] && <Markdown source={doc.sections['Parts and budget']} className="doc-text text-body text-ink2" />}
           {project.parts && project.parts.length > 0 ? (
             <ul className="list-disc space-y-0.5 pl-5 text-body text-ink2">
               {project.parts.map((part) => (

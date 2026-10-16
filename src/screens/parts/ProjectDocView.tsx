@@ -55,9 +55,9 @@ export function ProjectDocView({ seed, projectId, doc, done }: { seed: AppSeed; 
   };
 
   return (
-    <section aria-labelledby={'doc-' + projectId} className="space-y-4">
+    <section aria-labelledby={'doc-' + projectId} className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 id={'doc-' + projectId} className="text-meta font-normal text-ink2">
+        <h3 id={'doc-' + projectId} className="section-label mb-0">
           Tech doc
         </h3>
         <Button size="sm" onClick={() => void copy()}>
@@ -72,17 +72,17 @@ export function ProjectDocView({ seed, projectId, doc, done }: { seed: AppSeed; 
       {PROSE.slice(0, PROSE.indexOf('Done when')).map((s) =>
         doc.sections[s] ? (
           <div key={s}>
-            <h3 className="text-body font-medium">{s}</h3>
-            <Markdown source={doc.sections[s]!} className="mt-1 text-body text-ink2" />
+            <h3 className="section-label">{s}</h3>
+            <Markdown source={doc.sections[s]!} className="doc-text text-body" />
           </div>
         ) : null,
       )}
-      <Checklist label={'Milestones · ' + total + ' h'} refId={projectId} units={doc.milestones.map((m) => ({ id: m.id, title: m.title + ' (' + m.hours + ' h)' }))} done={done} />
+      <Checklist label={'Milestones · ' + total + ' h'} refId={projectId} units={doc.milestones.map((m, i) => ({ id: m.id, title: i + 1 + '. ' + m.title + ' (' + m.hours + ' h)' }))} done={done} />
       {PROSE.slice(PROSE.indexOf('Done when')).map((s) =>
         doc.sections[s] ? (
           <div key={s}>
-            <h3 className="text-body font-medium">{s}</h3>
-            <Markdown source={doc.sections[s]!} className="mt-1 text-body text-ink2" />
+            <h3 className="section-label">{s}</h3>
+            <Markdown source={doc.sections[s]!} className="doc-text text-body" />
           </div>
         ) : null,
       )}

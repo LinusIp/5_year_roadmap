@@ -235,8 +235,8 @@ test('a project’s tech doc: milestones count, survive a reload, and the README
   await expect(sheet.getByRole('heading', { name: 'Architecture' })).toBeVisible();
   const milestones = listUnder(sheet, 'Milestones · 40 h');
   await expect(milestones.getByRole('checkbox')).toHaveCount(6);
-  await milestones.getByRole('checkbox', { name: /^Naive generate loop/ }).click();
-  await expect(milestones.getByRole('checkbox', { name: /^Naive generate loop/ })).toBeChecked();
+  await milestones.getByRole('checkbox', { name: /^1\. Naive generate loop/ }).click();
+  await expect(milestones.getByRole('checkbox', { name: /^1\. Naive generate loop/ })).toBeChecked();
 
   await sheet.getByRole('button', { name: 'Copy as README skeleton' }).click();
   await expect(sheet.getByRole('status').filter({ hasText: 'Copied' })).toBeVisible();
@@ -245,7 +245,7 @@ test('a project’s tech doc: milestones count, survive a reload, and the README
   expect(copied).toContain('## Architecture');
 
   await reload(page);
-  await expect(listUnder(page.getByRole('dialog', { name: 'Inference server from scratch' }), 'Milestones · 40 h').getByRole('checkbox', { name: /^Naive generate loop/ })).toBeChecked();
+  await expect(listUnder(page.getByRole('dialog', { name: 'Inference server from scratch' }), 'Milestones · 40 h').getByRole('checkbox', { name: /^1\. Naive generate loop/ })).toBeChecked();
   const states = await dbRows<{ refId: string; unitsDone: string[] }>(page, 'itemStates');
   expect(states.find((s) => s.refId === 'm-inference-server')!.unitsDone).toEqual(['milestone-1']);
 });
