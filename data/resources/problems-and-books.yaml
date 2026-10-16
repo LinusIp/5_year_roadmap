@@ -71,7 +71,7 @@
   level: advanced
   cost: paid
   estHours: 40
-  summary: "Problems with hints and solutions that lead through the theory; for the proof questions of the daily set."
+  summary: "Problems with hints and solutions that lead through the theory."
 
 - id: pauls-online-math-notes
   title: "Paul's Online Math Notes (Calculus I-III, differential equations)"
@@ -237,7 +237,7 @@
   level: intro
   cost: free
   estHours: 40
-  summary: "A free introduction to proofs: logic, sets, induction, contradiction, with solutions to odd exercises. Behind the proof questions."
+  summary: "A free introduction to proofs: logic, sets, induction, contradiction, with solutions to odd exercises."
 
 - id: cses-problem-set
   title: "CSES Problem Set"
