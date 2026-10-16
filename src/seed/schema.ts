@@ -65,6 +65,9 @@ export const IsoDate = z
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'must be YYYY-MM-DD')
   .refine(isRealIsoDate, 'is not a real calendar date');
 
+/** A clock time, "09:30": a block's start in a template or on a date, a busy event's start. */
+export const ClockTime = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'a time is HH:MM, 00:00 to 23:59');
+
 export function isHttpUrl(s: string): boolean {
   try {
     const u = new URL(s);
@@ -424,7 +427,8 @@ export type BlockDef = z.infer<typeof BlockDefSchema>;
 export const DayTemplateSchema = z.strictObject({
   id: Slug,
   name: Text,
-  blocks: z.array(z.strictObject({ block: BlockIdSchema, minutes: z.number().int().min(0).max(720).optional() })),
+  /** `start`: the block's clock time on days of this template; without one it follows the block before it. */
+  blocks: z.array(z.strictObject({ block: BlockIdSchema, minutes: z.number().int().min(0).max(720).optional(), start: ClockTime.optional() })),
 });
 export type DayTemplate = z.infer<typeof DayTemplateSchema>;
 

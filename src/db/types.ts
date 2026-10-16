@@ -6,7 +6,7 @@
  * flat, self-describing JSON document so that another app ("Horizon") can read an export.
  */
 import { z } from 'zod';
-import { BlockIdSchema, DayTemplateSchema, GoalSchema, HttpUrl, IsoDate, PlanItemSchema, Slug, StoredCoreSchema, Text, TrackIdSchema } from '../seed/schema.ts';
+import { BlockIdSchema, ClockTime, DayTemplateSchema, GoalSchema, HttpUrl, IsoDate, PlanItemSchema, Slug, StoredCoreSchema, Text, TrackIdSchema } from '../seed/schema.ts';
 import type { SettingsDefaults } from '../seed/schema.ts';
 
 export const ITEM_STATUSES = ['todo', 'active', 'done', 'dropped'] as const;
@@ -331,8 +331,27 @@ export const DayChangeSchema = z.strictObject({
   toTomorrow: z.array(BlockIdSchema).optional(),
   /** Pairs of blocks that trade items on this day. */
   swaps: z.array(z.tuple([BlockIdSchema, BlockIdSchema])).optional(),
+  /** Calendar: blocks moved to a clock time on this day. */
+  times: z.record(BlockIdSchema, ClockTime).optional(),
+  /** Calendar: the item a block works on this day, instead of the lane's next one. */
+  items: z.record(BlockIdSchema, z.string().min(1)).optional(),
+  /** Calendar: blocks added to this day (from an empty slot, or moved here from another date). */
+  add: z.array(z.strictObject({ block: BlockIdSchema, minutes: z.number().int().min(5).max(720), start: ClockTime.optional() })).optional(),
 });
 export type DayChange = z.infer<typeof DayChangeSchema>;
+
+/** A fixed commitment from Calendar (a class, work): once on a date, or every week on a weekday from a date. */
+export const BusyEventSchema = z.strictObject({
+  id: z.string().min(1),
+  title: z.string().trim().min(1).max(80),
+  start: ClockTime,
+  minutes: z.number().int().min(15).max(720),
+  date: IsoDate.optional(),
+  weekday: z.number().int().min(0).max(6).optional(),
+  from: IsoDate.optional(),
+  until: IsoDate.optional(),
+});
+export type BusyEvent = z.infer<typeof BusyEventSchema>;
 
 /** "Exam week 12–19 Dec": a template for a date or a range. Beats the weekly pattern. */
 export const DateOverrideSchema = z.strictObject({
@@ -380,7 +399,7 @@ export const PauseSchema = z.strictObject({
 });
 export type Pause = z.infer<typeof PauseSchema>;
 
-export const TAB_IDS = ['today', 'plan', 'library', 'activity', 'projects', 'map', 'reviews'] as const;
+export const TAB_IDS = ['today', 'plan', 'calendar', 'library', 'activity', 'projects', 'map', 'reviews'] as const;
 export type TabId = (typeof TAB_IDS)[number];
 export const PLAN_SEGMENTS = ['timeline', 'projects', 'papers', 'credentials', 'roadmaps'] as const;
 
@@ -407,6 +426,8 @@ export const ScheduleStateSchema = z.strictObject({
   overrides: z.array(DateOverrideSchema),
   days: z.record(IsoDate, DayChangeSchema),
   history: z.array(ScheduleVersionSchema),
+  /** Calendar's busy events. Optional so that version 2 schedules parse; version 3 always has it. */
+  busy: z.array(BusyEventSchema).optional(),
 });
 export type ScheduleState = z.infer<typeof ScheduleStateSchema>;
 
@@ -532,6 +553,8 @@ export const TimerSchema = z.strictObject({
   track: TrackIdSchema,
   refId: z.string().optional(),
   startedAt: z.number(),
+  /** When "Keep" last answered the forgotten-timer question. */
+  keptAt: z.number().optional(),
 });
 export type RunningTimer = z.infer<typeof TimerSchema>;
 
