@@ -820,7 +820,8 @@ was, not what is.
 - **Pause is "back to not started"**, the only status between active and done that keeps an item in the plan; the
   units ticked and the minutes logged stay. Dropped stays in the item's own sheet: from a card it is too easy to hit.
 - **Up next** is the three steps not started whose phase starts first (then lane, then order), across every path; when
-  the step before it is not done it says "after …", so the order of a path stays readable.
+  the step before it is not done it says "after …", so the order of a path stays readable. Its right side is the
+  month its phase starts, or "Now" once that phase has started (a past month read as overdue).
 - **Shelves** are the existing types folded into seven: lectures and tutorials are Courses; repos, tools and
   problem sets are Tools; Papers are the paper queue plus papers listed as resources; Projects are the plan's and the
   catalogue's. **Blogs to follow** are the four resources that are real blogs (Sander Dieleman, Inigo Quilez's
