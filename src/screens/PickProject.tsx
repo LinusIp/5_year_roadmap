@@ -19,6 +19,7 @@ import type { DeckCard } from '../ui/Deck.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
 import { Screen } from '../ui/Screen.tsx';
+import { ItemSheet } from './parts/ItemSheet.tsx';
 import { PickerSheet } from './parts/PickerSheet.tsx';
 import { moveIntoToday, takenProject } from './parts/taken.ts';
 import { partOf, plural, shortTitle } from './parts/text.ts';
@@ -31,7 +32,7 @@ const BACK: Record<string, string> = { today: '/', reviews: '/reviews' };
  * curriculum's monthly projects, then the catalogue's real cases. A topic or domain chip and This phase / Earlier /
  * Everything narrow it down. Taking a weekly build makes it this week's (or, from the Sunday review, next week's)
  * build in Block D; a monthly project becomes the next item of the Block D lane; a case joins the monthly queue; a
- * challenge opens.
+ * challenge opens. A tap on the card opens its tech doc, which has Take it too.
  */
 export function PickProject() {
   const atlas = useAtlas();
@@ -41,6 +42,8 @@ export function PickProject() {
   const [week] = useQueryParam('week');
   const [from] = useQueryParam('from');
   const [pickingGroup, setPickingGroup] = useState(false);
+  // The card whose tech doc is open, and its element (Take it from the doc moves it into Today like the button).
+  const [doc, setDoc] = useState<{ card: DeckCard; element: HTMLElement } | null>(null);
   const entries = useCatalogueIndex();
   const items = useCatalogue();
   const events = useChallengeEvents();
@@ -184,9 +187,26 @@ export function PickProject() {
                 : 'Every ' + noun + (scopeValue === 'earlier' ? ' from earlier phases' : ' for this phase') + ' is done.'}
           </EmptyState>
         ) : (
-          <Deck key={(cadence ?? '') + (scope ?? '') + (group ?? '')} cards={cards} hint={hint} onTake={(card, el) => void take(card, el)} />
+          <Deck
+            key={(cadence ?? '') + (scope ?? '') + (group ?? '')}
+            cards={cards}
+            hint={hint}
+            onTake={(card, el) => void take(card, el)}
+            onOpen={(card, element) => (entries?.find((e) => e.id === card.id)?.kind === 'challenge' ? navigate('/challenge/' + card.id) : setDoc({ card, element }))}
+          />
         )}
       </div>
+      <ItemSheet
+        atlas={atlas}
+        id={doc?.card.id ?? null}
+        onClose={() => setDoc(null)}
+        onTake={() => {
+          if (!doc) return;
+          const { card, element } = doc;
+          setDoc(null);
+          void take(card, element);
+        }}
+      />
       <PickerSheet
         open={pickingGroup}
         title={groupNoun}

@@ -128,8 +128,8 @@ function describeCatalogueBuild(entry: CatalogueEntry, state: UserItemState | un
     url: null,
     status: state?.status ?? 'todo',
     estHours: entry.hours,
-    unitsDone: 0,
-    unitCount: 0,
+    unitsDone: (state?.unitsDone ?? []).length,
+    unitCount: entry.steps ?? 0,
     cadence: 'weekly',
   };
 }

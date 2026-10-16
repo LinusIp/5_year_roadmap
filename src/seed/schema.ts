@@ -452,8 +452,11 @@ const SettingsDefaultsObject = z.strictObject({
   }),
   /** `relative`: a day's intensity is its share of what it planned. `absolute`: minutes against heatmapThresholds. */
   heatmapMode: z.enum(['relative', 'absolute']),
-  /** The Practice block's period (it exists only between these days, inclusive) and the questions per subject. */
-  practice: z.strictObject({ start: IsoDate, end: IsoDate, perSubject: z.number().int().min(3).max(5) }),
+  /**
+   * The Practice block's period (it exists only between these days, inclusive), the questions per subject, and the
+   * subject the start screen offers first (absent: none). It only suggests; any subject can be done first.
+   */
+  practice: z.strictObject({ start: IsoDate, end: IsoDate, perSubject: z.number().int().min(3).max(5), startWith: Slug.optional() }),
   /** The project catalogue: the daily challenge in Block B (on or off), and the weekdays of Block D's weekly slot. */
   catalogue: z.strictObject({ dailyChallenge: z.boolean(), weeklyDays: z.array(z.number().int().min(0).max(6)).max(7) }),
   backupReminderDays: z.number().int().min(1),

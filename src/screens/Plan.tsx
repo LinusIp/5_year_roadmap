@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useCertStates, useMilestoneStates } from '../db/credentials.ts';
 import { usePaperStates, useWeekPick } from '../db/state.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
+import { useCatalogueIndex } from '../hooks/useCatalogue.ts';
 import { useUnits } from '../hooks/useUnits.ts';
 import { daysBetween, startOfWeek, today as todayDate } from '../lib/dates.ts';
 import { weeklyBuildFor } from '../lib/schedule.ts';
@@ -39,6 +40,7 @@ export function Plan() {
   const paperStates = usePaperStates();
   const certStates = useCertStates();
   const milestoneStates = useMilestoneStates();
+  const catalogue = useCatalogueIndex();
   const [viewParam, setView] = useQueryParam('view');
   const [laneParam, setLane] = useQueryParam('lane');
   const [itemParam, setItem] = useQueryParam('item');
@@ -67,8 +69,8 @@ export function Plan() {
   const endsIn = phase ? daysBetween(asOf, phase.end) : 0;
   const ends = phase ? (endsIn < 365 ? longDate(phase.end).replace(/ \d{4}$/, '') : longDate(phase.end)) : '';
   const sub = phase ? 'Year ' + phase.year + ' · ' + phase.title + ' · ends ' + ends : 'The five years are done';
-  const weekly = weeklyBuildFor(phase, weekPick?.projectId, { seed: atlas.seed, states: atlas.states });
-  const weeklyProject = weekly ? (atlas.seed.projects.find((p) => p.id === weekly.refId) ?? null) : null;
+  // The week's build, which can be one of the catalogue's medium builds once its index has loaded.
+  const weekly = weeklyBuildFor(phase, weekPick?.projectId, { seed: atlas.seed, states: atlas.states, ...(catalogue ? { catalogue } : {}) });
 
   const [lanePhaseId, laneBlock] = laneParam ? (laneParam.split('.') as [string, BlockId]) : [null, null];
   const laneModel = lanePhaseId ? model.find((m) => m.phase.id === lanePhaseId) : undefined;
@@ -97,7 +99,7 @@ export function Plan() {
       )}
       {view !== 'timeline' && (
         <div className="mt-6">
-          {view === 'projects' && <ProjectsView atlas={atlas} phase={phase} weekly={weeklyProject} onOpenItem={openItem} />}
+          {view === 'projects' && <ProjectsView atlas={atlas} phase={phase} weekly={weekly} onOpenItem={openItem} />}
           {view === 'papers' && paperStates && <PapersView atlas={atlas} states={paperStates} />}
           {view === 'credentials' && certStates && milestoneStates && <CredentialsView atlas={atlas} certStates={certStates} milestoneStates={milestoneStates} onOpenItem={openItem} />}
         </div>

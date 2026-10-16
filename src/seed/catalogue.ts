@@ -192,6 +192,8 @@ export interface CatalogueEntry {
   /** Hours for a build or case; a challenge's minutes as hours. */
   hours: number;
   estMinutes?: number;
+  /** A build's approach steps or a case's milestones: the checkboxes its progress counts. */
+  steps?: number;
 }
 
 /** Catalogue domains that are not tracks of the curriculum, and the track each counts toward. */
@@ -271,13 +273,18 @@ export function entryOf(item: CatalogueItem): CatalogueEntry {
   else {
     entry.phaseId = item.phaseId;
     entry.level = item.level;
+    entry.steps = catalogueUnitCount(item);
   }
   return entry;
 }
 
-/** The milestones' checkboxes of a case count toward its progress; a build and a challenge have none. */
-export function catalogueUnitCount(item: Pick<CatalogueItem, 'kind'> & { milestones?: unknown[] }): number {
-  return item.kind === 'case' ? (item.milestones?.length ?? 0) : 0;
+/** A build's approach steps (`step-1`, …) and a case's milestones (`milestone-1`, …) are checkboxes that count toward its progress. */
+export function stepId(index: number): string {
+  return 'step-' + (index + 1);
+}
+
+export function catalogueUnitCount(item: CatalogueItem): number {
+  return item.kind === 'case' ? item.milestones.length : item.kind === 'build' ? item.approach.length : 0;
 }
 
 export interface CatalogueRefs {

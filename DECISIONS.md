@@ -577,3 +577,42 @@ it left open; `briefs/PLAN.md` records how the three briefs of that day fit toge
 - **`check:links --candidates`** checks proposed links for resources that have none, so a link is added only after a
   fetch confirmed its page title. The one-off job that ran it in pull request #1 is gone; the option stays.
 
+## Practice in any order, and the tech doc one tap away (pull request #2)
+
+- **What a finished subject is.** A subject is finished once every question of it in today's set is answered. Its
+  minutes go to the Practice block at that moment, once (`refId: practice:<subject>`, the subject's track), and the
+  third one marks the block done. The summary's Done now only goes back to Today. Practice on demand keeps its
+  old Done, which logs the whole set.
+- **The set does not depend on the order.** It was already built from the date and the answers before it, each
+  subject with its own random draw; the start screen only chooses which subject's questions to show. Questions are
+  numbered within their subject ("Question 2 of 3 · Calculus").
+- **Resume** is by question: a half-done subject reopens at its first unanswered question. A question half-typed
+  and left is not kept, as before.
+- **Today counts finished subjects from the day's log** (the `practice:<subject>` entries), not from the question
+  bank, so Today does not load the bank, and a second device shows "1 of 3 subjects" as soon as the day file syncs.
+- **Start with** suggests, it never orders: the start screen's one filled button is "Go on with" a half-done subject
+  first, then "Start" the Start with subject, then the first one not started; the rows keep their order. It is
+  stored as `core.practice.startWith`, written only when set, so settings files stay as they were until it is used.
+  A device still on the build before this one rejects a settings file that has it (its parser is strict) and keeps
+  its own settings; if that device then changes a setting, its file wins and Start with is lost. Update every
+  device before setting it.
+- **A project's title on the Now card opens its doc** instead of unfolding the card; resources still unfold. What
+  the unfolded card offered for a project moved into the doc: its Done when checklist and source were already
+  there, Notes joined the curriculum projects' docs (only catalogue items had it), and Block D's choices (the
+  monthly project instead, another weekly build, Pick a project) are rows at the end of the doc, under "On Today".
+- **A project's Later today row opens its doc** too; its pinned "Work on it now" does what tapping the row did.
+- **Mark done moved to the Now card's first line.** With Stop and its running time, Log time and Tech doc, the
+  actions row had no room left on a 390 px phone; the tick is the same 44 px button. Buttons no longer wrap their
+  label onto two lines.
+- **The timer belongs to the database, not the screen**, so a sheet changes nothing about it; the sheet's header
+  shows it ("Running · 12:04", or "Graphics running · …" for another block's timer).
+- **Scroll memory** is per item and per tab session (in memory, and in sessionStorage when allowed): a doc reopens
+  where it was left, also after a reload, and starts at the top in a new tab.
+- **The Deck tells a tap from a swipe** by distance (under 6 px); the top card's title is a button, so Enter and
+  Space open the doc from the keyboard, and the native dialog gives focus back to it. "Take it" in the doc does the
+  same as the Deck's own Take it. A challenge opens its challenge screen, as Take it already did.
+- **A build's approach steps are checkboxes** (`step-1`, …) that count toward its progress, like a case's
+  milestones; the catalogue index carries their number (`steps`) so Today and Plan can show "2 of 6 ticked"
+  without loading the catalogue.
+- **Fixed on the way: Plan › Projects' weekly slot ignored a catalogue build** picked for the week and showed the
+  curriculum's suggestion. It now shows the week's build, whichever it is, and opens its doc.

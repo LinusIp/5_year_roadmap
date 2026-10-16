@@ -7,7 +7,7 @@ import { db } from '../db/db.ts';
 import type { PracticeAnswer } from '../db/types.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { addDays, dayName, today as todayDate } from '../lib/dates.ts';
-import { addEntry, editLog, toggleBlockDone } from '../lib/logs.ts';
+import { addEntry, editLog } from '../lib/logs.ts';
 import { Markdown } from '../lib/markdown.tsx';
 import type { MathRenderer } from '../lib/markdown.tsx';
 import { markQuestion } from '../lib/practice/check.ts';
@@ -15,6 +15,7 @@ import type { Mark } from '../lib/practice/check.ts';
 import { instantiate } from '../lib/practice/engine.ts';
 import type { RenderedPart, RenderedQuestion } from '../lib/practice/engine.ts';
 import { reviewQueue } from '../lib/practice/history.ts';
+import { practiceRef, statusText, subjectProgress, subjectsDone, suggestedSubject, withFinishedSubjects } from '../lib/practice/progress.ts';
 import { buildDailySet, buildTopicSet, dailySetId } from '../lib/practice/sets.ts';
 import type { SetSlot } from '../lib/practice/sets.ts';
 import { navigate, useQueryParam } from '../router/router.tsx';
@@ -90,6 +91,7 @@ function QuestionScreen({
   subjectTitle,
   topicTitle,
   reading,
+  lastLabel,
   onAnswered,
   onNext,
 }: {
@@ -100,6 +102,8 @@ function QuestionScreen({
   topicTitle: string;
   /** Resources mapped to this topic, offered under the solution. */
   reading: { id: string; title: string }[];
+  /** The button after the last question: "See the summary", or back to the subjects. */
+  lastLabel: string;
   onAnswered: (a: Attempt, result: PracticeAnswer['result'], followed: boolean) => void;
   onNext: () => void;
 }) {
@@ -128,7 +132,7 @@ function QuestionScreen({
   if (answered) {
     primary = (
       <Button variant="filled" onClick={onNext}>
-        {index + 1 === total ? 'See the summary' : 'Next'}
+        {index + 1 === total ? lastLabel : 'Next'}
       </Button>
     );
   } else if (proof) {
@@ -249,7 +253,7 @@ function QuestionScreen({
   );
 }
 
-function Summary({ bank, slots, answers, setId, onDone, done }: { bank: QuestionBank; slots: SetSlot[]; answers: PracticeAnswer[]; setId: string; onDone: () => void; done: boolean }) {
+function Summary({ bank, slots, answers, setId, onDone, done, daily }: { bank: QuestionBank; slots: SetSlot[]; answers: PracticeAnswer[]; setId: string; onDone: () => void; done: boolean; daily: boolean }) {
   const mine = answers.filter((a) => a.set === setId);
   const right = mine.filter((a) => a.result === 'right' && !a.revealed).length;
   const seconds = mine.reduce((s, a) => s + a.seconds, 0);
@@ -278,7 +282,9 @@ function Summary({ bank, slots, answers, setId, onDone, done }: { bank: Question
         <Button variant="filled" onClick={onDone} aria-disabled={done || undefined}>
           {done ? 'Logged' : 'Done'}
         </Button>
-        <p className="mt-2 text-meta text-ink2">Done logs the time to the Practice block, and only to it.</p>
+        <p className="mt-2 text-meta text-ink2">
+          {daily ? 'Each subject’s minutes went to the Practice block, and only to it, as you finished the subject.' : 'Done logs the time to the Practice block, and only to it.'}
+        </p>
       </div>
     </section>
   );
@@ -301,22 +307,31 @@ function Chooser({ bank }: { bank: QuestionBank }) {
 }
 
 /**
- * Practice: today's set (linear algebra, then calculus, then physics), one question a screen, or practice on demand
- * from Library › Practice. Check is the one filled button; hints come one at a time; the solution can be shown at
- * any point, and then the answer counts as missed. The summary's Done logs the minutes to the Practice block.
+ * Practice. Today's set opens on a start screen: one row a subject with its status, the subjects done in any order
+ * and separately across the day. A subject runs its questions one a screen and comes back to the start screen; its
+ * minutes go to the Practice block as soon as it is finished, and once every subject is, the start screen becomes
+ * the day's summary. Practice on demand (Library › Practice) runs straight through to its summary, whose Done logs
+ * the time. Check is the one filled button; hints come one at a time; the solution can be shown at any point, and
+ * then the answer counts as missed.
  */
 export function Practice() {
   const atlas = useAtlas();
   const [topicParam] = useQueryParam('topic');
   const [nParam] = useQueryParam('n');
   const [choose] = useQueryParam('choose');
+  const [subjectParam] = useQueryParam('subject');
   const [bank, setBank] = useState<QuestionBank | null>(null);
   const [follow, setFollow] = useState<string[] | null>(null);
   const answers = useLiveQuery(() => db.practice.toArray(), []);
   const date = todayDate();
-  const [position, setPosition] = useState<number | null>(null);
+  const [position, setPosition] = useState<{ key: string; index: number } | null>(null);
   const [loggedSet, setLoggedSet] = useState<string | null>(null);
-  const sessionStart = useRef(Date.now());
+  // Opening another subject (or the start screen) starts from that subject's first open question.
+  const [seenSubject, setSeenSubject] = useState(subjectParam);
+  if (seenSubject !== subjectParam) {
+    setSeenSubject(subjectParam);
+    setPosition(null);
+  }
   const topicSeed = useRef(String(Date.now()));
 
   useEffect(() => {
@@ -376,12 +391,13 @@ export function Practice() {
     );
   }
 
-  const answeredIds = new Set(answers.filter((a) => a.set === setId).map((a) => a.questionId));
-  const firstOpen = slots.findIndex((s) => !answeredIds.has(s.question.id));
-  const index = position ?? (firstOpen < 0 ? slots.length : firstOpen);
   const subjectOf = (id: string) => bank.subjects.find((s) => s.id === id);
+  const daily = !subjectId;
+  const practiceBlock = settings.core.blocks.find((b) => b.role === 'practice')?.id ?? 'P';
+  const trackOf = (subject: string) => subjectOf(subject)?.tracks[0] ?? 'math';
+  const progress = subjectProgress(slots, answers, setId);
 
-  const record = (slot: SetSlot, attempt: Attempt, result: PracticeAnswer['result'], followed: boolean): void => {
+  const record = async (slot: SetSlot, attempt: Attempt, result: PracticeAnswer['result'], followed: boolean): Promise<void> => {
     const row: PracticeAnswer = {
       id: setId + '|' + slot.question.id,
       questionId: slot.question.id,
@@ -397,59 +413,131 @@ export function Practice() {
     };
     if (attempt.revealed) row.revealed = true;
     if (followed) row.followed = true;
-    void db.practice.put(row);
+    await db.practice.put(row);
+    if (!daily) return;
+    // A subject's last answer logs its minutes to the Practice block at once; the third subject also marks it done.
+    const after = subjectProgress(slots, [...answers.filter((a) => a.id !== row.id), row], setId);
+    if (after.find((p) => p.subject === slot.question.subject)?.status !== 'done') return;
+    await editLog(date, (log) => withFinishedSubjects(log, after, practiceBlock, trackOf));
   };
 
+  /** Practice on demand: Done logs the whole set's minutes, by subject. */
   const done = async (): Promise<void> => {
+    if (daily) {
+      navigate('/');
+      return;
+    }
     const mine = answers.filter((a) => a.set === setId);
     const bySubject = new Map<string, number>();
     for (const a of mine) bySubject.set(a.subject, (bySubject.get(a.subject) ?? 0) + a.seconds);
-    const block = settings.core.blocks.find((b) => b.role === 'practice')?.id ?? 'P';
     await editLog(date, (log) => {
       let next = log;
-      for (const [subject, seconds] of bySubject) {
-        const track = subjectOf(subject)?.tracks[0] ?? 'math';
-        next = addEntry(next, { block, track, minutes: Math.max(1, Math.round(seconds / 60)), refId: 'practice:' + subject });
-      }
-      return setId.startsWith('daily:') && !(next.doneBlocks ?? []).includes(block) ? toggleBlockDone(next, block) : next;
+      for (const [subject, seconds] of bySubject) next = addEntry(next, { block: practiceBlock, track: trackOf(subject), minutes: Math.max(1, Math.round(seconds / 60)), refId: practiceRef(subject) });
+      return next;
     });
     setLoggedSet(setId);
-    navigate(subjectId ? '/library' : '/');
+    navigate('/library');
   };
 
-  const slot = slots[index];
-  const question = questions[index];
-  const subject = slot ? subjectOf(slot.question.subject) : undefined;
+  const readingFor = (slot: SetSlot) =>
+    atlas.seed.resources
+      .filter((r) => r.practiceTopics?.includes(slot.question.subject + '/' + slot.question.topic))
+      .slice(0, 3)
+      .map((r) => ({ id: r.id, title: r.short ?? r.title }));
+  const questionScreen = (list: SetSlot[], index: number, lastLabel: string, onLast: () => void) => {
+    const slot = list[index]!;
+    const question = questions[slots.indexOf(slot)]!;
+    const subject = subjectOf(slot.question.subject)!;
+    return (
+      <QuestionScreen
+        key={setId + slot.question.id}
+        question={question}
+        index={index}
+        total={list.length}
+        subjectTitle={subject.short}
+        topicTitle={subject.topics.find((t) => t.id === slot.question.topic)?.title ?? slot.question.topic}
+        reading={readingFor(slot)}
+        lastLabel={lastLabel}
+        onAnswered={(attempt, result, followed) => {
+          // Stay on this question (with its solution) until Next, though the first open one has moved on.
+          setPosition({ key: subjectParam ?? '', index });
+          void record(slot, attempt, result, followed);
+        }}
+        onNext={() => (index + 1 < list.length ? setPosition({ key: subjectParam ?? '', index: index + 1 }) : onLast())}
+      />
+    );
+  };
+
+  if (!daily) {
+    const answeredIds = new Set(answers.filter((a) => a.set === setId).map((a) => a.questionId));
+    const firstOpen = slots.findIndex((s) => !answeredIds.has(s.question.id));
+    const index = position?.key === '' ? position.index : firstOpen < 0 ? slots.length : firstOpen;
+    return (
+      <Screen title="Practice">
+        <Header title={subjectOf(subjectId ?? '')?.topics.find((t) => t.id === topicId)?.title ?? 'Practice'} sub={plural(slots.length, 'question')} actions={close} />
+        {index < slots.length ? (
+          questionScreen(slots, index, 'See the summary', () => setPosition({ key: '', index: slots.length }))
+        ) : (
+          <Summary bank={bank} slots={slots} answers={answers} setId={setId} daily={false} done={loggedSet === setId} onDone={() => void done()} />
+        )}
+      </Screen>
+    );
+  }
+
+  // Today's set, one subject at a time, in the order the user picks.
+  const current = subjectParam ? progress.find((p) => p.subject === subjectParam) : undefined;
+  const finished = subjectsDone(progress);
+  if (current) {
+    const index = position?.key === current.subject ? position.index : current.next;
+    if (index < current.total) {
+      const othersOpen = progress.some((p) => p.subject !== current.subject && p.status !== 'done');
+      return (
+        <Screen title="Practice">
+          <Header
+            title="Practice"
+            sub={subjectOf(current.subject)!.short + ' · ' + plural(current.total, 'question')}
+            actions={
+              <Button variant="icon" to="/practice">
+                Close
+              </Button>
+            }
+          />
+          {questionScreen(current.slots, index, othersOpen ? 'Back to the subjects' : 'See the summary', () => navigate('/practice'))}
+        </Screen>
+      );
+    }
+  }
+
+  const suggested = suggestedSubject(progress, settings.core.practice.startWith);
+  const suggestedProgress = progress.find((p) => p.subject === suggested);
   return (
     <Screen title="Practice">
-      <Header
-        title={subjectId ? (subjectOf(subjectId)?.topics.find((t) => t.id === topicId)?.title ?? 'Practice') : 'Practice'}
-        sub={plural(slots.length, 'question') + (subjectId ? '' : ' · ' + bank.subjects.map((s) => s.short.toLowerCase()).join(', '))}
-        actions={close}
-      />
-      {slot && question && subject ? (
-        <QuestionScreen
-          key={setId + index}
-          question={question}
-          index={index}
-          total={slots.length}
-          subjectTitle={subject.short}
-          topicTitle={subject.topics.find((t) => t.id === slot.question.topic)?.title ?? slot.question.topic}
-          reading={atlas.seed.resources
-            .filter((r) => r.practiceTopics?.includes(slot.question.subject + '/' + slot.question.topic))
-            .slice(0, 3)
-            .map((r) => ({ id: r.id, title: r.short ?? r.title }))}
-          onAnswered={(attempt, result, followed) => {
-            // Stay on this question (with its solution) until Next, though the first open one has moved on.
-            setPosition(index);
-            record(slot, attempt, result, followed);
-          }}
-          onNext={() => setPosition(index + 1)}
-        />
+      <Header title="Practice" sub={finished === progress.length ? 'Every subject done today' : finished + ' of ' + plural(progress.length, 'subject') + ' done · any order'} actions={close} />
+      {finished === progress.length ? (
+        <Summary bank={bank} slots={slots} answers={answers} setId={setId} daily done={false} onDone={() => void done()} />
       ) : (
-        <Summary bank={bank} slots={slots} answers={answers} setId={setId} done={loggedSet === setId} onDone={() => void done()} />
+        <div className="mt-6 flex flex-col gap-6">
+          <RowList label="Today’s subjects">
+            {progress.map((p) => (
+              <Row
+                key={p.subject}
+                title={subjectOf(p.subject)?.short ?? p.subject}
+                meta={plural(p.total, 'question') + ' · ~' + p.estMinutes + ' min'}
+                trailing={statusText(p)}
+                to={'/practice?subject=' + p.subject}
+              />
+            ))}
+          </RowList>
+          {suggested && suggestedProgress && (
+            <div>
+              <Button variant="filled" icon="play" to={'/practice?subject=' + suggested}>
+                {(suggestedProgress.status === 'partial' ? 'Go on with ' : 'Start ') + (subjectOf(suggested)?.short.toLowerCase() ?? suggested)}
+              </Button>
+              <p className="mt-3 text-meta text-ink2">Each subject’s minutes go to the Practice block as soon as you finish it.</p>
+            </div>
+          )}
+        </div>
       )}
-      <p className="sr-only">Started {Math.round((Date.now() - sessionStart.current) / 60000)} minutes ago.</p>
     </Screen>
   );
 }

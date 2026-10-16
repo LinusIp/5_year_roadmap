@@ -14,9 +14,10 @@ function listUnder(scope: Page | Locator, heading: string): Locator {
 const practiceRow = (page: Page): Locator => page.getByRole('main').getByRole('link', { name: /^Practice/ });
 
 /**
- * Daily practice, through the real UI: today's set (one answer wrong, one after a hint, the rest with the solution
- * shown), the summary and its Done, the reviews it schedules, the end of the practice period, practice on demand
- * from the Library, a project's tech doc, and the answers reaching a second device.
+ * Daily practice, through the real UI: today's set subject by subject in an order of the user's choosing (one answer
+ * wrong, one after a hint, the rest with the solution shown), resuming a half-done subject, the summary and its
+ * Done, the reviews it schedules, "Start with", the end of the practice period, practice on demand from the Library,
+ * a project's tech doc, and the answers reaching a second device.
  */
 test.use({ timezoneId: 'Asia/Tashkent' });
 
@@ -56,22 +57,24 @@ async function answerOne(page: Page, how: 'wrong' | 'hint' | 'reveal'): Promise<
 }
 
 async function next(page: Page): Promise<void> {
-  await page.getByRole('button', { name: /^(Next|See the summary)$/ }).click();
+  await page.getByRole('button', { name: /^(Next|Back to the subjects|See the summary)$/ }).click();
 }
 
-async function answerTodaysSet(page: Page): Promise<void> {
-  let wrongDone = false;
-  let hintDone = false;
-  for (let i = 1; i <= 9; i++) {
-    await expect(page.getByText(new RegExp('^Question ' + i + ' of 9'))).toBeVisible();
-    if (!wrongDone && (await answerOne(page, 'wrong'))) wrongDone = true;
-    else if (!hintDone && (await page.getByRole('button', { name: 'Hint' }).count()) > 0) {
+/** A subject's row on the Practice start screen. */
+const subjectRow = (page: Page, subject: string): Locator => page.getByRole('main').getByRole('link', { name: new RegExp('^' + subject + ' ') });
+
+/** One wrong answer, one after a hint, the rest with the solution shown, over the whole set. */
+const tally = { wrong: false, hint: false };
+async function answerQuestions(page: Page, subject: string, from: number, to: number): Promise<void> {
+  for (let i = from; i <= to; i++) {
+    await expect(page.getByText(new RegExp('^Question ' + i + ' of 3 · ' + subject))).toBeVisible();
+    if (!tally.wrong && (await answerOne(page, 'wrong'))) tally.wrong = true;
+    else if (!tally.hint && (await page.getByRole('button', { name: 'Hint' }).count()) > 0) {
       await answerOne(page, 'hint');
-      hintDone = true;
+      tally.hint = true;
     } else await answerOne(page, 'reveal');
     await next(page);
   }
-  expect(wrongDone && hintDone).toBe(true);
 }
 
 async function dbRows<T>(page: Page, store: string): Promise<T[]> {
@@ -94,18 +97,58 @@ async function dbRows<T>(page: Page, store: string): Promise<T[]> {
   );
 }
 
-test('today’s set: a wrong answer, a hint, shown solutions, the summary, minutes to Practice only, and reviews', async ({ page }) => {
+test('today’s set in an order of my choosing: physics, linear algebra, then calculus resumed after a reload', async ({ page }) => {
   await page.clock.install({ time: new Date(PRACTICE_DAY) });
   await open(page, './');
   const row = practiceRow(page);
   await expect(row).toContainText('9 questions · linear algebra, calculus, physics');
   await row.click();
 
-  await expect(page.getByText(/^Question 1 of 9 · Linear algebra/)).toBeVisible();
-  await page.screenshot({ path: 'test-results/practice-question.png', fullPage: true });
-  await answerTodaysSet(page);
+  // The start screen: the three subjects with their size and status, any order.
+  await expect(page).toHaveURL(/#\/practice$/);
+  for (const subject of ['Linear algebra', 'Calculus', 'Physics']) {
+    await expect(subjectRow(page, subject)).toContainText(/3 questions · ~\d+ min/);
+    await expect(subjectRow(page, subject)).toContainText('Not started');
+  }
+  await expect(page.locator('[data-variant="filled"]')).toHaveCount(1);
+  await page.screenshot({ path: 'test-results/practice-start.png', fullPage: true });
 
-  // The summary: nothing right, every question back tomorrow.
+  // Physics first: its three questions, then back to the start screen, not to a summary.
+  await subjectRow(page, 'Physics').click();
+  await page.screenshot({ path: 'test-results/practice-question.png', fullPage: true });
+  await answerQuestions(page, 'Physics', 1, 3);
+  await expect(page).toHaveURL(/#\/practice$/);
+  await expect(subjectRow(page, 'Physics')).toContainText('Done');
+  await expect(subjectRow(page, 'Calculus')).toContainText('Not started');
+
+  // Its minutes are on the Practice block already, on the physics track; the block is not done yet.
+  let logs = await dbRows<{ date: string; entries: { block: string; track: string; minutes: number; refId?: string }[]; doneBlocks?: string[] }>(page, 'dayLogs');
+  let today = logs.find((l) => l.date === '2026-10-19')!;
+  expect(today.entries).toEqual([expect.objectContaining({ block: 'P', track: 'physics', refId: 'practice:physics' })]);
+  expect(today.doneBlocks ?? []).not.toContain('P');
+  await open(page, './');
+  await expect(practiceRow(page)).toContainText('1 of 3 subjects');
+  await practiceRow(page).click();
+
+  // Then linear algebra.
+  await subjectRow(page, 'Linear algebra').click();
+  await answerQuestions(page, 'Linear algebra', 1, 3);
+  await expect(subjectRow(page, 'Linear algebra')).toContainText('Done');
+
+  // Calculus half done, then a reload: it keeps its place and resumes at the next question.
+  await subjectRow(page, 'Calculus').click();
+  await answerOne(page, 'reveal');
+  await reload(page);
+  await expect(page.getByText(/^Question 2 of 3 · Calculus/)).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Solution' })).toHaveCount(0);
+  await open(page, './#/practice');
+  await expect(subjectRow(page, 'Calculus')).toContainText('1 of 3');
+  // The half-done subject is the one offered first.
+  await page.getByRole('link', { name: 'Go on with calculus' }).click();
+  await answerQuestions(page, 'Calculus', 2, 3);
+  expect(tally.wrong && tally.hint).toBe(true);
+
+  // All three done: the day's summary, as before. Nothing right, every question back tomorrow.
   await expect(page.getByRole('heading', { name: '0 of 9 questions right' })).toBeVisible();
   await expect(listUnder(page, 'Coming back for review')).toContainText('9 questions tomorrow');
   await page.screenshot({ path: 'test-results/practice-summary.png', fullPage: true });
@@ -116,17 +159,17 @@ test('today’s set: a wrong answer, a hint, shown solutions, the summary, minut
   expect(answers.filter((a) => a.hints === 1)).toHaveLength(1);
   expect(answers.filter((a) => a.revealed).length).toBeGreaterThanOrEqual(1);
 
-  await page.getByRole('button', { name: 'Done' }).click();
-  await expect(page).toHaveURL(/#\/$/);
-  await expect(page.getByText('Done today: Practice')).toBeVisible();
-
-  // The minutes went to the Practice block, split by subject track, and to nothing else.
-  const logs = await dbRows<{ date: string; entries: { block: string; track: string; minutes: number }[]; doneBlocks?: string[] }>(page, 'dayLogs');
-  const today = logs.find((l) => l.date === '2026-10-19')!;
-  expect(today.entries.length).toBeGreaterThan(0);
+  // One entry a subject, all on the Practice block, and the block done.
+  logs = await dbRows(page, 'dayLogs');
+  today = logs.find((l) => l.date === '2026-10-19')!;
+  expect(today.entries.map((e) => e.refId).sort()).toEqual(['practice:calculus', 'practice:linear-algebra', 'practice:physics']);
   expect(new Set(today.entries.map((e) => e.block))).toEqual(new Set(['P']));
   expect(new Set(today.entries.map((e) => e.track))).toEqual(new Set(['math', 'physics']));
   expect(today.doneBlocks).toContain('P');
+
+  await page.getByRole('button', { name: 'Done' }).click();
+  await expect(page).toHaveURL(/#\/$/);
+  await expect(page.getByText('Done today: Practice')).toBeVisible();
 
   // Tomorrow every subject's set ends with a review, and Activity › Practice lists them as due.
   await writesSettled(page);
@@ -135,18 +178,27 @@ test('today’s set: a wrong answer, a hint, shown solutions, the summary, minut
   const due = listUnder(page, 'Reviews due');
   for (const subject of ['Linear algebra', 'Calculus', 'Physics']) await expect(due.getByRole('listitem').filter({ hasText: subject })).toContainText('3');
   await expect(page.getByText(/^9 questions answered · 0 % right/)).toBeVisible();
+});
 
-  // The set survives a reload half-way through: the next open question is where it resumes.
+test('Settings › Practice › Start with offers that subject first, and never fixes the order', async ({ page }) => {
+  await page.clock.install({ time: new Date(PRACTICE_DAY) });
+  await open(page, './#/settings?section=practice');
+  await page.getByRole('button', { name: /^Start with/ }).click();
+  await page.getByRole('dialog', { name: 'Start with' }).getByRole('button', { name: 'Physics' }).click();
+  await expect(page.getByRole('button', { name: /^Start with/ })).toContainText('Physics');
   await open(page, './#/practice');
-  await expect(page.getByText(/^Question 1 of 9/)).toBeVisible();
-  await answerOne(page, 'reveal');
+  await expect(page.getByRole('link', { name: 'Start physics' })).toBeVisible();
+  // Any other subject still opens.
+  await subjectRow(page, 'Calculus').click();
+  await expect(page.getByText(/^Question 1 of 3 · Calculus/)).toBeVisible();
   await reload(page);
-  await expect(page.getByText(/^Question 2 of 9/)).toBeVisible();
+  await open(page, './#/practice');
+  await expect(page.getByRole('link', { name: 'Start physics' })).toBeVisible();
 });
 
 test('the solution screen shows the worked solution and reading on the topic', async ({ page }) => {
   await page.clock.install({ time: new Date(PRACTICE_DAY) });
-  await open(page, './#/practice');
+  await open(page, './#/practice?subject=linear-algebra');
   await page.getByRole('button', { name: 'Show solution' }).first().click();
   await expect(page.getByRole('region', { name: 'Solution' })).toBeVisible();
   await page.screenshot({ path: 'test-results/practice-solution.png', fullPage: true });
@@ -215,13 +267,17 @@ async function connect(page: Page): Promise<void> {
   await expect(section.getByRole('status')).toHaveText('Synced just now');
 }
 
-test('practice answers reach a second device through GitHub Sync', async ({ browser }) => {
+test('practice answers and finished subjects reach a second device through GitHub Sync', async ({ browser }) => {
   const fake = new FakeGithub({ owner: 'octo-learner', repo: 'atlas-data', token: TOKEN, userId: 4242, name: 'Octo Learner' });
   const a = await device(browser, fake);
   await connect(a);
-  await open(a, './#/practice');
-  await answerOne(a, 'reveal');
-  await next(a);
+  // Physics finished, calculus started.
+  await open(a, './#/practice?subject=physics');
+  for (let i = 0; i < 3; i++) {
+    await answerOne(a, 'reveal');
+    await next(a);
+  }
+  await open(a, './#/practice?subject=calculus');
   await answerOne(a, 'reveal');
   await writesSettled(a);
   await open(a, './#/settings?section=sync');
@@ -229,14 +285,19 @@ test('practice answers reach a second device through GitHub Sync', async ({ brow
   await expect(a.locator('section#sync').getByRole('status')).toHaveText('Synced just now');
   const file = JSON.parse(fake.files()['state/practice.json']!);
   expect(file.format).toBe('atlas-practice');
-  expect(file.answers).toHaveLength(2);
+  expect(file.answers).toHaveLength(4);
 
   const b = await device(browser, fake);
   await connect(b);
+  await open(b, './');
+  await expect(practiceRow(b)).toContainText('1 of 3 subjects');
   await open(b, './#/practice');
-  await expect(b.getByText(/^Question 3 of 9/)).toBeVisible();
+  await expect(subjectRow(b, 'Physics')).toContainText('Done');
+  await expect(subjectRow(b, 'Calculus')).toContainText('1 of 3');
+  await subjectRow(b, 'Calculus').click();
+  await expect(b.getByText(/^Question 2 of 3 · Calculus/)).toBeVisible();
   await reload(b);
-  await expect(b.getByText(/^Question 3 of 9/)).toBeVisible();
+  await expect(b.getByText(/^Question 2 of 3 · Calculus/)).toBeVisible();
   await open(b, './#/activity?view=practice');
-  await expect(b.getByText(/^2 questions answered/)).toBeVisible();
+  await expect(b.getByText(/^4 questions answered/)).toBeVisible();
 });

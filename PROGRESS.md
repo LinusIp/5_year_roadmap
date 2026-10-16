@@ -739,3 +739,22 @@ Verified on this machine (Linux, Chromium 140):
   writes the newer files again and asks for the device to be updated. Tested with the live build's own files.
 - The Pages deploy checks the live site: update prompt, reload into the new version, the new screens.
 
+## Pull request #2: practice in any order, the tech doc one tap away
+
+- Practice opens on a start screen: Linear algebra · Calculus · Physics, each "3 questions · ~N min" and Not started,
+  2 of 3 or Done. A subject runs its questions and returns to the start screen; a half-done one resumes where it
+  stopped; all three done shows the day's summary.
+- Each finished subject logs its own minutes to the Practice block at once; the third marks the block done. Today's
+  Practice row reads "1 of 3 subjects" and opens the start screen.
+- Settings › Practice › Start with (none, linear algebra, calculus, physics): offered first, never forced.
+- The tech doc opens in a sheet from the Deck (with Take it in the doc), the Library, Plan › Projects (weekly slot,
+  monthly lists, monthly queue) and Today (the Now card's title, a quiet Tech doc button, project rows in Later
+  today with Work on it now, the monthly case row). The timer keeps running in the sheet's header, ticks show on the
+  Now card at once, the doc remembers its scroll position, Enter/Space open it and Escape closes it with focus back.
+- A catalogue build's approach steps are checkboxes and count toward its progress.
+- Fixed: Plan › Projects showed the curriculum's suggestion instead of a catalogue build picked for the week.
+- Tests: `tests/unit/practice-order.test.ts` (per-subject progress, resume, minutes per subject, questions
+  unchanged by order); `tests/e2e/practice.spec.ts` (physics, then linear algebra, then calculus resumed after a
+  reload; Start with; two devices); `tests/e2e/tech-doc.spec.ts` (Deck, Library, Plan, Today with the timer running,
+  a milestone ticked from the doc, scroll memory, keyboard, two devices). New baselines: `practice-start-light.png`,
+  `tech-doc-today-light.png`.
