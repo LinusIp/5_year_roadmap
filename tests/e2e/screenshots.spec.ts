@@ -73,3 +73,18 @@ test('the Sync section in Settings, off and connected, matches the committed scr
   await page.getByRole('heading', { level: 1, name: 'Settings' }).click();
   await expect(section).toHaveScreenshot('settings-sync-on-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });
+
+test('compact Today and the Change today sheet match the committed screenshots', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await importDemo(page, 'light');
+  await open(page, './#/settings?section=layout');
+  await page.getByRole('radio', { name: 'Compact' }).first().click();
+  await open(page, './');
+  await expect(page.locator('main .text-meta').first()).toBeVisible();
+  await expect(page).toHaveScreenshot('today-compact-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+
+  await page.getByRole('button', { name: 'Change today' }).click();
+  const sheet = page.getByRole('dialog', { name: 'Change today' });
+  await expect(sheet.getByText(/^Blocks · /)).toBeVisible();
+  await expect(page).toHaveScreenshot('change-today-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+});

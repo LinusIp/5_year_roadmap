@@ -1,7 +1,8 @@
 # Atlas
 
 A local-first personal learning platform for one five-year plan (2026-09-21 to 2031-08-31). It answers
-one question every morning: **what exactly do I do in my 8 hours today?**
+one question every morning: **what exactly do I do today?** By default that is an 8-hour day; the day can be
+shaped to fit (see [Making it yours](#making-it-yours)).
 
 No backend and no account. Everything you log is kept in your browser (IndexedDB), and with the optional
 GitHub Sync also in a private repository you own, where each study session becomes a commit. Without it, the
@@ -42,6 +43,44 @@ npm run dev
 | `npm run screenshots` | Builds, then redraws the screenshots above (the screenshot test's baselines in `screenshots/`) from demo data. |
 | `npm run fetch:units` | Rebuilds the lecture and chapter checklists from the courses own syllabus pages. |
 | `npm run test:sync -- --repo owner/name` | Runs GitHub Sync against the real GitHub, by hand (see below). Never in CI. |
+
+## Making it yours
+
+Atlas starts as the plan in `data/`: the same 8-hour day, every day. Real weeks are not like that, so the day,
+the plan, the pace and the layout can all be changed from the app. Nothing new shows on the main screens until
+you use it: every option sits behind an Edit or Change action in a sheet.
+
+<p>
+  <img src="screenshots/change-today-light.png" alt="Change today: the day's template, a rest-day switch, and each block with its minutes" width="32%">
+  <img src="screenshots/today-compact-light.png" alt="Today in compact mode: Later today shows titles only" width="32%">
+</p>
+
+| You want to | Where |
+|---|---|
+| Make today a University day, give one block fewer minutes, skip a block, move it to tomorrow, swap two blocks' work, or rest | Today › the sliders icon (Change today) |
+| Change the templates (Full day, University day, Weekend, Exam week, Rest day) or make your own | Settings › Schedule › Day templates |
+| Give each weekday a template | Settings › Schedule › Weekly pattern |
+| Give a date or a range another template ("Exam week 12–19 Dec") | Settings › Schedule › Date ranges |
+| Add, rename, recolour or reorder blocks, or give one a track | Settings › Blocks |
+| Count a day from 60 minutes or half its plan, whichever is lower | Settings › Heatmap and streak (both numbers are yours) |
+| Light the heatmap by share of the day's plan, or by minutes | Settings › Heatmap and streak |
+| Add a library item to the plan at a position | the item's sheet › Add to the plan |
+| Reorder, swap for an alternative, or drop (and restore) an item | Plan › a lane › Edit |
+| Rename or re-date a phase, change a lane's focus, add or split a phase | Plan › Edit plan › Phases |
+| Set a goal with a date and see whether it is on track | Plan › Edit plan › Goals; it then shows on the Timeline |
+| Undo a plan edit | the toast right after it, or Plan › Edit plan › Recent edits (the last 50) |
+| Go relaxed, intense or a fixed number of minutes in one lane; pause it; catch up | Plan › a lane › Pace |
+| Re-plan: push dates back, redistribute across lanes, or drop and defer the lowest-priority items | Plan › Re-plan (a preview first, always) |
+| Hide parts of Today, compact rows, choose what Now picks | Settings › Layout › Today (with a live preview) |
+| Choose 3 to 5 tabs and their order | Settings › Layout › Tabs |
+| Plan's first view, dropped items shown or not | Settings › Layout › Plan |
+| Theme, week start, 12- or 24-hour clock, density | Settings › Layout › General |
+| Add a resource, project, paper or track of your own | Library › Add a resource |
+
+**Nothing is lost.** Your edits are kept apart from the curriculum, as an ordered list of patches in
+`state/plan.json`, so an update to `data/` still flows in and your edits survive it. Dropped items stay
+restorable, every plan edit can be undone, and a change to the schedule never rewrites a day already past: the
+old templates are kept for the days they applied to. Schedule, pace and layout travel in `state/settings.json`.
 
 ## Keyboard
 
@@ -94,8 +133,8 @@ README that Atlas writes into it explains each file.
 | Path | What is in it |
 |---|---|
 | `state/items.json` | Status, ticked units, notes and links of every course, book, project, paper, certificate and milestone |
-| `state/plan.json` | Your plan edits, items of your own, re-plans and picked builds |
-| `state/settings.json` | Blocks, thresholds, streak rules and theme. Never the token. |
+| `state/plan.json` | Your plan edits (an ordered list of patches, version 2), items of your own, re-plans and picked builds |
+| `state/settings.json` | Blocks, day templates, the weekly pattern, date ranges, day changes, pace, pauses and layout (version 2). Never the token. |
 | `log/YYYY/MM/YYYY-MM-DD.json` and `.md` | One day, and its human-readable twin |
 | `reviews/` | Weekly, monthly and quarterly reviews |
 | `projects/` | Each project's write-up, links and checklist |

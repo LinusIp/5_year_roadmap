@@ -338,3 +338,83 @@ courses and books) and reshapes years 2, 3 and 5. Everything else in it is uncha
   year 3 plan for the library.
 - **MIT 6.172 is in the library, not on the plan.** The brief now names performance engineering, but its
   table does not place 6.172; year 3 block B (CUDA in depth) is where it would go.
+
+## Flexibility (the briefs of 2026-10-16)
+
+The flexibility brief makes the day, the plan, the pace and the layout editable. The decisions below are the ones
+it left open; `briefs/PLAN.md` records how the three briefs of that day fit together.
+
+- **Work happens on the session branch.** This round was built in a cloud session that may push only to
+  `claude/new-session-2cjn2k`. The stages (`flex`, `practice`, `catalogue`) are consecutive commits there, and
+  local branches of those names mark where each ends. Merging into `main`, which triggers CI and the Pages deploy,
+  waits for the owner's go-ahead.
+- **Block ids are open-ended.** Any short capitalised id is a block (`/^[A-Z][A-Z0-9]{0,7}$/`): A to E stay the
+  curriculum's lanes, P is Practice, and blocks the user adds take the next free letter. The authoritative data
+  model in `src/seed/model.ts` had `'A' | … | 'E'`; it says `string` now, with a note. A to E cannot be deleted
+  (the curriculum plans into them); taking one out of a template leaves it out of those days.
+- **Tracks can be the user's own** (`my-…`), created as a `custom` plan patch. They take the colour of the first
+  track in the colour slot chosen for them.
+- **Settings version 2 is a superset of version 1, upgraded when read.** A version 1 file (from IndexedDB, a
+  backup or another device's `state/settings.json`) still parses; `upgradeSettings` fills the new fields from
+  `data/settings.yaml`. The Full day template lists its blocks without minutes, so it takes each block's own:
+  someone who had set block D to 150 minutes keeps 150 minutes.
+- **A schedule change never rewrites a day already past.** Editing templates, the weekly pattern or a block's
+  minutes or weekdays first keeps a copy of the schedule as it was, "valid until yesterday"
+  (`settings.schedule.history`), once per day. Pace and pauses carry the date they start. Changes to one date
+  (Change today) name that date. So the streak, the heatmap and reviews of past days read the plan those days had.
+- **Today's changes live in settings, by date** (`schedule.days`). They are small, they sync with the rest of the
+  schedule, and keeping them is what keeps the past's plan. Only today and later days can be changed.
+- **The streak rule** is "60 minutes or 50 % of the day's planned minutes, whichever is lower". A day that plans
+  nothing (a rest day, a template with no blocks) counts if it reaches 60 minutes and otherwise holds the streak:
+  it neither breaks it nor spends a freeze, and is never "at risk".
+- **The heatmap is relative by default**, as the brief asks: 0, under 25 %, under 60 %, under 100 % and 100 % of
+  the day's plan. A full 8-hour day is still the top step, so the redesign's acceptance test holds. A day that
+  planned nothing falls back to the absolute thresholds. Settings switches back to minutes.
+- **The forecast walks the future plan.** A lane's remaining hours are spent day by day at what the schedule
+  plans for it, scaled by the share of its plan it actually got over the pace window. An exam week (which plans
+  nothing for most lanes) moves the projected finish by exactly its length. With nothing logged lately, the verdict
+  is still "No hours logged lately" rather than an invented date.
+- **Plan edits are an ordered list of patches** in a new `planPatches` table and `state/plan.json` version 2:
+  `add`, `drop`, `restore`, `move`, `swap`, `editPhase`, `addPhase`, `custom` and `goal`, applied by time then id
+  so every device gets the same result. Database version 3 converts plan-item edits stored the old way (a patch
+  per item, a "removed" flag, custom plan items); an old backup or an old device's `plan.json` is converted the
+  same way when read. Resources, projects and papers of the user's stay in `customEntities` (they are library
+  content, not plan edits); only tracks are `custom` patches. `plan.json` keeps the existing rule, last writer
+  wins for the whole file.
+- **Undo removes an edit's patches.** One action is one group (a re-plan is one group of many moves). The last 50
+  groups can be undone, from the toast or Plan › Edit plan › Recent edits, in any order. The toast also appears
+  inside an open sheet, because a modal sheet makes the rest of the page inert.
+- **Dropping is a plan edit, not a status.** "Remove an item (status dropped)" became a `drop` patch: the item
+  leaves its lane for the lane's collapsed Dropped group, keeps its own status, notes and ticks, and Restore puts
+  it back where it was. The item status called Dropped still exists for "I am not doing this at all".
+- **Patches that no longer apply are skipped and listed once**, in Settings, never fatal.
+- **Alternatives** are a new optional `alternatives` field on resources, filled for the pairs the brief names.
+  SolidWorks and Fusion were only certificates, so each got a learning resource (with a search hint: no link
+  could be checked from here) to pair with Onshape.
+- **Prerequisites stay enforced in the editor, not forbidden.** Adding an item before a phase that holds one of
+  its unfinished prerequisites shows the conflict and offers "Add, and move the prerequisite too"; "Add it anyway"
+  is there for the user who knows better. The validator still forbids it in `data/`.
+- **The three re-plans.** *Push dates back* stretches each phase from today on by what its fullest lane needs,
+  the later phases moving along. *Redistribute* gives the short lanes of the current phase minutes a day from
+  lanes with room, as custom paces from today, the day's length unchanged. *Drop or defer* moves the overflow of
+  each lane to the start of the next phase, choosing stretch items first, then the items teaching the
+  lowest-priority roadmap (inference, then architecture, then graphics; an item's tracks stand in when it covers
+  no node), then the latest; in the last phase they are dropped, restorably. It never moves an item ahead of one
+  that needs it. The earlier lane-by-lane re-plan remains behind the monthly review's suggestion.
+- **Catch-up adds to Today's target only.** It is shown on the Now card ("30 m of it catch-up"); the streak and the
+  heatmap keep reading the schedule, so opting in can never break a streak.
+- **Ahead of schedule.** Today already pulls the next phase's item forward when a lane is done; the lane's Pace
+  sheet says so and offers "Give the time to another lane", which pauses the lane until the phase ends with its
+  time going to the highest-priority lane.
+- **Pausing defaults to the highest-priority active lane**, from the roadmaps its current items cover, then their
+  tracks; free time is one tap away.
+- **Block colours** come from the track palette, limited to the twelve colours that reach 3:1 against the card in
+  both themes (WCAG 1.4.11). The default lane colours are the mockup's and unchanged.
+- **Layout.** "Detailed" is the mockup's Later today (title and meta); "Compact" is titles only. Density compact
+  only tightens row padding, to 44 px rows. Theme and week start moved into Settings › Layout › General with the
+  clock and density. The tabs Projects and Map open Plan's Projects view and the five-year map; Plan's "Roadmaps"
+  default opens Credentials, where the roadmaps are.
+- **One pace suggestion on Sunday, dismissed per device.** "Not now" is remembered on the device for that week.
+- **The new screenshot baselines** (`today-compact-light.png`, `change-today-light.png`) were drawn by Chromium on
+  Linux in the build container, not Edge on Windows like the older ones. `npm run screenshots` redraws them all
+  on your machine.

@@ -18,6 +18,9 @@ with each. "Verified" means it was run, not assumed.
 | – | Redesign (section 4.0, to the mockups) | **done** |
 | – | Brief update of 2026-10-08: research cadence, roadmap.sh roadmaps, new phase table | **done** |
 | – | GitHub Sync (section 4.10) | **done** |
+| – | Flexibility: schedule, plan editing, pace, layout | **done** |
+| – | Practice, resources, tech docs | in progress |
+| – | The three-tier project catalogue | to do |
 
 ## Milestone 1 — Scaffold
 
@@ -617,3 +620,41 @@ repository is a Git data or contents call, which GitHub gates on the Contents pe
 metadata, which every fine-grained token can read; a fine-grained token itself was not used in this run. The
 test repository could not be deleted with this credential, which lacks the `delete_repo` scope; it is safe to
 delete by hand.
+
+## Flexibility (the brief of 2026-10-16)
+
+The day, the plan, the pace and the layout can be changed in the app; a fresh install still looks like the
+mockups (every redesign acceptance test passes unchanged). README › Making it yours lists where each option is.
+
+- **The day.** Five day templates ship (Full day, University day, Weekend, Exam week, Rest day), a weekly pattern
+  gives each weekday one, and date ranges override it. Change today switches the template, changes a block's
+  minutes, skips a block, moves it to tomorrow, swaps two blocks' work or makes a rest day. Blocks are
+  open-ended: add, rename, recolour, give a track, reorder.
+- **What depends on it.** Today's "X of Y h", the week's target, lane budgets and the forecast come from the
+  resolved day (`src/lib/day-plan.ts`). The streak counts a day at 60 minutes or half its plan, whichever is
+  lower, and rest days never break it. The heatmap is relative to the day's plan, or absolute by choice.
+- **The plan.** Plan edits are an ordered list of patches over the curriculum (state/plan.json version 2), with
+  undo for the last 50. Add to a lane at a position, reorder by drag, long-press or arrows, swap for an
+  alternative, drop and restore, phase edits with a preview, goals on the Timeline, and prerequisite conflicts
+  with "move the prerequisite too". Resources, projects, papers and tracks of your own.
+- **Pace.** Per-lane pace, pauses whose time goes to another lane, "behind by" per lane with opt-in capped
+  catch-up, an offer when a lane finishes early, one suggestion in the Sunday review, and a re-plan with three
+  strategies and a preview.
+- **Layout.** Settings › Layout, with a live preview of Today: its parts, compact rows, what Now picks; 3–5 tabs;
+  Plan's first view; theme, week start, clock and density; reset per section.
+- **Sync and migration.** Settings version 2 and plan version 2 travel through GitHub Sync with the existing
+  merge rules. Version 1 settings, plan files and backups still read and are upgraded on the way in.
+
+Verified on this machine (Linux, Chromium 140):
+
+- `npm run validate:data` and `npm run typecheck` pass.
+- `npm test`: 268 unit tests. 46 are new: template resolution (pattern, override, the day's change), planned
+  minutes and targets, pace and pauses, history kept across schedule edits, the streak rule with rest days,
+  relative heatmap levels, settings v1 → v2, every patch type with missing references and order, the legacy
+  conversion, undo, prerequisite conflicts, the three re-plan strategies, catch-up, goals, and the plan and
+  settings files of the data repository.
+- `npm run test:e2e`: 83 tests pass (78 before, 9 new, 4 updated for new wording). New: University day changes
+  the targets; skip and move to tomorrow; one block's minutes and a rest day; an exam-week range shifts the
+  forecast; add, reorder, undo, swap, drop and restore; a custom resource and a goal; pause and resume; compact
+  Today, tabs and reset; two devices on the fake GitHub. The four Windows-drawn screenshot comparisons still
+  differ on Linux, as before (CI skips them); the two new baselines were drawn here.
