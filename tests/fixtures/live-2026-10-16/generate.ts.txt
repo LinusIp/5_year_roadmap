@@ -1,0 +1,86 @@
+/**
+ * Not a test: run once on the build that is live with Practice (pull request #5, af1e1b3: copy it to tests/unit/zz-live-1016.test.ts there) to write a fixture of
+ * the live formats into tests/fixtures/live-2026-10-16/: the settings GitHub Sync writes (state/settings.json),
+ * state/practice.json, a day with Practice minutes, and the backup file. Everything is made with that build's own code.
+ */
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { it } from 'vitest';
+import { loadSeedOrThrow } from '../../scripts/lib/load-seed.ts';
+import { splitSeed } from '../../scripts/lib/vite-plugin-seed.ts';
+import { db } from '../../src/db/db.ts';
+import { createBackup, serialiseBackup } from '../../src/db/backup.ts';
+import { updateSettings } from '../../src/db/settings.ts';
+import { addEntry, editLog, toggleBlockDone } from '../../src/lib/logs.ts';
+import { withScheduleEdit } from '../../src/lib/day-plan.ts';
+import { allPaths, readLocal, renderPath } from '../../src/sync/local.ts';
+
+const OUT = join(import.meta.dirname, '..', 'fixtures', 'live-2026-10-16');
+
+function write(rel: string, text: string): void {
+  const path = join(OUT, rel);
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, text);
+}
+
+it('writes the live-format fixture with Practice', async () => {
+  const seed = loadSeedOrThrow();
+  const { app } = splitSeed(seed);
+  await db.open();
+
+  // Settings changed in the app: a block's minutes, the theme, Practice's questions and Start with, the Practice
+  // lane relaxed, and a schedule edit (so the schedule history keeps a copy with P in it).
+  await updateSettings(seed.settings, (s) => ({
+    ...s,
+    theme: 'dark',
+    github: { ...s.github, username: 'octo-learner' },
+    pace: { P: { mode: 'relaxed', from: '2026-10-16' } },
+    core: {
+      ...s.core,
+      blocks: s.core.blocks.map((b) => (b.id === 'C' ? { ...b, minutes: 90 } : b)),
+      practice: { ...s.core.practice, perSubject: 4, startWith: 'calculus' },
+    },
+  }));
+  await updateSettings(seed.settings, (s) =>
+    withScheduleEdit(s, '2026-10-17', (x) => ({
+      ...x,
+      core: { ...x.core, templates: x.core.templates.map((t) => (t.id === 'weekend' ? { ...t, blocks: t.blocks.map((b) => (b.block === 'P' ? { ...b, minutes: 60 } : b)) } : t)) },
+    })),
+  );
+
+  // A day with Practice minutes (two subjects finished) and Block A.
+  await editLog('2026-10-16', (l) =>
+    toggleBlockDone(
+      addEntry(addEntry(addEntry(l, { block: 'A', track: 'graphics', minutes: 60 }), { block: 'P', track: 'math', refId: 'practice:calculus', minutes: 14 }), { block: 'P', track: 'physics', refId: 'practice:physics', minutes: 16 }),
+      'A',
+    ),
+  );
+
+  // Practice answers, as the Practice screen stores them.
+  const stamp = { updatedAt: '2026-10-16T09:00:00.000Z', deviceId: 'fixture' };
+  await db.practice.bulkPut([
+    { id: 'daily:2026-10-16|calc-derivative-power', questionId: 'calc-derivative-power', subject: 'calculus', topic: 'derivatives-and-rules', date: '2026-10-16', set: 'daily:2026-10-16', role: 'new', result: 'right', hints: 0, seconds: 95, difficulty: 2, ...stamp },
+    { id: 'daily:2026-10-16|phys-projectile-range', questionId: 'phys-projectile-range', subject: 'physics', topic: 'projectile-motion', date: '2026-10-16', set: 'daily:2026-10-16', role: 'new', result: 'wrong', revealed: true, hints: 2, seconds: 240, difficulty: 3, ...stamp },
+  ]);
+
+  // A finished weekly review whose numbers include P.
+  await db.reviews.put({
+    id: 'week:2026-10-12',
+    kind: 'week',
+    periodStart: '2026-10-12',
+    completedAt: '2026-10-18',
+    worked: 'Practice before breakfast.',
+    didnt: 'Evenings.',
+    changes: 'None.',
+    snapshot: { totalMinutes: 90, targetMinutes: 3675, minutesByBlock: { A: 60, P: 30 }, itemsFinished: [], daysCounted: 1 },
+    updatedAt: '2026-10-18T20:00:00.000Z',
+  });
+
+  write('backup.json', serialiseBackup(await createBackup(new Date('2026-10-16T12:00:00Z'))));
+  const local = await readLocal(db);
+  for (const path of allPaths(local, app)) {
+    if (!path.startsWith('state/settings') && !path.startsWith('state/practice') && !path.startsWith('log/')) continue;
+    const text = renderPath(path, local, app);
+    if (text !== null) write('atlas-data/' + path, text);
+  }
+}, 60_000);
