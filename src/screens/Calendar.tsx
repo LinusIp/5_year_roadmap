@@ -163,9 +163,12 @@ export function Calendar() {
           <button type="button" aria-haspopup="dialog" onClick={() => setSheet({ kind: 'template', date })} className="knob min-h-11 rounded-pill px-4 text-meta font-semibold">
             {resolvedDay.resolved.rest ? 'Rest day' : resolvedDay.resolved.templateName}
           </button>
-          <p className="text-meta text-ink2">
+          <p className="min-w-0 flex-1 text-meta text-ink2">
             {span(resolvedDay.targetMinutes) + ' planned · ' + span(totalMinutes(dayLog)) + ' logged'}
           </p>
+          <Button size="sm" icon="plus" onClick={() => setSheet({ kind: 'add', date, minute: Math.min(22 * 60, Math.ceil(Math.max(date === now ? minute : 0, 8 * 60) / 30) * 30) })}>
+            Add
+          </Button>
         </section>
       )}
 
@@ -208,11 +211,6 @@ export function Calendar() {
                 />
               ))}
             </div>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" icon="plus" onClick={() => setSheet({ kind: 'add', date, minute: Math.min(22 * 60, Math.ceil(Math.max(minute, 8 * 60) / 30) * 30) })}>
-              Add
-            </Button>
           </div>
         </>
       )}

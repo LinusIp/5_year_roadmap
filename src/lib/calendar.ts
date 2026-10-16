@@ -28,7 +28,7 @@ export function dayLayout(date: string, settings: StoredSettings): PlacedBlock[]
   const change = settings.schedule.days[date];
   const starts = templateStarts(date, settings);
   const blocks = resolved.blocks.map((b) => {
-    const own = change?.times?.[b.id];
+    const own = change?.times?.[b.id] ?? change?.add?.find((a) => a.block === b.id)?.start;
     const start = own !== undefined ? parseHm(own) : starts.get(b.id);
     return start === undefined ? { id: b.id, minutes: b.minutes } : { id: b.id, minutes: b.minutes, start };
   });
@@ -100,7 +100,13 @@ export function withTemplateOn(settings: StoredSettings, date: string, templateI
 
 /** One date becomes a rest day. */
 export function withRestDay(settings: StoredSettings, date: string): StoredSettings {
-  return edit(settings, date, (c) => ({ ...c, rest: true }));
+  return edit(settings, date, (c) => {
+    // A rest day plans nothing: blocks added to the date, and their times, go with it.
+    const next: DayChange = { ...c, rest: true };
+    delete next.add;
+    delete next.times;
+    return next;
+  });
 }
 
 const DAY_ID = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
