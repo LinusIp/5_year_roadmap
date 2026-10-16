@@ -72,11 +72,15 @@ export function planInOrder(seed: AppSeed): AppSeed['plan'] {
     });
 }
 
-/** Every path that has plan items, each with its steps in plan order. Dropped items are left out. */
+/**
+ * Every path that has plan items, each with its steps in plan order: the plan's courses, books and tutorials (its
+ * projects are the Projects shelf's and Block D's). Dropped items are left out.
+ */
 export function buildPaths(seed: AppSeed, states: ReadonlyMap<string, UserItemState>): LibraryPath[] {
   const familyOf = new Map(seed.tracks.map((t) => [t.id, t.family]));
   const byPath = new Map<string, PathStep[]>(PATHS.map((p) => [p.id, []]));
   for (const item of planInOrder(seed)) {
+    if (!item.resourceId) continue;
     const kind = item.resourceId ? 'resource' : 'project';
     const refId = (item.resourceId ?? item.projectId)!;
     const status = states.get(refId)?.status ?? 'todo';
@@ -194,4 +198,13 @@ export function groupResults<E extends { shelf: ShelfKey }>(results: readonly E[
     const all = results.filter((r) => r.shelf === s.key);
     return all.length === 0 ? [] : [{ shelf: s.key, label: s.label, items: all.slice(0, top), total: all.length }];
   });
+}
+
+/** Whether a path starts more than a year after `today`: the home folds those into one "Later in the plan" row. */
+export function startsMuchLater(path: LibraryPath, seed: AppSeed, today: string): boolean {
+  const first = path.steps[0];
+  const start = first ? seed.phases.find((p) => p.id === first.phaseId)?.start : undefined;
+  if (!start || path.done > 0) return false;
+  const [y, m, d] = today.split('-').map(Number) as [number, number, number];
+  return start > String(y + 1) + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
 }

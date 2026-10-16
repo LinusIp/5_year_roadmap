@@ -40,7 +40,7 @@ test('finishing a resource ticks the nodes it covers, which cannot be unticked b
   const node = sheet.getByRole('checkbox', { name: 'Continuous Batching' });
   await expect(node).toHaveAttribute('aria-checked', 'true');
   await expect(node).toHaveAttribute('aria-disabled', 'true');
-  await expect(sheet.getByRole('listitem').filter({ hasText: 'Continuous Batching' })).toContainText('From vLLM documentation and source');
+  await expect(sheet.getByRole('listitem').filter({ hasText: 'Continuous Batching' })).toContainText('From vLLM Docs');
   await node.click({ force: true });
   await expect(node).toHaveAttribute('aria-checked', 'true');
 });

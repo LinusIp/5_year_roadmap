@@ -33,7 +33,7 @@ async function expectNoPractice(page: Page): Promise<void> {
   await expect(page.getByLabel('Questions a subject')).toHaveCount(0);
   await expect(page.locator('#practice')).toHaveCount(0);
 
-  await open(page, './#/library');
+  await open(page, './#/library?type=course');
   await expect(page.getByRole('button', { name: 'Add a resource' })).toBeVisible();
   await expect(page.getByRole('link', { name: /Practise/ })).toHaveCount(0);
 
