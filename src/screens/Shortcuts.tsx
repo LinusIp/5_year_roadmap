@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMeta } from '../db/state.ts';
-import { SHORTCUTS, SHORTCUTS_META_KEY, helpRequests, logTimeRequests, shortcutFor } from '../lib/shortcuts.ts';
+import { SHORTCUTS, SHORTCUTS_META_KEY, helpRequests, shortcutFor } from '../lib/shortcuts.ts';
 import { navigate, useLocation } from '../router/router.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
 import { Sheet } from '../ui/Sheet.tsx';
@@ -58,11 +58,8 @@ export function KeyboardShortcuts() {
       if (action === 'today') navigate('/');
       else if (action === 'roadmap') navigate('/plan');
       else if (action === 'search') focusSearch();
-      else if (action === 'help') setHelpOpen(true);
-      else {
-        if (path !== '/') navigate('/');
-        logTimeRequests.request();
-      }
+      else if (action === 'calendar') navigate('/calendar');
+      else setHelpOpen(true);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);

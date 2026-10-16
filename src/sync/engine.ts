@@ -12,7 +12,7 @@
  * Triggers: a block or item done, a timer stopped, a review saved (3 s later, so the paired writes land);
  * 60 s after any other change; leaving the page; coming back online; every 5 minutes while visible.
  */
-import { NOTICE_OLD_DEVICE, droppedNewBlocks, isNewSettings, isOldPlanFile, isOldSettingsFile, mergeOldDay, mergeOldPlan, mergeReviewNumbers, reviewLostBlocks } from './downgrade.ts';
+import { NOTICE_OLD_DEVICE, droppedNewBlocks, hasCalendarSettings, isNewSettings, isOldPlanFile, isOldSettingsFile, isPreCalendarSettingsFile, mergeOldDay, mergeOldPlan, mergePreCalendarSettings, mergeReviewNumbers, reviewLostBlocks } from './downgrade.ts';
 import { currentSettings } from '../lib/settings.ts';
 import type { AtlasDB } from '../db/db.ts';
 import { updateSettings } from '../db/settings.ts';
@@ -416,6 +416,14 @@ export class SyncEngine {
       if (!parsed.ok) return parsed.error;
       if (!firstSync && isOldSettingsFile(text) && isNewSettings((await readLocal(db)).settings[0])) {
         // An older Atlas wrote its own copy: it could not read these settings, so it would only lose them.
+        await this.restore(path);
+        return;
+      }
+      const mine = (await readLocal(db)).settings[0];
+      if (!firstSync && isPreCalendarSettingsFile(text) && hasCalendarSettings(mine)) {
+        // A device on the build before Calendar wrote its copy without the calendar's fields: keep its changes, put
+        // the calendar's back, and write the result back for the other devices.
+        await writeSettings(db, mergePreCalendarSettings(currentSettings(mine, this.deps.seed.settings), currentSettings(parsed.value, this.deps.seed.settings)));
         await this.restore(path);
         return;
       }

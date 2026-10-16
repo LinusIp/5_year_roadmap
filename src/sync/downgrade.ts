@@ -51,7 +51,50 @@ export function mergeOldPlan(local: PlanData, remote: PlanData): PlanData {
 
 /** Whether local settings are of the newer build: an older copy must not replace them. */
 export function isNewSettings(local: StoredSettingsInput | StoredSettings | undefined): boolean {
-  return Boolean(local && 'version' in local && local.version === 2);
+  return Boolean(local && 'version' in local && (local.version ?? 0) >= 2);
+}
+
+/** state/settings.json as a device on the build before Calendar writes it: version 2. */
+export function isPreCalendarSettingsFile(text: string): boolean {
+  return versionOf(text) === 2;
+}
+
+/** Whether local settings carry Calendar's data (version 3). */
+export function hasCalendarSettings(local: StoredSettingsInput | StoredSettings | undefined): boolean {
+  return Boolean(local && local.version === 3);
+}
+
+/**
+ * Settings written by a device on the build before Calendar, over this device's version 3: that device could
+ * read none of the calendar's fields and wrote its copy without them. The merge keeps its changes (they are the
+ * newer) and puts back what it dropped: block start times in templates, the templates Calendar made for one
+ * weekday (with the pattern that points to them), busy events, the calendar fields of each day, and the Calendar
+ * tab. Both sides are upgraded settings.
+ */
+export function mergePreCalendarSettings(local: StoredSettings, remote: StoredSettings): StoredSettings {
+  const templates = remote.core.templates.map((t) => {
+    const mine = local.core.templates.find((x) => x.id === t.id);
+    if (!mine) return t;
+    return { ...t, blocks: t.blocks.map((b) => {
+      const start = mine.blocks.find((x) => x.block === b.block)?.start;
+      return start && !b.start ? { ...b, start } : b;
+    }) };
+  });
+  const onlyMine = local.core.templates.filter((t) => !remote.core.templates.some((x) => x.id === t.id));
+  const pattern = remote.core.pattern.map((id, day) => (onlyMine.some((t) => t.id === local.core.pattern[day]) ? local.core.pattern[day]! : id));
+  const days = { ...remote.schedule.days };
+  for (const [date, change] of Object.entries(local.schedule.days)) {
+    const extra = { ...(change.times ? { times: change.times } : {}), ...(change.items ? { items: change.items } : {}), ...(change.add ? { add: change.add } : {}) };
+    if (Object.keys(extra).length > 0) days[date] = { ...extra, ...days[date] };
+  }
+  const tabs = local.layout.tabs.includes('calendar') && !remote.layout.tabs.includes('calendar') && remote.layout.tabs.length < 5 ? local.layout.tabs : remote.layout.tabs;
+  return {
+    ...remote,
+    version: 3,
+    core: { ...remote.core, templates: [...templates, ...onlyMine], pattern },
+    schedule: { ...remote.schedule, days, busy: local.schedule.busy },
+    layout: { ...remote.layout, tabs },
+  };
 }
 
 /**

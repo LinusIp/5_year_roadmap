@@ -39,7 +39,8 @@ export async function stopTimer(stopAt: number = Date.now(), database: AtlasDB =
     total += minutes;
     await editLog(date, (log) => addEntry(log, { block: timer.block, track: timer.track, ...(timer.refId ? { refId: timer.refId } : {}), minutes }), database);
   }
-  if (total > 0 && timer.refId) await setItemStatus(timer.refId, 'active', database).catch(() => undefined);
+  // Time on an item not started yet starts it; a finished one stays finished.
+  if (total > 0 && timer.refId && ((await database.itemStates.get(timer.refId))?.status ?? 'todo') === 'todo') await setItemStatus(timer.refId, 'active', database);
   return total;
 }
 

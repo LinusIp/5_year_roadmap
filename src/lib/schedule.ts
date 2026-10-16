@@ -12,6 +12,7 @@ import type { AppResource, AppSeed } from '../seed/index.ts';
 import type { BlockDef, BlockId, Phase, PlanItem, Project, TrackId } from '../seed/schema.ts';
 import type { ItemStatus, StoredSettings, UserItemState } from '../db/types.ts';
 import { isWithinRange, startOfWeek, today as todayDate, weekday } from './dates.ts';
+import { blockOrderByTime } from './calendar.ts';
 import { plannedMinutes, resolveDay, weekTarget } from './day-plan.ts';
 import type { ResolvedDay } from './day-plan.ts';
 import type { CatalogueEntry } from '../seed/catalogue.ts';
@@ -317,6 +318,18 @@ export function planForDay({ date, settings, weeklyPickId, ctx }: TodayInput): T
     return block;
   });
 
+  // Calendar: an item chosen for a block on this date, instead of the lane's next one.
+  for (const [blockId, refId] of Object.entries(settings.schedule.days[date]?.items ?? {})) {
+    const block = blocks.find((b) => b.id === blockId);
+    const planItem = ctx.seed.plan.find((p) => p.block === blockId && (p.resourceId === refId || p.projectId === refId));
+    const item = planItem ? describePlanItem(planItem, ctx) : null;
+    if (!block || !item || block.kind === 'review') continue;
+    block.kind = 'item';
+    block.item = item;
+    delete block.weeklyBuild;
+    delete block.emptyReason;
+  }
+
   // "Swap two blocks' items" for this date: each block keeps its time and takes the other's work.
   for (const [a, b] of resolved.swaps) {
     const x = blocks.find((blk) => blk.id === a);
@@ -336,6 +349,10 @@ export function planForDay({ date, settings, weeklyPickId, ctx }: TodayInput): T
       target.swappedWith = target === x ? b : a;
     }
   }
+
+  // In the order of the day's start times, as Calendar places them.
+  const order = blockOrderByTime(date, settings);
+  blocks.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
 
   return {
     date,

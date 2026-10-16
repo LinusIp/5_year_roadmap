@@ -141,7 +141,7 @@ describe('the live IndexedDB (Dexie version 2) on this build', () => {
 
     // Settings: version 2 on read, the user's own values kept, the new parts from data/settings.yaml.
     const settings = await readSettings(raw.settings, db);
-    expect(settings.version).toBe(2);
+    expect(settings.version).toBe(3);
     expect(settings.theme).toBe('dark');
     expect(settings.github.username).toBe('octo-learner');
     expect(settings.core.blocks.find((b) => b.id === 'C')!.minutes).toBe(90);
@@ -214,7 +214,7 @@ describe('the live atlas-data repository on this build', () => {
     await laptop.as(() => addPlanEdit([{ op: 'goal', goal: { id: 'g1', title: 'Ship the ray tracer', date: '2027-01-31', refIds: [] } } as never], 'Goal', laptop.db));
     await sync(laptop);
     const files = fake.files();
-    expect(JSON.parse(files['state/settings.json']!).version).toBe(2);
+    expect(JSON.parse(files['state/settings.json']!).version).toBe(3);
     const plan = JSON.parse(files['state/plan.json']!);
     expect(plan.version).toBe(2);
     expect(plan.patches.map((p: { op: string }) => p.op).sort()).toEqual(['drop', 'goal', 'move']);
@@ -274,7 +274,7 @@ describe('a device still on the live build', () => {
     expect(plan.version).toBe(2);
     expect(plan.patches.some((p: { op: string }) => p.op === 'goal')).toBe(true);
     const settings = JSON.parse(files['state/settings.json']!);
-    expect(settings.version).toBe(2);
+    expect(settings.version).toBe(3);
     expect(settings.core.pattern[0]).toBe('rest');
     expect(JSON.parse(files['log/2026/09/2026-09-21.json']!).entries.map((e: { block: string }) => e.block).sort()).toEqual(['A', 'B', 'P']);
     expect(JSON.parse(files['reviews/2026-W39.md']!.split('\n')[1]!).snapshot.minutesByBlock).toMatchObject({ A: 120, P: 20 });

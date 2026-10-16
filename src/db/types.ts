@@ -431,16 +431,17 @@ export const ScheduleStateSchema = z.strictObject({
 });
 export type ScheduleState = z.infer<typeof ScheduleStateSchema>;
 
-export const SETTINGS_VERSION = 2;
+export const SETTINGS_VERSION = 3;
 
 /**
  * Settings as stored: in IndexedDB, in a backup and in state/settings.json. Version 1 (before the flexibility
- * brief) has none of the schedule, pace or layout fields and a core without templates; it still parses, and
- * `upgradeSettings` (src/db/settings.ts) brings it to version 2 when it is read.
+ * brief) has none of the schedule, pace or layout fields and a core without templates; version 2 (before Calendar)
+ * has no busy events, block start times or calendar fields on a day. Both still parse, and `upgradeSettings`
+ * (src/lib/settings.ts) brings them to version 3 when they are read.
  */
 export const StoredSettingsSchema = z.strictObject({
   id: z.literal('app'),
-  version: z.literal(SETTINGS_VERSION).optional(),
+  version: z.union([z.literal(2), z.literal(SETTINGS_VERSION)]).optional(),
   /** Same shape as data/settings.yaml: blocks, templates, review day, heatmap thresholds, streak rules… */
   core: StoredCoreSchema,
   theme: z.enum(THEMES),
@@ -454,14 +455,14 @@ export const StoredSettingsSchema = z.strictObject({
   layout: LayoutSchema.optional(),
   ...Stamp,
 });
-/** What the parsers accept: version 1 or 2. */
+/** What the parsers accept: version 1, 2 or 3. */
 export type StoredSettingsInput = z.infer<typeof StoredSettingsSchema>;
 
-/** Settings as the app uses them: always version 2, every field present. */
+/** Settings as the app uses them: always version 3, every field present. */
 export interface StoredSettings extends Omit<StoredSettingsInput, 'version' | 'core' | 'schedule' | 'pace' | 'pauses' | 'catchUp' | 'layout'> {
   version: typeof SETTINGS_VERSION;
   core: SettingsDefaults;
-  schedule: ScheduleState;
+  schedule: ScheduleState & { busy: BusyEvent[] };
   pace: Record<string, LanePace>;
   pauses: Pause[];
   catchUp: Record<string, { capMinutes: number }>;

@@ -10,7 +10,7 @@ import type { BlockId, SettingsDefaults, StoredCore } from '../seed/schema.ts';
 export function defaultLayout(core: Pick<SettingsDefaults, 'blocks'>): Layout {
   return {
     today: { stats: true, later: true, review: true, footer: true, view: 'detailed', now: 'first', order: core.blocks.map((b) => b.id) },
-    tabs: ['today', 'plan', 'library', 'activity'],
+    tabs: ['today', 'plan', 'calendar', 'library', 'activity'],
     plan: { segment: 'timeline', showDropped: true },
     general: { clock: '24', density: 'comfortable' },
   };
@@ -25,7 +25,7 @@ export function defaultSettings(core: SettingsDefaults): StoredSettings {
     theme: 'light',
     github: { username: '', showCalendar: false },
     backup: {},
-    schedule: { overrides: [], days: {}, history: [] },
+    schedule: { overrides: [], days: {}, history: [], busy: [] },
     pace: {},
     pauses: [],
     catchUp: {},
@@ -34,21 +34,23 @@ export function defaultSettings(core: SettingsDefaults): StoredSettings {
 }
 
 /**
- * Brings stored settings of any version to version 2 (the flexibility brief), filling what is missing from the
+ * Brings stored settings of any version to version 3 (Calendar), filling what is missing from the
  * curriculum's defaults. Version 1 had five fixed blocks, each with its minutes and weekdays; the Full day
  * template lists the blocks without minutes, so it keeps whatever minutes the user had set, and the weekly
  * pattern starts as Full day on every day. Days already logged keep their plan.
  *
  * Settings saved while Practice existed lose it first (withoutPractice).
  *
- * Pure and idempotent: version 2 settings come back unchanged (as the same object when nothing was missing).
+ * Version 2 gains an empty list of busy events, and Calendar in the tab bar if the tabs were the old default.
+ *
+ * Pure and idempotent: version 3 settings come back unchanged (as the same object when nothing was missing).
  */
 export function upgradeSettings(saved: StoredSettingsInput | StoredSettings, defaults: SettingsDefaults): StoredSettings {
   const stored = withoutPractice(saved);
   const core = stored.core;
   const complete =
     stored.version === SETTINGS_VERSION && core.templates && core.pattern && core.heatmapMode && core.streak.percent !== undefined && core.catalogue &&
-    stored.schedule && stored.pace && stored.pauses && stored.catchUp && stored.layout;
+    stored.schedule?.busy && stored.pace && stored.pauses && stored.catchUp && stored.layout;
   if (complete) return stored as StoredSettings;
 
   const blocks = [...core.blocks];
@@ -70,12 +72,24 @@ export function upgradeSettings(saved: StoredSettingsInput | StoredSettings, def
     ...stored,
     version: SETTINGS_VERSION,
     core: nextCore,
-    schedule: stored.schedule ?? { overrides: [], days: {}, history: [] },
+    schedule: { ...(stored.schedule ?? { overrides: [], days: {}, history: [] }), busy: stored.schedule?.busy ?? [] },
     pace: stored.pace ?? {},
     pauses: stored.pauses ?? [],
     catchUp: stored.catchUp ?? {},
-    layout: stored.layout ?? defaultLayout(nextCore),
+    layout: stored.layout ? withCalendarTab(stored.layout) : defaultLayout(nextCore),
   };
+}
+
+/** The tabs before Calendar, as a fresh install had them. */
+const OLD_DEFAULT_TABS = ['today', 'plan', 'library', 'activity'];
+
+/**
+ * Calendar joins the tab bar between Plan and Library for everyone who kept the old default tabs; tabs the user
+ * chose stay as they are (Calendar can be added under Settings > Layout).
+ */
+function withCalendarTab(layout: Layout): Layout {
+  if (layout.tabs.join() !== OLD_DEFAULT_TABS.join()) return layout;
+  return { ...layout, tabs: ['today', 'plan', 'calendar', 'library', 'activity'] };
 }
 
 /**

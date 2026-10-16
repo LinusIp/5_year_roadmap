@@ -248,9 +248,9 @@ describe('settings v1 → v2', () => {
     expect(StoredSettingsSchema.safeParse(v1()).success).toBe(true);
   });
 
-  it('upgrades to version 2 keeping the user’s own block minutes and every other setting', () => {
+  it('upgrades to version 3 keeping the user’s own block minutes and every other setting', () => {
     const upgraded = upgradeSettings(v1(), seed.settings);
-    expect(upgraded.version).toBe(2);
+    expect(upgraded.version).toBe(3);
     expect(upgraded.theme).toBe('dark');
     expect(upgraded.github).toEqual({ username: 'me', showCalendar: true });
     expect(upgraded.backup.lastBackupAt).toBe('2026-10-01');
@@ -258,8 +258,8 @@ describe('settings v1 → v2', () => {
     expect(upgraded.core.pattern).toEqual(seed.settings.pattern);
     expect(upgraded.core.streak.percent).toBe(50);
     expect(upgraded.core.heatmapMode).toBe('relative');
-    expect(upgraded.schedule).toEqual({ overrides: [], days: {}, history: [] });
-    expect(upgraded.layout.tabs).toEqual(['today', 'plan', 'library', 'activity']);
+    expect(upgraded.schedule).toEqual({ overrides: [], days: {}, history: [], busy: [] });
+    expect(upgraded.layout.tabs).toEqual(['today', 'plan', 'calendar', 'library', 'activity']);
     // The Full day follows the blocks' own minutes, so the user's 150 minutes of D survive.
     expect(resolveDay(MONDAY, upgraded).blocks.find((b) => b.id === 'D')!.minutes).toBe(150);
     expect(resolveDay(MONDAY, upgraded).planned).toBe(510);
