@@ -43,7 +43,7 @@
   level: intro
   cost: free
   estHours: 60
-  summary: "A free textbook with a full answer book: a deep well of extra exercises for every topic of the daily set."
+  summary: "A free textbook with a full answer book: a deep well of extra exercises for every topic."
 
 - id: vmls-book
   title: "Introduction to Applied Linear Algebra: Vectors, Matrices, and Least Squares"
@@ -182,7 +182,7 @@
   cost: free
   estHours: 0
   reference: true
-  summary: "A library of open physics texts; a reference for any topic of the daily set."
+  summary: "A library of open physics texts; a reference for any mechanics or electromagnetism topic."
 
 - id: morin-mechanics-problems
   title: "Problems and Solutions in Introductory Mechanics"
@@ -196,7 +196,7 @@
   level: intermediate
   cost: paid
   estHours: 60
-  summary: "Hundreds of mechanics problems, each with a full solution; harder than the daily set, for topics already done."
+  summary: "Hundreds of mechanics problems, each with a full solution; for topics already done."
 
 - id: walter-lewin-lectures
   title: "Walter Lewin lectures (8.01, 8.02, 8.03)"
