@@ -21,6 +21,7 @@ with each. "Verified" means it was run, not assumed.
 | – | Flexibility: schedule, plan editing, pace, layout | **done** |
 | – | Practice, resources, tech docs | **done** |
 | – | The three-tier project catalogue | **done** |
+| – | Practice removed (pull request #6) | **done** |
 
 ## Milestone 1 — Scaffold
 
@@ -806,3 +807,19 @@ Verified on this machine (Linux, Chromium 140):
   median 40 ms before and after; p98 120 to 144 ms before, 112 to 136 ms after. No worse.
 - The live check also asserts the brush mark loads on Today and the page is set in Nunito.
 - Before and after of Today, Plan, Library, Activity, Pick a project and a tech doc in both themes: `docs/ui-clay/`.
+
+## Pull request #6: Practice removed
+
+- Gone: block P, the Practice screen and start screen, Library › Practise a topic, Activity › Practice, Settings ›
+  Practice, Today's Practice row, roadmap ticks from practice, the question bank, its checkers, set builder, spaced
+  repetition and Elo, `verify:questions` and the SymPy CI job, KaTeX and mathjs. The default day is 8 h again.
+- Kept: state/practice.json in the data repository (never read, rewritten or deleted) and the answers on the device
+  (Dexie table `practice`, and backups); minutes logged to P, shown as "Practice" (DECISIONS.md).
+- Settings saved with Practice load without it: `tests/unit/live-upgrade.test.ts` ("settings saved by the live build
+  with Practice …", four tests against `tests/fixtures/live-2026-10-16/`, made by that build) and
+  `tests/unit/flex-schedule.test.ts` ("drops the Practice block and its settings …"). E2E:
+  `tests/e2e/practice-removed.spec.ts` (nothing of Practice on Today, Activity, Settings or Library, `#/practice` is
+  not found, the live backup restores with its Practice minutes).
+- Bundle: `dist/assets` 6,590.7 kB → 3,630.3 kB (−2,960.4 kB); main JS 360.3 → 357.5 kB raw, 114.8 → 113.8 kB gzip.
+- Verified: validate:data, map:catalogue --check, typecheck, the unit tests and the full E2E suite (local Chromium),
+  screenshots redrawn.

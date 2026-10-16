@@ -200,11 +200,12 @@ export type PlanPatchOp = PlanPatch['op'];
 /** A patch before it is stored: id, time and group are added by addPlanEdit. */
 export type NewPlanPatch = PlanPatch extends infer P ? (P extends PlanPatch ? Omit<P, 'id' | 'at' | 'group' | 'label' | 'updatedAt' | 'deviceId'> : never) : never;
 
-/* ------------------------------------------------------------------ practice */
+/* ------------------------------------------------------------------ practice (archived) */
 
 /**
- * One answered practice question. The log is append-only: what comes back for review, each topic's rating and
- * when a topic is done are all worked out from it (src/lib/practice/history.ts), so two devices' logs merge by id.
+ * One answered practice question, as the Practice feature stored them until it was removed (pull request #6). The
+ * answers are archived: they stay in their table on the device and travel in backups as they are, and the app no
+ * longer reads or writes them. The schema stays so that those backups still parse.
  */
 export const PracticeAnswerSchema = z.strictObject({
   /** "<set>|<question id>": a question is answered once per set. */
@@ -235,7 +236,7 @@ export type PracticeAnswer = z.infer<typeof PracticeAnswerSchema>;
 
 /**
  * One thing done with a catalogue challenge: solved (in a language), skipped as the day's pick, or hidden for the
- * day ("Not today"). Append-only like the practice log: the daily pick, the cycles through the pool and the
+ * day ("Not today"). Append-only: the daily pick, the cycles through the pool and the
  * daily-challenge streak are worked out from it (src/lib/catalogue/daily.ts), so two devices' logs merge by id.
  */
 export const ChallengeEventSchema = z.strictObject({
@@ -574,7 +575,7 @@ export const BackupDataSchema = z.strictObject({
   replans: z.array(ReplanRecordSchema),
   /** Plan edits (flexibility brief). Absent from backups made before it. */
   planPatches: z.array(PlanPatchSchema).default([]),
-  /** Practice answers (practice brief). Absent from backups made before it. */
+  /** Practice answers (archived since pull request #6, kept as they are). Absent from backups made before the practice brief. */
   practice: z.array(PracticeAnswerSchema).default([]),
   /** Catalogue challenges solved, skipped or hidden (catalogue brief). Absent from backups made before it. */
   challenges: z.array(ChallengeEventSchema).default([]),

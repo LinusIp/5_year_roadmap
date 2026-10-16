@@ -43,7 +43,7 @@
   level: intro
   cost: free
   estHours: 60
-  summary: "A free textbook with a full answer book: a deep well of extra exercises for every topic of the daily set."
+  summary: "A free textbook with a full answer book: a deep well of extra exercises for every topic."
 
 - id: vmls-book
   title: "Introduction to Applied Linear Algebra: Vectors, Matrices, and Least Squares"
@@ -71,7 +71,7 @@
   level: advanced
   cost: paid
   estHours: 40
-  summary: "Problems with hints and solutions that lead through the theory; for the proof questions of the daily set."
+  summary: "Problems with hints and solutions that lead through the theory."
 
 - id: pauls-online-math-notes
   title: "Paul's Online Math Notes (Calculus I-III, differential equations)"
@@ -85,7 +85,7 @@
   level: intro
   cost: free
   estHours: 60
-  summary: "Notes with practice and assignment problems, worked solutions for the practice set, for every calculus topic of the daily set."
+  summary: "Notes with practice and assignment problems, and worked solutions, for every calculus topic."
 
 - id: openstax-calculus
   title: "OpenStax Calculus, volumes 1-3"
@@ -182,7 +182,7 @@
   cost: free
   estHours: 0
   reference: true
-  summary: "A library of open physics texts; a reference for any topic of the daily set."
+  summary: "A library of open physics texts; a reference for any physics topic."
 
 - id: morin-mechanics-problems
   title: "Problems and Solutions in Introductory Mechanics"
@@ -196,7 +196,7 @@
   level: intermediate
   cost: paid
   estHours: 60
-  summary: "Hundreds of mechanics problems, each with a full solution; harder than the daily set, for topics already done."
+  summary: "Hundreds of mechanics problems, each with a full solution; for topics already done."
 
 - id: walter-lewin-lectures
   title: "Walter Lewin lectures (8.01, 8.02, 8.03)"
@@ -237,7 +237,7 @@
   level: intro
   cost: free
   estHours: 40
-  summary: "A free introduction to proofs: logic, sets, induction, contradiction, with solutions to odd exercises. Behind the proof questions."
+  summary: "A free introduction to proofs: logic, sets, induction, contradiction, with solutions to odd exercises."
 
 - id: cses-problem-set
   title: "CSES Problem Set"
