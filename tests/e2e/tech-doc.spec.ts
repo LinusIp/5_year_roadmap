@@ -33,7 +33,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(sheet).toHaveCount(0);
     // The deck kept its card and its buttons.
     await expect(page.locator('#deck-top-title')).toHaveText(title);
-    await expect(page.getByRole('button', { name: 'Shuffle' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Shuffle', exact: true })).toBeVisible();
 
     // From the keyboard: Enter on the card's title opens it, Escape gives focus back.
     const titleButton = page.locator('#deck-top-title button');
