@@ -68,6 +68,12 @@ export function Sheet({ open, title, onClose, children, footer, aside, scrollKey
     return () => cancelAnimationFrame(frame);
   }, [open, scrollKey]);
 
+  // Closing saves where the content was scrolled: a scroll just before Escape has not reported itself yet.
+  const close = (): void => {
+    if (scrollKey && body.current) saveScroll(scrollKey, body.current.scrollTop);
+    onClose();
+  };
+
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
@@ -82,16 +88,16 @@ export function Sheet({ open, title, onClose, children, footer, aside, scrollKey
       // A sheet opened from inside this one (a status list) closes on its own: React hands its close and
       // cancel events up the component tree, so only this dialog's own events count.
       onClose={(e) => {
-        if (e.target === e.currentTarget && open) onClose();
+        if (e.target === e.currentTarget && open) close();
       }}
       onCancel={(e) => {
         if (e.target !== e.currentTarget) return;
         e.preventDefault();
-        onClose();
+        close();
       }}
       onClick={(e) => {
         // A tap on the backdrop lands on the dialog element itself.
-        if (e.target === ref.current) onClose();
+        if (e.target === ref.current) close();
       }}
       className="mx-auto mb-0 mt-auto max-h-[90dvh] w-full max-w-[640px] rounded-t-[32px] bg-bg p-0 text-ink sm:mb-6 sm:rounded-[32px]"
     >
@@ -103,7 +109,7 @@ export function Sheet({ open, title, onClose, children, footer, aside, scrollKey
               {title}
             </h2>
             {aside && <span className="shrink-0 self-center">{aside}</span>}
-            <Button variant="icon" icon="x" label="Close" onClick={onClose} />
+            <Button variant="icon" icon="x" label="Close" onClick={close} />
           </header>
           <div ref={body} className="min-h-0 flex-1 overflow-y-auto px-5 pb-6 pt-2 [overflow-anchor:none] [&>*+*]:mt-[18px]" onScroll={scrollKey ? (e) => saveScroll(scrollKey, e.currentTarget.scrollTop) : undefined}>
             <InSheet.Provider value={true}>{children}</InSheet.Provider>

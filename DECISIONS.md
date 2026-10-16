@@ -888,7 +888,8 @@ prose; the writers picked the two or three that matter.
   "1 of 6 milestones" and the forecasts mean what they did. A plan project's Done when is its acceptance criteria, as
   before, and counts as it always did.
 - **The whole doc waits for its design**, and sheets turn scroll anchoring off, so a doc reopens exactly where it
-  was left. Loading the design later moved the reopened doc otherwise.
+  was left. Loading the design later moved the reopened doc otherwise. A sheet also saves its position as it closes,
+  not only on scroll events, which arrive a frame late (a scroll then Escape lost the position about 1 time in 8).
 - **The running timer is a blue pill at the top of the doc** (Running · 12:04), not in the sheet's header, for
   projects and catalogue items; resources keep it in the header.
 - **"Work on it now" is filled** (the doc's one filled action), as the board draws it; the Deck's doc keeps Take it.
