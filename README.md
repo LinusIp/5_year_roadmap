@@ -19,8 +19,10 @@ app makes no network calls at all, and everything can still be exported to a sin
 
 ![The five-year map: six phases on a timeline, with each lane's work, what ships and the credentials](screenshots/map-light.png)
 
-The screenshots show eight weeks of made-up history. They are also the baselines of a screenshot test, and
-`npm run screenshots` redraws them after a change to the UI.
+The screenshots show eight weeks of made-up history. They are also the baselines of a screenshot test that CI runs
+on every pull request. They are drawn on CI's Linux: after a change to the UI, commit an empty `screenshots/.redraw`
+to the pull request's branch and CI redraws them all and pushes them back. (`npm run screenshots` redraws them on
+your machine, to look at; fonts render a little differently on each system, so commit CI's.)
 
 ## Run it
 
@@ -40,7 +42,7 @@ npm run dev
 | `npm run validate:data` | Validates everything under `data/`. Fails on schema errors, duplicate ids, dangling references. |
 | `npm run check:links` | Requests every URL in `data/` and prints a report. Never fails the build. |
 | `npm run log:export` | Writes each logged day from a backup to `learning-log/YYYY/MM/DD.md` (see below). |
-| `npm run screenshots` | Builds, then redraws the screenshots above (the screenshot test's baselines in `screenshots/`) from demo data. |
+| `npm run screenshots` | Builds, then redraws the screenshots above from demo data, locally. The committed baselines are CI's: see above. |
 | `npm run fetch:units` | Rebuilds the lecture and chapter checklists from the courses own syllabus pages. |
 | `npm run test:sync -- --repo owner/name` | Runs GitHub Sync against the real GitHub, by hand (see below). Never in CI. |
 
@@ -169,6 +171,10 @@ Enter opens it.
 
 Pushing to `main` builds and deploys to GitHub Pages (`.github/workflows/deploy.yml`). One-time setup in
 the repository: **Settings > Pages > Build and deployment > Source = "GitHub Actions"**.
+
+The deploy checks itself (`scripts/live-check.ts`): before deploying, a browser opens the live site as a returning
+user on the old build; after it, the app's update prompt must appear, Reload must bring in the new version (its
+service-worker cache), and the main screens must render without an error. If not, the deploy run fails.
 
 ## GitHub Sync (optional)
 
