@@ -55,16 +55,16 @@ export function UndoToast({ inSheet = false }: { inSheet?: boolean }) {
   };
 
   return (
-    <div ref={ref} role="status" aria-live="polite" className={'pointer-events-none z-20 mx-auto max-w-[640px] px-5 ' + (inSheet ? 'sticky bottom-2 mt-3 px-0' : 'fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))]')}>
+    <div ref={ref} role="status" aria-live="polite" className={'pointer-events-none z-20 mx-auto max-w-[640px] px-5 ' + (inSheet ? 'sticky bottom-2 mt-3 px-0' : 'fixed inset-x-0 bottom-[calc(7rem+env(safe-area-inset-bottom))]')}>
       {edit && mine && (
-        <p className="pointer-events-auto flex min-h-11 items-center gap-3 rounded-card bg-ink py-1 pl-4 pr-1 text-meta text-canvas">
+        <p className="pointer-events-auto flex min-h-11 items-center gap-3 knob rounded-pill py-1 pl-5 pr-1.5 text-meta text-ink">
           <span className="min-w-0 flex-1">{edit.label}</span>
-          <button type="button" onClick={() => void undo()} className="min-h-11 shrink-0 rounded-button px-3 font-medium text-canvas underline underline-offset-2">
+          <button type="button" onClick={() => void undo()} className="min-h-11 shrink-0 rounded-pill px-4 font-semibold text-blue-deep">
             Undo
           </button>
         </p>
       )}
-      {!edit && mine && undone && <p className="rounded-card bg-ink px-4 py-3 text-meta text-canvas">{undone}</p>}
+      {!edit && mine && undone && <p className="knob rounded-pill px-5 py-3 text-meta text-ink">{undone}</p>}
     </div>
   );
 }

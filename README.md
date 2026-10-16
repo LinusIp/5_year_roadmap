@@ -1,4 +1,4 @@
-# Atlas
+# <img src="public/brand/atlas-mark-light.png" alt="" width="40" height="40"> Atlas
 
 A local-first personal learning platform for one five-year plan (2026-09-21 to 2031-08-31). It answers
 one question every morning: **what exactly do I do today?** By default that is an 8-hour day; the day can be
@@ -19,8 +19,9 @@ app makes no network calls at all, and everything can still be exported to a sin
 
 ![The five-year map: six phases on a timeline, with each lane's work, what ships and the credentials](screenshots/map-light.png)
 
-Each block has its own icon on Today, in its colour; subjects, kinds of project and their status have theirs too,
-always next to a word that says the same (the icon map and the type scale are in [DECISIONS.md](DECISIONS.md)).
+The look is soft clay: one calm background, raised tiles, sunken wells, and only blue and ice. Each block has its own
+icon on Today; subjects, kinds of project and their status have theirs too, always next to a word that says the same
+(the icon map and the clay rules are in [DECISIONS.md](DECISIONS.md), the boards in [docs/mockups](docs/mockups)).
 
 The screenshots show eight weeks of made-up history. They are also the baselines of a screenshot test that CI runs
 on every pull request. They are drawn on CI's Linux: after a change to the UI, commit an empty `screenshots/.redraw`

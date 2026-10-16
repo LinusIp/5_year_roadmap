@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Button } from './Button.tsx';
 import { UndoToast } from './UndoToast.tsx';
 
-/** Lists inside a sheet sit flat on it: a card on a card of the same colour would only add an inset. */
+/** True inside a sheet. Groups in a sheet are tiles too: the sheet is the background they rise from. */
 export const InSheet = createContext(false);
 
 interface SheetProps {
@@ -92,22 +92,23 @@ export function Sheet({ open, title, onClose, children, footer, aside, scrollKey
         // A tap on the backdrop lands on the dialog element itself.
         if (e.target === ref.current) onClose();
       }}
-      className="mx-auto mb-0 mt-auto max-h-[88dvh] w-full max-w-[640px] rounded-t-card bg-surface p-0 text-ink sm:mb-6 sm:rounded-card"
+      className="mx-auto mb-0 mt-auto max-h-[90dvh] w-full max-w-[640px] rounded-t-[32px] bg-bg p-0 text-ink sm:mb-6 sm:rounded-[32px]"
     >
       {open && (
-        <div className="flex max-h-[88dvh] flex-col">
-          <header className="flex items-center justify-between gap-3 py-1 pl-4 pr-1.5">
-            <h2 id={titleId} className="min-w-0 flex-1 text-body font-medium">
+        <div className="flex max-h-[90dvh] flex-col">
+          <div aria-hidden="true" className="well mx-auto mt-2.5 h-[5px] w-10 rounded-pill" />
+          <header className="flex items-start justify-between gap-3 px-5 pb-2 pt-3">
+            <h2 id={titleId} className="min-w-0 flex-1 pt-2 text-[1.375rem] font-semibold leading-tight">
               {title}
             </h2>
-            {aside}
+            {aside && <span className="shrink-0 self-center">{aside}</span>}
             <Button variant="icon" icon="x" label="Close" onClick={onClose} />
           </header>
-          <div ref={body} className="min-h-0 flex-1 overflow-y-auto px-4 pb-6" onScroll={scrollKey ? (e) => saveScroll(scrollKey, e.currentTarget.scrollTop) : undefined}>
+          <div ref={body} className="min-h-0 flex-1 overflow-y-auto px-5 pb-6 pt-2 [&>*+*]:mt-[18px]" onScroll={scrollKey ? (e) => saveScroll(scrollKey, e.currentTarget.scrollTop) : undefined}>
             <InSheet.Provider value={true}>{children}</InSheet.Provider>
             <UndoToast inSheet />
           </div>
-          {footer && <footer className="flex flex-wrap gap-2 px-4 pb-4 pt-2">{footer}</footer>}
+          {footer && <footer className="flex flex-wrap gap-3 px-5 pb-5 pt-3">{footer}</footer>}
         </div>
       )}
     </dialog>

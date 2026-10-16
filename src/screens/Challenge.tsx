@@ -68,7 +68,7 @@ function Body({ challenge, events, isDaily, language, setLanguage }: { challenge
       <Block title={challenge.examples.length === 1 ? 'Example' : 'Examples'}>
         <div className="flex flex-col gap-3">
           {challenge.examples.map((ex, i) => (
-            <figure key={i} className="rounded-card bg-surface p-4">
+            <figure key={i} className="tile p-[18px]">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <p className="section-label">Input</p>
@@ -88,7 +88,7 @@ function Body({ challenge, events, isDaily, language, setLanguage }: { challenge
       {hints > 0 && (
         <ol className="flex flex-col gap-2" aria-label="Hints">
           {challenge.hints.slice(0, hints).map((h, i) => (
-            <li key={i} className="doc-text rounded-button border border-line p-4 text-body">
+            <li key={i} className="doc-text knob rounded-knob p-4 text-body">
               <span className="text-meta text-ink2">Hint {i + 1}. </span>
               {h}
             </li>
@@ -96,7 +96,7 @@ function Body({ challenge, events, isDaily, language, setLanguage }: { challenge
         </ol>
       )}
       {approach && (
-        <section aria-label="Approach" className="rounded-card bg-surface p-5">
+        <section aria-label="Approach" className="tile p-[18px]">
           <h2 className="section-label">Approach</h2>
           <p className="doc-text text-body">{challenge.approach}</p>
           <h2 className="section-label mt-6">Complexity</h2>

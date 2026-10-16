@@ -31,11 +31,11 @@ export function TextField({ label, value, onChange, type = 'text', multiline, ro
   const id = useId();
   const describedBy = error ? id + '-error' : hint ? id + '-hint' : undefined;
   const field =
-    'peer block w-full rounded-button border bg-surface px-3 text-body text-ink outline-none focus:border-accent ' +
-    (error ? 'border-ink ' : 'border-line ');
+    'well peer block w-full rounded-knob px-4 text-body text-ink outline-none focus-visible:outline-2 focus-visible:outline-blue-deep ' +
+    (error ? 'outline outline-2 outline-ink2 ' : '');
   const floating =
-    'pointer-events-none absolute left-3 top-1.5 text-meta leading-none text-ink2 transition-[top,font-size] duration-100 ' +
-    'peer-focus:top-1.5 peer-focus:text-meta';
+    'pointer-events-none absolute left-4 top-1.5 text-small font-medium leading-none text-ink2 transition-[top,font-size] duration-100 ' +
+    'peer-focus:top-1.5 peer-focus:text-small';
 
   return (
     <div className={className}>
@@ -61,7 +61,7 @@ export function TextField({ label, value, onChange, type = 'text', multiline, ro
             ref={inputRef}
             type={type === 'numeric' ? 'text' : type}
             inputMode={type === 'numeric' ? 'numeric' : undefined}
-            className={field + 'h-11 pb-0.5 pt-4'}
+            className={field + 'h-12 pb-0.5 pt-4'}
             value={value}
             placeholder=" "
             onChange={(e) => onChange(e.target.value)}
@@ -98,14 +98,14 @@ export function TextField({ label, value, onChange, type = 'text', multiline, ro
 }
 
 /**
- * The Library's search, as in the mockup: a magnifier inside the field and a placeholder that says what can be
+ * The Library's search, a sunken pill: a magnifier inside the field and a placeholder that says what can be
  * found. The field's name is a visually hidden label, so the placeholder never has to stand in for it.
  */
 export function SearchField({ label, placeholder, value, onChange, searchBox, className = '' }: { label: string; placeholder: string; value: string; onChange: (value: string) => void; searchBox?: boolean; className?: string }) {
   const id = useId();
   return (
     <div className={'relative flex items-center ' + className}>
-      <Icon name="search" size={18} className="pointer-events-none absolute left-3.5 text-ink2" />
+      <Icon name="search" size={19} className="pointer-events-none absolute left-4 text-ink2" />
       <label htmlFor={id} className="sr-only">
         {label}
       </label>
@@ -116,7 +116,7 @@ export function SearchField({ label, placeholder, value, onChange, searchBox, cl
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         data-search-box={searchBox ? '' : undefined}
-        className="h-11 w-full rounded-button border border-line bg-surface pl-[42px] pr-3.5 text-body text-ink outline-none placeholder:text-ink2 focus:border-accent"
+        className="well h-12 w-full rounded-pill pl-12 pr-4 text-body font-medium text-ink outline-none placeholder:text-ink2 focus-visible:outline-2 focus-visible:outline-blue-deep"
       />
     </div>
   );

@@ -4,11 +4,11 @@ import { daysBetween, monthName } from '../lib/dates.ts';
 import type { BlockId, Phase } from '../seed/schema.ts';
 import { Button } from '../ui/Button.tsx';
 import { span } from './parts/text.ts';
-import { blockColor } from '../ui/colors.ts';
+import { BlockTile } from '../ui/glyphs.tsx';
+import { Icon } from '../ui/Icon.tsx';
+import { today } from '../lib/dates.ts';
 import { planBlocks } from '../lib/settings.ts';
 
-/** Each year's colour on the map, as in the mockup: green for year 1, then blue, purple, amber and grey. */
-const YEAR_COLOR: Record<number, string> = { 1: 'var(--accent)', 2: 'var(--track-ai)', 3: 'var(--track-robotics)', 4: 'var(--track-ee)', 5: 'var(--track-mech)' };
 const STAGE_NAME: Record<number, string> = { 1: 'Software engineering mastery', 2: 'Electrical + mechanical' };
 const MAP_LANES: BlockId[] = ['A', 'B', 'C', 'E'];
 
@@ -38,7 +38,7 @@ export function PhaseMap() {
   useEffect(() => {
     document.title = 'Five-year map · Atlas';
   }, []);
-  if (!atlas) return <main id="main" className="min-h-dvh bg-canvas" />;
+  if (!atlas) return <main id="main" className="min-h-dvh bg-bg" />;
 
   const { seed, settings } = atlas;
   const phases = seed.phases;
@@ -48,51 +48,51 @@ export function PhaseMap() {
   const stage1 = phases.filter((p) => p.stage === 1);
   const daily = settings.core.blocks.reduce((sum, b) => sum + b.minutes, 0);
   const themes = [...new Set(stage1.map((p) => p.theme).filter(Boolean))].join(' · ');
+  const asOf = today();
+  const nowId = phases.find((p) => p.start <= asOf && asOf <= p.end)?.id;
 
   return (
-    <main id="main" tabIndex={-1} className="min-h-dvh bg-canvas outline-none">
+    <main id="main" tabIndex={-1} className="min-h-dvh bg-bg outline-none">
       <div className="relative overflow-x-auto">
         <div className="flex min-w-[1200px] flex-col gap-7 px-14 py-12">
-          <div className="flex items-end justify-between gap-6">
+          <div className="flex items-start justify-between gap-6">
             <div className="flex flex-col gap-1.5">
               <h1 className="text-hero font-semibold">Five years, six phases</h1>
-              <p className="text-button text-ink2">
+              <p className="text-meta text-ink2">
                 {long(first.start)} → {long(last.end)} · {span(daily)} a day · Stage 1 software{themes ? ': ' + themes : ''} · Stage 2 electrical and mechanical
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <ul className="flex gap-[18px] text-label text-ink2" aria-label="Lanes">
-                {planBlocks(settings.core).map((b) => (
-                  <li key={b.id} className="flex items-center gap-1.5 whitespace-nowrap">
-                    <span aria-hidden="true" className="inline-block size-2.5 rounded-cell" style={{ background: blockColor(b) }} />
-                    {b.id} {legendName(b.name)} {span(b.minutes)}
-                  </li>
-                ))}
-              </ul>
-              <Button variant="icon" to="/plan">
-                Close
-              </Button>
-            </div>
+            <Button variant="quiet" to="/plan">
+              Close
+            </Button>
           </div>
+          <ul className="-mt-2 flex flex-wrap gap-x-6 gap-y-3 text-meta text-ink2" aria-label="Lanes">
+            {planBlocks(settings.core).map((b) => (
+              <li key={b.id} className="flex items-center gap-2.5 whitespace-nowrap">
+                <BlockTile block={b.id} size={36} />
+                {b.id} {legendName(b.name)} · {span(b.minutes)}
+              </li>
+            ))}
+          </ul>
 
           <div className="grid gap-4" style={{ gridTemplateColumns: columns }}>
-            <div className="flex h-7 items-center rounded-segment bg-accent-soft px-3 text-label font-medium text-accent" style={{ gridColumn: '1 / ' + (stage1.length + 1) }}>
+            <div className="knob flex h-9 items-center rounded-pill !bg-blue-soft px-4 text-label text-blue-deep" style={{ gridColumn: '1 / ' + (stage1.length + 1) }}>
               Stage 1 · {STAGE_NAME[1]} · {short(stage1[0]!.start)} → {short(stage1.at(-1)!.end)}
             </div>
             {phases.length > stage1.length && (
-              <div className="flex h-7 items-center rounded-segment bg-stage2-soft px-3 text-label font-medium text-stage2-ink" style={{ gridColumn: stage1.length + 1 + ' / ' + (phases.length + 1) }}>
+              <div className="knob flex h-9 items-center rounded-pill !bg-ice-soft px-4 text-label text-ice-deep" style={{ gridColumn: stage1.length + 1 + ' / ' + (phases.length + 1) }}>
                 Stage 2 · {STAGE_NAME[2]} · {short(phases[stage1.length]!.start)} → {short(last.end)}
               </div>
             )}
           </div>
 
           <div className="relative h-14" aria-hidden="true">
-            <div className="absolute inset-x-0 top-[27px] h-0.5 bg-rail" />
+            <div className="well absolute inset-x-0 top-[25px] h-1.5 rounded-pill" />
             <div className="absolute inset-x-0 top-0 grid gap-4" style={{ gridTemplateColumns: columns }}>
               {phases.map((p) => (
                 <div key={p.id} className="flex flex-col items-start gap-1.5">
                   <span className="h-4 text-label text-ink2">{short(p.start)}</span>
-                  <span className="-mt-px size-4 rounded-pill border-[3px] border-canvas" style={{ background: YEAR_COLOR[p.year], boxShadow: '0 0 0 2px ' + YEAR_COLOR[p.year] }} />
+                  <span className={'size-4 rounded-pill ' + (p.id === nowId ? 'fill-ice' : 'fill-blue')} />
                   <span className="text-label text-ink2">{Math.round(months(p))} months</span>
                 </div>
               ))}
@@ -104,18 +104,19 @@ export function PhaseMap() {
             {phases.map((p) => {
               const sameYear = p.start.slice(0, 4) === p.end.slice(0, 4);
               return (
-                <li key={p.id} className="flex flex-col gap-3 rounded-card border-t-[3px] bg-surface p-[18px]" style={{ borderTopColor: YEAR_COLOR[p.year] }}>
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-label text-ink2">
+                <li key={p.id} className="tile flex flex-col gap-4 p-[18px]">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-meta text-ink2">
                       {day(p.start, !sameYear)} → {day(p.end, true)}
                     </p>
-                    <h2 className="text-lead font-semibold">{p.title}</h2>
+                    {p.id === nowId && <span className="w-fit rounded-pill bg-ice-soft px-2.5 py-0.5 text-label text-ice-deep">Now</span>}
+                    <h2 className="text-lead font-semibold leading-[1.3]">{p.title}</h2>
                   </div>
-                  <ul className="flex flex-col gap-2.5 text-label">
+                  <ul className="flex flex-col gap-4 text-meta">
                     {MAP_LANES.map((lane) => (
-                      <li key={lane} className="flex gap-2">
-                        <span aria-hidden="true" className="w-[3px] shrink-0 rounded-cell" style={{ background: blockColor(settings.core.blocks.find((b) => b.id === lane), lane) }} />
-                        <span>
+                      <li key={lane} className="flex gap-3">
+                        <BlockTile block={lane} size={36} />
+                        <span className="pt-1.5">
                           <span className="sr-only">Block {lane}: </span>
                           {p.map?.[lane as 'A' | 'B' | 'C' | 'E'] ?? (p.focus as Record<string, string>)[lane]}
                         </span>
@@ -123,10 +124,13 @@ export function PhaseMap() {
                     ))}
                   </ul>
                   {p.map && (
-                    <div className="mt-auto flex flex-col gap-1.5 border-t border-line pt-3">
-                      <p className="text-label text-ink2">Ships</p>
-                      <p className="text-meta font-medium leading-[1.35]">{p.map.ships}</p>
-                      <p className="text-label text-ink2">{p.map.credentials}</p>
+                    <div className="knob mt-auto flex flex-col gap-1.5 rounded-[18px] p-3.5">
+                      <p className="flex items-center gap-1.5 text-label text-ice-deep">
+                        <Icon name="hammer" size={16} />
+                        Ships
+                      </p>
+                      <p className="text-meta font-medium leading-[1.4]">{p.map.ships}</p>
+                      <p className="text-small text-ink2">{p.map.credentials}</p>
                     </div>
                   )}
                 </li>

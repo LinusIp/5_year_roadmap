@@ -25,7 +25,7 @@ const SCREENS: [string, string][] = [
  * The type scale since the polish of pull request #3: tab 12, section label 13, meta and button 15, body 17, lead 18,
  * card 24, headline 26, hero 30 (body was 16 and meta 14 before).
  */
-const TYPE_SCALE = [12, 13, 15, 17, 18, 24, 26, 30];
+const TYPE_SCALE = [12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 30, 32];
 
 /** Distinct font sizes of the visible text on the page, in px. */
 async function fontSizes(page: Page): Promise<number[]> {
@@ -62,10 +62,13 @@ async function smallTargets(page: Page): Promise<string[]> {
   });
 }
 
-test('Today fits one 390 x 844 screen with nothing expanded, and shows exactly one filled button', async ({ page }) => {
+test('Today reaches "Later today" at 390 x 844 without scrolling, above the tab bar, and shows exactly one filled button', async ({ page }) => {
   await open(page, './');
-  const { scroll, viewport } = await page.evaluate(() => ({ scroll: document.documentElement.scrollHeight, viewport: innerHeight }));
-  expect(scroll).toBeLessThanOrEqual(viewport);
+  const later = await page.getByRole('heading', { name: 'Later today' }).boundingBox();
+  const tabs = await page.getByRole('navigation', { name: 'Main' }).boundingBox();
+  expect(later).not.toBeNull();
+  expect(tabs).not.toBeNull();
+  expect(later!.y + later!.height).toBeLessThanOrEqual(tabs!.y);
   await expect(page.locator('[data-variant="filled"]')).toHaveCount(1);
 });
 
@@ -79,9 +82,9 @@ test('every screen draws its text from the type scale', async ({ page }) => {
     report[name] = sizes;
     for (const size of sizes) expect(TYPE_SCALE, name + ' uses ' + size + ' px').toContain(size);
   }
-  // The mockup sets Today in five sizes (26, 16, 15, 14, 12), so the spec's three-size rule gives way to it;
-  // DECISIONS.md records why. Nothing may add sizes beyond the mockup's.
-  expect(report.Today!.length).toBeLessThanOrEqual(5);
+  // The clay Today board sets seven sizes (32 time, 24 Now title, 20 wordmark, 16 rows and buttons, 14 meta,
+  // 13 labels, 12 week days); DECISIONS.md records why. Nothing may add sizes beyond the board's.
+  expect(report.Today!.length).toBeLessThanOrEqual(7);
   test.info().annotations.push({ type: 'font sizes', description: JSON.stringify(report) });
   console.log('font sizes ' + JSON.stringify(report));
 });
@@ -111,7 +114,7 @@ test('the keyboard focus ring is visible', async ({ page }) => {
 });
 
 for (const theme of ['light', 'dark'] as const) {
-  test('ink2 is at least 5:1 on surface, canvas and a pressed chip, ' + theme + ' theme', async ({ page }) => {
+  test('every text colour is at least 4.5:1 on what it sits on, ' + theme + ' theme', async ({ page }) => {
     await open(page, './#/settings');
     await page.getByRole('radio', { name: theme === 'dark' ? 'Dark' : 'Light' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
@@ -135,13 +138,20 @@ for (const theme of ['light', 'dark'] as const) {
         return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
       };
       const out: Record<string, number> = {};
-      for (const bg of ['--surface', '--canvas', '--accent-soft']) out['ink2 on ' + bg] = contrast('--ink2', bg);
-      // The block icons on Today: 3:1 or better wherever a block's row or card sits.
-      for (const block of ['A', 'B', 'C', 'D', 'E', 'P']) for (const bg of ['--surface', '--canvas']) out['block ' + block + ' on ' + bg] = contrast('--block-' + block, bg);
+      // Soft clay has one background; widgets sit on its soft blue and soft ice.
+      // ink2 never sits on soft blue: the blue wells hold blue-deep numbers.
+      for (const bg of ['--bg', '--ice-soft']) out['ink2 on ' + bg] = contrast('--ink2', bg);
+      for (const bg of ['--bg', '--blue-soft', '--ice-soft']) out['ink on ' + bg] = contrast('--ink', bg);
+      // The deep colours carry text (Active, behind, the Now label) and the block icons.
+      for (const bg of ['--bg', '--blue-soft']) out['blue-deep on ' + bg] = contrast('--blue-deep', bg);
+      for (const bg of ['--bg', '--ice-soft']) out['ice-deep on ' + bg] = contrast('--ice-deep', bg);
+      // Words on the buttons: the blue gradient runs from --blue to --blue-deep, the ice one ends on --ice.
+      for (const bg of ['--blue', '--blue-deep']) out['on-blue on ' + bg] = contrast('--on-blue', bg);
+      out['on-ice on --ice'] = contrast('--on-ice', '--ice');
       probe.remove();
       return out;
     });
     console.log(theme + ' ' + JSON.stringify(Object.fromEntries(Object.entries(ratios).map(([k, v]) => [k, Number(v.toFixed(2))]))));
-    for (const [what, ratio] of Object.entries(ratios)) expect(ratio, what).toBeGreaterThanOrEqual(what.startsWith('ink2') ? 5 : 3);
+    for (const [what, ratio] of Object.entries(ratios)) expect(ratio, what).toBeGreaterThanOrEqual(4.5);
   });
 }

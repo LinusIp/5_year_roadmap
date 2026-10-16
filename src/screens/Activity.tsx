@@ -19,7 +19,8 @@ import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { DaySheet } from './parts/DaySheet.tsx';
 import { GithubCalendar } from './parts/GithubCalendar.tsx';
-import { trackColor } from '../ui/colors.ts';
+import { IconTile } from '../ui/glyphs.tsx';
+import { longDate } from './parts/text.ts';
 import { PickerSheet } from './parts/PickerSheet.tsx';
 import { PracticeActivity } from './parts/PracticeActivity.tsx';
 import { ProjectsActivity } from './parts/ProjectsActivity.tsx';
@@ -63,7 +64,6 @@ export function Activity() {
   // The whole calendar year, like GitHub's: days before the plan or still ahead are simply empty.
   const range = { from: year + '-01-01', to: year + '-12-31' };
   const track = seed.tracks.find((t) => t.id === trackParam);
-  const color = track ? trackColor(track, seed.tracks) : undefined;
   const weekStartsOn = settings.core.weekStartsOn;
   const gridFor = (y: number) =>
     buildGrid({
@@ -104,10 +104,18 @@ export function Activity() {
 
   return (
     <Screen title="Activity">
-      <Header
-        title="Activity"
-        sub={hours(logged) + ' logged · longest streak ' + plural(streakState.longest, 'day') + ' · ' + plural(freezesLeft, 'freeze') + ' left this month'}
-      />
+      <Header title="Activity" sub={'Since ' + longDate(planStart) + ' · longest streak ' + plural(streakState.longest, 'day')} />
+      <div className="mt-[18px] grid grid-cols-2 gap-4">
+        <section aria-label="Logged" className="tile flex flex-col items-center gap-2 px-3 py-[18px] text-center">
+          <h2 className="section-label mb-0">Logged</h2>
+          <p className="well-ice rounded-[14px] px-4 py-1 text-big font-semibold leading-tight">{hours(logged)}</p>
+        </section>
+        <section aria-label="Streak" className="tile flex flex-col items-center gap-2 px-3 py-[18px] text-center">
+          <h2 className="section-label mb-0">Streak</h2>
+          <p className="well-blue rounded-[14px] px-4 py-1 text-big font-semibold leading-tight text-blue-deep">{plural(streakState.current, 'day')}</p>
+          <p className="text-meta text-ink2">{plural(freezesLeft, 'freeze') + ' left this month'}</p>
+        </section>
+      </div>
 
       {/* Practice is a view of its own once there is something to show; a fresh install keeps the mockup. */}
       {(atlas.practice.length > 0 || anyChallenge || view === 'practice' || view === 'projects') && (
@@ -134,13 +142,13 @@ export function Activity() {
           {(allYears ? years : [year]).map((y, index) => {
             const grid = gridFor(y);
             return (
-              <section key={y} aria-labelledby={'heatmap-' + y} className={(index === 0 ? 'mt-6' : 'mt-3') + ' flex flex-col gap-3 rounded-card bg-surface p-4'}>
+              <section key={y} aria-labelledby={'heatmap-' + y} className="tile mt-[18px] flex flex-col gap-3 p-[18px]">
                 <div className="flex items-center justify-between gap-2">
-                  <h2 id={'heatmap-' + y} className="text-meta font-medium">
+                  <h2 id={'heatmap-' + y} className="section-label mb-0">
                     {y}
                     {track ? ' · ' + track.name : ''}
                   </h2>
-                  {index === 0 && <HeatLegend color={color} />}
+                  {index === 0 && <HeatLegend />}
                 </div>
                 <Heatmap
                   cells={grid.cells}
@@ -150,13 +158,12 @@ export function Activity() {
                   label={cellLabel}
                   onSelect={setOpen}
                   selected={open ?? undefined}
-                  color={color}
                 />
               </section>
             );
           })}
 
-          <div className="mt-3">
+          <div className="mt-[18px]">
             <Chips
               label="Year and track"
               items={[
@@ -176,19 +183,19 @@ export function Activity() {
           {logged === 0 ? (
             <EmptyState action={<Button to="/">Go to Today</Button>}>Nothing logged yet. Log an hour on Today and the first square lights up.</EmptyState>
           ) : (
-            <RowList flat label="Last 7 days" className="mt-6">
+            <RowList flat label="Last 7 days" className="mt-[18px]">
               {lastWeek.map((date) => {
                 const row = dayRow(date);
-                return <Row key={date} height={48} title={row.title} meta={row.meta} trailing={span(row.minutes)} onClick={() => setOpen(date)} />;
+                return <Row key={date} height={48} icon={<IconTile icon="clock" tone={date === now ? 'ice' : 'blue'} />} title={row.title} meta={row.meta} trailing={span(row.minutes)} onClick={() => setOpen(date)} />;
               })}
             </RowList>
           )}
         </>
       )}
 
-      <RowList flat className="mt-6">
-        <Row height={48} title="Weekly reviews" meta="What worked, what didn't, what changes" to="/reviews" />
-        <Row height={48} title="Stats" meta="Hours per track and block, pace against the plan" to="/stats" />
+      <RowList flat label="More" className="mt-[18px]">
+        <Row height={48} icon={<IconTile icon="reviews" tone="ice" />} title="Weekly reviews" meta="What worked, what didn't, what changes" to="/reviews" chevron />
+        <Row height={48} icon={<IconTile icon="stats" />} title="Stats" meta="Hours per track and block, pace against the plan" to="/stats" chevron />
       </RowList>
 
       <DaySheet date={open} title={open ? dateTitle(open) : ''} onClose={() => setOpen(null)} seed={seed} blocks={settings.core.blocks} />

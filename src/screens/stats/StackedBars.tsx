@@ -74,7 +74,7 @@ export function StackedBars({ title, series, bars, format, scale = (v) => v, hei
             </thead>
             <tbody>
               {bars.map((bar, i) => (
-                <tr key={bar.key} className="border-t border-line">
+                <tr key={bar.key} className="border-t-[1.5px] border-dashed border-dash">
                   <th scope="row" className="py-1 pr-3 font-normal">
                     {bar.label}
                   </th>
@@ -95,7 +95,7 @@ export function StackedBars({ title, series, bars, format, scale = (v) => v, hei
             <svg role="img" aria-labelledby={titleId} width={width} height={height} className="max-w-none">
               {ticks.map((t) => (
                 <g key={t}>
-                  <line x1={left} x2={width - 4} y1={y(t)} y2={y(t)} stroke="var(--line)" strokeWidth={1} />
+                  <line x1={left} x2={width - 4} y1={y(t)} y2={y(t)} stroke="var(--dash)" strokeWidth={1} />
                   <text x={left - 6} y={y(t) + 4} textAnchor="end" className="fill-ink2 text-small">
                     {format(t)}
                   </text>
@@ -127,7 +127,7 @@ export function StackedBars({ title, series, bars, format, scale = (v) => v, hei
                       aria-label={bar.label + ': ' + format(totals[i]!)}
                       onClick={() => setActive(active === i ? null : i)}
                       onFocus={() => setActive(i)}
-                      className="cursor-pointer outline-none focus-visible:stroke-[var(--accent)]"
+                      className="cursor-pointer outline-none focus-visible:stroke-[var(--blue)]"
                     />
                     {i % labelEvery === 0 && (
                       <text x={left + band * i + band / 2} y={height - 4} textAnchor="middle" className="fill-ink2 text-small">

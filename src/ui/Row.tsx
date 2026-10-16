@@ -1,8 +1,7 @@
-import { useContext, useId } from 'react';
+import { useId } from 'react';
 import type { ReactNode, Ref } from 'react';
 import { Icon } from './Icon.tsx';
 import { Link } from '../router/router.tsx';
-import { InSheet } from './Sheet.tsx';
 
 export interface RowProps {
   title: ReactNode;
@@ -12,8 +11,6 @@ export interface RowProps {
   trailing?: ReactNode;
   /** A control at the end of the row (a status pill, a remove button): a tap target of its own. */
   action?: ReactNode;
-  /** A 3 px edge in a lane's colour; the roadmap is the only place that uses it. */
-  edge?: string;
   onClick?: () => void;
   to?: string;
   href?: string;
@@ -37,30 +34,27 @@ export interface RowProps {
   height?: 44 | 48 | 52 | 56 | 60;
   /** Keep the title to one line, ending in an ellipsis (the Library). */
   truncate?: boolean;
-  /** A checklist item's title is regular weight, as in the mockup. */
+  /** Kept for callers: checklist titles are 16/700 like every row in clay. */
   plainTitle?: boolean;
   /** A row of a list that can be reordered by dragging (useDragReorder finds rows by it). */
   dragRow?: boolean;
+  /** A trailing chevron: the row opens something (it turns down while the row is expanded). */
+  chevron?: boolean;
 }
 
-/** The mockup's checkbox: a 20 px box with softened corners, filled with accent and a tick when done. */
+/** The clay checkbox: a 24 px sunken square with 8 px corners; checked, a filled blue gradient with a white tick. */
 function CheckBox({ checked }: { checked: boolean }) {
   return (
-    <span
-      className={
-        'grid size-5 place-items-center rounded-[4px] border-[1.5px] ' +
-        (checked ? 'border-accent bg-accent text-on-accent' : 'border-ink2 text-transparent')
-      }
-    >
-      <Icon name="check" size={14} />
+    <span className={'grid size-6 place-items-center rounded-check ' + (checked ? 'fill-blue' : 'well rounded-check text-transparent')}>
+      <Icon name="check" size={16} />
     </span>
   );
 }
 
 function RadioDot({ selected }: { selected: boolean }) {
   return (
-    <span aria-hidden="true" className={'grid size-5 shrink-0 place-items-center rounded-pill border ' + (selected ? 'border-accent' : 'border-ink2')}>
-      {selected && <span className="size-2.5 rounded-pill bg-accent" />}
+    <span aria-hidden="true" className="well grid size-6 shrink-0 place-items-center rounded-pill">
+      {selected && <span className="fill-blue size-3 rounded-pill" />}
     </span>
   );
 }
@@ -76,26 +70,26 @@ export function Switch({ on, onChange, labelledBy, label, disabled }: { on: bool
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange(!on)}
-      className="-mr-1 grid size-11 shrink-0 place-items-center disabled:opacity-50"
+      className="-mr-1 grid h-11 w-14 shrink-0 place-items-center disabled:opacity-50"
     >
-      <span className={'relative h-5 w-9 rounded-pill ' + (on ? 'bg-accent' : 'bg-line')}>
-        <span className={'absolute top-0.5 size-4 rounded-pill bg-surface ' + (on ? 'left-[18px]' : 'left-0.5')} />
+      <span className={'relative h-7 w-12 rounded-pill ' + (on ? 'fill-blue' : 'well rounded-pill')}>
+        <span className={'knob absolute top-1 size-5 rounded-pill ' + (on ? 'left-6' : 'left-1')} />
       </span>
     </button>
   );
 }
 
 /**
- * The one list item of the system: a title (17/500, at most two lines), an optional meta line (15, ink2), optional trailing
- * text, and at most one of a check circle, a switch or a radio dot. Rows are separated by a hairline from
- * their list, never boxed one by one.
+ * The one list item of the system: an optional 40 px icon knob, a title (16/700, at most two lines), an optional meta
+ * line (14, ink2), optional trailing text, and at most one of a checkbox, a switch or a radio dot. Rows sit in a
+ * list group, divided by dashed lines, never boxed one by one.
  */
-const HEIGHT = { 44: 'min-h-11', 48: 'min-h-16 py-2', 52: 'min-h-17 py-2', 56: 'min-h-19 py-2.5', 60: 'min-h-20 py-2.5' } as const;
+const HEIGHT = { 44: 'min-h-11', 48: 'min-h-16 py-2', 52: 'min-h-16 py-2', 56: 'min-h-16 py-2', 60: 'min-h-16 py-2' } as const;
 
-export function Row({ title, meta, trailing, action, edge, onClick, to, href, expanded, check, toggle, selected, children, className = '', height = 56, truncate, plainTitle, dragRow, icon }: RowProps) {
+export function Row({ title, meta, trailing, action, onClick, to, href, expanded, check, toggle, selected, children, className = '', height = 56, truncate, plainTitle: _plainTitle, dragRow, icon, chevron }: RowProps) {
   const titleId = useId();
   const titleClass =
-    'block text-body leading-[1.3] ' + (plainTitle ? 'font-normal' : 'font-medium') + (check?.checked ? ' text-ink2' : '') + (truncate ? ' truncate' : plainTitle ? '' : ' line-clamp-2');
+    'block text-body leading-[1.25] font-medium' + (check?.checked ? ' text-ink2 line-through' : '') + (truncate ? ' truncate' : ' line-clamp-2');
   const body = (
     <>
       {selected !== undefined && <RadioDot selected={selected} />}
@@ -104,9 +98,10 @@ export function Row({ title, meta, trailing, action, edge, onClick, to, href, ex
         <span id={titleId} className={titleClass}>
           {title}
         </span>
-        {meta && <span className="block truncate text-meta leading-[1.3] text-ink2">{meta}</span>}
+        {meta && <span className="block truncate text-meta text-ink2">{meta}</span>}
       </span>
       {trailing !== undefined && trailing !== null && <span className="flex shrink-0 items-center gap-1.5 text-meta text-ink2">{trailing}</span>}
+      {chevron && <Icon name={expanded ? 'chevronDown' : 'chevronRight'} size={18} className="text-ink2" />}
     </>
   );
   const mainClass = 'row-main flex min-w-0 flex-1 items-center gap-3 text-left ' + HEIGHT[height];
@@ -136,8 +131,7 @@ export function Row({ title, meta, trailing, action, edge, onClick, to, href, ex
 
   return (
     <li className={'relative ' + className} data-drag-row={dragRow || undefined}>
-      {edge && <span aria-hidden="true" className="absolute inset-y-2.5 left-0 w-[3px] rounded-pill" style={{ background: edge }} />}
-      <div className={'flex items-center gap-1' + (edge ? ' pl-3' : '')}>
+      <div className="flex items-center gap-1">
         {check && (
           <button
             type="button"
@@ -147,7 +141,7 @@ export function Row({ title, meta, trailing, action, edge, onClick, to, href, ex
             aria-labelledby={check.label ? undefined : titleId}
             aria-disabled={check.disabled || undefined}
             onClick={() => !check.disabled && check.onChange(!check.checked)}
-            className={'-ml-3 -mr-1 grid size-11 shrink-0 place-items-center' + (check.disabled ? ' cursor-default' : '')}
+            className={'-ml-2.5 grid size-11 shrink-0 place-items-center' + (check.disabled ? ' cursor-default' : '')}
           >
             <CheckBox checked={check.checked} />
           </button>
@@ -162,16 +156,28 @@ export function Row({ title, meta, trailing, action, edge, onClick, to, href, ex
 }
 
 /**
- * A list of rows: on the one card level, or `flat` on the page between hairlines (Today's "Later today").
- * `label` is the section's quiet heading above it.
+ * A list group: one raised tile, its section label inside at the top, rows divided by dashed lines. `plain` is the
+ * bare list, for a list inside another tile. `flat` is kept for callers and now looks the same as the tile.
  */
-export function RowList({ label, children, className = '', flat, plain, ref }: { label?: ReactNode; children: ReactNode; className?: string; flat?: boolean; plain?: boolean; ref?: Ref<HTMLElement> }) {
-  const inSheet = useContext(InSheet);
-  const list = plain ? '' : flat || inSheet ? 'divide-y divide-line border-y border-line' : 'divide-y divide-line rounded-card bg-surface px-4';
+export function RowList({ label, children, className = '', flat: _flat, plain, ref, aside }: { label?: ReactNode; children: ReactNode; className?: string; flat?: boolean; plain?: boolean; ref?: Ref<HTMLElement>; aside?: ReactNode }) {
+  const heading = label ? (
+    <div className="flex items-baseline justify-between gap-3 pb-1 pt-0.5">
+      <h2 className="section-label mb-0">{label}</h2>
+      {aside && <span className="text-meta text-ink2">{aside}</span>}
+    </div>
+  ) : null;
+  if (plain) {
+    return (
+      <section className={className} ref={ref}>
+        {heading}
+        <ul className="rows">{children}</ul>
+      </section>
+    );
+  }
   return (
-    <section className={className} ref={ref}>
-      {label && <h2 className="section-label">{label}</h2>}
-      <ul className={list}>{children}</ul>
+    <section className={'tile px-[18px] pb-2 pt-3.5 ' + className} ref={ref}>
+      {heading}
+      <ul className="rows">{children}</ul>
     </section>
   );
 }

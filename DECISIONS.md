@@ -42,17 +42,13 @@ what was chosen, why, and what it would take to change. Newest first within each
 
 ## Design
 
-- **Sixteen tracks, eight colours.** Sixteen hues cannot be told apart reliably (and not at all by
-  colour-blind readers), so tracks are grouped into eight families that share one of eight categorical
-  colours, assigned in a fixed order that was validated for colour-vision-deficiency separation. The
-  track's name always accompanies its colour.
-- **The heatmap is one green ramp, the accent's, as the mockups draw it** (it was blue before the
-  redesign). Intensity encodes magnitude, so it stays a single-hue ordered ramp: empty days are the hairline
-  grey, then three mixes of the accent, then the accent. A track filter recolours the same four steps in the
-  track's colour and counts only that track's minutes.
-- **Instrument Sans, self-hosted.** The mockups set it. It ships in the bundle
-  (`@fontsource-variable/instrument-sans`) and is precached with the app, so the app still makes no font
-  requests and works offline. Before the redesign the app used system fonts.
+- **The look is soft clay** (CLAY-STYLE.md, pull request #5): one background, raised tiles and knobs, sunken
+  wells, blue and ice only. See "Soft clay" below; it replaces the earlier style rules of this file.
+- **Colour never names a track or a block.** A block is told apart by its icon, in blue or ice; a track by its
+  name. The heatmap is one ordered ramp (`--ramp-0` … `--ramp-4`), and a track filter keeps the same ramp and only
+  counts that track's minutes. Charts take their series colours from the ramp, ice and blue, in a fixed order.
+- **Nunito 600, 700 and 800, self-hosted** (`@fontsource/nunito`, Latin and Latin Extended), precached with the
+  app, so it still makes no font requests and works offline.
 - **All text tokens meet WCAG AA** (4.5:1) on every surface they are used on, in both themes; measured,
   not estimated.
 
@@ -222,24 +218,11 @@ what was chosen, why, and what it would take to change. Newest first within each
 The redesign prompt and `Atlas Mockups.html` arrived together, and the user's instruction was that the UI must
 be the same as the mockups. Where the two disagree, the mockups win, and each such case is listed here.
 
-- **Square checkboxes.** Section 4.0 describes check circles; every mockup frame draws a 20 px box with
-  softened corners. The box is what ships.
-- **Five font sizes on Today, not three.** The spec allows three sizes per screen. The mockup's Today uses five:
-  26 px for the Now title, 16 for the date and row titles, 15 for buttons, 14 for meta lines and 12 for the tab
-  labels. The acceptance test now checks that every screen draws only from the mockups' scale (12, 13, 14, 15,
-  16, 18, 24, 26 and 30 px) and that Today uses no more than its five. The measured sizes are in PROGRESS.md.
-- **Line heights follow the mockups.** The mockups set 14 px text at the font's normal line height, about 1.3.
-  Atlas had 1.45, which made Today 16 px taller than a 390 x 844 screen. The meta size now uses 1.3, as rows
-  already did, and Today fits again.
-- **Chips are 36 px pills inside 44 px targets.** The mockup draws 36 px chips; the spec asks for 44 px tap
-  targets. Each chip is a 44 px button whose visible pill is 36 px.
-- **No letter-spacing.** The mockups tighten the large titles by 0.01 em. The design system's rule against
-  `tracking-*` stayed, and at these sizes the difference is under half a pixel.
+- **Square checkboxes.** Section 4.0 describes check circles; every mockup frame draws a box with softened
+  corners. The box is what ships (24 px in clay).
 - **The heatmap's day cells are smaller than 44 px.** Thirty weeks fill the card, as in the mockup, so a cell is
   about 9 px. The grid is one tab stop with arrow keys, and the last seven days open from 48 px rows under it.
   The tap-target test leaves the grid out for that reason.
-- **The stage 2 band's text is a shade darker than the mockup's** (#8a5c00 instead of #9a6700) in the light
-  theme. The mockup's colour measures 4.47:1 on its band; the darker one passes 4.5:1.
 - **The five-year map is its own page,** at `#/plan/map`, opened from "Five-year map" under the Timeline. The
   mockups draw it at desktop width; on a phone it scrolls sideways inside its frame, and the page itself never
   does.
@@ -619,8 +602,8 @@ it left open; `briefs/PLAN.md` records how the three briefs of that day fit toge
 
 ## The polish: type scale and icon map (pull request #3)
 
-Easier to read, with icons that carry meaning, in the same calm layout: one filled button per screen, Today on one
-390 x 844 screen, no tiles, gradients, shadows, extra cards or new motion.
+Easier to read, with icons that carry meaning: one filled button per screen and Today on one 390 x 844 screen.
+(Its type sizes and icon colours were replaced by soft clay in pull request #5; the icon map below still holds.)
 
 **Type scale** (tokens in `src/index.css`; the acceptance test checks every screen draws from it):
 
@@ -663,14 +646,53 @@ Easier to read, with icons that carry meaning, in the same calm layout: one fill
 | Time, streak | clock (`Clock`), flame (`Flame`): Today's stats line only |
 | Start, Tech doc, Hint | play, file (`FileText`), light bulb (`Lightbulb`), next to the label |
 
-- **Block icons** are 20 px in the block's track colour (`--block-A` … `--block-P`), checked at 3:1 or better on
-  surface and canvas in both themes (light 3.2 to 5.0, dark 5.0 to 8.7), at the start of each Today row and on the
-  Now card's first line. A block added by the user gets no icon, only the space for one.
+- **Block icons** sit in a 40 px knob at the start of each row, blue-deep or ice-deep (soft clay), and bare on the
+  Now card's first line. A block added by the user gets a layers icon.
 - **Sizes**: 24 px in the tabs, 20 px in rows and headers, 16 px inside buttons (play and pause were 14).
-- **The tabs keep their own glyphs**, drawn for the mockups; every other glyph is lucide's, so actions and the new
-  icons share one stroke.
 - **Decorative**: every icon is `aria-hidden`, because a word beside it says the same. The header's icon buttons
   (Change today, Settings, the theme toggle) and a sheet's Close keep an `aria-label` and no text: they are the
   screen's chrome, not its actions. **Mark done**, which was a tick alone on the Now card, now says "Mark done".
 - **The live check** of the Pages deploy now also asserts the Practice start screen, a tech doc opened from a Deck
   card with Take it, and the icons on Today.
+
+## Soft clay (pull request #5)
+
+The whole app is restyled to CLAY-STYLE.md and the boards of `Atlas Mockups.html` (saved as pictures in
+`docs/mockups/`). Visual only: no behaviour, data, route or sync changed, except where listed.
+
+- **Tokens.** `src/index.css` holds CLAY-STYLE's tokens for light and dark (`--bg`, `--hi`, `--lo`, `--edge`, `--ink`,
+  `--ink2`, `--ink3`, blue, ice and their deep and soft shades, `--dash`, `--ramp-0` … `--ramp-4`), still switched by
+  `data-theme` with the system as the default. Every `--block-*`, `--track-*`, accent, surface, canvas and line token
+  is gone, and a unit test (`tests/unit/tokens.test.ts`) fails on a hex colour or an old token in any component.
+  `--ink3` and `--deco` have no text utility, so no text can be set in them.
+- **Depth in three utilities**: `.tile` (raised, 26 px corners), `.knob` (a small raised control) and `.well`
+  (sunken). Buttons, chips, the segmented control, progress, checkboxes, list groups, the tab bar and sheets are
+  restyled once in `src/ui`, and the screens use them.
+- **One filled button per screen** stays: the blue gradient pill. Secondary actions are ice pills (Tech doc, Pick a
+  project, Take it), neutral ones knob pills.
+- **Type**: page title 26, card title 24, big numbers 32, row title and body 16, meta 14, section label 13, small
+  print 12, all Nunito, set at 600, 700 and 800. Today uses seven sizes (the board's own); the acceptance test checks
+  every screen against the clay scale and Today against seven.
+- **Contrast**: every text colour measures 4.5:1 or better on what it sits on, in both themes (measured by the
+  acceptance test; PROGRESS.md has the numbers). CLAY-STYLE's `--ink2` is 4.9:1 on the light background, so the old
+  5:1 rule for ink2 became 4.5:1, the WCAG AA level. With `prefers-contrast: more`, tiles and knobs get a 1 px ink2
+  outline.
+- **The block colour picker in Settings > Schedule is gone.** Colour no longer marks a block, so it had nothing to
+  change. A `colour` already saved in settings is kept and ignored.
+- **Today's header** follows the board: the brush mark and "Atlas" (decorative; the date stays the page's h1 for
+  screen readers), then a widget with today's time in a well and the two knobs. "Change today" and the date picker,
+  which the board has no place for, sit in the logo row on the right. While a timer runs, the widget shows the
+  running time in blue, and the Now card's Stop no longer repeats it. Log time is a plus knob next to Done.
+- **"Later today" above the tab bar.** The floating tab bar covers the bottom 92 px of a 390 x 844 screen, so the
+  rule "Today fits one screen" became "Today reaches the Later today heading without scrolling, above the tab bar".
+  Today's tiles are 16 px apart instead of the board's 18 to make it fit.
+- **Plan** gets an ice "Pick a project" under the phases (the same route Projects already had); its lanes show
+  "behind" in ice-deep instead of a pink progress line. **Activity** shows Logged and Streak as two widgets; the
+  sentence it had moves to the header ("Since 21 September · longest streak …") and the widgets.
+- **The logo is the user's hand-painted brush mark**, used as painted: the PNGs in `public/brand/` are the user's
+  files (the mark and the favicons are the PNGs embedded in their SVGs; the app icons are their SVGs rendered at
+  180, 192 and 512 px). Nothing is redrawn, traced or vectorised. The social preview (`public/brand/social-preview.png`,
+  1200 x 630) is the mark at its own 128 px next to "Atlas" in Nunito 800 on `--bg`. GitHub's repository social
+  preview is set by hand in the repository's settings; the file is there to upload.
+- **Baselines**: every screen in both themes at 390 x 844 and 1280 x 800, drawn on CI's Linux.
+

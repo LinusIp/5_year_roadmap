@@ -15,6 +15,7 @@ import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { blockShort, hours, plural } from './parts/text.ts';
 import { StackedBars } from './stats/StackedBars.tsx';
+import { seriesColour } from '../ui/colors.ts';
 
 const CADENCE = { weekly: 'Weekly builds', monthly: 'Monthly projects', research: 'Research', capstone: 'Capstones' } as const;
 const PERIOD = { weekly: 'week', monthly: 'month', research: 'quarter', capstone: 'plan year' } as const;
@@ -58,10 +59,10 @@ export function Stats() {
       {total === 0 ? (
         <EmptyState action={<Button to="/">Go to Today</Button>}>The charts fill in as you log time.</EmptyState>
       ) : (
-        <section className="mt-6 rounded-card bg-surface p-4">
+        <section className="tile mt-[18px] p-[18px]">
           <StackedBars
             title="Hours per track family, by month"
-            series={model.fams.map((f) => ({ key: f.slot, name: f.name, color: 'var(--track-' + f.tracks[0] + ')' }))}
+            series={model.fams.map((f, i) => ({ key: f.slot, name: f.name, color: seriesColour(i) }))}
             bars={model.months.map((m) => {
               const [y, mo] = m.month.split('-').map(Number) as [number, number];
               return { key: m.month, label: monthName(mo - 1) + ' ' + y, tick: monthName(mo - 1, true), values: m.bySlot };
@@ -72,7 +73,7 @@ export function Stats() {
         </section>
       )}
 
-      <RowList label="Completion by year" className="mt-7">
+      <RowList label="Completion by year" className="mt-[18px]">
         {model.years.map((year) => (
           <Row
             key={year.year}
@@ -86,7 +87,7 @@ export function Stats() {
         ))}
       </RowList>
 
-      <RowList label="Cadences" className="mt-7">
+      <RowList label="Cadences" className="mt-[18px]">
         {cadences.map((c) => (
           <Row
             key={c.cadence}
@@ -99,12 +100,12 @@ export function Stats() {
 
       {total > 0 && (
         <>
-          <RowList label="Hours per block" className="mt-7">
+          <RowList label="Hours per block" className="mt-[18px]">
             {settings.core.blocks.map((b) => (
               <Row key={b.id} title={'Block ' + b.id + ' · ' + blockShort(b.name)} trailing={hours(blocks[b.id] ?? 0)} />
             ))}
           </RowList>
-          <RowList label="Hours per track" className="mt-7">
+          <RowList label="Hours per track" className="mt-[18px]">
             {tracks.map((t) => (
               <Row key={t.track} title={seed.tracks.find((x) => x.id === t.track)?.name ?? t.track} trailing={hours(t.minutes)}>
                 <div className="pb-3">

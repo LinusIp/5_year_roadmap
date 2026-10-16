@@ -21,8 +21,8 @@ export const TAB_DEFS: Record<TabId, { to: string; label: string; icon: IconName
 const DEFAULT_TABS: TabId[] = ['today', 'plan', 'library', 'activity'];
 
 /**
- * A screen: one column, 20 px gutters on a phone (as in the mockup) and 24 px from a tablet up, at most 640 px
- * wide and centred, over the four tabs. Settings has no tab: it sits behind the gear in Today's header.
+ * A screen: one column of tiles 18 px apart, 20 px gutters on a phone and 24 px from a tablet up, at most 640 px
+ * wide and centred, over the floating tab bar. Settings has no tab: it sits behind the gear in Today's header.
  */
 export function Screen({ title, children }: { title: string; children: ReactNode }) {
   useEffect(() => {
@@ -45,20 +45,21 @@ export function Screen({ title, children }: { title: string; children: ReactNode
 
   return (
     <>
-      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[640px] px-5 pb-[calc(3.5rem+max(1.75rem,env(safe-area-inset-bottom)))] outline-none sm:px-6">
+      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[640px] px-5 pb-[calc(7.5rem+env(safe-area-inset-bottom))] outline-none sm:px-6">
         {children}
       </main>
-      <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-surface px-2 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-2.5">
-        <ul className="mx-auto grid max-w-[640px]" style={{ gridTemplateColumns: 'repeat(' + tabs.length + ', minmax(0, 1fr))' }}>
+      {/* The tab bar: a raised pill floating 24 px above the bottom; the active tab is pressed in, in blue-deep. */}
+      <nav aria-label="Main" className="pointer-events-none fixed inset-x-0 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] z-10 px-5 sm:px-6">
+        <ul className="tile pointer-events-auto mx-auto flex max-w-[600px] items-center justify-around rounded-pill p-2">
           {tabs.map((tab) => (
             <li key={tab.to}>
               <Link
                 to={tab.to}
                 aria-current={tab.to === active ? 'page' : undefined}
-                className="flex min-h-11 flex-col items-center justify-center gap-1 text-small font-medium text-ink2 aria-[current=page]:text-accent"
+                className="press flex h-12 w-[60px] items-center justify-center rounded-[18px] text-ink2 aria-[current=page]:text-blue-deep aria-[current=page]:[box-shadow:inset_3px_3px_7px_var(--lo),inset_-3px_-3px_7px_var(--hi)]"
               >
-                <Icon name={tab.icon} />
-                {tab.label}
+                <Icon name={tab.icon} size={22} />
+                <span className="sr-only">{tab.label}</span>
               </Link>
             </li>
           ))}

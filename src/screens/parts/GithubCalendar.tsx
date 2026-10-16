@@ -59,7 +59,7 @@ export function GithubCalendar({ from, to, year, weekStartsOn, username, atlasDa
           : '';
 
   return (
-    <section aria-labelledby="github-title" className="rounded-card bg-surface p-4">
+    <section aria-labelledby="github-title" className="tile p-[18px]">
       <div className="mb-3 flex items-baseline justify-between gap-2">
         <h2 id="github-title" className="text-meta font-medium">
           GitHub{username ? ' @' + username : ''}
@@ -70,7 +70,7 @@ export function GithubCalendar({ from, to, year, weekStartsOn, username, atlasDa
       {!connected ? (
         <p className="text-meta text-ink2">
           The GitHub calendar needs a token, and a token is never part of a backup.{' '}
-          <Link to="/settings?section=github" className="text-accent">
+          <Link to="/settings?section=github" className="text-blue-deep">
             Add it in Settings
           </Link>
           .
@@ -90,7 +90,7 @@ export function GithubCalendar({ from, to, year, weekStartsOn, username, atlasDa
             {outcome && typeof outcome === 'object' && outcome.status === 'failed' && outcome.reason === 'unauthorized' && (
               <>
                 {' '}
-                <Link to="/settings?section=github" className="text-accent">
+                <Link to="/settings?section=github" className="text-blue-deep">
                   Update the token in Settings
                 </Link>
                 .

@@ -1,7 +1,8 @@
 import type { Theme } from '../db/types.ts';
 
 const STORAGE_KEY = 'atlas.theme';
-const CANVAS = { dark: '#121417', light: '#f2f3f1' } as const;
+/** The browser bar's colour: the clay --bg of each theme (index.html and the manifest carry the light one). */
+const CANVAS = { dark: '#2B2F36', light: '#E6EAE7' } as const;
 
 export function resolveTheme(theme: Theme): 'dark' | 'light' {
   if (theme !== 'system') return theme;

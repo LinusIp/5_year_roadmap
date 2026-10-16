@@ -6,8 +6,8 @@ import { serveGithub } from './github-route.ts';
 import { open } from './helpers.ts';
 
 /**
- * The redesign's screenshot test: Today, Activity, Plan and Library on a 390 x 844 phone in both themes, plus
- * the five-year map on a desktop, Practice, a tech doc over Today and the other screens below, compared with the pictures committed in /screenshots. Eight weeks of demo
+ * The screenshot test: every screen on a 390 x 844 phone and a 1280 x 800 desktop in both themes, plus
+ * the five-year map in full, Practice, a tech doc over Today and the other screens below, compared with the pictures committed in /screenshots. Eight weeks of demo
  * history are imported first, so the screens have something to show.
  *
  * The baselines are drawn on CI's Linux (Chromium from `npx playwright install`), and CI compares against them on
@@ -22,7 +22,15 @@ const PHONE = [
   ['activity', './#/activity'],
   ['plan', './#/plan'],
   ['library', './#/library'],
+  ['settings', './#/settings'],
+  ['pick', './#/plan/pick'],
+  ['stats', './#/stats'],
+  ['reviews', './#/reviews'],
+  ['practice', './#/practice'],
 ] as const;
+
+/** The same screens on a 1280 x 800 desktop, and the five-year map that only fits there. */
+const DESKTOP = [...PHONE, ['map', './#/plan/map']] as const;
 
 async function importDemo(page: Page, theme: 'light' | 'dark'): Promise<void> {
   // A fixed time: the clock reads the same in every run, and timers still run.
@@ -44,6 +52,19 @@ for (const theme of ['light', 'dark'] as const) {
       // The catalogue index loads after the day: wait for Block B's daily challenge.
       if (name === 'today') await expect(page.getByText(/daily challenge/).first()).toBeVisible();
       await expect(page).toHaveScreenshot(name + '-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+    }
+  });
+}
+
+for (const theme of ['light', 'dark'] as const) {
+  test('the desktop screens match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await importDemo(page, theme);
+    for (const [name, path] of DESKTOP) {
+      await open(page, path);
+      await expect(page.locator('main h1').first()).toBeVisible();
+      if (name === 'today') await expect(page.getByText(/daily challenge/).first()).toBeVisible();
+      await expect(page).toHaveScreenshot(name + '-desktop-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
     }
   });
 }

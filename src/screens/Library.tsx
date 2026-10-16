@@ -18,7 +18,9 @@ import type { Unit } from '../seed/schema.ts';
 import { Chips } from '../ui/Chips.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
-import { DifficultyDots, KindIcon, StatusIcon } from '../ui/glyphs.tsx';
+import { DifficultyDots, IconTile, KindIcon, StatusIcon } from '../ui/glyphs.tsx';
+import type { IconName } from '../ui/Icon.tsx';
+
 import { Button } from '../ui/Button.tsx';
 import { Row } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
@@ -38,6 +40,8 @@ const TYPE_CHIPS: { key: string; label: string }[] = [
   { key: 'tool', label: 'Tools' },
   { key: 'project', label: 'Projects' },
 ];
+/** A shelf's icon on a row: course, book, paper, article, blog or tool. */
+const SHELF_ICON: Record<string, IconName> = { course: 'course', book: 'book', paper: 'paper', article: 'article', blog: 'blog', tool: 'wrench' };
 const KIND_OF_TYPE: Record<string, string> = { course: 'course', lectures: 'course', tutorial: 'course', cert: 'course', book: 'book', paper: 'paper', article: 'article', repo: 'tool', tool: 'tool', problems: 'tool' };
 const STATUS_CHIPS: { key: ItemStatus; label: string }[] = [
   { key: 'active', label: 'Active' },
@@ -204,9 +208,9 @@ function VirtualList<T>({ items, keyOf, render, label }: { items: T[]; keyOf: (i
   }, [items, rowHeight]);
   const [start, end] = [Math.min(range[0], items.length), Math.min(Math.max(range[1], 40), items.length)];
   return (
-    <section className="mt-5">
+    <section className="tile mt-[18px] px-[18px] pb-2 pt-3.5">
       {label && <h2 className="section-label">{label}</h2>}
-      <ul ref={ref} className="divide-y divide-line border-y border-line" style={{ paddingTop: start * rowHeight, paddingBottom: (items.length - end) * rowHeight }}>
+      <ul ref={ref} className="rows" style={{ paddingTop: start * rowHeight, paddingBottom: (items.length - end) * rowHeight }}>
         {items.slice(start, end).map((item) => (
           <ListKey key={keyOf(item)}>{render(item)}</ListKey>
         ))}
@@ -381,7 +385,13 @@ export function Library({ openId }: { openId?: string }) {
             <Row
               height={60}
               truncate
-              icon={entry.project ? <KindIcon kind={entry.project.kind === 'curriculum' ? (entry.project.group === 'weekly' ? 'build' : 'case') : entry.project.kind} /> : undefined}
+              icon={
+                entry.project ? (
+                  <KindIcon kind={entry.project.kind === 'curriculum' ? (entry.project.group === 'weekly' ? 'build' : 'case') : entry.project.kind} />
+                ) : (
+                  <IconTile icon={SHELF_ICON[entry.type] ?? 'course'} tone={entry.kind === 'paper' ? 'ice' : 'blue'} />
+                )
+              }
               title={entry.title}
               meta={
                 entry.project?.difficulty ? (
@@ -395,8 +405,8 @@ export function Library({ openId }: { openId?: string }) {
               trailing={
                 entry.trailing ? (
                   <>
-                    <StatusIcon status={entry.status === 'done' ? 'done' : entry.status === 'active' ? 'active' : 'todo'} />
-                    <span className={entry.status === 'active' ? 'text-accent' : ''}>{entry.trailing}</span>
+                    {entry.status === 'done' && <StatusIcon status="done" />}
+                    <span className={entry.status === 'active' ? 'font-semibold text-blue-deep' : ''}>{entry.trailing}</span>
                   </>
                 ) : undefined
               }

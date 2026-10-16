@@ -5,7 +5,12 @@ import { db } from './db/db.ts';
 import { registerServiceWorker } from './pwa/register.ts';
 import { peekUnits, seed } from './seed/index.ts';
 import { startSync } from './sync/engine.ts';
-import '@fontsource-variable/instrument-sans';
+import '@fontsource/nunito/latin-600.css';
+import '@fontsource/nunito/latin-700.css';
+import '@fontsource/nunito/latin-800.css';
+import '@fontsource/nunito/latin-ext-600.css';
+import '@fontsource/nunito/latin-ext-700.css';
+import '@fontsource/nunito/latin-ext-800.css';
 import './index.css';
 
 registerServiceWorker();

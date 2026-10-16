@@ -110,7 +110,7 @@ function PaceSuggestion({ atlas, weekStart }: { atlas: Atlas; weekStart: string 
   const name = blockShort(atlas.settings.core.blocks.find((b) => b.id === suggestion.block)?.name ?? suggestion.block);
   const stretch = shiftPhaseEnd(atlas.seed.phases, phase.id, addDays(phase.end, suggestion.weeks * 7));
   return (
-    <section aria-label="Pace" className="rounded-card bg-surface p-4">
+    <section aria-label="Pace" className="tile p-[18px]">
       <p className="text-body">
         {name} is {plural(suggestion.days, 'day')} behind. Stretch {phase.title} by {plural(suggestion.weeks, 'week')}?
       </p>

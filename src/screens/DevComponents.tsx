@@ -55,7 +55,7 @@ export function DevComponents() {
         <Row title="30 Days of Python · day 19" meta="Languages · 0 m of 1 h" onClick={() => undefined} />
         <Row title="Lecture 3: Multiplication and inverse matrices" check={{ checked, onChange: setChecked }} />
         <Row title="Spend freezes automatically" toggle={{ on, onChange: setOn }} />
-        <Row title="Vulkan Guide" meta="Graphics" edge="var(--track-graphics)" trailing="50 h" onClick={() => undefined} />
+        <Row title="Vulkan Guide" meta="Graphics" trailing="50 h" onClick={() => undefined} />
         {['swe', 'ai'].map((id) => (
           <Row key={id} title={id === 'swe' ? 'Software engineering' : 'AI and ML'} selected={picked === id} onClick={() => setPicked(id)} />
         ))}

@@ -197,7 +197,7 @@ function Backup({ settings }: { settings: StoredSettings }) {
 /** The link to a step of the setup, as a 44 px target of its own. */
 function StepLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <a href={href} target="_blank" rel="noreferrer noopener" className="flex min-h-11 items-center gap-2 text-button font-medium text-accent">
+    <a href={href} target="_blank" rel="noreferrer noopener" className="flex min-h-11 items-center gap-2 text-button font-medium text-blue-deep">
       <Icon name="external" size={16} />
       {children}
     </a>

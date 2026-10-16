@@ -6,7 +6,7 @@ import type { Goal, Unit } from '../../seed/schema.ts';
 import { goalStatus } from '../../lib/goals.ts';
 import { today } from '../../lib/dates.ts';
 import { longDate } from '../parts/text.ts';
-import { blockColor } from '../../ui/colors.ts';
+import { BlockTile, IconTile } from '../../ui/glyphs.tsx';
 import { Button } from '../../ui/Button.tsx';
 import { ProgressLine } from '../../ui/ProgressLine.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
@@ -28,13 +28,12 @@ function monthRange(start: string, end: string): string {
 }
 
 /**
- * The five lanes of a phase, as in the mockup: a card of rows, each with its lane colour as a 3 px edge flush
- * with the card, the block and its hours, the forecast on the right, the item it is on, and a 2 px progress line
- * that turns pink when the lane is behind.
+ * The five lanes of a phase, as on the Plan board: one list group, each lane a row with its block's icon in a knob,
+ * the block and its hours, the forecast on the right ("behind" in ice-deep), the item it is on, and a progress well.
  */
-function Lanes({ atlas, model, units, isCurrent, weekly, onLane }: { atlas: Atlas; model: PhaseModel; units: Record<string, Unit[]> | undefined; isCurrent: boolean; weekly: string | null; onLane: (block: string) => void }) {
-  return (
-    <ul className="overflow-hidden rounded-card bg-surface px-4 py-1">
+function Lanes({ atlas, model, units, isCurrent, weekly, onLane, label }: { atlas: Atlas; model: PhaseModel; units: Record<string, Unit[]> | undefined; isCurrent: boolean; weekly: string | null; onLane: (block: string) => void; label?: string }) {
+  const list = (
+    <ul className="rows">
       {model.progress.lanes.map((lane) => {
         const def = atlas.settings.core.blocks.find((b) => b.id === lane.block)!;
         const next = lane.items.find(isOpenItem);
@@ -51,23 +50,32 @@ function Lanes({ atlas, model, units, isCurrent, weekly, onLane }: { atlas: Atla
         const title = laneName(def.name) + ' · ' + span(def.minutes);
         return (
           <li key={lane.block}>
-            <button
-              type="button"
-              onClick={() => onLane(lane.block)}
-              className="-ml-4 flex w-[calc(100%+1rem)] flex-col gap-1.5 border-t border-l-[3px] border-t-line py-3.5 pl-[25px] text-left"
-              style={{ borderLeftColor: blockColor(atlas.settings.core.blocks.find((b) => b.id === lane.block), lane.block) }}
-            >
-              <span className="flex items-baseline justify-between gap-3">
-                <span className="text-body font-medium leading-[1.3]">{title}</span>
-                <span className="shrink-0 text-meta text-ink2">{isCurrent && forecast ? describeVerdict(forecast.verdict, forecast.weeksLate) : Math.round(lane.totalHours) + ' h'}</span>
+            <button type="button" onClick={() => onLane(lane.block)} className="flex w-full items-start gap-3 py-3 text-left">
+              <BlockTile block={lane.block} />
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="flex items-baseline justify-between gap-3">
+                  <span className="text-body font-medium leading-[1.3]">{title}</span>
+                  <span className={'shrink-0 text-meta ' + (behind ? 'font-semibold text-ice-deep' : 'text-ink2')}>
+                    {isCurrent && forecast ? describeVerdict(forecast.verdict, forecast.weeksLate) : Math.round(lane.totalHours) + ' h'}
+                  </span>
+                </span>
+                <span className="text-meta text-ink2">{meta}</span>
+                <span className="mt-1.5 block">
+                  <ProgressLine value={lane.fraction} label={laneName(def.name) + ' progress'} />
+                </span>
               </span>
-              <span className="text-meta leading-[1.3] text-ink2">{meta}</span>
-              <ProgressLine value={lane.fraction} label={laneName(def.name) + ' progress'} color={behind ? 'var(--behind)' : undefined} />
             </button>
           </li>
         );
       })}
     </ul>
+  );
+  if (!label) return list;
+  return (
+    <section className="tile px-[18px] pb-2 pt-3.5">
+      <h2 className="section-label">{label}</h2>
+      {list}
+    </section>
   );
 }
 
@@ -113,11 +121,11 @@ export function Timeline({
     list.map((m, position) => {
       const open = openPhase === m.phase.id;
       return (
-        <Row key={m.phase.id} height={52} title={m.phase.title} meta={phaseMeta(m, position)} expanded={open} onClick={() => setOpenPhase(open ? null : m.phase.id)}>
+        <Row key={m.phase.id} height={52} icon={<IconTile icon="flag" tone={position === 0 ? 'blue' : 'ice'} />} title={m.phase.title} meta={phaseMeta(m, position)} expanded={open} chevron onClick={() => setOpenPhase(open ? null : m.phase.id)}>
           {open && (
             <div className="pb-4">
               {m.phase.theme && <p className="mb-1 text-meta font-medium">{m.phase.theme}</p>}
-              <p className="mb-3 text-meta text-ink2">{m.phase.goal}</p>
+              <p className="mb-2 text-meta text-ink2">{m.phase.goal}</p>
               <Lanes atlas={atlas} model={m} units={units} isCurrent={false} weekly={null} onLane={(block) => onLane(m.phase.id, block)} />
             </div>
           )}
@@ -126,20 +134,20 @@ export function Timeline({
     });
 
   return (
-    <div className="mt-6">
-      {current && <Lanes atlas={atlas} model={current} units={units} isCurrent weekly={weekly} onLane={(block) => onLane(current.phase.id, block)} />}
+    <div className="mt-[18px] flex flex-col gap-[18px]">
+      {current && <Lanes atlas={atlas} model={current} units={units} isCurrent weekly={weekly} label="Today’s lanes" onLane={(block) => onLane(current.phase.id, block)} />}
       {earlier.length > 0 && (
-        <RowList flat label="Earlier" className="mt-6">
+        <RowList flat label="Earlier">
           {phaseRows(earlier)}
         </RowList>
       )}
       {later.length > 0 && (
-        <RowList flat label="Next" className="mt-6">
+        <RowList flat label="Next">
           {phaseRows(later)}
         </RowList>
       )}
       {(atlas.seed.goals ?? []).length > 0 && (
-        <RowList flat label="Goals" className="mt-6">
+        <RowList flat label="Goals">
           {(atlas.seed.goals ?? []).map((goal) => {
             const status = goalStatus(goal, atlas.seed, atlas.settings, atlas.states, atlas.logs, today());
             return (
@@ -147,14 +155,20 @@ export function Timeline({
                 key={goal.id}
                 title={goal.title}
                 meta={'By ' + longDate(goal.date) + (status.projected && status.verdict !== 'done' ? ' · projected ' + longDate(status.projected) : '')}
-                trailing={<span className={status.verdict === 'at-risk' ? 'text-[color:var(--behind)]' : undefined}>{status.verdict === 'done' ? 'Done' : status.verdict === 'on-track' ? 'On track' : 'At risk'}</span>}
+                icon={<IconTile icon="flag" tone={status.verdict === 'done' ? 'blue' : 'ice'} />}
+                trailing={<span className={status.verdict === 'at-risk' ? 'font-semibold text-ice-deep' : undefined}>{status.verdict === 'done' ? 'Done' : status.verdict === 'on-track' ? 'On track' : 'At risk'}</span>}
                 onClick={() => onGoal(goal)}
               />
             );
           })}
         </RowList>
       )}
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-3">
+        <Button variant="ice" icon="shuffle" to="/plan/pick">
+          Pick a project
+        </Button>
+      </div>
+      <div className="flex flex-wrap gap-2">
         <Button size="sm" onClick={onReplan}>
           Re-plan
         </Button>
