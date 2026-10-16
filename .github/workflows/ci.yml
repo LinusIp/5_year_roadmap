@@ -103,7 +103,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run check:links -- --titles --candidates scripts/link-candidates.json --only candidate: --json
+      - run: "npm run check:links -- --titles --candidates scripts/link-candidates.json --only candidate: --json"
       - uses: actions/upload-artifact@v7
         with:
           name: links

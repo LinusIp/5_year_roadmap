@@ -1,0 +1,38 @@
+{
+  "certStates": [],
+  "format": "atlas-items",
+  "itemStates": [
+    {
+      "deviceId": "5kmn4cd1hgnm",
+      "notes": "## Lecture 2\n\nElimination with matrices.",
+      "refId": "mit-18-06",
+      "startedAt": "2026-10-16",
+      "status": "active",
+      "unitsDone": [
+        "lecture-1",
+        "lecture-2"
+      ],
+      "updatedAt": "2026-10-16T04:24:38.421Z"
+    },
+    {
+      "deviceId": "5kmn4cd1hgnm",
+      "doneAt": "2026-09-26",
+      "refId": "w-c-ring-buffer",
+      "repoUrl": "https://github.com/octo-learner/ring-buffer",
+      "status": "done",
+      "unitsDone": [],
+      "updatedAt": "2026-10-16T04:24:38.422Z"
+    }
+  ],
+  "milestoneStates": [],
+  "paperStates": [
+    {
+      "deviceId": "5kmn4cd1hgnm",
+      "refId": "paper-alexnet",
+      "startedAt": "2026-10-16",
+      "status": "reading",
+      "updatedAt": "2026-10-16T04:24:38.424Z"
+    }
+  ],
+  "version": 1
+}

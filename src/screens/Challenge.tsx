@@ -39,7 +39,8 @@ function Body({ challenge, events, isDaily, language, setLanguage }: { challenge
   const date = todayDate();
   const solvedToday = events.some((e) => e.challengeId === challenge.id && e.event === 'solved' && e.date === date);
   const history = events.filter((e) => e.challengeId === challenge.id && e.event === 'solved').sort((a, b) => a.date.localeCompare(b.date));
-  const setField = (key: 'notes' | 'solutionUrl', value: string): void =>
+  // A challenge's solution link lives in `demoUrl`, so items.json stays readable by devices on an older Atlas.
+  const setField = (key: 'notes' | 'demoUrl', value: string): void =>
     void editItemState(challenge.id, (s) => {
       const next = { ...s };
       if (value.trim()) next[key] = value;
@@ -122,7 +123,7 @@ function Body({ challenge, events, isDaily, language, setLanguage }: { challenge
 
       <div className="flex flex-col gap-3">
         <NotesField label="Notes" value={state?.notes} onSave={(v) => setField('notes', v)} />
-        <LinkField label="Link to your solution" value={state?.solutionUrl} onSave={(v) => setField('solutionUrl', v)} />
+        <LinkField label="Link to your solution" value={state?.demoUrl} onSave={(v) => setField('demoUrl', v)} />
       </div>
 
       <div>

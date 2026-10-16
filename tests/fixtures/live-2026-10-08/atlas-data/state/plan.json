@@ -1,0 +1,59 @@
+{
+  "customEntities": [
+    {
+      "createdAt": "2026-10-16",
+      "data": {
+        "cost": "free",
+        "estHours": 10,
+        "id": "my-probability-notes",
+        "level": "intro",
+        "prerequisites": [],
+        "provider": "Me",
+        "searchHint": "my notes",
+        "source": "user",
+        "title": "My probability notes",
+        "tracks": [
+          "math"
+        ],
+        "type": "book",
+        "url": null,
+        "urlVerified": false
+      },
+      "deviceId": "5kmn4cd1hgnm",
+      "id": "my-probability-notes",
+      "kind": "resource",
+      "updatedAt": "2026-10-16T04:24:38.433Z"
+    }
+  ],
+  "format": "atlas-plan",
+  "overrides": [
+    {
+      "deviceId": "5kmn4cd1hgnm",
+      "id": "plan.30-days-of-python",
+      "kind": "planItem",
+      "patch": {
+        "order": 99
+      },
+      "updatedAt": "2026-10-16T04:24:38.431Z"
+    },
+    {
+      "deviceId": "5kmn4cd1hgnm",
+      "id": "plan.automate-the-boring-stuff",
+      "kind": "planItem",
+      "patch": {},
+      "removed": true,
+      "updatedAt": "2026-10-16T04:24:38.432Z"
+    }
+  ],
+  "replans": [],
+  "version": 1,
+  "weekPicks": [
+    {
+      "deviceId": "5kmn4cd1hgnm",
+      "pickedAt": "2026-10-16",
+      "projectId": "w-c-ring-buffer",
+      "updatedAt": "2026-10-16T04:24:38.434Z",
+      "weekStart": "2026-09-21"
+    }
+  ]
+}

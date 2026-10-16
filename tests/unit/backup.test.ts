@@ -5,7 +5,7 @@ import { defaultSettings } from '../../src/db/settings.ts';
 import { loadSeedOrThrow } from '../../scripts/lib/load-seed.ts';
 import { addEntry, editLog, toggleBlockDone } from '../../src/lib/logs.ts';
 import { editItemState, setItemStatus, toggleUnit } from '../../src/db/state.ts';
-import { patchEntity, addCustomEntity } from '../../src/db/edits.ts';
+import { patchEntity, addCustomEntity, addPlanEdit } from '../../src/db/edits.ts';
 
 const seedSettings = loadSeedOrThrow().settings;
 let database: AtlasDB;
@@ -35,7 +35,9 @@ async function populate(): Promise<void> {
   await database.paperStates.put({ refId: 'paper-attention', status: 'reading', summary: 'Attention is enough.' });
   await database.certStates.put({ refId: 'cert-pcep', status: 'studying', targetQuarter: '2027-Q1' });
   await database.milestoneStates.put({ refId: 'ms-python-cli', status: 'active', url: 'https://github.com/me/cli' });
-  await patchEntity('planItem', 'plan.m02', { order: 5 }, database);
+  // A plan edit as this build stores it (a patch), and a resource edit as an override.
+  await addPlanEdit([{ op: 'move', planItemId: 'plan.m02', order: 5 }], 'Move', database);
+  await patchEntity('resource', 'mit-18-06', { estHours: 100 }, database);
   await addCustomEntity('resource', 'my-book', { id: 'my-book', title: 'A book', provider: 'Me', type: 'book', url: null, urlVerified: false, searchHint: 'a book', tracks: ['swe'], level: 'intro', cost: 'free', estHours: 10, prerequisites: [] }, database);
   await database.reviews.put({ id: 'week:2026-09-21', kind: 'week', periodStart: '2026-09-21', worked: 'Mornings', didnt: 'Evenings', changes: 'Start earlier' });
   await database.weekPicks.put({ weekStart: '2026-09-21', projectId: 'w-c-ring-buffer', pickedAt: '2026-09-21' });

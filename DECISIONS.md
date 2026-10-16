@@ -534,3 +534,27 @@ it left open; `briefs/PLAN.md` records how the three briefs of that day fit toge
 - **Screenshots.** New: `challenge-light.png`, `case-sheet-light.png`, `deck-daily-light.png`; redrawn: Today (Block B
   says "daily challenge") and Library (the Projects chip). All drawn on Linux; the other Windows baselines are kept.
 
+## Updating safely (pull request #1)
+
+- **What existing users have** is the build of 2026-10-08: IndexedDB at Dexie version 2 (not 3), settings without a
+  version field, plan.json version 1, backups of format 1. `tests/fixtures/live-2026-10-08/` was made by that build's
+  own code, and `tests/unit/live-upgrade.test.ts` upgrades it: the database to version 5 with nothing lost (the old
+  plan-item edits become patches and the plan reads the same), settings to version 2 with the user's values kept, the
+  data repository into a new device and back out in the new formats.
+- **Restoring an older backup kept its plan edits only by accident of the database upgrade.** Restore wrote the old
+  plan-item overrides straight in, and the plan no longer reads those: they were silently lost. Restore now converts
+  them to patches the same way the database upgrade does (`withLegacyPlanEdits`). Found by the fixture test.
+- **A device still on the older build cannot read** state/plan.json version 2, state/settings.json version 2, a day
+  with a Practice entry, or a review whose numbers include P (checked with that build's own parsers). When it changes
+  one of those, it writes its own older copy over the newer one. It can still read everything else this build writes,
+  and never touches practice.json or challenges.json. An old build cannot be changed after the fact, so the newer build
+  defends itself (`src/sync/downgrade.ts`): a version 1 plan over local patches is merged record by record; settings
+  without a version never replace version 2 settings; a day that lost entries in blocks outside A–E (with no tombstone
+  for them) is merged, not taken; a review keeps the block numbers it would lose. Each time, the merged file goes back
+  to GitHub and the device shows "A device with an older version of Atlas changed your data on GitHub … reload to update
+  them". A device that is not upgraded takes nothing from settings it could not read: its own setting changes made
+  in the meantime are dropped in favour of the newer settings, which is the one loss left, and it is visible in the
+  notice. Old devices update on their next load (the service worker's update prompt).
+- **A challenge's solution link is stored in `demoUrl`**, not in a new field, so items.json stays readable by older
+  devices (their schema is strict and would reject the whole file).
+

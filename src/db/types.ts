@@ -84,8 +84,6 @@ export const UserItemStateSchema = z.strictObject({
   writeUp: z.string().optional(),
   /** Stage 2 project cards: what was bought and what it cost. */
   partsNotes: z.string().optional(),
-  /** A catalogue challenge: the link to your solution. */
-  solutionUrl: OptionalUrl,
   budget: z.string().optional(),
   startedAt: IsoDate.optional(),
   doneAt: IsoDate.optional(),

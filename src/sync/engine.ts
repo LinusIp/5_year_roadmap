@@ -12,6 +12,7 @@
  * Triggers: a block or item done, a timer stopped, a review saved (3 s later, so the paired writes land);
  * 60 s after any other change; leaving the page; coming back online; every 5 minutes while visible.
  */
+import { NOTICE_OLD_DEVICE, droppedNewBlocks, isNewSettings, isOldPlanFile, isOldSettingsFile, mergeOldDay, mergeOldPlan, mergeReviewNumbers, reviewLostBlocks } from './downgrade.ts';
 import { currentSettings } from '../lib/settings.ts';
 import type { AtlasDB } from '../db/db.ts';
 import { updateSettings } from '../db/settings.ts';
@@ -83,6 +84,12 @@ export class SyncEngine {
 
   private online(): boolean {
     return this.deps.online ? this.deps.online() : typeof navigator === 'undefined' || navigator.onLine !== false;
+  }
+
+  /** A file an older Atlas overwrote: queue this device's merged copy to go back up, and say so once. */
+  private async restore(path: string): Promise<void> {
+    await enqueue(this.db, [{ path, summary: 'restore what an older Atlas overwrote' }]);
+    this.notice(NOTICE_OLD_DEVICE);
   }
 
   private notice(text: string): void {
@@ -393,6 +400,13 @@ export class SyncEngine {
     if (path === PLAN_PATH) {
       const parsed = parsePlan(text);
       if (!parsed.ok) return parsed.error;
+      const current = planOf(await readLocal(db));
+      if (!firstSync && isOldPlanFile(text) && current.patches.length > 0) {
+        // Written by a device on an older Atlas, which cannot read version 2: merge, and write version 2 back.
+        await writePlan(db, mergeOldPlan(current, parsed.value));
+        await this.restore(path);
+        return;
+      }
       if (!dirty) {
         await writePlan(db, parsed.value);
         return;
@@ -406,6 +420,11 @@ export class SyncEngine {
     if (path === SETTINGS_PATH) {
       const parsed = parseSettings(text);
       if (!parsed.ok) return parsed.error;
+      if (!firstSync && isOldSettingsFile(text) && isNewSettings((await readLocal(db)).settings[0])) {
+        // An older Atlas wrote its own copy: it could not read these settings, so it would only lose them.
+        await this.restore(path);
+        return;
+      }
       if (!dirty) {
         await writeSettings(db, parsed.value);
         return;
@@ -420,6 +439,12 @@ export class SyncEngine {
       const parsed = parseDay(text, path);
       if (!parsed.ok) return parsed.error;
       if (parsed.value.date !== date) return path + ' holds the day ' + parsed.value.date;
+      const stored = await db.dayLogs.get(date);
+      if (stored && droppedNewBlocks(stored, parsed.value)) {
+        await writeDay(db, mergeOldDay(stored, parsed.value), date);
+        await this.restore(path);
+        return;
+      }
       if (!dirty) {
         await writeDay(db, parsed.value, date);
         return;
@@ -432,7 +457,13 @@ export class SyncEngine {
       const parsed = parseReview(text, path);
       if (!parsed.ok) return parsed.error;
       const local = await db.reviews.get(parsed.value.id);
-      if (!dirty || !local || lastWriter(local, parsed.value) === 'remote') await writeReview(db, parsed.value);
+      const remoteWins = !dirty || !local || lastWriter(local, parsed.value) === 'remote';
+      if (reviewLostBlocks(parsed.value, local)) {
+        await writeReview(db, mergeReviewNumbers(remoteWins ? parsed.value : local!, local));
+        await this.restore(path);
+        return;
+      }
+      if (remoteWins) await writeReview(db, parsed.value);
       return;
     }
     return undefined;

@@ -1,0 +1,112 @@
+/**
+ * Not a test: run once in a worktree of `main` (the build that is live) to write a fixture of the live formats
+ * into the new branch's tests/fixtures/live-2026-10-08/: the raw IndexedDB as Dexie left it, the backup file, and
+ * the files GitHub Sync writes to atlas-data. Everything is made with main's own code.
+ */
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { it } from 'vitest';
+import { loadSeedOrThrow } from '../../scripts/lib/load-seed.ts';
+import { splitSeed } from '../../scripts/lib/vite-plugin-seed.ts';
+import { db } from '../../src/db/db.ts';
+import { createBackup, serialiseBackup } from '../../src/db/backup.ts';
+import { addCustomEntity, patchEntity, removePlanItem } from '../../src/db/edits.ts';
+import { updateSettings } from '../../src/db/settings.ts';
+import { editItemState, setItemStatus, setPaperStatus, setWeekPick, toggleUnit } from '../../src/db/state.ts';
+import { addEntry, editLog, removeEntry, toggleBlockDone } from '../../src/lib/logs.ts';
+import { renderReadme } from '../../src/sync/files.ts';
+import { allPaths, readLocal, renderPath } from '../../src/sync/local.ts';
+
+const OUT = '/home/user/5_year_roadmap/tests/fixtures/live-2026-10-08';
+
+function write(rel: string, text: string): void {
+  const path = join(OUT, rel);
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, text);
+}
+
+it('writes the live-format fixture', async () => {
+  const seed = loadSeedOrThrow();
+  const { app } = splitSeed(seed);
+  await db.open();
+
+  // Settings changed in the app: a block's minutes, the streak, the theme, the GitHub username.
+  await updateSettings(seed.settings, (s) => ({
+    ...s,
+    theme: 'dark',
+    github: { ...s.github, username: 'octo-learner' },
+    core: { ...s.core, blocks: s.core.blocks.map((b) => (b.id === 'C' ? { ...b, minutes: 90 } : b)), streak: { ...s.core.streak, minMinutes: 45 } },
+  }));
+
+  // Progress on items, a project shipped with its repository, a paper being read.
+  await setItemStatus('mit-18-06', 'active');
+  await toggleUnit('mit-18-06', 'lecture-1');
+  await toggleUnit('mit-18-06', 'lecture-2');
+  await editItemState('mit-18-06', (s) => ({ ...s, notes: '## Lecture 2\n\nElimination with matrices.' }));
+  await editItemState('w-c-ring-buffer', (s) => ({ ...s, status: 'done', repoUrl: 'https://github.com/octo-learner/ring-buffer', doneAt: '2026-09-26' }));
+  await setPaperStatus(seed.papers[0]!.id, 'reading');
+
+  // Three days of log, with a block done, a reflection, and an entry removed (a tombstone).
+  await editLog('2026-09-21', (l) => toggleBlockDone(addEntry(addEntry(l, { block: 'A', track: 'graphics', minutes: 120 }), { block: 'B', track: 'languages', refId: '30-days-of-python', minutes: 60 }), 'A'));
+  await editLog('2026-09-22', (l) => ({ ...addEntry(l, { block: 'C', track: 'ai', refId: 'ml-zoomcamp', minutes: 90 }), reflection: 'Good focus.', energy: 4 }));
+  await editLog('2026-09-23', (l) => addEntry(addEntry(l, { block: 'E', track: 'math', refId: 'mit-18-06', minutes: 45 }), { block: 'D', track: 'swe', refId: 'w-c-ring-buffer', minutes: 30 }));
+  await editLog('2026-09-23', (l) => removeEntry(l, 1));
+
+  // Plan edits the old way: an item moved, an item removed, an item of the user's, the week's build.
+  const inLaneB = seed.plan.filter((p) => p.phaseId === 'y1-p0' && p.block === 'B').sort((a, b) => a.order - b.order);
+  await patchEntity('planItem', inLaneB[0]!.id, { order: 99 });
+  await removePlanItem(inLaneB[1]!.id);
+  await addCustomEntity('resource', 'my-probability-notes', { id: 'my-probability-notes', title: 'My probability notes', provider: 'Me', type: 'book', url: null, urlVerified: false, searchHint: 'my notes', tracks: ['math'], level: 'intro', cost: 'free', estHours: 10, prerequisites: [], source: 'user' });
+  await setWeekPick('2026-09-21', 'w-c-ring-buffer');
+
+  // A finished weekly review with its snapshot.
+  await db.reviews.put({
+    id: 'week:2026-09-21',
+    kind: 'week',
+    periodStart: '2026-09-21',
+    completedAt: '2026-09-27',
+    worked: 'Mornings on graphics.',
+    didnt: 'Evenings.',
+    changes: 'Earlier start.',
+    snapshot: { totalMinutes: 345, targetMinutes: 3360, minutesByBlock: { A: 120, B: 60, C: 90, D: 30, E: 45 }, itemsFinished: ['w-c-ring-buffer'], daysCounted: 3 },
+    updatedAt: '2026-09-27T20:00:00.000Z',
+  });
+
+  // 1. The raw IndexedDB, as Dexie left it: version, stores, indexes and every row.
+  const raw = await new Promise<IDBDatabase>((resolve, reject) => {
+    const req = indexedDB.open('atlas');
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  const stores: Record<string, unknown> = {};
+  for (const name of [...raw.objectStoreNames]) {
+    const tx = raw.transaction(name, 'readonly');
+    const store = tx.objectStore(name);
+    const rows = await new Promise<unknown[]>((resolve) => {
+      const r = store.getAll();
+      r.onsuccess = () => resolve(r.result);
+    });
+    stores[name] = {
+      keyPath: store.keyPath,
+      autoIncrement: store.autoIncrement,
+      indexes: [...store.indexNames].map((i) => {
+        const idx = store.index(i);
+        return { name: idx.name, keyPath: idx.keyPath, unique: idx.unique, multiEntry: idx.multiEntry };
+      }),
+      rows,
+    };
+  }
+  write('indexeddb.json', JSON.stringify({ name: raw.name, version: raw.version, stores }, null, 2) + '\n');
+  raw.close();
+
+  // 2. The backup file, as Settings > Export writes it.
+  write('backup.json', serialiseBackup(await createBackup(new Date('2026-10-08T12:00:00Z'))));
+
+  // 3. The atlas-data repository, as GitHub Sync writes it.
+  const local = await readLocal(db);
+  write('atlas-data/README.md', renderReadme('https://linusip.github.io/5_year_roadmap/'));
+  for (const path of allPaths(local, app)) {
+    const text = renderPath(path, local, app);
+    if (text !== null) write('atlas-data/' + path, text);
+  }
+}, 60_000);
