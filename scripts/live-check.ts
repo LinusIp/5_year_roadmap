@@ -79,8 +79,11 @@ try {
   await page.getByRole('dialog', { name: title }).getByRole('button', { name: 'Take it' }).waitFor({ timeout: 30_000 });
   step('a tap on the Deck card opens its tech doc, with Take it: ' + title);
   await page.keyboard.press('Escape');
+  // A full load, not a hash change from the Deck: wait for Today's own Now card, then for its block icons.
   await page.goto(new URL('#/', url).href);
-  await page.locator('#now-title, main h2').first().waitFor({ timeout: 30_000 });
+  await page.reload();
+  await page.locator('#now-title').waitFor({ timeout: 30_000 });
+  await page.locator('main svg.lucide').first().waitFor({ timeout: 30_000 }).catch(() => undefined);
   const icons = await page.locator('main svg.lucide').count();
   if (icons === 0) throw new Error('Today shows no icons');
   step('Today shows its icons (' + icons + ')');
