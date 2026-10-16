@@ -205,7 +205,7 @@ export function LibraryHome({
                 icon={<IconTile icon={icon} tone={tone} />}
                 title={u.step.title}
                 meta={type + (u.after ? ' · after ' + u.after : ' · ' + Math.round(u.step.hours) + ' h')}
-                trailing={u.start ? monthOf(u.start, thisYear) : undefined}
+                trailing={u.start > today ? monthOf(u.start, thisYear) : 'Now'}
                 onClick={() => onOpen(u.step.refId)}
               />
             );

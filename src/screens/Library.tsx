@@ -382,28 +382,23 @@ export function Library({ openId }: { openId?: string }) {
     <Screen title="Library">
       {mode === 'path' && pathId && <PathView atlas={atlas} pathId={pathId} onOpen={(id) => navigate('/library/' + id + (keep ? '?' + keep : ''))} onOpenPaper={(id) => setPaperId(id, { replace: false })} />}
 
-      {mode === 'home' && (
+      {/* Home and search share one header and one search box, so typing the first letter keeps focus. */}
+      {(mode === 'home' || mode === 'search') && (
         <>
-          <Header title="Library" sub={homeSub} />
+          <Header title="Library" sub={mode === 'home' ? homeSub : plural(results.length, 'match', 'matches')} />
           {searchField}
-          <LibraryHome
-            atlas={atlas}
-            units={units}
-            counts={counts}
-            today={today()}
-            onOpen={(id) => navigate('/library/' + id)}
-            onPath={(id) => navigate('/library?path=' + id, { replace: false })}
-            onShelf={goShelf}
-          />
-        </>
-      )}
-
-      {mode === 'search' && (
-        <>
-          <Header title="Library" sub={plural(results.length, 'match', 'matches')} />
-          {searchField}
-          {results.length === 0 ? (
-            <EmptyState action={<Button onClick={clear}>Clear the search</Button>}>No matches. Try fewer words.</EmptyState>
+          {mode === 'home' ? (
+            <LibraryHome
+              atlas={atlas}
+              units={units}
+              counts={counts}
+              today={today()}
+              onOpen={(id) => navigate('/library/' + id)}
+              onPath={(id) => navigate('/library?path=' + id, { replace: false })}
+              onShelf={goShelf}
+            />
+          ) : results.length === 0 ? (
+            <EmptyState action={<Button onClick={clear}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>
           ) : (
             groupResults(results.map((e) => ({ ...e, shelf: e.type as ShelfKey }))).map((g) => (
               <RowList key={g.shelf} label={SHELF_TITLE[g.shelf] + ' · ' + g.total} className="mt-[18px]">

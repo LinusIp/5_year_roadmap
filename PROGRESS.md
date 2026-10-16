@@ -22,6 +22,8 @@ with each. "Verified" means it was run, not assumed.
 | – | Practice, resources, tech docs | **done** |
 | – | The three-tier project catalogue | **done** |
 | – | Practice removed (pull request #6) | **done** |
+| – | Calendar and the timer (pull request #6) | **done** |
+| – | The Library organised (pull request #8) | **done** |
 
 ## Milestone 1 — Scaffold
 
@@ -848,3 +850,19 @@ Verified on this machine (Linux, Chromium 140):
   is its own 23.5 kB chunk, 8.4 kB gzip). The main chunk is 371.6 kB (118.5 kB gzip), up from 360.3 kB (114.8 kB):
   the calendar's layout, the timer and the forgotten-timer sheet load with Today.
 - The live check now also opens Calendar's day view, and fails if Today shows Log time or a Practice tab.
+
+## Pull request #8: the Library organised
+
+- **Home**: header "X in progress · Y up next · Z more when you need them"; In progress (two columns, at most six,
+  Pause and Mark done from a menu); Your paths (subway line of at most eight stops and +N, next step, later paths
+  folded); Up next (three); Browse (seven shelf tiles with real counts). Empty states "Nothing in progress. Start the
+  next step of a path." and "No matches. Clear filters."
+- **Path view** (`#/library?path=ai`): steps grouped by phase, the current one highlighted, optional extras folded.
+- **Shelf** (`#/library?type=course`): the filtered, virtualised list with Active, Not started, Done and Track chips.
+- **Search**: grouped by shelf, top three each, "Show all N".
+- Data: `short` (≤ 28) for every planned resource, checked by validate:data; `blog: true` on four resources.
+- Tests: `tests/unit/library-home.test.ts` (paths, subway window, up next, in progress cap, shelves, grouping),
+  `tests/e2e/library-home.spec.ts` (home, path → resource, Pause from a card, a shelf's filter, grouped search and
+  Show all, Mark done after a reload and on a second device). Older E2E updated to reach the list through a shelf.
+- Baselines: Library home, path, shelf and search, light and dark, phone and desktop.
+

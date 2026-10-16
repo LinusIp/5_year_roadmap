@@ -14,7 +14,7 @@ app makes no network calls at all, and everything can still be exported to a sin
   <img src="screenshots/today-light.png" alt="Today: the one block to do now, large, and the other blocks as a list, each with its block's icon" width="24%">
   <img src="screenshots/plan-light.png" alt="Plan: the current phase's five lanes, each with its item, progress line and forecast" width="24%">
   <img src="screenshots/activity-dark.png" alt="Activity in the dark theme: the year's heatmap and the last seven days" width="24%">
-  <img src="screenshots/library-light.png" alt="Library: search, filters, and every course, book and paper with its status" width="24%">
+  <img src="screenshots/library-light.png" alt="Library: what is in progress, the plan's paths as subway lines, the next three steps and the shelves to browse" width="24%">
 </p>
 
 ![The five-year map: six phases on a timeline, with each lane's work, what ships and the credentials](screenshots/map-light.png)
@@ -81,13 +81,39 @@ you use it: every option sits behind an Edit or Change action in a sheet.
 | Choose 3 to 5 tabs and their order | Settings › Layout › Tabs |
 | Plan's first view, dropped items shown or not | Settings › Layout › Plan |
 | Theme, week start, 12- or 24-hour clock, density | Settings › Layout › General |
-| Add a resource, project, paper or track of your own | Library › Add a resource |
+| Add a resource, project, paper or track of your own | Library › a shelf › Add a resource |
 | Turn the daily challenge off, or move the weekly slot to other days | Settings › Projects |
 
 **Nothing is lost.** Your edits are kept apart from the curriculum, as an ordered list of patches in
 `state/plan.json`, so an update to `data/` still flows in and your edits survive it. Dropped items stay
 restorable, every plan edit can be undone, and a change to the schedule never rewrites a day already past: the
 old templates are kept for the days they applied to. Schedule, pace and layout travel in `state/settings.json`.
+
+## The Library
+
+The Library opens on what matters now, not on all of it:
+
+- **In progress**: what is started (at most six cards), each with how far it is ("Module 6 of 10") and a menu to
+  Pause (back to not started; its progress stays) or Mark done. A long press on a card opens the same menu.
+- **Your paths**: the plan's courses and books in plan order, one path per family of tracks (AI engineering,
+  Languages, Graphics, Math and physics, Systems; Electrical and embedded and Mechanical and robotics wait under
+  "Later in the plan" until they come within a year). Each shows a subway line of at most eight stops and "+N", and
+  its next step. A path opens on its own page, grouped by phase, its current step marked; alternatives and the
+  papers of its tracks wait under "Optional for this path".
+- **Up next**: the three nearest steps not started, across every path.
+- **Browse when you need something**: shelves for Courses, Books, Papers, Articles, Blogs to follow, Tools and
+  Projects, with their real counts. A shelf is the full list with search and the Active, Not started, Done and Track
+  filters, and it is where you add a resource of your own.
+
+Searching shows the matches grouped by shelf, three of each, with "Show all" to open that shelf on the same search.
+Every planned resource has a short title (28 characters at most, checked by `npm run validate:data`) so cards and
+paths stay one line.
+
+<p>
+  <img src="screenshots/library-path-light.png" alt="A path: AI engineering's steps grouped by phase, the current one highlighted" width="32%">
+  <img src="screenshots/library-shelf-light.png" alt="The Courses shelf filtered to Active" width="32%">
+  <img src="screenshots/library-search-dark.png" alt="Search results grouped by shelf, three of each, with Show all" width="32%">
+</p>
 
 ## Calendar and the timer
 
@@ -336,7 +362,7 @@ statuses and notes reference items by id, so editing the curriculum never loses 
 4. Run `npm run validate:data`, then `npm run dev` to see it.
 
 A project works the same way in `data/projects/*.yaml`, with acceptance criteria instead of units. Anything
-you would rather not put in a file can be added from the app instead (Library > Add a resource, or Plan > a
+you would rather not put in a file can be added from the app instead (Library > a shelf > Add a resource, or Plan > a
 lane > Edit > "Add to this lane"); those additions live in your browser and travel in backups.
 
 A roadmap.sh node's id is the slug of its label in `data/roadmaps.yaml`: "Ops:Byte Ratio" is

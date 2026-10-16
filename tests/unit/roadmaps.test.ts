@@ -33,7 +33,7 @@ describe('roadmap.sh coverage', () => {
   it('ticks the nodes a finished resource covers, and only those', () => {
     const c = coverageOf('inference-engineering', [done('vllm-docs')]);
     expect([...c.checked].sort()).toEqual(['continuous-batching', 'pagedattention', 'vllm']);
-    expect(c.coveredBy.get('vllm')).toEqual(['vLLM documentation and source']);
+    expect(c.coveredBy.get('vllm')).toEqual(['vLLM Docs']);
     // An unfinished one ticks nothing.
     expect(coverageOf('inference-engineering', [{ refId: 'vllm-docs', status: 'active', unitsDone: [] }]).checked.size).toBe(0);
   });
