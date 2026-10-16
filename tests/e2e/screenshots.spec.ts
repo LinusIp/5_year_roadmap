@@ -40,6 +40,8 @@ for (const theme of ['light', 'dark'] as const) {
     for (const [name, path] of PHONE) {
       await open(page, path);
       await expect(page.locator('main .text-meta').first()).toBeVisible();
+      // The catalogue index loads after the day: wait for Block B's daily challenge.
+      if (name === 'today') await expect(page.getByText(/daily challenge/).first()).toBeVisible();
       await expect(page).toHaveScreenshot(name + '-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
     }
   });
@@ -116,4 +118,22 @@ test('a practice question, its solution and the set summary match the committed 
   }
   await expect(page.getByRole('heading', { name: /questions right$/ })).toBeVisible();
   await expect(page).toHaveScreenshot('practice-summary-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
+});
+
+test('a challenge, a case sheet and the Deck on Daily match the committed screenshots', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await importDemo(page, 'light');
+  await open(page, './#/challenge/dc-a-zeros-to-the-back');
+  await expect(page.getByRole('button', { name: 'Mark solved' })).toBeVisible();
+  await page.getByRole('button', { name: 'Hint', exact: true }).click();
+  await expect(page).toHaveScreenshot('challenge-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
+
+  await open(page, './#/library/mx-ai-ticket-triage-llm');
+  const sheet = page.getByRole('dialog', { name: 'Support-ticket triage service for a SaaS helpdesk' });
+  await expect(sheet.getByRole('heading', { name: 'Requirements', exact: true })).toBeVisible();
+  await expect(page).toHaveScreenshot('case-sheet-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+
+  await open(page, './#/plan/pick?cadence=daily');
+  await expect(page.locator('#deck-top-title')).not.toHaveText('');
+  await expect(page).toHaveScreenshot('deck-daily-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });

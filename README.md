@@ -77,6 +77,7 @@ you use it: every option sits behind an Edit or Change action in a sheet.
 | Theme, week start, 12- or 24-hour clock, density | Settings › Layout › General |
 | Add a resource, project, paper or track of your own | Library › Add a resource |
 | Move the practice period, or take three to five questions a subject | Settings › Practice |
+| Turn the daily challenge off, or move the weekly slot to other days | Settings › Projects |
 
 **Nothing is lost.** Your edits are kept apart from the curriculum, as an ordered list of patches in
 `state/plan.json`, so an update to `data/` still flows in and your edits survive it. Dropped items stay
@@ -119,6 +120,36 @@ time. `npm run verify:questions` recomputes every answer with SymPy (`pip instal
 architecture, stack, milestones, how to measure and report it. It shows in the project's sheet. Its milestones are
 checkboxes that count toward the project's progress, and "Copy as README skeleton" starts the project's repository
 README from it.
+
+## Projects: daily, weekly, monthly
+
+Besides the curriculum's own projects, Atlas carries a catalogue of 920 in three tiers (`data/projects/*.jsonl`):
+
+| Tier | What | Where it shows |
+|---|---|---|
+| Daily | 254 easy coding challenges, 30 topics | Block B: on its Now card, and mentioned on its row |
+| Weekly | 112 medium challenges and 250 medium builds | Block D's weekly slot (the weekend by default): the week's challenge, and a build you take |
+| Monthly | 304 advanced real cases | Block D's monthly queue, next to the plan's monthly projects |
+
+<p>
+  <img src="screenshots/challenge-light.png" alt="A challenge: statement, input and output, constraints, examples, a hint, languages, notes and Mark solved" width="32%">
+  <img src="screenshots/case-sheet-light.png" alt="A real case in its sheet: scenario, requirements, Take it, Copy as README skeleton" width="32%">
+  <img src="screenshots/deck-daily-light.png" alt="The Deck on Daily: tier, topic and phase chips over the cards" width="32%">
+</p>
+
+- **The daily challenge** is picked for the date from the challenges not solved yet, a new topic after each solve, in
+  the language of Block B's course. Skip gives another (three a day), Not today hides it, and Settings › Projects
+  turns it off. Once all 254 are solved they come round again, to solve in another language. Its streak is its own.
+- **A challenge** shows the statement, input and output, constraints and examples; hints one at a time; Show approach
+  for the approach, complexity and edge cases; notes, a link to your solution, and Mark solved.
+- **A build or a case** opens in a sheet. A case reads as a short tech doc whose milestones are checkboxes. Copy as
+  README skeleton starts its repository; it is done only with the repository link filled in.
+- **Finding one**: the Deck (Plan › Pick a project) by Daily, Weekly or Monthly, topic or domain, and This phase,
+  Earlier or Everything; Library › Projects with search and filters for kind, difficulty, topic or domain, track,
+  phase, level and hours; Activity › Projects for what is done per tier and domain and each topic's solve rate.
+
+`npm run map:catalogue` fills each item's `refs` (courses) and `covers` (roadmap nodes) from the reviewed keyword
+table in `scripts/lib/catalogue-mapping.ts`; CI checks the files match it.
 
 ## Keyboard
 
@@ -174,6 +205,7 @@ README that Atlas writes into it explains each file.
 | `state/plan.json` | Your plan edits (an ordered list of patches, version 2), items of your own, re-plans and picked builds |
 | `state/settings.json` | Blocks, day templates, the weekly pattern, date ranges, day changes, pace, pauses and layout (version 2). Never the token. |
 | `state/practice.json` | Every practice answer: question, date, right or wrong, hints, time. Merged by answer, so two devices never lose one. |
+| `state/challenges.json` | Catalogue challenges solved (and in which language), skipped or hidden for a day. Merged the same way. |
 | `log/YYYY/MM/YYYY-MM-DD.json` and `.md` | One day, and its human-readable twin |
 | `reviews/` | Weekly, monthly and quarterly reviews |
 | `projects/` | Each project's write-up, links and checklist |
@@ -232,6 +264,7 @@ statuses and notes reference items by id, so editing the curriculum never loses 
 | `data/settings.yaml` | The defaults a fresh install starts from |
 | `data/questions/` | The practice bank: `topics.yaml`, then one file of questions per topic (`SCHEMA.md` describes them) |
 | `data/projects/docs/*.md` | One tech doc per project (the file name is the project's id) |
+| `data/projects/*.jsonl` | The project catalogue: daily easy challenges, weekly medium challenges and builds, monthly real cases, one per line |
 
 ### Adding a course, step by step
 

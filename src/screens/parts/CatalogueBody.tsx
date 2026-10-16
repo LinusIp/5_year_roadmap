@@ -97,8 +97,8 @@ export function CatalogueBody({ atlas, item }: { atlas: Atlas; item: CatalogueIt
   const now = today();
   const weekStart = startOfWeek(now, atlas.settings.core.weekStartsOn);
   const take = async (): Promise<void> => {
-    if (item.kind === 'build') await setWeekPick(weekStart, item.id);
-    if (status === 'todo') await setItemStatus(item.id, 'active');
+    // Both writes start at once, so nothing can navigate away between them.
+    await Promise.all([item.kind === 'build' ? setWeekPick(weekStart, item.id) : null, status === 'todo' ? setItemStatus(item.id, 'active') : null]);
   };
 
   return (

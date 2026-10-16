@@ -20,7 +20,7 @@ with each. "Verified" means it was run, not assumed.
 | – | GitHub Sync (section 4.10) | **done** |
 | – | Flexibility: schedule, plan editing, pace, layout | **done** |
 | – | Practice, resources, tech docs | **done** |
-| – | The three-tier project catalogue | to do |
+| – | The three-tier project catalogue | **done** |
 
 ## Milestone 1 — Scaffold
 
@@ -694,4 +694,32 @@ Verified on this machine (Linux, Chromium 140):
   fake GitHub. One older test's locator was made exact (the doc's Stack also says "nothing to buy").
 - Lighthouse 13.5 accessibility (Chromium, headless): 100 on Today, Practice, Practice › topics, Activity ›
   Practice, Settings, Library and two project sheets with tech docs.
+
+## The three-tier project catalogue (the brief of 2026-10-16)
+
+- **Imported**: 920 items from the brief's three files, unchanged except three dangling prerequisites (DECISIONS):
+  daily 254 easy challenges; weekly 112 medium challenges and 250 medium builds; monthly 304 advanced cases. Builds
+  and cases by domain: services 103, graphics 98, AI 95, inference 88, hardware 51, systems and networking 44, low
+  level 40, DevOps/architecture/security 35. Challenges over 30 topics.
+- **Mapped**: refs on 451 items and covers on 221, from the reviewed keyword table; `map:catalogue --check` in CI.
+- **Where it lives**: the daily challenge in Block B (Skip ×3, Not today, a setting to turn it off, Block B's
+  language, another language once all are solved, its own streak); the challenge screen; Block D's weekly slot and
+  monthly queue; build and case sheets with milestones, README skeleton and the repository rule; the Deck's tiers,
+  topic or domain and phase scope; Library › Projects with seven filters over a windowed list; Activity › Projects;
+  Settings › Projects; `state/challenges.json` through GitHub Sync.
+
+Verified on this machine (Linux, Chromium 140):
+
+- `npm run validate:data`, `npm run typecheck` and `npm run map:catalogue -- --check` pass.
+- `npm test`: 326 unit tests (29 new): loading and normalising, the validator's eight errors, refs and covers against
+  the table, the daily pick (deterministic, topic rotation, no repeat until all 254 are solved, then another language;
+  three skips; Not today), the challenge streak, the weekly slot, a catalogue build as the week's build, and the
+  Deck's and Library's filters.
+- `npm run test:e2e`: 7 new tests pass, also 4 times over in parallel: today's challenge solved from Block B with a
+  hint and the approach; Skip and Not today; a weekly build taken and done only with a repository; a case from the
+  Deck with a milestone ticked, the README skeleton copied and the repository rule; Library filtered to advanced
+  Year 2 inference cases; the windowed list; two devices on the fake GitHub, and a reload. The suite: every test
+  passes but the four Windows-drawn screenshot comparisons, as before (CI skips them).
+- Lighthouse 13.5 accessibility: 100 on Library with the Projects filter (the long list), Library, a challenge, a
+  case sheet, the Deck on Daily, Activity › Projects, Today, Settings and Plan › Projects.
 

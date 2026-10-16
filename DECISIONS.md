@@ -479,3 +479,56 @@ it left open; `briefs/PLAN.md` records how the three briefs of that day fit toge
   a Practice row) and were redrawn on Linux with the three new Practice baselines. The other Windows-drawn
   baselines were kept.
 
+## The three-tier project catalogue (the brief of 2026-10-16)
+
+- **The catalogue is its own pool, not more curriculum projects.** `data/projects/{daily-easy,weekly-medium,
+  monthly-advanced}.jsonl` are the brief's files, read by `scripts/lib/load-catalogue.ts` and typed in
+  `src/seed/catalogue.ts` (`kind` challenge, build or case; `difficulty`; cadence daily, weekly or monthly; each kind's
+  fields). The curriculum's 245 projects keep their numbering, phases, capstones and state. The catalogue is 1.3 MB,
+  so it is two lazy chunks: a small index (Today, the Deck, lists) and every field (a challenge's screen, a sheet).
+- **Normalised in one place.** Phases "Y1-P0" and "Y2" are the curriculum's `y1-p0` and `y2`; `measure` is always a
+  list; `parts` a list split at commas (not inside "1,200"); milestones `{ step, hours }` become `milestone-N`
+  checkboxes. The catalogue's `inference` and `research` domains are not tracks: they count toward AI.
+- **Nine defects in the brief's files**, fixed or tolerated and nothing invented: two builds have an empty
+  `measure` and four an empty `parts` (read as none); three prerequisites named ids that exist nowhere.
+  `low-d-c-arena` clearly means the curriculum's existing "Arena allocator" build and now says so
+  (`w-c-arena-allocator`); `low-d-lcs-diff` and `low-d-pcap-header` have no counterpart and were dropped.
+- **validate:data** checks: ids unique across the catalogue and everything in the curriculum; difficulty matching the
+  cadence; examples on every challenge; case milestones adding up to `estHours`; prerequisites, refs, covers and
+  phases that resolve; no URL anywhere.
+- **refs and covers** come from a reviewed keyword table (`scripts/lib/catalogue-mapping.ts`): one rule per phrase
+  that names a technique or tool unambiguously ("continuous batching", "OpenGL", "Raft"); language names only from
+  the stack. Two rules were narrowed after review ("alpha-beta" matched a latency model; "buffer pool" GPU work).
+  451 items have refs, 221 covers; the rest are empty, as the brief prefers to a guess.
+- **The daily challenge lives inside Block B.** On B's Now card it is a row ("Daily challenge · … · easy · 20 min · in
+  Python"); while B waits in Later today, B's row says "· daily challenge". It is not a sixth row: the redesign's
+  acceptance test needs Today to fit one 390 × 844 screen. Once B is done it leads Later today. The weekly challenge
+  and an active case sit in Block D the same way.
+- **The pick** depends on the date and on what happened before it, like the practice set: the topic after the one
+  last solved, a draw from that topic's unsolved challenges seeded by the date; Skip moves to the next topic, three
+  times a day; a challenge solved today stays today's, marked solved. After every challenge is solved once, the next
+  cycle suggests a language it has not been solved in. Solves, skips and "Not today" are an append-only log
+  (`state/challenges.json`, merged per event), from which the daily-challenge streak is counted, apart from the
+  study streak.
+- **The weekly slot** is the weekend by default (Settings › Projects): the week's medium challenge, drawn per week,
+  and the week's build. Taking a catalogue build (from the Deck or its sheet) makes it the week's build in Block D,
+  through the existing weekly pick; without one, Block D keeps the curriculum's suggestion as before. A build needs a
+  repository to be done; a challenge does not.
+- **The monthly queue** is the cases taken from the Deck, active, listed in Plan › Projects next to the month's
+  projects and shown in Block D. Cases are not added to the plan's lanes: plan edits name curriculum items only.
+- **The Deck** keeps the curriculum's cards first (its tests and habits) and adds the catalogue's after them. A topic
+  or domain chip narrows to the catalogue. "Earlier" means a phase before the current one; challenges have no phase
+  and are always in.
+- **Library › Projects** is a sixth type chip. Projects (the curriculum's and the catalogue's) sort after resources
+  and papers, so the list opens as before. The list is windowed: only rows near the viewport are drawn, the rest is
+  padding of the measured row height, so 1,600 entries cost a few dozen rows. Browser find-in-page does not see rows
+  far off screen; search does.
+- **Activity › Projects** and **Activity › Practice** share one segmented control, shown once there is a solve or an
+  answer, so a fresh install keeps the Activity mockup.
+- **No in-browser runner.** Pyodide is a download of several megabytes; lazy-loading it would not grow the main bundle, but it is a
+  large dependency for an optional feature, and the examples alone are a weak test. Skipped, as the brief allows.
+- **A pressed chip's count** used a ramp colour at 2.9:1; it is the accent colour now (Lighthouse found it on the
+  Projects filter).
+- **Screenshots.** New: `challenge-light.png`, `case-sheet-light.png`, `deck-daily-light.png`; redrawn: Today (Block B
+  says "daily challenge") and Library (the Projects chip). All drawn on Linux; the other Windows baselines are kept.
+
