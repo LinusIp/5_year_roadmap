@@ -4,15 +4,26 @@ import { buildServiceWorkerSource } from '../../scripts/lib/vite-plugin-sw.ts';
 
 type Handler = (event: Record<string, unknown>) => void;
 
+class FakeRequest {
+  url: string;
+  cache: string | undefined;
+  constructor(url: string, init?: { cache?: string }) {
+    this.url = url;
+    this.cache = init?.cache;
+  }
+}
+
 /** Runs the generated service worker against fakes of `self` and `caches`. */
 function boot(files: string[], version: string, existingCaches: string[] = []) {
   const handlers = new Map<string, Handler>();
   const stored = new Map<string, string[]>(existingCaches.map((name) => [name, []]));
+  const modes: string[] = [];
   let skipped = false;
   const caches = {
     open: async (name: string) => ({
-      addAll: async (urls: string[]) => {
-        stored.set(name, urls);
+      addAll: async (requests: FakeRequest[]) => {
+        stored.set(name, requests.map((r) => r.url));
+        modes.push(...requests.map((r) => r.cache ?? 'default'));
       },
     }),
     keys: async () => [...stored.keys()],
@@ -34,8 +45,8 @@ function boot(files: string[], version: string, existingCaches: string[] = []) {
     },
     addEventListener: (type: string, handler: Handler) => handlers.set(type, handler),
   };
-  vm.runInNewContext(buildServiceWorkerSource(files, version), { self, caches, URL, Promise, fetch: async (r: { url: string }) => 'network:' + r.url });
-  return { handlers, stored, wasSkipped: () => skipped };
+  vm.runInNewContext(buildServiceWorkerSource(files, version), { self, caches, URL, Promise, Request: FakeRequest, fetch: async (r: { url: string }) => 'network:' + r.url });
+  return { handlers, stored, modes, wasSkipped: () => skipped };
 }
 
 async function dispatch(handler: Handler | undefined, event: Record<string, unknown>): Promise<unknown> {
@@ -61,6 +72,13 @@ describe('generated service worker', () => {
     const sw = boot(files, 'v1');
     await dispatch(sw.handlers.get('install'), {});
     expect(sw.stored.get('atlas-v1')).toEqual(['./', './assets/index-abc.js', './assets/index-abc.css', './index.html', './manifest.webmanifest']);
+  });
+
+  it('fetches them past the HTTP cache, so a fresh install never stores the old build\'s page', async () => {
+    const sw = boot(files, 'v1');
+    await dispatch(sw.handlers.get('install'), {});
+    expect(sw.modes).toHaveLength(5);
+    expect(sw.modes.every((m) => m === 'reload')).toBe(true);
   });
 
   it('drops caches of older versions on activate, and leaves foreign caches alone', async () => {
