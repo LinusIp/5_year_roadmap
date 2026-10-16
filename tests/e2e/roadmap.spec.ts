@@ -71,18 +71,21 @@ test('re-plan shows a diff first, applies only when asked, and is then a no-op',
   await open(page, './#/plan');
   await page.getByRole('button', { name: 'Re-plan' }).click();
   const sheet = page.getByRole('dialog', { name: 'Re-plan from today' });
-  await expect(sheet.getByText(/Nothing is dropped/)).toBeVisible();
+  await sheet.getByRole('radio', { name: 'Defer or drop' }).click();
+  await expect(sheet.getByText(/stretch items go first/)).toBeVisible();
   // The seed runs some lanes over budget, so there is something to move.
-  await expect(sheet.getByRole('button', { name: /^Apply \d+ moves?$/ })).toBeVisible();
+  await expect(sheet.getByRole('button', { name: /^Apply \d+ changes?$/ })).toBeVisible();
 
   // Closing changes nothing.
   await sheet.getByRole('button', { name: 'Close' }).click();
   await page.getByRole('button', { name: 'Re-plan' }).click();
-  await sheet.getByRole('button', { name: /^Apply \d+ moves?$/ }).click();
+  await sheet.getByRole('radio', { name: 'Defer or drop' }).click();
+  await sheet.getByRole('button', { name: /^Apply \d+ changes?$/ }).click();
   await expect(sheet).toBeHidden();
 
   await page.getByRole('button', { name: 'Re-plan' }).click();
-  await expect(sheet.getByText('Everything already fits. Nothing would move.')).toBeVisible();
+  await sheet.getByRole('radio', { name: 'Defer or drop' }).click();
+  await expect(sheet.getByText('Everything already fits. Nothing would change.')).toBeVisible();
 });
 
 test('reorders a lane with the arrows and keeps the order', async ({ page }) => {

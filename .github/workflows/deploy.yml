@@ -20,6 +20,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -30,17 +32,48 @@ jobs:
       # `build` = validate:data + typecheck + vite build, so an invalid curriculum is never deployed.
       - run: npm run build
       - run: npm test
+      - id: version
+        run: echo "version=$(grep -o 'const VERSION = "[0-9a-f]*"' dist/sw.js | grep -o '[0-9a-f]\{12\}')" >> "$GITHUB_OUTPUT"
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
+  # The deploy, checked as it happens: before deploying, a browser opens the live site as a returning user on the
+  # old build (scripts/live-check.ts); after it, the app's own update prompt must appear, Reload must bring in the
+  # new version, and the new screens must render.
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci && npx playwright install --with-deps chromium
+      - name: Open the live site on the old build
+        run: |
+          nohup node scripts/live-check.ts "https://linusip.github.io/5_year_roadmap/" "${{ needs.build.outputs.version }}" > live-check.log 2>&1 &
+          echo $! > live-check.pid
+          for i in $(seq 1 60); do grep -q "opened as a returning user\|Live check failed" live-check.log && break; sleep 2; done
+          cat live-check.log
       - id: deployment
         uses: actions/deploy-pages@v5
+      - name: Update prompt, reload, new screens
+        run: |
+          while kill -0 "$(cat live-check.pid)" 2>/dev/null; do sleep 5; done
+          cat live-check.log
+          grep -q "Live check passed." live-check.log
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: live-check
+          path: |
+            live-check.log
+            live-check.png
+          retention-days: 7

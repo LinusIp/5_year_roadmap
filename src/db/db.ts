@@ -5,9 +5,10 @@
 import Dexie from 'dexie';
 import type { EntityTable, Table } from 'dexie';
 import type {
-  CertState, CustomEntity, DayLog, EntityKind, Meta, MilestoneState, OutboxEntry, Override, PaperState,
-  ReplanRecord, Review, Secret, StoredSettings, SyncRow, UserItemState, WeekPick,
+  CertState, CustomEntity, DayLog, EntityKind, Meta, MilestoneState, OutboxEntry, Override, PaperState, PlanPatch, PracticeAnswer, ChallengeEvent,
+  ReplanRecord, Review, Secret, StoredSettingsInput, SyncRow, UserItemState, WeekPick,
 } from './types.ts';
+import { legacyPlanPatches } from '../lib/plan.ts';
 import { newId } from '../sync/device.ts';
 import { markSilent, syncMiddleware } from '../sync/middleware.ts';
 
@@ -22,7 +23,14 @@ export class AtlasDB extends Dexie {
   reviews!: EntityTable<Review, 'id'>;
   weekPicks!: EntityTable<WeekPick, 'weekStart'>;
   replans!: EntityTable<ReplanRecord, 'id'>;
-  settings!: EntityTable<StoredSettings, 'id'>;
+  /** Plan edits as an ordered list of patches over the curriculum (flexibility brief). */
+  planPatches!: EntityTable<PlanPatch, 'id'>;
+  /** Practice answers, one row per question answered in a set. */
+  practice!: EntityTable<PracticeAnswer, 'id'>;
+  /** Catalogue challenges solved, skipped or hidden. */
+  challenges!: EntityTable<ChallengeEvent, 'id'>;
+  /** Version 1 or 2 as stored; read through readSettings, which upgrades. */
+  settings!: EntityTable<StoredSettingsInput, 'id'>;
   meta!: EntityTable<Meta, 'key'>;
   secrets!: EntityTable<Secret, 'id'>;
   /** GitHub Sync, local-only: files waiting to be pushed. */
@@ -57,6 +65,23 @@ export class AtlasDB extends Dexie {
           log.entries = log.entries.map((entry) => (entry.id ? entry : { ...entry, id: newId() }));
         });
       });
+    // Version 3, flexibility: plan edits become an ordered list of patches. Plan-item edits stored the old way
+    // (a patch per item, a "removed" flag, custom plan items) are converted, so they can be undone and restored.
+    this.version(3)
+      .stores({ planPatches: 'id, at, group' })
+      .upgrade(async (tx) => {
+        markSilent(tx);
+        const overrides = await tx.table<Override, [EntityKind, string]>('overrides').where('kind').equals('planItem').toArray();
+        const customs = await tx.table<CustomEntity, [EntityKind, string]>('customEntities').where('kind').equals('planItem').toArray();
+        const patches = legacyPlanPatches(overrides, customs, new Date().toISOString());
+        if (patches.length > 0) await tx.table<PlanPatch, string>('planPatches').bulkPut(patches);
+        await tx.table('overrides').where('kind').equals('planItem').delete();
+        await tx.table('customEntities').where('kind').equals('planItem').delete();
+      });
+    // Version 4, practice: the answers of the daily sets and of practice on demand.
+    this.version(4).stores({ practice: 'id, date, questionId, topic' });
+    // Version 5, the project catalogue: what was done with its challenges.
+    this.version(5).stores({ challenges: 'id, date, challengeId' });
     this.use(syncMiddleware(this));
   }
 }
@@ -67,7 +92,7 @@ export class AtlasDB extends Dexie {
  */
 export const EXPORTED_TABLES = [
   'dayLogs', 'itemStates', 'paperStates', 'certStates', 'milestoneStates', 'customEntities',
-  'overrides', 'reviews', 'weekPicks', 'replans', 'settings', 'meta',
+  'overrides', 'reviews', 'weekPicks', 'replans', 'planPatches', 'practice', 'challenges', 'settings', 'meta',
 ] as const;
 export type ExportedTable = (typeof EXPORTED_TABLES)[number];
 

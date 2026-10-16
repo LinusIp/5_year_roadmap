@@ -1,8 +1,10 @@
 /**
  * Streaks and heatmap intensity.
  *
- * The rules come from Settings, not from code: a day counts from `minMinutes` logged, and the user has
- * `freezesPerMonth` freeze days that do not break the streak. A freeze is spent on a day that would
+ * The rules come from Settings, not from code. A day counts when it logs `minMinutes`, or `percent` of the
+ * minutes its schedule planned, whichever is lower. A day that planned nothing (a rest day, a day whose template
+ * has no blocks) counts if it reaches `minMinutes` and otherwise simply holds the streak: it never breaks it and
+ * never spends a freeze. The user has `freezesPerMonth` freeze days; a freeze is spent on a day that would
  * otherwise end the streak, and only while the month still has one left.
  *
  * Pure. Every date is a local "YYYY-MM-DD" (see dates.ts).
@@ -13,6 +15,8 @@ import { addDays, daysBetween, eachDay, monthKey, today } from './dates.ts';
 
 export interface StreakRules {
   minMinutes: number;
+  /** Share of the day's planned minutes that also counts. Absent: minMinutes alone. */
+  percent?: number;
   freezesPerMonth: number;
   autoFreeze: boolean;
 }
@@ -21,10 +25,15 @@ export interface DayTotals {
   date: string;
   minutes: number;
   frozen: boolean;
+  /** Minutes the day planned, when the caller knows the schedule. */
+  planned?: number;
 }
 
+/** Planned minutes of a date, from the schedule (src/lib/day-plan.ts). */
+export type PlannedFor = (date: string) => number;
+
 /** One entry per day between the first and last log, with zero-minute days filled in. */
-export function dailyTotals(logs: DayLog[], from?: string, to?: string): DayTotals[] {
+export function dailyTotals(logs: DayLog[], from?: string, to?: string, planned?: PlannedFor): DayTotals[] {
   const byDate = new Map(logs.map((log) => [log.date, log]));
   const dates = logs.map((l) => l.date).sort();
   const start = from ?? dates[0];
@@ -32,16 +41,29 @@ export function dailyTotals(logs: DayLog[], from?: string, to?: string): DayTota
   if (!start || !end || start > end) return [];
   return eachDay(start, end).map((date) => {
     const log = byDate.get(date);
-    return {
+    const total: DayTotals = {
       date,
       minutes: log ? log.entries.reduce((sum, e) => sum + e.minutes, 0) : 0,
       frozen: Boolean(log?.frozen),
     };
+    if (planned) total.planned = planned(date);
+    return total;
   });
 }
 
+/** The minutes a day needs to count: minMinutes, or `percent` of its plan when that is lower. */
+export function minutesToCount(planned: number | undefined, rules: StreakRules): number {
+  if (planned === undefined || planned <= 0 || rules.percent === undefined) return rules.minMinutes;
+  return Math.min(rules.minMinutes, Math.ceil((planned * rules.percent) / 100));
+}
+
 export function counts(total: DayTotals, rules: StreakRules): boolean {
-  return total.minutes >= rules.minMinutes;
+  return total.minutes >= minutesToCount(total.planned, rules);
+}
+
+/** A day that planned nothing and did not count: it holds the streak without breaking it or spending a freeze. */
+export function isNeutral(total: DayTotals, rules: StreakRules): boolean {
+  return total.planned === 0 && !counts(total, rules);
 }
 
 export interface StreakState {
@@ -84,6 +106,8 @@ function walk(totals: DayTotals[], rules: StreakRules): { longest: number; run: 
   for (const total of totals) {
     if (counts(total, rules)) {
       run = { length: run.length + 1, start: run.start ?? total.date, freezes: run.freezes };
+    } else if (isNeutral(total, rules)) {
+      // A rest day: nothing to do, nothing lost.
     } else if (total.frozen && spendFreeze(total.date)) {
       // An explicit freeze holds the streak without adding a day to it.
       run = { ...run, freezes: run.freezes + 1 };
@@ -99,8 +123,8 @@ function walk(totals: DayTotals[], rules: StreakRules): { longest: number; run: 
   return { longest: Math.max(longest, run.length), run, runs };
 }
 
-export function streak(logs: DayLog[], rules: StreakRules, asOf: string = today()): StreakState {
-  const totals = dailyTotals(logs, undefined, asOf).filter((t) => t.date <= asOf);
+export function streak(logs: DayLog[], rules: StreakRules, asOf: string = today(), planned?: PlannedFor): StreakState {
+  const totals = dailyTotals(logs, undefined, asOf, planned).filter((t) => t.date <= asOf);
   if (totals.length === 0) {
     return { current: 0, longest: 0, freezesInUse: 0, startedOn: null, lastCountedOn: null, atRisk: false };
   }
@@ -110,7 +134,9 @@ export function streak(logs: DayLog[], rules: StreakRules, asOf: string = today(
   const full = walk(totals, rules);
   // Today not being finished yet must not end the streak: if today does not count, judge the streak as of
   // yesterday and mark it at risk.
-  const todayCounts = counts(totals.at(-1)!, rules);
+  const last = totals.at(-1)!;
+  const todayCounts = counts(last, rules);
+  const todayResting = last.date === asOf && isNeutral(last, rules);
   const state = todayCounts ? full : walk(totals.slice(0, -1), rules);
   const alive = todayCounts || state.run.length > 0;
 
@@ -120,7 +146,7 @@ export function streak(logs: DayLog[], rules: StreakRules, asOf: string = today(
     freezesInUse: alive ? state.run.freezes : 0,
     startedOn: alive ? state.run.start : null,
     lastCountedOn,
-    atRisk: !todayCounts && alive,
+    atRisk: !todayCounts && !todayResting && alive,
   };
 }
 
@@ -130,12 +156,12 @@ export function streak(logs: DayLog[], rules: StreakRules, asOf: string = today(
  * `date` itself counts only when the user froze it on purpose: an unfinished day has not spent a freeze
  * yet, the same rule that keeps today from breaking the streak.
  */
-export function freezesSpentInMonth(logs: DayLog[], rules: StreakRules, date: string): number {
+export function freezesSpentInMonth(logs: DayLog[], rules: StreakRules, date: string, planned?: PlannedFor): number {
   const month = monthKey(date);
-  const totals = dailyTotals(logs, undefined, date).filter((t) => monthKey(t.date) === month);
+  const totals = dailyTotals(logs, undefined, date, planned).filter((t) => monthKey(t.date) === month);
   let used = 0;
   for (const total of totals) {
-    if (counts(total, rules)) continue;
+    if (counts(total, rules) || isNeutral(total, rules)) continue;
     if (total.frozen) used++;
     else if (rules.autoFreeze && total.date < date) used++;
   }
@@ -153,6 +179,27 @@ export function heatLevel(minutes: number, thresholds: SettingsDefaults['heatmap
   if (minutes >= thresholds[1]) return 2;
   if (minutes >= thresholds[0]) return 1;
   return 0;
+}
+
+/** The steps of the relative heatmap: a share of the day's plan. */
+export const RELATIVE_STEPS = [0.25, 0.6, 1] as const;
+
+/**
+ * Relative intensity: 0 for nothing, then under 25 %, under 60 %, under 100 % and at least 100 % of the minutes
+ * the day planned. A day that planned nothing falls back to the absolute thresholds.
+ */
+export function relativeLevel(minutes: number, planned: number, thresholds: SettingsDefaults['heatmapThresholds']): HeatLevel {
+  if (minutes <= 0) return 0;
+  if (planned <= 0) return heatLevel(minutes, thresholds);
+  const share = minutes / planned;
+  if (share >= RELATIVE_STEPS[2]) return 4;
+  if (share >= RELATIVE_STEPS[1]) return 3;
+  if (share >= RELATIVE_STEPS[0]) return 2;
+  return 1;
+}
+
+export function relativeLabel(level: HeatLevel): string {
+  return ['Nothing logged', 'Under 25 % of the plan', '25 to 59 % of the plan', '60 to 99 % of the plan', 'The whole plan or more'][level]!;
 }
 
 /** Human-readable band for a level, for the legend and tooltips. */

@@ -114,6 +114,7 @@
   estHours: 80
   prerequisites: [30-days-of-python]
   subject: deep-learning
+  alternatives: [stanford-cs231n]
 
 - id: stanford-cs229
   title: "Stanford CS229 Machine Learning"
@@ -129,6 +130,7 @@
   prerequisites: [mit-18-06, mit-6-041]
   subject: machine-learning
   stretch: true
+  alternatives: [ng-ml-spec]
 
 - id: stanford-cs231n
   title: "Stanford CS231n Deep Learning for Computer Vision"
@@ -145,6 +147,7 @@
   prerequisites: [mit-18-06]
   subject: deep-learning
   stretch: true
+  alternatives: [fastai-practical-dl]
 
 - id: stanford-cs224n
   title: "Stanford CS224n Natural Language Processing with Deep Learning"
@@ -463,6 +466,7 @@
   cost: audit-free
   estHours: 90
   summary: "The beginner route into machine learning, free to audit."
+  alternatives: [stanford-cs229]
 
 - id: cs50-ai
   title: "CS50's Introduction to Artificial Intelligence with Python"

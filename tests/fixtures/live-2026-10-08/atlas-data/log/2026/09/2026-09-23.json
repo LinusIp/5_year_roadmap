@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-23",
+  "deviceId": "5kmn4cd1hgnm",
+  "entries": [
+    {
+      "block": "E",
+      "deviceId": "5kmn4cd1hgnm",
+      "id": "8u5if6yn5oji",
+      "minutes": 45,
+      "refId": "mit-18-06",
+      "track": "math",
+      "updatedAt": "2026-10-16T04:24:38.428Z"
+    }
+  ],
+  "removed": [
+    {
+      "at": "2026-10-16T04:24:38.429Z",
+      "deviceId": "5kmn4cd1hgnm",
+      "id": "ehmt3fpyr29m"
+    }
+  ],
+  "updatedAt": "2026-10-16T04:24:38.429Z"
+}

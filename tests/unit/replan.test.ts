@@ -5,7 +5,7 @@ import { defaultSettings } from '../../src/db/settings.ts';
 import { budgetHoursBetween, fractionDone, itemProgress, laneProgress, phaseProgress } from '../../src/lib/progress.ts';
 import { describeVerdict, forecastPhase, paceForBlock, paceSummary } from '../../src/lib/forecast.ts';
 import { laneCapacity, replan, replanToPatches } from '../../src/lib/replan.ts';
-import { nextOrder, reorderLane, resolveSeed, takeIntoLane } from '../../src/lib/plan.ts';
+import { nextOrder, reorderLane, resolveSeed, stampPatches, takeIntoLane } from '../../src/lib/plan.ts';
 import type { AppSeed, PlanItem } from '../../src/seed/schema.ts';
 import type { DayLog, UserItemState } from '../../src/db/types.ts';
 
@@ -199,13 +199,13 @@ describe('re-planning', () => {
     const patches = replanToPatches(result);
     expect(patches).toHaveLength(result.moves.length + result.reorders.length);
     if (result.moves.length > 0) {
-      expect(patches[0]).toMatchObject({ patch: { phaseId: expect.any(String), order: expect.any(Number) } });
+      expect(patches[0]).toMatchObject({ op: 'move', phaseId: expect.any(String), order: expect.any(Number) });
     }
   });
 
   it('leaves no two items of a lane at the same position once applied', () => {
     const result = replan({ seed, settings, states: new Map(), asOf: FIRST_DAY });
-    const applied = resolveSeed(seed, replanToPatches(result).map((p) => ({ kind: 'planItem' as const, id: p.id, patch: p.patch })), []);
+    const applied = resolveSeed(seed, [], [], stampPatches(replanToPatches(result), 'Re-plan'));
     const seen = new Set<string>();
     for (const item of applied.plan) {
       const key = item.phaseId + '/' + item.block + '/' + item.order;
@@ -216,7 +216,7 @@ describe('re-planning', () => {
 
   it('is stable: re-planning an already re-planned roadmap changes nothing', () => {
     const first = replan({ seed, settings, states: new Map(), asOf: FIRST_DAY });
-    const applied = resolveSeed(seed, replanToPatches(first).map((p) => ({ kind: 'planItem' as const, id: p.id, patch: p.patch })), []);
+    const applied = resolveSeed(seed, [], [], stampPatches(replanToPatches(first), 'Re-plan'));
     const second = replan({ seed: applied, settings, states: new Map(), asOf: FIRST_DAY });
     expect(second.moves).toEqual([]);
     expect(second.reorders).toEqual([]);

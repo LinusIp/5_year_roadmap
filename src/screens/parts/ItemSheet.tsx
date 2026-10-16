@@ -6,7 +6,9 @@ import type { Atlas } from '../../hooks/useAtlas.ts';
 import { monthName } from '../../lib/dates.ts';
 import { fractionDone } from '../../lib/progress.ts';
 import { hasRepo, repoLinkProblem, statusBlocker } from '../../lib/projects.ts';
-import { loadUnits } from '../../seed/index.ts';
+import { loadCatalogue, loadUnits } from '../../seed/index.ts';
+import type { CatalogueItem } from '../../seed/catalogue.ts';
+import { CatalogueBody } from './CatalogueBody.tsx';
 import type { AppResource, Project, Unit } from '../../seed/schema.ts';
 import { Button } from '../../ui/Button.tsx';
 import { ProgressLine } from '../../ui/ProgressLine.tsx';
@@ -14,8 +16,11 @@ import { Row, RowList } from '../../ui/Row.tsx';
 import { Sheet } from '../../ui/Sheet.tsx';
 import { TextField } from '../../ui/TextField.tsx';
 import { Checklist, criteriaUnits } from './Checklist.tsx';
+import { ProjectDocView, useProjectDoc } from './ProjectDocView.tsx';
+import { Markdown } from '../../lib/markdown.tsx';
 import { NotesField } from './NotesField.tsx';
 import { StatusPill } from './StatusPill.tsx';
+import { AddToPlanSheet } from '../plan/EditSheets.tsx';
 import { blockShort, plural } from './text.ts';
 
 export const ITEM_STATUSES: { value: ItemStatus; label: string }[] = [
@@ -40,12 +45,13 @@ export function ItemStatusPill({ kind, refId, title, state }: { kind: 'resource'
   );
 }
 
-/** "Year 1 · In flight · Block A, Gamedev": where an item sits on the plan. */
+/** "Year 1 · In flight · Block A, Gamedev": where an item sits on the plan, and "Add to the plan". */
 function Placement({ atlas, refId }: { atlas: Atlas; refId: string }) {
+  const [adding, setAdding] = useState(false);
   const items = atlas.seed.plan.filter((i) => (i.resourceId ?? i.projectId) === refId);
-  if (items.length === 0) return <Row title="Not on the plan" meta="Add it to a lane from Plan" />;
   return (
     <>
+      {items.length === 0 && <Row title="Not on the plan" />}
       {items.map((item) => {
         const phase = atlas.seed.phases.find((p) => p.id === item.phaseId);
         const block = atlas.settings.core.blocks.find((b) => b.id === item.block);
@@ -58,6 +64,8 @@ function Placement({ atlas, refId }: { atlas: Atlas; refId: string }) {
           />
         );
       })}
+      <Row title={items.length === 0 ? 'Add to the plan' : 'Add it to another lane too'} meta="Pick a phase, a lane and a position" onClick={() => setAdding(true)} />
+      {adding && <AddToPlanSheet atlas={atlas} refId={refId} open onClose={() => setAdding(false)} />}
     </>
   );
 }
@@ -90,7 +98,8 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
   const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => {
     let live = true;
-    void loadUnits(resource.id).then((list) => live && setUnits(list));
+    if (resource.customUnits) setUnits(resource.customUnits);
+    else void loadUnits(resource.id).then((list) => live && setUnits(list));
     return () => {
       live = false;
     };
@@ -202,6 +211,7 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
       return next;
     });
   const [budget, setBudget] = useState<string | null>(null);
+  const doc = useProjectDoc(project.id);
 
   return (
     <div className="space-y-6">
@@ -225,6 +235,8 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
 
       <Checklist label="Done when" refId={project.id} units={criteriaUnits(project.acceptance)} done={state?.unitsDone ?? []} />
 
+      <ProjectDocView seed={atlas.seed} projectId={project.id} doc={doc} done={state?.unitsDone ?? []} />
+
       <div className="space-y-3">
         <h3 className="text-meta font-normal text-ink2">Ship it</h3>
         <LinkField label="Repository" value={state?.repoUrl} onSave={(v) => setField('repoUrl', v)} />
@@ -235,6 +247,7 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
       {project.stage === 2 && (
         <div className="space-y-3">
           <h3 className="text-meta font-normal text-ink2">Parts and budget</h3>
+          {doc?.sections['Parts and budget'] && <Markdown source={doc.sections['Parts and budget']} className="text-body text-ink2" />}
           {project.parts && project.parts.length > 0 ? (
             <ul className="list-disc space-y-0.5 pl-5 text-body text-ink2">
               {project.parts.map((part) => (
@@ -276,13 +289,31 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
 export function ItemSheet({ atlas, id, onClose }: { atlas: Atlas; id: string | null; onClose: () => void }) {
   const resource = id ? atlas.seed.resources.find((r) => r.id === id) : undefined;
   const project = id && !resource ? atlas.seed.projects.find((p) => p.id === id) : undefined;
-  const title = resource?.title ?? project?.title ?? 'Not in the library';
+  // Not in the curriculum: perhaps a catalogue build, case or challenge, whose chunk loads on demand.
+  const [catalogue, setCatalogue] = useState<CatalogueItem[] | null>(null);
+  useEffect(() => {
+    if (!id || resource || project || catalogue) return;
+    let live = true;
+    void loadCatalogue().then((items) => live && setCatalogue(items));
+    return () => {
+      live = false;
+    };
+  }, [id, resource, project, catalogue]);
+  const fromCatalogue = id && !resource && !project ? catalogue?.find((i) => i.id === id) : undefined;
+  const loading = Boolean(id && !resource && !project && !catalogue);
+  const title = resource?.title ?? project?.title ?? fromCatalogue?.title ?? (loading ? 'Loading…' : 'Not in the library');
   return (
     <Sheet open={id !== null} title={title} onClose={onClose}>
       {resource ? (
         <ResourceBody key={resource.id} atlas={atlas} resource={resource} />
       ) : project ? (
         <ProjectBody key={project.id} atlas={atlas} project={project} />
+      ) : fromCatalogue ? (
+        <CatalogueBody key={fromCatalogue.id} atlas={atlas} item={fromCatalogue} />
+      ) : loading ? (
+        <p className="text-meta text-ink2" role="status">
+          Loading…
+        </p>
       ) : (
         <p className="text-body text-ink2">It may have been renamed or removed from the curriculum. Your notes on it are kept under the old id.</p>
       )}

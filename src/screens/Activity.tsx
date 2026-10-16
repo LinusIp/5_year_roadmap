@@ -2,10 +2,11 @@ import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
-import { addDays, today as todayDate, weekday } from '../lib/dates.ts';
+import { addDays, today as todayDate } from '../lib/dates.ts';
 import { buildGrid, planYears } from '../lib/heatmap.ts';
 import type { HeatCell } from '../lib/heatmap.ts';
 import { isBlockDone, totalMinutes } from '../lib/logs.ts';
+import { plannedFor, resolveDay } from '../lib/day-plan.ts';
 import { freezesSpentInMonth, streak } from '../lib/streaks.ts';
 import { useQueryParam } from '../router/router.tsx';
 import type { TrackId } from '../seed/schema.ts';
@@ -18,7 +19,11 @@ import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { DaySheet } from './parts/DaySheet.tsx';
 import { GithubCalendar } from './parts/GithubCalendar.tsx';
+import { trackColor } from '../ui/colors.ts';
 import { PickerSheet } from './parts/PickerSheet.tsx';
+import { PracticeActivity } from './parts/PracticeActivity.tsx';
+import { ProjectsActivity } from './parts/ProjectsActivity.tsx';
+import { SegmentedControl } from '../ui/SegmentedControl.tsx';
 import { dateTitle, hours, plural, span } from './parts/text.ts';
 
 /**
@@ -29,9 +34,11 @@ export function Activity() {
   const atlas = useAtlas();
   const [yearParam, setYear] = useQueryParam('year');
   const [trackParam, setTrack] = useQueryParam('track');
+  const [view, setView] = useQueryParam('view');
   const [open, setOpen] = useState<string | null>(null);
   const [pickingTrack, setPickingTrack] = useState(false);
   const reviews = useLiveQuery(() => db.reviews.where('kind').equals('week').toArray(), []);
+  const anyChallenge = (useLiveQuery(() => db.challenges.count(), []) ?? 0) > 0;
   const logs = atlas?.logs;
   const atlasDates = useMemo(() => (logs ?? []).filter((log) => log.entries.some((e) => e.minutes > 0)).map((log) => log.date), [logs]);
 
@@ -56,14 +63,24 @@ export function Activity() {
   // The whole calendar year, like GitHub's: days before the plan or still ahead are simply empty.
   const range = { from: year + '-01-01', to: year + '-12-31' };
   const track = seed.tracks.find((t) => t.id === trackParam);
-  const color = track ? 'var(--track-' + track.id + ')' : undefined;
+  const color = track ? trackColor(track, seed.tracks) : undefined;
   const weekStartsOn = settings.core.weekStartsOn;
   const gridFor = (y: number) =>
-    buildGrid({ from: y + '-01-01', to: y + '-12-31', logs, thresholds: settings.core.heatmapThresholds, tracks: track ? [track.id as TrackId] : [], weekStartsOn });
+    buildGrid({
+      from: y + '-01-01',
+      to: y + '-12-31',
+      logs,
+      thresholds: settings.core.heatmapThresholds,
+      tracks: track ? [track.id as TrackId] : [],
+      weekStartsOn,
+      mode: settings.core.heatmapMode,
+      planned,
+    });
 
   const rules = settings.core.streak;
-  const streakState = streak(logs, rules, now);
-  const freezesLeft = Math.max(0, rules.freezesPerMonth - freezesSpentInMonth(logs, rules, now));
+  const planned = plannedFor(settings);
+  const streakState = streak(logs, rules, now, planned);
+  const freezesLeft = Math.max(0, rules.freezesPerMonth - freezesSpentInMonth(logs, rules, now, planned));
   const logged = logs.reduce((sum, log) => sum + totalMinutes(log), 0);
   const reviewedOn = new Set((reviews ?? []).map((r) => r.completedAt).filter(Boolean));
 
@@ -77,7 +94,7 @@ export function Activity() {
   const lastWeek = Array.from({ length: 7 }, (_, i) => addDays(now, -i)).filter((d) => d >= planStart || logs.some((l) => l.date === d));
   const dayRow = (date: string): { title: string; meta: string; minutes: number } => {
     const log = logs.find((l) => l.date === date);
-    const scheduled = settings.core.blocks.filter((b) => b.days.includes(weekday(date)));
+    const scheduled = resolveDay(date, settings).blocks;
     const done = scheduled.filter((b) => isBlockDone(log, b.id)).length;
     const blocks = done + ' of ' + scheduled.length + ' blocks done';
     const meta = log?.frozen ? 'Freeze day' : reviewedOn.has(date) ? 'Review written · ' + done + ' of ' + scheduled.length : blocks;
@@ -92,57 +109,81 @@ export function Activity() {
         sub={hours(logged) + ' logged · longest streak ' + plural(streakState.longest, 'day') + ' · ' + plural(freezesLeft, 'freeze') + ' left this month'}
       />
 
-      {(allYears ? years : [year]).map((y, index) => {
-        const grid = gridFor(y);
-        return (
-          <section key={y} aria-labelledby={'heatmap-' + y} className={(index === 0 ? 'mt-6' : 'mt-3') + ' flex flex-col gap-3 rounded-card bg-surface p-4'}>
-            <div className="flex items-center justify-between gap-2">
-              <h2 id={'heatmap-' + y} className="text-meta font-medium">
-                {y}
-                {track ? ' · ' + track.name : ''}
-              </h2>
-              {index === 0 && <HeatLegend color={color} />}
-            </div>
-            <Heatmap
-              cells={grid.cells}
-              columns={grid.columns}
-              months={grid.months}
-              title={'Time logged in ' + y + (track ? ' on ' + track.name : '')}
-              label={cellLabel}
-              onSelect={setOpen}
-              selected={open ?? undefined}
-              color={color}
-            />
-          </section>
-        );
-      })}
-
-      <div className="mt-3">
-        <Chips
-          label="Year and track"
-          items={[
-            ...yearChips.map((y) => ({ key: String(y), label: String(y), pressed: !allYears && y === year, onClick: () => setYear(y === currentYear ? null : String(y)) })),
-            { key: 'all', label: 'All years', pressed: allYears, onClick: () => setYear(allYears ? null : 'all') },
-            { key: 'track', label: track ? track.name : 'By track', pressed: Boolean(track), end: true, onClick: () => setPickingTrack(true) },
-          ]}
-        />
-      </div>
-
-      {settings.github.showCalendar && !allYears && (
-        <div className="mt-4">
-          <GithubCalendar from={range.from} to={range.to} year={String(year)} weekStartsOn={weekStartsOn} username={settings.github.username} atlasDates={atlasDates} />
+      {/* Practice is a view of its own once there is something to show; a fresh install keeps the mockup. */}
+      {(atlas.practice.length > 0 || anyChallenge || view === 'practice' || view === 'projects') && (
+        <div className="mt-5">
+          <SegmentedControl
+            label="View"
+            value={view === 'practice' || view === 'projects' ? view : 'time'}
+            options={[
+              { value: 'time', label: 'Time' },
+              { value: 'practice', label: 'Practice' },
+              { value: 'projects', label: 'Projects' },
+            ]}
+            onChange={(v) => setView(v === 'time' ? null : v)}
+          />
         </div>
       )}
 
-      {logged === 0 ? (
-        <EmptyState action={<Button to="/">Go to Today</Button>}>Nothing logged yet. Log an hour on Today and the first square lights up.</EmptyState>
+      {view === 'practice' ? (
+        <PracticeActivity atlas={atlas} />
+      ) : view === 'projects' ? (
+        <ProjectsActivity atlas={atlas} />
       ) : (
-        <RowList flat label="Last 7 days" className="mt-6">
-          {lastWeek.map((date) => {
-            const row = dayRow(date);
-            return <Row key={date} height={48} title={row.title} meta={row.meta} trailing={span(row.minutes)} onClick={() => setOpen(date)} />;
+        <>
+          {(allYears ? years : [year]).map((y, index) => {
+            const grid = gridFor(y);
+            return (
+              <section key={y} aria-labelledby={'heatmap-' + y} className={(index === 0 ? 'mt-6' : 'mt-3') + ' flex flex-col gap-3 rounded-card bg-surface p-4'}>
+                <div className="flex items-center justify-between gap-2">
+                  <h2 id={'heatmap-' + y} className="text-meta font-medium">
+                    {y}
+                    {track ? ' · ' + track.name : ''}
+                  </h2>
+                  {index === 0 && <HeatLegend color={color} />}
+                </div>
+                <Heatmap
+                  cells={grid.cells}
+                  columns={grid.columns}
+                  months={grid.months}
+                  title={'Time logged in ' + y + (track ? ' on ' + track.name : '')}
+                  label={cellLabel}
+                  onSelect={setOpen}
+                  selected={open ?? undefined}
+                  color={color}
+                />
+              </section>
+            );
           })}
-        </RowList>
+
+          <div className="mt-3">
+            <Chips
+              label="Year and track"
+              items={[
+                ...yearChips.map((y) => ({ key: String(y), label: String(y), pressed: !allYears && y === year, onClick: () => setYear(y === currentYear ? null : String(y)) })),
+                { key: 'all', label: 'All years', pressed: allYears, onClick: () => setYear(allYears ? null : 'all') },
+                { key: 'track', label: track ? track.name : 'By track', pressed: Boolean(track), end: true, onClick: () => setPickingTrack(true) },
+              ]}
+            />
+          </div>
+
+          {settings.github.showCalendar && !allYears && (
+            <div className="mt-4">
+              <GithubCalendar from={range.from} to={range.to} year={String(year)} weekStartsOn={weekStartsOn} username={settings.github.username} atlasDates={atlasDates} clock={settings.layout.general.clock} />
+            </div>
+          )}
+
+          {logged === 0 ? (
+            <EmptyState action={<Button to="/">Go to Today</Button>}>Nothing logged yet. Log an hour on Today and the first square lights up.</EmptyState>
+          ) : (
+            <RowList flat label="Last 7 days" className="mt-6">
+              {lastWeek.map((date) => {
+                const row = dayRow(date);
+                return <Row key={date} height={48} title={row.title} meta={row.meta} trailing={span(row.minutes)} onClick={() => setOpen(date)} />;
+              })}
+            </RowList>
+          )}
+        </>
       )}
 
       <RowList flat className="mt-6">

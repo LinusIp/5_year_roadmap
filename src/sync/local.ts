@@ -2,19 +2,20 @@
  * The local half of GitHub Sync: the device's records as repository files, and repository files applied back
  * to the device. Writes made here are silent (not stamped, not queued): they are GitHub's version, not edits.
  */
+import { currentSettings } from '../lib/settings.ts';
 import Dexie from 'dexie';
 import type { AtlasDB } from '../db/db.ts';
 import type {
-  CertState, CustomEntity, DayLog, MilestoneState, Override, PaperState, ReplanRecord, Review, StoredSettings,
+  CertState, CustomEntity, DayLog, MilestoneState, Override, PaperState, PlanPatch, PracticeAnswer, ChallengeEvent, ReplanRecord, Review, StoredSettingsInput,
   UserItemState, WeekPick,
 } from '../db/types.ts';
 import { renderDayMarkdown, titleIndex } from '../lib/day-markdown.ts';
 import type { AppSeed } from '../seed/schema.ts';
-import { renderDay, renderItems, renderPlan, renderProject, renderReview, renderSettings } from './files.ts';
+import { renderChallenges, renderDay, renderItems, renderPlan, renderPractice, renderProject, renderReview, renderSettings } from './files.ts';
 import type { ItemsData, PlanData } from './files.ts';
 import { markSilent } from './middleware.ts';
 import {
-  ITEMS_PATH, PLAN_PATH, SETTINGS_PATH, dateOfLogPath, logMarkdownPath, logPath, projectPath, reviewPath,
+  CHALLENGES_PATH, ITEMS_PATH, PLAN_PATH, PRACTICE_PATH, SETTINGS_PATH, dateOfLogPath, logMarkdownPath, logPath, projectPath, reviewPath,
 } from './paths.ts';
 
 export interface LocalState {
@@ -28,13 +29,16 @@ export interface LocalState {
   reviews: Review[];
   weekPicks: WeekPick[];
   replans: ReplanRecord[];
-  settings: StoredSettings[];
+  planPatches: PlanPatch[];
+  practice: PracticeAnswer[];
+  challenges: ChallengeEvent[];
+  settings: StoredSettingsInput[];
 }
 
 export async function readLocal(database: AtlasDB): Promise<LocalState> {
   return database.transaction(
     'r',
-    [database.dayLogs, database.itemStates, database.paperStates, database.certStates, database.milestoneStates, database.customEntities, database.overrides, database.reviews, database.weekPicks, database.replans, database.settings],
+    [database.dayLogs, database.itemStates, database.paperStates, database.certStates, database.milestoneStates, database.customEntities, database.overrides, database.reviews, database.weekPicks, database.replans, database.planPatches, database.practice, database.challenges, database.settings],
     async () => ({
       dayLogs: await database.dayLogs.toArray(),
       itemStates: await database.itemStates.toArray(),
@@ -46,6 +50,9 @@ export async function readLocal(database: AtlasDB): Promise<LocalState> {
       reviews: await database.reviews.toArray(),
       weekPicks: await database.weekPicks.toArray(),
       replans: await database.replans.toArray(),
+      planPatches: await database.planPatches.toArray(),
+      practice: await database.practice.toArray(),
+      challenges: await database.challenges.toArray(),
       settings: await database.settings.toArray(),
     }),
   );
@@ -56,7 +63,7 @@ export function itemsOf(local: LocalState): ItemsData {
 }
 
 export function planOf(local: LocalState): PlanData {
-  return { overrides: local.overrides, customEntities: local.customEntities, replans: local.replans, weekPicks: local.weekPicks };
+  return { overrides: local.overrides, customEntities: local.customEntities, replans: local.replans, weekPicks: local.weekPicks, patches: local.planPatches };
 }
 
 /** Every file the device's records make, for a first sync or after an import. */
@@ -64,6 +71,8 @@ export function allPaths(local: LocalState, seed: AppSeed): string[] {
   const projects = new Set(seed.projects.map((p) => p.id));
   const paths = [ITEMS_PATH, PLAN_PATH];
   if (local.settings.length > 0) paths.push(SETTINGS_PATH);
+  if (local.practice.length > 0) paths.push(PRACTICE_PATH);
+  if (local.challenges.length > 0) paths.push(CHALLENGES_PATH);
   for (const log of local.dayLogs) paths.push(logPath(log.date));
   for (const review of local.reviews) paths.push(reviewPath(review.id));
   for (const state of local.itemStates) if (projects.has(state.refId)) paths.push(projectPath(state.refId));
@@ -84,6 +93,8 @@ export function withCompanions(paths: Iterable<string>): string[] {
 /** A file's content as the device's records have it, or null when the file should not exist. */
 export function renderPath(path: string, local: LocalState, seed: AppSeed): string | null {
   if (path === ITEMS_PATH) return renderItems(itemsOf(local));
+  if (path === PRACTICE_PATH) return local.practice.length > 0 ? renderPractice(local.practice) : null;
+  if (path === CHALLENGES_PATH) return local.challenges.length > 0 ? renderChallenges(local.challenges) : null;
   if (path === PLAN_PATH) return renderPlan(planOf(local));
   if (path === SETTINGS_PATH) return local.settings[0] ? renderSettings(local.settings[0]) : null;
 
@@ -96,7 +107,7 @@ export function renderPath(path: string, local: LocalState, seed: AppSeed): stri
   if (mdDate) {
     const log = local.dayLogs.find((l) => l.date === mdDate);
     if (!log) return null;
-    const core = local.settings[0]?.core ?? seed.settings;
+    const core = currentSettings(local.settings[0], seed.settings).core;
     return renderDayMarkdown(log, { core, titles: titleIndex(seed), planStart: seed.phases[0]!.start, states: itemsOf(local) }, { reflections: true });
   }
   if (path.startsWith('reviews/')) {
@@ -135,7 +146,7 @@ export async function writeItems(database: AtlasDB, data: ItemsData): Promise<vo
 }
 
 export async function writePlan(database: AtlasDB, data: PlanData): Promise<void> {
-  await silently(database, [database.overrides, database.customEntities, database.replans, database.weekPicks], async () => {
+  await silently(database, [database.overrides, database.customEntities, database.replans, database.weekPicks, database.planPatches], async () => {
     await database.overrides.clear();
     await database.overrides.bulkPut(data.overrides);
     await database.customEntities.clear();
@@ -144,10 +155,12 @@ export async function writePlan(database: AtlasDB, data: PlanData): Promise<void
     await database.replans.bulkPut(data.replans);
     await database.weekPicks.clear();
     await database.weekPicks.bulkPut(data.weekPicks);
+    await database.planPatches.clear();
+    await database.planPatches.bulkPut(data.patches);
   });
 }
 
-export async function writeSettings(database: AtlasDB, settings: StoredSettings): Promise<void> {
+export async function writeSettings(database: AtlasDB, settings: StoredSettingsInput): Promise<void> {
   await silently(database, [database.settings], async () => {
     await database.settings.put(settings);
   });
@@ -163,5 +176,19 @@ export async function writeDay(database: AtlasDB, log: DayLog | null, date: stri
 export async function writeReview(database: AtlasDB, review: Review): Promise<void> {
   await silently(database, [database.reviews], async () => {
     await database.reviews.put(review);
+  });
+}
+
+/** Practice answers from GitHub, merged with this device's by id: an answer is never lost. */
+export async function writePractice(database: AtlasDB, answers: PracticeAnswer[]): Promise<void> {
+  await silently(database, [database.practice], async () => {
+    await database.practice.bulkPut(answers);
+  });
+}
+
+/** Challenge events from GitHub, merged with this device's by id, like practice answers. */
+export async function writeChallenges(database: AtlasDB, events: ChallengeEvent[]): Promise<void> {
+  await silently(database, [database.challenges], async () => {
+    await database.challenges.bulkPut(events);
   });
 }

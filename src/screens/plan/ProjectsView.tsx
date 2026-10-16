@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Atlas } from '../../hooks/useAtlas.ts';
+import { useCatalogueIndex } from '../../hooks/useCatalogue.ts';
 import { today } from '../../lib/dates.ts';
 import { minutesForRef } from '../../lib/logs.ts';
 import { adherence } from '../../lib/shipping.ts';
@@ -17,6 +18,7 @@ import { plural, shortTitle } from '../parts/text.ts';
  */
 export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atlas; phase: Phase | null; weekly: Project | null; onOpenItem: (id: string) => void }) {
   const [showDone, setShowDone] = useState<string | null>(null);
+  const catalogue = useCatalogueIndex();
   const { seed, states, logs, settings } = atlas;
   const asOf = today();
   const planStart = seed.phases[0]!.start;
@@ -74,6 +76,25 @@ export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atla
         {monthly.filter(open).length === 0 && <Row title="Every monthly project of this phase is shipped" meta="Pick one from the deck" to="/plan/pick?cadence=monthly" />}
         {doneRow('monthly', monthly.filter((p) => !open(p)), 'monthly project')}
       </RowList>
+
+      {catalogue && (
+        <RowList label="Monthly queue · real cases">
+          {catalogue
+            .filter((e) => e.kind === 'case' && states.get(e.id)?.status === 'active')
+            .map((e, i) => (
+              <Row
+                key={e.id}
+                title={e.title}
+                meta={(i === 0 ? 'Next in Block D · ' : '') + (states.get(e.id)?.unitsDone.length ?? 0) + ' milestones ticked · ' + hoursOn(e.id) + ' of ' + e.hours + ' h'}
+                onClick={() => onOpenItem(e.id)}
+                action={<ItemStatusPill kind="project" refId={e.id} title={e.title} state={states.get(e.id)} />}
+              />
+            ))}
+          {!catalogue.some((e) => e.kind === 'case' && states.get(e.id)?.status === 'active') && (
+            <Row title="No case taken" meta={plural(catalogue.filter((e) => e.kind === 'case').length, 'real case') + ' in the deck'} to="/plan/pick?cadence=monthly" />
+          )}
+        </RowList>
+      )}
 
       <RowList label="Research">
         {researchNow.filter(open).map((p) => projectRow(p, (p.number !== undefined ? 'No. ' + p.number + ' · ' : '') + hoursOn(p.id) + ' of ' + p.estHours + ' h'))}

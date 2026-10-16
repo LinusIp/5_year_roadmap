@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import type { BackupFile } from '../../src/db/types.ts';
 import { renderDayMarkdown, titleIndex } from '../../src/lib/day-markdown.ts';
 import { resolveSeed } from '../../src/lib/plan.ts';
+import { currentSettings } from '../../src/lib/settings.ts';
 import type { AppSeed } from '../../src/seed/schema.ts';
 
 export interface LearningLogOptions {
@@ -26,7 +27,7 @@ export function logPath(date: string): string {
 /** Every file of the log, by path relative to the log's folder. */
 export function buildLearningLog(file: BackupFile, seed: AppSeed, options: LearningLogOptions = {}): Map<string, string> {
   const resolved = resolveSeed(seed, file.data.overrides, file.data.customEntities);
-  const core = file.data.settings.find((s) => s.id === 'app')?.core ?? resolved.settings;
+  const core = currentSettings(file.data.settings.find((s) => s.id === 'app'), resolved.settings).core;
   const context = { core, titles: titleIndex(resolved), planStart: resolved.phases[0]!.start, states: file.data };
 
   const out = new Map<string, string>();

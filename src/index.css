@@ -263,3 +263,10 @@
     animation: none;
   }
 }
+
+/* Settings > Layout > Density: compact only tightens rows' padding; every tap target stays at least 44 px. */
+:root[data-density="compact"] .row-main {
+  min-height: 2.75rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}

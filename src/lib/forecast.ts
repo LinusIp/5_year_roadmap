@@ -10,6 +10,7 @@
 import type { DayLog, StoredSettings } from '../db/types.ts';
 import type { BlockId, Phase, SettingsDefaults } from '../seed/schema.ts';
 import { addDays, clampDate, daysBetween } from './dates.ts';
+import { plannedForBlock, plannedOver } from './day-plan.ts';
 import type { LaneProgress } from './progress.ts';
 
 export type Verdict = 'ahead' | 'on-track' | 'behind' | 'stalled' | 'done' | 'not-started';
@@ -51,10 +52,30 @@ export function paceForBlock(logs: DayLog[], block: BlockId, asOf: string, windo
   return minutes / 60 / windowDays;
 }
 
-export function plannedHoursPerDay(settings: StoredSettings, block: BlockId): number {
-  const def = settings.core.blocks.find((b) => b.id === block);
-  if (!def) return 0;
-  return (def.minutes * def.days.length) / 7 / 60;
+/** Hours a day the schedule plans for a lane between two dates, on average (templates, overrides, pace, pauses). */
+export function plannedHoursPerDay(settings: StoredSettings, block: BlockId, from: string, to: string): number {
+  if (to < from) return 0;
+  return plannedOver(settings, from, to, block) / 60 / (daysBetween(from, to) + 1);
+}
+
+/** Days are walked at most this far ahead; past it a lane has no projected end. */
+const HORIZON_DAYS = 365 * 12;
+
+/**
+ * When a lane's remaining hours run out if each future day gets what the schedule plans for it, scaled by how
+ * much of its plan the lane has actually been getting lately. An exam week or a paused lane plans nothing, so it
+ * pushes the date out by exactly as long as it lasts.
+ */
+export function projectEnd(settings: StoredSettings, block: BlockId, from: string, remainingHours: number, efficiency: number): string | null {
+  if (remainingHours <= 0) return from;
+  if (efficiency <= 0) return null;
+  let left = remainingHours * 60;
+  for (let i = 0; i < HORIZON_DAYS; i++) {
+    const date = addDays(from, i);
+    left -= plannedForBlock(date, settings, block) * efficiency;
+    if (left <= 0) return date;
+  }
+  return null;
 }
 
 /**
@@ -84,17 +105,21 @@ export function forecastPhase({ phase, lanes, logs, settings, asOf }: ForecastIn
   const windowDays = settings.core.forecast.paceWindowDays;
   const from = clampDate(asOf, phase.start, phase.end);
 
+  const windowStart = addDays(asOf, -(windowDays - 1));
   const laneForecasts: LaneForecast[] = lanes.map((lane) => {
     const pace = paceForBlock(logs, lane.block, asOf, windowDays);
-    const planned = plannedHoursPerDay(settings, lane.block);
+    const planned = plannedHoursPerDay(settings, lane.block, from, phase.end);
     const remaining = lane.remainingHours;
     const started = lane.doneHours > 0;
 
     let projectedEnd: string | null = null;
     let weeksLate: number | null = null;
     if (remaining > 0 && pace > 0) {
-      const days = Math.ceil(remaining / pace);
-      projectedEnd = addDays(from, days);
+      // How much of its plan the lane got over the window; the future plan is scaled by the same share.
+      const plannedInWindow = plannedHoursPerDay(settings, lane.block, windowStart, asOf);
+      projectedEnd = plannedInWindow > 0 ? projectEnd(settings, lane.block, from, remaining, pace / plannedInWindow) : null;
+      // A lane that planned nothing lately but got hours anyway: fall back to its pace.
+      projectedEnd ??= addDays(from, Math.ceil(remaining / pace));
       weeksLate = Math.round(daysBetween(phase.end, projectedEnd) / 7);
     }
 
@@ -186,17 +211,13 @@ export function paceSummary(logs: DayLog[], settings: StoredSettings, asOf: stri
     minutes += log.entries.reduce((sum, e) => sum + e.minutes, 0);
   }
   const actual = minutes / 60 / windowDays;
-  const planned = settings.core.blocks.reduce((sum, b) => sum + (b.minutes * b.days.length) / 7 / 60, 0);
+  const planned = plannedOver(settings, from, asOf) / 60 / windowDays;
   return { actual, planned, ratio: planned > 0 ? actual / planned : 0, windowDays };
 }
 
 /** Hours a lane gets over a phase, used to show a lane that is over its budget before any pace is known. */
 export function laneBudget(settings: StoredSettings, block: BlockId, start: string, end: string): number {
-  const def = settings.core.blocks.find((b) => b.id === block);
-  if (!def) return 0;
-  const days = daysBetween(start, end) + 1;
-  const weeks = days / 7;
-  return (def.minutes * def.days.length * weeks) / 60;
+  return plannedOver(settings, start, end, block) / 60;
 }
 
 export type { SettingsDefaults };

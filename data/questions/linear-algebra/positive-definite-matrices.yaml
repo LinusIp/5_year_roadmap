@@ -1,0 +1,308 @@
+subject: linear-algebra
+topic: positive-definite-matrices
+questions:
+  - id: la-pd-001
+    difficulty: 1
+    type: mc
+    prompt: |
+      $A$ is a real symmetric matrix. Which of these is **not** a valid test for $A$ to be positive definite?
+    options:
+      - "All eigenvalues of $A$ are positive"
+      - "All pivots of $A$ (elimination without row exchanges) are positive"
+      - "All upper-left determinants of $A$ are positive"
+      - "All entries of $A$ are positive"
+    answer: 3
+    hints:
+      - 'Look for a symmetric matrix with all entries positive but a negative determinant.'
+    solution: |
+      For symmetric $A$, positive eigenvalues, positive pivots, positive upper-left determinants and $\mathbf{x}^TA\mathbf{x} > 0$ for all $\mathbf{x} \ne \mathbf{0}$ are
+      equivalent tests.
+
+      Positive entries prove nothing: $\begin{bmatrix} 1 & 2 \\ 2 & 1 \end{bmatrix}$ has determinant $-3$ (eigenvalues $3$ and $-1$), so it is not positive definite;
+      and $\begin{bmatrix} 2 & -1 \\ -1 & 2 \end{bmatrix}$ is positive definite despite its negative entries.
+    verify: "3"
+    covers: [mit-18-06/lecture-25, mit-18-06/lecture-27]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+  - id: la-pd-002
+    difficulty: 1
+    type: numeric
+    prompt: |
+      Compute the energy $\mathbf{x}^TA\mathbf{x}$ for $A = {{A}}$ and $\mathbf{x} = {{x}}$.
+    params:
+      a: { int: [1, 6] }
+      b: { int: [-3, 3] }
+      c: { int: [1, 6] }
+      x1: { int: [-3, 3] }
+      x2: { int: [-3, 3] }
+    let:
+      A: "[[a, b], [b, c]]"
+      x: "[x1, x2]"
+    require: ["x1 != 0 or x2 != 0"]
+    answer: "a*x1^2 + 2*b*x1*x2 + c*x2^2"
+    hints:
+      - 'For a symmetric $2 \times 2$ matrix, $\mathbf{x}^TA\mathbf{x} = ax_1^2 + 2bx_1x_2 + cx_2^2$.'
+    solution: |
+      $A\mathbf{x} = {{A * x}}$, and then $\mathbf{x}^T(A\mathbf{x}) = {{dot(x, A * x)}}$.
+
+      Equivalently, $ax_1^2 + 2bx_1x_2 + cx_2^2 = {{a}}({{x1^2}}) + 2({{b}})({{x1*x2}}) + {{c}}({{x2^2}}) = {{a*x1^2 + 2*b*x1*x2 + c*x2^2}}$.
+    verify: "(Matrix([[x1, x2]]) * Matrix([[a, b], [b, c]]) * Matrix([x1, x2]))[0]"
+    covers: [mit-18-06/lecture-27]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+  - id: la-pd-003
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Eliminate (no row exchanges) on $A = {{A}}$. What is the **second pivot**?
+    params:
+      a: { int: [1, 3] }
+      m: { int: [-2, 2], not: [0] }
+      c: { int: [-3, 12] }
+    let:
+      A: "[[a, a*m], [a*m, c]]"
+    answer: "c - a*m^2"
+    hints:
+      - 'The multiplier is $\ell_{21} = {{a*m}}/{{a}} = {{m}}$.'
+      - 'Subtract ${{m}}$ times row 1 from row 2.'
+    solution: |
+      The first pivot is ${{a}}$ and the multiplier is $\ell_{21} = \tfrac{ {{a*m}} }{ {{a}} } = {{m}}$. Row 2 minus ${{m}}$ times row 1 is
+      $(0,\; {{c}} - ({{m}})({{a*m}})) = (0,\; {{c - a*m^2}})$, so the second pivot is ${{c - a*m^2}}$.
+
+      $A$ is positive definite exactly when both pivots are positive, here when ${{c}} > {{a*m^2}}$.
+    verify: "Matrix([[a, a*m], [a*m, c]]).LUdecomposition()[1][1, 1]"
+    covers: [mit-18-06/lecture-27]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+  - id: la-pd-004
+    difficulty: 2
+    type: numeric
+    prompt: |
+      What is the **smallest integer** $c$ for which $A = \begin{bmatrix} {{a}} & {{b}} \\ {{b}} & c \end{bmatrix}$ is positive definite?
+    params:
+      a: { int: [1, 4] }
+      b: { int: [-5, 5], not: [0] }
+    let:
+      cmin: "floor(b^2 / a) + 1"
+    answer: cmin
+    hints:
+      - 'Test the upper-left determinants: $a > 0$ and $\det A > 0$.'
+      - '$\det A = {{a}}c - {{b^2}}$.'
+    solution: |
+      The first upper-left determinant is ${{a}} > 0$. The second is $\det A = {{a}}c - {{b^2}}$, which is positive exactly when
+      $c > \tfrac{ {{b^2}} }{ {{a}} } \approx {{b^2 / a}}$. The smallest integer with that property is $c = {{cmin}}$.
+      (At $c = {{b^2 / a}}$ exactly the matrix would only be semidefinite.)
+    verify: "min(cc for cc in range(-30, 100) if Matrix([[a, b], [b, cc]]).is_positive_definite)"
+    covers: [mit-18-06/lecture-27]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+  - id: la-pd-005
+    difficulty: 3
+    type: numeric
+    prompt: |
+      The matrix $A = \begin{bmatrix} {{p}} & {{q}} & 0 \\ {{q}} & {{r}} & {{s}} \\ 0 & {{s}} & b \end{bmatrix}$ is positive definite exactly when $b > b^*$. What is $b^*$?
+    params:
+      p: { int: [1, 3] }
+      q: { int: [-2, 2] }
+      r: { int: [1, 5] }
+      s: { int: [-2, 2], not: [0] }
+    let:
+      d2: "p*r - q^2"
+      bstar: "p*s^2 / (p*r - q^2)"
+    require: ["p*r - q^2 > 0", "mod(p*s^2, p*r - q^2) == 0"]
+    answer: bstar
+    hints:
+      - 'Check the upper-left determinants in order: $D_1 = {{p}}$, $D_2 = {{d2}}$, and $D_3 = \det A$.'
+      - 'Expand $\det A$ along the last row; it is linear in $b$.'
+    solution: |
+      The first two upper-left determinants are $D_1 = {{p}} > 0$ and $D_2 = {{p}}\cdot{{r}} - ({{q}})^2 = {{d2}} > 0$, whatever $b$ is.
+      Expanding along the last row,
+      $$D_3 = \det A = b\,D_2 - ({{s}})^2\cdot {{p}} = {{d2}}\,b - {{p*s^2}}.$$
+      So $A$ is positive definite exactly when ${{d2}}\,b > {{p*s^2}}$, i.e. $b > b^* = {{bstar}}$.
+    verify: "solve(Matrix([[p, q, 0], [q, r, s], [0, s, Symbol('bb')]]).det(), Symbol('bb'))[0]"
+    covers: [mit-18-06/lecture-27]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+  - id: la-pd-006
+    difficulty: 3
+    type: matrix
+    prompt: |
+      $A = {{A}}$ is positive definite. Find its Cholesky factor: the lower triangular $L$ with **positive** diagonal such that $A = LL^T$.
+      Enter it as `[[1, 0, 0], [2, 3, 0], [4, 5, 6]]`.
+    params:
+      l11: { int: [1, 2] }
+      l22: { int: [1, 2] }
+      l33: { int: [1, 2] }
+      l21: { int: [-2, 2] }
+      l31: { int: [-2, 2] }
+      l32: { int: [-2, 2] }
+    let:
+      L: "[[l11, 0, 0], [l21, l22, 0], [l31, l32, l33]]"
+      A: "L * transpose(L)"
+    answer: L
+    hints:
+      - 'Match entries of $LL^T$ column by column: $a_{11} = \ell_{11}^2$, $a_{21} = \ell_{21}\ell_{11}$, $a_{31} = \ell_{31}\ell_{11}$.'
+      - 'Then $a_{22} = \ell_{21}^2 + \ell_{22}^2$, $a_{32} = \ell_{31}\ell_{21} + \ell_{32}\ell_{22}$, and finally $a_{33} = \ell_{31}^2 + \ell_{32}^2 + \ell_{33}^2$.'
+    solution: |
+      Work through the entries of $A = LL^T$ in order:
+
+      - $\ell_{11} = \sqrt{a_{11}} = \sqrt{ {{A[1, 1]}} } = {{l11}}$, then $\ell_{21} = a_{21}/\ell_{11} = {{l21}}$ and $\ell_{31} = a_{31}/\ell_{11} = {{l31}}$.
+      - $\ell_{22} = \sqrt{a_{22} - \ell_{21}^2} = \sqrt{ {{A[2, 2]}} - {{l21^2}} } = {{l22}}$, then $\ell_{32} = (a_{32} - \ell_{31}\ell_{21})/\ell_{22} = {{l32}}$.
+      - $\ell_{33} = \sqrt{a_{33} - \ell_{31}^2 - \ell_{32}^2} = \sqrt{ {{A[3, 3]}} - {{l31^2}} - {{l32^2}} } = {{l33}}$.
+
+      $$L = {{L}}.$$
+      The square roots are real at every step precisely because $A$ is positive definite (they are the square roots of the pivots).
+    verify: "(lambda L: (L * L.T).cholesky())(Matrix([[l11, 0, 0], [l21, l22, 0], [l31, l32, l33]]))"
+    covers: [mit-18-06/lecture-27]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 7
+  - id: la-pd-007
+    difficulty: 3
+    type: multipart
+    prompt: |
+      Consider the quadratic form $f(x, y) = {{a}}x^2 {{signed: 2*b}}xy {{signed: c}}y^2$.
+    params:
+      p: { int: [1, 2] }
+      q: { int: [-2, 2], not: [0] }
+      c0: { int: [-2, 3] }
+      m: { int: [-2, 2], not: [0] }
+    let:
+      a: "c0 + m*p^2"
+      b: "m*p*q"
+      c: "c0 + m*q^2"
+      A: "[[a, b], [b, c]]"
+      lmin: "min(c0, c0 + m*(p^2 + q^2))"
+    require: ["a != 0", "c != 0"]
+    parts:
+      - prompt: "(a) What is the symmetric matrix $A$ with $f = \\mathbf{x}^TA\\mathbf{x}$? Enter it as `[[1, 2], [2, 3]]`."
+        type: matrix
+        answer: A
+        verify: "hessian(Integer(c0 + m*p**2)*x**2 + 2*m*p*q*x*y + Integer(c0 + m*q**2)*y**2, (x, y)) / 2"
+      - prompt: "(b) What is the minimum value of $f$ on the unit circle $x^2 + y^2 = 1$?"
+        type: numeric
+        answer: lmin
+        verify: "min((hessian(Integer(c0 + m*p**2)*x**2 + 2*m*p*q*x*y + Integer(c0 + m*q**2)*y**2, (x, y)) / 2).eigenvals().keys())"
+    hints:
+      - 'The $xy$ coefficient is split equally between the two off-diagonal entries.'
+      - 'On the unit circle, $\mathbf{x}^TA\mathbf{x}$ ranges between the smallest and largest eigenvalues of $A$.'
+      - '$\operatorname{tr}A = {{a + c}}$ and $\det A = {{a*c - b^2}}$.'
+    solution: |
+      (a) $f = ax^2 + 2bxy + cy^2$ corresponds to $A = \begin{bmatrix} a & b \\ b & c \end{bmatrix} = {{A}}$: half of the $xy$ coefficient goes in each off-diagonal slot.
+
+      (b) Write $\mathbf{x} = \sum c_i\mathbf{q}_i$ in orthonormal eigenvectors; then $\mathbf{x}^TA\mathbf{x} = \sum\lambda_ic_i^2$ with $\sum c_i^2 = 1$, which is smallest
+      when $\mathbf{x}$ is the eigenvector of the smallest eigenvalue. Here $\lambda^2 - {{a + c}}\lambda {{signed: a*c - b^2}} = 0$ gives
+      $\lambda = {{c0}}$ and $\lambda = {{c0 + m*(p^2 + q^2)}}$, so the minimum is ${{lmin}}$
+      (attained at a unit eigenvector, a multiple of ${{row: min(c0, c0 + m*(p^2 + q^2)) == c0 ? [-q, p] : [p, q]}}$).
+    covers: [mit-18-06/lecture-27]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+  - id: la-pd-008
+    difficulty: 4
+    type: multipart
+    prompt: |
+      Minimise $f(\mathbf{x}) = \tfrac12\mathbf{x}^TA\mathbf{x} - \mathbf{b}^T\mathbf{x}$ with $A = {{A}}$ and $\mathbf{b} = {{b}}$.
+    params:
+      l: { int: [-2, 2] }
+      t: { int: [1, 2] }
+      b1: { int: [-4, 4] }
+      b2: { int: [-4, 4] }
+    let:
+      L: "[[1, 0], [l, t]]"
+      A: "L * transpose(L)"
+      b: "[b1, b2]"
+      xs: "inv(A) * b"
+    require: ["b1 != 0 or b2 != 0"]
+    parts:
+      - prompt: "(a) Where is the minimum? Enter $\\mathbf{x}^*$ as a list such as `1, -2`. Decimals are fine."
+        type: vector
+        answer: xs
+        verify: "(lambda F: (lambda sol: [sol[x], sol[y]])(solve([diff(F, x), diff(F, y)], [x, y])))(Rational(1, 2)*(Matrix([[x, y]]) * Matrix([[1, l], [l, l**2 + t**2]]) * Matrix([x, y]))[0] - b1*x - b2*y)"
+      - prompt: "(b) Using your $\\mathbf{x}^*$, what is the minimum value $f(\\mathbf{x}^*)$?"
+        type: numeric
+        answer: "dot(part1, A * part1) / 2 - dot(b, part1)"
+        verify: "-Rational(1, 2) * (Matrix([[b1, b2]]) * Matrix([[1, l], [l, l**2 + t**2]]).inv() * Matrix([b1, b2]))[0]"
+    hints:
+      - 'The gradient of $f$ is $A\mathbf{x} - \mathbf{b}$; set it to zero.'
+      - '$A$ is positive definite (it is $LL^T$ with $L = {{L}}$), so the critical point is a minimum.'
+      - 'At the minimum, $f(\mathbf{x}^*) = -\tfrac12\mathbf{b}^T\mathbf{x}^*$.'
+    solution: |
+      (a) $\nabla f = A\mathbf{x} - \mathbf{b}$, so the minimiser solves $A\mathbf{x}^* = \mathbf{b}$. Here $\det A = {{det(A)}}$ and
+      $$\mathbf{x}^* = A^{-1}\mathbf{b} = \frac{1}{ {{det(A)}} }{{[[A[2, 2], -A[1, 2]], [-A[2, 1], A[1, 1]]]}}{{b}} = {{xs}}.$$
+      It is a minimum because $A = LL^T$ with $L = {{L}}$ invertible, so $A$ is positive definite.
+
+      (b) Substituting $A\mathbf{x}^* = \mathbf{b}$: $f(\mathbf{x}^*) = \tfrac12\mathbf{x}^{*T}\mathbf{b} - \mathbf{b}^T\mathbf{x}^* = -\tfrac12\mathbf{b}^T\mathbf{x}^* = {{-dot(b, xs) / 2}}$.
+    covers: [mit-18-06/lecture-27]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8
+  - id: la-pd-009
+    difficulty: 4
+    type: proof
+    prompt: |
+      $A$ is an $m \times n$ real matrix with independent columns. Prove that $A^TA$ is positive definite.
+    hints:
+      - 'Positive definite means symmetric with $\mathbf{x}^T(A^TA)\mathbf{x} > 0$ for every $\mathbf{x} \ne \mathbf{0}$.'
+      - 'Regroup $\mathbf{x}^TA^TA\mathbf{x}$ as a squared length.'
+    solution: |
+      $A^TA$ is symmetric since $(A^TA)^T = A^TA$. For any $\mathbf{x}$,
+      $$\mathbf{x}^T(A^TA)\mathbf{x} = (A\mathbf{x})^T(A\mathbf{x}) = \|A\mathbf{x}\|^2 \ge 0.$$
+      Equality needs $A\mathbf{x} = \mathbf{0}$, and because the columns of $A$ are independent that forces $\mathbf{x} = \mathbf{0}$.
+      So $\mathbf{x}^TA^TA\mathbf{x} > 0$ for every $\mathbf{x} \ne \mathbf{0}$: $A^TA$ is positive definite.
+      (With dependent columns the same computation shows $A^TA$ is only positive semidefinite.)
+    covers: [mit-18-06/lecture-27]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+  - id: la-pd-010
+    difficulty: 5
+    type: numeric
+    prompt: |
+      $A$ is the ${{n}} \times {{n}}$ matrix with $1$ on the diagonal and $b$ in every off-diagonal position. It is positive definite exactly when $\beta < b < 1$.
+      What is $\beta$? A fraction such as `-2/7` or a decimal is fine.
+    params:
+      n: { int: [3, 6] }
+    answer: "-1 / (n - 1)"
+    tolerance: { rel: 0.002 }
+    hints:
+      - 'Write $A = (1 - b)I + bJ$ with $J$ the all-ones matrix.'
+      - 'The eigenvalues of $J$ are $n$ (once) and $0$ ($n - 1$ times).'
+    solution: |
+      $A = (1 - b)I + bJ$. The all-ones $J$ has eigenvalue ${{n}}$ for $\mathbf{1}$ and $0$ on the ${{n - 1}}$-dimensional space orthogonal to $\mathbf{1}$, so $A$ has eigenvalues
+      $$1 - b + {{n}}b = 1 + {{n - 1}}b \quad\text{(once)}, \qquad 1 - b \quad\text{(${{n - 1}}$ times)}.$$
+      $A$ is symmetric, so it is positive definite exactly when both are positive: $b < 1$ and $b > -\tfrac{1}{ {{n - 1}} }$.
+      So $\beta = -\tfrac{1}{ {{n - 1}} } \approx {{-1 / (n - 1)}}$.
+    verify: "min(solve(Matrix(n, n, lambda i, j: 1 if i == j else Symbol('bb')).det(), Symbol('bb')))"
+    covers: [mit-18-06/lecture-27]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8
+  - id: la-pd-011
+    difficulty: 2
+    type: mc
+    prompt: |
+      $A$ is symmetric positive definite. Which of the following **must** also be true?
+    options:
+      - "$A^{-1}$ exists and is positive definite"
+      - "Every entry of $A$ is positive"
+      - "$-A$ is positive definite"
+      - "$A$ has a zero eigenvalue"
+    answer: 0
+    hints:
+      - 'What are the eigenvalues of $A^{-1}$ in terms of those of $A$?'
+    solution: |
+      The eigenvalues of $A$ are all positive, so none is zero and $A$ is invertible. $A^{-1}$ is symmetric with eigenvalues $1/\lambda_i > 0$,
+      so it is positive definite too.
+
+      Entries can be negative ($\begin{bmatrix} 2 & -1 \\ -1 & 2 \end{bmatrix}$), $-A$ has negative eigenvalues, and a zero eigenvalue is impossible.
+    verify: "0"
+    covers: [mit-18-06/lecture-27]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2

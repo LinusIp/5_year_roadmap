@@ -10,10 +10,11 @@
  *
  * The result is a diff, not a change: the page shows it and the user decides. Pure and deterministic.
  */
-import { daysBetween } from './dates.ts';
+import { plannedOver } from './day-plan.ts';
 import type { AppSeed, BlockId, Phase, PlanItem } from '../seed/schema.ts';
-import type { StoredSettings, UserItemState } from '../db/types.ts';
-import { itemProgress } from './progress.ts';
+import type { NewPlanPatch, StoredSettings, UserItemState } from '../db/types.ts';
+import { itemProgress, projectUnitCount } from './progress.ts';
+import { planBlocks } from './settings.ts';
 
 export interface ReplanMove {
   planItemId: string;
@@ -62,11 +63,8 @@ export interface ReplanInput {
 
 /** Hours a lane has between two dates, from the block's minutes and the weekdays it runs on. */
 export function laneCapacity(settings: StoredSettings, block: BlockId, start: string, end: string): number {
-  const def = settings.core.blocks.find((b) => b.id === block);
-  if (!def || end < start) return 0;
-  const days = daysBetween(start, end) + 1;
-  // Average over whole weeks rather than counting weekdays one by one: the difference is under a day.
-  return (def.minutes * def.days.length * (days / 7)) / 60;
+  // Day by day from the schedule: templates, date overrides, pace and pauses all change it.
+  return plannedOver(settings, start, end, block) / 60;
 }
 
 function remainingHoursOf(item: PlanItem, seed: AppSeed, states: Map<string, UserItemState>): number {
@@ -74,7 +72,7 @@ function remainingHoursOf(item: PlanItem, seed: AppSeed, states: Map<string, Use
   const resource = item.resourceId ? seed.resources.find((r) => r.id === item.resourceId) : undefined;
   const project = item.projectId ? seed.projects.find((p) => p.id === item.projectId) : undefined;
   const estHours = item.hours ?? resource?.estHours ?? project?.estHours ?? 0;
-  const unitCount = resource?.unitCount ?? project?.acceptance.length ?? 0;
+  const unitCount = resource?.unitCount ?? (project ? projectUnitCount(project) : 0);
   return itemProgress({ refId, estHours, unitCount, state: states.get(refId) }).remainingHours;
 }
 
@@ -112,7 +110,7 @@ export function replan({ seed, settings, states, asOf }: ReplanInput): ReplanRes
     if (remainingHoursOf(item, seed, states) <= 0) landedIn.set(refId, phaseIndex.get(item.phaseId) ?? 0);
   }
 
-  for (const block of settings.core.blocks.map((b) => b.id)) {
+  for (const block of planBlocks(settings.core).map((b) => b.id)) {
     // Every unfinished item of this lane, in their present order, across every phase.
     const queue = seed.plan
       .filter((i) => i.block === block)
@@ -218,11 +216,11 @@ export function replan({ seed, settings, states, asOf }: ReplanInput): ReplanRes
   return { moves, reorders, lanes, pastPlanEnd, unchanged };
 }
 
-/** Everything a re-plan changes, as plan-item patches ready to store as overrides. */
-export function replanToPatches(result: Pick<ReplanResult, 'moves' | 'reorders'>): { id: string; patch: Record<string, unknown> }[] {
+/** Everything a re-plan changes, as move patches: one edit, one undo. */
+export function replanToPatches(result: Pick<ReplanResult, 'moves' | 'reorders'>): NewPlanPatch[] {
   return [
-    ...result.moves.map((move) => ({ id: move.planItemId, patch: { phaseId: move.toPhaseId, order: move.toOrder } })),
-    ...result.reorders.map((r) => ({ id: r.planItemId, patch: { order: r.order } })),
+    ...result.moves.map((move): NewPlanPatch => ({ op: 'move', planItemId: move.planItemId, phaseId: move.toPhaseId, order: move.toOrder })),
+    ...result.reorders.map((r): NewPlanPatch => ({ op: 'move', planItemId: r.planItemId, order: r.order })),
   ];
 }
 

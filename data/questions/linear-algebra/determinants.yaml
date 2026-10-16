@@ -1,0 +1,349 @@
+subject: linear-algebra
+topic: determinants
+questions:
+  - id: la-det-001
+    difficulty: 1
+    type: numeric
+    prompt: |
+      What is $\det A$ for $A = {{A}}$?
+    params:
+      a: { int: [-6, 6] }
+      b: { int: [-6, 6] }
+      c: { int: [-6, 6] }
+      d: { int: [-6, 6] }
+    let:
+      A: "[[a, b], [c, d]]"
+    answer: "a*d - b*c"
+    hints:
+      - 'For a $2 \times 2$ matrix, $\det\begin{bmatrix} a & b \\ c & d \end{bmatrix} = ad - bc$.'
+    solution: |
+      $\det A = ({{a}})({{d}}) - ({{b}})({{c}}) = {{a*d}} - ({{b*c}}) = {{a*d - b*c}}.$
+    verify: "Matrix([[a, b], [c, d]]).det()"
+    covers: [mit-18-06/lecture-18]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+  - id: la-det-002
+    difficulty: 1
+    type: mc
+    prompt: |
+      $B$ is obtained from a square matrix $A$ by exchanging two rows. How are $\det B$ and $\det A$ related?
+    options:
+      - "$\\det B = -\\det A$"
+      - "$\\det B = \\det A$"
+      - "$\\det B = 2\\det A$"
+      - "It depends on which two rows are exchanged"
+    answer: 0
+    hints:
+      - 'This is one of the three defining properties of the determinant.'
+    solution: |
+      Exchanging two rows reverses the sign of the determinant, whichever two rows they are (property 2 of the determinant).
+      So $\det B = -\det A$. A permutation matrix therefore has determinant $+1$ or $-1$ according to whether it takes an even or an odd number of exchanges.
+    verify: "0"
+    covers: [mit-18-06/lecture-18]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+  - id: la-det-003
+    difficulty: 2
+    type: numeric
+    prompt: |
+      $A$ is a ${{n}} \times {{n}}$ matrix with $\det A = {{d}}$. What is $\det\!\left({{c}}\,A^2\,(A^T)^{-1}\right)$?
+    params:
+      n: { int: [2, 4] }
+      d: { int: [-4, 4], not: [0, 1] }
+      c: { choice: [2, -1, 3, -2] }
+    answer: "c^n * d"
+    hints:
+      - 'Use $\det(AB) = \det A \det B$, $\det A^T = \det A$ and $\det A^{-1} = 1/\det A$.'
+      - 'Multiplying a whole $n \times n$ matrix by $c$ multiplies its determinant by $c^n$, not by $c$.'
+    solution: |
+      Each factor contributes separately:
+      $$\det\!\left({{c}}\,A^2(A^T)^{-1}\right) = ({{c}})^{ {{n}} } \cdot (\det A)^2 \cdot \frac{1}{\det A^T} = {{c^n}} \cdot ({{d}})^2 \cdot \frac{1}{ {{d}} } = {{c^n * d}}.$$
+      The scalar $c$ multiplies all ${{n}}$ rows, so it comes out as $c^{ {{n}} }$.
+    verify: "(lambda M: (c * M**2 * M.T.inv()).det())(diag(*([d] + [1] * (n - 1))))"
+    covers: [mit-18-06/lecture-18]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+  - id: la-det-004
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Compute $\det A$ for $A = {{A}}$.
+    params:
+      a11: { int: [-3, 3] }
+      a12: { int: [-3, 3] }
+      a13: { int: [-3, 3] }
+      a21: { int: [-3, 3] }
+      a22: { int: [-3, 3] }
+      a23: { int: [-3, 3] }
+      a31: { int: [-3, 3] }
+      a32: { int: [-3, 3] }
+      a33: { int: [-3, 3] }
+    let:
+      A: "[[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]]"
+      C11: "a22*a33 - a23*a32"
+      C12: "-(a21*a33 - a23*a31)"
+      C13: "a21*a32 - a22*a31"
+      D: "a11*C11 + a12*C12 + a13*C13"
+    answer: D
+    hints:
+      - 'Expand along the first row: $\det A = a_{11}C_{11} + a_{12}C_{12} + a_{13}C_{13}$.'
+      - 'The cofactor $C_{1j}$ is $(-1)^{1+j}$ times the $2 \times 2$ determinant left after deleting row 1 and column $j$.'
+    solution: |
+      Cofactor expansion along row 1:
+      $$C_{11} = \det{{[[a22, a23], [a32, a33]]}} = {{C11}}, \quad C_{12} = -\det{{[[a21, a23], [a31, a33]]}} = {{C12}}, \quad C_{13} = \det{{[[a21, a22], [a31, a32]]}} = {{C13}}.$$
+      So
+      $$\det A = ({{a11}})({{C11}}) + ({{a12}})({{C12}}) + ({{a13}})({{C13}}) = {{D}}.$$
+    verify: "Matrix([[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]]).det()"
+    covers: [mit-18-06/lecture-19]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+  - id: la-det-005
+    difficulty: 3
+    type: numeric
+    prompt: |
+      Compute the determinant of $V = {{V}}$.
+    params:
+      a: { int: [-3, 4] }
+      b: { int: [-3, 4] }
+      c: { int: [-3, 4] }
+    let:
+      V: "[[1, a, a^2], [1, b, b^2], [1, c, c^2]]"
+    require: ["a != b", "a != c", "b != c"]
+    answer: "(b - a)*(c - a)*(c - b)"
+    hints:
+      - 'Subtract row 1 from rows 2 and 3 first; that does not change the determinant.'
+      - 'Row 2 becomes $(0,\; b - a,\; b^2 - a^2)$: factor out $b - a$. Do the same for row 3.'
+    solution: |
+      This is a Vandermonde matrix with $a = {{a}}$, $b = {{b}}$, $c = {{c}}$. Subtracting row 1 from rows 2 and 3:
+      $$\det V = \det\begin{bmatrix} 1 & a & a^2 \\ 0 & b - a & b^2 - a^2 \\ 0 & c - a & c^2 - a^2 \end{bmatrix} = (b - a)(c - a)\det\begin{bmatrix} 1 & b + a \\ 1 & c + a \end{bmatrix} = (b - a)(c - a)(c - b).$$
+      Here that is $({{b - a}})({{c - a}})({{c - b}}) = {{(b - a)*(c - a)*(c - b)}}$.
+      It vanishes exactly when two of $a, b, c$ coincide (two equal rows).
+    verify: "Matrix([[1, a, a**2], [1, b, b**2], [1, c, c**2]]).det()"
+    covers: [mit-18-06/lecture-19]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+  - id: la-det-006
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Use Cramer's rule to find $x_2$ in the system $A\mathbf{x} = \mathbf{b}$ with $A = {{A}}$ and $\mathbf{b} = {{b}}$.
+    params:
+      a: { int: [-4, 4] }
+      b12: { int: [-4, 4] }
+      c: { int: [-4, 4] }
+      d: { int: [-4, 4] }
+      x1: { int: [-3, 3] }
+      x2: { int: [-3, 3] }
+    let:
+      A: "[[a, b12], [c, d]]"
+      b: "A * [x1, x2]"
+      B2: "[[a, b[1]], [c, b[2]]]"
+    require: ["a*d - b12*c != 0"]
+    answer: x2
+    hints:
+      - 'Cramer: $x_2 = \dfrac{\det B_2}{\det A}$, where $B_2$ is $A$ with column 2 replaced by $\mathbf{b}$.'
+      - '$\det A = {{a*d - b12*c}}$.'
+    solution: |
+      Replace the second column of $A$ by $\mathbf{b}$: $B_2 = {{B2}}$. Then
+      $$x_2 = \frac{\det B_2}{\det A} = \frac{ {{a*b[2] - b[1]*c}} }{ {{a*d - b12*c}} } = {{x2}}.$$
+    verify: "Matrix([[a, b12], [c, d]]).LUsolve(Matrix([a*x1 + b12*x2, c*x1 + d*x2]))[1]"
+    covers: [mit-18-06/lecture-20]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+  - id: la-det-007
+    difficulty: 2
+    type: numeric
+    prompt: |
+      What is the area of the triangle with vertices $({{x1}}, {{y1}})$, $({{x2}}, {{y2}})$ and $({{x3}}, {{y3}})$? A decimal is fine.
+    params:
+      x1: { int: [-4, 5] }
+      y1: { int: [-4, 5] }
+      x2: { int: [-4, 5] }
+      y2: { int: [-4, 5] }
+      x3: { int: [-4, 5] }
+      y3: { int: [-4, 5] }
+    let:
+      D: "det([[x2 - x1, y2 - y1], [x3 - x1, y3 - y1]])"
+    require: ["abs(D) > 0.5"]
+    answer: "abs(D) / 2"
+    hints:
+      - 'Two edges from the first vertex span a parallelogram; the triangle is half of it.'
+      - 'The parallelogram''s area is $|\det|$ of the $2 \times 2$ matrix whose rows are the two edge vectors.'
+    solution: |
+      The edges from $({{x1}}, {{y1}})$ are ${{row: [x2 - x1, y2 - y1]}}$ and ${{row: [x3 - x1, y3 - y1]}}$. They span a parallelogram of area
+      $$\left|\det{{[[x2 - x1, y2 - y1], [x3 - x1, y3 - y1]]}}\right| = |{{round(D)}}| = {{abs(round(D))}},$$
+      and the triangle is half of it: area $= {{abs(round(D)) / 2}}$.
+    verify: "abs(Polygon(Point(x1, y1), Point(x2, y2), Point(x3, y3)).area)"
+    covers: [mit-18-06/lecture-20]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+  - id: la-det-008
+    difficulty: 4
+    type: numeric
+    prompt: |
+      $A$ is the ${{n}} \times {{n}}$ matrix with every diagonal entry equal to ${{a}}$ and every off-diagonal entry equal to ${{b}}$:
+      $$A = {{A}}.$$
+      What is $\det A$?
+    params:
+      n: { int: [3, 5] }
+      a: { int: [-3, 5] }
+      b: { int: [-2, 3], not: [0] }
+    let:
+      A: "b*ones(n, n) + (a - b)*identity(n)"
+    require: ["a != b"]
+    answer: "(a - b)^(n - 1) * (a + (n - 1)*b)"
+    hints:
+      - 'Subtract row 1 from every other row, then add every column to column 1.'
+      - 'Alternatively: $A = (a - b)I + b\,\mathbf{1}\mathbf{1}^T$. What are the eigenvalues of the all-ones matrix $\mathbf{1}\mathbf{1}^T$?'
+    solution: |
+      Write $A = (a - b)I + b\,J$ with $J$ the all-ones matrix. $J$ has rank 1: eigenvalue $n$ (eigenvector $\mathbf{1}$) and eigenvalue $0$ repeated $n - 1$ times.
+      So $A$ has eigenvalues $a - b + nb = a + (n - 1)b$ once and $a - b$ repeated $n - 1$ times, and the determinant is their product:
+      $$\det A = (a - b)^{n - 1}\,(a + (n - 1)b) = ({{a - b}})^{ {{n - 1}} }\,({{a + (n - 1)*b}}) = {{(a - b)^(n - 1) * (a + (n - 1)*b)}}.$$
+      (By elimination: subtracting row 1 from the others and then adding all columns into column 1 leaves a triangular matrix with diagonal $a + (n-1)b, a - b, \dots, a - b$.)
+    verify: "(ones(n, n) * b + eye(n) * (a - b)).det()"
+    covers: [mit-18-06/lecture-18, mit-18-06/lecture-19]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+  - id: la-det-009
+    difficulty: 4
+    type: proof
+    prompt: |
+      A real square matrix is **skew-symmetric** if $A^T = -A$. Prove that every skew-symmetric matrix of **odd** size $n$ has $\det A = 0$.
+    hints:
+      - 'Take determinants of both sides of $A^T = -A$.'
+      - '$\det(-A) = (-1)^n \det A$.'
+    solution: |
+      From $A^T = -A$,
+      $$\det A = \det A^T = \det(-A) = (-1)^n\det A.$$
+      The first equality is the rule $\det A^T = \det A$; the last holds because $-A$ multiplies each of the $n$ rows by $-1$.
+      For odd $n$, $(-1)^n = -1$, so $\det A = -\det A$, i.e. $2\det A = 0$ and $\det A = 0$.
+
+      (For even $n$ nothing forces this: $\begin{bmatrix} 0 & 1 \\ -1 & 0 \end{bmatrix}$ has determinant $1$.)
+    covers: [mit-18-06/lecture-18]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+  - id: la-det-010
+    difficulty: 3
+    type: numeric
+    prompt: |
+      Let $A = {{A}}$. Use cofactors to find the entry $(A^{-1})_{12}$ (row 1, column 2 of the inverse).
+    params:
+      l1: { int: [-2, 2] }
+      l2: { int: [-2, 2] }
+      l3: { int: [-2, 2] }
+      u1: { int: [-2, 2] }
+      u2: { int: [-2, 2] }
+      u3: { int: [-2, 2] }
+      sg: { choice: [1, -1] }
+    let:
+      A: "[[1, 0, 0], [l1, 1, 0], [l2, l3, 1]] * [[sg, u1, u2], [0, 1, u3], [0, 0, 1]]"
+      dA: "round(det(A))"
+      M21: "A[[1, 3], [2, 3]]"
+      C21: "-round(det(M21))"
+    require: ["C21 != 0"]
+    answer: "C21 / dA"
+    hints:
+      - '$A^{-1} = \dfrac{1}{\det A}C^T$, so $(A^{-1})_{12} = C_{21}/\det A$: note the transpose.'
+      - '$C_{21} = (-1)^{2+1}$ times the determinant of $A$ with row 2 and column 1 deleted.'
+    solution: |
+      The cofactor formula is $A^{-1} = C^T/\det A$, so the $(1, 2)$ entry of $A^{-1}$ uses the cofactor $C_{21}$.
+
+      Deleting row 2 and column 1 leaves ${{M21}}$, whose determinant is ${{-C21}}$; with the sign $(-1)^{2+1}$, $C_{21} = {{C21}}$.
+
+      Expanding $\det A$ (for example along a row) gives $\det A = {{dA}}$. Therefore
+      $$(A^{-1})_{12} = \frac{C_{21}}{\det A} = \frac{ {{C21}} }{ {{dA}} } = {{C21 / dA}}.$$
+    verify: "Matrix([[1, 0, 0], [l1, 1, 0], [l2, l3, 1]]).multiply(Matrix([[sg, u1, u2], [0, 1, u3], [0, 0, 1]])).inv()[0, 1]"
+    covers: [mit-18-06/lecture-19, mit-18-06/lecture-20]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+  - id: la-det-011
+    difficulty: 5
+    type: numeric
+    prompt: |
+      $T_{ {{n}} }$ is the ${{n}} \times {{n}}$ tridiagonal matrix with ${{a}}$ on the diagonal and $1$ just above and just below it:
+      $$T_{ {{n}} } = {{T}}.$$
+      What is $\det T_{ {{n}} }$?
+    params:
+      n: { int: [4, 6] }
+      a: { choice: [2, 3, -2, -3, 4] }
+    let:
+      Sup: "concat(concat(zeros(n - 1, 1), identity(n - 1), 2), zeros(1, n), 1)"
+      T: "a*identity(n) + Sup + transpose(Sup)"
+      D1: "a"
+      D2: "a^2 - 1"
+      D3: "a*D2 - D1"
+      D4: "a*D3 - D2"
+      D5: "a*D4 - D3"
+      D6: "a*D5 - D4"
+      Ds: "[D1, D2, D3, D4, D5, D6]"
+    answer: "Ds[n]"
+    hints:
+      - 'Let $D_k$ be the determinant of the $k \times k$ version. Expand $D_k$ along its first row.'
+      - 'The expansion gives the recurrence $D_k = {{a}}\,D_{k-1} - D_{k-2}$.'
+      - '$D_1 = {{a}}$ and $D_2 = {{a^2 - 1}}$.'
+    solution: |
+      Let $D_k$ be the determinant of the $k \times k$ matrix of this form. Expanding along the first row: the $(1,1)$ entry ${{a}}$ multiplies $D_{k-1}$.
+      The $(1,2)$ entry $1$ has cofactor $-\det$ of a matrix whose first column is $(1, 0, \dots, 0)$; expanding that down its first column leaves $D_{k-2}$. So
+      $$D_k = {{a}}\,D_{k-1} - D_{k-2}, \qquad D_1 = {{a}}, \quad D_2 = {{a^2 - 1}}.$$
+      Running the recurrence: $D_1, \dots, D_{ {{n}} } = {{row: Ds[1:n]}}$, so $\det T_{ {{n}} } = {{Ds[n]}}$.
+    verify: "Matrix(n, n, lambda i, j: a if i == j else (1 if abs(i - j) == 1 else 0)).det()"
+    covers: [mit-18-06/lecture-19]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8
+  - id: la-det-012
+    difficulty: 3
+    type: multipart
+    prompt: |
+      Let $A = {{A}}$.
+    params:
+      a: { int: [-3, 3], not: [0] }
+      b: { int: [-3, 3] }
+      c: { int: [-3, 3] }
+      d: { int: [-3, 3], not: [0] }
+      e2: { int: [-3, 3] }
+      f: { int: [-3, 3], not: [0] }
+      g: { int: [-2, 2] }
+      s: { choice: [2, 3, -2, -3] }
+    let:
+      A: "[[a, b, c], [g*a, g*b + d, g*c + e2], [0, 0, f]]"
+      D: "a*d*f"
+    parts:
+      - prompt: "(a) What is $\\det A$?"
+        type: numeric
+        answer: D
+        verify: "Matrix([[a, b, c], [g*a, g*b + d, g*c + e2], [0, 0, f]]).det()"
+      - prompt: "(b) $B$ is $A$ with rows 1 and 3 exchanged and then row 2 multiplied by ${{s}}$. Using your answer to (a), what is $\\det B$?"
+        type: numeric
+        answer: "-s * part1"
+        verify: "(lambda A: Matrix([A.row(2), s * A.row(1), A.row(0)]).det())(Matrix([[a, b, c], [g*a, g*b + d, g*c + e2], [0, 0, f]]))"
+      - prompt: "(c) Using your answer to (a), what is the volume of the box whose edges are the three rows of $2A$?"
+        type: numeric
+        answer: "abs(8 * part1)"
+        verify: "abs((2 * Matrix([[a, b, c], [g*a, g*b + d, g*c + e2], [0, 0, f]])).det())"
+    hints:
+      - 'Subtract ${{g}}$ times row 1 from row 2: that does not change the determinant and leaves a triangular matrix.'
+      - 'A row exchange flips the sign; multiplying one row by $s$ multiplies the determinant by $s$.'
+      - 'The volume of a box is $|\det|$ of the matrix of its edges; $2A$ doubles all three rows.'
+    solution: |
+      (a) Row 2 minus ${{g}}$ times row 1 gives ${{row: [0, d, e2]}}$, so $A$ reduces to the upper triangular
+      $\begin{bmatrix} {{a}} & {{b}} & {{c}} \\ 0 & {{d}} & {{e2}} \\ 0 & 0 & {{f}} \end{bmatrix}$ without changing the determinant:
+      $\det A = ({{a}})({{d}})({{f}}) = {{D}}$.
+
+      (b) The exchange multiplies by $-1$ and the scaling by ${{s}}$: $\det B = -({{s}})\det A = {{-s*D}}$.
+
+      (c) $\det(2A) = 2^3\det A = {{8*D}}$, and the volume is its absolute value, ${{abs(8*D)}}$.
+    covers: [mit-18-06/lecture-18, mit-18-06/lecture-20]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6

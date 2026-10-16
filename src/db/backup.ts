@@ -16,6 +16,7 @@ import { canonical, parseBackup } from './backup-file.ts';
 import { BACKUP_FORMAT_VERSION } from './types.ts';
 import type { BackupData, BackupFile } from './types.ts';
 import { today } from '../lib/dates.ts';
+import { legacyPlanPatches } from '../lib/plan.ts';
 import { syncEngine } from '../sync/engine.ts';
 import { markSilent } from '../sync/middleware.ts';
 
@@ -52,16 +53,36 @@ export type ImportResult = { ok: true; counts: Record<ExportedTable, number> } |
  */
 export async function restoreBackup(file: BackupFile, database: AtlasDB = db): Promise<Record<ExportedTable, number>> {
   const counts = {} as Record<ExportedTable, number>;
+  const data = withLegacyPlanEdits(file.data);
   await database.transaction('rw', EXPORTED_TABLES.map((t) => database.table(t)), async () => {
     markSilent(Dexie.currentTransaction);
     for (const table of EXPORTED_TABLES) {
       await database.table(table).clear();
-      const rows = file.data[table];
+      const rows = data[table];
       if (rows.length > 0) await database.table(table).bulkPut(rows);
       counts[table] = rows.length;
     }
   });
   return counts;
+}
+
+/**
+ * A backup from before plan edits were patches keeps them as plan-item overrides and custom plan items, which the
+ * plan no longer reads. They become patches here, exactly as the database upgrade (version 3) turns them into
+ * patches, so restoring an older backup keeps its plan edits.
+ */
+export function withLegacyPlanEdits(data: BackupData): BackupData {
+  const overrides = data.overrides.filter((o) => o.kind === 'planItem');
+  const customs = data.customEntities.filter((c) => c.kind === 'planItem');
+  if (overrides.length === 0 && customs.length === 0) return data;
+  const converted = legacyPlanPatches(overrides, customs, new Date().toISOString());
+  const known = new Set(data.planPatches.map((p) => p.id));
+  return {
+    ...data,
+    overrides: data.overrides.filter((o) => o.kind !== 'planItem'),
+    customEntities: data.customEntities.filter((c) => c.kind !== 'planItem'),
+    planPatches: [...data.planPatches, ...converted.filter((p) => !known.has(p.id))],
+  };
 }
 
 export async function importBackup(text: string, database: AtlasDB = db): Promise<ImportResult> {

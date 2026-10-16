@@ -5,7 +5,7 @@
 import type { DayLog, UserItemState } from '../db/types.ts';
 import type { AppSeed, Track } from '../seed/schema.ts';
 import { addDays, monthKey, startOfMonth } from './dates.ts';
-import { itemProgress } from './progress.ts';
+import { itemProgress, projectUnitCount } from './progress.ts';
 
 export interface Family {
   name: string;
@@ -73,7 +73,7 @@ export function completionByYear(seed: AppSeed, states: Map<string, UserItemStat
       const resource = item.resourceId ? seed.resources.find((r) => r.id === item.resourceId) : undefined;
       const project = item.projectId ? seed.projects.find((p) => p.id === item.projectId) : undefined;
       const estHours = item.hours ?? resource?.estHours ?? project?.estHours ?? 0;
-      const progress = itemProgress({ refId, estHours, unitCount: resource?.unitCount ?? project?.acceptance.length ?? 0, state: states.get(refId) });
+      const progress = itemProgress({ refId, estHours, unitCount: resource?.unitCount ?? (project ? projectUnitCount(project) : 0), state: states.get(refId) });
       planned += estHours;
       remaining += progress.remainingHours;
       itemsTotal++;

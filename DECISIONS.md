@@ -338,3 +338,242 @@ courses and books) and reshapes years 2, 3 and 5. Everything else in it is uncha
   year 3 plan for the library.
 - **MIT 6.172 is in the library, not on the plan.** The brief now names performance engineering, but its
   table does not place 6.172; year 3 block B (CUDA in depth) is where it would go.
+
+## Flexibility (the briefs of 2026-10-16)
+
+The flexibility brief makes the day, the plan, the pace and the layout editable. The decisions below are the ones
+it left open; `briefs/PLAN.md` records how the three briefs of that day fit together.
+
+- **Work happens on the session branch.** This round was built in a cloud session that may push only to
+  `claude/new-session-2cjn2k`. The stages (`flex`, `practice`, `catalogue`) are consecutive commits there, and
+  local branches of those names mark where each ends. Merging into `main`, which triggers CI and the Pages deploy,
+  waits for the owner's go-ahead.
+- **Block ids are open-ended.** Any short capitalised id is a block (`/^[A-Z][A-Z0-9]{0,7}$/`): A to E stay the
+  curriculum's lanes, P is Practice, and blocks the user adds take the next free letter. The authoritative data
+  model in `src/seed/model.ts` had `'A' | … | 'E'`; it says `string` now, with a note. A to E cannot be deleted
+  (the curriculum plans into them); taking one out of a template leaves it out of those days.
+- **Tracks can be the user's own** (`my-…`), created as a `custom` plan patch. They take the colour of the first
+  track in the colour slot chosen for them.
+- **Settings version 2 is a superset of version 1, upgraded when read.** A version 1 file (from IndexedDB, a
+  backup or another device's `state/settings.json`) still parses; `upgradeSettings` fills the new fields from
+  `data/settings.yaml`. The Full day template lists its blocks without minutes, so it takes each block's own:
+  someone who had set block D to 150 minutes keeps 150 minutes.
+- **A schedule change never rewrites a day already past.** Editing templates, the weekly pattern or a block's
+  minutes or weekdays first keeps a copy of the schedule as it was, "valid until yesterday"
+  (`settings.schedule.history`), once per day. Pace and pauses carry the date they start. Changes to one date
+  (Change today) name that date. So the streak, the heatmap and reviews of past days read the plan those days had.
+- **Today's changes live in settings, by date** (`schedule.days`). They are small, they sync with the rest of the
+  schedule, and keeping them is what keeps the past's plan. Only today and later days can be changed.
+- **The streak rule** is "60 minutes or 50 % of the day's planned minutes, whichever is lower". A day that plans
+  nothing (a rest day, a template with no blocks) counts if it reaches 60 minutes and otherwise holds the streak:
+  it neither breaks it nor spends a freeze, and is never "at risk".
+- **The heatmap is relative by default**, as the brief asks: 0, under 25 %, under 60 %, under 100 % and 100 % of
+  the day's plan. A full 8-hour day is still the top step, so the redesign's acceptance test holds. A day that
+  planned nothing falls back to the absolute thresholds. Settings switches back to minutes.
+- **The forecast walks the future plan.** A lane's remaining hours are spent day by day at what the schedule
+  plans for it, scaled by the share of its plan it actually got over the pace window. An exam week (which plans
+  nothing for most lanes) moves the projected finish by exactly its length. With nothing logged lately, the verdict
+  is still "No hours logged lately" rather than an invented date.
+- **Plan edits are an ordered list of patches** in a new `planPatches` table and `state/plan.json` version 2:
+  `add`, `drop`, `restore`, `move`, `swap`, `editPhase`, `addPhase`, `custom` and `goal`, applied by time then id
+  so every device gets the same result. Database version 3 converts plan-item edits stored the old way (a patch
+  per item, a "removed" flag, custom plan items); an old backup or an old device's `plan.json` is converted the
+  same way when read. Resources, projects and papers of the user's stay in `customEntities` (they are library
+  content, not plan edits); only tracks are `custom` patches. `plan.json` keeps the existing rule, last writer
+  wins for the whole file.
+- **Undo removes an edit's patches.** One action is one group (a re-plan is one group of many moves). The last 50
+  groups can be undone, from the toast or Plan › Edit plan › Recent edits, in any order. The toast also appears
+  inside an open sheet, because a modal sheet makes the rest of the page inert.
+- **Dropping is a plan edit, not a status.** "Remove an item (status dropped)" became a `drop` patch: the item
+  leaves its lane for the lane's collapsed Dropped group, keeps its own status, notes and ticks, and Restore puts
+  it back where it was. The item status called Dropped still exists for "I am not doing this at all".
+- **Patches that no longer apply are skipped and listed once**, in Settings, never fatal.
+- **Alternatives** are a new optional `alternatives` field on resources, filled for the pairs the brief names.
+  SolidWorks and Fusion were only certificates, so each got a learning resource (with a search hint: no link
+  could be checked from here) to pair with Onshape.
+- **Prerequisites stay enforced in the editor, not forbidden.** Adding an item before a phase that holds one of
+  its unfinished prerequisites shows the conflict and offers "Add, and move the prerequisite too"; "Add it anyway"
+  is there for the user who knows better. The validator still forbids it in `data/`.
+- **The three re-plans.** *Push dates back* stretches each phase from today on by what its fullest lane needs,
+  the later phases moving along. *Redistribute* gives the short lanes of the current phase minutes a day from
+  lanes with room, as custom paces from today, the day's length unchanged. *Drop or defer* moves the overflow of
+  each lane to the start of the next phase, choosing stretch items first, then the items teaching the
+  lowest-priority roadmap (inference, then architecture, then graphics; an item's tracks stand in when it covers
+  no node), then the latest; in the last phase they are dropped, restorably. It never moves an item ahead of one
+  that needs it. The earlier lane-by-lane re-plan remains behind the monthly review's suggestion.
+- **Catch-up adds to Today's target only.** It is shown on the Now card ("30 m of it catch-up"); the streak and the
+  heatmap keep reading the schedule, so opting in can never break a streak.
+- **Ahead of schedule.** Today already pulls the next phase's item forward when a lane is done; the lane's Pace
+  sheet says so and offers "Give the time to another lane", which pauses the lane until the phase ends with its
+  time going to the highest-priority lane.
+- **Pausing defaults to the highest-priority active lane**, from the roadmaps its current items cover, then their
+  tracks; free time is one tap away.
+- **Block colours** come from the track palette, limited to the twelve colours that reach 3:1 against the card in
+  both themes (WCAG 1.4.11). The default lane colours are the mockup's and unchanged.
+- **Layout.** "Detailed" is the mockup's Later today (title and meta); "Compact" is titles only. Density compact
+  only tightens row padding, to 44 px rows. Theme and week start moved into Settings › Layout › General with the
+  clock and density. The tabs Projects and Map open Plan's Projects view and the five-year map; Plan's "Roadmaps"
+  default opens Credentials, where the roadmaps are.
+- **One pace suggestion on Sunday, dismissed per device.** "Not now" is remembered on the device for that week.
+- **The new screenshot baselines** were first drawn in the build container; since pull request #1 every baseline is
+  drawn on CI's Linux and compared there (DECISIONS, "CI and the deploy").
+
+## Daily practice, resources and tech docs (the brief of 2026-10-16)
+
+- **Practice is its own block, P, only during the practice period.** It is a block with `role: practice` in
+  `data/settings.yaml` (45 minutes on full days and weekends, 30 on a University day, 45 in an exam week) and
+  `practice: { start: 2026-10-16, end: 2027-01-31, perSubject: 3 }`. Outside those dates the day leaves it out, so
+  targets, the streak and the heatmap are unchanged before and after. It is not a lane of the plan: the timeline,
+  the five-year map, pace, re-plans and "move to lane" skip it (`planBlocks`). Settings saved before it existed get
+  it on read (`upgradeSettings`), so existing users see it too. Coding challenges never go in it.
+- **The set depends only on the date and earlier answers.** Answers given today are ignored when building today's
+  set, so it never reshuffles while it is answered and two devices build the same one. Each subject is two new
+  questions and the most overdue review (or three new ones). Within the current topic, questions within one level
+  of the topic's rating come first, then those never seen, then those seen longest ago.
+- **Linear algebra follows 18.06 through its ticked lectures**, weighted to the latest, as the brief asks; before
+  the first lecture is ticked it starts at the first topic like the others. Calculus and physics walk their topics
+  in order: a topic is done after 15 answers at 80 %.
+- **Spaced repetition**: a miss, a partial answer or a shown solution starts a question on 1 day; each right
+  answer steps it to 3, 7, 21, 60, then it leaves the queue. **Elo**: each topic starts at 1200, a question rates
+  900 + 150 × difficulty, K = 32; the topic's level is the difficulty nearest its rating.
+- **Showing the solution counts as missed**, and after it the only way on is "Count it as missed": checking then
+  would only copy the solution. Proofs are graded by the user (Got it, Partly, Missed it).
+- **Marking needs no computer algebra in the browser.** mathjs reads every answer (units included). Expressions are
+  right when they agree with the answer at random points; vectors "up to scale" when parallel. A later part that is
+  right for the user's own wrong earlier answer is marked right, flagged as following, unless that earlier answer
+  makes the later part meaningless (a non-finite value).
+- **Every answer is checked twice, independently.** Each part carries a `verify` expression, written apart from the
+  `answer`; `npm run verify:questions` draws each template 200 times with the app's own engine, renders every bit
+  of maths with KaTeX, and has SymPy and NumPy recompute every answer from `verify`. It lives in `scripts/` (not
+  `scratch/`, which is for throwaway scripts) because CI runs it. CI runs 40 draws a template to stay near five
+  minutes; the full 200 ran here in 23 minutes and passed.
+- **KaTeX ships with the Practice chunk only**, with MathML alongside the drawing (`output: 'htmlAndMathml'`), so
+  screen readers read the maths. Lighthouse accessibility is 100 on Practice.
+- **Done logs to P only.** The summary's Done adds one entry per subject on the P block (track math for linear
+  algebra and calculus, physics for physics) and marks P done for the day. Practice on demand logs to P too, without
+  marking it done.
+- **Answers sync as `state/practice.json`, merged per answer by id**, not last writer wins: two devices answering
+  on the same day keep both.
+- **Activity › Practice appears once there is an answer**, so a fresh install still matches the Activity mockup.
+- **Practice ticks roadmap nodes** through the topic's `covers` in `topics.yaml`; the node then shows "covered by
+  Practice", like an item that covers it.
+- **Resources: links verified on GitHub's runner.** The cloud machine that added them cannot reach the course sites,
+  so the verifier ran on GitHub's runner instead (`check:links --titles --candidates`, two rounds in pull request
+  #1). A link was filled in only when its page title named the resource: 20 of the 25. The other 5 keep `url: null`
+  and their search hint: Halmos's problem book (AMS answers bots with a check page), Walter Lewin's lectures (the
+  OCW page is gone; the YouTube channel answers without a title), Khan Academy (a bot challenge), All About Circuits
+  (Cloudflare) and Morin's problems (503). The OpenStax books are their preface pages: the book pages render their
+  title only in the browser. Already in the catalogue and only mapped to
+  practice topics: 3Blue1Brown, 18.01, 18.02, 8.01 and Mathematics for Machine Learning; Stat 110, 6.042J, NeetCode,
+  the system-design primer, DDIA, the Scaling Book, Susskind and the MIT EE/ME courses were already there too.
+- **Two new resource types**, `problems` (problem sets, judges, exercise collections) and `tool` (software and
+  reference sites), as the brief's "course, book, problem source or tool". Library shows both under Tools, so the
+  mockup's five type chips stay. `practiceTopics` maps a resource to question topics; the Practice screen offers
+  up to three of them under a solution.
+- **Tech docs for the 110 projects that are not weekly builds.** Weekly builds are small enough that their brief
+  and acceptance criteria are the spec; the catalogue's builds and cases come with their own. The template is the
+  brief's, checked by `npm run check:docs` and `validate:data`: every section in order, 300 to 700 words, three to
+  six milestones adding up to the project's hours, Parts and budget on stage 2 builds, references that are
+  catalogue ids (never raw URLs). Milestones are stored as `milestone-N` ticks and count toward progress (the
+  seed carries each project's milestone count). The doc's Parts and budget shows in the sheet's own Parts and
+  budget section, next to the budget fields.
+- **Screenshots.** The Today baselines changed (the demo date, 18 November, is in the practice period, so Today has
+  a Practice row) and were redrawn on Linux with the three new Practice baselines. The other Windows-drawn
+  baselines were kept.
+
+## The three-tier project catalogue (the brief of 2026-10-16)
+
+- **The catalogue is its own pool, not more curriculum projects.** `data/projects/{daily-easy,weekly-medium,
+  monthly-advanced}.jsonl` are the brief's files, read by `scripts/lib/load-catalogue.ts` and typed in
+  `src/seed/catalogue.ts` (`kind` challenge, build or case; `difficulty`; cadence daily, weekly or monthly; each kind's
+  fields). The curriculum's 245 projects keep their numbering, phases, capstones and state. The catalogue is 1.3 MB,
+  so it is two lazy chunks: a small index (Today, the Deck, lists) and every field (a challenge's screen, a sheet).
+- **Normalised in one place.** Phases "Y1-P0" and "Y2" are the curriculum's `y1-p0` and `y2`; `measure` is always a
+  list; `parts` a list split at commas (not inside "1,200"); milestones `{ step, hours }` become `milestone-N`
+  checkboxes. The catalogue's `inference` and `research` domains are not tracks: they count toward AI.
+- **Nine defects in the brief's files**, fixed or tolerated and nothing invented: two builds have an empty
+  `measure` and four an empty `parts` (read as none); three prerequisites named ids that exist nowhere.
+  `low-d-c-arena` clearly means the curriculum's existing "Arena allocator" build and now says so
+  (`w-c-arena-allocator`); `low-d-lcs-diff` and `low-d-pcap-header` have no counterpart and were dropped.
+- **validate:data** checks: ids unique across the catalogue and everything in the curriculum; difficulty matching the
+  cadence; examples on every challenge; case milestones adding up to `estHours`; prerequisites, refs, covers and
+  phases that resolve; no URL anywhere.
+- **refs and covers** come from a reviewed keyword table (`scripts/lib/catalogue-mapping.ts`): one rule per phrase
+  that names a technique or tool unambiguously ("continuous batching", "OpenGL", "Raft"); language names only from
+  the stack. Two rules were narrowed after review ("alpha-beta" matched a latency model; "buffer pool" GPU work).
+  451 items have refs, 221 covers; the rest are empty, as the brief prefers to a guess.
+- **The daily challenge lives inside Block B.** On B's Now card it is a row ("Daily challenge · … · easy · 20 min · in
+  Python"); while B waits in Later today, B's row says "· daily challenge". It is not a sixth row: the redesign's
+  acceptance test needs Today to fit one 390 × 844 screen. Once B is done it leads Later today. The weekly challenge
+  and an active case sit in Block D the same way.
+- **The pick** depends on the date and on what happened before it, like the practice set: the topic after the one
+  last solved, a draw from that topic's unsolved challenges seeded by the date; Skip moves to the next topic, three
+  times a day; a challenge solved today stays today's, marked solved. After every challenge is solved once, the next
+  cycle suggests a language it has not been solved in. Solves, skips and "Not today" are an append-only log
+  (`state/challenges.json`, merged per event), from which the daily-challenge streak is counted, apart from the
+  study streak.
+- **The weekly slot** is the weekend by default (Settings › Projects): the week's medium challenge, drawn per week,
+  and the week's build. Taking a catalogue build (from the Deck or its sheet) makes it the week's build in Block D,
+  through the existing weekly pick; without one, Block D keeps the curriculum's suggestion as before. A build needs a
+  repository to be done; a challenge does not.
+- **The monthly queue** is the cases taken from the Deck, active, listed in Plan › Projects next to the month's
+  projects and shown in Block D. Cases are not added to the plan's lanes: plan edits name curriculum items only.
+- **The Deck** keeps the curriculum's cards first (its tests and habits) and adds the catalogue's after them. Its Weekly
+  tier is builds only: Take it fills Block D, which a challenge cannot (CI caught a shuffled weekly challenge being
+  "taken" into a challenge screen). The week's medium challenge comes with the weekly slot; all are in the Library. A topic
+  or domain chip narrows to the catalogue. "Earlier" means a phase before the current one; challenges have no phase
+  and are always in.
+- **Library › Projects** is a sixth type chip. Projects (the curriculum's and the catalogue's) sort after resources
+  and papers, so the list opens as before. The list is windowed: only rows near the viewport are drawn, the rest is
+  padding of the measured row height, so 1,600 entries cost a few dozen rows. Browser find-in-page does not see rows
+  far off screen; search does.
+- **Activity › Projects** and **Activity › Practice** share one segmented control, shown once there is a solve or an
+  answer, so a fresh install keeps the Activity mockup.
+- **No in-browser runner.** Pyodide is a download of several megabytes; lazy-loading it would not grow the main bundle, but it is a
+  large dependency for an optional feature, and the examples alone are a weak test. Skipped, as the brief allows.
+- **A pressed chip's count** used a ramp colour at 2.9:1; it is the accent colour now (Lighthouse found it on the
+  Projects filter).
+- **Screenshots.** New: `challenge-light.png`, `case-sheet-light.png`, `deck-daily-light.png`; redrawn: Today (Block B
+  says "daily challenge") and Library (the Projects chip). All drawn on Linux; the other Windows baselines are kept.
+
+## Updating safely (pull request #1)
+
+- **What existing users have** is the build of 2026-10-08: IndexedDB at Dexie version 2 (not 3), settings without a
+  version field, plan.json version 1, backups of format 1. `tests/fixtures/live-2026-10-08/` was made by that build's
+  own code, and `tests/unit/live-upgrade.test.ts` upgrades it: the database to version 5 with nothing lost (the old
+  plan-item edits become patches and the plan reads the same), settings to version 2 with the user's values kept, the
+  data repository into a new device and back out in the new formats.
+- **Restoring an older backup kept its plan edits only by accident of the database upgrade.** Restore wrote the old
+  plan-item overrides straight in, and the plan no longer reads those: they were silently lost. Restore now converts
+  them to patches the same way the database upgrade does (`withLegacyPlanEdits`). Found by the fixture test.
+- **A device still on the older build cannot read** state/plan.json version 2, state/settings.json version 2, a day
+  with a Practice entry, or a review whose numbers include P (checked with that build's own parsers). When it changes
+  one of those, it writes its own older copy over the newer one. It can still read everything else this build writes,
+  and never touches practice.json or challenges.json. An old build cannot be changed after the fact, so the newer build
+  defends itself (`src/sync/downgrade.ts`): a version 1 plan over local patches is merged record by record; settings
+  without a version never replace version 2 settings; a day that lost entries in blocks outside A–E (with no tombstone
+  for them) is merged, not taken; a review keeps the block numbers it would lose. Each time, the merged file goes back
+  to GitHub and the device shows "A device with an older version of Atlas changed your data on GitHub … reload to update
+  them". A device that is not upgraded takes nothing from settings it could not read: its own setting changes made
+  in the meantime are dropped in favour of the newer settings, which is the one loss left, and it is visible in the
+  notice. Old devices update on their next load (the service worker's update prompt).
+- **A challenge's solution link is stored in `demoUrl`**, not in a new field, so items.json stays readable by older
+  devices (their schema is strict and would reject the whole file).
+
+## CI and the deploy (pull request #1)
+
+- **Screenshots are drawn and compared on one platform: CI's Linux.** The old baselines were drawn by Edge on Windows
+  and CI skipped the comparison; the newer ones by Chromium in a cloud container, which CI's Chromium renders
+  differently too (all seven comparisons failed there). Now the `screenshots` job redraws every baseline on CI when
+  a pull request carries `screenshots/.redraw`, commits them, and `verify` compares against them on every run. A
+  run started by that bot commit waits for approval (GitHub's rule for bot pushes); the next push runs normally.
+- **The SymPy check runs on every pull request** (40 draws a template, about five minutes), next to `verify`; the
+  catalogue mapping is checked in `verify`.
+- **The deploy checks the live site as it deploys** (`scripts/live-check.ts`): before deploying, a browser opens the
+  live site as a returning user on the old build; after, the app's own update prompt must appear, Reload must
+  bring in the new version, and five screens must render without an error. The page must be controlled by the old
+  service worker first (a first visit is not), which is what a returning user has. Tried here against the old build
+  swapped for the new one under a running browser.
+- **`check:links --candidates`** checks proposed links for resources that have none, so a link is added only after a
+  fetch confirmed its page title. The one-off job that ran it in pull request #1 is gone; the option stays.
+

@@ -9,9 +9,10 @@ import { z } from 'zod';
 import { canonical } from '../db/backup-file.ts';
 import {
   CertStateSchema, CustomEntitySchema, DayLogSchema, MilestoneStateSchema, OverrideSchema, PaperStateSchema,
-  ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
+  PlanPatchSchema, PracticeAnswerSchema, ChallengeEventSchema, ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
 } from '../db/types.ts';
-import type { DayLog, Review, StoredSettings, UserItemState } from '../db/types.ts';
+import { legacyPlanPatches } from '../lib/plan.ts';
+import type { ChallengeEvent, DayLog, PracticeAnswer, Review, StoredSettingsInput, UserItemState } from '../db/types.ts';
 import { formatRange, monthName } from '../lib/dates.ts';
 import type { Project } from '../seed/schema.ts';
 
@@ -68,7 +69,11 @@ export function parseItems(text: string): ParseResult<ItemsData> {
 
 /* ------------------------------------------------------------------ state/plan.json */
 
-export const PlanFileSchema = z.strictObject({
+/**
+ * Version 2 (flexibility brief) adds `patches`, the plan edits in order. Version 1, written by a device on an
+ * older build, is still read: its plan-item overrides and custom plan items become patches.
+ */
+const PlanFileV1Schema = z.strictObject({
   format: z.literal('atlas-plan'),
   version: z.literal(1),
   overrides: z.array(OverrideSchema),
@@ -76,6 +81,7 @@ export const PlanFileSchema = z.strictObject({
   replans: z.array(ReplanRecordSchema),
   weekPicks: z.array(WeekPickSchema),
 });
+export const PlanFileSchema = PlanFileV1Schema.extend({ version: z.literal(2), patches: z.array(PlanPatchSchema) });
 export type PlanFile = z.infer<typeof PlanFileSchema>;
 export type PlanData = Omit<PlanFile, 'format' | 'version'>;
 
@@ -83,37 +89,86 @@ export function renderPlan(data: PlanData): string {
   const byKind = <T extends { kind: string; id: string }>(rows: readonly T[]): T[] => [...rows].sort((a, b) => (a.kind + '/' + a.id).localeCompare(b.kind + '/' + b.id));
   return toJson({
     format: 'atlas-plan',
-    version: 1,
+    version: 2,
     overrides: byKind(data.overrides),
     customEntities: byKind(data.customEntities),
     replans: [...data.replans].sort((a, b) => a.id.localeCompare(b.id)),
     weekPicks: [...data.weekPicks].sort((a, b) => a.weekStart.localeCompare(b.weekStart)),
+    patches: [...data.patches].sort((a, b) => (a.at === b.at ? a.id.localeCompare(b.id) : a.at.localeCompare(b.at))),
   });
 }
 
 export function parsePlan(text: string): ParseResult<PlanData> {
-  const result = parseJson(text, PlanFileSchema, 'state/plan.json');
+  const result = parseJson(text, z.union([PlanFileSchema, PlanFileV1Schema]), 'state/plan.json');
   if (!result.ok) return result;
-  const { format: _format, version: _version, ...data } = result.value;
-  return { ok: true, value: data };
+  if (result.value.version === 2) {
+    const { format: _format, version: _version, ...data } = result.value;
+    return { ok: true, value: data };
+  }
+  const { format: _format, version: _version, ...v1 } = result.value;
+  const patches = legacyPlanPatches(v1.overrides, v1.customEntities, planUpdatedAt({ ...v1, patches: [] }) || '1970-01-01T00:00:00.000Z');
+  return {
+    ok: true,
+    value: {
+      ...v1,
+      overrides: v1.overrides.filter((o) => o.kind !== 'planItem'),
+      customEntities: v1.customEntities.filter((c) => c.kind !== 'planItem'),
+      patches,
+    },
+  };
 }
 
 /** The newest change in the plan file, for last-writer-wins. */
 export function planUpdatedAt(data: PlanData): string {
   let newest = '';
-  for (const row of [...data.overrides, ...data.customEntities, ...data.replans, ...data.weekPicks]) {
+  for (const row of [...data.overrides, ...data.customEntities, ...data.replans, ...data.weekPicks, ...data.patches]) {
     if ((row.updatedAt ?? '') > newest) newest = row.updatedAt!;
   }
   return newest;
 }
 
+/* ------------------------------------------------------------------ state/challenges.json */
+
+export const ChallengesFileSchema = z.strictObject({
+  format: z.literal('atlas-challenges'),
+  version: z.literal(1),
+  events: z.array(ChallengeEventSchema),
+});
+
+export function renderChallenges(events: readonly ChallengeEvent[]): string {
+  return toJson({ format: 'atlas-challenges', version: 1, events: [...events].sort((a, b) => (a.date === b.date ? a.id.localeCompare(b.id) : a.date.localeCompare(b.date))) });
+}
+
+export function parseChallenges(text: string): ParseResult<ChallengeEvent[]> {
+  const result = parseJson(text, ChallengesFileSchema, 'state/challenges.json');
+  return result.ok ? { ok: true, value: result.value.events } : result;
+}
+
+/* ------------------------------------------------------------------ state/practice.json */
+
+export const PracticeFileSchema = z.strictObject({
+  format: z.literal('atlas-practice'),
+  version: z.literal(1),
+  answers: z.array(PracticeAnswerSchema),
+});
+
+export function renderPractice(answers: readonly PracticeAnswer[]): string {
+  return toJson({ format: 'atlas-practice', version: 1, answers: [...answers].sort((a, b) => (a.date === b.date ? a.id.localeCompare(b.id) : a.date.localeCompare(b.date))) });
+}
+
+export function parsePractice(text: string): ParseResult<PracticeAnswer[]> {
+  const result = parseJson(text, PracticeFileSchema, 'state/practice.json');
+  return result.ok ? { ok: true, value: result.value.answers } : result;
+}
+
 /* ------------------------------------------------------------------ state/settings.json */
 
-export function renderSettings(settings: StoredSettings): string {
+export function renderSettings(settings: StoredSettingsInput): string {
   return toJson(settings);
 }
 
-export function parseSettings(text: string): ParseResult<StoredSettings> {
+/** Version 1 or 2: the app upgrades when it reads (src/lib/settings.ts). */
+export function parseSettings(text: string): ParseResult<StoredSettingsInput> {
   return parseJson(text, StoredSettingsSchema, 'state/settings.json');
 }
 
@@ -208,7 +263,9 @@ read it here, edit it by hand, or take it elsewhere. Every study session is one 
 |---|---|
 | \`state/items.json\` | The status, ticked units, notes and links of every course, book, project, paper, certificate and milestone |
 | \`state/plan.json\` | Your edits to the plan: moved and added items, re-plans, the builds you picked |
-| \`state/settings.json\` | Blocks, heatmap thresholds, streak rules and theme. Never the token. |
+| \`state/settings.json\` | Blocks, day templates, the weekly pattern, date ranges, pace and layout. Never the token. |
+| \`state/practice.json\` | Every practice question answered: when, right or wrong, hints, time |
+| \`state/challenges.json\` | Catalogue challenges solved (and in which language), skipped or hidden for a day |
 | \`log/YYYY/MM/YYYY-MM-DD.json\` | One day: the time logged, blocks done, reflection and energy |
 | \`log/YYYY/MM/YYYY-MM-DD.md\` | The same day to read on GitHub, generated |
 | \`reviews/\` | Weekly (\`2026-W41.md\`), monthly (\`2026-10.md\`) and quarterly (\`2027-Q1.md\`) reviews |

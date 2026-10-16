@@ -10,10 +10,11 @@ import { open } from './helpers.ts';
  * the five-year map on a desktop, compared with the pictures committed in /screenshots. Eight weeks of demo
  * history are imported first, so the screens have something to show.
  *
- * `npm run screenshots` redraws the baselines after a UI change. They are drawn by Edge on Windows; Linux
- * renders text differently, so CI skips the comparison (DECISIONS.md).
+ * The baselines are drawn on CI's Linux (Chromium from `npx playwright install`), and CI compares against them on
+ * every run. To redraw them after a UI change, commit an empty `screenshots/.redraw` to the pull request's branch:
+ * the `screenshots` job in .github/workflows/ci.yml redraws them all and pushes them. `npm run screenshots` redraws
+ * them locally, but text renders differently on other systems, so a local redraw is for looking, not committing.
  */
-test.skip(Boolean(process.env.CI), 'The baselines are drawn by Edge on Windows; CI renders text differently');
 test.use({ timezoneId: 'Asia/Tashkent', serviceWorkers: 'block' });
 
 const PHONE = [
@@ -40,6 +41,8 @@ for (const theme of ['light', 'dark'] as const) {
     for (const [name, path] of PHONE) {
       await open(page, path);
       await expect(page.locator('main .text-meta').first()).toBeVisible();
+      // The catalogue index loads after the day: wait for Block B's daily challenge.
+      if (name === 'today') await expect(page.getByText(/daily challenge/).first()).toBeVisible();
       await expect(page).toHaveScreenshot(name + '-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
     }
   });
@@ -72,4 +75,66 @@ test('the Sync section in Settings, off and connected, matches the committed scr
   await expiry.blur();
   await page.getByRole('heading', { level: 1, name: 'Settings' }).click();
   await expect(section).toHaveScreenshot('settings-sync-on-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+});
+
+test('compact Today and the Change today sheet match the committed screenshots', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await importDemo(page, 'light');
+  await open(page, './#/settings?section=layout');
+  await page.getByRole('radio', { name: 'Compact' }).first().click();
+  await open(page, './');
+  await expect(page.locator('main .text-meta').first()).toBeVisible();
+  await expect(page).toHaveScreenshot('today-compact-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+
+  await page.getByRole('button', { name: 'Change today' }).click();
+  const sheet = page.getByRole('dialog', { name: 'Change today' });
+  await expect(sheet.getByText(/^Blocks · /)).toBeVisible();
+  await expect(page).toHaveScreenshot('change-today-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+});
+
+test('a practice question, its solution and the set summary match the committed screenshots', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await importDemo(page, 'light');
+  await open(page, './#/practice');
+  const section = page.locator('section[aria-labelledby="question-heading"]');
+  await expect(page.getByText(/^Question 1 of 9/)).toBeVisible();
+  await expect(page).toHaveScreenshot('practice-question-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
+
+  await section.getByRole('button', { name: 'Hint' }).click();
+  await section.getByRole('button', { name: 'Show solution' }).click();
+  await expect(section.getByRole('region', { name: 'Solution' })).toBeVisible();
+  await expect(page).toHaveScreenshot('practice-solution-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
+
+  for (let i = 1; i <= 9; i++) {
+    await expect(page.getByText(new RegExp('^Question ' + i + ' of 9'))).toBeVisible();
+    const proof = section.getByRole('button', { name: 'Show the solution' });
+    if ((await proof.count()) > 0) {
+      await proof.click();
+      await section.getByRole('button', { name: i % 2 ? 'Got it' : 'Missed it' }).click();
+    } else {
+      if (i > 1) await section.getByRole('button', { name: 'Show solution' }).click();
+      await section.getByRole('button', { name: 'Count it as missed' }).click();
+    }
+    await page.getByRole('button', { name: /^(Next|See the summary)$/ }).click();
+  }
+  await expect(page.getByRole('heading', { name: /questions right$/ })).toBeVisible();
+  await expect(page).toHaveScreenshot('practice-summary-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
+});
+
+test('a challenge, a case sheet and the Deck on Daily match the committed screenshots', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await importDemo(page, 'light');
+  await open(page, './#/challenge/dc-a-zeros-to-the-back');
+  await expect(page.getByRole('button', { name: 'Mark solved' })).toBeVisible();
+  await page.getByRole('button', { name: 'Hint', exact: true }).click();
+  await expect(page).toHaveScreenshot('challenge-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
+
+  await open(page, './#/library/mx-ai-ticket-triage-llm');
+  const sheet = page.getByRole('dialog', { name: 'Support-ticket triage service for a SaaS helpdesk' });
+  await expect(sheet.getByRole('heading', { name: 'Requirements', exact: true })).toBeVisible();
+  await expect(page).toHaveScreenshot('case-sheet-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+
+  await open(page, './#/plan/pick?cadence=daily');
+  await expect(page.locator('#deck-top-title')).not.toHaveText('');
+  await expect(page).toHaveScreenshot('deck-daily-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });

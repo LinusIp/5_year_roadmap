@@ -19,7 +19,7 @@ export function totalMinutes(log: DayLog | undefined): number {
 
 export function minutesByBlock(log: DayLog | undefined): Record<BlockId, number> {
   const out: Record<BlockId, number> = { A: 0, B: 0, C: 0, D: 0, E: 0 };
-  for (const entry of log?.entries ?? []) out[entry.block] += entry.minutes;
+  for (const entry of log?.entries ?? []) out[entry.block] = (out[entry.block] ?? 0) + entry.minutes;
   return out;
 }
 

@@ -6,7 +6,8 @@ import { useUnits } from '../hooks/useUnits.ts';
 import { daysBetween, startOfWeek, today as todayDate } from '../lib/dates.ts';
 import { weeklyBuildFor } from '../lib/schedule.ts';
 import { useQueryParam } from '../router/router.tsx';
-import type { BlockId } from '../seed/schema.ts';
+import type { BlockId, Goal } from '../seed/schema.ts';
+import { EditPlanSheet, GoalSheet } from './plan/EditSheets.tsx';
 import { Header } from '../ui/Header.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { SegmentedControl } from '../ui/SegmentedControl.tsx';
@@ -42,8 +43,13 @@ export function Plan() {
   const [laneParam, setLane] = useQueryParam('lane');
   const [itemParam, setItem] = useQueryParam('item');
   const [replanOpen, setReplanOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [goalOpen, setGoalOpen] = useState<Goal | null>(null);
   const asOf = todayDate();
-  const view: View = VIEWS.some((v) => v.value === viewParam) ? (viewParam as View) : 'timeline';
+  // With no view in the address, the one chosen in Settings > Layout (roadmaps live at the top of Credentials).
+  const preferred = atlas?.settings.layout.plan.segment ?? 'timeline';
+  const fallback: View = preferred === 'roadmaps' ? 'credentials' : preferred;
+  const view: View = VIEWS.some((v) => v.value === viewParam) ? (viewParam as View) : fallback;
   const weekStart = startOfWeek(asOf, atlas?.settings.core.weekStartsOn ?? 1);
   const weekPick = useWeekPick(weekStart);
   const model = useMemo(() => (atlas ? buildModel(atlas, asOf) : null), [atlas, asOf]);
@@ -73,7 +79,7 @@ export function Plan() {
     <Screen title="Plan">
       <Header title="Plan" sub={sub} />
       <div className="mt-5">
-        <SegmentedControl label="View" value={view} onChange={(v) => setView(v === 'timeline' ? null : v)} options={VIEWS} />
+        <SegmentedControl label="View" value={view} onChange={(v) => setView(v === fallback ? null : v)} options={VIEWS} />
       </div>
 
       {view === 'timeline' && (
@@ -85,6 +91,8 @@ export function Plan() {
           weekly={weekly ? nameOf(weekly) : null}
           onLane={(phaseId, block) => setLane(phaseId + '.' + block, { replace: false })}
           onReplan={() => setReplanOpen(true)}
+          onEdit={() => setEditOpen(true)}
+          onGoal={(goal) => setGoalOpen(goal)}
         />
       )}
       {view !== 'timeline' && (
@@ -97,6 +105,8 @@ export function Plan() {
 
       <LaneSheet atlas={atlas} phase={laneModel?.phase ?? null} lane={itemParam ? null : lane} units={units} onClose={() => setLane(null)} onOpenItem={openItem} />
       <ItemSheet atlas={atlas} id={itemParam} onClose={() => setItem(null)} />
+      <EditPlanSheet atlas={atlas} open={editOpen} onClose={() => setEditOpen(false)} />
+      {goalOpen && <GoalSheet key={goalOpen.id} atlas={atlas} goal={goalOpen} onClose={() => setGoalOpen(null)} />}
       <ReplanSheet open={replanOpen} onClose={() => setReplanOpen(false)} seed={atlas.seed} settings={atlas.settings} states={atlas.states} asOf={asOf} />
     </Screen>
   );

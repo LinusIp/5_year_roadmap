@@ -106,13 +106,11 @@ describe('the schedule', () => {
     }
   });
 
-  it('marks a block as resting on a day it is not scheduled', () => {
+  it('leaves a block out on a weekday it does not run', () => {
     const custom = structuredClone(settings);
     custom.core.blocks[0]!.days = [1, 2, 3, 4, 5];
     const plan = planForDay({ date: '2026-09-26', settings: custom, ctx: context() }); // a Saturday
-    const blockA = plan.blocks.find((b) => b.id === 'A')!;
-    expect(blockA.kind).toBe('rest');
-    expect(blockA.targetMinutes).toBe(0);
+    expect(plan.blocks.find((b) => b.id === 'A')).toBeUndefined();
     expect(plan.targetMinutes).toBe(360);
   });
 
@@ -145,7 +143,7 @@ describe('the schedule', () => {
 
   it('adds up to the 8-hour day and the 56-hour week', () => {
     expect(dailyTargetMinutes(settings, FIRST_DAY)).toBe(480);
-    expect(weeklyTargetMinutes(settings)).toBe(56 * 60);
+    expect(weeklyTargetMinutes(settings, FIRST_DAY)).toBe(56 * 60);
   });
 
   it('falls back to the nearest phase outside the plan rather than showing nothing', () => {

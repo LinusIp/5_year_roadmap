@@ -1,0 +1,324 @@
+{
+  "app": "atlas",
+  "data": {
+    "certStates": [],
+    "customEntities": [
+      {
+        "createdAt": "2026-10-16",
+        "data": {
+          "cost": "free",
+          "estHours": 10,
+          "id": "my-probability-notes",
+          "level": "intro",
+          "prerequisites": [],
+          "provider": "Me",
+          "searchHint": "my notes",
+          "source": "user",
+          "title": "My probability notes",
+          "tracks": [
+            "math"
+          ],
+          "type": "book",
+          "url": null,
+          "urlVerified": false
+        },
+        "deviceId": "5kmn4cd1hgnm",
+        "id": "my-probability-notes",
+        "kind": "resource",
+        "updatedAt": "2026-10-16T04:24:38.433Z"
+      }
+    ],
+    "dayLogs": [
+      {
+        "date": "2026-09-21",
+        "deviceId": "5kmn4cd1hgnm",
+        "doneBlocks": [
+          "A"
+        ],
+        "entries": [
+          {
+            "block": "A",
+            "deviceId": "5kmn4cd1hgnm",
+            "id": "zeri0l7imla2",
+            "minutes": 120,
+            "track": "graphics",
+            "updatedAt": "2026-10-16T04:24:38.425Z"
+          },
+          {
+            "block": "B",
+            "deviceId": "5kmn4cd1hgnm",
+            "id": "38ae0sa3lywz",
+            "minutes": 60,
+            "refId": "30-days-of-python",
+            "track": "languages",
+            "updatedAt": "2026-10-16T04:24:38.425Z"
+          }
+        ],
+        "fieldsAt": {
+          "doneBlocks": "2026-10-16T04:24:38.425Z"
+        },
+        "updatedAt": "2026-10-16T04:24:38.426Z"
+      },
+      {
+        "date": "2026-09-22",
+        "deviceId": "5kmn4cd1hgnm",
+        "energy": 4,
+        "entries": [
+          {
+            "block": "C",
+            "deviceId": "5kmn4cd1hgnm",
+            "id": "ljck524x682o",
+            "minutes": 90,
+            "refId": "ml-zoomcamp",
+            "track": "ai",
+            "updatedAt": "2026-10-16T04:24:38.427Z"
+          }
+        ],
+        "fieldsAt": {
+          "energy": "2026-10-16T04:24:38.427Z",
+          "reflection": "2026-10-16T04:24:38.427Z"
+        },
+        "reflection": "Good focus.",
+        "updatedAt": "2026-10-16T04:24:38.427Z"
+      },
+      {
+        "date": "2026-09-23",
+        "deviceId": "5kmn4cd1hgnm",
+        "entries": [
+          {
+            "block": "E",
+            "deviceId": "5kmn4cd1hgnm",
+            "id": "8u5if6yn5oji",
+            "minutes": 45,
+            "refId": "mit-18-06",
+            "track": "math",
+            "updatedAt": "2026-10-16T04:24:38.428Z"
+          }
+        ],
+        "removed": [
+          {
+            "at": "2026-10-16T04:24:38.429Z",
+            "deviceId": "5kmn4cd1hgnm",
+            "id": "ehmt3fpyr29m"
+          }
+        ],
+        "updatedAt": "2026-10-16T04:24:38.429Z"
+      }
+    ],
+    "itemStates": [
+      {
+        "deviceId": "5kmn4cd1hgnm",
+        "notes": "## Lecture 2\n\nElimination with matrices.",
+        "refId": "mit-18-06",
+        "startedAt": "2026-10-16",
+        "status": "active",
+        "unitsDone": [
+          "lecture-1",
+          "lecture-2"
+        ],
+        "updatedAt": "2026-10-16T04:24:38.421Z"
+      },
+      {
+        "deviceId": "5kmn4cd1hgnm",
+        "doneAt": "2026-09-26",
+        "refId": "w-c-ring-buffer",
+        "repoUrl": "https://github.com/octo-learner/ring-buffer",
+        "status": "done",
+        "unitsDone": [],
+        "updatedAt": "2026-10-16T04:24:38.422Z"
+      }
+    ],
+    "meta": [],
+    "milestoneStates": [],
+    "overrides": [
+      {
+        "deviceId": "5kmn4cd1hgnm",
+        "id": "plan.30-days-of-python",
+        "kind": "planItem",
+        "patch": {
+          "order": 99
+        },
+        "updatedAt": "2026-10-16T04:24:38.431Z"
+      },
+      {
+        "deviceId": "5kmn4cd1hgnm",
+        "id": "plan.automate-the-boring-stuff",
+        "kind": "planItem",
+        "patch": {},
+        "removed": true,
+        "updatedAt": "2026-10-16T04:24:38.432Z"
+      }
+    ],
+    "paperStates": [
+      {
+        "deviceId": "5kmn4cd1hgnm",
+        "refId": "paper-alexnet",
+        "startedAt": "2026-10-16",
+        "status": "reading",
+        "updatedAt": "2026-10-16T04:24:38.424Z"
+      }
+    ],
+    "replans": [],
+    "reviews": [
+      {
+        "changes": "Earlier start.",
+        "completedAt": "2026-09-27",
+        "deviceId": "5kmn4cd1hgnm",
+        "didnt": "Evenings.",
+        "id": "week:2026-09-21",
+        "kind": "week",
+        "periodStart": "2026-09-21",
+        "snapshot": {
+          "daysCounted": 3,
+          "itemsFinished": [
+            "w-c-ring-buffer"
+          ],
+          "minutesByBlock": {
+            "A": 120,
+            "B": 60,
+            "C": 90,
+            "D": 30,
+            "E": 45
+          },
+          "targetMinutes": 3360,
+          "totalMinutes": 345
+        },
+        "updatedAt": "2026-10-16T04:24:38.434Z",
+        "worked": "Mornings on graphics."
+      }
+    ],
+    "settings": [
+      {
+        "backup": {},
+        "core": {
+          "backupReminderDays": 30,
+          "blocks": [
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "formerNames": [
+                "Gamedev / Graphics / Simulation"
+              ],
+              "id": "A",
+              "minutes": 120,
+              "name": "Graphics / rendering / simulation",
+              "summary": "Two hours, every day. Small games are a monthly-project vehicle inside it, not the subject."
+            },
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "id": "B",
+              "minutes": 60,
+              "name": "Languages",
+              "summary": "One hour, every day."
+            },
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "id": "C",
+              "minutes": 90,
+              "name": "Core track",
+              "summary": "ML Zoomcamp for the first four months, then AI inference and AI engineering (priority 1), alternating by phase with software architecture (priority 2)."
+            },
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "id": "D",
+              "minutes": 120,
+              "name": "Projects / hands-on",
+              "summary": "The current weekly mini-build and monthly project. In stage 2 this is lab, PCB, CAD and build time."
+            },
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "id": "E",
+              "minutes": 60,
+              "name": "Math & physics",
+              "summary": "The prerequisites of stage 2, running from day one."
+            }
+          ],
+          "forecast": {
+            "paceWindowDays": 28
+          },
+          "heatmapThresholds": [
+            1,
+            120,
+            300,
+            420
+          ],
+          "paperCadence": {
+            "fromPhase": "y1-p1",
+            "fromYear": 1,
+            "perWeek": 1
+          },
+          "review": {
+            "block": "D",
+            "day": 0,
+            "title": "Weekly review + paper reading"
+          },
+          "streak": {
+            "autoFreeze": true,
+            "freezesPerMonth": 2,
+            "minMinutes": 45
+          },
+          "weekStartsOn": 1,
+          "weeklyBuildHours": 4
+        },
+        "deviceId": "5kmn4cd1hgnm",
+        "github": {
+          "showCalendar": false,
+          "username": "octo-learner"
+        },
+        "id": "app",
+        "theme": "dark",
+        "updatedAt": "2026-10-16T04:24:38.410Z"
+      }
+    ],
+    "weekPicks": [
+      {
+        "deviceId": "5kmn4cd1hgnm",
+        "pickedAt": "2026-10-16",
+        "projectId": "w-c-ring-buffer",
+        "updatedAt": "2026-10-16T04:24:38.434Z",
+        "weekStart": "2026-09-21"
+      }
+    ]
+  },
+  "exportedAt": "2026-10-08T12:00:00.000Z",
+  "formatVersion": 1
+}

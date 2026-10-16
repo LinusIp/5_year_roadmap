@@ -7,8 +7,8 @@
 import type { DayLog } from '../db/types.ts';
 import type { BlockId, SettingsDefaults, TrackId } from '../seed/schema.ts';
 import { addDays, daysBetween, monthName, startOfWeek, weekday } from './dates.ts';
-import { heatLevel } from './streaks.ts';
-import type { HeatLevel } from './streaks.ts';
+import { heatLevel, relativeLevel } from './streaks.ts';
+import type { HeatLevel, PlannedFor } from './streaks.ts';
 
 export interface HeatCell {
   date: string;
@@ -51,6 +51,9 @@ export interface GridOptions {
   /** Only count minutes on these tracks. Empty or absent means all of them. */
   tracks?: TrackId[];
   weekStartsOn?: 0 | 1;
+  /** relative: a share of each day's planned minutes (needs `planned`); absolute (default): `thresholds`. */
+  mode?: 'relative' | 'absolute';
+  planned?: PlannedFor;
 }
 
 function minutesOf(log: DayLog | undefined, tracks: Set<TrackId> | null): number {
@@ -108,7 +111,7 @@ export function layoutGrid(from: string, to: string, weekStartsOn: 0 | 1 = 1): G
   return { slots, columns: Math.ceil(dayCount / 7), months, start: gridStart, end: gridEnd };
 }
 
-export function buildGrid({ from, to, logs, thresholds, tracks, weekStartsOn = 1 }: GridOptions): HeatGrid {
+export function buildGrid({ from, to, logs, thresholds, tracks, weekStartsOn = 1, mode = 'absolute', planned }: GridOptions): HeatGrid {
   const byDate = new Map(logs.map((log) => [log.date, log]));
   const filter = tracks && tracks.length > 0 ? new Set(tracks) : null;
   const layout = layoutGrid(from, to, weekStartsOn);
@@ -128,7 +131,7 @@ export function buildGrid({ from, to, logs, thresholds, tracks, weekStartsOn = 1
       ...slot,
       minutes,
       totalMinutes: minutesOf(log, null),
-      level: slot.outside ? 0 : heatLevel(minutes, thresholds),
+      level: slot.outside ? 0 : mode === 'relative' && planned ? relativeLevel(minutes, planned(slot.date), thresholds) : heatLevel(minutes, thresholds),
       frozen: Boolean(log?.frozen),
     };
   });
@@ -174,7 +177,7 @@ export function minutesPerBlock(logs: DayLog[], from?: string, to?: string): Rec
   for (const log of logs) {
     if (from && log.date < from) continue;
     if (to && log.date > to) continue;
-    for (const entry of log.entries) out[entry.block] += entry.minutes;
+    for (const entry of log.entries) out[entry.block] = (out[entry.block] ?? 0) + entry.minutes;
   }
   return out;
 }

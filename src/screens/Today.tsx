@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../db/db.ts';
+import { useCatalogueIndex, useChallengeEvents } from '../hooks/useCatalogue.ts';
+import { dailyChallenge, isSlotDay, languageOf, weeklyChallenge } from '../lib/catalogue/daily.ts';
+import type { Pick as ChallengePick } from '../lib/catalogue/daily.ts';
+import { groupLabel } from '../lib/catalogue/filters.ts';
 import { updateSettings } from '../db/settings.ts';
 import { clearTimer, editItemState, setItemStatus, setWeekPick, startTimer, useRunningTimer, useWeekPick } from '../db/state.ts';
 import type { RunningTimer } from '../db/types.ts';
@@ -7,6 +12,8 @@ import { useAtlas } from '../hooks/useAtlas.ts';
 import { useUnits } from '../hooks/useUnits.ts';
 import { addDays, dayName, formatLong, formatStopwatch, startOfWeek, today as todayDate, weekday } from '../lib/dates.ts';
 import { addEntry, editLog, isBlockDone, minutesByBlock, minutesForRef, readLog, toggleBlockDone, totalMinutes } from '../lib/logs.ts';
+import { plannedFor } from '../lib/day-plan.ts';
+import { catchUpMinutes, laneBalance } from '../lib/pace.ts';
 import { planForDay, suggestWeeklyBuild } from '../lib/schedule.ts';
 import type { ScheduledItem, TodayBlock } from '../lib/schedule.ts';
 import { logTimeRequests } from '../lib/shortcuts.ts';
@@ -26,6 +33,7 @@ import { Screen } from '../ui/Screen.tsx';
 import { Sheet } from '../ui/Sheet.tsx';
 import { Checklist, criteriaUnits } from './parts/Checklist.tsx';
 import type { ChecklistUnit } from './parts/Checklist.tsx';
+import { ChangeTodaySheet } from './parts/ChangeTodaySheet.tsx';
 import { DayFields } from './parts/DayFields.tsx';
 import { LogTimeSheet } from './parts/LogTimeSheet.tsx';
 import { NotesField } from './parts/NotesField.tsx';
@@ -34,7 +42,7 @@ import { takenProject } from './parts/taken.ts';
 import { blockShort, dateTitle, nameOf, partOf, span, unitDetail } from './parts/text.ts';
 import { todayLine, tokenDaysLeft, useSyncView } from '../sync/status.ts';
 
-type SheetName = 'log' | 'date' | 'day' | 'note' | null;
+type SheetName = 'log' | 'date' | 'day' | 'note' | 'change' | null;
 
 /** The item a block puts in front of you. Block D carries the week's build first, then the monthly project. */
 function focusItem(block: TodayBlock, monthlyFirst: boolean): ScheduledItem | undefined {
@@ -63,6 +71,12 @@ function unitWindow(units: ChecklistUnit[], done: string[]): ChecklistUnit[] {
   }
   const start = Math.max(0, next - 2);
   return units.slice(start, start + 5);
+}
+
+/** Position of a block in a fixed order; blocks not listed go last, in the day's order. */
+function rank(order: string[], id: string): number {
+  const i = order.indexOf(id);
+  return i < 0 ? order.length : i;
 }
 
 /** Elapsed time of the running timer, ticking once a second. */
@@ -95,6 +109,9 @@ export function Today() {
   const timer = useRunningTimer();
   const elapsed = useElapsed(timer);
   const log = useLiveQuery(() => readLog(date), [date]);
+  // How far today's practice set has got: "4 of 9 answered".
+  const practiceAnswered = useLiveQuery(() => db.practice.where('date').equals(date).filter((a) => a.set === 'daily:' + date).count(), [date]) ?? 0;
+  const practiceMeta = (it: ScheduledItem): string => (practiceAnswered >= it.unitCount ? 'Set done · ' : practiceAnswered > 0 ? practiceAnswered + ' of ' + it.unitCount + ' answered · ' : '') + (it.note ?? '');
   const settings = atlas?.settings;
   const weekStart = useMemo(() => startOfWeek(date, settings?.core.weekStartsOn ?? 1), [date, settings]);
   const weekPick = useWeekPick(weekStart);
@@ -123,11 +140,24 @@ export function Today() {
     return logTimeRequests.listen(take);
   }, []);
 
-  const ctx = useMemo(() => (atlas ? { seed: atlas.seed, states: atlas.states, units } : null), [atlas, units]);
-  const plan = useMemo(
-    () => (settings && ctx ? planForDay({ date, settings, weeklyPickId: weekPick?.projectId, ctx }) : null),
-    [date, settings, weekPick, ctx],
-  );
+  const catalogue = useCatalogueIndex();
+  const challengeEvents = useChallengeEvents();
+  const ctx = useMemo(() => (atlas ? { seed: atlas.seed, states: atlas.states, units, ...(catalogue ? { catalogue } : {}) } : null), [atlas, units, catalogue]);
+  const plan = useMemo(() => {
+    if (!settings || !ctx || !atlas) return null;
+    const day = planForDay({ date, settings, weeklyPickId: weekPick?.projectId, ctx });
+    // Lanes that opted into catch-up get their extra minutes on top, up to the cap, while they are behind.
+    if (day.phase && Object.keys(settings.catchUp).length > 0) {
+      let extra = 0;
+      const blocks = day.blocks.map((b) => {
+        const more = catchUpMinutes(settings, laneBalance(settings, atlas.logs, b.id, day.phase!.start, date));
+        extra += more;
+        return more > 0 ? { ...b, targetMinutes: b.targetMinutes + more, catchUp: more } : b;
+      });
+      return { ...day, blocks, targetMinutes: day.targetMinutes + extra };
+    }
+    return day;
+  }, [date, settings, weekPick, ctx, atlas]);
 
   const pickAnother = useCallback(() => {
     if (!plan || !ctx) return;
@@ -150,21 +180,28 @@ export function Today() {
   }
 
   const isToday = date === now;
-  const blocks = plan.blocks.filter((b) => b.kind !== 'rest');
+  const layout = settings.layout.today;
+  const blocks = plan.blocks;
   const done = (b: TodayBlock): boolean => isBlockDone(log, b.id);
   const timerBlock = isToday && timer ? blocks.find((b) => b.id === timer.block) : undefined;
-  const nowBlock = (chosen ? blocks.find((b) => b.id === chosen) : undefined) ?? timerBlock ?? blocks.find((b) => !done(b)) ?? null;
+  // "Now" is the first unfinished block, in the day's order or in the order set under Settings > Layout.
+  const nowOrder = layout.now === 'order' ? [...blocks].sort((a, b) => rank(layout.order, a.id) - rank(layout.order, b.id)) : blocks;
+  const nowBlock = (chosen ? blocks.find((b) => b.id === chosen) : undefined) ?? timerBlock ?? nowOrder.find((b) => !done(b)) ?? null;
   const later = blocks.filter((b) => b !== nowBlock && !done(b));
   const finished = blocks.filter((b) => b !== nowBlock && done(b));
   const byBlock = minutesByBlock(log);
   const logged = totalMinutes(log);
-  const streakState = streak(atlas.logs, settings.core.streak, date);
-  const nothingPlanned = blocks.every((b) => b.kind === 'empty' && !b.weeklyBuild);
+  const streakState = streak(atlas.logs, settings.core.streak, date, plannedFor(settings));
+  const restDay = plan.resolved.rest;
+  const nothingPlanned = !restDay && blocks.every((b) => b.kind === 'empty' && !b.weeklyBuild);
+  // The day's template is named in the header only when it is not the usual Full day.
+  const templateNote = restDay ? 'rest day' : plan.resolved.templateId !== 'full' || plan.resolved.source === 'change' ? plan.resolved.templateName : null;
+  const canChange = date >= now;
 
   const item = nowBlock ? focusItem(nowBlock, monthlyFirst) : undefined;
   const nowRunning = Boolean(timer && nowBlock && timer.block === nowBlock.id);
   const otherRunning = Boolean(timer && !nowRunning);
-  const nowMinutes = nowBlock ? byBlock[nowBlock.id] + (nowRunning ? elapsed / 60_000 : 0) : 0;
+  const nowMinutes = nowBlock ? (byBlock[nowBlock.id] ?? 0) + (nowRunning ? elapsed / 60_000 : 0) : 0;
   const nowDone = nowBlock ? done(nowBlock) : false;
 
   const reviewDay = settings.core.review.day;
@@ -192,8 +229,46 @@ export function Today() {
   /** Hours already put into a project, over every day: "2 of 4 h done". */
   const hoursOn = (refId: string): number => Math.round(atlas.logs.reduce((sum, l) => sum + minutesForRef(l, refId), 0) / 60);
 
+  // The project catalogue on Today: the day's easy challenge under Block B; on the weekly slot's days, the week's
+  // medium challenge under Block D; and a real case taken from the Deck, also under Block D.
+  const blockLanguage = languageOf(((b) => (b ? b.refId + ' ' + b.title : undefined))(blocks.find((b) => b.id === 'B')?.item));
+  const daily: ChallengePick | null =
+    isToday && settings.core.catalogue.dailyChallenge && catalogue && challengeEvents ? dailyChallenge({ entries: catalogue, events: challengeEvents, date, blockLanguage }) : null;
+  const weeklyPick: ChallengePick | null =
+    isToday && isSlotDay(date, settings.core.catalogue.weeklyDays) && catalogue && challengeEvents ? weeklyChallenge({ entries: catalogue, events: challengeEvents, weekStart, blockLanguage }) : null;
+  const activeCase = catalogue?.find((e) => e.kind === 'case' && atlas.states.get(e.id)?.status === 'active');
+  type ExtraRow = { key: string; title: string; meta: string; to: string; trailing: string };
+  const challengeRow = (label: string, pick: ChallengePick, query: string): ExtraRow => ({
+    key: label,
+    title: label + ' · ' + pick.challenge.title,
+    meta: pick.solved
+      ? 'Solved'
+      : [pick.challenge.difficulty, (pick.challenge.estMinutes ?? 30) + ' min', groupLabel(pick.challenge.group), (pick.anotherLanguage ? 'in another language: ' : 'in ') + pick.language].join(' · '),
+    to: '/challenge/' + pick.challenge.id + query,
+    trailing: pick.solved ? 'Done' : span(pick.challenge.estMinutes ?? 30),
+  });
+  const extrasFor = (id: BlockId): ExtraRow[] => {
+    const rows: ExtraRow[] = [];
+    if (id === 'B' && daily) rows.push(challengeRow('Daily challenge', daily, '?daily=1'));
+    if (id === 'D' && weeklyPick) rows.push(challengeRow('Weekly challenge', weeklyPick, ''));
+    if (id === 'D' && activeCase) {
+      const ticked = atlas.states.get(activeCase.id)?.unitsDone.length ?? 0;
+      rows.push({ key: 'Monthly case', title: 'Monthly case · ' + activeCase.title, meta: 'Advanced · ' + ticked + ' milestones ticked · ' + activeCase.hours + ' h', to: '/library/' + activeCase.id, trailing: hoursOn(activeCase.id) + ' h' });
+    }
+    return rows;
+  };
+  // They live inside their block, so Today still fits one screen: on the block's Now card as rows, and as a mention on
+  // its Later today row. Once the block is done, they lead Later today.
+  const leadingExtras = finished.flatMap((b) => extrasFor(b.id));
+  const extrasNote = (id: BlockId): string | null => {
+    const rows = extrasFor(id);
+    return rows.length ? rows.map((r) => r.key.toLowerCase() + (r.trailing === 'Done' ? ' done' : '')).join(', ') : null;
+  };
+  const extraRow = (row: ExtraRow) => <Row key={row.key} title={row.title} meta={layout.view === 'compact' ? undefined : row.meta} trailing={row.trailing} to={row.to} />;
+
   const rowFor = (block: TodayBlock): { title: string; meta: string; to?: string } => {
     const name = blockShort(block.def.name);
+    if (block.item?.kind === 'practice') return { title: block.def.name, meta: practiceMeta(block.item), to: '/practice' };
     if (block.kind === 'review') return { title: 'Weekly review and paper', meta: name + ' · close the week' };
     const blockItem = focusItem(block, monthlyFirst);
     if (!blockItem) {
@@ -235,6 +310,12 @@ export function Today() {
         Open the review
       </Button>
     );
+  } else if (item?.kind === 'practice' && !nowRunning) {
+    primary = (
+      <Button variant="filled" icon="play" to="/practice">
+        {practiceAnswered > 0 ? 'Go on' : 'Start the set'}
+      </Button>
+    );
   } else if (nowBlock && !item) {
     primary = (
       <Button variant="filled" to={nowBlock.id === 'D' ? '/plan/pick?from=today' : '/plan'}>
@@ -256,7 +337,11 @@ export function Today() {
     );
   }
 
-  const allUnits: ChecklistUnit[] = item ? (item.kind === 'project' ? criteriaUnits(item.acceptance ?? []) : (units?.[item.refId] ?? [])) : [];
+  const allUnits: ChecklistUnit[] = item
+    ? item.kind === 'project'
+      ? criteriaUnits(item.acceptance ?? [])
+      : (atlas.seed.resources.find((r) => r.id === item.refId)?.customUnits ?? units?.[item.refId] ?? [])
+    : [];
   const unitsDone = item ? (atlas.states.get(item.refId)?.unitsDone ?? []) : [];
   const resource = item?.kind === 'resource' ? atlas.seed.resources.find((r) => r.id === item.refId) : undefined;
   const otherD =
@@ -265,9 +350,9 @@ export function Today() {
         ? nowBlock.weeklyBuild
         : nowBlock.item
       : undefined;
-  const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item ? nameOf(item) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
+  const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item?.kind === 'practice' ? practiceMeta(item) : item ? nameOf(item) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
   const metaLine = nowBlock
-    ? [blockShort(nowBlock.def.name), span(nowMinutes) + ' of ' + span(nowBlock.targetMinutes), detailOf(item), nowDone ? 'done' : null].filter(Boolean).join(' · ')
+    ? [blockShort(nowBlock.def.name), span(nowMinutes) + ' of ' + span(nowBlock.targetMinutes), nowBlock.catchUp ? span(nowBlock.catchUp) + ' of it catch-up' : null, detailOf(item), nowDone ? 'done' : null].filter(Boolean).join(' · ')
     : '';
   const linkClass = 'inline-flex min-h-11 items-center gap-2 text-button font-medium text-accent';
 
@@ -291,9 +376,14 @@ export function Today() {
               {dateTitle(date)}
             </button>
           }
-          sub={span(logged) + ' of ' + span(plan.targetMinutes) + ' today · ' + (streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet')}
+          sub={
+            layout.stats
+              ? [span(logged) + ' of ' + span(plan.targetMinutes) + ' today', templateNote, streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet'].filter(Boolean).join(' · ')
+              : undefined
+          }
           actions={
             <>
+              {canChange && <Button variant="icon" icon="sliders" label={isToday ? 'Change today' : 'Change ' + dateTitle(date)} onClick={() => setSheet('change')} />}
               <Button variant="icon" icon="gear" label="Settings" to="/settings" />
               <Button
                 variant="icon"
@@ -314,7 +404,13 @@ export function Today() {
         </RowList>
       )}
 
-      {nothingPlanned ? (
+      {restDay ? (
+        <section aria-label="Now" className="mt-7 flex flex-col gap-1.5 rounded-card bg-surface p-5">
+          <p className="text-meta text-ink2">Now</p>
+          <p className="text-headline font-semibold">A rest day.</p>
+          <p className="text-meta text-ink2">Nothing is planned, and the streak is safe.{logged > 0 ? ' ' + span(logged) + ' logged anyway.' : ''}</p>
+        </section>
+      ) : nothingPlanned ? (
         <EmptyState action={<Button to="/plan">Open Plan</Button>}>Nothing scheduled. Open Plan to pick what you&apos;re learning.</EmptyState>
       ) : !nowBlock ? (
         <section aria-label="Now" className="mt-7 flex flex-col gap-1.5 rounded-card bg-surface p-5">
@@ -397,20 +493,24 @@ export function Today() {
               />
             )}
           </div>
+          {extrasFor(nowBlock.id).length > 0 && (
+            <ul className="mt-3 divide-y divide-line border-t border-line">{extrasFor(nowBlock.id).map(extraRow)}</ul>
+          )}
         </section>
       )}
 
-      {!nothingPlanned && later.length > 0 && (
+      {!nothingPlanned && layout.later && (later.length > 0 || leadingExtras.length > 0) && (
         <RowList flat label="Later today" className="mt-7">
-          {later.map((block) => {
+          {leadingExtras.map(extraRow)}
+          {later.flatMap((block) => {
             const row = rowFor(block);
             const isTaken = Boolean(taken && block.id === 'D' && focusItem(block, monthlyFirst)?.refId === taken.id);
-            return (
+            return [
               <Row
                 key={block.id}
                 className={isTaken ? 'taken' : ''}
                 title={row.title}
-                meta={row.meta}
+                meta={layout.view === 'compact' ? undefined : [row.meta, extrasNote(block.id)].filter(Boolean).join(' · ')}
                 trailing={span(block.targetMinutes)}
                 to={row.to}
                 onClick={
@@ -424,13 +524,13 @@ export function Today() {
                 }
               >
                 {isTaken && <span aria-hidden="true" className="taken-line absolute inset-x-0 bottom-0 h-0.5 bg-accent" />}
-              </Row>
-            );
+              </Row>,
+            ];
           })}
         </RowList>
       )}
 
-      {finished.length > 0 && (
+      {layout.footer && finished.length > 0 && (
         <p className="mt-4 text-meta text-ink2">
           Done today: {finished.map((b) => rowFor(b).title).join(', ')}
         </p>
@@ -442,13 +542,13 @@ export function Today() {
         </RowList>
       )}
 
-      {!isReviewDay && (
+      {layout.review && !isReviewDay && (
         <Link to="/reviews" className="mt-1 flex min-h-11 items-center text-meta text-ink2">
           Weekly review on {dayName(addDays(date, (reviewDay - weekday(date) + 7) % 7))}
         </Link>
       )}
 
-      {syncLine && (
+      {layout.footer && syncLine && (
         <Link to="/settings?section=sync" className="flex min-h-11 items-center text-meta text-ink2">
           {syncLine}
         </Link>
@@ -477,6 +577,8 @@ export function Today() {
         onPick={(v) => v && setDate(v)}
         onClose={() => setSheet(null)}
       />
+
+      <ChangeTodaySheet open={sheet === 'change'} onClose={() => setSheet(null)} date={date} settings={settings} title={isToday ? 'Change today' : 'Change ' + dateTitle(date)} />
 
       <Sheet open={sheet === 'day'} title={isToday ? 'How was today?' : 'How was ' + dateTitle(date) + '?'} onClose={() => setSheet(null)}>
         <DayFields date={date} />

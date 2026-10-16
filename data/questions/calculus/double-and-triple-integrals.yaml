@@ -1,0 +1,320 @@
+subject: calculus
+topic: double-and-triple-integrals
+questions:
+  - id: calc-dbl-001
+    difficulty: 1
+    type: numeric
+    prompt: |
+      Evaluate
+      $$\int_0^{ {{a}} }\!\!\int_0^{ {{b}} } xy \, dy\, dx .$$
+    params:
+      a: { int: [1, 4] }
+      b: { int: [1, 4] }
+    answer: "a^2 * b^2 / 4"
+    hints:
+      - 'Do the inner integral first, treating $x$ as a constant: $\int_0^{ {{b}} } xy\,dy = x\frac{y^2}{2}\Big|_0^{ {{b}} }$.'
+    solution: |
+      Inner: $\displaystyle\int_0^{ {{b}} } xy\,dy = x\cdot\frac{ {{b^2}} }{2}$. Outer:
+      $$\int_0^{ {{a}} } \frac{ {{b^2}} }{2}x\,dx = \frac{ {{b^2}} }{2}\cdot\frac{ {{a^2}} }{2} = {{frac: a^2*b^2/4}}.$$
+    verify: "integrate(x*y, (y, 0, b), (x, 0, a))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: calc-dbl-002
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Let $R = [0, {{a}}] \times [0, {{b}}]$. Evaluate $\displaystyle\iint_R ({{p}}x {{signed: q}}y^2)\, dA$.
+      Give the exact value or a decimal to 4 significant figures.
+    params:
+      a: { int: [1, 4] }
+      b: { int: [1, 3] }
+      p: { int: [1, 6] }
+      q: { int: [-4, 4], not: [0, 1, -1] }
+    answer: "p*a^2*b/2 + q*a*b^3/3"
+    hints:
+      - 'Write it as an iterated integral, for example $\int_0^{ {{a}} }\int_0^{ {{b}} } (\dots)\,dy\,dx$.'
+      - 'You can split it: $\iint {{p}}x\,dA + \iint ({{q}})y^2\,dA$, and each factors into a product of single integrals.'
+    solution: |
+      $$\int_0^{ {{a}} }\!\!\int_0^{ {{b}} } ({{p}}x {{signed: q}}y^2)\,dy\,dx = \int_0^{ {{a}} } \left({{p*b}}x {{signed: q}}\cdot\frac{ {{b^3}} }{3}\right) dx
+        = {{p*b}}\cdot\frac{ {{a^2}} }{2} + ({{q}})\frac{ {{b^3}} }{3}\cdot{{a}} = {{frac: p*a^2*b/2 + q*a*b^3/3}}.$$
+    verify: "integrate(p*x + q*y**2, (x, 0, a), (y, 0, b))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-dbl-003
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Let $T$ be the triangle with vertices $(0, 0)$, $({{a}}, 0)$ and $({{a}}, {{a}})$. Evaluate $\displaystyle\iint_T (x {{signed: k}}y)\, dA$.
+      Give the exact value or a decimal to 4 significant figures.
+    params:
+      a: { int: [1, 4] }
+      k: { int: [-3, 4], not: [0, 1, -1, -2] }
+    answer: "(1 + k/2) * a^3 / 3"
+    hints:
+      - 'Describe $T$ as $0 \le x \le {{a}}$, $0 \le y \le x$.'
+      - 'Inner integral: $\int_0^x (x {{signed: k}}y)\,dy = x^2 {{signed: k}}\frac{x^2}{2}$.'
+    solution: |
+      $T = \{0 \le x \le {{a}},\ 0 \le y \le x\}$. Then
+      $$\int_0^{ {{a}} }\!\!\int_0^{x} (x {{signed: k}}y)\,dy\,dx = \int_0^{ {{a}} } \left(x^2 {{signed: k}}\frac{x^2}{2}\right)dx
+        = \left(1 {{signed: k/2}}\right)\frac{ {{a^3}} }{3} = {{frac: (1 + k/2)*a^3/3}}.$$
+    verify: "integrate(x + k*y, (x, y, a), (y, 0, a))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-dbl-004
+    difficulty: 2
+    type: mc
+    prompt: |
+      Which integral equals $\displaystyle\int_0^1\!\!\int_x^1 f(x, y)\, dy\, dx$ for every continuous $f$?
+    options:
+      - "$\\displaystyle\\int_0^1\\!\\!\\int_0^y f(x, y)\\, dx\\, dy$"
+      - "$\\displaystyle\\int_0^1\\!\\!\\int_y^1 f(x, y)\\, dx\\, dy$"
+      - "$\\displaystyle\\int_0^1\\!\\!\\int_0^{1-y} f(x, y)\\, dx\\, dy$"
+      - "$\\displaystyle\\int_0^1\\!\\!\\int_0^1 f(x, y)\\, dx\\, dy$"
+    answer: 0
+    hints:
+      - 'Sketch the region: $0 \le x \le 1$ and $x \le y \le 1$.'
+      - 'It is the triangle with vertices $(0, 0)$, $(0, 1)$, $(1, 1)$. For a fixed $y$, which $x$ are in it?'
+    solution: |
+      The region is $\{0 \le x \le 1,\ x \le y \le 1\}$: the triangle with vertices $(0,0)$, $(0,1)$, $(1,1)$, above the line $y = x$.
+      For a fixed $y \in [0, 1]$, the horizontal slice runs from $x = 0$ to $x = y$. So the integral equals
+      $\displaystyle\int_0^1\!\!\int_0^y f(x, y)\,dx\,dy$.
+    verify: "(lambda F: [integrate(F, (x, 0, y), (y, 0, 1)), integrate(F, (x, y, 1), (y, 0, 1)), integrate(F, (x, 0, 1 - y), (y, 0, 1)), integrate(F, (x, 0, 1), (y, 0, 1))].index(integrate(F, (y, x, 1), (x, 0, 1))))(x**3*y + 2*y**2)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: calc-dbl-005
+    difficulty: 3
+    type: numeric
+    prompt: |
+      Evaluate
+      $$\int_0^{\sqrt{ {{L}} }}\!\!\int_y^{\sqrt{ {{L}} }} e^{x^2}\, dx\, dy$$
+      by reversing the order of integration. Give it to 4 significant figures.
+    params:
+      L: { int: [1, 3] }
+    answer: "(e^L - 1) / 2"
+    hints:
+      - '$e^{x^2}$ has no elementary antiderivative, so integrate in $y$ first.'
+      - 'The region is $0 \le y \le x \le \sqrt{ {{L}} }$; for fixed $x$, $y$ runs from $0$ to $x$.'
+    solution: |
+      The region is the triangle $0 \le y \le x \le \sqrt{ {{L}} }$. Reversing the order:
+      $$\int_0^{\sqrt{ {{L}} }}\!\!\int_0^{x} e^{x^2}\,dy\,dx = \int_0^{\sqrt{ {{L}} }} x\,e^{x^2}\,dx = \frac12 e^{x^2}\Big|_0^{\sqrt{ {{L}} }} = \frac{e^{ {{L}} } - 1}{2} \approx {{(e^L - 1)/2}}.$$
+    verify: "integrate(exp(x**2), (x, y, sqrt(L)), (y, 0, sqrt(L)))"
+    source: "Adapted from MIT OCW 18.02SC, Part III: Double integrals (exchanging the order of integration)"
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-dbl-006
+    difficulty: 3
+    type: numeric
+    prompt: |
+      Use polar coordinates to evaluate $\displaystyle\iint_D \sqrt{x^2 + y^2}\, dA$, where $D$ is the annulus ${{a^2}} \le x^2 + y^2 \le {{b^2}}$.
+      Give it to 4 significant figures.
+    params:
+      a: { int: [1, 2] }
+      b: { int: [3, 5] }
+    answer: "2 * pi * (b^3 - a^3) / 3"
+    hints:
+      - 'In polar coordinates $\sqrt{x^2 + y^2} = r$ and $dA = r\,dr\,d\theta$.'
+      - 'The annulus is ${{a}} \le r \le {{b}}$, $0 \le \theta \le 2\pi$.'
+    solution: |
+      $$\iint_D \sqrt{x^2 + y^2}\,dA = \int_0^{2\pi}\!\!\int_{ {{a}} }^{ {{b}} } r\cdot r\,dr\,d\theta = 2\pi\cdot\frac{ {{b}}^3 - {{a}}^3}{3}
+        = \frac{ {{2*(b^3 - a^3)}}\pi}{3} \approx {{2*pi*(b^3 - a^3)/3}}.$$
+      (Do not forget the Jacobian factor $r$ in $dA = r\,dr\,d\theta$.)
+    verify: "(lambda r: integrate(sqrt((r*cos(t))**2 + (r*sin(t))**2)*Matrix([[cos(t), -r*sin(t)], [sin(t), r*cos(t)]]).det(), (r, a, b), (t, 0, 2*pi)))(Symbol('r', positive=True))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-dbl-007
+    difficulty: 3
+    type: numeric
+    prompt: |
+      Use a triple integral to find the volume of the tetrahedron bounded by the coordinate planes and the plane
+      $$\frac{x}{ {{a}} } + \frac{y}{ {{b}} } + \frac{z}{ {{c}} } = 1 .$$
+    params:
+      a: { int: [1, 6] }
+      b: { int: [1, 6] }
+      c: { int: [1, 6] }
+    answer: "a*b*c/6"
+    hints:
+      - 'Limits: $0 \le x \le {{a}}$, $0 \le y \le {{b}}(1 - x/{{a}})$, $0 \le z \le {{c}}(1 - x/{{a}} - y/{{b}})$.'
+      - 'After the $z$-integral you have the double integral of the height ${{c}}(1 - x/{{a}} - y/{{b}})$ over a triangle.'
+    solution: |
+      $$V = \int_0^{ {{a}} }\!\!\int_0^{ {{b}}(1 - x/{{a}})}\!\!\int_0^{ {{c}}(1 - x/{{a}} - y/{{b}})} dz\,dy\,dx .$$
+      Substituting $x = {{a}}u$, $y = {{b}}v$ turns it into ${{a}}\cdot{{b}}\cdot{{c}}$ times the integral of $1 - u - v$ over the unit triangle, which is $\frac16$
+      (the volume of the unit tetrahedron). So $V = \frac{ {{a*b*c}} }{6} = {{frac: a*b*c/6}}$.
+      Working the iterated integral directly gives the same: the inner two steps give $\frac{ {{b*c}} }{2}(1 - x/{{a}})^2$, and $\int_0^{ {{a}} } \frac{ {{b*c}} }{2}(1 - x/{{a}})^2 dx = \frac{ {{a*b*c}} }{6}$.
+    verify: "integrate(1, (z, 0, c*(1 - x/a - y/b)), (y, 0, b*(1 - x/a)), (x, 0, a))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: calc-dbl-008
+    difficulty: 3
+    type: numeric
+    prompt: |
+      A thin plate of uniform density occupies the region $0 \le x \le {{a}}$, $0 \le y \le x^{ {{n}} }$.
+      Find the $x$-coordinate $\bar x$ of its centre of mass. Give the exact value or a decimal to 4 significant figures.
+    params:
+      a: { int: [1, 4] }
+      n: { int: [1, 4] }
+    answer: "(n + 1) * a / (n + 2)"
+    hints:
+      - '$\bar x = \dfrac{\iint x\,dA}{\iint dA}$.'
+      - '$\iint dA = \int_0^{ {{a}} } x^{ {{n}} }dx$ and $\iint x\,dA = \int_0^{ {{a}} } x\cdot x^{ {{n}} }dx$.'
+    solution: |
+      $$\text{Area} = \int_0^{ {{a}} }\!\!\int_0^{x^{ {{n}} }} dy\,dx = \frac{ {{a}}^{ {{n + 1}} } }{ {{n + 1}} }, \qquad
+        \iint x\,dA = \int_0^{ {{a}} } x^{ {{n + 1}} }dx = \frac{ {{a}}^{ {{n + 2}} } }{ {{n + 2}} }.$$
+      $$\bar x = \frac{ {{a}}^{ {{n + 2}} }/{{n + 2}} }{ {{a}}^{ {{n + 1}} }/{{n + 1}} } = \frac{ {{n + 1}} }{ {{n + 2}} }\cdot{{a}} = {{frac: (n + 1)*a/(n + 2)}}.$$
+    verify: "integrate(x, (y, 0, x**n), (x, 0, a)) / integrate(1, (y, 0, x**n), (x, 0, a))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-dbl-009
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Let $B = [0, {{a}}] \times [0, {{b}}] \times [0, {{c}}]$. Evaluate $\displaystyle\iiint_B xyz^2\, dV$.
+      Give the exact value or a decimal to 4 significant figures.
+    params:
+      a: { int: [1, 3] }
+      b: { int: [1, 3] }
+      c: { int: [1, 3] }
+    answer: "(a^2/2) * (b^2/2) * (c^3/3)"
+    hints:
+      - 'On a box with a product integrand, the triple integral is a product of three single integrals.'
+    solution: |
+      $$\iiint_B xyz^2\,dV = \int_0^{ {{a}} } x\,dx\cdot\int_0^{ {{b}} } y\,dy\cdot\int_0^{ {{c}} } z^2\,dz = \frac{ {{a^2}} }{2}\cdot\frac{ {{b^2}} }{2}\cdot\frac{ {{c^3}} }{3} = {{frac: a^2*b^2*c^3/12}}.$$
+    verify: "integrate(x*y*z**2, (x, 0, a), (y, 0, b), (z, 0, c))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: calc-dbl-010
+    difficulty: 4
+    type: numeric
+    prompt: |
+      Find the volume of the solid that lies inside the sphere $x^2 + y^2 + z^2 = {{R^2}}$ and above the cone $z = \sqrt{x^2 + y^2}$.
+      Give it to 4 significant figures.
+    params:
+      R: { int: [1, 5] }
+    answer: "(2 * pi * R^3 / 3) * (1 - sqrt(2) / 2)"
+    hints:
+      - 'Use spherical coordinates: the cone $z = \sqrt{x^2 + y^2}$ is $\varphi = \pi/4$.'
+      - '$dV = \rho^2\sin\varphi\,d\rho\,d\varphi\,d\theta$ with $0 \le \rho \le {{R}}$, $0 \le \varphi \le \pi/4$, $0 \le \theta \le 2\pi$.'
+    solution: |
+      In spherical coordinates the solid is $0 \le \rho \le {{R}}$, $0 \le \varphi \le \frac{\pi}{4}$, $0 \le \theta \le 2\pi$:
+      $$V = \int_0^{2\pi}\!\!\int_0^{\pi/4}\!\!\int_0^{ {{R}} } \rho^2\sin\varphi\,d\rho\,d\varphi\,d\theta = 2\pi\cdot\left(1 - \frac{\sqrt2}{2}\right)\cdot\frac{ {{R^3}} }{3}
+        \approx {{(2*pi*R^3/3)*(1 - sqrt(2)/2)}}.$$
+    verify: "(lambda r: integrate(r, (z, r, sqrt(R**2 - r**2)), (r, 0, R/sqrt(2)), (t, 0, 2*pi)))(Symbol('r', positive=True))"
+    source: "Adapted from MIT OCW 18.02SC, Part IV: Triple integrals in spherical coordinates"
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: calc-dbl-011
+    difficulty: 4
+    type: numeric
+    prompt: |
+      Let $D$ be the parallelogram $|{{a}}x {{signed: b}}y| \le {{c1}}$, $|{{c}}x {{signed: d}}y| \le {{c2}}$. Use the change of variables
+      $u = {{a}}x {{signed: b}}y$, $v = {{c}}x {{signed: d}}y$ to evaluate
+      $$\iint_D ({{a}}x {{signed: b}}y)^2\, dA .$$
+      Give the exact value or a decimal to 4 significant figures.
+    params:
+      a: { int: [2, 3] }
+      b: { int: [-3, 3], not: [0, 1, -1] }
+      c: { int: [-3, 3], not: [0, 1, -1] }
+      d: { int: [2, 3] }
+      c1: { int: [1, 3] }
+      c2: { int: [1, 3] }
+    let:
+      J: "a*d - b*c"
+    require: ["J != 0"]
+    answer: "(4 * c1^3 * c2 / 3) / abs(J)"
+    hints:
+      - '$\dfrac{\partial(u, v)}{\partial(x, y)} = \det\begin{bmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{bmatrix} = {{J}}$, so $dA = dx\,dy = \dfrac{du\,dv}{|{{J}}|}$.'
+      - 'In the $uv$-plane the region is the rectangle $[-{{c1}}, {{c1}}] \times [-{{c2}}, {{c2}}]$ and the integrand is $u^2$.'
+    solution: |
+      The Jacobian is $\dfrac{\partial(u, v)}{\partial(x, y)} = ({{a}})({{d}}) - ({{b}})({{c}}) = {{J}}$, so $dx\,dy = \dfrac{1}{|{{J}}|}\,du\,dv$, and $D$ becomes the rectangle
+      $|u| \le {{c1}}$, $|v| \le {{c2}}$:
+      $$\iint_D ({{a}}x {{signed: b}}y)^2\,dA = \frac{1}{ {{abs(J)}} }\int_{-{{c2}}}^{ {{c2}} }\!\!\int_{-{{c1}}}^{ {{c1}} } u^2\,du\,dv = \frac{1}{ {{abs(J)}} }\cdot\frac{2\cdot{{c1^3}}}{3}\cdot{{2*c2}} = {{frac: (4*c1^3*c2/3)/abs(J)}}.$$
+    verify: "(lambda V: abs(__import__('sympy.integrals.intpoly', fromlist=['polytope_integrate']).polytope_integrate(Polygon(*[Point(v[x], v[y]) for v in V]), (a*x + b*y)**2)))([solve([a*x + b*y - s1*c1, c*x + d*y - s2*c2], [x, y]) for s1, s2 in [(1, 1), (-1, 1), (-1, -1), (1, -1)]])"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: calc-dbl-012
+    difficulty: 4
+    type: multipart
+    prompt: |
+      Let $D$ be the region between the parabola $y = x^2$ and the line $y = {{k}}x$.
+    params:
+      k: { int: [1, 4] }
+    parts:
+      - prompt: "(a) What is the area of $D$? Give the exact value or a decimal to 4 significant figures."
+        type: numeric
+        answer: "k^3 / 6"
+        verify: "integrate(1, (y, x**2, k*x), (x, 0, k))"
+      - prompt: "(b) Using your area from (a), what is the $y$-coordinate $\\bar y$ of the centroid of $D$?"
+        type: numeric
+        answer: "(k^5 / 15) / part1"
+        verify: "integrate(y, (y, x**2, k*x), (x, 0, k)) / integrate(1, (y, x**2, k*x), (x, 0, k))"
+    hints:
+      - 'The curves meet at $x = 0$ and $x = {{k}}$; for $0 \le x \le {{k}}$, $x^2 \le y \le {{k}}x$.'
+      - '$\bar y = \dfrac{1}{A}\iint_D y\,dA$, and $\int_{x^2}^{ {{k}}x } y\,dy = \frac{ {{k^2}}x^2 - x^4}{2}$.'
+    solution: |
+      **(a)** $A = \displaystyle\int_0^{ {{k}} } ({{k}}x - x^2)\,dx = \frac{ {{k^3}} }{2} - \frac{ {{k^3}} }{3} = \frac{ {{k^3}} }{6} = {{frac: k^3/6}}$.
+
+      **(b)** $\displaystyle\iint_D y\,dA = \int_0^{ {{k}} } \frac{ {{k^2}}x^2 - x^4}{2}\,dx = \frac12\left(\frac{ {{k^5}} }{3} - \frac{ {{k^5}} }{5}\right) = \frac{ {{k^5}} }{15}$,
+      so $\bar y = \dfrac{ {{k^5}}/15}{ {{k^3}}/6} = \dfrac{2\cdot{{k^2}}}{5} = {{frac: 2*k^2/5}}$.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: calc-dbl-013
+    difficulty: 5
+    type: numeric
+    prompt: |
+      Find the volume of the solid common to the two cylinders $x^2 + z^2 \le {{R^2}}$ and $y^2 + z^2 \le {{R^2}}$.
+      Give the exact value or a decimal to 4 significant figures.
+    params:
+      R: { int: [1, 4] }
+    answer: "16 * R^3 / 3"
+    hints:
+      - 'Slice perpendicular to the $z$-axis. At height $z$, what does each cylinder allow for $x$ and for $y$?'
+      - 'Each slice is a square of side $2\sqrt{ {{R^2}} - z^2}$.'
+    solution: |
+      At height $z$ ($|z| \le {{R}}$) the first cylinder allows $|x| \le \sqrt{ {{R^2}} - z^2}$ and the second $|y| \le \sqrt{ {{R^2}} - z^2}$, so the slice is a
+      square of area $4({{R^2}} - z^2)$. Hence
+      $$V = \int_{-{{R}}}^{ {{R}} } 4({{R^2}} - z^2)\,dz = 4\left(2\cdot{{R^3}} - \frac{2\cdot{{R^3}}}{3}\right) = \frac{16\cdot{{R^3}}}{3} = {{frac: 16*R^3/3}}.$$
+      As a triple integral: $\displaystyle\int_{-{{R}}}^{ {{R}} }\int_{-\sqrt{ {{R^2}} - z^2}}^{\sqrt{ {{R^2}} - z^2}}\int_{-\sqrt{ {{R^2}} - z^2}}^{\sqrt{ {{R^2}} - z^2}} dx\,dy\,dz$.
+    verify: "integrate(1, (x, -sqrt(R**2 - z**2), sqrt(R**2 - z**2)), (y, -sqrt(R**2 - z**2), sqrt(R**2 - z**2)), (z, -R, R))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8
+
+  - id: calc-dbl-014
+    difficulty: 4
+    type: proof
+    prompt: |
+      Let $I = \displaystyle\int_{-\infty}^{\infty} e^{-x^2}\,dx$. Show that $I = \sqrt{\pi}$ by computing $I^2$ as a double integral in polar coordinates.
+    hints:
+      - '$I^2 = \int e^{-x^2}dx\int e^{-y^2}dy = \iint_{\mathbb{R}^2} e^{-(x^2 + y^2)}\,dA$.'
+      - 'In polar coordinates, $dA = r\,dr\,d\theta$ and the substitution $u = r^2$ handles $\int_0^\infty r e^{-r^2}dr$.'
+    solution: |
+      Since $e^{-x^2} > 0$ and the integral converges, $I > 0$ and
+      $$I^2 = \int_{-\infty}^{\infty} e^{-x^2}dx\int_{-\infty}^{\infty} e^{-y^2}dy = \iint_{\mathbb{R}^2} e^{-(x^2 + y^2)}\,dA$$
+      (Fubini, valid since the integrand is positive). In polar coordinates,
+      $$I^2 = \int_0^{2\pi}\!\!\int_0^{\infty} e^{-r^2}\,r\,dr\,d\theta = 2\pi\left[-\tfrac12 e^{-r^2}\right]_0^{\infty} = 2\pi\cdot\tfrac12 = \pi .$$
+      Hence $I = \sqrt{\pi}$. (Strictly, one integrates over the disk of radius $R$ and lets $R \to \infty$; the disks exhaust the plane and the
+      integrand is positive, so the limits agree.) $\blacksquare$
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 7

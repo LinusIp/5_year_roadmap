@@ -1,0 +1,334 @@
+subject: physics
+topic: torque-and-moment-of-inertia
+questions:
+  - id: phys-torque-001
+    difficulty: 1
+    type: numeric
+    prompt: |
+      You pull on the end of a spanner {{r}} m long with a force of {{F}} N, directed at {{th}}° to the spanner's
+      handle (in the plane of rotation). What is the magnitude of the torque about the bolt? Give your answer with units.
+    params:
+      r: { real: [0.1, 0.6], step: 0.05 }
+      F: { int: [10, 200] }
+      th: { int: [15, 90] }
+    answer: "r * F * sin(th * pi / 180)"
+    units: "N m"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "$\\tau = rF\\sin\\theta$, where $\\theta$ is the angle between $\\mathbf{r}$ and $\\mathbf{F}$."
+      - "Only the component of the force perpendicular to the handle turns the bolt."
+    solution: |
+      $$\tau = |\mathbf{r} \times \mathbf{F}| = rF\sin\theta = {{r}} \times {{F}} \times \sin {{th}}° \approx {{round(r*F*sin(th*pi/180), 3)}}\ \text{N·m}.$$
+    verify: "float(np.linalg.norm(np.cross([r, 0, 0], [F*math.cos(math.radians(th)), F*math.sin(math.radians(th)), 0])))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: phys-torque-002
+    difficulty: 1
+    type: mc
+    prompt: |
+      A thin ring and a uniform solid disc have the same mass $M$ and the same radius $R$. Which has the larger moment
+      of inertia about its central axis (perpendicular to its plane)?
+    options:
+      - "The ring"
+      - "The disc"
+      - "They are equal, since mass and radius are equal"
+      - "It depends on how fast they spin"
+    answer: 0
+    hints:
+      - "$I = \\int r^2\\,dm$: what matters is how far the mass is from the axis."
+    solution: |
+      All of the ring's mass is at distance $R$, so $I_{\text{ring}} = MR^2$. Most of the disc's mass is closer in:
+      $I_{\text{disc}} = \int_0^R r^2 \,\frac{M}{\pi R^2}\,2\pi r\,dr = \tfrac12 MR^2$. The ring's is twice as large.
+    verify: "0 if 1 > integrate(2*x**3, (x, 0, 1)) else 1"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: phys-torque-003
+    difficulty: 2
+    type: numeric
+    prompt: |
+      A uniform rod of mass {{M}} kg and length {{L}} m rotates about an axis perpendicular to it through one end.
+      What is its moment of inertia? Give your answer with units.
+    params:
+      M: { real: [0.5, 5], step: 0.5 }
+      L: { real: [0.5, 3], step: 0.1 }
+    answer: "M * L^2 / 3"
+    units: "kg m^2"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "$I = \\int x^2\\,dm$ with $dm = (M/L)\\,dx$."
+      - "Integrate from $x = 0$ (the axis) to $x = L$."
+    solution: |
+      $$I = \int_0^L x^2\,\frac{M}{L}\,dx = \frac{M}{L}\cdot\frac{L^3}{3} = \frac{ML^2}{3} = \frac{ {{M}} \times {{L}}^2}{3} \approx {{round(M*L^2/3, 4)}}\ \text{kg·m}^2.$$
+    verify: "integrate(M/L*x**2, (x, 0, L))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: phys-torque-004
+    difficulty: 2
+    type: numeric
+    prompt: |
+      A light rod {{L}} m long carries a {{m1}} kg mass at one end and a {{m2}} kg mass at the other. It spins about
+      an axis perpendicular to the rod, passing through the rod {{a}} m from the {{m1}} kg mass. What is the moment of
+      inertia about that axis? Give your answer with units.
+    params:
+      L: { real: [0.5, 2], step: 0.1 }
+      m1: { int: [1, 8] }
+      m2: { int: [1, 8] }
+      a: { real: [0.1, 1.9], step: 0.1 }
+    require: ["a < L", "m1 != m2"]
+    answer: "m1 * a^2 + m2 * (L - a)^2"
+    units: "kg m^2"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "For point masses, $I = \\sum m_i r_i^2$, with $r_i$ the distance from the axis."
+      - "The {{m2}} kg mass is ${{round(L - a, 2)}}$ m from the axis."
+    solution: |
+      $$I = m_1 a^2 + m_2 (L - a)^2 = {{m1}}({{a}})^2 + {{m2}}({{round(L - a, 2)}})^2 \approx {{round(m1*a^2 + m2*(L - a)^2, 4)}}\ \text{kg·m}^2.$$
+    verify: "float(np.dot([m1, m2], np.array([a, L - a])**2))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: phys-torque-005
+    difficulty: 2
+    type: numeric
+    prompt: |
+      A uniform disc of mass {{M}} kg and radius {{R}} m spins about an axis perpendicular to its face that passes
+      through a point on its rim. What is its moment of inertia about this axis? Give your answer with units.
+    params:
+      M: { real: [1, 10], step: 0.5 }
+      R: { real: [0.1, 0.5], step: 0.05 }
+    answer: "1.5 * M * R^2"
+    units: "kg m^2"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "About its centre, $I_{\\text{cm}} = \\tfrac12 MR^2$."
+      - "Parallel-axis theorem: $I = I_{\\text{cm}} + Md^2$, here with $d = R$."
+    solution: |
+      $$I = I_{\text{cm}} + MR^2 = \tfrac12 MR^2 + MR^2 = \tfrac32 MR^2 = 1.5 \times {{M}} \times {{R}}^2 \approx {{round(1.5*M*R^2, 4)}}\ \text{kg·m}^2.$$
+    verify: "integrate(integrate(M/(pi*R**2)*((Symbol('rho')*cos(Symbol('ph')) - R)**2 + Symbol('rho')**2*sin(Symbol('ph'))**2)*Symbol('rho'), (Symbol('rho'), 0, R)), (Symbol('ph'), 0, 2*pi))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: phys-torque-006
+    difficulty: 2
+    type: estimate
+    prompt: |
+      Treat the Earth as a uniform solid sphere. Estimate its moment of inertia about its rotation axis. Give a value
+      with units.
+    answer: "0.4 * 5.97e24 * (6.37e6)^2"
+    units: "kg m^2"
+    factor: 3
+    hints:
+      - "Earth's mass is about $6 \\times 10^{24}$ kg and its radius about 6 400 km."
+      - "A uniform solid sphere has $I = \\tfrac25 MR^2$."
+    solution: |
+      $$I = \tfrac25 MR^2 \approx 0.4 \times (6.0 \times 10^{24}\ \text{kg}) \times (6.4 \times 10^6\ \text{m})^2 \approx 1 \times 10^{38}\ \text{kg·m}^2.$$
+      The real Earth is denser at its core, so its actual value is a little smaller, $I \approx 0.33\,MR^2 \approx 8 \times 10^{37}\ \text{kg·m}^2$.
+    verify: "2*pi*integrate(integrate(3*5.97e24/(4*pi*6.37e6**3)*Symbol('rr')**4*sin(Symbol('th'))**3, (Symbol('rr'), 0, 6.37e6)), (Symbol('th'), 0, pi))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: phys-torque-007
+    difficulty: 3
+    type: numeric
+    prompt: |
+      An Atwood machine has blocks of {{m1}} kg and {{m2}} kg hanging from a string over a pulley that is a uniform
+      disc of mass {{Mp}} kg. The string does not slip, and the axle is frictionless. What is the magnitude of the
+      blocks' acceleration? Take $g = 9.8\ \text{m/s}^2$ and give your answer with units.
+    params:
+      m1: { int: [2, 9] }
+      m2: { int: [1, 8] }
+      Mp: { real: [0.5, 4], step: 0.5 }
+    require: ["m1 > m2"]
+    answer: "(m1 - m2) * 9.8 / (m1 + m2 + Mp / 2)"
+    units: "m/s^2"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "The tensions on the two sides of a massive pulley are different."
+      - "Write $F = ma$ for each block and $\\tau = I\\alpha$ for the pulley, with $a = \\alpha R$."
+      - "The pulley's radius cancels out."
+    solution: |
+      With the heavier block going down:
+      $$m_1 g - T_1 = m_1 a,\qquad T_2 - m_2 g = m_2 a,\qquad (T_1 - T_2)R = \tfrac12 M_p R^2 \cdot \frac{a}{R}.$$
+      Adding the three (the last as $T_1 - T_2 = \tfrac12 M_p a$):
+      $$a = \frac{(m_1 - m_2)g}{m_1 + m_2 + \tfrac12 M_p} = \frac{ {{m1 - m2}} \times 9.8}{ {{m1 + m2 + Mp/2}} } \approx {{round((m1 - m2)*9.8/(m1 + m2 + Mp/2), 3)}}\ \text{m/s}^2.$$
+    verify: "solve([m1*9.8 - Symbol('T1') - m1*Symbol('a'), Symbol('T2') - m2*9.8 - m2*Symbol('a'), (Symbol('T1') - Symbol('T2'))*0.2 - Rational(1, 2)*Mp*0.2**2*Symbol('a')/0.2], [Symbol('a'), Symbol('T1'), Symbol('T2')])[Symbol('a')]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: phys-torque-008
+    difficulty: 3
+    type: numeric
+    prompt: |
+      A string is wrapped around a uniform solid cylinder of mass {{M}} kg that can turn freely on a fixed horizontal
+      axle. A {{m}} kg block hangs from the free end of the string and is released. What is the tension in the string
+      while the block falls? Take $g = 9.8\ \text{m/s}^2$ and give your answer with units.
+    params:
+      M: { real: [1, 10], step: 0.5 }
+      m: { real: [0.5, 5], step: 0.5 }
+    answer: "m * M * 9.8 / (2 * m + M)"
+    units: "N"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "Block: $mg - T = ma$. Cylinder: $TR = \\tfrac12 MR^2\\alpha$."
+      - "The string does not slip, so $a = \\alpha R$."
+    solution: |
+      From the cylinder, $TR = \tfrac12 MR^2 (a/R)$ gives $T = \tfrac12 M a$. Substituting into $mg - T = ma$:
+      $$a = \frac{mg}{m + M/2},\qquad T = \frac{M}{2}a = \frac{mMg}{2m + M} = \frac{ {{m}} \times {{M}} \times 9.8}{ {{2*m + M}} } \approx {{round(m*M*9.8/(2*m + M), 3)}}\ \text{N}.$$
+      The tension is less than the block's weight ${{round(m*9.8, 2)}}$ N, as it must be for the block to accelerate down.
+    verify: "solve([m*9.8 - Symbol('Tn') - m*Symbol('a'), Symbol('Tn')*0.15 - Rational(1, 2)*M*0.15**2*Symbol('a')/0.15], [Symbol('a'), Symbol('Tn')])[Symbol('Tn')]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: phys-torque-009
+    difficulty: 3
+    type: multipart
+    prompt: |
+      A uniform rod of mass {{M}} kg and length {{L}} m is pivoted at one end on a frictionless horizontal axle. It is
+      held horizontal and released from rest. Take $g = 9.8\ \text{m/s}^2$.
+    params:
+      M: { real: [0.5, 4], step: 0.5 }
+      L: { real: [0.5, 2], step: 0.1 }
+    parts:
+      - prompt: "(a) What is the rod's angular acceleration just after release? Give it with units."
+        type: numeric
+        answer: "3 * 9.8 / (2 * L)"
+        units: "rad/s^2"
+        tolerance: { rel: 0.01 }
+        verify: "integrate(M/L*9.8*x, (x, 0, L)) / integrate(M/L*x**2, (x, 0, L))"
+      - prompt: "(b) Using your answer to (a), what is the linear acceleration of the free end at that moment? Give it with units."
+        type: numeric
+        answer: "part1 * L"
+        units: "m/s^2"
+        tolerance: { rel: 0.01 }
+        verify: "Rational(3, 2)*9.8"
+      - prompt: "(c) What is the rod's angular velocity as it swings through the vertical? Give it with units."
+        type: numeric
+        answer: "sqrt(3 * 9.8 / L)"
+        units: "rad/s"
+        tolerance: { rel: 0.01 }
+        verify: "sqrt(2*integrate(M/L*9.8*x, (x, 0, L)) / integrate(M/L*x**2, (x, 0, L)))"
+    hints:
+      - "Gravity acts at the centre of mass, $L/2$ from the pivot; $I_{\\text{end}} = \\tfrac13 ML^2$."
+      - "The free end is at distance $L$, so $a_{\\text{end}} = \\alpha L$."
+      - "For (c) use energy: the centre of mass drops by $L/2$."
+    solution: |
+      (a) $\tau = Mg\tfrac{L}{2}$ and $I = \tfrac13 ML^2$, so
+      $\alpha = \dfrac{MgL/2}{ML^2/3} = \dfrac{3g}{2L} = \dfrac{3 \times 9.8}{2 \times {{L}}} \approx {{round(3*9.8/(2*L), 3)}}\ \text{rad/s}^2.$
+
+      (b) $a_{\text{end}} = \alpha L = \tfrac32 g = 14.7\ \text{m/s}^2$, more than $g$: the free end falls faster than a dropped stone.
+
+      (c) $Mg\tfrac{L}{2} = \tfrac12\cdot\tfrac13 ML^2\omega^2$ gives $\omega = \sqrt{3g/L} \approx {{round(sqrt(3*9.8/L), 3)}}\ \text{rad/s}$.
+      The mass $M$ drops out of every answer.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: phys-torque-010
+    difficulty: 3
+    type: numeric
+    prompt: |
+      A uniform door {{w}} m wide with a mass of {{M}} kg hangs on frictionless hinges. You push on it with a force of
+      {{F}} N, perpendicular to the door, {{d}} m from the hinge line. What is the door's angular acceleration?
+      Give your answer with units.
+    params:
+      w: { real: [0.7, 1.0], step: 0.05 }
+      M: { int: [15, 40] }
+      F: { int: [10, 60] }
+      d: { real: [0.5, 1.0], step: 0.05 }
+    require: ["d <= w"]
+    answer: "F * d / (M * w^2 / 3)"
+    units: "rad/s^2"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "Rotating about the hinge line, the door is like a rod rotating about one end: its height does not matter."
+      - "$I = \\tfrac13 M w^2$, and $\\alpha = \\tau / I$."
+    solution: |
+      Each vertical strip of the door at distance $x$ from the hinges contributes $x^2\,dm$, so
+      $I = \int_0^w x^2 \tfrac{M}{w}dx = \tfrac13 Mw^2 \approx {{round(M*w^2/3, 3)}}\ \text{kg·m}^2$. The torque is
+      $\tau = Fd = {{round(F*d, 3)}}$ N·m, so
+      $$\alpha = \frac{\tau}{I} \approx {{round(F*d/(M*w^2/3), 3)}}\ \text{rad/s}^2.$$
+    verify: "F*d / integrate(M/w*x**2, (x, 0, w))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: phys-torque-011
+    difficulty: 4
+    type: numeric
+    prompt: |
+      A solid uniform ball of mass {{M}} kg and radius {{R}} m swings about a horizontal axis that is tangent to its
+      surface. What is its moment of inertia about that axis? Give your answer with units.
+    params:
+      M: { real: [1, 10], step: 0.5 }
+      R: { real: [0.05, 0.3], step: 0.01 }
+    answer: "7 / 5 * M * R^2"
+    units: "kg m^2"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "Start from the moment of inertia of a solid sphere about a diameter, $\\tfrac25 MR^2$."
+      - "The tangent axis is parallel to a diameter, a distance $R$ away."
+    solution: |
+      About a diameter, $I_{\text{cm}} = \tfrac25 MR^2$ (from slicing the ball into discs, or integrating in spherical
+      coordinates). The tangent axis is parallel and a distance $R$ away, so by the parallel-axis theorem
+      $$I = \tfrac25 MR^2 + MR^2 = \tfrac75 MR^2 = 1.4 \times {{M}} \times {{R}}^2 \approx {{round(1.4*M*R^2, 5)}}\ \text{kg·m}^2.$$
+    verify: "(lambda r_, th_, ph_: integrate(integrate(integrate(3*M/(4*pi*R**3)*((r_*sin(th_)*cos(ph_) - R)**2 + (r_*sin(th_)*sin(ph_))**2)*r_**2*sin(th_), (r_, 0, R)), (th_, 0, pi)), (ph_, 0, 2*pi)))(Symbol('r_'), Symbol('th_'), Symbol('ph_'))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: phys-torque-012
+    difficulty: 4
+    type: numeric
+    prompt: |
+      A uniform plank of mass {{M}} kg rests horizontally on two supports, one under each end. One support is
+      suddenly knocked away. What is the force exerted by the remaining support immediately afterwards?
+      Take $g = 9.8\ \text{m/s}^2$ and give your answer with units.
+    params:
+      M: { real: [2, 30], step: 0.5 }
+    answer: "M * 9.8 / 4"
+    units: "N"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "Right after the support is removed the plank is still at rest but starts to rotate about the remaining support."
+      - "Use $\\tau = I\\alpha$ about the centre of mass (or the end) and $Mg - N = Ma_{\\text{cm}}$."
+      - "The centre of mass is $L/2$ from the support: $a_{\\text{cm}} = \\alpha L/2$."
+    solution: |
+      Let $L$ be the length. About the remaining support (a fixed point at this instant), $I = \tfrac13 ML^2$ and
+      $\tau = Mg\tfrac{L}{2}$, so $\alpha = \tfrac{3g}{2L}$ and $a_{\text{cm}} = \alpha\tfrac{L}{2} = \tfrac34 g$. Then
+      $$Mg - N = M\cdot\tfrac34 g \Rightarrow N = \tfrac14 Mg = \tfrac14 \times {{M}} \times 9.8 \approx {{round(M*9.8/4, 3)}}\ \text{N}.$$
+      Before the support was removed it carried $\tfrac12 Mg$: the force halves the instant the other support goes.
+    verify: "solve([M*9.8 - Symbol('Nf') - M*Symbol('acm'), Symbol('Nf')*1.3/2 - M*1.3**2/12*Symbol('al'), Symbol('acm') - Symbol('al')*1.3/2], [Symbol('Nf'), Symbol('acm'), Symbol('al')])[Symbol('Nf')]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 7
+
+  - id: phys-torque-013
+    difficulty: 4
+    type: proof
+    prompt: |
+      Prove the parallel-axis theorem: if $I_{\text{cm}}$ is a body's moment of inertia about an axis through its
+      centre of mass, its moment of inertia about a parallel axis a distance $d$ away is $I = I_{\text{cm}} + Md^2$.
+    hints:
+      - "Put the centre of mass at the origin and the axes along $z$; the new axis passes through $(d, 0)$ in the $xy$-plane."
+      - "Expand $(x - d)^2 + y^2$ and integrate term by term over $dm$."
+      - "What is $\\int x\\,dm$ when the origin is the centre of mass?"
+    solution: |
+      Take the centre of mass as origin and both axes parallel to $z$, the second through $(d, 0)$. The squared
+      distance of $dm$ at $(x, y)$ from the second axis is $(x - d)^2 + y^2$, so
+      $$I = \int\big[(x - d)^2 + y^2\big]dm = \int (x^2 + y^2)\,dm - 2d\int x\,dm + d^2\int dm.$$
+      The first term is $I_{\text{cm}}$, the last is $Md^2$, and $\int x\,dm = M x_{\text{cm}} = 0$ because the origin is
+      the centre of mass. Hence $I = I_{\text{cm}} + Md^2$. $\blacksquare$
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6

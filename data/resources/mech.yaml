@@ -231,6 +231,37 @@
   estHours: 40
   subject: cad
   summary: "Stands in for 'vendor tutorials for the chosen CAD' until you choose one (SolidWorks, Fusion, Onshape or FreeCAD)."
+  alternatives: [solidworks-tutorials, fusion-learning, freecad-docs]
+
+- id: solidworks-tutorials
+  title: "SOLIDWORKS tutorials (built into the software)"
+  provider: Dassault Systèmes
+  type: tutorial
+  url: null
+  urlVerified: false
+  searchHint: "SOLIDWORKS tutorials getting started"
+  tracks: [mech]
+  level: intro
+  cost: paid
+  estHours: 40
+  subject: cad
+  summary: "The SolidWorks path of the CAD choice (CSWA, then CSWP). An alternative to Onshape on the plan; no link checked yet."
+  alternatives: [onshape-learning-center, fusion-learning]
+
+- id: fusion-learning
+  title: "Autodesk Fusion learning"
+  provider: Autodesk
+  type: course
+  url: null
+  urlVerified: false
+  searchHint: "Autodesk Fusion learning getting started"
+  tracks: [mech]
+  level: intro
+  cost: audit-free
+  estHours: 40
+  subject: cad
+  summary: "The Autodesk path of the CAD choice. An alternative to Onshape on the plan; no link checked yet."
+  alternatives: [onshape-learning-center, solidworks-tutorials]
 
 - id: freecad-docs
   title: "FreeCAD documentation: getting started"

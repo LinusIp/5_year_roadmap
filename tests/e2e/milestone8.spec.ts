@@ -79,7 +79,7 @@ test.describe('settings', () => {
     await sheet.getByRole('textbox', { name: 'Minutes a day' }).fill('180');
     await sheet.getByRole('textbox', { name: 'Minutes a day' }).blur();
     await sheet.getByRole('button', { name: 'Close' }).click();
-    await expect(page.getByText('Blocks · about 9 h a day, 63 h a week')).toBeVisible();
+    await expect(page.getByText('Schedule · 63 h this week')).toBeVisible();
 
     await open(page, './');
     await expect(page.getByText(/^0 h of 9 h today/)).toBeVisible();

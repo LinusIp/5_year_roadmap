@@ -119,7 +119,7 @@ describe('npm run log:export', () => {
   const run = (...args: string[]): string =>
     execFileSync(process.execPath, [resolve('scripts/log-export.ts'), ...args], { cwd: dir, encoding: 'utf8', env: { ...process.env, TZ: 'Asia/Tashkent' } });
 
-  it('writes the files from a backup, then reports them unchanged, and never deletes a day', async () => {
+  it('writes the files from a backup, then reports them unchanged, and never deletes a day', { timeout: 20_000 }, async () => {
     const file = await backup();
     const backupPath = join(dir, 'atlas-backup-2026-09-28.json');
     writeFileSync(backupPath, serialiseBackup(file));

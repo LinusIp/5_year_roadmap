@@ -1,0 +1,307 @@
+subject: calculus
+topic: substitution-and-integration-by-parts
+questions:
+  - id: calc-sub-001
+    difficulty: 1
+    type: numeric
+    prompt: "Evaluate $\\displaystyle\\int_0^1 2x\\left(x^2 + 1\\right)^{ {{n}} }dx$. Give a fraction such as `7/4`, or a decimal to 4 significant figures."
+    params:
+      n: { int: [2, 6] }
+    answer: "(2^(n + 1) - 1) / (n + 1)"
+    hints:
+      - "Substitute $u = x^2 + 1$, so $du = 2x\\,dx$."
+      - "Change the limits too: $x = 0 \\Rightarrow u = 1$ and $x = 1 \\Rightarrow u = 2$."
+    solution: |
+      With $u = x^2 + 1$, $du = 2x\,dx$, and the limits become $u = 1$ to $u = 2$:
+      $$\int_1^2 u^{ {{n}} }\,du = \left[\frac{u^{ {{n + 1}} }}{ {{n + 1}} }\right]_1^2 = \frac{ {{2^(n + 1)}} - 1}{ {{n + 1}} } = {{frac: (2^(n + 1) - 1)/(n + 1)}}.$$
+    verify: "integrate(2*x*(x**2 + 1)**n, (x, 0, 1))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: calc-sub-002
+    difficulty: 1
+    type: mc
+    prompt: "Which substitution turns $\\displaystyle\\int x\\cos\\left(x^2\\right)dx$ into an integral you can do at once?"
+    options:
+      - "$u = x^2$"
+      - "$u = \\cos\\left(x^2\\right)$"
+      - "$u = x$"
+      - "$u = \\sin x$"
+    answer: 0
+    hints:
+      - "Look for an inner function whose derivative also appears (up to a constant) as a factor."
+    solution: |
+      The inner function is $x^2$, and its derivative $2x$ is (up to the factor 2) the other factor. With $u = x^2$,
+      $du = 2x\,dx$, so
+      $$\int x\cos(x^2)\,dx = \frac{1}{2}\int \cos u\,du = \frac{1}{2}\sin\left(x^2\right) + C.$$
+    verify: "0 if simplify(diff(sin(x**2)/2, x) - x*cos(x**2)) == 0 else 1"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: calc-sub-003
+    difficulty: 2
+    type: expression
+    prompt: |
+      Find the antiderivative $F$ of $f(x) = x\left(x^2 + {{a}}\right)^{ {{n}} }$ that satisfies $F(0) = 0$.
+
+      Type an expression in $x$, such as `((x^2 + 2)^3 - 8)/5`.
+    params:
+      a: { int: [1, 4] }
+      n: { int: [2, 4] }
+    answer: "((x^2 + a)^(n + 1) - a^(n + 1)) / (2*(n + 1))"
+    vars: [x]
+    hints:
+      - "Substitute $u = x^2 + {{a}}$, $du = 2x\\,dx$."
+      - "General antiderivative: $\\frac{(x^2 + {{a}})^{ {{n + 1}} }}{ {{2*(n + 1)}} } + C$. Choose $C$ so that $F(0) = 0$."
+    solution: |
+      With $u = x^2 + {{a}}$, $x\,dx = \tfrac{1}{2}du$, so
+      $$\int x(x^2 + {{a}})^{ {{n}} }dx = \frac{1}{2}\cdot\frac{u^{ {{n + 1}} }}{ {{n + 1}} } + C = \frac{(x^2 + {{a}})^{ {{n + 1}} }}{ {{2*(n + 1)}} } + C.$$
+      $F(0) = 0$ needs $C = -\dfrac{ {{a}}^{ {{n + 1}} }}{ {{2*(n + 1)}} } = -{{frac: a^(n + 1)/(2*(n + 1))}}$, so
+      $$F(x) = \frac{(x^2 + {{a}})^{ {{n + 1}} } - {{a^(n + 1)}} }{ {{2*(n + 1)}} }.$$
+    verify: "integrate(t*(t**2 + a)**n, (t, 0, x))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-sub-004
+    difficulty: 2
+    type: numeric
+    prompt: "Evaluate $\\displaystyle\\int_0^{\\pi/2} \\sin^{ {{n}} }x\\,\\cos x\\,dx$. Give a fraction such as `7/4`, or a decimal to 4 significant figures."
+    params:
+      n: { int: [2, 8] }
+    answer: "1 / (n + 1)"
+    hints:
+      - "Let $u = \\sin x$; then $du = \\cos x\\,dx$."
+      - "The limits become $u = 0$ and $u = 1$."
+    solution: |
+      With $u = \sin x$, $du = \cos x\,dx$, and $u$ runs from $0$ to $1$:
+      $$\int_0^1 u^{ {{n}} }\,du = \frac{1}{ {{n + 1}} }.$$
+    verify: "integrate(sin(x)**n*cos(x), (x, 0, pi/2))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: calc-sub-005
+    difficulty: 2
+    type: numeric
+    prompt: "Evaluate $\\displaystyle\\int_0^{ {{b}} } x e^{x}\\,dx$. Give a decimal (4 significant figures or more)."
+    params:
+      b: { int: [1, 3] }
+    answer: "(b - 1)*e^b + 1"
+    hints:
+      - "Integrate by parts: $\\int u\\,dv = uv - \\int v\\,du$."
+      - "Take $u = x$ (it gets simpler when differentiated) and $dv = e^x\\,dx$."
+    solution: |
+      With $u = x$, $dv = e^x dx$: $du = dx$, $v = e^x$, so
+      $$\int_0^{ {{b}} } xe^x\,dx = \Bigl[xe^x\Bigr]_0^{ {{b}} } - \int_0^{ {{b}} } e^x\,dx = {{b}}e^{ {{b}} } - (e^{ {{b}} } - 1) = {{b - 1}}e^{ {{b}} } + 1 \approx {{(b - 1)*e^b + 1}}.$$
+    verify: "integrate(x*exp(x), (x, 0, b))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-sub-006
+    difficulty: 3
+    type: numeric
+    prompt: "Evaluate $\\displaystyle\\int_1^{e} x^{ {{n}} }\\ln x\\,dx$. Give a decimal (4 significant figures or more)."
+    params:
+      n: { int: [1, 4] }
+    answer: "(n*e^(n + 1) + 1) / (n + 1)^2"
+    hints:
+      - "Integrate by parts with $u = \\ln x$ (its derivative $\\frac{1}{x}$ is simpler) and $dv = x^{ {{n}} }dx$."
+      - "$v = \\frac{x^{ {{n + 1}} }}{ {{n + 1}} }$, and $v\\,du = \\frac{x^{ {{n}} }}{ {{n + 1}} }dx$."
+    solution: |
+      With $u = \ln x$, $dv = x^{ {{n}} }dx$: $du = \frac{dx}{x}$, $v = \frac{x^{ {{n + 1}} }}{ {{n + 1}} }$. So
+      $$\int_1^e x^{ {{n}} }\ln x\,dx = \left[\frac{x^{ {{n + 1}} }\ln x}{ {{n + 1}} }\right]_1^e - \frac{1}{ {{n + 1}} }\int_1^e x^{ {{n}} }dx
+      = \frac{e^{ {{n + 1}} }}{ {{n + 1}} } - \frac{e^{ {{n + 1}} } - 1}{ {{(n + 1)^2}} } = \frac{ {{n}}e^{ {{n + 1}} } + 1}{ {{(n + 1)^2}} } \approx {{(n*e^(n + 1) + 1)/(n + 1)^2}}.$$
+    verify: "integrate(x**n*log(x), (x, 1, E))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-sub-007
+    difficulty: 3
+    type: expression
+    prompt: |
+      Find the antiderivative $F$ of $f(x) = x\cos({{a}}x)$ with $F(0) = 0$.
+
+      Type an expression in $x$, such as `x^2 sin(x) + cos(3x)/9`.
+    params:
+      a: { int: [2, 5] }
+    answer: "x*sin(a*x)/a + (cos(a*x) - 1)/a^2"
+    vars: [x]
+    hints:
+      - "Integration by parts with $u = x$ and $dv = \\cos({{a}}x)\\,dx$."
+      - "$v = \\frac{1}{ {{a}} }\\sin({{a}}x)$, and $\\int \\frac{1}{ {{a}} }\\sin({{a}}x)\\,dx = -\\frac{1}{ {{a^2}} }\\cos({{a}}x)$."
+    solution: |
+      With $u = x$, $dv = \cos({{a}}x)\,dx$: $du = dx$, $v = \frac{\sin({{a}}x)}{ {{a}} }$. So
+      $$\int x\cos({{a}}x)\,dx = \frac{x\sin({{a}}x)}{ {{a}} } - \int\frac{\sin({{a}}x)}{ {{a}} }dx = \frac{x\sin({{a}}x)}{ {{a}} } + \frac{\cos({{a}}x)}{ {{a^2}} } + C.$$
+      At $x = 0$ this is $\frac{1}{ {{a^2}} } + C$, so $C = -\frac{1}{ {{a^2}} }$ and
+      $$F(x) = \frac{x\sin({{a}}x)}{ {{a}} } + \frac{\cos({{a}}x) - 1}{ {{a^2}} }.$$
+    verify: "integrate(t*cos(a*t), (t, 0, x))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-sub-008
+    difficulty: 3
+    type: numeric
+    prompt: "Evaluate $\\displaystyle\\int_0^{\\pi} x\\sin({{k}}x)\\,dx$. Give a decimal (4 significant figures or more)."
+    params:
+      k: { int: [2, 5] }
+    answer: "pi*(-1)^(k + 1) / k"
+    hints:
+      - "Parts: $u = x$, $dv = \\sin({{k}}x)\\,dx$, so $v = -\\frac{1}{ {{k}} }\\cos({{k}}x)$."
+      - "$\\cos({{k}}\\pi) = (-1)^{ {{k}} }$ and $\\int_0^\\pi \\cos({{k}}x)\\,dx = 0$."
+    solution: |
+      $$\int_0^\pi x\sin({{k}}x)\,dx = \left[-\frac{x\cos({{k}}x)}{ {{k}} }\right]_0^\pi + \frac{1}{ {{k}} }\int_0^\pi \cos({{k}}x)\,dx = -\frac{\pi\cos({{k}}\pi)}{ {{k}} } + 0.$$
+      Since $\cos({{k}}\pi) = {{(-1)^k}}$, the integral is ${{(-1)^(k + 1) == 1 ? "" : "-"}}\frac{\pi}{ {{k}} } \approx {{pi*(-1)^(k + 1)/k}}$.
+    verify: "integrate(x*sin(k*x), (x, 0, pi))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: calc-sub-009
+    difficulty: 2
+    type: numeric
+    prompt: "Evaluate $\\displaystyle\\int_0^{ {{a}} } \\frac{x}{\\sqrt{x^2 + {{b^2}}}}\\,dx$. Give a fraction such as `7/4`, or a decimal to 4 significant figures."
+    params:
+      a: { int: [1, 6] }
+      b: { int: [1, 6] }
+    answer: "sqrt(a^2 + b^2) - b"
+    hints:
+      - "Let $u = x^2 + {{b^2}}$, so $x\\,dx = \\tfrac{1}{2}du$."
+      - "$\\int \\tfrac{1}{2}u^{-1/2}du = u^{1/2}$."
+    solution: |
+      With $u = x^2 + {{b^2}}$ (from $u = {{b^2}}$ to $u = {{a^2 + b^2}}$):
+      $$\int_{ {{b^2}} }^{ {{a^2 + b^2}} } \frac{1}{2}u^{-1/2}\,du = \Bigl[\sqrt{u}\Bigr]_{ {{b^2}} }^{ {{a^2 + b^2}} } = \sqrt{ {{a^2 + b^2}} } - {{b}} \approx {{sqrt(a^2 + b^2) - b}}.$$
+    verify: "integrate(x/sqrt(x**2 + b**2), (x, 0, a))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: calc-sub-010
+    difficulty: 4
+    type: numeric
+    prompt: "Evaluate $\\displaystyle\\int_0^{\\pi} e^{ {{a}}x}\\sin x\\,dx$. Give a decimal (4 significant figures or more)."
+    params:
+      a: { int: [2, 3] }
+    answer: "(e^(a*pi) + 1) / (a^2 + 1)"
+    hints:
+      - "Integrate by parts twice; the original integral $I$ reappears."
+      - "After two steps you get an equation of the form $I = (\\text{boundary terms}) - {{a^2}} I$. Solve it for $I$."
+    solution: |
+      Let $I = \int_0^\pi e^{ {{a}}x}\sin x\,dx$. Parts with $u = e^{ {{a}}x}$, $dv = \sin x\,dx$:
+      $$I = \Bigl[-e^{ {{a}}x}\cos x\Bigr]_0^\pi + {{a}}\int_0^\pi e^{ {{a}}x}\cos x\,dx = (e^{ {{a}}\pi} + 1) + {{a}}\int_0^\pi e^{ {{a}}x}\cos x\,dx.$$
+      Parts again on the last integral: $\int_0^\pi e^{ {{a}}x}\cos x\,dx = \Bigl[e^{ {{a}}x}\sin x\Bigr]_0^\pi - {{a}} I = -{{a}}I$. Hence
+      $$I = e^{ {{a}}\pi} + 1 - {{a^2}} I \quad\Longrightarrow\quad I = \frac{e^{ {{a}}\pi} + 1}{ {{a^2 + 1}} } \approx {{(e^(a*pi) + 1)/(a^2 + 1)}}.$$
+    verify: "integrate(exp(a*x)*sin(x), (x, 0, pi))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: calc-sub-011
+    difficulty: 4
+    type: proof
+    prompt: |
+      Prove the reduction formula, for $n \ge 2$:
+      $$\int \sin^n x\,dx = -\frac{\sin^{n-1}x\cos x}{n} + \frac{n-1}{n}\int \sin^{n-2}x\,dx.$$
+    hints:
+      - "Write $\\sin^n x = \\sin^{n-1}x \\cdot \\sin x$ and integrate by parts with $u = \\sin^{n-1}x$, $dv = \\sin x\\,dx$."
+      - "You will get $\\cos^2 x$; replace it with $1 - \\sin^2 x$."
+      - "The original integral appears on the right; collect it on the left."
+    solution: |
+      Let $I_n = \int \sin^n x\,dx$. With $u = \sin^{n-1}x$, $dv = \sin x\,dx$: $du = (n-1)\sin^{n-2}x\cos x\,dx$, $v = -\cos x$.
+      $$I_n = -\sin^{n-1}x\cos x + (n-1)\int \sin^{n-2}x\cos^2 x\,dx.$$
+      Using $\cos^2 x = 1 - \sin^2 x$, the last integral is $I_{n-2} - I_n$, so
+      $$I_n = -\sin^{n-1}x\cos x + (n-1)I_{n-2} - (n-1)I_n.$$
+      Adding $(n-1)I_n$ to both sides gives $nI_n = -\sin^{n-1}x\cos x + (n-1)I_{n-2}$; divide by $n$. $\blacksquare$
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8
+
+  - id: calc-sub-012
+    difficulty: 4
+    type: multipart
+    prompt: |
+      Let $J_n = \displaystyle\int_0^1 x^n e^{ {{a}}x}\,dx$. Integration by parts gives the reduction formula
+      $J_n = \dfrac{e^{ {{a}} }}{ {{a}} } - \dfrac{n}{ {{a}} }J_{n-1}$ for $n \ge 1$. Give decimals with 4 significant figures or more.
+    params:
+      a: { int: [1, 3] }
+    parts:
+      - prompt: "(a) What is $J_0$?"
+        type: numeric
+        answer: "(e^a - 1) / a"
+        tolerance: { rel: 0.001 }
+        verify: "integrate(exp(a*x), (x, 0, 1))"
+      - prompt: "(b) Using your $J_0$, what is $J_1$?"
+        type: numeric
+        answer: "e^a/a - part1/a"
+        tolerance: { rel: 0.001 }
+        verify: "integrate(x*exp(a*x), (x, 0, 1))"
+      - prompt: "(c) Using your $J_1$, what is $J_2$?"
+        type: numeric
+        answer: "e^a/a - 2*part2/a"
+        tolerance: { rel: 0.001 }
+        verify: "integrate(x**2*exp(a*x), (x, 0, 1))"
+    hints:
+      - "$J_0$ is a plain exponential integral: $\\int_0^1 e^{ {{a}}x}dx$."
+      - "Then apply the reduction formula with $n = 1$ and $n = 2$."
+    solution: |
+      (a) $J_0 = \left[\frac{e^{ {{a}}x}}{ {{a}} }\right]_0^1 = \frac{e^{ {{a}} } - 1}{ {{a}} } \approx {{(e^a - 1)/a}}$.
+
+      (b) $J_1 = \frac{e^{ {{a}} }}{ {{a}} } - \frac{1}{ {{a}} }J_0 \approx {{e^a/a - (e^a - 1)/a^2}}$.
+
+      (c) $J_2 = \frac{e^{ {{a}} }}{ {{a}} } - \frac{2}{ {{a}} }J_1 \approx {{e^a/a - 2*(e^a/a - (e^a - 1)/a^2)/a}}$.
+
+      The reduction formula itself comes from parts with $u = x^n$, $dv = e^{ {{a}}x}dx$:
+      $J_n = \left[\frac{x^n e^{ {{a}}x}}{ {{a}} }\right]_0^1 - \frac{n}{ {{a}} }\int_0^1 x^{n-1}e^{ {{a}}x}dx$.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 7
+
+  - id: calc-sub-013
+    difficulty: 5
+    type: numeric
+    prompt: |
+      Evaluate $\displaystyle\int_0^{\pi/2} \sin^{ {{n}} }x\,dx$. Give a decimal (4 significant figures or more).
+    params:
+      n: { int: [6, 9] }
+    let:
+      w: "sqrt(pi)/2 * gamma((n + 1)/2) / gamma(n/2 + 1)"
+      r: "mod(n, 2) == 0 ? w / (pi/2) : w"
+    answer: "sqrt(pi)/2 * gamma((n + 1)/2) / gamma(n/2 + 1)"
+    hints:
+      - "Use the reduction formula $\\int \\sin^n x\\,dx = -\\frac{\\sin^{n-1}x\\cos x}{n} + \\frac{n-1}{n}\\int \\sin^{n-2}x\\,dx$."
+      - "On $[0, \\pi/2]$ the boundary term vanishes, so $W_n = \\frac{n-1}{n}W_{n-2}$, with $W_0 = \\frac{\\pi}{2}$ and $W_1 = 1$."
+    solution: |
+      Let $W_n = \int_0^{\pi/2}\sin^n x\,dx$. In the reduction formula the boundary term $-\frac{1}{n}\sin^{n-1}x\cos x$ is $0$ at
+      both $0$ and $\frac{\pi}{2}$, so $W_n = \frac{n-1}{n}W_{n-2}$. Starting from $W_0 = \frac{\pi}{2}$ (even $n$) or $W_1 = 1$ (odd $n$)
+      and stepping up to $n = {{n}}$:
+      $$W_{ {{n}} } = \frac{ {{n - 1}} }{ {{n}} }\cdot\frac{ {{n - 3}} }{ {{n - 2}} }\cdots\frac{ {{mod(n, 2) == 0 ? 1 : 2}} }{ {{mod(n, 2) == 0 ? 2 : 3}} }\cdot W_{ {{mod(n, 2)}} } = {{frac: r}}{{mod(n, 2) == 0 ? "\\cdot\\frac{\\pi}{2}" : ""}} \approx {{w}}.$$
+    verify: "integrate(sin(x)**n, (x, 0, pi/2))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8
+
+  - id: calc-sub-014
+    difficulty: 2
+    type: mc
+    prompt: "To integrate $\\displaystyle\\int x^2\\ln x\\,dx$ by parts, which choice works?"
+    options:
+      - "$u = \\ln x$, $dv = x^2\\,dx$"
+      - "$u = x^2$, $dv = \\ln x\\,dx$"
+      - "$u = x^2\\ln x$, $dv = dx$"
+      - "Substitution $u = x^3$ instead"
+    answer: 0
+    hints:
+      - "Choose $u$ so that $du$ is simpler, and $dv$ so that you can integrate it easily."
+    solution: |
+      Take $u = \ln x$ (its derivative $\frac{1}{x}$ is algebraic) and $dv = x^2dx$, $v = \frac{x^3}{3}$:
+      $$\int x^2\ln x\,dx = \frac{x^3\ln x}{3} - \int\frac{x^3}{3}\cdot\frac{1}{x}dx = \frac{x^3\ln x}{3} - \frac{x^3}{9} + C.$$
+      With $dv = \ln x\,dx$ you would need $\int \ln x\,dx$ first and the powers of $x$ would grow.
+    verify: "0 if simplify(diff(x**3*log(x)/3 - x**3/9, x) - x**2*log(x)) == 0 else 1"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2

@@ -3,13 +3,35 @@
  * Exits 1 on any schema error, duplicate id, dangling reference or missing credential-map row.
  * `npm run build` runs this first, so an invalid curriculum can never be built or deployed.
  */
+import { loadCatalogue } from './lib/load-catalogue.ts';
+import { loadDocs } from './lib/load-docs.ts';
+import { checkBankAgainstSeed, loadQuestions } from './lib/load-questions.ts';
 import { loadSeed } from './lib/load-seed.ts';
 
-const { seed, errors, warnings } = loadSeed();
+const result = loadSeed();
+const { seed } = result;
+const errors = [...result.errors];
+const warnings = [...result.warnings];
+
+// The practice bank (data/questions/) and the projects' tech docs (data/projects/docs/) are checked here too, with
+// the launch quotas of the practice brief: 200 per subject, 40 % templates, every topic at difficulties 1 to 4.
+const bank = loadQuestions(undefined, { requireQuotas: true });
+errors.push(...bank.errors);
+warnings.push(...bank.warnings);
+const docs = seed ? loadDocs(seed, undefined, { requireAll: true }) : null;
+if (docs) {
+  errors.push(...docs.errors);
+  warnings.push(...docs.warnings);
+}
+if (seed && bank.bank) errors.push(...checkBankAgainstSeed(bank.bank, seed));
+// The three-tier project catalogue (data/projects/*.jsonl): unique ids across it and the curriculum, difficulty
+// matching cadence, examples, milestones adding up, prerequisites that resolve, no URLs.
+const catalogue = seed ? loadCatalogue(seed) : null;
+if (catalogue) errors.push(...catalogue.errors);
 
 for (const w of warnings) console.warn('warning  ' + w);
 
-if (!seed) {
+if (!seed || errors.length > 0) {
   console.error('\n/data is invalid: ' + errors.length + ' problem' + (errors.length === 1 ? '' : 's') + '\n');
   for (const e of errors) console.error('error    ' + e);
   console.error('');
@@ -26,8 +48,17 @@ const lines: [string, string | number][] = [
   ['papers', seed.papers.length],
   ['certifications', seed.certs.length],
   ['credential-map rows', seed.subjects.length],
+  ['practice questions', bank.stats.subjects.map((s) => s.id + ' ' + s.questions + ' (' + s.templates + ' templates)').join(', ')],
+  ['tech docs', Object.keys(docs?.parsed ?? {}).length + ' of ' + seed.projects.filter((p) => p.cadence !== 'weekly').length + ' projects'],
+  ['project catalogue', catalogueSummary()],
   ['roadmap.sh roadmaps', seed.roadmaps.length + ' (' + seed.roadmaps.reduce((n, r) => n + r.sections.reduce((m, s) => m + s.nodes.length, 0), 0) + ' nodes)'],
 ];
 console.log('/data is valid');
 for (const [label, value] of lines) console.log('  ' + label.padEnd(20) + value);
 if (warnings.length > 0) console.log('  ' + warnings.length + ' warning' + (warnings.length === 1 ? '' : 's') + ' (see above)');
+
+function catalogueSummary(): string {
+  const items = catalogue?.items ?? [];
+  const count = (kind: string, difficulty: string): number => items.filter((i) => i.kind === kind && i.difficulty === difficulty).length;
+  return items.length + ': daily ' + count('challenge', 'easy') + ' challenges; weekly ' + count('challenge', 'medium') + ' challenges, ' + count('build', 'medium') + ' builds; monthly ' + count('case', 'advanced') + ' cases';
+}

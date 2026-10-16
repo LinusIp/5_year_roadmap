@@ -1,5 +1,5 @@
 import { useContext, useId } from 'react';
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
 import { Icon } from './Icon.tsx';
 import { Link } from '../router/router.tsx';
 import { InSheet } from './Sheet.tsx';
@@ -37,6 +37,8 @@ export interface RowProps {
   truncate?: boolean;
   /** A checklist item's title is regular weight, as in the mockup. */
   plainTitle?: boolean;
+  /** A row of a list that can be reordered by dragging (useDragReorder finds rows by it). */
+  dragRow?: boolean;
 }
 
 /** The mockup's checkbox: a 20 px box with softened corners, filled with accent and a tick when done. */
@@ -88,7 +90,7 @@ export function Switch({ on, onChange, labelledBy, label, disabled }: { on: bool
  */
 const HEIGHT = { 44: 'min-h-11', 48: 'min-h-16 py-2', 52: 'min-h-17 py-2', 56: 'min-h-19 py-2.5', 60: 'min-h-20 py-2.5' } as const;
 
-export function Row({ title, meta, trailing, action, edge, onClick, to, href, expanded, check, toggle, selected, children, className = '', height = 56, truncate, plainTitle }: RowProps) {
+export function Row({ title, meta, trailing, action, edge, onClick, to, href, expanded, check, toggle, selected, children, className = '', height = 56, truncate, plainTitle, dragRow }: RowProps) {
   const titleId = useId();
   const titleClass =
     'block text-body leading-[1.3] ' + (plainTitle ? 'font-normal' : 'font-medium') + (check?.checked ? ' text-ink2' : '') + (truncate ? ' truncate' : '');
@@ -104,7 +106,7 @@ export function Row({ title, meta, trailing, action, edge, onClick, to, href, ex
       {trailing !== undefined && trailing !== null && <span className="shrink-0 text-meta text-ink2">{trailing}</span>}
     </>
   );
-  const mainClass = 'flex min-w-0 flex-1 items-center gap-3 text-left ' + HEIGHT[height];
+  const mainClass = 'row-main flex min-w-0 flex-1 items-center gap-3 text-left ' + HEIGHT[height];
 
   let main: ReactNode;
   if (to) {
@@ -130,7 +132,7 @@ export function Row({ title, meta, trailing, action, edge, onClick, to, href, ex
   }
 
   return (
-    <li className={'relative ' + className}>
+    <li className={'relative ' + className} data-drag-row={dragRow || undefined}>
       {edge && <span aria-hidden="true" className="absolute inset-y-2.5 left-0 w-[3px] rounded-pill" style={{ background: edge }} />}
       <div className={'flex items-center gap-1' + (edge ? ' pl-3' : '')}>
         {check && (
@@ -160,11 +162,11 @@ export function Row({ title, meta, trailing, action, edge, onClick, to, href, ex
  * A list of rows: on the one card level, or `flat` on the page between hairlines (Today's "Later today").
  * `label` is the section's quiet heading above it.
  */
-export function RowList({ label, children, className = '', flat, plain }: { label?: ReactNode; children: ReactNode; className?: string; flat?: boolean; plain?: boolean }) {
+export function RowList({ label, children, className = '', flat, plain, ref }: { label?: ReactNode; children: ReactNode; className?: string; flat?: boolean; plain?: boolean; ref?: Ref<HTMLElement> }) {
   const inSheet = useContext(InSheet);
   const list = plain ? '' : flat || inSheet ? 'divide-y divide-line border-y border-line' : 'divide-y divide-line rounded-card bg-surface px-4';
   return (
-    <section className={className}>
+    <section className={className} ref={ref}>
       {label && <h2 className="mb-1.5 text-meta font-normal text-ink2">{label}</h2>}
       <ul className={list}>{children}</ul>
     </section>

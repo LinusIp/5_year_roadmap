@@ -13,3 +13,27 @@ declare module 'virtual:atlas-units' {
   const units: Record<string, import('./schema.ts').Unit[]>;
   export default units;
 }
+
+declare module 'virtual:atlas-questions' {
+  /** The practice bank: subjects, topics and every question. Loaded with the Practice screen. */
+  const bank: import('./questions.ts').QuestionBank;
+  export default bank;
+}
+
+declare module 'virtual:atlas-docs' {
+  /** Each project's tech doc, as Markdown, by project id. Loaded with a project's sheet. */
+  const docs: Record<string, string>;
+  export default docs;
+}
+
+declare module 'virtual:atlas-catalogue' {
+  /** The three-tier project catalogue, normalised. Loaded with a catalogue item's screen or sheet. */
+  const items: import('./catalogue.ts').CatalogueItem[];
+  export default items;
+}
+
+declare module 'virtual:atlas-catalogue-index' {
+  /** One small entry per catalogue item: Today's daily challenge, the Deck, Library and Activity lists. */
+  const entries: import('./catalogue.ts').CatalogueEntry[];
+  export default entries;
+}

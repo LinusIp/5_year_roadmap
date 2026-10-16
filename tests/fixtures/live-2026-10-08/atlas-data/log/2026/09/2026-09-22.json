@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-22",
+  "deviceId": "5kmn4cd1hgnm",
+  "energy": 4,
+  "entries": [
+    {
+      "block": "C",
+      "deviceId": "5kmn4cd1hgnm",
+      "id": "ljck524x682o",
+      "minutes": 90,
+      "refId": "ml-zoomcamp",
+      "track": "ai",
+      "updatedAt": "2026-10-16T04:24:38.427Z"
+    }
+  ],
+  "fieldsAt": {
+    "energy": "2026-10-16T04:24:38.427Z",
+    "reflection": "2026-10-16T04:24:38.427Z"
+  },
+  "reflection": "Good focus.",
+  "updatedAt": "2026-10-16T04:24:38.427Z"
+}

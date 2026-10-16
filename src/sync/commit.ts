@@ -55,7 +55,9 @@ export function commitMessage(days: DayLog[], summaries: string[], core: Setting
   let rest = unique;
   if (latest) {
     const minutes = latest.entries.reduce((sum, e) => sum + e.minutes, 0);
-    const scheduled = core.blocks.filter((b) => b.days.includes(weekday(latest.date))).length;
+    // The blocks of the weekday; the Practice block only inside its period.
+    const inPeriod = (date: string): boolean => !core.practice || (date >= core.practice.start && date <= core.practice.end);
+    const scheduled = core.blocks.filter((b) => b.days.includes(weekday(latest.date)) && (b.role !== 'practice' || inPeriod(latest.date))).length;
     const done = (latest.doneBlocks ?? []).length;
     subject = 'log: ' + latest.date + ' · ' + duration(minutes) + ' · ' + done + '/' + scheduled + ' blocks';
     if (days.length > 1) subject += ' (and ' + (days.length - 1) + ' more ' + (days.length === 2 ? 'day' : 'days') + ')';

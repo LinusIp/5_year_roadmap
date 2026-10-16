@@ -1,7 +1,8 @@
 # Atlas
 
 A local-first personal learning platform for one five-year plan (2026-09-21 to 2031-08-31). It answers
-one question every morning: **what exactly do I do in my 8 hours today?**
+one question every morning: **what exactly do I do today?** By default that is an 8-hour day; the day can be
+shaped to fit (see [Making it yours](#making-it-yours)).
 
 No backend and no account. Everything you log is kept in your browser (IndexedDB), and with the optional
 GitHub Sync also in a private repository you own, where each study session becomes a commit. Without it, the
@@ -18,8 +19,10 @@ app makes no network calls at all, and everything can still be exported to a sin
 
 ![The five-year map: six phases on a timeline, with each lane's work, what ships and the credentials](screenshots/map-light.png)
 
-The screenshots show eight weeks of made-up history. They are also the baselines of a screenshot test, and
-`npm run screenshots` redraws them after a change to the UI.
+The screenshots show eight weeks of made-up history. They are also the baselines of a screenshot test that CI runs
+on every pull request. They are drawn on CI's Linux: after a change to the UI, commit an empty `screenshots/.redraw`
+to the pull request's branch and CI redraws them all and pushes them back. (`npm run screenshots` redraws them on
+your machine, to look at; fonts render a little differently on each system, so commit CI's.)
 
 ## Run it
 
@@ -39,9 +42,116 @@ npm run dev
 | `npm run validate:data` | Validates everything under `data/`. Fails on schema errors, duplicate ids, dangling references. |
 | `npm run check:links` | Requests every URL in `data/` and prints a report. Never fails the build. |
 | `npm run log:export` | Writes each logged day from a backup to `learning-log/YYYY/MM/DD.md` (see below). |
-| `npm run screenshots` | Builds, then redraws the screenshots above (the screenshot test's baselines in `screenshots/`) from demo data. |
+| `npm run screenshots` | Builds, then redraws the screenshots above from demo data, locally. The committed baselines are CI's: see above. |
 | `npm run fetch:units` | Rebuilds the lecture and chapter checklists from the courses own syllabus pages. |
 | `npm run test:sync -- --repo owner/name` | Runs GitHub Sync against the real GitHub, by hand (see below). Never in CI. |
+
+## Making it yours
+
+Atlas starts as the plan in `data/`: the same 8-hour day, every day. Real weeks are not like that, so the day,
+the plan, the pace and the layout can all be changed from the app. Nothing new shows on the main screens until
+you use it: every option sits behind an Edit or Change action in a sheet.
+
+<p>
+  <img src="screenshots/change-today-light.png" alt="Change today: the day's template, a rest-day switch, and each block with its minutes" width="32%">
+  <img src="screenshots/today-compact-light.png" alt="Today in compact mode: Later today shows titles only" width="32%">
+</p>
+
+| You want to | Where |
+|---|---|
+| Make today a University day, give one block fewer minutes, skip a block, move it to tomorrow, swap two blocks' work, or rest | Today › the sliders icon (Change today) |
+| Change the templates (Full day, University day, Weekend, Exam week, Rest day) or make your own | Settings › Schedule › Day templates |
+| Give each weekday a template | Settings › Schedule › Weekly pattern |
+| Give a date or a range another template ("Exam week 12–19 Dec") | Settings › Schedule › Date ranges |
+| Add, rename, recolour or reorder blocks, or give one a track | Settings › Blocks |
+| Count a day from 60 minutes or half its plan, whichever is lower | Settings › Heatmap and streak (both numbers are yours) |
+| Light the heatmap by share of the day's plan, or by minutes | Settings › Heatmap and streak |
+| Add a library item to the plan at a position | the item's sheet › Add to the plan |
+| Reorder, swap for an alternative, or drop (and restore) an item | Plan › a lane › Edit |
+| Rename or re-date a phase, change a lane's focus, add or split a phase | Plan › Edit plan › Phases |
+| Set a goal with a date and see whether it is on track | Plan › Edit plan › Goals; it then shows on the Timeline |
+| Undo a plan edit | the toast right after it, or Plan › Edit plan › Recent edits (the last 50) |
+| Go relaxed, intense or a fixed number of minutes in one lane; pause it; catch up | Plan › a lane › Pace |
+| Re-plan: push dates back, redistribute across lanes, or drop and defer the lowest-priority items | Plan › Re-plan (a preview first, always) |
+| Hide parts of Today, compact rows, choose what Now picks | Settings › Layout › Today (with a live preview) |
+| Choose 3 to 5 tabs and their order | Settings › Layout › Tabs |
+| Plan's first view, dropped items shown or not | Settings › Layout › Plan |
+| Theme, week start, 12- or 24-hour clock, density | Settings › Layout › General |
+| Add a resource, project, paper or track of your own | Library › Add a resource |
+| Move the practice period, or take three to five questions a subject | Settings › Practice |
+| Turn the daily challenge off, or move the weekly slot to other days | Settings › Projects |
+
+**Nothing is lost.** Your edits are kept apart from the curriculum, as an ordered list of patches in
+`state/plan.json`, so an update to `data/` still flows in and your edits survive it. Dropped items stay
+restorable, every plan edit can be undone, and a change to the schedule never rewrites a day already past: the
+old templates are kept for the days they applied to. Schedule, pace and layout travel in `state/settings.json`.
+
+## Daily practice
+
+From 16 October 2026 to 31 January 2027 the day has a sixth block, **Practice** (P, 45 minutes): nine questions,
+three each of linear algebra, calculus and physics, two new and one review once a review is due. Today's set
+opens from Today's Practice row. It is the same set on every device for that date, and it does not change while
+you answer it.
+
+<p>
+  <img src="screenshots/practice-question-light.png" alt="A practice question: the prompt with maths, an answer field, Check, Hint and Show solution" width="32%">
+  <img src="screenshots/practice-solution-light.png" alt="The same question with a hint and the worked solution shown" width="32%">
+  <img src="screenshots/practice-summary-light.png" alt="The set summary: score, time, topics, when the reviews come back, and Done" width="32%">
+</p>
+
+- **Answering.** Numbers (with units where asked: `9.81 m/s^2`, `7/4`, `sqrt(2)/2`), vectors (`1, -2, 3`),
+  matrices (`1 2; 3 4`), expressions (`2x sin(x)`), multiple choice, estimates within a factor, and proofs you
+  grade yourself against the solution. A later part of a multi-part question that follows correctly from your own
+  wrong earlier answer is marked right, and says so.
+- **Hints and solutions.** Hints come one at a time. Showing the solution counts the question as missed.
+- **Reviews.** A miss comes back after 1 day, then 3, 7, 21 and 60 as you get it right.
+- **Difficulty** follows a rating per topic. Linear algebra follows the 18.06 lectures you have ticked; calculus
+  and physics move to the next topic after 15 answers at 80 %.
+- **Done** on the summary logs the time to the Practice block, by subject (math or physics), and nothing else.
+- **On demand**: Library › Practise a topic, ten questions on any topic, any day.
+- **Activity › Practice** (once you have answered something): accuracy per subject and topic, the five weakest
+  topics, reviews due, minutes.
+- **Roadmaps**: a topic at 85 % over its last 20 answers ticks the roadmap.sh nodes it covers.
+- **Settings › Practice**: the first and last day, and three to five questions a subject. After the last day the
+  block disappears; the answers stay.
+
+The questions live in `data/questions/` (format: `data/questions/SCHEMA.md`). Templates draw new numbers every
+time. `npm run verify:questions` recomputes every answer with SymPy (`pip install sympy numpy`).
+
+**Tech docs.** Every project that is not a weekly build has a tech doc in `data/projects/docs/<id>.md`: goal,
+architecture, stack, milestones, how to measure and report it. It shows in the project's sheet. Its milestones are
+checkboxes that count toward the project's progress, and "Copy as README skeleton" starts the project's repository
+README from it.
+
+## Projects: daily, weekly, monthly
+
+Besides the curriculum's own projects, Atlas carries a catalogue of 920 in three tiers (`data/projects/*.jsonl`):
+
+| Tier | What | Where it shows |
+|---|---|---|
+| Daily | 254 easy coding challenges, 30 topics | Block B: on its Now card, and mentioned on its row |
+| Weekly | 112 medium challenges and 250 medium builds | Block D's weekly slot (the weekend by default): the week's challenge, and a build you take |
+| Monthly | 304 advanced real cases | Block D's monthly queue, next to the plan's monthly projects |
+
+<p>
+  <img src="screenshots/challenge-light.png" alt="A challenge: statement, input and output, constraints, examples, a hint, languages, notes and Mark solved" width="32%">
+  <img src="screenshots/case-sheet-light.png" alt="A real case in its sheet: scenario, requirements, Take it, Copy as README skeleton" width="32%">
+  <img src="screenshots/deck-daily-light.png" alt="The Deck on Daily: tier, topic and phase chips over the cards" width="32%">
+</p>
+
+- **The daily challenge** is picked for the date from the challenges not solved yet, a new topic after each solve, in
+  the language of Block B's course. Skip gives another (three a day), Not today hides it, and Settings › Projects
+  turns it off. Once all 254 are solved they come round again, to solve in another language. Its streak is its own.
+- **A challenge** shows the statement, input and output, constraints and examples; hints one at a time; Show approach
+  for the approach, complexity and edge cases; notes, a link to your solution, and Mark solved.
+- **A build or a case** opens in a sheet. A case reads as a short tech doc whose milestones are checkboxes. Copy as
+  README skeleton starts its repository; it is done only with the repository link filled in.
+- **Finding one**: the Deck (Plan › Pick a project) by Daily, Weekly or Monthly, topic or domain, and This phase,
+  Earlier or Everything; Library › Projects with search and filters for kind, difficulty, topic or domain, track,
+  phase, level and hours; Activity › Projects for what is done per tier and domain and each topic's solve rate.
+
+`npm run map:catalogue` fills each item's `refs` (courses) and `covers` (roadmap nodes) from the reviewed keyword
+table in `scripts/lib/catalogue-mapping.ts`; CI checks the files match it.
 
 ## Keyboard
 
@@ -61,6 +171,10 @@ Enter opens it.
 
 Pushing to `main` builds and deploys to GitHub Pages (`.github/workflows/deploy.yml`). One-time setup in
 the repository: **Settings > Pages > Build and deployment > Source = "GitHub Actions"**.
+
+The deploy checks itself (`scripts/live-check.ts`): before deploying, a browser opens the live site as a returning
+user on the old build; after it, the app's update prompt must appear, Reload must bring in the new version (its
+service-worker cache), and the main screens must render without an error. If not, the deploy run fails.
 
 ## GitHub Sync (optional)
 
@@ -94,8 +208,10 @@ README that Atlas writes into it explains each file.
 | Path | What is in it |
 |---|---|
 | `state/items.json` | Status, ticked units, notes and links of every course, book, project, paper, certificate and milestone |
-| `state/plan.json` | Your plan edits, items of your own, re-plans and picked builds |
-| `state/settings.json` | Blocks, thresholds, streak rules and theme. Never the token. |
+| `state/plan.json` | Your plan edits (an ordered list of patches, version 2), items of your own, re-plans and picked builds |
+| `state/settings.json` | Blocks, day templates, the weekly pattern, date ranges, day changes, pace, pauses and layout (version 2). Never the token. |
+| `state/practice.json` | Every practice answer: question, date, right or wrong, hints, time. Merged by answer, so two devices never lose one. |
+| `state/challenges.json` | Catalogue challenges solved (and in which language), skipped or hidden for a day. Merged the same way. |
 | `log/YYYY/MM/YYYY-MM-DD.json` and `.md` | One day, and its human-readable twin |
 | `reviews/` | Weekly, monthly and quarterly reviews |
 | `projects/` | Each project's write-up, links and checklist |
@@ -152,6 +268,9 @@ statuses and notes reference items by id, so editing the curriculum never loses 
 | `data/certs.yaml`, `data/subjects.yaml` | Certifications, and the credential map |
 | `data/roadmaps.yaml` | The five roadmap.sh roadmaps, as sections of nodes, each section with the phase that teaches it |
 | `data/settings.yaml` | The defaults a fresh install starts from |
+| `data/questions/` | The practice bank: `topics.yaml`, then one file of questions per topic (`SCHEMA.md` describes them) |
+| `data/projects/docs/*.md` | One tech doc per project (the file name is the project's id) |
+| `data/projects/*.jsonl` | The project catalogue: daily easy challenges, weekly medium challenges and builds, monthly real cases, one per line |
 
 ### Adding a course, step by step
 

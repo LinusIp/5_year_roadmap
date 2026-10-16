@@ -11,9 +11,13 @@
 import type { AppResource, AppSeed } from '../seed/index.ts';
 import type { BlockDef, BlockId, Phase, PlanItem, Project, TrackId } from '../seed/schema.ts';
 import type { ItemStatus, StoredSettings, UserItemState } from '../db/types.ts';
-import { isWithinRange, weekday } from './dates.ts';
+import { isWithinRange, startOfWeek, today as todayDate, weekday } from './dates.ts';
+import { plannedMinutes, resolveDay, weekTarget } from './day-plan.ts';
+import type { ResolvedDay } from './day-plan.ts';
+import type { CatalogueEntry } from '../seed/catalogue.ts';
+import { projectUnitCount } from './progress.ts';
 
-export type ScheduledKind = 'resource' | 'project';
+export type ScheduledKind = 'resource' | 'project' | 'practice';
 
 export interface NextUnit {
   id: string;
@@ -52,7 +56,7 @@ export interface ScheduledItem {
   acceptance?: string[];
 }
 
-export type BlockPlanKind = 'item' | 'review' | 'rest' | 'empty';
+export type BlockPlanKind = 'item' | 'review' | 'empty';
 
 export interface TodayBlock {
   id: BlockId;
@@ -66,6 +70,10 @@ export interface TodayBlock {
   weeklyBuild?: ScheduledItem;
   /** Why there is no item: shown instead of a card. */
   emptyReason?: string;
+  /** Today this block carries the work of another (Change today > swap). */
+  swappedWith?: BlockId;
+  /** Extra minutes today from opt-in catch-up (included in targetMinutes). */
+  catchUp?: number;
 }
 
 export interface TodayPlan {
@@ -74,6 +82,8 @@ export interface TodayPlan {
   blocks: TodayBlock[];
   targetMinutes: number;
   isReviewDay: boolean;
+  /** The day's template, overrides and changes, as resolved from the schedule. */
+  resolved: ResolvedDay;
 }
 
 export function activePhase(date: string, phases: Phase[]): Phase | null {
@@ -103,6 +113,25 @@ export interface ScheduleContext {
   states: Map<string, UserItemState>;
   /** Unit checklists, when the chunk is loaded. Without it items still schedule, just without a next unit. */
   units?: Record<string, { id: string; title: string; url?: string; section?: string }[]>;
+  /** The project catalogue's index, when loaded: a week's build can be one of its medium builds. */
+  catalogue?: readonly CatalogueEntry[];
+}
+
+/** A catalogue build as Block D's weekly build. */
+function describeCatalogueBuild(entry: CatalogueEntry, state: UserItemState | undefined): ScheduledItem {
+  return {
+    refId: entry.id,
+    kind: 'project',
+    title: entry.title,
+    track: entry.tracks[0] ?? 'swe',
+    tracks: entry.tracks,
+    url: null,
+    status: state?.status ?? 'todo',
+    estHours: entry.hours,
+    unitsDone: 0,
+    unitCount: 0,
+    cadence: 'weekly',
+  };
 }
 
 function describeResource(resource: AppResource, state: UserItemState | undefined, ctx: ScheduleContext, note?: string): ScheduledItem {
@@ -124,7 +153,7 @@ function describeResource(resource: AppResource, state: UserItemState | undefine
   if (resource.short) item.short = resource.short;
   if (note) item.note = note;
 
-  const list = ctx.units?.[resource.id];
+  const list = resource.customUnits ?? ctx.units?.[resource.id];
   if (list && list.length > 0) {
     const done = new Set(unitsDone);
     const index = list.findIndex((u) => !done.has(u.id));
@@ -150,7 +179,7 @@ function describeProject(project: Project, state: UserItemState | undefined, not
     status: state?.status ?? 'todo',
     estHours: project.estHours,
     unitsDone: (state?.unitsDone ?? []).length,
-    unitCount: project.acceptance.length,
+    unitCount: projectUnitCount(project),
     cadence: project.cadence,
     brief: project.brief,
     acceptance: project.acceptance,
@@ -195,6 +224,8 @@ export function weeklyBuildFor(
   ctx: ScheduleContext,
 ): ScheduledItem | null {
   const pool = ctx.seed.projects.filter((p) => p.cadence === 'weekly');
+  const fromCatalogue = pickedId ? ctx.catalogue?.find((e) => e.id === pickedId && e.kind === 'build') : undefined;
+  if (fromCatalogue) return describeCatalogueBuild(fromCatalogue, ctx.states.get(fromCatalogue.id));
   const picked = pickedId ? pool.find((p) => p.id === pickedId) : undefined;
   const chosen = picked ?? suggestWeeklyBuild(phase, ctx);
   return chosen ? describeProject(chosen, ctx.states.get(chosen.id)) : null;
@@ -252,21 +283,20 @@ export function planForDay({ date, settings, weeklyPickId, ctx }: TodayInput): T
   const day = weekday(date);
   const review = settings.core.review;
   const isReviewDay = day === review.day;
+  const resolved = resolveDay(date, settings);
 
-  const blocks: TodayBlock[] = settings.core.blocks.map((def) => {
-    const scheduledToday = def.days.includes(day);
-    if (!scheduledToday) {
-      return { id: def.id, def, kind: 'rest', targetMinutes: 0, emptyReason: 'Not scheduled today' };
-    }
-    if (isReviewDay && def.id === review.block) {
-      return { id: def.id, def, kind: 'review', targetMinutes: def.minutes };
+  const blocks: TodayBlock[] = resolved.blocks.map(({ id, def, minutes }) => {
+    // The Practice block carries the day's question set, not a plan item.
+    if (def.role === 'practice') return { id, def, kind: 'item', targetMinutes: minutes, item: practiceItem(settings, ctx.seed) };
+    if (isReviewDay && id === review.block) {
+      return { id, def, kind: 'review', targetMinutes: minutes };
     }
     if (!phase) {
-      return { id: def.id, def, kind: 'empty', targetMinutes: def.minutes, emptyReason: 'No phase covers this date' };
+      return { id, def, kind: 'empty', targetMinutes: minutes, emptyReason: 'No phase covers this date' };
     }
 
-    const next = nextInLane(phase.id, def.id, ctx);
-    const block: TodayBlock = { id: def.id, def, kind: next ? 'item' : 'empty', targetMinutes: def.minutes };
+    const next = nextInLane(phase.id, id, ctx);
+    const block: TodayBlock = { id, def, kind: next ? 'item' : 'empty', targetMinutes: minutes };
     if (next) {
       const item = describePlanItem(next.planItem, ctx);
       if (item) {
@@ -281,7 +311,7 @@ export function planForDay({ date, settings, weeklyPickId, ctx }: TodayInput): T
     }
 
     // The projects block also carries the week's mini-build.
-    if (def.id === 'D') {
+    if (id === 'D') {
       const weekly = weeklyBuildFor(phase, weeklyPickId, ctx);
       if (weekly) block.weeklyBuild = weekly;
       if (block.kind === 'empty' && weekly) block.kind = 'item';
@@ -289,21 +319,61 @@ export function planForDay({ date, settings, weeklyPickId, ctx }: TodayInput): T
     return block;
   });
 
+  // "Swap two blocks' items" for this date: each block keeps its time and takes the other's work.
+  for (const [a, b] of resolved.swaps) {
+    const x = blocks.find((blk) => blk.id === a);
+    const y = blocks.find((blk) => blk.id === b);
+    if (!x || !y || x.kind === 'review' || y.kind === 'review') continue;
+    const take = (blk: TodayBlock): Pick<TodayBlock, 'kind' | 'item' | 'weeklyBuild' | 'emptyReason'> => ({ kind: blk.kind, item: blk.item, weeklyBuild: blk.weeklyBuild, emptyReason: blk.emptyReason });
+    const fromX = take(x);
+    const fromY = take(y);
+    for (const [target, source] of [[x, fromY], [y, fromX]] as const) {
+      target.kind = source.kind;
+      if (source.item) target.item = source.item;
+      else delete target.item;
+      if (source.weeklyBuild) target.weeklyBuild = source.weeklyBuild;
+      else delete target.weeklyBuild;
+      if (source.emptyReason) target.emptyReason = source.emptyReason;
+      else delete target.emptyReason;
+      target.swappedWith = target === x ? b : a;
+    }
+  }
+
   return {
     date,
     phase,
     blocks,
-    targetMinutes: blocks.reduce((sum, b) => sum + b.targetMinutes, 0),
+    targetMinutes: resolved.planned,
     isReviewDay,
+    resolved,
   };
 }
 
-/** The daily target in minutes, for the week's-hours line and the forecast. */
-export function dailyTargetMinutes(settings: StoredSettings, date: string): number {
-  const day = weekday(date);
-  return settings.core.blocks.filter((b) => b.days.includes(day)).reduce((sum, b) => sum + b.minutes, 0);
+/** "Practice · 9 questions · linear algebra, calculus, physics": the Practice block's card. */
+export function practiceItem(settings: StoredSettings, seed: AppSeed): ScheduledItem {
+  const subjects = seed.practiceSubjects ?? [];
+  const count = settings.core.practice.perSubject * subjects.length;
+  return {
+    refId: 'practice',
+    kind: 'practice',
+    title: 'Practice',
+    track: 'math',
+    tracks: ['math', 'physics'],
+    url: null,
+    status: 'active',
+    estHours: 0,
+    unitsDone: 0,
+    unitCount: count,
+    note: count + ' questions · ' + subjects.map((s) => s.short.toLowerCase()).join(', '),
+  };
 }
 
-export function weeklyTargetMinutes(settings: StoredSettings): number {
-  return settings.core.blocks.reduce((sum, b) => sum + b.minutes * b.days.length, 0);
+/** The daily target in minutes: what the day's template, overrides and changes plan. */
+export function dailyTargetMinutes(settings: StoredSettings, date: string): number {
+  return plannedMinutes(date, settings);
+}
+
+/** The week's target: the planned minutes of the seven days of the week holding `date` (default: this week). */
+export function weeklyTargetMinutes(settings: StoredSettings, date: string = todayDate()): number {
+  return weekTarget(settings, startOfWeek(date, settings.core.weekStartsOn));
 }

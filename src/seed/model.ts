@@ -7,17 +7,19 @@
  * The schemas may add optional fields; they may never drop or retype a field below.
  */
 
+/** The brief's sixteen tracks; the flexibility brief adds tracks the user creates (`my-…`). */
 export type TrackId =
   | 'ai' | 'swe' | 'systems' | 'graphics' | 'simulation' | 'gamedev'
-  | 'languages' | 'math' | 'physics' | 'ee' | 'embedded' | 'controls' | 'mech' | 'robotics' | 'chem' | 'career';
+  | 'languages' | 'math' | 'physics' | 'ee' | 'embedded' | 'controls' | 'mech' | 'robotics' | 'chem' | 'career' | `my-${string}`;
 
-export type BlockId = 'A' | 'B' | 'C' | 'D' | 'E';
+/** The brief had 'A' | 'B' | 'C' | 'D' | 'E'. The flexibility brief made blocks open-ended: A-E stay the defaults. */
+export type BlockId = string;
 
 export interface Resource {
   id: string;                 // stable slug, e.g. "mit-18-06"
   title: string;
   provider: string;           // "MIT OCW", "Stanford Online", ...
-  type: 'course' | 'lectures' | 'book' | 'tutorial' | 'article' | 'paper' | 'repo' | 'cert';
+  type: 'course' | 'lectures' | 'book' | 'tutorial' | 'article' | 'paper' | 'repo' | 'cert' | 'problems' | 'tool';
   url: string | null;         // null if not verified
   urlVerified: boolean;
   searchHint?: string;        // exact query to find it when url is null

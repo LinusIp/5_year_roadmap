@@ -4,6 +4,8 @@
 import type { DayLog, StoredSettings, UserItemState } from '../db/types.ts';
 import type { AppSeed, BlockId } from '../seed/schema.ts';
 import { addDays, endOfMonth, startOfMonth, startOfWeek } from './dates.ts';
+import { plannedMinutes, plannedOver } from './day-plan.ts';
+import { minutesToCount } from './streaks.ts';
 
 export interface PeriodSummary {
   start: string;
@@ -41,20 +43,16 @@ export function summarise(
     if (log.date < start || log.date > end) continue;
     let dayMinutes = 0;
     for (const entry of log.entries) {
-      minutesByBlock[entry.block] += entry.minutes;
+      minutesByBlock[entry.block] = (minutesByBlock[entry.block] ?? 0) + entry.minutes;
       dayMinutes += entry.minutes;
     }
     totalMinutes += dayMinutes;
-    if (dayMinutes >= settings.core.streak.minMinutes) daysCounted++;
+    if (dayMinutes >= minutesToCount(plannedMinutes(log.date, settings), settings.core.streak)) daysCounted++;
     if (log.energy) energies.push(log.energy);
   }
 
   const days = Math.round((new Date(end + 'T00:00:00').getTime() - new Date(start + 'T00:00:00').getTime()) / 86_400_000) + 1;
-  let targetMinutes = 0;
-  for (let d = start; d <= end; d = addDays(d, 1)) {
-    const weekday = new Date(d + 'T00:00:00').getDay();
-    for (const block of settings.core.blocks) if (block.days.includes(weekday)) targetMinutes += block.minutes;
-  }
+  const targetMinutes = plannedOver(settings, start, end);
 
   const itemsFinished: string[] = [];
   const shipped: PeriodSummary['shipped'] = { weekly: [], monthly: [], research: [], capstone: [] };

@@ -4,7 +4,11 @@ import { db } from '../db/db.ts';
 import type { Review } from '../db/types.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import type { Atlas } from '../hooks/useAtlas.ts';
-import { formatRange, monthName, today as todayDate } from '../lib/dates.ts';
+import { addDays, formatRange, monthName, today as todayDate } from '../lib/dates.ts';
+import { addPlanEdit } from '../db/edits.ts';
+import { useMeta, writeMeta } from '../db/state.ts';
+import { paceSuggestion } from '../lib/pace.ts';
+import { shiftPhaseEnd } from '../lib/plan-edit.ts';
 import { buildPlanItemView, laneProgress, phaseProgress } from '../lib/progress.ts';
 import { replan } from '../lib/replan.ts';
 import { monthRange, monthsSoFar, quarterOf, quarterRange, quartersSoFar, summarise, weekRange, weeksSoFar, WEEKLY_PROMPTS } from '../lib/reviews.ts';
@@ -38,7 +42,7 @@ function Numbers({ summary, atlas }: { summary: PeriodSummary; atlas: Atlas }) {
         {span(summary.totalMinutes)} of {span(summary.targetMinutes)} ({percent}%) · {summary.daysCounted} of {plural(summary.days, 'day')} counted
         {summary.averageEnergy !== null ? ' · energy ' + summary.averageEnergy.toFixed(1) + ' of 5' : ''}
       </p>
-      <p className="mt-1 text-meta text-ink2">{atlas.settings.core.blocks.map((b) => blockShort(b.name) + ' ' + span(summary.minutesByBlock[b.id])).join(' · ')}</p>
+      <p className="mt-1 text-meta text-ink2">{atlas.settings.core.blocks.map((b) => blockShort(b.name) + ' ' + span(summary.minutesByBlock[b.id] ?? 0)).join(' · ')}</p>
       {summary.itemsFinished.length > 0 && (
         <RowList label="Finished" className="mt-4">
           {summary.itemsFinished.map((id) => (
@@ -92,6 +96,34 @@ function PromptFields({ id, base, review, period }: { id: string; base: Omit<Rev
   );
 }
 
+/**
+ * The Sunday review's one pace suggestion, at most: "Core is 9 days behind — stretch Foundations II by a week?"
+ * Apply stretches the phase (later phases move with it, and it can be undone); Not now hides it for the week.
+ */
+function PaceSuggestion({ atlas, weekStart }: { atlas: Atlas; weekStart: string }) {
+  const key = 'pace-suggestion-dismissed:' + weekStart;
+  const dismissed = useMeta<boolean>(key, false);
+  const now = todayDate();
+  const phase = activePhase(now, atlas.seed.phases);
+  const suggestion = phase ? paceSuggestion(atlas.settings, atlas.logs, phase, now) : null;
+  if (!phase || !suggestion || dismissed !== false) return null;
+  const name = blockShort(atlas.settings.core.blocks.find((b) => b.id === suggestion.block)?.name ?? suggestion.block);
+  const stretch = shiftPhaseEnd(atlas.seed.phases, phase.id, addDays(phase.end, suggestion.weeks * 7));
+  return (
+    <section aria-label="Pace" className="rounded-card bg-surface p-4">
+      <p className="text-body">
+        {name} is {plural(suggestion.days, 'day')} behind. Stretch {phase.title} by {plural(suggestion.weeks, 'week')}?
+      </p>
+      <div className="mt-3 flex gap-2">
+        <Button onClick={() => void addPlanEdit(stretch.patches, 'Stretched ' + phase.title + ' by ' + plural(suggestion.weeks, 'week'))}>Apply</Button>
+        <Button variant="icon" onClick={() => void writeMeta(key, true)}>
+          Not now
+        </Button>
+      </div>
+    </section>
+  );
+}
+
 function WeekSheet({ atlas, weekStart, review, onClose }: { atlas: Atlas; weekStart: string | null; review: Review | undefined; onClose: () => void }) {
   const range = weekStart ? weekRange(weekStart, atlas.settings.core.weekStartsOn) : null;
   const summary = range ? summarise(range.start, range.end, atlas.logs, atlas.seed, atlas.states, atlas.settings) : null;
@@ -123,6 +155,7 @@ function WeekSheet({ atlas, weekStart, review, onClose }: { atlas: Atlas; weekSt
       {range && summary && (
         <div key={id} className="space-y-5">
           <Numbers summary={summary} atlas={atlas} />
+          {range.start <= todayDate() && todayDate() <= range.end && <PaceSuggestion atlas={atlas} weekStart={range.start} />}
           <PromptFields id={id} base={base} review={review} period="week" />
           <RowList label="Next">
             <Row title="Next week's build" meta="Pick it from the deck" to="/plan/pick?week=next&from=reviews" />

@@ -1,0 +1,488 @@
+{
+  "name": "atlas",
+  "version": 20,
+  "stores": {
+    "certStates": {
+      "keyPath": "refId",
+      "autoIncrement": false,
+      "indexes": [],
+      "rows": []
+    },
+    "customEntities": {
+      "keyPath": [
+        "kind",
+        "id"
+      ],
+      "autoIncrement": false,
+      "indexes": [
+        {
+          "name": "kind",
+          "keyPath": "kind",
+          "unique": false,
+          "multiEntry": false
+        }
+      ],
+      "rows": [
+        {
+          "kind": "resource",
+          "id": "my-probability-notes",
+          "data": {
+            "id": "my-probability-notes",
+            "title": "My probability notes",
+            "provider": "Me",
+            "type": "book",
+            "url": null,
+            "urlVerified": false,
+            "searchHint": "my notes",
+            "tracks": [
+              "math"
+            ],
+            "level": "intro",
+            "cost": "free",
+            "estHours": 10,
+            "prerequisites": [],
+            "source": "user"
+          },
+          "createdAt": "2026-10-16",
+          "updatedAt": "2026-10-16T04:24:38.433Z",
+          "deviceId": "5kmn4cd1hgnm"
+        }
+      ]
+    },
+    "dayLogs": {
+      "keyPath": "date",
+      "autoIncrement": false,
+      "indexes": [],
+      "rows": [
+        {
+          "date": "2026-09-21",
+          "entries": [
+            {
+              "block": "A",
+              "track": "graphics",
+              "minutes": 120,
+              "id": "zeri0l7imla2",
+              "updatedAt": "2026-10-16T04:24:38.425Z",
+              "deviceId": "5kmn4cd1hgnm"
+            },
+            {
+              "block": "B",
+              "track": "languages",
+              "minutes": 60,
+              "refId": "30-days-of-python",
+              "id": "38ae0sa3lywz",
+              "updatedAt": "2026-10-16T04:24:38.425Z",
+              "deviceId": "5kmn4cd1hgnm"
+            }
+          ],
+          "doneBlocks": [
+            "A"
+          ],
+          "fieldsAt": {
+            "doneBlocks": "2026-10-16T04:24:38.425Z"
+          },
+          "updatedAt": "2026-10-16T04:24:38.426Z",
+          "deviceId": "5kmn4cd1hgnm"
+        },
+        {
+          "date": "2026-09-22",
+          "entries": [
+            {
+              "block": "C",
+              "track": "ai",
+              "minutes": 90,
+              "refId": "ml-zoomcamp",
+              "id": "ljck524x682o",
+              "updatedAt": "2026-10-16T04:24:38.427Z",
+              "deviceId": "5kmn4cd1hgnm"
+            }
+          ],
+          "reflection": "Good focus.",
+          "energy": 4,
+          "fieldsAt": {
+            "reflection": "2026-10-16T04:24:38.427Z",
+            "energy": "2026-10-16T04:24:38.427Z"
+          },
+          "updatedAt": "2026-10-16T04:24:38.427Z",
+          "deviceId": "5kmn4cd1hgnm"
+        },
+        {
+          "date": "2026-09-23",
+          "entries": [
+            {
+              "block": "E",
+              "track": "math",
+              "minutes": 45,
+              "refId": "mit-18-06",
+              "id": "8u5if6yn5oji",
+              "updatedAt": "2026-10-16T04:24:38.428Z",
+              "deviceId": "5kmn4cd1hgnm"
+            }
+          ],
+          "updatedAt": "2026-10-16T04:24:38.429Z",
+          "deviceId": "5kmn4cd1hgnm",
+          "removed": [
+            {
+              "id": "ehmt3fpyr29m",
+              "at": "2026-10-16T04:24:38.429Z",
+              "deviceId": "5kmn4cd1hgnm"
+            }
+          ]
+        }
+      ]
+    },
+    "itemStates": {
+      "keyPath": "refId",
+      "autoIncrement": false,
+      "indexes": [
+        {
+          "name": "status",
+          "keyPath": "status",
+          "unique": false,
+          "multiEntry": false
+        }
+      ],
+      "rows": [
+        {
+          "refId": "mit-18-06",
+          "status": "active",
+          "unitsDone": [
+            "lecture-1",
+            "lecture-2"
+          ],
+          "startedAt": "2026-10-16",
+          "updatedAt": "2026-10-16T04:24:38.421Z",
+          "deviceId": "5kmn4cd1hgnm",
+          "notes": "## Lecture 2\n\nElimination with matrices."
+        },
+        {
+          "refId": "w-c-ring-buffer",
+          "status": "done",
+          "unitsDone": [],
+          "repoUrl": "https://github.com/octo-learner/ring-buffer",
+          "doneAt": "2026-09-26",
+          "updatedAt": "2026-10-16T04:24:38.422Z",
+          "deviceId": "5kmn4cd1hgnm"
+        }
+      ]
+    },
+    "meta": {
+      "keyPath": "key",
+      "autoIncrement": false,
+      "indexes": [],
+      "rows": []
+    },
+    "milestoneStates": {
+      "keyPath": "refId",
+      "autoIncrement": false,
+      "indexes": [],
+      "rows": []
+    },
+    "outbox": {
+      "keyPath": "path",
+      "autoIncrement": false,
+      "indexes": [],
+      "rows": [
+        {
+          "path": "log/2026/09/2026-09-21.json",
+          "queuedAt": 1792124678426,
+          "seq": 1
+        },
+        {
+          "path": "log/2026/09/2026-09-22.json",
+          "queuedAt": 1792124678427,
+          "seq": 1
+        },
+        {
+          "path": "log/2026/09/2026-09-23.json",
+          "queuedAt": 1792124678429,
+          "seq": 2
+        },
+        {
+          "path": "reviews/2026-W39.md",
+          "queuedAt": 1792124678435,
+          "seq": 1,
+          "summary": "write a review"
+        },
+        {
+          "path": "state/items.json",
+          "queuedAt": 1792124678416,
+          "seq": 6,
+          "summary": "update the reading list"
+        },
+        {
+          "path": "state/plan.json",
+          "queuedAt": 1792124678431,
+          "seq": 4,
+          "summary": "pick the week's build"
+        },
+        {
+          "path": "state/settings.json",
+          "queuedAt": 1792124678413,
+          "seq": 1,
+          "summary": "update settings"
+        }
+      ]
+    },
+    "overrides": {
+      "keyPath": [
+        "kind",
+        "id"
+      ],
+      "autoIncrement": false,
+      "indexes": [
+        {
+          "name": "kind",
+          "keyPath": "kind",
+          "unique": false,
+          "multiEntry": false
+        }
+      ],
+      "rows": [
+        {
+          "kind": "planItem",
+          "id": "plan.30-days-of-python",
+          "patch": {
+            "order": 99
+          },
+          "updatedAt": "2026-10-16T04:24:38.431Z",
+          "deviceId": "5kmn4cd1hgnm"
+        },
+        {
+          "kind": "planItem",
+          "id": "plan.automate-the-boring-stuff",
+          "patch": {},
+          "removed": true,
+          "updatedAt": "2026-10-16T04:24:38.432Z",
+          "deviceId": "5kmn4cd1hgnm"
+        }
+      ]
+    },
+    "paperStates": {
+      "keyPath": "refId",
+      "autoIncrement": false,
+      "indexes": [
+        {
+          "name": "status",
+          "keyPath": "status",
+          "unique": false,
+          "multiEntry": false
+        }
+      ],
+      "rows": [
+        {
+          "refId": "paper-alexnet",
+          "status": "reading",
+          "startedAt": "2026-10-16",
+          "updatedAt": "2026-10-16T04:24:38.424Z",
+          "deviceId": "5kmn4cd1hgnm"
+        }
+      ]
+    },
+    "replans": {
+      "keyPath": "id",
+      "autoIncrement": false,
+      "indexes": [],
+      "rows": []
+    },
+    "reviews": {
+      "keyPath": "id",
+      "autoIncrement": false,
+      "indexes": [
+        {
+          "name": "kind",
+          "keyPath": "kind",
+          "unique": false,
+          "multiEntry": false
+        },
+        {
+          "name": "periodStart",
+          "keyPath": "periodStart",
+          "unique": false,
+          "multiEntry": false
+        }
+      ],
+      "rows": [
+        {
+          "id": "week:2026-09-21",
+          "kind": "week",
+          "periodStart": "2026-09-21",
+          "completedAt": "2026-09-27",
+          "worked": "Mornings on graphics.",
+          "didnt": "Evenings.",
+          "changes": "Earlier start.",
+          "snapshot": {
+            "totalMinutes": 345,
+            "targetMinutes": 3360,
+            "minutesByBlock": {
+              "A": 120,
+              "B": 60,
+              "C": 90,
+              "D": 30,
+              "E": 45
+            },
+            "itemsFinished": [
+              "w-c-ring-buffer"
+            ],
+            "daysCounted": 3
+          },
+          "updatedAt": "2026-10-16T04:24:38.434Z",
+          "deviceId": "5kmn4cd1hgnm"
+        }
+      ]
+    },
+    "secrets": {
+      "keyPath": "id",
+      "autoIncrement": false,
+      "indexes": [],
+      "rows": []
+    },
+    "settings": {
+      "keyPath": "id",
+      "autoIncrement": false,
+      "indexes": [],
+      "rows": [
+        {
+          "id": "app",
+          "core": {
+            "blocks": [
+              {
+                "id": "A",
+                "name": "Graphics / rendering / simulation",
+                "minutes": 120,
+                "days": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6
+                ],
+                "summary": "Two hours, every day. Small games are a monthly-project vehicle inside it, not the subject.",
+                "formerNames": [
+                  "Gamedev / Graphics / Simulation"
+                ]
+              },
+              {
+                "id": "B",
+                "name": "Languages",
+                "minutes": 60,
+                "days": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6
+                ],
+                "summary": "One hour, every day."
+              },
+              {
+                "id": "C",
+                "name": "Core track",
+                "minutes": 90,
+                "days": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6
+                ],
+                "summary": "ML Zoomcamp for the first four months, then AI inference and AI engineering (priority 1), alternating by phase with software architecture (priority 2)."
+              },
+              {
+                "id": "D",
+                "name": "Projects / hands-on",
+                "minutes": 120,
+                "days": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6
+                ],
+                "summary": "The current weekly mini-build and monthly project. In stage 2 this is lab, PCB, CAD and build time."
+              },
+              {
+                "id": "E",
+                "name": "Math & physics",
+                "minutes": 60,
+                "days": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6
+                ],
+                "summary": "The prerequisites of stage 2, running from day one."
+              }
+            ],
+            "review": {
+              "day": 0,
+              "block": "D",
+              "title": "Weekly review + paper reading"
+            },
+            "weekStartsOn": 1,
+            "heatmapThresholds": [
+              1,
+              120,
+              300,
+              420
+            ],
+            "streak": {
+              "minMinutes": 45,
+              "freezesPerMonth": 2,
+              "autoFreeze": true
+            },
+            "backupReminderDays": 30,
+            "paperCadence": {
+              "fromYear": 1,
+              "fromPhase": "y1-p1",
+              "perWeek": 1
+            },
+            "forecast": {
+              "paceWindowDays": 28
+            },
+            "weeklyBuildHours": 4
+          },
+          "theme": "dark",
+          "github": {
+            "username": "octo-learner",
+            "showCalendar": false
+          },
+          "backup": {},
+          "updatedAt": "2026-10-16T04:24:38.410Z",
+          "deviceId": "5kmn4cd1hgnm"
+        }
+      ]
+    },
+    "sync": {
+      "keyPath": "id",
+      "autoIncrement": false,
+      "indexes": [],
+      "rows": []
+    },
+    "weekPicks": {
+      "keyPath": "weekStart",
+      "autoIncrement": false,
+      "indexes": [],
+      "rows": [
+        {
+          "weekStart": "2026-09-21",
+          "projectId": "w-c-ring-buffer",
+          "pickedAt": "2026-10-16",
+          "updatedAt": "2026-10-16T04:24:38.434Z",
+          "deviceId": "5kmn4cd1hgnm"
+        }
+      ]
+    }
+  }
+}

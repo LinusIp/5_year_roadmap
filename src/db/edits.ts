@@ -7,8 +7,10 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db.ts';
 import type { AtlasDB } from './db.ts';
-import type { CustomEntity, EntityKind, Override } from './types.ts';
+import type { CustomEntity, EntityKind, NewPlanPatch, Override, PlanPatch } from './types.ts';
 import { today } from '../lib/dates.ts';
+import { stampPatches, undoableGroups } from '../lib/plan.ts';
+import { announceEdit } from '../lib/edit-events.ts';
 
 export function useOverrides(): Override[] | undefined {
   return useLiveQuery(() => db.overrides.toArray(), []);
@@ -16,6 +18,43 @@ export function useOverrides(): Override[] | undefined {
 
 export function useCustomEntities(): CustomEntity[] | undefined {
   return useLiveQuery(() => db.customEntities.toArray(), []);
+}
+
+export function usePlanPatches(): PlanPatch[] | undefined {
+  return useLiveQuery(() => db.planPatches.toArray(), []);
+}
+
+/* ------------------------------------------------------------------ plan edits (flexibility brief) */
+
+/**
+ * Records one plan edit, made of one or more patches, as one undoable group, and announces it so the toast can
+ * offer Undo. Returns the group id.
+ */
+export async function addPlanEdit(patches: readonly NewPlanPatch[], label: string, database: AtlasDB = db): Promise<string | null> {
+  if (patches.length === 0) return null;
+  const stamped = stampPatches(patches, label);
+  await database.planPatches.bulkPut(stamped);
+  const group = stamped[0]!.group;
+  if (database === db) announceEdit({ group, label });
+  return group;
+}
+
+/** Takes one edit group back. Only the last 50 groups can be undone. */
+export async function undoPlanEdit(group: string, database: AtlasDB = db): Promise<boolean> {
+  return database.transaction('rw', database.planPatches, async () => {
+    const all = await database.planPatches.toArray();
+    if (!undoableGroups(all).some((g) => g.group === group)) return false;
+    await database.planPatches.bulkDelete(all.filter((p) => p.group === group).map((p) => p.id));
+    return true;
+  });
+}
+
+/** Undoes the newest edit group, if any. Returns its label. */
+export async function undoLastPlanEdit(database: AtlasDB = db): Promise<string | null> {
+  const last = undoableGroups(await database.planPatches.toArray(), 1)[0];
+  if (!last) return null;
+  await undoPlanEdit(last.group, database);
+  return last.label;
 }
 
 /** Merges fields into an item's patch, leaving the rest of the patch alone. */
@@ -44,22 +83,13 @@ export async function patchMany(
   });
 }
 
-/** Takes a plan item off the roadmap. The resource or project itself stays in the library. */
-export async function removePlanItem(id: string, database: AtlasDB = db): Promise<void> {
-  await database.transaction('rw', database.overrides, async () => {
-    const current = await database.overrides.get(['planItem', id]);
-    await database.overrides.put({ kind: 'planItem', id, patch: current?.patch ?? {}, removed: true });
-  });
+/** Takes a plan item off the roadmap, into the lane's "Dropped" group. The resource or project stays in the library. */
+export async function removePlanItem(id: string, label = 'Took an item off the plan', database: AtlasDB = db): Promise<void> {
+  await addPlanEdit([{ op: 'drop', planItemId: id }], label, database);
 }
 
-export async function restorePlanItem(id: string, database: AtlasDB = db): Promise<void> {
-  await database.transaction('rw', database.overrides, async () => {
-    const current = await database.overrides.get(['planItem', id]);
-    if (!current) return;
-    const { removed, ...rest } = current;
-    void removed;
-    await database.overrides.put(rest);
-  });
+export async function restorePlanItem(id: string, label = 'Restored an item', database: AtlasDB = db): Promise<void> {
+  await addPlanEdit([{ op: 'restore', planItemId: id }], label, database);
 }
 
 /** Undoes every edit to one item, putting it back to what /data says. */

@@ -29,6 +29,7 @@
   level: intro
   cost: free
   estHours: 8
+  practiceTopics: [linear-algebra/vectors-and-linear-combinations, linear-algebra/matrices-and-elimination, linear-algebra/vector-spaces-and-subspaces, linear-algebra/independence-basis-dimension, linear-algebra/orthogonality-and-projections, linear-algebra/determinants, linear-algebra/eigenvalues-and-eigenvectors, linear-algebra/linear-transformations-and-change-of-basis]
   subject: math-physics
   summary: "Geometric intuition for 18.06. Watch alongside the first ten lectures."
 
@@ -44,6 +45,7 @@
   level: intro
   cost: free
   estHours: 7
+  practiceTopics: [calculus/limits-and-continuity, calculus/derivatives-and-rules, calculus/chain-rule-and-implicit-differentiation, calculus/applications-of-derivatives, calculus/integrals-and-the-fundamental-theorem, calculus/substitution-and-integration-by-parts, calculus/applications-of-integrals]
   subject: math-physics
   summary: "Geometric intuition for 18.01."
 
@@ -59,6 +61,7 @@
   level: intro
   cost: free
   estHours: 120
+  practiceTopics: [calculus/limits-and-continuity, calculus/derivatives-and-rules, calculus/chain-rule-and-implicit-differentiation, calculus/applications-of-derivatives, calculus/integrals-and-the-fundamental-theorem, calculus/substitution-and-integration-by-parts, calculus/applications-of-integrals, calculus/exponentials-logarithms-lhopital, calculus/sequences-series-taylor]
   subject: math-physics
 
 - id: mit-18-02
@@ -73,6 +76,7 @@
   level: intro
   cost: free
   estHours: 120
+  practiceTopics: [calculus/vectors-dot-and-cross-product, calculus/partial-derivatives-and-gradients, calculus/directional-derivatives-and-tangent-planes, calculus/multivariable-optimisation-lagrange, calculus/double-and-triple-integrals, calculus/line-integrals-and-greens-theorem, calculus/flux-divergence-curl]
   prerequisites: [mit-18-01]
   subject: math-physics
 
@@ -107,6 +111,7 @@
   prerequisites: [mit-18-02]
   subject: math-physics
   summary: "The probability course of the plan. Harvard Stat 110 is the alternative: take one."
+  alternatives: [harvard-stat-110]
 
 - id: harvard-stat-110
   title: "Harvard Stat 110: Probability (Joe Blitzstein)"
@@ -122,6 +127,7 @@
   estHours: 120
   subject: math-physics
   summary: "Alternative to MIT 6.041."
+  alternatives: [mit-6-041]
 
 - id: mit-18-065
   title: "MIT 18.065 Matrix Methods in Data Analysis, Signal Processing, and Machine Learning (Spring 2018)"
@@ -150,6 +156,7 @@
   level: intermediate
   cost: free
   estHours: 100
+  practiceTopics: [linear-algebra/eigenvalues-and-eigenvectors, linear-algebra/svd, calculus/partial-derivatives-and-gradients]
   subject: math-physics
 
 - id: mit-6-042j

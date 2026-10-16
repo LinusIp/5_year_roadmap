@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { refreshCalendar, useCachedCalendar, useGithubConnected } from '../../db/github.ts';
 import type { RefreshOutcome } from '../../db/github.ts';
-import { dayName, formatShort, toIsoDate } from '../../lib/dates.ts';
+import { dayName, formatClock, formatShort, toIsoDate } from '../../lib/dates.ts';
 import { buildContributionGrid, calendarQueryRange, compareDays } from '../../lib/github.ts';
 import type { ContributionCell } from '../../lib/github.ts';
 import { Link } from '../../router/router.tsx';
@@ -14,16 +14,16 @@ function cellLabel(cell: ContributionCell): string {
   return head + ': ' + (cell.count === 0 ? 'no contributions' : plural(cell.count, 'contribution'));
 }
 
-function timeOf(epochMs: number): string {
+function timeOf(epochMs: number, clock: '24' | '12'): string {
   const d = new Date(epochMs);
-  return formatShort(toIsoDate(d), new Date().getFullYear()) + ', ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  return formatShort(toIsoDate(d), new Date().getFullYear()) + ', ' + formatClock(d, clock);
 }
 
 /**
  * The user's GitHub contribution calendar over exactly the year of the heatmap above it, column for column.
  * Drawn from the cache at once; refreshed from GitHub when the copy is over an hour old, or on request.
  */
-export function GithubCalendar({ from, to, year, weekStartsOn, username, atlasDates }: { from: string; to: string; year: string; weekStartsOn: 0 | 1; username: string; atlasDates: string[] }) {
+export function GithubCalendar({ from, to, year, weekStartsOn, username, atlasDates, clock = '24' }: { from: string; to: string; year: string; weekStartsOn: 0 | 1; username: string; atlasDates: string[]; clock?: '24' | '12' }) {
   const connected = useGithubConnected();
   const cached = useCachedCalendar(from, to);
   const [outcome, setOutcome] = useState<RefreshOutcome | 'loading'>();
@@ -53,9 +53,9 @@ export function GithubCalendar({ from, to, year, weekStartsOn, username, atlasDa
         ? 'Checking GitHub for anything new…'
         : 'Fetching your calendar from GitHub…'
       : outcome && outcome.status === 'failed'
-        ? outcome.message + (cached ? ' Showing the copy from ' + timeOf(cached.fetchedAt) + '.' : '')
+        ? outcome.message + (cached ? ' Showing the copy from ' + timeOf(cached.fetchedAt, clock) + '.' : '')
         : cached
-          ? 'Updated ' + timeOf(cached.fetchedAt) + '.'
+          ? 'Updated ' + timeOf(cached.fetchedAt, clock) + '.'
           : '';
 
   return (

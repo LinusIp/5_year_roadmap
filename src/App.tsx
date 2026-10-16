@@ -6,6 +6,7 @@ import { matchPath } from './router/paths.ts';
 import { navigate, useLocation } from './router/router.tsx';
 import { KeyboardShortcuts } from './screens/Shortcuts.tsx';
 import { SyncNotice } from './screens/parts/SyncNotice.tsx';
+import { UndoToast } from './ui/UndoToast.tsx';
 import { Today } from './screens/Today.tsx';
 import { seed } from './seed/index.ts';
 
@@ -23,6 +24,8 @@ const Settings = lazy(() => import('./screens/Settings.tsx').then((m) => ({ defa
 const NotFound = lazy(() => import('./screens/NotFound.tsx').then((m) => ({ default: m.NotFound })));
 const PhaseMap = lazy(() => import('./screens/PhaseMap.tsx').then((m) => ({ default: m.PhaseMap })));
 const PickProject = lazy(() => import('./screens/PickProject.tsx').then((m) => ({ default: m.PickProject })));
+const Practice = lazy(() => import('./screens/Practice.tsx').then((m) => ({ default: m.Practice })));
+const Challenge = lazy(() => import('./screens/Challenge.tsx').then((m) => ({ default: m.Challenge })));
 const DevComponents = lazy(() => import('./screens/DevComponents.tsx').then((m) => ({ default: m.DevComponents })));
 
 interface RouteDef {
@@ -41,6 +44,8 @@ const ROUTES: RouteDef[] = [
   { pattern: '/reviews', render: () => <Reviews /> },
   { pattern: '/stats', render: () => <Stats /> },
   { pattern: '/settings', render: () => <Settings /> },
+  { pattern: '/practice', render: () => <Practice /> },
+  { pattern: '/challenge/:id', render: (p) => <Challenge id={p.id!} /> },
   { pattern: '/dev/components', render: () => <DevComponents /> },
 ];
 
@@ -69,6 +74,11 @@ export function App() {
   useEffect(() => {
     if (theme) applyTheme(theme);
   }, [theme]);
+  const density = settings?.layout.general.density;
+  useEffect(() => {
+    if (density === 'compact') document.documentElement.dataset.density = 'compact';
+    else delete document.documentElement.dataset.density;
+  }, [density]);
   useEffect(() => watchSystemTheme(() => theme ?? 'light'), [theme]);
 
   // On navigation, move focus to the new screen so keyboard and screen-reader users land on it. An item's
@@ -105,6 +115,7 @@ export function App() {
       <Suspense fallback={<Loading />}>{page}</Suspense>
       <KeyboardShortcuts />
       <SyncNotice />
+      <UndoToast />
     </>
   );
 }

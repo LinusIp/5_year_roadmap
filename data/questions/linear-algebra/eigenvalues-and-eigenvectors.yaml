@@ -1,0 +1,336 @@
+subject: linear-algebra
+topic: eigenvalues-and-eigenvectors
+questions:
+  - id: la-eig-001
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Let $A = {{A}}$. What is the **larger** eigenvalue of $A$?
+    params:
+      p: { int: [-4, 6] }
+      q: { int: [-4, 6] }
+      s: { int: [1, 3] }
+    let:
+      A: "[[p, s], [0, q]] * 1"
+      big: "max(p, q)"
+    require: ["p != q"]
+    answer: big
+    hints:
+      - "The matrix is upper triangular."
+      - "For a triangular matrix, $\\det(A - \\lambda I)$ is the product of the diagonal entries of $A - \\lambda I$."
+    solution: |
+      $A$ is upper triangular, so $\det(A - \lambda I) = ({{p}} - \lambda)({{q}} - \lambda)$.
+      The eigenvalues are the diagonal entries, $\lambda = {{p}}$ and $\lambda = {{q}}$, and the larger is ${{big}}$.
+    verify: "max(Matrix([[p, s], [0, q]]).eigenvals().keys())"
+    covers: [mit-18-06/lecture-21]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+  - id: la-eig-002
+    difficulty: 3
+    type: vector
+    prompt: |
+      Let $A = {{A}}$. One eigenvalue is $\lambda = {{l1}}$. Give an eigenvector for it, as a list such as `1, 2`.
+    params:
+      l1: { int: [-3, 5] }
+      l2: { int: [-3, 5] }
+      u: { int: [1, 3] }
+    let:
+      A: "[[l1, u], [0, l2]]"
+    require: ["l1 != l2"]
+    answer: "[1, 0]"
+    upToScale: true
+    hints:
+      - "Solve $(A - {{l1}} I)\\mathbf{x} = \\mathbf{0}$."
+      - "The first row of $A - {{l1}}I$ is $(0, {{u}})$, so $x_2 = 0$."
+    solution: |
+      $A - {{l1}}I = {{[[0, u], [0, l2 - l1]]}}$. Its rows force $x_2 = 0$ and leave $x_1$ free,
+      so every eigenvector is a non-zero multiple of ${{[1, 0]}}$.
+    verify: "list(Matrix([[l1, u], [0, l2]]).eigenvects()[[ev[0] for ev in Matrix([[l1, u], [0, l2]]).eigenvects()].index(l1)][2][0])"
+    covers: [mit-18-06/lecture-21]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+  - id: la-eig-003
+    difficulty: 1
+    type: mc
+    prompt: "If $A\\mathbf{x} = \\lambda \\mathbf{x}$ for a non-zero $\\mathbf{x}$, then $\\lambda$ is:"
+    options:
+      - "an eigenvalue of $A$"
+      - "the determinant of $A$"
+      - "a pivot of $A$"
+      - "the trace of $A$"
+    answer: 0
+    hints: ["Read the defining equation of an eigenvector."]
+    solution: "That is the definition: $\\mathbf{x}$ is an eigenvector and $\\lambda$ its eigenvalue."
+    verify: "0"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+  - id: la-eig-004
+    difficulty: 4
+    type: proof
+    prompt: "Show that if $\\lambda$ is an eigenvalue of an invertible $A$, then $1/\\lambda$ is an eigenvalue of $A^{-1}$."
+    hints: ["Why can $\\lambda$ not be 0?", "Multiply $A\\mathbf{x} = \\lambda\\mathbf{x}$ by $A^{-1}$."]
+    solution: |
+      If $\lambda = 0$ then $A\mathbf{x} = \mathbf{0}$ for a non-zero $\mathbf{x}$, so $A$ is singular; hence $\lambda \ne 0$.
+      Multiplying $A\mathbf{x} = \lambda\mathbf{x}$ by $A^{-1}$ gives $\mathbf{x} = \lambda A^{-1}\mathbf{x}$, so
+      $A^{-1}\mathbf{x} = \tfrac{1}{\lambda}\mathbf{x}$: the same $\mathbf{x}$ is an eigenvector of $A^{-1}$ with eigenvalue $1/\lambda$.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+  - id: la-eig-005
+    difficulty: 1
+    type: numeric
+    prompt: |
+      What is the **sum** of the three eigenvalues of $A = {{A}}$ (counted with multiplicity)?
+    params:
+      a11: { int: [-5, 5] }
+      a12: { int: [-5, 5] }
+      a13: { int: [-5, 5] }
+      a21: { int: [-5, 5] }
+      a22: { int: [-5, 5] }
+      a23: { int: [-5, 5] }
+      a31: { int: [-5, 5] }
+      a32: { int: [-5, 5] }
+      a33: { int: [-5, 5] }
+    let:
+      A: "[[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]]"
+    answer: "a11 + a22 + a33"
+    hints:
+      - 'There is no need to find the eigenvalues themselves.'
+      - 'The sum of the eigenvalues equals the trace: the sum of the diagonal entries.'
+    solution: |
+      The eigenvalues are the roots of $\det(A - \lambda I)$, a cubic whose $\lambda^2$ coefficient is the trace, so
+      $$\lambda_1 + \lambda_2 + \lambda_3 = \operatorname{tr} A = {{a11}} {{signed: a22}} {{signed: a33}} = {{a11 + a22 + a33}}.$$
+      This holds even when some eigenvalues are complex (they then come in conjugate pairs and their imaginary parts cancel).
+    verify: "float(np.real(np.sum(np.linalg.eigvals(np.array([[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]], dtype=float)))))"
+    covers: [mit-18-06/lecture-21]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+  - id: la-eig-006
+    difficulty: 2
+    type: expression
+    prompt: |
+      Let $A = {{A}}$. Write the characteristic polynomial $p(t) = \det(A - tI)$ as a polynomial in $t$, for example `t^2 - 3t + 2`.
+    params:
+      a: { int: [-5, 5] }
+      b: { int: [-5, 5] }
+      c: { int: [-5, 5] }
+      d: { int: [-5, 5] }
+    let:
+      A: "[[a, b], [c, d]]"
+      tr: "a + d"
+      dt: "a*d - b*c"
+    answer: "t^2 - tr*t + dt"
+    vars: [t]
+    hints:
+      - '$A - tI = \begin{bmatrix} {{a}} - t & {{b}} \\ {{c}} & {{d}} - t \end{bmatrix}$.'
+      - 'For any $2 \times 2$ matrix, $\det(A - tI) = t^2 - (\operatorname{tr} A)\,t + \det A$.'
+    solution: |
+      $$\det(A - tI) = ({{a}} - t)({{d}} - t) - ({{b}})({{c}}) = t^2 - ({{tr}})t + ({{a*d}} - ({{b*c}})) = t^2 {{signed: -tr}}t {{signed: dt}}.$$
+      The coefficients are the trace ${{tr}}$ (with a minus sign) and the determinant ${{dt}}$: in general $p(t) = t^2 - (\operatorname{tr}A)\,t + \det A$.
+    verify: "(Matrix([[a, b], [c, d]]) - t*eye(2)).det()"
+    covers: [mit-18-06/lecture-21]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+  - id: la-eig-007
+    difficulty: 2
+    type: vector
+    prompt: |
+      $A = {{A}}$ has eigenvalues ${{l1}}$ and ${{l2}}$. Find an eigenvector for $\lambda = {{l1}}$ (any non-zero multiple is accepted), as a list such as `1, 2`.
+    params:
+      l1: { int: [-4, 5] }
+      l2: { int: [-4, 5] }
+      m: { int: [-2, 2], not: [0] }
+      n: { int: [-2, 2], not: [0] }
+    let:
+      S: "[[1, m], [n, 1 + m*n]]"
+      Si: "[[1 + m*n, -m], [-n, 1]]"
+      A: "S * diag([l1, l2]) * Si"
+      B: "A - l1*identity(2)"
+    require: ["l1 != l2"]
+    answer: "[1, n]"
+    upToScale: true
+    hints:
+      - 'Solve $(A - {{l1}}I)\mathbf{x} = \mathbf{0}$.'
+      - '$A - {{l1}}I = {{B}}$ is singular, so its two rows are dependent: one equation is enough.'
+    solution: |
+      $$A - {{l1}}I = {{B}}.$$
+      Its rows are multiples of each other (the matrix is singular because ${{l1}}$ is an eigenvalue). The first row says
+      ${{B[1, 1]}}\,x_1 {{signed: B[1, 2]}}\,x_2 = 0$, solved by $\mathbf{x} = {{[1, n]}}$ (or any multiple).
+
+      Check: $A\mathbf{x} = {{A * [1, n]}} = {{l1}}\,\mathbf{x}$.
+    verify: "(lambda A: [v for (val, mult, vs) in A.eigenvects() for v in vs if val == l1][0])(Matrix([[1, m], [n, 1 + m*n]]) * diag(l1, l2) * Matrix([[1, m], [n, 1 + m*n]]).inv())"
+    covers: [mit-18-06/lecture-21]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+  - id: la-eig-008
+    difficulty: 3
+    type: numeric
+    prompt: |
+      All three eigenvalues of $A = {{A}}$ are integers. What is the **largest** one?
+    params:
+      l1: { int: [-3, 4] }
+      l2: { int: [-3, 4] }
+      l3: { int: [-3, 4] }
+      p: { int: [-1, 1] }
+      q: { int: [-1, 1] }
+      r: { int: [-1, 1] }
+      u: { int: [-1, 1] }
+      v: { int: [-1, 1] }
+      w: { int: [-1, 1] }
+    let:
+      S: "[[1, 0, 0], [p, 1, 0], [q, r, 1]] * [[1, u, v], [0, 1, w], [0, 0, 1]]"
+      Si: "round(inv(S))"
+      A: "S * diag([l1, l2, l3]) * Si"
+      e1: "l1 + l2 + l3"
+      e2: "l1*l2 + l1*l3 + l2*l3"
+      e3: "l1*l2*l3"
+    require: ["l1 < l2", "l2 < l3", "abs(A[1, 2]) + abs(A[1, 3]) + abs(A[2, 3]) > 0", "abs(A[2, 1]) + abs(A[3, 1]) + abs(A[3, 2]) > 0"]
+    answer: l3
+    hints:
+      - '$\det(A - \lambda I) = -(\lambda^3 - c_1\lambda^2 + c_2\lambda - c_3)$ with $c_1 = \operatorname{tr}A$, $c_3 = \det A$, and $c_2$ the sum of the three $2 \times 2$ principal minors.'
+      - 'Here $\operatorname{tr}A = {{e1}}$ and $\det A = {{e3}}$. Integer roots divide the constant term.'
+    solution: |
+      The characteristic polynomial is $\det(A - \lambda I) = -(\lambda^3 - c_1\lambda^2 + c_2\lambda - c_3)$ with
+      $c_1 = \operatorname{tr}A = {{e1}}$, $c_2 = $ (sum of the principal $2 \times 2$ minors) $= {{e2}}$ and $c_3 = \det A = {{e3}}$.
+
+      So the eigenvalues solve $\lambda^3 {{signed: -e1}}\lambda^2 {{signed: e2}}\lambda {{signed: -e3}} = 0$. Testing small integers (divisors of the constant term, or $0$)
+      finds the roots ${{l1}}, {{l2}}, {{l3}}$, and indeed $(\lambda - ({{l1}}))(\lambda - ({{l2}}))(\lambda - ({{l3}}))$ expands to that cubic.
+      Check: they add to the trace ${{e1}}$ and multiply to the determinant ${{e3}}$. The largest is ${{l3}}$.
+    verify: "(lambda S: max((S * diag(l1, l2, l3) * S.inv()).eigenvals().keys()))(Matrix([[1, 0, 0], [p, 1, 0], [q, r, 1]]) * Matrix([[1, u, v], [0, 1, w], [0, 0, 1]]))"
+    covers: [mit-18-06/lecture-21]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 7
+  - id: la-eig-009
+    difficulty: 2
+    type: mc
+    prompt: |
+      A square matrix satisfies $A^2 = A$. Which numbers can be eigenvalues of $A$?
+    options:
+      - "Only $0$ and $1$"
+      - "Only $1$"
+      - "Only $1$ and $-1$"
+      - "Any real number"
+    answer: 0
+    hints:
+      - 'If $A\mathbf{x} = \lambda\mathbf{x}$, what is $A^2\mathbf{x}$?'
+    solution: |
+      If $A\mathbf{x} = \lambda\mathbf{x}$ with $\mathbf{x} \ne \mathbf{0}$, then $A^2\mathbf{x} = \lambda^2\mathbf{x}$. Since $A^2 = A$, $\lambda^2\mathbf{x} = \lambda\mathbf{x}$, so
+      $\lambda^2 = \lambda$ and $\lambda \in \{0, 1\}$. Both occur: a projection onto a plane in $\mathbb{R}^3$ has eigenvalues $1, 1, 0$.
+      ($\pm 1$ is the answer for $A^2 = I$, such as a reflection.)
+    verify: "0"
+    covers: [mit-18-06/lecture-21]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+  - id: la-eig-010
+    difficulty: 3
+    type: multipart
+    prompt: |
+      Let $A = {{A}}$.
+    params:
+      l1: { int: [-4, 5], not: [0] }
+      l2: { int: [-4, 5], not: [0] }
+      m: { int: [-2, 2] }
+      n: { int: [-2, 2] }
+    let:
+      S: "[[1, m], [n, 1 + m*n]]"
+      Si: "[[1 + m*n, -m], [-n, 1]]"
+      A: "S * diag([l1, l2]) * Si"
+      big: "max(l1, l2)"
+      small: "min(l1, l2)"
+    require: ["l1 != l2", "m != 0 or n != 0"]
+    parts:
+      - prompt: "(a) What is the larger eigenvalue of $A$?"
+        type: numeric
+        answer: big
+        verify: "max((Matrix([[1, m], [n, 1 + m*n]]) * diag(l1, l2) * Matrix([[1, m], [n, 1 + m*n]]).inv()).eigenvals().keys())"
+      - prompt: "(b) What is the smaller eigenvalue of $A$?"
+        type: numeric
+        answer: small
+        verify: "min((Matrix([[1, m], [n, 1 + m*n]]) * diag(l1, l2) * Matrix([[1, m], [n, 1 + m*n]]).inv()).eigenvals().keys())"
+      - prompt: "(c) Using your eigenvalues, what is $\\det(A^3)$?"
+        type: numeric
+        answer: "(part1 * part2)^3"
+        verify: "((Matrix([[1, m], [n, 1 + m*n]]) * diag(l1, l2) * Matrix([[1, m], [n, 1 + m*n]]).inv())**3).det()"
+    hints:
+      - '$\det(A - \lambda I) = \lambda^2 - (\operatorname{tr}A)\lambda + \det A$ with $\operatorname{tr}A = {{l1 + l2}}$.'
+      - 'The eigenvalues of $A^3$ are the cubes of those of $A$, and the determinant is their product.'
+    solution: |
+      (a), (b) $\operatorname{tr}A = {{l1 + l2}}$ and $\det A = {{l1*l2}}$, so
+      $$\lambda^2 {{signed: -(l1 + l2)}}\lambda {{signed: l1*l2}} = (\lambda - ({{l1}}))(\lambda - ({{l2}})) = 0,$$
+      giving eigenvalues ${{big}}$ (larger) and ${{small}}$ (smaller).
+
+      (c) If $A\mathbf{x} = \lambda\mathbf{x}$ then $A^3\mathbf{x} = \lambda^3\mathbf{x}$, so $A^3$ has eigenvalues ${{big^3}}$ and ${{small^3}}$, and
+      $\det(A^3) = (\lambda_1\lambda_2)^3 = ({{l1*l2}})^3 = {{(l1*l2)^3}}$ (also $= (\det A)^3$).
+    covers: [mit-18-06/lecture-21]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+  - id: la-eig-011
+    difficulty: 5
+    type: proof
+    prompt: |
+      Let $A$ and $B$ be $n \times n$ matrices. Prove that $AB$ and $BA$ have the same eigenvalues. (Treat $\lambda = 0$ separately.)
+    hints:
+      - 'For $\lambda \ne 0$: if $AB\mathbf{x} = \lambda\mathbf{x}$, try the vector $B\mathbf{x}$ for $BA$.'
+      - 'Why is $B\mathbf{x} \ne \mathbf{0}$ when $\lambda \ne 0$?'
+      - 'For $\lambda = 0$, use determinants: $\det(AB) = \det(BA)$.'
+    solution: |
+      **Non-zero eigenvalues.** Let $AB\mathbf{x} = \lambda\mathbf{x}$ with $\mathbf{x} \ne \mathbf{0}$ and $\lambda \ne 0$. Put $\mathbf{y} = B\mathbf{x}$. Then
+      $\mathbf{y} \ne \mathbf{0}$, since otherwise $\lambda\mathbf{x} = A\mathbf{y} = \mathbf{0}$. And
+      $$BA\mathbf{y} = B(AB\mathbf{x}) = B(\lambda\mathbf{x}) = \lambda\mathbf{y},$$
+      so $\lambda$ is an eigenvalue of $BA$. Exchanging the roles of $A$ and $B$ gives the converse.
+
+      **Zero.** $0$ is an eigenvalue of $AB$ exactly when $\det(AB) = 0$. Since $\det(AB) = \det A\det B = \det(BA)$, this happens exactly when $0$ is an
+      eigenvalue of $BA$.
+
+      So the two sets of eigenvalues coincide. (In fact the characteristic polynomials are equal, so multiplicities agree too.)
+    covers: [mit-18-06/lecture-21]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 10
+  - id: la-eig-012
+    difficulty: 4
+    type: vector
+    prompt: |
+      $A = {{A}}$ has eigenvalues ${{l1}}$, ${{l2}}$ and ${{l3}}$. Find an eigenvector for $\lambda = {{l2}}$ (any non-zero multiple is accepted), as a list such as `1, 2, 3`.
+    params:
+      l1: { int: [-3, 4] }
+      l2: { int: [-3, 4] }
+      l3: { int: [-3, 4] }
+      p: { int: [-1, 1] }
+      q: { int: [-1, 1] }
+      r: { int: [-1, 1] }
+      u: { int: [-1, 1], not: [0] }
+      v: { int: [-1, 1] }
+      w: { int: [-1, 1] }
+    let:
+      S: "[[1, 0, 0], [p, 1, 0], [q, r, 1]] * [[1, u, v], [0, 1, w], [0, 0, 1]]"
+      Si: "round(inv(S))"
+      A: "S * diag([l1, l2, l3]) * Si"
+      B: "A - l2*identity(3)"
+      x: "squeeze(S[:, 2])"
+    require: ["l1 != l2", "l2 != l3", "l1 != l3"]
+    answer: x
+    upToScale: true
+    hints:
+      - 'Solve $(A - {{l2}}I)\mathbf{x} = \mathbf{0}$ by elimination.'
+      - '$A - {{l2}}I = {{B}}$ has rank 2, so there is one free variable.'
+    solution: |
+      $$A - {{l2}}I = {{B}}.$$
+      Because ${{l2}}$ is an eigenvalue of multiplicity one, this matrix has rank 2 and its null space is a line. Eliminating and back-substituting
+      (or taking the cross product of two independent rows) gives
+      $$\mathbf{x} = {{x}}$$
+      up to scale. Check: $A\mathbf{x} = {{A * x}} = {{l2}}\,\mathbf{x}$.
+    verify: "(lambda A: [vec for (val, mult, vs) in A.eigenvects() for vec in vs if val == l2][0])((lambda S: S * diag(l1, l2, l3) * S.inv())(Matrix([[1, 0, 0], [p, 1, 0], [q, r, 1]]) * Matrix([[1, u, v], [0, 1, w], [0, 0, 1]])))"
+    covers: [mit-18-06/lecture-21]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8

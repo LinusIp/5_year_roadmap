@@ -2,14 +2,23 @@ import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { Icon } from './Icon.tsx';
 import type { IconName } from './Icon.tsx';
-import { Link } from '../router/router.tsx';
+import { useSettings } from '../db/settings.ts';
+import type { TabId } from '../db/types.ts';
+import { Link, useLocation } from '../router/router.tsx';
+import { isWithin } from '../router/paths.ts';
+import { seed } from '../seed/index.ts';
 
-const TABS: { to: string; label: string; icon: IconName }[] = [
-  { to: '/', label: 'Today', icon: 'today' },
-  { to: '/plan', label: 'Plan', icon: 'plan' },
-  { to: '/library', label: 'Library', icon: 'library' },
-  { to: '/activity', label: 'Activity', icon: 'activity' },
-];
+/** Every tab Settings > Layout can show. The default four are the mockup's. */
+export const TAB_DEFS: Record<TabId, { to: string; label: string; icon: IconName }> = {
+  today: { to: '/', label: 'Today', icon: 'today' },
+  plan: { to: '/plan', label: 'Plan', icon: 'plan' },
+  library: { to: '/library', label: 'Library', icon: 'library' },
+  activity: { to: '/activity', label: 'Activity', icon: 'activity' },
+  projects: { to: '/plan?view=projects', label: 'Projects', icon: 'projects' },
+  map: { to: '/plan/map', label: 'Map', icon: 'map' },
+  reviews: { to: '/reviews', label: 'Reviews', icon: 'reviews' },
+};
+const DEFAULT_TABS: TabId[] = ['today', 'plan', 'library', 'activity'];
 
 /**
  * A screen: one column, 20 px gutters on a phone (as in the mockup) and 24 px from a tablet up, at most 640 px
@@ -19,6 +28,20 @@ export function Screen({ title, children }: { title: string; children: ReactNode
   useEffect(() => {
     document.title = title + ' · Atlas';
   }, [title]);
+  const settings = useSettings(seed.settings);
+  const tabs = (settings?.layout.tabs ?? DEFAULT_TABS).map((id) => TAB_DEFS[id]);
+  const location = useLocation();
+  // The tab that matches the address most closely: Projects (/plan?view=projects) and Map (/plan/map) beat Plan.
+  const score = (to: string): number => {
+    const [path, query] = to.split('?') as [string, string | undefined];
+    if (!isWithin(path, location.path)) return -1;
+    if (query && [...new URLSearchParams(query)].some(([k, v]) => location.query.get(k) !== v)) return -1;
+    return path.length + (query ? 1 : 0);
+  };
+  const active = tabs.reduce<{ to: string; score: number } | null>((best, t) => {
+    const s = score(t.to);
+    return s >= 0 && (!best || s > best.score) ? { to: t.to, score: s } : best;
+  }, null)?.to;
 
   return (
     <>
@@ -26,12 +49,12 @@ export function Screen({ title, children }: { title: string; children: ReactNode
         {children}
       </main>
       <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-surface px-2 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-2.5">
-        <ul className="mx-auto grid max-w-[640px] grid-cols-4">
-          {TABS.map((tab) => (
+        <ul className="mx-auto grid max-w-[640px]" style={{ gridTemplateColumns: 'repeat(' + tabs.length + ', minmax(0, 1fr))' }}>
+          {tabs.map((tab) => (
             <li key={tab.to}>
               <Link
                 to={tab.to}
-                nav
+                aria-current={tab.to === active ? 'page' : undefined}
                 className="flex min-h-11 flex-col items-center justify-center gap-1 text-small font-medium text-ink2 aria-[current=page]:text-accent"
               >
                 <Icon name={tab.icon} />

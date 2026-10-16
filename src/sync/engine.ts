@@ -12,6 +12,8 @@
  * Triggers: a block or item done, a timer stopped, a review saved (3 s later, so the paired writes land);
  * 60 s after any other change; leaving the page; coming back online; every 5 minutes while visible.
  */
+import { NOTICE_OLD_DEVICE, droppedNewBlocks, isNewSettings, isOldPlanFile, isOldSettingsFile, mergeOldDay, mergeOldPlan, mergeReviewNumbers, reviewLostBlocks } from './downgrade.ts';
+import { currentSettings } from '../lib/settings.ts';
 import type { AtlasDB } from '../db/db.ts';
 import { updateSettings } from '../db/settings.ts';
 import type { SyncCache, SyncConfig, SyncStatus } from '../db/types.ts';
@@ -21,13 +23,13 @@ import type { AppSeed } from '../seed/schema.ts';
 import { commitFiles, commitMessage } from './commit.ts';
 import type { FileChange } from './commit.ts';
 import { adoptDeviceId, deviceId } from './device.ts';
-import { parseDay, parseItems, parsePlan, parseReview, parseSettings, planUpdatedAt, renderReadme } from './files.ts';
+import { parseDay, parseItems, parseChallenges, parsePlan, parsePractice, parseReview, parseSettings, planUpdatedAt, renderReadme } from './files.ts';
 import { GithubClient, GithubError, gitBlobSha } from './github-api.ts';
 import type { Author } from './github-api.ts';
-import { allPaths, itemsOf, planOf, readLocal, renderPath, withCompanions, writeDay, writeItems, writePlan, writeReview, writeSettings } from './local.ts';
-import { lastWriter, mergeDay, mergeItems } from './merge.ts';
+import { allPaths, itemsOf, planOf, readLocal, renderPath, withCompanions, writeDay, writeItems, writeChallenges, writePlan, writePractice, writeReview, writeSettings } from './local.ts';
+import { lastWriter, mergeDay, mergeItems, mergeRecords } from './merge.ts';
 import { enqueue, onSyncChange, queuedWrites, setSyncVocabulary } from './middleware.ts';
-import { ITEMS_PATH, PLAN_PATH, README_PATH, SETTINGS_PATH, dateOfLogPath, isPulledPath } from './paths.ts';
+import { CHALLENGES_PATH, ITEMS_PATH, PLAN_PATH, PRACTICE_PATH, README_PATH, SETTINGS_PATH, dateOfLogPath, isPulledPath } from './paths.ts';
 
 export const URGENT_DELAY_MS = 3_000;
 export const IDLE_DELAY_MS = 60_000;
@@ -82,6 +84,12 @@ export class SyncEngine {
 
   private online(): boolean {
     return this.deps.online ? this.deps.online() : typeof navigator === 'undefined' || navigator.onLine !== false;
+  }
+
+  /** A file an older Atlas overwrote: queue this device's merged copy to go back up, and say so once. */
+  private async restore(path: string): Promise<void> {
+    await enqueue(this.db, [{ path, summary: 'restore what an older Atlas overwrote' }]);
+    this.notice(NOTICE_OLD_DEVICE);
   }
 
   private notice(text: string): void {
@@ -315,7 +323,7 @@ export class SyncEngine {
         .map((d) => local.dayLogs.find((l) => l.date === d))
         .filter((l) => l !== undefined);
       const summaries = [...outbox].sort((a, b) => a.queuedAt - b.queuedAt).flatMap((e) => (e.summary ? [e.summary] : []));
-      const core = local.settings[0]?.core ?? seed.settings;
+      const core = currentSettings(local.settings[0], seed.settings).core;
       const message = firstSync && days.length > 1 ? 'state: first sync from Atlas, ' + days.length + ' days of log' : commitMessage(days, summaries, core);
       try {
         const result = await commitFiles(client, {
@@ -375,9 +383,30 @@ export class SyncEngine {
       await writeItems(db, dirty ? mergeItems(itemsOf(await readLocal(db)), parsed.value) : parsed.value);
       return;
     }
+    if (path === PRACTICE_PATH) {
+      const parsed = parsePractice(text);
+      if (!parsed.ok) return parsed.error;
+      // Answers only ever accumulate: the union of both sides, the later edit winning per answer.
+      const local = await db.practice.toArray();
+      await writePractice(db, mergeRecords(local, parsed.value, (a) => a.id));
+      return;
+    }
+    if (path === CHALLENGES_PATH) {
+      const parsed = parseChallenges(text);
+      if (!parsed.ok) return parsed.error;
+      await writeChallenges(db, mergeRecords(await db.challenges.toArray(), parsed.value, (e) => e.id));
+      return;
+    }
     if (path === PLAN_PATH) {
       const parsed = parsePlan(text);
       if (!parsed.ok) return parsed.error;
+      const current = planOf(await readLocal(db));
+      if (!firstSync && isOldPlanFile(text) && current.patches.length > 0) {
+        // Written by a device on an older Atlas, which cannot read version 2: merge, and write version 2 back.
+        await writePlan(db, mergeOldPlan(current, parsed.value));
+        await this.restore(path);
+        return;
+      }
       if (!dirty) {
         await writePlan(db, parsed.value);
         return;
@@ -391,6 +420,11 @@ export class SyncEngine {
     if (path === SETTINGS_PATH) {
       const parsed = parseSettings(text);
       if (!parsed.ok) return parsed.error;
+      if (!firstSync && isOldSettingsFile(text) && isNewSettings((await readLocal(db)).settings[0])) {
+        // An older Atlas wrote its own copy: it could not read these settings, so it would only lose them.
+        await this.restore(path);
+        return;
+      }
       if (!dirty) {
         await writeSettings(db, parsed.value);
         return;
@@ -405,6 +439,12 @@ export class SyncEngine {
       const parsed = parseDay(text, path);
       if (!parsed.ok) return parsed.error;
       if (parsed.value.date !== date) return path + ' holds the day ' + parsed.value.date;
+      const stored = await db.dayLogs.get(date);
+      if (stored && droppedNewBlocks(stored, parsed.value)) {
+        await writeDay(db, mergeOldDay(stored, parsed.value), date);
+        await this.restore(path);
+        return;
+      }
       if (!dirty) {
         await writeDay(db, parsed.value, date);
         return;
@@ -417,7 +457,13 @@ export class SyncEngine {
       const parsed = parseReview(text, path);
       if (!parsed.ok) return parsed.error;
       const local = await db.reviews.get(parsed.value.id);
-      if (!dirty || !local || lastWriter(local, parsed.value) === 'remote') await writeReview(db, parsed.value);
+      const remoteWins = !dirty || !local || lastWriter(local, parsed.value) === 'remote';
+      if (reviewLostBlocks(parsed.value, local)) {
+        await writeReview(db, mergeReviewNumbers(remoteWins ? parsed.value : local!, local));
+        await this.restore(path);
+        return;
+      }
+      if (remoteWins) await writeReview(db, parsed.value);
       return;
     }
     return undefined;

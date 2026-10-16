@@ -1,0 +1,344 @@
+subject: linear-algebra
+topic: column-space-and-null-space
+questions:
+  - id: la-cns-001
+    difficulty: 1
+    type: mc
+    prompt: |
+      $A$ is an $m \times n$ matrix. Its null space $N(A)$, all solutions of $A\mathbf{x} = \mathbf{0}$, is a subspace of which space?
+    options:
+      - "$\\mathbb{R}^n$"
+      - "$\\mathbb{R}^m$"
+      - "$\\mathbb{R}^{m+n}$"
+      - "$\\mathbb{R}^{\\min(m, n)}$"
+    answer: 0
+    hints:
+      - 'How many components must $\mathbf{x}$ have for $A\mathbf{x}$ to make sense?'
+    solution: |
+      $A\mathbf{x}$ needs one component of $\mathbf{x}$ per column of $A$, so $\mathbf{x} \in \mathbb{R}^n$ and $N(A) \subseteq \mathbb{R}^n$.
+      The column space $C(A)$, made of combinations of columns with $m$ entries each, is the one that lives in $\mathbb{R}^m$.
+    verify: "[2, 3].index(len(Matrix([[1, 2, 3], [2, 4, 6]]).nullspace()[0]) - 1)"
+    covers: [mit-18-06/lecture-6]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: la-cns-002
+    difficulty: 2
+    type: vector
+    prompt: |
+      $\mathbf{b} = {{b}}$ is in the column space of $A = {{A}}$. Find the $\mathbf{x}$ with $A\mathbf{x} = \mathbf{b}$, i.e. the combination of the columns that gives $\mathbf{b}$.
+
+      Enter it as a list `x1, x2`.
+    params:
+      a11: { int: [-3, 3] }
+      a12: { int: [-3, 3] }
+      a21: { int: [-3, 3] }
+      a22: { int: [-3, 3] }
+      a31: { int: [-3, 3] }
+      a32: { int: [-3, 3] }
+      x1: { int: [-3, 3] }
+      x2: { int: [-3, 3] }
+    let:
+      A: "[[a11, a12], [a21, a22], [a31, a32]]"
+      x: "[x1, x2]"
+      b: "A*x"
+      d: "a11*a22 - a12*a21"
+    require: ["d != 0"]
+    answer: x
+    hints:
+      - 'Three equations, two unknowns. Since $\mathbf{b}$ is in $C(A)$, two of the equations determine $\mathbf{x}$ and the third agrees.'
+      - 'Rows 1 and 2: ${{a11}}x_1 {{signed: a12}}x_2 = {{b[1]}}$ and ${{a21}}x_1 {{signed: a22}}x_2 = {{b[2]}}$.'
+    solution: |
+      Rows 1 and 2 give
+      $$ {{a11}}x_1 {{signed: a12}}x_2 = {{b[1]}}, \qquad {{a21}}x_1 {{signed: a22}}x_2 = {{b[2]}}. $$
+      Their determinant is ${{d}} \ne 0$; eliminating gives
+      $x_1 = \dfrac{ ({{b[1]}})({{a22}}) - ({{a12}})({{b[2]}}) }{ {{d}} } = {{x1}}$ and $x_2 = \dfrac{ ({{a11}})({{b[2]}}) - ({{b[1]}})({{a21}}) }{ {{d}} } = {{x2}}$.
+
+      Row 3 checks: $({{a31}})({{x1}}) + ({{a32}})({{x2}}) = {{b[3]}}$. So $\mathbf{b} = {{x1}}\,(\text{column 1}) {{signed: x2}}\,(\text{column 2})$.
+    verify: "list(Matrix([[a11, a12], [a21, a22], [a31, a32]]).gauss_jordan_solve(Matrix([[a11, a12], [a21, a22], [a31, a32]])*Matrix([x1, x2]))[0])"
+    covers: [mit-18-06/lecture-6]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: la-cns-003
+    difficulty: 2
+    type: vector
+    prompt: |
+      Find a non-zero vector in the null space of
+      $$ A = {{A}}. $$
+      Enter it as a list such as `1, 2, 3` (any non-zero multiple is accepted).
+    params:
+      p: { int: [-2, 2] }
+      q: { int: [-2, 2] }
+      a: { int: [-3, 3] }
+      b: { int: [-3, 3] }
+    let:
+      E: "[[1 + p*q, p], [q, 1]]"
+      R: "[[1, 0, a], [0, 1, b]]"
+      A: "E*R"
+      s: "[-a, -b, 1]"
+    answer: s
+    upToScale: true
+    hints:
+      - 'Row reduce $A$ to its reduced row echelon form $R$; $A\mathbf{x} = \mathbf{0}$ and $R\mathbf{x} = \mathbf{0}$ have the same solutions.'
+      - '$R = {{R}}$. Column 3 has no pivot, so $x_3$ is free: set $x_3 = 1$.'
+    solution: |
+      Elimination (and dividing by pivots) takes $A$ to
+      $$ R = {{R}}. $$
+      Columns 1 and 2 have pivots and $x_3$ is free. With $x_3 = 1$, the rows of $R\mathbf{x} = \mathbf{0}$ say
+      $x_1 {{signed: a}} = 0$ and $x_2 {{signed: b}} = 0$, so the special solution is
+      $$ \mathbf{s} = {{s}}. $$
+      Check: $A\mathbf{s} = {{A*s}}$. $N(A)$ is the line of all multiples of $\mathbf{s}$.
+    verify: "list((Matrix([[1 + p*q, p], [q, 1]])*Matrix([[1, 0, a], [0, 1, b]])).nullspace()[0])"
+    covers: [mit-18-06/lecture-6, mit-18-06/lecture-7]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: la-cns-004
+    difficulty: 3
+    type: vector
+    prompt: |
+      Let
+      $$ A = {{A}}. $$
+      Find the **special solution** of $A\mathbf{x} = \mathbf{0}$ that has $x_4 = 1$ and every other free variable equal to $0$.
+
+      Enter it as a list `x1, x2, x3, x4`.
+    params:
+      l21: { int: [-2, 2] }
+      l31: { int: [-2, 2] }
+      l32: { int: [-2, 2], not: [0] }
+      a: { int: [-3, 3] }
+      b: { int: [-3, 3] }
+      c: { int: [-3, 3] }
+    let:
+      E: "[[1, 0, 0], [l21, 1, 0], [l31, l32, 1]]"
+      R: "[[1, a, 0, b], [0, 0, 1, c], [0, 0, 0, 0]]"
+      A: "E*R"
+      s: "[-b, 0, -c, 1]"
+    answer: s
+    hints:
+      - 'Reduce $A$ to $R = \operatorname{rref}(A)$ and find the pivot columns; the other variables are free.'
+      - '$R = {{R}}$: pivots in columns 1 and 3, so $x_2$ and $x_4$ are free. Set $x_2 = 0$, $x_4 = 1$.'
+    solution: |
+      Elimination gives
+      $$ R = {{R}}, $$
+      with pivot columns 1 and 3 and free variables $x_2, x_4$. Take $x_2 = 0$, $x_4 = 1$ and read off the pivot variables from the rows of $R\mathbf{x} = \mathbf{0}$:
+      $$ x_1 {{signed: a}}\cdot 0 {{signed: b}}\cdot 1 = 0 \Rightarrow x_1 = {{-b}}, \qquad x_3 {{signed: c}}\cdot 1 = 0 \Rightarrow x_3 = {{-c}}. $$
+      So $\mathbf{s} = {{row: s}}$. Check: $A\mathbf{s} = {{row: A*s}}$.
+    verify: "list((Matrix([[1, 0, 0], [l21, 1, 0], [l31, l32, 1]])*Matrix([[1, a, 0, b], [0, 0, 1, c], [0, 0, 0, 0]])).nullspace()[1])"
+    covers: [mit-18-06/lecture-7]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: la-cns-005
+    difficulty: 3
+    type: matrix
+    prompt: |
+      Find the reduced row echelon form $R = \operatorname{rref}(A)$ of
+      $$ A = {{A}}. $$
+      Enter it as `[[a, b, c, d], [e, f, g, h], [i, j, k, l]]`.
+    params:
+      l21: { int: [-3, 3] }
+      l31: { int: [-3, 3] }
+      l32: { int: [-2, 2], not: [0] }
+      p1: { choice: [1, -1, 2] }
+      a: { int: [-3, 3] }
+      b: { int: [-3, 3] }
+      c: { int: [-3, 3] }
+    let:
+      E: "[[p1, 0, 0], [l21*p1, 1, 0], [l31*p1, l32, 1]]"
+      R: "[[1, a, 0, b], [0, 0, 1, c], [0, 0, 0, 0]]"
+      A: "E*R"
+      A1: "[[p1, p1*a, 0, p1*b], [0, 0, 1, c], [0, 0, l32, l32*c]]"
+    answer: R
+    hints:
+      - 'Eliminate below the first pivot ${{p1}}$. Column 2 then has no pivot; the next pivot is in column 3.'
+      - 'After clearing column 1 the matrix is ${{A1}}$.'
+      - 'Finish: clear below the column-3 pivot, then divide each pivot row by its pivot (and clear above pivots if needed).'
+    solution: |
+      Subtract ${{l21}}$ and ${{l31}}$ times row 1 from rows 2 and 3:
+      $$ {{A1}}. $$
+      Column 2 has no pivot (its entries below row 1 are zero). Subtract ${{l32}}$ times row 2 from row 3, which empties row 3, and divide row 1 by ${{p1}}$:
+      $$ R = {{R}}. $$
+      The pivot columns are 1 and 3; the entry above the second pivot is already $0$. The rank is 2.
+    verify: "(Matrix([[p1, 0, 0], [l21*p1, 1, 0], [l31*p1, l32, 1]])*Matrix([[1, a, 0, b], [0, 0, 1, c], [0, 0, 0, 0]])).rref()[0]"
+    covers: [mit-18-06/lecture-7]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: la-cns-006
+    difficulty: 2
+    type: numeric
+    prompt: |
+      How many **free variables** does $A\mathbf{x} = \mathbf{0}$ have, for
+      $$ A = {{A}}? $$
+    params:
+      r: { int: [1, 3] }
+      l21: { int: [-2, 2] }
+      l31: { int: [-2, 2] }
+      l32: { int: [-2, 2] }
+      a: { int: [-3, 3] }
+      b: { int: [-3, 3] }
+      c: { int: [-3, 3] }
+    let:
+      E: "[[1, 0, 0], [l21, 1, 0], [l31, l32, 1]]"
+      Rf: "[[1, a, 0, b], [0, 0, 1, c], [0, 0, 0, 1]]"
+      R: "diag([1, r >= 2 ? 1 : 0, r >= 3 ? 1 : 0]) * Rf"
+      A: "E*R"
+    answer: "4 - r"
+    hints:
+      - 'Free variables = number of columns $-$ number of pivots.'
+      - 'Eliminate to echelon form: $U = {{R}}$.'
+    solution: |
+      Elimination (multipliers ${{l21}}$, ${{l31}}$, ${{l32}}$) reduces $A$ to
+      $$ {{R}}, $$
+      which has ${{r}}$ pivot{{r == 1 ? "" : "s"}}. With 4 columns, the number of free variables is $4 - {{r}} = {{4 - r}}$,
+      and $N(A)$ has dimension ${{4 - r}}$ (one special solution per free variable).
+    verify: "len((Matrix([[1, 0, 0], [l21, 1, 0], [l31, l32, 1]])*diag(1, 1 if r >= 2 else 0, 1 if r >= 3 else 0)*Matrix([[1, a, 0, b], [0, 0, 1, c], [0, 0, 0, 1]])).nullspace())"
+    covers: [mit-18-06/lecture-7]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: la-cns-007
+    difficulty: 4
+    type: multipart
+    prompt: |
+      Let
+      $$ A = {{A}}. $$
+      Its rank is 2, so its column space $C(A)$ is a plane through the origin in $\mathbb{R}^3$.
+    params:
+      l21: { int: [-2, 2] }
+      l31: { int: [-2, 2] }
+      l32: { int: [-2, 2] }
+      a: { int: [-2, 2] }
+      b: { int: [-2, 2] }
+      b1: { int: [-4, 4] }
+      b2: { int: [-4, 4] }
+    let:
+      E: "[[1, 0, 0], [l21, 1, 0], [l31, l32, 1]]"
+      A: "E*[[1, 0, a], [0, 1, b], [0, 0, 0]]"
+      Einv: "round(inv(E))"
+      n: "Einv[3, :]"
+    parts:
+      - prompt: "(a) Give a non-zero vector $\\mathbf{y}$ such that $\\mathbf{b} \\in C(A)$ exactly when $\\mathbf{y} \\cdot \\mathbf{b} = 0$. Enter it as a list such as `1, 2, 3` (any multiple)."
+        type: vector
+        answer: n
+        upToScale: true
+        verify: "list((Matrix([[1, 0, 0], [l21, 1, 0], [l31, l32, 1]])*Matrix([[1, 0, a], [0, 1, b], [0, 0, 0]])).T.nullspace()[0])"
+      - prompt: "(b) Using (a): for which $k$ is $\\mathbf{b} = ({{b1}}, {{b2}}, k)$ in $C(A)$?"
+        type: numeric
+        answer: "-(part1[1]*b1 + part1[2]*b2) / part1[3]"
+        verify: "(lambda M: solve(Matrix.hstack(M[:, :2], Matrix([b1, b2, Symbol('k')])).det(), Symbol('k'))[0])(Matrix([[1, 0, 0], [l21, 1, 0], [l31, l32, 1]])*Matrix([[1, 0, a], [0, 1, b], [0, 0, 0]]))"
+    hints:
+      - 'Eliminate on $[A \mid \mathbf{b}]$ with a general $\mathbf{b} = (b_1, b_2, b_3)$. Row 3 of $A$ becomes zero; what happens to $b_3$?'
+      - 'The multipliers are $\ell_{21} = {{l21}}$, $\ell_{31} = {{l31}}$, $\ell_{32} = {{l32}}$. Track $b_3 - \ell_{31}b_1 - \ell_{32}(b_2 - \ell_{21}b_1)$.'
+    solution: |
+      (a) Eliminating on $[A \mid \mathbf{b}]$ with multipliers ${{l21}}, {{l31}}, {{l32}}$ empties row 3 of $A$ and leaves on the right
+      $$ b_3 - ({{l31}})b_1 - ({{l32}})\big(b_2 - ({{l21}})b_1\big) = {{n[1]}}\,b_1 {{signed: n[2]}}\,b_2 + b_3. $$
+      $A\mathbf{x} = \mathbf{b}$ is solvable exactly when this is $0$, so $\mathbf{y} = {{row: n}}$ (it spans $N(A^{\mathsf T})$: $\mathbf{y}^{\mathsf T}A = {{row: n*A}}$).
+
+      (b) $\mathbf{y} \cdot ({{b1}}, {{b2}}, k) = ({{n[1]}})({{b1}}) + ({{n[2]}})({{b2}}) + k = 0$ gives $k = {{-(n[1]*b1 + n[2]*b2)}}$.
+    covers: [mit-18-06/lecture-6, mit-18-06/lecture-7]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8
+
+  - id: la-cns-008
+    difficulty: 2
+    type: mc
+    prompt: |
+      $A$ is a $5 \times 3$ matrix and the only solution of $A\mathbf{x} = \mathbf{0}$ is $\mathbf{x} = \mathbf{0}$. What is the rank of $A$?
+    options:
+      - "3"
+      - "5"
+      - "2"
+      - "It cannot be determined"
+    answer: 0
+    hints:
+      - '$N(A) = \{\mathbf{0}\}$ means there are no free variables.'
+    solution: |
+      No free variables means every one of the 3 columns has a pivot, so $r = n = 3$. (The rank can never exceed 3 here, since there are only 3 columns.)
+    verify: "[3, 5, 2].index(Matrix([[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [0, 1, 1]]).rank())"
+    covers: [mit-18-06/lecture-7]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: la-cns-009
+    difficulty: 4
+    type: proof
+    prompt: |
+      Prove that $N(A^{\mathsf T}A) = N(A)$ for every $m \times n$ matrix $A$.
+    hints:
+      - 'One inclusion is immediate: if $A\mathbf{x} = \mathbf{0}$, what is $A^{\mathsf T}A\mathbf{x}$?'
+      - 'For the other, multiply $A^{\mathsf T}A\mathbf{x} = \mathbf{0}$ on the left by $\mathbf{x}^{\mathsf T}$.'
+    solution: |
+      If $A\mathbf{x} = \mathbf{0}$ then $A^{\mathsf T}A\mathbf{x} = A^{\mathsf T}\mathbf{0} = \mathbf{0}$, so $N(A) \subseteq N(A^{\mathsf T}A)$.
+
+      Conversely, suppose $A^{\mathsf T}A\mathbf{x} = \mathbf{0}$. Then
+      $$ 0 = \mathbf{x}^{\mathsf T}A^{\mathsf T}A\mathbf{x} = (A\mathbf{x})^{\mathsf T}(A\mathbf{x}) = \lVert A\mathbf{x} \rVert^2, $$
+      and a vector of length zero is the zero vector, so $A\mathbf{x} = \mathbf{0}$. Hence $N(A^{\mathsf T}A) \subseteq N(A)$, and the two null spaces are equal.
+      (Consequently $A^{\mathsf T}A$ and $A$ have the same rank.)
+    covers: [mit-18-06/lecture-6, mit-18-06/lecture-7]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: la-cns-010
+    difficulty: 4
+    type: numeric
+    prompt: |
+      For which real number $a$ does
+      $$ A = \begin{bmatrix} 1 & 1 & a \\ 1 & a & 1 \\ a & 1 & 1 \end{bmatrix} $$
+      have a **two-dimensional** null space?
+    answer: 1
+    hints:
+      - 'A two-dimensional null space means rank 1: every row is a multiple of one row.'
+      - '$\det A = -(a - 1)^2(a + 2)$. Check the rank at each root.'
+    solution: |
+      $\dim N(A) = 3 - r$, so we need rank $r = 1$. The matrix is singular when $\det A = -(a - 1)^2(a + 2) = 0$, i.e. $a = 1$ or $a = -2$.
+
+      - $a = 1$: every entry is $1$, all rows are equal, $r = 1$ and $\dim N(A) = 2$ (spanned by $(-1, 1, 0)$ and $(-1, 0, 1)$).
+      - $a = -2$: rows $(1, 1, -2)$ and $(1, -2, 1)$ are independent, so $r = 2$ and the null space is only the line through $(1, 1, 1)$.
+
+      So $a = 1$.
+    verify: "[s for s in solve(Matrix([[1, 1, Symbol('a')], [1, Symbol('a'), 1], [Symbol('a'), 1, 1]]).det(), Symbol('a')) if len(Matrix([[1, 1, s], [1, s, 1], [s, 1, 1]]).nullspace()) == 2][0]"
+    covers: [mit-18-06/lecture-6, mit-18-06/lecture-7]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: la-cns-011
+    difficulty: 1
+    type: mc
+    prompt: |
+      Is $\mathbf{x} = {{x}}$ in the null space of $A = {{A}}$?
+    params:
+      p: { int: [-2, 2] }
+      q: { int: [-2, 2] }
+      a: { int: [-3, 3] }
+      b: { int: [-3, 3] }
+      m: { int: [1, 3] }
+    let:
+      A: "[[1 + p*q, p], [q, 1]] * [[1, 0, a], [0, 1, b]]"
+      x: "m*[-a, -b, 1]"
+    options:
+      - "Yes: $A\\mathbf{x} = \\mathbf{0}$"
+      - "No: $A\\mathbf{x} \\ne \\mathbf{0}$"
+    answer: 0
+    hints:
+      - 'Compute $A\mathbf{x}$: each entry is a row of $A$ dotted with $\mathbf{x}$.'
+    solution: |
+      $$ A\mathbf{x} = {{A}}{{x}} = {{A*x}}. $$
+      Both entries are zero, so $\mathbf{x} \in N(A)$.
+    verify: "0 if ((Matrix([[1 + p*q, p], [q, 1]])*Matrix([[1, 0, a], [0, 1, b]]))*(m*Matrix([-a, -b, 1]))).is_zero_matrix else 1"
+    covers: [mit-18-06/lecture-6]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1

@@ -18,6 +18,9 @@ with each. "Verified" means it was run, not assumed.
 | – | Redesign (section 4.0, to the mockups) | **done** |
 | – | Brief update of 2026-10-08: research cadence, roadmap.sh roadmaps, new phase table | **done** |
 | – | GitHub Sync (section 4.10) | **done** |
+| – | Flexibility: schedule, plan editing, pace, layout | **done** |
+| – | Practice, resources, tech docs | **done** |
+| – | The three-tier project catalogue | **done** |
 
 ## Milestone 1 — Scaffold
 
@@ -617,3 +620,122 @@ repository is a Git data or contents call, which GitHub gates on the Contents pe
 metadata, which every fine-grained token can read; a fine-grained token itself was not used in this run. The
 test repository could not be deleted with this credential, which lacks the `delete_repo` scope; it is safe to
 delete by hand.
+
+## Flexibility (the brief of 2026-10-16)
+
+The day, the plan, the pace and the layout can be changed in the app; a fresh install still looks like the
+mockups (every redesign acceptance test passes unchanged). README › Making it yours lists where each option is.
+
+- **The day.** Five day templates ship (Full day, University day, Weekend, Exam week, Rest day), a weekly pattern
+  gives each weekday one, and date ranges override it. Change today switches the template, changes a block's
+  minutes, skips a block, moves it to tomorrow, swaps two blocks' work or makes a rest day. Blocks are
+  open-ended: add, rename, recolour, give a track, reorder.
+- **What depends on it.** Today's "X of Y h", the week's target, lane budgets and the forecast come from the
+  resolved day (`src/lib/day-plan.ts`). The streak counts a day at 60 minutes or half its plan, whichever is
+  lower, and rest days never break it. The heatmap is relative to the day's plan, or absolute by choice.
+- **The plan.** Plan edits are an ordered list of patches over the curriculum (state/plan.json version 2), with
+  undo for the last 50. Add to a lane at a position, reorder by drag, long-press or arrows, swap for an
+  alternative, drop and restore, phase edits with a preview, goals on the Timeline, and prerequisite conflicts
+  with "move the prerequisite too". Resources, projects, papers and tracks of your own.
+- **Pace.** Per-lane pace, pauses whose time goes to another lane, "behind by" per lane with opt-in capped
+  catch-up, an offer when a lane finishes early, one suggestion in the Sunday review, and a re-plan with three
+  strategies and a preview.
+- **Layout.** Settings › Layout, with a live preview of Today: its parts, compact rows, what Now picks; 3–5 tabs;
+  Plan's first view; theme, week start, clock and density; reset per section.
+- **Sync and migration.** Settings version 2 and plan version 2 travel through GitHub Sync with the existing
+  merge rules. Version 1 settings, plan files and backups still read and are upgraded on the way in.
+
+Verified on this machine (Linux, Chromium 140):
+
+- `npm run validate:data` and `npm run typecheck` pass.
+- `npm test`: 268 unit tests. 46 are new: template resolution (pattern, override, the day's change), planned
+  minutes and targets, pace and pauses, history kept across schedule edits, the streak rule with rest days,
+  relative heatmap levels, settings v1 → v2, every patch type with missing references and order, the legacy
+  conversion, undo, prerequisite conflicts, the three re-plan strategies, catch-up, goals, and the plan and
+  settings files of the data repository.
+- `npm run test:e2e`: 83 tests pass (78 before, 9 new, 4 updated for new wording). New: University day changes
+  the targets; skip and move to tomorrow; one block's minutes and a rest day; an exam-week range shifts the
+  forecast; add, reorder, undo, swap, drop and restore; a custom resource and a goal; pause and resume; compact
+  Today, tabs and reset; two devices on the fake GitHub. The four Windows-drawn screenshot comparisons still
+  differ on Linux, as before (CI skips them); the two new baselines were drawn here.
+
+## Practice, resources and tech docs (the brief of 2026-10-16)
+
+- **Daily practice.** Block P (45 minutes) from 16 October 2026 to 31 January 2027: nine questions a day, three
+  each of linear algebra, calculus and physics, two new and one review. One question a screen with Check as the one
+  filled button, hints one at a time, the worked solution, multi-part questions that follow your own earlier
+  answers, self-graded proofs, and a summary (score, time, topics, when the reviews come back) whose Done logs the
+  minutes to P. Spaced repetition at 1/3/7/21/60 days, an Elo rating per topic, linear algebra following the 18.06
+  lectures ticked, calculus and physics topic by topic. Practice on demand from the Library; Activity › Practice;
+  Settings › Practice; roadmap nodes ticked at 85 % over 20 answers; answers in `state/practice.json`.
+- **The bank.** 693 questions: linear algebra 223 (154 templates, 69 %), calculus 224 (185, 83 %), physics 246
+  (184, 75 %), every topic at difficulties 1 to 4, in `data/questions/` with `SCHEMA.md`.
+- **Resources.** 25 added (books, problem sources, tools, lectures), mapped to tracks and practice topics; six
+  existing ones mapped to topics. 20 links verified on GitHub's runner by page title; 5 keep `url: null` and a
+  search hint (see DECISIONS).
+- **Tech docs.** 110, one for every project that is not a weekly build, rendered in the project sheet with
+  milestone checkboxes that count toward progress and "Copy as README skeleton".
+
+Verified on this machine (Linux, Chromium 140):
+
+- `npm run validate:data` (now also the question bank, the docs, and resources' practice topics) and
+  `npm run typecheck` pass.
+- `npm run verify:questions`: every answer of all 693 questions, 200 draws per template, recomputed by SymPy and
+  NumPy, every rendered formula parsed by KaTeX: passed (23 minutes). CI runs it with 40 draws.
+- `npm test`: 297 unit tests (28 new): the bank's quotas, every template's draws, the set's determinism, order,
+  size and two-new-one-review, a set that does not change while answered, topic progression, 18.06 following, the
+  difficulty window, the end of the practice period, the review intervals, Elo, each checker (numbers and units,
+  estimates, vectors and up-to-scale, matrices, expressions, multiple choice, a chained part), roadmap ticks at
+  85 %, and the doc parser, milestone progress and README skeleton.
+- `npm run test:e2e`: 6 new tests pass: a daily set with one wrong answer, one hint and shown solutions, the
+  summary, minutes to P only, reviews due the next day and resuming after a reload; the solution screen; no
+  Practice after 31 January 2027; ten questions on a topic from the Library; a project's tech doc (a milestone
+  ticked and kept across a reload, the README skeleton on the clipboard); answers reaching a second device on the
+  fake GitHub. One older test's locator was made exact (the doc's Stack also says "nothing to buy").
+- Lighthouse 13.5 accessibility (Chromium, headless): 100 on Today, Practice, Practice › topics, Activity ›
+  Practice, Settings, Library and two project sheets with tech docs.
+
+## The three-tier project catalogue (the brief of 2026-10-16)
+
+- **Imported**: 920 items from the brief's three files, unchanged except three dangling prerequisites (DECISIONS):
+  daily 254 easy challenges; weekly 112 medium challenges and 250 medium builds; monthly 304 advanced cases. Builds
+  and cases by domain: services 103, graphics 98, AI 95, inference 88, hardware 51, systems and networking 44, low
+  level 40, DevOps/architecture/security 35. Challenges over 30 topics.
+- **Mapped**: refs on 451 items and covers on 221, from the reviewed keyword table; `map:catalogue --check` in CI.
+- **Where it lives**: the daily challenge in Block B (Skip ×3, Not today, a setting to turn it off, Block B's
+  language, another language once all are solved, its own streak); the challenge screen; Block D's weekly slot and
+  monthly queue; build and case sheets with milestones, README skeleton and the repository rule; the Deck's tiers,
+  topic or domain and phase scope; Library › Projects with seven filters over a windowed list; Activity › Projects;
+  Settings › Projects; `state/challenges.json` through GitHub Sync.
+
+Verified on this machine (Linux, Chromium 140):
+
+- `npm run validate:data`, `npm run typecheck` and `npm run map:catalogue -- --check` pass.
+- `npm test`: 326 unit tests (29 new): loading and normalising, the validator's eight errors, refs and covers against
+  the table, the daily pick (deterministic, topic rotation, no repeat until all 254 are solved, then another language;
+  three skips; Not today), the challenge streak, the weekly slot, a catalogue build as the week's build, and the
+  Deck's and Library's filters.
+- `npm run test:e2e`: 7 new tests pass, also 4 times over in parallel: today's challenge solved from Block B with a
+  hint and the approach; Skip and Not today; a weekly build taken and done only with a repository; a case from the
+  Deck with a milestone ticked, the README skeleton copied and the repository rule; Library filtered to advanced
+  Year 2 inference cases; the windowed list; two devices on the fake GitHub, and a reload. The suite: every test
+  passes but the four Windows-drawn screenshot comparisons, as before (CI skips them).
+- Lighthouse 13.5 accessibility: 100 on Library with the Projects filter (the long list), Library, a challenge, a
+  case sheet, the Deck on Daily, Activity › Projects, Today, Settings and Plan › Projects.
+
+## Pull request #1: CI, screenshots, links, data safety
+
+- CI on the pull request, all green: `verify` (validate, catalogue mapping, typecheck, 331 unit tests, build, 103
+  e2e tests including every screenshot comparison), `questions` (SymPy, 40 draws a template), `screenshots`.
+- The first run caught a real bug: a shuffled Weekly deck could put a challenge on top, and Take it opened it
+  instead of filling Block D. The Weekly deck is builds only.
+- Every screenshot baseline redrawn on CI's Linux, and compared there on every run (no longer skipped).
+- Resources: 20 of the 25 new links verified on GitHub's runner by page title; 5 stay `url: null` with a hint.
+- Upgrade from the live build (Dexie 2, settings without a version, plan.json v1, backup format 1), tested against a
+  fixture that build made itself (`tests/fixtures/live-2026-10-08/`). Found and fixed: restoring an older backup lost
+  its plan edits.
+- A device still on the live build cannot read plan.json v2, settings v2, a day with Practice entries or a review
+  with P (checked with that build's own parsers) and would overwrite them; this build now merges those copies back,
+  writes the newer files again and asks for the device to be updated. Tested with the live build's own files.
+- The Pages deploy checks the live site: update prompt, reload into the new version, the new screens.
+

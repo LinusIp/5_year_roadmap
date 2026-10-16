@@ -36,7 +36,7 @@ export function Chips({ label, items }: { label: string; items: Chip[] }) {
             }
           >
             {chip.label}
-            {chip.count !== undefined && <span className={chip.pressed ? 'text-[color:var(--ramp-3)]' : 'text-ink2'}>{chip.count}</span>}
+            {chip.count !== undefined && <span className={chip.pressed ? 'text-accent' : 'text-ink2'}>{chip.count}</span>}
             {chip.chevron && <Icon name="chevronDown" size={14} />}
           </span>
         </button>

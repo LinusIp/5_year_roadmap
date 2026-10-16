@@ -1,0 +1,399 @@
+subject: linear-algebra
+topic: lu-factorisation
+questions:
+  - id: la-lu-001
+    difficulty: 1
+    type: mc
+    prompt: |
+      In the factorisation $A = LU$ produced by elimination without row exchanges, what is $L$?
+    options:
+      - "Lower triangular, with 1s on the diagonal and the multipliers $\\ell_{ij}$ below it"
+      - "Upper triangular, with the pivots on the diagonal"
+      - "Lower triangular, with the pivots on the diagonal"
+      - "The product $E_{32}E_{31}E_{21}$ of the elimination matrices"
+    answer: 0
+    hints:
+      - 'Elimination gives $E_{32}E_{31}E_{21}A = U$. Undo the steps in reverse order to recover $A$.'
+    solution: |
+      Elimination gives $EA = U$ with $E = E_{32}E_{31}E_{21}$, so $A = E^{-1}U = LU$ with
+      $L = E_{21}^{-1}E_{31}^{-1}E_{32}^{-1}$. In this order the multipliers drop straight into place: $L$ is lower triangular
+      with 1s on the diagonal and $\ell_{ij}$ in position $(i, j)$. The pivots sit on the diagonal of $U$, not $L$; and $E$ itself is $L^{-1}$, not $L$.
+    verify: "0 if Matrix([[2, 1], [6, 8]]).LUdecomposition()[0] == Matrix([[1, 0], [3, 1]]) else 1"
+    covers: [mit-18-06/lecture-4]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: la-lu-002
+    difficulty: 2
+    type: multipart
+    prompt: |
+      Factor $A = {{A}}$ as $A = LU$, with $L$ lower triangular with 1s on its diagonal and $U$ upper triangular.
+
+      Enter each matrix as `[[a, b], [c, d]]`.
+    params:
+      a: { choice: [1, -1, 2, -2, 3] }
+      l: { int: [-4, 4], not: [0] }
+      b: { int: [-4, 4] }
+      c: { int: [-6, 6] }
+    let:
+      A: "[[a, b], [l*a, c]]"
+      L: "[[1, 0], [l, 1]]"
+      U: "[[a, b], [0, c - l*b]]"
+    parts:
+      - prompt: "(a) $L$"
+        type: matrix
+        answer: L
+        verify: "Matrix([[a, b], [l*a, c]]).LUdecomposition()[0]"
+      - prompt: "(b) $U$"
+        type: matrix
+        answer: U
+        verify: "Matrix([[a, b], [l*a, c]]).LUdecomposition()[1]"
+    hints:
+      - 'Do one elimination step. $U$ is the result; the multiplier goes into $L$.'
+      - 'The multiplier is $\ell_{21} = {{l*a}} / ({{a}})$.'
+    solution: |
+      The multiplier is $\ell_{21} = {{l*a}} / ({{a}}) = {{l}}$. Subtracting ${{l}}$ times row 1 from row 2 gives
+      $$ U = {{U}}, \qquad \text{and the multiplier fills } L = {{L}}. $$
+      Check: $LU = {{L*U}} = A$.
+    covers: [mit-18-06/lecture-4]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: la-lu-003
+    difficulty: 3
+    type: matrix
+    prompt: |
+      Find $L$ in the factorisation $A = LU$ of
+      $$ A = {{A}}, $$
+      where $L$ is lower triangular with 1s on the diagonal and $U$ is upper triangular (no row exchanges are needed).
+
+      Enter it as `[[a, b, c], [d, e, f], [g, h, i]]`.
+    params:
+      l21: { int: [-3, 3] }
+      l31: { int: [-3, 3] }
+      l32: { int: [-3, 3] }
+      p1: { choice: [1, -1, 2, -2] }
+      p2: { choice: [1, -1, 2, -2, 3] }
+      p3: { int: [-4, 4], not: [0] }
+      u12: { int: [-3, 3] }
+      u13: { int: [-3, 3] }
+      u23: { int: [-3, 3] }
+    let:
+      L: "[[1, 0, 0], [l21, 1, 0], [l31, l32, 1]]"
+      U: "[[p1, u12, u13], [0, p2, u23], [0, 0, p3]]"
+      A: "L*U"
+      A1: "[[p1, u12, u13], [0, p2, u23], [0, l32*p2, l32*u23 + p3]]"
+    answer: L
+    hints:
+      - 'Run elimination and record each multiplier $\ell_{ij}$ = (entry to eliminate) / (pivot).'
+      - '$\ell_{21} = {{A[2,1]}}/({{p1}})$ and $\ell_{31} = {{A[3,1]}}/({{p1}})$. After that step the matrix is ${{A1}}$.'
+      - '$L$ holds the multipliers in their positions: $L = \begin{bmatrix} 1 & 0 & 0 \\ \ell_{21} & 1 & 0 \\ \ell_{31} & \ell_{32} & 1 \end{bmatrix}$.'
+    solution: |
+      Step 1: $\ell_{21} = {{A[2,1]}}/({{p1}}) = {{l21}}$ and $\ell_{31} = {{A[3,1]}}/({{p1}}) = {{l31}}$, leaving
+      $$ {{A1}}. $$
+      Step 2: $\ell_{32} = {{l32*p2}}/({{p2}}) = {{l32}}$, leaving $U = {{U}}$.
+
+      The multipliers go straight into $L$:
+      $$ L = {{L}}. $$
+      Check: $LU = {{L*U}} = A$.
+    verify: "(Matrix([[1, 0, 0], [l21, 1, 0], [l31, l32, 1]])*Matrix([[p1, u12, u13], [0, p2, u23], [0, 0, p3]])).LUdecomposition()[0]"
+    covers: [mit-18-06/lecture-4]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: la-lu-004
+    difficulty: 1
+    type: matrix
+    prompt: |
+      The elimination matrix $E_{ {{[21, 31, 32][pos]}} } = {{E}}$ subtracts ${{l}}$ times row ${{[1, 1, 2][pos]}}$ from row ${{[2, 3, 3][pos]}}$.
+      What is $E_{ {{[21, 31, 32][pos]}} }^{-1}$?
+
+      Enter it as `[[a, b, c], [d, e, f], [g, h, i]]`.
+    params:
+      pos: { int: [1, 3] }
+      l: { int: [-5, 5], not: [0] }
+    let:
+      N: "pos == 1 ? [[0, 0, 0], [1, 0, 0], [0, 0, 0]] : (pos == 2 ? [[0, 0, 0], [0, 0, 0], [1, 0, 0]] : [[0, 0, 0], [0, 0, 0], [0, 1, 0]])"
+      E: "identity(3) - l*N"
+      Einv: "identity(3) + l*N"
+    answer: Einv
+    hints:
+      - 'To undo "subtract ${{l}}$ times a row", **add** ${{l}}$ times that row back.'
+    solution: |
+      The inverse operation adds ${{l}}$ times row ${{[1, 1, 2][pos]}}$ back to row ${{[2, 3, 3][pos]}}$, so only the sign of the off-diagonal entry changes:
+      $$ E_{ {{[21, 31, 32][pos]}} }^{-1} = {{Einv}}. $$
+      Check: $E\,E^{-1} = {{E*Einv}}$.
+    verify: "(lambda rc: (eye(3) - l*Matrix(3, 3, lambda i, j: 1 if (i, j) == rc else 0)).inv())([(1, 0), (2, 0), (2, 1)][pos - 1])"
+    covers: [mit-18-06/lecture-4]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: la-lu-005
+    difficulty: 3
+    type: multipart
+    prompt: |
+      Elimination on a $3 \times 3$ matrix uses $E_{21}$, which subtracts ${{a}}$ times row 1 from row 2, and then $E_{32}$, which subtracts ${{b}}$ times row 2 from row 3
+      (no $E_{31}$ step is needed).
+
+      Enter each matrix as `[[a, b, c], [d, e, f], [g, h, i]]`.
+    params:
+      a: { int: [-3, 3], not: [0] }
+      b: { int: [-3, 3], not: [0] }
+    let:
+      E21: "[[1, 0, 0], [-a, 1, 0], [0, 0, 1]]"
+      E32: "[[1, 0, 0], [0, 1, 0], [0, -b, 1]]"
+    parts:
+      - prompt: "(a) Compute $E = E_{32}E_{21}$, the matrix that does both steps."
+        type: matrix
+        answer: "E32*E21"
+        verify: "Matrix([[1, 0, 0], [0, 1, 0], [0, -b, 1]])*Matrix([[1, 0, 0], [-a, 1, 0], [0, 0, 1]])"
+      - prompt: "(b) Compute $L = E^{-1} = E_{21}^{-1}E_{32}^{-1}$."
+        type: matrix
+        answer: "round(inv(E32*E21))"
+        verify: "(Matrix([[1, 0, 0], [0, 1, 0], [0, -b, 1]])*Matrix([[1, 0, 0], [-a, 1, 0], [0, 0, 1]])).inv()"
+    hints:
+      - '$E_{21} = {{E21}}$ and $E_{32} = {{E32}}$.'
+      - 'In $E$ the steps interact: row 3 loses ${{b}}$ times the **new** row 2, which already contains $-{{a}}$ times row 1. In $L$ they do not interact.'
+    solution: |
+      (a) $$ E = E_{32}E_{21} = {{E32}}{{E21}} = {{E32*E21}}. $$
+      The $(3, 1)$ entry ${{a*b}} = ({{a}})({{b}})$ appears because row 2 was changed before it was subtracted from row 3.
+
+      (b) Inverting each factor flips the sign of its multiplier, and in the reverse order they do not interact:
+      $$ L = E_{21}^{-1}E_{32}^{-1} = {{round(inv(E21))}}{{round(inv(E32))}} = {{round(inv(E32*E21))}}. $$
+      The multipliers ${{a}}$ and ${{b}}$ sit in $L$ exactly where they were used; this is why $A = LU$ is more convenient than $EA = U$.
+    covers: [mit-18-06/lecture-4]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: la-lu-006
+    difficulty: 3
+    type: multipart
+    prompt: |
+      Factor $A = {{A}}$ as $A = LDU$: $L$ lower triangular with 1s on its diagonal, $D$ diagonal, and $U$ upper triangular with 1s on its diagonal.
+
+      Enter each matrix as `[[a, b], [c, d]]`.
+    params:
+      a: { choice: [1, -1, 2, -2, 3] }
+      l: { int: [-3, 3], not: [0] }
+      u: { int: [-3, 3], not: [0] }
+      d2: { int: [-4, 4], not: [0] }
+    let:
+      A: "[[a, a*u], [l*a, l*a*u + d2]]"
+      D: "[[a, 0], [0, d2]]"
+      Uu: "[[1, u], [0, 1]]"
+    parts:
+      - prompt: "(a) $D$"
+        type: matrix
+        answer: D
+        verify: "(lambda U0: diag(U0[0, 0], U0[1, 1]))(Matrix([[a, a*u], [l*a, l*a*u + d2]]).LUdecomposition()[1])"
+      - prompt: "(b) $U$ (with 1s on its diagonal)"
+        type: matrix
+        answer: Uu
+        verify: "(lambda U0: diag(U0[0, 0], U0[1, 1]).inv()*U0)(Matrix([[a, a*u], [l*a, l*a*u + d2]]).LUdecomposition()[1])"
+    hints:
+      - 'First find $A = LU$ the usual way; the diagonal of that $U$ holds the pivots.'
+      - 'Divide each row of that $U$ by its pivot: the pivots form $D$ and what is left is the unit upper triangular $U$.'
+    solution: |
+      The multiplier is $\ell_{21} = {{l*a}}/({{a}}) = {{l}}$, and elimination gives
+      $$ A = {{[[1, 0], [l, 1]]}}{{[[a, a*u], [0, d2]]}}. $$
+      Factor the pivots ${{a}}$ and ${{d2}}$ out of the rows of the upper triangular factor:
+      $$ {{[[a, a*u], [0, d2]]}} = {{D}}{{Uu}}. $$
+      So $D = {{D}}$ and $U = {{Uu}}$, with $L = {{[[1, 0], [l, 1]]}}$.
+    covers: [mit-18-06/lecture-4]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: la-lu-007
+    difficulty: 3
+    type: multipart
+    prompt: |
+      $A = LU$ with
+      $$ L = {{L}}, \qquad U = {{U}}. $$
+      Solve $A\mathbf{x} = \mathbf{b}$ for $\mathbf{b} = {{b}}$ in two triangular steps.
+
+      Enter each vector as a list such as `1, 2, 3`.
+    params:
+      l21: { int: [-2, 2] }
+      l31: { int: [-2, 2] }
+      l32: { int: [-2, 2] }
+      p1: { choice: [1, -1, 2] }
+      p2: { choice: [1, -1, 2, -2] }
+      p3: { choice: [1, -1, 3] }
+      u12: { int: [-2, 2] }
+      u13: { int: [-2, 2] }
+      u23: { int: [-2, 2] }
+      x1: { int: [-3, 3] }
+      x2: { int: [-3, 3] }
+      x3: { int: [-3, 3] }
+    let:
+      L: "[[1, 0, 0], [l21, 1, 0], [l31, l32, 1]]"
+      U: "[[p1, u12, u13], [0, p2, u23], [0, 0, p3]]"
+      x: "[x1, x2, x3]"
+      c: "U*x"
+      b: "L*c"
+    parts:
+      - prompt: "(a) Forward substitution: solve $L\\mathbf{c} = \\mathbf{b}$ for $\\mathbf{c}$."
+        type: vector
+        answer: c
+        verify: "list(Matrix([[1, 0, 0], [l21, 1, 0], [l31, l32, 1]]).LUsolve(Matrix([[1, 0, 0], [l21, 1, 0], [l31, l32, 1]])*Matrix([[p1, u12, u13], [0, p2, u23], [0, 0, p3]])*Matrix([x1, x2, x3])))"
+      - prompt: "(b) Back substitution: using your $\\mathbf{c}$, solve $U\\mathbf{x} = \\mathbf{c}$ for $\\mathbf{x}$."
+        type: vector
+        answer: "inv(U)*part1"
+        tolerance: { abs: 0.001 }
+        verify: "list(Matrix([[p1, u12, u13], [0, p2, u23], [0, 0, p3]]).LUsolve(Matrix(part1)))"
+    hints:
+      - '$A\mathbf{x} = LU\mathbf{x} = \mathbf{b}$. Put $\mathbf{c} = U\mathbf{x}$: first $L\mathbf{c} = \mathbf{b}$, then $U\mathbf{x} = \mathbf{c}$.'
+      - 'For $L\mathbf{c} = \mathbf{b}$ go top to bottom: $c_1 = {{b[1]}}$, then $c_2 = {{b[2]}} - ({{l21}})c_1$, …'
+    solution: |
+      (a) Top to bottom:
+      $c_1 = {{b[1]}}$, $\ c_2 = {{b[2]}} - ({{l21}})({{c[1]}}) = {{c[2]}}$, $\ c_3 = {{b[3]}} - ({{l31}})({{c[1]}}) - ({{l32}})({{c[2]}}) = {{c[3]}}$.
+      So $\mathbf{c} = {{row: c}}$.
+
+      (b) Bottom to top:
+      $x_3 = {{c[3]}}/({{p3}}) = {{x3}}$, $\ x_2 = \big({{c[2]}} - ({{u23}})({{x3}})\big)/({{p2}}) = {{x2}}$,
+      $\ x_1 = \big({{c[1]}} - ({{u12}})({{x2}}) - ({{u13}})({{x3}})\big)/({{p1}}) = {{x1}}$.
+      So $\mathbf{x} = {{row: x}}$.
+
+      Two triangular solves cost about $n^2$ operations each, far less than eliminating $A$ again for every new $\mathbf{b}$.
+    covers: [mit-18-06/lecture-4]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: la-lu-008
+    difficulty: 3
+    type: estimate
+    prompt: |
+      Elimination on an $n \times n$ matrix $A$ (ignoring $\mathbf{b}$): when $k$ rows remain to be processed, each of the $k - 1$ rows below the pivot
+      needs $k$ multiply–subtract operations. **Roughly** how many multiply–subtract operations does the whole elimination take for $n = {{n}}$?
+      (Within a factor of 2 is accepted.)
+    params:
+      n: { choice: [10, 30, 100, 300, 1000, 3000] }
+    answer: "(n^3 - n) / 3"
+    factor: 2
+    hints:
+      - 'Add up $k(k - 1) = k^2 - k$ for $k = 1, \dots, n$.'
+      - 'For large $n$, $1^2 + 2^2 + \dots + n^2 \approx n^3/3$.'
+    solution: |
+      The total is
+      $$ \sum_{k=1}^{n} k(k - 1) = \sum_{k=1}^{n} k^2 - \sum_{k=1}^{n} k = \frac{n(n+1)(2n+1)}{6} - \frac{n(n+1)}{2} = \frac{n^3 - n}{3}. $$
+      For $n = {{n}}$ that is ${{(n^3 - n) / 3}}$, about $n^3/3$. Doubling $n$ multiplies the work by about 8.
+    verify: "sum(k*(k - 1) for k in range(1, n + 1))"
+    covers: [mit-18-06/lecture-4]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: la-lu-009
+    difficulty: 4
+    type: multipart
+    prompt: |
+      $$ A = {{A}} $$
+      needs a row exchange before elimination can start. Let $P$ exchange rows 1 and 2. Find $L$ and $U$ in $PA = LU$
+      ($L$ lower triangular with 1s on the diagonal, $U$ upper triangular).
+
+      Enter each matrix as `[[a, b, c], [d, e, f], [g, h, i]]`.
+    params:
+      l31: { int: [-2, 2], not: [0] }
+      l32: { int: [-2, 2] }
+      p1: { choice: [1, -1, 2] }
+      p2: { choice: [1, -1, 2, -2] }
+      p3: { int: [-3, 3], not: [0] }
+      u12: { int: [-3, 3] }
+      u13: { int: [-3, 3] }
+      u23: { int: [-3, 3] }
+    let:
+      P: "[[0, 1, 0], [1, 0, 0], [0, 0, 1]]"
+      L: "[[1, 0, 0], [0, 1, 0], [l31, l32, 1]]"
+      U: "[[p1, u12, u13], [0, p2, u23], [0, 0, p3]]"
+      A: "P*L*U"
+    parts:
+      - prompt: "(a) $L$"
+        type: matrix
+        answer: L
+        verify: "(Matrix([[0, 1, 0], [1, 0, 0], [0, 0, 1]])*Matrix([[0, 1, 0], [1, 0, 0], [0, 0, 1]])*Matrix([[1, 0, 0], [0, 1, 0], [l31, l32, 1]])*Matrix([[p1, u12, u13], [0, p2, u23], [0, 0, p3]])).LUdecomposition()[0]"
+      - prompt: "(b) $U$"
+        type: matrix
+        answer: U
+        verify: "(Matrix([[0, 1, 0], [1, 0, 0], [0, 0, 1]])*Matrix([[0, 1, 0], [1, 0, 0], [0, 0, 1]])*Matrix([[1, 0, 0], [0, 1, 0], [l31, l32, 1]])*Matrix([[p1, u12, u13], [0, p2, u23], [0, 0, p3]])).LUdecomposition()[1]"
+    hints:
+      - 'Exchange rows 1 and 2 first: $PA = {{P*A}}$. Now eliminate as usual.'
+      - 'In $PA$ the $(2, 1)$ entry is already 0, so $\ell_{21} = 0$.'
+    solution: |
+      $$ PA = {{P*A}}. $$
+      Column 1: $\ell_{21} = 0/({{p1}}) = 0$ and $\ell_{31} = {{l31*p1}}/({{p1}}) = {{l31}}$. Row 3 becomes $(0,\ {{l32*p2}},\ {{l32*u23 + p3}})$.
+      Column 2: $\ell_{32} = {{l32*p2}}/({{p2}}) = {{l32}}$, which leaves the third pivot ${{p3}}$. So
+      $$ L = {{L}}, \qquad U = {{U}}. $$
+      Check: $LU = {{L*U}} = PA$.
+    covers: [mit-18-06/lecture-4]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 7
+
+  - id: la-lu-010
+    difficulty: 5
+    type: proof
+    prompt: |
+      Suppose an invertible matrix has two factorisations $A = L_1U_1 = L_2U_2$, where $L_1, L_2$ are lower triangular with 1s on the diagonal and $U_1, U_2$ are upper triangular.
+      Prove that $L_1 = L_2$ and $U_1 = U_2$.
+    hints:
+      - 'Why are $U_1$ and $U_2$ invertible? Rearrange to get $L_2^{-1}L_1 = U_2U_1^{-1}$.'
+      - 'Inverses and products of lower triangular matrices with unit diagonal are again of that kind; the same holds for upper triangular matrices.'
+      - 'Which matrices are both lower triangular with unit diagonal and upper triangular?'
+    solution: |
+      $A$ is invertible and $L_1$ is invertible ($\det L_1 = 1$), so $U_1 = L_1^{-1}A$ is invertible; likewise $U_2$.
+      From $L_1U_1 = L_2U_2$, multiply on the left by $L_2^{-1}$ and on the right by $U_1^{-1}$:
+      $$ L_2^{-1}L_1 = U_2U_1^{-1}. $$
+      The left side is lower triangular with 1s on the diagonal (the inverse of a unit lower triangular matrix is unit lower triangular, as is a product of two such).
+      The right side is upper triangular (inverses and products of upper triangular matrices stay upper triangular).
+      A matrix that is both lower and upper triangular is diagonal, and this one has 1s on its diagonal, so it is $I$.
+      Hence $L_2^{-1}L_1 = I$, i.e. $L_1 = L_2$, and $U_2U_1^{-1} = I$, i.e. $U_1 = U_2$.
+    covers: [mit-18-06/lecture-4]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 8
+
+  - id: la-lu-011
+    difficulty: 4
+    type: vector
+    prompt: |
+      The symmetric matrix
+      $$ S = {{S}} $$
+      factors as $S = LDL^{\mathsf T}$ without row exchanges. What are the pivots $d_1, d_2, d_3$ (the diagonal of $D$)?
+
+      Enter them as a list `d1, d2, d3`.
+    params:
+      l21: { int: [-2, 2] }
+      l31: { int: [-2, 2] }
+      l32: { int: [-2, 2] }
+      d1: { choice: [1, -1, 2, -2] }
+      d2: { choice: [1, -1, 2, -2, 3] }
+      d3: { int: [-4, 4], not: [0] }
+    let:
+      L: "[[1, 0, 0], [l21, 1, 0], [l31, l32, 1]]"
+      D: "[[d1, 0, 0], [0, d2, 0], [0, 0, d3]]"
+      S: "L*D*transpose(L)"
+      S1: "S - [[1, 0, 0], [l21, 0, 0], [l31, 0, 0]] * [[d1, 0, 0], [0, 0, 0], [0, 0, 0]] * [[1, l21, l31], [0, 0, 0], [0, 0, 0]]"
+    answer: "[d1, d2, d3]"
+    hints:
+      - 'The pivots of $LDL^{\mathsf T}$ are the pivots of ordinary elimination on $S$.'
+      - 'The first pivot is $s_{11} = {{d1}}$. After clearing column 1 the lower-right $2 \times 2$ block is ${{[[S1[2,2], S1[2,3]], [S1[3,2], S1[3,3]]]}}$.'
+    solution: |
+      Eliminate on $S$. The first pivot is $d_1 = {{d1}}$, with multipliers $\ell_{21} = {{S[2,1]}}/({{d1}}) = {{l21}}$ and $\ell_{31} = {{S[3,1]}}/({{d1}}) = {{l31}}$.
+      Clearing column 1 leaves the symmetric block
+      $$ {{[[S1[2,2], S1[2,3]], [S1[3,2], S1[3,3]]]}}, $$
+      whose first entry is the second pivot $d_2 = {{d2}}$. Then $\ell_{32} = {{S1[3,2]}}/({{d2}}) = {{l32}}$ and the last pivot is
+      ${{S1[3,3]}} - ({{l32}})({{S1[2,3]}}) = {{d3}}$.
+
+      So the pivots are ${{row: [d1, d2, d3]}}$, and indeed $S = LDL^{\mathsf T}$ with $L = {{L}}$: symmetry makes the upper factor $L^{\mathsf T}$.
+    verify: "(lambda U0: [U0[i, i] for i in range(3)])((Matrix([[1, 0, 0], [l21, 1, 0], [l31, l32, 1]])*diag(d1, d2, d3)*Matrix([[1, 0, 0], [l21, 1, 0], [l31, l32, 1]]).T).LUdecomposition()[1])"
+    covers: [mit-18-06/lecture-4]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6

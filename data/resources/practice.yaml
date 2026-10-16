@@ -1,0 +1,367 @@
+# The practice brief of 2026-10-16: books, problem sources and tools for the daily sets and beyond.
+# Every url below was fetched on 2026-10-16 by `npm run check:links -- --titles` on GitHub's runner and its page
+# title checked against the resource. The rest could not be confirmed (a bot check, a missing page, or a title that
+# says nothing) and keep `url: null` with a search hint (DECISIONS.md).
+# `practiceTopics` lists the question topics a resource helps with; the Practice screen offers it under a solution.
+
+- id: axler-ladr
+  title: "Linear Algebra Done Right (open-access edition)"
+  short: "Axler LADR"
+  provider: "Sheldon Axler"
+  type: book
+  url: "https://linear.axler.net/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [math]
+  level: intermediate
+  cost: free
+  estHours: 80
+  practiceTopics: [linear-algebra/vector-spaces-and-subspaces, linear-algebra/independence-basis-dimension, linear-algebra/linear-transformations-and-change-of-basis, linear-algebra/eigenvalues-and-eigenvectors, linear-algebra/symmetric-matrices]
+  summary: "Determinant-free, proof-first linear algebra; the open-access fourth edition, with exercises after every section."
+
+- id: strang-ila-book
+  title: "Introduction to Linear Algebra (book site and problem sets)"
+  short: "Strang ILA"
+  provider: "Gilbert Strang"
+  type: book
+  url: "https://math.mit.edu/~gs/linearalgebra/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [math]
+  level: intro
+  cost: paid
+  estHours: 60
+  practiceTopics: [linear-algebra/vectors-and-linear-combinations, linear-algebra/matrices-and-elimination, linear-algebra/vector-spaces-and-subspaces, linear-algebra/independence-basis-dimension, linear-algebra/orthogonality-and-projections, linear-algebra/determinants, linear-algebra/eigenvalues-and-eigenvectors, linear-algebra/linear-transformations-and-change-of-basis]
+  summary: "The textbook behind 18.06. The book site carries problem sets and solutions that match the lectures."
+
+- id: hefferon-linear-algebra
+  title: "Linear Algebra (Hefferon), with answers to exercises"
+  short: "Hefferon"
+  provider: "Jim Hefferon"
+  type: book
+  url: "https://hefferon.net/linearalgebra/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [math]
+  level: intro
+  cost: free
+  estHours: 60
+  practiceTopics: [linear-algebra/vectors-and-linear-combinations, linear-algebra/matrices-and-elimination, linear-algebra/vector-spaces-and-subspaces, linear-algebra/independence-basis-dimension, linear-algebra/orthogonality-and-projections, linear-algebra/determinants, linear-algebra/eigenvalues-and-eigenvectors, linear-algebra/linear-transformations-and-change-of-basis]
+  summary: "A free textbook with a full answer book: a deep well of extra exercises for every topic of the daily set."
+
+- id: vmls-book
+  title: "Introduction to Applied Linear Algebra: Vectors, Matrices, and Least Squares"
+  short: "VMLS"
+  provider: "Boyd & Vandenberghe"
+  type: book
+  url: "https://web.stanford.edu/~boyd/vmls/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [math, ai]
+  level: intro
+  cost: free
+  estHours: 50
+  practiceTopics: [linear-algebra/vectors-and-linear-combinations, linear-algebra/matrix-multiplication-and-inverses, linear-algebra/least-squares, linear-algebra/gram-schmidt-and-qr]
+  summary: "Linear algebra for applications: least squares, data fitting and control, with exercises and a Julia companion."
+
+- id: halmos-la-problem-book
+  title: "Linear Algebra Problem Book"
+  short: "Halmos problems"
+  provider: "Paul Halmos"
+  type: problems
+  url: null
+  urlVerified: false
+  searchHint: "Halmos Linear Algebra Problem Book Dolciani Mathematical Expositions"
+  tracks: [math]
+  level: advanced
+  cost: paid
+  estHours: 40
+  practiceTopics: [linear-algebra/vector-spaces-and-subspaces, linear-algebra/independence-basis-dimension, linear-algebra/linear-transformations-and-change-of-basis, linear-algebra/eigenvalues-and-eigenvectors, linear-algebra/symmetric-matrices]
+  summary: "Problems with hints and solutions that lead through the theory; for the proof questions of the daily set."
+
+- id: pauls-online-math-notes
+  title: "Paul's Online Math Notes (Calculus I-III, differential equations)"
+  short: "Paul's Notes"
+  provider: "Paul Dawkins, Lamar University"
+  type: problems
+  url: "https://tutorial.math.lamar.edu/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [math]
+  level: intro
+  cost: free
+  estHours: 60
+  practiceTopics: [calculus/limits-and-continuity, calculus/derivatives-and-rules, calculus/chain-rule-and-implicit-differentiation, calculus/applications-of-derivatives, calculus/integrals-and-the-fundamental-theorem, calculus/substitution-and-integration-by-parts, calculus/applications-of-integrals, calculus/exponentials-logarithms-lhopital, calculus/sequences-series-taylor, calculus/vectors-dot-and-cross-product, calculus/partial-derivatives-and-gradients, calculus/directional-derivatives-and-tangent-planes, calculus/multivariable-optimisation-lagrange, calculus/double-and-triple-integrals, calculus/line-integrals-and-greens-theorem, calculus/flux-divergence-curl]
+  summary: "Notes with practice and assignment problems, worked solutions for the practice set, for every calculus topic of the daily set."
+
+- id: openstax-calculus
+  title: "OpenStax Calculus, volumes 1-3"
+  short: "OpenStax Calculus"
+  provider: "OpenStax"
+  type: book
+  url: "https://openstax.org/books/calculus-volume-1/pages/preface"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [math]
+  level: intro
+  cost: free
+  estHours: 90
+  practiceTopics: [calculus/limits-and-continuity, calculus/derivatives-and-rules, calculus/chain-rule-and-implicit-differentiation, calculus/applications-of-derivatives, calculus/integrals-and-the-fundamental-theorem, calculus/substitution-and-integration-by-parts, calculus/applications-of-integrals, calculus/exponentials-logarithms-lhopital, calculus/sequences-series-taylor, calculus/vectors-dot-and-cross-product, calculus/partial-derivatives-and-gradients, calculus/directional-derivatives-and-tangent-planes, calculus/multivariable-optimisation-lagrange, calculus/double-and-triple-integrals, calculus/line-integrals-and-greens-theorem, calculus/flux-divergence-curl]
+  summary: "A free three-volume calculus text with answers to the odd exercises: single-variable, series, multivariable and vector calculus."
+
+- id: khan-academy-calculus
+  title: "Khan Academy: Calculus, multivariable calculus and differential equations"
+  short: "Khan Academy calculus"
+  provider: "Khan Academy"
+  type: course
+  url: null
+  urlVerified: false
+  searchHint: "Khan Academy calculus multivariable differential equations"
+  tracks: [math]
+  level: intro
+  cost: free
+  estHours: 60
+  practiceTopics: [calculus/limits-and-continuity, calculus/derivatives-and-rules, calculus/chain-rule-and-implicit-differentiation, calculus/applications-of-derivatives, calculus/integrals-and-the-fundamental-theorem, calculus/substitution-and-integration-by-parts, calculus/applications-of-integrals, calculus/exponentials-logarithms-lhopital, calculus/sequences-series-taylor, calculus/vectors-dot-and-cross-product, calculus/partial-derivatives-and-gradients, calculus/directional-derivatives-and-tangent-planes, calculus/multivariable-optimisation-lagrange, calculus/double-and-triple-integrals, calculus/line-integrals-and-greens-theorem, calculus/flux-divergence-curl]
+  summary: "Short videos with mastery exercises; good for a quick second explanation when a topic stalls."
+
+- id: blitzstein-hwang-probability
+  title: "Introduction to Probability (Blitzstein & Hwang)"
+  short: "Blitzstein & Hwang"
+  provider: "Joseph Blitzstein, Jessica Hwang"
+  type: book
+  url: "http://probabilitybook.net/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [math, ai]
+  level: intermediate
+  cost: free
+  estHours: 80
+  summary: "The Stat 110 textbook, free as a PDF, with strategic practice problems and solutions."
+
+- id: seeing-theory
+  title: "Seeing Theory"
+  provider: "Brown University"
+  type: tool
+  url: "https://seeing-theory.brown.edu/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [math]
+  level: intro
+  cost: free
+  estHours: 4
+  summary: "Interactive visual introduction to probability and statistics."
+
+- id: openstax-university-physics
+  title: "OpenStax University Physics, volumes 1-3"
+  short: "OpenStax Physics"
+  provider: "OpenStax"
+  type: book
+  url: "https://openstax.org/books/university-physics-volume-1/pages/preface"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [physics]
+  level: intro
+  cost: free
+  estHours: 100
+  practiceTopics: [physics/units-dimensions-vectors, physics/kinematics-1d-2d, physics/projectile-motion, physics/newtons-laws-free-body-diagrams, physics/friction-and-inclines, physics/circular-motion, physics/work-and-kinetic-energy, physics/potential-energy-and-conservation, physics/momentum-impulse-collisions, physics/centre-of-mass, physics/rotational-kinematics, physics/torque-and-moment-of-inertia, physics/angular-momentum, physics/rolling-motion, physics/static-equilibrium, physics/gravitation-and-orbits, physics/simple-harmonic-motion, physics/damped-and-driven-oscillations]
+  summary: "A free calculus-based physics text with answers to the odd problems: mechanics, waves, thermodynamics, E&M, optics and modern physics."
+
+- id: hyperphysics
+  title: "HyperPhysics"
+  provider: "Georgia State University"
+  type: tool
+  url: "http://hyperphysics.phy-astr.gsu.edu/hbase/hframe.html"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [physics]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  practiceTopics: [physics/units-dimensions-vectors, physics/kinematics-1d-2d, physics/projectile-motion, physics/newtons-laws-free-body-diagrams, physics/friction-and-inclines, physics/circular-motion, physics/work-and-kinetic-energy, physics/potential-energy-and-conservation, physics/momentum-impulse-collisions, physics/centre-of-mass, physics/rotational-kinematics, physics/torque-and-moment-of-inertia, physics/angular-momentum, physics/rolling-motion, physics/static-equilibrium, physics/gravitation-and-orbits, physics/simple-harmonic-motion, physics/damped-and-driven-oscillations]
+  summary: "A concept map of physics with short worked explanations; a reference, consulted rather than completed."
+
+- id: physics-libretexts
+  title: "Physics LibreTexts"
+  provider: "LibreTexts"
+  type: book
+  url: "https://phys.libretexts.org/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [physics]
+  level: intro
+  cost: free
+  estHours: 0
+  reference: true
+  practiceTopics: [physics/units-dimensions-vectors, physics/kinematics-1d-2d, physics/projectile-motion, physics/newtons-laws-free-body-diagrams, physics/friction-and-inclines, physics/circular-motion, physics/work-and-kinetic-energy, physics/potential-energy-and-conservation, physics/momentum-impulse-collisions, physics/centre-of-mass, physics/rotational-kinematics, physics/torque-and-moment-of-inertia, physics/angular-momentum, physics/rolling-motion, physics/static-equilibrium, physics/gravitation-and-orbits, physics/simple-harmonic-motion, physics/damped-and-driven-oscillations]
+  summary: "A library of open physics texts; a reference for any topic of the daily set."
+
+- id: morin-mechanics-problems
+  title: "Problems and Solutions in Introductory Mechanics"
+  short: "Morin problems"
+  provider: "David Morin"
+  type: problems
+  url: null
+  urlVerified: false
+  searchHint: "David Morin Problems and Solutions in Introductory Mechanics"
+  tracks: [physics]
+  level: intermediate
+  cost: paid
+  estHours: 60
+  practiceTopics: [physics/units-dimensions-vectors, physics/kinematics-1d-2d, physics/projectile-motion, physics/newtons-laws-free-body-diagrams, physics/friction-and-inclines, physics/circular-motion, physics/work-and-kinetic-energy, physics/potential-energy-and-conservation, physics/momentum-impulse-collisions, physics/centre-of-mass, physics/rotational-kinematics, physics/torque-and-moment-of-inertia, physics/angular-momentum, physics/rolling-motion, physics/static-equilibrium, physics/gravitation-and-orbits, physics/simple-harmonic-motion, physics/damped-and-driven-oscillations]
+  summary: "Hundreds of mechanics problems, each with a full solution; harder than the daily set, for topics already done."
+
+- id: walter-lewin-lectures
+  title: "Walter Lewin lectures (8.01, 8.02, 8.03)"
+  short: "Walter Lewin"
+  provider: "Walter Lewin"
+  type: lectures
+  url: null
+  urlVerified: false
+  searchHint: "Walter Lewin lectures 8.01 classical mechanics YouTube"
+  tracks: [physics]
+  level: intro
+  cost: free
+  estHours: 100
+  practiceTopics: [physics/units-dimensions-vectors, physics/kinematics-1d-2d, physics/projectile-motion, physics/newtons-laws-free-body-diagrams, physics/friction-and-inclines, physics/circular-motion, physics/work-and-kinetic-energy, physics/potential-energy-and-conservation, physics/momentum-impulse-collisions, physics/centre-of-mass, physics/rotational-kinematics, physics/torque-and-moment-of-inertia, physics/angular-momentum, physics/rolling-motion, physics/static-equilibrium, physics/gravitation-and-orbits, physics/simple-harmonic-motion, physics/damped-and-driven-oscillations]
+  summary: "The classic MIT physics lectures with demonstrations, a companion to 8.01 and 8.02."
+
+- id: tong-lecture-notes
+  title: "David Tong's lecture notes (classical dynamics, electromagnetism, quantum)"
+  short: "Tong notes"
+  provider: "David Tong, Cambridge"
+  type: book
+  url: "https://davidtong.org/teaching/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [physics]
+  level: advanced
+  cost: free
+  estHours: 120
+  practiceTopics: [physics/angular-momentum, physics/gravitation-and-orbits, physics/simple-harmonic-motion]
+  summary: "Cambridge lecture notes with example sheets, for after the intro sequence: Lagrangian and Hamiltonian dynamics, E&M, quantum."
+
+- id: book-of-proof
+  title: "Book of Proof"
+  provider: "Richard Hammack"
+  type: book
+  url: "https://richardhammack.github.io/BookOfProof/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [math, swe]
+  level: intro
+  cost: free
+  estHours: 40
+  practiceTopics: [linear-algebra/vector-spaces-and-subspaces, linear-algebra/independence-basis-dimension, linear-algebra/linear-transformations-and-change-of-basis, linear-algebra/eigenvalues-and-eigenvectors, linear-algebra/symmetric-matrices]
+  summary: "A free introduction to proofs: logic, sets, induction, contradiction, with solutions to odd exercises. Behind the proof questions."
+
+- id: cses-problem-set
+  title: "CSES Problem Set"
+  short: "CSES"
+  provider: "CSES"
+  type: problems
+  url: "https://cses.fi/problemset/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [swe]
+  level: intermediate
+  cost: free
+  estHours: 120
+  summary: "Some 300 classic algorithm problems with an online judge, grouped by technique."
+
+- id: codeforces-edu
+  title: "Codeforces EDU"
+  provider: "Codeforces"
+  type: problems
+  url: "https://codeforces.com/edu/courses"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [swe]
+  level: intermediate
+  cost: free
+  estHours: 60
+  summary: "Lessons with graded practice problems on binary search, two pointers, segment trees and more."
+
+- id: usaco-guide
+  title: "USACO Guide"
+  provider: "USACO Guide"
+  type: problems
+  url: "https://usaco.guide/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [swe]
+  level: intro
+  cost: free
+  estHours: 100
+  summary: "A curated path from bronze to platinum, every module with practice problems and solutions."
+
+- id: matrix-calculus-dl
+  title: "The Matrix Calculus You Need for Deep Learning"
+  short: "Matrix calculus for DL"
+  provider: "Terence Parr & Jeremy Howard"
+  type: article
+  url: "https://explained.ai/matrix-calculus/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [math, ai]
+  level: intermediate
+  cost: free
+  estHours: 6
+  practiceTopics: [calculus/partial-derivatives-and-gradients, calculus/chain-rule-and-implicit-differentiation]
+  summary: "Jacobians, the vector chain rule and the gradients of neural network layers, worked out by hand."
+
+- id: transformer-math-101
+  title: "Transformer Math 101"
+  provider: "EleutherAI"
+  type: article
+  url: "https://blog.eleuther.ai/transformer-math/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [ai, systems]
+  level: intermediate
+  cost: free
+  estHours: 2
+  summary: "Back-of-the-envelope compute, memory and communication estimates for training and serving transformers."
+
+- id: hello-interview
+  title: "Hello Interview (free system design pages)"
+  short: "Hello Interview"
+  provider: "Hello Interview"
+  type: problems
+  url: "https://www.hellointerview.com/learn/system-design/in-a-hurry/introduction"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [systems]
+  level: intermediate
+  cost: free
+  estHours: 20
+  summary: "Free system design guides and worked problems in the interview format."
+
+- id: all-about-circuits
+  title: "All About Circuits: textbook and worksheets"
+  short: "All About Circuits"
+  provider: "All About Circuits"
+  type: book
+  url: null
+  urlVerified: false
+  searchHint: "All About Circuits textbook worksheets"
+  tracks: [ee]
+  level: intro
+  cost: free
+  estHours: 60
+  summary: "A free electronics textbook in six volumes, with worksheets that come with answers."
+
+- id: engineering-statics-open
+  title: "Engineering Statics: Open and Interactive"
+  short: "Engineering Statics"
+  provider: "Baker & Haynes"
+  type: book
+  url: "https://engineeringstatics.org/"
+  urlVerified: true
+  lastVerified: 2026-10-16
+  tracks: [mech, physics]
+  level: intro
+  cost: free
+  estHours: 40
+  practiceTopics: [physics/static-equilibrium, physics/torque-and-moment-of-inertia, physics/centre-of-mass]
+  summary: "A free interactive statics text: equilibrium, trusses, friction and moments of inertia, with exercises."

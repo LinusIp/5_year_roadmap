@@ -18,3 +18,8 @@ reports/
 
 # Throwaway scripts and notes for local work
 scratch/
+
+# The deploy's live check writes these when it fails
+live-check.png
+live-check.log
+live-check.pid
