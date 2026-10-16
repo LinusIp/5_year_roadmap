@@ -1,6 +1,7 @@
 # The practice brief of 2026-10-16: books, problem sources and tools for the daily sets and beyond.
-# The link verifier (npm run check:links -- --titles) could not reach these sites from the machine that added
-# them, so every one is stored with `url: null` and a search hint until a link is verified (DECISIONS.md).
+# Every url below was fetched on 2026-10-16 by `npm run check:links -- --titles` on GitHub's runner and its page
+# title checked against the resource. The rest could not be confirmed (a bot check, a missing page, or a title that
+# says nothing) and keep `url: null` with a search hint (DECISIONS.md).
 # `practiceTopics` lists the question topics a resource helps with; the Practice screen offers it under a solution.
 
 - id: axler-ladr
@@ -8,9 +9,9 @@
   short: "Axler LADR"
   provider: "Sheldon Axler"
   type: book
-  url: null
-  urlVerified: false
-  searchHint: "Axler Linear Algebra Done Right 4th edition open access PDF"
+  url: "https://linear.axler.net/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [math]
   level: intermediate
   cost: free
@@ -23,9 +24,9 @@
   short: "Strang ILA"
   provider: "Gilbert Strang"
   type: book
-  url: null
-  urlVerified: false
-  searchHint: "Strang Introduction to Linear Algebra book website problem sets solutions"
+  url: "https://math.mit.edu/~gs/linearalgebra/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [math]
   level: intro
   cost: paid
@@ -38,9 +39,9 @@
   short: "Hefferon"
   provider: "Jim Hefferon"
   type: book
-  url: null
-  urlVerified: false
-  searchHint: "Jim Hefferon Linear Algebra free textbook answers to exercises"
+  url: "https://hefferon.net/linearalgebra/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [math]
   level: intro
   cost: free
@@ -53,9 +54,9 @@
   short: "VMLS"
   provider: "Boyd & Vandenberghe"
   type: book
-  url: null
-  urlVerified: false
-  searchHint: "Boyd Vandenberghe Introduction to Applied Linear Algebra VMLS free PDF"
+  url: "https://web.stanford.edu/~boyd/vmls/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [math, ai]
   level: intro
   cost: free
@@ -83,9 +84,9 @@
   short: "Paul's Notes"
   provider: "Paul Dawkins, Lamar University"
   type: problems
-  url: null
-  urlVerified: false
-  searchHint: "Paul's Online Math Notes Lamar calculus practice problems"
+  url: "https://tutorial.math.lamar.edu/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [math]
   level: intro
   cost: free
@@ -128,9 +129,9 @@
   short: "Blitzstein & Hwang"
   provider: "Joseph Blitzstein, Jessica Hwang"
   type: book
-  url: null
-  urlVerified: false
-  searchHint: "Blitzstein Hwang Introduction to Probability free PDF"
+  url: "http://probabilitybook.net/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [math, ai]
   level: intermediate
   cost: free
@@ -141,9 +142,9 @@
   title: "Seeing Theory"
   provider: "Brown University"
   type: tool
-  url: null
-  urlVerified: false
-  searchHint: "Seeing Theory Brown University visual introduction to probability and statistics"
+  url: "https://seeing-theory.brown.edu/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [math]
   level: intro
   cost: free
@@ -169,9 +170,9 @@
   title: "HyperPhysics"
   provider: "Georgia State University"
   type: tool
-  url: null
-  urlVerified: false
-  searchHint: "HyperPhysics Georgia State University concept map"
+  url: "http://hyperphysics.phy-astr.gsu.edu/hbase/hframe.html"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [physics]
   level: intro
   cost: free
@@ -184,9 +185,9 @@
   title: "Physics LibreTexts"
   provider: "LibreTexts"
   type: book
-  url: null
-  urlVerified: false
-  searchHint: "Physics LibreTexts library"
+  url: "https://phys.libretexts.org/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [physics]
   level: intro
   cost: free
@@ -230,9 +231,9 @@
   short: "Tong notes"
   provider: "David Tong, Cambridge"
   type: book
-  url: null
-  urlVerified: false
-  searchHint: "David Tong lecture notes Cambridge classical dynamics electromagnetism quantum mechanics"
+  url: "https://davidtong.org/teaching/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [physics]
   level: advanced
   cost: free
@@ -259,9 +260,9 @@
   short: "CSES"
   provider: "CSES"
   type: problems
-  url: null
-  urlVerified: false
-  searchHint: "CSES Problem Set competitive programming"
+  url: "https://cses.fi/problemset/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [swe]
   level: intermediate
   cost: free
@@ -272,9 +273,9 @@
   title: "Codeforces EDU"
   provider: "Codeforces"
   type: problems
-  url: null
-  urlVerified: false
-  searchHint: "Codeforces EDU courses"
+  url: "https://codeforces.com/edu/courses"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [swe]
   level: intermediate
   cost: free
@@ -285,9 +286,9 @@
   title: "USACO Guide"
   provider: "USACO Guide"
   type: problems
-  url: null
-  urlVerified: false
-  searchHint: "USACO Guide competitive programming"
+  url: "https://usaco.guide/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [swe]
   level: intro
   cost: free
@@ -299,9 +300,9 @@
   short: "Matrix calculus for DL"
   provider: "Terence Parr & Jeremy Howard"
   type: article
-  url: null
-  urlVerified: false
-  searchHint: "Parr Howard The Matrix Calculus You Need For Deep Learning"
+  url: "https://explained.ai/matrix-calculus/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [math, ai]
   level: intermediate
   cost: free
@@ -313,9 +314,9 @@
   title: "Transformer Math 101"
   provider: "EleutherAI"
   type: article
-  url: null
-  urlVerified: false
-  searchHint: "EleutherAI blog Transformer Math 101"
+  url: "https://blog.eleuther.ai/transformer-math/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [ai, systems]
   level: intermediate
   cost: free
@@ -327,9 +328,9 @@
   short: "Hello Interview"
   provider: "Hello Interview"
   type: problems
-  url: null
-  urlVerified: false
-  searchHint: "Hello Interview system design in a hurry free guides"
+  url: "https://www.hellointerview.com/learn/system-design/in-a-hurry/introduction"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [systems]
   level: intermediate
   cost: free
@@ -355,9 +356,9 @@
   short: "Engineering Statics"
   provider: "Baker & Haynes"
   type: book
-  url: null
-  urlVerified: false
-  searchHint: "Engineering Statics Open and Interactive Baker Haynes"
+  url: "https://engineeringstatics.org/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [mech, physics]
   level: intro
   cost: free
