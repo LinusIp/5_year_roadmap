@@ -671,8 +671,8 @@ Verified on this machine (Linux, Chromium 140):
 - **The bank.** 693 questions: linear algebra 223 (154 templates, 69 %), calculus 224 (185, 83 %), physics 246
   (184, 75 %), every topic at difficulties 1 to 4, in `data/questions/` with `SCHEMA.md`.
 - **Resources.** 25 added (books, problem sources, tools, lectures), mapped to tracks and practice topics; six
-  existing ones mapped to topics. None could be link-verified from the build machine (see DECISIONS), so all 25
-  carry `url: null` and a search hint.
+  existing ones mapped to topics. 20 links verified on GitHub's runner by page title; 5 keep `url: null` and a
+  search hint (see DECISIONS).
 - **Tech docs.** 110, one for every project that is not a weekly build, rendered in the project sheet with
   milestone checkboxes that count toward progress and "Copy as README skeleton".
 
@@ -722,4 +722,20 @@ Verified on this machine (Linux, Chromium 140):
   passes but the four Windows-drawn screenshot comparisons, as before (CI skips them).
 - Lighthouse 13.5 accessibility: 100 on Library with the Projects filter (the long list), Library, a challenge, a
   case sheet, the Deck on Daily, Activity › Projects, Today, Settings and Plan › Projects.
+
+## Pull request #1: CI, screenshots, links, data safety
+
+- CI on the pull request, all green: `verify` (validate, catalogue mapping, typecheck, 331 unit tests, build, 103
+  e2e tests including every screenshot comparison), `questions` (SymPy, 40 draws a template), `screenshots`.
+- The first run caught a real bug: a shuffled Weekly deck could put a challenge on top, and Take it opened it
+  instead of filling Block D. The Weekly deck is builds only.
+- Every screenshot baseline redrawn on CI's Linux, and compared there on every run (no longer skipped).
+- Resources: 20 of the 25 new links verified on GitHub's runner by page title; 5 stay `url: null` with a hint.
+- Upgrade from the live build (Dexie 2, settings without a version, plan.json v1, backup format 1), tested against a
+  fixture that build made itself (`tests/fixtures/live-2026-10-08/`). Found and fixed: restoring an older backup lost
+  its plan edits.
+- A device still on the live build cannot read plan.json v2, settings v2, a day with Practice entries or a review
+  with P (checked with that build's own parsers) and would overwrite them; this build now merges those copies back,
+  writes the newer files again and asks for the device to be updated. Tested with the live build's own files.
+- The Pages deploy checks the live site: update prompt, reload into the new version, the new screens.
 

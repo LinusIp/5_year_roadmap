@@ -415,9 +415,8 @@ it left open; `briefs/PLAN.md` records how the three briefs of that day fit toge
   clock and density. The tabs Projects and Map open Plan's Projects view and the five-year map; Plan's "Roadmaps"
   default opens Credentials, where the roadmaps are.
 - **One pace suggestion on Sunday, dismissed per device.** "Not now" is remembered on the device for that week.
-- **The new screenshot baselines** (`today-compact-light.png`, `change-today-light.png`) were drawn by Chromium on
-  Linux in the build container, not Edge on Windows like the older ones. `npm run screenshots` redraws them all
-  on your machine.
+- **The new screenshot baselines** were first drawn in the build container; since pull request #1 every baseline is
+  drawn on CI's Linux and compared there (DECISIONS, "CI and the deploy").
 
 ## Daily practice, resources and tech docs (the brief of 2026-10-16)
 
@@ -458,10 +457,13 @@ it left open; `briefs/PLAN.md` records how the three briefs of that day fit toge
 - **Activity › Practice appears once there is an answer**, so a fresh install still matches the Activity mockup.
 - **Practice ticks roadmap nodes** through the topic's `covers` in `topics.yaml`; the node then shows "covered by
   Practice", like an item that covers it.
-- **Resources: no link could be verified from here.** The cloud machine that added them cannot reach the course
-  sites (the proxy refuses them), so the link verifier could not fetch any title. All 25 new resources are stored
-  with `url: null` and a search hint, as the rules require; none failed on content. Run `npm run check:links --
-  --titles` from a normal connection and add the URLs that check out. Already in the catalogue and only mapped to
+- **Resources: links verified on GitHub's runner.** The cloud machine that added them cannot reach the course sites,
+  so the verifier ran on GitHub's runner instead (`check:links --titles --candidates`, two rounds in pull request
+  #1). A link was filled in only when its page title named the resource: 20 of the 25. The other 5 keep `url: null`
+  and their search hint: Halmos's problem book (AMS answers bots with a check page), Walter Lewin's lectures (the
+  OCW page is gone; the YouTube channel answers without a title), Khan Academy (a bot challenge), All About Circuits
+  (Cloudflare) and Morin's problems (503). The OpenStax books are their preface pages: the book pages render their
+  title only in the browser. Already in the catalogue and only mapped to
   practice topics: 3Blue1Brown, 18.01, 18.02, 8.01 and Mathematics for Machine Learning; Stat 110, 6.042J, NeetCode,
   the system-design primer, DDIA, the Scaling Book, Susskind and the MIT EE/ME courses were already there too.
 - **Two new resource types**, `problems` (problem sets, judges, exercise collections) and `tool` (software and
@@ -557,4 +559,21 @@ it left open; `briefs/PLAN.md` records how the three briefs of that day fit toge
   notice. Old devices update on their next load (the service worker's update prompt).
 - **A challenge's solution link is stored in `demoUrl`**, not in a new field, so items.json stays readable by older
   devices (their schema is strict and would reject the whole file).
+
+## CI and the deploy (pull request #1)
+
+- **Screenshots are drawn and compared on one platform: CI's Linux.** The old baselines were drawn by Edge on Windows
+  and CI skipped the comparison; the newer ones by Chromium in a cloud container, which CI's Chromium renders
+  differently too (all seven comparisons failed there). Now the `screenshots` job redraws every baseline on CI when
+  a pull request carries `screenshots/.redraw`, commits them, and `verify` compares against them on every run. A
+  run started by that bot commit waits for approval (GitHub's rule for bot pushes); the next push runs normally.
+- **The SymPy check runs on every pull request** (40 draws a template, about five minutes), next to `verify`; the
+  catalogue mapping is checked in `verify`.
+- **The deploy checks the live site as it deploys** (`scripts/live-check.ts`): before deploying, a browser opens the
+  live site as a returning user on the old build; after, the app's own update prompt must appear, Reload must
+  bring in the new version, and five screens must render without an error. The page must be controlled by the old
+  service worker first (a first visit is not), which is what a returning user has. Tried here against the old build
+  swapped for the new one under a running browser.
+- **`check:links --candidates`** checks proposed links for resources that have none, so a link is added only after a
+  fetch confirmed its page title. The one-off job that ran it in pull request #1 is gone; the option stays.
 

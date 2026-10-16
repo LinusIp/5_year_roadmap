@@ -99,9 +99,9 @@
   short: "OpenStax Calculus"
   provider: "OpenStax"
   type: book
-  url: null
-  urlVerified: false
-  searchHint: "OpenStax Calculus Volume 1 2 3 free textbook"
+  url: "https://openstax.org/books/calculus-volume-1/pages/preface"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [math]
   level: intro
   cost: free
@@ -156,9 +156,9 @@
   short: "OpenStax Physics"
   provider: "OpenStax"
   type: book
-  url: null
-  urlVerified: false
-  searchHint: "OpenStax University Physics Volume 1 2 3 free textbook"
+  url: "https://openstax.org/books/university-physics-volume-1/pages/preface"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [physics]
   level: intro
   cost: free
@@ -245,9 +245,9 @@
   title: "Book of Proof"
   provider: "Richard Hammack"
   type: book
-  url: null
-  urlVerified: false
-  searchHint: "Hammack Book of Proof free textbook"
+  url: "https://richardhammack.github.io/BookOfProof/"
+  urlVerified: true
+  lastVerified: 2026-10-16
   tracks: [math, swe]
   level: intro
   cost: free

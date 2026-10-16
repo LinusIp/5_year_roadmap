@@ -89,24 +89,3 @@ jobs:
           git add screenshots
           git commit -q -m "Screenshots: every baseline redrawn on CI's Linux"
           git push
-
-  # One-off for this pull request: the links proposed for the resources added without one, fetched from GitHub's
-  # runner (which has an ordinary internet connection) with their page titles. Report only.
-  links:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: "npm run check:links -- --titles --candidates scripts/link-candidates.json --only candidate: --json"
-      - uses: actions/upload-artifact@v7
-        with:
-          name: links
-          path: reports/links.json
-          retention-days: 7
-
