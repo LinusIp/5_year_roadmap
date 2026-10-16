@@ -84,6 +84,8 @@ export const UserItemStateSchema = z.strictObject({
   writeUp: z.string().optional(),
   /** Stage 2 project cards: what was bought and what it cost. */
   partsNotes: z.string().optional(),
+  /** A catalogue challenge: the link to your solution. */
+  solutionUrl: OptionalUrl,
   budget: z.string().optional(),
   startedAt: IsoDate.optional(),
   doneAt: IsoDate.optional(),
@@ -230,6 +232,27 @@ export const PracticeAnswerSchema = z.strictObject({
   ...Stamp,
 });
 export type PracticeAnswer = z.infer<typeof PracticeAnswerSchema>;
+
+/* ------------------------------------------------------------------ catalogue challenges */
+
+/**
+ * One thing done with a catalogue challenge: solved (in a language), skipped as the day's pick, or hidden for the
+ * day ("Not today"). Append-only like the practice log: the daily pick, the cycles through the pool and the
+ * daily-challenge streak are worked out from it (src/lib/catalogue/daily.ts), so two devices' logs merge by id.
+ */
+export const ChallengeEventSchema = z.strictObject({
+  /** "<date>|<event>|<challenge id>|<n>". */
+  id: z.string().min(1),
+  challengeId: Slug,
+  date: IsoDate,
+  event: z.enum(['solved', 'skipped', 'hidden']),
+  /** The language it was solved in. */
+  language: z.string().trim().min(1).max(40).optional(),
+  /** Whether it was the day's pick (Block B) rather than one opened from the Deck or the Library. */
+  daily: z.boolean().optional(),
+  ...Stamp,
+});
+export type ChallengeEvent = z.infer<typeof ChallengeEventSchema>;
 
 const MinutesByBlock = z.record(BlockIdSchema, z.number());
 
@@ -531,6 +554,8 @@ export const BackupDataSchema = z.strictObject({
   planPatches: z.array(PlanPatchSchema).default([]),
   /** Practice answers (practice brief). Absent from backups made before it. */
   practice: z.array(PracticeAnswerSchema).default([]),
+  /** Catalogue challenges solved, skipped or hidden (catalogue brief). Absent from backups made before it. */
+  challenges: z.array(ChallengeEventSchema).default([]),
   settings: z.array(StoredSettingsSchema),
   meta: z.array(MetaSchema),
 });

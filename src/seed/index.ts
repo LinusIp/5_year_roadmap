@@ -44,3 +44,23 @@ export async function loadDoc(projectId: string): Promise<string | undefined> {
   docsCache ??= (await import('virtual:atlas-docs')).default;
   return docsCache[projectId];
 }
+
+let catalogueCache: import('./catalogue.ts').CatalogueItem[] | null = null;
+let catalogueIndexCache: import('./catalogue.ts').CatalogueEntry[] | null = null;
+
+/** Every catalogue item with all its fields, loading the catalogue chunk on first use. */
+export async function loadCatalogue(): Promise<import('./catalogue.ts').CatalogueItem[]> {
+  catalogueCache ??= (await import('virtual:atlas-catalogue')).default;
+  return catalogueCache;
+}
+
+/** The catalogue's small index, loading its chunk on first use. */
+export async function loadCatalogueIndex(): Promise<import('./catalogue.ts').CatalogueEntry[]> {
+  catalogueIndexCache ??= (await import('virtual:atlas-catalogue-index')).default;
+  return catalogueIndexCache;
+}
+
+/** The index if it is already in memory, so a render can skip the loading state. */
+export function peekCatalogueIndex(): import('./catalogue.ts').CatalogueEntry[] | null {
+  return catalogueIndexCache;
+}

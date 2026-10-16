@@ -23,6 +23,7 @@
     "fetch:units": "node scripts/fetch-units.ts",
     "test:sync": "node scripts/test-sync.ts",
     "verify:questions": "node scripts/verify-questions.ts",
+    "map:catalogue": "node scripts/map-catalogue.ts",
     "check:docs": "node scripts/check-docs.ts"
   },
   "dependencies": {

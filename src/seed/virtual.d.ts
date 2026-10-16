@@ -25,3 +25,15 @@ declare module 'virtual:atlas-docs' {
   const docs: Record<string, string>;
   export default docs;
 }
+
+declare module 'virtual:atlas-catalogue' {
+  /** The three-tier project catalogue, normalised. Loaded with a catalogue item's screen or sheet. */
+  const items: import('./catalogue.ts').CatalogueItem[];
+  export default items;
+}
+
+declare module 'virtual:atlas-catalogue-index' {
+  /** One small entry per catalogue item: Today's daily challenge, the Deck, Library and Activity lists. */
+  const entries: import('./catalogue.ts').CatalogueEntry[];
+  export default entries;
+}

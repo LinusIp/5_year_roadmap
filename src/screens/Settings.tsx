@@ -28,6 +28,7 @@ import { NumberField } from '../ui/NumberField.tsx';
 import { Blocks, Schedule } from './settings/Schedule.tsx';
 import { Layout } from './settings/Layout.tsx';
 import { PracticeSettings } from './settings/PracticeSettings.tsx';
+import { ProjectSettings } from './settings/ProjectSettings.tsx';
 import { Problem, Section, saveCore } from './settings/shared.tsx';
 import { exportBackup } from './parts/backupActions.ts';
 import { ShortcutRows } from './Shortcuts.tsx';
@@ -401,6 +402,7 @@ export function Settings() {
           <Schedule settings={atlas.settings} />
           <Blocks settings={atlas.settings} />
           <PracticeSettings settings={atlas.settings} />
+          <ProjectSettings settings={atlas.settings} />
           <HeatAndStreak settings={atlas.settings} />
           <Layout atlas={atlas} />
           {(atlas.seed.patchProblems ?? []).length > 0 && (

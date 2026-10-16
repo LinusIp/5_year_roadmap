@@ -22,13 +22,13 @@ import type { AppSeed } from '../seed/schema.ts';
 import { commitFiles, commitMessage } from './commit.ts';
 import type { FileChange } from './commit.ts';
 import { adoptDeviceId, deviceId } from './device.ts';
-import { parseDay, parseItems, parsePlan, parsePractice, parseReview, parseSettings, planUpdatedAt, renderReadme } from './files.ts';
+import { parseDay, parseItems, parseChallenges, parsePlan, parsePractice, parseReview, parseSettings, planUpdatedAt, renderReadme } from './files.ts';
 import { GithubClient, GithubError, gitBlobSha } from './github-api.ts';
 import type { Author } from './github-api.ts';
-import { allPaths, itemsOf, planOf, readLocal, renderPath, withCompanions, writeDay, writeItems, writePlan, writePractice, writeReview, writeSettings } from './local.ts';
+import { allPaths, itemsOf, planOf, readLocal, renderPath, withCompanions, writeDay, writeItems, writeChallenges, writePlan, writePractice, writeReview, writeSettings } from './local.ts';
 import { lastWriter, mergeDay, mergeItems, mergeRecords } from './merge.ts';
 import { enqueue, onSyncChange, queuedWrites, setSyncVocabulary } from './middleware.ts';
-import { ITEMS_PATH, PLAN_PATH, PRACTICE_PATH, README_PATH, SETTINGS_PATH, dateOfLogPath, isPulledPath } from './paths.ts';
+import { CHALLENGES_PATH, ITEMS_PATH, PLAN_PATH, PRACTICE_PATH, README_PATH, SETTINGS_PATH, dateOfLogPath, isPulledPath } from './paths.ts';
 
 export const URGENT_DELAY_MS = 3_000;
 export const IDLE_DELAY_MS = 60_000;
@@ -382,6 +382,12 @@ export class SyncEngine {
       // Answers only ever accumulate: the union of both sides, the later edit winning per answer.
       const local = await db.practice.toArray();
       await writePractice(db, mergeRecords(local, parsed.value, (a) => a.id));
+      return;
+    }
+    if (path === CHALLENGES_PATH) {
+      const parsed = parseChallenges(text);
+      if (!parsed.ok) return parsed.error;
+      await writeChallenges(db, mergeRecords(await db.challenges.toArray(), parsed.value, (e) => e.id));
       return;
     }
     if (path === PLAN_PATH) {

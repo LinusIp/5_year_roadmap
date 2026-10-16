@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db.ts';
+import { useCatalogueIndex, useChallengeEvents } from '../hooks/useCatalogue.ts';
+import { dailyChallenge, isSlotDay, languageOf, weeklyChallenge } from '../lib/catalogue/daily.ts';
+import type { Pick as ChallengePick } from '../lib/catalogue/daily.ts';
+import { groupLabel } from '../lib/catalogue/filters.ts';
 import { updateSettings } from '../db/settings.ts';
 import { clearTimer, editItemState, setItemStatus, setWeekPick, startTimer, useRunningTimer, useWeekPick } from '../db/state.ts';
 import type { RunningTimer } from '../db/types.ts';
@@ -136,7 +140,9 @@ export function Today() {
     return logTimeRequests.listen(take);
   }, []);
 
-  const ctx = useMemo(() => (atlas ? { seed: atlas.seed, states: atlas.states, units } : null), [atlas, units]);
+  const catalogue = useCatalogueIndex();
+  const challengeEvents = useChallengeEvents();
+  const ctx = useMemo(() => (atlas ? { seed: atlas.seed, states: atlas.states, units, ...(catalogue ? { catalogue } : {}) } : null), [atlas, units, catalogue]);
   const plan = useMemo(() => {
     if (!settings || !ctx || !atlas) return null;
     const day = planForDay({ date, settings, weeklyPickId: weekPick?.projectId, ctx });
@@ -222,6 +228,43 @@ export function Today() {
 
   /** Hours already put into a project, over every day: "2 of 4 h done". */
   const hoursOn = (refId: string): number => Math.round(atlas.logs.reduce((sum, l) => sum + minutesForRef(l, refId), 0) / 60);
+
+  // The project catalogue on Today: the day's easy challenge under Block B; on the weekly slot's days, the week's
+  // medium challenge under Block D; and a real case taken from the Deck, also under Block D.
+  const blockLanguage = languageOf(((b) => (b ? b.refId + ' ' + b.title : undefined))(blocks.find((b) => b.id === 'B')?.item));
+  const daily: ChallengePick | null =
+    isToday && settings.core.catalogue.dailyChallenge && catalogue && challengeEvents ? dailyChallenge({ entries: catalogue, events: challengeEvents, date, blockLanguage }) : null;
+  const weeklyPick: ChallengePick | null =
+    isToday && isSlotDay(date, settings.core.catalogue.weeklyDays) && catalogue && challengeEvents ? weeklyChallenge({ entries: catalogue, events: challengeEvents, weekStart, blockLanguage }) : null;
+  const activeCase = catalogue?.find((e) => e.kind === 'case' && atlas.states.get(e.id)?.status === 'active');
+  type ExtraRow = { key: string; title: string; meta: string; to: string; trailing: string };
+  const challengeRow = (label: string, pick: ChallengePick, query: string): ExtraRow => ({
+    key: label,
+    title: label + ' · ' + pick.challenge.title,
+    meta: pick.solved
+      ? 'Solved'
+      : [pick.challenge.difficulty, (pick.challenge.estMinutes ?? 30) + ' min', groupLabel(pick.challenge.group), (pick.anotherLanguage ? 'in another language: ' : 'in ') + pick.language].join(' · '),
+    to: '/challenge/' + pick.challenge.id + query,
+    trailing: pick.solved ? 'Done' : span(pick.challenge.estMinutes ?? 30),
+  });
+  const extrasFor = (id: BlockId): ExtraRow[] => {
+    const rows: ExtraRow[] = [];
+    if (id === 'B' && daily) rows.push(challengeRow('Daily challenge', daily, '?daily=1'));
+    if (id === 'D' && weeklyPick) rows.push(challengeRow('Weekly challenge', weeklyPick, ''));
+    if (id === 'D' && activeCase) {
+      const ticked = atlas.states.get(activeCase.id)?.unitsDone.length ?? 0;
+      rows.push({ key: 'Monthly case', title: 'Monthly case · ' + activeCase.title, meta: 'Advanced · ' + ticked + ' milestones ticked · ' + activeCase.hours + ' h', to: '/library/' + activeCase.id, trailing: hoursOn(activeCase.id) + ' h' });
+    }
+    return rows;
+  };
+  // They live inside their block, so Today still fits one screen: on the block's Now card as rows, and as a mention on
+  // its Later today row. Once the block is done, they lead Later today.
+  const leadingExtras = finished.flatMap((b) => extrasFor(b.id));
+  const extrasNote = (id: BlockId): string | null => {
+    const rows = extrasFor(id);
+    return rows.length ? rows.map((r) => r.key.toLowerCase() + (r.trailing === 'Done' ? ' done' : '')).join(', ') : null;
+  };
+  const extraRow = (row: ExtraRow) => <Row key={row.key} title={row.title} meta={layout.view === 'compact' ? undefined : row.meta} trailing={row.trailing} to={row.to} />;
 
   const rowFor = (block: TodayBlock): { title: string; meta: string; to?: string } => {
     const name = blockShort(block.def.name);
@@ -450,20 +493,24 @@ export function Today() {
               />
             )}
           </div>
+          {extrasFor(nowBlock.id).length > 0 && (
+            <ul className="mt-3 divide-y divide-line border-t border-line">{extrasFor(nowBlock.id).map(extraRow)}</ul>
+          )}
         </section>
       )}
 
-      {!nothingPlanned && layout.later && later.length > 0 && (
+      {!nothingPlanned && layout.later && (later.length > 0 || leadingExtras.length > 0) && (
         <RowList flat label="Later today" className="mt-7">
-          {later.map((block) => {
+          {leadingExtras.map(extraRow)}
+          {later.flatMap((block) => {
             const row = rowFor(block);
             const isTaken = Boolean(taken && block.id === 'D' && focusItem(block, monthlyFirst)?.refId === taken.id);
-            return (
+            return [
               <Row
                 key={block.id}
                 className={isTaken ? 'taken' : ''}
                 title={row.title}
-                meta={layout.view === 'compact' ? undefined : row.meta}
+                meta={layout.view === 'compact' ? undefined : [row.meta, extrasNote(block.id)].filter(Boolean).join(' · ')}
                 trailing={span(block.targetMinutes)}
                 to={row.to}
                 onClick={
@@ -477,8 +524,8 @@ export function Today() {
                 }
               >
                 {isTaken && <span aria-hidden="true" className="taken-line absolute inset-x-0 bottom-0 h-0.5 bg-accent" />}
-              </Row>
-            );
+              </Row>,
+            ];
           })}
         </RowList>
       )}

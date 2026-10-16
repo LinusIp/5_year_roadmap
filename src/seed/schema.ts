@@ -454,6 +454,8 @@ const SettingsDefaultsObject = z.strictObject({
   heatmapMode: z.enum(['relative', 'absolute']),
   /** The Practice block's period (it exists only between these days, inclusive) and the questions per subject. */
   practice: z.strictObject({ start: IsoDate, end: IsoDate, perSubject: z.number().int().min(3).max(5) }),
+  /** The project catalogue: the daily challenge in Block B (on or off), and the weekdays of Block D's weekly slot. */
+  catalogue: z.strictObject({ dailyChallenge: z.boolean(), weeklyDays: z.array(z.number().int().min(0).max(6)).max(7) }),
   backupReminderDays: z.number().int().min(1),
   /** One paper a week from the first phase of `fromYear`, or from `fromPhase` when it is set (the research cadence starts in Foundations II). */
   paperCadence: z.strictObject({ fromYear: z.literal([1, 2, 3, 4, 5]), fromPhase: Slug.optional(), perWeek: z.number().positive() }),
@@ -494,6 +496,7 @@ export const StoredCoreSchema = SettingsDefaultsObject.extend({
   pattern: SettingsDefaultsObject.shape.pattern.optional(),
   heatmapMode: SettingsDefaultsObject.shape.heatmapMode.optional(),
   practice: SettingsDefaultsObject.shape.practice.optional(),
+  catalogue: SettingsDefaultsObject.shape.catalogue.optional(),
   streak: SettingsDefaultsObject.shape.streak.extend({ percent: z.number().min(1).max(100).optional() }),
 });
 export type StoredCore = z.infer<typeof StoredCoreSchema>;

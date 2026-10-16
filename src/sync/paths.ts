@@ -6,6 +6,7 @@
  *   state/plan.json        plan edits: patches, items of your own, re-plans, weekly picks
  *   state/settings.json    blocks, thresholds, streak rules, theme (never the token)
  *   state/practice.json    practice answers
+ *   state/challenges.json  catalogue challenges solved, skipped or hidden
  *   log/2026/10/2026-10-07.json   one day
  *   log/2026/10/2026-10-07.md     its human-readable twin, generated
  *   reviews/2026-W41.md, reviews/2026-10.md, reviews/2027-Q1.md
@@ -19,11 +20,12 @@ export const ITEMS_PATH = 'state/items.json';
 export const PLAN_PATH = 'state/plan.json';
 export const SETTINGS_PATH = 'state/settings.json';
 export const PRACTICE_PATH = 'state/practice.json';
+export const CHALLENGES_PATH = 'state/challenges.json';
 
 /** The tables whose records go to the data repository. `meta` (timer, shortcuts) stays on the device. */
 export const SYNCED_TABLES = [
   'dayLogs', 'itemStates', 'paperStates', 'certStates', 'milestoneStates', 'customEntities', 'overrides',
-  'reviews', 'weekPicks', 'replans', 'planPatches', 'practice', 'settings',
+  'reviews', 'weekPicks', 'replans', 'planPatches', 'practice', 'challenges', 'settings',
 ] as const;
 export type SyncedTable = (typeof SYNCED_TABLES)[number];
 
@@ -66,7 +68,7 @@ export function dateOfLogPath(path: string): string | null {
 
 /** Files the app reads back on a pull. Markdown twins and project pages are generated, so they are only written. */
 export function isPulledPath(path: string): boolean {
-  return path === ITEMS_PATH || path === PLAN_PATH || path === SETTINGS_PATH || path === PRACTICE_PATH || dateOfLogPath(path) !== null || /^reviews\/[^/]+\.md$/.test(path);
+  return path === ITEMS_PATH || path === PLAN_PATH || path === SETTINGS_PATH || path === PRACTICE_PATH || path === CHALLENGES_PATH || dateOfLogPath(path) !== null || /^reviews\/[^/]+\.md$/.test(path);
 }
 
 /**
@@ -95,6 +97,8 @@ export function pathsForRecord(table: SyncedTable, key: unknown, record: unknown
       return [SETTINGS_PATH];
     case 'practice':
       return [PRACTICE_PATH];
+    case 'challenges':
+      return [CHALLENGES_PATH];
     case 'reviews': {
       const id = (record as Review | undefined)?.id ?? String(key);
       return [reviewPath(id as Review['id'])];

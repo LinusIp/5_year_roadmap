@@ -69,8 +69,11 @@ review:
 
 weekStartsOn: 1                         # 1 = Monday, so the Sunday review closes the week
 heatmapThresholds: [1, 120, 300, 420]   # absolute mode, minutes for levels 1-4: 1-119, 120-299, 300-419, 420+
-heatmapMode: relative
-practice: { start: 2026-10-16, end: 2027-01-31, perSubject: 3 }   # the Practice block runs between these days                   # relative: a share of the day's plan (0, <25 %, <60 %, <100 %, 100 %+)
+heatmapMode: relative                   # relative: a share of the day's plan (0, <25 %, <60 %, <100 %, 100 %+)
+practice: { start: 2026-10-16, end: 2027-01-31, perSubject: 3 }   # the Practice block runs between these days
+# The project catalogue (data/projects/*.jsonl): an easy challenge a day in Block B, and on these weekdays
+# (0 = Sunday, 6 = Saturday) Block D's weekly slot: the week's medium build and medium challenge.
+catalogue: { dailyChallenge: true, weeklyDays: [6, 0] }
 streak:
   minMinutes: 60                        # a day counts towards the streak from this many minutes,
   percent: 50                           # or from this share of its planned minutes, whichever is lower

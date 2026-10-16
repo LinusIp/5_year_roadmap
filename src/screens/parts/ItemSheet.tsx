@@ -6,7 +6,9 @@ import type { Atlas } from '../../hooks/useAtlas.ts';
 import { monthName } from '../../lib/dates.ts';
 import { fractionDone } from '../../lib/progress.ts';
 import { hasRepo, repoLinkProblem, statusBlocker } from '../../lib/projects.ts';
-import { loadUnits } from '../../seed/index.ts';
+import { loadCatalogue, loadUnits } from '../../seed/index.ts';
+import type { CatalogueItem } from '../../seed/catalogue.ts';
+import { CatalogueBody } from './CatalogueBody.tsx';
 import type { AppResource, Project, Unit } from '../../seed/schema.ts';
 import { Button } from '../../ui/Button.tsx';
 import { ProgressLine } from '../../ui/ProgressLine.tsx';
@@ -287,13 +289,31 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
 export function ItemSheet({ atlas, id, onClose }: { atlas: Atlas; id: string | null; onClose: () => void }) {
   const resource = id ? atlas.seed.resources.find((r) => r.id === id) : undefined;
   const project = id && !resource ? atlas.seed.projects.find((p) => p.id === id) : undefined;
-  const title = resource?.title ?? project?.title ?? 'Not in the library';
+  // Not in the curriculum: perhaps a catalogue build, case or challenge, whose chunk loads on demand.
+  const [catalogue, setCatalogue] = useState<CatalogueItem[] | null>(null);
+  useEffect(() => {
+    if (!id || resource || project || catalogue) return;
+    let live = true;
+    void loadCatalogue().then((items) => live && setCatalogue(items));
+    return () => {
+      live = false;
+    };
+  }, [id, resource, project, catalogue]);
+  const fromCatalogue = id && !resource && !project ? catalogue?.find((i) => i.id === id) : undefined;
+  const loading = Boolean(id && !resource && !project && !catalogue);
+  const title = resource?.title ?? project?.title ?? fromCatalogue?.title ?? (loading ? 'Loading…' : 'Not in the library');
   return (
     <Sheet open={id !== null} title={title} onClose={onClose}>
       {resource ? (
         <ResourceBody key={resource.id} atlas={atlas} resource={resource} />
       ) : project ? (
         <ProjectBody key={project.id} atlas={atlas} project={project} />
+      ) : fromCatalogue ? (
+        <CatalogueBody key={fromCatalogue.id} atlas={atlas} item={fromCatalogue} />
+      ) : loading ? (
+        <p className="text-meta text-ink2" role="status">
+          Loading…
+        </p>
       ) : (
         <p className="text-body text-ink2">It may have been renamed or removed from the curriculum. Your notes on it are kept under the old id.</p>
       )}

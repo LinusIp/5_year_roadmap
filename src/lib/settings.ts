@@ -49,7 +49,7 @@ export function defaultSettings(core: SettingsDefaults): StoredSettings {
 export function upgradeSettings(stored: StoredSettingsInput | StoredSettings, defaults: SettingsDefaults): StoredSettings {
   const core = stored.core;
   const complete =
-    stored.version === SETTINGS_VERSION && core.templates && core.pattern && core.heatmapMode && core.streak.percent !== undefined && core.practice &&
+    stored.version === SETTINGS_VERSION && core.templates && core.pattern && core.heatmapMode && core.streak.percent !== undefined && core.practice && core.catalogue &&
     stored.schedule && stored.pace && stored.pauses && stored.catchUp && stored.layout;
   if (complete) return stored as StoredSettings;
 
@@ -77,6 +77,7 @@ export function upgradeSettings(stored: StoredSettingsInput | StoredSettings, de
     pattern: core.pattern ?? [...defaults.pattern],
     heatmapMode: core.heatmapMode ?? defaults.heatmapMode,
     practice: core.practice ?? { ...defaults.practice },
+    catalogue: core.catalogue ?? structuredClone(defaults.catalogue),
     streak: { ...core.streak, percent: core.streak.percent ?? defaults.streak.percent },
   };
   return {

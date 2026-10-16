@@ -25,6 +25,7 @@ const NotFound = lazy(() => import('./screens/NotFound.tsx').then((m) => ({ defa
 const PhaseMap = lazy(() => import('./screens/PhaseMap.tsx').then((m) => ({ default: m.PhaseMap })));
 const PickProject = lazy(() => import('./screens/PickProject.tsx').then((m) => ({ default: m.PickProject })));
 const Practice = lazy(() => import('./screens/Practice.tsx').then((m) => ({ default: m.Practice })));
+const Challenge = lazy(() => import('./screens/Challenge.tsx').then((m) => ({ default: m.Challenge })));
 const DevComponents = lazy(() => import('./screens/DevComponents.tsx').then((m) => ({ default: m.DevComponents })));
 
 interface RouteDef {
@@ -44,6 +45,7 @@ const ROUTES: RouteDef[] = [
   { pattern: '/stats', render: () => <Stats /> },
   { pattern: '/settings', render: () => <Settings /> },
   { pattern: '/practice', render: () => <Practice /> },
+  { pattern: '/challenge/:id', render: (p) => <Challenge id={p.id!} /> },
   { pattern: '/dev/components', render: () => <DevComponents /> },
 ];
 

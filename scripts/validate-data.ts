@@ -3,6 +3,7 @@
  * Exits 1 on any schema error, duplicate id, dangling reference or missing credential-map row.
  * `npm run build` runs this first, so an invalid curriculum can never be built or deployed.
  */
+import { loadCatalogue } from './lib/load-catalogue.ts';
 import { loadDocs } from './lib/load-docs.ts';
 import { checkBankAgainstSeed, loadQuestions } from './lib/load-questions.ts';
 import { loadSeed } from './lib/load-seed.ts';
@@ -23,6 +24,10 @@ if (docs) {
   warnings.push(...docs.warnings);
 }
 if (seed && bank.bank) errors.push(...checkBankAgainstSeed(bank.bank, seed));
+// The three-tier project catalogue (data/projects/*.jsonl): unique ids across it and the curriculum, difficulty
+// matching cadence, examples, milestones adding up, prerequisites that resolve, no URLs.
+const catalogue = seed ? loadCatalogue(seed) : null;
+if (catalogue) errors.push(...catalogue.errors);
 
 for (const w of warnings) console.warn('warning  ' + w);
 
@@ -45,8 +50,15 @@ const lines: [string, string | number][] = [
   ['credential-map rows', seed.subjects.length],
   ['practice questions', bank.stats.subjects.map((s) => s.id + ' ' + s.questions + ' (' + s.templates + ' templates)').join(', ')],
   ['tech docs', Object.keys(docs?.parsed ?? {}).length + ' of ' + seed.projects.filter((p) => p.cadence !== 'weekly').length + ' projects'],
+  ['project catalogue', catalogueSummary()],
   ['roadmap.sh roadmaps', seed.roadmaps.length + ' (' + seed.roadmaps.reduce((n, r) => n + r.sections.reduce((m, s) => m + s.nodes.length, 0), 0) + ' nodes)'],
 ];
 console.log('/data is valid');
 for (const [label, value] of lines) console.log('  ' + label.padEnd(20) + value);
 if (warnings.length > 0) console.log('  ' + warnings.length + ' warning' + (warnings.length === 1 ? '' : 's') + ' (see above)');
+
+function catalogueSummary(): string {
+  const items = catalogue?.items ?? [];
+  const count = (kind: string, difficulty: string): number => items.filter((i) => i.kind === kind && i.difficulty === difficulty).length;
+  return items.length + ': daily ' + count('challenge', 'easy') + ' challenges; weekly ' + count('challenge', 'medium') + ' challenges, ' + count('build', 'medium') + ' builds; monthly ' + count('case', 'advanced') + ' cases';
+}

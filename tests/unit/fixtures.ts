@@ -37,6 +37,7 @@ export function minimalSeed(): RawSeed {
         heatmapThresholds: [1, 120, 300, 420],
         heatmapMode: 'relative',
         practice: { start: '2026-10-16', end: '2027-01-31', perSubject: 3 },
+        catalogue: { dailyChallenge: true, weeklyDays: [6, 0] },
         streak: { minMinutes: 60, percent: 50, freezesPerMonth: 2, autoFreeze: true },
         backupReminderDays: 30,
         paperCadence: { fromYear: 2, perWeek: 1 },

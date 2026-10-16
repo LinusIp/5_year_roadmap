@@ -88,6 +88,7 @@ export function demoBackup(theme: 'light' | 'dark' = 'light'): BackupFile {
       replans: [],
       planPatches: [],
       practice: [],
+      challenges: [],
       settings: [{ id: 'app', core: seed.settings, theme, github: { username: '', showCalendar: false }, backup: { lastBackupAt: '2026-11-15' } }],
       meta: [],
     },

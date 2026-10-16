@@ -5,7 +5,7 @@
 import Dexie from 'dexie';
 import type { EntityTable, Table } from 'dexie';
 import type {
-  CertState, CustomEntity, DayLog, EntityKind, Meta, MilestoneState, OutboxEntry, Override, PaperState, PlanPatch, PracticeAnswer,
+  CertState, CustomEntity, DayLog, EntityKind, Meta, MilestoneState, OutboxEntry, Override, PaperState, PlanPatch, PracticeAnswer, ChallengeEvent,
   ReplanRecord, Review, Secret, StoredSettingsInput, SyncRow, UserItemState, WeekPick,
 } from './types.ts';
 import { legacyPlanPatches } from '../lib/plan.ts';
@@ -27,6 +27,8 @@ export class AtlasDB extends Dexie {
   planPatches!: EntityTable<PlanPatch, 'id'>;
   /** Practice answers, one row per question answered in a set. */
   practice!: EntityTable<PracticeAnswer, 'id'>;
+  /** Catalogue challenges solved, skipped or hidden. */
+  challenges!: EntityTable<ChallengeEvent, 'id'>;
   /** Version 1 or 2 as stored; read through readSettings, which upgrades. */
   settings!: EntityTable<StoredSettingsInput, 'id'>;
   meta!: EntityTable<Meta, 'key'>;
@@ -78,6 +80,8 @@ export class AtlasDB extends Dexie {
       });
     // Version 4, practice: the answers of the daily sets and of practice on demand.
     this.version(4).stores({ practice: 'id, date, questionId, topic' });
+    // Version 5, the project catalogue: what was done with its challenges.
+    this.version(5).stores({ challenges: 'id, date, challengeId' });
     this.use(syncMiddleware(this));
   }
 }
@@ -88,7 +92,7 @@ export class AtlasDB extends Dexie {
  */
 export const EXPORTED_TABLES = [
   'dayLogs', 'itemStates', 'paperStates', 'certStates', 'milestoneStates', 'customEntities',
-  'overrides', 'reviews', 'weekPicks', 'replans', 'planPatches', 'practice', 'settings', 'meta',
+  'overrides', 'reviews', 'weekPicks', 'replans', 'planPatches', 'practice', 'challenges', 'settings', 'meta',
 ] as const;
 export type ExportedTable = (typeof EXPORTED_TABLES)[number];
 

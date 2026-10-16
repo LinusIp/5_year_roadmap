@@ -14,6 +14,7 @@ import type { ItemStatus, StoredSettings, UserItemState } from '../db/types.ts';
 import { isWithinRange, startOfWeek, today as todayDate, weekday } from './dates.ts';
 import { plannedMinutes, resolveDay, weekTarget } from './day-plan.ts';
 import type { ResolvedDay } from './day-plan.ts';
+import type { CatalogueEntry } from '../seed/catalogue.ts';
 import { projectUnitCount } from './progress.ts';
 
 export type ScheduledKind = 'resource' | 'project' | 'practice';
@@ -112,6 +113,25 @@ export interface ScheduleContext {
   states: Map<string, UserItemState>;
   /** Unit checklists, when the chunk is loaded. Without it items still schedule, just without a next unit. */
   units?: Record<string, { id: string; title: string; url?: string; section?: string }[]>;
+  /** The project catalogue's index, when loaded: a week's build can be one of its medium builds. */
+  catalogue?: readonly CatalogueEntry[];
+}
+
+/** A catalogue build as Block D's weekly build. */
+function describeCatalogueBuild(entry: CatalogueEntry, state: UserItemState | undefined): ScheduledItem {
+  return {
+    refId: entry.id,
+    kind: 'project',
+    title: entry.title,
+    track: entry.tracks[0] ?? 'swe',
+    tracks: entry.tracks,
+    url: null,
+    status: state?.status ?? 'todo',
+    estHours: entry.hours,
+    unitsDone: 0,
+    unitCount: 0,
+    cadence: 'weekly',
+  };
 }
 
 function describeResource(resource: AppResource, state: UserItemState | undefined, ctx: ScheduleContext, note?: string): ScheduledItem {
@@ -204,6 +224,8 @@ export function weeklyBuildFor(
   ctx: ScheduleContext,
 ): ScheduledItem | null {
   const pool = ctx.seed.projects.filter((p) => p.cadence === 'weekly');
+  const fromCatalogue = pickedId ? ctx.catalogue?.find((e) => e.id === pickedId && e.kind === 'build') : undefined;
+  if (fromCatalogue) return describeCatalogueBuild(fromCatalogue, ctx.states.get(fromCatalogue.id));
   const picked = pickedId ? pool.find((p) => p.id === pickedId) : undefined;
   const chosen = picked ?? suggestWeeklyBuild(phase, ctx);
   return chosen ? describeProject(chosen, ctx.states.get(chosen.id)) : null;

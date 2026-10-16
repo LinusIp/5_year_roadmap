@@ -12,6 +12,8 @@
  *
  *   virtual:atlas-questions  the practice bank (data/questions/), for the Practice screen
  *   virtual:atlas-docs       the projects' tech docs (data/projects/docs/), for a project's sheet
+ *   virtual:atlas-catalogue  the three-tier project catalogue (data/projects/*.jsonl), every field
+ *   virtual:atlas-catalogue-index  one small entry per catalogue item, for Today, the Deck and the Library list
  *
  * The practice subjects and topics (small) ride in the seed, for Today, Settings and the roadmaps.
  *
@@ -19,7 +21,9 @@
  */
 import { normalizePath } from 'vite';
 import type { Plugin } from 'vite';
+import { loadCatalogue } from './load-catalogue.ts';
 import { loadDocs } from './load-docs.ts';
+import { entryOf } from '../../src/seed/catalogue.ts';
 import { loadQuestions } from './load-questions.ts';
 import { parseDoc } from '../../src/lib/project-doc.ts';
 import { DATA_DIR, loadSeedOrThrow, splitSeed } from './load-seed.ts';
@@ -30,7 +34,9 @@ const SEED_ID = 'virtual:atlas-seed';
 const UNITS_ID = 'virtual:atlas-units';
 const QUESTIONS_ID = 'virtual:atlas-questions';
 const DOCS_ID = 'virtual:atlas-docs';
-const RESOLVED = new Map([SEED_ID, UNITS_ID, QUESTIONS_ID, DOCS_ID].map((id) => [id, '\0' + id]));
+const CATALOGUE_ID = 'virtual:atlas-catalogue';
+const CATALOGUE_INDEX_ID = 'virtual:atlas-catalogue-index';
+const RESOLVED = new Map([SEED_ID, UNITS_ID, QUESTIONS_ID, DOCS_ID, CATALOGUE_ID, CATALOGUE_INDEX_ID].map((id) => [id, '\0' + id]));
 
 function questionsOrThrow() {
   const { bank, errors } = loadQuestions();
@@ -54,6 +60,11 @@ export function atlasSeed(): Plugin {
       const seed = loadSeedOrThrow();
       if (id === RESOLVED.get(QUESTIONS_ID)) return asModule(questionsOrThrow());
       if (id === RESOLVED.get(DOCS_ID)) return asModule(loadDocs(seed).docs);
+      if (id === RESOLVED.get(CATALOGUE_ID) || id === RESOLVED.get(CATALOGUE_INDEX_ID)) {
+        const { items, errors } = loadCatalogue(seed);
+        if (errors.length > 0) throw new Error('The project catalogue in data/projects/*.jsonl is invalid:\n  - ' + errors.join('\n  - '));
+        return asModule(id === RESOLVED.get(CATALOGUE_ID) ? items : items.map(entryOf));
+      }
       const { app, units } = splitSeed(seed);
       if (id !== RESOLVED.get(SEED_ID)) return asModule(units);
       // A doc's milestones are checkboxes that count toward the project's progress, so the count rides in the seed.
@@ -67,7 +78,7 @@ export function atlasSeed(): Plugin {
     configureServer(server) {
       server.watcher.add(DATA_DIR);
       const onChange = (file: string): void => {
-        if (!normalizePath(file).includes('/data/') || !(file.endsWith('.yaml') || file.endsWith('.md'))) return;
+        if (!normalizePath(file).includes('/data/') || !(file.endsWith('.yaml') || file.endsWith('.md') || file.endsWith('.jsonl'))) return;
         for (const resolved of RESOLVED.values()) {
           const mod = server.moduleGraph.getModuleById(resolved);
           if (mod) server.moduleGraph.invalidateModule(mod);

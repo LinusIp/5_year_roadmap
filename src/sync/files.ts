@@ -9,10 +9,10 @@ import { z } from 'zod';
 import { canonical } from '../db/backup-file.ts';
 import {
   CertStateSchema, CustomEntitySchema, DayLogSchema, MilestoneStateSchema, OverrideSchema, PaperStateSchema,
-  PlanPatchSchema, PracticeAnswerSchema, ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
+  PlanPatchSchema, PracticeAnswerSchema, ChallengeEventSchema, ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
 } from '../db/types.ts';
 import { legacyPlanPatches } from '../lib/plan.ts';
-import type { DayLog, PracticeAnswer, Review, StoredSettingsInput, UserItemState } from '../db/types.ts';
+import type { ChallengeEvent, DayLog, PracticeAnswer, Review, StoredSettingsInput, UserItemState } from '../db/types.ts';
 import { formatRange, monthName } from '../lib/dates.ts';
 import type { Project } from '../seed/schema.ts';
 
@@ -125,6 +125,23 @@ export function planUpdatedAt(data: PlanData): string {
     if ((row.updatedAt ?? '') > newest) newest = row.updatedAt!;
   }
   return newest;
+}
+
+/* ------------------------------------------------------------------ state/challenges.json */
+
+export const ChallengesFileSchema = z.strictObject({
+  format: z.literal('atlas-challenges'),
+  version: z.literal(1),
+  events: z.array(ChallengeEventSchema),
+});
+
+export function renderChallenges(events: readonly ChallengeEvent[]): string {
+  return toJson({ format: 'atlas-challenges', version: 1, events: [...events].sort((a, b) => (a.date === b.date ? a.id.localeCompare(b.id) : a.date.localeCompare(b.date))) });
+}
+
+export function parseChallenges(text: string): ParseResult<ChallengeEvent[]> {
+  const result = parseJson(text, ChallengesFileSchema, 'state/challenges.json');
+  return result.ok ? { ok: true, value: result.value.events } : result;
 }
 
 /* ------------------------------------------------------------------ state/practice.json */
@@ -248,6 +265,7 @@ read it here, edit it by hand, or take it elsewhere. Every study session is one 
 | \`state/plan.json\` | Your edits to the plan: moved and added items, re-plans, the builds you picked |
 | \`state/settings.json\` | Blocks, day templates, the weekly pattern, date ranges, pace and layout. Never the token. |
 | \`state/practice.json\` | Every practice question answered: when, right or wrong, hints, time |
+| \`state/challenges.json\` | Catalogue challenges solved (and in which language), skipped or hidden for a day |
 | \`log/YYYY/MM/YYYY-MM-DD.json\` | One day: the time logged, blocks done, reflection and energy |
 | \`log/YYYY/MM/YYYY-MM-DD.md\` | The same day to read on GitHub, generated |
 | \`reviews/\` | Weekly (\`2026-W41.md\`), monthly (\`2026-10.md\`) and quarterly (\`2027-Q1.md\`) reviews |
