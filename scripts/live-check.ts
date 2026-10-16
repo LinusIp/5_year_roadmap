@@ -15,6 +15,13 @@ if (!url || !version) {
 const swUrl = new URL('sw.js', url).href;
 const step = (s: string): void => console.log('• ' + s);
 
+/** The build files the served service worker precaches: the new build's, once it is live. */
+async function servedAssets(): Promise<string[]> {
+  const res = await fetch(swUrl + '?check=' + Date.now(), { cache: 'no-store' });
+  const m = /const ASSETS = (\[.*\]);/.exec(await res.text());
+  return m ? (JSON.parse(m[1]!) as string[]) : [];
+}
+
 async function servedVersion(): Promise<string> {
   const res = await fetch(swUrl + '?check=' + Date.now(), { cache: 'no-store' });
   const m = /const VERSION = "([0-9a-f]+)"/.exec(await res.text());
@@ -57,7 +64,12 @@ try {
 
   const caches = await page.evaluate(() => globalThis.caches.keys());
   if (!caches.includes('atlas-' + version)) throw new Error('after Reload the cache is ' + caches.join(', ') + ', not atlas-' + version);
-  step('reloaded into version ' + version);
+  // The new cache alone is not enough: the page must run the new build's own script, not an old index.html's.
+  const scripts = await page.evaluate(() => [...document.querySelectorAll<HTMLScriptElement>('script[type="module"][src]')].map((s) => new URL(s.src).pathname));
+  const assets = await servedAssets();
+  const stale = scripts.filter((path) => !assets.some((a) => a !== './' && path.endsWith(a.replace(/^\.\//, ''))));
+  if (scripts.length === 0 || stale.length > 0) throw new Error('the page runs a script that is not the new build\'s: ' + (stale.join(', ') || 'none found'));
+  step('reloaded into version ' + version + ', running ' + scripts.map((p) => p.split('/').pop()).join(', '));
 
   for (const hash of ['#/', '#/calendar', '#/plan/pick?cadence=daily', '#/library?type=project', '#/activity']) {
     await page.goto(new URL(hash, url).href);
