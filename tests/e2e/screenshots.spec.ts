@@ -133,6 +133,36 @@ test('a tech doc over Today, with the timer running, matches the committed scree
   await expect(page).toHaveScreenshot('tech-doc-today-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });
 
+for (const theme of ['light', 'dark'] as const) {
+  test('a case doc, its Overview and its Design, matches the committed screenshots, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await importDemo(page, theme);
+    await open(page, './#/library/mx-ai-ticket-triage-llm');
+    const sheet = page.getByRole('dialog', { name: 'Support-ticket triage service for a SaaS helpdesk' });
+    await expect(sheet.getByRole('heading', { name: 'The situation' })).toBeVisible();
+    await expect(page).toHaveScreenshot('doc-case-overview-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+    await sheet.getByRole('radio', { name: 'Design' }).click();
+    await expect(sheet.getByRole('radio', { name: 'Design' })).toHaveAttribute('aria-checked', 'true');
+    await expect(sheet.getByRole('img', { name: /^Diagram of / })).toBeInViewport();
+    // The jump scrolls smoothly unless motion is reduced; wait for it to settle.
+    const body = sheet.locator('div.overflow-y-auto');
+    await expect.poll(async () => { const a = await body.evaluate((el) => el.scrollTop); await page.waitForTimeout(150); return a === (await body.evaluate((el) => el.scrollTop)); }).toBe(true);
+    await expect(page).toHaveScreenshot('doc-case-design-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+  });
+}
+
+test('a weekly build doc matches the committed screenshot', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await importDemo(page, 'light');
+  await open(page, './#/library/ai-hybrid-retrieval-benchmark');
+  const sheet = page.getByRole('dialog', { name: 'BM25 versus dense versus hybrid retrieval benchmark' });
+  await sheet.getByRole('radio', { name: 'Design' }).click();
+  await expect(sheet.getByRole('img', { name: /^Diagram of / })).toBeInViewport();
+  const body = sheet.locator('div.overflow-y-auto');
+  await expect.poll(async () => { const a = await body.evaluate((el) => el.scrollTop); await page.waitForTimeout(150); return a === (await body.evaluate((el) => el.scrollTop)); }).toBe(true);
+  await expect(page).toHaveScreenshot('doc-build-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+});
+
 test('a calendar event sheet matches the committed screenshot', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await importDemo(page, 'light');
@@ -153,7 +183,7 @@ test('a challenge, a case sheet and the Deck on Daily match the committed screen
 
   await open(page, './#/library/mx-ai-ticket-triage-llm');
   const sheet = page.getByRole('dialog', { name: 'Support-ticket triage service for a SaaS helpdesk' });
-  await expect(sheet.getByRole('heading', { name: 'Requirements', exact: true })).toBeVisible();
+  await expect(sheet.getByRole('heading', { name: 'The situation', exact: true })).toBeVisible();
   await expect(page).toHaveScreenshot('case-sheet-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 
   await open(page, './#/plan/pick?cadence=daily');

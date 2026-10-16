@@ -135,6 +135,64 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(nowCard(page).getByText(/1 of \d+ ticked$/)).toBeVisible();
   });
 
+  test('a case doc: the jump bar follows the reading and jumps, the diagram opens full screen, decisions and the interface show', async ({ page }) => {
+    await open(page, './#/library/mx-ai-ticket-triage-llm');
+    const sheet = page.getByRole('dialog', { name: /^Support-ticket triage/ });
+    const bar = sheet.getByRole('radiogroup', { name: 'Jump to a part of the doc' });
+    await expect(bar.getByRole('radio', { name: 'Overview' })).toHaveAttribute('aria-checked', 'true');
+    await expect(sheet.getByText('Monthly · advanced · AI · Year 1 · 30 h')).toBeVisible();
+    await expect(sheet.getByRole('heading', { name: 'The situation' })).toBeVisible();
+    await expect(sheet.getByRole('link', { name: 'Structured output' })).toHaveAttribute('href', /#\/library\/llm-zoomcamp$/);
+
+    // Jump to Design: the bar stays on top and says where the reader is.
+    await bar.getByRole('radio', { name: 'Design' }).click();
+    await expect(bar.getByRole('radio', { name: 'Design' })).toHaveAttribute('aria-checked', 'true');
+    await expect(sheet.getByRole('heading', { name: 'How it works' })).toBeInViewport();
+    await expect(bar).toBeInViewport();
+    const diagram = sheet.getByRole('img', { name: /^Diagram of Support-ticket triage/ });
+    await expect(diagram).toBeVisible();
+    await expect(sheet.getByRole('heading', { name: 'One ticket, step by step' })).toBeVisible();
+    await expect(sheet.getByText('Step 4:', { exact: false }).first()).toBeAttached();
+    await expect(sheet.getByRole('heading', { name: 'Key decisions' })).toBeVisible();
+    await expect(sheet.getByText('Hosted LLM, not a fine-tuned classifier')).toBeVisible();
+    await expect(sheet.getByLabel('Interface, http')).toContainText('POST /triage');
+
+    // Scrolling down to the checks moves the bar with it.
+    const body = sheet.locator('div.overflow-y-auto');
+    await body.evaluate((el) => el.scrollTo(0, el.scrollHeight));
+    await expect(bar.getByRole('radio', { name: 'Checks' })).toHaveAttribute('aria-checked', 'true');
+    await bar.getByRole('radio', { name: 'Build' }).click();
+    await expect(sheet.getByRole('heading', { name: 'Milestones' })).toBeInViewport();
+    await expect(sheet.getByRole('heading', { name: 'Watch out' })).toBeVisible();
+
+    // The diagram full screen: a dialog over the doc, Escape back to the doc with focus on the diagram.
+    await bar.getByRole('radio', { name: 'Design' }).click();
+    const opener = sheet.getByRole('button', { name: 'Open the diagram full screen' });
+    await opener.click();
+    const full = page.getByRole('dialog', { name: 'Diagram' });
+    await expect(full).toBeVisible();
+    await expect(full.getByRole('img', { name: /^Diagram of / })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(full).toBeHidden();
+    await expect(sheet).toBeVisible();
+    await expect(opener).toBeFocused();
+  });
+
+  test('a weekly build has the lighter doc: no stat wells, a small design with one decision, approach steps', async ({ page }) => {
+    await open(page, './#/library/' + BUILD.id);
+    const sheet = page.getByRole('dialog', { name: BUILD.title });
+    await expect(sheet.getByText(/^Weekly · medium · /)).toBeVisible();
+    await expect(sheet.locator('li.well-blue')).toHaveCount(0);
+    await expect(sheet.getByRole('img', { name: /^Diagram of / })).toBeVisible();
+    await expect(sheet.getByRole('heading', { name: 'Key decisions' })).toBeVisible();
+    await expect(sheet.getByRole('heading', { name: 'Approach' })).toBeVisible();
+    const step = sheet.getByRole('checkbox', { name: /^1\. / });
+    await step.click();
+    await expect(step).toBeChecked();
+    await reload(page);
+    await expect(page.getByRole('dialog', { name: BUILD.title }).getByRole('checkbox', { name: /^1\. / })).toBeChecked();
+  });
+
   test('a challenge opens its challenge screen, from the Deck and from Today', async ({ page }) => {
     await open(page, './#/plan/pick?cadence=daily');
     const title = (await page.locator('#deck-top-title').innerText()).trim();

@@ -806,3 +806,67 @@ was, not what is.
   started on is over, a sheet asks "Still working on Core? You started at 14:10" with Keep, Stop at the last time
   the app was used (taps and keys mark it, at most once a minute), and Stop now. Keep asks again three hours later
   or at the next midnight.
+
+## The tech doc redesigned (pull request #9)
+
+**Field schema** (`src/seed/design.ts`, one file per item in `data/projects/design/`; validate:data checks them all):
+
+| Field | Shape | Cases and plan projects | Weekly builds |
+|---|---|---|---|
+| `overview` | plain sentences, jargon explained inline | 2–4 | 1–2 |
+| `learn` | `[{name, ref?}]`, `ref` a Library resource id when one exists | 3–6 | 2–4 |
+| `stats` | `[{value, label}]`, headline numbers from the requirements | 2–3 (optional) | none |
+| `components` | `[{id, name, role, tech, talksTo: [id], kind: core \| offline \| external}]` | 4–8 | 2–4 |
+| `flow` | `[{component, text}]`: one request, frame or job; `` `code` `` and `**stress**` marks | 4–7 | 3–4 |
+| `interface` | `{lang, code}` | when there is one | optional |
+| `decisions` | `[{choice, instead, why}]` | 2–4 | 1 |
+| `watchOut` | one or two sentences | required | required |
+
+Checked: every flow step and every `talksTo` names a component, no component talks to itself, every core component
+is on the flow (offline and external ones need not be), `instead` is not the choice, no URLs in any field, `learn`
+refs resolve, the counts for the weight, and one design per case, build and documented plan project (none extra).
+`stats` is a field of its own rather than parsed from `nonFunctional`, because the requirement lines mix numbers with
+prose; the writers picked the two or three that matter.
+
+**Diagram rules** (`src/lib/diagram.ts`, drawn by `src/ui/Diagram.tsx`):
+
+- Core boxes stack down a left column (about 58 % of 330 px) in the order the flow first names them, labelled
+  "N · Name" with N the flow step. Core boxes the flow never names follow, unnumbered.
+- External and offline parts share the right column, each level with the first core box it is linked to; an
+  external one with no link goes to the top, an offline one to the bottom. One column, not two, because 330 px holds
+  only one side column with 12 px labels.
+- More than eight components: the core path wraps into two columns of equal rows, and the side column narrows.
+- Arrows are axis-aligned polylines from edge to edge, one per `talksTo`, routed through the gutter between the
+  columns or a lane beside the core column; dashed when an end is offline or external. Arrows to an offline part are `--ice-deep`, not `--ice`, which is too
+  faint against `--bg` to read as a line.
+- Labels are 12 px and never shrink: a long name wraps to two lines and the box grows; a third line is cut with "…".
+  In a 314 px tile the 330 px drawing scales to 95 %, so text is 11.4 px at its smallest, above the 11 px floor.
+- Colours are CSS variables only, so the dark theme needs nothing extra. The SVG has a title and the flow as its
+  description; tapping it opens a full-screen dialog with pinch-zoom (1 to 4 times), pan, and double-tap to reset.
+- The layout is pure and deterministic; the unit test runs it over all 664 designs.
+
+**The sheet:**
+
+- **The jump bar** is the segmented control, sticky at the top of the sheet's scroller. The current part is the last
+  one whose heading has passed just under the bar, or the last part at the very bottom.
+- **The step list's heading names what travels**: "One ticket, step by step". The noun is the one the flow uses most,
+  from a short list, with "request" as the default.
+- **The situation's numbers are bold** (800 weight). Numbers inside names and part numbers (H100, 6061-T6) are not.
+- **Done when on a case or build** is one checkbox row: its `doneWhen` is a single sentence. Its tick is stored as
+  `when-1` beside the milestones, but progress counts only milestones and steps (`stepsTicked`), so Today's
+  "1 of 6 milestones" and the forecasts mean what they did. A plan project's Done when is its acceptance criteria, as
+  before, and counts as it always did.
+- **The whole doc waits for its design**, and sheets turn scroll anchoring off, so a doc reopens exactly where it
+  was left. Loading the design later moved the reopened doc otherwise.
+- **The running timer is a blue pill at the top of the doc** (Running · 12:04), not in the sheet's header, for
+  projects and catalogue items; resources keep it in the header.
+- **"Work on it now" is filled** (the doc's one filled action), as the board draws it; the Deck's doc keeps Take it.
+  "README skeleton" is a knob at the end of Checks; for a case its Architecture section is now written from the
+  design (overview, components, numbered flow).
+- **Plan docs:** their Markdown keeps Goal (the situation), Why, Scope, Stack, Milestones, Done when (shown as "Done
+  when, in detail" beside the acceptance checklist), Measure and report, Pitfalls, References and Write-up. The design
+  replaces Architecture. A unit test checks that every other section still shows, and that the boxes of each old
+  Architecture diagram are named in the design: 1,004 of 1,033 (97 %), every doc at least half. The 29 left out are
+  mostly endpoints (a screen, a mouse, the internet).
+- **Loading:** the designs ride in 16 lazy chunks (115–197 kB each) by a hash of the id, so a doc loads one sixteenth
+  of them; the diagram is its own 11.7 kB chunk. The main chunk grows 10.5 kB (the sheet itself).

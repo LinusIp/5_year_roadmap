@@ -225,6 +225,9 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
       ) : (
         <div>
           <p className="text-meta text-ink2">{meta}</p>
+          <div className="mt-2 flex">
+            <RunningTime atlas={atlas} refId={project.id} pill />
+          </div>
           <p className="doc-text mt-2 text-body text-ink2">{project.brief}</p>
         </div>
       )}
