@@ -4,7 +4,7 @@ import { daysBetween, monthName } from '../lib/dates.ts';
 import type { BlockId, Phase } from '../seed/schema.ts';
 import { Button } from '../ui/Button.tsx';
 import { span } from './parts/text.ts';
-import { LANE_COLOR } from './plan/Timeline.tsx';
+import { blockColor } from '../ui/colors.ts';
 
 /** Each year's colour on the map, as in the mockup: green for year 1, then blue, purple, amber and grey. */
 const YEAR_COLOR: Record<number, string> = { 1: 'var(--accent)', 2: 'var(--track-ai)', 3: 'var(--track-robotics)', 4: 'var(--track-ee)', 5: 'var(--track-mech)' };
@@ -63,7 +63,7 @@ export function PhaseMap() {
               <ul className="flex gap-[18px] text-label text-ink2" aria-label="Lanes">
                 {settings.core.blocks.map((b) => (
                   <li key={b.id} className="flex items-center gap-1.5 whitespace-nowrap">
-                    <span aria-hidden="true" className="inline-block size-2.5 rounded-cell" style={{ background: LANE_COLOR[b.id] }} />
+                    <span aria-hidden="true" className="inline-block size-2.5 rounded-cell" style={{ background: blockColor(b) }} />
                     {b.id} {legendName(b.name)} {span(b.minutes)}
                   </li>
                 ))}
@@ -113,7 +113,7 @@ export function PhaseMap() {
                   <ul className="flex flex-col gap-2.5 text-label">
                     {MAP_LANES.map((lane) => (
                       <li key={lane} className="flex gap-2">
-                        <span aria-hidden="true" className="w-[3px] shrink-0 rounded-cell" style={{ background: LANE_COLOR[lane] }} />
+                        <span aria-hidden="true" className="w-[3px] shrink-0 rounded-cell" style={{ background: blockColor(settings.core.blocks.find((b) => b.id === lane), lane) }} />
                         <span>
                           <span className="sr-only">Block {lane}: </span>
                           {p.map?.[lane as 'A' | 'B' | 'C' | 'E'] ?? (p.focus as Record<string, string>)[lane]}

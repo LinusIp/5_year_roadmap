@@ -60,6 +60,18 @@ const ICONS = {
   plus: <path d="M12 5v14M5 12h14" />,
   arrowUp: <path d="M12 19V5M6 11l6-6 6 6" />,
   arrowDown: <path d="M12 5v14M6 13l6 6 6-6" />,
+  sliders: (
+    <>
+      <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+      <circle cx="15" cy="7" r="2" />
+      <circle cx="9" cy="17" r="2" />
+    </>
+  ),
+  undo: <path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" />,
+  grip: <path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" />,
+  projects: <path d="M4 7h16v12H4zM9 7V5h6v2" />,
+  map: <path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14" />,
+  reviews: <path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h5" />,
   refresh: (
     <>
       <path d="M3.5 12a8.5 8.5 0 0 1 14.7-5.8L20.5 8.5" />

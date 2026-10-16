@@ -27,6 +27,7 @@ import { Screen } from '../ui/Screen.tsx';
 import { Sheet } from '../ui/Sheet.tsx';
 import { Checklist, criteriaUnits } from './parts/Checklist.tsx';
 import type { ChecklistUnit } from './parts/Checklist.tsx';
+import { ChangeTodaySheet } from './parts/ChangeTodaySheet.tsx';
 import { DayFields } from './parts/DayFields.tsx';
 import { LogTimeSheet } from './parts/LogTimeSheet.tsx';
 import { NotesField } from './parts/NotesField.tsx';
@@ -35,7 +36,7 @@ import { takenProject } from './parts/taken.ts';
 import { blockShort, dateTitle, nameOf, partOf, span, unitDetail } from './parts/text.ts';
 import { todayLine, tokenDaysLeft, useSyncView } from '../sync/status.ts';
 
-type SheetName = 'log' | 'date' | 'day' | 'note' | null;
+type SheetName = 'log' | 'date' | 'day' | 'note' | 'change' | null;
 
 /** The item a block puts in front of you. Block D carries the week's build first, then the monthly project. */
 function focusItem(block: TodayBlock, monthlyFirst: boolean): ScheduledItem | undefined {
@@ -64,6 +65,12 @@ function unitWindow(units: ChecklistUnit[], done: string[]): ChecklistUnit[] {
   }
   const start = Math.max(0, next - 2);
   return units.slice(start, start + 5);
+}
+
+/** Position of a block in a fixed order; blocks not listed go last, in the day's order. */
+function rank(order: string[], id: string): number {
+  const i = order.indexOf(id);
+  return i < 0 ? order.length : i;
 }
 
 /** Elapsed time of the running timer, ticking once a second. */
@@ -151,16 +158,23 @@ export function Today() {
   }
 
   const isToday = date === now;
+  const layout = settings.layout.today;
   const blocks = plan.blocks;
   const done = (b: TodayBlock): boolean => isBlockDone(log, b.id);
   const timerBlock = isToday && timer ? blocks.find((b) => b.id === timer.block) : undefined;
-  const nowBlock = (chosen ? blocks.find((b) => b.id === chosen) : undefined) ?? timerBlock ?? blocks.find((b) => !done(b)) ?? null;
+  // "Now" is the first unfinished block, in the day's order or in the order set under Settings > Layout.
+  const nowOrder = layout.now === 'order' ? [...blocks].sort((a, b) => rank(layout.order, a.id) - rank(layout.order, b.id)) : blocks;
+  const nowBlock = (chosen ? blocks.find((b) => b.id === chosen) : undefined) ?? timerBlock ?? nowOrder.find((b) => !done(b)) ?? null;
   const later = blocks.filter((b) => b !== nowBlock && !done(b));
   const finished = blocks.filter((b) => b !== nowBlock && done(b));
   const byBlock = minutesByBlock(log);
   const logged = totalMinutes(log);
   const streakState = streak(atlas.logs, settings.core.streak, date, plannedFor(settings));
-  const nothingPlanned = blocks.every((b) => b.kind === 'empty' && !b.weeklyBuild);
+  const restDay = plan.resolved.rest;
+  const nothingPlanned = !restDay && blocks.every((b) => b.kind === 'empty' && !b.weeklyBuild);
+  // The day's template is named in the header only when it is not the usual Full day.
+  const templateNote = restDay ? 'rest day' : plan.resolved.templateId !== 'full' || plan.resolved.source === 'change' ? plan.resolved.templateName : null;
+  const canChange = date >= now;
 
   const item = nowBlock ? focusItem(nowBlock, monthlyFirst) : undefined;
   const nowRunning = Boolean(timer && nowBlock && timer.block === nowBlock.id);
@@ -292,9 +306,14 @@ export function Today() {
               {dateTitle(date)}
             </button>
           }
-          sub={span(logged) + ' of ' + span(plan.targetMinutes) + ' today · ' + (streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet')}
+          sub={
+            layout.stats
+              ? [span(logged) + ' of ' + span(plan.targetMinutes) + ' today', templateNote, streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet'].filter(Boolean).join(' · ')
+              : undefined
+          }
           actions={
             <>
+              {canChange && <Button variant="icon" icon="sliders" label={isToday ? 'Change today' : 'Change ' + dateTitle(date)} onClick={() => setSheet('change')} />}
               <Button variant="icon" icon="gear" label="Settings" to="/settings" />
               <Button
                 variant="icon"
@@ -315,7 +334,13 @@ export function Today() {
         </RowList>
       )}
 
-      {nothingPlanned ? (
+      {restDay ? (
+        <section aria-label="Now" className="mt-7 flex flex-col gap-1.5 rounded-card bg-surface p-5">
+          <p className="text-meta text-ink2">Now</p>
+          <p className="text-headline font-semibold">A rest day.</p>
+          <p className="text-meta text-ink2">Nothing is planned, and the streak is safe.{logged > 0 ? ' ' + span(logged) + ' logged anyway.' : ''}</p>
+        </section>
+      ) : nothingPlanned ? (
         <EmptyState action={<Button to="/plan">Open Plan</Button>}>Nothing scheduled. Open Plan to pick what you&apos;re learning.</EmptyState>
       ) : !nowBlock ? (
         <section aria-label="Now" className="mt-7 flex flex-col gap-1.5 rounded-card bg-surface p-5">
@@ -401,7 +426,7 @@ export function Today() {
         </section>
       )}
 
-      {!nothingPlanned && later.length > 0 && (
+      {!nothingPlanned && layout.later && later.length > 0 && (
         <RowList flat label="Later today" className="mt-7">
           {later.map((block) => {
             const row = rowFor(block);
@@ -411,7 +436,7 @@ export function Today() {
                 key={block.id}
                 className={isTaken ? 'taken' : ''}
                 title={row.title}
-                meta={row.meta}
+                meta={layout.view === 'compact' ? undefined : row.meta}
                 trailing={span(block.targetMinutes)}
                 to={row.to}
                 onClick={
@@ -431,7 +456,7 @@ export function Today() {
         </RowList>
       )}
 
-      {finished.length > 0 && (
+      {layout.footer && finished.length > 0 && (
         <p className="mt-4 text-meta text-ink2">
           Done today: {finished.map((b) => rowFor(b).title).join(', ')}
         </p>
@@ -443,13 +468,13 @@ export function Today() {
         </RowList>
       )}
 
-      {!isReviewDay && (
+      {layout.review && !isReviewDay && (
         <Link to="/reviews" className="mt-1 flex min-h-11 items-center text-meta text-ink2">
           Weekly review on {dayName(addDays(date, (reviewDay - weekday(date) + 7) % 7))}
         </Link>
       )}
 
-      {syncLine && (
+      {layout.footer && syncLine && (
         <Link to="/settings?section=sync" className="flex min-h-11 items-center text-meta text-ink2">
           {syncLine}
         </Link>
@@ -478,6 +503,8 @@ export function Today() {
         onPick={(v) => v && setDate(v)}
         onClose={() => setSheet(null)}
       />
+
+      <ChangeTodaySheet open={sheet === 'change'} onClose={() => setSheet(null)} date={date} settings={settings} title={isToday ? 'Change today' : 'Change ' + dateTitle(date)} />
 
       <Sheet open={sheet === 'day'} title={isToday ? 'How was today?' : 'How was ' + dateTitle(date) + '?'} onClose={() => setSheet(null)}>
         <DayFields date={date} />

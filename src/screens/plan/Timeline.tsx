@@ -2,7 +2,8 @@ import { useState } from 'react';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { describeVerdict } from '../../lib/forecast.ts';
 import { monthName } from '../../lib/dates.ts';
-import type { BlockId, Unit } from '../../seed/schema.ts';
+import type { Unit } from '../../seed/schema.ts';
+import { blockColor } from '../../ui/colors.ts';
 import { Button } from '../../ui/Button.tsx';
 import { ProgressLine } from '../../ui/ProgressLine.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
@@ -10,14 +11,6 @@ import { nameOf, span } from '../parts/text.ts';
 import { isOpenItem, itemDetail } from './model.ts';
 import type { PhaseModel } from './model.ts';
 
-/** Each lane keeps one colour, as in the mockup and the five-year map: orange, green, blue, purple, teal. */
-export const LANE_COLOR: Record<BlockId, string> = {
-  A: 'var(--track-gamedev)',
-  B: 'var(--track-languages)',
-  C: 'var(--track-ai)',
-  D: 'var(--track-systems)',
-  E: 'var(--track-math)',
-};
 
 /** "Math & physics" -> "Math and physics", "Core track" -> "Core", "Projects / hands-on" -> "Projects". */
 export function laneName(name: string): string {
@@ -59,7 +52,7 @@ function Lanes({ atlas, model, units, isCurrent, weekly, onLane }: { atlas: Atla
               type="button"
               onClick={() => onLane(lane.block)}
               className="-ml-4 flex w-[calc(100%+1rem)] flex-col gap-1.5 border-t border-l-[3px] border-t-line py-3.5 pl-[25px] text-left"
-              style={{ borderLeftColor: LANE_COLOR[lane.block] }}
+              style={{ borderLeftColor: blockColor(atlas.settings.core.blocks.find((b) => b.id === lane.block), lane.block) }}
             >
               <span className="flex items-baseline justify-between gap-3">
                 <span className="text-body font-medium leading-[1.3]">{title}</span>

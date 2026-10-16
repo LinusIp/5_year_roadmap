@@ -406,8 +406,8 @@ export const BlockDefSchema = z.strictObject({
   summary: Text,
   /** Names this block had in earlier curricula: settings that still carry one are brought up to date. */
   formerNames: z.array(Text).optional(),
-  /** Colour from the track palette (1-8). Omitted: the lane's default colour. */
-  slot: z.literal([1, 2, 3, 4, 5, 6, 7, 8]).optional(),
+  /** A colour from the track palette, by track id. Omitted: the lane's default colour. */
+  colour: SeedTrackIdSchema.optional(),
   /** The track time in this block is logged against when its item has none (a block the user added). */
   track: TrackIdSchema.optional(),
 });
