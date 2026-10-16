@@ -7,7 +7,7 @@ import { open } from './helpers.ts';
 
 /**
  * The redesign's screenshot test: Today, Activity, Plan and Library on a 390 x 844 phone in both themes, plus
- * the five-year map on a desktop, compared with the pictures committed in /screenshots. Eight weeks of demo
+ * the five-year map on a desktop, Practice, a tech doc over Today and the other screens below, compared with the pictures committed in /screenshots. Eight weeks of demo
  * history are imported first, so the screens have something to show.
  *
  * The baselines are drawn on CI's Linux (Chromium from `npx playwright install`), and CI compares against them on
@@ -92,12 +92,16 @@ test('compact Today and the Change today sheet match the committed screenshots',
   await expect(page).toHaveScreenshot('change-today-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });
 
-test('a practice question, its solution and the set summary match the committed screenshots', async ({ page }) => {
+test('the Practice start screen, a question, its solution and the set summary match the committed screenshots', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await importDemo(page, 'light');
   await open(page, './#/practice');
+  await expect(page.getByRole('main').getByRole('link', { name: /^Physics / })).toBeVisible();
+  await expect(page).toHaveScreenshot('practice-start-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+
+  await open(page, './#/practice?subject=linear-algebra');
   const section = page.locator('section[aria-labelledby="question-heading"]');
-  await expect(page.getByText(/^Question 1 of 9/)).toBeVisible();
+  await expect(page.getByText(/^Question 1 of 3 · Linear algebra/)).toBeVisible();
   await expect(page).toHaveScreenshot('practice-question-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
 
   await section.getByRole('button', { name: 'Hint' }).click();
@@ -105,20 +109,43 @@ test('a practice question, its solution and the set summary match the committed 
   await expect(section.getByRole('region', { name: 'Solution' })).toBeVisible();
   await expect(page).toHaveScreenshot('practice-solution-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
 
-  for (let i = 1; i <= 9; i++) {
-    await expect(page.getByText(new RegExp('^Question ' + i + ' of 9'))).toBeVisible();
-    const proof = section.getByRole('button', { name: 'Show the solution' });
-    if ((await proof.count()) > 0) {
-      await proof.click();
-      await section.getByRole('button', { name: i % 2 ? 'Got it' : 'Missed it' }).click();
-    } else {
-      if (i > 1) await section.getByRole('button', { name: 'Show solution' }).click();
-      await section.getByRole('button', { name: 'Count it as missed' }).click();
+  let first = true;
+  for (const subject of ['Linear algebra', 'Calculus', 'Physics']) {
+    if (!first) await page.getByRole('main').getByRole('link', { name: new RegExp('^' + subject + ' ') }).click();
+    for (let i = 1; i <= 3; i++) {
+      await expect(page.getByText(new RegExp('^Question ' + i + ' of 3 · ' + subject))).toBeVisible();
+      const proof = section.getByRole('button', { name: 'Show the solution' });
+      if ((await proof.count()) > 0) {
+        await proof.click();
+        await section.getByRole('button', { name: i % 2 ? 'Got it' : 'Missed it' }).click();
+      } else {
+        if (!first) await section.getByRole('button', { name: 'Show solution' }).click();
+        await section.getByRole('button', { name: 'Count it as missed' }).click();
+      }
+      first = false;
+      await page.getByRole('button', { name: /^(Next|Back to the subjects|See the summary)$/ }).click();
     }
-    await page.getByRole('button', { name: /^(Next|See the summary)$/ }).click();
   }
   await expect(page.getByRole('heading', { name: /questions right$/ })).toBeVisible();
   await expect(page).toHaveScreenshot('practice-summary-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
+});
+
+test('a tech doc over Today, with the timer running, matches the committed screenshot', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await importDemo(page, 'light');
+  await open(page, './');
+  await expect(page.getByText(/daily challenge/).first()).toBeVisible();
+  // Block D's weekly build becomes Now from its doc, its timer starts, and Tech doc opens the doc over it.
+  await page.getByRole('button', { name: / Weekly build · / }).click();
+  const sheet = page.getByRole('dialog');
+  await sheet.getByRole('button', { name: 'Work on it now' }).click();
+  const now = page.locator('section[aria-labelledby="now-title"]');
+  await now.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByText('Now · running')).toBeVisible();
+  await now.getByRole('button', { name: 'Tech doc' }).click();
+  await expect(sheet.getByRole('timer')).toHaveText(/^Running · 0:00$/);
+  await expect(sheet.getByRole('heading', { name: /^Done when/ }).first()).toBeVisible();
+  await expect(page).toHaveScreenshot('tech-doc-today-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });
 
 test('a challenge, a case sheet and the Deck on Daily match the committed screenshots', async ({ page }) => {

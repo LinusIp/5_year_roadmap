@@ -21,7 +21,7 @@ type ButtonProps = Common & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'child
 type LinkProps = Common & { to: string; href?: undefined; onClick?: () => void };
 type ExternalProps = Common & { href: string; to?: undefined; onClick?: () => void };
 
-const BASE = 'inline-flex min-h-11 select-none items-center justify-center gap-2 rounded-button font-medium disabled:opacity-50 aria-disabled:opacity-50';
+const BASE = 'inline-flex min-h-11 select-none items-center justify-center gap-2 whitespace-nowrap rounded-button font-medium disabled:opacity-50 aria-disabled:opacity-50';
 const VARIANT: Record<ButtonVariant, string> = {
   filled: 'bg-accent px-5 text-on-accent hover:opacity-90',
   quiet: 'border border-line px-4 text-ink hover:bg-accent-soft',

@@ -34,10 +34,12 @@ import { Sheet } from '../ui/Sheet.tsx';
 import { Checklist, criteriaUnits } from './parts/Checklist.tsx';
 import type { ChecklistUnit } from './parts/Checklist.tsx';
 import { ChangeTodaySheet } from './parts/ChangeTodaySheet.tsx';
+import { ItemSheet } from './parts/ItemSheet.tsx';
 import { DayFields } from './parts/DayFields.tsx';
 import { LogTimeSheet } from './parts/LogTimeSheet.tsx';
 import { NotesField } from './parts/NotesField.tsx';
 import { PickerSheet } from './parts/PickerSheet.tsx';
+import { useElapsed } from './parts/RunningTime.tsx';
 import { takenProject } from './parts/taken.ts';
 import { blockShort, dateTitle, nameOf, partOf, span, unitDetail } from './parts/text.ts';
 import { todayLine, tokenDaysLeft, useSyncView } from '../sync/status.ts';
@@ -79,18 +81,6 @@ function rank(order: string[], id: string): number {
   return i < 0 ? order.length : i;
 }
 
-/** Elapsed time of the running timer, ticking once a second. */
-function useElapsed(timer: RunningTimer | null | undefined): number {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!timer) return undefined;
-    setNow(Date.now());
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, [timer]);
-  return timer ? Math.max(0, now - timer.startedAt) : 0;
-}
-
 async function stopTimer(timer: RunningTimer, date: string, item: ScheduledItem | undefined): Promise<void> {
   const minutes = Math.round((Date.now() - timer.startedAt) / 60_000);
   await clearTimer();
@@ -109,9 +99,15 @@ export function Today() {
   const timer = useRunningTimer();
   const elapsed = useElapsed(timer);
   const log = useLiveQuery(() => readLog(date), [date]);
-  // How far today's practice set has got: "4 of 9 answered".
+  // How far today's practice set has got: "1 of 3 subjects". A subject counts once it is finished, which is when its
+  // minutes reach the Practice block under practice:<subject>.
   const practiceAnswered = useLiveQuery(() => db.practice.where('date').equals(date).filter((a) => a.set === 'daily:' + date).count(), [date]) ?? 0;
-  const practiceMeta = (it: ScheduledItem): string => (practiceAnswered >= it.unitCount ? 'Set done · ' : practiceAnswered > 0 ? practiceAnswered + ' of ' + it.unitCount + ' answered · ' : '') + (it.note ?? '');
+  const practiceMeta = (it: ScheduledItem): string => {
+    const total = atlas?.seed.practiceSubjects?.length ?? 3;
+    const finished = new Set((log?.entries ?? []).filter((e) => e.refId?.startsWith('practice:')).map((e) => e.refId)).size;
+    if (practiceAnswered === 0 && finished === 0) return it.note ?? '';
+    return finished >= total ? 'All ' + total + ' subjects done' : finished + ' of ' + total + ' subjects';
+  };
   const settings = atlas?.settings;
   const weekStart = useMemo(() => startOfWeek(date, settings?.core.weekStartsOn ?? 1), [date, settings]);
   const weekPick = useWeekPick(weekStart);
@@ -123,6 +119,8 @@ export function Today() {
   const [taken] = useState(() => takenProject.recent());
   const [monthlyFirst, setMonthlyFirst] = useState(() => taken?.kind === 'monthly');
   const [sheet, setSheet] = useState<SheetName>(null);
+  // A project's tech doc over Today, opened from the Now card or a Later today row. Today stays as it was under it.
+  const [doc, setDoc] = useState<{ id: string; block: BlockId; from: 'now' | 'later' } | null>(null);
   const [updateReady, setUpdateReady] = useState(false);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
@@ -199,6 +197,7 @@ export function Today() {
   const canChange = date >= now;
 
   const item = nowBlock ? focusItem(nowBlock, monthlyFirst) : undefined;
+  const isProject = item?.kind === 'project';
   const nowRunning = Boolean(timer && nowBlock && timer.block === nowBlock.id);
   const otherRunning = Boolean(timer && !nowRunning);
   const nowMinutes = nowBlock ? (byBlock[nowBlock.id] ?? 0) + (nowRunning ? elapsed / 60_000 : 0) : 0;
@@ -237,7 +236,7 @@ export function Today() {
   const weeklyPick: ChallengePick | null =
     isToday && isSlotDay(date, settings.core.catalogue.weeklyDays) && catalogue && challengeEvents ? weeklyChallenge({ entries: catalogue, events: challengeEvents, weekStart, blockLanguage }) : null;
   const activeCase = catalogue?.find((e) => e.kind === 'case' && atlas.states.get(e.id)?.status === 'active');
-  type ExtraRow = { key: string; title: string; meta: string; to: string; trailing: string };
+  type ExtraRow = { key: string; title: string; meta: string; to?: string; doc?: string; trailing: string };
   const challengeRow = (label: string, pick: ChallengePick, query: string): ExtraRow => ({
     key: label,
     title: label + ' · ' + pick.challenge.title,
@@ -253,7 +252,7 @@ export function Today() {
     if (id === 'D' && weeklyPick) rows.push(challengeRow('Weekly challenge', weeklyPick, ''));
     if (id === 'D' && activeCase) {
       const ticked = atlas.states.get(activeCase.id)?.unitsDone.length ?? 0;
-      rows.push({ key: 'Monthly case', title: 'Monthly case · ' + activeCase.title, meta: 'Advanced · ' + ticked + ' milestones ticked · ' + activeCase.hours + ' h', to: '/library/' + activeCase.id, trailing: hoursOn(activeCase.id) + ' h' });
+      rows.push({ key: 'Monthly case', title: 'Monthly case · ' + activeCase.title, meta: 'Advanced · ' + ticked + ' of ' + (activeCase.steps ?? 0) + ' milestones ticked · ' + activeCase.hours + ' h', doc: activeCase.id, trailing: hoursOn(activeCase.id) + ' h' });
     }
     return rows;
   };
@@ -264,9 +263,18 @@ export function Today() {
     const rows = extrasFor(id);
     return rows.length ? rows.map((r) => r.key.toLowerCase() + (r.trailing === 'Done' ? ' done' : '')).join(', ') : null;
   };
-  const extraRow = (row: ExtraRow) => <Row key={row.key} title={row.title} meta={layout.view === 'compact' ? undefined : row.meta} trailing={row.trailing} to={row.to} />;
+  const extraRow = (row: ExtraRow) => (
+    <Row
+      key={row.key}
+      title={row.title}
+      meta={layout.view === 'compact' ? undefined : row.meta}
+      trailing={row.trailing}
+      to={row.to}
+      onClick={row.doc ? () => setDoc({ id: row.doc!, block: 'D', from: nowBlock?.id === 'D' ? 'now' : 'later' }) : undefined}
+    />
+  );
 
-  const rowFor = (block: TodayBlock): { title: string; meta: string; to?: string } => {
+  const rowFor = (block: TodayBlock): { title: string; meta: string; to?: string; doc?: string } => {
     const name = blockShort(block.def.name);
     if (block.item?.kind === 'practice') return { title: block.def.name, meta: practiceMeta(block.item), to: '/practice' };
     if (block.kind === 'review') return { title: 'Weekly review and paper', meta: name + ' · close the week' };
@@ -275,8 +283,10 @@ export function Today() {
       if (block.id === 'D') return { title: 'No project this week', meta: 'Pick one', to: '/plan/pick?from=today' };
       return { title: block.emptyReason ?? 'Nothing planned', meta: name };
     }
-    if (blockItem === block.weeklyBuild) return { title: nameOf(blockItem), meta: 'Weekly build · ' + hoursOn(blockItem.refId) + ' of ' + blockItem.estHours + ' h done' };
-    return { title: nameOf(blockItem), meta: [name, detailOf(blockItem)].filter(Boolean).join(' · ') };
+    // A project's row opens its tech doc; the doc's "Work on it now" makes it Now.
+    const doc = blockItem.kind === 'project' ? blockItem.refId : undefined;
+    if (blockItem === block.weeklyBuild) return { title: nameOf(blockItem), meta: 'Weekly build · ' + hoursOn(blockItem.refId) + ' of ' + blockItem.estHours + ' h done', doc };
+    return { title: nameOf(blockItem), meta: [name, detailOf(blockItem)].filter(Boolean).join(' · '), doc };
   };
 
   const start = (): void => {
@@ -352,7 +362,16 @@ export function Today() {
       : undefined;
   const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item?.kind === 'practice' ? practiceMeta(item) : item ? nameOf(item) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
   const metaLine = nowBlock
-    ? [blockShort(nowBlock.def.name), span(nowMinutes) + ' of ' + span(nowBlock.targetMinutes), nowBlock.catchUp ? span(nowBlock.catchUp) + ' of it catch-up' : null, detailOf(item), nowDone ? 'done' : null].filter(Boolean).join(' · ')
+    ? [
+        blockShort(nowBlock.def.name),
+        span(nowMinutes) + ' of ' + span(nowBlock.targetMinutes),
+        nowBlock.catchUp ? span(nowBlock.catchUp) + ' of it catch-up' : null,
+        detailOf(item),
+        isProject && item.unitCount > 0 ? item.unitsDone + ' of ' + item.unitCount + ' ticked' : null,
+        nowDone ? 'done' : null,
+      ]
+        .filter(Boolean)
+        .join(' · ')
     : '';
   const linkClass = 'inline-flex min-h-11 items-center gap-2 text-button font-medium text-accent';
 
@@ -420,11 +439,34 @@ export function Today() {
         </section>
       ) : (
         <section aria-labelledby="now-title" className={'mt-7 flex flex-col gap-1.5 rounded-card bg-surface p-5' + (taken && item?.refId === taken.id ? ' taken' : '')}>
-          <p className="text-meta text-ink2">{nowRunning ? 'Now · running' : 'Now'}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-meta text-ink2">{nowRunning ? 'Now · running' : 'Now'}</p>
+            {!expanded && (
+              // Mark done sits on the card's first line, so the actions row keeps room for Tech doc.
+              <Button
+                className="-my-3 -mr-1.5"
+                icon="check"
+                label={nowDone ? 'Mark not done' : 'Mark done'}
+                aria-pressed={nowDone}
+                onClick={() => {
+                  void editLog(date, (current) => toggleBlockDone(current, nowBlock.id));
+                  setChosen(null);
+                  setExpanded(false);
+                }}
+              />
+            )}
+          </div>
           <h2 className="text-headline">
-            <button id="now-title" type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className="-my-2 block w-full py-2 text-left text-headline font-semibold">
-              {headline}
-            </button>
+            {isProject && item ? (
+              // A project's title opens its tech doc; everything else unfolds in place.
+              <button id="now-title" type="button" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })} className="-my-2 block w-full py-2 text-left text-headline font-semibold">
+                {headline}
+              </button>
+            ) : (
+              <button id="now-title" type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className="-my-2 block w-full py-2 text-left text-headline font-semibold">
+                {headline}
+              </button>
+            )}
           </h2>
           <p className="text-meta text-ink2">{metaLine}</p>
           <div className="mt-2.5">
@@ -479,19 +521,12 @@ export function Today() {
             ) : (
               !primaryLogs && <Button onClick={() => setSheet('log')}>Log time</Button>
             )}
-            {!expanded && (
-              <Button
-                className="ml-auto"
-                icon="check"
-                label={nowDone ? 'Mark not done' : 'Mark done'}
-                aria-pressed={nowDone}
-                onClick={() => {
-                  void editLog(date, (current) => toggleBlockDone(current, nowBlock.id));
-                  setChosen(null);
-                  setExpanded(false);
-                }}
-              />
+            {isProject && item && (
+              <Button variant="icon" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })}>
+                Tech doc
+              </Button>
             )}
+
           </div>
           {extrasFor(nowBlock.id).length > 0 && (
             <ul className="mt-3 divide-y divide-line border-t border-line">{extrasFor(nowBlock.id).map(extraRow)}</ul>
@@ -516,11 +551,13 @@ export function Today() {
                 onClick={
                   row.to
                     ? undefined
-                    : () => {
-                        setChosen(block.id);
-                        setExpanded(false);
-                        window.scrollTo(0, 0);
-                      }
+                    : row.doc
+                      ? () => setDoc({ id: row.doc!, block: block.id, from: 'later' })
+                      : () => {
+                          setChosen(block.id);
+                          setExpanded(false);
+                          window.scrollTo(0, 0);
+                        }
                 }
               >
                 {isTaken && <span aria-hidden="true" className="taken-line absolute inset-x-0 bottom-0 h-0.5 bg-accent" />}
@@ -576,6 +613,51 @@ export function Today() {
         }))}
         onPick={(v) => v && setDate(v)}
         onClose={() => setSheet(null)}
+      />
+
+      <ItemSheet
+        atlas={atlas}
+        id={doc?.id ?? null}
+        onClose={() => setDoc(null)}
+        footer={
+          doc?.from === 'later' ? (
+            <Button
+              onClick={() => {
+                setChosen(doc.block);
+                setExpanded(false);
+                setDoc(null);
+                window.scrollTo(0, 0);
+              }}
+            >
+              Work on it now
+            </Button>
+          ) : undefined
+        }
+        after={
+          doc?.from === 'now' && doc.block === 'D' && nowBlock?.id === 'D' ? (
+            <>
+              {otherD && (
+                <Row
+                  title={otherD === nowBlock.weeklyBuild ? 'Work on the weekly build instead' : 'Work on the monthly project instead'}
+                  onClick={() => {
+                    setMonthlyFirst((v) => !v);
+                    setDoc(null);
+                  }}
+                />
+              )}
+              {nowBlock.weeklyBuild && item === nowBlock.weeklyBuild && (
+                <Row
+                  title="Suggest another weekly build"
+                  onClick={() => {
+                    pickAnother();
+                    setDoc(null);
+                  }}
+                />
+              )}
+              <Row title="Pick a project" to="/plan/pick?from=today" />
+            </>
+          ) : undefined
+        }
       />
 
       <ChangeTodaySheet open={sheet === 'change'} onClose={() => setSheet(null)} date={date} settings={settings} title={isToday ? 'Change today' : 'Change ' + dateTitle(date)} />

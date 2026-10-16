@@ -18,7 +18,12 @@ interface DeckProps {
   onTake: (card: DeckCard, element: HTMLElement) => void;
   /** One line under the buttons saying what Skip and Take it do here. */
   hint: string;
+  /** A tap on the top card, or Enter or Space on its title: its tech doc. */
+  onOpen?: (card: DeckCard, element: HTMLElement) => void;
 }
+
+/** A pointer that moves less than this between down and up is a tap, not a swipe. */
+const TAP = 6;
 
 /** How many cards the stack shows; the fourth is there to fade in from behind. */
 const VISIBLE = 4;
@@ -36,12 +41,12 @@ function reducedMotion(): boolean {
  * The project deck, the one orchestrated motion in Atlas (section 4.0, Motion). Up to four cards; each one
  * behind steps down 10 px and scales by 4 %. Shuffle makes 7 to 10 swaps that slow down and land on one card;
  * Skip flies the top card left and the next one rises; Take it hands the card to the caller. A swipe does the
- * same as Skip (left) and Take it (right). With reduced motion every change is instant.
+ * same as Skip (left) and Take it (right); a tap opens the card's tech doc. With reduced motion every change is instant.
  *
  * `top` counts up without wrapping, and each visible card is keyed by its position in that count, so the card
  * that rises keeps its element (and its transition) while the one that left is gone.
  */
-export function Deck({ cards, onTake, hint }: DeckProps) {
+export function Deck({ cards, onTake, hint, onOpen }: DeckProps) {
   const [top, setTop] = useState(0);
   const [shuffling, setShuffling] = useState(false);
   const [shuffled, setShuffled] = useState(false);
@@ -129,6 +134,11 @@ export function Deck({ cards, onTake, hint }: DeckProps) {
     dragStart.current = null;
     if (!start || start.id !== e.pointerId) return;
     const dx = e.clientX - start.x;
+    if (Math.abs(dx) < TAP && onOpen && topEl.current) {
+      setDrag(null);
+      onOpen(current(top), topEl.current);
+      return;
+    }
     if (dx <= -SWIPE && n > 1) skip();
     else if (dx >= SWIPE) {
       take();
@@ -177,7 +187,19 @@ export function Deck({ cards, onTake, hint }: DeckProps) {
             >
               <p className="text-meta text-ink2">{card.kind}</p>
               <h2 id={isTop ? 'deck-top-title' : undefined} className="text-card font-semibold">
-                {card.title}
+                {isTop && onOpen ? (
+                  <button
+                    type="button"
+                    aria-haspopup="dialog"
+                    className="-my-1 py-1 text-left"
+                    // A pointer tap is handled on the card (it has the pointer captured); this is Enter and Space.
+                    onClick={(e) => e.detail === 0 && topEl.current && onOpen(card, topEl.current)}
+                  >
+                    {card.title}
+                  </button>
+                ) : (
+                  card.title
+                )}
               </h2>
               <p className="line-clamp-5 text-button text-ink2">{card.brief}</p>
               <p className="mt-auto truncate text-meta text-ink2">{card.footer}</p>

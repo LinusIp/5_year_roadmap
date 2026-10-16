@@ -5,18 +5,19 @@ import { today } from '../../lib/dates.ts';
 import { minutesForRef } from '../../lib/logs.ts';
 import { adherence } from '../../lib/shipping.ts';
 import { isOpen, lane } from '../../lib/schedule.ts';
+import type { ScheduledItem } from '../../lib/schedule.ts';
 import type { Phase, Project } from '../../seed/schema.ts';
 import { Button } from '../../ui/Button.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { ItemStatusPill } from '../parts/ItemSheet.tsx';
-import { plural, shortTitle } from '../parts/text.ts';
+import { nameOf, plural, shortTitle } from '../parts/text.ts';
 
 /**
  * Projects: four stacks, this week's build, this month's project, research and the capstones, each a list. What
  * is shipped folds into one row with a count; "Pick a project" opens the deck. Research cards show once their
  * phase has begun; before that, one row names the first of them.
  */
-export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atlas; phase: Phase | null; weekly: Project | null; onOpenItem: (id: string) => void }) {
+export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atlas; phase: Phase | null; weekly: ScheduledItem | null; onOpenItem: (id: string) => void }) {
   const [showDone, setShowDone] = useState<string | null>(null);
   const catalogue = useCatalogueIndex();
   const { seed, states, logs, settings } = atlas;
@@ -63,7 +64,16 @@ export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atla
 
       <div>
         <RowList label="This week">
-          {weekly && open(weekly) ? projectRow(weekly, 'Weekly build · ' + hoursOn(weekly.id) + ' of ' + weekly.estHours + ' h done') : <Row title="No build this week" meta="Pick one from the deck" to="/plan/pick" />}
+          {weekly && isOpen(weekly.refId, states) ? (
+            <Row
+              title={nameOf(weekly)}
+              meta={'Weekly build · ' + hoursOn(weekly.refId) + ' of ' + weekly.estHours + ' h done' + (weekly.unitCount > 0 ? ' · ' + weekly.unitsDone + ' of ' + weekly.unitCount + ' ticked' : '')}
+              onClick={() => onOpenItem(weekly.refId)}
+              action={<ItemStatusPill kind="project" refId={weekly.refId} title={weekly.title} state={states.get(weekly.refId)} />}
+            />
+          ) : (
+            <Row title="No build this week" meta="Pick one from the deck" to="/plan/pick" />
+          )}
           {doneRow('weekly', weeklyDone, 'weekly build')}
         </RowList>
         <Button className="mt-3" icon="shuffle" to="/plan/pick">

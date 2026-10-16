@@ -4,8 +4,11 @@ import { editItemState, setItemStatus, setWeekPick, useItemState } from '../../d
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { groupLabel, KIND_LABEL } from '../../lib/catalogue/filters.ts';
 import { hasRepo } from '../../lib/projects.ts';
+import { catalogueUnitCount, stepId } from '../../seed/catalogue.ts';
 import type { Build, Case, CatalogueItem } from '../../seed/catalogue.ts';
+import { fractionDone } from '../../lib/progress.ts';
 import { Button } from '../../ui/Button.tsx';
+import { ProgressLine } from '../../ui/ProgressLine.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { Checklist } from './Checklist.tsx';
 import { ItemStatusPill, LinkField } from './ItemSheet.tsx';
@@ -54,7 +57,7 @@ export function catalogueReadme(item: Build | Case): string {
  * architecture, data, milestones as checkboxes, deliverables, done when, measure, pitfalls, stretch, parts. Either
  * one needs a repository link to be marked done; "Copy as README skeleton" starts that README.
  */
-export function CatalogueBody({ atlas, item }: { atlas: Atlas; item: CatalogueItem }) {
+export function CatalogueBody({ atlas, item, taking }: { atlas: Atlas; item: CatalogueItem; taking?: boolean }) {
   const state = useItemState(item.id);
   const [copied, setCopied] = useState<string | null>(null);
   if (item.kind === 'challenge') {
@@ -94,6 +97,8 @@ export function CatalogueBody({ atlas, item }: { atlas: Atlas; item: CatalogueIt
     }
   };
   const status = state?.status ?? 'todo';
+  const steps = catalogueUnitCount(item);
+  const ticked = (state?.unitsDone ?? []).length;
   const now = today();
   const weekStart = startOfWeek(now, atlas.settings.core.weekStartsOn);
   const take = async (): Promise<void> => {
@@ -108,8 +113,14 @@ export function CatalogueBody({ atlas, item }: { atlas: Atlas; item: CatalogueIt
           {[KIND_LABEL[item.kind] + ' · ' + item.difficulty, groupLabel(item.domain), phase ? 'Year ' + phase.year + ' · ' + phase.title : null, 'level ' + item.level, item.estHours + ' h'].filter(Boolean).join(' · ')}
         </p>
         <p className="mt-2 text-body text-ink2">{item.kind === 'case' ? item.scenario : item.goal}</p>
+        <div className="mt-3">
+          <ProgressLine value={fractionDone(status, ticked, steps)} label={'Progress on ' + item.title} />
+          <p className="mt-1.5 text-meta text-ink2">
+            {ticked + ' of ' + steps + (item.kind === 'case' ? ' milestones' : ' steps') + ' ticked'}
+          </p>
+        </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          {status === 'todo' && (
+          {status === 'todo' && !taking && (
             <Button variant="filled" onClick={() => void take()}>
               {item.kind === 'build' ? "Make it this week's build" : 'Take it into the monthly queue'}
             </Button>
@@ -161,13 +172,7 @@ export function CatalogueBody({ atlas, item }: { atlas: Atlas; item: CatalogueIt
         </div>
       ) : (
         <div className="space-y-4">
-          <Section title="Approach">
-            <ol className="list-decimal space-y-0.5 pl-5">
-              {item.approach.map((x) => (
-                <li key={x}>{x}</li>
-              ))}
-            </ol>
-          </Section>
+          <Checklist label={'Approach · ' + item.approach.length + ' steps'} refId={item.id} units={item.approach.map((x, i) => ({ id: stepId(i), title: i + 1 + '. ' + x }))} done={state?.unitsDone ?? []} />
           <Section title="Stack">
             <p>{item.stack}</p>
           </Section>

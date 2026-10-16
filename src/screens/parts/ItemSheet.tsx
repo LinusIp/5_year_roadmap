@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { deleteCustomEntity, patchEntity, resetEntity } from '../../db/edits.ts';
 import { editItemState, setItemStatus, useItemState } from '../../db/state.ts';
 import type { ItemStatus, UserItemState } from '../../db/types.ts';
@@ -19,6 +20,7 @@ import { Checklist, criteriaUnits } from './Checklist.tsx';
 import { ProjectDocView, useProjectDoc } from './ProjectDocView.tsx';
 import { Markdown } from '../../lib/markdown.tsx';
 import { NotesField } from './NotesField.tsx';
+import { RunningTime } from './RunningTime.tsx';
 import { StatusPill } from './StatusPill.tsx';
 import { AddToPlanSheet } from '../plan/EditSheets.tsx';
 import { blockShort, plural } from './text.ts';
@@ -201,7 +203,7 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
 function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
   const state = useItemState(project.id);
   const phase = atlas.seed.phases.find((p) => p.id === project.phaseId);
-  const setField = (key: 'repoUrl' | 'demoUrl' | 'writeUp' | 'partsNotes' | 'budget', value: string): void =>
+  const setField = (key: 'repoUrl' | 'demoUrl' | 'writeUp' | 'partsNotes' | 'budget' | 'notes', value: string): void =>
     void editItemState(project.id, (s) => {
       const next = { ...s };
       if (value.trim()) next[key] = value;
@@ -242,6 +244,7 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
         <LinkField label="Repository" value={state?.repoUrl} onSave={(v) => setField('repoUrl', v)} />
         <LinkField label="Demo, video or page" value={state?.demoUrl} onSave={(v) => setField('demoUrl', v)} />
         <NotesField label="Write-up" value={state?.writeUp} onSave={(v) => setField('writeUp', v)} />
+        <NotesField label="Notes" value={state?.notes} onSave={(v) => setField('notes', v)} />
       </div>
 
       {project.stage === 2 && (
@@ -285,8 +288,14 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
   );
 }
 
-/** A resource's or project's details in a sheet: link, status, checklist, notes, and where it sits on the plan. */
-export function ItemSheet({ atlas, id, onClose }: { atlas: Atlas; id: string | null; onClose: () => void }) {
+/**
+ * A resource's or project's details in a sheet: link, status, checklist, notes, and where it sits on the plan. For a
+ * project this is its tech doc, one tap from every card and row that names it. The header keeps a running timer in
+ * view, the sheet reopens at the place it was scrolled to, and Escape closes it with focus back on the row.
+ * `onTake` adds "Take it" (the Deck), `footer` one action pinned under the doc, `after` rows at its end (Today's
+ * choices for Block D).
+ */
+export function ItemSheet({ atlas, id, onClose, onTake, footer, after }: { atlas: Atlas; id: string | null; onClose: () => void; onTake?: () => void; footer?: ReactNode; after?: ReactNode }) {
   const resource = id ? atlas.seed.resources.find((r) => r.id === id) : undefined;
   const project = id && !resource ? atlas.seed.projects.find((p) => p.id === id) : undefined;
   // Not in the curriculum: perhaps a catalogue build, case or challenge, whose chunk loads on demand.
@@ -302,20 +311,36 @@ export function ItemSheet({ atlas, id, onClose }: { atlas: Atlas; id: string | n
   const fromCatalogue = id && !resource && !project ? catalogue?.find((i) => i.id === id) : undefined;
   const loading = Boolean(id && !resource && !project && !catalogue);
   const title = resource?.title ?? project?.title ?? fromCatalogue?.title ?? (loading ? 'Loading…' : 'Not in the library');
+  const actions =
+    onTake || footer ? (
+      <>
+        {onTake && (
+          <Button variant="filled" onClick={onTake}>
+            Take it
+          </Button>
+        )}
+        {footer}
+      </>
+    ) : undefined;
   return (
-    <Sheet open={id !== null} title={title} onClose={onClose}>
+    <Sheet open={id !== null} title={title} onClose={onClose} scrollKey={id ? 'item:' + id : undefined} aside={<RunningTime atlas={atlas} refId={id} />} footer={actions}>
       {resource ? (
         <ResourceBody key={resource.id} atlas={atlas} resource={resource} />
       ) : project ? (
         <ProjectBody key={project.id} atlas={atlas} project={project} />
       ) : fromCatalogue ? (
-        <CatalogueBody key={fromCatalogue.id} atlas={atlas} item={fromCatalogue} />
+        <CatalogueBody key={fromCatalogue.id} atlas={atlas} item={fromCatalogue} taking={Boolean(onTake)} />
       ) : loading ? (
         <p className="text-meta text-ink2" role="status">
           Loading…
         </p>
       ) : (
         <p className="text-body text-ink2">It may have been renamed or removed from the curriculum. Your notes on it are kept under the old id.</p>
+      )}
+      {after && (
+        <RowList label="On Today" className="mt-6">
+          {after}
+        </RowList>
       )}
     </Sheet>
   );

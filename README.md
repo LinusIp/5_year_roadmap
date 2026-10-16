@@ -89,13 +89,16 @@ old templates are kept for the days they applied to. Schedule, pace and layout t
 ## Daily practice
 
 From 16 October 2026 to 31 January 2027 the day has a sixth block, **Practice** (P, 45 minutes): nine questions,
-three each of linear algebra, calculus and physics, two new and one review once a review is due. Today's set
-opens from Today's Practice row. It is the same set on every device for that date, and it does not change while
-you answer it.
+three each of linear algebra, calculus and physics, two new and one review once a review is due. Today's
+Practice row ("1 of 3 subjects") opens a start screen with the three subjects and their status: not started,
+2 of 3, done. Tap one to do its questions; after its last one you are back on the start screen. Do them in any
+order, and separately across the day: a half-done subject resumes where it stopped. Once all three are done the
+start screen shows the day's summary. The questions are the same on every device for that date, whatever the
+order, and they do not change while you answer them.
 
 <p>
+  <img src="screenshots/practice-start-light.png" alt="The Practice start screen: linear algebra, calculus and physics, each with three questions, about fifteen minutes and its status, and Start linear algebra" width="32%">
   <img src="screenshots/practice-question-light.png" alt="A practice question: the prompt with maths, an answer field, Check, Hint and Show solution" width="32%">
-  <img src="screenshots/practice-solution-light.png" alt="The same question with a hint and the worked solution shown" width="32%">
   <img src="screenshots/practice-summary-light.png" alt="The set summary: score, time, topics, when the reviews come back, and Done" width="32%">
 </p>
 
@@ -107,21 +110,34 @@ you answer it.
 - **Reviews.** A miss comes back after 1 day, then 3, 7, 21 and 60 as you get it right.
 - **Difficulty** follows a rating per topic. Linear algebra follows the 18.06 lectures you have ticked; calculus
   and physics move to the next topic after 15 answers at 80 %.
-- **Done** on the summary logs the time to the Practice block, by subject (math or physics), and nothing else.
+- **Minutes**: each subject's time goes to the Practice block (math or physics) the moment you finish it, and
+  nothing else gets it. The third subject marks the block done.
 - **On demand**: Library › Practise a topic, ten questions on any topic, any day.
 - **Activity › Practice** (once you have answered something): accuracy per subject and topic, the five weakest
   topics, reviews due, minutes.
 - **Roadmaps**: a topic at 85 % over its last 20 answers ticks the roadmap.sh nodes it covers.
-- **Settings › Practice**: the first and last day, and three to five questions a subject. After the last day the
-  block disappears; the answers stay.
+- **Settings › Practice**: the first and last day, three to five questions a subject, and an optional **Start
+  with** subject, which the start screen offers first (it never fixes the order). After the last day the block
+  disappears; the answers stay.
 
 The questions live in `data/questions/` (format: `data/questions/SCHEMA.md`). Templates draw new numbers every
 time. `npm run verify:questions` recomputes every answer with SymPy (`pip install sympy numpy`).
 
 **Tech docs.** Every project that is not a weekly build has a tech doc in `data/projects/docs/<id>.md`: goal,
-architecture, stack, milestones, how to measure and report it. It shows in the project's sheet. Its milestones are
-checkboxes that count toward the project's progress, and "Copy as README skeleton" starts the project's repository
-README from it.
+architecture, stack, milestones, how to measure and report it. Its milestones are checkboxes that count toward the
+project's progress, and "Copy as README skeleton" starts the project's repository README from it. A catalogue build
+shows its brief, approach (steps you can tick), done when, measure and pitfalls the same way.
+
+The doc is one tap away: any project card or row opens it in a sheet, in the Deck (before Take it; the doc has Take
+it too), the Library, Plan › Projects, the monthly queue and the weekly slot. On Today, the project's title on the
+Now card, a quiet **Tech doc** next to Start and Log time, and a project's Later today row (with "Work on it now")
+open it over Today. The timer keeps running, with its time in the sheet's header; ticks made in the doc show on the
+card at once; closing it leaves Today as it was; and each doc reopens where you left it. Enter or Space opens a doc
+from a focused row, Escape closes it and puts focus back. Challenges open their own screen instead.
+
+<p>
+  <img src="screenshots/tech-doc-today-light.png" alt="A weekly build's tech doc over Today, Running 0:00 in its header, the Done when checklist and the choices for Block D" width="32%">
+</p>
 
 ## Projects: daily, weekly, monthly
 
