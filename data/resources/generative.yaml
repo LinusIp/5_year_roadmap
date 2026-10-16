@@ -2,6 +2,7 @@
 
 - id: stanford-cs236
   title: Deep Generative Models (Stanford CS236)
+  short: "CS236 Deep Generative Models"
   provider: Stanford University
   type: course
   url: https://deepgenerativemodels.github.io/
@@ -81,6 +82,7 @@
   title: Sander Dieleman's blog
   provider: Sander Dieleman
   type: article
+  blog: true
   url: https://sander.ai/
   urlVerified: true
   lastVerified: 2026-10-08

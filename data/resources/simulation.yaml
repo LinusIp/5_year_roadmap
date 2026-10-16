@@ -2,6 +2,7 @@
 
 - id: catto-box2d-publications
   title: "Erin Catto: GDC talks and Box2D publications (with the Box2D source)"
+  short: "Box2D Publications"
   provider: box2d.org
   type: article
   url: https://box2d.org/publications/
@@ -16,6 +17,7 @@
 
 - id: millington-game-physics
   title: "Game Physics Engine Development, 2nd edition (Ian Millington)"
+  short: "Game Physics Engine Dev"
   provider: CRC Press
   type: book
   url: https://www.routledge.com/Game-Physics-Engine-Development-How-to-Build-a-Robust-Commercial-Grade-Physics-Engine-for-your-Game/Millington/p/book/9780123819765
@@ -29,8 +31,10 @@
 
 - id: gaffer-on-games
   title: "Gaffer On Games: integration basics, fix your timestep, networked physics"
+  short: "Gaffer On Games"
   provider: Glenn Fiedler
   type: article
+  blog: true
   url: https://gafferongames.com/
   urlVerified: true
   lastVerified: 2026-09-20
@@ -42,6 +46,7 @@
 
 - id: witkin-baraff-pbm
   title: "Witkin and Baraff: Physically Based Modeling (SIGGRAPH course notes)"
+  short: "Physically Based Modeling"
   provider: Pixar / CMU
   type: article
   url: https://www.cs.cmu.edu/~baraff/sigcourse/
@@ -56,6 +61,7 @@
 
 - id: ericson-rtcd
   title: "Real-Time Collision Detection (Christer Ericson)"
+  short: "Realtime Collision Detection"
   provider: CRC Press
   type: book
   url: https://realtimecollisiondetection.net/
@@ -70,6 +76,7 @@
 
 - id: ten-minute-physics
   title: "Ten Minute Physics (Matthias Muller)"
+  short: "Ten Minute Physics"
   provider: Matthias Muller
   type: lectures
   url: https://matthias-research.github.io/pages/tenMinutePhysics/index.html
@@ -84,6 +91,7 @@
 
 - id: bridson-fluid-sim
   title: "Fluid Simulation for Computer Graphics, 2nd edition (Robert Bridson)"
+  short: "Fluid Simulation for CG"
   provider: Routledge
   type: book
   url: https://www.routledge.com/Fluid-Simulation-for-Computer-Graphics/Bridson/p/book/9781482232837
@@ -99,6 +107,7 @@
 
 - id: pbdl-book
   title: "Physics-Based Deep Learning (physicsbaseddeeplearning.org)"
+  short: "Physics-Based Deep Learning"
   provider: Thuerey group, TUM
   type: book
   url: https://www.physicsbaseddeeplearning.org/intro.html
@@ -116,6 +125,7 @@
 
 - id: mujoco-docs
   title: "MuJoCo: official documentation"
+  short: "MuJoCo Docs"
   provider: Google DeepMind
   type: tutorial
   url: https://mujoco.readthedocs.io/en/stable/overview.html

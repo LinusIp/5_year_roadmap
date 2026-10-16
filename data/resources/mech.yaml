@@ -2,6 +2,7 @@
 
 - id: mit-2-001
   title: "MIT 2.001 Mechanics and Materials I (Fall 2006)"
+  short: "2.001 Mechanics & Materials"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/2-001-mechanics-materials-i-fall-2006/
@@ -31,6 +32,7 @@
 
 - id: mit-2-003
   title: "MIT 2.003SC Engineering Dynamics (Fall 2011)"
+  short: "2.003 Engineering Dynamics"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/2-003sc-engineering-dynamics-fall-2011/
@@ -46,6 +48,7 @@
 
 - id: mit-2-005
   title: "MITx 2.005.1x Thermal-Fluids Engineering 1: Basics of Thermodynamics and Hydrostatics"
+  short: "2.005 Thermal-Fluids"
   provider: MIT Learn (MITx)
   type: course
   url: https://mitxonline.mit.edu/courses/course-v1:MITxT+2.005.1x/
@@ -77,6 +80,7 @@
 
 - id: mit-2-008
   title: "MIT 2.008 Design and Manufacturing II (Spring 2025)"
+  short: "2.008 Design & Manufacturing"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/2-008-design-and-manufacturing-ii-spring-2025/
@@ -104,6 +108,7 @@
 
 - id: mit-2-086
   title: "MIT 2.086 Numerical Computation for Mechanical Engineers (Fall 2014)"
+  short: "2.086 Numerical Computation"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/2-086-numerical-computation-for-mechanical-engineers-fall-2014/
@@ -119,6 +124,7 @@
 
 - id: fish-belytschko-fem
   title: "A First Course in Finite Elements (Fish and Belytschko)"
+  short: "A First Course in FEM"
   provider: Wiley
   type: book
   url: https://www.wiley.com/en-us/A+First+Course+in+Finite+Elements-p-9780470035801
@@ -134,6 +140,7 @@
 
 - id: bangerth-dealii-lectures
   title: "Wolfgang Bangerth: finite element video lectures (deal.II), selected"
+  short: "deal.II FEM Lectures"
   provider: Colorado State University
   type: lectures
   url: https://www.math.colostate.edu/~bangerth/videos.html
@@ -163,6 +170,7 @@
 
 - id: modern-robotics
   title: "Modern Robotics: Mechanics, Planning, and Control (Lynch and Park, free book)"
+  short: "Modern Robotics"
   provider: Northwestern University
   type: course
   url: https://hades.mech.northwestern.edu/index.php/Modern_Robotics
@@ -192,6 +200,7 @@
 
 - id: ros2-tutorials
   title: "ROS 2 official tutorials (Jazzy)"
+  short: "ROS 2 Tutorials"
   provider: Open Robotics
   type: tutorial
   url: https://docs.ros.org/en/jazzy/Tutorials.html
@@ -206,6 +215,7 @@
 
 - id: articulated-robotics
   title: "Articulated Robotics: build a mobile robot with ROS 2"
+  short: "Articulated Robotics"
   provider: Josh Newans
   type: tutorial
   url: https://www.youtube.com/@ArticulatedRobotics
@@ -280,6 +290,7 @@
 
 - id: cadquery-docs
   title: "CadQuery documentation (CAD scripting in Python)"
+  short: "CadQuery Docs"
   provider: CadQuery
   type: tutorial
   url: https://cadquery.readthedocs.io/en/latest/
@@ -338,6 +349,7 @@
 
 - id: scientific-python-lectures
   title: "Scientific Python Lectures (NumPy, SciPy, Matplotlib)"
+  short: "Scientific Python Lectures"
   provider: scientific-python.org
   type: tutorial
   url: https://lectures.scientific-python.org/
@@ -367,6 +379,7 @@
 
 - id: mit-2-12
   title: "MIT 2.12 Introduction to Robotics (Asada and Leonard, Fall 2005)"
+  short: "2.12 Intro to Robotics"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/2-12-introduction-to-robotics-fall-2005/
@@ -381,6 +394,7 @@
 
 - id: mit-manipulation
   title: "MIT 6.4210 Robotic Manipulation (Russ Tedrake, Drake notebooks)"
+  short: "6.4210 Robotic Manipulation"
   provider: MIT
   type: course
   url: https://manipulation.mit.edu/

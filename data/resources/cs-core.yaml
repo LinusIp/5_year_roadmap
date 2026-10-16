@@ -33,6 +33,7 @@
 
 - id: current-dsa-course
   title: "Current algorithms and data structures course (the one already in progress)"
+  short: "Current DSA Course"
   provider: "(fill in)"
   type: course
   url: null
@@ -120,6 +121,7 @@
 
 - id: csapp-labs
   title: "CS:APP labs (data, bomb, attack, architecture, cache, performance, shell, malloc, proxy)"
+  short: "CS:APP Labs"
   provider: CMU
   type: course
   url: https://csapp.cs.cmu.edu/3e/labs.html

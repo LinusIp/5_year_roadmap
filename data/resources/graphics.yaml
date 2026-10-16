@@ -107,6 +107,7 @@
 
 - id: utah-cs6610
   title: "Cem Yuksel: Interactive Computer Graphics (University of Utah CS 5610/6610, lecture videos)"
+  short: "CS 6610 Interactive Graphics"
   provider: University of Utah
   type: lectures
   url: https://www.youtube.com/playlist?list=PLplnkTzzqsZS3R5DjmCQsqupu43oS9CFN
@@ -122,6 +123,7 @@
 
 - id: vulkan-tutorial
   title: "Vulkan Tutorial (vulkan-tutorial.com)"
+  short: "Vulkan Tutorial"
   provider: Alexander Overvoorde
   type: tutorial
   url: https://vulkan-tutorial.com/
@@ -229,6 +231,7 @@
   title: "Inigo Quilez: articles"
   provider: iquilezles.org
   type: article
+  blog: true
   url: https://iquilezles.org/articles/
   urlVerified: true
   lastVerified: 2026-09-20
@@ -256,6 +259,7 @@
 
 - id: game-engine-architecture
   title: "Game Engine Architecture (Jason Gregory)"
+  short: "Game Engine Architecture"
   provider: CRC Press
   type: book
   url: https://www.gameenginebook.com/

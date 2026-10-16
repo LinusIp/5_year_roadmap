@@ -187,6 +187,8 @@ export const ResourceSchema = z
     stretch: z.boolean().optional(),
     /** A reference work: consulted, not completed. Carries no scheduled hours. */
     reference: z.boolean().optional(),
+    /** A site that keeps publishing (a blog, a newsletter): the Library's "Blogs to follow" shelf. */
+    blog: z.boolean().optional(),
     /** roadmap.sh nodes this resource teaches; finishing it ticks them. */
     covers: z.array(NodeRef).optional(),
     /** Resources that can take its place on the plan (fast.ai or CS231n): offered first by Swap. */
