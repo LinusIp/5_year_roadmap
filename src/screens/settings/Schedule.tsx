@@ -6,7 +6,6 @@ import { seed } from '../../seed/index.ts';
 import type { BlockDef, DayTemplate, SettingsDefaults, TrackId } from '../../seed/schema.ts';
 import { Button } from '../../ui/Button.tsx';
 import { Chips } from '../../ui/Chips.tsx';
-import { BLOCK_COLOURS, blockColor } from '../../ui/colors.ts';
 import { NumberField } from '../../ui/NumberField.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { Sheet } from '../../ui/Sheet.tsx';
@@ -319,32 +318,6 @@ function BlockSheet({ settings, id, onClose }: { settings: StoredSettings; id: s
                 };
               })}
             />
-            <div>
-              <p className="mb-1.5 text-meta text-ink2">Colour</p>
-              <div role="radiogroup" aria-label="Colour" className="flex flex-wrap gap-1">
-                {BLOCK_COLOURS.map((track) => {
-                  const chosen = (block.colour ?? null) === track;
-                  return (
-                    <button
-                      key={track}
-                      type="button"
-                      role="radio"
-                      aria-checked={chosen}
-                      aria-label={seed.tracks.find((t) => t.id === track)?.name ?? track}
-                      onClick={() => void run((core) => ((core.blocks[index]!.colour = track), core))}
-                      className="grid size-11 place-items-center rounded-button"
-                    >
-                      <span className={'size-7 rounded-pill ' + (chosen ? 'ring-2 ring-ink ring-offset-2 ring-offset-surface' : '')} style={{ background: 'var(--track-' + track + ')' }} />
-                    </button>
-                  );
-                })}
-              </div>
-              {block.colour && (
-                <Button size="sm" className="mt-1" onClick={() => void run((core) => (delete core.blocks[index]!.colour, core))}>
-                  The lane’s own colour
-                </Button>
-              )}
-            </div>
             <RowList plain>
               <Row title="Track" meta="Time in this block counts toward it when its item has none" trailing={seed.tracks.find((t) => t.id === block.track)?.name ?? 'None'} onClick={() => setPickingTrack(true)} />
             </RowList>
@@ -412,7 +385,6 @@ export function Blocks({ settings }: { settings: StoredSettings }) {
         {blocks.map((block, index) => (
           <Row
             key={block.id}
-            edge={blockColor(block)}
             title={'Block ' + block.id + ' · ' + blockShort(block.name)}
             meta={span(block.minutes) + ' · ' + describeDays(block.days)}
             onClick={ordering ? undefined : () => setOpen(block.id)}

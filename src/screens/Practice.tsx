@@ -64,10 +64,10 @@ function OptionList({ part, value, onChange, disabled, name }: { part: RenderedP
             aria-checked={checked}
             disabled={disabled}
             onClick={() => onChange(String(i))}
-            className={'flex min-h-11 items-center gap-3 rounded-button border px-3 py-2 text-left text-body ' + (checked ? 'border-accent bg-accent-soft' : 'border-line')}
+            className={'flex min-h-11 items-center gap-3 rounded-knob border px-3 py-2 text-left text-body ' + (checked ? 'border-blue bg-blue-soft' : 'border-dash')}
           >
-            <span aria-hidden="true" className={'grid size-5 shrink-0 place-items-center rounded-pill border ' + (checked ? 'border-accent' : 'border-ink2')}>
-              {checked && <span className="size-2.5 rounded-pill bg-accent" />}
+            <span aria-hidden="true" className={'grid size-5 shrink-0 place-items-center rounded-pill border ' + (checked ? 'border-blue' : 'border-ink2')}>
+              {checked && <span className="size-2.5 rounded-pill bg-blue" />}
             </span>
             <Maths source={option} />
           </button>
@@ -171,7 +171,7 @@ function QuestionScreen({
       <h2 id="question-heading" className="sr-only">
         Question {index + 1}
       </h2>
-      <div className="rounded-card bg-surface p-5 text-body">
+      <div className="tile p-[18px] text-body">
         <Maths source={question.prompt} className="doc-text" />
       </div>
 
@@ -198,7 +198,7 @@ function QuestionScreen({
       {attempt.hints > 0 && (
         <ol className="flex flex-col gap-2" aria-label="Hints">
           {question.hints.slice(0, attempt.hints).map((h, i) => (
-            <li key={i} className="rounded-button border border-line p-3 text-body">
+            <li key={i} className="knob rounded-knob p-3 text-body">
               <span className="text-meta text-ink2">Hint {i + 1}. </span>
               <Maths source={h} />
             </li>
@@ -209,7 +209,7 @@ function QuestionScreen({
       {correct !== null && <p className="text-body font-medium">{correct ? 'Correct.' : 'The worked solution is below.'}</p>}
 
       {showSolution && (
-        <div className="rounded-card bg-surface p-5 text-body" aria-label="Solution" role="region">
+        <div className="tile p-[18px] text-body" aria-label="Solution" role="region">
           <h3 className="section-label">Solution</h3>
           <Maths source={question.solution} className="doc-text" />
           {reading.length > 0 && (

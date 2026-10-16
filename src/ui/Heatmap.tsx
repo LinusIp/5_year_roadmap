@@ -33,7 +33,7 @@ const MIN_LABEL_GAP = 28;
 /** The ramp for a track's colour: the same four steps, mixed from the track colour instead of accent. */
 export function trackRamp(color: string | undefined): CSSProperties | undefined {
   if (!color) return undefined;
-  const mix = (share: number): string => 'color-mix(in srgb, ' + color + ' ' + share + '%, var(--surface))';
+  const mix = (share: number): string => 'color-mix(in srgb, ' + color + ' ' + share + '%, var(--bg))';
   return { '--heat-color': color, '--heat-1': mix(22), '--heat-2': mix(48), '--heat-3': mix(74) } as CSSProperties;
 }
 

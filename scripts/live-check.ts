@@ -87,6 +87,14 @@ try {
   const icons = await page.locator('main svg.lucide').count();
   if (icons === 0) throw new Error('Today shows no icons');
   step('Today shows its icons (' + icons + ')');
+  // The brush mark at the top of Today, in the theme's colour, and the font the clay style sets.
+  const mark = page.locator('img[src*="brand/atlas-mark-"]');
+  await mark.waitFor({ timeout: 30_000 });
+  const markLoaded = await mark.evaluate((img) => (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0);
+  if (!markLoaded) throw new Error('The Atlas mark did not load');
+  const font = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
+  if (!font.includes('Nunito')) throw new Error('Today is not set in Nunito: ' + font);
+  step('Today shows the Atlas mark (' + (await mark.getAttribute('src')) + ') in Nunito');
 
   if (errors.length > 0) throw new Error('page errors: ' + errors.join(' | '));
   console.log('\nLive check passed.');

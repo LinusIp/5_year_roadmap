@@ -10,14 +10,14 @@ import { clearTimer, editItemState, setItemStatus, setWeekPick, startTimer, useR
 import type { RunningTimer } from '../db/types.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { useUnits } from '../hooks/useUnits.ts';
-import { addDays, dayName, formatLong, formatStopwatch, startOfWeek, today as todayDate, weekday } from '../lib/dates.ts';
+import { addDays, dayName, daysBetween, formatLong, formatStopwatch, startOfWeek, today as todayDate, weekday } from '../lib/dates.ts';
 import { addEntry, editLog, isBlockDone, minutesByBlock, minutesForRef, readLog, toggleBlockDone, totalMinutes } from '../lib/logs.ts';
 import { plannedFor } from '../lib/day-plan.ts';
 import { catchUpMinutes, laneBalance } from '../lib/pace.ts';
 import { planForDay, suggestWeeklyBuild } from '../lib/schedule.ts';
 import type { ScheduledItem, TodayBlock } from '../lib/schedule.ts';
 import { logTimeRequests } from '../lib/shortcuts.ts';
-import { streak } from '../lib/streaks.ts';
+import { counts, dailyTotals, streak } from '../lib/streaks.ts';
 import { resolveTheme } from '../lib/theme.ts';
 import { applyUpdate, onUpdateReady } from '../pwa/register.ts';
 import { Link, useQueryParam } from '../router/router.tsx';
@@ -25,9 +25,9 @@ import { isRealIsoDate } from '../seed/schema.ts';
 import type { BlockId } from '../seed/schema.ts';
 import { Button } from '../ui/Button.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
-import { Header } from '../ui/Header.tsx';
 import { Icon } from '../ui/Icon.tsx';
-import { BlockIcon, KindIcon } from '../ui/glyphs.tsx';
+import { BlockIcon, BlockTile, KindIcon } from '../ui/glyphs.tsx';
+import { blockTone, toneInk } from '../ui/colors.ts';
 import { ProgressLine } from '../ui/ProgressLine.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
@@ -191,6 +191,10 @@ export function Today() {
   const byBlock = minutesByBlock(log);
   const logged = totalMinutes(log);
   const streakState = streak(atlas.logs, settings.core.streak, date, plannedFor(settings));
+  // The week strip: the six days before today and today. A day counts as it does for the streak.
+  const weekDays = dailyTotals(atlas.logs, addDays(now, -6), now, plannedFor(settings)).map((t) => ({ date: t.date, counted: counts(t, settings.core.streak) }));
+  // The header widget names what the running timer is on.
+  const timerItemName = ((i) => (i ? nameOf(i) : undefined))(timer ? blocks.map((b) => focusItem(b, monthlyFirst)).find((i) => i && i.refId === timer.refId) : undefined);
   const restDay = plan.resolved.rest;
   const nothingPlanned = !restDay && blocks.every((b) => b.kind === 'empty' && !b.weeklyBuild);
   // The day's template is named in the header only when it is not the usual Full day.
@@ -307,14 +311,14 @@ export function Today() {
   if (otherRunning && timer) {
     const name = blockShort(settings.core.blocks.find((b) => b.id === timer.block)?.name ?? timer.block);
     primary = (
-      <Button variant="filled" icon="pause" onClick={stop}>
-        Stop {name} {formatStopwatch(elapsed)}
+      <Button variant="filled" icon="stop" onClick={stop}>
+        Stop {name}
       </Button>
     );
   } else if (nowRunning) {
     primary = (
-      <Button variant="filled" icon="pause" onClick={stop}>
-        Stop {formatStopwatch(elapsed)}
+      <Button variant="filled" icon="stop" onClick={stop}>
+        Stop
       </Button>
     );
   } else if (nowBlock?.kind === 'review') {
@@ -376,7 +380,7 @@ export function Today() {
         .filter(Boolean)
         .join(' · ')
     : '';
-  const linkClass = 'inline-flex min-h-11 items-center gap-2 text-button font-medium text-accent';
+  const linkClass = 'inline-flex min-h-11 items-center gap-2 text-button font-medium text-blue-deep';
 
   return (
     <Screen title="Today">
@@ -392,93 +396,130 @@ export function Today() {
           if (Math.abs(dx) > 60 && Math.abs(e.clientY - s.y) < 40) setDate(addDays(date, dx > 0 ? -1 : 1));
         }}
       >
-        <Header
-          title={
-            <button type="button" className="-mx-2 -my-2.5 min-h-11 rounded-button px-2 text-left" onClick={() => setSheet('date')} aria-haspopup="dialog">
-              {dateTitle(date)}
-            </button>
-          }
-          sub={
-            layout.stats ? (
-              // The stats line: the clock for time, the flame for the streak, and the only place the flame shows.
-              <span className="inline-flex flex-wrap items-center gap-x-1.5">
-                <Icon name="clock" size={16} />
-                <span>{span(logged) + ' of ' + span(plan.targetMinutes) + ' today' + (templateNote ? ' · ' + templateNote : '') + ' · '}</span>
-                {streakState.current > 0 && <Icon name="flame" size={16} />}
-                <span>{streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet'}</span>
+        {/* The page's title, for screen readers: the date. The mark and wordmark are decoration. */}
+        <h1 className="sr-only">{dateTitle(date)}</h1>
+        <div className="-mb-1.5 flex items-center gap-2 pl-1 pt-[max(2.25rem,env(safe-area-inset-top))]">
+          <span aria-hidden="true" className="flex flex-1 items-center gap-2">
+            <img src={'./brand/atlas-mark-' + theme + '.png'} width={30} height={30} alt="" />
+            <span className="text-[1.25rem] font-semibold tracking-[-0.01em]">Atlas</span>
+          </span>
+          <button type="button" className="min-h-11 rounded-pill px-2 text-meta font-semibold text-blue-deep" onClick={() => setSheet('date')} aria-haspopup="dialog">
+            {isToday ? 'Today, ' + dayName(date, true) + ' ' + Number(date.slice(8, 10)) : dateTitle(date)}
+          </button>
+          {canChange && <Button variant="icon" icon="sliders" className="!size-11" label={isToday ? 'Change today' : 'Change ' + dateTitle(date)} onClick={() => setSheet('change')} />}
+        </div>
+        <div className="mt-4 grid grid-cols-[1fr_48px] gap-4">
+          <div className="tile flex flex-col items-center justify-center gap-1.5 px-[18px] py-4 text-center">
+            {nowRunning || otherRunning ? (
+              <p className="flex flex-col items-center gap-1.5">
+                <span className="well well-blue rounded-[14px] px-[18px] py-1.5 text-big font-semibold">{formatStopwatch(elapsed)}</span>{' '}
+                <span className="text-meta text-ink2">
+                  <span className="font-semibold text-blue-deep">Running</span>
+                  {' · ' + (timerItemName ?? blockShort(settings.core.blocks.find((b) => b.id === timer?.block)?.name ?? '')) + ' · ' + span(logged) + ' today'}
+                </span>
+              </p>
+            ) : layout.stats ? (
+              <p className="flex flex-col items-center gap-1.5">
+                <span className="well well-ice rounded-[14px] px-[18px] py-1.5 text-big font-semibold">{span(logged)}</span>{' '}
+                <span className="text-meta text-ink2">{'of ' + span(plan.targetMinutes) + ' today' + (templateNote ? ' · ' + templateNote : '') + ' · ' + (streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet')}</span>
+              </p>
+            ) : null}
+          </div>
+          <div className="flex flex-col gap-3">
+            <Button variant="icon" icon="gear" label="Settings" to="/settings" />
+            <Button
+              variant="icon"
+              icon={theme === 'dark' ? 'sun' : 'moon'}
+              label={'Switch to the ' + nextTheme + ' theme'}
+              onClick={() => void updateSettings(settings.core, (s) => ({ ...s, theme: nextTheme }))}
+            />
+          </div>
+        </div>
+        {/* The week so far: a day that counted is blue, today is ice, a day that did not count is pressed in. */}
+        <nav aria-label="This week" className="tile mt-4 flex justify-between px-2.5 py-2.5">
+          {weekDays.map((d) => (
+            <button
+              key={d.date}
+              type="button"
+              onClick={() => setDate(d.date)}
+              aria-current={d.date === date ? 'date' : undefined}
+              className="flex min-w-11 flex-col items-center gap-1.5"
+            >
+              {/* The visible "Sat 10" starts the name; the full date and whether it counted follow for screen readers. */}
+              <span className="text-small font-semibold text-ink2">{dayName(d.date, true)}</span>
+              <span
+                className={
+                  'grid size-[34px] place-items-center rounded-pill text-label font-semibold ' +
+                  (d.date === now ? 'fill-ice' : d.counted ? 'fill-blue' : 'well rounded-pill text-ink2') +
+                  (d.date === date && d.date !== now ? ' outline outline-2 outline-offset-2 outline-blue-deep' : '')
+                }
+              >
+                {Number(d.date.slice(8, 10))}
               </span>
-            ) : undefined
-          }
-          actions={
-            <>
-              {canChange && <Button variant="icon" icon="sliders" label={isToday ? 'Change today' : 'Change ' + dateTitle(date)} onClick={() => setSheet('change')} />}
-              <Button variant="icon" icon="gear" label="Settings" to="/settings" />
-              <Button
-                variant="icon"
-                icon={theme === 'dark' ? 'sun' : 'moon'}
-                label={'Switch to the ' + nextTheme + ' theme'}
-                onClick={() => void updateSettings(settings.core, (s) => ({ ...s, theme: nextTheme }))}
-              />
-            </>
-          }
-        />
+              <span className="sr-only">{', ' + dateTitle(d.date) + (d.date === now ? ', today' : d.counted ? ', counted' : ', not counted')}</span>
+            </button>
+          ))}
+        </nav>
       </div>
 
       {outside && <p className="mt-2 text-meta text-ink2">{outside}</p>}
 
       {updateReady && (
-        <RowList flat className="mt-5">
+        <RowList className="mt-4">
           <Row title="A new version of Atlas is ready" trailing="Reload" onClick={applyUpdate} />
         </RowList>
       )}
 
       {restDay ? (
-        <section aria-label="Now" className="mt-6 flex flex-col gap-1.5 rounded-card bg-surface p-5">
+        <section aria-label="Now" className="tile mt-4 flex flex-col gap-1.5 p-[18px]">
           <p className="section-label mb-0">Now</p>
-          <p className="text-headline font-semibold">A rest day.</p>
+          <p className="text-card font-semibold">A rest day.</p>
           <p className="text-meta text-ink2">Nothing is planned, and the streak is safe.{logged > 0 ? ' ' + span(logged) + ' logged anyway.' : ''}</p>
         </section>
       ) : nothingPlanned ? (
         <EmptyState action={<Button to="/plan">Open Plan</Button>}>Nothing scheduled. Open Plan to pick what you&apos;re learning.</EmptyState>
       ) : !nowBlock ? (
-        <section aria-label="Now" className="mt-6 flex flex-col gap-1.5 rounded-card bg-surface p-5">
+        <section aria-label="Now" className="tile mt-4 flex flex-col gap-1.5 p-[18px]">
           <p className="section-label mb-0">Now</p>
-          <p className="text-headline font-semibold">All five blocks are done.</p>
+          <p className="text-card font-semibold">All five blocks are done.</p>
           <p className="text-meta text-ink2">{span(logged)} logged today.</p>
         </section>
       ) : (
-        <section aria-labelledby="now-title" className={'mt-6 flex flex-col gap-1.5 rounded-card bg-surface p-5' + (taken && item?.refId === taken.id ? ' taken' : '')}>
+        <section aria-labelledby="now-title" className={'tile mt-4 flex flex-col gap-1.5 p-[18px]' + (taken && item?.refId === taken.id ? ' taken' : '')}>
           <div className="flex items-center justify-between gap-2">
-            <p className="section-label mb-0 flex items-center gap-2">
-              <BlockIcon block={nowBlock.id} />
-              {nowRunning ? 'Now · running' : 'Now'}
+            <p className="section-label mb-0 flex min-w-0 items-center gap-1.5 uppercase" style={{ color: toneInk(blockTone(nowBlock.id)) }}>
+              <BlockIcon block={nowBlock.id} size={18} />
+              <span className="truncate">{(nowRunning ? 'Now · running · ' : 'Now · ') + blockShort(nowBlock.def.name)}</span>
             </p>
             {!expanded && (
-              // Mark done sits on the card's first line, so the actions row keeps room for Tech doc.
-              <Button
-                className="-my-3 -mr-2"
-                size="sm"
-                variant="icon"
-                icon="check"
-                aria-pressed={nowDone}
+              <div className="-my-1 flex shrink-0 gap-2">
+                {!primaryLogs && (
+                  <Button variant="icon" icon="plus" className="!size-11" label="Log time" onClick={() => setSheet('log')} />
+                )}
+                <Button
+                  size="sm"
+                  icon="check"
+                  name={nowDone ? 'Mark not done' : 'Mark done'}
+                  aria-pressed={nowDone}
                 onClick={() => {
                   void editLog(date, (current) => toggleBlockDone(current, nowBlock.id));
                   setChosen(null);
                   setExpanded(false);
                 }}
               >
-                {nowDone ? 'Mark not done' : 'Mark done'}
-              </Button>
+                  {nowDone ? 'Undo' : 'Done'}
+                </Button>
+              </div>
             )}
           </div>
-          <h2 className="text-headline">
+          <h2 className="mt-1 text-card">
             {isProject && item ? (
               // A project's title opens its tech doc; everything else unfolds in place.
-              <button id="now-title" type="button" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })} className="-my-2 line-clamp-2 w-full py-2 text-left text-headline font-semibold">
+              <button id="now-title" type="button" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })} className="-my-1 line-clamp-2 min-h-11 w-full py-1 text-left text-card font-semibold">
                 {headline}
               </button>
             ) : (
-              <button id="now-title" type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className="-my-2 line-clamp-2 w-full py-2 text-left text-headline font-semibold">
+              <button id="now-title" type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className="-my-1 line-clamp-2 min-h-11 w-full py-1 text-left text-card font-semibold">
                 {headline}
               </button>
             )}
@@ -494,12 +535,17 @@ export function Today() {
               {item?.note && <p className="mb-2 text-meta text-ink2">{item.note}</p>}
               {item && allUnits.length > 0 && <Checklist plain compact refId={item.refId} units={unitWindow(allUnits, unitsDone)} done={unitsDone} />}
               <div className="flex flex-col items-start">
-                {item?.url ? (
+                {item && (
+                  <button type="button" className={linkClass} onClick={() => setSheet('note')}>
+                    Add a note
+                  </button>
+                )}
+                {item?.url && item.kind === 'project' ? (
                   <a href={item.url} target="_blank" rel="noreferrer noopener" className={linkClass}>
                     <Icon name="external" size={16} />
-                    {item.kind === 'project' ? 'Open the source' : resource?.type === 'book' ? 'Open the book' : 'Open course'}
+                    Open the source
                   </a>
-                ) : item?.searchHint ? (
+                ) : !item?.url && item?.searchHint ? (
                   <a href={'https://duckduckgo.com/?q=' + encodeURIComponent(item.searchHint)} target="_blank" rel="noreferrer noopener" className={linkClass}>
                     <Icon name="search" size={16} />
                     Find a link
@@ -529,28 +575,59 @@ export function Today() {
             </div>
           )}
 
-          <div className={(expanded ? 'mt-1.5' : 'mt-3.5') + ' flex items-center gap-2'}>
+          {/* Start (the one filled button) and the ice secondary: the tech doc, or the course. */}
+          <div className={(expanded ? 'mt-2' : 'mt-3.5') + ' flex items-center gap-3 [&>*]:flex-1'}>
             {primary}
-            {expanded && item ? (
-              <Button onClick={() => setSheet('note')}>Add a note</Button>
-            ) : (
-              !primaryLogs && <Button onClick={() => setSheet('log')}>Log time</Button>
-            )}
-            {isProject && item && (
-              <Button variant="icon" icon="doc" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })}>
+            {isProject && item ? (
+              <Button variant="ice" icon="doc" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })}>
                 Tech doc
               </Button>
-            )}
-
+            ) : item?.url ? (
+              <Button variant="ice" icon="external" href={item.url}>
+                {resource?.type === 'book' ? 'Open the book' : 'Open course'}
+              </Button>
+            ) : null}
           </div>
-          {extrasFor(nowBlock.id).length > 0 && (
-            <ul className="mt-3 divide-y divide-line border-t border-line">{extrasFor(nowBlock.id).map(extraRow)}</ul>
-          )}
+          {extrasFor(nowBlock.id).length > 0 && <ul className="rows mt-3 border-t-[1.5px] border-dashed border-dash">{extrasFor(nowBlock.id).map(extraRow)}</ul>}
         </section>
       )}
 
+      {!restDay && !nothingPlanned && (
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          <div className="tile flex flex-col items-center gap-2 p-3.5">
+            <span className="section-label mb-0">Blocks today</span>
+            <span className="text-big font-semibold leading-none">
+              {blocks.filter(done).length}
+              <span className="text-ink2">/{blocks.length}</span>
+            </span>
+            <span aria-hidden="true" className="flex gap-1.5">
+              {blocks.map((b) => (
+                <span key={b.id} className={'size-3 rounded-pill ' + (done(b) ? 'fill-blue' : 'well rounded-pill')} />
+              ))}
+            </span>
+          </div>
+          {plan.phase && (
+            <div className="tile flex flex-col items-center gap-2 p-3.5">
+              <span className="section-label mb-0 max-w-full truncate">{plan.phase.title.split(' — ')[0]}</span>
+              <span className="well well-blue rounded-[14px] px-3.5 py-1 text-card font-semibold leading-tight text-blue-deep">{Math.max(0, daysBetween(date, plan.phase.end))}</span>
+              <span className="text-meta text-ink2">days left</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {!nothingPlanned && layout.later && (later.length > 0 || leadingExtras.length > 0) && (
-        <RowList flat label="Later today" className="mt-6">
+        <RowList
+          label="Later today"
+          className="mt-4"
+          aside={
+            layout.review && !isReviewDay ? (
+              <Link to="/reviews" className="-my-3 inline-flex min-h-11 items-center">
+                Review on {dayName(addDays(date, (reviewDay - weekday(date) + 7) % 7))}
+              </Link>
+            ) : undefined
+          }
+        >
           {leadingExtras.map(extraRow)}
           {later.flatMap((block) => {
             const row = rowFor(block);
@@ -559,7 +636,7 @@ export function Today() {
               <Row
                 key={block.id}
                 className={isTaken ? 'taken' : ''}
-                icon={<BlockIcon block={block.id} />}
+                icon={<BlockTile block={block.id} />}
                 title={row.title}
                 meta={layout.view === 'compact' ? undefined : [row.meta, extrasNote(block.id)].filter(Boolean).join(' · ')}
                 trailing={span(block.targetMinutes)}
@@ -576,7 +653,7 @@ export function Today() {
                         }
                 }
               >
-                {isTaken && <span aria-hidden="true" className="taken-line absolute inset-x-0 bottom-0 h-0.5 bg-accent" />}
+                {isTaken && <span aria-hidden="true" className="taken-line absolute inset-x-0 bottom-0 h-0.5 bg-blue" />}
               </Row>,
             ];
           })}
@@ -584,25 +661,20 @@ export function Today() {
       )}
 
       {layout.footer && finished.length > 0 && (
-        <p className="mt-4 text-meta text-ink2">
+        <p className="mt-4 px-1 text-meta text-ink2">
           Done today: {finished.map((b) => rowFor(b).title).join(', ')}
         </p>
       )}
 
       {showDayRow && (
-        <RowList flat className="mt-4">
+        <RowList className="mt-4">
           <Row title="How was today?" trailing={log?.energy ? 'Energy ' + log.energy + ' of 5' : undefined} onClick={() => setSheet('day')} />
         </RowList>
       )}
 
-      {layout.review && !isReviewDay && (
-        <Link to="/reviews" className="mt-1 flex min-h-11 items-center text-meta text-ink2">
-          Weekly review on {dayName(addDays(date, (reviewDay - weekday(date) + 7) % 7))}
-        </Link>
-      )}
 
       {layout.footer && syncLine && (
-        <Link to="/settings?section=sync" className="flex min-h-11 items-center text-meta text-ink2">
+        <Link to="/settings?section=sync" className="mt-2 flex min-h-11 items-center px-1 text-meta text-ink2">
           {syncLine}
         </Link>
       )}

@@ -25,12 +25,12 @@ test('shuffle slows down and lands, skip moves on, take it puts the build into B
   await expect(shuffle).toHaveText('Shuffle again');
 
   const before = await topTitle(page).innerText();
-  await page.getByRole('button', { name: 'Skip' }).click();
+  await page.getByRole('button', { name: 'Skip', exact: true }).click();
   await page.clock.runFor(400);
   await expect(topTitle(page)).not.toHaveText(before);
 
   const taken = await topTitle(page).innerText();
-  await page.getByRole('button', { name: 'Take it' }).click();
+  await page.getByRole('button', { name: 'Take it', exact: true }).click();
   await expect(page).toHaveURL(/#\/$/);
   await expect(page.locator('.taken')).toContainText(taken);
 
@@ -50,10 +50,10 @@ test('with reduced motion the shuffle lands at once', async ({ page }) => {
 test('taking a monthly project makes it the next one in Block D', async ({ page }) => {
   await open(page, './#/plan/pick?cadence=monthly');
   await expect(page.getByText(/monthly projects? fit this phase$/)).toBeVisible();
-  await page.getByRole('button', { name: 'Skip' }).click();
+  await page.getByRole('button', { name: 'Skip', exact: true }).click();
   await page.clock.runFor(400);
   const taken = await topTitle(page).innerText();
-  await page.getByRole('button', { name: 'Take it' }).click();
+  await page.getByRole('button', { name: 'Take it', exact: true }).click();
   await expect(page).toHaveURL(/#\/$/);
 
   await open(page, './#/plan');
@@ -63,6 +63,6 @@ test('taking a monthly project makes it the next one in Block D', async ({ page 
 test("from the Sunday review it picks next week's build and goes back", async ({ page }) => {
   await open(page, './#/plan/pick?week=next&from=reviews');
   await expect(page.getByText("Skip flicks the card away. Take it makes it next week's build.")).toBeVisible();
-  await page.getByRole('button', { name: 'Take it' }).click();
+  await page.getByRole('button', { name: 'Take it', exact: true }).click();
   await expect(page).toHaveURL(/#\/reviews$/);
 });

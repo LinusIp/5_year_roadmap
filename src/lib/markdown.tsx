@@ -109,7 +109,7 @@ function renderInline(nodes: Inline[], keyPrefix: string, math?: MathRenderer): 
         return math ? math(node.tex, node.display, key) : (node.display ? '$$' : '$') + node.tex + (node.display ? '$$' : '$');
       case 'code':
         return (
-          <code key={key} className="rounded-button bg-soft px-1 font-mono">
+          <code key={key} className="rounded-knob bg-ice-soft px-1 font-mono">
             {node.text}
           </code>
         );
@@ -119,7 +119,7 @@ function renderInline(nodes: Inline[], keyPrefix: string, math?: MathRenderer): 
         return <em key={key}>{renderInline(node.children, key, math)}</em>;
       case 'link':
         return (
-          <a key={key} href={node.href} target="_blank" rel="noreferrer noopener" className="text-accent underline underline-offset-2">
+          <a key={key} href={node.href} target="_blank" rel="noreferrer noopener" className="text-blue-deep underline underline-offset-2">
             {renderInline(node.children, key, math)}
           </a>
         );
@@ -211,7 +211,7 @@ export function Markdown({ source, className, options = {}, math }: { source: st
             return <p key={key}>{inline(block.text, key)}</p>;
           case 'quote':
             return (
-              <blockquote key={key} className="border-l-2 border-line pl-3 text-ink2">
+              <blockquote key={key} className="border-l-2 border-dash pl-3 text-ink2">
                 {inline(block.text, key)}
               </blockquote>
             );

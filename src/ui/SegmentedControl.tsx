@@ -6,8 +6,8 @@ export interface Segment<T extends string> {
 }
 
 /**
- * Views, sort and group: one control, never a dropdown. Arrow keys move between segments. The track is 2 px
- * of line colour around 36 px segments, as in the mockup; each segment's tap target is 44 px tall.
+ * Views, sort and group: one control, never a dropdown. Arrow keys move between segments. A sunken pill track; the
+ * selected segment is a raised pill in blue-deep. Each segment's tap target is 44 px tall.
  */
 export function SegmentedControl<T extends string>({ label, options, value, onChange }: { label: string; options: Segment<T>[]; value: T; onChange: (value: T) => void }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -20,7 +20,7 @@ export function SegmentedControl<T extends string>({ label, options, value, onCh
   };
 
   return (
-    <div role="radiogroup" aria-label={label} className="grid rounded-button bg-line p-0.5" style={{ gridTemplateColumns: 'repeat(' + options.length + ', minmax(0, 1fr))' }}>
+    <div role="radiogroup" aria-label={label} className="well grid gap-1 rounded-pill p-[5px]" style={{ gridTemplateColumns: 'repeat(' + options.length + ', minmax(0, 1fr))' }}>
       {options.map((option, i) => {
         const checked = i === index;
         return (
@@ -43,9 +43,9 @@ export function SegmentedControl<T extends string>({ label, options, value, onCh
                 move(i - 1);
               }
             }}
-            className="group -my-1 min-h-11 min-w-0"
+            className={'min-h-11 min-w-0 truncate rounded-pill px-1 text-chip ' + (checked ? 'knob rounded-pill font-semibold text-blue-deep' : 'font-medium text-ink2 hover:text-ink')}
           >
-            <span className={'block h-9 truncate rounded-segment px-1 text-meta font-medium leading-9 ' + (checked ? 'bg-surface text-ink' : 'text-ink2 group-hover:text-ink')}>{option.label}</span>
+            {option.label}
           </button>
         );
       })}

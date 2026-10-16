@@ -50,7 +50,7 @@ export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atla
     done.length > 0 && (
       <Row key={key + '-done'} title={plural(done.length, noun) + ' shipped'} trailing={showDone === key ? 'Hide' : 'Show'} expanded={showDone === key} onClick={() => setShowDone(showDone === key ? null : key)}>
         {showDone === key && (
-          <ul className="divide-y divide-line pb-2">
+          <ul className="rows pb-2">
             {done.map((p) => (
               <Row key={p.id} title={shortTitle(p.title)} meta={states.get(p.id)?.repoUrl ?? 'Shipped'} onClick={() => onOpenItem(p.id)} />
             ))}

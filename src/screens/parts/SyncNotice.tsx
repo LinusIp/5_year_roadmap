@@ -21,7 +21,7 @@ export function SyncNotice() {
   }, []);
   return (
     <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-20 mx-auto max-w-[640px] px-5">
-      {text && <p className="rounded-card bg-ink px-4 py-3 text-meta text-canvas">{text}</p>}
+      {text && <p className="knob rounded-pill px-5 py-3 text-meta text-ink">{text}</p>}
     </div>
   );
 }

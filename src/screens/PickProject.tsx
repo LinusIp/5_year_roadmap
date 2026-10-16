@@ -49,9 +49,7 @@ export function PickProject() {
   const events = useChallengeEvents();
   const back = BACK[from ?? ''] ?? '/plan?view=projects';
   const close = (
-    <Button variant="icon" to={back}>
-      Close
-    </Button>
+    <Button variant="icon" icon="x" label="Close" to={back} />
   );
 
   if (!atlas) {
@@ -178,7 +176,7 @@ export function PickProject() {
           ]}
         />
       </div>
-      <div className="mt-9">
+      <div className="mt-6">
         {cards.length === 0 ? (
           <EmptyState>
             {!entries

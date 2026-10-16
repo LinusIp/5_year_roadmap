@@ -103,7 +103,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(page.locator('#deck-top-title')).not.toHaveText('');
     await page.screenshot({ path: 'test-results/catalogue-deck.png' });
     const title = await page.locator('#deck-top-title').innerText();
-    await page.getByRole('button', { name: 'Take it' }).click();
+    await page.getByRole('button', { name: 'Take it', exact: true }).click();
     await expect(page).toHaveURL(/#\/$/);
     await expect(laterRow(page, /monthly case \d+ h$/)).toBeVisible();
 

@@ -20,13 +20,13 @@ export function RoadmapsList({ coverage, onOpen }: { coverage: RoadmapCoverage[]
   return (
     <section>
       <h2 className="section-label">Roadmaps</h2>
-      <ul className="rounded-card bg-surface px-4">
-        {coverage.map((c, i) => (
+      <ul className="tile rows px-[18px]">
+        {coverage.map((c) => (
           <li key={c.roadmap.id}>
             <button
               type="button"
               onClick={() => onOpen(c.roadmap.id)}
-              className={'flex w-full flex-col gap-1.5 py-3.5 text-left' + (i > 0 ? ' border-t border-line' : '')}
+              className="flex w-full flex-col gap-1.5 py-3.5 text-left"
             >
               <span className="flex items-baseline justify-between gap-3">
                 <span className="text-body font-medium leading-[1.3]">{c.roadmap.title}</span>

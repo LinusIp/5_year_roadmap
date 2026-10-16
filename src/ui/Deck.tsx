@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
+import { Icon } from './Icon.tsx';
 import { Button } from './Button.tsx';
 import { DifficultyDots, KindIcon } from './glyphs.tsx';
 import type { Difficulty } from '../seed/catalogue.ts';
@@ -187,15 +188,15 @@ export function Deck({ cards, onTake, hint, onOpen }: DeckProps) {
               onPointerMove={isTop ? onPointerMove : undefined}
               onPointerUp={isTop ? onPointerUp : undefined}
               onPointerCancel={isTop ? () => ((dragStart.current = null), setDrag(null)) : undefined}
-              className="absolute inset-x-0 top-0 flex h-[300px] flex-col gap-2 rounded-deck border border-line bg-surface p-[22px] select-none"
+              className="tile absolute inset-x-0 top-0 flex h-[300px] flex-col gap-2 p-[22px] select-none"
               style={{ zIndex: VISIBLE - i, transform, opacity, transition, willChange: 'transform' }}
             >
-              <p className="flex items-center gap-2 text-meta text-ink2">
+              <p className="flex items-center gap-2.5 text-label text-ink2">
                 {card.type && <KindIcon kind={card.type} />}
                 <span className="min-w-0 truncate">{card.kind}</span>
                 {card.difficulty && <DifficultyDots difficulty={card.difficulty} />}
               </p>
-              <h2 id={isTop ? 'deck-top-title' : undefined} className="line-clamp-2 text-card font-semibold">
+              <h2 id={isTop ? 'deck-top-title' : undefined} className="mt-2 line-clamp-2 text-card font-semibold">
                 {isTop && onOpen ? (
                   <button
                     type="button"
@@ -210,21 +211,30 @@ export function Deck({ cards, onTake, hint, onOpen }: DeckProps) {
                   card.title
                 )}
               </h2>
-              <p className="line-clamp-5 text-button text-ink2">{card.brief}</p>
-              <p className="mt-auto truncate text-meta text-ink2">{card.footer}</p>
+              <p className="line-clamp-4 text-body text-ink2">{card.brief}</p>
+              <div className="mt-auto flex items-center justify-between gap-3">
+                <p className="min-w-0 truncate text-meta text-ink2">{card.footer}</p>
+                {/* The whole card opens the tech doc; the pill only says so. */}
+                {onOpen && (
+                  <span aria-hidden="true" className="knob inline-flex h-11 shrink-0 items-center gap-1.5 rounded-pill px-4 text-meta font-semibold">
+                    <Icon name="doc" size={16} />
+                    Tech doc
+                  </span>
+                )}
+              </div>
             </article>
           );
         })}
       </div>
 
-      <div className="mt-6 flex items-center gap-2">
+      <div className="mt-6 flex items-center gap-3">
         <Button variant="filled" size="lg" icon="shuffle" onClick={shuffle} aria-disabled={n < 2 || undefined}>
           {shuffling ? 'Shuffling' : shuffled ? 'Shuffle again' : 'Shuffle'}
         </Button>
         <Button size="lg" onClick={skip} aria-disabled={busy || n < 2 || undefined}>
           Skip
         </Button>
-        <Button size="lg" className="ml-auto" onClick={take} aria-disabled={busy || undefined}>
+        <Button variant="ice" size="lg" icon="check" className="ml-auto" onClick={take} aria-disabled={busy || undefined}>
           Take it
         </Button>
       </div>

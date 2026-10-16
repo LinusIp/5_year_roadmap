@@ -1,30 +1,48 @@
 import type { Difficulty } from '../seed/catalogue.ts';
+import { blockTone, toneInk } from './colors.ts';
 import { Icon } from './Icon.tsx';
 import type { IconName } from './Icon.tsx';
 
 /**
- * The icons that carry meaning (DECISIONS.md, "The icon map"): one per block in its track's colour, one per practice
+ * The icons that carry meaning (DECISIONS.md, "The icon map"): one per block, blue or ice, one per practice
  * subject, one per kind of project with a difficulty mark, and a status. All decorative: a word always says the same.
  */
 const BLOCK_ICON: Record<string, IconName> = { A: 'cube', B: 'code', C: 'cpu', D: 'hammer', E: 'sigma', P: 'pencil' };
 
-/** A block's icon at 20 px in its colour (3:1 or better on surface and canvas, both themes). */
-export function BlockIcon({ block }: { block: string }) {
-  const name = BLOCK_ICON[block];
-  if (!name) return <span aria-hidden="true" className="inline-block size-5 shrink-0" />;
-  return <Icon name={name} size={20} color={'var(--block-' + block + ')'} />;
+export function blockIconName(block: string): IconName {
+  return BLOCK_ICON[block] ?? 'layers';
+}
+
+/** A block's bare icon, 20 px, in its tone's deep colour (the Now card's label). */
+export function BlockIcon({ block, size = 20 }: { block: string; size?: number }) {
+  return <Icon name={blockIconName(block)} size={size} color={toneInk(blockTone(block))} />;
+}
+
+/** A 40 px knob tile with an icon in it: the start of a row in a list group. */
+export function IconTile({ icon, tone = 'blue', size = 40 }: { icon: IconName; tone?: 'blue' | 'ice' | 'neutral'; size?: number }) {
+  const color = tone === 'neutral' ? 'var(--ink2)' : toneInk(tone);
+  return (
+    <span aria-hidden="true" className="knob grid shrink-0 place-items-center" style={{ width: size, height: size, color, borderRadius: Math.round(size * 0.35) }}>
+      <Icon name={icon} size={size < 40 ? 16 : 20} />
+    </span>
+  );
+}
+
+/** A block's icon in its knob tile. */
+export function BlockTile({ block, size = 40 }: { block: string; size?: number }) {
+  return <IconTile icon={blockIconName(block)} tone={blockTone(block)} size={size} />;
 }
 
 const SUBJECT_ICON: Record<string, IconName> = { 'linear-algebra': 'grid', calculus: 'function', physics: 'atom' };
 
 export function SubjectIcon({ subject }: { subject: string }) {
-  return <Icon name={SUBJECT_ICON[subject] ?? 'sigma'} size={20} className="text-ink2" />;
+  return <IconTile icon={SUBJECT_ICON[subject] ?? 'sigma'} tone="blue" />;
 }
 
 const KIND_ICON: Record<string, IconName> = { challenge: 'puzzle', build: 'wrench', case: 'briefcase' };
 
 export function KindIcon({ kind }: { kind: string }) {
-  return <Icon name={KIND_ICON[kind] ?? 'wrench'} size={20} className="text-ink2" />;
+  return <IconTile icon={KIND_ICON[kind] ?? 'wrench'} tone={kind === 'case' ? 'ice' : 'blue'} />;
 }
 
 const DOTS: Record<Difficulty, number> = { easy: 1, medium: 2, advanced: 3 };
@@ -35,7 +53,7 @@ export function DifficultyDots({ difficulty }: { difficulty: Difficulty }) {
   return (
     <span aria-hidden="true" className="inline-flex shrink-0 items-center gap-0.5 align-middle">
       {[1, 2, 3].map((i) => (
-        <span key={i} className={'size-1.5 rounded-pill ' + (i <= n ? 'bg-ink2' : 'border border-ink2')} />
+        <span key={i} className={'size-1.5 rounded-pill ' + (i <= n ? 'bg-blue' : 'well')} />
       ))}
     </span>
   );
@@ -44,5 +62,5 @@ export function DifficultyDots({ difficulty }: { difficulty: Difficulty }) {
 /** Done, in progress, or nothing yet: a check-circle, a circle-dot, or no mark. */
 export function StatusIcon({ status, size = 16 }: { status: 'done' | 'active' | 'todo'; size?: number }) {
   if (status === 'todo') return null;
-  return <Icon name={status === 'done' ? 'done' : 'inProgress'} size={size} className={status === 'done' ? 'text-accent' : 'text-ink2'} />;
+  return <Icon name={status === 'done' ? 'done' : 'inProgress'} size={size} className={status === 'done' ? 'text-blue-deep' : 'text-ice-deep'} />;
 }

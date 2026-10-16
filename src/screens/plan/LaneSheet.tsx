@@ -112,7 +112,7 @@ export function LaneSheet({
                     <Row
                       key={item.planItem.id}
                       dragRow
-                      className={drag?.over === index && drag.from !== index ? 'shadow-[inset_0_2px_0_var(--accent)]' : drag?.from === index ? 'opacity-60' : ''}
+                      className={drag?.over === index && drag.from !== index ? 'shadow-[inset_0_2px_0_var(--blue)]' : drag?.from === index ? 'opacity-60' : ''}
                       title={nameOf(item)}
                       meta={meta}
                       onClick={editing ? undefined : () => onOpenItem(item.refId)}

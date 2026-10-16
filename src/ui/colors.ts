@@ -1,32 +1,26 @@
 /**
- * Colours of blocks. Each lane keeps one colour, as in the mockup and the five-year map; a block can be given
- * another colour from the track palette in Settings.
+ * Colour in soft clay (CLAY-STYLE.md): only blue and ice. A block is told apart by its icon, not its colour; its
+ * icon is blue or ice. Charts and the heatmap use the ramp.
  */
-import type { BlockDef, BlockId, SeedTrackId, Track } from '../seed/schema.ts';
+import type { BlockId } from '../seed/schema.ts';
 
-export const LANE_COLOR: Record<string, string> = {
-  A: 'var(--track-gamedev)',
-  B: 'var(--track-languages)',
-  C: 'var(--track-ai)',
-  D: 'var(--track-systems)',
-  E: 'var(--track-math)',
-  P: 'var(--track-physics)',
-};
+export type Tone = 'blue' | 'ice';
 
-/**
- * The track colours a block may take: those at 3:1 or more against the card surface in both themes (WCAG 1.4.11
- * for a non-text mark), measured from src/index.css. Gamedev, EE, chemistry and career fall short in one theme.
- */
-export const BLOCK_COLOURS: readonly SeedTrackId[] = ['ai', 'swe', 'systems', 'graphics', 'simulation', 'languages', 'math', 'physics', 'embedded', 'controls', 'mech', 'robotics'];
+/** Graphics and projects are ice; languages, the core track, maths and practice are blue. */
+const BLOCK_TONE: Record<string, Tone> = { A: 'ice', B: 'blue', C: 'blue', D: 'ice', E: 'blue', P: 'blue' };
 
-export function blockColor(def: Pick<BlockDef, 'id' | 'colour'> | undefined, id?: BlockId): string {
-  if (def?.colour) return 'var(--track-' + def.colour + ')';
-  return LANE_COLOR[def?.id ?? id ?? ''] ?? 'var(--track-mech)';
+export function blockTone(id: BlockId | string | undefined): Tone {
+  return BLOCK_TONE[id ?? ''] ?? 'blue';
 }
 
-/** A track's colour. A track of the user's takes the colour of the first track in its slot. */
-export function trackColor(track: Pick<Track, 'id' | 'slot' | 'source'>, tracks: readonly Pick<Track, 'id' | 'slot' | 'source'>[]): string {
-  if (track.source !== 'user') return 'var(--track-' + track.id + ')';
-  const sibling = tracks.find((t) => t.source !== 'user' && t.slot === track.slot);
-  return 'var(--track-' + (sibling?.id ?? 'mech') + ')';
+/** The text and icon colour of a tone: blue-deep or ice-deep, 4.5:1 or better on the background. */
+export function toneInk(tone: Tone): string {
+  return tone === 'ice' ? 'var(--ice-deep)' : 'var(--blue-deep)';
+}
+
+/** Categorical series in a chart (hours per track): the ramp's steps, darkest first, then blue and ice. */
+export const SERIES_COLOURS = ['var(--ramp-4)', 'var(--ice-deep)', 'var(--ramp-2)', 'var(--blue-deep)', 'var(--ice)', 'var(--ramp-3)', 'var(--deco)', 'var(--ramp-1)'] as const;
+
+export function seriesColour(index: number): string {
+  return SERIES_COLOURS[index % SERIES_COLOURS.length]!;
 }

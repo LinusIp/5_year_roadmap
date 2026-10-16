@@ -32,7 +32,9 @@ test('8 hours light the day up at the top step, and the sentence counts it', asy
 
   const cell = page.getByRole('button', { name: 'Monday 21 September: 8 h' });
   await expect(cell).toHaveClass(/heat-4/);
-  await expect(page.getByText('8 h logged · longest streak 1 day · 2 freezes left this month')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Logged' })).toContainText('8 h');
+  await expect(page.getByText('Since 21 September · longest streak 1 day')).toBeVisible();
+  await expect(page.getByText('2 freezes left this month')).toBeVisible();
   await expect(page.getByRole('button', { name: /^Today 0 of 5 blocks done 8 h$/ })).toBeVisible();
 });
 

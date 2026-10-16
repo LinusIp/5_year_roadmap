@@ -27,12 +27,12 @@ function TodayPreview({ atlas }: { atlas: Atlas }) {
   const title = (b: TodayBlock): string => (b.kind === 'review' ? 'Weekly review and paper' : b.weeklyBuild && b.id === 'D' ? nameOf(b.weeklyBuild) : b.item ? nameOf(b.item) : (b.emptyReason ?? 'Nothing planned'));
   const [now, ...later] = blocks;
   return (
-    <figure aria-label="Preview of Today" className="rounded-card border border-line bg-canvas p-3">
+    <figure aria-label="Preview of Today" className="well rounded-tile p-3">
       <div className="space-y-1 text-meta">
         <p className="font-medium text-ink">{dateTitle(date)}</p>
         {layout.stats && <p className="text-ink2">{'0 h of ' + span(plan.targetMinutes) + ' today · ' + formatClock(new Date(), settings.layout.general.clock)}</p>}
         {now ? (
-          <div className="rounded-button bg-surface p-2">
+          <div className="rounded-knob bg-bg p-2">
             <p className="text-ink2">Now</p>
             <p className="font-medium text-ink">{title(now)}</p>
             <p className="text-ink2">{blockShort(now.def.name) + ' · 0 h of ' + span(now.targetMinutes)}</p>
@@ -41,7 +41,7 @@ function TodayPreview({ atlas }: { atlas: Atlas }) {
           <p className="text-ink2">A rest day.</p>
         )}
         {layout.later && later.length > 0 && (
-          <ul className="divide-y divide-line border-y border-line">
+          <ul className="rows">
             {later.map((b) => (
               <li key={b.id} className="py-1">
                 <span className="text-ink">{title(b)}</span>

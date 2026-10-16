@@ -33,7 +33,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(sheet).toHaveCount(0);
     // The deck kept its card and its buttons.
     await expect(page.locator('#deck-top-title')).toHaveText(title);
-    await expect(page.getByRole('button', { name: 'Shuffle' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Shuffle', exact: true })).toBeVisible();
 
     // From the keyboard: Enter on the card's title opens it, Escape gives focus back.
     const titleButton = page.locator('#deck-top-title button');
@@ -100,7 +100,9 @@ test.describe('with the clock on the plan’s first day', () => {
     await page.keyboard.press('Escape');
     await expect(sheet).toHaveCount(0);
     await expect(nowCard(page).getByText('Now · running')).toBeVisible();
-    await expect(nowCard(page).getByRole('button', { name: /^Stop 3:0\d$/ })).toBeVisible();
+    // The running time sits in Today's header widget, in blue; the Now card keeps Stop.
+    await expect(nowCard(page).getByRole('button', { name: /^Stop/ })).toBeVisible();
+    await expect(page.getByText(/^3:0\d$/)).toBeVisible();
     await expect(nowCard(page).getByText(/^Graphics · .* · 1 of \d+ ticked$/)).toBeVisible();
 
     // The doc reopens where it was left.

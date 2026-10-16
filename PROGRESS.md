@@ -779,3 +779,30 @@ Verified on this machine (Linux, Chromium 140):
   projects), a tech doc, Activity, a challenge and Settings.
 - The Pages deploy's live check now also asserts the Practice start screen, a tech doc from the Deck and Today's
   icons.
+
+## Pull request #5: soft clay
+
+- The whole app in CLAY-STYLE.md's soft clay, per the boards saved in `docs/mockups/`: clay tokens for light and dark
+  in `src/index.css`, `.tile`, `.knob` and `.well`, Nunito 600/700/800 self-hosted (Instrument Sans removed), and the
+  shared components restyled once: buttons (blue gradient, ice, knob), chips, segmented control, progress wells,
+  checkboxes, list groups with dashed dividers and 40 px icon knobs, the floating tab bar, sheets, fields.
+- Screens per their boards: Today (brush mark and wordmark, time widget, week strip, Now tile with Start and Tech doc,
+  Blocks today and days-left widgets, Later today with "Review on Sunday"), Plan (lanes group, Next, Pick a project),
+  Activity (Logged and Streak widgets, the heatmap on the blue ramp, chips, Last 7 days, More), the five-year map,
+  the Library list, Pick a project, Settings, Stats, Reviews, Practice and the sheets.
+- The user's brush mark: favicons (light, dark), apple-touch icon, manifest icons (192, 512, maskable 512) and the
+  1200 x 630 social preview; theme and background colour #E6EAE7.
+- Removed: every `--block-*` and `--track-*` colour, the block colour picker in Settings, the unused colour
+  utilities, `scripts/make-icons.ts` and the old `public/icons`.
+- Tests: `tests/unit/tokens.test.ts` (no hex colour or old token in any component; every clay token in both themes).
+  The acceptance test now checks the clay type scale (at most seven sizes on Today; measured on a fresh install: 13,
+  14, 16, 24 and 32), that "Later today" sits above the tab bar at 390 x 844, one filled button, 44 px targets,
+  the focus ring, and every text colour at 4.5:1 on what it sits on. Measured: light ink2 4.86 on the background and
+  4.97 on soft ice, blue-deep 5.19, ice-deep 5.00, white on blue 4.74; dark ink2 6.67, blue-deep 6.92, ice-deep 8.99.
+- Baselines: every screen (Today, Activity, Plan, Library, Settings, Pick a project, Stats, Reviews, Practice) in
+  both themes at 390 x 844 and 1280 x 800, plus the map, drawn on CI's Linux.
+- Lighthouse accessibility 100 with no failing audit on Today, Plan, Library and Activity, light and dark.
+- Today's interaction latency (open and close the Now item, the theme switch; 4x CPU slowdown, 6 runs, twice):
+  median 40 ms before and after; p98 120 to 144 ms before, 112 to 136 ms after. No worse.
+- The live check also asserts the brush mark loads on Today and the page is set in Nunito.
+- Before and after of Today, Plan, Library, Activity, Pick a project and a tech doc in both themes: `docs/ui-clay/`.

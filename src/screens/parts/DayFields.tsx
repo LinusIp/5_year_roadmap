@@ -59,7 +59,7 @@ export function DayFields({ date }: { date: string }) {
                   });
                 }}
               >
-                <span className={'size-4 rounded-pill border ' + (filled ? 'border-accent bg-accent' : 'border-ink2')} />
+                <span className={'size-4 rounded-pill border ' + (filled ? 'border-blue bg-blue' : 'border-ink2')} />
               </button>
             );
           })}

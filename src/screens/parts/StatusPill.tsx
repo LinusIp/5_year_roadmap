@@ -81,7 +81,7 @@ export function StatusPill<T extends string>({
         }}
         className={
           'inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-pill px-3 text-meta ' +
-          (value === done ? 'bg-accent-soft font-medium text-accent' : 'border border-line text-ink')
+          (value === done ? 'bg-blue-soft font-medium text-blue-deep' : 'knob text-ink')
         }
       >
         {current.label}
