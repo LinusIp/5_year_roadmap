@@ -10,7 +10,7 @@
 import type { ChallengeEvent } from '../../db/types.ts';
 import type { CatalogueEntry, Difficulty } from '../../seed/catalogue.ts';
 import { addDays } from '../dates.ts';
-import { rngFrom } from '../practice/rng.ts';
+import { rngFrom } from '../rng.ts';
 
 export const SKIPS_PER_DAY = 3;
 /** The languages offered, in the order "another language" tries them. */

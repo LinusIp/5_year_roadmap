@@ -23,13 +23,13 @@ import type { AppSeed } from '../seed/schema.ts';
 import { commitFiles, commitMessage } from './commit.ts';
 import type { FileChange } from './commit.ts';
 import { adoptDeviceId, deviceId } from './device.ts';
-import { parseDay, parseItems, parseChallenges, parsePlan, parsePractice, parseReview, parseSettings, planUpdatedAt, renderReadme } from './files.ts';
+import { parseDay, parseItems, parseChallenges, parsePlan, parseReview, parseSettings, planUpdatedAt, renderReadme } from './files.ts';
 import { GithubClient, GithubError, gitBlobSha } from './github-api.ts';
 import type { Author } from './github-api.ts';
-import { allPaths, itemsOf, planOf, readLocal, renderPath, withCompanions, writeDay, writeItems, writeChallenges, writePlan, writePractice, writeReview, writeSettings } from './local.ts';
+import { allPaths, itemsOf, planOf, readLocal, renderPath, withCompanions, writeDay, writeItems, writeChallenges, writePlan, writeReview, writeSettings } from './local.ts';
 import { lastWriter, mergeDay, mergeItems, mergeRecords } from './merge.ts';
 import { enqueue, onSyncChange, queuedWrites, setSyncVocabulary } from './middleware.ts';
-import { CHALLENGES_PATH, ITEMS_PATH, PLAN_PATH, PRACTICE_PATH, README_PATH, SETTINGS_PATH, dateOfLogPath, isPulledPath } from './paths.ts';
+import { CHALLENGES_PATH, ITEMS_PATH, PLAN_PATH, README_PATH, SETTINGS_PATH, dateOfLogPath, isArchivedPath, isPulledPath } from './paths.ts';
 
 export const URGENT_DELAY_MS = 3_000;
 export const IDLE_DELAY_MS = 60_000;
@@ -306,6 +306,8 @@ export class SyncEngine {
     const local = await readLocal(db);
     const changes: FileChange[] = [];
     for (const path of withCompanions(outbox.map((e) => e.path))) {
+      // An archived file (state/practice.json) stays as it is on GitHub; a queued entry for it is just dropped.
+      if (isArchivedPath(path)) continue;
       const content = renderPath(path, local, seed);
       const remoteSha = remote[path];
       if (content === null) {
@@ -381,14 +383,6 @@ export class SyncEngine {
       const parsed = parseItems(text);
       if (!parsed.ok) return parsed.error;
       await writeItems(db, dirty ? mergeItems(itemsOf(await readLocal(db)), parsed.value) : parsed.value);
-      return;
-    }
-    if (path === PRACTICE_PATH) {
-      const parsed = parsePractice(text);
-      if (!parsed.ok) return parsed.error;
-      // Answers only ever accumulate: the union of both sides, the later edit winning per answer.
-      const local = await db.practice.toArray();
-      await writePractice(db, mergeRecords(local, parsed.value, (a) => a.id));
       return;
     }
     if (path === CHALLENGES_PATH) {

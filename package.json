@@ -21,7 +21,6 @@
     "screenshots": "vite build && playwright test tests/e2e/screenshots.spec.ts --update-snapshots",
     "fetch:units": "node scripts/fetch-units.ts",
     "test:sync": "node scripts/test-sync.ts",
-    "verify:questions": "node scripts/verify-questions.ts",
     "map:catalogue": "node scripts/map-catalogue.ts",
     "check:docs": "node scripts/check-docs.ts"
   },
@@ -29,9 +28,7 @@
     "@fontsource/nunito": "^5.3.0",
     "dexie": "^4.4.6",
     "dexie-react-hooks": "^4.4.0",
-    "katex": "^0.16.47",
     "lucide-react": "^1.58.0",
-    "mathjs": "^15.2.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "zod": "^4.6.5"

@@ -59,19 +59,14 @@ try {
   if (!caches.includes('atlas-' + version)) throw new Error('after Reload the cache is ' + caches.join(', ') + ', not atlas-' + version);
   step('reloaded into version ' + version);
 
-  for (const hash of ['#/', '#/practice', '#/plan/pick?cadence=daily', '#/library?type=project', '#/activity']) {
+  for (const hash of ['#/', '#/plan/pick?cadence=daily', '#/library?type=project', '#/activity']) {
     await page.goto(new URL(hash, url).href);
     await page.getByRole('heading', { level: 1 }).first().waitFor({ timeout: 30_000 });
     step('renders ' + hash);
   }
 
-  // The features of the last pull requests, on the live site: the Practice start screen (inside the practice
-  // period), a tech doc opened by a tap on a Deck card with Take it in it, and the icons on Today.
-  await page.goto(new URL('#/practice', url).href);
-  const physics = page.getByRole('main').getByRole('link', { name: /^Physics / });
-  const outside = page.getByText(/^No daily set today/);
-  await physics.or(outside).first().waitFor({ timeout: 30_000 });
-  step((await physics.count()) > 0 ? 'Practice opens on its start screen: ' + (await page.getByRole('main').getByRole('listitem').allInnerTexts()).map((t) => t.replace(/\s+/g, ' ')).join(' | ') : 'Practice is outside its period today');
+  // The features of the last pull requests, on the live site: a tech doc opened by a tap on a Deck card with Take
+  // it in it, and the icons on Today.
   await page.goto(new URL('#/plan/pick?cadence=monthly&scope=all', url).href);
   await page.locator('#deck-top-title').waitFor({ timeout: 30_000 });
   const title = (await page.locator('#deck-top-title').innerText()).trim();

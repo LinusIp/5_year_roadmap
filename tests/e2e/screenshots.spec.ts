@@ -7,7 +7,7 @@ import { open } from './helpers.ts';
 
 /**
  * The screenshot test: every screen on a 390 x 844 phone and a 1280 x 800 desktop in both themes, plus
- * the five-year map in full, Practice, a tech doc over Today and the other screens below, compared with the pictures committed in /screenshots. Eight weeks of demo
+ * the five-year map in full, a tech doc over Today and the other screens below, compared with the pictures committed in /screenshots. Eight weeks of demo
  * history are imported first, so the screens have something to show.
  *
  * The baselines are drawn on CI's Linux (Chromium from `npx playwright install`), and CI compares against them on
@@ -26,7 +26,6 @@ const PHONE = [
   ['pick', './#/plan/pick'],
   ['stats', './#/stats'],
   ['reviews', './#/reviews'],
-  ['practice', './#/practice'],
 ] as const;
 
 /** The same screens on a 1280 x 800 desktop, and the five-year map that only fits there. */
@@ -111,44 +110,6 @@ test('compact Today and the Change today sheet match the committed screenshots',
   const sheet = page.getByRole('dialog', { name: 'Change today' });
   await expect(sheet.getByText(/^Blocks · /)).toBeVisible();
   await expect(page).toHaveScreenshot('change-today-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
-});
-
-test('the Practice start screen, a question, its solution and the set summary match the committed screenshots', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await importDemo(page, 'light');
-  await open(page, './#/practice');
-  await expect(page.getByRole('main').getByRole('link', { name: /^Physics / })).toBeVisible();
-  await expect(page).toHaveScreenshot('practice-start-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
-
-  await open(page, './#/practice?subject=linear-algebra');
-  const section = page.locator('section[aria-labelledby="question-heading"]');
-  await expect(page.getByText(/^Question 1 of 3 · Linear algebra/)).toBeVisible();
-  await expect(page).toHaveScreenshot('practice-question-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
-
-  await section.getByRole('button', { name: 'Hint' }).click();
-  await section.getByRole('button', { name: 'Show solution' }).click();
-  await expect(section.getByRole('region', { name: 'Solution' })).toBeVisible();
-  await expect(page).toHaveScreenshot('practice-solution-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
-
-  let first = true;
-  for (const subject of ['Linear algebra', 'Calculus', 'Physics']) {
-    if (!first) await page.getByRole('main').getByRole('link', { name: new RegExp('^' + subject + ' ') }).click();
-    for (let i = 1; i <= 3; i++) {
-      await expect(page.getByText(new RegExp('^Question ' + i + ' of 3 · ' + subject))).toBeVisible();
-      const proof = section.getByRole('button', { name: 'Show the solution' });
-      if ((await proof.count()) > 0) {
-        await proof.click();
-        await section.getByRole('button', { name: i % 2 ? 'Got it' : 'Missed it' }).click();
-      } else {
-        if (!first) await section.getByRole('button', { name: 'Show solution' }).click();
-        await section.getByRole('button', { name: 'Count it as missed' }).click();
-      }
-      first = false;
-      await page.getByRole('button', { name: /^(Next|Back to the subjects|See the summary)$/ }).click();
-    }
-  }
-  await expect(page.getByRole('heading', { name: /questions right$/ })).toBeVisible();
-  await expect(page).toHaveScreenshot('practice-summary-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
 });
 
 test('a tech doc over Today, with the timer running, matches the committed screenshot', async ({ page }) => {

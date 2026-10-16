@@ -5,7 +5,6 @@
  */
 import { loadCatalogue } from './lib/load-catalogue.ts';
 import { loadDocs } from './lib/load-docs.ts';
-import { checkBankAgainstSeed, loadQuestions } from './lib/load-questions.ts';
 import { loadSeed } from './lib/load-seed.ts';
 
 const result = loadSeed();
@@ -13,17 +12,12 @@ const { seed } = result;
 const errors = [...result.errors];
 const warnings = [...result.warnings];
 
-// The practice bank (data/questions/) and the projects' tech docs (data/projects/docs/) are checked here too, with
-// the launch quotas of the practice brief: 200 per subject, 40 % templates, every topic at difficulties 1 to 4.
-const bank = loadQuestions(undefined, { requireQuotas: true });
-errors.push(...bank.errors);
-warnings.push(...bank.warnings);
+// The projects' tech docs (data/projects/docs/) are checked here too.
 const docs = seed ? loadDocs(seed, undefined, { requireAll: true }) : null;
 if (docs) {
   errors.push(...docs.errors);
   warnings.push(...docs.warnings);
 }
-if (seed && bank.bank) errors.push(...checkBankAgainstSeed(bank.bank, seed));
 // The three-tier project catalogue (data/projects/*.jsonl): unique ids across it and the curriculum, difficulty
 // matching cadence, examples, milestones adding up, prerequisites that resolve, no URLs.
 const catalogue = seed ? loadCatalogue(seed) : null;
@@ -48,7 +42,6 @@ const lines: [string, string | number][] = [
   ['papers', seed.papers.length],
   ['certifications', seed.certs.length],
   ['credential-map rows', seed.subjects.length],
-  ['practice questions', bank.stats.subjects.map((s) => s.id + ' ' + s.questions + ' (' + s.templates + ' templates)').join(', ')],
   ['tech docs', Object.keys(docs?.parsed ?? {}).length + ' of ' + seed.projects.filter((p) => p.cadence !== 'weekly').length + ' projects'],
   ['project catalogue', catalogueSummary()],
   ['roadmap.sh roadmaps', seed.roadmaps.length + ' (' + seed.roadmaps.reduce((n, r) => n + r.sections.reduce((m, s) => m + s.nodes.length, 0), 0) + ' nodes)'],

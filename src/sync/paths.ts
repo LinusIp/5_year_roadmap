@@ -5,12 +5,14 @@
  *   state/items.json       item, paper, certificate and milestone states
  *   state/plan.json        plan edits: patches, items of your own, re-plans, weekly picks
  *   state/settings.json    blocks, thresholds, streak rules, theme (never the token)
- *   state/practice.json    practice answers
  *   state/challenges.json  catalogue challenges solved, skipped or hidden
  *   log/2026/10/2026-10-07.json   one day
  *   log/2026/10/2026-10-07.md     its human-readable twin, generated
  *   reviews/2026-W41.md, reviews/2026-10.md, reviews/2027-Q1.md
  *   projects/<project id>.md      a project's write-up, links and checklist, generated
+ *
+ * state/practice.json (practice answers) may still be there from before Practice was removed (pull request #6). It is
+ * archived: Atlas no longer reads it, writes it or deletes it.
  */
 import type { Review } from '../db/types.ts';
 import { addDays } from '../lib/dates.ts';
@@ -19,15 +21,24 @@ export const README_PATH = 'README.md';
 export const ITEMS_PATH = 'state/items.json';
 export const PLAN_PATH = 'state/plan.json';
 export const SETTINGS_PATH = 'state/settings.json';
-export const PRACTICE_PATH = 'state/practice.json';
 export const CHALLENGES_PATH = 'state/challenges.json';
 
 /** The tables whose records go to the data repository. `meta` (timer, shortcuts) stays on the device. */
 export const SYNCED_TABLES = [
   'dayLogs', 'itemStates', 'paperStates', 'certStates', 'milestoneStates', 'customEntities', 'overrides',
-  'reviews', 'weekPicks', 'replans', 'planPatches', 'practice', 'challenges', 'settings',
+  'reviews', 'weekPicks', 'replans', 'planPatches', 'challenges', 'settings',
 ] as const;
 export type SyncedTable = (typeof SYNCED_TABLES)[number];
+
+/**
+ * Files of the data repository that Atlas once wrote and now leaves alone: never read, rewritten or deleted, even when
+ * an outbox entry for one is left over from an older build. The user's practice answers stay in the repository.
+ */
+export const ARCHIVED_PATHS: readonly string[] = ['state/practice.json'];
+
+export function isArchivedPath(path: string): boolean {
+  return ARCHIVED_PATHS.includes(path);
+}
 
 export function isSyncedTable(name: string): name is SyncedTable {
   return (SYNCED_TABLES as readonly string[]).includes(name);
@@ -68,7 +79,7 @@ export function dateOfLogPath(path: string): string | null {
 
 /** Files the app reads back on a pull. Markdown twins and project pages are generated, so they are only written. */
 export function isPulledPath(path: string): boolean {
-  return path === ITEMS_PATH || path === PLAN_PATH || path === SETTINGS_PATH || path === PRACTICE_PATH || path === CHALLENGES_PATH || dateOfLogPath(path) !== null || /^reviews\/[^/]+\.md$/.test(path);
+  return path === ITEMS_PATH || path === PLAN_PATH || path === SETTINGS_PATH || path === CHALLENGES_PATH || dateOfLogPath(path) !== null || /^reviews\/[^/]+\.md$/.test(path);
 }
 
 /**
@@ -95,8 +106,6 @@ export function pathsForRecord(table: SyncedTable, key: unknown, record: unknown
       return [PLAN_PATH];
     case 'settings':
       return [SETTINGS_PATH];
-    case 'practice':
-      return [PRACTICE_PATH];
     case 'challenges':
       return [CHALLENGES_PATH];
     case 'reviews': {

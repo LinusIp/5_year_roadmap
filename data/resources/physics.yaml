@@ -13,7 +13,6 @@
   level: intro
   cost: free
   estHours: 130
-  practiceTopics: [physics/units-dimensions-vectors, physics/kinematics-1d-2d, physics/projectile-motion, physics/newtons-laws-free-body-diagrams, physics/friction-and-inclines, physics/circular-motion, physics/work-and-kinetic-energy, physics/potential-energy-and-conservation, physics/momentum-impulse-collisions, physics/centre-of-mass, physics/rotational-kinematics, physics/torque-and-moment-of-inertia, physics/angular-momentum, physics/rolling-motion, physics/static-equilibrium, physics/gravitation-and-orbits, physics/simple-harmonic-motion, physics/damped-and-driven-oscillations]
   prerequisites: [mit-18-01]
   subject: math-physics
 

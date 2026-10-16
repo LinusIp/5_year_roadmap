@@ -1,0 +1,611 @@
+{
+  "app": "atlas",
+  "data": {
+    "certStates": [],
+    "challenges": [],
+    "customEntities": [],
+    "dayLogs": [
+      {
+        "date": "2026-10-16",
+        "deviceId": "ykj6wo69u3ji",
+        "doneBlocks": [
+          "A"
+        ],
+        "entries": [
+          {
+            "block": "A",
+            "deviceId": "ykj6wo69u3ji",
+            "id": "af376u1pxnkb",
+            "minutes": 60,
+            "track": "graphics",
+            "updatedAt": "2026-10-16T11:40:02.832Z"
+          },
+          {
+            "block": "P",
+            "deviceId": "ykj6wo69u3ji",
+            "id": "u6non6dt7mgt",
+            "minutes": 14,
+            "refId": "practice:calculus",
+            "track": "math",
+            "updatedAt": "2026-10-16T11:40:02.832Z"
+          },
+          {
+            "block": "P",
+            "deviceId": "ykj6wo69u3ji",
+            "id": "t763daabud79",
+            "minutes": 16,
+            "refId": "practice:physics",
+            "track": "physics",
+            "updatedAt": "2026-10-16T11:40:02.832Z"
+          }
+        ],
+        "fieldsAt": {
+          "doneBlocks": "2026-10-16T11:40:02.832Z"
+        },
+        "updatedAt": "2026-10-16T11:40:02.832Z"
+      }
+    ],
+    "itemStates": [],
+    "meta": [],
+    "milestoneStates": [],
+    "overrides": [],
+    "paperStates": [],
+    "planPatches": [],
+    "practice": [
+      {
+        "date": "2026-10-16",
+        "deviceId": "ykj6wo69u3ji",
+        "difficulty": 2,
+        "hints": 0,
+        "id": "daily:2026-10-16|calc-derivative-power",
+        "questionId": "calc-derivative-power",
+        "result": "right",
+        "role": "new",
+        "seconds": 95,
+        "set": "daily:2026-10-16",
+        "subject": "calculus",
+        "topic": "derivatives-and-rules",
+        "updatedAt": "2026-10-16T11:40:02.834Z"
+      },
+      {
+        "date": "2026-10-16",
+        "deviceId": "ykj6wo69u3ji",
+        "difficulty": 3,
+        "hints": 2,
+        "id": "daily:2026-10-16|phys-projectile-range",
+        "questionId": "phys-projectile-range",
+        "result": "wrong",
+        "revealed": true,
+        "role": "new",
+        "seconds": 240,
+        "set": "daily:2026-10-16",
+        "subject": "physics",
+        "topic": "projectile-motion",
+        "updatedAt": "2026-10-16T11:40:02.834Z"
+      }
+    ],
+    "replans": [],
+    "reviews": [
+      {
+        "changes": "None.",
+        "completedAt": "2026-10-18",
+        "deviceId": "ykj6wo69u3ji",
+        "didnt": "Evenings.",
+        "id": "week:2026-10-12",
+        "kind": "week",
+        "periodStart": "2026-10-12",
+        "snapshot": {
+          "daysCounted": 1,
+          "itemsFinished": [],
+          "minutesByBlock": {
+            "A": 60,
+            "P": 30
+          },
+          "targetMinutes": 3675,
+          "totalMinutes": 90
+        },
+        "updatedAt": "2026-10-16T11:40:02.836Z",
+        "worked": "Practice before breakfast."
+      }
+    ],
+    "settings": [
+      {
+        "backup": {},
+        "catchUp": {},
+        "core": {
+          "backupReminderDays": 30,
+          "blocks": [
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "formerNames": [
+                "Gamedev / Graphics / Simulation"
+              ],
+              "id": "A",
+              "minutes": 120,
+              "name": "Graphics / rendering / simulation",
+              "summary": "Two hours, every day. Small games are a monthly-project vehicle inside it, not the subject."
+            },
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "id": "B",
+              "minutes": 60,
+              "name": "Languages",
+              "summary": "One hour, every day."
+            },
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "id": "C",
+              "minutes": 90,
+              "name": "Core track",
+              "summary": "ML Zoomcamp for the first four months, then AI inference and AI engineering (priority 1), alternating by phase with software architecture (priority 2)."
+            },
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "id": "D",
+              "minutes": 120,
+              "name": "Projects / hands-on",
+              "summary": "The current weekly mini-build and monthly project. In stage 2 this is lab, PCB, CAD and build time."
+            },
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "id": "E",
+              "minutes": 60,
+              "name": "Math & physics",
+              "summary": "The prerequisites of stage 2, running from day one."
+            },
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "id": "P",
+              "minutes": 45,
+              "name": "Practice",
+              "role": "practice",
+              "summary": "A daily set of linear algebra, calculus and physics questions, apart from the coding blocks.",
+              "track": "math"
+            }
+          ],
+          "catalogue": {
+            "dailyChallenge": true,
+            "weeklyDays": [
+              6,
+              0
+            ]
+          },
+          "forecast": {
+            "paceWindowDays": 28
+          },
+          "heatmapMode": "relative",
+          "heatmapThresholds": [
+            1,
+            120,
+            300,
+            420
+          ],
+          "paperCadence": {
+            "fromPhase": "y1-p1",
+            "fromYear": 1,
+            "perWeek": 1
+          },
+          "pattern": [
+            "full",
+            "full",
+            "full",
+            "full",
+            "full",
+            "full",
+            "full"
+          ],
+          "practice": {
+            "end": "2027-01-31",
+            "perSubject": 4,
+            "start": "2026-10-16",
+            "startWith": "calculus"
+          },
+          "review": {
+            "block": "D",
+            "day": 0,
+            "title": "Weekly review + paper reading"
+          },
+          "streak": {
+            "autoFreeze": true,
+            "freezesPerMonth": 2,
+            "minMinutes": 60,
+            "percent": 50
+          },
+          "templates": [
+            {
+              "blocks": [
+                {
+                  "block": "A"
+                },
+                {
+                  "block": "B"
+                },
+                {
+                  "block": "C"
+                },
+                {
+                  "block": "D"
+                },
+                {
+                  "block": "E"
+                },
+                {
+                  "block": "P"
+                }
+              ],
+              "id": "full",
+              "name": "Full day"
+            },
+            {
+              "blocks": [
+                {
+                  "block": "A",
+                  "minutes": 60
+                },
+                {
+                  "block": "B",
+                  "minutes": 30
+                },
+                {
+                  "block": "C",
+                  "minutes": 60
+                },
+                {
+                  "block": "E",
+                  "minutes": 30
+                },
+                {
+                  "block": "P",
+                  "minutes": 30
+                }
+              ],
+              "id": "university",
+              "name": "University day"
+            },
+            {
+              "blocks": [
+                {
+                  "block": "A",
+                  "minutes": 120
+                },
+                {
+                  "block": "C",
+                  "minutes": 120
+                },
+                {
+                  "block": "D",
+                  "minutes": 180
+                },
+                {
+                  "block": "P",
+                  "minutes": 60
+                }
+              ],
+              "id": "weekend",
+              "name": "Weekend"
+            },
+            {
+              "blocks": [
+                {
+                  "block": "B",
+                  "minutes": 30
+                },
+                {
+                  "block": "E",
+                  "minutes": 60
+                },
+                {
+                  "block": "P",
+                  "minutes": 45
+                }
+              ],
+              "id": "exam",
+              "name": "Exam week"
+            },
+            {
+              "blocks": [],
+              "id": "rest",
+              "name": "Rest day"
+            }
+          ],
+          "weekStartsOn": 1,
+          "weeklyBuildHours": 4
+        },
+        "deviceId": "ykj6wo69u3ji",
+        "github": {
+          "showCalendar": false,
+          "username": "octo-learner"
+        },
+        "id": "app",
+        "layout": {
+          "general": {
+            "clock": "24",
+            "density": "comfortable"
+          },
+          "plan": {
+            "segment": "timeline",
+            "showDropped": true
+          },
+          "tabs": [
+            "today",
+            "plan",
+            "library",
+            "activity"
+          ],
+          "today": {
+            "footer": true,
+            "later": true,
+            "now": "first",
+            "order": [
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "P"
+            ],
+            "review": true,
+            "stats": true,
+            "view": "detailed"
+          }
+        },
+        "pace": {
+          "P": {
+            "from": "2026-10-16",
+            "mode": "relaxed"
+          }
+        },
+        "pauses": [],
+        "schedule": {
+          "days": {},
+          "history": [
+            {
+              "blocks": [
+                {
+                  "days": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                  ],
+                  "id": "A",
+                  "minutes": 120
+                },
+                {
+                  "days": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                  ],
+                  "id": "B",
+                  "minutes": 60
+                },
+                {
+                  "days": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                  ],
+                  "id": "C",
+                  "minutes": 90
+                },
+                {
+                  "days": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                  ],
+                  "id": "D",
+                  "minutes": 120
+                },
+                {
+                  "days": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                  ],
+                  "id": "E",
+                  "minutes": 60
+                },
+                {
+                  "days": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                  ],
+                  "id": "P",
+                  "minutes": 45
+                }
+              ],
+              "pattern": [
+                "full",
+                "full",
+                "full",
+                "full",
+                "full",
+                "full",
+                "full"
+              ],
+              "templates": [
+                {
+                  "blocks": [
+                    {
+                      "block": "A"
+                    },
+                    {
+                      "block": "B"
+                    },
+                    {
+                      "block": "C"
+                    },
+                    {
+                      "block": "D"
+                    },
+                    {
+                      "block": "E"
+                    },
+                    {
+                      "block": "P"
+                    }
+                  ],
+                  "id": "full",
+                  "name": "Full day"
+                },
+                {
+                  "blocks": [
+                    {
+                      "block": "A",
+                      "minutes": 60
+                    },
+                    {
+                      "block": "B",
+                      "minutes": 30
+                    },
+                    {
+                      "block": "C",
+                      "minutes": 60
+                    },
+                    {
+                      "block": "E",
+                      "minutes": 30
+                    },
+                    {
+                      "block": "P",
+                      "minutes": 30
+                    }
+                  ],
+                  "id": "university",
+                  "name": "University day"
+                },
+                {
+                  "blocks": [
+                    {
+                      "block": "A",
+                      "minutes": 120
+                    },
+                    {
+                      "block": "C",
+                      "minutes": 120
+                    },
+                    {
+                      "block": "D",
+                      "minutes": 180
+                    },
+                    {
+                      "block": "P",
+                      "minutes": 45
+                    }
+                  ],
+                  "id": "weekend",
+                  "name": "Weekend"
+                },
+                {
+                  "blocks": [
+                    {
+                      "block": "B",
+                      "minutes": 30
+                    },
+                    {
+                      "block": "E",
+                      "minutes": 60
+                    },
+                    {
+                      "block": "P",
+                      "minutes": 45
+                    }
+                  ],
+                  "id": "exam",
+                  "name": "Exam week"
+                },
+                {
+                  "blocks": [],
+                  "id": "rest",
+                  "name": "Rest day"
+                }
+              ],
+              "until": "2026-10-16"
+            }
+          ],
+          "overrides": []
+        },
+        "theme": "dark",
+        "updatedAt": "2026-10-16T11:40:02.830Z",
+        "version": 2
+      }
+    ],
+    "weekPicks": []
+  },
+  "exportedAt": "2026-10-16T12:00:00.000Z",
+  "formatVersion": 1
+}

@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-16",
+  "deviceId": "ykj6wo69u3ji",
+  "doneBlocks": [
+    "A"
+  ],
+  "entries": [
+    {
+      "block": "A",
+      "deviceId": "ykj6wo69u3ji",
+      "id": "af376u1pxnkb",
+      "minutes": 60,
+      "track": "graphics",
+      "updatedAt": "2026-10-16T11:40:02.832Z"
+    },
+    {
+      "block": "P",
+      "deviceId": "ykj6wo69u3ji",
+      "id": "u6non6dt7mgt",
+      "minutes": 14,
+      "refId": "practice:calculus",
+      "track": "math",
+      "updatedAt": "2026-10-16T11:40:02.832Z"
+    },
+    {
+      "block": "P",
+      "deviceId": "ykj6wo69u3ji",
+      "id": "t763daabud79",
+      "minutes": 16,
+      "refId": "practice:physics",
+      "track": "physics",
+      "updatedAt": "2026-10-16T11:40:02.832Z"
+    }
+  ],
+  "fieldsAt": {
+    "doneBlocks": "2026-10-16T11:40:02.832Z"
+  },
+  "updatedAt": "2026-10-16T11:40:02.832Z"
+}
