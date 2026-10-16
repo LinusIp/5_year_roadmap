@@ -11,13 +11,16 @@ app makes no network calls at all, and everything can still be exported to a sin
 > Build status: see [PROGRESS.md](PROGRESS.md). Choices and assumptions: see [DECISIONS.md](DECISIONS.md).
 
 <p>
-  <img src="screenshots/today-light.png" alt="Today: the one block to do now, large, and the other four as a list" width="24%">
+  <img src="screenshots/today-light.png" alt="Today: the one block to do now, large, and the other blocks as a list, each with its block's icon" width="24%">
   <img src="screenshots/plan-light.png" alt="Plan: the current phase's five lanes, each with its item, progress line and forecast" width="24%">
   <img src="screenshots/activity-dark.png" alt="Activity in the dark theme: the year's heatmap and the last seven days" width="24%">
   <img src="screenshots/library-light.png" alt="Library: search, filters, and every course, book and paper with its status" width="24%">
 </p>
 
 ![The five-year map: six phases on a timeline, with each lane's work, what ships and the credentials](screenshots/map-light.png)
+
+Each block has its own icon on Today, in its colour; subjects, kinds of project and their status have theirs too,
+always next to a word that says the same (the icon map and the type scale are in [DECISIONS.md](DECISIONS.md)).
 
 The screenshots show eight weeks of made-up history. They are also the baselines of a screenshot test that CI runs
 on every pull request. They are drawn on CI's Linux: after a change to the UI, commit an empty `screenshots/.redraw`

@@ -19,6 +19,8 @@ export interface RowProps {
   href?: string;
   /** For rows that open content in place. */
   expanded?: boolean;
+  /** A 20 px icon before the title: the block, the subject or the kind of project. */
+  icon?: ReactNode;
   /** A leading 20 px box that fills with accent and a tick; a ticked row's title turns ink2. */
   check?: { checked: boolean; onChange: (checked: boolean) => void; label?: string; disabled?: boolean };
   /** A trailing 36 x 20 switch, named by the row's title. */
@@ -84,26 +86,27 @@ export function Switch({ on, onChange, labelledBy, label, disabled }: { on: bool
 }
 
 /**
- * The one list item of the system: a title (16/500), an optional meta line (14, ink2), optional trailing
+ * The one list item of the system: a title (17/500, at most two lines), an optional meta line (15, ink2), optional trailing
  * text, and at most one of a check circle, a switch or a radio dot. Rows are separated by a hairline from
  * their list, never boxed one by one.
  */
 const HEIGHT = { 44: 'min-h-11', 48: 'min-h-16 py-2', 52: 'min-h-17 py-2', 56: 'min-h-19 py-2.5', 60: 'min-h-20 py-2.5' } as const;
 
-export function Row({ title, meta, trailing, action, edge, onClick, to, href, expanded, check, toggle, selected, children, className = '', height = 56, truncate, plainTitle, dragRow }: RowProps) {
+export function Row({ title, meta, trailing, action, edge, onClick, to, href, expanded, check, toggle, selected, children, className = '', height = 56, truncate, plainTitle, dragRow, icon }: RowProps) {
   const titleId = useId();
   const titleClass =
-    'block text-body leading-[1.3] ' + (plainTitle ? 'font-normal' : 'font-medium') + (check?.checked ? ' text-ink2' : '') + (truncate ? ' truncate' : '');
+    'block text-body leading-[1.3] ' + (plainTitle ? 'font-normal' : 'font-medium') + (check?.checked ? ' text-ink2' : '') + (truncate ? ' truncate' : plainTitle ? '' : ' line-clamp-2');
   const body = (
     <>
       {selected !== undefined && <RadioDot selected={selected} />}
+      {icon}
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span id={titleId} className={titleClass}>
           {title}
         </span>
         {meta && <span className="block truncate text-meta leading-[1.3] text-ink2">{meta}</span>}
       </span>
-      {trailing !== undefined && trailing !== null && <span className="shrink-0 text-meta text-ink2">{trailing}</span>}
+      {trailing !== undefined && trailing !== null && <span className="flex shrink-0 items-center gap-1.5 text-meta text-ink2">{trailing}</span>}
     </>
   );
   const mainClass = 'row-main flex min-w-0 flex-1 items-center gap-3 text-left ' + HEIGHT[height];
@@ -167,7 +170,7 @@ export function RowList({ label, children, className = '', flat, plain, ref }: {
   const list = plain ? '' : flat || inSheet ? 'divide-y divide-line border-y border-line' : 'divide-y divide-line rounded-card bg-surface px-4';
   return (
     <section className={className} ref={ref}>
-      {label && <h2 className="mb-1.5 text-meta font-normal text-ink2">{label}</h2>}
+      {label && <h2 className="section-label">{label}</h2>}
       <ul className={list}>{children}</ul>
     </section>
   );

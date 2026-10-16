@@ -19,7 +19,7 @@ function status(c: RoadmapCoverage): string {
 export function RoadmapsList({ coverage, onOpen }: { coverage: RoadmapCoverage[]; onOpen: (id: string) => void }) {
   return (
     <section>
-      <h2 className="mb-1.5 text-meta font-normal text-ink2">Roadmaps</h2>
+      <h2 className="section-label">Roadmaps</h2>
       <ul className="rounded-card bg-surface px-4">
         {coverage.map((c, i) => (
           <li key={c.roadmap.id}>

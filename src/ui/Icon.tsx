@@ -1,10 +1,51 @@
-import type { ReactNode } from 'react';
+import type { ComponentType, ReactNode, SVGProps } from 'react';
+import {
+  ArrowDown,
+  ArrowUp,
+  Atom,
+  Box,
+  Briefcase,
+  Check,
+  ChevronDown,
+  CircleCheck,
+  CircleDot,
+  Clock,
+  Code,
+  Cpu,
+  ExternalLink,
+  FileText,
+  Flame,
+  Grid3x3,
+  GripVertical,
+  Hammer,
+  Lightbulb,
+  Moon,
+  Pause,
+  Pencil,
+  Play,
+  Plus,
+  Puzzle,
+  RefreshCw,
+  Search,
+  Settings,
+  Shuffle,
+  Sigma,
+  SlidersHorizontal,
+  SquareFunction,
+  Sun,
+  Undo2,
+  Wrench,
+  X,
+} from 'lucide-react';
 
 /**
- * Outline glyphs, 24x24, as drawn in the mockups. Icons appear only where they carry meaning: the four tabs
- * and icon buttons (which always have a label), never as decoration next to text.
+ * Icons. The four tabs (and the optional Reviews, Projects and map tabs) keep the mockup's own glyphs; everything
+ * else is lucide-react, outline, imported one by one so the build carries only these. Icons carry meaning: a block,
+ * a subject, a kind of project, a status, or an action next to its label. They are decorative (aria-hidden) because
+ * a text label always sits next to them; the few icon-only header buttons carry an aria-label of their own.
+ * Sizes: 24 in the tabs, 20 in rows and headers, 16 inside buttons.
  */
-const ICONS = {
+const TAB_GLYPHS = {
   today: (
     <>
       <circle cx="12" cy="12" r="9" />
@@ -26,71 +67,72 @@ const ICONS = {
       <rect x="16" y="16" width="4" height="4" />
     </>
   ),
-  gear: (
-    <>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1A1.7 1.7 0 0 0 10 3.1V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
-    </>
-  ),
-  moon: <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z" />,
-  sun: (
-    <>
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-    </>
-  ),
-  play: <path d="M7 4v16l13-8z" fill="currentColor" stroke="none" />,
-  pause: (
-    <>
-      <rect x="6" y="5" width="4" height="14" fill="currentColor" stroke="none" />
-      <rect x="14" y="5" width="4" height="14" fill="currentColor" stroke="none" />
-    </>
-  ),
-  check: <path d="M20 6 9 17l-5-5" />,
-  shuffle: <path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />,
-  search: (
-    <>
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-3.5-3.5" />
-    </>
-  ),
-  external: <path d="M10 14 21 3M21 3h-6M21 3v6M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5" />,
-  chevronDown: <path d="m6 9 6 6 6-6" />,
-  x: <path d="M6 6l12 12M18 6 6 18" />,
-  plus: <path d="M12 5v14M5 12h14" />,
-  arrowUp: <path d="M12 19V5M6 11l6-6 6 6" />,
-  arrowDown: <path d="M12 5v14M6 13l6 6 6-6" />,
-  sliders: (
-    <>
-      <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
-      <circle cx="15" cy="7" r="2" />
-      <circle cx="9" cy="17" r="2" />
-    </>
-  ),
-  undo: <path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" />,
-  grip: <path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" />,
   projects: <path d="M4 7h16v12H4zM9 7V5h6v2" />,
   map: <path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14" />,
   reviews: <path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h5" />,
-  refresh: (
-    <>
-      <path d="M3.5 12a8.5 8.5 0 0 1 14.7-5.8L20.5 8.5" />
-      <path d="M20.5 3.5v5h-5M20.5 12a8.5 8.5 0 0 1-14.7 5.8L3.5 15.5" />
-      <path d="M3.5 20.5v-5h5" />
-    </>
-  ),
 } satisfies Record<string, ReactNode>;
 
-export type IconName = keyof typeof ICONS;
+type Glyph = ComponentType<SVGProps<SVGSVGElement> & { size?: number; strokeWidth?: number }>;
 
-/** The mockup's stroke for each size: 2 inside buttons and fields, 1.6 in the header, 1.8 for the tabs. */
+const LUCIDE = {
+  // Actions
+  gear: Settings,
+  moon: Moon,
+  sun: Sun,
+  play: Play,
+  pause: Pause,
+  check: Check,
+  shuffle: Shuffle,
+  search: Search,
+  external: ExternalLink,
+  chevronDown: ChevronDown,
+  x: X,
+  plus: Plus,
+  arrowUp: ArrowUp,
+  arrowDown: ArrowDown,
+  sliders: SlidersHorizontal,
+  undo: Undo2,
+  grip: GripVertical,
+  refresh: RefreshCw,
+  doc: FileText,
+  hint: Lightbulb,
+  // Blocks: graphics and simulation, languages, the core track, projects, maths and physics, practice
+  cube: Box,
+  code: Code,
+  cpu: Cpu,
+  hammer: Hammer,
+  sigma: Sigma,
+  pencil: Pencil,
+  // Subjects
+  grid: Grid3x3,
+  function: SquareFunction,
+  atom: Atom,
+  // Kinds of project
+  puzzle: Puzzle,
+  wrench: Wrench,
+  briefcase: Briefcase,
+  // Status
+  done: CircleCheck,
+  inProgress: CircleDot,
+  clock: Clock,
+  flame: Flame,
+} satisfies Record<string, Glyph>;
+
+export type IconName = keyof typeof TAB_GLYPHS | keyof typeof LUCIDE;
+
+/** The stroke for each size: 2 inside buttons and fields, 1.75 in rows and headers, 1.8 for the tabs. */
 function strokeFor(size: number): number {
   if (size <= 18) return 2;
-  if (size <= 20) return 1.6;
+  if (size <= 20) return 1.75;
   return 1.8;
 }
 
-export function Icon({ name, size = 24, className }: { name: IconName; size?: number; className?: string }) {
+export function Icon({ name, size = 24, className, color }: { name: IconName; size?: number; className?: string; color?: string }) {
+  const style = { flexShrink: 0, ...(color ? { color } : {}) };
+  if (name in LUCIDE) {
+    const Glyph = LUCIDE[name as keyof typeof LUCIDE];
+    return <Glyph size={size} strokeWidth={strokeFor(size)} className={className} style={style} aria-hidden="true" focusable="false" />;
+  }
   return (
     <svg
       width={size}
@@ -104,9 +146,9 @@ export function Icon({ name, size = 24, className }: { name: IconName; size?: nu
       className={className}
       aria-hidden="true"
       focusable="false"
-      style={{ flexShrink: 0 }}
+      style={style}
     >
-      {ICONS[name]}
+      {TAB_GLYPHS[name as keyof typeof TAB_GLYPHS]}
     </svg>
   );
 }

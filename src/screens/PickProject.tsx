@@ -91,6 +91,7 @@ export function PickProject() {
         id: p.id,
         // The cadence's range, as the mockup writes it, rather than one estimate.
         kind: [monthly ? 'Monthly project' : 'Weekly build', part, monthly ? '20–40 h' : '2–6 h'].filter(Boolean).join(' · '),
+        type: monthly ? ('case' as const) : ('build' as const),
         title: shortTitle(p.title),
         brief: p.brief,
         footer: [track, p.source && p.source !== 'user' ? 'from ' + p.source : p.source === 'user' ? 'yours' : null].filter(Boolean).join(' · '),
@@ -102,7 +103,7 @@ export function PickProject() {
       const size = e.kind === 'challenge' ? e.estMinutes + ' min' : e.hours + ' h';
       const label = e.kind === 'challenge' ? TIER_LABEL[e.cadence] + ' challenge' : e.kind === 'build' ? 'Weekly build' : 'Monthly case';
       const track = seed.tracks.find((t) => t.id === e.tracks[0])?.name;
-      return { id: e.id, kind: [label, e.difficulty, size].join(' · '), title: e.title, brief, footer: [groupLabel(e.group), e.kind === 'challenge' ? null : track].filter(Boolean).join(' · ') };
+      return { id: e.id, kind: [label, e.difficulty, size].join(' · '), type: e.kind, difficulty: e.difficulty, title: e.title, brief, footer: [groupLabel(e.group), e.kind === 'challenge' ? null : track].filter(Boolean).join(' · ') };
     }),
   ];
 

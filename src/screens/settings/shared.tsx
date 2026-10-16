@@ -43,9 +43,9 @@ export async function saveSettings(change: (current: StoredSettings) => StoredSe
 
 export function Section({ id, title, children, onReset }: { id?: string; title: string; children: ReactNode; onReset?: () => void }) {
   return (
-    <section id={id} className="mt-8 scroll-mt-4">
-      <div className="mb-1.5 flex items-end justify-between gap-3">
-        <h2 className="text-meta font-normal text-ink2">{title}</h2>
+    <section id={id} className="mt-6 scroll-mt-4">
+      <div className="mb-2 flex items-end justify-between gap-3">
+        <h2 className="section-label mb-0">{title}</h2>
         {onReset && (
           <Button size="sm" variant="icon" className="-my-2 text-meta" onClick={onReset}>
             Reset to default

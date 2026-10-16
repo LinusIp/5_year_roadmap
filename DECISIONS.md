@@ -616,3 +616,61 @@ it left open; `briefs/PLAN.md` records how the three briefs of that day fit toge
   without loading the catalogue.
 - **Fixed on the way: Plan › Projects' weekly slot ignored a catalogue build** picked for the week and showed the
   curriculum's suggestion. It now shows the week's build, whichever it is, and opens its doc.
+
+## The polish: type scale and icon map (pull request #3)
+
+Easier to read, with icons that carry meaning, in the same calm layout: one filled button per screen, Today on one
+390 x 844 screen, no tiles, gradients, shadows, extra cards or new motion.
+
+**Type scale** (tokens in `src/index.css`; the acceptance test checks every screen draws from it):
+
+| Token | Before | Now | Used for |
+|---|---|---|---|
+| `text-body` | 16 px / 1.45 | **17 px / 1.5** | titles of rows, paragraphs, answers |
+| `text-meta` | 14 px / 1.3 | **15 px / 1.4** | secondary text; rows set it at 1.3 |
+| `text-button` | 15 px | 15 px | buttons and links |
+| `text-label` | 13 px | **13 px medium**, `.section-label` | section labels: Now, Later today, Approach, Done when, Ship it |
+| `text-small` | 12 px | 12 px | the tab bar |
+| `text-lead`, `card`, `headline`, `hero` | 18, 24, 26, 30 | unchanged | the map, a deck card, Today's Now title, the map |
+
+- **Rows** keep their heights (56 px content on Today): a 17 px title and a 15 px meta line at 1.3 still fit, so
+  Today still fits one screen. Row titles take at most two lines, then an ellipsis; the full title is in the sheet.
+  The Library keeps its one-line titles.
+- **Sections**: a 13 px medium label in ink2, 24 px above the section (Today's cards and lists, Settings, the docs)
+  and 8 px below. Related rows are grouped by space, not by extra lines.
+- **Reading text** (`.doc-text`) in tech docs, challenge statements and practice questions and solutions: about 65
+  characters a line, at 1.5. **Code and formulas** (`.doc-block`, `.math-block`) sit in a soft panel (`--soft`)
+  with 16 px padding, in a monospace font (a `--font-mono` token: Tailwind's had been switched off, so code fell
+  back to the sans) or KaTeX. Milestones and approach steps are numbered.
+- **Numbers**: tabular figures on the whole page (already), times as "1 h 30 m", progress as "2 of 5".
+- **ink2 at 5:1 or better** on surface, canvas and a pressed chip, both themes. Light already measured 6.1, 5.5 and
+  5.2. Dark was 4.8 on a pressed chip and is now #a7afb8 (7.6, 8.3, 5.6). The acceptance test now asks for 5:1.
+
+**Icon map** (lucide-react, outline, imported one by one so the build carries only the 37 used; about 13 KB):
+
+| Where | Icon |
+|---|---|
+| Block A, graphics and simulation | cube (`Box`) |
+| Block B, languages | code (`Code`) |
+| Block C, the core track | chip (`Cpu`) |
+| Block D, projects | hammer (`Hammer`) |
+| Block E, maths and physics | sigma (`Sigma`) |
+| Practice | pencil (`Pencil`) |
+| Linear algebra, calculus, physics | grid (`Grid3x3`), function (`SquareFunction`), atom (`Atom`) |
+| Challenge, build, case | puzzle (`Puzzle`), wrench (`Wrench`), briefcase (`Briefcase`); a curriculum weekly build is a build, the other curriculum projects are cases |
+| Difficulty | one, two or three dots: easy, medium, advanced |
+| Done, in progress | check-circle (`CircleCheck`, accent), circle-dot (`CircleDot`) |
+| Time, streak | clock (`Clock`), flame (`Flame`): Today's stats line only |
+| Start, Tech doc, Hint | play, file (`FileText`), light bulb (`Lightbulb`), next to the label |
+
+- **Block icons** are 20 px in the block's track colour (`--block-A` … `--block-P`), checked at 3:1 or better on
+  surface and canvas in both themes (light 3.2 to 5.0, dark 5.0 to 8.7), at the start of each Today row and on the
+  Now card's first line. A block added by the user gets no icon, only the space for one.
+- **Sizes**: 24 px in the tabs, 20 px in rows and headers, 16 px inside buttons (play and pause were 14).
+- **The tabs keep their own glyphs**, drawn for the mockups; every other glyph is lucide's, so actions and the new
+  icons share one stroke.
+- **Decorative**: every icon is `aria-hidden`, because a word beside it says the same. The header's icon buttons
+  (Change today, Settings, the theme toggle) and a sheet's Close keep an `aria-label` and no text: they are the
+  screen's chrome, not its actions. **Mark done**, which was a tick alone on the Now card, now says "Mark done".
+- **The live check** of the Pages deploy now also asserts the Practice start screen, a tech doc opened from a Deck
+  card with Take it, and the icons on Today.

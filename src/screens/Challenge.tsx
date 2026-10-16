@@ -25,8 +25,8 @@ async function logEvent(event: Omit<ChallengeEvent, 'id'>): Promise<void> {
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col gap-1.5">
-      <h2 className="text-meta font-normal text-ink2">{title}</h2>
+    <section className="flex flex-col">
+      <h2 className="section-label">{title}</h2>
       {children}
     </section>
   );
@@ -55,15 +55,15 @@ function Body({ challenge, events, isDaily, language, setLanguage }: { challenge
 
   return (
     <div className="mt-6 flex flex-col gap-6">
-      <p className="whitespace-pre-line text-body">{challenge.statement}</p>
+      <p className="doc-text whitespace-pre-line text-body">{challenge.statement}</p>
       <Block title="Input">
-        <p className="text-body">{challenge.input}</p>
+        <p className="doc-text text-body">{challenge.input}</p>
       </Block>
       <Block title="Output">
-        <p className="text-body">{challenge.output}</p>
+        <p className="doc-text text-body">{challenge.output}</p>
       </Block>
       <Block title="Constraints">
-        <p className="text-body">{challenge.constraints}</p>
+        <p className="doc-block">{challenge.constraints}</p>
       </Block>
       <Block title={challenge.examples.length === 1 ? 'Example' : 'Examples'}>
         <div className="flex flex-col gap-3">
@@ -71,15 +71,15 @@ function Body({ challenge, events, isDaily, language, setLanguage }: { challenge
             <figure key={i} className="rounded-card bg-surface p-4">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <p className="text-meta text-ink2">Input</p>
-                  <pre className="mt-1 overflow-x-auto font-mono text-body">{ex.in}</pre>
+                  <p className="section-label">Input</p>
+                  <pre className="doc-block">{ex.in}</pre>
                 </div>
                 <div>
-                  <p className="text-meta text-ink2">Output</p>
-                  <pre className="mt-1 overflow-x-auto font-mono text-body">{ex.out}</pre>
+                  <p className="section-label">Output</p>
+                  <pre className="doc-block">{ex.out}</pre>
                 </div>
               </div>
-              {ex.why && <figcaption className="mt-2 text-meta text-ink2">{ex.why}</figcaption>}
+              {ex.why && <figcaption className="doc-text mt-3 text-meta text-ink2">{ex.why}</figcaption>}
             </figure>
           ))}
         </div>
@@ -88,7 +88,7 @@ function Body({ challenge, events, isDaily, language, setLanguage }: { challenge
       {hints > 0 && (
         <ol className="flex flex-col gap-2" aria-label="Hints">
           {challenge.hints.slice(0, hints).map((h, i) => (
-            <li key={i} className="rounded-button border border-line p-3 text-body">
+            <li key={i} className="doc-text rounded-button border border-line p-4 text-body">
               <span className="text-meta text-ink2">Hint {i + 1}. </span>
               {h}
             </li>
@@ -97,14 +97,14 @@ function Body({ challenge, events, isDaily, language, setLanguage }: { challenge
       )}
       {approach && (
         <section aria-label="Approach" className="rounded-card bg-surface p-5">
-          <p className="text-meta text-ink2">Approach</p>
-          <p className="mt-1 text-body">{challenge.approach}</p>
-          <p className="mt-3 text-meta text-ink2">Complexity</p>
-          <p className="mt-1 text-body">{challenge.complexity}</p>
+          <h2 className="section-label">Approach</h2>
+          <p className="doc-text text-body">{challenge.approach}</p>
+          <h2 className="section-label mt-6">Complexity</h2>
+          <p className="doc-block">{challenge.complexity}</p>
           {challenge.edgeCases.length > 0 && (
             <>
-              <p className="mt-3 text-meta text-ink2">Edge cases to test</p>
-              <ul className="mt-1 list-disc pl-5 text-body">
+              <h2 className="section-label mt-6">Edge cases to test</h2>
+              <ul className="doc-text list-disc space-y-1 pl-5 text-body">
                 {challenge.edgeCases.map((e) => (
                   <li key={e}>{e}</li>
                 ))}
@@ -115,7 +115,7 @@ function Body({ challenge, events, isDaily, language, setLanguage }: { challenge
       )}
 
       <div className="flex flex-wrap items-center gap-2">
-        {hints < challenge.hints.length && <Button onClick={() => setHints((n) => n + 1)}>{hints === 0 ? 'Hint' : 'Another hint'}</Button>}
+        {hints < challenge.hints.length && <Button icon="hint" onClick={() => setHints((n) => n + 1)}>{hints === 0 ? 'Hint' : 'Another hint'}</Button>}
         {!approach && <Button onClick={() => setApproach(true)}>Show approach</Button>}
       </div>
 

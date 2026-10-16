@@ -9,6 +9,7 @@ import type { ScheduledItem } from '../../lib/schedule.ts';
 import type { Phase, Project } from '../../seed/schema.ts';
 import { Button } from '../../ui/Button.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
+import { KindIcon } from '../../ui/glyphs.tsx';
 import { ItemStatusPill } from '../parts/ItemSheet.tsx';
 import { nameOf, plural, shortTitle } from '../parts/text.ts';
 
@@ -43,7 +44,7 @@ export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atla
       : 'The plan has not started yet.';
 
   const projectRow = (p: Project, meta: string) => (
-    <Row key={p.id} title={shortTitle(p.title)} meta={meta} onClick={() => onOpenItem(p.id)} action={<ItemStatusPill kind="project" refId={p.id} title={p.title} state={states.get(p.id)} />} />
+    <Row key={p.id} icon={<KindIcon kind={p.cadence === 'weekly' ? 'build' : 'case'} />} title={shortTitle(p.title)} meta={meta} onClick={() => onOpenItem(p.id)} action={<ItemStatusPill kind="project" refId={p.id} title={p.title} state={states.get(p.id)} />} />
   );
   const doneRow = (key: string, done: Project[], noun: string) =>
     done.length > 0 && (
@@ -59,13 +60,14 @@ export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atla
     );
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <p className="text-meta text-ink2">{sentence}</p>
 
       <div>
         <RowList label="This week">
           {weekly && isOpen(weekly.refId, states) ? (
             <Row
+              icon={<KindIcon kind="build" />}
               title={nameOf(weekly)}
               meta={'Weekly build · ' + hoursOn(weekly.refId) + ' of ' + weekly.estHours + ' h done' + (weekly.unitCount > 0 ? ' · ' + weekly.unitsDone + ' of ' + weekly.unitCount + ' ticked' : '')}
               onClick={() => onOpenItem(weekly.refId)}
@@ -94,6 +96,7 @@ export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atla
             .map((e, i) => (
               <Row
                 key={e.id}
+                icon={<KindIcon kind="case" />}
                 title={e.title}
                 meta={(i === 0 ? 'Next in Block D · ' : '') + (states.get(e.id)?.unitsDone.length ?? 0) + ' milestones ticked · ' + hoursOn(e.id) + ' of ' + e.hours + ' h'}
                 onClick={() => onOpenItem(e.id)}

@@ -264,7 +264,7 @@ export function PhaseSheet({ atlas, phase, onClose }: { atlas: Atlas; phase: Pha
           })}
         </RowList>
         <div className="space-y-3">
-          <h3 className="text-meta font-normal text-ink2">Add a phase after this one</h3>
+          <h3 className="section-label">Add a phase after this one</h3>
           <div className="grid grid-cols-[1fr_7rem] gap-3">
             <TextField label="Name" value={newTitle} onChange={setNewTitle} />
             <TextField label="Weeks" type="numeric" value={newWeeks} onChange={setNewWeeks} />
@@ -281,7 +281,7 @@ export function PhaseSheet({ atlas, phase, onClose }: { atlas: Atlas; phase: Pha
           </Button>
         </div>
         <div className="space-y-3">
-          <h3 className="text-meta font-normal text-ink2">Split this phase</h3>
+          <h3 className="section-label">Split this phase</h3>
           <TextField label="The second part starts on" value={splitAt} onChange={setSplitAt} hint="YYYY-MM-DD, inside the phase. Items stay in the first part." />
           <Button
             onClick={() => {

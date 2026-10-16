@@ -761,3 +761,21 @@ Verified on this machine (Linux, Chromium 140):
 - Lighthouse accessibility 100 on `/`, `/practice`, `/practice?subject=physics`, `/plan/pick` (weekly and monthly),
   `/library/ai-hybrid-retrieval-benchmark`, `/library/m-inference-server`, `/plan?view=projects` and
   `/settings?section=practice`.
+
+## Pull request #3: the UI polish
+
+- Body 17 px and meta 15 px (from 16 and 14), paragraphs at 1.5 and rows at 1.3, 13 px medium section labels with
+  24 px above and 8 px below, reading text at about 65 characters, code and formulas in a soft 16 px panel,
+  numbered steps, row titles at two lines at most.
+- ink2 at 5:1 or better on surface, canvas and a pressed chip in both themes (dark #a7afb8).
+- lucide-react icons: one per block in its colour on Today, one per subject on the Practice start screen, the kind
+  of project and its difficulty dots in the Library, Plan › Projects and the Deck, done and in-progress marks, the
+  clock and the flame in Today's stats line, and icons beside Start, Tech doc and Hint. Mark done has its label.
+- Before and after, seven screens in both themes at 390 x 844 with the demo history, rendered by the same local
+  Chromium from the build before and after: `docs/ui-polish/before/` and `docs/ui-polish/after/`.
+- Acceptance: Today fits 390 x 844 with one filled button; every screen draws from the new scale (Today uses 12,
+  13, 15, 17 and 26); every control is at least 44 x 44 px; ink2 at 5:1 and the block icons at 3:1. Lighthouse
+  accessibility 100 on Today, Practice (start and a subject), Plan, Plan › Projects, the Deck, the Library (all and
+  projects), a tech doc, Activity, a challenge and Settings.
+- The Pages deploy's live check now also asserts the Practice start screen, a tech doc from the Deck and Today's
+  icons.

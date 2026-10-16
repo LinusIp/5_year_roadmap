@@ -29,17 +29,14 @@ const VARIANT: Record<ButtonVariant, string> = {
 };
 const SIZE = { sm: ' text-meta px-3.5', md: ' text-button', lg: ' text-button min-h-12' } as const;
 
-/** Glyph sizes inside buttons, as in the mockup: play and pause 14, shuffle and links 16, ticks 18. */
-const GLYPH: Partial<Record<IconName, number>> = { play: 14, pause: 14, shuffle: 16, external: 16, refresh: 16, search: 18, check: 18, plus: 18 };
-
 export function buttonClass(variant: ButtonVariant = 'quiet', extra = '', size: 'sm' | 'md' | 'lg' = 'md'): string {
   const padding = size === 'lg' && variant === 'filled' ? ' px-[22px]' : '';
   return BASE + ' ' + VARIANT[variant] + SIZE[size] + padding + (extra ? ' ' + extra : '');
 }
 
 /**
- * Buttons say what happens: "Start", "Stop", "Mark done", "Log 30 min". At least 44 px tall. A quiet button
- * with only an icon is square; the icon variant has no border, for headers.
+ * Buttons say what happens: "Start", "Stop", "Mark done", "Log 30 min". At least 44 px tall. An icon sits next to
+ * the label at 16 px; only the header's icon buttons (20 px) go without one, and carry an aria-label instead.
  */
 export function Button(props: ButtonProps | LinkProps | ExternalProps) {
   const { variant = 'quiet', icon, label, children, className = '', size = 'md' } = props;
@@ -47,7 +44,7 @@ export function Button(props: ButtonProps | LinkProps | ExternalProps) {
   const classes = buttonClass(variant, className + square, size);
   const content = (
     <>
-      {icon && <Icon name={icon} size={variant === 'icon' && !children ? 20 : (GLYPH[icon] ?? 16)} />}
+      {icon && <Icon name={icon} size={variant === 'icon' && !children ? 20 : 16} />}
       {children}
     </>
   );
