@@ -82,7 +82,6 @@ you use it: every option sits behind an Edit or Change action in a sheet.
 | Plan's first view, dropped items shown or not | Settings › Layout › Plan |
 | Theme, week start, 12- or 24-hour clock, density | Settings › Layout › General |
 | Add a resource, project, paper or track of your own | Library › Add a resource |
-| Move the practice period, or take three to five questions a subject | Settings › Practice |
 | Turn the daily challenge off, or move the weekly slot to other days | Settings › Projects |
 
 **Nothing is lost.** Your edits are kept apart from the curriculum, as an ordered list of patches in
@@ -90,44 +89,9 @@ you use it: every option sits behind an Edit or Change action in a sheet.
 restorable, every plan edit can be undone, and a change to the schedule never rewrites a day already past: the
 old templates are kept for the days they applied to. Schedule, pace and layout travel in `state/settings.json`.
 
-## Daily practice
+## Tech docs
 
-From 16 October 2026 to 31 January 2027 the day has a sixth block, **Practice** (P, 45 minutes): nine questions,
-three each of linear algebra, calculus and physics, two new and one review once a review is due. Today's
-Practice row ("1 of 3 subjects") opens a start screen with the three subjects and their status: not started,
-2 of 3, done. Tap one to do its questions; after its last one you are back on the start screen. Do them in any
-order, and separately across the day: a half-done subject resumes where it stopped. Once all three are done the
-start screen shows the day's summary. The questions are the same on every device for that date, whatever the
-order, and they do not change while you answer them.
-
-<p>
-  <img src="screenshots/practice-start-light.png" alt="The Practice start screen: linear algebra, calculus and physics, each with three questions, about fifteen minutes and its status, and Start linear algebra" width="32%">
-  <img src="screenshots/practice-question-light.png" alt="A practice question: the prompt with maths, an answer field, Check, Hint and Show solution" width="32%">
-  <img src="screenshots/practice-summary-light.png" alt="The set summary: score, time, topics, when the reviews come back, and Done" width="32%">
-</p>
-
-- **Answering.** Numbers (with units where asked: `9.81 m/s^2`, `7/4`, `sqrt(2)/2`), vectors (`1, -2, 3`),
-  matrices (`1 2; 3 4`), expressions (`2x sin(x)`), multiple choice, estimates within a factor, and proofs you
-  grade yourself against the solution. A later part of a multi-part question that follows correctly from your own
-  wrong earlier answer is marked right, and says so.
-- **Hints and solutions.** Hints come one at a time. Showing the solution counts the question as missed.
-- **Reviews.** A miss comes back after 1 day, then 3, 7, 21 and 60 as you get it right.
-- **Difficulty** follows a rating per topic. Linear algebra follows the 18.06 lectures you have ticked; calculus
-  and physics move to the next topic after 15 answers at 80 %.
-- **Minutes**: each subject's time goes to the Practice block (math or physics) the moment you finish it, and
-  nothing else gets it. The third subject marks the block done.
-- **On demand**: Library › Practise a topic, ten questions on any topic, any day.
-- **Activity › Practice** (once you have answered something): accuracy per subject and topic, the five weakest
-  topics, reviews due, minutes.
-- **Roadmaps**: a topic at 85 % over its last 20 answers ticks the roadmap.sh nodes it covers.
-- **Settings › Practice**: the first and last day, three to five questions a subject, and an optional **Start
-  with** subject, which the start screen offers first (it never fixes the order). After the last day the block
-  disappears; the answers stay.
-
-The questions live in `data/questions/` (format: `data/questions/SCHEMA.md`). Templates draw new numbers every
-time. `npm run verify:questions` recomputes every answer with SymPy (`pip install sympy numpy`).
-
-**Tech docs.** Every project that is not a weekly build has a tech doc in `data/projects/docs/<id>.md`: goal,
+Every project that is not a weekly build has a tech doc in `data/projects/docs/<id>.md`: goal,
 architecture, stack, milestones, how to measure and report it. Its milestones are checkboxes that count toward the
 project's progress, and "Copy as README skeleton" starts the project's repository README from it. A catalogue build
 shows its brief, approach (steps you can tick), done when, measure and pitfalls the same way.
@@ -230,7 +194,7 @@ README that Atlas writes into it explains each file.
 | `state/items.json` | Status, ticked units, notes and links of every course, book, project, paper, certificate and milestone |
 | `state/plan.json` | Your plan edits (an ordered list of patches, version 2), items of your own, re-plans and picked builds |
 | `state/settings.json` | Blocks, day templates, the weekly pattern, date ranges, day changes, pace, pauses and layout (version 2). Never the token. |
-| `state/practice.json` | Every practice answer: question, date, right or wrong, hints, time. Merged by answer, so two devices never lose one. |
+| `state/practice.json` | Only in repositories from before Practice was removed (pull request #6): the practice answers of that time. Archived: Atlas no longer reads, rewrites or deletes it. |
 | `state/challenges.json` | Catalogue challenges solved (and in which language), skipped or hidden for a day. Merged the same way. |
 | `log/YYYY/MM/YYYY-MM-DD.json` and `.md` | One day, and its human-readable twin |
 | `reviews/` | Weekly, monthly and quarterly reviews |
@@ -288,7 +252,6 @@ statuses and notes reference items by id, so editing the curriculum never loses 
 | `data/certs.yaml`, `data/subjects.yaml` | Certifications, and the credential map |
 | `data/roadmaps.yaml` | The five roadmap.sh roadmaps, as sections of nodes, each section with the phase that teaches it |
 | `data/settings.yaml` | The defaults a fresh install starts from |
-| `data/questions/` | The practice bank: `topics.yaml`, then one file of questions per topic (`SCHEMA.md` describes them) |
 | `data/projects/docs/*.md` | One tech doc per project (the file name is the project's id) |
 | `data/projects/*.jsonl` | The project catalogue: daily easy challenges, weekly medium challenges and builds, monthly real cases, one per line |
 
