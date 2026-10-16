@@ -89,6 +89,39 @@ you use it: every option sits behind an Edit or Change action in a sheet.
 restorable, every plan edit can be undone, and a change to the schedule never rewrites a day already past: the
 old templates are kept for the days they applied to. Schedule, pace and layout travel in `state/settings.json`.
 
+## Calendar and the timer
+
+**Calendar** (the tab between Plan and Library) is where the plan's days are seen and changed, like a calendar app.
+
+- **Month**: a grid from your week's first day. A past day that counted is blue and has a small pill in the
+  heatmap's colour for the time logged; a day that should have had time and has none is pressed in; today is ice.
+  Future days show a dot per planned block, a short label on another template ("Uni", "Exam", "Rest"), and a flag
+  for a phase start, a goal or a monthly project due. Arrows or a swipe change the month; **Today** comes back.
+- **Day** (tap a date): a time grid from 06:00 to 24:00 with the current time on today. Each block sits at its time
+  with its icon, name, item and length; time already logged fills it, time still to come is pressed in. Blocks
+  follow each other from 08:00 with 15-minute breaks unless a template (Settings › Schedule) or the date gives
+  them a start time.
+  - **Drag** a block to move it, **drag its bottom edge** to change its length (15-minute steps; on a phone, press
+    and hold first). Every change has **Undo**.
+  - **Tap a block** for its sheet: start time, length, which item it works on, skip it, move it to another date,
+    or **Apply to every Monday** (or whichever weekday) to write it into the template instead of this date.
+  - **Tap an empty slot** (or **Add**) to add a block, a **busy** event (a class, once or every week) or a rest
+    day. Blocks never overlap busy time: they move to after it, and a block dropped onto it asks to shift it and
+    the blocks after it.
+  - The header shows the day's template (tap to switch) and planned against logged time.
+- **Week**: seven narrow columns, with the same moves.
+- **Add to my calendar** downloads the next four weeks of blocks as an `.ics` file.
+
+Changes to one date are that date's own change (as Change today makes); "every weekday" changes the template. Both
+sync with your settings. Nothing in Calendar logs minutes, and Today shows its blocks in the order of their times.
+
+**The timer is how time is logged.** Start on Today's Now card; it stores when it started, so it keeps counting
+through a reload, a closed tab or a locked phone. One runs at a time: starting another block stops the first and
+saves its minutes. A timer left running is caught the next time Atlas opens, after three hours or past midnight:
+"Still working on Core? You started at 14:10" with **Keep**, **Stop at** the last time the app was used, or
+**Stop now**. A timer that ran past midnight logs each part on its own day. To correct a mistake, open the day in
+Calendar, tap the block and choose **Edit logged time**: the one place minutes can be entered by hand.
+
 ## Tech docs
 
 Every project that is not a weekly build has a tech doc in `data/projects/docs/<id>.md`: goal,
@@ -98,7 +131,7 @@ shows its brief, approach (steps you can tick), done when, measure and pitfalls 
 
 The doc is one tap away: any project card or row opens it in a sheet, in the Deck (before Take it; the doc has Take
 it too), the Library, Plan › Projects, the monthly queue and the weekly slot. On Today, the project's title on the
-Now card, a quiet **Tech doc** next to Start and Log time, and a project's Later today row (with "Work on it now")
+Now card, a quiet **Tech doc** next to Start, and a project's Later today row (with "Work on it now")
 open it over Today. The timer keeps running, with its time in the sheet's header; ticks made in the doc show on the
 card at once; closing it leaves Today as it was; and each doc reopens where you left it. Enter or Space opens a doc
 from a focused row, Escape closes it and puts focus back. Challenges open their own screen instead.
@@ -144,7 +177,7 @@ table in `scripts/lib/catalogue-mapping.ts`; CI checks the files match it.
 | `t` | Go to Today |
 | `r` | Go to the Plan |
 | `/` | Search: the page's own search box, or the Library's |
-| `l` | Log time: opens the log form on Today, with the cursor in it |
+| `c` | Calendar |
 | `?` | List the shortcuts |
 
 They never fire while you type, or with Ctrl, Alt or Cmd held, and Settings > Keyboard turns them off, for

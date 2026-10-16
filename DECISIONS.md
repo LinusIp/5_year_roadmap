@@ -749,3 +749,60 @@ was, not what is.
 - **Screenshots** redrawn here (the container renders byte for byte what CI does: the screens without Practice
   content came out identical): Today in every theme and size ("of 8 h today", "0/5"), Activity, Stats, Settings,
   the map, the change-today and case sheets, and the tech doc over Today. The eight Practice baselines (the screen in both themes and sizes, and its start, question, solution and summary) are gone.
+
+## Calendar and the timer (pull request #6)
+
+- **Calendar is a tab between Plan and Library.** Settings saved with the old default tabs (Today, Plan, Library,
+  Activity) get it on upgrade; tabs a user chose stay as they were, and Calendar can be switched on under
+  Settings › Layout › Tabs. The `c` key opens it.
+- **Storage is the schedule's, as the prompt asks.** A drag, a resize, a skip, a chosen item, a block added or moved
+  to a date are fields of that date's change (`schedule.days[date]`: `times`, `minutes`, `skip`, `items`, `add`),
+  next to what Change today already wrote there. "Apply to every Monday" edits the template Monday uses, from today
+  on, through the same schedule history that keeps past days as they were. Busy events are `schedule.busy`. All of
+  it syncs in `state/settings.json`. Nothing in Calendar writes minutes.
+- **Settings version 3.** The build before this one reads settings strictly and could not read the new fields, so
+  the version goes to 3. Version 2 upgrades on read (no busy events yet, Calendar in an untouched tab bar). A device
+  still on the old build that writes its version-2 copy is caught on the next pull, as the version-1 copies were:
+  its changes are kept (they are the newer), the calendar's fields it dropped are put back (block start times,
+  per-weekday templates and the pattern that points to them, busy events, each date's times, items and added
+  blocks, the Calendar tab), and the result is written back with the "older Atlas" notice.
+- **"Every Monday" on a template other days share** gives Monday its own copy ("Full day · Monday") and points the
+  pattern at it, so Tuesday's Full day stays as it was. A template used only on Mondays is edited in place. The
+  date's own time and length for that block are cleared, so the template's apply.
+- **Clock times.** A template's block may have a start time (Settings › Schedule); without one, blocks follow each
+  other from 08:00 with 15-minute breaks in the template's order. A date's own time beats the template's. Blocks
+  never overlap each other or busy time: one that would moves to just after (with the break), and blocks without a
+  time fill the gaps in order. Dropping a block onto busy time asks before shifting it ("Shift them"); blocks
+  without a time of their own move out of a busy event's way without asking, which is what "add a weekly busy
+  event and see blocks shift" needs.
+- **Today follows the times**: Now and Later today are in the order of the day's start times. Today shows no clock
+  times itself; they are Calendar's.
+- **Colours.** The prompt's pink is clay's ice (CLAY-STYLE has no pink): today's circle, ice blocks' events and the
+  current-time line are ice / ice-deep. The heatmap's middle steps cannot carry a number at 4.5:1, so a past date
+  is a blue circle when it counted for the streak (as in Today's week strip) and shows its logged time as a small
+  pill in the heatmap's colour underneath, not as the circle's fill. Days outside the month are not dimmed (that
+  failed contrast); their numbers are ink2.
+- **Markers** on a date: a phase starting, a goal's date (the plan's milestones), and the last day of a month with
+  a monthly project in progress (projects have no due date of their own; a monthly one is due with its month).
+- **Tap targets.** Blocks on the time grid are drawn to scale, so a 30-minute block is 24 px tall. Like the
+  heatmap's cells, the acceptance test leaves them out; each opens the same sheet, where time and length are
+  fields, and the grid's day headers and Add are full-size.
+- **Week view** has the same events and moves in narrow columns (icon only); tapping a day's header opens its day.
+  Moving a block from one day to another is done from its sheet (Move to another date), not by dragging sideways.
+- **Export**: "Add to my calendar" writes the next four weeks of blocks to an `.ics` file with floating times (the
+  same clock time wherever it is opened). Busy events are left out: they came from the user's own calendar.
+
+**The timer is the only way to log.**
+
+- **Log time is gone** from the Now card, the block sheet, a past day's Today (its main action is now "Open in
+  Calendar") and the `l` shortcut. Activity's day sheet shows the day without remove buttons and points to the day
+  in Calendar. Manual minutes exist in one place: Calendar › a block › **Edit logged time** (the day's entries,
+  removable, and "Add logged time", which can also log something not on the plan).
+- **The timer** stores its start time on this device (it is a stopwatch, not data: it does not sync). Starting a
+  block while another runs stops the other first and logs its minutes. A stop logs each part of the time on its
+  own date when the timer ran past midnight. Stopping a timer starts an item that was not started; a finished one
+  stays finished.
+- **Forgotten timer**: on opening Atlas (or coming back to its tab), after three hours of running or once the day it
+  started on is over, a sheet asks "Still working on Core? You started at 14:10" with Keep, Stop at the last time
+  the app was used (taps and keys mark it, at most once a minute), and Stop now. Keep asks again three hours later
+  or at the next midnight.

@@ -53,6 +53,7 @@ test('the schedule, pace, layout and plan edits reach a second device, and survi
   await change.getByRole('button', { name: 'Close' }).click();
 
   await open(a, './#/settings?section=layout');
+  await a.locator('section').filter({ has: a.getByRole('heading', { name: 'Layout · Tabs' }) }).getByRole('switch', { name: 'Calendar' }).click();
   await a.getByRole('switch', { name: 'Reviews' }).click();
 
   await open(a, './#/plan?lane=y1-p0.B');
@@ -63,7 +64,7 @@ test('the schedule, pace, layout and plan edits reach a second device, and survi
 
   await syncNow(a);
   const settings = JSON.parse(fake.files()['state/settings.json']!);
-  expect(settings.version).toBe(2);
+  expect(settings.version).toBe(3);
   expect(settings.schedule.days['2026-09-21']).toEqual({ template: 'university' });
   expect(settings.layout.tabs).toEqual(['today', 'plan', 'library', 'activity', 'reviews']);
   const plan = JSON.parse(fake.files()['state/plan.json']!);

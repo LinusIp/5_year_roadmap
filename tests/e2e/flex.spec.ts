@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { FIRST_DAY, laterRow, nowCard, open, reload, writesSettled } from './helpers.ts';
+import { FIRST_DAY, laterRow, logTime, nowCard, open, reload, writesSettled } from './helpers.ts';
 
 /**
  * The flexibility brief, through the real UI: the day's schedule, plan editing, pace and layout. The clock is
@@ -84,11 +84,7 @@ test('changes one block’s minutes and makes a rest day', async ({ page }) => {
 
 test('an exam-week date range shifts the forecast', async ({ page }) => {
   await open(page, './');
-  await page.getByRole('button', { name: 'Log time' }).first().click();
-  const log = page.getByRole('dialog', { name: 'Log time' });
-  await log.getByRole('textbox', { name: 'Minutes' }).fill('120');
-  await log.getByRole('textbox', { name: 'Minutes' }).press('Enter');
-  await writesSettled(page);
+  await logTime(page, '120');
 
   await open(page, './#/plan');
   const graphics = page.getByRole('button', { name: /^Graphics · 2 h/ });
@@ -216,6 +212,7 @@ test('pauses a lane, giving its time to another, and resumes it', async ({ page 
 test('compact Today, other tabs, and a reset to the default layout', async ({ page }) => {
   await open(page, './#/settings?section=layout');
   await page.getByRole('radio', { name: 'Compact' }).first().click();
+  await page.locator('section').filter({ has: page.getByRole('heading', { name: 'Layout · Tabs' }) }).getByRole('switch', { name: 'Calendar' }).click();
   await page.getByRole('switch', { name: 'Reviews' }).click();
   await page.getByRole('switch', { name: 'Library' }).click();
   await writesSettled(page);
@@ -234,6 +231,6 @@ test('compact Today, other tabs, and a reset to the default layout', async ({ pa
     await page.locator('section').filter({ has: page.getByRole('heading', { name: section }) }).getByRole('button', { name: 'Reset to default' }).click();
   }
   await open(page, './');
-  await expect(tabs).toHaveText(['Today', 'Plan', 'Library', 'Activity']);
+  await expect(tabs).toHaveText(['Today', 'Plan', 'Calendar', 'Library', 'Activity']);
   await expect(laterRow(page, /^30 Days of Python Languages · day 1/)).toBeVisible();
 });

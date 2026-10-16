@@ -84,7 +84,9 @@ export function MonthView({ atlas, month, selected, today, onPick, onMonth }: { 
                     ? 'fill-blue'
                     : missed
                       ? 'well text-ink2'
-                      : '';
+                      : inMonth
+                        ? ''
+                        : 'text-ink2';
               const describe = [
                 dateTitle(date) + (date === today ? ', today' : ''),
                 past ? (minutes > 0 ? span(minutes) + ' logged' : missed ? 'nothing logged' : null) : resolved.blocks.length > 0 ? resolved.blocks.length + ' blocks planned' : null,
@@ -101,7 +103,7 @@ export function MonthView({ atlas, month, selected, today, onPick, onMonth }: { 
                     aria-label={describe}
                     aria-current={date === today ? 'date' : undefined}
                     aria-pressed={date === selected}
-                    className={'relative flex min-h-[60px] w-11 flex-col items-center gap-0.5 pt-1' + (inMonth ? '' : ' opacity-45')}
+                    className="relative flex min-h-[60px] w-11 flex-col items-center gap-0.5 pt-1"
                   >
                     <span
                       aria-hidden="true"

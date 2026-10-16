@@ -180,13 +180,14 @@ export function Calendar() {
           {view === 'week' && (
             <div className="mt-[18px] flex pl-11">
               {days.map((d) => (
-                <button key={d} type="button" aria-label={'Open ' + dateTitle(d)} onClick={() => go(d, 'day')} className={'min-h-11 flex-1 text-center text-small font-semibold ' + (d === now ? 'text-ice-deep' : 'text-ink2')}>
+                <button key={d} type="button" onClick={() => go(d, 'day')} className={'min-h-11 flex-1 text-center text-small font-semibold ' + (d === now ? 'text-ice-deep' : 'text-ink2')}>
                   {dayName(d, true)} {Number(d.slice(8, 10))}
+                  <span className="sr-only">{', open ' + dateTitle(d)}</span>
                 </button>
               ))}
             </div>
           )}
-          <div ref={scroller} className="tile mt-2 overflow-y-auto px-1.5 py-2" style={{ maxHeight: 'calc(100dvh - 19rem)' }}>
+          <div ref={scroller} data-calendar-grid className="tile mt-2 overflow-y-auto px-1.5 py-2" style={{ maxHeight: 'calc(100dvh - 19rem)' }}>
             <div className="flex" style={{ height: GRID_HEIGHT }}>
               <div aria-hidden="true" className="relative w-10 shrink-0">
                 {Array.from({ length: 18 }, (_, i) => (

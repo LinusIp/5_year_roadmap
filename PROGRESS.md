@@ -823,3 +823,28 @@ Verified on this machine (Linux, Chromium 140):
 - Bundle: `dist/assets` 6,590.7 kB → 3,630.3 kB (−2,960.4 kB); main JS 360.3 → 357.5 kB raw, 114.8 → 113.8 kB gzip.
 - Verified: validate:data, map:catalogue --check, typecheck, the unit tests and the full E2E suite (local Chromium),
   screenshots redrawn.
+
+## Pull request #6: Calendar, timer only (with Practice removed)
+
+- **Calendar tab** (Today · Plan · Calendar · Library · Activity): month (heat pill for past days, dots for planned
+  blocks, template labels, markers), day (06:00–24:00 grid, current-time line, drag to move, drag the bottom edge to
+  resize in 15-minute steps, long press on a phone, a sheet per block, an empty slot adds a block, busy time or a
+  rest day, Undo after every change) and week. Busy events once or weekly; blocks move out of their way. "Apply to
+  every Monday" writes the template. Template start times in Settings › Schedule. "Add to my calendar" (.ics).
+- **Timer only**: Log time is gone; one timer at a time; switching saves the first; a forgotten timer asks after
+  three hours or past midnight; a stop past midnight logs each day's part on its day. Corrections only in Calendar ›
+  a block › Edit logged time. Activity's day sheet is read-only and links to Calendar. The `l` shortcut became `c`.
+- **Settings version 3**, with the merge of a version-2 copy from a device not yet updated.
+- Tests: `tests/unit/calendar.test.ts` (drag and resize to the date's change, every weekday to the template,
+  busy events, Today's order, skip/add/move/rest, the v2 → v3 upgrade and the pre-Calendar merge, .ics),
+  `tests/unit/timer-calendar.test.ts` (the timer's rules, clock times, busy repetition, the layout),
+  `tests/e2e/calendar.spec.ts` (month to day, drag to 19:00 and resize to 90 m with Today following, the sheet and
+  Undo, a weekly busy event, the shift offer, every Monday, add and rest day, the timer through a reload and a
+  switch, the correction, the forgotten timer, two devices). Tests that logged by hand now use the timer.
+- Baselines: Calendar month, day and week in both themes at 390 × 844 and 1280 × 800, an event sheet, and Today
+  without Log time. Lighthouse accessibility 100 with no failing audit on Today and Calendar's month, day and week,
+  light and dark. The acceptance test covers Calendar's month and day.
+- Bundle (`dist/assets`): 6,590.7 kB before → 3,665.4 kB after (−44 %, KaTeX and the question bank gone; Calendar
+  is its own 23.5 kB chunk, 8.4 kB gzip). The main chunk is 371.6 kB (118.5 kB gzip), up from 360.3 kB (114.8 kB):
+  the calendar's layout, the timer and the forgotten-timer sheet load with Today.
+- The live check now also opens Calendar's day view, and fails if Today shows Log time or a Practice tab.

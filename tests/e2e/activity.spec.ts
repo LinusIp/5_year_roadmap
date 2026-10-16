@@ -38,15 +38,21 @@ test('8 hours light the day up at the top step, and the sentence counts it', asy
   await expect(page.getByRole('button', { name: /^Today 0 of 5 blocks done 8 h$/ })).toBeVisible();
 });
 
-test('a day opens in a sheet where its entries can be corrected', async ({ page }) => {
+test('a day opens in a sheet to look at; corrections are Calendar\'s', async ({ page }) => {
   await logEightHours(page);
   await open(page, './#/activity');
 
   await page.getByRole('button', { name: 'Monday 21 September: 8 h' }).click();
   const sheet = page.getByRole('dialog', { name: 'Monday 21 September' });
   await expect(sheet.getByText('Block A · Game development')).toBeVisible();
-  await sheet.getByRole('button', { name: 'Remove 8 h of One finished small game' }).click();
-  await expect(sheet.getByText('Nothing logged.')).toBeVisible();
+  await expect(sheet.getByRole('button', { name: /^Remove / })).toHaveCount(0);
+  await sheet.getByRole('link', { name: 'Correct it in Calendar' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Calendar' })).toBeVisible();
+  await page.getByRole('button', { name: /^Graphics ?, \d/ }).click();
+  await page.getByRole('dialog', { name: 'Graphics' }).getByRole('button', { name: /^Edit logged time/ }).click();
+  const logged = page.getByRole('dialog', { name: /^Logged on / });
+  await logged.getByRole('button', { name: 'Remove 8 h of One finished small game' }).click();
+  await expect(logged.getByText('Nothing logged.')).toBeVisible();
 });
 
 test('the track filter counts only that track', async ({ page }) => {

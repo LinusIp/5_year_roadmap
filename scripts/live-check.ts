@@ -59,7 +59,7 @@ try {
   if (!caches.includes('atlas-' + version)) throw new Error('after Reload the cache is ' + caches.join(', ') + ', not atlas-' + version);
   step('reloaded into version ' + version);
 
-  for (const hash of ['#/', '#/plan/pick?cadence=daily', '#/library?type=project', '#/activity']) {
+  for (const hash of ['#/', '#/calendar', '#/plan/pick?cadence=daily', '#/library?type=project', '#/activity']) {
     await page.goto(new URL(hash, url).href);
     await page.getByRole('heading', { level: 1 }).first().waitFor({ timeout: 30_000 });
     step('renders ' + hash);
@@ -90,6 +90,14 @@ try {
   const font = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
   if (!font.includes('Nunito')) throw new Error('Today is not set in Nunito: ' + font);
   step('Today shows the Atlas mark (' + (await mark.getAttribute('src')) + ') in Nunito');
+
+  // Calendar: today's day view draws the day's blocks at their times; Today has no Log time, only the timer.
+  if ((await page.getByRole('button', { name: 'Log time' }).count()) > 0) throw new Error('Today still shows Log time');
+  await page.goto(new URL('#/calendar?view=day', url).href);
+  const first = page.locator('[data-block]').first();
+  await first.waitFor({ timeout: 30_000 });
+  step('Calendar draws today with ' + (await page.locator('[data-block]').count()) + ' blocks, the first: ' + (await first.innerText()).replace(/\s+/g, ' ').trim());
+  if ((await page.getByRole('link', { name: 'Practice' }).count()) > 0) throw new Error('a Practice tab is still there');
 
   if (errors.length > 0) throw new Error('page errors: ' + errors.join(' | '));
   console.log('\nLive check passed.');

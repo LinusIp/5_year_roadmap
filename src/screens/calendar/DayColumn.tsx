@@ -151,9 +151,9 @@ export function DayColumn({
           onClick={() => onOpenBusy(e.id)}
           className="knob absolute inset-x-1 flex items-start overflow-hidden rounded-box px-2.5 py-1 text-left text-meta"
           style={{ top: top(parseHm(e.start)), height: Math.max(22, e.minutes * PX_PER_MIN) }}
-          aria-label={'Busy: ' + e.title + ', ' + e.start + ' to ' + hm(parseHm(e.start) + e.minutes)}
         >
           <span className="truncate font-semibold text-ink2">{compact ? e.title.slice(0, 3) : e.title + ' · ' + e.start}</span>
+          <span className="sr-only">{(compact ? e.title.slice(3) : '') + ', busy, ' + e.start + ' to ' + hm(parseHm(e.start) + e.minutes)}</span>
         </button>
       ))}
       {blocks.map((b) => {
@@ -162,7 +162,6 @@ export function DayColumn({
         const minutes = live ? live.nextMinutes : b.minutes;
         const tone = blockTone(b.id);
         const filled = Math.min(1, b.logged / Math.max(1, minutes));
-        const label = b.name + ', ' + hm(start) + ' to ' + hm(start + minutes) + (b.item ? ', ' + b.item : '') + (b.logged > 0 ? ', ' + span(b.logged) + ' logged' : '');
         return (
           <div
             key={b.id}
@@ -172,7 +171,6 @@ export function DayColumn({
             <button
               type="button"
               data-block={b.id}
-              aria-label={label}
               aria-describedby="calendar-drag-hint"
               onPointerDown={(e) => begin(e, b, 'move')}
               onPointerMove={move}
@@ -187,12 +185,16 @@ export function DayColumn({
             >
               {/* Time already logged fills the pill from the top; time still to come stays pressed in. */}
               {filled > 0 && <span aria-hidden="true" className={'absolute inset-x-0 top-0 ' + (tone === 'ice' ? 'bg-ice-soft' : 'bg-blue-soft')} style={{ height: filled * 100 + '%' }} />}
-              <span aria-hidden="true" className="relative flex min-w-0 items-center gap-1.5 text-meta font-semibold">
+              {/* The name starts with what is written on the pill, then says the rest. */}
+              <span className="relative flex min-w-0 items-center gap-1.5 text-meta font-semibold">
                 <BlockIcon block={b.id} size={14} />
-                {!compact && <span className="truncate">{b.name}</span>}
+                <span className={compact ? 'sr-only' : 'truncate'}>
+                  {b.name}
+                  <span className="sr-only">{', ' + hm(start) + ' to ' + hm(start + minutes) + (b.item ? ', ' + b.item : '') + (b.logged > 0 ? ', ' + span(b.logged) + ' logged' : '') + '. '}</span>
+                </span>
               </span>
               {!compact && minutes >= 45 && (
-                <span aria-hidden="true" className="relative truncate text-small font-semibold text-ink2">
+                <span className="relative truncate text-small font-semibold text-ink2">
                   {hm(start) + ' · ' + span(minutes) + (b.item ? ' · ' + b.item : '')}
                 </span>
               )}

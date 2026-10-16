@@ -26,6 +26,9 @@ const PHONE = [
   ['pick', './#/plan/pick'],
   ['stats', './#/stats'],
   ['reviews', './#/reviews'],
+  ['calendar', './#/calendar'],
+  ['calendar-day', './#/calendar?view=day'],
+  ['calendar-week', './#/calendar?view=week'],
 ] as const;
 
 /** The same screens on a 1280 x 800 desktop, and the five-year map that only fits there. */
@@ -128,6 +131,16 @@ test('a tech doc over Today, with the timer running, matches the committed scree
   await expect(sheet.getByRole('timer')).toHaveText(/^Running · 0:00$/);
   await expect(sheet.getByRole('heading', { name: /^Done when/ }).first()).toBeVisible();
   await expect(page).toHaveScreenshot('tech-doc-today-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+});
+
+test('a calendar event sheet matches the committed screenshot', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await importDemo(page, 'light');
+  await open(page, './#/calendar?view=day');
+  await page.getByRole('button', { name: /^Core ?, \d/ }).click();
+  const sheet = page.getByRole('dialog', { name: 'Core' });
+  await expect(sheet).toBeVisible();
+  await expect(sheet).toHaveScreenshot('calendar-event-sheet-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });
 
 test('a challenge, a case sheet and the Deck on Daily match the committed screenshots', async ({ page }) => {

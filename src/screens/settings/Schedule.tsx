@@ -96,6 +96,24 @@ function TemplateSheet({ settings, id, onClose, onOpen }: { settings: StoredSett
                           })
                         }
                       />
+                      <label className="mt-3 flex flex-col gap-1.5">
+                        <span className="text-meta font-semibold text-ink2">{'Starts at (' + blockShort(def.name) + ')'}</span>
+                        <input
+                          type="time"
+                          step={900}
+                          value={entry.start ?? ''}
+                          onChange={(e) =>
+                            edit((t) => {
+                              const b = t.blocks.find((x) => x.block === def.id);
+                              if (!b) return;
+                              if (e.target.value) b.start = e.target.value;
+                              else delete b.start;
+                            })
+                          }
+                          className="well h-12 rounded-pill px-4 text-body text-ink"
+                        />
+                        <span className="text-meta text-ink2">Empty: after the block before it, from 08:00 with 15-minute breaks.</span>
+                      </label>
                     </div>
                   )}
                 </Row>

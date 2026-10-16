@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 /** A block on the day grid, by its name: its accessible name starts with it. */
-const event = (page: Page, name: string): Locator => page.getByRole('button', { name: new RegExp('^' + name + ', ') });
+const event = (page: Page, name: string): Locator => page.getByRole('button', { name: new RegExp('^' + name + ' ?, \\d') });
 
 /** Drags a locator vertically by a number of minutes on the grid (0.8 px a minute). */
 async function drag(page: Page, target: Locator, minutes: number, where: 'middle' | 'bottom' = 'middle'): Promise<void> {
@@ -41,8 +41,8 @@ test('the month opens on today; a date opens its day, with the blocks at their t
 
   await month.getByRole('button', { name: /^Wednesday 23 September/ }).click();
   await expect(page.getByText('Wednesday 23 September')).toBeVisible();
-  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics, 08:00 to 10:00/);
-  await expect(event(page, 'Languages')).toHaveAccessibleName(/^Languages, 10:15 to 11:15/);
+  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics ?, 08:00 to 10:00/);
+  await expect(event(page, 'Languages')).toHaveAccessibleName(/^Languages ?, 10:15 to 11:15/);
   await expect(page.getByText('8 h planned · 0 h logged')).toBeVisible();
 
   // Arrows move by a day in the day view, and Today comes back.
@@ -55,11 +55,11 @@ test('the month opens on today; a date opens its day, with the blocks at their t
 test('drag a block to 19:00, make it 90 minutes, and Today follows', async ({ page }) => {
   await open(page, './#/calendar?view=day');
   await drag(page, event(page, 'Languages'), 19 * 60 - (10 * 60 + 15));
-  await expect(event(page, 'Languages')).toHaveAccessibleName(/^Languages, 19:00 to 20:00/);
+  await expect(event(page, 'Languages')).toHaveAccessibleName(/^Languages ?, 19:00 to 20:00/);
   await expect(page.getByRole('status').getByText('Moved Languages to 19:00')).toBeVisible();
 
   await drag(page, event(page, 'Languages'), 30, 'bottom');
-  await expect(event(page, 'Languages')).toHaveAccessibleName(/^Languages, 19:00 to 20:30/);
+  await expect(event(page, 'Languages')).toHaveAccessibleName(/^Languages ?, 19:00 to 20:30/);
 
   // Today: Languages is last, in the order of the day's times, and takes 1 h 30 m.
   await open(page, './');
@@ -74,9 +74,9 @@ test('the block sheet sets the time, and Undo takes it back', async ({ page }) =
   const sheet = page.getByRole('dialog', { name: 'Core' });
   await sheet.getByLabel('Starts').fill('16:00');
   await sheet.getByRole('button', { name: 'Save' }).click();
-  await expect(event(page, 'Core')).toHaveAccessibleName(/^Core, 16:00 to 18:00/);
+  await expect(event(page, 'Core')).toHaveAccessibleName(/^Core ?, 16:00 to 18:00/);
   await page.getByRole('button', { name: 'Undo' }).click();
-  await expect(event(page, 'Core')).toHaveAccessibleName(/^Core, 11:30 to 13:30/);
+  await expect(event(page, 'Core')).toHaveAccessibleName(/^Core ?, 11:30 to 13:30/);
 });
 
 test('a weekly busy event on Tuesdays moves the blocks out of its way', async ({ page }) => {
@@ -90,14 +90,14 @@ test('a weekly busy event on Tuesdays moves the blocks out of its way', async ({
   await add.getByRole('switch', { name: 'Every Tuesday' }).click();
   await add.getByRole('button', { name: 'Add busy time' }).click();
 
-  await expect(page.getByRole('button', { name: 'Busy: Lectures, 09:00 to 13:00' })).toBeVisible();
-  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics, 13:15 to 15:15/);
+  await expect(page.getByRole('button', { name: /^Lectures · 09:00 ?, busy, 09:00 to 13:00/ })).toBeVisible();
+  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics ?, 13:15 to 15:15/);
   // The next Tuesday too, and not the Wednesday.
   await page.getByRole('button', { name: 'Next day' }).click();
-  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics, 08:00/);
+  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics ?, 08:00/);
   await open(page, './#/calendar?view=day&date=2026-09-29');
-  await expect(page.getByRole('button', { name: 'Busy: Lectures, 09:00 to 13:00' })).toBeVisible();
-  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics, 13:15/);
+  await expect(page.getByRole('button', { name: /^Lectures · 09:00 ?, busy, 09:00 to 13:00/ })).toBeVisible();
+  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics ?, 13:15/);
 });
 
 test('a block dropped on busy time offers to shift it and the blocks after it', async ({ page }) => {
@@ -112,7 +112,7 @@ test('a block dropped on busy time offers to shift it and the blocks after it', 
   const conflict = page.getByRole('dialog', { name: 'Busy then' });
   await expect(conflict).toContainText('Dentist is 18:00–19:00');
   await conflict.getByRole('button', { name: 'Shift them' }).click();
-  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics, 19:15 to 21:15/);
+  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics ?, 19:15 to 21:15/);
 });
 
 test('apply a change to every Monday', async ({ page }) => {
@@ -122,13 +122,13 @@ test('apply a change to every Monday', async ({ page }) => {
   await sheet.getByLabel('Starts').fill('07:00');
   await sheet.getByRole('switch', { name: 'Apply to every Monday' }).click();
   await sheet.getByRole('button', { name: 'Save' }).click();
-  await expect(event(page, 'Math')).toHaveAccessibleName(/^Math, 07:00 to 08:00/);
+  await expect(event(page, 'Math')).toHaveAccessibleName(/^Math ?, 07:00 to 08:00/);
 
   await open(page, './#/calendar?view=day&date=2026-09-28');
-  await expect(event(page, 'Math')).toHaveAccessibleName(/^Math, 07:00/);
+  await expect(event(page, 'Math')).toHaveAccessibleName(/^Math ?, 07:00/);
   // Tuesday keeps the Full day as it was.
   await open(page, './#/calendar?view=day&date=2026-09-29');
-  await expect(event(page, 'Math')).not.toHaveAccessibleName(/^Math, 07:00/);
+  await expect(event(page, 'Math')).not.toHaveAccessibleName(/^Math ?, 07:00/);
 });
 
 test('an empty slot adds a block that is not on the day, or makes it a rest day', async ({ page }) => {
@@ -141,7 +141,7 @@ test('an empty slot adds a block that is not on the day, or makes it a rest day'
   const add = page.getByRole('dialog', { name: /^Add at / });
   await add.getByLabel('Starts').fill('20:00');
   await add.getByRole('button', { name: /^Projects/ }).click();
-  await expect(event(page, 'Projects')).toHaveAccessibleName(/^Projects, 20:00 to 21:00/);
+  await expect(event(page, 'Projects')).toHaveAccessibleName(/^Projects ?, 20:00 to 21:00/);
 
   await page.getByRole('button', { name: 'Add', exact: true }).click();
   await add.getByRole('radio', { name: 'Rest day' }).click();
@@ -236,8 +236,8 @@ test('calendar edits reach a second device', async ({ browser }) => {
   const b = await device(browser, fake);
   await syncNow(b, true);
   await open(b, './#/calendar?view=day&date=2026-09-22');
-  await expect(b.getByRole('button', { name: 'Busy: Lectures, 09:00 to 13:00' })).toBeVisible();
-  await expect(event(b, 'Core')).toHaveAccessibleName(/^Core, 19:00/);
+  await expect(b.getByRole('button', { name: /^Lectures · 09:00 ?, busy, 09:00 to 13:00/ })).toBeVisible();
+  await expect(event(b, 'Core')).toHaveAccessibleName(/^Core ?, 19:00/);
   await reload(b);
-  await expect(event(b, 'Core')).toHaveAccessibleName(/^Core, 19:00/);
+  await expect(event(b, 'Core')).toHaveAccessibleName(/^Core ?, 19:00/);
 });

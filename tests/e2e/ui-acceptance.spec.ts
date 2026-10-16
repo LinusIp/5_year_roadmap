@@ -17,6 +17,8 @@ const SCREENS: [string, string][] = [
   ['Today', './'],
   ['Activity', './#/activity'],
   ['Plan', './#/plan'],
+  ['Calendar', './#/calendar'],
+  ['Calendar day', './#/calendar?view=day'],
   ['Library', './#/library'],
   ['Settings', './#/settings'],
 ];
@@ -55,6 +57,9 @@ async function smallTargets(page: Page): Promise<string[]> {
       // The heatmap's day cells are drawn at the mockup's size; the grid is one tab stop with arrow keys, and the
       // last seven days open from 48 px rows under it (DECISIONS.md).
       if (el.closest('svg')) continue;
+      // Calendar's time grid draws blocks to scale (a 30-minute block is 24 px tall); each opens the same sheet with
+      // its time and length as fields (DECISIONS.md).
+      if (el.closest('[data-calendar-grid]')) continue;
       if (el.getAttribute('type') === 'file') continue;
       if (rect.width < 44 - 0.5 || rect.height < 44 - 0.5) out.push((el.getAttribute('aria-label') ?? el.textContent ?? el.tagName).trim().slice(0, 40) + ' ' + Math.round(rect.width) + 'x' + Math.round(rect.height));
     }
