@@ -704,7 +704,7 @@ Practise a topic, Activity › Practice, Settings › Practice, Today's Practice
 ticked by practice accuracy. The sections above on Practice (the brief of 2026-10-16, pull request #2) describe what
 was, not what is.
 
-- **Removed with it**: the question bank (`data/questions/`, 52 topic files), `src/seed/questions.ts` and the
+- **Removed with it**: the question bank (`data/questions/`, 54 topic files), `src/seed/questions.ts` and the
   `virtual:atlas-questions` module, the checkers, the set builder, spaced repetition and Elo (`src/lib/practice/`),
   `npm run verify:questions` (`scripts/verify-questions.ts`, its SymPy half and `scripts/lib/load-questions.ts`), the
   SymPy `questions` job in CI, the live check's Practice step (it now opens four screens), the resources'
@@ -748,4 +748,4 @@ was, not what is.
   Vite reports it (−1.0 kB; `gzip -9`: 113.4 to 112.4 kB).
 - **Screenshots** redrawn here (the container renders byte for byte what CI does: the screens without Practice
   content came out identical): Today in every theme and size ("of 8 h today", "0/5"), Activity, Stats, Settings,
-  the map, the change-today and case sheets, and the tech doc over Today. The three Practice baselines are gone.
+  the map, the change-today and case sheets, and the tech doc over Today. The eight Practice baselines (the screen in both themes and sizes, and its start, question, solution and summary) are gone.
