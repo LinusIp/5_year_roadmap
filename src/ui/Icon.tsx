@@ -29,6 +29,7 @@ import {
   Library,
   Lightbulb,
   Map,
+  MoreHorizontal,
   Moon,
   Newspaper,
   NotebookPen,
@@ -97,6 +98,7 @@ const LUCIDE = {
   flag: Flag,
   zap: Zap,
   stats: ChartColumn,
+  more: MoreHorizontal,
   // Blocks: graphics and simulation, languages, the core track, projects, maths and physics
   cube: Box,
   code: Code,

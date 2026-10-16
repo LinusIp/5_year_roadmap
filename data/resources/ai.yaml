@@ -61,6 +61,7 @@
 
 - id: hf-diffusion-course
   title: "Hugging Face Diffusion Models Course"
+  short: "Diffusion Models Course"
   provider: Hugging Face
   type: course
   url: https://huggingface.co/learn/diffusion-course/unit0/1
@@ -87,7 +88,7 @@
 
 - id: karpathy-zero-to-hero
   title: "Andrej Karpathy: Neural Networks, Zero to Hero"
-  short: "Neural Networks: Zero to Hero"
+  short: "Zero to Hero"
   provider: "Karpathy"
   type: lectures
   url: https://karpathy.ai/zero-to-hero.html
@@ -102,7 +103,7 @@
 
 - id: fastai-practical-dl
   title: "fast.ai: Practical Deep Learning for Coders"
-  short: "Practical Deep Learning for Coders"
+  short: "Practical Deep Learning"
   provider: fast.ai
   type: course
   url: https://course.fast.ai/
@@ -222,6 +223,7 @@
 
 - id: berkeley-cs285
   title: "UC Berkeley CS 285 Deep Reinforcement Learning"
+  short: "CS 285 Deep RL"
   provider: UC Berkeley
   type: course
   url: https://rail.eecs.berkeley.edu/deeprlcourse/
@@ -334,6 +336,7 @@
 
 - id: pmpp-book
   title: "Programming Massively Parallel Processors, 5th edition (Hwu, Kirk)"
+  short: "PMPP"
   provider: Elsevier
   type: book
   url: https://shop.elsevier.com/books/programming-massively-parallel-processors/hwu/978-0-443-43900-1

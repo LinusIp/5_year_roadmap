@@ -8,29 +8,28 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe('library', () => {
-  test('search and filters narrow the list, and live in the URL', async ({ page }) => {
+  test('search groups results by shelf; a shelf filters, and both live in the URL', async ({ page }) => {
     await open(page, './#/library');
     const search = page.getByRole('searchbox', { name: 'Search the library' });
     await search.fill('linear algebra');
     await expect(page).toHaveURL(/q=linear/);
+    await expect(page.getByRole('heading', { name: /^Courses · \d+$/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /^18\.06 Linear Algebra/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /^The Rust Programming Language/ })).toBeHidden();
+    await expect(page.getByRole('button', { name: /^Rust Book/ })).toBeHidden();
 
     await search.fill('');
+    await page.getByRole('button', { name: /^\d+ Courses$/ }).click();
+    await expect(page).toHaveURL(/type=course/);
     await page.getByRole('button', { name: 'Track', exact: true }).click();
     await page.getByRole('dialog', { name: 'Track' }).getByRole('button', { name: 'Embedded' }).click();
     await expect(page).toHaveURL(/track=embedded/);
-    await expect(page.getByRole('button', { name: /Embedded Rust Book/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /^18\.06/ })).toBeHidden();
-
-    await page.getByRole('button', { name: /^Courses \d+$/ }).click();
-    await expect(page).toHaveURL(/type=course/);
-    await expect(page.getByText(/^\d+ match(es)?$/)).toBeVisible();
+    await expect(page.getByText(/^\d+ of \d+$/)).toBeVisible();
   });
 
   test('an item without a checked link says so, and offers a search instead', async ({ page }) => {
     await open(page, './#/library?q=current+algorithms');
-    await page.getByRole('button', { name: /Current algorithms and data structures course/ }).click();
+    await page.getByRole('button', { name: /Current DSA Course/ }).click();
     const sheet = page.getByRole('dialog', { name: /Current algorithms and data structures course/ });
     await expect(sheet.getByText(/No checked link yet/)).toBeVisible();
     await expect(sheet.getByRole('link', { name: 'Find a link' })).toHaveAttribute('href', /duckduckgo\.com/);
@@ -54,7 +53,7 @@ test.describe('library', () => {
   });
 
   test('adds a resource of your own and opens it', async ({ page }) => {
-    await open(page, './#/library');
+    await open(page, './#/library?type=book');
     await page.getByRole('button', { name: 'Add a resource' }).click();
     const sheet = page.getByRole('dialog', { name: 'Add a resource' });
     await sheet.getByRole('textbox', { name: 'Title' }).fill('Computer Networking: A Top-Down Approach');

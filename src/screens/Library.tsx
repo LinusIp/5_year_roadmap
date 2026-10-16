@@ -10,7 +10,6 @@ import { useCatalogueIndex, useChallengeEvents } from '../hooks/useCatalogue.ts'
 import { groupLabel, HOUR_BUCKETS, KIND_LABEL, matchesFilter, solvedSet } from '../lib/catalogue/filters.ts';
 import type { Filterable, HourBucket, LibraryFilter } from '../lib/catalogue/filters.ts';
 import type { CatalogueEntry, CatalogueKind, Difficulty } from '../seed/catalogue.ts';
-import { defaultCertStatus } from '../lib/credentials.ts';
 import { monthName, today } from '../lib/dates.ts';
 import { buildIndex, search } from '../lib/search.ts';
 import { navigate, useLocation, useQueryParam } from '../router/router.tsx';
@@ -19,10 +18,13 @@ import { Chips } from '../ui/Chips.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
 import { DifficultyDots, IconTile, KindIcon, StatusIcon } from '../ui/glyphs.tsx';
-import type { IconName } from '../ui/Icon.tsx';
+import { buildPaths, inProgress, shelfCounts, groupResults, shelfOf, upNext } from '../lib/library-home.ts';
+import type { ShelfKey } from '../lib/library-home.ts';
+import { LibraryHome, SHELF_ICON } from './library/Home.tsx';
+import { PathView } from './library/PathView.tsx';
 
 import { Button } from '../ui/Button.tsx';
-import { Row } from '../ui/Row.tsx';
+import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { SearchField } from '../ui/TextField.tsx';
 import { AddResourceSheet } from './library/AddResourceSheet.tsx';
@@ -31,18 +33,9 @@ import { PickerSheet } from './parts/PickerSheet.tsx';
 import { plural, shortTitle, unitShort } from './parts/text.ts';
 import { PaperSheet } from './plan/PapersView.tsx';
 
-/** The mockup's five kinds; lecture series, tutorials and certificate courses count as courses, repositories as tools. */
-const TYPE_CHIPS: { key: string; label: string }[] = [
-  { key: 'course', label: 'Courses' },
-  { key: 'book', label: 'Books' },
-  { key: 'paper', label: 'Papers' },
-  { key: 'article', label: 'Articles' },
-  { key: 'tool', label: 'Tools' },
-  { key: 'project', label: 'Projects' },
-];
-/** A shelf's icon on a row: course, book, paper, article, blog or tool. */
-const SHELF_ICON: Record<string, IconName> = { course: 'course', book: 'book', paper: 'paper', article: 'article', blog: 'blog', tool: 'wrench' };
-const KIND_OF_TYPE: Record<string, string> = { course: 'course', lectures: 'course', tutorial: 'course', cert: 'course', book: 'book', paper: 'paper', article: 'article', repo: 'tool', tool: 'tool', problems: 'tool' };
+/** One shelf's name, for its own page: "Courses", "Blogs to follow". */
+const SHELF_TITLE: Record<ShelfKey, string> = { course: 'Courses', book: 'Books', paper: 'Papers', article: 'Articles', blog: 'Blogs to follow', tool: 'Tools', project: 'Projects' };
+const SHELF_NOUN: Record<ShelfKey, [string, string]> = { course: ['course', 'courses'], book: ['book', 'books'], paper: ['paper', 'papers'], article: ['article', 'articles'], blog: ['blog', 'blogs'], tool: ['tool', 'tools'], project: ['project', 'projects'] };
 const STATUS_CHIPS: { key: ItemStatus; label: string }[] = [
   { key: 'active', label: 'Active' },
   { key: 'todo', label: 'Not started' },
@@ -111,7 +104,7 @@ function buildEntries(
       id: r.id,
       title: r.short ?? shortTitle(r.title),
       body: [r.title, r.provider, r.summary ?? '', r.tracks.join(' '), r.type, state?.notes ?? ''].join(' '),
-      type: KIND_OF_TYPE[r.type] ?? 'course',
+      type: shelfOf(r),
       tracks: r.tracks,
       status,
       meta: [r.provider, r.estHours > 0 ? r.estHours + ' h' : null, progressOf(r.id, state?.unitsDone ?? [], units)].filter(Boolean).join(' · '),
@@ -271,6 +264,7 @@ export function Library({ openId }: { openId?: string }) {
   const [track, setTrack] = useQueryParam('track');
   const [status, setStatus] = useQueryParam('status');
   const [paperId, setPaperId] = useQueryParam('paper');
+  const [pathId] = useQueryParam('path');
   const [draft, setDraft] = useState<string | null>(null);
   const [pickingTrack, setPickingTrack] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -311,8 +305,6 @@ export function Library({ openId }: { openId?: string }) {
   const matchesProject = (e: Entry): boolean => !projectFiltersOn || (e.project ? matchesFilter(e.project, projectFilter) : false);
   const filtered = search(index, query ?? '').filter((e) => (!type || e.type === type) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && matchesProject(e));
   const results = query ? filtered : [...filtered].sort((a, b) => a.sortKey.localeCompare(b.sortKey));
-  const queued = seed.papers.filter((p) => (paperStates.get(p.id)?.status ?? 'queued') === 'queued').length;
-  const certsPlanned = seed.certs.filter((c) => (certStates.get(c.id)?.status ?? defaultCertStatus(c)) === 'planned').length;
   const trackName = seed.tracks.find((t) => t.id === track)?.name;
   const keep = params.toString();
   const open = (entry: Entry): void => {
@@ -325,102 +317,141 @@ export function Library({ openId }: { openId?: string }) {
     setDraft(null);
   };
 
+  const shelf = (type as ShelfKey | null) ?? null;
+  const filtersOn = Boolean(type || track || status || projectFiltersOn);
+  const mode: 'home' | 'path' | 'search' | 'shelf' = pathId ? 'path' : query && !filtersOn ? 'search' : filtersOn ? 'shelf' : 'home';
+  const counts = shelfCounts(seed, catalogue?.length ?? 0);
+  const goShelf = (key: ShelfKey): void => navigate('/library?type=' + key + (query ? '&q=' + encodeURIComponent(query) : ''), { replace: false });
+
+  const row = (entry: Entry): ReactNode => (
+    <Row
+      key={entry.kind + entry.id}
+      height={60}
+      truncate
+      icon={
+        entry.project ? (
+          <KindIcon kind={entry.project.kind === 'curriculum' ? (entry.project.group === 'weekly' ? 'build' : 'case') : entry.project.kind} />
+        ) : (
+          <IconTile icon={SHELF_ICON[entry.type as ShelfKey] ?? 'course'} tone={entry.kind === 'paper' || entry.type === 'blog' ? 'ice' : 'blue'} />
+        )
+      }
+      title={entry.title}
+      meta={
+        entry.project?.difficulty ? (
+          <>
+            <DifficultyDots difficulty={entry.project.difficulty} /> {entry.meta}
+          </>
+        ) : (
+          entry.meta
+        )
+      }
+      trailing={
+        entry.trailing ? (
+          <>
+            {entry.status === 'done' && <StatusIcon status="done" />}
+            <span className={entry.status === 'active' ? 'font-semibold text-blue-deep' : ''}>{entry.trailing}</span>
+          </>
+        ) : undefined
+      }
+      onClick={() => open(entry)}
+    />
+  );
+
+  const searchField = (
+    <SearchField
+      className="mt-5"
+      label={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : 'Search the library'}
+      placeholder={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : 'Search courses, books, papers'}
+      searchBox
+      value={text}
+      onChange={(v) => {
+        setDraft(v);
+        setQuery(v.trim() ? v : null);
+      }}
+    />
+  );
+
+  // The home's line: what is in progress, what is next, and how much more waits on the shelves.
+  const activeCount = inProgress(seed.resources, atlas.states, Infinity).length;
+  const nextCount = upNext(buildPaths(seed, atlas.states), seed).length;
+  const homeSub = activeCount + ' in progress · ' + nextCount + ' up next · ' + Math.max(0, seed.resources.length - activeCount - nextCount) + ' more when you need them';
+  const shelfTotal = shelf ? entries.filter((e) => e.type === shelf).length : entries.length;
+  const shelfActive = shelf ? entries.filter((e) => e.type === shelf && e.status === 'active').length : 0;
+
   return (
     <Screen title="Library">
-      <Header
-        title="Library"
-        sub={plural(seed.resources.length, 'resource') + ' · ' + plural(queued, 'paper') + ' queued · ' + plural(certsPlanned, 'credential') + ' planned'}
-      />
+      {mode === 'path' && pathId && <PathView atlas={atlas} pathId={pathId} onOpen={(id) => navigate('/library/' + id + (keep ? '?' + keep : ''))} onOpenPaper={(id) => setPaperId(id, { replace: false })} />}
 
-      <SearchField
-        className="mt-5"
-        label="Search the library"
-        placeholder="Search courses, books, papers"
-        searchBox
-        value={text}
-        onChange={(v) => {
-          setDraft(v);
-          setQuery(v.trim() ? v : null);
-        }}
-      />
-
-      <div className="mt-3">
-        <Chips
-          label="Type"
-          items={TYPE_CHIPS.map((chip) => {
-            const count = entries.filter((e) => e.type === chip.key).length;
-            return { key: chip.key, label: chip.label, count: count > 0 ? count : undefined, pressed: type === chip.key, onClick: () => setType(type === chip.key ? null : chip.key) };
-          })}
-        />
-      </div>
-      <div className="mt-2">
-        <Chips
-          label="Status and track"
-          items={[
-            ...STATUS_CHIPS.map((chip) => ({ key: chip.key, label: chip.label, pressed: status === chip.key, onClick: () => setStatus(status === chip.key ? null : chip.key) })),
-            { key: 'track', label: trackName ?? 'Track', pressed: Boolean(trackName), chevron: true, onClick: () => setPickingTrack(true) },
-          ]}
-        />
-      </div>
-      {(type === 'project' || projectFiltersOn) && (
-        <div className="mt-2">
-          <Chips
-            label="Project filters"
-            items={PROJECT_FILTERS.map((f) => {
-              const value = { kind, difficulty, group, phase: phaseParam, level, hours }[f.key];
-              return { key: f.key, label: value ? f.show(value, seed) : f.label, pressed: Boolean(value), chevron: true, onClick: () => setPicking(f.key) };
-            })}
-          />
-        </div>
-      )}
-
-      {results.length === 0 ? (
-        <EmptyState action={<Button onClick={clear}>Clear the search and filters</Button>}>Nothing matches. Try fewer words, or a different filter.</EmptyState>
-      ) : (
-        <VirtualList
-          items={results}
-          label={query || type || track || status || projectFiltersOn ? plural(results.length, 'match', 'matches') : undefined}
-          keyOf={(entry) => entry.kind + entry.id}
-          render={(entry) => (
-            <Row
-              height={60}
-              truncate
-              icon={
-                entry.project ? (
-                  <KindIcon kind={entry.project.kind === 'curriculum' ? (entry.project.group === 'weekly' ? 'build' : 'case') : entry.project.kind} />
-                ) : (
-                  <IconTile icon={SHELF_ICON[entry.type] ?? 'course'} tone={entry.kind === 'paper' ? 'ice' : 'blue'} />
-                )
-              }
-              title={entry.title}
-              meta={
-                entry.project?.difficulty ? (
-                  <>
-                    <DifficultyDots difficulty={entry.project.difficulty} /> {entry.meta}
-                  </>
-                ) : (
-                  entry.meta
-                )
-              }
-              trailing={
-                entry.trailing ? (
-                  <>
-                    {entry.status === 'done' && <StatusIcon status="done" />}
-                    <span className={entry.status === 'active' ? 'font-semibold text-blue-deep' : ''}>{entry.trailing}</span>
-                  </>
-                ) : undefined
-              }
-              onClick={() => open(entry)}
+      {/* Home and search share one header and one search box, so typing the first letter keeps focus. */}
+      {(mode === 'home' || mode === 'search') && (
+        <>
+          <Header title="Library" sub={mode === 'home' ? homeSub : plural(results.length, 'match', 'matches')} />
+          {searchField}
+          {mode === 'home' ? (
+            <LibraryHome
+              atlas={atlas}
+              units={units}
+              counts={counts}
+              today={today()}
+              onOpen={(id) => navigate('/library/' + id)}
+              onPath={(id) => navigate('/library?path=' + id, { replace: false })}
+              onShelf={goShelf}
             />
+          ) : results.length === 0 ? (
+            <EmptyState action={<Button onClick={clear}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>
+          ) : (
+            groupResults(results.map((e) => ({ ...e, shelf: e.type as ShelfKey }))).map((g) => (
+              <RowList key={g.shelf} label={SHELF_TITLE[g.shelf] + ' · ' + g.total} className="mt-[18px]">
+                {g.items.map((e) => row(e))}
+                {g.total > g.items.length && <Row title={'Show all ' + g.total} chevron height={44} onClick={() => goShelf(g.shelf)} />}
+              </RowList>
+            ))
           )}
-        />
+        </>
       )}
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        <Button icon="plus" onClick={() => setAdding(true)}>
-          Add a resource
-        </Button>
-      </div>
+      {mode === 'shelf' && (
+        <>
+          <Header
+            title={shelf ? SHELF_TITLE[shelf] : 'Library'}
+            sub={shelf ? plural(shelfTotal, ...SHELF_NOUN[shelf]) + (shelfActive > 0 ? ' · ' + shelfActive + ' active' : '') : plural(results.length, 'match', 'matches')}
+            back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />}
+          />
+          {searchField}
+          <div className="mt-3">
+            <Chips
+              label="Status and track"
+              items={[
+                ...STATUS_CHIPS.map((chip) => ({ key: chip.key, label: chip.label, pressed: status === chip.key, onClick: () => setStatus(status === chip.key ? null : chip.key) })),
+                { key: 'track', label: trackName ?? 'Track', pressed: Boolean(trackName), chevron: true, onClick: () => setPickingTrack(true) },
+              ]}
+            />
+          </div>
+          {(type === 'project' || projectFiltersOn) && (
+            <div className="mt-2">
+              <Chips
+                label="Project filters"
+                items={PROJECT_FILTERS.map((f) => {
+                  const value = { kind, difficulty, group, phase: phaseParam, level, hours }[f.key];
+                  return { key: f.key, label: value ? f.show(value, seed) : f.label, pressed: Boolean(value), chevron: true, onClick: () => setPicking(f.key) };
+                })}
+              />
+            </div>
+          )}
+          {results.length === 0 ? (
+            <EmptyState action={<Button onClick={() => { for (const set of [setQuery, setTrack, setStatus, setKind, setDifficulty, setGroup, setPhase, setLevel, setHours]) set(null); setDraft(null); }}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>
+          ) : (
+            <VirtualList items={results} label={results.length + ' of ' + shelfTotal} keyOf={(entry) => entry.kind + entry.id} render={row} />
+          )}
+          {type !== 'project' && type !== 'paper' && (
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Button icon="plus" onClick={() => setAdding(true)}>
+                Add a resource
+              </Button>
+            </div>
+          )}
+        </>
+      )}
 
       <ItemSheet atlas={atlas} id={openId ?? null} onClose={() => navigate('/library' + (keep ? '?' + keep : ''))} />
       <PaperSheet paper={paperId ? (seed.papers.find((p) => p.id === paperId) ?? null) : null} state={paperId ? paperStates.get(paperId) : undefined} onClose={() => setPaperId(null)} />

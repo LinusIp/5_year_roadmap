@@ -33,13 +33,39 @@ const context = await browser.newContext({ serviceWorkers: 'allow', locale: 'en-
 const page = await context.newPage();
 const errors: string[] = [];
 page.on('pageerror', (e) => errors.push(String(e)));
+// Requests that failed or came back 4xx/5xx, the page's and the service worker's: what to look at when it stalls.
+const failed: string[] = [];
+const noteFailure = (what: string): void => {
+  if (failed.length < 20) failed.push(what);
+};
+context.on('requestfailed', (r) => noteFailure(r.url() + ' (' + (r.failure()?.errorText ?? 'failed') + ')'));
+context.on('response', (r) => {
+  if (r.status() >= 400) noteFailure(r.url() + ' (' + r.status() + ')');
+});
+
+/** The service worker becomes active within `ms`, or the check fails saying how far it got. */
+async function workerReady(ms: number): Promise<void> {
+  const state = await page.evaluate(
+    (limit) =>
+      Promise.race([
+        navigator.serviceWorker.ready.then(() => 'ready'),
+        new Promise<string>((resolve) =>
+          setTimeout(() => {
+            void navigator.serviceWorker.getRegistration().then((r) => resolve(r ? 'installing ' + Boolean(r.installing) + ', waiting ' + Boolean(r.waiting) + ', active ' + Boolean(r.active) : 'no registration'));
+          }, limit),
+        ),
+      ]),
+    ms,
+  );
+  if (state !== 'ready') throw new Error('the service worker did not become active within ' + ms / 1000 + ' s (' + state + ')');
+}
 
 try {
   const before = await servedVersion();
   step('live site serves version ' + before + '; the new build is ' + version);
   await page.goto(url);
   await page.getByRole('heading', { level: 1 }).first().waitFor({ timeout: 30_000 });
-  await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
+  await workerReady(90_000);
   // A returning user's page is controlled by the service worker; a first visit is not until it reloads.
   await page.reload();
   await page.getByRole('heading', { level: 1 }).first().waitFor({ timeout: 30_000 });
@@ -114,6 +140,7 @@ try {
   if (errors.length > 0) throw new Error('page errors: ' + errors.join(' | '));
   console.log('\nLive check passed.');
 } catch (err) {
+  if (failed.length > 0) console.error('Failed requests:\n  ' + failed.join('\n  '));
   console.error('\nLive check failed: ' + (err instanceof Error ? err.message : String(err)));
   await page.screenshot({ path: 'live-check.png', fullPage: true }).catch(() => undefined);
   process.exitCode = 1;

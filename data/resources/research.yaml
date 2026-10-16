@@ -80,6 +80,7 @@
   title: Ahead of AI (reading lists and research summaries)
   provider: Sebastian Raschka
   type: article
+  blog: true
   url: https://magazine.sebastianraschka.com/
   urlVerified: true
   lastVerified: 2026-10-08

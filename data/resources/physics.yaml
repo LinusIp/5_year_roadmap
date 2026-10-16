@@ -18,7 +18,7 @@
 
 - id: mit-8-02
   title: "MIT 8.02 Physics II: Electricity and Magnetism (Spring 2019)"
-  short: "8.02 Electricity and Magnetism"
+  short: "8.02 Electricity & Magnetism"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2019/
@@ -79,6 +79,7 @@
 
 - id: mit-8-05
   title: "MIT 8.05 Quantum Physics II (Fall 2013)"
+  short: "8.05 Quantum Physics II"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/
@@ -109,6 +110,7 @@
 
 - id: susskind-classical-mechanics
   title: "Leonard Susskind: The Theoretical Minimum, Classical Mechanics (Fall 2011)"
+  short: "TTM Classical Mechanics"
   provider: Stanford Continuing Studies
   type: lectures
   url: https://theoreticalminimum.com/courses/classical-mechanics/2011/fall
@@ -151,6 +153,7 @@
 
 - id: ibm-quantum-learning
   title: "IBM Quantum Learning (Qiskit courses)"
+  short: "IBM Quantum Learning"
   provider: IBM
   type: course
   url: https://learning.quantum.ibm.com/
@@ -180,6 +183,7 @@
 
 - id: mitx-8-370
   title: "MITx 8.370.1x Quantum Information Science I, Part 1"
+  short: "8.370 Quantum Information"
   provider: MIT Open Learning Library
   type: course
   url: https://openlearninglibrary.mit.edu/courses/course-v1:MITx+8.370.1x+1T2018/about
@@ -196,6 +200,7 @@
 
 - id: mit-3-091
   title: "MIT 3.091SC Introduction to Solid State Chemistry (Fall 2010)"
+  short: "3.091 Solid State Chemistry"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/3-091sc-introduction-to-solid-state-chemistry-fall-2010/
@@ -224,6 +229,7 @@
 
 - id: mit-5-60
   title: "MIT 5.60 Thermodynamics and Kinetics (Spring 2008)"
+  short: "5.60 Thermodynamics"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/5-60-thermodynamics-kinetics-spring-2008/

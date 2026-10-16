@@ -50,7 +50,7 @@ test('marking an item done moves Today on to the next item in the lane', async (
   await pickStatus(page, laneSheet.getByRole('button', { name: /^Status of MIT 18\.06/ }), 'Done');
 
   await open(page, './');
-  await expect(laterRow(page, /algorithms and data structures/i)).toBeVisible();
+  await expect(laterRow(page, /Current DSA Course|algorithms and data structures/i)).toBeVisible();
 });
 
 test('the forecast reads as a verdict once the lane has hours and progress', async ({ page }) => {

@@ -2,6 +2,7 @@
 
 - id: ddia
   title: "Designing Data-Intensive Applications (Martin Kleppmann)"
+  short: "DDIA"
   provider: O'Reilly
   type: book
   url: https://dataintensive.net/
@@ -32,6 +33,7 @@
 
 - id: system-design-primer
   title: "The System Design Primer (donnemartin)"
+  short: "System Design Primer"
   provider: GitHub
   type: repo
   url: https://github.com/donnemartin/system-design-primer
@@ -87,6 +89,7 @@
 
 - id: docker-get-started
   title: "Docker: official getting-started guides"
+  short: "Docker Getting Started"
   provider: Docker
   type: tutorial
   url: https://docs.docker.com/get-started/
@@ -100,6 +103,7 @@
 
 - id: kubernetes-tutorials
   title: "Kubernetes: official tutorials"
+  short: "Kubernetes Tutorials"
   provider: Kubernetes
   type: tutorial
   url: https://kubernetes.io/docs/tutorials/
@@ -114,6 +118,7 @@
 
 - id: kubernetes-the-hard-way
   title: "Kubernetes the Hard Way (Kelsey Hightower)"
+  short: "Kubernetes the Hard Way"
   provider: GitHub
   type: tutorial
   url: https://github.com/kelseyhightower/kubernetes-the-hard-way
@@ -128,6 +133,7 @@
 
 - id: aws-skill-builder
   title: "AWS Skill Builder (free digital training; the prep for the AWS certifications)"
+  short: "AWS Skill Builder"
   provider: Amazon Web Services
   type: course
   url: https://skillbuilder.aws/
@@ -158,6 +164,7 @@
 
 - id: lfs101-intro-linux
   title: "Introduction to Linux (LFS101), Linux Foundation"
+  short: "LFS101 Intro to Linux"
   provider: Linux Foundation
   type: course
   url: https://training.linuxfoundation.org/training/introduction-to-linux/
@@ -172,6 +179,7 @@
 
 - id: github-actions-docs
   title: "GitHub Actions: official documentation and quickstart (CI/CD)"
+  short: "GitHub Actions Docs"
   provider: GitHub
   type: tutorial
   url: https://docs.github.com/en/actions
@@ -186,6 +194,7 @@
 
 - id: terraform-tutorials
   title: "Terraform: official tutorials"
+  short: "Terraform Tutorials"
   provider: HashiCorp
   type: tutorial
   url: https://developer.hashicorp.com/terraform/tutorials
@@ -200,6 +209,7 @@
 
 - id: opentelemetry-docs
   title: "OpenTelemetry: official documentation"
+  short: "OpenTelemetry Docs"
   provider: OpenTelemetry
   type: tutorial
   url: https://opentelemetry.io/docs/
@@ -214,6 +224,7 @@
 
 - id: prometheus-docs
   title: "Prometheus: official documentation and getting-started guide"
+  short: "Prometheus Docs"
   provider: Prometheus
   type: tutorial
   url: https://prometheus.io/docs/introduction/overview/

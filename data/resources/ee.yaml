@@ -3,6 +3,7 @@
 
 - id: mit-6-002
   title: "MIT 6.002 Circuits and Electronics (Anant Agarwal, Spring 2007)"
+  short: "6.002 Circuits"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/
@@ -18,6 +19,7 @@
 
 - id: mit-6-003
   title: "MIT 6.003 Signals and Systems (Fall 2011)"
+  short: "6.003 Signals and Systems"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/
@@ -47,6 +49,7 @@
 
 - id: mit-6-004
   title: "MIT 6.004 Computation Structures (Spring 2017)"
+  short: "6.004 Computation Structures"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/
@@ -75,6 +78,7 @@
 
 - id: nandland
   title: "Nandland: FPGA, VHDL and Verilog tutorials"
+  short: "Nandland FPGA Tutorials"
   provider: Russell Merrick
   type: tutorial
   url: https://nandland.com/
@@ -89,6 +93,7 @@
 
 - id: getting-started-with-fpgas
   title: "Getting Started with FPGAs (Russell Merrick)"
+  short: "Getting Started with FPGAs"
   provider: No Starch Press
   type: book
   url: https://nostarch.com/gettingstartedwithfpgas
@@ -102,6 +107,7 @@
 
 - id: project-f
   title: "Project F: FPGA graphics and maths in SystemVerilog"
+  short: "Project F"
   provider: Will Green
   type: tutorial
   url: https://projectf.io/
@@ -130,6 +136,7 @@
 
 - id: ut-embedded-shape-the-world
   title: "UT Austin: Embedded Systems, Shape the World (Valvano and Yerraballi)"
+  short: "Shape the World"
   provider: edX (UTAustinX)
   type: course
   url: https://www.edx.org/learn/embedded-systems/the-university-of-texas-at-austin-embedded-systems-shape-the-world-microcontroller-input-output
@@ -145,6 +152,7 @@
 
 - id: making-embedded-systems
   title: "Making Embedded Systems, 2nd edition (Elecia White)"
+  short: "Making Embedded Systems"
   provider: O'Reilly
   type: book
   url: https://www.oreilly.com/library/view/making-embedded-systems/9781098151539/
@@ -172,6 +180,7 @@
 
 - id: phils-lab
   title: "Phil's Lab: STM32 firmware and KiCad PCB design"
+  short: "Phil's Lab"
   provider: Phil's Lab (YouTube)
   type: lectures
   url: https://www.youtube.com/@PhilsLab
@@ -213,6 +222,7 @@
 
 - id: cu-boulder-power-electronics
   title: "CU Boulder: Power Electronics specialization"
+  short: "Power Electronics"
   provider: Coursera
   type: course
   url: https://www.coursera.org/specializations/power-electronics
@@ -227,6 +237,7 @@
 
 - id: brian-douglas-control
   title: "Brian Douglas: Control System Lectures"
+  short: "Control System Lectures"
   provider: Brian Douglas (YouTube)
   type: lectures
   url: https://www.youtube.com/user/ControlLectures
@@ -241,6 +252,7 @@
 
 - id: mit-2-004
   title: "MIT 2.004 Dynamics and Control II (Spring 2008)"
+  short: "2.004 Dynamics and Control"
   provider: MIT OCW
   type: course
   url: https://ocw.mit.edu/courses/2-004-dynamics-and-control-ii-spring-2008/
@@ -271,6 +283,7 @@
 
 - id: brunton-control-bootcamp
   title: "Steve Brunton: Control Bootcamp"
+  short: "Control Bootcamp"
   provider: Steve Brunton (YouTube)
   type: lectures
   url: https://www.youtube.com/playlist?list=PLMrJAkhIeNNR20Mz-VpzgfQs5zrYi085m
