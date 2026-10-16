@@ -1,0 +1,51 @@
+overview: >-
+  A cost study of a tool-using agent on 20 tasks: you log tokens per step, reorder the prompt so the unchanging part
+  (system prompt, tool definitions) comes first and can be served from the provider's prompt cache, and prune stale
+  tool outputs. Cost per task should fall while the success rate stays the same.
+learn:
+  - name: Prompt caching
+  - name: Context pruning
+  - name: Token accounting
+components:
+  - id: agent
+    name: Agent loop
+    role: Calls the model, runs tools and appends results to the context.
+    tech: Python
+    talksTo: [pruner]
+    kind: core
+  - id: pruner
+    name: Context builder
+    role: Puts stable content first and replaces old tool outputs with short stubs.
+    tech: Python
+    talksTo: [llm]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Answers and reports cached and uncached input tokens.
+    tech: Hosted LLM with prompt caching
+    talksTo: [ledger]
+    kind: external
+  - id: ledger
+    name: Cost ledger
+    role: Logs tokens, cache reads and price per step and task success.
+    tech: CSV · pandas
+    talksTo: []
+    kind: offline
+flow:
+  - component: agent
+    text: starts a task and keeps a message list of steps and tool results.
+  - component: pruner
+    text: builds the prompt as **system + tools** (identical every step), then history, with tool outputs older than 3 steps cut to a one-line stub.
+  - component: llm
+    text: serves the stable prefix from cache and reports `cache_read_input_tokens` alongside normal input tokens.
+  - component: ledger
+    text: compares cost per task and success rate for baseline, caching only, and caching plus pruning.
+decisions:
+  - choice: Stub old tool outputs, not delete them
+    instead: Drop old tool messages entirely
+    why: >-
+      A stub keeps the record that a tool ran and what it was for, so the agent does not repeat calls. Check the
+      failures by hand to see whether any needed a pruned detail.
+watchOut: >-
+  A timestamp or request id near the top of the prompt changes the prefix every call and silently disables caching.
+  Keep anything that changes after the stable part.

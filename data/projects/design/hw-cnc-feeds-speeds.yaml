@@ -1,0 +1,69 @@
+overview: >-
+  A Python calculator turns tool diameter, flute count and the material's recommended surface speed and chip load into
+  spindle speed, feed rate and material removal rate, and cutting trials on a hobby CNC check those numbers. Slots cut
+  at three feeds are rated for finish, measured for width and logged with spindle current, giving a table that links
+  feed to finish and the chip load that cut best.
+learn:
+  - name: Chip load and surface speed
+    ref: mit-2-008
+  - name: Material removal rate
+  - name: Tool deflection
+  - name: Experiment logs
+components:
+  - id: calc
+    name: Feeds calculator
+    role: Turns tool and material data into rpm, feed and removal rate.
+    tech: Python
+    talksTo: [gcode]
+    kind: core
+  - id: gcode
+    name: G-code writer
+    role: Writes the three test slots at different feeds.
+    tech: Python
+    talksTo: [cnc]
+    kind: core
+  - id: cnc
+    name: Hobby CNC
+    role: Cuts the slots in aluminium or wood.
+    tech: Desktop CNC router
+    talksTo: [log]
+    kind: external
+  - id: log
+    name: Trial log
+    role: Records current, slot width, finish rating and wear per slot.
+    tech: Spreadsheet · calipers
+    talksTo: []
+    kind: offline
+flow:
+  - component: calc
+    text: computes `rpm = Vc·1000 / (π·D)` capped at the spindle's maximum, then `feed = rpm·flutes·fz` and `MRR = ae·ap·feed`.
+  - component: gcode
+    text: writes three 30 mm full-width slots at 0.7, 1.0 and 1.3 times the calculated feed, at a shallow depth such as 0.5 mm for a 3 mm tool in aluminium.
+  - component: log
+    text: records spindle current, slot width against tool diameter, a 1 to 5 finish rating against reference photos, and visible tool wear.
+  - component: log
+    text: gives the **feed-to-finish table** and the chip load in mm per tooth at the best finish.
+interface:
+  lang: python
+  code: |
+    def feeds(d_mm, flutes, vc_m_min, fz_mm,
+              rpm_max=12000):
+        rpm = min(vc_m_min * 1000 / (math.pi * d_mm),
+                  rpm_max)
+        feed = rpm * flutes * fz_mm      # mm/min
+        return rpm, feed
+
+    def mrr(ae_mm, ap_mm, feed_mm_min):
+        return ae_mm * ap_mm * feed_mm_min  # mm³/min
+
+    # 3 mm, 2 flutes, aluminium: vc 120, fz 0.02
+    # -> 12,000 rpm (capped), 480 mm/min
+decisions:
+  - choice: Hold chip load when rpm is capped
+    instead: Keep the chart's feed rate
+    why: >-
+      Hobby spindles top out near 12,000 rpm, below what small tools in aluminium want. Keeping the chart's feed then
+      overloads each tooth and snaps the tool, so the feed is worked out from the capped rpm instead.
+watchOut: >-
+  A thin end mill bends under load, so slots come out wider than the tool and finish worsens with feed for a reason
+  that is not chip load. Measure slot width at every feed and treat growing width as deflection.

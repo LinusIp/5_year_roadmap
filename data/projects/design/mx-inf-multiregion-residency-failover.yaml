@@ -1,0 +1,125 @@
+overview: >-
+  A residency-aware router for Aurora Pay that keeps EU prompts inside the EU, even during a regional GPU outage.
+  Every request carries a residency tag, a policy engine limits it to backends in its own zone, and health checks move
+  traffic to the other region in that zone within 20 s; if the zone runs short of capacity, the router falls back to
+  a smaller model instead of crossing zones. An audit log, checked over 1M simulated requests, proves no request ever
+  left its zone.
+learn:
+  - name: Data residency
+  - name: Health checks and hysteresis
+    ref: google-sre-book
+  - name: Failover
+    ref: ddia
+  - name: Graceful degradation
+    ref: google-sre-book
+  - name: Chaos testing
+  - name: Audit logging
+stats:
+  - value: ≤ 20 s
+    label: failover, under 1% errors
+  - value: "0"
+    label: cross-zone requests in 1M
+  - value: ≤ 3 ms
+    label: router overhead at p99
+components:
+  - id: clients
+    name: Tagged traffic
+    role: Simulated clients sending requests tagged `eu` or `us`.
+    tech: Python load generator
+    talksTo: [router]
+    kind: external
+  - id: router
+    name: Router
+    role: Picks a healthy backend from the allowed set for each request, retries included.
+    tech: Go
+    talksTo: [policy, backends, audit]
+    kind: core
+  - id: policy
+    name: Residency policy
+    role: Maps a residency tag to the regions it may use, and rejects requests with no tag.
+    tech: Go · YAML rules
+    talksTo: []
+    kind: core
+  - id: health
+    name: Health checker
+    role: Probes every backend every 2 s and changes its state only after several results agree.
+    tech: Go
+    talksTo: [router]
+    kind: core
+  - id: degrade
+    name: Degradation controller
+    role: Switches part of a zone's traffic to a smaller model when its healthy capacity is too low.
+    tech: Go
+    talksTo: [router]
+    kind: core
+  - id: backends
+    name: Regional backends
+    role: Mock model servers in eu-west, eu-central, us-east and us-west, with real service-time profiles.
+    tech: Docker Compose
+    talksTo: []
+    kind: external
+  - id: audit
+    name: Audit log
+    role: Records request id, tag, chosen region and a prompt hash, never the prompt text.
+    tech: JSON lines · Prometheus
+    talksTo: []
+    kind: offline
+  - id: chaos
+    name: Chaos harness
+    role: Kills a region's containers mid-test and checks failover time, errors and the audit log.
+    tech: Python · Docker
+    talksTo: [backends]
+    kind: offline
+flow:
+  - component: router
+    text: receives a request tagged `residency=eu` and adds under 3 ms of work before forwarding it.
+  - component: policy
+    text: >-
+      returns the allowed set `[eu-west, eu-central]`; a request with no tag is rejected, never guessed.
+  - component: health
+    text: >-
+      sees eu-west fail 3 checks in a row (about 6 s) and marks it down; it needs 5 good checks to come back, so a
+      shaky region does not **flap**.
+  - component: degrade
+    text: >-
+      finds eu-central alone cannot carry all EU traffic and sends the overflow to a smaller in-zone model, never to
+      a US region.
+  - component: router
+    text: >-
+      retries a failed request only within the same allowed set and writes the region it used to the **audit log**,
+      which the chaos harness checks for leaks.
+interface:
+  lang: yaml
+  code: |
+    zones:
+      eu: [eu-west, eu-central]
+      us: [us-east, us-west]
+    rules:
+      - match: {residency: eu}
+        allow: zone(eu)        # retries too
+        degrade: {model: small, below: 0.6}
+      - match: {residency: missing}
+        action: reject
+    health:
+      interval: 2s
+      down_after: 3
+      up_after: 5
+decisions:
+  - choice: Residency checked on every attempt
+    instead: Check the tag only on the first attempt
+    why: >-
+      Retries and failover are exactly when traffic tends to slip across zones. Filtering every attempt by the
+      allowed set is what keeps the 1M-request leak count at 0.
+  - choice: Degrade to a smaller model in zone
+    instead: Spill overflow to the other zone
+    why: >-
+      Crossing zones breaks the residency rule, so the only safe extra capacity is a cheaper model inside the zone.
+      Track degraded-mode quality to know what users get.
+  - choice: Hysteresis on health state
+    instead: Flip state on every probe result
+    why: >-
+      A single slow probe would bounce traffic back and forth. Requiring 3 failures to go down and 5 successes to come
+      back keeps failover under 20 s without flapping.
+watchOut: >-
+  Retries are the usual leak: a generic retry policy picks any healthy backend, including one in the wrong zone.
+  Route every retry through the same policy check and make the audit log, which stores only hashes, prove it.

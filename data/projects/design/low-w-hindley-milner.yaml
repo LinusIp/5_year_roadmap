@@ -1,0 +1,78 @@
+overview: >-
+  Type inference for a tiny lambda calculus in Python with Algorithm W: every unknown type gets a fresh variable, each
+  application adds an equation that unification solves (the occurs check rejects `a = a -> b`), and `let`
+  generalises a type over its free variables so `id` can be used at two types. It must infer the known types of 30
+  expressions and reject 10 ill-typed ones.
+learn:
+  - name: Unification
+  - name: Let polymorphism
+  - name: Type schemes
+  - name: Substitutions
+components:
+  - id: parser
+    name: Parser
+    role: Turns source text into Var, Lam, App, Let, If and literal nodes.
+    tech: Python
+    talksTo: [infer]
+    kind: core
+  - id: infer
+    name: Algorithm W
+    role: Walks the AST with a type environment and returns a substitution and a type.
+    tech: Python
+    talksTo: [unify]
+    kind: core
+  - id: unify
+    name: Unifier
+    role: Solves one type equation into a substitution, with the occurs check.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: tests
+    name: Typing tests
+    role: 30 expressions with expected types and 10 that must fail.
+    tech: pytest
+    talksTo: [parser]
+    kind: offline
+flow:
+  - component: parser
+    text: >-
+      turns `let id = fun x -> x in if id true then id 1 else 0` into `Let`, `Lam`, `If` and `App` nodes.
+  - component: infer
+    text: >-
+      gives the lambda parameter a fresh variable `t1`, and for an application `f x` makes a result variable `t2`
+      and asks that `type(f) = type(x) -> t2`.
+  - component: unify
+    text: >-
+      solves that equation into a substitution, binding a variable only after the **occurs check**, and fails with a
+      type error on `int` against `bool`.
+  - component: infer
+    text: >-
+      at a `let` applies the substitution and generalises variables not free in the environment, so
+      `id: forall a. a -> a` is instantiated fresh at `bool` and at `int`.
+interface:
+  lang: python
+  code: |
+    def unify(a: Type, b: Type, s: Subst) -> Subst:
+        a, b = apply(s, a), apply(s, b)
+        if a == b:
+            return s
+        if isinstance(a, TVar):
+            if occurs(a, b):
+                raise TypeError("occurs check")
+            return s | {a.name: b}
+        if isinstance(b, TVar):
+            return unify(b, a, s)
+        if isinstance(a, TFun) and isinstance(b, TFun):
+            s = unify(a.arg, b.arg, s)
+            return unify(a.res, b.res, s)
+        raise TypeError(f"cannot unify {a} with {b}")
+decisions:
+  - choice: Algorithm W with explicit substitutions
+    instead: Generating all constraints first, then solving them
+    why: >-
+      For lambda, let and if, W keeps each step next to its typing rule and is easy to check against 30 known
+      typings. Constraint solving gives better error locations; revisit it if you add records or type classes.
+watchOut: >-
+  Generalising a variable that is still free in the environment makes inference unsound: inside
+  `fun x -> let y = x in ...`, `y` must not get `forall a. a`. Apply the current substitution to the environment
+  before collecting its free variables.

@@ -1,0 +1,60 @@
+overview: >-
+  A simulator for pipeline parallelism, where a model is split into S stages on S devices and a batch into M
+  microbatches. It places forward and backward steps on a timeline for GPipe, 1F1B and interleaved 1F1B, draws a
+  Gantt chart, and reports the bubble (idle time) and the peak number of microbatches whose activations each stage
+  holds.
+learn:
+  - name: Pipeline parallelism
+    ref: ultra-scale-playbook
+  - name: Pipeline bubble
+    ref: scaling-book
+  - name: Activation memory
+components:
+  - id: model
+    name: Stage model
+    role: Holds S stages, M microbatches and the forward and backward time of each.
+    tech: Python dataclasses
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Schedules
+    role: Orders the forward and backward tasks for GPipe, 1F1B and interleaved, respecting dependencies.
+    tech: Python
+    talksTo: [timeline]
+    kind: core
+  - id: timeline
+    name: Timeline
+    role: Gives each task a start time and tracks in-flight microbatches per stage.
+    tech: Python
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Draws Gantt charts and compares bubble % with the closed form.
+    tech: matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: model
+    text: sets for example `S = 4`, `M = 8`, forward time `tf = 1` and backward `tb = 2`.
+  - component: scheduler
+    text: >-
+      emits task lists; a backward step on stage `s` can only start after the backward on `s + 1` and the forward on
+      `s` for that microbatch.
+  - component: timeline
+    text: >-
+      starts each task at the later of its device being free and its inputs being ready, and counts microbatches whose
+      forward is done but backward is not.
+  - component: report
+    text: >-
+      checks GPipe's bubble against `(S - 1) / (M + S - 1)` and shows 1F1B peaks at `S` in-flight microbatches instead
+      of `M`.
+decisions:
+  - choice: Unequal forward and backward times by default
+    instead: The same duration for both
+    why: >-
+      Backward is about twice the forward in real training. With equal times the schedules look more alike than
+      they are and the interleaved gain is hard to see. Keep a switch to equal times to check the closed forms.
+watchOut: >-
+  1F1B and GPipe have the same bubble for the same S and M; 1F1B only saves memory. If your chart shows 1F1B with a
+  smaller bubble, the dependency rules are wrong.

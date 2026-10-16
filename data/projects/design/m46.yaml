@@ -1,0 +1,128 @@
+overview: >-
+  A small temperature and humidity logger that runs for weeks on one lithium cell. Power flows from USB through a
+  charger into a protected cell, then through a regulator with under 5 µA quiescent current (the current it draws
+  itself) to the microcontroller. The firmware wakes on its real-time clock every 60 s, powers the sensor from a pin,
+  measures, stores the reading and sleeps again. A power budget written before the board is ordered predicts the
+  average current, a week-long test checks it, and a printed enclosure you designed holds the board.
+learn:
+  - name: Sleep modes and duty cycling
+    ref: making-embedded-systems
+  - name: Quiescent current
+    ref: art-of-electronics
+  - name: Li-ion charging and protection
+    ref: art-of-electronics
+  - name: Measuring microamps
+    ref: phils-lab
+  - name: Enclosure tolerances
+    ref: onshape-learning-center
+stats:
+  - value: < 10 µA
+    label: sleep current, target 5 µA
+  - value: ≥ 7 days
+    label: on one cell, voltage logged
+  - value: ±25 %
+    label: measured average against the budget
+components:
+  - id: usb
+    name: USB 5 V
+    role: Supplies charging power when plugged in.
+    tech: USB-C connector
+    talksTo: [charger]
+    kind: external
+  - id: charger
+    name: Charger
+    role: Charges the cell at constant current, then constant voltage to 4.2 V.
+    tech: MCP73831
+    talksTo: [cell]
+    kind: core
+  - id: cell
+    name: Cell
+    role: Stores the energy; its protection circuit cuts out on under-voltage and over-current.
+    tech: 1,000 mAh LiPo · protection IC
+    talksTo: [regulator]
+    kind: core
+  - id: regulator
+    name: Low-Iq regulator
+    role: Gives the MCU a steady rail while drawing only microamps itself.
+    tech: TPS7A02
+    talksTo: [mcu]
+    kind: core
+  - id: mcu
+    name: MCU firmware
+    role: Runs the sleep, wake, measure, store state machine and logs readings to flash.
+    tech: STM32L0 · C
+    talksTo: [sensor]
+    kind: core
+  - id: sensor
+    name: Sensor
+    role: Measures temperature and humidity, powered from a GPIO pin only while needed.
+    tech: SHT40 · I2C
+    talksTo: [mcu]
+    kind: core
+  - id: budget
+    name: Power budget
+    role: Models each state's current and duration and predicts battery life in days.
+    tech: Spreadsheet or Python
+    talksTo: []
+    kind: offline
+  - id: profiler
+    name: Power profiler
+    role: Measures the real current of each state for comparison with the budget.
+    tech: Power profiler or precision shunt
+    talksTo: [budget]
+    kind: offline
+flow:
+  - component: charger
+    text: >-
+      charges the cell from USB and **terminates at 4.2 V ±1 %**; unplugged, it draws almost nothing from the cell.
+  - component: cell
+    text: >-
+      feeds the board through its protection circuit, which disconnects the load if the voltage falls too low.
+  - component: regulator
+    text: >-
+      holds the MCU rail steady; at microamp loads its own `Iq` would otherwise dominate the whole budget.
+  - component: mcu
+    text: >-
+      wakes from stop mode on the 60 s RTC alarm and sets `SENSOR_PWR` high to power the sensor.
+  - component: sensor
+    text: >-
+      returns a reading over I2C; the MCU then switches it off and sets the I2C pins to analogue so no current leaks.
+  - component: mcu
+    text: >-
+      appends the reading to flash, sets the next alarm and **sleeps** at a target of 5 µA.
+  - component: profiler
+    text: >-
+      captures one full wake cycle; current times duration per state goes into the **budget** beside the prediction.
+interface:
+  lang: c
+  code: |
+    /* one wake cycle, every 60 s */
+    void on_rtc_wake(void) {
+      gpio_set(SENSOR_PWR, 1);    /* sensor on */
+      delay_ms(SHT40_POWERUP_MS);
+      reading_t r = sht40_measure();
+      gpio_set(SENSOR_PWR, 0);    /* sensor off */
+      i2c_pins_analog();          /* no leak paths */
+      log_append(&r);
+      rtc_set_alarm_s(60);
+      enter_stop_mode();          /* target 5 uA */
+    }
+decisions:
+  - choice: Power budget before the board order
+    instead: Measure first and explain afterwards
+    why: >-
+      The budget picks the parts: it shows whether the regulator or the sensor dominates before you commit to a
+      layout. Measured numbers then go next to the predictions.
+  - choice: Low-Iq LDO regulator
+    instead: A buck converter
+    why: >-
+      The device spends nearly all its time asleep at microamps, where a regulator's own draw matters more than its
+      efficiency at load. Revisit if the radio stretch goal adds long high-current bursts.
+  - choice: Sensor powered from a GPIO pin
+    instead: An always-on sensor
+    why: >-
+      A sensor idling all day can cost more than the MCU asleep. Switching it off between readings removes it from the
+      sleep current, as long as the I2C pins cannot leak into it.
+watchOut: >-
+  A floating GPIO or a debug probe left attached can add hundreds of microamps and swamp a 5 µA target. Measure sleep
+  current with the probe removed and every unused pin set to analogue.

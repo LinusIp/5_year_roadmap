@@ -1,0 +1,106 @@
+overview: >-
+  A controlled experiment that gives Statute Labs apples-to-apples data on fp16, FP8, INT8 (W8A8: 8-bit weights and
+  activations) and AWQ int4 for its legal summariser. Every variant runs on the same FP8-capable GPU with the same
+  batching, is scored for factual consistency against the source at 8k, 16k and 32k tokens, and gets confidence
+  intervals from several seeds. The winner is the cheapest per quality-adjusted token that keeps at least 98% of
+  fp16's consistency score.
+learn:
+  - name: FP8 and INT8 formats
+    ref: nvidia-modelopt
+  - name: Activation-aware quantization
+    ref: vllm-docs
+  - name: Calibration data
+  - name: Factual consistency checks
+  - name: Bootstrap confidence intervals
+    ref: harvard-stat-110
+  - name: Long-context degradation
+stats:
+  - value: ≥ 98%
+    label: of fp16 consistency for the winner
+  - value: 1 / 16 / 64
+    label: batch sizes benchmarked
+  - value: 95% CI
+    label: on every quality number
+components:
+  - id: builders
+    name: Variant builders
+    role: Produce the FP8, W8A8 and AWQ int4 checkpoints, all calibrated on the same legal text.
+    tech: llm-compressor · AutoAWQ
+    talksTo: [engine]
+    kind: core
+  - id: engine
+    name: Serving engine
+    role: Serves one variant at a time on the rented FP8-capable GPU with fixed batching settings.
+    tech: vLLM · rented GPU
+    talksTo: [speed, consistency]
+    kind: external
+  - id: speed
+    name: Speed benchmark
+    role: Measures throughput and ITL at batch 1, 16 and 64.
+    tech: Python · asyncio
+    talksTo: [ranking]
+    kind: core
+  - id: consistency
+    name: Consistency evaluator
+    role: Checks each summary sentence against the source and scores the share that is supported.
+    tech: Python · NLI model
+    talksTo: [longctx, ranking]
+    kind: core
+  - id: longctx
+    name: Long-context test
+    role: Repeats the consistency check on inputs cut to 8k, 16k and 32k tokens.
+    tech: Python
+    talksTo: [ranking]
+    kind: core
+  - id: ranking
+    name: Ranking report
+    role: Ranks variants by cost per quality-adjusted token with intervals.
+    tech: pandas · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: builders
+    text: >-
+      calibrates every quantized variant on 512 held-out BillSum documents, the same data for all, so no method gets
+      an easier calibration set.
+  - component: speed
+    text: runs each variant at batch 1, 16 and 64 with the same `max_num_seqs` and prompt lengths, and records tokens/s.
+  - component: consistency
+    text: >-
+      checks every summary sentence with an entailment model (does the source support it?) and averages over 3 seeds;
+      bootstrapping gives a **95% interval**.
+  - component: longctx
+    text: repeats that on 8k, 16k and 32k inputs, since low precision often hurts most at long contexts.
+  - component: ranking
+    text: >-
+      drops any variant below 98% of fp16's score, then ranks the rest by `$/1M tokens ÷ relative consistency`.
+interface:
+  lang: python
+  code: |
+    def quality_adjusted_cost(v, fp16) -> float:
+        rel = v.consistency / fp16.consistency
+        if rel < 0.98:
+            return float("inf")   # fails the bar
+        return v.usd_per_1m_tokens / rel
+
+    lo, hi = bootstrap(v.doc_scores,
+                       n=2000, q=(2.5, 97.5))
+decisions:
+  - choice: One calibration set for every method
+    instead: Each tool's default calibration data
+    why: >-
+      Defaults are usually general web text, unlike legal documents, and they differ between tools. A shared legal
+      set keeps the comparison fair.
+  - choice: Several seeds with bootstrap intervals
+    instead: One run per variant
+    why: >-
+      Differences near the 98% bar can be smaller than seed-to-seed noise. Intervals show when two variants are
+      actually tied.
+  - choice: Rank by quality-adjusted cost
+    instead: Pick the fastest variant that passes
+    why: >-
+      The question is cost on Statute Labs' documents, and a slightly slower variant with higher consistency may cost
+      less per useful token.
+watchOut: >-
+  Calibration data that does not look like legal text can make a good method look bad. Use the same in-domain
+  calibration set for all, and keep it separate from the evaluation documents.

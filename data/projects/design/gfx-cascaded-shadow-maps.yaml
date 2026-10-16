@@ -1,0 +1,71 @@
+overview: >-
+  A directional light's shadow split into 4 cascades: the camera frustum is cut into slices by distance and each slice
+  gets its own shadow map, so near objects get many texels per metre and far ones fewer. Each cascade is snapped to
+  whole texels so shadows do not shimmer as the camera turns, and neighbouring cascades blend across a small band.
+learn:
+  - name: Cascaded shadow maps
+    ref: learnopengl
+  - name: Practical split scheme
+  - name: Texel snapping
+  - name: Depth clamping
+components:
+  - id: splits
+    name: Split calculator
+    role: Chooses the near and far distance of each cascade.
+    tech: C++
+    talksTo: [fit]
+    kind: core
+  - id: fit
+    name: Cascade fitter
+    role: Builds a stable, texel-snapped light box around each slice.
+    tech: C++ · GLM
+    talksTo: [depth]
+    kind: core
+  - id: depth
+    name: Shadow pass
+    role: Renders each cascade into one layer of a depth texture array.
+    tech: OpenGL 4.6 / Vulkan
+    talksTo: [lit]
+    kind: core
+  - id: lit
+    name: Lighting pass
+    role: Picks and blends cascades per pixel and draws the debug overlay.
+    tech: GLSL
+    talksTo: []
+    kind: core
+flow:
+  - component: splits
+    text: mixes log and even splits, `d_i = λ·n·(f/n)^(i/N) + (1-λ)·(n + (f-n)·i/N)` with `λ = 0.7` and `N = 4`.
+  - component: fit
+    text: wraps each slice's 8 corners in a **bounding sphere**, whose size does not change as the camera turns, and snaps the light box origin to whole texels.
+  - component: depth
+    text: renders 4 layers of 2048x2048 with `GL_DEPTH_CLAMP` on, so casters outside a slice but between it and the light still cast.
+  - component: lit
+    text: picks the cascade by view depth, blends into the next over the last 10% of the slice, tints by cascade in debug mode, and prints texels per world unit.
+interface:
+  lang: glsl
+  code: |
+    uniform sampler2DArrayShadow shadowMaps;
+    uniform mat4 lightViewProj[4];
+    uniform float splitFar[4];    // view-space depth
+    uniform bool debugCascades;
+
+    int   pickCascade(float viewDepth);
+    float shadowAt(int c, vec3 worldPos);
+    float blendFactor(int c, float viewDepth);
+    float shadow(vec3 p, float viewDepth) {
+      int c = pickCascade(viewDepth);
+      float s = shadowAt(c, p);
+      if (c == 3) return s;
+      return mix(s, shadowAt(c + 1, p),
+                 blendFactor(c, viewDepth));
+    }
+decisions:
+  - choice: Bounding sphere per cascade
+    instead: A tight box around each slice, refitted each frame
+    why: >-
+      A tight box changes size as the camera turns, so the texel size changes and shadow edges swim. A sphere wastes
+      some texels but keeps the size fixed, which together with snapping gives the no-shimmer result.
+watchOut: >-
+  Casters outside the camera's view, such as a tall tower behind you, get clipped by the light's near plane and their
+  shadows vanish. Pull the near plane back to the scene bounds or turn on depth clamping.

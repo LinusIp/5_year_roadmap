@@ -1,0 +1,114 @@
+overview: >-
+  A `habit` command-line tool in three thin layers: a Typer CLI that parses arguments and prints results, a service
+  that owns the rules for streaks and weekly completion rates, and a store that hides SQLite behind a small repository
+  interface (a class with a few methods like `add_entry` and `entries_for`, so tests can swap in an in-memory
+  database). Today's date comes from an injected clock, so the streak tests can pretend to be any day. Every push runs
+  Ruff and pytest in GitHub Actions, and pushing a `v*` tag publishes the package to PyPI with no manual step.
+learn:
+  - name: Packaging with pyproject
+  - name: Layered design
+  - name: Injecting a clock
+  - name: Dates versus datetimes
+  - name: CI pipelines
+    ref: github-actions-docs
+  - name: Trusted publishing
+stats:
+  - value: ≥ 90 %
+    label: coverage of storage and summaries
+  - value: < 150 ms
+    label: start-up of habit --help
+  - value: '3'
+    label: Python versions in CI
+components:
+  - id: cli
+    name: CLI
+    role: Parses `add`, `done`, `list`, `stats` and `export`, and formats the output and every `--help`.
+    tech: Typer
+    talksTo: [service]
+    kind: core
+  - id: clock
+    name: Clock
+    role: Supplies today's local date; tests pass a fake one.
+    tech: Python · datetime.date
+    talksTo: [service]
+    kind: core
+  - id: service
+    name: Service
+    role: Holds the rules for what counts as a streak, how a missed day is treated and the weekly rate.
+    tech: Python
+    talksTo: [store, export]
+    kind: core
+  - id: store
+    name: Store
+    role: Reads and writes habits and entries through a repository interface over SQLite.
+    tech: sqlite3 · platformdirs
+    talksTo: []
+    kind: core
+  - id: export
+    name: CSV export
+    role: Writes every entry as CSV for `habit export --csv`.
+    tech: csv module
+    talksTo: []
+    kind: offline
+  - id: ci
+    name: CI pipeline
+    role: Runs Ruff and pytest on 3.11, 3.12 and 3.13 on every push and builds the wheel on a `v*` tag.
+    tech: GitHub Actions · pytest-cov
+    talksTo: [pypi]
+    kind: offline
+  - id: pypi
+    name: PyPI
+    role: Hosts each tagged release so `pipx install` works on any machine.
+    tech: PyPI · trusted publishing
+    talksTo: []
+    kind: external
+flow:
+  - component: cli
+    text: >-
+      receives `habit done read`, validates the habit name and calls the service; the `habit` command itself comes
+      from `[project.scripts]` in `pyproject.toml`.
+  - component: clock
+    text: gives the service today's **date** (not a datetime), so a daylight-saving change cannot shift a day.
+  - component: service
+    text: >-
+      records the entry, then recomputes the streak by walking back day by day to the first missed day, across month
+      ends and leap days.
+  - component: store
+    text: >-
+      inserts the row into the SQLite file under the user data directory from `platformdirs`, never next to the code
+      in site-packages.
+  - component: cli
+    text: prints the new streak; `habit stats` reads the same service for streaks and the weekly completion rate.
+  - component: ci
+    text: >-
+      on a pushed `v0.3.0` tag runs the tests, builds the wheel and publishes it to **PyPI** with a short-lived
+      credential from trusted publishing.
+interface:
+  lang: shell
+  code: |
+    $ habit add read --target 7
+    $ habit done read
+    read: done today, streak 5 days
+    $ habit stats --week
+    habit   done   rate   streak
+    read    6/7    86 %   5
+    $ habit export --csv > habits.csv
+decisions:
+  - choice: SQLite behind a repository interface
+    instead: A JSON file read and rewritten on every command
+    why: >-
+      Entries grow by a few rows a day for years, and SQLite gives safe writes and date queries for free. The
+      interface lets tests use `:memory:` and never touch the real home directory.
+  - choice: An injected clock
+    instead: Calling date.today() inside the service
+    why: >-
+      Streaks across a month end, a leap day and a missed day must be testable on whatever day the suite runs.
+      Passing the date in makes each case a two-line test.
+  - choice: Trusted publishing on tag
+    instead: A long-lived PyPI API token in repository secrets
+    why: >-
+      A token that never expires can leak and publish anything. Trusted publishing gives each release run its own
+      short-lived credential, and the tag is the only manual step.
+watchOut: >-
+  Streaks computed from datetimes break on time zones and daylight-saving changes. Convert to the user's local date
+  at the edge and let the service work only with dates.

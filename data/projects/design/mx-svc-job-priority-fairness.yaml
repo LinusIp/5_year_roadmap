@@ -1,0 +1,109 @@
+overview: >-
+  A single-process scheduler for Insightly's report exports that stops one big tenant from starving the rest. Each
+  tenant has its own queue, and a **virtual-time** fair scheduler (each tenant's clock advances by job cost divided
+  by its weight, and the lowest clock goes next) decides whose job runs. Priority classes sit inside each tenant's
+  queue with aging, so old low-priority jobs still move up, and per-tenant caps limit how many run at once.
+learn:
+  - name: Weighted fair queueing
+    ref: ostep
+  - name: Virtual time
+  - name: Priority aging
+    ref: ostep
+  - name: Concurrency limits
+  - name: Tail wait percentiles
+stats:
+  - value: < 5 s
+    label: small tenants' wait p99
+  - value: < 10 %
+    label: fairness error, 10-min windows
+  - value: 2,000/s
+    label: jobs dispatched
+components:
+  - id: api
+    name: Submit API
+    role: Accepts report jobs with tenant, priority class and estimated cost, and supports cancel.
+    tech: Go · net/http
+    talksTo: [queues]
+    kind: core
+  - id: queues
+    name: Tenant queues
+    role: One queue per tenant, ordered by priority class and then by aged submit time.
+    tech: Go · container/heap
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Fair scheduler
+    role: Picks the eligible tenant with the lowest virtual time and advances it by cost over weight.
+    tech: Go · min-heap
+    talksTo: [limiter]
+    kind: core
+  - id: limiter
+    name: Concurrency limiter
+    role: Counts running jobs per tenant from leases and skips tenants at their cap.
+    tech: Go
+    talksTo: [workers]
+    kind: core
+  - id: workers
+    name: Worker simulator
+    role: Runs jobs for their simulated duration, reports done, fails or times out.
+    tech: Go goroutines
+    talksTo: [metrics]
+    kind: external
+  - id: metrics
+    name: Metrics
+    role: Wait time per tenant and priority, share of work against weighted share per window.
+    tech: Prometheus client
+    talksTo: []
+    kind: offline
+  - id: scenarios
+    name: Scenario runner
+    role: Replays a tenant mix with one noisy neighbour submitting 50,000 jobs.
+    tech: Go
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: receives `POST /jobs` with `tenant`, `class` (`interactive`, `standard` or `bulk`) and `cost`, and puts it on the tenant's queue.
+  - component: queues
+    text: >-
+      order jobs by class, but subtract 1 class step for every 60 s a job has waited, so a `bulk` job cannot wait
+      forever; aging is capped so it never jumps above `interactive`.
+  - component: scheduler
+    text: >-
+      pops the tenant with the lowest **virtual time**; a new tenant starts at the current minimum, not at 0, so it
+      cannot claim a burst of credit.
+  - component: limiter
+    text: checks the tenant is under its cap, for example 20 running jobs; if not, the scheduler tries the next tenant.
+  - component: workers
+    text: run the job under a lease with a timeout; cancel or timeout releases the slot, and so does a lease that expires after a worker crash.
+interface:
+  lang: go
+  code: |
+    type Job struct {
+        ID       string
+        Tenant   string
+        Class    Class   // Interactive, Standard, Bulk
+        Cost     float64 // estimated seconds
+        Enqueued time.Time
+    }
+    // Next returns the next job to run, or nil.
+    func (s *Scheduler) Next(now time.Time) *Job
+decisions:
+  - choice: Virtual-time fair queueing by tenant
+    instead: One global priority queue
+    why: >-
+      In one queue, 50,000 jobs from the heavy tenant sit ahead of everyone. Fair queueing gives each tenant its
+      weighted share, which is what the 5 s small-tenant target needs.
+  - choice: Priority inside a tenant, fairness between tenants
+    instead: Priority as the first sort key across all tenants
+    why: >-
+      If priority came first, a tenant marking all jobs `interactive` would starve the rest again. Keeping classes
+      inside each tenant's share stops that.
+  - choice: Running counts from leases
+    instead: Increment and decrement a counter on start and finish
+    why: >-
+      A crashed worker never sends finish, so a counter drifts and the tenant is locked out. Counting live leases
+      heals by itself when they expire.
+watchOut: >-
+  Aging that is too strong turns every job into top priority after a few minutes and the classes mean nothing.
+  Cap the boost and check wait times per class, not only per tenant.

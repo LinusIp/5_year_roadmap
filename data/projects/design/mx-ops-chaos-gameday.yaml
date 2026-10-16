@@ -1,0 +1,102 @@
+overview: >-
+  Ten weeks before Black Friday, you test whether Stallion Market's retries and fallbacks really work. Each
+  experiment starts from a steady-state hypothesis, a measurable claim such as checkout success stays above 99 % while
+  the recommendations service is down, then injects one fault into one service while k6 drives 400 requests a second.
+  A safety watcher aborts the fault within 15 seconds if errors cross the threshold, and each weakness found goes on a
+  fix list and is re-tested.
+learn:
+  - name: Steady-state hypotheses
+  - name: Blast radius
+  - name: Timeouts and retries
+    ref: google-sre-book
+  - name: Retry storms
+  - name: Circuit breakers
+  - name: Abort conditions
+stats:
+  - value: "> 99 %"
+    label: journey success under one failure
+  - value: < 15 s
+    label: auto-abort on breach
+  - value: 8 found, 6 fixed
+    label: weaknesses
+components:
+  - id: catalogue
+    name: Experiment catalogue
+    role: Lists each experiment's hypothesis, target, fault, duration and abort threshold.
+    tech: YAML
+    talksTo: [runner]
+    kind: core
+  - id: runner
+    name: Experiment runner
+    role: Starts the load and the fault, and ends the fault on schedule or on abort.
+    tech: Python
+    talksTo: [injector, load]
+    kind: core
+  - id: injector
+    name: Fault injector
+    role: Adds latency or packet loss, kills pods or cuts a dependency for one service.
+    tech: Chaos Mesh · toxiproxy
+    talksTo: [market]
+    kind: core
+  - id: load
+    name: Load generator
+    role: Runs the 5 customer journeys at 400 requests a second.
+    tech: k6
+    talksTo: [market]
+    kind: external
+  - id: market
+    name: Marketplace
+    role: The 10-service demo app in an isolated test cluster.
+    tech: Kubernetes
+    talksTo: [watcher]
+    kind: core
+  - id: watcher
+    name: Safety abort
+    role: Checks journey success every 5 s and tells the runner to stop the fault on a breach.
+    tech: Prometheus · Python
+    talksTo: [runner, findings]
+    kind: core
+  - id: findings
+    name: Findings tracker
+    role: Records each weakness, its fix and the re-run result.
+    tech: GitHub Issues
+    talksTo: []
+    kind: offline
+flow:
+  - component: catalogue
+    text: "defines `exp-07`: hypothesis **checkout success > 99 %** while the `recommendations` service has 2 s added latency, abort if errors exceed 5 %."
+  - component: runner
+    text: starts k6 for 2 minutes of steady state, then applies the fault to that one service only.
+  - component: injector
+    text: adds the latency; the product page waits on recommendations with no timeout, and checkout threads pile up.
+  - component: market
+    text: shows success falling, and the callers' retries triple the load on the slow service, a **retry storm**.
+  - component: watcher
+    text: sees errors above 5 % and stops the fault within 15 s; the runner restores normal service.
+  - component: findings
+    text: gets "missing timeout and unbounded retries on recommendations"; after a 300 ms timeout, a fallback and retry budget are added, `exp-07` passes.
+interface:
+  lang: yaml
+  code: |
+    id: exp-07
+    hypothesis: checkout success > 99 %
+    target:
+      service: recommendations
+      max_pods: all   # one service only
+    fault:
+      type: latency
+      delay: 2s
+      duration: 5m
+    load: { profile: journeys, rps: 400 }
+    abort:
+      metric: checkout_error_ratio
+      above: 0.05
+      within: 15s
+decisions:
+  - choice: One service at a time, in a test cluster
+    instead: Inject faults into production traffic
+    why: The team has never run an experiment and has no proven abort path. Starting isolated and small keeps the blast radius tiny; revisit production experiments after Black Friday.
+  - choice: Every experiment has a written hypothesis
+    instead: Break things and see what happens
+    why: Without a measurable claim nobody can say whether the system passed. The hypothesis is also what the safety abort watches.
+watchOut: Retries without a budget turn a slow dependency into a full outage, because every caller multiplies the load on it. Limit retries, add jitter, and test retry behaviour on purpose.

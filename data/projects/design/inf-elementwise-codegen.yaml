@@ -1,0 +1,60 @@
+overview: >-
+  A tool that takes an elementwise expression such as `relu(a * b + c)` as a DAG, writes the source of one CUDA
+  kernel that computes it in a single pass, compiles it at runtime with NVRTC (or emits a Triton kernel) and caches
+  it. Each element is read once and written once instead of once per op, so the speedup over the eager chain should
+  track the ratio of bytes moved.
+learn:
+  - name: Kernel fusion
+    ref: horace-he-brrr
+  - name: Runtime compilation
+    ref: cuda-guide
+  - name: Vectorized loads
+    ref: pmpp-book
+  - name: Broadcasting rules
+components:
+  - id: parser
+    name: Expression parser
+    role: Turns the expression into a DAG of ops with input shapes and broadcast strides.
+    tech: Python ast
+    talksTo: [emitter]
+    kind: core
+  - id: emitter
+    name: Code emitter
+    role: Writes kernel source with one index calculation and float4 loads where aligned.
+    tech: Python string templates
+    talksTo: [compiler]
+    kind: core
+  - id: compiler
+    name: Compile cache
+    role: Compiles with NVRTC or Triton and caches by expression, dtypes and shapes.
+    tech: NVRTC · cuda-python or Triton
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Bench
+    role: Checks output against eager PyTorch and compares speedup with the traffic ratio.
+    tech: PyTorch · CUDA events
+    talksTo: []
+    kind: core
+flow:
+  - component: parser
+    text: parses `relu(a * b + c)` and records that `c` of shape `[N]` broadcasts over `a` of shape `[M, N]`.
+  - component: emitter
+    text: >-
+      writes one kernel where each thread loads `a[i]`, `b[i]` and `c[i % N]`, evaluates the DAG in registers and
+      stores once.
+  - component: compiler
+    text: compiles the source the first time a key is seen and reuses the binary after that.
+  - component: bench
+    text: >-
+      runs 5 expressions, asserts `allclose` with eager, and compares the speedup with the **predicted** traffic ratio
+      (eager bytes divided by fused bytes).
+decisions:
+  - choice: Cache by expression, dtypes and shapes
+    instead: Compile on every call
+    why: >-
+      NVRTC takes tens of milliseconds, far longer than the kernel. Caching makes repeat calls cost only a launch.
+      Add shape-generic kernels later if too many shapes appear.
+watchOut: >-
+  Broadcast indexing is the main source of wrong answers: a size-1 dimension needs stride 0, not the stride of the
+  full tensor. Test every expression with at least one broadcast input.

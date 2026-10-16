@@ -1,0 +1,70 @@
+overview: >-
+  A 2D renderer that draws 50,000 rotated, tinted sprites per frame in a handful of draw calls. Sprites are packed into
+  one texture atlas, their corners are written into one big vertex buffer each frame, and a draw call is issued only
+  when the buffer fills or the texture changes.
+learn:
+  - name: Texture atlases
+  - name: Dynamic vertex buffers
+    ref: learnopengl
+  - name: Draw-call batching
+  - name: Atlas bleeding
+components:
+  - id: packer
+    name: Atlas packer
+    role: Packs sprite images into one texture at load and records each UV rectangle.
+    tech: C++ / Python
+    talksTo: [batcher]
+    kind: offline
+  - id: game
+    name: Game code
+    role: Asks for each sprite with an id, position, rotation, scale and tint.
+    tech: C++ / Python
+    talksTo: [batcher]
+    kind: core
+  - id: batcher
+    name: Sprite batcher
+    role: Builds the quads into a vertex buffer and decides when to flush.
+    tech: OpenGL
+    talksTo: [shader]
+    kind: core
+  - id: shader
+    name: Sprite shader
+    role: Samples the atlas at each vertex UV and multiplies by the tint.
+    tech: GLSL
+    talksTo: []
+    kind: core
+flow:
+  - component: game
+    text: calls `draw(id, pos, rot, scale, tint)` 50k times; the id looks up a UV rectangle in the atlas.
+  - component: batcher
+    text: rotates the four corners on the CPU and appends 4 vertices of `x, y, u, v, rgba` to the buffer; indices come from a prebuilt buffer.
+  - component: batcher
+    text: "**flushes** with one `glDrawElements` when the texture changes or 8,192 sprites are queued, so 50k sprites take about 7 calls."
+  - component: shader
+    text: draws each quad as atlas colour times tint; sprites at 60 FPS and draw calls per frame are logged.
+interface:
+  lang: cpp
+  code: |
+    struct Vertex { float x, y, u, v; uint32_t rgba; };
+
+    class SpriteBatch {
+    public:
+      void begin(const Mat3& view);
+      void draw(SpriteId id, Vec2 pos, float rot,
+                Vec2 scale, uint32_t tint);
+      void end();             // flushes the rest
+      int  draw_calls() const;
+    private:
+      void flush();           // one glDrawElements
+      std::vector<Vertex> verts_;  // 4 per sprite
+      GLuint texture_ = 0;
+    };
+decisions:
+  - choice: Corners on the CPU, not instancing
+    instead: Instanced quads with a per-sprite transform in the vertex shader
+    why: >-
+      At 20 bytes a vertex, 50k sprites are 4 MB a frame, which uploads easily and keeps the code simple. Move to
+      instancing (one quad, per-sprite data) if you need ten times more sprites.
+watchOut: >-
+  Neighbouring sprites bleed into each other at atlas edges once filtering or mipmaps kick in. Pad each sprite with
+  2 px copied from its own edge, and inset UVs by half a texel.

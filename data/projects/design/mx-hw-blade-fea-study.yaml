@@ -1,0 +1,102 @@
+overview: >-
+  A scripted study that follows one load case from wind to stress in the 2.5 m blade. Blade element momentum
+  theory (BEM: split the blade into strips and balance each strip's lift and drag against the air it slows down)
+  turns wind speed into forces along the span, and those forces load a shell model of the blade meshed with Gmsh and
+  solved in CalculiX. The postprocessor reports root stress, tip deflection and natural frequencies for two root
+  layups, and every result is checked against hand beam theory before it is believed.
+learn:
+  - name: Blade element momentum
+  - name: Shell finite elements
+    ref: fish-belytschko-fem
+  - name: Mesh convergence
+  - name: Composite laminates
+  - name: Beam theory checks
+    ref: mit-2-001
+  - name: Modal analysis
+stats:
+  - value: < 5 %
+    label: tip deflection of blade length
+  - value: < 40 %
+    label: of laminate strength at extreme load
+  - value: ≤ 3 %
+    label: change between mesh refinements
+components:
+  - id: geometry
+    name: Geometry generator
+    role: Builds the 2.5 m blade surface from published airfoil sections, chord and twist along the span.
+    tech: Python · Gmsh
+    talksTo: [model]
+    kind: core
+  - id: bem
+    name: BEM loads
+    role: Computes lift and drag per span strip for rated wind and the extreme gust.
+    tech: Python · NumPy
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: FEA model builder
+    role: Meshes the shell, assigns the layup per region, applies loads and fixes the root.
+    tech: Python · Gmsh
+    talksTo: [solver]
+    kind: core
+  - id: solver
+    name: Solver
+    role: Runs the static and frequency analyses on a laptop in under 10 minutes.
+    tech: CalculiX
+    talksTo: [post]
+    kind: core
+  - id: post
+    name: Postprocessor
+    role: Extracts peak stress and its location, tip deflection and the first natural frequencies.
+    tech: Python · Matplotlib
+    talksTo: [check]
+    kind: core
+  - id: check
+    name: Beam-theory check
+    role: Treats the blade as a tapered cantilever and compares deflection with the FEA within 10 percent.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: coupon
+    name: Coupon bend test
+    role: Optional 1 m printed coupon with a dial gauge and weights to sanity-check stiffness.
+    tech: Dial gauge · weights
+    talksTo: []
+    kind: external
+flow:
+  - component: bem
+    text: takes the extreme gust case and returns force per strip; the summed force gives the **root bending moment** the blade must carry.
+  - component: geometry
+    text: lofts the airfoil sections into a surface, splitting it into root, spar cap and shell regions.
+  - component: model
+    text: meshes the surface, gives each region its layup (for example `root_A` vs `root_B`), fixes the root nodes and applies the strip forces.
+  - component: solver
+    text: solves the static case and the first three modes, writing displacements and stresses.
+  - component: post
+    text: reports peak stress as a fraction of laminate strength, tip deflection as a percent of `2.5 m`, and reruns on a finer mesh to check the `3 %` convergence.
+  - component: check
+    text: compares tip deflection with `δ = F·L³ / (3·E·I)` for an equivalent beam; a gap over `10 %` means a load or boundary error, not a result.
+interface:
+  lang: python
+  code: |
+    def bem_loads(v_wind: float, rpm: float,
+                  sections: list[Section]
+                  ) -> list[StripLoad]: ...
+
+    def run_case(layup: str, loads: list[StripLoad],
+                 mesh_size_mm: float) -> Result: ...
+
+    @dataclass
+    class Result:
+        tip_defl_m: float
+        max_stress_ratio: float   # / strength
+        hotspot: tuple[float, float, float]
+        freqs_hz: list[float]     # first 3 modes
+decisions:
+  - choice: Shell model, beam as a check
+    instead: A beam model only
+    why: The crack was at the root, where a beam model cannot show local stress around the transition. The beam model stays as a cheap check of the shell.
+  - choice: Orthotropic laminate properties
+    instead: Treat the composite as isotropic
+    why: Glass-fibre laminate is far stiffer along the fibres; an isotropic guess gets the root stress pattern wrong. Use documented ply properties per layup.
+watchOut: Applying the loads in the wrong direction, or forgetting the blade's twist, can make results look tidy and still be wrong. Check the sum of reaction forces at the root against the BEM total.

@@ -1,0 +1,110 @@
+overview: >-
+  An append-only ledger for TipJar where every tip is a journal entry whose legs (one line per account touched) sum
+  to zero. A tip, the platform fee and the tax withholding post in one transaction, and running balances are
+  updated in that same transaction so reads stay fast. A nightly job re-adds the whole journal to prove the
+  balances match and the trial balance is zero per currency.
+learn:
+  - name: Double-entry bookkeeping
+  - name: Deferred constraints
+    ref: cmu-15-445
+  - name: Integer minor units
+  - name: Hot-row contention
+    ref: ddia
+  - name: Append-only audit logs
+    ref: ddia
+stats:
+  - value: 800/s
+    label: transfers for 10 minutes
+  - value: < 20 ms
+    label: p99 balance read
+  - value: < 60 s
+    label: trial balance, 50M entries
+components:
+  - id: app
+    name: TipJar app
+    role: Sends a tip with fan, creator, amount and currency.
+    tech: Mobile · web
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: Transfer API
+    role: Turns a tip into balanced legs, posts it, and posts reversals as new opposite entries.
+    tech: Go · pgx
+    talksTo: [journal, balances]
+    kind: core
+  - id: journal
+    name: Journal store
+    role: Immutable entries and legs; a deferred trigger rejects any entry whose legs do not sum to zero.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: balances
+    name: Balance materialiser
+    role: Keeps one running balance row per account, updated in the posting transaction.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: trial
+    name: Trial-balance job
+    role: Sums all legs per currency and checks every stored balance against the journal.
+    tech: SQL · cron
+    talksTo: [journal, balances]
+    kind: offline
+  - id: load
+    name: Load generator
+    role: Posts Zipf-skewed tips over 500k accounts to reach 800 transfers a second.
+    tech: Go
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: >-
+      receives `POST /transfers` for a 500-cent tip and builds three legs, fan `-500`, creator `+425`, fee `+75`,
+      all as integer cents.
+  - component: api
+    text: >-
+      picks one of 16 **fee sub-accounts** at random, so thousands of tips a second do not queue on one platform-fee
+      row.
+  - component: journal
+    text: inserts the entry and its legs; at commit the deferred check rejects it if the legs do not sum to `0`.
+  - component: balances
+    text: >-
+      updates each account's balance row in the same transaction, locking accounts in id order so two transfers can
+      never deadlock.
+  - component: api
+    text: returns `201` with the entry id; a later mistake is fixed with `POST /transfers/{id}/reverse`, a new entry with the signs flipped.
+  - component: balances
+    text: >-
+      answers `GET /balances/{account}?as_of=…` from the stored row, or from the journal for a past timestamp; the
+      **trial-balance job** checks both agree every night.
+interface:
+  lang: http
+  code: |
+    POST /transfers
+    { "kind": "tip", "currency": "USD",
+      "legs": [
+        { "account": "fan:8812", "amount": -500 },
+        { "account": "creator:91", "amount": 425 },
+        { "account": "fee:07", "amount": 75 } ] }
+
+    201 Created
+    { "entry_id": "e_51x", "posted_at": "…Z" }
+decisions:
+  - choice: Integer cents
+    instead: Floats or decimals in the application
+    why: >-
+      0.1 + 0.2 is not 0.3 in floating point, and a trial balance that must be exactly zero over 50M entries leaves
+      no room for rounding drift.
+  - choice: Balances updated in the posting transaction
+    instead: Summing the journal on every read
+    why: >-
+      Summing millions of legs cannot meet 20 ms; a stored row can. The nightly verifier catches any bug that lets
+      the two drift.
+  - choice: Split the fee account into 16 sub-accounts
+    instead: One platform-fee account
+    why: >-
+      Every tip touches the fee account, so one row would serialise all 800 transfers a second. Reports add the 16
+      rows; revisit the count if lock waits show up in load tests.
+watchOut: >-
+  Never UPDATE or DELETE a journal row to fix a mistake. Post a reversal, or the history auditors rely on stops being
+  provable.

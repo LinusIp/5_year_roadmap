@@ -1,0 +1,119 @@
+overview: >-
+  Speculative decoding guesses ahead with a small draft model and lets the large target model check several guesses in
+  one forward pass. Decoding is memory-bound (each step spends most of its time reading weights), so verifying k tokens
+  costs about the same as generating one. A verifier accepts or rejects each guess with a rule that keeps the output
+  distribution exactly the target's, both KV caches roll back to the accepted length, and the same measurements are
+  repeated with EAGLE on the same target.
+learn:
+  - name: Speculative sampling
+  - name: Memory-bound decoding
+    ref: kipply-inference-arithmetic
+  - name: Acceptance rate
+  - name: KV-cache rollback
+  - name: EAGLE draft heads
+    ref: vllm-docs
+  - name: Distribution tests
+stats:
+  - value: 50 of 50
+    label: greedy prompts identical to target
+  - value: < 0.01
+    label: total variation distance
+  - value: k = 1–8
+    label: draft lengths, 3 prompt types
+components:
+  - id: draft
+    name: Draft model
+    role: Proposes k tokens autoregressively and records its probabilities q.
+    tech: Llama 3.2 1B · own KV cache
+    talksTo: [target]
+    kind: core
+  - id: target
+    name: Target model
+    role: Scores the prefix plus all k drafted tokens in one pass, giving p at k + 1 positions.
+    tech: Llama 3.1 8B · own KV cache
+    talksTo: [verifier]
+    kind: core
+  - id: verifier
+    name: Verifier
+    role: Accepts each token with probability min(1, p/q), resamples on rejection, adds a bonus token.
+    tech: PyTorch
+    talksTo: [kv]
+    kind: core
+  - id: kv
+    name: KV rollback
+    role: Truncates both caches to the accepted length before the next round.
+    tech: PyTorch tensors
+    talksTo: [draft]
+    kind: core
+  - id: disttest
+    name: Distribution test
+    role: Samples 10,000 tokens at fixed prefixes and compares them with the target alone.
+    tech: SciPy chi-squared
+    talksTo: []
+    kind: offline
+  - id: bench
+    name: Sweep bench
+    role: Measures acceptance, tokens per target pass and speed-up per draft length, prompt type and batch.
+    tech: Python · pandas
+    talksTo: []
+    kind: offline
+  - id: eagle
+    name: EAGLE
+    role: The reference or engine EAGLE implementation, run on the same target and prompts.
+    tech: EAGLE reference code
+    talksTo: [bench]
+    kind: external
+flow:
+  - component: draft
+    text: runs `k` steps on the prefix and keeps tokens `t1…tk` with their probabilities `q1…qk`.
+  - component: target
+    text: >-
+      runs **one** forward pass over prefix plus drafts and returns `p1…pk+1`, using the same temperature and top-p
+      processing as the draft.
+  - component: verifier
+    text: >-
+      walks the positions, accepting `ti` with probability `min(1, p/q)`; at the first rejection it samples from
+      `max(0, p − q)`, normalised, and stops.
+  - component: verifier
+    text: adds one **bonus** token sampled from `pk+1` when all `k` drafts pass.
+  - component: kv
+    text: rolls both caches back to the accepted length, so the next round starts from a clean prefix; this round **loops**.
+  - component: disttest
+    text: checks at temperature 1 that a chi-squared test cannot tell the output from the target at `p = 0.01`.
+  - component: bench
+    text: >-
+      reports acceptance and speed-up for `k` of 1, 2, 4 and 8 on code, chat and summarisation, then EAGLE, and how
+      the gain shrinks at batch 4 and 16.
+interface:
+  lang: python
+  code: |
+    def speculate(prefix, k):
+        toks, q = draft.propose(prefix, k)  # q: [k, V]
+        p = target.probs(prefix + toks)     # [k+1, V]
+        for i, t in enumerate(toks):
+            if rand() < min(1, p[i, t] / q[i, t]):
+                continue
+            r = (p[i] - q[i]).clamp(min=0)
+            out = toks[:i] + [sample(r / r.sum())]
+            return rollback(prefix, out)
+        out = toks + [sample(p[k])]         # bonus
+        return rollback(prefix, out)
+decisions:
+  - choice: Draft from the same family
+    instead: Any small fast model
+    why: >-
+      Llama 3.2 1B shares Llama 3.1 8B's tokenizer, so drafted tokens mean the same thing to both. A different
+      tokenizer breaks the p/q comparison.
+  - choice: Exact rejection sampling
+    instead: Accept the draft when it matches the target's top token
+    why: >-
+      Top-token matching only works for greedy decoding. The min(1, p/q) rule keeps temperature sampling exactly the
+      target's distribution, which the chi-squared test checks.
+  - choice: EAGLE from its reference code
+    instead: Reimplementing EAGLE
+    why: >-
+      The 4 h budget for EAGLE is for measuring it, not building it; the comparison only needs the same target,
+      prompts and hardware.
+watchOut: >-
+  Computing p and q after different temperature or top-p processing silently changes the output distribution. Apply
+  the same logits processing to both models and keep the distribution test in the suite.

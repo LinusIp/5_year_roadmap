@@ -1,0 +1,78 @@
+overview: >-
+  Three multi-producer multi-consumer queues in C++20, one behind a mutex, a bounded ring where each slot's sequence
+  number (a ticket) says whose turn it is, and a lock-free linked list, run through one benchmark harness with pinned
+  threads from 1 to 16. A throughput table, perf cache-miss counts and a written explanation of the winner finish it.
+learn:
+  - name: Atomics and compare-and-swap
+    ref: mit-6-172
+  - name: Cache-line contention
+  - name: Thread pinning
+  - name: Benchmark methodology
+components:
+  - id: harness
+    name: Benchmark harness
+    role: Pins threads, starts them on a barrier, times the run and checks every item arrives once.
+    tech: C++20 · pthreads
+    talksTo: [queues, report]
+    kind: core
+  - id: queues
+    name: Queue designs
+    role: Mutex deque, ticketed ring and lock-free linked queue behind one push/pop interface.
+    tech: std::atomic
+    talksTo: []
+    kind: core
+  - id: perf
+    name: perf
+    role: Counts cache misses and cycles for each run.
+    tech: perf stat
+    talksTo: [report]
+    kind: external
+  - id: report
+    name: Results table
+    role: Ops per second and cache misses per design and thread count.
+    tech: CSV · plot
+    talksTo: []
+    kind: offline
+flow:
+  - component: harness
+    text: >-
+      pins P producers and C consumers to cores with `pthread_setaffinity_np`, releases them together, and has each
+      producer push 10M tagged items.
+  - component: queues
+    text: >-
+      differ in how they hand out slots: the mutex queue locks a `std::deque`, the ticket ring claims a slot with
+      `fetch_add` on `tail` and waits until its `seq` matches, and the linked queue swings `tail` with
+      **compare-and-swap**.
+  - component: harness
+    text: >-
+      times the run after a warm-up, checks every item arrived exactly once, and repeats 5 times per thread count,
+      keeping the median.
+  - component: report
+    text: joins ops/s with `perf stat -e cache-misses` for each design at 1 to 16 threads into one table.
+interface:
+  lang: cpp
+  code: |
+    template <class T>
+    struct alignas(64) Slot {
+      std::atomic<size_t> seq;  // whose turn
+      T value;
+    };
+
+    template <class T, size_t N>
+    class TicketRing {
+      alignas(64) std::atomic<size_t> head_{0};
+      alignas(64) std::atomic<size_t> tail_{0};
+      Slot<T> slots_[N];
+    public:
+      bool push(const T& v);  // ticket = tail_++
+      bool pop(T& out);       // ticket = head_++
+    };
+decisions:
+  - choice: Pinned threads and a fixed CPU frequency
+    instead: Running on the default desktop setup
+    why: >-
+      Turbo boost and the scheduler moving threads change throughput by more than the gap between designs at low
+      thread counts. Pin threads, set the performance governor, and report the median of 5 runs.
+watchOut: >-
+  Head, tail and neighbouring slots on one 64-byte cache line make every core invalidate the others' copy (false
+  sharing), so a design looks slower than it is. Pad them with `alignas(64)` and confirm with perf cache-miss counts.

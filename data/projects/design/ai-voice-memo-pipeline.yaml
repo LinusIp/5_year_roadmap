@@ -1,0 +1,54 @@
+overview: >-
+  A script that walks a folder of voice memos, transcribes each with a Whisper-class speech model, and asks an LLM to
+  turn the transcript into a summary and action items that follow a fixed schema. Word error rate (WER, the share of
+  words wrong) on 3 hand-corrected transcripts shows how good the transcripts are.
+learn:
+  - name: Speech recognition
+  - name: Audio chunking
+  - name: Structured output
+    ref: llm-zoomcamp
+  - name: Word error rate
+    ref: slp3
+components:
+  - id: asr
+    name: Transcriber
+    role: Splits long audio into chunks and transcribes them.
+    tech: Whisper-class ASR
+    talksTo: [summarizer, wer]
+    kind: core
+  - id: summarizer
+    name: Summarizer
+    role: Sends the transcript with a JSON schema and validates the reply.
+    tech: Python · LLM API
+    talksTo: [llm]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Returns the summary and action items as JSON.
+    tech: Hosted LLM
+    talksTo: []
+    kind: external
+  - id: wer
+    name: WER check
+    role: Compares 3 transcripts with your hand-corrected versions.
+    tech: jiwer
+    talksTo: []
+    kind: offline
+flow:
+  - component: asr
+    text: cuts each file into 30-second chunks and joins the chunk transcripts into one text.
+  - component: summarizer
+    text: asks for `summary`, `action_items[]` and an `owner` per item, and retries once if the JSON fails validation.
+  - component: llm
+    text: returns the structured result, saved next to the audio file as `.json`.
+  - component: wer
+    text: normalizes case and punctuation on both sides and reports **WER** for the 3 checked memos.
+decisions:
+  - choice: Fixed 30-second chunks
+    instead: Silence-based splitting
+    why: >-
+      Short memos rarely need more, and fixed chunks are a few lines of code in a 5-hour build. Switch to
+      silence-based splits if words at chunk edges show up as errors in the WER check.
+watchOut: >-
+  Judging summaries by eye hides missing action items. Write the expected action items for the 3 checked memos and
+  count how many each summary catches.

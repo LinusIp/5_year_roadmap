@@ -1,0 +1,128 @@
+overview: >-
+  A router in Go or Rust in front of three or more vLLM replicas. It hashes each prompt into blocks of tokens,
+  guesses which replica still holds the longest matching prefix in its cache, and balances that against how busy each
+  replica is. An autoscaler adds replicas when queues stay long, scales idle ones to zero and holds requests while a
+  cold replica starts, and a benchmark compares all of it with plain round-robin.
+learn:
+  - name: Prefix caching
+    ref: vllm-docs
+  - name: Prefix-aware routing
+    ref: sglang-docs
+  - name: Load balancing
+    ref: system-design-primer
+  - name: Autoscaling on Kubernetes
+    ref: kubernetes-tutorials
+  - name: Prometheus metrics
+    ref: prometheus-docs
+  - name: Cold starts
+stats:
+  - value: ≥ 2×
+    label: prefix cache hit rate over round-robin
+  - value: ≥ 30 %
+    label: lower p50 TTFT
+  - value: 0 → 20
+    label: requests a second from zero, none failing
+components:
+  - id: loadgen
+    name: Load generator
+    role: Plays 200 multi-turn sessions that share 20 system prompts.
+    tech: Python
+    talksTo: [router]
+    kind: external
+  - id: router
+    name: Router
+    role: An OpenAI-compatible proxy that scores replicas, forwards and streams responses.
+    tech: Go net/http or Rust axum
+    talksTo: [index, poller, replicas]
+    kind: core
+  - id: index
+    name: Prefix index
+    role: Remembers which block hashes went to which replica recently, and forgets old ones.
+    tech: In-memory hash map
+    talksTo: []
+    kind: core
+  - id: poller
+    name: Metrics poller
+    role: Reads each replica's waiting and running requests.
+    tech: Prometheus metrics
+    talksTo: [replicas]
+    kind: core
+  - id: replicas
+    name: vLLM replicas
+    role: Serve a 1–3B model with prefix caching on.
+    tech: vLLM · GPU
+    talksTo: []
+    kind: external
+  - id: autoscaler
+    name: Autoscaler
+    role: Adds or removes replicas from queue depth, down to zero, and buffers during cold starts.
+    tech: Go or Rust
+    talksTo: [poller, k8s]
+    kind: core
+  - id: k8s
+    name: Kubernetes
+    role: Starts and stops replica pods on the GPU node pool.
+    tech: Kubernetes
+    talksTo: [replicas]
+    kind: external
+flow:
+  - component: loadgen
+    text: sends a chat request whose system prompt is shared with many other sessions.
+  - component: router
+    text: >-
+      tokenises the prompt and hashes it into **blocks of tokens** the same size as vLLM's cache blocks, each hash
+      chained to the one before.
+  - component: index
+    text: >-
+      returns, for every replica, the longest run of those hashes it was sent within the expiry window.
+  - component: poller
+    text: >-
+      supplies each replica's queue depth, and the router picks the highest `matched_blocks - λ × queue_depth`.
+  - component: replicas
+    text: >-
+      skip the cached prefix on the chosen replica, prefill only the rest of the prompt and stream tokens back
+      through the router.
+  - component: autoscaler
+    text: >-
+      adds a replica when average queue depth stays over its threshold, and scales idle ones to zero after a
+      cool-down, holding new requests while a replica starts.
+interface:
+  lang: go
+  code: |
+    type Replica struct {
+        Addr    string
+        Index   *PrefixIndex // block hash -> last seen
+        Waiting int          // from /metrics
+        Running int
+    }
+
+    // Higher is better; lambda trades cache for load.
+    func score(r *Replica, blocks []uint64) float64 {
+        hit := r.Index.LongestRun(blocks, ttl)
+        load := r.Waiting + r.Running
+        return float64(hit) - lambda*float64(load)
+    }
+decisions:
+  - choice: Prefix match minus a load penalty
+    instead: Route purely on prefix match
+    why: >-
+      With 20 shared system prompts, pure prefix routing piles the popular ones onto one hot replica. The penalty
+      `λ` is tuned on the benchmark until queue depth stays even.
+  - choice: Router-side index with expiry
+    instead: Replicas reporting their cache contents
+    why: >-
+      A guessed index works with stock vLLM. Entries expire so the router stops trusting evicted prefixes; replica
+      reports are the stretch if guesses and measured hit rates drift apart.
+  - choice: Hash token blocks
+    instead: Hash prompt characters
+    why: >-
+      vLLM caches whole blocks of tokens. Character hashes put block boundaries in different places, so matches the
+      router counts never hit in the engine.
+  - choice: Scale on queue depth
+    instead: Scale on GPU utilisation
+    why: >-
+      A GPU looks nearly fully used whether it keeps up or not; waiting requests are what users feel as TTFT. Queue
+      depth also reads zero when a replica can go.
+watchOut: >-
+  Scale-down that stops a replica mid-stream cuts off responses. Mark a replica as draining, stop routing to it, and
+  remove it only when its running requests reach zero.

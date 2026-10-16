@@ -1,0 +1,71 @@
+overview: >-
+  A glTF 2.0 loader behind an asset cache: meshes, materials and textures are created once and handed out as
+  ref-counted handles (small ids with a generation count instead of raw pointers), so loading the same model twice
+  shares GPU resources. Texture decoding runs on worker threads while the main thread keeps rendering, and cold and
+  warm load times are reported.
+learn:
+  - name: glTF accessors
+  - name: Handle-based resources
+    ref: game-engine-architecture
+  - name: Reference counting
+  - name: Async loading
+components:
+  - id: parser
+    name: glTF parser
+    role: Reads the JSON and resolves accessors to typed views into the buffers.
+    tech: cgltf
+    talksTo: [cache]
+    kind: core
+  - id: cache
+    name: Asset cache
+    role: Maps paths and content hashes to handles and counts references.
+    tech: C++20
+    talksTo: [decode]
+    kind: core
+  - id: decode
+    name: Texture workers
+    role: Decode PNG and JPEG images off the main thread.
+    tech: stb_image · threads
+    talksTo: [upload]
+    kind: core
+  - id: upload
+    name: GPU upload
+    role: Creates buffers and textures on the main thread and marks assets ready.
+    tech: OpenGL
+    talksTo: []
+    kind: core
+flow:
+  - component: parser
+    text: resolves each accessor to `bufferView.byteOffset + accessor.byteOffset`, steps by `byteStride` when set (interleaved data) and applies **sparse** overrides on top.
+  - component: cache
+    text: looks up the path and content hash; a hit returns the existing `Handle<Model>` and bumps its count, a miss creates entries in state `Loading`.
+  - component: decode
+    text: decodes images on 4 worker threads and pushes pixels onto a queue for the main thread.
+  - component: upload
+    text: drains the queue each frame, creates textures with mipmaps and flips them to `Ready`; materials use a 1x1 placeholder until then.
+interface:
+  lang: cpp
+  code: |
+    template <class T>
+    struct Handle { uint32_t index, generation; };
+
+    class AssetCache {
+    public:
+      Handle<Model> load(const std::string& path);
+      const Model* get(Handle<Model> h) const; // or null
+      AssetState state(Handle<Texture> h) const;
+      void retain(Handle<Model> h);
+      void release(Handle<Model> h);  // frees at 0
+      void pump();  // main thread: upload ready work
+    };
+    // byteStride 0 means tightly packed
+    const uint8_t* element(const Accessor& a, size_t i);
+decisions:
+  - choice: Decode on workers, upload on main thread
+    instead: Upload from worker threads with shared GL contexts
+    why: >-
+      A GL context belongs to one thread, and shared contexts behave differently across drivers. Decoding is the slow
+      part (tens of ms for a 2K PNG) while uploading is quick; revisit with Vulkan, where transfer queues make worker uploads normal.
+watchOut: >-
+  With interleaved buffers, element `i` sits at `offset + i * byteStride`, not `i * elementSize`, so ignoring the stride
+  garbles only some files. Test with the Khronos sample models that use interleaving and sparse accessors.

@@ -1,0 +1,97 @@
+overview: >-
+  A header-only C++17 library where entities are just handles and their data lives in archetype tables: every entity
+  with the same set of components sits in the same table, one tightly packed array per component. Queries cache which
+  tables match, so a system walks straight through contiguous memory. Systems declare which components they read and
+  write, and changes that move entities between tables wait in a command buffer until the stage ends.
+learn:
+  - name: Entity-component-system
+    ref: game-engine-architecture
+  - name: Archetype storage
+  - name: Generational handles
+  - name: Cache-friendly iteration
+    ref: cmu-15-213
+  - name: Deferred structural changes
+stats:
+  - value: < 5 ms
+    label: iterate 1M entities, 2 components
+  - value: < 20 ms
+    label: create or destroy 100k entities
+  - value: "0"
+    label: steady-state heap allocations
+components:
+  - id: alloc
+    name: Entity allocator
+    role: Hands out index-plus-generation handles and recycles indices through a free list.
+    tech: C++17
+    talksTo: [storage]
+    kind: core
+  - id: storage
+    name: Component storage
+    role: Keeps one table per component set, with a packed column per component type.
+    tech: C++17 templates
+    talksTo: [query]
+    kind: core
+  - id: query
+    name: Query engine
+    role: Matches include and exclude masks against tables and caches the result until a new table appears.
+    tech: C++17 · bitsets
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Scheduler
+    role: Groups systems into stages so systems with no conflicting writes can run in parallel.
+    tech: C++17 · std::thread
+    talksTo: [storage, snapshot]
+    kind: core
+  - id: snapshot
+    name: Snapshot IO
+    role: Writes and reads every table as a binary world snapshot.
+    tech: C++17
+    talksTo: []
+    kind: offline
+  - id: bench
+    name: Benchmarks
+    role: Builds 1M-entity worlds and counts allocations through an allocator hook.
+    tech: Catch2-style · CMake
+    talksTo: [storage]
+    kind: offline
+flow:
+  - component: alloc
+    text: returns `Entity{index, generation}`; a destroyed entity bumps the generation, so old handles fail the check instead of **dangling**.
+  - component: storage
+    text: places an entity with `Pos` and `Vel` in the `{Pos, Vel}` table; adding `Health` moves its row to the `{Pos, Vel, Health}` table.
+  - component: query
+    text: returns the cached list of tables containing `Pos` and `Vel` and not `Frozen`, rebuilt only when a new table is created.
+  - component: scheduler
+    text: runs `move` beside any system that writes neither `Pos` nor `Vel`, calling it over each table's columns in order.
+  - component: storage
+    text: applies the stage's buffered creates, destroys and component adds after the systems finish, so no system sees a table change under it.
+interface:
+  lang: cpp
+  code: |
+    struct Entity { uint32_t index, generation; };
+
+    World w;
+    auto e = w.create(Pos{0, 0}, Vel{1, 0});
+    w.add(e, Health{100});   // row moves to new table
+
+    // Declared access lets disjoint systems run in
+    // parallel; Exclude filters out tables.
+    w.system<Write<Pos>, Read<Vel>, Exclude<Frozen>>(
+      "move", [](Pos& p, const Vel& v) {
+        p.x += v.x; p.y += v.y;
+      });
+    w.run_frame();   // stages, then deferred commands
+decisions:
+  - choice: Archetype tables
+    instead: Sparse sets per component
+    why: The headline target is iterating 1M entities in 5 ms, and packed tables are best for that. Sparse sets add and remove faster; revisit if a game toggles components every frame.
+  - choice: Deferred structural changes
+    instead: Applying adds and destroys immediately
+    why: Moving rows while a system iterates invalidates references; a command buffer applied between stages removes the whole class of bug.
+  - choice: Generational 32+32-bit handles
+    instead: Pointers to entity objects
+    why: Rows move between tables, so pointers break; a generation check catches stale handles in one comparison.
+watchOut: >-
+  Benchmarks with data that fits in L1 cache lie. Use 1M entities, real component sizes and random destroy
+  patterns, or the 5 ms number will not hold in the studio's games.

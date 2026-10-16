@@ -1,0 +1,121 @@
+overview: >-
+  A hand-rolled HTTP/1.1 server for Nimbus Ads' bid endpoint, in Rust on raw `libc` calls with no async runtime.
+  Each of 4 worker threads opens its own listening socket with `SO_REUSEPORT`, so the kernel spreads new connections
+  across them, and its own edge-triggered epoll instance, which reports a socket only when new data arrives, so the
+  worker must read until the kernel says `EAGAIN`. Connections live in a slab (a pre-allocated array indexed by a
+  small integer), idle ones expire through a timer wheel, and nothing on the hot path is shared between threads.
+learn:
+  - name: Event-driven servers
+    ref: cmu-15-213
+  - name: Edge-triggered epoll
+  - name: SO_REUSEPORT
+  - name: Slab allocation
+  - name: Timer wheels
+  - name: HTTP pipelining
+stats:
+  - value: 150k req/s
+    label: on 4 cores
+  - value: < 3 ms
+    label: p99 latency
+  - value: < 1 GB
+    label: for 100k idle connections
+components:
+  - id: clients
+    name: Bid clients
+    role: Bursty clients holding tens of thousands of keep-alive connections.
+    tech: HTTP/1.1
+    talksTo: [acceptor]
+    kind: external
+  - id: acceptor
+    name: Reuseport acceptor
+    role: One non-blocking listening socket per worker, balanced by the kernel.
+    tech: SO_REUSEPORT
+    talksTo: [worker]
+    kind: core
+  - id: worker
+    name: Worker loop
+    role: Waits on its epoll instance, reads and writes ready sockets, runs timers.
+    tech: epoll · libc
+    talksTo: [slab, timers]
+    kind: core
+  - id: slab
+    name: Connection slab
+    role: Stores each connection's fd, state and pending output by slot index.
+    tech: Pre-allocated Vec
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: HTTP parser
+    role: Parses complete requests from a buffer and keeps partial ones.
+    tech: Zero-copy parser
+    talksTo: []
+    kind: core
+  - id: timers
+    name: Timer wheel
+    role: Expires idle connections with constant-time reset and cancel.
+    tech: Hashed wheel
+    talksTo: []
+    kind: core
+  - id: loadgen
+    name: Load harness
+    role: Opens idle connections and drives request load from separate cores.
+    tech: Benchmark tool
+    talksTo: [clients]
+    kind: offline
+flow:
+  - component: acceptor
+    text: >-
+      lets the kernel hash a new connection to one worker's socket; the worker calls `accept4` with
+      `SOCK_NONBLOCK` until `EAGAIN`.
+  - component: slab
+    text: >-
+      gives the connection a slot of under 100 bytes, stored in `epoll_event.data`; read buffers come from a pool
+      only while data is pending, which keeps 100,000 idle connections under 1 GB.
+  - component: worker
+    text: >-
+      on `EPOLLIN` reads until `EAGAIN`, because edge-triggered epoll will not report the same bytes again, with a
+      budget of 16 reads before moving on to other sockets.
+  - component: parser
+    text: >-
+      parses every complete request in the buffer (pipelining), answers `GET /bid` with static JSON and
+      `POST /echo` with the body, and keeps any partial request for the next read.
+  - component: timers
+    text: >-
+      after the response is written (a short write keeps the rest and waits for `EPOLLOUT`), resets the 60 s idle
+      timer; each tick closes expired connections and frees their slots.
+interface:
+  lang: rust
+  code: |
+    // per worker thread, nothing shared
+    let lfd = listen_reuseport(addr)?; // nonblocking
+    let ep = epoll_create1(EPOLL_CLOEXEC);
+    let mut ev = epoll_event {
+        events: (EPOLLIN | EPOLLOUT | EPOLLET
+                 | EPOLLRDHUP) as u32,
+        u64: slot as u64,     // slab index
+    };
+    epoll_ctl(ep, EPOLL_CTL_ADD, fd, &mut ev);
+    loop {
+        let n = epoll_wait(ep, evs, 1024, wheel.next());
+        for e in &evs[..n] { handle(e.u64 as usize) }
+        wheel.expire(now_ms(), close_conn);
+    }
+decisions:
+  - choice: Thread per core with SO_REUSEPORT
+    instead: One acceptor thread handing off connections
+    why: >-
+      A hand-off queue is a shared lock on every new connection during a burst. Separate sockets let the kernel
+      balance and keep each worker lock-free; revisit if long-lived connections end up unevenly spread.
+  - choice: Edge-triggered epoll
+    instead: Level-triggered epoll
+    why: >-
+      With 100,000 mostly idle sockets, level-triggered mode keeps reporting sockets you have not drained, costing
+      wakeups. Edge-triggered is cheaper but demands read-until-EAGAIN discipline.
+  - choice: Timer wheel, not a heap
+    instead: A binary heap of deadlines
+    why: >-
+      Every request resets a connection's idle timer, so 150,000 resets a second. A wheel resets in constant time;
+      a heap pays a logarithmic cost and a search to cancel.
+watchOut: >-
+  With edge-triggered epoll, a socket left undrained is never reported again and the connection hangs silently. When
+  a socket hits the read budget, put it on a ready list so it is served on the next loop.

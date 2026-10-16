@@ -1,0 +1,70 @@
+overview: >-
+  A cart-pole simulated in Python from its nonlinear equations of motion, linearised by hand around upright into
+  `ẋ = Ax + Bu`, and balanced by LQR, whose gain comes from SciPy's continuous Riccati solver. The controller must bring
+  the pole back from a 15-degree tilt in under 3 s, with the peak force reported and kept within the actuator limit.
+learn:
+  - name: Equations of motion
+    ref: mit-2-003
+  - name: Linearisation
+  - name: LQR
+    ref: brunton-control-bootcamp
+  - name: Q and R weights
+components:
+  - id: plant
+    name: Nonlinear plant
+    role: Full cart-pole dynamics, giving state derivatives for a force.
+    tech: NumPy
+    talksTo: [lin]
+    kind: core
+  - id: lin
+    name: Linear model
+    role: Hand-derived A and B at upright, checked numerically.
+    tech: NumPy
+    talksTo: [lqr]
+    kind: core
+  - id: lqr
+    name: LQR design
+    role: Solves the Riccati equation for the gain K.
+    tech: scipy.linalg
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Closed-loop sim
+    role: Runs the nonlinear plant under u = -Kx with a force limit and a push.
+    tech: SciPy solve_ivp · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: plant
+    text: models a 1 kg cart and a 0.1 kg pole mass at 0.5 m, and returns `[ẋ, ẍ, θ̇, θ̈]` for a force `u`.
+  - component: lin
+    text: uses `sin θ ≈ θ`, `cos θ ≈ 1` and drops products of small terms, then checks A and B against a finite-difference Jacobian of the plant.
+  - component: lqr
+    text: solves `solve_continuous_are(A, B, Q, R)` and sets `K = R⁻¹BᵀP`, starting from `Q = diag(1, 1, 10, 1)` and `R = 0.1`.
+  - component: sim
+    text: integrates the **nonlinear** plant from 15 degrees with `u` clipped to ±20 N and a push at 5 s, and reports settling time and peak force.
+interface:
+  lang: python
+  code: |
+    def f(t, s, u, M=1.0, m=0.1, l=0.5, g=9.81):
+        """Nonlinear cart-pole, s = [x, xd, th, thd]."""
+
+    def linearise(M=1.0, m=0.1, l=0.5, g=9.81):
+        """A (4x4), B (4x1) at upright, by hand."""
+
+    def lqr(A, B, Q, R):
+        P = scipy.linalg.solve_continuous_are(A, B, Q, R)
+        return np.linalg.solve(R, B.T @ P)  # K
+
+    Q = np.diag([1.0, 1.0, 10.0, 1.0])
+    R = np.array([[0.1]])
+    u = np.clip(-K @ s, -20.0, 20.0)
+decisions:
+  - choice: Design linear, test nonlinear
+    instead: Test the controller on the same linear model
+    why: >-
+      The linear model always looks perfect because the gain was designed for it. Only the nonlinear plant with the
+      force limit shows whether a 15-degree start and a push are really recovered.
+watchOut: >-
+  Large Q or small R give gains that ask for far more force than the actuator has, and once the force is clipped the
+  loop is no longer the one LQR designed. Print the peak force, raise R until it fits the limit, then retune Q.

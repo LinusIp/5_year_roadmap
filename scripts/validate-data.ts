@@ -4,6 +4,7 @@
  * `npm run build` runs this first, so an invalid curriculum can never be built or deployed.
  */
 import { loadCatalogue } from './lib/load-catalogue.ts';
+import { loadDesigns } from './lib/load-designs.ts';
 import { loadDocs } from './lib/load-docs.ts';
 import { loadSeed } from './lib/load-seed.ts';
 
@@ -22,6 +23,10 @@ if (docs) {
 // matching cadence, examples, milestones adding up, prerequisites that resolve, no URLs.
 const catalogue = seed ? loadCatalogue(seed) : null;
 if (catalogue) errors.push(...catalogue.errors);
+// The designs (data/projects/design/): one per case, build and documented plan project, each within its weight's
+// counts, its flow and talksTo resolving, every core component on the flow, decisions with an alternative, no URLs.
+const designs = seed && catalogue ? loadDesigns(seed, catalogue.items) : null;
+if (designs) errors.push(...designs.errors);
 
 for (const w of warnings) console.warn('warning  ' + w);
 
@@ -44,6 +49,7 @@ const lines: [string, string | number][] = [
   ['credential-map rows', seed.subjects.length],
   ['tech docs', Object.keys(docs?.parsed ?? {}).length + ' of ' + seed.projects.filter((p) => p.cadence !== 'weekly').length + ' projects'],
   ['project catalogue', catalogueSummary()],
+  ['designs', designSummary()],
   ['roadmap.sh roadmaps', seed.roadmaps.length + ' (' + seed.roadmaps.reduce((n, r) => n + r.sections.reduce((m, s) => m + s.nodes.length, 0), 0) + ' nodes)'],
 ];
 console.log('/data is valid');
@@ -54,4 +60,12 @@ function catalogueSummary(): string {
   const items = catalogue?.items ?? [];
   const count = (kind: string, difficulty: string): number => items.filter((i) => i.kind === kind && i.difficulty === difficulty).length;
   return items.length + ': daily ' + count('challenge', 'easy') + ' challenges; weekly ' + count('challenge', 'medium') + ' challenges, ' + count('build', 'medium') + ' builds; monthly ' + count('case', 'advanced') + ' cases';
+}
+
+function designSummary(): string {
+  const weights = designs?.weights ?? new Map();
+  const ids = Object.keys(designs?.designs ?? {});
+  const kind = new Map((catalogue?.items ?? []).map((i) => [i.id, i.kind]));
+  const count = (k: string): number => ids.filter((id) => (kind.get(id) ?? 'plan') === k).length;
+  return ids.length + ' of ' + weights.size + ': ' + count('case') + ' cases, ' + count('build') + ' builds (light), ' + count('plan') + ' plan projects';
 }

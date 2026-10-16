@@ -1,0 +1,46 @@
+overview: >-
+  A two-stage search: a fast bi-encoder retrieves the top 50 passages, then a slower cross-encoder (a model that reads
+  query and passage together) rescores them. The study reports nDCG@10 gain over the first stage and the milliseconds
+  per query that gain costs.
+learn:
+  - name: Bi-encoders vs cross-encoders
+    ref: hf-llm-course
+  - name: Two-stage retrieval
+  - name: nDCG@10
+components:
+  - id: retriever
+    name: Bi-encoder
+    role: Embeds the query and returns the 50 nearest passages.
+    tech: sentence-transformers
+    talksTo: [reranker]
+    kind: core
+  - id: reranker
+    name: Cross-encoder
+    role: Scores each query and passage pair and reorders the 50.
+    tech: sentence-transformers CrossEncoder
+    talksTo: [eval]
+    kind: core
+  - id: eval
+    name: Evaluator
+    role: Computes nDCG@10 for both stages and times each stage per query.
+    tech: Python · NumPy
+    talksTo: []
+    kind: core
+flow:
+  - component: retriever
+    text: returns the top `k=50` passages by cosine similarity in a few milliseconds.
+  - component: reranker
+    text: scores all 50 `(query, passage)` pairs in one batch and sorts them.
+  - component: eval
+    text: computes **nDCG@10** before and after reranking, with the time spent in each stage.
+  - component: eval
+    text: repeats with `k=10, 20, 50, 100` to show where extra candidates stop helping and only add latency.
+decisions:
+  - choice: Rerank the top 50
+    instead: Rerank the top 200
+    why: >-
+      Cross-encoder cost grows linearly with candidates, and most relevant passages are already in the top 50 for
+      a decent bi-encoder. The k sweep tells you whether to move it.
+watchOut: >-
+  If the cross-encoder was fine-tuned on data that overlaps your evaluation queries, the gain is inflated. Use a
+  public checkpoint and an evaluation set it has not seen.

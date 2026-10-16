@@ -1,0 +1,111 @@
+overview: >-
+  A service that erases one learner's data from all five of Kindle Learn's stores and proves it, instead of manual
+  scripts. A subject registry knows where each learner's data lives; a coordinator checks legal holds, then sends
+  an idempotent delete task to an adapter per store and tracks each one to done. An independent verifier searches
+  every store for the learner's identifiers, and only a clean scan produces a signed **deletion certificate**.
+learn:
+  - name: Data mapping by subject
+  - name: Idempotent fan-out tasks
+    ref: ddia
+  - name: Legal holds
+  - name: Crypto-shredding for backups
+  - name: Batched deletes without locks
+  - name: Independent verification
+stats:
+  - value: < 10 min
+    label: erasure, 99 % of subjects
+  - value: "0"
+    label: residual records in 1,000 tests
+  - value: 100M rows
+    label: nightly retention, no lockout
+components:
+  - id: registry
+    name: Subject registry
+    role: Maps a learner id and its aliases (email, external ids) to every store, table and owner that holds them.
+    tech: PostgreSQL
+    talksTo: [coordinator]
+    kind: core
+  - id: coordinator
+    name: Workflow coordinator
+    role: Runs each request as a workflow, checks legal holds, fans out tasks and tracks their status.
+    tech: Go · PostgreSQL
+    talksTo: [adapters]
+    kind: core
+  - id: adapters
+    name: Store adapters
+    role: One per store (PostgreSQL, object storage, search, analytics, logs) with an idempotent delete by subject.
+    tech: Go · MinIO · OpenSearch
+    talksTo: [stores]
+    kind: core
+  - id: stores
+    name: Data stores
+    role: The five simulated stores, seeded with learner PII.
+    tech: Docker
+    talksTo: [verifier]
+    kind: external
+  - id: verifier
+    name: Verifier
+    role: Searches every store for the subject's identifiers, independently of the registry, and reports any hits.
+    tech: Go
+    talksTo: [certs]
+    kind: core
+  - id: certs
+    name: Certificate generator
+    role: Writes a signed record of what was deleted, where and when, holding only a hash of the subject id.
+    tech: Go · Ed25519
+    talksTo: []
+    kind: core
+  - id: retention
+    name: Retention scheduler
+    role: Nightly expires data by class in small batches across 100M rows.
+    tech: Go · SQL
+    talksTo: [adapters]
+    kind: offline
+flow:
+  - component: registry
+    text: resolves `learner_id` 4412 to every location, including aliases such as their email in search and logs.
+  - component: coordinator
+    text: >-
+      checks for a **legal hold** first and pauses if one exists; otherwise creates one task per location with a
+      30-day deadline and the status `pending`.
+  - component: adapters
+    text: >-
+      delete by subject, safe to run twice; tombstones keep only a hashed id, and backups are covered by deleting
+      the learner's encryption key, so restored copies stay unreadable.
+  - component: verifier
+    text: scans all five stores for the learner's id, email and name tokens; any hit sends the task back to `pending`.
+  - component: certs
+    text: issues a certificate once the scan is clean, listing each store, row count deleted and verification time.
+interface:
+  lang: http
+  code: |
+    POST /erasure-requests
+    { "subject": "learner:4412",
+      "reason": "gdpr_art17" }
+
+    202 Accepted
+    { "id": "er_208", "status": "in_progress",
+      "tasks": { "postgres": "done",
+                 "objects": "done",
+                 "search": "pending",
+                 "analytics": "pending",
+                 "logs": "pending" } }
+decisions:
+  - choice: Verifier independent of the registry
+    instead: Trust each adapter's success response
+    why: >-
+      Forgotten copies in logs and caches are the top pitfall; an adapter only deletes what the registry knows about.
+      A separate scan is what makes 0 residual records provable.
+  - choice: Per-subject encryption keys for backups
+    instead: Rewrite every backup on each erasure
+    why: >-
+      Rewriting backups for each request is slow and risky, and a restore would bring data back. Deleting the key
+      makes the backup copy unreadable at once.
+  - choice: Small batched deletes for retention
+    instead: One large DELETE per table each night
+    why: >-
+      A single delete over 100M rows holds locks and swells replication, and traffic p99 must not rise more than 10
+      percent. Batches of 5,000 with short pauses keep it flat.
+watchOut: >-
+  Erasing before checking legal holds destroys data the company is required to keep. Make the hold check a
+  blocking first step that no adapter can skip.

@@ -1,0 +1,123 @@
+overview: >-
+  A readable firewall for Dr. Alvarez's clinic router VM, written in Rust: a small rule language, a compiler that turns
+  ordered rules into a fast lookup structure, and a stateful engine. Packets arrive from the kernel through NFQUEUE, a
+  Linux hook that hands each packet to a user program for a verdict; replies of known connections are allowed by
+  connection tracking (a table of flows already seen), and only new flows are checked against the rules. The same
+  engine replays pcap files in dry-run mode, so every rule change can be tested before it goes live.
+learn:
+  - name: Stateful firewalls
+  - name: Connection tracking
+  - name: First-match rule order
+  - name: Packet classification
+  - name: Differential testing
+  - name: Parsing a small language
+    ref: crafting-interpreters
+stats:
+  - value: 1M packets/s
+    label: with 200 rules, one core
+  - value: < 300 MB
+    label: for 500k tracked flows
+  - value: "0"
+    label: mismatches in 100k packets
+components:
+  - id: parser
+    name: Rule parser
+    role: Reads the rules file into ordered rules with address sets and port ranges.
+    tech: Rust · hand-written parser
+    talksTo: [compiler, linter]
+    kind: core
+  - id: compiler
+    name: Compiler
+    role: Builds per-field lookup tables that return a bitset of matching rules.
+    tech: Rust · bitsets
+    talksTo: [evaluator]
+    kind: core
+  - id: kernel
+    name: Router kernel
+    role: Queues each forwarded packet to the engine and applies the verdict.
+    tech: Linux · NFQUEUE
+    talksTo: [conntrack]
+    kind: external
+  - id: conntrack
+    name: Conntrack table
+    role: Tracks each TCP, UDP and ICMP flow with its state and timeout.
+    tech: Hash map · timer wheel
+    talksTo: [evaluator]
+    kind: core
+  - id: evaluator
+    name: Evaluator
+    role: Finds the first matching rule for a new flow and returns allow, drop or reject.
+    tech: Rust
+    talksTo: [kernel]
+    kind: core
+  - id: replay
+    name: Pcap replay
+    role: Runs saved traffic through the engine and a simple reference, comparing verdicts.
+    tech: pcap files
+    talksTo: [conntrack]
+    kind: offline
+  - id: linter
+    name: Linter
+    role: Flags rules that can never match or contradict earlier ones.
+    tech: Rust
+    talksTo: []
+    kind: offline
+flow:
+  - component: parser
+    text: >-
+      reads `set staff = { 10.0.1.0/24 }` and `allow tcp from staff to any port 443`; rules are numbered in order and
+      the **first match wins**.
+  - component: compiler
+    text: >-
+      builds, for each field (source, destination, protocol, port), a table from value ranges to a 200-bit set of
+      matching rules.
+  - component: kernel
+    text: >-
+      queues a packet on NFQUEUE 0 with its packet id; the engine parses the IPv4 header and the ports.
+  - component: conntrack
+    text: >-
+      looks up the 5-tuple in both directions; an `ESTABLISHED` flow is allowed at once, refreshing its timeout (TCP
+      2 h, closing 2 min, UDP 30 s, ICMP 10 s).
+  - component: evaluator
+    text: >-
+      for a new flow, ANDs the four bitsets and takes the lowest set bit, the first matching rule; `allow` adds a
+      conntrack entry, `reject` answers with a TCP reset or ICMP unreachable.
+  - component: replay
+    text: >-
+      in dry-run mode feeds 100,000 test packets through both the engine and a plain loop over the rules, and fails on
+      any verdict that differs.
+interface:
+  lang: text
+  code: |
+    # clinic.rules, first match wins
+    set staff   = { 10.0.1.0/24 }
+    set servers = { 10.0.2.10, 10.0.2.11 }
+
+    allow tcp from staff to servers port 22
+    allow tcp from staff to any port 80,443
+    allow udp from any to 10.0.0.1 port 53
+    reject tcp from any to servers port 1-1023
+    drop all
+
+    $ fw replay --rules clinic.rules sample.pcap
+    pkt 1841  10.0.1.7:51022 > 10.0.2.10:22  allow #1
+decisions:
+  - choice: Bitset lookup per field
+    instead: Check all 200 rules one by one
+    why: >-
+      A linear scan costs up to 200 comparisons per new flow. Four table lookups and an AND over four 64-bit words keep
+      a single core near 1 million packets a second; the linear version stays as the reference for testing.
+  - choice: Conntrack before rules
+    instead: Evaluate rules on every packet
+    why: >-
+      Most packets belong to flows already allowed, and replies would need rules of their own. A 64-byte entry per flow
+      keeps 500,000 flows far under 300 MB.
+  - choice: Measure throughput on replayed packets
+    instead: Measure through NFQUEUE
+    why: >-
+      NFQUEUE's per-packet kernel round trip, not the engine, limits real throughput. Benchmark the engine on
+      in-memory packets, and report the NFQUEUE rate separately.
+watchOut: >-
+  TCP flows that end without a clean FIN, like a crashed client, stay in the table until timeout. Pick per-state
+  timeouts deliberately and evict the oldest flows when the table is full, or it slowly fills and new flows are
+  dropped.

@@ -52,6 +52,7 @@ export function Sheet({ open, title, onClose, children, footer, aside, scrollKey
   const titleId = useId();
 
   // Back to the remembered position once the content is tall enough to hold it (a doc loads after the sheet opens).
+  // Scroll anchoring is off on the body: content that loads in under the restored position must not move it.
   useEffect(() => {
     const el = body.current;
     if (!open || !scrollKey || !el) return undefined;
@@ -104,7 +105,7 @@ export function Sheet({ open, title, onClose, children, footer, aside, scrollKey
             {aside && <span className="shrink-0 self-center">{aside}</span>}
             <Button variant="icon" icon="x" label="Close" onClick={onClose} />
           </header>
-          <div ref={body} className="min-h-0 flex-1 overflow-y-auto px-5 pb-6 pt-2 [&>*+*]:mt-[18px]" onScroll={scrollKey ? (e) => saveScroll(scrollKey, e.currentTarget.scrollTop) : undefined}>
+          <div ref={body} className="min-h-0 flex-1 overflow-y-auto px-5 pb-6 pt-2 [overflow-anchor:none] [&>*+*]:mt-[18px]" onScroll={scrollKey ? (e) => saveScroll(scrollKey, e.currentTarget.scrollTop) : undefined}>
             <InSheet.Provider value={true}>{children}</InSheet.Provider>
             <UndoToast inSheet />
           </div>

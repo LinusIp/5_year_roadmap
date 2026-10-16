@@ -1,0 +1,45 @@
+overview: >-
+  N workers compete for one lease in etcd or Postgres; the holder renews it well before its TTL and stops acting as
+  leader as soon as a renewal fails, so 100 forced failovers never produce two leaders at once.
+learn:
+  - name: Leader election
+    ref: mit-6-5840
+  - name: Lease TTLs
+  - name: Clock skew margins
+components:
+  - id: workers
+    name: Workers
+    role: Try to acquire the lease, renew it while leading, and do leader-only work.
+    tech: Python
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Lease store
+    role: Holds one key with the holder and a TTL; only the holder can renew.
+    tech: etcd or PostgreSQL advisory locks
+    talksTo: []
+    kind: core
+  - id: chaos
+    name: Failover test
+    role: Kills or pauses the leader 100 times and records leaders over time.
+    tech: Python · Docker
+    talksTo: [workers]
+    kind: offline
+flow:
+  - component: workers
+    text: try to create the lease key with a 10 s TTL; the one that succeeds becomes leader.
+  - component: workers
+    text: the leader renews every 3 s and treats itself as leader only until `last_renewal + 10 s - 2 s margin`.
+  - component: store
+    text: expires the key when renewals stop, and another worker acquires it.
+  - component: chaos
+    text: kills the leader, measures the leaderless gap, and checks no two workers acted as leader at once.
+decisions:
+  - choice: Step down before the TTL ends
+    instead: Act as leader until a renewal fails
+    why: >-
+      Clocks drift and messages are slow, so the store may expire the key before the old leader notices. A 2 s
+      margin trades a slightly longer gap for never overlapping.
+watchOut: >-
+  Renewing after the lease has already expired can succeed on some stores, while another worker also leads.
+  Renewal must be conditional on still being the holder.

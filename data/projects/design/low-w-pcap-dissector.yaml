@@ -1,0 +1,70 @@
+overview: >-
+  A tool that reads a pcap capture file and peels each packet layer by layer, Ethernet then IPv4 then TCP or UDP,
+  printing each header's fields and adding the packet to a flow table keyed by the 5-tuple (addresses, ports,
+  protocol). On a 10k-packet capture its per-flow packet and byte counts must equal those of tshark.
+learn:
+  - name: Packet headers
+    ref: stanford-cs144
+  - name: Network byte order
+  - name: Flow 5-tuples
+components:
+  - id: reader
+    name: pcap reader
+    role: Parses the 24-byte file header and each 16-byte record header.
+    tech: Python · struct
+    talksTo: [layers]
+    kind: core
+  - id: layers
+    name: Layer parsers
+    role: Decode Ethernet, IPv4, TCP and UDP headers using their length fields.
+    tech: Python · struct
+    talksTo: [flows]
+    kind: core
+  - id: flows
+    name: Flow table
+    role: Counts packets, payload bytes and TCP flags per 5-tuple and writes a CSV.
+    tech: Python dict
+    talksTo: []
+    kind: core
+  - id: tshark
+    name: tshark
+    role: The reference conversation table for the same capture.
+    tech: tshark
+    talksTo: [flows]
+    kind: external
+flow:
+  - component: reader
+    text: >-
+      checks the magic number for byte order, then yields each record's timestamp and bytes, noting when `caplen` is
+      shorter than the original length.
+  - component: layers
+    text: >-
+      reads the EtherType (`0x0800` is IPv4), takes the IP header length as `IHL × 4` so options are skipped, then
+      parses TCP (data offset × 4) or UDP (8 bytes).
+  - component: flows
+    text: >-
+      adds the packet to its 5-tuple, ordered so both directions share one entry, counting packets and payload bytes
+      and noting SYN, FIN and RST.
+  - component: flows
+    text: writes the table as CSV and diffs it against `tshark -q -z conv,tcp` on the same capture.
+interface:
+  lang: python
+  code: |
+    FMT = "!BBHHHBBH4s4s"   # 20-byte IPv4 header
+
+    def parse_ipv4(b: bytes):
+        (ver_ihl, _, total, _, _, ttl, proto,
+         csum, src, dst) = struct.unpack(FMT, b[:20])
+        ihl = (ver_ihl & 0x0F) * 4   # options!
+        hdr = {"src": src, "dst": dst,
+               "proto": proto, "ttl": ttl}
+        return hdr, b[ihl:total]
+decisions:
+  - choice: Flag bad checksums, keep the packet
+    instead: Dropping packets whose checksum fails
+    why: >-
+      Captures taken on the sending host often show wrong TCP checksums because the network card fills them in later
+      (checksum offload). Dropping them would make the flow table disagree with tshark, which keeps them.
+watchOut: >-
+  IPv4 and TCP headers have variable length: always use `IHL` and the TCP data offset, never a fixed 20 bytes. Slice
+  the payload by the IP total length too, since Ethernet pads short frames.

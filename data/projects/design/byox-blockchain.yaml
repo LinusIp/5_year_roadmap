@@ -1,0 +1,118 @@
+overview: >-
+  A toy cryptocurrency run by three nodes that gossip transactions and blocks and agree on one chain again after you
+  cut the network between them. Each node has a validator (signatures, balances, no double spends), a mempool of
+  waiting transactions, a miner that searches proof-of-work nonces, a chain store that tracks the branch with the most
+  cumulative work, and a network layer. When a heavier branch arrives, a reorg rewinds to the fork point, applies the
+  new branch and puts orphaned transactions back in the mempool.
+learn:
+  - name: Merkle trees
+  - name: Digital signatures
+  - name: Proof of work
+  - name: Fork choice and reorgs
+  - name: Eventual consistency
+    ref: kleppmann-distributed-systems
+stats:
+  - value: < 10 s
+    label: to one tip after the partition heals
+  - value: "1"
+    label: of two double spends confirmed
+  - value: "3"
+    label: nodes, split two against one
+components:
+  - id: wallet
+    name: CLI wallet
+    role: Holds an Ed25519 key pair and signs transactions.
+    tech: Python · cryptography
+    talksTo: [validator]
+    kind: external
+  - id: validator
+    name: Validator
+    role: Checks signatures, balances, nonces and conflicts for transactions and whole blocks.
+    tech: Python · cryptography
+    talksTo: [mempool, chain]
+    kind: core
+  - id: mempool
+    name: Mempool
+    role: Holds valid transactions not yet in a block, with no two spending the same funds.
+    tech: Python dict
+    talksTo: [miner]
+    kind: core
+  - id: miner
+    name: Miner
+    role: Builds a block template with a Merkle root and searches nonces at a fixed difficulty.
+    tech: Python · hashlib
+    talksTo: [chain]
+    kind: core
+  - id: chain
+    name: Chain store
+    role: Keeps every block, the tip of the heaviest branch, and the state needed to reorg.
+    tech: SQLite per node
+    talksTo: [network]
+    kind: core
+  - id: network
+    name: Network layer
+    role: Gossips new transactions and blocks once each and requests missing ancestors.
+    tech: asyncio
+    talksTo: [nodes]
+    kind: core
+  - id: nodes
+    name: Other nodes
+    role: The two other nodes, each running the same code in its own container.
+    tech: Docker Compose
+    talksTo: [validator]
+    kind: external
+flow:
+  - component: wallet
+    text: signs a transfer with its private key and sends it to one node.
+  - component: validator
+    text: >-
+      checks the signature, the balance and the account `nonce`, and rejects it if it conflicts with a transaction
+      already in the mempool.
+  - component: mempool
+    text: keeps it until the miner builds the next block template.
+  - component: miner
+    text: >-
+      puts it in a block with a Merkle root over the transaction ids and tries nonces until `sha256(header) < target`.
+  - component: chain
+    text: >-
+      stores the block and moves the tip only if its branch has more **cumulative work**, not more blocks.
+  - component: network
+    text: >-
+      gossips the block to peers that have not seen it; a node that receives a heavier branch fetches the missing
+      ancestors, rewinds to the fork point and returns orphaned transactions to its mempool. This is the gossip loop.
+interface:
+  lang: python
+  code: |
+    @dataclass(frozen=True)
+    class Header:
+        prev: bytes          # parent block id
+        merkle_root: bytes   # over tx ids
+        target: int          # fixed difficulty
+        nonce: int
+
+    def block_id(h: Header) -> bytes:
+        return sha256(canonical(h)).digest()
+
+    def work(h: Header) -> int:
+        return 2**256 // (h.target + 1)
+
+    async def on_block(b: Block) -> None: ...
+decisions:
+  - choice: Account balances with a nonce
+    instead: UTXOs (unspent outputs)
+    why: >-
+      With three nodes and a 30-hour budget, one balance and one nonce per account make double-spend checks a single
+      comparison. UTXOs are worth it if you add light-client proofs.
+  - choice: Fork choice by cumulative work
+    instead: The chain with the most blocks
+    why: >-
+      At a fixed difficulty the two agree, but they part ways once difficulty adjusts. Building it right now costs one
+      sum per block.
+  - choice: Python with asyncio
+    instead: Go
+    why: >-
+      Proof of work at a fixed, low difficulty and three nodes need no speed, and asyncio keeps gossip readable. Go is
+      the move if validation time per block becomes the bottleneck.
+watchOut: >-
+  Hashing a serialisation that is not canonical, such as a dict whose key order can change, makes two nodes disagree
+  about the same block. Define one byte encoding for headers and transactions and hash only that.

@@ -1,0 +1,115 @@
+overview: >-
+  A rollout pipeline that lets Quanta Retail move its product-description model to an int4 version (45% cheaper on
+  GPU) without another silent regression. A router mirrors a copy of live requests to the candidate in the
+  background, a scorer compares each pair of outputs, and a sequential statistical gate decides after every batch
+  whether to ramp the canary share up, hold, or roll back. Every verdict lands in an audit log, and simulated
+  rollouts with an injected 3% regression prove the gate catches it within 2,000 canary requests.
+learn:
+  - name: Shadow traffic
+  - name: Canary rollout
+  - name: Sequential testing
+  - name: Paired comparison
+  - name: LLM-as-judge bias
+  - name: Int4 weight quantization
+    ref: vllm-docs
+stats:
+  - value: ≤ 2,000
+    label: canary requests to catch a 3% drop
+  - value: ≤ 5%
+    label: false rollbacks, 100 clean runs
+  - value: ≤ 3 ms
+    label: mirror cost on the primary path
+components:
+  - id: router
+    name: Traffic router
+    role: Serves each request from primary or canary by the current percentage and mirrors a copy to the candidate.
+    tech: FastAPI · asyncio
+    talksTo: [models, store]
+    kind: core
+  - id: models
+    name: Model servers
+    role: Run the current bf16 model and the int4 candidate side by side on one GPU.
+    tech: vLLM
+    talksTo: []
+    kind: external
+  - id: store
+    name: Shadow store
+    role: Keeps each input with both outputs, latencies and the prompt hash, so pairs can be scored later.
+    tech: SQLite
+    talksTo: [scorer]
+    kind: core
+  - id: scorer
+    name: Paired scorer
+    role: Scores every pair with reference metrics and a small local judge that sees both outputs blind.
+    tech: Python · vLLM
+    talksTo: [gate]
+    kind: core
+  - id: gate
+    name: Sequential gate
+    role: Tests after each batch whether the candidate is worse by more than the allowed margin.
+    tech: Python · scipy
+    talksTo: [controller]
+    kind: core
+  - id: controller
+    name: Rollout controller
+    role: Moves the canary share up a stage, holds it, or sets it to 0% on a fail verdict.
+    tech: Python
+    talksTo: [router, audit]
+    kind: core
+  - id: audit
+    name: Audit log
+    role: Records every verdict with its sample size, effect estimate, test statistic and the action taken.
+    tech: SQLite
+    talksTo: []
+    kind: offline
+flow:
+  - component: router
+    text: >-
+      answers a request from the primary, then copies it to the candidate **after** the response is sent, so the
+      mirror adds at most `3 ms`; only side-effect-free generate calls are mirrored.
+  - component: store
+    text: saves the input with both outputs as one **pair**; comparing the same input removes most of the noise between requests.
+  - component: scorer
+    text: >-
+      computes attribute coverage against the input facts and asks the judge which output is better, with order
+      shuffled and a length penalty so longer text does not win by default.
+  - component: gate
+    text: >-
+      updates a sequential test (one you may check after every batch without inflating false alarms) and returns
+      `pass`, `continue` or `fail` against a 3% margin.
+  - component: controller
+    text: >-
+      on `pass` moves the canary from 1% to 5%, 25%, 50% and 100%; on `fail` sets it to 0% at once. The router reads the
+      new share, so this is a deliberate **control loop**.
+  - component: audit
+    text: stores the verdict, `n`, effect size and stage, which the runbook and the experiment report read back.
+interface:
+  lang: python
+  code: |
+    def gate(pairs: list[Pair], margin=0.03,
+             alpha=0.05, beta=0.2) -> Verdict:
+        """Sequential test on paired score
+        differences, safe to call every batch."""
+
+    Verdict(state="fail", n=1460,
+            delta=-0.034, stat=3.2,
+            stage="5%", action="rollback")
+decisions:
+  - choice: Sequential test, not a fixed-sample t-test
+    instead: A t-test checked after every batch
+    why: >-
+      Checking a plain p-value 20 times during a ramp makes false rollbacks far more likely than 5%. A sequential
+      test keeps that rate under 5% across the 100 clean runs and still stops early on a real 3% drop.
+  - choice: Paired shadow comparison before any user sees int4
+    instead: A/B split between user groups
+    why: >-
+      Both models answer the same input, so differences come from the model, not the traffic mix. That is what
+      makes 2,000 requests enough. Revisit if outputs depend on per-user state that the mirror cannot copy.
+  - choice: Small local judge plus reference metrics
+    instead: A large hosted judge only
+    why: >-
+      The constraint is one GPU and simulated traffic; a small judge fits next to the two models. Reference metrics
+      catch the judge's blind spots, such as preferring longer text.
+watchOut: >-
+  Peeking at ordinary p-values after every batch will roll back clean candidates far too often. Use the sequential
+  test from the start and count the 100 clean simulated rollouts to prove the false rollback rate stays ≤ 5%.

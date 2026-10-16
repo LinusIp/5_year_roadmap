@@ -1,0 +1,54 @@
+overview: >-
+  A soft actor-critic (SAC) agent written from scratch: twin Q-networks estimate action values, a policy outputs a
+  Gaussian squashed by tanh into the action range, and an entropy bonus keeps it exploring. It solves Pendulum, then
+  tries a harder MuJoCo task, with automatic entropy tuning on and off over 3 seeds.
+learn:
+  - name: Off-policy actor-critic
+    ref: spinning-up
+  - name: Entropy regularization
+    ref: berkeley-cs285
+  - name: Tanh-squashed Gaussian
+  - name: Replay buffers
+components:
+  - id: env
+    name: Environment
+    role: Returns observations and rewards for continuous actions.
+    tech: Gymnasium · MuJoCo
+    talksTo: [buffer]
+    kind: external
+  - id: buffer
+    name: Replay buffer
+    role: Stores transitions and samples random minibatches.
+    tech: NumPy
+    talksTo: [learner]
+    kind: core
+  - id: learner
+    name: SAC learner
+    role: Updates twin critics, the policy and the entropy weight alpha.
+    tech: PyTorch
+    talksTo: [policy]
+    kind: core
+  - id: policy
+    name: Policy
+    role: Samples squashed Gaussian actions for the environment.
+    tech: PyTorch
+    talksTo: [env]
+    kind: core
+flow:
+  - component: policy
+    text: acts uniformly at random for the first 5,000 steps to fill the buffer, then samples `a = tanh(μ + σ·ε)`.
+  - component: buffer
+    text: stores `(s, a, r, s', done)` and returns batches of 256.
+  - component: learner
+    text: trains both critics toward `r + γ(min Q' - α log π)`, updates the policy, and tunes `α` toward a target entropy when enabled.
+  - component: env
+    text: returns the next state and reward, closing the **control loop**; returns are logged per episode for each seed.
+decisions:
+  - choice: Automatic entropy tuning as the default
+    instead: A fixed alpha
+    why: >-
+      The right fixed alpha differs per task and reward scale; tuning toward a target entropy of minus the action
+      dimension works across both tasks. The ablation shows what it buys.
+watchOut: >-
+  Forgetting the tanh correction `- Σ log(1 - tanh(u)² + ε)` in the log-probability makes the entropy term wrong and
+  training unstable. Unit test log-probs against a numerical check.

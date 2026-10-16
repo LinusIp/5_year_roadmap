@@ -1,0 +1,123 @@
+overview: >-
+  A pre-registered study of a graph-network simulator (GNS), a model that treats each object as a node and passes
+  messages between nearby objects to predict their accelerations. It is trained on scenes from your 2D engine with 4
+  to 16 objects and tested at 2, 24, 32, 48 and 64, in two series: one where the arena grows so density stays fixed,
+  and one where the arena stays fixed so the scene gets crowded. Rollout errors against a constant-velocity baseline
+  show where generalisation holds and where it breaks, in a two-page report where a negative result counts.
+learn:
+  - name: Message passing
+    ref: cs224w
+  - name: Learned simulators
+    ref: pbdl-book
+  - name: Rollout evaluation
+    ref: pbdl-book
+  - name: Controlling confounders
+    ref: schulman-research-guide
+stats:
+  - value: 4–16
+    label: objects in training
+  - value: 2–64
+    label: objects at test, two density series
+  - value: 50 × 3
+    label: held-out scenes per setting × training seeds
+components:
+  - id: protocol
+    name: Prediction and protocol
+    role: Fixes the test counts, both density series, metrics and seeds before the sweep.
+    tech: Markdown in research/
+    talksTo: [scenes]
+    kind: core
+  - id: engine
+    name: 2D engine
+    role: Simulates circles, then boxes, in a walled arena.
+    tech: Your engine · Python bindings
+    talksTo: [scenes]
+    kind: external
+  - id: scenes
+    name: Scene generator
+    role: Produces training scenes at 4 to 16 objects and the held-out test settings.
+    tech: Python · NumPy
+    talksTo: [graph]
+    kind: core
+  - id: graph
+    name: Radius graph
+    role: Connects objects within the connectivity radius and normalises features.
+    tech: PyTorch Geometric
+    talksTo: [gns]
+    kind: core
+  - id: gns
+    name: GNS model
+    role: Encodes, passes messages a fixed number of times, and decodes accelerations.
+    tech: PyTorch · W&B
+    talksTo: [rollout]
+    kind: core
+  - id: baseline
+    name: Constant velocity
+    role: Predicts no acceleration, the floor any learned model must beat.
+    tech: NumPy
+    talksTo: [rollout]
+    kind: offline
+  - id: rollout
+    name: Rollout and errors
+    role: Rolls out 100 steps and measures error normalised by object radius.
+    tech: PyTorch · NumPy
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Two pages with the error-against-count chart and the prediction beside the outcome.
+    tech: research/ in the data repo
+    talksTo: []
+    kind: core
+flow:
+  - component: protocol
+    text: >-
+      commits a prediction such as "at fixed density, 100-step error at 48 objects stays **within 1.5×** the in-range
+      error; at fixed arena size it exceeds 3×".
+  - component: scenes
+    text: >-
+      generates the training range and 50 held-out scenes per test count and density series.
+  - component: graph
+    text: >-
+      links each object to those within the radius, using **relative positions** as edge features, and logs
+      neighbours per node.
+  - component: gns
+    text: >-
+      predicts each object's acceleration, trained on one-step targets with three seeds.
+  - component: rollout
+    text: >-
+      feeds predictions back in for 100 steps, recording error at 10, 50 and 100 steps, penetration and energy drift.
+  - component: report
+    text: >-
+      divides each error by the in-range error and plots both density series with the baseline.
+interface:
+  lang: python
+  code: |
+    def gns_step(pos, vel_hist, r):
+        """Positions in, accelerations out."""
+        src, dst = radius_graph(pos, r)
+        x = enc_node(norm(vel_hist), walls(pos))
+        e = enc_edge(pos[src] - pos[dst])
+        for _ in range(M):        # message passes
+            e = e + edge_mlp(x[src], x[dst], e)
+            x = x + node_mlp(x, sum_to(e, dst))
+        return unnorm(dec(x))     # accelerations
+decisions:
+  - choice: Two density series
+    instead: One test series at a fixed arena size
+    why: >-
+      More objects in the same arena is also more crowding. Growing the arena in one series separates "more objects"
+      from "denser", so the report credits the right cause.
+  - choice: Relative positions as edge features
+    instead: Absolute positions on each node
+    why: >-
+      Relative features make the model the same everywhere in the arena, which is what lets message passing extend to
+      counts it never saw.
+  - choice: A constant-velocity baseline
+    instead: Reporting the GNS error alone
+    why: >-
+      Without a floor, an error at 64 objects has no meaning. If the GNS falls to the baseline's level, the model has
+      stopped helping.
+watchOut: >-
+  Normalisation statistics computed on the 4 to 16 object range can saturate on dense scenes, so the model fails for
+  a reason unrelated to the question. Log input statistics at every test count and compare them with training.

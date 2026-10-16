@@ -1,0 +1,47 @@
+overview: >-
+  An attention kernel for one decode step where each sequence's K and V live in fixed-size blocks scattered in memory,
+  found through a block table, as in vLLM's paged attention. It supports grouped-query attention (several query heads
+  sharing one KV head) and ragged sequence lengths, and is checked against gather plus SDPA.
+learn:
+  - name: Paged attention
+    ref: vllm-docs
+  - name: Grouped-query attention
+  - name: Decode is memory-bound
+    ref: kipply-inference-arithmetic
+components:
+  - id: tables
+    name: Block tables
+    role: Map each sequence's logical block number to a physical cache block, with its length.
+    tech: int32 tensors
+    talksTo: [kernel]
+    kind: core
+  - id: kernel
+    name: Decode kernel
+    role: One program per sequence and KV head; reads K and V block by block and runs online softmax.
+    tech: CUDA C++ or Triton
+    talksTo: [ref]
+    kind: core
+  - id: ref
+    name: Reference check
+    role: Gathers K and V into contiguous tensors, runs SDPA and compares; reports GB/s.
+    tech: PyTorch
+    talksTo: []
+    kind: offline
+flow:
+  - component: tables
+    text: give, for sequence `s` and token `t`, the physical block `table[s][t // 16]` and slot `t % 16`.
+  - component: kernel
+    text: loads the query heads that share one KV head (for example 4 when `n_q = 32, n_kv = 8`) and walks the sequence's blocks.
+  - component: kernel
+    text: masks slots at or past `seq_len` in the **last block**, updates a running max and sum per head, and writes the output.
+  - component: ref
+    text: compares with SDPA within `1e-3` over random block layouts and ragged lengths, and reports GB/s against KV bytes read.
+decisions:
+  - choice: One program per sequence and KV head
+    instead: One program per query head
+    why: >-
+      Query heads in a GQA group read the same K and V, so handling them together reads each KV block once instead of
+      4 times. For very long contexts, split the sequence too (flash decoding).
+watchOut: >-
+  The last block of a sequence is usually partly filled, and reading past `seq_len` mixes in stale tokens from another
+  sequence. Mask by position, and test lengths that are not multiples of the block size.

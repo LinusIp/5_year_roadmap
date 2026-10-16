@@ -1,0 +1,121 @@
+overview: >-
+  A prototype that runs the two phases of LLM inference on separate GPUs: prefill, which reads the whole prompt at
+  once and is limited by compute, and decode, which makes one token at a time and is limited by memory bandwidth.
+  A router sends each request to the prefill worker, which returns the first token and then ships the request's KV
+  cache over NCCL to the decode worker, where it joins a continuously batched decode loop. A benchmark compares
+  latency under a mixed workload with a colocated server doing both on one GPU.
+learn:
+  - name: Prefill and decode phases
+    ref: databricks-inference-best-practices
+  - name: KV cache size arithmetic
+    ref: kipply-inference-arithmetic
+  - name: Paged KV cache
+    ref: vllm-docs
+  - name: Disaggregated serving
+    ref: nvidia-dynamo
+  - name: NCCL point-to-point
+  - name: Goodput
+stats:
+  - value: 20 of 20
+    label: greedy prompts match the colocated server
+  - value: ~450 MB
+    label: KV cache of a 4,000-token prompt
+  - value: "2"
+    label: GPUs, one prefill and one decode worker
+components:
+  - id: loadgen
+    name: Load generator
+    role: Mixes short chat prompts with 4,000-token documents at three request rates.
+    tech: Python · asyncio
+    talksTo: [router, baseline]
+    kind: external
+  - id: router
+    name: Router
+    role: Sends new requests to prefill and hands them to decode once their cache has moved.
+    tech: Python · asyncio
+    talksTo: [prefill]
+    kind: core
+  - id: prefill
+    name: Prefill worker
+    role: Runs the prompt, samples and streams the first token, and offers the KV blocks.
+    tech: PyTorch · your model runner
+    talksTo: [transfer]
+    kind: core
+  - id: transfer
+    name: Transfer manager
+    role: Moves each request's KV blocks for every layer and tracks in-flight caches until receipt.
+    tech: torch.distributed · NCCL
+    talksTo: [decode]
+    kind: core
+  - id: decode
+    name: Decode worker
+    role: Receives the cache into its own blocks and generates the remaining tokens in a running batch.
+    tech: PyTorch · your KV manager
+    talksTo: []
+    kind: core
+  - id: baseline
+    name: Colocated baseline
+    role: Your project 24 server doing prefill and decode on one GPU, on the same trace.
+    tech: PyTorch
+    talksTo: []
+    kind: offline
+flow:
+  - component: router
+    text: receives a new request and queues it for the prefill worker.
+  - component: prefill
+    text: >-
+      processes the whole prompt in one pass, samples the first token and streams it to the client, which is where
+      **time to first token** ends.
+  - component: transfer
+    text: >-
+      waits for the decode worker to allocate matching blocks, sends keys and values layer by layer with NCCL, and
+      frees the prefill copy only after decode confirms receipt.
+  - component: decode
+    text: >-
+      adds the request to its continuously batched loop without pausing the others; the gap before its second token
+      includes the transfer, so it counts in **inter-token latency**.
+  - component: baseline
+    text: >-
+      serves the same trace on one GPU, and both report TTFT and ITL at p50 and p99 and goodput (requests a second
+      that meet both targets).
+interface:
+  lang: python
+  code: |
+    # prefill worker, rank 0
+    tok = model.prefill(req)        # TTFT ends here
+    client.send(req.id, tok)
+    wait_for_alloc(req.id)          # decode is ready
+    for l in range(n_layers):
+        k, v = kv.layer_blocks(req.id, l)
+        dist.isend(k, dst=1); dist.isend(v, dst=1)
+    wait_for_ack(req.id); kv.free(req.id)
+
+    # decode worker, rank 1
+    dst = kv.alloc(req.id, req.n_tokens)
+    for l in range(n_layers):
+        dist.irecv(dst.k[l], src=0)
+        dist.irecv(dst.v[l], src=0)
+decisions:
+  - choice: NCCL straight between GPUs
+    instead: Copying the cache through host memory
+    why: >-
+      A 4,000-token prompt on a 3B model with grouped-query attention is about 450 MB of KV. Going through the CPU
+      adds two copies; NCCL sends GPU to GPU, at roughly 20 ms over PCIe.
+  - choice: Receiver allocates first and acknowledges
+    instead: Prefill sends and frees at once
+    why: >-
+      Decode may be out of blocks, and freeing the prefill copy early loses the cache if the transfer fails. The
+      transfer manager holds both ends until the ack.
+  - choice: Whole cache after prefill
+    instead: Layer-by-layer transfer overlapped with prefill
+    why: >-
+      Sending after prefill keeps the transfer cost separate and measurable. Overlap is the stretch, worth it if
+      transfer becomes a large share of long-prompt latency.
+  - choice: One shared KV block layout
+    instead: Each worker choosing its own layout
+    why: >-
+      Both workers use the same KV manager code, block size and head order. A mismatch gives fluent garbage, not an
+      error, which the 20-prompt greedy test catches.
+watchOut: >-
+  A transfer landing on the decode GPU can block the decode loop and raise everyone's ITL. Receive on a separate CUDA
+  stream and add the request to the batch only when its cache has fully arrived.

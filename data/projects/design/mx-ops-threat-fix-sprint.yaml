@@ -1,0 +1,96 @@
+overview: >-
+  A two-week sprint that fixes Pawprint's top 15 threat-model findings one layer at a time and proves each fix. Tenant
+  isolation moves into the database with Postgres row-level security (RLS), a rule the database applies to every
+  query so a request can only see its own tenant's rows. Sessions, the auth endpoints and the top injection paths are
+  hardened at their own layers, and every fix gets a regression test that fails if the fix is reverted, run in CI
+  together with 1,000 cross-tenant probes.
+learn:
+  - name: Row-level security
+  - name: Session hardening
+  - name: Rate limiting
+  - name: Output encoding
+  - name: Security regression tests
+stats:
+  - value: 0 of 1,000
+    label: cross-tenant probes succeed
+  - value: < 150 ms
+    label: p99 on auth with limits on
+  - value: 15 of 15
+    label: fixes with a revert test
+components:
+  - id: client
+    name: Client
+    role: Browsers and existing API clients, whose requests must keep working unchanged.
+    tech: HTTP
+    talksTo: [limiter]
+    kind: external
+  - id: limiter
+    name: Rate limiter
+    role: Allows 10 login attempts a minute per account and per IP, then locks out with a back-off.
+    tech: Redis · token bucket
+    talksTo: [session]
+    kind: core
+  - id: session
+    name: Session layer
+    role: Rotates the session ID at login, sets secure cookie flags and ends idle sessions.
+    tech: Flask or Express middleware
+    talksTo: [validation]
+    kind: core
+  - id: validation
+    name: Validation layer
+    role: Validates input against schemas and encodes output on the top injection paths.
+    tech: Pydantic or zod · templates
+    talksTo: [rls]
+    kind: core
+  - id: rls
+    name: Tenant isolation
+    role: Sets the request's tenant on the connection, and RLS policies filter every table by it.
+    tech: PostgreSQL RLS
+    talksTo: []
+    kind: core
+  - id: suite
+    name: Regression suite
+    role: One test per finding, the 1,000 tenant probes and a ZAP baseline scan, all in CI.
+    tech: pytest or Jest · OWASP ZAP
+    talksTo: [evidence]
+    kind: offline
+  - id: evidence
+    name: Evidence report
+    role: Shows each finding, its fix, its test and the before and after numbers for the customer.
+    tech: Markdown · CI artefacts
+    talksTo: []
+    kind: offline
+flow:
+  - component: limiter
+    text: counts `POST /login` attempts per account in Redis and returns `429` after 10 in a minute, keyed on the account and the real client IP, not a spoofable header.
+  - component: session
+    text: issues a new session ID after login with `Secure`, `HttpOnly` and `SameSite=Lax`, and expires it after 30 idle minutes.
+  - component: validation
+    text: rejects a booking whose fields fail the schema and escapes pet names on output, closing the stored-XSS path.
+  - component: rls
+    text: runs `SET app.tenant_id` for the request, so even a buggy query like `SELECT * FROM bookings` returns **only** that clinic's rows.
+  - component: rls
+    text: is tested by the **regression suite**, which tries 1,000 cross-tenant reads and writes and expects zero to succeed.
+interface:
+  lang: sql
+  code: |
+    ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE bookings FORCE ROW LEVEL SECURITY;
+
+    CREATE POLICY tenant_only ON bookings
+      USING (tenant_id =
+        current_setting('app.tenant_id')::uuid);
+
+    -- the app role must not bypass RLS
+    ALTER ROLE app_user NOBYPASSRLS;
+
+    -- per request, inside a transaction
+    SET LOCAL app.tenant_id = '6f1c…';
+decisions:
+  - choice: Isolation in the database with RLS
+    instead: Add a tenant filter to every query in app code
+    why: One forgotten WHERE clause leaks another clinic's records. RLS applies to every query, including ones written next year.
+  - choice: A revert test for each fix
+    instead: Rely on a scanner run before the customer review
+    why: The customer wants proof that fixes stay fixed. A test that fails when the fix is removed keeps that proof in CI.
+watchOut: Table owners and superuser roles bypass RLS, so tests pass while an admin or migration connection still sees everything. Use FORCE ROW LEVEL SECURITY and a non-owner app role, and probe with that exact role.

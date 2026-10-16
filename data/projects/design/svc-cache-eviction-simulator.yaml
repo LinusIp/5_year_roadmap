@@ -1,0 +1,51 @@
+overview: >-
+  A simulator that replays request traces through LRU, LFU, an ARC-style policy and TinyLFU behind one interface,
+  and plots hit ratio against cache size for Zipf (a few very popular keys) and scan-heavy traces.
+learn:
+  - name: Eviction policies
+  - name: Zipf workloads
+  - name: Scan resistance
+  - name: Frequency sketches
+components:
+  - id: traces
+    name: Trace generator
+    role: Produces Zipf, scan-heavy and mixed key sequences of 1M requests.
+    tech: Python or Rust
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Simulator
+    role: Feeds each key to every policy and counts hits and misses.
+    tech: Python or Rust
+    talksTo: [policies]
+    kind: core
+  - id: policies
+    name: Policies
+    role: LRU, LFU, ARC-style and TinyLFU, each with `get` and `put` and a fixed capacity.
+    tech: Python or Rust
+    talksTo: []
+    kind: core
+  - id: plots
+    name: Plots
+    role: Hit ratio against cache size per trace and policy.
+    tech: matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: traces
+    text: generate a Zipf trace with `s = 0.9` and a trace that mixes it with long one-off scans.
+  - component: sim
+    text: replays each trace at cache sizes from 0.1 to 10 percent of the distinct keys.
+  - component: policies
+    text: decide what to evict; TinyLFU only admits a new key if a small count sketch says it is used more than the victim.
+  - component: plots
+    text: show LRU collapsing on the scan trace while TinyLFU and ARC keep their hit ratio.
+decisions:
+  - choice: Generated traces with known shape
+    instead: Uniform random keys
+    why: >-
+      With uniform keys every policy scores about cache size divided by key count, so nothing can be learned. Add a
+      real trace later if you can get one.
+watchOut: >-
+  Uniform traces make all policies look the same. Use skewed and scan-heavy traces, and say which workload each
+  winner wins on.

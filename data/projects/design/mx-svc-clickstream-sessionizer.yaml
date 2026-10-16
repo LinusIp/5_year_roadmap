@@ -1,0 +1,117 @@
+overview: >-
+  A single-node streaming job that groups Fennel's clicks into sessions with a 30-minute inactivity gap, using the
+  time each event happened rather than the time it arrived. A watermark (the job's estimate of "no older events will
+  come now") decides when a session can be closed, and a late event within the allowed lateness reopens it and
+  sends a correction. State and read offsets are checkpointed together, so a restart picks up exactly where it was.
+learn:
+  - name: Event time vs processing time
+    ref: ddia
+  - name: Watermarks and lateness
+    ref: ddia
+  - name: Session windows
+  - name: Retractions
+  - name: Checkpointing
+    ref: ddia
+stats:
+  - value: 50,000/s
+    label: events on 4 cores
+  - value: ≤ 0.1%
+    label: difference from batch oracle
+  - value: < 30 s
+    label: restart recovery
+components:
+  - id: source
+    name: Source reader
+    role: Reads the click log in offset order and parses each event with its event time.
+    tech: Rust · JSON lines
+    talksTo: [state, watermark]
+    kind: core
+  - id: watermark
+    name: Watermark tracker
+    role: Keeps the watermark at the highest event time seen minus 2 minutes, and allows 1 hour of lateness after it.
+    tech: Rust
+    talksTo: [emitter]
+    kind: core
+  - id: state
+    name: Keyed state
+    role: Holds open sessions per user id with start, end, page count and funnel flags.
+    tech: Rust · HashMap
+    talksTo: [emitter]
+    kind: core
+  - id: emitter
+    name: Session emitter
+    role: Emits closed sessions, and a retraction plus a new version when late data changes one.
+    tech: Rust
+    talksTo: [sink]
+    kind: core
+  - id: sink
+    name: Session table
+    role: Stores the latest version of each session for funnel and attribution queries.
+    tech: DuckDB
+    talksTo: []
+    kind: external
+  - id: checkpoint
+    name: Checkpoint manager
+    role: Every 30 s saves keyed state, watermark and source offset as one file.
+    tech: Rust · bincode
+    talksTo: []
+    kind: offline
+  - id: oracle
+    name: Batch oracle
+    role: Sessionises the full 10M-event day offline to compare against the stream output.
+    tech: Python · DuckDB
+    talksTo: [sink]
+    kind: offline
+flow:
+  - component: source
+    text: reads a `product_view` for user `u_412` with event time 09:45, which arrives at 10:11 because the phone was offline.
+  - component: watermark
+    text: >-
+      is at 10:09, so the event is 24 minutes **late**; that is inside the 1-hour allowed lateness, so it is used as
+      a correction rather than dropped to the late-events log.
+  - component: state
+    text: >-
+      still holds u_412's session that ended at 09:20 and was emitted when the watermark passed 09:50; 09:45 is
+      within 30 minutes of 09:20, so the event **extends** it.
+  - component: emitter
+    text: >-
+      sends a **retraction** for session version 1 and then version 2 with the new end time and funnel flag
+      `viewed_product = true`.
+  - component: sink
+    text: replaces version 1 with version 2 by session id, so downstream counts never include both.
+  - component: state
+    text: >-
+      drops the session once the watermark passes its end plus 30 minutes plus the allowed lateness, which keeps
+      memory bounded for users who never come back.
+interface:
+  lang: json
+  code: |
+    { "session_id": "u_412:2026-10-16T09:12:40Z",
+      "version": 2,
+      "retracts": 1,
+      "user_id": "u_412",
+      "start": "2026-10-16T09:12:40Z",
+      "end": "2026-10-16T09:45:03Z",
+      "events": 17,
+      "funnel": { "viewed_product": true,
+                  "added_to_cart": false,
+                  "purchased": false } }
+decisions:
+  - choice: Event time with a watermark
+    instead: Processing time
+    why: >-
+      8 percent of events arrive late from mobile, and processing time would split their sessions in two, which is
+      why the nightly job breaks today. Event time is what the batch oracle uses too.
+  - choice: Retract and re-emit
+    instead: Hold every session until the end of the day
+    why: >-
+      Holding results back defeats streaming. Versioned updates keep sessions fresh and still converge to the batch
+      answer within 0.1 percent.
+  - choice: Custom single-node job
+    instead: A Flink cluster
+    why: >-
+      50,000 events a second fits 4 cores and 8 GB, and building the windows by hand teaches what a framework does.
+      Revisit if one node cannot hold the open-session state.
+watchOut: >-
+  A downstream counter that adds every emitted session will double count after a retraction. Store sessions by id
+  and version, and only count the latest version.

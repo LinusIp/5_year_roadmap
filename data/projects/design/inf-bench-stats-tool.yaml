@@ -1,0 +1,55 @@
+overview: >-
+  A command-line tool that runs two benchmark commands in interleaved order, drops warmup runs, and reports the median
+  speedup with a bootstrap confidence interval (resampling the trials to see how much the estimate moves). It flags
+  bimodal timings and must catch a real 3% difference while staying quiet on an A-versus-A run.
+learn:
+  - name: Bootstrap intervals
+    ref: harvard-stat-110
+  - name: Interleaved trials
+  - name: Bimodal timings
+components:
+  - id: runner
+    name: Trial runner
+    role: Runs A and B alternately N times and records wall time per run.
+    tech: Python · subprocess
+    talksTo: [stats]
+    kind: core
+  - id: stats
+    name: Statistics
+    role: Drops warmup, computes medians, bootstrap CI and a bimodality check.
+    tech: SciPy · NumPy
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Writes a Markdown table with the speedup, its interval and any warnings.
+    tech: Python
+    talksTo: []
+    kind: core
+flow:
+  - component: runner
+    text: runs `A, B, A, B …` for 30 pairs, so drift in machine load hits both equally.
+  - component: stats
+    text: drops the first 3 of each, takes the median ratio, and resamples the pairs 10,000 times for a **95% interval**.
+  - component: stats
+    text: warns when a histogram of times has two clear peaks, which usually means frequency scaling or a cache effect.
+  - component: report
+    text: says faster, slower or no clear difference based on whether the interval excludes 1.0.
+interface:
+  lang: shell
+  code: |
+    $ benchcmp --runs 30 --warmup 3 \
+        "./gemm_v1 2048" "./gemm_v2 2048"
+
+    median speedup  1.031x
+    95% CI          [1.018, 1.045]
+    verdict         B faster
+decisions:
+  - choice: Bootstrap on medians
+    instead: A t-test on means
+    why: >-
+      Benchmark times are skewed with outliers from interrupts, which breaks the normality a t-test assumes. Medians
+      with bootstrap intervals need no such assumption.
+watchOut: >-
+  Running all A trials then all B trials lets thermal and background drift look like a speedup. Always interleave,
+  and run an A-versus-A check to measure your false-positive rate.

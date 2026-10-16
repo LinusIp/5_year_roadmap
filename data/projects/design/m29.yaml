@@ -1,0 +1,131 @@
+overview: >-
+  Everything above raw tensor operations, written yourself for CS336: a byte-level BPE tokenizer that learns merges
+  from your corpus, a pre-norm transformer built from your own Linear, Embedding, RMSNorm, SwiGLU, RoPE and attention
+  modules, and a training loop with AdamW and a cosine schedule. The corpus is tokenized once into a memory-mapped file
+  (an array on disk read like one in memory), the run on TinyStories logs to Weights & Biases, and a profiling script
+  shows where time and memory go in one step.
+learn:
+  - name: Byte-pair encoding
+    ref: stanford-cs336
+  - name: Transformer blocks
+    ref: karpathy-zero-to-hero
+  - name: Rotary embeddings (RoPE)
+  - name: AdamW and LR schedules
+  - name: Profiling GPU code
+    ref: nsight-compute-docs
+  - name: Experiment tracking
+    ref: wandb
+stats:
+  - value: ≈ 1.45
+    label: TinyStories validation loss
+  - value: 100 %
+    label: public Assignment 1 tests passing
+  - value: ≥ 3
+    label: learning rates in the sweep
+components:
+  - id: trainer
+    name: BPE trainer
+    role: Counts pre-tokens, learns merges from byte-pair counts and saves vocabulary and merges.
+    tech: Python · regex
+    talksTo: [encoder]
+    kind: core
+  - id: encoder
+    name: Encoder
+    role: Applies merges in rank order and writes the corpus once as token ids.
+    tech: Python · NumPy memmap
+    talksTo: [loader]
+    kind: core
+  - id: loader
+    name: Data loader
+    role: Samples random batches of context-length windows from the memmap.
+    tech: NumPy · PyTorch
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Transformer LM
+    role: Your modules, composed into a pre-norm decoder that returns logits.
+    tech: PyTorch · einops
+    talksTo: [loop]
+    kind: core
+  - id: loop
+    name: Training loop
+    role: Loss, backward, clipping, AdamW step, schedule and checkpoints.
+    tech: PyTorch
+    talksTo: [wandb]
+    kind: core
+  - id: wandb
+    name: Weights & Biases
+    role: Keeps loss curves, learning rates and generated samples for each run.
+    tech: W&B
+    talksTo: []
+    kind: external
+  - id: profiler
+    name: Profiler script
+    role: Times forward and backward per component and records peak memory.
+    tech: PyTorch profiler · Nsight Systems
+    talksTo: [model]
+    kind: offline
+  - id: tests
+    name: Assignment tests
+    role: The course's public tests for the tokenizer and every module.
+    tech: pytest · uv
+    talksTo: []
+    kind: offline
+flow:
+  - component: trainer
+    text: >-
+      splits the corpus with the GPT-2 regex, keeps special tokens whole, and merges the most frequent byte pair
+      again and again, updating pair counts **incrementally**.
+  - component: encoder
+    text: applies the merges in rank order and streams the ids into a `uint16` memmap once.
+  - component: loader
+    text: picks random offsets and returns `(x, y)` batches of shape `(batch, context_length)`, `y` shifted by one.
+  - component: model
+    text: >-
+      runs Embedding, then `L` blocks of RMSNorm, causal attention with RoPE, residual, RMSNorm, SwiGLU, residual, then
+      the output projection to logits.
+  - component: loop
+    text: >-
+      takes the cross-entropy, runs backward, clips the gradient norm, steps AdamW and the warm-up plus cosine
+      schedule, and checkpoints.
+  - component: wandb
+    text: logs training and validation loss for each learning rate, with samples at three checkpoints.
+  - component: profiler
+    text: >-
+      times each component's forward and backward with `torch.cuda.synchronize()` around every timing and records peak
+      memory.
+interface:
+  lang: python
+  code: |
+    class Tokenizer:
+        @classmethod
+        def train(cls, path: str, vocab_size: int,
+                  special_tokens: list[str]): ...
+        def encode(self, text: str) -> list[int]: ...
+        def encode_iterable(self, it) -> Iterator[int]: ...
+        def decode(self, ids: list[int]) -> str: ...
+
+    class TransformerLM(nn.Module):
+        def __init__(self, vocab_size, context_length,
+                     d_model, num_layers, num_heads,
+                     d_ff, rope_theta): ...
+        def forward(self, ids: Tensor) -> Tensor: ...
+decisions:
+  - choice: Tokenize once into a memmap
+    instead: Tokenize text on the fly in the loader
+    why: >-
+      Python BPE encoding is far slower than a training step, and the run reads the same tokens many times; a memmap
+      gives random batches without loading the corpus into RAM.
+  - choice: Incremental pair-count updates
+    instead: Recount every pair after each merge
+    why: >-
+      A 10k or 32k vocabulary means thousands of merges, and a full recount after each one takes hours; only pairs
+      next to the merged one change.
+  - choice: Pick the learning rate by validation loss
+    instead: Pick it by training loss
+    why: >-
+      Training loss rewards memorising; the sweep of at least three rates is judged on held-out TinyStories text
+      against the 1.45 target.
+watchOut: >-
+  Timing GPU code without `torch.cuda.synchronize()` measures the kernel launch, not the work. Synchronise before
+  reading the clock, and skip the first warm-up steps.

@@ -1,0 +1,115 @@
+overview: >-
+  An append-only audit service where every access event in Carewell's health-records system is chained to the one
+  before it by a hash. A single sequencer per partition assigns each event a number and computes
+  `hash = SHA-256(prev_hash + event)`, so changing any past byte breaks every hash after it. Every 10,000 entries a
+  signer builds a **Merkle root** (one hash that sums up a whole batch) and signs it with an Ed25519 key kept on a
+  different host, which also makes a cut-off tail detectable.
+learn:
+  - name: Hash chains
+  - name: Merkle trees
+  - name: Digital signatures
+  - name: Single-writer sequencing
+    ref: ddia
+  - name: Tamper detection testing
+stats:
+  - value: 5,000/s
+    label: events, append p99 < 15 ms
+  - value: < 2 min
+    label: verify 10M entries
+  - value: 1,000 of 1,000
+    label: tamper trials detected
+components:
+  - id: apps
+    name: Records apps
+    role: Send an event for every read or change of a patient record.
+    tech: HTTP clients
+    talksTo: [ingest]
+    kind: external
+  - id: ingest
+    name: Ingest API
+    role: Validates the event schema and hands it to the sequencer for its partition.
+    tech: Go · net/http
+    talksTo: [sequencer]
+    kind: core
+  - id: sequencer
+    name: Sequencer
+    role: The one writer per partition; assigns `seq`, links to the previous hash and batches inserts.
+    tech: Go · channel
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Chain store
+    role: Append-only table of entries with seq, payload, prev_hash and hash; updates and deletes are revoked.
+    tech: PostgreSQL
+    talksTo: [signer, index]
+    kind: core
+  - id: signer
+    name: Checkpoint signer
+    role: Builds a Merkle root over each 10,000 entries and signs it on a separate host.
+    tech: Go · Ed25519
+    talksTo: [checkpoints]
+    kind: core
+  - id: checkpoints
+    name: Published checkpoints
+    role: Signed roots kept outside the log, for example in a separate bucket the log host cannot write.
+    tech: Object storage
+    talksTo: []
+    kind: external
+  - id: index
+    name: Query index
+    role: Indexes on actor, resource and time for audit queries.
+    tech: PostgreSQL indexes
+    talksTo: []
+    kind: offline
+  - id: verifier
+    name: Verifier
+    role: Recomputes hashes and Merkle roots for any range and checks them against signed checkpoints.
+    tech: Go CLI
+    talksTo: [store, checkpoints]
+    kind: offline
+flow:
+  - component: ingest
+    text: receives `POST /events` with actor, action, resource and request id, and rejects anything missing a field.
+  - component: sequencer
+    text: >-
+      assigns the next `seq` for the partition and computes `hash = SHA-256(prev_hash || canonical_json(event))`;
+      because it is the **only writer**, there is never doubt about which entry came first.
+  - component: store
+    text: inserts a batch of up to 200 entries in one transaction, which keeps p99 under 15 ms at 5,000 events/s.
+  - component: signer
+    text: every 10,000 entries builds the Merkle root, signs `{partition, last_seq, root}` and publishes it away from the log.
+  - component: verifier
+    text: >-
+      recomputes the chain for a range and compares with the signed root; a changed byte breaks a hash, and a
+      deleted tail shows up because the latest checkpoint names a `last_seq` that no longer exists.
+interface:
+  lang: json
+  code: |
+    { "seq": 4812337,
+      "partition": "clinic-07",
+      "ts": "2026-03-02T09:14:03.211Z",
+      "actor": "dr.okafor",
+      "action": "record.read",
+      "resource": "patient/55102",
+      "request_id": "req_8f1c",
+      "prev_hash": "9b1e…c4",
+      "hash": "02af…7d" }
+decisions:
+  - choice: One sequencer per partition
+    instead: Many writers with a database sequence
+    why: >-
+      With concurrent writers two entries can claim the same previous hash and the chain forks. Partitioning by clinic
+      keeps a single writer each and still reaches 5,000 events/s.
+  - choice: Signed Merkle checkpoints published elsewhere
+    instead: Hash chain alone
+    why: >-
+      A chain alone cannot show that its last entries were deleted, and an attacker could rebuild it from the edit
+      onwards. A signed root naming `last_seq` catches both; recomputing 10M hashes still fits in 2 minutes.
+  - choice: Signing key on a separate host
+    instead: Key in the service's config
+    why: >-
+      Anyone who can edit the log on that host could also re-sign it. The constraint says the key never lives with
+      the log.
+watchOut: >-
+  Hashing JSON that is not canonical (keys in a fixed order, fixed number format) makes honest entries fail
+  verification. Define one byte encoding and hash exactly that.

@@ -1,0 +1,47 @@
+overview: >-
+  A monitor that compares each new window of a simulated feature stream with a reference window using PSI (population
+  stability index, how much the binned distribution moved) and the KS test, and raises an alert when drift is found.
+  Gradual and sudden shifts are injected so detection delay and false alarms can be measured.
+learn:
+  - name: Population stability index
+  - name: Kolmogorov-Smirnov test
+    ref: harvard-stat-110
+  - name: Multiple testing
+  - name: Window sizing
+components:
+  - id: stream
+    name: Stream simulator
+    role: Generates feature rows with drift injected at known times.
+    tech: NumPy · pandas
+    talksTo: [detector]
+    kind: core
+  - id: detector
+    name: Drift detector
+    role: Computes PSI and KS per feature for each window against the reference.
+    tech: SciPy
+    talksTo: [alerter]
+    kind: core
+  - id: alerter
+    name: Alerter
+    role: Applies thresholds with a multiple-testing correction and logs alerts.
+    tech: Python
+    talksTo: []
+    kind: core
+flow:
+  - component: stream
+    text: emits windows of 1,000 rows; a sudden shift starts at a known window and a gradual one ramps over 20 windows.
+  - component: detector
+    text: bins each feature by reference deciles and computes `PSI = Σ (a - e) · ln(a / e)`, plus a two-sample KS p-value.
+  - component: alerter
+    text: flags a feature when `PSI > 0.2` or its p-value passes a **Bonferroni**-corrected level.
+  - component: alerter
+    text: reports delay from injection to first alert and the false-alarm rate on windows with no drift.
+decisions:
+  - choice: Fixed reference window
+    instead: A sliding reference of the previous window
+    why: >-
+      A sliding reference adapts to gradual drift and never alerts on it. A fixed reference catches slow ramps; reset
+      it deliberately after a confirmed and accepted change.
+watchOut: >-
+  Testing 20 features every window at p < 0.05 gives about one false alarm per window by chance. Correct for the
+  number of tests, or require two windows in a row.

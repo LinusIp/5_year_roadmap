@@ -1,0 +1,68 @@
+overview: >-
+  A water surface built from a grid moved in the vertex shader by a sum of Gerstner waves (each moves points in small
+  circles, giving sharp crests and flat troughs), shaded by a Fresnel blend of refraction and reflection. Reflections
+  come from screen-space ray marching against the depth buffer and fade smoothly to an environment cubemap where the
+  ray leaves the screen, with foam on steep crests.
+learn:
+  - name: Gerstner waves
+  - name: Schlick Fresnel
+  - name: Screen-space reflections
+  - name: Depth-buffer ray marching
+components:
+  - id: scene
+    name: Scene buffers
+    role: Colour and depth of the opaque scene, rendered before the water.
+    tech: OpenGL / Vulkan
+    talksTo: [ssr]
+    kind: core
+  - id: waves
+    name: Wave displacement
+    role: Moves the water grid and computes analytic normals from the wave sum.
+    tech: GLSL vertex shader
+    talksTo: [shade]
+    kind: core
+  - id: ssr
+    name: SSR march
+    role: Finds where the reflected ray hits the depth buffer, if anywhere.
+    tech: GLSL
+    talksTo: [shade]
+    kind: core
+  - id: shade
+    name: Water shader
+    role: Mixes refraction, reflection, fallback and foam into the final colour.
+    tech: GLSL
+    talksTo: []
+    kind: core
+flow:
+  - component: scene
+    text: renders opaque geometry into colour and depth textures that the water pass reads for refraction and reflection.
+  - component: waves
+    text: displaces a 256x256 grid by 4 to 8 waves, each adding `(Q·A·D·cos φ, A·sin φ)` with `φ = k·dot(D, xz) - ω·t`, and takes the normal from the same sum.
+  - component: ssr
+    text: steps the reflected ray in view space, compares its depth with the depth buffer using a thickness test, and refines the hit by binary search; the pass is timed.
+  - component: shade
+    text: blends refraction and reflection by Schlick Fresnel, **fades to the cubemap** near screen edges or on a miss, and adds foam where crests pinch together.
+interface:
+  lang: glsl
+  code: |
+    struct Wave { vec2 dir; float amp, k, omega, Q; };
+    uniform Wave waves[8];
+    uniform int waveCount;
+    uniform float time;
+    vec3 gerstner(vec2 xz, out vec3 normal);
+
+    // uv of the hit, or vec2(-1.0) on a miss
+    vec2 ssrMarch(vec3 posVS, vec3 reflVS,
+                  sampler2D depth, int maxSteps,
+                  float thickness);
+    float edgeFade(vec2 hitUV);  // 0 at the border
+    uniform samplerCube envFallback;
+decisions:
+  - choice: SSR with cubemap fallback
+    instead: Planar reflection, rendering the scene again mirrored
+    why: >-
+      A planar reflection is exact but doubles scene rendering. SSR costs one screen pass but cannot see off-screen
+      objects, hence the fallback; choose planar for a single flat lake where exact reflections matter.
+watchOut: >-
+  Switching sharply from SSR to the cubemap where rays leave the screen looks like holes at the edges. Fade by
+  distance to the border and by ray length, so the two sources cross-fade.

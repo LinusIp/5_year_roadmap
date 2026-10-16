@@ -1,0 +1,52 @@
+overview: >-
+  Stepped k6 load tests against your service that record throughput, latency and CPU at each step, find the knee
+  where latency starts to climb, and check the numbers with Little's law (concurrency = arrival rate × time in
+  system).
+learn:
+  - name: Open-loop load
+  - name: Saturation knee
+  - name: Little's law
+    ref: google-sre-book
+components:
+  - id: k6
+    name: k6
+    role: Generates requests at fixed arrival rates in steps.
+    tech: k6 constant-arrival-rate
+    talksTo: [service]
+    kind: core
+  - id: service
+    name: Service
+    role: The system under test, exposing request and in-flight metrics.
+    tech: Your API
+    talksTo: [prometheus]
+    kind: core
+  - id: prometheus
+    name: Prometheus
+    role: Scrapes CPU, latency histograms and in-flight requests every 5 s.
+    tech: Prometheus
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Capacity model
+    role: Plots the curves, finds the knee and compares predicted and measured concurrency.
+    tech: Python · pandas
+    talksTo: []
+    kind: offline
+flow:
+  - component: k6
+    text: holds each rate, such as 100, 200, 400 and 800 rps, for 3 minutes with a fixed arrival rate.
+  - component: service
+    text: serves the load while exporting a latency histogram and an `in_flight` gauge.
+  - component: prometheus
+    text: records throughput, p50, p99 and CPU per step.
+  - component: model
+    text: finds the knee where p99 rises sharply, and checks `L = λ × W` against measured `in_flight` within 15 percent.
+decisions:
+  - choice: Open-loop arrival rate
+    instead: A fixed number of virtual users looping
+    why: >-
+      Looping users wait for replies, so a slow server receives less load and queueing delay is hidden.
+      Open-loop keeps sending, as real traffic does.
+watchOut: >-
+  Closed-loop load (users that wait for each reply) hides queueing delay and makes the knee look later than it is.
+  Use the arrival-rate executor.

@@ -1,0 +1,48 @@
+overview: >-
+  Four CUDA softmax kernels for rows of width 128 to 32768: a three-pass baseline (max, sum, divide), a warp per row
+  for short rows, a block per row, and a one-pass online softmax that keeps a running max and rescales the running sum
+  when the max grows. Each is checked against torch and plotted as GB/s against row width.
+learn:
+  - name: Online softmax
+    ref: gpu-mode-lectures
+  - name: Warp shuffles
+    ref: cuda-guide
+  - name: Parallel reduction
+    ref: pmpp-book
+components:
+  - id: harness
+    name: Test harness
+    role: Builds random rows, runs each kernel and compares with torch.softmax.
+    tech: CUDA C++ · PyTorch
+    talksTo: [kernels]
+    kind: core
+  - id: kernels
+    name: Softmax kernels
+    role: Holds the three-pass, warp-per-row, block-per-row and online versions.
+    tech: CUDA C++
+    talksTo: [plot]
+    kind: core
+  - id: plot
+    name: Bandwidth plot
+    role: Converts time to GB/s per width and plots all kernels with torch.
+    tech: matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: harness
+    text: creates rows for each width from 128 to 32768 and picks warp-per-row below 1024 and block-per-row above.
+  - component: kernels
+    text: keep, in the online version, a running `(m, d)` per thread; on a new value `x`, `m' = max(m, x)` and `d' = d·exp(m - m') + exp(x - m')`.
+  - component: kernels
+    text: merges per-thread `(m, d)` pairs with warp shuffles using the **same rescale**, then writes `exp(x - m) / d` in a second read of the row.
+  - component: plot
+    text: shows GB/s per width; done is a max error within `1e-5` of torch and within 1.3x of its speed.
+decisions:
+  - choice: Pick the kernel by row width
+    instead: One block-per-row kernel for all widths
+    why: >-
+      A block of 256 threads on a 128-wide row leaves most threads idle; a warp per row keeps short rows busy. Above
+      about 1024 a whole block is needed to hide memory latency.
+watchOut: >-
+  Merging two partial sums without rescaling them to the larger max gives silently wrong results for some rows. Test
+  rows where the max is in different thread chunks.

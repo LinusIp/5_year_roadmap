@@ -1,0 +1,100 @@
+overview: >-
+  A continuous-space crowd simulation for Northbank Arena's gates 4 to 6, so operations can try turnstile counts and
+  queue-rail layouts before a derby. Each of 20,000 agents walks toward its next waypoint and, every step, picks the
+  velocity closest to the one it wants that will not hit a neighbour or a rail within the next 2 s (optimal reciprocal
+  collision avoidance, ORCA). A uniform-grid spatial hash finds neighbours fast, OpenMP solves all agents in parallel,
+  and analytics counts crossings of each gate line.
+learn:
+  - name: Velocity obstacles (ORCA)
+  - name: Spatial hashing
+    ref: ericson-rtcd
+  - name: OpenMP parallel loops
+    ref: cs149
+  - name: Queueing at a server
+    ref: mit-6-041
+  - name: Model calibration
+stats:
+  - value: 20,000
+    label: agents at 20 steps/s on 8 cores
+  - value: 99%
+    label: of steps with no overlap above 10 cm
+  - value: ± 10%
+    label: gate throughput vs turnstile spec
+components:
+  - id: map
+    name: Map loader
+    role: Reads rails, turnstiles, walls and gate lines as polygons, and the waypoint graph.
+    tech: C++17 · JSON
+    talksTo: [router]
+    kind: core
+  - id: router
+    name: Waypoint router
+    role: Gives each agent its preferred velocity toward the next waypoint on the way to its gate.
+    tech: C++17
+    talksTo: [hash]
+    kind: core
+  - id: hash
+    name: Spatial hash
+    role: Bins agents into 2 m grid cells each step so neighbour queries look at 9 cells only.
+    tech: C++17
+    talksTo: [solver]
+    kind: core
+  - id: solver
+    name: Avoidance solver
+    role: Picks each agent's new velocity with ORCA and moves it, in parallel.
+    tech: C++17 · OpenMP
+    talksTo: [analytics]
+    kind: core
+  - id: analytics
+    name: Analytics
+    role: Counts gate-line crossings and queue lengths per gate over time.
+    tech: C++17 · CSV
+    talksTo: [viewer]
+    kind: core
+  - id: viewer
+    name: Visualiser
+    role: Plays back agent positions and plots throughput and queue length.
+    tech: OpenGL or matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: map
+    text: has loaded the stadium polygons once; each turnstile is a gate line that releases one agent every 60 / 45 = 1.33 s.
+  - component: router
+    text: sets each agent's `prefVel` toward its next waypoint at up to 1.4 m/s, choosing the gate with the shortest expected wait.
+  - component: hash
+    text: re-bins all 20,000 agents into cells with a counting sort, so the cost is linear in the number of agents.
+  - component: solver
+    text: turns each neighbour within 3 m and each nearby rail into a **half-plane** of allowed velocities, then solves a small 2D linear program for the allowed velocity closest to `prefVel`.
+  - component: solver
+    text: writes new positions into a second buffer, so the result does not depend on which thread ran which agent.
+  - component: analytics
+    text: checks which agents crossed a gate line this step and updates throughput per minute and queue length per gate.
+interface:
+  lang: cpp
+  code: |
+    struct Agent {
+      vec2  pos, vel;       // m, m/s
+      vec2  prefVel;        // toward next waypoint
+      float radius = 0.25f, maxSpeed = 1.4f;
+      uint16_t gate;
+    };
+    void buildHash(std::span<const Agent>, Grid& g);
+    // cell 2 m; neighbours within 3 m, at most 10
+    vec2 solveOrca(const Agent& a,
+                   std::span<const Agent*> nbrs,
+                   std::span<const Segment> rails,
+                   float tau = 2.0f);  // horizon, s
+decisions:
+  - choice: ORCA
+    instead: Social-force model
+    why: Social forces push agents apart only after they get close, so dense queues overlap and jitter unless the step is tiny. ORCA picks a collision-free velocity directly, which is what the 10 cm overlap target needs at 20 steps/s.
+  - choice: Uniform grid rebuilt every step
+    instead: A k-d tree
+    why: Every agent moves every step, and the stadium has a fixed size, so a counting-sort grid rebuild is linear and cheap. A tree would need rebuilding too and costs more per query.
+  - choice: Calibrate before comparing layouts
+    instead: Tune parameters until the crowd looks right
+    why: Operations will change real turnstile counts from this. Each gate must reach 45 persons a minute within 10% in a saturated-queue test before any layout result is trusted.
+watchOut: >-
+  Agents oscillate at doorways and turnstiles when they all want the same gap. Keep the time horizon about 2 s, add a
+  small consistent side preference, and watch the overlap and throughput numbers, not just the animation.

@@ -1,0 +1,111 @@
+overview: >-
+  A remote build cache and executor in Go for Granite Software's 40-minute monorepo build. Each build action (a
+  compile command with its inputs) is named by a digest, a hash of its command, environment and the hashes of every
+  input file, so the same action anywhere has the same name. If the action cache already knows that digest, the client
+  just downloads the outputs; otherwise a scheduler runs it on a sandboxed worker that pulls inputs from a
+  content-addressed store (CAS), where every file is stored under the hash of its bytes.
+learn:
+  - name: Content-addressed storage
+  - name: Hermetic builds
+  - name: Merkle trees
+  - name: DAG scheduling
+  - name: Locality-aware scheduling
+stats:
+  - value: ≥ 10×
+    label: warm vs cold rebuild
+  - value: < 3 s
+    label: for 1,000 cache hits
+  - value: ≥ 75%
+    label: efficiency at 8 workers
+components:
+  - id: client
+    name: CLI client
+    role: Hashes actions, checks the cache, uploads missing inputs and fetches outputs.
+    tech: Go CLI
+    talksTo: [ac, cas, scheduler]
+    kind: core
+  - id: ac
+    name: Action cache
+    role: Maps an action digest to its exit code and output digests.
+    tech: Go · bbolt
+    talksTo: []
+    kind: core
+  - id: cas
+    name: CAS server
+    role: Stores blobs by SHA-256 and size and reports which ones are missing.
+    tech: Go · disk
+    talksTo: [workers]
+    kind: core
+  - id: scheduler
+    name: Scheduler
+    role: Assigns actions to workers by cached inputs, free slots and critical path.
+    tech: Go
+    talksTo: [workers]
+    kind: core
+  - id: workers
+    name: Workers
+    role: Run actions in a fresh sandbox and upload the outputs.
+    tech: Go · Linux namespaces
+    talksTo: [ac]
+    kind: core
+  - id: gen
+    name: Graph generator
+    role: Makes synthetic DAGs of 5,000 compile-like actions with varied durations.
+    tech: Go
+    talksTo: [client]
+    kind: offline
+flow:
+  - component: client
+    text: >-
+      hashes the command, environment and the sorted tree of input digests into one **action digest**, then looks up
+      a batch of 100 digests at a time so 1,000 hits fit in 3 s.
+  - component: ac
+    text: >-
+      on a hit returns the output digests, and the client downloads only the blobs it lacks; on a miss the client hands
+      the action to the scheduler.
+  - component: cas
+    text: >-
+      answers `findMissing` so the client uploads only new inputs; large files go up in resumable 4 MB pieces, so one
+      big upload cannot stall the rest.
+  - component: scheduler
+    text: >-
+      picks a free worker that already holds the most input bytes, and runs actions on the DAG's longest remaining
+      path first so stragglers do not hold up the end.
+  - component: workers
+    text: >-
+      link the inputs into an empty sandbox with no network and a fixed environment, run the command, upload outputs
+      to the CAS, and write the action cache entry only if it exited 0.
+interface:
+  lang: http
+  code: |
+    POST /cas/findMissing
+    { "digests": ["sha256:9f2c.../4812",
+                  "sha256:07ab.../77"] }
+    200 OK
+    { "missing": ["sha256:07ab.../77"] }
+
+    GET /ac/sha256:5d1e...
+    200 OK
+    { "exitCode": 0,
+      "outputs": [ { "path": "out/lib.o",
+        "digest": "sha256:c3f0.../90112" } ] }
+decisions:
+  - choice: Digests of content, not paths or timestamps
+    instead: Keys built from file paths and modification times
+    why: >-
+      Two developers' checkouts have different mtimes but the same bytes. Hashing content is what lets a warm rebuild
+      be 10 times faster than cold, for everyone.
+  - choice: Only workers write the action cache
+    instead: Let clients upload results they built locally
+    why: >-
+      A laptop build can depend on local tools or environment, which poisons the cache for everyone. Results from the
+      sandbox are hermetic by construction.
+  - choice: Locality-aware scheduling
+    instead: Plain least-loaded scheduling
+    why: >-
+      On a LAN the cost is moving inputs, and related actions share most of them. Preferring a worker that has the
+      inputs cached cuts transfer, which is what keeps 8 workers at 75% efficiency.
+watchOut: >-
+  An action that reads the clock, an absolute path or a stray environment variable gives different outputs for the
+  same digest. Run a sample of actions twice and alert when output digests differ, before they spread through the
+  cache.

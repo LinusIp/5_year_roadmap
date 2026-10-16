@@ -1,0 +1,105 @@
+overview: >-
+  An animation tool that reads gridded wind (u, v) and pressure for several forecast times and draws speed as a
+  colour map with 5,000 moving streamline particles and isobars on top. A field sampler interpolates bilinearly in
+  space and linearly in time, and particles move through it with a midpoint (RK2) step and fade with age. The same
+  frames go to the screen or to a looping MP4 or GIF.
+learn:
+  - name: Bilinear interpolation
+    ref: scratchapixel
+  - name: Particle advection (RK2)
+    ref: mit-18-03
+  - name: Marching squares contours
+  - name: Perceptual colour maps
+    ref: scientific-python-lectures
+  - name: Longitude wrap-around
+stats:
+  - value: 30 FPS
+    label: 5,000 particles on 720 × 360
+  - value: < 1%
+    label: interpolation error at nodes
+  - value: < 20 s
+    label: export a 48-frame loop
+components:
+  - id: reader
+    name: Grid reader
+    role: Loads u, v and pressure arrays for every time step with their lat-lon axes.
+    tech: numpy
+    talksTo: [sampler, isobars]
+    kind: core
+  - id: sampler
+    name: Field sampler
+    role: Returns u and v at any longitude, latitude and time, wrapping at the date line.
+    tech: numpy
+    talksTo: [advector]
+    kind: core
+  - id: advector
+    name: Particle advector
+    role: Moves 5,000 particles with an RK2 step, ages them and respawns old ones at random.
+    tech: numpy
+    talksTo: [renderer]
+    kind: core
+  - id: isobars
+    name: Isobar contouring
+    role: Traces pressure lines every 4 hPa per time step and caches them.
+    tech: numpy · marching squares
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Draws the speed colour map, fading particle trails and isobars into an offscreen frame.
+    tech: moderngl
+    talksTo: [exporter, readout]
+    kind: core
+  - id: exporter
+    name: Animation exporter
+    role: Writes 48 frames to a looping MP4 or GIF.
+    tech: imageio
+    talksTo: []
+    kind: offline
+  - id: readout
+    name: Readout UI
+    role: Shows the time slider and the wind speed, direction and pressure under a click.
+    tech: pyglet
+    talksTo: []
+    kind: core
+flow:
+  - component: reader
+    text: has loaded all time steps once, with longitudes running 0 to 360 and pressure in hPa.
+  - component: sampler
+    text: finds the two time steps around `t`, blends them linearly, and samples each with bilinear weights, taking column `i % nx` past the date line.
+  - component: advector
+    text: moves every particle with a **midpoint step** (sample, go half a step, sample again), so vortex paths close instead of spiralling out.
+  - component: isobars
+    text: returns the cached 4 hPa lines for the two nearby time steps and fades between them.
+  - component: renderer
+    text: draws the colour map, dims the trail texture, adds the particles, then the isobars, at 30 FPS.
+  - component: readout
+    text: on a click calls the same sampler at that point, so the readout and the animation always agree.
+interface:
+  lang: python
+  code: |
+    def sample(f: Field, lon: Arr, lat: Arr,
+               t: float) -> tuple[Arr, Arr]:
+        """u, v in m/s at points in degrees, t in hours.
+
+        Bilinear in space, linear in time.
+        Longitude wraps: column nx is column 0."""
+
+    def advect(p: Particles, f: Field, t, dt):
+        u, v = sample(f, p.lon, p.lat, t)
+        mid = p.moved(u, v, dt / 2)
+        u, v = sample(f, mid.lon, mid.lat, t + dt / 2)
+        p.move(u, v, dt)   # RK2 midpoint
+decisions:
+  - choice: Midpoint (RK2) advection
+    instead: Forward Euler
+    why: Euler pushes particles outward in every vortex; RK2 costs two samples per step and keeps the analytic vortex test closed. Measure radius drift against step size.
+  - choice: moderngl for the live view
+    instead: matplotlib animation
+    why: Redrawing 5,000 particles with trails in matplotlib falls well under 30 FPS; matplotlib stays for the colour bar and static checks.
+  - choice: Sequential colour map for speed
+    instead: Rainbow colour map
+    why: Speed has no meaningful midpoint, and rainbow maps invent bands that forecasters read as fronts.
+watchOut: >-
+  The date line. Without wrapping the column index, particles freeze or jump at 180 degrees and isobars break, so test
+  with a field that crosses it.

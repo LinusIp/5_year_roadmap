@@ -1,0 +1,122 @@
+overview: >-
+  A reservation engine for Lantern Stays' 30 properties where every room type has one inventory row per night. A
+  hold for a date range decrements all those nights in one transaction or none of them, a confirm turns it into a
+  booking, and a leased sweeper gives back rooms from holds that pass their 10-minute deadline. Partner channels
+  read availability through a Redis cache that is cleared on every hold and confirm.
+learn:
+  - name: Conditional updates
+    ref: cmu-15-445
+  - name: Transactions and isolation
+    ref: ddia
+  - name: Leases for background jobs
+    ref: kleppmann-distributed-systems
+  - name: Cache invalidation
+    ref: system-design-primer
+  - name: Inventory invariants
+stats:
+  - value: "0"
+    label: oversold nights at 300 holds/s
+  - value: < 5 s
+    label: p99 hold release delay
+  - value: < 80 ms
+    label: p99 availability, 14 nights
+components:
+  - id: channels
+    name: Site and partners
+    role: Ask for availability and send holds and confirms on behalf of guests.
+    tech: HTTP clients
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: Partner API
+    role: Exposes availability, hold, confirm and release endpoints with the same rules for every channel.
+    tech: Go · net/http
+    talksTo: [holds, cache]
+    kind: core
+  - id: holds
+    name: Hold manager
+    role: Runs the all-nights-or-nothing hold transaction and the confirm that turns a hold into a booking.
+    tech: Go · pgx
+    talksTo: [store, cache]
+    kind: core
+  - id: store
+    name: Inventory store
+    role: One row per property, room type and night with capacity, held and booked counts.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: cache
+    name: Availability cache
+    role: Serves 14-night availability to partners, keyed by property and range, cleared on writes.
+    tech: Redis
+    talksTo: [store]
+    kind: core
+  - id: sweeper
+    name: Expiry sweeper
+    role: Takes a lease, finds holds past their deadline and returns their nights to free stock.
+    tech: Go · SKIP LOCKED
+    talksTo: [store, cache]
+    kind: core
+  - id: loadgen
+    name: Load generator
+    role: Replays Poisson arrivals with a weekend surge at 300 hold attempts per second.
+    tech: k6
+    talksTo: [api]
+    kind: offline
+  - id: checker
+    name: Invariant checker
+    role: Checks held plus booked plus free equals capacity for every night after a run.
+    tech: SQL
+    talksTo: [store]
+    kind: offline
+flow:
+  - component: api
+    text: receives `POST /holds` for 2 nights of room type `deluxe-king` and gives the hold a 10-minute `expires_at`.
+  - component: holds
+    text: >-
+      runs one transaction with `UPDATE nights SET held = held + 1 WHERE … AND capacity - held - booked >= 1` and
+      checks it touched **every** night; if only some rows changed it rolls back and returns `409 SOLD_OUT`.
+  - component: store
+    text: commits the night rows and the `holds` row together, so a hold can never exist with only half its nights taken.
+  - component: cache
+    text: deletes the cached availability keys for that property, so the next partner read rebuilds from the store.
+  - component: holds
+    text: >-
+      on `POST /holds/{id}/confirm` moves the count from `held` to `booked`, but only `WHERE status = 'held' AND
+      expires_at > now()`.
+  - component: sweeper
+    text: >-
+      if no confirm comes, picks the hold within 5 s of its deadline with `FOR UPDATE SKIP LOCKED`, sets it to
+      `expired` and gives the nights back; the same status check stops it racing a late confirm.
+interface:
+  lang: http
+  code: |
+    POST /holds
+    { "property": "LS-14", "room_type": "deluxe-king",
+      "check_in": "2026-11-20", "nights": 2,
+      "channel": "partner-a" }
+
+    201 Created
+    { "hold_id": "h_93kd", "expires_at": "…T18:10:00Z" }
+
+    409 Conflict
+    { "error": "SOLD_OUT", "night": "2026-11-21" }
+decisions:
+  - choice: Conditional UPDATE on per-night rows
+    instead: Read availability, then write the hold
+    why: >-
+      At 300 attempts a second two guests read "1 left" at the same moment; the WHERE clause makes the database do
+      the check and the write as one step. Revisit only if one hot night row becomes a bottleneck.
+  - choice: Leases and SKIP LOCKED for the sweeper
+    instead: A separate distributed lock service
+    why: >-
+      The constraint is database features only, and several sweeper nodes can safely share work this way. A crashed
+      node's lease simply runs out.
+  - choice: Cache with a short TTL plus delete on write
+    instead: No cache, every partner read hits PostgreSQL
+    why: >-
+      Partners poll 14-night ranges far more often than guests book; the cache keeps reads under 80 ms. The store
+      still has the final say at hold time, so a stale read can only cause a 409, never an oversell.
+watchOut: >-
+  The sweeper and a late confirm can both touch the same hold. Both must check `status` and `expires_at` in their
+  WHERE clause, or a guest can pay for a room that was just released.

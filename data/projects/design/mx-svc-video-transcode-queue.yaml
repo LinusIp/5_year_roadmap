@@ -1,0 +1,122 @@
+overview: >-
+  A transcoding job system for Lecturo's 400 hours of lecture video a week. A planner cuts each source at keyframes
+  (frames that can be decoded on their own) into segments, workers claim segment jobs from a PostgreSQL queue with a
+  lease and run ffmpeg to make 3 renditions, and a failed segment is retried alone instead of redoing the file. Once
+  every segment verifies, a manifest builder writes the HLS playlists the course player streams from.
+learn:
+  - name: Keyframes and GOPs
+  - name: Job queues with leases
+    ref: ddia
+  - name: Adaptive bitrate streaming
+  - name: Parallel speed-up
+    ref: cmu-15-418
+  - name: Idempotent workers
+stats:
+  - value: < 12 min
+    label: 60-minute 1080p lecture, 8 cores
+  - value: < 10%
+    label: extra time from segment retries
+  - value: "> 75%"
+    label: worker utilisation in bursts
+components:
+  - id: upload
+    name: Lecture upload
+    role: Drops the recorded source file in storage and asks for a transcode.
+    tech: Course platform
+    talksTo: [planner]
+    kind: external
+  - id: planner
+    name: Planner
+    role: Finds keyframes with ffprobe and creates one job per 10-second-aligned segment and rendition.
+    tech: Python · ffprobe
+    talksTo: [queue]
+    kind: core
+  - id: queue
+    name: Job queue
+    role: Segment jobs with priority lane, lease expiry and attempt count.
+    tech: PostgreSQL · SKIP LOCKED
+    talksTo: [workers]
+    kind: core
+  - id: workers
+    name: Workers
+    role: Claim a job, renew the lease while ffmpeg runs, upload the output to storage.
+    tech: Python · ffmpeg · Docker
+    talksTo: [verifier]
+    kind: core
+  - id: verifier
+    name: Segment verifier
+    role: Checks duration, start timestamp and stream count of each output against the plan.
+    tech: ffprobe
+    talksTo: [manifest]
+    kind: core
+  - id: manifest
+    name: Manifest builder
+    role: Writes the 3 rendition playlists and the master playlist when all segments verify.
+    tech: Python · HLS
+    talksTo: [storage]
+    kind: core
+  - id: storage
+    name: Object storage
+    role: Holds sources, segment outputs and manifests.
+    tech: MinIO
+    talksTo: []
+    kind: external
+  - id: progress
+    name: Progress API
+    role: Reports done segments, ETA and failures per lecture.
+    tech: FastAPI
+    talksTo: [queue]
+    kind: offline
+flow:
+  - component: planner
+    text: >-
+      probes a 60-minute 1080p lecture, finds keyframes, and creates 360 segment cuts of about 10 s, times 3
+      renditions, in the `live` lane because it was just recorded.
+  - component: queue
+    text: >-
+      hands job 1,204 to a worker with `UPDATE … SET leased_until = now() + 60 s … FOR UPDATE SKIP LOCKED`, so two
+      workers never take the same job.
+  - component: workers
+    text: run ffmpeg on that segment for the 720p rendition, renew the lease every 20 s, and upload to a key named after the job.
+  - component: verifier
+    text: >-
+      checks the output's duration and first timestamp match the plan; a mismatch or a crash marks only this job for
+      **retry**, up to 3 attempts.
+  - component: manifest
+    text: >-
+      runs once all 1,080 jobs are done, writes the playlists and stores them, and the lecture plays smoothly across
+      every boundary.
+interface:
+  lang: sql
+  code: |
+    -- claim the next job, priority lane first
+    UPDATE jobs SET status = 'running',
+           leased_until = now() + interval '60 s',
+           attempts = attempts + 1
+    WHERE id = (
+      SELECT id FROM jobs
+      WHERE status = 'queued'
+         OR (status = 'running'
+             AND leased_until < now())
+      ORDER BY lane, created_at
+      LIMIT 1 FOR UPDATE SKIP LOCKED)
+    RETURNING id, source_key, start_s, rendition;
+decisions:
+  - choice: Cut at keyframes
+    instead: Cut at exact 10-second marks
+    why: >-
+      A segment that does not start on a keyframe cannot be decoded cleanly and shows a glitch at each join. Keyframe
+      cuts are slightly uneven but always play.
+  - choice: PostgreSQL queue with leases
+    instead: A message broker such as RabbitMQ
+    why: >-
+      Thousands of jobs a week is tiny for PostgreSQL, and progress, retries and priority are just SQL. A lease means
+      a crashed worker's job comes back after 60 s.
+  - choice: Retry per segment
+    instead: Retry the whole file
+    why: >-
+      Large files used to fail mid-way and restart from zero. One failed 10-second segment costs seconds, which keeps
+      retries under 10 percent of total time.
+watchOut: >-
+  If a lease expires while a slow worker is still running, two workers produce the same segment. Write outputs to a
+  key named after the job and attempt, and let the verifier pick one.

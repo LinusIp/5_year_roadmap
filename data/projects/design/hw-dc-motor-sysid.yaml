@@ -1,0 +1,69 @@
+overview: >-
+  A geared DC motor with an encoder is driven with steps and a PRBS (pseudo-random binary sequence: a voltage that
+  switches between two levels at random-looking times, so it excites many frequencies at once), its speed is logged,
+  and a discrete model is fitted by least squares. The model is then checked on a separate recording it never saw,
+  with a fit above 85%, and its electrical and mechanical time constants are read from its poles.
+learn:
+  - name: System identification
+    ref: brunton-databook
+  - name: PRBS excitation
+  - name: ARX least squares
+  - name: Validation fit
+components:
+  - id: firmware
+    name: Drive firmware
+    role: Applies the voltage sequence by PWM and counts encoder edges.
+    tech: C · timers · H-bridge
+    talksTo: [motor, logger]
+    kind: core
+  - id: motor
+    name: Motor and encoder
+    role: The geared motor under test, with a quadrature encoder.
+    tech: 12 V geared motor
+    talksTo: []
+    kind: external
+  - id: logger
+    name: Serial logger
+    role: Streams time, voltage and counts each tick to a CSV.
+    tech: Python · pyserial
+    talksTo: [fit]
+    kind: core
+  - id: fit
+    name: Model fit
+    role: Fits the model on one recording and scores it on another.
+    tech: Python · NumPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: firmware
+    text: at 1 kHz applies the next PRBS level, switching between 3 V and 9 V to stay clear of stall and full drive, and counts encoder edges in hardware quadrature mode.
+  - component: logger
+    text: saves `(t, u, counts)` per tick, with one recording for fitting and one with a different PRBS seed for validation.
+  - component: fit
+    text: converts counts to speed and fits `y[k] = -a1·y[k-1] - a2·y[k-2] + b1·u[k-1] + b2·u[k-2]` with `lstsq`, then turns the poles into time constants.
+  - component: fit
+    text: simulates the model on the validation input from its **own** past outputs and reports `fit = 100·(1 - ‖y - ŷ‖ / ‖y - ȳ‖)`, target above 85%.
+interface:
+  lang: python
+  code: |
+    def arx_fit(u, y, na=2, nb=2):
+        """Least-squares ARX: returns a (na), b (nb)."""
+        n0 = max(na, nb)
+        X = np.array([np.r_[-y[k-na:k][::-1],
+                            u[k-nb:k][::-1]]
+                      for k in range(n0, len(y))])
+        theta, *_ = np.linalg.lstsq(X, y[n0:], rcond=None)
+        return theta[:na], theta[na:]
+
+    def fit_percent(y, y_hat):
+        return 100 * (1 - np.linalg.norm(y - y_hat)
+                      / np.linalg.norm(y - y.mean()))
+decisions:
+  - choice: Score by free-run simulation
+    instead: Score one-step-ahead predictions on the validation data
+    why: >-
+      One-step prediction uses the measured previous speed, so even a poor model scores above 95%. Simulating from the
+      model's own outputs exposes wrong poles, and the 85% target is meant for that.
+watchOut: >-
+  Driving the H-bridge to full voltage, or so low that friction stalls the motor, makes the response nonlinear and the
+  fit misleading. Keep both PRBS levels in the linear range and look for flat tops or stalls in the log.

@@ -1,0 +1,125 @@
+overview: >-
+  Raft in Go, inside the MIT 6.5840 lab framework: each peer keeps one state struct behind a mutex, and a few
+  long-lived goroutines work on it, an election ticker, one replicator per follower and an applier. RPC handlers for
+  RequestVote, AppendEntries and InstallSnapshot change the same state, and term, vote, log and snapshot are saved
+  before any reply that depends on them. A parallel test script runs every part hundreds of times, because the bugs
+  show up once in fifty runs.
+learn:
+  - name: Raft consensus
+    ref: mit-6-5840
+  - name: Figure 2 invariants
+  - name: Go concurrency
+    ref: tour-of-go
+  - name: Log compaction
+  - name: Persist before reply
+  - name: Debugging from logs
+stats:
+  - value: 100×
+    label: every lab 3 test in a row, race detector on
+  - value: ≥ 5
+    label: bugs in the public write-up
+components:
+  - id: ticker
+    name: Election ticker
+    role: Starts an election when no valid heartbeat arrives within a randomised timeout.
+    tech: goroutine · time
+    talksTo: [network]
+    kind: core
+  - id: replicators
+    name: Replicators
+    role: On the leader, one loop per follower sends heartbeats, entries from nextIndex, or a snapshot.
+    tech: goroutines
+    talksTo: [network]
+    kind: core
+  - id: network
+    name: labrpc network
+    role: The lab's simulated network, which delays, drops, reorders and partitions RPCs.
+    tech: labrpc
+    talksTo: [state]
+    kind: external
+  - id: state
+    name: Peer state
+    role: One mutex-protected struct holding term, vote, log and commitIndex, changed by the RPC handlers.
+    tech: Go · sync.Mutex
+    talksTo: [persister, applier]
+    kind: core
+  - id: persister
+    name: Persister
+    role: Saves term, vote, log and snapshot so a restarted peer comes back with them.
+    tech: Lab persister · labgob
+    talksTo: []
+    kind: core
+  - id: applier
+    name: Applier
+    role: Sends each committed entry, in order, to the service on the apply channel.
+    tech: goroutine · channel
+    talksTo: [service]
+    kind: core
+  - id: service
+    name: Service
+    role: The tester or key-value server that calls Start and reads applyCh.
+    tech: Lab tester
+    talksTo: [state]
+    kind: external
+  - id: tests
+    name: Test loop
+    role: Runs each part hundreds of times in parallel and keeps the logs of failed runs.
+    tech: Script · go test -race
+    talksTo: []
+    kind: offline
+flow:
+  - component: ticker
+    text: >-
+      fires on a follower that heard no valid leader in time: it becomes a candidate, bumps `currentTerm`, votes for
+      itself and sends `RequestVote` to every peer.
+  - component: persister
+    text: >-
+      saves `currentTerm`, `votedFor` and the log on each voter **before** it replies; a majority of votes makes the
+      candidate leader.
+  - component: service
+    text: calls `Start(cmd)` on the leader, which appends the entry under the mutex and returns index and term at once.
+  - component: replicators
+    text: >-
+      send `AppendEntries` from each follower's `nextIndex`, or `InstallSnapshot` if it is behind the snapshot, and
+      jump back by `ConflictTerm` when a follower rejects.
+  - component: state
+    text: >-
+      advances `commitIndex` when a majority's `matchIndex` reaches an entry of the **current term**; older entries
+      commit only along with it.
+  - component: applier
+    text: releases the mutex and sends each new `ApplyMsg` on `applyCh` to the service.
+interface:
+  lang: go
+  code: |
+    type AppendEntriesArgs struct {
+      Term         int
+      LeaderId     int
+      PrevLogIndex int
+      PrevLogTerm  int
+      Entries      []LogEntry
+      LeaderCommit int
+    }
+    type AppendEntriesReply struct {
+      Term          int
+      Success       bool
+      ConflictTerm  int // for fast backtracking
+      ConflictIndex int
+    }
+decisions:
+  - choice: One mutex around all peer state
+    instead: Fine-grained locks or state owned by channels
+    why: >-
+      With three to seven peers and ten heartbeats a second there is no contention to win, and one lock keeps the
+      Figure 2 rules checkable in one place. Revisit only if the key-value store profiles lock waits.
+  - choice: A parallel test script, hundreds of runs
+    instead: Running go test by hand
+    why: >-
+      A bug that fails one run in fifty passes most manual runs; 100 clean runs in a row is the bar, so the script
+      runs them in parallel and keeps only the failing logs.
+  - choice: Conflict-term backtracking
+    instead: Decrement nextIndex by one per rejection
+    why: >-
+      The 3C tests leave followers with long divergent logs, and one entry per round trip breaks the time limits.
+watchOut: >-
+  Holding the mutex across an RPC call or a channel send deadlocks under the unreliable network. Copy what you need,
+  unlock, call, then lock again and check the term has not changed.

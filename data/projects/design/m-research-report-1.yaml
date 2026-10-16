@@ -1,0 +1,119 @@
+overview: >-
+  A research project built from fixed artefacts, each committed with a date so git history proves the order. A
+  pre-registration (a note written before any experiment) states the question, the hypothesis, a quantitative
+  prediction and the result that would refute it; a pilot sizes the experiment; the full runs use at least three seeds;
+  and one script turns the logged runs into every number in a two-page report. A reader you asked comments on it, and
+  a negative result counts as a result.
+learn:
+  - name: Choosing a question
+    ref: hamming-you-and-your-research
+  - name: Pre-registration
+  - name: Falsifiable predictions
+    ref: schulman-research-guide
+  - name: Effect size and spread
+  - name: Scientific writing
+    ref: nielsen-principles
+stats:
+  - value: 2 pages
+    label: one main figure
+  - value: ≥ 3
+    label: seeds, or a stated sample size
+  - value: "1"
+    label: reader's comments, answered
+components:
+  - id: cards
+    name: Research cards
+    role: Seed questions such as `q-specdec-code-prose` and `q-kv-quant-long-context`.
+    tech: Atlas research cards
+    talksTo: [prereg]
+    kind: external
+  - id: prereg
+    name: Pre-registration
+    role: Holds question, hypothesis, prediction and refutation criterion, committed before any run.
+    tech: prereg.md · git
+    talksTo: [pilot]
+    kind: core
+  - id: pilot
+    name: Pilot
+    role: A small run that checks the setup and sizes seeds and samples for the full experiment.
+    tech: Python · PyTorch
+    talksTo: [runs]
+    kind: core
+  - id: runs
+    name: Full runs
+    role: The experiment with controls and at least three seeds, each logged with its config.
+    tech: Weights & Biases · earlier inference server
+    talksTo: [results]
+    kind: core
+  - id: results
+    name: Results script
+    role: Regenerates every number and figure from the logged runs into results.json.
+    tech: Python · Matplotlib
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Two pages in `research/` saying whether the hypothesis survived.
+    tech: Markdown or LaTeX
+    talksTo: [reader]
+    kind: core
+  - id: reader
+    name: Reader
+    role: Someone you asked, who reads and comments on the report.
+    tech: A person
+    talksTo: []
+    kind: external
+  - id: notebook
+    name: Lab notebook
+    role: Records each work session, dead ends included.
+    tech: Markdown · Zotero
+    talksTo: []
+    kind: offline
+flow:
+  - component: prereg
+    text: >-
+      is committed with a date before the first full run: a **quantitative** prediction, such as a speed-up of at least
+      `1.3×`, and the result that would count against it.
+  - component: pilot
+    text: runs a small version to check the code and estimate the spread, which sets the number of seeds or samples.
+  - component: runs
+    text: >-
+      change **one** thing against a control, use at least three seeds, and log every config and GPU-hour.
+  - component: results
+    text: regenerates every number and figure from the logs with a single script, including spread or a confidence interval.
+  - component: report
+    text: fits on two pages with one main figure and states in one sentence how the result compares with the prediction.
+  - component: reader
+    text: is asked early in the month; the comments and your replies are linked from `research/`.
+interface:
+  lang: markdown
+  code: |
+    # prereg.md (committed before any full run)
+    Question: does speculative decoding speed up
+      code more than prose?
+    Hypothesis: code accepts more draft tokens.
+    Prediction: speed-up on code ≥ 1.3× the
+      speed-up on prose, 3 seeds, 200 prompts each.
+    Refuted if: the ratio is below 1.1 and its
+      95 % interval excludes 1.3.
+    Primary metric: tokens/s ratio, mean ± CI.
+    Control: same model, draft and hardware.
+decisions:
+  - choice: Pre-register in a dated commit
+    instead: Decide what counts after the runs
+    why: >-
+      Git history shows the prediction came first, so the result cannot quietly reshape the hypothesis. It is the
+      habit the year 3 research capstone builds on.
+  - choice: A pilot before the full run
+    instead: Going straight to the full experiment
+    why: >-
+      The pilot's spread tells you how many seeds or samples the 10 h of full runs need to detect the predicted
+      effect.
+  - choice: A question one figure can answer
+    instead: A broad question
+    why: >-
+      30 hours is enough for one clean comparison. Shrink the question until a single figure answers it; a follow-up
+      experiment is the stretch.
+watchOut: >-
+  Changing the hypothesis after seeing the data turns a test into a story. Commit the pre-registration before the first
+  full run, and if you must change it, add a dated amendment rather than editing it.

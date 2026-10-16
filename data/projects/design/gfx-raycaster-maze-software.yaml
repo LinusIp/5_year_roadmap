@@ -1,0 +1,67 @@
+overview: >-
+  A first-person maze drawn without a GPU: for each of the 800 screen columns you cast one ray across a 24x24 grid
+  with DDA (stepping from one grid line to the next, so no wall is skipped), turn the hit distance into a wall-slice
+  height and copy one column of the wall texture into the frame. A minimap shows the same rays from above.
+learn:
+  - name: DDA grid traversal
+  - name: Fisheye correction
+  - name: Texture columns
+  - name: Software frame buffers
+    ref: sdl
+components:
+  - id: player
+    name: Player input
+    role: Moves the position and turns the view direction and camera plane each frame.
+    tech: SDL2 / pygame
+    talksTo: [caster]
+    kind: core
+  - id: caster
+    name: Ray caster
+    role: Casts one ray per column through the grid map and returns distance, side and hit point.
+    tech: C / Python
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Column renderer
+    role: Draws each textured wall slice, floor, ceiling and the minimap into the frame buffer.
+    tech: C / Python
+    talksTo: [window]
+    kind: core
+  - id: window
+    name: SDL window
+    role: Shows the finished 800x600 frame and reports frame time.
+    tech: SDL2
+    talksTo: []
+    kind: external
+flow:
+  - component: player
+    text: reads WASD, moves `pos` along `dir` and rotates `dir` and the camera plane `plane`, refusing moves into wall cells.
+  - component: caster
+    text: builds the ray `dir + plane * (2x/w - 1)` for column `x` and steps with DDA on `sideDistX` and `sideDistY` until it enters a wall cell.
+  - component: caster
+    text: uses the **perpendicular** distance `perpWallDist`, not the straight-line one, so the slice height `h / perpWallDist` keeps flat walls flat.
+  - component: renderer
+    text: picks texture column `texX` from the exact hit point, scales it to the slice and presents the frame; the target is under 16.6 ms at 800x600.
+interface:
+  lang: c
+  code: |
+    typedef struct { double x, y; } vec2;
+
+    typedef struct {
+      double dist;   /* perpendicular distance */
+      int side;      /* 0 = x wall, 1 = y wall */
+      int cell;      /* wall type, picks texture */
+      double wallX;  /* hit point along wall 0..1 */
+    } Hit;
+
+    Hit cast_ray(const int map[24][24],
+                 vec2 pos, vec2 ray_dir);
+decisions:
+  - choice: Camera plane, not evenly spaced angles
+    instead: Cast rays at equal angle steps with sin and cos
+    why: >-
+      Rays through a flat camera plane space columns like a real projection and give the perpendicular distance
+      for free. Equal angles bend straight walls; use them only if you want a curved view on purpose.
+watchOut: >-
+  Using the straight-line hit distance bows every wall into a fisheye curve. Also flip `texX` for rays facing
+  negative x or y, or textures appear mirrored on two sides of each block.

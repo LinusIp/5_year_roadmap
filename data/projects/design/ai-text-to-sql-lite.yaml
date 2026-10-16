@@ -1,0 +1,53 @@
+overview: >-
+  A tool that turns a question into SQL for a sample SQLite database, with the schema and a few examples in the
+  prompt, and scores itself by running both its SQL and a gold query and comparing the rows. A repair loop sends the
+  database error back to the model once, and accuracy is reported before and after it.
+learn:
+  - name: Schema in the prompt
+  - name: Execution accuracy
+  - name: Error repair loop
+  - name: SQL basics
+    ref: sqlbolt
+components:
+  - id: prompter
+    name: Prompt builder
+    role: Puts the table definitions and 3 examples around the question.
+    tech: Python
+    talksTo: [llm]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Returns one SQL query.
+    tech: Hosted LLM
+    talksTo: [executor]
+    kind: external
+  - id: executor
+    name: Executor
+    role: Runs the query on a read-only connection and asks for one repair on error.
+    tech: sqlite3
+    talksTo: [scorer]
+    kind: core
+  - id: scorer
+    name: Scorer
+    role: Compares result rows with the gold query's rows over 40 pairs.
+    tech: Python
+    talksTo: []
+    kind: core
+flow:
+  - component: prompter
+    text: builds a prompt from the `CREATE TABLE` statements, 3 example pairs and the question.
+  - component: executor
+    text: runs the returned SQL on a connection opened with `mode=ro`; on an error it sends the message back for **one** repair.
+  - component: scorer
+    text: compares rows as unordered multisets, unless the question asks for an order, and counts a match.
+  - component: scorer
+    text: reports execution accuracy over the 40 questions with and without the repair step.
+decisions:
+  - choice: Compare result sets, not SQL text
+    instead: Exact match against the gold SQL
+    why: >-
+      Many different queries return the same correct rows, so string match would mark right answers wrong. Revisit
+      only if wrong queries start matching by luck on tiny tables; then add a second, larger test database.
+watchOut: >-
+  Running generated SQL on a writable connection lets one bad answer drop a table. Open the database read-only rather
+  than filtering the text for `DROP` or `DELETE`.

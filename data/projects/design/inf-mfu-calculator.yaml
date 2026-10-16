@@ -1,0 +1,68 @@
+overview: >-
+  A command-line tool that reads a Hugging Face model config, counts the FLOPs and bytes one prefill or decode step
+  needs, and divides by a measured step time and the GPU's peak numbers. It reports MFU (model FLOPs utilisation,
+  the share of peak compute used) for prefill and MBU (bandwidth utilisation, the share of peak memory bandwidth)
+  for decode.
+learn:
+  - name: FLOP counting for transformers
+    ref: transformer-math-101
+  - name: MFU and MBU
+    ref: databricks-inference-best-practices
+  - name: Compute versus memory bound
+    ref: kipply-inference-arithmetic
+components:
+  - id: config
+    name: Config reader
+    role: Reads layers, hidden size, heads, KV heads, vocab and dtype from config.json.
+    tech: Python · json
+    talksTo: [counter]
+    kind: core
+  - id: counter
+    name: FLOP and byte counter
+    role: Counts matmul and attention FLOPs and weight plus KV-cache bytes per step.
+    tech: Python
+    talksTo: [report]
+    kind: core
+  - id: timings
+    name: Measured timings
+    role: Step times from a real run, with batch size, prompt length and context length.
+    tech: CSV
+    talksTo: [report]
+    kind: external
+  - id: report
+    name: Report
+    role: Divides achieved FLOP/s and bytes/s by the GPU's peaks and prints MFU and MBU.
+    tech: Python
+    talksTo: []
+    kind: core
+flow:
+  - component: config
+    text: loads `config.json` and works out the parameter count, checking it against the published size.
+  - component: counter
+    text: >-
+      counts about `2 · params` FLOPs per token for the matmuls plus the attention term, and for decode the bytes of
+      all weights plus the KV cache read once per step.
+  - component: report
+    text: >-
+      computes `MFU = FLOPs / (time · peak_flops)` for prefill and `MBU = bytes / (time · peak_bw)` for decode, and
+      prints both.
+  - component: report
+    text: is checked against one **hand-worked** example, then run on two real models.
+interface:
+  lang: shell
+  code: |
+    $ mfu --config llama-3-8b/config.json \
+          --gpu a100-80g --dtype bf16 \
+          --timings run.csv
+    phase    batch  ctx   time_ms  MFU   MBU
+    prefill  1      2048  200      0.53  -
+    decode   1      2048  10.0     -     0.80
+decisions:
+  - choice: MFU for prefill, MBU for decode
+    instead: MFU for both
+    why: >-
+      Decode at batch 1 does about 1 FLOP per byte of bf16 weights read, far below what the GPU needs to be compute
+      bound, so its MFU is always a few percent and says nothing. MBU shows how close decode is to its real limit.
+watchOut: >-
+  With causal attention each token attends only to earlier tokens, so the attention FLOPs for a prompt are about half
+  the full square. Counting the full square inflates MFU, sometimes past what the GPU could do.

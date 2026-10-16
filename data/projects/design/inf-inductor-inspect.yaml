@@ -1,0 +1,58 @@
+overview: >-
+  A transformer block is compiled with `torch.compile`, whose Inductor backend writes Triton kernels, and every
+  generated kernel is mapped back to the eager ops it replaced, with the reason ops were or were not fused. One
+  missed fusion is then fixed by hand and measured.
+learn:
+  - name: torch.compile and Inductor
+    ref: gpu-mode-lectures
+  - name: Triton kernels
+    ref: triton-tutorials
+  - name: Fusion decisions
+  - name: Recompiles and guards
+components:
+  - id: block
+    name: Transformer block
+    role: The eager module to compile, run with fixed shapes.
+    tech: PyTorch 2.x
+    talksTo: [inductor]
+    kind: core
+  - id: inductor
+    name: Inductor
+    role: Lowers the graph, decides fusions and writes Triton source to disk.
+    tech: torch.compile · Triton
+    talksTo: [mapper]
+    kind: core
+  - id: mapper
+    name: Kernel map
+    role: Lists each generated kernel with the eager ops inside it.
+    tech: Python · TORCH_LOGS
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Bench
+    role: Counts kernels eager versus compiled and times the manual fix.
+    tech: torch.profiler
+    talksTo: []
+    kind: core
+flow:
+  - component: block
+    text: runs eagerly once under `torch.profiler` to count the kernels it launches per step.
+  - component: inductor
+    text: >-
+      compiles the block with `TORCH_LOGS="output_code"` so each generated `triton_` kernel and its source-op comments
+      are printed.
+  - component: mapper
+    text: >-
+      builds a table of kernel name, eager ops covered and why it stops where it does, then picks one **missed
+      fusion**, such as a residual add left separate from a norm, and writes a Triton kernel that joins them.
+  - component: bench
+    text: profiles eager, compiled and compiled-plus-fix, reporting kernel count and time per step.
+decisions:
+  - choice: Fixed shapes for the study
+    instead: Dynamic shapes
+    why: >-
+      Changing sequence lengths cause recompiles and shape-generic kernels, which make the kernel list change between
+      runs. Fixing shapes keeps one list to explain; try `dynamic=True` after.
+watchOut: >-
+  Timing the first compiled call includes compilation, and a new input shape silently triggers a recompile. Warm up,
+  then check `TORCH_LOGS="recompiles"` shows none during timing.

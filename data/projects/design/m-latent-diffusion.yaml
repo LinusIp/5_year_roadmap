@@ -1,0 +1,121 @@
+overview: >-
+  The Stable Diffusion recipe at a size one GPU can train. First a VAE (an autoencoder whose latent is a small
+  probability distribution) learns to squeeze each 128×128 image into a 16×16×4 latent and back. The whole dataset is
+  encoded once, scaled to unit variance and cached, and the project 47 diffusion U-Net trains on those latents instead
+  of pixels. Sampling runs DDIM in latent space and decodes once at the end, and a pixel-space model trained for the
+  same GPU-hours shows what the latent saves and what it costs.
+learn:
+  - name: VAEs and the KL term
+    ref: stanford-cs236
+  - name: Perceptual loss (LPIPS)
+  - name: Latent diffusion
+    ref: hf-diffusion-course
+  - name: DDIM sampling
+    ref: lilian-weng-diffusion
+  - name: Reconstruction floor
+stats:
+  - value: ≥ 25 dB
+    label: VAE PSNR, held-out set
+  - value: 48×
+    label: fewer numbers than pixels
+  - value: 10,000
+    label: samples per FID
+components:
+  - id: data
+    name: Image dataset
+    role: Supplies 30,000–70,000 faces or animals resized to 128×128.
+    tech: CelebA or AFHQ
+    talksTo: [encoder]
+    kind: external
+  - id: encoder
+    name: VAE encoder
+    role: Maps each image to a mean and variance over a 16×16×4 latent, trained with a small KL weight and LPIPS.
+    tech: PyTorch · lpips
+    talksTo: [cache]
+    kind: core
+  - id: cache
+    name: Latent cache
+    role: Stores every encoded image once, multiplied by the dataset's scaling factor.
+    tech: NumPy on disk
+    talksTo: [unet]
+    kind: core
+  - id: unet
+    name: Latent U-Net
+    role: The project 47 network with 4-channel input, trained to predict noise on cached latents.
+    tech: PyTorch 2.x
+    talksTo: [sampler]
+    kind: core
+  - id: sampler
+    name: DDIM sampler
+    role: Runs the reverse process in latent space for 50 steps.
+    tech: PyTorch
+    talksTo: [decoder]
+    kind: core
+  - id: decoder
+    name: VAE decoder
+    role: Unscales the final latent and turns it back into a 128×128 image.
+    tech: PyTorch
+    talksTo: [fid]
+    kind: core
+  - id: fid
+    name: Evaluator
+    role: Computes FID on 10,000 samples, VAE PSNR, LPIPS and reconstruction FID.
+    tech: clean-fid · W&B
+    talksTo: []
+    kind: core
+  - id: baseline
+    name: Pixel baseline
+    role: Project 47's pixel-space model retrained at 128×128 for the same GPU-hours.
+    tech: PyTorch
+    talksTo: [fid]
+    kind: offline
+flow:
+  - component: encoder
+    text: >-
+      is trained first with reconstruction, LPIPS and a **small** KL term, then encodes each image to `z` of shape
+      `4×16×16` by taking the mean.
+  - component: cache
+    text: >-
+      measures the standard deviation of all latents, stores `scale = 1 / std`, and writes `z · scale` to disk, so the
+      noise schedule meets unit-variance inputs.
+  - component: unet
+    text: trains on the cached latents exactly as in project 47, now on 1,024 numbers per image instead of 49,152.
+  - component: sampler
+    text: starts from Gaussian noise of the latent shape and runs 50 DDIM steps.
+  - component: decoder
+    text: divides by `scale` and decodes **once**, so sampling time includes a single decoder pass.
+  - component: fid
+    text: >-
+      scores samples on 10,000 images and compares training throughput, sampling time and FID with the pixel
+      baseline at equal GPU-hours.
+interface:
+  lang: python
+  code: |
+    # once, after the VAE is trained
+    z = vae.encode(x).mean          # [B, 4, 16, 16]
+    scale = 1.0 / all_latents.std()
+    cache.write(z * scale)
+
+    # sampling
+    z = ddim(unet, torch.randn(B, 4, 16, 16), steps=50)
+    img = vae.decode(z / scale)     # [B, 3, 128, 128]
+decisions:
+  - choice: Downsampling factor 8 (16×16×4)
+    instead: Factor 4 (32×32×4)
+    why: >-
+      Factor 8 cuts each image to 1,024 numbers, 48× fewer than pixels, which is where the compute saving comes from.
+      Revisit if VAE PSNR stays under 25 dB, since its reconstruction FID is the floor the sampler cannot beat.
+  - choice: Small KL weight plus LPIPS
+    instead: Mean squared error only
+    why: >-
+      MSE alone gives blurry reconstructions; no KL at all gives a latent space too irregular for diffusion to fit. A
+      small KL and a perceptual loss keep both sharpness and a smooth latent.
+  - choice: Encode the dataset once and cache it
+    instead: Run the encoder on every training batch
+    why: >-
+      The encoder is frozen after training, so running it every step wastes GPU time. The price: no flip
+      augmentation on cached latents unless you encode flipped images too.
+watchOut: >-
+  Skipping the latent scaling factor sends latents with variance far from one into a noise schedule built for unit
+  variance, and samples come out washed out or noisy. Measure the standard deviation once and apply it in both
+  directions.

@@ -1,0 +1,57 @@
+overview: >-
+  An L-shaped bracket that carries a load is analysed with finite element analysis (FEA: the part is split into many
+  small tetrahedra and the stress in each is solved for), then reshaped with pockets, fillets and ribs to cut mass by
+  30% while keeping the safety factor (yield strength divided by peak stress) at 2 or more. Every iteration is logged
+  with its mass, peak stress and safety factor.
+learn:
+  - name: Finite element analysis
+    ref: fish-belytschko-fem
+  - name: Stress and safety factor
+    ref: mit-2-001
+  - name: Mesh convergence
+  - name: Stress singularities
+components:
+  - id: cad
+    name: Parametric model
+    role: The bracket with wall thickness, pocket size and fillet radius as named parameters.
+    tech: FreeCAD / Fusion
+    talksTo: [setup]
+    kind: core
+  - id: setup
+    name: Analysis setup
+    role: Material, fixed faces and the applied load.
+    tech: FreeCAD FEM / Fusion Simulation
+    talksTo: [solve]
+    kind: core
+  - id: solve
+    name: Mesh and solve
+    role: Meshes the part, solves, and reports von Mises stress and displacement.
+    tech: CalculiX / Fusion solver
+    talksTo: [log]
+    kind: core
+  - id: log
+    name: Iteration log
+    role: One row per design with mass, peak stress, safety factor and a note.
+    tech: Spreadsheet
+    talksTo: []
+    kind: offline
+flow:
+  - component: cad
+    text: holds the key dimensions as parameters, so each iteration is a parameter change or one new pocket, not a remodel.
+  - component: setup
+    text: fixes the bolt-hole faces, puts the service load on the mounting face, and assigns the material, for example 6061-T6 aluminium with a 276 MPa yield.
+  - component: solve
+    text: uses second-order tetrahedra and refines until peak stress **away from sharp corners** changes by under 5% between meshes.
+  - component: log
+    text: records mass, peak stress and safety factor; done is mass down at least 30% with a safety factor of at least 2.
+decisions:
+  - choice: Guided pockets, not topology optimisation
+    instead: Automatic topology optimisation
+    why: >-
+      Placing pockets and fillets from the stress plot teaches where the load really flows and gives a part you can
+      machine or print as drawn. Topology optimisation gives organic shapes that need remodelling, and a 30% target
+      is reachable with a few guided cuts.
+watchOut: >-
+  At a sharp inside corner or a single fixed point, the computed stress keeps rising as you refine the mesh and never
+  settles, so the safety factor looks worse than it is. Model the fillets the real part will have and read stress
+  where it converges.

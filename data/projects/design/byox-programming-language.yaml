@@ -1,0 +1,119 @@
+overview: >-
+  A small dynamically typed language with first-class functions and closures, built twice on one front end. The
+  scanner turns source into tokens, a Pratt parser (one function per token type, ordered by precedence) builds an AST,
+  and a resolver binds each variable to its scope depth. One back end walks the AST; the other compiles it to bytecode
+  for a stack VM that keeps captured variables alive as upvalues, and a test runner checks both give the same output.
+learn:
+  - name: Pratt parsing
+    ref: crafting-interpreters
+  - name: Lexical scope resolution
+  - name: Environment model
+    ref: sicp
+  - name: Closures and upvalues
+    ref: crafting-interpreters
+  - name: Bytecode stack VM
+stats:
+  - value: ≥ 3×
+    label: VM faster than the tree-walker on fib(30)
+  - value: ≥ 60
+    label: test programs pass on both back ends
+  - value: "832040"
+    label: fib(30) on both
+components:
+  - id: scanner
+    name: Scanner
+    role: Turns source text into tokens with line numbers.
+    tech: C
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: Pratt parser
+    role: Builds the AST, handling precedence and associativity by binding power.
+    tech: C
+    talksTo: [resolver]
+    kind: core
+  - id: resolver
+    name: Resolver
+    role: Binds each variable use to the scope it was declared in.
+    tech: C
+    talksTo: [walker, compiler]
+    kind: core
+  - id: walker
+    name: Tree-walker
+    role: Evaluates the AST against chains of environments.
+    tech: C
+    talksTo: []
+    kind: core
+  - id: compiler
+    name: Compiler
+    role: Emits bytecode into chunks with a constant table and marks captured locals as upvalues.
+    tech: C
+    talksTo: [vm]
+    kind: core
+  - id: vm
+    name: VM
+    role: Runs a dispatch loop over a value stack and call frames, closing upvalues on return.
+    tech: C
+    talksTo: []
+    kind: core
+  - id: tests
+    name: Test runner
+    role: Runs every program on both back ends and diffs the output with the expected file.
+    tech: Shell · hyperfine
+    talksTo: [scanner]
+    kind: offline
+flow:
+  - component: scanner
+    text: reads `counter.lang` and produces tokens, each with its line for error messages.
+  - component: parser
+    text: >-
+      builds the AST, giving `*` a higher binding power than `+` so mixed expressions group correctly.
+  - component: resolver
+    text: >-
+      records for each use of `count` how many scopes up it lives, so the inner function refers to the
+      **variable**, not a copy.
+  - component: walker
+    text: evaluates the AST with environment chains and prints the result; this is back end one.
+  - component: compiler
+    text: >-
+      emits `OP_GET_UPVALUE` for `count` inside the closure and `OP_CLOSURE` with its capture list; this is back end
+      two.
+  - component: vm
+    text: >-
+      runs the dispatch loop, and when the outer frame returns, moves `count` from the stack to the heap with
+      `OP_CLOSE_UPVALUE`, so two counters keep separate state.
+interface:
+  lang: c
+  code: |
+    typedef enum {
+      OP_CONSTANT, OP_GET_LOCAL, OP_SET_LOCAL,
+      OP_GET_UPVALUE, OP_SET_UPVALUE,
+      OP_ADD, OP_LESS, OP_JUMP_IF_FALSE, OP_LOOP,
+      OP_CALL, OP_CLOSURE, OP_CLOSE_UPVALUE,
+      OP_RETURN,
+    } OpCode;
+
+    typedef struct {
+      uint8_t *code;
+      int *lines;            /* per byte, for errors */
+      ValueArray constants;
+    } Chunk;
+decisions:
+  - choice: Both back ends in the same host language
+    instead: The tree-walker in a scripting language, the VM in C
+    why: >-
+      The 3× target should measure the design, not the gap between host languages. C, Rust or Go all work if both
+      sides use it.
+  - choice: A resolver pass before evaluation
+    instead: Looking variables up by name at run time
+    why: >-
+      Closures need to know which variable they capture, and the VM needs slot numbers anyway. One pass serves both back
+      ends.
+  - choice: Upvalues closed on return
+    instead: Putting every environment on the heap
+    why: >-
+      Heap environments are simple but make every call allocate, which would eat the speed-up on fib(30). Upvalues
+      keep locals on the stack until a closure needs them.
+watchOut: >-
+  A closure that captures a copy of a variable instead of the variable makes a counter that never counts. Write the
+  two-counter test first and run it on both back ends after every change.

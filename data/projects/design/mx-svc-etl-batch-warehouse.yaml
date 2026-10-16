@@ -1,0 +1,112 @@
+overview: >-
+  A nightly Python job, started by cron, that turns six shops' POS CSV exports into a small **star schema** (one
+  table of sales facts surrounded by lookup tables for shop, product and date) in DuckDB. Rows move through
+  raw, validated and loaded stages; bad rows go to a quarantine table with a reason. Each day loads inside one
+  transaction that first deletes that day, so re-running any date gives identical totals.
+learn:
+  - name: Star schemas
+    ref: de-zoomcamp
+  - name: Idempotent loads
+    ref: ddia
+  - name: Data validation and quarantine
+  - name: Slowly changing dimensions
+  - name: Surrogate keys
+stats:
+  - value: < 3 min
+    label: for 5M rows nightly
+  - value: 100 %
+    label: injected bad rows quarantined
+  - value: "0"
+    label: difference on re-run
+components:
+  - id: pos
+    name: POS exports
+    role: Six shops each drop a daily CSV, with their own column order.
+    tech: CSV files
+    talksTo: [extract]
+    kind: external
+  - id: extract
+    name: Extractors
+    role: Map each shop's columns to one layout and copy the file into a raw table, tagged with shop and file name.
+    tech: Python · DuckDB read_csv
+    talksTo: [validator]
+    kind: core
+  - id: validator
+    name: Validator
+    role: Checks types, ranges and known products, and splits rows into clean and quarantine.
+    tech: Python · SQL
+    talksTo: [staging]
+    kind: core
+  - id: staging
+    name: Staging
+    role: Holds the clean rows and the quarantine rows with a reason code for one business date.
+    tech: DuckDB
+    talksTo: [loader]
+    kind: core
+  - id: loader
+    name: Star schema loader
+    role: Upserts dimensions with surrogate keys, versions product prices and replaces the day's facts.
+    tech: DuckDB SQL
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Run report
+    role: Records loaded, rejected and late rows per shop and checks fact totals against source totals.
+    tech: Python · DuckDB
+    talksTo: [dashboard]
+    kind: core
+  - id: dashboard
+    name: Sales dashboard
+    role: Reads the fact table for the daily sales view.
+    tech: BI tool
+    talksTo: []
+    kind: external
+flow:
+  - component: extract
+    text: runs `etl run --date 2026-03-01` from cron, reads each shop's file and records which shops have not delivered yet as **late**.
+  - component: validator
+    text: >-
+      casts every field explicitly with `TRY_CAST`; a row with a null where a number should be, a negative quantity
+      or an unknown SKU goes to `quarantine` with a reason like `bad_qty`.
+  - component: staging
+    text: holds clean rows for that business date only, so nothing from other days is touched.
+  - component: loader
+    text: >-
+      inside one transaction inserts new products and shops, opens a new `dim_product` row when a price changes,
+      then runs `DELETE` and `INSERT` on `fact_sales` for that date.
+  - component: report
+    text: compares the summed `amount` per shop with the source file totals and writes the run summary; any gap fails the run with a non-zero exit code.
+interface:
+  lang: sql
+  code: |
+    CREATE TABLE fact_sales (
+      date_key    INTEGER,   -- 20260301
+      shop_key    INTEGER,
+      product_key INTEGER,   -- version valid that day
+      qty         INTEGER,
+      amount      DECIMAL(10,2),
+      source_file VARCHAR
+    );
+    CREATE TABLE quarantine (
+      raw_row VARCHAR, shop VARCHAR,
+      reason VARCHAR, run_id VARCHAR
+    );
+decisions:
+  - choice: Delete and reload a whole day in one transaction
+    instead: Append new rows each night
+    why: >-
+      Plain inserts double the totals on a re-run. Replacing one date at a time makes any re-run safe and still
+      fits 5M rows inside 3 minutes. Revisit with watermarks if loads go incremental.
+  - choice: DuckDB, not SQLite
+    instead: SQLite
+    why: >-
+      Both meet the constraint, but DuckDB reads CSV natively and its column store aggregates 5M rows for the
+      dashboard much faster on a laptop.
+  - choice: Versioned product rows for price changes
+    instead: Overwrite the product price
+    why: >-
+      Bakery prices change during the year; overwriting would rewrite last month's revenue. A new row per price keeps
+      history true.
+watchOut: >-
+  Silent type coercion turns "1,5" into 15 or null without an error. Cast explicitly, and count quarantined rows
+  per reason so a sudden spike is visible.

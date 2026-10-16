@@ -1,0 +1,77 @@
+overview: >-
+  A NumPy study of optimisers on the Rosenbrock function and a logistic-regression loss: gradient descent with a line
+  search, momentum, BFGS, and L-BFGS, which estimates curvature from only the last m steps and gradient changes. A
+  counting wrapper records function evaluations until the gradient norm drops below 1e-8, and L-BFGS must need fewer
+  than gradient descent on both problems.
+learn:
+  - name: Line search
+    ref: cvxbook
+  - name: Quasi-Newton methods
+  - name: L-BFGS two-loop recursion
+  - name: Ill-conditioning
+components:
+  - id: problems
+    name: Objectives
+    role: Rosenbrock and logistic loss with gradients, wrapped to count every call.
+    tech: NumPy
+    talksTo: [opt]
+    kind: core
+  - id: opt
+    name: Optimisers
+    role: Pick a search direction for gradient descent, momentum, BFGS or L-BFGS.
+    tech: NumPy
+    talksTo: [ls, report]
+    kind: core
+  - id: ls
+    name: Line search
+    role: Finds a step length that meets the Wolfe conditions.
+    tech: NumPy
+    talksTo: []
+    kind: core
+  - id: report
+    name: Report
+    role: Tables evaluations to tolerance and plots gradient norm against evaluations.
+    tech: Matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: problems
+    text: >-
+      wrap each objective so every call to `f` and `grad` increments a counter, and check `grad` against finite
+      differences once.
+  - component: opt
+    text: >-
+      picks a direction, `-grad` for gradient descent, or for L-BFGS the two-loop recursion over the last `m = 10`
+      pairs `s = x_new - x` and `y = g_new - g`.
+  - component: ls
+    text: >-
+      finds a step with enough decrease and a flattened slope (the **Wolfe conditions**), which also guarantees
+      `y·s > 0` for the next pair.
+  - component: opt
+    text: >-
+      stops when `‖grad‖ < 1e-8` and logs iterations and evaluations; the report plots gradient norm against
+      evaluations per method.
+interface:
+  lang: python
+  code: |
+    def two_loop(g, S, Y):
+        q, alphas = g.copy(), []
+        for s, y in zip(reversed(S), reversed(Y)):
+            a = (s @ q) / (y @ s)
+            q -= a * y
+            alphas.append(a)
+        s, y = S[-1], Y[-1]
+        r = (s @ y) / (y @ y) * q   # scaled H0
+        for (s, y), a in zip(zip(S, Y), alphas[::-1]):
+            b = (y @ r) / (y @ s)
+            r += (a - b) * s
+        return -r                    # descent direction
+decisions:
+  - choice: Wolfe line search, not a fixed step
+    instead: A fixed learning rate
+    why: >-
+      Rosenbrock's narrow curved valley needs tiny steps across it and long ones along it, so a fixed step either
+      diverges or takes tens of thousands of evaluations. The curvature condition also keeps L-BFGS pairs usable.
+watchOut: >-
+  A pair with `y·s ≤ 0` makes the L-BFGS matrix stop being positive definite, and the direction can point uphill.
+  Skip such pairs, and count evaluations made inside the line search, or the comparison flatters every method.

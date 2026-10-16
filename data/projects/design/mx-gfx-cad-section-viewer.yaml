@@ -1,0 +1,108 @@
+overview: >-
+  A small C++ viewer that loads STL and OBJ parts, fits the camera to them and cuts through the assembly with up to
+  three clip planes. The vertex shader writes `gl_ClipDistance` for each plane, so dragging a plane is just a uniform
+  change. The cut face is filled with a two-pass stencil trick: count how many surfaces each pixel's ray crosses
+  behind the plane, and where that count is odd the pixel is inside the solid and gets the cap colour.
+learn:
+  - name: Clip distances
+    ref: learnopengl
+  - name: Stencil buffer
+    ref: learnopengl
+  - name: Watertight meshes
+    ref: cmu-15-462
+  - name: Orbit and fit-to-view
+    ref: gamemath-3d-primer
+  - name: Polygon offset
+stats:
+  - value: 60 FPS
+    label: 2M triangles, mid-range GPU
+  - value: < 1 frame
+    label: plane drag latency
+  - value: 10 / 10
+    label: closed test meshes capped
+components:
+  - id: loaders
+    name: Mesh loaders
+    role: Reads binary and ASCII STL and OBJ, welds duplicate vertices and recomputes missing normals.
+    tech: C++17
+    talksTo: [scene]
+    kind: core
+  - id: scene
+    name: Scene graph
+    role: Holds each part's buffers, transform, visibility and a watertight flag.
+    tech: C++17 · OpenGL 3.3
+    talksTo: [clip]
+    kind: core
+  - id: camera
+    name: Camera
+    role: Orbits, pans and fits the view to the assembly's bounding sphere.
+    tech: GLM
+    talksTo: [clip]
+    kind: core
+  - id: clip
+    name: Clip-plane manager
+    role: Keeps up to three planes, their drag handles and the uniform array the shaders read.
+    tech: GLM · GLFW input
+    talksTo: [cap]
+    kind: core
+  - id: cap
+    name: Stencil cap pass
+    role: Fills each cut face by stencil parity and draws edges and wireframe on top.
+    tech: OpenGL 3.3 · GLSL
+    talksTo: [gpu, shot]
+    kind: core
+  - id: gpu
+    name: GPU
+    role: A mid-range card that runs the passes.
+    tech: OpenGL 3.3 core
+    talksTo: []
+    kind: external
+  - id: shot
+    name: Screenshot exporter
+    role: Reads back the frame and stamps a scale bar from the camera's millimetres per pixel.
+    tech: stb_image_write
+    talksTo: []
+    kind: core
+flow:
+  - component: loaders
+    text: have loaded each part at startup and checked that every edge is shared by exactly two triangles, setting the **watertight** flag.
+  - component: camera
+    text: applies this frame's mouse orbit and sends the view-projection matrix.
+  - component: clip
+    text: moves a dragged plane along its normal and uploads `u_planes[3]` before the draw, so the cut follows the mouse in the same frame.
+  - component: scene
+    text: draws every visible part once with `gl_ClipDistance[i] = dot(u_planes[i], worldPos)`, which removes the near side of each plane.
+  - component: cap
+    text: for each plane counts the clipped surfaces into the stencil with `GL_INVERT`, then draws the plane quad only where the count is odd, with polygon offset against z-fighting.
+  - component: shot
+    text: on request reads the finished frame with `glReadPixels` and writes a PNG with a scale bar.
+interface:
+  lang: cpp
+  code: |
+    void drawCap(const Scene& s, int i) { // closed only
+      glClear(GL_STENCIL_BUFFER_BIT);
+      glEnable(GL_STENCIL_TEST);
+      glDisable(GL_CULL_FACE);
+      glDisable(GL_DEPTH_TEST);
+      glColorMask(0, 0, 0, 0);    // count only
+      glStencilFunc(GL_ALWAYS, 0, 0xFF);
+      glStencilOp(GL_KEEP, GL_KEEP, GL_INVERT);
+      s.drawClipped();            // odd = inside solid
+      glColorMask(1, 1, 1, 1);
+      glEnable(GL_DEPTH_TEST);
+      glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
+      drawPlaneQuad(s.plane(i));  // clipped by others
+    }
+decisions:
+  - choice: Stencil capping per pixel
+    instead: Slicing the mesh on the CPU into cut polygons
+    why: Re-slicing 2M triangles on every drag would miss the one-frame latency target; the stencil cap costs two extra draws. Revisit if engineers need the cut outline as a file.
+  - choice: gl_ClipDistance in the shader
+    instead: Discarding fragments with a plane test
+    why: Hardware clipping is free in OpenGL 3.3 core and keeps early depth testing working, which matters at 2M triangles.
+  - choice: Check watertightness at load
+    instead: Trusting every file to be closed
+    why: A cap on an open mesh is wrong in a way engineers cannot see, so a part that fails the edge check is drawn without a cap and flagged.
+watchOut: >-
+  Non-manifold or open meshes break stencil parity and paint caps in mid-air. Run the edge check on every part, and
+  test all 10 closed meshes plus one deliberately open one.

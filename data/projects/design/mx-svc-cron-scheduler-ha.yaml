@@ -1,0 +1,118 @@
+overview: >-
+  A scheduler for Dataweave's 800 cron jobs (tested to 5,000) that runs on 3 nodes so one dying box no longer
+  means missed runs. The nodes compete for a lease row in PostgreSQL and only the holder, the **leader**, scans for
+  due schedules. Each due run becomes a tick row with a unique `(schedule_id, tick_time)` key, so even if two
+  nodes briefly both think they lead, the database lets only one of them create that tick.
+learn:
+  - name: Leader election with leases
+    ref: mit-6-5840
+  - name: Unique keys for exactly-once
+    ref: ddia
+  - name: Cron expressions and time zones
+  - name: Missed-run policies
+  - name: Accelerated clock simulation
+stats:
+  - value: < 10 s
+    label: leader failover
+  - value: "0"
+    label: duplicate or missed ticks, 20 kills
+  - value: < 1 s
+    label: tick latency p99, 5,000 schedules
+components:
+  - id: nodes
+    name: Scheduler nodes
+    role: Three identical processes; each tries to take or renew the lease every 3 s.
+    tech: Go
+    talksTo: [election]
+    kind: core
+  - id: election
+    name: Leader election
+    role: A lease row holding leader id, epoch and expiry, taken with a conditional UPDATE.
+    tech: PostgreSQL
+    talksTo: [ticks]
+    kind: core
+  - id: parser
+    name: Cron parser
+    role: Turns an expression and time zone into the next fire times, including DST gaps and repeats.
+    tech: Go
+    talksTo: [ticks]
+    kind: core
+  - id: ticks
+    name: Tick generator
+    role: Finds schedules due by now and inserts one tick row per fire time.
+    tech: Go · PostgreSQL
+    talksTo: [missed]
+    kind: core
+  - id: missed
+    name: Missed-run handler
+    role: After downtime applies the schedule's policy, skip, catch-up or coalesce.
+    tech: Go
+    talksTo: [bridge]
+    kind: core
+  - id: bridge
+    name: Job enqueue bridge
+    role: Turns each new tick into a job on the existing job queue, keyed by the tick id.
+    tech: Go · SQL
+    talksTo: [queue]
+    kind: core
+  - id: queue
+    name: Job queue
+    role: Runs the actual jobs.
+    tech: PostgreSQL queue
+    talksTo: []
+    kind: external
+  - id: sim
+    name: Simulator
+    role: Runs 24 hours on a fast fake clock, kills the leader 20 times and counts every tick.
+    tech: Go
+    talksTo: [nodes]
+    kind: offline
+flow:
+  - component: nodes
+    text: each run `UPDATE lease SET holder = $me, epoch = epoch + 1, expires = now() + 10 s WHERE expires < now() OR holder = $me`.
+  - component: election
+    text: makes the node whose update hit a row the leader for this **epoch**; the others keep trying, so a dead leader is replaced within 10 s.
+  - component: parser
+    text: gives the next fire time for each schedule in its own time zone, so `0 2 * * *` in Berlin runs once on the night clocks change.
+  - component: ticks
+    text: >-
+      inserts `(schedule_id, tick_time, epoch)` with `ON CONFLICT DO NOTHING`; a second leader inserting the same
+      tick gets no row back and does nothing.
+  - component: missed
+    text: >-
+      when ticks are older than the grace window, `skip` drops them, `catch-up` keeps them all with a rate limit, and
+      `coalesce` keeps only the newest.
+  - component: bridge
+    text: enqueues a job with the tick id as its idempotency key and marks the tick `enqueued`.
+interface:
+  lang: sql
+  code: |
+    CREATE TABLE ticks (
+      schedule_id  BIGINT,
+      tick_time    TIMESTAMPTZ,
+      epoch        BIGINT,
+      status       TEXT DEFAULT 'new',
+      PRIMARY KEY (schedule_id, tick_time)
+    );
+    INSERT INTO ticks (schedule_id, tick_time, epoch)
+    VALUES ($1, $2, $3)
+    ON CONFLICT DO NOTHING RETURNING schedule_id;
+decisions:
+  - choice: Lease row in PostgreSQL
+    instead: An external coordinator such as etcd or ZooKeeper
+    why: >-
+      No external coordination service is allowed, and PostgreSQL is already there. A lease with a 10 s expiry meets
+      the failover target with one row.
+  - choice: Unique tick key as the real guarantee
+    instead: Trust the lease alone to prevent duplicates
+    why: >-
+      Two nodes can both act as leader while an old lease runs out, a pitfall named here. The primary key makes a
+      duplicate tick impossible whoever inserts it.
+  - choice: Rate-limited catch-up
+    instead: Fire every missed tick at once
+    why: >-
+      After an hour of downtime, 800 schedules can owe thousands of runs; firing them together floods the queue.
+      Spreading them keeps tick latency under 1 s for on-time schedules.
+watchOut: >-
+  Daylight saving time skips an hour in spring and repeats one in autumn, so a 02:30 job runs zero or two times.
+  Compute fire times in the schedule's zone and test both changeover nights.

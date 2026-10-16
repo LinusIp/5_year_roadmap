@@ -1,0 +1,93 @@
+overview: >-
+  A slow-motion pipeline that invents the frames between two real ones. For each pair of 30 fps frames, a flow
+  network estimates where every pixel moves (optical flow), both frames are warped to the middle moment, and a
+  synthesis network blends them using occlusion masks that say which frame can see each pixel. ffmpeg splits the
+  clip into chunks and keeps the audio, and PSNR, SSIM and LPIPS on Vimeo-90K show how close it is to an open
+  baseline.
+learn:
+  - name: Optical flow
+  - name: Backward warping
+  - name: Occlusion masks
+  - name: Image quality metrics
+  - name: Video encoding with ffmpeg
+stats:
+  - value: ≤ 1 dB
+    label: PSNR gap to open baseline
+  - value: ≥ 8 fps
+    label: at 1080p on one GPU
+  - value: < 10 GB
+    label: GPU memory
+components:
+  - id: dataset
+    name: Triplet dataset
+    role: Serves Vimeo-90K frame triplets with random crops, flips and time reversal for training.
+    tech: PyTorch Dataset
+    talksTo: [flownet]
+    kind: offline
+  - id: pipeline
+    name: Video pipeline
+    role: Decodes the clip in chunks, feeds frame pairs to the GPU and re-encodes at 2× or 4× with the original audio.
+    tech: ffmpeg · PyAV
+    talksTo: [flownet]
+    kind: core
+  - id: flownet
+    name: Flow network
+    role: Estimates flow from the middle moment to each of the two frames, coarse to fine.
+    tech: PyTorch · IFNet-style
+    talksTo: [synth]
+    kind: core
+  - id: synth
+    name: Synthesis network
+    role: Warps both frames, predicts an occlusion mask and blends, then refines with a small UNet.
+    tech: PyTorch
+    talksTo: [pipeline, metrics]
+    kind: core
+  - id: metrics
+    name: Metrics
+    role: Scores PSNR, SSIM and LPIPS on the test split and builds the artifact gallery.
+    tech: torchmetrics · lpips
+    talksTo: []
+    kind: offline
+flow:
+  - component: pipeline
+    text: decodes 1080p frames in chunks of 64, pads them to a multiple of 32 and sends consecutive pairs as `fp16` tensors.
+  - component: flownet
+    text: estimates flow at 1/4, 1/2 and full scale from time `t = 0.5` back to both frames, so fast motion is found coarse first.
+  - component: synth
+    text: >-
+      **backward-warps** each frame to the middle, blends them with mask `M` (`M·warp0 + (1-M)·warp1`) so hidden
+      pixels come from the frame that sees them, and adds a small residual.
+  - component: pipeline
+    text: interleaves real and new frames, re-encodes with ffmpeg and copies the audio track, at 8 fps or better.
+  - component: metrics
+    text: reports PSNR, SSIM and LPIPS on Vimeo-90K test triplets and saves crops of the worst 50 frames to the gallery.
+interface:
+  lang: python
+  code: |
+    def interpolate(f0: Tensor, f1: Tensor,
+                    t: float = 0.5) -> Tensor:
+        """(B,3,H,W) x2 in [0,1] -> (B,3,H,W)"""
+
+    def slowmo(src: Path, dst: Path,
+               factor: int = 4,
+               chunk: int = 64) -> Stats: ...
+
+    # Stats(frames_out=7196, fps=9.4,
+    #       peak_vram_gb=7.8)
+decisions:
+  - choice: Flow-based warping
+    instead: Predict the middle frame directly with a CNN
+    why: >-
+      Direct prediction blurs anything that moves more than a few pixels. Moving real pixels along estimated flow keeps
+      them sharp, and occlusion masks handle what one frame cannot see.
+  - choice: Coarse-to-fine flow at fp16
+    instead: A large flow model at full resolution
+    why: 1080p at 8 fps under 10 GB rules out heavy flow models; estimating at low resolution first is fast and still catches large motion.
+  - choice: LPIPS and a gallery alongside PSNR
+    instead: PSNR only
+    why: >-
+      PSNR rewards blur and says nothing about ghosting or flicker. A perceptual metric and a look at the worst frames
+      show what coaches will notice.
+watchOut: >-
+  Per-frame metrics miss temporal flicker and the ghosting of fast limbs and balls, which is exactly what coaching
+  clips have. Watch the worst clips at full speed and add a sports clip with fast motion to the test set.

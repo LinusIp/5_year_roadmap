@@ -1,0 +1,124 @@
+overview: >-
+  A network monitor that tells the security team which processes talk to which IPs, using eBPF: small programs the
+  Linux kernel checks for safety and then runs at chosen hook points, here the TCP connect, accept and close paths.
+  The programs count bytes per socket in kernel maps (shared key-value tables) and push one event per connection
+  into a ring buffer. A Go agent reads those events, adds process details, and exports JSON and a live top-style view,
+  with no packet capture at all.
+learn:
+  - name: eBPF programs and maps
+  - name: The BPF verifier
+  - name: fentry and tracepoints
+  - name: BPF ring buffers
+  - name: Process context
+    ref: ostep
+stats:
+  - value: < 2%
+    label: CPU at 50k conn/s
+  - value: "0"
+    label: lost events at 100k/s
+  - value: ≥ 99%
+    label: connections attributed correctly
+components:
+  - id: kernel
+    name: Kernel TCP stack
+    role: The hooks where connections open, carry data and close.
+    tech: Linux 5.15+ · BTF
+    talksTo: [progs]
+    kind: external
+  - id: progs
+    name: BPF programs
+    role: Run on connect, accept, send, receive and close, and record who did it.
+    tech: C · libbpf CO-RE
+    talksTo: [maps, ringbuf]
+    kind: core
+  - id: maps
+    name: Maps
+    role: Per-socket record of process, addresses and byte counts.
+    tech: BPF LRU hash
+    talksTo: []
+    kind: core
+  - id: ringbuf
+    name: Ring buffer
+    role: Carries one event per connect, accept and close to userspace.
+    tech: BPF ringbuf · 16 MB
+    talksTo: [consumer]
+    kind: core
+  - id: consumer
+    name: Ring buffer consumer
+    role: Reads events in the Go agent and checks the drop counter.
+    tech: Go · cilium/ebpf
+    talksTo: [enricher]
+    kind: core
+  - id: enricher
+    name: Process enricher
+    role: Adds executable path, command line and container from a process cache.
+    tech: Go · /proc
+    talksTo: [exporter]
+    kind: core
+  - id: exporter
+    name: Exporter
+    role: Writes JSON lines and draws a live table sorted by bytes.
+    tech: Go · terminal UI
+    talksTo: []
+    kind: core
+flow:
+  - component: progs
+    text: >-
+      on `fentry/tcp_connect` and `fexit/inet_csk_accept`, both run by the process itself, record `tgid`, `comm` and
+      the 4-tuple; send and receive hooks only add to byte counters.
+  - component: maps
+    text: >-
+      keeps that record keyed by socket pointer in an **LRU** hash of 262,144 entries, so a burst of connections evicts
+      the oldest instead of failing.
+  - component: ringbuf
+    text: >-
+      on connect, accept and close gets a 64-byte event with `bpf_ringbuf_reserve`; if the buffer is full, a per-CPU
+      drop counter goes up so losses are visible.
+  - component: consumer
+    text: >-
+      wakes on the ring buffer through epoll and drains events in batches, keeping up with 100,000 events a second.
+  - component: enricher
+    text: >-
+      looks up the exe and command line by `tgid` plus process start time; a process that already exited still has the
+      `comm` captured in the kernel.
+  - component: exporter
+    text: >-
+      writes `{"pid":4121,"comm":"curl","dst":"203.0.113.9:443","tx":5120,"rx":48211}` and refreshes the top view
+      every second.
+interface:
+  lang: c
+  code: |
+    struct conn_event {
+        __u64 ts_ns, tx, rx;  /* bytes set at close */
+        __u32 tgid, saddr, daddr; __u16 sport, dport;
+        __u8  kind;           /* CONNECT/ACCEPT/CLOSE */
+        char  comm[16];
+    };
+    SEC("fentry/tcp_connect")
+    int BPF_PROG(on_connect, struct sock *sk) {
+      struct conn_event *e = bpf_ringbuf_reserve(
+          &events, sizeof(*e), 0);
+      if (!e) { count_drop(); return 0; }
+      fill(e, sk, CONNECT); /* pid, comm, 4-tuple */
+      bpf_ringbuf_submit(e, 0); return 0;
+    }
+decisions:
+  - choice: Count bytes in maps, events only per connection
+    instead: An event for every send and receive
+    why: >-
+      At 50,000 connections a second, per-send events would multiply ring traffic many times over and break the 2%
+      budget. Counters in a map cost a few nanoseconds and arrive with the close event.
+  - choice: BPF ring buffer
+    instead: Per-CPU perf buffers
+    why: >-
+      One shared buffer keeps events in order across CPUs and uses memory better under bursts. Reserving before writing
+      also shows a drop at the moment it happens.
+  - choice: fentry and fexit with BTF
+    instead: kprobes
+    why: >-
+      Kernel 5.15+ with BTF is a given, and fentry is cheaper than a kprobe with typed access to `struct sock`. CO-RE
+      lets one build run on different kernel versions.
+watchOut: >-
+  The current process is only the socket's owner in process context; hooks that run in softirq, such as a TCP state
+  change on an incoming packet, see whoever happened to be running. Take the pid only from connect, accept and
+  send hooks.

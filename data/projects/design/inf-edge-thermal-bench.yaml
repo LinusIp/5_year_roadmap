@@ -1,0 +1,55 @@
+overview: >-
+  A 30-minute decode benchmark on a phone or laptop that keeps a small quantized model generating without a break,
+  logging tokens/s and temperature (or power) each minute. As the chip heats it lowers its clock (thermal
+  throttling), so the chart shows how far the steady rate falls below the first-minute burst at two thread counts.
+learn:
+  - name: Thermal throttling
+    ref: making-embedded-systems
+  - name: Sustained versus burst performance
+  - name: Thread count and memory bandwidth
+    ref: llama-cpp
+components:
+  - id: runner
+    name: Generation loop
+    role: Runs continuous decode on a fixed prompt and restarts the context when full.
+    tech: llama.cpp
+    talksTo: [logger]
+    kind: core
+  - id: sensors
+    name: Device sensors
+    role: Report CPU or SoC temperature and, where available, power draw.
+    tech: Phone or laptop
+    talksTo: [logger]
+    kind: external
+  - id: logger
+    name: Logger
+    role: Writes tokens/s, temperature and clock per minute to CSV.
+    tech: Python or shell
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Charts the 30 minutes for both thread counts and names a sustainable setting.
+    tech: matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: runner
+    text: starts from a cool device, fixed charger state and screen setting, and generates nonstop with `-t 4`, then again with `-t 8`.
+  - component: logger
+    text: every 60 s records tokens generated, mean tokens/s and the temperature reading.
+  - component: report
+    text: >-
+      plots tokens/s and temperature over 30 minutes and compares minute-1 **burst** with the mean of the last 10
+      minutes.
+  - component: report
+    text: recommends the thread count with the highest steady-state rate, which is often the lower one.
+decisions:
+  - choice: Compare steady state, not peak
+    instead: Report the first-minute speed
+    why: >-
+      Most benchmarks run for a few seconds and show the cool-chip burst. A real assistant session lasts minutes, so
+      the last-10-minute mean is the number a user feels.
+watchOut: >-
+  Starting runs at different temperatures or charger states changes the result more than the thread count. Let the
+  device cool to the same reading and fix power settings before each run.

@@ -1,0 +1,52 @@
+overview: >-
+  An iterative DNS resolver that builds query packets by hand, starts at a root server, follows referrals down
+  through the NS and glue records to the authoritative server, chases CNAMEs, and caches answers for their TTL.
+learn:
+  - name: DNS message format
+    ref: stanford-cs144
+  - name: Iterative resolution
+  - name: Glue records
+  - name: TTL caching
+components:
+  - id: codec
+    name: Packet codec
+    role: Builds queries and parses answers, including compressed names.
+    tech: Python or Go
+    talksTo: [resolver]
+    kind: core
+  - id: resolver
+    name: Resolver
+    role: Walks referrals from the root, chases CNAMEs and limits steps.
+    tech: Python or Go · UDP
+    talksTo: [servers, cache]
+    kind: core
+  - id: servers
+    name: Name servers
+    role: Root, TLD and authoritative servers on the internet.
+    tech: DNS over UDP 53
+    talksTo: []
+    kind: external
+  - id: cache
+    name: TTL cache
+    role: Stores records keyed by name and type until their TTL runs out.
+    tech: In-memory map
+    talksTo: []
+    kind: core
+flow:
+  - component: resolver
+    text: checks the cache for `api.example.com A`, then sends the query to a root hint such as `198.41.0.4`.
+  - component: codec
+    text: parses the referral, NS records for `com.` with their IP addresses in the additional section (glue).
+  - component: resolver
+    text: asks the TLD, then the authoritative server; if there is no glue, it resolves the NS name first.
+  - component: cache
+    text: stores the final answer and every NS on the way, so a repeat lookup is a cache hit.
+decisions:
+  - choice: Iterative from the root
+    instead: Forward to a recursive resolver like 8.8.8.8
+    why: >-
+      Forwarding hides referrals and glue, which are what the build is for. Compare your answers with the system
+      resolver on the 20 test domains.
+watchOut: >-
+  CNAME chains can loop and referrals can point back up. Cap total steps at about 20 and remember names already
+  visited.

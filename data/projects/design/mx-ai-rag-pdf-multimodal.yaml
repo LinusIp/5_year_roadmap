@@ -1,0 +1,111 @@
+overview: >-
+  Search over 40 scanned manuals where many answers live in diagrams and tables. At ingest, every page is rendered
+  and OCRed, and each figure is cropped and described in words by a vision-language model (a model that reads images
+  and text), so figures become searchable. A question retrieves the best pages and figure crops, the model answers
+  from the page images themselves, and the tablet shows the page with the cited region highlighted.
+learn:
+  - name: OCR with layout
+  - name: Figure captioning
+  - name: Multimodal retrieval
+  - name: Vision-language models
+  - name: Recall by question type
+    ref: llm-zoomcamp
+stats:
+  - value: ≥ 0.85
+    label: recall@5 on figure questions
+  - value: < 8 s
+    label: p95 per answer
+  - value: < 2 GB
+    label: index for 4,000 pages
+components:
+  - id: tablet
+    name: Tablet app
+    role: Technicians type a question and see the answer next to the page.
+    tech: Web app
+    talksTo: [index]
+    kind: external
+  - id: prep
+    name: Page prep
+    role: Renders each page to an image and OCRs text with word boxes.
+    tech: PyMuPDF · Tesseract
+    talksTo: [captioner, index]
+    kind: offline
+  - id: captioner
+    name: Figure captioner
+    role: Crops figures and tables and writes a searchable description of each.
+    tech: Vision-language model
+    talksTo: [index]
+    kind: offline
+  - id: index
+    name: Mixed index
+    role: Holds page text and figure captions with embeddings, linked to page and box.
+    tech: FAISS · SQLite FTS
+    talksTo: [answerer]
+    kind: core
+  - id: answerer
+    name: Answerer
+    role: Sends the question and top page images to the model and parses citations.
+    tech: Python
+    talksTo: [vlm, highlighter]
+    kind: core
+  - id: vlm
+    name: VLM
+    role: Reads the page images and answers with page and region.
+    tech: 16 GB GPU or API
+    talksTo: []
+    kind: external
+  - id: highlighter
+    name: Highlighter
+    role: Draws the cited box on the page image for the tablet.
+    tech: Pillow
+    talksTo: []
+    kind: core
+  - id: eval
+    name: Eval set
+    role: 80 questions, half answerable only from figures, with page and region.
+    tech: JSONL · pytest
+    talksTo: [index]
+    kind: offline
+flow:
+  - component: index
+    text: matches "torque for the impeller bolt on P-300" against OCR text and figure captions and returns the top 5 hits, here a table crop on page 212.
+  - component: answerer
+    text: sends the question with the 3 best page images at reading resolution.
+  - component: vlm
+    text: reads the table on the image and answers "45 N·m" citing `manual P-300, p.212, fig 7-3`.
+  - component: highlighter
+    text: looks up the figure's stored box and outlines it on the page image the tablet shows.
+  - component: eval
+    text: offline, reports **recall@5** separately for text and figure questions, since a combined score hides figure misses.
+interface:
+  lang: http
+  code: |
+    POST /ask
+    { "question": "Impeller bolt torque, P-300?" }
+
+    200 OK
+    { "answer": "45 N·m, tightened in a cross
+        pattern.",
+      "citations": [
+        { "manual": "P-300", "page": 212,
+          "box": [88, 410, 520, 690] } ],
+      "page_image": "pages/P-300/212.jpg" }
+decisions:
+  - choice: Caption figures into a text index
+    instead: Visual page embeddings only
+    why: >-
+      Captions can be read, searched and debugged, and they fit one 16 GB GPU at ingest. Try page-image
+      embeddings if figure recall stays under 0.85.
+  - choice: Index figure crops separately
+    instead: One entry per whole page
+    why: >-
+      A page often holds three figures and a table. Separate entries make retrieval more precise and give the
+      highlighter an exact box.
+  - choice: Answer from page images
+    instead: Answer from OCR text alone
+    why: >-
+      OCR flattens tables and loses diagram labels. The model sees what the technician sees, which is the point
+      of figure questions.
+watchOut: >-
+  Captions can invent part numbers or values that are not in the figure. Use captions only to find pages, and
+  make the answer come from the page image.

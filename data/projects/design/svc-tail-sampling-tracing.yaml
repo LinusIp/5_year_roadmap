@@ -1,0 +1,66 @@
+overview: >-
+  An OpenTelemetry Collector that buffers each trace until it is complete, then keeps every trace with an error or
+  over 500 ms and a 5 percent sample of the rest, cutting stored volume by about 90 percent.
+learn:
+  - name: Head vs tail sampling
+    ref: opentelemetry-docs
+  - name: Sampling policies
+  - name: Trace-aware routing
+components:
+  - id: apps
+    name: Services
+    role: Emit all spans over OTLP, sampling nothing themselves.
+    tech: OpenTelemetry SDK
+    talksTo: [lb]
+    kind: external
+  - id: lb
+    name: Load-balancing exporter
+    role: Sends every span of one trace to the same sampling collector, by trace ID.
+    tech: OTel Collector
+    talksTo: [sampler]
+    kind: core
+  - id: sampler
+    name: Tail sampler
+    role: Waits 10 s per trace, then applies the policies.
+    tech: OTel Collector tail_sampling
+    talksTo: [jaeger]
+    kind: core
+  - id: jaeger
+    name: Jaeger
+    role: Stores the kept traces.
+    tech: Jaeger
+    talksTo: []
+    kind: external
+flow:
+  - component: lb
+    text: hashes the trace ID so every span of a trace reaches the same sampler instance.
+  - component: sampler
+    text: holds spans for `decision_wait = 10s` so the whole trace is present.
+  - component: sampler
+    text: keeps the trace if any span has `status_code = ERROR` or the trace took over 500 ms, and samples the rest at 5 percent.
+  - component: jaeger
+    text: receives the kept traces; the test checks 100 percent of error traces are there and volume fell by 90 percent.
+interface:
+  lang: yaml
+  code: |
+    tail_sampling:
+      decision_wait: 10s
+      policies:
+        - name: errors
+          type: status_code
+          status_code: { status_codes: [ERROR] }
+        - name: slow
+          type: latency
+          latency: { threshold_ms: 500 }
+        - name: rest
+          type: probabilistic
+          probabilistic: { sampling_percentage: 5 }
+decisions:
+  - choice: Tail sampling in the collector
+    instead: Head sampling in each service
+    why: >-
+      A head sampler decides at the first span, before it knows the trace will fail, so it drops most error
+      traces. Tail sampling costs memory for the 10 s buffer.
+watchOut: >-
+  If spans of one trace reach different collectors, each sees half a trace and decides wrongly. Route by trace ID
+  before sampling.

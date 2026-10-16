@@ -1,0 +1,122 @@
+overview: >-
+  A Linux kernel module in C that gives a lab instrument's software its samples without copying them. The module
+  creates a character device, a file under `/dev` whose read, ioctl, mmap and poll calls run your module's code, and
+  owns a ring buffer that userspace maps straight into its own memory. A kernel timer stands in for the hardware
+  interrupt and writes samples into the ring, and readers sleep in `epoll` until there is data, then read it in place.
+learn:
+  - name: Character devices
+    ref: mit-6-1810
+  - name: Memory-mapped I/O
+    ref: ostep
+  - name: Single-producer ring buffers
+  - name: Acquire and release ordering
+  - name: Wait queues and poll
+  - name: Kernel timers
+stats:
+  - value: 1M samples/s
+    label: with zero drops
+  - value: < 15%
+    label: of one core
+  - value: 100×
+    label: load and unload, no leaks
+components:
+  - id: app
+    name: Instrument app
+    role: The vendor's analysis software consuming samples.
+    tech: C
+    talksTo: [lib]
+    kind: external
+  - id: lib
+    name: Userspace library
+    role: Opens the device, sets the ring size, maps it and waits for data.
+    tech: C · epoll
+    talksTo: [module]
+    kind: core
+  - id: module
+    name: Char device
+    role: Implements open, ioctl, mmap, poll and release for the device file.
+    tech: Kernel 6.x · C
+    talksTo: []
+    kind: core
+  - id: ring
+    name: Ring buffer
+    role: Page-backed slots plus a header page with head, tail and drop count.
+    tech: vmalloc_user
+    talksTo: [lib]
+    kind: core
+  - id: producer
+    name: Timer producer
+    role: Writes a batch of samples into the ring on every timer tick.
+    tech: hrtimer
+    talksTo: [ring, wakeups]
+    kind: core
+  - id: wakeups
+    name: Poll wakeups
+    role: Wakes sleeping readers when the head moves past their tail.
+    tech: Wait queue
+    talksTo: [lib]
+    kind: core
+  - id: bench
+    name: Benchmark tool
+    role: Reads at full rate and reports samples/s, drops, CPU and wakeup latency.
+    tech: C · perf
+    talksTo: [lib]
+    kind: offline
+flow:
+  - component: lib
+    text: >-
+      opens `/dev/sensring` and calls `ioctl(fd, SENSRING_SET_ORDER, 7)`, asking for 2^7 = 128 pages (512 KB, 16,384
+      samples of 32 bytes).
+  - component: module
+    text: >-
+      allocates the ring and, on `mmap`, maps the header page and data pages into the reader with `remap_vmalloc_range`;
+      unload is refused while any mapping is open.
+  - component: producer
+    text: >-
+      on each 100 µs tick writes 100 samples, then publishes the new `head` with `smp_store_release`; a full ring
+      bumps `drops` instead of overwriting.
+  - component: wakeups
+    text: >-
+      calls `wake_up_interruptible` after each batch; the device's `poll` reports `EPOLLIN` whenever `head != tail`.
+  - component: ring
+    text: >-
+      is read **in place**: the library loads `head` with acquire ordering, uses the samples, then stores `tail` with
+      release so the producer can reuse those slots.
+interface:
+  lang: c
+  code: |
+    /* sensring.h, shared by module and library */
+    #define SENSRING_SET_ORDER _IOW('s', 1, __u32)
+    struct sensring_hdr {     /* first mapped page */
+        __u64 head;           /* kernel writes */
+        __u64 tail;           /* reader writes */
+        __u64 drops;
+        __u32 mask;           /* slots - 1 */
+    };
+    struct sample { __u64 t_ns; __s32 v[6]; };
+
+    while (epoll_wait(ep, &ev, 1, -1) > 0) {
+        h = __atomic_load_n(&r->head, __ATOMIC_ACQUIRE);
+        for (; t != h; t++) use(&s[t & r->mask]);
+        __atomic_store_n(&r->tail, t, __ATOMIC_RELEASE);
+    }
+decisions:
+  - choice: Shared mmap ring
+    instead: A read() call that copies samples
+    why: >-
+      Copying is the cost the vendor wants gone. At 1 million samples a second, a mapped ring costs only a few wakeups
+      instead of a system call and copy for every batch.
+  - choice: Batches of 100 per timer tick
+    instead: One timer event per sample
+    why: >-
+      A million timer interrupts a second would blow the 15% CPU budget. Real hardware also delivers samples in bursts;
+      10,000 ticks a second is a realistic stand-in.
+  - choice: Drop new samples when full
+    instead: Overwrite the oldest samples
+    why: >-
+      Overwriting races with a reader that is still using those slots. Dropping and counting keeps the reader's data
+      intact and makes the zero-drops target measurable.
+watchOut: >-
+  Kernel and userspace run on different CPUs, so without acquire and release ordering a reader can see the new `head`
+  before the samples it covers. Every head and tail access must use the paired barriers, and the stress test should
+  run on several cores.

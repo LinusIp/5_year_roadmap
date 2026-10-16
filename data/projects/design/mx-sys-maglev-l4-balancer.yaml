@@ -1,0 +1,127 @@
+overview: >-
+  A TCP load balancer in Go for Starlit Studios' 24 matchmaking servers that replaces DNS round-robin. Each new
+  connection's client address is hashed into a Maglev lookup table, a fixed array of 65,537 slots where every slot
+  names a backend, and the proxy then copies bytes both ways. Health probes and deploys change which backends fill the
+  table, and Maglev's build keeps almost every slot where it was, so clients keep landing on the same server.
+learn:
+  - name: Consistent hashing
+    ref: bytebytego
+  - name: Maglev lookup tables
+  - name: Active health checks
+    ref: google-sre-book
+  - name: Connection draining
+  - name: TCP half-close
+  - name: Prometheus metrics
+    ref: prometheus-docs
+stats:
+  - value: < 1%
+    label: flows moved when 1 of 24 leaves
+  - value: 50k conn/s
+    label: on 4 cores
+  - value: < 3 s
+    label: to detect a failed backend
+components:
+  - id: clients
+    name: Game clients
+    role: Open TCP connections to the balancer's single address.
+    tech: TCP
+    talksTo: [listener]
+    kind: external
+  - id: listener
+    name: Listener
+    role: Accepts connections and hashes the client address to a table slot.
+    tech: Go net
+    talksTo: [table]
+    kind: core
+  - id: table
+    name: Maglev table
+    role: Builds the 65,537-slot table from live backends and swaps it in atomically.
+    tech: Go · atomic.Pointer
+    talksTo: [relay]
+    kind: core
+  - id: relay
+    name: Proxy relay
+    role: Dials the chosen backend and copies bytes in both directions.
+    tech: Go · io.Copy
+    talksTo: [backends, metrics]
+    kind: core
+  - id: prober
+    name: Health prober
+    role: Checks every backend each second, ejects failures and ramps recovered ones back.
+    tech: Go
+    talksTo: [table]
+    kind: core
+  - id: drain
+    name: Drain controller
+    role: Lets connections on a removed backend finish, up to a deadline.
+    tech: Go
+    talksTo: [relay]
+    kind: core
+  - id: backends
+    name: Matchmaking servers
+    role: The 24 game servers, read from a static list reloadable at runtime.
+    tech: TCP
+    talksTo: []
+    kind: external
+  - id: metrics
+    name: Metrics
+    role: Exposes conn/s, per-backend share and table build time for scraping.
+    tech: Prometheus format
+    talksTo: []
+    kind: offline
+flow:
+  - component: listener
+    text: >-
+      accepts the connection and hashes the client's IP and port with a 64-bit hash; `hash % 65537` picks the slot.
+  - component: table
+    text: >-
+      returns that slot's backend. The table was built by letting each backend claim slots in turn along its own
+      permutation (`offset + j*skip`), so every backend gets nearly the same share.
+  - component: relay
+    text: >-
+      dials the backend and runs two copy loops; when one side sends FIN it calls `CloseWrite`, so a **half-closed**
+      connection still delivers the other direction.
+  - component: prober
+    text: >-
+      sends a TCP check every second; two misses in a row eject the backend (detected within 3 s), the table is
+      rebuilt off the hot path, and a recovered backend is ramped back over 30 s.
+  - component: drain
+    text: >-
+      on removal or reload, stops new flows to that backend and keeps its open connections until they close or a 60 s
+      deadline passes.
+interface:
+  lang: go
+  code: |
+    const M = 65537 // prime, much bigger than 24
+    type Table struct{ slot [M]uint16 }
+
+    // backend i's j-th choice:
+    //   (offset_i + j*skip_i) % M
+    // offset = h1(name) % M
+    // skip   = h2(name) % (M-1) + 1
+    func Build(backends []string) *Table
+
+    var live atomic.Pointer[Table]
+
+    func Pick(c netip.AddrPort) uint16 {
+        return live.Load().slot[hash64(c)%M]
+    }
+decisions:
+  - choice: Maglev table, not a hash ring
+    instead: A consistent-hash ring with virtual nodes
+    why: >-
+      Lookup is one array read at 50k conn/s, and balance across 24 backends is within a percent or two. A ring needs
+      hundreds of virtual nodes per server to balance as well. Revisit if weighted backends become the main need.
+  - choice: User-space TCP proxy
+    instead: Kernel forwarding such as IPVS or direct server return
+    why: >-
+      The constraint is user space, and proxying makes draining and metrics simple. It costs a copy per byte; check
+      that 4 cores reach 50k new conns/s before adding anything cleverer.
+  - choice: Build the table off the hot path and swap a pointer
+    instead: Rebuild under a lock
+    why: >-
+      A 65,537-slot rebuild takes about a millisecond. Under a lock every new connection would wait for it, which is
+      the latency spike the pitfalls warn about.
+watchOut: >-
+  Measure disruption only on flows whose backend stayed up: those on the removed backend (about 1/24) must move.
+  Count how many of the rest change slot when one backend leaves, and keep that under 1%.

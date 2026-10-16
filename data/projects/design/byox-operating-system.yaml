@@ -1,0 +1,126 @@
+overview: >-
+  A small 32-bit x86 kernel that boots in QEMU from an ISO you build and runs a user program that calls back into it.
+  GRUB loads the kernel and hands over a memory map, a few lines of assembly set up a stack, and the C entry point sets
+  up descriptor tables, then interrupts, then memory (a frame allocator, page tables and a heap). Drivers sit behind
+  interrupt handlers, and a process layer builds a user address space and drops to ring 3 (the CPU's unprivileged
+  mode), where system calls trap back into a dispatcher.
+learn:
+  - name: Boot process
+  - name: Interrupt descriptor table
+  - name: Paging and page tables
+    ref: ostep
+  - name: Privilege rings and the TSS
+  - name: System-call boundary
+    ref: mit-6-1810
+stats:
+  - value: make run
+    label: builds the ISO and boots to a prompt
+  - value: CR2
+    label: faulting address printed on a page fault
+  - value: ring 3
+    label: program writes, exits and faults safely
+components:
+  - id: grub
+    name: GRUB
+    role: Loads the Multiboot2 kernel from the ISO and passes the memory map.
+    tech: GRUB · xorriso
+    talksTo: [boot]
+    kind: external
+  - id: boot
+    name: boot.s
+    role: Sets up a stack and calls the C entry point.
+    tech: NASM
+    talksTo: [kmain]
+    kind: core
+  - id: kmain
+    name: Descriptor tables
+    role: kmain loads the GDT and IDT and installs CPU exception handlers.
+    tech: C · i686-elf
+    talksTo: [irq]
+    kind: core
+  - id: irq
+    name: Interrupts and drivers
+    role: Remaps the PIC and runs the PIT timer, PS/2 keyboard, VGA and serial drivers.
+    tech: C
+    talksTo: [memory]
+    kind: core
+  - id: memory
+    name: Memory manager
+    role: Frame allocator from the memory map, higher-half page tables and a kernel heap.
+    tech: C
+    talksTo: [process]
+    kind: core
+  - id: process
+    name: Process layer
+    role: Builds a user address space, copies in the program and enters ring 3 with iret.
+    tech: C · TSS
+    talksTo: [syscall]
+    kind: core
+  - id: syscall
+    name: Syscall dispatcher
+    role: Handles int 0x80 by number, for write and exit.
+    tech: C · assembly stub
+    talksTo: []
+    kind: core
+  - id: qemu
+    name: QEMU test run
+    role: Boots the ISO headless and checks the serial log for every expected event.
+    tech: QEMU · gdb
+    talksTo: []
+    kind: offline
+flow:
+  - component: boot
+    text: receives control from GRUB with the Multiboot2 info pointer, sets up a stack and calls `kmain`.
+  - component: kmain
+    text: loads the GDT and IDT and installs handlers for the CPU exceptions, including the page fault.
+  - component: irq
+    text: >-
+      remaps the PIC to vectors `0x20`–`0x2F`, starts the PIT, and enables the keyboard on IRQ 1, sending an
+      **end-of-interrupt** after every interrupt.
+  - component: memory
+    text: >-
+      builds the frame allocator from the memory map, identity-maps the running code before turning paging on, maps
+      the kernel in the higher half, and starts the heap.
+  - component: process
+    text: >-
+      maps the user program, sets the TSS kernel stack pointer `esp0`, and enters ring 3 with `iret`.
+  - component: syscall
+    text: >-
+      catches `int 0x80`, calls the handler for the number in `eax`, and returns; a privileged instruction in ring 3
+      raises a general protection fault that the kernel reports and survives.
+interface:
+  lang: c
+  code: |
+    /* int 0x80: eax = number; ebx, ecx, edx = args */
+    enum { SYS_WRITE = 1, SYS_EXIT = 2 };
+
+    struct regs {        /* pushed by the ISR stub */
+      uint32_t edi, esi, ebp, ebx, edx, ecx, eax;
+      uint32_t int_no, err, eip, cs, eflags;
+      uint32_t user_esp, ss;
+    };
+    typedef int32_t (*syscall_fn)(struct regs *r);
+    static syscall_fn table[] = {
+      [SYS_WRITE] = sys_write,  /* fd, buf, len */
+      [SYS_EXIT]  = sys_exit,   /* status */
+    };
+    void syscall_dispatch(struct regs *r);
+decisions:
+  - choice: 32-bit i686
+    instead: x86_64
+    why: >-
+      No long-mode switch and two-level page tables leave more of the 40 hours for interrupts and ring 3. Move to
+      x86_64 once the system-call path works.
+  - choice: GRUB and Multiboot2
+    instead: Your own boot sector
+    why: >-
+      GRUB hands over the memory map and loads an ELF kernel, so the 6-hour boot milestone ends with output on screen
+      and serial. A boot sector is its own project.
+  - choice: The legacy PIC and PIT
+    instead: The APIC and its timer
+    why: >-
+      Timer and keyboard are the only interrupts needed, and QEMU emulates the PIC faithfully. The APIC matters once
+      you add more than one CPU.
+watchOut: >-
+  A triple fault reboots QEMU silently, so a bug looks like a hang or a boot loop. Always run with `-no-reboot -d int`
+  and gdb attached, and print to serial before anything else works.

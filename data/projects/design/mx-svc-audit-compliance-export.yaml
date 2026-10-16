@@ -1,0 +1,117 @@
+overview: >-
+  A pipeline that gives Ledgerly's auditors "who changed what" for any 90-day window without hand-written SQL.
+  Services send change events in one common envelope; a diff engine computes field-level before and after values,
+  and a redactor masks or tokenises personal data **before** anything is stored. Events land in date-partitioned
+  Parquet files queried with DuckDB, and an export job writes the same bundle byte for byte on every run, with a
+  signed manifest of file hashes.
+learn:
+  - name: Event envelopes
+  - name: Field-level diffs
+  - name: PII classification and tokenisation
+  - name: Partitioned columnar storage
+    ref: de-zoomcamp
+  - name: Reproducible exports
+  - name: Signed manifests
+stats:
+  - value: < 800 ms
+    label: search p99 over 200M events
+  - value: < 5 min
+    label: export 10M events
+  - value: "0"
+    label: redaction leaks in 100k samples
+components:
+  - id: services
+    name: Banking services
+    role: Five services that emit an event with before and after state for every change.
+    tech: Any language
+    talksTo: [envelope]
+    kind: external
+  - id: envelope
+    name: Envelope schema
+    role: Checks each event against the common schema and its version.
+    tech: Go · JSON Schema
+    talksTo: [diff]
+    kind: core
+  - id: diff
+    name: Diff engine
+    role: Walks nested before and after objects and lists changed fields by dotted path.
+    tech: Go
+    talksTo: [redactor]
+    kind: core
+  - id: redactor
+    name: Redactor
+    role: Looks up each field path in the classification table and masks, tokenises or keeps it.
+    tech: Go · HMAC-SHA256
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Columnar store
+    role: Parquet files partitioned by date and service, sorted by actor inside each file.
+    tech: Parquet · DuckDB
+    talksTo: [gate]
+    kind: core
+  - id: gate
+    name: Access gate
+    role: Lets only the auditor role search or export, and logs every query with who ran it.
+    tech: Go · OIDC roles
+    talksTo: [export]
+    kind: core
+  - id: export
+    name: Export job
+    role: Writes the window as sorted CSV and JSON files plus a manifest of SHA-256 hashes, then signs it.
+    tech: Go · DuckDB · Ed25519
+    talksTo: [auditor]
+    kind: core
+  - id: auditor
+    name: Auditor
+    role: Requests a 90-day window and checks the bundle signature.
+    tech: Browser · CLI
+    talksTo: []
+    kind: external
+flow:
+  - component: envelope
+    text: receives an event with `service`, `entity`, `entity_id`, `actor`, `at`, `before` and `after`, and rejects unknown schema versions.
+  - component: diff
+    text: compares `before` and `after` field by field, including nested objects and lists, into rows of `path`, `old` and `new`, such as `address.city` from Leeds to York.
+  - component: redactor
+    text: >-
+      masks fields classed `pii.secret` and replaces `pii.id` fields with an HMAC token, so the same customer gets the
+      same token without the raw value being kept; an unclassified field is **rejected**, not passed through.
+  - component: store
+    text: appends the redacted event to `date=…/service=…` Parquet files, so a 90-day query reads only 90 partitions.
+  - component: gate
+    text: checks the caller's role on `POST /exports` and writes the request to its own access log.
+  - component: export
+    text: >-
+      runs the query with a fixed `ORDER BY at, event_id`, writes the files, hashes each into `manifest.json` and
+      signs it; a re-run of the same window gives **identical bytes**.
+interface:
+  lang: http
+  code: |
+    POST /exports
+    Authorization: Bearer <auditor token>
+    { "from": "2026-01-01", "to": "2026-03-31",
+      "actor": "ops.jlee", "format": ["csv","json"] }
+
+    202 Accepted
+    { "export_id": "exp_71c",
+      "manifest_sha256": "4be1…09",
+      "signature": "ed25519:…" }
+decisions:
+  - choice: Redact before storage
+    instead: Store raw events and redact at export
+    why: >-
+      Raw PII in the store would leak through any query or backup. Redacting in the path means 200M stored events
+      never hold it, and the 100k-sample test checks the store itself.
+  - choice: Parquet and DuckDB, partitioned by date
+    instead: A row database such as PostgreSQL
+    why: >-
+      Audit queries scan a date range and a few columns; columnar files read only those, which is how 800 ms over
+      200M events fits a $50 a month budget. Revisit if many users need concurrent search.
+  - choice: Reject unclassified fields
+    instead: Pass unknown fields through until someone classifies them
+    why: >-
+      A service adding a new `ssn` field would leak it on day one. Failing loudly forces classification first.
+watchOut: >-
+  Exports that depend on file order or timestamps differ between runs, so the signature cannot be checked again.
+  Sort explicitly and pin the export time in the manifest, not in the file contents.

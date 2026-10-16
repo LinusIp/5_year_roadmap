@@ -1,0 +1,70 @@
+overview: >-
+  One scene full of thin wires, fences and shiny highlights, rendered at 1080p with a switch between no AA, MSAA
+  (several coverage samples per pixel), FXAA (one post pass that blurs along edges found in brightness) and a
+  simplified SMAA-style pass that recognises edge shapes. Each method is timed on the GPU and scored against a 16x
+  supersampled reference image.
+learn:
+  - name: MSAA resolve
+    ref: learnopengl
+  - name: Luma edge detection
+  - name: Morphological AA
+  - name: Tonemapping order
+components:
+  - id: scene
+    name: Test scene
+    role: Renders thin geometry and specular shimmer into a single-sample or multisample HDR target.
+    tech: OpenGL 4.6
+    talksTo: [aa]
+    kind: core
+  - id: aa
+    name: AA passes
+    role: Resolves MSAA or runs the FXAA or SMAA-lite post passes.
+    tech: GLSL
+    talksTo: [report]
+    kind: core
+  - id: ref
+    name: 16x reference
+    role: Renders the same frame at 4x width and height and downsamples it.
+    tech: OpenGL 4.6
+    talksTo: [report]
+    kind: offline
+  - id: report
+    name: Results table
+    role: Records ms and edge error per method, plus notes on shimmer in motion.
+    tech: Python · CSV
+    talksTo: []
+    kind: offline
+flow:
+  - component: scene
+    text: renders to `GL_TEXTURE_2D_MULTISAMPLE` with 4 or 8 samples for MSAA, or to a single-sample HDR texture for the post methods.
+  - component: aa
+    text: for MSAA, tonemaps **each sample** in a custom resolve, so bright edges are not averaged into a hard step.
+  - component: aa
+    text: for FXAA and SMAA-lite, runs after tonemapping, finds edges where luma contrast exceeds `0.125`, then blends along the edge or by its shape.
+  - component: report
+    text: logs GPU ms from timer queries and the mean edge error against the 16x reference, one row per method at 1080p.
+interface:
+  lang: glsl
+  code: |
+    // post passes read tonemapped LDR colour
+    uniform sampler2D colour;
+    uniform vec2 texel;           // 1.0 / resolution
+    uniform float edgeThreshold;  // 0.125
+    uniform float edgeMin;        // 0.0312
+
+    float luma(vec3 c) {
+      return dot(c, vec3(0.299, 0.587, 0.114));
+    }
+    vec3 fxaa(vec2 uv);
+    vec4 smaaEdges(vec2 uv);      // pass 1
+    vec4 smaaWeights(vec2 uv);    // pass 2
+    vec3 smaaBlend(vec2 uv);      // pass 3
+decisions:
+  - choice: Score against a 16x reference
+    instead: Judge from screenshots by eye
+    why: >-
+      On thin geometry the differences are small, and a number per method makes the table fair. Keep a written note
+      on shimmer too, since a still image cannot show edges crawling as the camera moves.
+watchOut: >-
+  Running FXAA on HDR values before tonemapping finds edges in the wrong places and misses others. Apply it after
+  tonemapping, and draw text and UI after the AA pass so they are not blurred.

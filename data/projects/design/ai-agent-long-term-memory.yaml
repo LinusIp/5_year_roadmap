@@ -1,0 +1,52 @@
+overview: >-
+  An assistant that writes short facts to a memory store at the end of each session and retrieves the relevant ones
+  at the start of the next. 20 scripted multi-session conversations test whether it recalls facts, with and without
+  memory.
+learn:
+  - name: Memory write policies
+  - name: Retrieval for context
+    ref: hf-agents-course
+  - name: Conflict resolution
+components:
+  - id: agent
+    name: Assistant
+    role: Answers the user with recalled facts in its prompt.
+    tech: Python · LLM API
+    talksTo: [writer, llm]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Generates replies and extracts candidate facts.
+    tech: Hosted LLM
+    talksTo: []
+    kind: external
+  - id: writer
+    name: Memory writer
+    role: Keeps only durable facts and replaces ones they contradict.
+    tech: Python
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Memory store
+    role: Holds facts with embedding, timestamp and source session; returns the top matches.
+    tech: SQLite or vector store
+    talksTo: [agent]
+    kind: core
+flow:
+  - component: store
+    text: returns the top 5 facts for the new session's first message.
+  - component: agent
+    text: puts those facts in the prompt and answers.
+  - component: writer
+    text: at session end extracts facts like `user.diet = vegetarian`, and overwrites an older value for the same key instead of adding a second.
+  - component: agent
+    text: is scored on the recall questions in the 20 test conversations, once with the store and once empty.
+decisions:
+  - choice: Keyed facts that overwrite
+    instead: Store every message as a memory
+    why: >-
+      Storing everything fills retrieval with chatter and keeps old, contradicted facts. Keyed facts stay small and
+      current; revisit if users need history ("what did I say last month").
+watchOut: >-
+  Stale facts that contradict newer ones make the assistant confidently wrong. Include test conversations where a
+  fact changes, and check the newer value wins.

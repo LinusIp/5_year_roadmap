@@ -1,0 +1,127 @@
+overview: >-
+  The two structures at the bottom of a relational database, built inside CMU's BusTub codebase. The buffer pool keeps
+  a fixed number of page-sized frames in memory, maps page ids to frames through a page table, evicts with the LRU-K
+  policy (it evicts the page whose k-th most recent use is oldest) and writes dirty pages through a background disk
+  scheduler. The B+tree stores its internal and leaf pages in those frames, and each operation descends from the root
+  with latch crabbing: it takes a child's latch, then releases the ancestors once the child cannot split or merge.
+learn:
+  - name: Buffer pool management
+    ref: cmu-15-445
+  - name: LRU-K replacement
+    ref: cmu-15-445
+  - name: B+tree splits and merges
+    ref: cmu-15-445
+  - name: Latch crabbing
+    ref: cmu-15-445
+  - name: RAII guards
+    ref: cpp-core-guidelines
+stats:
+  - value: '0'
+    label: ThreadSanitizer reports on the tests
+  - value: 1M
+    label: keys checked against std::map
+  - value: 1, 4, 8
+    label: threads in the benchmark
+components:
+  - id: btree
+    name: B+tree
+    role: Search, insert with splits, delete with merge and redistribution, and an iterator over leaves.
+    tech: C++17
+    talksTo: [guards]
+    kind: core
+  - id: guards
+    name: Page guards
+    role: Pin and latch a page for as long as the guard lives, and release both when it goes out of scope.
+    tech: ReadPageGuard · WritePageGuard
+    talksTo: [bpm]
+    kind: core
+  - id: bpm
+    name: Buffer pool
+    role: Maps page ids to frames, counts pins and marks dirty pages.
+    tech: Page table · std::mutex
+    talksTo: [replacer, scheduler]
+    kind: core
+  - id: replacer
+    name: LRU-K replacer
+    role: Picks the evictable frame with the largest backward k-distance.
+    tech: C++17
+    talksTo: []
+    kind: core
+  - id: scheduler
+    name: Disk scheduler
+    role: Runs reads and write-backs on a background thread and signals completion with a promise.
+    tech: std::thread · std::promise
+    talksTo: [disk]
+    kind: core
+  - id: disk
+    name: Disk manager
+    role: Reads and writes fixed-size pages in the database file.
+    tech: BusTub DiskManager
+    talksTo: []
+    kind: external
+  - id: bench
+    name: Benchmark
+    role: Mixed inserts, lookups and deletes over 1 million keys, checked against `std::map`.
+    tech: GoogleTest · perf
+    talksTo: [btree]
+    kind: offline
+flow:
+  - component: btree
+    text: >-
+      starts an insert with an **optimistic** descent, read latches down to the leaf and a write latch on the leaf;
+      if the leaf is full it starts again holding write latches.
+  - component: guards
+    text: wrap each page the descent touches, so no path can forget to unpin or unlatch it.
+  - component: bpm
+    text: >-
+      finds the page in the page table, or on a miss asks the replacer for a frame and records the access.
+  - component: replacer
+    text: >-
+      evicts the frame whose k-th most recent access is oldest; frames with fewer than k accesses go first, oldest
+      first.
+  - component: scheduler
+    text: >-
+      writes the victim back if it is dirty, then reads the wanted page into the frame on its background thread.
+  - component: btree
+    text: >-
+      inserts into the leaf; on a split it moves half the entries to a new leaf and pushes the separator key into the
+      parent, which it still holds latched.
+  - component: bench
+    text: >-
+      repeats this from 1, 4 and 8 threads with pools of 64 and 1,024 frames and compares every key with `std::map`.
+interface:
+  lang: cpp
+  code: |
+    class BufferPoolManager {
+     public:
+      auto NewPage() -> page_id_t;
+      auto ReadPage(page_id_t id) -> ReadPageGuard;
+      auto WritePage(page_id_t id) -> WritePageGuard;
+      auto FlushPage(page_id_t id) -> bool;
+    };
+
+    class LRUKReplacer {
+     public:
+      void RecordAccess(frame_id_t f);
+      void SetEvictable(frame_id_t f, bool evictable);
+      auto Evict() -> std::optional<frame_id_t>;
+    };
+decisions:
+  - choice: LRU-K, not plain LRU
+    instead: Least recently used
+    why: >-
+      One sequential scan touches every page once and flushes a plain LRU pool. LRU-K needs k uses before it trusts a
+      page, so the tree's hot inner pages survive a scan of 1 million keys.
+  - choice: Optimistic descent first
+    instead: Write latches from the root on every insert
+    why: >-
+      Most inserts do not split, so write-latching the root serialises all 8 threads for nothing. Retry
+      pessimistically only when the leaf is full.
+  - choice: Page guards, not manual unpin
+    instead: Calling Unpin and unlatch by hand
+    why: >-
+      Every early return in a tree operation is a chance to leak a pin, and leaked pins fill the pool until every fetch
+      fails. A guard's destructor releases on every path.
+watchOut: >-
+  Deadlock comes from taking latches in different orders, or holding a page latch while waiting for the buffer pool's
+  latch. Always latch top-down, and never block on the pool while holding a page.

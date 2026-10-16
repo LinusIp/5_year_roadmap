@@ -15,6 +15,7 @@ import { isWithinRange, startOfWeek, today as todayDate, weekday } from './dates
 import { blockOrderByTime } from './calendar.ts';
 import { plannedMinutes, resolveDay, weekTarget } from './day-plan.ts';
 import type { ResolvedDay } from './day-plan.ts';
+import { stepsTicked } from '../seed/catalogue.ts';
 import type { CatalogueEntry } from '../seed/catalogue.ts';
 import { projectUnitCount } from './progress.ts';
 
@@ -129,7 +130,7 @@ function describeCatalogueBuild(entry: CatalogueEntry, state: UserItemState | un
     url: null,
     status: state?.status ?? 'todo',
     estHours: entry.hours,
-    unitsDone: (state?.unitsDone ?? []).length,
+    unitsDone: stepsTicked(state?.unitsDone),
     unitCount: entry.steps ?? 0,
     cadence: 'weekly',
   };

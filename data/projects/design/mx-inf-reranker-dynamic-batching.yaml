@@ -1,0 +1,110 @@
+overview: >-
+  A reranking server that gives Searchlight a predictable p99 instead of anything between 60 and 600 ms. It pools
+  query-passage pairs from many concurrent queries into one GPU batch, groups pairs by length so little padding is
+  wasted, and watches each query's deadline. When time runs short it reranks only the top 30 candidates, and tests
+  check every score against an unbatched reference within 0.001.
+learn:
+  - name: Cross-encoder reranking
+  - name: Dynamic batching
+    ref: batching-effects-gpt
+  - name: Padding and length buckets
+  - name: Deadline scheduling
+  - name: nDCG@10
+  - name: ONNX Runtime on GPU
+    ref: onnx-runtime-docs
+stats:
+  - value: ≤ 120 ms
+    label: p99 at 50 qps × 100 candidates
+  - value: ≤ 0.3
+    label: nDCG@10 loss on early exit
+  - value: ≤ 0.001
+    label: score difference from reference
+components:
+  - id: api
+    name: Rerank API
+    role: Accepts a query with 100 candidates and returns them reordered, with a stable tie order.
+    tech: FastAPI
+    talksTo: [queue]
+    kind: core
+  - id: queue
+    name: Request queue
+    role: Holds every pair tagged with its request id and that request's deadline.
+    tech: Python · asyncio
+    talksTo: [bucketer]
+    kind: core
+  - id: bucketer
+    name: Length bucketer
+    role: Groups waiting pairs from all requests into token-length buckets of 64, 128, 256 and 512.
+    tech: Python · tokenizer
+    talksTo: [deadline]
+    kind: core
+  - id: deadline
+    name: Deadline manager
+    role: Picks the next batch by earliest deadline and switches a late request to top-30 early exit.
+    tech: Python
+    talksTo: [runner]
+    kind: core
+  - id: runner
+    name: GPU batch runner
+    role: Scores a padded batch of up to 256 pairs and returns each score to its request.
+    tech: ONNX Runtime · 16 GB GPU
+    talksTo: []
+    kind: core
+  - id: tests
+    name: Equivalence tests
+    role: Compares batched scores with one-pair-at-a-time scores and measures nDCG@10 on MS MARCO.
+    tech: pytest
+    talksTo: []
+    kind: offline
+flow:
+  - component: api
+    text: >-
+      receives `POST /rerank` with a query, 100 BM25 candidates and a `120 ms` budget, which sets the request's
+      deadline.
+  - component: queue
+    text: >-
+      adds 100 pairs; at 50 qps that is about **5,000 pairs a second** from requests that overlap in time.
+  - component: bucketer
+    text: >-
+      puts each pair in the smallest bucket it fits, so a 90-token pair is padded to 128, not to 512.
+  - component: deadline
+    text: >-
+      flushes a bucket when it holds `256` pairs or its oldest pair has waited `5 ms`, earliest deadline first; if a
+      request can no longer finish, it scores only its top 30 by BM25.
+  - component: runner
+    text: scores the batch with the attention mask set, so padding never changes a score.
+  - component: api
+    text: >-
+      sorts each request's scores, breaks ties by passage id, and appends early-exit leftovers in BM25 order.
+interface:
+  lang: http
+  code: |
+    POST /rerank
+    { "query": "symptoms of iron deficiency",
+      "candidates": [{"id": "p17", "text": "…"},
+                     … 100 in total],
+      "budget_ms": 120 }
+
+    200 OK
+    { "ranked": ["p42", "p17", "p88", …],
+      "early_exit": false,
+      "scored": 100, "latency_ms": 74 }
+decisions:
+  - choice: Dynamic batching across queries
+    instead: Static batch of one query's 100 pairs
+    why: >-
+      One query's pairs alone vary in length and leave gaps between requests. Pooling 5,000 pairs a second fills
+      the GPU, which is what makes p99 predictable.
+  - choice: Small wait window, flush when full
+    instead: A fixed 20 ms window
+    why: >-
+      At low traffic a long window only adds delay. A 5 ms cap with flush-on-full keeps quiet hours fast and busy
+      hours efficient; tune it from the latency-throughput plot.
+  - choice: Top-30 early exit near the deadline
+    instead: Miss the deadline and score all 100
+    why: >-
+      BM25's top 30 contain most of the relevant passages, so the nDCG@10 loss stays ≤ 0.3 while the answer arrives
+      on time. Track the early-exit rate; if it rises, the GPU is under-sized.
+watchOut: >-
+  A batch window that is too long hurts latency at low load. Flush on a size limit or a short timer, whichever comes
+  first, and load-test both 5 qps and 50 qps.

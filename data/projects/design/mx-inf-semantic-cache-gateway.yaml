@@ -1,0 +1,104 @@
+overview: >-
+  A thin gateway between Tutorly's app and its LLM API that answers repeated homework questions from a cache. It
+  first checks an exact cache keyed by a hash of the normalised prompt, then a semantic cache that compares a small
+  local embedding of the question with stored ones, and only then forwards the request upstream. Per-team monthly
+  token budgets are enforced before any upstream call, and the whole thing runs on 2 vCPUs for under $20 a month.
+learn:
+  - name: Exact versus semantic caching
+  - name: Sentence embeddings
+    ref: hf-llm-course
+  - name: Cosine similarity thresholds
+  - name: Cache TTLs
+    ref: system-design-primer
+  - name: Spend caps and budgets
+stats:
+  - value: ≤ 15 ms
+    label: p95 cache lookup
+  - value: ≤ 1%
+    label: wrong-answer hits
+  - value: "300"
+    label: req/s on 2 vCPU
+components:
+  - id: app
+    name: Tutoring app
+    role: Sends chat requests with a team id and the student's question.
+    tech: Client
+    talksTo: [proxy]
+    kind: external
+  - id: proxy
+    name: Proxy server
+    role: Receives requests, decides if a request may be cached, and forwards misses upstream.
+    tech: FastAPI or Go
+    talksTo: [budget]
+    kind: core
+  - id: budget
+    name: Budget enforcer
+    role: Checks and charges the team's monthly token budget, returning 429 when it is spent.
+    tech: SQLite
+    talksTo: [embed]
+    kind: core
+  - id: embed
+    name: Embedding module
+    role: Embeds the normalised question with a small local model on the CPU.
+    tech: MiniLM-class · ONNX Runtime
+    talksTo: [cache]
+    kind: core
+  - id: cache
+    name: Vector cache
+    role: Holds an exact-hash tier and a vector tier with per-category thresholds and TTLs.
+    tech: Redis or SQLite · numpy
+    talksTo: [upstream, metrics]
+    kind: core
+  - id: upstream
+    name: LLM API
+    role: Answers cache misses; a mock is used in tests.
+    tech: Hosted LLM
+    talksTo: []
+    kind: external
+  - id: metrics
+    name: Metrics store
+    role: Records hit tier, similarity score, tokens saved and latency per request.
+    tech: SQLite
+    talksTo: []
+    kind: offline
+flow:
+  - component: proxy
+    text: >-
+      receives `POST /v1/chat` from team `algebra-3`; a request with conversation history or student-specific
+      details is marked **not cacheable** and skips the cache tiers.
+  - component: budget
+    text: checks the team has budget left this month, since even a cache miss must not overspend.
+  - component: embed
+    text: lower-cases and trims the question and embeds it in a few milliseconds on the CPU.
+  - component: cache
+    text: >-
+      tries the exact hash, then the nearest stored vector; a cosine score of 0.94 against "solve 2x + 6 = 10"
+      passes the maths threshold of 0.92 and returns the stored answer.
+  - component: upstream
+    text: on a miss answers the request; the proxy stores the answer with a 7-day TTL and charges the tokens to the team.
+interface:
+  lang: http
+  code: |
+    POST /v1/chat
+    X-Team: algebra-3
+    { "messages": [{ "role": "user",
+        "content": "How do I solve 2x+6=10?" }] }
+
+    200 OK
+    X-Cache: semantic; score=0.94
+    { "answer": "Subtract 6 from both sides…",
+      "tokens_charged": 0 }
+decisions:
+  - choice: Exact tier before the semantic tier
+    instead: Semantic lookup for everything
+    why: >-
+      Many repeats are word-for-word, and a hash lookup costs microseconds with zero false hits. The embedding only
+      runs when the hash misses.
+  - choice: A threshold per question type
+    instead: One global similarity threshold
+    why: >-
+      In maths, "2x + 6 = 10" and "2x + 6 = 12" are close in embedding space but need different answers, so maths needs
+      a stricter threshold than general questions. Tune each on the labelled paraphrase set to keep false hits ≤ 1%.
+watchOut: >-
+  Never serve a cached answer that depended on one student's context. Mark anything with history, names or uploaded
+  work as not cacheable before the lookup, not after.

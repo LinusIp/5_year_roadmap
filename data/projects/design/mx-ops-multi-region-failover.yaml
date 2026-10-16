@@ -1,0 +1,96 @@
+overview: >-
+  Kitepay's payments API runs in two simulated regions: an active primary and a warm standby with a streaming
+  Postgres replica. A health-checked proxy sends all traffic to the primary, and when it fails a failover controller
+  asks a human to confirm, fences the old primary so two databases can never both accept writes (split-brain),
+  promotes the replica and moves traffic. Every payment carries an idempotency key, a unique ID the client reuses on
+  retry, so a request retried across the switch is never charged twice.
+learn:
+  - name: Active-passive failover
+    ref: system-design-primer
+  - name: Streaming replication
+    ref: ddia
+  - name: Idempotency keys
+  - name: Split-brain and fencing
+    ref: kleppmann-distributed-systems
+  - name: Game days
+    ref: google-sre-book
+stats:
+  - value: < 4 min
+    label: failover from decision
+  - value: < 10 s
+    label: acknowledged payments lost
+  - value: "0"
+    label: duplicate charges in 50,000 retries
+components:
+  - id: clients
+    name: Payment clients
+    role: Send 300 requests a second, each with an Idempotency-Key, and retry on errors.
+    tech: Load generator
+    talksTo: [steering]
+    kind: external
+  - id: steering
+    name: Traffic steering
+    role: Health-checks both regions and sends all traffic to the active one.
+    tech: HAProxy or Envoy
+    talksTo: [api]
+    kind: core
+  - id: api
+    name: Payments API
+    role: Stateless service deployed in both regions; checks the idempotency key before charging.
+    tech: Go or Python
+    talksTo: [db]
+    kind: core
+  - id: db
+    name: Database pair
+    role: Primary in region A streaming to a replica in region B, with lag measured every second.
+    tech: PostgreSQL streaming replication
+    talksTo: []
+    kind: core
+  - id: controller
+    name: Failover controller
+    role: Detects a dead region, waits for human confirmation, fences, promotes and repoints traffic.
+    tech: Go or Python CLI
+    talksTo: [db, steering]
+    kind: core
+  - id: gameday
+    name: Game-day harness
+    role: Cuts region A off with network partitions and counts lost and duplicate payments.
+    tech: toxiproxy · Docker networks
+    talksTo: [steering]
+    kind: offline
+flow:
+  - component: api
+    text: receives `POST /payments` with an `Idempotency-Key`, stores the key and result in the same transaction as the charge, and returns the stored result on a repeat.
+  - component: db
+    text: streams each commit to the replica in region B; lag above `10 s` raises an alert because that is the RPO.
+  - component: steering
+    text: marks region A down after 3 failed health checks in a row, and clients start retrying.
+  - component: controller
+    text: pages the on-call engineer, who confirms; it then **fences** region A by cutting its database off from the proxy, so it cannot take writes.
+  - component: db
+    text: promotes the region B replica with `pg_promote()`, so it becomes the writer.
+  - component: steering
+    text: switches traffic to region B; retried requests find their keys there, so nothing is charged twice, and the clock stops under 4 minutes.
+interface:
+  lang: http
+  code: |
+    POST /payments
+    Idempotency-Key: 7c1e9a2f-4b6d-4e1a
+    { "amount": 4200,
+      "currency": "EUR",
+      "card_token": "tok_83kd" }
+
+    201 Created
+    { "payment_id": "pay_51x",
+      "status": "captured" }
+
+    # same key again, after failover
+    200 OK   (stored result, no new charge)
+decisions:
+  - choice: Active-passive with a human gate
+    instead: Fully automatic failover
+    why: A flaky link could trigger a promotion while region A still takes writes, which is worse than 4 minutes of downtime. A person confirms; revisit once fencing is proven on 10 game days.
+  - choice: Proxy-based steering, not DNS alone
+    instead: Switch a DNS record
+    why: Clients and resolvers cache DNS past its TTL, which can blow the 4-minute target. A proxy switch takes effect at once.
+watchOut: Idempotency keys that expire before clients stop retrying, or that live only in region A, let a retry charge twice. Replicate the key table with the payments and keep keys longer than the longest retry window.

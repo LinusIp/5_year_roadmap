@@ -1,0 +1,115 @@
+overview: >-
+  A market-data feed handler in C++ for a small trading firm, tested on a synthetic feed only. Two identical multicast
+  UDP feeds, A and B, carry numbered packets of order events; a single pinned thread decodes both, keeps the first copy
+  of each sequence number, and applies the events to an order book held in flat, preallocated arrays. When both feeds
+  miss a packet, it asks for the gap over a TCP side channel and holds later packets until the gap is filled, so the
+  book never applies events out of order.
+learn:
+  - name: UDP multicast
+    ref: stanford-cs144
+  - name: Sequence gap recovery
+  - name: Order books
+  - name: Cache-friendly layouts
+    ref: mit-6-172
+  - name: Latency measurement with TSC
+  - name: Allocation-free hot paths
+stats:
+  - value: 2M msgs/s
+    label: on one core
+  - value: < 5 µs
+    label: tick-to-book p99
+  - value: "0"
+    label: book mismatches at 1% loss
+components:
+  - id: feed
+    name: Feed simulator
+    role: Sends the same order flow on feeds A and B with independent random loss.
+    tech: C++ · multicast
+    talksTo: [decoder]
+    kind: external
+  - id: decoder
+    name: Decoder
+    role: Reads packet batches from both sockets and decodes fixed-size messages.
+    tech: C++ · recvmmsg
+    talksTo: [arbiter]
+    kind: core
+  - id: arbiter
+    name: A/B arbiter
+    role: Keeps the expected sequence number, drops duplicates and buffers early packets.
+    tech: Ring buffer
+    talksTo: [recovery, book]
+    kind: core
+  - id: recovery
+    name: Gap recovery client
+    role: Requests missing sequence ranges over TCP and feeds them back in order.
+    tech: C++ · TCP
+    talksTo: [book]
+    kind: core
+  - id: book
+    name: Order book
+    role: Applies add, modify and delete events to price levels and an order table.
+    tech: Flat arrays · open addressing
+    talksTo: [latency]
+    kind: core
+  - id: latency
+    name: Latency recorder
+    role: Stamps receive and book-update times and keeps a histogram.
+    tech: rdtsc · fixed histogram
+    talksTo: []
+    kind: offline
+flow:
+  - component: decoder
+    text: >-
+      busy-polls both sockets on a pinned core, pulling up to 32 packets per `recvmmsg`, and stamps each with `rdtsc`;
+      at 2 million messages a second the budget is 500 ns each.
+  - component: arbiter
+    text: >-
+      compares the packet's `seq` with `next_seq`: lower is the other feed's duplicate and is dropped, equal is passed
+      on, higher is held in a 4,096-slot ring while the other feed gets 50 µs to fill the gap.
+  - component: recovery
+    text: >-
+      if the gap is still open, sends `RETRANS from=1041 count=12` over TCP and applies the replies **in sequence**,
+      then drains the held packets.
+  - component: book
+    text: >-
+      finds the order in a preallocated hash table and the price level by `(price - base) / tick` in an array, so add,
+      modify and delete are constant time with no allocation.
+  - component: latency
+    text: >-
+      stamps again after the update and adds the difference to a fixed histogram that never allocates, to report p99.
+interface:
+  lang: cpp
+  code: |
+    #pragma pack(push, 1)
+    struct PacketHeader {
+        uint64_t seq;      // of the first message
+        uint16_t count;    // messages that follow
+    };
+    struct AddOrder {      // type 'A', 30 bytes
+        char     type;
+        uint64_t order_id;
+        char     side;     // 'B' or 'S'
+        int64_t  price;    // in ticks
+        uint32_t qty;
+        uint64_t ts_ns;
+    };
+    #pragma pack(pop)      // also 'M'odify, 'D'elete
+decisions:
+  - choice: One pinned thread for the hot path
+    instead: A pipeline of decoder, arbiter and book threads
+    why: >-
+      Each hand-off between threads costs a queue and cache-line traffic, a large slice of a 5 µs p99. One core at
+      500 ns a message fits 2 million a second; recovery's TCP I/O is the only thing kept off it.
+  - choice: Flat arrays for price levels
+    instead: A balanced tree such as std::map
+    why: >-
+      A tree chases pointers and allocates on every new level, both cache misses. Prices sit close to the touch, so an
+      array indexed by tick is direct and preallocated.
+  - choice: Wait briefly for the other feed
+    instead: Request recovery on every gap at once
+    why: >-
+      With independent loss on A and B, the other feed almost always has the packet. A 50 µs wait avoids most TCP
+      requests; tune it from the measured gap fill times.
+watchOut: >-
+  The book silently goes wrong if a recovered message is applied after a later buffered one. Apply strictly in
+  sequence order, and compare a checksum of the book with the simulator's after every test run.

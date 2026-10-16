@@ -1,0 +1,140 @@
+overview: >-
+  A piece of research written up as a 6–8 page workshop paper. Your 3D engine generates short clips with actions and
+  the exact physical state, an action-conditioned world model (a model that predicts the next frames given what the
+  agent does) learns to predict them, and its rollouts are checked against the engine's truth up to 64 steps ahead.
+  A state probe reads positions and velocities from predicted frames, so blurry but plausible predictions cannot hide
+  behind pixel scores, and the model is served through your own inference stack.
+learn:
+  - name: Action-conditioned world models
+    ref: dreamerv3-code
+  - name: Diffusion transformers
+    ref: facebookresearch-dit
+  - name: Pre-registered hypotheses
+    ref: schulman-research-guide
+  - name: Perceptual metrics
+  - name: State probes
+  - name: Experiment tracking
+    ref: wandb
+stats:
+  - value: 100k+
+    label: clips from your engine
+  - value: 1 → 64
+    label: steps ahead, checked against ground truth
+  - value: 6–8
+    label: pages, reviewed by two people
+components:
+  - id: engine
+    name: Engine bindings
+    role: Generates seeded scenes with random actions and saves frames, actions and full state.
+    tech: Your engine · Python bindings
+    talksTo: [dataset]
+    kind: core
+  - id: dataset
+    name: Clip dataset
+    role: Stores clips in shards with their seeds, split by scene.
+    tech: NumPy shards
+    talksTo: [model, probe]
+    kind: core
+  - id: model
+    name: World model
+    role: Encodes frames to latents and predicts future latents from actions, at sizes S, M and L.
+    tech: PyTorch · VAE and DiT or RSSM
+    talksTo: [eval, server]
+    kind: core
+  - id: probe
+    name: State probe
+    role: Reads object positions and velocities from frames, trained on the engine's states.
+    tech: PyTorch
+    talksTo: [eval]
+    kind: core
+  - id: eval
+    name: Evaluation
+    role: Scores rollouts against the engine by horizon, with pixel, perceptual and state errors.
+    tech: Python · W&B
+    talksTo: [paper]
+    kind: core
+  - id: server
+    name: Inference stack
+    role: Serves the exported model and streams predicted frames.
+    tech: Your serving stack
+    talksTo: [client]
+    kind: core
+  - id: client
+    name: Client
+    role: Sends a context frame and actions and times each predicted frame.
+    tech: Python
+    talksTo: []
+    kind: external
+  - id: paper
+    name: Paper
+    role: Turns the results into figures, tables and a 6–8 page workshop paper.
+    tech: LaTeX · Zotero
+    talksTo: []
+    kind: offline
+flow:
+  - component: engine
+    text: >-
+      builds a scene from a seed, applies random actions and writes each step's frame, action and object state
+      (positions, velocities, energy).
+  - component: dataset
+    text: >-
+      stores the clip with its seed, so the whole set regenerates from a script, and keeps **test scenes unseen** in
+      training.
+  - component: model
+    text: >-
+      encodes the context frame to a latent and rolls forward with the clip's actions, predicting latents up to 64
+      steps ahead.
+  - component: probe
+    text: >-
+      decodes the predicted frames and reads the objects' states from them, the way it learned from the engine's
+      true states.
+  - component: eval
+    text: >-
+      compares at horizons `1`, `4`, `16` and `64`: PSNR, LPIPS, probe-state error and energy drift, over three
+      seeds and every model size.
+  - component: server
+    text: >-
+      loads the exported model and streams predicted frames to the client, reporting time per frame at p50 and p99.
+  - component: paper
+    text: >-
+      takes the error-against-horizon figure and the latency table, states whether the **hypothesis held**, and is
+      revised after two outside reviews.
+interface:
+  lang: python
+  code: |
+    # one clip, as stored in a shard
+    clip = {
+        "frames":  uint8[T, H, W, 3],
+        "actions": float32[T, A],
+        "state":   float32[T, N, 6],  # pos, vel
+        "seed": int, "scene": str,
+    }
+
+    def rollout(z0: Tensor, actions: Tensor,
+                horizon: int) -> Tensor:
+        """z0 [B, C, h, w] context latent;
+        returns latents [B, horizon, C, h, w]."""
+decisions:
+  - choice: Probe-state error next to pixel metrics
+    instead: PSNR and LPIPS alone
+    why: >-
+      Pixel metrics reward blurry averages, which look fine at horizon 4 and are physically wrong by 64. The engine
+      gives exact states for free, which is what makes this evaluation stronger than most.
+  - choice: Hypothesis written down before training
+    instead: A question picked after seeing the results
+    why: >-
+      With three sizes and four horizons, some pattern always appears. Writing the hypothesis first is what lets the
+      paper say whether it held.
+  - choice: One model family at two or three sizes
+    instead: Two model families compared
+    why: >-
+      150 hours cover one family done properly, with ablations and three seeds. A second family is the stretch once
+      the evaluation is finished.
+  - choice: Split train and test by scene seed
+    instead: Random split over clips
+    why: >-
+      Clips from one scene look alike, so a random split tests memory, not prediction. Revisit only if scene variety
+      is so low that held-out scenes are trivial.
+watchOut: >-
+  Too little variety in the generated scenes lets the model memorise them, and every metric then looks good. Check
+  the error on held-out scenes before scaling the model up.

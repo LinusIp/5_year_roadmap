@@ -1,0 +1,104 @@
+overview: >-
+  A research viewer for the Holloway imaging group that ray-marches 1024 × 1024 × 600 CTs in real time and overlays
+  the labels from their U-Net with its confidence. The model runs offline in Python and writes a label volume and a
+  confidence volume on the CT's own grid. On the GPU a coarse grid of bricks stores each brick's min and max value, so
+  rays skip bricks the transfer function makes invisible, and each step samples CT, label and confidence together.
+learn:
+  - name: Volume ray marching
+    ref: scratchapixel
+  - name: Empty-space skipping
+  - name: Nearest vs linear sampling
+    ref: learnopengl
+  - name: Showing uncertainty
+  - name: Dice score
+stats:
+  - value: 30 FPS
+    label: 1024 × 1024 × 600 at 1080p
+  - value: ≥ 50%
+    label: fewer ray steps from skipping
+  - value: < 0.5 voxel
+    label: overlay alignment error
+components:
+  - id: model
+    name: Model run script
+    role: Runs the U-Net offline and writes labels and confidence on the CT grid.
+    tech: Python · PyTorch
+    talksTo: [labels]
+    kind: offline
+  - id: labels
+    name: Label volume loader
+    role: Loads labels and confidence and checks their geometry matches the CT.
+    tech: C++17
+    talksTo: [bricks]
+    kind: core
+  - id: bricks
+    name: Brick builder
+    role: Uploads the CT and builds the per-brick min/max grid and visibility flags.
+    tech: C++17 · OpenGL 4.6
+    talksTo: [marcher]
+    kind: core
+  - id: marcher
+    name: Ray marcher
+    role: Skips empty bricks and samples CT, label and confidence at each step.
+    tech: GLSL 4.6
+    talksTo: [shading]
+    kind: core
+  - id: shading
+    name: Uncertainty shading
+    role: Tints by label and fades or hatches where confidence is low.
+    tech: GLSL 4.6
+    talksTo: []
+    kind: core
+  - id: tools
+    name: Clip and measure
+    role: Clip box, slice planes and distance measurement, with a research-use banner.
+    tech: Dear ImGui
+    talksTo: [marcher]
+    kind: core
+  - id: gpu
+    name: 12 GB GPU
+    role: Holds about 2.5 GB of CT, label and confidence textures.
+    tech: OpenGL 4.6
+    talksTo: []
+    kind: external
+flow:
+  - component: labels
+    text: compares the label file's size, spacing and origin with the CT header and refuses a mismatch, which keeps alignment under 0.5 voxel.
+  - component: bricks
+    text: stores the CT as 16-bit, splits it into 16³ bricks, and marks a brick visible when its min-max range has any opacity in the transfer function.
+  - component: tools
+    text: sets the clip box; dragging the transfer function only recomputes brick flags, not the volume.
+  - component: marcher
+    text: jumps over invisible bricks in one step each, then marches visible ones, reading the CT with linear filtering and the label with `texelFetch`, **never** interpolated.
+  - component: shading
+    text: mixes the label colour into the CT colour by confidence and hatches voxels under 0.5 confidence, so weak predictions look weak.
+interface:
+  lang: glsl
+  code: |
+    uniform sampler3D  u_ct;     // R16, linear
+    uniform usampler3D u_label;  // R8UI, nearest
+    uniform sampler3D  u_conf;   // R8, 0..1
+    uniform vec3 u_labelRgb[16];
+    for (int i = 0; i < MAX_STEPS && t < t1; ++i) {
+      vec3 p = o + t * d;
+      if (!brickVisible(p)) { t = brickExit(p, d);
+                              continue; }
+      vec4 c = texture(u_tf, texture(u_ct, p).r);
+      uint id = texelFetch(u_label, voxel(p), 0).r;
+      float k = texture(u_conf, p).r;
+      c.rgb = mix(c.rgb, u_labelRgb[id], 0.6 * k);
+      acc += (1.0 - acc.a) * vec4(c.rgb * c.a, c.a);
+      t += u_step; }
+decisions:
+  - choice: Nearest sampling for labels
+    instead: Linear filtering for every texture
+    why: Halfway between label 1 and label 3, linear filtering gives 2, an organ that is not there. Labels are read with texelFetch; only CT and confidence are filtered.
+  - choice: Min/max brick grid
+    instead: March every step through the box
+    why: Much of a CT is air or tissue the transfer function hides. Skipping those bricks gives the 50% step reduction, and changing the transfer function only updates a small flag grid.
+  - choice: Model runs offline in Python
+    instead: Run the U-Net inside the viewer
+    why: Inference once per scan is enough for a viewer, and keeping PyTorch out of the C++ app keeps VRAM free for the 2.5 GB of volumes.
+watchOut: >-
+  A clean overlay makes model output look like truth. Always show confidence, keep the research-use banner on screen,
+  and report the model's Dice score against ground truth next to the view.

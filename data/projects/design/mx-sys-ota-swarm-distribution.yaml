@@ -1,0 +1,114 @@
+overview: >-
+  Peer-assisted firmware delivery in Go for Meridian Meters' 5,000 gateways, so the 80 MB image crosses the expensive
+  origin link far fewer times. The image is split into 256 KB chunks listed with their hashes in a signed manifest, a
+  coordinator groups gateways on the same site into small swarms, and each gateway fetches the rarest chunks from its
+  neighbours first and only the rest from the origin. Every chunk is checked against the manifest before it is kept,
+  and progress survives a power cut.
+learn:
+  - name: Content-addressed chunks
+  - name: Rarest-first selection
+  - name: Signed manifests
+  - name: Rollback protection
+  - name: Fleet simulation
+stats:
+  - value: ≥ 70%
+    label: fewer origin bytes
+  - value: 95%
+    label: of devices updated in 2 h
+  - value: 100%
+    label: of corrupt chunks rejected
+components:
+  - id: manifest
+    name: Manifest builder
+    role: Splits the image into chunks, hashes each and signs the list.
+    tech: Go · ed25519
+    talksTo: [coordinator, origin]
+    kind: core
+  - id: coordinator
+    name: Swarm coordinator
+    role: Groups gateways by site and tells each which peers to ask.
+    tech: Go · HTTP
+    talksTo: [peer]
+    kind: core
+  - id: peer
+    name: Peer protocol
+    role: Exchanges have-lists and chunks with neighbours over the local network.
+    tech: Go · TCP
+    talksTo: [store]
+    kind: core
+  - id: origin
+    name: Origin server
+    role: Serves any chunk over cellular when no peer has it.
+    tech: HTTP range requests
+    talksTo: [store]
+    kind: external
+  - id: store
+    name: Chunk store
+    role: Verifies each chunk's hash and writes it into the image file.
+    tech: SHA-256 · file
+    talksTo: [resume]
+    kind: core
+  - id: resume
+    name: Resume logic
+    role: Persists which chunks are done so a reboot continues where it stopped.
+    tech: Bitfield file · fsync
+    talksTo: []
+    kind: core
+  - id: sim
+    name: Fleet simulator
+    role: Models 5,000 gateways with mixed links to measure origin bytes and completion.
+    tech: Go discrete-event
+    talksTo: []
+    kind: offline
+flow:
+  - component: manifest
+    text: >-
+      cuts the 80 MB image into 320 chunks, lists their SHA-256 hashes with `version: 412`, and signs the manifest
+      with ed25519 from the standard library.
+  - component: coordinator
+    text: >-
+      on a gateway's check-in returns the manifest and up to 20 peers on the same site, seeding a few gateways per
+      swarm from the origin first.
+  - component: peer
+    text: >-
+      swaps have-lists (bitfields) with peers and requests the **rarest** chunk first, 4 at a time; peers that upload
+      get served first, so free riders wait. Chunks no peer has after 60 s come from the origin.
+  - component: store
+    text: >-
+      hashes each chunk and compares it with the signed manifest; a mismatch is thrown away, and a peer that sends 3
+      bad chunks is dropped.
+  - component: resume
+    text: >-
+      sets the chunk's bit and fsyncs the bitfield; after a power cut the gateway rechecks only the last chunk and
+      continues.
+interface:
+  lang: json
+  code: |
+    { "firmware": "meter-gw",
+      "version": 412,
+      "minVersion": 405,
+      "size": 83886080,
+      "chunkSize": 262144,
+      "chunks": [ "9f2c...e1", "07ab...5d", "..." ],
+      "sig": "ed25519:Q2h1bmtz..." }
+    // peer messages: HAVE(i), BITFIELD(bits),
+    // REQUEST(i), PIECE(i, 256 KB)
+decisions:
+  - choice: Per-chunk hashes in a signed manifest
+    instead: One signature over the whole image
+    why: >-
+      With only a whole-image signature, a bad chunk from a peer shows up after all 80 MB arrive. Per-chunk hashes
+      reject it at once and point at the peer that sent it.
+  - choice: Rarest-first, not in order
+    instead: Fetch chunks in order
+    why: >-
+      In order, every gateway wants the same early chunks and the late ones exist only at the origin. Rarest-first
+      spreads chunks across the swarm so neighbours have something to trade, which is where the 70% saving comes from.
+  - choice: Site swarms from a coordinator
+    instead: A fully decentralised peer lookup
+    why: >-
+      Gateways already check in with a server, and the cheap links are on the same site. A coordinator that groups by
+      site is simpler and keeps traffic off cellular.
+watchOut: >-
+  A correctly signed old image can be replayed to roll gateways back to a version with known bugs. Refuse any manifest
+  whose version is not higher than the installed one or is below `minVersion`.

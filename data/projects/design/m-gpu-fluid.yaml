@@ -1,0 +1,133 @@
+overview: >-
+  A particle fluid (SPH, smoothed-particle hydrodynamics: each particle's density and pressure come from its
+  neighbours) that lives entirely in GPU storage buffers in your Vulkan engine. Every frame runs a fixed chain of
+  compute dispatches: sort particles into a uniform grid so neighbours sit next to each other in memory, compute
+  density, then pressure and viscosity forces, then integrate and push particles out of walls. The graphics pass
+  draws the sorted positions straight from the same buffer, and a CPU reference and a dam-break experiment check that
+  the result is physically right.
+learn:
+  - name: SPH kernels
+    ref: bridson-fluid-sim
+  - name: Counting-sort spatial grid
+    ref: ten-minute-physics
+  - name: Parallel prefix sum
+    ref: pmpp-book
+  - name: Compute pipeline barriers
+    ref: vkguide
+  - name: CFL time-step limit
+    ref: bridson-fluid-sim
+stats:
+  - value: ≥ 60 fps
+    label: at 100,000 particles
+  - value: < 0.1 %
+    label: density gap to CPU reference
+  - value: ± 10 %
+    label: dam-break front vs experiment
+components:
+  - id: buffers
+    name: Particle buffers
+    role: Hold positions, velocities, densities and the per-cell start indices on the GPU.
+    tech: Vulkan storage buffers
+    talksTo: [sort]
+    kind: core
+  - id: sort
+    name: Grid sort
+    role: Hashes particles to cells, counts per cell, prefix-sums the counts and scatters into sorted order.
+    tech: GLSL compute
+    talksTo: [density]
+    kind: core
+  - id: density
+    name: Density kernel
+    role: Sums neighbour contributions from the 27 surrounding cells, boundary particles included.
+    tech: GLSL compute
+    talksTo: [forces, cpuref]
+    kind: core
+  - id: forces
+    name: Force kernel
+    role: Computes pressure from density and adds pressure, viscosity and gravity forces.
+    tech: GLSL compute
+    talksTo: [integrate]
+    kind: core
+  - id: integrate
+    name: Integrator
+    role: Advances velocities and positions by one time step and resolves the walls.
+    tech: GLSL compute
+    talksTo: [buffers, render, plots]
+    kind: core
+  - id: render
+    name: Impostor renderer
+    role: Draws each particle as a sphere impostor from the sorted positions, with an ImGui parameter panel.
+    tech: Vulkan graphics · Dear ImGui
+    talksTo: []
+    kind: core
+  - id: cpuref
+    name: CPU reference
+    role: Runs the same SPH on small scenes so GPU densities can be checked number for number.
+    tech: C++ or NumPy
+    talksTo: []
+    kind: offline
+  - id: plots
+    name: Validation plots
+    role: Plots the surge front against Martin and Moyce's data and the per-kernel GPU timings.
+    tech: Python · Matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: buffers
+    text: start the frame with last step's particle state; the whole step stays on the GPU with no readback.
+  - component: sort
+    text: >-
+      hashes each particle to a cell whose size **equals** the kernel radius `h`, counts per cell, prefix-sums the
+      counts into `cellStart` and scatters particles into sorted order.
+  - component: density
+    text: >-
+      reads only the 27 cells around each particle and sums `m·W(r, h)`; walls are lined with boundary particles that
+      add their own density.
+  - component: forces
+    text: turns density into pressure and adds pressure, viscosity and gravity, with a **barrier** before and after.
+  - component: integrate
+    text: >-
+      moves particles by a time step under the CFL limit, resolves boundaries and writes back to the buffers; this
+      per-frame **loop** then starts again.
+  - component: render
+    text: draws the sorted positions as sphere impostors to the swapchain, reading the same buffer the solver wrote.
+  - component: cpuref
+    text: >-
+      checks offline that GPU densities match within `0.1 %` on a 10,000-particle scene after 100 steps, and the
+      **plots** compare the dam-break front with experiment.
+interface:
+  lang: glsl
+  code: |
+    layout(local_size_x = 256) in;
+    layout(binding=0) readonly buffer P {vec4 pos[];};
+    layout(binding=1) readonly buffer C {uint start[];};
+    layout(binding=2) writeonly buffer D {float rho[];};
+    layout(push_constant) uniform K {
+      float h; float mass; uint n; uint gridDim;
+    };
+
+    void main() {
+      uint i = gl_GlobalInvocationID.x;
+      if (i >= n) return;
+      ivec3 c = ivec3(floor(pos[i].xyz / h));
+      // 27 cells around c: rho += mass * W(r, h)
+    }
+decisions:
+  - choice: SPH, not FLIP
+    instead: FLIP with a grid pressure solve
+    why: >-
+      SPH keeps everything as particles with one neighbour grid, so the 40 h go into the GPU pipeline rather than a
+      Jacobi or multigrid solver. Revisit FLIP if the dam break cannot hold density error under 3 %.
+  - choice: Counting sort rebuilt every frame
+    instead: A hash table with atomic linked lists
+    why: >-
+      Sorted particles make neighbour reads contiguous, which matters at 100,000 to 1,000,000 particles where memory
+      bandwidth is the limit; integer counts avoid float atomics.
+  - choice: CPU reference before any shader
+    instead: Debugging the GPU solver by eye
+    why: >-
+      A fluid that looks plausible can still be wrong. A small CPU scene gives exact numbers to match within 0.1 %
+      before performance work starts.
+watchOut: >-
+  A missing barrier between dependent dispatches can work on your GPU and corrupt the simulation on another. Put a
+  pipeline barrier between every dispatch that reads what the previous one wrote, and test with validation layers on.

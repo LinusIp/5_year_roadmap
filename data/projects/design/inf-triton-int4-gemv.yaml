@@ -1,0 +1,47 @@
+overview: >-
+  A Triton kernel for the decode step of an LLM, where batch 1 makes matrix times vector (GEMV) limited by how fast
+  weights can be read. Weights are stored as int4, eight to an int32, with one fp16 scale per group of 128, and the
+  kernel unpacks, scales and multiplies in one pass so it reads a quarter of the fp16 bytes.
+learn:
+  - name: Weight-only quantization
+    ref: mit-6-5940
+  - name: Memory-bound kernels
+    ref: kipply-inference-arithmetic
+  - name: Bit packing
+components:
+  - id: packer
+    name: Weight packer
+    role: Quantizes fp16 weights to int4 with group scales and packs 8 per int32.
+    tech: PyTorch
+    talksTo: [kernel]
+    kind: offline
+  - id: kernel
+    name: GEMV kernel
+    role: Unpacks nibbles, applies scales and accumulates the dot product in fp32.
+    tech: Triton
+    talksTo: [check]
+    kind: core
+  - id: check
+    name: Check and bench
+    role: Compares with a dequantized torch matmul and times batch 1 to 8 against fp16.
+    tech: PyTorch · triton.testing
+    talksTo: []
+    kind: core
+flow:
+  - component: packer
+    text: stores `q = round(w / s)` in `[-8, 7]`, one scale `s` per 128 weights, and packs 8 values per int32 in a fixed nibble order.
+  - component: kernel
+    text: loads int32 blocks and unpacks with `(w >> (4 * i)) & 0xF` minus 8, in **the same order** as the packer.
+  - component: kernel
+    text: multiplies by the group's scale and the matching slice of `x`, then sums in fp32 per output row.
+  - component: check
+    text: reports max error against `x @ dequant(W).T`, and speedup and effective GB/s against fp16 GEMV at batch 1 (target 2x).
+decisions:
+  - choice: Group size 128
+    instead: One scale per row
+    why: >-
+      Per-row scales are cheaper to read but let one outlier weight ruin a whole row's precision. 128 is a common
+      balance; scales then add only about 3% to the bytes read.
+watchOut: >-
+  Unpacking nibbles in a different order than the packer wrote them pairs weights with the wrong scales and inputs,
+  and the output is plausible-looking noise. Test with a tiny matrix of known values first.

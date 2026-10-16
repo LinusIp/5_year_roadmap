@@ -1,0 +1,126 @@
+overview: >-
+  A gateway tier in Go for Sparrow Chat's 100,000 connected users: 4 gateway processes hold the WebSocket connections,
+  and a small internal pub/sub bus carries room messages between them. A message is published once per gateway that
+  has members in the room, not once per member, and each gateway encodes it once and hands the same bytes to all its
+  local members. A presence service turns heartbeats into online and offline changes, debounced (held back briefly so
+  a quick reconnect does not flicker) and sent in batches.
+learn:
+  - name: WebSockets
+  - name: Publish-subscribe fan-out
+    ref: bytebytego
+  - name: Backpressure
+    ref: ddia
+  - name: Heartbeats and debouncing
+  - name: File descriptor limits
+    ref: lfs101-intro-linux
+stats:
+  - value: 100k
+    label: connections in < 8 GB
+  - value: < 150 ms
+    label: p99 to a 1,000-member room
+  - value: < 3 s
+    label: presence propagation
+components:
+  - id: clients
+    name: Chat clients
+    role: Phones and browsers holding one WebSocket each.
+    tech: WebSocket
+    talksTo: [gateway]
+    kind: external
+  - id: gateway
+    name: WebSocket gateway
+    role: Owns 25,000 connections per process, their send queues and local room lists.
+    tech: Go · gorilla/websocket
+    talksTo: [router, presence]
+    kind: core
+  - id: router
+    name: Room router
+    role: Knows which gateways have members in each room.
+    tech: Go map
+    talksTo: [bus]
+    kind: core
+  - id: bus
+    name: Internal bus
+    role: Delivers each room message once to every subscribed gateway.
+    tech: Go · TCP mesh
+    talksTo: [fanout]
+    kind: core
+  - id: fanout
+    name: Local fan-out
+    role: Encodes a frame once and queues it for each local member.
+    tech: Go · shared []byte
+    talksTo: [slow]
+    kind: core
+  - id: slow
+    name: Slow-client policy
+    role: Bounds each send queue and evicts clients that stay behind.
+    tech: Go · buffered channels
+    talksTo: [clients]
+    kind: core
+  - id: presence
+    name: Presence service
+    role: Turns heartbeats into debounced online and offline updates per room.
+    tech: Go
+    talksTo: [bus]
+    kind: core
+  - id: loadgen
+    name: Load generator
+    role: Simulates 100,000 users in power-law sized rooms across several source IPs.
+    tech: Go
+    talksTo: [clients]
+    kind: offline
+flow:
+  - component: gateway
+    text: >-
+      reads `{"type":"msg","room":"r-77","text":"hi"}` from one user's socket; with a budget of 80 KB per connection
+      (8 GB over 100,000), buffers stay small and are reused.
+  - component: router
+    text: >-
+      looks up room `r-77`, finds its 1,000 members spread over all 4 gateways, and publishes **once per gateway**.
+  - component: bus
+    text: >-
+      sends the message over persistent TCP links between gateways, so 1,000 recipients cost 4 bus messages, not 1,000.
+  - component: fanout
+    text: >-
+      on each gateway encodes the WebSocket frame once and puts the same byte slice into every local member's queue.
+  - component: slow
+    text: >-
+      lets each connection's writer drain its queue of up to 256 frames; a queue that stays full for 5 s closes that
+      client so it cannot hold memory or delay the room.
+  - component: presence
+    text: >-
+      marks a user offline only after 2 missed 25 s heartbeats or a close plus a 2 s grace period, and sends each room
+      one batched update a second, well inside 3 s.
+interface:
+  lang: json
+  code: |
+    // client -> gateway
+    { "type": "msg", "room": "r-77", "text": "hi" }
+
+    // gateway -> each member
+    { "type": "msg", "room": "r-77", "id": 90311,
+      "from": "u-4410", "text": "hi" }
+
+    // presence, batched once a second per room
+    { "type": "presence", "room": "r-77",
+      "online": ["u-12", "u-981"],
+      "offline": ["u-77"] }
+decisions:
+  - choice: Publish once per gateway, encode once per gateway
+    instead: Publish and encode once per recipient
+    why: >-
+      A 1,000-member room would mean 1,000 bus messages and 1,000 encodings per chat line. Sharing one byte slice keeps
+      CPU and memory flat as rooms grow.
+  - choice: Our own TCP mesh between 4 gateways
+    instead: A message broker process
+    why: >-
+      Managed pub/sub is ruled out, and with 4 gateways a full mesh is only 6 links. Revisit with a broker if the tier
+      grows past about 10 gateways.
+  - choice: Evict slow clients
+    instead: Unbounded queues per client
+    why: >-
+      A phone on a bad link would otherwise collect every message in memory. Bounded queues keep each connection inside
+      its 80 KB budget; the evicted client reconnects and catches up.
+watchOut: >-
+  After a gateway restart, 25,000 clients reconnect at once and each one's presence change floods every room. Add
+  random reconnect delay on clients, and rely on the 2 s grace and batching so a reconnect sends nothing.

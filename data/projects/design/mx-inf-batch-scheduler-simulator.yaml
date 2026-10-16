@@ -1,0 +1,110 @@
+overview: >-
+  A token-step simulator that lets Helix AI try new batching policies without risking production. It models every
+  engine step (prefill, decode and KV-cache memory limits) with step times measured on a real GPU, and plugs in
+  first-come-first-served, shortest-job-first by predicted length, priority and fair-share policies. Before any
+  policy result counts, the simulator must match a real engine under FCFS to within 15%.
+learn:
+  - name: Continuous batching
+    ref: vllm-docs
+  - name: Scheduling policies (SJF)
+    ref: ostep
+  - name: Starvation and aging
+    ref: ostep
+  - name: Length prediction error
+  - name: KV-cache preemption
+    ref: vllm-docs
+  - name: Simulator validation
+stats:
+  - value: ≤ 15%
+    label: sim vs real p99 under FCFS
+  - value: ≥ 20%
+    label: p99 cut, ≤ 3% throughput loss
+  - value: < 0.1%
+    label: requests waiting over 30 s
+components:
+  - id: calib
+    name: Step-time calibrator
+    role: Measures step time against batch size and tokens in the step on a real engine.
+    tech: vLLM · 1 GPU
+    talksTo: [sim]
+    kind: offline
+  - id: trace
+    name: Trace generator
+    role: Produces arrivals with lognormal prompt and output lengths from public conversation statistics.
+    tech: Python · numpy
+    talksTo: [predictor]
+    kind: core
+  - id: predictor
+    name: Length predictor
+    role: Guesses each request's output length with a tunable error, from perfect to badly wrong.
+    tech: Python
+    talksTo: [policy]
+    kind: core
+  - id: policy
+    name: Policy plug-ins
+    role: Orders the waiting queue each step as FCFS, SJF with aging, priority or fair share.
+    tech: Python
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Step simulator
+    role: Admits requests while KV blocks are free, advances steps, and preempts when memory runs out.
+    tech: Python · numpy
+    talksTo: [analysis]
+    kind: core
+  - id: analysis
+    name: Analysis notebook
+    role: Compares p50, p99, throughput and starvation across policies and predictor error levels.
+    tech: Jupyter · pandas
+    talksTo: []
+    kind: core
+flow:
+  - component: trace
+    text: emits a request with a 900-token prompt and a 1,400-token answer, unknown to the scheduler.
+  - component: predictor
+    text: >-
+      guesses 700 tokens, a typical miss; runs are repeated with error from **0** to large, because real predictors
+      are never perfect.
+  - component: policy
+    text: >-
+      under SJF with aging sorts by `pred_tokens − k × wait`, so short jobs go first but nobody waits forever.
+  - component: sim
+    text: >-
+      admits the request when enough KV blocks are free, charges each step its calibrated time, and **preempts**
+      the newest request if memory runs out mid-decode.
+  - component: analysis
+    text: >-
+      keeps a policy only if p99 drops ≥ 20%, throughput drops ≤ 3% and fewer than 0.1% of requests wait over 30 s.
+interface:
+  lang: python
+  code: |
+    class Policy(Protocol):
+        def order(self, waiting: list[Req],
+                  now: float) -> list[Req]: ...
+
+    class SJFAging:
+        def __init__(self, k: float = 20.0):
+            self.k = k  # tokens forgiven per second
+        def order(self, waiting, now):
+            return sorted(waiting, key=lambda r:
+                r.pred_tokens
+                - self.k * (now - r.arrival))
+decisions:
+  - choice: Step-level simulation
+    instead: A closed-form queueing model
+    why: >-
+      Policies differ in which requests share a step and when memory forces preemption. Only stepping through
+      tokens captures that.
+  - choice: SJF with aging
+    instead: Pure shortest-job-first
+    why: >-
+      Pure SJF can leave a long request waiting indefinitely under steady load, and starvation must stay under 0.1%.
+      Aging trades a little of the p99 gain for that guarantee.
+  - choice: Sweep predictor error
+    instead: Assume perfect length prediction
+    why: >-
+      SJF's benefit shrinks as predictions get worse, so a result with perfect lengths overstates the gain. The sweep
+      shows how good a predictor Helix would need.
+watchOut: >-
+  A simulator that was never checked against a real engine produces confident nonsense. Validate FCFS against vLLM
+  to within 15% first, including preemption under memory pressure, before trusting any policy comparison.

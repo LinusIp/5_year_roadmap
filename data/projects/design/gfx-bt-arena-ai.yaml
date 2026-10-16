@@ -1,0 +1,72 @@
+overview: >-
+  Squad enemies in an arena driven by behaviour trees (trees of selector, sequence and action nodes ticked each frame,
+  each returning success, failure or running), with a utility layer that scores tactics such as flank, attack and
+  retreat and picks the best. A live in-game visualiser colours each node by its last status, so you can see why an
+  enemy did what it did.
+learn:
+  - name: Behaviour trees
+  - name: Utility scoring
+  - name: Blackboards
+  - name: Deterministic seeds
+components:
+  - id: blackboard
+    name: Blackboard
+    role: Holds each agent's facts for this tick, such as health, target distance and cover.
+    tech: C++20
+    talksTo: [utility]
+    kind: core
+  - id: utility
+    name: Utility selector
+    role: Scores each tactic from the blackboard and picks one.
+    tech: C++20
+    talksTo: [bt]
+    kind: core
+  - id: bt
+    name: BT core
+    role: Ticks the chosen tactic's subtree and runs its actions.
+    tech: C++20
+    talksTo: [viz]
+    kind: core
+  - id: viz
+    name: Tree visualiser
+    role: Draws each agent's tree with node colours from the last tick.
+    tech: Debug UI
+    talksTo: []
+    kind: offline
+flow:
+  - component: blackboard
+    text: gathers health, distance to target, free cover points and squad mates' roles for each agent once per tick.
+  - component: utility
+    text: scores tactics with curves such as retreat `= 1 - health²`, and adds a 0.1 bonus to the current one so agents do not **flip** every frame.
+  - component: bt
+    text: ticks the tactic's subtree, for example a sequence `MoveToCover, Aim, Shoot` that returns `Running` while moving; decision time per agent is timed in µs.
+  - component: viz
+    text: reads a per-agent ring buffer of node statuses after the tick and draws green, red or yellow, so drawing never changes the timings.
+interface:
+  lang: cpp
+  code: |
+    enum class Status : uint8_t {
+      Success, Failure, Running };
+
+    struct Node {
+      virtual ~Node() = default;
+      virtual Status tick(Agent& a, Blackboard& bb) = 0;
+    };
+    struct Selector : Node { std::vector<NodePtr> kids; };
+    struct Sequence : Node { std::vector<NodePtr> kids; };
+
+    struct Tactic { const char* name;
+                    float (*score)(const Blackboard&);
+                    NodePtr tree; };
+    int pick_tactic(std::span<const Tactic> t,
+                    const Blackboard& bb, int current);
+decisions:
+  - choice: Utility scores choose the tactic
+    instead: Priority-ordered selector branches with conditions
+    why: >-
+      Choosing between flank, attack and retreat depends on health, distance and squad roles at once, which needs many
+      hand-written conditions in a fixed order. Scores make the trade-offs explicit and tunable; the tree keeps the
+      step-by-step execution.
+watchOut: >-
+  Unseeded random choices make an odd behaviour impossible to reproduce. Seed each agent's generator from a match seed
+  and its id, and log the seed so a run can be replayed.

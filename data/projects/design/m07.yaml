@@ -1,0 +1,122 @@
+overview: >-
+  A Unix shell in C11 that reads a line, splits it into tokens, parses it into a pipeline of commands and runs them.
+  The executor puts each job in its own process group (a set of processes the terminal signals together), forks one
+  child per stage, connects them with pipes using `dup2`, applies redirections and calls `execvp`. Built-ins such as
+  `cd` run inside the shell itself, and a job controller hands the terminal to the foreground job and reaps finished
+  children when SIGCHLD arrives, so Ctrl-C, Ctrl-Z, `fg` and `bg` behave as in bash.
+learn:
+  - name: fork, exec and waitpid
+    ref: ostep
+  - name: File descriptors and dup2
+    ref: cmu-15-213
+  - name: Signals and handlers
+    ref: cmu-15-213
+  - name: Process groups and job control
+    ref: csapp-labs
+  - name: Writing a tokenizer
+    ref: crafting-interpreters
+stats:
+  - value: 30 of 30
+    label: command lines that match bash
+  - value: '3'
+    label: open fds after 1,000 pipelines
+  - value: '0'
+    label: zombies after 100 background jobs
+components:
+  - id: terminal
+    name: Terminal
+    role: Sends typed lines and turns Ctrl-C and Ctrl-Z into signals for the foreground process group.
+    tech: TTY
+    talksTo: [reader]
+    kind: external
+  - id: reader
+    name: Reader
+    role: Prints the prompt and reads one line, exiting cleanly on end of input.
+    tech: getline
+    talksTo: [lexer]
+    kind: core
+  - id: lexer
+    name: Lexer
+    role: Splits the line into words and operators, honouring quotes and escapes and expanding `$VAR`.
+    tech: C11
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: Parser
+    role: Builds a pipeline of commands, each with its argv and redirections, plus the background flag.
+    tech: C11
+    talksTo: [executor]
+    kind: core
+  - id: executor
+    name: Executor
+    role: Runs the six built-ins in the shell process; forks, wires pipes, redirects and execs everything else.
+    tech: fork · pipe · dup2 · execvp
+    talksTo: [jobs]
+    kind: core
+  - id: jobs
+    name: Job controller
+    role: Owns the job table, gives the terminal to the foreground group and reaps children on SIGCHLD.
+    tech: setpgid · tcsetpgrp · waitpid
+    talksTo: []
+    kind: core
+  - id: harness
+    name: Test harness
+    role: Runs 30 command lines through this shell and bash and compares stdout, stderr and exit status.
+    tech: Bash · Python
+    talksTo: [reader]
+    kind: offline
+flow:
+  - component: reader
+    text: reads `grep err log | sort > out &` from the terminal.
+  - component: lexer
+    text: >-
+      turns it into tokens `grep`, `err`, `log`, `|`, `sort`, `>`, `out`, `&`, keeping quoted text as one word.
+  - component: parser
+    text: builds a pipeline of two commands; the second has `out` as its output file, and the job runs in the background.
+  - component: executor
+    text: >-
+      finds no built-in, **blocks SIGCHLD**, forks both stages into one new process group, connects them with a pipe,
+      opens `out`, closes every unused pipe end and calls `execvp` with a PATH lookup.
+  - component: jobs
+    text: >-
+      adds job `[1]` with its group id and only then unblocks SIGCHLD; a foreground job would get the terminal with
+      `tcsetpgrp` and be waited for with `WUNTRACED`.
+  - component: jobs
+    text: >-
+      reaps both children in the SIGCHLD handler with `waitpid(-1, …, WNOHANG | WUNTRACED)`, marks the job done and
+      reports it at the next prompt.
+interface:
+  lang: c
+  code: |
+    typedef struct {
+        char **argv;     /* NULL-terminated   */
+        char  *in, *out; /* < file, > file    */
+        bool   append;   /* >> instead of >   */
+    } Cmd;
+
+    typedef struct {
+        Cmd   *cmds;     /* cmd | cmd | ...   */
+        size_t ncmds;
+        bool   background; /* trailing &    */
+    } Pipeline;
+
+    int run_pipeline(Shell *sh, const Pipeline *p);
+decisions:
+  - choice: One process group per job
+    instead: Children left in the shell's own group
+    why: >-
+      Ctrl-C goes to the whole foreground group. If the children share the shell's group, the shell dies with them;
+      their own group lets the terminal stop or kill just that job.
+  - choice: Block SIGCHLD around fork and add
+    instead: Adding the job after fork with signals open
+    why: >-
+      A short child can exit before the parent records it, and the handler then reaps a job it does not know. Blocking
+      the signal for those few lines closes the race.
+  - choice: Built-ins in the shell process
+    instead: Forking for every command
+    why: >-
+      `cd`, `export` and `exit` change the shell's own state; in a child they change nothing. Only the six built-ins
+      run in-process, everything else forks.
+watchOut: >-
+  A pipe end left open anywhere means the reader never sees end of file and the pipeline hangs. Close every unused end
+  in every child and in the shell, and check that only fds 0, 1 and 2 stay open after 1,000 pipelines.

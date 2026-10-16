@@ -1,0 +1,129 @@
+overview: >-
+  A pre-registered experiment on speculative decoding, where a small draft model proposes a few tokens and the large
+  target model checks them all in one forward pass, keeping the ones it agrees with. A 0.5B draft and a 7B target run
+  200 code and 200 prose prompts, logging how many tokens are accepted at every step. The standard analysis assumes
+  acceptances are independent, so equal acceptance rate should mean equal speed-up; comparing the domains within
+  acceptance-rate bins tests whether code's acceptances come in longer runs, in a two-page report where a negative
+  result counts.
+learn:
+  - name: Draft-target decoding
+    ref: roadmap-inference-engineering
+  - name: Acceptance rate and speed-up
+    ref: lilian-weng-inference
+  - name: Benchmarking tokens per second
+    ref: vllm-docs
+  - name: Autocorrelation
+    ref: harvard-stat-110
+  - name: Binned comparisons
+    ref: schulman-research-guide
+stats:
+  - value: 200 + 200
+    label: code and prose prompts
+  - value: 2–8
+    label: draft lengths swept
+  - value: "0.05"
+    label: width of each acceptance-rate bin
+components:
+  - id: protocol
+    name: Prediction and protocol
+    role: Fixes models, prompts, draft lengths, bins and metrics before the sweep.
+    tech: Markdown in research/
+    talksTo: [prompts]
+    kind: core
+  - id: prompts
+    name: Prompt sets
+    role: Holds 200 code and 200 prose prompts with matched lengths.
+    tech: JSONL
+    talksTo: [draft]
+    kind: core
+  - id: draft
+    name: Draft model
+    role: Proposes γ tokens cheaply from the current context.
+    tech: 0.5B checkpoint
+    talksTo: [target]
+    kind: core
+  - id: target
+    name: Target model
+    role: Verifies all γ tokens in one pass and accepts the first k it agrees with.
+    tech: 7B checkpoint · PyTorch
+    talksTo: [draft, log]
+    kind: core
+  - id: log
+    name: Acceptance log
+    role: Records accepted tokens and timings for every step.
+    tech: Parquet
+    talksTo: [analysis]
+    kind: core
+  - id: baseline
+    name: Baseline timing
+    role: Times the target alone, without speculation, on the same prompts.
+    tech: PyTorch
+    talksTo: [analysis]
+    kind: offline
+  - id: analysis
+    name: Binned analysis
+    role: Compares tokens per step and speed-up within bins, against the independence model.
+    tech: pandas · Matplotlib
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Two pages with the speed-up chart, run lengths and the prediction beside the outcome.
+    tech: research/ in the data repo
+    talksTo: []
+    kind: core
+flow:
+  - component: protocol
+    text: >-
+      commits a prediction such as "in the same bin, code gives **at least 10 % more** tokens per target step than
+      prose".
+  - component: prompts
+    text: >-
+      feeds each prompt to the decoder at each draft length, greedy and at temperature 0.7, after warm-up.
+  - component: draft
+    text: >-
+      proposes `γ` tokens one at a time from the current context.
+  - component: target
+    text: >-
+      scores all `γ` in one pass, accepts the first `k` and adds one of its own; the draft continues from there, the
+      **decoding loop**.
+  - component: log
+    text: >-
+      appends `k`, `γ` and the step times, so runs of acceptances can be measured later.
+  - component: analysis
+    text: >-
+      bins sequences by acceptance rate and compares measured tokens per step with `(1 − α^(γ+1)) / (1 − α)`.
+  - component: report
+    text: >-
+      shows speed-up against acceptance for both domains with the independence curve and run-length histograms.
+interface:
+  lang: python
+  code: |
+    def expected_tokens(alpha, gamma):
+        """Tokens per target step if acceptances
+        are independent with rate alpha."""
+        return (1 - alpha ** (gamma + 1)) / (1 - alpha)
+
+    # one log row per speculative step
+    {"domain": "code", "prompt_id": 17,
+     "gamma": 4, "accepted": 3,
+     "t_draft_ms": 6.1, "t_target_ms": 21.4}
+decisions:
+  - choice: Compare within acceptance-rate bins
+    instead: Compare domain averages
+    why: >-
+      Code probably has a higher mean acceptance, which already explains a larger speed-up. Only within the same bin
+      does a difference point to the shape of acceptances, which is the question.
+  - choice: Log every step
+    instead: Record only tokens per second
+    why: >-
+      Lag-1 autocorrelation and run-length histograms need the accepted count of each step; an average throws that
+      away.
+  - choice: Draft and target from one family
+    instead: Any small model as the draft
+    why: >-
+      A shared tokenizer makes verification exact and keeps acceptance rates high enough to fill five or more bins
+      with 20 sequences each.
+watchOut: >-
+  A sampling bug can make speculative output differ from what the target would produce alone, which changes the
+  acceptance numbers. Check that greedy speculative output matches the target's own greedy output token for token.

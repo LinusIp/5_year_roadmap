@@ -1,0 +1,120 @@
+overview: >-
+  A working electronics bench and ten textbook circuits, each run through the same loop: datasheet values into a
+  schematic, a SPICE prediction, a breadboard build, a scope capture saved as CSV, and a Python script that overlays
+  both on one plot and computes the error in the key figure. Any error above 5 % has to name its cause, such as part
+  tolerance, probe loading, slew rate or op-amp gain-bandwidth (how gain falls as frequency rises).
+learn:
+  - name: Probe compensation and loading
+    ref: learning-the-art-of-electronics
+  - name: SPICE simulation
+    ref: ltspice
+  - name: RC and RLC response
+    ref: mit-6-002
+  - name: Op-amp gain-bandwidth
+    ref: art-of-electronics
+  - name: Comparator hysteresis
+  - name: Reading datasheets
+stats:
+  - value: '10'
+    label: circuits, simulated and measured
+  - value: ≤ 5 %
+    label: RC corner and RLC resonance error
+  - value: 1 %
+    label: meter and scope agree on a DC rail
+components:
+  - id: datasheets
+    name: Datasheets
+    role: Give the part values and limits the prediction starts from.
+    tech: Vendor PDFs
+    talksTo: [schematic]
+    kind: external
+  - id: schematic
+    name: Schematic
+    role: A clean drawing of the circuit with the measured value of every part.
+    tech: KiCad schematic editor
+    talksTo: [spice, breadboard]
+    kind: core
+  - id: spice
+    name: SPICE model
+    role: Predicts the waveform and the key figure, such as corner frequency or gain.
+    tech: LTspice or ngspice
+    talksTo: [overlay]
+    kind: core
+  - id: instruments
+    name: Bench instruments
+    role: Current-limited supply, function generator and multimeter that power, drive and check the circuit.
+    tech: PSU · generator · DMM
+    talksTo: [breadboard]
+    kind: external
+  - id: breadboard
+    name: Breadboard
+    role: The built circuit, with real parts and 2–5 pF between rows.
+    tech: Breadboard · parts kit
+    talksTo: [scope]
+    kind: core
+  - id: scope
+    name: Scope capture
+    role: Records input and output through compensated 10× probes and exports CSV.
+    tech: USB scope · pyvisa
+    talksTo: [overlay]
+    kind: core
+  - id: overlay
+    name: Overlay script
+    role: Puts simulated and measured traces on the same axes and computes the error.
+    tech: Python · NumPy · Matplotlib
+    talksTo: [notes]
+    kind: core
+  - id: notes
+    name: Error table
+    role: Keeps predicted, measured and error per circuit, with the cause of every miss.
+    tech: Markdown · CSV
+    talksTo: []
+    kind: offline
+flow:
+  - component: schematic
+    text: >-
+      takes the datasheet values for, say, the RC low-pass, after each R and C has been **measured** with the
+      multimeter.
+  - component: spice
+    text: predicts the response and the key figure, here `f_c = 1 / (2πRC)`.
+  - component: breadboard
+    text: >-
+      is built and powered from the current-limited supply and driven by the generator, remembering it expects a
+      `50 Ω` load.
+  - component: scope
+    text: captures input and output on two channels and saves them as CSV.
+  - component: overlay
+    text: lines both traces up on one plot and computes the error in `f_c`.
+  - component: notes
+    text: records the error and, above **5 %**, names its cause.
+interface:
+  lang: python
+  code: |
+    def overlay(sim_csv: str, scope_csv: str,
+                key: str) -> dict:
+        """Plot both traces on one axis and return
+        the key figure predicted, measured, error."""
+
+    overlay("rc_lowpass.sim.csv",
+            "rc_lowpass.scope.csv", key="f_c")
+    # {"predicted": 1591.5, "measured": 1548.0,
+    #  "error_pct": -2.7}
+decisions:
+  - choice: A 2-channel USB scope
+    instead: An entry bench scope
+    why: >-
+      The fastest circuits here are a 555 and op-amps at audio frequencies, well inside a USB scope's bandwidth, and
+      its CSV export feeds the overlay script directly. Revisit for fast digital edges.
+  - choice: Simulate with measured part values
+    instead: Simulate with nominal values
+    why: >-
+      Measuring every R and C first separates part tolerance from probe loading and parasitics, so the error left
+      over has a cause you can name.
+  - choice: SPICE for every circuit
+    instead: Hand calculation only
+    why: >-
+      The rectifier, comparator and 555 are nonlinear, and only a full simulated waveform can be overlaid on the
+      capture point by point.
+watchOut: >-
+  An uncompensated or 1× probe rounds every edge and makes good circuits look wrong. Compensate each probe on the
+  scope's calibration square wave before the first measurement.

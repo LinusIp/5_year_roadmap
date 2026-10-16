@@ -1,0 +1,135 @@
+overview: >-
+  Firmware for an STM32 Nucleo board with no vendor HAL: your own vector table and reset handler copy `.data`, zero
+  `.bss` and set up the clocks before `main()` runs. Drivers for GPIO, UART, I2C and SPI sit on a typed register layer
+  checked against the chip's SVD file (the vendor's machine-readable register map). Interrupt handlers only move bytes
+  between peripherals and ring buffers, and the application reads and writes those buffers, so a busy main loop never
+  loses a byte.
+learn:
+  - name: Linker scripts and startup
+    ref: making-embedded-systems
+  - name: Interrupts and the NVIC
+    ref: ut-embedded-shape-the-world
+  - name: Ring buffers
+    ref: making-embedded-systems
+  - name: Clock tree and PLL
+    ref: phils-lab
+  - name: I2C and SPI buses
+  - name: Logic analysers
+stats:
+  - value: 1 MB
+    label: echoed at 115,200 baud, no lost bytes
+  - value: 0.1 %
+    label: SYSCLK error measured on MCO
+  - value: ≥ 8 MHz
+    label: SPI clock to the display
+components:
+  - id: startup
+    name: Startup code
+    role: Vector table at the start of flash and a reset handler that sets up the C runtime.
+    tech: C11 · GNU ld script
+    talksTo: [clocks]
+    kind: core
+  - id: clocks
+    name: Clock setup
+    role: Flash wait states, PLL to the board's maximum clock, and SysTick.
+    tech: RCC registers
+    talksTo: [app]
+    kind: core
+  - id: app
+    name: Application
+    role: Enables peripherals and reads and writes the ring buffers from the main loop.
+    tech: C11
+    talksTo: [rings]
+    kind: core
+  - id: rings
+    name: Ring buffers
+    role: TX and RX byte queues shared between the main loop and the interrupts.
+    tech: C11 · volatile indices
+    talksTo: [isrs]
+    kind: core
+  - id: isrs
+    name: Interrupt handlers
+    role: Move single bytes between ring buffers and peripheral data registers, nothing more.
+    tech: NVIC
+    talksTo: [regs]
+    kind: core
+  - id: regs
+    name: Register layer
+    role: Typed structs at each peripheral's address, checked against the SVD file.
+    tech: C11 structs · SVD
+    talksTo: [devices]
+    kind: core
+  - id: devices
+    name: Sensor and display
+    role: An I2C IMU or temperature sensor and an SPI display on the board's pins.
+    tech: MPU-6050 or TMP117 · SSD1306
+    talksTo: [analyser]
+    kind: external
+  - id: analyser
+    name: Logic analyser
+    role: Decodes each bus to check timing and contents.
+    tech: sigrok · PulseView
+    talksTo: []
+    kind: offline
+flow:
+  - component: startup
+    text: >-
+      runs from the reset vector, copies `.data` from flash to RAM, zeroes `.bss`, and calls `SystemInit`.
+  - component: clocks
+    text: >-
+      raises the **flash wait states first**, then switches SYSCLK to the PLL and starts SysTick; MCO puts SYSCLK on a
+      pin to measure.
+  - component: app
+    text: >-
+      enables each peripheral's clock in `RCC`, then calls `uart_write()`, which only queues bytes and returns at
+      once.
+  - component: rings
+    text: >-
+      hold the bytes; the writer moves `head`, the reader moves `tail`, and full is `head + 1 == tail` so it never
+      looks like empty.
+  - component: isrs
+    text: >-
+      wake on `TXE` or `RXNE` and move one byte each way; the I2C event handler steps a read through address,
+      register and data.
+  - component: regs
+    text: drive the UART, the I2C bus at 100 or 400 kHz and SPI at 8 MHz or more.
+  - component: devices
+    text: >-
+      answer: the sensor returns its ID register and readings, the display draws; the **logic analyser** decodes every
+      bus.
+interface:
+  lang: c
+  code: |
+    typedef struct {
+      volatile uint32_t SR, DR, BRR, CR1, CR2, CR3;
+    } usart_t;
+    #define USART2 ((usart_t *)0x40004400u)
+
+    typedef struct {
+      uint8_t buf[256];
+      volatile uint16_t head;  /* written by producer */
+      volatile uint16_t tail;  /* written by consumer */
+    } ring_t;
+
+    bool ring_put(ring_t *r, uint8_t b);
+    bool ring_get(ring_t *r, uint8_t *b);
+    void USART2_IRQHandler(void);
+decisions:
+  - choice: Own register layer, no vendor HAL
+    instead: The STM32 HAL
+    why: >-
+      The point is to remove the magic between your C and the silicon; the size table against a HAL blinky shows what
+      the layer costs. Revisit for product work, where the HAL saves time.
+  - choice: Interrupts only move bytes
+    instead: Parse commands inside the interrupt
+    why: >-
+      At 115,200 baud a byte arrives every 87 µs; short handlers keep latency low and let the main loop be busy for
+      long stretches without dropping any.
+  - choice: I2C polled first, then interrupts
+    instead: Interrupt-driven from the start
+    why: >-
+      A polled read is easy to follow next to a logic-analyser capture; once the sensor answers, the same steps move
+      into the event handler.
+watchOut: >-
+  A peripheral whose clock is not enabled in RCC reads zeros forever and ignores every write. Enable it first and read
+  a register back to prove it.

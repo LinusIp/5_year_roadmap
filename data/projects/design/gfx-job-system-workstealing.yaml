@@ -1,0 +1,71 @@
+overview: >-
+  A thread pool where each worker owns a Chase-Lev deque (a double-ended queue: the owner pushes and pops at the
+  bottom, idle threads steal from the top), jobs wait on atomic counters for their dependencies, and `parallel_for`
+  splits a range into jobs by a grain size. The target is 0.7 parallel efficiency on 8 threads with ThreadSanitizer
+  reporting nothing.
+learn:
+  - name: Work stealing
+    ref: cs149
+  - name: Atomics and memory order
+  - name: Dependency counters
+  - name: Grain size
+components:
+  - id: api
+    name: Job API
+    role: Turns run, wait and parallel_for calls into jobs with counters.
+    tech: C++20
+    talksTo: [deque]
+    kind: core
+  - id: deque
+    name: Worker deques
+    role: One lock-free Chase-Lev deque per worker thread.
+    tech: std::atomic
+    talksTo: [workers]
+    kind: core
+  - id: workers
+    name: Worker threads
+    role: Pop local jobs, steal when empty, and decrement counters when a job ends.
+    tech: std::jthread
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Benchmark
+    role: Measures speedup per thread count and runs the tests under TSAN.
+    tech: C++20 · TSAN
+    talksTo: []
+    kind: offline
+flow:
+  - component: api
+    text: splits `parallel_for(0, n, grain, fn)` into `n / grain` jobs, sets one counter to that number and pushes them on the caller's deque.
+  - component: deque
+    text: lets the owner push and pop at `bottom` with no lock, while thieves take from `top` with one `compare_exchange`, so only one thread wins a contested job.
+  - component: workers
+    text: take local work first, then steal from a random victim, then spin briefly and sleep; `wait(counter)` **runs other jobs** until the counter reaches zero.
+  - component: bench
+    text: runs the tests with `-fsanitize=thread`, and times 1, 2, 4 and 8 threads without it; efficiency is speedup divided by threads.
+interface:
+  lang: cpp
+  code: |
+    struct Job { void (*fn)(void*); void* data;
+                 std::atomic<int>* counter; };
+
+    class JobSystem {
+    public:
+      explicit JobSystem(int threads);
+      void run(Job j);                 // push local
+      void wait(std::atomic<int>& c);  // helps, no block
+      template <class F>
+      void parallel_for(size_t begin, size_t end,
+                        size_t grain, F&& fn);
+    };
+    bool pop(Deque& d, Job& out);    // owner only
+    bool steal(Deque& d, Job& out);  // any thread
+decisions:
+  - choice: Waiting threads help, not block
+    instead: Block on a condition variable until children finish
+    why: >-
+      A worker that blocks inside a job while its child jobs sit in queues can deadlock all 8 threads once nesting gets
+      deeper than the thread count. Running other jobs while waiting keeps every thread busy.
+watchOut: >-
+  Relaxed atomics in the race between `pop` and `steal` on the last item make a job run twice or never, and only
+  sometimes. Start with sequentially consistent order everywhere, keep TSAN in the tests, and relax only with a reason.

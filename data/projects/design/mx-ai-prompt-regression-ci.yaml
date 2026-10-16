@@ -1,0 +1,107 @@
+overview: >-
+  A CLI that CI runs on every pull request that touches a prompt. It runs 200 test cases through the main-branch
+  prompt and the candidate, scores both with cheap deterministic checks (valid JSON, length, banned words) and an
+  LLM judge for tone, and fails the build when the candidate is worse by more than a set margin. A cache means
+  unchanged prompts are never paid for twice.
+learn:
+  - name: Eval-driven development
+    ref: fsdl
+  - name: Deterministic assertions
+  - name: LLM-as-judge calibration
+  - name: Response caching
+  - name: Async concurrency
+  - name: CI workflows
+    ref: github-actions-docs
+stats:
+  - value: < 5 min
+    label: 200-case suite
+  - value: ≥ 85%
+    label: judge agreement with humans
+  - value: < $1
+    label: per CI run
+components:
+  - id: ci
+    name: CI job
+    role: Starts the run on a pull request and blocks the merge on a non-zero exit code.
+    tech: GitHub Actions
+    talksTo: [runner]
+    kind: external
+  - id: runner
+    name: Runner
+    role: Loads cases, runs both prompt versions concurrently and enforces the cost cap.
+    tech: Python · asyncio
+    talksTo: [cache, assertions]
+    kind: core
+  - id: cache
+    name: Response cache
+    role: Returns a stored output when model, prompt hash and input are unchanged.
+    tech: SQLite
+    talksTo: [llm]
+    kind: core
+  - id: llm
+    name: LLM provider
+    role: Generates outputs behind one provider-agnostic `complete()` interface.
+    tech: Any LLM API
+    talksTo: []
+    kind: external
+  - id: assertions
+    name: Assertions
+    role: Checks schema, length and banned words; cheap and never flaky.
+    tech: Pydantic
+    talksTo: [judge]
+    kind: core
+  - id: judge
+    name: Judge
+    role: Compares candidate and main output for tone against the case's rubric.
+    tech: LLM API
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Writes the HTML diff report and the pass or fail verdict.
+    tech: Jinja2 · HTML
+    talksTo: []
+    kind: core
+flow:
+  - component: ci
+    text: sees a change under `prompts/` and runs `promptci run --base main --cand HEAD`.
+  - component: runner
+    text: loads 200 cases for the summariser, tone rewriter and extractor, and runs up to 16 calls at once with `temperature=0`.
+  - component: cache
+    text: serves every main-branch output from earlier runs, so only the candidate is paid for; the runner stops if spend reaches `max_cost`.
+  - component: assertions
+    text: fail a case outright on invalid JSON, an over-length output or a banned word.
+  - component: judge
+    text: compares the two outputs twice with positions swapped and counts a win only when both orders agree.
+  - component: report
+    text: fails the build if the pass rate drops more than **3 points** or any hard assertion newly fails, and links the HTML diffs.
+interface:
+  lang: shell
+  code: |
+    $ promptci run --base main --cand HEAD \
+        --suite cases/ --max-cost 1.00
+
+    summariser    pass 68/70  (main 69/70)
+    tone-rewrite  pass 61/70  (main 66/70)  REGRESSED
+    extractor     pass 60/60  (main 60/60)
+    cost $0.41 · 3m12s · report: out/report.html
+    exit 1
+decisions:
+  - choice: Cache keyed by model, prompt hash and input
+    instead: Rerun everything each time
+    why: >-
+      Main-branch outputs rarely change, so caching halves the cost and keeps the $1 cap safe. It also makes a
+      no-op change produce identical outputs instead of new random ones.
+  - choice: Fail on a margin, not on any changed case
+    instead: Fail when any case flips
+    why: >-
+      LLM outputs wobble even at temperature 0. Set the 3-point margin from repeated runs of a seeded no-op
+      change, then confirm a seeded regression still trips it.
+  - choice: Assertions first, judge only for tone
+    instead: Judge everything with the LLM
+    why: >-
+      Format bugs, like last month's broken JSON, are caught exactly and for free. The judge costs money and needs
+      calibration, so it only rates what code cannot.
+watchOut: >-
+  LLM judges tend to prefer longer answers and whichever output they see first. Swap positions, add a length
+  assertion, and check the judge against the 50 human-labelled outputs before trusting a red build.

@@ -1,0 +1,66 @@
+overview: >-
+  A box for a PCB whose every dimension follows from a few parameters (board length and width, tallest part,
+  clearance, wall thickness), with standoffs at the mounting holes and cantilever snap fits holding the lid. The snap
+  arm is sized with the cantilever formula so its strain while snapping stays under the plastic's limit, and the same
+  model must fit three different PCBs by changing only the parameters.
+learn:
+  - name: Parametric modelling
+    ref: freecad-docs
+  - name: Cantilever snap fits
+  - name: Design for 3D printing
+  - name: Fit clearances
+components:
+  - id: params
+    name: Parameter table
+    role: Board size, hole positions, clearance and wall thickness, the only inputs.
+    tech: FreeCAD spreadsheet / Fusion parameters
+    talksTo: [snap, model]
+    kind: core
+  - id: snap
+    name: Snap-fit calculator
+    role: Sizes each snap arm so bending strain stays under the material limit.
+    tech: Python
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Parametric model
+    role: Builds walls, lid lip, standoffs and snap hooks from the parameters.
+    tech: FreeCAD / Fusion
+    talksTo: [print]
+    kind: core
+  - id: print
+    name: Fit check
+    role: Prints the box for each PCB size and records fit and snap behaviour.
+    tech: FDM printer
+    talksTo: []
+    kind: core
+flow:
+  - component: params
+    text: defines `pcb_l`, `pcb_w`, `part_h`, `clear = 0.5 mm`, `wall = 2 mm` and the hole positions; every other dimension refers to these.
+  - component: snap
+    text: uses `ε = 1.5·t·y / L²` (thickness `t`, undercut `y`, arm length `L`) and picks `L` so strain stays under about 2% for PLA.
+  - component: model
+    text: builds the box and lid from the parameters, with snap arms laid **along** the print layers and a fillet at each arm's root.
+  - component: print
+    text: fits three PCB sizes by editing only the table, and records snap strain against the material limit for each.
+interface:
+  lang: python
+  code: |
+    def snap_strain(t, y, L):
+        """Rectangular cantilever, all in mm.
+        Returns strain, 0.02 meaning 2%."""
+        return 1.5 * t * y / L**2
+
+    def arm_length_for(t, y, eps_max=0.02):
+        return (1.5 * t * y / eps_max) ** 0.5
+
+    # t = 1.2 mm, y = 0.8 mm -> L >= 8.5 mm at 2%
+decisions:
+  - choice: Size snap arms by calculation
+    instead: Tune snap arms by trial prints
+    why: >-
+      The formula gives a length in a minute and shows how strain moves with each dimension, for example doubling the
+      thickness doubles the strain. Trial prints mix that up with layer and material effects; print once to confirm.
+watchOut: >-
+  A snap arm printed upright bends across its layer lines and breaks the first time it is used. Lay arms flat so the
+  layers run along their length.

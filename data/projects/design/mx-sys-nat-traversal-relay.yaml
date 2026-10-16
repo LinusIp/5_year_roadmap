@@ -1,0 +1,115 @@
+overview: >-
+  A Go toolkit that lets two remote-care devices behind home routers open a direct UDP path, and falls back to a relay
+  when they cannot. Each device learns its public address from a STUN-style server and classifies its NAT, the router
+  feature that rewrites private addresses to one public one; a rendezvous server then swaps addresses and tells both
+  sides to send at the same moment, which opens a hole in each router (hole punching). A lab of Linux network
+  namespaces emulates every NAT type, so the success matrix can be measured.
+learn:
+  - name: NAT mapping and filtering
+    ref: stanford-cs144
+  - name: STUN discovery
+  - name: UDP hole punching
+  - name: Network namespaces
+  - name: Token-bucket limits
+stats:
+  - value: ≥ 90%
+    label: direct, non-symmetric pairs
+  - value: ≤ 3 s
+    label: to fall back to the relay
+  - value: < 5 ms
+    label: median relay overhead
+components:
+  - id: client
+    name: Punching client
+    role: Discovers its endpoints, punches toward the peer and keeps the path alive.
+    tech: Go · UDP
+    talksTo: [nat, classifier]
+    kind: core
+  - id: nat
+    name: Emulated NATs
+    role: Network namespaces whose iptables rules behave like each NAT type.
+    tech: netns · iptables
+    talksTo: [stun, rendezvous, relay]
+    kind: external
+  - id: stun
+    name: STUN server
+    role: Replies with the address and port each request came from, on two IPs.
+    tech: Go · UDP
+    talksTo: [classifier]
+    kind: core
+  - id: classifier
+    name: NAT classifier
+    role: Compares mapped addresses to label the NAT cone, restricted or symmetric.
+    tech: Go
+    talksTo: [rendezvous]
+    kind: core
+  - id: rendezvous
+    name: Rendezvous server
+    role: Pairs two devices by session, swaps their endpoints and picks a start time.
+    tech: Go · UDP
+    talksTo: []
+    kind: core
+  - id: relay
+    name: Relay
+    role: Forwards UDP between the two sides when punching fails, with a bandwidth cap.
+    tech: Go · token bucket
+    talksTo: []
+    kind: core
+  - id: lab
+    name: Matrix runner
+    role: Builds each NAT pair in the lab, runs the setup and records the result.
+    tech: Shell · Go
+    talksTo: [nat]
+    kind: offline
+flow:
+  - component: stun
+    text: >-
+      answers the client's binding request with the source `ip:port` it saw, from two server addresses.
+  - component: classifier
+    text: >-
+      labels the NAT: the same mapping for both servers means **endpoint-independent** (cone); a different one means
+      symmetric, where punching usually fails.
+  - component: rendezvous
+    text: >-
+      registers both devices under one session id, sends each the other's mapped and local endpoints, and a `punch`
+      with a shared start 200 ms ahead.
+  - component: client
+    text: >-
+      sends probes to the peer's mapped endpoint every 50 ms from the **same socket** it used for STUN; the outgoing
+      probes open its own router, and the first probe that arrives from the peer confirms the direct path.
+  - component: relay
+    text: >-
+      takes over if nothing arrives within 2 s: both sides send to an allocated relay port with the session's token,
+      capped at 1 Mbit/s each, so fallback completes inside 3 s.
+interface:
+  lang: json
+  code: |
+    // client -> rendezvous
+    { "type": "register", "session": "c81f",
+      "peer": "A", "nat": "port-restricted",
+      "mapped": "203.0.113.7:51820",
+      "local": "192.168.1.20:51820" }
+    // rendezvous -> both clients
+    { "type": "punch", "session": "c81f",
+      "peerMapped": "198.51.100.4:40211",
+      "startInMs": 200,
+      "relayToken": "q9f2..." }
+decisions:
+  - choice: Punch first, relay as fallback
+    instead: Always relay
+    why: >-
+      Most non-symmetric pairs connect directly, which saves relay bandwidth and the extra hop. The relay is still
+      there for symmetric NATs, within the 3 s fallback budget.
+  - choice: A timed simultaneous start
+    instead: One side waits for the other to send first
+    why: >-
+      Restricted NATs drop packets from an address you have not sent to yet. Both sides must send first, so the
+      rendezvous gives them the same start time.
+  - choice: No port prediction for symmetric NATs
+    instead: Guessing the next mapped ports
+    why: >-
+      Prediction rests on assumptions about how routers pick ports that often do not hold. Go straight to the relay
+      and keep birthday-style guessing as a stretch goal.
+watchOut: >-
+  An open relay can be abused to forward anyone's traffic. Accept packets only with a session token from the
+  rendezvous server, cap each session's bandwidth, and expire idle allocations.

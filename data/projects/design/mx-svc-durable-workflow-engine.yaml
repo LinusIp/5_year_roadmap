@@ -1,0 +1,114 @@
+overview: >-
+  A small workflow engine for Parcelo's order flows, where payment, picking, shipping and returns can take days.
+  Workflow code is ordinary Go, but every side effect (an activity call, a timer, a signal) goes through the engine
+  and its result is appended to a history log in PostgreSQL. After a crash a worker **replays** the code against that
+  history: recorded results are returned instead of being run again, which rebuilds the exact state and continues.
+learn:
+  - name: Deterministic replay
+  - name: Event sourcing
+    ref: ddia
+  - name: At-least-once with idempotency keys
+  - name: Durable timers
+  - name: Workflow versioning
+stats:
+  - value: < 100 ms
+    label: step p99, 10,000 workflows
+  - value: "0"
+    label: lost or duplicated completions in 1M steps
+  - value: < 200 ms
+    label: replay 5,000 events
+components:
+  - id: signals
+    name: Signal API
+    role: Accepts external events such as "parcel returned" and appends them to the workflow's history.
+    tech: Go · net/http
+    talksTo: [history]
+    kind: core
+  - id: history
+    name: History store
+    role: Append-only events per workflow with sequence numbers, plus a task table of workflows ready to run.
+    tech: PostgreSQL
+    talksTo: [runtime]
+    kind: core
+  - id: runtime
+    name: Workflow runtime
+    role: Runs workflow code, replaying recorded events and pausing at the first step with no result yet.
+    tech: Go
+    talksTo: [dispatcher, timers]
+    kind: core
+  - id: dispatcher
+    name: Activity dispatcher
+    role: Runs activities with retries and an idempotency key, and records their result in history.
+    tech: Go worker pool
+    talksTo: [services, history]
+    kind: core
+  - id: timers
+    name: Timer service
+    role: Stores timers with a fire time and appends `TimerFired` when they are due.
+    tech: Go · PostgreSQL
+    talksTo: [history]
+    kind: core
+  - id: services
+    name: Order services
+    role: Payment, warehouse and carrier APIs, simulated with failures.
+    tech: HTTP
+    talksTo: []
+    kind: external
+  - id: replaycheck
+    name: Replay checker
+    role: Replays recorded histories against new code and fails on any step that does not match.
+    tech: Go test
+    talksTo: [history]
+    kind: offline
+flow:
+  - component: runtime
+    text: >-
+      picks a ready workflow, loads its history and runs the code from the start; each `ctx.Activity(…)` that already
+      has a result in history returns it at once instead of calling out.
+  - component: dispatcher
+    text: >-
+      runs the first activity with no result, sending `Idempotency-Key: wf-881/step-4`, so a retry after a crash
+      cannot charge twice; it appends `ActivityCompleted` to history.
+  - component: timers
+    text: for `ctx.Sleep(48h)` stores a timer; when it fires it appends `TimerFired` and marks the workflow ready again.
+  - component: signals
+    text: on `POST /workflows/wf-881/signals/return` appends `SignalReceived`, which a waiting `ctx.Receive` sees on the next run.
+  - component: history
+    text: >-
+      checks each append against the expected sequence number, so two workers racing on one workflow cannot both
+      write; the loser re-reads and replays. This runtime and history pair is a **loop** until the workflow ends.
+interface:
+  lang: go
+  code: |
+    func Fulfil(ctx wf.Context, o Order) error {
+        var pay Receipt
+        err := ctx.Activity(Charge, o).Get(&pay)
+        if err != nil {
+            return err
+        }
+        ctx.Activity(Pick, o.Items).Get(nil)
+        ctx.Sleep(48 * time.Hour) // durable timer
+        if ctx.Receive("return", nil) {
+            ctx.Activity(Refund, pay).Get(nil)
+        }
+        return nil
+    }
+decisions:
+  - choice: Replay the code against history
+    instead: A hand-written state machine stored as a status column
+    why: >-
+      Hand-written state machines are exactly what keeps losing state at Parcelo. Replay lets flows read as normal
+      code while history holds every result; 5,000 events replay in under 200 ms.
+  - choice: At-least-once activities with idempotency keys
+    instead: Try for exactly-once delivery
+    why: >-
+      A worker can die after the payment call but before recording it, so a retry is unavoidable. The key makes the
+      provider ignore the repeat, which is how 1M steps stay free of duplicates.
+  - choice: One PostgreSQL for history and tasks
+    instead: A separate queue for ready workflows
+    why: >-
+      The constraint is one database, and a task row committed with the history event cannot get out of step with it.
+      Revisit if 10,000 concurrent workflows saturate it.
+watchOut: >-
+  Calling `time.Now()` or `rand` inside workflow code gives a different answer on replay and breaks the history.
+  Offer `ctx.Now()` and run the replay checker in CI on every code change.

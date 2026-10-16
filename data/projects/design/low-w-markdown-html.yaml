@@ -1,0 +1,46 @@
+overview: >-
+  A Markdown subset converter in two stages: a block parser splits lines into headings, lists, code blocks and
+  paragraphs, an inline parser handles emphasis, code spans and links, and a renderer turns the tree into HTML with
+  all user text escaped.
+learn:
+  - name: Abstract syntax trees
+    ref: crafting-interpreters
+  - name: Block and inline parsing
+  - name: HTML escaping
+components:
+  - id: blocks
+    name: Block parser
+    role: Groups lines into heading, list, code and paragraph nodes.
+    tech: Python 3
+    talksTo: [inlines]
+    kind: core
+  - id: inlines
+    name: Inline parser
+    role: Parses emphasis, strong, code spans and links inside each text block.
+    tech: Python 3
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: HTML renderer
+    role: Walks the tree and writes HTML, escaping every text node.
+    tech: Python 3
+    talksTo: []
+    kind: core
+flow:
+  - component: blocks
+    text: turns `## Setup` into a heading node of level 2 and consecutive `- ` lines into one list.
+  - component: inlines
+    text: parses `**bold *and* italic**` with a delimiter stack, so nested emphasis pairs up correctly.
+  - component: renderer
+    text: escapes `<`, `>`, `&` and quotes in text nodes before wrapping them in tags.
+  - component: renderer
+    text: produces HTML that the 60 hand-written cases compare against expected output.
+decisions:
+  - choice: An AST between parse and render
+    instead: Regex substitution straight to HTML
+    why: >-
+      Regexes cannot nest emphasis or keep code spans literal. The tree also makes escaping one rule in the
+      renderer, applied once.
+watchOut: >-
+  Escaping before parsing breaks the syntax, and escaping after rendering escapes your own tags. Escape text nodes
+  exactly once, in the renderer.

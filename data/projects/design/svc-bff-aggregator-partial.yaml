@@ -1,0 +1,55 @@
+overview: >-
+  One endpoint that calls three backend services in parallel with asyncio, gives each call its own timeout inside a
+  300 ms budget, and returns whatever arrived plus a warning for each part that did not.
+learn:
+  - name: Async fan-out
+  - name: Latency budgets
+  - name: Graceful degradation
+  - name: Hedged requests
+    ref: google-sre-book
+components:
+  - id: client
+    name: Client
+    role: Calls `GET /dashboard` and renders missing parts as placeholders.
+    tech: Browser or app
+    talksTo: [bff]
+    kind: external
+  - id: bff
+    name: Aggregator
+    role: Fans out, enforces per-call timeouts and a concurrency cap, and merges results.
+    tech: Python asyncio · httpx
+    talksTo: [backends]
+    kind: core
+  - id: backends
+    name: Mock backends
+    role: Profile, orders and recommendations services with injected latency and failures.
+    tech: FastAPI
+    talksTo: []
+    kind: core
+flow:
+  - component: bff
+    text: receives `GET /dashboard` and starts three calls with `asyncio.gather`, each under a 250 ms timeout.
+  - component: backends
+    text: answer, or one of them hangs because it is down.
+  - component: bff
+    text: sends a second, **hedged** copy of the slowest call if it has not answered after 150 ms, keeping the first reply.
+  - component: bff
+    text: returns the parts that arrived and lists the rest in `warnings`, all within 300 ms.
+interface:
+  lang: json
+  code: |
+    {
+      "profile": { "name": "Ana" },
+      "orders": [ { "id": 81, "total": 42.0 } ],
+      "recommendations": null,
+      "warnings": ["recommendations: timeout"]
+    }
+decisions:
+  - choice: Partial results with warnings
+    instead: Fail the whole request if any call fails
+    why: >-
+      The page is still useful without recommendations, and the 300 ms budget has to hold while one backend is
+      down. Fail hard only for a part the page cannot show without, such as the profile.
+watchOut: >-
+  Retrying every timed-out call multiplies load on a backend that is already struggling. Allow at most one hedge
+  per request and cap concurrent outbound calls.

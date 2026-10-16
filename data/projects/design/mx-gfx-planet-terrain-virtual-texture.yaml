@@ -1,0 +1,105 @@
+overview: >-
+  A globe viewer for Atlas Wren with metre-level detail anywhere, inside a fixed 2 GB texture cache. Terrain is a
+  quadtree on each face of a cube mapped to the sphere, split until a patch's error is under a pixel, and positions are
+  computed relative to the camera so floats stay precise. Imagery is a virtual texture: shaders look up a page table
+  that points into a cache of 128 × 128 pages, record which pages they wanted in a small feedback buffer, and the CPU
+  streams those tiles from disk within a per-frame budget.
+learn:
+  - name: Quadtree terrain LOD
+    ref: rtr4
+  - name: Virtual texturing
+    ref: rtr4
+  - name: Camera-relative rendering
+  - name: LRU caches
+    ref: cs61c
+  - name: Asynchronous streaming
+    ref: game-engine-architecture
+stats:
+  - value: 60 FPS
+    label: at 1440p flying at Mach 1
+  - value: < 2%
+    label: residency misses in steady flight
+  - value: 2 GB
+    label: fixed texture cache
+components:
+  - id: quadtree
+    name: Quadtree LOD
+    role: Selects and culls terrain patches by screen-space error, in double precision on the CPU.
+    tech: C++17
+    talksTo: [pagetable]
+    kind: core
+  - id: pagetable
+    name: Page table
+    role: Maps each virtual page to its cache slot, falling back to the best resident coarser mip.
+    tech: R32UI texture
+    talksTo: [feedback]
+    kind: core
+  - id: feedback
+    name: Feedback pass
+    role: Writes the page and mip each pixel wanted into a buffer at 1/8 resolution.
+    tech: GLSL · SSBO
+    talksTo: [cache]
+    kind: core
+  - id: cache
+    name: Cache manager
+    role: Ranks requested pages, evicts least recently used ones and keeps the 2 GB budget.
+    tech: C++17
+    talksTo: [streamer]
+    kind: core
+  - id: streamer
+    name: Tile streamer
+    role: Reads and decodes tiles on worker threads and uploads a fixed number per frame.
+    tech: C++17 · thread pool
+    talksTo: [pagetable]
+    kind: core
+  - id: disk
+    name: Local tile store
+    role: Elevation and imagery tiles on local disk.
+    tech: Tile files
+    talksTo: [streamer]
+    kind: external
+  - id: dashboard
+    name: Dashboard
+    role: Shows hit rate, miss rate, stream MB/s and eviction churn.
+    tech: Dear ImGui
+    talksTo: []
+    kind: offline
+flow:
+  - component: quadtree
+    text: splits patches until their error is under one pixel and subtracts the camera position in double before sending positions as floats.
+  - component: pagetable
+    text: tells each terrain pixel where its virtual page lives in the cache, or the nearest coarser page that is resident, so there are never holes.
+  - component: feedback
+    text: records `(page x, page y, mip)` for what the pixel really wanted; the CPU reads it one or two frames later.
+  - component: cache
+    text: dedupes requests, ranks them by mip and distance ahead along the flight path, and evicts least recently used pages not seen last frame.
+  - component: streamer
+    text: loads the top-ranked tiles from disk on worker threads, uploads up to a fixed count per frame, and updates the page table, which closes the **feedback loop** for the next frame.
+interface:
+  lang: glsl
+  code: |
+    uniform usampler2D u_pageTable; // virtual -> slot
+    uniform sampler2D  u_cache;     // physical pages
+    uniform vec2 u_vpages;          // virtual size
+    vec4 sampleVirtual(vec2 vuv, float lod) {
+      uvec4 e = textureLod(u_pageTable, vuv, lod);
+      // e.xy: cache slot, e.z: mip actually resident
+      vec2 f = fract(vuv * u_vpages / exp2(e.z));
+      vec2 uv = (vec2(e.xy) * SLOT + BORDER + f * PAGE)
+                / CACHE_SIZE;
+      return texture(u_cache, uv);
+    }
+    // feedback: write (page, wanted mip) at 1/8 res
+decisions:
+  - choice: GPU feedback pass
+    instead: Guess needed tiles on the CPU from camera distance
+    why: Only the GPU knows which pages are visible at which mip after occlusion and slopes. The feedback buffer is small at 1/8 resolution, and a frame or two of lag is fine for streaming.
+  - choice: Camera-relative positions
+    instead: World positions as floats
+    why: At the Earth's radius of 6,371 km a float can only step about half a metre, so vertices jitter. Subtracting the camera in double first keeps nearby geometry precise.
+  - choice: Fixed cache with coarse fallback
+    instead: Grow texture memory as needed
+    why: The budget is fixed at 2 GB. Falling back to a coarser resident mip keeps the picture complete at Mach 1 while the sharp tile streams in.
+watchOut: >-
+  When one view needs more pages than the cache holds, pages evict each other every frame and nothing settles. Raise
+  the mip bias when requests exceed the budget, and never evict a page used in the last frame.

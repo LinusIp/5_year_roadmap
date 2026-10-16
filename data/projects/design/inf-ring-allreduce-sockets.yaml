@@ -1,0 +1,69 @@
+overview: >-
+  N processes on one machine, each holding a tensor, connected in a ring over TCP sockets: rank i sends only to rank
+  i+1. A reduce-scatter pass sums one slice per rank, an all-gather pass spreads the summed slices, and the result is
+  checked against a numpy sum and timed against a naive gather-to-rank-0-then-broadcast.
+learn:
+  - name: Ring all-reduce
+    ref: ultra-scale-playbook
+  - name: Reduce-scatter and all-gather
+    ref: scaling-book
+  - name: Blocking versus non-blocking IO
+  - name: Bandwidth cost model
+components:
+  - id: launcher
+    name: Launcher
+    role: Starts N rank processes and gives each its rank and its neighbours' ports.
+    tech: Python multiprocessing or Rust std::process
+    talksTo: [ring]
+    kind: core
+  - id: ring
+    name: Ring links
+    role: Holds one send socket to the right neighbour and one receive socket from the left.
+    tech: TCP sockets
+    talksTo: [allreduce]
+    kind: core
+  - id: allreduce
+    name: All-reduce
+    role: Runs N-1 reduce-scatter steps then N-1 all-gather steps, chunk by chunk.
+    tech: Python · numpy or Rust
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Bench
+    role: Checks results against numpy and times ring and naive for sizes up to 100 MB.
+    tech: Python · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: launcher
+    text: starts 4 ranks; rank `i` listens on a port and connects to rank `(i + 1) % N`.
+  - component: ring
+    text: >-
+      splits the tensor into N slices, and each slice into small **chunks**, so a rank can send one chunk while
+      receiving the next.
+  - component: allreduce
+    text: >-
+      in step `k` of reduce-scatter, sends slice `(i - k) % N` right and adds the slice arriving from the left, so
+      after N-1 steps each rank owns one fully summed slice. An all-gather repeats the pattern without adding.
+  - component: bench
+    text: asserts `np.allclose` with the plain sum and plots time against size for ring and naive, from 1 KB to 100 MB.
+interface:
+  lang: python
+  code: |
+    def ring_allreduce(x: np.ndarray, rank: int,
+                       n: int, left: socket,
+                       right: socket,
+                       chunk_bytes: int = 1 << 20
+                       ) -> np.ndarray:
+        """Each rank sends 2(n-1)/n of x in
+        total, whatever n is."""
+decisions:
+  - choice: A send thread and a receive thread per rank
+    instead: Plain blocking send then receive
+    why: >-
+      If every rank calls a blocking send of a 25 MB slice at the same time, all wait for a reader and the ring
+      deadlocks once the socket buffers fill. A separate sender (or non-blocking IO) lets each rank drain its left
+      neighbour while it sends.
+watchOut: >-
+  Small tensors make the ring look slow, because 2(N-1) steps each pay a fixed socket latency. Show the crossover
+  size where ring starts to beat naive, not just the 100 MB point.

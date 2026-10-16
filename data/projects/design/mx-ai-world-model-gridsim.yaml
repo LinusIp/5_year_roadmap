@@ -1,0 +1,97 @@
+overview: >-
+  A learned simulator for a 2D parcel-sorting cell. Transitions logged from a reference physics simulator train a
+  latent recurrent model (it compresses the state into a small vector and predicts how that vector changes), which
+  then rolls out 50 steps ahead at least 20 times faster. A controller trained entirely inside the model is tested
+  back in the real physics sim to see if it still scores 80% of one trained there.
+learn:
+  - name: World models
+    ref: dreamerv3-code
+  - name: Model-based RL
+    ref: berkeley-cs285
+  - name: Compounding rollout error
+  - name: Recurrent latent dynamics
+  - name: Sim-to-sim transfer
+stats:
+  - value: < 10%
+    label: 50-step error of state range
+  - value: ≥ 20×
+    label: faster than physics sim
+  - value: ≥ 80%
+    label: return after transfer
+components:
+  - id: refsim
+    name: Reference sim
+    role: The 2D physics cell with a conveyor, a pusher and parcels, the ground truth.
+    tech: pymunk
+    talksTo: [collector]
+    kind: external
+  - id: collector
+    name: Data collector
+    role: Runs random and scripted actions and logs state, action and next state.
+    tech: Python · NumPy
+    talksTo: [dynamics]
+    kind: core
+  - id: dynamics
+    name: Dynamics model
+    role: Encodes the state, steps a GRU in latent space per action and decodes predicted states.
+    tech: PyTorch · GRU
+    talksTo: [rollout, policy]
+    kind: core
+  - id: rollout
+    name: Rollout evaluator
+    role: Compares open-loop predictions with the reference sim at 1, 10 and 50 steps.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: policy
+    name: Policy trainer
+    role: Trains the pusher controller on imagined rollouts and tests it in the reference sim.
+    tech: PyTorch · PPO
+    talksTo: []
+    kind: core
+  - id: bench
+    name: Speed benchmark
+    role: Times batched model steps against reference sim steps on the same GPU machine.
+    tech: Python · time
+    talksTo: []
+    kind: offline
+flow:
+  - component: collector
+    text: logs 500k transitions of parcel positions, velocities and pusher state, mixing random and scripted actions so rare states appear.
+  - component: dynamics
+    text: >-
+      trains on 50-step sequences, feeding back its own predictions during training so it learns to correct **its own
+      drift**, not just the next step.
+  - component: rollout
+    text: starts from real states, rolls 50 steps open loop, and reports error as a share of each variable's range, by horizon.
+  - component: policy
+    text: >-
+      trains the controller on thousands of imagined rollouts in parallel, then runs it in the **reference sim** and
+      compares its return with a policy trained there.
+interface:
+  lang: python
+  code: |
+    class WorldModel(nn.Module):
+        def encode(self, s: Tensor) -> Tensor: ...
+        def step(self, z: Tensor, a: Tensor
+                 ) -> Tensor: ...
+        def decode(self, z: Tensor) -> Tensor: ...
+
+    def rollout(m: WorldModel, s0: Tensor,
+                actions: Tensor) -> Tensor:
+        """(B, state) + (B, T, act) -> (B, T, state)"""
+decisions:
+  - choice: Train on multi-step rollouts
+    instead: One-step prediction loss only
+    why: >-
+      A model good at one step can be useless at 50, because small errors compound. Training on its own rollouts is
+      what makes the 10% target at 50 steps reachable.
+  - choice: Latent GRU model
+    instead: Predicting raw states with an MLP
+    why: The latent state carries memory of contacts across steps, and a GRU batches thousands of rollouts on one GPU for the 20× speedup.
+  - choice: Test the policy in the reference sim
+    instead: Report return inside the model
+    why: A policy learns to exploit the model's mistakes, so return inside the model is always flattering.
+watchOut: >-
+  One-step error looks excellent while 50-step rollouts drift off, and a policy finds and exploits those errors.
+  Always plot error against horizon and judge the policy only in the reference simulator.

@@ -1,0 +1,92 @@
+overview: >-
+  Quarry Analytics' architecture lives in people's heads, so you write it down twice: as ADRs (architecture decision
+  records, short files saying what was decided, what else was considered and what follows from it) and as fitness
+  functions, tests that fail when the code breaks an architectural rule. You apply both to an open-source codebase
+  you pick, run the checks in CI in under 60 seconds, and replay the project's git history to chart layer violations
+  and coupling over time.
+learn:
+  - name: Architecture decision records
+    ref: roadmap-software-architect
+  - name: Fitness functions
+    ref: roadmap-software-architect
+  - name: Layered architecture
+  - name: Coupling metrics
+  - name: Dependency cycles
+  - name: API compatibility checks
+stats:
+  - value: "10"
+    label: ADRs with options and consequences
+  - value: < 60 s
+    label: fitness checks in CI
+  - value: −90 %
+    label: layer violations from baseline
+components:
+  - id: adrs
+    name: ADR repository
+    role: Numbered Markdown ADRs with status, options and consequences, next to the code.
+    tech: Markdown · docs/adr
+    talksTo: [rules]
+    kind: core
+  - id: rules
+    name: Fitness functions
+    role: Executable rules for layers, cycles, coupling limits and public API compatibility, each linked to its ADR.
+    tech: import-linter · Python
+    talksTo: [ci]
+    kind: core
+  - id: ci
+    name: CI job
+    role: Runs every rule on each pull request and fails only on new violations.
+    tech: GitHub Actions
+    talksTo: [trend]
+    kind: core
+  - id: trend
+    name: Trend report
+    role: Stores violation counts and coupling per commit and draws the chart.
+    tech: Python · SQLite · Mermaid
+    talksTo: [health]
+    kind: core
+  - id: history
+    name: History replay
+    role: Runs the rules over past commits to measure the baseline and the trend.
+    tech: Python · git
+    talksTo: [trend]
+    kind: offline
+  - id: health
+    name: Health report
+    role: Quarterly summary of trends, rule changes and superseded ADRs.
+    tech: Markdown template
+    talksTo: []
+    kind: offline
+flow:
+  - component: adrs
+    text: "gain `0007-layers.md`: domain must not import web or db adapters; status accepted; options considered were hexagonal, plain layers or no rule."
+  - component: rules
+    text: encode it as a `layers` contract, `web → service → domain`, with a link back to ADR 0007 in the rule's name.
+  - component: ci
+    text: runs all rules in under 60 s and fails the pull request only on a violation that is **not** in the recorded baseline.
+  - component: trend
+    text: records the count for that commit, so the chart shows violations falling towards 90 % below baseline.
+  - component: adrs
+    text: get a new ADR that marks 0007 `superseded` when the rule changes, so the history of the decision is kept.
+interface:
+  lang: shell
+  code: |
+    # docs/adr/0007-layers.md
+    # Status: Accepted (2026-09-02)
+    # Context: views query the ORM directly …
+    # Options: hexagonal | strict layers | none
+    # Decision: strict layers web > service > domain
+    # Consequences: adapters move out of domain/
+    # Fitness function: contract "layers-0007"
+
+    $ lint-imports
+    layers-0007  BROKEN (3 new, 41 baseline)
+      app.web.reports -> app.db.models
+decisions:
+  - choice: Rules in CI that block only new violations
+    instead: Fix every existing violation before turning rules on
+    why: The baseline may hold hundreds of violations in a codebase this size. Freezing it lets the rule work from day one while the count falls towards the 90 % target.
+  - choice: Every rule cites an ADR
+    instead: A standalone list of lint rules
+    why: A rule with no recorded reason gets switched off the first time it is annoying. The ADR says why it exists and when it may change.
+watchOut: ADRs that record only the outcome are just announcements. Each one must name at least two real options and the consequences you accept.

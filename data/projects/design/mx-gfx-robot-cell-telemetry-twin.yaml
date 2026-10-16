@@ -1,0 +1,104 @@
+overview: >-
+  A replay twin for Crestline Packaging's pick-and-place cell: maintenance staff load the PLC and arm-controller logs
+  on a laptop and scrub through the last 10 minutes before a fault. The 100 Hz logs are parsed into columnar arrays
+  on one shared clock, and each frame looks up the scrub time, interpolates the six joint angles and drives a 3D arm
+  through forward kinematics (joint angles to link poses). An anomaly detector marks joint-limit approaches and
+  cycle-time drift on the timeline.
+learn:
+  - name: Forward kinematics
+    ref: modern-robotics
+  - name: Columnar time series
+    ref: scientific-python-lectures
+  - name: Angle wrapping
+  - name: Clock alignment
+  - name: CUSUM drift detection
+    ref: mit-6-041
+stats:
+  - value: 60 FPS
+    label: scrubbing 60,000 samples
+  - value: ≤ 20 cycles
+    label: to flag a 5% slowdown
+  - value: < 10 s
+    label: import of 1 hour of logs
+components:
+  - id: logs
+    name: Cell logs
+    role: Joint angles and sensor states at 100 Hz, each with its own clock.
+    tech: CSV log files
+    talksTo: [parser]
+    kind: external
+  - id: parser
+    name: Log parser
+    role: Reads both logs in chunks and aligns the clocks with shared events.
+    tech: Python · numpy
+    talksTo: [store]
+    kind: offline
+  - id: store
+    name: Time store
+    role: One sorted time column and one array per signal, saved as a single file.
+    tech: numpy · .npz
+    talksTo: [fk, anomaly]
+    kind: core
+  - id: timeline
+    name: Timeline UI
+    role: Scrubber with sensor traces and fault markers; sets the time to show.
+    tech: Dear ImGui
+    talksTo: [store]
+    kind: core
+  - id: fk
+    name: Forward kinematics
+    role: Turns six joint angles into link transforms from the URDF-like description.
+    tech: Python · numpy
+    talksTo: [viewer]
+    kind: core
+  - id: viewer
+    name: 3D viewer
+    role: Draws the cell and the arm at the current pose, and records fault clips as video.
+    tech: moderngl
+    talksTo: []
+    kind: core
+  - id: anomaly
+    name: Anomaly detector
+    role: Flags joint-limit approaches and cycle-time drift as fault markers for the timeline.
+    tech: Python · numpy
+    talksTo: []
+    kind: offline
+flow:
+  - component: timeline
+    text: sends the scrub time, say `t = 512.37` s, each frame as the user drags.
+  - component: store
+    text: finds the sample pair around `t` with a binary search (`searchsorted`), which stays fast for 60,000 or 360,000 samples.
+  - component: store
+    text: interpolates each joint along the **shortest** angle, so a joint passing ±π does not spin a full turn.
+  - component: fk
+    text: chains one transform per joint from the base to the gripper, giving 7 link poses as 4 × 4 matrices.
+  - component: viewer
+    text: draws the arm at those poses and the vacuum and sensor states, at 60 FPS.
+interface:
+  lang: python
+  code: |
+    store = TimeStore.load("cell_2026-10-14.npz")
+    store.t              # float64 s, one aligned clock
+    store["q"]           # (N, 6) joint angles, rad
+    store["vacuum"]      # (N,) bool
+
+    q = store.interp("q", t=512.37)   # wrap-aware
+    poses = fk(robot, q)              # 7 x (4, 4)
+
+    detect(store)
+    # [Fault(t=498.2, kind="cycle_drift"),
+    #  Fault(t=511.9, kind="near_limit", joint=4)]
+decisions:
+  - choice: Columnar numpy arrays in memory
+    instead: Rows in SQLite
+    why: Scrubbing needs one lookup by time per frame, and an hour at 100 Hz is about 360,000 rows, tens of MB, which fits in laptop memory. Arrays also make the 10 s import a few vectorised passes.
+  - choice: CUSUM on cycle times
+    instead: A fixed cycle-time threshold
+    why: A fixed limit either fires on normal noise or misses a slow 5% drift. CUSUM (a running sum of deviations above a small slack) catches a 5% slowdown within 20 cycles with few false alarms.
+  - choice: Python with moderngl
+    instead: C++17 with OpenGL
+    why: Six joints per frame are trivial work, numpy makes the import fast enough, and maintenance laptops can run it with a single install.
+watchOut: >-
+  The PLC and arm controller clocks drift apart, so a sensor change can appear before the arm movement that caused it.
+  Align them on shared events, such as gripper close, with an offset and a drift rate, before trusting any fault
+  timeline.

@@ -1,0 +1,90 @@
+overview: >-
+  A museum kiosk that answers visitors' questions from exhibit text on a fanless 15 W mini-PC with no network and no
+  GPU. A small full-text index finds the right exhibit passages, a 1B model in 4-bit runs through llama.cpp and
+  streams the answer, and a prompt policy keeps answers short and refuses questions the exhibits do not cover. The
+  first token must appear within 2 s, total memory stays under 4 GB, and speed must hold through a 20-minute soak.
+learn:
+  - name: Int4 quantised models
+    ref: llama-cpp
+  - name: BM25 retrieval
+    ref: slp3
+  - name: Prompt token budgets
+  - name: Thermal throttling
+  - name: Grounded refusals
+stats:
+  - value: ≤ 2 s
+    label: time to first token
+  - value: ≤ 4 GB
+    label: total memory
+  - value: ≤ 15%
+    label: speed drop in 20 min
+components:
+  - id: ui
+    name: Kiosk UI
+    role: Shows a touch keyboard and suggested questions, and streams the answer as it arrives.
+    tech: Local web UI
+    talksTo: [retriever]
+    kind: core
+  - id: retriever
+    name: Retriever
+    role: Finds the top exhibit passages by BM25 score in a local index.
+    tech: SQLite FTS5
+    talksTo: [policy]
+    kind: core
+  - id: policy
+    name: Prompt policy
+    role: Refuses when no passage scores high enough, and caps context and answer length.
+    tech: Python
+    talksTo: [runner]
+    kind: core
+  - id: runner
+    name: Model runner
+    role: Runs the 1B 4-bit GGUF model on the CPU, with the fixed instructions kept in the KV cache.
+    tech: llama.cpp bindings
+    talksTo: [ui, telemetry]
+    kind: core
+  - id: telemetry
+    name: Telemetry
+    role: Logs TTFT, tokens per second, memory and CPU temperature for every answer.
+    tech: SQLite
+    talksTo: []
+    kind: offline
+flow:
+  - component: ui
+    text: sends the visitor's question, "Why is the vase painted black?", to the local service.
+  - component: retriever
+    text: returns the two best passages from the room's exhibit text, with their BM25 scores.
+  - component: policy
+    text: >-
+      refuses with a fixed reply if the best score is under the threshold, without running the model; otherwise it
+      trims passages to about **300 tokens**, the prefill a 15 W CPU can do in well under 2 s.
+  - component: runner
+    text: >-
+      appends passages and question after the cached instructions, streams up to 120 tokens back, and the
+      **telemetry** records TTFT and CPU temperature.
+interface:
+  lang: python
+  code: |
+    def answer(question: str) -> Iterator[str]:
+        hits = index.search(question, k=2)
+        if not hits or hits[0].score < MIN_SCORE:
+            yield REFUSAL
+            return
+        context = trim(hits, max_tokens=300)
+        yield from llm.stream(
+            prompt(context, question),
+            max_tokens=120, temperature=0.2)
+decisions:
+  - choice: Refuse before the model, on retrieval score
+    instead: Ask the model to decide if it knows
+    why: >-
+      A 1B model often answers confidently anyway, and a fixed refusal also costs no CPU time. Tune the threshold on
+      the 100-question set.
+  - choice: A 300-token context cap
+    instead: Pass every passage retrieval returns
+    why: >-
+      Prefill time grows with every token on a 15 W CPU, and long context is the quickest way to miss the 2 s TTFT.
+      Raise the cap only if grounding drops.
+watchOut: >-
+  A fanless box that is fast in a cool office can throttle in a warm gallery after 15 minutes. Run the 20-minute
+  soak in a warm room or enclosure, and log temperature beside tokens per second.

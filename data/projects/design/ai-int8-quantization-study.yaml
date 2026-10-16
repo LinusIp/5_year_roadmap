@@ -1,0 +1,53 @@
+overview: >-
+  A trained CNN converted to int8 two ways after training: dynamic quantization (weights int8, activations scaled on
+  the fly) and static quantization (activation ranges fixed from a calibration set). Each is compared on file size,
+  accuracy and real CPU latency, with per-channel versus per-tensor weight scales.
+learn:
+  - name: Post-training quantization
+    ref: mit-6-5940
+  - name: Calibration
+    ref: onnx-runtime-docs
+  - name: Per-channel scales
+components:
+  - id: baseline
+    name: Baseline CNN
+    role: The fp32 model and its test accuracy.
+    tech: PyTorch
+    talksTo: [quant]
+    kind: core
+  - id: quant
+    name: Quantizer
+    role: Produces dynamic and static int8 models, per-tensor and per-channel.
+    tech: ONNX Runtime or torch.ao
+    talksTo: [bench]
+    kind: core
+  - id: calib
+    name: Calibration set
+    role: A few hundred training images used to fix activation ranges.
+    tech: torchvision
+    talksTo: [quant]
+    kind: core
+  - id: bench
+    name: Benchmark
+    role: Measures size, accuracy and CPU latency for every variant.
+    tech: Python · onnxruntime
+    talksTo: []
+    kind: core
+flow:
+  - component: baseline
+    text: is exported to ONNX and its fp32 accuracy and latency are recorded.
+  - component: calib
+    text: feeds 500 training images, drawn from all classes, to record activation ranges.
+  - component: quant
+    text: writes int8 models with `quantize_dynamic` and `quantize_static`, each per-tensor and per-channel.
+  - component: bench
+    text: runs every model with the **int8 execution provider** on CPU and reports size ratio (target 3x or more), accuracy change (under 1 point) and latency.
+decisions:
+  - choice: Time the real int8 runtime
+    instead: Time fake-quantized models in PyTorch
+    why: >-
+      Fake quantization simulates rounding in fp32, so it shows accuracy effects but no speedup. Only a runtime with
+      int8 kernels gives true latency.
+watchOut: >-
+  A calibration set that is unrepresentative (one class, or only bright images) sets activation ranges badly and costs
+  accuracy. Sample calibration images across classes.

@@ -1,0 +1,47 @@
+overview: >-
+  A keyword classifier for 10 words from the Speech Commands dataset: each 1-second clip becomes a log-mel spectrogram
+  (an image of energy per frequency band over time), a small CNN classifies it, and SpecAugment masks random time and
+  frequency bands during training. A confusion matrix shows which words get mixed up.
+learn:
+  - name: Mel spectrograms
+    ref: think-dsp
+  - name: SpecAugment
+  - name: Speaker-disjoint splits
+  - name: Confusion matrices
+components:
+  - id: features
+    name: Feature extractor
+    role: Pads or trims audio to 1 s and computes 40-band log-mel features.
+    tech: torchaudio
+    talksTo: [cnn]
+    kind: core
+  - id: cnn
+    name: Small CNN
+    role: Classifies the spectrogram into 10 words plus unknown.
+    tech: PyTorch
+    talksTo: [eval]
+    kind: core
+  - id: eval
+    name: Evaluator
+    role: Computes test accuracy and the confusion matrix.
+    tech: scikit-learn · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: features
+    text: pads every clip to exactly 16,000 samples and computes a `40 x 101` log-mel spectrogram.
+  - component: cnn
+    text: trains with SpecAugment masking up to 2 time bands and 2 frequency bands per example.
+  - component: eval
+    text: scores the official test list, which has **no speakers** in common with training.
+  - component: eval
+    text: reports accuracy (target above 90%) and the top confused pairs, such as "no" and "go".
+decisions:
+  - choice: Use the dataset's own split lists
+    instead: A random split of all clips
+    why: >-
+      The official lists keep each speaker in one split; a random split puts the same voices in train and test and
+      inflates accuracy.
+watchOut: >-
+  Clips shorter than 1 s give spectrograms of different widths, which either crash batching or teach the model clip
+  length. Pad or trim every clip to the same length first.

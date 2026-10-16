@@ -1,0 +1,46 @@
+overview: >-
+  Five architecture decision records (short documents giving context, options, decision and consequences) for a
+  small modular monolith, a diagram of its module boundaries, and an automated architecture test that fails when
+  code breaks a dependency rule.
+learn:
+  - name: Architecture decision records
+  - name: Quality attributes
+  - name: Module boundaries
+  - name: Architecture tests
+components:
+  - id: adrs
+    name: ADRs
+    role: Five numbered Markdown files, each with context, options, decision and consequences.
+    tech: Markdown
+    talksTo: [rules]
+    kind: core
+  - id: rules
+    name: Dependency rules
+    role: Which modules may import which, written as a config file from the ADRs.
+    tech: import-linter or ArchUnit
+    talksTo: [test]
+    kind: core
+  - id: test
+    name: Architecture test
+    role: Runs in CI and fails on any import that breaks a rule.
+    tech: CI
+    talksTo: []
+    kind: core
+flow:
+  - component: adrs
+    text: start from the forces, such as a two-person team and a need to split billing out later.
+  - component: adrs
+    text: record each decision with at least two rejected options, such as `ADR-003 modules talk through service interfaces`.
+  - component: rules
+    text: turn ADR-003 into a contract, for example `orders` may not import `billing.internal`.
+  - component: test
+    text: fails the build when a planted import from `orders` into `billing.internal` is added.
+decisions:
+  - choice: Modular monolith
+    instead: Microservices from the start
+    why: >-
+      A small team gets one deploy and simple transactions, while enforced module boundaries keep a later split
+      possible. Revisit when one module needs to scale or ship on its own.
+watchOut: >-
+  An ADR that lists no rejected alternatives cannot be reviewed later. Every record needs the options and why they
+  lost.

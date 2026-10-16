@@ -1,0 +1,107 @@
+overview: >-
+  A cart on a 50 cm rail carries a free-swinging pendulum, and a Teensy or Pico runs one control cycle every 2 ms:
+  read the cart and pendulum encoders, estimate their speeds, compute a motor voltage and send it to the DC motor
+  driver. Far from upright an energy-based swing-up controller pumps the pendulum up; within about 15 degrees it
+  hands over to LQR (state feedback with gains chosen by weighing angle error against motor effort). Students
+  design gains on a nonlinear Python model of the same rig before trying them on hardware.
+learn:
+  - name: State-space models
+    ref: brunton-control-bootcamp
+  - name: LQR state feedback
+    ref: feedback-systems
+  - name: Energy-based swing-up
+    ref: mit-6-832-underactuated
+  - name: System identification
+  - name: Fixed-rate control loops
+stats:
+  - value: ±2°
+    label: upright for 60 s
+  - value: < 100 µs
+    label: jitter on a 2 ms loop
+  - value: 1.5 s
+    label: settle after a 0.2 N tap
+components:
+  - id: encoders
+    name: Encoders
+    role: Quadrature encoders on the cart motor and the pendulum pivot.
+    tech: Quadrature encoders
+    talksTo: [reader]
+    kind: external
+  - id: reader
+    name: Encoder reader
+    role: Counts quadrature edges in hardware and turns counts into position, angle and filtered speeds.
+    tech: C++ · Teensy QDEC
+    talksTo: [loop]
+    kind: core
+  - id: loop
+    name: Control loop
+    role: Runs every 2 ms from a timer interrupt and chooses swing-up or LQR by angle.
+    tech: C++
+    talksTo: [swingup, lqr]
+    kind: core
+  - id: swingup
+    name: Swing-up
+    role: Pushes the cart to add energy until the pendulum's energy matches the upright energy.
+    tech: C++
+    talksTo: [safety]
+    kind: core
+  - id: lqr
+    name: LQR balance
+    role: Computes motor voltage as −K·x from cart position, speed, angle and angular speed.
+    tech: C++
+    talksTo: [safety]
+    kind: core
+  - id: safety
+    name: Safety limits
+    role: Cuts the motor at the limit switches, near the rail ends or above 3 A.
+    tech: C++ · limit switches
+    talksTo: [motor]
+    kind: core
+  - id: motor
+    name: Motor driver
+    role: 12 V, 3 A H-bridge and DC motor that move the cart through a belt.
+    tech: H-bridge · DC motor
+    talksTo: []
+    kind: external
+  - id: design
+    name: Model and LQR design
+    role: Nonlinear cart-pole model and the script that computes K from identified parameters.
+    tech: python-control · NumPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: reader
+    text: latches both encoder counts at the timer tick and turns them into `x`, `θ` and filtered speeds `ẋ`, `θ̇`.
+  - component: loop
+    text: checks the angle; with `|θ| > 15°` from upright it runs swing-up, otherwise LQR.
+  - component: swingup
+    text: pushes in the direction that **adds energy**, with force proportional to the energy still missing.
+  - component: lqr
+    text: computes `u = −K·[x, ẋ, θ, θ̇]` with the gains from the design script, clipped to ±12 V.
+  - component: safety
+    text: zeroes `u` if a limit switch closes, the cart is within `3 cm` of a rail end, or current exceeds `3 A`.
+  - component: motor
+    text: applies `u` as PWM; the loop logs `θ` and `u` and waits for the next 2 ms tick.
+interface:
+  lang: cpp
+  code: |
+    struct State { float x, xdot, th, thdot; };
+
+    // gains from the Python LQR script
+    constexpr float K[4] = {-3.2f, -4.1f, 38.5f, 5.6f};
+
+    // timer ISR, every 2 ms
+    void control_tick() {
+      State s = read_state();
+      float u = fabsf(wrap(s.th)) < deg(15)
+                  ? -dot(K, s) : swing_up(s);
+      motor_volts(safety_clip(u, s));
+    }
+decisions:
+  - choice: LQR for balance, PID as the lab comparison
+    instead: PID only
+    why: One PID on angle lets the cart drift into the 50 cm rail ends; LQR uses all four states and keeps the cart centred. Students tune both and compare.
+  - choice: Encoder speeds from a filtered difference
+    instead: Raw difference of counts every 2 ms
+    why: At 2 ms one count step looks like a huge speed spike, which LQR multiplies by its gain. A short low-pass filter keeps the loop quiet.
+watchOut: A sign flip between the model and the rig, in angle direction or motor polarity, makes LQR push the pendulum over at once. Check each sign by hand before closing the loop.

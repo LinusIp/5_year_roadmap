@@ -1,0 +1,92 @@
+overview: >-
+  A structured security review of your own invoicing API before its first 20 customers, done only in an isolated lab
+  copy. A written test plan gives each of the 10 OWASP API Top 10 categories at least 3 test cases, and scanners plus
+  manual testing through an intercepting proxy, which sits between client and API so you can read and replay
+  requests, feed a findings tracker. Each confirmed finding is fixed with a regression test that joins a CI security
+  suite, and a retest must show zero high or critical findings.
+learn:
+  - name: OWASP API Top 10
+  - name: Object-level authorisation
+  - name: Intercepting proxies
+  - name: Finding triage
+  - name: Security headers and TLS
+  - name: Security tests in CI
+    ref: github-actions-docs
+stats:
+  - value: "0"
+    label: high or critical on retest
+  - value: 10 × 3+
+    label: categories × test cases
+  - value: < 8 min
+    label: security suite in CI
+components:
+  - id: lab
+    name: Isolated lab
+    role: A private Docker network running a copy of the API with synthetic invoices and users, reachable from nothing else.
+    tech: Docker Compose
+    talksTo: [api]
+    kind: core
+  - id: api
+    name: Target API
+    role: The FastAPI invoicing service you own and are hardening.
+    tech: FastAPI · PostgreSQL
+    talksTo: [scanners]
+    kind: core
+  - id: scanners
+    name: Scanners and proxy
+    role: Runs ZAP and Nuclei scans and records manual requests through mitmproxy.
+    tech: OWASP ZAP · Nuclei · mitmproxy
+    talksTo: [tracker]
+    kind: core
+  - id: tracker
+    name: Findings tracker
+    role: Holds each finding with category, severity, evidence, owner and retest status.
+    tech: GitHub Issues · CSV
+    talksTo: [suite]
+    kind: core
+  - id: suite
+    name: Regression suite
+    role: One pytest case per fixed finding plus the 30+ planned cases, run in CI.
+    tech: pytest · GitHub Actions
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Severity, evidence, fix and retest result for every finding, for the founder.
+    tech: Markdown
+    talksTo: []
+    kind: offline
+flow:
+  - component: lab
+    text: starts the API on an internal network with two test tenants, so scans can never reach a system you do not own.
+  - component: api
+    text: is probed with case API1, where user A requests `GET /invoices/1043`, an invoice that belongs to user B.
+  - component: scanners
+    text: record the request in mitmproxy; a `200` with B's data confirms **broken object-level authorisation**, which scanners alone usually miss.
+  - component: tracker
+    text: logs it as high severity with the request and response as evidence; scanner-only alerts stay unconfirmed until reproduced by hand.
+  - component: suite
+    text: gets `test_cannot_read_other_users_invoice`, which fails before the ownership check is added and passes after.
+  - component: report
+    text: records the fix and the retest, and the CI suite must still finish in under 8 minutes.
+interface:
+  lang: python
+  code: |
+    def test_cannot_read_other_users_invoice(client):
+        a = login(client, "alice@lab.test")
+        b_invoice = make_invoice(owner="bob@lab.test")
+
+        r = client.get(f"/invoices/{b_invoice.id}",
+                       headers=a.auth)
+
+        # 404, not 403: do not reveal it exists
+        assert r.status_code == 404
+        assert "amount" not in r.text
+decisions:
+  - choice: Manual tests for authorisation, scanners for the rest
+    instead: Rely on automated scanners alone
+    why: Scanners do not know that invoice 1043 belongs to someone else, and object-level authorisation is the top API risk. Scanners cover headers, TLS and known CVEs quickly.
+  - choice: A regression test for every fix
+    instead: Fix findings and retest once by hand
+    why: Each fix must stay fixed after go-live. A test in CI keeps that promise for 20 customers and every later release.
+watchOut: Treating scanner output as findings. Confirm each one by hand in the lab and record the evidence, or the report fills with noise and real issues get lost.

@@ -1,0 +1,114 @@
+overview: >-
+  A restic-like backup tool in Rust for a video shop's 6 TB of projects, where 90% is unchanged each night. Files are
+  cut into chunks at points chosen by the content itself (content-defined chunking), so inserting bytes only changes
+  the chunks around the edit, and each chunk is stored once under the hash of its contents. A snapshot is just a list
+  of files and their chunk ids, every chunk is encrypted, and restores check every hash.
+learn:
+  - name: Content-defined chunking
+  - name: Content addressing
+  - name: Authenticated encryption
+  - name: Reference counting
+  - name: Safe garbage collection
+stats:
+  - value: ≥ 200 MB/s
+    label: backup on SSD
+  - value: ≥ 8×
+    label: dedup vs full copies
+  - value: < 1 GB
+    label: index per 10 TB
+components:
+  - id: files
+    name: Source files
+    role: The editing shop's project folders on disk.
+    tech: Filesystem
+    talksTo: [chunker]
+    kind: external
+  - id: chunker
+    name: Chunker
+    role: Splits file streams at content-defined boundaries with a rolling hash.
+    tech: FastCDC · Rust
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Chunk store
+    role: Keeps each unique chunk compressed and encrypted in pack files, with an id index.
+    tech: zstd · XChaCha20-Poly1305
+    talksTo: [snapshot]
+    kind: core
+  - id: snapshot
+    name: Snapshot manager
+    role: Writes each night's file-to-chunk lists and updates reference counts.
+    tech: JSON manifests
+    talksTo: [verifier, pruner]
+    kind: core
+  - id: verifier
+    name: Restore verifier
+    role: Rebuilds files from chunks and checks every chunk and file hash.
+    tech: Rust
+    talksTo: []
+    kind: core
+  - id: pruner
+    name: Pruner
+    role: Deletes chunks no snapshot references, never during a running backup.
+    tech: Rust · repo lock
+    talksTo: []
+    kind: offline
+  - id: bench
+    name: Benchmark generator
+    role: Builds datasets with a controlled change rate to measure dedup and speed.
+    tech: Rust
+    talksTo: [files]
+    kind: offline
+flow:
+  - component: chunker
+    text: >-
+      skips files whose size and mtime match last night's snapshot; for the rest, cuts a chunk where the rolling hash
+      `& mask == 0`, aiming at 1 MiB with a 256 KiB minimum and a 4 MiB maximum.
+  - component: store
+    text: >-
+      names each chunk by a **keyed** hash of its plaintext, so ids do not reveal content; a known id is skipped (the
+      dedup), a new one is compressed, encrypted and appended to a 16 MB pack file.
+  - component: snapshot
+    text: >-
+      writes the manifest of paths, chunk ids and whole-file hashes, then raises each referenced chunk's count; only
+      then is the snapshot visible.
+  - component: verifier
+    text: >-
+      on restore decrypts each chunk (a tampered one fails its authentication tag), checks its id, writes the file and
+      compares the whole-file hash.
+  - component: pruner
+    text: >-
+      after `forget` lowers the counts, deletes chunks at zero and repacks half-empty pack files, while holding an
+      exclusive repository lock.
+interface:
+  lang: shell
+  code: |
+    $ dedup init /mnt/backup/repo
+    $ dedup backup /mnt/projects
+    snapshot 7f3a91c2
+      files       1,284,019 (1,190,450 unchanged)
+      new chunks  601,233 (588 GB)
+      speed       214 MB/s
+    $ dedup restore 7f3a91c2 --to /mnt/restore \
+        --verify
+    verified 1,284,019 files, 0 errors
+    $ dedup forget --keep-daily 30 && dedup prune
+decisions:
+  - choice: Content-defined chunks, not fixed-size blocks
+    instead: Fixed 1 MiB blocks
+    why: >-
+      Inserting a few frames into a video shifts every later fixed block, so nothing after the edit dedups. Content
+      boundaries move with the data. FastCDC's normalised sizes also avoid a too-narrow size spread.
+  - choice: A 256-bit keyed hash as chunk id
+    instead: The rolling hash or a 64-bit hash as id
+    why: >-
+      The rolling hash only finds boundaries and collides easily. A 256-bit hash makes a collision across 10 TB
+      practically impossible; at about 10 million chunks of 48 bytes each the index stays near 500 MB.
+  - choice: Reference counts plus a repository lock
+    instead: Mark-and-sweep over all snapshots at every prune
+    why: >-
+      Counts make prune proportional to what changed, not to all of history. The lock keeps prune from running during
+      a backup whose snapshot is not yet counted.
+watchOut: >-
+  A backup in progress has written chunks that no snapshot counts yet, and a careless prune deletes them. Raise counts
+  before the snapshot is visible, and never prune while a backup holds the lock.

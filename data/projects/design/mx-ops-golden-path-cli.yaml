@@ -1,0 +1,92 @@
+overview: >-
+  One static binary that gives Ledgerly's 20 engineers a single way to start a service. It renders a versioned
+  template (HTTP API, worker or cron job) with Dockerfile, CI, health endpoints and telemetry already wired, writes
+  the template version into a manifest, and checks the repo against 12 policy rules locally and in CI. Later, an
+  upgrade does a three-way merge, combining the old template, the new template and the team's edits, and shows a diff
+  before anything changes.
+learn:
+  - name: Project templating
+  - name: Policy as code
+  - name: Three-way merge
+  - name: Static binaries in Go
+    ref: tour-of-go
+  - name: CI checks
+    ref: github-actions-docs
+stats:
+  - value: < 5 min
+    label: scaffold to first green CI
+  - value: < 10 s
+    label: policy check per repo
+  - value: 9 of 10
+    label: sample services upgrade cleanly
+components:
+  - id: cli
+    name: CLI
+    role: Parses `new`, `check` and `upgrade` commands and works with no network.
+    tech: Go · cobra
+    talksTo: [templates]
+    kind: core
+  - id: templates
+    name: Template engine
+    role: Renders the embedded http-api, worker and cron templates with the service's values.
+    tech: Go text/template · embed
+    talksTo: [manifest]
+    kind: core
+  - id: manifest
+    name: Manifest
+    role: Records template name, version and values in the repo so upgrades know where they started.
+    tech: YAML file
+    talksTo: [policy, differ]
+    kind: core
+  - id: policy
+    name: Policy evaluator
+    role: Runs 12 rules such as no root user, pinned base image and required labels, each with a fix hint.
+    tech: Go · Rego or custom rules
+    talksTo: [ci]
+    kind: core
+  - id: differ
+    name: Upgrade differ
+    role: Three-way merges old template, new template and the repo, and previews the diff and conflicts.
+    tech: Go · diff3
+    talksTo: []
+    kind: offline
+  - id: ci
+    name: CI pipeline
+    role: Runs the same policy check on every pull request and blocks the merge on a failure.
+    tech: GitHub Actions
+    talksTo: []
+    kind: external
+flow:
+  - component: cli
+    text: runs `ledger new payouts --template http-api` offline, because the templates are compiled into the binary.
+  - component: templates
+    text: renders the Dockerfile, CI workflow, `/healthz` and `/readyz` handlers and telemetry setup with the service name filled in.
+  - component: manifest
+    text: "writes `.ledger.yaml` with `template: http-api` and `version: 1.4.0`, the base every later upgrade merges from."
+  - component: policy
+    text: runs all 12 rules in under 10 s and prints each failure with the file, line and **how to fix it**.
+  - component: ci
+    text: repeats the check on the first push, and the run goes green in under 5 minutes from the first command.
+interface:
+  lang: shell
+  code: |
+    $ ledger new payouts --template http-api
+    created payouts/ (http-api 1.4.0, 23 files)
+
+    $ ledger check
+    FAIL no-root      Dockerfile:9  USER is root
+         fix: add `USER 10001` after install
+    FAIL pinned-base  Dockerfile:1  FROM go:latest
+         fix: pin a digest, e.g. go@sha256:…
+    10 passed, 2 failed (0.8 s)
+
+    $ ledger upgrade --to 1.5.0 --dry-run
+    3 files change, 1 conflict: ci.yml
+decisions:
+  - choice: Three-way merge from the recorded version
+    instead: Overwrite generated files on upgrade
+    why: Teams edit their CI and Dockerfiles. Merging against the manifest's base keeps their edits and is how 9 of 10 samples can upgrade cleanly.
+  - choice: Templates embedded in one Go binary
+    instead: Fetch templates from a Git repo at run time
+    why: The constraint says no network for scaffolding, and one binary is easy to ship. Revisit if template releases need to be faster than CLI releases.
+watchOut: Policy messages that only say "failed" get rules switched off. Every rule must print the file, the line and the exact fix.

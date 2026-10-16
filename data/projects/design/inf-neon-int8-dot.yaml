@@ -1,0 +1,46 @@
+overview: >-
+  An int8 matrix-vector multiply for ARM written three ways: a scalar reference, NEON widening multiplies, and the sdot
+  instruction, which multiplies four int8 pairs and adds them into one int32 in a single step. Each row has a float
+  scale, results must be exact before scaling, and the benchmark notes how heat affects the numbers.
+learn:
+  - name: NEON intrinsics
+  - name: Integer dot products
+  - name: Accumulator overflow
+  - name: Thermal throttling
+components:
+  - id: scalar
+    name: Scalar reference
+    role: Plain C loops with int32 accumulation, the ground truth.
+    tech: C
+    talksTo: [bench]
+    kind: offline
+  - id: neon
+    name: NEON kernels
+    role: Widening-multiply version and sdot version of the same GEMV.
+    tech: C · arm_neon.h
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Benchmark
+    role: Checks exact equality, then reports GOPS and GB/s with timestamps and temperature notes.
+    tech: C · clock_gettime
+    talksTo: []
+    kind: core
+flow:
+  - component: neon
+    text: multiply with `vmull_s8` to int16 in the widening version, and add pairs into int32 with `vpadalq_s16` before any int16 sum can overflow.
+  - component: neon
+    text: use `vdotq_s32` in the sdot version, adding four int8 products straight into each int32 lane, 16 bytes per instruction.
+  - component: bench
+    text: compares integer results with the scalar reference **exactly**, then applies the per-row scale.
+  - component: bench
+    text: reports GOPS and GB/s per version (target 3x scalar for sdot), with runs repeated after a cool-down.
+decisions:
+  - choice: Exact integer comparison
+    instead: Compare with a float tolerance
+    why: >-
+      Integer dot products have a single right answer, so any difference is a bug, not rounding. Compare floats only
+      after the scale is applied.
+watchOut: >-
+  Summing int8 products in int16 lanes overflows after just a couple of products (127 · 127 is 16,129). Widen to
+  int32 early, or use sdot, which accumulates in int32.

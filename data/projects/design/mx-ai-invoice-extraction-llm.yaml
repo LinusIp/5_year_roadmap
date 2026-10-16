@@ -1,0 +1,109 @@
+overview: >-
+  A pipeline that turns a supplier invoice into a ledger row. It reads the PDF's text layer (or runs OCR on photos),
+  asks an LLM to fill a strict schema, then checks the result with plain arithmetic: lines must add up to the net
+  total and net plus tax to the gross. Fields that pass every check are accepted automatically; only doubtful ones
+  go to a small review page.
+learn:
+  - name: OCR basics
+  - name: Structured output
+    ref: llm-zoomcamp
+  - name: Validation rules
+  - name: Confidence scoring
+  - name: Human-in-the-loop review
+stats:
+  - value: ≥ 95%
+    label: header-field accuracy
+  - value: ≥ 70%
+    label: invoices auto-accepted
+  - value: < $0.01
+    label: per invoice
+components:
+  - id: upload
+    name: Upload endpoint
+    role: Receives invoice PDFs and phone photos from the practice's staff.
+    tech: FastAPI
+    talksTo: [ocr]
+    kind: core
+  - id: ocr
+    name: Text reader
+    role: Uses the PDF text layer when present, otherwise OCR with word confidences.
+    tech: pdfplumber · Tesseract
+    talksTo: [extractor]
+    kind: core
+  - id: extractor
+    name: Extractor
+    role: Sends the page text with the invoice schema and parses the reply.
+    tech: Python · Pydantic
+    talksTo: [llm, validators]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Returns vendor, dates, totals and line items as JSON.
+    tech: Hosted LLM
+    talksTo: []
+    kind: external
+  - id: validators
+    name: Validators
+    role: Checks schema, sums, tax rate and dates, and gives each field a confidence.
+    tech: Python
+    talksTo: [review, exporter]
+    kind: core
+  - id: review
+    name: Review page
+    role: Shows only the doubtful fields beside the page crop for a person to fix.
+    tech: FastAPI · HTML
+    talksTo: [exporter]
+    kind: core
+  - id: exporter
+    name: CSV exporter
+    role: Writes accepted invoices in the ledger's import format.
+    tech: Python
+    talksTo: []
+    kind: core
+flow:
+  - component: upload
+    text: receives a 2-page supplier PDF and stores it locally with an id.
+  - component: ocr
+    text: finds a text layer and uses it; a phone photo would go through Tesseract and keep each word's confidence.
+  - component: extractor
+    text: sends only the text, never the file, with the `Invoice` schema, and retries once if the JSON fails validation.
+  - component: validators
+    text: checks `sum(lines) == net_total`, `net + tax == gross` to the cent and the tax rate against the allowed rates; a field below `conf 0.9` or failing a check is **doubtful**.
+  - component: review
+    text: shows the 1 or 2 doubtful fields next to the cropped page; the reviewer fixes them in seconds.
+  - component: exporter
+    text: appends the accepted invoice to the client's CSV import file.
+interface:
+  lang: python
+  code: |
+    class Invoice(BaseModel):
+        vendor: str
+        invoice_no: str
+        invoice_date: date
+        net_total: Decimal
+        tax_total: Decimal
+        gross_total: Decimal
+        lines: list[LineItem]
+
+    # auto-accept only if every check passes
+    sum(l.amount for l in inv.lines) == inv.net_total
+    inv.net_total + inv.tax_total == inv.gross_total
+decisions:
+  - choice: Arithmetic checks decide confidence
+    instead: Trust the LLM's own confidence
+    why: >-
+      An LLM's self-reported confidence is not calibrated. A total that does not add up is hard evidence, and most
+      invoices carry three or four such checks for free.
+  - choice: Text layer first, OCR only for images
+    instead: OCR every page
+    why: >-
+      Most supplier invoices are digital PDFs. Reading their text layer is faster, has no OCR noise and keeps the
+      8 s per page budget easy. OCR runs only on photos and scans.
+  - choice: Synthetic invoices for ground truth
+    instead: Hand-label real client invoices
+    why: >-
+      Rendered templates give exact truth per field and per layout, and the 80 clients' invoices stay private.
+      Add a small hand-checked set of real ones before go-live.
+watchOut: >-
+  OCR noise gets blamed on the LLM. Log the text each page produced and score extraction on clean text too, so you
+  know which step lost the field.

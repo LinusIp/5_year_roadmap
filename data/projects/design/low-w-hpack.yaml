@@ -1,0 +1,73 @@
+overview: >-
+  An encoder and decoder for HPACK, the header compression of HTTP/2: each header becomes an index into a 61-entry
+  static table or a dynamic table of recent headers, or a literal string that may be Huffman-coded, with integers
+  packed into a few prefix bits. It must round-trip the RFC's examples and 1,000 random header sets, and reports the
+  compression ratio.
+learn:
+  - name: Prefix integer coding
+  - name: Huffman coding
+    ref: cs106b
+  - name: Dynamic table eviction
+components:
+  - id: encoder
+    name: Encoder
+    role: Chooses indexed, literal-with-indexing or never-indexed for each header and writes the bytes.
+    tech: Rust or Python
+    talksTo: [tables, huffman, decoder]
+    kind: core
+  - id: huffman
+    name: Huffman coder
+    role: Encodes and decodes strings with the fixed HPACK code table.
+    tech: Rust or Python
+    talksTo: []
+    kind: core
+  - id: tables
+    name: Header tables
+    role: The 61 static entries plus a size-limited dynamic table, newest first.
+    tech: Rust or Python
+    talksTo: []
+    kind: core
+  - id: decoder
+    name: Decoder
+    role: Reads the header block back into a header list and keeps its own copy of the dynamic table.
+    tech: Rust or Python
+    talksTo: [tables, huffman]
+    kind: core
+flow:
+  - component: encoder
+    text: >-
+      for each `(name, value)` looks for a full match in the tables and emits an indexed field (`1xxxxxxx`),
+      otherwise a literal with incremental indexing (`01xxxxxx`).
+  - component: huffman
+    text: codes the literal string and sets the `H` bit only when the result is shorter than the raw bytes.
+  - component: tables
+    text: >-
+      insert the new entry at the front of the dynamic table, counting its size as name + value + 32 bytes, and
+      **evict** the oldest entries until the total fits the limit (default 4,096).
+  - component: decoder
+    text: >-
+      reads prefix integers, looks up indices (1 to 61 static, 62 and up dynamic) and decodes Huffman strings; its
+      table must equal the encoder's after every block.
+interface:
+  lang: python
+  code: |
+    def encode_int(n, prefix, first) -> bytes:
+        """Pack n into the low `prefix` bits of `first`."""
+        limit = (1 << prefix) - 1
+        if n < limit:
+            return bytes([first | n])
+        out = [first | limit]
+        n -= limit
+        while n >= 128:
+            out.append(n % 128 + 128)
+            n //= 128
+        return bytes(out + [n])
+decisions:
+  - choice: Literal with incremental indexing by default
+    instead: Literals without indexing for every header
+    why: >-
+      In 1,000 random header sets most names and many values repeat, so adding them to the dynamic table turns later
+      copies into one-byte indices. Use never-indexed literals for secrets like `authorization`.
+watchOut: >-
+  Encoder and decoder must evict in exactly the same order (oldest first) and apply a dynamic table size update the
+  same way, or every later index points at a different header. Compare both tables after each header block.

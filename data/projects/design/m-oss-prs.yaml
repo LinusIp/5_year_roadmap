@@ -1,0 +1,121 @@
+overview: >-
+  Not a program but a pipeline you run three times on one project (vLLM, SGLang, diffusers or MuJoCo, two at most).
+  Each issue moves from a shortlist, to a claim agreed with a maintainer, to a branch with a failing test that
+  reproduces it, to a fix, to a draft pull request with green CI, through review rounds to merged. A tracking file
+  records every stage with dates and links, so the portfolio entry and the next contribution can be planned from real
+  numbers.
+learn:
+  - name: Reading a large codebase
+  - name: Scoping a change
+  - name: Regression tests first
+  - name: Contribution guides
+  - name: Answering code review
+stats:
+  - value: "3"
+    label: merged PRs with tests
+  - value: ≥ 1
+    label: discussed before the first commit
+  - value: Week 1
+    label: first PR started
+components:
+  - id: issues
+    name: Issue tracker
+    role: Holds good-first-issue, help-wanted and bug reports, including bugs you hit in earlier projects.
+    tech: GitHub Issues
+    talksTo: [shortlist]
+    kind: external
+  - id: shortlist
+    name: Shortlist
+    role: Ranks candidate issues by size, clarity and whether anyone has claimed them.
+    tech: Markdown
+    talksTo: [discuss]
+    kind: core
+  - id: discuss
+    name: Maintainer thread
+    role: Agrees the approach and claims the issue before any code is written.
+    tech: Issue comments · Discussions
+    talksTo: [branch]
+    kind: core
+  - id: branch
+    name: Fix branch
+    role: Holds a test that fails without the change, then the fix, on a local build from source.
+    tech: Git · pytest or CTest
+    talksTo: [pr]
+    kind: core
+  - id: pr
+    name: Pull request
+    role: Opens as a draft once the project's own CI and pre-commit hooks pass.
+    tech: GitHub CLI · project CI
+    talksTo: [review]
+    kind: core
+  - id: review
+    name: Review rounds
+    role: Turns maintainer comments into new commits until the PR is merged.
+    tech: GitHub reviews
+    talksTo: [log]
+    kind: core
+  - id: log
+    name: Tracking file
+    role: Records each stage with dates, links, lines changed, tests added and review rounds.
+    tech: Markdown table
+    talksTo: [portfolio]
+    kind: offline
+  - id: portfolio
+    name: Portfolio
+    role: Lists the three PRs with one paragraph each and the table of measures.
+    tech: Portfolio site
+    talksTo: []
+    kind: offline
+flow:
+  - component: shortlist
+    text: >-
+      picks small, unclaimed issues from the tracker, skipping any near a **release freeze**; the first one starts in
+      the first week.
+  - component: discuss
+    text: posts the proposed approach on the issue and waits for a maintainer to agree before the first commit.
+  - component: branch
+    text: >-
+      first adds a test that reproduces the bug and **fails**, then the fix that makes it pass, with the full local
+      suite still green.
+  - component: branch
+    text: >-
+      follows the contribution guide: formatting, signed-off commits and a changelog entry, and for a performance
+      change a before-and-after benchmark.
+  - component: pr
+    text: opens a draft linked to the issue with `gh pr create --draft` and marks it ready once CI is green.
+  - component: review
+    text: answers every comment with a commit or a reply, and counts the rounds until merge.
+  - component: log
+    text: >-
+      stores days from first commit to merge, time spent waiting and the measured gain, which feed the **portfolio**
+      entry.
+interface:
+  lang: shell
+  code: |
+    gh issue view 1234 --comments
+    git switch -c fix-1234-sampler-seed
+    pytest tests/test_sampler.py -k seed   # fails
+    # ... the fix ...
+    pytest tests/test_sampler.py           # passes
+    pre-commit run --all-files
+    git commit -s -m "Fix seeded sampling (#1234)"
+    gh pr create --draft --fill
+decisions:
+  - choice: One project, two at most
+    instead: One PR in each of several projects
+    why: >-
+      A source build with its test suite takes hours (CUDA for vLLM and SGLang, CMake for MuJoCo), and conventions
+      are learned once. Spend the 5 h of setup once and reuse it for all three PRs.
+  - choice: Small issues, started in week one
+    instead: One ambitious feature
+    why: >-
+      Merge time is outside your control, and a large first PR can stall for weeks. Three small merged changes beat
+      one big open one; try a bigger one once review has gone well.
+  - choice: Failing test before the fix
+    instead: Fix first, tests if asked
+    why: >-
+      The done-when needs tests that fail without the change, and a reproducing test is also the clearest bug report
+      a maintainer can read.
+watchOut: >-
+  An issue that is too large or already claimed stalls the first pull request for weeks. Ask on the issue first, keep
+  the change small, and open the first PR in the first week.

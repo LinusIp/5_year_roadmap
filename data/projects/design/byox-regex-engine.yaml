@@ -1,0 +1,109 @@
+overview: >-
+  A regular-expression library that never backtracks, so it stays fast on patterns that make other engines take
+  seconds. A parser turns the pattern into an AST, a compiler lowers it to a Thompson NFA (a small program of char,
+  split, jump, save and match instructions), and a Pike VM runs all possible matches at once, one input character at a
+  time. Each thread carries its own capture slots, and the order of the thread list encodes priority, so greedy and
+  lazy quantifiers give the same captures as Python's re.
+learn:
+  - name: Recursive-descent parsing
+    ref: crafting-interpreters
+  - name: Thompson NFA construction
+  - name: Pike VM threads
+  - name: Leftmost-first priority
+  - name: Catastrophic backtracking
+stats:
+  - value: ≥ 300
+    label: borrowed test cases pass
+  - value: < 10 ms
+    label: (a?){30}a{30} on 30 a's
+  - value: Linear
+    label: match time up to 10 MB of input
+components:
+  - id: api
+    name: Match API
+    role: Exposes compile, find and find_all, and caches compiled programs.
+    tech: Rust
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: Parser
+    role: Builds the AST and reports errors with their position in the pattern.
+    tech: Rust
+    talksTo: [compiler]
+    kind: core
+  - id: compiler
+    name: NFA compiler
+    role: Lowers the AST to NFA instructions and expands counted repetition.
+    tech: Rust
+    talksTo: [vm]
+    kind: core
+  - id: vm
+    name: Pike VM
+    role: Steps a priority-ordered thread list over the input and returns the match and captures.
+    tech: Rust
+    talksTo: []
+    kind: core
+  - id: suite
+    name: Test harness
+    role: Runs cases borrowed from RE2 or Rust regex and lists the skipped features.
+    tech: Rust tests
+    talksTo: [api, pyre]
+    kind: offline
+  - id: pyre
+    name: Python re
+    role: The backtracking engine used as the reference for captures and the timing comparison.
+    tech: Python re
+    talksTo: []
+    kind: external
+flow:
+  - component: api
+    text: receives `find_all("(a+?)b", text)` and looks up the compiled program in its cache.
+  - component: parser
+    text: >-
+      parses the group, the lazy `+?` and the literal, and rejects backreferences with a clear error and position.
+  - component: compiler
+    text: >-
+      emits `save`, `char`, `split` and `match` instructions; for the lazy loop, `split` lists the **exit first** so it
+      is preferred.
+  - component: vm
+    text: >-
+      adds threads depth-first in split order, skipping any `pc` already on this step's list, which keeps the work
+      per character bounded by the program size.
+  - component: vm
+    text: >-
+      stops lower-priority threads once a higher one matches (leftmost-first) and returns the match with its capture
+      slots.
+interface:
+  lang: text
+  code: |
+    pattern (a+?)b
+    0  save  0         match start
+    1  save  2         group 1 start
+    2  char  'a'
+    3  split 4, 2      lazy: try exit first
+    4  save  3         group 1 end
+    5  char  'b'
+    6  save  1         match end
+    7  match
+
+    fn find_all(re: &Regex, text: &str)
+        -> impl Iterator<Item = Match>
+decisions:
+  - choice: Pike VM, no backreferences
+    instead: A backtracking matcher
+    why: >-
+      Backtracking takes seconds on (a?){30}a{30}, and the target is under 10 ms. Backreferences cannot run in linear
+      time, so they are listed and skipped, as RE2 does.
+  - choice: Leftmost-first semantics
+    instead: POSIX leftmost-longest
+    why: >-
+      The borrowed suite and Python's re both expect Perl-style priority, so captures can be compared case by case.
+  - choice: Rust for the VM loop
+    instead: Python throughout
+    why: >-
+      Throughput on a 100 MB log file is measured in MB/s, and a Python VM loop would hide the algorithm behind
+      interpreter cost. Prototype in Python if you like, then port the VM.
+watchOut: >-
+  Adding threads out of order loses priority, so lazy quantifiers act greedy and captures disagree with Python's re.
+  Add threads depth-first in split order and skip any pc already on the list, which also stops empty loops like
+  (a*)* cycling forever.

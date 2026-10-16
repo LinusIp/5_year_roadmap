@@ -1,0 +1,52 @@
+overview: >-
+  Two agent setups run on the same 20 tasks: a single agent, and a pair where a planner writes steps, an executor
+  carries them out and a critic approves or sends work back. Every call's tokens are logged, so the result is success
+  per dollar for each setup.
+learn:
+  - name: Multi-agent roles
+    ref: hf-agents-course
+  - name: Critic loops
+  - name: Token cost accounting
+components:
+  - id: planner
+    name: Planner
+    role: Turns the task into numbered steps.
+    tech: LLM prompt
+    talksTo: [executor]
+    kind: core
+  - id: executor
+    name: Executor
+    role: Carries out each step and produces the answer.
+    tech: LLM prompt · tools
+    talksTo: [critic]
+    kind: core
+  - id: critic
+    name: Critic
+    role: Checks the answer against the task and approves or returns it with one reason.
+    tech: LLM prompt
+    talksTo: [ledger]
+    kind: core
+  - id: ledger
+    name: Cost ledger
+    role: Logs tokens and price per call and the pass or fail of each task.
+    tech: Python · CSV
+    talksTo: []
+    kind: offline
+flow:
+  - component: planner
+    text: receives one of the 20 tasks and writes a short plan.
+  - component: executor
+    text: follows the plan and returns a candidate answer.
+  - component: critic
+    text: approves, or sends it back with a reason, at most **2** rounds.
+  - component: ledger
+    text: adds up `input_tokens` and `output_tokens` per task for both setups and divides successes by dollars.
+decisions:
+  - choice: Cap the critic at 2 rounds
+    instead: Loop until the critic approves
+    why: >-
+      Unbounded loops make cost per task unpredictable and can spin forever on a hard task. Two rounds show whether
+      the critic helps at all; raise the cap only if round 2 still fixes many tasks.
+watchOut: >-
+  A critic that approves almost everything adds cost and no quality. Log its approval rate, and seed a few known-bad
+  answers to check that it rejects them.

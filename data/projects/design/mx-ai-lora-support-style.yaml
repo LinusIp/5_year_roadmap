@@ -1,0 +1,108 @@
+overview: >-
+  A training pipeline that teaches a small open model the brand's support tone. It builds 2,000 reply pairs from
+  public support dialogues rewritten in the brand's style, trains LoRA adapters (small extra weight matrices, so only
+  a few million parameters learn) on one 24 GB GPU, merges and quantises the result, and serves it with llama.cpp.
+  A pairwise judge, checked against 50 human labels, decides whether it really beats few-shot prompting of the same
+  base model.
+learn:
+  - name: LoRA and QLoRA
+    ref: hf-llm-course
+  - name: Instruction datasets
+    ref: mlabonne-llm-course
+  - name: Data filtering
+  - name: Pairwise win rate
+  - name: Quantised serving
+    ref: llama-cpp
+stats:
+  - value: ≥ 60%
+    label: win rate vs few-shot base
+  - value: < 3 h
+    label: training on one 24 GB GPU
+  - value: < $30
+    label: serving a month
+components:
+  - id: sources
+    name: Public dialogues
+    role: Open customer-support conversations used as the raw questions.
+    tech: Hugging Face datasets
+    talksTo: [builder]
+    kind: external
+  - id: builder
+    name: Dataset builder
+    role: Rewrites replies in brand style, filters and dedupes into 2,000 pairs.
+    tech: Python · LLM API
+    talksTo: [trainer]
+    kind: core
+  - id: trainer
+    name: LoRA trainer
+    role: Trains adapters on a 3B to 8B base with chat formatting.
+    tech: PEFT · TRL
+    talksTo: [gpu, export]
+    kind: core
+  - id: gpu
+    name: 24 GB GPU
+    role: The single card training must fit.
+    tech: Consumer GPU
+    talksTo: []
+    kind: external
+  - id: export
+    name: Merge and export
+    role: Merges adapters into the base and converts to a 4-bit GGUF file.
+    tech: llama.cpp tools
+    talksTo: [server]
+    kind: core
+  - id: server
+    name: Reply server
+    role: Serves the merged model on a small CPU VM.
+    tech: llama.cpp server
+    talksTo: [judge]
+    kind: core
+  - id: judge
+    name: Pairwise judge
+    role: Compares fine-tuned and few-shot replies on held-out questions.
+    tech: LLM API · Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: builder
+    text: rewrites each public reply in the brand voice, drops ones over 120 words or with invented order numbers, and removes near-duplicate openings.
+  - component: trainer
+    text: loads the base in 4-bit (QLoRA) on the **24 GB GPU**, trains `r=16` adapters for 2 epochs and logs loss on a held-out 10%.
+  - component: export
+    text: merges the adapters, quantises to `Q4_K_M` and checks the GGUF answers like the PyTorch model on 20 prompts.
+  - component: server
+    text: answers held-out customer questions at a measured tokens per second, which sets the VM size and the monthly cost.
+  - component: judge
+    text: shows each pair of replies in both orders and counts a win only when both agree; 50 human labels check the judge.
+interface:
+  lang: python
+  code: |
+    bnb = BitsAndBytesConfig(load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.bfloat16)
+    lora = LoraConfig(r=16, lora_alpha=32,
+            lora_dropout=0.05,
+            target_modules=["q_proj", "k_proj",
+                            "v_proj", "o_proj"])
+    cfg = SFTConfig(num_train_epochs=2,
+            learning_rate=2e-4,
+            per_device_train_batch_size=8,
+            max_seq_length=1024, bf16=True)
+decisions:
+  - choice: QLoRA adapters
+    instead: Full fine-tuning
+    why: >-
+      Full fine-tuning an 8B model needs several times the memory of one 24 GB card. Adapters on a 4-bit base fit
+      and train 2,000 short pairs well inside 3 hours.
+  - choice: Self-host a quantised model
+    instead: Keep calling a hosted API
+    why: >-
+      20k replies a month is about 670 a day, which a small CPU VM running a 4-bit model can serve within $30.
+      Revisit if volume grows past what one VM's tokens per second can handle.
+  - choice: Judge with a different model family
+    instead: Judge with the model that wrote the data
+    why: >-
+      A judge prefers text that sounds like its own. Using another family, plus 50 human labels, keeps the 60%
+      win rate honest.
+watchOut: >-
+  Synthetic rewrites often start the same way ("Hi there, thanks so much…") and the model learns the template, not
+  the tone. Dedupe openings, cap epochs, and read 30 outputs by hand.

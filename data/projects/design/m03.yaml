@@ -1,0 +1,119 @@
+overview: >-
+  An offline question-answering tool over a folder of your notes. An ingester splits Markdown and PDF files into
+  chunks of 300–800 tokens, turns each into an embedding (a vector of numbers where similar meanings sit close
+  together) and stores them in Chroma. At question time the retriever fetches the 5 closest chunks and drops any below
+  a similarity threshold; a local model answers from the numbered chunks and cites them, or says "not in my notes". A
+  30-question eval set scores retrieval and answers after every change.
+learn:
+  - name: Chunking
+    ref: llm-zoomcamp
+  - name: Embeddings and vector search
+    ref: llm-zoomcamp
+  - name: Grounded citations
+  - name: Hit rate and MRR
+    ref: llm-zoomcamp
+  - name: Local model serving
+    ref: llama-cpp
+stats:
+  - value: ≥ 80 %
+    label: retrieval hit rate at k = 5
+  - value: ≥ 4 of 5
+    label: unanswerable questions refused
+  - value: '30'
+    label: questions in the eval set
+components:
+  - id: notes
+    name: Notes folder
+    role: Your Markdown files and course PDFs.
+    tech: Markdown · PDF
+    talksTo: [ingester]
+    kind: external
+  - id: ingester
+    name: Ingester
+    role: Extracts text, splits it at headings into overlapping chunks with file, heading and page, and embeds them.
+    tech: PyMuPDF · sentence-transformers
+    talksTo: [index]
+    kind: core
+  - id: index
+    name: Vector index
+    role: Stores every chunk with its embedding and metadata on disk.
+    tech: Chroma
+    talksTo: [retriever]
+    kind: core
+  - id: retriever
+    name: Retriever
+    role: Embeds the question with the same model, takes the top k chunks and drops those under the threshold.
+    tech: Typer CLI · bge-small
+    talksTo: [generator]
+    kind: core
+  - id: generator
+    name: Generator
+    role: Builds a prompt of numbered chunks with the instruction to cite them, and attaches the sources.
+    tech: Python
+    talksTo: [llm]
+    kind: core
+  - id: llm
+    name: Local model
+    role: A 3–8B instruct model at 4-bit that writes the answer on your own machine.
+    tech: Ollama · llama.cpp
+    talksTo: []
+    kind: external
+  - id: evaluator
+    name: Eval script
+    role: Replays the 30 questions and scores hit rate, MRR, answer quality and refusals.
+    tech: Python · CSV
+    talksTo: [retriever]
+    kind: offline
+flow:
+  - component: ingester
+    text: >-
+      walks `notes/`, splits each file at headings into chunks of 300–800 tokens with overlap, keeping tables and
+      code blocks whole, and embeds each chunk.
+  - component: index
+    text: stores each chunk with `file`, `heading` and `page`, and the name of the embedding model that made it.
+  - component: retriever
+    text: >-
+      receives `notes ask "…"`, embeds the question with the **same** model, fetches `k = 5` chunks and drops any
+      below `min_score`.
+  - component: generator
+    text: >-
+      returns "not in my notes" if no chunk is left; otherwise numbers the chunks `[1]` to `[5]` and asks for an
+      answer that cites them.
+  - component: llm
+    text: writes the answer with networking disabled; the generator rejects any citation number it was never given.
+  - component: evaluator
+    text: >-
+      replays all 30 questions, 5 of them unanswerable, and records hit rate at k = 1, 3 and 5, MRR, a 0–2 answer
+      score and refusal accuracy.
+interface:
+  lang: shell
+  code: |
+    $ notes ask "What happens in a B-tree split?"
+    The median key moves up to the parent [1]
+    and a new sibling node is created [2].
+
+    Sources
+    [1] databases.md > B-trees
+    [2] cmu-445-lecture-08.pdf > page 14
+
+    $ notes ask "Who won the 1998 World Cup?"
+    Not in my notes (best score 0.31).
+decisions:
+  - choice: A similarity threshold that refuses
+    instead: Always answering from the top k chunks
+    why: >-
+      A small local model will answer from whatever it is given, so a weak match becomes a confident wrong answer.
+      The threshold is what lets the 5 unanswerable questions pass.
+  - choice: Heading-aware chunks of 300–800 tokens
+    instead: Fixed 500-token windows
+    why: >-
+      Notes are organised by heading, so a heading is a natural unit and gives the citation its label. Compare two
+      chunk sizes on the eval set before settling.
+  - choice: Local 4-bit model, not a hosted API
+    instead: A hosted LLM API
+    why: >-
+      The tool must run fully offline on your own notes. A 3–8B model at 4-bit fits a laptop; check that its context
+      window holds 5 chunks plus the prompt, or they are silently cut.
+watchOut: >-
+  Tuning the threshold and chunk size on the questions you report inflates every number. Keep 10 of the 30 as a dev
+  split for tuning and report on the other 20.

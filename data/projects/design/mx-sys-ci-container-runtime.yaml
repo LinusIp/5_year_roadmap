@@ -1,0 +1,121 @@
+overview: >-
+  A small runtime that runs each of Forge Labs' untrusted CI jobs in its own Linux sandbox. The launcher creates a
+  cgroup v2 group with memory, CPU and process limits, then clones a child into new PID, mount, UTS, IPC and network
+  namespaces (private views of processes, mounts, hostname, shared memory and network) straight inside that group.
+  The child mounts a copy-on-write overlay over a cached root filesystem, switches into it, drops capabilities,
+  loads a seccomp filter (a list of system calls it may make) and execs the job. A supervisor reaps processes,
+  collects logs, exit code and resource use, and tears the sandbox down.
+learn:
+  - name: Linux namespaces
+  - name: cgroup v2 limits
+  - name: Overlay filesystems
+  - name: Mount propagation
+  - name: Capabilities and seccomp
+  - name: PID 1 and zombie reaping
+stats:
+  - value: < 150 ms
+    label: start from cached image
+  - value: "50"
+    label: concurrent jobs on 8 cores
+  - value: "0"
+    label: escapes in the hostile-job suite
+components:
+  - id: ci
+    name: CI scheduler
+    role: Sends each pull-request job with its image and limits.
+    tech: Existing CI
+    talksTo: [launcher]
+    kind: external
+  - id: launcher
+    name: Namespace launcher
+    role: Clones the job process into new namespaces inside its cgroup.
+    tech: Rust or Go · clone3
+    talksTo: [cgroup, overlay]
+    kind: core
+  - id: cgroup
+    name: Cgroup controller
+    role: Creates the job's group, writes limits, reads usage and kills it at the end.
+    tech: cgroup v2 files
+    talksTo: []
+    kind: core
+  - id: overlay
+    name: Overlay manager
+    role: Mounts the cached image read-only with a per-job writable upper layer.
+    tech: overlayfs
+    talksTo: [net]
+    kind: core
+  - id: net
+    name: Network setup
+    role: Adds a veth pair to the CI bridge, or only loopback in no-network mode.
+    tech: netlink · bridge
+    talksTo: [drop]
+    kind: core
+  - id: drop
+    name: Privilege drop
+    role: Removes capabilities, sets no_new_privs and loads the seccomp filter.
+    tech: prctl · seccomp-bpf
+    talksTo: [supervisor]
+    kind: core
+  - id: supervisor
+    name: Supervisor
+    role: Runs as the job's init, captures output, records exit code and usage.
+    tech: Rust or Go
+    talksTo: []
+    kind: core
+flow:
+  - component: launcher
+    text: >-
+      takes job 4711 and calls `clone3` with the five `CLONE_NEW*` flags and `CLONE_INTO_CGROUP`, so the child is
+      limited from its first instruction; a pipe holds it until setup is done.
+  - component: cgroup
+    text: >-
+      has set `memory.max=2G`, `pids.max=256` and `cpu.max`, so a fork bomb hits the process ceiling and a 4 GB
+      allocation is killed inside the job only.
+  - component: overlay
+    text: >-
+      makes every mount **private** first, mounts the cached Alpine image as lower and `job-4711/upper` as upper,
+      then `pivot_root`s into it and unmounts the host root.
+  - component: net
+    text: gives the job a veth on bridge `ci0` with NAT, or nothing but loopback for `--no-network` jobs.
+  - component: drop
+    text: drops all capabilities, sets `no_new_privs`, blocks calls like `mount` and `ptrace`, and `execve`s the job.
+  - component: supervisor
+    text: >-
+      reaps zombies as PID 1, streams output to the job log, then reads `memory.peak` and `cpu.stat`, writes
+      `cgroup.kill`, and removes the upper layer.
+interface:
+  lang: c
+  code: |
+    /* host: limits first, then clone into them */
+    write("ci/job-4711/memory.max", "2G");
+    write("ci/job-4711/pids.max", "256");
+    clone3(&(struct clone_args){ .flags =
+        CLONE_NEWPID | CLONE_NEWNS | CLONE_NEWUTS |
+        CLONE_NEWIPC | CLONE_NEWNET |
+        CLONE_INTO_CGROUP, .cgroup = cg_fd }, sz);
+    /* child */
+    mount(0, "/", 0, MS_REC | MS_PRIVATE, 0);
+    mount("overlay", root, "overlay", 0,
+      "lowerdir=img,upperdir=up,workdir=wk");
+    pivot_root(root, old); umount2(old, MNT_DETACH);
+    prctl(PR_SET_NO_NEW_PRIVS, 1); seccomp(filter);
+    execve(argv[0], argv, envp);
+decisions:
+  - choice: Own runtime on namespaces and cgroups
+    instead: Docker or another full container engine
+    why: >-
+      A root daemon and image layers add weight the team wants to avoid, and the start budget is 150 ms. Revisit
+      if jobs need image builds or registries.
+  - choice: Overlay on a cached image
+    instead: Copy the root filesystem per job
+    why: >-
+      Copying even a small image 50 times blows the start budget and the disk; an overlay mount takes
+      milliseconds and gives each job a private writable layer.
+  - choice: One cgroup per job
+    instead: One shared cgroup for all jobs
+    why: >-
+      Per-job limits contain a fork bomb to its own job, and `cgroup.kill` removes every leftover process in one
+      write, which avoids cleanup races.
+watchOut: >-
+  Most hosts make `/` a shared mount, so mounts inside the job can propagate back to the host. Mark the whole tree
+  `MS_REC | MS_PRIVATE` before mounting anything.

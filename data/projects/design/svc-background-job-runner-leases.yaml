@@ -1,0 +1,64 @@
+overview: >-
+  A job queue stored in a Postgres table: workers claim a job with `FOR UPDATE SKIP LOCKED`, hold it under a lease
+  they renew by heartbeat, retry failures with backoff, and move a job to a dead-letter table after its last attempt.
+learn:
+  - name: SKIP LOCKED claiming
+  - name: Visibility leases
+  - name: Idempotent handlers
+  - name: Exponential backoff
+components:
+  - id: producer
+    name: Producer
+    role: Inserts jobs with a payload, `run_at` and `max_attempts`.
+    tech: Python
+    talksTo: [jobs]
+    kind: external
+  - id: jobs
+    name: Jobs table
+    role: Holds status, `attempts`, `run_at` and `lease_until` for every job.
+    tech: PostgreSQL
+    talksTo: [worker]
+    kind: core
+  - id: worker
+    name: Workers
+    role: Four processes that claim, heartbeat, run and finish jobs.
+    tech: Python
+    talksTo: [jobs, dlq]
+    kind: core
+  - id: dlq
+    name: Dead letters
+    role: Keeps jobs that failed every attempt, with their last error.
+    tech: PostgreSQL table
+    talksTo: []
+    kind: core
+flow:
+  - component: worker
+    text: claims one ready job whose lease is free or expired with `FOR UPDATE SKIP LOCKED`, and sets `lease_until = now() + 30 s`.
+  - component: worker
+    text: runs the handler and extends `lease_until` every 10 s; a killed worker stops renewing, so the job is claimed again.
+  - component: jobs
+    text: on failure gets `attempts + 1` and a later `run_at` of 2^attempts seconds; on success is marked done.
+  - component: dlq
+    text: receives the job and its error once `attempts` reaches `max_attempts`.
+interface:
+  lang: sql
+  code: |
+    UPDATE jobs SET status = 'running',
+      lease_until = now() + interval '30 s'
+    WHERE id = (
+      SELECT id FROM jobs
+      WHERE run_at <= now()
+        AND (status = 'ready'
+             OR lease_until < now())
+      ORDER BY run_at
+      FOR UPDATE SKIP LOCKED LIMIT 1)
+    RETURNING id, payload;
+decisions:
+  - choice: Postgres table, not a message broker
+    instead: RabbitMQ or Redis queues
+    why: >-
+      Jobs commit in the same transaction as the data that creates them, and one database is easy to inspect.
+      Revisit when throughput with 4 workers needs thousands of jobs a second.
+watchOut: >-
+  Re-delivery after a crash means a handler can run twice, so handlers must be idempotent. A lease shorter than the
+  job's runtime makes two workers run it at once.

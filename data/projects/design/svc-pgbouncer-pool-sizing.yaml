@@ -1,0 +1,50 @@
+overview: >-
+  A load experiment that sends the same k6 workload to Postgres directly and then through PgBouncer in transaction
+  mode, sweeping the server pool size and plotting throughput and p99 to pick one size you can defend.
+learn:
+  - name: Connection pooling
+  - name: Transaction pooling
+  - name: Tail latency
+components:
+  - id: k6
+    name: k6
+    role: Runs the same request mix at 500 concurrent clients.
+    tech: k6
+    talksTo: [app]
+    kind: core
+  - id: app
+    name: App
+    role: A small API that opens connections to PgBouncer.
+    tech: Python or Go
+    talksTo: [pgbouncer]
+    kind: core
+  - id: pgbouncer
+    name: PgBouncer
+    role: Lends one of `default_pool_size` server connections to a client for each transaction.
+    tech: PgBouncer
+    talksTo: [db]
+    kind: core
+  - id: db
+    name: Postgres
+    role: Does the work; CPU and lock waits are recorded per run.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+flow:
+  - component: k6
+    text: drives 500 virtual users for 2 minutes per run.
+  - component: app
+    text: opens many client connections; in the baseline run they go straight to Postgres.
+  - component: pgbouncer
+    text: maps them onto `default_pool_size` server connections, swept over 5, 10, 20, 40 and 80.
+  - component: db
+    text: peaks near a small multiple of its CPU cores; the plot shows throughput flattening and p99 rising after it.
+decisions:
+  - choice: Transaction pooling
+    instead: Session pooling
+    why: >-
+      Session mode ties a server connection to a client for its whole life, so 500 clients still need 500
+      connections. Use session mode if the app needs prepared statements or temp tables.
+watchOut: >-
+  Transaction mode hands each transaction a different server connection, so `SET`, temp tables and advisory locks
+  leak or vanish. Use `SET LOCAL` inside the transaction.

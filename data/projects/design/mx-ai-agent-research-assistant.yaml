@@ -1,0 +1,110 @@
+overview: >-
+  A hand-written agent loop: the model either calls one of three tools (search, open_document, calculate) or gives a
+  final answer, and the loop runs the tool and feeds the result back. A budget enforcer stops it at 15 tool calls or
+  a token limit and asks for the best answer so far, and every step is written to a JSON trace analysts can audit.
+  The same 60 questions run through a single-shot RAG baseline to prove the tools are worth it.
+learn:
+  - name: Tool calling
+    ref: hf-agents-course
+  - name: Agent loop
+    ref: hf-agents-course
+  - name: Step and token budgets
+  - name: Trace logging
+  - name: Agent evaluation
+stats:
+  - value: +15 points
+    label: accuracy vs single-shot RAG
+  - value: ≤ 15
+    label: tool calls, hard cap
+  - value: < $0.10
+    label: per question
+components:
+  - id: analyst
+    name: Analyst
+    role: Asks a factual question through a small CLI.
+    tech: CLI
+    talksTo: [loop]
+    kind: external
+  - id: loop
+    name: Agent loop
+    role: Alternates model calls and tool runs until a final answer or a stop.
+    tech: Python
+    talksTo: [budget, llm, tools, trace]
+    kind: core
+  - id: budget
+    name: Budget enforcer
+    role: Counts steps, tokens and cost, and forces a final answer at the cap.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Picks the next tool call or writes the answer.
+    tech: Tool-calling LLM
+    talksTo: []
+    kind: external
+  - id: tools
+    name: Tool registry
+    role: Validates arguments and runs search, open_document and calculate.
+    tech: Python
+    talksTo: [corpus]
+    kind: core
+  - id: corpus
+    name: Report index
+    role: Full-text index over the 3,000 reports.
+    tech: SQLite FTS5
+    talksTo: []
+    kind: core
+  - id: trace
+    name: Trace log
+    role: One JSON line per step with arguments, results, tokens and cost.
+    tech: JSONL
+    talksTo: [evaluator]
+    kind: offline
+  - id: evaluator
+    name: Evaluator
+    role: Scores the agent and the RAG baseline on the 60 questions.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: loop
+    text: sends the question and the three tool schemas to the model.
+  - component: budget
+    text: checks the step count against 15 and the spend against $0.10 before every model call.
+  - component: tools
+    text: runs `search("rent burden 2019")`; an identical repeat call returns "already searched, try other terms" instead.
+  - component: corpus
+    text: returns the top 5 report ids with snippets, which go back to the model as the tool result.
+  - component: loop
+    text: repeats until the model answers or the cap hits, then asks for a **final answer** from what it has, marked as budget-stopped.
+  - component: trace
+    text: holds every step, so the evaluator can count tool calls and analysts can see why the agent answered as it did.
+interface:
+  lang: json
+  code: |
+    { "q": "q17", "step": 3,
+      "tool": "search",
+      "args": { "query": "rent burden 2019" },
+      "result_ids": ["r1042", "r0877", "r2210"],
+      "tokens_in": 1830, "tokens_out": 42,
+      "cost_usd": 0.0021,
+      "budget_left": { "steps": 12 } }
+decisions:
+  - choice: A loop written by hand
+    instead: An agent framework
+    why: >-
+      The whole loop is about 100 lines, and each step must show up in the audit trace. Writing it yourself shows
+      exactly where budgets and errors are handled.
+  - choice: Hard cap with a graceful stop
+    instead: Let the model decide when to stop
+    why: >-
+      Agents loop on the same search. A cap of 15 with a final "answer from what you have" call keeps cost under
+      $0.10 and still returns something useful.
+  - choice: Compare with single-shot RAG
+    instead: Report agent accuracy alone
+    why: >-
+      Tools add cost and latency, and the +15 point gap on the same 60 questions is what justifies them.
+watchOut: >-
+  If most eval questions can be answered from one retrieved passage, the agent will not beat the baseline and the
+  test proves nothing. Write questions that need two reports or a calculation.

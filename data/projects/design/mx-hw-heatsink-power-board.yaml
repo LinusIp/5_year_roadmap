@@ -1,0 +1,92 @@
+overview: >-
+  A sizing study that follows the heat from one MOSFET junction to the air outside the sealed box. A loss calculator
+  turns the 3 kW operating point into conduction and switching watts per MOSFET, and a thermal resistance network
+  (a chain of °C-per-watt steps, like resistors in series) adds up the temperature rise from junction through case,
+  pad and heat sink to the 40 °C enclosure air. Candidate extrusions and fans are compared in that network, the best
+  one is checked in a simple simulation, and a bench test with power resistors as heaters confirms the model within
+  10 °C.
+learn:
+  - name: MOSFET power loss
+    ref: cu-boulder-power-electronics
+  - name: Thermal resistance networks
+  - name: Fan curve and system curve
+  - name: Interface resistance
+  - name: Model vs bench validation
+stats:
+  - value: ≤ 110 °C
+    label: junction at 3 kW, 40 °C ambient
+  - value: ±10 °C
+    label: model vs bench
+  - value: < 600 g
+    label: heat sink mass
+components:
+  - id: losses
+    name: Loss calculator
+    role: Computes conduction loss I²·R_ds(on) and switching loss per MOSFET at the 3 kW point.
+    tech: Python
+    talksTo: [network]
+    kind: core
+  - id: network
+    name: Thermal network
+    role: Adds junction-case, pad and sink-air resistances to predict junction temperature.
+    tech: Python
+    talksTo: [candidates]
+    kind: core
+  - id: candidates
+    name: Heat-sink options
+    role: Holds extrusion sizes with their thermal resistance versus airflow, mass and cost.
+    tech: Spreadsheet · Python
+    talksTo: [fan]
+    kind: core
+  - id: fan
+    name: Fan operating point
+    role: Finds where the fan curve meets the heat sink's pressure-drop curve, giving the real airflow.
+    tech: Python · SciPy
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Simulation
+    role: Conduction model of the board and sink that shows hotspots between MOSFETs.
+    tech: Open-source FEM
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Bench test
+    role: Power resistors mounted like the MOSFETs, with four thermocouples, in the real enclosure.
+    tech: Power resistors · thermocouples
+    talksTo: []
+    kind: external
+flow:
+  - component: losses
+    text: turns phase current and switching data into watts per device, for example `P = I²·R_ds(on) + ½·V·I·(t_r + t_f)·f_sw`.
+  - component: network
+    text: computes `Tj = T_air + P × (R_jc + R_pad + R_sa)`, with `T_air` the inside air, which is hotter than the 40 °C ambient in a sealed box.
+  - component: candidates
+    text: lists each extrusion's `R_sa` at the airflow it will really get, with mass and cost against the 600 g and $25 limits.
+  - component: fan
+    text: intersects the fan curve with the sink's pressure drop; the **airflow comes from that crossing**, not the fan's free-air rating.
+  - component: sim
+    text: checks the chosen design for hotspots, such as a middle MOSFET heated by its neighbours.
+  - component: bench
+    text: heats resistors with the same watts and compares thermocouple readings with the model, aiming for under `10 °C` difference.
+interface:
+  lang: python
+  code: |
+    def mosfet_loss(i_rms: float, v_bus: float,
+                    f_sw: float, dev: Mosfet) -> float:
+        """Watts per device: conduction + switching."""
+
+    def junction_temp(p_w: float, t_air: float,
+                      r_jc: float, r_pad: float,
+                      r_sa: float) -> float:
+        return t_air + p_w * (r_jc + r_pad + r_sa)
+
+    # pass if junction_temp(...) <= 110 with margin
+decisions:
+  - choice: Thermal network first, simulation second
+    instead: Start with a full CFD model
+    why: A network ranks a dozen heat sinks in seconds and shows which resistance dominates. Simulation only needs to confirm the winner and its hotspots.
+  - choice: Fan airflow from the operating point
+    instead: Use the fan's rated free-air flow
+    why: A dense extrusion in a 25x15x10 cm box can cut airflow to half the rating. Using the crossing point keeps the 20 percent margin real.
+watchOut: The thermal pad between MOSFET and sink is often the largest single resistance in the chain. Measure or look up its real value at the clamping pressure you use, instead of assuming it is small.

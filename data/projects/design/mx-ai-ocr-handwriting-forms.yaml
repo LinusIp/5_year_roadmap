@@ -1,0 +1,99 @@
+overview: >-
+  An offline, CPU-only digitiser for one fixed intake form. Each scanned page is aligned to the blank template, cut
+  into field crops, and a small recogniser reads each field with a confidence score. The 15% of fields the model is
+  least sure about go to a verification screen, and the result is exported to CSV for the clinic network.
+learn:
+  - name: Image alignment
+  - name: Handwriting recognition
+  - name: CTC decoding
+  - name: Confidence calibration
+  - name: Synthetic training data
+stats:
+  - value: ≥ 98%
+    label: digit-field accuracy
+  - value: ≤ 15%
+    label: fields reviewed
+  - value: < 3 s
+    label: per page on CPU
+components:
+  - id: scanner
+    name: Scanner
+    role: The clinic's scanner or phone photo of a filled form.
+    tech: JPEG · PDF
+    talksTo: [aligner]
+    kind: external
+  - id: aligner
+    name: Template aligner
+    role: Finds matching points between the scan and the blank form and warps the scan onto it.
+    tech: OpenCV ORB · homography
+    talksTo: [cropper]
+    kind: core
+  - id: cropper
+    name: Field cropper
+    role: Cuts each field box from the aligned page using the template's coordinates.
+    tech: OpenCV · JSON template
+    talksTo: [recognizer]
+    kind: core
+  - id: recognizer
+    name: Recognizer
+    role: Reads digits and short text from each crop with a small CNN and CTC decoding.
+    tech: PyTorch CRNN
+    talksTo: [confidence]
+    kind: core
+  - id: confidence
+    name: Confidence model
+    role: Turns recogniser scores into a calibrated chance the field is right and picks the review set.
+    tech: Python · temperature scaling
+    talksTo: [verify]
+    kind: core
+  - id: verify
+    name: Verification UI
+    role: Shows each low-confidence crop next to its reading for a quick fix, then writes the CSV.
+    tech: Flask · HTML
+    talksTo: []
+    kind: core
+  - id: synth
+    name: Form generator
+    role: Composites IAM words and EMNIST digits onto blank forms to make labelled training pages.
+    tech: Python · Pillow
+    talksTo: [recognizer]
+    kind: offline
+flow:
+  - component: aligner
+    text: matches keypoints between the scan and the template and warps the page, rejecting it if fewer than 50 points match.
+  - component: cropper
+    text: cuts the fields listed in `template.json`, such as `age`, `village_code` and `visit_date`, with a small margin.
+  - component: recognizer
+    text: reads each crop in a few milliseconds, digits with a 10-class head and text with CTC (which reads a line without per-letter boxes).
+  - component: confidence
+    text: ranks all fields by calibrated confidence and sends the **bottom 15%** to review.
+  - component: verify
+    text: shows the crop and the guess; the clerk accepts or types the fix, and the page is appended to `forms.csv`.
+interface:
+  lang: json
+  code: |
+    { "page": "clinic07_2026-10-12_p3.jpg",
+      "fields": [
+        { "name": "age", "value": "34",
+          "confidence": 0.993, "review": false },
+        { "name": "village_code", "value": "V17",
+          "confidence": 0.62, "review": true } ],
+      "align_inliers": 212,
+      "ms": 1840 }
+decisions:
+  - choice: Fixed template alignment
+    instead: A general text detector
+    why: >-
+      Every clinic uses the same form, so a homography to the blank template finds every field cheaply on CPU. Revisit
+      if the form changes or several versions are in use.
+  - choice: Small CRNN under 60 MB
+    instead: A large pretrained OCR transformer
+    why: Short fields and digits need little context, and the 3 s per page CPU limit and 60 MB cap rule out big models.
+  - choice: Review the least confident 15%
+    instead: Review everything below a fixed threshold
+    why: >-
+      A fixed share gives the clinics a predictable workload; calibrated confidence makes sure that share holds most
+      of the errors.
+watchOut: >-
+  Synthetic forms are cleaner than real scans, so accuracy drops on real pages, and skewed scans give crops that cut
+  digits in half. Test on a few dozen real scans early and log alignment inliers for every page.

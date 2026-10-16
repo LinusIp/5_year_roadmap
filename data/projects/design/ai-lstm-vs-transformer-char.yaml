@@ -1,0 +1,54 @@
+overview: >-
+  A character-level LSTM and a tiny transformer trained on the same text with parameter counts within 5% of each
+  other and the same token budget. Validation bits per character (lower means better prediction) is plotted against
+  both tokens seen and wall-clock time.
+learn:
+  - name: Character language models
+    ref: karpathy-zero-to-hero
+  - name: Self-attention
+    ref: karpathy-zero-to-hero
+  - name: Bits per character
+  - name: Matched budgets
+components:
+  - id: data
+    name: Text loader
+    role: Encodes one text file into character ids with a single shared vocabulary.
+    tech: Python
+    talksTo: [models]
+    kind: core
+  - id: models
+    name: Two models
+    role: Holds the LSTM and the transformer, sized so parameter counts match within 5%.
+    tech: PyTorch
+    talksTo: [trainer]
+    kind: core
+  - id: trainer
+    name: Trainer
+    role: Trains both for the same number of tokens and logs loss with elapsed time.
+    tech: PyTorch
+    talksTo: [plots]
+    kind: core
+  - id: plots
+    name: Curves
+    role: Plots validation bits per character against tokens and against seconds.
+    tech: matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: data
+    text: builds one character vocabulary and a 90/10 train and validation split used by both models.
+  - component: models
+    text: are resized until their `sum(p.numel())` differ by under 5%.
+  - component: trainer
+    text: trains each on the same token count and context length, logging validation loss and seconds elapsed.
+  - component: plots
+    text: convert loss to **bits per character** (`loss / ln 2`) and draw both curves, with a few samples from each model.
+decisions:
+  - choice: Match tokens seen, and also report time
+    instead: Match only wall-clock time
+    why: >-
+      Tokens make the comparison independent of your GPU; time shows the practical cost, since the transformer
+      parallelizes better. Plotting both avoids arguing over which budget is fair.
+watchOut: >-
+  Different tokenization or context lengths for the two models compares data, not architectures. Share the
+  vocabulary and the context length.

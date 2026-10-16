@@ -1,0 +1,110 @@
+overview: >-
+  A top-down shooter in C++ and SDL2 with no engine, built through five gates: design doc, prototype, vertical slice,
+  beta and release, each with a playtest and a written go or no-go note. The game updates at a fixed 120 Hz tick over
+  plain component arrays that are all allocated at load, so nothing is allocated while playing. Enemies, weapons and
+  waves come from data files, and anonymous telemetry shows whether a balance change actually helped.
+learn:
+  - name: Fixed tick, interpolated render
+    ref: gaffer-on-games
+  - name: Data-oriented entities
+    ref: game-engine-architecture
+  - name: Object pools
+    ref: game-engine-architecture
+  - name: Game feel feedback
+  - name: Milestone go/no-go
+stats:
+  - value: 120 Hz
+    label: fixed simulation tick
+  - value: < 150 MB
+    label: memory, no hot-loop allocation
+  - value: 30 min
+    label: crash-free soak test
+components:
+  - id: loop
+    name: Game loop
+    role: Runs fixed 1/120 s ticks from an accumulator and renders once per display refresh.
+    tech: SDL2
+    talksTo: [director]
+    kind: core
+  - id: data
+    name: Content data
+    role: Loads the 4 enemy types, 2 bosses, 3 weapons and wave scripts from text files at startup.
+    tech: JSON
+    talksTo: [director]
+    kind: core
+  - id: director
+    name: Wave director
+    role: Spawns enemies from the wave script at the right tick into free pool slots.
+    tech: C++17
+    talksTo: [entities]
+    kind: core
+  - id: entities
+    name: Entity storage
+    role: Fixed-capacity component arrays and the systems (move, fire, collide, damage) that run over them.
+    tech: C++17
+    talksTo: [fx, renderer, telemetry]
+    kind: core
+  - id: fx
+    name: Audio and VFX
+    role: Turns hit and death events into sounds, particles and screen shake.
+    tech: SDL2 mixer
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Draws code-made sprites blended between the last two ticks.
+    tech: SDL2 renderer
+    talksTo: []
+    kind: core
+  - id: telemetry
+    name: Telemetry
+    role: Writes anonymous time-to-death and completion per wave for playtest builds.
+    tech: CSV
+    talksTo: [testers]
+    kind: offline
+  - id: testers
+    name: Playtesters
+    role: Four people per milestone whose runs and notes feed the go/no-go note.
+    tech: People
+    talksTo: []
+    kind: external
+flow:
+  - component: data
+    text: has loaded every enemy, weapon and wave file at startup and sized every pool, so no allocation follows.
+  - component: loop
+    text: adds the frame's real time to an accumulator and calls `tick(world, input, data)` once per 1/120 s.
+  - component: director
+    text: checks the wave script for this tick and fills free pool slots with new enemies.
+  - component: entities
+    text: run move, fire, collide and damage over the arrays in that order and push hits and deaths into a fixed **event buffer**.
+  - component: fx
+    text: reads the event buffer, plays sounds, emits particles and adds screen shake.
+  - component: renderer
+    text: draws everything blended by `alpha` between the previous and current tick and presents at display rate.
+interface:
+  lang: cpp
+  code: |
+    constexpr double kTick = 1.0 / 120.0;
+    struct World {                // sized at load
+      Pool<Transform, 4096> xf;
+      Pool<Velocity, 4096> vel;
+      Pool<Health, 1024> hp;
+      EventBuffer<512> events;      // hits, deaths, sfx
+    };
+    void tick(World& w, const Input& in,
+              const GameData& d);
+    void render(const World& prev, const World& cur,
+                float alpha, Renderer& r);
+decisions:
+  - choice: Fixed pools sized at load
+    instead: new and delete per bullet and enemy
+    why: The release gate requires no allocation in the hot loop and under 150 MB; pools make both true by construction and remove hitches.
+  - choice: Enemies and waves as data files
+    instead: Hard-coded spawn logic
+    why: Balance changes after each playtest must be quick and visible in diffs, and telemetry compares the before and after.
+  - choice: 120 Hz tick independent of display
+    instead: Simulating once per rendered frame
+    why: Bullet patterns must be the same on a 60 Hz laptop and a 144 Hz monitor.
+watchOut: >-
+  Scope creep before the vertical slice. Freeze the feature list in the design doc and make one level feel finished
+  before adding enemy types three and four.

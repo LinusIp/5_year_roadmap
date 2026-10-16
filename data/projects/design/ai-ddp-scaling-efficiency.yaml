@@ -1,0 +1,47 @@
+overview: >-
+  A measurement of how training throughput grows from 1 to 2 to 4 processes with PyTorch DDP (distributed data
+  parallel, where each process holds a model copy and gradients are averaged with all-reduce). Scaling efficiency is
+  throughput at N divided by N times throughput at 1, and profiling shows how much of each step is communication.
+learn:
+  - name: Data parallel training
+    ref: ultra-scale-playbook
+  - name: All-reduce
+  - name: Gradient buckets
+  - name: Scaling efficiency
+components:
+  - id: launcher
+    name: Launcher
+    role: Starts N ranks with torchrun and fixes per-device batch size.
+    tech: torchrun
+    talksTo: [ddp]
+    kind: core
+  - id: ddp
+    name: DDP trainer
+    role: Runs forward and backward and overlaps gradient all-reduce with backward.
+    tech: PyTorch DDP · NCCL or gloo
+    talksTo: [profiler]
+    kind: core
+  - id: profiler
+    name: Profiler
+    role: Times compute and all-reduce per step and writes the efficiency table.
+    tech: torch.profiler
+    talksTo: []
+    kind: core
+flow:
+  - component: launcher
+    text: starts `torchrun --nproc_per_node=N` for N = 1, 2, 4 with the same per-device batch, so the global batch grows with N.
+  - component: ddp
+    text: syncs gradients in buckets during backward; the run is repeated with `bucket_cap_mb` of 5, 25 and 100.
+  - component: profiler
+    text: records samples per second after warmup and the share of step time in all-reduce kernels.
+  - component: profiler
+    text: computes **efficiency** `= T_N / (N · T_1)` and names the bottleneck, for example communication or data loading.
+decisions:
+  - choice: Fixed per-device batch
+    instead: Fixed global batch split across ranks
+    why: >-
+      Fixed per-device work keeps each GPU equally busy, so a drop in efficiency points at communication. A fixed
+      global batch mixes in the effect of smaller per-GPU batches.
+watchOut: >-
+  Confusing global and per-device batch size makes throughput numbers wrong by a factor of N. Print both at startup
+  on rank 0 and count samples, not steps.

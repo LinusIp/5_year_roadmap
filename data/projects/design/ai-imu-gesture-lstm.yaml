@@ -1,0 +1,54 @@
+overview: >-
+  A gesture classifier trained on IMU data (accelerometer and gyroscope) you record yourself: 5 gestures, 30 samples
+  each, cut into fixed windows and fed to a small GRU or 1D CNN. It must reach over 90% held-out accuracy with under
+  20k parameters so it could run on a microcontroller.
+learn:
+  - name: Sensor time series
+  - name: Recurrent networks
+    ref: d2l
+  - name: Recording-level splits
+  - name: Model size budgets
+    ref: mit-6-5940
+components:
+  - id: logger
+    name: IMU logger
+    role: Records 6-axis readings at a fixed rate with a gesture label per recording.
+    tech: Phone or MCU IMU
+    talksTo: [windows]
+    kind: external
+  - id: windows
+    name: Windowing
+    role: Normalizes axes and cuts each recording into fixed 2-second windows.
+    tech: NumPy
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Small GRU
+    role: Classifies a window into one of 5 gestures.
+    tech: PyTorch
+    talksTo: [eval]
+    kind: core
+  - id: eval
+    name: Evaluator
+    role: Reports accuracy on held-out recordings and the parameter count.
+    tech: Python
+    talksTo: []
+    kind: core
+flow:
+  - component: logger
+    text: saves 150 recordings at 100 Hz as CSV, one file per gesture sample.
+  - component: windows
+    text: assigns whole **recordings** to train or test before cutting windows, so no recording is in both.
+  - component: model
+    text: runs a 1-layer GRU with 32 hidden units over the window and classifies from the last state.
+  - component: eval
+    text: reports held-out accuracy and `sum(p.numel())`, which must stay under 20,000.
+decisions:
+  - choice: Small GRU
+    instead: A 1D CNN
+    why: >-
+      A 32-unit GRU is about 4k parameters, well under budget, and handles gestures of different speeds. Try a 1D CNN
+      if on-device latency matters more than size.
+watchOut: >-
+  Splitting overlapping windows randomly puts near-copies of the same recording in train and test. Split by
+  recording, and if possible test on a second person.

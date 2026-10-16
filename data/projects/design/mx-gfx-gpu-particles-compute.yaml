@@ -1,0 +1,110 @@
+overview: >-
+  A GPU particle system for Lantern Moth Games that lifts the limit from 50k to a million particles. Particles live in
+  two shader storage buffers (SSBOs, large GPU arrays) used in turn: each frame compute passes emit new particles, move
+  the living ones with curl-noise turbulence, bounce them off the depth buffer, and copy survivors into the other
+  buffer. A bitonic sort orders alpha-blended smoke back to front, and the last pass writes the draw arguments itself,
+  so the CPU never reads particle data back.
+learn:
+  - name: Compute shaders and SSBOs
+    ref: learnopengl
+  - name: Atomic counters
+    ref: pmpp-book
+  - name: Curl noise
+  - name: Bitonic sort
+    ref: pmpp-book
+  - name: Indirect drawing
+  - name: Memory barriers
+stats:
+  - value: < 4 ms
+    label: 1M particles, update and draw
+  - value: < 1 ms
+    label: sort of 256k particles
+  - value: '0'
+    label: CPU readbacks per frame
+components:
+  - id: ui
+    name: Parameter UI
+    role: Edits emitter rate, lifetime, turbulence and collision settings, shared with the previewer.
+    tech: Dear ImGui
+    talksTo: [emit]
+    kind: core
+  - id: pools
+    name: SSBO pools
+    role: Two particle buffers used in turn, plus a counters buffer for alive count and emit count.
+    tech: OpenGL 4.5 SSBO
+    talksTo: [emit]
+    kind: core
+  - id: emit
+    name: Emit pass
+    role: Appends new particles to the end of the current buffer with an atomic counter, up to capacity.
+    tech: GLSL compute
+    talksTo: [update]
+    kind: core
+  - id: update
+    name: Update pass
+    role: Integrates velocity with curl noise, collides with the depth buffer, and copies survivors across.
+    tech: GLSL compute
+    talksTo: [sort]
+    kind: core
+  - id: sort
+    name: Sort pass
+    role: Bitonic-sorts alpha-blended particles by view depth.
+    tech: GLSL compute
+    talksTo: [draw]
+    kind: core
+  - id: draw
+    name: Indirect draw
+    role: Draws camera-facing quads with a count the GPU wrote itself.
+    tech: glDrawArraysIndirect
+    talksTo: [gpu]
+    kind: core
+  - id: gpu
+    name: Mid-range GPU
+    role: Runs the passes and provides the scene's depth buffer and GPU timers.
+    tech: 2020 GPU · OpenGL 4.5
+    talksTo: []
+    kind: external
+flow:
+  - component: pools
+    text: start the frame with last frame's particles in buffer A and the counters reset on the GPU with `glClearBufferData`, not by the CPU reading them.
+  - component: ui
+    text: supplies this frame's emit rate and settings as uniforms; nothing comes back from the GPU.
+  - component: emit
+    text: reserves slots with `atomicAdd` and writes new particles, clamped so the total never passes capacity.
+  - component: update
+    text: adds the **curl** of a noise field to velocity (it swirls without clumping), tests each particle against the depth buffer and reflects it off the surface, then copies survivors into buffer B.
+  - component: sort
+    text: after a `glMemoryBarrier`, sorts alpha-blended particles by depth in a fixed series of compare-and-swap passes, most of them in shared memory.
+  - component: draw
+    text: reads the alive count from the counters buffer as indirect draw arguments and draws back to front; next frame A and B swap roles.
+interface:
+  lang: glsl
+  code: |
+    layout(local_size_x = 256) in;
+    layout(std430, binding = 0) readonly buffer A
+      { Particle src[]; };
+    layout(std430, binding = 1) writeonly buffer B
+      { Particle dst[]; };
+    layout(std430, binding = 2) buffer Counters
+      { uint alive; uint aliveNext; };
+    void main() {
+      uint i = gl_GlobalInvocationID.x;
+      if (i >= alive) return;
+      Particle p = integrate(src[i], u_dt);
+      if (p.life <= 0.0) return;   // slot freed
+      dst[atomicAdd(aliveNext, 1u)] = p;
+    }
+decisions:
+  - choice: GPU-written indirect arguments
+    instead: Read the alive count back to the CPU
+    why: A readback stalls until the GPU finishes, often costing a frame or more, and the case requires zero readbacks. The GPU writes the count straight into the draw call's argument buffer.
+  - choice: Bitonic sort
+    instead: GPU radix sort
+    why: Bitonic sort is a fixed sequence of compare-and-swap passes, simple to write and test, and 256k keys fit the 1 ms budget. Radix sort is faster for the whole million but much harder; revisit if every particle must be sorted.
+  - choice: Depth-buffer collisions
+    instead: Collide against scene meshes
+    why: The depth buffer is already there, costs one texture read per particle, and covers any geometry on screen. Particles off screen or behind objects pass through, which is fine for smoke and sparks.
+watchOut: >-
+  A missing barrier between passes lets a pass read a buffer before the previous pass finished writing it, and the bug
+  shows only sometimes. Put `glMemoryBarrier` with the storage bit between compute passes and the command bit before
+  the indirect draw, and check them in a frame capture.

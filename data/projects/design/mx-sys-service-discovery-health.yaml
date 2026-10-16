@@ -1,0 +1,127 @@
+overview: >-
+  A three-node service registry in Go for Zephyr Foods' 60 instances. Instances register with a TTL lease and keep it
+  alive with heartbeats, health checkers mark instances up or down with flap damping, and every node copies the
+  registry to the others by anti-entropy, a regular exchange of "what versions do you have" until all copies match.
+  Clients look up healthy addresses by HTTP, DNS or a long-poll watch, answered from the node's own memory.
+learn:
+  - name: Leases and TTLs
+    ref: ddia
+  - name: Anti-entropy replication
+    ref: ddia
+  - name: Eventual consistency
+    ref: kleppmann-distributed-systems
+  - name: Flap damping
+  - name: DNS A and SRV records
+  - name: Long polling
+stats:
+  - value: < 5 s
+    label: to drop a dead instance
+  - value: < 5 ms
+    label: lookup p99 at 10k/s
+  - value: 1 of 3
+    label: registry nodes can fail
+components:
+  - id: instances
+    name: Service instances
+    role: The 60 instances that register, heartbeat and serve health endpoints.
+    tech: HTTP
+    talksTo: [lease]
+    kind: external
+  - id: lease
+    name: Lease manager
+    role: Grants TTL leases on register, renews them on heartbeat, expires them.
+    tech: Go
+    talksTo: [store]
+    kind: core
+  - id: checker
+    name: Health checker
+    role: Probes instances and damps flapping before publishing a verdict.
+    tech: Go
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Registry store
+    role: Holds every instance with its tags, status and version in memory.
+    tech: Go map · snapshots
+    talksTo: [repl, dns, http]
+    kind: core
+  - id: repl
+    name: Replication
+    role: Exchanges version digests with the other two nodes and copies newer entries.
+    tech: Anti-entropy
+    talksTo: []
+    kind: core
+  - id: dns
+    name: DNS front end
+    role: Answers A and SRV queries with healthy instances only.
+    tech: miekg/dns
+    talksTo: [clients]
+    kind: core
+  - id: http
+    name: Lookup/watch API
+    role: Serves tag-filtered lookups and long-poll watches.
+    tech: Go net/http
+    talksTo: [clients]
+    kind: core
+  - id: clients
+    name: Calling services
+    role: Resolve a service name before each call or keep a watch open.
+    tech: HTTP · DNS
+    talksTo: []
+    kind: external
+flow:
+  - component: lease
+    text: >-
+      receives `PUT /v1/register` with name, address, tags and `ttl=3s`; a heartbeat every second renews it, and a
+      missed lease expires 3 s after the last one.
+  - component: checker
+    text: >-
+      also probes `GET /health` every second with a random start offset, so 60 checks do not land at once; each
+      up/down change adds a **penalty** that decays over time, and a flapping instance stays out until it decays.
+  - component: store
+    text: >-
+      applies the verdict to the entry, bumps its version (node id plus counter) and raises the registry's index,
+      waking any watchers.
+  - component: repl
+    text: >-
+      every 500 ms swaps digests with a peer and copies newer versions, so all three nodes agree within about 1 s;
+      a node that was down catches up the same way.
+  - component: dns
+    text: >-
+      answers `orders.service.local` with only healthy addresses and a 1 s TTL. Lease 3 s plus replication 1 s plus
+      DNS cache 1 s keeps removal under the 5 s budget.
+  - component: http
+    text: >-
+      serves `GET /v1/lookup/orders?tag=eu` from the in-memory snapshot (well under 5 ms); with `index=42` it holds
+      the request up to 30 s until something changes.
+interface:
+  lang: http
+  code: |
+    GET /v1/lookup/orders?tag=eu&index=42
+
+    200 OK
+    X-Registry-Index: 43
+    [ { "id": "orders-7",
+        "addr": "10.0.3.17:8080",
+        "tags": ["eu", "v2"],
+        "status": "passing" } ]
+decisions:
+  - choice: Anti-entropy, not Raft
+    instead: A Raft-replicated registry
+    why: >-
+      Eventual consistency is allowed, and lookups must keep answering with one node down. Raft would pause writes
+      during elections for a list that is rebuilt from heartbeats anyway. Revisit if the registry also has to hand
+      out locks or unique names.
+  - choice: Flap damping with a decaying penalty
+    instead: A fixed count of failed checks
+    why: >-
+      A fixed count lets an instance that fails every other second bounce in and out of answers. A penalty that grows
+      with each change and decays keeps it out until it is stable, and costs only a second or two.
+  - choice: 1 s DNS TTL
+    instead: A 30 s TTL to cut query load
+    why: >-
+      A long TTL alone would break the 5 s removal budget. 10,000 lookups a second served from memory is cheap, so
+      short TTLs cost little here.
+watchOut: >-
+  During a split, nodes can give different answers. Keep each entry's version and let the newest win when nodes
+  reconnect, and write down how stale an answer can be.

@@ -1,0 +1,60 @@
+overview: >-
+  A small graph IR (intermediate representation: nodes for ops, edges for tensors, each with a shape) and a pass that
+  merges chains of elementwise ops, and conv or matmul followed by bias and activation, into single fused nodes.
+  The fused graph must give identical outputs, and the pass reports how many bytes of memory traffic it saved on a
+  small CNN and a transformer block.
+learn:
+  - name: Graph IR
+    ref: cmu-10-414
+  - name: Operator fusion
+    ref: onnx-runtime-docs
+  - name: Pattern matching rewrites
+  - name: Memory traffic
+    ref: horace-he-brrr
+components:
+  - id: ir
+    name: Graph IR
+    role: Holds nodes, input and output tensors, shapes and a consumer list per tensor.
+    tech: Python dataclasses or Rust structs
+    talksTo: [matcher]
+    kind: core
+  - id: matcher
+    name: Pattern matcher
+    role: Finds fusable chains whose inner tensors have exactly one consumer.
+    tech: Python or Rust
+    talksTo: [rewriter]
+    kind: core
+  - id: rewriter
+    name: Rewriter
+    role: Replaces each chain with one fused node and reconnects its inputs and outputs.
+    tech: Python or Rust
+    talksTo: [checker]
+    kind: core
+  - id: checker
+    name: Numerics and bytes
+    role: Runs both graphs on random inputs, compares outputs and sums bytes read and written.
+    tech: NumPy
+    talksTo: []
+    kind: core
+flow:
+  - component: ir
+    text: builds a small CNN and a transformer block, each tensor tagged with its shape and dtype.
+  - component: matcher
+    text: >-
+      walks the graph in topological order and grows a chain while the next op is elementwise and the tensor between
+      has **one consumer**.
+  - component: rewriter
+    text: swaps `matmul → add(bias) → gelu` for one `fused_matmul_bias_gelu` node, keeping the original ops inside for reference.
+  - component: checker
+    text: >-
+      asserts outputs are identical, then reports bytes moved before and after, counting each intermediate tensor's
+      write and read that fusion removed.
+decisions:
+  - choice: Count bytes, not time
+    instead: Time the fused graph on hardware
+    why: >-
+      The pass runs in NumPy with no real kernels, so timing would measure Python. Bytes moved is the quantity fusion
+      changes, and it predicts the speedup for memory-bound elementwise ops.
+watchOut: >-
+  If an intermediate tensor feeds two ops, fusing it away into one of them leaves the other with no input, or forces
+  recomputation. Check the consumer count before every merge.

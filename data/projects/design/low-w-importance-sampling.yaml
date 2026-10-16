@@ -1,0 +1,73 @@
+overview: >-
+  A NumPy study of three ways to estimate hard integrals (one with a sharp peak, one with a heavy tail, one in several
+  dimensions): plain Monte Carlo with uniform samples, importance sampling that draws from a proposal shaped like the
+  integrand and divides by its density, and scrambled Sobol points that fill space evenly. Error is plotted against
+  sample count on log-log axes, and the fitted slope (about -0.5 for plain Monte Carlo) shows which converges faster.
+learn:
+  - name: Monte Carlo estimators
+    ref: pbr-book
+  - name: Importance sampling
+    ref: pbr-book
+  - name: Low-discrepancy sequences
+    ref: pbr-book
+  - name: Variance and convergence
+    ref: harvard-stat-110
+components:
+  - id: integrals
+    name: Test integrals
+    role: Three integrands with known exact values.
+    tech: NumPy
+    talksTo: [estimators]
+    kind: core
+  - id: estimators
+    name: Estimators
+    role: Plain Monte Carlo, importance sampling with a chosen proposal, and scrambled Sobol.
+    tech: NumPy · scipy.stats.qmc
+    talksTo: [runner]
+    kind: core
+  - id: runner
+    name: Experiment runner
+    role: Repeats each estimator over seeds and sample counts and records errors.
+    tech: NumPy
+    talksTo: [plots]
+    kind: core
+  - id: plots
+    name: Convergence plots
+    role: Plots error against samples and fits the slope per method.
+    tech: Matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: integrals
+    text: >-
+      define each integrand with its exact value, for example a Gaussian peak at 0.7 with width 0.01 on the unit
+      interval.
+  - component: estimators
+    text: >-
+      compute `mean(f(x))` for uniform `x`, `mean(f(x) / q(x))` for `x` drawn from the proposal `q`, and the same
+      mean over scrambled Sobol points.
+  - component: runner
+    text: >-
+      repeats each estimator 50 times at `N = 2^6` to `2^16` with different seeds, recording the root-mean-square
+      error and the variance of the **weights**.
+  - component: plots
+    text: >-
+      draw error against N on log-log axes and fit a line, near -0.5 for plain Monte Carlo and closer to -1 for Sobol
+      on smooth integrands.
+interface:
+  lang: python
+  code: |
+    def importance(f, sample_q, pdf_q, n, rng):
+        x = sample_q(n, rng)          # x ~ q
+        w = f(x) / pdf_q(x)           # weights
+        return w.mean(), w.var() / n  # estimate, variance
+decisions:
+  - choice: Powers of two for every sample count
+    instead: Round counts like 1,000 or 10,000
+    why: >-
+      Sobol points are only evenly balanced at N = 2^k, and other counts make their slope look worse than it is.
+      Using the same N for all three methods keeps the comparison fair.
+watchOut: >-
+  A proposal that is zero, or has lighter tails, where the integrand is not makes the weights `f/q` biased or wildly
+  variable, and the plot looks fine until one rare sample lands. Keep the proposal's support and tails at least as
+  wide as the integrand's and report the weights' variance.

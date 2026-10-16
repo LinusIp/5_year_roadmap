@@ -1,0 +1,105 @@
+overview: >-
+  A research harness that answers "would the new ranker win?" from old click logs instead of live traffic. A
+  simulator with known relevance generates 1M logged impressions from the old ranker, where users mostly click near
+  the top (position bias). Inverse propensity (IPS) and doubly robust (DR) estimators then predict the new ranker's
+  click rate from those logs, and because the simulator also knows the true lift, you can measure how wrong each
+  estimator is across 200 seeds.
+learn:
+  - name: Position bias
+  - name: Inverse propensity scoring
+  - name: Doubly robust estimators
+  - name: Unbiased learning to rank
+  - name: Confidence interval coverage
+stats:
+  - value: < 5%
+    label: error vs true lift
+  - value: 92–98%
+    label: 95% CI coverage
+  - value: < 30 s
+    label: per 1M impressions
+components:
+  - id: simulator
+    name: Click simulator
+    role: Draws queries, ranks jobs with the old ranker and samples clicks from true relevance times a position-bias curve.
+    tech: Python · NumPy
+    talksTo: [ltr, estimators, harness]
+    kind: core
+  - id: ltr
+    name: LTR trainer
+    role: Trains the new ranker on the logs with clicks reweighted by inverse propensity.
+    tech: LightGBM lambdarank
+    talksTo: [estimators]
+    kind: core
+  - id: estimators
+    name: Estimators
+    role: Computes IPS and DR estimates of the new ranker's click rate, with bootstrap confidence intervals.
+    tech: NumPy
+    talksTo: [harness]
+    kind: core
+  - id: harness
+    name: Study harness
+    role: Runs 200 seeds and compares every estimate with the simulator's true online lift.
+    tech: Python · multiprocessing
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report and ship rule
+    role: Plots bias, variance and coverage, and applies the ship-or-not rule.
+    tech: Matplotlib · Markdown
+    talksTo: []
+    kind: core
+  - id: yahoo
+    name: Yahoo LTR set
+    role: Optional public relevance labels used to make the simulated queries realistic.
+    tech: Public dataset
+    talksTo: [simulator]
+    kind: external
+flow:
+  - component: simulator
+    text: >-
+      samples 1M impressions from the old ranker, with the chance of looking at rank `k` set to `1 / k^eta`, and
+      logs query, ranking, clicks and that **propensity** for each shown job.
+  - component: ltr
+    text: trains the new LightGBM ranker on the logged clicks, each weighted by `1 / propensity` so top-of-page clicks stop dominating.
+  - component: estimators
+    text: >-
+      estimates the new ranker's click rate with IPS (reweight logged clicks) and DR (a click model's prediction plus
+      an IPS correction of its error), clipping weights at `w_max = 10`.
+  - component: simulator
+    text: replays the new ranker on fresh simulated users to get the **true** lift, which the estimators never see.
+  - component: harness
+    text: repeats this for 200 seeds and records error, variance and whether each 95% interval contains the true lift.
+  - component: report
+    text: ships the ranker only when the lower end of the DR interval is above 0 and coverage is inside 92–98%.
+interface:
+  lang: python
+  code: |
+    def ips(logs: Logs, new_rank: np.ndarray,
+            w_max: float = 10.0) -> Estimate: ...
+
+    def doubly_robust(logs: Logs,
+            new_rank: np.ndarray,
+            click_model: Model,
+            w_max: float = 10.0) -> Estimate: ...
+
+    @dataclass
+    class Estimate:
+        lift: float               # 0.031
+        ci: tuple[float, float]   # (0.012, 0.05)
+decisions:
+  - choice: Simulated logs with known truth
+    instead: Only a public click dataset
+    why: >-
+      Real logs never tell you the true lift, so "error under 5% of true lift" cannot be measured on them. Seed the
+      simulator from the Yahoo labels for realism; revisit once a real A/B test exists to calibrate against.
+  - choice: Doubly robust as the main estimator
+    instead: Plain IPS
+    why: >-
+      IPS is unbiased but its weights explode for jobs shown at rank 8 or 9, which blows up variance. DR leans on a
+      click model and stays unbiased if either the model or the propensities are right.
+  - choice: Ship on the CI lower bound
+    instead: Ship when the point estimate is positive
+    why: With 1M impressions a tiny positive lift can be noise; requiring the interval to clear 0 keeps false launches rare.
+watchOut: >-
+  If the simulator generates clicks with exactly the model the estimators assume, every estimator looks perfect and
+  clipping hides its bias. Add effects the estimators do not model (noisy propensities, trust bias) and sweep `w_max`.

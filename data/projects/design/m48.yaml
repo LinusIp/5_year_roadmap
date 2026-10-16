@@ -1,0 +1,124 @@
+overview: >-
+  Ten parametric parts of rising difficulty, from a spacer to a handle with a swept profile, and two assemblies, a
+  hinge box and a crank-slider, that move through their range. Each part goes down one pipeline: design intent, a
+  fully constrained sketch (every line fixed by a dimension or a rule, so nothing can drift), features, a drawing
+  with tolerances, a print, and caliper measurements. The errors go into a shared table, and one round of correction
+  in the model or slicer brings reprinted features within 0.15 mm.
+learn:
+  - name: Design intent
+    ref: onshape-learning-center
+  - name: Fully constrained sketches
+    ref: freecad-docs
+  - name: Engineering drawings
+    ref: mit-2-008
+  - name: Fits and tolerances
+    ref: mit-2-008
+  - name: Design for printing
+    ref: mit-2-007
+stats:
+  - value: < 0.15 mm
+    label: mean error after compensation
+  - value: ≥ 30
+    label: critical dimensions measured
+  - value: 10 + 2
+    label: parts and assemblies
+components:
+  - id: intent
+    name: Design intent
+    role: Writes down what each part must do and which dimensions drive it.
+    tech: Notes · sketch on paper
+    talksTo: [sketch]
+    kind: core
+  - id: sketch
+    name: Sketches
+    role: Holds fully constrained profiles driven by named variables.
+    tech: Onshape or FreeCAD
+    talksTo: [features]
+    kind: core
+  - id: features
+    name: Features
+    role: Turns sketches into solids with extrudes, fillets, drafts, shells and patterns.
+    tech: Onshape or FreeCAD
+    talksTo: [assembly, drawing, slicer]
+    kind: core
+  - id: assembly
+    name: Assemblies
+    role: Mates parts and checks motion and interference through the full range.
+    tech: Mates · motion study
+    talksTo: []
+    kind: core
+  - id: drawing
+    name: Drawings
+    role: Gives views, sections, dimensions, a title block and toleranced fits.
+    tech: Drawing workspace
+    talksTo: []
+    kind: core
+  - id: slicer
+    name: Slicer
+    role: Turns the model into printer moves, with orientation and hole compensation.
+    tech: PrusaSlicer or Cura
+    talksTo: [printer]
+    kind: core
+  - id: printer
+    name: FDM printer
+    role: Prints the part in PLA or PETG.
+    tech: Owned or makerspace
+    talksTo: [measure]
+    kind: external
+  - id: measure
+    name: Error table
+    role: Records nominal, measured and error for every critical dimension.
+    tech: Calipers · pandas
+    talksTo: [sketch]
+    kind: core
+flow:
+  - component: intent
+    text: >-
+      states, for an L-bracket, which holes must line up with what and which thickness carries the load.
+  - component: sketch
+    text: >-
+      draws the profile until it reports **fully constrained**, with `hole_d` and `wall_t` as named variables.
+  - component: features
+    text: >-
+      extrudes, fillets and patterns; changing one driving dimension must regenerate the part **without errors**.
+  - component: assembly
+    text: >-
+      mates the parts of the hinge box and crank-slider and runs them through their range with no interference.
+  - component: drawing
+    text: >-
+      dimensions every part, with general tolerances the printer can hold and tighter fits only where parts mate.
+  - component: slicer
+    text: >-
+      orients the part, then the printer builds it; print time and mass go in the table.
+  - component: measure
+    text: >-
+      records each caliper reading above the first layers; errors feed back into the **sketch** as a correction,
+      closing the loop.
+interface:
+  lang: csv
+  code: |
+    part,feature,kind,nominal_mm,measured_mm,error_mm
+    l-bracket,hole_a,hole,5.00,4.71,-0.29
+    l-bracket,width,outer,40.00,40.06,0.06
+    l-bracket,slot,slot,6.00,5.82,-0.18
+    pulley,bore,hole,8.00,7.74,-0.26
+    hinge,pin_clear,fit,0.30,0.24,-0.06
+decisions:
+  - choice: Fully constrained, parametric sketches
+    instead: Quick sketches that only look right
+    why: >-
+      The done-when test changes one driving dimension per part and expects a clean rebuild, and the correction round
+      only works if a hole size is one variable to edit.
+  - choice: Tolerances the printer can hold
+    instead: Machining-grade tolerances everywhere
+    why: >-
+      An FDM print holds a few tenths of a millimetre. Tight tolerances go only on fits that matter, and the clearances
+      you measure become your defaults for later builds.
+  - choice: Correct from measurements, then reprint
+    instead: Draw nominal sizes and file or drill to fit
+    why: >-
+      Holes typically print 0.2 to 0.4 mm undersized. Measuring 30 or more dimensions shows your printer's real
+      offsets, so one round of compensation fixes every later part.
+watchOut: >-
+  Holes print undersized and the base of a part bulges outward (elephant's foot), so both surprise you at assembly.
+  Measure above the first layers, and compensate holes from your own error table.

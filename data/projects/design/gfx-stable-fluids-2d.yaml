@@ -1,0 +1,72 @@
+overview: >-
+  Jos Stam's stable fluids on a 512x512 grid: each step moves velocity and dye by tracing every cell backwards along
+  the flow and sampling where it came from (semi-Lagrangian advection, which never blows up however big the step),
+  then makes the velocity divergence-free (no fluid created or destroyed) by solving for pressure with Jacobi iterations
+  and subtracting its gradient. Mouse drags add force and dye.
+learn:
+  - name: Semi-Lagrangian advection
+    ref: bridson-fluid-sim
+  - name: Pressure projection
+    ref: bridson-fluid-sim
+  - name: Jacobi iteration
+    ref: cfd-python-12-steps
+  - name: Boundary conditions
+components:
+  - id: force
+    name: Mouse forcing
+    role: Adds a soft splat of velocity and dye where the mouse drags.
+    tech: GLSL / C++
+    talksTo: [advect]
+    kind: core
+  - id: advect
+    name: Advection
+    role: Moves velocity and dye along the flow by backtracing each cell.
+    tech: GLSL / C++
+    talksTo: [project]
+    kind: core
+  - id: project
+    name: Pressure projection
+    role: Solves for pressure and removes divergence from the velocity.
+    tech: GLSL / C++
+    talksTo: [display]
+    kind: core
+  - id: display
+    name: Display
+    role: Draws the dye and reports mean divergence each frame.
+    tech: OpenGL
+    talksTo: []
+    kind: core
+flow:
+  - component: force
+    text: adds a Gaussian splat of velocity in the drag direction and a splat of dye at the mouse position.
+  - component: advect
+    text: traces `x - dt·u(x)` back from each cell and samples velocity and dye there bilinearly; on the GPU each field is a pair of ping-pong textures.
+  - component: project
+    text: computes divergence, runs 40 to 80 sweeps of `p = (pL + pR + pB + pT - h²·div) / 4`, subtracts `∇p`, and applies **walls** (`u·n = 0`, `∂p/∂n = 0`) after every pass.
+  - component: display
+    text: shows the dye and mean divergence after projection; done is under `1e-3` while running in real time at 512x512.
+interface:
+  lang: glsl
+  code: |
+    uniform sampler2D velocity;   // RG16F, cells/s
+    uniform sampler2D pressure;   // R16F
+    uniform sampler2D divergence;
+    uniform vec2 texel;           // 1.0 / 512.0
+    uniform float dt;
+
+    vec4 advect(sampler2D q, vec2 uv) {
+      vec2 u = texture(velocity, uv).xy;
+      vec2 back = uv - dt * u * texel;  // backtrace
+      return texture(q, back);
+    }
+    float jacobi(vec2 uv);          // one sweep
+    vec2  subtractGradient(vec2 uv);
+decisions:
+  - choice: Jacobi sweeps, not a faster solver
+    instead: Conjugate gradient or multigrid
+    why: >-
+      Jacobi is a few lines of shader and every cell updates in parallel. It converges slowly, so plot divergence
+      against the number of sweeps, and move to multigrid only if 80 sweeps cannot reach `1e-3`.
+watchOut: >-
+  Forgetting the wall rule in either the velocity or the pressure step lets dye leak through walls or pile up at the
+  edges. Apply boundaries after every pass and check divergence near the border on its own.

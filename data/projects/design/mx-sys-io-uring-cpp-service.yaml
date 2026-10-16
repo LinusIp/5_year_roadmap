@@ -1,0 +1,119 @@
+overview: >-
+  A quote fan-out service for Marlin Capital that replaces one syscall per send with io_uring, a pair of rings
+  shared with the kernel: the program queues many I/O requests in one and the kernel posts their results in the
+  other, so a single call can submit thousands of sends. The single publisher thread copies each quote once into a
+  registered buffer (memory pre-registered with the kernel) and queues a send of it to each of 2,000 TCP
+  subscribers. A subscriber table tracks each one's unsent backlog so a slow consumer is cut off instead of slowing
+  everyone, and an epoll build of the same service is the baseline it must beat.
+learn:
+  - name: io_uring rings
+  - name: Registered buffers
+  - name: Multishot accept and recv
+  - name: Length-prefixed framing
+  - name: Coordinated omission
+  - name: Buffer lifetimes
+stats:
+  - value: < 200 µs
+    label: fan-out p99 to 2,000
+  - value: ≥ 30%
+    label: less CPU than epoll
+  - value: "0"
+    label: messages lost to healthy subscribers
+components:
+  - id: feed
+    name: Quote feed
+    role: Publishes quotes, with bursts of 200k messages a second.
+    tech: Synthetic stream
+    talksTo: [pool]
+    kind: external
+  - id: pool
+    name: Buffer pool
+    role: Hands out registered buffer slots and takes them back when all sends finish.
+    tech: io_uring fixed buffers
+    talksTo: [subs]
+    kind: core
+  - id: subs
+    name: Subscriber table
+    role: Holds each subscriber's socket, backlog bytes and health.
+    tech: C++20 flat array
+    talksTo: [policy, ring]
+    kind: core
+  - id: policy
+    name: Slow-consumer policy
+    role: Disconnects subscribers whose backlog passes the limit.
+    tech: C++20
+    talksTo: []
+    kind: core
+  - id: ring
+    name: Ring wrapper
+    role: Queues sends, submits in batches and dispatches completions.
+    tech: liburing
+    talksTo: [clients]
+    kind: core
+  - id: clients
+    name: Subscribers
+    role: The 2,000 internal services receiving quotes over TCP.
+    tech: TCP clients
+    talksTo: [harness]
+    kind: external
+  - id: harness
+    name: Latency harness
+    role: Compares send timestamps in each message with arrival time.
+    tech: C++ · HdrHistogram
+    talksTo: []
+    kind: offline
+  - id: baseline
+    name: epoll baseline
+    role: The same service on epoll and send(), run with the same load.
+    tech: epoll
+    talksTo: [clients]
+    kind: offline
+flow:
+  - component: feed
+    text: delivers a quote, which the publisher frames as a `u32` length and a 60-byte body stamped with its send time.
+  - component: pool
+    text: >-
+      copies it once into a free registered slot and sets the slot's `refs` to the number of healthy subscribers.
+  - component: subs
+    text: walks the subscribers and skips any already marked slow, so they never touch the hot path.
+  - component: policy
+    text: disconnects a subscriber whose unsent backlog passes 1 MB; it reconnects and resubscribes.
+  - component: ring
+    text: >-
+      queues one `WRITE_FIXED` per subscriber pointing at the **same** slot and submits them with one syscall;
+      each completion decrements `refs`, and a short write is resent from where it stopped.
+interface:
+  lang: cpp
+  code: |
+    Buf* b = pool.acquire();          // registered slot
+    b->len  = encode(quote, b->data); // u32 len + body
+    b->refs = subs.healthy_count();
+    for (Sub& s : subs.healthy()) {
+      io_uring_sqe* e = io_uring_get_sqe(&ring);
+      io_uring_prep_write_fixed(e, s.fd, b->data,
+                                b->len, 0, b->index);
+      io_uring_sqe_set_data(e, tag(&s, b));
+    }
+    io_uring_submit(&ring);           // one syscall
+    // per completion: res < len  -> send the rest
+    //                 --b->refs == 0 -> release(b)
+decisions:
+  - choice: One shared buffer per quote
+    instead: A copy per subscriber
+    why: >-
+      2,000 copies per quote at 200k quotes a second is wasted memory traffic, and the registered pool would need
+      thousands more slots. A reference count makes the shared slot's lifetime explicit.
+  - choice: Disconnect slow consumers
+    instead: Queue without limit
+    why: >-
+      One stalled subscriber would grow the backlog until memory or other subscribers' p99 suffers. A clear 1 MB
+      limit protects the 200 µs target for everyone else.
+  - choice: Timestamps in the messages
+    instead: A request-reply ping loop
+    why: >-
+      A loop that waits for each reply skips measuring during stalls, which is called coordinated omission. Stamping
+      every quote and recording arrival times captures the stalls too.
+watchOut: >-
+  Never release a registered slot when you submit; release it when its last completion arrives. Reusing it early
+  lets the next quote overwrite bytes the kernel has not sent yet, and subscribers get corrupted prices only under
+  load.

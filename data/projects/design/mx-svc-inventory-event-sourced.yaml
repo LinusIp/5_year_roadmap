@@ -1,0 +1,115 @@
+overview: >-
+  One append-only stream of stock events for Greenfold's 200 stores, from which every stock count is computed.
+  Projectors read the stream in order and build on-hand, available-to-promise and history tables, checking a
+  sequence number per store and SKU so duplicates are skipped and gaps are noticed. Because the events are the
+  truth, any projection can be thrown away and rebuilt from snapshots, and a checker compares the rebuild with live.
+learn:
+  - name: Event sourcing
+    ref: ddia
+  - name: Idempotent consumers
+    ref: ddia
+  - name: Schema evolution
+    ref: ddia
+  - name: Snapshots and replay
+  - name: Partitioned logs
+    ref: kleppmann-distributed-systems
+stats:
+  - value: 5,000/s
+    label: events ingested
+  - value: < 2 s
+    label: p99 projection lag
+  - value: < 20 min
+    label: rebuild of 100M events
+components:
+  - id: sources
+    name: POS, web, warehouse
+    role: Send receive, sell, adjust, transfer and shrink events with their own ids.
+    tech: Upstream systems
+    talksTo: [registry]
+    kind: external
+  - id: registry
+    name: Schema registry
+    role: Validates each event against its versioned schema and upgrades old versions on read.
+    tech: Go · JSON Schema
+    talksTo: [log]
+    kind: core
+  - id: log
+    name: Event log
+    role: Append-only events partitioned by store, deduplicated by event id.
+    tech: PostgreSQL
+    talksTo: [projectors, snapshotter]
+    kind: core
+  - id: projectors
+    name: Projectors
+    role: Apply events in sequence per store and SKU to on-hand, ATP and history tables.
+    tech: Go
+    talksTo: []
+    kind: core
+  - id: snapshotter
+    name: Snapshotter
+    role: Writes projection state every 1M events per partition so rebuilds start near the end.
+    tech: Go · Parquet
+    talksTo: [rebuild]
+    kind: offline
+  - id: rebuild
+    name: Rebuild tool
+    role: Loads the latest snapshot and replays later events, partitions in parallel.
+    tech: Go CLI
+    talksTo: [checker]
+    kind: offline
+  - id: checker
+    name: Divergence checker
+    role: Compares a rebuilt projection with the live one row by row.
+    tech: SQL
+    talksTo: []
+    kind: offline
+flow:
+  - component: registry
+    text: >-
+      receives a `stock.sold` v2 event for store 117, SKU 40021, with `event_id` and `seq = 5832`, and rejects it if
+      the shape does not match.
+  - component: log
+    text: appends it to partition `store-117`; a repeat `event_id` hits a unique index and is acknowledged without a second row.
+  - component: projectors
+    text: >-
+      read the new event and compare `seq` with the last applied for that store and SKU; `5832` after `5831` is
+      applied, a **gap** parks the event and raises an alert.
+  - component: projectors
+    text: >-
+      lower on-hand and ATP by the sold quantity and save the new `last_seq` in the **same** transaction, so a crash
+      never applies an event twice.
+  - component: log
+    text: makes the event part of the history the **snapshotter** and **rebuild tool** replay later to prove the live counts.
+interface:
+  lang: json
+  code: |
+    {
+      "event_id": "0b9c…e1",
+      "type": "stock.sold",
+      "schema_version": 2,
+      "store": 117,
+      "sku": 40021,
+      "seq": 5832,
+      "qty": -3,
+      "occurred_at": "2026-10-16T09:41:07Z",
+      "source": "pos"
+    }
+decisions:
+  - choice: Sequence number per store and SKU
+    instead: Rely on arrival order
+    why: >-
+      POS tills batch and resend, so late and duplicate events are normal. A per-aggregate sequence makes duplicates
+      and gaps visible instead of silently wrong counts.
+  - choice: PostgreSQL as the log
+    instead: Kafka
+    why: >-
+      Single node and under $40 a month rules out a broker cluster; 5,000 appends a second fits PostgreSQL with
+      partitioned tables. Revisit if ingest passes about 20k a second.
+  - choice: Snapshots every 1M events in Parquet
+    instead: Always replay from event zero
+    why: >-
+      Replaying 100M events from zero cannot fit 20 minutes on one node; starting from the last snapshot and running
+      200 store partitions in parallel can.
+watchOut: >-
+  Never fix a projection by hand. Post an adjust event instead, or the next rebuild will undo the fix and the
+  divergence checker will flag it.

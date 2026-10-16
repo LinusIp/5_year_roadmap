@@ -1,0 +1,45 @@
+overview: >-
+  A simulation of a request that fans out to N backends with heavy-tailed latency, showing how the slowest reply
+  sets the request's p99, and how hedged requests (sending a backup copy after a delay) and tied requests cut it
+  for under 10 percent extra load.
+learn:
+  - name: Tail amplification
+  - name: Heavy-tailed latency
+  - name: Hedged requests
+  - name: Queueing under load
+components:
+  - id: model
+    name: Latency model
+    role: Draws per-backend service times from a log-normal with rare 10x slow events.
+    tech: Python · NumPy
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Simulator
+    role: Runs fan-out requests over queued backends with plain, hedged and tied strategies.
+    tech: Python · SimPy or NumPy
+    talksTo: [plots]
+    kind: core
+  - id: plots
+    name: Plots
+    role: p99 against load and fan-out width, plus extra load per strategy.
+    tech: matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: model
+    text: gives each backend a median of 10 ms with 1 percent of calls taking 100 ms or more.
+  - component: sim
+    text: fans one request out to N = 1, 10 and 100 backends; with 100, most requests hit at least one slow call.
+  - component: sim
+    text: hedges by sending a second copy after the backend's p95 and keeping the first answer, counting the extra calls.
+  - component: plots
+    text: show p99 falling sharply with hedging while extra load stays **under 10 percent**.
+decisions:
+  - choice: Hedge after p95, not at once
+    instead: Send two copies of every call
+    why: >-
+      Duplicating every call doubles load and pushes queues into the tail. Waiting until p95 limits extra calls to
+      about 5 percent.
+watchOut: >-
+  A hedged write can run twice. Hedge only idempotent reads, or give writes an idempotency key.

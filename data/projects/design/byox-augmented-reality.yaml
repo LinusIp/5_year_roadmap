@@ -1,0 +1,114 @@
+overview: >-
+  A webcam application that calibrates its own camera, finds a printed square marker in every frame, works out the
+  marker's 6-DoF pose (position and rotation) and draws a lit 3D model glued to it. A one-off calibration tool solves
+  for the camera's focal lengths, principal point (the optical centre on the image) and lens distortion. At runtime each
+  frame goes through capture, marker detection, a Perspective-n-Point pose solve (pose from known 3D points and their
+  image positions), a smoother, and a renderer whose projection matrix comes from those same calibrated numbers.
+learn:
+  - name: Pinhole camera model
+    ref: scratchapixel
+  - name: Camera calibration
+  - name: Perspective-n-Point
+  - name: Homographies
+  - name: CV to GL frames
+    ref: learnopengl
+stats:
+  - value: < 0.5 px
+    label: calibration RMS on held-out views
+  - value: ≤ 3 px
+    label: mean model-corner error at 30 FPS
+  - value: < 60 ms
+    label: motion to photon
+components:
+  - id: calib
+    name: Calibration tool
+    role: Collects 20 to 30 chessboard views and solves for the intrinsics K and distortion.
+    tech: OpenCV calibrateCamera
+    talksTo: [capture, renderer]
+    kind: offline
+  - id: webcam
+    name: Webcam
+    role: Supplies 30 FPS video of the scene and the printed marker.
+    tech: USB webcam
+    talksTo: [capture]
+    kind: external
+  - id: capture
+    name: Capture thread
+    role: Grabs frames and undistorts them with the calibrated K and distortion.
+    tech: OpenCV · thread
+    talksTo: [detector]
+    kind: core
+  - id: detector
+    name: Marker detector
+    role: Thresholds, finds quadrilaterals, decodes the marker id and refines the four corners.
+    tech: OpenCV aruco
+    talksTo: [pose]
+    kind: core
+  - id: pose
+    name: Pose solver
+    role: Turns four image corners into a rotation and translation of the marker.
+    tech: OpenCV solvePnP
+    talksTo: [smoother]
+    kind: core
+  - id: smoother
+    name: Smoother
+    role: Damps jitter and rejects the sudden flips of the planar-pose ambiguity.
+    tech: NumPy
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Draws the video frame, then the model with a projection from K and a model-view from the pose.
+    tech: moderngl or raylib
+    talksTo: []
+    kind: core
+flow:
+  - component: capture
+    text: grabs a frame and undistorts it with `K` and `dist` from the calibration file.
+  - component: detector
+    text: >-
+      thresholds the grey image, keeps square-looking quadrilaterals, decodes the id from the inner bit grid and
+      refines the corners to sub-pixel.
+  - component: pose
+    text: >-
+      calls `solvePnP` with the marker's four 3D corners and their image positions, and gets `rvec` and `tvec`.
+  - component: smoother
+    text: >-
+      blends the new pose with the last one and drops a pose that suddenly flips, so the model does not jump at
+      near-frontal views.
+  - component: renderer
+    text: >-
+      builds the projection from `fx`, `fy`, `cx`, `cy`, converts the pose from OpenCV axes (**y down, +z forward**)
+      to OpenGL axes (**y up, −z forward**), and draws the model over the frame.
+interface:
+  lang: python
+  code: |
+    K, dist = load_calibration("camera.yaml")
+    corners, ids, _ = detector.detectMarkers(gray)
+    ok, rvec, tvec = cv2.solvePnP(
+        MARKER_3D, corners[0], K, dist,
+        flags=cv2.SOLVEPNP_IPPE_SQUARE)
+    pose = smoother.update(rvec, tvec)
+
+    P  = projection_from_K(K, w, h, near, far)
+    MV = CV_TO_GL @ pose.matrix()   # flip y, z
+    draw_model(frame, P, MV)
+decisions:
+  - choice: OpenCV aruco and solvePnP first
+    instead: Your own homography and pose code from the start
+    why: >-
+      The library gives a correct reference in a 6-hour milestone, so your own code (the stretch) has something to be
+      checked against corner by corner.
+  - choice: Python with OpenCV and moderngl
+    instead: C++
+    why: >-
+      Detection and PnP run in OpenCV's C++ code, so Python adds little at 30 FPS. Move to C++ if latency stays above
+      60 ms after the capture thread is in place.
+  - choice: A light pose smoother
+    instead: A Kalman filter on the pose
+    why: >-
+      Heavier filtering adds lag that eats the 60 ms budget. Try the Kalman filter as a stretch and report jitter and
+      latency for both.
+watchOut: >-
+  OpenCV's camera looks down +z with y down, OpenGL's looks down −z with y up, so the model appears mirrored or behind
+  the camera. Draw the marker's axes first and check them before loading any model.

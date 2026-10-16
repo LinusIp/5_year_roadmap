@@ -1,0 +1,56 @@
+overview: >-
+  A PyTorch extension op that fuses the residual add and RMSNorm of a decoder block into one CUDA kernel: it reads x
+  and the residual once in bf16, accumulates the sum of squares in fp32, and writes the normalized output and the new
+  residual. Eager PyTorch does this as two ops with an extra round trip through memory.
+learn:
+  - name: Kernel fusion
+    ref: horace-he-brrr
+  - name: RMSNorm
+  - name: Mixed-precision accumulation
+    ref: cuda-guide
+  - name: Torch C++ extensions
+components:
+  - id: binding
+    name: Torch binding
+    role: Exposes fused_add_rmsnorm to Python and checks shapes and dtypes.
+    tech: torch.utils.cpp_extension
+    talksTo: [kernel]
+    kind: core
+  - id: kernel
+    name: Fused kernel
+    role: One block per row; vectorized bf16 loads, fp32 reduction, one write pass.
+    tech: CUDA C++
+    talksTo: [tests]
+    kind: core
+  - id: tests
+    name: Tests and bench
+    role: Compares with eager add plus RMSNorm and times both inside a decoder block.
+    tech: pytest · torch.cuda.Event
+    talksTo: []
+    kind: core
+flow:
+  - component: binding
+    text: receives `x`, `residual` and `weight` in bf16 and launches one block per token row.
+  - component: kernel
+    text: loads 8 bf16 values per thread as one 16-byte vector, computes `h = x + residual` and accumulates `Σ h²` in **fp32**.
+  - component: kernel
+    text: reduces across the block, computes `h · rsqrt(mean + eps) · weight`, and writes the output and `h` as the new residual.
+  - component: tests
+    text: check a max error under `1e-2` against eager, and report speedup and bytes moved against the theoretical minimum.
+interface:
+  lang: python
+  code: |
+    out, new_res = fused_add_rmsnorm(
+        x,         # [tokens, hidden] bf16
+        residual,  # [tokens, hidden] bf16
+        weight,    # [hidden] bf16
+        eps=1e-6)
+decisions:
+  - choice: One block per row
+    instead: One warp per row
+    why: >-
+      Hidden sizes of 2048 to 8192 give each thread of a 256-thread block 8 to 32 values, enough to keep loads wide.
+      A warp per row suits hidden sizes under about 1024.
+watchOut: >-
+  Accumulating the sum of squares in bf16 loses precision over thousands of values and pushes error past tolerance.
+  Convert to fp32 before squaring and keep the reduction in fp32.

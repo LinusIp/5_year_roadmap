@@ -1,0 +1,101 @@
+overview: >-
+  Nomad Freight's 15 services get one shared instrumentation library, so every request carries the same request ID
+  through metrics, logs and traces. Services send all of it to an OpenTelemetry collector on one 8 vCPU VM, which
+  keeps at most 10 % of traces and routes the rest to Prometheus, Tempo and Loki. SLOs for 5 user journeys are written
+  as code, turned into recording rules, and drawn as journey dashboards with an error budget, the share of failures
+  the target still allows this month.
+learn:
+  - name: OpenTelemetry instrumentation
+    ref: opentelemetry-docs
+  - name: SLIs and SLOs
+    ref: google-sre-book
+  - name: Error budgets
+    ref: google-sre-book
+  - name: Trace sampling
+  - name: Label cardinality
+    ref: prometheus-docs
+  - name: Log-trace correlation
+stats:
+  - value: < 3 min
+    label: mean time to detect
+  - value: < 3 %
+    label: CPU overhead
+  - value: < $150
+    label: telemetry a month
+components:
+  - id: services
+    name: Services
+    role: The 15 demo services plus a load generator at 2,000 req/s.
+    tech: Python or Go
+    talksTo: [lib]
+    kind: external
+  - id: lib
+    name: Telemetry library
+    role: One import that sets up metrics, traces and JSON logs with the shared request ID and standard labels.
+    tech: OpenTelemetry SDK
+    talksTo: [collector]
+    kind: core
+  - id: collector
+    name: OTel collector
+    role: Receives all telemetry, samples traces down to 10 % and routes each signal to its backend.
+    tech: OpenTelemetry Collector
+    talksTo: [backends]
+    kind: core
+  - id: backends
+    name: Backends
+    role: Store metrics, traces and logs with set retention.
+    tech: Prometheus · Tempo · Loki
+    talksTo: [slo]
+    kind: core
+  - id: slo
+    name: SLO rules
+    role: SLO definitions as code turned into recording rules and error-budget numbers for 5 journeys.
+    tech: Sloth or YAML · Prometheus rules
+    talksTo: [dashboards]
+    kind: core
+  - id: dashboards
+    name: Dashboards
+    role: One dashboard per journey with its SLI, budget left and links from a slow request to its trace and logs.
+    tech: Grafana · JSON
+    talksTo: []
+    kind: core
+  - id: faults
+    name: Fault injector
+    role: Adds latency or errors to one service and records when the alert fires.
+    tech: Python script · toxiproxy
+    talksTo: [services]
+    kind: offline
+flow:
+  - component: lib
+    text: starts a span for `POST /checkout`, adds `request_id` to every log line and counts the request in `http_server_duration` with only low-cardinality labels.
+  - component: collector
+    text: batches the data, keeps **all error traces** plus a 10 % sample of the rest, and exports each signal to its backend.
+  - component: backends
+    text: store the metric in Prometheus, the trace in Tempo and the logs in Loki, all searchable by the same `request_id`.
+  - component: slo
+    text: computes the checkout SLI as the share of requests that succeed in under `800 ms` against a `99.5 %` target, and how much budget is left.
+  - component: dashboards
+    text: show the checkout journey's budget falling; a click on a slow point opens its trace and log lines.
+interface:
+  lang: yaml
+  code: |
+    slo:
+      journey: checkout
+      objective: 99.5
+      window: 30d
+      sli:
+        good: http_server_duration_bucket{
+                route="/checkout", le="0.8",
+                code!~"5.."}
+        total: http_server_duration_count{
+                route="/checkout"}
+      alerting:
+        page_burn_rate: 14.4
+decisions:
+  - choice: One collector in the middle
+    instead: Each service writing straight to every backend
+    why: Sampling, label clean-up and backend changes happen in one place instead of 15. On a single VM it also keeps the cost under $150 a month.
+  - choice: SLIs from journeys, not hosts
+    instead: CPU and memory alerts per service
+    why: Customers were the alert system because server health looked fine. Measuring checkout success is what they feel.
+watchOut: One label such as user ID or order ID on a metric multiplies its time series by the user count and blows up storage. Keep IDs in traces and logs, never on metric labels.

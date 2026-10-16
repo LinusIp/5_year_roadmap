@@ -1,0 +1,52 @@
+overview: >-
+  A small ML pipeline where data, code and parameters are all versioned: Git holds code and small pointer files, a
+  DVC-style tool stores the data in a remote cache, and stages (prep, train, eval) rerun only when their inputs
+  change. A fresh clone with one pull and one repro must give identical metrics.
+learn:
+  - name: Data versioning
+    ref: mlops-zoomcamp
+  - name: Pipeline stages
+  - name: Deterministic training
+components:
+  - id: repo
+    name: Git repo
+    role: Holds code, params and the small files that point to data versions.
+    tech: Git
+    talksTo: [pipeline]
+    kind: core
+  - id: remote
+    name: Data remote
+    role: Stores the actual data and model files by content hash.
+    tech: Local folder or object store
+    talksTo: [pipeline]
+    kind: external
+  - id: pipeline
+    name: Pipeline
+    role: Runs prep, train and eval stages declared with their inputs and outputs.
+    tech: dvc.yaml · Python
+    talksTo: [metrics]
+    kind: core
+  - id: metrics
+    name: Metrics file
+    role: Records the eval scores that are compared across clones.
+    tech: JSON
+    talksTo: []
+    kind: core
+flow:
+  - component: repo
+    text: is cloned fresh into an empty folder.
+  - component: pipeline
+    text: pulls data with `dvc pull`, then `dvc repro` runs only the stages whose hashed inputs differ from the lock file.
+  - component: pipeline
+    text: runs **prep**, **train** with a fixed seed and single-threaded where needed, and **eval**.
+  - component: metrics
+    text: is compared with the committed `metrics.json`; the build is done when they match exactly.
+decisions:
+  - choice: Exact metric equality
+    instead: Equality within a tolerance
+    why: >-
+      On CPU with fixed seeds, small models can be made bit-for-bit deterministic, and an exact check catches hidden
+      randomness. Use a tolerance only if you move training to GPU.
+watchOut: >-
+  Committing data or model files to Git bloats the repository and bypasses the data versioning. Add them through the
+  data tool and check `git ls-files` for anything large.

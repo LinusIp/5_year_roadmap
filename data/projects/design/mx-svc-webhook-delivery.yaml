@@ -1,0 +1,102 @@
+overview: >-
+  A webhook service for Slotly that turns each booking event into one delivery row per subscribed endpoint, then
+  sends it signed with HMAC (a hash of the body and a shared secret that proves who sent it). Workers retry failures
+  with growing gaps for 24 hours, and each endpoint has its own small concurrency limit, so one slow receiver cannot
+  tie up every worker. Every attempt is logged, and a failed delivery can be replayed by hand.
+learn:
+  - name: HMAC signatures
+  - name: Replay protection with timestamps
+  - name: Exponential backoff with jitter
+  - name: Bulkheads per endpoint
+    ref: google-sre-book
+  - name: Delivery logs and replay
+stats:
+  - value: 500/s
+    label: events to 200 endpoints
+  - value: 99.9 %
+    label: eventual delivery, 30 % flaky
+  - value: 24 h
+    label: retry window
+components:
+  - id: subs
+    name: Subscription API
+    role: Creates subscriptions with endpoint URL, event types and a generated secret, stored encrypted.
+    tech: Go · PostgreSQL
+    talksTo: [fanout]
+    kind: core
+  - id: fanout
+    name: Fan-out
+    role: For each booking event inserts one delivery row per matching subscription.
+    tech: Go · SQL
+    talksTo: [workers]
+    kind: core
+  - id: workers
+    name: Delivery workers
+    role: Claim due deliveries, respecting a limit of 4 in flight per endpoint, send them and schedule retries.
+    tech: Go · PostgreSQL SKIP LOCKED
+    talksTo: [signer]
+    kind: core
+  - id: signer
+    name: Signer
+    role: Adds a timestamp and an HMAC-SHA256 signature over timestamp and body.
+    tech: Go crypto/hmac
+    talksTo: [receivers, log]
+    kind: core
+  - id: receivers
+    name: Customer endpoints
+    role: 200 simulated receivers that answer slowly, fail 30 percent of the time or go down for hours.
+    tech: Go simulator
+    talksTo: []
+    kind: external
+  - id: log
+    name: Delivery log
+    role: One row per attempt with status code, latency and error, but never the secret or signature.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+flow:
+  - component: subs
+    text: stores `{url, events, secret}` per customer and shows the secret only once at creation.
+  - component: fanout
+    text: inserts a `deliveries` row with `next_attempt_at = now()` for every subscription that wants `booking.created`.
+  - component: workers
+    text: >-
+      claim due rows with `SKIP LOCKED`, skipping endpoints that already have 4 in flight, so a slow endpoint fills
+      only its own **bulkhead** (a separate compartment of capacity).
+  - component: signer
+    text: sets `Slotly-Timestamp` and `Slotly-Signature = HMAC(secret, timestamp + "." + body)` and posts with a 10 s timeout.
+  - component: log
+    text: >-
+      records the attempt; a `2xx` marks it delivered, anything else schedules a retry with backoff and jitter up to
+      24 h, and 24 h of failures disables the endpoint and emails the customer.
+interface:
+  lang: http
+  code: |
+    POST /hooks/slotly   (customer endpoint)
+    Content-Type: application/json
+    Slotly-Timestamp: 1772443200
+    Slotly-Signature: v1=5d2f…a8c1
+    { "id": "evt_91k", "type": "booking.created",
+      "data": { "booking_id": "bk_33",
+                "start": "2026-03-04T10:00:00Z" } }
+
+    200 OK
+decisions:
+  - choice: Per-endpoint concurrency limit
+    instead: One shared pool of workers for all endpoints
+    why: >-
+      With a shared pool, one endpoint that takes 10 s to time out soaks up every worker and stalls the other 199.
+      A cap of 4 per endpoint keeps 500 events/s flowing.
+  - choice: Sign timestamp and body together
+    instead: Sign the body alone
+    why: >-
+      A captured request signed on body alone can be replayed forever. With the timestamp inside the signature,
+      receivers can reject anything older than 5 minutes.
+  - choice: Delivery rows in PostgreSQL
+    instead: An in-memory retry queue
+    why: >-
+      Retries last 24 hours, so they must survive restarts. 500 events/s to a few endpoints each is fine for one
+      PostgreSQL; revisit at ten times that.
+watchOut: >-
+  Logging full requests leaks signatures and sometimes secrets into log storage. Log status, latency and event id
+  only, and test that the secret never appears in any log line.

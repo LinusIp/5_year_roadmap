@@ -1,0 +1,69 @@
+overview: >-
+  A four-bar linkage (four rigid links joined by pins: a fixed ground link, a crank you turn, a coupler and a rocker)
+  designed so a point on its coupler traces a chosen path. Python solves the loop-closure equations at every crank
+  angle to predict the coupler curve, the links are 3D-printed and pinned, and a pen at the coupler point draws the
+  real curve for a comparison within 3 mm.
+learn:
+  - name: Four-bar kinematics
+  - name: Grashof condition
+  - name: Loop-closure equations
+  - name: Print tolerances
+components:
+  - id: synth
+    name: Link synthesis
+    role: Chooses link lengths and the coupler point to match target path points.
+    tech: Python · SciPy
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Coupler-curve sim
+    role: Solves the linkage at each crank angle and plots the coupler point.
+    tech: Python · NumPy
+    talksTo: [cad]
+    kind: core
+  - id: cad
+    name: CAD and print
+    role: Links with pin holes on separate layers, checked for interference.
+    tech: CAD · FDM printer
+    talksTo: [trace]
+    kind: core
+  - id: trace
+    name: Trace comparison
+    role: Overlays the pen trace on the predicted curve and measures the gap.
+    tech: Scan · Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: synth
+    text: minimises the distance from the curve to target points with `scipy.optimize`, and checks Grashof (`s + l ≤ p + q`) so the crank can turn all the way round.
+  - component: sim
+    text: steps the crank 0 to 360 degrees in 1-degree steps, finds the rocker by intersecting two circles, and stays on the **same assembly branch** every step.
+  - component: cad
+    text: puts each link on its own layer so they pass each other, and turns the assembly a full 360 degrees to check for collisions before printing.
+  - component: trace
+    text: scans the pen trace with a scale bar and overlays it on the simulated curve; done is a maximum deviation under 3 mm.
+interface:
+  lang: python
+  code: |
+    def rocker_angle(theta2, a, b, c, d, branch=+1):
+        """Ground d, crank a, coupler b, rocker c.
+        Returns (theta3, theta4) by circle intersection,
+        or None where the linkage cannot close."""
+
+    def coupler_point(theta2, theta3, a, px, py):
+        """Point fixed to the coupler: px along it,
+        py perpendicular, in mm."""
+
+    def grashof(lengths) -> bool:
+        s, p, q, l = sorted(lengths)
+        return s + l <= p + q
+decisions:
+  - choice: Print a clearance test first
+    instead: Print pins and holes at nominal size
+    why: >-
+      Printed holes usually come out a little undersize, and slop in four joints adds up to millimetres at the coupler
+      point, a large share of the 3 mm budget. A strip of holes at +0.1, +0.2 and +0.3 mm finds the snug fit for your
+      printer.
+watchOut: >-
+  Links that collide at some crank angle lock the mechanism part-way round. Check the full rotation in the CAD
+  assembly, not just the start pose.

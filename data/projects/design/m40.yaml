@@ -1,0 +1,124 @@
+overview: >-
+  A microcontroller spectrum analyser: a timer starts an ADC conversion 32,000 times a second, and DMA (hardware that
+  copies data without the CPU) writes the samples into a circular buffer of two 512-sample halves. Each time a half
+  fills, the processing task takes the latest 1,024 samples, applies a Hann window, runs an FFT, converts magnitudes
+  to dB and bins them into display columns. The display gets the frame over SPI with DMA while the next half fills, and
+  a GPIO pin shows the processing time on a scope.
+learn:
+  - name: Nyquist and aliasing
+    ref: dspguide
+  - name: Windowing and leakage
+    ref: think-dsp
+  - name: The FFT
+    ref: dspguide
+  - name: DMA ping-pong buffers
+    ref: making-embedded-systems
+  - name: Fixed-point q15
+  - name: Real-time budgets
+stats:
+  - value: < 25 %
+    label: of the 16 ms frame for window, FFT, bins
+  - value: ≥ 20 FPS
+    label: measured display refresh
+  - value: '0'
+    label: dropped samples in 10 minutes
+components:
+  - id: mic
+    name: Mic and preamp
+    role: Turns sound, or the generator's test tone, into a voltage for the ADC.
+    tech: MAX9814 electret
+    talksTo: [adc]
+    kind: external
+  - id: timer
+    name: Timer trigger
+    role: Fires the ADC at exactly 32 kHz from its trigger output.
+    tech: STM32 timer TRGO
+    talksTo: [adc]
+    kind: core
+  - id: adc
+    name: ADC
+    role: Converts one sample on each timer trigger.
+    tech: 12-bit ADC
+    talksTo: [dma]
+    kind: core
+  - id: dma
+    name: Circular DMA
+    role: Writes samples into two 512-sample halves and interrupts at each half.
+    tech: DMA · half and full IRQs
+    talksTo: [dsp]
+    kind: core
+  - id: dsp
+    name: Processing task
+    role: Window, 1,024-point real FFT, dB magnitudes and log-frequency bins.
+    tech: C11 · CMSIS-DSP
+    talksTo: [display]
+    kind: core
+  - id: display
+    name: Display driver
+    role: Sends each frame of bars to the LCD over SPI with DMA.
+    tech: SPI DMA
+    talksTo: [lcd]
+    kind: core
+  - id: lcd
+    name: LCD
+    role: Shows the spectrum as bars.
+    tech: ST7789 240×240
+    talksTo: []
+    kind: external
+  - id: reference
+    name: NumPy reference
+    role: Computes the spectrum of a captured block on the PC to compare in dB.
+    tech: Python · NumPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: timer
+    text: emits a trigger every `1/32,000 s`, so the sample rate never depends on software.
+  - component: adc
+    text: converts the microphone voltage on each trigger.
+  - component: dma
+    text: >-
+      stores it in `adc_buf` and raises the **half-complete** or **complete** interrupt every 512 samples, one new
+      half every 16 ms.
+  - component: dsp
+    text: >-
+      takes the latest two halves, only the one DMA has **finished**, applies the Hann window, runs the FFT, and bins
+      `20·log10|X|` into columns with the GPIO pin high.
+  - component: display
+    text: starts an SPI DMA transfer of the bars and returns while the next half fills.
+  - component: lcd
+    text: shows the new frame; a 1 kHz tone lands in its bin within ±1.
+interface:
+  lang: c
+  code: |
+    #define FS    32000  /* timer trigger rate */
+    #define HALF  512    /* 16 ms of samples */
+    #define NFFT  1024   /* latest two halves */
+    static uint16_t adc_buf[2 * HALF]; /* circular */
+
+    void DMA2_Stream0_IRQHandler(void) {
+      if (dma_half_done()) ready = HALF_A;
+      if (dma_full_done()) ready = HALF_B;
+      dma_clear_flags();
+    }
+    /* main loop: window, FFT, |X| in dB, bins */
+    void process(const uint16_t *buf, int newest);
+decisions:
+  - choice: Timer-triggered ADC with circular DMA
+    instead: Conversions started from software
+    why: >-
+      Software starts jitter the sample rate and cost the CPU 32,000 interrupts a second; the timer and DMA take
+      both off the CPU.
+  - choice: 1,024 points with 50 % overlap
+    instead: 512 points, no overlap
+    why: >-
+      At 32 kHz, 1,024 points give 31.25 Hz bins instead of 62.5 Hz, and the overlap still yields a frame every 16 ms,
+      well above 20 FPS.
+  - choice: Display over SPI with DMA
+    instead: Polled SPI
+    why: >-
+      A 240×240 frame at 2 bytes a pixel is 115 KB; at 20 FPS that is 2.3 MB/s, which polled SPI would take out of
+      the 16 ms budget.
+watchOut: >-
+  Processing the half that DMA is still writing mixes old and new samples and shows up as phase jumps. Only touch the
+  half named by the last interrupt.

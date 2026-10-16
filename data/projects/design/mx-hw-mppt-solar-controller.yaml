@@ -1,0 +1,105 @@
+overview: >-
+  A buck converter between the clinic's 200 W panel and its battery, with an MCU that keeps the panel at its
+  maximum power point (the voltage where volts times amps peaks, which moves with sun and temperature). Every
+  10 ms the MCU nudges the buck duty cycle, checks whether panel power went up or down, and keeps going in the
+  better direction; this is perturb-and-observe. A faster loop caps charge current, a state machine runs the
+  three charging stages, and a Python panel model drives every test before the 30 V bench.
+learn:
+  - name: Buck converters
+    ref: cu-boulder-power-electronics
+  - name: Maximum power point tracking
+  - name: Perturb and observe
+  - name: Three-stage charging
+  - name: Averaged converter models
+    ref: ltspice
+stats:
+  - value: ≥ 95 %
+    label: tracking efficiency
+  - value: '> 94 %'
+    label: converter efficiency at 10 A
+  - value: < 2 s
+    label: recovery after a shading step
+components:
+  - id: panel
+    name: PV panel
+    role: The 200 W panel, or the Python panel model fed by irradiance profiles in tests.
+    tech: PV panel · Python model
+    talksTo: [sense]
+    kind: external
+  - id: sense
+    name: V/I sensing
+    role: Measures panel and battery voltage and current through dividers and current sensors.
+    tech: C · ADC
+    talksTo: [protect]
+    kind: core
+  - id: protect
+    name: Protection
+    role: Blocks charging on reverse polarity, battery overvoltage or over-temperature.
+    tech: C · comparator
+    talksTo: [mppt]
+    kind: core
+  - id: mppt
+    name: MPPT
+    role: Perturb-and-observe on panel power at 100 Hz, with a step size that shrinks near the peak.
+    tech: C
+    talksTo: [charger]
+    kind: core
+  - id: charger
+    name: Charge stages
+    role: Bulk, absorption and float stages per chemistry profile; limits current and voltage over MPPT.
+    tech: C · state machine
+    talksTo: [buck]
+    kind: core
+  - id: buck
+    name: Buck converter
+    role: MOSFET, inductor and diode stage whose PWM duty sets the panel operating voltage.
+    tech: MOSFET · PWM
+    talksTo: [battery]
+    kind: core
+  - id: battery
+    name: Battery
+    role: Lead-acid or LiFePO4 bank that powers the clinic fridge.
+    tech: 12 V battery
+    talksTo: []
+    kind: external
+  - id: logger
+    name: Energy logger
+    role: Sums watt-hours harvested per day for the clinic.
+    tech: C · flash
+    talksTo: []
+    kind: offline
+flow:
+  - component: sense
+    text: samples `V_pv`, `I_pv`, `V_bat` and `I_bat` and averages over one 10 ms period to remove switching ripple.
+  - component: protect
+    text: forces duty to zero if the battery is above its profile voltage, reversed, or over `45 °C`.
+  - component: mppt
+    text: computes `P = V_pv × I_pv`; if it rose since the last step it **keeps the direction**, otherwise it reverses the duty step.
+  - component: charger
+    text: in bulk passes the MPPT duty through, in absorption and float caps it so `V_bat` holds the stage setpoint, for example `14.4 V` then `13.6 V`.
+  - component: buck
+    text: switches at tens of kHz with that duty; lower duty draws the panel voltage up toward its open-circuit value.
+interface:
+  lang: c
+  code: |
+    typedef enum { BULK, ABSORB, FLOAT, FAULT } stage_t;
+
+    typedef struct {
+      float v_pv, i_pv, v_bat, i_bat, t_bat;
+    } meas_t;
+
+    /* every 10 ms; returns new duty 0.0..0.95 */
+    float mppt_po_step(const meas_t *m,
+                       float duty, float step);
+
+    stage_t charge_update(stage_t s, const meas_t *m,
+                          const profile_t *p,
+                          float *duty);
+decisions:
+  - choice: Perturb and observe
+    instead: Incremental conductance
+    why: P&O needs only power readings and is simple to verify on the model; with an adaptive step it reaches 95 percent here. Try incremental conductance if fast cloud edges cost more than 5 percent.
+  - choice: Simulation first, 30 V bench second
+    instead: Develop on the full 200 W system
+    why: The model covers clear, cloudy and shading days in seconds, and the constraint caps hardware tests at 30 V and 5 A anyway.
+watchOut: P&O never stops moving, so it wobbles around the peak and loses energy if the step is large. Shrink the step near the peak and check the wobble in the logged power.

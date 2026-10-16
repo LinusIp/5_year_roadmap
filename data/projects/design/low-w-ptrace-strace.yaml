@@ -1,0 +1,70 @@
+overview: >-
+  A Linux tracer in C that forks a child, has it call `PTRACE_TRACEME` and exec the target, then stops it at every
+  system call entry and exit to read the call number and arguments from registers and print lines like
+  `openat(AT_FDCWD, "/etc/hosts", O_RDONLY) = 3`. The syscall order must match strace on 5 simple programs.
+learn:
+  - name: System calls
+    ref: cmu-15-213
+  - name: ptrace stops
+  - name: x86-64 syscall registers
+  - name: Reading tracee memory
+components:
+  - id: launcher
+    name: Launcher
+    role: Forks, marks the child as traced and execs the target program.
+    tech: fork · execvp
+    talksTo: [tracer]
+    kind: core
+  - id: tracer
+    name: Tracer loop
+    role: Resumes the child to the next syscall stop and tracks entry or exit per pid.
+    tech: ptrace · waitpid
+    talksTo: [decoder]
+    kind: core
+  - id: decoder
+    name: Syscall decoder
+    role: Names 30 syscalls, formats their arguments and prints the result.
+    tech: C table
+    talksTo: []
+    kind: core
+  - id: child
+    name: Traced program
+    role: The target, which stops at each syscall until the tracer resumes it.
+    tech: Linux x86-64
+    talksTo: [tracer]
+    kind: external
+flow:
+  - component: launcher
+    text: forks; the child calls `ptrace(PTRACE_TRACEME)` and `execvp`, and stops with `SIGTRAP` before its first instruction.
+  - component: tracer
+    text: >-
+      sets `PTRACE_O_TRACESYSGOOD`, resumes with `PTRACE_SYSCALL` and waits; stops alternate entry and exit, so it
+      keeps an `in_syscall` flag per pid.
+  - component: decoder
+    text: >-
+      at entry reads `orig_rax` for the number and `rdi, rsi, rdx, r10, r8, r9` for arguments, copying strings word
+      by word with `PTRACE_PEEKDATA`.
+  - component: decoder
+    text: >-
+      at exit reads `rax`, prints the result or `-1 ENOENT` for a negative value, and follows new children through
+      `PTRACE_O_TRACEFORK`.
+interface:
+  lang: c
+  code: |
+    struct user_regs_struct r;
+    ptrace(PTRACE_GETREGS, pid, 0, &r);
+    long nr  = r.orig_rax;          /* syscall no. */
+    long a0  = r.rdi, a1 = r.rsi, a2 = r.rdx;
+    long a3  = r.r10, a4 = r.r8,  a5 = r.r9;
+    long ret = r.rax;               /* exit stop */
+
+    /* entry stop: rax == -ENOSYS */
+decisions:
+  - choice: PTRACE_O_TRACESYSGOOD to mark syscall stops
+    instead: Treating every SIGTRAP as a syscall stop
+    why: >-
+      Without it a signal delivered to the child looks like a syscall stop and flips the entry or exit flag,
+      shifting every later line. The option sets bit `0x80` in the stop signal, so syscall stops are unambiguous.
+watchOut: >-
+  Entry and exit stops look the same to `waitpid`. If the flag gets out of step once, every later line prints
+  arguments as results, so track it per pid, especially after following a fork.

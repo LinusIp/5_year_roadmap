@@ -1,0 +1,108 @@
+overview: >-
+  A camera photographs each board, the image is cut into crops, and a pretrained CNN fine-tuned on fewer than 3,000
+  labelled images scores each crop for defects such as solder bridges. A board is flagged when any crop passes a
+  threshold chosen for 95% recall, and flagged boards come with a Grad-CAM heatmap (a picture of where the model
+  looked) so the inspector checks the right spot first.
+learn:
+  - name: Transfer learning
+    ref: fastai-practical-dl
+  - name: Data augmentation
+  - name: Class imbalance
+  - name: Operating-point selection
+  - name: Grad-CAM
+    ref: stanford-cs231n
+stats:
+  - value: ≥ 95%
+    label: defect recall
+  - value: ≤ 10%
+    label: false-flag rate
+  - value: < 50 ms
+    label: per image on GPU
+components:
+  - id: camera
+    name: Line camera
+    role: Saves one photo per board to a folder.
+    tech: Industrial camera
+    talksTo: [loader]
+    kind: external
+  - id: loader
+    name: Loader
+    role: Cuts each photo into fixed crops and normalises them.
+    tech: torchvision
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Classifier
+    role: Scores each crop for defect probability.
+    tech: PyTorch · ResNet-18
+    talksTo: [decision]
+    kind: core
+  - id: decision
+    name: Threshold
+    role: Flags the board if any crop's score passes the chosen operating point.
+    tech: Python
+    talksTo: [gradcam]
+    kind: core
+  - id: gradcam
+    name: Grad-CAM overlay
+    role: Draws a heatmap on flagged crops for the inspector.
+    tech: pytorch-grad-cam
+    talksTo: [inspector]
+    kind: core
+  - id: inspector
+    name: Inspector
+    role: Checks flagged boards by eye and confirms or clears them.
+    tech: Review folder
+    talksTo: []
+    kind: external
+  - id: trainer
+    name: Trainer
+    role: Fine-tunes the backbone with heavy augmentation and class weights.
+    tech: PyTorch
+    talksTo: [selector]
+    kind: offline
+  - id: selector
+    name: Threshold selector
+    role: Picks the threshold that reaches 95% recall on validation boards.
+    tech: scikit-learn
+    talksTo: [decision]
+    kind: offline
+flow:
+  - component: loader
+    text: reads the board image and cuts it into overlapping 224 px crops.
+  - component: model
+    text: scores all crops of the board in one batch on the GPU.
+  - component: decision
+    text: flags the board if any crop has `p_defect ≥ 0.18`, the value the selector chose to reach **95% recall**.
+  - component: gradcam
+    text: writes an overlay for each flagged crop and moves the board to the review folder.
+  - component: inspector
+    text: confirms or clears it; confirmed defects are added to the next training set.
+interface:
+  lang: shell
+  code: |
+    $ inspect run images/2026-10-16/ --threshold 0.18
+    4,012 boards · 38 ms/board · 296 flagged (7.4%)
+    → out/flags.csv
+    board_id,p_max,flagged,overlay
+    B-20871,0.91,1,overlays/B-20871_c07.png
+    B-20872,0.03,0,
+decisions:
+  - choice: Fine-tune a pretrained backbone
+    instead: Train a CNN from scratch
+    why: >-
+      Under 3,000 labelled images is far too few to learn edges and textures from zero. An ImageNet backbone
+      already has them; only the top layers need to learn solder.
+  - choice: Threshold for recall, not accuracy
+    instead: The default 0.5 cut-off
+    why: >-
+      A missed bridge reaches a customer; a false flag costs an inspector a few seconds. Pick the lowest false-flag
+      rate that still keeps 95% recall on validation boards.
+  - choice: Class weights and augmentation
+    instead: Throw away OK images to balance
+    why: >-
+      With so little data every image matters. Weighting defects and adding flips, rotations and brightness
+      changes keeps all of it.
+watchOut: >-
+  Crops of the same board in both train and test leak lighting and layout, and recall looks great until a new
+  batch arrives. Split by board, and ideally by production day.

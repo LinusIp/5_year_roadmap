@@ -1,0 +1,73 @@
+overview: >-
+  A renderer with three frames in flight (the CPU records the next frame while the GPU still draws earlier ones), where
+  per-object uniforms go into a ring buffer at dynamic offsets, small per-draw data goes in push constants, and all
+  textures sit in one descriptor array indexed by material id. Done is 1,000 objects with different materials and
+  synchronisation validation clean.
+learn:
+  - name: Frames in flight
+    ref: vulkan-tutorial
+  - name: Dynamic uniform offsets
+    ref: vkguide
+  - name: Descriptor indexing
+  - name: Push constants
+components:
+  - id: frame
+    name: Frame context
+    role: Owns each frame's fence, command pool and slice of the ring.
+    tech: Vulkan · C++20
+    talksTo: [ring]
+    kind: core
+  - id: ring
+    name: Uniform ring
+    role: One persistently mapped buffer split into three per-frame slices.
+    tech: Vulkan · VMA
+    talksTo: [record]
+    kind: core
+  - id: bindless
+    name: Texture array
+    role: Holds every material texture in one descriptor set, written once at load.
+    tech: Descriptor indexing
+    talksTo: [record]
+    kind: core
+  - id: record
+    name: Command recording
+    role: Binds offsets and push constants and draws each object.
+    tech: Vulkan
+    talksTo: []
+    kind: core
+flow:
+  - component: frame
+    text: waits on frame `i % 3`'s fence before touching its resources, then resets its command pool.
+  - component: ring
+    text: copies each object's uniform block into this frame's slice at offsets rounded up to `minUniformBufferOffsetAlignment`.
+  - component: bindless
+    text: exposes `sampler2D textures[]` with `PARTIALLY_BOUND`, so no descriptor set is allocated per draw.
+  - component: record
+    text: binds the set with the object's **dynamic offset**, pushes `{ material }` as a push constant and draws; frame time is plotted for 1, 2 and 3 frames in flight.
+interface:
+  lang: glsl
+  code: |
+    #extension GL_EXT_nonuniform_qualifier : require
+
+    layout(set = 0, binding = 0) uniform Object {
+      mat4 model; vec4 tint;   // one ring slot
+    } obj;                     // dynamic offset
+    layout(set = 1, binding = 0)
+      uniform sampler2D textures[];
+    layout(push_constant) uniform Push {
+      uint material;           // same for whole draw
+    } pc;
+
+    void main() {
+      outColour = texture(textures[pc.material], uv)
+                * obj.tint;
+    }
+decisions:
+  - choice: One ring buffer with dynamic offsets
+    instead: One uniform buffer and descriptor set per object per frame
+    why: >-
+      1,000 objects times 3 frames is 3,000 sets to allocate and update. One buffer and one set per frame, moved by a
+      dynamic offset, needs 3 sets in total and one big copy per frame.
+watchOut: >-
+  Writing frame `i`'s slice before its fence has signalled corrupts objects the GPU is still drawing, and only under
+  load. Always wait on that frame's fence first, and size each slice for the most objects you will draw.

@@ -1,0 +1,111 @@
+overview: >-
+  A search API for Pageturn's 20,000 books that replaces a slow SQL LIKE. Books go into a SQLite FTS5 index (a
+  built-in full-text index that ranks with BM25), a typo corrector fixes query words within edit distance 2, and
+  filters and facets narrow results by category and price. A reindex builds a new file and swaps it in at once, so
+  queries never see a half-built index.
+learn:
+  - name: Inverted indexes
+    ref: slp3
+  - name: BM25 ranking
+    ref: slp3
+  - name: Edit distance
+    ref: slp3
+  - name: NDCG evaluation
+    ref: slp3
+  - name: Atomic swap reindex
+stats:
+  - value: < 40 ms
+    label: p99 query at 50 QPS
+  - value: +25%
+    label: NDCG@5 over LIKE
+  - value: < 10 s
+    label: full reindex
+components:
+  - id: shop
+    name: Shop frontend
+    role: Sends what the customer typed and the chosen filters.
+    tech: Web
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: HTTP API
+    role: Exposes search and facet endpoints and holds the current index handle.
+    tech: FastAPI
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: Query parser
+    role: Tokenises the query with the same rules as the indexer and pulls out filters.
+    tech: Python
+    talksTo: [typo]
+    kind: core
+  - id: typo
+    name: Typo corrector
+    role: Replaces unknown words with the most frequent index word within edit distance 2.
+    tech: Python · SymSpell-style lookup
+    talksTo: [ranker]
+    kind: core
+  - id: ranker
+    name: Ranker
+    role: Runs the FTS5 match with BM25 weights per field, applies filters and counts facets.
+    tech: SQLite FTS5
+    talksTo: []
+    kind: core
+  - id: indexer
+    name: Indexer
+    role: Builds a new index file and vocabulary from the catalogue, then swaps it in.
+    tech: Python · SQLite
+    talksTo: [ranker]
+    kind: offline
+  - id: eval
+    name: Evaluation script
+    role: Scores 200 labelled queries with NDCG@5 and MRR against the LIKE baseline.
+    tech: Python
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: receives `GET /search?q=hary poter&category=fiction&max_price=15`.
+  - component: parser
+    text: lower-cases, strips accents and splits the words exactly like the indexer did, and separates the two filters.
+  - component: typo
+    text: >-
+      sees `hary` and `poter` are not in the vocabulary and swaps in `harry` and `potter`, the most frequent words
+      within edit distance 2.
+  - component: ranker
+    text: >-
+      runs `MATCH` with `bm25(books, 10.0, 5.0, 1.0)` so title beats author beats tags, applies the price filter,
+      and counts category facets.
+  - component: api
+    text: returns the top 10 with a `corrected_query` field, so the page can show "showing results for harry potter".
+interface:
+  lang: http
+  code: |
+    GET /search?q=hary+poter&category=fiction
+        &max_price=15&limit=10
+
+    200 OK
+    { "corrected_query": "harry potter",
+      "total": 37,
+      "hits": [{ "isbn": "9780747532699",
+                 "title": "Harry Potter and the…",
+                 "score": 12.4 }],
+      "facets": { "category": { "fiction": 37 } } }
+decisions:
+  - choice: SQLite FTS5
+    instead: A separate search server such as Elasticsearch
+    why: >-
+      20,000 books fit in a few megabytes, and a JVM server does not fit in 1 GB of RAM next to the API. FTS5 gives
+      BM25 and runs in-process.
+  - choice: Build a new file and swap the handle
+    instead: Update the live index in place
+    why: >-
+      In-place rebuilds serve half-empty results for several seconds. Building `books.next.db` and swapping makes
+      the change instant, and the old file stays for rollback.
+  - choice: Tune on half the labelled queries
+    instead: Tune and report on all 200
+    why: >-
+      Field weights tuned on the test queries inflate NDCG. Report the 25 percent gain on the held-out 100 only.
+watchOut: >-
+  If the query path and the indexer tokenise differently, a word like "café" never matches. Share one tokenise
+  function between them and test it on accents and hyphens.

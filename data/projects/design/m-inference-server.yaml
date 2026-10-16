@@ -1,0 +1,123 @@
+overview: >-
+  A Python server that streams tokens from a 1–3B Llama-style model, built from the parts real inference engines have.
+  Requests wait in a queue; at every step a scheduler lets new ones join the running batch while KV-cache memory (the
+  stored attention keys and values of earlier tokens) allows. The model runner prefills new prompts and decodes one
+  token for every running sequence, and a streamer pushes each token to its client and frees finished sequences.
+learn:
+  - name: KV cache
+    ref: kipply-inference-arithmetic
+  - name: Prefill and decode
+    ref: databricks-inference-best-practices
+  - name: Continuous batching
+    ref: batching-effects-gpt
+  - name: Server-sent events
+  - name: Latency percentiles
+    ref: google-sre-book
+stats:
+  - value: ≥ 2×
+    label: throughput over static, 32 users
+  - value: "50"
+    label: concurrent streams, no lost tokens
+  - value: 20 of 20
+    label: prompts match HF greedy
+components:
+  - id: client
+    name: Client
+    role: Sends a prompt and reads tokens as they arrive; the load-test script plays many of them.
+    tech: Locust · asyncio
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: HTTP API
+    role: Accepts `POST /generate`, tokenises the prompt and opens the event stream.
+    tech: FastAPI · SSE
+    talksTo: [queue]
+    kind: core
+  - id: queue
+    name: Request queue
+    role: Holds waiting requests in arrival order with their arrival time.
+    tech: asyncio.Queue
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Scheduler
+    role: Each step, admits waiting requests into the batch while KV memory allows.
+    tech: Python
+    talksTo: [runner, kvcache]
+    kind: core
+  - id: runner
+    name: Model runner
+    role: Prefills new sequences and decodes one token for every running one, with masks and position ids.
+    tech: PyTorch
+    talksTo: [kvcache, streamer]
+    kind: core
+  - id: kvcache
+    name: KV cache manager
+    role: Hands out per-sequence key and value tensors and frees them when a sequence ends.
+    tech: PyTorch tensors
+    talksTo: []
+    kind: core
+  - id: streamer
+    name: Streamer
+    role: Pushes each new token to its client, logs TTFT and ITL, and retires finished sequences.
+    tech: FastAPI · SSE
+    talksTo: [client, scheduler]
+    kind: core
+  - id: bench
+    name: Benchmark log
+    role: Collects TTFT, inter-token latency and tokens per second at concurrency 1 to 64.
+    tech: CSV · Matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: api
+    text: receives `POST /generate`, tokenises the prompt and puts the request on the queue with its arrival time.
+  - component: queue
+    text: holds it until the next scheduler step; queue time counts towards **time to first token**.
+  - component: scheduler
+    text: >-
+      admits it if the KV cache has room for prompt plus `max_tokens`, so new requests join a running batch instead
+      of waiting for it to finish.
+  - component: runner
+    text: >-
+      prefills the new prompt in one pass, then decodes one token per step for all running sequences, with padding
+      masks and correct position ids.
+  - component: kvcache
+    text: stores the new keys and values per sequence, so each decode step attends over the cache instead of recomputing.
+  - component: streamer
+    text: >-
+      sends the token as an SSE `data:` line and, on end-of-sequence or `max_tokens`, frees the cache and tells the
+      scheduler; this step **loop** repeats.
+  - component: bench
+    text: records TTFT and ITL at p50 and p99 and tokens per second, for static and continuous batching.
+interface:
+  lang: http
+  code: |
+    POST /generate
+    { "prompt": "Explain the KV cache",
+      "max_tokens": 128, "top_p": 0.9 }
+
+    200 OK  (text/event-stream)
+    data: {"token": " The", "index": 0}
+    data: {"token": " cache", "index": 1}
+    …
+    data: {"done": true, "reason": "length"}
+decisions:
+  - choice: Continuous batching
+    instead: Static batches padded to the longest
+    why: >-
+      With static batches short requests wait for the longest one and new ones wait for the whole batch. The target is
+      at least 2× the throughput at 32 users, measured by the shipped load test.
+  - choice: Contiguous per-sequence KV cache
+    instead: Paged KV blocks
+    why: >-
+      One tensor per sequence is easy to get right on a single GPU with a 1–3B model. Paged blocks are the stretch;
+      revisit when fragmentation limits the batch size.
+  - choice: Server-sent events
+    instead: WebSockets
+    why: >-
+      Tokens flow one way, server to client, so plain HTTP with `text/event-stream` is enough and works with any load
+      tool.
+watchOut: >-
+  A padding mask forgotten in batched decode silently corrupts shorter sequences while long ones look fine. Keep the 20
+  greedy prompts matching Hugging Face token for token as a test, and run it in a batch, not one at a time.

@@ -1,0 +1,124 @@
+overview: >-
+  A measurement pipeline for one 7–8B model and five variants: the BF16 baseline and GPTQ and AWQ at 8 and 4 bits. Both
+  methods are post-training quantization (they round weights to fewer bits after training, using a small calibration
+  set to decide how), and both get the same 128 calibration samples. Every variant goes through the same quality evals
+  and the same vLLM serving benchmark on one GPU, and everything lands in one results table that becomes a
+  quality-against-speed chart.
+learn:
+  - name: Post-training quantization
+    ref: mit-6-5940
+  - name: GPTQ and AWQ
+    ref: mit-6-5940
+  - name: Perplexity windows
+  - name: Eval standard error
+  - name: Memory- vs compute-bound
+    ref: horace-he-brrr
+stats:
+  - value: "5"
+    label: variants, same GPU
+  - value: 128 × 2,048
+    label: shared calibration tokens
+  - value: 1 and 32
+    label: concurrency benchmarked
+components:
+  - id: model
+    name: BF16 model
+    role: The 7–8B checkpoint (1–3B on a small GPU) every variant starts from.
+    tech: Hugging Face checkpoint
+    talksTo: [quantize]
+    kind: external
+  - id: calib
+    name: Calibration set
+    role: 128 samples of 2,048 tokens, shared by both methods and disjoint from the test sets.
+    tech: JSONL
+    talksTo: [quantize]
+    kind: core
+  - id: quantize
+    name: Quantize script
+    role: Runs GPTQ or AWQ at 8 or 4 bits with group size 128.
+    tech: llm-compressor · GPTQModel · AutoAWQ
+    talksTo: [variants]
+    kind: core
+  - id: variants
+    name: Variants
+    role: Holds each quantized model with its config and quantization time.
+    tech: safetensors · variants/
+    talksTo: [eval, bench]
+    kind: core
+  - id: eval
+    name: Quality eval
+    role: WikiText-2 perplexity in 2,048-token windows and two lm-eval tasks, with standard errors.
+    tech: lm-evaluation-harness
+    talksTo: [results]
+    kind: core
+  - id: bench
+    name: Serving bench
+    role: Serves each variant and measures memory, TTFT, ITL and tokens per second.
+    tech: vLLM
+    talksTo: [results]
+    kind: core
+  - id: results
+    name: Results table
+    role: One row per variant with every quality and speed number and its delta from BF16.
+    tech: pandas · results.csv
+    talksTo: [charts]
+    kind: core
+  - id: charts
+    name: Pareto chart
+    role: Plots quality against tokens per second and marks the variants worth shipping.
+    tech: Matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: calib
+    text: is drawn once from data that does **not** overlap WikiText-2 test or the task sets, and is reused for every run.
+  - component: quantize
+    text: >-
+      loads the BF16 model and runs GPTQ or AWQ with `group_size=128`; check first that your toolkit supports 8-bit
+      AWQ (AutoAWQ is 4-bit only).
+  - component: variants
+    text: saves each variant with its config and the same tokenizer and chat template as the baseline.
+  - component: eval
+    text: >-
+      runs perplexity with one context length and stride for all variants, then ARC-Challenge and GSM8K, keeping the
+      **standard error** of each score.
+  - component: bench
+    text: >-
+      serves the variant in vLLM and records weight memory, peak memory, TTFT, ITL and output tokens per second at
+      batch 1 and 32.
+  - component: results
+    text: joins quality and speed into `results.csv`, one row per variant, with deltas from BF16.
+  - component: charts
+    text: >-
+      draw the Pareto chart and pick a variant for a memory-bound laptop and one for a throughput-bound server.
+interface:
+  lang: shell
+  code: |
+    python quantize.py --method awq --bits 4 \
+      --group-size 128 --calib calib.jsonl \
+      --out variants/awq-w4
+    python ppl.py variants/awq-w4 --ctx 2048
+    lm_eval --model vllm \
+      --model_args pretrained=variants/awq-w4 \
+      --tasks arc_challenge,gsm8k
+    python bench.py variants/awq-w4 \
+      --concurrency 1,32 --append results.csv
+decisions:
+  - choice: One calibration set for both methods
+    instead: Each tool's default calibration data
+    why: >-
+      With different data, a quality gap could come from the samples instead of the method. 128 × 2,048 tokens is
+      small enough to fix once and reuse.
+  - choice: Benchmark in vLLM
+    instead: Time Hugging Face generate
+    why: >-
+      Speed depends on the low-bit kernels a real server uses; a 4-bit kernel can be slower than BF16 at batch 32
+      because it becomes compute-bound, and only real kernels show that.
+  - choice: Report deltas with standard error
+    instead: Raw accuracy per variant
+    why: >-
+      Task scores move by about a point from noise alone; a 0.3-point drop with a 1-point standard error is not a
+      finding.
+watchOut: >-
+  Calibration data that overlaps the perplexity test set makes quantized models look better than they are. Draw the
+  calibration samples from a different split and record where they came from.

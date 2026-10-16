@@ -1,0 +1,63 @@
+overview: >-
+  A JSON parser in C11 that allocates every node from one arena (a big block handed out in slices and freed all at
+  once), exposes a small path query such as `a.b[2]`, and is fuzzed with 100k mutated inputs.
+learn:
+  - name: Arena allocation
+  - name: Recursive descent
+    ref: crafting-interpreters
+  - name: Integer overflow checks
+  - name: Mutation fuzzing
+components:
+  - id: arena
+    name: Arena
+    role: Hands out aligned slices from growing blocks and frees them all with one call.
+    tech: C11
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: Parser
+    role: Builds tagged `JsonValue` nodes from the input buffer, with a depth limit.
+    tech: C11
+    talksTo: [query]
+    kind: core
+  - id: query
+    name: Path query
+    role: Walks the tree for paths such as `users[3].name`.
+    tech: C11
+    talksTo: []
+    kind: core
+  - id: fuzz
+    name: Fuzzer
+    role: Flips, inserts and deletes bytes in seed files and runs the parser under ASan.
+    tech: libFuzzer or a small mutator
+    talksTo: [parser]
+    kind: offline
+flow:
+  - component: arena
+    text: is created with a 1 MB first block; each later block doubles, so a 50 MB file needs few `malloc` calls.
+  - component: parser
+    text: reads the buffer, stores strings and arrays in arena memory, and fails cleanly past depth 512.
+  - component: query
+    text: resolves `json_get(root, "a.b[2]")` by splitting the path and stepping through objects and arrays.
+  - component: arena
+    text: is freed with `arena_free` once, so there is nothing to leak node by node.
+interface:
+  lang: c
+  code: |
+    Arena *arena_new(size_t first_block);
+    void   arena_free(Arena *a);
+
+    JsonValue *json_parse(Arena *a,
+                          const char *buf, size_t len,
+                          JsonError *err);
+    JsonValue *json_get(JsonValue *root,
+                        const char *path);
+decisions:
+  - choice: One arena per document
+    instead: malloc and free per node
+    why: >-
+      Nodes all live exactly as long as the document, so one free matches their lifetime and removes leak
+      bookkeeping. Use per-node allocation only if parts of a tree must outlive the rest.
+watchOut: >-
+  Size arithmetic such as `count * sizeof(JsonValue)` can overflow on hostile input and allocate too little.
+  Check before multiplying; the fuzzer will find it if you do not.

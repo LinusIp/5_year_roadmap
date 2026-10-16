@@ -1,0 +1,102 @@
+overview: >-
+  A pygame Breakout game whose simulation runs at a fixed 60 Hz step, separate from drawing, so the ball behaves the
+  same on every machine. Levels are text files designers edit, and a telemetry log records every death per level. The
+  project runs through the studio's three milestones (prototype, vertical slice, release candidate), and each
+  playtest's numbers decide what changes next.
+learn:
+  - name: Fixed-timestep loop
+    ref: gaffer-on-games
+  - name: Swept collision
+    ref: ericson-rtcd
+  - name: Data-driven levels
+  - name: Playtest telemetry
+  - name: Milestone gates
+stats:
+  - value: 60 Hz
+    label: fixed simulation step
+  - value: < 50 ms
+    label: input to screen
+  - value: ≥ 55 FPS
+    label: with 200 bricks and effects
+components:
+  - id: loop
+    name: Game loop
+    role: Reads input, runs as many fixed 1/60 s steps as time allows, then draws once.
+    tech: pygame
+    talksTo: [physics]
+    kind: core
+  - id: levels
+    name: Level loader
+    role: Parses designer-edited text files into brick grids with three brick types.
+    tech: Python
+    talksTo: [physics]
+    kind: core
+  - id: physics
+    name: Collision and physics
+    role: Moves paddle and ball and resolves swept ball-versus-brick and wall hits.
+    tech: Python
+    talksTo: [powerups, telemetry]
+    kind: core
+  - id: powerups
+    name: Power-up system
+    role: Drops and applies multiball, wide paddle and slow ball with timers.
+    tech: Python
+    talksTo: [hud]
+    kind: core
+  - id: hud
+    name: HUD and menus
+    role: Draws the scene, score, lives and pause menu and keeps the high-score file.
+    tech: pygame
+    talksTo: []
+    kind: core
+  - id: telemetry
+    name: Telemetry logger
+    role: Appends one CSV row per death and per level clear with time and level id.
+    tech: csv
+    talksTo: [playtest]
+    kind: offline
+  - id: playtest
+    name: Playtesters
+    role: Three people play 15 minutes each per milestone; their notes and CSVs drive changes.
+    tech: People · notebook
+    talksTo: []
+    kind: external
+flow:
+  - component: levels
+    text: has turned `level07.txt` into a brick grid at level start, so designers can edit levels without code.
+  - component: loop
+    text: adds the real elapsed time to an accumulator and runs `step(state, 1/60)` until less than one step is left.
+  - component: physics
+    text: moves the ball along its path and tests the **swept** segment against bricks, so a fast ball cannot pass through one.
+  - component: powerups
+    text: spawns a capsule when a special brick breaks and counts its effect down in steps, not in wall-clock seconds.
+  - component: hud
+    text: draws ball and paddle blended between the last two steps by `alpha = acc / STEP`, then flips the display.
+  - component: telemetry
+    text: writes `level,t,cause` when a life is lost, which feeds the deaths-per-level chart for the next playtest.
+interface:
+  lang: python
+  code: |
+    STEP = 1 / 60
+    acc = 0.0
+    while running:
+        acc += min(clock.tick() / 1000, 0.25)
+        handle_input(state)
+        while acc >= STEP:
+            step(state, STEP)  # physics, power-ups
+            acc -= STEP
+        draw(screen, state, alpha=acc / STEP)
+        pygame.display.flip()
+decisions:
+  - choice: Fixed 60 Hz step with interpolation
+    instead: Variable timestep using frame time
+    why: A variable step makes bounces differ between fast and slow machines, which ruins comparing playtests. The 0.25 s cap stops a spiral after a hitch.
+  - choice: Swept segment collision
+    instead: Overlap test at the new position
+    why: A fast ball moves more than half a brick per step late in the game, so overlap tests let it tunnel.
+  - choice: Plain-text levels and CSV telemetry
+    instead: Levels in code and notes only
+    why: The release target (deaths spread under 3x between easiest and hardest level) needs counts, and designers need to tweak levels between playtests.
+watchOut: >-
+  Shipping a milestone without its playtest because the game feels fine. Book the three testers before you start
+  each milestone and write down what the numbers changed.

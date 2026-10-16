@@ -1,0 +1,52 @@
+overview: >-
+  A large teacher network is trained first, then a small student learns from the teacher's softened output
+  probabilities (soft targets) as well as the true labels. The student is compared with the same small network
+  trained alone, across a sweep of the softening temperature.
+learn:
+  - name: Soft targets
+  - name: Temperature scaling
+  - name: KL divergence loss
+    ref: d2l
+components:
+  - id: teacher
+    name: Teacher
+    role: Large network trained normally, then frozen.
+    tech: PyTorch
+    talksTo: [distill]
+    kind: core
+  - id: baseline
+    name: Baseline student
+    role: Small network trained on hard labels only.
+    tech: PyTorch
+    talksTo: [report]
+    kind: offline
+  - id: distill
+    name: Distillation trainer
+    role: Trains the small network on a mix of KL to the teacher and cross-entropy to labels.
+    tech: PyTorch
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Compares student accuracy with the baseline at each temperature.
+    tech: pandas · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: teacher
+    text: is trained and checked on validation, then frozen.
+  - component: distill
+    text: computes `alpha * T² * KL(softmax(t/T), softmax(s/T)) + (1 - alpha) * CE` per batch.
+  - component: distill
+    text: repeats for `T = 1, 2, 4, 8` with the same student size and epochs as the baseline.
+  - component: report
+    text: shows test accuracy gain over the **baseline student** for each temperature.
+decisions:
+  - choice: Multiply the soft loss by T²
+    instead: Use the KL term unscaled
+    why: >-
+      Dividing logits by T shrinks the soft-target gradients by about 1/T², so without the factor higher temperatures
+      silently weaken the teacher signal and the sweep is not fair.
+watchOut: >-
+  An overfit teacher passes on confident mistakes. Pick the teacher checkpoint on validation, and check its
+  calibration before distilling from it.

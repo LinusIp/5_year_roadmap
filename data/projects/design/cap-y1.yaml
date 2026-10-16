@@ -1,0 +1,120 @@
+overview: >-
+  A finished arcade game in C with raylib, whose opponent is a small neural network you trained. The game is a state
+  machine over a fixed-timestep simulation; each tick the opponent turns positions and velocities into a feature
+  vector, runs your own C forward pass and picks an action. The same simulation built headless plays thousands of
+  logged games, which a Python trainer learns from by behaviour cloning (copying recorded actions) and exports as a
+  flat weight file.
+learn:
+  - name: Fixed timestep
+    ref: gaffer-on-games
+  - name: Game state machines
+  - name: Behaviour cloning
+  - name: MLP forward pass
+    ref: karpathy-zero-to-hero
+  - name: Binary files in C
+    ref: beej-c
+stats:
+  - value: 20 / 50 / 80 %
+    label: win rate per difficulty
+  - value: < 0.1 ms
+    label: inference per tick
+  - value: ≤ 1e-5
+    label: C logits against PyTorch
+components:
+  - id: player
+    name: Player
+    role: Plays with the keyboard or a gamepad.
+    tech: raylib input
+    talksTo: [game]
+    kind: external
+  - id: game
+    name: Game loop
+    role: Runs menu, play, paused, win and lose states and ticks the simulation at a fixed dt.
+    tech: C17 · raylib
+    talksTo: [features, sim]
+    kind: core
+  - id: features
+    name: Features
+    role: Builds the opponent's input vector from positions, velocities and distances.
+    tech: C
+    talksTo: [mlp]
+    kind: core
+  - id: mlp
+    name: C MLP
+    role: Loads `weights.bin` and turns features into action logits.
+    tech: C
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Simulation
+    role: Applies both sides' actions and steps the arena physics.
+    tech: C
+    talksTo: [render]
+    kind: core
+  - id: render
+    name: Render and audio
+    role: Draws the arena and plays sound at 60 FPS.
+    tech: raylib
+    talksTo: []
+    kind: core
+  - id: headless
+    name: Headless runs
+    role: The same simulation without a window, playing and logging thousands of games fast.
+    tech: C · ctypes
+    talksTo: [trainer]
+    kind: offline
+  - id: trainer
+    name: Trainer
+    role: Trains the MLP on logged pairs, evaluates it over 200 games and writes the weight file.
+    tech: Python · PyTorch
+    talksTo: [mlp]
+    kind: offline
+flow:
+  - component: game
+    text: >-
+      is in its `PLAY` state, reads the player's input and runs one fixed `dt` tick, however fast frames are drawn.
+  - component: features
+    text: >-
+      builds the opponent's vector with the **same C function** the headless logs used, so training and game see
+      identical inputs.
+  - component: mlp
+    text: >-
+      multiplies through two small layers with the loaded weights, takes the argmax of the logits as the action, in
+      well under 0.1 ms.
+  - component: sim
+    text: applies the player's and the opponent's actions, moves bodies and resolves collisions.
+  - component: render
+    text: draws the frame and plays sounds; on a goal or a timeout the game loop moves to its win or lose state.
+interface:
+  lang: c
+  code: |
+    // weights.bin: dims header, then float32
+    typedef struct {
+      int n_in, n_hidden, n_out;  // e.g. 12, 64, 5
+      float *w1, *b1, *w2, *b2;
+    } mlp_t;
+
+    int  mlp_load(mlp_t *m, const char *path);
+    void features(const state_t *s, int side,
+                  float *out);       // n_in floats
+    int  mlp_act(const mlp_t *m,
+                 const float *x);   // argmax action
+decisions:
+  - choice: Behaviour cloning on logged games
+    instead: Reinforcement learning from the start
+    why: >-
+      In 100 hours, cloning your play and the scripted bot's needs only logs and a supervised loss. PPO through the
+      headless binding is the stretch once the game ships.
+  - choice: Difficulty from different trained networks
+    instead: The same network with random noise added
+    why: >-
+      Noise looks broken rather than easier. Use checkpoints or data mixes whose win rates over 200 headless games
+      land near 20, 50 and 80 %.
+  - choice: Your own forward pass on a flat weight file
+    instead: A runtime such as ONNX Runtime
+    why: >-
+      The acceptance asks for your own C inference, and a two-layer MLP is a few loops. A parity test against
+      PyTorch on 1,000 states proves it right.
+watchOut: >-
+  Features computed one way in Python and another in C make the trained policy play nonsense in the game. Log the
+  feature vectors from the C code itself and train on those.

@@ -1,0 +1,46 @@
+overview: >-
+  A round-robin HTTP proxy written with asyncio that sends active health checks to each backend, takes a backend
+  out after consecutive failures, puts it back after consecutive successes, and retries failed requests only when
+  the method is idempotent.
+learn:
+  - name: Round-robin balancing
+    ref: system-design-primer
+  - name: Active health checks
+  - name: Idempotent retries
+components:
+  - id: proxy
+    name: Proxy
+    role: Accepts requests and forwards each to the next healthy backend.
+    tech: Python asyncio
+    talksTo: [backends]
+    kind: core
+  - id: checker
+    name: Health checker
+    role: Calls `GET /healthz` on every backend every 1 s and updates the healthy set.
+    tech: Python asyncio
+    talksTo: [backends, proxy]
+    kind: core
+  - id: backends
+    name: Backends
+    role: Three test servers that can be made to crash or flap.
+    tech: Python
+    talksTo: []
+    kind: external
+flow:
+  - component: checker
+    text: marks a backend down after 3 failed checks in a row and up again after 2 good ones.
+  - component: proxy
+    text: picks the next backend in the healthy list for `GET /items` and forwards it.
+  - component: proxy
+    text: on a connection error retries a `GET` once on another backend, but returns the error for a `POST`.
+  - component: checker
+    text: is tested with a flapping backend; no request may reach it after the 3 s detection window.
+decisions:
+  - choice: Active checks plus passive retry
+    instead: Passive detection from failed requests only
+    why: >-
+      Active checks find a dead backend even when traffic is low, which keeps detection time bounded at 3 s. The
+      retry covers requests that hit it inside that window.
+watchOut: >-
+  Retrying a `POST` can create an order twice. Retry only idempotent methods unless the request carries an
+  idempotency key.

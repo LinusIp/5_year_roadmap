@@ -1,0 +1,52 @@
+overview: >-
+  A cache in front of an LLM that embeds each question and returns a stored answer when a past question is close
+  enough by cosine similarity. A threshold sweep on a paraphrase set shows the trade-off between hits (calls saved)
+  and wrong hits (a stored answer to a different question).
+learn:
+  - name: Text embeddings
+    ref: hf-llm-course
+  - name: Cosine similarity
+  - name: Cache thresholds
+components:
+  - id: cache
+    name: Cache lookup
+    role: Embeds the question and finds the nearest stored question.
+    tech: Python · embeddings
+    talksTo: [store, llm]
+    kind: core
+  - id: store
+    name: Cache store
+    role: Keeps question text, embedding and answer for each past call.
+    tech: SQLite
+    talksTo: []
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Answers on a miss; the answer is then stored.
+    tech: Hosted LLM
+    talksTo: []
+    kind: external
+  - id: eval
+    name: Threshold sweep
+    role: Runs labelled paraphrase pairs at many thresholds and charts hit and false-hit rates.
+    tech: Python · matplotlib
+    talksTo: [cache]
+    kind: offline
+flow:
+  - component: cache
+    text: embeds the new question and compares it with the stored embeddings.
+  - component: store
+    text: returns the closest entry; if `cosine ≥ threshold` its answer goes back as a **hit**.
+  - component: llm
+    text: answers on a miss, and the question, embedding and answer are written to the store.
+  - component: eval
+    text: replays paraphrases (same meaning) and near-misses (different meaning) at thresholds from `0.80` to `0.98`.
+decisions:
+  - choice: Brute-force search over SQLite rows
+    instead: A vector database
+    why: >-
+      A few thousand cached questions fit in memory and one NumPy dot product is fast enough. Revisit above about 100k
+      entries or when lookup time shows up in latency.
+watchOut: >-
+  Caching answers that depend on the user ("my order", "my account") hands one person's answer to another. Skip the
+  cache for personalized questions, or key entries by user.

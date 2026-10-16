@@ -1,0 +1,63 @@
+overview: >-
+  Brick and stone surfaces get fine bumps from a normal map: per-vertex tangents are computed from the UVs, the vertex
+  shader builds a TBN matrix (tangent, bitangent and normal, the surface's local axes), and the fragment shader turns
+  the map's tangent-space normal into world space for lighting. A sign stored in `tangent.w` keeps mirrored UVs lit the
+  right way, as MikkTSpace does.
+learn:
+  - name: Tangent space
+    ref: learnopengl
+  - name: Gram-Schmidt orthogonalisation
+  - name: UV handedness
+  - name: Normal map conventions
+components:
+  - id: tangents
+    name: Tangent builder
+    role: Computes a tangent and handedness sign per vertex from positions and UVs.
+    tech: C++ / Python
+    talksTo: [vs]
+    kind: core
+  - id: vs
+    name: Vertex shader
+    role: Builds an orthogonal TBN matrix per vertex.
+    tech: GLSL
+    talksTo: [fs]
+    kind: core
+  - id: fs
+    name: Fragment shader
+    role: Decodes the normal map, moves it to world space and lights it.
+    tech: GLSL
+    talksTo: []
+    kind: core
+flow:
+  - component: tangents
+    text: solves each triangle's UV edges for `T` and `B`, sums them per vertex, and stores `w = sign(dot(cross(N, T), B))`.
+  - component: vs
+    text: re-orthogonalises with `T = normalize(T - N * dot(N, T))` and sets `B = cross(N, T) * w`, so the basis stays square on curved meshes.
+  - component: fs
+    text: maps the texel with `rgb * 2 - 1`, flips green if the map is DirectX style, and lights with `normalize(TBN * n)`.
+  - component: fs
+    text: has keys that turn orthogonalisation and the **mirror sign** off, so you can see the seams they fix on a mirrored and a curved mesh.
+interface:
+  lang: glsl
+  code: |
+    layout(location = 1) in vec3 aNormal;
+    layout(location = 3) in vec4 aTangent; // w = ±1
+    uniform mat3 normalMatrix;
+    out mat3 TBN;
+    void main() {
+      vec3 N = normalize(normalMatrix * aNormal);
+      vec3 T = normalize(normalMatrix * aTangent.xyz);
+      T = normalize(T - N * dot(N, T));
+      vec3 B = cross(N, T) * aTangent.w;
+      TBN = mat3(T, B, N);
+      // ... gl_Position as usual
+    }
+decisions:
+  - choice: Tangent plus sign, not stored bitangent
+    instead: Store a full bitangent per vertex
+    why: >-
+      A `vec4` tangent is 16 bytes against 24 for T and B, matches glTF and MikkTSpace, and rebuilding B in the shader
+      keeps it at right angles to T and N.
+watchOut: >-
+  Normal maps use two green-channel conventions (OpenGL up, DirectX down); the wrong one makes bumps look lit from
+  below. Check with one brick and a light moving up and down before blaming the tangents.

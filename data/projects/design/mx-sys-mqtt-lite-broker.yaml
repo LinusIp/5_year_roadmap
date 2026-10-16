@@ -1,0 +1,122 @@
+overview: >-
+  A single-node MQTT 3.1.1 broker in Rust for Homely Systems' hubs, replacing a Python server that falls over at 5,000
+  connections. An async event loop (one OS thread juggling thousands of sockets, waking only those with data) reads
+  packets, matches each published topic against a trie of subscriptions with `+` and `#` wildcards, and delivers to
+  every matching session. QoS 1 means at-least-once: each delivery is held in a per-session in-flight table until the
+  receiver acknowledges it, and is resent when it reconnects.
+learn:
+  - name: Async I/O
+    ref: rust-book
+  - name: Binary protocol codecs
+  - name: Topic tries
+  - name: At-least-once delivery
+  - name: Persistent sessions
+  - name: Backpressure
+stats:
+  - value: 20k
+    label: connections in < 500 MB
+  - value: < 10 ms
+    label: p99 at 20k msgs/s
+  - value: 40 / 40
+    label: conformance tests
+components:
+  - id: hubs
+    name: Home hubs
+    role: Connect, publish telemetry and subscribe to commands.
+    tech: MQTT 3.1.1
+    talksTo: [codec]
+    kind: external
+  - id: codec
+    name: Packet codec
+    role: Decodes and encodes MQTT packets from a byte stream, with size limits.
+    tech: Rust · tokio codec
+    talksTo: [session]
+    kind: core
+  - id: session
+    name: Session manager
+    role: Owns each client's subscriptions, last-will and saved state across reconnects.
+    tech: Rust · tokio
+    talksTo: [trie, retained]
+    kind: core
+  - id: trie
+    name: Topic trie
+    role: Finds every subscription matching a topic, wildcards included.
+    tech: Rust
+    talksTo: [qos]
+    kind: core
+  - id: retained
+    name: Retained store
+    role: Keeps the last retained message per topic for new subscribers.
+    tech: Rust HashMap
+    talksTo: []
+    kind: core
+  - id: qos
+    name: QoS 1 tracker
+    role: Numbers outgoing messages per session and holds them until PUBACK.
+    tech: Rust
+    talksTo: [subs]
+    kind: core
+  - id: subs
+    name: Subscribers
+    role: Hubs and apps receiving messages on their subscribed topics.
+    tech: MQTT 3.1.1
+    talksTo: []
+    kind: external
+  - id: loadgen
+    name: Load generator
+    role: Simulates 20,000 hubs publishing and measures delivery latency.
+    tech: Rust
+    talksTo: [hubs]
+    kind: offline
+flow:
+  - component: codec
+    text: >-
+      reads the fixed header and the variable-length "remaining length", refuses packets over 64 KB, and decodes a
+      `PUBLISH` to `home/42/temp` with QoS 1 and packet id 7.
+  - component: session
+    text: >-
+      checks the publisher's session, and answers `PUBACK 7` once the message is routed; that ack is the
+      publisher's at-least-once guarantee.
+  - component: retained
+    text: >-
+      stores the message as the topic's latest when the retain flag is set (an empty payload clears it).
+  - component: trie
+    text: >-
+      walks one level per topic segment: `+` matches one level, `#` the rest, and topics starting with `$` never match
+      a wildcard at the first level.
+  - component: qos
+    text: >-
+      gives each QoS 1 subscriber its own packet id and keeps the message in-flight (up to 20 per session, then a
+      capped queue) until `PUBACK`; on reconnect it resends with the `DUP` flag.
+interface:
+  lang: text
+  code: |
+    PUBLISH, QoS 1, topic "home/42/temp"
+    32              type 3, QoS 1
+    14              remaining length = 20
+    00 0C           topic length 12
+    68 6F 6D 65 ..  "home/42/temp"
+    00 07           packet id 7
+    32 31 2E 35     payload "21.5"
+
+    PUBACK
+    40 02 00 07     type 4, length 2, packet id 7
+decisions:
+  - choice: Async tasks, not a thread per connection
+    instead: One OS thread per connection
+    why: >-
+      20,000 threads would reserve far more stack than the 500 MB budget allows. A tokio task needs a few KB, which
+      leaves room for each connection's buffers.
+  - choice: Topic trie
+    instead: Scan every subscription for each publish
+    why: >-
+      At 20,000 messages a second over thousands of subscriptions, scanning would eat the 10 ms budget. A trie only
+      walks the few levels of the topic.
+  - choice: Resend QoS 1 only on reconnect
+    instead: Resend on a timer while connected
+    why: >-
+      MQTT 3.1.1 runs over TCP, which already retransmits while the connection is up. Timer resends just add
+      duplicates; resend unacked messages when the session reconnects.
+watchOut: >-
+  A persistent session whose hub stays offline keeps collecting QoS 1 messages until memory runs out. Cap each
+  session's queue, drop or expire beyond it, and report the drops.

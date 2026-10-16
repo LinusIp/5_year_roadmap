@@ -1,0 +1,116 @@
+overview: >-
+  A published article series, one per MIT 6.1810 lab you completed, each explaining what the lab asked, how xv6 does
+  it, the key changes you made and why. Every article lives as Markdown in one repository with short code excerpts
+  and two diagrams drawn by you: the path of one system call from user space into the kernel and back, and xv6's user
+  address space checked against `memlayout.h`. A static site generator publishes the series, and no complete
+  solution is ever posted.
+learn:
+  - name: Traps and system calls
+    ref: mit-6-1810
+  - name: Page tables
+    ref: mit-6-1810
+  - name: Copy-on-write fork
+    ref: mit-6-1810
+  - name: Address spaces
+    ref: ostep
+  - name: Explaining why, not what
+stats:
+  - value: ≥ 5
+    label: articles, one per completed lab
+  - value: 800–2,000
+    label: words per article
+  - value: ≤ 30
+    label: lines per code excerpt
+components:
+  - id: labs
+    name: Lab work
+    role: Your xv6 lab branches, `make grade` results and gdb sessions, kept private.
+    tech: xv6-riscv · QEMU · gdb-multiarch
+    talksTo: [article]
+    kind: external
+  - id: article
+    name: Article
+    role: One Markdown file per lab with the problem, the xv6 mechanism, your changes, a bug story and a test run.
+    tech: Markdown
+    talksTo: [site]
+    kind: core
+  - id: excerpts
+    name: Code excerpts
+    role: Annotated snippets of 30 lines or fewer, with the rest described in prose.
+    tech: Markdown code blocks
+    talksTo: [article]
+    kind: core
+  - id: diagrams
+    name: Diagrams
+    role: The trap-path and address-space diagrams, kept as editable sources and rendered images.
+    tech: Excalidraw · Mermaid
+    talksTo: [article]
+    kind: core
+  - id: site
+    name: Static site
+    role: Builds the series index and article pages from the repository.
+    tech: Hugo · Astro · Jekyll
+    talksTo: [readers]
+    kind: core
+  - id: readers
+    name: Readers
+    role: At least two people who know OSTEP but have not done the labs.
+    tech: Feedback notes
+    talksTo: []
+    kind: external
+flow:
+  - component: labs
+    text: >-
+      comes first: the traps lab passes `make grade`, and one `write` call is stepped through `ecall` in gdb while the
+      details are fresh.
+  - component: article
+    text: >-
+      is drafted within a week of the lab in the fixed order: the problem, how xv6 does it, your changes and why, one
+      bug story and the test transcript.
+  - component: excerpts
+    text: >-
+      are cut to 30 lines or fewer around the lines that matter, with comments saying **why**; everything else is
+      explained in prose.
+  - component: diagrams
+    text: >-
+      follow the trap path `ecall`, `uservec`, `usertrap`, `syscall`, `sys_write`, `usertrapret`, `userret`, `sret`,
+      and the address space is checked line by line against `memlayout.h`.
+  - component: site
+    text: rebuilds and publishes the article with a one-line summary in the series index.
+  - component: readers
+    text: >-
+      read the traps article and explain the trap path back to you; what they got wrong becomes the next edit.
+interface:
+  lang: c
+  code: |
+    // kernel/trap.c in xv6-riscv, shortened
+    void usertrap(void) {
+      struct proc *p = myproc();
+      p->trapframe->epc = r_sepc();
+      if (r_scause() == 8) {    // ecall from user
+        p->trapframe->epc += 4; // resume after ecall
+        intr_on();
+        syscall();              // a7 picks sys_*
+      }
+      // ... device interrupts, faults
+      usertrapret();            // to userret, sret
+    }
+decisions:
+  - choice: Short excerpts, explained in prose
+    instead: Publishing the full lab diffs
+    why: >-
+      The course asks that solutions stay private, and a code dump does not explain anything. Thirty lines around the
+      key idea, with the reasoning written out, teach more.
+  - choice: Write each article within a week
+    instead: Writing the whole series at the end
+    why: >-
+      The bug stories and the reasons behind each change fade within weeks. Five labs spread over the term make five
+      small writing tasks instead of one 30-hour slog.
+  - choice: Diagrams from your own xv6 version
+    instead: Reusing diagrams from the book or lectures
+    why: >-
+      Layouts change between xv6 releases. Drawing from `memlayout.h` and the trap code you ran keeps every box true,
+      and drawing it is part of understanding it.
+watchOut: >-
+  Explaining what each line does and never why turns an article into a code tour. For every excerpt, say what would
+  break without it.

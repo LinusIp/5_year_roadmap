@@ -1,0 +1,97 @@
+overview: >-
+  Kestrel Retail's 12 services stop being deployed by hand. One config repo holds a shared base and a Kustomize
+  overlay per environment, and Argo CD in each of three local clusters keeps pulling the repo and applying it until
+  the live state matches Git. CI publishes an image, a promotion bot opens a pull request to bump its tag, and merging
+  that PR is the only way anything changes, so a stale manifest can no longer be applied by accident.
+learn:
+  - name: GitOps reconciliation
+  - name: Kustomize overlays
+    ref: kubernetes-tutorials
+  - name: Promotion by pull request
+    ref: github-actions-docs
+  - name: Drift detection
+  - name: Sealed secrets
+stats:
+  - value: < 5 min
+    label: merge to running in prod
+  - value: < 2 min
+    label: drift detected
+  - value: < 30 min
+    label: full cluster rebuild
+components:
+  - id: ci
+    name: App CI
+    role: Builds and tests each service and pushes an image tagged with the commit hash.
+    tech: GitHub Actions · registry
+    talksTo: [bot]
+    kind: external
+  - id: bot
+    name: Promotion bot
+    role: Opens a pull request that bumps the image tag in dev, then staging, then prod.
+    tech: Argo CD Image Updater or script
+    talksTo: [repo]
+    kind: core
+  - id: repo
+    name: Config repo
+    role: Holds base manifests and one overlay per environment for all 12 services.
+    tech: Git · Kustomize · Helm
+    talksTo: [argocd]
+    kind: core
+  - id: argocd
+    name: GitOps controller
+    role: Pulls the repo every few minutes, applies changes and reports anything out of sync.
+    tech: Argo CD
+    talksTo: [clusters, alerts]
+    kind: core
+  - id: clusters
+    name: Clusters
+    role: Dev, staging and prod clusters on one 16 GB laptop.
+    tech: k3d · Kubernetes
+    talksTo: []
+    kind: core
+  - id: secrets
+    name: Sealed secrets
+    role: Decrypts secrets inside the cluster, so Git only ever holds encrypted ones.
+    tech: Sealed Secrets
+    talksTo: [clusters]
+    kind: core
+  - id: alerts
+    name: Drift alerts
+    role: Sends an alert when an app shows OutOfSync for more than one check.
+    tech: Argo CD notifications
+    talksTo: []
+    kind: offline
+flow:
+  - component: ci
+    text: pushes `orders:3f9c2e1` after the tests pass on the main branch.
+  - component: bot
+    text: opens a pull request changing `newTag` in `envs/staging/orders/kustomization.yaml`; after checks, a second PR does the same for prod.
+  - component: repo
+    text: merges the prod pull request, which is now the **only** path to change production.
+  - component: argocd
+    text: sees the new commit, renders the prod overlay and applies it; the app shows `Synced` and `Healthy` in under 5 minutes.
+  - component: secrets
+    text: turns the committed `SealedSecret` into a normal Secret inside the cluster, so the new pod gets its database password.
+  - component: clusters
+    text: run the new pods; if someone runs `kubectl edit`, Argo CD marks the app `OutOfSync` and an alert fires within 2 minutes.
+interface:
+  lang: yaml
+  code: |
+    # envs/prod/orders/kustomization.yaml
+    resources:
+      - ../../../base/orders
+    patches:
+      - path: replicas.yaml
+    images:
+      - name: ghcr.io/kestrel/orders
+        newTag: 3f9c2e1   # bumped by the bot's PR
+    # base/orders/ holds deployment.yaml and
+    # service.yaml, shared by dev, staging, prod
+decisions:
+  - choice: Pull-based controller, not CI running kubectl
+    instead: CI pipelines that push manifests with kubectl apply
+    why: A pusher never notices drift, and drift caused the last outage. A controller that keeps comparing Git to the cluster catches it within 2 minutes.
+  - choice: Overlays per environment in one repo
+    instead: A branch per environment
+    why: Branches drift apart the same way clusters did. One main branch with small overlays makes each promotion a one-line, reviewable diff.
+watchOut: A secret committed in plain text once stays in Git history forever. Add a secret scanner as a pre-commit hook before onboarding the first service.

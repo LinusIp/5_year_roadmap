@@ -1,0 +1,52 @@
+overview: >-
+  A 3-class text task solved two ways with the same small LLM: few-shot prompting, and a LoRA fine-tune (training small
+  added weight matrices instead of the whole model) on 500 labelled examples. A table compares accuracy, latency and
+  cost per 1k predictions, including training cost.
+learn:
+  - name: Few-shot prompting
+  - name: LoRA adapters
+    ref: hf-llm-course
+  - name: Cost per prediction
+components:
+  - id: data
+    name: Labelled data
+    role: Holds 500 training examples and a separate test set.
+    tech: JSONL
+    talksTo: [prompt, lora]
+    kind: core
+  - id: prompt
+    name: Few-shot runner
+    role: Puts a handful of examples in the prompt and parses the label.
+    tech: Transformers
+    talksTo: [compare]
+    kind: core
+  - id: lora
+    name: LoRA trainer
+    role: Fine-tunes adapters with a classification head and predicts.
+    tech: PyTorch · PEFT
+    talksTo: [compare]
+    kind: core
+  - id: compare
+    name: Comparison
+    role: Scores both on the test set and adds up time and GPU cost.
+    tech: Python · pandas
+    talksTo: []
+    kind: core
+flow:
+  - component: data
+    text: is split once; few-shot examples come only from the 500 training rows.
+  - component: prompt
+    text: classifies each test text with 6 examples in the prompt and maps the reply to one of the 3 labels.
+  - component: lora
+    text: trains adapters with `r=8, lora_alpha=16`, then classifies the same test texts.
+  - component: compare
+    text: reports accuracy, ms per prediction and **cost per 1k**, counting the LoRA training time once.
+decisions:
+  - choice: Same base model for both
+    instead: A large hosted model for prompting
+    why: >-
+      A shared base isolates the method from model size. A hosted large model as a third row is a useful extra,
+      but only once the like-for-like result is in.
+watchOut: >-
+  Few-shot examples or tuning choices taken from the test set make either method look better than it is. Keep the
+  test rows untouched until the final run.

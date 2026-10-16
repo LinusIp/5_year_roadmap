@@ -1,0 +1,98 @@
+overview: >-
+  A differential-drive robot (two driven wheels, steered by speed difference) running ROS 2 on a single-board
+  computer. Wheel odometry and the IMU give a smooth short-term pose, lidar scan matching against the pre-built
+  campus map corrects its drift, and the route planner follows waypoints from the dorms to the library. A safety
+  layer between the planner and the motors slows the robot near obstacles and stops it when the path is blocked or
+  the operator link is lost. The whole graph runs first in a Gazebo campus world.
+learn:
+  - name: Differential-drive odometry
+    ref: modern-robotics
+  - name: Sensor fusion
+  - name: Scan-matching localisation
+  - name: ROS 2 nodes and topics
+    ref: ros2-tutorials
+  - name: Stopping distance
+  - name: Simulation testing
+    ref: gazebo-docs
+stats:
+  - value: ≤ 0.3 m
+    label: waypoint error on a 200 m route
+  - value: < 0.5 m
+    label: stop from 1.5 m/s
+  - value: 50 Hz
+    label: control loop, CPU < 60 %
+components:
+  - id: sensors
+    name: Lidar and IMU
+    role: 2D lidar scans and IMU rates, plus wheel encoder ticks from the hub motors.
+    tech: 2D lidar · IMU
+    talksTo: [odom, localise]
+    kind: external
+  - id: odom
+    name: Odometry fusion
+    role: Fuses wheel ticks and IMU yaw rate into a smooth pose estimate at 50 Hz.
+    tech: robot_localization EKF
+    talksTo: [localise]
+    kind: core
+  - id: localise
+    name: Localisation
+    role: Matches each lidar scan against the campus map and corrects the odometry drift.
+    tech: AMCL or scan matcher
+    talksTo: [planner]
+    kind: core
+  - id: planner
+    name: Route planner
+    role: Follows the waypoint route and produces a velocity command toward the next waypoint.
+    tech: Nav2
+    talksTo: [safety]
+    kind: core
+  - id: safety
+    name: Safety layer
+    role: Scales speed by obstacle distance and forces a stop on a blocked path, lost link or E-stop.
+    tech: C++ ROS 2 node
+    talksTo: [base]
+    kind: core
+  - id: base
+    name: Base controller
+    role: Turns a velocity command into left and right wheel speeds and runs the wheel PI loops.
+    tech: C++ · motor controller
+    talksTo: []
+    kind: core
+  - id: logger
+    name: Run logger
+    role: Records every topic to a bag for offline replay of failed runs.
+    tech: ros2 bag
+    talksTo: []
+    kind: offline
+flow:
+  - component: odom
+    text: integrates wheel ticks and IMU yaw rate into `/odom` every `20 ms`.
+  - component: localise
+    text: matches the latest scan to the map and publishes the correction `map → odom`, which fixes slip and drift.
+  - component: planner
+    text: compares the pose with the next waypoint and outputs `/cmd_vel`, up to `1.5 m/s`.
+  - component: safety
+    text: limits speed so the robot can always stop before the nearest obstacle; at 1.5 m/s that means **braking starts more than 0.5 m away**, and a lost heartbeat for `500 ms` means stop.
+  - component: base
+    text: converts `/cmd_vel` to wheel speeds `v ± ω·b/2` (b is the wheel spacing) and holds them with a PI loop on each motor.
+interface:
+  lang: shell
+  code: |
+    # main topics
+    /scan        sensor_msgs/LaserScan   10 Hz
+    /imu         sensor_msgs/Imu        100 Hz
+    /odom        nav_msgs/Odometry       50 Hz
+    /cmd_vel     geometry_msgs/Twist     50 Hz
+    /cmd_safe    geometry_msgs/Twist     50 Hz
+    /heartbeat   std_msgs/Header          5 Hz
+
+    # safety: speed limit from nearest obstacle d
+    v_max = min(1.5, sqrt(2 * a_brake * (d - 0.3)))
+decisions:
+  - choice: Separate safety node before the base
+    instead: Rely on the planner's obstacle layer
+    why: The planner is large and can stall; a small node that only checks distance and heartbeat is easy to test for the 0.5 m stop. It also catches link loss, which the planner ignores.
+  - choice: Simulation first, then campus
+    instead: Test on the campus paths directly
+    why: 20 stop trials at 1.5 m/s and every corridor failure can be repeated in Gazebo safely. Move to campus once the 200 m route passes in simulation.
+watchOut: Long featureless corridors give the scan matcher nothing to lock onto, so the pose slides along the corridor. Watch localisation confidence there and slow down when it drops.

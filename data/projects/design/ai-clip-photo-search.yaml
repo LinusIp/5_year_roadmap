@@ -1,0 +1,51 @@
+overview: >-
+  A search tool over a folder of 1,000 photos: CLIP embeds every image once into the same vector space as text, so a
+  typed query or an example image finds the nearest photos. 30 labelled queries give precision@5.
+learn:
+  - name: Joint image-text embeddings
+    ref: hf-llm-course
+  - name: Nearest-neighbour index
+  - name: Precision@k
+components:
+  - id: indexer
+    name: Indexer
+    role: Resizes each image and stores its CLIP embedding.
+    tech: CLIP · Pillow
+    talksTo: [index]
+    kind: core
+  - id: index
+    name: Vector index
+    role: Holds normalized embeddings and file paths and returns nearest matches.
+    tech: FAISS
+    talksTo: [cli]
+    kind: core
+  - id: cli
+    name: Search CLI
+    role: Embeds a text or image query and prints the top 5 files.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: eval
+    name: Evaluator
+    role: Runs 30 labelled queries and computes precision@5.
+    tech: Python
+    talksTo: [cli]
+    kind: offline
+flow:
+  - component: indexer
+    text: downsizes each photo to the model's 224-pixel input before embedding, so large files do not slow indexing.
+  - component: index
+    text: stores L2-normalized vectors in `IndexFlatIP`, so inner product equals cosine similarity.
+  - component: cli
+    text: embeds the query (for example "dog on a beach") with the text encoder and returns the top 5 paths.
+  - component: eval
+    text: marks each returned photo relevant or not for the 30 queries and averages **precision@5**.
+decisions:
+  - choice: Exact flat index
+    instead: An approximate index such as HNSW
+    why: >-
+      1,000 vectors take microseconds to scan exactly, and exact search removes one source of error from the
+      evaluation. Switch to approximate search past about a million photos.
+watchOut: >-
+  If you write the 30 queries while browsing results, they drift toward what CLIP already finds. Write them first
+  from what is in the folder, including a few hard ones.

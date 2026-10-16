@@ -1,0 +1,98 @@
+overview: >-
+  A "you may also like" row for a bookshop with 30k users and 60k titles. A nightly job learns from purchases with
+  matrix factorisation (it gives every user and book a short vector, so similar tastes end up close) and writes
+  each user's top 20 to a small store. The API only looks lists up, which keeps it fast on one small VM, and falls
+  back to popular-in-genre for new users and new books.
+learn:
+  - name: Implicit feedback
+  - name: Matrix factorisation
+    ref: ng-ml-spec
+  - name: Leave-last-out split
+  - name: Cold-start fallback
+  - name: Recall@k and NDCG
+stats:
+  - value: ≥ 1.25×
+    label: recall@20 vs popularity
+  - value: < 50 ms
+    label: API p99
+  - value: < 15 min
+    label: nightly rebuild
+components:
+  - id: shop
+    name: Shop website
+    role: Asks for a user's recommendations when a book page loads.
+    tech: Web frontend
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: Recs API
+    role: Returns 20 books for a user, removing ones they already bought.
+    tech: FastAPI
+    talksTo: [store, coldstart]
+    kind: core
+  - id: store
+    name: Top-N store
+    role: Holds each user's precomputed top 20 and the popular lists per genre.
+    tech: SQLite
+    talksTo: []
+    kind: core
+  - id: coldstart
+    name: Cold-start logic
+    role: Picks popular-in-genre books for users and titles with no history.
+    tech: Python
+    talksTo: [store]
+    kind: core
+  - id: trainer
+    name: Nightly trainer
+    role: Loads purchases and ratings, fits ALS and baselines, writes all top-20 lists.
+    tech: implicit · pandas
+    talksTo: [store, evaluator]
+    kind: offline
+  - id: evaluator
+    name: Offline evaluator
+    role: Hides each user's last purchase and checks whether it shows up in their top 20.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: shop
+    text: calls `GET /recs/u_10423?n=20` as the book page renders.
+  - component: api
+    text: validates the user id and looks up the key `u_10423`.
+  - component: store
+    text: returns the 20 ISBNs that last night's ALS run wrote, in about a millisecond.
+  - component: coldstart
+    text: steps in only when there is no list (a user who signed up today) and returns the top sellers in the genre being browsed.
+  - component: api
+    text: drops books already bought, marks the response `source` as als or popular, and replies well under the `50 ms` p99 budget.
+interface:
+  lang: http
+  code: |
+    GET /recs/u_10423?n=20
+
+    200 OK
+    { "user": "u_10423",
+      "source": "als",
+      "items": [
+        { "isbn": "9780141439518", "score": 0.82 },
+        { "isbn": "9780099590088", "score": 0.79 }
+      ] }
+decisions:
+  - choice: Precompute top 20 nightly
+    instead: Score at request time
+    why: >-
+      30k users × 20 books is 600k rows, tiny to store. A key lookup makes the 50 ms p99 easy on one small VM.
+      Revisit if recommendations must react to what someone clicked a minute ago.
+  - choice: ALS on purchases
+    instead: Matrix factorisation on star ratings only
+    why: >-
+      Purchases far outnumber ratings, and a sparse rating matrix leaves most users with nothing. Ratings are
+      kept as extra weight on the purchases they belong to.
+  - choice: SQLite, not Redis
+    instead: Redis
+    why: >-
+      One API process reading 600k rows needs no extra server. Swap to Redis if you run several API instances or
+      update lists during the day.
+watchOut: >-
+  Popularity bias: an ALS list full of bestsellers can beat the recall target and still teach nobody anything
+  new. Report catalogue coverage and novelty next to recall@20.

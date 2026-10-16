@@ -1,0 +1,130 @@
+overview: >-
+  Two pieces of hardware described in Verilog on an FPGA: a UART that turns serial bits from a PC terminal into bytes,
+  and a 640×480, 60 Hz video timing generator that counts pixels and lines and drives a VGA or HDMI monitor. A command
+  decoder turns W, A, S and D bytes into a sprite position, which crosses safely from the UART's clock into the pixel
+  clock. A pattern mixer then draws colour bars, a checkerboard or a gradient with the 32×32 sprite on top.
+learn:
+  - name: Self-checking testbenches
+    ref: nandland
+  - name: Video timing
+    ref: project-f
+  - name: Clock-domain crossing
+    ref: getting-started-with-fpgas
+  - name: Timing constraints
+    ref: getting-started-with-fpgas
+  - name: UART oversampling
+    ref: fpga4fun
+  - name: Blocking vs non-blocking
+    ref: harris-ddca
+stats:
+  - value: 31.47 kHz
+    label: hsync on the scope, ±0.5 %
+  - value: '0'
+    label: mismatches in 1,000 bytes at ±2 % baud
+  - value: '0'
+    label: timing violations after place and route
+components:
+  - id: pc
+    name: PC terminal
+    role: Sends keystrokes at 115,200 baud 8N1 and shows the echo.
+    tech: Serial terminal
+    talksTo: [uart]
+    kind: external
+  - id: uart
+    name: UART
+    role: Synchronises the RX pin, samples each bit 16 times, and queues bytes in a FIFO; TX echoes them.
+    tech: Verilog
+    talksTo: [decoder]
+    kind: core
+  - id: decoder
+    name: Command decoder
+    role: Turns W, A, S and D bytes into sprite x and y registers.
+    tech: Verilog
+    talksTo: [cdc]
+    kind: core
+  - id: cdc
+    name: Clock crossing
+    role: Moves the sprite position into the pixel clock domain without metastability.
+    tech: Two-flop synchroniser
+    talksTo: [mixer]
+    kind: core
+  - id: timing
+    name: Timing generator
+    role: Counts pixels and lines and emits hsync, vsync, blanking and the current x and y.
+    tech: Verilog · 25.175 MHz
+    talksTo: [mixer]
+    kind: core
+  - id: mixer
+    name: Pattern mixer
+    role: Picks the pixel colour from the selected pattern and overlays the sprite.
+    tech: Verilog
+    talksTo: [output]
+    kind: core
+  - id: output
+    name: Video output
+    role: Drives the VGA resistor DAC or the TMDS serialisers.
+    tech: VGA PMOD or DVI
+    talksTo: [monitor]
+    kind: core
+  - id: monitor
+    name: Monitor
+    role: Locks to 640×480 at 60 Hz and shows the picture.
+    tech: VGA or HDMI monitor
+    talksTo: []
+    kind: external
+flow:
+  - component: pc
+    text: sends a `D` at 115,200 baud.
+  - component: uart
+    text: >-
+      passes the RX pin through **two flip-flops**, samples at 16× the baud rate, reads each bit near its middle and
+      pushes the byte into the FIFO.
+  - component: decoder
+    text: pops the byte and adds the step to `sprite_x`.
+  - component: cdc
+    text: >-
+      carries the new position into the pixel clock domain and applies it only during vertical blanking, so a frame
+      never shows half a move.
+  - component: timing
+    text: >-
+      counts 800 clocks a line and 525 lines a frame, and drives active-low `hsync` and `vsync` with the porches in the
+      right order.
+  - component: mixer
+    text: colours each visible `(x, y)` from the pattern, or from the sprite when the pixel falls inside it.
+  - component: output
+    text: converts the colour into VGA voltages or TMDS symbols for the monitor.
+interface:
+  lang: verilog
+  code: |
+    module vga_timing (
+      input  wire       clk_pix,  // 25.175 MHz
+      input  wire       rst,
+      output reg  [9:0] x, y,     // 0..799, 0..524
+      output wire       hsync, vsync, // active low
+      output wire       de        // visible area
+    );
+      // H: 640 visible, 16 front, 96 sync, 48 back
+      // V: 480 visible, 10 front,  2 sync, 33 back
+      assign de    = (x < 640) && (y < 480);
+      assign hsync = ~(x >= 656 && x < 752);
+      assign vsync = ~(y >= 490 && y < 492);
+    endmodule
+decisions:
+  - choice: 16× oversampling in the receiver
+    instead: Sample once per bit at a fixed delay
+    why: >-
+      The testbench throws a ±2 % baud error at it; finding the start bit's edge and sampling mid-bit absorbs that,
+      where a fixed delay drifts out of the bit within one frame.
+  - choice: Update the sprite in vertical blanking
+    instead: Write sprite registers whenever a byte lands
+    why: >-
+      A change in the middle of a frame tears the sprite, and writing across clock domains with no synchroniser risks
+      metastable values.
+  - choice: VGA resistor DAC first
+    instead: HDMI with hand-written TMDS
+    why: >-
+      VGA needs only the 25 MHz pixel clock, while TMDS needs a 10× serial clock near 252 MHz; it stays a stretch goal
+      once timing closes.
+watchOut: >-
+  An unregistered asynchronous input such as the UART RX pin can go metastable and corrupt bytes now and then. Pass it
+  through two flip-flops before any logic reads it.

@@ -1,0 +1,134 @@
+overview: >-
+  A small OpenGL 4.5 engine that loads a JSON scene and glTF assets and renders each frame as a fixed list of passes.
+  A shadow pass draws depth from the sun, a G-buffer pass stores each pixel's colour, normal and metal-roughness in
+  textures, and a lighting pass shades every pixel once for all lights with a physically based (PBR) model plus
+  image-based lighting (light taken from an environment map). A forward pass adds the sky, and a tone map turns the
+  HDR result into screen colours.
+learn:
+  - name: Deferred shading
+    ref: learnopengl
+  - name: Shadow mapping and PCF
+    ref: learnopengl
+  - name: PBR metallic-roughness
+    ref: learnopengl
+  - name: Image-based lighting
+    ref: learnopengl
+  - name: HDR and tone mapping
+    ref: learnopengl
+  - name: GPU timer queries
+stats:
+  - value: 60 fps
+    label: at 1080p, 64 lights and a shadowed sun
+  - value: '0'
+    label: OpenGL debug errors
+  - value: 1–256
+    label: lights, deferred against forward
+components:
+  - id: assets
+    name: Asset layer
+    role: Loads the scene file, glTF meshes, textures and materials once and hands out handles.
+    tech: cgltf · stb_image
+    talksTo: [graph]
+    kind: core
+  - id: graph
+    name: Scene graph
+    role: Holds nodes with transforms, meshes and lights, and builds the frame's draw and light lists.
+    tech: C++20 · GLM
+    talksTo: [shadow]
+    kind: core
+  - id: ibl
+    name: IBL precompute
+    role: Bakes the irradiance map, the prefiltered environment map and the BRDF lookup table at start-up.
+    tech: Compute or render-to-cubemap
+    talksTo: [lighting]
+    kind: offline
+  - id: shadow
+    name: Shadow pass
+    role: Renders scene depth from the sun into a shadow map.
+    tech: Depth texture
+    talksTo: [gbuffer]
+    kind: core
+  - id: gbuffer
+    name: G-buffer pass
+    role: Writes albedo, normal, metal-roughness and depth for every visible pixel.
+    tech: MRT framebuffer
+    talksTo: [lighting]
+    kind: core
+  - id: lighting
+    name: Lighting pass
+    role: Shades each pixel with GGX for the sun and point lights, adds IBL, and writes HDR colour.
+    tech: GLSL · RGBA16F
+    talksTo: [sky]
+    kind: core
+  - id: sky
+    name: Sky pass
+    role: Draws the environment cubemap forward where no geometry was drawn.
+    tech: GLSL
+    talksTo: [tonemap]
+    kind: core
+  - id: tonemap
+    name: Tone map
+    role: Applies exposure and ACES, converts to sRGB and presents.
+    tech: GLSL · GLFW
+    talksTo: []
+    kind: core
+flow:
+  - component: assets
+    text: >-
+      at start-up reads `scene.json` and the glTF files, uploading colour textures as **sRGB** and normal and
+      metal-roughness maps as linear.
+  - component: graph
+    text: updates world transforms and gathers the meshes, the sun and the 64 point lights for this frame.
+  - component: shadow
+    text: >-
+      draws the scene's depth from the sun; later lookups use PCF (averaging several shadow-map samples) and a
+      slope-scaled bias against acne.
+  - component: gbuffer
+    text: >-
+      draws every mesh once, writing base colour, a normal from the tangent frame and metal-roughness into its
+      targets.
+  - component: lighting
+    text: >-
+      runs one full-screen pass that loops over the lights per pixel, adds the IBL terms from the maps baked at
+      start-up, and writes into a 16-bit float target so bright values are not clipped.
+  - component: sky
+    text: draws the cubemap only where depth is still at the far plane.
+  - component: tonemap
+    text: >-
+      applies exposure and ACES and outputs sRGB; timer queries around each pass give the per-pass GPU times.
+interface:
+  lang: glsl
+  code: |
+    // G-buffer pass outputs at 1080p
+    layout(location = 0) out vec4 gAlbedo; // RGBA8
+    layout(location = 1) out vec4 gNormal; // RGBA16F
+    layout(location = 2) out vec2 gMR;     // RG8
+    // depth: position is rebuilt from it
+
+    void main() {
+        gAlbedo = texture(albedoTex, vUV) * baseColor;
+        vec3 n = texture(normTex, vUV).xyz * 2.0 - 1.0;
+        gNormal = vec4(normalize(vTBN * n), 0.0);
+        // glTF: green = roughness, blue = metal
+        gMR = texture(mrTex, vUV).bg
+              * vec2(metallic, roughness);
+    }
+decisions:
+  - choice: Deferred shading, not forward
+    instead: Forward shading with every light per object
+    why: >-
+      With 64 point lights, forward shading lights every overdrawn pixel 64 times. Deferred shades each screen pixel
+      once; the 1–256 light sweep against a forward baseline shows where it pays off.
+  - choice: Bake IBL maps once at start-up
+    instead: Computing environment lighting every frame
+    why: >-
+      The environment map does not change while the scene runs, so the irradiance, prefiltered map and BRDF table can
+      be baked once and stay out of the 16.7 ms frame budget.
+  - choice: glTF through a library
+    instead: Writing your own glTF parser
+    why: >-
+      The project is about passes, not file formats. cgltf or tinygltf loads Sponza and MetalRoughSpheres correctly,
+      so a wrong image points at your shaders.
+watchOut: >-
+  Treating colour textures as linear, or normal and roughness maps as sRGB, makes the spheres look almost right and
+  never match the Khronos sample viewer. Set the colour space per texture role when loading.

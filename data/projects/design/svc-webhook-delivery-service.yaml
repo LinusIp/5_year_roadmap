@@ -1,0 +1,62 @@
+overview: >-
+  A service that stores events and subscriptions in Postgres and delivers each event to each subscriber at least
+  once, signed with HMAC, with short timeouts, exponential backoff, and automatic disabling of endpoints that keep
+  failing.
+learn:
+  - name: At-least-once delivery
+  - name: HMAC signatures
+  - name: Exponential backoff
+  - name: Dead endpoint handling
+components:
+  - id: api
+    name: Events API
+    role: Accepts events and writes one delivery row per matching subscription.
+    tech: Python
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Delivery store
+    role: Events, subscriptions and deliveries with status, attempts and `next_attempt_at`.
+    tech: PostgreSQL
+    talksTo: [workers]
+    kind: core
+  - id: workers
+    name: Workers
+    role: Claim due deliveries, sign and POST them with a 5 s timeout, record the result.
+    tech: Python · httpx
+    talksTo: [receiver, store]
+    kind: core
+  - id: receiver
+    name: Receiver
+    role: A subscriber endpoint that fails 30 percent of the time in tests.
+    tech: Any HTTP server
+    talksTo: []
+    kind: external
+flow:
+  - component: api
+    text: stores `order.paid` and creates a delivery row for each subscriber of that event type.
+  - component: workers
+    text: claim a due row and POST the body with `X-Signature` set to HMAC-SHA256 of the timestamp and body.
+  - component: receiver
+    text: answers 2xx, or times out or errors, which counts as a failure.
+  - component: store
+    text: marks the row delivered, or schedules a retry at 2^attempt minutes; after 3 days of failures it disables the endpoint.
+interface:
+  lang: http
+  code: |
+    POST /hooks/orders  (receiver)
+    X-Event-Id: evt_01H…
+    X-Timestamp: 1760611200
+    X-Signature: sha256=9f2c…
+    { "type": "order.paid", "order_id": 81 }
+
+    200 OK
+decisions:
+  - choice: At-least-once with an event id
+    instead: Exactly-once delivery
+    why: >-
+      Exactly-once is impossible across a network you do not control. Sending `X-Event-Id` lets receivers drop
+      duplicates; document that they must.
+watchOut: >-
+  Workers waiting on slow receivers block delivery to everyone else. Use a short timeout and a cap on concurrent
+  deliveries per endpoint.

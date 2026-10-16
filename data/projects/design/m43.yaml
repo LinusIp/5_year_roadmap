@@ -1,0 +1,132 @@
+overview: >-
+  An RV32I processor in SystemVerilog, built twice: first single-cycle, then as a five-stage pipeline (fetch, decode,
+  execute, memory, write-back) with a hazard unit that forwards results and inserts bubbles. The memory stage uses an
+  address decoder to reach data RAM or a memory-mapped UART and GPIO. Both cores pass the official riscv-tests in
+  Verilator, and on the project 42 FPGA they run a C program built with your own crt0 and linker script that prints
+  over the UART.
+learn:
+  - name: Datapath and control
+    ref: harris-ddca
+  - name: Pipeline hazards
+    ref: mit-6-004
+  - name: Forwarding and stalls
+    ref: harris-ddca
+  - name: Linker scripts and crt0
+    ref: cmu-15-213
+  - name: Memory-mapped I/O
+    ref: nand2tetris
+stats:
+  - value: 100 %
+    label: rv32ui-p tests on both cores, bar fence_i
+  - value: 100,000
+    label: random instructions matched to a reference
+  - value: 4 KB
+    label: CRC-32 on the FPGA matches the host
+components:
+  - id: toolchain
+    name: C toolchain
+    role: Builds the C program with crt0 and your linker script into a memory image.
+    tech: riscv64-unknown-elf-gcc
+    talksTo: [fetch]
+    kind: offline
+  - id: fetch
+    name: Fetch
+    role: Reads the instruction at the PC from block RAM and guesses PC + 4.
+    tech: SystemVerilog · BRAM
+    talksTo: [decode]
+    kind: core
+  - id: decode
+    name: Decode
+    role: Reads the register file, builds the sign-extended immediate and the control signals.
+    tech: SystemVerilog
+    talksTo: [execute]
+    kind: core
+  - id: hazard
+    name: Hazard unit
+    role: Forwards results to execute, stalls on load-use, flushes on taken branches.
+    tech: SystemVerilog
+    talksTo: [execute, fetch]
+    kind: core
+  - id: execute
+    name: Execute
+    role: Runs the ALU and resolves branches and jumps.
+    tech: SystemVerilog
+    talksTo: [memory]
+    kind: core
+  - id: memory
+    name: Memory and I/O
+    role: Picks data RAM, the UART or GPIO by address and applies byte enables.
+    tech: BRAM · address decoder
+    talksTo: [writeback]
+    kind: core
+  - id: writeback
+    name: Write-back
+    role: Writes the result to the register file, never to x0.
+    tech: SystemVerilog
+    talksTo: [decode]
+    kind: core
+  - id: harness
+    name: Test harness
+    role: Loads ELF files into Verilator, runs riscv-tests and compares against Spike.
+    tech: Verilator · C++ · CI
+    talksTo: [fetch]
+    kind: offline
+flow:
+  - component: toolchain
+    text: >-
+      compiles with `-march=rv32i -mabi=ilp32`; crt0 sets the stack pointer, copies `.data` to RAM and zeroes `.bss`
+      before `main`.
+  - component: fetch
+    text: reads the instruction at `pc` and passes it down the pipeline, fetching `pc + 4` next.
+  - component: decode
+    text: >-
+      reads `rs1` and `rs2` and reassembles the immediate, including the scrambled bits of B- and J-type, with sign
+      extension.
+  - component: hazard
+    text: >-
+      sees an `add` that needs the `lw` just ahead of it, inserts **one bubble**, then forwards the loaded value from
+      the right stage.
+  - component: execute
+    text: >-
+      computes the result or branch target; a taken branch makes the hazard unit **flush** the two younger
+      instructions.
+  - component: memory
+    text: >-
+      sends loads and stores to data RAM, the UART at `0x1000_0000` or GPIO at `0x1000_1000`, with byte enables for
+      `sb` and `sh`.
+  - component: writeback
+    text: >-
+      writes `rd` unless it is `x0`, which closes the pipeline's loop back into the register file.
+interface:
+  lang: c
+  code: |
+    /* memory map as the C program sees it */
+    #define UART_DATA (*(volatile uint32_t *)0x10000000)
+    #define UART_BUSY (*(volatile uint32_t *)0x10000004)
+    #define GPIO_OUT  (*(volatile uint32_t *)0x10001000)
+
+    void putc(char c) {
+      while (UART_BUSY) {}
+      UART_DATA = c;
+    }
+    /* riscv64-unknown-elf-gcc -march=rv32i
+       -mabi=ilp32 -nostdlib -T link.ld crt0.S */
+decisions:
+  - choice: Single-cycle core first
+    instead: Go straight to the pipeline
+    why: >-
+      A single-cycle core that passes riscv-tests is a known-good reference, so a pipeline bug shows up as the first
+      cycle where the two traces differ.
+  - choice: Resolve branches in execute and flush
+    instead: Branch prediction
+    why: >-
+      Flushing costs two bubbles per taken branch, which the CPI table measures on CRC-32, a sort and a matrix
+      multiply. Prediction stays a stretch goal.
+  - choice: Separate instruction and data block RAMs
+    instead: One shared memory
+    why: >-
+      Fetch and memory each get a port every cycle, so loads never stall fetch; a 4 KB program fits easily in the
+      FPGA's block RAM.
+watchOut: >-
+  Immediates are where single-bit bugs hide: B- and J-type scramble their bits and every immediate is sign-extended.
+  Unit-test the immediate generator on each format before building the rest.

@@ -1,0 +1,114 @@
+overview: >-
+  One gateway in front of 12 MCP tool servers. Each request from one of the three agents is authenticated, checked
+  against a default-deny policy that covers both the tool name and its arguments, rate limited with a token bucket
+  (each agent gets a refilling allowance of calls), and then forwarded to a healthy upstream. Every decision lands in
+  an audit log with secrets removed, and the gateway keeps no state beyond its config files and in-memory counters.
+learn:
+  - name: MCP and JSON-RPC
+    ref: hf-mcp-course
+  - name: Default-deny policy
+  - name: Token-bucket rate limits
+    ref: bytebytego
+  - name: Reverse proxying
+  - name: Metrics and audit logs
+    ref: prometheus-docs
+stats:
+  - value: < 10 ms
+    label: p95 added latency
+  - value: 500 req/s
+    label: on one core
+  - value: '0'
+    label: bypasses in 50 negative tests
+components:
+  - id: agents
+    name: Agents
+    role: The three internal agents, each with its own token.
+    tech: MCP clients
+    talksTo: [auth]
+    kind: external
+  - id: auth
+    name: Auth layer
+    role: Maps the bearer token to an agent id or rejects the request.
+    tech: Python · asyncio
+    talksTo: [policy]
+    kind: core
+  - id: policy
+    name: Policy engine
+    role: Allows a call only if tool and arguments match that agent's rules.
+    tech: YAML config
+    talksTo: [limiter]
+    kind: core
+  - id: limiter
+    name: Rate limiter
+    role: Keeps a token bucket per agent and tool in memory.
+    tech: Python
+    talksTo: [proxy]
+    kind: core
+  - id: proxy
+    name: Router
+    role: Forwards to the healthy instance of the right upstream and fails over.
+    tech: aiohttp
+    talksTo: [upstreams, audit]
+    kind: core
+  - id: upstreams
+    name: MCP servers
+    role: The 12 tool servers, mocked for this project.
+    tech: MCP SDK
+    talksTo: []
+    kind: external
+  - id: audit
+    name: Audit log
+    role: One redacted JSON line per decision, plus Prometheus counters.
+    tech: JSONL · Prometheus
+    talksTo: []
+    kind: offline
+  - id: tests
+    name: Negative tests
+    role: 50 attempts to reach tools or arguments an agent is not allowed.
+    tech: pytest · load tool
+    talksTo: [agents]
+    kind: offline
+flow:
+  - component: auth
+    text: reads the bearer token on a `tools/call` request and resolves it to `reporting-agent`.
+  - component: policy
+    text: checks that `warehouse.query` is allowed for this agent **and** that `dataset` is one of sales or ops; anything not listed is denied.
+  - component: limiter
+    text: takes a token from the agent's bucket (20 a second, burst 40) or answers with a retry-after error.
+  - component: proxy
+    text: forwards to the first healthy warehouse instance, moves to the next on a failed health check, and streams the result back.
+  - component: audit
+    text: records agent, tool, decision and latency with argument values hashed and tokens removed.
+interface:
+  lang: yaml
+  code: |
+    agents:
+      reporting-agent:
+        token_env: AGENT_REPORTING_TOKEN
+        rate: { per_second: 20, burst: 40 }
+        allow:
+          - tool: warehouse.query
+            args: { dataset: [sales, ops] }
+          - tool: docs.search
+    upstreams:
+      warehouse: ["wh-1:8080", "wh-2:8080"]
+      docs: ["docs-1:8080"]
+decisions:
+  - choice: Rules on arguments, not only tool names
+    instead: A plain tool-name allowlist
+    why: >-
+      An allowed `warehouse.query` with any dataset is still a way into HR data. Default deny on both names and
+      argument values closes that hole; the 50 negative tests try it.
+  - choice: In-memory buckets, no shared store
+    instead: Redis-backed rate limits
+    why: >-
+      The gateway must be stateless and one instance carries 500 req/s. Move counters to Redis only when a second
+      instance has to share quotas.
+  - choice: Python asyncio first
+    instead: Write it in Go
+    why: >-
+      The MCP SDK and mocks are already Python, and a proxy that does little work per request can meet 500 req/s.
+      Profile at load, and switch to Go if the 10 ms p95 budget is not met.
+watchOut: >-
+  Audit logs end up holding tokens and customer data from tool arguments. Redact before writing, and test it by
+  sending a planted fake secret and searching the log for it.

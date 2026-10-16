@@ -1,0 +1,123 @@
+overview: >-
+  A multithreaded C++20 path tracer for meshes of 100k triangles and more. A bounding volume hierarchy (BVH, a tree of
+  boxes where each box holds the triangles inside it) lets a ray skip almost every triangle, so a hit costs a few dozen
+  box tests instead of 100k triangle tests. Worker threads take 32×32 tiles, follow each camera ray through several
+  bounces, and at every bounce sample both the material and a light, adding the result to a float image. The image is
+  checked against a 16,384-sample reference to show the error falls as samples grow.
+learn:
+  - name: Monte Carlo integration
+    ref: pbr-book
+  - name: Importance sampling
+    ref: pbr-book
+  - name: BVH and the surface area heuristic
+    ref: pbr-book
+  - name: Next-event estimation
+    ref: pbr-book
+  - name: Ray-triangle intersection
+    ref: scratchapixel
+stats:
+  - value: ≥ 100×
+    label: faster than brute force on 100k triangles
+  - value: ≥ 4×
+    label: fewer samples with next-event estimation
+  - value: ≥ 6×
+    label: speed-up from 1 to 8 threads
+components:
+  - id: loader
+    name: Scene loader
+    role: Turns OBJ files and a scene description into triangles, materials and area lights.
+    tech: tinyobjloader
+    talksTo: [bvh]
+    kind: core
+  - id: bvh
+    name: BVH builder
+    role: Splits triangles with the surface area heuristic and flattens the tree into one array.
+    tech: C++20
+    talksTo: [workers]
+    kind: core
+  - id: tiles
+    name: Tile queue
+    role: Hands 32×32 tiles to whichever thread is free.
+    tech: std::thread · atomic counter
+    talksTo: [workers]
+    kind: core
+  - id: workers
+    name: Workers
+    role: Trace camera rays through the flat BVH with their own random generator, bounce by bounce.
+    tech: C++20 threads
+    talksTo: [sampler, framebuffer]
+    kind: core
+  - id: sampler
+    name: Material and light sampling
+    role: Picks the next direction from the material and a point on a light, and returns the matching densities.
+    tech: Cosine hemisphere · NEE
+    talksTo: []
+    kind: core
+  - id: framebuffer
+    name: Framebuffer
+    role: Accumulates radiance in floats, tone maps it and writes PNG and EXR.
+    tech: stb_image_write · tinyexr
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Benchmarks
+    role: Times BVH against brute force and measures error against a 16,384-sample reference.
+    tech: CMake target · Python plots
+    talksTo: []
+    kind: offline
+flow:
+  - component: loader
+    text: loads the Stanford dragon or a similar mesh and the scene's materials and area lights.
+  - component: bvh
+    text: >-
+      splits each node where the **surface area heuristic** says a ray is cheapest to test, then flattens the tree
+      into an array so traversal follows indices, not pointers.
+  - component: tiles
+    text: gives each thread the next 32×32 tile from an atomic counter until none are left.
+  - component: workers
+    text: >-
+      shoot a ray per sample, walk the BVH nearest box first, and start each bounce slightly off the surface, so the
+      ray does not hit the triangle it just left.
+  - component: sampler
+    text: >-
+      sends a shadow ray to a point on a light (**next-event estimation**) and picks the next bounce by a
+      cosine-weighted direction, dividing each by the density it was sampled with.
+  - component: framebuffer
+    text: adds the radiance of every sample to its pixel and, when all tiles are done, tone maps and writes the image.
+  - component: bench
+    text: >-
+      renders the Cornell box at 16 to 1,024 samples per pixel and checks the RMSE roughly halves each time the sample
+      count quadruples.
+interface:
+  lang: cpp
+  code: |
+    struct BVHNode {        // 32 bytes
+        AABB box;           // 24 bytes
+        uint32_t offset;    // leaf: first triangle
+                            // inner: right child
+        uint16_t count;     // 0 for an inner node
+        uint8_t  axis, pad; // split axis
+    };
+
+    bool intersect(const std::vector<BVHNode> &nodes,
+                   const std::vector<Triangle> &tris,
+                   const Ray &ray, Hit &hit);
+decisions:
+  - choice: Surface area heuristic splits
+    instead: Splitting each node at its midpoint
+    why: >-
+      Midpoint splits leave long thin boxes that many rays enter, and the 100× target over brute force gets hard.
+      The heuristic costs more build time, paid once per mesh.
+  - choice: Next-event estimation for area lights
+    instead: Waiting for paths to hit a light by chance
+    why: >-
+      A Cornell box light is small, so most random paths miss it and the image stays noisy. Sampling the light at
+      every bounce reaches the same error with 4× fewer samples or better.
+  - choice: Tiles and a generator per thread
+    instead: Threads sharing one random generator and counters
+    why: >-
+      Shared state forces threads to wait for each other and kills the 6× scaling on 8 threads. Each worker owns its
+      generator and writes only its own tile.
+watchOut: >-
+  Dividing by a probability density that does not match how the direction was sampled biases the image without any
+  crash. Check convergence against the reference image, never by eye.

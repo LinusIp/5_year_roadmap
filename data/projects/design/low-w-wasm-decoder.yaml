@@ -1,0 +1,81 @@
+overview: >-
+  A Rust decoder and interpreter for integer-only WebAssembly modules: it reads the binary section by section with
+  LEB128 variable-length integers, decodes each function body into instructions, and runs them on an operand stack,
+  with `block`, `loop` and `br` handled through a stack of labels. Factorial and fib modules built by a reference
+  compiler must return correct results.
+learn:
+  - name: LEB128 encoding
+  - name: Stack machines
+    ref: crafting-interpreters
+  - name: Structured control flow
+  - name: Binary module formats
+components:
+  - id: compiler
+    name: Reference compiler
+    role: Produces the fib and factorial test modules as .wasm files.
+    tech: clang or wat2wasm
+    talksTo: [reader]
+    kind: external
+  - id: reader
+    name: Byte reader
+    role: Reads bytes, unsigned and signed LEB128 integers and names.
+    tech: Rust
+    talksTo: [module]
+    kind: core
+  - id: module
+    name: Module decoder
+    role: Decodes the type, function, export and code sections into function bodies.
+    tech: Rust
+    talksTo: [interp]
+    kind: core
+  - id: interp
+    name: Interpreter
+    role: Runs instructions on an operand stack with call frames and a label stack.
+    tech: Rust
+    talksTo: []
+    kind: core
+flow:
+  - component: reader
+    text: >-
+      checks the magic bytes `00 61 73 6d` and version 1, then reads LEB128 numbers, 7 bits per byte with the high
+      bit meaning more follows.
+  - component: module
+    text: >-
+      reads each section id and size, collecting function types, each function's type index, exports, and the code
+      bodies with their locals, recording where every `block` ends.
+  - component: interp
+    text: >-
+      calls the exported `fac` with its argument as local 0, pushing and popping values for `local.get`, `i64.mul`
+      and `call`.
+  - component: interp
+    text: >-
+      on `block` or `loop` pushes a label with the stack height; `br n` jumps to the n-th label out, past the end of a
+      block or **back** to the start of a loop.
+interface:
+  lang: rust
+  code: |
+    fn read_sleb32(b: &[u8], pos: &mut usize) -> i32 {
+        let (mut result, mut shift) = (0i32, 0);
+        loop {
+            let byte = b[*pos];
+            *pos += 1;
+            result |= ((byte & 0x7f) as i32) << shift;
+            shift += 7;
+            if byte & 0x80 == 0 {
+                if shift < 32 && byte & 0x40 != 0 {
+                    result |= -1 << shift; // sign-extend
+                }
+                return result;
+            }
+        }
+    }
+decisions:
+  - choice: Record block ends once, at decode time
+    instead: Scanning forward for the matching end on every branch
+    why: >-
+      fib branches thousands of times, and scanning for the matching `end` on each `br` makes every jump cost the
+      length of the body. One pass at decode time stores each block's end offset in a side table.
+watchOut: >-
+  Branch depth counts outward from the innermost label, and `br` to a `loop` goes back to its start while to a
+  `block` it goes past its end. Also cut the operand stack back to the label's height, keeping only the result
+  values.

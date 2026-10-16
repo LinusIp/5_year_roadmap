@@ -1,0 +1,47 @@
+overview: >-
+  An experiment that mixes noise into clean speech at 5 signal-to-noise ratios (SNR, speech power over noise power, in
+  decibels) and measures word error rate for two sizes of a Whisper-class model. The result is a WER-versus-SNR curve
+  per model.
+learn:
+  - name: Signal-to-noise ratio
+    ref: think-dsp
+  - name: Word error rate
+    ref: slp3
+  - name: Text normalization
+components:
+  - id: mixer
+    name: Noise mixer
+    role: Scales noise to hit a target SNR and adds it to each clean clip.
+    tech: NumPy · soundfile
+    talksTo: [asr]
+    kind: core
+  - id: asr
+    name: ASR models
+    role: Transcribes every mixed clip with a small and a larger model.
+    tech: Whisper-class models
+    talksTo: [scorer]
+    kind: core
+  - id: scorer
+    name: WER scorer
+    role: Normalizes text and computes WER per model and SNR.
+    tech: jiwer · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: mixer
+    text: scales the noise so `10·log10(P_speech / P_noise)` equals each of `20, 10, 5, 0, -5` dB, and rescales the sum if it would clip.
+  - component: asr
+    text: transcribes every clip at every SNR with both model sizes.
+  - component: scorer
+    text: lowercases, strips punctuation and expands numbers the same way on reference and output.
+  - component: scorer
+    text: plots **WER** against SNR, one line per model.
+decisions:
+  - choice: Mix noise yourself
+    instead: Use a ready-made noisy speech set
+    why: >-
+      Controlled mixing gives the exact SNR levels and the same speech at every level, so the only change is the noise.
+      A real noisy set is a good second check once the curve exists.
+watchOut: >-
+  Adding noise can push samples past ±1.0, and the clipping distorts speech beyond the noise you meant to add. Check
+  the peak after mixing and scale the whole clip down.

@@ -1,0 +1,132 @@
+overview: >-
+  A C++ Vulkan application in two halves: a viewer that loads a textured glTF model with an orbit camera, then a
+  compute-shader particle system that moves one million particles held in a storage buffer (a GPU array that shaders
+  can read and write). Every frame records one command buffer: a compute dispatch, a pipeline barrier, then a render
+  pass that draws the model and the particles. Two frames are in flight at once, each with its own resources, and GPU
+  timestamp queries time each pass.
+learn:
+  - name: Pipeline barriers
+    ref: vkguide
+  - name: Frames in flight
+    ref: vulkan-tutorial
+  - name: Compute shader particles
+    ref: vulkan-tutorial
+  - name: Descriptor sets
+    ref: vkguide
+  - name: std430 buffer layout
+  - name: GPU timestamp queries
+stats:
+  - value: 1M
+    label: particles above 60 fps at 1080p
+  - value: '0'
+    label: validation errors, sync included
+  - value: 1,000
+    label: frames timed per measurement
+components:
+  - id: device
+    name: Device layer
+    role: Owns the instance, queues, swapchain and the memory allocator that every buffer and image comes from.
+    tech: vk-bootstrap · VMA
+    talksTo: [frames]
+    kind: core
+  - id: loader
+    name: glTF loader
+    role: Reads the model once and uploads vertex and index buffers and mipmapped textures.
+    tech: cgltf
+    talksTo: [raster]
+    kind: core
+  - id: frames
+    name: Frame recorder
+    role: Records each frame's command buffer with that frame's own uniforms, semaphores and fence.
+    tech: C++20 · Vulkan 1.3
+    talksTo: [compute]
+    kind: core
+  - id: compute
+    name: Compute pass
+    role: Integrates particle positions and velocities in the storage buffer.
+    tech: GLSL → SPIR-V
+    talksTo: [barrier, timer]
+    kind: core
+  - id: barrier
+    name: Barrier
+    role: Makes the compute shader's writes visible to the vertex stage that reads them.
+    tech: vkCmdPipelineBarrier2
+    talksTo: [raster]
+    kind: core
+  - id: raster
+    name: Render pass
+    role: Draws the model with depth and the particles as points, using dynamic rendering.
+    tech: GLSL · dynamic rendering
+    talksTo: [window, timer]
+    kind: core
+  - id: window
+    name: Window
+    role: Shows the presented image and reports resizes that force a new swapchain.
+    tech: GLFW
+    talksTo: [frames]
+    kind: external
+  - id: timer
+    name: GPU timer
+    role: Reads timestamp queries around each pass and writes p50 and p99 frame times.
+    tech: Timestamp queries
+    talksTo: []
+    kind: offline
+flow:
+  - component: device
+    text: >-
+      creates the instance with validation layers, picks the queues, builds the swapchain and depth image, and
+      rebuilds both when the window is resized.
+  - component: loader
+    text: uploads the glTF model's buffers and textures once, before the first frame.
+  - component: frames
+    text: >-
+      waits on this frame's fence, updates its camera uniform and begins its command buffer; with
+      `MAX_FRAMES_IN_FLIGHT = 2` nothing is shared between the two frames.
+  - component: compute
+    text: dispatches `ceil(1,000,000 / 256)` workgroups that move every particle by `dt`.
+  - component: barrier
+    text: >-
+      orders the **compute write** before the **vertex read**, from `COMPUTE_SHADER` to `VERTEX_ATTRIBUTE_INPUT`, and
+      nothing broader.
+  - component: raster
+    text: draws the model, then the particle buffer as points, into the acquired swapchain image.
+  - component: window
+    text: >-
+      presents the image and the render loop starts the next frame; the **GPU timer** reads compute and draw time
+      from the timestamps.
+interface:
+  lang: glsl
+  code: |
+    #version 450
+    layout(local_size_x = 256) in;
+    struct Particle { vec4 pos; vec4 vel; };
+    layout(std430, binding = 0) buffer Particles {
+      Particle p[];
+    };
+    layout(push_constant) uniform Push {
+      float dt; uint count; };
+    void main() {
+      uint i = gl_GlobalInvocationID.x;
+      if (i >= count) return;
+      p[i].vel.y -= 9.8 * dt;
+      p[i].pos.xyz += p[i].vel.xyz * dt;
+    }
+decisions:
+  - choice: One buffer for compute and drawing
+    instead: Copy positions into a separate vertex buffer
+    why: >-
+      1M particles at 32 bytes is 32 MB; binding the same buffer as storage and vertex input saves a 32 MB copy every
+      frame. Revisit when sorting for alpha blending needs a second buffer.
+  - choice: Dynamic rendering, not render pass objects
+    instead: VkRenderPass and framebuffers
+    why: >-
+      Two plain passes need no subpasses, and fewer objects means less to rebuild on resize. Revisit only for a
+      tile-based mobile GPU.
+  - choice: Two frames in flight
+    instead: One frame, or three
+    why: >-
+      One leaves the GPU idle while the CPU records; three adds a frame of latency and more per-frame copies for no
+      gain at 60 fps.
+watchOut: >-
+  A missing barrier between the compute write and the vertex read gives flicker, and an over-broad one stalls the GPU.
+  Let synchronisation validation check it, and name the exact stages and access types.

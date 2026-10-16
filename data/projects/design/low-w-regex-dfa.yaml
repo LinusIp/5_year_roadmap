@@ -1,0 +1,77 @@
+overview: >-
+  A regex compiler that parses a pattern into a syntax tree, builds a Thompson NFA (a graph with empty ε-moves for
+  alternation and repetition), turns it into a DFA with subset construction, and shrinks that DFA with Hopcroft's
+  algorithm, so matching reads each character exactly once. It must agree with a reference engine on 500 random
+  strings for each of 20 patterns, in time linear in the input.
+learn:
+  - name: Finite automata
+  - name: Thompson construction
+  - name: Subset construction
+  - name: DFA minimisation
+components:
+  - id: parser
+    name: Regex parser
+    role: Parses literals, classes, concatenation, |, * and + into a syntax tree.
+    tech: Python or Rust
+    talksTo: [nfa]
+    kind: core
+  - id: nfa
+    name: NFA builder
+    role: Builds one start-and-accept fragment per tree node, joined by ε-edges.
+    tech: Python or Rust
+    talksTo: [dfa]
+    kind: core
+  - id: dfa
+    name: DFA builder
+    role: Runs subset construction, then Hopcroft minimisation, into a transition table.
+    tech: Python or Rust
+    talksTo: [matcher]
+    kind: core
+  - id: matcher
+    name: Matcher
+    role: Walks the table one character at a time and reports accept or reject.
+    tech: Python or Rust
+    talksTo: []
+    kind: core
+flow:
+  - component: parser
+    text: >-
+      reads `(a|b)*abb` with `*` binding tighter than concatenation and concatenation tighter than `|`, expanding a
+      class like `[a-c]` into alternatives.
+  - component: nfa
+    text: builds a fragment per node and links them with ε-edges for `|`, `*` and concatenation.
+  - component: dfa
+    text: >-
+      starts from the ε-closure of the NFA start and, for each set and input symbol, computes the next set, each new
+      set becoming one DFA state; Hopcroft then **merges** states no input can tell apart.
+  - component: matcher
+    text: >-
+      runs `state = table[state][ch]` once per character and accepts if it ends in an accepting state; the test
+      compares with `re.fullmatch` and logs state counts.
+interface:
+  lang: python
+  code: |
+    def subset_construction(nfa, alphabet):
+        start = eps_closure(nfa, {nfa.start})
+        states, todo = {start: 0}, [start]
+        table = {}
+        while todo:
+            S = todo.pop()
+            for ch in alphabet:
+                T = eps_closure(nfa, move(nfa, S, ch))
+                if T not in states:
+                    states[T] = len(states)
+                    todo.append(T)
+                table[states[S], ch] = states[T]
+        return states, table
+decisions:
+  - choice: Build the whole DFA ahead of time
+    instead: Simulating the NFA lazily, set by set, while matching
+    why: >-
+      The 20 test patterns compile to tens of states, so a full table is cheap and matching is one lookup per
+      character. A pattern like `(a|b)*a(a|b){10}` needs over 2,000 states; for those a lazy DFA that builds states on
+      demand is the fix.
+watchOut: >-
+  A DFA built for a pattern accepts whole strings, while a search finds a match anywhere. Compare with full-match
+  semantics, or wrap the pattern in `.*` and handle `^` and `$` explicitly; otherwise the agreement rate means
+  nothing.

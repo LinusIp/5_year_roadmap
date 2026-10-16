@@ -1,0 +1,109 @@
+overview: >-
+  Formly's constrained decoding guarantees valid JSON but makes the service 35% slower at batch 32; this project
+  finds where that time goes and cuts it to 10% or less. Each JSON schema is compiled once into an automaton (a state
+  machine that knows which characters may come next) over the tokenizer's vocabulary. The allowed-token mask for each
+  state is cached and computed off the critical path, while every output is checked against its schema.
+learn:
+  - name: Constrained decoding
+    ref: llm-zoomcamp
+  - name: Finite-state automata
+    ref: cs61a
+  - name: Logits processors
+    ref: hf-llm-course
+  - name: CPU vs GPU overlap
+    ref: horace-he-brrr
+  - name: Bounded caches
+stats:
+  - value: ≤ 10%
+    label: overhead at batch 32
+  - value: 5,000 / 5,000
+    label: outputs schema-valid
+  - value: ≤ 200 ms
+    label: grammar compile, typical schema
+components:
+  - id: schemas
+    name: Schema suite
+    role: Supplies schemas from flat to deeply nested, with function-calling style prompts.
+    tech: JSON Schema
+    talksTo: [compiler]
+    kind: offline
+  - id: compiler
+    name: Automaton compiler
+    role: Turns a schema into a state machine and precomputes which vocabulary tokens are legal from each state.
+    tech: Python
+    talksTo: [cache]
+    kind: core
+  - id: cache
+    name: Mask cache
+    role: Keeps a bitmask per automaton state, with a size limit and least-recently-used eviction.
+    tech: Python · numpy
+    talksTo: [hook]
+    kind: core
+  - id: hook
+    name: Engine hook
+    role: Applies each sequence's mask to its logits before sampling and advances its automaton state.
+    tech: Logits processor
+    talksTo: [engine]
+    kind: core
+  - id: engine
+    name: Inference engine
+    role: Runs the forward pass for the batch of 32 on the GPU.
+    tech: 24 GB GPU
+    talksTo: [hook]
+    kind: external
+  - id: bench
+    name: Benchmark harness
+    role: Times masked vs free decoding per schema and validates all 5,000 outputs.
+    tech: pytest · jsonschema
+    talksTo: []
+    kind: offline
+flow:
+  - component: compiler
+    text: >-
+      compiles a schema once at registration in under `200 ms`, walking every token's full string, since one token
+      like `"},` can cross several grammar symbols.
+  - component: engine
+    text: runs the forward pass for 32 sequences; the GPU is busy for most of the step.
+  - component: cache
+    text: >-
+      meanwhile looks up the mask for each sequence's current state; a 128k vocabulary is a **16 KB** bitmask, so a hit
+      costs almost nothing.
+  - component: hook
+    text: >-
+      sets disallowed logits to `-inf`, samples, and moves each automaton one token forward; the next step's masks are
+      fetched while the GPU runs again. This GPU-to-hook loop is the decode loop itself.
+  - component: bench
+    text: validates every output with `jsonschema` and splits the overhead into compile, mask lookup and waiting.
+interface:
+  lang: python
+  code: |
+    class SchemaMask:
+        def __init__(self, schema: dict, tok):
+            self.fsm = compile_schema(schema, tok)
+            self.cache = LRU(maxsize=20_000)
+
+        def __call__(self, states: list[int],
+                     logits: Tensor) -> Tensor:
+            allowed = stack([self.mask(s)
+                             for s in states])
+            return logits.masked_fill(~allowed,
+                                      float("-inf"))
+decisions:
+  - choice: Precompile per schema, not per token
+    instead: Walk the grammar for every vocabulary token at each step
+    why: >-
+      Checking 128k tokens against the grammar each step on the CPU is where most of the 35% goes. Doing it once per
+      schema state moves that cost to registration, inside the 200 ms budget.
+  - choice: Overlap mask work with the forward pass
+    instead: Compute masks on the main thread after logits arrive
+    why: >-
+      The GPU and CPU then take turns instead of working together. Fetching masks while the GPU runs hides them
+      almost completely at batch 32.
+  - choice: LRU cache with a size limit
+    instead: Cache every state forever
+    why: >-
+      Deep schemas can create many states, and an unbounded cache grows until the server runs short of memory. Size
+      the limit from the measured hit rate.
+watchOut: >-
+  Mask computation on the critical CPU thread is the usual hidden cost; profile CPU and GPU time on the same timeline
+  before optimising, and check that tokens spanning several grammar symbols are handled, or valid outputs get blocked.

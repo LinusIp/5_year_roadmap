@@ -1,0 +1,93 @@
+overview: >-
+  A small single-board computer sits between the factory's 15 energy meters and the plant network. Every 2 seconds
+  its scheduler asks each meter over one RS-485 cable for its voltage, current and energy registers using Modbus RTU
+  (a master asks, one slave answers, each frame ends with a CRC), retries meters that time out, and publishes each
+  reading as JSON over MQTT. When the network is down, readings wait in a bounded SQLite buffer of one hour.
+learn:
+  - name: Modbus RTU framing
+  - name: RS-485 half-duplex buses
+  - name: Timeouts and retries
+  - name: MQTT publish/subscribe
+  - name: Bounded store-and-forward
+    ref: ddia
+stats:
+  - value: < 2 s
+    label: to poll all 15 meters
+  - value: < 5 s
+    label: recovery from a bus fault
+  - value: < 30 MB
+    label: gateway RAM
+components:
+  - id: meters
+    name: Energy meters
+    role: 15 Modbus RTU slaves on one RS-485 bus, read only.
+    tech: Modbus meters · RS-485
+    talksTo: [client]
+    kind: external
+  - id: scheduler
+    name: Device scheduler
+    role: Walks the meter list every 2 s and skips a failing meter for a back-off period.
+    tech: Python asyncio
+    talksTo: [client]
+    kind: core
+  - id: client
+    name: Modbus RTU client
+    role: Builds read requests, waits the silent gap, checks the reply CRC and decodes registers.
+    tech: Python · pyserial
+    talksTo: [buffer]
+    kind: core
+  - id: buffer
+    name: Buffer and retry
+    role: Holds unsent readings in SQLite, capped at one hour, and drops the oldest first.
+    tech: SQLite
+    talksTo: [mqtt]
+    kind: core
+  - id: mqtt
+    name: MQTT publisher
+    role: Publishes each reading as JSON to the plant broker and marks it sent on acknowledgement.
+    tech: paho-mqtt · broker
+    talksTo: []
+    kind: core
+  - id: health
+    name: Health page
+    role: Shows last good read, error count and latency per meter.
+    tech: Small HTTP server
+    talksTo: []
+    kind: offline
+  - id: sim
+    name: Simulated slaves
+    role: Fake meters with real register maps, delays and injected CRC errors for tests without hardware.
+    tech: Python · virtual serial
+    talksTo: []
+    kind: offline
+flow:
+  - component: scheduler
+    text: picks the next meter, for example slave `7`, giving each about `130 ms` of the 2 s cycle.
+  - component: client
+    text: sends `07 03 0000 0006 CRC`, a read of 6 holding registers, and waits up to `100 ms` for the reply.
+  - component: client
+    text: checks the CRC and decodes each **32-bit value from two registers** in the meter's word order; on timeout it retries once, then marks the meter down.
+  - component: buffer
+    text: stores the reading with a time stamp; if the broker is unreachable it keeps up to 1 hour (about 27,000 rows) and drops the oldest beyond that.
+  - component: mqtt
+    text: publishes to `factory/energy/7` with QoS 1 and deletes the row once the broker acknowledges.
+interface:
+  lang: shell
+  code: |
+    # Modbus RTU read, slave 7, 6 registers
+    -> 07 03 00 00 00 06 C5 AE
+    <- 07 03 0C 43 66 00 00 ... CRC CRC
+       # V (float32), I (float32), kWh (uint32)
+
+    # MQTT topic factory/energy/7
+    { "meter": 7, "ts": "2026-03-02T08:15:04Z",
+      "v": 230.0, "a": 12.4, "kwh": 18452.7,
+      "ok": true }
+decisions:
+  - choice: Sequential polling on one bus
+    instead: One adapter and bus per meter group
+    why: Each request and reply takes about 30 ms at 19,200 baud, so 15 meters fit in 2 s on one bus. Split the bus if meters or registers double.
+  - choice: Bounded one-hour buffer
+    instead: Keep everything until the network is back
+    why: An unbounded queue on an SBC with a small SD card will fill it during a long outage. One hour covers typical network work; lost data beyond that is counted and reported.
+watchOut: Meters disagree on the word order of 32-bit values, and a swapped pair still decodes to a plausible-looking number. Check each meter model against its display before trusting its readings.

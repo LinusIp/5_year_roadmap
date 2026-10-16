@@ -1,0 +1,122 @@
+overview: >-
+  A 1–3B language model shrunk to int4 (4-bit weights) and run on a laptop or phone through llama.cpp, then measured
+  the way a device feels it. A harness runs the same prompts after a warm-up, reads speed from the runtime's own
+  counters and samples memory and power alongside. An eval runner checks how much quality the int4 model lost
+  against the full-precision one, and a report joins it all into a table of what fits where.
+learn:
+  - name: Weight quantization
+    ref: mit-6-5940
+  - name: GGUF and k-quants
+    ref: llama-cpp
+  - name: ONNX Runtime
+    ref: onnx-runtime-docs
+  - name: Perplexity
+  - name: Thermal throttling
+  - name: Energy per token
+stats:
+  - value: ≤ 3 pts
+    label: eval accuracy lost at int4
+  - value: 512 + 128
+    label: prompt and generated tokens per run
+  - value: 10 min
+    label: sustained run to expose throttling
+components:
+  - id: checkpoint
+    name: HF checkpoint
+    role: The full-precision model, used as the quality reference.
+    tech: Hugging Face
+    talksTo: [convert, eval]
+    kind: external
+  - id: convert
+    name: Converter
+    role: Turns the checkpoint into a Q4_K_M GGUF, and an ONNX int4 build as the stretch.
+    tech: llama.cpp · ONNX Runtime GenAI
+    talksTo: [device]
+    kind: core
+  - id: harness
+    name: Harness
+    role: Runs fixed prompts with fixed threads and context, after a warm-up, and writes results.json.
+    tech: Python · llama-bench
+    talksTo: [device, power, report]
+    kind: core
+  - id: device
+    name: Device runtime
+    role: Runs the int4 model on the laptop or phone and reports its own timings.
+    tech: llama.cpp · Android or iOS build
+    talksTo: []
+    kind: core
+  - id: power
+    name: Power counters
+    role: Give energy and memory readings while the model runs.
+    tech: powermetrics · RAPL · battery stats
+    talksTo: []
+    kind: external
+  - id: eval
+    name: Eval runner
+    role: Scores full precision and int4 on 200 multiple-choice questions and WikiText-2 perplexity.
+    tech: Python · llama-perplexity
+    talksTo: [report]
+    kind: offline
+  - id: report
+    name: Report
+    role: Joins speed, memory, energy and quality into one fits-on table.
+    tech: pandas
+    talksTo: []
+    kind: offline
+flow:
+  - component: convert
+    text: converts the checkpoint to F16 GGUF and quantizes it to `Q4_K_M`, about a quarter of the original size.
+  - component: harness
+    text: >-
+      copies the model to the device and runs one **warm-up** first, so weight loading and page faults stay out of
+      the numbers.
+  - component: device
+    text: >-
+      processes a 512-token prompt and generates 128 tokens five times, reporting prompt and generation tokens per
+      second from its own counters.
+  - component: power
+    text: >-
+      are sampled alongside for peak resident memory and joules per generated token, with the phone on battery,
+      not on a charger.
+  - component: eval
+    text: >-
+      asks both models the same 200 questions with the same chat template; int4 must stay within 3 points, and the
+      **perplexity** rise is reported.
+interface:
+  lang: shell
+  code: |
+    # convert, then quantize to 4-bit
+    python convert_hf_to_gguf.py ./model \
+      --outtype f16 --outfile model-f16.gguf
+    llama-quantize model-f16.gguf model-q4.gguf Q4_K_M
+
+    # 512 in, 128 out, 5 runs, fixed threads
+    llama-bench -m model-q4.gguf -p 512 -n 128 \
+      -r 5 -t 8 -o json > results/bench.json
+
+    # quality against full precision
+    llama-perplexity -m model-q4.gguf -f wiki.test.raw
+decisions:
+  - choice: llama.cpp with Q4_K_M first
+    instead: ONNX Runtime int4 first
+    why: >-
+      One llama.cpp build runs on a laptop and on Android or iOS, with benchmark and perplexity tools included. ONNX
+      Runtime is the second runtime once the harness works.
+  - choice: Energy from the OS's own counters
+    instead: Estimating energy from the chip's rated power
+    why: >-
+      Rated power says nothing about a chip that throttles or idles cores. powermetrics, RAPL and battery stats
+      measure what the run really used.
+  - choice: Same threads, context and template everywhere
+    instead: Each runtime's defaults
+    why: >-
+      Defaults differ between runtimes and builds, and a comparison with different thread counts measures the
+      settings, not the model.
+  - choice: A sustained 10-minute run
+    instead: A 30-second benchmark
+    why: >-
+      A device gets hot and slows down after a few minutes. Short runs overstate the speed a user gets in a long
+      conversation.
+watchOut: >-
+  The first run includes loading and page-faulting the weights and makes the device look slow, while a cold device
+  then looks fast for half a minute. Discard the warm-up, and report the 10-minute sustained speed next to the peak.

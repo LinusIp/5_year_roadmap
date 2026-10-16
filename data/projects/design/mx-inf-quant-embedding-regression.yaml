@@ -1,0 +1,110 @@
+overview: >-
+  A regression harness that tells Vecta whether an int8 embedding variant is safe to ship before customers' hidden
+  queries find out. It embeds five public BEIR datasets with fp32 and each quantized variant, searches them with
+  identical index settings, and compares recall@10 slice by slice, not only on average. A gate passes a variant
+  only if no slice loses more than 1% and the index shrinks at least 3.5×, all in 20 minutes on one GPU.
+learn:
+  - name: Embedding quantization
+    ref: hf-llm-course
+  - name: Recall@k
+  - name: Exact vs ANN search
+  - name: Slice analysis
+    ref: fsdl
+  - name: Regression gates
+stats:
+  - value: ≤ 1%
+    label: recall@10 loss on every slice
+  - value: ≥ 3.5×
+    label: index memory saved
+  - value: ≤ 20 min
+    label: full run, 5 datasets
+components:
+  - id: loaders
+    name: Dataset loaders
+    role: Load SciFact, FiQA, NFCorpus and two more BEIR sets with queries, documents and relevance labels.
+    tech: Python · BEIR
+    talksTo: [variants]
+    kind: core
+  - id: variants
+    name: Quantization variants
+    role: Builds fp32, int8 model weights, int8 vectors and both together, with one set of scales per variant.
+    tech: sentence-transformers · PyTorch
+    talksTo: [embedder]
+    kind: core
+  - id: embedder
+    name: Embedder
+    role: Embeds every document and query on the GPU and caches fp32 results so reruns are fast.
+    tech: sentence-transformers · 1 GPU
+    talksTo: [search]
+    kind: core
+  - id: search
+    name: ANN evaluator
+    role: Searches with exact and HNSW indexes whose parameters are frozen in a config file.
+    tech: FAISS
+    talksTo: [slices]
+    kind: core
+  - id: slices
+    name: Slice analyser
+    role: Computes recall@10 per dataset and domain slice, and ranks queries whose top 10 changed most.
+    tech: pandas
+    talksTo: [gate]
+    kind: core
+  - id: gate
+    name: Gate reporter
+    role: Marks each variant pass or fail and writes the memory, QPS and hard-query report.
+    tech: Python · Markdown report
+    talksTo: []
+    kind: core
+flow:
+  - component: loaders
+    text: loads FiQA's documents, queries and relevance labels, tagged with their **slice** (the dataset or topic).
+  - component: variants
+    text: >-
+      builds `int8-vectors`: each dimension is mapped to −127..127 with a scale learned from documents, and queries
+      use the **same** scales.
+  - component: embedder
+    text: >-
+      embeds with the variant's model; a 768-dimension vector drops from 3,072 to 768 bytes, so about 4× before index
+      overhead.
+  - component: search
+    text: >-
+      runs exact search first, so only quantization can change results, then HNSW with the same frozen `M` and
+      `efSearch` as the fp32 run.
+  - component: slices
+    text: >-
+      computes `recall@10` per slice against fp32 and lists the 50 queries whose result lists changed most, the ones a
+      customer would notice.
+  - component: gate
+    text: passes the variant only if **every** slice loses ≤ 1% and the index is ≥ 3.5× smaller.
+interface:
+  lang: shell
+  code: |
+    $ embq run --model bge-base \
+        --variants fp32,w8,v8,w8v8 \
+        --datasets scifact,fiqa,nfcorpus,...
+
+    variant  mem    worst slice     loss  gate
+    w8       1.0×   fiqa           0.4%  fail mem
+    v8       3.8×   nfcorpus       0.7%  PASS
+    w8v8     3.8×   fiqa/tax       1.9%  fail
+    total 14m 32s
+decisions:
+  - choice: Gate on the worst slice
+    instead: Gate on average recall
+    why: >-
+      Customers' queries are hidden, and a 0.5% average loss can hide a 3% loss on one domain. Gating every slice is
+      the only way to catch the domain a customer lives in.
+  - choice: Exact search before ANN
+    instead: Compare HNSW runs only
+    why: >-
+      HNSW results shift with its own parameters and build order. Exact search isolates the effect of quantization,
+      and HNSW with frozen settings then shows what users would see.
+  - choice: Cache fp32 embeddings
+    instead: Re-embed everything per variant
+    why: >-
+      Vector-only variants reuse the fp32 embeddings and just quantize them, which is how five datasets fit in 20
+      minutes on one GPU.
+watchOut: >-
+  Quantizing queries and documents with different scales, or rebuilding the index with other parameters between
+  runs, creates regressions the model did not cause. Freeze scales and index settings in config and log them with
+  every run.

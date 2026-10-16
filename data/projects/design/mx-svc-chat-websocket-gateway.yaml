@@ -1,0 +1,116 @@
+overview: >-
+  A gateway tier for Huddlr's chat that holds 50,000 WebSocket connections across 3 nodes and survives deploys
+  without losing messages. Each room has a log that gives every message the next sequence number, and Redis pub/sub
+  carries new messages to whichever gateways have members of that room. Clients remember the last sequence they
+  saw, so after a reconnect they ask for everything after it and nothing is lost or out of order.
+learn:
+  - name: WebSockets and heartbeats
+  - name: Pub/sub fan-out
+    ref: system-design-primer
+  - name: Per-room sequence numbers
+    ref: ddia
+  - name: Replay from a cursor
+  - name: Connection draining
+    ref: google-sre-book
+stats:
+  - value: 50,000
+    label: connections on 3 nodes
+  - value: < 150 ms
+    label: p99 delivery, room of 500
+  - value: "0"
+    label: lost or reordered on restart
+components:
+  - id: clients
+    name: Chat clients
+    role: Hold a WebSocket, send messages and track the last sequence per room.
+    tech: Mobile · web
+    talksTo: [gateway]
+    kind: external
+  - id: gateway
+    name: Gateway
+    role: Authenticates the token, keeps heartbeats and room subscriptions for its connections.
+    tech: Go · gorilla/websocket
+    talksTo: [log]
+    kind: core
+  - id: log
+    name: Room log
+    role: Appends each message with the next sequence number for its room.
+    tech: PostgreSQL
+    talksTo: [broker]
+    kind: core
+  - id: broker
+    name: Broker
+    role: Publishes new messages on a channel per room to every subscribed gateway.
+    tech: Redis pub/sub
+    talksTo: [cursors]
+    kind: core
+  - id: cursors
+    name: Cursor tracker
+    role: Per connection, the last sequence delivered in each room, used to spot gaps.
+    tech: Go · in memory
+    talksTo: []
+    kind: core
+  - id: drain
+    name: Drain manager
+    role: On deploy, stops new connections and asks clients to reconnect elsewhere, a few at a time.
+    tech: Go · SIGTERM handler
+    talksTo: [gateway]
+    kind: offline
+  - id: load
+    name: Load generator
+    role: Opens 50,000 clients with churn and bursts and checks order and loss.
+    tech: Go
+    talksTo: [gateway]
+    kind: offline
+flow:
+  - component: gateway
+    text: receives `{"type":"send","room":"r_42","text":"…","client_id":"c9"}` from a member of room `r_42`.
+  - component: log
+    text: >-
+      inserts it with `seq = last_seq + 1` in one transaction, here `seq 18233`; a repeated `client_id` returns the
+      existing seq, so a resend is not a duplicate.
+  - component: broker
+    text: publishes the stored message once on channel `room:r_42`, and each gateway with members of r_42 receives one copy.
+  - component: cursors
+    text: >-
+      check `18233` follows the connection's last `18232`; if a gap appears, the gateway fetches the missing range
+      from the log before delivering.
+  - component: gateway
+    text: writes the message to all 500 members' sockets from one encoded buffer and updates each cursor.
+  - component: gateway
+    text: >-
+      after a rolling restart, the client reconnects with `resume: {r_42: 18233}` and gets everything after it from
+      the log, in order.
+interface:
+  lang: json
+  code: |
+    // client → gateway
+    { "type": "send", "room": "r_42",
+      "client_id": "c9-0007", "text": "On my way" }
+
+    // gateway → client
+    { "type": "msg", "room": "r_42", "seq": 18233,
+      "from": "u_771", "text": "On my way",
+      "ts": "2026-10-16T09:41:07Z" }
+
+    // on reconnect
+    { "type": "resume", "rooms": { "r_42": 18233 } }
+decisions:
+  - choice: Sequence numbers from the room log
+    instead: Ordering by timestamps
+    why: >-
+      Clocks on 3 gateways differ by milliseconds, so two messages sent close together can swap. One counter per room
+      gives a single order every client agrees on.
+  - choice: Redis pub/sub plus a durable log
+    instead: Pub/sub alone
+    why: >-
+      Pub/sub drops messages for a gateway that is restarting. The log is the source of truth and pub/sub is only
+      the fast path, so a gap is always repairable.
+  - choice: Drain slowly on deploy
+    instead: Kill the process and let clients reconnect
+    why: >-
+      Dropping 17,000 sockets at once causes a reconnect storm on the other nodes. Closing in batches with a random
+      delay keeps p99 within budget during the restart.
+watchOut: >-
+  Encoding the message once per recipient makes a 500-member room cost 500 serialisations. Encode once and write the
+  same bytes to every socket.

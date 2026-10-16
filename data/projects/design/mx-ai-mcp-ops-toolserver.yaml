@@ -1,0 +1,105 @@
+overview: >-
+  An MCP server (Model Context Protocol, a standard way to offer tools to an AI assistant) that wraps the clinic's
+  booking database. Read tools such as `find_slots` answer at once; write tools only return a pending plan with a
+  confirm token, and nothing changes until a separate `confirm` call presents that token. Every write is logged, and
+  30 scripted scenarios prove that no write ever slips through unconfirmed.
+learn:
+  - name: Model Context Protocol
+    ref: hf-mcp-course
+  - name: Tool descriptions
+  - name: Confirm-before-write
+  - name: Database transactions
+    ref: cmu-15-445
+  - name: Audit logging
+stats:
+  - value: < 300 ms
+    label: p95 tool call
+  - value: '0'
+    label: unconfirmed writes
+  - value: '20'
+    label: concurrent sessions
+components:
+  - id: host
+    name: Assistant
+    role: The LLM client staff talk to; it chooses which tool to call.
+    tech: MCP host
+    talksTo: [server]
+    kind: external
+  - id: server
+    name: MCP server
+    role: Lists the tools, validates arguments and returns errors the model can act on.
+    tech: Python MCP SDK
+    talksTo: [confirm, repo]
+    kind: core
+  - id: confirm
+    name: Confirm manager
+    role: Issues single-use tokens tied to a pending plan and checks them on confirm.
+    tech: Python
+    talksTo: [repo]
+    kind: core
+  - id: repo
+    name: Repository
+    role: The only code that runs SQL; every write is one transaction.
+    tech: Python · sqlite3
+    talksTo: [db, audit]
+    kind: core
+  - id: db
+    name: Booking database
+    role: The clinic's existing schedule, therapists and patients.
+    tech: SQLite
+    talksTo: []
+    kind: external
+  - id: audit
+    name: Audit log
+    role: Records who confirmed what, with the before and after rows.
+    tech: SQLite table
+    talksTo: []
+    kind: offline
+  - id: tests
+    name: Scenario client
+    role: Scripts 30 conversations, including attempts to write without confirming.
+    tech: pytest
+    talksTo: [server]
+    kind: offline
+flow:
+  - component: host
+    text: calls `reschedule` with appointment 4812 and a new start of Tuesday 09:30.
+  - component: server
+    text: checks that the appointment exists and the slot is free, and on failure answers with "slot taken; nearest free 10:15".
+  - component: confirm
+    text: stores the plan, returns `status pending` with a token that expires in 2 minutes; the assistant reads the plan to the staff member.
+  - component: server
+    text: receives `confirm` with that token after the staff member says yes; a missing, reused or expired token is refused.
+  - component: repo
+    text: moves the booking inside one transaction, where a unique index on therapist and start time blocks a **double booking**, then writes the audit row.
+interface:
+  lang: json
+  code: |
+    → reschedule { "appointment_id": 4812,
+                   "new_start": "2026-10-20T09:30" }
+    ← { "status": "pending",
+        "plan": "Move J. Silva, Mon 14:00 → Tue 09:30,
+                 Ana, Clinic 2",
+        "confirm_token": "cf_7Q2x…",
+        "expires_in": 120 }
+    → confirm { "confirm_token": "cf_7Q2x…" }
+    ← { "status": "done", "audit_id": 991 }
+decisions:
+  - choice: Two-step write with a token
+    instead: One write tool that says "ask first" in its description
+    why: >-
+      A model can ignore a description; it cannot invent a valid token. The rule is then enforced in code, and the
+      30 scenario tests can prove it.
+  - choice: Unique index plus a transaction
+    instead: Check the slot in Python, then insert
+    why: >-
+      With 20 sessions, two staff can grab the same slot between the check and the insert. The database rejects
+      the second one, and the tool returns the next free slot.
+  - choice: SQLite in WAL mode
+    instead: Move the clinic to Postgres
+    why: >-
+      The booking system already is SQLite, and WAL mode lets readers carry on during a write. 20 sessions of short
+      transactions stay well inside 300 ms.
+watchOut: >-
+  Vague tool descriptions make the model pick `book` when it should `reschedule`. Write each description with when
+  to use it and when not, and track tool-selection accuracy in the scenarios.

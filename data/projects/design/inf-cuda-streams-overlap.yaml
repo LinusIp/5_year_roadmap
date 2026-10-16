@@ -1,0 +1,61 @@
+overview: >-
+  A large array is copied to the GPU, processed by a kernel and copied back, first in one synchronous pass, then
+  split into chunks spread over 4 CUDA streams so chunk i's kernel runs while chunk i+1 is copying in. With pinned
+  host memory the Nsight Systems timeline shows the copies and kernels overlapping, and total time falls towards the
+  larger of copy time and compute time.
+learn:
+  - name: CUDA streams
+    ref: cuda-guide
+  - name: Pinned memory
+    ref: pmpp-book
+  - name: Copy and compute overlap
+    ref: nvidia-dli-cuda
+  - name: Timeline profiling
+    ref: nsight-compute-docs
+components:
+  - id: host
+    name: Pinned host buffers
+    role: Input and output arrays allocated with cudaMallocHost so DMA copies can run async.
+    tech: CUDA C++
+    talksTo: [streams]
+    kind: core
+  - id: streams
+    name: Stream pipeline
+    role: Issues copy-in, kernel and copy-out per chunk, round-robin over 4 streams.
+    tech: cudaMemcpyAsync · cudaStream_t
+    talksTo: [kernel]
+    kind: core
+  - id: kernel
+    name: Compute kernel
+    role: Does enough arithmetic per element that compute time is close to copy time.
+    tech: CUDA C++
+    talksTo: [profile]
+    kind: core
+  - id: profile
+    name: Timeline and sweep
+    role: Records the timeline and total time for each chunk size.
+    tech: Nsight Systems · cudaEvent
+    talksTo: []
+    kind: core
+flow:
+  - component: host
+    text: allocates for example 512 MB in and out with `cudaMallocHost`, and times a synchronous copy, kernel, copy baseline.
+  - component: streams
+    text: >-
+      for chunk `c`, on stream `c % 4` issues `cudaMemcpyAsync` in, the kernel, and `cudaMemcpyAsync` out, so the
+      copy engines and the SMs work on different chunks at once.
+  - component: kernel
+    text: processes its chunk; because chunks are independent, no sync is needed until the end.
+  - component: profile
+    text: >-
+      shows overlapping rows in `nsys`, and sweeps chunk sizes from 1 MB to 128 MB to find where total time nears
+      `max(copy, compute)`.
+decisions:
+  - choice: Four streams
+    instead: Two streams or one per chunk
+    why: >-
+      Copy in, compute and copy out are three stages, so three streams can keep all busy and a fourth absorbs uneven
+      timing. Many more streams add launch overhead without more overlap.
+watchOut: >-
+  With pageable host memory (plain malloc) the driver copies through a staging buffer and `cudaMemcpyAsync` does not
+  overlap, so the timeline looks serial. Check every host buffer comes from `cudaMallocHost`.

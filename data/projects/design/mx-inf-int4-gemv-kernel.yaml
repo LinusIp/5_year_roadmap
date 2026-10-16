@@ -1,0 +1,113 @@
+overview: >-
+  A fused GPU kernel for Mosaic Devices' decode step, which multiplies a 4-bit weight matrix by a small batch of
+  activations. Decode at batch 1 to 8 is memory-bound: the time goes into reading weights, not arithmetic. The kernel
+  reads packed int4 weights once, turns them back into numbers in registers and accumulates in fp32, instead of
+  writing a full fp16 copy first. The target is 75% of the GPU's peak memory bandwidth, within 10% of a library
+  kernel.
+learn:
+  - name: Memory-bound kernels
+    ref: horace-he-brrr
+  - name: Roofline model
+    ref: pmpp-book
+  - name: Coalesced memory access
+    ref: cuda-guide
+  - name: Group-wise int4 quantization
+  - name: Kernel profiling
+    ref: nsight-compute-docs
+  - name: Triton kernels
+    ref: triton-tutorials
+stats:
+  - value: ≥ 75%
+    label: of peak memory bandwidth
+  - value: ≤ 10%
+    label: slower than a library kernel
+  - value: ≤ 2e-2
+    label: max error vs fp16 reference
+components:
+  - id: packer
+    name: Packing format
+    role: Stores 8 int4 weights per 32-bit word in groups of 128 with fp16 scales, laid out for contiguous loads.
+    tech: PyTorch
+    talksTo: [kernel]
+    kind: core
+  - id: kernel
+    name: Fused kernel
+    role: Loads packed weights and scales, dequantizes in registers and multiplies by the activations.
+    tech: CUDA C++ or Triton
+    talksTo: [output]
+    kind: core
+  - id: output
+    name: Output check
+    role: Compares the kernel's result with the reference and stores the error.
+    tech: PyTorch
+    talksTo: []
+    kind: core
+  - id: reference
+    name: Reference path
+    role: Dequantizes to a full fp16 matrix and multiplies with torch, the unfused baseline.
+    tech: PyTorch
+    talksTo: [output]
+    kind: offline
+  - id: sweep
+    name: Shape sweep
+    role: Runs batch 1 to 8 on 4096×4096, 4096×11008 and misaligned shapes, timing each.
+    tech: Python
+    talksTo: [kernel]
+    kind: offline
+  - id: bench
+    name: Comparison bench
+    role: Measures GB/s and percent of peak with Nsight Compute, against a library int4 kernel.
+    tech: Nsight Compute
+    talksTo: []
+    kind: offline
+flow:
+  - component: packer
+    text: >-
+      packs a 4096×11008 matrix into **22.5 MB** of int4 plus under 1 MB of scales, 4× less to read than fp16.
+  - component: kernel
+    text: >-
+      gives each warp a few output rows; its 32 threads read neighbouring 16-byte chunks, so loads are
+      **coalesced** (one wide memory transaction instead of many small ones).
+  - component: kernel
+    text: >-
+      unpacks nibbles with shifts and masks, applies the group scale, and accumulates `x · w` in fp32 registers; the
+      fp16 matrix never exists in memory.
+  - component: kernel
+    text: >-
+      reduces partial sums across the warp with shuffles and writes `y`; at 75% of a roughly 1 TB/s card that is
+      about 30 µs for this shape.
+  - component: output
+    text: checks the result against the fp16 reference and fails if the max error exceeds `2e-2`.
+interface:
+  lang: cuda
+  code: |
+    // y[B,N] = x[B,K] · dequant(W)ᵀ, group 128
+    __global__ void w4a16_gemv(
+        const uint32_t* qw,   // [N, K/8]
+        const half* scales,   // [N, K/128]
+        const half* zeros,    // [N, K/128]
+        const half* x,        // [B, K], B ≤ 8
+        half* y,              // [B, N]
+        int N, int K, int B);
+    // one warp per 4 rows, 16-byte loads,
+    // fp32 accumulate, warp-shuffle reduce
+decisions:
+  - choice: Fused dequant and multiply
+    instead: Dequantize to fp16, then call cuBLAS
+    why: >-
+      The unfused path writes and rereads a full fp16 matrix, 4× the bytes of the int4 weights, on a step that is
+      limited by memory. Fusing reads each weight byte once.
+  - choice: Layout chosen for the kernel's loads
+    instead: Keep the checkpoint's original packing
+    why: >-
+      The original order makes neighbouring threads read far-apart addresses. Repacking once at load time costs
+      nothing per token and enables 16-byte coalesced loads.
+  - choice: Measure against the roofline
+    instead: Compare only against the unfused baseline
+    why: >-
+      Beating a slow baseline proves little; percent of peak bandwidth shows how much is left. Nsight Compute's memory
+      throughput is the number to report.
+watchOut: >-
+  At batch 8 the unpacking arithmetic can become the bottleneck instead of memory. Keep dequantization to a few
+  integer operations per weight, check that scale loads are coalesced too, and test shapes that are not multiples of
+  the tile size.

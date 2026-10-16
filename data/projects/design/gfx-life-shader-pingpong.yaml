@@ -1,0 +1,71 @@
+overview: >-
+  Conway's Life on a 2048x2048 grid where each cell is one texel: a fragment shader reads the current state texture,
+  counts the eight neighbours with `texelFetch` and writes the next generation into a second texture, then the two
+  swap roles (ping-pong). The mouse paints live cells into the current texture before each step.
+learn:
+  - name: Fragment shaders
+    ref: book-of-shaders
+  - name: Framebuffer objects
+    ref: learnopengl
+  - name: Ping-pong textures
+  - name: Toroidal wrap
+components:
+  - id: brush
+    name: Mouse brush
+    role: Turns mouse drags into a circle of live cells written into the current texture.
+    tech: OpenGL · GLSL
+    talksTo: [step]
+    kind: core
+  - id: step
+    name: Step shader
+    role: Reads texture A and writes the next generation into framebuffer B.
+    tech: GLSL
+    talksTo: [display, check]
+    kind: core
+  - id: display
+    name: Display pass
+    role: Draws the new state to the screen and swaps A and B.
+    tech: OpenGL
+    talksTo: []
+    kind: core
+  - id: check
+    name: CPU reference
+    role: Runs the same rule on the CPU and compares 100 generations bit for bit.
+    tech: C / NumPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: brush
+    text: converts the mouse position to a texel and draws a filled circle of live cells into texture **A**.
+  - component: step
+    text: binds A as input and B as the render target, sums the 8 neighbours and applies birth on 3, survive on 2 or 3.
+  - component: display
+    text: draws B with a colour map, then A and B swap; 60 steps a second is about 252 M cell updates a second.
+  - component: check
+    text: reads B back with `glReadPixels` after each of 100 generations and compares it with the CPU result.
+interface:
+  lang: glsl
+  code: |
+    uniform sampler2D state; // R16F: 0.0 dead, 1.0 alive
+    uniform int birth;       // B3:  1 << 3
+    uniform int survive;     // S23: (1 << 2) | (1 << 3)
+    out float next;
+
+    void main() {
+      ivec2 p = ivec2(gl_FragCoord.xy);
+      int n = 0;
+      for (int i = 0; i < 8; i++)  // wrap with & 2047
+        n += int(texelFetch(state, (p+OFF[i])&2047, 0).r);
+      bool alive = texelFetch(state, p, 0).r > 0.5;
+      int mask = alive ? survive : birth;
+      next = float((mask >> n) & 1);
+    }
+decisions:
+  - choice: texelFetch with manual wrap
+    instead: texture() with GL_REPEAT and nearest filtering
+    why: >-
+      texelFetch reads exact texels with no filtering or half-texel maths, which keeps the CPU comparison exact. It
+      ignores the sampler's wrap mode, so wrap the coordinate yourself with `& 2047` (the grid is a power of two).
+watchOut: >-
+  Reading and writing the same texture in one pass is undefined and gives smeared, order-dependent results. Always
+  render into the other texture and swap, including for the brush.

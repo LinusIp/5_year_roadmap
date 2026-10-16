@@ -1,0 +1,121 @@
+overview: >-
+  A small static-file server in C11 for a hobby hosting collective, built on a single `poll` loop and an incremental
+  HTTP/1.1 parser. The parser is called again after every read and picks up where it stopped, so a request split
+  across reads parses the same as one that arrives whole, and it never allocates or reads past the buffer. Strict
+  limits, AddressSanitizer and UBSan (compiler checks that stop on memory and undefined-behaviour bugs) and 10
+  million fuzz runs, which feed the parser random bytes, are how you trust it.
+learn:
+  - name: Incremental parsing
+  - name: Fuzzing
+  - name: Sanitizers
+  - name: Path traversal
+  - name: Request smuggling
+  - name: Non-blocking I/O
+    ref: cmu-15-213
+stats:
+  - value: 20k req/s
+    label: 4 KB file, one core
+  - value: 10M
+    label: fuzz runs, no findings
+  - value: 50 / 50
+    label: traversal attacks rejected
+components:
+  - id: clients
+    name: HTTP clients
+    role: Browsers and attack scripts sending requests over keep-alive connections.
+    tech: HTTP/1.1
+    talksTo: [conn]
+    kind: external
+  - id: conn
+    name: Connection state machine
+    role: Owns each connection's fixed buffer and state, driven by the poll loop.
+    tech: C11 · poll
+    talksTo: [limits]
+    kind: core
+  - id: limits
+    name: Limits
+    role: Caps header size, header count, request time and open connections.
+    tech: C11
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: Parser
+    role: Parses the request line and headers as offsets into the buffer.
+    tech: C11 · no allocation
+    talksTo: [files]
+    kind: core
+  - id: files
+    name: File server
+    role: Normalises the path under the web root and sends the file or a Range of it.
+    tech: openat · sendfile
+    talksTo: []
+    kind: core
+  - id: fuzz
+    name: Fuzz harness
+    role: Feeds random bytes in random splits to the parser under sanitizers.
+    tech: libFuzzer · ASan · UBSan
+    talksTo: [parser]
+    kind: offline
+  - id: tests
+    name: Test suite
+    role: Runs 50 path-traversal cases and request edge cases in CI.
+    tech: Shell · curl
+    talksTo: [clients]
+    kind: offline
+flow:
+  - component: conn
+    text: >-
+      wakes from `poll()` with a readable socket and appends to the connection's fixed 8 KB buffer, keeping the
+      parser's saved state.
+  - component: limits
+    text: >-
+      answers `431` if the buffer fills before the headers end, `408` after 10 s without a full request (slow
+      clients), and refuses connections past 1,000.
+  - component: parser
+    text: >-
+      resumes at the saved offset, so a token split across two reads is still parsed; duplicate or conflicting
+      `Content-Length`, or any `Transfer-Encoding`, is a `400` to stop **request smuggling**.
+  - component: files
+    text: >-
+      decodes `%xx` once, rejects `%00`, resolves `.` and `..` without climbing above the root, opens with
+      `O_NOFOLLOW`, and answers `Range: bytes=0-1023` with `206`.
+  - component: conn
+    text: >-
+      after the response, resets the parser for the next request on the same keep-alive connection, or closes on
+      `Connection: close`.
+interface:
+  lang: c
+  code: |
+    typedef enum { HP_MORE, HP_DONE, HP_ERR } hp_status;
+    typedef struct { uint32_t off, len; } hp_span;
+    typedef struct {
+        int      state;    /* where parsing stopped */
+        size_t   pos;      /* bytes consumed so far */
+        hp_span  method, target;
+        hp_span  hdr_name[50], hdr_value[50];
+        unsigned n_hdrs;
+        int      status;   /* 400, 414, 431 on error */
+    } hp_req;
+    /* call after each read(); never allocates,
+       never reads past len */
+    hp_status hp_parse(hp_req *r, const char *buf,
+                       size_t len);
+decisions:
+  - choice: Incremental parser over a fixed buffer
+    instead: Read the whole request, then parse it with sscanf
+    why: >-
+      TCP gives no promise that a request arrives in one read, and waiting for the end needs unbounded memory.
+      Resuming from saved state handles splits; the fixed 8 KB buffer bounds memory per connection.
+  - choice: Reject ambiguous requests
+    instead: Accept them leniently, as many servers do
+    why: >-
+      A proxy and this server reading two `Content-Length` values differently is how smuggling works. A static-file
+      server needs no request bodies, so refusing them costs nothing.
+  - choice: Single-threaded poll loop
+    instead: A thread per connection
+    why: >-
+      The constraint says single thread, and 20,000 small requests a second fits one core when nothing blocks. It
+      also keeps the code small enough to review for memory bugs.
+watchOut: >-
+  Length arithmetic overflows quietly in C: an offset plus a length can wrap and pass a bounds check. Do every size
+  calculation with checked adds on `size_t`, and let UBSan and the fuzzer hunt for the cases you missed.

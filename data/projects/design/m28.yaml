@@ -1,0 +1,123 @@
+overview: >-
+  Two producers send keyed events, each stamped with the time it happened, into a six-partition Kafka topic. A
+  consumer group puts each event into tumbling and sliding windows by that event time, keeps a window open until the
+  watermark (the point up to which it assumes all events have arrived) passes its end plus a grace period, and writes
+  the aggregates to Postgres as upserts, so a replay overwrites instead of duplicating. Every part sends metrics, logs
+  and traces to an OpenTelemetry collector, and an alert fires on consumer lag.
+learn:
+  - name: Partitions and consumer groups
+    ref: de-zoomcamp
+  - name: Event time and watermarks
+    ref: ddia
+  - name: Effectively-once output
+  - name: Distributed tracing
+    ref: opentelemetry-docs
+  - name: Lag alerting
+    ref: prometheus-docs
+stats:
+  - value: 1,000,000
+    label: events, exact counts after a consumer kill
+  - value: < 2 min
+    label: lag alert after consumers stop
+  - value: '6'
+    label: partitions in the input topic
+components:
+  - id: producers
+    name: Producers
+    role: Emit keyed events with event-time stamps, some out of order and some late.
+    tech: Python · confluent-kafka
+    talksTo: [topic]
+    kind: core
+  - id: topic
+    name: Kafka topic
+    role: Stores the events in six partitions, in order within each partition.
+    tech: Kafka (KRaft)
+    talksTo: [processor]
+    kind: core
+  - id: processor
+    name: Stream processor
+    role: A consumer group that assigns events to windows by event time and emits aggregates.
+    tech: Kafka Streams, Flink or Python
+    talksTo: [sink]
+    kind: core
+  - id: sink
+    name: Postgres sink
+    role: Holds one row per window and key, written as an upsert.
+    tech: Postgres
+    talksTo: []
+    kind: core
+  - id: collector
+    name: OTel collector
+    role: Receives metrics, logs and spans from every component and forwards them.
+    tech: OpenTelemetry collector
+    talksTo: [metrics, tracing]
+    kind: offline
+  - id: metrics
+    name: Metrics and alert
+    role: Scrapes consumer lag and pipeline metrics, draws dashboards and fires the lag alert.
+    tech: Prometheus · Grafana · kafka-exporter
+    talksTo: []
+    kind: offline
+  - id: tracing
+    name: Trace store
+    role: Shows one event's path from producer to sink as a single trace.
+    tech: Jaeger or Tempo
+    talksTo: []
+    kind: offline
+  - id: killtest
+    name: Kill test
+    role: Sends a known set of events, kills a consumer mid-run and checks every window exactly.
+    tech: Python script
+    talksTo: [producers]
+    kind: offline
+flow:
+  - component: producers
+    text: >-
+      send an event with `key`, `event_time` and `value`, with the trace context in the message headers.
+  - component: topic
+    text: hashes the key to one of `6` partitions, so all events for a key stay in order on one consumer.
+  - component: processor
+    text: >-
+      adds the event to its tumbling and sliding windows by `event_time`, closes a window once the **watermark**
+      passes its end plus the grace period, and counts later events in `late_events_total`.
+  - component: sink
+    text: >-
+      upserts the aggregate on `(key, window_start, window_kind)`; the processor commits its offsets only **after**
+      the write is durable.
+  - component: collector
+    text: gathers each component's metrics and spans, so one trace runs from producer to sink.
+  - component: metrics
+    text: watches lag from kafka-exporter and fires the alert within two minutes of the consumers stopping.
+  - component: killtest
+    text: >-
+      sends 1,000,000 known events, kills a consumer mid-run, restarts it, and checks every window's count and sum
+      match exactly.
+interface:
+  lang: sql
+  code: |
+    INSERT INTO window_agg
+      (key, window_start, window_kind, cnt, total)
+    VALUES ($1, $2, $3, $4, $5)
+    ON CONFLICT (key, window_start, window_kind)
+    DO UPDATE SET cnt   = EXCLUDED.cnt,
+                  total = EXCLUDED.total;
+decisions:
+  - choice: Upserts keyed by window and key
+    instead: A Kafka transaction with the offsets
+    why: >-
+      The sink is Postgres, outside Kafka, so a Kafka transaction cannot cover the write; an upsert lets the replay
+      after a kill overwrite the same rows, so the 1,000,000-event check comes out exact. Revisit for a Kafka output
+      topic.
+  - choice: Windows by event time with a grace period
+    instead: Windows by processing time
+    why: >-
+      The producers send out-of-order and late events on purpose, and a restart replays old events; only event time
+      puts them back in the same window.
+  - choice: Six partitions
+    instead: One partition
+    why: >-
+      A consumer group can use at most one consumer per partition, so six lets the processor scale to six; the 1, 3,
+      6 and 12 partition runs show where it stops helping.
+watchOut: >-
+  Committing offsets before the output is durable loses data, and committing after without an idempotent write
+  duplicates it. Write the upsert first, then commit the offsets.

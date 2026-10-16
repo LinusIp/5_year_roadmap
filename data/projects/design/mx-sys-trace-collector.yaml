@@ -1,0 +1,125 @@
+overview: >-
+  A single-node collector in Go for Parcelbox's 35 services that keeps every error and slow trace and only a sample of
+  the rest. Spans are grouped by trace id in memory until a trace goes quiet, then a policy decides the whole trace at
+  once; this is tail-based sampling, as opposed to deciding at the first span before you know how it ends. Kept traces
+  go to compact hourly segment files with 24 hours of retention, and a lookup API feeds a waterfall viewer.
+learn:
+  - name: Distributed tracing
+    ref: opentelemetry-docs
+  - name: Tail-based sampling
+  - name: Sharded in-memory state
+  - name: Append-only segments
+  - name: Clock skew
+stats:
+  - value: 100k spans/s
+    label: ingested on one node
+  - value: 100% / < 10%
+    label: error traces kept / all kept
+  - value: < 100 ms
+    label: trace lookup p99
+components:
+  - id: services
+    name: Instrumented services
+    role: The 35 services, sending spans in batches.
+    tech: Tracing SDK
+    talksTo: [ingest]
+    kind: external
+  - id: ingest
+    name: Ingest endpoint
+    role: Decodes span batches and routes each span to a shard by trace id.
+    tech: Go · protobuf over TCP
+    talksTo: [assembler]
+    kind: core
+  - id: assembler
+    name: Trace assembler
+    role: Collects open traces per shard and closes one after 10 s without new spans.
+    tech: 16 goroutine shards
+    talksTo: [policy]
+    kind: core
+  - id: policy
+    name: Policy engine
+    role: Keeps or drops a finished trace and remembers the decision.
+    tech: Go
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Trace store
+    role: Writes kept traces to hourly segment files with a sorted id index.
+    tech: Segment files · zstd
+    talksTo: [lookup]
+    kind: core
+  - id: lookup
+    name: Lookup API
+    role: Finds a trace by id through the hourly indexes and returns its spans.
+    tech: Go net/http
+    talksTo: [viewer]
+    kind: core
+  - id: viewer
+    name: Waterfall viewer
+    role: Draws spans as nested bars on a time axis.
+    tech: HTML · SVG
+    talksTo: []
+    kind: core
+  - id: loadgen
+    name: Load generator
+    role: Generates synthetic call graphs with injected errors and slowness.
+    tech: Go
+    talksTo: [ingest]
+    kind: offline
+flow:
+  - component: ingest
+    text: >-
+      decodes a batch of up to 512 spans and sends each to shard `hash(trace_id) % 16`, so a shard owns its traces
+      with no locks.
+  - component: assembler
+    text: >-
+      appends the span to its open trace; a trace closes after **10 s** with no new span, or early at 10,000 spans,
+      which bounds memory to about 1 million open spans.
+  - component: policy
+    text: >-
+      keeps the trace if any span has `error = true`, if the root took over 2 s, or if `hash(trace_id)` falls in a 5%
+      sample; the decision is cached for 5 minutes so late spans follow it.
+  - component: store
+    text: >-
+      appends kept traces to the current hour's segment and adds `trace_id → offset` to that hour's index; the oldest
+      hour is deleted after 24 h.
+  - component: lookup
+    text: >-
+      serves `GET /traces/{id}` by binary search in up to 24 sorted indexes and one read, well under 100 ms.
+  - component: viewer
+    text: >-
+      draws the waterfall, clamping a child span inside its parent when the services' clocks disagree.
+interface:
+  lang: protobuf
+  code: |
+    // length-prefixed batches over TCP
+    message Span {
+      bytes  trace_id  = 1;  // 16 bytes
+      bytes  span_id   = 2;  // 8 bytes
+      bytes  parent_id = 3;  // empty for the root
+      string service   = 4;
+      string name      = 5;
+      int64  start_ns  = 6;
+      int64  dur_ns    = 7;
+      bool   error     = 8;
+    }
+    message SpanBatch { repeated Span spans = 1; }
+decisions:
+  - choice: Tail-based sampling
+    instead: Head-based sampling at the first span
+    why: >-
+      Keeping 100% of error traces needs to know how the trace ended. The cost is holding about 10 s of spans in
+      memory, which at 100k spans/s fits one node.
+  - choice: Close a trace after 10 s of quiet
+    instead: Close it when the root span ends
+    why: >-
+      Async children can finish after their root, so closing on the root drops spans. Measure trace completeness and
+      shorten the window if most traces are done in 2 s.
+  - choice: Own segment files
+    instead: A database such as Cassandra or ClickHouse
+    why: >-
+      Traces are written once, read by id and deleted by the hour after 24 h. Append-only files with a sorted index do
+      all of that on one node with nothing else to run.
+watchOut: >-
+  Spans arriving after a trace was decided are easy to lose or to store as a broken second trace. Keep the per-trace
+  decision cache and apply it to late spans, and count how many arrive late.

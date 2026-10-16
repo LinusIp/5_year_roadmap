@@ -1,0 +1,56 @@
+overview: >-
+  A study of how to pick the scale that maps a tensor into fp8's narrow range (e4m3 tops out at 448) for linear
+  layers, comparing one scale per tensor, one per row, and delayed scaling, which reuses the max seen over the last
+  few steps. Real activations from 3 layers are quantized each way, the relative error is tabled, and real fp8
+  matmuls are timed where the GPU supports them.
+learn:
+  - name: FP8 formats e4m3 and e5m2
+    ref: nvidia-modelopt
+  - name: Scaling granularity
+  - name: Delayed scaling and amax
+  - name: Relative error
+components:
+  - id: capture
+    name: Activation capture
+    role: Saves real inputs and weights of 3 linear layers from a forward pass.
+    tech: PyTorch forward hooks
+    talksTo: [scaler]
+    kind: core
+  - id: scaler
+    name: Scale strategies
+    role: Computes per-tensor, per-row and delayed (amax history) scales.
+    tech: PyTorch
+    talksTo: [fp8mm]
+    kind: core
+  - id: fp8mm
+    name: FP8 matmul
+    role: Emulates fp8 by casting with the scale, and runs a real fp8 matmul when the GPU has one.
+    tech: torch.float8_e4m3fn · torch._scaled_mm
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Error table
+    role: Tables relative error and time per strategy and layer, and names a default.
+    tech: pandas
+    talksTo: []
+    kind: core
+flow:
+  - component: capture
+    text: runs a few batches and saves the inputs of an attention projection, an MLP up and an MLP down layer.
+  - component: scaler
+    text: >-
+      sets `scale = 448 / amax`, where `amax` is the largest absolute value of the whole tensor, of each row, or the
+      max over the last 16 steps for **delayed** scaling.
+  - component: fp8mm
+    text: casts both operands to `e4m3`, multiplies, divides out the scales and compares with the fp16 result.
+  - component: report
+    text: fills `‖Y_fp8 - Y_fp16‖ / ‖Y_fp16‖` for 3 strategies on 3 layers and adds timings if real fp8 ran.
+decisions:
+  - choice: Emulate first, then run real fp8
+    instead: Only real fp8 kernels
+    why: >-
+      Casting to fp8 and back gives the same rounding on any GPU, so the error table can be built without fp8
+      hardware. Real kernels are only needed for the speed column.
+watchOut: >-
+  A short amax history in delayed scaling misses a spike that arrives later; values above the scale clip to 448 and
+  the error jumps. Test with a batch that has a larger outlier than the history saw.

@@ -1,0 +1,112 @@
+overview: >-
+  An ESP32 in each greenhouse runs one control cycle every second: read four sensor nodes, compare air temperature
+  with the day or night setpoint, and drive the roof vent, fogger and heater. A PID (a controller that reacts to
+  the error, its sum over time and its rate of change) moves the vent, while hysteresis (a dead band so a relay does
+  not flick on and off) switches the heater and fogger. Safety interlocks sit between the controller and every
+  output, and a laptop thermal simulator closes the loop before any hardware is wired.
+learn:
+  - name: PID with anti-windup
+    ref: brian-douglas-control
+  - name: Hysteresis control
+  - name: Fixed-period RTOS tasks
+    ref: making-embedded-systems
+  - name: Fail-safe interlocks
+  - name: Lumped thermal model
+    ref: feedback-systems
+stats:
+  - value: ±1.5 °C
+    label: from setpoint over 24 h
+  - value: < 50 ms
+    label: jitter on a 1 s loop
+  - value: < 5 s
+    label: state restored after a power cut
+components:
+  - id: sensors
+    name: Sensor nodes
+    role: Four SHT31 and soil-moisture nodes per greenhouse report temperature, humidity and moisture.
+    tech: SHT31 · RS-485
+    talksTo: [drivers]
+    kind: external
+  - id: drivers
+    name: Sensor drivers
+    role: Polls each node over I2C or RS-485, checks CRC and age, and marks stale readings.
+    tech: C++ · ESP-IDF
+    talksTo: [controller]
+    kind: core
+  - id: schedule
+    name: Setpoint manager
+    role: Holds the day/night schedule and gives the controller the current setpoint.
+    tech: C++ · NVS flash
+    talksTo: [controller]
+    kind: core
+  - id: controller
+    name: PID + hysteresis
+    role: Turns the averaged temperature and setpoint into a vent position and heater and fogger requests.
+    tech: C++ · FreeRTOS task
+    talksTo: [interlocks]
+    kind: core
+  - id: interlocks
+    name: Safety interlocks
+    role: Enforces min on/off times and forces vents open and heater off on sensor disagreement or timeout.
+    tech: C++ · watchdog
+    talksTo: [actuators, logger]
+    kind: core
+  - id: actuators
+    name: Vent and relays
+    role: The 12 V vent gear motor and fused relays for the fogger and heater.
+    tech: Relay board · gear motor
+    talksTo: []
+    kind: external
+  - id: logger
+    name: Web UI and logger
+    role: Writes readings and actuator states to SD and serves the setpoint page over Wi-Fi.
+    tech: ESP32 HTTP server · SD
+    talksTo: []
+    kind: offline
+  - id: sim
+    name: Thermal simulator
+    role: First-order greenhouse model with solar gain and vent loss that stands in for the real house in tests.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: drivers
+    text: wakes on the 1 s tick, reads all four nodes and drops any reading older than `2 s` or failing its CRC.
+  - component: schedule
+    text: returns the setpoint for this time of day, for example `24 °C` by day and `17 °C` at night.
+  - component: controller
+    text: runs the PID on the mean temperature to set vent opening, and **freezes the integrator** when the vent is fully open.
+  - component: controller
+    text: switches the heater on below `setpoint − 1 °C` and off above `setpoint`, and the fogger the same way on humidity.
+  - component: interlocks
+    text: blocks any relay change inside its `min_on`/`min_off` time and, if two sensors differ by more than `3 °C`, opens vents and cuts the heater.
+  - component: interlocks
+    text: hands the final outputs to the actuators and the logger, then saves setpoint and mode to flash so a reboot resumes in under `5 s`.
+interface:
+  lang: c
+  code: |
+    typedef struct {
+      float air_c[4], rh[4], soil[4];
+      uint32_t age_ms[4];
+    } readings_t;
+
+    typedef struct {
+      uint8_t vent_pct;   /* 0..100 */
+      bool heater, fogger;
+      uint8_t fault;      /* bit flags */
+    } outputs_t;
+
+    void control_step(const readings_t *in,
+                      float setpoint_c,
+                      outputs_t *out);
+decisions:
+  - choice: PID on the vent, hysteresis on relays
+    instead: PID on every output
+    why: A relay cannot sit at 40 percent, and PWM on a mains relay wears it out within weeks. The vent motor can hold any position, so it gets the PID.
+  - choice: Simulator before hardware
+    instead: Tune on a real greenhouse
+    why: A 24 h day runs in minutes on a laptop, and a bad gain cannot cook tomatoes. Retune on site once real step responses are logged.
+  - choice: Fixed 1 s FreeRTOS task
+    instead: Arduino loop with delay()
+    why: The 50 ms jitter target needs a timer-driven task; Wi-Fi and SD writes would otherwise stretch the loop.
+watchOut: Without minimum on/off times the heater relay chatters around the setpoint and wears out its contacts. Set min_on and min_off before tuning anything else.

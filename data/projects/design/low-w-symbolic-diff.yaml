@@ -1,0 +1,53 @@
+overview: >-
+  Expressions stored as trees of number, variable, sum, product, power and function nodes, a differentiator that
+  applies the rules including the chain rule, and a simplifier that rewrites until nothing changes, checked
+  against numeric derivatives.
+learn:
+  - name: Expression trees
+    ref: sicp
+  - name: Chain rule
+    ref: mit-18-01
+  - name: Rewrite to fixed point
+components:
+  - id: ast
+    name: Expression tree
+    role: Immutable node classes with structural equality.
+    tech: Python dataclasses
+    talksTo: [diff]
+    kind: core
+  - id: diff
+    name: Differentiator
+    role: Returns the derivative tree for each node type.
+    tech: Python
+    talksTo: [simplify]
+    kind: core
+  - id: simplify
+    name: Simplifier
+    role: Applies rules such as `x*1 → x` and `0+x → x` until the tree stops changing.
+    tech: Python
+    talksTo: [check]
+    kind: core
+  - id: check
+    name: Numeric check
+    role: Compares with central differences at 100 random points.
+    tech: Python · math
+    talksTo: []
+    kind: core
+flow:
+  - component: ast
+    text: holds `sin(x^2)` as `Func("sin", Pow(Var("x"), Num(2)))`, immutable so equal subtrees compare directly.
+  - component: diff
+    text: turns it into `cos(x^2) * (2 * x^1 * 1)` by the chain rule.
+  - component: simplify
+    text: rewrites to `2 * x * cos(x^2)`, repeating passes until no rule fires, with a cap of 50 passes.
+  - component: check
+    text: evaluates the result at random `x` and compares with `(f(x+h) − f(x−h)) / 2h`, requiring agreement within 1e-6.
+decisions:
+  - choice: Rules that only shrink the tree
+    instead: Any algebraic rewrite, such as expanding products
+    why: >-
+      If every rule makes the tree smaller, the loop must end. Expansion rules can undo each other and loop
+      forever.
+watchOut: >-
+  Product and chain rules double the tree at every level, so derivatives blow up without simplification after
+  each step. Simplify as you go, not only at the end.

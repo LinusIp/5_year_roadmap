@@ -56,8 +56,8 @@ test.describe('with the clock on the plan’s first day', () => {
     await row.focus();
     await page.keyboard.press('Enter');
     const sheet = page.getByRole('dialog', { name: BUILD.title });
-    // A weekly build reads like a tech doc: brief, approach, done when, measure, pitfalls.
-    for (const heading of [/^Approach · \d+ steps$/, /^Done when$/, /^Measure and report$/, /^Pitfalls$/]) await expect(sheet.getByRole('heading', { name: heading })).toBeVisible();
+    // A weekly build reads like a tech doc: goal, approach, done when, measure, pitfalls.
+    for (const heading of [/^Approach$/, /^Done when$/, /^Measure$/, /^Pitfalls$/]) await expect(sheet.getByRole('heading', { name: heading })).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(sheet).toHaveCount(0);
     await expect(row).toBeFocused();
@@ -128,7 +128,7 @@ test.describe('with the clock on the plan’s first day', () => {
     const steps = sheet.getByRole('checkbox');
     await steps.first().click();
     await expect(steps.first()).toBeChecked();
-    await expect(sheet.getByText(/^1 of \d+ steps ticked$/)).toBeVisible();
+    await expect(sheet.getByText(/^1 of \d+ steps$/)).toBeVisible();
     await sheet.getByRole('button', { name: 'Work on it now' }).click();
     await expect(sheet).toHaveCount(0);
     await expect(page.locator('#now-title')).toHaveText(BUILD.title);

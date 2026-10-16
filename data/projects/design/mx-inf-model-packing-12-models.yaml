@@ -1,0 +1,109 @@
+overview: >-
+  A planner that moves Dovetail Docs' 12 models, each idling at 10-25% on its own GPU, onto 5 GPUs or fewer without
+  latency incidents. It profiles every model's memory and latency by batch size, measures how much co-located pairs
+  slow each other down, and hands both to a constraint solver that packs models under memory headroom and p99
+  limits. A load test on rented GPUs then checks the plan before anyone trusts it.
+learn:
+  - name: Bin packing
+  - name: Constraint solvers
+  - name: GPU sharing (MPS, MIG)
+    ref: cuda-guide
+  - name: Interference measurement
+  - name: Tail latency
+    ref: google-sre-book
+stats:
+  - value: ≤ 5
+    label: GPUs, down from 12
+  - value: ≤ 1.3×
+    label: p99 vs isolated, every model
+  - value: ≥ 15%
+    label: memory headroom per GPU
+components:
+  - id: profiler
+    name: Model profiler
+    role: Records weights, peak memory, GPU busy time and p99 latency per batch size for each of the 12 models.
+    tech: PyTorch · NVML
+    talksTo: [interfere]
+    kind: core
+  - id: interfere
+    name: Interference tester
+    role: Runs each pair of models together under their own traffic and measures each one's p99 slowdown.
+    tech: Python · MPS
+    talksTo: [slowdown]
+    kind: core
+  - id: slowdown
+    name: Slowdown model
+    role: Predicts a model's p99 on a GPU from the pairwise matrix and its neighbours' traffic peaks.
+    tech: Python · numpy
+    talksTo: [planner]
+    kind: core
+  - id: planner
+    name: Packing planner
+    role: Assigns models to the fewest GPUs subject to memory, headroom and slowdown limits.
+    tech: OR-Tools CP-SAT
+    talksTo: [validator]
+    kind: core
+  - id: validator
+    name: Plan validator
+    role: Deploys one planned GPU at a time under replayed traffic and checks every model's p99.
+    tech: Python · load generator
+    talksTo: [gpus]
+    kind: core
+  - id: gpus
+    name: Rented GPUs
+    role: One or two GPUs where profiling, pair tests and validation run.
+    tech: 1–2 GPUs
+    talksTo: []
+    kind: external
+flow:
+  - component: profiler
+    text: >-
+      measures, for example, the 7B generator at about 14 GB of weights plus its KV cache, and a classifier at under
+      1 GB, with p99 at batch 1, 8 and 32.
+  - component: interfere
+    text: >-
+      runs every pair together with MPS (NVIDIA's service that lets kernels from different processes share the GPU at
+      once) and fills the **interference matrix** of p99 ratios.
+  - component: slowdown
+    text: >-
+      predicts a group's slowdown by adding pairwise effects, a cautious choice, and uses per-second traffic peaks,
+      not averages, so bursts that overlap are counted.
+  - component: planner
+    text: >-
+      solves for the fewest GPUs with `sum(mem) ≤ 0.85 × gpu_mem` and predicted `p99 ≤ 1.3 × isolated` for every
+      model, and also counts load time if a model must move.
+  - component: validator
+    text: >-
+      replays each GPU's planned traffic for 30 minutes and fails the plan if any model's p99 passes **1.3×** its
+      isolated baseline.
+interface:
+  lang: python
+  code: |
+    plan = pack(profiles, matrix,
+                gpu_mem_gb=24, headroom=0.15,
+                max_slowdown=1.3)
+
+    plan.gpus           # 4
+    plan.assign[0]      # ["gen-7b", "embed-s"]
+    plan.assign[1]      # ["ner", "cls-intent",
+                        #  "cls-lang", "extract-a"]
+    plan.pred_p99_ratio["gen-7b"]   # 1.18
+decisions:
+  - choice: Exact solver, not first-fit
+    instead: First-fit decreasing by memory
+    why: >-
+      Twelve models is small enough for CP-SAT to find the true minimum in seconds, and first-fit ignores the latency
+      limit. Switch to a heuristic only if the fleet grows into the hundreds.
+  - choice: MPS sharing, not MIG partitions
+    instead: Hard MIG partitions or plain time slicing
+    why: >-
+      Most of these models are tiny and bursty, so letting kernels overlap (MPS) uses idle compute best. MIG gives
+      strong isolation but needs supported GPUs and fixed slice sizes; use it for the 7B if its p99 suffers.
+  - choice: Measured pairwise interference
+    instead: Assume utilisations simply add up
+    why: >-
+      Two models at 20% each can still slow each other down a lot when they compete for memory bandwidth. Only the
+      matrix shows which pairs to keep apart.
+watchOut: >-
+  Averaged utilisation hides bursts that overlap. Plan from per-second peaks and validate with replayed traffic,
+  because 15% average can still mean two models spiking together at the same moment.

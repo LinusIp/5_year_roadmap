@@ -1,0 +1,108 @@
+overview: >-
+  A capacity calculator that tells Ironwood Bank's platform team how many GPUs a traffic level needs to meet its
+  latency SLO, instead of guessing. It measures how long prefill and decode take on a real server at each batch size,
+  feeds that into a queueing simulation with bursty arrivals and batching, and turns the results into an answer in
+  under a second. Load tests at 50%, 70% and 90% utilisation check that predicted p99 is within 20% of what really
+  happens.
+learn:
+  - name: Queueing theory (M/G/c)
+    ref: mit-6-041
+  - name: Little's law
+    ref: mit-6-041
+  - name: Bursty arrivals
+  - name: Batching and service time
+    ref: batching-effects-gpt
+  - name: Discrete-event simulation
+  - name: Load testing
+stats:
+  - value: ≤ 20%
+    label: p99 error at 50/70/90% load
+  - value: < 1 s
+    label: per calculator answer
+  - value: 3 loads
+    label: validated, plus saturation
+components:
+  - id: server
+    name: Model server
+    role: The real engine whose timings are measured and which load tests hit.
+    tech: vLLM · 1 GPU
+    talksTo: [profiler]
+    kind: external
+  - id: profiler
+    name: Service-time profiler
+    role: Measures prefill time by prompt length and decode step time by batch size.
+    tech: Python · numpy
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Queue simulator
+    role: Simulates c GPUs with batching and bursty arrivals and records p99 for each traffic level.
+    tech: SimPy · scipy
+    talksTo: [calc]
+    kind: core
+  - id: calc
+    name: Capacity calculator
+    role: Interpolates the simulated table to answer how many GPUs for a rate and SLO.
+    tech: Python CLI
+    talksTo: []
+    kind: core
+  - id: mgc
+    name: M/G/c model
+    role: A closed-form queue formula used as a quick check and to explain the curve.
+    tech: scipy
+    talksTo: [calc]
+    kind: offline
+  - id: loadtest
+    name: Load tester
+    role: Drives the server at 50%, 70% and 90% of its capacity and compares measured p99 with the prediction.
+    tech: Locust
+    talksTo: [server]
+    kind: offline
+flow:
+  - component: profiler
+    text: >-
+      fits decode step time as a function of batch size; bigger batches make each step slower but serve more
+      requests, which is why a plain queue formula is not enough.
+  - component: sim
+    text: >-
+      draws arrivals with a measured burstiness (inter-arrival spread larger than a Poisson process) and simulates
+      `c` GPUs, each batching what is waiting.
+  - component: sim
+    text: sweeps rates and GPU counts once and stores p99 for each, so the calculator never runs a slow simulation.
+  - component: calc
+    text: >-
+      answers `rate=40/s, p99 ≤ 2.5 s` with the smallest GPU count that meets it, and warns when utilisation is close
+      to **saturation**, where p99 explodes.
+  - component: calc
+    text: >-
+      is checked by the **load tester**: at 50%, 70% and 90% utilisation measured p99 must sit within `20%` of the
+      prediction.
+interface:
+  lang: shell
+  code: |
+    $ capcalc --rate 40/s --slo-p99 2.5s \
+        --burstiness 1.8 --model llm-8b
+
+    GPUs needed      6   (utilisation 71%)
+    predicted p99    2.1 s  (validated ±20%)
+    with 5 GPUs      p99 9.4 s, near saturation
+    model valid up to 90% utilisation
+decisions:
+  - choice: Simulation calibrated on real timings
+    instead: Closed-form M/G/c alone
+    why: >-
+      M/G/c assumes each server handles one request at a time, but an LLM server batches, which changes service time
+      with load. The formula stays as a sanity check.
+  - choice: Measured burstiness, not Poisson
+    instead: Assume Poisson arrivals
+    why: >-
+      Bank traffic comes in bursts, and bursts raise p99 well above what Poisson predicts at the same average rate.
+      Fit the spread from real logs when they become available.
+  - choice: Precomputed table behind the calculator
+    instead: Simulate on every question
+    why: >-
+      A full sweep takes minutes, and the calculator must answer in under 1 s. Recompute the table when the model or
+      GPU changes.
+watchOut: >-
+  Validating only at low load makes any model look accurate. The interesting errors appear near 90% utilisation, so
+  test there, and state plainly where the model breaks down.

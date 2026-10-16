@@ -1,0 +1,96 @@
+overview: >-
+  A meter add-on that sleeps almost all the time: each pulse from the reed or Hall sensor wakes the MCU for a few
+  microseconds to bump a counter, and a low-power timer wakes it once an hour to store the hour's total. Once a day
+  it checks the last 24 hours for a leak (flow that never drops to zero) and sends one small LoRa packet. Keeping
+  the average current under 15 µA is the whole design problem, because the 2.6 Ah cell must last 8 years.
+learn:
+  - name: Interrupt-driven wake-up
+    ref: making-embedded-systems
+  - name: Low-power state machines
+  - name: Battery life budgets
+  - name: Ring-buffer logging
+  - name: Duty-cycled radio
+stats:
+  - value: < 15 µA
+    label: average current
+  - value: < 0.1 %
+    label: count error over 10,000 pulses
+  - value: ≤ 24 h
+    label: to flag a 2 L/h leak
+components:
+  - id: sensor
+    name: Flow sensor
+    role: Reed switch or Hall sensor that closes once per fixed volume of water.
+    tech: Reed · Hall
+    talksTo: [isr]
+    kind: external
+  - id: isr
+    name: Pulse counter
+    role: Counts filtered pulse edges in a hardware timer, with a small ISR only for overflow and tamper inputs.
+    tech: C · STM32L0 LPTIM
+    talksTo: [fsm]
+    kind: core
+  - id: fsm
+    name: Power state machine
+    role: Moves between STOP, hourly store and daily send, and keeps every peripheral off by default.
+    tech: C
+    talksTo: [log]
+    kind: core
+  - id: log
+    name: Ring-buffer log
+    role: Keeps 30 days of hourly counts (720 slots) in flash or EEPROM.
+    tech: C · EEPROM
+    talksTo: [detector]
+    kind: core
+  - id: detector
+    name: Leak and tamper
+    role: Flags continuous flow over 24 h, magnet attack on the sensor and cover opening.
+    tech: C
+    talksTo: [radio]
+    kind: core
+  - id: radio
+    name: Packet encoder
+    role: Builds the daily packet and sends it, keeping air time under the 1 percent duty limit.
+    tech: C · LoRa module
+    talksTo: []
+    kind: core
+  - id: sim
+    name: Usage simulator
+    role: Replays household profiles with leaks as pulses into the device and into a model.
+    tech: Python · pulse rig
+    talksTo: []
+    kind: offline
+flow:
+  - component: isr
+    text: counts each pulse edge in the low-power timer while the CPU stays asleep; the timer's glitch filter rejects reed bounce shorter than the `20 ms` period of a 50 Hz flow.
+  - component: fsm
+    text: on the hourly low-power timer tick, copies the count since the last hour and goes straight back to STOP mode.
+  - component: log
+    text: writes the hour into slot `hour % 720`, so the oldest hour is overwritten and 30 days are always kept.
+  - component: detector
+    text: once a day checks whether **every one of the last 24 hours** had flow above zero, which marks a leak such as a running toilet.
+  - component: radio
+    text: sends a 16-byte packet with the daily total, lowest and highest hour, leak and tamper flags and battery voltage, then powers the radio off.
+interface:
+  lang: c
+  code: |
+    typedef struct __attribute__((packed)) {
+      uint32_t meter_id;
+      uint16_t day;          /* days since install */
+      uint32_t total_pulses;
+      uint16_t min_hour_l;   /* lowest hour */
+      uint16_t max_hour_l;   /* highest hour */
+      uint8_t  flags;  /* LEAK|MAGNET|COVER|LOWBAT */
+      uint8_t  batt_dv;      /* 0.1 V steps */
+    } daily_pkt_t;           /* 16 bytes */
+
+    uint32_t pulses_read_and_clear(void);
+    void     on_hour_tick(void);
+decisions:
+  - choice: One packet a day
+    instead: Hourly uplinks
+    why: Each LoRa send costs around 40 mA for a second; hourly sends alone would eat most of the 15 µA budget. Raise the rate only if the utility needs faster leak alerts.
+  - choice: Count in a low-power timer
+    instead: Wake the CPU on every pulse
+    why: A hardware counter keeps counting during flash writes, which is where pulses get lost. Fall back to the ISR only on MCUs without a pulse-capable timer.
+watchOut: Even a 1 MΩ pull-up on a closed reed switch draws 3 µA, a fifth of the whole budget. Measure sleep current with the switch both open and closed, and pulse the pull-up if needed.

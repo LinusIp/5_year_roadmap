@@ -1,0 +1,47 @@
+overview: >-
+  A vectorized exp for 8 floats at once with AVX2 (or 4 with NEON), built by range reduction (split x into
+  n·ln2 + r so exp(x) = 2^n · exp(r)) and a short polynomial for exp(r), then used in a row softmax. Error is
+  measured in ULPs (units in the last place) against libm, and speed against a std::exp loop.
+learn:
+  - name: SIMD intrinsics
+    ref: learncpp
+  - name: Range reduction
+  - name: Polynomial approximation
+  - name: ULP error
+components:
+  - id: vexp
+    name: Vector exp
+    role: Range-reduces, evaluates the polynomial and rebuilds 2^n through the exponent bits.
+    tech: C++20 · AVX2 intrinsics
+    talksTo: [softmax]
+    kind: core
+  - id: softmax
+    name: Row softmax
+    role: Finds the row max, calls vexp on x - max, sums and divides.
+    tech: C++20 · AVX2
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Bench
+    role: Sweeps inputs against std::exp for ULP error and times ns per element.
+    tech: C++ · chrono
+    talksTo: []
+    kind: core
+flow:
+  - component: vexp
+    text: computes `n = round(x / ln2)` and `r = x - n·ln2`, so `r` lies in about `[-0.35, 0.35]`.
+  - component: vexp
+    text: evaluates a degree-5 polynomial for `exp(r)` with `_mm256_fmadd_ps`, then multiplies by `2^n` by adding `n << 23` to the float's bits.
+  - component: softmax
+    text: subtracts the row max so all inputs are at most 0, and sets flush-to-zero so tiny results do not slow the loop.
+  - component: bench
+    text: reports max relative error on `[-20, 0]` (target under `1e-6`), ULP histogram and speedup over a `std::exp` loop (target 4x).
+decisions:
+  - choice: Degree-5 polynomial
+    instead: A lookup table with interpolation
+    why: >-
+      Five FMAs per 8 values stay in registers and need no gathers, which are slow on AVX2. Try fewer terms only if
+      the error budget allows it.
+watchOut: >-
+  Very negative inputs give denormal results, which can make each instruction many times slower on some CPUs. Clamp
+  inputs or enable flush-to-zero and denormals-are-zero, and time with them on.

@@ -1,0 +1,96 @@
+overview: >-
+  A 2 m belt runs at a regulated 0.3 m/s past a tag reader and three pusher gates. The controller never looks for a
+  parcel again after the reader: it records the belt encoder count when the parcel passes, adds the known distance to
+  its gate, and fires the pusher when the belt has moved that far, minus the pusher's own delay. A PLC-style state
+  machine (fixed states such as RUN, JAM and STOP, the way factory controllers are written) handles jams, misreads
+  and the E-stop, and a discrete-event simulator feeds it 1,000 parcels before the rig runs.
+learn:
+  - name: Encoder position tracking
+  - name: PLC-style state machines
+  - name: Belt speed PI control
+    ref: brian-douglas-control
+  - name: Actuator latency compensation
+  - name: Discrete-event simulation
+stats:
+  - value: 800 / h
+    label: parcels at 0.3 m/s
+  - value: '> 99 %'
+    label: sorted correctly in 1,000 parcels
+  - value: < 20 ms
+    label: pusher timing error
+components:
+  - id: belt
+    name: Belt speed loop
+    role: PI loop on the gear motor that holds 0.3 m/s from the belt encoder.
+    tech: C++ · motor driver
+    talksTo: [tracker]
+    kind: core
+  - id: reader
+    name: Tag reader
+    role: Barcode or colour sensor at the read station that reports a bin or unknown.
+    tech: Barcode · colour sensor
+    talksTo: [tracker]
+    kind: external
+  - id: tracker
+    name: Parcel tracker
+    role: Keeps a queue of parcels with the encoder count at which each passed the reader and its bin.
+    tech: C++
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Gate scheduler
+    role: Turns each parcel's target count into a pusher fire time, ahead by the pusher delay.
+    tech: C++ · timer
+    talksTo: [pushers]
+    kind: core
+  - id: pushers
+    name: Pusher gates
+    role: Three solenoid or servo pushers into bins A, B and C; the end of the belt is the reject bin.
+    tech: Solenoids · servos
+    talksTo: []
+    kind: external
+  - id: faults
+    name: Fault handler
+    role: State machine for RUN, JAM, REJECT and E-STOP, with a safe stop inside 300 ms.
+    tech: C++ · HMI page
+    talksTo: [belt]
+    kind: core
+  - id: sim
+    name: Parcel simulator
+    role: Generates streams with random spacing, sizes and misreads to test sorting accuracy.
+    tech: Python · SimPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: belt
+    text: holds `0.3 m/s` with a PI loop on encoder speed, so counts per metre stay constant.
+  - component: reader
+    text: reads the tag as the parcel passes and reports `bin = B`, or `unknown` for a misread.
+  - component: tracker
+    text: queues `{id, count_at_read, bin}`; an unknown tag is simply never pushed and rides to the reject bin.
+  - component: scheduler
+    text: fires gate B at `count_at_read + dist_B − v × t_pusher`, so the pusher's `~40 ms` delay is **paid in advance**.
+  - component: faults
+    text: if a parcel does not clear the exit sensor in time it enters `JAM`, stops the belt and lists the queue on the HMI; E-stop stops the belt in under `300 ms`.
+interface:
+  lang: cpp
+  code: |
+    struct Parcel {
+      uint32_t id;
+      int32_t  count_at_read;  // belt encoder
+      uint8_t  bin;            // 0=A 1=B 2=C 3=reject
+    };
+
+    // gate distances from reader, in counts
+    constexpr int32_t GATE[3] = {2400, 4000, 5600};
+
+    void on_tag(uint8_t bin);           // reader ISR
+    void gate_tick(int32_t belt_count); // every 1 ms
+decisions:
+  - choice: Track by encoder counts
+    instead: A presence sensor in front of every gate
+    why: One reader plus counts needs no extra sensors and stays accurate as long as the belt does not slip. Add gate sensors as a check if slip shows up in the jam log.
+  - choice: Unknown tags go to the end of the belt
+    instead: A dedicated reject pusher
+    why: Doing nothing is the fail-safe action, so a misread or a crash never pushes a parcel into the wrong bin. It also saves a fourth pusher.
+watchOut: At 800 parcels an hour on a 0.3 m/s belt, parcels average only about 1.35 m apart and some arrive much closer. Check in the simulator that two parcels can never need the same gate within its cycle time.

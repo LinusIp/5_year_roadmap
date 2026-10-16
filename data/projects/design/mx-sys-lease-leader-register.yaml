@@ -1,0 +1,121 @@
+overview: >-
+  A single replicated register in Go, one feature flag shared by three edge sites, built on leader leases rather than
+  full consensus. A node becomes leader for a numbered epoch once 2 of 3 peers grant it a lease, a promise not to back
+  anyone else for 2 s; writes go to a majority, and the leader answers reads from memory while its lease is safely
+  valid. The design is only correct if clocks drift within a stated bound, so a simulator injects drift and partitions
+  and a checker shows it holds within the bound and breaks beyond it.
+learn:
+  - name: Leader leases
+    ref: mit-6-5840
+  - name: Epochs and fencing
+    ref: ddia
+  - name: Quorum replication
+    ref: ddia
+  - name: Clock drift
+    ref: kleppmann-distributed-systems
+  - name: Linearisability
+    ref: kleppmann-distributed-systems
+stats:
+  - value: < 1 ms
+    label: leader read p99
+  - value: "0"
+    label: violations in 500 partitions
+  - value: < 3 s
+    label: failover
+components:
+  - id: clients
+    name: Site clients
+    role: Read the flag often and change it rarely.
+    tech: HTTP
+    talksTo: [read]
+    kind: external
+  - id: lease
+    name: Lease manager
+    role: Requests, grants and renews 2 s leases with a drift margin.
+    tech: Go · monotonic clock
+    talksTo: [epoch]
+    kind: core
+  - id: epoch
+    name: Epoch logic
+    role: Persists the highest epoch seen and rejects messages from older ones.
+    tech: Go · fsync
+    talksTo: [repl]
+    kind: core
+  - id: repl
+    name: Replication
+    role: Sends each write to followers and acks it once a majority has stored it.
+    tech: Go · TCP
+    talksTo: []
+    kind: core
+  - id: read
+    name: Read path
+    role: Serves reads from the leader under a valid lease, or from followers with a staleness bound.
+    tech: Go
+    talksTo: [lease]
+    kind: core
+  - id: sim
+    name: Simulator
+    role: Runs three nodes with seeded partitions, delays and per-node clock drift.
+    tech: Go · virtual clocks
+    talksTo: [checker]
+    kind: offline
+  - id: checker
+    name: Checker
+    role: Checks each recorded history for linearisability.
+    tech: Go
+    talksTo: []
+    kind: offline
+flow:
+  - component: lease
+    text: >-
+      sends `RequestLease(epoch=8)` to both peers; each grants if it has not promised another node, and keeps that
+      promise for 2 s measured on its own clock from **receipt**.
+  - component: epoch
+    text: >-
+      with 2 of 3 grants, the node fsyncs epoch 8, reads the latest value from a majority, and from then on rejects
+      any message carrying epoch 7.
+  - component: repl
+    text: >-
+      on `PUT /flag` sends `write(epoch=8, version=31, value)` to followers and acks the client once one follower plus
+      itself have stored it.
+  - component: read
+    text: >-
+      on the leader answers from memory while `now < sentAt + 2 s × (1 − 2ρ)`, where ρ is the assumed drift (1%); a
+      follower answers only if it heard from the leader in the last 1 s, tagging the version.
+  - component: lease
+    text: >-
+      if the leader goes silent, grants expire after 2 s and a peer wins epoch 9, so failover completes inside 3 s.
+interface:
+  lang: go
+  code: |
+    const LeaseDur = 2 * time.Second
+    const Drift = 0.01 // assumed max clock rate error
+
+    // leader: count from when the request was SENT,
+    // shrunk by the drift bound on both clocks
+    func (l *Leader) CanRead(now time.Time) bool {
+        safe := LeaseDur * 98 / 100 // 1 - 2*Drift
+        return now.Before(l.sentAt.Add(safe))
+    }
+    // follower: back no other node until
+    // receivedAt + LeaseDur, on its own clock
+    type Grant struct{ Epoch uint64; For time.Duration }
+decisions:
+  - choice: Leader leases, not full consensus
+    instead: A Raft log for one register
+    why: >-
+      One flag that changes rarely does not need a log, snapshots or membership changes. Leases give sub-millisecond
+      local reads; revisit with Raft if the register grows into several keys with ordering between them.
+  - choice: Count the lease from send time
+    instead: Count it from when the grant arrives
+    why: >-
+      A grant can take hundreds of milliseconds over a bad edge link. Counting from arrival would let the leader think
+      it holds the lease after the follower's promise has run out.
+  - choice: Write the clock assumption down
+    instead: Assume synchronised clocks
+    why: >-
+      Leases trade a clock assumption for speed. Running the simulator past the 1% bound and showing the violations
+      makes that trade visible instead of hidden.
+watchOut: >-
+  After an epoch change the old leader may still believe its lease is valid and serve a stale read. Keep its margin
+  strict, check that the epoch is current before every read, and test exactly that case in the simulator.

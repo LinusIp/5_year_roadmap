@@ -1,0 +1,117 @@
+overview: >-
+  A kiosk app that draws one sofa mesh with a Blinn-Phong shader and swaps its fabric and leg textures when a
+  customer taps a swatch. The chosen configuration is a plain data object, so the touch UI only edits data and the
+  renderer only reads it. Every frame renders into an offscreen framebuffer, so the exported PNG is exactly the
+  picture on screen, written next to a JSON order line.
+learn:
+  - name: Blinn-Phong shading
+    ref: learnopengl
+  - name: Vertex and index buffers
+    ref: learnopengl
+  - name: sRGB and linear colour
+    ref: rtr4
+  - name: Orbit camera maths
+    ref: gamemath-3d-primer
+  - name: Offscreen framebuffers
+    ref: learnopengl
+stats:
+  - value: < 16.6 ms
+    label: frame time at 1080p (60 FPS)
+  - value: < 100 ms
+    label: swatch tap to new image
+  - value: 0 px
+    label: export vs screen difference
+components:
+  - id: ui
+    name: Kiosk UI
+    role: Shows the 24 fabric, 6 leg and cushion swatches and the orbit, reset and export buttons.
+    tech: pyglet
+    talksTo: [config]
+    kind: core
+  - id: config
+    name: Config state
+    role: Holds the current fabric, leg finish and cushion colour as one immutable dataclass.
+    tech: Python dataclass
+    talksTo: [materials, exporter]
+    kind: core
+  - id: mesh
+    name: Mesh loader
+    role: Parses the sofa OBJ once into vertex and index buffers with checked normals.
+    tech: numpy · moderngl
+    talksTo: [shader]
+    kind: core
+  - id: materials
+    name: Material library
+    role: Keeps all 30 textures uploaded as sRGB textures and binds the chosen ones.
+    tech: moderngl · Pillow
+    talksTo: [shader]
+    kind: core
+  - id: camera
+    name: Orbit camera
+    role: Turns mouse drags into yaw and pitch around the sofa and builds the view matrix.
+    tech: numpy
+    talksTo: [shader]
+    kind: core
+  - id: shader
+    name: Shader pipeline
+    role: Draws the sofa with Blinn-Phong lighting into an offscreen sRGB framebuffer.
+    tech: GLSL 3.3
+    talksTo: [gpu, exporter]
+    kind: core
+  - id: gpu
+    name: Kiosk iGPU
+    role: The 2018-class integrated GPU that runs the shaders and shows the frame.
+    tech: Integrated graphics
+    talksTo: []
+    kind: external
+  - id: exporter
+    name: Exporter
+    role: Reads the framebuffer to a PNG and writes the config as a JSON order line.
+    tech: Pillow · json
+    talksTo: []
+    kind: core
+flow:
+  - component: mesh
+    text: has already built the vertex and index buffers at startup, recomputing normals where the OBJ winding is flipped.
+  - component: ui
+    text: receives a tap on a swatch and replaces the config with `fabric="linen-14"`, nothing else.
+  - component: config
+    text: hands the new object to the renderer, which compares it with last frame's config to see what changed.
+  - component: materials
+    text: binds the already uploaded texture for that fabric, so the swap costs one bind, not a **texture upload**.
+  - component: camera
+    text: supplies the view matrix from the current yaw and pitch; reset sets both back to the front view.
+  - component: shader
+    text: lights the sofa in linear colour and writes into the sRGB framebuffer, which is then blitted to the screen.
+  - component: exporter
+    text: on Export reads the same framebuffer with `fbo.read()` and writes `order.png` plus one JSON line.
+interface:
+  lang: glsl
+  code: |
+    #version 330
+    uniform sampler2D u_fabric;  // sRGB texture
+    uniform vec3 u_light, u_eye; // world space
+    uniform float u_shininess;   // 16 fabric, 64 legs
+    in vec3 v_pos; in vec3 v_n; in vec2 v_uv;
+    out vec4 f_color;
+    void main() {
+      vec3 n = normalize(v_n);
+      vec3 v = normalize(u_eye - v_pos);
+      vec3 h = normalize(u_light + v);
+      float d = max(dot(n, u_light), 0.0);
+      float s = pow(max(dot(n, h), 0.0), u_shininess);
+      vec3 a = texture(u_fabric, v_uv).rgb;
+      f_color = vec4(a * (0.15 + d) + 0.2 * s, 1.0); }
+decisions:
+  - choice: Upload all 30 textures at startup
+    instead: Load each texture when its swatch is tapped
+    why: 30 textures at 1024 px are about 160 MB with mipmaps, which the iGPU's shared memory holds, and a tap then costs one bind instead of a stalling upload. Revisit if the catalogue grows past about 150 swatches.
+  - choice: Render offscreen, then blit
+    instead: Render to the window and re-render for export
+    why: Export reads the very pixels shown, so the zero-difference check passes by construction.
+  - choice: Blinn-Phong, not PBR
+    instead: Physically based shading
+    why: Fabrics are mostly diffuse and a 2018 iGPU must hold 60 FPS at 1080p. Revisit if metal leg finishes look plastic to the sales staff.
+watchOut: >-
+  Colour mismatch is the reason this kiosk exists. Load swatch images as sRGB textures and render into an sRGB
+  framebuffer, or every fabric looks darker than the paper sample.

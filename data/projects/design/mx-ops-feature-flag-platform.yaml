@@ -1,0 +1,93 @@
+overview: >-
+  A feature flag platform so Bloom Fitness can switch a feature off without a redeploy. A control plane stores flags
+  and targeting rules, records every change with an approval for production, and streams updates to SDKs over
+  server-sent events (SSE), a long-lived HTTP connection the server pushes on. Each SDK keeps the rules in memory and
+  evaluates them locally, hashing the flag key with the user ID so the same user always lands in the same rollout
+  bucket, which keeps evaluation under 50 µs and keeps it working when the control plane is down.
+learn:
+  - name: Feature flags
+  - name: Consistent hashing
+    ref: system-design-primer
+  - name: Server-sent events
+  - name: Kill switches
+  - name: Change approval and audit
+  - name: Stale flag cleanup
+stats:
+  - value: < 50 µs
+    label: p99 flag evaluation
+  - value: < 10 s
+    label: kill switch to 99 % of clients
+  - value: "0"
+    label: failed evaluations in an outage
+components:
+  - id: console
+    name: Admin console
+    role: Where engineers create flags, edit rules and request production changes.
+    tech: Web UI
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: Control plane API
+    role: Validates rule changes, enforces approval for production and writes the audit trail.
+    tech: Go · PostgreSQL
+    talksTo: [stream]
+    kind: core
+  - id: stream
+    name: Update stream
+    role: Pushes each new rule-set version to every connected SDK.
+    tech: Go · SSE
+    talksTo: [sdk]
+    kind: core
+  - id: sdk
+    name: SDK
+    role: Caches rules in memory and on disk and evaluates flags locally with no network call.
+    tech: TypeScript · Go
+    talksTo: [engine]
+    kind: core
+  - id: engine
+    name: Rule engine
+    role: Applies targeting rules, then the percentage rollout by hashing flag key and user ID.
+    tech: Library inside the SDK
+    talksTo: []
+    kind: core
+  - id: scanner
+    name: Stale-flag scanner
+    role: Finds flags fully rolled out or unchanged for 30 days and their code references, and opens cleanup reminders.
+    tech: Go · ripgrep
+    talksTo: []
+    kind: offline
+flow:
+  - component: api
+    text: "receives a change setting `new-workout-builder` to `enabled: false` in production, checks the approval and writes it to the audit trail."
+  - component: stream
+    text: pushes rule-set `v418` to every connected SDK; 99 % of clients have it in under 10 s.
+  - component: sdk
+    text: swaps in the new rules atomically and saves them to disk, so after a restart with the control plane down it still has the **last-known** rules.
+  - component: engine
+    text: evaluates `isEnabled("new-workout-builder", user)` from memory; for a 20 % rollout it uses `hash(flag + user_id) % 100 < 20`, so each user's answer is sticky.
+  - component: sdk
+    text: returns the answer in under 50 µs and counts the exposure for experiment metrics.
+interface:
+  lang: typescript
+  code: |
+    const flags = await Flags.init({
+      sdkKey: env.FLAGS_KEY,
+      cachePath: "./.flags-cache.json",
+    });
+
+    const user = { id: "u_51902", plan: "premium",
+                   country: "NL" };
+
+    if (flags.isEnabled("new-workout-builder", user)) {
+      renderNewBuilder();
+    } else {
+      renderOldBuilder();
+    }
+decisions:
+  - choice: Evaluate locally in the SDK
+    instead: Call the flag service for each check
+    why: A network call cannot fit the 50 µs budget and fails during an outage. Local rules with streamed updates give both speed and survival.
+  - choice: Hash-based buckets, not random draws
+    instead: Roll a random number on each evaluation
+    why: A random draw flips a user between old and new on every screen. Hashing flag and user ID is deterministic, as the constraint requires.
+watchOut: Flags that are never removed pile up into tangles where one flag depends on another and nobody dares touch them. Give every flag an owner and an expiry date, and let the scanner nag until the code is deleted.

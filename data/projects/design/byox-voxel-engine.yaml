@@ -1,0 +1,125 @@
+overview: >-
+  Infinite, editable voxel terrain in your own OpenGL renderer, streamed in 32×32×32 chunks around the player. A world
+  manager decides which chunks should exist and queues jobs; worker threads fill chunks from noise and build their
+  meshes with greedy meshing (merging neighbouring faces of the same block type into larger quads). The render thread
+  alone talks to the GPU: it uploads finished meshes, frees chunks that left the view, culls the rest against the
+  camera frustum (the visible pyramid) and draws them.
+learn:
+  - name: Greedy meshing
+  - name: Frustum culling
+    ref: learnopengl
+  - name: Job systems
+    ref: game-engine-architecture
+  - name: Chunk hashing
+  - name: Voxel ray-casting
+stats:
+  - value: ≥ 3×
+    label: fewer triangles than face-culled naive
+  - value: < 33 ms
+    label: worst frame while streaming 2 km
+  - value: 60 FPS
+    label: at 1080p, 12-chunk view
+components:
+  - id: world
+    name: World manager
+    role: Decides which chunks should exist within the view radius and queues jobs by distance.
+    tech: C++20 · hash map
+    talksTo: [workers]
+    kind: core
+  - id: workers
+    name: Worker pool
+    role: Fills each chunk's voxel array from simplex noise.
+    tech: std::thread · job queue
+    talksTo: [mesher]
+    kind: core
+  - id: mesher
+    name: Greedy mesher
+    role: Culls hidden faces against neighbours and merges matching faces into quads.
+    tech: C++20
+    talksTo: [upload]
+    kind: core
+  - id: upload
+    name: Uploader
+    role: On the render thread, uploads finished meshes and frees chunks that left the radius.
+    tech: OpenGL 4.5
+    talksTo: [draw]
+    kind: core
+  - id: draw
+    name: Cull and draw
+    role: Tests chunk bounding boxes against the frustum and draws the visible ones.
+    tech: OpenGL 4.5 · GLFW
+    talksTo: [gpu]
+    kind: core
+  - id: gpu
+    name: GPU
+    role: Holds the chunk vertex buffers and renders the frame.
+    tech: GPU
+    talksTo: []
+    kind: external
+  - id: editor
+    name: Block editor
+    role: Ray-casts from the camera to a block, changes it and re-queues affected chunks.
+    tech: C++20
+    talksTo: [workers]
+    kind: core
+  - id: profiler
+    name: Profiler
+    role: Records frame times, mesh times and worker throughput.
+    tech: Tracy · RenderDoc
+    talksTo: []
+    kind: offline
+flow:
+  - component: world
+    text: >-
+      sees the player cross into a new chunk and queues every missing chunk within `12` chunks, nearest first.
+  - component: workers
+    text: fill the new chunk's `32³` voxel array from noise, off the render thread.
+  - component: mesher
+    text: >-
+      waits until all **six neighbours** have voxel data, culls faces hidden at the borders, merges same-type faces into
+      quads, and returns plain vertex data with no GL calls.
+  - component: upload
+    text: >-
+      uploads a few finished meshes per frame into GPU buffers and frees the chunks that fell out of range.
+  - component: draw
+    text: tests each chunk's bounding box against the six frustum planes and draws only the visible ones.
+  - component: editor
+    text: >-
+      walks a ray voxel by voxel to the block under the crosshair, breaks it, and re-queues its chunk and any
+      neighbour sharing that face, so no crack opens at the border.
+interface:
+  lang: cpp
+  code: |
+    constexpr int N = 32;            // chunk edge
+    using ChunkKey = glm::ivec3;     // chunk coords
+    struct Chunk { uint8_t vox[N][N][N]; };
+
+    struct MeshJob {
+      ChunkKey key;
+      std::array<const Chunk*, 6> neighbours;
+    };
+    struct MeshResult {
+      ChunkKey key;
+      std::vector<Vertex> verts;     // no GL here
+    };
+    void mesh_greedy(const MeshJob& job,
+                     std::vector<Vertex>& out);
+decisions:
+  - choice: GL calls only on the render thread
+    instead: A shared GL context per worker
+    why: >-
+      Workers have no context, and shared contexts are fragile across drivers. Plain vertex data through a queue keeps
+      meshing parallel while uploads stay within the 33 ms frame budget.
+  - choice: 32³ chunks in a hash map
+    instead: One big array or an octree
+    why: >-
+      Infinite terrain needs sparse storage keyed by chunk coordinates, and 32³ is small enough to mesh within a
+      frame's worth of worker time.
+  - choice: Greedy meshing
+    instead: Drawing every exposed face
+    why: >-
+      Face culling alone leaves too many triangles for 60 FPS at a 12-chunk view. Greedy merging should cut them at
+      least 3× on the same terrain.
+watchOut: >-
+  Meshing a chunk before its neighbours exist leaves walls of faces at the borders, and an edit on a border needs the
+  neighbour re-meshed too. Gate meshing on all six neighbours and re-queue both chunks for border edits.

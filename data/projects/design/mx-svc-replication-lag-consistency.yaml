@@ -1,0 +1,114 @@
+overview: >-
+  A read service for Atlas Rentals with one write region and two read regions, where each read says how fresh it
+  must be: strong, bounded to 2 s of staleness, or session (you always see your own edits). Every write returns a
+  **commit position** (the primary's log sequence number), and each region's replica publishes how far it has
+  applied. The service compares the two and serves locally, waits briefly, or forwards to the primary, while probes
+  measure real staleness all the time.
+learn:
+  - name: Consistency models
+    ref: kleppmann-distributed-systems
+  - name: Session guarantees
+    ref: ddia
+  - name: Bounded staleness
+  - name: Commit positions, not clocks
+  - name: Latency emulation with netem
+stats:
+  - value: "0"
+    label: bounded reads over 2 s stale in 10M
+  - value: < 20 ms
+    label: local read p99
+  - value: < 200 ms
+    label: cross-region strong p99
+components:
+  - id: client
+    name: Booking app
+    role: Edits and reads bookings, sending back the position token from its last write.
+    tech: HTTP client
+    talksTo: [tokens, policy]
+    kind: external
+  - id: tokens
+    name: Write path tokens
+    role: Sends each write to the primary and returns its commit LSN to the client as a session token.
+    tech: Go · PostgreSQL
+    talksTo: [primary]
+    kind: core
+  - id: monitor
+    name: Replica monitor
+    role: Tracks each region's applied LSN and the primary time at that LSN, refreshed every 50 ms.
+    tech: Go
+    talksTo: [policy]
+    kind: core
+  - id: policy
+    name: Read mode policy
+    role: Decides per read whether the local replica is fresh enough, whether to wait up to 100 ms, or to forward.
+    tech: Go
+    talksTo: [replica, forwarder]
+    kind: core
+  - id: replica
+    name: Local replica
+    role: The region's read-only PostgreSQL copy.
+    tech: PostgreSQL streaming replica
+    talksTo: []
+    kind: external
+  - id: forwarder
+    name: Forwarder
+    role: Sends strong reads, and reads that cannot be served fresh locally, to the primary region.
+    tech: Go · pgx
+    talksTo: [primary]
+    kind: core
+  - id: primary
+    name: Primary region
+    role: The single write region, reached across emulated 80 ms links.
+    tech: PostgreSQL · netem
+    talksTo: []
+    kind: external
+  - id: prober
+    name: Staleness prober
+    role: Writes a heartbeat row on the primary every second and records when each region sees it.
+    tech: Go
+    talksTo: [primary, replica]
+    kind: offline
+flow:
+  - component: tokens
+    text: returns a `pos` token such as `0/3A1F20` with each write; the client sends it as `X-Read-After` on later reads.
+  - component: monitor
+    text: >-
+      reads `pg_last_wal_replay_lsn()` on each replica and the commit time of the newest replayed heartbeat, so
+      staleness is measured on the **primary's clock**, never by comparing two regions' wall clocks.
+  - component: policy
+    text: >-
+      for `session` reads checks `replay_lsn ≥ pos`; for `bounded` checks the replica is under 2 s behind; if
+      not, it waits up to 100 ms for the replica to catch up.
+  - component: replica
+    text: serves the read locally when the check passes, which keeps local p99 under 20 ms.
+  - component: forwarder
+    text: sends `strong` reads and any read that is still not fresh after the wait to the primary, and counts the forward for the report.
+interface:
+  lang: http
+  code: |
+    GET /bookings/7731?consistency=bounded&max_ms=2000
+    X-Read-After: 0/3A1F20
+
+    200 OK
+    X-Served-By: eu-west-replica
+    X-Staleness-Ms: 340
+    { "id": 7731, "status": "confirmed" }
+decisions:
+  - choice: Positions and primary-clock heartbeats
+    instead: Compare wall-clock timestamps across regions
+    why: >-
+      Clocks in different regions drift by more than the tolerances being tested, so a 2 s bound checked with them
+      cannot be trusted. Positions are exact and heartbeats measure time on one clock.
+  - choice: Short wait, then forward
+    instead: Wait until the replica catches up
+    why: >-
+      Under injected lag a replica can stay behind for many seconds, and waiting forever breaks the latency targets.
+      A 100 ms cap keeps local p99 low; tune it from the forward-rate measurements.
+  - choice: Heartbeat probe every second
+    instead: Probing on every read
+    why: >-
+      One write a second across three regions stays far under 1 percent of capacity while still giving a staleness
+      distribution per region.
+watchOut: >-
+  A cache in front of the read service hides stale reads from every check. Either put the position token in the
+  cache key or measure staleness at the client.

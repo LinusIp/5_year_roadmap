@@ -1,0 +1,71 @@
+overview: >-
+  A sandbox of agents that move by adding up steering forces (seek, flee, arrive, pursue, wander, obstacle avoidance
+  and path following), each capped and blended by priority. Debug lines draw every force, so you can see why an agent
+  turns.
+learn:
+  - name: Steering behaviours
+  - name: Vector maths
+    ref: gamemath-3d-primer
+  - name: Priority blending
+  - name: Fixed timestep
+    ref: gaffer-on-games
+components:
+  - id: behaviours
+    name: Behaviours
+    role: Each turns a goal, a target or the obstacles into a steering force.
+    tech: C++ / Python
+    talksTo: [blender]
+    kind: core
+  - id: blender
+    name: Force blender
+    role: Adds forces in priority order within a maximum force budget.
+    tech: C++ / Python
+    talksTo: [agent]
+    kind: core
+  - id: agent
+    name: Agent motion
+    role: Integrates velocity and position and counts collisions.
+    tech: C++ / Python
+    talksTo: [debug]
+    kind: core
+  - id: debug
+    name: Debug draw
+    role: Draws each force vector, the look-ahead probe and the path.
+    tech: raylib / pygame
+    talksTo: []
+    kind: offline
+flow:
+  - component: behaviours
+    text: returns desired velocity minus current, for example seek is `normalize(target - pos) * maxSpeed - vel`; arrive slows inside a 3 m radius.
+  - component: blender
+    text: adds avoidance first, then path following, then wander, each weighted, and stops when `maxForce` is used up, so **avoidance is never outvoted**.
+  - component: agent
+    text: integrates `vel += force / mass * dt` at a fixed 60 Hz, clamps to `maxSpeed`, and points the heading along the velocity.
+  - component: agent
+    text: counts collisions per minute against obstacle circles; done is a 5-minute run along the path with none.
+interface:
+  lang: cpp
+  code: |
+    struct Agent { Vec2 pos, vel;
+                   float maxSpeed, maxForce; };
+
+    Vec2 seek(const Agent& a, Vec2 target);
+    Vec2 arrive(const Agent& a, Vec2 target,
+                float slowRadius);
+    Vec2 pursue(const Agent& a, const Agent& quarry);
+    Vec2 avoid(const Agent& a, const Obstacles& obs,
+               float lookAhead);
+    Vec2 followPath(const Agent& a, const Path& p,
+                    float predict);
+    // adds forces in order until maxForce is used up
+    Vec2 blendPriority(const Agent& a,
+                       std::span<const Weighted> f);
+decisions:
+  - choice: Priority with a force budget
+    instead: A plain weighted sum of all forces
+    why: >-
+      In a plain sum, wander and path following can outvote avoidance next to a wall, which is where collisions come
+      from. A budget gives avoidance first claim, and tuning becomes an order plus a few weights.
+watchOut: >-
+  Agents overshoot and jitter around their target when speed is not scaled down with distance. Use arrive's slowing
+  radius and watch the debug vectors rather than tuning weights blind.

@@ -1,0 +1,121 @@
+overview: >-
+  One write-ahead log library in Rust for Ironbridge's services: an append-only file of checksummed records that a
+  service writes before changing its state, so after a crash it can replay what it promised. Concurrent appends are
+  batched into one `fdatasync` (group commit), and a caller is acknowledged only once its record is on disk. Recovery
+  reads segments in order and stops cleanly at the first torn record, and a fault-injecting filesystem simulates
+  power loss at 5,000 different points to prove no acknowledged record is ever lost.
+learn:
+  - name: Write-ahead logging
+    ref: cmu-15-445
+  - name: fsync semantics
+    ref: ostep
+  - name: Group commit
+    ref: cmu-15-445
+  - name: Checksummed framing
+  - name: Crash-consistency testing
+    ref: ostep
+stats:
+  - value: ≥ 50k/s
+    label: durable appends on SSD
+  - value: "0"
+    label: acked losses in 5,000 crashes
+  - value: < 2 s
+    label: to recover 1 GB
+components:
+  - id: service
+    name: Calling service
+    role: Appends records from many threads and replays them on restart.
+    tech: Rust
+    talksTo: [format]
+    kind: external
+  - id: format
+    name: Record format
+    role: Frames each record with length, checksum and log sequence number.
+    tech: CRC32C
+    talksTo: [committer]
+    kind: core
+  - id: committer
+    name: Group committer
+    role: One writer thread that writes a batch, syncs once and wakes the waiting callers.
+    tech: Rust · fdatasync
+    talksTo: [segments]
+    kind: core
+  - id: segments
+    name: Segment manager
+    role: Rotates 64 MB segment files and deletes ones below the truncation point.
+    tech: POSIX files
+    talksTo: [disk]
+    kind: core
+  - id: disk
+    name: Filesystem
+    role: Real POSIX files, or the crash simulator behind the same trait.
+    tech: FileSystem trait
+    talksTo: [recovery]
+    kind: external
+  - id: recovery
+    name: Recovery
+    role: Scans segments, verifies every record and cuts off a torn tail.
+    tech: Rust
+    talksTo: []
+    kind: core
+  - id: crashfs
+    name: Crash-simulating filesystem
+    role: Records writes and syncs, then keeps only what a power cut could leave.
+    tech: In-memory FS
+    talksTo: [disk]
+    kind: offline
+flow:
+  - component: format
+    text: >-
+      frames `append(payload)` as `len | crc | lsn | payload`, where the CRC covers the length and LSN too, so a
+      corrupted length cannot pass as valid.
+  - component: committer
+    text: >-
+      adds the record to the open batch; the writer thread writes the batch in one call, runs one `fdatasync`, then
+      returns each caller its **LSN**. At about 1 ms a sync, 50 records a batch already gives 50,000 appends a second.
+  - component: segments
+    text: >-
+      at 64 MB creates `000043.wal`, then fsyncs the new file **and its directory**, so the new name itself survives
+      power loss.
+  - component: recovery
+    text: >-
+      on open, reads segments in LSN order and checks each CRC; at the first short or bad record it truncates there
+      and stops, reading 1 GB at disk speed in under 2 s.
+  - component: crashfs
+    text: >-
+      in tests cuts power at a chosen write, keeps synced bytes and a random, possibly torn and reordered, part of the
+      rest, then checks that every acknowledged LSN replays.
+interface:
+  lang: rust
+  code: |
+    impl<F: FileSystem> Wal<F> {
+        pub fn open(fs: F, dir: &Path)
+            -> Result<(Wal<F>, Lsn)>;   // recovers first
+        /// returns only after the record is synced
+        pub fn append(&self, rec: &[u8]) -> Result<Lsn>;
+        pub fn truncate_before(&self, lsn: Lsn)
+            -> Result<()>;
+        /// yields Result<(Lsn, Vec<u8>)> in LSN order
+        pub fn replay(&self, from: Lsn) -> Replay<'_>;
+    }
+    // on disk, little-endian, per record:
+    // | len u32 | crc32c u32 | lsn u64 | payload |
+decisions:
+  - choice: Group commit
+    instead: One fsync per append
+    why: >-
+      A sync on an SSD takes around a millisecond, so one per append caps you near 1,000 a second. Sharing it across a
+      batch reaches 50,000 while keeping the rule that nothing is acked before it is durable.
+  - choice: Stop at the first invalid record
+    instead: Skip bad records and keep reading
+    why: >-
+      A torn tail is the normal result of a crash, and anything after it was never acked. Skipping could replay records
+      out of order, so truncate and report where.
+  - choice: A filesystem trait with a crash simulator
+    instead: Testing by pulling power on real machines
+    why: >-
+      Real power cuts are slow and hard to repeat. A simulator can try 5,000 crash points in minutes, each repeatable
+      from its seed; a few real power-pull runs then confirm it.
+watchOut: >-
+  Creating, renaming or deleting a segment changes the directory, not the file. Without an fsync on the directory, a
+  freshly rotated segment can vanish after power loss along with every acknowledged record in it.

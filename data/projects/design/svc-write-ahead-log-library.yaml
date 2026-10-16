@@ -1,0 +1,54 @@
+overview: >-
+  An append-only log library: each record is written as length, CRC32 checksum and payload into numbered segment
+  files, fsync policy is configurable, and recovery scans the last segment and truncates a torn tail, tested by
+  killing the process at random points.
+learn:
+  - name: Write-ahead logging
+    ref: cmu-15-445
+  - name: fsync durability
+    ref: ostep
+  - name: Checksums
+  - name: Crash testing
+components:
+  - id: writer
+    name: Appender
+    role: Encodes records, appends to the active segment and acknowledges per the fsync policy.
+    tech: Rust or Go
+    talksTo: [segments]
+    kind: core
+  - id: segments
+    name: Segments
+    role: Files of up to 64 MB named by their first record's offset.
+    tech: Files on disk
+    talksTo: [recovery]
+    kind: core
+  - id: recovery
+    name: Recovery
+    role: On open, validates records in the last segment and cuts off anything after the first bad one.
+    tech: Rust or Go
+    talksTo: []
+    kind: core
+  - id: crasher
+    name: Crash harness
+    role: Kills the writer with SIGKILL at random moments, 1,000 times, and checks acknowledged records.
+    tech: Shell · test binary
+    talksTo: [writer]
+    kind: offline
+flow:
+  - component: writer
+    text: appends `[len u32][crc32 u32][payload]` and, with policy `always`, calls fsync before acknowledging.
+  - component: segments
+    text: roll to a new file at 64 MB, and the directory is fsynced so the new file name survives.
+  - component: recovery
+    text: reads the last segment and truncates at the first record whose length runs past the end or whose CRC fails.
+  - component: crasher
+    text: checks that every acknowledged record survives each crash; throughput is compared for `always`, `batch` and `never`.
+decisions:
+  - choice: Configurable fsync policy
+    instead: Always fsync every record
+    why: >-
+      fsync per record is safe but slow; batching gives far higher throughput with a small loss window. The
+      benchmark makes the trade-off a measured number instead of a guess.
+watchOut: >-
+  `write()` returning does not mean the data is on disk; it may sit in the page cache. Only acknowledge after
+  fsync under the strict policy.

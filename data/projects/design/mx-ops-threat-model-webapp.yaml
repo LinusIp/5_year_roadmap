@@ -1,0 +1,98 @@
+overview: >-
+  A threat model of Pawprint's own multi-tenant booking app, kept as code in the repo so it does not rot after the
+  first review. One Python file describes the app's parts, its data flows and 5 trust boundaries, the lines where
+  data passes between areas you trust differently; pytm generates the data-flow diagram and a STRIDE threat list
+  from it. Each threat is scored with a written method, the top 15 become tracked issues with an owner and a test,
+  and the hospital group's 60-question questionnaire is answered by pointing at that evidence.
+learn:
+  - name: Data-flow diagrams
+  - name: Trust boundaries
+  - name: STRIDE
+  - name: Risk scoring
+  - name: Threat model as code
+stats:
+  - value: ≥ 60
+    label: threats across 5 boundaries
+  - value: "15"
+    label: top risks with owner and test
+  - value: ≥ 90 %
+    label: questionnaire traced to evidence
+components:
+  - id: app
+    name: Sample app
+    role: The small multi-tenant booking app being modelled, with clinics, pet owners and staff.
+    tech: Flask · PostgreSQL
+    talksTo: [model]
+    kind: external
+  - id: model
+    name: Model file
+    role: Lists elements, data flows and the 5 trust boundaries in code, reviewed like any other change.
+    tech: Python · pytm
+    talksTo: [dfd, catalogue]
+    kind: core
+  - id: dfd
+    name: Diagram output
+    role: The generated data-flow diagram a new engineer reviews in under an hour.
+    tech: pytm · Mermaid
+    talksTo: []
+    kind: core
+  - id: catalogue
+    name: Threat catalogue
+    role: STRIDE threats per element and flow, plus threats the team adds by hand.
+    tech: pytm rules · Markdown
+    talksTo: [scoring]
+    kind: core
+  - id: scoring
+    name: Risk scoring
+    role: Scores likelihood and impact with a written reason, and ranks every threat.
+    tech: Python · CSV
+    talksTo: [tracker]
+    kind: core
+  - id: tracker
+    name: Mitigation tracker
+    role: Turns each top-15 risk into an issue with an owner, a mitigation and a verification test.
+    tech: GitHub Issues
+    talksTo: [questionnaire]
+    kind: core
+  - id: questionnaire
+    name: Questionnaire map
+    role: Links each of the 60 questions to the threats, mitigations and tests that answer it.
+    tech: Markdown table
+    talksTo: []
+    kind: offline
+flow:
+  - component: model
+    text: declares a flow such as `Dataflow(browser, api, "booking request")` crossing the **internet** boundary, with `isEncrypted` and `authenticatesSource` set.
+  - component: dfd
+    text: is regenerated in CI, so the diagram always matches the model file.
+  - component: catalogue
+    text: lists threats for that flow under each STRIDE letter, such as **spoofing** a clinic login or **information disclosure** across tenants.
+  - component: scoring
+    text: rates each threat 1 to 5 for likelihood and impact with a one-line reason, so cross-tenant reads rank above a verbose error page.
+  - component: tracker
+    text: opens an issue for each of the top 15 with an owner, the mitigation and the test that will prove it.
+interface:
+  lang: python
+  code: |
+    from pytm import (TM, Boundary, Actor,
+                      Server, Dataflow)
+
+    tm = TM("Pawprint booking")
+    internet = Boundary("Internet")
+    tenant_db = Boundary("Tenant data")
+
+    owner = Actor("Pet owner", inBoundary=internet)
+    api = Server("Booking API")
+    flow = Dataflow(owner, api, "Create booking")
+    flow.protocol = "HTTPS"
+    flow.isEncrypted = True
+
+    tm.process()   # writes DFD and threat list
+decisions:
+  - choice: Model as code in the repo
+    instead: A diagram drawn once in a drawing tool
+    why: A picture drifts from the app within weeks. A file reviewed in pull requests changes with the code and can regenerate the diagram and threats.
+  - choice: STRIDE per element, then a written score
+    instead: A brainstorm of threats ranked by gut feeling
+    why: STRIDE makes sure each flow is checked for all six kinds of threat, which is how you reach 60. A one-line reason per score lets the customer see why one risk outranks another.
+watchOut: Drawing boxes without the data flows between them. Threats live on the flows that cross a trust boundary, so draw every flow before listing a single threat.

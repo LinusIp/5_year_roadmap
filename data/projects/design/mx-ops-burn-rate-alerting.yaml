@@ -1,0 +1,99 @@
+overview: >-
+  Quillpay's two on-call engineers get 140 alerts a week and have stopped trusting the pager. You sort every
+  existing alert into page, ticket or delete, then generate new pages from SLOs using burn rate, how many times faster
+  than allowed the error budget is being spent, checked over a long and a short window at once. Before anything goes
+  live, a replay harness runs the new rules over 30 days of recorded metrics with 12 planted incidents, so the cut to
+  under 25 pages a week is proven without missing a single real one.
+learn:
+  - name: Multi-window burn rates
+    ref: google-sre-book
+  - name: Symptom-based alerting
+    ref: google-sre-book
+  - name: Precision and recall
+  - name: Alertmanager routing
+    ref: prometheus-docs
+  - name: Runbooks
+stats:
+  - value: 140 → < 25
+    label: pages a week
+  - value: 12 of 12
+    label: planted incidents still page
+  - value: < 1 %
+    label: added load on metrics store
+components:
+  - id: audit
+    name: Alert audit
+    role: Scores each of today's alerts by how often it fired and whether anyone acted, and tags it page, ticket or delete.
+    tech: Python · Alertmanager history
+    talksTo: [generator]
+    kind: offline
+  - id: generator
+    name: SLO rule generator
+    role: Turns each SLO file into recording rules and paired fast-burn and slow-burn alerts.
+    tech: Sloth or custom Python
+    talksTo: [prometheus]
+    kind: core
+  - id: prometheus
+    name: Prometheus
+    role: Evaluates the burn-rate rules every 30 s over the recorded or live metrics.
+    tech: Prometheus
+    talksTo: [alertmanager]
+    kind: core
+  - id: alertmanager
+    name: Router
+    role: Groups alerts, routes by severity, escalates unacknowledged pages and holds tickets during quiet hours.
+    tech: Alertmanager
+    talksTo: [oncall]
+    kind: core
+  - id: oncall
+    name: On-call engineer
+    role: Receives a page with the SLO, budget left, a dashboard and the runbook link.
+    tech: Pager · chat
+    talksTo: []
+    kind: external
+  - id: replay
+    name: Replay harness
+    role: Feeds 30 days of synthetic metrics through the rules and scores pages against the 12 planted incidents.
+    tech: Python · promtool
+    talksTo: [report]
+    kind: offline
+  - id: report
+    name: Quality report
+    role: Weekly pages, precision, recall and time to page per alert.
+    tech: Grafana · Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: generator
+    text: reads `checkout.slo.yaml` with a `99.9 %` target and writes a fast alert (burn rate `14.4` over 1 h and 5 m) and a slow one (`6` over 6 h and 30 m).
+  - component: prometheus
+    text: evaluates both rules; a page fires only when the long **and** the short window are both over the threshold, so a brief blip that is already over does not page.
+  - component: alertmanager
+    text: routes `severity=page` to the on-call engineer, escalates to the second person after 10 minutes, and turns `severity=ticket` into a queue item.
+  - component: oncall
+    text: gets one grouped page with the budget left and the runbook link, instead of 30 separate host alerts.
+  - component: prometheus
+    text: runs the same rules in the **replay harness** first, which must page on all 12 incidents and stay under 25 pages a week before the rules ship.
+interface:
+  lang: yaml
+  code: |
+    - alert: CheckoutErrorBudgetFastBurn
+      expr: |
+        slo:sli_error:ratio_rate1h{slo="checkout"}
+          > (14.4 * 0.001)
+        and
+        slo:sli_error:ratio_rate5m{slo="checkout"}
+          > (14.4 * 0.001)
+      for: 2m
+      labels:
+        severity: page
+      annotations:
+        runbook: runbooks/checkout-errors.md
+decisions:
+  - choice: Burn-rate alerts on SLOs
+    instead: Tuned static thresholds per metric
+    why: Static thresholds created most of the 140 weekly alerts. Burn rate pages only when users are hurt fast enough to matter, and a slow-burn rule catches the gradual leaks.
+  - choice: Prove rules on replay before rollout
+    instead: Switch on the new rules and watch for a few weeks
+    why: A missed incident costs far more than a noisy week. Replaying 30 days with 12 known incidents measures recall up front.
+watchOut: Tuning windows until the replay scores perfectly overfits to 12 incidents. Hold back a few planted incidents the tuning never sees and check them last.

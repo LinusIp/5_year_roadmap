@@ -1,0 +1,52 @@
+overview: >-
+  A search library built from scratch: a tokenizer feeds an inverted index (for each term, the list of documents
+  and positions it appears in), queries are ranked with BM25 and phrase matching, and MRR on labelled queries is
+  compared with SQLite FTS5 on the same corpus.
+learn:
+  - name: Inverted index
+  - name: BM25 scoring
+  - name: Phrase queries
+  - name: Mean reciprocal rank
+components:
+  - id: tokenizer
+    name: Tokenizer
+    role: Lower-cases, splits on non-letters and drops stop words, keeping each token's position.
+    tech: Python or Rust
+    talksTo: [index]
+    kind: core
+  - id: index
+    name: Inverted index
+    role: Postings lists of (doc id, positions) per term, plus each document's length.
+    tech: Python or Rust · on-disk file
+    talksTo: [ranker]
+    kind: core
+  - id: ranker
+    name: Ranker
+    role: Scores candidate documents with BM25 and filters phrases by adjacent positions.
+    tech: Python or Rust
+    talksTo: []
+    kind: core
+  - id: eval
+    name: Evaluator
+    role: Runs labelled queries and reports MRR next to an FTS5 baseline.
+    tech: Python · SQLite FTS5
+    talksTo: [ranker]
+    kind: offline
+flow:
+  - component: tokenizer
+    text: turns each document into terms with positions, for example `["write", "ahead", "log"]` at 0, 1, 2.
+  - component: index
+    text: appends `(doc_id, [positions])` to each term's postings list and stores the document length.
+  - component: ranker
+    text: scores a query with BM25 using `k1 = 1.2` and `b = 0.75`, where `b` scales the score by document length against the average.
+  - component: eval
+    text: computes MRR (the mean of 1 / rank of the first correct result) and requires it within **10 percent** of FTS5.
+decisions:
+  - choice: Positions stored in postings
+    instead: Document ids and counts only
+    why: >-
+      Phrase queries need positions, and the index-size cost is part of what this build measures. Drop them only
+      if index size matters more than phrase search.
+watchOut: >-
+  Without length normalisation, long documents win every query just by containing more words. Check that `b` is
+  applied and the average length is computed over the whole corpus.

@@ -1,0 +1,66 @@
+overview: >-
+  Two seed-reproducible map generators on a tile grid: BSP (binary space partitioning: split the map in two again and
+  again, put a room in each piece, then join sibling rooms with corridors) and cellular-automata caves (random fill,
+  then smoothing rules). A flood fill checks every map is fully connected and fixes it if not, tested over 1,000 seeds.
+learn:
+  - name: Binary space partitioning
+  - name: Cellular automata
+  - name: Flood fill
+  - name: Seeded generators
+components:
+  - id: bsp
+    name: BSP generator
+    role: Splits the map into leaves, carves a room in each and joins siblings with corridors.
+    tech: Python / C++
+    talksTo: [connect]
+    kind: core
+  - id: caves
+    name: Cave generator
+    role: Fills random walls and smooths them into caves with neighbour rules.
+    tech: Python / C++
+    talksTo: [connect]
+    kind: core
+  - id: connect
+    name: Connectivity fixer
+    role: Finds separate open regions and tunnels or fills them until one is left.
+    tech: Flood fill
+    talksTo: [batch]
+    kind: core
+  - id: batch
+    name: Seed runner
+    role: Generates 1,000 seeds per generator and records the stats.
+    tech: Python · CSV
+    talksTo: []
+    kind: offline
+flow:
+  - component: bsp
+    text: splits rectangles at 40 to 60% while both halves stay over 8 tiles, carves a room in each leaf, and joins sibling rooms through **door cells** on their edges.
+  - component: caves
+    text: fills 45% of cells with wall using `rng`, then runs 5 passes where a cell becomes wall if 5 or more of its 8 neighbours are walls.
+  - component: connect
+    text: flood-fills each open region, keeps the largest, and either tunnels each other region to its nearest open cell or fills it if under 20 tiles.
+  - component: batch
+    text: records room count, open area and the fraction of seeds disconnected before the fix; done is all 1,000 connected after it.
+interface:
+  lang: python
+  code: |
+    Grid = list[list[int]]   # 0 floor, 1 wall
+
+    def bsp_dungeon(rng: random.Random, w=80, h=50,
+                    min_leaf=8
+                    ) -> tuple[Grid, list[Rect]]: ...
+    def cave(rng: random.Random, w=80, h=50,
+             fill=0.45, passes=5) -> Grid: ...
+    def regions(g: Grid) -> list[set[tuple[int, int]]]:
+        ...
+    def connect(g: Grid, rng: random.Random) -> int:
+        """Returns the number of tunnels added."""
+decisions:
+  - choice: One seeded RNG passed in
+    instead: Calls to the global `random` module
+    why: >-
+      Any other global call, from a library or a debug print, shifts every later number and changes the map. Passing
+      `random.Random(seed)` makes seed 417 give the same map every run, which the 1,000-seed test depends on.
+watchOut: >-
+  Corridors dug straight between room centres cut through other rooms and merge them into odd shapes. Route them
+  between door cells on room edges and only through wall.

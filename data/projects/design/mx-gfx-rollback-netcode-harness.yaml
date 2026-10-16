@@ -1,0 +1,106 @@
+overview: >-
+  Rollback netcode for Ironvale Studios' fighting game, so play feels local on 100 ms links. Each peer runs ahead
+  using a guess of the remote player's input; when the real input arrives and differs, it restores the saved state
+  from that frame and quickly re-simulates up to 8 frames to catch up. A network emulator adds latency, jitter, loss
+  and reordering on loopback, and peers swap hashes of confirmed frames so any desync is caught and saved as a replay.
+learn:
+  - name: Rollback netcode
+    ref: gaffer-on-games
+  - name: Deterministic simulation
+    ref: gaffer-on-games
+  - name: UDP and packet loss
+    ref: stanford-cs144
+  - name: Input prediction
+  - name: State snapshots
+stats:
+  - value: < 4 ms
+    label: to re-simulate 8 frames
+  - value: 0 of 10,000
+    label: matches desync at 150 ms RTT, 5% loss
+  - value: < 3%
+    label: frames corrected at 100 ms RTT
+components:
+  - id: net
+    name: UDP transport
+    role: Sends each frame's packet with the last 8 local inputs and acks.
+    tech: UDP sockets
+    talksTo: [emulator]
+    kind: core
+  - id: emulator
+    name: Network emulator
+    role: Delays, jitters, drops and reorders packets on loopback by a seeded profile.
+    tech: Rust
+    talksTo: [predictor]
+    kind: core
+  - id: predictor
+    name: Input predictor
+    role: Fills missing remote inputs by repeating the last known one and spots wrong guesses.
+    tech: Rust
+    talksTo: [rollback]
+    kind: core
+  - id: rollback
+    name: Rollback engine
+    role: Restores the snapshot of the first wrong frame and re-simulates to the present.
+    tech: Rust
+    talksTo: [snapshots, hash]
+    kind: core
+  - id: snapshots
+    name: Snapshot ring
+    role: Keeps the game state of the last 9 frames in a fixed ring buffer.
+    tech: Rust
+    talksTo: []
+    kind: core
+  - id: hash
+    name: Hash checker
+    role: Hashes each confirmed frame and compares it with the peer's hash every 30 frames.
+    tech: Rust · xxHash64
+    talksTo: [replay]
+    kind: core
+  - id: replay
+    name: Replay tool
+    role: Saves both peers' inputs for a failing session and re-runs it to the first different frame.
+    tech: Rust CLI
+    talksTo: []
+    kind: offline
+flow:
+  - component: net
+    text: sends frame 120's packet carrying the last 8 local inputs, so one lost packet costs nothing.
+  - component: emulator
+    text: holds it for 50 ms ± jitter, drops 5% and reorders some, as set by the seeded profile.
+  - component: predictor
+    text: had guessed the remote input for frames 116 to 120 by repeating 115's; the packet shows frame 117 was really a kick.
+  - component: rollback
+    text: loads the snapshot of frame 117 and re-simulates frames 117 to 120 with the real input, well inside 4 ms.
+  - component: snapshots
+    text: overwrite the oldest slot with each re-simulated frame's state.
+  - component: hash
+    text: hashes frames for which both inputs are now **confirmed**, and a mismatch with the peer's hash saves the session for the replay tool.
+interface:
+  lang: rust
+  code: |
+    pub trait Game {          // deterministic, no clock
+        fn step(&mut self, inputs: [Input; 2]);
+        fn save(&self) -> Snapshot;
+        fn load(&mut self, s: &Snapshot);
+        fn hash(&self) -> u64;
+    }
+    struct InputPacket {      // one UDP packet a frame
+        frame: u32,           // newest frame included
+        inputs: [u16; 8],     // last 8 frames
+        ack: u32,             // newest remote frame
+        hash: Option<(u32, u64)>, // confirmed frame
+    }
+decisions:
+  - choice: Rollback with 2 frames of local delay
+    instead: Delay-based lockstep
+    why: At 100 ms round trip, lockstep must wait about 3 frames each way, which players feel. A 2-frame local delay hides most of the trip and rollback covers the rest, keeping corrections under 3% of frames.
+  - choice: Resend the last 8 inputs in every packet
+    instead: Reliable delivery with acks and resends
+    why: Resending waits a full round trip after a loss. With 8 inputs in each 60 Hz packet, a lost packet is covered by the next one, which matters at 5% loss.
+  - choice: Hash confirmed frames only
+    instead: Compare full states between peers
+    why: Predicted frames differ by design, and full states are large. A 64-bit hash every 30 confirmed frames is a few bytes and finds the desync window.
+watchOut: >-
+  State left out of the snapshot, such as a random seed, an animation timer or a static counter, replays differently
+  after a rollback and desyncs much later. Run a sync test that saves, steps, loads and steps again every frame, and
+  compares the hashes.

@@ -1,0 +1,101 @@
+overview: >-
+  Ticketeer's presale will send about 40 times normal traffic for 20 minutes, and last year the site fell over at 6x.
+  You model that spike, drive the seat-booking funnel with an open-loop load generator, which sends new users at a
+  fixed rate whether or not the site keeps up, and use the USE method (utilisation, saturation and errors for every
+  resource) to find what saturates first. The top 3 bottlenecks are fixed and retested until 2,000 bookings a second
+  hold p99 under 800 ms with zero oversold seats, and a capacity model gives the headroom and the scale-up playbook.
+learn:
+  - name: Open vs closed load models
+  - name: USE method
+  - name: Little's law
+    ref: system-design-primer
+  - name: Row locking
+    ref: ddia
+  - name: Flame graphs
+  - name: Autoscaling
+    ref: kubernetes-tutorials
+stats:
+  - value: 2,000/s
+    label: bookings at p99 < 800 ms
+  - value: "0"
+    label: oversells in 200k attempts
+  - value: < 4 min
+    label: autoscale to target
+components:
+  - id: load
+    name: Load generator
+    role: Replays the presale shape with think times, arriving users at a set rate.
+    tech: k6 · constant-arrival-rate
+    talksTo: [app]
+    kind: external
+  - id: app
+    name: Booking app
+    role: Event page, seat map, hold, pay and confirm, scaled out behind a load balancer.
+    tech: Python · autoscaler
+    talksTo: [redis, db]
+    kind: core
+  - id: redis
+    name: Seat cache
+    role: Caches seat maps and holds short seat reservations with expiry.
+    tech: Redis
+    talksTo: []
+    kind: core
+  - id: db
+    name: Database
+    role: The source of truth for bookings, where a unique constraint makes double-selling impossible.
+    tech: PostgreSQL
+    talksTo: [metrics]
+    kind: core
+  - id: metrics
+    name: Saturation metrics
+    role: CPU, connection pool, lock waits and queue depth for every resource.
+    tech: Prometheus · flamegraphs
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Capacity model
+    role: Turns measured throughput per instance into instances needed, headroom and a scale-up playbook.
+    tech: Python · queueing maths
+    talksTo: []
+    kind: offline
+flow:
+  - component: load
+    text: ramps to `2,000 req/s` of booking traffic in 2 minutes, matching the presale shape, with think times between steps.
+  - component: app
+    text: receives `POST /holds` for one seat and serves the seat map from cache, so the database is not read on every page view.
+  - component: redis
+    text: places a 5-minute hold with `SET seat:… NX EX 300`; a second buyer for that seat gets **seat taken** at once.
+  - component: db
+    text: inserts the booking with a unique key on `(event_id, seat_id)`, so a second buyer for the same seat fails cleanly instead of being oversold.
+  - component: metrics
+    text: show which resource saturates first, for example the connection pool at 100 % with lock waits rising, while CPU is only at 40 %.
+  - component: model
+    text: uses the measured rate per instance and Little's law to set the instance count and **headroom** for the 40x spike.
+interface:
+  lang: javascript
+  code: |
+    export const options = {
+      scenarios: {
+        presale: {
+          executor: 'ramping-arrival-rate',
+          startRate: 50, timeUnit: '1s',
+          preAllocatedVUs: 4000,
+          stages: [
+            { target: 2000, duration: '2m' },
+            { target: 2000, duration: '20m' },
+          ],
+        },
+      },
+      thresholds: { http_req_duration: ['p(99)<800'] },
+    };
+decisions:
+  - choice: Open-loop arrival rate
+    instead: A fixed number of virtual users in a loop
+    why: A fixed user pool waits for slow responses, so the load drops just as the site struggles and hides the queueing that broke it at 6x. Real presale users keep arriving.
+  - choice: Database constraint as the final guard
+    instead: Rely on the Redis hold alone
+    why: A cache can lose a key or race under 2,000 req/s. A unique constraint makes zero oversells a database guarantee, not a hope.
+  - choice: Measure, then fix the top 3
+    instead: Add caching everywhere up front
+    why: Last year's failure point was never measured. Saturation data shows which 3 fixes buy the most, and the others may not matter.
+watchOut: Testing only with warm caches or only cold ones gives the wrong answer. The presale starts cold, so run each test from an empty cache and include the first minutes.

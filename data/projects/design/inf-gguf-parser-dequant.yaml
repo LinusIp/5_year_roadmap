@@ -1,0 +1,58 @@
+overview: >-
+  A reader for a GGUF model file (the format llama.cpp uses) that parses the header, metadata and tensor table, then
+  turns Q8_0 and Q4_0 blocks back into floats. Each block of 32 values stores one fp16 scale and 32 small integers, and
+  the result is compared with the dequantized tensor from the reference runtime.
+learn:
+  - name: Binary file parsing
+  - name: Block quantization
+    ref: llama-cpp
+  - name: Endianness and alignment
+    ref: cmu-15-213
+  - name: Half-precision floats
+components:
+  - id: header
+    name: Header reader
+    role: Reads magic, version, metadata key-values and the tensor table of names, shapes, types and offsets.
+    tech: Python struct or Rust byteorder
+    talksTo: [blocks]
+    kind: core
+  - id: blocks
+    name: Block decoder
+    role: Unpacks Q8_0 and Q4_0 blocks into scale and integer values.
+    tech: NumPy or Rust
+    talksTo: [dequant]
+    kind: core
+  - id: dequant
+    name: Dequantizer
+    role: Multiplies each integer by its block scale and reshapes to the tensor's shape.
+    tech: NumPy or Rust
+    talksTo: [compare]
+    kind: core
+  - id: compare
+    name: Reference check
+    role: Compares with the reference runtime's dequantized output and reports max abs diff.
+    tech: llama.cpp gguf tools
+    talksTo: []
+    kind: core
+flow:
+  - component: header
+    text: >-
+      checks the `GGUF` magic, reads little-endian counts and skips to the data section, aligned to the
+      `general.alignment` value (32 by default).
+  - component: blocks
+    text: >-
+      reads a Q8_0 block as an fp16 `d` then 32 int8; a Q4_0 block as `d` then 16 bytes, each holding two 4-bit values
+      in its low and high nibble.
+  - component: dequant
+    text: computes `x = d · q` for Q8_0 and `x = d · (q - 8)` for Q4_0, then reshapes.
+  - component: compare
+    text: reports max abs diff per format, which should be 0 or within one rounding step of the block scale.
+decisions:
+  - choice: Memory-map the file
+    instead: Read the whole file into memory
+    why: >-
+      Model files are several GB. A memory map lets the reader touch only the tensors it dequantizes, and offsets from
+      the tensor table index straight into it.
+watchOut: >-
+  The block scale is fp16, not fp32, and the nibble order in Q4_0 puts the first 16 values in the low nibbles. Reading
+  either wrong still gives plausible-looking numbers, so check against the reference on the first tensor.

@@ -1,0 +1,46 @@
+overview: >-
+  A sales dataset reshaped into one fact table and a few dimension tables, loaded from Parquet into DuckDB, and
+  queried with ten business questions whose runtimes at 10M rows are compared with one wide denormalised table.
+learn:
+  - name: Star schema
+    ref: de-zoomcamp
+  - name: Columnar storage
+  - name: Window functions
+  - name: Surrogate keys
+components:
+  - id: loader
+    name: Loader
+    role: Generates sales rows and writes fact and dimension Parquet files.
+    tech: Python
+    talksTo: [duckdb]
+    kind: core
+  - id: duckdb
+    name: DuckDB
+    role: Holds `fact_sales` and the date, product and store dimension tables.
+    tech: DuckDB
+    talksTo: [queries]
+    kind: core
+  - id: queries
+    name: Query set
+    role: Ten SQL files, each answering one business question, run and timed by a script.
+    tech: SQL · Python
+    talksTo: []
+    kind: core
+flow:
+  - component: loader
+    text: writes 10M fact rows with integer keys into Parquet, plus one row per product, store and day.
+  - component: duckdb
+    text: reads the files with `read_parquet` and checks that every dimension key is **unique**.
+  - component: queries
+    text: runs questions such as a running monthly total with `SUM(amount) OVER (PARTITION BY store_id ORDER BY month)`.
+  - component: queries
+    text: times each query three times on the star and on the wide table and writes a results table.
+decisions:
+  - choice: Star schema with integer keys
+    instead: One wide denormalised table
+    why: >-
+      Dimensions stay small and easy to correct, and integer joins are cheap in DuckDB. Keep the wide table as the
+      baseline; if it wins a few scans at 10M rows, that is a result worth reporting.
+watchOut: >-
+  A dimension key that appears twice silently duplicates fact rows in every join and inflates totals. Assert that
+  `COUNT(*)` equals `COUNT(DISTINCT key)` after loading.

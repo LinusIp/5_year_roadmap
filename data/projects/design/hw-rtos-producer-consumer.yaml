@@ -1,0 +1,72 @@
+overview: >-
+  Three RTOS tasks on a microcontroller: a high-priority sensor task samples at 1 kHz, a processing task filters the
+  samples, and a low-priority logging task prints over UART; they pass data through queues and share the UART behind
+  a mutex. A GPIO set at send and cleared on receive lets a logic analyzer measure the worst-case queue-to-handler
+  latency over 10 minutes.
+learn:
+  - name: Tasks and priorities
+    ref: making-embedded-systems
+  - name: RTOS queues
+  - name: Priority inversion
+  - name: Logic analyzer timing
+components:
+  - id: sensor
+    name: Sensor task
+    role: Wakes at 1 kHz, reads the ADC and sends each sample to the queue.
+    tech: FreeRTOS / Zephyr · C
+    talksTo: [proc]
+    kind: core
+  - id: proc
+    name: Processing task
+    role: Receives samples, filters them and sends summaries to the logger.
+    tech: FreeRTOS / Zephyr · C
+    talksTo: [logger]
+    kind: core
+  - id: logger
+    name: Logging task
+    role: Prints results over the UART, which it shares through a mutex.
+    tech: FreeRTOS / Zephyr · C
+    talksTo: []
+    kind: core
+  - id: la
+    name: Logic analyzer
+    role: Records the latency pin for 10 minutes and finds the longest pulse.
+    tech: Logic analyzer
+    talksTo: []
+    kind: external
+flow:
+  - component: sensor
+    text: wakes on a timer notification at priority 3, reads the ADC, sets the latency pin high and calls `xQueueSend(q, &s, 0)`, counting drops when full.
+  - component: proc
+    text: blocks in `xQueueReceive` at priority 2, clears the pin as soon as it wakes, keeps a moving average and sends one summary per 100 samples.
+  - component: logger
+    text: runs at priority 1 and prints under the UART mutex; the processing task prints warnings through the same mutex, which is where **priority inversion** can happen.
+  - component: la
+    text: samples the pin at 1 MHz or faster for 10 minutes; the longest high pulse is the worst-case latency in µs.
+interface:
+  lang: c
+  code: |
+    typedef struct { uint32_t t_us; int16_t v; } Sample;
+
+    static QueueHandle_t sample_q;     /* 32 Samples */
+    static SemaphoreHandle_t uart_mx;  /* a mutex */
+
+    void sensor_task(void* arg);  /* prio 3, 1 kHz */
+    void proc_task(void* arg);    /* prio 2 */
+    void log_task(void* arg);     /* prio 1 */
+
+    /* sensor_task: */
+    gpio_set(LAT_PIN);
+    if (xQueueSend(sample_q, &s, 0) != pdPASS) drops++;
+    /* proc_task, right after xQueueReceive: */
+    gpio_clear(LAT_PIN);
+decisions:
+  - choice: A mutex for the UART, not a binary semaphore
+    instead: A binary semaphore guarding the UART
+    why: >-
+      A FreeRTOS mutex lends the holder the priority of whoever waits (priority inheritance). With a plain semaphore the
+      logger can be pre-empted while holding the UART and a higher task waits behind it; swap them once and watch the
+      worst-case latency jump.
+watchOut: >-
+  Timing with printf or the 1 ms RTOS tick hides the microsecond spikes you are looking for. Measure only with the
+  GPIO and the analyzer, and keep printing out of the timed path.

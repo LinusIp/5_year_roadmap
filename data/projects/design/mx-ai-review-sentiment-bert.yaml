@@ -1,0 +1,102 @@
+overview: >-
+  An LLM labels a sample of about 8,000 hotel reviews with a sentiment for each aspect (cleanliness, noise, staff,
+  price), and a small encoder model is fine-tuned on those labels. The cheap encoder then labels all 200k reviews in
+  one bulk run, and the results become weekly trends per hotel. A set of 300 human-labelled reviews, never used in
+  training, tells you whether to trust both the LLM and the encoder.
+learn:
+  - name: Label distillation
+  - name: Fine-tuning an encoder
+    ref: hf-llm-course
+  - name: Multi-label classification
+  - name: Agreement and kappa
+  - name: Class weighting
+stats:
+  - value: ≥ 0.80
+    label: aspect F1 vs humans
+  - value: < 20 min
+    label: 200k reviews on one GPU
+  - value: < $25
+    label: total labelling cost
+components:
+  - id: reviews
+    name: Review export
+    role: The 200k free-text reviews with hotel id and date.
+    tech: CSV
+    talksTo: [labeler, bulk]
+    kind: external
+  - id: labeler
+    name: Label generator
+    role: Prompts the LLM to tag each sampled review per aspect as positive, negative or not mentioned.
+    tech: Python · LLM API
+    talksTo: [finetune]
+    kind: offline
+  - id: checkset
+    name: Human check set
+    role: 300 reviews labelled by hand, used only to measure the LLM and the model.
+    tech: CSV
+    talksTo: []
+    kind: offline
+  - id: finetune
+    name: Fine-tuning script
+    role: Trains a DistilBERT-sized encoder with one 3-way head per aspect.
+    tech: Transformers
+    talksTo: [bulk]
+    kind: offline
+  - id: bulk
+    name: Bulk inference
+    role: Runs the fine-tuned model over every review in large batches.
+    tech: Transformers · GPU
+    talksTo: [aggregator]
+    kind: core
+  - id: aggregator
+    name: Trend aggregator
+    role: Turns labels into weekly share of negative mentions per hotel and aspect.
+    tech: pandas
+    talksTo: [dashboard]
+    kind: core
+  - id: dashboard
+    name: Dashboard data
+    role: The table the operations team charts each week.
+    tech: CSV · Parquet
+    talksTo: []
+    kind: external
+flow:
+  - component: labeler
+    text: samples 8,000 reviews stratified by hotel and star rating and labels them for under $25.
+  - component: finetune
+    text: trains the encoder on those labels with class weights, because "noise" is mentioned far less often than "staff".
+  - component: checkset
+    text: scores the LLM and the fine-tuned model against human labels with per-aspect **F1** and Cohen's kappa (agreement beyond chance).
+  - component: bulk
+    text: labels all 200k reviews in batches of 128, in under 20 minutes on one GPU.
+  - component: aggregator
+    text: writes `hotel, week, aspect, pct_negative, n_mentions` rows, hiding weeks with fewer than 10 mentions.
+interface:
+  lang: python
+  code: |
+    predict(["Lovely staff but the walls are
+              paper thin and street noise all night."])
+
+    [{ "cleanliness": "none",
+       "noise": "negative",
+       "staff": "positive",
+       "price": "none" }]
+decisions:
+  - choice: Distil LLM labels into a small encoder
+    instead: Run the LLM on all 200k reviews
+    why: >-
+      200k LLM calls blow the $25 budget many times over and take hours. The encoder costs nothing per review
+      after training, which is how the < 10% of LLM cost target is met.
+  - choice: One shared encoder with four heads
+    instead: A separate model per aspect
+    why: >-
+      All four aspects read the same sentence, so one pass serves them all and bulk inference stays at one run.
+      Split only if one aspect lags far behind the others.
+  - choice: Keep the 300 human labels out of training
+    instead: Add them to the training data
+    why: >-
+      300 extra labels barely help training, but without them there is no honest score. Grow the check set
+      before growing the training set.
+watchOut: >-
+  If the LLM itself agrees poorly with humans on an aspect, the encoder learns its mistakes. Measure LLM against the
+  check set first and fix the prompt or taxonomy before you fine-tune.

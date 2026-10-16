@@ -1,0 +1,54 @@
+overview: >-
+  A benchmark that runs 50 labelled queries through three retrievers (BM25 keyword search, dense embeddings, and a
+  hybrid that merges both with reciprocal rank fusion) and scores each with recall@5 and MRR. BM25 matches exact
+  words, dense search matches meaning, and fusion combines their ranked lists without tuning score scales.
+learn:
+  - name: BM25 ranking
+  - name: Dense embeddings
+    ref: hf-llm-course
+  - name: Reciprocal rank fusion
+  - name: Recall@k and MRR
+    ref: llm-zoomcamp
+components:
+  - id: qset
+    name: Query set
+    role: Holds 50 queries, each with the ids of the documents that answer it.
+    tech: JSONL
+    talksTo: [bm25, dense]
+    kind: core
+  - id: bm25
+    name: BM25 index
+    role: Ranks documents by keyword overlap weighted by how rare each term is.
+    tech: rank_bm25
+    talksTo: [fusion]
+    kind: core
+  - id: dense
+    name: Dense index
+    role: Ranks documents by cosine similarity of sentence embeddings.
+    tech: sentence-transformers
+    talksTo: [fusion]
+    kind: core
+  - id: fusion
+    name: Fusion and scorer
+    role: Merges the two ranked lists with RRF and scores all three retrievers.
+    tech: Python · pandas
+    talksTo: []
+    kind: core
+flow:
+  - component: qset
+    text: sends one query, with its gold document ids kept aside for scoring.
+  - component: bm25
+    text: tokenizes the query and returns its top 100 documents by **BM25** score.
+  - component: dense
+    text: embeds the query and returns its top 100 documents by cosine similarity.
+  - component: fusion
+    text: gives each document `1 / (60 + rank)` from each list and sums them, then computes `recall@5` and MRR for all three rankings.
+decisions:
+  - choice: Reciprocal rank fusion, not score blending
+    instead: A weighted sum of normalized BM25 and cosine scores
+    why: >-
+      RRF uses only ranks, so it needs no weight tuning, and 50 queries are too few to tune a weight without
+      overfitting. Revisit with a few hundred queries and a held-out split.
+watchOut: >-
+  Gold labels picked by looking at what the dense model retrieves favour that model. Write the gold documents for
+  each query before running any retriever, and report the five worst failures, not only the averages.

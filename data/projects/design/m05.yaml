@@ -1,0 +1,122 @@
+overview: >-
+  Backpropagation written twice. First a scalar engine: each `Value` keeps its number, its gradient, its parents and
+  a small closure that knows its local derivative, and `backward()` sorts the graph topologically (every node after
+  the nodes it depends on) and runs the closures in reverse. Then a vectorised NumPy network, 784 inputs to a hidden
+  layer to 10 classes, whose layers have hand-written forward and backward functions, trained by your own mini-batch
+  SGD to at least 97 % on the MNIST test set. A gradient checker compares every backward with central differences.
+learn:
+  - name: Reverse-mode autodiff
+    ref: karpathy-zero-to-hero
+  - name: Topological sort
+    ref: mit-6-006
+  - name: Softmax cross-entropy
+    ref: d2l
+  - name: Gradient checking
+    ref: stanford-cs231n
+  - name: Weight initialisation
+    ref: d2l
+stats:
+  - value: ≥ 97 %
+    label: MNIST test accuracy
+  - value: < 1e-6
+    label: relative gradient error, 20 expressions
+  - value: '3'
+    label: seeds for the mean accuracy
+components:
+  - id: value
+    name: Value engine
+    role: Builds the graph of scalar operations and fills every `.grad` with one `backward()` call.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: gradcheck
+    name: Gradient tests
+    role: Compares gradients with central differences in float64 and with PyTorch autograd.
+    tech: pytest · PyTorch (tests only)
+    talksTo: [value, layers]
+    kind: offline
+  - id: mnist
+    name: MNIST files
+    role: 60,000 training and 10,000 test images in the raw IDX format.
+    tech: IDX files
+    talksTo: [loader]
+    kind: external
+  - id: loader
+    name: Loader
+    role: Reads the IDX files and scales pixels with the training set's mean and standard deviation.
+    tech: NumPy
+    talksTo: [trainer]
+    kind: core
+  - id: trainer
+    name: Training loop
+    role: Shuffles, batches, runs forward and backward, steps SGD and evaluates each epoch.
+    tech: NumPy
+    talksTo: [layers, curves]
+    kind: core
+  - id: layers
+    name: NumPy layers
+    role: Linear, ReLU and softmax cross-entropy, each with a forward and a hand-written backward.
+    tech: NumPy · float64 for checks
+    talksTo: []
+    kind: core
+  - id: curves
+    name: Curves and runs
+    role: Saves loss and accuracy per epoch and the table of hyperparameter runs.
+    tech: Matplotlib · CSV
+    talksTo: []
+    kind: offline
+flow:
+  - component: value
+    text: >-
+      builds a graph from expressions like `tanh(w * x + b)`, then `backward()` sets the output's grad to 1 and runs
+      each node's closure in reverse topological order, **adding** into `.grad`.
+  - component: loader
+    text: >-
+      reads the IDX files and normalises both splits with the **training** set's statistics, then holds out part of
+      the training set for validation.
+  - component: trainer
+    text: shuffles with a fixed seed and slices a mini-batch of, say, 64 images.
+  - component: layers
+    text: >-
+      run `Linear → ReLU → Linear → softmax-CE`, subtracting each row's maximum before `exp`, then backward returns
+      `dW`, `db` and `dx` for every layer.
+  - component: trainer
+    text: >-
+      updates `W -= lr * dW` and repeats; after each epoch it scores the validation set and writes the curves, and
+      the test set is scored once at the end.
+interface:
+  lang: python
+  code: |
+    class Value:
+        def __init__(self, data, parents=()):
+            self.data, self.grad = data, 0.0
+            self._parents = parents
+            self._backward = lambda: None
+
+        def __mul__(self, other):
+            out = Value(self.data * other.data,
+                        (self, other))
+            def _backward():
+                self.grad += other.data * out.grad
+                other.grad += self.data * out.grad
+            out._backward = _backward
+            return out
+decisions:
+  - choice: Hand-written backward for array layers
+    instead: Running the scalar Value engine on MNIST
+    why: >-
+      A 784 → 128 layer has about 100,000 weights, so one image would build hundreds of thousands of Python objects.
+      Vectorised NumPy runs an epoch in seconds; the scalar engine stays for learning and tests.
+  - choice: Gradient checks in float64
+    instead: Checking in float32
+    why: >-
+      Central differences with a small epsilon lose most of float32's 7 digits to rounding, so a 1e-5 target becomes
+      noise. Check in float64 and train in either.
+  - choice: PyTorch only inside the tests
+    instead: No reference at all, or PyTorch in the model
+    why: >-
+      The rule is no framework in the model, but autograd gives exact gradients to compare with, so a failing test
+      points at your code and not at a badly chosen epsilon.
+watchOut: >-
+  A node used twice must add up gradients from both uses; assigning `=` instead of `+=` gives silently wrong
+  gradients. Also zero every gradient before each step, or they pile up across batches.

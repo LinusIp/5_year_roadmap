@@ -1,0 +1,73 @@
+overview: >-
+  A Rust parser for expressions in the Pratt style: each operator gets a binding power, a number for how tightly it
+  holds its operands, and one loop keeps taking operators while their power beats the current minimum. Every token
+  and AST node carries a byte span, so 40 test expressions print as S-expressions and errors underline the exact
+  source range.
+learn:
+  - name: Pratt parsing
+    ref: crafting-interpreters
+  - name: Binding power
+  - name: Source spans
+  - name: Rust enums
+    ref: rust-book
+components:
+  - id: lexer
+    name: Tokenizer
+    role: Turns source text into tokens, each with a start..end byte span.
+    tech: Rust
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: Pratt parser
+    role: Parses a prefix form, then loops over infix operators by binding power.
+    tech: Rust
+    talksTo: [ast, errors]
+    kind: core
+  - id: ast
+    name: AST
+    role: An Expr enum with spans and a Display impl that prints S-expressions.
+    tech: Rust enum
+    talksTo: []
+    kind: core
+  - id: errors
+    name: Error reporter
+    role: Prints the source line with carets under the offending span.
+    tech: Rust
+    talksTo: []
+    kind: core
+flow:
+  - component: lexer
+    text: scans `1 + 2 * -x` into tokens, each with its byte range `start..end`.
+  - component: parser
+    text: >-
+      calls `expr(0)`, reads a prefix (a number, `-` or `(`), then while the next operator's left power is above
+      `min_bp` recurses with its right power.
+  - component: ast
+    text: >-
+      builds `Binary(+, 1, Binary(*, 2, Neg(x)))` whose span covers the first to last token, and prints
+      `(+ 1 (* 2 (- x)))`.
+  - component: errors
+    text: on an unexpected token, shows the line with `^^^` under its span and names what the parser **expected**.
+interface:
+  lang: rust
+  code: |
+    fn infix_bp(op: &Tok) -> Option<(u8, u8)> {
+        match op {
+            Tok::Plus | Tok::Minus => Some((1, 2)),
+            Tok::Star | Tok::Slash => Some((3, 4)),
+            Tok::Caret => Some((6, 5)), // right-assoc
+            _ => None,
+        }
+    }
+
+    fn expr(&mut self, min_bp: u8)
+        -> Result<Expr, ParseError>;
+decisions:
+  - choice: Pratt loop with a power table
+    instead: Recursive descent with one function per precedence level
+    why: >-
+      A table of binding powers adds an operator in one line, and associativity is just the order of the two powers.
+      For expressions alone either works; recursive descent wins once statements and declarations arrive.
+watchOut: >-
+  Associativity lives in the pair of powers: left-associative `-` needs its right power above its left (1, 2), and
+  swapping them parses `1 - 2 - 3` as `1 - (2 - 3)`. Put such cases in the 40 tests.

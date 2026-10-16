@@ -1,0 +1,105 @@
+overview: >-
+  A weekly batch job that forecasts next week's sales for each of 500 series (25 stores times 20 categories). It
+  fits simple baselines and one global LightGBM model on lag and calendar features, and picks per group of series
+  whichever won a rolling-origin backtest (re-forecasting many past weeks as if they were the future). Each
+  forecast ships with an 80% interval, so buyers can order to the lower or upper edge for perishables.
+learn:
+  - name: Seasonal naive baseline
+  - name: Lag features
+    ref: kaggle-learn
+  - name: Rolling-origin backtest
+  - name: MASE metric
+  - name: Prediction intervals
+stats:
+  - value: < 0.85
+    label: MASE vs seasonal naive
+  - value: 75–85%
+    label: 80% interval coverage
+  - value: < 10 min
+    label: retrain and forecast 500 series
+components:
+  - id: sales
+    name: Sales history
+    role: Daily sales per store and item, with promotions and holidays.
+    tech: CSV · Favorita or M5
+    talksTo: [panel]
+    kind: external
+  - id: panel
+    name: Panel builder
+    role: Aggregates to weekly store-and-category series and adds calendar and promo flags.
+    tech: pandas
+    talksTo: [baselines, gbm]
+    kind: core
+  - id: baselines
+    name: Baselines
+    role: Fits seasonal naive and ETS (exponential smoothing) per series.
+    tech: statsmodels
+    talksTo: [intervals]
+    kind: core
+  - id: gbm
+    name: Global GBM
+    role: One LightGBM model over all 500 series using lags, rolling means and calendar.
+    tech: LightGBM
+    talksTo: [intervals]
+    kind: core
+  - id: backtester
+    name: Backtester
+    role: Replays 12 past forecast origins, scores each model family and keeps residuals.
+    tech: Python
+    talksTo: [intervals]
+    kind: offline
+  - id: intervals
+    name: Interval maker
+    role: Picks the winning model per group and adds an 80% interval from its backtest errors.
+    tech: NumPy
+    talksTo: [exporter]
+    kind: core
+  - id: exporter
+    name: Exporter
+    role: Writes the forecast CSV the ordering team imports.
+    tech: pandas
+    talksTo: [buyers]
+    kind: core
+  - id: buyers
+    name: Ordering team
+    role: Uses the p50 and interval to place next week's orders.
+    tech: CSV
+    talksTo: []
+    kind: external
+flow:
+  - component: panel
+    text: turns daily sales into 500 weekly series and computes `lag_1`, `lag_52` and 4-week means, each shifted so it ends **before** the forecast week.
+  - component: baselines
+    text: forecast every series with seasonal naive (same week last year) and ETS.
+  - component: gbm
+    text: retrains one global model on all series and forecasts the coming week.
+  - component: intervals
+    text: takes the family that won the backtest for each group and sets p10 and p90 from the 10th and 90th percentiles of its past errors.
+  - component: exporter
+    text: writes one row per store, category and week with p10, p50, p90 and the model name.
+interface:
+  lang: csv
+  code: |
+    store,category,week,p10,p50,p90,model
+    S07,leafy_greens,2026-W43,212,248,281,lgbm
+    S07,bakery,2026-W43,530,571,610,ets
+    S12,berries,2026-W43,88,104,131,lgbm
+decisions:
+  - choice: One global LightGBM
+    instead: A separate model per series
+    why: >-
+      500 short weekly series each have little history. A single model shares holiday and promo patterns across
+      them and retrains in about a minute. Revisit for series that behave very differently.
+  - choice: Rolling-origin backtest over 12 weeks
+    instead: One holdout week
+    why: >-
+      A single week says nothing about holidays or promotions. Twelve origins give a MASE you can trust and the
+      residuals the intervals need.
+  - choice: Intervals from backtest errors
+    instead: Each model's own interval formula
+    why: >-
+      LightGBM has no built-in interval. Error quantiles work the same for every family, and the 75–85% coverage
+      target checks them directly.
+watchOut: >-
+  A rolling mean that includes the forecast week leaks the answer into the features. Shift every lag by the
+  forecast horizon and test it on one series by hand.

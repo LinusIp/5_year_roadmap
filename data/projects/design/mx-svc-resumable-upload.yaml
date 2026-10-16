@@ -1,0 +1,121 @@
+overview: >-
+  A chunked upload service for Rigline's inspectors, so a 20 MB photo on a patchy network no longer restarts from
+  zero. The app opens an upload session, sends 1 MB chunks in any order with a checksum each, and after a drop
+  asks which chunks arrived and sends only the missing ones. On completion the service checks the whole-file hash
+  and only then moves the photo to its final key, so a half-assembled file is never visible.
+learn:
+  - name: Resumable upload protocols
+  - name: Checksums and hashes
+  - name: Streaming without buffering
+  - name: Atomic publish
+  - name: Garbage collection of temp data
+stats:
+  - value: "200"
+    label: concurrent 20 MB uploads
+  - value: ≤ 1
+    label: chunk re-sent after a drop
+  - value: 100%
+    label: injected corruption caught
+components:
+  - id: app
+    name: Inspector app
+    role: Splits the photo into chunks, uploads them and resumes after a drop.
+    tech: Mobile app
+    talksTo: [sessions]
+    kind: external
+  - id: sessions
+    name: Session API
+    role: Creates sessions with chunk size and expected hash, and reports which chunks are in.
+    tech: Go · PostgreSQL
+    talksTo: [receiver]
+    kind: core
+  - id: receiver
+    name: Chunk receiver
+    role: Streams each chunk to staging while computing its SHA-256, then compares.
+    tech: Go · io.Copy
+    talksTo: [staging]
+    kind: core
+  - id: staging
+    name: Staging store
+    role: Holds chunks under `staging/{session}/{n}` until assembly.
+    tech: MinIO
+    talksTo: [assembler]
+    kind: core
+  - id: assembler
+    name: Assembler
+    role: Joins chunks in order, checks the full-file hash and copies to the final key.
+    tech: Go · S3 multipart
+    talksTo: [final]
+    kind: core
+  - id: final
+    name: Photo storage
+    role: The only place the inspection app reads photos from.
+    tech: MinIO bucket
+    talksTo: []
+    kind: core
+  - id: cleanup
+    name: Cleanup job
+    role: Deletes sessions and staging data untouched for 24 hours.
+    tech: Go cron
+    talksTo: [staging]
+    kind: offline
+  - id: sim
+    name: Flaky-network sim
+    role: Drops connections, resets mid-chunk and flips bits in 1 percent of chunks.
+    tech: Go · toxiproxy
+    talksTo: [sessions]
+    kind: offline
+flow:
+  - component: sessions
+    text: >-
+      receives `POST /uploads` with size 20,971,520 bytes and the file's SHA-256, and returns an id and a chunk size
+      of 1 MB, so 20 chunks.
+  - component: receiver
+    text: >-
+      takes `PUT /uploads/{id}/chunks/7` with a `Content-SHA256` header and streams it to staging while hashing, never
+      holding the whole chunk in memory.
+  - component: staging
+    text: keeps chunk 7 only if its hash matches; a corrupted chunk is deleted and the app gets `422` to resend it.
+  - component: sessions
+    text: >-
+      after the connection drops, answers `GET /uploads/{id}` with the chunks received, for example 0–11 and 13, so
+      the app re-sends 12 and 14 onwards only.
+  - component: assembler
+    text: on `POST /uploads/{id}/complete` joins the 20 chunks in order and recomputes the full-file hash.
+  - component: final
+    text: >-
+      receives the photo under `photos/{site}/{id}.jpg` only after the hash matches; until then nothing outside
+      staging can see it.
+interface:
+  lang: http
+  code: |
+    PUT /uploads/u_51a/chunks/7
+    Content-Length: 1048576
+    Content-SHA256: 3a7bd3e2360a3d…
+    <1 MB of bytes>
+
+    204 No Content
+
+    GET /uploads/u_51a
+    200 OK
+    { "chunk_size": 1048576, "total": 20,
+      "received": [0,1,2,3,4,5,6,7,8,9,10,11,13] }
+decisions:
+  - choice: Fixed 1 MB chunks
+    instead: One upload per file with HTTP range resume
+    why: >-
+      On a patchy network a 1 MB chunk usually finishes, so a drop costs at most one chunk. Chunks can also be sent
+      in any order or in parallel.
+  - choice: Hash every chunk and the whole file
+    instead: Trust TCP checksums
+    why: >-
+      TCP's 16-bit checksum misses some corruption, and the test injects bit flips into 1 percent of chunks. Per-chunk
+      hashes catch them early, the final hash catches assembly bugs.
+  - choice: Stream chunks to storage
+    instead: Read each chunk into memory first
+    why: >-
+      200 uploads with several chunks in flight would use gigabytes on one VM. Streaming keeps memory per request
+      at the copy buffer.
+watchOut: >-
+  Abandoned sessions quietly fill the disk. Track staging bytes per session and make the cleanup job's deletions
+  show up in a metric, so leaks are visible.

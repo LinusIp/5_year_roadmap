@@ -1,0 +1,116 @@
+overview: >-
+  A small reverse proxy in Rust that sits in front of Meridian Freight's 14 services, so auth, routing, timeouts
+  and retries live in one place. An async accept loop parses each request, matches it against a route table, runs
+  a short middleware chain (JWT check, timeout, retry) and forwards it over a pooled connection to a healthy
+  upstream. The whole config is swapped through one atomic pointer, so a reload never drops a request in flight.
+learn:
+  - name: Reverse proxies
+    ref: system-design-primer
+  - name: Async I/O with tokio
+    ref: rust-book
+  - name: JWT verification
+  - name: Load balancing and health checks
+    ref: bytebytego
+  - name: Hop-by-hop headers
+  - name: Atomic config swap
+stats:
+  - value: < 1 ms
+    label: p99 overhead at 10,000 req/s
+  - value: 20,000 req/s
+    label: on 4 cores
+  - value: "0"
+    label: failed requests on reload
+components:
+  - id: client
+    name: Internal caller
+    role: A service or app calling another service through the gateway with a bearer token.
+    tech: HTTP/1.1
+    talksTo: [listener]
+    kind: external
+  - id: listener
+    name: Listener
+    role: Accepts connections on the tokio runtime and parses each request with hyper.
+    tech: Rust · tokio · hyper
+    talksTo: [router]
+    kind: core
+  - id: router
+    name: Router
+    role: Matches host and longest path prefix to a route and its upstream pool.
+    tech: Rust
+    talksTo: [middleware]
+    kind: core
+  - id: middleware
+    name: Middleware chain
+    role: Verifies the JWT against cached keys, sets the route timeout and decides if a retry is allowed.
+    tech: Rust · jsonwebtoken
+    talksTo: [pool]
+    kind: core
+  - id: pool
+    name: Upstream pool
+    role: Picks a healthy instance by round-robin or least connections and reuses pooled connections.
+    tech: Rust · hyper client
+    talksTo: [upstream]
+    kind: core
+  - id: upstream
+    name: Services
+    role: The 14 freight services, here simulated with configurable latency and failures.
+    tech: Rust test servers
+    talksTo: []
+    kind: external
+  - id: config
+    name: Config loader
+    role: Watches the YAML file, builds a new route table and swaps it in through an atomic pointer.
+    tech: Rust · arc-swap · notify
+    talksTo: [router]
+    kind: offline
+  - id: bench
+    name: Benchmark rig
+    role: Measures overhead against direct calls and throughput per core with wrk.
+    tech: wrk · Docker
+    talksTo: [listener]
+    kind: offline
+flow:
+  - component: listener
+    text: accepts the connection and parses the request, then strips **hop-by-hop headers** such as `Connection` and `Keep-Alive`, which belong to one link only.
+  - component: router
+    text: loads the current table with one atomic read and matches `Host` plus the longest path prefix, for example `/shipments/` to the `shipments` pool.
+  - component: middleware
+    text: checks the JWT signature with a cached key set and rejects with `401` before any upstream work; it then starts the route's timeout, such as 800 ms.
+  - component: pool
+    text: picks an instance that passed its last health check and sends the request on a reused keep-alive connection.
+  - component: middleware
+    text: retries once on another instance only if the method is idempotent (`GET`, `PUT`, `DELETE`) and the first try failed or timed out.
+  - component: listener
+    text: streams the upstream response back with `x-request-id` added.
+interface:
+  lang: rust
+  code: |
+    struct Route {
+        host: String,
+        prefix: String,
+        pool: PoolId,
+        timeout: Duration,
+        retries: u8,      // idempotent methods only
+        auth: AuthPolicy,
+    }
+    // swapped whole on reload
+    static TABLE: ArcSwap<RouteTable>;
+decisions:
+  - choice: Whole config swapped through an atomic pointer
+    instead: A lock around a mutable route table
+    why: >-
+      At 20,000 req/s every request reads the table, so a lock would be hot. With an atomic swap, in-flight requests
+      keep the old table until they finish, which gives 0 failed requests on reload.
+  - choice: Retry only idempotent methods
+    instead: Retry any failed request
+    why: >-
+      A retried `POST /shipments` after a timeout can book a truck twice. Revisit per route if a service starts
+      accepting idempotency keys.
+  - choice: Build on hyper, not a proxy framework
+    instead: Extend an existing proxy framework
+    why: >-
+      The constraint rules out a framework for the core, and owning the accept loop is what this case teaches;
+      hyper still handles HTTP parsing correctly.
+watchOut: >-
+  Upstream connections that are never returned to the pool leak until the gateway runs out of file descriptors.
+  Watch open sockets during the benchmark, not just latency.

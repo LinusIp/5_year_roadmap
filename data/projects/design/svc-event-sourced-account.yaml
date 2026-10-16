@@ -1,0 +1,46 @@
+overview: >-
+  A bank account stored as a stream of events in Postgres with expected-version checks, rebuilt by replaying events
+  from the latest snapshot, and an upcaster that converts an old event shape to the new one as it is read.
+learn:
+  - name: Event sourcing
+    ref: ddia
+  - name: Optimistic concurrency
+  - name: Snapshots
+  - name: Upcasting
+components:
+  - id: handler
+    name: Command handler
+    role: Loads the account, applies a command and appends the resulting events.
+    tech: Python
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Event store
+    role: Events per account with a unique (account, version) pair, plus a snapshots table.
+    tech: PostgreSQL
+    talksTo: [upcaster]
+    kind: core
+  - id: upcaster
+    name: Upcaster
+    role: Converts `Deposited v1` (amount as float) to v2 (integer cents) on read.
+    tech: Python
+    talksTo: [handler]
+    kind: core
+flow:
+  - component: handler
+    text: handles `Withdraw 50` for account 9 and asks for the latest snapshot plus later events.
+  - component: store
+    text: returns the snapshot at version 1,000 and events 1,001 to 1,042.
+  - component: upcaster
+    text: rewrites any v1 events into the v2 shape in memory, never in the table.
+  - component: handler
+    text: rebuilds the balance, checks funds and appends `Withdrawn` at version 1,043; a concurrent writer gets a conflict and retries.
+decisions:
+  - choice: Snapshot every 100 events
+    instead: Replay the full stream every time
+    why: >-
+      At 100k events a full replay is slow; a snapshot bounds work to 100 events. The test checks both paths give
+      identical state, so the snapshot never hides a bug.
+watchOut: >-
+  Editing or deleting past events destroys the history the model depends on. Fix mistakes with new compensating
+  events and change shapes with upcasters.

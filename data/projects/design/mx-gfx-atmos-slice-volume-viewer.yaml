@@ -1,0 +1,109 @@
+overview: >-
+  A 3D viewer for a regional weather service's forecast grids (wind, humidity, cloud water), which until now appear
+  only as 2D charts. Each 6-hourly step of a 360 × 240 × 40 grid is streamed into 3D textures, and the next step is
+  prefetched so switching takes under 150 ms. Horizontal and vertical slices, a cloud-water isosurface and a volume
+  rendering all sample the same textures through one transfer function, and a cross-section follows a flight route as
+  a vertical curtain.
+learn:
+  - name: 3D textures
+    ref: learnopengl
+  - name: Vertical coordinates
+  - name: Trilinear interpolation
+    ref: scratchapixel
+  - name: Volume ray marching
+    ref: scratchapixel
+  - name: Perceptual colour maps
+  - name: Asynchronous prefetch
+stats:
+  - value: 45 FPS
+    label: 360 × 240 × 40 grid
+  - value: < 150 ms
+    label: time-step switch
+  - value: < 1%
+    label: cross-section sampling error
+components:
+  - id: reader
+    name: Grid reader
+    role: Reads each variable's 3D field per time step and the height of every level from netCDF-style files.
+    tech: C++17 · netCDF-lite
+    talksTo: [streamer]
+    kind: core
+  - id: time
+    name: Time controller
+    role: Chooses the current and next step, the blend weight while animating, and what to prefetch.
+    tech: C++17
+    talksTo: [streamer]
+    kind: core
+  - id: streamer
+    name: Texture streamer
+    role: Converts fields to 16-bit floats and uploads them to 3D textures on a worker thread, two steps resident.
+    tech: OpenGL 4.5 · PBOs
+    talksTo: [tf]
+    kind: core
+  - id: tf
+    name: Transfer function
+    role: Maps a value to colour and opacity with a perceptual colour map, log scale for cloud water.
+    tech: GLSL · 1D texture
+    talksTo: [slices, iso, volume]
+    kind: core
+  - id: slices
+    name: Slice renderer
+    role: Draws horizontal slices, vertical slices and the curtain along a route.
+    tech: GLSL
+    talksTo: []
+    kind: core
+  - id: iso
+    name: Isosurface pass
+    role: Ray-marches to the first sample above the cloud-water threshold and shades it.
+    tech: GLSL
+    talksTo: []
+    kind: core
+  - id: volume
+    name: Volume pass
+    role: Ray-marches the field front to back for a soft volume view.
+    tech: GLSL
+    talksTo: []
+    kind: core
+flow:
+  - component: time
+    text: moves to the next 6-hour step and asks the streamer for the one after it.
+  - component: reader
+    text: reads wind, humidity and cloud water for that step plus the height in metres of each of the 40 levels.
+  - component: streamer
+    text: uploads the step as 16-bit 3D textures, about 7 MB per variable, through pixel buffer objects on a worker thread, so the frame never waits.
+  - component: tf
+    text: turns height into a level coordinate through a lookup texture, because levels are not evenly spaced, then maps values to colour and opacity.
+  - component: slices
+    text: draws the chosen slices and a **curtain** along the route, sampling every column of waypoints from ground to model top.
+  - component: iso
+    text: marches each pixel's ray to the first sample above the cloud-water threshold, about 0.1 g/kg.
+  - component: volume
+    text: composites the same field front to back at 45 FPS, blending the two resident steps by the time weight while animating.
+interface:
+  lang: glsl
+  code: |
+    uniform sampler3D u_t0, u_t1;   // two time steps
+    uniform float u_w;              // 0..1 between them
+    uniform sampler1D u_levelOfZ;   // height -> level
+    uniform float u_zTop;           // model top, m
+    uniform sampler1D u_cmap;       // perceptual
+    float field(vec2 xy, float z) {
+      float lev = texture(u_levelOfZ, z / u_zTop).r;
+      vec3 p = vec3(xy, lev);
+      float a = texture(u_t0, p).r;
+      float b = texture(u_t1, p).r;
+      return mix(a, b, u_w);
+    }
+decisions:
+  - choice: Two time steps resident, next one prefetched
+    instead: Load each step when it is asked for
+    why: Reading and converting three variables from disk can take longer than 150 ms, but a step is only about 21 MB, so keeping one ahead on a laptop GPU is cheap.
+  - choice: Height-to-level lookup texture
+    instead: Treat the 40 levels as evenly spaced
+    why: Model levels bunch up near the ground, so even spacing stretches the boundary layer and puts clouds at the wrong height. The lookup keeps the textures small and the shapes true.
+  - choice: OpenGL 4.5 first
+    instead: Vulkan from the start
+    why: The laptop GPUs support both, and the case is about slicing and sampling, not the API. Vulkan stays an option once the passes are correct.
+watchOut: >-
+  Mixing pressure levels and height levels puts a 500 hPa field at the wrong altitude, and the cross-section then lies
+  about icing heights. Convert every field to one vertical coordinate on load and check it against a known sounding.

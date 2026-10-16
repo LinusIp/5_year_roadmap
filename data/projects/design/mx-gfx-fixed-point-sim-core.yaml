@@ -1,0 +1,108 @@
+overview: >-
+  A deterministic simulation core for Ironvale Studios' lockstep strategy game: every player runs the same simulation
+  from the same inputs, so all builds must compute bit-identical results. All simulation maths uses Q16.16 fixed
+  point (a 32-bit integer read as value / 65,536), with sin, cos, sqrt and atan2 from tables. Each tick ends with a
+  tree of hashes over entities and systems, and a harness replays seeded matches on two OSes and two compilers and
+  bisects to the first tick and entity that differ.
+learn:
+  - name: Fixed-point arithmetic
+    ref: cs61c
+  - name: Lockstep networking
+    ref: gaffer-on-games
+  - name: Hash trees
+  - name: Bisecting a divergence
+  - name: Integer overflow
+    ref: csapp-labs
+stats:
+  - value: 0 of 1,000
+    label: matches diverge on 2 OSes, 2 compilers
+  - value: < 5 ms
+    label: per tick for 2,000 units
+  - value: < 0.3 ms
+    label: hash cost per tick
+components:
+  - id: recorder
+    name: Replay recorder
+    role: Stores each tick's inputs and root hash, and feeds recorded inputs back in.
+    tech: Rust · binary file
+    talksTo: [systems]
+    kind: core
+  - id: fixmath
+    name: Fixed-point math
+    role: The Q16.16 type with 64-bit products and table-based sin, cos, sqrt and atan2.
+    tech: Rust
+    talksTo: [systems]
+    kind: core
+  - id: systems
+    name: Sim systems
+    role: Movement, collision and pathing over entities kept in id order, using only fixed point.
+    tech: Rust
+    talksTo: [hash]
+    kind: core
+  - id: hash
+    name: Hash tree
+    role: Hashes each entity, then each system, then one root per tick.
+    tech: Rust · xxHash64
+    talksTo: [recorder]
+    kind: core
+  - id: lint
+    name: Float lint
+    role: Fails the build if f32, f64 or a float library call appears in simulation code.
+    tech: Clippy rule · grep
+    talksTo: []
+    kind: offline
+  - id: ci
+    name: CI matrix
+    role: Runs the same 1,000 seeded matches on Windows and Linux with two compilers.
+    tech: Local scripts · CI runner
+    talksTo: [bisector]
+    kind: offline
+  - id: bisector
+    name: Divergence bisector
+    role: Finds the first tick whose root hash differs, then walks the tree down to the system and entity.
+    tech: Rust CLI
+    talksTo: []
+    kind: offline
+flow:
+  - component: recorder
+    text: hands the simulation the inputs for tick N, from live players or a recorded match from seeded bots.
+  - component: systems
+    text: applies the inputs and runs movement, collision and pathing over entities **in id order**, never in hash-map order.
+  - component: fixmath
+    text: does every multiply as a 64-bit product shifted right by 16, and every angle through a lookup table, so no platform's float library is involved.
+  - component: hash
+    text: hashes each entity's state, combines them per system and returns one `root_hash` for the tick.
+  - component: recorder
+    text: writes `{tick, inputs, root_hash}`; in a lockstep game the peers compare root hashes every tick.
+  - component: bisector
+    text: takes two recordings from the **CI matrix**, finds the first tick whose root differs, and descends the tree to name the system and entity.
+interface:
+  lang: rust
+  code: |
+    #[derive(Clone, Copy, PartialEq, Eq, Hash)]
+    pub struct Fx(i32);          // Q16.16: raw / 65536
+
+    impl Mul for Fx {
+        type Output = Fx;
+        fn mul(self, o: Fx) -> Fx {
+            Fx(((self.0 as i64 * o.0 as i64) >> 16)
+                as i32)
+        }
+    }
+    pub fn step(s: &mut State, inp: &[Input]) -> u64;
+    // returns the tick's root hash
+    pub struct TickRecord { tick: u32,
+        inputs: Vec<Input>, root_hash: u64 }
+decisions:
+  - choice: Q16.16 fixed point
+    instead: Floats with strict compiler flags
+    why: Different compilers fuse multiply-adds differently and each OS ships its own sin and sqrt, so floats break across 2 OSes and 2 compilers. The cost is range; Q16.16 tops out near 32,767, so map units must fit. Revisit if maps grow past that.
+  - choice: Hash tree, not one hash per tick
+    instead: A single hash of the whole state per tick
+    why: A single hash only says that something differs. The tree points at the system and entity at once, which is what the injected float bug test needs, and still fits in 0.3 ms.
+  - choice: Entities in id-sorted vectors
+    instead: Hash maps keyed by entity id
+    why: Hash-map iteration order changes between builds and runs, which reorders collisions. Sorted vectors also iterate faster for 2,000 units.
+watchOut: >-
+  Intermediate products overflow silently: two Q16.16 values above about 181 multiply past 32 bits after the shift.
+  Use checked arithmetic in debug and soak builds and count the overflow checks tripped.

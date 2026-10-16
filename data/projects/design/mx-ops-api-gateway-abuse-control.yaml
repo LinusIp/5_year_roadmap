@@ -1,0 +1,97 @@
+overview: >-
+  A gateway in front of DataStream's public API that gives each of 2,000 customers a fair share by plan. Three gateway
+  instances share one token-bucket limiter in Redis, where each API key has a bucket that refills at its plan's rate
+  and every request takes a token, so limits hold no matter which instance a request lands on. Access logs feed an
+  abuse detector that spots credential stuffing and scraping and pushes blocks back to the gateway, and under
+  overload paid tiers are served first.
+learn:
+  - name: Token bucket limiting
+    ref: system-design-primer
+  - name: Distributed rate limits
+  - name: Quota headers
+  - name: Abuse detection
+  - name: Fail-open vs fail-closed
+  - name: Load shedding
+    ref: google-sre-book
+stats:
+  - value: < 2 ms
+    label: added p99 at 5,000 req/s
+  - value: ± 5 %
+    label: limit accuracy over 3 instances
+  - value: < 5 %
+    label: of load from abusive clients
+components:
+  - id: clients
+    name: API clients
+    role: Normal, bursty and abusive clients from the attack simulator.
+    tech: k6
+    talksTo: [gateway]
+    kind: external
+  - id: gateway
+    name: Gateway
+    role: Authenticates the API key, checks blocks and the limiter, and proxies or rejects.
+    tech: Go reverse proxy
+    talksTo: [limiter, upstream, detector]
+    kind: core
+  - id: limiter
+    name: Distributed limiter
+    role: An atomic Lua script per key that refills and takes tokens in one Redis call.
+    tech: Redis · Lua
+    talksTo: [quota]
+    kind: core
+  - id: quota
+    name: Quota service
+    role: Holds each plan's rate, burst and monthly quota, cached in the gateway.
+    tech: Go · PostgreSQL
+    talksTo: []
+    kind: core
+  - id: upstream
+    name: API backend
+    role: The real data API behind the gateway.
+    tech: HTTP service
+    talksTo: []
+    kind: external
+  - id: detector
+    name: Abuse detector
+    role: Reads access logs and flags failed-login bursts and crawl patterns, then writes blocks.
+    tech: Python · Prometheus
+    talksTo: [admin]
+    kind: offline
+  - id: admin
+    name: Admin dashboard
+    role: Shows top consumers, current blocks and limiter rejections.
+    tech: Grafana
+    talksTo: []
+    kind: offline
+flow:
+  - component: gateway
+    text: receives `GET /v1/streams` with key `k_live_93`, finds its plan `pro` in the cached quota table and checks the block list.
+  - component: limiter
+    text: runs one Lua script that refills the bucket from elapsed time and takes a token, returning `remaining`; Redis time is used so instance clocks cannot skew it.
+  - component: quota
+    text: supplies `pro` limits of 50 req/s with a burst of 100, and the monthly quota left.
+  - component: gateway
+    text: forwards the request with `X-RateLimit-Remaining`, or returns `429` with `Retry-After`; under overload it sheds free-tier requests **first**.
+  - component: gateway
+    text: logs the request; the **abuse detector** blocks a key that tries 300 logins a minute, without blocking a shared office IP outright.
+interface:
+  lang: http
+  code: |
+    GET /v1/streams?page=4
+    Authorization: Bearer k_live_93
+
+    429 Too Many Requests
+    RateLimit-Limit: 50
+    RateLimit-Remaining: 0
+    Retry-After: 1
+    { "error": "rate_limited",
+      "plan": "pro",
+      "quota_left_month": 812440 }
+decisions:
+  - choice: Shared limiter in Redis
+    instead: A separate in-process limiter per instance
+    why: With 3 instances, local limits let a key get up to 3 times its rate, far outside 5 % accuracy. One atomic Redis call costs well under the 2 ms budget.
+  - choice: Fail open for paid keys when Redis is down
+    instead: Fail closed and reject everything
+    why: Rejecting 2,000 paying customers because the limiter failed is worse than a few minutes without limits. Free and unknown keys fail closed; the choice is a documented config flag.
+watchOut: Blocking by IP address cuts off whole offices and mobile carriers behind one shared address. Limit by API key first and use IP only as one signal in the detector.

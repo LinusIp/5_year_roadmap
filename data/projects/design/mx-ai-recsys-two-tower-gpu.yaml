@@ -1,0 +1,99 @@
+overview: >-
+  A two-stage feed for Craftloop. A two-tower model (one network embeds users, another embeds items, and a dot
+  product scores a pair) is trained on one GPU with the other items in each batch as negatives; item vectors go into
+  a FAISS index for approximate nearest-neighbour search. At request time the user's vector pulls 500 candidates in
+  milliseconds and a LightGBM ranker with feature crosses orders them, all within 100 ms p99.
+learn:
+  - name: Two-tower retrieval
+  - name: In-batch negatives
+  - name: Approximate nearest neighbours
+  - name: Learning to rank
+  - name: Time-based splits
+    ref: ml-zoomcamp
+stats:
+  - value: +30%
+    label: recall@100 vs baseline
+  - value: < 100 ms
+    label: end-to-end p99
+  - value: < 2 h
+    label: training on one GPU
+components:
+  - id: prep
+    name: Data prep
+    role: Turns Retailrocket events into user histories and item features, split by time.
+    tech: pandas
+    talksTo: [trainer]
+    kind: offline
+  - id: trainer
+    name: Two-tower trainer
+    role: Trains user and item towers with in-batch softmax and writes item embeddings.
+    tech: PyTorch
+    talksTo: [index]
+    kind: offline
+  - id: api
+    name: Serving API
+    role: Receives the feed request, runs the user tower and returns the ranked items.
+    tech: FastAPI · TorchScript
+    talksTo: [index]
+    kind: core
+  - id: index
+    name: ANN index
+    role: Holds item vectors and returns the 500 nearest to a user vector.
+    tech: FAISS IVF-PQ
+    talksTo: [ranker]
+    kind: core
+  - id: ranker
+    name: Ranker
+    role: Scores the candidates with user, item and cross features such as category-affinity × price band.
+    tech: LightGBM lambdarank
+    talksTo: []
+    kind: core
+  - id: eval
+    name: Offline evaluator
+    role: Measures recall@100 and NDCG on the last week, with purchases weighted above views.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: api
+    text: >-
+      receives `GET /feed?user=u-7731`, builds the user's last 50 events and runs the **user tower** on CPU in a few
+      milliseconds.
+  - component: index
+    text: searches the whole catalogue's item vectors and returns the 500 nearest in under 10 ms, including new items embedded from content alone.
+  - component: ranker
+    text: scores the 500 candidates with crosses like `user_cat_affinity × item_price_band` and keeps the top 50.
+  - component: api
+    text: drops items already bought or out of stock and returns the feed, logging what was shown for the next training run.
+  - component: eval
+    text: replays the following week and reports recall@100 against the popularity-plus-content baseline and NDCG with purchases as the top grade.
+interface:
+  lang: http
+  code: |
+    GET /feed?user=u-7731&n=50
+
+    200 OK
+    { "items": [
+        { "id": "i-58210", "score": 0.83,
+          "source": "two_tower" },
+        { "id": "i-90417", "score": 0.79,
+          "source": "content_cold" } ],
+      "timings_ms": { "user_tower": 4,
+        "ann": 7, "ranker": 31, "total": 49 } }
+decisions:
+  - choice: Two stages, retrieval then ranking
+    instead: One model scoring every item
+    why: >-
+      Scoring hundreds of thousands of items with a rich model per request cannot meet 100 ms. Cheap dot products narrow to 500, and the
+      expensive ranker only sees those.
+  - choice: Content features in the item tower
+    instead: Item ids only
+    why: >-
+      A handmade marketplace adds new one-off items every day. Title, category and price let a new item get a useful
+      vector before anyone has clicked it.
+  - choice: Split by time
+    instead: Random train/test split
+    why: Random splits let the model see a user's future purchases during training and inflate recall.
+watchOut: >-
+  In-batch negatives are mostly popular items, so the model learns to push popular items down too hard. Correct the
+  logits for item frequency (log-Q correction), and never let future interactions leak into training features.

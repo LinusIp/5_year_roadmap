@@ -1,0 +1,53 @@
+overview: >-
+  GRPO (group relative policy optimization) applied to a small language model on arithmetic problems: for each prompt
+  it samples a group of answers, a verifier marks each right or wrong, and each answer's advantage is its reward minus
+  the group mean. A KL penalty keeps the model close to the base, and pass@1 on held-out problems is tracked.
+learn:
+  - name: Policy gradients
+    ref: spinning-up
+  - name: Group-relative advantages
+  - name: KL penalty
+  - name: Verifiable rewards
+components:
+  - id: generator
+    name: Problem generator
+    role: Makes arithmetic prompts with known answers, with a held-out set.
+    tech: Python
+    talksTo: [policy]
+    kind: core
+  - id: policy
+    name: Policy model
+    role: Samples a group of answers per prompt and is updated.
+    tech: PyTorch · small LM
+    talksTo: [verifier]
+    kind: core
+  - id: verifier
+    name: Verifier
+    role: Parses the final number and gives reward 1 if it is correct.
+    tech: Python
+    talksTo: [update]
+    kind: core
+  - id: update
+    name: GRPO update
+    role: Computes advantages and the KL-penalized loss and steps the optimizer.
+    tech: PyTorch
+    talksTo: [policy]
+    kind: core
+flow:
+  - component: generator
+    text: produces a batch of prompts like `What is 37 * 12?`.
+  - component: policy
+    text: samples `G=8` answers per prompt.
+  - component: verifier
+    text: extracts the number after `Answer:` and rewards an exact match only.
+  - component: update
+    text: sets each advantage to `(r - mean) / std` within its group, adds `beta · KL` to the reference model, and updates the policy, closing the training **loop**.
+decisions:
+  - choice: Exact-match reward only
+    instead: Partial credit for format or closeness
+    why: >-
+      Partial rewards invite the model to game format without getting answers right. A strict verifier is easy to
+      write for arithmetic and leaves nothing to hack.
+watchOut: >-
+  With small groups or easy problems all answers in a group often score the same, so every advantage is zero and
+  nothing is learned. Log the share of groups with mixed rewards and adjust difficulty or group size.

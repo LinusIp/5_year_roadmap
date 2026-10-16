@@ -1,0 +1,115 @@
+overview: >-
+  A compact binary frame for GreenRow's 800 soil sensors, and the gateway that receives it. A device encodes each
+  reading into a fixed stack buffer: a version and type byte, varint numbers (small values take one byte), tagged
+  optional fields and a CRC-16 checksum, so a typical reading fits in 24 bytes instead of a JSON body several times
+  larger. The gateway checks the CRC, drops duplicates by sequence number, reassembles fragments, acknowledges with
+  a bitmap of what it has, and exports readings to a time-series file. A seeded simulator plays all 800 nodes over a
+  link that loses and reorders frames.
+learn:
+  - name: Varint encoding
+  - name: Tagged fields for evolution
+  - name: CRC checksums
+  - name: Sequence number wraparound
+    ref: stanford-cs144
+  - name: Selective acknowledgement
+    ref: stanford-cs144
+  - name: Fuzz testing
+stats:
+  - value: ≤ 24 B
+    label: typical reading frame
+  - value: "0"
+    label: lost readings at 10% loss
+  - value: 5M
+    label: fuzzed frames, no crash
+components:
+  - id: device
+    name: Device codec
+    role: Encodes readings into a 50-byte stack buffer with no dynamic allocation.
+    tech: C or Rust (no_std)
+    talksTo: [frag]
+    kind: core
+  - id: frag
+    name: Fragmenter
+    role: Splits a batch of catch-up readings over 50 bytes into numbered fragments.
+    tech: C or Rust
+    talksTo: [link]
+    kind: core
+  - id: link
+    name: Lossy link sim
+    role: Plays 800 devices with seeded loss, reordering and a 1% duty-cycle limit.
+    tech: Seeded simulator
+    talksTo: [gateway]
+    kind: core
+  - id: gateway
+    name: Gateway
+    role: Checks CRCs, dedups by sequence, reassembles and acknowledges.
+    tech: State machine per device
+    talksTo: [exporter]
+    kind: core
+  - id: exporter
+    name: Exporter
+    role: Writes decoded readings to a time-series file and counts delivery.
+    tech: CSV or Parquet
+    talksTo: []
+    kind: core
+  - id: fuzz
+    name: Fuzzer
+    role: Feeds millions of random and mutated frames to the decoder.
+    tech: cargo-fuzz or libFuzzer
+    talksTo: [gateway]
+    kind: offline
+flow:
+  - component: device
+    text: >-
+      writes the version and type byte, varint `device_id` and `seq`, tagged `moisture`, `temp_c10` and
+      `batt_mv`, then a CRC-16: about 18 bytes for one reading.
+  - component: frag
+    text: >-
+      leaves a single reading whole; after an outage a batch of stored readings is split into fragments carrying
+      `frag_index` and `frag_count`.
+  - component: link
+    text: >-
+      drops 10% of frames and reorders some, and only lets a device transmit 1% of the time, so every retry costs
+      real airtime.
+  - component: gateway
+    text: >-
+      rejects bad CRCs, drops a `seq` it has already seen (compared with wraparound-safe arithmetic), reassembles
+      fragments and replies with a one-byte **bitmap** so the device resends only missing pieces.
+  - component: exporter
+    text: writes `device_id, seq, ts, moisture, temp` rows and updates the delivery ratio and retransmit rate.
+interface:
+  lang: c
+  code: |
+    /* Reading frame, max 50 bytes, little-endian
+       [0]   ver:3 | type:5   (type 1 = reading)
+       [1..] varint device_id (2 bytes for 800)
+             varint seq       (16-bit, wraps)
+             varint ts_offset_s
+             fields: key = field<<3 | wire_type
+               1 moisture   u16, 0.1 % steps
+               2 temp_c10   zigzag varint
+               3 batt_mv    varint
+             unknown field: skip by wire_type
+       [n-2] crc16-ccitt over bytes 0..n-3 */
+    size_t frame_encode(const reading_t*, uint8_t*);
+    int frame_decode(const uint8_t *b, size_t n,
+                     reading_t *r);
+decisions:
+  - choice: Tagged varint fields
+    instead: A fixed C struct per message
+    why: >-
+      A fixed layout is a few bytes smaller but every new sensor field breaks old gateways. With tags, old readers
+      skip what they do not know, and the reading still fits in 24 bytes.
+  - choice: One bitmap ack per message
+    instead: An ack for every frame
+    why: >-
+      At a 1% duty cycle each ack costs airtime the gateway shares with 800 devices. One ack per message with a
+      bitmap of received fragments keeps zero loss at 10% link loss without doubling traffic.
+  - choice: CRC-16, not CRC-32
+    instead: CRC-32
+    why: >-
+      Frames are under 50 bytes, where CRC-16 already catches all burst errors up to 16 bits, and two bytes is 8%
+      of a 24-byte budget. Revisit if frames grow past a few hundred bytes.
+watchOut: >-
+  A 16-bit sequence wraps after 65,536 readings, about 227 days at one every 5 minutes. Compare with
+  `(int16_t)(a - b) > 0`, or after the wrap the gateway drops every new frame as an old duplicate.

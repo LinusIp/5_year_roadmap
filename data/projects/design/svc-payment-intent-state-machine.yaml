@@ -1,0 +1,52 @@
+overview: >-
+  A payment intent that moves through explicit states (created, requires_confirmation, processing, succeeded,
+  failed, canceled), where only listed transitions are allowed, confirm and capture take idempotency keys, and
+  provider webhooks are reconciled safely even when duplicated.
+learn:
+  - name: State machines
+  - name: Idempotency keys
+  - name: Webhook reconciliation
+  - name: Unknown outcomes
+components:
+  - id: api
+    name: Payments API
+    role: Handles create, confirm and capture, storing each idempotency key with its response.
+    tech: Python
+    talksTo: [machine]
+    kind: core
+  - id: machine
+    name: State machine
+    role: The transition table and a guarded update that applies only legal moves.
+    tech: Python · PostgreSQL
+    talksTo: [provider]
+    kind: core
+  - id: provider
+    name: Fake provider
+    role: Simulates charges with timeouts and duplicate or late webhooks.
+    tech: Python
+    talksTo: [webhooks]
+    kind: external
+  - id: webhooks
+    name: Webhook handler
+    role: Applies provider events by event id, ignoring ones already seen.
+    tech: Python
+    talksTo: [machine]
+    kind: core
+flow:
+  - component: api
+    text: receives `POST /intents/42/confirm` with `Idempotency-Key`; a repeated key returns the stored response.
+  - component: machine
+    text: moves `requires_confirmation → processing` with `UPDATE … WHERE state = 'requires_confirmation'`, then calls the provider.
+  - component: provider
+    text: times out, so the intent **stays** in processing instead of being marked failed.
+  - component: webhooks
+    text: apply `charge.succeeded` once by event id; a duplicate or a stale `failed` after success is ignored.
+decisions:
+  - choice: Timeout means unknown, not failed
+    instead: Mark the payment failed on timeout
+    why: >-
+      The provider may have charged the card, and a retry would charge twice. A reconciler asks the provider about
+      intents stuck in processing for more than 10 minutes.
+watchOut: >-
+  Treating a timeout as a failure leads to double charges when the customer retries. Keep the state unknown until
+  a webhook or the reconciler settles it.

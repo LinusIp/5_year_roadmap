@@ -1,0 +1,100 @@
+overview: >-
+  An animation runtime for Pixel Harbour's characters, which today play one clip at a time and pop between states. A
+  JSON state machine decides which clips play and how fast to cross-fade, a sampler decompresses and blends their
+  poses with additive layers such as aim and breathe on top, and each character's job writes its 60 bone matrices into
+  one shared palette buffer. The vertex shader then skins every vertex from that buffer, with linear blend skinning or
+  dual quaternions for twisting joints.
+learn:
+  - name: Quaternion blending
+    ref: gamemath-3d-primer
+  - name: Skinning (LBS and DQS)
+    ref: game-engine-architecture
+  - name: Blend trees and cross-fades
+    ref: game-engine-architecture
+  - name: Additive animation
+  - name: Keyframe compression
+  - name: State machines
+stats:
+  - value: < 3 ms
+    label: CPU for 200 characters, 60 bones
+  - value: ≥ 4×
+    label: clip compression at < 0.5 mm
+  - value: ≤ 1 cm
+    label: largest pop in a transition
+components:
+  - id: loader
+    name: glTF clip loader
+    role: Loads skeletons, skins and clips and compresses keyframes at import.
+    tech: C++17 · tinygltf-style
+    talksTo: [sampler]
+    kind: offline
+  - id: fsm
+    name: State machine
+    role: Reads parameters, fires transition rules and gives each active clip a weight and time.
+    tech: C++17 · JSON
+    talksTo: [sampler]
+    kind: core
+  - id: sampler
+    name: Pose blender
+    role: Decompresses keys at the clip time, blends poses and adds additive layers.
+    tech: C++17 · job system
+    talksTo: [palette]
+    kind: core
+  - id: palette
+    name: Palette buffer
+    role: Holds 200 × 60 skinning matrices or dual quaternions for this frame.
+    tech: OpenGL 4.5 SSBO
+    talksTo: [skin]
+    kind: core
+  - id: skin
+    name: Skinning shaders
+    role: Skins each vertex from up to 4 bones read from the palette.
+    tech: GLSL
+    talksTo: [gpu]
+    kind: core
+  - id: gpu
+    name: GPU
+    role: Runs the skinning shaders within 2 ms for all characters.
+    tech: OpenGL 4.5
+    talksTo: []
+    kind: external
+flow:
+  - component: fsm
+    text: checks the character's parameters such as `speed` and `jumpPressed`, starts a transition with its `fade` time, and lists active clips with weights.
+  - component: sampler
+    text: finds the two keys around each clip's time, decompresses them, and interpolates; rotations use normalised lerp after **flipping** a quaternion whose dot with the other is negative.
+  - component: sampler
+    text: blends clips by weight, adds the aim and breathe layers as differences from their reference pose, and converts local poses to model space.
+  - component: palette
+    text: receives each bone's model matrix times its inverse bind matrix, written by 200 jobs into their own slice, then one upload.
+  - component: skin
+    text: reads 4 bone indices and weights per vertex and blends the matrices, or the dual quaternions on twist joints, so wrists do not collapse.
+interface:
+  lang: json
+  code: |
+    { "params": { "speed": 0.0, "jumpPressed": false },
+      "states": {
+        "locomotion": { "blend1d": "speed", "clips":
+          [["idle", 0], ["walk", 1.5], ["run", 4.0]] },
+        "jump": { "clip": "jump", "loop": false } },
+      "transitions": [
+        { "from": "locomotion", "to": "jump",
+          "when": "jumpPressed", "fade": 0.15 },
+        { "from": "jump", "to": "locomotion",
+          "when": "clipEnded", "fade": 0.2 } ],
+      "layers": [
+        { "additive": "breathe", "weight": 1.0 },
+        { "additive": "aim", "weight": "aimWeight" } ] }
+decisions:
+  - choice: Linear blend skinning, dual quaternions as an option
+    instead: Dual quaternions everywhere
+    why: LBS is cheapest and fine for most joints; twisting wrists and shoulders lose volume (the candy-wrapper look), which DQS fixes. Per-mesh choice keeps the GPU under 2 ms.
+  - choice: One shared palette buffer
+    instead: Upload each character's bones as uniforms
+    why: 200 small uploads and state changes cost more than one SSBO write; jobs fill their own slice with no locks.
+  - choice: Measure compression error in millimetres
+    instead: A fixed tolerance per curve value
+    why: A tiny rotation error at the hip moves the hand far more than one at the finger. Removing keys until the bone positions are off by 0.5 mm reaches 4× safely.
+watchOut: >-
+  q and -q are the same rotation, so blending two quaternions in opposite hemispheres swings the bone the long way
+  round. Flip one when their dot product is negative, in both clip interpolation and blending.

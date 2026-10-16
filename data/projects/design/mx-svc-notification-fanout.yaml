@@ -1,0 +1,118 @@
+overview: >-
+  One notification service that replaces the five copies of send code in CrumbRun's services. The intake API checks
+  the request, drops repeats by event id and writes a job to a Redis stream, then returns at once. A worker per
+  channel renders the template, calls the push, SMS or email provider, falls back to the next channel on failure,
+  and records every state change.
+learn:
+  - name: Durable queues
+    ref: ddia
+  - name: At-least-once delivery
+    ref: ddia
+  - name: Deduplication keys
+  - name: Retry with backoff
+    ref: google-sre-book
+  - name: Bulkheads per channel
+    ref: google-sre-book
+stats:
+  - value: < 25 ms
+    label: p99 enqueue at 2,000/s
+  - value: < 3 s
+    label: p99 to first attempt
+  - value: "0"
+    label: duplicate sends, 10,000 requests
+components:
+  - id: services
+    name: Order services
+    role: Send a notification request when an order changes state.
+    tech: Five internal services
+    talksTo: [intake]
+    kind: external
+  - id: intake
+    name: Intake API
+    role: Validates template id and variables, deduplicates by event id, enqueues the job.
+    tech: Go · net/http
+    talksTo: [queue, status]
+    kind: core
+  - id: queue
+    name: Queue
+    role: One durable stream per channel, read by consumer groups that acknowledge each job.
+    tech: Redis Streams
+    talksTo: [workers]
+    kind: core
+  - id: workers
+    name: Channel workers
+    role: Pull a job, pick the channel from user preference, retry with backoff, fall back on failure.
+    tech: Go
+    talksTo: [renderer, adapters, status]
+    kind: core
+  - id: renderer
+    name: Template renderer
+    role: Fills the localised template and escapes every variable for its channel.
+    tech: Go text/template
+    talksTo: []
+    kind: core
+  - id: adapters
+    name: Provider adapters
+    role: Wrap each fake provider with its own rate limit and timeout.
+    tech: Go
+    talksTo: [providers]
+    kind: core
+  - id: providers
+    name: Fake providers
+    role: Accept push, SMS and email with latency, failures and rate limits.
+    tech: Go · HTTP
+    talksTo: []
+    kind: external
+  - id: status
+    name: Status store
+    role: Records queued, sent, delivered and failed for every notification.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+flow:
+  - component: intake
+    text: >-
+      receives `POST /notifications` for event `order-8812-out-for-delivery`, checks the variables match the template,
+      and runs `SET dedup:{event_id} NX EX 86400`; a repeat returns the first id.
+  - component: queue
+    text: stores the job on the `push` stream and the API answers `202` with status `queued`, well inside 25 ms.
+  - component: workers
+    text: a push worker reads the job from its consumer group and loads the user's channel order, for example push, then SMS.
+  - component: renderer
+    text: fills the Spanish template with `rider_name` and `eta_min`, escaping each value so a variable cannot inject markup.
+  - component: adapters
+    text: >-
+      call the push provider with a 2 s timeout; on failure the worker retries at 1 s, 4 s, then moves the job to
+      the SMS stream as the **fallback**.
+  - component: status
+    text: records `sent` with provider id and later `delivered` from the callback, and the worker acknowledges the stream entry.
+interface:
+  lang: http
+  code: |
+    POST /notifications
+    { "event_id": "order-8812-out-for-delivery",
+      "user_id": "u_5531",
+      "template": "order.out_for_delivery",
+      "vars": { "rider_name": "Ana", "eta_min": 12 } }
+
+    202 Accepted
+    { "notification_id": "n_7f1", "status": "queued" }
+decisions:
+  - choice: Redis Streams as the one queue
+    instead: A PostgreSQL table used as a queue
+    why: >-
+      2,000 enqueues a second with p99 under 25 ms is easy for Redis, and consumer groups give acknowledgements and
+      redelivery for free. PostgreSQL stays for status, where history matters.
+  - choice: Separate stream and worker pool per channel
+    instead: One shared pool for all channels
+    why: >-
+      When the SMS fake slows down, its jobs pile up in its own stream while push and email keep their 3-second
+      start time.
+  - choice: Dedup at intake and before send
+    instead: Trust that each service sends an event once
+    why: >-
+      The streams deliver at least once, so a worker crash after sending replays the job. A sent marker per
+      notification stops the second send.
+watchOut: >-
+  At-least-once delivery means a crashed worker's job comes back. Without a sent marker checked before each provider
+  call, the injected-retry run will show duplicate texts.

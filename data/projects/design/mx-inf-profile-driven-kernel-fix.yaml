@@ -1,0 +1,117 @@
+overview: >-
+  Find out why Lumen's ranker got twice as slow, and fix the biggest cause with one fused GPU kernel. A profiling
+  harness ranks kernels by time at batch 32, roofline reasoning (comparing a kernel's arithmetic per byte with the
+  GPU's limits) shows whether the top offender is memory-bound or launch-bound, and a Triton or CUDA kernel does that
+  chain of operations in one pass. It ships as a PyTorch custom op with a fallback to the original path.
+learn:
+  - name: GPU profiling
+    ref: nsight-compute-docs
+  - name: Roofline model
+    ref: horace-he-brrr
+  - name: Kernel fusion
+    ref: triton-tutorials
+  - name: Memory coalescing
+    ref: pmpp-book
+  - name: PyTorch custom ops
+  - name: Benchmarking with synchronisation
+stats:
+  - value: ≥ 2.5×
+    label: fused op speed-up at batch 32
+  - value: ≥ 30%
+    label: lower end-to-end p99
+  - value: ≤ 1e-3
+    label: relative error in fp16
+components:
+  - id: harness
+    name: Profiling harness
+    role: Runs the ranker with production-shaped inputs and captures a timeline and per-kernel metrics.
+    tech: Nsight Systems · Nsight Compute
+    talksTo: [reference]
+    kind: core
+  - id: reference
+    name: Reference path
+    role: The original unfused PyTorch operations, kept as the source of truth and the fallback.
+    tech: PyTorch
+    talksTo: [kernel]
+    kind: core
+  - id: kernel
+    name: Fused kernel
+    role: Reads each input once, does the whole chain in registers and writes the result once.
+    tech: Triton or CUDA C++
+    talksTo: [binding]
+    kind: core
+  - id: binding
+    name: PyTorch binding
+    role: Registers the kernel as a custom op and falls back to the reference for unsupported shapes.
+    tech: torch.library
+    talksTo: [bench]
+    kind: core
+  - id: tests
+    name: Correctness tests
+    role: Compares fused and reference outputs across shapes, strides and dtypes at 1e-3 relative error.
+    tech: pytest
+    talksTo: [binding]
+    kind: offline
+  - id: bench
+    name: Benchmark script
+    role: Times the op and the whole model with warm-up and synchronisation, and reports p50 and p99.
+    tech: Python · CUDA events
+    talksTo: []
+    kind: core
+  - id: gpu
+    name: 24 GB GPU
+    role: A consumer GPU whose memory bandwidth, about 1 TB/s, is the ceiling for memory-bound kernels.
+    tech: Consumer GPU
+    talksTo: []
+    kind: external
+flow:
+  - component: harness
+    text: >-
+      profiles one batch-32 forward pass and ranks kernels; for example a bias-add, GELU and LayerNorm chain added by
+      the model change shows up as several **separate** launches.
+  - component: reference
+    text: >-
+      gets its roofline check: each op reads and writes the full activation tensor for under one FLOP per byte, so
+      the chain is memory-bound and fusing it saves most of that traffic.
+  - component: kernel
+    text: >-
+      has one program per row load the row once, apply bias, GELU and LayerNorm in registers, and store once; the
+      goal is close to peak bandwidth, not more FLOPs.
+  - component: binding
+    text: exposes `lumen::fused_bias_gelu_ln` and routes any shape the kernel does not handle, such as a non-contiguous input, to the reference.
+  - component: bench
+    text: >-
+      times the op and the full ranker after warm-up with `torch.cuda.synchronize()`, and reports both the ≥ 2.5×
+      op speed-up and the p99 change.
+interface:
+  lang: python
+  code: |
+    @triton.jit
+    def fused_bias_gelu_ln(
+        x_ptr, bias_ptr, gamma_ptr, beta_ptr,
+        out_ptr, n_cols, stride_row, eps,
+        BLOCK: tl.constexpr):
+        ...
+
+    # registered op, falls back to the reference
+    y = torch.ops.lumen.fused_bias_gelu_ln(
+        x, bias, gamma, beta, eps=1e-5)
+decisions:
+  - choice: Profile first, fuse the top offender
+    instead: Rewrite attention because it usually dominates
+    why: >-
+      Latency doubled after a specific model change, so the timeline, not habit, says which ops are new and slow.
+      Revisit with the next kernel in the ranking once this one is fixed.
+  - choice: A custom op with a fallback
+    instead: Patch the framework's own operator
+    why: >-
+      The brief forbids framework patching, and a fallback keeps rare shapes correct while only common shapes take
+      the fast path.
+  - choice: Triton before hand-written CUDA
+    instead: CUDA C++ from the start
+    why: >-
+      For a row-wise memory-bound chain, Triton reaches near-peak bandwidth with far less code. Move to CUDA only if
+      the profile shows Triton missing the 2.5× target.
+watchOut: >-
+  A kernel that is not on the critical path can be made 10× faster and change nothing end to end. Confirm it in the
+  timeline, and benchmark with warm-up and synchronisation, or GPU timings measure only the launch.

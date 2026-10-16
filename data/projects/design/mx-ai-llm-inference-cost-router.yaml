@@ -1,0 +1,105 @@
+overview: >-
+  A routing layer in front of three LLMs of rising price. A cache answers repeated queries for free, a small
+  classifier trained on past outputs predicts whether the cheap model will get a query right, and the router picks
+  the cheapest model likely to succeed. If the cheap answer reports low confidence it escalates once, and an
+  analyser traces the cost-quality curve so Lexmill can pick the operating point that cuts 40% of cost.
+learn:
+  - name: Model routing
+  - name: Cost-quality frontier
+  - name: Semantic caching
+  - name: Confidence-based escalation
+  - name: Logistic regression
+    ref: ml-zoomcamp
+stats:
+  - value: ≥ 40%
+    label: cost reduction
+  - value: ≤ 2 pts
+    label: quality loss
+  - value: < 20 ms
+    label: router overhead
+components:
+  - id: client
+    name: Document app
+    role: Sends each user query with its document context.
+    tech: Lexmill backend
+    talksTo: [cache]
+    kind: external
+  - id: cache
+    name: Cache
+    role: Returns a stored answer for an exact or near-identical repeated query.
+    tech: Redis · embeddings
+    talksTo: [classifier]
+    kind: core
+  - id: classifier
+    name: Difficulty classifier
+    role: Predicts the chance that the small model answers correctly from query features.
+    tech: scikit-learn · logistic regression
+    talksTo: [router]
+    kind: core
+  - id: router
+    name: Router
+    role: Picks small, medium or large by threshold and escalates once on low self-reported confidence.
+    tech: Python · FastAPI
+    talksTo: [llms, logger]
+    kind: core
+  - id: llms
+    name: LLM tier
+    role: Three models from cheap and fast to strong and costly.
+    tech: LLM APIs or local models
+    talksTo: []
+    kind: external
+  - id: logger
+    name: Query logger
+    role: Stores query, route, cost, latency and graded correctness for every call.
+    tech: SQLite
+    talksTo: [frontier]
+    kind: offline
+  - id: frontier
+    name: Frontier analyser
+    role: Sweeps thresholds on logged data and plots cost per 1k queries against quality.
+    tech: pandas · Matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: cache
+    text: hashes the normalised query and returns at once on a hit; at 30% repeat traffic this alone removes a large share of calls.
+  - component: classifier
+    text: scores query length, question type and embedding features and outputs `p_small_ok` in a couple of milliseconds.
+  - component: router
+    text: sends to the small model when `p_small_ok ≥ 0.8`, to medium between 0.5 and 0.8, otherwise to large.
+  - component: router
+    text: escalates one tier if the cheap answer's own confidence is below `0.6`, and never more than once.
+  - component: logger
+    text: records the route, tokens and cost, and later the grade from the benchmark's reference answer.
+  - component: frontier
+    text: replays the log with other thresholds to draw the **cost-quality curve** and pick the point with ≤ 2 points loss.
+interface:
+  lang: http
+  code: |
+    POST /ask
+    { "query": "What is the notice period
+                in clause 14?",
+      "doc_id": "contract-2291" }
+
+    200 OK
+    { "answer": "Ninety days…",
+      "model": "small", "escalated": false,
+      "cache": "miss", "cost_usd": 0.0004,
+      "router_ms": 6 }
+decisions:
+  - choice: Predict difficulty before calling
+    instead: Always call cheap first, then check
+    why: >-
+      Cascading every query doubles latency and cost on the hard ones. A classifier skips the cheap call for queries it
+      already knows are hard; escalation covers its mistakes.
+  - choice: Train on outputs of all three models
+    instead: Label difficulty by hand
+    why: >-
+      Running the 3 models on a few thousand benchmark queries gives exact "small was right" labels for free. Retrain
+      when the model tier changes.
+  - choice: Exact-match graded benchmarks
+    instead: An LLM judge or BLEU-style score
+    why: TriviaQA and GSM8K have checkable answers, so a 2-point drop is a real drop, not judge noise.
+watchOut: >-
+  If the classifier's training queries are mostly easy, it learns "small is fine" and quality quietly falls on the
+  hard tail. Balance the training set by difficulty and report quality by query type, not only overall.

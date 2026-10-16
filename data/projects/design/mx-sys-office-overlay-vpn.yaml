@@ -1,0 +1,120 @@
+overview: >-
+  A userspace VPN peer for Pinnacle Drafting's two offices and four remote staff. A TUN device (a virtual network
+  card whose packets your program reads and writes) hands each outgoing IP packet to the program, which picks the
+  destination peer from an allowed-IP routing trie, encrypts the packet with session keys from an authenticated
+  handshake, and sends it as one UDP datagram. The receiver checks a replay window, decrypts, confirms the inner
+  source address is one that peer may use, and writes the packet into its own TUN; keepalives, roaming to new IPs
+  and a relay on one public VPS keep the path alive through home routers.
+learn:
+  - name: TUN devices
+  - name: Authenticated key exchange
+  - name: Longest-prefix match
+    ref: stanford-cs144
+  - name: Replay windows
+  - name: MTU and fragmentation
+    ref: stanford-cs144
+  - name: Network namespaces
+stats:
+  - value: ≥ 400 Mbit/s
+    label: between two VMs
+  - value: < 5 s
+    label: reconnect after IP change
+  - value: < 60 B
+    label: overhead per packet
+components:
+  - id: tun
+    name: TUN reader
+    role: Reads outgoing IP packets from tun0 and writes decrypted ones back.
+    tech: Linux TUN
+    talksTo: [router]
+    kind: core
+  - id: router
+    name: Allowed-IP trie
+    role: Maps a destination address to the peer that owns it by longest-prefix match.
+    tech: Rust or C++
+    talksTo: [session]
+    kind: core
+  - id: session
+    name: Session keys
+    role: Runs the handshake, holds send and receive keys, nonce counters and the replay window.
+    tech: Vetted AEAD library
+    talksTo: [peer]
+    kind: core
+  - id: peer
+    name: Peer tracker
+    role: Owns each peer's UDP endpoint, keepalive timer, roaming and relay fallback.
+    tech: UDP sockets
+    talksTo: [relay, remote, cli]
+    kind: core
+  - id: relay
+    name: Relay forwarder
+    role: Forwards still-encrypted datagrams between peers by session index; holds no keys.
+    tech: Same binary on a VPS
+    talksTo: [remote]
+    kind: core
+  - id: remote
+    name: Remote peer
+    role: The other office or laptop, running the same binary.
+    tech: Linux peer
+    talksTo: []
+    kind: external
+  - id: cli
+    name: CLI status
+    role: Shows each peer's handshake age, endpoint and byte counters.
+    tech: CLI
+    talksTo: []
+    kind: offline
+flow:
+  - component: tun
+    text: hands the program one outgoing packet, say a 1,380-byte SMB write to the file server at `10.8.0.10`.
+  - component: router
+    text: finds the longest prefix that contains the destination, `10.8.0.0/24`, and picks the main-office peer.
+  - component: session
+    text: >-
+      encrypts the packet with the current send key, using a 64-bit `counter` as the nonce, and adds a 16-byte
+      header and a 16-byte tag: 32 bytes of overhead before the outer UDP and IP headers.
+  - component: peer
+    text: >-
+      sends the datagram to the peer's last **authenticated** endpoint, sends a keepalive every 25 s when idle, and
+      switches to the relay after three failed handshakes.
+  - component: relay
+    text: only when the direct path fails, forwards the datagram unchanged by its `receiver` index; it cannot read it.
+  - component: remote
+    text: >-
+      rejects a `counter` outside the replay window, decrypts, checks the inner source IP is in the sender's
+      allowed IPs, writes it to its TUN, and only then updates the sender's endpoint.
+interface:
+  lang: rust
+  code: |
+    // Data message inside one UDP datagram
+    #[repr(C)]
+    struct DataHeader {
+        msg_type: u8,       // 4 = data
+        reserved: [u8; 3],
+        receiver: u32,      // peer's session index, LE
+        counter: u64,       // nonce + replay check, LE
+    }
+    // then: AEAD(inner IP packet) + 16-byte tag
+    // overhead = 16 + 16 = 32 bytes
+    // tunnel MTU = 1500 - 20 (IPv4) - 8 (UDP) - 32
+    //            = 1440 (use 1420 if outer is IPv6)
+decisions:
+  - choice: Own sessions over UDP, not a TCP tunnel
+    instead: Tunnel over TCP or TLS
+    why: >-
+      TCP inside TCP stalls, because both layers retransmit on loss, and UDP lets roaming work by simply changing
+      the endpoint. Revisit only if a site blocks UDP; then add a TCP 443 mode on the relay.
+  - choice: Static peer file, not a coordination server
+    instead: A control server that hands out keys and endpoints
+    why: >-
+      Six peers (two offices, four remote staff) fit in one config file the owner edits. Revisit past about 30
+      peers or when people join every week.
+  - choice: An existing AEAD and handshake library
+    instead: Writing ChaCha20-Poly1305 or the key exchange yourself
+    why: >-
+      The constraint forbids own primitives, and a vetted library is also faster. Your work is the state machine
+      around it: counters, rekeying and the replay window.
+watchOut: >-
+  Never update a peer's endpoint from a packet that has not decrypted and passed the replay check, or one spoofed
+  datagram redirects the office's traffic. Set the tunnel MTU explicitly too, since oversized packets otherwise
+  vanish without an error.

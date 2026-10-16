@@ -1,0 +1,105 @@
+overview: >-
+  An offline map renderer for a courier tablet. Each vector tile is parsed and turned into triangles once, when it
+  first becomes visible: polygons by ear clipping, roads by extruding the centreline into a strip with joins and caps.
+  Line widths are applied in the vertex shader from the JSON style, so zooming never re-tessellates. Each frame draws
+  the visible tiles layer by layer and then places labels in screen space, skipping any that overlap.
+learn:
+  - name: Ear-clipping triangulation
+    ref: cmu-15-462
+  - name: Line extrusion and joins
+  - name: Data-driven styling
+  - name: Inertial pan and zoom
+  - name: Label collision
+stats:
+  - value: 60 FPS
+    label: 20,000 features on a 2018 tablet
+  - value: < 8 ms
+    label: tile parse and upload
+  - value: < 3 ms
+    label: label pass per frame
+components:
+  - id: tiles
+    name: Tile store
+    role: The city's preloaded tiles on the tablet, in a simplified vector format.
+    tech: Local files
+    talksTo: [parser]
+    kind: external
+  - id: parser
+    name: Tile parser
+    role: Reads lines, polygons and points with their tags in tile units from 0 to 4096.
+    tech: C++17
+    talksTo: [tess]
+    kind: core
+  - id: tess
+    name: Tessellator
+    role: Ear-clips polygons with holes and extrudes roads with miter, bevel and round joins.
+    tech: C++17 · own earcut
+    talksTo: [renderer]
+    kind: core
+  - id: camera
+    name: Camera and inertia
+    role: Handles pan and pinch zoom and lets the map glide to a stop after a fling.
+    tech: C++17
+    talksTo: [style]
+    kind: core
+  - id: style
+    name: Style engine
+    role: Maps each layer to colour and width at the current zoom from the JSON style sheet.
+    tech: JSON
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Draws visible tiles per style layer with widths applied in the vertex shader.
+    tech: OpenGL ES 3.0
+    talksTo: [labels]
+    kind: core
+  - id: labels
+    name: Label placer
+    role: Places street and place labels by priority in a screen grid and drops overlapping ones.
+    tech: C++17
+    talksTo: []
+    kind: core
+flow:
+  - component: camera
+    text: applies this frame's drag or the fling velocity, decayed by `0.92` per 60 Hz frame, and works out the zoom and visible tiles.
+  - component: parser
+    text: reads at most one newly visible tile per frame, so loading never costs more than about 8 ms.
+  - component: tess
+    text: triangulates that tile's polygons and turns each road point into two vertices with opposite normals, switching to a bevel where a sharp turn would make a **miter spike**.
+  - component: style
+    text: interpolates colours and pixel widths for zoom 15.3 between the style's zoom stops.
+  - component: renderer
+    text: draws water, parks, road casings and roads in order, one draw per layer per tile.
+  - component: labels
+    text: tries labels from highest priority down, keeping those placed last frame first, so labels do not flicker as the map moves.
+interface:
+  lang: glsl
+  code: |
+    #version 300 es
+    // Road vertex: each centreline point is sent twice
+    // with opposite normals, extruded here in pixels.
+    in vec2 a_pos;               // tile units, 0..4096
+    in vec2 a_normal;            // scaled at joins
+    uniform mat3 u_tile_to_px;
+    uniform float u_half_width;  // px, from the style
+    uniform vec2 u_viewport;     // px
+    void main() {
+      vec3 p = u_tile_to_px * vec3(a_pos, 1.0);
+      vec2 px = p.xy + a_normal * u_half_width;
+      vec2 ndc = px / u_viewport * 2.0 - 1.0;
+      gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
+    }
+decisions:
+  - choice: Tessellate once per tile
+    instead: Re-tessellating every frame
+    why: Ear clipping 20,000 features per frame would not fit a 2018 tablet; done once, panning only changes a matrix.
+  - choice: Widths in the vertex shader
+    instead: Baking line widths into the geometry
+    why: Zoom changes widths every frame; in the shader that is one uniform, baked it would mean re-tessellating.
+  - choice: Labels placed last frame go first
+    instead: Placing labels from scratch each frame
+    why: Without this, two labels of equal priority swap every frame while panning. The 100-position overlap test still applies.
+watchOut: >-
+  Self-intersecting polygons from real street data break ear clipping and leave holes or spikes. Run the tessellator
+  over every city tile in a test and log the ones it rejects.

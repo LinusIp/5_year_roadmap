@@ -1,0 +1,110 @@
+overview: >-
+  A generator of synthetic patient tables that Northgate could share instead of real rows, built on public medical
+  data. A CTGAN-style model learns the mixed numeric and categorical columns, a constraint checker throws out
+  clinically impossible rows, and the result is judged two ways. Utility asks whether a model trained on synthetic
+  rows still predicts well on real ones; privacy asks whether an attacker can tell which real patients were in the
+  training data.
+learn:
+  - name: Tabular GANs
+  - name: Train on synthetic, test on real
+  - name: Membership inference
+  - name: Distance to closest record
+  - name: ROC AUC
+    ref: ml-zoomcamp
+stats:
+  - value: ≤ 5%
+    label: AUC gap to real-trained model
+  - value: < 0.55
+    label: membership inference AUC
+  - value: < 1 min
+    label: for 100k rows
+components:
+  - id: source
+    name: Public patient data
+    role: UCI heart and diabetes tables or the MIMIC demo, split into train and holdout patients.
+    tech: CSV
+    talksTo: [prep]
+    kind: external
+  - id: prep
+    name: Preprocessor
+    role: Encodes categories as one-hot and splits each numeric column into modes so skewed values are learnable.
+    tech: pandas · scikit-learn
+    talksTo: [generator]
+    kind: core
+  - id: generator
+    name: Generator
+    role: Trains on the train split and samples synthetic rows conditioned on rare categories.
+    tech: PyTorch · CTGAN
+    talksTo: [constraints]
+    kind: core
+  - id: constraints
+    name: Constraint checker
+    role: Rejects rows that break clinical rules and logs the violation rate.
+    tech: Python rules
+    talksTo: [utility, privacy]
+    kind: core
+  - id: utility
+    name: Utility evaluator
+    role: Trains the same classifier on real and on synthetic data and tests both on real holdout rows.
+    tech: scikit-learn · LightGBM
+    talksTo: [report]
+    kind: core
+  - id: privacy
+    name: Privacy attacks
+    role: Runs distance-to-closest-record and a membership inference attack against the synthetic set.
+    tech: scikit-learn
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Plots utility against privacy across training epochs and noise settings.
+    tech: Matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: prep
+    text: splits patients 50/50 into `train` and `holdout`, then encodes columns such as `age`, `chol` and `diagnosis`.
+  - component: generator
+    text: trains CTGAN on `train` only and samples 100k rows in under a minute, oversampling rare diagnoses during training.
+  - component: constraints
+    text: drops rows where, for example, `age` is outside 0–110 or a male patient has a pregnancy code, and reports the share dropped.
+  - component: utility
+    text: compares the AUC of a classifier trained on synthetic rows with one trained on real `train` rows, both tested on `holdout`.
+  - component: privacy
+    text: >-
+      checks whether synthetic rows sit closer to `train` patients than to `holdout` ones, and trains an attacker to
+      tell them apart; an AUC near **0.5** means it cannot.
+  - component: report
+    text: plots the utility gap against attack AUC for each setting and picks the most useful one with attack AUC `< 0.55`.
+interface:
+  lang: python
+  code: |
+    def fit(train: pd.DataFrame,
+            discrete: list[str],
+            epochs: int = 300) -> Generator: ...
+
+    def evaluate(gen: Generator,
+                 train: pd.DataFrame,
+                 holdout: pd.DataFrame,
+                 n: int = 100_000) -> Report: ...
+
+    # Report(tstr_auc=0.81, trtr_auc=0.84,
+    #   mia_auc=0.53, dcr_ratio=1.02,
+    #   violations=0.004)
+decisions:
+  - choice: Holdout patients as the privacy baseline
+    instead: Compare synthetic rows only with the training rows
+    why: >-
+      Synthetic rows always look somewhat like real patients. Only by comparing with patients the model never saw can
+      you tell normal similarity from memorisation.
+  - choice: CTGAN-style generator
+    instead: A tabular diffusion model
+    why: >-
+      CTGAN handles mixed column types and samples 100k rows in seconds on a laptop. Try diffusion if utility misses
+      the 5% target.
+  - choice: Rule-based constraint checker
+    instead: Trust the generator to learn the rules
+    why: A few impossible rows destroy clinicians' trust in the dataset, and rules are cheap to write and test.
+watchOut: >-
+  Average fidelity scores look fine while the model copies rare patients almost exactly. Look at the closest
+  synthetic match for every rare-category patient, not only the averages.

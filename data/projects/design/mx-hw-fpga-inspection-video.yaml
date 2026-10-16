@@ -1,0 +1,102 @@
+overview: >-
+  An FPGA pipeline that processes the weld camera's video one pixel per clock as it streams in, so a frame never
+  needs to be stored in DRAM. Each stage keeps only a few lines in on-chip line buffers: debayer (rebuild colour
+  from the sensor's red, green and blue mosaic), gamma and a 3x3 filter, then a threshold and connected-component
+  labelling that groups bright pixels into defect blobs. A Python and OpenCV golden model produces the expected
+  output for every test frame, and the RTL must match it bit for bit.
+learn:
+  - name: Streaming pipelines
+    ref: project-f
+  - name: Line buffers
+  - name: Valid/ready handshakes
+  - name: Connected-component labelling
+  - name: Bit-exact golden models
+  - name: Timing closure
+    ref: getting-started-with-fpgas
+stats:
+  - value: < 5 ms
+    label: end-to-end latency
+  - value: 148.5 MHz
+    label: pixel clock, 720p60
+  - value: < 60 %
+    label: logic used
+components:
+  - id: source
+    name: Sensor emulator
+    role: Produces 1280x720 Bayer frames at 60 fps from a camera or a test pattern with injected defects.
+    tech: SystemVerilog
+    talksTo: [debayer]
+    kind: core
+  - id: debayer
+    name: Debayer stage
+    role: Rebuilds RGB per pixel from a 3x3 window over two line buffers, then applies a gamma lookup table.
+    tech: SystemVerilog · BRAM
+    talksTo: [conv]
+    kind: core
+  - id: conv
+    name: 3x3 filter
+    role: Runs a fixed-point 3x3 convolution on luma with its own line buffers.
+    tech: SystemVerilog · DSP
+    talksTo: [blob]
+    kind: core
+  - id: blob
+    name: Threshold and blobs
+    role: Thresholds each pixel and labels connected regions in one pass, keeping box and area per blob.
+    tech: SystemVerilog
+    talksTo: [output]
+    kind: core
+  - id: output
+    name: Output formatter
+    role: Draws blob boxes on the video for HDMI and updates the statistics registers.
+    tech: SystemVerilog · HDMI
+    talksTo: [host]
+    kind: core
+  - id: host
+    name: Host link
+    role: Reads defect counts and blob boxes over UART or SPI.
+    tech: Python · UART
+    talksTo: []
+    kind: external
+  - id: golden
+    name: Golden model
+    role: Python and OpenCV model in the same fixed-point maths; cocotb compares its frames with Verilator's.
+    tech: Python · cocotb · Verilator
+    talksTo: []
+    kind: offline
+flow:
+  - component: source
+    text: sends one pixel per clock with `valid`, `sof` (start of frame) and `eol` (end of line) flags at 148.5 MHz.
+  - component: debayer
+    text: holds two previous lines in BRAM, so the 3x3 window around each pixel is ready and RGB comes out **one line late**.
+  - component: conv
+    text: applies the 3x3 kernel with integer weights and a right shift, adding about one more line of delay.
+  - component: blob
+    text: marks pixels above `THRESH`, merges labels with the left and upper neighbour, and closes each blob at `eof`.
+  - component: output
+    text: overlays boxes and writes `defect_count` to the register map; total delay is a few lines, about `0.1 ms`, far below 5 ms.
+interface:
+  lang: verilog
+  code: |
+    module conv3x3 #(parameter W = 1280) (
+      input  logic       clk, rst,
+      input  logic [7:0] s_data,
+      input  logic       s_valid, s_sof, s_eol,
+      output logic       s_ready,
+      output logic [7:0] m_data,
+      output logic       m_valid, m_sof, m_eol,
+      input  logic       m_ready
+    );
+
+    // regs @ host: 0x00 FRAME_CNT  0x04 DEFECTS
+    //              0x08 THRESH     0x10 BLOB[0..15]
+decisions:
+  - choice: Line buffers only, no DRAM
+    instead: Store full frames in external DRAM
+    why: A 3x3 window needs just two lines (about 2.5 KB each), and avoiding DRAM keeps latency to microseconds and the board cheap. Revisit if a stage needs the whole frame, such as temporal filtering.
+  - choice: Bit-exact Python golden model
+    instead: Eyeball the output on a monitor
+    why: Off-by-one and rounding bugs look fine on screen but shift blob boxes. 100 frames compared bit for bit catch them in simulation.
+  - choice: One-pass blob labelling
+    instead: Two-pass labelling over a stored frame
+    why: Two-pass needs the full label image, which breaks the no-DRAM rule. Cap at 16 blobs per frame; raise it if real welds show more.
+watchOut: Line buffers are easy to get off by one at frame edges, which shifts the image a pixel or smears the first column. Test with frames whose border pixels carry known values.

@@ -1,0 +1,55 @@
+overview: >-
+  A multi-tenant API where tenant isolation is enforced inside Postgres with row-level security: every table has a
+  `tenant_id`, a policy compares it to a per-transaction setting, and a suite of cross-tenant attack tests proves no
+  read or write gets through.
+learn:
+  - name: Row-level security
+  - name: Session variables
+  - name: Least-privilege roles
+components:
+  - id: api
+    name: API
+    role: Authenticates the caller and sets the tenant for each transaction.
+    tech: FastAPI
+    talksTo: [db]
+    kind: core
+  - id: db
+    name: Postgres
+    role: Tables with `tenant_id` and policies that filter every query, connected as a non-owner role.
+    tech: PostgreSQL RLS
+    talksTo: []
+    kind: core
+  - id: attacks
+    name: Attack tests
+    role: Try to read, update and insert another tenant's rows, directly and through the API.
+    tech: pytest
+    talksTo: [api, db]
+    kind: offline
+flow:
+  - component: api
+    text: resolves tenant `acme` from the token and runs `SET LOCAL app.tenant_id = '…'` at the start of the transaction.
+  - component: db
+    text: applies the policy `USING (tenant_id = current_setting('app.tenant_id')::uuid)` to every select, update and delete.
+  - component: db
+    text: rejects inserts for another tenant through the policy's `WITH CHECK` clause.
+  - component: attacks
+    text: run as tenant A against tenant B's ids and expect empty results or errors; plans are checked for the `tenant_id` index.
+interface:
+  lang: sql
+  code: |
+    ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE notes FORCE ROW LEVEL SECURITY;
+    CREATE POLICY tenant_isolation ON notes
+      USING (tenant_id =
+        current_setting('app.tenant_id')::uuid)
+      WITH CHECK (tenant_id =
+        current_setting('app.tenant_id')::uuid);
+decisions:
+  - choice: RLS in the database
+    instead: A WHERE tenant_id filter in every query
+    why: >-
+      One forgotten filter in application code leaks data, while a policy applies to every query. Keep the app
+      filter too as a second layer.
+watchOut: >-
+  Superusers and table owners bypass RLS, and a plain `SET` on a pooled connection carries the tenant into the next
+  request. Use a non-owner role, `FORCE ROW LEVEL SECURITY` and `SET LOCAL`.

@@ -1,0 +1,70 @@
+overview: >-
+  A 2D jelly blob made of a ring of point masses joined by edge and cross springs, kept round by a pressure force that
+  pushes outward when the enclosed area shrinks. It bounces in a polygon world, stepped with small substeps so stiff
+  springs stay stable and fast points do not tunnel through walls.
+learn:
+  - name: Spring forces
+    ref: witkin-baraff-pbm
+  - name: Pressure soft bodies
+  - name: Semi-implicit Euler
+    ref: gaffer-on-games
+  - name: Swept collision
+components:
+  - id: body
+    name: Soft body
+    role: Holds the masses, springs, rest lengths and rest area.
+    tech: C++ / Python
+    talksTo: [forces]
+    kind: core
+  - id: forces
+    name: Force pass
+    role: Adds damped spring forces and the pressure force on every edge.
+    tech: C++ / NumPy
+    talksTo: [integrator]
+    kind: core
+  - id: integrator
+    name: Integrator
+    role: Advances velocities and positions in substeps.
+    tech: C++ / NumPy
+    talksTo: [collide]
+    kind: core
+  - id: collide
+    name: Collision
+    role: Sweeps each moving point against the world's polygon edges.
+    tech: C++ / NumPy
+    talksTo: []
+    kind: core
+flow:
+  - component: body
+    text: places 24 to 32 masses on a ring with springs to neighbours and to points a few steps across, which resist folding.
+  - component: forces
+    text: adds `-k(|d| - L)·d̂` plus damping along each spring, and pressure `kp·(A0/A - 1)` along each edge's outward normal, with `A` from the shoelace formula.
+  - component: integrator
+    text: uses semi-implicit Euler (`v += a·dt`, then `x += v·dt`) with **8 substeps** per 60 Hz frame.
+  - component: collide
+    text: tests the segment from each point's old to new position against walls, moves it to the contact and reflects normal velocity with restitution 0.3; max speed and area error are logged.
+interface:
+  lang: cpp
+  code: |
+    struct Mass   { Vec2 x, v; float invMass; };
+    struct Spring { int a, b; float rest, k, damp; };
+
+    struct SoftBody {
+      std::vector<Mass> m;
+      std::vector<Spring> s;
+      float restArea, pressureK;
+      float area() const;   // shoelace formula
+    };
+
+    void add_forces(SoftBody& b, std::span<Vec2> f);
+    void step(SoftBody& b, const World& w,
+              float dt, int substeps = 8);
+decisions:
+  - choice: Substeps, not an implicit solver
+    instead: Implicit integration with a linear solve each step
+    why: >-
+      With 32 masses, 8 substeps cost almost nothing and keep stiff springs stable. Implicit integration allows big
+      steps but needs a sparse solver; switch only if you need far stiffer jelly than substeps can hold.
+watchOut: >-
+  If the ring folds through itself, the area goes negative and pressure pulls the body further inside out. Clamp the
+  pressure for tiny or negative areas, and keep the cross springs.

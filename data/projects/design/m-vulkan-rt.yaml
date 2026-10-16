@@ -1,0 +1,124 @@
+overview: >-
+  A hybrid renderer in your Vulkan engine: rasterize what the camera sees first into a G-buffer (per-pixel position,
+  normal and material), then trace hardware rays from those pixels for shadows and reflections. Rays are tested against
+  acceleration structures, a bottom-level one (BLAS) built once per mesh and a top-level one (TLAS) over all instances,
+  updated every frame as objects move. A physically based GGX material combines the results, and a toggle swaps in the
+  raster shadow map and screen-space reflections so both paths can be timed side by side.
+learn:
+  - name: BLAS and TLAS
+    ref: khronos-vulkan-samples
+  - name: Shader binding table
+    ref: khronos-vulkan-samples
+  - name: Cook-Torrance GGX
+    ref: pbr-book
+  - name: White-furnace test
+    ref: pbr-book
+  - name: Hybrid rendering
+    ref: rtr4
+stats:
+  - value: ≥ 50
+    label: instances moving every frame
+  - value: ≤ 5 %
+    label: energy lost, white furnace
+  - value: 1080p, 1440p
+    label: per-pass timing, raster vs RT
+components:
+  - id: scene
+    name: Scene graph
+    role: Produces the instance transforms of every glTF mesh each frame.
+    tech: C++20 · glTF 2.0
+    talksTo: [asm, gbuffer]
+    kind: core
+  - id: asm
+    name: AS manager
+    role: Builds one BLAS per mesh once and refits or rebuilds the TLAS from the instance list.
+    tech: VK_KHR_acceleration_structure
+    talksTo: [rt]
+    kind: core
+  - id: gbuffer
+    name: G-buffer pass
+    role: Rasterizes position, normal, albedo and metallic-roughness for every pixel.
+    tech: Vulkan 1.3 · GLSL
+    talksTo: [rt, raster, lighting]
+    kind: core
+  - id: rt
+    name: Ray-tracing pass
+    role: Launches shadow and reflection rays from G-buffer pixels through the shader binding table.
+    tech: VK_KHR_ray_tracing_pipeline
+    talksTo: [lighting]
+    kind: core
+  - id: raster
+    name: Raster fallback
+    role: The shadow map and screen-space reflections the toggle switches to.
+    tech: Vulkan graphics · GLSL
+    talksTo: [lighting]
+    kind: core
+  - id: lighting
+    name: PBR lighting
+    role: Applies the GGX metallic-roughness BRDF with image-based ambient light, then tone-maps to the swapchain.
+    tech: GLSL compute
+    talksTo: []
+    kind: core
+  - id: timing
+    name: Pass timing
+    role: Times every pass with GPU timestamps and captures frames for inspection.
+    tech: Timestamp queries · Nsight Graphics
+    talksTo: []
+    kind: offline
+flow:
+  - component: scene
+    text: updates the transforms of at least 50 moving instances and hands the instance list over.
+  - component: asm
+    text: >-
+      **refits** the TLAS when only transforms changed and rebuilds it when instances are added, with a barrier before
+      any ray is traced.
+  - component: gbuffer
+    text: rasterizes primary visibility once, so rays start from known surface points instead of the camera.
+  - component: rt
+    text: >-
+      traces a shadow ray per light from each pixel, offset along the normal to avoid self-hits, and one reflection
+      ray, shaded through the shader binding table.
+  - component: raster
+    text: replaces the ray-traced shadows and reflections with a shadow map and SSR when the toggle is off.
+  - component: lighting
+    text: >-
+      combines both with Cook-Torrance GGX using `alpha = roughness²` and tone-maps; a rough sphere under uniform
+      light must keep 95 % of its energy.
+  - component: timing
+    text: records milliseconds per pass at 1080p and 1440p, and TLAS refit against rebuild for 50, 500 and 5,000 instances.
+interface:
+  lang: glsl
+  code: |
+    layout(binding = 0) uniform
+        accelerationStructureEXT tlas;
+    layout(location = 0) rayPayloadEXT float lit;
+
+    void main() {  // shadow ray generation shader
+      ivec2 px = ivec2(gl_LaunchIDEXT.xy);
+      vec3 p = texelFetch(gPos, px, 0).xyz;
+      vec3 n = texelFetch(gNormal, px, 0).xyz;
+      lit = 0.0;               // miss shader sets 1.0
+      uint f = gl_RayFlagsTerminateOnFirstHitEXT;
+      traceRayEXT(tlas, f, 0xFF, 0, 0, 1,
+                  p + n * 1e-3, 0.0, L, dist, 0);
+      imageStore(shadowImg, px, vec4(lit));
+    }
+decisions:
+  - choice: Hybrid raster plus ray tracing
+    instead: Full path tracing
+    why: >-
+      Rasterizing primary visibility is cheap and leaves the ray budget for shadows and single-bounce reflections,
+      which keeps 1080p real-time without a denoiser. Revisit with the temporal denoiser stretch.
+  - choice: BLAS once, TLAS refit per frame
+    instead: Rebuilding every structure each frame
+    why: >-
+      Meshes do not deform, so only instance transforms change; a refit is much cheaper than a rebuild. Measure where
+      rebuild wins at 50, 500 and 5,000 instances.
+  - choice: Keep the raster path in the same build
+    instead: A separate ray-traced build
+    why: >-
+      A toggle gives frame times and image differences on the same scene and the same three camera views, which is
+      the comparison the project asks for.
+watchOut: >-
+  A missing memory barrier between the acceleration-structure build and the trace lets rays hit last frame's
+  geometry, which shows as stale shadows on moving objects. Barrier after every AS build or refit, before the ray pass.

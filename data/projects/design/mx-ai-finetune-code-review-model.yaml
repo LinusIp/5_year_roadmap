@@ -1,0 +1,107 @@
+overview: >-
+  A pipeline that turns public, permissively licensed pull-request reviews into training pairs, fine-tunes a 7B
+  code model with QLoRA (small adapter weights on a 4-bit base) on one 24 GB GPU, and serves it on Gearloop's own
+  machine so no source code leaves. Every draft comment is checked for symbols that do not exist in the diff, and a
+  judge compares it with the base model's comment to prove it is more useful.
+learn:
+  - name: LoRA and QLoRA
+    ref: hf-llm-course
+  - name: Data licensing and filtering
+  - name: Pairwise win rate
+  - name: Hallucination checks
+  - name: Batched LLM serving
+    ref: vllm-docs
+stats:
+  - value: ≥ 55%
+    label: win rate vs base model
+  - value: < 10 s
+    label: per comment on 24 GB
+  - value: < 8 h
+    label: training
+components:
+  - id: miner
+    name: Data miner
+    role: Pulls diff hunks and the review comment left on them from permissively licensed repositories.
+    tech: Python · CodeReviewer data
+    talksTo: [filter]
+    kind: core
+  - id: filter
+    name: Filter
+    role: Drops non-permissive licences, "LGTM"-style comments, bots and near-duplicates.
+    tech: Python · MinHash
+    talksTo: [trainer]
+    kind: core
+  - id: trainer
+    name: QLoRA trainer
+    role: Trains adapters on a 7B code model in 4-bit on the single GPU.
+    tech: PyTorch · PEFT · TRL
+    talksTo: [server]
+    kind: core
+  - id: server
+    name: Review server
+    role: Batches incoming diffs and generates draft comments with the adapter loaded.
+    tech: vLLM
+    talksTo: [symbols]
+    kind: core
+  - id: symbols
+    name: Symbol checker
+    role: Flags any function, variable or file named in a comment that is not in the diff or repo index.
+    tech: Python · tree-sitter
+    talksTo: [judge]
+    kind: core
+  - id: judge
+    name: Judge
+    role: Compares fine-tuned and base comments on held-out diffs; 100 human labels check it.
+    tech: Local LLM · Python
+    talksTo: []
+    kind: offline
+  - id: gpu
+    name: 24 GB GPU
+    role: The one card that training and serving must both fit.
+    tech: Consumer GPU
+    talksTo: []
+    kind: external
+flow:
+  - component: miner
+    text: collects pairs of `(diff_hunk, comment)` and records each repository's licence next to them.
+  - component: filter
+    text: keeps only MIT, Apache-2.0 and BSD repos, removes comments under 8 words or from bots, and dedupes; **license** is checked before anything trains.
+  - component: trainer
+    text: trains `r=16` adapters for 2 epochs on the **24 GB GPU** in 4-bit, keeping 5% of repos aside for evaluation.
+  - component: server
+    text: receives a diff from `POST /review`, batches it with others and returns draft comments within 10 s.
+  - component: symbols
+    text: parses the diff and marks a comment as hallucinated when it names a symbol that is not there.
+  - component: judge
+    text: shows base and fine-tuned comments in both orders and counts a win only when both orders agree.
+interface:
+  lang: http
+  code: |
+    POST /review
+    { "repo": "gearloop/billing",
+      "diff": "@@ -40,6 +40,9 @@ def charge(…" }
+
+    200 OK
+    { "comments": [
+        { "line": 44,
+          "text": "charge() retries without
+                   an idempotency key…",
+          "unknown_symbols": [] } ],
+      "model": "review-7b-qlora-v3" }
+decisions:
+  - choice: QLoRA on a 7B model
+    instead: Full fine-tuning or a hosted API
+    why: >-
+      Code cannot leave the company and there is one 24 GB card, so full fine-tuning does not fit and a hosted API is
+      ruled out. 4-bit adapters fit and finish well inside 8 hours.
+  - choice: Filter by licence and comment quality first
+    instead: Train on every public review comment
+    why: >-
+      Many real review comments are "nit" or "LGTM" and teach nothing, and a GPL repo in the set contaminates the
+      model card. Fewer, better pairs beat more noisy ones.
+  - choice: Automatic symbol check
+    instead: Rely on the judge alone
+    why: A judge rarely notices that `parse_cfg()` does not exist; a parser does, every time, and gives a hard rate to beat.
+watchOut: >-
+  Low-quality comments in the data teach the model to write vague praise that the judge may still prefer. Read 50
+  filtered pairs by hand before training and keep the human-labelled check on the judge.

@@ -1,0 +1,129 @@
+overview: >-
+  A small TCP/IP stack in C that runs as an ordinary program and talks to a real Linux host through a TAP device, a
+  virtual network card whose Ethernet frames your program reads and writes as a file. One single-threaded poll loop
+  reads each frame, hands it up through ARP, IPv4 and ICMP to a TCP state machine, and a timer queue drives
+  retransmissions. Because everything happens in one loop, a student can single-step the whole path from a frame
+  arriving to bytes reaching the demo HTTP client.
+learn:
+  - name: TCP state machine
+    ref: stanford-cs144
+  - name: Sliding windows
+    ref: stanford-cs144
+  - name: Retransmission timeouts
+  - name: Slow start and AIMD
+  - name: Sequence number arithmetic
+  - name: ARP resolution
+stats:
+  - value: ≥ 80%
+    label: of a 1 Gbit link, no loss
+  - value: 5% loss
+    label: survived with matching hash
+  - value: "50"
+    label: packet-trace tests pass
+components:
+  - id: host
+    name: Linux host
+    role: A normal Linux machine serving the 100 MB file, with tc netem adding loss.
+    tech: Linux · tc netem
+    talksTo: [tap]
+    kind: external
+  - id: tap
+    name: TAP I/O
+    role: Opens the TAP device, reads and writes raw Ethernet frames, answers ARP.
+    tech: /dev/net/tun · poll
+    talksTo: [ip]
+    kind: core
+  - id: ip
+    name: ARP/IP layer
+    role: Checks IPv4 headers, answers ICMP echo and hands TCP segments up.
+    tech: C
+    talksTo: [tcp]
+    kind: core
+  - id: tcp
+    name: TCP state machine
+    role: Owns each connection's state, send and receive windows and unacked segments.
+    tech: C
+    talksTo: [cc, socket]
+    kind: core
+  - id: cc
+    name: Congestion control
+    role: Keeps cwnd and ssthresh and decides how much may be in flight.
+    tech: Reno-style
+    talksTo: []
+    kind: core
+  - id: timers
+    name: Timer queue
+    role: Holds retransmission and TIME_WAIT deadlines ordered by expiry.
+    tech: Min-heap · monotonic clock
+    talksTo: [tcp]
+    kind: core
+  - id: socket
+    name: Socket API
+    role: Gives the demo HTTP client connect, read, write and close calls.
+    tech: C
+    talksTo: []
+    kind: core
+  - id: traces
+    name: Trace tests
+    role: Replays 50 scripted frame sequences and checks the exact frames sent back.
+    tech: Recorded frames
+    talksTo: [tap]
+    kind: offline
+flow:
+  - component: tap
+    text: >-
+      wakes from `poll()` with one frame from the TAP fd; ARP requests for our IP get a reply, and the host's MAC
+      goes into the ARP cache.
+  - component: ip
+    text: >-
+      checks version, header length and checksum, drops fragments (out of scope), replies to ICMP echo and passes
+      protocol 6 to TCP.
+  - component: tcp
+    text: >-
+      finds the connection by its 4-tuple, steps the state machine (`SYN_SENT` to `ESTABLISHED` on a SYN-ACK),
+      accepts in-window bytes and sends an ACK advertising the free buffer, scaled by the window scale option.
+  - component: cc
+    text: >-
+      grows `cwnd` on each new ACK, by one MSS per ACK in **slow start** and about one MSS per round trip once past
+      `ssthresh`; three duplicate ACKs halve it and resend the missing segment.
+  - component: timers
+    text: >-
+      fires the retransmission timeout if the oldest segment is still unacked: resend it, double the RTO, and set
+      `cwnd` back to one MSS.
+  - component: socket
+    text: >-
+      lets the HTTP client's `tcp_read()` take the in-order bytes; the client hashes the 100 MB body and compares it
+      with the host's hash.
+interface:
+  lang: c
+  code: |
+    // everything runs inside stack_poll(), one thread
+    stack_t *stack_open(const char *tap, ip4_t ip);
+    int     tcp_connect(stack_t *s, ip4_t dst,
+                        uint16_t port);
+    ssize_t tcp_write(stack_t *s, int sd,
+                      const void *buf, size_t n);
+    ssize_t tcp_read(stack_t *s, int sd,
+                     void *buf, size_t n); // -EAGAIN
+    int     tcp_close(stack_t *s, int sd);
+    // read frames, run due timers, return
+    void    stack_poll(stack_t *s, int timeout_ms);
+decisions:
+  - choice: One single-threaded poll loop
+    instead: A thread per connection or per layer
+    why: >-
+      The lab wants students to single-step TCP, and the constraint says single-threaded. One loop also makes trace
+      tests deterministic. At 1 Gbit, one core can still keep up if frames are read in batches.
+  - choice: One timer queue on a monotonic clock
+    instead: An OS timer per connection
+    why: >-
+      The next deadline becomes the `poll()` timeout, so timers fire in order and tests can fake the clock. Keep
+      times in milliseconds; coarse ticks are the timer granularity errors the pitfalls warn about.
+  - choice: Reno-style congestion control
+    instead: Cubic, as Linux uses
+    why: >-
+      Slow start and congestion avoidance are a few lines each and their cwnd traces are easy to read. Comparing
+      against Linux Cubic is a stretch goal, once the simple version passes the 5% loss test.
+watchOut: >-
+  Sequence numbers are 32 bits and wrap around, so never compare them with `<`. Use `(int32_t)(a - b) < 0`
+  everywhere, and test with a starting sequence number just below 2^32.

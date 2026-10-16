@@ -1,0 +1,54 @@
+overview: >-
+  A lease lock where each grant comes with a fencing token (a number that increases on every grant), and the
+  storage layer refuses writes carrying a token lower than one it has already seen, so a client that paused past
+  its lease cannot corrupt data.
+learn:
+  - name: Lease locks
+  - name: Fencing tokens
+    ref: ddia
+  - name: Process pauses
+    ref: kleppmann-distributed-systems
+components:
+  - id: client
+    name: Clients
+    role: Two workers that take the lock, then write to storage.
+    tech: Python
+    talksTo: [lock, storage]
+    kind: core
+  - id: lock
+    name: Lock service
+    role: Grants a 5 s lease with the next token from a counter.
+    tech: Redis or PostgreSQL
+    talksTo: []
+    kind: core
+  - id: storage
+    name: Storage
+    role: Accepts a write only if its token is at least the highest one seen for that key.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+flow:
+  - component: lock
+    text: grants client A the lease with token 33.
+  - component: client
+    text: A pauses for 8 s, as a long GC pause would; its lease expires and B gets token 34 and writes.
+  - component: client
+    text: A wakes up, still believing it holds the lock, and sends its write with token 33.
+  - component: storage
+    text: rejects it because `33 < 34`; without the check the test shows a corrupted record.
+interface:
+  lang: sql
+  code: |
+    UPDATE files
+    SET body = $1, fence = $2
+    WHERE key = $3 AND fence < $2;
+    -- 0 rows updated means a stale holder
+decisions:
+  - choice: Check the token in storage
+    instead: Check the lease before writing
+    why: >-
+      The pause can happen between the lease check and the write, so the client can never be sure. Only the
+      storage, which sees every write, can enforce order.
+watchOut: >-
+  Believing that a lease check makes a write safe is the bug this build exists to show. Safety needs the storage
+  layer to reject old tokens.

@@ -1,0 +1,99 @@
+overview: >-
+  Parcelo's Django app stays one deployable, but its code is cut into 6 modules such as billing, lockers and
+  notifications, each exposing only a small public api package. An import-linter contract in CI fails any pull
+  request that imports another module's internals, and a shrinking allowlist records the 400+ old violations until
+  each is fixed. Each module also gets its own Postgres schema, so cross-module ORM joins become calls through those
+  public interfaces, and a Locust gate checks that p99 latency has not moved.
+learn:
+  - name: Modular monolith
+    ref: roadmap-software-architect
+  - name: Bounded contexts
+  - name: Import contracts in CI
+    ref: github-actions-docs
+  - name: Coupling metrics
+  - name: Strangler-style refactoring
+  - name: Load-test regression gates
+stats:
+  - value: 400+ → 0
+    label: import violations on main
+  - value: < 20 s
+    label: added to a 6-minute CI run
+  - value: ±5 %
+    label: p99 latency at 300 req/s
+components:
+  - id: analyzer
+    name: Import analyzer
+    role: Builds the import graph and coupling numbers that the 6 module boundaries were drawn from.
+    tech: Python · grimp · Graphviz
+    talksTo: [rules]
+    kind: offline
+  - id: pr
+    name: Pull request
+    role: A small change that moves code or a call behind a module's public interface.
+    tech: GitHub
+    talksTo: [interfaces]
+    kind: external
+  - id: rules
+    name: Boundary rules
+    role: Import-linter contracts and the allowlist; any new forbidden import fails the build.
+    tech: import-linter · GitHub Actions
+    talksTo: [tests]
+    kind: core
+  - id: interfaces
+    name: Module interfaces
+    role: Each module's api package of functions and plain data classes, the only thing others may import.
+    tech: Python · Django
+    talksTo: [schemas]
+    kind: core
+  - id: schemas
+    name: Schema separation
+    role: One Postgres schema and migration set per module, with no foreign keys across modules.
+    tech: PostgreSQL · Django migrations
+    talksTo: [rules]
+    kind: core
+  - id: tests
+    name: Tests and load gate
+    role: Runs the 1,800 tests, then a Locust run at 300 req/s compared with the stored baseline.
+    tech: pytest · Locust
+    talksTo: [diagram]
+    kind: core
+  - id: diagram
+    name: Diagram generator
+    role: Draws the module dependency graph from code on every merge.
+    tech: Graphviz
+    talksTo: []
+    kind: offline
+flow:
+  - component: interfaces
+    text: gain a call such as `billing.api.get_invoice(order_id)` that returns a plain data class, so the pull request can drop its import of `billing.models`.
+  - component: schemas
+    text: move the module's tables into its own schema, so a join across modules **can no longer be written** and becomes two interface calls.
+  - component: rules
+    text: run `lint-imports` on the pull request; any import of another module's internals fails unless it is still on the allowlist.
+  - component: tests
+    text: runs the 1,800 tests, then Locust at `300 req/s`, and blocks the merge if p99 is more than `5 %` above baseline.
+  - component: rules
+    text: on merge remove the fixed entries from the allowlist, so the violation count can only go down.
+interface:
+  lang: shell
+  code: |
+    # .importlinter
+    [importlinter:contract:billing]
+    name = Only billing.api is public
+    type = forbidden
+    source_modules = lockers, notifications, accounts
+    forbidden_modules = billing.models, billing.services
+    ignore_imports =
+        lockers.views -> billing.models  # TODO-123
+
+    $ lint-imports
+    Only billing.api is public  BROKEN
+      notifications.tasks -> billing.models (l.14)
+decisions:
+  - choice: Modular monolith, not microservices
+    instead: Split straight into microservices
+    why: The pain is tangled code, not scaling, and the constraint keeps one deployable. Clean module boundaries make a later service split cheap if a team ever needs it.
+  - choice: Allowlist that only shrinks
+    instead: Fix all 400 violations before turning the check on
+    why: A big-bang fix stalls for weeks while new violations keep arriving. Turning the rule on day one stops new ones, and each PR pays a few old ones off.
+watchOut: A shared utils module tends to swallow everything that does not fit elsewhere and becomes the new god module. Give it an owner and a contract that forbids it from importing any business module.

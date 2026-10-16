@@ -1,0 +1,102 @@
+overview: >-
+  An 8-player arena shooter for Cobalt Fern Studio with a dedicated server, built end to end with milestone gates and
+  3 playtests. The server is authoritative at 60 ticks/s and sends delta-compressed snapshots; each client predicts its
+  own movement at once, shows other players slightly in the past, and corrects itself when the server disagrees. Shots
+  are checked with lag compensation, rewinding other players to where the shooter saw them, and telemetry from bots and
+  6 testers feeds each milestone.
+learn:
+  - name: Client-side prediction
+    ref: gaffer-on-games
+  - name: Snapshot interpolation
+    ref: gaffer-on-games
+  - name: Lag compensation
+  - name: Delta compression
+  - name: UDP protocols
+    ref: stanford-cs144
+stats:
+  - value: < 25%
+    label: of one core for 8 players
+  - value: < 40 KB/s
+    label: per client
+  - value: < 2%
+    label: hit-reg disagreement at 100 ms RTT
+components:
+  - id: lobby
+    name: Lobby
+    role: Groups 8 players or bots into a match and starts the server match flow.
+    tech: C++17 · UDP
+    talksTo: [client]
+    kind: core
+  - id: client
+    name: Client prediction
+    role: Applies local input immediately, keeps unacknowledged inputs, and reconciles with snapshots.
+    tech: C++17
+    talksTo: [server]
+    kind: core
+  - id: server
+    name: Server loop
+    role: Applies all inputs at 60 ticks/s, runs movement and combat, and owns the true state.
+    tech: C++17
+    talksTo: [lagcomp]
+    kind: core
+  - id: lagcomp
+    name: Lag compensation
+    role: Keeps 1 s of player hitbox history and rewinds it to test a shot.
+    tech: C++17
+    talksTo: [encoder]
+    kind: core
+  - id: encoder
+    name: Snapshot encoder
+    role: Quantises state and encodes it as a delta against the client's last acknowledged snapshot.
+    tech: C++17 · bit packing
+    talksTo: [client, telemetry]
+    kind: core
+  - id: telemetry
+    name: Telemetry
+    role: Logs hits, disagreements, latency and match events for playtest reports.
+    tech: CSV · notebook
+    talksTo: []
+    kind: offline
+flow:
+  - component: lobby
+    text: has filled the match with 8 players and bots and sent everyone the server address.
+  - component: client
+    text: samples input for tick 1,200, moves its own player **at once** with the same movement code as the server, and sends the input with the last 2 for redundancy.
+  - component: server
+    text: applies everyone's inputs for the tick; a fire input arrives for a shooter with 100 ms round trip.
+  - component: lagcomp
+    text: rewinds the other players' hitboxes by half the round trip plus the 100 ms interpolation delay, raycasts the shot, and restores them.
+  - component: encoder
+    text: sends each client only what changed since its last acked snapshot, positions in 1/64 m and angles in 16 bits.
+  - component: client
+    text: compares the server's state at `ackInputTick` with its own prediction, replays the unacked inputs on top if they differ, and draws others 100 ms in the past; then the loop starts again next tick.
+interface:
+  lang: cpp
+  code: |
+    struct InputCmd {           // client -> server
+      uint32_t tick;
+      int16_t  moveX, moveY;    // quantised stick
+      uint16_t yaw, pitch;      // 16-bit angles
+      uint8_t  buttons;         // fire, jump, ...
+    };                          // 3 per packet
+    struct SnapshotHeader {     // server -> client
+      uint32_t tick;
+      uint32_t baseTick;        // delta against this
+      uint32_t ackInputTick;    // newest input used
+    };
+    // then per player: changed fields only,
+    // position in 1/64 m
+decisions:
+  - choice: Authoritative server
+    instead: Clients report their own positions and hits
+    why: Trusting clients makes speed hacks and fake hits trivial. The server owns the state; clients only send inputs.
+  - choice: Lag compensation capped at 200 ms
+    instead: No compensation, players lead their shots
+    why: At 100 ms round trip a moving target is far from where it looks, so hits would disagree far beyond 2%. The cap stops high-latency players shooting round corners.
+  - choice: Delta against the last acked snapshot
+    instead: Full snapshots every tick
+    why: Full snapshots for 8 players at 60 Hz go past 40 KB/s. Deltas against a snapshot the client confirmed stay small and survive packet loss.
+watchOut: >-
+  Wrong reconciliation causes rubber-banding: the client snaps back every time a snapshot arrives. Compare only the
+  state at the acked input tick, replay later inputs with the identical movement code and tick length, and smooth
+  small errors over a few frames.

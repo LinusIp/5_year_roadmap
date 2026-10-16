@@ -1,0 +1,113 @@
+overview: >-
+  One 8B base model on a 48 GB GPU serves 200 tenants, each with its own LoRA adapter, which is a small set of extra
+  low-rank weights added to the base layers. A router tags each request with its tenant's adapter, a two-tier cache
+  keeps the hot adapters on the GPU and all 200 in pinned CPU memory, and a grouped LoRA kernel lets requests for
+  different adapters share one decode batch. The test traffic is Zipf-skewed, so a few tenants are very busy and
+  most are quiet.
+learn:
+  - name: LoRA adapters
+    ref: hf-llm-course
+  - name: Multi-LoRA batching
+    ref: vllm-docs
+  - name: LRU caching
+  - name: Zipf traffic
+  - name: Token-bucket rate limits
+  - name: Tail latency
+    ref: databricks-inference-best-practices
+stats:
+  - value: ≥ 90%
+    label: GPU adapter cache hits
+  - value: ≤ 150 ms
+    label: cold swap-in, rank 16
+  - value: ≤ 1.5 s
+    label: p99 TTFT
+components:
+  - id: load
+    name: Load generator
+    role: Sends requests from 200 tenants with Zipf s=1.1 popularity.
+    tech: Python · asyncio
+    talksTo: [limiter]
+    kind: external
+  - id: limiter
+    name: Tenant limiter
+    role: Applies a per-tenant token bucket so one tenant's burst cannot fill the queue.
+    tech: Python
+    talksTo: [router]
+    kind: core
+  - id: router
+    name: Request router
+    role: Looks up the tenant's adapter id and attaches it to the request.
+    tech: FastAPI
+    talksTo: [cache]
+    kind: core
+  - id: registry
+    name: Adapter registry
+    role: Stores the 200 adapters (20–80 MB each) with rank, checksum and version.
+    tech: Disk · safetensors
+    talksTo: [cache]
+    kind: offline
+  - id: cache
+    name: Tiered cache
+    role: Keeps about 96 adapters on the GPU and all 200 in pinned CPU memory, evicting least recently used.
+    tech: Python · PyTorch
+    talksTo: [engine]
+    kind: core
+  - id: engine
+    name: Grouped LoRA batching
+    role: Runs one decode batch over the shared base, applying each request's adapter in a grouped kernel.
+    tech: vLLM multi-LoRA · 48 GB GPU
+    talksTo: [metrics]
+    kind: core
+  - id: metrics
+    name: Metrics
+    role: Tracks hit rate, swap latency, p99 TTFT per tenant and memory per tier.
+    tech: Prometheus
+    talksTo: []
+    kind: offline
+flow:
+  - component: limiter
+    text: takes a request from tenant `t-0147` and lets it through because the tenant still has tokens in its bucket.
+  - component: router
+    text: attaches `lora_id=147`, which the engine needs to pick the right adapter weights.
+  - component: cache
+    text: >-
+      misses on the GPU tier, so copies the 40 MB adapter from pinned CPU memory over PCIe in a few milliseconds and
+      evicts the least recently used one; a **cold** load from disk must still finish in 150 ms.
+  - component: engine
+    text: >-
+      adds the request to the running batch beside requests for 20 other adapters; the base weights are read once
+      per step and each adapter adds only a small rank-16 matmul.
+  - component: metrics
+    text: records the swap time and the request's TTFT, so the p99 for **quiet** tenants can be checked as well as the overall one.
+interface:
+  lang: shell
+  code: |
+    vllm serve base-8b \
+      --enable-lora \
+      --max-loras 96 \
+      --max-cpu-loras 200 \
+      --max-lora-rank 16
+
+    curl localhost:8000/v1/completions -d '{
+      "model": "t-0147",
+      "prompt": "Customer asks about refunds…",
+      "max_tokens": 200 }'
+decisions:
+  - choice: About 96 adapter slots on the GPU
+    instead: All 200 adapters on the GPU
+    why: >-
+      With Zipf s=1.1, the 93 most popular adapters carry 90% of requests, and 96 slots of about 40 MB use roughly
+      4 GB, leaving the rest of the 48 GB for KV cache. Revisit if the tenant mix flattens.
+  - choice: Grouped kernel over mixed adapters
+    instead: Batch only requests with the same adapter
+    why: >-
+      With 200 tenants, same-adapter batches would be tiny and throughput would fall far below the 75% target.
+      Revisit only if one tenant dominates traffic.
+  - choice: One maximum rank for every slot
+    instead: Slots sized to each adapter's own rank
+    why: >-
+      Mixed-size slots fragment GPU memory; padding every slot to rank 16 keeps allocation simple. Revisit if a
+      tenant needs rank 64.
+watchOut: >-
+  Uniform test traffic hides cache problems, and the mean hides a starving tenant. Load-test with the Zipf mix, burst
+  one heavy tenant on purpose, and check p99 TTFT for the quiet tenants on their own.

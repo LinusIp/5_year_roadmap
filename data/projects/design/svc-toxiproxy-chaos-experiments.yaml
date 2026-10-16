@@ -1,0 +1,51 @@
+overview: >-
+  Three chaos experiments run with Toxiproxy (a proxy that adds latency, resets or cuts connections on command)
+  between your service and its dependencies, each with a hypothesis, steady-state metrics from k6, an abort
+  condition and a fix.
+learn:
+  - name: Steady-state hypothesis
+  - name: Fault injection
+  - name: Timeouts and fallbacks
+  - name: Blast radius
+components:
+  - id: k6
+    name: k6
+    role: Sends steady traffic and records success rate and p95.
+    tech: k6
+    talksTo: [service]
+    kind: core
+  - id: service
+    name: Service
+    role: The system under test, which reaches its dependencies only through Toxiproxy.
+    tech: Your API
+    talksTo: [toxiproxy]
+    kind: core
+  - id: toxiproxy
+    name: Toxiproxy
+    role: Sits in front of Postgres and Redis and applies toxics on command.
+    tech: Toxiproxy
+    talksTo: [deps]
+    kind: core
+  - id: deps
+    name: Dependencies
+    role: Postgres and Redis in Docker Compose.
+    tech: Postgres · Redis
+    talksTo: []
+    kind: external
+flow:
+  - component: k6
+    text: measures the steady state, such as 99.9 percent success at p95 < 200 ms.
+  - component: toxiproxy
+    text: adds a `latency` toxic of 500 ms to Redis, under the hypothesis that the cache timeout keeps p95 under 300 ms.
+  - component: service
+    text: handles the fault; the run is aborted if success drops below 95 percent.
+  - component: k6
+    text: records the deviation; then resets and a partition are tried, and the weakest handling is fixed and rerun.
+decisions:
+  - choice: Toxiproxy in the network path
+    instead: Killing containers at random
+    why: >-
+      Each fault is precise and reversible, so a result can be tied to one hypothesis. Random kills come later,
+      once these three pass.
+watchOut: >-
+  An experiment without an abort condition can turn into a real outage. Decide the stop rule before you inject.

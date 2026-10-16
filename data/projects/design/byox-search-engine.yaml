@@ -1,0 +1,113 @@
+overview: >-
+  A small web search engine: a polite crawler collects at least 50,000 pages from one corner of the web, an indexer
+  builds an inverted index (for each word, the list of documents that contain it), and a query server ranks results
+  with BM25 in under 50 ms. The crawler keeps a frontier queue per host and waits between requests, the extractor
+  strips markup and near-duplicates, and the indexer writes compressed posting lists in batches and merges them on
+  disk. Twenty test queries, written before you see any results, judge the ranking.
+learn:
+  - name: Polite crawling
+    ref: system-design-primer
+  - name: Inverted index
+  - name: Posting-list compression
+  - name: BM25 ranking
+  - name: Offline relevance evaluation
+stats:
+  - value: ≥ 50,000
+    label: distinct documents indexed
+  - value: < 50 ms
+    label: p95 query latency on a laptop
+  - value: 1 req/s
+    label: max per host, robots.txt obeyed
+components:
+  - id: web
+    name: Web hosts
+    role: The sites in the chosen corner of the web, each with its robots.txt.
+    tech: HTTP
+    talksTo: [crawler]
+    kind: external
+  - id: crawler
+    name: Crawler
+    role: Keeps a frontier queue per host, fetches politely, deduplicates URLs and stores raw pages.
+    tech: Python · asyncio · httpx
+    talksTo: [extractor]
+    kind: core
+  - id: extractor
+    name: Extractor
+    role: Strips markup, drops near-duplicate pages, and tokenises with lower-casing and stemming.
+    tech: selectolax
+    talksTo: [indexer]
+    kind: core
+  - id: indexer
+    name: Indexer
+    role: Builds sorted posting lists in memory-sized batches, merges them on disk, and fills the document table.
+    tech: Rust or Go · SQLite
+    talksTo: [server]
+    kind: core
+  - id: server
+    name: Query server
+    role: Decodes the query terms' posting lists, scores with BM25 and returns the top 10 with snippets.
+    tech: Rust or Go · HTTP
+    talksTo: []
+    kind: core
+  - id: eval
+    name: Relevance eval
+    role: Replays 1,000 queries for latency and scores the 20 judged queries with precision and nDCG at 10.
+    tech: Python
+    talksTo: [server]
+    kind: offline
+flow:
+  - component: crawler
+    text: >-
+      pops a URL from the host's queue, checks `robots.txt`, waits until **1 s** has passed since that host's last
+      request, fetches the page and queues new normalised links.
+  - component: extractor
+    text: >-
+      turns the HTML into text, skips it if its shingle hash matches a page already kept, and tokenises it.
+  - component: indexer
+    text: >-
+      adds the document's terms to the current batch, writes sorted runs with delta-encoded, variable-byte postings,
+      and records the document's length and URL.
+  - component: server
+    text: >-
+      receives `GET /search?q=`, tokenises the query with the **same** tokeniser as the documents, and decodes each
+      term's postings.
+  - component: server
+    text: >-
+      adds up BM25 scores per document, keeps the best 10 in a heap, and builds a snippet around the matched terms.
+  - component: eval
+    text: >-
+      measures p50, p95 and p99 with a cold and a warm cache, and compares BM25 with a TF-IDF baseline on the 20
+      judged queries.
+interface:
+  lang: http
+  code: |
+    GET /search?q=borrow+checker&k=10
+
+    200 OK
+    { "took_ms": 12,
+      "total": 418,
+      "results": [
+        { "doc_id": 30117,
+          "url": "…",
+          "title": "Understanding ownership",
+          "score": 14.2,
+          "snippet": "…the borrow checker rejects…" }
+      ] }
+decisions:
+  - choice: Python crawler, compiled index and server
+    instead: One language for everything
+    why: >-
+      Crawling at 1 request per second per host is bound by the network, where asyncio is enough. Decoding postings
+      for a 50 ms p95 is bound by CPU, where Rust or Go pays off.
+  - choice: Batch build and on-disk merge
+    instead: One in-memory dictionary written at the end
+    why: >-
+      50,000 pages might just fit in memory, but the batch-and-merge build keeps working when the crawl grows, and it
+      is the method the reading teaches.
+  - choice: BM25 scored against a TF-IDF baseline
+    instead: Reporting BM25 alone
+    why: >-
+      Without a baseline you cannot tell whether the ranking is good. The 20 judged queries make the comparison cheap.
+watchOut: >-
+  Crawler traps such as calendars, session ids and endless pagination eat the crawl budget. Strip tracking and session
+  parameters from URLs, cap pages per host and link depth, and watch pages per host while it runs.

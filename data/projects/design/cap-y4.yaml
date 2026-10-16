@@ -1,0 +1,123 @@
+overview: >-
+  A reaction-wheel pendulum on your own 12 V board, balanced by bare-metal firmware running a 1 kHz control loop.
+  Every millisecond the microcontroller reads the angle and wheel encoder, samples motor current in the middle of
+  the PWM period, computes an LQR (a controller whose gains come from the system's model) and sets a new duty. A
+  digital twin couples your SPICE-like circuit solver to your mechanics engine and runs the same controller code, so
+  simulated and measured step responses can be laid over each other.
+learn:
+  - name: PCB layout
+    ref: phils-lab
+  - name: Bare-metal firmware
+    ref: making-embedded-systems
+  - name: H-bridges and current sensing
+  - name: State space and LQR
+    ref: brunton-control-bootcamp
+  - name: System identification
+  - name: SPICE simulation
+    ref: ngspice
+stats:
+  - value: 1 kHz
+    label: loop, under 5 µs jitter
+  - value: ≤ 10 %
+    label: RMS error, twin against bench
+  - value: 5 min
+    label: balanced, recovers from a 5° tap
+components:
+  - id: host
+    name: Host
+    role: Sends setpoints and test steps and records telemetry.
+    tech: Python · NumPy
+    talksTo: [firmware]
+    kind: core
+  - id: firmware
+    name: Firmware
+    role: Runs the 1 kHz timer-driven loop that senses, computes the controller and sets PWM duty.
+    tech: STM32G4 · bare-metal C or Rust
+    talksTo: [power, analysis]
+    kind: core
+  - id: power
+    name: Power stage
+    role: H-bridge with dead time turning duty into motor current, measured by a shunt and amplifier.
+    tech: MOSFETs · INA240-class amp
+    talksTo: [plant]
+    kind: core
+  - id: plant
+    name: Pendulum rig
+    role: Motor, reaction wheel and pendulum, with encoder and IMU or angle sensor.
+    tech: Printed frame · encoder motor
+    talksTo: [firmware]
+    kind: core
+  - id: circuit
+    name: Circuit model
+    role: Simulates bridge, motor resistance and inductance, back-EMF and the sense amplifier.
+    tech: Your SPICE-like solver
+    talksTo: [mech]
+    kind: offline
+  - id: mech
+    name: Mechanics model
+    role: Simulates pendulum, wheel inertia and friction and runs the host build of the controller.
+    tech: Your multibody engine
+    talksTo: [circuit, analysis]
+    kind: offline
+  - id: analysis
+    name: Analysis
+    role: Identifies model parameters from bench steps and overlays bench and twin responses.
+    tech: SciPy · python-control
+    talksTo: []
+    kind: offline
+flow:
+  - component: host
+    text: sends a voltage step or a setpoint over UART and starts recording telemetry.
+  - component: firmware
+    text: >-
+      wakes on the timer every 1 ms, reads the angle and a 32-bit extended encoder count, samples current
+      **mid-PWM**, computes the controller and writes the new duty.
+  - component: power
+    text: >-
+      switches the H-bridge with dead time between the high and low transistors, so the duty becomes motor current
+      without shoot-through.
+  - component: plant
+    text: >-
+      turns current into wheel torque that pushes the pendulum, and its sensors feed the next tick; this is the
+      control **loop**.
+  - component: mech
+    text: >-
+      runs the same controller and step in the twin, swapping current and speed with the circuit model at every
+      solver step.
+  - component: analysis
+    text: >-
+      overlays bench and twin responses and checks them against `10 %` RMS error and `15 %` on rise time.
+interface:
+  lang: c
+  code: |
+    typedef struct {       // sent over UART
+      uint32_t tick;       // 1 ms per tick
+      float    theta;      // pendulum angle, rad
+      int32_t  wheel_cnt;  // 32-bit extended
+      float    i_motor;    // amps, sampled mid-PWM
+      float    u_volts;    // commanded voltage
+    } telem_t;
+
+    // Timer ISR at 1 kHz: sense, control, actuate
+    void control_isr(void);
+    // Same code builds for the MCU and the twin
+    float controller_step(const state_t *x);
+decisions:
+  - choice: One controller source for MCU and twin
+    instead: Rewriting the controller in Python for simulation
+    why: >-
+      A second copy drifts, and the gap shows up as a sim-to-bench error you cannot explain. One file also makes
+      gains tuned on hardware flow back into the model.
+  - choice: Model identified from bench steps
+    instead: Datasheet values for the motor and rig
+    why: >-
+      Friction, backlash and real winding resistance are missing from datasheets, which makes the twin too
+      optimistic. Fit them from open-loop voltage steps with uncertainty.
+  - choice: Bare-metal timer interrupt
+    instead: An RTOS task or a busy loop
+    why: >-
+      The target is under 5 µs of jitter at 1 kHz, measured on a GPIO. One interrupt has nothing to share the time
+      with; add an RTOS only if a second loop arrives.
+watchOut: >-
+  Missing dead time lets both transistors of a bridge leg conduct at once and burns the board on first power-up.
+  Configure dead time in the timer before enabling PWM, and bring the board up on a current-limited supply.

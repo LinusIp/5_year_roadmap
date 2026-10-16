@@ -1,0 +1,106 @@
+overview: >-
+  A cheaper replacement for Parcelhub's all-LLM classifier of shipment exceptions. The LLM labels a 20k sample once
+  (checked against a human-audited set), a small TF-IDF and linear model learns from those labels and serves 1,000
+  requests a second on CPU, and only notes the small model is unsure about, mostly rare classes, go back to the LLM.
+  A cost model shows the hybrid is at least 80% cheaper, and a drift check watches the label mix.
+learn:
+  - name: Knowledge distillation
+  - name: TF-IDF and linear models
+    ref: ml-zoomcamp
+  - name: Confidence calibration
+  - name: Selective fallback
+  - name: Label drift
+stats:
+  - value: ≥ 95%
+    label: agreement on common classes
+  - value: ≥ 80%
+    label: cost cut vs all-LLM
+  - value: 1,000
+    label: requests/s on CPU
+components:
+  - id: labeler
+    name: Labeler
+    role: Asks the LLM to label 20k sampled notes into the exception classes with a fixed prompt.
+    tech: LLM API · JSON schema
+    talksTo: [student]
+    kind: offline
+  - id: audit
+    name: Audit set
+    role: 500 notes labelled by people, used to check the LLM and the student.
+    tech: CSV
+    talksTo: []
+    kind: offline
+  - id: api
+    name: Classify API
+    role: Receives each exception note and returns a class.
+    tech: FastAPI · uvicorn workers
+    talksTo: [student]
+    kind: core
+  - id: student
+    name: Student model
+    role: TF-IDF features and logistic regression with calibrated class probabilities.
+    tech: scikit-learn
+    talksTo: [router]
+    kind: core
+  - id: router
+    name: Confidence router
+    role: Keeps the student's answer above a per-class threshold, otherwise calls the LLM.
+    tech: Python
+    talksTo: [llm, cost]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: The original classifier, now only for low-confidence and rare-class notes.
+    tech: Hosted LLM
+    talksTo: []
+    kind: external
+  - id: cost
+    name: Cost model
+    role: Tracks escalation rate and cost per 1,000 notes, and checks the label mix for drift.
+    tech: pandas
+    talksTo: []
+    kind: offline
+flow:
+  - component: api
+    text: receives `POST /classify` with a note like "Parcel returned, recipient address incomplete".
+  - component: student
+    text: vectorises the note and returns calibrated probabilities over the classes in well under a millisecond.
+  - component: router
+    text: >-
+      accepts `address_issue` at `p = 0.97` because it is above that class's threshold; a rare class or `p < 0.85`
+      goes to the **LLM** instead.
+  - component: llm
+    text: labels the escalated note, and the label is stored so the next retrain can learn the rare class.
+  - component: cost
+    text: >-
+      computes the monthly cost from the escalation rate (with 3M notes, 15% escalated keeps the cut above 80%) and
+      alerts if the class mix shifts.
+interface:
+  lang: http
+  code: |
+    POST /classify
+    { "note": "Parcel returned, recipient
+               address incomplete" }
+
+    200 OK
+    { "class": "address_issue",
+      "confidence": 0.97,
+      "source": "student",
+      "model": "tfidf-lr-2026-10" }
+decisions:
+  - choice: TF-IDF and logistic regression
+    instead: A fine-tuned small transformer
+    why: >-
+      1,000 requests a second on CPU is easy for a linear model and hard for a transformer. Shipment notes are short
+      and keyword-heavy; move up only if agreement stays under 95%.
+  - choice: Per-class thresholds on calibrated scores
+    instead: One global confidence cut-off
+    why: >-
+      Common classes are easy and rare ones are not. Thresholds per class keep agreement at 95% on the common classes
+      while sending the rare tail to the LLM.
+  - choice: Check the LLM against a human audit set
+    instead: Treat LLM labels as ground truth
+    why: The student copies the LLM's mistakes, so you need to know where the teacher is wrong before trusting agreement.
+watchOut: >-
+  Raw classifier probabilities are often overconfident, so wrong answers pass the threshold and never reach the LLM.
+  Calibrate on held-out labels and check accuracy among accepted answers, not only overall agreement.

@@ -1,0 +1,124 @@
+overview: >-
+  A low-overhead profiler for Orbit Commerce's Linux services. It asks the kernel through `perf_event_open` to
+  interrupt each thread 99 times per second of CPU time and record the instruction pointer and the frame-pointer
+  call chain into a shared ring buffer. The collector drains the rings, maps each address to a function using the
+  process's memory map and ELF symbol tables, and counts identical stacks as folded lines. A renderer draws them as
+  an interactive SVG flame graph, where a frame's width is its share of samples, and a diff mode colours what got
+  hotter between two runs.
+learn:
+  - name: perf_event sampling
+  - name: Stack frames and frame pointers
+    ref: cmu-15-213
+  - name: ELF symbol tables
+    ref: cmu-15-213
+  - name: ASLR and memory maps
+  - name: Flame graphs
+  - name: Sampling skid
+stats:
+  - value: < 3%
+    label: overhead at 99 Hz
+  - value: ≥ 95%
+    label: samples symbolized
+  - value: < 1%
+    label: sample loss at 64 threads
+components:
+  - id: kernel
+    name: Kernel perf events
+    role: Interrupts the target's threads and writes sample records to per-CPU rings.
+    tech: perf_event_open
+    talksTo: [reader]
+    kind: external
+  - id: reader
+    name: perf_event reader
+    role: Drains the mmap rings, tracks lost-record counts and mmap events.
+    tech: C++ or Rust
+    talksTo: [unwinder]
+    kind: core
+  - id: unwinder
+    name: Unwinder
+    role: Turns each call chain into clean user frames and flags broken chains.
+    tech: Frame-pointer chains
+    talksTo: [symbolizer]
+    kind: core
+  - id: symbolizer
+    name: Symbolizer
+    role: Maps addresses to module, offset and function name.
+    tech: /proc maps · ELF symtab
+    talksTo: [aggregator]
+    kind: core
+  - id: aggregator
+    name: Aggregator
+    role: Counts identical stacks as folded lines per process, thread and time window.
+    tech: Hash map
+    talksTo: [renderer, diff]
+    kind: core
+  - id: renderer
+    name: SVG renderer
+    role: Lays out the flame graph with hover and click-to-zoom.
+    tech: SVG · small JS
+    talksTo: []
+    kind: core
+  - id: diff
+    name: Diff tool
+    role: Compares two folded profiles and colours frames by change.
+    tech: CLI
+    talksTo: []
+    kind: offline
+flow:
+  - component: kernel
+    text: >-
+      on every 1/99 s of a thread's CPU time, writes a record with `ip`, `tid`, `time` and the frame-pointer
+      `callchain` into that CPU's ring.
+  - component: reader
+    text: >-
+      polls the rings, copies records out, advances `data_tail`, and counts `PERF_RECORD_LOST` so loss stays
+      measured, not guessed.
+  - component: unwinder
+    text: >-
+      drops kernel frames, subtracts 1 from each return address so it lands inside the calling instruction, and
+      marks chains that stop early because frame pointers are missing.
+  - component: symbolizer
+    text: >-
+      finds each address's module in `/proc/<pid>/maps`, subtracts the random load address (ASLR), and
+      binary-searches the ELF symbol table for the function.
+  - component: aggregator
+    text: joins frames root first into lines like `main;handle_req;json_encode 412` and adds up the counts.
+  - component: renderer
+    text: draws each frame as a box as wide as its share of samples, so the planted hotspot is the widest tower.
+interface:
+  lang: c
+  code: |
+    struct perf_event_attr a = {
+      .type        = PERF_TYPE_SOFTWARE,
+      .config      = PERF_COUNT_SW_CPU_CLOCK,
+      .freq = 1,   .sample_freq = 99,
+      .sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_TID
+                   | PERF_SAMPLE_TIME
+                   | PERF_SAMPLE_CALLCHAIN,
+      .exclude_kernel = 1,  /* perf_event perm only */
+      .inherit = 1,         /* follow new threads */
+      .mmap = 1,            /* MMAP records for maps */
+    };
+    /* one fd per CPU, then mmap 1 + 2^n pages */
+    int fd = perf_event_open(&a, pid, cpu, -1, 0);
+    /* output: main;handle_req;json_encode 412 */
+decisions:
+  - choice: Kernel-walked frame-pointer chains
+    instead: Copy user stacks and unwind with DWARF
+    why: >-
+      Copying 8 KB of stack per sample at 99 Hz on 64 threads pushes about 50 MB/s through the rings and risks
+      the 1% loss limit. Test binaries keep frame pointers, so the kernel's walk is enough; revisit for binaries
+      built without them.
+  - choice: 99 Hz, not 100 Hz
+    instead: A round 100 Hz
+    why: >-
+      Many services run timers at 100 Hz, and sampling in lockstep would always land on the same code. 99 Hz
+      drifts across them and keeps overhead under 3%.
+  - choice: Symbolize after capture
+    instead: Resolve symbols while sampling
+    why: >-
+      Symbol lookups on the production host cost CPU during the spike you are trying to see. Store raw addresses
+      plus the mapping events and resolve them afterwards.
+watchOut: >-
+  Build test binaries with `-fno-omit-frame-pointer`. Without it chains break after a frame or two and the flame
+  graph shows plausible but wrong hotspots, so report the share of truncated chains next to every profile.

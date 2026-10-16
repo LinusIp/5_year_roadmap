@@ -1,0 +1,120 @@
+overview: >-
+  Calder Research wants a 47B-parameter mixture-of-experts model (each token uses only 13B of it: 2 of 8 expert
+  blocks per layer) on one 48 GB GPU. Attention stays in 16-bit while experts are quantized, the most-used experts
+  stay in a GPU cache, and the rest wait in pinned host RAM and are copied over just before they are needed. The
+  target is 15 tokens/s at batch 1 within 46 GB, an 85% cache hit rate, and 97% of fp16 quality.
+learn:
+  - name: Mixture of experts
+    ref: hf-llm-course
+  - name: Expert routing
+  - name: Weight quantization
+  - name: Caching and eviction
+    ref: ostep
+  - name: Prefetching over PCIe
+    ref: cuda-guide
+  - name: Pinned memory and streams
+    ref: cuda-guide
+stats:
+  - value: ≥ 15
+    label: tokens/s at batch 1
+  - value: ≤ 46 GB
+    label: GPU memory used
+  - value: ≥ 85%
+    label: expert cache hit rate
+components:
+  - id: runner
+    name: Model runner
+    role: Runs attention and routing in 16-bit and asks the cache for the experts each token picks.
+    tech: PyTorch
+    talksTo: []
+    kind: core
+  - id: cache
+    name: Expert cache
+    role: Keeps hot experts in fixed GPU slots and evicts by use frequency and recency.
+    tech: PyTorch · CUDA
+    talksTo: [runner]
+    kind: core
+  - id: prefetch
+    name: Prefetcher
+    role: Guesses the next layer's experts and starts copying them on a side CUDA stream.
+    tech: CUDA streams
+    talksTo: [host]
+    kind: core
+  - id: host
+    name: Host expert store
+    role: Holds every quantized expert in pinned RAM, ready for fast copies.
+    tech: 128 GB pinned RAM
+    talksTo: [cache]
+    kind: core
+  - id: profiler
+    name: Expert profiler
+    role: Counts how often each expert is picked on code, chat and summarisation prompts.
+    tech: Python
+    talksTo: [cache]
+    kind: offline
+  - id: quantizer
+    name: Quantizer
+    role: Quantizes expert weights to 4 or 8 bits and leaves attention in 16-bit.
+    tech: bitsandbytes · AWQ
+    talksTo: [host]
+    kind: offline
+  - id: evaluator
+    name: Quality evaluator
+    role: Scores the served model against fp16 on 3 tasks.
+    tech: Python · public evals
+    talksTo: []
+    kind: offline
+flow:
+  - component: runner
+    text: >-
+      computes attention for layer 12, and the router picks experts 3 and 6 for this token; 32 layers × 2 means **64
+      expert uses** per token.
+  - component: prefetch
+    text: >-
+      runs layer 13's router early on the same hidden state and starts copying its likely experts while layer 12 is
+      still computing.
+  - component: cache
+    text: >-
+      serves expert 3 from a GPU slot (a hit) but finds 6 missing; at about 25 GB/s over PCIe a 176 MB int8 expert
+      takes about 7 ms to copy.
+  - component: host
+    text: >-
+      sends expert 6 from pinned memory; 10 misses per token would already cost 70 ms, more than the 66 ms budget at
+      15 tokens/s, which is why the hit rate must stay ≥ 85%.
+  - component: runner
+    text: >-
+      runs both experts and moves on; the **profiler**'s counts decide which experts start in the cache.
+interface:
+  lang: python
+  code: |
+    class ExpertCache:
+        def __init__(self, slots: int,
+                     host: HostStore): ...
+
+        def get(self, layer: int, e: int) -> Expert:
+            """GPU copy; blocks on a miss."""
+
+        def prefetch(self, layer: int,
+                     experts: list[int]) -> None:
+            """Async copy on a side stream."""
+
+        hits: int; misses: int; bytes_moved: int
+decisions:
+  - choice: Quantize experts, keep attention 16-bit
+    instead: Quantize the whole model to 4 bits
+    why: >-
+      Experts are most of the 47B parameters, so they give most of the saving, while attention is small and
+      sensitive. Measure each choice against the 97% quality bar.
+  - choice: Cache by measured routing frequency
+    instead: A fixed set of experts pinned on the GPU
+    why: >-
+      Routing is skewed, and the skew changes with the domain: code prompts favour different experts than chat. A
+      frequency-and-recency cache follows the current mix.
+  - choice: Speculative prefetch with the next router
+    instead: Copy experts only when they are needed
+    why: >-
+      A copy on demand stalls the GPU for about 7 ms each time. Starting it one layer early hides most of that behind
+      compute.
+watchOut: >-
+  PCIe bandwidth can become the bottleneck long before GPU compute, especially when prefetch guesses wrong in long
+  outputs. Measure PCIe GB/s and prefetch accuracy alongside tokens/s.

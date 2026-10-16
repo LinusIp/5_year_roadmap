@@ -1,0 +1,99 @@
+overview: >-
+  Every Clearbook service sends a structured audit event, who did what to which patient record and with what
+  outcome, through a small SDK that pseudonymises patient IDs, replacing them with a keyed hash. A collector reads the
+  events from a queue and appends them to hash-chained segments, where each event carries the hash of the one before,
+  so editing or deleting any event breaks the chain. Signed checkpoints let a verifier prove nothing changed, and a
+  columnar index answers auditor queries over 100 million events in seconds.
+learn:
+  - name: Structured audit events
+  - name: Hash chains
+  - name: Digital signatures
+  - name: Pseudonymisation
+  - name: Columnar storage
+    ref: ddia
+  - name: Retention and legal hold
+stats:
+  - value: 5,000/s
+    label: events with under 1 % loss
+  - value: 50 of 50
+    label: planted tamperings found
+  - value: < 5 s
+    label: query over 100M events
+components:
+  - id: sdk
+    name: Audit SDK
+    role: Builds the event with actor, action, resource and outcome, and hashes patient IDs with a secret key.
+    tech: Go library
+    talksTo: [queue]
+    kind: core
+  - id: queue
+    name: Event queue
+    role: Buffers bursts so a slow store never drops events.
+    tech: NATS JetStream or Kafka
+    talksTo: [collector]
+    kind: core
+  - id: collector
+    name: Collector
+    role: Orders events, chains each to the previous hash and writes segments.
+    tech: Go
+    talksTo: [store, index]
+    kind: core
+  - id: store
+    name: Chained store
+    role: Append-only segments in object storage with object lock for 7-year retention.
+    tech: Parquet · MinIO object lock
+    talksTo: [signer]
+    kind: core
+  - id: signer
+    name: Checkpoint signer
+    role: Signs the latest chain hash every minute with a key kept off the collector.
+    tech: Ed25519
+    talksTo: [verifier]
+    kind: core
+  - id: index
+    name: Query API
+    role: Serves auditor filters and exports from a columnar copy of the events.
+    tech: ClickHouse or DuckDB · HTTP
+    talksTo: []
+    kind: core
+  - id: verifier
+    name: Tamper verifier
+    role: Recomputes the chain between signed checkpoints and reports any break or gap.
+    tech: Go CLI
+    talksTo: []
+    kind: offline
+flow:
+  - component: sdk
+    text: emits `record.viewed` for actor `u_88`, with the patient ID replaced by `HMAC(key, patient_id)`, so the log never holds the raw ID.
+  - component: queue
+    text: holds the event until the collector acknowledges it, which keeps loss under 1 % at 5,000 events a second.
+  - component: collector
+    text: sets `seq` and `prev_hash`, computes `hash = SHA-256(prev_hash + event)`, and writes it to the open segment and the index.
+  - component: store
+    text: closes the segment each minute under object lock, so it cannot be overwritten during retention.
+  - component: signer
+    text: signs `(seq, hash)` of the last event; the **verifier** later recomputes every hash up to it and flags the first one that does not match.
+  - component: index
+    text: answers `GET /audit?resource=patient:…&from=2026-01-01` from the columnar copy in under 5 seconds.
+interface:
+  lang: json
+  code: |
+    {
+      "seq": 918273645,
+      "ts": "2026-10-16T09:14:03.211Z",
+      "actor": "u_88",
+      "action": "record.viewed",
+      "resource": "patient:hm_5f2a9c",
+      "outcome": "allowed",
+      "service": "billing-ui",
+      "prev_hash": "9b1e…c40a",
+      "hash": "02f7…8d1e"
+    }
+decisions:
+  - choice: Hash chain plus signed checkpoints
+    instead: Trust the database's access controls
+    why: The customer asked for tamper evidence, which means proof even against someone with write access. A chain shows any edit, and signatures stop an attacker rebuilding it.
+  - choice: Queue in front of the collector
+    instead: Services writing straight to storage
+    why: 5,000 events a second arrive in bursts. A queue absorbs them and keeps loss under 1 %, and a single collector keeps the chain in one order.
+watchOut: Audit events quietly collect secrets and full patient details from careless call sites. Let the SDK accept only typed fields, never free-form payloads, and test that raw IDs never reach storage.

@@ -1,0 +1,118 @@
+overview: >-
+  Your first board, either a 20–40 W audio amplifier (LM3886 or TPA3116) or a 0–20 V, 1 A adjustable linear supply,
+  designed in KiCad, made by a prototype service, soldered by hand and measured against targets written down first.
+  The board is laid out as stages in bring-up order: input protection, rails and decoupling, the core stage, the output
+  and its protection, with test points on every rail. Each stage is powered and checked at a current limit before the
+  next, so a fault points to one stage.
+learn:
+  - name: Schematic and layout
+    ref: kicad
+  - name: High-current loop layout
+    ref: phils-lab
+  - name: Decoupling capacitors
+    ref: art-of-electronics
+  - name: Staged bring-up
+  - name: THD+N and regulation
+stats:
+  - value: '0'
+    label: ERC and DRC errors
+  - value: < 0.1 %
+    label: amp THD+N at 1 W, 1 kHz, 8 Ω
+  - value: < 10 mV
+    label: supply ripple at 1 A, peak to peak
+components:
+  - id: bench
+    name: Bench supply
+    role: Feeds DC in with a current limit set low for each bring-up stage.
+    tech: Project 36 bench
+    talksTo: [protection]
+    kind: external
+  - id: protection
+    name: Input protection
+    role: Fuse and reverse-polarity protection, so a wrong cable kills nothing.
+    tech: Fuse · diode or P-MOSFET
+    talksTo: [rails]
+    kind: core
+  - id: rails
+    name: Rails and decoupling
+    role: Regulated rails with bulk and 100 nF capacitors at every IC.
+    tech: Regulators · capacitors
+    talksTo: [core]
+    kind: core
+  - id: core
+    name: Core stage
+    role: The amplifier IC or the pass element with its control loop and feedback.
+    tech: LM3886, TPA3116 or LM317
+    talksTo: [output]
+    kind: core
+  - id: output
+    name: Output stage
+    role: Output protection and the connector, on a short, wide copper path.
+    tech: Relay or current limit
+    talksTo: [load]
+    kind: core
+  - id: load
+    name: Load
+    role: Dummy load or test speaker the targets are measured into.
+    tech: Power resistors · speaker
+    talksTo: [measure]
+    kind: external
+  - id: measure
+    name: Measurement log
+    role: Records each number from the test points next to its target.
+    tech: Python · REW or scope FFT
+    talksTo: []
+    kind: offline
+  - id: design
+    name: KiCad project
+    role: Schematic, layout and the Gerber, drill, BOM and position files sent to fabrication.
+    tech: KiCad 8 · LTspice
+    talksTo: [protection]
+    kind: offline
+flow:
+  - component: bench
+    text: powers the bare board at a low **current limit** and you read the idle draw before anything else.
+  - component: protection
+    text: is checked first, fuse and reverse-polarity part in place, with the supply reversed once on purpose.
+  - component: rails
+    text: >-
+      come up next; each rail is read at its test point and must be in range before the next stage is populated.
+  - component: core
+    text: >-
+      gets its part and its feedback network, laid out away from the high-current loop, then a small test signal or a
+      set voltage.
+  - component: output
+    text: connects through its protection to the load, with the heat sink fitted before full power.
+  - component: measure
+    text: >-
+      logs gain, THD+N and response for the amplifier, or regulation, ripple and current limit for the supply, next
+      to each target.
+interface:
+  lang: json
+  code: |
+    { "board": "amp-lm3886-revA",
+      "load_ohm": 8,
+      "targets": {
+        "gain_db":     { "design": 26.0, "tol": 0.5 },
+        "thdn_pct":    { "max": 0.1, "at": "1 W, 1 kHz" },
+        "f_low_hz":    { "max": 20 },
+        "f_high_hz":   { "min": 20000 } } }
+decisions:
+  - choice: Staged bring-up at a current limit
+    instead: Power the whole board at once
+    why: >-
+      With five boards from a $10–40 run, a fault is cheap only if you know which stage caused it; whole-board power-up
+      destroys that evidence.
+  - choice: Two-layer board with a ground pour
+    instead: A four-layer board
+    why: >-
+      Currents of a few amps and audio frequencies fit two layers if the high-current loop is small and the load
+      return stays off the input ground. Revisit for mixed-signal boards.
+  - choice: Through-hole and 0805 parts
+    instead: 0402 parts and QFN packages
+    why: >-
+      Everything has to be soldered by hand with a fine-tip iron; 0805 is the smallest that is reliable without hot
+      air.
+watchOut: >-
+  A footprint that does not match the part you bought means a new board. Check every pinout against the purchased
+  part's datasheet before ordering.

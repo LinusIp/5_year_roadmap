@@ -1,0 +1,112 @@
+overview: >-
+  An auth session service for Northwind Metrics that replaces hand-rolled cookies. Login checks an Argon2 password
+  hash (a deliberately slow hash that makes stolen hashes hard to crack) and issues a 10-minute signed access token
+  plus an opaque refresh token. Every refresh swaps the old refresh token for a new one in the same family, and a
+  reused old token revokes the whole family, which is how a stolen token is caught.
+learn:
+  - name: Password hashing with Argon2
+  - name: JWT access tokens
+  - name: Refresh token rotation
+  - name: Constant-time comparison
+  - name: Revocation caching
+    ref: system-design-primer
+stats:
+  - value: < 300 ms
+    label: p99 login, 100 ms hash
+  - value: < 5 ms
+    label: p99 introspection at 2,000/s
+  - value: 12 of 12
+    label: attack scenarios blocked
+components:
+  - id: dashboard
+    name: Dashboard app
+    role: Logs users in, sends access tokens, refreshes them when they expire.
+    tech: Browser
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: Session API
+    role: Login, refresh, logout, device list and introspection endpoints.
+    tech: Go · net/http
+    talksTo: [creds, issuer, rotation, revocation]
+    kind: core
+  - id: creds
+    name: Credential store
+    role: Users with Argon2id hashes and failed-attempt counters for lockout.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: issuer
+    name: Token issuer
+    role: Signs 10-minute access tokens with an Ed25519 key loaded from the environment.
+    tech: Go · JWT
+    talksTo: []
+    kind: core
+  - id: rotation
+    name: Refresh rotation
+    role: Stores SHA-256 hashes of refresh tokens with family and device, and detects reuse.
+    tech: PostgreSQL
+    talksTo: [revocation]
+    kind: core
+  - id: revocation
+    name: Revocation cache
+    role: Holds revoked session ids until their access tokens would expire anyway.
+    tech: Redis
+    talksTo: []
+    kind: core
+  - id: attacks
+    name: Attack test suite
+    role: Replays stolen tokens, races refreshes, brute-forces logins and times comparisons.
+    tech: Go tests
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: receives `POST /login` with email and password from a new laptop.
+  - component: creds
+    text: >-
+      verifies the password against the **Argon2id** hash tuned to about 100 ms; five failures in 15 minutes lock
+      the account for a while.
+  - component: issuer
+    text: signs an access token with `sub`, `sid` and `exp` 10 minutes ahead; the API sets it with a refresh token in an `HttpOnly` cookie.
+  - component: rotation
+    text: >-
+      on `POST /refresh` marks the old token used and issues a new one in the same family; if a **used** token comes
+      back, it revokes every session in that family.
+  - component: revocation
+    text: >-
+      gets the revoked `sid`s with a TTL of 10 minutes, and `POST /introspect` checks the signature and this cache,
+      well under 5 ms.
+interface:
+  lang: http
+  code: |
+    POST /refresh
+    Cookie: rt=Qm9i…opaque
+
+    200 OK
+    Set-Cookie: rt=Zk1x…; HttpOnly; Secure
+    { "access_token": "eyJhbGciOiJFZERTQSJ9…",
+      "expires_in": 600 }
+
+    401 Unauthorized
+    { "error": "REFRESH_REUSED",
+      "revoked_family": "fam_92k" }
+decisions:
+  - choice: Short JWTs plus opaque refresh tokens
+    instead: Only server-side sessions looked up every request
+    why: >-
+      A signature check plus one Redis lookup meets 5 ms at 2,000 requests a second. Refresh tokens stay opaque and
+      hashed in the database, so a leaked table cannot be replayed.
+  - choice: Revoke the whole family on reuse
+    instead: Reject only the reused token
+    why: >-
+      Reuse means two parties hold the same token, and the server cannot tell which is the thief. Ending the family
+      forces both to log in again.
+  - choice: Allow a 10-second grace for the same new token
+    instead: Strict single use with no grace
+    why: >-
+      Two browser tabs refreshing at once is a real race, not an attack. Returning the same new token within 10
+      seconds avoids false revocations.
+watchOut: >-
+  Comparing token hashes with `==` leaks timing. Use a constant-time compare and include a timing test in the
+  attack suite.

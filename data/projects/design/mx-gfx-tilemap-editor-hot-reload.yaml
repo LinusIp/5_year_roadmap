@@ -1,0 +1,107 @@
+overview: >-
+  A tile editor and the studio's game share one level library, so both read and write the same versioned JSON format.
+  Every edit is a command object that knows how to apply and revert itself, which gives 500 steps of undo. On save the
+  editor writes a temp file and renames it, a watcher thread in the game notices, and the game's main loop swaps in the
+  new level between two frames while keeping the player where they were.
+learn:
+  - name: Command pattern undo
+    ref: game-engine-architecture
+  - name: File watching
+  - name: Atomic file replace
+    ref: ostep
+  - name: Thread-safe queues
+    ref: ostep
+  - name: Versioned formats
+stats:
+  - value: < 300 ms
+    label: save to visible in game
+  - value: < 5 ms
+    label: per undo or redo, 500 deep
+  - value: 60 FPS
+    label: editing a 512 × 512 level
+components:
+  - id: painter
+    name: Tile painter UI
+    role: Paints tiles, entities and triggers on layered grids and offers play-from-here.
+    tech: SDL2 · Dear ImGui
+    talksTo: [commands]
+    kind: core
+  - id: commands
+    name: Command stack
+    role: Applies each edit as a reversible command and keeps the last 500.
+    tech: C++17
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Level model
+    role: The shared library type for layers, entities and triggers, used by editor and game.
+    tech: C++17 static library
+    talksTo: [migrator]
+    kind: core
+  - id: migrator
+    name: Format and migrator
+    role: Saves versioned JSON atomically and upgrades old files step by step on load.
+    tech: C++17 · JSON
+    talksTo: [watcher]
+    kind: core
+  - id: watcher
+    name: File watcher
+    role: A thread in the game that sees renamed level and sprite-sheet files and debounces them.
+    tech: inotify · ReadDirectoryChangesW
+    talksTo: [bridge]
+    kind: core
+  - id: bridge
+    name: Reload bridge
+    role: Passes reload events into the game's main loop and swaps level data between frames.
+    tech: SPSC queue
+    talksTo: [game]
+    kind: core
+  - id: game
+    name: Running game
+    role: The studio's platformer, which keeps player state across a reload.
+    tech: SDL2
+    talksTo: []
+    kind: external
+flow:
+  - component: painter
+    text: turns a brush stroke into one `PaintTiles` command holding each cell's before and after value.
+  - component: commands
+    text: applies the command to the model and pushes it; undo calls `revert`, so no level snapshots are stored.
+  - component: model
+    text: changes only the touched cells, so painting stays at 60 FPS on a 512 × 512 level.
+  - component: migrator
+    text: on save writes `level.json.tmp` at format version 3 and renames it over the old file, so readers never see **half a file**.
+  - component: watcher
+    text: sees the rename, waits 50 ms for more changes, and posts one `ReloadEvent` for that path.
+  - component: bridge
+    text: drains the queue at the top of the game's next frame, loads the new level through the migrator, and keeps the player's position and state.
+interface:
+  lang: cpp
+  code: |
+    struct Command {
+      virtual ~Command() = default;
+      virtual void apply(Level& lv) = 0;
+      virtual void revert(Level& lv) = 0;
+    };
+    struct PaintTiles : Command {
+      int layer;
+      std::vector<CellEdit> cells; // x, y, old, new
+      void apply(Level& lv) override;
+      void revert(Level& lv) override;
+    };
+    // Watcher thread -> game main loop
+    struct ReloadEvent { std::string path; int ver; };
+    bool try_pop(Spsc<ReloadEvent>& q, ReloadEvent& e);
+decisions:
+  - choice: Temp file plus rename on save
+    instead: Writing the level file in place
+    why: Rename is atomic on Windows and Linux, so the watcher can never read a half-written file, which is the top failure in hot-reload tools.
+  - choice: Commands that store deltas
+    instead: A full level snapshot per edit
+    why: 500 snapshots of a layered 512 × 512 level would be hundreds of megabytes; deltas keep each undo under 5 ms.
+  - choice: A chain of one-step migrations
+    instead: Refusing files from older versions
+    why: Designers keep old levels for months; each format change adds one small v(n) to v(n+1) function with its own test.
+watchOut: >-
+  A reload that resets the player makes designers stop using it. Swap only level data, keep the player entity and
+  camera, and test by saving while the player is mid-jump.

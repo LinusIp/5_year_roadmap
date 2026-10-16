@@ -1,0 +1,121 @@
+overview: >-
+  An observability stack for Pocketpay's four services that pages on-call only when users are hurt. Each service is
+  instrumented with OpenTelemetry for golden-signal metrics (traffic, errors, latency, saturation) and traces, sent
+  through a collector that keeps every error trace and 5 percent of the rest. SLOs are written as rules, and
+  **burn-rate** alerts (how fast the error budget is being used up) page within 5 minutes of a real burst, which
+  game-day scripts prove by injecting failures.
+learn:
+  - name: SLIs and SLOs
+    ref: google-sre-book
+  - name: Error budgets and burn rates
+    ref: google-sre-book
+  - name: Distributed tracing
+    ref: opentelemetry-docs
+  - name: Tail-based sampling
+    ref: opentelemetry-docs
+  - name: Label cardinality
+    ref: prometheus-docs
+  - name: Game days
+stats:
+  - value: < 5 min
+    label: page on a 5 % error burst
+  - value: < 1
+    label: false page a week
+  - value: < 3 %
+    label: p99 overhead
+components:
+  - id: services
+    name: Sample services
+    role: Four small payment services calling each other, with failure switches for game days.
+    tech: Go · docker compose
+    talksTo: [instr]
+    kind: core
+  - id: instr
+    name: Instrumentation
+    role: Shared library that records request count, errors and latency histograms and starts spans.
+    tech: OpenTelemetry Go SDK
+    talksTo: [collector]
+    kind: core
+  - id: collector
+    name: Collector pipeline
+    role: Receives metrics and spans, keeps all error traces and 5 percent of successes, and exports them.
+    tech: OpenTelemetry Collector
+    talksTo: [prom, traces]
+    kind: core
+  - id: prom
+    name: Metrics store
+    role: Stores the metrics and evaluates recording rules for SLIs and burn rates.
+    tech: Prometheus
+    talksTo: [alerts]
+    kind: core
+  - id: traces
+    name: Trace store
+    role: Keeps sampled traces so an alert can link to failing requests.
+    tech: Tempo or Jaeger
+    talksTo: []
+    kind: offline
+  - id: alerts
+    name: Alert rules
+    role: Multi-window burn-rate rules that page or open a ticket.
+    tech: Prometheus · Alertmanager
+    talksTo: [oncall]
+    kind: core
+  - id: oncall
+    name: On-call
+    role: Gets the page with the SLO, burn rate and a dashboard link.
+    tech: Pager · Grafana
+    talksTo: []
+    kind: external
+  - id: gameday
+    name: Game-day runner
+    role: Injects error bursts and latency, then records when each alert fired; also replays a healthy week.
+    tech: Go · scripts
+    talksTo: [services]
+    kind: offline
+flow:
+  - component: services
+    text: handle a request; the checkout service calls ledger and risk, all under one trace id.
+  - component: instr
+    text: >-
+      increments `http_requests_total{service, route, code}` and records latency in a histogram; labels stay
+      low-cardinality, so **no user ids** in labels.
+  - component: collector
+    text: waits until each trace is complete, keeps it if any span has an error, and keeps 5 percent of the rest.
+  - component: prom
+    text: computes the SLI as good requests over all requests and the burn rate against a 99.9 percent SLO over 5 min, 30 min and 6 h windows.
+  - component: alerts
+    text: >-
+      page when both the 30 min and 5 min burn rates exceed 6; a 5 percent burst burns budget 50 times too fast, so
+      it pages in about 4 minutes, while a single bad minute does not.
+interface:
+  lang: yaml
+  code: |
+    - alert: CheckoutErrorBudgetFastBurn
+      expr: |
+        slo:burn_rate:30m{service="checkout"} > 6
+        and
+        slo:burn_rate:5m{service="checkout"} > 6
+      labels:
+        severity: page
+      annotations:
+        summary: Checkout burning budget over 6x
+decisions:
+  - choice: Alert on SLO burn rate
+    instead: Alert on CPU, memory and single error spikes
+    why: >-
+      Cause-based alerts are why on-call is paged by noise today. Burn rate measures user pain directly, and the
+      healthy-week replay checks the under-1-false-page target.
+  - choice: Two windows per alert
+    instead: A single 5-minute window
+    why: >-
+      A single short window pages on every blip; a single long one is slow. Requiring both the 30 min and 5 min
+      rates catches a 5 percent burst inside 5 minutes and clears fast once it ends. Tune the threshold on the
+      healthy-week replay.
+  - choice: Tail-based sampling in the collector
+    instead: Sample 5 percent at the start of each request
+    why: >-
+      Head sampling decides before anyone knows the request will fail, so 95 percent of error traces vanish. Deciding
+      at the end keeps them all within the 8 GB RAM budget.
+watchOut: >-
+  A label like `user_id` creates a time series per user and can exhaust Prometheus on an 8 GB machine. Review every
+  new label for how many values it can take.

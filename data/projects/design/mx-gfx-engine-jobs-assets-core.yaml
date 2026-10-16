@@ -1,0 +1,106 @@
+overview: >-
+  A shared engine core for Brindle Works' three games: a work-stealing job system and an incremental asset pipeline.
+  Each of 8 workers keeps its own queue of small jobs and steals from others when idle, with dependencies tracked by
+  counters. The cooker hashes every source asset and its settings, rebuilds only what changed using those jobs, and
+  writes packs already laid out like the runtime structs, so loading is one big read with no parsing.
+learn:
+  - name: Work-stealing deques
+    ref: cmu-15-418
+  - name: False sharing
+    ref: mit-6-172
+  - name: Content hashing
+  - name: Memory arenas
+    ref: handmade-hero
+  - name: Memory-mapped files
+    ref: ostep
+stats:
+  - value: < 1 µs
+    label: overhead per job, 100k jobs
+  - value: < 3 s
+    label: incremental cook after a texture change
+  - value: ≥ 80%
+    label: of disk bandwidth when loading
+components:
+  - id: sources
+    name: Source assets
+    role: Textures, meshes and materials in the 2 GB project, edited by artists.
+    tech: Project folder
+    talksTo: [tracker]
+    kind: external
+  - id: tracker
+    name: Dependency tracker
+    role: Keeps the graph of which cooked outputs depend on which inputs and settings, keyed by content hash.
+    tech: C++17
+    talksTo: [cooker]
+    kind: core
+  - id: cooker
+    name: Cooker
+    role: Converts changed assets to runtime formats as jobs.
+    tech: C++17
+    talksTo: [jobs]
+    kind: core
+  - id: jobs
+    name: Job scheduler
+    role: Fixed pool of 8 workers with per-thread deques, stealing, parallel-for and dependency counters.
+    tech: C++17 · atomics
+    talksTo: [pack]
+    kind: core
+  - id: pack
+    name: Pack format
+    role: Versioned file with a table of contents and data in runtime layout, pointers stored as offsets.
+    tech: Binary pack
+    talksTo: [loader]
+    kind: core
+  - id: loader
+    name: Loader
+    role: Reads or maps a pack into an arena and fixes up offsets.
+    tech: C++17 · mmap
+    talksTo: [arenas]
+    kind: core
+  - id: arenas
+    name: Arenas
+    role: Bump allocators freed all at once at the end of a frame or a level.
+    tech: C++17
+    talksTo: []
+    kind: core
+flow:
+  - component: tracker
+    text: sees that `rock_albedo.png` has a new content hash and marks it and the material packs that use it as dirty.
+  - component: cooker
+    text: queues a compress job per mip level for that texture plus one job per affected pack, with dependencies between them.
+  - component: jobs
+    text: runs those jobs on 8 workers; a worker pops from its own deque and **steals** from another's when empty, and a waiting job runs other work instead of blocking.
+  - component: pack
+    text: is rewritten with the new texture data, a header holding format version and input hashes, and offsets instead of pointers.
+  - component: loader
+    text: reads the pack in one large sequential read into a level arena, then turns offsets into pointers, with no per-asset parsing.
+  - component: arenas
+    text: free the whole level at once on unload, so there is no per-asset `delete`.
+interface:
+  lang: cpp
+  code: |
+    JobHandle h = jobs.parallelFor(mips.size(), 1,
+        [&](size_t i) { compressMip(tex, i); });
+    jobs.waitHelping(h);   // runs other jobs meanwhile
+
+    struct CookKey {       // cooked output is valid if
+      uint64_t inputHash;  //   all three still match
+      uint64_t settingsHash;
+      uint32_t cookerVersion;
+    };
+    struct PackHeader { char magic[4];
+      uint32_t version, assetCount;
+      uint64_t tocOffset; };   // then runtime layout
+decisions:
+  - choice: Per-thread deques with stealing
+    instead: One global queue behind a lock
+    why: 100k jobs a frame through one lock means 8 threads queue up on it, and the 1 µs budget is gone. Own-deque pops stay in each core's cache and steals are rare.
+  - choice: Content hashes plus settings and cooker version
+    instead: File modification times
+    why: Times change on checkout and copy, and miss a changed cook setting or cooker update. Hashing the 2 GB project once and then only edited files keeps the incremental cook under 3 s.
+  - choice: Packs in runtime layout
+    instead: Parse a general serialisation format on load
+    why: Parsing is CPU-bound and cannot reach 80% of disk bandwidth. Offsets fixed up after one read are close to free; the version field forces a recook when layouts change.
+watchOut: >-
+  A worker that blocks while waiting for a job's dependencies can deadlock the pool when every worker is waiting. Always
+  wait by running other jobs, and test with a pool of 1 worker, which finds this at once.

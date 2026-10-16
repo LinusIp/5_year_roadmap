@@ -1,0 +1,99 @@
+overview: >-
+  A CPU physics twin of Parcelwise's 6-axis picking arm, used to test grasp strategies and cycle times before touching
+  the line. A scenario runner drops 20 random parcels in a bin from a seed, a planner solves inverse kinematics (joint
+  angles for a target gripper pose) and builds a trajectory within velocity and jerk limits, and joint motors track it
+  at 1 kHz. Articulated rigid-body dynamics move the arm, a contact solver handles gripper friction, and every pick's
+  cycle time is compared with the reference measurement table.
+learn:
+  - name: Articulated-body dynamics
+    ref: modern-robotics
+  - name: Inverse kinematics
+    ref: modern-robotics
+  - name: Jerk-limited trajectories
+  - name: Friction cones
+    ref: catto-box2d-publications
+  - name: Seeded experiments
+stats:
+  - value: ≥ 5×
+    label: real time at 1 kHz, one core
+  - value: ≤ 5%
+    label: cycle-time error vs reference
+  - value: 100 seeds
+    label: reproducible grasp statistics
+components:
+  - id: urdf
+    name: URDF parser
+    role: Reads links, joints, limits, inertias and meshes from the URDF-like file.
+    tech: C++17 · XML
+    talksTo: [scenario]
+    kind: offline
+  - id: scenario
+    name: Scenario runner
+    role: Seeds parcel sizes and poses, runs picks and records success and cycle time.
+    tech: C++17
+    talksTo: [planner]
+    kind: core
+  - id: planner
+    name: IK and planner
+    role: Solves joint angles for the grasp pose and builds a jerk-limited joint trajectory.
+    tech: C++17
+    talksTo: [dynamics]
+    kind: core
+  - id: dynamics
+    name: Articulated dynamics
+    role: Turns motor torques into joint accelerations with the articulated-body algorithm.
+    tech: C++17
+    talksTo: [contact]
+    kind: core
+  - id: contact
+    name: Contact solver
+    role: Resolves gripper-parcel and parcel-bin contacts with friction, and enforces joint limits.
+    tech: C++17
+    talksTo: [viewer]
+    kind: core
+  - id: viewer
+    name: Viewer
+    role: Shows the arm, bin and parcels, and plots simulated against logged joint traces.
+    tech: OpenGL
+    talksTo: []
+    kind: offline
+flow:
+  - component: scenario
+    text: creates 20 parcels from `seed`, picks the next target and the grasp strategy under test.
+  - component: planner
+    text: solves IK for the approach and grasp poses and builds a joint trajectory that respects `vmax`, `amax` and `jmax` per joint.
+  - component: dynamics
+    text: each 1 ms step, applies PD motor torques toward the trajectory and computes accelerations in O(n) without **inverting** the mass matrix.
+  - component: contact
+    text: finds gripper, parcel and bin contacts, solves impulses inside each friction cone, and clamps joints at their limits as hard constraints.
+  - component: scenario
+    text: marks the pick done when the parcel reaches the tote, records cycle time and success, and compares it with the reference table.
+interface:
+  lang: cpp
+  code: |
+    struct Scenario { uint64_t seed; int parcels = 20;
+                      GraspStrategy strategy; };
+    struct PickResult { bool success;
+                        double cycle_s;
+                        double maxJointErr_rad; };
+
+    // 1 kHz fixed step, one thread, seeded
+    std::vector<PickResult> run(const Robot& r,
+                                const Scenario& s);
+    JointTrajectory plan(const Robot& r,
+                         const Pose& grasp,
+                         const Limits& lim);
+    // lim: vmax, amax, jmax per joint
+decisions:
+  - choice: Featherstone articulated-body algorithm
+    instead: Build the mass matrix and invert it each step
+    why: The articulated-body algorithm is linear in the number of joints and avoids an ill-conditioned inverse near stretched-out poses. Six joints at 1 kHz then leave plenty of headroom for 5× real time.
+  - choice: Joint limits as hard constraints
+    instead: Stiff springs at the limits
+    why: Soft limits let the solver push joints past their range under contact load, which a real arm cannot do and which shortens cycle times falsely.
+  - choice: One thread, fixed step, seeded parcels
+    instead: A multi-threaded solver
+    why: Grasp statistics must match across 100 seeds, and one core is already 5× faster than real time. Parallelise across seeds instead.
+watchOut: >-
+  Tuning friction until one logged trajectory matches makes the twin agree with that move and nothing else. Fit
+  friction on some reference moves and check cycle times on moves held out from the fit.

@@ -1,0 +1,115 @@
+overview: >-
+  A policy service that every StreakUp notification must pass before it is sent. It reads the user's cached
+  preferences, checks quiet hours in their own time zone and counts recent sends in Redis sliding windows, then
+  answers send, suppress or digest. Low-priority items that are held back collect in a digest buffer, and a
+  scheduled flusher sends one summary instead of many pings.
+learn:
+  - name: Sliding-window rate limits
+    ref: bytebytego
+  - name: Time zones and DST
+  - name: Cache invalidation
+    ref: system-design-primer
+  - name: Policy engines
+  - name: Batch digests
+stats:
+  - value: < 10 ms
+    label: p99 decision at 5,000/s
+  - value: "0"
+    label: cap violations, 1M-event replay
+  - value: < 2 min
+    label: digest flush of 1M items
+components:
+  - id: producers
+    name: Challenge services
+    role: Ask whether a notification for a user and category may go out now.
+    tech: Internal services
+    talksTo: [policy]
+    kind: external
+  - id: prefs
+    name: Preference store
+    role: Per-user, per-category settings, quiet hours and IANA time zone, with defaults.
+    tech: PostgreSQL
+    talksTo: [policy]
+    kind: core
+  - id: policy
+    name: Policy engine
+    role: Applies the rules in a fixed order and returns send, suppress or digest with a reason.
+    tech: Go · in-memory cache
+    talksTo: [counters, digest]
+    kind: core
+  - id: counters
+    name: Window counters
+    role: Count sends per user and category over a rolling window with an atomic Lua script.
+    tech: Redis sorted sets
+    talksTo: []
+    kind: core
+  - id: digest
+    name: Digest buffer
+    role: Holds suppressed low-priority items per user, bucketed by the hour they are due.
+    tech: Redis lists
+    talksTo: [flusher]
+    kind: core
+  - id: flusher
+    name: Digest flusher
+    role: Every 5 minutes takes the due buckets and builds one summary message per user.
+    tech: Go worker
+    talksTo: []
+    kind: core
+  - id: replay
+    name: Replay tester
+    role: Replays the 1M-event stream for 500k users and checks no cap was exceeded.
+    tech: Go
+    talksTo: [policy]
+    kind: offline
+flow:
+  - component: policy
+    text: >-
+      receives `POST /decide` for user `u_88` and category `group_challenge`; a `security` priority skips every rule
+      and returns `send`.
+  - component: prefs
+    text: >-
+      supplies the cached preferences; a change in the app publishes an invalidation so the cache is never more than
+      a few seconds stale.
+  - component: policy
+    text: >-
+      converts now to the user's zone, here `Asia/Kolkata` at UTC+5:30, and finds 23:10 is inside quiet hours
+      22:00–07:00, so the item is not sent now.
+  - component: counters
+    text: >-
+      for items outside quiet hours, run one Lua script that drops entries older than 24 h, counts, and adds the new
+      one only if the count is under the cap of 3.
+  - component: digest
+    text: stores the suppressed item in the bucket for 07:00 local time, and the API answers `digest`.
+  - component: flusher
+    text: at 07:00 local pulls the bucket, groups the user's items into one "5 updates from your groups" message and clears it.
+interface:
+  lang: http
+  code: |
+    POST /decide
+    { "user_id": "u_88",
+      "category": "group_challenge",
+      "priority": "low",
+      "event_id": "ev_19c" }
+
+    200 OK
+    { "action": "digest",
+      "reason": "quiet_hours",
+      "deliver_at": "2026-10-17T01:30:00Z" }
+decisions:
+  - choice: Redis sorted-set sliding window
+    instead: Fixed hourly counters
+    why: >-
+      A fixed window lets 3 pings at 09:59 and 3 more at 10:00, which is exactly the spam users report. A Lua script
+      keeps count and add atomic, so 5,000 decisions a second cannot slip past the cap.
+  - choice: Digest buckets by due time
+    instead: A cron job per user
+    why: >-
+      500k per-user jobs is forbidden and fragile. One flusher scanning due buckets handles 1M items in a couple of
+      minutes.
+  - choice: Use IANA zone names, not offsets
+    instead: Store a fixed UTC offset per user
+    why: >-
+      Offsets go wrong at every DST change and miss rules like half-hour zones. The zone database handles both.
+watchOut: >-
+  Quiet hours computed from a stored offset are off by an hour twice a year. Always convert with the user's IANA zone
+  at decision time, and test a DST weekend in the replay.

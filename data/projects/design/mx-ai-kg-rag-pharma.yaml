@@ -1,0 +1,110 @@
+overview: >-
+  A question-answering service over a drug knowledge graph: drugs, enzymes and interactions are nodes and edges, so
+  a chain like "drug A is broken down by CYP3A4, and drug B blocks CYP3A4" is a path you can retrieve. The query path
+  links drug names in the question to graph nodes, expands paths of up to 3 hops between them, and asks an LLM to
+  answer citing only those paths. An 80-question set compares it with plain vector RAG. Built on public data and not
+  for clinical use.
+learn:
+  - name: Knowledge graphs
+    ref: cs224w
+  - name: Entity linking
+    ref: slp3
+  - name: Multi-hop retrieval
+  - name: Grounded generation
+    ref: llm-zoomcamp
+  - name: RAG evaluation
+stats:
+  - value: +20 pts
+    label: multi-hop accuracy vs vector RAG
+  - value: < 6 s
+    label: query p95
+  - value: < 30 s
+    label: to load 50k edges
+components:
+  - id: sources
+    name: Open drug data
+    role: Public interaction and enzyme tables such as DDInter and Hetionet.
+    tech: CSV · TSV
+    talksTo: [builder]
+    kind: external
+  - id: builder
+    name: Graph builder
+    role: Loads drugs, enzymes and interactions into a typed graph with synonyms on each drug.
+    tech: Python · NetworkX
+    talksTo: [retriever]
+    kind: offline
+  - id: linker
+    name: Entity linker
+    role: Maps drug names and brand names in the question to graph node ids.
+    tech: RapidFuzz · synonym table
+    talksTo: [retriever]
+    kind: core
+  - id: retriever
+    name: Path retriever
+    role: Finds paths of up to 3 hops between the linked drugs, pruning at hub nodes.
+    tech: NetworkX
+    talksTo: [answerer]
+    kind: core
+  - id: answerer
+    name: Answerer
+    role: Turns paths into numbered facts and asks the LLM to answer citing them.
+    tech: Python
+    talksTo: [llm]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Writes the answer using only the given facts.
+    tech: Hosted LLM
+    talksTo: []
+    kind: external
+  - id: evalset
+    name: Eval set
+    role: 80 questions labelled by hop count, run against graph RAG and vector-only RAG.
+    tech: JSONL · Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: linker
+    text: finds `simvastatin` and `clarithromycin` in the question and maps them to node ids, asking back if a name matches two drugs.
+  - component: retriever
+    text: >-
+      searches paths up to 3 hops between them through `metabolised_by` and `inhibits` edges, skipping nodes with
+      over 500 neighbours unless they are an endpoint, and keeps the 10 shortest.
+  - component: answerer
+    text: writes each path as a numbered fact, such as `[2] clarithromycin inhibits CYP3A4`, and prompts the LLM to cite facts by number.
+  - component: llm
+    text: answers in a few sentences with citations, or says the graph has no connecting path.
+  - component: evalset
+    text: runs all 80 questions through both systems and reports accuracy by hop count and **path recall**.
+interface:
+  lang: http
+  code: |
+    POST /ask
+    { "question": "Do simvastatin and
+        clarithromycin interact, and why?" }
+
+    200 OK
+    { "answer": "Yes. Clarithromycin inhibits
+        CYP3A4 [2], which breaks down
+        simvastatin [1]…",
+      "paths": [["simvastatin", "metabolised_by",
+        "CYP3A4"], ["clarithromycin",
+        "inhibits", "CYP3A4"]],
+      "hops": 2 }
+decisions:
+  - choice: Graph paths, not only vector search
+    instead: Vector-only RAG
+    why: >-
+      Vector search returns passages about each drug separately and misses the enzyme that links them. A path through
+      `CYP3A4` is the answer, so retrieve paths.
+  - choice: NetworkX in memory
+    instead: A graph database such as Neo4j
+    why: 50k edges fit in memory and load in seconds. Move to a graph database when the graph or concurrent users grow.
+  - choice: Cap hops and prune hubs
+    instead: Unbounded path search
+    why: >-
+      Enzymes like CYP3A4 touch thousands of drugs, so 3-hop search explodes. Hub pruning keeps the 6 s p95 and the
+      prompt short.
+watchOut: >-
+  Name ambiguity in linking (brand vs generic names, similar spellings) silently retrieves paths for the wrong drug,
+  and the answer then looks well grounded. Show the linked entities in every answer and test the linker on its own.

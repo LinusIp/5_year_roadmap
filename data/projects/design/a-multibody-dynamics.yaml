@@ -1,0 +1,127 @@
+overview: >-
+  The Stage 1 engine grows from game physics into engineering dynamics: chains and trees of bodies joined by revolute
+  (hinge) and prismatic (slider) joints, with limits, friction and motors. A loader builds the kinematic tree from a
+  parameter file; each step runs forward kinematics, joint forces, Featherstone's articulated-body algorithm (ABA, an
+  O(n) way to get joint accelerations) and an integrator. A headless harness checks the results against analytical
+  answers, SymPy and MuJoCo, and the existing renderer shows the bodies.
+learn:
+  - name: Spatial vector algebra
+    ref: modern-robotics
+  - name: Articulated-body algorithm
+  - name: Symplectic integration
+  - name: Linearisation about upright
+    ref: mit-6-832-underactuated
+  - name: Model validation
+stats:
+  - value: < 0.1 %
+    label: energy drift over 60 s at 1 ms
+  - value: 1 %
+    label: cart-pole A and B match
+  - value: "1e-9"
+    label: five-link mass matrix match
+components:
+  - id: model
+    name: Parameter file
+    role: Describes the bodies, masses, inertias, joint axes, limits, friction and motors of a real rig.
+    tech: YAML or JSON
+    talksTo: [loader]
+    kind: external
+  - id: loader
+    name: Tree builder
+    role: Parses the file and builds the kinematic tree with each joint axis in its parent frame.
+    tech: C++20
+    talksTo: [kinematics]
+    kind: core
+  - id: kinematics
+    name: Forward kinematics
+    role: Computes every body's pose and velocity from the joint positions and rates.
+    tech: C++20 · Eigen
+    talksTo: [forces]
+    kind: core
+  - id: forces
+    name: Joint forces
+    role: Adds motor torques, viscous and Coulomb friction, and limit forces for each joint.
+    tech: C++20 · Eigen
+    talksTo: [aba]
+    kind: core
+  - id: aba
+    name: ABA solver
+    role: Turns joint forces into joint accelerations with the articulated-body algorithm.
+    tech: C++20 · Eigen
+    talksTo: [integrator]
+    kind: core
+  - id: integrator
+    name: Integrator
+    role: Advances the state with semi-implicit Euler, RK4 or implicit midpoint.
+    tech: C++20
+    talksTo: [kinematics, renderer, harness]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Draws the bodies through the existing Stage 1 pipeline.
+    tech: Stage 1 renderer
+    talksTo: []
+    kind: core
+  - id: harness
+    name: Validation harness
+    role: Runs scenarios headless and compares them with analytical, SymPy and MuJoCo results.
+    tech: Python bindings · SciPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: loader
+    text: >-
+      reads the parameter file once and builds the tree, the parent indices and the joint list, with axes in the
+      **parent** frame.
+  - component: kinematics
+    text: starts each `1 ms` step by computing body poses and spatial velocities from `q` and `qd`.
+  - component: forces
+    text: >-
+      sums motor commands (torque, velocity or position targets), friction smoothed near zero speed, and limit forces
+      into `tau`.
+  - component: aba
+    text: runs the articulated-body algorithm on `q`, `qd` and `tau` to get the joint accelerations `qdd` in O(n).
+  - component: integrator
+    text: >-
+      updates `q` and `qd` and loops back to forward kinematics for the next step; this is the simulation loop.
+  - component: renderer
+    text: draws the bodies from the latest state once per frame, several physics steps apart.
+  - component: harness
+    text: >-
+      runs the same loop headless and reports energy drift, the cart-pole Jacobian against the analytical A and B, and
+      the mass matrix against **SymPy** or **MuJoCo**.
+interface:
+  lang: cpp
+  code: |
+    struct Joint {
+      JointType type;      // Revolute, Prismatic
+      Vec3 axis;           // in the parent frame
+      double lo, hi;       // limits
+      Motor motor; Friction friction;
+    };
+    Model load_model(const std::string& path);
+
+    // Featherstone ABA: q, qd, tau -> qdd
+    VecX aba(const Model& m, const VecX& q,
+             const VecX& qd, const VecX& tau);
+    void step(const Model& m, State& s,
+              double dt, Integrator kind);
+decisions:
+  - choice: Reduced coordinates with ABA
+    instead: Maximal coordinates with joint constraints, as in game engines
+    why: >-
+      Joints hold exactly with no drift, and ABA stays O(n), so the 2 to 100 body sweep stays fast. Revisit for
+      closed loops, which need Lagrange multipliers on top.
+  - choice: Symplectic or implicit midpoint by default
+    instead: RK4 or explicit Euler
+    why: >-
+      The 0.1 % energy target over 60 s at a 1 ms step suits integrators that do not slowly pump energy in or out. RK4
+      stays as a measured comparison, with its drift reported.
+  - choice: Limits as constraints or stiff penalties
+    instead: Resetting velocity when a joint hits its limit
+    why: >-
+      A velocity reset injects energy and breaks the conservation tests. Start with penalties; move to constraints if
+      penetration stays visible.
+watchOut: >-
+  Mixing motion and force spatial vectors, or expressing them in the wrong frame, gives motion that looks plausible but
+  is wrong. Unit-test each transform against SymPy before building ABA on it, and validate with friction off first.

@@ -1,0 +1,45 @@
+overview: >-
+  A Helm chart written by hand for one web service: deployment, service and ingress templates, a values schema that
+  rejects bad input, and a checksum annotation so changing the ConfigMap rolls the pods, all tested on a kind
+  cluster.
+learn:
+  - name: Helm templating
+  - name: Values schema
+  - name: Rolling updates
+    ref: kubernetes-tutorials
+components:
+  - id: values
+    name: Values
+    role: User-facing settings, validated by `values.schema.json`.
+    tech: YAML · JSON Schema
+    talksTo: [templates]
+    kind: core
+  - id: templates
+    name: Templates
+    role: Deployment, Service, Ingress, ConfigMap and shared helpers in `_helpers.tpl`.
+    tech: Helm
+    talksTo: [cluster]
+    kind: core
+  - id: cluster
+    name: kind cluster
+    role: Runs the release and the `helm test` pod.
+    tech: kind · Kubernetes
+    talksTo: []
+    kind: external
+flow:
+  - component: values
+    text: are checked against the schema, so `replicaCount "two"` fails before anything renders.
+  - component: templates
+    text: render with `helm template`, adding `checksum/config` set to the hash of the rendered ConfigMap on the pod template.
+  - component: cluster
+    text: receives `helm upgrade`; a changed ConfigMap changes the checksum, so the Deployment rolls its pods.
+  - component: cluster
+    text: runs `helm test`, a pod that curls the service and must exit 0.
+decisions:
+  - choice: Expose only the values people change
+    instead: Template every field of every resource
+    why: >-
+      A chart where everything is a value is as hard to read as raw YAML and hard to validate. Add a value when a
+      second user needs it.
+watchOut: >-
+  Over-templating makes the chart unreadable and untestable. Keep the templates close to plain Kubernetes YAML.

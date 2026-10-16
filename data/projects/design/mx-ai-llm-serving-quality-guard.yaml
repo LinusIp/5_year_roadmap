@@ -1,0 +1,102 @@
+overview: >-
+  A CI quality gate for Nimbus Notes' quantised 8B model. Every build makes INT8 and INT4 variants, runs the same
+  task suite (summaries, extraction, reasoning) on them and on the full-precision reference, and a paired
+  statistical test decides pass or fail. The suite is sized by a power calculation so a real 3-point drop is caught
+  9 times out of 10, and the report shows each variant's quality change with a confidence interval next to its speed
+  and memory.
+learn:
+  - name: Weight quantisation
+    ref: llama-cpp
+  - name: Statistical power
+  - name: Paired bootstrap tests
+  - name: Perplexity
+    ref: stanford-cs224n
+  - name: Eval contamination
+stats:
+  - value: < 30 min
+    label: per gate run
+  - value: '0.9'
+    label: power for a 3-point drop
+  - value: ≥ 1.5×
+    label: speedup of passing variant
+components:
+  - id: ci
+    name: CI job
+    role: Starts the gate on every model or quantisation change and blocks the release on fail.
+    tech: GitHub Actions · self-hosted GPU
+    talksTo: [quant]
+    kind: external
+  - id: quant
+    name: Quantisation step
+    role: Builds INT8 and INT4 variants with AWQ or GPTQ and records their size.
+    tech: AutoAWQ · AutoGPTQ
+    talksTo: [server]
+    kind: core
+  - id: server
+    name: Inference server
+    role: Serves the reference and each variant in turn and measures tokens per second and memory.
+    tech: vLLM
+    talksTo: [suite]
+    kind: core
+  - id: suite
+    name: Task suite
+    role: Fixed items from XSum, an extraction set, GSM8K and HellaSwag, scored per item.
+    tech: Python · JSONL
+    talksTo: [gate]
+    kind: core
+  - id: gate
+    name: Stats gate
+    role: Compares per-item scores of variant and reference with a paired bootstrap and decides pass or fail.
+    tech: SciPy · NumPy
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Writes the cost-quality table and posts the verdict on the build.
+    tech: Markdown
+    talksTo: []
+    kind: core
+flow:
+  - component: quant
+    text: quantises the 8B model to `int8` and `int4-awq` with a 512-sample calibration set kept apart from the eval items.
+  - component: server
+    text: loads one model at a time on the 24 GB GPU, runs the suite with batching and records tokens per second and peak memory.
+  - component: suite
+    text: >-
+      scores about 1,800 items, a count set by the **power calculation** for a 3-point drop, with exact match for
+      extraction and maths and a reference-based score for summaries.
+  - component: gate
+    text: >-
+      bootstraps the per-item difference against the reference 10,000 times and fails the variant if the 95% interval
+      is entirely below `-3` points on any task.
+  - component: report
+    text: lists each variant's quality delta with its interval, speedup and memory, and marks the fastest one that passed.
+interface:
+  lang: json
+  code: |
+    { "build": "nimbus-8b@4f2c1e",
+      "variant": "int4-awq",
+      "tasks": {
+        "summaries": { "delta": -0.8,
+                       "ci95": [-1.9, 0.3] },
+        "gsm8k": { "delta": -2.1,
+                   "ci95": [-3.6, -0.6] } },
+      "speedup": 1.9, "vram_gb": 6.1,
+      "verdict": "pass", "minutes": 24 }
+decisions:
+  - choice: Paired test on the same items
+    instead: Compare two average scores
+    why: >-
+      Most of the variance is in which items are hard, and pairing removes it. That is what makes a 3-point drop
+      detectable with about 1,800 items inside 30 minutes.
+  - choice: Size the suite by a power calculation
+    instead: A round number of items per task
+    why: >-
+      200 items per task would often miss a 3-point drop and the gate would pass broken builds. Power analysis says
+      how many items are needed; check it by seeding a known 3-point drop.
+  - choice: Task metrics alongside perplexity
+    instead: Perplexity only
+    why: The summary regression that slipped through barely moved perplexity; per-task scores catch what users see.
+watchOut: >-
+  An underpowered suite passes real regressions, and benchmark items that leaked into calibration or training make
+  every variant look fine. Seed a known drop to test the gate and keep calibration data separate from eval items.

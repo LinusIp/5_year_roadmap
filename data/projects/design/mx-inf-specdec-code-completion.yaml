@@ -1,0 +1,102 @@
+overview: >-
+  Speculative decoding for Forge Editor's inline completions: a small draft model of at most 0.5B guesses the next k
+  tokens cheaply, and the 7B target model checks all k in one forward pass, keeping the longest prefix it agrees
+  with. At batch 1 a forward pass costs about the same for 1 token or 6, because it is limited by reading the 14 GB
+  of weights, so every accepted guess is nearly free. An adaptive controller picks k from recent acceptance, and a
+  greedy test proves the output is exactly what the 7B alone would write.
+learn:
+  - name: Speculative decoding
+    ref: vllm-docs
+  - name: Memory-bound decode
+    ref: kipply-inference-arithmetic
+  - name: Acceptance rate
+  - name: Batch size effects
+    ref: batching-effects-gpt
+  - name: Greedy equivalence testing
+stats:
+  - value: ≤ 250 ms
+    label: median for 64 tokens, batch 1
+  - value: ≥ 1.8×
+    label: speed-up at batch 1
+  - value: 500 / 500
+    label: greedy outputs identical
+components:
+  - id: editor
+    name: Editor client
+    role: Sends the code before and after the cursor when the user pauses typing.
+    tech: IDE plug-in
+    talksTo: [controller]
+    kind: external
+  - id: controller
+    name: Adaptive-k controller
+    role: Chooses how many tokens to draft from this request's recent acceptance rate.
+    tech: Python
+    talksTo: [draft]
+    kind: core
+  - id: draft
+    name: Draft runner
+    role: Runs the 0.5B model, sharing the target's tokenizer, to propose k tokens.
+    tech: PyTorch · transformers
+    talksTo: [verifier]
+    kind: core
+  - id: verifier
+    name: Verifier
+    role: Runs the 7B on all k drafted tokens in one pass and accepts the matching prefix plus one token of its own.
+    tech: vLLM speculative or custom loop · 48 GB GPU
+    talksTo: [controller, editor]
+    kind: core
+  - id: equiv
+    name: Equivalence tests
+    role: Compares greedy outputs with and without speculation on 500 prompts.
+    tech: pytest
+    talksTo: []
+    kind: offline
+  - id: bench
+    name: Benchmark harness
+    role: Measures acceptance by language, tokens per verify step and latency at batch 1 to 16.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: editor
+    text: sends a Python file cut at the cursor, asking for up to `max_tokens=64`.
+  - component: controller
+    text: starts at `k=4` and raises it toward 8 while drafts keep being accepted, or drops it after misses.
+  - component: draft
+    text: proposes 4 tokens, for example `    return self.` plus `name`, each costing a small fraction of a 7B step.
+  - component: verifier
+    text: >-
+      scores all 4 positions in one 7B pass, accepts the first 3 that match its own greedy choice and adds its own
+      4th token, so one expensive step yields **4 tokens**.
+  - component: controller
+    text: loops until 64 tokens or a stop such as a blank line, then returns the completion to the editor.
+interface:
+  lang: python
+  code: |
+    def spec_step(ctx: list[int], k: int):
+        draft = draft_model.greedy(ctx, k)       # k tokens
+        logits = target.forward(ctx + draft)     # 1 pass
+        best = logits[-k-1:].argmax(-1)          # k + 1
+        n = 0
+        while n < k and draft[n] == best[n]:
+            n += 1
+        return draft[:n] + [best[n]], n          # n accepted
+decisions:
+  - choice: Adapt k per request
+    instead: One fixed draft length
+    why: >-
+      Boilerplate in Python and JSON is accepted far more often than novel logic or rare languages, so a fixed k
+      wastes draft work on one and leaves speed on the table on the other.
+  - choice: Turn speculation off at high batch
+    instead: Always speculate
+    why: >-
+      At batch 16 the GPU has less idle compute to verify extra tokens, and wasted drafts slow everyone. Switch it
+      off above the batch size where the benchmark shows a gain under 5%.
+  - choice: Same tokenizer for draft and target
+    instead: Any small code model
+    why: >-
+      Draft tokens are compared to target tokens one by one; different vocabularies make that comparison meaningless.
+      Pick a draft from the same model family.
+watchOut: >-
+  Greedy equivalence only proves the greedy path. With sampling you must use the proper accept-reject rule, or the
+  output distribution quietly changes; keep the 500-prompt test in CI.

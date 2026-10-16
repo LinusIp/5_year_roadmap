@@ -1,0 +1,128 @@
+overview: >-
+  A cart-pole (a pendulum on a moving cart) modelled in your own multibody engine, stabilised there by an LQR
+  controller designed on the model linearised about upright, then built on a belt-driven cart and balanced for a
+  minute. Two encoders give the cart position and pendulum angle, a 500 Hz loop estimates the four states and
+  computes the force `u = −Kx`, and the motor stage of project 44 turns that into cart motion. The same controller
+  code runs against the engine and the hardware, so you can overlay simulated and measured trajectories.
+learn:
+  - name: State-space models
+    ref: brunton-control-bootcamp
+  - name: Linearisation
+    ref: mit-6-832-underactuated
+  - name: LQR design
+    ref: brunton-control-bootcamp
+  - name: Velocity estimation
+    ref: feedback-systems
+  - name: Sim-to-real gap
+    ref: mit-6-832-underactuated
+stats:
+  - value: ≥ 60 s
+    label: balancing within ±15 cm of centre
+  - value: < 2 s
+    label: recovery from a 5° tap
+  - value: 500 Hz
+    label: control loop
+components:
+  - id: engine
+    name: Sim and design
+    role: Runs the nonlinear cart-pole in your engine and computes K from the linearised model.
+    tech: Your engine · python-control
+    talksTo: [lqr]
+    kind: offline
+  - id: encoders
+    name: Encoders
+    role: Count cart position and pendulum angle in hardware timers.
+    tech: Quadrature timers · 600 lines
+    talksTo: [estimator]
+    kind: core
+  - id: estimator
+    name: State estimator
+    role: Builds x, ẋ, θ and θ̇ by filtered differentiation of the two counts.
+    tech: C
+    talksTo: [lqr]
+    kind: core
+  - id: lqr
+    name: LQR controller
+    role: Computes the cart force from the four states with the gains K.
+    tech: C
+    talksTo: [force]
+    kind: core
+  - id: force
+    name: Force to voltage
+    role: Converts the force command to a motor voltage through the identified motor model.
+    tech: C
+    talksTo: [bridge]
+    kind: core
+  - id: bridge
+    name: Motor stage
+    role: Drives the belt motor with the PWM bridge from project 44.
+    tech: Project 44 driver
+    talksTo: [plant]
+    kind: core
+  - id: supervisor
+    name: Supervisor
+    role: Disables the motor at the travel limits or when the angle leaves ±25°.
+    tech: C · limit switches
+    talksTo: [bridge]
+    kind: core
+  - id: plant
+    name: Cart-pole
+    role: The real belt-driven cart and pendulum, or the engine standing in for them.
+    tech: GT2 belt · rail
+    talksTo: [encoders]
+    kind: external
+flow:
+  - component: engine
+    text: >-
+      linearises the model about upright, and `lqr(A, B, Q, R)` returns the four gains, tested from 15° starts and a
+      0.5 N·s impulse.
+  - component: encoders
+    text: >-
+      are read every 2 ms; counts become `x` in metres and `θ` in radians, with upright as zero.
+  - component: estimator
+    text: >-
+      differentiates both and low-pass filters the result, because raw `θ̇` is too noisy for its gain.
+  - component: lqr
+    text: >-
+      computes `u = −K·[x, ẋ, θ, θ̇]`, pushing the cart under the pendulum as it starts to fall.
+  - component: force
+    text: >-
+      adds the back-EMF term for the current cart speed and divides by the motor gain to get a **voltage**.
+  - component: bridge
+    text: >-
+      applies that voltage; the cart moves, the pendulum responds, and the encoders close the **control loop**.
+  - component: supervisor
+    text: >-
+      checks every cycle and cuts the motor past the software travel limit, at a limit switch or when `|θ| > 25°`.
+interface:
+  lang: c
+  code: |
+    typedef struct { float x, xd, th, thd; } state_t;
+
+    /* same code in the engine and on the MCU */
+    float lqr_force(const state_t *s,
+                    const float K[4]) {
+      return -(K[0] * s->x  + K[1] * s->xd +
+               K[2] * s->th + K[3] * s->thd);
+    }
+    float force_to_volts(float force_n, float xd);
+    bool  supervisor_ok(const state_t *s);
+decisions:
+  - choice: LQR on the linearised model
+    instead: Two hand-tuned PID loops
+    why: >-
+      Four coupled states with one input suit LQR, and Q and R state the trade-off between angle error and cart travel
+      directly, which matters with only ±15 cm of rail to use.
+  - choice: Filtered differentiation for velocities
+    instead: A Kalman filter
+    why: >-
+      Filtered differences of 600-line encoders are enough to balance at 500 Hz. Move to a Kalman filter, the stretch
+      goal, if θ̇ noise stops you raising the gains.
+  - choice: One controller behind a thin interface
+    instead: A separate controller in the simulation
+    why: >-
+      The sim-to-real overlay only means something if both sides ran the same code; any gap is then the model's, not
+      a transcription bug.
+watchOut: >-
+  Sign conventions that differ between the model, the encoders and the motor make the controller push the wrong way
+  and throw the cart into the end stop. Check each sign by hand, and fit the hard stops before the first test.

@@ -1,0 +1,107 @@
+overview: >-
+  A single-process gateway in front of Parley's model backend that refuses work it cannot finish in time, instead of
+  letting queues and retries pile up until p99 reaches 40 s. It estimates each request's wait from the queued and
+  in-flight tokens, keeps capacity reserved for premium tenants, and answers excess low-priority work at once with a
+  429 and a jittered Retry-After. A simulator reproduces the retry storm and shows the gateway keeping premium p99
+  TTFT under 2 s at twice the backend's capacity.
+learn:
+  - name: Admission control
+    ref: google-sre-book
+  - name: Retry storms and backoff
+    ref: google-sre-book
+  - name: Priority queues
+  - name: Goodput
+  - name: Little's law
+    ref: mit-6-041
+stats:
+  - value: ≤ 2 s
+    label: premium p99 TTFT at 2× load
+  - value: ≥ 90%
+    label: goodput of capacity
+  - value: ≤ 20 s
+    label: recovery after overload
+components:
+  - id: clients
+    name: Load generator
+    role: Simulates voice clients with timeouts and retries, at up to 2× backend capacity.
+    tech: Python · asyncio
+    talksTo: [estimator]
+    kind: external
+  - id: estimator
+    name: Wait estimator
+    role: Predicts time to first token from queued prompt tokens, in-flight requests and measured backend speed.
+    tech: Go
+    talksTo: [admission]
+    kind: core
+  - id: admission
+    name: Admission controller
+    role: Admits a request only if its predicted wait fits its class deadline, otherwise returns 429.
+    tech: Go
+    talksTo: [queues]
+    kind: core
+  - id: queues
+    name: Priority queues
+    role: Holds premium and standard queues, with 30% of backend slots reserved for premium and lent out when idle.
+    tech: Go
+    talksTo: [backend]
+    kind: core
+  - id: backend
+    name: Model backend
+    role: A mock LLM server whose service time comes from real benchmark measurements.
+    tech: Mock server
+    talksTo: [metrics]
+    kind: external
+  - id: metrics
+    name: Metrics
+    role: Exposes shed rate, p99 TTFT by class, goodput and retry amplification.
+    tech: Prometheus
+    talksTo: []
+    kind: offline
+flow:
+  - component: estimator
+    text: >-
+      for a standard request sees 42,000 prompt tokens queued and a backend speed of 30,000 prefill tokens per second,
+      so predicts about 1.4 s of wait before it would start.
+  - component: admission
+    text: >-
+      compares that with the standard deadline of 1.0 s and returns `429` with `Retry-After` of 2–6 s, picked at
+      random, in under a millisecond; no backend work was started.
+  - component: queues
+    text: >-
+      lets a premium request use its reserved slots straight away, and lends idle reserved slots to standard work so
+      capacity is not wasted.
+  - component: backend
+    text: >-
+      serves only work that can meet its deadline, so the requests it accepts are **goodput** rather than responses
+      that arrive after the client has given up.
+interface:
+  lang: http
+  code: |
+    POST /v1/generate
+    X-Tenant: acme   X-Class: standard
+
+    429 Too Many Requests
+    Retry-After: 4
+    { "error": "overloaded",
+      "predicted_wait_ms": 1400,
+      "deadline_ms": 1000,
+      "class": "standard" }
+decisions:
+  - choice: Shed at the door, before any work
+    instead: Time out requests inside the backend
+    why: >-
+      A request that times out after prefill has already used GPU time and then gets retried, which is how the storm
+      grows. Rejecting before work keeps goodput at 90% of capacity.
+  - choice: Jittered Retry-After
+    instead: A fixed retry delay
+    why: >-
+      A fixed delay makes every rejected client come back in the same second and recreates the overload. Random
+      2–6 s spreads them out and helps recovery within 20 s.
+  - choice: Reserved but lendable premium capacity
+    instead: Hard partition of the GPU slots
+    why: >-
+      A hard partition leaves premium slots idle at quiet times. Lending them to standard work while preempting new
+      standard admissions keeps both goodput and the premium p99.
+watchOut: >-
+  Shedding after the work has started is the most common mistake. Measure retry amplification, total attempts per
+  unique request, and make sure it stays near 1 during overload.

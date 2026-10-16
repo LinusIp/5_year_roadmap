@@ -1,0 +1,139 @@
+overview: >-
+  One machine built end to end: a pen plotter, a self-balancing robot or a quadruped leg. The CAD model is the one
+  source of geometry and mass properties, and it feeds both the drawings you build from and a digital twin (a
+  simulation of the same machine) in your own engine. Your own PCB runs the control loop on board, and a ROS 2 node
+  sends the same commands to the machine and the twin so their motion can be compared and the error reported.
+learn:
+  - name: CAD and drawings
+    ref: onshape-learning-center
+  - name: Design for manufacturing
+    ref: mit-2-008
+  - name: PCB design
+    ref: kicad
+  - name: Rigid-body dynamics
+    ref: modern-robotics
+  - name: Feedback control
+    ref: feedback-systems
+  - name: ROS 2 nodes
+    ref: ros2-tutorials
+stats:
+  - value: 9 of 10
+    label: task attempts succeed on video
+  - value: < 10 %
+    label: twin RMS error of motion range
+  - value: $285–900
+    label: parts budget
+components:
+  - id: cad
+    name: CAD model
+    role: Holds every part's geometry and mass properties and exports them to the drawings and the twin.
+    tech: Onshape or FreeCAD
+    talksTo: [drawings, twin]
+    kind: core
+  - id: drawings
+    name: Drawings and BOM
+    role: Gives dimensions with tolerances and a costed bill of materials to build and order from.
+    tech: CAD drawings · spreadsheet
+    talksTo: [machine]
+    kind: core
+  - id: twin
+    name: Digital twin
+    role: Simulates the machine from the exported parameters, sizes the motors and predicts each test's motion.
+    tech: Your C++ engine
+    talksTo: [report]
+    kind: core
+  - id: machine
+    name: Machine
+    role: The built frame, motors, encoders, IMU or limit switches doing the task.
+    tech: Printed and machined parts
+    talksTo: [board]
+    kind: core
+  - id: board
+    name: PCB and firmware
+    role: Runs the control loop at a fixed rate, drives the motors and streams telemetry.
+    tech: KiCad · STM32 · C or Rust
+    talksTo: [machine, bridge]
+    kind: core
+  - id: bridge
+    name: ROS 2 bridge
+    role: Sends commands to the board and the same inputs to the twin, and records both responses.
+    tech: ROS 2 Jazzy · Python
+    talksTo: [twin, report]
+    kind: core
+  - id: report
+    name: Error report
+    role: Compares predicted and measured motion per test and tabulates accuracy and repeatability.
+    tech: Python · Matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: cad
+    text: >-
+      holds the machine's geometry and exports mass, centre of mass and inertia to a twin parameter file, and
+      dimensions to the drawings.
+  - component: twin
+    text: >-
+      runs the task in your engine first, so motor torque and speed are **sized from simulation**, and the controller
+      gains are tuned before any hardware exists.
+  - component: drawings
+    text: >-
+      turn the model into parts to print, machine and order from the BOM; critical dimensions are measured and
+      tabulated against their tolerances.
+  - component: board
+    text: >-
+      reads encoders and the IMU, computes the next motor command and writes it every tick at a stated rate; this
+      sensor-to-motor **loop** runs on the PCB, not on a laptop.
+  - component: machine
+    text: >-
+      performs the standard test (plot a 150 mm drawing within 0.5 mm, take a 2 N·s push, or track a foot path within
+      5 mm), and its sensors feed the next tick.
+  - component: bridge
+    text: >-
+      sends the test's command sequence to the board and the same inputs to the twin, and logs telemetry from both
+      with timestamps.
+  - component: report
+    text: >-
+      lines the two traces up and reports RMS position error against the motion range, plus loop rate, jitter and
+      success over 10 runs.
+interface:
+  lang: c
+  code: |
+    // Telemetry frame, firmware -> ROS 2 bridge
+    typedef struct {
+      uint32_t t_us;         // MCU time stamp
+      float    pos[4];       // joint or axis positions
+      float    vel[4];
+      float    current_a[4]; // motor currents
+      float    imu[6];       // accel xyz, gyro xyz
+      uint16_t jitter_us;    // this tick's lateness
+      uint8_t  faults;       // overcurrent, limits
+    } telemetry_t;
+
+    // Called every tick by the timer interrupt
+    void control_step(const cmd_t *cmd,
+                      telemetry_t *out);
+decisions:
+  - choice: CAD exports mass properties to the twin
+    instead: Masses and inertias typed into the twin by hand
+    why: >-
+      The twin is only worth comparing if it describes the machine you built. Re-export after every design change,
+      and after the build weigh the real parts and update the model.
+  - choice: Size motors from the twin
+    instead: Buy motors first and design around them
+    why: >-
+      Motors are the largest share of a $285–900 budget and hard to swap later. Simulate the task, read peak torque
+      and speed, then add margin.
+  - choice: Control loop on your PCB, ROS 2 for commands and telemetry
+    instead: Run the controller on a laptop through ROS 2
+    why: >-
+      The acceptance rules out a laptop in the loop, and a USB link adds jitter a balancing robot cannot absorb. The
+      laptop only drives the twin and records.
+  - choice: Plan two PCB revisions
+    instead: One board run with no slack
+    why: >-
+      A first board almost always has a footprint or pinout mistake. Keep 20 % of the budget and time for a second
+      run.
+watchOut: >-
+  Mass properties in the twin drift from the built machine as parts, wiring and fasteners change, and the reported
+  error then measures your bookkeeping, not the model. Weigh the assembled machine and update the CAD before each
+  comparison.

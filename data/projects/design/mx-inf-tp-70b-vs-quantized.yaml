@@ -1,0 +1,116 @@
+overview: >-
+  A head-to-head study that tells Sable Analytics how to serve a 70B-class model for its premium tier: option A
+  splits the full-precision model across 4 GPUs with tensor parallelism (each layer's matrices are sharded and the
+  GPUs exchange partial results every layer), option B runs a 4-bit version on one large GPU. One harness drives both
+  with the same workload, a quality suite measures the loss with confidence intervals, and a cost model turns it
+  all into $/1M tokens. The result is a memo with a decision table and a failure-mode analysis, within a $150
+  rental budget.
+learn:
+  - name: Tensor parallelism
+    ref: ultra-scale-playbook
+  - name: All-reduce communication
+    ref: scaling-book
+  - name: 4-bit weight quantization
+    ref: vllm-docs
+  - name: Confidence intervals
+    ref: harvard-stat-110
+  - name: Cost per million tokens
+    ref: databricks-inference-best-practices
+stats:
+  - value: 1 / 8 / 32
+    label: concurrent users benchmarked
+  - value: ≥ 3
+    label: quality tasks with CIs
+  - value: ≤ 10%
+    label: cost model error vs measured
+components:
+  - id: recipes
+    name: Deployment recipes
+    role: Scripts that start option A with tensor parallel 4 and option B with the int4 model on one GPU.
+    tech: vLLM · shell
+    talksTo: [gpus]
+    kind: core
+  - id: gpus
+    name: Rented GPUs
+    role: Four GPUs with a known interconnect for A and one large-memory GPU for B, rented by the hour.
+    tech: Cloud GPUs
+    talksTo: [harness]
+    kind: external
+  - id: harness
+    name: Benchmark harness
+    role: Replays the same prompts at 1, 8 and 32 users and records ITL, throughput and communication time.
+    tech: Python · asyncio
+    talksTo: [quality, cost]
+    kind: core
+  - id: quality
+    name: Quality suite
+    role: Scores both options on MMLU subsets, a summarisation set and a third task, with bootstrap intervals.
+    tech: lm-eval-style harness
+    talksTo: [memo]
+    kind: core
+  - id: cost
+    name: Cost model
+    role: Predicts $/1M tokens and users at SLO from GPU prices and measured throughput.
+    tech: pandas
+    talksTo: [memo]
+    kind: core
+  - id: memo
+    name: Decision memo
+    role: Puts latency, quality, cost and what happens when a GPU fails into one table and a recommendation.
+    tech: Markdown
+    talksTo: []
+    kind: core
+flow:
+  - component: recipes
+    text: >-
+      starts A as `tensor_parallel_size=4` with bf16 weights (about 140 GB) and B as an int4 checkpoint (about 35 GB
+      plus KV cache) on one GPU, both with the same `max_num_seqs`.
+  - component: harness
+    text: >-
+      replays identical prompts at 1, 8 and 32 users and records p99 ITL and tokens/s; for A it also measures the
+      share of each step spent in **all-reduce** between GPUs.
+  - component: quality
+    text: >-
+      runs the same questions through both and reports each task's score difference with a 95% interval, so a small
+      gap is not mistaken for no gap.
+  - component: cost
+    text: >-
+      divides hourly price by measured tokens per hour at the latency SLO, then checks its own predictions against
+      measured runs to within `10%`.
+  - component: memo
+    text: >-
+      weighs the results and notes that if one of A's 4 GPUs fails the whole replica stops, while B's single-GPU
+      replicas fail one at a time.
+interface:
+  lang: yaml
+  code: |
+    # bench.yaml, identical for A and B
+    workload:
+      prompts: sable_mix.jsonl
+      out_tokens: 256
+      concurrency: [1, 8, 32]
+      max_num_seqs: 32
+      warmup_requests: 50
+    deployments:
+      A: {model: 70b-bf16, tp: 4}
+      B: {model: 70b-awq-int4, tp: 1}
+    report: [p99_itl, tok_s, usd_per_1m, comm_frac]
+decisions:
+  - choice: One harness and one batch limit for both
+    instead: Each option tuned to its own best batch size
+    why: >-
+      Comparing at different batch sizes compares the tuning, not the hardware. Fixing `max_num_seqs` and the prompt
+      mix makes the latency and cost columns comparable.
+  - choice: Short scripted rentals
+    instead: Keep the GPUs up while experimenting
+    why: >-
+      Four large GPUs eat a $150 budget in a few hours. Recipes that start, benchmark and stop on their own keep idle
+      time near zero.
+  - choice: Count failure domains in the decision
+    instead: Compare only speed, quality and price
+    why: >-
+      A premium tier needs to stay up. Tensor parallelism ties 4 GPUs into one failure unit, which can outweigh a
+      small latency gain.
+watchOut: >-
+  A quality eval that is too small hides a real loss in the 4-bit model. Use enough questions per task that the 95%
+  interval is narrower than the difference you care about.

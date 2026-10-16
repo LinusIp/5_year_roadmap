@@ -1,0 +1,99 @@
+overview: >-
+  A measurement harness that tells the team how far their LLM judge can be trusted. It runs the judge on 200 summary
+  pairs that the author labelled by hand, in both positions and with and without a rubric, plus probes that change
+  one thing on purpose (pad one summary, swap the order, name the model). Statistics turn the verdicts into
+  agreement with a confidence interval, a position flip rate and a length bias, and a report recommends a judge set-up.
+learn:
+  - name: LLM-as-judge
+    ref: fsdl
+  - name: Position and length bias
+  - name: Cohen's kappa
+  - name: Bootstrap intervals
+  - name: Controlled probes
+stats:
+  - value: 95% CI
+    label: on judge agreement
+  - value: < 10%
+    label: position flip rate
+  - value: < $30
+    label: total judging cost
+components:
+  - id: pairs
+    name: Pair dataset
+    role: 200 summary pairs with the author's preference and model names stripped.
+    tech: JSONL · pandas
+    talksTo: [probes]
+    kind: core
+  - id: probes
+    name: Bias probes
+    role: Makes controlled variants such as swapped order, padded length or a named model.
+    tech: Python
+    talksTo: [runner]
+    kind: core
+  - id: runner
+    name: Judge runner
+    role: Calls the judge for every pair, variant and prompt, with caching and a cost cap.
+    tech: Python · asyncio
+    talksTo: [judge, stats]
+    kind: core
+  - id: judge
+    name: Judge LLM
+    role: Returns A, B or tie with a short reason.
+    tech: LLM API
+    talksTo: []
+    kind: external
+  - id: stats
+    name: Statistics
+    role: Computes agreement, kappa, bootstrap intervals, flip rate and length effect.
+    tech: scipy · NumPy
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Tables, plots and a recommended judge configuration.
+    tech: Jupyter · Markdown
+    talksTo: []
+    kind: core
+flow:
+  - component: pairs
+    text: loads the 200 pairs with the author's labels, removing anything that names the summariser version.
+  - component: probes
+    text: adds variants, for example the same pair in B-A order, or one side padded with two neutral sentences, so each bias is tested on its own.
+  - component: runner
+    text: sends about 2,400 judge calls (pairs × orders × rubric on/off × probes) at `temperature=0`, stopping at the $30 cap.
+  - component: stats
+    text: computes agreement and Cohen's kappa (agreement beyond chance), then resamples the 200 pairs 10,000 times for a **95% interval**.
+  - component: stats
+    text: counts how often the verdict flips when only the order changes, and how often padding alone wins.
+  - component: report
+    text: recommends the set-up, such as rubric plus averaging both orders, with its interval and cost per comparison.
+interface:
+  lang: json
+  code: |
+    { "pair": "p0137", "variant": "swapped",
+      "prompt": "rubric-v2",
+      "verdict": "B", "human": "A",
+      "len_a": 118, "len_b": 164,
+      "cost_usd": 0.0031 }
+
+    → agreement 0.78 (95% CI 0.72–0.84)
+      flip rate 6.5% · padding wins 61%
+decisions:
+  - choice: Pairwise verdicts
+    instead: A 1–10 score per summary
+    why: >-
+      The team ranks summariser versions, which is a pairwise question. People and judges agree much more on
+      "which is better" than on a score.
+  - choice: Average both orders
+    instead: Judge each pair once
+    why: >-
+      If the verdict flips when only the order changes, a single pass is a coin toss. Two calls per pair doubles
+      cost but stays far inside $30 at 200 pairs.
+  - choice: Report intervals, not one number
+    instead: A single agreement percentage
+    why: >-
+      With 200 labels the interval is several points wide. Without it, a 3-point difference between judge
+      prompts looks real when it is noise.
+watchOut: >-
+  200 labels cannot separate two judge set-ups that differ by a few points. Say so in the report instead of
+  picking a winner, or label more pairs where the set-ups disagree.

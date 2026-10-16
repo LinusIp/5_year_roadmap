@@ -1,0 +1,46 @@
+overview: >-
+  Knuth's Algorithm X for exact cover (choose rows so every column is covered exactly once), implemented with
+  Dancing Links, a grid of circular doubly linked nodes where covering and uncovering a column is a few pointer
+  updates, then used to solve Sudoku and N-queens.
+learn:
+  - name: Exact cover
+  - name: Dancing Links
+  - name: Backtracking search
+    ref: skiena-adm
+components:
+  - id: encoder
+    name: Encoder
+    role: Turns a puzzle into 729 rows and 324 constraint columns.
+    tech: C++20
+    talksTo: [matrix]
+    kind: core
+  - id: matrix
+    name: Link matrix
+    role: Nodes with left, right, up, down and column pointers, plus a size per column.
+    tech: C++20 · arrays of nodes
+    talksTo: [search]
+    kind: core
+  - id: search
+    name: Algorithm X
+    role: Picks a column, tries each row in it, covers, recurses and uncovers.
+    tech: C++20
+    talksTo: []
+    kind: core
+flow:
+  - component: encoder
+    text: adds one row per (cell, digit) covering four columns, cell, row-digit, column-digit and box-digit, and pre-selects the given clues.
+  - component: matrix
+    text: is built once with every node linked into its row ring and its column ring.
+  - component: search
+    text: picks the column with the **fewest** rows, covers it and recurses into each candidate row.
+  - component: search
+    text: uncovers in the exact reverse order when backtracking; 100 hard puzzles must solve at under 10 ms median.
+decisions:
+  - choice: Node arrays with integer links
+    instead: Heap-allocated nodes with pointers
+    why: >-
+      One contiguous array is faster to build and kinder to the cache, and indexes are easy to print while
+      debugging. Pointers read closer to Knuth's paper, if you prefer that.
+watchOut: >-
+  Uncovering in any order other than the reverse of covering corrupts the links silently. Also always choose the
+  smallest column, or hard puzzles take seconds.

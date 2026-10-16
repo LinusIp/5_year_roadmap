@@ -111,12 +111,12 @@ test.describe('with the clock on the plan’s first day', () => {
     await listUnder(page, 'Monthly queue · real cases').getByRole('button', { name: new RegExp('^' + title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }).click();
     const sheet = page.getByRole('dialog', { name: title });
     await expect(sheet.getByRole('heading', { name: 'Requirements', exact: true })).toBeVisible();
-    const milestones = listUnder(sheet, /^Milestones · \d+ h$/);
+    const milestones = listUnder(sheet, /^Milestones$/);
     await milestones.getByRole('checkbox').first().click();
     await expect(milestones.getByRole('checkbox').first()).toBeChecked();
     await page.screenshot({ path: 'test-results/catalogue-case.png', fullPage: true });
 
-    await sheet.getByRole('button', { name: 'Copy as README skeleton' }).click();
+    await sheet.getByRole('button', { name: 'README skeleton' }).click();
     await expect(sheet.getByRole('status').filter({ hasText: 'Copied' })).toBeVisible();
     const copied = await page.evaluate(() => navigator.clipboard.readText());
     expect(copied.startsWith('# ' + title + '\n')).toBe(true);
@@ -124,7 +124,7 @@ test.describe('with the clock on the plan’s first day', () => {
 
     await reload(page);
     const again = page.getByRole('dialog', { name: title });
-    await expect(listUnder(again, /^Milestones · \d+ h$/).getByRole('checkbox').first()).toBeChecked();
+    await expect(listUnder(again, /^Milestones$/).getByRole('checkbox').first()).toBeChecked();
     const pill = again.getByRole('button', { name: /^Status of / }).first();
     await expect(pill).toHaveText('Active');
     await expect(again.getByText('Add the repository link below to be able to mark it done.')).toBeVisible();

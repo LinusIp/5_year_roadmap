@@ -1,0 +1,97 @@
+overview: >-
+  Northwind Games' 38-minute monorepo pipeline is cut to 8 by measuring first and then removing the waste. A profiler
+  attributes every minute to a stage, the build tool skips any package whose inputs have not changed by keying its
+  cache on a hash of those inputs, and tests are split across 8 shards balanced by their past run times. A flake
+  detector retries failures, labels tests that pass and fail on the same code, and quarantines them so a red build
+  means something again.
+learn:
+  - name: Content-addressed caching
+  - name: Hermetic builds
+  - name: Test sharding
+  - name: Flaky test quarantine
+  - name: CI pipelines
+    ref: github-actions-docs
+stats:
+  - value: 38 → < 8 min
+    label: median pipeline
+  - value: 9 % → < 1 %
+    label: flaky runs
+  - value: "> 85 %"
+    label: cache hit rate on PRs
+components:
+  - id: profiler
+    name: Pipeline profiler
+    role: Reads job logs and timings and attributes the minutes to each stage and package.
+    tech: Python · CI API
+    talksTo: [dashboard]
+    kind: offline
+  - id: graph
+    name: Affected graph
+    role: Works out which of the 40 packages a change touches, directly or through dependencies.
+    tech: Nx or Turborepo
+    talksTo: [cache]
+    kind: core
+  - id: cache
+    name: Cache layer
+    role: Stores build and test outputs under a hash of sources, lockfile, toolchain and flags.
+    tech: Remote cache on local disk
+    talksTo: [sharder]
+    kind: core
+  - id: sharder
+    name: Test sharder
+    role: Splits the tests that still need to run into 8 shards of equal expected time.
+    tech: Python · timing history
+    talksTo: [runner]
+    kind: core
+  - id: runner
+    name: Runner
+    role: One self-hosted 8-core machine running the shards in parallel.
+    tech: GitHub Actions runner
+    talksTo: [flake]
+    kind: core
+  - id: flake
+    name: Flake detector
+    role: Retries a failed test once, records pass-after-fail as a flake and quarantines repeat offenders.
+    tech: Python · pytest or Jest reports
+    talksTo: [dashboard]
+    kind: core
+  - id: dashboard
+    name: Metrics dashboard
+    role: Pipeline time by stage, hit rate, flake rate and queue time.
+    tech: Grafana
+    talksTo: []
+    kind: offline
+flow:
+  - component: graph
+    text: finds that a pull request touching `packages/physics` affects 6 of the 40 packages.
+  - component: cache
+    text: hashes each affected package's inputs; 4 are hits and restore their outputs in seconds, 2 are rebuilt.
+  - component: sharder
+    text: takes the remaining 700 tests and their recorded times and packs them into 8 shards of about **90 s** each.
+  - component: runner
+    text: runs the shards in parallel; one slow test over `60 s` is flagged, because no shard can finish before it.
+  - component: flake
+    text: reruns a failed test once on the same commit; a pass marks it flaky, and after 3 flakes in a week it moves to `quarantine` with an owner.
+interface:
+  lang: shell
+  code: |
+    # cache key for one package build
+    key = sha256(
+      sources(packages/physics/**)
+      + pnpm-lock.yaml
+      + toolchain: node 20.11.1, tsc 5.4.5
+      + env: CI=true, NODE_ENV=test
+    )
+
+    $ ci-shard --tests affected.txt \
+        --timings timings.json --shards 8
+    shard 1/8  88 tests  est 91 s
+    shard 8/8  81 tests  est 89 s
+decisions:
+  - choice: Hash all inputs, including the toolchain
+    instead: Cache keyed on branch name or date
+    why: A key that misses an input serves stale outputs, called cache poisoning, and breaks reproducibility. Hashing every input keeps builds hermetic and still reaches over 85 % hits.
+  - choice: Quarantine with an owner, not endless retries
+    instead: Retry every failed test three times
+    why: Blind retries hide the 9 % flake rate and add minutes. Quarantine keeps main green and gives each flaky test a person who must fix it.
+watchOut: The quarantine list becomes a graveyard of tests nobody fixes. Cap its size, show it on the dashboard and fail the build when an entry is older than two weeks.

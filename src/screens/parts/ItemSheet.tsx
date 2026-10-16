@@ -17,7 +17,8 @@ import { Row, RowList } from '../../ui/Row.tsx';
 import { Sheet } from '../../ui/Sheet.tsx';
 import { TextField } from '../../ui/TextField.tsx';
 import { Checklist, criteriaUnits } from './Checklist.tsx';
-import { ProjectDocView, useProjectDoc } from './ProjectDocView.tsx';
+import { planDocModel, useProjectDoc } from './PlanDoc.tsx';
+import { TechDoc, useDesign } from './TechDoc.tsx';
 import { Markdown } from '../../lib/markdown.tsx';
 import { NotesField } from './NotesField.tsx';
 import { RunningTime } from './RunningTime.tsx';
@@ -214,15 +215,21 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
     });
   const [budget, setBudget] = useState<string | null>(null);
   const doc = useProjectDoc(project.id);
+  const design = useDesign(doc ? project.id : '');
+  const meta = [CADENCE[project.cadence] + (project.number !== undefined ? ' ' + project.number : ''), phase?.title, project.estHours + ' h'].filter(Boolean).join(' · ');
 
   return (
     <div className="space-y-6">
+      {doc ? (
+        <TechDoc atlas={atlas} model={planDocModel({ seed: atlas.seed, project, doc, meta })} design={design} done={state?.unitsDone ?? []} />
+      ) : (
+        <div>
+          <p className="text-meta text-ink2">{meta}</p>
+          <p className="doc-text mt-2 text-body text-ink2">{project.brief}</p>
+        </div>
+      )}
       <div>
-        <p className="text-meta text-ink2">
-          {[CADENCE[project.cadence] + (project.number !== undefined ? ' ' + project.number : ''), phase?.title, project.estHours + ' h'].filter(Boolean).join(' · ')}
-        </p>
-        <p className="doc-text mt-2 text-body text-ink2">{project.brief}</p>
-        <div className="mt-4 flex items-center gap-2">
+        <div className="flex items-center gap-2">
           {project.sourceUrl && (
             <Button href={project.sourceUrl} icon="external">
               Open the source
@@ -235,9 +242,8 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
         {!hasRepo(state) && <p className="mt-2 text-meta text-ink2">Add the repository link below to be able to mark it done.</p>}
       </div>
 
-      <Checklist label="Done when" refId={project.id} units={criteriaUnits(project.acceptance)} done={state?.unitsDone ?? []} />
-
-      <ProjectDocView seed={atlas.seed} projectId={project.id} doc={doc} done={state?.unitsDone ?? []} />
+      {doc === undefined && <p className="text-meta text-ink2">Loading the tech doc…</p>}
+      {doc === null && <Checklist label="Done when" refId={project.id} units={criteriaUnits(project.acceptance)} done={state?.unitsDone ?? []} />}
 
       <div className="space-y-3">
         <h3 className="section-label">Ship it</h3>
@@ -323,13 +329,13 @@ export function ItemSheet({ atlas, id, onClose, onTake, footer, after }: { atlas
       </>
     ) : undefined;
   return (
-    <Sheet open={id !== null} title={title} onClose={onClose} scrollKey={id ? 'item:' + id : undefined} aside={<RunningTime atlas={atlas} refId={id} />} footer={actions}>
+    <Sheet open={id !== null} title={title} onClose={onClose} scrollKey={id ? 'item:' + id : undefined} aside={resource ? <RunningTime atlas={atlas} refId={id} /> : undefined} footer={actions}>
       {resource ? (
         <ResourceBody key={resource.id} atlas={atlas} resource={resource} />
       ) : project ? (
         <ProjectBody key={project.id} atlas={atlas} project={project} />
       ) : fromCatalogue ? (
-        <CatalogueBody key={fromCatalogue.id} atlas={atlas} item={fromCatalogue} taking={Boolean(onTake)} />
+        <CatalogueBody key={fromCatalogue.id} atlas={atlas} item={fromCatalogue} taking={Boolean(onTake)} footer={Boolean(footer)} />
       ) : loading ? (
         <p className="text-meta text-ink2" role="status">
           Loading…

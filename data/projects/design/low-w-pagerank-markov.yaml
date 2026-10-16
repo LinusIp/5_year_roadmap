@@ -1,0 +1,52 @@
+overview: >-
+  PageRank computed by power iteration on a small link graph with damping 0.85, then confirmed by simulating a
+  random surfer who follows links or jumps, comparing the two distributions by L1 distance.
+learn:
+  - name: Markov chains
+    ref: mit-6-041
+  - name: Power iteration
+    ref: mit-18-065
+  - name: Stationary distributions
+components:
+  - id: graph
+    name: Link graph
+    role: Sparse adjacency for a few thousand pages, with dangling pages marked.
+    tech: NumPy or SciPy sparse
+    talksTo: [power, walk]
+    kind: core
+  - id: power
+    name: Power iteration
+    role: Repeats the rank update until the change is below 1e-10.
+    tech: NumPy
+    talksTo: [compare]
+    kind: core
+  - id: walk
+    name: Random surfer
+    role: Simulates 10M steps and counts visits per page.
+    tech: NumPy
+    talksTo: [compare]
+    kind: core
+  - id: compare
+    name: Comparison
+    role: Computes L1 distance and top-10 overlap between the two rankings.
+    tech: Python
+    talksTo: []
+    kind: core
+flow:
+  - component: graph
+    text: builds the transition matrix; pages with no out-links are treated as linking to every page.
+  - component: power
+    text: iterates `r = 0.85 · M r + 0.15 / n` until the L1 change is under 1e-10.
+  - component: walk
+    text: follows a random link with probability 0.85 or jumps to a random page, counting visits.
+  - component: compare
+    text: checks the top 10 match and the L1 distance shrinks as about 1 / √steps.
+decisions:
+  - choice: Dangling pages link everywhere
+    instead: Drop dangling pages
+    why: >-
+      Dropping them changes the graph and the ranks, and leaving them in loses probability mass every step.
+      Spreading their rank evenly keeps the total at 1.
+watchOut: >-
+  Without the dangling-page fix the ranks sum to less than 1 and drift to zero. Assert `r.sum() ≈ 1` after every
+  iteration.

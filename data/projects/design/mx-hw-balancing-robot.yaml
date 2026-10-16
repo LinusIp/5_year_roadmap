@@ -1,0 +1,100 @@
+overview: >-
+  A two-wheeled kit robot that stays upright by driving its wheels under its own centre of mass, like balancing a
+  broom on a hand. Every 5 ms the Pico reads the IMU, a complementary filter estimates tilt, and a cascade of PIDs
+  runs: an outer speed loop asks for a small lean to move forward, an inner balance loop turns the tilt error into
+  motor power, and a turn command is added to one wheel and subtracted from the other. A fall detector cuts the
+  motors past 45 degrees, and students change gains over serial while the robot runs.
+learn:
+  - name: Inverted pendulum
+    ref: brian-douglas-control
+  - name: Complementary filters
+  - name: Cascaded PID
+  - name: Motor deadband
+  - name: Fail-safe behaviour
+stats:
+  - value: ±3°
+    label: tilt for 5 minutes
+  - value: < 1 ms
+    label: jitter on a 200 Hz loop
+  - value: < 1 s
+    label: recover from a 0.3 N push
+components:
+  - id: imu
+    name: IMU
+    role: 6-axis accelerometer and gyro on the robot body.
+    tech: 6-axis IMU · I2C
+    talksTo: [filter]
+    kind: external
+  - id: filter
+    name: Tilt filter
+    role: Fuses gyro rate and accelerometer angle into tilt, after removing gyro bias at start-up.
+    tech: C++ · complementary
+    talksTo: [speed]
+    kind: core
+  - id: speed
+    name: Speed/turn loop
+    role: Turns remote forward and turn commands plus encoder speed into a target tilt and a turn offset.
+    tech: C++ · PID
+    talksTo: [balance]
+    kind: core
+  - id: balance
+    name: Balance loop
+    role: PID on tilt error that sets the common motor command.
+    tech: C++ · PID
+    talksTo: [fall]
+    kind: core
+  - id: fall
+    name: Fall detector
+    role: Cuts both motors if tilt passes 45° and waits to be set upright again.
+    tech: C++
+    talksTo: [motors]
+    kind: core
+  - id: motors
+    name: Motors and encoders
+    role: Two geared DC motors with encoders on a dual driver from the 2S pack.
+    tech: DC motors · H-bridge
+    talksTo: []
+    kind: external
+  - id: tuning
+    name: Serial tuning
+    role: Reads commands like kp 22 from a laptop and prints tilt and outputs for plotting.
+    tech: USB serial
+    talksTo: []
+    kind: offline
+  - id: sim
+    name: Simulator
+    role: Inverted-pendulum-on-wheels model where students try gains before the real robot.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: filter
+    text: on the 5 ms timer reads the IMU and updates `tilt = 0.98 × (tilt + gyro × dt) + 0.02 × acc_angle`.
+  - component: speed
+    text: compares wheel speed with the remote's forward command and asks for a small target tilt, a few degrees at most.
+  - component: balance
+    text: computes the motor command from `tilt_target − tilt` and the gyro rate, and **adds a deadband offset** so tiny commands still turn the wheels.
+  - component: fall
+    text: passes the command through, or cuts both motors if `|tilt| > 45°`, so a fallen robot does not race across the floor.
+  - component: motors
+    text: get `cmd + turn` on the left and `cmd − turn` on the right as PWM, and the loop waits for the next tick.
+interface:
+  lang: shell
+  code: |
+    # serial tuning, 115200 baud
+    > kp 22
+    > ki 0.8
+    > kd 0.6
+    > speed_kp 0.04
+    > save
+    # robot streams at 50 Hz
+    t_ms,tilt,target,cmd,speed,state
+    81240,0.42,0.30,-38,0.05,RUN
+decisions:
+  - choice: Complementary filter
+    instead: A Kalman filter
+    why: Students can see what the one constant does and tune it themselves; a Kalman filter hides that behind matrices. It is accurate enough for ±3°.
+  - choice: Cut the motors on a fall
+    instead: Try to recover from any tilt
+    why: Past 45° the motors cannot bring it back and only spin the wheels at full power. Stopping is the safe, predictable behaviour for a classroom.
+watchOut: Cheap geared motors ignore small commands, so near upright the balance loop does nothing and the robot wobbles. Measure the deadband and add it to every non-zero command.

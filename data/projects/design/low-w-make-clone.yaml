@@ -1,0 +1,77 @@
+overview: >-
+  A small build tool in Go that reads a subset of Makefile syntax (targets, prerequisites, tab-indented commands),
+  builds the dependency graph, and runs only the commands whose target is missing or older than a prerequisite, up
+  to `-j N` at once. On a 50-file project, touching one file must rebuild only what depends on it, and a cycle must
+  be reported rather than loop.
+learn:
+  - name: Dependency graphs
+  - name: Topological sort
+    ref: mit-6-006
+  - name: Timestamp checks
+  - name: Worker pools
+    ref: tour-of-go
+components:
+  - id: parser
+    name: Makefile parser
+    role: Reads rules, prerequisites and commands, expanding $@ and $<.
+    tech: Go
+    talksTo: [graph]
+    kind: core
+  - id: graph
+    name: Dependency graph
+    role: Orders targets depth-first, detects cycles and marks stale targets by mtime.
+    tech: Go
+    talksTo: [sched]
+    kind: core
+  - id: sched
+    name: Scheduler
+    role: Runs ready targets on up to N goroutines and stops on the first failure.
+    tech: goroutines · os/exec
+    talksTo: [shell]
+    kind: core
+  - id: shell
+    name: Shell
+    role: Runs each command line, such as a compiler call.
+    tech: /bin/sh
+    talksTo: []
+    kind: external
+flow:
+  - component: parser
+    text: >-
+      reads `target: prereqs` lines and the tab-indented commands below each into `Rule` values.
+  - component: graph
+    text: >-
+      walks from the goal depth-first, marking nodes **grey** while on the current path, so reaching a grey node
+      reports a cycle with its path.
+  - component: graph
+    text: >-
+      marks a target stale if it is missing or older than any prerequisite, or if a prerequisite is itself being
+      rebuilt.
+  - component: sched
+    text: >-
+      starts stale targets whose prerequisites are done, at most `N` at a time, re-stats each target after its
+      commands, and counts targets rebuilt.
+interface:
+  lang: go
+  code: |
+    type Rule struct {
+        Target  string
+        Prereqs []string
+        Cmds    []string
+    }
+
+    // Stale if missing or older than a prerequisite.
+    func stale(r *Rule, rebuilt map[string]bool) bool
+
+    func Build(rules map[string]*Rule, goal string,
+        jobs int) (rebuilt int, err error)
+decisions:
+  - choice: Timestamps, not content hashes
+    instead: Hashing every input and storing the hashes
+    why: >-
+      It is how make works and needs one `stat` per file, which on 50 files is instant. Hashes skip rebuilds after a
+      touch with no real change; revisit if coarse mtimes cause missed rebuilds.
+watchOut: >-
+  On file systems with coarse mtime (1 or 2 s), a target built in the same second as its source looks up to date and
+  is wrongly skipped. Treat equal timestamps as stale, and re-stat a target after its rule runs instead of assuming
+  it is new.

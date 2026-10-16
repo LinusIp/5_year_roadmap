@@ -283,6 +283,14 @@ export function stepId(index: number): string {
   return 'step-' + (index + 1);
 }
 
+/** A case's or build's "Done when" tick: stored with its milestones, but not one of them. */
+export const DONE_WHEN_ID = 'when-1';
+
+/** How many of a catalogue item's milestones or steps are ticked: its "Done when" tick does not count. */
+export function stepsTicked(unitsDone: readonly string[] | undefined): number {
+  return (unitsDone ?? []).filter((id) => !id.startsWith('when-')).length;
+}
+
 export function catalogueUnitCount(item: CatalogueItem): number {
   return item.kind === 'case' ? item.milestones.length : item.kind === 'build' ? item.approach.length : 0;
 }

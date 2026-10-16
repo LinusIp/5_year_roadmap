@@ -1,0 +1,121 @@
+overview: >-
+  A command-line BitTorrent client that downloads a Debian ISO from many peers at once and checks every piece. A
+  metainfo parser reads the .torrent file, the tracker client announces and gets a list of peers, and a peer manager
+  keeps up to 30 connections, each a small state machine. A piece picker hands out the rarest missing pieces in 16 KiB
+  blocks, finished pieces are SHA-1 checked, and the storage layer writes them at their offset so a restart can resume.
+learn:
+  - name: Bencode and info-hash
+  - name: Peer wire state machine
+  - name: Rarest-first selection
+  - name: Request pipelining
+  - name: Goroutines per connection
+    ref: tour-of-go
+stats:
+  - value: ≥ 5
+    label: peers serving blocks at once
+  - value: < 30 s
+    label: longest stall when peers drop
+  - value: 100 %
+    label: pieces SHA-1 verified
+components:
+  - id: metainfo
+    name: Metainfo parser
+    role: Decodes the .torrent, computes the info-hash and yields piece hashes and file layout.
+    tech: Go · bencode
+    talksTo: [tracker]
+    kind: core
+  - id: tracker
+    name: Tracker client
+    role: Announces to the HTTP tracker and decodes the compact peer list.
+    tech: Go net/http
+    talksTo: [trackersrv, peers]
+    kind: core
+  - id: trackersrv
+    name: Tracker
+    role: The public tracker for the Debian torrent.
+    tech: HTTP tracker
+    talksTo: []
+    kind: external
+  - id: peers
+    name: Peer manager
+    role: Keeps up to 30 connections, each a state machine from handshake to requesting.
+    tech: Go · goroutine per peer
+    talksTo: [remote, verify]
+    kind: core
+  - id: remote
+    name: Remote peers
+    role: Strangers' machines that send bitfields, choke or unchoke, and serve blocks.
+    tech: TCP
+    talksTo: []
+    kind: external
+  - id: picker
+    name: Piece picker
+    role: Chooses the rarest missing piece a peer has and hands out its blocks.
+    tech: Go
+    talksTo: [peers]
+    kind: core
+  - id: verify
+    name: Verifier
+    role: Hashes each completed piece and re-queues it if the SHA-1 does not match.
+    tech: Go crypto/sha1
+    talksTo: [storage]
+    kind: core
+  - id: storage
+    name: Storage
+    role: Writes verified pieces at their offset and keeps the bitfield used to resume.
+    tech: Go os.File
+    talksTo: []
+    kind: core
+flow:
+  - component: metainfo
+    text: >-
+      decodes the .torrent and hashes the **exact original bytes** of the `info` dictionary into the 20-byte
+      `info_hash`.
+  - component: tracker
+    text: announces with `info_hash`, `peer_id` and `left`, and gets back compact 6-byte peer addresses.
+  - component: peers
+    text: >-
+      dials peers, sends the handshake, reads the bitfield and later `have` messages, says `interested` and waits for
+      `unchoke`, with a timeout on every read.
+  - component: picker
+    text: >-
+      picks the rarest missing piece this peer has and gives out its 16 KiB blocks, keeping about five requests in
+      flight per peer.
+  - component: verify
+    text: >-
+      hashes a finished piece, including the shorter last piece, and puts it back in the queue if it fails its SHA-1.
+  - component: storage
+    text: >-
+      writes the piece at `index × piece_length` across the files and marks it done, so a restart skips verified
+      pieces.
+interface:
+  lang: text
+  code: |
+    handshake:
+      <19>"BitTorrent protocol"<8 reserved>
+      <20 info_hash><20 peer_id>
+    message: <4-byte length><1-byte id><payload>
+      0 choke      1 unchoke     2 interested
+      4 have       <piece index>
+      5 bitfield   <one bit per piece>
+      6 request    <index><begin><length 16384>
+      7 piece      <index><begin><block bytes>
+decisions:
+  - choice: Pipeline about five requests per peer
+    instead: One request at a time
+    why: >-
+      One block per round trip caps a peer at 16 KiB per RTT, about 160 KiB/s at 100 ms. Tune the depth from the
+      throughput chart against Transmission.
+  - choice: Rarest-first piece selection
+    instead: Sequential pieces
+    why: >-
+      With up to 30 peers holding different pieces, fetching the rare ones first stops the download waiting on one
+      slow peer at the end. Sequential only matters for streaming.
+  - choice: Go with a goroutine per peer
+    instead: Rust with tokio
+    why: >-
+      Thirty connections are trivial for goroutines, and blocking reads with deadlines keep each peer's state machine
+      readable. Rust is as good a choice; pick the one you know better.
+watchOut: >-
+  Computing the info-hash over a re-encoded dictionary instead of the exact original bytes gives a hash the tracker
+  does not know. Keep the raw byte span of `info` from the decoder and hash that.

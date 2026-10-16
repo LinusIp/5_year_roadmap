@@ -1,0 +1,70 @@
+overview: >-
+  A second-order IIR low-pass (a biquad) running on a microcontroller in Q15 fixed point, where a 16-bit integer stands
+  for a number from -1 to just under 1. Coefficients are designed in Python and stored with one extra bit of headroom,
+  the filter runs in direct form II transposed with a wide accumulator and saturation, and its output is compared
+  sample by sample with a float reference while a cycle counter times it.
+learn:
+  - name: Q15 fixed point
+  - name: Biquad filters
+    ref: dspguide
+  - name: Direct form II transposed
+  - name: Coefficient quantisation
+components:
+  - id: design
+    name: Coefficient design
+    role: Designs the filter in Python and quantises the coefficients, checking the poles.
+    tech: Python · SciPy
+    talksTo: [filter]
+    kind: offline
+  - id: input
+    name: Test signals
+    role: Full-scale sweep and step as int16 samples, the hardest case for overflow.
+    tech: C
+    talksTo: [filter]
+    kind: core
+  - id: filter
+    name: Q15 biquad
+    role: Filters each sample in fixed point and saturates the result.
+    tech: C · Cortex-M
+    talksTo: [compare]
+    kind: core
+  - id: compare
+    name: Float comparison
+    role: Runs the same input through a float reference and reports error and overflows.
+    tech: Python / C
+    talksTo: []
+    kind: offline
+flow:
+  - component: design
+    text: calls `butter(2, fc, fs=fs)`; for a low cutoff `a1` is near -1.98, so coefficients are stored as Q14 (range ±2) and the quantised poles must stay inside the unit circle.
+  - component: input
+    text: feeds a full-scale sine sweep and a full-scale step, logged sample by sample over serial.
+  - component: filter
+    text: computes `y = (b0·x + s1) >> 14`, then `s1 = b1·x - a1·y + s2` and `s2 = b2·x - a2·y`, with **64-bit** state and rounding before the shift; the DWT cycle counter gives cycles per sample.
+  - component: compare
+    text: reports the maximum error in LSB against the float filter, with done at under 3 LSB and no overflow on full-scale input.
+interface:
+  lang: c
+  code: |
+    typedef struct {
+      int16_t b0, b1, b2, a1, a2;  /* Q14, range ±2 */
+      int64_t s1, s2;              /* state, Q29 */
+    } Biquad;
+
+    /* y  = sat16((b0*x + s1) >> 14)       */
+    /* s1 = b1*x - a1*y + s2;  s2 = b2*x - a2*y */
+    int16_t biquad_q15(Biquad* f, int16_t x);
+
+    static inline int16_t sat16(int64_t v) {
+      return v > 32767 ? 32767
+           : v < -32768 ? -32768 : (int16_t)v;
+    }
+decisions:
+  - choice: Q14 coefficients, not Q15
+    instead: Q15 coefficients clipped to the range -1 to 1
+    why: >-
+      For a low cutoff `a1` is close to -2, which Q15 cannot hold at all. Q14 gives up one bit of precision to fit it,
+      and the 64-bit state keeps the inner sums from overflowing.
+watchOut: >-
+  Rounding the coefficients moves the poles, and for low cutoffs or high Q they can end up on or past the unit circle,
+  so the filter rings or blows up. Check the quantised poles' radius in Python before flashing.

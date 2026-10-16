@@ -1,0 +1,111 @@
+overview: >-
+  A durable job queue for Billfold built on the PostgreSQL it already runs, so invoice PDFs and reminders leave the
+  request handlers. Handlers insert a row into a `jobs` table; 8 workers claim rows with
+  `FOR UPDATE SKIP LOCKED` (lock a row and skip ones others have locked, so workers never wait on each other) and
+  hold a **lease**, a deadline they keep extending while they work. A reaper hands expired leases back to the queue,
+  so a job from a crashed worker runs again within 30 s.
+learn:
+  - name: SKIP LOCKED queues
+    ref: cmu-15-445
+  - name: Leases and heartbeats
+    ref: ddia
+  - name: Exponential backoff
+  - name: Dead-letter queues
+  - name: Partial indexes
+stats:
+  - value: 1,000/s
+    label: jobs with 8 workers
+  - value: "0"
+    label: double runs in 100k jobs
+  - value: < 30 s
+    label: crashed job retried
+components:
+  - id: app
+    name: Invoicing app
+    role: Calls enqueue from a request handler, in the same transaction as the invoice when it can.
+    tech: Go web app
+    talksTo: [enqueue]
+    kind: external
+  - id: enqueue
+    name: Enqueue API
+    role: Inserts a job with kind, payload, run_at and max_attempts.
+    tech: Go · pgx
+    talksTo: [jobs]
+    kind: core
+  - id: jobs
+    name: Jobs table
+    role: One row per job with status, attempts, run_at and lease_until, plus a partial index on ready jobs.
+    tech: PostgreSQL
+    talksTo: [worker]
+    kind: core
+  - id: worker
+    name: Worker loop
+    role: Claims a small batch, runs each handler, heartbeats the lease and records success, retry or dead.
+    tech: Go
+    talksTo: [handlers]
+    kind: core
+  - id: handlers
+    name: Job handlers
+    role: Render the invoice PDF or send the reminder email.
+    tech: PDF renderer · email API
+    talksTo: []
+    kind: external
+  - id: reaper
+    name: Lease reaper
+    role: Every 5 s returns running jobs whose lease_until has passed to the ready state.
+    tech: Go · SQL
+    talksTo: [jobs]
+    kind: offline
+  - id: stats
+    name: Stats queries
+    role: Queue depth by kind, oldest ready job, failures and dead letters for a dashboard.
+    tech: SQL views
+    talksTo: []
+    kind: offline
+flow:
+  - component: enqueue
+    text: runs `INSERT INTO jobs (kind, payload, run_at, max_attempts)` inside the invoice's own transaction, so a rolled-back invoice never sends an email.
+  - component: jobs
+    text: >-
+      serves the claim query, which picks up to 10 rows `WHERE status = 'ready' AND run_at <= now()` with
+      `FOR UPDATE SKIP LOCKED`, sets `status = 'running'` and `lease_until = now() + 30 s`, and commits at once.
+  - component: worker
+    text: runs the handler **outside** that short transaction and extends `lease_until` every 10 s while it works.
+  - component: handlers
+    text: render or send; success marks the job `done`.
+  - component: worker
+    text: >-
+      on failure sets `run_at = now() + 2^attempts seconds`; after `max_attempts` the job moves to `dead` for a
+      person to look at.
+interface:
+  lang: sql
+  code: |
+    UPDATE jobs SET status = 'running',
+      lease_until = now() + interval '30 s',
+      attempts = attempts + 1, worker = $1
+    WHERE id IN (
+      SELECT id FROM jobs
+      WHERE status = 'ready' AND run_at <= now()
+      ORDER BY run_at
+      LIMIT 10
+      FOR UPDATE SKIP LOCKED)
+    RETURNING id, kind, payload;
+decisions:
+  - choice: PostgreSQL queue with SKIP LOCKED
+    instead: A message broker such as RabbitMQ
+    why: >-
+      A broker is ruled out, and 1,000 jobs/s is well within one PostgreSQL. Enqueueing in the same transaction as
+      the invoice is a bonus no broker gives. Revisit past about 10,000 jobs/s.
+  - choice: Short claim transaction plus a lease
+    instead: Hold the row lock for the whole job
+    why: >-
+      A PDF can take seconds, and long transactions hold locks and block vacuum. A lease releases the lock at once
+      and still lets the reaper recover crashed work within 30 s.
+  - choice: LISTEN/NOTIFY wake-up with a 1 s poll fallback
+    instead: Tight polling every few milliseconds
+    why: >-
+      8 workers polling constantly would hammer the database. A notify on insert wakes them at once, and the slow
+      poll catches anything missed.
+watchOut: >-
+  A worker that loses its lease but keeps running can finish after another worker reclaimed the job, so the email
+  goes twice. Check the lease on completion and make handlers idempotent by job id.

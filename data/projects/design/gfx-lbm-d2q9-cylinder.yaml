@@ -1,0 +1,70 @@
+overview: >-
+  Flow past a cylinder with the lattice Boltzmann method: each grid cell stores 9 values, one per direction of the
+  D2Q9 lattice, saying how much fluid is moving that way, and each step relaxes them toward equilibrium (collision) and
+  shifts each to the neighbour in its direction (streaming). The inflow speed and relaxation time τ set the Reynolds
+  number, a von Kármán vortex street forms behind the cylinder, and its shedding frequency gives a Strouhal number to
+  check against the textbook value, about 0.165 at Re = 100.
+learn:
+  - name: Lattice Boltzmann method
+  - name: BGK collision
+  - name: Bounce-back walls
+  - name: Strouhal number
+components:
+  - id: init
+    name: Setup
+    role: Builds the grid, the cylinder mask and τ from the chosen Reynolds number.
+    tech: C++ / CUDA
+    talksTo: [collide]
+    kind: core
+  - id: collide
+    name: Collision
+    role: Computes density and velocity per cell and relaxes toward equilibrium.
+    tech: C++ / CUDA / GLSL
+    talksTo: [stream]
+    kind: core
+  - id: stream
+    name: Streaming
+    role: Shifts values to neighbours and applies bounce-back, inlet and outlet.
+    tech: C++ / CUDA / GLSL
+    talksTo: [probe]
+    kind: core
+  - id: probe
+    name: Shedding probe
+    role: Records velocity behind the cylinder and finds the shedding frequency.
+    tech: Python · NumPy FFT
+    talksTo: []
+    kind: offline
+flow:
+  - component: init
+    text: sets a 400x100 grid, a cylinder of `D = 20` cells, inflow `U = 0.1` in lattice units, and `τ = 3ν + 0.5` with `ν = U·D / Re` (0.56 at Re = 100).
+  - component: collide
+    text: computes `ρ = Σf` and `u = Σf·c / ρ`, then relaxes `f += (feq - f) / τ` with weights 4/9, 1/9 and 1/36.
+  - component: stream
+    text: moves each value one cell along its direction; values entering the cylinder are **bounced back** the way they came (no-slip), with a fixed-velocity inlet and a zero-gradient outlet.
+  - component: probe
+    text: records the cross-flow velocity 5 D behind the cylinder after the flow settles, takes an FFT and reports `St = f·D / U`; done is within 15% of the textbook value.
+interface:
+  lang: cpp
+  code: |
+    constexpr int Q = 9;
+    constexpr int cx[Q]  = {0, 1, 0,-1, 0, 1,-1,-1, 1};
+    constexpr int cy[Q]  = {0, 0, 1, 0,-1, 1, 1,-1,-1};
+    constexpr int opp[Q] = {0, 3, 4, 1, 2, 7, 8, 5, 6};
+    constexpr float w[Q] = {4/9.f, 1/9.f, 1/9.f,
+      1/9.f, 1/9.f, 1/36.f, 1/36.f, 1/36.f, 1/36.f};
+
+    // feq = w·rho·(1 + 3c·u + 4.5(c·u)² - 1.5u·u)
+    float feq(int i, float rho, float ux, float uy);
+    void collide(Lattice& L, float tau);
+    void stream_bounce(Lattice& L, const Mask& solid);
+    float strouhal(std::span<const float> v,
+                   float dt, float D, float U);
+decisions:
+  - choice: Slow inflow, Reynolds number from τ
+    instead: A faster inflow to reach higher Re quickly
+    why: >-
+      The method is only accurate when lattice speeds stay well below the lattice sound speed of about 0.577. At
+      `U = 0.1` the error stays small; reach higher Re with a bigger cylinder in cells rather than a faster flow.
+watchOut: >-
+  As τ approaches 0.5 (very low viscosity) the run fills with checkerboard noise and blows up. Keep τ above about 0.51,
+  and grow the grid and cylinder if you need a higher Reynolds number.

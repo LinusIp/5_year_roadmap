@@ -1,0 +1,46 @@
+overview: >-
+  A diff tool that finds the longest common subsequence of lines and prints unified hunks with three lines of
+  context, and a patch tool that applies those hunks with offset and fuzz tolerance, round-trip tested on 50 random
+  file pairs.
+learn:
+  - name: Longest common subsequence
+    ref: mit-6-006
+  - name: Unified diff format
+  - name: Fuzzy patching
+components:
+  - id: differ
+    name: Differ
+    role: Computes the edit script between two line lists with Myers or LCS.
+    tech: Python 3
+    talksTo: [formatter]
+    kind: core
+  - id: formatter
+    name: Hunk formatter
+    role: Groups edits into hunks with context and writes the headers.
+    tech: Python 3
+    talksTo: [patcher]
+    kind: core
+  - id: patcher
+    name: Patcher
+    role: Finds each hunk in the target, tolerating shifted lines, and applies it.
+    tech: Python 3
+    talksTo: []
+    kind: core
+flow:
+  - component: differ
+    text: turns `old.txt` and `new.txt` into keep, delete and insert operations.
+  - component: formatter
+    text: writes `@@ -12,7 +12,8 @@` where 7 and 8 count old and new lines in the hunk, including context.
+  - component: patcher
+    text: looks for the hunk at line 12, then up to 50 lines away (offset), and with up to 2 context lines ignored (fuzz).
+  - component: patcher
+    text: writes the result; the test checks it equals `new.txt` and that GNU patch also accepts the diff.
+decisions:
+  - choice: Three context lines
+    instead: Zero context lines
+    why: >-
+      Context lets the patcher find a hunk after the file shifts, and GNU patch expects it. Zero context makes
+      smaller diffs that break on any nearby edit.
+watchOut: >-
+  Wrong line counts in the hunk header and a missing `\ No newline at end of file` marker are the usual reasons GNU
+  patch rejects your diff. Test files without a final newline.

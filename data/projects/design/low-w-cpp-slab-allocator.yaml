@@ -1,0 +1,53 @@
+overview: >-
+  A pool allocator in C++20 with one slab of fixed-size blocks per size class (16 to 64 bytes), a free list threaded
+  through the free blocks, and thread-local caches, benchmarked against malloc on a churn workload and run under
+  ASan.
+learn:
+  - name: Slab allocation
+    ref: csapp-labs
+  - name: Free lists
+  - name: Alignment
+  - name: Thread-local caches
+components:
+  - id: api
+    name: Allocator API
+    role: Rounds a request up to a size class and routes it to the thread's cache.
+    tech: C++20
+    talksTo: [cache]
+    kind: core
+  - id: cache
+    name: Thread cache
+    role: A small per-thread free list per size class, refilled in batches.
+    tech: thread_local
+    talksTo: [slabs]
+    kind: core
+  - id: slabs
+    name: Slabs
+    role: 64 KB pages cut into equal blocks, shared under a lock.
+    tech: C++20 · mmap
+    talksTo: []
+    kind: core
+  - id: bench
+    name: Benchmark
+    role: Runs mixed alloc and free workloads and reports ns per operation against malloc.
+    tech: Google Benchmark
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: rounds `alloc(24)` up to the 32-byte class, keeping every block 16-byte aligned.
+  - component: cache
+    text: pops the head of that class's free list; if empty, takes 64 blocks from a slab.
+  - component: slabs
+    text: carve a new 64 KB page when no slab has free blocks, and record the class in the page header.
+  - component: cache
+    text: pushes freed blocks back; a block freed on another thread goes to its owning slab's list, not this one.
+decisions:
+  - choice: Per-thread caches with batch refill
+    instead: One global free list per class under a mutex
+    why: >-
+      Most frees happen on the allocating thread, so the fast path takes no lock. The global lock remains for
+      refills and cross-thread frees.
+watchOut: >-
+  Freeing a block on a different thread than the one that allocated it corrupts a thread-local list. Detect the
+  owner from the page header and hand it back.

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { stepsTicked } from '../seed/catalogue.ts';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useCatalogueIndex, useChallengeEvents } from '../hooks/useCatalogue.ts';
 import { dailyChallenge, isSlotDay, languageOf, weeklyChallenge } from '../lib/catalogue/daily.ts';
@@ -230,7 +231,7 @@ export function Today() {
     if (id === 'B' && daily) rows.push(challengeRow('Daily challenge', daily, '?daily=1'));
     if (id === 'D' && weeklyPick) rows.push(challengeRow('Weekly challenge', weeklyPick, ''));
     if (id === 'D' && activeCase) {
-      const ticked = atlas.states.get(activeCase.id)?.unitsDone.length ?? 0;
+      const ticked = stepsTicked(atlas.states.get(activeCase.id)?.unitsDone);
       rows.push({ key: 'Monthly case', kind: 'case', title: 'Monthly case · ' + activeCase.title, meta: 'Advanced · ' + ticked + ' of ' + (activeCase.steps ?? 0) + ' milestones ticked · ' + activeCase.hours + ' h', doc: activeCase.id, trailing: hoursOn(activeCase.id) + ' h' });
     }
     return rows;
@@ -660,6 +661,7 @@ export function Today() {
         footer={
           doc?.from === 'later' ? (
             <Button
+              variant="filled"
               onClick={() => {
                 setChosen(doc.block);
                 setExpanded(false);

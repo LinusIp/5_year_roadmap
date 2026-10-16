@@ -1,0 +1,46 @@
+overview: >-
+  A reward model trained on pairs of answers where one was preferred: a small language model with a single-number
+  head learns to give the chosen answer a higher score (the Bradley-Terry model of preferences). It is checked by
+  held-out pairwise accuracy and by whether picking the best of n samples improves a proxy score.
+learn:
+  - name: Bradley-Terry model
+  - name: Reward modelling
+    ref: hf-deep-rl-course
+  - name: Best-of-n sampling
+components:
+  - id: pairs
+    name: Preference pairs
+    role: Holds prompt, chosen and rejected answers, split into train and held-out.
+    tech: JSONL
+    talksTo: [rm]
+    kind: core
+  - id: rm
+    name: Reward model
+    role: Scores a prompt and answer with a scalar head on a small backbone.
+    tech: PyTorch
+    talksTo: [eval]
+    kind: core
+  - id: eval
+    name: Evaluator
+    role: Measures pairwise accuracy and best-of-n lift, and checks for length bias.
+    tech: Python
+    talksTo: []
+    kind: core
+flow:
+  - component: pairs
+    text: provide `(prompt, chosen, rejected)` triples; a few have chosen shorter than rejected on purpose.
+  - component: rm
+    text: scores both answers and trains on `-log sigmoid(r_chosen - r_rejected)`.
+  - component: eval
+    text: reports held-out **pairwise accuracy** (target above 70%) and the correlation of reward with answer length.
+  - component: eval
+    text: samples n answers per prompt, keeps the one with the highest reward, and compares its proxy score with a random pick.
+decisions:
+  - choice: Small pretrained backbone with a scalar head
+    instead: Train a scorer from scratch
+    why: >-
+      A few thousand pairs are not enough to learn language from scratch; a pretrained backbone already reads text.
+      Revisit model size only if accuracy stalls well below 70%.
+watchOut: >-
+  If chosen answers are usually longer, the model can learn "longer is better". Report accuracy on pairs where the
+  chosen answer is shorter.

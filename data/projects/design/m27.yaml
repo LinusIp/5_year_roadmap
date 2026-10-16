@@ -1,0 +1,135 @@
+overview: >-
+  A 3D rigid-body engine in C++ that runs one fixed step at 60 Hz: a dynamic AABB tree (a tree of boxes around the
+  bodies) finds pairs that might touch, analytic tests or GJK and EPA find the real contacts, and a persistent manifold
+  per pair keeps them from frame to frame. Touching bodies form islands that a sequential-impulse solver works through
+  ten times a step, warm-started with last step's impulses. Islands that stay still for half a second go to sleep, and
+  a debug view draws contacts, normals and tree nodes.
+learn:
+  - name: GJK and EPA
+    ref: ericson-rtcd
+  - name: Sequential impulses
+    ref: catto-box2d-publications
+  - name: Inertia tensors
+    ref: millington-game-physics
+  - name: Quaternion orientation
+    ref: gamemath-3d-primer
+  - name: Dynamic AABB trees
+    ref: ericson-rtcd
+  - name: Warm starting
+stats:
+  - value: 60 s
+    label: ten-box stack standing at 60 Hz
+  - value: < 3 s
+    label: 50-box pyramid settles and sleeps
+  - value: '1e-5'
+    label: max GJK distance error in tests
+components:
+  - id: bodies
+    name: Body state
+    role: Position, quaternion orientation, velocities and world-space inverse inertia, and the integrator.
+    tech: C++20
+    talksTo: [tree, debug]
+    kind: core
+  - id: tree
+    name: AABB tree
+    role: Keeps a fat box per body and reports pairs whose boxes overlap.
+    tech: Dynamic BVH
+    talksTo: [narrow]
+    kind: core
+  - id: narrow
+    name: Narrowphase
+    role: Turns each pair into contact points, normal and depth.
+    tech: Analytic tests · GJK · EPA
+    talksTo: [manifolds]
+    kind: core
+  - id: manifolds
+    name: Manifolds
+    role: Keeps up to four contact points per pair, matched across frames with their last impulses.
+    tech: C++ · feature ids
+    talksTo: [islands]
+    kind: core
+  - id: islands
+    name: Islands
+    role: Groups touching bodies and puts still islands to sleep.
+    tech: Union-find
+    talksTo: [solver]
+    kind: core
+  - id: solver
+    name: Impulse solver
+    role: Applies normal and friction impulses per contact, ten iterations, starting from last step's values.
+    tech: Sequential impulses
+    talksTo: [bodies]
+    kind: core
+  - id: debug
+    name: Debug draw
+    role: Draws contacts, normals and tree nodes in your renderer, with controls.
+    tech: OpenGL or Vulkan · ImGui
+    talksTo: []
+    kind: core
+  - id: tests
+    name: Unit tests
+    role: Checks GJK and EPA on 1,000 random pairs against analytic answers.
+    tech: doctest or Catch2
+    talksTo: [narrow]
+    kind: offline
+flow:
+  - component: tree
+    text: >-
+      refits the boxes of bodies that moved out of their **fat AABB** and lists every overlapping pair.
+  - component: narrow
+    text: >-
+      uses exact formulas for sphere and capsule pairs and GJK with EPA for boxes and hulls, with `maxIter` capped so
+      a flat simplex cannot loop forever.
+  - component: manifolds
+    text: >-
+      merges new points into the pair's manifold, keeps the four that cover the largest area, and carries over each
+      matched point's `normalImpulse`.
+  - component: islands
+    text: >-
+      builds islands from the contact graph and skips any island whose bodies stayed under the motion thresholds for
+      `0.5 s`.
+  - component: solver
+    text: >-
+      warm-starts with the stored impulses, then runs `10` iterations of clamped normal and friction impulses per
+      contact.
+  - component: bodies
+    text: >-
+      integrates velocities and orientations, renormalises each quaternion and recomputes `I⁻¹_world = R I⁻¹_body Rᵀ`;
+      the step loop then starts again from the tree.
+  - component: debug
+    text: draws this step's contacts, normals and tree nodes on top of the scene.
+interface:
+  lang: cpp
+  code: |
+    struct GjkResult {
+      bool  hit;       // shapes overlap
+      float distance;  // 0 when they overlap
+      Vec3  pA, pB;    // closest points
+    };
+    Vec3 support(const Shape& s, const Vec3& dir);
+    GjkResult gjk(const Shape& a, const Xform& ta,
+                  const Shape& b, const Xform& tb,
+                  int maxIter = 32);
+    struct Penetration { Vec3 normal; float depth; };
+    Penetration epa(const Simplex& s,
+                    const Shape& a, const Xform& ta,
+                    const Shape& b, const Xform& tb);
+decisions:
+  - choice: Persistent manifolds with warm starting
+    instead: Fresh contacts every step
+    why: >-
+      A ten-box stack at only ten iterations needs last step's impulses as a starting point or it drifts and falls;
+      the drift-against-iterations chart shows the difference.
+  - choice: Analytic tests for spheres and capsules
+    instead: GJK and EPA for every pair
+    why: >-
+      Spheres and capsules are a point or a segment plus a radius, so exact formulas are cheaper and also give the
+      reference values the GJK tests compare against.
+  - choice: Dynamic AABB tree with fat boxes
+    instead: Testing every pair
+    why: >-
+      2,000 bodies is about two million pairs; the tree cuts that to near the true contact count, and fat boxes mean a
+      slow body is not reinserted every step.
+watchOut: >-
+  Using the body-space inertia tensor in world space without rotating it makes tumbling bodies spin wrongly. Rebuild
+  the world-space inverse inertia from the orientation every step.

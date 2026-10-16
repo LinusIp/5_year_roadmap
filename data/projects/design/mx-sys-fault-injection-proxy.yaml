@@ -1,0 +1,115 @@
+overview: >-
+  A single Go binary that sits between Larkspur Health's services and injects faults on purpose: added latency,
+  bandwidth caps, connection resets, blackholes and HTTP 5xx answers. Each connection is matched to a route, and its
+  bytes pass through a pipeline of fault stages chosen by rules that the SRE team switches on and off through a control
+  API. With no fault active the proxy only copies bytes, so it adds under half a millisecond.
+learn:
+  - name: Timeouts and retries
+    ref: google-sre-book
+  - name: Chaos experiments
+    ref: google-sre-book
+  - name: TCP resets and linger
+  - name: Token buckets
+  - name: HTTP/1.1 framing
+stats:
+  - value: < 0.5 ms
+    label: p99 overhead at 10k req/s
+  - value: ± 5 ms
+    label: latency injection accuracy
+  - value: < 100 ms
+    label: for a rule change to apply
+components:
+  - id: control
+    name: Control API
+    role: Adds, enables and removes fault rules at runtime.
+    tech: Go net/http
+    talksTo: [listener]
+    kind: core
+  - id: client
+    name: Demo client
+    role: The calling service, with the timeout and retry logic under test.
+    tech: HTTP/1.1
+    talksTo: [listener]
+    kind: external
+  - id: listener
+    name: Listener and router
+    role: Accepts connections per route and picks the upstream and active rules.
+    tech: Go net · atomic.Pointer
+    talksTo: [pipeline]
+    kind: core
+  - id: pipeline
+    name: Stage pipeline
+    role: Chains the stages for one connection, or a plain copy when none apply.
+    tech: Go io
+    talksTo: [stages]
+    kind: core
+  - id: stages
+    name: Fault stages
+    role: Delay, throttle, reset, blackhole or answer 5xx for a request.
+    tech: Go
+    talksTo: [upstream, logger]
+    kind: core
+  - id: upstream
+    name: Demo target app
+    role: The upstream service the faults stand in front of.
+    tech: HTTP/1.1
+    talksTo: []
+    kind: external
+  - id: logger
+    name: Fault logger
+    role: Records every injected fault with time, route and connection id.
+    tech: JSON lines
+    talksTo: []
+    kind: offline
+flow:
+  - component: control
+    text: >-
+      receives `PUT /rules/orders-slow`; the new rule set is built and swapped in with one atomic pointer store, so
+      the next request sees it, well within 100 ms.
+  - component: listener
+    text: >-
+      accepts a connection on the `orders` route port, loads the current rule set and dials the upstream.
+  - component: pipeline
+    text: >-
+      with no matching rule uses plain `io.Copy`, which Go turns into `splice` on Linux; otherwise it parses each
+      request head so faults apply **per request**, not per read chunk.
+  - component: stages
+    text: >-
+      rolls the rule's probability and, if hit, sleeps 200 ms once before forwarding, or closes with `SetLinger(0)` to
+      send a reset, or writes `503` without calling upstream.
+  - component: logger
+    text: >-
+      appends `{"route":"orders","fault":"latency","ms":200}` so an experiment can line up faults with the client's
+      retries.
+interface:
+  lang: http
+  code: |
+    PUT /rules/orders-slow
+    { "route": "orders",
+      "fault": "latency", "ms": 200,
+      "probability": 0.3,
+      "schedule": { "start": "+0s",
+                    "duration": "120s" } }
+
+    200 OK
+    { "id": "orders-slow", "active": true,
+      "version": 17 }
+decisions:
+  - choice: Faults per request, parsed from HTTP/1.1
+    instead: Faults per TCP read chunk
+    why: >-
+      A request split over 4 reads would get 4 delays and miss the ±5 ms target. Parsing only the request head is
+      cheap and keeps raw TCP routes on per-connection faults.
+  - choice: Atomic rule-set swap
+    instead: A lock read on every request
+    why: >-
+      10,000 requests a second would contend on the lock and eat into the 0.5 ms budget. Rule changes are rare, so
+      build a new immutable set and swap the pointer.
+  - choice: Fast path with no stages when no rule matches
+    instead: Always run the full pipeline
+    why: >-
+      Most traffic carries no fault. A plain copy keeps no-fault overhead near zero; benchmark both paths at 10,000
+      req/s.
+watchOut: >-
+  Blackhole and slow faults hold connections open forever, which leaks file descriptors like a slow-loris attack.
+  Give every route a connection cap and an idle timeout, and watch open fds during experiments.

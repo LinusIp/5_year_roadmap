@@ -1,0 +1,119 @@
+overview: >-
+  A daily batch job that matches Harbor & Pine's 4,000 orders a day against the payment processors' settlement
+  files. Every file format is first parsed into one canonical staging table, then matched in ordered passes, exact,
+  date window and fuzzy, and each match records the rule that made it. Whatever is left is classified into an
+  exception queue that finance works through instead of a spreadsheet.
+learn:
+  - name: Canonical data models
+    ref: ddia
+  - name: Idempotent batch reruns
+    ref: de-zoomcamp
+  - name: Multi-pass matching
+  - name: Settlement cut-off times
+  - name: Fault injection data
+stats:
+  - value: ≥ 99.5%
+    label: records matched automatically
+  - value: < 5 min
+    label: for 2M settlement lines
+  - value: "0"
+    label: false matches on injected faults
+components:
+  - id: files
+    name: Settlement files
+    role: CSV reports from each processor, each with its own columns, sign rules and cut-off.
+    tech: CSV
+    talksTo: [ingester]
+    kind: external
+  - id: orders
+    name: Order export
+    role: The shop's daily list of orders, refunds and expected amounts.
+    tech: Shop database
+    talksTo: [staging]
+    kind: external
+  - id: ingester
+    name: File ingester
+    role: Detects the format, parses every line into canonical rows with cents and UTC timestamps.
+    tech: Python · DuckDB
+    talksTo: [staging]
+    kind: core
+  - id: staging
+    name: Canonical staging
+    role: One settlement table and one order table per run date, replaced as a whole on rerun.
+    tech: DuckDB
+    talksTo: [matcher]
+    kind: core
+  - id: matcher
+    name: Matcher passes
+    role: Runs exact, window and fuzzy passes in order and stores each match with its rule name.
+    tech: Python · SQL
+    talksTo: [exceptions]
+    kind: core
+  - id: exceptions
+    name: Exceptions store
+    role: Classifies leftovers as missing, duplicate, amount mismatch or fee drift, with resolution notes.
+    tech: DuckDB
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report generator
+    role: Writes the daily and monthly summary of match rate by pass and exception mix.
+    tech: Python · CSV
+    talksTo: []
+    kind: core
+  - id: faults
+    name: Fault generator
+    role: Makes synthetic orders and settlements with duplicates, delays, fee changes and partial refunds.
+    tech: Python
+    talksTo: [files, orders]
+    kind: offline
+flow:
+  - component: ingester
+    text: >-
+      picks up the files for run date `2026-10-15`, matches the header to a known format, and converts amounts to
+      integer cents and times to UTC using that processor's **cut-off** hour.
+  - component: staging
+    text: deletes any rows for that run date and inserts the new ones in one transaction, so a rerun gives byte-identical tables.
+  - component: matcher
+    text: "pass 1 joins on `order_id` and exact amount; matched pairs are stored with `rule = 'exact'`."
+  - component: matcher
+    text: >-
+      pass 2 tries amount plus a ±2-day window, and pass 3 compares references fuzzily, each only on rows still
+      unmatched and only when exactly **one** candidate fits.
+  - component: exceptions
+    text: labels each leftover, for example a second settlement for one order is `duplicate`, a gap of a few cents is `fee_drift`.
+  - component: report
+    text: writes the day's summary sorted by key, so two runs of the same day produce the same file.
+interface:
+  lang: sql
+  code: |
+    -- pass 2: same amount, settled within 2 days
+    INSERT INTO matches (settlement_id, order_id, rule)
+    SELECT s.id, o.id, 'window_2d'
+    FROM settlements s JOIN orders o
+      ON s.amount_cents = o.amount_cents
+     AND s.settled_at BETWEEN o.paid_at
+         AND o.paid_at + INTERVAL 2 DAY
+    WHERE s.run_date = '2026-10-15'
+      AND s.id NOT IN (SELECT settlement_id
+                       FROM matches)
+    QUALIFY count(*) OVER (PARTITION BY s.id) = 1;
+decisions:
+  - choice: Ordered passes with a rule per match
+    instead: One scoring model that picks the best match
+    why: >-
+      Finance has to trust and explain every pair. A strict pass order with the rule recorded lets them see why
+      any match happened; a score would not.
+  - choice: DuckDB on one machine
+    instead: PostgreSQL server
+    why: >-
+      2M lines is a few hundred megabytes, which DuckDB joins in seconds from one file with no server to run. Move
+      to PostgreSQL if several people need to edit exceptions at once.
+  - choice: Replace a run date's rows as a whole
+    instead: Append new rows on every run
+    why: >-
+      Appending is how a rerun doubles the data. Delete-and-insert per date in one transaction makes the job safe to
+      run as often as needed.
+watchOut: >-
+  Matching on amount alone pairs two different $49.00 orders. Only accept a fuzzy or window match when exactly one
+  candidate fits; send the rest to exceptions.

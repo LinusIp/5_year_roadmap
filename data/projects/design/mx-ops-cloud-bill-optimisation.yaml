@@ -1,0 +1,96 @@
+overview: >-
+  A cost pipeline for Fernhill's $38k a month cloud bill, built from the billing export alone so anyone can rerun it.
+  About 2 million line items are loaded into DuckDB, tagged to a team and service, and scanned by waste detectors for
+  idle machines, oversized instances, unattached disks and data transfer. A savings model ranks each fix by dollars
+  and risk, the top 5 are applied in a test environment and load-tested with k6, and only fixes that keep p99 within
+  5 % count towards the 35 % target.
+learn:
+  - name: Cost allocation tags
+  - name: Rightsizing
+    ref: aws-skill-builder
+  - name: Commitment discounts
+  - name: Load testing with k6
+  - name: Cost anomaly detection
+  - name: Unit economics
+stats:
+  - value: ≥ 35 %
+    label: of $38k a month saved
+  - value: < 5 %
+    label: p99 regression
+  - value: < 24 h
+    label: to flag a cost spike
+components:
+  - id: export
+    name: Billing export
+    role: A month of synthetic line items with resource IDs, usage, price and tags.
+    tech: CSV · Parquet
+    talksTo: [ingest]
+    kind: external
+  - id: ingest
+    name: Ingestion
+    role: Loads and normalises line items and maps each one to a team and service.
+    tech: Python · DuckDB
+    talksTo: [detectors]
+    kind: core
+  - id: detectors
+    name: Waste detectors
+    role: SQL checks for idle, oversized, unattached and transfer-heavy resources.
+    tech: DuckDB SQL
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Savings model
+    role: Scores each fix by monthly savings and a risk rating, and orders rightsizing before commitments.
+    tech: Python
+    talksTo: [loadtest]
+    kind: core
+  - id: loadtest
+    name: Load-test check
+    role: Applies a fix in the test environment and compares p99 with the baseline.
+    tech: Terraform · k6
+    talksTo: [dashboard]
+    kind: core
+  - id: dashboard
+    name: Cost dashboard
+    role: Shows spend by team, cost per active user and the savings proven so far.
+    tech: Grafana
+    talksTo: []
+    kind: core
+  - id: anomaly
+    name: Anomaly alerts
+    role: Compares each day's spend per service with its recent range and alerts on a spike.
+    tech: Python · cron
+    talksTo: []
+    kind: offline
+flow:
+  - component: ingest
+    text: loads the month's export and fills `team` and `service` from tags; untagged spend is shown as its own line so coverage can be raised.
+  - component: detectors
+    text: flag, for example, 14 instances with p95 CPU under `10 %` for 30 days, and 3 TB of disks attached to nothing.
+  - component: model
+    text: prices each fix, such as moving an `m5.2xlarge` to an `m5.large`, gives it a risk of low, medium or high, and holds commitment buys until rightsizing is done.
+  - component: loadtest
+    text: applies the fix with Terraform in the test environment and runs k6; a fix that pushes p99 more than **5 %** over baseline is rejected.
+  - component: dashboard
+    text: adds the accepted fix to proven savings and updates cost per active user.
+interface:
+  lang: sql
+  code: |
+    -- idle instances: low CPU for 30 days
+    SELECT resource_id, service, team,
+           SUM(cost) AS monthly_cost
+    FROM line_items li
+    JOIN cpu_daily c USING (resource_id)
+    WHERE li.product = 'compute'
+    GROUP BY 1, 2, 3
+    HAVING MAX(c.cpu_p95) < 0.10
+    ORDER BY monthly_cost DESC
+    LIMIT 20;
+decisions:
+  - choice: Rightsize first, commit second
+    instead: Buy savings plans for today's usage straight away
+    why: A one- or three-year commitment locks in today's oversized fleet. Rightsizing shrinks the base, then the commitment covers what is left.
+  - choice: DuckDB on the export
+    instead: A hosted cost-management product
+    why: The analysis must be reproducible from the export alone, and 2 million rows fit on a laptop. Revisit if the export grows past what one machine handles.
+watchOut: Egress and cross-zone data transfer hide in small line items and often add up to more than the compute you are tuning. Group transfer costs by source and destination before choosing fixes.

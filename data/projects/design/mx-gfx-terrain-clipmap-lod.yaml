@@ -1,0 +1,99 @@
+overview: >-
+  A terrain renderer using geometry clipmaps: about ten nested square rings centred on the aircraft, each with the same
+  vertex count but twice the spacing of the one inside it, from 3 m near the camera out to the edge of the 200 km
+  region. When the camera moves, each ring shifts and only the newly exposed rows of height and imagery are written
+  into its texture, which wraps around (toroidal) so nothing else is copied. A background thread streams those rows
+  from SSD, and the shader blends each ring into the next coarser one so detail does not pop.
+learn:
+  - name: Geometry clipmaps
+    ref: rtr4
+  - name: Toroidal texture updates
+  - name: Asynchronous streaming
+    ref: game-engine-architecture
+  - name: LOD blending
+  - name: Camera-relative rendering
+stats:
+  - value: 60 FPS
+    label: 1080p over the full region
+  - value: < 20 ms
+    label: 99.9th percentile frame at 120 m/s
+  - value: < 600 MB
+    label: GPU memory
+components:
+  - id: store
+    name: Tile store
+    role: Height and imagery tiles on SSD in a pyramid of resolutions.
+    tech: SSD files
+    talksTo: [streamer]
+    kind: external
+  - id: streamer
+    name: Streaming thread
+    role: Reads requested tiles with priority by distance and flight direction, never on the render thread.
+    tech: std::thread · queue
+    talksTo: [clipmap]
+    kind: core
+  - id: clipmap
+    name: Clipmap manager
+    role: Snaps each ring's origin to its grid and uploads new rows into wrap-around textures.
+    tech: OpenGL 4.5 · DSA
+    talksTo: [culling]
+    kind: core
+  - id: culling
+    name: Culling
+    role: Skips ring blocks outside the view frustum or hidden behind the horizon.
+    tech: C++17 · GLM
+    talksTo: [mesh]
+    kind: core
+  - id: mesh
+    name: Ring mesh
+    role: One shared grid of blocks reused for every ring, scaled per level.
+    tech: OpenGL 4.5
+    talksTo: [shaders]
+    kind: core
+  - id: shaders
+    name: Terrain shaders
+    role: Fetch heights, blend into the coarser ring near the edge and drape imagery with splat detail.
+    tech: GLSL 4.5
+    talksTo: []
+    kind: core
+flow:
+  - component: clipmap
+    text: works out where each ring's origin should be this frame; at 120 m/s the finest ring moves about 40 texels a second.
+  - component: streamer
+    text: has already read the rows ahead of the aircraft, because requests are ranked by distance and flight direction, so the render thread **never waits** on IO.
+  - component: clipmap
+    text: writes the arrived rows with `glTextureSubImage3D` at the wrapped position, leaving the rest of the texture untouched.
+  - component: culling
+    text: drops blocks outside the frustum or below the horizon line for the current altitude.
+  - component: mesh
+    text: draws the remaining blocks of each ring with its scale and camera-relative origin as uniforms.
+  - component: shaders
+    text: sample height at `fract(world / ring_size)` and, in each ring's outer 10%, blend towards the coarser ring so edges meet without cracks.
+interface:
+  lang: glsl
+  code: |
+    uniform sampler2DArray u_height; // layer = ring
+    uniform int u_ring;
+    uniform vec2 u_origin;   // camera-relative, m
+    uniform float u_spacing; // m between vertices
+    uniform float u_size;    // ring width in m
+    in vec2 a_grid;          // integer grid position
+    out float v_blend;       // 0 inner .. 1 coarser
+    float ringHeight(vec2 worldRel, vec2 camWorld) {
+      vec2 uv = fract((worldRel + camWorld) / u_size);
+      return texture(u_height,
+                     vec3(uv, float(u_ring))).r;
+    }
+decisions:
+  - choice: Geometry clipmaps
+    instead: A chunked quadtree with per-chunk LOD
+    why: Each ring has a fixed vertex count, so frame cost does not depend on speed or terrain, which is what the 20 ms worst-frame target needs.
+  - choice: A dedicated streaming thread
+    instead: Reading tiles on the render thread when needed
+    why: One blocking SSD read can cost tens of milliseconds; ranked prefetch keeps IO off the frame entirely.
+  - choice: Camera-relative positions
+    instead: Absolute world coordinates in floats
+    why: 200 km from the origin, float positions jitter visibly at 3 m detail; subtracting the camera first keeps numbers small.
+watchOut: >-
+  Cracks and pops where rings meet. The outer vertices of each ring must land exactly on the coarser ring's heights,
+  so check edges with a wireframe flight before tuning anything else.

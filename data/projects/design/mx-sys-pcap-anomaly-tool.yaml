@@ -1,0 +1,113 @@
+overview: >-
+  A laptop tool for Lakeview High that turns packet captures into evidence. It reads pcap files or a live
+  interface, decodes Ethernet, IP, TCP, UDP and DNS headers in place without copying (zero-copy), and groups
+  packets into bidirectional flows, one entry per conversation in both directions. Detectors watch the flow table
+  for port scans, regular beacon intervals and DNS-tunnel-like names and write JSON alerts with the evidence flows,
+  and a replay harness scores the same detectors on labelled captures.
+learn:
+  - name: Packet header layouts
+    ref: stanford-cs144
+  - name: Flow aggregation
+  - name: Beacon interval statistics
+  - name: Entropy of names
+  - name: Precision and recall
+    ref: ml-zoomcamp
+stats:
+  - value: ≥ 300k
+    label: packets per second
+  - value: ≥ 0.9
+    label: precision
+  - value: ≥ 0.8
+    label: recall
+components:
+  - id: captures
+    name: Captures
+    role: Pcap files from the lab switch's mirror port, or a live interface.
+    tech: pcap · AF_PACKET
+    talksTo: [reader]
+    kind: external
+  - id: reader
+    name: Capture reader
+    role: Reads packet records with timestamps into a reused buffer.
+    tech: Rust or C++
+    talksTo: [decoder]
+    kind: core
+  - id: decoder
+    name: Protocol decoder
+    role: Walks the headers by offset and returns slices into the buffer.
+    tech: Zero-copy parser
+    talksTo: [flows]
+    kind: core
+  - id: flows
+    name: Flow table
+    role: Keeps per-flow counters, flags and inter-arrival times, and expires idle flows.
+    tech: Hash map
+    talksTo: [detectors]
+    kind: core
+  - id: detectors
+    name: Detectors
+    role: Scores scans, beaconing and DNS tunnelling from flow features.
+    tech: Rules and statistics
+    talksTo: [alerts]
+    kind: core
+  - id: alerts
+    name: Alert writer
+    role: Writes one JSON line per alert with its evidence.
+    tech: JSON Lines
+    talksTo: [eval]
+    kind: core
+  - id: eval
+    name: Evaluation harness
+    role: Replays labelled captures and reports precision, recall and false positives per hour.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: reader
+    text: reads the next record from the pcap file with its timestamp and captured length into a reused buffer.
+  - component: decoder
+    text: >-
+      walks Ethernet, IPv4 or IPv6, TCP or UDP and DNS by offsets; fragmented or truncated packets are counted, not
+      silently dropped.
+  - component: flows
+    text: >-
+      orders the 5-tuple (two addresses, two ports, protocol) so both directions hit one entry, then updates
+      packets, bytes, TCP flags and inter-arrival times.
+  - component: detectors
+    text: >-
+      flag a host touching over 100 distinct ports in 10 min with SYN-only flows, a destination hit at intervals
+      with jitter under 10%, or long high-entropy DNS labels under one domain.
+  - component: alerts
+    text: writes the alert with the detector, a `score`, the hosts and the ids of the **evidence** flows.
+interface:
+  lang: json
+  code: |
+    { "ts": "2026-03-04T02:13:07Z",
+      "detector": "beacon",
+      "src": "10.20.4.37",
+      "dst": "203.0.113.50:443",
+      "score": 0.93,
+      "evidence": {
+        "connections": 48,
+        "mean_interval_s": 300.2,
+        "jitter_cv": 0.03 },
+      "flows": [18231, 18304, 18377] }
+decisions:
+  - choice: Explainable rules on flow features
+    instead: A learned model on raw packets
+    why: >-
+      There are only a few labelled captures, and the IT teacher must be able to read why a machine was flagged.
+      Revisit once the labelled set covers several weeks of lab traffic.
+  - choice: Scan window separate from flow timeout
+    instead: Count scans only from live flows
+    why: >-
+      A 120 s idle timeout frees memory for 5 million flows but would hide a scan probing one port a minute. The
+      scan detector keeps its own per-source counters over 10 minutes.
+  - choice: Split train and test by capture day
+    instead: A random split of flows
+    why: >-
+      Flows from one attack run look alike, so a random split leaks answers into the test set and inflates
+      precision.
+watchOut: >-
+  Tuning thresholds on the same attack run you report on makes 0.9 precision meaningless. Tune on one capture day
+  and report on another.

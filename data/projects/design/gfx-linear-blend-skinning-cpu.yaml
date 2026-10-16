@@ -1,0 +1,70 @@
+overview: >-
+  A glTF character animated on the CPU: each frame the joint transforms are combined down the skeleton, multiplied by
+  each joint's inverse bind matrix, and every vertex is moved by the weighted blend of up to 4 joint matrices (linear
+  blend skinning). A twisted forearm shows LBS collapsing into a "candy wrapper" next to dual quaternion skinning
+  (blending rigid motions as dual quaternions instead of matrices), which keeps the volume.
+learn:
+  - name: Skeletal hierarchies
+    ref: game-engine-architecture
+  - name: Inverse bind matrices
+  - name: Quaternions
+    ref: gamemath-3d-primer
+  - name: Dual quaternion skinning
+components:
+  - id: loader
+    name: glTF loader
+    role: Reads the skeleton, inverse bind matrices, joint indices, weights and clips.
+    tech: C++ / Python
+    talksTo: [pose]
+    kind: core
+  - id: pose
+    name: Pose solver
+    role: Samples the clip and builds one skinning matrix per joint.
+    tech: C++ / NumPy
+    talksTo: [skin]
+    kind: core
+  - id: skin
+    name: Skinning
+    role: Moves every vertex by LBS or by DQS.
+    tech: C++ / NumPy
+    talksTo: [view]
+    kind: core
+  - id: view
+    name: Viewer
+    role: Draws both results side by side and shows skinning time.
+    tech: OpenGL
+    talksTo: []
+    kind: core
+flow:
+  - component: loader
+    text: reads `inverseBindMatrices`, `JOINTS_0` and `WEIGHTS_0`, and renormalises any vertex whose 4 weights do not sum to 1.
+  - component: pose
+    text: samples the clip at `t`, then visits parents before children with `global[j] = global[parent] * local[j]` and `skin[j] = global[j] * invBind[j]`.
+  - component: skin
+    text: for LBS computes `v' = Σ w·skin[j]·v`; for DQS converts each matrix to a dual quaternion, flips any facing away from the first, blends and **normalises**.
+  - component: view
+    text: shows LBS and DQS at a 90-degree forearm twist and prints skinning ms per frame.
+interface:
+  lang: cpp
+  code: |
+    struct SkinVertex { Vec3 pos, nrm;
+      uint8_t joint[4]; float weight[4]; };  // sum 1
+
+    void compute_skin_matrices(const Skeleton& s,
+                               const Pose& local,
+                               std::span<Mat4> out);
+    void skin_lbs(std::span<const SkinVertex> in,
+                  std::span<const Mat4> skin,
+                  std::span<Vec3> outPos);
+    void skin_dqs(std::span<const SkinVertex> in,
+                  std::span<const DualQuat> skin,
+                  std::span<Vec3> outPos);
+decisions:
+  - choice: Skin on the CPU first
+    instead: Skin in the vertex shader from the start
+    why: >-
+      On the CPU you can print one vertex's joints, weights and matrices, which is where order and inverse-bind bugs
+      show up. A few thousand vertices take well under a millisecond; move to the GPU once LBS and DQS look right.
+watchOut: >-
+  Multiplying in the wrong order (`invBind * global`) or updating a child before its parent makes the mesh explode or
+  collapse to the origin. Check first that the bind pose with no animation reproduces the original mesh exactly.

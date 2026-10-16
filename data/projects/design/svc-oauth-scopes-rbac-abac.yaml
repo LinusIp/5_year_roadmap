@@ -1,0 +1,52 @@
+overview: >-
+  A policy layer for a document API that first answers "may this user do this action on this document?" with roles
+  (RBAC), then with attributes such as owner and department (ABAC), tested against a 40-row decision table with
+  every decision logged.
+learn:
+  - name: RBAC
+  - name: ABAC
+  - name: Policy as code
+  - name: Audit logging
+components:
+  - id: api
+    name: Document API
+    role: Loads the user and document and asks the policy engine before acting.
+    tech: Python
+    talksTo: [policy]
+    kind: core
+  - id: policy
+    name: Policy engine
+    role: Evaluates RBAC and ABAC rules and returns allow or deny with a reason.
+    tech: Python or Open Policy Agent
+    talksTo: [audit]
+    kind: core
+  - id: audit
+    name: Decision log
+    role: Stores user, action, document, decision and reason for every check.
+    tech: JSON lines
+    talksTo: []
+    kind: core
+  - id: table
+    name: Decision table
+    role: 40 cases of (user, action, document, expected) run as tests.
+    tech: pytest
+    talksTo: [policy]
+    kind: offline
+flow:
+  - component: api
+    text: receives `PUT /docs/7` from Ana and loads the document's owner, department and status.
+  - component: policy
+    text: allows editors to edit (RBAC), and owners to edit their own drafts in their department (ABAC).
+  - component: audit
+    text: records `{"user":"ana","action":"edit","doc":7,"allow":true,"rule":"owner-draft"}`.
+  - component: api
+    text: performs the edit, or returns 403 with the reason from the engine.
+decisions:
+  - choice: Check in the service layer, per document
+    instead: Check only at the route
+    why: >-
+      A route check knows the action but not the document, so it cannot apply owner or department rules. Every
+      path that loads a document must call the engine.
+watchOut: >-
+  Authorising only at the route layer lets list and search endpoints return documents the user may not see. Filter
+  those results through the same policy.

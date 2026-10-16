@@ -1,0 +1,109 @@
+overview: >-
+  An allocation service for Oakline that chooses which of 6 warehouses ships each line of a furniture order. A
+  greedy pass picks the cheapest site per line with a penalty for splitting the order, then a short local search
+  moves lines between sites to cut cost further. Every decision is logged with its stock snapshot and inputs, so it
+  can be replayed exactly and compared with an offline optimal solver.
+learn:
+  - name: Greedy algorithms
+    ref: skiena-adm
+  - name: Local search
+    ref: cs188
+  - name: Integer linear programming
+  - name: Deterministic replay
+  - name: Snapshot reads
+    ref: ddia
+stats:
+  - value: ≤ 3%
+    label: cost gap vs optimum, 1,000 orders
+  - value: < 100 ms
+    label: p99 for a 20-line order
+  - value: 200/s
+    label: orders allocated
+components:
+  - id: oms
+    name: Order system
+    role: Sends each paid order with its lines, address and promised delivery date.
+    tech: Upstream HTTP
+    talksTo: [allocator]
+    kind: external
+  - id: snapshot
+    name: Stock snapshotter
+    role: Gives a versioned view of usable stock per warehouse, net of safety buffer, plus in-transit units.
+    tech: Rust · PostgreSQL
+    talksTo: [allocator]
+    kind: core
+  - id: cost
+    name: Cost model
+    role: Prices shipping each line from each warehouse from the distance matrix, plus a split penalty.
+    tech: Rust
+    talksTo: [allocator]
+    kind: core
+  - id: allocator
+    name: Allocator
+    role: Runs the greedy pass and local search and returns a site per line with an explanation.
+    tech: Rust
+    talksTo: [log]
+    kind: core
+  - id: log
+    name: Decision log
+    role: Stores the order, snapshot version, costs and chosen sites for every allocation.
+    tech: PostgreSQL · JSONB
+    talksTo: [replay]
+    kind: core
+  - id: replay
+    name: Replay tool
+    role: Re-runs logged decisions and checks they come out identical.
+    tech: Rust CLI
+    talksTo: [baseline]
+    kind: offline
+  - id: baseline
+    name: Offline baseline
+    role: Solves the same orders optimally with a MILP solver to measure the cost gap.
+    tech: Python · PuLP · CBC
+    talksTo: []
+    kind: offline
+flow:
+  - component: allocator
+    text: receives `POST /allocate` with a 20-line order and a promise date of 9 days.
+  - component: snapshot
+    text: >-
+      hands over snapshot `v81234`, where usable stock is on-hand minus reserved minus safety buffer, plus
+      in-transit units that **arrive before** the promise date.
+  - component: cost
+    text: prices each line at each warehouse that has it and adds a fixed **split penalty** for every extra warehouse used.
+  - component: allocator
+    text: >-
+      first tries to ship the whole order from one site; otherwise assigns each line to its cheapest site, then tries
+      moving single lines for up to 20 ms, breaking ties by warehouse id.
+  - component: log
+    text: stores the order, snapshot version, cost table and result, then the API returns sites and an `explain` per line.
+interface:
+  lang: http
+  code: |
+    POST /allocate
+    { "order_id": "OK-55120", "postcode": "M4 1HN",
+      "promise_by": "2026-10-25",
+      "lines": [{ "sku": "SOFA-3S-GRY", "qty": 1 }, …] }
+
+    200 OK
+    { "snapshot": "v81234", "cost": 18450,
+      "lines": [{ "sku": "SOFA-3S-GRY", "site": "LEEDS",
+        "explain": "cheapest; avoids 2nd site" }] }
+decisions:
+  - choice: Greedy plus local search online
+    instead: Run the MILP solver for every order
+    why: >-
+      An open-source solver can take seconds on a 20-line, 6-site order, far over the 100 ms budget. Greedy plus
+      local search gets within 3 percent, which the offline baseline proves on 1,000 orders.
+  - choice: Allocate against a versioned snapshot
+    instead: Read live stock row by row during the search
+    why: >-
+      Stock changing mid-search makes results impossible to replay. The snapshot version in the log lets replay see
+      exactly what the allocator saw.
+  - choice: Fixed tie-break by warehouse id
+    instead: Whatever order a hash map gives
+    why: >-
+      Two equal-cost sites picked at random break 100 percent replay fidelity. A fixed rule costs nothing.
+watchOut: >-
+  Allocating against stale stock sends a sofa to a warehouse that sold its last one an hour ago. Re-check the
+  snapshot version at pick time and re-allocate if stock moved.

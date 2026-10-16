@@ -1,0 +1,91 @@
+overview: >-
+  A bench rig that pulls one printed finger's tendon with a servo, again and again, and measures what the finger
+  does. Each cycle the controller drives the tendon, reads fingertip force from a 20 N load cell and finger angle
+  from a potentiometer, and stops within 50 ms if force goes over the limit. Per-cycle peak force and angle are
+  logged, and a Python script tracks how they drift over 10,000 cycles to show wear before a hand reaches a patient.
+learn:
+  - name: Load-cell calibration
+    ref: art-of-electronics
+  - name: Cycle testing
+  - name: Overload protection
+  - name: Drift detection
+  - name: Tendon-driven mechanisms
+stats:
+  - value: ±3 %
+    label: force error up to 20 N
+  - value: '10,000'
+    label: cycles at 1 Hz
+  - value: < 50 ms
+    label: overload stop
+components:
+  - id: fixture
+    name: Fixture and finger
+    role: Printed PLA/PETG finger clamped on the 40x30 cm bench, with tendon and load-cell mount.
+    tech: PLA/PETG · fixture
+    talksTo: [sensors]
+    kind: external
+  - id: sensors
+    name: Force and angle
+    role: 20 N load cell with amplifier at the fingertip and a potentiometer at the joint.
+    tech: Load cell · HX711 at 80 Hz · pot
+    talksTo: [controller]
+    kind: core
+  - id: controller
+    name: Cycle controller
+    role: Runs the flex and release profile once a second and samples force and angle at 80 Hz.
+    tech: C++ · Pico
+    talksTo: [overload, cyclelog]
+    kind: core
+  - id: overload
+    name: Overload stop
+    role: Releases the tendon and halts the test when force exceeds the limit.
+    tech: C++
+    talksTo: [actuator]
+    kind: core
+  - id: actuator
+    name: Tendon actuator
+    role: Servo or linear actuator that pulls the tendon line.
+    tech: Servo · linear actuator
+    talksTo: []
+    kind: external
+  - id: cyclelog
+    name: Cycle logger
+    role: Writes one row per cycle with peak force, angle range and time to close.
+    tech: C++ · serial to CSV
+    talksTo: [drift]
+    kind: core
+  - id: drift
+    name: Drift analyzer
+    role: Fits trends across cycles and flags force loss or angle change beyond a set margin.
+    tech: Python · pandas
+    talksTo: []
+    kind: offline
+flow:
+  - component: controller
+    text: starts a cycle by commanding the actuator to pull the tendon to the flex position, for example `servo 0° → 120°` over `400 ms`.
+  - component: sensors
+    text: report fingertip force and joint angle every `12.5 ms` (80 Hz); the load cell is calibrated with known weights at 0, 5, 10 and 20 N.
+  - component: overload
+    text: releases the tendon if force passes `18 N`, 90 percent of the load cell range, and **stops the whole test**, not just the cycle, so a jammed finger is not loaded again.
+  - component: controller
+    text: releases the finger and records peak force, angle range and time to close for this cycle.
+  - component: cyclelog
+    text: appends that row; the drift analyzer later compares cycle 10,000 with cycle 100, after the tendon has settled.
+interface:
+  lang: shell
+  code: |
+    # one row per cycle (CSV)
+    cycle,t_s,peak_n,angle_min,angle_max,t_close_ms,stop
+    1,1.0,11.82,4.1,86.3,388,0
+    2,2.0,11.79,4.0,86.4,386,0
+    ...
+    9999,9999.0,10.94,5.2,83.0,402,0
+    10000,10000.0,10.91,5.3,82.9,403,0
+decisions:
+  - choice: One row per cycle, not raw samples
+    instead: Log the full 80 Hz stream for every cycle
+    why: 10,000 cycles of raw data is close to a million rows, while drift shows in per-cycle peaks. Keep raw traces for every 100th cycle to inspect odd ones.
+  - choice: Compare against a settled baseline
+    instead: Compare against cycle 1
+    why: Tendon line creeps in the first hundred cycles, which would look like wear. Using cycle 100 as the baseline separates settling from real damage.
+watchOut: Tendon creep slowly lowers force for the same servo angle and can be mistaken for finger wear. Record creep on a rigid dummy finger first so it can be subtracted.

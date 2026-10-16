@@ -1,0 +1,106 @@
+overview: >-
+  A small nRF52 board rides on each 36 V pack and only watches it: it never switches pack current. Every sample
+  cycle it reads 10 cell voltages, the shunt current and 3 thermistors, updates state of charge by coulomb counting
+  (adding up current over time) and corrects it with the open-circuit voltage when the bike has rested. Unsafe
+  events go into a flash log that a phone pulls over BLE, so the fleet can spot weak packs before replacing them.
+learn:
+  - name: Coulomb counting
+  - name: OCV correction
+  - name: ADC calibration
+    ref: art-of-electronics
+  - name: Low-power sleep modes
+    ref: making-embedded-systems
+  - name: Flash wear levelling
+  - name: BLE GATT services
+stats:
+  - value: ≤ 10 mV
+    label: per-cell voltage error
+  - value: < 5 %
+    label: SOC error over a ride
+  - value: < 2 mA
+    label: sleep current
+components:
+  - id: pack
+    name: 10S battery pack
+    role: The 36 V pack with its cell taps, current shunt and three NTC thermistors.
+    tech: Li-ion 10S · 1 mΩ shunt
+    talksTo: [afe]
+    kind: external
+  - id: afe
+    name: Analog front end
+    role: Cell-monitor IC and shunt amplifier that scale every signal into ADC range.
+    tech: Cell monitor IC · op-amp
+    talksTo: [adc]
+    kind: core
+  - id: adc
+    name: ADC sampler
+    role: Samples all channels on a timer and applies per-channel offset and gain from calibration.
+    tech: C · nRF52 SAADC
+    talksTo: [soc]
+    kind: core
+  - id: soc
+    name: SOC estimator
+    role: Integrates current into charge used and snaps to the OCV curve after a long rest.
+    tech: C · fixed-point
+    talksTo: [events]
+    kind: core
+  - id: events
+    name: Event detector
+    role: Flags over-temperature, deep discharge and cell imbalance with debounce.
+    tech: C
+    talksTo: [log]
+    kind: core
+  - id: log
+    name: Flash log
+    role: Appends event records to a ring of flash pages, rotating to spread wear.
+    tech: C · nRF52 flash
+    talksTo: [ble]
+    kind: core
+  - id: ble
+    name: BLE service
+    role: Exposes SOC, health and the event log to the fleet phone app.
+    tech: Zephyr BLE GATT
+    talksTo: []
+    kind: core
+  - id: analyzer
+    name: Log analyzer
+    role: Replays synthetic ride cycles and compares estimated SOC against the cell model.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: afe
+    text: divides each cell tap and amplifies the shunt voltage, so `I = V_shunt / 1 mΩ` lands inside the ADC range.
+  - component: adc
+    text: takes one sample of all 14 channels every `100 ms` and applies `v = (raw − offset) × gain` from the calibration table.
+  - component: soc
+    text: adds `I × Δt` to charge used; after `30 min` at near-zero current it **resets to the OCV curve**, because a resting cell's voltage tells its charge.
+  - component: events
+    text: raises an event when any cell is below `3.0 V`, a thermistor reads above `55 °C`, or two cells differ by more than `50 mV` for 5 samples in a row.
+  - component: log
+    text: appends a 12-byte record with time, type and values to the current flash page; it writes only on events and once an hour.
+  - component: ble
+    text: serves the latest SOC and the log to the phone when it connects, then the MCU goes back to sleep under `2 mA`.
+interface:
+  lang: c
+  code: |
+    typedef struct {
+      uint32_t t_s;        /* seconds since boot */
+      uint8_t  type;       /* EV_OVERTEMP, ... */
+      uint8_t  cell;       /* 0..9 or 0xFF */
+      int16_t  value_mv;   /* or 0.1 °C */
+      uint16_t soc_pmil;   /* SOC in 0.1 % */
+      uint16_t crc16;
+    } bms_event_t;
+
+    int  bms_sample(bms_frame_t *out);
+    void soc_update(float amps, float dt_s);
+    int  log_append(const bms_event_t *ev);
+decisions:
+  - choice: Coulomb counting plus OCV reset
+    instead: A Kalman filter on an equivalent-circuit model
+    why: Coulomb counting alone drifts with sensor offset, and a rest reset fixes that cheaply on a small MCU. Move to a Kalman filter if rides with no rest stops push error past 5 percent.
+  - choice: Log events, not every sample
+    instead: Log every sample to flash
+    why: At 10 samples a second the flash would be written to death within months. Events plus an hourly summary are what the fleet needs to rank weak packs.
+watchOut: OCV correction taken while current is flowing reads a sagged voltage and drags SOC down. Only correct after the pack has rested at near-zero current.

@@ -1,0 +1,128 @@
+overview: >-
+  One repository, three small reproductions sharing one harness: a translation transformer against a GRU baseline,
+  naive attention against FlashAttention across sequence lengths, and DDPM on CIFAR-10. Before any run, a claims file
+  writes down each paper's headline number, the scale you can afford and the result you expect at that scale. Every
+  experiment then reads a config, logs, saves checkpoints and writes a results file, and a report script puts your
+  number next to the paper's and explains the gap.
+learn:
+  - name: Reproducing a claim
+    ref: ml-reproducibility-challenge
+  - name: Reading a paper for its claim
+    ref: keshav-how-to-read
+  - name: BLEU done consistently
+  - name: Timing GPU kernels
+    ref: gpu-mode-lectures
+  - name: DDPM with EMA weights
+    ref: annotated-diffusion
+stats:
+  - value: ≤ 3 BLEU
+    label: from a published small model
+  - value: ≥ 2×
+    label: FlashAttention at length 4,096
+  - value: ≤ 30
+    label: DDPM FID, 10,000 samples
+components:
+  - id: claims
+    name: Claims file
+    role: States each paper's number, your affordable scale and your expected result, before any run.
+    tech: claims.md
+    talksTo: [harness]
+    kind: core
+  - id: harness
+    name: Shared harness
+    role: Reads a config, seeds, logs, checkpoints and writes a results JSON for every experiment.
+    tech: Python 3.12 · PyTorch 2.x
+    talksTo: [translate, attention, ddpm, wandb]
+    kind: core
+  - id: translate
+    name: Translation run
+    role: Trains a base transformer and a GRU-with-attention baseline on the same data and tokenizer.
+    tech: PyTorch · IWSLT14 or Multi30k
+    talksTo: [eval]
+    kind: core
+  - id: attention
+    name: Attention bench
+    role: Times naive attention and FlashAttention forward and backward from 512 to 16,384 tokens.
+    tech: PyTorch SDPA · flash-attn
+    talksTo: [eval]
+    kind: core
+  - id: ddpm
+    name: DDPM run
+    role: Trains a U-Net on CIFAR-10 with an EMA of the weights and saves sample grids.
+    tech: PyTorch
+    talksTo: [eval]
+    kind: core
+  - id: eval
+    name: Evaluator
+    role: Computes detokenised BLEU, milliseconds and peak GB, and FID, into results.json.
+    tech: sacreBLEU · clean-fid
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report script
+    role: Builds the paper-against-yours table, the attention plots and one section per paper.
+    tech: Python · Matplotlib
+    talksTo: []
+    kind: core
+  - id: wandb
+    name: Run tracker
+    role: Keeps loss curves, GPU-hours and sample grids for every run.
+    tech: Weights & Biases
+    talksTo: []
+    kind: external
+flow:
+  - component: claims
+    text: >-
+      fixes the target for each paper first, for example "FlashAttention ≥ 2× faster at length 4,096, memory linear
+      in length".
+  - component: harness
+    text: loads the experiment's config, sets the seed and starts logging to the run tracker.
+  - component: translate
+    text: >-
+      trains both models with learning-rate **warm-up** and reports BLEU with training time, aiming within 3 BLEU of a
+      published small model.
+  - component: attention
+    text: >-
+      warms up, calls `torch.cuda.synchronize()` around each timed call, and records time and peak memory at head
+      dimensions 64 and 128.
+  - component: ddpm
+    text: trains on CIFAR-10, sampling from the **EMA** weights at three checkpoints.
+  - component: eval
+    text: >-
+      scores with detokenised sacreBLEU and FID on 10,000 samples against the training set, and writes `results.json`.
+  - component: report
+    text: puts each paper's number next to yours and says what matched, what did not, and why.
+interface:
+  lang: json
+  code: |
+    {
+      "paper": "flashattention",
+      "claim": "≥ 2× faster fwd+bwd at seq 4096",
+      "scale": "1 GPU, head dim 64 and 128",
+      "expected": "memory linear in seq length",
+      "result": {
+        "speedup_4096": null,
+        "peak_gb": { "naive": null, "flash": null }
+      },
+      "matched": null
+    }
+decisions:
+  - choice: Claims written before any run
+    instead: Deciding what to compare afterwards
+    why: >-
+      Writing the target first stops you from picking whichever number looks best. It is the habit every later report
+      in the plan depends on.
+  - choice: One shared harness
+    instead: Three separate repositories
+    why: >-
+      Config, seeding, logging and results files are the same for all three; sharing them means every number in the
+      report comes from the same scripts.
+  - choice: FID on 10,000 samples
+    instead: FID on 50,000 like the paper
+    why: >-
+      It fits the 13 h DDPM budget on one 24 GB GPU. The write-up must say the sample count differs, because FID
+      shifts with it; 50,000 is the stretch.
+watchOut: >-
+  Comparing your number with the paper's under a different measurement (tokenised against detokenised BLEU, FID on a
+  different sample count, timings without synchronisation) makes the gap meaningless. Match the measurement before
+  you compare the result.

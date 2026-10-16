@@ -1,0 +1,54 @@
+overview: >-
+  A device-wide prefix sum done in a single pass with decoupled look-back: each tile publishes its local total with a
+  status flag, and later tiles read earlier flags to get their offset without waiting for a second kernel. It is
+  compared with a three-kernel scan and with thrust, and stress tested for memory-ordering bugs.
+learn:
+  - name: Parallel prefix scan
+    ref: pmpp-book
+  - name: Decoupled look-back
+  - name: Memory fences
+    ref: cuda-guide
+components:
+  - id: baseline
+    name: Three-kernel scan
+    role: Scans tiles, scans tile totals, then adds offsets back.
+    tech: CUDA C++
+    talksTo: [stress]
+    kind: offline
+  - id: tiles
+    name: Tile scan
+    role: Each block scans its tile in shared memory and publishes an aggregate.
+    tech: CUDA C++
+    talksTo: [flags]
+    kind: core
+  - id: flags
+    name: Status flags
+    role: One word per tile holding a state (none, aggregate, inclusive) and a value.
+    tech: Global memory · atomics
+    talksTo: [stress]
+    kind: core
+  - id: stress
+    name: Stress tester
+    role: Runs 1,000 random sizes up to 2^28 against a CPU scan and times thrust.
+    tech: C++ · thrust
+    talksTo: []
+    kind: core
+flow:
+  - component: tiles
+    text: takes a tile id from an atomic counter, so tiles start in order, and scans its elements locally.
+  - component: flags
+    text: get the tile's aggregate with state **A**, written after `__threadfence()` so the value is visible before the flag.
+  - component: tiles
+    text: looks back over earlier flags, summing aggregates until one shows state **P** (inclusive prefix), then publishes its own inclusive prefix and adds the offset.
+  - component: stress
+    text: compares every result with a CPU scan over 1,000 random sizes and reports GB/s against thrust (target within 2x).
+decisions:
+  - choice: Atomic tile counter for ordering
+    instead: Using blockIdx as the tile id
+    why: >-
+      Blocks are not guaranteed to start in blockIdx order, so a tile could wait on a predecessor that has not been
+      scheduled and deadlock. An atomic counter hands out ids in start order.
+watchOut: >-
+  Writing the value and the flag without a fence lets another block see the flag before the value, giving wrong
+  sums once in thousands of runs. Pack value and flag into one 64-bit word, or fence between them, and run the stress
+  test many times.

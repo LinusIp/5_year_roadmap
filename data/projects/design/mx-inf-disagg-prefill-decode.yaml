@@ -1,0 +1,114 @@
+overview: >-
+  A discrete-event simulator (one that jumps from event to event instead of ticking a clock) that answers Atlas
+  Docs' question: does splitting prefill and decode onto separate GPU pools stop 12k-token prompts from ruining
+  everyone's inter-token latency, and how fast must the KV-cache link be? Prefill and decode times come from real
+  single-GPU measurements, and the same traces run through colocated, chunked-prefill and disaggregated policies.
+  The simulator is first checked against a real colocated run to within 15%.
+learn:
+  - name: Prefill vs decode
+    ref: kipply-inference-arithmetic
+  - name: Inter-token latency
+    ref: databricks-inference-best-practices
+  - name: Chunked prefill
+    ref: vllm-docs
+  - name: KV cache size
+    ref: transformer-math-101
+  - name: Discrete-event simulation
+  - name: Disaggregated serving
+    ref: nvidia-dynamo
+stats:
+  - value: ≤ 15%
+    label: simulator error vs a real run
+  - value: ≤ 60 ms
+    label: p99 ITL at 8 req/s
+  - value: 12k / 200
+    label: prompt / answer tokens
+components:
+  - id: calib
+    name: Calibration bench
+    role: Measures prefill time by prompt length and decode step time by batch size on one real GPU.
+    tech: vLLM · 1 GPU
+    talksTo: [sim]
+    kind: offline
+  - id: trace
+    name: Trace generator
+    role: Emits arrivals at 8 req/s with lognormal prompt lengths around 12k and about 200 output tokens.
+    tech: Python · numpy
+    talksTo: [policy]
+    kind: core
+  - id: policy
+    name: Policy
+    role: Decides where a request runs, as colocated, chunked prefill or split prefill and decode pools.
+    tech: Python
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Event simulator
+    role: Advances GPUs, queues and batches through time using the calibrated step costs.
+    tech: SimPy
+    talksTo: [kvlink]
+    kind: core
+  - id: kvlink
+    name: KV transfer model
+    role: Charges the time to move a request's KV cache between pools at a given link speed.
+    tech: Python
+    talksTo: [compare]
+    kind: core
+  - id: compare
+    name: Policy comparison
+    role: Reports p99 ITL, TTFT, goodput and per-pool utilisation, and sweeps pool ratios and link speeds.
+    tech: pandas · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: trace
+    text: draws a request with a `12,000`-token prompt and a 200-token answer, arriving in a stream at 8 req/s.
+  - component: policy
+    text: >-
+      under **disaggregated** sends it to a prefill pool; under colocated or chunked prefill it shares a GPU with
+      requests that are already decoding.
+  - component: sim
+    text: >-
+      charges prefill time from the calibration table; colocated, every decode step queued behind that prefill waits
+      for it, which is the ITL spike Atlas Docs sees.
+  - component: kvlink
+    text: >-
+      moves `2 × 32 × 8 × 128 × 2 bytes = 128 KiB` per token for an 8B model, so **1.5 GiB** per request; at 25 GB/s
+      that is about 60 ms, and it is not assumed to overlap with compute.
+  - component: sim
+    text: runs the 200 decode steps on the decode pool, batched with other requests, with no long prefill in the way.
+  - component: compare
+    text: >-
+      repeats the trace under each policy and pool ratio, and finds the link speed below which disaggregation stops
+      beating chunked prefill: the **break-even bandwidth**.
+interface:
+  lang: python
+  code: |
+    res = simulate(
+        trace=lognormal_trace(rate=8.0,
+            prompt_median=12_000, out=200),
+        policy=Disaggregated(prefill=3,
+            decode=1, link_gb_s=25),
+        timings="calib/24gb-8b.json",
+        seed=7)
+    res.p99_itl_ms, res.ttft_p50_s
+    res.pool_util   # {"prefill": .., "decode": ..}
+decisions:
+  - choice: Calibrated simulator, not a real cluster
+    instead: Rent a multi-GPU cluster and measure
+    why: >-
+      The budget is one GPU, and a simulator sweeps dozens of pool ratios and link speeds in minutes. It is trusted
+      only after it predicts a real colocated run within 15%.
+  - choice: Chunked prefill as the baseline to beat
+    instead: Compare against plain colocated only
+    why: >-
+      Chunked prefill splits a 12k prompt into pieces mixed with decode steps and needs no KV transfer. If it already
+      reaches p99 ITL ≤ 60 ms at 8 req/s, the extra pools are not worth it.
+  - choice: Calibrate across the full prompt range
+    instead: Measure a few short prompts and extrapolate
+    why: >-
+      Attention cost grows faster than linearly with length, so 2k timings underestimate 12k prefills. Measure up to
+      the longest prompt in the trace.
+watchOut: >-
+  Don't assume the KV transfer hides perfectly behind compute. Charge it in full first, then add overlap only as far
+  as a measurement supports it, or the break-even bandwidth comes out far too low.

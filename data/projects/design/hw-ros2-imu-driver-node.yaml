@@ -1,0 +1,71 @@
+overview: >-
+  A ROS 2 node on a Raspberry Pi that reads an I2C IMU and publishes `sensor_msgs/Imu` at 100 Hz, with gyro bias
+  removed by a start-up calibration, covariances filled from measured noise, and a static transform that tells the rest
+  of the robot where the IMU sits. The topic rate must stay within 2% of 100 Hz and gyro bias under 0.1 deg/s.
+learn:
+  - name: ROS 2 nodes and topics
+    ref: ros2-tutorials
+  - name: The Imu message
+  - name: TF frames
+    ref: ros2-tutorials
+  - name: Bias calibration
+components:
+  - id: imu
+    name: I2C IMU
+    role: The sensor breakout wired to the Pi's I2C bus.
+    tech: IMU breakout
+    talksTo: [calib]
+    kind: external
+  - id: calib
+    name: Bias calibration
+    role: Measures gyro bias and noise at start-up while the robot is still.
+    tech: rclpy / rclcpp
+    talksTo: [node]
+    kind: core
+  - id: node
+    name: Driver node
+    role: Reads the IMU on a timer, corrects and converts it, and publishes Imu.
+    tech: rclpy / rclcpp
+    talksTo: [tf]
+    kind: core
+  - id: tf
+    name: Static TF
+    role: Publishes where imu_link sits relative to base_link.
+    tech: tf2_ros
+    talksTo: []
+    kind: core
+flow:
+  - component: calib
+    text: averages 500 gyro samples (5 s) with the robot still for the bias, and puts the measured variances on the covariance diagonals.
+  - component: node
+    text: reads accel and gyro in one I2C burst every 10 ms, subtracts the bias, converts to rad/s and m/s² in ROS axes (x forward, y left, z up), and stamps the time of the read.
+  - component: tf
+    text: publishes `base_link → imu_link` with the mounting offset and rotation, matching the message's `frame_id`.
+  - component: node
+    text: is checked with `ros2 topic hz` for the **2% rate target** and with a 10-minute still log for the bias target.
+interface:
+  lang: python
+  code: |
+    class ImuNode(Node):
+        def __init__(self):
+            super().__init__("imu_driver")
+            self.declare_parameter("frame_id", "imu_link")
+            self.pub = self.create_publisher(
+                Imu, "imu/data", qos_profile_sensor_data)
+            self.create_timer(0.01, self.tick)  # 100 Hz
+
+        def tick(self):
+            msg = Imu()
+            now = self.get_clock().now()
+            msg.header.stamp = now.to_msg()
+            msg.header.frame_id = self.frame_id
+            msg.orientation_covariance[0] = -1.0  # none
+decisions:
+  - choice: rclpy first, rclcpp if needed
+    instead: Write the node in rclcpp from the start
+    why: >-
+      One I2C read and one publish per 10 ms tick is well within what rclpy handles on a Pi. Measure the rate with
+      `ros2 topic hz`, and port to rclcpp only if it drifts beyond 2%.
+watchOut: >-
+  The chip's axes often differ from ROS's x-forward, y-left, z-up, so turning left shows a negative yaw rate. Fix it in
+  the driver or the TF, and test by turning the board by hand while watching rviz.

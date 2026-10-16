@@ -1,0 +1,110 @@
+overview: >-
+  Monitoring for Relay Support's LLM platform that measures what customers feel: how long until the first token, how
+  smoothly the rest streams, and whether a stream stalls. Middleware wraps every streaming response and records these
+  as histograms; SLOs with error budgets sit on top, and burn-rate alerts page within 2 minutes of a real regression
+  but stay quiet for a clean day. Injected incidents prove both.
+learn:
+  - name: SLIs, SLOs and error budgets
+    ref: google-sre-book
+  - name: Burn-rate alerts
+    ref: google-sre-book
+  - name: Prometheus histograms
+    ref: prometheus-docs
+  - name: Label cardinality
+    ref: prometheus-docs
+  - name: Streaming latency metrics
+    ref: databricks-inference-best-practices
+stats:
+  - value: ≤ 2 min
+    label: to alert on a 3× TTFT regression
+  - value: ≤ 1%
+    label: throughput lost to telemetry
+  - value: ≤ 1
+    label: false alert per 24 h
+components:
+  - id: clients
+    name: Load and incidents
+    role: Sends synthetic chat traffic and injects incidents such as slow prefill or stalled streams.
+    tech: Python · asyncio
+    talksTo: [middleware]
+    kind: external
+  - id: middleware
+    name: Instrumentation
+    role: Times each streamed response and records TTFT, inter-token gaps, stalls, queue time and tokens/s.
+    tech: Python · OpenTelemetry
+    talksTo: [engine, prom]
+    kind: core
+  - id: engine
+    name: Model server
+    role: Generates the streamed answer.
+    tech: vLLM
+    talksTo: []
+    kind: external
+  - id: prom
+    name: Prometheus
+    role: Scrapes histograms every 15 s and computes the bad-event ratio per window.
+    tech: Prometheus
+    talksTo: [alerts, dash]
+    kind: core
+  - id: alerts
+    name: Burn-rate alerts
+    role: Pages when the error budget burns fast in both a short and a long window.
+    tech: Prometheus rules · Alertmanager
+    talksTo: []
+    kind: core
+  - id: dash
+    name: Dashboards
+    role: Shows engineers percentiles and stalls, and managers SLO attainment and budget left.
+    tech: Grafana
+    talksTo: []
+    kind: offline
+flow:
+  - component: middleware
+    text: >-
+      starts a timer when the request arrives, stops TTFT at the first streamed token, and counts a **stall** when two
+      tokens are more than `2 s` apart.
+  - component: middleware
+    text: >-
+      records into histograms labelled only by model and route, never by user or request id, so the number of series
+      stays small.
+  - component: prom
+    text: >-
+      computes the share of requests with `TTFT > 1.5 s` over 1-minute and 5-minute windows against an SLO of 99%
+      good, which leaves a **1% error budget**.
+  - component: alerts
+    text: >-
+      pages when both windows burn the budget over 14.4× too fast; a 3× TTFT regression makes nearly every request
+      bad, so this fires in about a minute.
+  - component: prom
+    text: feeds the **dashboards** with budget left this month, per-route percentiles and stall counts.
+interface:
+  lang: yaml
+  code: |
+    - record: ttft:bad_ratio:5m
+      expr: 1 - sum(rate(llm_ttft_bucket{le="1.5"}[5m]))
+              / sum(rate(llm_ttft_count[5m]))
+    # same rule with [1m] gives ttft:bad_ratio:1m
+
+    - alert: TTFTFastBurn
+      expr: ttft:bad_ratio:5m > 0.144
+        and ttft:bad_ratio:1m > 0.144
+      labels: {severity: page}
+decisions:
+  - choice: Per-token SLIs, not HTTP latency
+    instead: Use request duration from the HTTP dashboards
+    why: >-
+      A streaming response's HTTP time is the whole answer, which hides a slow first token and stalls in the middle.
+      TTFT and stall counts match what Relay's customers notice.
+  - choice: Burn-rate alerts with two windows
+    instead: A fixed threshold on p99 TTFT
+    why: >-
+      A fixed threshold is either noisy or slow and is not tied to the budget. Two windows make the alert both fast
+      (under 2 minutes) and robust to a brief blip, which keeps false alerts ≤ 1 a day.
+  - choice: Histograms, not averages
+    instead: Export a mean latency gauge
+    why: >-
+      An average of 400 ms can hide 3% of requests stalling for 10 s. Histograms keep the distribution, so
+      percentiles and bad-event ratios can be computed later.
+watchOut: >-
+  High-cardinality labels such as user id or prompt hash multiply the number of time series until Prometheus slows
+  down or runs out of memory. Keep labels to a short fixed list and put per-request detail in traces instead.

@@ -1,0 +1,120 @@
+overview: >-
+  A differential-drive robot (two driven wheels, steered by their speed difference) simulated in your own engine,
+  with wheel slip, noisy sensors and a path-following controller in the loop. The plant, either the engine or a real
+  robot, publishes sensor topics and takes wheel commands through one ROS 2 interface. An extended Kalman filter (EKF,
+  a filter that blends a motion model with noisy measurements) turns encoders and IMU into a pose, and a pure-pursuit
+  controller tracks the path from that estimate; swapping the plant changes a launch argument, not the controller.
+learn:
+  - name: Wheel slip and friction circle
+    ref: modern-robotics
+  - name: Sensor noise models
+  - name: Extended Kalman filter
+  - name: Pure-pursuit tracking
+  - name: ROS 2 topics and launch
+    ref: ros2-tutorials
+stats:
+  - value: < 5 cm
+    label: RMS cross-track at 0.5 m/s
+  - value: 3 %
+    label: max acceleration against μg
+  - value: 2 %
+    label: turning radius at low speed
+components:
+  - id: path
+    name: Path
+    role: Gives the reference path, such as a figure-eight, as a list of waypoints.
+    tech: YAML waypoints
+    talksTo: [controller]
+    kind: external
+  - id: controller
+    name: Pure pursuit
+    role: Picks a lookahead point on the path from the estimated pose and publishes wheel commands.
+    tech: C++20 · rclcpp
+    talksTo: [plant, robot]
+    kind: core
+  - id: plant
+    name: Engine plant
+    role: Applies motor torque limits and the slip model, then integrates the chassis on the multibody core.
+    tech: C++20 engine · Eigen
+    talksTo: [sensors]
+    kind: core
+  - id: sensors
+    name: Sensor models
+    role: Produces IMU with bias and noise, quantised encoders and a 2D range scan with dropouts.
+    tech: C++20 · rclcpp
+    talksTo: [ekf, analysis]
+    kind: core
+  - id: robot
+    name: Real robot
+    role: Takes the same topics as the engine plant, first as a stub node and later as hardware.
+    tech: ROS 2 node
+    talksTo: [ekf]
+    kind: external
+  - id: ekf
+    name: State estimator
+    role: Fuses encoder odometry and IMU, optionally range data, into a pose estimate.
+    tech: C++20 · Eigen
+    talksTo: [controller, analysis]
+    kind: core
+  - id: analysis
+    name: Analysis scripts
+    role: Compares estimated and true pose, cross-track error and sensor statistics against their settings.
+    tech: Python · RViz
+    talksTo: []
+    kind: offline
+flow:
+  - component: controller
+    text: >-
+      takes the latest estimated `/pose`, finds the lookahead point on the path and publishes `/cmd_vel` at the
+      control rate.
+  - component: plant
+    text: >-
+      turns the command into wheel torques within the motor limits and applies **linear slip up to the friction
+      circle**, kept finite at standstill.
+  - component: plant
+    text: integrates the chassis on the multibody core and keeps the true pose for later comparison.
+  - component: sensors
+    text: >-
+      sample `/imu`, `/encoders` and `/scan` at their own rates, with noise scaled to each rate so the result does
+      not depend on the time step.
+  - component: ekf
+    text: >-
+      predicts from the encoder odometry, corrects with the IMU, and publishes the pose in the same frame and yaw
+      convention as the plant.
+  - component: controller
+    text: >-
+      closes the loop on that estimate, never the true pose; the **analysis** scripts compute RMS cross-track error at
+      0.25, 0.5 and 1 m/s.
+interface:
+  lang: text
+  code: |
+    # plant (sim or real robot) -> estimator
+    /imu       sensor_msgs/Imu
+    /encoders  wheel ticks, left and right
+    /scan      sensor_msgs/LaserScan
+    # estimator -> controller
+    /pose      nav_msgs/Odometry
+    # controller -> plant
+    /cmd_vel   geometry_msgs/Twist
+
+    ros2 launch sim bringup.launch.py plant:=engine
+    ros2 launch sim bringup.launch.py plant:=robot
+decisions:
+  - choice: One ROS 2 interface for both plants
+    instead: Calling the simulator directly from the controller
+    why: >-
+      The same controller binary must run against a stub robot with no code change, and topics make that a launch
+      argument. The cost is a little message latency, which the control rate absorbs.
+  - choice: Linear slip up to a friction circle
+    instead: A Pacejka tyre model
+    why: >-
+      A differential-drive robot at 0.25 to 1 m/s needs only the friction limit that the μg check tests. Pacejka
+      belongs to the stretch car with suspension.
+  - choice: Tune on the estimated pose
+    instead: Tuning on the true pose from the simulator
+    why: >-
+      A real robot has no true pose, and the 5 cm target is set on the estimate. Use the true pose only to measure EKF
+      error.
+watchOut: >-
+  Slip models that divide by wheel speed blow up at standstill. Use a small floor on the speed in the slip ratio, and
+  test a start from rest before any path tracking.

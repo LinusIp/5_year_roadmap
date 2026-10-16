@@ -1,0 +1,111 @@
+overview: >-
+  One OpenID Connect login for Cobalt Works' nine internal apps, written without an identity library. An app sends
+  the browser to the authorization endpoint, which signs the user in once with a session cookie and returns a
+  short-lived one-time code. The app trades that code plus its PKCE verifier (a secret that proves it is the same
+  app that started the login) for ID and access tokens signed with keys that rotate on a schedule.
+learn:
+  - name: Authorization code flow
+  - name: PKCE
+  - name: JWT signing and JWKS
+  - name: Key rotation overlap
+  - name: Open redirect risks
+stats:
+  - value: < 80 ms
+    label: p99 token endpoint at 300/s
+  - value: 25 of 25
+    label: protocol edge cases
+  - value: "0"
+    label: failed validations during rotation
+components:
+  - id: rp
+    name: Internal app
+    role: Starts login, receives the code and validates tokens with the published keys.
+    tech: Any of 9 apps
+    talksTo: [authz, token]
+    kind: external
+  - id: registry
+    name: Client registry
+    role: Client ids, secrets and exact redirect URIs for the nine apps.
+    tech: PostgreSQL
+    talksTo: [authz]
+    kind: core
+  - id: session
+    name: Session manager
+    role: Signs the user in once and keeps an SSO session cookie for all apps.
+    tech: Go · PostgreSQL
+    talksTo: [authz]
+    kind: core
+  - id: authz
+    name: Authorize endpoint
+    role: Checks client, redirect URI, state and PKCE challenge, then issues a one-time code.
+    tech: Go · net/http
+    talksTo: [token]
+    kind: core
+  - id: token
+    name: Token endpoint
+    role: Swaps a code and verifier for ID and access tokens and serves userinfo.
+    tech: Go
+    talksTo: [keys]
+    kind: core
+  - id: keys
+    name: Key manager
+    role: Creates a new signing key every 30 days and publishes old and new keys at the JWKS endpoint.
+    tech: Go · RS256
+    talksTo: []
+    kind: core
+  - id: tests
+    name: Conformance tests
+    role: Run the 25 edge cases, from code replay to redirect tricks and clock skew.
+    tech: Go tests · local TLS
+    talksTo: [authz, token]
+    kind: offline
+flow:
+  - component: authz
+    text: >-
+      receives `GET /authorize` from the wiki app with `client_id`, `redirect_uri`, `state`, `nonce` and a
+      `code_challenge`.
+  - component: registry
+    text: confirms the redirect URI matches a registered one **exactly**, character for character; anything else gets an error page, never a redirect.
+  - component: session
+    text: finds the SSO cookie from this morning's login, so the user is not asked again; first-party apps skip the consent screen.
+  - component: authz
+    text: stores a 60-second code bound to client, redirect URI and challenge, and redirects back with `code` and `state`.
+  - component: token
+    text: >-
+      receives `POST /token`, checks `SHA256(code_verifier)` equals the challenge, marks the code used and rejects
+      any second use.
+  - component: keys
+    text: sign the ID token with the current key and its `kid`; apps fetch `/jwks`, which still lists the previous key during the overlap.
+interface:
+  lang: http
+  code: |
+    POST /token
+    Content-Type: application/x-www-form-urlencoded
+
+    grant_type=authorization_code&code=SplxlO…
+    &redirect_uri=https%3A%2F%2Fwiki.cobalt.internal
+    &client_id=wiki&code_verifier=dBjftJeZ4CVP…
+
+    200 OK
+    { "id_token": "eyJraWQiOiJrMjAyNi0xMCJ9…",
+      "access_token": "…", "token_type": "Bearer",
+      "expires_in": 300 }
+decisions:
+  - choice: PKCE for every client
+    instead: Client secrets only
+    why: >-
+      Some of the nine apps are single-page apps that cannot keep a secret. PKCE stops a stolen code being used, and
+      using it everywhere means one code path to test.
+  - choice: Exact redirect URI match
+    instead: Prefix or wildcard matching
+    why: >-
+      Loose matching is the classic open redirect that leaks codes to an attacker's page. Nine apps make listing
+      every URI easy.
+  - choice: Publish old and new keys together
+    instead: Swap keys at a fixed moment
+    why: >-
+      Apps cache the key set, and tokens signed just before a swap are still in use. Keeping the old key for a full
+      token lifetime gives zero failed validations.
+watchOut: >-
+  A code that can be redeemed twice lets an intercepted code be replayed. Mark it used in the same transaction that
+  issues tokens, and test two parallel redemptions.

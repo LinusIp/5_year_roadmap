@@ -1,0 +1,102 @@
+overview: >-
+  A single-machine streaming pipeline that keeps fraud features fresh. Card transactions are appended to an event
+  log; an aggregator reads them in order, updates sliding-window counts such as transactions per card in the last 5
+  minutes, and writes them to Redis with a time-to-live (TTL, so stale keys expire). The same aggregation code
+  replays the log to build point-in-time correct training sets, and a parity checker proves online and offline
+  values agree.
+learn:
+  - name: Windowed aggregation
+    ref: ddia
+  - name: Event time vs processing time
+  - name: Point-in-time joins
+  - name: Train/serve skew
+  - name: Feature stores
+stats:
+  - value: 5,000
+    label: events/s on one machine
+  - value: < 1 s
+    label: feature freshness
+  - value: < 0.1%
+    label: online/offline mismatch
+components:
+  - id: generator
+    name: Event generator
+    role: Emits synthetic or replayed IEEE-CIS transactions at a set rate.
+    tech: Python
+    talksTo: [log]
+    kind: external
+  - id: log
+    name: Event log
+    role: Append-only, ordered file segments that every reader consumes by offset.
+    tech: Segmented files
+    talksTo: [aggregator, replay]
+    kind: core
+  - id: aggregator
+    name: Windowed aggregator
+    role: Updates per-card counts and sums over 5 min, 1 h and 24 h windows by event time.
+    tech: Rust or Python
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Online store
+    role: Holds the latest feature values per card with a TTL for the scorer to read.
+    tech: Redis
+    talksTo: [parity]
+    kind: core
+  - id: replay
+    name: Replay tool
+    role: Runs the same aggregation over history and records each feature as of each transaction time.
+    tech: Same code · pandas
+    talksTo: [parity]
+    kind: offline
+  - id: parity
+    name: Parity checker
+    role: Compares online snapshots with replayed values for the same card and time.
+    tech: pandas
+    talksTo: []
+    kind: offline
+flow:
+  - component: log
+    text: appends each transaction with its `event_time`, `card_id` and `amount`, and gives it an offset.
+  - component: aggregator
+    text: >-
+      reads the next offset, drops events older than the window from each card's buckets, adds this one, and allows
+      a 30 s **watermark** for late events.
+  - component: store
+    text: writes `txn_count_5m`, `amount_sum_1h` and `txn_count_24h` under `card:{id}` with a 25 h TTL, under 1 s after the event.
+  - component: replay
+    text: re-reads the log offline with the same function and stores each card's features **as of** each transaction for training.
+  - component: parity
+    text: samples 10,000 online snapshots, finds the replayed value at the same time and fails if over 0.1% differ.
+interface:
+  lang: rust
+  code: |
+    pub struct Event {
+        pub card_id: u64,
+        pub amount_cents: i64,
+        pub event_time_ms: i64,
+    }
+
+    pub trait Aggregator {
+        /// Same code online and in replay.
+        fn apply(&mut self, e: &Event) -> Features;
+    }
+    // Features { txn_count_5m: 3,
+    //   amount_sum_1h: 41250, txn_count_24h: 9 }
+decisions:
+  - choice: One aggregation function for both paths
+    instead: SQL for training, stream code for serving
+    why: >-
+      Two implementations drift on window edges and time zones, and the 0.1% mismatch target would be hard to hit.
+      Sharing the code makes parity a test, not a hope.
+  - choice: File-based log on one node
+    instead: A Kafka cluster
+    why: >-
+      5,000 events a second is a few hundred KB a second, well within one disk and one process. Move to Kafka when a
+      second consumer machine or retention policies are needed.
+  - choice: Event-time windows with a watermark
+    instead: Processing-time windows
+    why: Replay runs much faster than real time, so only event time gives the same answer online and offline.
+watchOut: >-
+  Training-serving skew hides in time definitions: whether the current transaction is counted, and how late events
+  are handled. Fix both rules in one place and test them with deliberately late and duplicate events.

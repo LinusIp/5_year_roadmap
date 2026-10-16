@@ -1,0 +1,115 @@
+overview: >-
+  A change-data-capture pipeline that moves Stockline's order data into DuckDB within seconds instead of overnight.
+  It reads PostgreSQL's write-ahead log through **logical decoding** (the database's own stream of row changes, in
+  commit order), buffers the events durably, and applies them in batches merged by primary key. The applier saves
+  the log position in the same transaction as the data, so after a crash it resumes exactly where it stopped.
+learn:
+  - name: Change data capture
+    ref: ddia
+  - name: Logical decoding
+  - name: Log sequence numbers
+  - name: Idempotent upserts
+    ref: de-zoomcamp
+  - name: Snapshot to stream handover
+  - name: Source to target verification
+stats:
+  - value: < 30 s
+    label: p99 lag at 3,000 changes/s
+  - value: "0"
+    label: differences after 1M changes and a crash
+  - value: < 30 min
+    label: 50M-row initial snapshot
+components:
+  - id: source
+    name: App database
+    role: The orders database; a replication slot keeps its change log until the reader confirms it.
+    tech: PostgreSQL · pgoutput
+    talksTo: [reader, snapshotter]
+    kind: external
+  - id: snapshotter
+    name: Snapshotter
+    role: Copies every table once at the slot's starting position, in parallel chunks by primary key.
+    tech: Go · COPY
+    talksTo: [applier]
+    kind: core
+  - id: reader
+    name: Log reader
+    role: Streams decoded changes and turns them into ordered events tagged with their LSN.
+    tech: Go · pglogrepl
+    talksTo: [buffer, schema]
+    kind: core
+  - id: buffer
+    name: Event buffer
+    role: Durable append-only files of events, so the applier can fall behind or crash without losing changes.
+    tech: Segment files on disk
+    talksTo: [applier]
+    kind: core
+  - id: schema
+    name: Schema tracker
+    role: Notices new columns in relation messages and adds them to the warehouse table before the next batch.
+    tech: Go
+    talksTo: [applier]
+    kind: core
+  - id: applier
+    name: Batch applier
+    role: Keeps the last change per key in a batch, merges it into DuckDB and saves the LSN in the same transaction.
+    tech: Go · DuckDB
+    talksTo: [warehouse]
+    kind: core
+  - id: warehouse
+    name: Warehouse
+    role: Analyst-facing tables plus a `_cdc_position` table holding the last applied LSN.
+    tech: DuckDB
+    talksTo: []
+    kind: external
+  - id: verifier
+    name: Verifier
+    role: Compares row counts and per-chunk checksums between source and warehouse.
+    tech: Go · SQL
+    talksTo: [source, warehouse]
+    kind: offline
+flow:
+  - component: snapshotter
+    text: >-
+      creates the replication slot, which returns a consistent snapshot and its LSN, then copies the 50M rows under
+      that snapshot, so **no change falls in a gap** between copy and stream.
+  - component: reader
+    text: starts streaming from that same LSN and emits one event per row change with `op`, `table`, `key`, `after` and `lsn`.
+  - component: buffer
+    text: appends events to disk and fsyncs every 100 ms; only then does the reader confirm the LSN back to PostgreSQL.
+  - component: schema
+    text: sees an added column in the relation message and runs `ALTER TABLE … ADD COLUMN` in DuckDB before rows that carry it are applied.
+  - component: applier
+    text: >-
+      collapses a batch of up to 5,000 events to the latest per key, deletes old rows for those keys, inserts the new
+      ones and writes `last_lsn`, all in **one transaction**; events at or below `last_lsn` are skipped on restart.
+interface:
+  lang: json
+  code: |
+    { "lsn": "0/1A3F9C8",
+      "op": "update",
+      "table": "orders",
+      "key": { "id": 88213 },
+      "before_key": { "id": 88213 },
+      "after": { "id": 88213, "status": "shipped",
+                 "total": 129.50 },
+      "commit_ts": "2026-03-02T09:14:03Z" }
+decisions:
+  - choice: Log-based capture with a replication slot
+    instead: Polling with `updated_at` timestamps
+    why: >-
+      Polling misses deletes and rows updated twice between polls, and the 0-difference target rules that out. The
+      log gives every change in commit order.
+  - choice: LSN saved in the same transaction as the data
+    instead: Commit the data, then save the position separately
+    why: >-
+      A crash between the two steps would replay or skip a batch. Keeping both in one DuckDB transaction makes the
+      mid-run crash test pass.
+  - choice: Delete then insert per key in a batch
+    instead: Apply every event one at a time
+    why: >-
+      3,000 changes/s one by one would exceed the 30 s lag budget on DuckDB. Merging by key cuts writes and makes
+      the apply idempotent.
+watchOut: >-
+  An update that changes the primary key looks like an update but must delete the old key. Use `before_key` and
+  test it, or the warehouse keeps ghost rows.

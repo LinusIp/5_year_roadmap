@@ -1,0 +1,118 @@
+overview: >-
+  A summarisation pipeline that brings Brief.ly's cost for a 200-page contract from $0.85 to $0.40 or less on one
+  24 GB GPU. It extracts the text, drops boilerplate with a cheap extractive filter, splits at clause boundaries, and
+  summarises all chunks in one batch with a shared prompt prefix the engine caches; partial summaries are then merged
+  in a map-reduce tree. Every change is scored on cost and on recall of a clause checklist, so savings never hide
+  missing clauses.
+learn:
+  - name: Map-reduce summarisation
+    ref: llm-zoomcamp
+  - name: Prefix caching
+    ref: vllm-docs
+  - name: Continuous batching
+    ref: batching-effects-gpt
+  - name: Extractive filtering
+  - name: Cost per document
+  - name: Judge-model bias
+stats:
+  - value: ≤ $0.40
+    label: cost per 200-page document
+  - value: ≥ 95%
+    label: clause recall of baseline
+  - value: ≤ 90 s
+    label: median time, 200 pages
+components:
+  - id: extractor
+    name: PDF extractor
+    role: Pulls text with page and heading positions out of each PDF.
+    tech: PyMuPDF
+    talksTo: [filter]
+    kind: core
+  - id: filter
+    name: Boilerplate filter
+    role: Drops repeated headers, signature blocks and standard notices, scored by how often a line repeats.
+    tech: Python · pandas
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Chunk scheduler
+    role: Cuts the kept text at clause and section boundaries and submits all chunks together.
+    tech: Python
+    talksTo: [llm]
+    kind: core
+  - id: llm
+    name: 8B model
+    role: Summarises each chunk, reusing the cached instruction prefix.
+    tech: vLLM · 24 GB GPU
+    talksTo: [reducer]
+    kind: external
+  - id: reducer
+    name: Reducer
+    role: Merges chunk summaries in groups until one summary fits, keeping every clause it was handed.
+    tech: Python · vLLM
+    talksTo: [ledger]
+    kind: core
+  - id: ledger
+    name: Cost ledger
+    role: Records tokens, GPU seconds and CPU seconds per document and turns them into dollars.
+    tech: SQLite
+    talksTo: [evaluator]
+    kind: core
+  - id: evaluator
+    name: Evaluator
+    role: Checks clause recall against annotated CUAD clauses, adds a judge score and draws the Pareto chart.
+    tech: Python · matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: extractor
+    text: turns a 200-page contract into about 100k tokens of text with section headings kept.
+  - component: filter
+    text: >-
+      removes lines that repeat across pages or match known boilerplate, often a large share of the tokens, at
+      almost no cost because it runs on the CPU.
+  - component: scheduler
+    text: >-
+      cuts the rest into chunks of up to `6,000` tokens at clause headings, so no clause is split, and sends them all
+      at once.
+  - component: llm
+    text: >-
+      runs the chunks as one **batch**, and the shared instruction prefix is computed once and cached instead of for
+      every chunk.
+  - component: reducer
+    text: merges the partial summaries in groups of 4 until one remains under the 32k context limit.
+  - component: ledger
+    text: >-
+      adds GPU and CPU time at the hourly price to give `$/doc`; the **evaluator** checks clause recall against the
+      baseline on the same contracts.
+interface:
+  lang: shell
+  code: |
+    $ briefly summarise contract.pdf \
+        --chunk 6000 --batch all --reduce 4
+
+    pages 212   tokens 104,300
+    kept  71,800  (boilerplate -31%)
+    map   13 chunks, 1 batch, prefix cached
+    reduce 2 levels
+    time 68 s    cost $0.37   (baseline $0.85)
+    clause recall 41/42 of baseline
+decisions:
+  - choice: Map-reduce in one batch
+    instead: Feed 32k windows one after another
+    why: >-
+      Sequential windows leave the GPU waiting on one long request at a time. Thirteen independent chunks fill a
+      batch, which is where most of the saving comes from.
+  - choice: Split at clause boundaries
+    instead: Fixed 6,000-token windows
+    why: >-
+      A clause cut in half is often summarised by neither chunk, and clause recall is the metric lawyers care about.
+      Headings in contracts make boundaries easy to find.
+  - choice: Cheap extractive filter before the model
+    instead: Ask the LLM to skip boilerplate
+    why: >-
+      Every token the model reads costs money, so boilerplate should be dropped before it. Check recall after each
+      filter rule, because a rule that is too eager deletes real clauses.
+watchOut: >-
+  A judge model tends to prefer longer summaries, so a cheaper pipeline can look worse or better for the wrong
+  reason. Make the clause checklist the main score and use the judge only as a second opinion.

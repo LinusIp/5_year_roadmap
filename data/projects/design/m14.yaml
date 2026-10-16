@@ -1,0 +1,132 @@
+overview: >-
+  Two CS:APP labs done properly and explained; the shell lab is covered by project m07 and the proxy lab is the
+  stretch. The allocator manages a heap of blocks, each with a header and a footer holding its size and an allocated
+  bit (boundary tags), and keeps free blocks in about a dozen lists by size class, so `malloc` searches only blocks
+  that could fit and `free` merges a block with free neighbours at once. The cache lab simulates an LRU cache from
+  Valgrind memory traces, then uses it to tune blocked matrix transposes for 32×32, 64×64 and 61×67.
+learn:
+  - name: Dynamic memory allocation
+    ref: cmu-15-213
+  - name: Boundary tags and coalescing
+    ref: csapp-labs
+  - name: Segregated free lists
+    ref: ostep
+  - name: Cache sets, tags and LRU
+    ref: cmu-15-213
+  - name: Blocking for locality
+    ref: mit-6-172
+stats:
+  - value: ≥ 85
+    label: mdriver performance index out of 100
+  - value: < 300
+    label: misses, 32×32 transpose
+  - value: < 1,300
+    label: misses, 64×64 transpose
+components:
+  - id: mdriver
+    name: mdriver
+    role: The lab's driver; replays allocation traces and scores utilisation and throughput.
+    tech: Lab handout
+    talksTo: [allocator]
+    kind: external
+  - id: allocator
+    name: Allocator
+    role: Implements `mm_init`, `malloc`, `free` and `realloc`, splitting and coalescing blocks.
+    tech: C · GCC
+    talksTo: [seglists, heap]
+    kind: core
+  - id: seglists
+    name: Size-class lists
+    role: About a dozen doubly linked free lists, the next and previous pointers stored inside free blocks.
+    tech: C
+    talksTo: []
+    kind: core
+  - id: heap
+    name: Heap
+    role: Prologue, tagged blocks and an epilogue in memory grown with `mem_sbrk`.
+    tech: memlib
+    talksTo: []
+    kind: core
+  - id: checker
+    name: Heap checker
+    role: Walks every block and list and stops at the first broken invariant.
+    tech: C · gdb
+    talksTo: [heap]
+    kind: offline
+  - id: transpose
+    name: Blocked transpose
+    role: Transposes 32×32, 64×64 and 61×67 matrices in cache-sized blocks.
+    tech: C
+    talksTo: [traces]
+    kind: core
+  - id: traces
+    name: Valgrind traces
+    role: Lists every load and store a program makes, with address and size.
+    tech: Valgrind lackey
+    talksTo: [csim]
+    kind: external
+  - id: csim
+    name: Cache simulator
+    role: Splits each address into tag, set and offset and counts hits, misses and evictions under LRU.
+    tech: C · getopt
+    talksTo: []
+    kind: core
+flow:
+  - component: mdriver
+    text: replays a trace line such as `a 0 24`, which asks for 24 bytes.
+  - component: allocator
+    text: >-
+      adds room for the header and footer, rounds up to the alignment, and picks the size class for the result.
+  - component: seglists
+    text: >-
+      return the first block that fits from that class or a larger one; the allocator splits it if the rest is big
+      enough to be a block of its own.
+  - component: heap
+    text: grows by `mem_sbrk` only when no list has a fit, moving the epilogue to the new end.
+  - component: allocator
+    text: >-
+      on `free`, reads the neighbours' tags, **unlinks** each free neighbour from its list, merges them and inserts
+      the result into the right class.
+  - component: transpose
+    text: >-
+      for the cache lab, copies the matrix in 8×8 blocks, and for 64×64 in 4×4 quarters, while Valgrind records every
+      access.
+  - component: csim
+    text: >-
+      replays those accesses through a cache of 32 sets of 32-byte lines (`-s 5 -E 1 -b 5`) and counts the misses
+      that `test-trans` scores.
+interface:
+  lang: c
+  code: |
+    int   mm_init(void);
+    void *mm_malloc(size_t size);
+    void  mm_free(void *ptr);
+    void *mm_realloc(void *ptr, size_t size);
+    int   mm_checkheap(int verbose);
+
+    /* free block: [hdr][next][prev] … [ftr] */
+
+    typedef struct {
+        bool     valid;
+        uint64_t tag;
+        uint64_t last_used;  /* LRU counter */
+    } Line;
+decisions:
+  - choice: Segregated free lists
+    instead: One implicit list of every block
+    why: >-
+      An implicit list walks allocated blocks too, so throughput collapses on the long traces. Size classes keep each
+      search short; the 85 target needs both utilisation and speed.
+  - choice: Coalesce immediately on free
+    instead: Deferred coalescing in batches
+    why: >-
+      Merging at once keeps the heap free of adjacent free blocks, which simplifies the checker's invariants and
+      helps utilisation. Revisit only if a profile shows free is the bottleneck.
+  - choice: 4×4 quarters for 64×64
+    instead: Plain 8×8 blocks
+    why: >-
+      A 64-int row is 256 bytes, so in a 1 KB direct-mapped cache rows 4 apart land in the same set, and 8×8 blocks
+      evict themselves. Quarters stay under the 1,300-miss limit.
+watchOut: >-
+  Coalescing that forgets to unlink the neighbour from its free list leaves a block in two places and corrupts the
+  heap much later. Write the heap checker first and run it after every call while debugging.

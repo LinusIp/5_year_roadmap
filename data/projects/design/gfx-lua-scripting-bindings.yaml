@@ -1,0 +1,69 @@
+overview: >-
+  Lua embedded in a C++ engine: each entity can carry a script that runs in its own environment table, receives
+  `on_update(self, dt)`, and changes the world only through a small bound API, where entities appear as userdata (a
+  handle object Lua cannot look inside). An instruction-count hook stops runaway scripts, and saving a script file
+  reloads it in place.
+learn:
+  - name: Lua C API
+  - name: Userdata handles
+  - name: Sandboxed environments
+  - name: Debug hooks
+components:
+  - id: vm
+    name: Lua state
+    role: One interpreter with only safe libraries and an instruction limit.
+    tech: Lua 5.4
+    talksTo: [bindings]
+    kind: core
+  - id: bindings
+    name: Entity API
+    role: Exposes entity handles and their methods to Lua, checking each handle.
+    tech: C++20 · Lua C API
+    talksTo: [scripts]
+    kind: core
+  - id: scripts
+    name: Script instances
+    role: One environment table per entity script, called every frame.
+    tech: Lua
+    talksTo: [reload]
+    kind: core
+  - id: reload
+    name: Hot reloader
+    role: Re-runs a changed script file into its existing environment.
+    tech: C++20
+    talksTo: []
+    kind: core
+flow:
+  - component: vm
+    text: opens only `base`, `math`, `string` and `table` (no `io`, `os` or `debug`), and sets a count hook that raises an error once a call passes 1M instructions.
+  - component: bindings
+    text: give each `Entity` userdata an `{index, generation}`; methods such as `self:move(dx, dy)` check the generation, so a dead entity raises an error instead of crashing.
+  - component: scripts
+    text: run with their own `_ENV` whose metatable falls back to the safe globals; the engine calls `on_update` inside `lua_pcall` and logs script calls per second at 1k entities.
+  - component: reload
+    text: re-runs the file into the **same** `_ENV`, so variables survive while functions are replaced; the looping test script must be stopped by the hook.
+interface:
+  lang: lua
+  code: |
+    -- what a script sees (sandboxed engine API)
+    --   self:get_pos()       -> x, y
+    --   self:move(dx, dy)
+    --   world.spawn(kind, x, y) -> entity
+    --   log(msg)
+
+    speed = speed or 3   -- keeps its value on reload
+
+    function on_update(self, dt)
+      local x, y = self:get_pos()
+      if x > 10 or x < -10 then speed = -speed end
+      self:move(speed * dt, 0)
+    end
+decisions:
+  - choice: One Lua state, one _ENV per entity
+    instead: A separate lua_State per entity
+    why: >-
+      Each state costs tens of KB and calls between states need copying. With 1,000 entities in one state the API
+      tables are shared and `_ENV` still keeps each script's globals apart; revisit only for scripts on several threads.
+watchOut: >-
+  Returning a fresh table per call, such as `{x = 1, y = 2}`, every frame creates garbage and visible collector pauses
+  at 1k entities. Return multiple values instead and reuse userdata.

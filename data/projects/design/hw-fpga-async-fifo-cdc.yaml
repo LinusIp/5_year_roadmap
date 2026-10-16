@@ -1,0 +1,72 @@
+overview: >-
+  A FIFO that passes data between two unrelated clocks: each side keeps its own pointer, and each pointer crosses into
+  the other clock domain as a Gray code (neighbouring values differ in one bit, so a value caught mid-change is the old
+  or the new one, never garbage) through two flip-flops. Full and empty come from the synchronised pointers, and a
+  random testbench at a 3:7 clock ratio must deliver 1M words in order.
+learn:
+  - name: Clock domain crossing
+  - name: Gray code
+    ref: harris-ddca
+  - name: Synchronisers and metastability
+    ref: harris-ddca
+  - name: Random testbenches
+components:
+  - id: wr
+    name: Write side
+    role: Writes when not full and keeps the binary and Gray write pointers.
+    tech: Verilog
+    talksTo: [mem]
+    kind: core
+  - id: mem
+    name: Dual-port RAM
+    role: Written in the write clock domain and read in the read clock domain.
+    tech: Verilog · BRAM
+    talksTo: [rd]
+    kind: core
+  - id: rd
+    name: Read side
+    role: Reads when not empty and keeps the binary and Gray read pointers.
+    tech: Verilog
+    talksTo: [tb]
+    kind: core
+  - id: tb
+    name: Testbench
+    role: Drives both clocks with random enables and checks order against a model queue.
+    tech: Icarus / Verilator
+    talksTo: []
+    kind: offline
+flow:
+  - component: wr
+    text: on `wr_en && !full` writes `mem[wbin[A-1:0]]`, increments `wbin` and registers `wgray = wbin ^ (wbin >> 1)` before it leaves the domain.
+  - component: mem
+    text: holds 2^A entries (16 here); each pointer has one extra bit so a full FIFO and an empty one look different.
+  - component: rd
+    text: passes `wgray` through **two read-clock flip-flops** and is empty when `rgray == wgray_sync`; the write side flags full when the synced read pointer equals `wgray` with its top two bits inverted.
+  - component: tb
+    text: runs 30 MHz writes and 70 MHz reads with random enables, compares 1M words against a model queue, and records the deepest fill.
+interface:
+  lang: verilog
+  code: |
+    module async_fifo #(parameter W = 8, A = 4) (
+      input  wire         wclk, wrst_n, wr_en,
+      input  wire [W-1:0] wdata,
+      output reg          full,
+      input  wire         rclk, rrst_n, rd_en,
+      output wire [W-1:0] rdata,
+      output reg          empty
+    );
+      reg [A:0] wbin, wgray, rbin, rgray; // extra bit
+      reg [A:0] rgray_w1, rgray_w2;       // into wclk
+      reg [A:0] wgray_r1, wgray_r2;       // into rclk
+      // full: top two bits differ, the rest equal
+      // empty: Gray pointers equal
+decisions:
+  - choice: Gray pointers, not a handshake per word
+    instead: Pass each word across with a request and acknowledge
+    why: >-
+      A handshake costs several clocks of each domain per word. With Gray pointers both sides run at full rate and only
+      the pointers cross; the data stays in the RAM.
+watchOut: >-
+  A binary pointer changes several bits at once (0111 to 1000), so the other clock can catch a value that never
+  existed and signal a false full or empty. Convert to Gray and register it in the source domain, never cross from
+  combinational logic.

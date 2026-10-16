@@ -1,0 +1,107 @@
+overview: >-
+  A batch labelling system that lets Datum Insights run its 30M documents a month on spot GPUs, 65% cheaper but
+  reclaimed without warning. A coordinator splits the job into small idempotent work units and leases them to
+  workers; each worker checkpoints as it goes and writes results atomically with a deduplication key. When a spot
+  GPU disappears its lease expires and another worker resumes from the last checkpoint, so nothing is lost or
+  written twice.
+learn:
+  - name: Idempotent work units
+  - name: Leases and heartbeats
+    ref: ddia
+  - name: Fencing tokens
+    ref: ddia
+  - name: Atomic writes
+    ref: cmu-15-445
+  - name: Chaos testing
+  - name: Spot pricing
+stats:
+  - value: ≤ 45%
+    label: of on-demand cost
+  - value: "0"
+    label: lost or duplicate outputs, 50 preemptions
+  - value: ≤ 5%
+    label: throughput spent on checkpoints
+components:
+  - id: coordinator
+    name: Coordinator
+    role: Splits the job into units of 2,000 documents and hands out leases with a token and expiry.
+    tech: Python · Postgres
+    talksTo: [worker]
+    kind: core
+  - id: worker
+    name: Worker
+    role: Leases a unit, labels it in batches, heartbeats and commits progress after each batch.
+    tech: vLLM · Docker
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Result store
+    role: Writes labels and the unit's checkpoint in one transaction keyed by document and job.
+    tech: Postgres
+    talksTo: []
+    kind: core
+  - id: spot
+    name: Spot GPUs
+    role: Cheap GPUs that can vanish at any moment.
+    tech: 1–2 GPUs
+    talksTo: [worker]
+    kind: external
+  - id: chaos
+    name: Chaos injector
+    role: Kills worker containers at random moments, 50 times per test run.
+    tech: Docker · Python
+    talksTo: [worker]
+    kind: offline
+  - id: costsim
+    name: Cost simulator
+    role: Replays price and preemption traces to compare cost and completion time with on-demand.
+    tech: Python · pandas
+    talksTo: []
+    kind: offline
+flow:
+  - component: coordinator
+    text: >-
+      leases unit `u-1842` to a worker for 5 minutes with `lease_token=77`, renewed by a heartbeat every 30 s.
+  - component: worker
+    text: labels 64 documents per batch with vLLM, starting from the unit's last committed offset.
+  - component: store
+    text: >-
+      inserts the 64 labels with `ON CONFLICT DO NOTHING` and moves the checkpoint in the **same** transaction, but
+      only if the lease token still matches.
+  - component: worker
+    text: is killed by the chaos injector mid-batch; its uncommitted labels vanish with it, which is safe.
+  - component: coordinator
+    text: >-
+      sees the lease expire, re-leases `u-1842` with `lease_token=78`, and the new worker resumes from the checkpoint;
+      a late write from the old worker fails its token check.
+interface:
+  lang: sql
+  code: |
+    BEGIN;
+    INSERT INTO results (job, doc_id, label)
+      VALUES ($1, $2, $3), ...
+      ON CONFLICT (job, doc_id) DO NOTHING;
+    UPDATE units
+      SET done_upto = $4, heartbeat = now()
+      WHERE id = $5 AND lease_token = $6;
+    -- 0 rows updated: lease lost, ROLLBACK
+    COMMIT;
+decisions:
+  - choice: Small units with per-batch checkpoints
+    instead: Large units restarted from scratch
+    why: >-
+      A preemption loses at most one batch of 64 documents, not a whole unit. Committing every batch costs far less
+      than the 5% overhead budget; measure it and raise the batch size if it does not.
+  - choice: Dedup key plus lease token
+    instead: Trust each worker to write once
+    why: >-
+      A worker that was presumed dead can wake up and write late. The unique key stops duplicates and the token stops
+      a stale worker from moving the checkpoint.
+  - choice: Count restart time in the cost model
+    instead: Assume a new spot GPU is ready at once
+    why: >-
+      Pulling the image and loading the model takes minutes, and it is paid on every preemption. With 65% off, that
+      time must stay small enough to land at ≤ 45% of on-demand.
+watchOut: >-
+  Output writes that are not idempotent turn every retry into a duplicate. Make the result write and the checkpoint
+  one transaction with a unique key, and prove it with the 50-preemption chaos run.

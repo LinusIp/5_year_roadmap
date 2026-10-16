@@ -1,0 +1,54 @@
+overview: >-
+  A fair comparison of a linear model, a random forest and LightGBM on one public tabular dataset using nested
+  cross-validation: an inner loop tunes each model, an outer loop scores it on folds the tuning never saw. The report
+  gives each model's mean score with a 95% interval and says whether the gaps are real.
+learn:
+  - name: Nested cross-validation
+    ref: ml-zoomcamp
+  - name: Leak-free pipelines
+    ref: kaggle-learn
+  - name: Gradient boosting
+  - name: Confidence intervals
+components:
+  - id: data
+    name: Dataset
+    role: Loads the public table and fixes the outer folds once for all models.
+    tech: pandas
+    talksTo: [pipeline]
+    kind: core
+  - id: pipeline
+    name: Pipelines
+    role: Wraps scaling, encoding and each model so preprocessing is fitted only on training folds.
+    tech: scikit-learn Pipeline
+    talksTo: [cv]
+    kind: core
+  - id: cv
+    name: Nested CV
+    role: Tunes in the inner folds and scores on the outer folds.
+    tech: GridSearchCV · cross_val_score
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Computes mean, 95% interval and a paired test across models.
+    tech: SciPy · pandas
+    talksTo: []
+    kind: core
+flow:
+  - component: data
+    text: splits the rows into 5 outer folds with a fixed seed, shared by all three models.
+  - component: pipeline
+    text: builds `Pipeline([preprocess, model])` for linear, forest and LightGBM, so nothing is fitted on test rows.
+  - component: cv
+    text: runs a 3-fold inner search per outer fold, then scores the best setting on the held-out outer fold.
+  - component: report
+    text: turns the 5 outer scores per model into a mean and interval, and runs a **paired** test on the same folds.
+decisions:
+  - choice: Nested CV, not one tuned split
+    instead: Tune with CV, then report the best CV score
+    why: >-
+      The best inner score is picked by the tuning, so it is optimistic; on one small dataset the outer folds are the
+      only unbiased estimate. Revisit with a large dataset, where a plain held-out test set is enough.
+watchOut: >-
+  Features computed from the target, or scalers fitted on the full table, leak test information and make every model
+  look better. Keep every fitted step inside the pipeline.

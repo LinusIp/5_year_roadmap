@@ -1,0 +1,120 @@
+overview: >-
+  A small GPT trained from scratch by following one tutorial (Karpathy's "Let's build GPT" by default), its
+  validation loss reproduced, then one change of your own tested against it. A data module serves random fixed-length
+  windows of tokens, a decoder-only transformer predicts the next token, and a trainer runs AdamW and logs train and
+  validation loss. An experiment runner launches the baseline and the variant with the same three seeds and token
+  budget, and a notebook turns the logs into curves with seed bands.
+learn:
+  - name: Decoder-only transformer
+    ref: karpathy-zero-to-hero
+  - name: AdamW and LR schedules
+    ref: stanford-cs336
+  - name: Reproducing a baseline
+  - name: Controlled ablation
+  - name: Seed variance
+  - name: Experiment tracking
+    ref: wandb
+stats:
+  - value: ≤ 0.05 nats
+    label: from the tutorial's validation loss
+  - value: 3 + 3
+    label: seeds for baseline and variant
+  - value: < 1 h
+    label: per run on one consumer GPU
+components:
+  - id: corpus
+    name: Corpus
+    role: The text the tutorial uses, such as Tiny Shakespeare, or your new dataset.
+    tech: Plain text
+    talksTo: [data]
+    kind: external
+  - id: runner
+    name: Experiment runner
+    role: Launches baseline and variant with the same seeds, config and token budget.
+    tech: Python
+    talksTo: [data, trainer]
+    kind: core
+  - id: data
+    name: Data module
+    role: Tokenises the corpus, holds out a validation split, and serves random fixed-length windows.
+    tech: tiktoken or characters · NumPy
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: GPT model
+    role: Embedding, N blocks of attention and MLP, final norm and output head.
+    tech: PyTorch
+    talksTo: [trainer]
+    kind: core
+  - id: trainer
+    name: Trainer
+    role: Computes the loss, steps AdamW on a learning-rate schedule, evaluates and saves checkpoints.
+    tech: PyTorch · consumer GPU
+    talksTo: [logger]
+    kind: core
+  - id: logger
+    name: Run log
+    role: Records train and validation loss, tokens seen and tokens per second for each run.
+    tech: Weights & Biases or CSV
+    talksTo: [notebook]
+    kind: offline
+  - id: notebook
+    name: Analysis notebook
+    role: Plots mean and range over seeds and compares final losses at equal tokens.
+    tech: Jupyter · NumPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: runner
+    text: >-
+      starts one run with a `Config` and a `seed`, and gives the baseline and the variant the same token budget.
+  - component: data
+    text: >-
+      draws a batch of random windows of `block_size` tokens from the training split only; the validation windows
+      never overlap it.
+  - component: model
+    text: runs the batch through the blocks and returns logits for every next token.
+  - component: trainer
+    text: >-
+      takes the cross-entropy loss, steps AdamW, and every few hundred steps evaluates on validation with **dropout
+      off**; the loop repeats until the token budget is spent.
+  - component: logger
+    text: >-
+      stores the losses against **tokens seen**, not steps; the notebook then compares the six runs at equal tokens
+      and at equal wall-clock.
+interface:
+  lang: python
+  code: |
+    @dataclass(frozen=True)
+    class Config:
+        n_layer: int = 6; n_head: int = 6
+        n_embd: int = 384
+        block_size: int = 256
+        batch_size: int = 64
+        lr: float = 3e-4
+        max_iters: int = 5000  # fixes the token budget
+        seed: int = 0
+
+    def train(cfg: Config, variant: str) -> RunLog: ...
+    for seed in (0, 1, 2):
+        for v in ("baseline", "change"):
+            train(replace(cfg, seed=seed), v)
+decisions:
+  - choice: Karpathy's "Let's build GPT" as the baseline
+    instead: A larger codebase such as nanoGPT on OpenWebText
+    why: >-
+      Its runs finish in under an hour on one consumer GPU, so six seeded runs fit the 8-hour milestone. Move up only
+      for the stretch scaling sweep.
+  - choice: Compare at equal tokens, three seeds each
+    instead: One run each, compared at equal steps
+    why: >-
+      A variant that sees more tokens per step wins at equal steps for free, and one seed's noise can be larger than
+      the effect. Report the difference with its spread.
+  - choice: Exactly one change, prediction written first
+    instead: Several changes tried together
+    why: >-
+      With two changes you cannot say which one moved the loss. A second change is a separate experiment against the
+      same baseline.
+watchOut: >-
+  Changing two things at once, such as a new dataset and a new learning rate, and crediting one of them. Freeze the
+  config, change one field, and keep everything else identical across the six runs.

@@ -1,0 +1,116 @@
+overview: >-
+  A small TypeScript UI library and a to-do app written in it. Function components return virtual nodes (plain objects
+  that describe the DOM you want), and on a state change a scheduler re-renders the component once, in a microtask. A
+  differ compares the old and new trees and the renderer applies only the changes, moving existing DOM nodes by key
+  instead of rebuilding them. An instrumentation layer counts every create, move and remove, which is how you prove it.
+learn:
+  - name: Virtual DOM diffing
+  - name: Keyed reconciliation
+  - name: Rules of hooks
+  - name: Microtask batching
+  - name: Stale closures
+stats:
+  - value: "0"
+    label: rows created when shuffling 1,000 keyed rows
+  - value: ≥ 40
+    label: unit tests on diffing edge cases
+components:
+  - id: hooks
+    name: State hooks
+    role: Keep each component's state slots in call order and enqueue it when setState runs.
+    tech: TypeScript
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Scheduler
+    role: Collects dirty components and re-renders them once per microtask.
+    tech: queueMicrotask
+    talksTo: [components]
+    kind: core
+  - id: components
+    name: Components
+    role: Function components, such as the to-do list, that return a new virtual tree.
+    tech: TypeScript · JSX via tsc
+    talksTo: [differ]
+    kind: core
+  - id: differ
+    name: Differ
+    role: Walks the old and new trees and produces patches, matching keyed children by key.
+    tech: TypeScript
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Keeps the previous tree per root and applies patches to the real DOM.
+    tech: DOM API
+    talksTo: [dom, counters]
+    kind: core
+  - id: dom
+    name: Browser DOM
+    role: The page the user sees and types into.
+    tech: Browser or jsdom
+    talksTo: []
+    kind: external
+  - id: counters
+    name: DOM counters
+    role: Count created, moved and removed nodes for the demo and the tests.
+    tech: TypeScript · Vitest
+    talksTo: []
+    kind: offline
+flow:
+  - component: hooks
+    text: >-
+      a click on "toggle" calls `setTodos`, which stores the new value in its slot and marks the component dirty.
+  - component: scheduler
+    text: >-
+      queues the component once, however many `setState` calls arrive, and flushes the queue in one microtask.
+  - component: components
+    text: >-
+      re-runs `TodoList()`; the hooks return their slots in the same order as last time, so state lines up with the
+      right call.
+  - component: differ
+    text: >-
+      patches props when the node type is the same, replaces it when the type differs, and matches children by `key`
+      so a moved row is a **move**, not a new row.
+  - component: renderer
+    text: >-
+      moves existing elements with `insertBefore`, updates changed props and text, keeps input focus, and stores the
+      new tree as the previous one.
+  - component: counters
+    text: >-
+      record `created`, `moved` and `removed`; a shuffle of 1,000 keyed rows must show `created = 0`.
+interface:
+  lang: typescript
+  code: |
+    type VNode = {
+      type: string | Component;
+      key?: string | number;
+      props: Record<string, unknown>;
+      children: VNode[];
+    };
+    function h(type: VNode["type"], props: object,
+      ...children: unknown[]): VNode;
+    function useState<T>(init: T):
+      [T, (next: T | ((prev: T) => T)) => void];
+    function useEffect(fn: () => void | (() => void),
+      deps?: unknown[]): void;
+    function render(node: VNode, root: Element): void;
+decisions:
+  - choice: Batch re-renders in a microtask
+    instead: Re-render synchronously on every setState
+    why: >-
+      A handler that sets three values would render three times, and setState inside a render could loop. One
+      microtask keeps the to-do app to one render per event.
+  - choice: Key map matching first, LIS moves later
+    instead: The longest-increasing-subsequence move pass from the start
+    why: >-
+      A key-to-node map already gives zero new rows on a shuffle; LIS only cuts the number of moves. Add it as the
+      stretch if the benchmark shows moves dominating.
+  - choice: No runtime dependencies
+    instead: Building on a small library such as a ready-made diff
+    why: >-
+      The point is to own the diff and the hooks, and a zero-dependency bundle makes the size comparison with Preact
+      fair.
+watchOut: >-
+  Using array indices as keys defeats reconciliation and mixes up state between rows when you insert or reorder. Key
+  each to-do by a stable id and add a test that reorders rows holding typed input.

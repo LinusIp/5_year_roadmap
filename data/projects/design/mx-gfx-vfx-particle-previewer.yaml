@@ -1,0 +1,100 @@
+overview: >-
+  A previewer where all particles live in a few numpy arrays (one array per field, called structure of arrays) that
+  one vectorised update advances each frame. The emitter fills free slots, a colour and size curve is looked up by
+  age, and the whole set is drawn as instanced quads with one buffer upload. Sliders edit the same parameter object
+  the update reads, so a change shows on the next frame.
+learn:
+  - name: Structure of arrays
+  - name: numpy vectorisation
+    ref: scientific-python-lectures
+  - name: Instanced rendering
+    ref: learnopengl
+  - name: Additive vs alpha blending
+    ref: learnopengl
+  - name: Curves over lifetime
+stats:
+  - value: 50,000
+    label: particles at 60 FPS on CPU
+  - value: 1 frame
+    label: slider to screen
+  - value: < 4 KB
+    label: per preset file
+components:
+  - id: ui
+    name: Slider UI
+    role: Edits emitter rate, lifetime, cone, gravity, drag, curves and blend mode.
+    tech: imgui bindings
+    talksTo: [emitter, presets]
+    kind: core
+  - id: emitter
+    name: Emitter
+    role: Spawns rate × dt particles per frame inside the velocity cone.
+    tech: numpy random
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Particle store
+    role: Holds position, velocity, age and lifetime arrays and advances all live particles at once.
+    tech: numpy float32
+    talksTo: [curves]
+    kind: core
+  - id: curves
+    name: Curve evaluator
+    role: Bakes colour and size curves into 256-entry tables and looks them up by age over lifetime.
+    tech: numpy
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Instanced renderer
+    role: Uploads one interleaved instance buffer and draws every particle as a quad.
+    tech: moderngl · pyglet
+    talksTo: [recorder]
+    kind: core
+  - id: presets
+    name: Preset IO
+    role: Saves and loads parameter sets for fire, smoke, sparks and rain as small JSON files.
+    tech: json
+    talksTo: []
+    kind: offline
+  - id: recorder
+    name: Sprite-sheet recorder
+    role: Captures 3 seconds of frames into one sprite-sheet PNG.
+    tech: Pillow
+    talksTo: []
+    kind: offline
+flow:
+  - component: ui
+    text: writes a dragged slider straight into the shared `Params` object before the frame's update starts.
+  - component: emitter
+    text: spawns `rate * dt` new particles into the free tail of the arrays with random directions in the cone.
+  - component: store
+    text: advances all live particles in four array operations, then removes dead ones with one boolean-mask copy, **no Python loop**.
+  - component: curves
+    text: turns `age / life` into a table index and fetches colour and size for every particle in one gather.
+  - component: renderer
+    text: writes position, size and colour into the instance buffer and calls `vao.render(instances=n)` with additive or alpha blending.
+interface:
+  lang: python
+  code: |
+    def update(s: Store, p: Params, dt: float) -> int:
+        """Advance every live particle one frame.
+
+        s.pos, s.vel: float32 (n, 3); s.age: (n,)
+        Returns the live count after compaction."""
+        s.vel += (p.gravity - p.drag * s.vel) * dt
+        s.pos += s.vel * dt
+        s.age += dt
+        return s.compact(s.age < s.life)
+decisions:
+  - choice: numpy arrays, not particle objects
+    instead: A list of Particle objects
+    why: 50,000 Python objects updated in a loop take tens of milliseconds; array operations take about 1 to 2 ms, leaving room for the draw.
+  - choice: Baked 256-entry curve tables
+    instead: Evaluating curve keyframes per particle
+    why: One gather per frame instead of a search per particle; rebake only when an artist edits a curve.
+  - choice: Compact once per frame with a mask
+    instead: A free list of dead slots
+    why: Keeps live particles contiguous so the upload is one slice. Revisit if compaction shows up above 1 ms in the update-vs-draw timings.
+watchOut: >-
+  One Python loop over particles anywhere (spawning, curves, upload) drops you far below 60 FPS. Time update and draw
+  separately each frame so a slow path shows up at once.

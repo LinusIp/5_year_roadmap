@@ -1,0 +1,95 @@
+overview: >-
+  A battery-backed logger clipped to each vaccine fridge reads two probes once a minute, stores every reading with
+  an RTC time stamp in a wear-levelled flash log, and sounds a buzzer if the fridge stays outside 2 to 8 °C for more
+  than 10 minutes. Each record carries a check value computed over itself and the record before it, so a deleted or edited
+  reading shows up when the report script checks the export. There is no cloud: staff plug in USB, the logger
+  writes a CSV, and a Python script produces the compliance report.
+learn:
+  - name: Sensor calibration
+  - name: Wear-levelled flash logs
+    ref: making-embedded-systems
+  - name: Alarm state machines
+  - name: RTC and time keeping
+  - name: Tamper-evident hash chains
+stats:
+  - value: ±0.3 °C
+    label: after calibration, 0 to 10 °C
+  - value: 72 h
+    label: logging on backup battery
+  - value: < 2 MB
+    label: storage for 90 days
+components:
+  - id: probes
+    name: Probes
+    role: Two waterproof digital temperature probes, one in the air and one in a glycol vial.
+    tech: DS18B20-class probes
+    talksTo: [reader]
+    kind: external
+  - id: reader
+    name: Probe reader
+    role: Reads both probes each minute and applies the two-point calibration.
+    tech: C
+    talksTo: [alarm, log]
+    kind: core
+  - id: rtc
+    name: RTC
+    role: Keeps time through mains loss on its own backup cell and stamps each reading.
+    tech: RTC module
+    talksTo: [log]
+    kind: core
+  - id: alarm
+    name: Alarm state machine
+    role: Goes OK, then PENDING, then ALARM after 10 minutes out of range, driving buzzer and LED.
+    tech: C
+    talksTo: []
+    kind: core
+  - id: log
+    name: Flash log
+    role: Appends hash-chained records across rotating flash sectors so no sector wears out first.
+    tech: C · SPI flash
+    talksTo: [usb]
+    kind: core
+  - id: usb
+    name: USB CSV export
+    role: Streams the log as CSV when staff connect a laptop.
+    tech: USB MSC or CDC
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report script
+    role: Verifies the hash chain, finds excursions and writes the compliance report.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: reader
+    text: reads both probes at the minute tick and corrects them with `t = a × raw + b`, fitted at the ice-bath and warm-bath points.
+  - component: rtc
+    text: supplies the time stamp; it keeps running on its coin cell even when the main backup battery is low.
+  - component: alarm
+    text: moves to `PENDING` when the vial probe leaves `2–8 °C` and to `ALARM` after **10 minutes** there, so a door opening does not set it off.
+  - component: log
+    text: appends a 12-byte record whose `chain` value covers this record and the one before; 1,440 records a day for 90 days is about 1.6 MB.
+  - component: usb
+    text: exports the log as CSV, and the report script checks that every chain value links up and no minute is missing.
+interface:
+  lang: c
+  code: |
+    typedef struct __attribute__((packed)) {
+      uint32_t unix_s;     /* from RTC */
+      int16_t  air_cc;     /* 0.01 °C */
+      int16_t  vial_cc;
+      uint8_t  state;      /* OK, PENDING, ALARM */
+      uint8_t  flags;      /* MAINS_LOST, PROBE_ERR */
+      uint16_t chain;      /* CRC of rec + prev */
+    } log_rec_t;           /* 12 bytes */
+
+    int log_append(const log_rec_t *r);
+decisions:
+  - choice: Alarm on the vial probe, log both
+    instead: Alarm on the air probe alone
+    why: Air temperature spikes every time the door opens, while the vial follows what the vaccine feels. Logging both lets an inspector see either.
+  - choice: Chained records on the device
+    instead: A plain CSV file on an SD card
+    why: Anyone can edit a CSV on a card; a chain makes a missing or changed minute visible. It costs 2 bytes a record and keeps 90 days near 1.6 MB.
+watchOut: A probe that is powered continuously warms itself and reads high. Power the probe only for the reading and check the ice-bath point after the firmware is final.

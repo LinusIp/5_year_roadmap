@@ -1,0 +1,58 @@
+overview: >-
+  A small model is pruned to 2:4 sparsity, where in every group of 4 weights the 2 smallest are set to zero, which
+  sparse tensor cores on recent NVIDIA GPUs can skip. After a short fine-tune to recover, the perplexity change is
+  measured, and the linear layers are converted to semi-structured sparse tensors and timed against dense for 3
+  layer shapes.
+learn:
+  - name: Structured sparsity
+    ref: mit-6-5940
+  - name: Magnitude pruning
+    ref: mit-6-5940
+  - name: Recovery fine-tuning
+  - name: Perplexity
+    ref: hf-llm-course
+components:
+  - id: prune
+    name: 2:4 pruner
+    role: Keeps the 2 largest-magnitude weights in each group of 4 and stores the mask.
+    tech: PyTorch
+    talksTo: [finetune]
+    kind: core
+  - id: finetune
+    name: Recovery fine-tune
+    role: Trains briefly with the mask reapplied after each step so zeros stay zero.
+    tech: PyTorch
+    talksTo: [convert]
+    kind: core
+  - id: convert
+    name: Sparse convert
+    role: Turns each pruned weight into a semi-structured sparse tensor.
+    tech: torch.sparse.to_sparse_semi_structured
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Eval and bench
+    role: Reports perplexity for dense, pruned and fine-tuned, and layer time for 3 shapes.
+    tech: PyTorch · CUDA events
+    talksTo: []
+    kind: core
+flow:
+  - component: prune
+    text: reshapes each linear weight into groups of 4 along the input dimension and zeroes the 2 smallest by `|w|`.
+  - component: finetune
+    text: trains for a few hundred steps on general text, multiplying weights by the mask after every optimiser step.
+  - component: convert
+    text: converts weights with `to_sparse_semi_structured`, which stores the 2 kept values plus a small index per group.
+  - component: bench
+    text: >-
+      reports perplexity delta against dense, and times dense versus sparse matmul for a small, a medium and a large
+      shape, for example 1024, 4096 and 8192 wide.
+decisions:
+  - choice: Magnitude pruning with a short fine-tune
+    instead: One-shot pruning with no training
+    why: >-
+      One-shot magnitude 2:4 on a small model costs a lot of perplexity, and a few hundred steps recover much of it.
+      Try a smarter one-shot method only if fine-tuning is not possible.
+watchOut: >-
+  At small shapes or batch 1 the sparse kernel can be slower than dense, because the saved FLOPs are smaller than the
+  overhead. Report speedup per shape and batch size rather than one number.

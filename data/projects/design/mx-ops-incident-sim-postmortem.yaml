@@ -1,0 +1,98 @@
+overview: >-
+  A repeatable incident drill programme for Brightloop: a fault injector breaks a demo shop on cue, responders work
+  the incident with defined roles and runbooks, and a timeline collector stitches alerts, chat and deploy events into
+  one record. Each of the 4 drills ends in a blameless postmortem, which looks for the conditions that let the failure
+  happen rather than a person to blame, and its action items are tracked until closed.
+learn:
+  - name: Incident roles
+    ref: google-sre-book
+  - name: Severity levels
+  - name: Blameless postmortems
+    ref: google-sre-book
+  - name: MTTA and MTTR
+  - name: Fault injection
+stats:
+  - value: < 5 min
+    label: acknowledge in final drill
+  - value: < 30 min
+    label: mitigate in final drill
+  - value: ≥ 80 %
+    label: action items closed
+components:
+  - id: facilitator
+    name: Facilitator script
+    role: Picks a scenario, briefs roles and starts the injected fault, so anyone can rerun the drill.
+    tech: Markdown · Python
+    talksTo: [injector]
+    kind: offline
+  - id: injector
+    name: Fault injector
+    role: Adds latency, drops a dependency or fills a disk in the demo stack on command.
+    tech: toxiproxy · Chaos Mesh
+    talksTo: [stack]
+    kind: core
+  - id: stack
+    name: Demo stack
+    role: A small shop with checkout, payments and inventory, plus Grafana alerts.
+    tech: Docker Compose · Grafana
+    talksTo: [responders, timeline]
+    kind: core
+  - id: responders
+    name: Responders
+    role: Incident commander, operations lead and comms lead working from the runbooks.
+    tech: Runbooks · chat
+    talksTo: [timeline]
+    kind: external
+  - id: timeline
+    name: Timeline collector
+    role: Merges alert, chat and deploy events into one timestamped timeline and computes MTTA and MTTR.
+    tech: Python · JSON logs
+    talksTo: [postmortem]
+    kind: core
+  - id: postmortem
+    name: Postmortem
+    role: The blameless write-up with impact, timeline, contributing factors and action items.
+    tech: Markdown template
+    talksTo: [actions]
+    kind: core
+  - id: actions
+    name: Action tracker
+    role: One issue per action item with an owner and a due date, counted until closed.
+    tech: GitHub Issues
+    talksTo: []
+    kind: offline
+flow:
+  - component: injector
+    text: adds `2 s` of latency to the payments database at a time only the facilitator knows.
+  - component: stack
+    text: fires the `CheckoutLatencyHigh` alert and posts it in the incident channel.
+  - component: responders
+    text: acknowledge, name an incident commander and declare `SEV2`, then follow the runbook to fail payments over; the clock is under 5 minutes to acknowledge.
+  - component: timeline
+    text: pulls the alert time, the `/ack` and `/mitigated` chat commands and the deploy log into one timeline, and works out MTTA and MTTR.
+  - component: postmortem
+    text: is written within 3 days from that timeline, asking **what made this possible** rather than who made the mistake.
+  - component: actions
+    text: gets each action item as an issue with one owner; closure rate is reported after every drill.
+interface:
+  lang: shell
+  code: |
+    # in the incident channel
+    /incident declare sev2 "Checkout slow"
+    /incident role commander @maya
+    /ack
+    /note payments DB p99 at 2.1 s, failing over
+    /mitigated
+    /incident close
+
+    $ timeline build --incident INC-0042
+    alert 14:02:10  ack 14:05:41  (MTTA 3m31s)
+    mitigated 14:26:03           (MTTR 23m53s)
+decisions:
+  - choice: Timeline from chat commands and alerts
+    instead: Reconstruct the timeline from memory afterwards
+    why: The last three postmortems were never finished, partly because nobody could rebuild what happened. Recording as you go makes a 3-day write-up realistic.
+  - choice: Drills with real injected faults
+    instead: Tabletop talk-through exercises
+    why: MTTA and MTTR targets need real alerts and real fixes to measure. Tabletops are cheaper, so use one first to teach the roles.
+watchOut: Action items with no owner or no date quietly die, which is how the old postmortems failed. Every item gets exactly one owner and a due date before the postmortem is accepted.

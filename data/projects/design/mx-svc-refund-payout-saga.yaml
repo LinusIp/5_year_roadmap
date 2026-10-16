@@ -1,0 +1,114 @@
+overview: >-
+  A payout service for Craftly Market's 3,000 sellers where each weekly payout runs as a saga, a series of steps
+  saved to a log, each with an undo step called a compensation. The netting calculator subtracts fees and refunds
+  from sales and carries any negative amount into next week. Every bank call uses an idempotency key, so a crash and
+  a replay can never pay a seller twice, and a reconciler closes sagas the bank never answered.
+learn:
+  - name: Saga pattern
+    ref: ddia
+  - name: Compensating actions
+  - name: Exponential backoff
+    ref: google-sre-book
+  - name: Idempotent external calls
+    ref: zero2prod
+  - name: Property-based tests
+stats:
+  - value: "0"
+    label: double payouts in 1,000 crashes
+  - value: < 3 min
+    label: batch of 3,000 payouts
+  - value: < 1 h
+    label: every saga reaches a final state
+components:
+  - id: netting
+    name: Netting calculator
+    role: Computes each seller's net from sales, fees, refunds and last week's carried debt.
+    tech: Go · property tests
+    talksTo: [orchestrator]
+    kind: core
+  - id: orchestrator
+    name: Saga orchestrator
+    role: Writes each saga and step to the log before acting, and decides retry, compensate or dead-letter.
+    tech: Go · PostgreSQL
+    talksTo: [handlers, console]
+    kind: core
+  - id: handlers
+    name: Step handlers
+    role: Do one step each, debit seller balance, send transfer, mark paid, and their compensations.
+    tech: Go
+    talksTo: [bank]
+    kind: core
+  - id: bank
+    name: Fake bank
+    role: Accepts transfers by idempotency key and injects timeouts, errors and crashes.
+    tech: Go · HTTP
+    talksTo: []
+    kind: external
+  - id: reconciler
+    name: Reconciler
+    role: Finds sagas stuck in unknown and asks the bank whether the transfer exists.
+    tech: Go worker
+    talksTo: [bank, orchestrator]
+    kind: offline
+  - id: console
+    name: Operator console
+    role: Lists stuck and dead-lettered sagas with their step history and a manual retry button.
+    tech: Server-rendered HTML
+    talksTo: []
+    kind: core
+  - id: chaos
+    name: Chaos harness
+    role: Kills the orchestrator at random points 1,000 times and checks no seller was paid twice.
+    tech: Go · docker compose
+    talksTo: [orchestrator]
+    kind: offline
+flow:
+  - component: netting
+    text: >-
+      computes seller 1182's net for week 42 as sales minus fees minus refunds; a negative result becomes
+      `carried_debt` for next week instead of a payout.
+  - component: orchestrator
+    text: creates saga `payout:w42:1182` and writes step 1 as `pending` **before** calling anything, so a crash leaves a trace.
+  - component: handlers
+    text: debit the seller's balance, then call the bank with idempotency key `payout:w42:1182`, the same on every retry.
+  - component: bank
+    text: pays once per key; a timeout leaves the step `unknown` rather than failed.
+  - component: orchestrator
+    text: >-
+      marks the step done, or retries at 1 s, 2 s, 4 s up to 6 times; after that it runs the compensation that puts
+      the balance back and moves the saga to `dead_letter`.
+  - component: console
+    text: shows any saga not final within the hour, with each step's status, so an operator can retry or close it.
+interface:
+  lang: sql
+  code: |
+    CREATE TABLE saga_steps (
+      saga_id     text,
+      step        int,
+      name        text,     -- send_transfer
+      status      text,     -- pending|done|unknown
+                            -- |compensated|dead
+      attempts    int DEFAULT 0,
+      idem_key    text UNIQUE,
+      updated_at  timestamptz,
+      PRIMARY KEY (saga_id, step)
+    );
+decisions:
+  - choice: Own saga log in PostgreSQL
+    instead: An external workflow engine such as Temporal
+    why: >-
+      The constraint is one database and no workflow engine. A saga table and a polling loop are enough for 3,000
+      payouts a week and teach what those engines do for you.
+  - choice: Carry negative balances forward
+    instead: Claw back from the seller's bank account
+    why: >-
+      Late refunds after payout are normal here. Netting them against next week avoids a second kind of bank call
+      that can also fail.
+  - choice: Log the step before the call
+    instead: Log after the call returns
+    why: >-
+      A crash between call and log write is exactly what the 1,000 crash drills hit. A pending row plus a fixed
+      idempotency key lets the replay ask the bank instead of paying again.
+watchOut: >-
+  Compensations must be idempotent too. A crash halfway through an undo will run it again, and a second refund of
+  the seller balance is as bad as a double payout.

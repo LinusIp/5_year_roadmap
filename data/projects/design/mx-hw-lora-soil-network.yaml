@@ -1,0 +1,99 @@
+overview: >-
+  Forty battery nodes spread over the 60-hectare orchard wake every 15 minutes, read soil moisture and temperature,
+  and send one short LoRa packet in their own time slot so they rarely collide. The gateway acknowledges each
+  packet, stores it in SQLite, flags stuck sensors and serves a dashboard, and its acknowledgement also carries any
+  new sampling interval. A discrete-event simulator (a program that steps from one send to the next) models 40
+  nodes on the shared channel before anything goes into the field.
+learn:
+  - name: LoRa airtime and duty cycle
+  - name: Time-slotted access
+  - name: ACKs and retries
+    ref: stanford-cs144
+  - name: Battery life budgets
+    ref: making-embedded-systems
+  - name: Discrete-event simulation
+stats:
+  - value: '> 2 years'
+    label: on 2 AA cells
+  - value: ≥ 95 %
+    label: packet delivery, 40 nodes
+  - value: < 5 %
+    label: collision rate
+components:
+  - id: probe
+    name: Soil probe
+    role: Capacitive moisture sensor and temperature sensor in the root zone.
+    tech: Capacitive probe
+    talksTo: [node]
+    kind: external
+  - id: node
+    name: Node firmware
+    role: Wakes, powers the probe, reads it, and sleeps again with every peripheral off.
+    tech: C · LoRa MCU board
+    talksTo: [slots]
+    kind: core
+  - id: slots
+    name: Slot scheduler
+    role: Picks this node's slot in the 15-minute frame plus a small random offset, and retries in a later slot.
+    tech: C
+    talksTo: [gateway]
+    kind: core
+  - id: gateway
+    name: Gateway receiver
+    role: Receives packets, sends ACKs with time and config, and stores readings.
+    tech: Python · SQLite
+    talksTo: [faults, dashboard]
+    kind: core
+  - id: faults
+    name: Fault detector
+    role: Marks nodes whose reading has not changed for a day or that stop reporting.
+    tech: Python
+    talksTo: [dashboard]
+    kind: core
+  - id: dashboard
+    name: Dashboard
+    role: Shows moisture per block and node health to the irrigation manager.
+    tech: Small web UI
+    talksTo: []
+    kind: core
+  - id: sim
+    name: Channel simulator
+    role: Simulates 40 nodes, airtime, collisions and clock drift to predict delivery ratio.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: node
+    text: wakes on its RTC alarm, powers the probe for `100 ms`, reads moisture and temperature, and builds an 11-byte packet.
+  - component: slots
+    text: waits for slot `node_id × 20 s` in the 15-minute frame plus a random `0–2 s`, so 40 nodes use about 800 s of the 900 s frame.
+  - component: gateway
+    text: checks the CRC, stores the reading and replies with an ACK that carries the gateway time and any new `interval_min`.
+  - component: slots
+    text: if no ACK comes within `2 s`, retries in the spare part of the frame, at most twice; the node resets its clock from the ACK time.
+  - component: faults
+    text: flags a node as **stuck** when moisture is identical for 96 readings, or missing when 4 slots in a row are empty.
+  - component: dashboard
+    text: shows the latest moisture per orchard block so irrigation runs on readings instead of a timer.
+interface:
+  lang: c
+  code: |
+    /* uplink, 11 bytes */
+    typedef struct __attribute__((packed)) {
+      uint8_t  node_id;
+      uint16_t seq;
+      uint16_t moisture_pmil;  /* 0.1 % VWC */
+      int16_t  temp_cc;        /* 0.01 °C */
+      uint16_t batt_mv;
+      uint8_t  flags;          /* RETRY|LOWBAT */
+      uint8_t  crc8;
+    } uplink_t;
+    /* ACK: node_id, seq, gw_time_s, interval_min */
+decisions:
+  - choice: Fixed time slots with jitter
+    instead: Pure random access (ALOHA)
+    why: With 40 nodes ALOHA collisions climb toward 10 percent; slots keep it under 5. Slots need clock sync, which the ACK time stamp gives for free.
+  - choice: One gateway, star network
+    instead: A mesh where nodes relay
+    why: 2 km is within LoRa range at low spreading factors, and relaying would keep nodes awake and kill the 2-year battery target. Add a second gateway if far blocks fall below 95 percent delivery.
+watchOut: Duty-cycle limits count airtime, not packets, and airtime grows fast with spreading factor. Compute airtime per packet at the spreading factor you really use before setting slot length.

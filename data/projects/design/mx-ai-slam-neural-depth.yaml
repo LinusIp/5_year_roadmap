@@ -1,0 +1,98 @@
+overview: >-
+  A depth-from-one-camera pipeline for a courier robot, tested in a simulated hallway. A pretrained monocular depth
+  model gives relative depth per frame (right order, unknown scale), wheel odometry turns it into metres, and the
+  depths are projected into a top-down occupancy grid. A stop rule halts the robot when an obstacle enters its path
+  within a safety distance, and 100 simulated runs measure collisions and false stops.
+learn:
+  - name: Monocular depth
+  - name: Scale recovery
+  - name: Camera projection
+    ref: tinyrenderer
+  - name: Occupancy grids
+  - name: Safety margins
+stats:
+  - value: < 0.15
+    label: depth AbsRel
+  - value: 15 fps
+    label: full pipeline on one GPU
+  - value: '0'
+    label: collisions in 100 runs
+components:
+  - id: sim
+    name: Sim harness
+    role: Runs the hallway world, the robot and its camera, and drives the 100 test runs.
+    tech: Open robot simulator
+    talksTo: [depth]
+    kind: external
+  - id: depth
+    name: Depth model
+    role: Predicts relative depth for each camera frame.
+    tech: PyTorch · Depth Anything-class
+    talksTo: [scale]
+    kind: core
+  - id: scale
+    name: Scale recovery
+    role: Fits one scale factor per frame from odometry-tracked points and the known floor plane.
+    tech: NumPy least squares
+    talksTo: [mapper]
+    kind: core
+  - id: mapper
+    name: Occupancy mapper
+    role: Projects metric depth into a 5 cm top-down grid and marks free and occupied cells.
+    tech: NumPy
+    talksTo: [stop]
+    kind: core
+  - id: stop
+    name: Stop rule
+    role: Halts the robot if any occupied cell lies in its path corridor within the stop distance.
+    tech: Python
+    talksTo: [sim]
+    kind: core
+  - id: evaluator
+    name: Evaluator
+    role: Scores AbsRel and delta1 on NYU Depth v2 and counts collisions and false stops in sim.
+    tech: Python · pandas
+    talksTo: []
+    kind: offline
+flow:
+  - component: depth
+    text: takes the 640×480 frame from the simulated camera and outputs relative depth at 15 fps or better.
+  - component: scale
+    text: >-
+      matches the floor pixels to the known camera height and wheel-odometry motion and fits `scale` so relative depth
+      becomes metres, smoothing it across frames to limit **scale drift**.
+  - component: mapper
+    text: back-projects each pixel with the camera intrinsics, drops floor and ceiling heights, and updates the grid.
+  - component: stop
+    text: >-
+      checks a corridor as wide as the robot plus `0.15 m`, stopping if anything is within `stop_dist = 0.8 m`;
+      its command goes back to the simulator, so this is a **control loop**.
+  - component: evaluator
+    text: replays 100 hallway runs with boxes, people and glass doors, and logs every collision, false stop and its frame.
+interface:
+  lang: python
+  code: |
+    def step(frame: np.ndarray, odom: Odom,
+             grid: Grid) -> Command:
+        rel = depth_model(frame)          # H×W
+        d = recover_scale(rel, odom, K)   # metres
+        grid.update(backproject(d, K, pose))
+        return Command(stop=grid.blocked(
+            corridor_m=0.65, ahead_m=0.8))
+decisions:
+  - choice: Pretrained depth model
+    instead: Train a depth network from scratch
+    why: >-
+      Large pretrained models already generalise to indoor scenes; training on NYU alone would not reach AbsRel 0.15
+      on new hallways. Spend the effort on scale and safety instead.
+  - choice: Scale from odometry and the floor plane
+    instead: A stereo camera or lidar
+    why: >-
+      The robot has one cheap camera and wheel encoders, so scale must come from them. Revisit if a cheap depth sensor
+      becomes affordable.
+  - choice: Conservative stop rule
+    instead: Plan a path around obstacles
+    why: The requirement is zero collisions; stopping early costs only time, and false stops are measured to keep it usable.
+watchOut: >-
+  Glass doors and mirrors fool monocular depth into seeing open space, and scale drift slowly shrinks the safety
+  margin. Put glass in the simulated hallways and log the scale factor over each run.

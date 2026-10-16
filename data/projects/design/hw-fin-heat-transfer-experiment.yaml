@@ -1,0 +1,70 @@
+overview: >-
+  An aluminium rod heated at one end acts as a fin, losing heat to the air along its length; five thermocouples measure
+  its steady temperature profile, which fin theory predicts as a cosh-shaped decay set by `m = sqrt(h·P / (k·A))`.
+  Fitting the profile gives the convection coefficient h, and the fitted curve must match the measurements within 10%.
+learn:
+  - name: Fin heat transfer
+    ref: mit-2-005
+  - name: Convection coefficient
+  - name: Steady state
+  - name: Curve fitting
+    ref: scientific-python-lectures
+components:
+  - id: heater
+    name: Heated end
+    role: Holds one end of the rod at a constant temperature.
+    tech: Heater block · controller
+    talksTo: [rod]
+    kind: core
+  - id: rod
+    name: Rod and thermocouples
+    role: The fin, with thermocouples set into it at 5 points.
+    tech: Aluminium rod · type K
+    talksTo: [logger]
+    kind: core
+  - id: logger
+    name: Logger
+    role: Records all temperatures and ambient until the profile stops changing.
+    tech: Thermocouple amp · Python
+    talksTo: [fit]
+    kind: core
+  - id: fit
+    name: Fin fit
+    role: Fits m to the profile, computes h and compares prediction with data.
+    tech: Python · SciPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: heater
+    text: holds the base at about 80 °C, insulated from everything but the rod.
+  - component: rod
+    text: is a 10 mm rod about 300 mm long (k ≈ 167 W/m·K for 6061), with each thermocouple bead in a drilled hole filled with thermal paste.
+  - component: logger
+    text: records every 5 s until each reading changes by under 0.1 °C over 10 minutes, which counts as **steady state**.
+  - component: fit
+    text: fits `θ/θb = cosh(m(Lc - x)) / cosh(m·Lc)` with `Lc = L + D/4` for tip loss, then takes `h = m²·k·D/4` for a round rod.
+interface:
+  lang: python
+  code: |
+    from scipy.optimize import curve_fit
+
+    D, L, k = 0.010, 0.300, 167.0   # m, m, W/m.K
+    Lc = L + D / 4                   # tip-loss correction
+
+    def fin_profile(x, m):
+        """theta / theta_base along the fin."""
+        return np.cosh(m * (Lc - x)) / np.cosh(m * Lc)
+
+    (m,), cov = curve_fit(fin_profile, x_pos, ratio,
+                          p0=[5.0])
+    h = m**2 * k * D / 4             # W/m^2.K
+    rel_err = np.abs(fin_profile(x_pos, m) / ratio - 1)
+decisions:
+  - choice: Fit h from the data
+    instead: Take h from a natural-convection correlation
+    why: >-
+      Correlations for a horizontal cylinder are uncertain by 25% or more and leave out radiation and room drafts.
+      Fitting h measures what your rig actually has; compare it with the correlation afterwards as a check.
+watchOut: >-
+  A thermocouple bead that only touches the rod at one point reads a few degrees low and bends the profile. Set beads
+  in paste-filled holes and check all five agree with the rod at room temperature before heating.

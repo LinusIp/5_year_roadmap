@@ -1,0 +1,103 @@
+overview: >-
+  A monitor that notices when Altus Legal's case-law RAG gets worse without anyone labelling production answers.
+  Every query, its retrieved chunks and its answer are logged, and hourly proxy metrics watch retrieval scores and
+  whether answers agree with the passages they cite. After every index change a canary set of 200 queries with known
+  correct opinions is replayed, and alert rules fire only when the evidence is clear, so injected corruption is
+  caught within an hour with under one false alert a week.
+learn:
+  - name: RAG evaluation
+    ref: llm-zoomcamp
+  - name: Proxy metrics
+  - name: Canary query sets
+  - name: Distribution drift tests
+  - name: Alert tuning
+    ref: google-sre-book
+stats:
+  - value: < 1 h
+    label: to detect index corruption
+  - value: < 1
+    label: false alert a week
+  - value: < 3 min
+    label: canary replay of 200 queries
+components:
+  - id: rag
+    name: RAG service
+    role: The existing case-law search and answer service.
+    tech: FastAPI · vector index
+    talksTo: [logger]
+    kind: external
+  - id: logger
+    name: Logger
+    role: Records query, retrieved chunk ids and scores, answer, citations and index version for every call.
+    tech: DuckDB
+    talksTo: [proxy]
+    kind: core
+  - id: proxy
+    name: Proxy metrics
+    role: Computes hourly retrieval-score distributions and answer-citation agreement per index version.
+    tech: Python · DuckDB
+    talksTo: [alerts]
+    kind: core
+  - id: canary
+    name: Canary runner
+    role: Replays 200 queries with known relevant opinions after each index change and scores recall@5.
+    tech: Python · asyncio
+    talksTo: [rag, alerts]
+    kind: core
+  - id: alerts
+    name: Alerting rules
+    role: Compares metrics with a 2-week baseline and raises an alert only on clear, sustained drops.
+    tech: Python rules
+    talksTo: [export]
+    kind: core
+  - id: export
+    name: Dashboard export
+    role: Writes metric series and alerts as CSV and JSON for the team's dashboard.
+    tech: DuckDB · CSV
+    talksTo: []
+    kind: core
+flow:
+  - component: canary
+    text: >-
+      sees a new `index_version`, replays 200 queries 10 at a time in under 3 minutes, and computes recall@5 of their
+      known opinions against the last good version.
+  - component: logger
+    text: keeps recording live traffic with the `index_version` attached, so metrics can be split before and after the change.
+  - component: proxy
+    text: >-
+      each hour compares top-1 retrieval scores with the baseline using a KS test, and checks with an entailment model
+      what share of answer sentences their cited chunk supports (**citation agreement**).
+  - component: alerts
+    text: >-
+      fires if canary recall@5 drops by 5 points, or if two proxy signals breach their limits for 2 hours in a row;
+      single noisy hours do not alert.
+  - component: export
+    text: writes the hourly series and every alert with its index version for the dashboard and the weekly review.
+interface:
+  lang: json
+  code: |
+    { "kind": "alert",
+      "index_version": "2026-10-14b",
+      "signal": "canary_recall_at_5",
+      "baseline": 0.91, "now": 0.72,
+      "proxies": { "top1_score_ks_p": 0.0004,
+                   "citation_agreement": 0.81 },
+      "detected_after_min": 7 }
+decisions:
+  - choice: Canary set with known answers
+    instead: Proxy metrics alone
+    why: >-
+      Proxies can stay flat while quality falls. 200 queries with known relevant opinions give a real quality number
+      after each index change, cheaply, in under 3 minutes.
+  - choice: Require persistence or two signals
+    instead: Alert on any single threshold breach
+    why: >-
+      Hourly proxy metrics are noisy, and one alert per noisy hour would blow the 1-a-week false alert budget. Two
+      hours or two signals still detect a corruption within the hour via the canary.
+  - choice: DuckDB on the same host
+    instead: A metrics stack like Prometheus and Grafana
+    why: The stack must stay local and the queries are analytical over logs; a single DuckDB file is enough until traffic grows.
+watchOut: >-
+  Proxy metrics that do not track true quality, and a canary set that goes stale as the case law changes, both give
+  false comfort. Measure each proxy's correlation with canary quality on injected faults and refresh 20% of the
+  canary set each quarter.

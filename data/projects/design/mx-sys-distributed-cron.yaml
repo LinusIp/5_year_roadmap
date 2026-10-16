@@ -1,0 +1,122 @@
+overview: >-
+  A cron scheduler for Brightpay's 5,000 jobs that keeps its promises when a host dies. Three nodes compete for a
+  lease row in PostgreSQL (a lock that expires unless renewed); the holder turns cron expressions into due ticks in
+  each job's time zone and inserts one run record per job per tick under a unique key. Workers claim runs
+  atomically and execute them with timeouts and retries. Because inserting a run is idempotent (doing it twice has
+  the effect of doing it once) and claiming is atomic, a new leader that recomputes a tick cannot double-fire, and a
+  catch-up pass finds ticks nobody recorded.
+learn:
+  - name: Leases and leader election
+    ref: ddia
+  - name: Fencing tokens
+    ref: ddia
+  - name: Idempotent writes
+  - name: SKIP LOCKED job queues
+  - name: Time zones and DST
+stats:
+  - value: < 10 s
+    label: leader failover
+  - value: "0"
+    label: duplicate or skipped runs in 1,000 ticks
+  - value: < 500 ms
+    label: tick latency p99
+components:
+  - id: lease
+    name: Lease manager
+    role: Holds or competes for the leader lease and its epoch number.
+    tech: Go or Rust
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: Cron parser
+    role: Turns cron expressions and time zones into the next due instants.
+    tech: Go or Rust · tz database
+    talksTo: [dispatcher]
+    kind: core
+  - id: dispatcher
+    name: Dispatcher
+    role: Inserts one run record per job per due tick, fenced by the lease epoch.
+    tech: SQL transactions
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Run store
+    role: Keeps leases, run records and history; the only shared state.
+    tech: PostgreSQL
+    talksTo: [worker]
+    kind: core
+  - id: worker
+    name: Worker agent
+    role: Claims due runs, executes them with timeouts, retries and overlap policy.
+    tech: Go or Rust
+    talksTo: []
+    kind: core
+  - id: api
+    name: API
+    role: Lists, pauses and triggers jobs and shows run history.
+    tech: HTTP · JSON
+    talksTo: [store]
+    kind: offline
+  - id: chaos
+    name: Chaos script
+    role: Kills scheduler and worker processes at random during the 1,000-tick test.
+    tech: docker-compose · shell
+    talksTo: [lease]
+    kind: offline
+flow:
+  - component: lease
+    text: >-
+      renews every 2 s with `UPDATE leases SET expires = now() + 8s`, using the database clock, so failover after
+      a crash takes under 10 s; on a failed renewal it stops scheduling at once.
+  - component: parser
+    text: >-
+      computes the payroll export's next instant in `Europe/London`, so 01:30 on the autumn DST night fires
+      **once**, not twice.
+  - component: dispatcher
+    text: >-
+      inserts `(job_id, scheduled_for)` with `ON CONFLICT DO NOTHING` in a transaction that also checks
+      `leases.epoch` is still its own, so a paused old leader writes nothing.
+  - component: store
+    text: >-
+      hands the run to exactly one worker through `FOR UPDATE SKIP LOCKED`, which lets other workers skip rows
+      already being claimed instead of waiting.
+  - component: worker
+    text: >-
+      runs the job with its timeout, retries with backoff, applies the overlap policy (`skip`, `queue` or
+      `allow`), and records `succeeded` or `failed`.
+interface:
+  lang: sql
+  code: |
+    -- one row per job per tick: the dedupe key
+    CREATE TABLE runs (
+      job_id        bigint      NOT NULL,
+      scheduled_for timestamptz NOT NULL,
+      state         text DEFAULT 'pending',
+      PRIMARY KEY (job_id, scheduled_for));
+
+    -- a worker claims one due run atomically
+    UPDATE runs SET state = 'running'
+    WHERE (job_id, scheduled_for) = (
+      SELECT job_id, scheduled_for FROM runs
+      WHERE state = 'pending' ORDER BY 2
+      LIMIT 1 FOR UPDATE SKIP LOCKED)
+    RETURNING job_id, scheduled_for;
+decisions:
+  - choice: PostgreSQL for lease, runs and claims
+    instead: etcd for the lease plus a separate queue
+    why: >-
+      One database gives the lease, the unique run key and the atomic claim in the same transactions. 5,000 jobs
+      is a few inserts a second, far below its limits. Revisit if ticks outgrow one primary.
+  - choice: Unique run key, not "the leader decides once"
+    instead: Trust the leader to fire each tick exactly once
+    why: >-
+      Leaders crash between deciding and recording. Making the insert idempotent turns at-least-once dispatch into
+      exactly-once runs, which is what the payroll export needed.
+  - choice: Explicit catch-up policy per job
+    instead: Silently skip missed ticks
+    why: >-
+      Last month's skipped export was the incident. On takeover the leader scans for ticks with no run row and
+      applies `run_once` or `skip` as each job declares, so nothing is missed quietly.
+watchOut: >-
+  A zombie leader, one paused past its lease, can wake and keep inserting runs. Check the lease epoch inside the
+  same transaction as the insert, and never trust the local clock for lease validity.

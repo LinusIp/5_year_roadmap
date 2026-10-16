@@ -1,0 +1,123 @@
+overview: >-
+  A sidecar proxy in Go that runs next to each Arbor Telehealth service, so timeouts, retries and circuit breaking live
+  in one place instead of in every codebase. The app sends its outbound calls to a local port, and the sidecar passes
+  each one through a chain of middleware (retry, circuit breaker, load balancer) before forwarding it. A circuit
+  breaker stops calling a failing service for a while, and a retry budget caps retries at 20% of traffic, so a failing
+  dependency cannot be flooded.
+learn:
+  - name: Retries with jitter
+    ref: google-sre-book
+  - name: Retry budgets
+    ref: google-sre-book
+  - name: Circuit breakers
+  - name: Power of two choices
+  - name: Outlier ejection
+  - name: Idempotent requests
+stats:
+  - value: < 3 ms
+    label: added p99 latency
+  - value: ≤ 1.2×
+    label: load during an outage
+  - value: < 2 s
+    label: for the breaker to open
+components:
+  - id: app
+    name: Local app
+    role: Calls other services through the sidecar's local port.
+    tech: HTTP
+    talksTo: [proxy]
+    kind: external
+  - id: proxy
+    name: Proxy core
+    role: Accepts calls, matches the route and runs its middleware chain.
+    tech: Go net/http
+    talksTo: [retry]
+    kind: core
+  - id: retry
+    name: Retry middleware
+    role: Applies per-try timeouts and retries with jitter while the budget allows.
+    tech: Go
+    talksTo: [breaker]
+    kind: core
+  - id: breaker
+    name: Circuit breaker
+    role: Fails fast when the route's recent failure rate is too high.
+    tech: Go · bucketed counters
+    talksTo: [lb]
+    kind: core
+  - id: lb
+    name: Load balancer
+    role: Picks a healthy endpoint by comparing two random ones.
+    tech: Go
+    talksTo: [remote, outlier]
+    kind: core
+  - id: outlier
+    name: Outlier detector
+    role: Ejects endpoints that return repeated 5xx for a cooling-off period.
+    tech: Go
+    talksTo: [metrics]
+    kind: core
+  - id: remote
+    name: Remote services
+    role: The other services' sidecars, reached over plain HTTP.
+    tech: HTTP
+    talksTo: []
+    kind: external
+  - id: metrics
+    name: Metrics
+    role: Counts requests, retries, latency and breaker state per route.
+    tech: Prometheus format
+    talksTo: []
+    kind: offline
+flow:
+  - component: proxy
+    text: >-
+      receives `GET /patients/42` with `Host: records` on port 15001 and loads the route from the config, which
+      `SIGHUP` reloads and swaps atomically.
+  - component: retry
+    text: >-
+      gives each try 300 ms; on a connect error or `503` it waits a random time up to `50 ms · 2^n` (**jitter**) and
+      retries only `GET`/`PUT`, and only while retries stay under 20% of the route's last 10 s of requests.
+  - component: breaker
+    text: >-
+      counts results in ten 100 ms buckets; with at least 20 calls and over 50% failing it opens, answers `503` at once
+      for 5 s, then lets one probe through (half-open).
+  - component: lb
+    text: >-
+      picks two random non-ejected endpoints and sends to the one with fewer requests in flight.
+  - component: outlier
+    text: >-
+      ejects an endpoint after 5 consecutive `5xx` for 30 s, and never more than a third of the endpoints at once.
+interface:
+  lang: yaml
+  code: |
+    routes:
+      - name: records
+        match: { host: records }
+        endpoints: [10.0.4.11:8080, 10.0.4.12:8080]
+        timeout: 800ms
+        perTryTimeout: 300ms
+        retries: { max: 2, on: [connect, "503"],
+                   methods: [GET, PUT], budget: 0.2 }
+        breaker: { window: 1s, minRequests: 20,
+                   failureRate: 0.5, openFor: 5s }
+        outlier: { consecutive5xx: 5, eject: 30s }
+decisions:
+  - choice: A retry budget on top of a retry count
+    instead: A fixed number of retries per request
+    why: >-
+      Two retries each would triple load during an outage. A 20% budget keeps amplification at 1.2× while still
+      hiding the odd failed call.
+  - choice: Retry only idempotent methods
+    instead: Retry every failed request
+    why: >-
+      A retried `POST` can book an appointment twice. Only `GET` and `PUT` are safe to resend; anything else needs an
+      idempotency key first.
+  - choice: Power of two choices
+    instead: Round robin
+    why: >-
+      Round robin keeps sending to a slow endpoint. Comparing two random ones avoids it with no shared state and costs
+      nothing on the 3 ms budget.
+watchOut: >-
+  The breaker's counters are updated by every concurrent request. Use atomic bucket counters or a short mutex per
+  route, and run the tests with Go's race detector.

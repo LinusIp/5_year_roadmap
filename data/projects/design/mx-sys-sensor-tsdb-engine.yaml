@@ -1,0 +1,123 @@
+overview: >-
+  A purpose-built storage engine for Helio Grid's 20,000 inverters, each sending a sample every 5 s. Every sample is
+  first appended to a write-ahead log (WAL, a file written before anything else so a crash can be replayed) and to
+  an in-memory head block; every 2 hours the head is cut into an immutable block that stores timestamps as
+  delta-of-delta and values XOR-ed against the previous one, Gorilla-style compression that needs under 2 bytes a
+  sample. An inverted index maps tags like `site=north` to series, queries decode only the blocks that overlap
+  their time range, and retention deletes whole old blocks.
+learn:
+  - name: Write-ahead logging
+    ref: cmu-15-445
+  - name: Delta-of-delta timestamps
+  - name: XOR float compression
+  - name: Inverted indexes
+  - name: Immutable blocks
+    ref: ddia
+  - name: Torn writes and checksums
+stats:
+  - value: 400k/s
+    label: samples ingested
+  - value: < 2 B
+    label: per sample on disk
+  - value: < 20 ms
+    label: 24 h query, one series
+components:
+  - id: feed
+    name: Inverter feed
+    role: Sends batches of samples tagged with inverter, site and metric.
+    tech: Synthetic solar signals
+    talksTo: [wal]
+    kind: external
+  - id: wal
+    name: WAL
+    role: Appends every sample batch with a length and CRC before acknowledging it.
+    tech: Segment files · fsync
+    talksTo: [head]
+    kind: core
+  - id: head
+    name: Head block
+    role: Holds the newest 2 hours of each series in memory.
+    tech: Rust or C++
+    talksTo: [encoder]
+    kind: core
+  - id: encoder
+    name: Block encoder
+    role: Compresses the head into an immutable block file with its own index.
+    tech: Bit-level encoder
+    talksTo: [index]
+    kind: core
+  - id: index
+    name: Tag index
+    role: Maps each tag pair to a sorted list of series ids.
+    tech: Posting lists
+    talksTo: [query]
+    kind: core
+  - id: query
+    name: Query engine
+    role: Finds series by tag, decodes overlapping blocks and downsamples.
+    tech: Rust or C++
+    talksTo: []
+    kind: core
+  - id: retention
+    name: Retention manager
+    role: Deletes block directories older than the retention period.
+    tech: Background task
+    talksTo: []
+    kind: offline
+flow:
+  - component: wal
+    text: >-
+      appends `(series_id, ts, value)` records with a length and `crc32` each, and acknowledges the batch after one
+      group `fsync` every 100 ms.
+  - component: head
+    text: >-
+      adds the sample to series `inverter=INV-08812,metric=ac_power`, creating the series id and its index entries
+      on first sight.
+  - component: encoder
+    text: >-
+      at the 2-hour cut stores the first timestamp raw, then delta-of-delta (a steady 5 s cadence costs **1 bit**),
+      and each value XOR-ed with the previous so only the changed bits are kept.
+  - component: index
+    text: >-
+      records the block's posting lists, such as `site=north` to a list of series ids, so tag filters become
+      sorted-list intersections.
+  - component: query
+    text: >-
+      for the last 24 h of one inverter reads the head plus 12 blocks, decodes about 17,280 samples, and returns
+      5-minute averages when a `step` is asked for, in under 20 ms.
+interface:
+  lang: rust
+  code: |
+    pub struct Sample { pub ts_ms: i64, pub v: f64 }
+
+    impl Db {
+        pub fn append(&mut self, labels: &Labels,
+                      s: Sample) -> Result<SeriesId>;
+        pub fn query(&self, m: &[Matcher],
+                     from_ms: i64, to_ms: i64,
+                     step_ms: Option<i64>)
+                     -> Result<Vec<Series>>;
+    }
+    // block dir, 2 h, immutable:
+    //   chunks: series_id, t0, dod bits, xor bits
+    //   index:  label -> postings, series -> chunk
+    //   meta:   min_ts, max_ts, crc32
+decisions:
+  - choice: Gorilla-style encoding
+    instead: zstd over raw blocks
+    why: >-
+      Timestamps arrive every 5 s, so delta-of-delta is almost always zero, and inverter power changes slowly, so
+      XOR leaves few bits. General compression gets close on size but cannot decode one series without the rest.
+  - choice: 2-hour immutable blocks
+    instead: Update data files in place
+    why: >-
+      Queries mostly cover the last week, which is at most 84 blocks, and retention becomes deleting a directory.
+      Nothing is rewritten, so write amplification stays near one.
+  - choice: Group commit every 100 ms
+    instead: fsync for every sample
+    why: >-
+      400,000 fsyncs a second is impossible on one disk. Batching makes each fsync cover thousands of samples, and
+      writers wait at most 100 ms for their acknowledgement.
+watchOut: >-
+  A crash can leave half a record at the end of the WAL. Recovery must stop at the first record whose length or CRC
+  is wrong and truncate there, instead of decoding garbage as samples.

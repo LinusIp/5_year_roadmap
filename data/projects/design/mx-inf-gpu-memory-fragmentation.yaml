@@ -1,0 +1,102 @@
+overview: >-
+  Prism Vision's model server hits out-of-memory every 36 hours although its working set is stable; you reproduce
+  that and fix it. The cause is fragmentation: PyTorch's caching allocator keeps freed GPU blocks for reuse, and
+  ever-changing input shapes leave them in pieces too small for the next big request. The fix rounds shapes into a
+  few buckets and draws activation buffers from a preallocated pool, and a 24-hour soak proves it holds.
+learn:
+  - name: Caching allocators
+    ref: cuda-guide
+  - name: Memory fragmentation
+    ref: ostep
+  - name: Shape bucketing
+  - name: Buffer pools
+  - name: Soak testing
+stats:
+  - value: "0"
+    label: OOMs in a 24 h soak at 30 req/s
+  - value: ≤ 120%
+    label: reserved memory vs live
+  - value: ≤ 3%
+    label: throughput lost
+components:
+  - id: workload
+    name: Workload generator
+    role: Sends 30 req/s with batch sizes and image sizes drawn from a realistic, shifting mix.
+    tech: Python · asyncio
+    talksTo: [bucketer]
+    kind: external
+  - id: bucketer
+    name: Shape bucketer
+    role: Rounds each request up to one of a few fixed shapes and pads it.
+    tech: Python
+    talksTo: [pool]
+    kind: core
+  - id: pool
+    name: Buffer pool
+    role: Hands out preallocated activation buffers per bucket and takes them back after the forward pass.
+    tech: PyTorch
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Model server
+    role: Runs the vision model with its activations written into pool buffers.
+    tech: PyTorch · 16 GB GPU
+    talksTo: [stats]
+    kind: core
+  - id: stats
+    name: Allocator stats
+    role: Samples reserved and allocated bytes every minute and saves memory snapshots on demand.
+    tech: torch.cuda memory stats
+    talksTo: [soak]
+    kind: offline
+  - id: soak
+    name: Soak runner
+    role: Runs the 24-hour test, compares mitigations and plots reserved vs live memory over time.
+    tech: Python · matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: workload
+    text: sends a batch of 3 images at 1,117 × 840 px, a shape the server has not seen in an hour.
+  - component: bucketer
+    text: >-
+      rounds it up to the `4 × 1,280 × 896` bucket; with 6 buckets the allocator sees 6 sizes, not thousands.
+  - component: pool
+    text: >-
+      gives the request that bucket's preallocated buffers, so no new GPU block is split, and takes them back when the
+      forward pass ends.
+  - component: model
+    text: runs the forward pass; padding costs a little compute, which must stay within the **3%** throughput budget.
+  - component: stats
+    text: >-
+      records `reserved / allocated` each minute; the soak fails if it rises above **1.2** or any OOM occurs in 24 h.
+interface:
+  lang: python
+  code: |
+    s = torch.cuda.memory_stats()
+    live = s["allocated_bytes.all.current"]
+    reserved = s["reserved_bytes.all.current"]
+    ratio = reserved / live      # target ≤ 1.2
+
+    torch.cuda.memory._record_memory_history()
+    # ... run 10 min of traffic ...
+    torch.cuda.memory._dump_snapshot("frag.pickle")
+decisions:
+  - choice: Shape buckets plus a buffer pool
+    instead: Call empty_cache() every few minutes
+    why: >-
+      Emptying the cache stalls requests and returns memory that is fragmented anyway. Few fixed sizes stop the
+      splitting at its source. Revisit the bucket edges if the input mix changes.
+  - choice: Six buckets chosen from the shape histogram
+    instead: Pad every request to the largest shape
+    why: >-
+      Padding to the maximum wastes far more than 3% of throughput on small images. Buckets set from the measured
+      size distribution keep padding waste small.
+  - choice: Compare against allocator settings first
+    instead: Write a custom allocator at once
+    why: >-
+      PyTorch's `expandable_segments` option sometimes fixes fragmentation alone. Measure it as a baseline so the pool
+      is only kept if it does better.
+watchOut: >-
+  High reserved memory is not a leak by itself: the caching allocator keeps freed blocks on purpose. Compare reserved
+  with live memory over time, and use snapshots to see whether free space is in pieces too small to use.

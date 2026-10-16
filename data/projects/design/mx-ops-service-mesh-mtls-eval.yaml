@@ -1,0 +1,93 @@
+overview: >-
+  Larch Insurance must encrypt and authenticate every call between its services by audit date, and the team is split
+  on whether a service mesh is worth it. You build the same 8-service app two ways: with a mesh that puts a sidecar
+  proxy next to each pod to add mutual TLS (mTLS, where both sides prove who they are with certificates), and with
+  app-level TLS using certificates from cert-manager. Both are benchmarked at 1,000 requests a second against a
+  no-TLS baseline, and the numbers go into a decision record.
+learn:
+  - name: Mutual TLS
+  - name: Service mesh sidecars
+  - name: Certificate rotation
+  - name: Identity-based authorisation
+  - name: Benchmarking overhead
+    ref: prometheus-docs
+  - name: Architecture decision records
+    ref: roadmap-software-architect
+stats:
+  - value: < 3 ms
+    label: added p99 at 1,000 req/s
+  - value: < 15 %
+    label: extra memory per pod
+  - value: 100 %
+    label: calls authenticated
+components:
+  - id: app
+    name: Demo app
+    role: Eight Go services with a realistic call graph, at least 3 hops deep.
+    tech: Go · Kubernetes
+    talksTo: [mesh, libtls]
+    kind: core
+  - id: mesh
+    name: Mesh variant
+    role: Linkerd sidecars that add mTLS and issue each pod an identity from its service account.
+    tech: Linkerd
+    talksTo: [authz]
+    kind: core
+  - id: libtls
+    name: Library-TLS variant
+    role: The same services doing TLS in code with certificates issued and rotated by cert-manager.
+    tech: Go crypto/tls · cert-manager
+    talksTo: [authz]
+    kind: core
+  - id: authz
+    name: Authz policies
+    role: Allow only named callers, such as claims calling policy, by service identity.
+    tech: Linkerd AuthorizationPolicy · Go middleware
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Benchmark harness
+    role: Runs k6 at 1,000 req/s against each variant and the baseline and records latency, CPU and memory.
+    tech: k6 · Prometheus
+    talksTo: [adr]
+    kind: core
+  - id: adr
+    name: Decision record
+    role: Weighs security, overhead and operational burden and recommends one option.
+    tech: Markdown ADR
+    talksTo: []
+    kind: offline
+flow:
+  - component: app
+    text: is deployed three times on the same cluster, with no TLS, with the mesh, and with library TLS.
+  - component: mesh
+    text: is rolled out one namespace at a time in **permissive** mode, then switched to strict, with k6 running throughout to catch any failed request.
+  - component: libtls
+    text: loads its certificate from a Secret that cert-manager renews, and reloads it without a restart.
+  - component: authz
+    text: denies `quotes → payments` while allowing `claims → payments`, checked with a test call from each.
+  - component: bench
+    text: runs 10 minutes per variant and reports added p99 and memory per pod against the baseline, for example `+1.8 ms` and `+11 %`.
+interface:
+  lang: yaml
+  code: |
+    apiVersion: policy.linkerd.io/v1alpha1
+    kind: AuthorizationPolicy
+    metadata:
+      name: payments-allow-claims
+      namespace: payments
+    spec:
+      targetRef:
+        kind: Server
+        name: payments-http
+      requiredAuthenticationRefs:
+        - kind: MeshTLSAuthentication
+          name: claims-identity
+decisions:
+  - choice: Benchmark both options on one app
+    instead: Pick the mesh because it is the common choice
+    why: The team disagrees, and the audit needs a reasoned answer. Real numbers on the same 8-service graph settle latency and memory, leaving only the operational trade-off to argue.
+  - choice: Linkerd for the mesh variant
+    instead: Istio
+    why: On a 16 GB local cluster Linkerd's lighter proxies leave room for 8 services and the load generator. Revisit if you need Istio's richer traffic rules.
+watchOut: Permissive mode, which accepts plain-text calls during rollout, is easy to leave on forever and then nothing is enforced. Set a date for strict mode and add a test that a plain-text call fails.

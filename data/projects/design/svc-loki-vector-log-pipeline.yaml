@@ -1,0 +1,50 @@
+overview: >-
+  Container logs shipped by Vector, parsed from JSON and given a few low-cardinality labels, stored in Loki and
+  queried in Grafana with LogQL, so one request ID finds every related line in under 2 s.
+learn:
+  - name: Structured logging
+  - name: Label cardinality
+  - name: LogQL queries
+components:
+  - id: apps
+    name: App containers
+    role: Write one JSON object per line to stdout, including `request_id`.
+    tech: Docker
+    talksTo: [vector]
+    kind: external
+  - id: vector
+    name: Vector
+    role: Collects container logs, parses JSON, sets labels and batches to Loki.
+    tech: Vector
+    talksTo: [loki]
+    kind: core
+  - id: loki
+    name: Loki
+    role: Indexes only labels and stores log lines in compressed chunks.
+    tech: Loki
+    talksTo: [grafana]
+    kind: core
+  - id: grafana
+    name: Grafana
+    role: Runs LogQL queries, dashboards and a log-based alert.
+    tech: Grafana
+    talksTo: []
+    kind: core
+flow:
+  - component: vector
+    text: reads each line from the Docker source and parses it with `parse_json`.
+  - component: vector
+    text: sets labels `service`, `env` and `level` only; `request_id` stays inside the line.
+  - component: loki
+    text: stores the line in the stream for those labels.
+  - component: grafana
+    text: runs `{env="prod"} | json | request_id="r-81f3"` and must return every line in under 2 s.
+decisions:
+  - choice: Request ID in the line, not a label
+    instead: request_id as a Loki label
+    why: >-
+      Every distinct label value creates a new stream, so a per-request label would mean millions of tiny streams.
+      Filtering inside a few streams is fast enough for 2 s.
+watchOut: >-
+  High-cardinality labels such as user or request IDs make Loki slow and expensive. Keep labels to values with a
+  small, fixed set.

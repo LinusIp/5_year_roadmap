@@ -1,0 +1,48 @@
+overview: >-
+  A small keyword-spotting model trained on the host, quantized to int8 and run on a Cortex-M board with TensorFlow
+  Lite Micro. You time inference on the device, check RAM and flash use, and compare on-device accuracy with the host.
+learn:
+  - name: Int8 quantization
+    ref: mit-6-5940
+  - name: TinyML deployment
+    ref: mit-6-5940
+  - name: MFCC features
+  - name: Memory budgets
+    ref: making-embedded-systems
+components:
+  - id: host
+    name: Host training
+    role: Trains the model and converts it to an int8 flatbuffer with a calibration set.
+    tech: TensorFlow · TFLite converter
+    talksTo: [firmware]
+    kind: offline
+  - id: frontend
+    name: Feature frontend
+    role: Turns 1 s of microphone audio into the same features the host used.
+    tech: C · CMSIS-DSP
+    talksTo: [firmware]
+    kind: core
+  - id: firmware
+    name: Inference firmware
+    role: Runs the model in a fixed tensor arena and outputs the keyword.
+    tech: TFLite Micro · Cortex-M
+    talksTo: []
+    kind: core
+flow:
+  - component: host
+    text: exports an int8 model as a C array, calibrated on a few hundred real clips.
+  - component: frontend
+    text: computes features from the microphone buffer with the **same** window, hop and mel settings as the host.
+  - component: firmware
+    text: runs `interpreter.Invoke()` and times it with the cycle counter; the target is under 100 ms.
+  - component: firmware
+    text: reports `arena_used_bytes()` and flash size, and accuracy on test clips replayed over serial, within 3 points of the host.
+decisions:
+  - choice: Replay test clips over serial
+    instead: Test only by speaking into the board
+    why: >-
+      Replaying the host's test set gives a number directly comparable to host accuracy. Live speaking is a good final
+      check but cannot measure a 3-point gap.
+watchOut: >-
+  Features computed differently on device than on the host (scaling, window or log base) quietly drop accuracy. Feed
+  the same clip to both and compare the feature arrays value by value.

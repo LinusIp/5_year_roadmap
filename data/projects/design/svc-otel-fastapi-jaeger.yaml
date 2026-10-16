@@ -1,0 +1,52 @@
+overview: >-
+  A FastAPI service instrumented with OpenTelemetry: auto-instrumentation creates spans for every request and SQL
+  call, manual spans mark business steps, and the traces go to Jaeger, where a slow endpoint is diagnosed from one
+  trace.
+learn:
+  - name: Spans and traces
+    ref: opentelemetry-docs
+  - name: Context propagation
+  - name: Span attributes
+components:
+  - id: api
+    name: API
+    role: Serves requests, with auto-instrumentation and a few manual spans.
+    tech: FastAPI · OpenTelemetry SDK
+    talksTo: [db, exporter]
+    kind: core
+  - id: db
+    name: Postgres
+    role: Answers queries, each wrapped in a child span with its SQL text.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: exporter
+    name: OTLP exporter
+    role: Batches finished spans and metrics and sends them out.
+    tech: OTLP · BatchSpanProcessor
+    talksTo: [jaeger]
+    kind: core
+  - id: jaeger
+    name: Jaeger
+    role: Stores traces and shows each request as a timeline of spans.
+    tech: Jaeger all-in-one
+    talksTo: []
+    kind: external
+flow:
+  - component: api
+    text: starts a root span for `GET /orders/42` and a manual span `price_order` with attribute `order.items=12`.
+  - component: db
+    text: runs the query inside a child span that records `db.statement` and its duration.
+  - component: exporter
+    text: sends the finished spans in a batch over OTLP, so the request is not slowed by export.
+  - component: api
+    text: is diagnosed in Jaeger, where one SQL span takes 800 ms of a 900 ms request and points at a missing index.
+decisions:
+  - choice: Auto-instrumentation plus a few manual spans
+    instead: Manual spans everywhere
+    why: >-
+      Auto-instrumentation covers HTTP and SQL for free; manual spans are only worth it where business logic hides
+      time. Add more if a trace shows an unexplained gap.
+watchOut: >-
+  Putting user IDs or full URLs with query strings into span attributes creates high cardinality and leaks data.
+  Use bounded values such as route templates and counts.

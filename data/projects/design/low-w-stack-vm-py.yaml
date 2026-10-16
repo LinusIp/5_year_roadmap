@@ -1,0 +1,47 @@
+overview: >-
+  A small stack-based virtual machine in Python with about 20 opcodes, an assembler that resolves labels by
+  back-patching, call frames for functions, and a disassembler whose output re-assembles to the same bytes.
+learn:
+  - name: Bytecode
+    ref: crafting-interpreters
+  - name: Stack machines
+    ref: nand2tetris
+  - name: Call frames
+  - name: Label back-patching
+components:
+  - id: asm
+    name: Assembler
+    role: Turns text such as `PUSH 1` and `JMP loop` into bytes, patching forward labels at the end.
+    tech: Python 3
+    talksTo: [vm]
+    kind: core
+  - id: vm
+    name: VM
+    role: Runs a fetch-decode-execute loop over an operand stack and a frame stack.
+    tech: Python 3
+    talksTo: []
+    kind: core
+  - id: dis
+    name: Disassembler
+    role: Prints bytecode back as assembly text.
+    tech: Python 3
+    talksTo: [asm]
+    kind: offline
+flow:
+  - component: asm
+    text: emits `JZ` with a placeholder for a label not seen yet and fills in its address once the label is defined.
+  - component: vm
+    text: reads an opcode at `pc`, pops its operands, pushes the result and checks for **stack underflow**.
+  - component: vm
+    text: on `CALL fib 1` pushes a frame with the return address and arguments; `RET` pops it.
+  - component: dis
+    text: prints the program, which the assembler re-assembles to identical bytes; fib(25) and a sieve check results.
+decisions:
+  - choice: Stack machine
+    instead: Register machine
+    why: >-
+      Stack code needs no register allocation, so the assembler and VM both stay small for a 4-hour build. A
+      register VM runs fewer instructions; try it as a follow-up.
+watchOut: >-
+  An unchecked pop on an empty stack crashes with a Python error far from the bug. Check underflow in every opcode
+  and report the `pc`.

@@ -1,0 +1,67 @@
+overview: >-
+  A Docker Compose file that starts FastAPI, Postgres and Redis with healthchecks, starts the API only once its
+  dependencies are healthy, seeds data and keeps the database in a named volume, so `docker compose up` works from
+  a clean checkout.
+learn:
+  - name: Container healthchecks
+    ref: docker-get-started
+  - name: Named volumes
+  - name: Env files
+components:
+  - id: api
+    name: API
+    role: Serves requests, reads from Postgres and caches hot reads in Redis.
+    tech: FastAPI
+    talksTo: [db, cache]
+    kind: core
+  - id: db
+    name: Postgres
+    role: Stores data in a named volume that survives `down` but not `down -v`.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: cache
+    name: Redis
+    role: Short-TTL cache in front of the slow queries.
+    tech: Redis
+    talksTo: []
+    kind: core
+  - id: seed
+    name: Seed job
+    role: One-shot container that loads sample rows once the database is healthy.
+    tech: Python script
+    talksTo: [db]
+    kind: offline
+flow:
+  - component: db
+    text: starts first; its healthcheck runs `pg_isready` every 2 s until it passes.
+  - component: cache
+    text: starts alongside it and reports healthy once `redis-cli ping` returns `PONG`.
+  - component: api
+    text: starts only when both are healthy, via `depends_on` with `condition service_healthy`, and reads secrets from `.env`.
+  - component: api
+    text: answers `GET /health` once it reaches both; the time from `up` to this answer is the cold start.
+interface:
+  lang: yaml
+  code: |
+    api:
+      build: .
+      env_file: .env
+      depends_on:
+        db:    { condition: service_healthy }
+        cache: { condition: service_healthy }
+    db:
+      image: postgres:16
+      volumes: [pgdata:/var/lib/postgresql/data]
+      healthcheck:
+        test: ["CMD", "pg_isready", "-U", "app"]
+        interval: 2s
+decisions:
+  - choice: Healthcheck conditions in depends_on
+    instead: Retry loops in the API start script
+    why: >-
+      Compose already knows when Postgres is ready, so start order lives in one file. Keep a short retry in the
+      app as well, because in production nothing orders startup for you.
+watchOut: >-
+  Passwords written into the compose file end up in git. Put them in an untracked `.env` and commit a
+  `.env.example` instead.

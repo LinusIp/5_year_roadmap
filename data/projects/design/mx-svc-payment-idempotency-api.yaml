@@ -1,0 +1,112 @@
+overview: >-
+  A payment-intent API for BrightLoop where a mobile client can retry as often as it likes and the customer is
+  charged once. Each request carries an `Idempotency-Key`, a unique row for that key makes concurrent duplicates
+  wait, and a stored response is replayed for every retry. The provider call runs inside a small state machine,
+  and a resolver asks the provider what really happened when a call times out.
+learn:
+  - name: Idempotency keys
+    ref: zero2prod
+  - name: Request fingerprints
+  - name: State machines
+  - name: Unknown outcomes after timeouts
+    ref: kleppmann-distributed-systems
+  - name: Fault injection
+stats:
+  - value: "0"
+    label: duplicate charges in 10,000 requests
+  - value: < 5 ms
+    label: p99 idempotency overhead
+  - value: 24 h
+    label: key retention, < 2 GB
+components:
+  - id: client
+    name: Mobile client
+    role: Sends the purchase and retries on flaky networks with the same key.
+    tech: iOS · Android
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: API layer
+    role: Reads the key and body, hashes the body into a fingerprint and returns stored or new responses.
+    tech: Go · net/http
+    talksTo: [keys, intents]
+    kind: core
+  - id: keys
+    name: Idempotency store
+    role: One row per key with fingerprint, status and the saved response, deleted after 24 hours.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: intents
+    name: Intent state machine
+    role: Moves an intent through created, processing, succeeded, failed or unknown and logs every transition.
+    tech: Go · PostgreSQL
+    talksTo: [provider]
+    kind: core
+  - id: provider
+    name: Fake provider
+    role: Charges cards and injects timeouts, 5xx errors and late successes on purpose.
+    tech: Go · docker compose
+    talksTo: []
+    kind: external
+  - id: resolver
+    name: Outcome resolver
+    role: Looks up intents left in unknown and asks the provider for their real result.
+    tech: Go worker
+    talksTo: [provider, intents]
+    kind: core
+  - id: chaos
+    name: Chaos runner
+    role: Sends 10,000 requests with 30 percent retries and 10 percent timeouts, then counts charges.
+    tech: Go
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: receives `POST /payment_intents` with `Idempotency-Key` and computes a **SHA-256 fingerprint** of the body.
+  - component: keys
+    text: >-
+      runs `INSERT … ON CONFLICT DO NOTHING`; a new row means go ahead, an existing finished row is replayed, an
+      unfinished one gets `409 IN_PROGRESS`, and a different fingerprint gets `422 KEY_REUSED`.
+  - component: intents
+    text: >-
+      writes `processing`, then calls the provider with a 2 s timeout, passing the intent id as the provider's own
+      idempotency key.
+  - component: provider
+    text: answers success or decline, or nothing at all; a timeout moves the intent to `unknown`, never to `failed`.
+  - component: resolver
+    text: queries the provider by intent id for every `unknown` intent and records the real outcome.
+  - component: keys
+    text: stores the final status code and body against the key, so the next retry from the phone gets the same answer.
+interface:
+  lang: http
+  code: |
+    POST /payment_intents
+    Idempotency-Key: 7c1e-…-a91f
+    { "course_id": "py-201", "amount": 4900,
+      "currency": "EUR", "card_token": "tok_…" }
+
+    201 Created
+    { "id": "pi_3k9", "status": "succeeded" }
+
+    422 Unprocessable Entity
+    { "error": "KEY_REUSED_WITH_DIFFERENT_BODY" }
+decisions:
+  - choice: Unique key row in PostgreSQL
+    instead: An in-process map or a Redis SETNX
+    why: >-
+      PostgreSQL is the only allowed store, and the key row commits with the intent, so they cannot disagree after a
+      crash. A 24-hour window of keys stays well under 2 GB.
+  - choice: Timeout means unknown, resolved by lookup
+    instead: Treat a timeout as failed and let the client retry
+    why: >-
+      10 percent of calls time out in the chaos run and some of those did charge; marking them failed is exactly how
+      duplicate charges happen. Revisit only if the provider gives no lookup endpoint.
+  - choice: Store a fingerprint with each key
+    instead: Trust the key alone
+    why: >-
+      A buggy client that reuses a key for a different course would otherwise get someone else's receipt. The hash
+      costs microseconds.
+watchOut: >-
+  Two requests with the same key can arrive in the same millisecond. Test the duplicate path with real concurrency,
+  not two calls in a row, or the race only shows up in production.

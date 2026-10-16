@@ -1,0 +1,54 @@
+overview: >-
+  A feature flag service where each flag has targeting rules and a rollout percentage, users are bucketed by
+  hashing their ID with the flag key so they stay in the same bucket, and a Python SDK polls the rules and decides
+  locally.
+learn:
+  - name: Consistent hashing buckets
+  - name: Targeting rules
+  - name: SDK local evaluation
+  - name: Safe fallbacks
+components:
+  - id: api
+    name: Flag API
+    role: CRUD for flags and rules, serving all rules with an ETag.
+    tech: FastAPI
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Flag store
+    role: Holds flag definitions as JSON.
+    tech: Redis
+    talksTo: []
+    kind: core
+  - id: sdk
+    name: Client SDK
+    role: Polls every 30 s, caches rules in memory and evaluates flags with no network call.
+    tech: Python
+    talksTo: [api]
+    kind: core
+flow:
+  - component: api
+    text: receives `PUT /flags/new-checkout` with rule `country == "SE"` and `rollout = 20`.
+  - component: store
+    text: saves the flag JSON and bumps the version used as the ETag for `GET /flags`.
+  - component: sdk
+    text: polls `GET /flags` with `If-None-Match`, keeping the last good copy if the API is down, or the flag's default if it never fetched.
+  - component: sdk
+    text: computes `bucket = sha256(flag_key + ":" + user_id) mod 100` and returns on when the rule matches and `bucket < 20`; a test over 100k IDs checks 20 ± 1 percent.
+interface:
+  lang: python
+  code: |
+    flags = FlagClient(url, poll_seconds=30)
+    flags.is_enabled("new-checkout",
+                     user_id="u_123",
+                     attrs={"country": "SE"},
+                     default=False)
+decisions:
+  - choice: Evaluate in the SDK
+    instead: Call the server for every check
+    why: >-
+      A flag check runs on every request, so a network call each time adds latency and a failure point. Revisit
+      for rules that need secret data the client must not see.
+watchOut: >-
+  Hashing on anything that changes, such as the rule set or the percentage, re-buckets users. Hash only the flag
+  key and user ID so raising 20 to 30 keeps the first 20 percent in.

@@ -1,0 +1,114 @@
+overview: >-
+  Direct device-to-device sync for six designers' 80 GB of assets, with no central copy of any file. Each peer
+  splits files into content-defined chunks (boundaries picked by a rolling hash of the bytes, so an edit only
+  changes the chunks near it) and keeps a Merkle manifest per folder, a tree of hashes where equal hashes mean
+  equal content, so two peers find their differences by comparing a few hashes. Peers find each other on the LAN
+  or through a rendezvous server, send only missing chunks, and use version vectors (one edit counter per device)
+  to tell a normal update from a real conflict, which becomes a conflict copy instead of lost work.
+learn:
+  - name: Content-defined chunking
+  - name: Merkle trees
+  - name: Version vectors
+    ref: kleppmann-distributed-systems
+  - name: Atomic file replace
+  - name: Debouncing file events
+stats:
+  - value: ≥ 70%
+    label: of LAN speed, first sync
+  - value: < 5%
+    label: of a 200 MB file sent per edit
+  - value: "0"
+    label: data losses in 1,000 runs
+components:
+  - id: watcher
+    name: Watcher
+    role: Turns file-system events into settled "file changed" notices.
+    tech: inotify · FSEvents
+    talksTo: [chunker]
+    kind: core
+  - id: chunker
+    name: Chunker
+    role: Splits files at rolling-hash boundaries and stores chunks by hash.
+    tech: Rust or Go · BLAKE3
+    talksTo: [manifest]
+    kind: core
+  - id: manifest
+    name: Manifest tree
+    role: Keeps each file's chunk list and version vector under a Merkle root.
+    tech: Embedded key-value store
+    talksTo: [transport]
+    kind: core
+  - id: transport
+    name: Peer transport
+    role: Finds peers, compares manifests and moves missing chunks over TLS.
+    tech: TCP · TLS · mDNS
+    talksTo: [rendezvous, resolver]
+    kind: core
+  - id: rendezvous
+    name: Rendezvous server
+    role: Tells peers each other's current address; never sees file contents.
+    tech: Small VPS service
+    talksTo: []
+    kind: external
+  - id: resolver
+    name: Conflict resolver
+    role: On the receiving peer, compares version vectors and applies or forks the file.
+    tech: Rust or Go
+    talksTo: []
+    kind: core
+flow:
+  - component: watcher
+    text: >-
+      sees writes to `brand/hero.psd` and waits until 2 s pass with no events and an unchanged size and mtime, so a
+      half-saved file is never synced.
+  - component: chunker
+    text: >-
+      re-chunks the 200 MB file at about 64 KB average; an edit to one layer changes a few dozen chunks, a few MB,
+      and the rest hash the same.
+  - component: manifest
+    text: >-
+      records the new chunk list, bumps this device's counter in the file's `version` vector, and recomputes hashes
+      up to the folder root.
+  - component: transport
+    text: >-
+      exchanges root hashes with a peer found by mDNS or the rendezvous server, walks down only differing subtrees,
+      and fetches **missing** chunks.
+  - component: resolver
+    text: >-
+      applies the file if the incoming vector dominates its own; if they are concurrent, keeps both as
+      `hero (conflict ana).psd`, writing to a temp file, `fsync`, then `rename`.
+interface:
+  lang: rust
+  code: |
+    struct FileEntry {
+        path: String,              // "brand/hero.psd"
+        size: u64,
+        chunks: Vec<[u8; 32]>,     // BLAKE3, in order
+        version: BTreeMap<DeviceId, u64>,
+        deleted: bool,             // tombstone
+    }
+    enum Msg {
+        Root { folder: FolderId, hash: [u8; 32] },
+        Children { node: [u8; 32] },
+        GetChunks { hashes: Vec<[u8; 32]> },
+        Chunk { hash: [u8; 32], data: Vec<u8> },
+    }
+decisions:
+  - choice: Content-defined chunks
+    instead: Fixed-size blocks
+    why: >-
+      Inserting bytes near the start of a PSD shifts every fixed block, so the whole 200 MB looks new. Rolling-hash
+      boundaries move with the content, which is how an edit stays under 5% of the file.
+  - choice: Version vectors, not newest timestamp wins
+    instead: Last writer wins by modification time
+    why: >-
+      Laptops edit offline and their clocks disagree, so newest-wins silently throws away one designer's work.
+      Vectors detect concurrent edits and keep both.
+  - choice: Rendezvous for addresses only
+    instead: A relay or cloud store for contents
+    why: >-
+      The constraint is no central storage of files, and the collective's point is to stop paying for it. Peers on
+      the same LAN skip the server entirely.
+watchOut: >-
+  A rename seen as delete plus create can propagate the delete before the new file arrives. Treat a delete and a
+  create with the same chunk list in one scan as a rename, and keep tombstones until every peer has seen them.

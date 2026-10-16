@@ -1,0 +1,110 @@
+overview: >-
+  A transactional outbox for Kettle & Co's order service: the order row and an `outbox` row describing the event are
+  written in **one transaction**, so either both exist or neither does. A relay reads unpublished outbox rows in id
+  order per order and publishes them to NATS, marking each published after the broker acknowledges it. Because a
+  crash can make the relay publish twice, consumers keep a table of processed event ids and skip repeats.
+learn:
+  - name: Transactional outbox
+    ref: ddia
+  - name: Dual-write problem
+  - name: At-least-once delivery
+    ref: kleppmann-distributed-systems
+  - name: Idempotent consumers
+  - name: Ordering per key
+stats:
+  - value: "0"
+    label: lost events in 50 crashes
+  - value: < 1 s
+    label: relay lag p99 at 1,000 events/s
+  - value: 1x
+    label: effective processing per event
+components:
+  - id: service
+    name: Order service
+    role: Handles `POST /orders` and owns the order tables.
+    tech: Go · PostgreSQL
+    talksTo: [writer]
+    kind: core
+  - id: writer
+    name: Outbox writer
+    role: Inserts the order and the outbox row in the same transaction.
+    tech: Go · pgx
+    talksTo: [outbox]
+    kind: core
+  - id: outbox
+    name: Outbox table
+    role: Rows of event id, aggregate id, type, payload and published_at; the single source of truth for events.
+    tech: PostgreSQL
+    talksTo: [relay]
+    kind: core
+  - id: relay
+    name: Relay
+    role: Claims a batch of unpublished rows per partition, publishes in order and marks them published.
+    tech: Go
+    talksTo: [adapter]
+    kind: core
+  - id: adapter
+    name: Broker adapter
+    role: Publishes to a subject keyed by order id and waits for the broker's acknowledgement.
+    tech: NATS JetStream
+    talksTo: [consumer]
+    kind: core
+  - id: consumer
+    name: Idempotent consumer
+    role: Applies each event and records its id in a processed table in the same transaction.
+    tech: Go · PostgreSQL
+    talksTo: []
+    kind: core
+  - id: chaos
+    name: Crash injector
+    role: Kills the service or relay at random points 50 times and compares sent and received events.
+    tech: Go · Docker
+    talksTo: [service, relay]
+    kind: offline
+flow:
+  - component: service
+    text: accepts a new order and calls the outbox writer instead of publishing itself; **no dual write** to the database and the broker.
+  - component: writer
+    text: in one transaction inserts into `orders` and `outbox (id, aggregate_id, type, payload)`; a crash before commit leaves neither.
+  - component: outbox
+    text: holds the committed row with `published_at` empty; a partial index on unpublished rows keeps the relay's query fast as the table grows.
+  - component: relay
+    text: >-
+      selects unpublished rows ordered by `id` for its partitions of `aggregate_id`, so all events for one order go
+      through one relay worker and stay in order.
+  - component: adapter
+    text: publishes each event with `Nats-Msg-Id` set to the event id; after the ack the relay sets `published_at = now()`.
+  - component: consumer
+    text: >-
+      inserts the event id into `processed_events`; if it already exists the event is a repeat after a relay crash
+      and is skipped, so each event is applied once.
+interface:
+  lang: sql
+  code: |
+    BEGIN;
+    INSERT INTO orders (id, customer_id, total)
+      VALUES ($1, $2, $3);
+    INSERT INTO outbox
+      (id, aggregate_id, type, payload)
+      VALUES (gen_random_uuid(), $1,
+              'order.created', $4);
+    COMMIT;
+decisions:
+  - choice: Outbox in the same database
+    instead: Write to the database, then publish to the broker
+    why: >-
+      Two separate writes are exactly how Kettle & Co loses events: a crash between them leaves one without the
+      other. One transaction removes the gap; 50 crash tests check it.
+  - choice: At-least-once publish with consumer dedup
+    instead: Aim for exactly-once in the relay
+    why: >-
+      The relay can crash after the broker's ack but before marking the row, so a repeat is unavoidable. A processed
+      table on the consumer side turns that into effectively once.
+  - choice: Partition relay work by aggregate id
+    instead: Many relay workers reading any row
+    why: >-
+      Free-for-all workers publish `order.shipped` before `order.created`. Hashing aggregate ids to workers keeps
+      per-order order and still reaches 1,000 events/s.
+watchOut: >-
+  The outbox grows forever if published rows are never removed, and the relay query slows with it. Delete or
+  partition rows older than a few days, and index unpublished rows.

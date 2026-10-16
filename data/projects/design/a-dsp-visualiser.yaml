@@ -1,0 +1,118 @@
+overview: >-
+  A desktop tool, drawn with your own Stage 1 renderer, that plays or records a signal, filters it and shows it in time
+  and frequency while you edit the filter. Four threads split the work: an audio thread moves samples through lock-free
+  ring buffers (queues that never block), a DSP thread filters each block and computes FFT frames, the UI thread owns
+  the filter designer and pole-zero editor, and the renderer draws traces, spectra and a scrolling spectrogram every
+  frame. New filter coefficients reach the DSP thread by an atomic swap, so editing never stalls the sound.
+learn:
+  - name: FFT windowing and leakage
+    ref: dspguide
+  - name: Overlap-add FIR filtering
+    ref: dspguide
+  - name: Bilinear transform
+    ref: mit-6-003
+  - name: Poles, zeros and stability
+    ref: mit-6-003
+  - name: Lock-free ring buffers
+stats:
+  - value: < 50 ms
+    label: sound to screen at 60 FPS
+  - value: 0.01 dB
+    label: passband match to scipy freqz
+  - value: "0"
+    label: underruns in 10 minutes
+components:
+  - id: mic
+    name: Microphone
+    role: Supplies live 48 kHz audio input next to the built-in signal generator.
+    tech: miniaudio
+    talksTo: [audio]
+    kind: external
+  - id: audio
+    name: Audio thread
+    role: Runs the signal generator and the audio callback, filling and draining lock-free ring buffers.
+    tech: miniaudio · C++20
+    talksTo: [dsp]
+    kind: core
+  - id: dsp
+    name: DSP thread
+    role: Filters each block (FIR by overlap-add, IIR as biquads) and computes windowed FFT frames.
+    tech: C++20 · own radix-2 FFT
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Draws time traces, spectra and the spectrogram texture once per frame.
+    tech: OpenGL or Vulkan
+    talksTo: []
+    kind: core
+  - id: designer
+    name: Filter designer
+    role: Owns FIR and IIR design and the draggable z-plane editor, and publishes new coefficients.
+    tech: Dear ImGui
+    talksTo: [dsp, renderer]
+    kind: core
+  - id: verify
+    name: SciPy checks
+    role: Compares the FFT with NumPy and the filter responses with scipy freqz in tests.
+    tech: Python · SciPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: audio
+    text: >-
+      generates a sine, chirp or noise block (or takes it from the mic) and pushes it into the input ring, with **no
+      allocation and no locks** in the callback.
+  - component: dsp
+    text: >-
+      reads a block, runs the active filter as overlap-add FIR or a cascade of second-order sections, and returns the
+      filtered block to the output ring for playback.
+  - component: dsp
+    text: >-
+      windows the newest samples and computes a `4096`-point FFT frame, which it puts on the frame queue for the
+      renderer.
+  - component: renderer
+    text: >-
+      draws the time trace and spectrum and adds one spectrogram column in **dB**, so detail below the peak stays
+      visible.
+  - component: designer
+    text: >-
+      turns a drag of a pole or zero into new coefficients, redraws the impulse and frequency responses within one
+      frame, and flags any pole with `|z| ≥ 1` as unstable.
+  - component: dsp
+    text: >-
+      picks up the new coefficients by an atomic pointer swap at the next block boundary and crossfades the filter
+      state, so the swap makes no click.
+interface:
+  lang: cpp
+  code: |
+    struct Biquad { float b0, b1, b2, a1, a2; };
+    struct Coeffs {
+      std::vector<float>  fir;  // overlap-add
+      std::vector<Biquad> sos;  // IIR cascade
+    };
+    // UI thread writes, DSP thread reads per block
+    std::atomic<const Coeffs*> active;
+
+    // audio callback: no allocation, no locks
+    void on_audio(const float* in, float* out,
+                  uint32_t frames);
+decisions:
+  - choice: IIR as cascaded biquads
+    instead: One high-order direct-form filter
+    why: >-
+      A high-order direct-form IIR goes unstable once its coefficients are rounded to float, and the 0.01 dB target
+      leaves no room for that. Keep direct form only to measure the quantisation effect next to biquads.
+  - choice: Atomic coefficient swap between threads
+    instead: A mutex around the filter
+    why: >-
+      A lock in the audio callback can wait on the UI thread and cause an underrun, and the target is zero underruns
+      in 10 minutes. Revisit only if one filter grows too large to rebuild in a single UI frame.
+  - choice: Own radix-2 FFT, checked against FFTW
+    instead: Calling FFTW or KISS FFT directly
+    why: >-
+      Writing it is the lesson, and a 4 096-point transform is cheap next to a 16 ms frame. It must match NumPy to
+      1e-6; switch to FFTW if the size sweep shows the FFT taking a real share of frame time.
+watchOut: >-
+  Allocating memory or taking a lock in the audio callback causes glitches that come and go. Preallocate every buffer
+  and pass data between threads only through the rings and the atomic swap.

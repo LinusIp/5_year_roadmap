@@ -1,0 +1,45 @@
+overview: >-
+  Two services fronted by Envoy with a static config that sets timeouts, retries limited by a retry budget,
+  outlier detection that ejects a failing instance, and admin stats read while one instance is broken.
+learn:
+  - name: Sidecar proxies
+  - name: Retry budgets
+  - name: Outlier detection
+  - name: Circuit breaking
+components:
+  - id: client
+    name: Client
+    role: Sends load through the Envoy listener.
+    tech: k6 or curl
+    talksTo: [envoy]
+    kind: external
+  - id: envoy
+    name: Envoy
+    role: Routes to the upstream cluster, retries within budget and ejects bad hosts.
+    tech: Envoy static config
+    talksTo: [upstream]
+    kind: core
+  - id: upstream
+    name: Service instances
+    role: Three instances of the backend, one of which returns 503s on demand.
+    tech: Docker Compose
+    talksTo: []
+    kind: core
+flow:
+  - component: envoy
+    text: receives `GET /prices` and forwards it with a 1 s route timeout.
+  - component: upstream
+    text: one instance starts returning 503 for every request.
+  - component: envoy
+    text: retries on `5xx` only for GET routes, capped by `retry_budget` at 20 percent of active requests.
+  - component: envoy
+    text: ejects the host after 5 consecutive 5xx; `/stats` shows `outlier_detection.ejections_active 1` and the retry ratio.
+decisions:
+  - choice: Retry budget
+    instead: A fixed number of retries per request
+    why: >-
+      Fixed retries multiply load when a whole service is down, while a budget caps retries as a share of
+      traffic. Three retries per request is fine only when failures are rare and spread out.
+watchOut: >-
+  Retrying a non-idempotent route such as `POST /orders` can create duplicates. Configure retries per route and
+  leave them off for writes.

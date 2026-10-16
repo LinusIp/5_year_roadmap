@@ -1,0 +1,124 @@
+overview: >-
+  Your own engine becomes a data source for a generative model. A seeded script samples scene parameters, renders
+  50,000 frames headless (off-screen, with no window) and saves each frame with its parameters, so the dataset can be
+  regenerated exactly. A diffusion transformer (DiT) learns to denoise VAE latents of those frames, conditioned on the
+  scene parameters, at two sizes, and a probe network checks that samples really show what was asked for.
+learn:
+  - name: Diffusion transformers
+    ref: facebookresearch-dit
+  - name: adaLN-Zero conditioning
+    ref: facebookresearch-dit
+  - name: Latent diffusion
+    ref: hf-diffusion-course
+  - name: Synthetic datasets
+  - name: Patch tokens
+  - name: FID
+stats:
+  - value: 50k
+    label: frames at 128×128, regenerated from a seed
+  - value: ~30M / 130M
+    label: parameters in the two DiT sizes
+  - value: ≥ 80 %
+    label: samples with the requested object count
+components:
+  - id: scene
+    name: Scene sampler
+    role: Draws object count, shapes, colours, camera and lighting from a seed.
+    tech: Python
+    talksTo: [engine]
+    kind: core
+  - id: engine
+    name: Headless engine
+    role: Renders each scene off-screen and writes the frame with its parameters.
+    tech: Your C++ engine · OpenGL or Vulkan
+    talksTo: [shards]
+    kind: core
+  - id: shards
+    name: Frame shards
+    role: Stores frames and parameter files in shards with checksums, with a held-out split.
+    tech: Files · checksums
+    talksTo: [vae, probe]
+    kind: core
+  - id: vae
+    name: VAE encoder
+    role: Turns each frame into a smaller latent once and caches it.
+    tech: Project 48 VAE
+    talksTo: [dit]
+    kind: core
+  - id: dit
+    name: DiT
+    role: Patchifies latents and denoises them in transformer blocks modulated by timestep and scene parameters.
+    tech: PyTorch 2.x · W&B
+    talksTo: [eval]
+    kind: core
+  - id: probe
+    name: Probe
+    role: Reads object count and colour from a frame, trained on real rendered frames.
+    tech: PyTorch CNN
+    talksTo: [eval]
+    kind: offline
+  - id: eval
+    name: Evaluator
+    role: Decodes samples with the VAE and reports FID and probe accuracy.
+    tech: clean-fid
+    talksTo: []
+    kind: offline
+flow:
+  - component: scene
+    text: draws one scene's parameters from the seed, for example 3 objects with given shapes, colours and a camera angle.
+  - component: engine
+    text: >-
+      renders it off-screen at 128×128 with every buffer cleared first, so the same seed gives the **same pixels**,
+      and writes frame and parameters.
+  - component: shards
+    text: store the pair in a shard whose checksum the generator checks when it is run again.
+  - component: vae
+    text: encodes the frame into a latent once, so training never touches pixels.
+  - component: dit
+    text: >-
+      splits the noisy latent into `2×2` patches, adds positions, and runs blocks whose layer norms are shifted and
+      scaled by the timestep and parameter embedding, predicting the noise.
+  - component: eval
+    text: >-
+      decodes 10,000 samples, compares them with held-out frames by FID, and asks the **probe** whether each shows
+      the requested object count.
+interface:
+  lang: python
+  code: |
+    class DiTBlock(nn.Module):
+        def __init__(self, d):
+            ...
+            self.ada = nn.Linear(d, 6 * d)
+            nn.init.zeros_(self.ada.weight)  # zero
+            nn.init.zeros_(self.ada.bias)
+
+        def forward(self, x, c):  # emb(t) + emb(p)
+            m = self.ada(c).unsqueeze(1).chunk(6, -1)
+            h = modulate(self.norm1(x), m[0], m[1])
+            x = x + m[2] * self.attn(h)
+            h = modulate(self.norm2(x), m[3], m[4])
+            return x + m[5] * self.mlp(h)
+decisions:
+  - choice: Train on cached VAE latents
+    instead: Train on pixels
+    why: >-
+      A latent is several times smaller than a 128×128 frame, so the DiT sees fewer tokens per image. Encoding once
+      with the project 48 VAE keeps 35 hours realistic on one GPU.
+  - choice: Condition through adaLN-Zero
+    instead: Cross-attention to the parameters
+    why: >-
+      Scene parameters are a short fixed vector, which adaLN handles cheaply. Zero-initialised gates start every
+      block as the identity, which the DiT paper found trains best.
+  - choice: Sizes compared at equal steps and settings
+    instead: Each size tuned separately
+    why: >-
+      Different batch sizes or learning rates make the size comparison mean nothing. Fix both and the step budget,
+      and change only width and depth.
+  - choice: A probe checks the conditioning
+    instead: Judging samples by eye
+    why: >-
+      The engine knows every frame's true parameters, so a probe trained on real frames can score 10,000 samples
+      against what was requested.
+watchOut: >-
+  Renders that change between runs, from uninitialised buffers, thread order or driver state, break the claim that a
+  seed regenerates the dataset. Render twice and compare checksums before training on anything.

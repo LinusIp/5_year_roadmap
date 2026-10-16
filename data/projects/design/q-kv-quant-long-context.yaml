@@ -1,0 +1,123 @@
+overview: >-
+  A pre-registered experiment on the KV cache, the stored keys and values of every past token that a model reads at
+  each decoding step. An open 3–8B model with at least a 32k context runs needle-in-a-haystack prompts at 4k to 32k
+  tokens and five depths, with the cache stored as fp16, int8 per token, int4 per token, or int4 with per-channel keys
+  and per-token values. Both are quantized when written to the cache and dequantized when read, and exact-match
+  accuracy per cell shows how retrieval degrades, written up in a two-page report where a negative result counts.
+learn:
+  - name: The KV cache
+    ref: kipply-inference-arithmetic
+  - name: Post-training quantization
+    ref: mit-6-5940
+  - name: Per-channel and per-token scales
+    ref: mit-6-5940
+  - name: Long-context evaluation
+    ref: roadmap-inference-engineering
+  - name: Pre-registration
+    ref: schulman-research-guide
+stats:
+  - value: 4k–32k
+    label: context lengths, five depths each
+  - value: ≥ 50
+    label: identical prompts per cell
+  - value: "4"
+    label: cache formats, fp16 included
+components:
+  - id: protocol
+    name: Prediction and protocol
+    role: Fixes the model, schemes, lengths, depths, prompts and scoring before the sweep.
+    tech: Markdown in research/
+    talksTo: [prompts]
+    kind: core
+  - id: prompts
+    name: Needle prompts
+    role: Builds haystacks with a needle at each length and depth, plus multi-key prompts with distractors.
+    tech: Python
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Model
+    role: Prefills the prompt and decodes the answer greedily.
+    tech: Llama 3.x or Qwen 2.5 · transformers
+    talksTo: [cache, scorer]
+    kind: core
+  - id: cache
+    name: Quantized cache
+    role: Quantizes keys and values on write and dequantizes them on read, per scheme.
+    tech: Custom cache class · PyTorch
+    talksTo: [model]
+    kind: core
+  - id: crosscheck
+    name: fp8 cross-check
+    role: Runs the same prompts with vLLM's fp8 cache as an independent reference.
+    tech: vLLM
+    talksTo: [scorer]
+    kind: offline
+  - id: scorer
+    name: Scorer
+    role: Scores exact matches and builds length-by-depth heatmaps per scheme.
+    tech: pandas · Matplotlib
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Two pages with the heatmaps, memory against accuracy, and the prediction beside the outcome.
+    tech: research/ in the data repo
+    talksTo: []
+    kind: core
+flow:
+  - component: protocol
+    text: >-
+      commits a prediction such as "int8 stays **within 2 points** of fp16; int4 per token loses more than 20 at 32k".
+  - component: prompts
+    text: >-
+      places a random key-value needle at five depths in 4k, 8k, 16k and 32k haystacks, and checks the token count.
+  - component: model
+    text: >-
+      prefills the haystack; each layer's new keys and values go to the cache.
+  - component: cache
+    text: >-
+      stores them as integers with a scale per token or per channel, and returns `fp16` values when attention reads
+      them.
+  - component: model
+    text: >-
+      decodes greedily, reading the dequantized cache at every step, until the answer ends.
+  - component: scorer
+    text: >-
+      marks exact matches and subtracts the fp16 heatmap from each scheme's.
+  - component: report
+    text: >-
+      sets accuracy beside KV memory per token and recommends a scheme per context length.
+interface:
+  lang: python
+  code: |
+    def quant(x, bits, dim):
+        """Symmetric integer quantization along dim."""
+        qmax = 2 ** (bits - 1) - 1
+        s = x.abs().amax(dim, keepdim=True) / qmax
+        q = (x / s).round().clamp(-qmax, qmax)
+        return q.to(torch.int8), s
+
+    # k, v: [batch, heads, tokens, head_dim]
+    qk, sk = quant(k, 4, dim=-2)  # per channel
+    qv, sv = quant(v, 4, dim=-1)  # per token
+    k_hat = (qk * sk).to(torch.float16)  # on read
+decisions:
+  - choice: Quantize on write, dequantize on read
+    instead: Fused low-bit attention kernels
+    why: >-
+      The question is about quality, not speed. Round-tripping the values in PyTorch isolates the effect of the
+      number format; vLLM's fp8 cache cross-checks it.
+  - choice: Random needles and exact match
+    instead: Natural facts scored by an LLM judge
+    why: >-
+      A random key cannot be guessed without reading it, and exact match has no judge noise. Each prompt is also run
+      without its needle to confirm it fails.
+  - choice: Identical prompts and greedy decoding
+    instead: Fresh prompts or sampling per scheme
+    why: >-
+      With the same 50 or more prompts per cell and no sampling, any difference between schemes comes from the cache,
+      not from noise.
+watchOut: >-
+  At 32k the run can run out of memory and silently truncate the prompt, so the needle is gone for reasons unrelated
+  to quantization. Assert the token count after tokenisation and fail the cell instead of shortening it.

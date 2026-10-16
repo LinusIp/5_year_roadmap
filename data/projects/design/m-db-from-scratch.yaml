@@ -1,0 +1,120 @@
+overview: >-
+  A single-file database in C, written from the first line. A REPL reads a SQL statement, a hand-written parser turns
+  it into a tree, and an executor runs it as cursor moves over a B-tree (a sorted, balanced tree of pages, so finding
+  a key reads only a few of them). A pager reads and caches 4 KiB pages of one file, page 0 holds the catalogue of
+  tables, and SQLite on the same data is the yardstick.
+learn:
+  - name: B-trees
+    ref: cmu-15-445
+  - name: Pages and buffer pools
+    ref: cmu-15-445
+  - name: Recursive-descent parsing
+    ref: crafting-interpreters
+  - name: Storage engines
+    ref: ddia
+  - name: SQL basics
+    ref: sqlbolt
+stats:
+  - value: "100,000"
+    label: rows in random order, all found after reopening
+  - value: 4 KiB
+    label: pages, cached by the pager
+components:
+  - id: repl
+    name: REPL
+    role: Reads one statement up to its semicolon and prints rows or errors.
+    tech: C11
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: Parser
+    role: Tokenises and parses CREATE TABLE, INSERT and SELECT with WHERE into an AST.
+    tech: C11 · recursive descent
+    talksTo: [executor]
+    kind: core
+  - id: executor
+    name: Executor
+    role: Turns the AST into cursor operations on the right table.
+    tech: C11
+    talksTo: [catalogue, btree]
+    kind: core
+  - id: catalogue
+    name: Catalogue
+    role: Maps table names to root pages and column schemas, stored in page 0.
+    tech: C11
+    talksTo: [pager]
+    kind: core
+  - id: btree
+    name: B-tree
+    role: Finds, inserts and splits leaf and internal nodes, each one page.
+    tech: C11
+    talksTo: [pager]
+    kind: core
+  - id: pager
+    name: Pager
+    role: Reads and writes fixed-size pages of the database file and caches them.
+    tech: C11 · one file
+    talksTo: []
+    kind: core
+  - id: bench
+    name: Tests and benchmark
+    role: Drives the REPL with randomised inserts, checks invariants and times SQLite on the same rows.
+    tech: pytest · ASan · SQLite 3
+    talksTo: [repl]
+    kind: offline
+flow:
+  - component: repl
+    text: reads `SELECT * FROM users WHERE id > 10 AND name = 'ada';` up to the semicolon.
+  - component: parser
+    text: >-
+      splits it into tokens and builds a `Select` node with the table name and an `And` of two comparisons, or
+      reports where the syntax went wrong.
+  - component: executor
+    text: asks the catalogue for the table and opens a cursor on its B-tree.
+  - component: catalogue
+    text: returns the table's root page number and its columns from page 0.
+  - component: btree
+    text: >-
+      descends internal nodes by key to the first matching leaf and walks leaves in key order, testing `WHERE` on
+      each row; an insert into a **full leaf** splits it and pushes a key up to the parent.
+  - component: pager
+    text: >-
+      serves each `get_page(n)` from its cache or the file, and writes dirty pages back on flush.
+interface:
+  lang: c
+  code: |
+    // Leaf page, 4 KiB:
+    // [type u8][is_root u8][parent u32]
+    // [num_cells u32][next_leaf u32]
+    // then cells: [key u32][row bytes] ...
+
+    void  *get_page(Pager *p, uint32_t n);
+    Cursor table_find(Table *t, uint32_t key);
+    void   leaf_insert(Cursor *c, uint32_t key,
+                       const Row *row);
+    void   serialize_row(const Row *src, void *dst);
+    bool   check_invariants(Table *t); // test only
+decisions:
+  - choice: Rows stored in B-tree leaves by key
+    instead: An unsorted heap file plus a separate index
+    why: >-
+      One tree gives sorted full scans and point lookups in a few page reads, which is all the two-table schema
+      needs. A secondary index is the stretch.
+  - choice: Hand-written recursive-descent parser
+    instead: A parser generator
+    why: >-
+      The grammar is three statements and comparisons joined by AND. A function per rule is short, readable and
+      gives exact error positions.
+  - choice: Serialise fields at fixed offsets
+    instead: Casting structs onto page memory
+    why: >-
+      Struct padding and byte order differ between compilers and machines. Explicit offsets keep the file format
+      yours and the cell maths testable.
+  - choice: Benchmark SQLite both ways, sync settings matched
+    instead: SQLite defaults against an engine that never syncs
+    why: >-
+      Per-statement SQLite pays an fsync on every insert. Time inserts in one transaction and one per statement,
+      and say how your engine syncs.
+watchOut: >-
+  A split that forgets to update the parent's key for the new right child leaves rows that a full scan finds but a
+  lookup misses. Run the invariant checker every 1,000 inserts in the randomised test.

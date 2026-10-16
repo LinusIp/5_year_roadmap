@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { stepsTicked } from '../../seed/catalogue.ts';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { useCatalogueIndex } from '../../hooks/useCatalogue.ts';
 import { today } from '../../lib/dates.ts';
@@ -98,7 +99,7 @@ export function ProjectsView({ atlas, phase, weekly, onOpenItem }: { atlas: Atla
                 key={e.id}
                 icon={<KindIcon kind="case" />}
                 title={e.title}
-                meta={(i === 0 ? 'Next in Block D · ' : '') + (states.get(e.id)?.unitsDone.length ?? 0) + ' milestones ticked · ' + hoursOn(e.id) + ' of ' + e.hours + ' h'}
+                meta={(i === 0 ? 'Next in Block D · ' : '') + stepsTicked(states.get(e.id)?.unitsDone) + ' milestones ticked · ' + hoursOn(e.id) + ' of ' + e.hours + ' h'}
                 onClick={() => onOpenItem(e.id)}
                 action={<ItemStatusPill kind="project" refId={e.id} title={e.title} state={states.get(e.id)} />}
               />

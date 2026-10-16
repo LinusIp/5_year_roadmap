@@ -1,0 +1,59 @@
+overview: >-
+  A lock-free ring buffer for exactly one producer and one consumer thread, where head and tail are atomics using
+  acquire and release ordering and sit on separate cache lines, compared with a mutex queue and tested with
+  ThreadSanitizer.
+learn:
+  - name: Memory ordering
+    ref: crust-of-rust
+  - name: False sharing
+    ref: mit-6-172
+  - name: Ring buffers
+components:
+  - id: producer
+    name: Producer thread
+    role: Writes items into the slot at tail and publishes the new tail.
+    tech: C++20
+    talksTo: [ring]
+    kind: core
+  - id: ring
+    name: Ring buffer
+    role: A power-of-two array with `head` and `tail` atomics, each padded to 64 bytes.
+    tech: std::atomic · alignas(64)
+    talksTo: [consumer]
+    kind: core
+  - id: consumer
+    name: Consumer thread
+    role: Reads the slot at head and publishes the new head.
+    tech: C++20
+    talksTo: []
+    kind: core
+flow:
+  - component: producer
+    text: loads `head` with acquire to check for space, writes the item, then stores `tail + 1` with **release**.
+  - component: ring
+    text: keeps `head` and `tail` on different cache lines so the two cores do not fight over one line.
+  - component: consumer
+    text: loads `tail` with acquire, so it sees the item written before that store, reads it and stores `head + 1` with release.
+  - component: consumer
+    text: checks that 10M sequence numbers arrive in order; the benchmark compares items per second with a mutex queue.
+interface:
+  lang: cpp
+  code: |
+    template <class T, size_t N>  // N power of two
+    class Spsc {
+      alignas(64) std::atomic<size_t> head_{0};
+      alignas(64) std::atomic<size_t> tail_{0};
+      T buf_[N];
+    public:
+      bool push(const T& v);   // producer only
+      bool pop(T& out);        // consumer only
+    };
+decisions:
+  - choice: Acquire and release, not seq_cst
+    instead: Default sequentially consistent atomics
+    why: >-
+      One writer per index needs only the release-acquire pairing to publish the item. seq_cst is correct too, but
+      adds fences on some CPUs; measure both.
+watchOut: >-
+  With relaxed ordering on the tail store the consumer can see the new tail before the item, and read garbage.
+  TSan and an ordered-sequence check catch it.

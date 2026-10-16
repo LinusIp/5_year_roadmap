@@ -1,0 +1,131 @@
+overview: >-
+  Block A's work joined into one C++ engine you can show and use. A core owns the world and steps it at a fixed time
+  step; physics runs as stages (broadphase, narrowphase, rigid solver, XPBD solver for cloth and soft bodies, GPU
+  fluid) that share one set of contacts. A Vulkan renderer draws a read-only snapshot of each step, Python bindings
+  turn the same world into a dataset generator, and a ROS 2 bridge lets robot nodes drive a simulated arm or base.
+learn:
+  - name: Engine architecture
+    ref: game-engine-architecture
+  - name: Vulkan rendering
+    ref: vkguide
+  - name: GJK and EPA
+    ref: ericson-rtcd
+  - name: Sequential impulses
+    ref: catto-box2d-publications
+  - name: XPBD constraints
+    ref: ten-minute-physics
+  - name: Grid fluids
+    ref: bridson-fluid-sim
+stats:
+  - value: 60 FPS
+    label: main scene at 1080p
+  - value: "1,000"
+    label: boxes stacked without jitter
+  - value: 2° RMS
+    label: robot joints against MuJoCo or Gazebo
+components:
+  - id: scene
+    name: Scene file
+    role: Describes bodies, materials, cameras and the robot, loaded the same way by the app and the bindings.
+    tech: Data files
+    talksTo: [core]
+    kind: core
+  - id: core
+    name: Core
+    role: Owns the world, the fixed-step loop and the job system that runs the stages.
+    tech: C++20
+    talksTo: [physics]
+    kind: core
+  - id: physics
+    name: Physics stages
+    role: Broadphase, GJK/EPA narrowphase, rigid, XPBD and fluid solvers over shared contact data.
+    tech: C++ · Vulkan compute
+    talksTo: [renderer, bindings, bridge]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Draws an immutable snapshot of transforms with PBR materials and shadows.
+    tech: Vulkan 1.3 · GLSL to SPIR-V
+    talksTo: []
+    kind: core
+  - id: bindings
+    name: Python bindings
+    role: Exposes step, set and read state, and render-to-array for dataset generation.
+    tech: nanobind or pybind11 · NumPy
+    talksTo: []
+    kind: core
+  - id: bridge
+    name: ROS 2 bridge
+    role: Publishes the robot's joint states and sim clock and applies incoming commands.
+    tech: ROS 2 Jazzy · rclcpp
+    talksTo: [nodes]
+    kind: core
+  - id: nodes
+    name: Robot nodes
+    role: Your ROS 2 controller nodes, which drive both your engine and the reference simulator.
+    tech: ROS 2 Jazzy
+    talksTo: [bridge, reference]
+    kind: external
+  - id: reference
+    name: Reference sim
+    role: Runs the same robot and task so joint trajectories can be compared.
+    tech: MuJoCo or Gazebo
+    talksTo: []
+    kind: external
+flow:
+  - component: scene
+    text: is loaded from one command line, so every demo scene and every dataset run starts from the same file.
+  - component: core
+    text: >-
+      advances the world by one fixed step `dt`, independent of frame rate, and hands the stages to the job system.
+  - component: physics
+    text: >-
+      finds candidate pairs, computes contacts with GJK/EPA, then runs the rigid, XPBD and fluid solvers on **shared
+      contacts**, so cloth drapes over a moving box.
+  - component: renderer
+    text: >-
+      reads the frozen transform snapshot of that step and draws PBR and shadows, without touching state the next
+      step is writing.
+  - component: bindings
+    text: >-
+      return the step's state and an image as NumPy arrays without copying whole buffers; a seeded run of 10,000
+      frames is **bit-identical** twice.
+  - component: bridge
+    text: >-
+      publishes joint states stamped with sim time on `/clock` and applies the nodes' commands at the next step;
+      this command loop is how the robot is controlled.
+interface:
+  lang: python
+  code: |
+    import engine
+
+    w = engine.World.load("scenes/arm.scene", seed=7)
+    for t in range(600):
+        w.set_joint_torques("arm", tau)
+        w.step()              # one fixed dt
+        s = w.get_state()     # dict of arrays
+        img = w.render(640, 480)  # uint8 HxWx3
+decisions:
+  - choice: Renderer reads an immutable snapshot
+    instead: Renderer and physics sharing the live world
+    why: >-
+      Physics runs on jobs and the GPU while frames are drawn. A snapshot per step removes tearing and races, at the
+      cost of one copy of transforms.
+  - choice: One world with shared contact data
+    instead: Separate rigid, cloth and fluid worlds
+    why: >-
+      The acceptance asks for rigid and soft bodies in the same world, and cloth over a moving body needs both
+      solvers to see the same contacts.
+  - choice: In-process bindings over engine buffers
+    instead: A separate engine process driven over a socket
+    why: >-
+      Datasets need thousands of frames a minute; a socket copies every state and image. Expose views of the
+      buffers and copy only what the script keeps.
+  - choice: Bridge runs on simulation time
+    instead: Bridge runs on wall time
+    why: >-
+      The robot is compared with MuJoCo or Gazebo over a 10-second task. On wall time the result changes with the
+      machine's load and the comparison means nothing.
+watchOut: >-
+  Parallel reductions that add floats in a different order each run make the engine non-deterministic and break
+  dataset reproducibility. Sum in a fixed order, and run the two-seed bit-identical check in CI.

@@ -1,0 +1,59 @@
+overview: >-
+  A small model predicts each request's output length from its prompt, and a simulated server runs the shortest
+  predicted job first (SJF). Mean and p99 latency are compared with first-come-first-served and with an oracle that
+  knows the true lengths, and noise is added to the predictions to see how much error the gain survives.
+learn:
+  - name: Shortest job first
+    ref: ostep
+  - name: Head-of-line blocking
+  - name: Regression on text features
+    ref: ml-zoomcamp
+  - name: Starvation and aging
+    ref: ostep
+components:
+  - id: predictor
+    name: Length predictor
+    role: Learns an output-length bucket from prompt features on a chat dataset with real reply lengths.
+    tech: scikit-learn
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Scheduler
+    role: Orders the queue by FCFS, predicted SJF with aging, or oracle length.
+    tech: Python · heapq
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Server sim
+    role: Runs requests with a fixed batch size and records finish times.
+    tech: Python
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Tables mean and p99 latency per policy and plots gain against noise.
+    tech: pandas · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: predictor
+    text: trains on prompt length, task words and a TF-IDF vector, and predicts a length bucket on a held-out split.
+  - component: scheduler
+    text: >-
+      keys each request by predicted length minus an **aging** bonus for time waited, so long requests still run
+      eventually.
+  - component: sim
+    text: replays the same arrival trace under FCFS, predicted SJF and oracle, so only the order changes.
+  - component: report
+    text: >-
+      shows mean and p99 latency per policy, then repeats predicted SJF with noise of 25%, 50% and 100% added to the
+      predictions.
+decisions:
+  - choice: Predict length buckets
+    instead: Predict exact token counts
+    why: >-
+      The scheduler only needs the order, and reply length from a prompt is very noisy. A few buckets (short, medium,
+      long) are easier to learn and their accuracy is easy to report.
+watchOut: >-
+  Pure SJF can leave a long request waiting forever under steady load, which wrecks p99. Report the slowest request
+  per policy, and keep the aging term in the predicted and oracle policies alike.

@@ -1,0 +1,109 @@
+overview: >-
+  A volumetric cloud renderer for Coastline TV, so a presenter can fly through clouds built from forecast cloud water.
+  A compute shader ray-marches density from a brick cache, lights each sample with single scattering toward the sun
+  plus a cheap approximation for light that bounces many times, and adds detail noise that changes shape but not total
+  mass. Each frame takes few samples with a jittered start, and a temporal pass blends the result with the reprojected
+  previous frame to reach 30 FPS at 1080p.
+learn:
+  - name: Volume rendering equation
+    ref: pbr-book
+  - name: Phase functions
+    ref: pbr-book
+  - name: Multiple-scattering approximation
+  - name: Temporal reprojection
+    ref: rtr4
+  - name: Empty-space skipping
+stats:
+  - value: 30 FPS
+    label: 1080p on a 12 GB GPU
+  - value: r > 0.95
+    label: optical depth vs data column
+  - value: < 2%
+    label: pixel flicker
+components:
+  - id: fields
+    name: Forecast fields
+    role: Cloud water on the model grid for each forecast step.
+    tech: Model output
+    talksTo: [time]
+    kind: external
+  - id: camera
+    name: Camera tools
+    role: Records and plays the presenter's flight path and the forecast time per frame.
+    tech: C++17 · ImGui
+    talksTo: [time]
+    kind: core
+  - id: time
+    name: Time interpolator
+    role: Blends the two forecast steps around the frame's time into one density field.
+    tech: GLSL compute
+    talksTo: [bricks]
+    kind: core
+  - id: bricks
+    name: Density brick cache
+    role: Keeps only bricks that contain cloud, with a coarse map that lets rays skip empty space.
+    tech: 3D textures
+    talksTo: [marcher]
+    kind: core
+  - id: marcher
+    name: Ray marcher
+    role: Marches view rays, accumulates scattered light and transmittance.
+    tech: GLSL compute
+    talksTo: [multi]
+    kind: core
+  - id: multi
+    name: Multi-scatter approx
+    role: Adds several weaker, wider scattering octaves to stand in for many bounces.
+    tech: GLSL
+    talksTo: [temporal]
+    kind: core
+  - id: temporal
+    name: Temporal reprojection
+    role: Blends this frame with last frame's result at the reprojected position, clamping to avoid ghosts.
+    tech: GLSL compute
+    talksTo: []
+    kind: core
+flow:
+  - component: camera
+    text: gives the frame's camera pose and forecast time from the recorded path.
+  - component: time
+    text: blends the two forecast steps around that time, so clouds evolve smoothly between forecast outputs.
+  - component: bricks
+    text: let each ray jump over empty bricks and start marching only where there is cloud water.
+  - component: marcher
+    text: starts each ray at a jittered offset, turns cloud water into extinction, and at each sample marches a few steps toward the sun for its shadow.
+  - component: multi
+    text: adds octaves with lower extinction and a flatter phase function, so thick clouds stay bright inside instead of turning grey.
+  - component: temporal
+    text: reprojects last frame's pixel with the camera motion, **clamps** it to this frame's neighbourhood colours, and blends about 90% history with 10% new.
+interface:
+  lang: glsl
+  code: |
+    uniform sampler3D u_q;   // cloud water, bricked
+    uniform float u_k;       // extinction per kg/kg
+    uniform float u_jitter;  // new every frame, 0..1
+    void main() {
+      Ray r = cameraRay(gl_GlobalInvocationID.xy);
+      vec3 L = vec3(0.0); float T = 1.0;
+      for (float t = r.t0 + u_jitter * DT; t < r.t1;
+           t += DT) {
+        vec3 p = r.o + t * r.d;
+        float s = u_k * detail(p, texture(u_q, p).r);
+        L += T * s * DT * inScatter(p); // sun, phase
+        T *= exp(-s * DT);
+        if (T < 0.01) break;
+      } store(L, T); }
+decisions:
+  - choice: Detail noise that keeps mass
+    instead: Free artistic noise on top of the data
+    why: The broadcaster needs clouds faithful to the forecast, measured as r > 0.95 against column cloud water. Noise erodes only edges and rescales so each column's total stays the same.
+  - choice: Few samples and temporal reprojection
+    instead: Full sample count every frame
+    why: Full quality at 1080p would cost several frames' budget. Jittered few-sample frames averaged over time reach 30 FPS and also remove banding.
+  - choice: Octave multi-scatter approximation
+    instead: Path-traced multiple scattering
+    why: Path tracing cannot run at 30 FPS on one GPU. The octave trick loses some energy, so check its brightness against an offline path-traced reference.
+watchOut: >-
+  Reprojection ghosts when the presenter's camera moves fast or clouds evolve between steps, leaving smeared trails.
+  Clamp history to the current neighbourhood, drop it where the reprojected pixel left the screen, and measure flicker
+  and ghosting on a recorded fly-through.

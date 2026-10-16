@@ -1,0 +1,124 @@
+overview: >-
+  A URL shortener grown one measured step at a time: a stateless API on Postgres first, then a Redis read-through
+  cache, click counting through a queue, storage sharded by key hash, and a Kubernetes deployment that autoscales the
+  API tier. The same k6 load test, with a skewed Zipf mix of keys (a few codes get most of the traffic), runs before
+  and after every step, so each change has its own number. The case study with a diagram per stage is the deliverable.
+learn:
+  - name: Load testing and saturation
+    ref: google-sre-book
+  - name: Read-through caching
+    ref: system-design-primer
+  - name: Sharding by key hash
+    ref: ddia
+  - name: Async writes via a queue
+    ref: bytebytego
+  - name: Horizontal pod autoscaling
+    ref: kubernetes-tutorials
+  - name: Metrics scraping
+    ref: prometheus-docs
+stats:
+  - value: 5×
+    label: baseline saturation rate, same p99
+  - value: < 100 ms
+    label: p99 redirect at saturation
+  - value: 2 → 6
+    label: API pods on the ramp, back in 10 min
+components:
+  - id: k6
+    name: k6 load test
+    role: Replays a read-heavy, Zipf-distributed mix of redirects and creates from a separate machine.
+    tech: k6
+    talksTo: [ingress]
+    kind: external
+  - id: ingress
+    name: Ingress
+    role: Spreads incoming requests over the API pods.
+    tech: Kubernetes ingress
+    talksTo: [api]
+    kind: core
+  - id: api
+    name: API pods
+    role: Stateless redirect and create handlers, with a router that maps each code to its shard.
+    tech: Go or FastAPI
+    talksTo: [cache, postgres, clicks]
+    kind: core
+  - id: cache
+    name: Redis cache
+    role: Holds hot code-to-URL pairs so most redirects never touch Postgres.
+    tech: Redis
+    talksTo: []
+    kind: core
+  - id: postgres
+    name: Postgres shards
+    role: N databases, each owning the codes whose hash lands on it, plus the click counters.
+    tech: Postgres ×N
+    talksTo: []
+    kind: core
+  - id: clicks
+    name: Click pipeline
+    role: A queue of click events and a worker that batches them into counters.
+    tech: Redis Streams or NATS
+    talksTo: [postgres]
+    kind: core
+  - id: metrics
+    name: Metrics and HPA
+    role: Scrapes every component, draws the dashboards and scales the API tier.
+    tech: Prometheus · Grafana · HPA
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: k6
+    text: >-
+      sends `GET /{code}` and `POST /links` in a skewed mix from **another machine**, ramping until p99 crosses 100 ms
+      or errors pass 1 %.
+  - component: ingress
+    text: hands each request to one of the API pods, whose number the autoscaler changes.
+  - component: cache
+    text: is asked first on a redirect; a hit returns the long URL without a database round trip.
+  - component: api
+    text: >-
+      on a miss picks the shard with `hash(code) mod N`, reads it, writes the pair back to Redis with a TTL and
+      returns `302`.
+  - component: postgres
+    text: >-
+      serves that one shard's read; creates write to the shard their new code hashes to, and codes carry enough
+      random bits that shards never collide.
+  - component: clicks
+    text: >-
+      gets a click event from the API **without** the redirect waiting on it; the worker adds up batches into the
+      counters.
+  - component: metrics
+    text: >-
+      scrapes latency, hit rate and queue lag, and the autoscaler grows the API tier from 2 to 6 pods on request rate.
+interface:
+  lang: http
+  code: |
+    POST /links
+    { "url": "<long link>" }
+
+    201 Created
+    { "code": "3fK9xQ" }
+
+    GET /3fK9xQ
+
+    302 Found
+    Location: <long link>
+decisions:
+  - choice: Cache first, shard later
+    instead: Shard Postgres from the start
+    why: >-
+      With a read-heavy, skewed key mix a small cache absorbs most redirects, so measure the hit rate against cache
+      size before paying for N databases.
+  - choice: Click counts through a queue
+    instead: An UPDATE on every redirect
+    why: >-
+      A hot code's counter row would serialise its redirects on a row lock; batching keeps the redirect path
+      read-only. Revisit if counts must be exact within the second.
+  - choice: Autoscale on request rate
+    instead: Autoscale on CPU only
+    why: >-
+      Once the database is the bottleneck, API CPU stays low while latency climbs, so CPU never triggers the scale-up
+      the ramp needs.
+watchOut: >-
+  Running k6 on the machine under test measures k6, not the service. Put the load generator on its own machine and
+  check its own CPU stays below saturation.

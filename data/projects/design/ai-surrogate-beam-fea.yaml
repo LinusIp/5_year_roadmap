@@ -1,0 +1,54 @@
+overview: >-
+  A small MLP that predicts beam deflection from geometry and load, trained on 2k cases from a solver (FEA or the
+  analytic beam formula). It must be within 2% inside the training ranges, and you document how badly it fails
+  outside them.
+learn:
+  - name: Surrogate models
+    ref: pbdl-book
+  - name: Input normalization
+  - name: Extrapolation limits
+  - name: Beam bending
+    ref: mit-2-001
+components:
+  - id: solver
+    name: Case generator
+    role: Samples length, section, modulus and load and solves for deflection.
+    tech: Analytic formula or FEA
+    talksTo: [prep]
+    kind: offline
+  - id: prep
+    name: Preprocessing
+    role: Log-scales and standardizes inputs and target.
+    tech: NumPy
+    talksTo: [mlp]
+    kind: core
+  - id: mlp
+    name: MLP surrogate
+    role: Predicts deflection from the scaled inputs.
+    tech: PyTorch
+    talksTo: [eval]
+    kind: core
+  - id: eval
+    name: Evaluator
+    role: Computes mean relative error in range and on out-of-range cases.
+    tech: Python · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: solver
+    text: produces 2k cases, plus a separate set with length and load beyond the training ranges.
+  - component: prep
+    text: takes `log` of quantities that span orders of magnitude, such as modulus and deflection, then standardizes them.
+  - component: mlp
+    text: trains on the in-range cases with a held-out in-range split.
+  - component: eval
+    text: reports **mean relative error** in range (target under 2%) and plots error growth outside it.
+decisions:
+  - choice: Train on log-deflection
+    instead: Train on raw deflection
+    why: >-
+      Deflection spans several orders of magnitude, so raw MSE is dominated by the floppiest beams. Log space makes
+      the loss match the relative-error target.
+watchOut: >-
+  A surrogate that is accurate in range can be confidently wrong just outside it. Report the out-of-range error and
+  refuse inputs outside the training box.
