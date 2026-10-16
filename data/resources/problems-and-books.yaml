@@ -85,7 +85,7 @@
   level: intro
   cost: free
   estHours: 60
-  summary: "Notes with practice and assignment problems, worked solutions for the practice set, for every calculus topic of the daily set."
+  summary: "Notes with practice and assignment problems, and worked solutions, for every calculus topic."
 
 - id: openstax-calculus
   title: "OpenStax Calculus, volumes 1-3"
