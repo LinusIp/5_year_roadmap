@@ -848,3 +848,15 @@ Verified on this machine (Linux, Chromium 140):
   is its own 23.5 kB chunk, 8.4 kB gzip). The main chunk is 371.6 kB (118.5 kB gzip), up from 360.3 kB (114.8 kB):
   the calendar's layout, the timer and the forgotten-timer sheet load with Today.
 - The live check now also opens Calendar's day view, and fails if Today shows Log time or a Practice tab.
+
+## Pull request #7: the service worker installs past the HTTP cache
+
+- The deploy of pull request #6 failed its live check ("Today still shows Log time"): after the update prompt the
+  page ran the old build. The new service worker's install fetched `./` and `index.html` through the browser's HTTP
+  cache, which GitHub Pages lets keep a page for ten minutes, so it stored the old page under the new version, and
+  the old page loaded the old build's script. The first live check of pull request #5 failed the same way.
+- Fix: the install fetches every file with `cache: 'reload'`. `tests/unit/sw.test.ts` checks every install request.
+- The live check now also checks that the page runs the new build's own script (one listed in the served
+  `sw.js`), not only that the new cache exists; the old build passed every other step.
+- Verified by replaying a deploy locally with Pages' `max-age=600`: without the fix the new check fails ("the page
+  runs a script that is not the new build's"), with it the live check passes.
