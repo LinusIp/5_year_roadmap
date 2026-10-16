@@ -1,0 +1,42 @@
+subject: calculus
+topic: derivatives-and-rules
+questions:
+  - id: calc-der-001
+    difficulty: 2
+    type: expression
+    prompt: "Differentiate $f(x) = x^{ {{n}} } \\sin x$."
+    params:
+      n: { int: [2, 5] }
+    answer: "n*x^(n-1)*sin(x) + x^n*cos(x)"
+    vars: [x]
+    hints: ["Use the product rule: $(uv)' = u'v + uv'$."]
+    solution: |
+      With $u = x^{ {{n}} }$ and $v = \sin x$: $f'(x) = {{n}}x^{ {{n - 1}} }\sin x + x^{ {{n}} }\cos x$.
+    verify: "diff(x**n*sin(x), x)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+  - id: calc-der-002
+    difficulty: 3
+    type: multipart
+    prompt: "Let $f(x) = {{a}}x^2 {{signed: b}}x$."
+    params:
+      a: { int: [1, 5] }
+      b: { int: [-6, 6], not: [0] }
+      c: { int: [1, 4] }
+    parts:
+      - prompt: "(a) What is $f'({{c}})$?"
+        type: numeric
+        answer: "2*a*c + b"
+        verify: "diff(a*x**2 + b*x, x).subs(x, c)"
+      - prompt: "(b) Using your answer to (a), what is the slope-intercept $y$-intercept of the tangent line at $x = {{c}}$?"
+        type: numeric
+        answer: "(a*c^2 + b*c) - part1*c"
+        verify: "(a*c**2 + b*c) - part1*c"
+    hints: ["$f'(x) = 2ax + b$.", "The tangent line is $y = f(c) + f'(c)(x - c)$; set $x = 0$."]
+    solution: |
+      (a) $f'(x) = {{2*a}}x {{signed: b}}$, so $f'({{c}}) = {{2*a*c + b}}$.
+      (b) $f({{c}}) = {{a*c^2 + b*c}}$, and at $x = 0$ the tangent line gives $f(c) - f'(c)\,c = {{(a*c^2 + b*c) - (2*a*c + b)*c}}$.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5

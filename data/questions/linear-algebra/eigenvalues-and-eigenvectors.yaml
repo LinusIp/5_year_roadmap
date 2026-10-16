@@ -1,0 +1,81 @@
+subject: linear-algebra
+topic: eigenvalues-and-eigenvectors
+questions:
+  - id: la-eig-001
+    difficulty: 2
+    type: numeric
+    prompt: |
+      Let $A = {{A}}$. What is the **larger** eigenvalue of $A$?
+    params:
+      p: { int: [-4, 6] }
+      q: { int: [-4, 6] }
+      s: { int: [1, 3] }
+    let:
+      A: "[[p, s], [0, q]] * 1"
+      big: "max(p, q)"
+    require: ["p != q"]
+    answer: big
+    hints:
+      - "The matrix is upper triangular."
+      - "For a triangular matrix, $\\det(A - \\lambda I)$ is the product of the diagonal entries of $A - \\lambda I$."
+    solution: |
+      $A$ is upper triangular, so $\det(A - \lambda I) = ({{p}} - \lambda)({{q}} - \lambda)$.
+      The eigenvalues are the diagonal entries, $\lambda = {{p}}$ and $\lambda = {{q}}$, and the larger is ${{big}}$.
+    verify: "max(Matrix([[p, s], [0, q]]).eigenvals().keys())"
+    covers: [mit-18-06/lecture-21]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+  - id: la-eig-002
+    difficulty: 3
+    type: vector
+    prompt: |
+      Let $A = {{A}}$. One eigenvalue is $\lambda = {{l1}}$. Give an eigenvector for it, as a list such as `1, 2`.
+    params:
+      l1: { int: [-3, 5] }
+      l2: { int: [-3, 5] }
+      u: { int: [1, 3] }
+    let:
+      A: "[[l1, u], [0, l2]]"
+    require: ["l1 != l2"]
+    answer: "[1, 0]"
+    upToScale: true
+    hints:
+      - "Solve $(A - {{l1}} I)\\mathbf{x} = \\mathbf{0}$."
+      - "The first row of $A - {{l1}}I$ is $(0, {{u}})$, so $x_2 = 0$."
+    solution: |
+      $A - {{l1}}I = {{[[0, u], [0, l2 - l1]]}}$. Its rows force $x_2 = 0$ and leave $x_1$ free,
+      so every eigenvector is a non-zero multiple of ${{[1, 0]}}$.
+    verify: "list(Matrix([[l1, u], [0, l2]]).eigenvects()[[ev[0] for ev in Matrix([[l1, u], [0, l2]]).eigenvects()].index(l1)][2][0])"
+    covers: [mit-18-06/lecture-21]
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+  - id: la-eig-003
+    difficulty: 1
+    type: mc
+    prompt: "If $A\\mathbf{x} = \\lambda \\mathbf{x}$ for a non-zero $\\mathbf{x}$, then $\\lambda$ is:"
+    options:
+      - "an eigenvalue of $A$"
+      - "the determinant of $A$"
+      - "a pivot of $A$"
+      - "the trace of $A$"
+    answer: 0
+    hints: ["Read the defining equation of an eigenvector."]
+    solution: "That is the definition: $\\mathbf{x}$ is an eigenvector and $\\lambda$ its eigenvalue."
+    verify: "0"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+  - id: la-eig-004
+    difficulty: 4
+    type: proof
+    prompt: "Show that if $\\lambda$ is an eigenvalue of an invertible $A$, then $1/\\lambda$ is an eigenvalue of $A^{-1}$."
+    hints: ["Why can $\\lambda$ not be 0?", "Multiply $A\\mathbf{x} = \\lambda\\mathbf{x}$ by $A^{-1}$."]
+    solution: |
+      If $\lambda = 0$ then $A\mathbf{x} = \mathbf{0}$ for a non-zero $\mathbf{x}$, so $A$ is singular; hence $\lambda \ne 0$.
+      Multiplying $A\mathbf{x} = \lambda\mathbf{x}$ by $A^{-1}$ gives $\mathbf{x} = \lambda A^{-1}\mathbf{x}$, so
+      $A^{-1}\mathbf{x} = \tfrac{1}{\lambda}\mathbf{x}$: the same $\mathbf{x}$ is an eigenvector of $A^{-1}$ with eigenvalue $1/\lambda$.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5

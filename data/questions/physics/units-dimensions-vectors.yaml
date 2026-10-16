@@ -1,0 +1,30 @@
+subject: physics
+topic: units-dimensions-vectors
+questions:
+  - id: phys-units-001
+    difficulty: 1
+    type: numeric
+    prompt: "A car travels at {{v}} km/h. What is its speed? Give a value with units."
+    params:
+      v: { int: [36, 144] }
+    answer: "v / 3.6"
+    units: "m/s"
+    tolerance: { rel: 0.005 }
+    hints: ["1 km = 1000 m and 1 h = 3600 s."]
+    solution: "${{v}}\\,\\text{km/h} = {{v}} \\times \\tfrac{1000}{3600}\\,\\text{m/s} \\approx {{v/3.6}}\\,\\text{m/s}$."
+    verify: "v*1000/3600"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+  - id: phys-units-002
+    difficulty: 2
+    type: estimate
+    prompt: "Estimate the number of heartbeats in a human lifetime of 80 years."
+    answer: "70 * 60 * 24 * 365 * 80"
+    factor: 3
+    hints: ["Roughly 70 beats per minute.", "Minutes in a year: about $5 \\times 10^5$."]
+    solution: "$70 \\times 60 \\times 24 \\times 365 \\times 80 \\approx 3 \\times 10^9$ beats."
+    verify: "70*60*24*365*80"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
