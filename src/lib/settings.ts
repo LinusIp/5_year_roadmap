@@ -7,6 +7,11 @@ import type { Layout, StoredSettings, StoredSettingsInput } from '../db/types.ts
 import type { SettingsDefaults } from '../seed/schema.ts';
 
 /** Layout as a fresh install has it: exactly the mockups. */
+/** The blocks that are lanes of the plan: every block but Practice, which is fed by the question sets, not plan items. */
+export function planBlocks<B extends { role?: string }>(core: { blocks: B[] }): B[] {
+  return core.blocks.filter((b) => b.role !== 'practice');
+}
+
 export function defaultLayout(core: Pick<SettingsDefaults, 'blocks'>): Layout {
   return {
     today: { stats: true, later: true, review: true, footer: true, view: 'detailed', now: 'first', order: core.blocks.map((b) => b.id) },

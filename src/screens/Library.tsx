@@ -31,7 +31,7 @@ const TYPE_CHIPS: { key: string; label: string }[] = [
   { key: 'article', label: 'Articles' },
   { key: 'tool', label: 'Tools' },
 ];
-const KIND_OF_TYPE: Record<string, string> = { course: 'course', lectures: 'course', tutorial: 'course', cert: 'course', book: 'book', paper: 'paper', article: 'article', repo: 'tool' };
+const KIND_OF_TYPE: Record<string, string> = { course: 'course', lectures: 'course', tutorial: 'course', cert: 'course', book: 'book', paper: 'paper', article: 'article', repo: 'tool', tool: 'tool', problems: 'tool' };
 const STATUS_CHIPS: { key: ItemStatus; label: string }[] = [
   { key: 'active', label: 'Active' },
   { key: 'todo', label: 'Not started' },
@@ -226,9 +226,12 @@ export function Library({ openId }: { openId?: string }) {
         </RowList>
       )}
 
-      <Button className="mt-5" icon="plus" onClick={() => setAdding(true)}>
-        Add a resource
-      </Button>
+      <div className="mt-5 flex flex-wrap gap-2">
+        <Button icon="plus" onClick={() => setAdding(true)}>
+          Add a resource
+        </Button>
+        {(seed.practiceSubjects?.length ?? 0) > 0 && <Button to="/practice?choose=1">Practise a topic</Button>}
+      </div>
 
       <ItemSheet atlas={atlas} id={openId ?? null} onClose={() => navigate('/library' + (keep ? '?' + keep : ''))} />
       <PaperSheet paper={paperId ? (seed.papers.find((p) => p.id === paperId) ?? null) : null} state={paperId ? paperStates.get(paperId) : undefined} onClose={() => setPaperId(null)} />

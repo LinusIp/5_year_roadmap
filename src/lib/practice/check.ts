@@ -198,7 +198,10 @@ export function markQuestion(question: RenderedQuestion, inputs: string[]): Mark
     let mark = markPart(part, inputs[i] ?? '');
     if (!mark.correct && i > 0 && !mark.message) {
       const alt = chainedAnswer(question, i, given);
-      if (alt !== null && markPart(part, inputs[i] ?? '', alt).correct) mark = { correct: true, followed: true };
+      // A wrong earlier answer can make a later one meaningless (a division by zero, a root of a negative): then
+      // there is nothing to follow, and the part is simply wrong.
+      const usable = alt !== null && !(typeof alt === 'number' && !Number.isFinite(alt)) && !(Array.isArray(alt) && alt.flat().some((x) => typeof x === 'number' && !Number.isFinite(x)));
+      if (usable && markPart(part, inputs[i] ?? '', alt).correct) mark = { correct: true, followed: true };
     }
     given.push(valueOf(part, inputs[i] ?? ''));
     return mark;

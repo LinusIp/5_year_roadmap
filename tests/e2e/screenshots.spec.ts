@@ -88,3 +88,32 @@ test('compact Today and the Change today sheet match the committed screenshots',
   await expect(sheet.getByText(/^Blocks · /)).toBeVisible();
   await expect(page).toHaveScreenshot('change-today-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });
+
+test('a practice question, its solution and the set summary match the committed screenshots', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await importDemo(page, 'light');
+  await open(page, './#/practice');
+  const section = page.locator('section[aria-labelledby="question-heading"]');
+  await expect(page.getByText(/^Question 1 of 9/)).toBeVisible();
+  await expect(page).toHaveScreenshot('practice-question-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
+
+  await section.getByRole('button', { name: 'Hint' }).click();
+  await section.getByRole('button', { name: 'Show solution' }).click();
+  await expect(section.getByRole('region', { name: 'Solution' })).toBeVisible();
+  await expect(page).toHaveScreenshot('practice-solution-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
+
+  for (let i = 1; i <= 9; i++) {
+    await expect(page.getByText(new RegExp('^Question ' + i + ' of 9'))).toBeVisible();
+    const proof = section.getByRole('button', { name: 'Show the solution' });
+    if ((await proof.count()) > 0) {
+      await proof.click();
+      await section.getByRole('button', { name: i % 2 ? 'Got it' : 'Missed it' }).click();
+    } else {
+      if (i > 1) await section.getByRole('button', { name: 'Show solution' }).click();
+      await section.getByRole('button', { name: 'Count it as missed' }).click();
+    }
+    await page.getByRole('button', { name: /^(Next|See the summary)$/ }).click();
+  }
+  await expect(page.getByRole('heading', { name: /questions right$/ })).toBeVisible();
+  await expect(page).toHaveScreenshot('practice-summary-light.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
+});

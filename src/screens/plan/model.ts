@@ -7,6 +7,7 @@ import { laneCapacity } from '../../lib/replan.ts';
 import { activePhase, lane as laneItems } from '../../lib/schedule.ts';
 import type { Phase, Unit } from '../../seed/schema.ts';
 import { partOf, unitShort } from '../parts/text.ts';
+import { planBlocks } from '../../lib/settings.ts';
 
 export interface PhaseModel {
   phase: Phase;
@@ -18,7 +19,7 @@ export interface PhaseModel {
 export function buildModel(atlas: Atlas, asOf: string): PhaseModel[] {
   const { seed, settings, states, logs } = atlas;
   return seed.phases.map((phase) => {
-    const lanes = settings.core.blocks.map((block) => {
+    const lanes = planBlocks(settings.core).map((block) => {
       const items = laneItems(seed, phase.id, block.id)
         .map((planItem) => buildPlanItemView(planItem, seed, states))
         .filter((v) => v !== null);

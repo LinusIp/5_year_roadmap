@@ -76,11 +76,49 @@ you use it: every option sits behind an Edit or Change action in a sheet.
 | Plan's first view, dropped items shown or not | Settings › Layout › Plan |
 | Theme, week start, 12- or 24-hour clock, density | Settings › Layout › General |
 | Add a resource, project, paper or track of your own | Library › Add a resource |
+| Move the practice period, or take three to five questions a subject | Settings › Practice |
 
 **Nothing is lost.** Your edits are kept apart from the curriculum, as an ordered list of patches in
 `state/plan.json`, so an update to `data/` still flows in and your edits survive it. Dropped items stay
 restorable, every plan edit can be undone, and a change to the schedule never rewrites a day already past: the
 old templates are kept for the days they applied to. Schedule, pace and layout travel in `state/settings.json`.
+
+## Daily practice
+
+From 16 October 2026 to 31 January 2027 the day has a sixth block, **Practice** (P, 45 minutes): nine questions,
+three each of linear algebra, calculus and physics, two new and one review once a review is due. Today's set
+opens from Today's Practice row. It is the same set on every device for that date, and it does not change while
+you answer it.
+
+<p>
+  <img src="screenshots/practice-question-light.png" alt="A practice question: the prompt with maths, an answer field, Check, Hint and Show solution" width="32%">
+  <img src="screenshots/practice-solution-light.png" alt="The same question with a hint and the worked solution shown" width="32%">
+  <img src="screenshots/practice-summary-light.png" alt="The set summary: score, time, topics, when the reviews come back, and Done" width="32%">
+</p>
+
+- **Answering.** Numbers (with units where asked: `9.81 m/s^2`, `7/4`, `sqrt(2)/2`), vectors (`1, -2, 3`),
+  matrices (`1 2; 3 4`), expressions (`2x sin(x)`), multiple choice, estimates within a factor, and proofs you
+  grade yourself against the solution. A later part of a multi-part question that follows correctly from your own
+  wrong earlier answer is marked right, and says so.
+- **Hints and solutions.** Hints come one at a time. Showing the solution counts the question as missed.
+- **Reviews.** A miss comes back after 1 day, then 3, 7, 21 and 60 as you get it right.
+- **Difficulty** follows a rating per topic. Linear algebra follows the 18.06 lectures you have ticked; calculus
+  and physics move to the next topic after 15 answers at 80 %.
+- **Done** on the summary logs the time to the Practice block, by subject (math or physics), and nothing else.
+- **On demand**: Library › Practise a topic, ten questions on any topic, any day.
+- **Activity › Practice** (once you have answered something): accuracy per subject and topic, the five weakest
+  topics, reviews due, minutes.
+- **Roadmaps**: a topic at 85 % over its last 20 answers ticks the roadmap.sh nodes it covers.
+- **Settings › Practice**: the first and last day, and three to five questions a subject. After the last day the
+  block disappears; the answers stay.
+
+The questions live in `data/questions/` (format: `data/questions/SCHEMA.md`). Templates draw new numbers every
+time. `npm run verify:questions` recomputes every answer with SymPy (`pip install sympy numpy`).
+
+**Tech docs.** Every project that is not a weekly build has a tech doc in `data/projects/docs/<id>.md`: goal,
+architecture, stack, milestones, how to measure and report it. It shows in the project's sheet. Its milestones are
+checkboxes that count toward the project's progress, and "Copy as README skeleton" starts the project's repository
+README from it.
 
 ## Keyboard
 
@@ -135,6 +173,7 @@ README that Atlas writes into it explains each file.
 | `state/items.json` | Status, ticked units, notes and links of every course, book, project, paper, certificate and milestone |
 | `state/plan.json` | Your plan edits (an ordered list of patches, version 2), items of your own, re-plans and picked builds |
 | `state/settings.json` | Blocks, day templates, the weekly pattern, date ranges, day changes, pace, pauses and layout (version 2). Never the token. |
+| `state/practice.json` | Every practice answer: question, date, right or wrong, hints, time. Merged by answer, so two devices never lose one. |
 | `log/YYYY/MM/YYYY-MM-DD.json` and `.md` | One day, and its human-readable twin |
 | `reviews/` | Weekly, monthly and quarterly reviews |
 | `projects/` | Each project's write-up, links and checklist |
@@ -191,6 +230,8 @@ statuses and notes reference items by id, so editing the curriculum never loses 
 | `data/certs.yaml`, `data/subjects.yaml` | Certifications, and the credential map |
 | `data/roadmaps.yaml` | The five roadmap.sh roadmaps, as sections of nodes, each section with the phase that teaches it |
 | `data/settings.yaml` | The defaults a fresh install starts from |
+| `data/questions/` | The practice bank: `topics.yaml`, then one file of questions per topic (`SCHEMA.md` describes them) |
+| `data/projects/docs/*.md` | One tech doc per project (the file name is the project's id) |
 
 ### Adding a course, step by step
 

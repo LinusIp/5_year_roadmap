@@ -6,7 +6,7 @@
  * for todo, active and done. Hours are the currency everywhere else, because that is what the forecast
  * and the budget are measured in.
  */
-import type { AppSeed } from '../seed/schema.ts';
+import type { AppProject, AppSeed } from '../seed/schema.ts';
 import type { BlockId, PlanItem, Project } from '../seed/schema.ts';
 import type { ItemStatus, UserItemState } from '../db/types.ts';
 import { hasRepo } from './projects.ts';
@@ -26,6 +26,11 @@ export interface ItemProgress {
 /** An item that is `active` but has ticked nothing yet still shows some progress, so a lane never looks stalled. */
 const ACTIVE_WITHOUT_UNITS = 0.5;
 const STARTED_MINIMUM = 0.05;
+
+/** A project's checklist: its acceptance criteria, then its tech doc's milestones. */
+export function projectUnitCount(project: Pick<AppProject, 'acceptance' | 'milestoneCount'>): number {
+  return project.acceptance.length + (project.milestoneCount ?? 0);
+}
 
 export function fractionDone(status: ItemStatus, unitsDone: number, unitCount: number): number {
   if (status === 'done') return 1;
@@ -98,7 +103,7 @@ export function buildPlanItemView(
   if (!resource && !project) return null;
 
   const estHours = planItem.hours ?? resource?.estHours ?? project?.estHours ?? 0;
-  const unitCount = resource?.unitCount ?? project?.acceptance.length ?? 0;
+  const unitCount = resource?.unitCount ?? (project ? projectUnitCount(project) : 0);
   const base = itemProgress({ refId, estHours, unitCount, state: states.get(refId) });
   const prerequisites = resource?.prerequisites ?? [];
 

@@ -15,6 +15,7 @@ import { TextField } from '../../ui/TextField.tsx';
 import { PickerSheet } from '../parts/PickerSheet.tsx';
 import { blockShort, shortTitle } from '../parts/text.ts';
 import { parseDateInput } from '../settings/shared.tsx';
+import { planBlocks } from '../../lib/settings.ts';
 
 function titleOf(atlas: Atlas, refId: string): string {
   return atlas.seed.resources.find((r) => r.id === refId)?.title ?? atlas.seed.projects.find((p) => p.id === refId)?.title ?? refId;
@@ -110,7 +111,7 @@ export function AddToPlanSheet({ atlas, refId, open, onClose }: { atlas: Atlas; 
         open={open && picking === 'lane'}
         title="Lane"
         value={block}
-        options={settings.core.blocks.map((b) => ({ value: b.id, label: 'Block ' + b.id + ' · ' + blockShort(b.name) }))}
+        options={planBlocks(settings.core).map((b) => ({ value: b.id, label: 'Block ' + b.id + ' · ' + blockShort(b.name) }))}
         onPick={(v) => {
           if (v) setBlock(v);
           setIndex(null);
@@ -241,7 +242,7 @@ export function PhaseSheet({ atlas, phase, onClose }: { atlas: Atlas; phase: Pha
           )}
         </div>
         <RowList label="Lane focus">
-          {atlas.settings.core.blocks.map((b) => {
+          {planBlocks(atlas.settings.core).map((b) => {
             const value = (phase.focus as Record<string, string | undefined>)[b.id] ?? '';
             return (
               <li key={b.id} className="py-2">

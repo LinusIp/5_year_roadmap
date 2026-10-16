@@ -89,6 +89,7 @@ function QuestionScreen({
   total,
   subjectTitle,
   topicTitle,
+  reading,
   onAnswered,
   onNext,
 }: {
@@ -97,6 +98,8 @@ function QuestionScreen({
   total: number;
   subjectTitle: string;
   topicTitle: string;
+  /** Resources mapped to this topic, offered under the solution. */
+  reading: { id: string; title: string }[];
   onAnswered: (a: Attempt, result: PracticeAnswer['result'], followed: boolean) => void;
   onNext: () => void;
 }) {
@@ -135,7 +138,19 @@ function QuestionScreen({
       </Button>
     );
   } else {
-    primary = (
+    // Once the solution is shown, the answer counts as missed: checking it then would only copy the solution.
+    primary = attempt.revealed ? (
+      <Button
+        variant="filled"
+        onClick={() => {
+          const next = { ...attempt, marks: question.parts.map(() => ({ correct: false })) };
+          setAttempt(next);
+          onAnswered(next, 'wrong', false);
+        }}
+      >
+        Count it as missed
+      </Button>
+    ) : (
       <Button variant="filled" onClick={check}>
         Check
       </Button>
@@ -192,6 +207,19 @@ function QuestionScreen({
         <div className="rounded-card bg-surface p-5 text-body" aria-label="Solution" role="region">
           <p className="mb-2 text-meta text-ink2">Solution</p>
           <Maths source={question.solution} />
+          {reading.length > 0 && (
+            <p className="mt-3 text-meta text-ink2">
+              More on this topic:{' '}
+              {reading.map((r, i) => (
+                <span key={r.id}>
+                  {i > 0 && ', '}
+                  <a className="underline" href={'#/library/' + r.id}>
+                    {r.title}
+                  </a>
+                </span>
+              ))}
+            </p>
+          )}
         </div>
       )}
 
@@ -214,17 +242,6 @@ function QuestionScreen({
         {!answered && !attempt.revealed && !proof && (
           <Button variant="icon" onClick={() => setAttempt((a) => ({ ...a, revealed: true }))}>
             Show solution
-          </Button>
-        )}
-        {!answered && attempt.revealed && !proof && (
-          <Button
-            onClick={() => {
-              const next = { ...attempt, marks: question.parts.map(() => ({ correct: false })) };
-              setAttempt(next);
-              onAnswered(next, 'wrong', false);
-            }}
-          >
-            Count it as missed
           </Button>
         )}
       </div>
@@ -275,7 +292,7 @@ function Chooser({ bank }: { bank: QuestionBank }) {
         <RowList key={s.id} label={s.title + ' · ' + s.level}>
           {s.topics.map((t) => {
             const n = bank.questions.filter((q) => q.subject === s.id && q.topic === t.id).length;
-            return <Row key={t.id} title={t.title} meta={plural(n, 'question')} trailing="10" to={'/practice?topic=' + s.id + '/' + t.id + '&n=10'} />;
+            return <Row key={t.id} title={t.title} meta={plural(n, 'question')} to={'/practice?topic=' + s.id + '/' + t.id + '&n=10'} />;
           })}
         </RowList>
       ))}
@@ -418,7 +435,15 @@ export function Practice() {
           total={slots.length}
           subjectTitle={subject.short}
           topicTitle={subject.topics.find((t) => t.id === slot.question.topic)?.title ?? slot.question.topic}
-          onAnswered={(attempt, result, followed) => record(slot, attempt, result, followed)}
+          reading={atlas.seed.resources
+            .filter((r) => r.practiceTopics?.includes(slot.question.subject + '/' + slot.question.topic))
+            .slice(0, 3)
+            .map((r) => ({ id: r.id, title: r.short ?? r.title }))}
+          onAnswered={(attempt, result, followed) => {
+            // Stay on this question (with its solution) until Next, though the first open one has moved on.
+            setPosition(index);
+            record(slot, attempt, result, followed);
+          }}
           onNext={() => setPosition(index + 1)}
         />
       ) : (

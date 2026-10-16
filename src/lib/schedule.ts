@@ -14,6 +14,7 @@ import type { ItemStatus, StoredSettings, UserItemState } from '../db/types.ts';
 import { isWithinRange, startOfWeek, today as todayDate, weekday } from './dates.ts';
 import { plannedMinutes, resolveDay, weekTarget } from './day-plan.ts';
 import type { ResolvedDay } from './day-plan.ts';
+import { projectUnitCount } from './progress.ts';
 
 export type ScheduledKind = 'resource' | 'project' | 'practice';
 
@@ -158,7 +159,7 @@ function describeProject(project: Project, state: UserItemState | undefined, not
     status: state?.status ?? 'todo',
     estHours: project.estHours,
     unitsDone: (state?.unitsDone ?? []).length,
-    unitCount: project.acceptance.length,
+    unitCount: projectUnitCount(project),
     cadence: project.cadence,
     brief: project.brief,
     acceptance: project.acceptance,

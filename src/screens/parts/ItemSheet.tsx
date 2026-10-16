@@ -14,6 +14,8 @@ import { Row, RowList } from '../../ui/Row.tsx';
 import { Sheet } from '../../ui/Sheet.tsx';
 import { TextField } from '../../ui/TextField.tsx';
 import { Checklist, criteriaUnits } from './Checklist.tsx';
+import { ProjectDocView, useProjectDoc } from './ProjectDocView.tsx';
+import { Markdown } from '../../lib/markdown.tsx';
 import { NotesField } from './NotesField.tsx';
 import { StatusPill } from './StatusPill.tsx';
 import { AddToPlanSheet } from '../plan/EditSheets.tsx';
@@ -207,6 +209,7 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
       return next;
     });
   const [budget, setBudget] = useState<string | null>(null);
+  const doc = useProjectDoc(project.id);
 
   return (
     <div className="space-y-6">
@@ -230,6 +233,8 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
 
       <Checklist label="Done when" refId={project.id} units={criteriaUnits(project.acceptance)} done={state?.unitsDone ?? []} />
 
+      <ProjectDocView seed={atlas.seed} projectId={project.id} doc={doc} done={state?.unitsDone ?? []} />
+
       <div className="space-y-3">
         <h3 className="text-meta font-normal text-ink2">Ship it</h3>
         <LinkField label="Repository" value={state?.repoUrl} onSave={(v) => setField('repoUrl', v)} />
@@ -240,6 +245,7 @@ function ProjectBody({ atlas, project }: { atlas: Atlas; project: Project }) {
       {project.stage === 2 && (
         <div className="space-y-3">
           <h3 className="text-meta font-normal text-ink2">Parts and budget</h3>
+          {doc?.sections['Parts and budget'] && <Markdown source={doc.sections['Parts and budget']} className="text-body text-ink2" />}
           {project.parts && project.parts.length > 0 ? (
             <ul className="list-disc space-y-0.5 pl-5 text-body text-ink2">
               {project.parts.map((part) => (

@@ -36,3 +36,21 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  # Every answer in the practice bank, recomputed with SymPy and NumPy from each question's independent `verify`.
+  # 40 draws a template here (about five minutes); `npm run verify:questions` runs the full 200 locally.
+  questions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install sympy numpy
+      - run: npm ci
+      - run: npm run verify:questions -- --draws 40

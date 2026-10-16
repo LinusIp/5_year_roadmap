@@ -5,6 +5,7 @@ import type { BlockId, Phase } from '../seed/schema.ts';
 import { Button } from '../ui/Button.tsx';
 import { span } from './parts/text.ts';
 import { blockColor } from '../ui/colors.ts';
+import { planBlocks } from '../lib/settings.ts';
 
 /** Each year's colour on the map, as in the mockup: green for year 1, then blue, purple, amber and grey. */
 const YEAR_COLOR: Record<number, string> = { 1: 'var(--accent)', 2: 'var(--track-ai)', 3: 'var(--track-robotics)', 4: 'var(--track-ee)', 5: 'var(--track-mech)' };
@@ -61,7 +62,7 @@ export function PhaseMap() {
             </div>
             <div className="flex items-center gap-4">
               <ul className="flex gap-[18px] text-label text-ink2" aria-label="Lanes">
-                {settings.core.blocks.map((b) => (
+                {planBlocks(settings.core).map((b) => (
                   <li key={b.id} className="flex items-center gap-1.5 whitespace-nowrap">
                     <span aria-hidden="true" className="inline-block size-2.5 rounded-cell" style={{ background: blockColor(b) }} />
                     {b.id} {legendName(b.name)} {span(b.minutes)}

@@ -121,6 +121,10 @@ export function checkBankAgainstSeed(bank: QuestionBank, seed: Seed): string[] {
       for (const c of topic.covers ?? []) if (!nodes.has(c)) errors.push('data/questions/topics.yaml: ' + subject.id + '/' + topic.id + ' covers "' + c + '", which is not a roadmap node');
     }
   }
+  const topics = new Set(bank.subjects.flatMap((s) => s.topics.map((t) => s.id + '/' + t.id)));
+  for (const r of seed.resources) {
+    for (const t of r.practiceTopics ?? []) if (!topics.has(t)) errors.push('resource ' + r.id + ': practiceTopics names "' + t + '", which is not a practice topic');
+  }
   for (const q of bank.questions) {
     for (const c of q.covers) if (!known(c)) errors.push('data/questions/' + q.subject + '/' + q.topic + '.yaml: ' + q.id + ' covers "' + c + '", which is neither a unit of a resource nor a roadmap node');
   }

@@ -8,7 +8,7 @@ import type { DayLog, StoredSettings, UserItemState } from '../db/types.ts';
 import type { AppSeed, Goal } from '../seed/schema.ts';
 import { addDays } from './dates.ts';
 import { paceForBlock, plannedHoursPerDay, projectEnd } from './forecast.ts';
-import { itemProgress } from './progress.ts';
+import { itemProgress, projectUnitCount } from './progress.ts';
 
 export type GoalVerdict = 'done' | 'on-track' | 'at-risk';
 
@@ -25,7 +25,7 @@ function remainingOf(seed: AppSeed, refId: string, states: Map<string, UserItemS
   const resource = seed.resources.find((r) => r.id === refId);
   const project = seed.projects.find((p) => p.id === refId);
   const estHours = hours ?? resource?.estHours ?? project?.estHours ?? 0;
-  const unitCount = resource?.unitCount ?? project?.acceptance.length ?? 0;
+  const unitCount = resource?.unitCount ?? (project ? projectUnitCount(project) : 0);
   return itemProgress({ refId, estHours, unitCount, state: states.get(refId) }).remainingHours;
 }
 

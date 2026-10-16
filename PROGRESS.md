@@ -19,7 +19,7 @@ with each. "Verified" means it was run, not assumed.
 | – | Brief update of 2026-10-08: research cadence, roadmap.sh roadmaps, new phase table | **done** |
 | – | GitHub Sync (section 4.10) | **done** |
 | – | Flexibility: schedule, plan editing, pace, layout | **done** |
-| – | Practice, resources, tech docs | in progress |
+| – | Practice, resources, tech docs | **done** |
 | – | The three-tier project catalogue | to do |
 
 ## Milestone 1 — Scaffold
@@ -658,3 +658,40 @@ Verified on this machine (Linux, Chromium 140):
   forecast; add, reorder, undo, swap, drop and restore; a custom resource and a goal; pause and resume; compact
   Today, tabs and reset; two devices on the fake GitHub. The four Windows-drawn screenshot comparisons still
   differ on Linux, as before (CI skips them); the two new baselines were drawn here.
+
+## Practice, resources and tech docs (the brief of 2026-10-16)
+
+- **Daily practice.** Block P (45 minutes) from 16 October 2026 to 31 January 2027: nine questions a day, three
+  each of linear algebra, calculus and physics, two new and one review. One question a screen with Check as the one
+  filled button, hints one at a time, the worked solution, multi-part questions that follow your own earlier
+  answers, self-graded proofs, and a summary (score, time, topics, when the reviews come back) whose Done logs the
+  minutes to P. Spaced repetition at 1/3/7/21/60 days, an Elo rating per topic, linear algebra following the 18.06
+  lectures ticked, calculus and physics topic by topic. Practice on demand from the Library; Activity › Practice;
+  Settings › Practice; roadmap nodes ticked at 85 % over 20 answers; answers in `state/practice.json`.
+- **The bank.** 693 questions: linear algebra 223 (154 templates, 69 %), calculus 224 (185, 83 %), physics 246
+  (184, 75 %), every topic at difficulties 1 to 4, in `data/questions/` with `SCHEMA.md`.
+- **Resources.** 25 added (books, problem sources, tools, lectures), mapped to tracks and practice topics; six
+  existing ones mapped to topics. None could be link-verified from the build machine (see DECISIONS), so all 25
+  carry `url: null` and a search hint.
+- **Tech docs.** 110, one for every project that is not a weekly build, rendered in the project sheet with
+  milestone checkboxes that count toward progress and "Copy as README skeleton".
+
+Verified on this machine (Linux, Chromium 140):
+
+- `npm run validate:data` (now also the question bank, the docs, and resources' practice topics) and
+  `npm run typecheck` pass.
+- `npm run verify:questions`: every answer of all 693 questions, 200 draws per template, recomputed by SymPy and
+  NumPy, every rendered formula parsed by KaTeX: passed (23 minutes). CI runs it with 40 draws.
+- `npm test`: 297 unit tests (28 new): the bank's quotas, every template's draws, the set's determinism, order,
+  size and two-new-one-review, a set that does not change while answered, topic progression, 18.06 following, the
+  difficulty window, the end of the practice period, the review intervals, Elo, each checker (numbers and units,
+  estimates, vectors and up-to-scale, matrices, expressions, multiple choice, a chained part), roadmap ticks at
+  85 %, and the doc parser, milestone progress and README skeleton.
+- `npm run test:e2e`: 6 new tests pass: a daily set with one wrong answer, one hint and shown solutions, the
+  summary, minutes to P only, reviews due the next day and resuming after a reload; the solution screen; no
+  Practice after 31 January 2027; ten questions on a topic from the Library; a project's tech doc (a milestone
+  ticked and kept across a reload, the README skeleton on the clipboard); answers reaching a second device on the
+  fake GitHub. One older test's locator was made exact (the doc's Stack also says "nothing to buy").
+- Lighthouse 13.5 accessibility (Chromium, headless): 100 on Today, Practice, Practice › topics, Activity ›
+  Practice, Settings, Library and two project sheets with tech docs.
+

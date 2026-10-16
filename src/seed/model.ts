@@ -19,7 +19,7 @@ export interface Resource {
   id: string;                 // stable slug, e.g. "mit-18-06"
   title: string;
   provider: string;           // "MIT OCW", "Stanford Online", ...
-  type: 'course' | 'lectures' | 'book' | 'tutorial' | 'article' | 'paper' | 'repo' | 'cert';
+  type: 'course' | 'lectures' | 'book' | 'tutorial' | 'article' | 'paper' | 'repo' | 'cert' | 'problems' | 'tool';
   url: string | null;         // null if not verified
   urlVerified: boolean;
   searchHint?: string;        // exact query to find it when url is null

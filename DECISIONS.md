@@ -418,3 +418,64 @@ it left open; `briefs/PLAN.md` records how the three briefs of that day fit toge
 - **The new screenshot baselines** (`today-compact-light.png`, `change-today-light.png`) were drawn by Chromium on
   Linux in the build container, not Edge on Windows like the older ones. `npm run screenshots` redraws them all
   on your machine.
+
+## Daily practice, resources and tech docs (the brief of 2026-10-16)
+
+- **Practice is its own block, P, only during the practice period.** It is a block with `role: practice` in
+  `data/settings.yaml` (45 minutes on full days and weekends, 30 on a University day, 45 in an exam week) and
+  `practice: { start: 2026-10-16, end: 2027-01-31, perSubject: 3 }`. Outside those dates the day leaves it out, so
+  targets, the streak and the heatmap are unchanged before and after. It is not a lane of the plan: the timeline,
+  the five-year map, pace, re-plans and "move to lane" skip it (`planBlocks`). Settings saved before it existed get
+  it on read (`upgradeSettings`), so existing users see it too. Coding challenges never go in it.
+- **The set depends only on the date and earlier answers.** Answers given today are ignored when building today's
+  set, so it never reshuffles while it is answered and two devices build the same one. Each subject is two new
+  questions and the most overdue review (or three new ones). Within the current topic, questions within one level
+  of the topic's rating come first, then those never seen, then those seen longest ago.
+- **Linear algebra follows 18.06 through its ticked lectures**, weighted to the latest, as the brief asks; before
+  the first lecture is ticked it starts at the first topic like the others. Calculus and physics walk their topics
+  in order: a topic is done after 15 answers at 80 %.
+- **Spaced repetition**: a miss, a partial answer or a shown solution starts a question on 1 day; each right
+  answer steps it to 3, 7, 21, 60, then it leaves the queue. **Elo**: each topic starts at 1200, a question rates
+  900 + 150 × difficulty, K = 32; the topic's level is the difficulty nearest its rating.
+- **Showing the solution counts as missed**, and after it the only way on is "Count it as missed": checking then
+  would only copy the solution. Proofs are graded by the user (Got it, Partly, Missed it).
+- **Marking needs no computer algebra in the browser.** mathjs reads every answer (units included). Expressions are
+  right when they agree with the answer at random points; vectors "up to scale" when parallel. A later part that is
+  right for the user's own wrong earlier answer is marked right, flagged as following, unless that earlier answer
+  makes the later part meaningless (a non-finite value).
+- **Every answer is checked twice, independently.** Each part carries a `verify` expression, written apart from the
+  `answer`; `npm run verify:questions` draws each template 200 times with the app's own engine, renders every bit
+  of maths with KaTeX, and has SymPy and NumPy recompute every answer from `verify`. It lives in `scripts/` (not
+  `scratch/`, which is for throwaway scripts) because CI runs it. CI runs 40 draws a template to stay near five
+  minutes; the full 200 ran here in 23 minutes and passed.
+- **KaTeX ships with the Practice chunk only**, with MathML alongside the drawing (`output: 'htmlAndMathml'`), so
+  screen readers read the maths. Lighthouse accessibility is 100 on Practice.
+- **Done logs to P only.** The summary's Done adds one entry per subject on the P block (track math for linear
+  algebra and calculus, physics for physics) and marks P done for the day. Practice on demand logs to P too, without
+  marking it done.
+- **Answers sync as `state/practice.json`, merged per answer by id**, not last writer wins: two devices answering
+  on the same day keep both.
+- **Activity › Practice appears once there is an answer**, so a fresh install still matches the Activity mockup.
+- **Practice ticks roadmap nodes** through the topic's `covers` in `topics.yaml`; the node then shows "covered by
+  Practice", like an item that covers it.
+- **Resources: no link could be verified from here.** The cloud machine that added them cannot reach the course
+  sites (the proxy refuses them), so the link verifier could not fetch any title. All 25 new resources are stored
+  with `url: null` and a search hint, as the rules require; none failed on content. Run `npm run check:links --
+  --titles` from a normal connection and add the URLs that check out. Already in the catalogue and only mapped to
+  practice topics: 3Blue1Brown, 18.01, 18.02, 8.01 and Mathematics for Machine Learning; Stat 110, 6.042J, NeetCode,
+  the system-design primer, DDIA, the Scaling Book, Susskind and the MIT EE/ME courses were already there too.
+- **Two new resource types**, `problems` (problem sets, judges, exercise collections) and `tool` (software and
+  reference sites), as the brief's "course, book, problem source or tool". Library shows both under Tools, so the
+  mockup's five type chips stay. `practiceTopics` maps a resource to question topics; the Practice screen offers
+  up to three of them under a solution.
+- **Tech docs for the 110 projects that are not weekly builds.** Weekly builds are small enough that their brief
+  and acceptance criteria are the spec; the catalogue's builds and cases come with their own. The template is the
+  brief's, checked by `npm run check:docs` and `validate:data`: every section in order, 300 to 700 words, three to
+  six milestones adding up to the project's hours, Parts and budget on stage 2 builds, references that are
+  catalogue ids (never raw URLs). Milestones are stored as `milestone-N` ticks and count toward progress (the
+  seed carries each project's milestone count). The doc's Parts and budget shows in the sheet's own Parts and
+  budget section, next to the budget fields.
+- **Screenshots.** The Today baselines changed (the demo date, 18 November, is in the practice period, so Today has
+  a Practice row) and were redrawn on Linux with the three new Practice baselines. The other Windows-drawn
+  baselines were kept.
+

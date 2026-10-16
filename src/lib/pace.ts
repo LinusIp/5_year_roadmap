@@ -9,6 +9,7 @@ import type { DayLog, StoredSettings } from '../db/types.ts';
 import type { AppSeed, BlockId, Phase } from '../seed/schema.ts';
 import { addDays, daysBetween } from './dates.ts';
 import { plannedOver } from './day-plan.ts';
+import { planBlocks } from './settings.ts';
 
 export interface LaneBalance {
   block: BlockId;
@@ -38,7 +39,7 @@ export function laneBalance(settings: StoredSettings, logs: DayLog[], block: Blo
 /** The balance of every block of the settings, over the phase that holds `asOf` (from its start). */
 export function balances(settings: StoredSettings, logs: DayLog[], phase: Phase | null, asOf: string): LaneBalance[] {
   const from = phase ? phase.start : asOf;
-  return settings.core.blocks.map((b) => laneBalance(settings, logs, b.id, from, asOf));
+  return planBlocks(settings.core).map((b) => laneBalance(settings, logs, b.id, from, asOf));
 }
 
 /** Today's extra minutes for a lane that opted into catch-up: at most the cap, never more than it is behind. */
@@ -77,7 +78,7 @@ export function lanePriority(seed: AppSeed, phaseId: string | null, block: Block
 
 /** Where a paused lane's minutes go by default: the highest-priority lane that is not itself paused. */
 export function defaultPauseTarget(seed: AppSeed, settings: StoredSettings, phaseId: string | null, block: BlockId, date: string): BlockId | 'free' {
-  const order = settings.core.blocks.map((b) => b.id);
+  const order = planBlocks(settings.core).map((b) => b.id);
   const candidates = order.filter((id) => id !== block && !settings.pauses.some((p) => p.block === id && p.from <= date && (p.until === null || date <= p.until)));
   candidates.sort((a, b) => lanePriority(seed, phaseId, a) - lanePriority(seed, phaseId, b) || order.indexOf(a) - order.indexOf(b));
   return candidates[0] ?? 'free';

@@ -24,7 +24,7 @@ test('stage 2 builds list their parts, and desk-only ones say there is nothing t
   await expect(page.getByRole('dialog').getByRole('listitem').first()).toBeVisible();
 
   await open(page, './#/library/m37');
-  await expect(page.getByRole('dialog').getByText(/Nothing to buy/)).toBeVisible();
+  await expect(page.getByRole('dialog').getByText(/^Nothing to buy: this one runs/)).toBeVisible();
 });
 
 test('shipping a weekly build counts the week, and only with a repository', async ({ page }) => {

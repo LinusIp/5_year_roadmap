@@ -39,8 +39,13 @@ export function subjectRowDone(row: SubjectRow | undefined): boolean {
   return row.milestones.length > 0 && row.milestones.every((m) => m.status === 'done');
 }
 
-export function roadmapCoverage(seed: AppSeed, itemStates: Map<string, UserItemState>, rows: SubjectRow[]): RoadmapCoverage[] {
+/**
+ * `practised` adds the nodes the practice bank has earned (history.ts `practiceNodes`): a topic at 85 % over its
+ * last 20 answers ticks what it covers, shown as covered by "Practice".
+ */
+export function roadmapCoverage(seed: AppSeed, itemStates: Map<string, UserItemState>, rows: SubjectRow[], practised: ReadonlySet<string> = new Set()): RoadmapCoverage[] {
   const coveredBy = new Map<string, string[]>();
+  for (const key of practised) coveredBy.set(key, ['Practice']);
   for (const item of [...seed.resources, ...seed.projects]) {
     if (!item.covers?.length || itemStates.get(item.id)?.status !== 'done') continue;
     const name = ('short' in item && item.short) || item.title;

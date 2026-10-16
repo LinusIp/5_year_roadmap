@@ -13,7 +13,8 @@ export const TRACK_IDS = [
 ] as const;
 /** The five lanes of the curriculum (plan.yaml, the phase table). The user can add blocks of their own beyond them. */
 export const BLOCK_IDS = ['A', 'B', 'C', 'D', 'E'] as const;
-export const RESOURCE_TYPES = ['course', 'lectures', 'book', 'tutorial', 'article', 'paper', 'repo', 'cert'] as const;
+/** `problems` is a problem source (problem sets, judges, exercise collections); `tool` is software or a reference site. */
+export const RESOURCE_TYPES = ['course', 'lectures', 'book', 'tutorial', 'article', 'paper', 'repo', 'cert', 'problems', 'tool'] as const;
 export const LEVELS = ['intro', 'intermediate', 'advanced'] as const;
 export const COSTS = ['free', 'audit-free', 'paid'] as const;
 /** The brief's four cadences: a weekly mini-build, a monthly project, research (a reimplementation, a quarterly question, a paper), a yearly capstone. */
@@ -185,6 +186,8 @@ export const ResourceSchema = z
     reference: z.boolean().optional(),
     /** roadmap.sh nodes this resource teaches; finishing it ticks them. */
     covers: z.array(NodeRef).optional(),
+    /** Practice topics it helps with ("calculus/sequences-series-taylor"): offered under a question's solution. */
+    practiceTopics: z.array(z.string().regex(/^[a-z0-9-]+\/[a-z0-9-]+$/)).optional(),
     /** Resources that can take its place on the plan (fast.ai or CS231n): offered first by Swap. */
     alternatives: z.array(Slug).optional(),
     /** Set on a resource the user added in the app. */
@@ -529,8 +532,11 @@ export interface Seed {
  */
 /** A resource as the app sees it: its checklist split off (count only), except a resource of the user's, which keeps its own. */
 export type AppResource = Omit<Resource, 'units'> & { unitCount: number; customUnits?: Unit[] };
-export type AppSeed = Omit<Seed, 'resources'> & {
+/** A project as the app sees it: with the number of milestones its tech doc has, which count toward its progress. */
+export type AppProject = Project & { milestoneCount?: number };
+export type AppSeed = Omit<Seed, 'resources' | 'projects'> & {
   resources: AppResource[];
+  projects: AppProject[];
   /** Set once the user's plan edits are applied (src/lib/plan.ts): items taken off the plan, restorable. */
   dropped?: PlanItem[];
   goals?: Goal[];

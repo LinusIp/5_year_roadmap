@@ -21,6 +21,7 @@ import { normalizePath } from 'vite';
 import type { Plugin } from 'vite';
 import { loadDocs } from './load-docs.ts';
 import { loadQuestions } from './load-questions.ts';
+import { parseDoc } from '../../src/lib/project-doc.ts';
 import { DATA_DIR, loadSeedOrThrow, splitSeed } from './load-seed.ts';
 
 export { splitSeed } from './load-seed.ts';
@@ -54,7 +55,14 @@ export function atlasSeed(): Plugin {
       if (id === RESOLVED.get(QUESTIONS_ID)) return asModule(questionsOrThrow());
       if (id === RESOLVED.get(DOCS_ID)) return asModule(loadDocs(seed).docs);
       const { app, units } = splitSeed(seed);
-      return asModule(id === RESOLVED.get(SEED_ID) ? { ...app, practiceSubjects: questionsOrThrow().subjects } : units);
+      if (id !== RESOLVED.get(SEED_ID)) return asModule(units);
+      // A doc's milestones are checkboxes that count toward the project's progress, so the count rides in the seed.
+      const { docs } = loadDocs(seed);
+      const projects = app.projects.map((p) => {
+        const count = docs[p.id] ? (parseDoc(docs[p.id]!).doc?.milestones.length ?? 0) : 0;
+        return count > 0 ? { ...p, milestoneCount: count } : p;
+      });
+      return asModule({ ...app, projects, practiceSubjects: questionsOrThrow().subjects });
     },
     configureServer(server) {
       server.watcher.add(DATA_DIR);
