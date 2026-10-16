@@ -1,0 +1,88 @@
+overview: >-
+  A stand that puts a planetary gearbox between two inline strain-gauge torque sensors: a motor drives the input, a
+  magnetic brake loads the output, and a fine encoder on the output shaft measures angle. For each test point the
+  controller sets speed and brake torque, waits for the reading to settle, and logs input and output torque and
+  speed, so efficiency is simply output power over input power. Backlash (the free play when the load reverses) is
+  measured by turning slowly back and forth and recording how far the output stays still while the input moves.
+learn:
+  - name: Strain-gauge torque sensing
+    ref: art-of-electronics
+  - name: Mechanical efficiency maps
+  - name: Backlash measurement
+  - name: Encoder resolution
+  - name: Speed and torque control
+    ref: brian-douglas-control
+stats:
+  - value: ±1.5 %
+    label: torque error up to 5 Nm
+  - value: 0.02°
+    label: backlash resolution
+  - value: < 20 min
+    label: for a 30-point map
+components:
+  - id: sequencer
+    name: Sweep sequencer
+    role: Steps through the 30 speed and torque points and the backlash routine.
+    tech: Python · serial
+    talksTo: [drive]
+    kind: core
+  - id: drive
+    name: Drive and load
+    role: Holds input speed with the motor and output torque with the brake current.
+    tech: C++ · motor and brake drivers
+    talksTo: [gearbox]
+    kind: core
+  - id: gearbox
+    name: Gearbox under test
+    role: The planetary gearbox with couplings to both torque sensors.
+    tech: Planetary gearbox
+    talksTo: [sensing]
+    kind: external
+  - id: sensing
+    name: Torque and encoders
+    role: Reads both torque sensors through bridge amplifiers and both shaft encoders.
+    tech: Strain gauges · 24-bit ADC
+    talksTo: [interlock]
+    kind: core
+  - id: interlock
+    name: Safety interlock
+    role: Stops the motor if the guard opens or torque exceeds 5 Nm.
+    tech: C++ · guard switch
+    talksTo: [analysis]
+    kind: core
+  - id: analysis
+    name: Analysis tool
+    role: Builds the efficiency map and backlash plot from the logged points.
+    tech: pandas · Matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: sequencer
+    text: sends the next point, for example `1500 rpm at 3.0 Nm`, and allows `20 s` to settle before `5 s` of averaging.
+  - component: drive
+    text: holds the input speed with a PI loop and sets the brake current for the output torque.
+  - component: sensing
+    text: averages input and output torque and speed over `5 s` once readings are steady.
+  - component: interlock
+    text: checks guard and torque limits on every sample before the point is accepted.
+  - component: analysis
+    text: computes `η = (T_out × ω_out) / (T_in × ω_in)` per point, and for backlash measures the **dead angle** at the output during a slow torque reversal.
+interface:
+  lang: shell
+  code: |
+    # PC -> stand
+    POINT rpm=1500 torque_nm=3.0 settle_s=20
+    BACKLASH rate_dps=0.5 torque_nm=0.3
+    # stand -> PC, one line per point
+    rpm,t_in,t_out,w_in,w_out,eff,temp_c
+    1500,0.368,3.004,157.1,15.71,0.816,31.2
+    # backlash result
+    BACKLASH dead_angle_deg=0.38 cycles=5
+decisions:
+  - choice: Two inline torque sensors
+    instead: Infer input torque from motor current
+    why: Motor current includes the motor's own losses, which would show up as gearbox losses. A sensor on each side measures only the gearbox.
+  - choice: Fixed settle time per point
+    instead: Wait until temperature is steady at every point
+    why: 30 points in 20 minutes leaves 40 s each. Log gearbox temperature with every point and run the map twice to see thermal drift.
+watchOut: A misaligned coupling adds a side load that the torque sensors read as torque. Check alignment with a dial gauge and confirm that zero load reads zero at several shaft angles.

@@ -1,0 +1,110 @@
+overview: >-
+  An offline lightmap baker and a runtime viewer for Brightline Architects' walkthroughs. The baker packs every static
+  mesh into a 2k lightmap atlas, rasterises the atlas so each texel knows its world position and normal, and traces
+  rays from there with bounces to store soft shadows and bounce light. At runtime a shader reads the lightmap through
+  a second UV set and adds a dynamic sun, while cell-and-portal culling (rooms are cells, doors and windows are
+  portals) draws only rooms that can be seen.
+learn:
+  - name: Lightmap UVs and atlases
+    ref: rtr4
+  - name: Path tracing basics
+    ref: rtiow
+  - name: BVH ray casting
+    ref: pbr-book
+  - name: Seams and dilation
+  - name: Cell-and-portal culling
+    ref: rtr4
+stats:
+  - value: < 15 min
+    label: bake, 1M triangles, 8 cores
+  - value: ≥ 50%
+    label: fewer draw calls indoors
+  - value: 60 FPS
+    label: at 1080p
+components:
+  - id: scene
+    name: Apartment glTF
+    role: The synthetic 3-storey apartment with static meshes, lights and room tags.
+    tech: glTF 2.0
+    talksTo: [packer]
+    kind: external
+  - id: packer
+    name: Atlas packer
+    role: Unwraps each mesh into charts and packs them into a 2048 × 2048 atlas with padding.
+    tech: C++17
+    talksTo: [texels]
+    kind: core
+  - id: texels
+    name: Texel rasteriser
+    role: Rasterises triangles in lightmap UV space to give each texel a world position and normal.
+    tech: C++17
+    talksTo: [tracer]
+    kind: core
+  - id: tracer
+    name: Ray tracer
+    role: Traces direct and bounce rays from each texel through its own BVH on 8 threads.
+    tech: C++17 · own BVH
+    talksTo: [dilate]
+    kind: core
+  - id: dilate
+    name: Denoise and dilate
+    role: Smooths noise and copies edge texels outwards so bilinear filtering never reads empty texels.
+    tech: C++17
+    talksTo: [runtime]
+    kind: core
+  - id: portals
+    name: Portal graph
+    role: Starts from the camera's room and walks only through portals inside the narrowed view.
+    tech: C++17
+    talksTo: [runtime]
+    kind: core
+  - id: runtime
+    name: Runtime shader
+    role: Combines albedo, baked light and the dynamic sun with its shadow map.
+    tech: OpenGL 4.5 · GLSL
+    talksTo: []
+    kind: core
+flow:
+  - component: packer
+    text: gives each static mesh's charts a place in the atlas, about one texel per 2 cm of wall, with 2 texels of padding.
+  - component: texels
+    text: rasterises each triangle in its lightmap UVs, storing world position and normal per texel; texels no triangle covers stay empty.
+  - component: tracer
+    text: shoots rays from each texel to the lights and into the hemisphere, follows up to 2 bounces, and averages the light it finds into `RGB16F`.
+  - component: dilate
+    text: filters the noise and copies colours a few texels past chart edges, so seams do not show black lines.
+  - component: portals
+    text: at runtime finds the camera's room and recurses only through doorway portals inside the view, cutting interior draw calls by **at least half**.
+  - component: runtime
+    text: samples `u_lightmap` with the second UV set and adds the sun with its shadow map, so the sun can move without a rebake.
+interface:
+  lang: glsl
+  code: |
+    in vec2 v_uv0;              // material UVs
+    in vec2 v_uv1;              // lightmap UVs
+    in vec3 v_n;  in vec4 v_shadow;
+    uniform sampler2D u_albedo, u_lightmap; // RGB16F
+    uniform sampler2DShadow u_sunShadow;
+    uniform vec3 u_sunDir, u_sunRgb;
+    out vec4 o_color;
+    void main() {
+      vec3 a = texture(u_albedo, v_uv0).rgb;
+      vec3 baked = texture(u_lightmap, v_uv1).rgb;
+      float vis = textureProj(u_sunShadow, v_shadow);
+      float nl = max(dot(normalize(v_n),-u_sunDir), 0.);
+      o_color = vec4(a * (baked + u_sunRgb*nl*vis), 1.);
+    }
+decisions:
+  - choice: Bake interior lights and sky, keep the sun dynamic
+    instead: Bake everything, sun included
+    why: The scenario asks for a dynamic sun. Baking its direct light too would count it twice and freeze it in place.
+  - choice: CPU ray casting with its own BVH
+    instead: A GPU or commercial baker
+    why: The constraints are an 8-core CPU and no middleware. 2048 × 2048 texels in 15 minutes leaves roughly 1.7 ms of one core per texel, enough for a few hundred rays.
+  - choice: Cell-and-portal culling
+    instead: GPU occlusion queries
+    why: Apartments are rooms joined by doors, so portals are almost free to compute and give the same answer every frame. Revisit for open-plan floors with few walls.
+watchOut: >-
+  Light leaks through thin walls when a texel's sample point sits just behind or inside another surface. Detect texels
+  whose rays mostly hit back faces at short range, push the sample point out along the normal or mark it invalid, and
+  let dilation fill it.

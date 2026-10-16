@@ -1,0 +1,99 @@
+overview: >-
+  A handheld 2-axis gimbal that keeps a 250 g phone camera level while the operator walks. A 6-axis IMU on the
+  camera plate is read every 1 ms, and a complementary filter (trust the gyro for fast motion and the accelerometer
+  for the slow direction of gravity) estimates pitch and roll. A cascade of an angle loop and a rate loop per axis
+  turns the angle error into a torque command for each brushless gimbal motor. A rigid-body simulation with
+  recorded hand motion is used to tune the loops before the printed frame is built.
+learn:
+  - name: Complementary filters
+  - name: Cascade PID
+    ref: brian-douglas-control
+  - name: Gimbal motor commutation
+  - name: Gyro bias calibration
+  - name: Mechanical resonance
+stats:
+  - value: < 0.2°
+    label: RMS jitter at 3 Hz hand motion
+  - value: 1 kHz
+    label: control loop
+  - value: '> 3 h'
+    label: on a 2000 mAh pack
+components:
+  - id: imu
+    name: IMU
+    role: 6-axis gyro and accelerometer fixed to the camera plate.
+    tech: 6-axis IMU · SPI
+    talksTo: [filter]
+    kind: external
+  - id: filter
+    name: Attitude filter
+    role: Removes gyro bias and fuses gyro and accelerometer into pitch and roll.
+    tech: C++ · Mahony or complementary
+    talksTo: [cascade]
+    kind: core
+  - id: follow
+    name: Follow mode
+    role: Turns joystick input or slow handle motion into a moving target angle.
+    tech: C++
+    talksTo: [cascade]
+    kind: core
+  - id: cascade
+    name: Cascade controller
+    role: Angle loop sets a rate target; rate loop sets motor torque per axis.
+    tech: C++ · PID
+    talksTo: [drivers]
+    kind: core
+  - id: drivers
+    name: Motor drivers
+    role: Drive each gimbal BLDC in torque mode using its measured rotor angle.
+    tech: 3-phase drivers · PWM
+    talksTo: [motors]
+    kind: core
+  - id: motors
+    name: Gimbal motors
+    role: Two low-speed BLDC motors that turn the pitch and roll axes.
+    tech: Gimbal BLDC
+    talksTo: []
+    kind: external
+  - id: sim
+    name: Simulation
+    role: Rigid-body model with hand-motion profiles and IMU noise to tune gains.
+    tech: Python · NumPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: filter
+    text: subtracts the gyro bias measured at start-up and blends `angle = 0.98 × (angle + gyro × dt) + 0.02 × accel_angle`.
+  - component: follow
+    text: sets the target angle; in follow mode it lets the target drift slowly toward the handle so pans look smooth.
+  - component: cascade
+    text: runs the **angle loop**, which turns angle error into a rate target, then the **rate loop**, which turns rate error from the gyro into a torque command.
+  - component: drivers
+    text: puts the voltage vector `90°` ahead of the measured rotor angle, scaled by the torque command, on each motor.
+  - component: cascade
+    text: repeats every `1 ms`; the loop timer and the residual angle are logged to check the 0.2° RMS target.
+interface:
+  lang: cpp
+  code: |
+    struct Attitude { float pitch, roll; };       // rad
+    struct AxisCmd  { float target, torque; };
+
+    // 1 kHz timer interrupt
+    void gimbal_tick(const ImuSample& s) {
+      Attitude a = filter.update(s, 0.001f);
+      for (int i = 0; i < 2; ++i) {
+        float rate_ref = angle_pid[i].step(
+            follow.target(i) - a[i]);
+        cmd[i].torque = rate_pid[i].step(
+            rate_ref - s.gyro[i]);
+      }
+      drivers.apply(cmd);
+    }
+decisions:
+  - choice: Complementary filter
+    instead: An extended Kalman filter
+    why: Two axes at 1 kHz on a small MCU need something cheap and easy to tune; a complementary filter has one constant. Revisit if accelerometer error during walking shows up in the jitter log.
+  - choice: Angle and rate cascade
+    instead: A single PID on angle
+    why: The gyro sees disturbance before the angle moves, so an inner rate loop rejects 3 Hz hand shake much better. The outer loop then only corrects slow drift.
+watchOut: A stiff 3D-printed arm can resonate near the loop bandwidth and turn into a buzzing oscillation. Tap-test the frame and keep the rate-loop bandwidth well below that frequency.

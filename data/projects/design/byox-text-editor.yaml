@@ -1,0 +1,119 @@
+overview: >-
+  A terminal text editor in C in the style of kilo that edits real files and never corrupts them. A terminal layer
+  puts the terminal in raw mode (every keypress delivered at once, with no echo) and decodes escape sequences into
+  keys. The buffer holds an array of rows, each with its raw characters, a rendered form with tabs expanded, and a
+  highlight array; the editor core handles commands and the cursor, and a renderer redraws the screen in one write.
+  Saving goes to a temporary file that is then renamed over the original.
+learn:
+  - name: Terminal raw mode
+  - name: VT100 escape sequences
+  - name: Raw and rendered columns
+  - name: Atomic file saves
+  - name: Memory management in C
+    ref: beej-c
+  - name: Replay testing
+stats:
+  - value: "0"
+    label: mismatches over 1,000 replayed edit scripts
+  - value: "0"
+    label: AddressSanitizer errors on the suite
+  - value: 10,000
+    label: lines searched and highlighted
+components:
+  - id: terminal
+    name: Terminal layer
+    role: Enters and restores raw mode and turns input bytes into keys.
+    tech: termios
+    talksTo: [core]
+    kind: core
+  - id: core
+    name: Editor core
+    role: Handles commands, the cursor, scrolling, search and the dirty flag.
+    tech: C17
+    talksTo: [rows, files]
+    kind: core
+  - id: rows
+    name: Row buffer
+    role: Holds each row's raw characters, rendered form and highlight array.
+    tech: C17
+    talksTo: [highlighter]
+    kind: core
+  - id: highlighter
+    name: Highlighter
+    role: Colours keywords, numbers, strings and comments, carrying an open-comment flag to the next row.
+    tech: C17
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Builds one append buffer per frame and writes it to the terminal in a single call.
+    tech: VT100 escapes
+    talksTo: []
+    kind: core
+  - id: files
+    name: File I/O
+    role: Opens files and saves them through a temporary file and a rename.
+    tech: POSIX I/O
+    talksTo: []
+    kind: core
+  - id: replay
+    name: Replay harness
+    role: Feeds keystroke scripts through a pseudo-terminal and compares saved bytes with a reference model.
+    tech: pty · AddressSanitizer
+    talksTo: [terminal]
+    kind: offline
+flow:
+  - component: terminal
+    text: >-
+      reads `ESC [ C` in raw mode, decodes it as `ARROW_RIGHT`, and passes printable keys through unchanged.
+  - component: core
+    text: >-
+      inserts a typed character at raw column `cx`, works out the rendered column `rx` for the cursor, and sets the
+      dirty flag.
+  - component: rows
+    text: updates the row's characters and rebuilds its rendered form, expanding tabs to spaces.
+  - component: highlighter
+    text: >-
+      re-highlights the row and, if its **open-comment flag** changed, moves on to the next row until the flag
+      settles.
+  - component: renderer
+    text: >-
+      hides the cursor, draws the visible rows, status bar and message line into one buffer, places the cursor at
+      `rx`, and sends it all with one `write()`.
+  - component: files
+    text: >-
+      on Ctrl-S writes the whole buffer to a temporary file, flushes it, and renames it over the original, so a killed
+      process never leaves a half-written file.
+interface:
+  lang: c
+  code: |
+    typedef struct {
+      int size, rsize;
+      char *chars;         /* bytes as in the file */
+      char *render;        /* tabs expanded */
+      unsigned char *hl;   /* class per render byte */
+      bool open_comment;   /* carried to next row */
+    } erow;
+
+    int  editor_read_key(void);  /* decodes ESC [ */
+    int  row_cx_to_rx(const erow *r, int cx);
+    void row_update_syntax(erow *r);
+    int  editor_save(const char *path); /* tmp+rename */
+decisions:
+  - choice: An array of rows
+    instead: A rope or gap buffer
+    why: >-
+      Rows make rendering, highlighting and search simple, and 30 hours is tight. The 50 MB open-time measurement
+      shows whether a rope is worth it later.
+  - choice: Write a temporary file, then rename
+    instead: Truncating the file and writing in place
+    why: >-
+      A crash during an in-place write leaves a truncated file, and the goal is never corrupting one. Rename replaces
+      the file in one step on the same filesystem.
+  - choice: One write per frame
+    instead: Drawing each row as it changes
+    why: >-
+      Piece-by-piece drawing flickers, and one buffered write keeps bytes per frame measurable.
+watchOut: >-
+  Crashing without restoring the terminal leaves the shell unusable. Restore the original termios settings in an
+  atexit handler and in the signal handlers, before anything else is built.

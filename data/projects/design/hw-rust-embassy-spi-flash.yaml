@@ -1,0 +1,71 @@
+overview: >-
+  An async driver for a W25Q-series SPI NOR flash chip in embedded Rust on Embassy (an async runtime for
+  microcontrollers): it reads the JEDEC ID, polls the busy bit, and supports read, 256-byte page program and 4 KB
+  sector erase. A test harness writes a pattern across the whole chip, reads it back, logs throughput in KB/s and keeps
+  an erase counter per sector.
+learn:
+  - name: SPI protocol
+  - name: NOR flash commands
+  - name: Async embedded Rust
+    ref: embedded-rust-book
+  - name: Driver traits
+    ref: rust-book
+components:
+  - id: harness
+    name: Test harness
+    role: Erases, programs and verifies every sector and logs throughput and erase counts.
+    tech: Rust · defmt
+    talksTo: [driver]
+    kind: core
+  - id: driver
+    name: Flash driver
+    role: Turns read, program and erase calls into flash commands and waits for busy.
+    tech: Rust · embedded-hal-async
+    talksTo: [bus]
+    kind: core
+  - id: bus
+    name: SPI device
+    role: Runs each command as one chip-select transaction on the SPI bus.
+    tech: Embassy SPI
+    talksTo: [chip]
+    kind: core
+  - id: chip
+    name: W25Q flash
+    role: Stores the data; pages of 256 bytes, sectors of 4 KB.
+    tech: W25Q breakout
+    talksTo: []
+    kind: external
+flow:
+  - component: harness
+    text: erases each 4 KB sector, programs 16 pages with a pattern from the address, reads back and compares, and bumps that sector's erase count.
+  - component: driver
+    text: sends `0x06` write-enable before **every** program and erase, then `0x02` page program or `0x20` sector erase, never letting a write cross a 256-byte page.
+  - component: driver
+    text: polls `0x05` read-status until the busy bit clears, awaiting `Timer::after_micros(50)` between polls so other tasks can run.
+  - component: bus
+    text: runs each command as one `SpiDevice::transaction`, so chip select stays low from opcode to last byte.
+interface:
+  lang: rust
+  code: |
+    pub struct W25q<SPI> { spi: SPI }
+    // E = Error<SPI::Error>
+    impl<SPI: SpiDevice> W25q<SPI> {
+        pub async fn jedec_id(&mut self)
+            -> Result<[u8; 3], E>;
+        pub async fn read(&mut self, addr: u32,
+            buf: &mut [u8]) -> Result<(), E>;
+        pub async fn program_page(&mut self, addr: u32,
+            data: &[u8]) -> Result<(), E>;  // <= 256 B
+        pub async fn erase_sector(&mut self, addr: u32)
+            -> Result<(), E>;               // 4 KB
+        async fn wait_busy(&mut self) -> Result<(), E>;
+    }
+decisions:
+  - choice: Async on Embassy, not blocking calls
+    instead: Blocking embedded-hal calls with a busy-wait
+    why: >-
+      A sector erase takes about 45 ms and can take 400 ms, and a whole-chip test does thousands of them. Awaiting
+      between status polls lets the rest of the firmware keep running instead of freezing for each erase.
+watchOut: >-
+  Without write-enable before each program or erase, the chip silently ignores the command and reads back old data,
+  often `0xFF`. Put write-enable inside the program and erase functions and check the WEL status bit after it.

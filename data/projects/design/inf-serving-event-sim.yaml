@@ -1,0 +1,62 @@
+overview: >-
+  A discrete-event simulator of an LLM server where requests arrive at random times, wait in a queue, get one
+  prefill step and then many decode steps inside a batch. Step times come from a curve measured on a real server,
+  so TTFT (time to first token), TPOT (time per output token) and goodput (requests a second that meet the SLO) can
+  be compared for static and continuous batching.
+learn:
+  - name: Discrete-event simulation
+  - name: Continuous batching
+    ref: vllm-docs
+  - name: TTFT, TPOT and goodput
+    ref: databricks-inference-best-practices
+  - name: Poisson arrivals
+    ref: harvard-stat-110
+components:
+  - id: engine
+    name: Event loop
+    role: Generates Poisson arrivals with real lengths and pops events from a time-ordered heap.
+    tech: heapq or simpy · numpy
+    talksTo: [batcher]
+    kind: core
+  - id: batcher
+    name: Batcher
+    role: Decides which requests join the next step, static or continuous.
+    tech: Python
+    talksTo: [cost]
+    kind: core
+  - id: cost
+    name: Step-time model
+    role: Returns the time of one step from batch size and tokens, fitted to step times measured on vLLM.
+    tech: numpy fit
+    talksTo: [metrics]
+    kind: core
+  - id: metrics
+    name: Metrics
+    role: Records TTFT, TPOT and SLO pass per request and plots them against rate.
+    tech: pandas · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: engine
+    text: >-
+      draws gaps from an exponential with mean `1 / rate`, samples prompt and output lengths from a chat dataset, and
+      pops the earliest event; an `arrive` puts the request in the waiting queue.
+  - component: batcher
+    text: >-
+      under **continuous** batching, adds waiting requests at every step until the token budget is full; under static,
+      waits for the whole batch to finish.
+  - component: cost
+    text: turns the step's batch size and prefill tokens into a duration and schedules a `step_done` event.
+  - component: metrics
+    text: >-
+      records first-token and finish times, plots TTFT p50 and p99 and goodput against request rate, and compares
+      tokens/s with one real server run.
+decisions:
+  - choice: Step times fitted from a real server
+    instead: Step times from FLOP counts
+    why: >-
+      Decode is memory-bound and has fixed overheads that FLOP counts miss, so a theoretical model can be off by 2x.
+      The done-when needs tokens/s within 15% of a real run, which only a measured curve gets.
+watchOut: >-
+  A step-time model fitted only at small batches extrapolates badly at high load, exactly where the plots matter.
+  Measure step times across the batch sizes and context lengths the simulation will reach.

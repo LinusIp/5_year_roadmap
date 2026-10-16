@@ -1,0 +1,121 @@
+overview: >-
+  A Linux tool in C that learns which system calls a student program needs, then locks it to exactly those. In trace
+  mode it runs the program under ptrace, the debugger interface that stops a child at every system call so the tracer
+  can read its registers, and records each call with its decoded arguments. From the profile it generates a seccomp-bpf
+  filter, a tiny program the kernel runs on every system call to allow it or kill the process, and enforcement mode
+  runs the submission under that filter.
+learn:
+  - name: System calls
+    ref: ostep
+  - name: ptrace
+    ref: mit-6-1810
+  - name: seccomp-bpf filters
+  - name: Process and thread creation
+    ref: cmu-15-213
+  - name: TOCTOU races
+  - name: Least privilege
+stats:
+  - value: < 8×
+    label: tracing overhead
+  - value: 0 / 20
+    label: sample programs falsely killed
+  - value: 15 / 15
+    label: escape attempts blocked
+components:
+  - id: program
+    name: Student program
+    role: The submission being profiled or confined, with all its threads and children.
+    tech: Linux x86-64
+    talksTo: [driver]
+    kind: external
+  - id: driver
+    name: ptrace driver
+    role: Starts the child, stops it at each syscall entry and exit and resumes it.
+    tech: C · ptrace
+    talksTo: [follower, decoder]
+    kind: core
+  - id: follower
+    name: Fork/thread follower
+    role: Attaches to every new thread and child and tracks each one's stop state.
+    tech: PTRACE_O_TRACECLONE
+    talksTo: []
+    kind: core
+  - id: decoder
+    name: Syscall decoder
+    role: Turns register values into a syscall name and readable arguments.
+    tech: x86-64 syscall table
+    talksTo: [aggregator]
+    kind: core
+  - id: aggregator
+    name: Profile aggregator
+    role: Counts and times each syscall across all traced runs.
+    tech: C
+    talksTo: [policy]
+    kind: core
+  - id: policy
+    name: BPF policy generator
+    role: Writes an allow-list filter from the profile and runs programs under it.
+    tech: seccomp-bpf
+    talksTo: []
+    kind: core
+  - id: tests
+    name: Test suite
+    role: 20 normal sample programs and 15 hostile ones that try to escape.
+    tech: C · shell
+    talksTo: [program]
+    kind: offline
+flow:
+  - component: driver
+    text: >-
+      forks, attaches with `PTRACE_SEIZE` and the options for clone, fork, vfork and exec events, then loops on
+      `PTRACE_SYSCALL` and `waitpid`, stopping the child twice per call.
+  - component: follower
+    text: >-
+      on a `clone`, `fork` or `vfork` event reads the new id with `PTRACE_GETEVENTMSG`; the child starts traced, and
+      each thread keeps its own entry-or-exit flag.
+  - component: decoder
+    text: >-
+      reads the registers: `orig_rax` is the syscall number and `rdi`, `rsi`, `rdx`, `r10`, `r8`, `r9` the arguments;
+      strings such as paths are copied with `process_vm_readv`.
+  - component: aggregator
+    text: >-
+      adds the call to the profile with its count and time spent, merging runs of the same program on different inputs.
+  - component: policy
+    text: >-
+      emits a filter that first checks the architecture, then allows each observed syscall number and kills on
+      anything else; enforcement mode installs it with `PR_SET_NO_NEW_PRIVS` just before `execve`.
+interface:
+  lang: c
+  code: |
+    struct sock_filter f[] = {
+      LD(offsetof(struct seccomp_data, arch)),
+      JEQ(AUDIT_ARCH_X86_64, 1, 0), RET(KILL_PROCESS),
+      LD(offsetof(struct seccomp_data, nr)),
+      JGE(__X32_SYSCALL_BIT, 0, 1), RET(KILL_PROCESS),
+      JEQ(__NR_read, 0, 1),  RET(ALLOW),
+      JEQ(__NR_write, 0, 1), RET(ALLOW),
+      /* ...one pair per observed syscall... */
+      RET(KILL_PROCESS),     /* not on the list */
+    };
+    prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
+    seccomp(SECCOMP_SET_MODE_FILTER, 0, &prog);
+    execve(path, argv, envp);
+decisions:
+  - choice: ptrace to learn, seccomp to enforce
+    instead: Enforce with ptrace, checking each call in the tracer
+    why: >-
+      A ptrace check costs two stops per call, up to the 8× budget, and it races with other threads. Seccomp runs in
+      the kernel at almost no cost, so tracing happens once and enforcement stays cheap.
+  - choice: Filter on syscall numbers only
+    instead: Filter on path and pointer arguments too
+    why: >-
+      seccomp-bpf cannot follow pointers, and a value the tracer read can change before the kernel reads it. Allow by
+      number, and handle file access with a read-only filesystem in the VM.
+  - choice: Kill by default
+    instead: Return an error for unlisted calls
+    why: >-
+      An error lets a hostile program keep probing. Killing makes every violation visible; the 20 sample programs
+      check that the profile is complete enough to cause no false kills.
+watchOut: >-
+  Check `arch` first, and refuse syscall numbers with the x32 bit set. Otherwise a program can enter through the
+  32-bit or x32 interfaces, where the same numbers mean different calls, and walk past the allow-list.

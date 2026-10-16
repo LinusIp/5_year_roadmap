@@ -1,0 +1,53 @@
+overview: >-
+  A static file server in C on Linux: non-blocking sockets registered with edge-triggered epoll (the kernel reports
+  a socket only when new data arrives), an incremental HTTP/1.1 parser per connection, keep-alive, and sendfile for
+  bodies, load-tested at 1,000 concurrent connections.
+learn:
+  - name: Non-blocking sockets
+    ref: stanford-cs144
+  - name: epoll event loops
+  - name: HTTP/1.1 keep-alive
+  - name: Zero-copy sendfile
+components:
+  - id: loop
+    name: Event loop
+    role: Accepts connections and dispatches readable and writable events.
+    tech: C · epoll
+    talksTo: [conn]
+    kind: core
+  - id: conn
+    name: Connection state
+    role: Per-socket read buffer, parse state and pending file offset.
+    tech: C structs
+    talksTo: [files]
+    kind: core
+  - id: files
+    name: File sender
+    role: Opens the requested file and streams it with `sendfile`.
+    tech: sendfile
+    talksTo: []
+    kind: core
+  - id: wrk
+    name: Load test
+    role: Opens 1,000 keep-alive connections and reports requests per second and errors.
+    tech: wrk
+    talksTo: [loop]
+    kind: external
+flow:
+  - component: loop
+    text: on `EPOLLIN` for the listen socket, calls `accept4` until `EAGAIN` and registers each new socket with `EPOLLET`.
+  - component: conn
+    text: reads until `EAGAIN`, appends to its buffer and parses only once `\r\n\r\n` has arrived.
+  - component: files
+    text: send headers and `sendfile` the body; on a partial send, the offset is saved and `EPOLLOUT` is armed.
+  - component: loop
+    text: resumes the send on `EPOLLOUT`, then resets the connection for the next keep-alive request.
+decisions:
+  - choice: Edge-triggered epoll
+    instead: Level-triggered epoll
+    why: >-
+      Edge mode wakes once per change, so 1,000 idle connections cost nothing. The price is that every read and
+      write must loop until `EAGAIN`.
+watchOut: >-
+  In edge-triggered mode, stopping before `EAGAIN` leaves data in the socket that never triggers another event, and
+  the connection hangs. Always drain, and handle partial writes.

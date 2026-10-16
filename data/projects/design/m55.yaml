@@ -1,0 +1,122 @@
+overview: >-
+  The two-link arm of project 54, built from printed links and geared motors and driven through ros2_control. The
+  joint trajectory controller calls your C++ hardware interface 200 times a second; the interface sends binary,
+  checksummed frames over USB serial to a microcontroller that closes each joint's loop at 1 kHz. The trajectories
+  planned in simulation run on the real arm, and RViz shows it beside a digital twin built from the same URDF.
+learn:
+  - name: ROS 2 nodes and launch
+    ref: ros2-tutorials
+  - name: ros2_control hardware interfaces
+    ref: articulated-robotics
+  - name: URDF and xacro
+    ref: articulated-robotics
+  - name: Serial framing and checksums
+    ref: making-embedded-systems
+  - name: Sim-to-real tracking
+    ref: modern-robotics
+stats:
+  - value: < 2°
+    label: RMS joint tracking error
+  - value: 200 Hz
+    label: hardware interface, under 1 % missed cycles
+  - value: < 5°
+    label: peak joint tracking error
+components:
+  - id: plan
+    name: Project 54 plans
+    role: Supplies the trajectories and the parameter file the URDF is generated from.
+    tech: Python models
+    talksTo: [jtc, urdf]
+    kind: offline
+  - id: urdf
+    name: URDF
+    role: Describes links, joints, limits and masses for RViz and the twin.
+    tech: xacro · URDF
+    talksTo: [rviz, twin]
+    kind: offline
+  - id: jtc
+    name: Trajectory controller
+    role: Interpolates the trajectory and sends joint commands every 5 ms.
+    tech: ros2_controllers JTC
+    talksTo: [hwif]
+    kind: core
+  - id: hwif
+    name: Hardware interface
+    role: Your SystemInterface plugin, writing commands and reading joint states over serial.
+    tech: C++ · ros2_control
+    talksTo: [mcu, jtc, rviz]
+    kind: core
+  - id: mcu
+    name: MCU joint loops
+    role: Closes position-velocity loops on both joints at 1 kHz and reports states back.
+    tech: C · USB serial
+    talksTo: [motors, hwif]
+    kind: core
+  - id: motors
+    name: Motors
+    role: Geared DC motors with encoders on each joint.
+    tech: Geared DC · encoders
+    talksTo: [mcu]
+    kind: external
+  - id: rviz
+    name: RViz
+    role: Shows the real arm from /joint_states next to the twin.
+    tech: RViz
+    talksTo: []
+    kind: core
+  - id: twin
+    name: Digital twin
+    role: Plays the same commanded trajectory in your engine.
+    tech: Your engine
+    talksTo: [rviz]
+    kind: offline
+flow:
+  - component: jtc
+    text: >-
+      loads a trajectory from project 54 and, every 5 ms, writes the desired position and velocity for each joint.
+  - component: hwif
+    text: >-
+      packs them in `write()` into a frame with a sequence number and a **CRC**, and sends it over USB serial.
+  - component: mcu
+    text: >-
+      checks the CRC, drops bad frames, and tracks the command at 1 kHz using encoder counts scaled by the gear ratio.
+  - component: hwif
+    text: >-
+      reads the latest state frame in `read()`; the controller compares it with the plan, closing the **control
+      loop**.
+  - component: rviz
+    text: >-
+      draws the arm from `/joint_states` beside the twin, so any offset or lag is visible during the run.
+interface:
+  lang: c
+  code: |
+    /* host -> MCU, every 5 ms */
+    typedef struct __attribute__((packed)) {
+      uint8_t  sync;        /* 0xA5 */
+      uint8_t  seq;
+      float    pos_cmd[2];  /* rad, at the joint */
+      float    vel_cmd[2];  /* rad/s */
+      uint16_t crc16;       /* over sync..vel_cmd */
+    } cmd_frame_t;
+
+    /* MCU -> host: sync, seq, then float pos[2],
+       vel[2], current[2], and crc16 */
+decisions:
+  - choice: Joint loops on the microcontroller
+    instead: Closing the loops in ROS at 200 Hz
+    why: >-
+      USB serial adds latency and jitter that a 1 kHz local loop never sees. ROS sends set-points; the MCU does the
+      fast work.
+  - choice: Binary frames with a CRC
+    instead: Text commands without checksums
+    why: >-
+      At 200 Hz a dropped or corrupted byte will happen. With a CRC it costs one frame; without, it becomes a wild
+      command to a motor.
+  - choice: URDF generated from the project 54 parameters
+    instead: A hand-written URDF
+    why: >-
+      The done-when test requires lengths, masses and limits to match the model, and generating the URDF keeps the
+      twin and the real arm describing the same machine.
+watchOut: >-
+  Encoder counts per joint revolution must include the gear ratio, or every angle is off by that factor. Turn each
+  joint exactly one revolution by hand and check the reported angle before running a trajectory.

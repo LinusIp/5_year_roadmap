@@ -1,0 +1,67 @@
+overview: >-
+  A microcontroller that shows up on a PC as a serial port, built from hand-written USB descriptors instead of a
+  vendor library: the device answers the host's control requests during enumeration (get descriptor, set address, set
+  configuration), then moves data over bulk endpoints. A test sends 1 MB from the PC, checks it echoes back unchanged,
+  and measures throughput.
+learn:
+  - name: USB enumeration
+  - name: USB descriptors
+  - name: Control transfers
+  - name: Bulk endpoints
+components:
+  - id: ctrl
+    name: Control handler
+    role: Answers standard and CDC class requests on endpoint 0.
+    tech: C / Rust · USB peripheral
+    talksTo: [desc]
+    kind: core
+  - id: desc
+    name: Descriptor tables
+    role: Device, configuration, interface, CDC functional and endpoint descriptors.
+    tech: const byte arrays
+    talksTo: [bulk]
+    kind: core
+  - id: bulk
+    name: Bulk echo
+    role: Copies each received packet from the OUT endpoint to the IN endpoint.
+    tech: C / Rust
+    talksTo: [host]
+    kind: core
+  - id: host
+    name: PC test
+    role: Opens the new serial port, sends 1 MB and compares what comes back.
+    tech: Python · pyserial
+    talksTo: []
+    kind: external
+flow:
+  - component: ctrl
+    text: answers `GET_DESCRIPTOR`, applies `SET_ADDRESS` only **after** its status stage, then handles `SET_CONFIGURATION`, `SET_LINE_CODING` and `SET_CONTROL_LINE_STATE`.
+  - component: desc
+    text: describe a CDC control interface with an interrupt IN endpoint and a data interface with bulk `0x01` OUT and `0x81` IN, each 64 bytes at full speed.
+  - component: bulk
+    text: echoes each OUT packet to IN, and sends a zero-length packet after a transfer that is an exact multiple of 64 bytes so the host knows it ended.
+  - component: host
+    text: sends 1 MB in 4 KB chunks, compares every byte, and reports KB/s.
+interface:
+  lang: c
+  code: |
+    static const uint8_t dev_desc[18] = {
+      18, 1,              /* bLength, DEVICE */
+      0x00, 0x02,         /* USB 2.0 */
+      0x02, 0x00, 0x00,   /* class CDC */
+      64,                 /* EP0 max packet */
+      0x09, 0x12,         /* VID 0x1209, test only */
+      0x01, 0x00,         /* test PID */
+      0x00, 0x01, 1, 2, 3, 1 };
+    #define EP_NOTIFY 0x82  /* interrupt IN, 8 bytes */
+    #define EP_OUT    0x01  /* bulk OUT, 64 bytes */
+    #define EP_IN     0x81  /* bulk IN, 64 bytes */
+decisions:
+  - choice: Hand-built descriptors, not a USB stack
+    instead: A ready stack such as TinyUSB or usb-device
+    why: >-
+      The point is to see enumeration happen. About 100 bytes of descriptors and six control requests written by hand
+      map one-to-one onto a Wireshark USB capture; use a stack afterwards for anything real.
+watchOut: >-
+  Full-speed bulk endpoints allow at most 64 bytes; copying 512 from a high-speed example makes the host reject the
+  device or stall transfers. Check every `wMaxPacketSize` against the speed your peripheral actually runs at.

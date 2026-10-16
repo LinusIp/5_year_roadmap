@@ -1,0 +1,46 @@
+overview: >-
+  A GraphQL API over authors, posts and comments where a naive resolver issues one SQL query per item, then
+  DataLoader batching collapses each nested level into a single `WHERE id IN (...)` query, so a nested request costs
+  at most 3 statements.
+learn:
+  - name: N+1 query problem
+  - name: Request batching
+  - name: Per-request caching
+  - name: Query cost limits
+components:
+  - id: server
+    name: GraphQL server
+    role: Parses the query, checks depth and cost limits, and runs the resolvers.
+    tech: Strawberry or Apollo
+    talksTo: [loaders]
+    kind: core
+  - id: loaders
+    name: DataLoaders
+    role: Collect the keys asked for in one tick and fetch them in one query, created fresh per request.
+    tech: DataLoader
+    talksTo: [db]
+    kind: core
+  - id: db
+    name: Postgres
+    role: Holds authors, posts and comments, and logs each statement for counting.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+flow:
+  - component: server
+    text: receives `{ authors { posts { comments { text } } } }` and rejects it if depth passes 5 or cost passes 1,000.
+  - component: loaders
+    text: gather every author id requested by the resolvers and wait one event-loop tick.
+  - component: db
+    text: answers one `SELECT … WHERE author_id IN (...)` for posts, then one for comments, instead of one query per author.
+  - component: server
+    text: returns the tree; the test asserts **3 statements** for 10 authors and for 1,000.
+decisions:
+  - choice: DataLoader per request
+    instead: One global DataLoader cache
+    why: >-
+      A shared cache would serve one user's rows to another and go stale after writes. Per request still gives the
+      3-statement bound; add a real cache later only with explicit invalidation.
+watchOut: >-
+  A loader cache shared across requests leaks data between users. Build the loaders inside the request context,
+  never at import time.

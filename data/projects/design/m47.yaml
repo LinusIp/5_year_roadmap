@@ -1,0 +1,119 @@
+overview: >-
+  A two-channel data-acquisition board: each input passes through protection, an instrumentation amplifier with gain
+  1, 10 or 100, and a fourth-order anti-aliasing filter at 1 kHz, which removes frequencies that would fold back into
+  the band after sampling. A precision ADC samples at 10 kSPS against a clean voltage reference and sends samples
+  over SPI to a microcontroller, which streams numbered blocks over USB to a host tool that plots and records them.
+  The layout keeps digital return currents away from the analogue front end, and you measure noise, ENOB and
+  bandwidth to prove it works.
+learn:
+  - name: Instrumentation amplifiers
+    ref: art-of-electronics
+  - name: Anti-aliasing filters
+    ref: dspguide
+  - name: ADC noise and ENOB
+    ref: learning-the-art-of-electronics
+  - name: Mixed-signal layout
+    ref: phils-lab
+  - name: Filter simulation
+    ref: ltspice
+stats:
+  - value: ≥ 14 bits
+    label: ENOB on a clean sine
+  - value: < 5 µV
+    label: RMS noise at gain 100, input-referred
+  - value: "0"
+    label: dropped blocks in 1 h at 10 kSPS
+components:
+  - id: sensor
+    name: Sensor
+    role: The real-world signal, brought in on shielded cable.
+    tech: BNC · terminal block
+    talksTo: [protection]
+    kind: external
+  - id: protection
+    name: Input protection
+    role: Limits current and clamps over-voltage before the amplifier.
+    tech: Series resistors · clamp diodes
+    talksTo: [inamp]
+    kind: core
+  - id: inamp
+    name: In-amp
+    role: Amplifies the differential signal by a selectable gain and rejects common-mode noise.
+    tech: INA828
+    talksTo: [filter]
+    kind: core
+  - id: filter
+    name: Anti-alias filter
+    role: Fourth-order Butterworth low-pass at 1 kHz, built with C0G capacitors.
+    tech: OPA2387 · 0.1 % resistors
+    talksTo: [adc]
+    kind: core
+  - id: adc
+    name: ADC
+    role: Converts both channels at 10 kSPS against the voltage reference.
+    tech: ADS131M04 · REF5025
+    talksTo: [mcu]
+    kind: core
+  - id: mcu
+    name: MCU
+    role: Reads the ADC over SPI, timestamps and numbers blocks, and streams them over USB.
+    tech: STM32 or RP2040 · C
+    talksTo: [host]
+    kind: core
+  - id: host
+    name: Host tool
+    role: Checks sequence numbers, plots live and records to CSV or Parquet.
+    tech: Python · pyqtgraph
+    talksTo: []
+    kind: core
+flow:
+  - component: protection
+    text: >-
+      takes the sensor signal and clamps anything outside the supply rails, so a wiring mistake does not destroy the
+      amplifier.
+  - component: inamp
+    text: >-
+      amplifies the difference between the two inputs by `G = 1, 10 or 100` and rejects noise common to both.
+  - component: filter
+    text: >-
+      rolls off above 1 kHz so that at 9 kHz, which would alias onto 1 kHz, the signal is down by **at least 60 dB**.
+  - component: adc
+    text: >-
+      samples on its data-ready clock at 10 kSPS; the reference sets full scale, so its noise becomes your noise.
+  - component: mcu
+    text: >-
+      reads each frame over SPI on `DRDY`, packs a block with `seq` and a timestamp, and sends it over USB.
+  - component: host
+    text: >-
+      flags any gap in `seq` as a **dropped block**, plots the channels live and appends them to the recording.
+interface:
+  lang: c
+  code: |
+    /* one USB block, little-endian */
+    #define N 64                /* samples per channel */
+    struct daq_block {
+      uint32_t seq;             /* +1 per block */
+      uint32_t t0_us;           /* first sample time */
+      uint8_t  gain[2];         /* 1, 10 or 100 */
+      uint16_t n;               /* = N */
+      int32_t  s[2][N];         /* sign-extended codes */
+    };
+decisions:
+  - choice: Fourth-order filter at 1 kHz
+    instead: A corner at Nyquist, 5 kHz
+    why: >-
+      A corner at Nyquist lets half-attenuated signals alias straight into the band. At 1 kHz a fourth-order
+      Butterworth is about 76 dB down at 9 kHz, comfortably past the 60 dB target.
+  - choice: One solid ground plane
+    instead: Split analogue and digital grounds
+    why: >-
+      A split plane forces return currents around the gap and often makes noise worse. One plane, with analogue parts
+      placed away from digital edges, keeps return paths short and predictable.
+  - choice: Sequence numbers in every block
+    instead: Trusting USB to deliver everything
+    why: >-
+      The done-when test is zero drops in one hour at 10 kSPS on two channels. A counter in each block is the only way
+      the host can prove it.
+watchOut: >-
+  Digital return currents routed under the analogue front end show up directly in the noise floor. Keep SPI and USB
+  traces and their return paths away from the in-amp and filter, and measure noise with the laptop on battery.

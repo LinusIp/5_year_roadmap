@@ -1,0 +1,53 @@
+overview: >-
+  Behaviour cloning (supervised learning on expert state-action pairs) compared with DAgger, which runs the learned
+  policy, asks the expert what it would have done in the states the policy actually reached, and retrains. Return
+  versus number of labelled states shows how cloning's small mistakes compound and how relabelling fixes it.
+learn:
+  - name: Behaviour cloning
+    ref: berkeley-cs285
+  - name: Distribution shift
+  - name: DAgger
+    ref: berkeley-cs285
+components:
+  - id: expert
+    name: Expert policy
+    role: A trained or scripted policy that labels any state with its action.
+    tech: Pretrained policy
+    talksTo: [dataset]
+    kind: external
+  - id: dataset
+    name: Dataset
+    role: Collects state and expert-action pairs across rounds.
+    tech: NumPy
+    talksTo: [learner]
+    kind: core
+  - id: learner
+    name: Learner policy
+    role: Trains on the dataset and rolls out in the environment.
+    tech: PyTorch
+    talksTo: [env]
+    kind: core
+  - id: env
+    name: Environment
+    role: Runs rollouts and returns episode returns.
+    tech: Gymnasium
+    talksTo: [expert]
+    kind: external
+flow:
+  - component: dataset
+    text: starts with expert demos, for example 5 episodes; behaviour cloning stops here.
+  - component: learner
+    text: trains on all pairs so far and rolls out in the environment.
+  - component: expert
+    text: labels the states the **learner** visited with its own actions, and these join the dataset.
+  - component: learner
+    text: repeats for 5 rounds; returns for both methods are plotted against total labelled states, a deliberate **loop**.
+decisions:
+  - choice: Compare at equal labelled states
+    instead: Compare at equal rounds or episodes
+    why: >-
+      Expert labels are the scarce resource, so the fair axis is how many were used. Cloning gets the same number of
+      states from extra expert demos.
+watchOut: >-
+  If the cloned policy is only tested from the expert's start states for a few steps, compounding error never shows.
+  Evaluate full episodes from random starts.

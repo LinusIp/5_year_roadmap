@@ -1,0 +1,46 @@
+overview: >-
+  A FastAPI app that sends users to Keycloak for login with the authorization-code flow plus PKCE, then validates
+  the returned ID token's signature, issuer, audience, expiry and nonce before mapping its roles to route
+  permissions.
+learn:
+  - name: OIDC code flow
+  - name: PKCE
+  - name: JWT validation
+  - name: Role mapping
+components:
+  - id: browser
+    name: Browser
+    role: Follows redirects between the app and Keycloak.
+    tech: Browser
+    talksTo: [app]
+    kind: external
+  - id: app
+    name: App
+    role: Starts login, exchanges the code, validates tokens and enforces roles per route.
+    tech: FastAPI · Authlib
+    talksTo: [keycloak]
+    kind: core
+  - id: keycloak
+    name: Keycloak
+    role: Authenticates users and signs ID tokens with keys published at its JWKS endpoint.
+    tech: Keycloak in Docker
+    talksTo: [app]
+    kind: external
+flow:
+  - component: app
+    text: redirects to Keycloak with a random `state`, `nonce` and a `code_challenge` (a hash of a secret only the app keeps).
+  - component: keycloak
+    text: logs the user in and redirects back to `/callback?code=…&state=…`.
+  - component: app
+    text: sends the code and the `code_verifier` to the token endpoint and receives an ID token.
+  - component: app
+    text: checks the signature against JWKS, then `iss`, `aud`, `exp` and `nonce`, and maps `realm_access.roles` to allowed routes.
+decisions:
+  - choice: Authorization code with PKCE
+    instead: Implicit flow returning tokens in the URL
+    why: >-
+      Tokens never appear in the browser URL or history, and PKCE stops a stolen code from being used elsewhere.
+      Implicit flow is deprecated; there is no case here to revisit it.
+watchOut: >-
+  A token with a valid signature can still be meant for another client. Without the audience and nonce checks, a
+  token issued to a different app or replayed from an old login is accepted.

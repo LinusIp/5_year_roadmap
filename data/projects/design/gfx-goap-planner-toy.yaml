@@ -1,0 +1,65 @@
+overview: >-
+  A survival agent that plans with GOAP (goal-oriented action planning): the world is a bitmask of facts such as
+  `has_axe` or `hungry`, each action has preconditions, effects and a cost, and A* searches from the current state to
+  any state that meets the goal. When the world changes under the agent, for example its axe is stolen, the next
+  precondition check fails and it replans.
+learn:
+  - name: State-space search
+    ref: cs188
+  - name: A* heuristics
+  - name: Bitmask states
+  - name: Replanning
+components:
+  - id: world
+    name: World state
+    role: Holds the live facts as a 32-bit mask and applies events such as sabotage.
+    tech: C++ / Python
+    talksTo: [planner]
+    kind: core
+  - id: planner
+    name: Planner
+    role: Holds the action set and searches for the cheapest action sequence to the goal.
+    tech: A*
+    talksTo: [executor]
+    kind: core
+  - id: executor
+    name: Executor
+    role: Runs the plan step by step, checking preconditions before each action.
+    tech: C++ / Python
+    talksTo: [world]
+    kind: core
+flow:
+  - component: world
+    text: packs facts into a mask, for example `has_wood = 1 << 2`, and updates it as actions finish or events happen.
+  - component: planner
+    text: runs A* where an action applies if `(s & preMask) == preVal`, gives `(s & ~effMask) | effVal`, and the heuristic counts goal bits still wrong.
+  - component: executor
+    text: runs the actions in order and re-checks each precondition against the **live** world just before it starts.
+  - component: executor
+    text: on a failed check asks the planner again from the current state, which closes the **sense, plan, act** loop; plan length and planner time are logged for all 3 goals.
+interface:
+  lang: cpp
+  code: |
+    using State = uint32_t;   // one bit per fact
+    struct Action {
+      const char* name;       // "chop_wood"
+      State preMask, preVal;  // must hold before
+      State effMask, effVal;  // set after
+      float cost;
+    };
+    bool  applicable(const Action& a, State s);
+    State apply(const Action& a, State s);
+
+    std::vector<int> plan(State start, State goalMask,
+                          State goalVal,
+                          std::span<const Action> acts,
+                          int maxNodes = 10000);
+decisions:
+  - choice: Forward search from the current state
+    instead: Backward search from the goal
+    why: >-
+      With about 15 actions and 32 facts, forward A* with a 10,000-node cap finishes in well under a millisecond, and
+      every node is a real world state you can print. Backward search pays off only with hundreds of actions.
+watchOut: >-
+  Facts that no action reads, such as counters or time of day, multiply the number of states and slow search to a
+  crawl. Keep only facts the actions use, and cap nodes so a failed plan returns fast instead of hanging.

@@ -1,0 +1,98 @@
+overview: >-
+  A live captioning server that makes Whisper, a model built for whole files, work on a stream. Audio is buffered
+  and decoded every second over a sliding window, a stabiliser commits only words that two consecutive decodes agree
+  on, and a WebSocket server sends grey partial text and black final text to viewers. One GPU batches decodes from
+  10 council meetings at once, keeping captions within 2 s and WER within 2 points of offline decoding.
+learn:
+  - name: Streaming ASR
+  - name: Voice activity detection
+  - name: Partial and final hypotheses
+  - name: Word error rate
+    ref: slp3
+  - name: WebSockets
+stats:
+  - value: < 2 s
+    label: caption lag p95
+  - value: ≤ 2 pts
+    label: WER above offline
+  - value: '10'
+    label: streams on one GPU
+components:
+  - id: source
+    name: Meeting audio
+    role: The live audio feed from each council chamber.
+    tech: RTMP · file replay
+    talksTo: [buffer]
+    kind: external
+  - id: buffer
+    name: Audio buffer
+    role: Keeps up to 15 s of unconfirmed 16 kHz audio per stream and marks pauses with VAD.
+    tech: NumPy · Silero VAD
+    talksTo: [decoder]
+    kind: core
+  - id: decoder
+    name: Streaming decoder
+    role: Decodes each stream's window every second, batching streams together on the GPU.
+    tech: faster-whisper
+    talksTo: [stabilizer]
+    kind: core
+  - id: stabilizer
+    name: Stabiliser
+    role: Commits the words two consecutive hypotheses agree on and trims committed audio from the buffer.
+    tech: Python
+    talksTo: [ws, buffer]
+    kind: core
+  - id: ws
+    name: WebSocket server
+    role: Pushes partial and final caption messages to every viewer of a town.
+    tech: websockets · asyncio
+    talksTo: []
+    kind: core
+  - id: eval
+    name: Evaluator
+    role: Replays AMI and LibriSpeech as streams and measures lag, WER and flicker against offline decoding.
+    tech: jiwer · Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: buffer
+    text: appends each 1 s chunk to the stream's window and lets VAD mark the last pause, so the window can end on silence.
+  - component: decoder
+    text: decodes the window, prompted with the last committed sentence, in one GPU batch with the other streams.
+  - component: stabilizer
+    text: >-
+      compares the new hypothesis with the previous one and commits the longest common prefix as **final**; the rest
+      stays partial, and committed audio leaves the buffer, which is a loop per stream.
+  - component: ws
+    text: sends `{"type":"partial"}` for the unstable tail and `{"type":"final"}` for committed words, about 1.5 s behind speech.
+  - component: eval
+    text: compares final captions with offline decoding of the same audio and counts how often shown partial words change.
+interface:
+  lang: json
+  code: |
+    { "town": "ashby", "type": "final",
+      "seq": 1841,
+      "text": "The motion to repair Mill Lane",
+      "start": 3605.2, "end": 3607.0 }
+
+    { "town": "ashby", "type": "partial",
+      "seq": 1842,
+      "text": "is seconded by councillor",
+      "lag_ms": 1380 }
+decisions:
+  - choice: Local agreement between decodes
+    instead: Show every new hypothesis as it arrives
+    why: >-
+      Whisper rewrites the end of its output as more audio arrives, so raw hypotheses flicker. Committing only words two
+      decodes agree on costs about a second of lag and keeps text stable.
+  - choice: Sliding window cut at pauses
+    instead: Fixed 5 s chunks
+    why: Fixed chunks cut words in half at the boundary. Ending the window on a VAD pause gives the model whole words.
+  - choice: Batch streams on one GPU
+    instead: One model instance per stream
+    why: >-
+      Ten model copies would not fit or would sit idle between seconds. One batched decode a second serves all 10
+      streams; add GPUs only past that.
+watchOut: >-
+  Word flicker and words cut at chunk boundaries make captions hard to read even when WER looks fine. Measure flicker
+  rate next to WER, and never commit the last word before a window edge.

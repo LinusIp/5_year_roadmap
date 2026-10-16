@@ -1,0 +1,54 @@
+overview: >-
+  A ResNet-20 style network trained on CIFAR-10 in several variants (with and without skip connections, at two
+  depths, with and without augmentation), each run with 3 seeds. A table of test accuracy mean and standard deviation
+  shows which choices really matter.
+learn:
+  - name: Residual connections
+    ref: stanford-cs231n
+  - name: Data augmentation
+    ref: d2l
+  - name: Ablation studies
+  - name: Seed variance
+components:
+  - id: data
+    name: Data loader
+    role: Loads CIFAR-10 with a fixed validation split and optional crop and flip.
+    tech: torchvision
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: ResNet
+    role: Builds the network from flags for depth and skips.
+    tech: PyTorch
+    talksTo: [trainer]
+    kind: core
+  - id: trainer
+    name: Trainer
+    role: Trains each variant with the same schedule for every seed.
+    tech: PyTorch
+    talksTo: [table]
+    kind: core
+  - id: table
+    name: Results table
+    role: Aggregates test accuracy into mean and std per variant.
+    tech: pandas
+    talksTo: []
+    kind: core
+flow:
+  - component: data
+    text: holds out 5,000 training images for validation, with augmentation on or off by the variant's flag.
+  - component: model
+    text: is built from flags such as `depth=20, skips=False`, with everything else identical.
+  - component: trainer
+    text: runs the same epochs and learning-rate schedule for seeds `0, 1, 2`, picks the checkpoint on validation and evaluates once on test.
+  - component: table
+    text: reports **mean ± std** per variant, so a gap smaller than the spread is not called a win.
+decisions:
+  - choice: 3 seeds per variant
+    instead: One long run per variant
+    why: >-
+      Seed-to-seed spread on CIFAR is often a few tenths of a percent, as big as some effects. Within a 7-hour
+      budget, shorter runs with 3 seeds tell you more than one long run.
+watchOut: >-
+  Choosing checkpoints or settings on the test set turns it into a validation set and inflates every number. Select
+  on the held-out validation images only.

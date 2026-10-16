@@ -1,0 +1,52 @@
+overview: >-
+  A near-duplicate finder for a text corpus: each document becomes a set of word shingles, MinHash compresses that set
+  into a short signature, and locality-sensitive hashing (LSH) bands put similar signatures in the same bucket so only
+  those pairs are compared. Known duplicates are injected to measure recall and the false-positive rate.
+learn:
+  - name: Shingling
+  - name: MinHash signatures
+  - name: LSH banding
+  - name: Jaccard similarity
+components:
+  - id: shingler
+    name: Shingler
+    role: Turns each document into a set of 5-word shingles.
+    tech: Python
+    talksTo: [minhash]
+    kind: core
+  - id: minhash
+    name: MinHash
+    role: Computes a 128-value signature per document.
+    tech: NumPy
+    talksTo: [lsh]
+    kind: core
+  - id: lsh
+    name: LSH buckets
+    role: Splits signatures into bands and groups documents whose band hashes collide.
+    tech: Python dict
+    talksTo: [eval]
+    kind: core
+  - id: eval
+    name: Evaluator
+    role: Checks candidate pairs by true Jaccard and scores recovery of injected duplicates.
+    tech: Python
+    talksTo: []
+    kind: core
+flow:
+  - component: shingler
+    text: normalizes text and builds 5-word shingles; injected copies are edited versions of known originals.
+  - component: minhash
+    text: applies 128 hash functions and keeps the minimum per function.
+  - component: lsh
+    text: uses `b=16` bands of `r=8` rows, which flags pairs above roughly 0.7 Jaccard with high probability.
+  - component: eval
+    text: computes exact Jaccard for candidate pairs and reports **recall** of injected duplicates and the false-positive rate.
+decisions:
+  - choice: Implement MinHash yourself
+    instead: Use the datasketch library directly
+    why: >-
+      The point of the build is to see how bands and rows set the similarity threshold. Compare against datasketch's
+      output afterwards as a correctness check.
+watchOut: >-
+  Bands and rows that do not match your target similarity either miss duplicates or flood you with candidates. Plot
+  the `1 - (1 - s^r)^b` curve and choose b and r from it before running.

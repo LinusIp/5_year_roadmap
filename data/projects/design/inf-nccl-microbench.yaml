@@ -1,0 +1,53 @@
+overview: >-
+  A sweep of all-reduce, all-gather and reduce-scatter from 1 KB to 1 GB on 2 or more GPUs, fitted to the alpha-beta
+  model: time = alpha (fixed latency per call) + size times beta (time per byte). Bus bandwidth is compared with the
+  link spec, and ring versus tree algorithms are tried through NCCL settings.
+learn:
+  - name: Collective operations
+    ref: ultra-scale-playbook
+  - name: Alpha-beta cost model
+    ref: scaling-book
+  - name: Bus bandwidth
+components:
+  - id: launcher
+    name: Launcher
+    role: Starts one process per GPU and sets NCCL_ALGO for each run.
+    tech: torchrun
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Collective bench
+    role: Warms up, then times each collective at each size with CUDA events.
+    tech: PyTorch distributed · NCCL
+    talksTo: [fit]
+    kind: core
+  - id: links
+    name: GPU links
+    role: The PCIe or NVLink connections whose bandwidth bounds the result.
+    tech: PCIe or NVLink
+    talksTo: []
+    kind: external
+  - id: fit
+    name: Model fit
+    role: Fits alpha and beta per collective and tests predictions on held-out sizes.
+    tech: NumPy · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: launcher
+    text: starts `torchrun --nproc_per_node=N` once with `NCCL_ALGO=Ring` and once with `Tree`.
+  - component: bench
+    text: runs 5 **warmup** calls per size, then times 20 and keeps the median.
+  - component: bench
+    text: converts to bus bandwidth, for all-reduce `busbw = size / time · 2(N - 1) / N`, to compare with the link spec.
+  - component: fit
+    text: fits `t = α + β · size` on even powers of two and checks it predicts the odd ones within 15%.
+decisions:
+  - choice: Fit one model per collective and algorithm
+    instead: One model for all collectives
+    why: >-
+      All-gather and reduce-scatter move about half the data of all-reduce, and tree and ring have different
+      latencies. Separate fits make the alpha and beta comparable to theory.
+watchOut: >-
+  The first call to a collective sets up communicators and buffers, and can be 100x slower. Leaving it in ruins the
+  small-size points and alpha. Always warm up per size.

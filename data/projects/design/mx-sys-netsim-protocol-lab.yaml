@@ -1,0 +1,127 @@
+overview: >-
+  A deterministic network simulator in Rust: node code never sees a real clock, socket or random source, only a
+  context the simulator hands it, so one seed always produces the same run. A single event loop pops the earliest
+  event, delivers it to a node, and the node's sends become new events whose delay, loss and reordering come from the
+  seeded network model. Every run is recorded and hashed, and a shrinker cuts a failing run down to the few events that
+  matter.
+learn:
+  - name: Discrete-event simulation
+  - name: Deterministic replay
+  - name: Dependency injection
+    ref: rust-book
+  - name: Delta debugging
+  - name: Two-phase commit
+    ref: ddia
+stats:
+  - value: 1,000 / 1,000
+    label: reruns with the same trace hash
+  - value: < 10 s
+    label: 1M events, 100 nodes
+  - value: < 30 events
+    label: in a shrunk failing run
+components:
+  - id: scripts
+    name: Fault scripts
+    role: Describe partitions, crashes and link settings as timed events.
+    tech: TOML · Rust
+    talksTo: [queue]
+    kind: offline
+  - id: queue
+    name: Event queue
+    role: Orders all pending events by virtual time and owns the seeded RNG.
+    tech: BinaryHeap · ChaCha8Rng
+    talksTo: [node]
+    kind: core
+  - id: node
+    name: Node API
+    role: Calls message and timer handlers with a context for time, sending and randomness.
+    tech: Rust trait
+    talksTo: [subject]
+    kind: core
+  - id: subject
+    name: Two-phase commit
+    role: The toy protocol under test, with a planted bug and an invariant check.
+    tech: Rust
+    talksTo: [net]
+    kind: core
+  - id: net
+    name: Network model
+    role: Turns each send into a delivery event with sampled latency, loss and duplication.
+    tech: Rust
+    talksTo: [queue, recorder]
+    kind: core
+  - id: recorder
+    name: Trace recorder
+    role: Appends every event to the trace and folds it into a running hash.
+    tech: BLAKE3
+    talksTo: [shrinker]
+    kind: core
+  - id: shrinker
+    name: Shrinker
+    role: Removes faults and events from a failing run while it still fails.
+    tech: Delta debugging
+    talksTo: []
+    kind: offline
+flow:
+  - component: scripts
+    text: >-
+      loads the run, for example seed `4127`, partition `{1,2} | {3}` at 40 ms and crash node 3 at 90 ms, and pushes
+      them as events.
+  - component: queue
+    text: >-
+      pops the earliest event; ties break by an insertion counter, never by hash or pointer order, and time is
+      **integer nanoseconds** so nothing drifts.
+  - component: node
+    text: >-
+      calls `on_message` or `on_timer` on the target node with a `Ctx`; the node reads time only through `ctx.now()`.
+  - component: subject
+    text: >-
+      runs its two-phase commit step and calls `ctx.send()`; after each event an invariant checks that no node
+      committed while another aborted.
+  - component: net
+    text: >-
+      draws latency from the link's distribution, applies loss, duplication and partitions, and schedules the delivery
+      back on the queue, which is the loop that drives the whole run.
+  - component: recorder
+    text: >-
+      hashes each event as it happens; 1,000 reruns of one seed must give the same final hash.
+  - component: shrinker
+    text: >-
+      when the invariant fails, drops half the faults and events, reruns, keeps any smaller run that still fails, and
+      repeats until under 30 events.
+interface:
+  lang: rust
+  code: |
+    pub trait Node {
+        fn on_start(&mut self, ctx: &mut Ctx);
+        fn on_message(&mut self, ctx: &mut Ctx,
+                      from: NodeId, msg: Msg);
+        fn on_timer(&mut self, ctx: &mut Ctx,
+                    id: TimerId);
+    }
+    impl Ctx {
+        pub fn now(&self) -> SimTime; // virtual ns
+        pub fn send(&mut self, to: NodeId, m: Msg);
+        pub fn timer(&mut self, d: Duration) -> TimerId;
+        pub fn rng(&mut self) -> &mut ChaCha8Rng;
+    }
+    // run(seed, script) -> Trace { events, hash }
+decisions:
+  - choice: One single-threaded event loop
+    instead: Real threads with a controlled scheduler
+    why: >-
+      Determinism is the whole point and a constraint. One loop makes order explicit, and 1 million events in 10 s is
+      only 100,000 a second, easy in Rust on one core.
+  - choice: Rust, not Python
+    instead: Python
+    why: >-
+      Both are allowed. Python would make 100,000 events a second tight once handlers do real work; Rust also lets the
+      `Ctx` type make wall-clock calls impossible to write by accident.
+  - choice: Automatic delta-debugging shrinker
+    instead: Minimise failing runs by hand
+    why: >-
+      A failing run can hold thousands of events. Each rerun takes milliseconds, so letting the machine try hundreds of
+      cuts reaches under 30 events faster than a person.
+watchOut: >-
+  Rust's `HashMap` uses a random seed per process, so iterating one changes order between runs and breaks replay. Use
+  `BTreeMap` or a fixed hasher in node code, and fail the build if `std::time` is used there.

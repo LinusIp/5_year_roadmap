@@ -1,0 +1,68 @@
+overview: >-
+  A chunked voxel world (32x32x32 blocks per chunk) turned into meshes in three steps: drop faces hidden by a solid
+  neighbour, merge runs of same-type faces in one plane into big rectangles (greedy meshing), and darken each vertex by
+  how many of its neighbouring blocks are solid (ambient occlusion). The target is at least 5x fewer triangles than one
+  quad per visible face on terrain.
+learn:
+  - name: Hidden face culling
+  - name: Greedy meshing
+  - name: Voxel ambient occlusion
+  - name: Chunk borders
+components:
+  - id: chunks
+    name: Chunk store
+    role: Holds block ids for each chunk plus a one-block border copied from neighbours.
+    tech: C++ / Rust
+    talksTo: [cull]
+    kind: core
+  - id: cull
+    name: Face culler
+    role: Builds a face mask per slice where a solid block meets air.
+    tech: C++ / Rust
+    talksTo: [greedy]
+    kind: core
+  - id: greedy
+    name: Greedy mesher
+    role: Merges matching faces in each mask into the fewest rectangles.
+    tech: C++ / Rust
+    talksTo: [render]
+    kind: core
+  - id: render
+    name: Renderer
+    role: Uploads quads per chunk and shades them with per-vertex AO.
+    tech: OpenGL
+    talksTo: []
+    kind: core
+flow:
+  - component: chunks
+    text: stores a flat `34³` array (32 plus a border on each side), so meshing never reads into another chunk.
+  - component: cull
+    text: for each of 6 directions and 32 slices, fills a 32x32 mask with the block type and 4 AO values of every exposed face.
+  - component: greedy
+    text: grows a rectangle right while mask entries match, then down while whole rows match, emits one quad and clears it from the mask.
+  - component: render
+    text: "shades with `ao = s1 && s2 ? 0 : 3 - (s1 + s2 + c)` and **flips the diagonal** when `ao00 + ao11 < ao01 + ao10`; naive and greedy triangle counts are printed."
+interface:
+  lang: cpp
+  code: |
+    constexpr int N = 32;
+    struct Chunk {
+      uint16_t block[(N + 2) * (N + 2) * (N + 2)];
+      uint16_t at(int x, int y, int z) const; // -1..N
+    };
+    struct Quad { uint8_t x, y, z, w, h, axis;
+                  uint16_t type; uint8_t ao[4]; };
+
+    std::vector<Quad> mesh_naive(const Chunk& c);
+    std::vector<Quad> mesh_greedy(const Chunk& c);
+    // 0 = darkest, 3 = fully open
+    int vertex_ao(bool side1, bool side2, bool corner);
+decisions:
+  - choice: AO values in the merge key
+    instead: Merge by block type only and add AO afterwards
+    why: >-
+      A merged quad has only 4 corner values, so merging faces with different AO smears the shading wrong. Matching
+      AO merges a little less; print the ratio both ways to see what it costs.
+watchOut: >-
+  Meshing a chunk without its neighbours' edge blocks draws hidden faces along every chunk border and gets AO wrong
+  there. Copy the border in, and remesh the neighbour when an edge block changes.

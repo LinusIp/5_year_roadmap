@@ -1,0 +1,63 @@
+overview: >-
+  A calculator in C11: a lexer produces tokens, a precedence-climbing parser builds an AST of tagged-union nodes, an
+  evaluator walks it with a symbol table for variables and built-in functions, and every node is freed so valgrind
+  reports zero leaks.
+learn:
+  - name: Precedence climbing
+    ref: crafting-interpreters
+  - name: Tagged unions
+    ref: modern-c
+  - name: Memory ownership
+  - name: Leak checking
+components:
+  - id: lexer
+    name: Lexer
+    role: Turns the input into numbers, names, operators and parentheses.
+    tech: C11
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: Parser
+    role: Builds `Node` structs by precedence and reports the position of errors.
+    tech: C11
+    talksTo: [eval]
+    kind: core
+  - id: eval
+    name: Evaluator
+    role: Computes values, stores variables and calls `sin`, `sqrt` and similar.
+    tech: C11 · libm
+    talksTo: []
+    kind: core
+flow:
+  - component: lexer
+    text: splits `x = 2 * (3 + sin(0.5))` into tokens.
+  - component: parser
+    text: parses with a binding power per operator, so `*` binds tighter than `+` and `^` is right-associative.
+  - component: eval
+    text: evaluates the tree and stores `x` in a hash-table symbol table.
+  - component: parser
+    text: owns the tree, which `free_node` frees recursively after evaluation or after a syntax error.
+interface:
+  lang: c
+  code: |
+    typedef struct Node Node;
+    typedef enum { N_NUM, N_VAR, N_BIN, N_CALL } Kind;
+    struct Node {
+      Kind kind;
+      union {
+        double num;
+        char *name;
+        struct { char op; Node *l, *r; } bin;
+      };
+    };
+    Node *parse(const char *src, Error *err);
+    void free_node(Node *n);
+decisions:
+  - choice: Precedence climbing
+    instead: One recursive function per precedence level
+    why: >-
+      One loop with a table handles all levels, so adding an operator is one line. Per-level functions are clearer
+      for two or three levels only.
+watchOut: >-
+  On a syntax error halfway through, partly built subtrees leak unless someone owns them. Free them on the error
+  path and run valgrind on failing inputs too.

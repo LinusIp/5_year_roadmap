@@ -1,0 +1,71 @@
+overview: >-
+  1,000 hair strands simulated with position-based dynamics (PBD: move particles freely, then repeatedly nudge their
+  positions until the constraints hold, and take velocity from how far they moved). Each strand is a particle chain
+  with distance constraints for length, bend constraints for shape and collisions against capsules for the head and
+  neck, drawn as line strips that must settle without stretching or poking through.
+learn:
+  - name: Position-based dynamics
+    ref: ten-minute-physics
+  - name: XPBD compliance
+  - name: Capsule collision
+    ref: ericson-rtcd
+  - name: Verlet-style velocity
+components:
+  - id: predict
+    name: Predictor
+    role: Moves every free particle by velocity and gravity and pins the roots to the head.
+    tech: C++ / compute
+    talksTo: [solve]
+    kind: core
+  - id: solve
+    name: Constraint solver
+    role: Projects distance and bend constraints along each strand.
+    tech: C++ / compute
+    talksTo: [collide]
+    kind: core
+  - id: collide
+    name: Capsule collider
+    role: Pushes particles out of the head and neck capsules.
+    tech: C++ / compute
+    talksTo: [render]
+    kind: core
+  - id: render
+    name: Line renderer
+    role: Draws each strand as a line strip from the position buffer.
+    tech: OpenGL
+    talksTo: []
+    kind: core
+flow:
+  - component: predict
+    text: stores `xPrev = x` and sets `x += v·dt + g·dt²` for 16 to 32 particles per strand; each root follows the head instead.
+  - component: solve
+    text: runs 10 iterations of distance constraints and of bend constraints between particles two apart, using XPBD compliance `α / dt²` so **stiffness does not depend on iteration count**.
+  - component: collide
+    text: moves any particle inside a capsule to its surface plus the hair radius inside each iteration, then sets `v = (x - xPrev) / dt` with light damping.
+  - component: render
+    text: draws the strands and reports how many run at 60 FPS; done is 1,000 strands settling stably with no penetration.
+interface:
+  lang: cpp
+  code: |
+    struct Strand  { uint32_t first, count; };
+    struct Capsule { Vec3 a, b; float r; };
+
+    struct HairSim {
+      std::vector<Vec3> x, xPrev, v;
+      std::vector<float> invMass;   // root = 0
+      std::vector<float> restLen;
+      std::vector<Strand> strands;
+      float compliance = 1e-7f;     // XPBD alpha
+      void step(float dt, int iters,
+                std::span<const Capsule> body);
+    };
+    Vec3 closest_on_segment(Vec3 p, Vec3 a, Vec3 b);
+decisions:
+  - choice: XPBD compliance, not plain PBD stiffness
+    instead: Plain PBD with a 0 to 1 stiffness factor
+    why: >-
+      With plain PBD the same stiffness looks softer or harder as you change iterations or time step, so tuning never
+      holds. XPBD's compliance gives the same material either way, so you can trade iterations for speed freely.
+watchOut: >-
+  Particles can move far enough in one step to pass right through a thin capsule such as an ear. Collide inside the
+  iteration loop, add substeps if needed, and inflate capsules by the hair radius.

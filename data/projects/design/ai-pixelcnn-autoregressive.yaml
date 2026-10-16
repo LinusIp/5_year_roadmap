@@ -1,0 +1,52 @@
+overview: >-
+  A PixelCNN-style model that predicts each pixel of a binarized MNIST digit from the pixels above and to the left,
+  using masked convolutions so it never sees the pixel it predicts. It reports bits per dimension (average negative
+  log-likelihood per pixel) and draws samples one pixel at a time.
+learn:
+  - name: Autoregressive models
+    ref: stanford-cs236
+  - name: Masked convolutions
+  - name: Bits per dimension
+components:
+  - id: data
+    name: Data
+    role: Binarizes MNIST at threshold 0.5 into 28x28 inputs.
+    tech: torchvision
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: PixelCNN
+    role: Stacks masked convolutions (mask A first, then mask B) and outputs a probability per pixel.
+    tech: PyTorch
+    talksTo: [eval, sampler]
+    kind: core
+  - id: eval
+    name: Evaluator
+    role: Computes test bits per dimension and compares with a baseline.
+    tech: PyTorch
+    talksTo: []
+    kind: core
+  - id: sampler
+    name: Sampler
+    role: Fills an empty image pixel by pixel from the model's predictions.
+    tech: PyTorch
+    talksTo: []
+    kind: offline
+flow:
+  - component: data
+    text: provides binarized digits; the target for each pixel is its own value.
+  - component: model
+    text: applies a 7x7 **mask A** conv (excludes the centre pixel), then 3x3 mask B layers, and outputs one logit per pixel.
+  - component: eval
+    text: converts test binary cross-entropy to bits per dimension (`nats / ln 2 / 784`) and compares with an independent-pixel baseline.
+  - component: sampler
+    text: runs 784 forward passes, sampling one pixel each time, to draw a batch of digits.
+decisions:
+  - choice: Plain masked stack
+    instead: Gated PixelCNN with separate vertical and horizontal stacks
+    why: >-
+      The plain stack is simpler to get right in 7 hours and still makes recognizable digits. Its blind spot
+      (pixels up-right that are never seen) is the reason to try the gated version next.
+watchOut: >-
+  Using mask B in the first layer lets each pixel see itself, so the loss drops near zero and samples are noise.
+  Check that changing pixel (i, j) leaves the output at (i, j) unchanged.

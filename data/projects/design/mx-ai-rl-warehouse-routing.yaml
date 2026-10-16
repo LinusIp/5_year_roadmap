@@ -1,0 +1,103 @@
+overview: >-
+  A study of whether a learned routing policy can shorten pickers' walks in a synthetic warehouse. A simulator
+  generates aisle layouts and batched orders and computes real walking distance around the racks. A policy with
+  attention over the pick locations picks the next location one at a time, trained with reinforcement learning, and
+  is compared with the S-shape and nearest-neighbour heuristics and an OR-Tools solver on 1,000 batches from layouts
+  it never saw.
+learn:
+  - name: Policy gradients
+    ref: spinning-up
+  - name: Attention for routing
+  - name: Travelling salesman heuristics
+    ref: skiena-adm
+  - name: Optimality gap
+  - name: Generalisation to new layouts
+stats:
+  - value: ≥ 5%
+    label: shorter than nearest-neighbour
+  - value: < 50 ms
+    label: per route
+  - value: < 6 h
+    label: training on one GPU
+components:
+  - id: sim
+    name: Simulator
+    role: Builds random aisle layouts and order batches and computes aisle-aware walking distance.
+    tech: Python · NumPy
+    talksTo: [policy, baselines, solver]
+    kind: core
+  - id: trainer
+    name: RL trainer
+    role: Trains the policy with REINFORCE and a greedy-rollout baseline on random layouts.
+    tech: PyTorch
+    talksTo: [policy]
+    kind: offline
+  - id: policy
+    name: Policy
+    role: Encodes pick locations with attention and decodes a visiting order step by step.
+    tech: PyTorch transformer
+    talksTo: [evaluator]
+    kind: core
+  - id: baselines
+    name: Baselines
+    role: S-shape and nearest-neighbour routes for the same batch.
+    tech: Python
+    talksTo: [evaluator]
+    kind: core
+  - id: solver
+    name: Solver reference
+    role: Near-optimal route from OR-Tools with a time limit, as the floor to compare with.
+    tech: OR-Tools
+    talksTo: [evaluator]
+    kind: core
+  - id: evaluator
+    name: Evaluator
+    role: Scores every method on 1,000 unseen batches and reports distance, gap to solver and time.
+    tech: pandas
+    talksTo: []
+    kind: core
+flow:
+  - component: sim
+    text: >-
+      draws an unseen layout (aisle count, cross-aisles, depot) and a batch of 20–40 picks, and precomputes the
+      **aisle distance** matrix, since pickers cannot walk through racks.
+  - component: policy
+    text: embeds the picks, then chooses the next one with masked attention until all are visited, greedily, in under 50 ms.
+  - component: baselines
+    text: route the same batch with S-shape (walk every aisle with a pick end to end) and nearest-neighbour.
+  - component: solver
+    text: solves the batch as a travelling salesman problem with a 10 s limit to give the near-optimal reference distance.
+  - component: evaluator
+    text: >-
+      computes each method's distance and its **gap to the solver**, and passes the policy only if its mean is at least
+      5% below nearest-neighbour on held-out layouts.
+interface:
+  lang: python
+  code: |
+    def route(policy: Policy, layout: Layout,
+              picks: list[Loc]) -> list[int]: ...
+
+    def walk_m(layout: Layout, order: list[Loc]
+               ) -> float: ...
+
+    # evaluator row
+    # {"batch": 418, "nn_m": 1312.0,
+    #  "sshape_m": 1460.5, "policy_m": 1221.4,
+    #  "solver_m": 1188.9, "policy_ms": 7.2}
+decisions:
+  - choice: Train on randomised layouts
+    instead: Train on one fixed layout
+    why: >-
+      A policy trained on one floor plan memorises it and fails on any other. Random aisle counts and depots force it
+      to learn the routing pattern; revisit if Stackhaus wants one site tuned.
+  - choice: OR-Tools as the reference
+    instead: Heuristics only
+    why: >-
+      Beating nearest-neighbour says little if both are far from optimal. The solver gap shows how much is left, and
+      whether 5% is the real ceiling.
+  - choice: Learned policy at serving time
+    instead: Run the solver for every batch
+    why: The solver needs seconds per batch, while the policy routes in milliseconds, inside the 50 ms limit.
+watchOut: >-
+  Evaluating on layouts seen in training, or only against S-shape, overstates the gain. Hold out whole layouts and
+  always report the gap to both nearest-neighbour and the solver.

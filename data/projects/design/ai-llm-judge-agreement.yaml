@@ -1,0 +1,51 @@
+overview: >-
+  A calibration study: you label 100 answers on a rubric yourself, run an LLM judge on the same answers with two
+  prompt variants, and measure agreement with Cohen's kappa (agreement corrected for chance). It also checks whether
+  the judge simply rewards longer answers.
+learn:
+  - name: LLM as judge
+    ref: llm-zoomcamp
+  - name: Cohen's kappa
+  - name: Length bias
+  - name: Rubric design
+components:
+  - id: labels
+    name: Human labels
+    role: Stores your rubric score for each of the 100 answers, written before any judge runs.
+    tech: CSV
+    talksTo: [stats]
+    kind: core
+  - id: judge
+    name: Judge runner
+    role: Sends each answer with prompt variant A or B and parses the rubric score.
+    tech: Python · LLM API
+    talksTo: [llm, stats]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Returns a score and a short reason for one answer.
+    tech: Hosted LLM
+    talksTo: []
+    kind: external
+  - id: stats
+    name: Agreement stats
+    role: Computes kappa per prompt and the correlation between score and answer length.
+    tech: scikit-learn · pandas
+    talksTo: []
+    kind: core
+flow:
+  - component: labels
+    text: are frozen first, one rubric score per answer, so the judge cannot influence them.
+  - component: judge
+    text: scores every answer once with prompt **A** and once with prompt **B** at `temperature=0`, storing `score` and `reason`.
+  - component: stats
+    text: computes `cohen_kappa_score` between you and each prompt, then compares the judge's score-to-word-count correlation with the same correlation for your labels.
+decisions:
+  - choice: Pointwise rubric scores, not pairwise
+    instead: Pairwise judging of which answer is better
+    why: >-
+      Pointwise scores line up one-to-one with your 100 labels for kappa and avoid position bias, where the judge
+      prefers whichever answer comes first. If you add pairwise later, run each pair in both orders.
+watchOut: >-
+  Labelling after you have seen the judge's outputs pulls your labels toward it and inflates kappa. Finish and save
+  all 100 labels before the first judge call.

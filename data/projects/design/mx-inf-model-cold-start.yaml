@@ -1,0 +1,116 @@
+overview: >-
+  Zenith Docs' scale-to-zero GPU workers make the first user after idle wait 90 s; this project brings an 8B model's
+  cold start to a 12 s median and 15 s p95. A start-up profiler times every phase (container, CUDA init, weight
+  loading, graph capture, warm-up), and each fix targets the biggest one: safetensors read from local NVMe in
+  parallel, compile artefacts reused from a cache, and a readiness probe that only says ready when the model is
+  really warm.
+learn:
+  - name: Memory-mapped files
+    ref: ostep
+  - name: Safetensors loading
+  - name: Page cache
+    ref: ostep
+  - name: CUDA graphs
+    ref: cuda-guide
+  - name: Readiness probes
+    ref: kubernetes-tutorials
+stats:
+  - value: ≤ 12 s
+    label: median cold start, 8B model
+  - value: ≤ 15 s
+    label: p95 over 10 repeats
+  - value: ≤ 5%
+    label: memory used by caches
+components:
+  - id: trigger
+    name: Scale-up trigger
+    role: Starts a worker when a request arrives and none is running.
+    tech: Autoscaler
+    talksTo: [container]
+    kind: external
+  - id: container
+    name: Container start
+    role: Starts the worker from an image already on the host.
+    tech: Docker
+    talksTo: [loader]
+    kind: core
+  - id: loader
+    name: Weight loader
+    role: Reads safetensors shards from local NVMe in parallel and copies them straight to the GPU.
+    tech: safetensors · NVMe
+    talksTo: [engine]
+    kind: core
+  - id: engine
+    name: Engine init
+    role: Sets up CUDA, allocates the KV cache and captures CUDA graphs, reusing cached compile artefacts.
+    tech: vLLM
+    talksTo: [probe]
+    kind: core
+  - id: probe
+    name: Readiness probe
+    role: Sends one real request and reports ready only after it returns.
+    tech: HTTP health check
+    talksTo: []
+    kind: core
+  - id: profiler
+    name: Start-up profiler
+    role: Timestamps each phase and reports seconds per phase and disk read speed.
+    tech: Python
+    talksTo: []
+    kind: offline
+  - id: repeats
+    name: Repeat runner
+    role: Runs 10 cold starts, clearing the OS page cache before each one.
+    tech: shell · Python
+    talksTo: [profiler]
+    kind: offline
+flow:
+  - component: container
+    text: starts from an image pre-pulled onto the host, so no download happens on the request path.
+  - component: loader
+    text: >-
+      reads 16 GB of bf16 weights from NVMe with several shards in parallel; at about 3 GB/s that is **5 to 6 s**,
+      the biggest phase.
+  - component: engine
+    text: >-
+      initialises CUDA and captures CUDA graphs (recorded GPU launch sequences that replay fast); the compile cache
+      is keyed by engine version and GPU, so a stale one is never used.
+  - component: probe
+    text: >-
+      sends a short real generation and only then returns `ready`, so traffic never reaches a worker still
+      capturing graphs.
+  - component: probe
+    text: >-
+      closes the measurement; the **repeat runner** clears the page cache and repeats 10 times for the median and
+      p95.
+interface:
+  lang: shell
+  code: |
+    $ coldstart run --repeats 10 --drop-caches
+
+    phase            median    p95
+    container         1.1 s    1.4 s
+    cuda init         0.9 s    1.1 s
+    weights 16 GB     5.4 s    6.0 s  (3.0 GB/s)
+    graphs (cached)   2.2 s    2.9 s
+    warm-up           0.4 s    0.5 s
+    ready            10.0 s   11.9 s
+decisions:
+  - choice: Weights cached on local NVMe
+    instead: Download from object storage on every start
+    why: >-
+      Pulling 16 GB over the network alone takes longer than the 15 s budget. A local copy reads at disk speed;
+      check it against a hash after each model upgrade.
+  - choice: Reuse compile artefacts, keyed by version
+    instead: Capture graphs fresh every time
+    why: >-
+      Graph capture and compilation are a large part of start-up and give the same result each time. Keying the cache
+      by engine version and GPU stops a stale artefact after an upgrade.
+  - choice: Ready only after one real request
+    instead: Ready as soon as the process listens
+    why: >-
+      A process can listen while still capturing graphs, and the first user then waits anyway. A real warm-up request
+      makes the probe honest.
+watchOut: >-
+  The OS page cache keeps recently read files in RAM, so repeat runs look much faster than a real cold start. Drop
+  caches before every measured run, or the 12 s median will not hold in production.

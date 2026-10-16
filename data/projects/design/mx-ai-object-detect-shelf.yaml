@@ -1,0 +1,109 @@
+overview: >-
+  Staff photograph a shelf; a small detector finds every product and every empty gap, post-processing groups the
+  boxes into shelf rows, and the app reports how much of each row is empty. The detector is a pretrained model
+  fine-tuned on dense shelf photos with gaps made by masking products, then exported to ONNX (a portable model
+  format) so it runs on a CPU in under 400 ms.
+learn:
+  - name: Object detection
+    ref: stanford-cs231n
+  - name: Transfer learning
+    ref: fastai-practical-dl
+  - name: mAP metric
+  - name: Non-max suppression
+  - name: ONNX export
+    ref: onnx-runtime-docs
+  - name: Synthetic training data
+stats:
+  - value: ≥ 0.80
+    label: mAP@0.5 on gaps
+  - value: < 400 ms
+    label: per image on CPU
+  - value: < 1.0
+    label: gap-count error per shelf
+components:
+  - id: phone
+    name: Staff phone
+    role: Takes a shelf photo and uploads it.
+    tech: Mobile browser
+    talksTo: [app]
+    kind: external
+  - id: app
+    name: Upload app
+    role: Receives the photo, resizes it to 640 px and returns the report.
+    tech: FastAPI
+    talksTo: [detector]
+    kind: core
+  - id: detector
+    name: Detector
+    role: Finds product and gap boxes in one pass.
+    tech: ONNX Runtime
+    talksTo: [rows]
+    kind: core
+  - id: rows
+    name: Row clustering
+    role: Groups boxes into shelf rows by their vertical centre.
+    tech: NumPy
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Gap report
+    role: Computes empty width per row and the shelf's gap percentage.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: prep
+    name: Dataset prep
+    role: Converts SKU-110K labels and makes gaps by masking product boxes.
+    tech: Python · OpenCV
+    talksTo: [trainer]
+    kind: offline
+  - id: trainer
+    name: Trainer
+    role: Fine-tunes a pretrained detector, then exports it under 50 MB.
+    tech: PyTorch · Ultralytics
+    talksTo: [detector]
+    kind: offline
+  - id: evaluator
+    name: Evaluator
+    role: Reports mAP, gap precision and recall, and count error on real photos.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: app
+    text: receives a phone photo of one bay and resizes it to 640 px on the long side.
+  - component: detector
+    text: returns about 150 product boxes and the gap boxes, with non-max suppression (removing overlapping duplicates) tuned for crowded shelves.
+  - component: rows
+    text: clusters box centres by height into rows, so each gap belongs to a shelf.
+  - component: report
+    text: sums gap widths per row and returns `gap_pct` with the boxes drawn, well inside **400 ms** on a CPU.
+interface:
+  lang: http
+  code: |
+    POST /shelf   (multipart: image=bay_14.jpg)
+
+    200 OK
+    { "rows": [
+        { "row": 1, "products": 23, "gaps": 0 },
+        { "row": 2, "products": 18, "gaps": 2,
+          "gap_pct": 11.5 } ],
+      "shelf_gap_pct": 5.8,
+      "latency_ms": 310 }
+decisions:
+  - choice: Gaps as their own class
+    instead: Infer gaps from spacing between products
+    why: >-
+      Product widths vary too much for a spacing rule. A gap class is learnt from examples and measured directly
+      with mAP, which is the target.
+  - choice: Synthetic gaps from masked products
+    instead: Photograph and label real empty shelves
+    why: >-
+      SKU-110K has few empty slots, and masking gives thousands quickly. Collect a small set of real photos from a
+      few shops to test on, never to tune on.
+  - choice: A small detector exported to ONNX
+    instead: A large detector in PyTorch
+    why: The 50 MB and 400 ms CPU limits rule large models out; check mAP before and after export.
+watchOut: >-
+  Masked gaps (a flat grey box) look nothing like a real empty shelf with a dark back panel and price tags, and
+  the model may learn the mask. Blend masks with real shelf backgrounds and score on real photos only.

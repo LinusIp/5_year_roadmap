@@ -1,0 +1,70 @@
+overview: >-
+  A double pendulum simulated with RK4 from equations derived with the Lagrangian (kinetic minus potential energy,
+  turned into equations of motion), shown as two runs that start 1e-9 rad apart and drift apart. The growth rate of
+  that gap, rescaled every few steps, estimates the largest Lyapunov exponent: how fast nearby states separate.
+learn:
+  - name: Lagrangian mechanics
+    ref: tong-lecture-notes
+  - name: RK4 integration
+    ref: mit-2-086
+  - name: Lyapunov exponents
+  - name: Energy checks
+components:
+  - id: eom
+    name: Equations of motion
+    role: Returns the time derivative of the state for given masses and lengths.
+    tech: NumPy
+    talksTo: [rk4]
+    kind: core
+  - id: rk4
+    name: RK4 stepper
+    role: Advances the reference and the nudged copy with a fixed step.
+    tech: NumPy
+    talksTo: [lyap]
+    kind: core
+  - id: lyap
+    name: Lyapunov estimator
+    role: Measures and rescales the separation and averages its log growth.
+    tech: NumPy
+    talksTo: [plots]
+    kind: core
+  - id: plots
+    name: Plots
+    role: Draws log separation over time and the two pendulums overlaid.
+    tech: matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: eom
+    text: returns `[θ1', θ2', ω1', ω2']` from the closed-form Lagrangian result; with no damping, total energy must stay within `1e-6` relative.
+  - component: rk4
+    text: steps both copies at `dt = 1e-3` s; halving `dt` must change the final estimate by only a few percent.
+  - component: lyap
+    text: every 10 steps adds `log(d / d0)` and **rescales** the copy back to distance `d0 = 1e-9` along the same direction (Benettin's method).
+  - component: plots
+    text: shows the running estimate `λ = Σ log(d/d0) / t`, compared with a published value for the same energy within a factor 2.
+interface:
+  lang: python
+  code: |
+    def deriv(s, m1=1.0, m2=1.0, l1=1.0, l2=1.0,
+              g=9.81) -> np.ndarray:
+        """s = [th1, th2, w1, w2] -> ds/dt"""
+
+    def rk4_step(f, s, dt):
+        k1 = f(s)
+        k2 = f(s + dt / 2 * k1)
+        k3 = f(s + dt / 2 * k2)
+        k4 = f(s + dt * k3)
+        return s + dt / 6 * (k1 + 2*k2 + 2*k3 + k4)
+
+    def lyapunov(s0, d0=1e-9, dt=1e-3,
+                 t_end=200.0, every=10) -> float: ...
+decisions:
+  - choice: Rescale the gap, not one long pair
+    instead: Fit the slope of log separation from one pair left alone
+    why: >-
+      Left alone, the gap grows to the size of the system within seconds and stops growing, so the fitted slope comes
+      out too low. Rescaling every 10 steps keeps the gap tiny for the whole 200 s run.
+watchOut: >-
+  A sign or index slip in the equations of motion still looks chaotic, so the animation will not reveal it. Check that
+  energy is conserved and that small swings match the two normal-mode frequencies of the linearised system.

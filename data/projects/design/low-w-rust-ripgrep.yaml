@@ -1,0 +1,58 @@
+overview: >-
+  A Rust search tool: a walker skips paths matched by gitignore rules, worker threads scan each file line by line
+  with the regex crate, and matches print as `path:line:text` exactly like `grep -rn`. A benchmark on a large source
+  tree reports seconds against grep.
+learn:
+  - name: Ignore rules
+  - name: Thread pools and channels
+    ref: rust-book
+  - name: Binary file detection
+  - name: Benchmarking
+    ref: mit-6-172
+components:
+  - id: walker
+    name: Walker
+    role: Walks directories, applies the stack of ignore rules and sends file paths on.
+    tech: std::fs
+    talksTo: [queue]
+    kind: core
+  - id: queue
+    name: Path channel
+    role: A bounded channel that hands paths to one worker per core.
+    tech: crossbeam-channel
+    talksTo: [searcher]
+    kind: core
+  - id: searcher
+    name: Search workers
+    role: Read each file, skip binaries and match the regex line by line.
+    tech: regex crate
+    talksTo: [printer]
+    kind: core
+  - id: printer
+    name: Printer
+    role: Writes each file's matches as one block under a stdout lock.
+    tech: std::io
+    talksTo: []
+    kind: core
+flow:
+  - component: walker
+    text: >-
+      reads each directory, pushes its `.gitignore` onto a stack of rules, and sends paths that are not ignored into
+      the channel.
+  - component: queue
+    text: gives paths to N worker threads, one per core, so one large file does not stall the walk.
+  - component: searcher
+    text: >-
+      reads the file, skips it if the first 8 KB hold a NUL byte (a **binary**), and runs `is_match` on each line
+      while counting line numbers.
+  - component: printer
+    text: writes the file's `path:line:text` lines as one block, so lines from two threads never interleave.
+decisions:
+  - choice: Fixed worker pool fed by a bounded channel
+    instead: A thread per directory
+    why: >-
+      A large source tree has thousands of directories, so a thread each wastes memory and thrashes. One worker per
+      core keeps memory flat, and the channel bound slows the walker when workers fall behind.
+watchOut: >-
+  Ignore rules are ordered: a later `!pattern` re-includes a path and a deeper `.gitignore` overrides its parent. To
+  compare with `grep -rn`, which ignores nothing, add a `--no-ignore` flag, or the match counts never agree.

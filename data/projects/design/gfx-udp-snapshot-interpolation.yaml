@@ -1,0 +1,71 @@
+overview: >-
+  Multiplayer netcode over UDP: an authoritative server simulates at 60 Hz and sends world snapshots 20 times a second,
+  delta-compressed against the last snapshot the client acknowledged. Clients draw other players about 100 ms in the
+  past by interpolating between snapshots, and predict their own movement at once, rewinding and replaying unconfirmed
+  inputs when the server disagrees (reconciliation).
+learn:
+  - name: Snapshot interpolation
+    ref: gaffer-on-games
+  - name: Client-side prediction
+  - name: Sequence and ack bits
+  - name: Delta compression
+components:
+  - id: client
+    name: Client input
+    role: Samples input, predicts the local player and keeps unconfirmed inputs.
+    tech: C++ / Rust
+    talksTo: [transport]
+    kind: core
+  - id: transport
+    name: Packet layer
+    role: Adds sequence numbers and acks to UDP packets in both directions.
+    tech: UDP sockets
+    talksTo: [server]
+    kind: core
+  - id: server
+    name: Server
+    role: Applies inputs, simulates the world and sends delta snapshots.
+    tech: C++ / Rust
+    talksTo: [interp]
+    kind: core
+  - id: interp
+    name: Interpolation buffer
+    role: Holds recent snapshots and renders remote players slightly in the past.
+    tech: C++ / Rust
+    talksTo: []
+    kind: core
+flow:
+  - component: client
+    text: applies each 60 Hz input locally at once (prediction) and sends the last few unconfirmed inputs in every packet, so one lost packet loses nothing.
+  - component: transport
+    text: puts `sequence`, `ack` and 32 `ack_bits` on every packet; tests run through a link conditioner at 100 ms RTT and 5% loss.
+  - component: server
+    text: applies inputs in tick order and every third tick sends a snapshot encoded as changes from the client's last **acknowledged** one.
+  - component: interp
+    text: renders others at `now - 100 ms`; for the local player it resets to the server state and replays later inputs, which closes the round trip; KB/s per client is logged.
+interface:
+  lang: cpp
+  code: |
+    struct PacketHeader {
+      uint16_t sequence;  // this packet
+      uint16_t ack;       // newest seen from peer
+      uint32_t ack_bits;  // bit i: ack - 1 - i seen
+    };
+    struct InputCmd { uint32_t tick; int8_t mx, my;
+                      uint8_t buttons; };
+    struct Snapshot {
+      uint32_t tick;
+      uint32_t baseline;  // tick it is a delta from
+      std::vector<EntityDelta> entities;
+    };
+    // wraps at 65535: true if a is newer than b
+    bool seq_greater(uint16_t a, uint16_t b);
+decisions:
+  - choice: Interpolate 100 ms behind
+    instead: Extrapolate remote players from their last velocity
+    why: >-
+      Snapshots arrive every 50 ms, so a 100 ms delay keeps two in hand and one lost packet is covered by the next.
+      Extrapolation shows players running through walls whenever they turn; the cost is seeing others 100 ms late.
+watchOut: >-
+  If the client's clock drifts, the interpolation buffer grows without bound or runs dry, and motion lags or stutters.
+  Cap the buffer, drop the oldest snapshots, and nudge playback time toward the 100 ms target.

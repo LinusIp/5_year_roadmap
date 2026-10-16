@@ -1,0 +1,103 @@
+overview: >-
+  Next-track suggestions for anonymous listeners, built from the current session only. Listening events are split
+  into sessions at long idle gaps, a GRU (a recurrent network that reads the tracks in order) learns to turn a
+  session into a vector, and a FAISS index finds the tracks whose embeddings best match it. The API takes the last
+  few tracks and answers in under 40 ms.
+learn:
+  - name: Sessionisation
+  - name: Recurrent networks
+    ref: d2l
+  - name: Item embeddings
+  - name: Vector search
+  - name: HitRate and MRR
+stats:
+  - value: ≥ 1.2×
+    label: HitRate@20 vs item-kNN
+  - value: < 40 ms
+    label: API p99
+  - value: < 1 h
+    label: training on one GPU
+components:
+  - id: app
+    name: Music app
+    role: Sends the tracks played so far in this session.
+    tech: Mobile client
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: Candidate API
+    role: Maps track ids, calls the encoder and filters the results.
+    tech: FastAPI
+    talksTo: [encoder]
+    kind: core
+  - id: encoder
+    name: Session encoder
+    role: Runs the GRU over the last 10 tracks and outputs a 64-number session vector.
+    tech: PyTorch (CPU)
+    talksTo: [index]
+    kind: core
+  - id: index
+    name: Track index
+    role: Finds the tracks whose embeddings score highest against the session vector.
+    tech: FAISS
+    talksTo: []
+    kind: core
+  - id: sessionizer
+    name: Sessioniser
+    role: Splits listening logs into sessions at 30 minutes of inactivity.
+    tech: pandas
+    talksTo: [trainer]
+    kind: offline
+  - id: trainer
+    name: Trainer
+    role: Trains GRU and track embeddings to predict the next track.
+    tech: PyTorch · GPU
+    talksTo: [index, evaluator]
+    kind: offline
+  - id: evaluator
+    name: Evaluator
+    role: Compares GRU, item-kNN and popularity on later sessions.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: app
+    text: sends `POST /next` with the session's last 10 track ids; no user id exists.
+  - component: api
+    text: maps the ids to model indices and drops unknown tracks.
+  - component: encoder
+    text: runs the GRU over the sequence, taking about 2 ms on a CPU.
+  - component: index
+    text: returns the top 50 tracks by inner product with the session vector.
+  - component: api
+    text: removes tracks already played this session and returns 20, inside the **40 ms** p99.
+interface:
+  lang: http
+  code: |
+    POST /next
+    { "session": ["t_8812", "t_0931", "t_4410",
+                  "t_7720"],
+      "n": 20 }
+
+    200 OK
+    { "tracks": ["t_5528", "t_1042", "t_3391", …],
+      "model": "gru-2026-10-14" }
+decisions:
+  - choice: Session-only model
+    instead: User-based collaborative filtering
+    why: >-
+      Most listeners are anonymous and user ids are off limits. The current session is the only signal you always
+      have.
+  - choice: Split train and test by time
+    instead: Random sessions in each set
+    why: >-
+      Hold out the last days of sessions. A random split puts near-copies of test sessions in training and
+      inflates HitRate.
+  - choice: GRU before a transformer
+    instead: Start with a transformer
+    why: >-
+      Sessions are short and a GRU trains well inside an hour. Try a transformer once the GRU beats item-kNN, and
+      keep it only if it adds HitRate without breaking 40 ms.
+watchOut: >-
+  Item-kNN and "popular right now" are strong baselines for next-track tasks. Report both, and do not claim the GRU
+  works until it beats them by the 1.2× margin.

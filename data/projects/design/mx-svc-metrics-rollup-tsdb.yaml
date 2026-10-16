@@ -1,0 +1,115 @@
+overview: >-
+  A small time-series database for Coldchain Eye's 50,000 trailers, each reporting every 10 seconds. Points go to a
+  write-ahead log and an in-memory table, then are flushed as compressed blocks using delta-of-delta timestamps and
+  XOR-encoded floats, so a regular reading costs only a few bits. Background compaction builds 1-minute, 15-minute
+  and 1-hour rollups with their own retention, and queries read the coarsest tier that fits the range.
+learn:
+  - name: Delta-of-delta encoding
+  - name: XOR float compression
+  - name: Write-ahead logging
+    ref: cmu-15-445
+  - name: LSM-style flush and compaction
+    ref: ddia
+  - name: Rollups with sum and count
+  - name: Label cardinality
+    ref: prometheus-docs
+stats:
+  - value: 500k/s
+    label: points ingested, 4 cores
+  - value: < 2 B
+    label: per point on disk
+  - value: < 50 ms
+    label: p99 7-day query, one series
+components:
+  - id: trailers
+    name: Trailer gateways
+    role: Send temperature, door and battery readings with series labels every 10 s.
+    tech: IoT gateways
+    talksTo: [wal]
+    kind: external
+  - id: wal
+    name: WAL and memtable
+    role: Logs each batch to disk, then adds points to an in-memory buffer per series.
+    tech: Rust
+    talksTo: [index, blocks]
+    kind: core
+  - id: index
+    name: Series index
+    role: Maps a label set like trailer and sensor to a series id, and labels to series lists.
+    tech: Rust · inverted index
+    talksTo: []
+    kind: core
+  - id: blocks
+    name: Block format
+    role: Immutable 2-hour blocks of compressed timestamps and values per series.
+    tech: Rust · mmap
+    talksTo: [compactor, query]
+    kind: core
+  - id: compactor
+    name: Rollup compactor
+    role: Builds 1 m, 15 m and 1 h tiers with min, max, sum and count, and drops expired blocks.
+    tech: Rust
+    talksTo: []
+    kind: offline
+  - id: query
+    name: Query engine
+    role: Picks the tier for the range and step, decodes blocks and aggregates.
+    tech: Rust
+    talksTo: []
+    kind: core
+  - id: bench
+    name: Benchmark suite
+    role: Simulates 50,000 trailers with drift, gaps and spikes and measures rate, size and latency.
+    tech: Rust · criterion
+    talksTo: [wal]
+    kind: offline
+flow:
+  - component: wal
+    text: >-
+      receives a batch with `trailer=TR-20931, sensor=temp` at `-18.4`, appends it to the log, and accepts points up
+      to 5 minutes late in the out-of-order window.
+  - component: index
+    text: finds or creates the series id for that label set; a new id is only made for a new trailer or sensor.
+  - component: blocks
+    text: >-
+      on flush, store timestamps as delta-of-delta, which is `0` for a steady 10-second reading, and each value XORed
+      with the previous one, so unchanged temperatures cost about 1 bit.
+  - component: query
+    text: >-
+      receives "trailer TR-20931, last 7 days, 5-minute steps" and reads the **1 m tier** rather than 60,480 raw
+      points.
+  - component: query
+    text: averages each 5-minute step as sum divided by count from the rollup, so the result equals the raw average exactly.
+interface:
+  lang: rust
+  code: |
+    pub struct Point { pub ts_ms: i64, pub value: f64 }
+
+    pub fn write(labels: &Labels, pts: &[Point])
+        -> Result<(), WriteError>;
+
+    pub fn query_range(
+        sel: &Selector,   // trailer="TR-20931"
+        start_ms: i64, end_ms: i64,
+        step_ms: i64,     // 300_000
+        agg: Agg,         // Avg | Min | Max
+    ) -> Vec<(i64, f64)>;
+decisions:
+  - choice: Gorilla-style compression
+    instead: General-purpose compression on raw rows
+    why: >-
+      Sensor readings every 10 s with slow drift are exactly where delta-of-delta and XOR shine, and they get under
+      2 bytes a point while still decoding one series at a time.
+  - choice: Store sum and count in rollups
+    instead: Store only the average
+    why: >-
+      Averages of averages are wrong whenever intervals have different point counts, for example after a gap.
+      Sum and count give exact rollups.
+  - choice: Fixed 5-minute out-of-order window
+    instead: Accept points at any age
+    why: >-
+      Late points older than the open block would force rewriting sealed blocks. Gateways buffer a few minutes at
+      most; drop and count anything later.
+watchOut: >-
+  Putting a reading id or timestamp in a label creates a new series for every point and blows up the index. Keep
+  labels to trailer, sensor and region.

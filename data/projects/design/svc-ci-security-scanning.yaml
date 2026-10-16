@@ -1,0 +1,46 @@
+overview: >-
+  A pull-request workflow with three scanners as required checks: gitleaks for committed secrets, Trivy for
+  vulnerable dependencies and image packages, and Semgrep for risky code patterns, with suppressions that carry a
+  reason and an expiry date.
+learn:
+  - name: Secret scanning
+  - name: Dependency scanning
+  - name: Static analysis
+  - name: Triage and suppression
+components:
+  - id: pr
+    name: Pull request
+    role: Triggers the workflow and is blocked from merging until all checks pass.
+    tech: GitHub
+    talksTo: [workflow]
+    kind: external
+  - id: workflow
+    name: Scan workflow
+    role: Runs gitleaks, Trivy and Semgrep as separate jobs that fail on findings.
+    tech: GitHub Actions
+    talksTo: [ignores]
+    kind: core
+  - id: ignores
+    name: Suppression file
+    role: Lists accepted findings, each with an id, reason, owner and expiry date.
+    tech: YAML in the repo
+    talksTo: []
+    kind: core
+flow:
+  - component: workflow
+    text: runs `gitleaks detect` over the diff and fails on a planted AWS-style key.
+  - component: workflow
+    text: runs `trivy fs` and `trivy image` with `--severity HIGH,CRITICAL --exit-code 1` and fails on the planted vulnerable package.
+  - component: workflow
+    text: runs Semgrep rules for patterns such as SQL built with string formatting.
+  - component: ignores
+    text: removes a finding only if its entry has not passed its `expires` date; expired entries fail the build again.
+decisions:
+  - choice: Block merges on findings
+    instead: Report findings without failing
+    why: >-
+      Reports nobody must act on get ignored; the done-when needs planted issues to fail the build. Start with
+      HIGH and CRITICAL only so the noise stays low.
+watchOut: >-
+  A suppression with no expiry is a permanent hole. Require a reason and a date on every entry and let the build
+  fail when it passes.

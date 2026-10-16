@@ -1,0 +1,74 @@
+overview: >-
+  A precise mark-sweep collector in C for a tiny heap: every object starts with a header holding its type, size and a
+  mark bit, the program registers its roots (variables that hold objects) explicitly, mark follows pointers from the
+  roots, and sweep returns every unmarked object to a free list. A stress mode collects on every allocation to expose
+  any missing root.
+learn:
+  - name: Reachability and roots
+    ref: crafting-interpreters
+  - name: Grey worklists
+  - name: Free lists
+  - name: GC stress testing
+components:
+  - id: alloc
+    name: Allocator
+    role: Hands out objects from the free list and starts a collection past a size threshold.
+    tech: C
+    talksTo: [marker]
+    kind: core
+  - id: roots
+    name: Root set
+    role: An explicit stack of pointers to C variables that hold objects, plus globals.
+    tech: C macros
+    talksTo: [marker]
+    kind: core
+  - id: marker
+    name: Marker
+    role: Sets mark bits from the roots outward using a grey worklist.
+    tech: C
+    talksTo: [sweeper]
+    kind: core
+  - id: sweeper
+    name: Sweeper
+    role: Frees unmarked objects to the free list and clears the rest's marks.
+    tech: C
+    talksTo: []
+    kind: core
+flow:
+  - component: alloc
+    text: >-
+      serves `gc_alloc(type, size)` from the free list; in stress mode it first runs a full collection, every single
+      time.
+  - component: roots
+    text: provide the objects held in C variables registered with `GC_PUSH(&p)`, plus globals, as the start of the trace.
+  - component: marker
+    text: >-
+      marks each root and pushes it on a grey stack, then pops objects and marks each unmarked pointer field, so a
+      **cycle** stops at objects already marked.
+  - component: sweeper
+    text: >-
+      walks the list of all objects, moves unmarked ones to the free list, counts them and the pause in ms, and
+      clears marks for the next cycle.
+interface:
+  lang: c
+  code: |
+    typedef struct Obj {
+      uint8_t  type;     /* PAIR, STRING, ... */
+      uint8_t  marked;
+      uint32_t size;
+      struct Obj *next;  /* all objects, for sweep */
+    } Obj;
+
+    Obj *gc_alloc(uint8_t type, uint32_t size);
+    void gc_push_root(Obj **slot);
+    void gc_pop_root(void);
+    void gc_collect(void);
+decisions:
+  - choice: An explicit root stack
+    instead: Conservatively scanning the C stack for pointer-like words
+    why: >-
+      Precise roots make the collector exact and portable, and stress mode immediately catches a forgotten
+      `GC_PUSH`. A conservative scan needs no discipline but can keep garbage alive and depends on compiler details.
+watchOut: >-
+  An object held only in an unregistered C variable is invisible to mark, so `a = alloc(); b = alloc();` can free `a`
+  while making `b`. Stress mode turns that rare bug into a crash on the first run.

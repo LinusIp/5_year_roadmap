@@ -1,0 +1,83 @@
+overview: >-
+  A secure baseline for Pixelmint's Ubuntu build and web servers, written once as an Ansible role and applied the
+  same way to every host. Applying it is idempotent, meaning running it again changes nothing if the host already
+  matches: SSH keys only, an nftables firewall, automatic security updates, least-privilege users, fail2ban and log
+  shipping. An audit tool then scores each host against 60 CIS-style checks, and a daily drift check compares live
+  settings with the expected ones and alerts on any change.
+learn:
+  - name: SSH hardening
+    ref: lfs101-intro-linux
+  - name: Host firewalls
+  - name: Idempotent configuration
+  - name: CIS benchmarks
+  - name: Brute-force protection
+  - name: Configuration drift
+stats:
+  - value: "> 90 %"
+    label: of 60 checks passing
+  - value: < 5 min
+    label: baseline on a fresh VM
+  - value: 10 of 10
+    label: planted deviations caught
+components:
+  - id: role
+    name: Baseline role
+    role: Ansible tasks for SSH, firewall, updates, users, fail2ban and log shipping.
+    tech: Ansible
+    talksTo: [hosts]
+    kind: core
+  - id: hosts
+    name: Servers
+    role: Two local Ubuntu VMs standing in for the build and web servers.
+    tech: Ubuntu · nftables · fail2ban
+    talksTo: [audit, logs]
+    kind: core
+  - id: audit
+    name: Audit script
+    role: Runs 60 checks and writes a scored report with what failed and why.
+    tech: Lynis or OpenSCAP · bash
+    talksTo: []
+    kind: core
+  - id: drift
+    name: Drift checker
+    role: Runs the role in check mode each day and alerts on any task that would change.
+    tech: ansible-playbook --check · cron
+    talksTo: [hosts]
+    kind: core
+  - id: logs
+    name: Log forwarding
+    role: Ships auth and system logs off the host, so an attacker cannot erase them locally.
+    tech: rsyslog
+    talksTo: []
+    kind: offline
+flow:
+  - component: role
+    text: "sets `PasswordAuthentication no` and `PermitRootLogin no`, but only after confirming your key works in a **second session**, so you cannot lock yourself out."
+  - component: hosts
+    text: get a default-drop nftables policy allowing only ports 22, 80 and 443, unattended security updates and fail2ban banning after 5 failed logins in 10 minutes.
+  - component: audit
+    text: scores each host against the 60 checks and lists failures such as `world-writable /opt/build`, aiming for over 90 %.
+  - component: drift
+    text: runs `ansible-playbook --check --diff` daily; a planted change like a re-enabled password login shows as **changed** and sends an alert.
+interface:
+  lang: yaml
+  code: |
+    - name: Harden sshd
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#?{{ item.key }} "
+        line: "{{ item.key }} {{ item.value }}"
+        validate: /usr/sbin/sshd -t -f %s
+      loop:
+        - { key: PasswordAuthentication, value: "no" }
+        - { key: PermitRootLogin, value: "no" }
+        - { key: MaxAuthTries, value: "3" }
+      notify: Reload sshd
+decisions:
+  - choice: Ansible role, not a hardening shell script
+    instead: A one-off bash script run on each new server
+    why: A script cannot tell you what has changed since. The same role in check mode becomes the drift detector for free.
+  - choice: Check mode for drift, plus a separate audit tool
+    instead: Rely on the audit score alone
+    why: The audit says how a host compares with a generic list; check mode says whether it still matches your own baseline. Planted deviations need both to reach 10 of 10.
+watchOut: A compliance score is not security. A host can pass 90 % of checks and still run an exposed service, so review what is listening on each host, not just the score.

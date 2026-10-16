@@ -1,0 +1,130 @@
+overview: >-
+  A pre-registered comparison: you write down a numeric prediction, then train DDPM and flow matching with the same
+  U-Net, the same images seen and three seeds each on 64×64 frames rendered by your own engine. Only the training
+  objective and the sampler differ; both arms are scored by FID and KID (distances between the statistics of real and
+  generated images) at 10, 25, 50 and 100 network evaluations. A two-page report in research/ says which wins, by how
+  much and at which budgets, and a negative result counts.
+learn:
+  - name: DDPM and DDIM sampling
+    ref: annotated-diffusion
+  - name: Flow matching
+    ref: mit-6-s978
+  - name: FID and KID
+    ref: hf-diffusion-course
+  - name: Matched-compute comparisons
+    ref: schulman-research-guide
+  - name: Pre-registration
+    ref: ml-reproducibility-challenge
+stats:
+  - value: 10,000
+    label: samples per FID against held-out frames
+  - value: 3 + 3
+    label: seeds per arm
+  - value: 10–100
+    label: sampling steps compared
+components:
+  - id: protocol
+    name: Prediction and protocol
+    role: Fixes the hypothesis, data, network, budget and metrics before any training.
+    tech: Markdown in research/
+    talksTo: [dataset]
+    kind: core
+  - id: engine
+    name: Your engine
+    role: Renders the frames through its Python bindings or a frame dump.
+    tech: Your simulator
+    talksTo: [dataset]
+    kind: external
+  - id: dataset
+    name: Frame dataset
+    role: Holds 20k training frames and a separate held-out set for FID.
+    tech: PyTorch Dataset
+    talksTo: [ddpm, flow]
+    kind: core
+  - id: ddpm
+    name: DDPM arm
+    role: Trains the shared U-Net to predict the added noise.
+    tech: PyTorch · W&B
+    talksTo: [samplers]
+    kind: core
+  - id: flow
+    name: Flow arm
+    role: Trains the same U-Net to predict velocity along a straight noise-to-data path.
+    tech: PyTorch · W&B
+    talksTo: [samplers]
+    kind: core
+  - id: samplers
+    name: Samplers
+    role: Runs ancestral and DDIM for DDPM, Euler and Heun for flow, at each step budget.
+    tech: PyTorch
+    talksTo: [metrics]
+    kind: core
+  - id: metrics
+    name: FID and KID
+    role: Scores 10,000 samples per cell against the fixed held-out frames.
+    tech: clean-fid style
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Two pages with the prediction quoted beside the outcome.
+    tech: research/ in the data repo
+    talksTo: []
+    kind: core
+flow:
+  - component: protocol
+    text: >-
+      commits a prediction such as "flow is **15 % lower FID** at 25 steps, and the gap is under 5 % at 100" before the
+      first run.
+  - component: dataset
+    text: >-
+      renders 20k frames from your engine and sets aside the held-out frames that every FID uses.
+  - component: ddpm
+    text: >-
+      trains with `objective: ddpm_eps`, three seeds, the shared config and the same number of images seen.
+  - component: flow
+    text: >-
+      trains with `objective: flow_matching` and nothing else changed; the config diff must be one line.
+  - component: samplers
+    text: >-
+      draw 10,000 samples from every checkpoint at 10, 25, 50 and 100 function evaluations.
+  - component: metrics
+    text: >-
+      computes FID and KID per cell, plus nearest-training-frame distances to check for **memorisation**.
+  - component: report
+    text: >-
+      plots FID against steps with seed ranges, and states whether the prediction held.
+interface:
+  lang: yaml
+  code: |
+    # configs/flow.yaml: only objective and
+    # samplers differ from configs/ddpm.yaml
+    data: frames-64px-20k
+    unet: {channels: 128, levels: 4}
+    optimiser: {name: adamw, lr: 2.0e-4}
+    batch_size: 128
+    images_seen: 5_000_000   # same in both arms
+    objective: flow_matching # ddpm_eps
+    samplers: [euler, heun]  # [ancestral, ddim]
+    nfe: [10, 25, 50, 100]
+    seeds: [0, 1, 2]
+    fid: {samples: 10000, ref: heldout-frames}
+decisions:
+  - choice: Equal images seen, same batch size
+    instead: Equal wall-clock time
+    why: >-
+      Images seen with one batch size also fixes the number of gradient steps, so neither arm gets hidden extra
+      training. Wall-clock per sample is reported separately.
+  - choice: Frames from your own engine
+    instead: A public benchmark such as CIFAR-10
+    why: >-
+      The question is about your simulator's frames, and published results already cover public benchmarks. The risk
+      is a dataset so easy that both arms saturate, which the protocol checks first.
+  - choice: The same small learning-rate sweep for both
+    instead: Tuning only the new method
+    why: >-
+      Tuning one arm and not the other is the most common way such comparisons mislead. Both get the same sweep, and
+      the chosen values go in the protocol.
+watchOut: >-
+  Unequal compute hides in different batch sizes, step counts or gradient accumulation. Diff the two configs before
+  training and require that only the objective and the samplers differ.

@@ -1,0 +1,127 @@
+overview: >-
+  A finite-element solver written from the weak form up: 1D bar and beam elements first, checked against exact
+  answers, then 2D plane-stress triangles and quads on a mesh imported from Gmsh. For each element, shape functions
+  and Gauss quadrature (a weighted sum at a few fixed points) give a small stiffness matrix, which is scattered into
+  one large sparse system, solved for displacements, and post-processed into stresses. A plate with a hole under
+  tension is the benchmark, compared with CalculiX or FEniCS and with the analytical stress concentration of 3.
+learn:
+  - name: Weak form and Galerkin
+    ref: fish-belytschko-fem
+  - name: Shape functions and quadrature
+    ref: fish-belytschko-fem
+  - name: Sparse assembly
+    ref: bangerth-dealii-lectures
+  - name: Patch tests and convergence
+    ref: dealii-tutorials
+  - name: Stiffness methods
+    ref: mit-18-085
+stats:
+  - value: ≤ 2 %
+    label: peak stress against CalculiX or FEniCS
+  - value: ≤ 3 %
+    label: against Kirsch's factor of 3
+  - value: "1e-10"
+    label: 1D error against analytical
+components:
+  - id: gmsh
+    name: Gmsh
+    role: Meshes the geometry and tags the boundaries.
+    tech: Gmsh
+    talksTo: [reader]
+    kind: external
+  - id: reader
+    name: Mesh reader
+    role: Reads nodes, elements and boundary tags into arrays.
+    tech: C++20
+    talksTo: [elements]
+    kind: core
+  - id: elements
+    name: Element routines
+    role: Builds each element's stiffness matrix and load vector for bar, beam, CST and Q4.
+    tech: C++ · Eigen
+    talksTo: [assembly]
+    kind: core
+  - id: assembly
+    name: Sparse assembly
+    role: Scatters element matrices into a global matrix, triplets first, then compressed rows.
+    tech: Eigen SparseMatrix
+    talksTo: [solver]
+    kind: core
+  - id: solver
+    name: BCs and solve
+    role: Applies fixed displacements and tractions, then solves for nodal displacements.
+    tech: Eigen sparse LDLT or CG
+    talksTo: [post]
+    kind: core
+  - id: post
+    name: Stress recovery
+    role: Computes strains and stresses at Gauss points, averages to nodes and writes VTK.
+    tech: C++ · ParaView
+    talksTo: [verify]
+    kind: core
+  - id: reference
+    name: Reference solver
+    role: Solves the same plate-with-hole mesh as the yardstick.
+    tech: CalculiX or FEniCS
+    talksTo: [verify]
+    kind: offline
+  - id: verify
+    name: Verification
+    role: Runs patch tests, analytical checks and the convergence study.
+    tech: GoogleTest · Python plots
+    talksTo: []
+    kind: offline
+flow:
+  - component: reader
+    text: >-
+      loads the Gmsh plate-with-hole mesh, with the hole edge, the loaded edge and the symmetry edges tagged.
+  - component: elements
+    text: >-
+      maps each element to a reference square, sums `Bᵀ D B · det J` at the Gauss points into `K_e`, and stops if
+      `det J ≤ 0`.
+  - component: assembly
+    text: >-
+      adds each `K_e` into a list of triplets by global DOF number, then compresses them into a **sparse** matrix.
+  - component: solver
+    text: >-
+      fixes the symmetry edges, spreads the traction over the loaded edge's nodes, and solves `K u = f`.
+  - component: post
+    text: >-
+      recovers stress at Gauss points, averages to nodes and reports the peak hoop stress at the hole edge.
+  - component: verify
+    text: >-
+      compares that peak with CalculiX or FEniCS and with 3 × the far-field stress, at each mesh refinement.
+interface:
+  lang: cpp
+  code: |
+    using Mat8 = Eigen::Matrix<double, 8, 8>;
+    using Trip = Eigen::Triplet<double>;
+
+    // plane-stress Q4 stiffness, 2x2 Gauss points
+    Mat8 q4_stiffness(
+        const Eigen::Matrix<double, 4, 2>& xy,
+        const Eigen::Matrix3d& D,  // plane stress
+        double thickness);
+
+    void assemble(std::vector<Trip>& K,
+                  const std::array<int, 4>& nodes,
+                  const Mat8& Ke);
+decisions:
+  - choice: Sparse matrix, built from triplets
+    instead: A dense global matrix
+    why: >-
+      At 10⁵ degrees of freedom a dense matrix needs about 80 GB, while each row of the sparse one holds a few dozen
+      entries. Triplets make scattering simple; compressed rows make the solve fast.
+  - choice: Direct sparse solve first
+    instead: Conjugate gradients from the start
+    why: >-
+      A direct solver has no tolerance to tune, so a wrong answer points to assembly, not the solver. Switch to
+      preconditioned CG if a mesh beyond 10⁵ DOF runs out of memory.
+  - choice: 1D elements before 2D
+    instead: Starting with the plate
+    why: >-
+      Bar and beam elements have exact answers and the ten problems of project 49 to match, so the assembly and
+      boundary-condition code is proven before 2D adds Jacobians and meshes.
+watchOut: >-
+  Stresses can be compared at the wrong place: your averaged nodal values against a reference that reports Gauss-point
+  values. Read both at the same points before blaming the solver for a few per cent of difference.

@@ -1,0 +1,122 @@
+overview: >-
+  Two deliverables. The ML Zoomcamp capstone reuses the midterm pipeline (notebook, `train.py`, one model artefact, a
+  prediction service in Docker) on a new image or text dataset, deployed and peer-reviewed. The agent is a loop: the
+  model reads the task and the tool descriptions, asks for a tool call, the runtime runs it in a sandbox and feeds the
+  result back, until the model gives a final answer or hits the step limit. A runner replays 15 fixed test tasks,
+  checks each answer automatically and appends pass or fail with the commit hash to `results.csv`.
+learn:
+  - name: The agent loop
+    ref: hf-agents-course
+  - name: Tool descriptions
+    ref: hf-agents-course
+  - name: Sandboxed code execution
+  - name: Agent test sets
+  - name: Model deployment
+    ref: ml-zoomcamp
+stats:
+  - value: ≥ 10 of 15
+    label: test tasks solved
+  - value: ≥ 3
+    label: tools the agent can call
+  - value: ≥ 2
+    label: tool calls needed per task
+components:
+  - id: capstone
+    name: Capstone service
+    role: The second end-to-end ML project, from notebook to a deployed prediction service.
+    tech: scikit-learn · FastAPI · Docker
+    talksTo: []
+    kind: core
+  - id: runner
+    name: Task runner
+    role: Feeds the 15 test tasks to the agent one at a time.
+    tech: Python
+    talksTo: [agent]
+    kind: core
+  - id: agent
+    name: Agent loop
+    role: Keeps the conversation, asks the model for the next step, runs tools and stops at an answer or the limit.
+    tech: smolagents
+    talksTo: [llm, tools, checker]
+    kind: core
+  - id: llm
+    name: LLM
+    role: Reads the task and tool descriptions and returns a tool call or a final answer.
+    tech: Hosted or local instruct model
+    talksTo: []
+    kind: external
+  - id: tools
+    name: Tools
+    role: Web search, a restricted Python executor and file access in a sandboxed folder, each with a timeout.
+    tech: DuckDuckGo · restricted Python
+    talksTo: []
+    kind: core
+  - id: checker
+    name: Checker
+    role: Compares the final answer with the task's expected result.
+    tech: Python
+    talksTo: [results]
+    kind: core
+  - id: results
+    name: results.csv
+    role: One row per task per commit, with pass or fail, tool calls, tokens and time.
+    tech: CSV
+    talksTo: []
+    kind: offline
+flow:
+  - component: capstone
+    text: >-
+      is built and shipped first, on a time box of 18 h, so the agent keeps its share of the 40 h; the rest of the
+      flow follows one agent task.
+  - component: runner
+    text: loads one of the 15 tasks with its expected answer and starts the agent with `max_steps` set.
+  - component: agent
+    text: >-
+      sends the task and the tool descriptions to the **LLM**, which replies with a tool call such as
+      `web_search("…")` or a code snippet.
+  - component: tools
+    text: >-
+      runs the call in the sandbox with a timeout and returns the observation, which the agent appends to the history
+      before asking for the next step; this is the **loop**.
+  - component: agent
+    text: stops when the model calls `final_answer` or the step limit is reached, and counts tool calls and tokens.
+  - component: checker
+    text: >-
+      compares the answer with the expected result and appends a row to `results.csv` with the commit hash, so two
+      versions can be compared task by task.
+interface:
+  lang: python
+  code: |
+    from smolagents import CodeAgent, tool
+
+    @tool
+    def read_file(path: str) -> str:
+        """Read a text file from ./workspace.
+
+        Args:
+            path: a path inside ./workspace
+        """
+        ...
+
+    agent = CodeAgent(tools=[search, read_file],
+                      model=model, max_steps=8)
+    answer = agent.run(task["prompt"])
+decisions:
+  - choice: Test tasks with fixed answers
+    instead: Tasks that depend on live web pages
+    why: >-
+      A pass rate on 15 tasks is only comparable across commits if the answers cannot drift. Use local files, pinned
+      data or facts that do not change.
+  - choice: Sandbox with a timeout for code
+    instead: Running generated code with plain exec
+    why: >-
+      The model writes the code, so it can delete files or loop forever. A restricted executor confined to one folder
+      with a time limit keeps a bad step to one failed task.
+  - choice: A low step limit
+    instead: Letting the agent run until it answers
+    why: >-
+      Tasks need at least two tool calls, so a limit around 8 leaves room to recover from one bad call. A looping
+      agent then fails fast instead of burning tokens; raise it only if real tasks need more.
+watchOut: >-
+  Grading by eye makes the pass rate drift with your mood. Write the expected result for each of the 15 tasks before
+  the first run and let the checker decide.

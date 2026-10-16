@@ -1,0 +1,46 @@
+overview: >-
+  A GitHub Actions setup where every push runs tests across Python versions and a dependency audit, and every
+  version tag builds a cached Docker image, signs it, pushes it to a registry and writes the changelog.
+learn:
+  - name: Build matrices
+    ref: github-actions-docs
+  - name: Semantic versioning
+  - name: Image signing
+  - name: Layer caching
+components:
+  - id: test
+    name: Test workflow
+    role: Runs pytest on 3.11, 3.12 and 3.13 and fails on known-vulnerable dependencies.
+    tech: GitHub Actions
+    talksTo: [release]
+    kind: core
+  - id: release
+    name: Release workflow
+    role: On a `v*` tag, builds and signs the image and creates the GitHub release with notes.
+    tech: GitHub Actions · Docker Buildx · cosign
+    talksTo: [registry]
+    kind: core
+  - id: registry
+    name: Registry
+    role: Stores images tagged with the version and the commit SHA.
+    tech: GHCR
+    talksTo: []
+    kind: external
+flow:
+  - component: test
+    text: runs the Python-version matrix in parallel and `pip-audit`, which fails the job on a known CVE.
+  - component: release
+    text: starts when a tag such as `v1.4.0` is pushed and test has passed on that commit.
+  - component: release
+    text: builds with the registry cache, then signs the image digest with `cosign sign`.
+  - component: registry
+    text: receives `app:1.4.0` and `app:sha-<commit>`; the release notes are generated from commits since the last tag.
+decisions:
+  - choice: Release only from tags
+    instead: Release on every merge to main
+    why: >-
+      A tag is a deliberate, human-chosen version number, and it keeps images traceable to semver. Switch to
+      release-on-merge once tests are trusted enough for continuous delivery.
+watchOut: >-
+  Workflows triggered by pull requests from forks must never see registry or signing secrets. Run the release only
+  on tag pushes in the main repository.

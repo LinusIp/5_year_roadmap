@@ -1,0 +1,103 @@
+overview: >-
+  A small internal developer platform for Helix Health's 60 engineers, built on one k3s cluster from open-source
+  parts. Every request, whether from the portal, the CLI or CI, becomes a declarative resource in a control plane;
+  controllers reconcile it, which means they keep acting until the real repos, pipelines and namespaces match it. The
+  same catalog that holds the 40 services and their owners feeds the scorecards and the portal, so a new service
+  goes from request to first production deploy in under 30 minutes instead of 9 days.
+learn:
+  - name: Platform as a product
+    ref: roadmap-sh-devops
+  - name: Kubernetes custom resources
+    ref: kubernetes-tutorials
+  - name: Reconciliation loops
+  - name: Golden-path templates
+  - name: GitOps with Argo CD
+  - name: Service scorecards
+stats:
+  - value: < 30 min
+    label: request to first prod deploy
+  - value: < 8 min
+    label: dev environment ready
+  - value: 38 of 40
+    label: catalog services with owners
+components:
+  - id: portal
+    name: Portal and CLI
+    role: Lets engineers browse the catalog and request a service or environment from a form or a command.
+    tech: Backstage or custom · Go CLI
+    talksTo: [api]
+    kind: core
+  - id: api
+    name: Platform API
+    role: Stores every request as a custom resource such as Service or Environment, the single source of truth.
+    tech: Kubernetes CRDs
+    talksTo: [scaffolder, envctl]
+    kind: core
+  - id: scaffolder
+    name: Scaffolder
+    role: Renders golden-path templates into a new repo with CI, deploy config and dashboards.
+    tech: Go · GitHub Actions
+    talksTo: [gitops, catalog]
+    kind: core
+  - id: envctl
+    name: Environment controller
+    role: Creates a namespace and a database per environment and deletes it when its time-to-live runs out.
+    tech: Go controller · Terraform
+    talksTo: [gitops]
+    kind: core
+  - id: gitops
+    name: Deploy engine
+    role: Syncs each service's deploy config from Git into the cluster.
+    tech: Argo CD · k3s
+    talksTo: []
+    kind: core
+  - id: catalog
+    name: Catalog
+    role: Holds owners, runbooks and dependencies for every service, ingested from each repo's metadata file.
+    tech: catalog-info.yaml · Postgres
+    talksTo: [scorecards]
+    kind: core
+  - id: scorecards
+    name: Scorecard engine
+    role: Grades each service's SLO, security and docs status every night and shows it in the portal.
+    tech: Go · cron job
+    talksTo: [portal]
+    kind: offline
+flow:
+  - component: portal
+    text: takes a request for a new HTTP service, its owner team and a template name, and sends it with `platform create service`.
+  - component: api
+    text: stores it as a `Service` resource; validation rejects it if `owner` is empty, so ownership coverage cannot slip.
+  - component: scaffolder
+    text: renders the template into a new repo with CI, a Helm chart and a dashboard, then opens the first pull request.
+  - component: catalog
+    text: picks up the new repo's `catalog-info.yaml`, so the service appears with its owner and runbook link.
+  - component: envctl
+    text: "creates a dev namespace and database in under 8 minutes and sets `ttl: 72h`, after which it is **deleted** automatically."
+  - component: gitops
+    text: syncs the merged deploy config to production, which stops the timed demo clock under 30 minutes.
+interface:
+  lang: yaml
+  code: |
+    apiVersion: platform.helix.dev/v1
+    kind: Service
+    metadata:
+      name: claims-intake
+    spec:
+      owner: team-claims
+      template: http-api@v3
+      tier: 2
+      environments:
+        - name: dev
+          ttl: 72h
+    status:
+      phase: Deployed
+      repo: helix/claims-intake
+decisions:
+  - choice: One declarative API behind portal, CLI and CI
+    instead: A portal that calls scripts directly
+    why: With three platform engineers there is no time to keep three entry points in sync. One resource type keeps the source of truth single and makes everything scriptable.
+  - choice: Environments expire by default
+    instead: Long-lived shared dev environments
+    why: A small cluster fills up with forgotten namespaces fast. A 72-hour TTL keeps it healthy; revisit if teams keep renewing the same one.
+watchOut: Building a polished portal nobody asked for. Time the 9-day setup with two real teams first and build only the steps that eat that time.

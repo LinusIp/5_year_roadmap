@@ -1,0 +1,105 @@
+overview: >-
+  You pull Brightwave's billing out of the monolith without a big-bang switch. A routing facade sits in front of
+  every billing call and sends each tenant to the old code or the new service by a per-tenant flag, while a
+  change-data-capture (CDC) stream, which tails the database's change log, keeps the old and new invoice stores in
+  step. The new service first runs in shadow mode, answering every call in parallel so its result can be diffed with
+  the monolith's, and tenants only move in finance-approved waves once 1.2 million events show a mismatch rate under
+  0.01 %.
+learn:
+  - name: Strangler-fig pattern
+    ref: roadmap-software-architect
+  - name: Change data capture
+    ref: ddia
+  - name: Shadow traffic diffing
+  - name: Per-tenant feature flags
+  - name: Contract tests
+  - name: Rollback drills
+    ref: google-sre-book
+stats:
+  - value: < 0.01 %
+    label: shadow mismatch rate
+  - value: < 30 ms
+    label: added p95 on invoice creation
+  - value: < 60 s
+    label: rollback of any tenant
+components:
+  - id: callers
+    name: Monolith callers
+    role: Web requests and background jobs in the monolith that create, change or refund invoices.
+    tech: Monolith app
+    talksTo: [facade]
+    kind: external
+  - id: facade
+    name: Routing facade
+    role: The only entry point to billing; picks old or new code per tenant flag and mirrors calls in shadow mode.
+    tech: Python or Go
+    talksTo: [legacy, billing, comparator]
+    kind: core
+  - id: legacy
+    name: Legacy billing
+    role: The tangled billing code path and its tables, still the source of truth until a tenant moves.
+    tech: Monolith · PostgreSQL
+    talksTo: [cdc]
+    kind: core
+  - id: billing
+    name: New billing service
+    role: Owns invoices, tax, proration and refunds behind a versioned contract and its own database.
+    tech: Python or Go · PostgreSQL
+    talksTo: []
+    kind: core
+  - id: cdc
+    name: CDC sync
+    role: Streams row changes from the legacy tables into the new store so both stay aligned during the move.
+    tech: PostgreSQL logical replication · Debezium
+    talksTo: [billing]
+    kind: core
+  - id: comparator
+    name: Shadow comparator
+    role: Diffs old and new results field by field and counts mismatches by category.
+    tech: Python · Prometheus
+    talksTo: [waves]
+    kind: core
+  - id: waves
+    name: Wave controller
+    role: Flips tenant flags in approved waves and runs the 60-second rollback from the runbook.
+    tech: CLI · flag table
+    talksTo: [facade]
+    kind: offline
+flow:
+  - component: facade
+    text: receives `create_invoice(tenant_id, lines)` and looks up the tenant's flag, which is `legacy`, `shadow` or `new`.
+  - component: legacy
+    text: still serves a `shadow` tenant and returns the real answer, so the customer never sees the new code's result.
+  - component: billing
+    text: gets the same call in parallel from the facade; its answer is kept only for comparison.
+  - component: comparator
+    text: diffs the two invoices after normalising rounding and time zones, and records any mismatch by category such as `tax` or `proration`.
+  - component: cdc
+    text: copies every committed legacy row change into the new store, and its **replication lag** is watched on a dashboard.
+  - component: facade
+    text: sends the tenant only to the new service once the finance team approves a wave and the mismatch rate is under `0.01 %`; one flag flip sends it back.
+interface:
+  lang: http
+  code: |
+    POST /internal/billing/invoices
+    X-Tenant-Id: t_4821
+    { "lines": [{ "sku": "pro-seat",
+                  "qty": 12 }],
+      "currency": "EUR" }
+
+    200 OK
+    X-Billing-Route: shadow
+    { "invoice_id": "inv_90311",
+      "total": "1428.00",
+      "tax": "228.00" }
+decisions:
+  - choice: CDC from the legacy store, not dual writes
+    instead: Write every invoice to both stores from the app
+    why: Two writes that can fail separately drift silently, and losing one of 1.2 million events breaks the zero-loss rule. Revisit with an outbox once the monolith no longer writes invoices.
+  - choice: Per-tenant waves behind a flag
+    instead: Switch all 9,000 accounts at one cutover
+    why: Finance must approve each wave, and a flag flip rolls one tenant back well inside 60 s instead of rolling back the whole release.
+  - choice: Shadow mode before any real traffic
+    instead: Canary a small share of live calls straight to the new service
+    why: A canary shows wrong invoices to real customers; shadow diffs prove parity on all 1.2 million events first.
+watchOut: Background jobs and cron tasks that call billing tables directly bypass the facade and keep the old path alive. Grep for every caller and route it through the facade before the first wave.

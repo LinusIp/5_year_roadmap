@@ -1,0 +1,115 @@
+overview: >-
+  A manager types a question; the assistant picks the few tables that matter, asks an LLM for one SQL query, and
+  shows the result table with the SQL and a short explanation. Safety does not rely on the prompt: a parser rejects
+  anything but a single SELECT, and the database login itself can only read. If the query errors, the error goes
+  back to the model for at most two repairs.
+learn:
+  - name: SQL joins and aggregates
+    ref: sqlbolt
+  - name: Schema linking
+  - name: SQL parsing
+  - name: Least-privilege roles
+  - name: Execution accuracy
+  - name: Self-repair loop
+stats:
+  - value: ≥ 75%
+    label: execution accuracy
+  - value: 5 s
+    label: query timeout
+  - value: < 8 s
+    label: p95 end to end
+components:
+  - id: manager
+    name: Manager
+    role: Asks a question in plain English from a small web page.
+    tech: Browser
+    talksTo: [schema]
+    kind: external
+  - id: schema
+    name: Schema summariser
+    role: Picks the relevant tables and writes their columns, keys and 3 sample rows.
+    tech: Python
+    talksTo: [generator]
+    kind: core
+  - id: generator
+    name: SQL generator
+    role: Prompts the LLM with the question and the compact schema.
+    tech: Python
+    talksTo: [llm, guard]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Writes one SQL query and a one-line explanation.
+    tech: Hosted LLM
+    talksTo: []
+    kind: external
+  - id: guard
+    name: Parser guard
+    role: Parses the SQL and allows only one SELECT on allowlisted tables.
+    tech: sqlglot
+    talksTo: [executor]
+    kind: core
+  - id: executor
+    name: Executor
+    role: Runs the query as a read-only role with a 5 s timeout and a row limit.
+    tech: Postgres · psycopg
+    talksTo: [repair]
+    kind: core
+  - id: repair
+    name: Repair loop
+    role: Sends a database error back to the generator, at most twice.
+    tech: Python
+    talksTo: [generator]
+    kind: core
+  - id: eval
+    name: Eval harness
+    role: Runs 80 questions and 20 injection attempts and compares result sets.
+    tech: pytest
+    talksTo: [schema]
+    kind: offline
+flow:
+  - component: schema
+    text: matches "top 5 blends by revenue in Q3" to `orders`, `order_items` and `products`, and sends only those tables.
+  - component: generator
+    text: asks for SQL in the Postgres dialect plus a one-line explanation.
+  - component: guard
+    text: rejects multiple statements, any `INSERT`, `UPDATE`, `DROP` or `COPY`, and tables outside the allowlist, and adds `LIMIT 1000` if missing.
+  - component: executor
+    text: runs it as role `analyst_ro` with `statement_timeout = 5s`.
+  - component: repair
+    text: on an error such as an unknown column, returns the message to the generator; this is the one deliberate **loop**, capped at 2 repairs.
+  - component: executor
+    text: returns rows, SQL and explanation to the page, so the manager can see exactly what was asked of the data.
+interface:
+  lang: http
+  code: |
+    POST /ask
+    { "question": "Top 5 blends by revenue in Q3" }
+
+    200 OK
+    { "sql": "SELECT p.name, SUM(oi.qty*oi.price)
+              AS revenue FROM order_items oi
+              JOIN products p ON … GROUP BY p.name
+              ORDER BY revenue DESC LIMIT 5",
+      "rows": [["Rift Valley", 18420.50], …],
+      "explanation": "Sums Q3 order lines per blend.",
+      "repairs": 0 }
+decisions:
+  - choice: Parser guard and a read-only role
+    instead: Tell the model to only write SELECT
+    why: >-
+      A prompt is not a security boundary, and the 20 injection tests will try. If the parser misses something, the
+      database role still refuses the write.
+  - choice: Compare result sets, not SQL text
+    instead: Exact match against the gold SQL
+    why: >-
+      Many different queries give the same correct answer. Execution accuracy compares the rows, ignoring order
+      unless the question asks for one.
+  - choice: Send only the linked tables
+    instead: Paste the whole schema in every prompt
+    why: >-
+      The sales schema grows with every feature, and long prompts cost money and confuse the model. Revisit with a
+      retrieval step over table descriptions if it passes about 50 tables.
+watchOut: >-
+  The dangerous failure is a query that runs and is wrong, such as a join that counts each order twice. Put such
+  traps in the gold set, and always show the SQL beside the answer.

@@ -1,0 +1,110 @@
+overview: >-
+  A rate limiter for Datacard's public API that every one of the 3 API nodes asks before serving a request. One
+  Redis script reads and updates the key's **token bucket** (a counter that refills at a steady rate and allows a
+  short burst) in a single atomic step, so the nodes share one limit. Responses carry the remaining quota and
+  reset time, and a local fallback bucket keeps abusers in check if Redis goes down.
+learn:
+  - name: Token bucket
+    ref: system-design-primer
+  - name: Sliding-window counters
+    ref: bytebytego
+  - name: Atomic Redis scripts
+  - name: Fail-open vs fail-closed
+  - name: Retry-After headers
+stats:
+  - value: < 3 ms
+    label: decision p99
+  - value: ± 5 %
+    label: of the limit across 3 nodes
+  - value: 20,000/s
+    label: decisions
+components:
+  - id: client
+    name: API customer
+    role: Calls the public API with an API key, sometimes in abusive bursts.
+    tech: HTTP client
+    talksTo: [middleware]
+    kind: external
+  - id: middleware
+    name: Limiter middleware
+    role: Builds the bucket key from API key and endpoint, asks for a decision and sets the rate-limit headers.
+    tech: Go · net/http
+    talksTo: [config, script, fallback, handler]
+    kind: core
+  - id: config
+    name: Plan config
+    role: Maps each plan to rate and burst per endpoint, loaded from a YAML file at start-up.
+    tech: YAML
+    talksTo: []
+    kind: core
+  - id: script
+    name: Redis script
+    role: Refills, checks and decrements the bucket in one atomic call and returns allowed, remaining and reset.
+    tech: Redis · Lua
+    talksTo: []
+    kind: core
+  - id: fallback
+    name: Fallback bucket
+    role: An in-memory bucket per node at one third of the limit, used only while Redis is unreachable.
+    tech: Go
+    talksTo: []
+    kind: core
+  - id: handler
+    name: API handler
+    role: Serves the real request once the limiter allows it.
+    tech: Go
+    talksTo: []
+    kind: external
+  - id: loadgen
+    name: Load generator
+    role: Drives 20,000 decisions a second with a mix of normal and abusive keys and measures accuracy.
+    tech: Go · vegeta
+    talksTo: [middleware]
+    kind: offline
+flow:
+  - component: middleware
+    text: reads the API key and route and builds the bucket key `rl:{key}:{endpoint}`.
+  - component: config
+    text: supplies the plan's `rate` and `burst`, for example 100 a minute with a burst of 20.
+  - component: script
+    text: >-
+      runs `EVALSHA`; using Redis's own `TIME`, it refills tokens since the last call, takes one if there is one and
+      saves the bucket, all in **one atomic step** so two nodes cannot both spend the last token.
+  - component: middleware
+    text: >-
+      sets `RateLimit-Remaining` and `RateLimit-Reset`; a denied call gets `429` with `Retry-After`, an allowed call
+      goes on to the handler.
+  - component: fallback
+    text: >-
+      takes over when the Redis call fails or exceeds 2 ms; each node allows a third of the limit, which keeps abuse
+      under 2x during an outage.
+interface:
+  lang: http
+  code: |
+    GET /v1/cards/123
+    Authorization: Bearer key_live_9f2
+
+    429 Too Many Requests
+    RateLimit-Limit: 100
+    RateLimit-Remaining: 0
+    RateLimit-Reset: 17
+    Retry-After: 17
+decisions:
+  - choice: Atomic Redis script per decision
+    instead: GET then SET from the application
+    why: >-
+      With 3 nodes, a read-modify-write lets two nodes spend the same token, and the 5 percent accuracy target
+      fails. One script round trip stays well inside the 3 ms p99.
+  - choice: Redis clock inside the script, not node clocks
+    instead: Each node sends its own timestamp
+    why: >-
+      Clock skew between nodes would refill buckets at different speeds. Using one clock source keeps refill
+      consistent; revisit if Redis is ever sharded.
+  - choice: Fail open to a local bucket
+    instead: Fail closed and reject everything
+    why: >-
+      A single Redis instance is an accepted constraint, so an outage is expected. Rejecting all traffic would take
+      the whole public API down; a local third-of-limit bucket keeps abuse under 2x.
+watchOut: >-
+  Clients that retry instantly on `429` turn a limit into a retry storm. Always send `Retry-After` and test with a
+  load generator that ignores it.

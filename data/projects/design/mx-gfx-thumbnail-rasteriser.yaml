@@ -1,0 +1,107 @@
+overview: >-
+  A CPU-only renderer that draws product thumbnails the way a GPU would: transform vertices, clip them against the near
+  plane, sort triangles into 64 × 64 pixel tiles, then let each of 4 worker threads fill whole tiles with a depth
+  buffer and shading. Pixels are tested with edge functions (a sign test for each triangle side) and textures are
+  interpolated with perspective correction. A batch command renders 8 turntable angles for each of 3,000 products
+  every night.
+learn:
+  - name: Edge-function rasterisation
+    ref: tinyrenderer
+  - name: Perspective-correct interpolation
+    ref: scratchapixel
+  - name: Homogeneous clipping
+    ref: cmu-15-462
+  - name: Tiled binning
+  - name: False sharing
+    ref: mit-6-172
+stats:
+  - value: < 150 ms
+    label: 512 px thumbnail, 100k triangles
+  - value: < 4 h
+    label: 24,000 renders on one 4-core server
+  - value: < 2
+    label: mean grey-level error vs GPU
+components:
+  - id: cli
+    name: Batch CLI
+    role: Lists models, renders 8 angles each and writes PNGs, skipping ones already done.
+    tech: C++17
+    talksTo: [loader]
+    kind: core
+  - id: loader
+    name: Mesh loader
+    role: Reads a product mesh and its texture into flat arrays.
+    tech: stb-style image IO
+    talksTo: [transform]
+    kind: core
+  - id: transform
+    name: Transform and clipping
+    role: Projects vertices, culls back faces and clips triangles against the near plane.
+    tech: C++17
+    talksTo: [binner]
+    kind: core
+  - id: binner
+    name: Tile binner
+    role: Puts each triangle's index into the list of every 64 × 64 tile its bounding box touches.
+    tech: C++17
+    talksTo: [raster]
+    kind: core
+  - id: raster
+    name: Rasteriser
+    role: Fills one tile at a time with edge functions, top-left fill rule and a depth test.
+    tech: std::thread pool
+    talksTo: [shading]
+    kind: core
+  - id: shading
+    name: Shader functions
+    role: Gouraud or Phong lighting and bilinear texture lookups per pixel.
+    tech: C++17
+    talksTo: [cli]
+    kind: core
+  - id: reference
+    name: GPU reference
+    role: Renders a few models on a workstation GPU to compare images against.
+    tech: OpenGL
+    talksTo: []
+    kind: offline
+flow:
+  - component: cli
+    text: picks the next model and angle, for example `chair-0412` at 45 degrees.
+  - component: loader
+    text: loads the mesh and texture once per model and reuses them for all 8 angles.
+  - component: transform
+    text: multiplies every vertex by the model-view-projection matrix, drops back faces and clips at the near plane **before** dividing by `w`.
+  - component: binner
+    text: adds each triangle to the tiles under its screen bounding box; a 512 × 512 image has 64 tiles.
+  - component: raster
+    text: lets each worker take a whole tile, so it owns that tile's colour and depth and never writes beside another thread.
+  - component: shading
+    text: interpolates `uv / w` and `1 / w` and divides per pixel, then lights the pixel and hands the finished tile back for the PNG.
+interface:
+  lang: cpp
+  code: |
+    struct Vtx { Vec4 clip; Vec3 n; Vec2 uv; };
+    struct Tile { int x0, y0; std::vector<int> tris; };
+
+    // > 0 when p is left of a->b (counter-clockwise).
+    inline float edge(Vec2 a, Vec2 b, Vec2 p) {
+      return (b.x - a.x) * (p.y - a.y)
+           - (b.y - a.y) * (p.x - a.x);
+    }
+    // Fill one 64x64 tile into its own colour and
+    // depth block; tiles never share writes.
+    void rasterTile(const Tile& t, const Vtx* v,
+                    const Shader& sh, Framebuffer& fb);
+decisions:
+  - choice: Tiles owned by one thread
+    instead: Splitting the triangle list across threads
+    why: Splitting triangles makes threads fight over the same depth pixels and need locks; whole tiles need none.
+  - choice: Edge functions with a top-left rule
+    instead: Scanline filling
+    why: The shared fill rule means a pixel on a shared edge is drawn exactly once, so no cracks, and edge tests suit 64 × 64 blocks.
+  - choice: 150 ms target on a 600 ms budget
+    instead: Just meeting the 4-hour window
+    why: 24,000 renders in 4 hours allow 0.6 s each; 150 ms finishes in about an hour, which leaves room for catalogue growth and reruns.
+watchOut: >-
+  Interpolating texture coordinates without dividing by `w` gives affine warping that looks fine head-on and bends on
+  turntable angles. Compare against the GPU reference at all 8 angles, not just the front.

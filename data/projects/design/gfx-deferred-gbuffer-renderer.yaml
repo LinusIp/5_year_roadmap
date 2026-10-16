@@ -1,0 +1,69 @@
+overview: >-
+  A deferred renderer: the geometry pass writes each pixel's albedo, normal, roughness and depth into several textures
+  at once (MRT, multiple render targets, together called the G-buffer), then a light pass shades each of 200 point
+  lights only over the pixels its sphere covers. A debug view shows any attachment, and the same scene in a forward
+  renderer gives the comparison number.
+learn:
+  - name: Deferred shading
+    ref: learnopengl
+  - name: Multiple render targets
+  - name: Light volumes
+  - name: G-buffer bandwidth
+components:
+  - id: geom
+    name: Geometry pass
+    role: Draws every mesh once into the G-buffer, with no lighting.
+    tech: OpenGL 4.6
+    talksTo: [gbuffer]
+    kind: core
+  - id: gbuffer
+    name: G-buffer
+    role: Holds albedo and metalness, packed normal, roughness and depth per pixel.
+    tech: FBO · MRT
+    talksTo: [light, debug]
+    kind: core
+  - id: light
+    name: Light pass
+    role: Draws a sphere per light and adds its contribution where the sphere covers geometry.
+    tech: GLSL
+    talksTo: []
+    kind: core
+  - id: debug
+    name: Debug views
+    role: Shows one attachment full-screen, with normals and depth mapped to colour.
+    tech: GLSL
+    talksTo: []
+    kind: offline
+flow:
+  - component: geom
+    text: renders into a framebuffer with three colour attachments plus depth, enabled with `glDrawBuffers`.
+  - component: gbuffer
+    text: stores `RGBA8` albedo and metalness, `RG16F` octahedral normal (a unit vector packed into two numbers) and `R8` roughness; position is **rebuilt from depth**.
+  - component: light
+    text: draws each light's sphere with additive blending, front faces culled and `GL_GREATER` depth, so only pixels inside its radius are shaded.
+  - component: light
+    text: times the frame with GPU queries; done is 200 lights at 60 FPS, with the forward renderer's ms reported beside it.
+interface:
+  lang: glsl
+  code: |
+    // geometry pass outputs
+    layout(location = 0) out vec4 gAlbedoMetal; // RGBA8
+    layout(location = 1) out vec2 gNormalOct;   // RG16F
+    layout(location = 2) out float gRoughness;  // R8
+
+    // light pass, one sphere per light
+    uniform sampler2D gAlbedo, gNormal, gRough;
+    uniform sampler2D gDepth;
+    uniform mat4 invViewProj;
+    uniform vec3 lightPos, lightColour;
+    uniform float radius;
+    vec3 positionFromDepth(vec2 uv, float depth);
+decisions:
+  - choice: Small G-buffer, position from depth
+    instead: Store world position in an RGBA32F attachment
+    why: >-
+      At 1080p an RGBA32F position target alone is 33 MB, read again by every light. Nine bytes a pixel plus depth
+      keeps the light pass's bandwidth low enough for 200 lights.
+watchOut: >-
+  A G-buffer holds one surface per pixel, so transparent objects cannot be lit in it. Draw them afterwards in a
+  forward pass using the same light list and the G-buffer's depth.

@@ -1,0 +1,130 @@
+overview: >-
+  A circuit simulator built on modified nodal analysis (MNA, one linear equation per node plus one per voltage
+  source): a parser reads a SPICE-style netlist, every element stamps its conductances and currents into a matrix, and
+  an LU solve gives the node voltages. Nonlinear parts stamp a straight-line model at the current guess, and a
+  Newton-Raphson loop restamps and solves until it converges. The transient driver swaps capacitors and inductors for
+  companion models, steps time and adapts the step from an error estimate, and every result is checked against
+  ngspice.
+learn:
+  - name: Modified nodal analysis
+    ref: mit-6-002
+  - name: Newton-Raphson
+    ref: mit-2-086
+  - name: Stiff integration
+    ref: mit-2-086
+  - name: LU factorisation
+    ref: mit-18-06
+  - name: Companion models
+  - name: Truncation error control
+stats:
+  - value: '1e-12'
+    label: relative error on a 100-resistor ladder
+  - value: ≤ 1 mV
+    label: DC error against ngspice, or 0.1 %
+  - value: < 1 %
+    label: RMS transient error against ngspice
+components:
+  - id: parser
+    name: Netlist parser
+    role: Reads R, C, L, sources, diodes and MOSFETs into elements and a node map.
+    tech: C++20 or Rust
+    talksTo: [stamps]
+    kind: core
+  - id: stamps
+    name: Element stamps
+    role: Each element adds its conductances to G and its currents to b.
+    tech: C++20 or Rust
+    talksTo: [lu]
+    kind: core
+  - id: lu
+    name: LU solver
+    role: Solves G x = b, dense first and sparse later.
+    tech: Eigen or own LU
+    talksTo: [newton]
+    kind: core
+  - id: newton
+    name: Newton loop
+    role: Checks convergence, limits voltage steps and asks for a restamp until the guess settles.
+    tech: C++20 or Rust
+    talksTo: [stamps, transient]
+    kind: core
+  - id: transient
+    name: Transient driver
+    role: Steps time with backward Euler or trapezoidal companion models and adapts the step.
+    tech: C++20 or Rust
+    talksTo: [stamps, viewer, compare]
+    kind: core
+  - id: viewer
+    name: Plot viewer
+    role: Draws the waveforms from the CSV output.
+    tech: Your Stage 1 renderer
+    talksTo: []
+    kind: core
+  - id: ngspice
+    name: ngspice
+    role: Runs the same netlists as the reference.
+    tech: ngspice
+    talksTo: [compare]
+    kind: external
+  - id: compare
+    name: Comparison harness
+    role: Reports DC and transient error per circuit against ngspice.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: parser
+    text: >-
+      turns lines like `R1 1 2 1k` and `D1 2 0 DMOD` into elements and maps node names to matrix rows, with node `0`
+      as ground.
+  - component: stamps
+    text: >-
+      fill `G` and `b`; a voltage source adds a row for its current, and a diode stamps its linearised model at the
+      present guess.
+  - component: lu
+    text: solves `G x = b` for node voltages and source currents.
+  - component: newton
+    text: >-
+      compares `x` with the last guess against `reltol` and `abstol`, limits the diode voltage step, and loops back to
+      the stamps until converged, with **gmin stepping** if it stalls.
+  - component: transient
+    text: >-
+      replaces each C and L with its companion model, advances `t`, and accepts or rejects the step from the
+      truncation-error estimate before the next one.
+  - component: viewer
+    text: draws the accepted time points as waveforms; the **harness** overlays them on ngspice's.
+interface:
+  lang: cpp
+  code: |
+    struct Stamp {             // MNA system G x = b
+      Matrix& G; Vector& b;
+      void g(int a, int c, double gval);  // conductance
+      void i(int a, int c, double ival);  // current
+    };
+    struct Element {
+      virtual void stamp(Stamp& s, const Vector& x,
+                         const TranState& t) = 0;
+      virtual bool nonlinear() const { return false; }
+    };
+    // diode at guess vd (companion model):
+    //   gd  = Is/(n·Vt) · exp(vd/(n·Vt))
+    //   Ieq = id − gd·vd
+decisions:
+  - choice: Dense LU first, sparse later
+    instead: Sparse LU from the start
+    why: >-
+      The project 36 circuits have tens of nodes, where dense LU is simple to debug; the 1,000-node RC mesh is where
+      sparse is measured against it.
+  - choice: Adaptive steps from truncation error
+    instead: One fixed small time step
+    why: >-
+      A 555's edges need tiny steps for a moment and long flat stretches need none; a fixed step small enough for the
+      edges wastes most of the run.
+  - choice: Backward Euler and trapezoidal both
+    instead: Trapezoidal only
+    why: >-
+      Trapezoidal is more accurate but rings on discontinuous sources such as a pulse; backward Euler damps it, so the
+      driver can switch at an edge.
+watchOut: >-
+  A diode's exponential overflows on the first Newton step if the voltage guess jumps too far. Limit the change in
+  junction voltage per iteration before anything else.

@@ -1,0 +1,73 @@
+overview: >-
+  A hardware SPI master in Verilog reads an MCP3008 ADC (8 channels, 10 bits) at a steady 50,000 samples a second,
+  stores bursts in block RAM, and streams them to a PC over UART, where a Python script plots them. Feeding in a sine
+  of known frequency and finding the same frequency in the plot proves the sample rate and bit timing are right.
+learn:
+  - name: SPI modes
+  - name: Finite state machines
+    ref: nandland
+  - name: Block RAM
+    ref: getting-started-with-fpgas
+  - name: UART framing
+    ref: fpga4fun
+components:
+  - id: spi
+    name: SPI master
+    role: A state machine that starts a conversion and shifts in 10 bits on a fixed schedule.
+    tech: Verilog
+    talksTo: [bram]
+    kind: core
+  - id: bram
+    name: Sample buffer
+    role: Stores a burst of 4,096 samples at full rate.
+    tech: Verilog · BRAM
+    talksTo: [uart]
+    kind: core
+  - id: uart
+    name: UART sender
+    role: Sends the burst to the PC as framed two-byte samples.
+    tech: Verilog · 115,200 baud
+    talksTo: [pc]
+    kind: core
+  - id: pc
+    name: PC plotter
+    role: Reads the burst, plots it and finds the main frequency.
+    tech: Python · pyserial · NumPy
+    talksTo: []
+    kind: external
+flow:
+  - component: spi
+    text: every 20 µs pulls CS low and runs 18 clocks at 1 MHz in **mode 0,0**, sending the start bit, single-ended flag and channel, then reading a null bit and 10 data bits on rising edges.
+  - component: bram
+    text: writes each sample to the next address until 4,096 are stored, then hands the full buffer to the UART side.
+  - component: uart
+    text: sends a 2-byte sync header, then each sample as two bytes in 8N1 framing.
+  - component: pc
+    text: plots the burst against `n / 50 kHz` and takes an FFT; the peak must sit at the input sine's frequency.
+interface:
+  lang: verilog
+  code: |
+    module mcp3008_reader #(
+      parameter CLK_HZ    = 12_000_000,
+      parameter SCLK_HZ   = 1_000_000,
+      parameter SAMPLE_HZ = 50_000
+    ) (
+      input  wire       clk, rst,
+      input  wire [2:0] channel,
+      output reg        cs_n, sclk, mosi,
+      input  wire       miso,
+      output reg  [9:0] sample,
+      output reg        sample_valid  // 1-clock pulse
+    );
+    // mode 0,0: change MOSI on falling SCLK,
+    // sample MISO on rising SCLK
+decisions:
+  - choice: Capture bursts in BRAM, then send
+    instead: Stream every sample straight out of the UART
+    why: >-
+      At 115,200 baud the UART carries about 5,700 two-byte samples a second, far below 50,000. A burst of 4,096 at full
+      rate captures a clean sine, and the PC waits under a second for it.
+watchOut: >-
+  Sampling MISO on the wrong clock edge shifts every bit by one, so values come out roughly doubled or halved and
+  noisy. Compare a logic analyzer capture with the datasheet timing diagram, and test with the input tied to ground and
+  to the reference first.

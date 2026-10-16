@@ -1,0 +1,121 @@
+overview: >-
+  A toy browser that fetches pages with your own HTTP code, parses HTML and a subset of CSS, lays out blocks and text,
+  and paints them in a window you can scroll and click. Each page goes through a pipeline of trees: the HTML parser
+  builds a DOM, the style engine works out each node's style through the cascade, layout turns styled nodes into
+  positioned boxes and lines, and paint turns boxes into a display list of text and rectangles. The window draws that
+  list at the scroll offset and maps clicks back to the link under the pointer.
+learn:
+  - name: HTTP/1.1 over sockets
+    ref: stanford-cs144
+  - name: Forgiving HTML parsing
+  - name: CSS cascade and specificity
+  - name: Block and inline layout
+  - name: Line breaking with font metrics
+  - name: Hit testing
+stats:
+  - value: "5"
+    label: real pages render recognisably
+  - value: ≥ 50
+    label: unit tests across HTTP, HTML, CSS, layout
+components:
+  - id: http
+    name: Network layer
+    role: Resolves URLs, sends GET over sockets with TLS, follows redirects and decodes chunked bodies.
+    tech: Python socket · ssl
+    talksTo: [html]
+    kind: core
+  - id: html
+    name: HTML parser
+    role: Tokenises HTML and builds a DOM tree, adding implied and unclosed tags.
+    tech: Python
+    talksTo: [style]
+    kind: core
+  - id: style
+    name: Style engine
+    role: Applies the default, page and inline styles by specificity, with inheritance.
+    tech: Python
+    talksTo: [layout]
+    kind: core
+  - id: layout
+    name: Layout
+    role: Builds block and line boxes with positions and sizes, wrapping words to the width.
+    tech: Python · font metrics
+    talksTo: [paint]
+    kind: core
+  - id: paint
+    name: Paint
+    role: Turns the layout tree into a display list of text runs and rectangles.
+    tech: Python
+    talksTo: [window]
+    kind: core
+  - id: window
+    name: Window
+    role: Draws the display list at the scroll offset and hit-tests clicks.
+    tech: Tkinter or skia-python
+    talksTo: [http]
+    kind: core
+  - id: servers
+    name: Web servers
+    role: The five chosen real sites and a local folder of test pages.
+    tech: HTTP and HTTPS
+    talksTo: [http]
+    kind: external
+flow:
+  - component: http
+    text: >-
+      resolves the URL against the current base, sends `GET` with TLS, follows redirects (updating the base), and
+      decodes `Transfer-Encoding: chunked` bodies.
+  - component: html
+    text: >-
+      tokenises the body and builds the DOM, closing an open `<p>` when a new block starts and inserting implied
+      `<html>` and `<body>`.
+  - component: style
+    text: >-
+      sorts rules by **specificity** and source order, applies them and inline styles, and lets font and colour inherit
+      to children.
+  - component: layout
+    text: >-
+      stacks block boxes vertically and fills lines with words measured by real font metrics, wrapping at the content
+      width.
+  - component: paint
+    text: walks the layout tree once and emits `DrawText` and `DrawRect` items with page coordinates.
+  - component: window
+    text: >-
+      draws only the items inside the viewport at the scroll offset, without re-running layout. A click at `(x, y +
+      scroll)` finds the box and its enclosing link and loads that URL, which closes the loop back to the network layer.
+interface:
+  lang: python
+  code: |
+    def load(self, url: URL) -> None:
+        headers, body = request(url)  # TLS, redirect
+        self.dom = HTMLParser(body).parse()
+        rules = DEFAULT_CSS + page_rules(self.dom, url)
+        style(self.dom, sorted(rules, key=cascade))
+        self.doc = DocumentLayout(self.dom)
+        self.doc.layout(width=WIDTH)
+        self.display_list = paint_tree(self.doc)
+        self.draw()
+
+    def click(self, x: int, y: int) -> None:
+        box = hit_test(self.doc, x, y + self.scroll)
+        if href := enclosing_link(box):
+            self.load(self.url.resolve(href))
+decisions:
+  - choice: A forgiving tree builder
+    instead: An XML parser
+    why: >-
+      Real pages leave tags unclosed and rely on implied ones, so an XML parser fails on most of the five chosen
+      pages. Follow a small part of the HTML5 rules and test each one.
+  - choice: A display list between layout and drawing
+    instead: Drawing straight from the layout tree
+    why: >-
+      Scrolling then only redraws the list, so the frames-per-second measurement while scrolling a long page does not
+      pay for layout each frame.
+  - choice: Python with Tkinter
+    instead: A compiled language with a GPU canvas
+    why: >-
+      Tkinter ships with Python and draws text and rectangles, enough for five simple pages in 40 hours. Switch to
+      skia-python if the per-stage timings show paint dominating.
+watchOut: >-
+  Treating HTML as XML chokes on unclosed and implied tags, which nearly every real page has. Build the tree with
+  explicit rules for implied tags and test them on the five chosen pages from the start.

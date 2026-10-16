@@ -1,0 +1,75 @@
+overview: >-
+  A read-only C tool for FAT32 disk images: it reads the boot sector for the layout, follows each file's cluster chain
+  through the File Allocation Table (a linked list stored as an array of 32-bit next-cluster numbers), lists
+  directories with their long file names, and extracts files. Ten extracted files must match the checksums of the
+  same files on the mounted image.
+learn:
+  - name: File allocation tables
+    ref: ostep
+  - name: Cluster chains
+  - name: Long file names
+  - name: Little-endian parsing
+components:
+  - id: image
+    name: Disk image
+    role: A FAT32 image file with nested directories and test files.
+    tech: .img file
+    talksTo: [boot]
+    kind: external
+  - id: boot
+    name: Boot sector
+    role: Reads sector size, cluster size, FAT location and root cluster.
+    tech: C
+    talksTo: [dir]
+    kind: core
+  - id: dir
+    name: Directory reader
+    role: Decodes 32-byte entries and joins long-name pieces into full names.
+    tech: C
+    talksTo: [fat]
+    kind: core
+  - id: fat
+    name: FAT walker
+    role: Follows next-cluster links to an end mark and reads each cluster's bytes.
+    tech: C
+    talksTo: []
+    kind: core
+flow:
+  - component: boot
+    text: >-
+      reads sector 0 for `BytesPerSec`, `SecPerClus`, reserved sectors, `NumFATs`, `FATSz32` and `RootClus`, and
+      loads the whole FAT into memory.
+  - component: dir
+    text: >-
+      reads the root directory as 32-byte entries, skipping `0xE5` (deleted), stopping at `0x00`, and gathering the
+      long-name entries (attribute `0x0F`) that precede each short entry.
+  - component: fat
+    text: >-
+      maps cluster N to sector `first_data + (N - 2) × SecPerClus` and looks up `FAT[N] & 0x0FFFFFFF` for the next
+      one, until a value `≥ 0x0FFFFFF8`.
+  - component: fat
+    text: writes the bytes trimmed to the entry's file size; the tool prints a SHA-256 to compare with the mounted copy.
+interface:
+  lang: c
+  code: |
+    uint32_t next_cluster(const Fat32 *fs, uint32_t n) {
+      uint32_t v;
+      memcpy(&v, fs->fat + n * 4, 4); /* LE */
+      return v & 0x0FFFFFFF;          /* 28 bits */
+    }
+
+    uint64_t cluster_offset(const Fat32 *fs, uint32_t n) {
+      return (uint64_t)(fs->first_data_sector
+               + (n - 2) * fs->sec_per_clus)
+             * fs->bytes_per_sec;
+    }
+decisions:
+  - choice: Read-only, with the whole FAT in memory
+    instead: Seeking into the FAT on the image for every lookup
+    why: >-
+      The FAT of a small test image is a few hundred KB, so loading it once turns chain walks into array lookups.
+      Read-only means a bug can never corrupt the image you check against.
+watchOut: >-
+  Long-name entries are stored in reverse order before their short entry, 13 UTF-16 characters each; the sequence
+  number and the short-name checksum tell you which belong together. Assembling them front to back scrambles every
+  long name.

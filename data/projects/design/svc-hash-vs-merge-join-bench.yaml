@@ -1,0 +1,52 @@
+overview: >-
+  A hash join (build a hash table on one side, probe it with the other) and a sort-merge join (sort both sides,
+  then walk them together) implemented over integer keys, with runtime plotted against table size and key skew.
+learn:
+  - name: Hash joins
+    ref: cmu-15-445
+  - name: Sort-merge joins
+  - name: Radix partitioning
+  - name: Data skew
+components:
+  - id: gen
+    name: Data generator
+    role: Builds two tables of 1M to 100M rows with uniform or Zipf-skewed keys.
+    tech: Rust or C++
+    talksTo: [hash, merge]
+    kind: core
+  - id: hash
+    name: Hash join
+    role: Partitions both sides by key bits, then builds and probes a table per partition.
+    tech: Rust or C++
+    talksTo: [bench]
+    kind: core
+  - id: merge
+    name: Sort-merge join
+    role: Sorts both sides by key and merges them, handling runs of equal keys.
+    tech: Rust or C++
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Benchmark
+    role: Times each join over the size and skew grid and plots the crossovers.
+    tech: Benchmark · matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: gen
+    text: writes both tables at 10M rows, once uniform and once with Zipf `s = 1.2` keys.
+  - component: hash
+    text: splits each side into partitions whose hash table fits in L2 cache, then probes them one by one.
+  - component: merge
+    text: sorts both sides, or skips sorting if the input is already ordered, and emits matches in one pass.
+  - component: bench
+    text: plots time against size and skew and marks where the faster join changes.
+decisions:
+  - choice: Partitioned hash join
+    instead: One big hash table
+    why: >-
+      A table bigger than cache turns every probe into a memory miss, which hides the comparison you want to see.
+      Keep the plain version as a baseline to show that gap.
+watchOut: >-
+  A build table that does not fit in cache makes the hash join look slow for the wrong reason. Partition, and check
+  cache misses with perf.

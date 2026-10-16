@@ -1,0 +1,101 @@
+overview: >-
+  A preference pipeline that teaches a small tutoring model to give hints instead of answers. Student-style prompts
+  are built from GSM8K and MATH problems, the base model writes two replies to each, and a rubric judge (audited by
+  a human on a sample) marks which one hints better without leaking the answer. DPO (direct preference
+  optimisation, training on chosen-versus-rejected pairs without a separate reward model) then trains adapters on
+  one 24 GB GPU, and evaluations check that leaks halve while maths skill stays within 2 points.
+learn:
+  - name: Preference data
+    ref: mlabonne-llm-course
+  - name: Direct preference optimisation
+    ref: hf-llm-course
+  - name: LLM-as-judge rubrics
+  - name: Capability regression tests
+  - name: Over-refusal
+stats:
+  - value: ≥ 50%
+    label: fewer answer leaks
+  - value: < 2 pts
+    label: GSM8K-style regression
+  - value: < 6 h
+    label: training on 24 GB
+components:
+  - id: prompts
+    name: Prompt generator
+    role: Turns maths problems into student messages like "I'm stuck on step 2".
+    tech: Python · templates
+    talksTo: [pairs]
+    kind: core
+  - id: pairs
+    name: Pair generator
+    role: Samples two replies per prompt from the base model at different temperatures and system prompts.
+    tech: vLLM
+    talksTo: [judge]
+    kind: core
+  - id: judge
+    name: Judge
+    role: Scores each reply on leak, correctness and helpfulness and picks chosen and rejected.
+    tech: LLM API · rubric
+    talksTo: [trainer]
+    kind: core
+  - id: audit
+    name: Human audit
+    role: Relabels 200 random pairs to measure agreement with the judge.
+    tech: Spreadsheet
+    talksTo: [judge]
+    kind: offline
+  - id: trainer
+    name: DPO trainer
+    role: Trains LoRA adapters with the DPO loss against a frozen reference copy.
+    tech: TRL · PEFT
+    talksTo: [evals]
+    kind: core
+  - id: evals
+    name: Evaluators
+    role: Measure leak rate, helpfulness, over-refusal and GSM8K and MMLU scores against the base model.
+    tech: Python · lm-eval
+    talksTo: []
+    kind: core
+flow:
+  - component: prompts
+    text: wraps a GSM8K problem as a student message, keeping the true final answer aside for leak checks.
+  - component: pairs
+    text: samples two replies, one nudged toward hinting and one plain, so pairs differ in behaviour, not just wording.
+  - component: judge
+    text: >-
+      flags a **leak** when the reply states the final answer (also checked by matching the number), rates
+      helpfulness 1–5, and keeps the pair only if the scores differ clearly.
+  - component: trainer
+    text: trains with `beta = 0.1` on about 5,000 pairs for 2 epochs, logging the reward margin between chosen and rejected.
+  - component: evals
+    text: >-
+      runs 500 held-out prompts for leak rate and helpfulness, a set of plain "please just hint" questions for
+      **over-refusal**, and GSM8K and MMLU subsets for regression.
+interface:
+  lang: json
+  code: |
+    { "prompt": "I'm stuck: a train goes 60 km
+        in 45 min. What is its speed?",
+      "chosen": "Speed is distance over time.
+        What is 45 minutes in hours?",
+      "rejected": "60 / 0.75 = 80 km/h.",
+      "judge": { "chosen_leak": false,
+                 "rejected_leak": true,
+                 "helpfulness": [4, 2] } }
+decisions:
+  - choice: DPO
+    instead: RLHF with a reward model and PPO
+    why: >-
+      PPO needs a reward model, a value model and the policy in memory at once, which is hard on one 24 GB card. DPO
+      learns from the pairs directly and trains in a few hours.
+  - choice: Judge with a human audit
+    instead: Label all pairs by hand
+    why: >-
+      Thousands of pairs are needed and a person can label a few hundred. The judge labels all; 200 human labels
+      measure its noise, and pairs with close scores are dropped.
+  - choice: Track over-refusal and regression
+    instead: Measure only the leak rate
+    why: A model that refuses to help never leaks, so leaks alone would reward the wrong behaviour.
+watchOut: >-
+  Judge noise and an eager DPO run can teach the model to refuse or be vague rather than hint well. Drop close-call
+  pairs, keep `beta` modest, and read 50 outputs on easy questions where a hint is clearly wanted.

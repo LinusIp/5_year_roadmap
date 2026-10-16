@@ -1,0 +1,48 @@
+overview: >-
+  LU with partial pivoting, Householder QR and Cholesky written from scratch in NumPy, used to solve Hilbert systems
+  of growing size, with relative error plotted against the condition number (how much the matrix amplifies input
+  errors).
+learn:
+  - name: LU with pivoting
+    ref: mit-18-06
+  - name: Householder QR
+  - name: Cholesky factorisation
+  - name: Condition numbers
+    ref: strang-ila-book
+components:
+  - id: factor
+    name: Factorizations
+    role: lu, qr and cholesky functions returning their factors.
+    tech: Python · NumPy
+    talksTo: [solve]
+    kind: core
+  - id: solve
+    name: Solvers
+    role: Forward and back substitution using the factors.
+    tech: NumPy
+    talksTo: [study]
+    kind: core
+  - id: study
+    name: Conditioning study
+    role: Builds Hilbert matrices with known solutions and records errors and residuals.
+    tech: NumPy · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: factor
+    text: factor `A`, picking the largest pivot in LU and choosing the Householder sign that avoids cancellation.
+  - component: solve
+    text: solve `Ax = b` by substitution and compare residuals with `numpy.linalg.solve` to 1e-8.
+  - component: study
+    text: builds Hilbert matrices for n = 2 to 14 with `b = A @ ones`, so the true answer is known.
+  - component: study
+    text: plots relative error against `np.linalg.cond(A)` on log axes for all three methods.
+decisions:
+  - choice: Hilbert matrices as the test set
+    instead: Random matrices
+    why: >-
+      Random matrices are usually well conditioned, so errors stay tiny. Hilbert condition numbers grow quickly with
+      n, which makes the error trend visible within 14 sizes.
+watchOut: >-
+  Cholesky only works on symmetric positive definite matrices and will take a square root of a negative number
+  otherwise. Check the pivot and raise a clear error.

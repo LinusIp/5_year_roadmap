@@ -1,0 +1,92 @@
+overview: >-
+  One identity provider becomes the place where Axiom Studio's 120 people and 12 services get their access. People
+  sign in with SSO and MFA, and their groups map to roles in three internal apps; services get a SPIFFE identity, a
+  standard name such as spiffe://axiom/billing proved by a signed token that lives at most 15 minutes. Every app
+  checks tokens in the same middleware against the issuer's rotating keys, so removing a person or a service from the
+  directory cuts all access within 5 minutes.
+learn:
+  - name: OpenID Connect
+  - name: JWT validation
+  - name: SPIFFE workload identity
+  - name: Role-based access
+  - name: Key rotation
+  - name: Access reviews
+stats:
+  - value: < 5 min
+    label: offboarding revokes all access
+  - value: < 3 ms
+    label: p99 token check
+  - value: 15 min
+    label: max token lifetime
+components:
+  - id: directory
+    name: Directory
+    role: The list of 120 users, 15 groups and 12 services, and the source of offboarding events.
+    tech: HR export · LDAP
+    talksTo: [idp, offboard]
+    kind: external
+  - id: idp
+    name: Identity provider
+    role: Signs people in with MFA and issues OIDC tokens carrying their group claims.
+    tech: Keycloak
+    talksTo: [middleware]
+    kind: core
+  - id: spire
+    name: Workload issuer
+    role: Checks a workload's pod identity and issues a 15-minute JWT naming its SPIFFE ID.
+    tech: SPIRE
+    talksTo: [middleware]
+    kind: core
+  - id: middleware
+    name: Token middleware
+    role: Verifies signature, expiry and audience against cached keys and maps groups or SPIFFE IDs to roles.
+    tech: Go middleware · JWKS cache
+    talksTo: [apps]
+    kind: core
+  - id: apps
+    name: Internal apps
+    role: Three internal apps and 12 services that trust only the middleware's decision.
+    tech: Go or Python
+    talksTo: []
+    kind: core
+  - id: offboard
+    name: Offboarding job
+    role: On a leaver event disables the user, ends their sessions and removes any workload entries they owned.
+    tech: Python · Keycloak admin API
+    talksTo: [idp]
+    kind: offline
+  - id: review
+    name: Access review
+    role: Monthly report of who and what can reach each app, from group and role data.
+    tech: Python · CSV
+    talksTo: []
+    kind: offline
+flow:
+  - component: spire
+    text: attests the `billing` pod by its service account and namespace, then issues a JWT with `sub=spiffe://axiom/billing` and `exp` 15 minutes ahead.
+  - component: middleware
+    text: in the `invoices` service checks the signature against cached keys, `exp` with 30 s of clock skew allowed, and `aud=invoices`.
+  - component: middleware
+    text: maps the SPIFFE ID to the `invoices:read` role; a person's token is mapped the same way from their `groups` claim.
+  - component: apps
+    text: serve the request; the whole check costs under **3 ms** p99 because keys are cached, not fetched per call.
+  - component: idp
+    text: on an offboarding event disables the user and revokes their sessions; their tokens stop being renewed, so access ends in under 5 minutes.
+interface:
+  lang: json
+  code: |
+    {
+      "iss": "spire.axiom.internal",
+      "sub": "spiffe://axiom/billing",
+      "aud": ["invoices"],
+      "iat": 1760605200,
+      "exp": 1760606100
+    }
+decisions:
+  - choice: 15-minute tokens, not revocation lists
+    instead: Long-lived tokens checked against a revocation list
+    why: Short lifetimes make offboarding automatic within one token life, and the middleware never has to call home. That is how the 5-minute target holds without slowing each request.
+  - choice: SPIFFE identities for services
+    instead: An API key per service pair
+    why: 12 services would need dozens of static keys to rotate. One issuer that attests pods gives every service an identity without any stored secret.
+watchOut: When the provider rotates its signing key, middleware that cached only the old key rejects every token at once. Publish the new key before signing with it and refresh the key cache on an unknown key ID.

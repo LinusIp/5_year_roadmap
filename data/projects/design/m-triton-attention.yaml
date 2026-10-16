@@ -1,0 +1,128 @@
+overview: >-
+  A fused attention forward kernel in Triton that never writes the N×N score matrix to GPU memory. Each program owns
+  one block of queries for one batch-head pair, keeps it in fast on-chip SRAM, and loops over blocks of keys and values.
+  Online softmax (a running maximum and sum, so softmax can be computed one block at a time) lets it rescale its
+  output as it goes. The kernel is checked against PyTorch and benchmarked against FlashAttention-2 and naive PyTorch,
+  with memory traffic worked out by hand.
+learn:
+  - name: Triton programs
+    ref: triton-tutorials
+  - name: Tiling and SRAM
+    ref: pmpp-book
+  - name: Online softmax
+    ref: gpu-mode-lectures
+  - name: Roofline and intensity
+    ref: horace-he-brrr
+  - name: Autotuning block sizes
+    ref: triton-tutorials
+stats:
+  - value: ≥ 60 %
+    label: of FlashAttention-2 TFLOP/s
+  - value: ≤ 2e-2
+    label: max error in FP16, 100 shapes
+  - value: 512–16k
+    label: sequence lengths benchmarked
+components:
+  - id: wrapper
+    name: Launch wrapper
+    role: Picks autotuned block sizes for the shape and launches one program per query block and batch-head pair.
+    tech: Python · triton.autotune
+    talksTo: [qload]
+    kind: core
+  - id: qload
+    name: Q tile load
+    role: Loads the program's Q block into SRAM and sets up float32 running state.
+    tech: Triton
+    talksTo: [kvloop]
+    kind: core
+  - id: kvloop
+    name: KV block loop
+    role: Computes scaled scores, masks, updates the running max and sum, and adds P·V.
+    tech: Triton · tl.dot
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Output store
+    role: Divides by the running sum and writes O and the log-sum-exp to HBM.
+    tech: Triton
+    talksTo: []
+    kind: core
+  - id: tests
+    name: Correctness suite
+    role: Compares against PyTorch's math backend over 100 or more random shapes.
+    tech: pytest · PyTorch SDPA
+    talksTo: []
+    kind: offline
+  - id: baselines
+    name: Baselines
+    role: FlashAttention-2 and a naive PyTorch version that materialises the score matrix.
+    tech: flash-attn 2 · PyTorch
+    talksTo: [bench]
+    kind: external
+  - id: bench
+    name: Benchmark
+    role: Measures time, TFLOP/s and peak memory per length and head size, with HBM bytes checked in Nsight Compute.
+    tech: triton.testing · Nsight Compute
+    talksTo: []
+    kind: offline
+flow:
+  - component: wrapper
+    text: >-
+      looks up the autotuned `BM` and `BN` for this `(N, D)` and launches a grid of `cdiv(N, BM) × B·H` programs, after a
+      warm-up call so compilation is not timed.
+  - component: qload
+    text: loads its `BM × D` block of Q once and sets `m = -inf`, `l = 0` and `acc = 0`, all in **float32**.
+  - component: kvloop
+    text: >-
+      loads each K and V block, computes `S = QKᵀ·scale` and applies the causal mask; causal programs **skip** blocks
+      wholly above the diagonal.
+  - component: kvloop
+    text: >-
+      updates the running max, rescales `acc` and `l` by `α = exp(m_old − m_new)`, then adds `P·V`; the order matters
+      once there are many blocks.
+  - component: store
+    text: writes `O = acc / l` and the log-sum-exp a backward pass would need, the only HBM writes of the kernel.
+  - component: tests
+    text: >-
+      check the output within `2e-2` in FP16 and `3e-2` in BF16, including lengths that are not multiples of the block
+      size and fully masked rows.
+  - component: bench
+    text: >-
+      compares the kernel with both baselines at head dims 64 and 128, causal and not, and records where naive
+      attention runs out of memory.
+interface:
+  lang: python
+  code: |
+    @triton.jit
+    def attn_fwd(Q, K, V, O, LSE, scale, N,
+                 D: tl.constexpr, CAUSAL: tl.constexpr,
+                 BM: tl.constexpr, BN: tl.constexpr):
+        # q: [BM, D] in SRAM; m, l, acc in float32
+        for start in range(0, hi, BN):
+            s = tl.dot(q, tl.trans(k)) * scale
+            m_new = tl.maximum(m, tl.max(s, 1))
+            p = tl.exp(s - m_new[:, None])
+            a = tl.exp(m - m_new)
+            acc = acc * a[:, None] + tl.dot(p, v)
+            l = l * a + tl.sum(p, 1)
+            m = m_new
+        tl.store(o_ptrs, acc / l[:, None])
+decisions:
+  - choice: Fused kernel with online softmax
+    instead: Materialise QKᵀ, softmax, then multiply by V
+    why: >-
+      At 16k tokens the score matrix has about 268 million entries per head, which is where naive attention runs out
+      of memory; fused attention reads Q, K and V and writes O, so its memory grows linearly with length.
+  - choice: Float32 running state
+    instead: Accumulating in FP16
+    why: >-
+      Sums over thousands of keys lose precision in FP16 and break the 2e-2 tolerance. Inputs stay FP16 or BF16, so
+      tensor cores still do the matmuls.
+  - choice: Autotune keyed on length and head dim
+    instead: One fixed block size
+    why: >-
+      The best tiles differ between head dims 64 and 128 and short and long sequences. Keying the cache on N and D
+      stops a tuning result from one shape being reused for another.
+watchOut: >-
+  Online-softmax rescaling in the wrong order is correct for one KV block and wrong for many. Test lengths that span
+  many blocks, not only short ones that fit in a single block.

@@ -1,0 +1,52 @@
+overview: >-
+  Two release strategies on a kind cluster: blue-green switches all traffic from v1 to v2 at once, while a canary
+  shifts traffic in weighted steps and an analysis of the Prometheus error rate aborts and rolls back a faulty v2
+  within 2 minutes.
+learn:
+  - name: Blue-green deploys
+  - name: Canary analysis
+    ref: google-sre-book
+  - name: Traffic weighting
+components:
+  - id: rollout
+    name: Rollout controller
+    role: Owns the v1 and v2 ReplicaSets and the traffic weights at each step.
+    tech: Argo Rollouts
+    talksTo: [pods]
+    kind: core
+  - id: pods
+    name: v1 and v2 pods
+    role: Serve requests and export request and error counters.
+    tech: Kubernetes
+    talksTo: [prometheus]
+    kind: core
+  - id: prometheus
+    name: Prometheus
+    role: Stores error and request rates per version.
+    tech: Prometheus
+    talksTo: [analysis]
+    kind: core
+  - id: analysis
+    name: Analysis
+    role: Queries the v2 error rate after each step and passes or fails it.
+    tech: AnalysisTemplate
+    talksTo: [rollout]
+    kind: core
+flow:
+  - component: rollout
+    text: sends 10 percent of traffic to v2, then 25 and 50, pausing 30 s at each step.
+  - component: pods
+    text: serve real load from a k6 script so each step has enough requests to judge.
+  - component: prometheus
+    text: computes the v2 error ratio over the last minute.
+  - component: analysis
+    text: fails when it passes **2 percent**; the controller sets v2 weight to 0, closing the control loop well inside 2 minutes.
+decisions:
+  - choice: Automated canary analysis
+    instead: A person watching dashboards
+    why: >-
+      A query decides in seconds and the same way every time, which is what makes a 2-minute rollback possible.
+      Keep a manual pause before 100 percent for risky changes.
+watchOut: >-
+  Judging a canary on a handful of requests is noise. Set a minimum request count per step, or the analysis passes
+  a broken v2 by luck.

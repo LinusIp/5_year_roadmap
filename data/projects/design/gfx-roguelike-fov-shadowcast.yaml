@@ -1,0 +1,68 @@
+overview: >-
+  Field of view on a tile map with symmetric recursive shadowcasting: the area around the player is split into 8
+  octants (45-degree wedges), each scanned row by row while walls narrow the visible range of slopes. Seen tiles are
+  remembered for fog of war, and a test over 1,000 random pairs checks that A sees B exactly when B sees A.
+learn:
+  - name: Recursive shadowcasting
+  - name: Slopes as fractions
+  - name: Symmetric FOV
+  - name: Fog of war
+components:
+  - id: map
+    name: Tile map
+    role: Answers whether a tile blocks light and maps octant coordinates to map coordinates.
+    tech: Python / C++
+    talksTo: [fov]
+    kind: core
+  - id: fov
+    name: Shadowcaster
+    role: Scans the 8 octants and marks every visible tile.
+    tech: Python / C++
+    talksTo: [memory, test]
+    kind: core
+  - id: memory
+    name: Explored memory
+    role: Remembers tiles seen before and draws them dimmed.
+    tech: Bitset
+    talksTo: []
+    kind: core
+  - id: test
+    name: Symmetry test
+    role: Checks random pairs both ways and compares coverage with a raycast FOV.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: map
+    text: provides `blocks_light(x, y)`, and turns octant coordinates `(depth, col)` into map tiles for each of the 8 wedges.
+  - component: fov
+    text: scans rows outward with a visible range `[start, end]` kept as exact fractions; a wall splits the range and the part above it **recurses** with a narrower end slope.
+  - component: memory
+    text: marks visible tiles explored, so they stay on screen, dimmed, once out of view.
+  - component: test
+    text: counts pairs on 1,000 random maps where `sees(a, b) != sees(b, a)`; done is zero, which works because a floor tile is lit only if its **centre** is in range.
+interface:
+  lang: python
+  code: |
+    from fractions import Fraction
+
+    def compute_fov(origin: tuple[int, int],
+                    blocks_light, mark_visible) -> None:
+        """Symmetric shadowcasting over 8 octants."""
+
+    def scan(row: Row, octant: Octant) -> None:
+        """Row holds depth, start and end slopes.
+        Visit tiles whose centre slope lies in range;
+        recurse past walls with a narrower range."""
+
+    def slope(depth: int, col: int) -> Fraction:
+        return Fraction(2 * col - 1, 2 * depth)
+decisions:
+  - choice: Exact fractions for slopes
+    instead: Float slopes
+    why: >-
+      Float rounding at tile corners makes a tile visible from one side and not the other, which is exactly what the
+      symmetry test catches. A radius of 10 to 20 tiles is cheap even with `Fraction`; in C++ compare by cross-multiplying integers.
+watchOut: >-
+  Letting light slip between two walls that touch only at a corner lets the player see through solid diagonals. Pick
+  a rule for diagonal gaps and test it on a checkerboard of walls.

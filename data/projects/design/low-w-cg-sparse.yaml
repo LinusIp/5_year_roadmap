@@ -1,0 +1,82 @@
+overview: >-
+  A solver for the 2D Poisson equation on a 512x512 grid, about 262k unknowns: the 5-point stencil is stored in
+  compressed sparse row (CSR) form, three arrays that keep only the non-zeros, and conjugate gradient solves it with
+  nothing but matrix-vector and dot products, helped by Jacobi and incomplete Cholesky preconditioners. It reports
+  iterations and seconds per preconditioner until the residual falls below 1e-8.
+learn:
+  - name: CSR storage
+  - name: Conjugate gradient
+    ref: mit-18-085
+  - name: Preconditioning
+    ref: mit-18-085
+  - name: Poisson stencils
+components:
+  - id: assemble
+    name: Matrix builder
+    role: Writes the 5-point Poisson matrix into CSR arrays.
+    tech: C++20
+    talksTo: [cg]
+    kind: core
+  - id: cg
+    name: CG solver
+    role: Runs the conjugate gradient iteration and checks the stopping test.
+    tech: C++20
+    talksTo: [spmv, precond]
+    kind: core
+  - id: spmv
+    name: SpMV
+    role: Multiplies the CSR matrix by a vector, row by row.
+    tech: C++20
+    talksTo: []
+    kind: core
+  - id: precond
+    name: Preconditioner
+    role: Applies an approximate inverse of A, Jacobi or incomplete Cholesky.
+    tech: C++20
+    talksTo: []
+    kind: core
+flow:
+  - component: assemble
+    text: >-
+      numbers grid point `(i, j)` as `i * 512 + j`, writes 4 on the diagonal and -1 for each neighbour, row by row
+      into `row_ptr`, `col` and `val`.
+  - component: spmv
+    text: >-
+      computes `A·p` row by row from the CSR arrays; starting from `x = 0` and `r = b`, CG needs this **one**
+      product per iteration, plus two dot products and three vector updates.
+  - component: precond
+    text: >-
+      applies `z = M⁻¹r`, where Jacobi divides by the diagonal and incomplete Cholesky does a forward and a backward
+      triangular solve with A's sparsity.
+  - component: cg
+    text: >-
+      stops when `‖r‖ / ‖b‖ < 1e-8` and logs iterations and seconds; grids of 64, 128, 256 and 512 show how
+      iterations grow with size.
+interface:
+  lang: cpp
+  code: |
+    struct Csr {
+      int n;
+      std::vector<int> row_ptr;  // n + 1 entries
+      std::vector<int> col;      // nnz entries
+      std::vector<double> val;
+    };
+
+    void spmv(const Csr& A, const double* x, double* y) {
+      const auto& rp = A.row_ptr;
+      for (int i = 0; i < A.n; ++i) {
+        double s = 0;
+        for (int k = rp[i]; k < rp[i + 1]; ++k)
+          s += A.val[k] * x[A.col[k]];
+        y[i] = s;
+      }
+    }
+decisions:
+  - choice: CSR, not a dense matrix
+    instead: Dense storage
+    why: >-
+      262k unknowns as a dense matrix is about 550 GB of doubles, while CSR stores about 1.3M non-zeros in roughly
+      16 MB. Revisit only if you go matrix-free and apply the stencil directly.
+watchOut: >-
+  In floating point the CG residuals slowly lose orthogonality, so the updated `r` can drift from the true
+  `b - A·x`. Recompute the true residual every 50 iterations, and at the end before claiming 1e-8.

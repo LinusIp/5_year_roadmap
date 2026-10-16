@@ -1,0 +1,72 @@
+overview: >-
+  A readelf-style tool in C that maps an ELF64 file, checks its magic, class and byte order, walks the section
+  headers and program headers (segments, the parts the loader maps into memory), and prints the symbol table with
+  names looked up in the string tables. Its `-h`, `-S` and `-s` output must match readelf on 5 binaries.
+learn:
+  - name: ELF file format
+    ref: cmu-15-213
+  - name: Sections and segments
+  - name: String tables
+  - name: Endianness
+components:
+  - id: map
+    name: File map
+    role: Maps the file read-only and bounds-checks every offset against its size.
+    tech: C · mmap
+    talksTo: [header]
+    kind: core
+  - id: header
+    name: ELF header
+    role: Validates the identification bytes and finds the section and program header tables.
+    tech: elf.h
+    talksTo: [sections]
+    kind: core
+  - id: sections
+    name: Section walker
+    role: Lists section and program headers with names from the section-name string table.
+    tech: elf.h
+    talksTo: [symbols]
+    kind: core
+  - id: symbols
+    name: Symbol reader
+    role: Prints each symbol's value, size, type, binding and name.
+    tech: elf.h
+    talksTo: []
+    kind: core
+flow:
+  - component: map
+    text: opens the file and `mmap`s it, so every table is a base pointer plus a checked offset.
+  - component: header
+    text: >-
+      checks the magic `7f 45 4c 46`, requires `ELFCLASS64`, notes `EI_DATA` for byte order, and reads `e_shoff`,
+      `e_shnum` and `e_shstrndx`.
+  - component: sections
+    text: >-
+      walks `e_shnum` section headers, naming each from the string table at index `e_shstrndx`, then the `e_phnum`
+      program headers.
+  - component: symbols
+    text: >-
+      reads `.symtab` as an array of `Elf64_Sym`, finds names in the string table its `sh_link` points to, and a
+      script diffs the output with `readelf -s`.
+interface:
+  lang: c
+  code: |
+    typedef struct {
+      uint32_t st_name;  /* offset into .strtab */
+      uint8_t  st_info;  /* type low 4, bind high 4 */
+      uint8_t  st_other;
+      uint16_t st_shndx; /* section index */
+      uint64_t st_value;
+      uint64_t st_size;
+    } Elf64_Sym;
+
+    const char *name = strtab + sym->st_name;
+decisions:
+  - choice: mmap the whole file
+    instead: Reading each header into a buffer with fread
+    why: >-
+      Test binaries of a few MB fit easily, and ELF offsets are file offsets, so one mapping lets you reach every
+      table with pointer arithmetic. Bounds-check each offset, since a truncated file would otherwise crash the tool.
+watchOut: >-
+  There are several string tables: section names come from the one at `e_shstrndx`, symbol names from the one the
+  symbol section's `sh_link` names. Mixing them up prints plausible but wrong names.

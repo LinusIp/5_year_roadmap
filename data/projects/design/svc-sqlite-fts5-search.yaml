@@ -1,0 +1,54 @@
+overview: >-
+  A small search service that indexes a text corpus into an SQLite FTS5 virtual table, ranks matches with bm25 and
+  returns highlighted snippets, with triggers keeping the index in step with the source table.
+learn:
+  - name: Full-text indexes
+  - name: BM25 ranking
+  - name: Prefix queries
+  - name: Sync triggers
+components:
+  - id: api
+    name: Search API
+    role: Takes a query, runs it against FTS5 and returns ranked snippets with timings.
+    tech: Python
+    talksTo: [fts]
+    kind: core
+  - id: docs
+    name: Documents table
+    role: The source of truth for title and body.
+    tech: SQLite
+    talksTo: [fts]
+    kind: core
+  - id: fts
+    name: FTS5 index
+    role: An external-content virtual table over the documents, updated by insert, update and delete triggers.
+    tech: SQLite FTS5
+    talksTo: []
+    kind: core
+flow:
+  - component: docs
+    text: gets a new row, and an `AFTER INSERT` trigger writes the same text into the FTS5 table.
+  - component: api
+    text: receives `q=postgr*` and builds `MATCH 'postgr*'`, a prefix query.
+  - component: fts
+    text: returns the top 10 by `bm25(docs_fts)` with `snippet()` marking the matched words.
+  - component: api
+    text: returns results and the query time, which must stay under 20 ms at 100k documents.
+interface:
+  lang: sql
+  code: |
+    SELECT rowid, title,
+      snippet(docs_fts, 1, '<b>', '</b>', '…', 12)
+    FROM docs_fts
+    WHERE docs_fts MATCH 'postgr*'
+    ORDER BY bm25(docs_fts)
+    LIMIT 10;
+decisions:
+  - choice: FTS5 inside SQLite
+    instead: Elasticsearch or OpenSearch
+    why: >-
+      100k documents fit in one file and the 20 ms target holds without running a separate server. Revisit for
+      millions of documents, many writers or fuzzy matching.
+watchOut: >-
+  An external-content index drifts from its table if any write path skips the triggers. Test update and delete as
+  well as insert, and keep a `rebuild` command for repairs.

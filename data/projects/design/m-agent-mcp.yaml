@@ -1,0 +1,134 @@
+overview: >-
+  A hand-written agent loop, with no framework, that does one real task for you with three tools, one of them served
+  by your own MCP server (MCP, the Model Context Protocol, is a standard way to offer tools to any model). Each
+  turn the model either answers or asks for a tool; a policy layer checks the call's permission and wraps what comes
+  back as data, not instructions. Every model and tool call is traced with tokens, latency and cost, and a set of 25
+  or more eval tasks scores each version.
+learn:
+  - name: Agent loop
+    ref: hf-agents-course
+  - name: Tool definitions
+    ref: berkeley-llm-agents
+  - name: MCP servers
+    ref: hf-mcp-course
+  - name: Tracing spans
+    ref: opentelemetry-docs
+  - name: Agent evals
+  - name: Prompt injection
+stats:
+  - value: ≥ 70 %
+    label: of the eval tasks passed
+  - value: 25+
+    label: eval tasks, scored every iteration
+  - value: "3"
+    label: tools, one over your MCP server
+components:
+  - id: user
+    name: User
+    role: Gives the task, such as planning a study week, and confirms writes.
+    tech: CLI
+    talksTo: [loop]
+    kind: external
+  - id: loop
+    name: Agent loop
+    role: Holds the conversation, enforces step and token budgets and dispatches tool calls.
+    tech: Python 3.12
+    talksTo: [llm, policy, traces]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Returns an answer or a tool call against the tool schemas it is given.
+    tech: Anthropic or OpenAI SDK
+    talksTo: []
+    kind: external
+  - id: policy
+    name: Policy layer
+    role: Checks each call against its tool's permission and marks returned text as data.
+    tech: Python
+    talksTo: [local, mcp]
+    kind: core
+  - id: local
+    name: Local tools
+    role: Web search and a file or calendar writer, called in-process.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: mcp
+    name: Notes MCP server
+    role: Serves the notes search tool to the agent's MCP client over stdio.
+    tech: MCP Python SDK
+    talksTo: []
+    kind: core
+  - id: traces
+    name: Traces
+    role: Stores one span per model or tool call with tokens, latency and cost.
+    tech: LangFuse or OpenLLMetry
+    talksTo: []
+    kind: offline
+  - id: evals
+    name: Eval runner
+    role: Replays the task set through the loop and logs scores per commit.
+    tech: Ragas or DeepEval · pytest
+    talksTo: [loop]
+    kind: offline
+flow:
+  - component: loop
+    text: >-
+      sends the conversation and the three tool schemas to the model, counting steps and tokens against the run's
+      budget.
+  - component: llm
+    text: replies with a final answer, or with a `tool_use` block naming a tool and its JSON arguments.
+  - component: policy
+    text: >-
+      allows read tools, refuses a **write** without the user's confirmation, and passes the call on to the right
+      tool.
+  - component: local
+    text: run web search or the writer directly and return their result to the policy layer.
+  - component: mcp
+    text: >-
+      answers `search_notes` through the MCP client session; the policy layer wraps the snippets as quoted data
+      before they enter the conversation, and the **loop** repeats.
+  - component: traces
+    text: >-
+      record a span for each step, so one task shows every tool call with its latency and cost; the **eval runner**
+      scores the finished answers.
+interface:
+  lang: python
+  code: |
+    from mcp.server.fastmcp import FastMCP
+
+    mcp = FastMCP("notes")
+
+    @mcp.tool()
+    def search_notes(query: str,
+                     k: int = 5) -> list[dict]:
+        """Search my notes by keywords. Returns up to
+        k snippets with note id and date. Read-only."""
+        return index.search(query, k)
+
+    if __name__ == "__main__":
+        mcp.run(transport="stdio")
+decisions:
+  - choice: Your own loop over native tool calling
+    instead: An agent framework
+    why: >-
+      The point is to see every step, and budgets and permissions are a few lines in your own loop. The done-when
+      rules out a framework.
+  - choice: Read-only by default, writes confirmed
+    instead: Every tool allowed once it is registered
+    why: >-
+      A planted instruction in a note could otherwise make the agent write to your calendar. One test shows a write
+      refused without permission.
+  - choice: MCP over stdio
+    instead: A remote MCP server over streamable HTTP
+    why: >-
+      A local process needs no auth and works in the MCP Inspector at once. Remote transport is the stretch, once the
+      evals are stable.
+  - choice: Self-hosted tracing
+    instead: A hosted tracing service
+    why: >-
+      Traces contain your private notes and tool outputs. Run LangFuse locally, or keep spans in OpenTelemetry files
+      on your machine.
+watchOut: >-
+  Eval tasks that every version passes cannot show whether a change helped. Include tasks the first version fails,
+  such as ones that need two tools in sequence, so the 70 % bar means something.

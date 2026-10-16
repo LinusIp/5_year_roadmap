@@ -1,0 +1,47 @@
+overview: >-
+  Fire, smoke and spark presets from one CPU particle system: particles live in a fixed pool stored as struct-of-arrays
+  (one array per field, so the update loop streams through memory), size and colour come from curves sampled by age,
+  and each frame the live ones are uploaded and drawn as blended quads.
+learn:
+  - name: Struct-of-arrays layout
+  - name: Object pools
+  - name: Blending modes
+    ref: learnopengl
+  - name: Lifetime curves
+components:
+  - id: emitter
+    name: Emitters
+    role: Hold each preset's rate, spawn shape, speed range, lifetime and curves.
+    tech: C++ / Python
+    talksTo: [pool]
+    kind: core
+  - id: pool
+    name: Particle pool
+    role: Owns fixed arrays of position, velocity, age and life, and updates them each frame.
+    tech: C++ / NumPy
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Uploads live particles and draws them as point sprites or quads.
+    tech: OpenGL
+    talksTo: []
+    kind: core
+flow:
+  - component: emitter
+    text: spawns `rate * dt` particles from its shape (fire is 2,000 a second in an upward cone) into free pool slots, with no allocation.
+  - component: pool
+    text: integrates `vel += gravity * dt` and `pos += vel * dt`, then kills expired particles by **swapping with the last live one**, so live ones stay in `[0, alive)`.
+  - component: pool
+    text: samples size and colour at `t = age / life` from 64-entry lookup tables built from each curve.
+  - component: renderer
+    text: copies `[0, alive)` into a vertex buffer and draws with `glBlendFunc(GL_SRC_ALPHA, GL_ONE)` for fire; the target is 100k live at 60 FPS.
+decisions:
+  - choice: Additive fire and sparks, sort only smoke
+    instead: Sort every particle back to front each frame
+    why: >-
+      Additive blending gives the same result in any order, so 100k fire particles need no sort. Smoke uses normal
+      alpha and must be drawn back to front, so sort just that emitter's few thousand.
+watchOut: >-
+  Allocating per particle (new and delete, or a list that grows and shrinks) caps you far below 100k. Size the pool
+  once at start and reuse slots.

@@ -1,0 +1,123 @@
+overview: >-
+  One on-prem server that turns 300 live phone calls into running transcripts for agent-assist. Each call streams
+  8 kHz audio over a WebSocket, voice-activity detection (VAD) drops the silence on the CPU, and a scheduler packs
+  speech chunks from many calls into one batched Whisper-class decode on the 24 GB GPU. Partial text goes back within
+  1.5 s at p95, and a final transcript replaces it when the speaker pauses; no audio ever touches disk.
+learn:
+  - name: Streaming chunked ASR
+  - name: Voice-activity detection
+  - name: Micro-batching across streams
+    ref: batching-effects-gpt
+  - name: Real-time factor
+  - name: Word error rate
+    ref: slp3
+  - name: Latency metrics
+    ref: prometheus-docs
+stats:
+  - value: "300"
+    label: concurrent calls on one 24 GB GPU
+  - value: ≤ 1.5 s
+    label: p95 partial lag
+  - value: ≤ 1.5 pts
+    label: WER gap to offline
+components:
+  - id: phones
+    name: Telephony feed
+    role: Sends each call's 8 kHz audio as 20 ms frames.
+    tech: SIP media fork
+    talksTo: [gateway]
+    kind: external
+  - id: gateway
+    name: WebSocket gateway
+    role: Holds one socket per call, resamples to 16 kHz and keeps a ring buffer in memory.
+    tech: FastAPI · WebSockets
+    talksTo: [vad]
+    kind: core
+  - id: vad
+    name: VAD stage
+    role: Marks speech and silence per 30 ms window and cuts chunks at pauses.
+    tech: Silero VAD · CPU
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Chunk scheduler
+    role: Collects ready chunks from all calls every 200 ms and forms one GPU batch.
+    tech: Python · asyncio
+    talksTo: [decoder]
+    kind: core
+  - id: decoder
+    name: Batched decoder
+    role: Runs the Whisper-class model on the batch in int8 or fp16.
+    tech: faster-whisper · CTranslate2
+    talksTo: [merger]
+    kind: core
+  - id: merger
+    name: Transcript merger
+    role: Joins overlapping chunk text per call and sends partial and final results.
+    tech: Python
+    talksTo: [metrics]
+    kind: core
+  - id: metrics
+    name: Metrics exporter
+    role: Exposes live streams, batch size, GPU memory and lag per call.
+    tech: Prometheus
+    talksTo: []
+    kind: offline
+  - id: wer
+    name: WER harness
+    role: Replays telephony-degraded LibriSpeech and compares WER with the offline model.
+    tech: Python · jiwer
+    talksTo: []
+    kind: offline
+flow:
+  - component: gateway
+    text: receives 20 ms frames for call 117, upsamples 8 kHz to the model's 16 kHz, and appends them to the call's ring buffer.
+  - component: vad
+    text: >-
+      finds speech, and when a 300 ms pause or a 5 s cap is reached, cuts a chunk with 0.5 s of **overlap** from the
+      previous one so a word on the edge is not split.
+  - component: scheduler
+    text: >-
+      on the next 200 ms tick, puts call 117's chunk in a batch with up to 31 others; silence never queues, which is
+      why 300 calls need far fewer than 300 decodes a second.
+  - component: decoder
+    text: >-
+      encodes and decodes the whole batch in one GPU call; the batch must finish in well under a tick, or lag grows
+      for every call at once.
+  - component: merger
+    text: >-
+      drops the words repeated in the overlap, sends `{"type":"partial"}` to the client, and sends `final` once VAD
+      reports the end of the utterance.
+interface:
+  lang: json
+  code: |
+    // client -> server: binary frames, 8 kHz PCM16
+    // server -> client
+    { "type": "partial",
+      "call_id": "c-117",
+      "text": "Change my billing",
+      "start_ms": 41200,
+      "lag_ms": 820 }
+    { "type": "final",
+      "call_id": "c-117",
+      "text": "Change my billing address.",
+      "start_ms": 41200, "end_ms": 44350 }
+decisions:
+  - choice: Shared micro-batches, not one decoder per call
+    instead: One model worker per call
+    why: >-
+      300 workers would never fit on one 24 GB GPU, while one model shared by batches of about 32 chunks keeps memory
+      flat. Revisit only if a second GPU arrives.
+  - choice: VAD before the GPU
+    instead: Decode every second of audio
+    why: >-
+      On a call one side is usually silent most of the time, so dropping silence roughly halves GPU work. Revisit if
+      agents need non-speech events such as hold music.
+  - choice: Pause-cut chunks with overlap
+    instead: Fixed 1 s chunks
+    why: >-
+      Fixed cuts split words and raise WER; cutting at pauses plus a 0.5 s overlap keeps the gap to offline within
+      1.5 points. Revisit the 5 s cap if long monologues push lag past 1.5 s.
+watchOut: >-
+  A load test where all 300 calls start in the same second gives a misleading picture. Stagger call starts and
+  speech patterns with the arrival generator, or the batches look far fuller and steadier than real ones.

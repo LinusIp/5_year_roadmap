@@ -1,0 +1,103 @@
+overview: >-
+  A laptop app that turns an inspector's typed or transcribed notes into a structured inspection form with no network
+  at all. A small 4-bit model runs on the CPU through llama.cpp, a grammar built from the form's JSON schema stops it
+  from writing anything that is not valid JSON, and Pydantic checks the fields and asks for one repair if needed. The
+  target is a 150-word note turned into a form in a median 8 s on a 16 GB laptop, using at most 6 GB of RAM.
+learn:
+  - name: GGUF quantised models
+    ref: llama-cpp
+  - name: Grammar-constrained decoding
+    ref: llama-cpp
+  - name: Prefill versus decode speed
+    ref: kipply-inference-arithmetic
+  - name: Schema validation
+  - name: Resident memory (RSS)
+stats:
+  - value: ≤ 8 s
+    label: median per 150-word note
+  - value: ≥ 97%
+    label: valid forms on 200 notes
+  - value: ≤ 6 GB
+    label: peak RSS, no GPU
+components:
+  - id: ui
+    name: Local UI and CLI
+    role: Takes a note from the inspector and shows the filled form for review.
+    tech: FastAPI · HTML · CLI
+    talksTo: [prompt]
+    kind: core
+  - id: prompt
+    name: Prompt builder
+    role: Puts fixed instructions first, then the note, and trims notes that would overflow the context.
+    tech: Python
+    talksTo: [decoder]
+    kind: core
+  - id: loader
+    name: Model loader
+    role: Memory-maps the GGUF file once at start and keeps the fixed instruction prefix in the KV cache.
+    tech: llama.cpp bindings
+    talksTo: [decoder]
+    kind: core
+  - id: decoder
+    name: Constrained decoder
+    role: Generates tokens on the CPU, allowing only tokens the JSON grammar permits next.
+    tech: llama.cpp · GBNF grammar
+    talksTo: [validator]
+    kind: core
+  - id: validator
+    name: Validator and repair
+    role: Checks types, enums and required fields, and sends one repair prompt with the error if a check fails.
+    tech: Pydantic
+    talksTo: [ui, telemetry]
+    kind: core
+  - id: telemetry
+    name: Telemetry log
+    role: Records tokens, time per stage, peak RSS and whether a repair was needed, on local disk only.
+    tech: SQLite
+    talksTo: []
+    kind: offline
+flow:
+  - component: loader
+    text: at start-up memory-maps a 3B model in 4-bit GGUF, about 2 GB, and pre-computes the KV cache for the fixed instructions.
+  - component: ui
+    text: receives a 150-word note, about 200 tokens, from the inspector through `POST /form` or the CLI.
+  - component: prompt
+    text: appends the note after the cached instructions, so only those **200 new tokens** need prefill on the CPU.
+  - component: decoder
+    text: >-
+      writes about 120 tokens of JSON; at roughly 15–20 tokens a second on a laptop CPU this decode, not prefill, is
+      what decides the 8 s budget.
+  - component: validator
+    text: >-
+      parses the JSON into the `InspectionForm` model; if `asset_id` or a `condition` enum is wrong, it sends one
+      repair prompt quoting the error.
+  - component: ui
+    text: shows the form for the inspector to confirm, and the **telemetry log** stores timings and peak RSS.
+interface:
+  lang: python
+  code: |
+    class InspectionForm(BaseModel):
+        asset_id: str
+        site: str
+        condition: Literal["ok", "minor", "major",
+                           "unsafe"]
+        defects: list[Defect]
+        actions: list[str]
+        follow_up_days: int | None
+
+    def fill_form(note: str) -> FormResult:
+        """Returns form, valid, repaired, ms, rss_mb."""
+decisions:
+  - choice: A 3B model in 4-bit, not a 7B model
+    instead: A 7B model in 4-bit
+    why: >-
+      A 7B model decodes at roughly half the speed on a laptop CPU, which pushes a 120-token form past 8 s and peak
+      RSS close to 6 GB. Revisit if field accuracy, not speed, is the failing number.
+  - choice: Grammar plus one repair, not repair loops alone
+    instead: Free generation, then retry until it parses
+    why: >-
+      The grammar makes broken JSON impossible, so the repair is only for wrong content such as a bad enum, and the
+      97% target is met without several slow retries.
+watchOut: >-
+  Valid JSON is not a correct form. Score field-level accuracy against the 50 hand-checked notes as well as the
+  valid-schema rate, and time everything on the slowest laptop the inspectors actually carry.

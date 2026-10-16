@@ -1,0 +1,70 @@
+overview: >-
+  A game audio mixer: the game thread sends commands (play, stop, move) through a lock-free queue, the audio callback
+  mixes up to 32 voices into the output buffer every few milliseconds, and each voice is panned, attenuated by distance
+  and pitch-shifted for Doppler from the listener's position and velocity. Long music streams from disk in chunks
+  instead of loading whole.
+learn:
+  - name: Real-time audio callbacks
+  - name: Lock-free SPSC queues
+  - name: Distance attenuation
+  - name: Doppler shift
+components:
+  - id: game
+    name: Game API
+    role: Turns play, stop, move and listener calls into small commands.
+    tech: C++20
+    talksTo: [queue]
+    kind: core
+  - id: queue
+    name: Command queue
+    role: A single-producer, single-consumer ring between game and audio thread.
+    tech: std::atomic
+    talksTo: [mixer]
+    kind: core
+  - id: mixer
+    name: Mixer callback
+    role: Applies commands, spatialises each voice and sums them into the buffer.
+    tech: C++20
+    talksTo: [device]
+    kind: core
+  - id: device
+    name: Audio device
+    role: Asks for 512 frames of 48 kHz stereo at a time and plays them.
+    tech: miniaudio / OpenAL
+    talksTo: []
+    kind: external
+flow:
+  - component: game
+    text: calls `play(sound, pos)` or `set_listener(t, vel)`, which pushes a command and returns at once, never waiting for audio.
+  - component: queue
+    text: holds up to 1,024 commands; the audio thread drains it at the start of each callback without taking a lock.
+  - component: mixer
+    text: per voice computes gain `ref / max(d, ref)`, equal-power pan `(cos θ, sin θ)` and Doppler pitch `(c + v_l) / (c + v_s)`, and **fades 5 ms** on start and stop to avoid clicks.
+  - component: device
+    text: plays the mixed buffer; underruns per minute and the audio thread's CPU % are counted with 32 voices playing.
+interface:
+  lang: cpp
+  code: |
+    struct Command { enum Kind : uint8_t { Play, Stop,
+                     Move, Listener } kind;
+                     VoiceId voice; SoundId sound;
+                     Vec3 pos, vel; };
+
+    class Mixer {
+    public:
+      VoiceId play(SoundId s, Vec3 pos);  // game thread
+      void stop(VoiceId v);
+      void move(VoiceId v, Vec3 pos, Vec3 vel);
+      void set_listener(const Transform& t, Vec3 vel);
+      // audio thread only, called by the device
+      void render(float* out, uint32_t frames);
+    };
+decisions:
+  - choice: A 32-voice limit with stealing
+    instead: Play every sound that is requested
+    why: >-
+      A fixed cap bounds the callback's work, so it always finishes inside the roughly 10 ms buffer. When a 33rd sound
+      starts, the quietest voice (gain times priority) fades out to make room.
+watchOut: >-
+  Locking a mutex, allocating memory or reading a file in the callback can block past the buffer deadline and cause an
+  audible dropout. Do all of that on the game or streaming thread and pass results through lock-free queues.

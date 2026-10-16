@@ -1,0 +1,113 @@
+overview: >-
+  A keyword spotter small enough for a microcontroller-class budget. Every 20 ms the device turns the last second
+  of audio into a log-mel spectrogram (energy per frequency band over time), a tiny depthwise-separable CNN
+  classifies it as one of ten commands, unknown speech or silence, and a smoother only fires when several windows in
+  a row agree. The model is quantised to INT8 so it fits under 100 KB.
+learn:
+  - name: Log-mel features
+    ref: think-dsp
+  - name: Depthwise-separable CNNs
+    ref: mit-6-5940
+  - name: INT8 quantisation
+    ref: mit-6-5940
+  - name: Streaming inference
+  - name: False accepts per hour
+stats:
+  - value: ≥ 94%
+    label: accuracy on 10 commands
+  - value: < 1
+    label: false accept per hour
+  - value: < 100 KB
+    label: model size
+components:
+  - id: mic
+    name: Microphone
+    role: Streams 16 kHz audio from the oven's mic.
+    tech: MEMS mic
+    talksTo: [features]
+    kind: external
+  - id: features
+    name: Feature extractor
+    role: Turns each 1 s window into 49 frames of 40 log-mel values.
+    tech: TorchAudio · C port
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: DS-CNN model
+    role: Classifies the window into 12 classes.
+    tech: INT8 · TFLite Micro
+    talksTo: [smoother]
+    kind: core
+  - id: smoother
+    name: Streaming wrapper
+    role: Averages the last windows and fires once per command.
+    tech: C
+    talksTo: [oven]
+    kind: core
+  - id: oven
+    name: Oven controller
+    role: Acts on the command, such as "preheat" or "timer off".
+    tech: Firmware
+    talksTo: []
+    kind: external
+  - id: trainer
+    name: Trainer
+    role: Trains on Speech Commands with noise mixing and unknown and silence classes.
+    tech: PyTorch
+    talksTo: [quantizer]
+    kind: offline
+  - id: quantizer
+    name: Quantiser
+    role: Converts weights and activations to INT8 using calibration clips.
+    tech: TFLite or ONNX
+    talksTo: [model]
+    kind: offline
+  - id: longaudio
+    name: Long-audio evaluator
+    role: Plays hours of kitchen background audio and counts false triggers.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: features
+    text: every 20 ms hop, computes the newest log-mel frame and slides the 49×40 window by one.
+  - component: model
+    text: runs the INT8 network on the window in well under `20 ms` and outputs 12 class scores.
+  - component: smoother
+    text: averages scores over the last 5 windows and fires only above 0.8, then ignores input for 1 s, so one "preheat" fires once.
+  - component: oven
+    text: receives the command id; "unknown" and "silence" never reach it.
+  - component: longaudio
+    text: offline, streams 10 hours of TV, extractor fan and frying sounds through the same wrapper to count **false accepts per hour**.
+interface:
+  lang: c
+  code: |
+    typedef struct {
+      uint8_t label;  /* 0-9 command, 10 unknown,
+                         11 silence */
+      uint8_t score;  /* smoothed, 0-255 */
+      bool    fire;   /* true once per command */
+    } kws_result_t;
+
+    /* call once per 20 ms hop of 320 samples */
+    void kws_step(const int16_t *pcm, int n,
+                  kws_result_t *out);
+decisions:
+  - choice: Depthwise-separable CNN
+    instead: A standard CNN or an RNN
+    why: >-
+      Splitting each convolution into a per-channel and a 1×1 step cuts weights and multiply-adds several times
+      over. About 25k parameters in INT8 is roughly 25 KB, far under 100 KB.
+  - choice: Unknown and silence classes
+    instead: Only the ten commands
+    why: >-
+      Without them every sound is forced into some command. Training on other words and noise is what makes
+      fewer than 1 false accept an hour possible.
+  - choice: Post-training INT8 first
+    instead: Quantisation-aware training from the start
+    why: >-
+      Post-training quantisation takes minutes. Switch to quantisation-aware training only if accuracy drops by
+      more than a point after conversion.
+watchOut: >-
+  The false-accept rate on clean test clips says nothing about a noisy kitchen. Measure it on hours of real
+  background audio through the full streaming wrapper.

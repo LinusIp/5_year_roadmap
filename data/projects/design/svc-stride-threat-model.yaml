@@ -1,0 +1,46 @@
+overview: >-
+  A threat model of your own small app: draw a data-flow diagram with trust boundaries, walk STRIDE (Spoofing,
+  Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege) over every element,
+  rank the risks, and implement and test the top three mitigations.
+learn:
+  - name: Data-flow diagrams
+  - name: Trust boundaries
+  - name: STRIDE categories
+  - name: Risk scoring
+components:
+  - id: dfd
+    name: Data-flow diagram
+    role: Shows processes, data stores, external actors, flows and trust boundaries.
+    tech: draw.io
+    talksTo: [register]
+    kind: core
+  - id: register
+    name: Threat register
+    role: One row per threat with element, STRIDE category, likelihood, impact, mitigation and owner.
+    tech: Markdown table
+    talksTo: [fixes]
+    kind: core
+  - id: fixes
+    name: Mitigations
+    role: Code changes for the top three threats, each with a test that shows the attack failing.
+    tech: Your app · tests
+    talksTo: []
+    kind: core
+flow:
+  - component: dfd
+    text: marks every flow that crosses a boundary, such as browser to API or API to database.
+  - component: register
+    text: gets the STRIDE questions for each element, for example tampering on the upload flow.
+  - component: register
+    text: ranks threats by likelihood times impact on a 1 to 5 scale and assigns each an owner.
+  - component: fixes
+    text: implement the top three, each with a test that replays the attack and expects it to fail.
+decisions:
+  - choice: STRIDE per element
+    instead: A free-form brainstorm of attacks
+    why: >-
+      Walking six fixed questions over every element on the diagram finds threats a brainstorm skips. Revisit with
+      an attack-tree method if one asset dominates the risk.
+watchOut: >-
+  A threat with no mitigation and no owner is just a list. Every row needs a decision (fix, accept or transfer) and
+  a name next to it.

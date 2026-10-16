@@ -1,0 +1,122 @@
+overview: >-
+  A GPT typed from an empty file in PyTorch. A data script turns the corpus into token ids in two memory-mapped files
+  (arrays read straight from disk), the model stacks pre-norm transformer blocks (LayerNorm, causal self-attention,
+  residual add; LayerNorm, MLP, residual add) between an embedding and an output head that shares its weights, and a
+  training loop samples random windows and steps AdamW with warm-up and cosine decay. Checkpoints feed a sampler that
+  generates text one token at a time with temperature and top-k.
+learn:
+  - name: Causal self-attention
+    ref: karpathy-zero-to-hero
+  - name: Tokenization
+    ref: karpathy-zero-to-hero
+  - name: Pre-norm residual blocks
+    ref: stanford-cs336
+  - name: Warm-up and cosine decay
+    ref: stanford-cs336
+  - name: Temperature and top-k
+stats:
+  - value: < 1.6
+    label: val loss, Tiny Shakespeare at char level
+  - value: ≥ 30 %
+    label: below the bigram baseline's val loss
+  - value: '3'
+    label: settings in the ablation
+components:
+  - id: corpus
+    name: Corpus
+    role: The text you chose, such as Tiny Shakespeare.
+    tech: Plain text
+    talksTo: [prep]
+    kind: external
+  - id: prep
+    name: Data script
+    role: Tokenizes the corpus and writes `train.bin` and `val.bin` as uint16 arrays.
+    tech: tiktoken or characters · NumPy memmap
+    talksTo: [trainer]
+    kind: core
+  - id: trainer
+    name: Training loop
+    role: Samples windows, runs forward and backward, clips gradients, steps AdamW and estimates val loss.
+    tech: PyTorch 2.x
+    talksTo: [model, checkpoints, logger]
+    kind: core
+  - id: model
+    name: GPT model
+    role: Embeddings, N pre-norm blocks with causal attention, and a tied output head that returns logits.
+    tech: PyTorch nn.Module
+    talksTo: []
+    kind: core
+  - id: checkpoints
+    name: Checkpoints
+    role: Model and optimiser state saved every N steps.
+    tech: torch.save
+    talksTo: [sampler]
+    kind: core
+  - id: sampler
+    name: Sampler
+    role: Loads a checkpoint and generates text with temperature and top-k.
+    tech: sample.py
+    talksTo: []
+    kind: core
+  - id: logger
+    name: Run logger
+    role: Records train and val loss, tokens per second and peak memory for every run and ablation.
+    tech: Weights & Biases · TensorBoard
+    talksTo: []
+    kind: offline
+flow:
+  - component: prep
+    text: tokenizes the corpus once and splits it 90/10 into `train.bin` and `val.bin`.
+  - component: trainer
+    text: >-
+      draws a batch of random windows of `block_size` tokens; each target is the same window shifted one token to the
+      right.
+  - component: model
+    text: >-
+      embeds tokens and positions, runs the blocks with a **causal mask** so position t never sees t+1, and returns
+      logits for every position.
+  - component: trainer
+    text: >-
+      computes cross-entropy, clips the gradient norm, steps AdamW on the warm-up then cosine schedule, and every N
+      steps averages val loss over many batches under `model.eval()` and `torch.no_grad()`.
+  - component: checkpoints
+    text: save the model whenever val loss improves, so samples from early, middle and final checkpoints can be compared.
+  - component: sampler
+    text: >-
+      feeds the last `block_size` tokens back in, divides the last logits by the temperature, keeps the top k, samples
+      one token and repeats.
+interface:
+  lang: python
+  code: |
+    @torch.no_grad()
+    def generate(model, idx, max_new_tokens,
+                 temperature=1.0, top_k=None):
+        for _ in range(max_new_tokens):
+            ctx = idx[:, -model.block_size:]
+            logits = model(ctx)[:, -1, :] / temperature
+            if top_k is not None:
+                v, _ = torch.topk(logits, top_k)
+                logits[logits < v[:, [-1]]] = -torch.inf
+            probs = logits.softmax(dim=-1)
+            nxt = torch.multinomial(probs, 1)
+            idx = torch.cat([idx, nxt], dim=1)
+        return idx
+decisions:
+  - choice: Pre-norm blocks
+    instead: Post-norm as in the original transformer
+    why: >-
+      LayerNorm before each sub-layer keeps the residual path clean, so a 6-layer model trains stably without careful
+      tuning. Post-norm usually needs a longer warm-up.
+  - choice: Warm-up, then cosine decay
+    instead: One constant learning rate
+    why: >-
+      Without warm-up, training often diverges in the first hundred steps; the cosine decay lowers the final val loss
+      for the same number of tokens.
+  - choice: Ablations at equal tokens seen
+    instead: Equal step counts
+    why: >-
+      A longer context sees more tokens per step, so equal steps is not a fair comparison. Report each of the 3
+      settings at equal tokens and at equal wall-clock time.
+watchOut: >-
+  A causal mask that leaks the future gives a suspiciously low loss and garbage samples. Write a test that changes
+  token t+1 and checks the logits at position t do not move.

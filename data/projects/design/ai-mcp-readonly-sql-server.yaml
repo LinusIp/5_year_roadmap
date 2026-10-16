@@ -1,0 +1,56 @@
+overview: >-
+  An MCP server (Model Context Protocol, the standard way for an LLM client to call outside tools) that exposes a
+  database's schema as resources and one query tool, with read-only access enforced by the connection itself and a row
+  limit on every result. An LLM client answers 15 questions through it while 5 write attempts are blocked.
+learn:
+  - name: MCP resources and tools
+    ref: hf-mcp-course
+  - name: Read-only connections
+  - name: Result limits
+components:
+  - id: client
+    name: LLM client
+    role: Discovers the tools, reads the schema and decides which queries to run.
+    tech: MCP client
+    talksTo: [server]
+    kind: external
+  - id: server
+    name: MCP server
+    role: Publishes schema resources and the run_query tool, and checks each query is one SELECT.
+    tech: Python MCP SDK
+    talksTo: [db]
+    kind: core
+  - id: db
+    name: Database
+    role: Runs queries on a read-only connection or role.
+    tech: SQLite or Postgres
+    talksTo: []
+    kind: core
+flow:
+  - component: client
+    text: lists the server's resources and reads `schema://tables` to learn the columns.
+  - component: server
+    text: receives `run_query(sql)`, parses it, rejects anything but a single `SELECT`, and appends `LIMIT 200`.
+  - component: db
+    text: executes on a connection that **cannot** write, so a write that slips past parsing still fails.
+  - component: server
+    text: returns rows and a `truncated` flag; the test log records each of the 15 answers and 5 blocked writes.
+interface:
+  lang: json
+  code: |
+    {"name": "run_query",
+     "inputSchema": {
+       "type": "object",
+       "properties": {"sql": {"type": "string"}},
+       "required": ["sql"]}}
+
+    -> {"rows": [[...]], "truncated": false}
+decisions:
+  - choice: Read-only connection plus a parser check
+    instead: Keyword filtering of the SQL text
+    why: >-
+      Keyword filters miss tricks like comments, case changes or a write hidden after a semicolon. A read-only
+      connection makes writes impossible, and the parser gives a clear error message to the model.
+watchOut: >-
+  An unbounded `SELECT *` on a big table floods the model's context and stalls the client. Always cap rows and say in
+  the reply when a result was cut.

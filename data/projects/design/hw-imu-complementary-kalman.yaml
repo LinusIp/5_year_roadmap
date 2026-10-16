@@ -1,0 +1,70 @@
+overview: >-
+  Tilt from an MPU-6050 estimated three ways and compared with a protractor on a rocking rig: from the accelerometer
+  alone (noisy, and fooled by motion), by a complementary filter (trusts the integrated gyro for fast changes and the
+  accelerometer for the slow average), and by a two-state Kalman filter that also estimates the gyro bias. The target
+  is Kalman RMS error at least 3x lower than accelerometer-only.
+learn:
+  - name: Sensor fusion
+  - name: Complementary filter
+  - name: Kalman filter
+    ref: brunton-control-bootcamp
+  - name: Gyro bias
+components:
+  - id: imu
+    name: IMU
+    role: Measures angular rate and acceleration on the rocking rig.
+    tech: MPU-6050 / BNO
+    talksTo: [logger]
+    kind: external
+  - id: logger
+    name: MCU logger
+    role: Reads the IMU at a fixed rate and streams raw timestamped samples.
+    tech: C · I2C
+    talksTo: [filters]
+    kind: core
+  - id: filters
+    name: Filters
+    role: Runs accelerometer-only, complementary and Kalman on the same log.
+    tech: Python · NumPy
+    talksTo: [compare]
+    kind: core
+  - id: compare
+    name: Comparison
+    role: Scores each method against protractor angles for error and lag.
+    tech: Python · matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: logger
+    text: reads gyro and accelerometer over I2C at 200 Hz from a timer and streams raw values, so all three methods see the **same** data.
+  - component: filters
+    text: computes `θa = atan2(ay, az)` and the complementary `θ = 0.98·(θ + ω·dt) + 0.02·θa`, a crossover of about 0.25 s at 200 Hz.
+  - component: filters
+    text: runs a Kalman filter with state `[θ, b]`, predicting `θ += (ω - b)·dt` and correcting with `θa`, using noise variances measured from a still recording.
+  - component: compare
+    text: holds the rig at 0, ±15 and ±30 degree marks and rocks between them, then reports RMS error and lag per method.
+interface:
+  lang: python
+  code: |
+    class TiltKalman:
+        """state x = [angle, gyro_bias], radians"""
+        def __init__(self, q_angle=1e-3, q_bias=3e-6,
+                     r_accel=3e-2): ...
+        def predict(self, gyro_rate, dt):
+            self.x[0] += (gyro_rate - self.x[1]) * dt
+            # P = F P F^T + Q
+        def update(self, accel_angle):
+            # K = P H^T / (H P H^T + R), H = [1, 0]
+            ...
+
+    def complementary(th, rate, acc, dt, a=0.98):
+        return a * (th + rate * dt) + (1 - a) * acc
+decisions:
+  - choice: Log raw data, filter on the PC first
+    instead: Run each filter live on the MCU only
+    why: >-
+      Feeding one recording to all three methods makes the comparison fair, and retuning Q and R takes seconds instead
+      of a new rig run. Port the winning filter to C afterwards and check it matches on the same log.
+watchOut: >-
+  A gyro bias of 1 deg/s integrates to 60 degrees a minute; the complementary filter turns it into a steady offset and
+  the accelerometer alone cannot see it. Measure the bias at rest on start-up and let the Kalman filter track drift.

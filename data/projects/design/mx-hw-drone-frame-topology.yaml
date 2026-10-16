@@ -1,0 +1,91 @@
+overview: >-
+  A Python pipeline that follows one design iteration of a 5-inch drone arm from loads to a printable part. SIMP
+  topology optimisation (each mesh element gets a density between 0 and 1, and the optimiser removes material
+  where it carries little load) runs on a 2D or 3D design space under the 200 N crash load, keeping a set fraction
+  of the volume. A filter and a threshold turn the density field into a smooth solid with walls of at least 1.2 mm,
+  which is exported to CAD, checked in a separate FEA and finally printed in nylon-carbon and bend-tested.
+learn:
+  - name: Topology optimisation (SIMP)
+  - name: Density filtering
+  - name: Linear static FEA
+    ref: fish-belytschko-fem
+  - name: Print anisotropy
+  - name: Load cases from impacts
+    ref: mit-2-003
+stats:
+  - value: ≥ 40 %
+    label: lighter than the solid arm
+  - value: < 50 %
+    label: of yield at 200 N
+  - value: < 2 mm
+    label: tip deflection at 50 N
+components:
+  - id: loads
+    name: Load cases
+    role: Defines the design space, the bolt-hole supports, a 200 N crash load and a 50 N stiffness load.
+    tech: Python
+    talksTo: [simp]
+    kind: core
+  - id: simp
+    name: SIMP optimizer
+    role: Iterates FEA and density updates until compliance stops improving at the target volume.
+    tech: NumPy · SciPy sparse
+    talksTo: [filter]
+    kind: core
+  - id: filter
+    name: Filter and threshold
+    role: Smooths densities over a 1.2 mm radius and cuts them into solid or void.
+    tech: Python
+    talksTo: [cad]
+    kind: core
+  - id: cad
+    name: CAD export
+    role: Turns the thresholded shape into a smooth STL or STEP with bolt bosses restored.
+    tech: CadQuery · mesh tools
+    talksTo: [verify]
+    kind: core
+  - id: verify
+    name: Verification FEA
+    role: Re-meshes the final shape and checks stress and deflection, independent of the optimizer's mesh.
+    tech: CalculiX
+    talksTo: [print]
+    kind: core
+  - id: print
+    name: Print and bend test
+    role: Nylon-carbon print of the arm, clamped and loaded with weights and a dial gauge.
+    tech: FDM printer · dial gauge
+    talksTo: []
+    kind: external
+flow:
+  - component: loads
+    text: fixes the arm at its two frame bolts and applies the crash load at the motor mount, plus the 50 N case.
+  - component: simp
+    text: repeats up to 200 times; each pass solves the FEA, computes how much each element's density lowers compliance, and updates densities so total volume stays at, say, `vol_frac = 0.4`.
+  - component: filter
+    text: averages densities over a `1.2 mm` radius, which **removes checkerboard patterns**, then thresholds at `0.5`.
+  - component: cad
+    text: smooths the boundary, restores bolt holes and the motor mount, and exports the part.
+  - component: verify
+    text: meshes the exported part from scratch and checks peak stress under `50 %` of yield at 200 N and deflection under `2 mm` at 50 N.
+  - component: print
+    text: prints with layers along the arm's length and compares the bend test with the FEA deflection.
+interface:
+  lang: python
+  code: |
+    def simp(nelx: int, nely: int, vol_frac: float,
+             penal: float = 3.0, r_min_mm: float = 1.2,
+             max_iter: int = 200) -> np.ndarray:
+        """Element densities in [0, 1].
+
+        Stops when the largest density change
+        is below 0.01 or after max_iter.
+        Must finish in under 5 min on a laptop.
+        """
+decisions:
+  - choice: 2D SIMP on the arm's plan view first
+    instead: Full 3D optimisation from the start
+    why: The arm is mostly a plate loaded in bending, and 2D runs in seconds well within the 5-minute limit. Move to 3D if the verification FEA shows the thickness direction matters.
+  - choice: Verify on a fresh mesh
+    instead: Trust the optimizer's own stress field
+    why: The optimizer's grey, blocky mesh hides stress peaks at the edges the threshold creates. A separate mesh of the final shape gives honest numbers.
+watchOut: Printed nylon-carbon is much weaker across layers than along them, and the optimiser assumes the same strength in every direction. Print with layers along the main bending stress and derate strength across them.

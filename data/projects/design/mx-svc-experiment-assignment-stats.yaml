@@ -1,0 +1,119 @@
+overview: >-
+  An experiment service for Lumio's 30 pricing and onboarding tests that replaces hand analysis in notebooks. Users
+  are hashed into layers, so tests in the same layer never share a user, and an exposure is logged only when the
+  user actually sees the variant. A nightly job computes conversion with confidence intervals, checks the sample
+  ratio, and uses a sequential test so looking at results early does not inflate false positives.
+learn:
+  - name: Hash-based assignment
+  - name: Exposure vs assignment
+  - name: Confidence intervals
+    ref: harvard-stat-110
+  - name: Sample ratio mismatch
+  - name: Sequential testing
+  - name: A/A simulation
+    ref: blitzstein-hwang-probability
+stats:
+  - value: 5% ± 0.5
+    label: false positives, 2,000 A/A tests
+  - value: 2%
+    label: imbalance flagged by SRM
+  - value: < 5 ms
+    label: p99 assignment
+components:
+  - id: app
+    name: Lumio app
+    role: Asks for a user's variant and reports when the variant is shown and when they convert.
+    tech: Mobile · web
+    talksTo: [assigner, exposure]
+    kind: external
+  - id: assigner
+    name: Assigner
+    role: Hashes user and layer into 1,000 buckets and maps buckets to an experiment and variant.
+    tech: Python · FastAPI
+    talksTo: []
+    kind: core
+  - id: exposure
+    name: Exposure logger
+    role: Appends exposure and conversion events with user, experiment, variant and time.
+    tech: Python · DuckDB
+    talksTo: [metrics]
+    kind: core
+  - id: metrics
+    name: Metric engine
+    role: Joins first exposures with later conversions and computes rates per variant.
+    tech: DuckDB · SQL
+    talksTo: [srm, sequential]
+    kind: core
+  - id: srm
+    name: SRM detector
+    role: Chi-square test of exposed counts against the planned split.
+    tech: SciPy
+    talksTo: [report]
+    kind: core
+  - id: sequential
+    name: Sequential analysis
+    role: Computes always-valid intervals so the result can be checked daily.
+    tech: Python · NumPy
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report view
+    role: Shows effect, interval, SRM status and a ship or wait verdict per experiment.
+    tech: HTML · Jinja
+    talksTo: []
+    kind: core
+  - id: sim
+    name: Simulator
+    role: Runs A/A and known-effect tests with injected SRM and logging loss.
+    tech: Python
+    talksTo: [assigner, exposure]
+    kind: offline
+flow:
+  - component: assigner
+    text: >-
+      receives `GET /assign?user=u_77&layer=pricing`; `sha1("pricing:u_77") % 1000` is bucket 412, which belongs to
+      experiment `annual-discount`, variant `B`.
+  - component: exposure
+    text: logs an **exposure** only when the paywall with variant B is rendered, not at assignment, so users who never reach it are left out.
+  - component: metrics
+    text: joins each user's first exposure with any `subscribe` event after it and computes conversion per variant.
+  - component: srm
+    text: >-
+      compares 50,912 vs 49,088 exposed users with the planned 50/50 split; `p < 0.001` marks the test as broken
+      before anyone reads the effect.
+  - component: sequential
+    text: computes an always-valid 95 percent interval for the lift, which stays correct however often it is checked.
+  - component: report
+    text: shows "B +1.8 pp, interval 0.6 to 3.0, SRM ok" and only says **ship** when the interval excludes zero.
+interface:
+  lang: http
+  code: |
+    GET /assign?user=u_77&layer=pricing
+
+    200 OK
+    { "experiment": "annual-discount",
+      "variant": "B", "bucket": 412 }
+
+    POST /exposures
+    { "user": "u_77",
+      "experiment": "annual-discount",
+      "variant": "B",
+      "ts": "2026-10-16T08:12:00Z" }
+decisions:
+  - choice: Layers of 1,000 buckets
+    instead: Independent hashing per experiment
+    why: >-
+      Two pricing tests on the same user make each other's results meaningless. Experiments in one layer share its
+      buckets without overlap; different layers can overlap safely.
+  - choice: Sequential intervals
+    instead: Fixed-horizon t-tests
+    why: >-
+      Analysts peek daily, and a fixed-horizon test checked daily gives far more than 5 percent false positives. The
+      2,000 A/A runs show whether the method holds the rate at 5 ± 0.5.
+  - choice: Analyse exposures only
+    instead: Analyse everyone who was assigned
+    why: >-
+      Most assigned users never reach the paywall, and including them waters the effect down toward zero.
+watchOut: >-
+  An SRM usually means a logging bug, not bad luck. Block the verdict until it is explained, even if the effect looks
+  great.

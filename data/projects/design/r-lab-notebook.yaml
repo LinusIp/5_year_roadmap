@@ -1,0 +1,116 @@
+overview: >-
+  A dated notebook entry for every Block D day spent on a research card, written the same day from a fixed four-part
+  template: the plan, what ran, what broke or surprised you, and what changes next. Each entry points to the run,
+  commit or dataset it talks about, by run id or commit hash, so any result can be reconstructed months later. At
+  each quarterly review you read the quarter's entries in order and condense them into a short lessons note that
+  changes how you work.
+learn:
+  - name: Research habits
+    ref: schulman-research-guide
+  - name: Reproducible records
+    ref: wandb
+  - name: Reviewing your direction
+    ref: hamming-you-and-your-research
+  - name: Learning from your own work
+    ref: nielsen-principles
+stats:
+  - value: "0"
+    label: research days without an entry in a quarter
+  - value: 5 of 5
+    label: sampled links that resolve
+  - value: ≥ 3
+    label: concrete changes from the read-back
+components:
+  - id: template
+    name: Entry template
+    role: Gives every entry the same four parts and the linking rules.
+    tech: Markdown
+    talksTo: [entry]
+    kind: core
+  - id: tracker
+    name: Experiment tracker
+    role: Holds the runs an entry refers to by id.
+    tech: Weights & Biases
+    talksTo: [entry]
+    kind: external
+  - id: repo
+    name: Code repository
+    role: Holds the pushed commits an entry refers to by hash.
+    tech: git
+    talksTo: [entry]
+    kind: external
+  - id: entry
+    name: Daily entry
+    role: One file per research day, next to the card it belongs to.
+    tech: research/ in the data repo
+    talksTo: [checker, review]
+    kind: core
+  - id: checker
+    name: Gap checker
+    role: Lists Block D research days that have no entry.
+    tech: 30-line Python script
+    talksTo: []
+    kind: offline
+  - id: review
+    name: Quarterly read-back
+    role: Reads every entry of the quarter in order and spots recurring problems.
+    tech: Quarterly review
+    talksTo: [lessons]
+    kind: core
+  - id: lessons
+    name: Lessons note
+    role: Records lessons, open questions and changes to the template and to how you work.
+    tech: Markdown in research/
+    talksTo: [template]
+    kind: core
+flow:
+  - component: template
+    text: >-
+      is copied to a new file named by date and card at the start of the research day, and the **plan** filled in.
+  - component: entry
+    text: >-
+      gets the run ids and commit hashes as work happens, only for commits already pushed.
+  - component: entry
+    text: >-
+      is finished **the same day** with what broke or surprised you and what changes next.
+  - component: review
+    text: >-
+      reads the quarter's entries in order, checks five random links, and counts the most frequent kinds of breakage.
+  - component: lessons
+    text: >-
+      lists at least three concrete changes, some of which update the template for the next quarter, closing the loop.
+interface:
+  lang: markdown
+  code: |
+    # 2027-01-14 · q-kv-quant-long-context
+
+    ## Plan
+    - Run int4 per-channel keys at 16k and 32k.
+
+    ## Ran
+    - W&B run `kvq-0114-a` · commit `3f2c9e1`
+
+    ## Broke or surprised me
+    - Out of memory at 32k; the length check caught it.
+
+    ## Next
+    - Halve the batch at 32k and rerun that cell.
+decisions:
+  - choice: One file per day in the data repo
+    instead: One long running document
+    why: >-
+      Daily files are easy to diff and link, and the gap checker can count them against the Block D log to prove zero
+      missing days.
+  - choice: A short fixed template
+    instead: Free-form notes
+    why: >-
+      Entries that grow long stop being written by week two. Four headings take ten minutes and still answer what ran,
+      what broke and what is next.
+  - choice: Links to pushed commits and run ids
+    instead: Local paths and unpushed work
+    why: >-
+      Local paths and unpushed commits die, and the review samples five links that must all resolve. Push before you
+      write the hash down.
+watchOut: >-
+  Entries written days later from memory record what you wish had happened. Write the entry before you close the
+  laptop, even if it is three lines.

@@ -1,0 +1,121 @@
+overview: >-
+  An offline GPU box for Steelwell Parts that checks 30 parts a second on a conveyor and decides reject or pass for
+  every frame within 60 ms. Frames land in a fixed-size ring buffer, are resized and normalised on the GPU, and go
+  through a small defect classifier compiled with TensorRT in fp16 or int8. Every frame's timing and verdict is
+  logged, and a 1-hour soak test proves no frame is ever dropped.
+learn:
+  - name: Ring buffers
+  - name: Bounded queues
+  - name: TensorRT and ONNX export
+    ref: onnx-runtime-docs
+  - name: Int8 calibration
+    ref: nvidia-modelopt
+  - name: Tail percentiles (p99.9)
+  - name: Recall vs false rejects
+    ref: ml-zoomcamp
+stats:
+  - value: "0"
+    label: dropped frames in 1 h at 30 FPS
+  - value: ≤ 60 ms
+    label: p99.9 capture to decision
+  - value: ≥ 98%
+    label: recall at ≤ 2% false rejects
+components:
+  - id: camera
+    name: Camera
+    role: Delivers 30 frames a second with a sequence number and capture timestamp; simulated by replaying MVTec images.
+    tech: OpenCV · replay
+    talksTo: [ring]
+    kind: external
+  - id: ring
+    name: Ring buffer
+    role: Holds the last 8 frames in fixed slots and counts any frame overwritten before it was read.
+    tech: C++ or Python · pinned memory
+    talksTo: [preproc]
+    kind: core
+  - id: preproc
+    name: Preprocessor
+    role: Copies a frame to the GPU, crops, resizes and normalises it there.
+    tech: CUDA · OpenCV
+    talksTo: [runner]
+    kind: core
+  - id: runner
+    name: Model runner
+    role: Runs the defect classifier as a prebuilt TensorRT engine with fixed input shape.
+    tech: TensorRT · 8 GB GPU
+    talksTo: [decision]
+    kind: core
+  - id: decision
+    name: Decision logic
+    role: Turns the defect probability into reject or pass using a threshold tuned for 98% recall.
+    tech: Python
+    talksTo: [reject, logger]
+    kind: core
+  - id: reject
+    name: Reject gate
+    role: The conveyor actuator that pushes a failed part off the line.
+    tech: PLC output
+    talksTo: []
+    kind: external
+  - id: logger
+    name: Latency logger
+    role: Writes per-frame sequence, timestamps, probability and verdict for percentiles and the soak report.
+    tech: CSV · pandas
+    talksTo: []
+    kind: offline
+  - id: watchdog
+    name: Health watchdog
+    role: Watches GPU temperature and drop counts, and raises an alarm or slows the line before frames are lost.
+    tech: NVML
+    talksTo: [decision]
+    kind: offline
+flow:
+  - component: camera
+    text: emits frame `seq=41207` every 33.3 ms, stamped at capture.
+  - component: ring
+    text: >-
+      writes it into the next of 8 fixed slots; if the reader is a whole lap behind, the overwrite is **counted as a
+      drop**, never hidden in a growing queue.
+  - component: preproc
+    text: >-
+      copies the frame from pinned memory to the GPU and resizes it there, so the CPU is not the bottleneck at 30 FPS.
+  - component: runner
+    text: runs the fp16 or int8 engine in a few milliseconds, with the same input shape every time so latency stays steady.
+  - component: decision
+    text: >-
+      rejects when `p_defect ≥ threshold`, where the threshold was picked on validation data to keep recall ≥ 98% with
+      false rejects ≤ 2%.
+  - component: logger
+    text: >-
+      records capture-to-decision time; over 1 hour that is **108,000 frames**, enough to read p99.9 from real data.
+interface:
+  lang: python
+  code: |
+    @dataclass
+    class FrameResult:
+        seq: int             # camera frame number
+        t_capture_ns: int
+        t_decision_ns: int
+        p_defect: float
+        reject: bool         # p_defect >= threshold
+        dropped_before: int  # gap since last seq
+        gpu_temp_c: int
+decisions:
+  - choice: Fixed ring buffer, not an open queue
+    instead: An unbounded queue between stages
+    why: >-
+      An unbounded queue hides overload as rising latency until memory runs out. Eight fixed slots make any slowdown
+      show up at once as a counted drop, which the 1-hour soak must keep at 0.
+  - choice: Preprocessing on the GPU
+    instead: Resize and normalise with OpenCV on the CPU
+    why: >-
+      At 30 FPS a full-resolution resize on the edge box's CPU can take longer than the model itself. Moving it to
+      the GPU keeps the 33 ms frame budget for the model with room to spare.
+  - choice: Int8 only after calibration on line images
+    instead: Ship int8 calibrated on any images
+    why: >-
+      Int8 needs sample images to set its value ranges. Calibrating on images unlike the conveyor's lighting can drop
+      recall below 98%; fp16 is the fallback if int8 cannot hold it.
+watchOut: >-
+  An unbounded queue makes overload look like slightly higher latency until the box falls over. Keep every queue
+  bounded, count drops explicitly, and run the full 1-hour soak with the GPU warmed up.

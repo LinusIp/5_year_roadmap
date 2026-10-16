@@ -1,0 +1,105 @@
+overview: >-
+  One booking API for all 12 clinics, so the receptionists and the web form stop writing to separate places. The
+  availability calculator turns working hours, time off and existing bookings into free 45-minute slots. A
+  PostgreSQL exclusion constraint (a rule that refuses two rows whose time ranges overlap) on each practitioner's
+  bookings makes a double booking impossible, and the API only turns that refusal into a clear `409`.
+learn:
+  - name: Exclusion constraints
+    ref: cmu-15-445
+  - name: Range types and indexes
+    ref: cmu-15-445
+  - name: Check-then-insert races
+    ref: ddia
+  - name: Time zones and DST
+  - name: Query plans with EXPLAIN
+    ref: cmu-15-445
+stats:
+  - value: "0"
+    label: double bookings in 100 race rounds
+  - value: < 150 ms
+    label: slot search p99, 200k bookings
+  - value: 100/s
+    label: booking writes on one small VM
+components:
+  - id: client
+    name: Reception and web
+    role: Sends slot searches and booking requests from the front desk and the public form.
+    tech: Browser · desk app
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: HTTP API
+    role: Validates requests, issues confirmation codes and maps database errors to error codes.
+    tech: FastAPI
+    talksTo: [availability, store]
+    kind: core
+  - id: availability
+    name: Availability calc
+    role: Expands weekly hours in the clinic's time zone, subtracts time off and bookings, returns free slots.
+    tech: Python · zoneinfo
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Booking store
+    role: Holds clinics, practitioners and bookings; the range constraint is the single source of truth.
+    tech: PostgreSQL · tstzrange
+    talksTo: []
+    kind: core
+  - id: seed
+    name: Seed generator
+    role: Creates 12 clinics, 80 practitioners and 200k past bookings with weekday peaks.
+    tech: Python
+    talksTo: [store]
+    kind: offline
+  - id: harness
+    name: Race harness
+    role: Fires 50 clients at one slot, 100 rounds, and counts overlapping rows.
+    tech: pytest · asyncio
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: receives `GET /slots?clinic=3&service=initial&from=…&to=…` and checks the date range is at most 14 days.
+  - component: availability
+    text: expands each practitioner's weekly hours into real UTC times for those dates, so a DST change moves the hours correctly.
+  - component: store
+    text: returns bookings and time off that overlap the range, using a **GiST index** on `during` so the query stays fast at 200k rows.
+  - component: availability
+    text: subtracts them and hands back free 45-minute slots; the API returns the list with `slot_id`s.
+  - component: api
+    text: receives `POST /bookings` for one slot and inserts the row in a single statement, with no check beforehand.
+  - component: store
+    text: "accepts the insert or raises `exclusion_violation` if any booking for that practitioner overlaps; the API turns that into `409 SLOT_TAKEN`."
+interface:
+  lang: http
+  code: |
+    POST /bookings
+    { "practitioner_id": 41,
+      "service": "initial",
+      "start": "2026-11-03T09:00:00+00:00" }
+
+    201 Created
+    { "code": "NP-7KQ2", "end": "…09:45:00+00:00" }
+
+    409 Conflict
+    { "error": "SLOT_TAKEN" }
+decisions:
+  - choice: Exclusion constraint in PostgreSQL
+    instead: Check for overlaps in Python, then insert
+    why: >-
+      Two of 50 racing clients both pass the check before either inserts; only the database sees every write. App
+      locks would also need to work across the API's workers. Revisit only if bookings move to a store without
+      range constraints.
+  - choice: Store timestamps as timestamptz, hours as local time plus zone
+    instead: Naive timestamps in local time
+    why: >-
+      Working hours are "9 to 5 in this clinic", which shifts against UTC twice a year; bookings are fixed instants.
+      Keeping both forms avoids the DST off-by-one-hour bug.
+  - choice: Compute slots on read
+    instead: Precompute a slot table for every day
+    why: >-
+      With 80 practitioners and an indexed range query, on-the-fly search fits in 150 ms and nothing has to be
+      regenerated when hours change. Revisit if p99 creeps up as history grows.
+watchOut: >-
+  A check-then-insert version passes every single-user test and still double books under load. Run the 50-client
+  race harness before trusting any conflict logic.

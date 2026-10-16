@@ -1,0 +1,69 @@
+overview: >-
+  A 5 V to 12 V boost converter on a prototype board: a switch shorts the inductor to ground to store energy, then lets
+  go so the inductor's voltage adds to the input and flows through a diode, while the controller IC sets the duty cycle
+  (about 58% here, from `D = 1 - Vin/Vout`) to hold 12 V. You size the inductor and diode from ripple sums, probe the
+  switch node, and measure efficiency at 5 load points; the target is a peak above 80%.
+learn:
+  - name: Boost topology
+    ref: cu-boulder-power-electronics
+  - name: Inductor ripple current
+  - name: Efficiency measurement
+  - name: Scope probing
+components:
+  - id: source
+    name: 5 V supply
+    role: A bench supply whose current reading gives input power.
+    tech: Bench supply
+    talksTo: [conv]
+    kind: external
+  - id: conv
+    name: Boost stage
+    role: Controller IC, inductor, Schottky diode and capacitors that make 12 V.
+    tech: Boost controller IC
+    talksTo: [load]
+    kind: core
+  - id: load
+    name: Load bank
+    role: Power resistors that set 5 output currents from light to full load.
+    tech: Power resistors
+    talksTo: [meas]
+    kind: core
+  - id: meas
+    name: Measurements
+    role: Meters and scope readings turned into an efficiency curve.
+    tech: Meters · scope · Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: conv
+    text: uses `L = Vin·D / (f·ΔI)`, about 27 µH for a 500 kHz controller and 30% ripple at 0.25 A out (pick 22 to 33 µH rated above 1 A), with a 20 V, 1 A Schottky.
+  - component: load
+    text: steps through 240, 120, 80, 60 and 48 Ω, which is 0.05 to 0.25 A at 12 V and up to 3 W in the resistor.
+  - component: meas
+    text: reads input and output voltage and current at the board terminals and computes `η = Vout·Iout / (Vin·Iin)` per point.
+  - component: meas
+    text: probes the switch node and output ripple with the **ground spring** on the probe tip, then plots efficiency against load.
+interface:
+  lang: python
+  code: |
+    vin, vout, f_sw = 5.0, 12.0, 500e3
+    i_out, eff_guess = 0.25, 0.85
+
+    duty = 1 - vin / vout                    # 0.58
+    i_in = vout * i_out / vin / eff_guess    # 0.71 A
+    ripple_i = 0.3 * i_in                    # 30%
+    L = vin * duty / (f_sw * ripple_i)       # ~27 uH
+    i_peak = i_in + ripple_i / 2   # L must not saturate
+    c_out = i_out * duty / (f_sw * 0.05)     # 50 mV
+
+    def efficiency(vin, iin, vout, iout):
+        return vout * iout / (vin * iin)
+decisions:
+  - choice: Schottky diode, not a silicon rectifier
+    instead: A general-purpose silicon diode such as a 1N4001
+    why: >-
+      The diode carries all the output current. A Schottky's 0.4 V instead of 0.9 V saves about 0.13 W of the 3 W
+      output, around 4 points of efficiency, and it switches fast enough for 500 kHz where a 1N4001 cannot.
+watchOut: >-
+  A long scope ground lead picks up the switching and shows large spikes that are not really there. Use the probe's
+  ground spring right at the switch node and the converter's ground.

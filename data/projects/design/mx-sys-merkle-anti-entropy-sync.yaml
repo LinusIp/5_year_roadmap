@@ -1,0 +1,122 @@
+overview: >-
+  An anti-entropy service in Go that finds and repairs the stock counts on which Tamarind Retail's two datacenters
+  disagree. Each site keeps a Merkle tree over its keys, a tree of hashes where every parent is the hash of its
+  children, so two sites that compare roots and then only the children that differ can narrow 10 million keys down to
+  the few that diverged by exchanging a few hundred kilobytes. Differing keys are settled by comparing version vectors,
+  and repairs stream at a throttled rate so production traffic is not hurt.
+learn:
+  - name: Merkle trees
+  - name: Anti-entropy
+    ref: ddia
+  - name: Version vectors
+    ref: kleppmann-distributed-systems
+  - name: Last-writer-wins trade-offs
+    ref: ddia
+  - name: Token-bucket throttling
+stats:
+  - value: < 5 MB
+    label: to find 100 of 10M diverged keys
+  - value: 20k keys/s
+    label: throttled repair
+  - value: < 10 µs
+    label: tree update per write
+components:
+  - id: store
+    name: Versioned store
+    role: Holds each key's value with its version vector, in memory and on disk.
+    tech: Go · append-only file
+    talksTo: [tree]
+    kind: core
+  - id: tree
+    name: Merkle tree
+    role: Keeps one hash per bucket of keys and a 16-way tree of hashes above them.
+    tech: Go · SHA-256
+    talksTo: [exchange]
+    kind: core
+  - id: exchange
+    name: Exchange protocol
+    role: Compares trees with the other site level by level, then lists keys in differing buckets.
+    tech: Go · TCP
+    talksTo: [peer, resolver]
+    kind: core
+  - id: peer
+    name: Other site
+    role: The second datacenter, running the same service.
+    tech: Same service
+    talksTo: []
+    kind: external
+  - id: resolver
+    name: Resolver
+    role: Decides per differing key which version wins or how to merge.
+    tech: Version vectors
+    talksTo: [throttle]
+    kind: core
+  - id: throttle
+    name: Repair throttle
+    role: Streams repairs in batches under a keys-per-second limit.
+    tech: Token bucket
+    talksTo: [store]
+    kind: core
+  - id: injector
+    name: Divergence injector
+    role: Changes or drops chosen keys at one site to create known divergence.
+    tech: Go
+    talksTo: [store]
+    kind: offline
+flow:
+  - component: store
+    text: >-
+      applies a write to `sku:4471` with version vector `{east: 41, west: 17}` and passes the old and new entry to the
+      tree.
+  - component: tree
+    text: >-
+      finds the bucket by `hash(key) % 65536` (hashing spreads keys evenly, about 150 per bucket) and updates the
+      bucket hash by **XOR**-ing out the old entry's hash and in the new one, a few hundred nanoseconds.
+  - component: exchange
+    text: >-
+      every minute recomputes dirty parents, compares roots and descends only into children that differ; 100 diverged
+      keys cost about 56 KB of hashes plus about 370 KB of key lists for their buckets.
+  - component: resolver
+    text: >-
+      copies the version that dominates; for **concurrent** versions of a stock count it merges each site's own
+      changes instead of letting the later write erase the other's.
+  - component: throttle
+    text: >-
+      sends repairs in batches of 500 at up to 20,000 keys a second, and backs off if production write latency rises.
+interface:
+  lang: go
+  code: |
+    // level by level, starting at the root
+    type CompareReq struct {
+        Level  int
+        Nodes  []uint32   // differing at the last level
+        Hashes [][16]byte // their 16 children each
+    }
+    type CompareResp struct {
+        Differ []uint32   // children that do not match
+    }
+    // then, for each differing bucket
+    type BucketList struct {
+        Bucket  uint32
+        Keys    []uint64     // key hashes
+        VVs     []VersionVec // one per key
+    }
+decisions:
+  - choice: XOR bucket hashes, updated per write
+    instead: Rebuild the tree before each exchange
+    why: >-
+      Rebuilding means hashing 10 million keys, which stalls the service. XOR lets a write update its bucket in
+      constant time; only the dirty parents above are recomputed before an exchange.
+  - choice: Version vectors, not last-writer-wins
+    instead: Last-writer-wins by timestamp
+    why: >-
+      After an outage both sites may have sold the same item. LWW keeps one count and silently loses the other site's
+      sales; version vectors detect the conflict so the resolver can merge.
+  - choice: 65,536 buckets under a 16-way tree
+    instead: Fewer, larger buckets
+    why: >-
+      Each differing bucket ships its whole key list, so smaller buckets mean less data per difference. At 150 keys a
+      bucket, 100 diverged keys stay well under the 5 MB budget.
+watchOut: >-
+  Bucketing by key prefix, such as by store or category, puts most keys in a few buckets, and every difference then
+  ships a huge list. Bucket by a hash of the key and check the bucket size spread.

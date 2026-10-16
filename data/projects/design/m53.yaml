@@ -1,0 +1,127 @@
+overview: >-
+  A power resistor dissipating about 10 W on an extruded heat sink, whose temperature you predict twice before
+  measuring: once with a thermal-resistance network (like an electrical circuit, with temperature as voltage and
+  heat as current) and once with your FEM solver on the fin cross-section. Thermocouples read through your project 47
+  board log the warm-up in natural and fan-forced convection. The predictions are committed first, then overlaid on
+  the measurements, and the convection coefficient you assumed is compared with the one that fits.
+learn:
+  - name: Thermal resistance networks
+    ref: mit-2-006
+  - name: Convection coefficients
+    ref: mit-2-006
+  - name: Fin efficiency
+    ref: mit-2-005
+  - name: Lumped time constants
+    ref: mit-2-005
+  - name: FEM for heat conduction
+    ref: fish-belytschko-fem
+stats:
+  - value: ±20 %
+    label: steady base temperature rise against prediction
+  - value: ±25 %
+    label: time constant against prediction
+  - value: ≤ 1 °C
+    label: thermocouple agreement after calibration
+components:
+  - id: network
+    name: Thermal network
+    role: Predicts the steady temperature rise and time constant from resistances and the sink's heat capacity.
+    tech: Python · SciPy
+    talksTo: [overlay]
+    kind: core
+  - id: fem
+    name: FEM model
+    role: Predicts the steady temperature field across one fin cross-section.
+    tech: Project 50 solver, heat mode
+    talksTo: [overlay]
+    kind: core
+  - id: supply
+    name: Bench supply
+    role: Powers the heater at a measured voltage and current.
+    tech: Bench supply
+    talksTo: [rig]
+    kind: external
+  - id: rig
+    name: Heater and sink
+    role: Turns electrical power into heat that flows through paste, base and fins into the air.
+    tech: TO-220 resistor · 12 V fan
+    talksTo: [tc]
+    kind: core
+  - id: tc
+    name: Thermocouples
+    role: Read source, sink base, fin tip and ambient through cold-junction amplifiers.
+    tech: Type K · MAX31855
+    talksTo: [daq]
+    kind: core
+  - id: daq
+    name: DAQ board
+    role: Reads the amplifiers over SPI and streams readings at 1 Hz over USB.
+    tech: Project 47 board
+    talksTo: [host]
+    kind: core
+  - id: host
+    name: Host log
+    role: Records every channel with timestamps, ambient included.
+    tech: Project 47 host tool
+    talksTo: [overlay]
+    kind: core
+  - id: overlay
+    name: Overlay and fit
+    role: Plots predicted against measured curves and fits the convection coefficient.
+    tech: Python · Matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: network
+    text: >-
+      computes `ΔT = P · R` and `τ = R · C` with a textbook convection coefficient, and the result is **committed**
+      before any test.
+  - component: fem
+    text: >-
+      solves steady conduction across a fin with convection on its faces, giving base-to-tip temperature drop.
+  - component: rig
+    text: >-
+      dissipates `P = V · I`, logged from the supply, with the fan off for natural and on for forced convection.
+  - component: tc
+    text: >-
+      sit bonded to the surfaces, checked in an ice bath and at room temperature to agree within 1 °C.
+  - component: daq
+    text: >-
+      polls each MAX31855 over SPI once a second and streams the readings over USB.
+  - component: host
+    text: >-
+      logs until the curves are flat, about **five time constants**, including the ambient channel.
+  - component: overlay
+    text: >-
+      overlays prediction and measurement, and fits the `h` that best explains the data against the assumed one.
+interface:
+  lang: python
+  code: |
+    # prediction, committed before the first run
+    P = 12.0 * 0.85         # W, measured V times I
+    R_cs = 0.3              # K/W, case to sink (paste)
+    R_sa = 4.2              # K/W, sink to air, from h
+    C_sink = 900 * 0.12     # J/K, c_p times mass
+    dT_base = P * R_sa      # steady base rise, K
+    dT_case = P * (R_cs + R_sa)
+    tau = R_sa * C_sink     # s, so run for 5 tau
+    # T_base(t) = T_amb + dT_base * (1 - exp(-t/tau))
+decisions:
+  - choice: Predictions committed before testing
+    instead: Fitting the model after the data is in
+    why: >-
+      A model tuned to the data proves nothing. Committing first makes the 20 % and 25 % targets a real test and shows
+      honestly which assumption was weakest.
+  - choice: Lumped network and FEM both
+    instead: FEM alone
+    why: >-
+      The network gives the time constant and the sink-to-air K/W in a few lines; the FEM checks the fin temperature
+      drop that the network assumes away.
+  - choice: MAX31855 amplifiers over SPI
+    instead: Raw thermocouples into the analogue front end
+    why: >-
+      Type K gives about 41 µV per °C and needs cold-junction compensation. The amplifier does both, and the project 47
+      board already speaks SPI.
+watchOut: >-
+  A thermocouple junction that is not bonded to the surface reads the air beside it and makes the sink look cooler.
+  Bond each with thermal epoxy or tape under pressure, and check it against a neighbour before trusting it.

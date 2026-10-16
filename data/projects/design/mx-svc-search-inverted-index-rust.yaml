@@ -1,0 +1,107 @@
+overview: >-
+  A search engine core in Rust for Tallyn's 5M support articles, built without any search library. New documents
+  fill an in-memory buffer that is flushed into immutable segments (read-only index files), and a background merger
+  combines small segments while readers keep using a fixed snapshot of the segment list. Postings lists are stored
+  as compressed gaps, and BM25 scoring skips whole blocks that cannot reach the top 10.
+learn:
+  - name: Inverted indexes
+    ref: slp3
+  - name: Variable-byte compression
+  - name: BM25 and top-k heaps
+    ref: slp3
+  - name: WAND and block-max pruning
+  - name: Immutable segments and merges
+    ref: ddia
+  - name: Snapshot readers
+stats:
+  - value: < 30 ms
+    label: p99 two-term query, 5M docs
+  - value: < 40%
+    label: index size vs raw text
+  - value: 20 MB/s
+    label: indexing on 4 cores
+components:
+  - id: tokenizer
+    name: Tokenizer
+    role: Splits text into lower-cased terms with positions, the same way for documents and queries.
+    tech: Rust · unicode-segmentation
+    talksTo: [writer, executor]
+    kind: core
+  - id: writer
+    name: Segment writer
+    role: Buffers postings in memory and flushes them as an immutable segment with a term dictionary.
+    tech: Rust
+    talksTo: [codec]
+    kind: offline
+  - id: codec
+    name: Postings codec
+    role: Encodes doc-id gaps and positions with variable-byte codes in 128-doc blocks with max scores.
+    tech: Rust
+    talksTo: [executor]
+    kind: core
+  - id: merger
+    name: Merger
+    role: Merges small segments into larger ones in the background and publishes a new segment list.
+    tech: Rust · Arc swap
+    talksTo: [codec]
+    kind: offline
+  - id: executor
+    name: Query executor
+    role: Runs boolean and phrase queries over a segment snapshot and keeps a top-k heap.
+    tech: Rust
+    talksTo: []
+    kind: core
+  - id: bench
+    name: Benchmark harness
+    role: Runs 500 queries for latency and compares scores with a reference BM25 implementation.
+    tech: Rust · criterion
+    talksTo: [executor]
+    kind: offline
+flow:
+  - component: executor
+    text: receives the query `"refund policy" AND invoice` and takes a **snapshot**, an `Arc` of the current segment list, so a merge can't change it mid-query.
+  - component: tokenizer
+    text: turns it into the phrase `[refund, policy]` and the term `invoice`, with the exact rules used at index time.
+  - component: codec
+    text: >-
+      opens each term's postings in every segment and decodes only the 128-doc blocks it needs; skip data says
+      where each block starts.
+  - component: executor
+    text: >-
+      walks the lists in doc-id order, checks positions for the phrase, and skips any block whose stored **max
+      score** cannot beat the 10th result in the heap.
+  - component: executor
+    text: returns the top 10 doc ids with BM25 scores computed from collection-wide statistics, not per-segment ones.
+interface:
+  lang: rust
+  code: |
+    pub enum Query {
+        Term(String),
+        Phrase(Vec<String>),
+        And(Vec<Query>),
+        Or(Vec<Query>),
+    }
+
+    impl Searcher {
+        pub fn search(&self, q: &Query, k: usize)
+            -> Vec<(DocId, f32)>;
+    }
+decisions:
+  - choice: Immutable segments plus merges
+    instead: One index updated in place
+    why: >-
+      In-place updates need locks that readers wait on. Immutable segments let 5M documents be indexed at 20 MB/s
+      while queries read a snapshot with no locking at all.
+  - choice: Variable-byte gaps in 128-doc blocks
+    instead: Raw 32-bit doc ids
+    why: >-
+      Gaps between doc ids are small and fit in one or two bytes, which is how the index stays under 40 percent of
+      the raw text. Blocks keep decoding cheap and allow skipping.
+  - choice: Block-max pruning
+    instead: Score every matching document
+    why: >-
+      Common terms match hundreds of thousands of articles; scoring them all misses 30 ms. Track the skip ratio to
+      show how much work pruning saves.
+watchOut: >-
+  An off-by-one in skip-block offsets silently drops documents rather than crashing. Compare results with the
+  reference BM25 on all 500 queries after every codec change.

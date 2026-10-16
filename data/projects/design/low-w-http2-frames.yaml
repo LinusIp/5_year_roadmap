@@ -1,0 +1,71 @@
+overview: >-
+  A decoder for HTTP/2 traffic: it cuts the byte stream into frames using the 9-byte header (24-bit length, type,
+  flags, 31-bit stream id), runs each stream through the spec's state machine, and tracks flow-control windows, the
+  byte budgets a receiver grants. It decodes a captured session and must flag 5 deliberately malformed frames.
+learn:
+  - name: Binary framing
+  - name: Protocol state machines
+  - name: Flow-control windows
+    ref: stanford-cs144
+components:
+  - id: capture
+    name: Captured session
+    role: Cleartext HTTP/2 bytes from one client session, plus 5 hand-corrupted frames.
+    tech: h2c capture
+    talksTo: [framer]
+    kind: external
+  - id: framer
+    name: Frame decoder
+    role: Reads the 9-byte header and exactly length bytes of payload per frame.
+    tech: Rust or Go
+    talksTo: [streams]
+    kind: core
+  - id: streams
+    name: Stream table
+    role: Holds each stream's state and send and receive windows, and rejects illegal frames.
+    tech: Rust or Go
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Frame log
+    role: Prints one line per frame and marks each violation with its error code.
+    tech: stdout
+    talksTo: []
+    kind: core
+flow:
+  - component: framer
+    text: >-
+      reads 9 bytes, takes `length` (24 bits), `type`, `flags` and `stream_id` with the reserved top bit masked, then
+      reads exactly `length` payload bytes.
+  - component: streams
+    text: >-
+      applies the frame to its stream: `HEADERS` moves idle to open, `END_STREAM` half-closes, `RST_STREAM` closes,
+      and client-opened ids must be **odd** and increasing.
+  - component: streams
+    text: >-
+      subtracts `DATA` length from the stream and connection windows and adds `WINDOW_UPDATE` increments, rejecting
+      any window above `2^31 - 1`.
+  - component: report
+    text: prints the frame and marks violations as `PROTOCOL_ERROR` or `FLOW_CONTROL_ERROR`, the codes the spec names.
+interface:
+  lang: rust
+  code: |
+    struct FrameHeader {
+        length: u32,    // 24 bits, ≤ 16,384 by default
+        kind: u8,       // 0 DATA, 1 HEADERS, 4 SETTINGS
+        flags: u8,      // 0x1 END_STREAM, 0x4 END_HEADERS
+        stream_id: u32, // 31 bits; 0 = connection
+    }
+
+    fn parse_header(b: &[u8; 9]) -> FrameHeader;
+    fn on_frame(&mut self, h: &FrameHeader, p: &[u8])
+        -> Result<(), H2Error>;
+decisions:
+  - choice: An explicit state enum per stream
+    instead: Checking flags ad hoc inside each frame handler
+    why: >-
+      The spec gives a seven-state diagram. Coding it as one `match (state, frame)` sends every illegal transition,
+      like `DATA` on an idle stream, to one error arm, which is exactly what the 5 malformed frames test.
+watchOut: >-
+  `WINDOW_UPDATE` adds to a signed 31-bit window, so an increment that pushes it past `2^31 - 1` must be an error, not
+  a silent wrap. Keep windows in a 64-bit signed integer and check after adding.

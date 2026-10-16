@@ -1,0 +1,119 @@
+overview: >-
+  Quorum Chat's median time to first token is 300 ms, but p99 jumps to 4 s every few minutes, and GPU metrics show
+  nothing. You trace every request through gateway, tokenizer, queue and GPU step, record host events (CPU run-queue
+  waits, garbage-collection pauses, swap) on the same clock, and match slow requests to what the host was doing.
+  Injected faults prove the attribution works before any fix is trusted.
+learn:
+  - name: Distributed tracing
+    ref: opentelemetry-docs
+  - name: Tail latency
+    ref: google-sre-book
+  - name: Coordinated omission
+  - name: CPU scheduling and pinning
+    ref: ostep
+  - name: eBPF host profiling
+  - name: Time to first token
+    ref: databricks-inference-best-practices
+stats:
+  - value: ≤ 1.0 s
+    label: p99 TTFT, down from 4 s spikes
+  - value: 4 of 5
+    label: injected faults named correctly
+  - value: ≤ 2%
+    label: tracing overhead
+components:
+  - id: loadgen
+    name: Load generator
+    role: Sends requests on a fixed schedule with bursts and a long-prompt tail, whether or not earlier ones finished.
+    tech: Python · asyncio
+    talksTo: [gateway]
+    kind: external
+  - id: gateway
+    name: Gateway
+    role: Accepts the chat request, starts its trace and forwards it.
+    tech: Python · FastAPI
+    talksTo: [tokenizer]
+    kind: core
+  - id: tokenizer
+    name: Tokenizer
+    role: Turns the prompt into token ids on the host CPU.
+    tech: Python
+    talksTo: [engine]
+    kind: core
+  - id: engine
+    name: Engine
+    role: Queues the request, runs prefill and streams the first token.
+    tech: vLLM
+    talksTo: [tracer]
+    kind: core
+  - id: tracer
+    name: Span store
+    role: Keeps a span for every stage of every request, with no sampling.
+    tech: OpenTelemetry
+    talksTo: [analyser]
+    kind: offline
+  - id: hostev
+    name: Host event collector
+    role: Records run-queue delay per CPU, GC pauses, page faults and swap, timestamped on the same clock.
+    tech: perf · eBPF
+    talksTo: [analyser]
+    kind: offline
+  - id: analyser
+    name: Correlation analyser
+    role: Lines up each slow request's spans with host events in the same window and names the likely cause.
+    tech: Python · pandas
+    talksTo: []
+    kind: offline
+  - id: faults
+    name: Fault injector
+    role: Adds noisy neighbours, long prompts and forced GC pauses on a known schedule.
+    tech: stress-ng · Python
+    talksTo: [gateway]
+    kind: offline
+flow:
+  - component: loadgen
+    text: >-
+      sends request `r-8812` at its scheduled time, even though earlier ones are stuck, so the stall is measured, not
+      skipped (**coordinated omission**).
+  - component: gateway
+    text: opens a trace and a `gateway` span, then hands the prompt on.
+  - component: tokenizer
+    text: >-
+      takes **3.6 s** instead of 5 ms: its thread waited on a CPU run queue shared with a log compactor; the span
+      shows the gap.
+  - component: engine
+    text: records `queue` and `prefill` spans of 40 ms and 410 ms, which rules the GPU out for this request.
+  - component: analyser
+    text: >-
+      finds 3.5 s of run-queue delay on that CPU in the same window and names **CPU contention** as the cause; the fix is
+      to pin tokenizer and engine threads to their own cores.
+interface:
+  lang: shell
+  code: |
+    $ tailhunt explain --since 10m --slow 1s
+    slow requests  37 of 18,204
+    r-8812   ttft 4.1 s
+      gateway     12 ms
+      tokenize   3.6 s   runqueue wait 3.5 s
+                 cpu 3 shared with log-compactor
+      queue      40 ms
+      prefill   410 ms
+    cause: cpu contention, tokenizer (0.92)
+decisions:
+  - choice: Trace every request, keep slow ones
+    instead: Sample 1% of requests at the start
+    why: >-
+      Spikes come every few minutes and touch about 1% of requests, so a 1% sample usually misses them. Keeping
+      spans in a local buffer and storing all slow ones stays inside the 2% overhead.
+  - choice: Open-loop load generator
+    instead: Clients that wait for each answer before sending again
+    why: >-
+      A waiting client sends nothing during a 4 s stall, so the stall barely shows in the percentiles. A fixed send
+      schedule counts every request the stall delays.
+  - choice: Validate with injected faults first
+    instead: Fix the first suspicious thing found
+    why: >-
+      If the tool cannot name 4 of 5 known faults, its verdict on the real spike is a guess. Prove it, then fix.
+watchOut: >-
+  It is easy to fix a symptom, such as adding a GPU, and see the spike move rather than vanish. Only call it solved
+  when p99 TTFT stays ≤ 1.0 s under the same load and the analyser no longer finds the cause.

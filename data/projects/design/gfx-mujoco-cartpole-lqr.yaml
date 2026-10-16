@@ -1,0 +1,73 @@
+overview: >-
+  A cart-pole written in MJCF (MuJoCo's XML model format) is linearised around upright by finite differences with
+  `mjd_transitionFD`, giving matrices A and B for the step-to-step dynamics `x' = Ax + Bu`. LQR (linear-quadratic
+  regulator: the best fixed gain for a cost on state error and effort) then balances the pole from a 10-degree start
+  and after a push, plotted with settling time.
+learn:
+  - name: LQR
+    ref: brunton-control-bootcamp
+  - name: Linearisation
+  - name: Riccati equation
+    ref: feedback-systems
+  - name: MuJoCo models
+    ref: mujoco-docs
+components:
+  - id: model
+    name: MJCF model
+    role: Defines the cart slider, pole hinge and force actuator.
+    tech: MuJoCo XML
+    talksTo: [linearise]
+    kind: core
+  - id: linearise
+    name: Linearizer
+    role: Finite-differences the simulator around upright to get A and B.
+    tech: mujoco Python
+    talksTo: [lqr]
+    kind: core
+  - id: lqr
+    name: LQR solver
+    role: Solves the discrete Riccati equation for the gain K.
+    tech: SciPy
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Closed-loop sim
+    role: Runs u = -Kx with a push and plots angle and force.
+    tech: MuJoCo · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: model
+    text: has a slider for the cart, a hinge for the pole and a motor with `gear="1"`, so `ctrl` is force in newtons.
+  - component: linearise
+    text: sets the state to upright and calls `mjd_transitionFD`; check the state order is `[x, θ, ẋ, θ̇]` before choosing `Q`.
+  - component: lqr
+    text: solves `solve_discrete_are(A, B, Q, R)` and computes `K = (R + BᵀPB)⁻¹BᵀPA`.
+  - component: sim
+    text: applies `u = -K x` every step from a 10-degree tilt, pushes the pole with `xfrc_applied` at 3 s, and reports **settling time** as when `|θ|` stays under 1 degree.
+interface:
+  lang: python
+  code: |
+    def linearise(m, d, eps=1e-6):
+        """Discrete A (4x4), B (4x1) at the current
+        state, order [x, theta, x_dot, theta_dot]."""
+        A = np.zeros((2 * m.nv, 2 * m.nv))
+        B = np.zeros((2 * m.nv, m.nu))
+        mujoco.mjd_transitionFD(m, d, eps, True,
+                                A, B, None, None)
+        return A, B
+
+    def lqr(A, B, Q, R):
+        P = scipy.linalg.solve_discrete_are(A, B, Q, R)
+        return np.linalg.solve(R + B.T @ P @ B,
+                               B.T @ P @ A)
+decisions:
+  - choice: Linearise MuJoCo numerically
+    instead: Derive A and B from the equations of motion by hand
+    why: >-
+      The MuJoCo model includes joint damping, armature and the actuator gear, which hand-derived equations usually
+      miss. Finite differences give the matrices of the plant you actually simulate; a hand derivation is still a good
+      check on the signs.
+watchOut: >-
+  If `Q` assumes one state order and MuJoCo uses another, or the gear scales `ctrl`, the gain is wrong and the pole
+  falls at once. Print A and B and check that a tilt makes the tilt grow faster, as it should for an upright pole.

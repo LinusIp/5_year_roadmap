@@ -1,0 +1,103 @@
+overview: >-
+  A command-line runner for Orbital Retail's 120 SQL models that works out the order itself. It parses each model's
+  SQL to find the tables it reads, builds a **DAG** (a graph of dependencies with no loops), and runs ready models
+  on 8 workers against DuckDB. Declarative tests check the results, column lineage shows where each output column
+  comes from, and saved run state lets a failed run resume from the failure.
+learn:
+  - name: Topological sort
+    ref: mit-6-006
+  - name: SQL parsing to an AST
+  - name: Incremental materialisation
+    ref: de-zoomcamp
+  - name: Data quality tests
+  - name: Column-level lineage
+stats:
+  - value: < 90 s
+    label: 120 models, 8 workers, 20M rows
+  - value: 100 %
+    label: dependencies match hand-checked graph
+components:
+  - id: models
+    name: Model files
+    role: One SQL file per model with a small YAML header for materialisation and tests.
+    tech: SQL · YAML
+    talksTo: [parser]
+    kind: external
+  - id: parser
+    name: Model parser
+    role: Parses each SELECT into a syntax tree and lists the tables it reads.
+    tech: Python · sqlglot
+    talksTo: [dag, lineage]
+    kind: core
+  - id: dag
+    name: DAG builder
+    role: Turns references into edges, reports any cycle with its full path, and orders models topologically.
+    tech: Python
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Scheduler
+    role: Runs every model whose parents are done on a pool of 8 workers and records each result in run state.
+    tech: Python · concurrent.futures · SQLite
+    talksTo: [materialiser]
+    kind: core
+  - id: materialiser
+    name: Materialiser
+    role: Builds each model as a view, a table, or an incremental table that merges only new rows.
+    tech: DuckDB
+    talksTo: [tests]
+    kind: core
+  - id: tests
+    name: Test runner
+    role: Turns not_null, unique, relationships and accepted_values into queries that must return 0 rows.
+    tech: Python · DuckDB
+    talksTo: []
+    kind: core
+  - id: lineage
+    name: Lineage extractor
+    role: Traces each output column through aliases, joins and CTEs back to source columns.
+    tech: Python · sqlglot
+    talksTo: []
+    kind: offline
+flow:
+  - component: parser
+    text: reads `models/*.sql`, parses each with sqlglot and collects every table name in `FROM` and `JOIN`, resolving CTE names so they are not mistaken for tables.
+  - component: dag
+    text: adds an edge from each referenced model to the reader, sorts with **Kahn's algorithm**, and if a cycle remains prints it as `a -> b -> c -> a`.
+  - component: scheduler
+    text: starts every model with no unfinished parents, and as each one finishes, frees its children; with `--resume` it skips models marked `success` in the last run.
+  - component: materialiser
+    text: runs `CREATE OR REPLACE TABLE` for tables, or for incremental models inserts only rows newer than the target's `max(updated_at)`.
+  - component: tests
+    text: runs each model's tests right after it builds; a failing test marks the model `failed` and its downstream models `skipped`.
+interface:
+  lang: sql
+  code: |
+    -- models/fct_daily_sales.sql
+    -- config: materialized=incremental
+    --         unique_key=sale_id
+    -- tests: sale_id: [not_null, unique]
+    --        store_id: relationships(dim_store)
+    SELECT s.sale_id, s.store_id,
+           s.sold_at::DATE AS sale_date,
+           s.qty * p.price AS revenue
+    FROM stg_sales s
+    JOIN dim_product p USING (product_id)
+decisions:
+  - choice: Infer dependencies from parsed SQL
+    instead: A ref() function authors must call
+    why: >-
+      120 models already exist as plain SQL; parsing them avoids rewriting all of them and lets the 100 percent
+      match be checked against the hand graph. Revisit if dynamic SQL appears.
+  - choice: Run state in SQLite, keyed by run and model
+    instead: Re-run the whole DAG after any failure
+    why: >-
+      A full run takes up to 90 s on 20M rows; resume re-runs only the failed model and its downstream ones, which
+      is a stated requirement.
+  - choice: Incremental merge on a unique key
+    instead: Append-only incremental inserts
+    why: >-
+      Appending rows that were already loaded double counts revenue. Merging on `unique_key` makes a re-run safe.
+watchOut: >-
+  SQL built from strings or `EXECUTE` hides its dependencies from the parser, so the DAG is silently wrong. Fail
+  the build on any model the parser cannot fully resolve.

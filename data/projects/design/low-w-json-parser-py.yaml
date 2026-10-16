@@ -1,0 +1,55 @@
+overview: >-
+  A JSON parser in plain Python: a tokenizer turns text into tokens with line and column, a recursive-descent parser
+  (one function per grammar rule) builds Python values, and a corpus of at least 60 accept and reject cases checks
+  it.
+learn:
+  - name: Tokenizing
+    ref: crafting-interpreters
+  - name: Recursive descent
+    ref: crafting-interpreters
+  - name: Error positions
+  - name: Unicode escapes
+components:
+  - id: lexer
+    name: Tokenizer
+    role: Produces strings, numbers, literals and punctuation, each with line and column.
+    tech: Python 3
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: Parser
+    role: Builds dicts, lists and scalars with a depth limit and clear errors.
+    tech: Python 3
+    talksTo: []
+    kind: core
+  - id: corpus
+    name: Conformance corpus
+    role: At least 60 files marked must-accept or must-reject, plus a speed test.
+    tech: pytest
+    talksTo: [lexer]
+    kind: offline
+flow:
+  - component: lexer
+    text: reads `"café"`, decodes the escape and combines surrogate pairs such as `😀` into one character.
+  - component: lexer
+    text: checks numbers against the grammar, so `01` and `1.` are rejected and `-0.5e10` is accepted.
+  - component: parser
+    text: calls `parse_value`, which dispatches to `parse_object` or `parse_array`, failing past depth 500.
+  - component: parser
+    text: reports errors such as `line 3, column 14, expected ',' or '}'`.
+interface:
+  lang: python
+  code: |
+    def loads(text: str) -> object: ...
+
+    class JSONError(Exception):
+        line: int
+        column: int
+decisions:
+  - choice: Recursion with a depth limit
+    instead: An explicit stack
+    why: >-
+      Recursive descent maps one function to one grammar rule and is easy to read. The limit turns Python's
+      recursion error into a clean JSON error on deep input.
+watchOut: >-
+  Surrogate pairs and the number grammar are where most parsers fail the corpus. Write those cases first.

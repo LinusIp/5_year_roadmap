@@ -1,0 +1,73 @@
+overview: >-
+  A single-threaded async runtime in Rust: a run queue of tasks, a waker that puts a task back on the queue when its
+  future can make progress, a timer wheel that wakes sleepers at their deadline, and a channel. 10,000 timer tasks
+  must fire in order, and with nothing ready the thread sleeps instead of spinning, so idle CPU stays near zero.
+learn:
+  - name: Futures and polling
+    ref: crust-of-rust
+  - name: Wakers
+  - name: Pinning
+    ref: rust-for-rustaceans
+  - name: Timer wheels
+components:
+  - id: queue
+    name: Run queue
+    role: Holds the tasks that are ready to be polled; wakers push onto it.
+    tech: VecDeque
+    talksTo: [executor]
+    kind: core
+  - id: executor
+    name: Executor loop
+    role: Pops a task and polls its future once with a Context holding its waker.
+    tech: std::task
+    talksTo: [timer, channel]
+    kind: core
+  - id: timer
+    name: Timer wheel
+    role: Keeps sleepers in 1 ms slots, wakes those that are due and says how long the thread may sleep.
+    tech: Rust
+    talksTo: [queue]
+    kind: core
+  - id: channel
+    name: Channel
+    role: A queue whose receiver stores a waker when empty and is woken by send.
+    tech: Rust
+    talksTo: [queue]
+    kind: core
+flow:
+  - component: queue
+    text: >-
+      holds the tasks ready to run; a `Waker` is an `Arc<Task>` whose `wake` pushes the task back here.
+  - component: executor
+    text: >-
+      pops a task and calls `poll`; `Pending` means the future has stored its waker somewhere, so the task is left
+      alone until woken.
+  - component: timer
+    text: >-
+      files a `sleep` under its deadline slot; when the queue is empty the thread **parks** until the next slot,
+      then the wheel wakes every task due, and the loop repeats.
+  - component: channel
+    text: works the same way, `recv` on an empty channel stores the waker and returns `Pending`, and `send` calls `wake`.
+interface:
+  lang: rust
+  code: |
+    pub fn spawn<F>(f: F)
+        where F: Future<Output = ()> + 'static;
+    pub fn block_on<F: Future>(f: F) -> F::Output;
+    pub async fn sleep(d: Duration);
+    pub fn channel<T>() -> (Sender<T>, Receiver<T>);
+
+    impl Wake for Task {
+        fn wake(self: Arc<Self>) {
+            self.queue.push(self.clone());
+        }
+    }
+decisions:
+  - choice: Poll only woken tasks, park until the next deadline
+    instead: A busy loop that re-polls every task
+    why: >-
+      The measure is idle CPU. Re-polling 10,000 timers that are not due burns a whole core; polling only woken tasks
+      and parking the thread until the next timer slot keeps idle CPU near 0%.
+watchOut: >-
+  A lost wakeup: if a future returns `Pending` without storing the current waker, or keeps a stale one from an
+  earlier poll, nothing ever wakes it and the task hangs silently. Store `cx.waker()` again on every poll.

@@ -1,0 +1,53 @@
+overview: >-
+  One Triton kernel that applies rotary position embedding (RoPE, which rotates pairs of Q and K values by an angle
+  set by the token's position) and writes the new K and V straight into a paged KV cache through a block table. It
+  replaces three separate launches in the decode step.
+learn:
+  - name: Rotary embeddings
+  - name: Paged KV cache
+    ref: vllm-docs
+  - name: Launch overhead
+    ref: triton-tutorials
+components:
+  - id: inputs
+    name: Step inputs
+    role: Q, K, V for the new tokens, their positions and each sequence's block table.
+    tech: PyTorch tensors
+    talksTo: [kernel]
+    kind: core
+  - id: kernel
+    name: Fused kernel
+    role: Rotates Q and K and scatters K and V into cache blocks in one launch.
+    tech: Triton
+    talksTo: [cache]
+    kind: core
+  - id: cache
+    name: Paged KV cache
+    role: Fixed-size blocks of K and V addressed through block tables.
+    tech: GPU memory
+    talksTo: [test]
+    kind: core
+  - id: test
+    name: Reference test
+    role: Compares cache contents with an unfused PyTorch version and times both.
+    tech: PyTorch
+    talksTo: []
+    kind: offline
+flow:
+  - component: inputs
+    text: give each new token its absolute position, which in decode is the sequence's current length, not 0.
+  - component: kernel
+    text: computes `cos` and `sin` of `pos · θ_i` and rotates each pair, `(x1, x2) → (x1·cos - x2·sin, x1·sin + x2·cos)`, for Q and K.
+  - component: cache
+    text: receives K and V at block `table[seq][pos // B]`, slot `pos % B`, written by the same program.
+  - component: test
+    text: checks the cache equals the unfused reference **bit for bit** in fp16 and reports time against the 3-kernel baseline.
+decisions:
+  - choice: Compute cos and sin in the kernel
+    instead: Read a precomputed cos and sin table
+    why: >-
+      For a handful of decode tokens, computing them is cheaper than an extra memory read. For long prefills a table
+      can win; benchmark both if prefill matters.
+watchOut: >-
+  Using position 0 for the decode token, or the batch index instead of the sequence length, rotates K wrongly while
+  shapes all look fine. Test decode at several sequence lengths against the reference.

@@ -1,0 +1,59 @@
+overview: >-
+  A gRPC service defined in a .proto file with a unary call and a server-streaming call, logging and auth
+  interceptors, and a schema change that adds a field while an old client keeps working.
+learn:
+  - name: Protocol Buffers
+  - name: Streaming RPCs
+  - name: Schema evolution
+  - name: Interceptors
+components:
+  - id: proto
+    name: Proto schema
+    role: Defines messages and the service, compiled to client and server code.
+    tech: protobuf · protoc
+    talksTo: [client, server]
+    kind: offline
+  - id: client
+    name: Client
+    role: Calls the service, one old build and one built from the new schema.
+    tech: Go or Python
+    talksTo: [server]
+    kind: core
+  - id: server
+    name: Server
+    role: Implements the calls behind logging and auth interceptors.
+    tech: gRPC
+    talksTo: []
+    kind: core
+flow:
+  - component: client
+    text: calls `GetPrice(PriceRequest{symbol})` with an `authorization` metadata header.
+  - component: server
+    text: runs the auth interceptor, then the handler, and logs method and latency in the logging interceptor.
+  - component: client
+    text: opens `WatchPrices`, a server stream, and reads messages until it cancels.
+  - component: server
+    text: is rebuilt with a new field `currency = 3`; the old client ignores the unknown field and keeps working.
+interface:
+  lang: protobuf
+  code: |
+    message PriceRequest { string symbol = 1; }
+    message Price {
+      string symbol = 1;
+      double value  = 2;
+      string currency = 3;  // added in v2
+    }
+    service Prices {
+      rpc GetPrice(PriceRequest) returns (Price);
+      rpc WatchPrices(PriceRequest)
+          returns (stream Price);
+    }
+decisions:
+  - choice: Server streaming for price updates
+    instead: Repeated unary polling
+    why: >-
+      One open stream avoids a call per update, and comparing calls per second against unary is the measure.
+      Use unary for one-off lookups.
+watchOut: >-
+  Field numbers are the wire identity. Never reuse or renumber one; mark removed fields `reserved` so they cannot be
+  taken again.

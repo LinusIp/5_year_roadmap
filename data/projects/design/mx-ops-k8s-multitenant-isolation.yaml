@@ -1,0 +1,92 @@
+overview: >-
+  Parcel Labs' four teams keep sharing one cluster, but each gets walls. A tenant definition in one file is stamped
+  out into a namespace with its RBAC roles, resource quota, limit range and a default-deny network policy, which
+  blocks all traffic until an explicit rule allows it. An admission controller enforces pod security, and an
+  isolation suite attacks the boundaries from inside, trying 40 forbidden paths and running one tenant at 4x its quota
+  to check that the others' p99 barely moves.
+learn:
+  - name: Namespaces and RBAC
+    ref: kubernetes-tutorials
+  - name: Network policies
+    ref: kubernetes-tutorials
+  - name: Quotas and limit ranges
+  - name: Pod security standards
+  - name: Priority classes
+  - name: Admission control
+stats:
+  - value: 40 of 40
+    label: forbidden paths blocked
+  - value: < 10 %
+    label: p99 hit from a noisy neighbour
+  - value: < 3 min
+    label: onboard a tenant
+components:
+  - id: tenantdef
+    name: Tenant definition
+    role: One YAML file per team naming its members, quota, allowed peers and priority.
+    tech: YAML · Helm values
+    talksTo: [provisioner]
+    kind: core
+  - id: provisioner
+    name: Tenant provisioner
+    role: Renders the namespace, RoleBindings, ResourceQuota, LimitRange and NetworkPolicies for a tenant.
+    tech: Helm chart
+    talksTo: [admission]
+    kind: core
+  - id: admission
+    name: Admission policies
+    role: Rejects privileged pods, host mounts and pods without limits, outside system namespaces.
+    tech: Kyverno
+    talksTo: [cluster]
+    kind: core
+  - id: cluster
+    name: Cluster
+    role: One k3s cluster whose network plugin enforces the policies.
+    tech: k3s · Cilium or Calico
+    talksTo: []
+    kind: core
+  - id: suite
+    name: Isolation suite
+    role: Tries 40 unauthorised paths from inside tenant pods and runs kube-bench.
+    tech: Bash · kube-bench
+    talksTo: [cluster]
+    kind: offline
+  - id: noisy
+    name: Noisy-neighbour test
+    role: Runs one tenant at 4x its quota while k6 measures the payments tenant's p99.
+    tech: k6 · stress pods
+    talksTo: [cluster]
+    kind: offline
+flow:
+  - component: tenantdef
+    text: "describes `payments` with `cpu: 8`, `memory: 16Gi`, priority `tenant-critical` and one allowed peer, `ingress-nginx`."
+  - component: provisioner
+    text: applies the chart, creating the namespace, a `team-payments` RoleBinding, quotas, a LimitRange and a **default-deny** policy for both ingress and egress, in under 3 minutes.
+  - component: admission
+    text: "rejects any pod in the namespace that asks for `privileged: true` or has no CPU and memory limits."
+  - component: cluster
+    text: drops a packet from a `marketing` pod to `payments-db`, because no policy allows that path.
+  - component: cluster
+    text: is probed by the **isolation suite** for all 40 paths and by the noisy-neighbour test at 4x quota, which must keep payments' p99 within 10 %.
+interface:
+  lang: yaml
+  code: |
+    apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: default-deny
+      namespace: payments
+    spec:
+      podSelector: {}
+      policyTypes: [Ingress, Egress]
+    # nothing is allowed until a rule says so;
+    # allow-dns and allow-ingress-nginx are
+    # separate policies stamped by the chart
+decisions:
+  - choice: Default-deny for ingress and egress
+    instead: Deny ingress only, egress left open
+    why: Pods today can reach every namespace, and open egress lets a compromised pod call out or reach another team's database. Deny both and allow DNS and named peers.
+  - choice: Namespaces on one cluster, not a cluster per team
+    instead: A separate cluster for each of the four teams
+    why: The constraint is a single cluster, and four teams do not justify four control planes. Revisit for a team with hard compliance needs.
+watchOut: A ResourceQuota without a LimitRange lets one pod claim the whole quota, or rejects pods that set no requests. Always ship both together.

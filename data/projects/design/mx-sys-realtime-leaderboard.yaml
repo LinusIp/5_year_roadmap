@@ -1,0 +1,121 @@
+overview: >-
+  An in-memory ranking service for Tidal Games' 2 million players. Each board is an order-statistic tree, a balanced
+  tree where every node also stores how many entries sit below it, so "how many players are ahead of me" takes
+  about 21 steps instead of a scan of 2 million rows. Score updates are appended to a log and applied in small
+  batches by one writer per board, and boards are snapshotted so a restart replays only the log tail. Friends boards
+  are built on request from the friend list, and daily and weekly boards rotate by key.
+learn:
+  - name: Order-statistic trees
+  - name: Skip lists
+  - name: Write batching
+  - name: Snapshots and log replay
+    ref: ddia
+  - name: Deterministic tie-breaking
+  - name: Sharding plans
+    ref: system-design-primer
+stats:
+  - value: < 10 ms
+    label: rank query p99
+  - value: 5,000/s
+    label: score updates
+  - value: < 1.5 GB
+    label: memory per node
+components:
+  - id: clients
+    name: Game clients
+    role: Submit scores and ask for ranks after each puzzle.
+    tech: Mobile app
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: API server
+    role: Validates submissions and serves rank, top-N and around-me queries.
+    tech: Rust, C++ or Go · HTTP
+    talksTo: [batcher, friends]
+    kind: core
+  - id: batcher
+    name: Write batcher
+    role: Groups updates per board so one writer applies them under one lock.
+    tech: Channel per board
+    talksTo: [log, tree]
+    kind: core
+  - id: log
+    name: Snapshot and log
+    role: Appends every batch to a log and snapshots each board every 60 s.
+    tech: Append-only files
+    talksTo: []
+    kind: core
+  - id: tree
+    name: Order-statistic tree
+    role: Keeps each board sorted and answers rank by subtree counts.
+    tech: Augmented balanced tree
+    talksTo: []
+    kind: core
+  - id: friends
+    name: Friends query
+    role: Ranks a player's friends by looking up each one's best score.
+    tech: Hash map lookups
+    talksTo: [tree]
+    kind: core
+  - id: loadgen
+    name: Load generator
+    role: Plays synthetic players with log-normal scores and a power-law friend graph.
+    tech: Seeded generator
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: >-
+      receives `POST /boards/weekly/scores` with player 48213 and score 91250, and returns early if it is not above
+      the player's best.
+  - component: batcher
+    text: >-
+      collects up to 1 ms or 512 updates for the board, so the writer takes the lock once per batch instead of
+      5,000 times a second.
+  - component: log
+    text: appends the batch to the board's log before it is applied, so a crash replays it after the last snapshot.
+  - component: tree
+    text: >-
+      removes the old entry and inserts the key `(-score, reached_at, player_id)`; summing subtree counts on the
+      path down gives rank 1,834.
+  - component: api
+    text: answers with the new rank and the 5 players above and 5 below, read by walking the tree's neighbours.
+  - component: friends
+    text: >-
+      for a later `GET /friends/48213`, looks up each friend's best score in a hash map and sorts the few hundred
+      results, with no tree scan.
+interface:
+  lang: http
+  code: |
+    POST /boards/weekly/scores
+    { "player": 48213, "score": 91250 }
+
+    200 OK
+    { "best": 91250, "rank": 1834,
+      "around": [
+        { "rank": 1829, "id": 77310, "s": 91420 },
+        { "rank": 1830, "id": 50821, "s": 91388 }
+      ] }
+
+    GET /boards/weekly/rank/48213?around=5
+    GET /boards/weekly/top?n=100
+    GET /boards/weekly/friends/48213
+decisions:
+  - choice: Own order-statistic tree
+    instead: SQL with ORDER BY and COUNT
+    why: >-
+      Counting the players above a score scans up to 2 million rows, which is what timed out at the last
+      tournament. Subtree counts make rank a logarithmic walk and keep p99 under 10 ms.
+  - choice: One writer per board, batched
+    instead: Fine-grained locks on tree nodes
+    why: >-
+      Every update to a hot weekly board touches the root's counts, so fine locks would contend anyway. Batching
+      5,000 updates a second into about five per millisecond keeps the lock short, and readers share a read lock.
+  - choice: Single node first, shard by board later
+    instead: Shard by score range from day one
+    why: >-
+      2 million entries at well under 100 bytes each fit in 1.5 GB with room for several boards. The written plan
+      shards whole boards across nodes first, and score ranges only if one board outgrows a machine.
+watchOut: >-
+  Equal scores ordered by insertion or hash give different ranks after a snapshot restore. Put the tie-break (time
+  the score was reached, then player id) into the key itself, so every replay builds the same order.

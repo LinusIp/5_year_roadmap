@@ -1,0 +1,44 @@
+overview: >-
+  A FastAPI service with v1 and v2 side by side under path prefixes, where v1 responses carry Deprecation and
+  Sunset headers, usage is counted per version, and CI diffs the OpenAPI spec to fail on breaking changes.
+learn:
+  - name: API versioning
+  - name: Deprecation headers
+  - name: OpenAPI contract diffs
+components:
+  - id: api
+    name: API
+    role: Serves `/v1` and `/v2` routers, adding sunset headers to v1.
+    tech: FastAPI
+    talksTo: [metrics]
+    kind: core
+  - id: metrics
+    name: Usage metrics
+    role: Counts requests per version and client so you know who still calls v1.
+    tech: Prometheus counter
+    talksTo: []
+    kind: core
+  - id: ci
+    name: Contract check
+    role: Compares the new OpenAPI spec against the released one and fails on breaking changes.
+    tech: oasdiff · GitHub Actions
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: 'answers `GET /v1/orders/7` with `Deprecation: true` and a `Sunset` header set to the shutdown date.'
+  - component: metrics
+    text: increments `api_requests_total{version="v1",client="mobile"}`.
+  - component: ci
+    text: exports `openapi.json` and diffs it with the spec saved at the last release.
+  - component: ci
+    text: fails the build when a v1 field is removed or made required; adding an optional field passes.
+decisions:
+  - choice: Version in the path
+    instead: Version in an Accept header
+    why: >-
+      Path versions are visible in logs, easy to route and easy to count. Header versioning is cleaner in theory
+      but harder for clients and caches to get right.
+watchOut: >-
+  The contract diff only sees the schema. Changing what a field means or how a v1 endpoint behaves is still a
+  breaking change; put that in v2.

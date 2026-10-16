@@ -1,0 +1,64 @@
+overview: >-
+  A test of how much print orientation weakens FDM parts: identical coupons are printed flat, on edge and upright, 3 of
+  each with the same settings, then loaded by a hanging bucket of weights until they break. Mean failure load and its
+  standard deviation per orientation show how much weaker the bond between layers is than the plastic itself.
+learn:
+  - name: Layer adhesion
+  - name: Test coupon design
+  - name: Mean and standard deviation
+    ref: seeing-theory
+  - name: Controlled experiments
+components:
+  - id: coupon
+    name: Coupon design
+    role: A dog-bone or bend bar with a fixed cross-section to compute stress from.
+    tech: CAD
+    talksTo: [print]
+    kind: core
+  - id: print
+    name: Print batch
+    role: Prints 3 coupons per orientation under the same conditions.
+    tech: FDM printer
+    talksTo: [rig]
+    kind: core
+  - id: rig
+    name: Load rig
+    role: Hangs a bucket from the coupon and adds weight in steps until failure.
+    tech: Bucket · weights · calipers
+    talksTo: [analysis]
+    kind: core
+  - id: analysis
+    name: Analysis
+    role: Reports mean and spread of failure load and stress per orientation.
+    tech: Python · NumPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: coupon
+    text: uses a 4 x 10 mm gauge section, measured with calipers after printing so load can be turned into stress.
+  - component: print
+    text: prints one coupon at a time in the **same bed spot** from one spool and one slicer profile, so cooling matches across all nine.
+  - component: rig
+    text: adds about 2 N per step, waiting 10 s between steps, and records the last load held before the break.
+  - component: analysis
+    text: reports mean ± standard deviation in N and MPa per orientation, with photos of each fracture surface.
+interface:
+  lang: python
+  code: |
+    def summarise(loads_n: dict[str, list[float]],
+                  area_mm2: dict[str, float]) -> None:
+        for name, xs in loads_n.items():
+            xs = np.asarray(xs)
+            mean, sd = xs.mean(), xs.std(ddof=1)
+            mpa = mean / area_mm2[name]  # N/mm² = MPa
+            print(f"{name:8s} {mean:6.1f} ± {sd:4.1f} N"
+                  f"  {mpa:5.1f} MPa")
+decisions:
+  - choice: One coupon at a time, same spot
+    instead: Print all nine coupons on one plate
+    why: >-
+      On a shared plate each coupon cools for a different time between layers, which changes how well layers bond.
+      Printing them one by one in the same place keeps orientation as the main difference, at the cost of nine prints.
+watchOut: >-
+  With only 3 coupons per orientation, a gap smaller than about two standard deviations may just be noise. Report the
+  spread with every mean, and print more coupons for any pair that looks close.

@@ -1,0 +1,125 @@
+overview: >-
+  A reading project with an experiment attached: follow one request through a pinned vLLM commit, layer by layer, and
+  write one explainer section per layer. The request goes from the OpenAI-compatible API server to the engine core loop,
+  where the scheduler picks what runs under a token budget, the KV cache manager hands out fixed-size blocks and fills a
+  block table (the map from a sequence's token positions to physical cache blocks), the model runner builds the batch
+  and the attention kernel reads keys and values through that table. A preemption experiment under memory pressure
+  shows the same machinery from the outside.
+learn:
+  - name: PagedAttention block tables
+    ref: vllm-docs
+  - name: Copy-on-write blocks
+  - name: Preemption by recompute
+  - name: KV bytes per token
+    ref: kipply-inference-arithmetic
+  - name: Reading a large codebase
+  - name: Technical writing
+stats:
+  - value: "5"
+    label: layers traced to file and function
+  - value: "64"
+    label: long prompts to force preemption
+  - value: Identical
+    label: output after preemption
+components:
+  - id: client
+    name: Load client
+    role: Sends one traced request, or 16 to 64 concurrent long prompts for the experiment.
+    tech: Python · OpenAI client
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: API server
+    role: Tokenises the request, hands it to the engine client, and detokenises and streams the output.
+    tech: vLLM OpenAI-compatible server
+    talksTo: [core, client]
+    kind: core
+  - id: core
+    name: Engine core loop
+    role: Runs one step after another in its own process, calling the scheduler and the model runner.
+    tech: vLLM V1 engine core
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Scheduler
+    role: Picks which requests run this step under a token budget and preempts when blocks run out.
+    tech: vLLM scheduler
+    talksTo: [kvmgr]
+    kind: core
+  - id: kvmgr
+    name: KV cache manager
+    role: Allocates fixed-size blocks, fills each sequence's block table and shares blocks with copy-on-write.
+    tech: vLLM KV cache manager
+    talksTo: [runner]
+    kind: core
+  - id: runner
+    name: Model runner
+    role: Builds the batch tensors, including the block tables, and runs the model.
+    tech: vLLM GPU model runner
+    talksTo: [attn]
+    kind: core
+  - id: attn
+    name: Attention backend
+    role: Reads keys and values through the block table and returns logits for sampling.
+    tech: PagedAttention kernel
+    talksTo: [api]
+    kind: core
+  - id: trace
+    name: Trace notes
+    role: Record file, function and a matching log line or breakpoint for every hop, and become the explainer.
+    tech: debugpy · py-spy · Markdown
+    talksTo: []
+    kind: offline
+flow:
+  - component: api
+    text: receives `POST /v1/completions`, tokenises the prompt and hands the request to the engine client.
+  - component: core
+    text: >-
+      picks it up in a **separate process**, so attach the debugger there; each loop iteration is one engine step.
+  - component: scheduler
+    text: >-
+      admits the request if its tokens fit the step's budget; under memory pressure it **preempts** a running request
+      and later recomputes it.
+  - component: kvmgr
+    text: >-
+      allocates blocks for the prompt and writes their ids to the block table; shared prefixes or parallel samples
+      share blocks until one writes, then **copy-on-write** gives it its own.
+  - component: runner
+    text: packs all scheduled sequences into one batch, passing token ids, positions and block tables.
+  - component: attn
+    text: >-
+      gathers keys and values block by block through the table; the new token goes back to the API server, which
+      streams it, and the **loop** continues.
+  - component: trace
+    text: >-
+      pins the commit hash at the top and backs every diagram with a log line or breakpoint showing the same state.
+interface:
+  lang: shell
+  code: |
+    git checkout <pinned-commit>    # named in the post
+    vllm serve <0.5-1B model> \
+      --gpu-memory-utilization 0.3 \
+      --max-num-seqs 64
+    python load.py --concurrency 64 \
+      --prompt-tokens 2000 --temperature 0
+    grep -i preempt server.log
+    python compare.py preempted.jsonl baseline.jsonl
+decisions:
+  - choice: One pinned commit
+    instead: Following the main branch
+    why: >-
+      vLLM changes weekly; file and function references against main rot before the post is published. State the
+      hash at the top.
+  - choice: A 0.5–1B model on one GPU
+    instead: A realistic 7B or larger model
+    why: >-
+      Restarts take seconds, and the KV cache is easy to shrink with `gpu_memory_utilization` until 64 long prompts
+      force preemption on demand.
+  - choice: Trigger copy-on-write on purpose
+    instead: Waiting to see it in ordinary traffic
+    why: >-
+      Blocks are only shared with parallel sampling, beam search or prefix caching, so a single plain request never
+      shows it. Run with `n > 1` or a shared prefix.
+watchOut: >-
+  In the V1 engine the core runs in a separate process, so a breakpoint in the API server never sees the scheduler.
+  Attach the debugger to the engine core process, and say whether your version preempts by recomputing or swapping.

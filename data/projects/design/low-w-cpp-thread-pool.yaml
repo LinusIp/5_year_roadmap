@@ -1,0 +1,59 @@
+overview: >-
+  A fixed-size thread pool in C++20 where `submit` wraps any callable in a `std::packaged_task`, pushes it on a
+  mutex-guarded queue and returns a `std::future`, with graceful shutdown and a parallel mergesort benchmark run
+  under ThreadSanitizer.
+learn:
+  - name: Condition variables
+    ref: ostep
+  - name: Futures and promises
+    ref: effective-modern-cpp
+  - name: Graceful shutdown
+  - name: Parallel speedup
+components:
+  - id: submit
+    name: submit()
+    role: Wraps the callable, stores its future and enqueues it.
+    tech: C++20 · packaged_task
+    talksTo: [queue]
+    kind: core
+  - id: queue
+    name: Task queue
+    role: A deque guarded by a mutex with a condition variable for waiting workers.
+    tech: std::mutex · std::condition_variable
+    talksTo: [workers]
+    kind: core
+  - id: workers
+    name: Workers
+    role: Threads that wait, pop and run tasks until shutdown and an empty queue.
+    tech: std::jthread
+    talksTo: []
+    kind: core
+flow:
+  - component: submit
+    text: turns `pool.submit(sort_half, lo, mid)` into a task and hands back a `future<void>`.
+  - component: queue
+    text: pushes the task under the lock and calls `notify_one`.
+  - component: workers
+    text: wake, pop and run it; an exception is stored in the future and rethrown by `get()`.
+  - component: workers
+    text: on shutdown finish queued tasks, then exit when `stopping` is set and the queue is empty.
+interface:
+  lang: cpp
+  code: |
+    class ThreadPool {
+    public:
+      explicit ThreadPool(size_t n);
+      ~ThreadPool();  // drains, then joins
+      template <class F, class... A>
+      auto submit(F&& f, A&&... a)
+          -> std::future<std::invoke_result_t<F, A...>>;
+    };
+decisions:
+  - choice: One shared queue
+    instead: Work-stealing deques per thread
+    why: >-
+      A single locked queue is simple to get right, and mergesort tasks are coarse enough that the lock is not the
+      bottleneck at 8 threads. Add stealing if the speedup flattens.
+watchOut: >-
+  A task that waits on another task's future can deadlock when all workers are waiting. In mergesort, run one half
+  on the current thread instead of waiting for both.

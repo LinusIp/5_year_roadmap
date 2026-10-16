@@ -1,0 +1,54 @@
+overview: >-
+  A 1-3B parameter model fine-tuned on 2k instruction pairs with QLoRA: the base weights are frozen in 4-bit to fit on
+  one GPU and only small LoRA adapters are trained. The tuned model is compared with the base on held-out prompts by
+  pairwise judging, and peak GPU memory is tracked.
+learn:
+  - name: 4-bit quantization
+  - name: LoRA adapters
+    ref: hf-llm-course
+  - name: Chat templates
+    ref: hf-llm-course
+  - name: Pairwise evaluation
+components:
+  - id: data
+    name: Instruction data
+    role: Holds 2k training pairs and a separate set of held-out prompts.
+    tech: JSONL
+    talksTo: [trainer]
+    kind: core
+  - id: trainer
+    name: QLoRA trainer
+    role: Loads the base in 4-bit, attaches adapters and trains them.
+    tech: PEFT · bitsandbytes
+    talksTo: [gpu, judge]
+    kind: core
+  - id: gpu
+    name: Single GPU
+    role: Runs training and generation; peak memory is recorded.
+    tech: CUDA GPU
+    talksTo: []
+    kind: external
+  - id: judge
+    name: Pairwise judge
+    role: Compares base and tuned answers on each held-out prompt with a rubric.
+    tech: LLM judge · rubric
+    talksTo: []
+    kind: core
+flow:
+  - component: data
+    text: is formatted with the model's own chat template via `apply_chat_template`, the same at training and evaluation.
+  - component: trainer
+    text: loads the model with `load_in_4bit=True` (NF4), trains LoRA adapters, and logs `torch.cuda.max_memory_allocated()`.
+  - component: judge
+    text: sees base and tuned answers for each held-out prompt in random order and picks the better one by the rubric.
+  - component: judge
+    text: reports the tuned model's **win rate**; the target is above 60%.
+decisions:
+  - choice: QLoRA on one GPU
+    instead: Full fine-tuning
+    why: >-
+      Full fine-tuning a 3B model needs several times the memory for weights, gradients and optimizer state. 4-bit
+      base plus adapters fits one consumer GPU, and 2k pairs are too few to need more.
+watchOut: >-
+  A chat template that differs between training and inference (missing system or end-of-turn tokens) makes a good
+  tune look broken. Format both through the tokenizer's template.

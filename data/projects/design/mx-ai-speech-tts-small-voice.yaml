@@ -1,0 +1,96 @@
+overview: >-
+  A local text-to-speech service in the voice of one consenting library staff member. A pretrained acoustic model
+  (text to mel spectrogram, a picture of sound energy over time) and a neural vocoder (spectrogram to waveform) are
+  fine-tuned on one hour of their recordings on a 24 GB GPU. Notices are normalised ("3 Oct" becomes "the third of
+  October"), synthesised sentence by sentence and streamed, and quality is checked by an ASR round trip and a
+  10-person listening test.
+learn:
+  - name: Text normalisation
+    ref: slp3
+  - name: Mel spectrograms
+  - name: Acoustic model and vocoder
+  - name: Mean opinion score
+  - name: Voice consent
+stats:
+  - value: < 0.2
+    label: real-time factor
+  - value: < 5%
+    label: ASR round-trip WER
+  - value: ≥ 3.8 / 5
+    label: listening test mean
+components:
+  - id: prep
+    name: Recording prep
+    role: Cuts the consented hour into clips, trims silence, drops noisy ones and aligns each to its script line.
+    tech: Python · ffmpeg
+    talksTo: [finetuner]
+    kind: offline
+  - id: finetuner
+    name: Fine-tuner
+    role: Starts from an LJSpeech-pretrained model and fine-tunes acoustic model and vocoder on the new voice.
+    tech: PyTorch · Coqui TTS
+    talksTo: [acoustic]
+    kind: offline
+  - id: normalizer
+    name: Normaliser
+    role: Expands dates, times, numbers, money and abbreviations into words and splits sentences.
+    tech: Python rules
+    talksTo: [acoustic]
+    kind: core
+  - id: acoustic
+    name: Acoustic model
+    role: Turns phonemes into a mel spectrogram, checking the voice's consent record before loading.
+    tech: FastPitch-class model
+    talksTo: [vocoder]
+    kind: core
+  - id: vocoder
+    name: Vocoder
+    role: Turns each spectrogram into 22 kHz audio and streams it out sentence by sentence.
+    tech: HiFi-GAN
+    talksTo: [evaluator]
+    kind: core
+  - id: evaluator
+    name: Evaluator
+    role: Transcribes the audio with Whisper for WER, times RTF and runs the listening test.
+    tech: Whisper · jiwer · web form
+    talksTo: []
+    kind: offline
+flow:
+  - component: normalizer
+    text: turns "Closed 3 Oct, 9-5" into `closed on the third of October, nine to five` and splits it into sentences.
+  - component: acoustic
+    text: loads the voice only if `consent_id` matches a signed record, then predicts a mel spectrogram per sentence.
+  - component: vocoder
+    text: synthesises each sentence and streams it while the next is generated, so playback starts after the first sentence.
+  - component: evaluator
+    text: >-
+      runs ASR on 200 synthesised notices and compares with the normalised text (`WER < 5%`), times `RTF < 0.2`, and
+      collects 1–5 ratings from 10 listeners.
+interface:
+  lang: http
+  code: |
+    POST /speak
+    { "text": "Library closed 3 Oct, 9-5.",
+      "voice": "staff-ana",
+      "consent_id": "C-2026-004" }
+
+    200 OK  (chunked audio/wav)
+    X-RTF: 0.12
+    X-Sentences: 2
+decisions:
+  - choice: Fine-tune a pretrained model
+    instead: Train from scratch on the staff recordings
+    why: >-
+      One hour of speech is far too little to learn speech from nothing. Starting from LJSpeech and adapting to the new
+      voice reaches good quality inside a few hours on one GPU.
+  - choice: Rule-based normaliser
+    instead: Let the model read raw text
+    why: Notices are full of dates, times and room numbers; a model reads "9-5" badly, while rules make it testable.
+  - choice: One fixed voice, no cloning endpoint
+    instead: Clone any uploaded voice sample
+    why: >-
+      Consent covers one person. A service that accepts arbitrary reference audio is a misuse risk, so only voices with
+      a stored consent record can load.
+watchOut: >-
+  Noisy or clipped recordings get learned as part of the voice and cannot be removed later. Record in one quiet
+  room, reject clips by signal-to-noise ratio, and listen to the training set before fine-tuning.

@@ -1,0 +1,48 @@
+overview: >-
+  A batched GPU sampler for LLM decoding that applies temperature, top-k (keep the k most likely tokens) and top-p (keep
+  the smallest set whose probability adds up to p) without sorting the whole 128k vocabulary. It finds cut-off
+  thresholds by selection and search instead, and a chi-square test checks it samples the right distribution.
+learn:
+  - name: Sampling strategies
+    ref: hf-llm-course
+  - name: Parallel selection
+    ref: pmpp-book
+  - name: Chi-square testing
+    ref: harvard-stat-110
+components:
+  - id: logits
+    name: Logits batch
+    role: A 64 x 128k block of logits plus per-row temperature, k and p.
+    tech: PyTorch tensor
+    talksTo: [sampler]
+    kind: core
+  - id: sampler
+    name: Sampler kernel
+    role: Finds the top-k and top-p thresholds per row and draws one token.
+    tech: Triton or CUDA C++
+    talksTo: [stats]
+    kind: core
+  - id: stats
+    name: Distribution test
+    role: Samples many times and runs chi-square against the reference distribution, and times against the sort path.
+    tech: SciPy · PyTorch
+    talksTo: []
+    kind: offline
+flow:
+  - component: logits
+    text: is scaled by `1 / temperature` and turned into probabilities with a row softmax.
+  - component: sampler
+    text: finds the k-th largest value per row by **threshold search**, a few passes counting values above a candidate, instead of sorting.
+  - component: sampler
+    text: searches the same way for the probability cut where the kept mass reaches `p`, then draws a token from the kept set with one uniform random number.
+  - component: stats
+    text: draws 100k samples on small test vocabularies, runs chi-square against the exact distribution, and reports microseconds per batch of 64 at vocab 128k.
+decisions:
+  - choice: Threshold search, not sort
+    instead: torch.sort then cumulative sum
+    why: >-
+      Sorting 128k values per row is the main cost of the reference path; a few counting passes over the row read the
+      same memory a handful of times and need no extra buffers.
+watchOut: >-
+  Ties at the threshold can keep more than k tokens or drop the boundary token on some rows. Decide a rule (keep all
+  ties, or break by index), and test on rows with many equal logits.

@@ -1,0 +1,113 @@
+overview: >-
+  A batch job that embeds 50M product descriptions on one rented spot GPU before Marketly's relaunch. A planner cuts
+  the input into 1,000 shards of 50,000 rows, each worker sorts its shard by length so batches carry little padding,
+  and finished shards are written as checksummed Parquet and only then marked done in a manifest. If the spot GPU is
+  killed, the job restarts from the manifest and redoes at most the shard in flight.
+learn:
+  - name: Length bucketing
+    ref: batching-effects-gpt
+  - name: Padding waste
+  - name: ONNX Runtime inference
+    ref: onnx-runtime-docs
+  - name: Idempotent checkpoints
+    ref: ddia
+  - name: Throughput per dollar
+stats:
+  - value: ≥ 4,000
+    label: texts per second, one GPU
+  - value: ≤ $0.40
+    label: per 1M embeddings
+  - value: < 1%
+    label: recomputed after a kill
+components:
+  - id: planner
+    name: Shard planner
+    role: Splits the 50M rows into 1,000 numbered shards and writes them to the manifest as pending.
+    tech: Python · PyArrow
+    talksTo: [manifest]
+    kind: offline
+  - id: manifest
+    name: Manifest
+    role: Records each shard's state, output path and checksum, and is the only source of truth for resume.
+    tech: SQLite
+    talksTo: [batcher]
+    kind: core
+  - id: batcher
+    name: Length batcher
+    role: Tokenises a shard in CPU worker processes, sorts by token count and packs batches by a token budget.
+    tech: Python · fast tokenizer
+    talksTo: [worker]
+    kind: core
+  - id: worker
+    name: GPU worker
+    role: Runs the small embedding model in fp16 and returns 384-dimension vectors.
+    tech: sentence-transformers or ONNX Runtime
+    talksTo: [writer]
+    kind: core
+  - id: writer
+    name: Parquet writer
+    role: Writes a shard to a temporary file, checks it, then renames it into place.
+    tech: PyArrow
+    talksTo: [manifest]
+    kind: core
+  - id: cost
+    name: Cost estimator
+    role: Turns measured texts per second and the spot price into $ per 1M and a finish time.
+    tech: Python
+    talksTo: []
+    kind: offline
+  - id: gpu
+    name: Spot GPU
+    role: The rented GPU that may be pre-empted at any moment.
+    tech: Spot instance · Docker
+    talksTo: []
+    kind: external
+flow:
+  - component: manifest
+    text: hands the next `pending` shard, say shard 412, to the worker after a restart or a finished shard.
+  - component: batcher
+    text: >-
+      tokenises 50,000 rows on several CPU processes, sorts them by length and packs batches of about 32,000
+      tokens, so a 20-token title never pads out to 512.
+  - component: worker
+    text: >-
+      embeds each batch in fp16 while the next one is tokenised, keeping the GPU busy; 4,000 texts per second means
+      a shard every 12.5 s.
+  - component: writer
+    text: >-
+      writes `shard-0412.parquet.tmp`, re-reads the row count and SHA-256, and renames it; a half-written file never
+      has the final name.
+  - component: manifest
+    text: marks shard 412 `done` with its checksum, the **only** moment it counts as finished.
+interface:
+  lang: sql
+  code: |
+    CREATE TABLE shards (
+      id        INTEGER PRIMARY KEY,
+      first_row INTEGER, n_rows INTEGER,
+      state     TEXT,   -- pending | running | done
+      out_path  TEXT,
+      sha256    TEXT,
+      rows_out  INTEGER,
+      texts_s   REAL,
+      done_at   TEXT
+    );
+decisions:
+  - choice: 1,000 shards of 50,000 rows
+    instead: A few very large shards
+    why: >-
+      A kill loses at most one shard, 0.1% of the job, well under the 1% limit, and each shard still takes several
+      seconds so manifest overhead is negligible. Use smaller shards if the GPU gets much faster.
+  - choice: Sort by length inside each shard
+    instead: Batches in input order
+    why: >-
+      Product descriptions range from a few words to several paragraphs, and unsorted batches pad every row to the
+      longest one. Sorting is what makes 4,000 texts per second reachable.
+  - choice: Price check against the cap
+    instead: Assume the spot price stays low
+    why: >-
+      At 4,000 texts per second, 1M texts take 250 s, so $0.40 per 1M allows up to about $5.76 an hour for the GPU.
+      The estimator warns if the live price or the measured rate breaks that.
+watchOut: >-
+  CPU tokenisation can quietly starve the GPU. Watch GPU utilisation while running; if it dips between batches, add
+  tokeniser processes or pre-tokenise the next shard before buying a bigger GPU.

@@ -1,0 +1,96 @@
+overview: >-
+  A lap simulator that treats the car as a single point with a grip limit, a power curve, drag and downforce. The track
+  centreline is resampled every metre and its curvature sets a cornering speed limit at each point; a forward pass
+  then adds the fastest possible acceleration and a backward pass the latest possible braking. The lowest of the three
+  speeds at each metre is the speed trace, and summing distance over speed gives the lap time.
+learn:
+  - name: Curvature of a path
+    ref: mit-18-02
+  - name: Friction circle
+    ref: mit-2-003
+  - name: Forward-backward speed profile
+  - name: Signal smoothing
+    ref: dspguide
+  - name: Parameter sweeps
+stats:
+  - value: < 2 s
+    label: solve a 5 km track at 1 m
+  - value: ≤ 3%
+    label: lap time vs reference
+  - value: ≤ 1%
+    label: skidpad vs analytic
+components:
+  - id: track
+    name: Track builder
+    role: Resamples the centreline to 1 m stations and computes smoothed curvature at each.
+    tech: numpy · scipy-free spline
+    talksTo: [limiter]
+    kind: core
+  - id: car
+    name: Car model
+    role: Gives grip, power-limited thrust, drag and downforce at any speed, all in SI units.
+    tech: Python dataclass
+    talksTo: [limiter, solver]
+    kind: core
+  - id: limiter
+    name: Corner-speed limiter
+    role: Solves for the speed where lateral grip exactly balances the curvature.
+    tech: numpy
+    talksTo: [solver]
+    kind: core
+  - id: solver
+    name: Forward-backward solver
+    role: Runs the acceleration and braking passes and takes the minimum speed at each station.
+    tech: Python · numpy
+    talksTo: [sweeps]
+    kind: core
+  - id: sweeps
+    name: Sweep runner
+    role: Repeats the solve over a grid of downforce and drag values and saves a results table.
+    tech: Python · CSV
+    talksTo: [plots]
+    kind: core
+  - id: plots
+    name: Plots
+    role: Draws speed traces, lap-time maps and the validation checks.
+    tech: matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: track
+    text: turns the raw centreline points into 1 m stations and smooths curvature before using it, because jagged points make **noisy curvature** and fake corners.
+  - component: car
+    text: supplies `mu`, the power curve, drag and downforce coefficients for this spec, all in m/s and newtons.
+  - component: limiter
+    text: solves `m v^2 k = mu (m g + q v^2)` per station, where `q` is the downforce coefficient; straights get the top-speed cap.
+  - component: solver
+    text: goes forward adding the acceleration left over inside the friction circle, then backward doing the same for braking, and keeps the minimum.
+  - component: sweeps
+    text: re-runs the solve for each downforce and drag pair and writes lap time per pair, about 30 ms each.
+interface:
+  lang: python
+  code: |
+    def solve_lap(tr: Track, car: Car) -> Lap:
+        """Quasi-steady point-mass lap, ds = 1 m.
+
+        tr.k: curvature (1/m) per station, shape (n,)
+        Returns speed (m/s) per station and lap time."""
+        v = corner_limit(tr.k, car)       # grip only
+        for i in range(1, tr.n):          # accelerate
+            v[i] = min(v[i], accel(v[i-1], tr, i, car))
+        for i in range(tr.n - 2, -1, -1): # brake
+            v[i] = min(v[i], brake(v[i+1], tr, i, car))
+        return Lap(v, t=float(np.sum(tr.ds / v)))
+decisions:
+  - choice: Quasi-steady point mass
+    instead: A transient multi-body vehicle model
+    why: Gear ratio and downforce choices before building need fast sweeps, and a 5 km lap solves in milliseconds. Revisit once load transfer matters for tyre choice.
+  - choice: Plain loops for the two passes
+    instead: Vectorising the passes
+    why: Each station depends on the one before, so the passes cannot be vectorised; 10,000 cheap iterations still finish well under 2 s.
+  - choice: SI units everywhere inside
+    instead: km/h and kW as entered on the spec sheet
+    why: Converting only at input and plot time removes the most common bug in this project.
+watchOut: >-
+  Validate before trusting sweeps. The skidpad lap must match `2 pi sqrt(r / (mu g))` within 1%, and remember the model
+  ignores load transfer, so it ranks setups rather than predicting exact lap times.

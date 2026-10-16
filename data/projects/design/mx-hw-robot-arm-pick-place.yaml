@@ -1,0 +1,102 @@
+overview: >-
+  A 6-DOF servo arm moves 96-well plates between two stations, and every move follows the same chain: a target
+  gripper pose is turned into joint angles by inverse kinematics (working backwards from where the hand should be to
+  how each joint must turn), checked against joint limits and self-collision, and turned into a smooth trajectory
+  with speed and acceleration limits. Only then are joint set-points sent over the servo bus. The same chain first
+  drives a simulator, and a calibration routine corrects each joint's zero offset against the two station poses.
+learn:
+  - name: Forward and inverse kinematics
+    ref: modern-robotics
+  - name: Trajectory generation
+    ref: modern-robotics
+  - name: Singularities
+  - name: Joint-zero calibration
+  - name: Backlash and repeatability
+stats:
+  - value: ≤ 1 mm
+    label: repeatability over 100 cycles
+  - value: < 8 s
+    label: per pick-place pair
+  - value: < 10 ms
+    label: planning per segment
+components:
+  - id: task
+    name: Task sequencer
+    role: Holds station poses and steps through approach, grip, lift, move and place.
+    tech: Python
+    talksTo: [ik]
+    kind: core
+  - id: ik
+    name: Kinematics solver
+    role: Computes joint angles for a gripper pose, choosing the solution closest to the current joints.
+    tech: Python · NumPy · URDF
+    talksTo: [checker]
+    kind: core
+  - id: checker
+    name: Limit checker
+    role: Rejects poses outside joint limits, near singularities or with self-collision.
+    tech: Python
+    talksTo: [traj]
+    kind: core
+  - id: traj
+    name: Trajectory generator
+    role: Builds a trapezoidal velocity profile per segment, synchronised across all six joints.
+    tech: C++ · NumPy
+    talksTo: [driver]
+    kind: core
+  - id: driver
+    name: Joint driver
+    role: Streams joint set-points to the servos over the bus at 50 Hz.
+    tech: Serial servo bus
+    talksTo: [arm]
+    kind: core
+  - id: arm
+    name: Arm and gripper
+    role: 6-DOF servo arm with a gripper carrying up to 300 g.
+    tech: Servo arm kit
+    talksTo: []
+    kind: external
+  - id: cal
+    name: Calibration tool
+    role: Fits joint-zero offsets so the arm reaches the two measured station poses.
+    tech: Python · SciPy
+    talksTo: [ik]
+    kind: offline
+  - id: sim
+    name: Simulator
+    role: Runs the same planner against the arm model and stops on any collision or limit breach.
+    tech: Python · URDF
+    talksTo: []
+    kind: offline
+flow:
+  - component: task
+    text: asks for the next pose, for example `approach_B`, 50 mm above the place station.
+  - component: ik
+    text: solves for six joint angles with the calibrated offsets and picks the solution nearest the current joints, so the arm never flips.
+  - component: checker
+    text: rejects the move if any joint is within `5°` of a limit or the wrist is near a **singularity** (where two joint axes line up and small moves need huge joint speeds).
+  - component: traj
+    text: plans each segment in under `10 ms` so all joints start and stop together within their speed and acceleration limits.
+  - component: driver
+    text: sends set-points every `20 ms`; approaching every pose from the same direction keeps backlash on the same side.
+interface:
+  lang: python
+  code: |
+    def ik(pose: SE3, q_now: np.ndarray
+           ) -> np.ndarray | None:
+        """6 joint angles, rad; None if unreachable."""
+
+    def plan_segment(q0, q1: np.ndarray,
+                     v_max, a_max: np.ndarray
+                     ) -> Trajectory: ...
+
+    # bus frame to each servo, every 20 ms
+    # [0xFF 0xFF id len CMD_POS pos_lo pos_hi crc]
+decisions:
+  - choice: Approach every pose from one side
+    instead: Take the shortest path into each pose
+    why: Servo backlash adds up across six joints and would break the 1 mm target. Arriving from the same direction puts the slack on the same side every time.
+  - choice: Simulate the full chain first
+    instead: Test new moves on the arm directly
+    why: A wrong IK branch can swing the arm through a plate. The simulator runs the same code and catches it before 100 real cycles.
+watchOut: Joint-zero offsets of even half a degree move the gripper by millimetres at full reach. Calibrate against both station poses and store the offsets with the arm.

@@ -1,0 +1,108 @@
+overview: >-
+  A fly-over viewer that turns an elevation raster into a float texture and a flat triangle grid, then lifts each
+  vertex to its height in the vertex shader. The fragment shader colours by elevation, paints slopes above a slider
+  threshold and draws contour lines, all from normals computed on the GPU. A click casts a ray into the raster on the
+  CPU and reads elevation and slope in metres.
+learn:
+  - name: Heightmap displacement
+    ref: learnopengl
+  - name: Normals from gradients
+    ref: scratchapixel
+  - name: Fly camera
+    ref: learnopengl
+  - name: Contours with fwidth
+    ref: book-of-shaders
+  - name: Ray-heightfield picking
+stats:
+  - value: 60 FPS
+    label: 2M triangles on an iGPU
+  - value: < 3 s
+    label: load a 4096 × 4096 raster
+  - value: < 0.5 m
+    label: elevation readout error
+components:
+  - id: reader
+    name: Raster reader
+    role: Reads the raster header (cell size, origin, no-data value) and the height samples in metres.
+    tech: numpy memmap
+    talksTo: [grid, picking]
+    kind: core
+  - id: grid
+    name: Grid builder
+    role: Makes a 1024 × 1024 vertex grid and uploads the full raster as an R32F height texture.
+    tech: numpy · moderngl
+    talksTo: [shaders]
+    kind: core
+  - id: camera
+    name: Fly camera
+    role: Moves with WASD and mouse look in world metres and builds the view-projection matrix.
+    tech: numpy · pyglet
+    talksTo: [shaders]
+    kind: core
+  - id: shaders
+    name: Terrain shaders
+    role: Displaces vertices, computes normals and slope, and colours by elevation ramp and slope threshold.
+    tech: GLSL 3.3
+    talksTo: [contours, gpu]
+    kind: core
+  - id: contours
+    name: Contour shading
+    role: Darkens pixels where elevation crosses a multiple of the contour interval.
+    tech: GLSL 3.3
+    talksTo: [gpu]
+    kind: core
+  - id: picking
+    name: Picking readout
+    role: Marches the click ray through the raster and reports elevation and slope at the hit.
+    tech: numpy
+    talksTo: []
+    kind: core
+  - id: gpu
+    name: Laptop iGPU
+    role: Runs the shaders on integrated graphics with no network.
+    tech: Integrated graphics
+    talksTo: []
+    kind: external
+flow:
+  - component: reader
+    text: loads the 4096 × 4096 raster as float32 metres with a memory map, so load stays under 3 s.
+  - component: grid
+    text: has built the flat 1024 × 1024 grid once; each vertex carries only its texture coordinate.
+  - component: camera
+    text: applies this frame's WASD and mouse movement and sends `u_view_proj` to the shaders.
+  - component: shaders
+    text: sample the height texture in the vertex shader, take normals from **central differences** divided by the cell size, and turn them into a slope angle.
+  - component: contours
+    text: uses `fract(h / u_interval)` and `fwidth(h)` to draw lines one pixel wide in the same pass as the terrain.
+  - component: picking
+    text: on a click steps the ray through the full-resolution raster, refines the hit by bisection and prints elevation and slope.
+interface:
+  lang: glsl
+  code: |
+    uniform sampler2D u_height;  // R32F, metres
+    uniform vec2 u_cell;         // metres per texel
+    uniform float u_slope_max;   // degrees, slider
+    uniform float u_interval;    // contour step, m
+    float slope_deg(vec2 uv) {
+      vec2 t = 1.0 / vec2(textureSize(u_height, 0));
+      vec2 ex = vec2(t.x, 0.0), ey = vec2(0.0, t.y);
+      float dx = texture(u_height, uv + ex).r
+               - texture(u_height, uv - ex).r;
+      float dy = texture(u_height, uv + ey).r
+               - texture(u_height, uv - ey).r;
+      vec2 g = vec2(dx, dy) / (2.0 * u_cell);
+      return degrees(atan(length(g)));
+    }
+decisions:
+  - choice: Contours in the fragment shader
+    instead: A separate line-geometry pass
+    why: Lines drawn in the terrain pass cannot z-fight with it, and changing the interval is one uniform. Revisit if councillors want labelled contour lines.
+  - choice: Normals on the GPU
+    instead: Per-vertex normals computed in numpy at load
+    why: Skipping the CPU normal pass keeps the 4096 raster load under 3 s, and the slope always matches the texture.
+  - choice: 1024 grid for drawing, full raster for readout
+    instead: One mesh at full 4096 resolution
+    why: A 4096 grid is 33M triangles, far over the iGPU budget; the readout still uses full-resolution metres, so the 0.5 m error target holds.
+watchOut: >-
+  Mixing metres and pixel coordinates breaks the slope colouring and the readout. Keep the cell size from the raster
+  header in every gradient, and clamp samples at the grid border so edges do not get wrong normals.

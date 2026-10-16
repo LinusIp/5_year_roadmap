@@ -1,0 +1,57 @@
+overview: >-
+  A small model wrapped in a FastAPI service with input validation and a health route, packed in Docker and load
+  tested until it saturates. The model loads once at startup, and the report states the requests per second it holds
+  at the target p95 latency.
+learn:
+  - name: Request validation
+  - name: Containers
+    ref: docker-get-started
+  - name: Load testing
+  - name: Tail latency
+components:
+  - id: client
+    name: Load generator
+    role: Fires requests at rising rates and records latency percentiles.
+    tech: locust or wrk
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: API
+    role: Validates input with Pydantic and exposes /predict and /health.
+    tech: FastAPI · Uvicorn workers
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Model
+    role: Is loaded once per worker at startup and answers predictions from memory.
+    tech: scikit-learn or small torch
+    talksTo: []
+    kind: core
+flow:
+  - component: client
+    text: sends `POST /predict` at a rate that steps up every minute.
+  - component: api
+    text: rejects bad payloads with `422` before they reach the model, and answers `GET /health` without touching it.
+  - component: model
+    text: runs the prediction on the copy loaded at startup and returns the label and score.
+  - component: client
+    text: reports requests/s and p95 per step; the **saturation point** is where p95 crosses the target.
+interface:
+  lang: http
+  code: |
+    POST /predict
+    { "features": [5.1, 3.5, 1.4, 0.2] }
+
+    200 OK
+    { "label": "setosa", "score": 0.97 }
+
+    GET /health  ->  200 { "status": "ok" }
+decisions:
+  - choice: Several Uvicorn workers in one container
+    instead: One worker per container, scaled out
+    why: >-
+      A CPU-bound model on one worker uses one core and saturates early; a worker per core is the cheapest fix on one
+      machine. Revisit when an orchestrator scales containers for you.
+watchOut: >-
+  Loading the model inside the request handler adds its load time to every call. Load it in the startup hook and
+  check that p95 stays flat at low load.

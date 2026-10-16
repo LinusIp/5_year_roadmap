@@ -1,0 +1,124 @@
+overview: >-
+  A CPU version of the graphics pipeline in C++20 that renders the tinyrenderer head model textured and lit. A vertex
+  shader moves each corner into clip space, the pipeline drops back-facing triangles, divides by w and maps to pixels,
+  then walks each triangle's bounding box and uses barycentric coordinates (three weights that say how close a pixel
+  is to each corner) to test coverage and depth. Covered pixels get their UVs and normals interpolated with
+  perspective correction and a fragment shader picks the colour.
+learn:
+  - name: Barycentric coordinates
+    ref: tinyrenderer
+  - name: Z-buffering
+    ref: tinyrenderer
+  - name: Edge functions and fill rules
+    ref: scratchapixel
+  - name: Perspective-correct interpolation
+    ref: scratchapixel
+  - name: Homogeneous coordinates
+    ref: gamemath-3d-primer
+stats:
+  - value: '0'
+    label: cracks or double-drawn pixels on shared edges
+  - value: ≥ 3
+    label: swappable shaders in the repository
+  - value: 800×800
+    label: frame time on 1 thread and several
+components:
+  - id: loader
+    name: OBJ loader
+    role: Reads positions, UVs, normals and faces, and loads the diffuse texture.
+    tech: C++20 · stb_image
+    talksTo: [vertex]
+    kind: core
+  - id: vertex
+    name: Vertex shader
+    role: Returns each corner's clip-space position and the varyings to interpolate.
+    tech: std::function
+    talksTo: [setup]
+    kind: core
+  - id: setup
+    name: Cull and viewport
+    role: Drops back faces, divides by w and maps to pixel coordinates with y flipped.
+    tech: C++20
+    talksTo: [raster]
+    kind: core
+  - id: raster
+    name: Rasterizer
+    role: Walks the bounding box, applies the top-left rule, tests depth and interpolates varyings.
+    tech: Edge functions · z-buffer
+    talksTo: [fragment]
+    kind: core
+  - id: fragment
+    name: Fragment shader
+    role: Turns interpolated UVs and normals into a colour, or discards the pixel.
+    tech: std::function
+    talksTo: [framebuffer]
+    kind: core
+  - id: framebuffer
+    name: Framebuffer
+    role: Holds colour and depth, and writes an image file or shows a live window.
+    tech: stb_image_write · SDL2 or minifb
+    talksTo: []
+    kind: core
+  - id: profiler
+    name: Profiler
+    role: Splits frame time between rasterization and shading.
+    tech: perf · Tracy
+    talksTo: []
+    kind: offline
+flow:
+  - component: loader
+    text: reads `head.obj` and its texture once, before the first frame.
+  - component: vertex
+    text: >-
+      computes `proj * view * model * v` for each corner and stores its UV and normal as varyings.
+  - component: setup
+    text: >-
+      skips the triangle if its signed area shows it faces away, divides by `w` but keeps `1/w`, and maps x and y to
+      the 800×800 viewport.
+  - component: raster
+    text: >-
+      evaluates three edge functions for every pixel in the bounding box; a pixel on a shared edge belongs to only one
+      triangle by the **top-left rule**, and it is drawn only if its depth beats the z-buffer.
+  - component: raster
+    text: >-
+      interpolates `uv / w` and `1 / w` with the barycentrics and divides one by the other, which is what makes the
+      interpolation **perspective-correct**.
+  - component: fragment
+    text: samples the texture, applies Gouraud or Phong lighting and returns the colour.
+  - component: framebuffer
+    text: >-
+      stores colour and depth, then writes the image or presents it in the window, where frame time is measured.
+interface:
+  lang: cpp
+  code: |
+    struct Varyings { vec2 uv; vec3 n; };
+
+    using VertexShader = std::function<
+        vec4(const Vertex &, Varyings &)>;
+    // returns false to discard the pixel
+    using FragmentShader = std::function<
+        bool(const Varyings &, Color &)>;
+
+    void draw(const Mesh &mesh,
+              const VertexShader &vs,
+              const FragmentShader &fs,
+              Framebuffer &fb);  // colour + depth
+decisions:
+  - choice: Bounding box and barycentrics
+    instead: Scanline filling
+    why: >-
+      The same three weights give coverage, depth and every varying, and each pixel is independent, so splitting the
+      image into tiles for several threads is easy later.
+  - choice: Shaders as swappable callables
+    instead: Lighting hard-coded in the pipeline
+    why: >-
+      The goal is to see the programmable stages a GPU has; three shaders behind one interface prove the pipeline does
+      not care. Measure the call overhead per pixel before replacing it with templates.
+  - choice: A consistent top-left fill rule
+    instead: Drawing every pixel on an edge
+    why: >-
+      Neighbouring triangles share edges all over the head model. Including the edge in both draws pixels twice, and
+      excluding it from both leaves cracks.
+watchOut: >-
+  Interpolating UVs linearly in screen space warps textures on surfaces seen at an angle. Render a checkerboard plane
+  at a steep angle; its lines must stay straight.

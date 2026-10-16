@@ -1,0 +1,107 @@
+overview: >-
+  A desktop forklift simulator for Eastgate Logistics: a gamepad or wheel drives a rear-steer truck through a
+  synthetic warehouse, and the trainee slaloms aisles, puts pallets away on 6 m racking and loads a dock. Physics runs
+  at a fixed 120 Hz with a 3-DOF planar model (position and heading) plus a check that the combined centre of gravity
+  of truck and load stays inside the stability triangle. Exercise scripts turn what happens into events, the scorer
+  turns events into points, and the recorder keeps the inputs so any run can be replayed next to the best run's ghost.
+learn:
+  - name: Fixed timestep loop
+    ref: gaffer-on-games
+  - name: Rear-steer kinematics
+  - name: Stability triangle
+  - name: Contact and penetration
+    ref: ericson-rtcd
+  - name: Deterministic replay
+    ref: gaffer-on-games
+stats:
+  - value: 120 Hz
+    label: fixed physics step, 60 FPS render
+  - value: ≤ 5%
+    label: tip-over error vs analytic limit
+  - value: 100 of 100
+    label: replays give the same score
+components:
+  - id: pad
+    name: Gamepad or wheel
+    role: Gives steer, throttle, brake, lift and tilt axes.
+    tech: SDL2 input
+    talksTo: [vehicle]
+    kind: external
+  - id: vehicle
+    name: Vehicle model
+    role: Integrates the rear-steer truck in x, y and heading with load-dependent speed limits.
+    tech: C++17
+    talksTo: [mast]
+    kind: core
+  - id: mast
+    name: Mast and load
+    role: Owns lift height, mast tilt, fork-pallet contact and the combined centre of gravity.
+    tech: C++17
+    talksTo: [exercise]
+    kind: core
+  - id: exercise
+    name: Exercise scripts
+    role: Watch the state each tick and emit events such as collision, overspeed, pallet placed or tip-over.
+    tech: C++17 · data files
+    talksTo: [scoring]
+    kind: core
+  - id: scoring
+    name: Scoring
+    role: Turns events into integer points for time, collisions, speed and load tilt.
+    tech: C++17
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Draws the warehouse, truck and ghost at 60 FPS, interpolating between physics states.
+    tech: OpenGL 3.3
+    talksTo: []
+    kind: core
+  - id: replay
+    name: Replay recorder
+    role: Stores the input of every tick and re-simulates a run, or the best run as a ghost.
+    tech: C++17 · binary file
+    talksTo: []
+    kind: offline
+flow:
+  - component: vehicle
+    text: reads the input sampled for this tick and advances the truck by exactly `dt = 1/120 s`; the rear wheels steer, so the tail swings out in tight turns.
+  - component: mast
+    text: moves the forks, resolves fork-pallet contact by pushing the forks back out, and computes the combined centre of gravity of truck plus load.
+  - component: mast
+    text: projects that point to the floor and measures its distance to the **stability triangle** (the two front wheels and the rear axle pivot); a negative `stabilityMargin` triggers tip-over.
+  - component: exercise
+    text: compares the state with the exercise's rules and appends events like `Overspeed` or `PalletPlaced`, each stamped with the tick number.
+  - component: scoring
+    text: adds or subtracts integer points per event, so the same event list always gives the same score.
+  - component: renderer
+    text: draws the latest two physics states blended by the leftover time in the accumulator, plus the ghost's state at the same tick.
+interface:
+  lang: cpp
+  code: |
+    struct Input {          // sampled once per tick
+      int16_t steer;        // -32767 .. 32767
+      int16_t throttle, brake;
+      int8_t  lift, tilt;   // -1, 0, +1
+    };
+    struct Event { uint32_t tick; EventType type;
+                   int32_t value; };
+
+    // dt is always 1/120 s, never the frame time
+    void  step(SimState& s, const Input& in,
+               std::vector<Event>& out);
+    float stabilityMargin(const SimState& s);
+    // < 0: centre of gravity left the triangle
+decisions:
+  - choice: Fixed 120 Hz step with an accumulator
+    instead: Step physics once per rendered frame
+    why: A variable step changes the result with the frame rate, so scores would differ between a fast and a slow office PC. The renderer interpolates, so 60 FPS still looks smooth.
+  - choice: Planar model plus a static stability check
+    instead: A full 3D rigid-body physics engine
+    why: The 5% target is measured against the analytic stability triangle, which a planar model reproduces exactly, and it runs easily on a 6-year-old PC. Revisit if uneven floors or ramps are added.
+  - choice: Record inputs, re-simulate for replay
+    instead: Record every state each tick
+    why: Inputs are about 8 bytes a tick, and re-simulating them is also the determinism test. The cost is that any non-determinism shows up as a drifting ghost.
+watchOut: >-
+  The score stops being deterministic when floating-point work changes order, for example a parallel sum or fast-math
+  flags. Keep the physics single-threaded with a fixed step, and run all 100 recorded runs in CI to catch it.

@@ -1,0 +1,72 @@
+overview: >-
+  An archetype ECS (entity component system): entities with the same set of component types live together in one
+  table, stored as struct-of-arrays in 16 KB chunks, so a query for Position, Velocity and Mass walks tightly packed
+  arrays. Adding or removing a component moves the entity to another table, and those structural changes wait until
+  iteration ends so they never break a loop in progress.
+learn:
+  - name: Entity component systems
+    ref: game-engine-architecture
+  - name: Archetype tables
+  - name: Struct-of-arrays
+  - name: Deferred commands
+components:
+  - id: registry
+    name: Entity registry
+    role: Hands out entity handles and maps each to its table, chunk and row.
+    tech: C++20
+    talksTo: [archetypes]
+    kind: core
+  - id: archetypes
+    name: Archetype tables
+    role: One table per component set, each a list of 16 KB SoA chunks.
+    tech: C++20
+    talksTo: [query]
+    kind: core
+  - id: query
+    name: Query iterator
+    role: Finds matching tables and calls the system once per row, chunk by chunk.
+    tech: C++20 templates
+    talksTo: [commands]
+    kind: core
+  - id: commands
+    name: Command buffer
+    role: Records adds, removes and destroys during iteration and applies them after.
+    tech: C++20
+    talksTo: [archetypes]
+    kind: core
+flow:
+  - component: registry
+    text: returns `Entity {index, generation}`; the generation goes up on destroy, so a stale handle is caught instead of reading another entity.
+  - component: archetypes
+    text: hash the sorted component-id set to find or create a table; each chunk holds one array per component for `16 KB / rowSize` rows.
+  - component: query
+    text: caches the tables that contain all requested types and calls `fn(Position&, Velocity&, const Mass&)` row by row; the target is fewer ns per entity than a sparse-set ECS over 1M entities.
+  - component: commands
+    text: applies changes after the loop by copying the row into the new table, then **swap-removing** the old row and fixing the moved entity's record; the next frame's queries see the new tables, which is the loop back.
+interface:
+  lang: cpp
+  code: |
+    struct Entity { uint32_t index, generation; };
+
+    class World {
+    public:
+      Entity create();
+      template <class T> void add(Entity e, T value);
+      template <class T> void remove(Entity e);
+      template <class... Ts, class F>
+      void each(F&& fn);  // fn(Ts&...) per row
+      void flush();       // apply deferred changes
+    private:
+      std::vector<Archetype> tables_;
+      std::unordered_map<TypeSetHash, int> lookup_;
+      CommandBuffer pending_;
+    };
+decisions:
+  - choice: Defer structural changes
+    instead: Move entities between tables immediately
+    why: >-
+      A move swap-removes a row inside the very chunk being iterated, so the loop skips or repeats an entity. A small
+      command buffer keeps iteration a plain loop over arrays.
+watchOut: >-
+  Every add or remove copies all of an entity's components, so toggling a tag component every frame gets slow. Cache
+  the target table for each (table, component) edge, and use a plain field for flags that flip often.

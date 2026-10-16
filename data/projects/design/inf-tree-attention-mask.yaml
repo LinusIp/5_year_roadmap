@@ -1,0 +1,59 @@
+overview: >-
+  In speculative decoding a small draft model proposes a tree of candidate continuations, and the big model checks
+  them all in one forward pass by letting each tree token attend only to the prompt and its own ancestors. This
+  build makes the tree-shaped position ids and the ancestor mask, proves the logits equal checking each branch one
+  token at a time, and times the gain for trees of 8 and 32 tokens.
+learn:
+  - name: Speculative decoding
+    ref: vllm-docs
+  - name: Tree attention
+  - name: Attention masks
+    ref: hf-llm-course
+  - name: Position ids and RoPE
+components:
+  - id: tree
+    name: Draft tree
+    role: Holds candidate tokens with a parent index each, flattened in depth-first order.
+    tech: Python · PyTorch
+    talksTo: [mask]
+    kind: core
+  - id: mask
+    name: Mask builder
+    role: Builds position ids from depth and the ancestor mask from the parent links.
+    tech: PyTorch
+    talksTo: [verify]
+    kind: core
+  - id: verify
+    name: Tree verifier
+    role: Runs the model once on prompt KV plus all tree tokens with the custom mask.
+    tech: PyTorch SDPA or Triton
+    talksTo: [check]
+    kind: core
+  - id: check
+    name: Equivalence check
+    role: Compares each node's logits with sequential decode of its branch and times both.
+    tech: PyTorch
+    talksTo: []
+    kind: core
+flow:
+  - component: tree
+    text: samples a random tree, for example 8 nodes with `parent = [-1, 0, 0, 1, 1, 2, 3, 3]`.
+  - component: mask
+    text: >-
+      sets `pos[i] = prompt_len + depth[i]`, so siblings share a position, and allows `mask[i][j]` only when `j` is
+      `i` or one of its **ancestors**.
+  - component: verify
+    text: appends the tree tokens after the cached prompt and runs one forward with the mask as `attn_mask`.
+  - component: check
+    text: >-
+      decodes each root-to-node path one token at a time and asserts the logits match within fp tolerance, for 20
+      random trees.
+decisions:
+  - choice: Dense boolean mask first
+    instead: A custom Triton kernel from the start
+    why: >-
+      For trees of 8 to 32 tokens the mask is tiny, and SDPA with a mask is easy to prove correct. Write a Triton
+      kernel only after the equivalence test passes, then reuse the test.
+watchOut: >-
+  Giving tree tokens positions 0, 1, 2 in flattened order instead of by depth breaks RoPE for every branch but the
+  first, and the logits drift only slightly. Assert positions equal the depth before any timing.

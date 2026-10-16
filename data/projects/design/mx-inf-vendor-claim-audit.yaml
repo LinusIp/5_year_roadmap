@@ -1,0 +1,100 @@
+overview: >-
+  A benchmark harness that checks two vendors' "3× faster" claims on Cedar Systems' own workloads and one consumer
+  GPU. A declarative workload file fixes prompts, lengths and seeds; adapters drive llama.cpp and vLLM through the
+  same OpenAI-style API at matching precision; and every run records an environment fingerprint. Each benchmark repeats
+  at least five times, and the report gives speed-up ratios with confidence intervals and says plainly where each
+  claim holds.
+learn:
+  - name: Benchmark methodology
+    ref: databricks-inference-best-practices
+  - name: Latency percentiles
+  - name: Confidence intervals on ratios
+  - name: Environment fingerprinting
+  - name: Warm versus cold runs
+stats:
+  - value: ≤ 5%
+    label: CI width vs mean
+  - value: ≤ 90 min
+    label: full harness run
+  - value: ≤ 10%
+    label: second-machine difference
+components:
+  - id: spec
+    name: Workload spec
+    role: Declares short chat, long prompt and batch workloads with length distributions and seeds.
+    tech: YAML
+    talksTo: [runner]
+    kind: core
+  - id: env
+    name: Env fingerprint
+    role: Records GPU, driver, CUDA, library versions, model file hash and quantisation.
+    tech: Python · nvidia-smi
+    talksTo: [runner]
+    kind: core
+  - id: runner
+    name: Runner
+    role: Warms each engine, runs repeats in shuffled order and stores raw per-request timings.
+    tech: Python · asyncio
+    talksTo: [adapters]
+    kind: core
+  - id: adapters
+    name: Engine adapters
+    role: Start, configure and call each engine with identical settings.
+    tech: llama.cpp · vLLM
+    talksTo: [stats]
+    kind: core
+  - id: stats
+    name: Stats and report
+    role: Computes p50 and p99, throughput, run-to-run variation and bootstrap intervals, then writes the report.
+    tech: pandas · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: spec
+    text: defines `long_prompt`, 4,000-token prompts and 256 output tokens at concurrency 4, with seed 7.
+  - component: env
+    text: fingerprints the machine and both model files, refusing to run if the two engines would use different precisions.
+  - component: runner
+    text: >-
+      sends a warm-up round that is thrown away, then 5 timed repeats, alternating engines so heat and background
+      noise affect both equally.
+  - component: adapters
+    text: send the same prompts with the same `max_tokens`, temperature 0 and batch limits, and stream back token timestamps.
+  - component: stats
+    text: >-
+      reports, for example, a 1.4× throughput ratio with interval [1.3, 1.5] for long prompts, so the "3×" claim is
+      marked **not reproduced** for that workload.
+interface:
+  lang: yaml
+  code: |
+    workload: long_prompt
+    seed: 7
+    model: open-8b-instruct
+    precision: q4          # same for every engine
+    prompts:
+      count: 200
+      input_tokens: { dist: lognormal, median: 4000 }
+      output_tokens: 256
+    concurrency: 4
+    repeats: 5
+    warmup_rounds: 1
+    engines: [llama.cpp, vllm]
+decisions:
+  - choice: Matching precision across engines
+    instead: Each engine's default format
+    why: >-
+      A 4-bit build against an fp16 build measures quantisation, not the runtime. If one engine cannot match, report
+      it as a separate row, labelled.
+  - choice: Median of five with intervals
+    instead: The best of several runs
+    why: >-
+      Vendor numbers are often best runs. Five repeats with bootstrap intervals show whether a gap is real, and the
+      5% CI target tells you when to add repeats.
+  - choice: Three workloads, judged separately
+    instead: One headline number
+    why: >-
+      A runtime can be 3× faster at batch throughput and no faster on a single long prompt; the decision depends on
+      which workload Cedar actually runs.
+watchOut: >-
+  Comparing a warm engine with a cold one, or different quantisation levels, produces a fake "3×". Fingerprint every
+  run and discard warm-up rounds for both engines.

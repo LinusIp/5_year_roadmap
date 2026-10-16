@@ -1,0 +1,75 @@
+overview: >-
+  A Python script that recomputes the TLS 1.3 key schedule, the chain of HKDF steps that turns a shared secret and a
+  running hash of the handshake messages into every key a connection uses. It derives handshake and traffic secrets
+  from a published test-vector trace, decrypts one recorded handshake record with them, and must match the vector byte
+  for byte.
+learn:
+  - name: HKDF extract and expand
+  - name: Transcript hashes
+  - name: AEAD record nonces
+components:
+  - id: vectors
+    name: Test-vector trace
+    role: The published handshake trace with its messages, shared secret and every derived value.
+    tech: RFC 8448 trace
+    talksTo: [schedule]
+    kind: external
+  - id: hkdf
+    name: HKDF
+    role: Extract, Expand and Expand-Label built on HMAC-SHA256.
+    tech: hmac · hashlib
+    talksTo: []
+    kind: core
+  - id: schedule
+    name: Key schedule
+    role: Walks early, handshake and master secrets and derives each traffic secret, key and IV.
+    tech: Python
+    talksTo: [hkdf, record]
+    kind: core
+  - id: record
+    name: Record decryptor
+    role: Decrypts one recorded handshake record with the derived server key and IV.
+    tech: cryptography · AES-GCM
+    talksTo: []
+    kind: core
+flow:
+  - component: hkdf
+    text: >-
+      implements `HKDF-Extract(salt, ikm) = HMAC(salt, ikm)` and `HKDF-Expand-Label`, which wraps the label as
+      `"tls13 " + label` inside a length-prefixed `HkdfLabel`.
+  - component: schedule
+    text: >-
+      extracts from zero to the early secret, then with the shared `(EC)DHE` secret to the handshake secret, and
+      derives `c hs traffic` and `s hs traffic` over the hash of ClientHello and ServerHello.
+  - component: schedule
+    text: >-
+      derives the master secret and, over the transcript up to server Finished, the `c ap traffic` and `s ap
+      traffic` secrets, then a `key` and `iv` from each.
+  - component: record
+    text: >-
+      builds the nonce as `iv XOR sequence number`, decrypts the server's EncryptedExtensions record, and the script
+      compares every secret with the vector.
+interface:
+  lang: python
+  code: |
+    def expand_label(secret: bytes, label: str,
+                     context: bytes, length: int) -> bytes:
+        full = b"tls13 " + label.encode()
+        info = (length.to_bytes(2, "big")
+                + bytes([len(full)]) + full
+                + bytes([len(context)]) + context)
+        return hkdf_expand(secret, info, length)
+
+    def derive_secret(secret, label, messages):
+        return expand_label(secret, label,
+                            sha256(messages), 32)
+decisions:
+  - choice: Own HKDF on top of HMAC
+    instead: The cryptography library's HKDF class
+    why: >-
+      The point is to see each step, and HKDF is about 15 lines on top of `hmac`. Keep AES-GCM from the library,
+      since writing that yourself teaches nothing about the schedule and is easy to get subtly wrong.
+watchOut: >-
+  Each secret hashes the transcript at a specific point: handshake secrets stop after ServerHello, application
+  secrets after server Finished. One message too many or too few gives a plausible but wrong key, so compare with the
+  vector after every step.

@@ -1,0 +1,116 @@
+overview: >-
+  One small Unity game taken all the way to finished: title screen, one loop of play lasting 3 to 10 minutes, a win and
+  a lose state, restart, sound, and builds on itch.io. A GameManager owns a state machine (a fixed list of states and
+  the moves between them) and loads scenes; gameplay objects only raise events, and the UI and audio listen for them.
+  Physics and input run in the fixed update, rendering and UI in the frame update.
+learn:
+  - name: Game state machine
+    ref: game-engine-architecture
+  - name: Event-driven decoupling
+  - name: Fixed versus frame update
+    ref: gaffer-on-games
+  - name: Scoping and cut lists
+  - name: Object pooling
+stats:
+  - value: 60 FPS
+    label: at 1080p on a mid-range laptop
+  - value: "3"
+    label: new players finish unaided
+  - value: 3–10 min
+    label: one run of play
+components:
+  - id: input
+    name: Keyboard / gamepad
+    role: Delivers player actions through the Input System package.
+    tech: Unity Input System
+    talksTo: [player]
+    kind: external
+  - id: player
+    name: Player and enemies
+    role: Moves with physics in FixedUpdate and raises score, health, death and goal events.
+    tech: C# · Unity physics
+    talksTo: [manager]
+    kind: core
+  - id: manager
+    name: GameManager
+    role: Owns the state machine Title, Playing, Paused, Won, Lost and decides when to change scene.
+    tech: C#
+    talksTo: [loader, audio, ui]
+    kind: core
+  - id: ui
+    name: UI layer
+    role: Shows title, HUD, pause, win and game-over screens from the events it subscribes to.
+    tech: Unity UI
+    talksTo: []
+    kind: core
+  - id: audio
+    name: AudioManager
+    role: Plays music and 5 to 10 pooled sound effects.
+    tech: C# · AudioSource pool
+    talksTo: []
+    kind: core
+  - id: loader
+    name: SceneLoader
+    role: Loads the title and level scenes for restart and return to title.
+    tech: Unity SceneManager
+    talksTo: []
+    kind: core
+  - id: release
+    name: Builds and itch.io
+    role: Produces the WebGL and Windows builds and uploads them.
+    tech: butler · Git LFS
+    talksTo: []
+    kind: offline
+flow:
+  - component: player
+    text: >-
+      reads input and moves in `FixedUpdate`, scaling by the time step so speed never depends on frame rate.
+  - component: player
+    text: >-
+      loses its last health point and raises `PlayerDied`; it holds no reference to any menu or sound.
+  - component: manager
+    text: moves the state machine from `Playing` to `Lost` and freezes play.
+  - component: ui
+    text: >-
+      hears the same events, so the HUD shows the final score and the **game-over** screen offers restart.
+  - component: audio
+    text: plays the lose sting from its pool and fades the level music.
+  - component: loader
+    text: >-
+      reloads the level when the player picks restart, and the manager returns to `Playing`, or to `Title` from the
+      menu.
+interface:
+  lang: csharp
+  code: |
+    public enum GameState {
+      Title, Playing, Paused, Won, Lost }
+
+    public static class GameEvents {
+      public static event Action<int> ScoreChanged;
+      public static event Action<float> HealthChanged;
+      public static event Action PlayerDied;
+      public static event Action GoalReached;
+    }
+
+    // GameManager: the only place that changes state
+    public void SetState(GameState next);
+decisions:
+  - choice: Gameplay talks through events
+    instead: Gameplay scripts calling the UI and audio directly
+    why: >-
+      Menus, pause and audio arrive in a later 14-hour milestone, and events let you add or cut them without touching
+      gameplay code. Direct calls are fine inside one object.
+  - choice: One state machine in the GameManager
+    instead: Booleans such as isPaused and isDead spread across scripts
+    why: >-
+      Five states and their moves fit on a card, and restart bugs come from flags that disagree. Add states, not
+      flags, if a second level arrives.
+  - choice: Unity, the engine you already know
+    instead: Your own engine
+    why: >-
+      Finishing is the skill here, and 70 hours leaves no room to build tools. Your own engine comes in the graphics
+      and physics projects that follow.
+watchOut: >-
+  Scope creep kills small games: a second mechanic before the first is fun, while menus, audio and builds wait for the
+  last weekend and then take a third of the time. Make an ugly WebGL build in the first week and keep the cut list
+  current.

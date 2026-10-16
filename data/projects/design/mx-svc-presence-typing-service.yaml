@@ -1,0 +1,116 @@
+overview: >-
+  A presence service for Ping Team that shows who is online without flicker or ghosts after a crash. Every device
+  sends a heartbeat every 20 s, which refreshes a Redis key that expires after 45 s, so a crashed client simply
+  times out. An aggregator turns the device states into one status per user and publishes only real changes, and
+  typing indicators are short-lived keys that expire on their own.
+learn:
+  - name: Heartbeats and TTLs
+  - name: Ephemeral state in Redis
+  - name: Debouncing and hysteresis
+  - name: Fan-out throttling
+    ref: system-design-primer
+  - name: Keyspace notifications
+stats:
+  - value: 20,000
+    label: users on 1 core
+  - value: < 45 s
+    label: p99 offline detection
+  - value: < 100 ms
+    label: p99 typing delivery
+components:
+  - id: devices
+    name: Client devices
+    role: Send a heartbeat every 20 s and typing events while the user types.
+    tech: Desktop · mobile
+    talksTo: [intake]
+    kind: external
+  - id: intake
+    name: Heartbeat intake
+    role: Accepts heartbeats and typing events over the existing WebSocket.
+    tech: Go
+    talksTo: [store, typing]
+    kind: core
+  - id: store
+    name: Presence store
+    role: One key per device with status and a 45 s TTL.
+    tech: Redis
+    talksTo: [aggregator]
+    kind: core
+  - id: aggregator
+    name: Aggregator
+    role: Combines a user's devices into online, away or offline and emits only changes.
+    tech: Go
+    talksTo: [fanout]
+    kind: core
+  - id: typing
+    name: Typing manager
+    role: Sets a 5 s key per user and channel and sends start and stop events.
+    tech: Go · Redis
+    talksTo: [fanout]
+    kind: core
+  - id: fanout
+    name: Subscription fan-out
+    role: Sends changes to subscribers, batching large channels to one update per 5 s.
+    tech: Go
+    talksTo: []
+    kind: core
+  - id: sim
+    name: Client simulator
+    role: Simulates 20,000 users with crashes and network flaps.
+    tech: Go
+    talksTo: [intake]
+    kind: offline
+flow:
+  - component: intake
+    text: receives a heartbeat from device `d_laptop` with status `active` for user `u_31` and passes it on.
+  - component: store
+    text: >-
+      runs `SET presence:u_31:d_laptop active EX 45`; if the laptop crashes, the key simply expires 45 s after the
+      last beat.
+  - component: aggregator
+    text: >-
+      on a key change or expiry recomputes u_31 as the **best** state across devices, so the phone can be away while
+      the user stays online.
+  - component: aggregator
+    text: >-
+      publishes only when the result really changed and has held for 10 s, so a phone flapping between Wi-Fi and 4G
+      causes no flicker.
+  - component: typing
+    text: sets `typing:c_eng:u_31` with a 5 s TTL on each keystroke burst; when it expires, a stop event goes out without the client sending one.
+  - component: fanout
+    text: >-
+      sends the change to u_31's contacts at once, but for a 10,000-member channel batches all changes into one
+      update every 5 s.
+interface:
+  lang: json
+  code: |
+    // device → server, every 20 s
+    { "type": "hb", "device": "d_laptop",
+      "status": "active" }
+
+    // server → subscriber, only on change
+    { "type": "presence", "user": "u_31",
+      "status": "online", "since": "…T09:41:07Z" }
+
+    // typing, auto-expires after 5 s
+    { "type": "typing", "channel": "c_eng",
+      "user": "u_31", "state": "start" }
+decisions:
+  - choice: TTL keys, not explicit logout
+    instead: Rely on a disconnect message
+    why: >-
+      Crashed apps never send one, which is why stale users linger today. A 45 s TTL with 20 s heartbeats allows one
+      lost beat and still meets the 45 s detection target.
+  - choice: Publish only held changes
+    instead: Publish every heartbeat result
+    why: >-
+      20,000 users beating every 20 s is 1,000 events a second; almost none are changes. Holding a change for 10 s
+      before sending removes flapping storms.
+  - choice: Batch big channels
+    instead: Send every change to every member
+    why: >-
+      One user going online in a 10,000-member channel would mean 10,000 messages. A 5-second batch keeps one core
+      enough for the whole fleet.
+watchOut: >-
+  Comparing heartbeat timestamps from different machines breaks when their clocks differ. Let Redis TTLs, which use
+  one clock, decide when a device has gone.

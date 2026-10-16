@@ -1,0 +1,53 @@
+overview: >-
+  A VQ-VAE that turns an image into a small grid of discrete tokens: an encoder makes feature vectors, each is
+  replaced by its nearest entry in a learned codebook, and a decoder rebuilds the image from those entries. Codebook
+  usage is tracked so you can see and prevent collapse, where only a few codes are ever used.
+learn:
+  - name: Vector quantization
+    ref: stanford-cs236
+  - name: Straight-through estimator
+  - name: EMA codebook updates
+  - name: Codebook perplexity
+components:
+  - id: encoder
+    name: Encoder
+    role: Downsamples a 32x32 image to an 8x8 grid of 64-dimensional vectors.
+    tech: PyTorch conv net
+    talksTo: [quantizer]
+    kind: core
+  - id: quantizer
+    name: Quantizer
+    role: Swaps each vector for its nearest of 512 codes and updates codes by moving average.
+    tech: PyTorch
+    talksTo: [decoder, stats]
+    kind: core
+  - id: decoder
+    name: Decoder
+    role: Rebuilds the image from the quantized grid.
+    tech: PyTorch conv net
+    talksTo: []
+    kind: core
+  - id: stats
+    name: Usage stats
+    role: Logs code histogram, perplexity, utilization and held-out PSNR.
+    tech: Python · matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: encoder
+    text: maps each image to an `8x8x64` grid.
+  - component: quantizer
+    text: picks the nearest code per vector, passes gradients straight through with `z + (q - z).detach()`, and updates codes with an **EMA** of their assigned vectors.
+  - component: decoder
+    text: reconstructs the image; loss is reconstruction plus a commitment term pulling the encoder toward its codes.
+  - component: stats
+    text: reports PSNR on held-out images, perplexity `exp(entropy)` of code usage, and the share of codes used (target over 50%).
+decisions:
+  - choice: EMA codebook updates
+    instead: Learning the codebook with a gradient loss term
+    why: >-
+      EMA updates are steadier and collapse less in short runs, which matters in an 8-hour build. Also reset unused
+      codes to random encoder outputs if utilization stays low.
+watchOut: >-
+  Without the straight-through trick the encoder gets no gradient, because nearest-code lookup is not
+  differentiable, and it never learns. Check that encoder weights change after the first step.

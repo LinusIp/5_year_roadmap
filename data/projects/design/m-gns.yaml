@@ -1,0 +1,132 @@
+overview: >-
+  A learned simulator trained on your own 2D rigid-body engine: each body becomes particles on its outline plus a centre
+  node, a graph links particles that are close, and a network passes messages along those links to predict every
+  particle's acceleration. Integrating that acceleration gives the next positions, which are fed back in for hundreds
+  of steps (a rollout) and compared with the engine. Test scenes with more bodies and unseen shapes show where it stops
+  generalising.
+learn:
+  - name: Message passing
+    ref: cs224w
+  - name: Encoder-processor-decoder
+  - name: Learned simulators
+    ref: pbdl-book
+  - name: Noise injection
+  - name: Rollout error
+  - name: Out-of-distribution tests
+stats:
+  - value: < 5 %
+    label: of box width, 100-step error
+  - value: 1,000
+    label: training trajectories
+  - value: 3–8 → 16
+    label: bodies, train to test
+components:
+  - id: generator
+    name: Trajectory generator
+    role: Steps the engine at a fixed timestep from a seed and saves positions per particle and per body.
+    tech: Your 2D engine · scene dump
+    talksTo: [graph]
+    kind: core
+  - id: graph
+    name: Graph builder
+    role: Links particles within a radius, adds wall distances and the last five velocities per node.
+    tech: PyTorch Geometric
+    talksTo: [encoder]
+    kind: core
+  - id: encoder
+    name: Encoder
+    role: Embeds node and edge features into latent vectors.
+    tech: PyTorch · MLP
+    talksTo: [processor]
+    kind: core
+  - id: processor
+    name: Processor
+    role: Runs 10 rounds of message passing so a push can travel through contacts.
+    tech: PyTorch Geometric
+    talksTo: [decoder]
+    kind: core
+  - id: decoder
+    name: Decoder
+    role: Turns each particle's latent vector into a 2D acceleration.
+    tech: PyTorch · MLP
+    talksTo: [integrator]
+    kind: core
+  - id: integrator
+    name: Integrator
+    role: Applies semi-implicit Euler and feeds the new positions back for the next step.
+    tech: PyTorch
+    talksTo: [graph, eval]
+    kind: core
+  - id: eval
+    name: Rollout evaluator
+    role: Compares rollouts with the engine for every test set and horizon, and logs energy and failures.
+    tech: NumPy
+    talksTo: [wandb]
+    kind: offline
+  - id: wandb
+    name: Run tracker
+    role: Keeps training curves, error-against-horizon charts and rollout GIFs.
+    tech: Weights & Biases
+    talksTo: []
+    kind: external
+flow:
+  - component: generator
+    text: >-
+      creates 1,000 training and 100 test trajectories of 300 steps with 3–8 boxes and circles, from **separate** seed
+      ranges, plus the out-of-distribution sets.
+  - component: graph
+    text: >-
+      connects particles closer than the radius, adds wall-distance features and five normalised past velocities, and
+      during training adds **noise** to the input velocities.
+  - component: encoder
+    text: maps each node and edge to a latent vector with small MLPs.
+  - component: processor
+    text: passes messages along the edges 10 times, so a push can reach particles several contacts away.
+  - component: decoder
+    text: outputs a normalised acceleration per particle; in training it is compared with the engine's acceleration.
+  - component: integrator
+    text: >-
+      updates `v += a·dt`, then `x += v·dt`, and hands the new positions back to the graph builder; this **loop** is
+      the rollout.
+  - component: eval
+    text: >-
+      reports position error against horizon from 1 to 300 steps, in distribution and on 12–16 bodies, new shapes and
+      a larger box.
+interface:
+  lang: python
+  code: |
+    def build_graph(pos_hist, walls, radius):
+        # pos_hist: [N, 6, 2] -> 5 past velocities
+        # returns x [N, F], edge_index [2, E],
+        #         edge_attr [E, 3]
+        ...
+
+    def step(model, pos_hist, dt):
+        a = model(build_graph(pos_hist, walls, R))
+        v = (pos_hist[:, -1] - pos_hist[:, -2]) / dt
+        v = v + a * dt          # semi-implicit Euler
+        return pos_hist[:, -1] + v * dt
+decisions:
+  - choice: Your own engine as ground truth
+    instead: A public GNS dataset
+    why: >-
+      The engine regenerates exact trajectories from a seed and makes any out-of-distribution set on demand (12–16
+      bodies, hexagons, a larger box), which a fixed dataset cannot.
+  - choice: Outline particles plus a centre node
+    instead: One node per body
+    why: >-
+      Contacts between boxes and circles happen at their edges, so outline particles keep collisions local and match
+      the GNS paper. The body-level graph stays a stretch comparison.
+  - choice: Predict accelerations and integrate
+    instead: Predict next positions directly
+    why: >-
+      Accelerations are small, well-scaled targets, and semi-implicit Euler keeps the equations of motion outside the
+      network.
+  - choice: Noise on input velocities
+    instead: Training on clean inputs
+    why: >-
+      In a rollout the model sees its own slightly wrong outputs; noise during training teaches it to recover. Report
+      rollout error with and without it.
+watchOut: >-
+  Training without noise gives excellent one-step error and rollouts that explode after a few dozen steps. Judge the
+  model on 100-step rollout error, never on one-step error alone.

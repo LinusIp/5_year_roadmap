@@ -1,0 +1,116 @@
+overview: >-
+  A mixer library in which the game thread never touches audio state directly: it pushes small fixed-size commands
+  into a lock-free single-producer, single-consumer ring. Every 256 samples the device calls the audio callback, which
+  drains the ring, mixes up to 64 voices into buses, runs a Schroeder reverb on a send bus and writes the output. Every
+  sample is decoded and every voice allocated before playing starts, so the callback has no locks and no allocation.
+learn:
+  - name: Real-time audio callbacks
+  - name: Lock-free SPSC ring
+    ref: ostep
+  - name: Resampling with interpolation
+    ref: dspguide
+  - name: One-pole filters
+    ref: think-dsp
+  - name: Schroeder reverb
+  - name: Gain ramps against clicks
+stats:
+  - value: < 30%
+    label: of the 5.3 ms callback, 64 voices
+  - value: "0"
+    label: locks or allocations in the callback
+  - value: < -60 dBFS
+    label: largest step during a fade
+components:
+  - id: api
+    name: Game API
+    role: Turns calls like play, stop and fade into commands on the game thread.
+    tech: C++17
+    talksTo: [queue]
+    kind: core
+  - id: decoder
+    name: Asset decoder
+    role: Decodes WAV and OGG-style files to float samples at load, or streams long music through a loader thread.
+    tech: C++17 · stb_vorbis-style
+    talksTo: [voices]
+    kind: core
+  - id: queue
+    name: SPSC command queue
+    role: A fixed 1,024-slot ring with atomic head and tail indices.
+    tech: std::atomic
+    talksTo: [voices]
+    kind: core
+  - id: voices
+    name: Voice pool
+    role: 64 preallocated voices with volume, pitch and pan, stealing the lowest-priority voice when full.
+    tech: C++17
+    talksTo: [buses]
+    kind: core
+  - id: buses
+    name: Bus graph
+    role: Sums voices into music, effects and master buses with gain and a one-pole low-pass.
+    tech: C++17
+    talksTo: [reverb, device]
+    kind: core
+  - id: reverb
+    name: Reverb
+    role: Four parallel comb filters and two all-pass filters on the send bus.
+    tech: C++17
+    talksTo: [buses]
+    kind: core
+  - id: device
+    name: Audio device
+    role: Calls the mixer every 256 frames at 48 kHz on Linux and Windows.
+    tech: miniaudio-style backend
+    talksTo: []
+    kind: external
+  - id: harness
+    name: Test harness
+    role: Times every callback, hooks the allocator and scans output for clicks.
+    tech: C++17 · CMake
+    talksTo: []
+    kind: offline
+flow:
+  - component: decoder
+    text: has decoded the explosion sample to 48 kHz floats at level load, so the callback only ever reads memory.
+  - component: api
+    text: turns `play(explosion, bus=sfx, priority=3)` into a `Cmd` and pushes it; if the ring is full the call fails instead of waiting.
+  - component: queue
+    text: is drained at the start of the callback, so all of this block's commands apply together.
+  - component: voices
+    text: read each playing sample at its pitch with linear interpolation and apply volume and pan through **per-sample ramps** over 5 ms.
+  - component: buses
+    text: add the voices, apply bus gain and the low-pass, and copy part of the effects bus to the reverb send.
+  - component: reverb
+    text: runs combs and all-passes with denormals flushed to zero and returns the wet signal to master.
+  - component: buses
+    text: write master into the device buffer, clamped, all within about 1.6 ms of the 5.3 ms block.
+interface:
+  lang: cpp
+  code: |
+    // Game thread -> audio thread, fixed-size POD.
+    struct Cmd {
+      uint8_t type;        // Play, Stop, Gain, Fade
+      uint8_t bus, priority;
+      uint16_t voice;
+      float value, seconds;
+      const Sample* sample;  // decoded at load
+    };
+    bool push(SpscRing<Cmd, 1024>& q, const Cmd& c);
+
+    // Every 256 frames at 48 kHz: budget 1.6 ms,
+    // no locks, no allocation, no logging.
+    void audioCallback(float* out, uint32_t frames,
+                       Mixer& m);
+decisions:
+  - choice: SPSC ring for commands
+    instead: A mutex around shared mixer state
+    why: If the game thread holds the mutex when the callback runs, the callback waits and the block is late, which is the pop the sound designer hears.
+  - choice: Everything allocated before play
+    instead: Allocating voices and buffers on demand
+    why: An allocator can take a lock or touch new pages; preallocating 64 voices and decoded samples makes zero allocations testable with a hook.
+  - choice: Per-sample gain ramps
+    instead: Changing gain at block boundaries
+    why: A jump in gain is a click; ramping over 5 ms keeps every step under -60 dBFS.
+watchOut: >-
+  Anything that can block in the callback: a mutex, a log line, a file read, a `new`. Run the harness with the
+  allocator hook and a lock detector over a long session, not just a short test.

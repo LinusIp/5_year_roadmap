@@ -1,0 +1,53 @@
+overview: >-
+  A boosted model trained on data with pairs of correlated features, explained twice: permutation importance (how much
+  the score drops when one column is shuffled) and SHAP (each feature's share of each prediction). A plot shows where
+  the two rankings disagree and why correlation causes it.
+learn:
+  - name: Permutation importance
+    ref: kaggle-learn
+  - name: SHAP values
+  - name: Correlated features
+  - name: Rank correlation
+components:
+  - id: data
+    name: Dataset
+    role: Provides a table with known correlated pairs and a held-out split.
+    tech: pandas
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Boosted model
+    role: Learns the target from all features.
+    tech: scikit-learn gradient boosting
+    talksTo: [explainers]
+    kind: core
+  - id: explainers
+    name: Explainers
+    role: Computes both importances on the held-out split.
+    tech: sklearn.inspection · shap
+    talksTo: [compare]
+    kind: core
+  - id: compare
+    name: Comparison
+    role: Ranks features by each method, computes Spearman correlation and plots the gaps.
+    tech: SciPy · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: data
+    text: is split into train and test, and the correlated pairs (for example `|r| > 0.8`) are noted.
+  - component: model
+    text: trains on the training split only.
+  - component: explainers
+    text: run `permutation_importance` and mean absolute SHAP on the **test** split.
+  - component: compare
+    text: reports the Spearman rank correlation, then drops one feature of each pair and reruns to show its importance moving to the partner.
+decisions:
+  - choice: Explain on the test split
+    instead: Explain on the training data
+    why: >-
+      Training-set importances include what the model memorized, so they overstate noisy features. The test split
+      shows what the model really relies on for new rows.
+watchOut: >-
+  Shuffling one of two correlated features barely hurts the score, because its partner still carries the signal, so
+  both look unimportant. Group correlated features before trusting a low score.

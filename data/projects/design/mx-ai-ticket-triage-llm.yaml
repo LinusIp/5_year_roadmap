@@ -1,0 +1,101 @@
+overview: >-
+  A small web service: mask personal data, one LLM call returns strict JSON, unsure tickets go to a review queue,
+  every call is logged for offline evals. A ticket in, a category, priority, team and confidence out, and a score
+  you can trust because a held-out set checks every prompt change.
+learn:
+  - name: Structured output
+    ref: llm-zoomcamp
+  - name: Prompt versioning
+  - name: Offline evals
+    ref: fsdl
+  - name: PII redaction
+  - name: Confidence thresholds
+stats:
+  - value: < 3 s
+    label: p95 per ticket
+  - value: ≥ 0.80
+    label: macro-F1
+  - value: $15
+    label: max a month
+components:
+  - id: webhook
+    name: Helpdesk webhook
+    role: Sends each new ticket's subject and body to the service.
+    tech: Helpdesk
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: API
+    role: Validates input, exposes /triage and /triage/batch.
+    tech: FastAPI
+    talksTo: [redactor]
+    kind: core
+  - id: redactor
+    name: Redactor
+    role: Masks emails, phone and card numbers before anything leaves the server.
+    tech: Python · regex
+    talksTo: [worker]
+    kind: core
+  - id: worker
+    name: Triage worker
+    role: Prompt registry, LLM client, schema check, one retry.
+    tech: Python · Pydantic
+    talksTo: [llm, router, log]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Returns the labels as JSON for the prompt version it is given.
+    tech: Hosted LLM
+    talksTo: []
+    kind: external
+  - id: router
+    name: Router
+    role: Sends confident labels back to the helpdesk and the rest to the review queue.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: log
+    name: Call log
+    role: Keeps prompt version, input hash, output, latency and cost of every call.
+    tech: SQLite
+    talksTo: [eval]
+    kind: offline
+  - id: eval
+    name: Eval harness
+    role: Fails if macro-F1 drops below 0.80.
+    tech: CLI · SQLite
+    talksTo: []
+    kind: offline
+flow:
+  - component: api
+    text: receives `POST /triage` with the ticket text and checks the size limit.
+  - component: redactor
+    text: masks emails, phone and card-like numbers, so no raw personal data leaves your server.
+  - component: worker
+    text: fills the current prompt version, calls the LLM with a JSON schema, retries once if invalid.
+  - component: router
+    text: sends labels back when `confidence ≥ 0.7`; lower goes to the review queue.
+  - component: log
+    text: stores prompt version, latency and cost; the **eval harness** replays 500 labelled tickets.
+interface:
+  lang: http
+  code: |
+    POST /triage
+    { "text": "My invoice is wrong…" }
+
+    200 OK
+    { "category": "billing",
+      "priority": "high",
+      "team": "finance",
+      "confidence": 0.86 }
+decisions:
+  - choice: Hosted LLM, not a fine-tuned classifier
+    instead: A fine-tuned classifier
+    why: No labelled data yet. Revisit after 5k labels from the review queue.
+  - choice: JSON schema and one retry
+    instead: Free-text output parsed afterwards
+    why: Fails loudly instead of silently; one retry fixes most slips.
+  - choice: SQLite, not Postgres
+    instead: Postgres
+    why: 1,200 rows a day fits easily and deploys stay one file.
+watchOut: Labels leaking into prompt examples inflate F1. Keep the eval set separate from few-shot examples.

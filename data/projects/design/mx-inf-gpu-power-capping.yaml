@@ -1,0 +1,107 @@
+overview: >-
+  An experiment rig that tells Greenfield Compute how much LLM throughput it gives up when GPU power limits are lowered
+  to fit a capped rack, and whether locking clocks does better. A sweep controller steps through power limits and
+  clock settings while fixed prefill-heavy and decode-heavy workloads run, and a logger records watts, clocks and
+  temperature several times a second. The result is energy per token against throughput, a Pareto frontier, and a
+  setting checked in a 30-minute run at the latency SLO.
+learn:
+  - name: Energy per token
+  - name: Power limits vs clock locking
+  - name: Compute-bound vs memory-bound
+    ref: horace-he-brrr
+  - name: Pareto frontier
+  - name: GPU telemetry with NVML
+stats:
+  - value: ≥ 20%
+    label: less energy per token
+  - value: ≤ 10%
+    label: throughput lost
+  - value: 30 min
+    label: SLO validation run
+components:
+  - id: sweep
+    name: Sweep controller
+    role: Sets each power limit or clock lock, waits for a steady temperature, then starts the measured run.
+    tech: Python · NVML
+    talksTo: [gpu, workload]
+    kind: core
+  - id: workload
+    name: Workload runner
+    role: Replays a fixed prefill-heavy or decode-heavy request mix and records tokens and latency.
+    tech: vLLM · Python
+    talksTo: [gpu]
+    kind: core
+  - id: gpu
+    name: GPU
+    role: The rented GPU with power control, or recorded telemetry when control is not available.
+    tech: Rented GPU
+    talksTo: [telemetry]
+    kind: external
+  - id: telemetry
+    name: Telemetry logger
+    role: Samples power, clocks, temperature and utilisation at 10 Hz into a timestamped log.
+    tech: NVML · CSV
+    talksTo: [energy]
+    kind: core
+  - id: energy
+    name: Energy model
+    role: Integrates power over the measured window and divides by tokens, per workload type.
+    tech: pandas
+    talksTo: [pareto]
+    kind: core
+  - id: pareto
+    name: Pareto analysis
+    role: Plots throughput against joules per token and picks settings on the frontier.
+    tech: pandas · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: sweep
+    text: >-
+      sets a power limit, for example `260 W`, then runs 2 minutes of warm-up so the GPU reaches a steady temperature
+      before measuring.
+  - component: workload
+    text: >-
+      replays the decode-heavy mix for 5 minutes and records tokens/s and p99 latency; the prefill-heavy mix runs
+      separately.
+  - component: telemetry
+    text: logs power at 10 Hz, well above the 1 Hz minimum, so short spikes are not missed.
+  - component: energy
+    text: >-
+      integrates watts over only the measured window (`J/token = ∫P dt ÷ tokens`); idle time between runs is
+      excluded.
+  - component: pareto
+    text: >-
+      plots each setting; decode, limited by memory bandwidth, usually loses little at lower power, while prefill,
+      limited by compute, loses more.
+interface:
+  lang: python
+  code: |
+    for limit_w in [350, 300, 260, 220, 180]:
+        nvml.set_power_limit(gpu, limit_w * 1000)
+        run(workload, seconds=120)  # warm-up only
+        r = run(workload, seconds=300)
+        rec(limit_w,
+            tok_s=r.tokens / r.seconds,
+            j_per_tok=r.joules / r.tokens,
+            p99_ms=r.p99_ms,
+            temp_c=r.max_temp_c)
+decisions:
+  - choice: Sweep power limits and locked clocks
+    instead: Sweep power limits only
+    why: >-
+      A power limit lets the GPU choose its clocks moment to moment, while a clock lock fixes them; which saves more
+      at the same throughput is the question Greenfield asked. Measure both on the same workloads.
+  - choice: Separate prefill-heavy and decode-heavy curves
+    instead: One blended workload
+    why: >-
+      The two respond very differently to lower power. A blended curve would give a setting that is wrong for both
+      kinds of rack.
+  - choice: Warm-up before every measurement
+    instead: Measure straight after changing the setting
+    why: >-
+      A cool GPU runs faster at first, so early points look better than they are. Two minutes of warm-up removes the
+      thermal bias between settings.
+watchOut: >-
+  Thermal state confounds sweeps: the same setting measures differently on a cold and a hot GPU. Warm up before each
+  point, record temperature with every sample, and repeat the best setting in random order.

@@ -1,0 +1,54 @@
+overview: >-
+  Two microbenchmarks that measure your machine's real peak compute (a loop of independent FMAs) and peak memory
+  bandwidth (a STREAM-like copy), drawn as a roofline: performance is capped by bandwidth times arithmetic intensity
+  until the ridge point, then by compute. Four of your own kernels are placed on the plot and each gap is explained.
+learn:
+  - name: Roofline model
+    ref: cs149
+  - name: Arithmetic intensity
+    ref: horace-he-brrr
+  - name: Microbenchmarking
+    ref: cuda-guide
+components:
+  - id: flops
+    name: FMA probe
+    role: Runs many independent FMA chains per thread to hit peak FLOP/s.
+    tech: CUDA C++ or C++
+    talksTo: [plot]
+    kind: core
+  - id: bw
+    name: Bandwidth probe
+    role: Copies and scales large arrays to measure peak GB/s.
+    tech: CUDA C++ or C++
+    talksTo: [plot]
+    kind: core
+  - id: kernels
+    name: Your kernels
+    role: Four earlier kernels with counted FLOPs and bytes.
+    tech: CUDA C++ or C++
+    talksTo: [plot]
+    kind: core
+  - id: plot
+    name: Roofline plot
+    role: Draws the two roofs, the ridge point and each kernel's point.
+    tech: matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: flops
+    text: runs 8 or more independent FMA chains per thread so latency is hidden, and reports peak FLOP/s.
+  - component: bw
+    text: copies arrays far larger than the last-level cache and reports peak GB/s, with clocks locked or logged.
+  - component: kernels
+    text: are each given an **arithmetic intensity**, FLOPs divided by bytes moved, and a measured FLOP/s.
+  - component: plot
+    text: draws `min(peak_flops, AI · peak_bw)`, marks the ridge at `peak_flops / peak_bw`, and labels why each kernel sits below its roof.
+decisions:
+  - choice: Measured roofs, compared with spec
+    instead: Spec-sheet roofs only
+    why: >-
+      Measured peaks show what is actually reachable; checking they are within 10% of spec catches a broken probe.
+      Kernel gaps are then judged against roofs you can really hit.
+watchOut: >-
+  GPUs and laptops lower their clocks as they heat up, so a long run can measure a lower peak than a short one. Lock
+  clocks if you can, or log clock speed during every run.

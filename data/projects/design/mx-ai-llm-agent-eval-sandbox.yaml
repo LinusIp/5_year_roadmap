@@ -1,0 +1,111 @@
+overview: >-
+  A test bench for IT-support agents that never touches a live system. A deterministic simulator holds fake users,
+  groups, tickets and permissions, and exposes them through typed tools; each of 50 tasks starts from a seeded state
+  and is graded only by the state at the end. A harness runs several agent designs over 5 seeds and reports success
+  rates with confidence intervals, cost and a taxonomy of failures.
+learn:
+  - name: LLM agents and tool use
+    ref: berkeley-llm-agents
+  - name: Function calling
+    ref: hf-agents-course
+  - name: State-based grading
+  - name: Deterministic simulation
+  - name: Confidence intervals
+stats:
+  - value: < 20 ms
+    label: per environment step
+  - value: 50 / 50
+    label: gold trajectories pass
+  - value: < $5
+    label: per full run
+components:
+  - id: tasks
+    name: Task set
+    role: 50 tasks, each with a goal text, a seed, a starting state and a gold trajectory.
+    tech: YAML · Pydantic
+    talksTo: [harness]
+    kind: core
+  - id: harness
+    name: Run harness
+    role: Runs each agent design on each task and seed, enforcing step and cost limits.
+    tech: Python · asyncio
+    talksTo: [agent]
+    kind: core
+  - id: agent
+    name: Agent under test
+    role: An LLM with a prompt and loop design that chooses the next tool call.
+    tech: LLM API
+    talksTo: [tools]
+    kind: external
+  - id: tools
+    name: Tool API
+    role: Validates each call such as `reset_password(user_id)` and returns the result or an error.
+    tech: Pydantic schemas
+    talksTo: [sim, agent]
+    kind: core
+  - id: sim
+    name: Simulator
+    role: Holds the directory, tickets and audit log and applies each change deterministically from the seed.
+    tech: Python dataclasses
+    talksTo: [graders]
+    kind: core
+  - id: graders
+    name: State graders
+    role: Compare the final state with the task's goal predicates.
+    tech: Python
+    talksTo: [analysis]
+    kind: core
+  - id: analysis
+    name: Analysis
+    role: Computes success rates with bootstrap CIs, cost and steps, and tags failures by category.
+    tech: pandas
+    talksTo: []
+    kind: offline
+flow:
+  - component: tasks
+    text: provides task `T17` "user locked out after MFA reset", with its seed, starting state and goal predicates.
+  - component: harness
+    text: builds the starting state from seed 3, gives the agent only the goal text and the tool list, and starts the step and cost counters.
+  - component: agent
+    text: reads the ticket and replies with a tool call such as `get_user("u-482")`.
+  - component: tools
+    text: >-
+      checks arguments against the schema and permissions, then calls the simulator; the result goes back to the
+      agent, and this **loop** runs until it says done or hits 30 steps.
+  - component: sim
+    text: applies each change in under 20 ms and records it in the audit log; the same seed always gives the same state.
+  - component: graders
+    text: checks the end state only, e.g. `user.locked == False` and `user.mfa_enrolled` and the ticket closed, never the path taken.
+  - component: analysis
+    text: aggregates 50 tasks × 5 seeds per design into success with a 95% CI, mean cost, and failure tags like `wrong_user`.
+interface:
+  lang: python
+  code: |
+    class ResetPassword(BaseModel):
+        user_id: str
+        notify: bool = True
+
+    def step(call: ToolCall) -> ToolResult: ...
+
+    def grade(task: Task, final: EnvState) -> Grade:
+        ...
+    # Grade(passed=False,
+    #   failed=["ticket.status == 'closed'"],
+    #   steps=12, cost_usd=0.031)
+decisions:
+  - choice: Grade the final state
+    instead: Compare against the gold trajectory
+    why: >-
+      There are many valid ways to unlock an account. Checking the end state accepts all of them and still catches a
+      wrong user being changed.
+  - choice: Deterministic simulator with seeds
+    instead: A sandbox of real directory software
+    why: >-
+      Live or containerised systems are slow and drift between runs. A seeded Python model steps in under 20 ms and
+      lets 5 seeds measure agent variance, not environment noise.
+  - choice: Report CIs over 5 seeds
+    instead: One run per design
+    why: With 50 tasks, one lucky run can swing success by 10 points; intervals show which design differences are real.
+watchOut: >-
+  Graders that check the trajectory, or task prompts that hint at the exact tool sequence, make every agent look
+  good. Grade state only, keep the solution out of the goal text, and run the gold trajectories through the graders.

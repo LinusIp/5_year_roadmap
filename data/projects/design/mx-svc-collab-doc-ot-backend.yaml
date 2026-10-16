@@ -1,0 +1,108 @@
+overview: >-
+  A server-authoritative sync backend for Specly's requirements editor. Each document has one actor, a single
+  loop that handles its ops one at a time, so the server decides a total order. An op that was written against an
+  older version is **transformed** (shifted to account for edits it did not see) before it is appended to the log
+  and broadcast. Snapshots every few thousand ops keep a 1M-op document loading in under 3 s.
+learn:
+  - name: Operational transform
+    ref: kleppmann-distributed-systems
+  - name: Actor per document
+  - name: Convergence properties
+  - name: Property-based testing
+  - name: Snapshots and log compaction
+    ref: ddia
+stats:
+  - value: < 40 ms
+    label: apply p99, 50 editors
+  - value: "100,000"
+    label: random schedules converge
+  - value: < 3 s
+    label: load a 1M-op document
+components:
+  - id: client
+    name: Editor client
+    role: Keeps one op in flight and a pending queue, and transforms incoming remote ops against them.
+    tech: TypeScript
+    talksTo: [actor]
+    kind: external
+  - id: actor
+    name: Document actor
+    role: Serialises every op for one document, transforms it, appends it and broadcasts the result.
+    tech: Go · goroutine and channel
+    talksTo: [transform, oplog]
+    kind: core
+  - id: transform
+    name: Transform functions
+    role: Pure functions that rewrite insert and delete against each other so both orders give the same text.
+    tech: Go
+    talksTo: []
+    kind: core
+  - id: oplog
+    name: Op log
+    role: Append-only table of ops by document and revision, the source of truth for history.
+    tech: PostgreSQL
+    talksTo: [snapshotter]
+    kind: core
+  - id: snapshotter
+    name: Snapshotter
+    role: Writes the full text at a revision every 5,000 ops and drops history older than the oldest open client.
+    tech: Go worker · PostgreSQL
+    talksTo: []
+    kind: offline
+  - id: simulator
+    name: Client simulator
+    role: Runs 50 fake editors with random inserts, deletes and network delays against one document.
+    tech: Go
+    talksTo: [actor]
+    kind: offline
+  - id: proptest
+    name: Property tester
+    role: Replays 100,000 random interleavings and fails if any two replicas end with different text.
+    tech: Go · rapid
+    talksTo: [transform]
+    kind: offline
+flow:
+  - component: client
+    text: sends `{op, baseRev}`, where `baseRev` is the last server revision it has seen, and holds further edits in its pending queue.
+  - component: actor
+    text: takes the op off the document's channel; because only this loop touches the document, there are **no locks** and the order is fixed.
+  - component: transform
+    text: rewrites the op against every op committed after `baseRev`, so an insert at position 10 moves to 13 if three characters landed before it.
+  - component: oplog
+    text: stores the transformed op at `rev = head + 1` in the same transaction that advances the head.
+  - component: actor
+    text: sends an `ack` with the new revision to the author and the transformed op to every other editor, who transform it against their own pending ops.
+  - component: snapshotter
+    text: every 5,000 ops saves the text; a load reads the latest snapshot plus the tail of the log instead of replaying 1M ops.
+interface:
+  lang: json
+  code: |
+    // client -> server
+    { "type": "op", "doc": "req-42", "baseRev": 1873,
+      "clientSeq": 9,
+      "op": [{"retain": 120}, {"insert": "shall "}] }
+
+    // server -> author
+    { "type": "ack", "rev": 1876, "clientSeq": 9 }
+
+    // server -> others
+    { "type": "remote", "rev": 1876, "op": [ ... ] }
+decisions:
+  - choice: Server-ordered OT with one actor per document
+    instead: A CRDT where every replica merges on its own
+    why: >-
+      Plain text, a central server and 50 editors fit OT's simple model, and server ordering means only one
+      transform property (TP1) has to hold. Revisit if offline editing in the stretch goals becomes a must.
+  - choice: Op log in PostgreSQL with periodic snapshots
+    instead: Store only the latest text
+    why: >-
+      Durable history is a requirement and lets a lagging client catch up by replaying ops. Snapshots every 5,000
+      ops cap load time; tune the interval from the measured 1M-op load.
+  - choice: Property tests before the server exists
+    instead: Hand-written example cases
+    why: >-
+      Transform bugs hide in rare interleavings; 100,000 random schedules find them in minutes, a dozen examples
+      never will.
+watchOut: >-
+  A lost `ack` leaves the client resending an op the server already applied. Give every op a `clientSeq` and
+  have the actor drop duplicates, or text doubles up.

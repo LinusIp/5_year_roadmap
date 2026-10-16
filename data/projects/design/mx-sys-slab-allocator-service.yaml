@@ -1,0 +1,131 @@
+overview: >-
+  A thread-caching slab allocator in C++ for a packet processor that spends 25% of its time in malloc. Each thread
+  keeps its own free lists per size class, so most allocations and frees are a pointer pop or push with no lock;
+  empty lists refill in batches from a central pool, which carves 64 KB slabs out of memory mapped with `mmap`. An
+  `LD_PRELOAD` shim swaps it in for `malloc` and `free` in real programs, and a debug mode with canaries catches
+  overflows and double frees.
+learn:
+  - name: Size classes
+    ref: ostep
+  - name: Free lists
+    ref: csapp-labs
+  - name: Thread-local storage
+  - name: False sharing
+    ref: mit-6-172
+  - name: Fragmentation
+    ref: ostep
+  - name: LD_PRELOAD interposition
+    ref: cmu-15-213
+stats:
+  - value: ≥ 2×
+    label: faster than malloc, 8 threads
+  - value: < 15%
+    label: memory overhead
+  - value: 1 h
+    label: random stress, no corruption
+components:
+  - id: app
+    name: Packet processor
+    role: The real program, allocating millions of small short-lived objects.
+    tech: C++
+    talksTo: [shim]
+    kind: external
+  - id: shim
+    name: LD_PRELOAD shim
+    role: Exports malloc, free, calloc, realloc and posix_memalign.
+    tech: Shared library
+    talksTo: [classes]
+    kind: core
+  - id: classes
+    name: Size classes
+    role: Maps a request size to one of about 60 classes with a lookup table.
+    tech: C++ constexpr table
+    talksTo: [cache]
+    kind: core
+  - id: cache
+    name: Thread cache
+    role: Per-thread LIFO free lists for each class, with a byte cap.
+    tech: thread_local · alignas(64)
+    talksTo: [central]
+    kind: core
+  - id: central
+    name: Central pool
+    role: Per-class free lists under a lock, refilled from slabs carved out of mmap.
+    tech: mmap · spin locks
+    talksTo: []
+    kind: core
+  - id: debug
+    name: Debug mode
+    role: Adds canaries around blocks, poisons freed memory and flags double frees.
+    tech: Compile-time flag
+    talksTo: []
+    kind: offline
+  - id: stats
+    name: Stats API
+    role: Reports live, cached and mapped bytes and fragmentation per class.
+    tech: C++
+    talksTo: []
+    kind: offline
+  - id: bench
+    name: Benchmark suite
+    role: Replays allocation traces at 8 threads against the system malloc.
+    tech: C++ · perf
+    talksTo: [app]
+    kind: offline
+flow:
+  - component: shim
+    text: >-
+      catches `malloc(48)` from the packet processor; sizes over 32 KB go straight to `mmap`.
+  - component: classes
+    text: >-
+      rounds 48 up to its class with a table lookup; classes are spaced at most 12.5% apart, which caps waste
+      inside a block and keeps overhead under 15%.
+  - component: cache
+    text: >-
+      pops the first block from this thread's list for that class, a few instructions with **no lock**; the free
+      blocks store the list's next pointers inside themselves.
+  - component: central
+    text: >-
+      if the thread's list was empty, hands over a batch of 32 blocks under the class lock, carving a new 64 KB slab
+      from `mmap` when it has none.
+  - component: cache
+    text: >-
+      on `free`, finds the block's class from its slab header and pushes it onto the freeing thread's list, even if
+      another thread allocated it; above 2 MB cached, half goes back to the central pool.
+interface:
+  lang: cpp
+  code: |
+    struct alignas(64) ThreadCache {  // no false sharing
+        FreeList list[kNumClasses];   // LIFO, no locks
+        size_t   bytes;               // capped at 2 MB
+    };
+    static thread_local ThreadCache tc;
+
+    extern "C" void* malloc(size_t n) {
+        if (n > kMaxSmall) return big_alloc(n);
+        int c = size_class(n);        // table lookup
+        if (void* p = tc.list[c].pop()) return p;
+        return refill(c);             // batch of 32
+    }
+    struct AllocStats { size_t live, cached, mapped; };
+    AllocStats alloc_stats();
+decisions:
+  - choice: Per-thread caches with batch refills
+    instead: One global free list per size class under a lock
+    why: >-
+      With 8 threads on millions of small objects, a shared lock is the bottleneck you are trying to remove. Moving
+      32 blocks per lock takes it off almost every call.
+  - choice: Free into the freeing thread's cache
+    instead: Return each block to the thread that allocated it
+    why: >-
+      Sending a block home needs an atomic queue on every cross-thread free. Keeping it locally is simpler; the 2 MB
+      cap returns surplus to the central pool so memory cannot pile up.
+  - choice: Slabs straight from mmap
+    instead: Building on top of the system malloc
+    why: >-
+      The constraint is mmap-only, and slabs of a fixed size make it cheap to find a block's class from its address.
+      Revisit with huge pages, a stretch goal, if TLB misses show up in perf.
+watchOut: >-
+  The packet processor allocates on the receive thread and frees on workers, so workers' caches fill while the
+  receiver's stay empty. Without the cap and the hand-back to the central pool, memory grows without limit; test that
+  producer-consumer pattern on purpose.

@@ -1,0 +1,131 @@
+overview: >-
+  A 2D physics engine for circles and convex polygons, stepped at a fixed 60 Hz. Each step a broadphase finds pairs
+  whose bounding boxes overlap, the separating axis test (if any edge direction separates two convex shapes, they do
+  not touch) finds real contacts and clips edges into up to two contact points, and those points are matched with
+  last step's so their impulses carry over. A sequential-impulse solver then pushes bodies apart and applies friction,
+  restitution and joints over 10 iterations, and an interactive sandbox spawns, drags and draws everything.
+learn:
+  - name: Separating axis theorem
+    ref: ericson-rtcd
+  - name: Contact manifolds and clipping
+    ref: catto-box2d-publications
+  - name: Sequential impulses
+    ref: catto-box2d-publications
+  - name: Warm starting
+    ref: catto-box2d-publications
+  - name: Semi-implicit Euler
+    ref: gaffer-on-games
+  - name: Broadphase culling
+    ref: ericson-rtcd
+stats:
+  - value: < 1 %
+    label: top-box drift, 10-box stack over 60 s
+  - value: 25 % ± 2 %
+    label: rebound height at restitution 0.5
+  - value: '10'
+    label: solver iterations at 60 Hz
+components:
+  - id: world
+    name: World
+    role: Holds bodies with mass, inertia, velocity and shape, and integrates them on a fixed step.
+    tech: C++20
+    talksTo: [broadphase]
+    kind: core
+  - id: broadphase
+    name: Broadphase
+    role: Sorts bounding boxes along one axis and returns the pairs that overlap.
+    tech: Sweep and prune
+    talksTo: [narrowphase]
+    kind: core
+  - id: narrowphase
+    name: Narrowphase
+    role: Runs SAT on each pair and clips edges into a manifold of up to two points.
+    tech: SAT · edge clipping
+    talksTo: [contacts]
+    kind: core
+  - id: contacts
+    name: Contact cache
+    role: Matches new points to last step's by feature id and carries their impulses over.
+    tech: Hash map
+    talksTo: [solver]
+    kind: core
+  - id: joints
+    name: Joints
+    role: Distance and revolute constraints between body pairs.
+    tech: C++20
+    talksTo: [solver]
+    kind: core
+  - id: solver
+    name: Impulse solver
+    role: Pre-steps, warm-starts and iterates all velocity constraints, then integrates positions.
+    tech: Sequential impulses
+    talksTo: [sandbox]
+    kind: core
+  - id: sandbox
+    name: Sandbox
+    role: Spawns, drags and deletes bodies and draws shapes, contacts and normals.
+    tech: raylib · Dear ImGui
+    talksTo: []
+    kind: core
+  - id: tests
+    name: Tests
+    role: Check SAT on known pairs and the stacking, rebound, slope and chain scenarios.
+    tech: doctest · Catch2
+    talksTo: [world]
+    kind: offline
+flow:
+  - component: world
+    text: >-
+      starts a step of `h = 1/60 s` and adds gravity to each velocity first, then position later, which is
+      **semi-implicit Euler**.
+  - component: broadphase
+    text: sorts box edges along x and reports only overlapping pairs, far fewer than all pairs at 2,000 bodies.
+  - component: narrowphase
+    text: >-
+      finds the axis of least overlap among both shapes' edge normals, clips the incident edge against the reference
+      edge and keeps up to two points with their feature ids.
+  - component: contacts
+    text: copy last step's accumulated normal and friction impulses to points with the same feature id.
+  - component: joints
+    text: add their distance and revolute constraints to the same list as the contacts.
+  - component: solver
+    text: >-
+      applies the warm-start impulses, then 10 times over every constraint clamps the **accumulated** impulse, with
+      restitution only above a closing-speed threshold; finally it moves the bodies.
+  - component: sandbox
+    text: draws the new state with contact points and normals and feeds mouse drags into the next step.
+interface:
+  lang: cpp
+  code: |
+    struct ContactPoint {
+        Vec2 rA, rB;          // from centres of mass
+        float normalMass, tangentMass, bias;
+        float Pn = 0, Pt = 0; // accumulated impulses
+        uint32_t featureId;   // for warm starting
+    };
+
+    // one iteration, normal impulse of one point
+    float vn = dot(relVel(a, b, cp), n);
+    float dPn = cp.normalMass * (-vn + cp.bias);
+    float Pn0 = cp.Pn;
+    cp.Pn = std::max(Pn0 + dPn, 0.0f); // clamp total
+    applyImpulse(a, b, cp, (cp.Pn - Pn0) * n);
+decisions:
+  - choice: Sequential impulses
+    instead: Building and solving one big matrix of constraints
+    why: >-
+      Solving contacts one at a time, many times, is simple, handles friction and joints the same way, and a 10-box
+      stack is stable at 10 iterations with warm starting.
+  - choice: Warm starting by feature id
+    instead: Starting every step from zero impulse
+    why: >-
+      A resting stack needs nearly the same impulses each step. Reusing last step's means 10 iterations hold ten boxes
+      with under 1 % drift; measure drift with and without it.
+  - choice: Sweep and prune
+    instead: A uniform grid
+    why: >-
+      The sandbox mixes small balls and long planks, which a grid of one cell size handles badly. Revisit if most
+      bodies are the same size.
+watchOut: >-
+  A contact normal that flips direction between steps makes warm starting push bodies the wrong way and stacks
+  explode. Always point the normal from body A to body B and keep A and B in a fixed order per pair.

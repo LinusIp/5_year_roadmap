@@ -1,0 +1,113 @@
+overview: >-
+  A picking and measuring library for Kelvane Pumps' assembly viewer: a click becomes a ray, and a bounding volume
+  hierarchy (BVH, a tree of nested boxes) finds the part, triangle and hit point in under 5 ms on 5M triangles instead
+  of 400 ms. The tree has two levels, one over part boxes and one per part over its triangles, so moving a part only
+  refits the small top tree. Snapping moves the hit to a nearby vertex, edge or circle centre, measure tools compute
+  distances in double precision, and measurements are saved with the model.
+learn:
+  - name: Bounding volume hierarchy
+    ref: pbr-book
+  - name: Surface area heuristic
+    ref: pbr-book
+  - name: Ray-triangle intersection
+    ref: scratchapixel
+  - name: Two-level BVH and refit
+  - name: Floating-point precision
+    ref: ericson-rtcd
+stats:
+  - value: < 5 ms
+    label: pick on 5M triangles
+  - value: < 2 s
+    label: BVH build on 8 threads
+  - value: 0.01 mm
+    label: measurement accuracy
+components:
+  - id: viewer
+    name: Viewer
+    role: Turns a mouse click into a world-space ray and shows hits and measurements.
+    tech: OpenGL viewer
+    talksTo: [toplevel]
+    kind: external
+  - id: store
+    name: Mesh store
+    role: Holds each part's vertices and indices in part-local coordinates plus its transform.
+    tech: C++17
+    talksTo: [builder]
+    kind: offline
+  - id: builder
+    name: BVH builder
+    role: Builds one binned-SAH tree per part on 8 threads and the small top tree over part boxes.
+    tech: C++17 · std::thread
+    talksTo: [toplevel]
+    kind: offline
+  - id: toplevel
+    name: Top-level BVH
+    role: Finds which parts' world boxes the ray enters, nearest first; refits when a part moves.
+    tech: C++17
+    talksTo: [picking]
+    kind: core
+  - id: picking
+    name: Picking
+    role: Traverses each candidate part's tree in local space and keeps the nearest triangle hit.
+    tech: C++17
+    talksTo: [snapping]
+    kind: core
+  - id: snapping
+    name: Snapping
+    role: Moves the hit to a vertex, edge or circle centre within a few pixels.
+    tech: C++17
+    talksTo: [measure]
+    kind: core
+  - id: measure
+    name: Measure tools
+    role: Point-to-point, point-to-plane and part-to-part minimum distance, in double precision.
+    tech: C++17
+    talksTo: [persist]
+    kind: core
+  - id: persist
+    name: Persistence
+    role: Saves measurements by part id and local point, so they survive part moves.
+    tech: JSON sidecar
+    talksTo: []
+    kind: core
+flow:
+  - component: toplevel
+    text: receives the click ray and tests it against part boxes, visiting the nearer child first and skipping boxes farther than the best hit so far.
+  - component: picking
+    text: moves the ray into each candidate part's local frame and walks its tree; a ray-triangle test returns `t` and barycentric coordinates.
+  - component: snapping
+    text: checks vertices, edges and detected circle centres of the hit triangle's neighbourhood and snaps when one is within a few pixels (`px`) on screen.
+  - component: measure
+    text: takes two snapped points, or two part ids for `minDistance`, and computes the result in millimetres with doubles.
+  - component: persist
+    text: stores the measurement as part id plus local point, then the viewer draws the dimension line.
+interface:
+  lang: cpp
+  code: |
+    struct Ray { dvec3 origin, dir; };   // world, mm
+    struct Hit {
+      uint32_t part, tri;
+      double   t;          // distance along the ray
+      dvec3    point;      // world space, mm
+      vec2     bary;       // barycentric u, v
+    };
+    std::optional<Hit> pick(const Scene&, const Ray&);
+    Snap   snap(const Scene&, const Hit&, float px);
+    // Snap::kind = Vertex | Edge | CircleCentre
+    double minDistance(const Scene&, uint32_t a,
+                       uint32_t b);   // mm
+    void   setTransform(Scene&, uint32_t part,
+                        const dmat4&); // refit top
+decisions:
+  - choice: Two-level BVH
+    instead: One flat BVH over all 5M triangles
+    why: A moved part in a flat tree means rebuilding or refitting 5M triangles. With two levels, a move refits a top tree of a few thousand boxes, and parts that repeat (bolts, gears) can share one bottom tree.
+  - choice: Binned SAH build
+    instead: Median split by triangle count
+    why: The surface area heuristic (split where the expected cost of testing both children is lowest) gives much faster traversal on uneven CAD meshes. Binning keeps the build under 2 s on 8 threads.
+  - choice: Part-local floats, doubles for measuring
+    instead: Floats in world space everywhere
+    why: Large world coordinates lose the precision needed for 0.01 mm. Local float vertices keep memory under 1 GB, and the few measured points are converted to doubles.
+watchOut: >-
+  A degenerate triangle (zero area or repeated vertices) can give NaN bounds, and every comparison with NaN is false,
+  so whole subtrees are silently skipped. Drop such triangles at load and assert that every node box is finite.

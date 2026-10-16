@@ -1,0 +1,114 @@
+overview: >-
+  An image service for HomeRow's 2M listing photos that makes sizes on request instead of storing every variant
+  in advance. Each URL carries the transform and an HMAC signature (a keyed hash only the site can produce), so
+  nobody can ask for arbitrary sizes. Hits come from an object cache keyed by normalised parameters, and misses go
+  to a fixed pool of 16 libvips workers with strict limits on size, memory and concurrency.
+learn:
+  - name: Signed URLs with HMAC
+  - name: Cache key normalisation
+    ref: system-design-primer
+  - name: Bounded worker pools
+  - name: Decompression bombs
+  - name: Cache-Control headers
+stats:
+  - value: < 20 ms
+    label: p99 cache hit
+  - value: < 400 ms
+    label: p99 miss, 12 MP image
+  - value: 150/s
+    label: transforms on 4 cores
+components:
+  - id: browser
+    name: Listing pages
+    role: Request photos with signed transform URLs.
+    tech: Browser · CDN
+    talksTo: [edge]
+    kind: external
+  - id: edge
+    name: URL verifier
+    role: Checks the HMAC, normalises parameters into a cache key and enforces limits.
+    tech: Go · net/http
+    talksTo: [cache]
+    kind: core
+  - id: cache
+    name: Cache layer
+    role: Stores transformed images by cache key and serves them with long-lived headers.
+    tech: Disk cache · MinIO
+    talksTo: [pool]
+    kind: core
+  - id: pool
+    name: Worker pool
+    role: 16 workers with a bounded queue; extra requests get 503 instead of piling up.
+    tech: Go semaphore
+    talksTo: [transform, source]
+    kind: core
+  - id: transform
+    name: Transform wrapper
+    role: Shrinks on load, auto-rotates, crops, strips metadata and encodes WebP or JPEG.
+    tech: libvips · govips
+    talksTo: []
+    kind: core
+  - id: source
+    name: Source photos
+    role: The original uploads, one per listing photo.
+    tech: S3-compatible bucket
+    talksTo: []
+    kind: external
+  - id: purge
+    name: Purge API
+    role: Deletes all cached variants of a photo when the agent replaces it.
+    tech: Go
+    talksTo: [cache]
+    kind: offline
+flow:
+  - component: edge
+    text: >-
+      receives `/img/L-4471/3.jpg?w=800&h=600&fit=cover&fmt=webp&sig=…`, recomputes the HMAC over path and query, and
+      rejects any change with `403`.
+  - component: edge
+    text: >-
+      sorts the parameters, rounds `w` up to the allowed sizes 320, 640, 800, 1280, 1920, and builds the key
+      `L-4471/3/800x600-cover.webp`.
+  - component: cache
+    text: >-
+      looks up the key; a **hit** returns in under 20 ms with `Cache-Control: max-age=31536000, immutable`.
+  - component: pool
+    text: on a miss waits for one of 16 slots, at most 2 s, and fetches the original from the source bucket.
+  - component: transform
+    text: >-
+      reads only the header first and refuses anything over 50 MP, then decodes with **shrink-on-load**, rotates by
+      EXIF, crops to 800×600 and strips metadata.
+  - component: cache
+    text: stores the result under the key and returns it, under 400 ms for a 12 MP original.
+interface:
+  lang: go
+  code: |
+    // sig = base64url(HMAC-SHA256(key, path+"?"+query))
+    type Params struct {
+        W, H   int    // rounded to allowed sizes
+        Fit    string // cover | contain
+        Format string // webp | jpeg
+    }
+
+    func Sign(key []byte, photo string, p Params) string
+    func Verify(key []byte, r *http.Request)
+        (Params, error)
+decisions:
+  - choice: Transform on request with a cache
+    instead: Pre-generate every size at upload
+    why: >-
+      Most of the 2M photos are viewed in only a few sizes, so pre-generating every variant wastes storage. On demand
+      plus a cache stores only what is used.
+  - choice: Signed URLs and a fixed size list
+    instead: Any width and height a client asks for
+    why: >-
+      Free parameters let anyone create millions of cache keys and burn CPU. Rounding to five widths keeps the hit
+      ratio high and the budget under $30 a month.
+  - choice: 16 workers and a bounded queue
+    instead: One goroutine per request
+    why: >-
+      A 12 MP decode needs tens of megabytes even with shrink-on-load, so unbounded concurrency breaks the 1.5 GB
+      limit. Excess load gets a fast 503 instead.
+watchOut: >-
+  A tiny file can declare a 30,000 × 30,000 image and exhaust memory on decode. Check dimensions from the header
+  before decoding anything.

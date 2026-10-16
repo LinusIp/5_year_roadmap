@@ -1,0 +1,123 @@
+overview: >-
+  Your physics engine owns a six-axis arm and steps it at a fixed 1 kHz, while ROS 2 nodes it does not own drive it. A
+  bridge publishes joint states and the simulation clock and applies incoming joint commands at the next step. A task
+  node sequences a pick-and-place, an inverse-kinematics node turns each Cartesian goal into joint angles, and a
+  trajectory node streams smooth set-points that a PD loop (a controller pushing on position error and on velocity)
+  inside the engine tracks.
+learn:
+  - name: Forward and inverse kinematics
+    ref: modern-robotics
+  - name: Damped least squares
+    ref: modern-robotics
+  - name: ROS 2 topics and QoS
+    ref: ros2-tutorials
+  - name: Simulation clock
+    ref: ros2-tutorials
+  - name: Quintic trajectories
+    ref: modern-robotics
+  - name: Joint PD control
+    ref: mit-manipulation
+stats:
+  - value: 48 of 50
+    label: pick-and-place runs succeed
+  - value: < 1 mm
+    label: IK error, 100 random poses
+  - value: 250 Hz
+    label: bridge, no drops for 10 min
+components:
+  - id: task
+    name: Task node
+    role: Sequences approach, grasp, lift, place and release, and checks each phase finished.
+    tech: rclpy state machine
+    talksTo: [ik]
+    kind: core
+  - id: ik
+    name: IK node
+    role: Turns a Cartesian goal into joint targets with damped least squares.
+    tech: rclpy · NumPy
+    talksTo: [traj]
+    kind: core
+  - id: traj
+    name: Trajectory node
+    role: Interpolates from the current joints to the targets with quintic splines and streams set-points.
+    tech: rclpy
+    talksTo: [bridge]
+    kind: core
+  - id: bridge
+    name: ROS 2 bridge
+    role: Publishes `/joint_states` and `/clock`, and applies `/joint_commands` at the next engine step.
+    tech: rclcpp · C++20
+    talksTo: [engine, task, rviz]
+    kind: core
+  - id: engine
+    name: Physics engine
+    role: Steps the arm at 1 kHz with joint motors, torque limits, a per-joint PD loop and a weld-constraint gripper.
+    tech: Your C++20 engine · Eigen
+    talksTo: [bridge]
+    kind: core
+  - id: rviz
+    name: RViz
+    role: Shows the arm's joint states and the goal poses.
+    tech: RViz 2
+    talksTo: []
+    kind: external
+  - id: runs
+    name: Reliability runs
+    role: Repeats the task 50 times with random object positions and logs latency, tracking error and success.
+    tech: rosbag2 · Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: task
+    text: picks the next phase, such as **approach**, and sends a Cartesian goal above the object.
+  - component: ik
+    text: >-
+      iterates `Δq = Jᵀ(JJᵀ + λ²I)⁻¹·e` until position error is under 1 mm; the damping `λ` keeps it stable near
+      singularities.
+  - component: traj
+    text: >-
+      fits a quintic spline per joint so velocity and acceleration start and end at zero, and streams set-points on
+      `/joint_commands`.
+  - component: bridge
+    text: queues each command and hands it to the engine at the next 1 kHz step, with joints in one fixed order.
+  - component: engine
+    text: >-
+      runs the PD loop per joint within torque limits; at grasp it enables the weld only when gripper and object move
+      together.
+  - component: bridge
+    text: >-
+      publishes `/joint_states` and `/clock` at 250 Hz, so every node runs on **simulation time**; this closes the
+      control loop.
+  - component: task
+    text: sees the phase reached from the joint states and moves on to grasp, lift, place and release.
+interface:
+  lang: text
+  code: |
+    # bridge, 250 Hz, all nodes use_sim_time:=true
+    pub /clock          rosgraph_msgs/Clock
+    pub /joint_states   sensor_msgs/JointState
+        name: [j1, j2, j3, j4, j5, j6]
+        position, velocity, effort
+    sub /joint_commands trajectory_msgs/
+                        JointTrajectoryPoint
+        positions, velocities, accelerations
+    srv /gripper/weld   std_srvs/SetBool
+decisions:
+  - choice: Damped least squares IK
+    instead: The plain Jacobian pseudo-inverse
+    why: >-
+      The pseudo-inverse explodes near singularities, and 100 random poses will find some. A small damping term
+      trades a little accuracy there for never blowing up.
+  - choice: PD loop inside the engine at 1 kHz
+    instead: A PD controller as a ROS 2 node
+    why: >-
+      Messages arrive at 250 Hz with jitter; tracking inside the engine step keeps joint RMS error under 1° while ROS
+      only streams set-points.
+  - choice: Grasp as a weld constraint
+    instead: Friction contacts between finger and object
+    why: >-
+      A weld makes the grasp reliable enough for 48 of 50 runs without tuning contact friction. Revisit with contacts
+      once the rest of the chain works.
+watchOut: >-
+  Nodes that use wall time instead of `/clock` drift whenever the simulation runs slower than real time. Set
+  `use_sim_time` on every node and check the real-time factor while ROS 2 is attached.

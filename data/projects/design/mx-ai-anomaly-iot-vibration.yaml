@@ -1,0 +1,110 @@
+overview: >-
+  A streaming detector for 60 pumps that never needs a labelled failure. Each second of accelerometer signal becomes
+  a few numbers (RMS level, kurtosis for spikiness, and energy in frequency bands from an FFT), and a model trained
+  only on normal running scores how unusual they are. An alert state machine raises an alarm only when the score
+  stays high, and injected synthetic faults measure recall and delay.
+learn:
+  - name: FFT band features
+    ref: dspguide
+  - name: RMS and kurtosis
+  - name: Autoencoders
+    ref: deep-learning-book
+  - name: Isolation forest
+  - name: Alert state machines
+stats:
+  - value: ≥ 90%
+    label: fault recall within 60 s
+  - value: < 1
+    label: false alert per pump a month
+  - value: 60 streams
+    label: real time on a laptop
+components:
+  - id: sensors
+    name: Accelerometers
+    role: Stream vibration from each of the 60 pumps, with pump speed.
+    tech: Sensor gateway
+    talksTo: [features]
+    kind: external
+  - id: features
+    name: Feature extractor
+    role: Turns each 1 s window into RMS, kurtosis and 16 band energies.
+    tech: NumPy · SciPy
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Normal model
+    role: Scores how far a window is from normal for that pump and speed.
+    tech: PyTorch autoencoder
+    talksTo: [alerts]
+    kind: core
+  - id: alerts
+    name: Alert machine
+    role: Moves each pump between normal, suspect and alert, with a cooldown.
+    tech: Python
+    talksTo: [maintenance]
+    kind: core
+  - id: maintenance
+    name: Maintenance board
+    role: Shows alerts and the band that changed most.
+    tech: CSV · metrics export
+    talksTo: []
+    kind: external
+  - id: trainer
+    name: Trainer
+    role: Fits the autoencoder and an isolation-forest baseline on normal weeks.
+    tech: scikit-learn · PyTorch
+    talksTo: [model]
+    kind: offline
+  - id: injector
+    name: Fault injector
+    role: Adds bearing-fault signatures to held-out normal data at known times.
+    tech: NumPy
+    talksTo: [evaluator]
+    kind: offline
+  - id: evaluator
+    name: Evaluator
+    role: Measures recall, detection delay and false alerts per pump-month.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: features
+    text: takes the latest 1 s window from pump P-17, removes the mean and computes RMS, kurtosis and 16 FFT band energies.
+  - component: model
+    text: reconstructs the features through the autoencoder; the error is the anomaly score, compared with a threshold set at the 99.9th percentile of normal scores at that speed.
+  - component: alerts
+    text: goes to **suspect** on the first high window and to **alert** if 20 of the last 30 windows are high, which fits the 60 s limit and ignores one-off knocks.
+  - component: alerts
+    text: after an alert, holds a 6-hour cooldown per pump so one fault does not page maintenance every minute.
+  - component: maintenance
+    text: receives the alert with the score and the band that moved most, such as 2–4 kHz for a bearing.
+interface:
+  lang: json
+  code: |
+    { "pump": "P-17",
+      "ts": "2026-10-16T03:12:44Z",
+      "state": "alert",
+      "score": 4.7, "threshold": 2.9,
+      "windows_high": "22/30",
+      "top_band": "2–4 kHz",
+      "speed_rpm": 1480,
+      "cooldown_until": "2026-10-16T09:12:44Z" }
+decisions:
+  - choice: Learn normal, flag the rest
+    instead: A supervised fault classifier
+    why: >-
+      There are no labelled failures to learn from. A model of normal running only needs normal data, which every
+      pump produces all day.
+  - choice: Threshold from normal data only
+    instead: Tune it on the injected faults
+    why: >-
+      Tuning on the test faults makes recall look better than it will be. Set it from normal validation weeks and
+      keep injected faults for the final score.
+  - choice: Spectral features and a small model
+    instead: A deep model on raw waveforms
+    why: >-
+      60 streams in real time on a laptop is easy with 18 numbers per second, and band energies tell maintenance
+      which part is changing.
+watchOut: >-
+  Pumps change speed and load, and a model trained on one mode alarms on the other. Include every normal operating
+  mode in training and set thresholds per speed band.

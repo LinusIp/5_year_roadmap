@@ -1,0 +1,106 @@
+overview: >-
+  A GPU crowd simulator for Northbank Arena's planning study of a 60,000-seat venue with multi-level concourses, ten
+  times larger than the 20k-agent CPU model. Each step, CUDA kernels rebuild a uniform grid of agents by counting sort,
+  steer every agent along a per-level navigation field toward its exit, and apply velocity-obstacle avoidance against
+  its neighbours. Analytics accumulate density and flow per cell to find bottlenecks, and a batch runner works through
+  scenarios headless and writes CSV.
+learn:
+  - name: Counting sort on GPU
+    ref: pmpp-book
+  - name: Velocity obstacles
+  - name: Navigation fields
+    ref: mit-6-006
+  - name: Structure of arrays
+    ref: cs149
+  - name: Crowd density and flow
+  - name: Deterministic GPU code
+stats:
+  - value: 200k
+    label: agents at 20 steps/s, 12 GB GPU
+  - value: ≤ 5%
+    label: evacuation time vs CPU model at 20k
+  - value: < 1 h
+    label: batch of 20 scenarios
+components:
+  - id: runner
+    name: Scenario runner
+    role: Loads a venue and scenario, seeds agents, runs headless and writes CSV results.
+    tech: C++17
+    talksTo: [nav]
+    kind: core
+  - id: nav
+    name: Nav field
+    role: Distance-to-exit fields per level, with stairs and ramps as links between levels.
+    tech: C++17 · CUDA
+    talksTo: [grid]
+    kind: core
+  - id: grid
+    name: Grid build
+    role: Counts agents per cell, prefix-sums the counts and scatters agents sorted by cell and id.
+    tech: CUDA
+    talksTo: [avoid]
+    kind: core
+  - id: avoid
+    name: Avoidance pass
+    role: Picks each agent's velocity from its nav direction and its neighbours' velocity obstacles.
+    tech: CUDA
+    talksTo: [analytics]
+    kind: core
+  - id: analytics
+    name: Analytics
+    role: Accumulates density and flow per cell and flags cells above a density threshold.
+    tech: CUDA · CSV
+    talksTo: [viewer]
+    kind: core
+  - id: viewer
+    name: Viewer
+    role: Shows agents and density heat maps per level for checking runs.
+    tech: OpenGL
+    talksTo: []
+    kind: offline
+  - id: cpu
+    name: CPU reference
+    role: The 20k-agent CPU model, used to compare evacuation times.
+    tech: C++17 · OpenMP
+    talksTo: []
+    kind: external
+flow:
+  - component: runner
+    text: seeds 200k agents in their seats from the scenario's seed and gives each an exit.
+  - component: nav
+    text: has computed once per scenario a field per level giving the direction to the nearest exit, routing through stairs when the exit is on another level.
+  - component: grid
+    text: counts agents per cell with atomics, prefix-sums the counts, and orders each cell's agents **by id**, so neighbour order is the same every run.
+  - component: avoid
+    text: reads each agent's neighbours from its 9 cells on the same level and picks the allowed velocity closest to its nav direction, writing to a second buffer.
+  - component: analytics
+    text: adds each agent to its cell's density and flow, so persistent hot spots at stairs and gates show up as bottlenecks.
+  - component: runner
+    text: records evacuation time when the last agent leaves, then starts the next scenario of the batch.
+interface:
+  lang: cuda
+  code: |
+    struct Agents {             // structure of arrays
+      float2* pos;   float2* vel;
+      uint8_t* level; uint32_t* id;
+    };
+    // per step: count, scan, scatter, then
+    __global__ void avoid(Agents in, Agents out,
+        const uint32_t* cellStart,  // by cell, id
+        const float2* navDir,       // cell, level
+        float dt, float tau);
+    __global__ void accumulate(Agents a,
+        float* density, float2* flow);
+decisions:
+  - choice: Counting-sort grid rebuilt every step
+    instead: A GPU tree for neighbour queries
+    why: Every agent moves every step and the venue has a fixed size, so count, scan and scatter is linear and maps well to the GPU. A tree would need rebuilding too.
+  - choice: Precomputed nav fields per level
+    instead: A* path per agent
+    why: 200k agents share a handful of exits, so a few fields per scenario answer every agent's route, while 200k searches would not fit the step budget.
+  - choice: Check against measured crowd flow too
+    instead: Trust agreement with the CPU model alone
+    why: The CPU model may share a bug with the GPU port. Also compare corridor flow against published flow-per-metre-width values before using bottleneck results.
+watchOut: >-
+  Atomics place agents in a different order each run, so floating-point sums differ and seeded runs drift apart.
+  Sort each cell's agents by id after the scatter, and test that two runs with one seed give identical CSVs.

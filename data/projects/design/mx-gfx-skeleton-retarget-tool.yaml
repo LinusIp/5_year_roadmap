@@ -1,0 +1,98 @@
+overview: >-
+  An offline tool that moves mocap clips from one skeleton onto five differently shaped characters. Each joint's
+  rotation is turned into world space, measured as a change from the source rest pose, and that change is applied to
+  the target's rest pose; root motion is scaled by the ratio of hip heights. A last pass finds frames where a foot is
+  planted and pins it there with two-bone IK (solving hip and knee angles so the foot reaches a point), so feet do not
+  slide.
+learn:
+  - name: Quaternions
+    ref: gamemath-3d-primer
+  - name: Rest-pose retargeting
+  - name: Two-bone IK
+    ref: game-engine-architecture
+  - name: Foot contact detection
+  - name: Vectorising over frames
+    ref: scientific-python-lectures
+stats:
+  - value: < 200 ms
+    label: per 10 s clip at 60 Hz
+  - value: < 2 cm
+    label: average foot slide
+  - value: < 2 min
+    label: batch of 300 clips
+components:
+  - id: parser
+    name: Clip parser
+    role: Reads the BVH-like hierarchy, offsets and per-frame channels into quaternion arrays.
+    tech: Python · numpy
+    talksTo: [mapper]
+    kind: core
+  - id: mapper
+    name: Skeleton mapper
+    role: Maps source bone names to target bones and holds both rest poses.
+    tech: JSON map
+    talksTo: [core]
+    kind: core
+  - id: core
+    name: Retarget core
+    role: Re-expresses world-space joint rotations relative to the target rest pose and scales root motion.
+    tech: numpy quaternions
+    talksTo: [ik]
+    kind: core
+  - id: ik
+    name: Foot IK
+    role: Detects foot contacts and locks the foot with two-bone IK, blending in and out.
+    tech: numpy
+    talksTo: [cli, preview]
+    kind: core
+  - id: preview
+    name: Previewer
+    role: Plays the source and result side by side with a skeleton overlay.
+    tech: moderngl
+    talksTo: []
+    kind: offline
+  - id: cli
+    name: Batch CLI
+    role: Converts a folder of clips for one character across worker processes and writes reports.
+    tech: multiprocessing
+    talksTo: []
+    kind: core
+flow:
+  - component: parser
+    text: loads a 600-frame walk into `rot` with shape (frames, joints, 4) and flips any quaternion whose dot with the previous frame is negative.
+  - component: mapper
+    text: pairs each source bone with its target bone, for example `LeftUpLeg` to `thigh_l`, and drops unmapped ones.
+  - component: core
+    text: computes each joint's world rotation, takes the change from the **source rest pose**, applies it to the target rest pose and converts back to local rotations.
+  - component: ik
+    text: marks frames where foot height is under 2 cm and speed under 0.1 m/s, pins the foot there with two-bone IK, and blends over 6 frames at each edge.
+  - component: cli
+    text: writes the result in the target format and logs foot slide and any flipped bones per clip.
+interface:
+  lang: python
+  code: |
+    def retarget(clip: Clip, src: Skeleton,
+                 dst: Skeleton, names: dict) -> Clip:
+        """Re-express each mapped joint's world
+        rotation relative to the target rest pose.
+
+        clip.rot: (frames, joints, 4) unit quaternions
+        Root translation scales by hip height ratio."""
+
+    def fix_feet(clip: Clip, dst: Skeleton,
+                 h_max=0.02, v_max=0.1) -> Clip:
+        """Pin feet while under 2 cm high and slower
+        than 0.1 m/s; blend 6 frames at each edge."""
+decisions:
+  - choice: Delta from rest pose in world space
+    instead: Copying local joint rotations across
+    why: The five characters have different rest poses, so copied local rotations twist limbs. With source equal to target, the joint-angle error must be zero.
+  - choice: IK only during detected contacts
+    instead: IK on the feet in every frame
+    why: Always-on IK fights the swing phase of the step; contact windows with short blends keep the motion and remove sliding.
+  - choice: Python with numpy over frames
+    instead: C++17
+    why: Each step is a batch of quaternion operations over 600 frames, which numpy does in milliseconds; 300 clips over 4 processes fit in 2 minutes.
+watchOut: >-
+  Quaternion sign flips. q and -q are the same rotation, but blending or interpolating across a flip spins a bone the
+  long way round, so keep every joint in the same hemisphere as its previous frame.

@@ -1,0 +1,115 @@
+overview: >-
+  A physically based renderer for worktop materials lit by an HDR photo of a room. At load, the environment is
+  pre-blurred into a small diffuse cube map and a mip chain where each level matches a rougher surface, and a lookup
+  table of the BRDF's response is built once (the split-sum approximation). Each pixel then needs only three texture
+  reads for lighting, so 20 materials hold 60 FPS at 1440p, and tone mapping turns the HDR result into screen colours.
+learn:
+  - name: Cook-Torrance GGX
+    ref: learnopengl
+  - name: Image-based lighting
+    ref: learnopengl
+  - name: Split-sum approximation
+    ref: rtr4
+  - name: Importance sampling
+    ref: pbr-book
+  - name: Tone mapping
+    ref: rtr4
+stats:
+  - value: 60 FPS
+    label: 20 materials at 1440p
+  - value: < 2 s
+    label: prefilter a 1k HDR environment
+  - value: < 3%
+    label: mean luminance error vs reference
+components:
+  - id: hdr
+    name: HDR loader
+    role: Loads an equirectangular HDR image and converts it to a 1k cube map.
+    tech: stb_image
+    talksTo: [prefilter]
+    kind: core
+  - id: prefilter
+    name: Environment prefilter
+    role: Builds a 32 px irradiance cube and a 5-level GGX prefiltered mip chain on the GPU.
+    tech: GLSL 4.5
+    talksTo: [pbr]
+    kind: core
+  - id: lut
+    name: BRDF LUT
+    role: A 512 × 512 two-channel table of the BRDF's scale and bias by angle and roughness.
+    tech: GLSL 4.5 · RG16F
+    talksTo: [pbr]
+    kind: core
+  - id: materials
+    name: Material system
+    role: Holds the 20 worktop materials with albedo, roughness and metallic maps and edge profiles.
+    tech: C++17
+    talksTo: [pbr]
+    kind: core
+  - id: pbr
+    name: PBR shader
+    role: Shades each pixel with direct lights plus diffuse and specular image-based light into an HDR target.
+    tech: GLSL 4.5
+    talksTo: [tonemap]
+    kind: core
+  - id: tonemap
+    name: Tone mapper
+    role: Applies exposure and a filmic curve, then encodes to sRGB.
+    tech: GLSL 4.5
+    talksTo: [gpu]
+    kind: core
+  - id: gpu
+    name: GPU
+    role: Runs the prefilter at load and the frame passes.
+    tech: OpenGL 4.5 core
+    talksTo: []
+    kind: external
+  - id: reference
+    name: Offline reference
+    role: Path-traced renders of 5 materials to measure luminance error against.
+    tech: Offline renderer
+    talksTo: []
+    kind: offline
+flow:
+  - component: hdr
+    text: loads the showroom or daylight HDR and renders it into a 1k cube map, keeping values above 1.0.
+  - component: prefilter
+    text: convolves it with GGX using 1,024 **importance samples** per texel for each roughness level, all in under 2 s.
+  - component: lut
+    text: is computed once at first start and cached, since it does not depend on the environment.
+  - component: materials
+    text: bind the chosen marble, quartz or steel maps, with albedo as sRGB and roughness and metallic as linear.
+  - component: pbr
+    text: adds diffuse light from the irradiance cube to specular from `textureLod(u_spec, R, rough * 4)` scaled by the LUT, writing RGBA16F.
+  - component: tonemap
+    text: multiplies by exposure, applies the curve and writes sRGB to the screen.
+interface:
+  lang: glsl
+  code: |
+    uniform samplerCube u_irradiance; // 32 px, diffuse
+    uniform samplerCube u_spec;       // 5 GGX mips
+    uniform sampler2D u_brdf_lut;     // split-sum A, B
+    vec3 ibl(vec3 n, vec3 v, vec3 albedo, float rough,
+             float metal) {
+      vec3 f0 = mix(vec3(0.04), albedo, metal);
+      float nv = max(dot(n, v), 1e-4);
+      vec2 ab = texture(u_brdf_lut, vec2(nv, rough)).rg;
+      vec3 spec = textureLod(u_spec, reflect(-v, n),
+                             rough * 4.0).rgb;
+      vec3 diff = texture(u_irradiance, n).rgb * albedo;
+      return diff * (1.0 - metal) * (1.0 - f0)
+           + spec * (f0 * ab.x + ab.y);
+    }
+decisions:
+  - choice: Split-sum prefiltered lighting
+    instead: Sampling the environment per pixel each frame
+    why: Hundreds of samples per pixel at 1440p cannot hold 60 FPS; precomputed maps make it three reads, at a small accuracy cost the 3% target allows.
+  - choice: Prefilter on the GPU at load
+    instead: Shipping prefiltered maps as files
+    why: Takes under 2 s, keeps assets well under 200 MB, and lets the shop add environments without a bake step.
+  - choice: Metal-roughness workflow
+    instead: Specular-glossiness
+    why: It matches glTF and most material sources, and steel versus stone is one metallic value.
+watchOut: >-
+  Gamma mistakes. Albedo maps are sRGB, but roughness and metallic maps are linear data; loading them as sRGB makes
+  stone look glossier than it is, which is exactly what customers judge.

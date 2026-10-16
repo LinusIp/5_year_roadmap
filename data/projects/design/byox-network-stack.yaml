@@ -1,0 +1,117 @@
+overview: >-
+  A user-space TCP/IP stack on a Linux TAP device (a virtual network card that hands your program raw Ethernet
+  frames). Frames pass up through an Ethernet layer that dispatches to ARP or IPv4, IPv4 that dispatches to ICMP or
+  TCP, and a TCP layer that keeps one control block per connection with buffers, sequence numbers and a retransmission
+  queue on a timer wheel. A tiny socket-like API lets an HTTP client fetch a real page, while the host routes and NATs
+  the TAP subnet to the internet.
+learn:
+  - name: Network byte order
+  - name: Internet checksum
+  - name: TCP state machine
+    ref: stanford-cs144
+  - name: Sliding window and retransmission
+    ref: stanford-cs144
+  - name: ARP resolution
+stats:
+  - value: 100 / 100
+    label: ping replies
+  - value: 5 %
+    label: injected loss, 10 MB download still exact
+  - value: "0"
+    label: malformed packets in Wireshark
+components:
+  - id: app
+    name: HTTP client
+    role: Calls connect, send and recv to fetch a page and checks the download's SHA-256.
+    tech: C
+    talksTo: [tcp]
+    kind: core
+  - id: tcp
+    name: TCP
+    role: One control block per connection with buffers, sequence numbers, window and retransmission queue.
+    tech: C · timer wheel
+    talksTo: [ip]
+    kind: core
+  - id: ip
+    name: IPv4 and ICMP
+    role: Builds and validates IPv4 headers, dispatches by protocol, and answers echo requests.
+    tech: C
+    talksTo: [arp, link]
+    kind: core
+  - id: arp
+    name: ARP cache
+    role: Resolves the next hop's MAC address and answers ARP requests for the stack's own IP.
+    tech: C
+    talksTo: [link]
+    kind: core
+  - id: link
+    name: Ethernet layer
+    role: Reads and writes raw frames on the TAP device and dispatches by EtherType.
+    tech: C · TUN/TAP
+    talksTo: [host]
+    kind: core
+  - id: host
+    name: Host and internet
+    role: Routes and NATs the TAP subnet to local and real HTTP servers.
+    tech: iproute2 · iptables
+    talksTo: []
+    kind: external
+flow:
+  - component: app
+    text: calls `tcp_connect()` to the server's IP and port 80.
+  - component: tcp
+    text: >-
+      picks an initial sequence number, sends a SYN, moves to `SYN_SENT` and starts a retransmission timer.
+  - component: ip
+    text: >-
+      wraps the segment in an IPv4 header in **network byte order**, fills the header checksum, and asks ARP for the
+      next hop.
+  - component: arp
+    text: returns the gateway's MAC from its cache, or sends an ARP request and waits for the reply.
+  - component: link
+    text: >-
+      writes the frame to the TAP device opened with `IFF_NO_PI`; the reply frame comes back the same way and is
+      dispatched on EtherType `0x0800`.
+  - component: tcp
+    text: >-
+      checks the checksum over the pseudo-header, accepts the SYN-ACK with wrap-safe sequence comparison, sends the
+      ACK and moves to `ESTABLISHED`.
+  - component: app
+    text: >-
+      sends `GET /`, reads the body through the receive window while TCP resends unacknowledged segments on timeout,
+      then both sides close with FIN.
+interface:
+  lang: c
+  code: |
+    struct tcb {
+      enum tcp_state state;   /* SYN_SENT, ... */
+      uint32_t snd_una, snd_nxt, rcv_nxt;
+      uint16_t snd_wnd, rcv_wnd;
+      struct rtx_queue rtx;   /* unacked segments */
+    };
+    int     tcp_connect(uint32_t ip, uint16_t port);
+    ssize_t tcp_send(int fd, const void *b, size_t n);
+    ssize_t tcp_recv(int fd, void *b, size_t n);
+
+    /* sequence numbers wrap at 2^32 */
+    static inline bool seq_lt(uint32_t a, uint32_t b)
+    { return (int32_t)(a - b) < 0; }
+decisions:
+  - choice: TAP, not TUN
+    instead: A TUN device that delivers IP packets
+    why: >-
+      Answering ARP and parsing Ethernet frames is part of the goal, and TAP is the only one that gives you frames.
+      It costs about 6 hours of the 40.
+  - choice: TCP client first
+    instead: Client and server together
+    why: >-
+      Fetching a page and surviving 5 % loss needs only the client side of the state machine. The server side and Reno
+      congestion control are the stretch.
+  - choice: C
+    instead: Rust
+    why: >-
+      Packed headers and byte-order conversions map directly to structs, as in the CS144 and CS:APP material. Rust is
+      a good choice if you want the compiler to catch buffer lifetimes.
+watchOut: >-
+  A TCP checksum computed without the pseudo-header makes the server drop every segment silently. Open Wireshark from
+  the first SYN and fix every checksum it flags before moving on.

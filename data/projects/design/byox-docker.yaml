@@ -1,0 +1,117 @@
+overview: >-
+  A container runtime that pulls an image from Docker Hub and runs it isolated, limited and networked, using the same
+  Linux features Docker uses. The registry client downloads layers into a store keyed by their sha256 digest, the
+  unpacker extracts each one once, and the runtime stacks them with overlayfs (a filesystem that layers read-only
+  directories under one writable one). It then starts the command in new namespaces (separate views of processes,
+  mounts, hostname and network), under cgroup v2 limits, with a veth pair (a virtual cable) into a bridge with NAT.
+learn:
+  - name: Linux namespaces
+  - name: OCI image layers
+  - name: Overlay filesystems
+  - name: cgroups v2 limits
+  - name: veth pairs and bridges
+  - name: Processes and exec
+    ref: ostep
+stats:
+  - value: 64 MB
+    label: limit OOM-kills a 128 MB allocation
+  - value: < 55 %
+    label: of a core at half-core cpu.max
+  - value: "2"
+    label: Docker Hub images run unchanged
+components:
+  - id: cli
+    name: CLI
+    role: Parses pull and run with the image reference, command and limits.
+    tech: Go
+    talksTo: [puller, runtime]
+    kind: core
+  - id: registry
+    name: Docker Hub
+    role: Serves the token, manifest list, platform manifest and gzip layers.
+    tech: Registry HTTP API
+    talksTo: [puller]
+    kind: external
+  - id: puller
+    name: Registry client
+    role: Resolves a reference to a manifest and stores layers by sha256 digest.
+    tech: Go net/http
+    talksTo: [unpacker]
+    kind: core
+  - id: unpacker
+    name: Layer unpacker
+    role: Extracts each layer once, turning whiteout files into deletions.
+    tech: Go archive/tar
+    talksTo: [runtime]
+    kind: core
+  - id: runtime
+    name: Runtime
+    role: Mounts the overlay, clones the child into new namespaces, pivots root and execs the command.
+    tech: Go · syscall
+    talksTo: [cgroups, network]
+    kind: core
+  - id: cgroups
+    name: Cgroup manager
+    role: Creates a group and writes memory, CPU and pids limits before the child starts.
+    tech: cgroups v2
+    talksTo: []
+    kind: core
+  - id: network
+    name: Network manager
+    role: Creates a veth pair, moves one end into the container and attaches the other to the bridge with NAT.
+    tech: iproute2 · nftables
+    talksTo: []
+    kind: core
+flow:
+  - component: cli
+    text: receives `run --memory 64m --cpus 0.5 alpine:3.20 /bin/sh`.
+  - component: puller
+    text: >-
+      gets a token, picks the `linux/amd64` manifest from the manifest list, and downloads any gzip layer whose digest
+      is not already stored.
+  - component: unpacker
+    text: extracts each layer once and applies `.wh.` whiteout files, so files deleted in a later layer stay deleted.
+  - component: runtime
+    text: >-
+      mounts an overlay with the layers as `lowerdir` and a fresh `upperdir`, then clones a child with new PID, mount,
+      UTS, IPC and network namespaces.
+  - component: cgroups
+    text: writes `memory.max`, `cpu.max` and `pids.max` and adds the child before it runs the command.
+  - component: network
+    text: >-
+      gives the child one end of a veth pair with its own IP on the bridge, and NAT on the host for outbound traffic.
+  - component: runtime
+    text: >-
+      in the child, sets the hostname, makes mounts **private**, mounts a fresh `/proc`, calls `pivot_root` and execs
+      the command under a small init that reaps zombies.
+interface:
+  lang: shell
+  code: |
+    $ mydocker pull python:3.12-slim
+    $ mydocker run --memory 64m --cpus 0.5 \
+        --pids 64 alpine:3.20 /bin/sh
+
+    # written before the child starts
+    # CG=/sys/fs/cgroup/mydocker/<id>
+    $CG/memory.max   67108864
+    $CG/cpu.max      50000 100000
+    $CG/pids.max     64
+decisions:
+  - choice: Overlayfs over the stored layers
+    instead: Copying the unpacked rootfs for each container
+    why: >-
+      Layers stay shared and start-up skips a full copy, which shows in the start latency compared with docker run.
+      Measure the disk saved as part of the report.
+  - choice: pivot_root
+    instead: chroot
+    why: >-
+      chroot only changes path lookup and a root process can escape it, while pivot_root swaps the root mount so the
+      host tree can be unmounted. It costs one extra step, making the root mount private.
+  - choice: cgroups v2 only
+    instead: Supporting cgroups v1 as well
+    why: >-
+      A current Linux VM uses the unified v2 tree, and v1 instructions from old tutorials do not apply to it. Supporting
+      both would double the limit code for no test that needs it.
+watchOut: >-
+  pivot_root fails with a vague error when the root mount is shared. Make the mount tree private in the new mount
+  namespace first, then bind-mount the new root onto itself before calling it.

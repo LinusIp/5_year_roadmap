@@ -1,0 +1,99 @@
+overview: >-
+  A fine-tuning pipeline that adapts an open Whisper-class speech model to insurance claim calls. It mixes accented
+  Common Voice speech with text-to-speech audio of claim scripts full of jargon, augments it with phone-line noise,
+  fine-tunes on one 24 GB GPU, and adds a prompt of domain terms at decoding time. Word error rate (WER, the share of
+  words wrong) is reported per accent and per term, so you see exactly where the 25% gain came from.
+learn:
+  - name: Word error rate
+    ref: slp3
+  - name: Speech fine-tuning
+  - name: Audio augmentation
+  - name: Vocabulary biasing
+  - name: Catastrophic forgetting
+  - name: Real-time factor
+stats:
+  - value: ≥ 25%
+    label: relative WER reduction
+  - value: < 0.3
+    label: real-time factor
+  - value: < 6 h
+    label: training on 24 GB
+components:
+  - id: data
+    name: Data prep
+    role: Builds paired audio and transcripts from Common Voice accents and TTS claim scripts, split by speaker.
+    tech: Python · datasets
+    talksTo: [augment]
+    kind: core
+  - id: augment
+    name: Augmenter
+    role: Adds 8 kHz phone-band filtering, noise and speed changes on the fly.
+    tech: torchaudio
+    talksTo: [trainer]
+    kind: core
+  - id: trainer
+    name: Trainer
+    role: Fine-tunes the Whisper model and mixes in general speech to limit forgetting.
+    tech: Transformers · PyTorch
+    talksTo: [biasing]
+    kind: core
+  - id: biasing
+    name: Biasing module
+    role: Feeds a list of claim terms as the decoder prompt so rare words win close calls.
+    tech: Whisper prompt
+    talksTo: [evaluator]
+    kind: core
+  - id: evaluator
+    name: WER evaluator
+    role: Scores held-out calls by accent and term, and times the real-time factor.
+    tech: jiwer
+    talksTo: []
+    kind: core
+  - id: gpu
+    name: 24 GB GPU
+    role: The single card for training and timing.
+    tech: Consumer GPU
+    talksTo: []
+    kind: external
+flow:
+  - component: data
+    text: >-
+      pairs each clip with its normalised transcript and splits by **speaker**, so no voice in the test set was heard
+      in training; TTS clips stay under 30% of the mix.
+  - component: augment
+    text: band-limits each clip to telephone quality and adds noise at 10–20 dB SNR before it reaches the model.
+  - component: trainer
+    text: fine-tunes on the **24 GB GPU** at a low learning rate with 20% general Common Voice audio mixed in.
+  - component: biasing
+    text: passes terms like `subrogation`, `deductible` and `no-claims bonus` as `initial_prompt` when decoding a call.
+  - component: evaluator
+    text: computes WER overall, per accent and as term recall, against the base model on the same held-out calls, and checks `RTF < 0.3`.
+interface:
+  lang: python
+  code: |
+    def transcribe(audio: np.ndarray, sr: int = 16000,
+                   terms: list[str] | None = None
+                   ) -> Transcript: ...
+
+    # Transcript(text="the deductible applies…",
+    #            rtf=0.21, model="whisper-small-ins-v2")
+
+    def wer_report(refs, hyps, accents, terms
+                   ) -> pd.DataFrame: ...
+decisions:
+  - choice: Fine-tune plus prompt biasing
+    instead: Prompt biasing alone
+    why: >-
+      Biasing fixes known terms but not accents, which drive much of the 25% error. Fine-tuning handles accents;
+      biasing still helps new terms without retraining.
+  - choice: A small Whisper model
+    instead: The largest Whisper model
+    why: >-
+      Training must fit 6 hours on 24 GB and decoding needs `RTF < 0.3`. Start with small or medium and only move up
+      if the WER target is missed.
+  - choice: Mix in general speech
+    instead: Train only on claim audio
+    why: Claim-only training makes the model forget ordinary speech. A 20% general share keeps baseline WER from rising.
+watchOut: >-
+  Training mostly on TTS audio teaches the model the synthetic voice, not the jargon. Cap the TTS share, use several
+  voices, and report WER on real speakers separately.

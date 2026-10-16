@@ -1,0 +1,58 @@
+overview: >-
+  At batch 1 a decode step launches hundreds of tiny kernels, and the CPU time to launch them can exceed the GPU
+  time to run them. This build profiles those gaps, captures one decode step in a CUDA graph (a recorded sequence of
+  kernels replayed with one call) using static input and output buffers, and compares step time with eager at batch
+  1, 8 and 64.
+learn:
+  - name: Kernel launch overhead
+    ref: horace-he-brrr
+  - name: CUDA graphs
+    ref: cuda-guide
+  - name: Static buffers
+  - name: Profiling timelines
+    ref: nsight-compute-docs
+components:
+  - id: model
+    name: Decode step
+    role: One forward of a small LLM for one new token per sequence, with a preallocated KV cache.
+    tech: PyTorch
+    talksTo: [capture]
+    kind: core
+  - id: capture
+    name: Graph capture
+    role: Records the step into a graph per batch size, reading and writing fixed buffers.
+    tech: torch.cuda.CUDAGraph
+    talksTo: [replay]
+    kind: core
+  - id: replay
+    name: Replay loop
+    role: Copies the new token and position into the static inputs and replays the graph.
+    tech: PyTorch
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Bench
+    role: Times eager versus replay per batch size and checks logits are identical.
+    tech: torch.profiler · CUDA events
+    talksTo: []
+    kind: core
+flow:
+  - component: model
+    text: runs eagerly under the profiler; the timeline shows gaps between kernels where the GPU waits for the CPU.
+  - component: capture
+    text: >-
+      warms up on a side stream, then records the step inside `torch.cuda.graph(g)` with `static_tokens`,
+      `static_pos` and `static_logits` tensors.
+  - component: replay
+    text: does `static_tokens.copy_(tok)` and `g.replay()`; no new tensors are allocated, so the recorded addresses stay valid.
+  - component: bench
+    text: reports step time eager versus graph at batch 1, 8 and 64 and asserts `torch.equal` on the logits.
+decisions:
+  - choice: One graph per batch size
+    instead: One graph padded to the largest batch
+    why: >-
+      A graph fixes every shape, so batch 1 inside a batch-64 graph does 64x the work and loses the gain. Three
+      captures cost little memory here; servers capture a handful of sizes and pad up to the next one.
+watchOut: >-
+  Anything that changes shape or allocates during the step, such as a growing KV cache or a `.item()` call, breaks
+  capture or replays stale data. Preallocate the cache at full length and keep the step free of CPU syncs.

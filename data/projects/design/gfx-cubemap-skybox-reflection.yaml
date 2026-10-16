@@ -1,0 +1,63 @@
+overview: >-
+  A cube-mapped sky drawn behind everything, plus objects that look up the same cubemap along the reflected or
+  refracted view direction, blended by Fresnel (more reflection at glancing angles). An option refracts red, green and
+  blue with slightly different ratios for a coloured edge.
+learn:
+  - name: Cubemaps
+    ref: learnopengl
+  - name: Reflect and refract
+  - name: Schlick Fresnel
+  - name: Depth tricks
+components:
+  - id: loader
+    name: Cubemap loader
+    role: Loads six faces or a cross layout into one cube texture.
+    tech: OpenGL 4.6 · stb_image
+    talksTo: [objects, skybox]
+    kind: core
+  - id: objects
+    name: Reflective shader
+    role: Shades objects with reflected and refracted cubemap lookups mixed by Fresnel.
+    tech: GLSL
+    talksTo: [skybox]
+    kind: core
+  - id: skybox
+    name: Skybox pass
+    role: Draws the sky last, only where nothing else was drawn.
+    tech: GLSL
+    talksTo: []
+    kind: core
+flow:
+  - component: loader
+    text: creates a `GL_TEXTURE_CUBE_MAP` with `CLAMP_TO_EDGE` on S, T and R and turns on `GL_TEXTURE_CUBE_MAP_SEAMLESS`.
+  - component: objects
+    text: computes `R = reflect(-V, N)` and `T = refract(-V, N, 1.0/1.52)`, and mixes them by `F = F0 + (1-F0)(1-cosθ)^5`.
+  - component: objects
+    text: in chromatic mode refracts three times with ratios near 1/1.51, 1/1.52 and 1/1.53 and takes one colour channel from each.
+  - component: skybox
+    text: draws with the view's **translation removed** and `gl_Position = p.xyww`, so its depth is 1.0 and `GL_LEQUAL` keeps only uncovered pixels.
+interface:
+  lang: glsl
+  code: |
+    // skybox vertex shader
+    uniform mat4 proj;
+    uniform mat4 viewNoMove;  // mat4(mat3(view))
+    out vec3 dir;
+    void main() {
+      dir = aPos;
+      vec4 p = proj * viewNoMove * vec4(aPos, 1);
+      gl_Position = p.xyww;   // depth = 1.0
+    }
+
+    // object fragment shader
+    uniform samplerCube env;
+    vec3 envColour(vec3 V, vec3 N, float eta);
+decisions:
+  - choice: Skybox last at depth 1.0
+    instead: Skybox first with depth writes off
+    why: >-
+      Drawn first, the sky is shaded for every pixel even where objects cover it; drawn last with `GL_LEQUAL`, it is
+      shaded only where it shows. Drawing it first is fine for a first test when the screen is mostly sky.
+watchOut: >-
+  Leaving the camera translation in the sky's view matrix makes the sky slide as you move, like a small box around
+  you. Use `mat4(mat3(view))` for the sky only, and keep clamp-to-edge so face seams do not show.

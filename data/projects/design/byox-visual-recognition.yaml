@@ -1,0 +1,119 @@
+overview: >-
+  An object detector for three to five things from your own life, fine-tuned on 400 or more photos you took and
+  labelled, scored on capture sessions it never saw, and running live on a webcam. Images are split by capture session
+  so near-identical frames never land on both sides, a COCO-pretrained detector is fine-tuned with augmentation, and
+  an evaluation script reports precision, recall and mAP (mean average precision) with the worst errors. The live app
+  preprocesses each frame exactly as in training and draws boxes with confidences.
+learn:
+  - name: Transfer learning
+    ref: fastai-practical-dl
+  - name: Leak-free data splits
+  - name: IoU and mAP
+    ref: stanford-cs231n
+  - name: Precision-recall trade-off
+  - name: Data augmentation
+stats:
+  - value: ≥ 100
+    label: test images from unseen sessions
+  - value: "> 0.7"
+    label: mAP at IoU 0.5
+  - value: ≥ 15 FPS
+    label: live webcam demo
+components:
+  - id: dataset
+    name: Dataset
+    role: Captured frames from several rooms and times, labelled and split by session.
+    tech: OpenCV · Label Studio
+    talksTo: [trainer, eval]
+    kind: offline
+  - id: trainer
+    name: Trainer
+    role: Fine-tunes a COCO-pretrained small YOLO with augmentation and saves the weights.
+    tech: Ultralytics YOLO · GPU
+    talksTo: [detector, eval]
+    kind: offline
+  - id: eval
+    name: Evaluation
+    role: Computes per-class precision, recall and mAP and dumps the worst errors.
+    tech: Python
+    talksTo: []
+    kind: offline
+  - id: webcam
+    name: Webcam
+    role: Supplies the live video stream.
+    tech: USB webcam
+    talksTo: [preprocess]
+    kind: external
+  - id: preprocess
+    name: Preprocess
+    role: Resizes and normalises each frame exactly as in training.
+    tech: OpenCV
+    talksTo: [detector]
+    kind: core
+  - id: detector
+    name: Detector
+    role: Runs the fine-tuned weights and returns boxes, classes and confidences.
+    tech: PyTorch
+    talksTo: [overlay]
+    kind: core
+  - id: overlay
+    name: Overlay
+    role: Draws the boxes and confidences above the threshold onto the frame.
+    tech: OpenCV
+    talksTo: []
+    kind: core
+flow:
+  - component: dataset
+    text: >-
+      groups photos by capture session and puts whole sessions in train, validation or test, so near-duplicates never
+      straddle the split.
+  - component: trainer
+    text: >-
+      fine-tunes the pretrained detector on your classes with flips, colour jitter and scale changes, and saves
+      `best.pt`.
+  - component: eval
+    text: >-
+      scores the held-out sessions at IoU `0.5`, draws the precision-recall curve, and compares with the pretrained
+      model used zero-shot.
+  - component: preprocess
+    text: takes a webcam frame and resizes it to `640` pixels with the training normalisation.
+  - component: detector
+    text: runs the weights and returns boxes with class and confidence.
+  - component: overlay
+    text: >-
+      draws the boxes above the chosen threshold, such as `conf ≥ 0.5`, and the frame rate.
+interface:
+  lang: python
+  code: |
+    # data.yaml: whole sessions per split
+    #   train: sessions/train  val: sessions/val
+    #   test:  sessions/test   (never trained on)
+    #   names: [mug, pliers, plant, cat]
+    model = YOLO("yolov8s.pt")      # COCO-pretrained
+    model.train(data="data.yaml", epochs=50,
+                imgsz=640, seed=0)
+    metrics = model.val(split="test", iou=0.5)
+
+    # live: same size and normalisation
+    for r in model.predict(source=0, imgsz=640,
+                           conf=0.5, stream=True):
+        show(r.plot())
+decisions:
+  - choice: Split by capture session
+    instead: A random split of all frames
+    why: >-
+      Frames from one session are near-identical, so a random split leaks them into the test set and inflates mAP.
+      The 100 test images must come from sessions the model never saw.
+  - choice: A small YOLO
+    instead: torchvision Faster R-CNN
+    why: >-
+      The live demo needs 15 FPS or more on your machine, which a small one-stage detector reaches easily. Faster
+      R-CNN is the fallback if mAP stays well under 0.7.
+  - choice: Fine-tune a pretrained model
+    instead: Training a detector from scratch
+    why: >-
+      400 images are far too few to learn features from scratch. COCO features carry over, and the mAP-against-data
+      sweep shows how much your images add.
+watchOut: >-
+  A random split of video frames leaks near-identical images into the test set and makes the scores meaningless.
+  Decide the session split before training and never move images between sides afterwards.

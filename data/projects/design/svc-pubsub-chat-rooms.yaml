@@ -1,0 +1,47 @@
+overview: >-
+  A WebSocket chat server run as two instances behind a proxy: every message is published to a Redis channel per
+  room so clients on either instance receive it, and presence is a Redis key with a 30 s TTL kept alive by
+  heartbeats.
+learn:
+  - name: WebSockets
+  - name: Pub/sub fan-out
+    ref: system-design-primer
+  - name: TTL presence
+  - name: Backpressure
+components:
+  - id: proxy
+    name: Proxy
+    role: Spreads WebSocket connections across the two server instances.
+    tech: nginx
+    talksTo: [server]
+    kind: core
+  - id: server
+    name: Chat server
+    role: Holds open sockets, handles join and leave, and keeps a bounded send queue per client.
+    tech: Python or Node · WebSockets
+    talksTo: [redis]
+    kind: core
+  - id: redis
+    name: Redis
+    role: Channels `room:<id>` for fan-out and presence keys with a TTL.
+    tech: Redis pub/sub
+    talksTo: [server]
+    kind: core
+flow:
+  - component: proxy
+    text: forwards a client's `{"type":"join","room":"general"}` to whichever instance holds its socket.
+  - component: server
+    text: publishes each chat message to `room:general` and refreshes `presence:general:<user>` with a 30 s TTL on each heartbeat.
+  - component: redis
+    text: delivers the message to every instance subscribed to the room; server to Redis and back is the loop by design.
+  - component: server
+    text: pushes it onto each local client's queue and disconnects any client whose queue passes 100 messages.
+decisions:
+  - choice: Presence as TTL keys
+    instead: Join and leave events only
+    why: >-
+      A crashed instance never sends leave, so its users would stay online forever. With a 30 s TTL they expire on
+      their own, which is exactly the done-when.
+watchOut: >-
+  One slow reader with an unbounded buffer grows memory until the instance dies. Cap each client's queue and drop
+  the slow client, not the room.

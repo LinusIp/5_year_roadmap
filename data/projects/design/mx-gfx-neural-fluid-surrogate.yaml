@@ -1,0 +1,100 @@
+overview: >-
+  A neural surrogate for Seagate Marine Weather's 2D smoke solver that steps a 256 × 256 flow 10 times faster with
+  controlled error. The numerical solver generates trajectories around random obstacles and inflows, and a U-Net (a
+  convolutional network that shrinks the image, then grows it back with skip connections) learns to predict the change
+  to the next state, trained on multi-step rollouts. In the viewer a monitor checks each scene and each predicted step,
+  and falls back to the real solver when the input looks unfamiliar or the predicted flow stops being divergence-free.
+learn:
+  - name: Neural surrogates
+    ref: pbdl-book
+  - name: U-Net architecture
+    ref: stanford-cs231n
+  - name: Rollout training
+    ref: pbdl-book
+  - name: Divergence-free flow
+    ref: bridson-fluid-sim
+  - name: Out-of-distribution detection
+stats:
+  - value: 10×
+    label: faster than the solver at 256 × 256
+  - value: < 10%
+    label: relative L2 error after 100 steps
+  - value: ≥ 90%
+    label: of out-of-distribution scenes fall back
+components:
+  - id: generator
+    name: Solver data generator
+    role: Runs the numerical solver on random obstacles and inflows and saves trajectories.
+    tech: Python · numpy
+    talksTo: [training]
+    kind: offline
+  - id: training
+    name: Training and eval
+    role: Trains on unrolled rollouts and reports error growth, divergence and energy decay.
+    tech: PyTorch
+    talksTo: [model]
+    kind: offline
+  - id: viewer
+    name: Viewer integration
+    role: Holds the current state and the solver/surrogate toggle and draws the flow.
+    tech: Python · OpenGL
+    talksTo: [monitor]
+    kind: core
+  - id: monitor
+    name: OOD monitor
+    role: Scores the obstacle layout and each step's divergence against training statistics.
+    tech: PyTorch · numpy
+    talksTo: [model, solver]
+    kind: core
+  - id: model
+    name: Surrogate model
+    role: Predicts the next density and velocity from the state and obstacle mask.
+    tech: PyTorch · U-Net
+    talksTo: [viewer]
+    kind: core
+  - id: solver
+    name: Numerical solver
+    role: The trusted solver from the earlier project, used for fallback and ground truth.
+    tech: Python port
+    talksTo: [viewer]
+    kind: external
+flow:
+  - component: viewer
+    text: hands the monitor the current density and velocity `(3, 256, 256)` and the obstacle mask.
+  - component: monitor
+    text: compares the mask's features with the training set and sends an unfamiliar scene straight to the **solver**.
+  - component: model
+    text: predicts the change to the state in one GPU forward pass and adds it to the current state.
+  - component: monitor
+    text: measures the divergence of the predicted velocity; above `tau`, the training set's 99th percentile, the step is redone by the solver.
+  - component: viewer
+    text: draws the accepted step, shows which engine produced it, and feeds it back as the next step's input, so the path is a loop.
+interface:
+  lang: python
+  code: |
+    class Surrogate(nn.Module):     # U-Net, 4 levels
+        def forward(self, x, mask):
+            # x: (B, 3, 256, 256) density, u, v
+            # mask: (B, 1, 256, 256), 1 = obstacle
+            inp = torch.cat([x, mask], dim=1)
+            return x + self.unet(inp)  # residual
+
+    def step(x, mask):
+        if monitor.unfamiliar(mask):
+            return solver.step(x, mask)
+        y = model(x, mask)
+        bad = monitor.divergence(y) > tau
+        return solver.step(x, mask) if bad else y
+decisions:
+  - choice: Train on unrolled multi-step rollouts
+    instead: One-step training only
+    why: One-step models never see their own errors, which then grow fast over 100 steps. Unrolling 4 to 8 steps in training teaches recovery and is the main lever for the 10% target.
+  - choice: Predict the change, not the whole state
+    instead: Predict the full next state
+    why: Between steps most of the field barely moves, so the change is small and easier to learn precisely.
+  - choice: Compare against a solver at the same cost
+    instead: Compare only against the full-resolution solver
+    why: A coarser solver that is also 10× faster may be just as accurate. Beating it is what justifies the network.
+watchOut: >-
+  Error builds up over long rollouts, and a model that looks good at step 1 can blow up by step 50. Always report the
+  error growth curve to 100 steps, not one-step error, and test on obstacle shapes left out of training.

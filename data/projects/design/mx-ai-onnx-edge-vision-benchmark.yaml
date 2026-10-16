@@ -1,0 +1,99 @@
+overview: >-
+  A benchmark that helps Wildcam choose how to ship its species classifier on battery-powered camera traps. The
+  trained PyTorch model is exported to ONNX and TFLite, quantised to INT8 (8-bit integers instead of 32-bit floats)
+  with a calibration set, and every runtime and precision runs the same images on a Raspberry Pi class CPU. The
+  output is a table of accuracy, latency, memory, size and CPU time per image, and a memo that recommends one.
+learn:
+  - name: ONNX export
+    ref: onnx-runtime-docs
+  - name: Post-training quantisation
+    ref: mit-6-5940
+  - name: Calibration sets
+  - name: Latency percentiles
+  - name: Energy per inference
+stats:
+  - value: < 1 pt
+    label: accuracy loss after INT8
+  - value: < 100 ms
+    label: per image on Pi-class CPU
+  - value: < 20 MB
+    label: model size
+components:
+  - id: model
+    name: Trained model
+    role: The FP32 species classifier trained on a Snapshot Serengeti subset.
+    tech: PyTorch · MobileNet-class
+    talksTo: [exporters]
+    kind: offline
+  - id: exporters
+    name: Exporters
+    role: Converts the model to ONNX and TFLite and checks outputs match PyTorch.
+    tech: torch.onnx · TFLite converter
+    talksTo: [calibrator]
+    kind: core
+  - id: calibrator
+    name: Calibrator
+    role: Runs 500 representative images to set INT8 scales, then writes the quantised models.
+    tech: ONNX Runtime quantization
+    talksTo: [harness]
+    kind: core
+  - id: harness
+    name: Benchmark harness
+    role: Runs each runtime and precision on the same images, cold and warm, and records metrics.
+    tech: Python · psutil
+    talksTo: [device, report]
+    kind: core
+  - id: device
+    name: Pi-class board
+    role: The ARM CPU that stands in for the camera trap.
+    tech: Raspberry Pi 4 or 5
+    talksTo: []
+    kind: external
+  - id: report
+    name: Report generator
+    role: Builds the results table and the recommendation memo.
+    tech: pandas · Markdown
+    talksTo: []
+    kind: core
+flow:
+  - component: exporters
+    text: exports to ONNX at opset 17 and to TFLite, and fails if top-1 differs from PyTorch on more than 0.5% of 1,000 images.
+  - component: calibrator
+    text: feeds 500 images covering **day, night and infrared** shots so the INT8 ranges match what the camera really sees.
+  - component: harness
+    text: >-
+      copies each variant to the **Pi-class board**, runs 2,000 test images after a reboot (cold) and again (warm),
+      and records p50 and p95 latency, peak memory and `cpu_time_ms` per image.
+  - component: harness
+    text: measures top-1 accuracy of each variant on the same held-out set, so the INT8 drop is a like-for-like comparison.
+  - component: report
+    text: keeps variants under 100 ms p95 and 20 MB, ranks them by CPU time as the **energy proxy**, and writes the memo.
+interface:
+  lang: python
+  code: |
+    def bench(variant: Path, images: list[Path],
+              threads: int = 4, cold: bool = True
+              ) -> BenchResult: ...
+
+    # BenchResult(runtime="onnxruntime",
+    #   precision="int8", top1=0.912,
+    #   p50_ms=48.3, p95_ms=71.0,
+    #   peak_mb=61, size_mb=4.1,
+    #   cpu_ms_per_img=152.0)
+decisions:
+  - choice: Post-training INT8 quantisation
+    instead: Quantisation-aware training
+    why: >-
+      Post-training needs only a calibration set and no retraining, and is usually within 1 point for a small CNN.
+      Move to quantisation-aware training only if the drop exceeds 1 point.
+  - choice: CPU time as the energy proxy
+    instead: Measure power with a USB meter
+    why: >-
+      Only one board is available and the comparison is relative, so CPU time per image ranks variants well. Add a
+      power meter for the final pick if one is at hand.
+  - choice: Report p95 as well as p50
+    instead: Average latency only
+    why: A trap wakes, classifies and sleeps; slow first runs after wake-up cost battery, and only the tail shows them.
+watchOut: >-
+  A calibration set of only daytime photos clips the ranges for night shots, and benchmarks run only warm hide the
+  cold-start cost a waking camera pays. Calibrate on all lighting conditions and report cold and warm runs.

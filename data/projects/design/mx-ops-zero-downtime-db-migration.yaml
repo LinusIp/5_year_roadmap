@@ -1,0 +1,96 @@
+overview: >-
+  Orbit Learning's 600 GB database moves from Postgres 15 to 17 on a new host, and its giant events table is split,
+  while live exams keep running. Schema changes use expand and contract, which means adding the new shape alongside
+  the old, moving readers and writers over, and only then dropping the old shape. Logical replication keeps the new
+  cluster in step at 800 writes a second, a verifier checks parity, and at cutover PgBouncer pauses writes for under
+  15 seconds while the last changes land and the connection string is switched.
+learn:
+  - name: Expand and contract
+  - name: Logical replication
+    ref: ddia
+  - name: Writer fencing
+  - name: Connection pooling
+  - name: Rollback rehearsals
+stats:
+  - value: < 15 s
+    label: write pause at cutover
+  - value: < 1 s
+    label: replication lag at 800 writes/s
+  - value: "0"
+    label: checksum mismatches
+components:
+  - id: app
+    name: Exam app
+    role: Serves 400k students and writes about 800 rows a second.
+    tech: App servers
+    talksTo: [proxy]
+    kind: external
+  - id: proxy
+    name: Connection proxy
+    role: Every connection goes through it, so writes can be paused and repointed in one place.
+    tech: PgBouncer
+    talksTo: [old, new]
+    kind: core
+  - id: old
+    name: Old cluster
+    role: The PostgreSQL 15 primary, the single writer until cutover.
+    tech: PostgreSQL 15
+    talksTo: [new]
+    kind: core
+  - id: new
+    name: New cluster
+    role: The PostgreSQL 17 primary with the split events tables, fed by logical replication.
+    tech: PostgreSQL 17
+    talksTo: [verifier, reverse]
+    kind: core
+  - id: verifier
+    name: Parity verifier
+    role: Compares row counts and per-chunk checksums of every table on both sides.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: reverse
+    name: Reverse replication
+    role: After cutover, streams new writes back to the old cluster so rollback loses nothing.
+    tech: Logical replication
+    talksTo: [old]
+    kind: offline
+flow:
+  - component: old
+    text: publishes all tables with `CREATE PUBLICATION`; the new cluster subscribes after the expanded schema with split events tables is created there.
+  - component: verifier
+    text: checksums every table in chunks while load runs, until the mismatch count is **zero** and lag stays under 1 s.
+  - component: proxy
+    text: runs `PAUSE` at cutover, waits for open transactions to finish, and so fences the old writer.
+  - component: new
+    text: receives the last changes; once lag is 0 the sequences are copied over, because logical replication does not carry them.
+  - component: proxy
+    text: is repointed to the new cluster and runs `RESUME`; writes were paused under 15 s.
+  - component: new
+    text: starts reverse replication to the old cluster, which stays ready as the rollback target.
+interface:
+  lang: sql
+  code: |
+    -- on the old cluster (PG 15)
+    CREATE PUBLICATION mig FOR ALL TABLES;
+
+    -- on the new cluster (PG 17)
+    CREATE SUBSCRIPTION mig
+      CONNECTION 'host=old-pg dbname=orbit'
+      PUBLICATION mig;
+
+    -- cutover, on PgBouncer's admin console
+    PAUSE orbit;
+    -- wait for lag = 0, sync sequences
+    RESUME orbit;
+decisions:
+  - choice: Logical replication, not dump and restore
+    instead: pg_upgrade or dump and restore in a window
+    why: Copying 600 GB takes hours and any window over 60 s breaks live exams. Logical replication copies while the app runs and also allows the version jump.
+  - choice: Pause at the proxy, not in the app
+    instead: Put the app into read-only mode
+    why: One PgBouncer `PAUSE` fences every writer at once, so there is never a second primary, and the app only sees a slower query.
+  - choice: Keep reverse replication after cutover
+    instead: Restore from backup if something goes wrong
+    why: A restore would lose every write since cutover. Reverse replication keeps the old cluster current, so rollback is the same short pause.
+watchOut: Sequences are not replicated, so the new cluster's IDs start low and inserts collide right after cutover. Copy every sequence value, plus a margin, while writes are paused.

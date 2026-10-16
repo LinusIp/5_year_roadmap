@@ -1,0 +1,109 @@
+overview: >-
+  A complete tower-defence game on a small in-house Rust engine, so Quillwright Games can measure productivity and
+  performance honestly before betting two titles on Rust. The engine crate gives a wgpu sprite batcher, input, audio and
+  a small ECS (entities as ids, components in arrays, systems as functions); the game crate registers systems and loads
+  towers and waves from data files that hot-reload. 2,000 enemies follow one flow field, a grid where every cell points
+  toward the goal, recomputed only when a tower changes the map.
+learn:
+  - name: ECS architecture
+    ref: game-engine-architecture
+  - name: Fixed timestep loop
+    ref: gaffer-on-games
+  - name: Flow fields (BFS)
+    ref: mit-6-006
+  - name: Sprite batching
+    ref: learnopengl
+  - name: Ownership and borrowing
+    ref: rust-book
+stats:
+  - value: < 4 ms
+    label: per tick, 2,000 enemies at 60 ticks/s
+  - value: < 8 ms
+    label: frame with 10,000 sprites at 1080p
+  - value: < 5 s
+    label: incremental build (clean < 90 s)
+components:
+  - id: input
+    name: Window and input
+    role: Delivers mouse, keyboard and window events.
+    tech: winit
+    talksTo: [waves]
+    kind: external
+  - id: data
+    name: Data hot reload
+    role: Loads tower, enemy and wave files at start and reloads them when they change.
+    tech: Rust · RON
+    talksTo: [waves]
+    kind: offline
+  - id: waves
+    name: Wave director
+    role: Spawns each of the 12 waves on schedule and handles tower placement and upgrades.
+    tech: Rust
+    talksTo: [flow, ecs]
+    kind: core
+  - id: flow
+    name: Flow-field pathing
+    role: Runs a breadth-first search from the goal and stores one direction per cell.
+    tech: Rust
+    talksTo: [ecs]
+    kind: core
+  - id: ecs
+    name: ECS
+    role: Runs movement, targeting, damage and death systems over component arrays at 60 ticks/s.
+    tech: Rust
+    talksTo: [audio, renderer]
+    kind: core
+  - id: audio
+    name: Audio
+    role: Plays shot, hit and death sounds from events.
+    tech: Rust · cpal-style output
+    talksTo: []
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Packs every sprite into one instance buffer with a sprite atlas and draws it in a few calls.
+    tech: wgpu
+    talksTo: []
+    kind: core
+flow:
+  - component: waves
+    text: reads the current wave from data, spawns enemies through the command buffer, and places any tower the player clicked.
+  - component: flow
+    text: rebuilds only if a tower changed the grid, with one BFS from the goal; each cell keeps the direction to its lowest-cost neighbour.
+  - component: ecs
+    text: moves each enemy along `dir_at(pos)`, lets towers target the nearest enemy in range, and applies damage, all with a fixed `dt` of 1/60 s.
+  - component: ecs
+    text: applies queued spawns and despawns at the **end of the tick**, so no system holds two mutable borrows of the world.
+  - component: audio
+    text: plays the tick's shot and death events, capped so 50 hits do not play 50 sounds.
+  - component: renderer
+    text: writes position, atlas rectangle and colour for up to 10,000 sprites into one buffer and draws them at 1080p in under 8 ms.
+interface:
+  lang: rust
+  code: |
+    pub struct FlowField { w: u16, h: u16,
+        dir: Vec<u8> }      // 8 directions, per cell
+    impl FlowField {
+        // BFS from the goal; only when towers change
+        pub fn rebuild(&mut self, g: &Grid, goal: Cell);
+        pub fn dir_at(&self, p: Vec2) -> Vec2;
+    }
+    pub trait System {
+        fn run(&mut self, w: &mut World,
+               cmds: &mut Commands, dt: f32);
+    }
+    // spawns and despawns go through `cmds` and apply
+    // at the end of the tick
+decisions:
+  - choice: One flow field
+    instead: A* per enemy
+    why: All 2,000 enemies share one goal, so one BFS over the grid answers every enemy's path, while 2,000 A* searches would blow the 4 ms tick.
+  - choice: Small array-based ECS with a command buffer
+    instead: Entity objects shared through Rc and RefCell
+    why: Shared mutable objects fight the borrow checker or panic at run time. Arrays per component and deferred spawns let systems borrow only what they need, and they are fast for 2,000 enemies.
+  - choice: Only the engine this game needs
+    instead: A general engine for both future titles
+    why: The trial measures productivity; a general engine would mostly measure abstraction. Count lines, unsafe blocks and build times, and decide on generality after the trial.
+watchOut: >-
+  Recomputing the flow field every frame looks fine with 3 towers and falls over with 40. Keep a dirty flag set by
+  tower placement, rebuild once, and check tick time with the full 12th wave on screen.

@@ -1,0 +1,99 @@
+overview: >-
+  A batch pipeline that gives Hearthmade's phone photos one consistent studio look. Each photo is segmented into a
+  product mask, a diffusion model with a style LoRA (small add-on weights trained on the shop's studio images)
+  paints only the background around the masked product, and the original product pixels are pasted back on top.
+  Automatic filters reject bad outputs, and the whole 200-SKU folder runs in under 30 minutes on one 24 GB GPU.
+learn:
+  - name: Diffusion inpainting
+    ref: hf-diffusion-course
+  - name: LoRA fine-tuning
+    ref: diffusers-repo
+  - name: Image segmentation
+    ref: stanford-cs231n
+  - name: Compositing and masks
+  - name: Automatic quality filters
+stats:
+  - value: '> 99%'
+    label: product pixels unchanged
+  - value: < 30 min
+    label: 200 images on 24 GB
+  - value: ≥ 80%
+    label: accepted by humans
+components:
+  - id: runner
+    name: Batch runner
+    role: Walks the input folder, resizes photos and tracks progress and failures.
+    tech: Python
+    talksTo: [segmenter]
+    kind: core
+  - id: segmenter
+    name: Segmenter
+    role: Produces a clean product mask from each photo.
+    tech: SAM-class model
+    talksTo: [inpaint]
+    kind: core
+  - id: lora
+    name: Style LoRA
+    role: Adapter trained on 20–40 studio backgrounds to fix the shop's look.
+    tech: diffusers · PEFT
+    talksTo: [inpaint]
+    kind: offline
+  - id: inpaint
+    name: Inpainting generator
+    role: Generates the background outside the mask and composites the original product back.
+    tech: diffusers SDXL inpaint
+    talksTo: [gpu, filter]
+    kind: core
+  - id: gpu
+    name: 24 GB GPU
+    role: The one card that segmentation and generation share.
+    tech: Consumer GPU
+    talksTo: []
+    kind: external
+  - id: filter
+    name: Quality filter
+    role: Rejects images with changed product pixels, halos or near-copies of training backgrounds.
+    tech: NumPy · CLIP
+    talksTo: []
+    kind: core
+flow:
+  - component: runner
+    text: loads each photo from `in/`, resizes to 1024 px and skips SKUs already in `out/`, so a crash resumes.
+  - component: segmenter
+    text: outputs the product mask and dilates it by 4 px so the inpainter never touches the product edge.
+  - component: inpaint
+    text: runs inpainting with the **style LoRA** at about 25 steps on the 24 GB GPU, then pastes the original product pixels back through the mask.
+  - component: filter
+    text: >-
+      checks that `≥ 99%` of pixels inside the mask are unchanged, scores edge halos, and rejects outputs whose CLIP
+      similarity to any LoRA training image is too high.
+  - component: runner
+    text: writes accepted images to `out/` and failed ones to `review/` with the reason, then logs time per image.
+interface:
+  lang: python
+  code: |
+    def shoot(photo: Path, style: str = "studio-v2",
+              steps: int = 25, seed: int = 0
+              ) -> Shot: ...
+
+    # Shot(path="out/mug-blue-12.png",
+    #   mask_fidelity=0.997, halo=0.02,
+    #   max_train_sim=0.71, accepted=True,
+    #   seconds=6.4)
+decisions:
+  - choice: Inpaint around a fixed product mask
+    instead: Regenerate the whole image from the photo
+    why: >-
+      Customers buy the exact glaze they see, so product pixels must stay above 99% unchanged. Generating only the
+      background and pasting the product back guarantees it.
+  - choice: A style LoRA
+    instead: Prompting the base model alone
+    why: >-
+      Prompts give a different studio for every SKU. A LoRA trained on a few dozen studio shots keeps all 200 images
+      consistent and costs minutes to train on the one GPU.
+  - choice: Automatic filters before human review
+    instead: Review every output by hand
+    why: Filters catch masks and halos cheaply, so humans only judge the style and the 80% acceptance is measured on clean candidates.
+watchOut: >-
+  Artifacts leak in along the product edge, and a LoRA trained on too few images copies its training backgrounds.
+  Dilate the mask, check edges automatically, and compare outputs with the training set.

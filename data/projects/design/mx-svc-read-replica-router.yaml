@@ -1,0 +1,109 @@
+overview: >-
+  A Go library that sits between Bazaarly's app and its PostgreSQL primary with 2 replicas, sending safe reads to a
+  replica and everything else to the primary. After a user writes, the router remembers the primary's **LSN** (log
+  sequence number, a position in the database's change log) for that session. A later read goes only to a replica
+  that has replayed at least that far, so users always see their own writes.
+learn:
+  - name: Streaming replication
+    ref: ddia
+  - name: Replication lag
+    ref: kleppmann-distributed-systems
+  - name: Read-your-writes consistency
+  - name: Log sequence numbers
+  - name: Statement classification
+stats:
+  - value: 80 %
+    label: of reads on replicas
+  - value: "0"
+    label: read-your-writes violations in 1M requests
+  - value: < 1 ms
+    label: router overhead p99
+components:
+  - id: app
+    name: Marketplace app
+    role: Runs queries through the router with a session id per user.
+    tech: Go
+    talksTo: [classifier]
+    kind: external
+  - id: classifier
+    name: SQL classifier
+    role: Marks a statement read only if it is a plain SELECT outside a transaction with no locking clause or volatile function.
+    tech: Go · pg_query
+    talksTo: [tracker]
+    kind: core
+  - id: tracker
+    name: Session tracker
+    role: Stores the primary LSN after each write, per session, in a token the app passes back.
+    tech: Go · signed cookie
+    talksTo: [policy]
+    kind: core
+  - id: monitor
+    name: Replica monitor
+    role: Polls each replica's replay LSN every 100 ms and marks it down if it stops answering.
+    tech: Go
+    talksTo: [db, policy]
+    kind: core
+  - id: policy
+    name: Selection policy
+    role: Picks the least-loaded replica that has caught up to the session's LSN, else the primary.
+    tech: Go
+    talksTo: [db]
+    kind: core
+  - id: db
+    name: Primary and replicas
+    role: One primary and 2 local streaming replicas.
+    tech: PostgreSQL · Docker
+    talksTo: []
+    kind: external
+  - id: workload
+    name: Workload generator
+    role: Replays a 90/10 read/write mix with injected 5 s lag and counts stale reads.
+    tech: Go
+    talksTo: [app]
+    kind: offline
+flow:
+  - component: classifier
+    text: parses the statement; `SELECT … FOR UPDATE`, a call to `nextval()` or anything inside `BEGIN` goes to the **primary**.
+  - component: tracker
+    text: after a write commits, reads `pg_current_wal_lsn()` and stores it as the session's `min_lsn`.
+  - component: monitor
+    text: keeps each replica's `pg_last_wal_replay_lsn()` fresh in memory, so a routing choice never waits on a query.
+  - component: policy
+    text: >-
+      sends a read to a replica whose replay LSN is at or past `min_lsn`; if none is, or a replica lags more than
+      a set number of bytes, the read falls back to the primary.
+  - component: db
+    text: runs the query; a hint comment `/* route:primary */` lets one query force the primary.
+interface:
+  lang: go
+  code: |
+    type Router struct { /* pools, monitor */ }
+
+    // Query routes one statement for a session.
+    func (r *Router) Query(ctx context.Context,
+        s *Session, sql string, args ...any,
+    ) (pgx.Rows, error)
+
+    type Session struct {
+        ID     string
+        MinLSN pglogrepl.LSN // 0 = no write yet
+    }
+decisions:
+  - choice: Compare log positions, not lag in seconds
+    instead: Use a replica only if its lag is under 1 s
+    why: >-
+      Time-based lag says nothing about whether this user's write has arrived, and the test injects 5 s lag. An LSN
+      comparison is exact, so 0 violations is achievable.
+  - choice: A library inside the app
+    instead: A separate proxy process
+    why: >-
+      Either is allowed. A library avoids an extra network hop, which keeps overhead under 1 ms p99, and it can see the
+      session directly. Revisit if services in other languages need routing.
+  - choice: Whole transactions on the primary
+    instead: Route each statement inside a transaction separately
+    why: >-
+      Splitting a transaction across nodes breaks its isolation. Most marketplace reads are single statements
+      outside a transaction, so the 80 percent target still holds; measure the share in the benchmark.
+watchOut: >-
+  A SELECT that calls a function with side effects is still a write. Keep a deny list of such functions and test
+  that each one routes to the primary.

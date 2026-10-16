@@ -1,0 +1,70 @@
+overview: >-
+  Five CUDA kernels that transpose an 8192x8192 float matrix, each fixing the previous one's main cost: naive, a plain
+  copy as the speed ceiling, a shared-memory tile, a padded tile that avoids bank conflicts, and wider float4 loads. A
+  chart shows GB/s for each against the copy kernel.
+learn:
+  - name: Memory coalescing
+    ref: pmpp-book
+  - name: Shared-memory tiling
+    ref: cuda-guide
+  - name: Bank conflicts
+    ref: cuda-guide
+  - name: Effective bandwidth
+    ref: nsight-compute-docs
+components:
+  - id: harness
+    name: Host harness
+    role: Allocates the matrix, launches each kernel, times it with CUDA events and checks the result.
+    tech: CUDA C++
+    talksTo: [kernels]
+    kind: core
+  - id: kernels
+    name: Kernel ladder
+    role: Holds the naive, copy, tiled, padded and vectorized kernels.
+    tech: CUDA C++
+    talksTo: [gpu]
+    kind: core
+  - id: gpu
+    name: GPU memory
+    role: Global and shared memory whose access patterns set the speed.
+    tech: NVIDIA GPU
+    talksTo: []
+    kind: external
+  - id: ncu
+    name: Nsight Compute
+    role: Reports memory throughput and shared-memory bank conflicts per kernel.
+    tech: ncu
+    talksTo: []
+    kind: offline
+flow:
+  - component: harness
+    text: fills an `8192 x 8192` float matrix, warms up, and times 20 launches per kernel.
+  - component: kernels
+    text: starts with the tiled version, which reads a `32 x 32` tile into shared memory with coalesced loads and writes it out transposed, also coalesced.
+  - component: kernels
+    text: then pads the tile to `[32][33]`, so column reads hit 32 different **banks**, and finally adds float4 loads and a tuned tile size.
+  - component: ncu
+    text: confirms each step with `dram__throughput` and bank-conflict counters; GB/s is `2 · N² · 4 bytes / time`.
+interface:
+  lang: cuda
+  code: |
+    __global__ void transpose_padded(
+        float* out, const float* in, int n) {
+      __shared__ float tile[32][33];
+      int x = blockIdx.x * 32 + threadIdx.x;
+      int y = blockIdx.y * 32 + threadIdx.y;
+      tile[threadIdx.y][threadIdx.x] = in[y * n + x];
+      __syncthreads();
+      x = blockIdx.y * 32 + threadIdx.x;
+      y = blockIdx.x * 32 + threadIdx.y;
+      out[y * n + x] = tile[threadIdx.x][threadIdx.y];
+    }
+decisions:
+  - choice: A copy kernel as the ceiling
+    instead: The GPU's spec-sheet bandwidth
+    why: >-
+      A copy reads and writes the same bytes as a transpose, so it is the realistic best case on your GPU. The 85%
+      target is measured against it, not the datasheet.
+watchOut: >-
+  A tiled kernel that reads coalesced but writes with the wrong index order is still slow. Check that consecutive
+  threads write consecutive addresses in both the read and the write.

@@ -1,0 +1,60 @@
+overview: >-
+  A FastAPI CRUD service for users and posts whose Postgres schema is built only by Alembic migrations, with
+  paginated list endpoints and a pytest suite that runs every test against a fresh throwaway database.
+learn:
+  - name: Schema migrations
+  - name: Foreign keys
+    ref: cmu-15-445
+  - name: Keyset pagination
+  - name: Test isolation
+components:
+  - id: api
+    name: API
+    role: Exposes CRUD routes for users and posts with `limit`, `cursor` and filter parameters.
+    tech: FastAPI · SQLAlchemy
+    talksTo: [db]
+    kind: core
+  - id: db
+    name: Postgres
+    role: Holds users and posts, with posts.user_id as a foreign key.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: migrations
+    name: Migrations
+    role: Versioned scripts that build the schema step by step, including one data backfill.
+    tech: Alembic
+    talksTo: [db]
+    kind: offline
+  - id: tests
+    name: Test suite
+    role: Creates a throwaway database, runs the migrations, then calls the API.
+    tech: pytest
+    talksTo: [migrations, api]
+    kind: offline
+flow:
+  - component: migrations
+    text: runs `alembic upgrade head` on an empty database, creating tables and then backfilling a new column.
+  - component: api
+    text: receives `GET /posts?user_id=7&limit=20` and validates the filter and the page size.
+  - component: db
+    text: returns 20 rows ordered by `id` where `id > cursor`, using the index on the foreign key.
+  - component: api
+    text: replies with the items and a `next_cursor`, so the client can ask for the next page.
+interface:
+  lang: http
+  code: |
+    GET /posts?user_id=7&limit=20&cursor=140
+
+    200 OK
+    { "items": [ { "id": 141, "title": "…" } ],
+      "next_cursor": 160 }
+decisions:
+  - choice: Cursor pagination on id
+    instead: OFFSET and LIMIT
+    why: >-
+      OFFSET rescans every skipped row and pages shift when posts are inserted mid-scroll. Offset is fine while
+      lists stay under a few thousand rows; revisit if clients need jump-to-page.
+watchOut: >-
+  Never edit a migration that has already been applied anywhere; write a new one. Give each test its own database
+  or a rolled-back transaction, or tests pass only in one order.

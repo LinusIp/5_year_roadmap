@@ -1,0 +1,73 @@
+overview: >-
+  The step from a Vulkan triangle to a textured quad: vertex, index and image data go through a CPU-visible staging
+  buffer into fast GPU-only memory, the image is moved through the layouts each step needs with pipeline barriers,
+  mipmaps are made by blitting each level from the one above, and a sampler reads it in the fragment shader. Done is a
+  quad with zero validation layer errors.
+learn:
+  - name: Staging buffers
+    ref: vulkan-tutorial
+  - name: Image layout transitions
+    ref: vkguide
+  - name: GPU memory types
+  - name: Mipmap generation
+    ref: vulkan-tutorial
+components:
+  - id: alloc
+    name: VMA allocator
+    role: Picks memory types and sub-allocates buffers and images.
+    tech: VMA
+    talksTo: [upload]
+    kind: core
+  - id: upload
+    name: Staging uploader
+    role: Copies data into staging memory and records the copies to device memory.
+    tech: Vulkan · C++20
+    talksTo: [image]
+    kind: core
+  - id: image
+    name: Texture image
+    role: Moves the image through its layouts and builds the mip chain.
+    tech: Vulkan
+    talksTo: [draw]
+    kind: core
+  - id: draw
+    name: Draw pass
+    role: Binds buffers and the image sampler and draws the quad.
+    tech: Vulkan · GLSL
+    talksTo: []
+    kind: core
+flow:
+  - component: alloc
+    text: makes a staging buffer with `HOST_ACCESS_SEQUENTIAL_WRITE` and the vertex, index and image resources with `VMA_MEMORY_USAGE_AUTO`, which lands them in device-local memory.
+  - component: upload
+    text: copies into staging, records `vkCmdCopyBuffer` and `vkCmdCopyBufferToImage` in a one-time command buffer, waits on its fence, then **frees the staging buffer**.
+  - component: image
+    text: moves `UNDEFINED → TRANSFER_DST_OPTIMAL` before the copy, then blits level `i-1` into `i` and moves `i-1` to `SHADER_READ_ONLY_OPTIMAL`, one barrier per level.
+  - component: draw
+    text: binds the buffers and a combined image sampler descriptor and draws 6 indices; upload throughput in MB/s is logged.
+interface:
+  lang: cpp
+  code: |
+    struct Buffer { VkBuffer buf; VmaAllocation mem; };
+    struct Image  { VkImage img; VmaAllocation mem;
+                    uint32_t mips; };
+
+    Buffer upload_buffer(Ctx& c, const void* data,
+                         VkDeviceSize size,
+                         VkBufferUsageFlags usage);
+    Image  upload_texture(Ctx& c, const Rgba8* px,
+                          uint32_t w, uint32_t h);
+    void transition(VkCommandBuffer cb, VkImage img,
+                    VkImageLayout from, VkImageLayout to,
+                    uint32_t baseMip, uint32_t count);
+    void generate_mips(VkCommandBuffer cb, Image& im,
+                       uint32_t w, uint32_t h);
+decisions:
+  - choice: VMA, not raw vkAllocateMemory
+    instead: One `vkAllocateMemory` call per resource
+    why: >-
+      Drivers cap the number of allocations (often 4,096) and choosing memory types by hand is fiddly. Write one raw
+      allocation to see how it works, then let VMA pick types and sub-allocate.
+watchOut: >-
+  A missing or wrong barrier often works on one GPU and corrupts the image on another. Turn on validation with
+  synchronisation checks from day one and give every transition explicit stage and access masks.

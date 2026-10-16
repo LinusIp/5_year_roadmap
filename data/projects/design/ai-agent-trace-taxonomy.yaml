@@ -1,0 +1,47 @@
+overview: >-
+  An error analysis of a tool-using agent: you collect 100 traces, read them and label each failure with a cause from
+  a taxonomy you build as you go, then fix the two most common causes and rerun. Counts per cause and the failure rate
+  before and after are the result.
+learn:
+  - name: Error analysis
+    ref: fsdl
+  - name: Failure taxonomies
+  - name: Agent traces
+    ref: hf-agents-course
+components:
+  - id: agent
+    name: Agent
+    role: Runs tasks and records every step, tool call and result.
+    tech: Python · LLM API
+    talksTo: [traces]
+    kind: core
+  - id: traces
+    name: Trace store
+    role: Keeps one JSON file per run with steps and final outcome.
+    tech: JSONL
+    talksTo: [sheet]
+    kind: core
+  - id: sheet
+    name: Label sheet
+    role: Holds the failure label, notes and taxonomy version per trace.
+    tech: Spreadsheet
+    talksTo: []
+    kind: core
+flow:
+  - component: agent
+    text: runs 100 tasks and writes each step as `{step, tool, args, result}`.
+  - component: traces
+    text: hands you the traces one by one, and each failure gets a first-pass cause like `wrong-tool` or `bad-args`.
+  - component: sheet
+    text: gets a second pass with the **final** taxonomy, so early traces are relabelled, then counts per cause.
+  - component: agent
+    text: gets fixes for the top two causes and reruns the same 100 tasks to compare failure rates.
+decisions:
+  - choice: Hand labels, not an LLM classifier
+    instead: Have an LLM label the traces
+    why: >-
+      With 100 traces, reading them yourself is a few hours and is how you discover the categories. An LLM labeller
+      can come later once the taxonomy is fixed and checked against your labels.
+watchOut: >-
+  Categories change as you read, so early traces end up labelled under an older scheme. Do a second pass over all
+  traces once the taxonomy settles.

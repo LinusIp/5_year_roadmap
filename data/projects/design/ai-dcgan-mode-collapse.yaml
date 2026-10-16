@@ -1,0 +1,46 @@
+overview: >-
+  A DCGAN (a GAN built from convolutions) trained on a small labelled dataset such as MNIST, with a pretrained
+  classifier that counts how many classes the generated samples cover. Mode collapse, where the generator only makes
+  a few kinds of output, shows up as low coverage, and a stabilizing fix is measured before and after.
+learn:
+  - name: GAN training
+    ref: stanford-cs236
+  - name: Mode collapse
+  - name: Spectral normalization
+components:
+  - id: generator
+    name: Generator
+    role: Turns random noise vectors into images with transposed convolutions.
+    tech: PyTorch
+    talksTo: [discriminator, counter]
+    kind: core
+  - id: discriminator
+    name: Discriminator
+    role: Scores images as real or fake, with spectral norm in the fixed version.
+    tech: PyTorch
+    talksTo: [generator]
+    kind: core
+  - id: counter
+    name: Mode counter
+    role: Classifies 10k samples and measures class coverage and spread.
+    tech: Pretrained classifier
+    talksTo: []
+    kind: offline
+flow:
+  - component: generator
+    text: maps a batch of `z ~ N(0, I)` vectors to fake images.
+  - component: discriminator
+    text: scores real and fake batches; its loss and the generator's loss are logged every step, as the two train in a **loop** against each other.
+  - component: generator
+    text: updates to fool the discriminator; training runs once as a baseline and once with spectral norm or label smoothing.
+  - component: counter
+    text: classifies 10k samples from each run and reports classes covered out of 10 and the entropy of the class histogram.
+decisions:
+  - choice: Classifier-based mode counting
+    instead: Judging sample grids by eye
+    why: >-
+      On a labelled dataset a classifier gives a number you can compare across runs in seconds; a grid of 64 images
+      hides missing classes. Add FID later if you move to unlabelled data.
+watchOut: >-
+  A discriminator that wins too fast gives the generator no useful gradient, and it collapses to a few outputs.
+  Watch the discriminator's accuracy, and if it sits near 100% weaken it or regularize it.

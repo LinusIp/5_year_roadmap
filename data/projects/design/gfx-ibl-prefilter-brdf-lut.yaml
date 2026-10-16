@@ -1,0 +1,71 @@
+overview: >-
+  Image-based lighting baked from one HDR environment: a diffuse irradiance map (the environment blurred over the whole
+  hemisphere), a specular cubemap whose mip levels are prefiltered for rising roughness with GGX importance sampling,
+  and a 2D BRDF lookup table, which together form the split-sum approximation. At runtime a metal sphere's ambient
+  light is three texture reads.
+learn:
+  - name: Image-based lighting
+    ref: learnopengl
+  - name: Importance sampling
+    ref: pbr-book
+  - name: Split-sum approximation
+  - name: GGX microfacets
+    ref: rtr4
+components:
+  - id: loader
+    name: HDR to cubemap
+    role: Loads the equirectangular HDR image and renders it into a float cubemap.
+    tech: OpenGL 4.6 · stb_image
+    talksTo: [convolve]
+    kind: core
+  - id: convolve
+    name: Convolution passes
+    role: Bakes the irradiance map and the prefiltered specular mips.
+    tech: GLSL
+    talksTo: [shade]
+    kind: core
+  - id: lut
+    name: BRDF LUT bake
+    role: Integrates the split-sum scale and bias into a 2D texture once.
+    tech: GLSL
+    talksTo: [shade]
+    kind: core
+  - id: shade
+    name: PBR shader
+    role: Combines the three baked textures into ambient diffuse and specular light.
+    tech: GLSL
+    talksTo: []
+    kind: core
+flow:
+  - component: loader
+    text: renders a cube with 6 views to turn the `.hdr` file into a 512x512-per-face `RGB16F` cubemap with mipmaps.
+  - component: convolve
+    text: bakes irradiance into a 32x32 cubemap, then for 5 mips of a 128x128 cubemap draws GGX samples at roughness `mip / 4`, reading **lower source mips** to cut noise.
+  - component: lut
+    text: integrates over `(NdotV, roughness)` into a 512x512 `RG16F` texture; it does not depend on the environment, so it is baked once.
+  - component: shade
+    text: computes `prefiltered(R, rough) * (F0 * lut.x + lut.y)` plus diffuse irradiance; spheres of roughness 0 to 1 are compared with a reference render, and bake time is printed.
+interface:
+  lang: glsl
+  code: |
+    // bake: one draw per cube face per mip
+    uniform samplerCube envMap;
+    uniform float roughness;       // mip / (mips - 1)
+    vec2 hammersley(uint i, uint n);
+    vec3 importanceSampleGGX(vec2 xi, vec3 N, float a);
+
+    // runtime
+    uniform samplerCube irradianceMap;
+    uniform samplerCube prefilterMap;  // 5 mips
+    uniform sampler2D brdfLUT;         // RG16F
+    vec3 ambient(vec3 N, vec3 V, vec3 albedo,
+                 float metal, float rough);
+decisions:
+  - choice: Sample lower mips while prefiltering
+    instead: Raise the sample count until the noise is gone
+    why: >-
+      At high roughness even 1,024 samples from the full-size map leave bright speckles from the sun. Reading a mip
+      chosen by each sample's probability removes them with about 256 samples, keeping the bake short.
+watchOut: >-
+  Small mips have faces only 8 texels wide, so filtering each face on its own leaves visible cube edges. Turn on
+  `GL_TEXTURE_CUBE_MAP_SEAMLESS` and sample by direction, never by face coordinates.

@@ -1,0 +1,120 @@
+overview: >-
+  A discrete-event simulator of Traverse's LLM fleet that tests three autoscaling policies against five seeded
+  traffic traces with 6× day-night swings, where every new GPU node takes 3 minutes to become ready. Each policy is
+  scored on minutes where p99 time-to-first-token goes above 2 s and on GPU-hours used. The winner, a queue-depth
+  policy with a small warm pool and a drain on scale-down, then runs as a controller against a local kind cluster.
+learn:
+  - name: Discrete-event simulation
+  - name: Queue-depth autoscaling
+    ref: kubernetes-tutorials
+  - name: Cold start and warm pools
+  - name: Hysteresis against flapping
+  - name: Graceful draining
+    ref: google-sre-book
+stats:
+  - value: < 0.5%
+    label: minutes over the 2 s p99 TTFT
+  - value: ≥ 35%
+    label: fewer GPU-hours than static peak
+  - value: ≤ 4 min
+    label: decision to ready
+components:
+  - id: traces
+    name: Trace generator
+    role: Produces five seeded days with a 6× diurnal swing and sudden event spikes.
+    tech: Python · numpy
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Fleet simulator
+    role: Models request arrivals, per-node service time, a 3-minute cold start and the warm pool.
+    tech: SimPy
+    talksTo: [policy]
+    kind: core
+  - id: policy
+    name: Policy plug-ins
+    role: Decides the desired node count each 30 s from utilisation, queue depth or a forecast.
+    tech: Python
+    talksTo: [drain]
+    kind: core
+  - id: drain
+    name: Drain manager
+    role: Stops new traffic to a node and removes it only when its streams have finished.
+    tech: Python
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Comparison report
+    role: Ranks policies by SLO-violating minutes, GPU-hours, scale events and flaps across all traces.
+    tech: pandas · matplotlib
+    talksTo: []
+    kind: core
+  - id: controller
+    name: Controller
+    role: Runs the winning policy for real, reading queue depth and setting replicas on a mock cluster.
+    tech: Python · kind
+    talksTo: [cluster]
+    kind: offline
+  - id: prom
+    name: Prometheus
+    role: Supplies `queue_depth` and in-flight streams per pod to the controller.
+    tech: Prometheus
+    talksTo: [controller]
+    kind: external
+  - id: cluster
+    name: kind cluster
+    role: A local Kubernetes cluster whose pods stand in for GPU nodes, with an injected 3-minute start delay.
+    tech: Kubernetes (kind)
+    talksTo: []
+    kind: external
+flow:
+  - component: traces
+    text: feeds the 07:40 morning ramp of seed 3, where arrivals climb from 4 to 18 req/s in twenty minutes.
+  - component: sim
+    text: >-
+      sees the queue grow to 60 waiting requests on 3 nodes and reports `queue_per_node=20`, while GPU utilisation
+      still looks fine.
+  - component: policy
+    text: >-
+      the queue-depth policy asks for 2 more nodes now; the warm pool covers one of them in under a minute, and the
+      second is ready after the full **3-minute** cold start.
+  - component: drain
+    text: >-
+      after the evening fall, and only once the queue has stayed low for 10 minutes, marks one node draining and
+      waits for its longest stream to finish before removing it.
+  - component: report
+    text: adds up violating minutes and GPU-hours for this run, then repeats for every policy on all **five** traces.
+interface:
+  lang: python
+  code: |
+    @dataclass
+    class FleetState:
+        t_s: float
+        ready: int
+        starting: int
+        warm: int
+        queue_depth: int
+        p99_ttft_s: float
+
+    class Policy(Protocol):
+        def desired_nodes(self, s: FleetState) -> int:
+            ...
+decisions:
+  - choice: Scale on queue depth, not utilisation
+    instead: Scale on GPU or CPU utilisation
+    why: >-
+      A batching LLM server can show high utilisation while the queue grows or shrinks, so utilisation reacts late
+      to a ramp. Queue depth per node shows waiting users directly.
+  - choice: A small warm pool
+    instead: Cold-start every new node
+    why: >-
+      With a 3-minute start, the first minutes of a spike breach the 2 s SLO; one or two pre-started nodes absorb that
+      while cold nodes come up. Size the pool from the spike traces.
+  - choice: Scale down slowly, scale up fast
+    instead: One symmetric threshold
+    why: >-
+      Symmetric thresholds flap around the boundary. A 10-minute calm period before scale-down costs a few GPU-hours
+      and removes most flaps.
+watchOut: >-
+  A simulator without a realistic cold start makes every policy look good. Model the 3 minutes, test on all five
+  traces, and never remove a node while it still has long generations in flight.

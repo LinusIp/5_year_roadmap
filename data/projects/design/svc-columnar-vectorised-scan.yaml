@@ -1,0 +1,54 @@
+overview: >-
+  A column-oriented file format where each column is stored separately with dictionary or run-length encoding, and
+  a scan engine filters and aggregates in batches of values instead of row by row, beating a row layout by at
+  least 5x on 100M values.
+learn:
+  - name: Columnar layout
+    ref: cmu-15-445
+  - name: Dictionary encoding
+  - name: Run-length encoding
+  - name: Vectorised execution
+    ref: mit-6-172
+components:
+  - id: writer
+    name: Writer
+    role: Splits rows into column chunks and picks an encoding per chunk.
+    tech: Rust or C++
+    talksTo: [file]
+    kind: core
+  - id: file
+    name: Column file
+    role: A header, then one encoded chunk per column, with min and max per chunk.
+    tech: Binary file
+    talksTo: [scanner]
+    kind: core
+  - id: scanner
+    name: Scanner
+    role: Decodes batches of 4,096 values and runs filter then aggregate on them.
+    tech: Rust or C++ · optional SIMD
+    talksTo: []
+    kind: core
+  - id: bench
+    name: Benchmark
+    role: Times the same query on the column file and on a row-wise file.
+    tech: criterion or Google Benchmark
+    talksTo: [scanner]
+    kind: offline
+flow:
+  - component: writer
+    text: encodes `country` with a dictionary of small integer codes and `status` with run-length pairs.
+  - component: file
+    text: stores chunks with min and max so a scan can skip chunks that cannot match.
+  - component: scanner
+    text: runs `SUM(amount) WHERE country = 'SE'` by building a selection mask per batch, then summing the masked values.
+  - component: bench
+    text: reports GB per second for both layouts and must show at least a **5x** gain at 100M values.
+decisions:
+  - choice: Batches of 4,096 values
+    instead: One value at a time through the operators
+    why: >-
+      A batch fits in cache and turns the inner loop into a tight, branch-free loop the compiler can vectorise.
+      Try other sizes and keep the one the benchmark prefers.
+watchOut: >-
+  An `if` per row in the filter loop causes branch mispredictions and kills vectorisation. Compute a mask or use a
+  selection vector instead.

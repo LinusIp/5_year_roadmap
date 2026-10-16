@@ -1,0 +1,73 @@
+overview: >-
+  An emulator for CHIP-8, a 1970s virtual machine with 4 KB of memory, 16 registers and 35 two-byte opcodes: a
+  fetch-decode-execute loop runs about 700 instructions a second, two timers count down at 60 Hz, and SDL draws the
+  64x32 screen and reads the 16-key keypad. It is done when a public opcode test ROM passes and two games play.
+learn:
+  - name: Fetch-decode-execute
+    ref: nand2tetris
+  - name: Opcode decoding
+  - name: Fixed-rate timers
+  - name: SDL rendering
+    ref: sdl
+components:
+  - id: rom
+    name: Test ROMs
+    role: Opcode test ROMs and two games, loaded into memory at address 0x200.
+    tech: .ch8 files
+    talksTo: [cpu]
+    kind: external
+  - id: cpu
+    name: CPU core
+    role: Holds V0 to VF, I, PC and the stack, and executes one opcode per step.
+    tech: C or Rust
+    talksTo: [timers, display]
+    kind: core
+  - id: timers
+    name: Timers
+    role: Delay and sound timers that tick down at 60 Hz, independent of the CPU rate.
+    tech: C or Rust
+    talksTo: []
+    kind: core
+  - id: display
+    name: SDL front end
+    role: Draws the 64x32 framebuffer scaled up and maps 16 keyboard keys to the hex keypad.
+    tech: SDL
+    talksTo: [cpu]
+    kind: core
+flow:
+  - component: cpu
+    text: >-
+      fetches two bytes at `PC`, adds 2 to `PC` and decodes by the top nibble, so `0xDXYN` is a sprite draw and
+      `0x8XY4` an add that sets the carry in `VF`.
+  - component: cpu
+    text: >-
+      executes `DXYN` by XORing N sprite rows into the framebuffer at (VX, VY), setting `VF = 1` if any lit pixel
+      turned off (a **collision**).
+  - component: timers
+    text: decrement `DT` and `ST` once per 60 Hz frame while the CPU runs about 11 opcodes in that frame; a beep plays while `ST > 0`.
+  - component: display
+    text: >-
+      presents the framebuffer once per frame and hands key states back to the CPU for `EX9E` and `FX0A`; then the
+      loop repeats.
+interface:
+  lang: c
+  code: |
+    typedef struct {
+      uint8_t  mem[4096], V[16];
+      uint16_t I, pc, stack[16];
+      uint8_t  sp, dt, st;
+      uint8_t  fb[64 * 32], keys[16];
+    } Chip8;
+
+    void chip8_step(Chip8 *c);   /* one opcode */
+    void chip8_tick60(Chip8 *c); /* timers, 60 Hz */
+decisions:
+  - choice: Timers at 60 Hz, separate from CPU speed
+    instead: Decrementing the timers on every instruction
+    why: >-
+      Games time animation and sound from the 60 Hz timers, so tying them to the CPU makes game speed depend on the
+      clock you picked. Run about 11 opcodes per frame and tune that number per game.
+watchOut: >-
+  Opcodes `8XY6`, `8XYE`, `FX55` and `FX65` behave differently between the original interpreter and later ones
+  (shift VY or VX, advance I or not). Make each a quirk flag, because a game that almost works is usually a quirk, not
+  a bug.

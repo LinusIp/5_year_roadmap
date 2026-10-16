@@ -1,0 +1,111 @@
+overview: >-
+  A streaming text-to-speech service for Echo Concierge's phone agents that starts speaking within 350 ms of the
+  LLM's first sentence. It cuts the LLM's token stream into short speakable chunks, synthesises chunks from many
+  calls in small batches on one GPU, and pushes 20 ms audio frames over a WebSocket while later chunks are still
+  being made. When the caller interrupts, a cancel manager stops the audio and frees the GPU work within 100 ms.
+learn:
+  - name: Streaming pipelines
+  - name: Real-time factor
+  - name: Micro-batching
+    ref: batching-effects-gpt
+  - name: Barge-in cancellation
+  - name: Audio frame buffers
+    ref: think-dsp
+stats:
+  - value: ≤ 350 ms
+    label: p95 time to first audio
+  - value: ≤ 0.2
+    label: real-time factor at 40 streams
+  - value: ≤ 100 ms
+    label: barge-in cancel
+components:
+  - id: llm
+    name: LLM stream
+    role: Sends the agent's reply token by token as it is generated.
+    tech: Upstream LLM
+    talksTo: [chunker]
+    kind: external
+  - id: chunker
+    name: Text chunker
+    role: Cuts the token stream into chunks at sentence or clause ends, with a short first chunk.
+    tech: Python · asyncio
+    talksTo: [workers]
+    kind: core
+  - id: workers
+    name: TTS worker pool
+    role: Batches waiting chunks from all calls every few milliseconds and synthesises audio on the GPU.
+    tech: PyTorch · open TTS model
+    talksTo: [streamer]
+    kind: core
+  - id: streamer
+    name: Frame streamer
+    role: Splits audio into 20 ms frames and sends them per call, with a small buffer against underruns.
+    tech: WebSockets
+    talksTo: [caller]
+    kind: core
+  - id: caller
+    name: Phone client
+    role: Plays the frames and sends a cancel message when the caller starts talking.
+    tech: WebSocket client
+    talksTo: [cancel]
+    kind: external
+  - id: cancel
+    name: Cancel manager
+    role: Drops a call's queued chunks, stops its in-flight job and flushes its frames.
+    tech: Python · asyncio
+    talksTo: [workers, streamer]
+    kind: core
+  - id: loadgen
+    name: Load generator
+    role: Plays scripted conversations as up to 40 parallel calls and records TTFA, RTF and underruns.
+    tech: Python · asyncio
+    talksTo: []
+    kind: offline
+flow:
+  - component: chunker
+    text: >-
+      sends the first chunk as soon as a clause of about 4 or more words ends, rather than waiting for the full
+      reply; later chunks are whole sentences, which sound more natural.
+  - component: workers
+    text: >-
+      collects chunks from all calls for up to `10 ms`, runs one batch, and keeps the **real-time factor** (seconds
+      to make 1 s of audio) at or below 0.2.
+  - component: streamer
+    text: sends the first 20 ms frame as soon as it exists; the time from the first sentence to here is **TTFA**.
+  - component: caller
+    text: plays frames from a short buffer and sends `{"type":"cancel"}` when the person interrupts.
+  - component: cancel
+    text: >-
+      removes the call's queued chunks, sets a stop flag the worker checks between decoder steps, and tells the
+      streamer to drop unsent frames, all within `100 ms`.
+interface:
+  lang: json
+  code: |
+    in:  {"type": "text", "call": "c42",
+          "delta": "Sure, I can move "}
+    in:  {"type": "text", "call": "c42",
+          "delta": "your booking."}
+    out: {"type": "audio", "call": "c42",
+          "seq": 0, "pcm16_b64": "..."}
+    in:  {"type": "cancel", "call": "c42"}
+    out: {"type": "cancelled", "call": "c42",
+          "after_ms": 41}
+decisions:
+  - choice: Short first chunk, then whole sentences
+    instead: Always wait for a full sentence
+    why: >-
+      A long first sentence alone can use up the 400 ms budget. A short first clause starts audio early, and whole
+      sentences afterwards avoid the prosody glitches that small chunks cause.
+  - choice: Micro-batching across calls
+    instead: One synthesis job per call at a time
+    why: >-
+      At 40 calls, single jobs leave the GPU underused and queue up. A 10 ms window costs little against 350 ms and
+      lets one GPU keep up. Shrink the window if TTFA p95 creeps up.
+  - choice: Stop flag checked between decoder steps
+    instead: Kill the worker process on barge-in
+    why: >-
+      Killing a process reloads the model and drops other calls' work. A flag stops only that call's job, and freeing
+      its GPU slot stops cancelled jobs from holding the GPU.
+watchOut: >-
+  Chunk boundaries can cause odd pauses and pitch jumps. Cut only at punctuation or clause ends, keep chunks after
+  the first at sentence length, and listen to the demo audio, not just the latency numbers.

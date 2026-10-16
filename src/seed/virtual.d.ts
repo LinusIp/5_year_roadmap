@@ -31,3 +31,8 @@ declare module 'virtual:atlas-catalogue-index' {
   const entries: import('./catalogue.ts').CatalogueEntry[];
   export default entries;
 }
+
+declare module 'virtual:atlas-designs' {
+  const loaders: (() => Promise<{ default: Record<string, import('./design.ts').Design> }>)[];
+  export default loaders;
+}

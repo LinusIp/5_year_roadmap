@@ -1,0 +1,91 @@
+overview: >-
+  A USB logger built on an RP2040 or STM32: protected op-amp inputs scale 8 channels into the ADC, DMA fills
+  ping-pong buffers (two buffers, one filling while the other is sent), and each full buffer becomes a numbered
+  frame with a CRC sent over USB CDC (a virtual serial port). A Python library on the student's laptop reads the
+  frames, checks that no sequence number is missing and hands back NumPy arrays or a CSV.
+learn:
+  - name: ADC and DMA sampling
+    ref: making-embedded-systems
+  - name: Ping-pong buffers
+  - name: Framing with CRC
+  - name: Input protection
+    ref: learning-the-art-of-electronics
+  - name: ENOB and noise floor
+    ref: dspguide
+stats:
+  - value: 0 gaps
+    label: in a 10-minute 10 kS/s stream
+  - value: ≥ 11 bits
+    label: ENOB at 1 kS/s per channel
+  - value: < $35
+    label: per unit
+components:
+  - id: inputs
+    name: Input stage
+    role: Clamps each input to ±12 V and scales it into the 0 to 3.3 V ADC range through a buffer op-amp.
+    tech: Op-amp · clamp diodes
+    talksTo: [sampler]
+    kind: core
+  - id: sampler
+    name: ADC DMA sampler
+    role: Scans the 8 channels on a timer and lets DMA fill one half of a ping-pong buffer at a time.
+    tech: C · Pico SDK
+    talksTo: [framer]
+    kind: core
+  - id: framer
+    name: Frame protocol
+    role: Wraps each full buffer with a sequence number, timestamp and CRC-16.
+    tech: C
+    talksTo: [usb]
+    kind: core
+  - id: usb
+    name: USB CDC transport
+    role: Sends frames to the host and reports when its TX queue overflows.
+    tech: TinyUSB CDC
+    talksTo: [hostlib]
+    kind: core
+  - id: hostlib
+    name: Python library
+    role: Parses frames, checks CRC and sequence gaps, applies calibration and exports CSV.
+    tech: Python · pyserial · NumPy
+    talksTo: []
+    kind: core
+  - id: cal
+    name: Calibration tool
+    role: Measures offset and gain per channel against the precision reference and stores them on the device.
+    tech: Python
+    talksTo: [hostlib]
+    kind: offline
+flow:
+  - component: inputs
+    text: buffers and scales the student's signal; a ±12 V input never reaches the ADC pin beyond its rails.
+  - component: sampler
+    text: is triggered by a hardware timer at the set rate, and DMA writes samples into buffer A while buffer B is being sent.
+  - component: framer
+    text: on the DMA half-done interrupt, adds `seq`, the first sample's timestamp and a `crc16` to the 512 samples.
+  - component: usb
+    text: queues the frame; at 10 kS/s × 2 bytes that is only 20 KB/s, well inside USB full-speed bandwidth.
+  - component: hostlib
+    text: reads frames, and **raises an error on any gap in `seq`** instead of silently joining the data; good frames become a NumPy array per channel.
+interface:
+  lang: c
+  code: |
+    /* one USB frame, little-endian */
+    typedef struct __attribute__((packed)) {
+      uint16_t magic;      /* 0xA55A */
+      uint32_t seq;        /* +1 per frame */
+      uint32_t t0_us;      /* first sample time */
+      uint8_t  ch_mask;    /* active channels */
+      uint8_t  trig;       /* 1 if trigger frame */
+      uint16_t n;          /* samples, max 512 */
+      uint16_t data[512];  /* 12-bit raw */
+      uint16_t crc16;      /* CRC-16/CCITT */
+    } frame_t;
+decisions:
+  - choice: USB CDC with own framing
+    instead: A custom USB bulk or vendor class
+    why: CDC needs no driver on student laptops, and 20 KB/s fits easily. Sequence numbers and CRC give back the checking a raw serial port lacks.
+  - choice: Calibrate on the host
+    instead: Calibrate in firmware
+    why: Raw 12-bit values keep frames small and let students see the correction. Move it on-device only if a non-Python client is added.
+watchOut: A high source impedance cannot charge the ADC's sample capacitor in time, so readings bleed between channels. The buffer op-amp on every input is what prevents this.

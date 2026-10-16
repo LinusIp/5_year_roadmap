@@ -1,0 +1,111 @@
+overview: >-
+  A cache cluster in Go for Sable Commerce's flash sales, where a few product keys get most of the traffic. Clients
+  hash each key onto a ring of nodes and count requests in a count-min sketch, a small fixed table of counters that
+  estimates how often each key is asked for without storing every key. Keys the sketch flags as hot are copied to
+  extra nodes and kept for a second in each client's own memory, so no single node takes the whole burst.
+learn:
+  - name: Consistent hashing
+    ref: bytebytego
+  - name: Count-min sketch
+  - name: Zipf distributions
+  - name: LRU with TTL
+  - name: Near-cache invalidation
+stats:
+  - value: ≤ 1.3×
+    label: max node load vs mean
+  - value: < 1 ms
+    label: hit latency p99
+  - value: 1/N + 5%
+    label: keys moved per added node
+components:
+  - id: app
+    name: Shop servers
+    role: Ask for product and price keys on every page view.
+    tech: Go
+    talksTo: [client]
+    kind: external
+  - id: client
+    name: Client with ring
+    role: Hashes keys to nodes on a ring of virtual nodes and holds the near-cache.
+    tech: Go library
+    talksTo: [sketch]
+    kind: core
+  - id: sketch
+    name: Count-min sketch
+    role: Estimates each key's recent request count and flags hot keys.
+    tech: 4 × 2,048 counters
+    talksTo: [replicator, nodes]
+    kind: core
+  - id: replicator
+    name: Hot-key replicator
+    role: Copies a hot key to two extra nodes and invalidates copies on writes.
+    tech: Go
+    talksTo: [nodes]
+    kind: core
+  - id: nodes
+    name: Cache nodes
+    role: Four in-memory LRU caches with TTLs, speaking a small text protocol.
+    tech: Go · TCP
+    talksTo: []
+    kind: core
+  - id: rebalancer
+    name: Rebalancer
+    role: Measures and warms the keys that move when a node joins.
+    tech: Go
+    talksTo: [nodes]
+    kind: offline
+  - id: traffic
+    name: Traffic generator
+    role: Replays Zipf(1.2) traffic with a flash-sale burst, in simulation and on localhost.
+    tech: Go
+    talksTo: [app]
+    kind: offline
+flow:
+  - component: client
+    text: >-
+      on `Get("product:981")` first checks the near-cache, which only holds hot keys, for 1 s.
+  - component: sketch
+    text: >-
+      adds one to the key's counter in each of 4 rows and takes the smallest as the estimate; counters halve every
+      second, and a key over 1% of recent requests is **hot**. Under Zipf(1.2) the top key alone draws about 18%.
+  - component: replicator
+    text: >-
+      when a key first turns hot, copies it to the next two distinct nodes on the ring with the same TTL; a write to it
+      goes to the primary and bumps a version that invalidates the copies.
+  - component: nodes
+    text: >-
+      serves `get product:981` from its LRU map, the primary for normal keys and one of three random replicas for hot
+      ones, well under 1 ms.
+interface:
+  lang: text
+  code: |
+    client -> node
+    get product:981
+    VALUE product:981 v=1042 ttl=28 len=312
+    <312 bytes>
+
+    set product:981 v=1043 ttl=30 len=318
+    <318 bytes>
+    STORED
+
+    # replicator, when a key turns hot
+    copy product:981 v=1043 ttl=30 to node-3,node-0
+decisions:
+  - choice: Count-min sketch for hot keys
+    instead: An exact counter per key
+    why: >-
+      A catalogue has millions of keys, and each client would hold a counter for every one. The sketch is 8,192
+      counters; its errors only overcount, so a cold key may be copied needlessly but a hot one is never missed.
+  - choice: Replicas plus a 1 s near-cache
+    instead: Replicas only
+    why: >-
+      Three replicas split an 18% key into 6% each, still too much on 4 nodes for the 1.3× target. The near-cache
+      takes most hot reads off the network, at the cost of up to 1 s of staleness.
+  - choice: Ring with virtual nodes
+    instead: Key hash modulo node count
+    why: >-
+      Modulo moves almost every key when a fifth node joins. A ring with about 160 virtual nodes each moves close to
+      1/N and keeps load even.
+watchOut: >-
+  Hot keys are exactly the ones whose price changes during a sale, and every copy can go stale. Version each write,
+  invalidate replicas on it, and keep the near-cache TTL short enough that 1 s of staleness is acceptable.

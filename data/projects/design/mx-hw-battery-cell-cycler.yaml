@@ -1,0 +1,95 @@
+overview: >-
+  Four independent channels, each a MOSFET and op-amp current source with a precision ADC reading cell voltage
+  through Kelvin leads (separate sense wires so lead resistance does not skew the reading). A recipe state machine
+  per channel runs charge, rest, pulse and discharge steps, and a safety supervisor checks voltage, temperature and
+  time on every sample and opens the channel within 100 ms. The host CLI loads recipes and grades each 18650 cell
+  A, B or C from its measured capacity and internal resistance.
+learn:
+  - name: Op-amp current sources
+    ref: learning-the-art-of-electronics
+  - name: CC/CV charging
+  - name: Kelvin sensing
+    ref: art-of-electronics
+  - name: Internal resistance pulse test
+  - name: Safety supervisors
+stats:
+  - value: ±1 %
+    label: current at 1 A
+  - value: ±2 %
+    label: capacity repeatability
+  - value: < 100 ms
+    label: safety cut-off
+components:
+  - id: cli
+    name: Host CLI
+    role: Loads a recipe per channel and collects the logged curves.
+    tech: Python
+    talksTo: [recipe]
+    kind: core
+  - id: recipe
+    name: Recipe state machine
+    role: Steps through CC/CV charge, rest, pulse test and CC discharge with their end conditions.
+    tech: C++ firmware
+    talksTo: [source]
+    kind: core
+  - id: source
+    name: Current source
+    role: Op-amp loop drives the MOSFET so shunt voltage matches the DAC set-point.
+    tech: Op-amp · MOSFET · shunt
+    talksTo: [cell]
+    kind: core
+  - id: cell
+    name: 18650 cell
+    role: The used cell under test in a holder with Kelvin leads and a thermistor.
+    tech: Li-ion 18650
+    talksTo: [adc]
+    kind: external
+  - id: adc
+    name: Measurement ADC
+    role: Samples cell voltage, current and temperature on every channel at 10 Hz.
+    tech: Precision ADC
+    talksTo: [safety, grading]
+    kind: core
+  - id: safety
+    name: Safety supervisor
+    role: Opens the channel above 4.25 V, below 2.5 V, above 45 °C or past the step time limit.
+    tech: C++ · hardware enable
+    talksTo: []
+    kind: core
+  - id: grading
+    name: Grading analysis
+    role: Integrates current into mAh, computes internal resistance and assigns a grade.
+    tech: Python · pandas
+    talksTo: []
+    kind: offline
+flow:
+  - component: cli
+    text: sends a recipe such as `CC 1.0 A to 4.20 V, CV until 50 mA, rest 30 min, discharge 1.0 A to 2.75 V`.
+  - component: recipe
+    text: enters the next step and sets the target current or voltage for that channel.
+  - component: source
+    text: regulates current by comparing the shunt voltage with the set-point; in CV the firmware lowers the set-point to hold `4.20 V`.
+  - component: adc
+    text: reads voltage at the cell through the sense leads, so the 50 mV lost in the power leads at 1 A does not shift the reading.
+  - component: safety
+    text: checks every sample against the limits and **drops the hardware enable line** if one is crossed, well within `100 ms`.
+  - component: recipe
+    text: during the pulse step reads the voltage drop `ΔV` for a `1 A` step, giving `R_int = ΔV / ΔI`, then continues to discharge and logs mAh.
+interface:
+  lang: shell
+  code: |
+    $ cycler run --ch 2 --recipe grade.yaml
+    ch2 CC  1.00A  3.71V  24.1°C  t=00:42:10
+    ch2 CV  4.20V  0.31A  25.0°C  t=01:58:44
+    ch2 REST          4.18V       t=02:31:02
+    ch2 PULSE ΔV=0.062V ΔI=1.00A  R=62 mΩ
+    ch2 DCH 1.00A  3.02V  27.3°C  2311 mAh
+    ch2 DONE capacity=2398 mAh R=62 mΩ grade=B
+decisions:
+  - choice: Linear MOSFET source, not a switching converter
+    instead: A bidirectional buck-boost per channel
+    why: At 2 A and 4.25 V a linear stage is simple to make accurate to 1 percent; the cost is heat in the pass transistor. Move to switching if channels grow beyond 2 A.
+  - choice: Hardware enable line under the firmware
+    instead: Firmware-only limit checks
+    why: A crashed loop must still stop a lithium cell from being overcharged. Firmware can request current, but only the supervisor holds the enable.
+watchOut: In discharge the pass MOSFET burns almost all the cell's energy as heat, about 3.7 W per channel at 1 A. Size heat sinks and check MOSFET temperature before running four channels at once.

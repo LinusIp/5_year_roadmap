@@ -24,6 +24,7 @@ with each. "Verified" means it was run, not assumed.
 | – | Practice removed (pull request #6) | **done** |
 | – | Calendar and the timer (pull request #6) | **done** |
 | – | The Library organised (pull request #8) | **done** |
+| – | The tech doc redesigned (pull request #9) | **done** |
 
 ## Milestone 1 — Scaffold
 
@@ -877,4 +878,22 @@ Verified on this machine (Linux, Chromium 140):
   `tests/e2e/library-home.spec.ts` (home, path → resource, Pause from a card, a shelf's filter, grouped search and
   Show all, Mark done after a reload and on a second device). Older E2E updated to reach the list through a shelf.
 - Baselines: Library home, path, shelf and search, light and dark, phone and desktop.
+
+## Pull request #9: the tech doc redesigned
+
+- **Content:** 664 designs in `data/projects/design/`, written by parallel writers by domain: 304 monthly cases (full),
+  250 weekly builds (light) and 110 plan projects (full, from their Markdown docs). All pass validate:data.
+- **Diagram** generated from the components (`src/lib/diagram.ts`, `src/ui/Diagram.tsx`): layered core path, side
+  column, arrows, legend, 330 px, two columns above eight components, text never under 11 px, full screen with
+  pinch-zoom, the flow as its text alternative.
+- **Doc sheet** (`src/screens/parts/TechDoc.tsx`): meta line, timer pill and progress, sticky jump bar, then Overview
+  (situation, what you'll build, stat wells, learn chips), Design (diagram, step by step, components, interface,
+  decisions), Build (milestones with Now, watch out) and Checks (Done when, Ship, Measure, Stretch, README skeleton).
+  Cases, builds and plan projects share it (`CatalogueBody.tsx`, `PlanDoc.tsx`).
+- Tests: `tests/unit/diagram.test.ts` (no overlaps, arrows end on boxes, deterministic, two columns, numbering, label
+  widths, over every design); `tests/unit/tech-doc.test.ts` (jump bar tracking, field validation, the bucketed
+  chunks, the plan docs' conversion losing nothing). E2E: the case doc (jump bar, diagram full screen, decisions,
+  interface), the build's light doc, and the earlier doc tests (Deck, Today with the timer, Library, a milestone after
+  a reload and on a second device) on the new sheet. Baselines: a case's Overview and Design, light and dark, and a
+  weekly build's doc.
 

@@ -1,0 +1,97 @@
+overview: >-
+  Every container Vantage ships is built in CI, never on a laptop, and leaves the pipeline with three things attached
+  to its digest: an SBOM (software bill of materials, the list of every package inside), a signature and a provenance
+  attestation saying which commit and workflow built it. A vulnerability gate checks the SBOM before release, and an
+  admission controller in the cluster refuses any pod whose image is unsigned or unattested. Customers can run the
+  same checks offline with one script.
+learn:
+  - name: SBOMs
+  - name: Image signing
+  - name: SLSA provenance
+  - name: Admission control
+    ref: kubernetes-tutorials
+  - name: Fail-closed policies
+  - name: Reproducible CI builds
+    ref: github-actions-docs
+stats:
+  - value: 100 %
+    label: prod images signed and attested
+  - value: 20 of 20
+    label: bypass attempts blocked
+  - value: < 90 s
+    label: added per build
+components:
+  - id: build
+    name: Build job
+    role: Builds the image from a pinned base on an isolated runner and pushes it by digest.
+    tech: GitHub Actions · Buildx
+    talksTo: [sbom]
+    kind: core
+  - id: sbom
+    name: SBOM generator
+    role: Lists OS and language packages in the image in a standard format.
+    tech: Syft · SPDX
+    talksTo: [vuln]
+    kind: core
+  - id: vuln
+    name: Vulnerability gate
+    role: Matches the SBOM against a vulnerability database and fails on critical findings without a waiver.
+    tech: Grype
+    talksTo: [sign]
+    kind: core
+  - id: sign
+    name: Signer
+    role: Signs the digest and attaches the SBOM and provenance as signed attestations.
+    tech: Cosign · keyless OIDC
+    talksTo: [registry]
+    kind: core
+  - id: registry
+    name: Registry
+    role: Stores the image with its signature and attestations next to it.
+    tech: OCI registry
+    talksTo: [admission, verifier]
+    kind: external
+  - id: admission
+    name: Admission policy
+    role: Verifies signature, signer identity and provenance before any pod starts, and denies on error.
+    tech: Kyverno · Kubernetes
+    talksTo: []
+    kind: core
+  - id: verifier
+    name: Customer verifier
+    role: A script that checks signature, provenance and SBOM against a bundled public key, offline.
+    tech: Shell · Cosign
+    talksTo: []
+    kind: offline
+flow:
+  - component: build
+    text: builds `infusion-api` from commit `a91f3c0` on a fresh runner and pushes it as `registry/infusion-api@sha256:…`, always by **digest**, never by tag.
+  - component: sbom
+    text: writes an SPDX SBOM that includes OS packages from the base image as well as the app's dependencies.
+  - component: vuln
+    text: fails the build on any critical CVE that has no recorded waiver.
+  - component: sign
+    text: signs the digest with a short-lived certificate tied to the workflow's OIDC identity and attaches SBOM and provenance with `cosign attest`.
+  - component: admission
+    text: on deploy checks that the signer is this repo's release workflow and that provenance names a commit on `main`; anything else, including a policy error, is **denied**.
+interface:
+  lang: shell
+  code: |
+    $ ID='^vantage/infusion-api/.+/release.yml'
+    $ cosign verify-attestation \
+        --type slsaprovenance \
+        --certificate-identity-regexp "$ID" \
+        --certificate-oidc-issuer "$GH_ISSUER" \
+        registry.local/infusion-api@sha256:4be1…
+
+    Verification for …@sha256:4be1… --
+      claims validated, signature verified
+      builder: github-actions  commit: a91f3c0
+decisions:
+  - choice: Keyless signing with the CI identity
+    instead: A long-lived signing key stored on the runner
+    why: A key on the runner can be stolen and used to sign anything. Keyless signing ties each signature to one workflow run, so there is no key to rotate or leak.
+  - choice: Admission control that fails closed
+    instead: Warn-only policy or checks only in CI
+    why: Regulators need proof that nothing unsigned can run, and 20 bypass attempts must all be blocked. A warning, or a policy that allows pods when it errors, does not prove that.
+watchOut: SBOM tools that scan only the app's lockfile miss the OS packages in the base image, where many vulnerabilities live. Scan the built image, not the source tree.

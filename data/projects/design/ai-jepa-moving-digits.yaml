@@ -1,0 +1,54 @@
+overview: >-
+  A JEPA-style model (joint-embedding predictive architecture) that learns from short moving-digit clips by predicting
+  the embedding of hidden future frames rather than their pixels. A context encoder sees the early frames, a target
+  encoder that is a slow moving average of it embeds the future, and a linear probe on the frozen features checks what
+  was learned.
+learn:
+  - name: Latent prediction
+    ref: jepa-code
+  - name: EMA target encoder
+  - name: Representation collapse
+  - name: Linear probing
+components:
+  - id: clips
+    name: Clip generator
+    role: Makes 8-frame clips of digits bouncing in a 64x64 frame, with digit labels.
+    tech: NumPy · MNIST
+    talksTo: [context, target]
+    kind: core
+  - id: context
+    name: Context encoder
+    role: Embeds the visible first frames and feeds a predictor.
+    tech: PyTorch
+    talksTo: [target]
+    kind: core
+  - id: target
+    name: Target encoder
+    role: Embeds the masked future frames with EMA weights and scores the prediction against them.
+    tech: PyTorch
+    talksTo: []
+    kind: core
+  - id: probe
+    name: Linear probe
+    role: Trains a linear classifier on frozen features to predict the digit class.
+    tech: scikit-learn
+    talksTo: []
+    kind: offline
+flow:
+  - component: clips
+    text: produces a clip; frames 1 to 4 are context and frames 5 to 8 are the masked future.
+  - component: context
+    text: embeds the context frames, and a small predictor outputs the expected embedding of the future.
+  - component: target
+    text: embeds the future without gradient, takes the distance to the prediction as the loss, logs the per-dimension **std** of embeddings to catch collapse, then updates as `θ_t ← 0.996 θ_t + 0.004 θ_c`.
+  - component: probe
+    text: freezes the context encoder and trains a linear classifier for digit class, compared with the same probe on a randomly initialized encoder.
+decisions:
+  - choice: EMA target with stop-gradient
+    instead: A contrastive loss with negative pairs
+    why: >-
+      The EMA target avoids needing large batches of negatives, which fits one GPU and short clips. Watch embedding
+      variance closely, since this setup can collapse without negatives.
+watchOut: >-
+  If every clip maps to nearly the same embedding, the loss looks great and the probe is at chance. Compare the probe
+  with a randomly initialized encoder, and keep probe training short with a held-out split.

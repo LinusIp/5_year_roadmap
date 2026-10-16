@@ -1,0 +1,110 @@
+overview: >-
+  A queue-driven batch pipeline that transcribes 40,000 hours of broadcast audio on rented spot GPUs within $6,000 and
+  three weeks. ffmpeg and voice-activity detection (VAD) cut each file into speech segments of up to 30 s, the queue
+  leases work in small chunks, and GPU workers decode length-sorted batches with faster-whisper and commit results
+  after every chunk. At a real-time factor of 1/150, one GPU-hour transcribes 150 hours of audio, so the whole archive
+  is about 270 GPU-hours.
+learn:
+  - name: Real-time factor
+  - name: Voice-activity detection
+  - name: Work queues with leases
+    ref: ddia
+  - name: Dead-letter handling
+  - name: Spot pre-emption
+  - name: Full-text search
+    ref: sqlbolt
+stats:
+  - value: ≤ 1/150
+    label: real-time factor per GPU
+  - value: ≤ $5,500
+    label: projected for 40,000 h
+  - value: ≤ 5 min
+    label: work lost per pre-emption
+components:
+  - id: segmenter
+    name: Audio segmenter
+    role: Decodes each file with ffmpeg to 16 kHz mono and cuts speech segments of up to 30 s with VAD.
+    tech: ffmpeg · Silero VAD
+    talksTo: [queue]
+    kind: core
+  - id: queue
+    name: Work queue
+    role: Hands out chunks of about 10 minutes of segments with a 5-minute lease.
+    tech: SQLite or Redis
+    talksTo: [decoder, deadletter]
+    kind: core
+  - id: decoder
+    name: GPU decoder
+    role: Sorts segments by duration and decodes them in batches with timestamps.
+    tech: faster-whisper · spot GPU
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Result store
+    role: Holds one committed JSON transcript per chunk in object storage.
+    tech: Object storage
+    talksTo: [index]
+    kind: core
+  - id: index
+    name: Index loader
+    role: Loads timestamped segments into a full-text index for search.
+    tech: Tantivy or SQLite FTS
+    talksTo: []
+    kind: core
+  - id: deadletter
+    name: Dead-letter list
+    role: Keeps files that failed three times with the error, for review.
+    tech: SQLite
+    talksTo: []
+    kind: offline
+  - id: cost
+    name: Cost tracker
+    role: Combines GPU-hours, spot price and audio hours done into $ per audio hour and a projected total.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: segmenter
+    text: >-
+      turns a 2-hour broadcast into about 180 speech segments, skipping music and silence, where Whisper models tend
+      to **hallucinate** text.
+  - component: queue
+    text: leases a chunk of about 10 minutes of audio to a worker; if the lease expires without a commit, the chunk goes back to the queue.
+  - component: decoder
+    text: >-
+      sorts the chunk's segments by length and decodes them in batches of 16; at RTF 1/150, 10 minutes of audio
+      takes about 4 s.
+  - component: store
+    text: writes `chunk-<id>.json` with word timestamps, then the queue marks it **done**; a pre-emption loses at most the chunk in flight.
+  - component: index
+    text: loads each segment's text with file id and start time, so a search hit jumps to the right minute.
+interface:
+  lang: json
+  code: |
+    { "chunk_id": "f0381-c07",
+      "file": "1987-04-12_am.mp3",
+      "model": "whisper-large-v3-ct2-fp16",
+      "segments": [
+        { "start": 1834.2, "end": 1851.9,
+          "text": "Good morning, the council met…",
+          "avg_logprob": -0.21 } ],
+      "gpu_s": 4.1, "audio_s": 612.0 }
+decisions:
+  - choice: Commit per chunk, not per file
+    instead: Write the transcript when a whole file is done
+    why: >-
+      A 3-hour file at RTF 1/150 is over a minute of work, and some files are much longer; per-chunk commits keep a
+      pre-emption under the 5-minute limit whatever the file length.
+  - choice: VAD before Whisper
+    instead: Feed whole files in 30 s windows
+    why: >-
+      Broadcast audio has music and silence where Whisper invents text; skipping them improves quality and cuts GPU
+      time.
+  - choice: Dead-letter after three tries
+    instead: Retry forever
+    why: >-
+      Corrupt files would block workers and burn budget. Three tries then a list keeps the unprocessed share
+      measurable and under 0.5%.
+watchOut: >-
+  The budget is lost through idle GPUs, re-done work and slow batches, not the hourly price. Watch RTF and GPU
+  utilisation live, and keep batches length-sorted so one long segment does not stall or OOM the rest.

@@ -1,0 +1,112 @@
+overview: >-
+  A small turn-based roguelike for Basalt Hollow Games, built and shipped in 8 weeks the way a studio would, with
+  milestones, test plans, a bug triage board and playtests that change the design. The game logic is a deterministic
+  simulation: each system draws from its own seeded random stream, so a seed and the list of player actions rebuild a
+  run exactly, and the logic runs headless for tests. SDL only draws the result and reads input, and telemetry from 5
+  outside playtesters feeds the next milestone.
+learn:
+  - name: Procedural generation
+    ref: game-engine-architecture
+  - name: Seeded random streams
+  - name: Field of view (shadowcasting)
+  - name: A* pathfinding
+    ref: cs188
+  - name: Playtest metrics
+  - name: Bug triage
+stats:
+  - value: < 20 ms
+    label: generate an 80 × 50 floor
+  - value: 100 of 100
+    label: seeds replay exactly
+  - value: 60 FPS
+    label: integrated graphics, < 200 MB
+components:
+  - id: generator
+    name: Dungeon generator
+    role: Builds each floor from the seed with rooms, corridors and a reachability check.
+    tech: Rust
+    talksTo: [turns]
+    kind: core
+  - id: content
+    name: Content data
+    role: Tables for 12 enemy types, 25 items and 3 classes, loaded at start.
+    tech: RON or JSON files
+    talksTo: [turns]
+    kind: core
+  - id: turns
+    name: Turn manager
+    role: Applies the player's action, then lets enemies act in energy order, and emits events.
+    tech: Rust
+    talksTo: [fov, save, render]
+    kind: core
+  - id: fov
+    name: FOV and pathing
+    role: Shadowcasting for what each actor sees and A* for enemies chasing the player.
+    tech: Rust
+    talksTo: [turns]
+    kind: core
+  - id: save
+    name: Save and replay
+    role: Stores the seed and the action list, and replays them headless.
+    tech: Rust · binary file
+    talksTo: [telemetry]
+    kind: core
+  - id: render
+    name: Renderer
+    role: Draws tiles and sprites and reads input; holds no game state.
+    tech: SDL2
+    talksTo: []
+    kind: core
+  - id: telemetry
+    name: Telemetry
+    role: Logs floor completion, deaths, item use and class per run.
+    tech: CSV
+    talksTo: [board]
+    kind: offline
+  - id: board
+    name: Triage board
+    role: Bugs by severity per milestone and playtest findings that become design changes.
+    tech: Issue board · spreadsheet
+    talksTo: []
+    kind: offline
+flow:
+  - component: generator
+    text: builds floor N from `rngs.dungeon`, places rooms and corridors, and flood-fills from the stairs to make sure every room is **reachable**.
+  - component: content
+    text: supplies the stats of the enemies and items the generator placed, from data tables rather than code.
+  - component: turns
+    text: applies the player's action, then gives every enemy with enough energy a turn, drawing only from `rngs.combat` and `rngs.ai`.
+  - component: fov
+    text: recomputes what the player sees with shadowcasting and gives chasing enemies an A* path on the 80 × 50 grid.
+  - component: save
+    text: appends the action to the run file `{seed, class, actions}`; replaying it headless must give the same events.
+  - component: render
+    text: draws the new state at 60 FPS; the renderer never touches the simulation's random streams.
+interface:
+  lang: rust
+  code: |
+    pub struct Run { seed: u64, class: Class,
+                     actions: Vec<Action> }  // the save
+    pub struct Rngs { dungeon: Pcg32, combat: Pcg32,
+                      loot: Pcg32, ai: Pcg32 }
+    impl Rngs {
+        // one stream per system, from seed + system id
+        pub fn new(seed: u64) -> Self;
+    }
+    pub fn generate_floor(r: &mut Pcg32, depth: u32)
+        -> Floor;                  // 80 x 50, < 20 ms
+    pub fn step(w: &mut World, a: Action)
+        -> Vec<Event>;             // headless, no SDL
+decisions:
+  - choice: One random stream per system
+    instead: One global random generator
+    why: With one generator, adding a sound or an animation that draws a random number shifts every later roll and breaks all saved replays. Separate streams keep floors identical while combat changes.
+  - choice: Save the seed and actions
+    instead: Save a full snapshot of the world
+    why: The file is tiny, turn-based replay is fast, and replaying it is also the determinism test for 100 seeds. Add snapshots only if long runs take too long to load.
+  - choice: Freeze content at alpha
+    instead: Keep adding enemies and items until release
+    why: 8 weeks leaves no room for creep. After alpha, content changes only when playtest numbers, such as win rate by class, ask for it.
+watchOut: >-
+  Content creep quietly eats the 8 weeks. Lock 12 enemies, 25 items and 3 classes at alpha, put every new idea on the
+  board, and ship with zero open blockers rather than more features.

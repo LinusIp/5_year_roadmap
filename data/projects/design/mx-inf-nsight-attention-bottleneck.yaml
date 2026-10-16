@@ -1,0 +1,107 @@
+overview: >-
+  Meridian's long-document QA uses a naive attention that writes the full score matrix, every query against every
+  key, to GPU memory, so throughput collapses past 16k tokens. You profile it to show where the bytes go, then write
+  a tiled attention kernel in the style of FlashAttention: it walks over blocks of keys, keeps scores in fast on-chip
+  memory and uses an online softmax, so the 32k × 32k matrix is never stored. It must handle causal masks and
+  variable lengths, and stay within 2e-3 of an fp32 reference.
+learn:
+  - name: Memory-bound attention
+    ref: horace-he-brrr
+  - name: Tiling and shared memory
+    ref: pmpp-book
+  - name: Online softmax
+    ref: gpu-mode-lectures
+  - name: Roofline analysis
+    ref: nsight-compute-docs
+  - name: Triton block programs
+    ref: triton-tutorials
+stats:
+  - value: ≥ 5×
+    label: faster than naive at 32k
+  - value: ≤ 2e-3
+    label: relative error vs fp32
+  - value: ≥ 60%
+    label: of library kernel throughput
+components:
+  - id: naive
+    name: Naive baseline
+    role: Computes `softmax(QKᵀ/√d)V` with the full score matrix written to memory.
+    tech: PyTorch
+    talksTo: [profile]
+    kind: core
+  - id: profile
+    name: Profiling notes
+    role: Records DRAM bytes, achieved FLOPs and time per length from 1k to 32k.
+    tech: Nsight Compute
+    talksTo: [kernel]
+    kind: core
+  - id: kernel
+    name: Tiled kernel
+    role: Computes one block of queries against all key blocks with a running max and sum.
+    tech: Triton or CUDA C++
+    talksTo: [masking]
+    kind: core
+  - id: masking
+    name: Masking and varlen
+    role: Skips key blocks after the diagonal for causal masks and handles sequences that are not tile-sized.
+    tech: Triton or CUDA C++
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Comparison benchmark
+    role: Times naive, tiled and the library kernel on odd and power-of-two lengths and checks error.
+    tech: PyTorch · CUDA events
+    talksTo: []
+    kind: core
+  - id: gpu
+    name: 24 GB GPU
+    role: The card whose memory size and bandwidth set the limits.
+    tech: Consumer GPU
+    talksTo: []
+    kind: external
+flow:
+  - component: naive
+    text: >-
+      at 32k tokens writes a score matrix of `32,768² × 2 bytes = 2 GiB` per head, so a few heads in parallel
+      exhaust 24 GB; at 16k it is 512 MiB, which is why trouble starts there.
+  - component: profile
+    text: shows that almost all the time goes to reading and writing that matrix, with **low** achieved FLOPs, a memory-bound kernel.
+  - component: kernel
+    text: >-
+      loads a 128-query tile once, then for each 64-key tile computes scores in on-chip memory, updates the running
+      max `m` and sum `l`, rescales the partial output, and writes only the final rows.
+  - component: masking
+    text: stops at the diagonal for causal attention, so about half of the key tiles are never loaded, and masks the ragged last tile.
+  - component: bench
+    text: >-
+      compares lengths from 1k to 32k, including odd ones like 30,001, against the fp32 reference and the library
+      kernel, and notes where the kernel is still below the roofline.
+interface:
+  lang: python
+  code: |
+    @triton.jit
+    def attn_fwd(Q, K, V, Out, seq_lens,
+                 stride_qm, stride_kn, stride_vn,
+                 sm_scale,
+                 CAUSAL: tl.constexpr,
+                 BLOCK_M: tl.constexpr,   # 128
+                 BLOCK_N: tl.constexpr,   # 64
+                 HEAD_DIM: tl.constexpr): # 128
+        # per tile: s = q @ k.T * sm_scale
+        # m_new = max(m, rowmax(s))
+        # l = l * exp(m - m_new) + rowsum(exp(s - m_new))
+        ...
+decisions:
+  - choice: Online softmax over key tiles
+    instead: Two passes, first the max, then the sum
+    why: >-
+      A second pass reads all of K again, which is the traffic you are trying to remove. The running max and rescale
+      keep it to one pass and avoid overflow.
+  - choice: Tile sizes chosen from the profile
+    instead: The largest tile that compiles
+    why: >-
+      Larger tiles reuse more data but use more on-chip memory and registers, which lowers occupancy. Sweep 64 and 128
+      and keep what Nsight shows is fastest at 32k.
+watchOut: >-
+  Softmax without subtracting the running max overflows in fp16 at long lengths. Test 30,001 and other odd lengths
+  too, since power-of-two tests hide bugs in the last, partial tile.

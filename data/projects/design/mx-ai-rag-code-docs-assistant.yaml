@@ -1,0 +1,102 @@
+overview: >-
+  A docs bot that can only cite what it really read. The docs are split by heading, keeping code samples whole, and
+  each chunk remembers its heading path and API version. The LLM must answer with exact quotes, and a verifier
+  rejects any answer whose quotes are not found in the retrieved chunks, so a wrong link never reaches a customer.
+learn:
+  - name: Heading-aware chunking
+  - name: Metadata filtering
+  - name: Quote-grounded citations
+  - name: Answer verification
+  - name: Retrieval evaluation
+    ref: llm-zoomcamp
+stats:
+  - value: 100%
+    label: verified citations
+  - value: ≥ 85%
+    label: answer correctness
+  - value: < 5 s
+    label: p95 latency
+components:
+  - id: ingester
+    name: Docs ingester
+    role: Reads the Markdown docs and splits them by heading without breaking code blocks.
+    tech: Python · markdown-it
+    talksTo: [store]
+    kind: offline
+  - id: api
+    name: Ask endpoint
+    role: Takes the question and the API version the customer uses.
+    tech: FastAPI
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Vector store
+    role: Holds chunk embeddings with heading path, version and page link.
+    tech: Chroma · sentence-transformers
+    talksTo: [generator]
+    kind: core
+  - id: generator
+    name: Generator
+    role: Asks the LLM for an answer plus exact quotes, each tied to a chunk id.
+    tech: Python
+    talksTo: [llm, verifier]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Writes the answer and picks supporting quotes from the given chunks.
+    tech: Hosted LLM
+    talksTo: []
+    kind: external
+  - id: verifier
+    name: Citation verifier
+    role: Checks every quote appears in its chunk and builds links from metadata.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: eval
+    name: Eval set
+    role: 100 support-style questions with expected answers and source pages.
+    tech: pytest · JSONL
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: receives "How do I refund part of a charge?" with `api_version 2024-06`.
+  - component: store
+    text: filters to chunks of that version and returns the top 6 by similarity, each with its heading path like `Refunds > Partial refunds`.
+  - component: generator
+    text: asks for JSON with `answer` and `quotes`, each quote naming a `chunk_id`.
+  - component: verifier
+    text: normalises whitespace and Markdown, then checks each quote is inside its chunk; one failure means one retry, a second means a **refusal**.
+  - component: verifier
+    text: builds every link from the chunk's stored path, never from model text, and returns the answer.
+interface:
+  lang: json
+  code: |
+    { "answer": "Create a refund with an amount
+        lower than the charge.",
+      "quotes": [
+        { "chunk_id": "refunds#partial-3",
+          "text": "Pass `amount` to refund part
+                   of a charge." } ],
+      "links": ["/docs/2024-06/refunds#partial"],
+      "verified": true }
+decisions:
+  - choice: Links built from metadata
+    instead: Let the model write the links
+    why: >-
+      A model can invent a plausible path. If links only come from chunks that were retrieved and verified, the
+      100% validity target holds by construction.
+  - choice: Filter by API version
+    instead: One mixed index for all versions
+    why: >-
+      Old and new versions describe the same endpoint differently, and a v1 answer to a v2 customer is a wrong
+      answer. The version arrives with the question, so filtering is free.
+  - choice: Split by heading, keep code whole
+    instead: Fixed 500-token windows
+    why: >-
+      Docs are already organised by heading, and a code sample cut in half loses its meaning. Very long sections
+      are split again at paragraph breaks.
+watchOut: >-
+  A verifier that matches bytes exactly rejects good answers over a changed space or backtick, and the bot refuses
+  too often. Normalise both sides the same way and watch the refusal rate next to validity.

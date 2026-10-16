@@ -1,0 +1,47 @@
+overview: >-
+  A training loop profiled with the PyTorch profiler, which records every operator and gap on CPU and GPU. You find the
+  top costs and idle time, apply three fixes such as pinned memory, more loader workers and fused ops, and show the
+  step time drop with before-and-after traces.
+learn:
+  - name: Profiler traces
+    ref: nsight-compute-docs
+  - name: GPU idle gaps
+    ref: horace-he-brrr
+  - name: Data loader tuning
+components:
+  - id: loop
+    name: Training loop
+    role: The baseline step being measured and changed.
+    tech: PyTorch
+    talksTo: [profiler]
+    kind: core
+  - id: profiler
+    name: Profiler
+    role: Records operators and timings for a few steps after warmup.
+    tech: torch.profiler
+    talksTo: [trace]
+    kind: core
+  - id: trace
+    name: Trace viewer
+    role: Shows the timeline and top-ops table for each version.
+    tech: TensorBoard or Chrome trace
+    talksTo: []
+    kind: core
+flow:
+  - component: loop
+    text: runs with `schedule(wait=1, warmup=2, active=5)`, so only steady-state steps are recorded.
+  - component: profiler
+    text: exports a trace and a table sorted by `cuda_time_total`.
+  - component: trace
+    text: shows where the GPU is **idle** (often waiting on data) and which ops dominate.
+  - component: loop
+    text: gets one fix at a time (`pin_memory=True`, more `num_workers`, a fused optimizer), each re-profiled, until step time is at least 25% lower.
+decisions:
+  - choice: One fix at a time
+    instead: Apply all fixes and measure once
+    why: >-
+      Changing one thing per trace shows what each fix is worth, and stops a fix that helps hiding one that hurts.
+      With three fixes this costs only three extra runs.
+watchOut: >-
+  Profiling the first steps captures CUDA startup and memory allocation, not your loop. Skip warmup steps, and call
+  `torch.cuda.synchronize()` before timing by hand.

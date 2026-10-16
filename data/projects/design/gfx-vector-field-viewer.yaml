@@ -1,0 +1,69 @@
+overview: >-
+  A viewer where you type a field such as `(-y, x)` and see it as arrows coloured by magnitude, RK4 streamlines and a
+  LIC image (line integral convolution: noise blurred along the flow, so it looks like brush strokes following it).
+  Expressions are parsed into a checked tree, never passed to `eval`, and dipole and vortex presets check that the
+  critical points (where the field is zero) come out right.
+learn:
+  - name: RK4 integration
+  - name: Critical points
+    ref: mit-18-03
+  - name: Line integral convolution
+  - name: Safe expression parsing
+components:
+  - id: parser
+    name: Expression parser
+    role: Turns the typed u and v expressions into a vectorised NumPy function, or rejects them.
+    tech: Python ast
+    talksTo: [field]
+    kind: core
+  - id: field
+    name: Field sampler
+    role: Evaluates the field on a grid and finds and classifies critical points.
+    tech: NumPy
+    talksTo: [stream]
+    kind: core
+  - id: stream
+    name: Streamline tracer
+    role: Integrates streamlines from seed points with RK4 and stopping rules.
+    tech: NumPy
+    talksTo: [render]
+    kind: core
+  - id: render
+    name: Renderer
+    role: Draws arrows, streamlines and the LIC image coloured by magnitude.
+    tech: matplotlib / WebGL
+    talksTo: []
+    kind: core
+flow:
+  - component: parser
+    text: walks the `ast` and allows only numbers, `x`, `y`, `+ - * / **` and a short list of functions such as `sin` and `exp`.
+  - component: field
+    text: samples a 64x64 grid, finds points where `|F|` is near zero and labels each by the Jacobian's eigenvalues (saddle, centre, source or sink).
+  - component: stream
+    text: steps each seed with RK4 at `h = 0.01`, stopping on leaving the domain, nearing a critical point or after 2,000 steps.
+  - component: render
+    text: draws the layers and reports streamlines per second; the dipole must show two critical points, the vortex one **centre**.
+interface:
+  lang: python
+  code: |
+    ALLOWED = {"sin", "cos", "exp", "sqrt", "log"}
+
+    def compile_field(u: str, v: str) -> Field:
+        """'-y', 'x' -> f(X, Y) -> (U, V) on arrays.
+        Raises ValueError on any other name or call."""
+
+    def rk4_streamline(f: Field, seed: Point,
+                       h: float = 0.01,
+                       max_steps: int = 2000,
+                       bounds=(-2, 2, -2, 2)
+                       ) -> np.ndarray:  # (n, 2)
+        ...
+decisions:
+  - choice: Whitelisted ast walk, not eval
+    instead: "`eval` with empty builtins"
+    why: >-
+      Even with no builtins, `eval` can be escaped through attribute tricks such as `().__class__`. An ast walk that
+      allows only known node types is about 30 lines and refuses anything it does not recognise.
+watchOut: >-
+  Streamlines that spiral into a sink or run off the edge loop forever or blow up to huge values. Stop on leaving the
+  domain, on a tiny `|F|`, and after a fixed step count.

@@ -1,0 +1,51 @@
+overview: >-
+  A login system where passwords are hashed with Argon2, sessions live in Redis behind an opaque cookie, and every
+  state-changing request must echo a CSRF token that a forged cross-site form cannot read.
+learn:
+  - name: Password hashing
+  - name: Cookie flags
+  - name: CSRF double-submit
+  - name: Session fixation
+components:
+  - id: browser
+    name: Browser
+    role: Sends the session cookie automatically and the CSRF token in a header.
+    tech: Browser
+    talksTo: [app]
+    kind: external
+  - id: app
+    name: Web app
+    role: Verifies passwords, issues and rotates session IDs, and checks CSRF tokens.
+    tech: FastAPI or Flask · Argon2
+    talksTo: [sessions]
+    kind: core
+  - id: sessions
+    name: Session store
+    role: Maps a random session ID to a user ID with a TTL.
+    tech: Redis
+    talksTo: []
+    kind: core
+  - id: attacks
+    name: Attack tests
+    role: Replays a forged cross-site POST and a planted pre-login session ID.
+    tech: pytest
+    talksTo: [app]
+    kind: offline
+flow:
+  - component: app
+    text: receives `POST /login`, checks the password with Argon2, and **discards** any session ID the browser sent.
+  - component: sessions
+    text: stores a fresh random ID with the `user_id` and a 30-minute TTL.
+  - component: app
+    text: sets the cookie with `HttpOnly; Secure; SameSite=Lax`, plus a separate `csrf` cookie the page can read.
+  - component: app
+    text: on `POST /transfer`, answers 403 unless the `X-CSRF-Token` header equals the `csrf` cookie.
+decisions:
+  - choice: Server-side sessions in Redis
+    instead: A signed JWT in a cookie
+    why: >-
+      Logout and ID rotation must take effect at once, and Redis deletes a key instantly. A JWT cannot be revoked
+      before it expires; revisit only if several services must check logins without Redis.
+watchOut: >-
+  If the session ID is not replaced at login, an attacker who planted a known ID before login is now logged in as
+  the victim. Rotate it on every login and privilege change.

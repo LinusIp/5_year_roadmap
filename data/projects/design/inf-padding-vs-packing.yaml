@@ -1,0 +1,62 @@
+overview: >-
+  An experiment that samples request lengths from a real distribution and counts how many tokens a padded batch
+  wastes when every sequence is padded to the longest one. The same batch is then packed end to end and run with
+  variable-length attention, and the measured speedup is checked against the predicted ratio of padded to real
+  tokens.
+learn:
+  - name: Padding waste
+    ref: batching-effects-gpt
+  - name: Sequence packing
+  - name: Variable-length attention
+    ref: hazy-gpus-go-brrr
+  - name: Attention masks
+    ref: hf-llm-course
+components:
+  - id: lengths
+    name: Length sampler
+    role: Draws batch lengths from a real chat or instruction dataset.
+    tech: Python · NumPy
+    talksTo: [batcher]
+    kind: core
+  - id: batcher
+    name: Batch builder
+    role: Builds a padded tensor with a mask and a packed tensor with cumulative offsets.
+    tech: PyTorch
+    talksTo: [attn]
+    kind: core
+  - id: attn
+    name: Attention runs
+    role: Runs padded SDPA and varlen attention on the same tokens.
+    tech: PyTorch SDPA · flash-attn varlen
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Compares padding waste with the measured speedup.
+    tech: pandas · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: lengths
+    text: draws batches of `B = 32` lengths from the dataset's real prompt-length histogram.
+  - component: batcher
+    text: >-
+      for each batch, computes `waste = 1 - sum(lengths) / (B · max_len)` and builds `cu_seqlens`, the start offset of
+      each sequence in the packed tensor.
+  - component: attn
+    text: >-
+      runs padded `scaled_dot_product_attention` with a mask, then varlen attention on the packed tokens so no
+      sequence attends across its neighbour, timing both with CUDA events over 50 runs after warmup.
+  - component: report
+    text: >-
+      plots measured speedup against the **predicted** token ratio `B · max_len / sum(lengths)` and checks they agree
+      within 20%.
+decisions:
+  - choice: Lengths from a real dataset
+    instead: Uniform random lengths
+    why: >-
+      Real request lengths are skewed: most are short and a few are very long, and one long request pads the whole
+      batch. Uniform lengths understate the waste and the gain from packing.
+watchOut: >-
+  Packing without a block-diagonal mask lets tokens attend to other requests, which looks faster and gives wrong
+  outputs. Check packed outputs match the padded ones on the real tokens.

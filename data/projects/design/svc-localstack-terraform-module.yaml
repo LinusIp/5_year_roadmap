@@ -1,0 +1,51 @@
+overview: >-
+  A reusable Terraform module that creates an SQS queue and an S3 bucket from validated variables, exposes their
+  ARNs as outputs, and is tested with `terraform test` against LocalStack (a local fake of AWS) in CI.
+learn:
+  - name: Terraform modules
+    ref: terraform-tutorials
+  - name: Variable validation
+  - name: Infrastructure tests
+components:
+  - id: module
+    name: Module
+    role: Variables with validation, the queue and bucket resources, and outputs.
+    tech: Terraform
+    talksTo: [localstack]
+    kind: core
+  - id: root
+    name: Root config
+    role: Pins the module by version and owns the provider configuration.
+    tech: Terraform
+    talksTo: [module]
+    kind: core
+  - id: tests
+    name: Module tests
+    role: Run plan and apply with assertions on names, tags and outputs.
+    tech: terraform test
+    talksTo: [module]
+    kind: offline
+  - id: localstack
+    name: LocalStack
+    role: Answers AWS API calls locally so tests cost nothing.
+    tech: LocalStack in Docker
+    talksTo: []
+    kind: external
+flow:
+  - component: root
+    text: calls the module with `name = "orders"` and `retention_days = 7`, and configures the provider endpoint.
+  - component: module
+    text: rejects `retention_days = 30` through a `validation` block before any API call.
+  - component: module
+    text: creates the queue and bucket in LocalStack and returns `queue_arn` and `bucket_name`.
+  - component: tests
+    text: assert outputs such as `startswith(output.queue_arn, "arn:aws:sqs")` and run in CI on every push.
+decisions:
+  - choice: LocalStack as the test target
+    instead: A real AWS sandbox account
+    why: >-
+      Tests run in seconds in CI with no cloud bill or credentials. Run against real AWS before release, since
+      LocalStack does not copy every behaviour.
+watchOut: >-
+  A `provider` block inside the module ties every caller to one region and endpoint. Keep provider config in the
+  root and pass only variables in.

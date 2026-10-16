@@ -1,0 +1,52 @@
+overview: >-
+  A sweep that splits one corpus at several chunk sizes and overlaps, embeds every version with the same model, and
+  checks how often the passage holding each of 40 answers lands in the top 5. The result is a heatmap of hit@5 and one
+  recommended setting.
+learn:
+  - name: Text chunking
+    ref: llm-zoomcamp
+  - name: Chunk overlap
+  - name: Hit rate at k
+components:
+  - id: splitter
+    name: Splitter
+    role: Cuts the corpus into chunks for one size, overlap and rule (fixed tokens or sentence-aware).
+    tech: Python
+    talksTo: [index]
+    kind: core
+  - id: index
+    name: Vector index
+    role: Embeds every chunk with one fixed model and answers top-5 lookups.
+    tech: Embedding model · vector store
+    talksTo: [scorer]
+    kind: core
+  - id: questions
+    name: Question set
+    role: Holds 40 questions, each with the character span of its source passage.
+    tech: JSONL
+    talksTo: [scorer]
+    kind: core
+  - id: scorer
+    name: Scorer
+    role: Counts a hit when a retrieved chunk overlaps the answer span, and draws the heatmap.
+    tech: Python · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: splitter
+    text: produces chunks for one grid cell, for example `size=256` tokens and `overlap=32`, keeping each chunk's start and end offsets.
+  - component: index
+    text: embeds the chunks and, for each question, returns the 5 nearest chunks.
+  - component: questions
+    text: supplies the gold span, so a hit is judged by character offsets, not by matching text.
+  - component: scorer
+    text: records hit@5 for the cell; after the whole grid it draws the heatmap and picks the best setting.
+decisions:
+  - choice: Judge hits by span overlap
+    instead: Ask an LLM whether the chunk answers the question
+    why: >-
+      40 questions with known spans give an exact, free and repeatable score for every grid cell. Revisit if the
+      questions start needing several passages to answer.
+watchOut: >-
+  Changing the embedding model or its settings partway through the sweep makes cells incomparable. Pin the model
+  version once and re-embed everything for each setting.

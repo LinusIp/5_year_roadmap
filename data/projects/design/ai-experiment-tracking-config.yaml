@@ -1,0 +1,52 @@
+overview: >-
+  A training template where every run is defined by a YAML config and logged with the commit hash, a dirty-tree flag,
+  the seed and its metrics. A compare script lists runs side by side, and any past run can be rerun from its log to
+  the same metric within noise.
+learn:
+  - name: Config-driven runs
+  - name: Experiment tracking
+    ref: mlops-zoomcamp
+  - name: Seeding and determinism
+components:
+  - id: config
+    name: Config
+    role: Holds every hyperparameter, data path and seed in YAML.
+    tech: Hydra-style YAML
+    talksTo: [train]
+    kind: core
+  - id: train
+    name: Train script
+    role: Reads only the config and logs metrics each epoch.
+    tech: Python
+    talksTo: [tracker]
+    kind: core
+  - id: tracker
+    name: Run log
+    role: Stores config, commit hash, dirty flag and metrics per run.
+    tech: MLflow or SQLite
+    talksTo: [compare]
+    kind: core
+  - id: compare
+    name: Compare script
+    role: Shows runs side by side and reruns one from its stored config.
+    tech: Python CLI
+    talksTo: []
+    kind: offline
+flow:
+  - component: config
+    text: is resolved with any command-line overrides, for example `lr=3e-4 seed=1`.
+  - component: train
+    text: seeds Python, NumPy, torch and the data loader order, then trains.
+  - component: tracker
+    text: records the resolved config, `git rev-parse HEAD`, a **dirty** flag and the final metric.
+  - component: compare
+    text: reruns a chosen run from its config at the same commit and reports the metric difference.
+decisions:
+  - choice: Refuse to start on a dirty tree
+    instead: Log a diff of the uncommitted changes
+    why: >-
+      In a one-person template, committing first is cheap and makes every hash mean exactly one code state. Allow a
+      flag to override it for quick experiments, logged as such.
+watchOut: >-
+  An unseeded data loader shuffles differently each run, so reproductions miss by more than noise. Seed the loader's
+  generator and its workers, not only torch.

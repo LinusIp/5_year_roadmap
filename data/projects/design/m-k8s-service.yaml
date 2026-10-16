@@ -1,0 +1,134 @@
+overview: >-
+  Your inference server taken to production standards. Terraform creates the cluster, registry and network from code;
+  every merge to main runs GitHub Actions, which tests, builds an image tagged with the commit SHA and updates the
+  Kubernetes Deployment. Kubernetes swaps pods one at a time and sends traffic only to pods whose readiness probe
+  passes, while old pods drain in-flight requests before they stop. Prometheus scrapes `/metrics` and Grafana shows
+  latency, traffic, errors and saturation, so a load test across a deploy can prove it drops nothing.
+learn:
+  - name: Infrastructure as code
+    ref: terraform-tutorials
+  - name: Readiness and liveness probes
+    ref: kubernetes-tutorials
+  - name: Graceful shutdown
+  - name: CI/CD with OIDC
+    ref: github-actions-docs
+  - name: Golden signals
+    ref: google-sre-book
+  - name: Prometheus scraping
+    ref: prometheus-docs
+stats:
+  - value: "0"
+    label: failed requests during a deploy
+  - value: 50 req/s
+    label: steady k6 load
+  - value: "3"
+    label: replicas rolled one at a time
+components:
+  - id: terraform
+    name: Terraform
+    role: Creates the cluster, registry and network, with remote state, and rebuilds them from scratch.
+    tech: Terraform · remote state
+    talksTo: [registry, pods]
+    kind: offline
+  - id: ci
+    name: CI/CD pipeline
+    role: On each merge, tests, builds and pushes the image, then updates the Deployment.
+    tech: GitHub Actions · OIDC
+    talksTo: [registry, pods]
+    kind: core
+  - id: registry
+    name: Registry
+    role: Stores images tagged with the commit SHA.
+    tech: Cloud container registry
+    talksTo: [pods]
+    kind: external
+  - id: k6
+    name: Load test
+    role: Sends a steady 50 requests a second and records every failure.
+    tech: k6
+    talksTo: [ingress]
+    kind: external
+  - id: ingress
+    name: Ingress and Service
+    role: Routes traffic only to pods that report ready.
+    tech: Kubernetes Ingress · Service
+    talksTo: [pods]
+    kind: core
+  - id: pods
+    name: Service pods
+    role: Three replicas with probes, resource requests, a preStop drain and a PodDisruptionBudget.
+    tech: Kubernetes Deployment · Docker
+    talksTo: [prometheus]
+    kind: core
+  - id: prometheus
+    name: Prometheus
+    role: Scrapes each pod's `/metrics` through a ServiceMonitor.
+    tech: kube-prometheus-stack
+    talksTo: [grafana]
+    kind: offline
+  - id: grafana
+    name: Grafana
+    role: Shows p50, p95 and p99 latency, error rate and saturation on one dashboard.
+    tech: Grafana
+    talksTo: []
+    kind: offline
+flow:
+  - component: ci
+    text: >-
+      runs the tests on a merge to main, builds the multi-stage image as `app:<sha>`, pushes it with short-lived **OIDC**
+      credentials and sets the new tag on the Deployment.
+  - component: pods
+    text: >-
+      roll one at a time with `maxUnavailable: 0`; a new pod's readiness probe passes only once the model is
+      **loaded**.
+  - component: ingress
+    text: keeps sending k6's 50 requests a second only to ready pods, old and new.
+  - component: pods
+    text: >-
+      receive `SIGTERM` on the old side; the `preStop` hook waits while the Service stops routing, and the server
+      finishes in-flight requests before exiting.
+  - component: prometheus
+    text: scrapes request counts, latency histograms and queue depth from every pod during the rollout.
+  - component: grafana
+    text: >-
+      shows latency percentiles before, during and after the deploy, and the k6 report shows **zero** failed
+      requests.
+interface:
+  lang: yaml
+  code: |
+    strategy:
+      rollingUpdate: { maxUnavailable: 0, maxSurge: 1 }
+    template:
+      spec:
+        terminationGracePeriodSeconds: 30
+        containers:
+          - name: app
+            image: REGISTRY/app:GIT_SHA
+            readinessProbe:
+              httpGet: { path: /ready, port: 8000 }
+            lifecycle:
+              preStop:
+                exec: { command: ["sleep", "10"] }
+decisions:
+  - choice: OIDC from CI to the cloud
+    instead: Long-lived cloud keys as CI secrets
+    why: >-
+      Each pipeline run gets credentials that expire in minutes, so a leaked log or fork cannot reuse them. Nothing to
+      rotate by hand.
+  - choice: Remote Terraform state
+    instead: State on a laptop
+    why: >-
+      The destroy-and-recreate test and the CI deploy both need the same state; on a laptop it is lost or out of date.
+  - choice: CPU image with a small model
+    instead: GPU nodes
+    why: >-
+      The project is about deploys and observability, not speed, and a CPU build keeps the monthly bill low. Revisit
+      when a latency target needs a GPU.
+  - choice: Readiness gated on the model load
+    instead: A probe that only checks the process is up
+    why: >-
+      The server takes seconds to load weights; a shallow probe sends traffic to cold pods and fails requests during
+      every rollout.
+watchOut: >-
+  A readiness probe that passes before the model is loaded sends traffic to cold pods and breaks the zero-failure
+  deploy. Make `/ready` return 200 only after a first test generation has succeeded.

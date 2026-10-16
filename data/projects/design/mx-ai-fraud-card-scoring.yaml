@@ -1,0 +1,103 @@
+overview: >-
+  A scoring service that sees each card transaction, updates per-card velocity counts (how many purchases and how
+  much spent in the last hour and day), and returns a fraud probability with a decision. The model is LightGBM
+  trained offline on the same features; the decision threshold comes from what each kind of mistake really costs,
+  not from accuracy.
+learn:
+  - name: Class imbalance
+  - name: Velocity features
+  - name: PR-AUC
+  - name: Cost-based thresholds
+  - name: Train/serve skew
+stats:
+  - value: ≥ 70%
+    label: recall at 1% FPR
+  - value: < 20 ms
+    label: p99 per transaction
+  - value: < 10 min
+    label: retrain on 1M rows
+components:
+  - id: switch
+    name: Payment switch
+    role: Sends each authorisation request for a score before approving it.
+    tech: Payfern core
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: Scoring API
+    role: Validates the transaction and returns probability and decision.
+    tech: FastAPI
+    talksTo: [features]
+    kind: core
+  - id: features
+    name: Online feature store
+    role: Keeps each card's recent transactions in memory and computes velocity features.
+    tech: Python dict · deque
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Model
+    role: LightGBM booster loaded once at start-up, scores one row.
+    tech: LightGBM
+    talksTo: [decision]
+    kind: core
+  - id: decision
+    name: Decision rule
+    role: Compares the probability with the cost-chosen threshold.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: trainer
+    name: Offline trainer
+    role: Rebuilds rolling-window features from history and trains with a time split.
+    tech: pandas · LightGBM
+    talksTo: [optimizer]
+    kind: offline
+  - id: optimizer
+    name: Threshold optimiser
+    role: Finds the threshold with the lowest expected cost on the last period.
+    tech: NumPy
+    talksTo: [model]
+    kind: offline
+flow:
+  - component: api
+    text: receives `POST /score` with a hashed card id, amount, merchant category, country and timestamp.
+  - component: features
+    text: computes `n_txn_1h`, `amount_24h` and distance from the card's usual country using only **earlier** transactions, then adds this one.
+  - component: model
+    text: scores the feature row in about a millisecond.
+  - component: decision
+    text: declines when `p_fraud ≥ 0.12` (the cost-chosen threshold), sends a narrow band below it to review, approves the rest.
+  - component: trainer
+    text: every week, retrains on the latest 1M rows with the same feature code, and the **optimiser** reprices the threshold.
+interface:
+  lang: http
+  code: |
+    POST /score
+    { "card": "c_9f3a…", "amount": 412.50,
+      "mcc": "5732", "country": "PT",
+      "ts": "2026-10-16T21:04:11Z" }
+
+    200 OK
+    { "p_fraud": 0.031,
+      "decision": "approve",
+      "threshold": 0.12,
+      "model": "lgbm-2026-10-12" }
+decisions:
+  - choice: Threshold from the cost curve
+    instead: A 0.5 cut-off or best F1
+    why: >-
+      A missed fraud costs its amount; a false decline costs margin and an angry customer. Pick the threshold that
+      minimises expected cost on the last period while keeping FPR at or under 1%.
+  - choice: In-process feature store
+    instead: Redis or a database
+    why: >-
+      One CPU process with a p99 of 20 ms: a dict of per-card queues answers in microseconds. Move to Redis when a
+      second scorer instance has to share the counts.
+  - choice: Judge by PR-AUC and recall at 1% FPR
+    instead: ROC-AUC
+    why: With 0.4% fraud, ROC-AUC stays high even when most alerts are false. PR-AUC shows that cost.
+watchOut: >-
+  Velocity features computed offline with a different window or including the current transaction make the model
+  look better than it will be live. Use one feature function for training and serving and test them against each
+  other.

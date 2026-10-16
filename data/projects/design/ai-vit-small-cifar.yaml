@@ -1,0 +1,54 @@
+overview: >-
+  A small vision transformer built from scratch (split the image into patches, embed each, run a transformer encoder)
+  and trained on CIFAR-10 against a CNN at about the same compute. It reports accuracy at equal FLOPs and shows
+  attention maps from the trained model.
+learn:
+  - name: Patch embeddings
+    ref: stanford-cs231n
+  - name: Transformer encoder
+    ref: d2l
+  - name: Inductive bias
+  - name: FLOP counting
+components:
+  - id: data
+    name: Data loader
+    role: Loads CIFAR-10 with random crop, flip and stronger augmentation for the ViT.
+    tech: torchvision
+    talksTo: [vit, cnn]
+    kind: core
+  - id: vit
+    name: ViT
+    role: Turns 4x4 patches into tokens and runs 6 encoder blocks.
+    tech: PyTorch
+    talksTo: [report]
+    kind: core
+  - id: cnn
+    name: CNN baseline
+    role: A small ResNet sized to similar FLOPs.
+    tech: PyTorch
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Compares test accuracy and FLOPs and plots attention maps.
+    tech: fvcore · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: data
+    text: feeds both models the same batches; the ViT also gets RandAugment-style augmentation.
+  - component: vit
+    text: splits each 32x32 image into 64 patches of `4x4`, adds a class token and position embeddings, and classifies from the class token.
+  - component: cnn
+    text: trains on the same schedule, its width chosen so FLOPs per image match the ViT within 10%.
+  - component: report
+    text: lists accuracy per FLOP budget and overlays the class token's **attention** on sample images.
+decisions:
+  - choice: 4x4 patches
+    instead: 16x16 patches as in ImageNet ViTs
+    why: >-
+      On 32x32 images 16x16 patches leave only 4 tokens, too coarse to learn from. 4x4 gives 64 tokens, still cheap
+      for a 6-block model.
+watchOut: >-
+  On 50k images a ViT has no built-in sense of locality and underperforms without strong augmentation. Compare at
+  equal augmentation too, or the gap is about augmentation, not architecture.

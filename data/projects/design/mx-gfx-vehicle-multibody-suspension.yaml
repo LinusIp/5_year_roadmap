@@ -1,0 +1,107 @@
+overview: >-
+  A multibody suspension model for Marlow Motorsport, so engineers can see bump steer and roll-centre migration that
+  their 7-DOF model hides. Each double-wishbone corner is a set of hardpoints joined by rigid links, and a constraint
+  solver finds where the upright sits for each wheel travel by keeping every link length fixed. The resulting camber,
+  toe and roll centre tables feed a 1 kHz vehicle integrator that also reads damper dyno maps and the tyre model from
+  the earlier project.
+learn:
+  - name: Kinematic constraints
+    ref: modern-robotics
+  - name: Newton-Raphson iteration
+    ref: mit-2-086
+  - name: Roll centre geometry
+  - name: Bump steer and camber gain
+  - name: Table interpolation
+stats:
+  - value: < 50 ms
+    label: 100-point travel sweep
+  - value: 2×
+    label: real time at 1 kHz
+  - value: ≤ 2 mm
+    label: roll-centre error vs closed form
+components:
+  - id: python
+    name: Python scripting
+    role: Loads hardpoints and setups, runs sweeps and laps, and calls the report generator.
+    tech: Python · pybind11
+    talksTo: [hardpoints]
+    kind: core
+  - id: hardpoints
+    name: Hardpoint model
+    role: Holds each corner's pickup points and link lengths in vehicle coordinates.
+    tech: C++17
+    talksTo: [solver]
+    kind: core
+  - id: solver
+    name: Constraint solver
+    role: Solves the upright pose for each wheel travel with Newton iterations on the link-length equations.
+    tech: C++17 · Eigen
+    talksTo: [integrator]
+    kind: core
+  - id: dampers
+    name: Damper tables
+    role: Gives damper force from velocity using the dyno curves, bump and rebound separately.
+    tech: C++17
+    talksTo: [integrator]
+    kind: core
+  - id: tyre
+    name: Tyre model
+    role: The Pacejka tyre model from the earlier vehicle project.
+    tech: C++17
+    talksTo: [integrator]
+    kind: external
+  - id: integrator
+    name: Vehicle integrator
+    role: Integrates chassis and four unsprung masses at 1 kHz using the geometry tables.
+    tech: C++17
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report generator
+    role: Plots camber, toe and roll centre against travel and compares setups.
+    tech: Python · matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: python
+    text: loads `front.yaml` hardpoints, changes one pickup point, and asks for a sweep from -50 to +50 mm of travel.
+  - component: hardpoints
+    text: turns the pickups into fixed link lengths for the upper and lower wishbones and the tie rod.
+  - component: solver
+    text: starts from the previous travel point's solution and runs Newton iterations until every link length is within 1 µm, so it stays on the **right branch**.
+  - component: solver
+    text: reads camber and toe from the upright's pose, and finds the roll centre where the lines from each contact patch through the wishbones' instant centre cross.
+  - component: dampers
+    text: return force for the current damper velocity by interpolating the dyno table, clamped at the table's last point.
+  - component: integrator
+    text: steps the chassis and wheels at 1 kHz with geometry looked up from the sweep tables and forces from springs, dampers and the tyre model.
+interface:
+  lang: python
+  code: |
+    import msusp
+
+    fr = msusp.DoubleWishbone.from_yaml("front.yaml")
+    fr.hardpoints["lca_front"] = (0.12, 0.35, 0.11)
+
+    sweep = fr.sweep(travel_mm=range(-50, 51))
+    sweep.camber_deg        # per travel point
+    sweep.toe_deg           # bump steer
+    sweep.roll_centre_mm    # height vs travel
+    sweep.solve_ms          # under 50 for the sweep
+
+    car = msusp.Car(front=fr, dampers="dyno.csv")
+    lap = msusp.run_lap(car, dt=1e-3)
+decisions:
+  - choice: Precomputed geometry tables
+    instead: Solve the constraints inside every 1 ms step
+    why: Rigid links give the same geometry for the same travel, so a table lookup makes 2× real time easy. Revisit when bushing compliance is added, since geometry then depends on load.
+  - choice: Newton iterations with warm start
+    instead: A closed-form geometric solution
+    why: A 3D double wishbone with a tie rod has no simple closed form. Warm-starting from the previous travel point converges in a few iterations and keeps the solver on the same branch.
+  - choice: Clamp damper maps at the last measured point
+    instead: Extrapolate the dyno curve linearly
+    why: Dyno tables stop at a measured velocity, and linear extrapolation of a digressive curve invents large forces over kerbs. Clamping is honest; log when it happens.
+watchOut: >-
+  Newton can converge to the mirror solution, an upright flipped through the wishbones, which still satisfies every
+  link length. Warm-start from the previous point, check the upright's orientation sign, and stop the sweep near
+  singular poses where links line up.

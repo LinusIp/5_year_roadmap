@@ -1,0 +1,128 @@
+overview: >-
+  A Redis-compatible server in Rust that redis-cli and redis-benchmark can talk to. A Tokio listener gives each client
+  its own lightweight task, which reads bytes into a buffer, cuts out complete RESP frames (Redis's text protocol of
+  length-prefixed strings and arrays), runs the command against a sharded in-memory keyspace and writes the reply.
+  Keys with a TTL expire lazily on access and through a background sampler, and every write goes to an append-only
+  file that is fsynced once a second and replayed at start-up.
+learn:
+  - name: Framing a TCP byte stream
+  - name: Async tasks with Tokio
+    ref: rust-book
+  - name: Shared state behind a Mutex
+    ref: rust-book
+  - name: Append-only logs and fsync
+    ref: ddia
+  - name: Benchmarking against a baseline
+stats:
+  - value: < 100 ms
+    label: for a key to vanish after its TTL
+  - value: ≤ 1 s
+    label: of acknowledged writes lost after kill -9
+  - value: 100k
+    label: requests per redis-benchmark test, no errors
+components:
+  - id: client
+    name: redis-cli
+    role: Real Redis clients and redis-benchmark from Redis 7.
+    tech: redis-cli · redis-benchmark
+    talksTo: [listener]
+    kind: external
+  - id: listener
+    name: Listener
+    role: Accepts TCP connections and spawns one task per client.
+    tech: Tokio TcpListener
+    talksTo: [conn]
+    kind: core
+  - id: conn
+    name: Connection task
+    role: Reads into a buffer, hands frames to the parser and writes replies back in order.
+    tech: Tokio · bytes
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: RESP parser
+    role: Returns a complete frame, or says more bytes are needed.
+    tech: Hand-written RESP2
+    talksTo: [dispatch]
+    kind: core
+  - id: dispatch
+    name: Dispatcher
+    role: Matches the command name, checks arguments and calls the keyspace.
+    tech: Rust match
+    talksTo: [keyspace, aof]
+    kind: core
+  - id: keyspace
+    name: Keyspace
+    role: Strings, lists, hashes and sets in a map split into shards, each behind its own lock.
+    tech: HashMap · std Mutex
+    talksTo: []
+    kind: core
+  - id: aof
+    name: AOF writer
+    role: Appends every mutating command to a file and fsyncs once a second.
+    tech: Tokio task · channel
+    talksTo: []
+    kind: core
+  - id: expiry
+    name: Expiry sampler
+    role: Several times a second, deletes expired keys from a random sample of keys with a TTL.
+    tech: Tokio interval
+    talksTo: [keyspace]
+    kind: offline
+flow:
+  - component: listener
+    text: accepts a connection from redis-cli and spawns its task.
+  - component: conn
+    text: >-
+      reads whatever bytes arrived into a `BytesMut` buffer; one read may hold half a command or ten pipelined ones.
+  - component: parser
+    text: >-
+      cuts out `SET k v EX 10` as a RESP array if it is complete, or returns `None` so the task reads more; leftover
+      bytes stay for the next frame.
+  - component: dispatch
+    text: >-
+      checks the `EX`, `PX` and `NX` options and calls the keyspace; a `GET` would also delete the key if it has
+      expired (**lazy expiry**).
+  - component: keyspace
+    text: >-
+      locks the shard for this key, stores the value with `expires_at = now + 10 s` and unlocks before any
+      `.await`.
+  - component: aof
+    text: >-
+      receives the command over a channel and appends it; the next once-a-second fsync makes it durable, and
+      start-up replays the file.
+  - component: conn
+    text: writes `+OK` back, keeping replies in the same order as the pipelined commands.
+interface:
+  lang: rust
+  code: |
+    enum Frame {
+        Simple(String),      // +OK\r\n
+        Error(String),       // -ERR msg\r\n
+        Integer(i64),        // :42\r\n
+        Bulk(Option<Bytes>), // $3\r\nfoo\r\n, $-1
+        Array(Vec<Frame>),   // *2\r\n...
+    }
+
+    // Ok(None): incomplete, read more bytes
+    fn parse(buf: &mut BytesMut)
+        -> Result<Option<Frame>, ProtocolError>;
+decisions:
+  - choice: A sharded map with short locks
+    instead: One task that owns all data, fed by a channel
+    why: >-
+      At 50 benchmark clients, shards let commands on different keys run in parallel, and a lock held for a few
+      microseconds never crosses an `.await`. Revisit with the single owner if lock contention shows in a profile.
+  - choice: AOF with fsync every second
+    instead: fsync on every write
+    why: >-
+      The done-when allows losing up to one second of writes, and fsync per write caps throughput at the disk's sync
+      rate. Compare with Redis on the same `appendfsync everysec` setting.
+  - choice: Lazy plus sampled expiry
+    instead: Scanning every key for expired ones
+    why: >-
+      A full scan stalls the server as the keyspace grows. Checking on access and sampling a few TTL keys several times
+      a second keeps expired keys under 100 ms, as Redis does.
+watchOut: >-
+  TCP does not deliver one command per read; it splits and joins them. The parser must handle half a frame and
+  several frames in one buffer, and a test should feed it one byte at a time.

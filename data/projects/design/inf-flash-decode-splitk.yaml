@@ -1,0 +1,47 @@
+overview: >-
+  A decode attention kernel for long contexts that splits each sequence's KV into chunks processed by different
+  programs in parallel, each producing a partial output plus its log-sum-exp, then merges the partials exactly. At
+  batch 1 and 64k context it keeps the GPU busy where one program per head would leave most of it idle.
+learn:
+  - name: Flash decoding
+    ref: triton-tutorials
+  - name: Log-sum-exp merge
+  - name: GPU occupancy
+    ref: cuda-guide
+components:
+  - id: split
+    name: Split kernel
+    role: Computes attention over one KV chunk and writes the partial output, max and sum.
+    tech: Triton
+    talksTo: [merge]
+    kind: core
+  - id: merge
+    name: Merge kernel
+    role: Combines the chunk partials with log-sum-exp rescaling.
+    tech: Triton
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Sweep
+    role: Compares output and latency with the unsplit kernel from 1k to 64k context.
+    tech: PyTorch · triton.testing
+    talksTo: []
+    kind: offline
+flow:
+  - component: split
+    text: launches `heads x num_splits` programs; each covers `ctx / num_splits` tokens and stores `o_i`, `m_i` and `l_i`.
+  - component: merge
+    text: computes `m = max m_i`, then `o = Σ exp(m_i - m)·l_i·o_i / Σ exp(m_i - m)·l_i`.
+  - component: bench
+    text: checks the merged output matches the unsplit kernel, and plots latency against context length for both.
+  - component: bench
+    text: picks `num_splits` so heads times splits fills all **SMs** (the GPU's compute units), and shows the gain at 64k.
+decisions:
+  - choice: Two kernels, split then merge
+    instead: One kernel merging with atomics
+    why: >-
+      A separate merge is simple and exact; the extra launch costs microseconds against milliseconds of KV reading at
+      64k. Fold the merge in only if it shows up in a profile.
+watchOut: >-
+  Merging partials without rescaling to the global max, or storing them in fp16, introduces error that grows with the
+  number of splits. Keep `m_i`, `l_i` and partial outputs in fp32.

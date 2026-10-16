@@ -1,0 +1,111 @@
+overview: >-
+  A canary layer inside Quillpay's gateway: a weighted router sends a small, sticky share of users to the new
+  version, while rolling metrics windows record error rate and latency for canary and stable side by side. A
+  rollout controller compares them with a statistical test every 10 s, raises the weight step by step and rolls back
+  on a regression. A circuit breaker per upstream stops calls to a failing instance within 2 s.
+learn:
+  - name: Canary releases
+    ref: google-sre-book
+  - name: Sticky hashing
+  - name: Two-proportion tests
+  - name: Circuit breakers
+    ref: system-design-primer
+  - name: Rollout state machines
+stats:
+  - value: < 60 s
+    label: to catch a 5 % error regression
+  - value: < 2 %
+    label: false rollbacks
+  - value: < 2 s
+    label: breaker opens
+components:
+  - id: client
+    name: API traffic
+    role: Payment requests at 500 req/s, each with a user id.
+    tech: HTTP
+    talksTo: [router]
+    kind: external
+  - id: router
+    name: Weighted router
+    role: Hashes the user id into 0 to 99 and sends users below the canary weight to the canary.
+    tech: Go
+    talksTo: [breaker]
+    kind: core
+  - id: breaker
+    name: Circuit breaker
+    role: Wraps each upstream; opens after repeated failures and lets a few probe calls through when half-open.
+    tech: Go
+    talksTo: [upstreams, metrics]
+    kind: core
+  - id: upstreams
+    name: Stable and canary
+    role: Two simulated versions of the payment service with injected latency and errors.
+    tech: Go · Docker
+    talksTo: []
+    kind: external
+  - id: metrics
+    name: Metrics windows
+    role: Keeps 10 s ring-buffer windows of requests, errors and latency histograms per version.
+    tech: Go · Prometheus client
+    talksTo: [analyser]
+    kind: core
+  - id: analyser
+    name: Canary analyser
+    role: Tests whether canary error rate and p99 are worse than stable, with a minimum sample size.
+    tech: Go
+    talksTo: [controller]
+    kind: core
+  - id: controller
+    name: Rollout controller
+    role: State machine that moves the weight 1, 5, 25, 50, 100 percent or rolls back, and logs each decision.
+    tech: Go · SQLite audit log
+    talksTo: [router]
+    kind: core
+  - id: sim
+    name: Fault simulator
+    role: Runs 500 healthy and many faulty rollouts to measure detection time and false rollbacks.
+    tech: Go
+    talksTo: [router, upstreams]
+    kind: offline
+flow:
+  - component: router
+    text: computes `hash(user_id) % 100` and sends the request to the canary if it is below the current weight, so a user **always sees the same version**.
+  - component: breaker
+    text: passes the call through when closed; after 5 failures in 1 s it opens and fails fast with `503`, then sends one probe every 2 s.
+  - component: metrics
+    text: adds the result to the version's current 10 s window of counts and latency buckets.
+  - component: analyser
+    text: >-
+      once each side has at least 200 requests, runs a one-sided two-proportion z-test on error rate and compares
+      p99; it reports `fail` if `p < 0.01` for two windows in a row.
+  - component: controller
+    text: on `pass` moves to the next weight step, on `fail` sets the weight to 0 and writes the reason to the audit log. The new weight feeds back into the router, so this is a **control loop**.
+interface:
+  lang: json
+  code: |
+    // audit log row, one per decision
+    { "rollout": "pay-api-v2.14",
+      "at": "2026-03-02T10:41:20Z",
+      "from_weight": 5, "to_weight": 0,
+      "reason": "error_rate",
+      "canary_err": 0.061, "stable_err": 0.009,
+      "p_value": 0.0004, "samples": [612, 11840] }
+decisions:
+  - choice: Statistical test with a minimum sample size
+    instead: A fixed threshold such as canary errors above 2 percent
+    why: >-
+      At a 5 percent weight a canary sees only 25 req/s, so a few errors swing the rate wildly. A test plus 200
+      samples keeps false rollbacks under 2 percent; tune the p-value after the 500 healthy runs.
+  - choice: Sticky routing by user id hash
+    instead: Random choice per request
+    why: >-
+      Random routing gives one user both versions in one session and mixes the error signal. Hashing keeps cohorts
+      clean and comparisons fair.
+  - choice: Breaker per upstream instance
+    instead: One breaker for the whole service
+    why: >-
+      One bad canary instance should not block calls to healthy stable ones. Revisit if instance counts grow past a
+      few dozen.
+watchOut: >-
+  A breaker with no half-open probing never closes again after a short outage. Test the full open, half-open,
+  closed cycle, not only the trip.

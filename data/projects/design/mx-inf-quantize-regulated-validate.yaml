@@ -1,0 +1,115 @@
+overview: >-
+  A pipeline that moves Harbor Credit's 7B loan-document extraction model from fp16 to 4-bit and produces the
+  evidence compliance needs. It quantises the model with AWQ and GPTQ using a separate calibration set, runs a frozen
+  extraction eval with greedy decoding, and tests non-inferiority: the 95% confidence interval on the F1 drop must
+  stay below 1.0 point. Everything is pinned and hashed so the 25-minute suite re-runs bit for bit.
+learn:
+  - name: Post-training quantisation
+    ref: nvidia-modelopt
+  - name: AWQ and GPTQ
+  - name: Calibration sets
+  - name: Non-inferiority testing
+  - name: Bootstrap confidence intervals
+  - name: Reproducible pipelines
+stats:
+  - value: ≤ 0.5 pts
+    label: F1 drop, CI upper bound ≤ 1.0
+  - value: ≤ 40%
+    label: of fp16 memory
+  - value: ≥ 1.6×
+    label: throughput
+components:
+  - id: docs
+    name: Document generator
+    role: Makes synthetic loan documents with injected noise, split once into calibration and test sets.
+    tech: Python · templates
+    talksTo: [calib, evalh]
+    kind: offline
+  - id: calib
+    name: Calibration builder
+    role: Samples 512 documents from the calibration split only, covering every document type.
+    tech: Python · DVC
+    talksTo: [quant]
+    kind: core
+  - id: quant
+    name: Quantisation runner
+    role: Produces 4-bit AWQ and GPTQ checkpoints from the fp16 model with fixed group size and seed.
+    tech: AutoAWQ · transformers
+    talksTo: [evalh]
+    kind: core
+  - id: evalh
+    name: Eval harness
+    role: Extracts fields from the frozen test set with greedy decoding and records memory and tokens/s.
+    tech: transformers · 24 GB GPU
+    talksTo: [slices, stats]
+    kind: core
+  - id: slices
+    name: Slice analyser
+    role: Breaks F1 and the output-diff rate down by field, document type and noise level.
+    tech: pandas
+    talksTo: [bundle]
+    kind: core
+  - id: stats
+    name: Non-inferiority stats
+    role: Runs a paired bootstrap on per-document F1 differences and tests against the 1.0-point margin.
+    tech: scipy
+    talksTo: [bundle]
+    kind: core
+  - id: bundle
+    name: Report bundler
+    role: Writes a versioned, signed report with model, data and environment hashes.
+    tech: DVC · Python
+    talksTo: []
+    kind: core
+flow:
+  - component: calib
+    text: picks 512 calibration documents from a split the test set never touches, so the quantiser cannot tune to the exam.
+  - component: quant
+    text: >-
+      runs AWQ with `w_bit=4, group_size=128`, scaling the weight channels that the calibration activations show
+      matter most; the 14 GB fp16 weights shrink to about 4 GB.
+  - component: evalh
+    text: >-
+      runs the fp16 and 4-bit models on the **same** frozen documents with greedy decoding and fixed seeds, logging
+      per-document F1, peak memory and tokens/s.
+  - component: slices
+    text: shows where differences cluster, for example `interest_rate` on noisy scans, and how often outputs differ from fp16 at all.
+  - component: stats
+    text: >-
+      resamples documents 10,000 times to get a 95% interval on the F1 drop and passes only if the drop is ≤ 0.5 and
+      the upper bound is ≤ 1.0.
+  - component: bundle
+    text: hashes checkpoints, data, container and library versions into the report, so an auditor can re-run it in ≤ 25 min.
+interface:
+  lang: json
+  code: |
+    { "candidate": "awq-w4-g128",
+      "baseline": "fp16",
+      "n_docs": 2000,
+      "f1_drop": 0.31,
+      "ci95": [0.12, 0.54],
+      "margin": 1.0,
+      "non_inferior": true,
+      "memory_ratio": 0.33,
+      "throughput_x": 1.9,
+      "env_sha256": "9f2c…",
+      "data_sha256": "41ab…" }
+decisions:
+  - choice: Non-inferiority test, not just a mean
+    instead: Report the mean F1 drop
+    why: >-
+      Compliance asked for a stated tolerance, and only a confidence bound shows the drop is under it. Revisit the
+      margin with compliance if a field such as the interest rate needs its own tighter one.
+  - choice: A test set sized for the interval
+    instead: A test set of a few hundred documents
+    why: >-
+      That gives an interval too wide to clear the 1.0 bound. Size the frozen set (around 2,000)
+      from a pilot run of the variance.
+  - choice: AWQ and GPTQ both, one shipped
+    instead: Only the method with the best reputation
+    why: >-
+      Their errors land on different fields, and the slice report is the evidence for the choice. Keep the loser's
+      numbers in the bundle as the rejected option.
+watchOut: >-
+  Non-deterministic GPU kernels make two runs differ, so the bit-identical claim fails. Pin library versions, decode
+  greedily, enable deterministic algorithms and check the hash of two consecutive runs.

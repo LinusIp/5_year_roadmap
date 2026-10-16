@@ -1,0 +1,130 @@
+overview: >-
+  Extended position-based dynamics (XPBD) inside your 3D engine: cloth and tetrahedral soft bodies are particles tied
+  together by constraints, and each frame is split into substeps that predict positions, then move particles until the
+  constraints hold. Every constraint has a compliance (the inverse of its stiffness) scaled by the substep squared and
+  keeps a Lagrange multiplier, which is what makes stiffness stop depending on iteration count and time step.
+  Collisions against the rigid world and, for cloth, against nearby particles become constraints too, and velocities
+  come from the position change.
+learn:
+  - name: XPBD compliance
+    ref: ten-minute-physics
+  - name: Position-based dynamics
+    ref: ten-minute-physics
+  - name: Substepping
+  - name: Volume constraints
+  - name: Spatial hashing
+    ref: ten-minute-physics
+  - name: Graph colouring
+stats:
+  - value: < 5 %
+    label: sag change, 5–50 iterations, 1/60–1/240 s
+  - value: 1 %
+    label: max soft-body volume error at rest
+  - value: 64×64
+    label: cloth draped at 60 fps
+components:
+  - id: predict
+    name: Predictor
+    role: Moves each particle by its velocity and external forces such as gravity and wind.
+    tech: C++20
+    talksTo: [collide]
+    kind: core
+  - id: rigid
+    name: Rigid world
+    role: Your rigid engine's spheres, boxes and hulls that cloth and soft bodies collide with.
+    tech: Your 3D engine
+    talksTo: [collide]
+    kind: external
+  - id: collide
+    name: Collision builder
+    role: Makes contact constraints against rigid shapes and, for cloth, against particles found in a spatial hash.
+    tech: Spatial hash
+    talksTo: [solver]
+    kind: core
+  - id: constraints
+    name: Constraint set
+    role: Stretch, bend, edge and volume constraints, each with its compliance and multiplier.
+    tech: C++ · TetGen meshes
+    talksTo: [solver]
+    kind: core
+  - id: solver
+    name: XPBD solver
+    role: Projects every constraint in colour groups so threads never write the same particle.
+    tech: OpenMP or job system
+    talksTo: [velocity]
+    kind: core
+  - id: velocity
+    name: Velocity update
+    role: Turns the position change into velocity, then applies friction and damping.
+    tech: C++20
+    talksTo: [predict, view]
+    kind: core
+  - id: mesher
+    name: Tet mesher
+    role: Turns a surface mesh into the tetrahedra a soft body is built from.
+    tech: TetGen or fTetWild
+    talksTo: [constraints]
+    kind: offline
+  - id: view
+    name: Renderer and UI
+    role: Draws the scene and changes compliance, iterations and substeps live.
+    tech: Your renderer · ImGui
+    talksTo: []
+    kind: external
+flow:
+  - component: predict
+    text: >-
+      starts a substep of `Δt = frame / n`, saves `x_prev` and sets `x = x + Δt·v + Δt²·f/m`; pinned corners have
+      zero inverse mass.
+  - component: collide
+    text: >-
+      adds contacts with the rigid world's shapes and nearby cloth particles, with a thickness larger than a
+      particle's travel in one substep.
+  - component: constraints
+    text: hands every stretch, bend and volume constraint to the solver and **resets each λ to zero**.
+  - component: solver
+    text: >-
+      projects each constraint with `α̃ = α / Δt²` and adds the change to its λ, one colour group at a time in
+      parallel.
+  - component: velocity
+    text: >-
+      sets `v = (x − x_prev) / Δt`, applies friction and damping, and loops back to the predictor for the next
+      substep.
+  - component: view
+    text: draws the frame after the last substep and logs sag, stretch and volume error.
+interface:
+  lang: cpp
+  code: |
+    // one XPBD projection, run every substep
+    void project(Constraint& c, Particles& p,
+                 float dt) {
+      Vec3 g[4];
+      float C = c.eval(p, g);   // value, gradients
+      float a = c.compliance / (dt * dt);
+      float w = 0;
+      for (int k = 0; k < c.n; ++k)
+        w += p.w[c.ids[k]] * dot(g[k], g[k]);
+      float dl = (-C - a * c.lambda) / (w + a);
+      c.lambda += dl;
+      for (int k = 0; k < c.n; ++k)
+        p.x[c.ids[k]] += p.w[c.ids[k]] * dl * g[k];
+    }
+decisions:
+  - choice: XPBD with compliance
+    instead: Plain PBD with a stiffness factor
+    why: >-
+      The target is under 5 % sag change from 5 to 50 iterations and from 1/60 to 1/240 s; PBD's stiffness shifts
+      with both, so the same scene run both ways is the project's main chart.
+  - choice: Many substeps, few iterations
+    instead: One step per frame, many iterations
+    why: >-
+      Short substeps keep tetrahedra from inverting and cloth from tunnelling, and cost less than extra iterations
+      for the same stiffness.
+  - choice: Graph colouring for the parallel solver
+    instead: Jacobi iterations
+    why: >-
+      Colouring keeps Gauss-Seidel's fast convergence without races on shared particles; Jacobi is simpler but needs
+      more iterations. Revisit for a GPU solver, where Jacobi suits better.
+watchOut: >-
+  Forgetting to reset the Lagrange multipliers each substep quietly turns XPBD back into PBD, and the stiffness test
+  then fails for no visible reason.

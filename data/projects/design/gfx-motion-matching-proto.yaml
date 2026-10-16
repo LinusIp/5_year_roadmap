@@ -1,0 +1,69 @@
+overview: >-
+  Instead of a hand-built blend tree, the character picks its animation by search: each frame of the mocap database is
+  described by 27 numbers (foot positions and velocities, hip velocity and the path 20, 40 and 60 frames ahead), and
+  every 10 frames the controller finds the frame closest to the current pose plus the joystick's desired path. The jump
+  is smoothed by inertialisation, which decays the pose difference over a short time instead of cross-fading two clips.
+learn:
+  - name: Motion matching
+  - name: Feature normalisation
+  - name: KD-trees
+  - name: Inertialisation
+components:
+  - id: db
+    name: Feature database
+    role: Turns BVH mocap into normalised, weighted feature vectors and a KD-tree.
+    tech: Python / C++
+    talksTo: [search]
+    kind: offline
+  - id: query
+    name: Query builder
+    role: Builds the same features from the current pose and the joystick path.
+    tech: Python / C++
+    talksTo: [search]
+    kind: core
+  - id: search
+    name: Nearest-neighbour search
+    role: Finds the best matching frame and decides whether to switch.
+    tech: KD-tree
+    talksTo: [player]
+    kind: core
+  - id: player
+    name: Pose player
+    role: Plays from the chosen frame and smooths the jump.
+    tech: Python / C++
+    talksTo: []
+    kind: core
+flow:
+  - component: db
+    text: is built once from the BVH files; each feature group is divided by its standard deviation, then multiplied by its weight.
+  - component: query
+    text: every 10 frames builds a vector from the current feet and hips plus the joystick's predicted path, using the **same** normalisation.
+  - component: search
+    text: finds the nearest frame and switches only if it beats continuing the current clip by a margin; query time in µs is logged.
+  - component: player
+    text: plays on from the match and removes the pose jump with a critically damped decay over about 0.2 s per joint.
+interface:
+  lang: python
+  code: |
+    FEATURES = {              # group: size, weight
+        "foot_pos": (6, 0.75),
+        "foot_vel": (6, 1.0),
+        "hip_vel":  (3, 1.0),
+        "traj_pos": (6, 1.0),  # +20, +40, +60 frames
+        "traj_dir": (6, 1.5),
+    }
+    def build_db(bvh_files) -> tuple[np.ndarray, KDTree]:
+        """(n_frames, 27) normalised, weighted."""
+
+    def query(tree, feat: np.ndarray, current: int,
+              margin: float = 0.05) -> int:
+        """Best frame, or current if not better."""
+decisions:
+  - choice: Switch only when clearly better
+    instead: Jump to the nearest frame at every query
+    why: >-
+      The next frames of the current clip are usually almost as good, and jumping to a slightly better frame every time
+      makes the character jitter. A margin plus a 10-frame interval keeps motion continuous.
+watchOut: >-
+  Positions in centimetres and velocities in cm/s differ hugely in size, so one group dominates the distance and the
+  others are ignored. Normalise each group before weighting, and recompute after adding data.

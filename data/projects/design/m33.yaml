@@ -1,0 +1,129 @@
+overview: >-
+  Three CUDA matrix-multiply kernels, each a step down the memory hierarchy: a naive kernel reading global memory, a
+  tiled kernel that stages blocks in shared memory and keeps a sub-tile of results in registers, and a tensor-core
+  kernel on FP16 inputs with FP32 sums. A host harness checks each one against cuBLAS and times it with CUDA events. A
+  roofline plot (a chart of the compute and memory-bandwidth ceilings) places every kernel, and Nsight Compute explains
+  what holds each one back.
+learn:
+  - name: Roofline model
+    ref: horace-he-brrr
+  - name: Memory coalescing
+    ref: pmpp-book
+  - name: Shared-memory tiling
+    ref: siboehm-cuda-matmul
+  - name: Tensor cores and WMMA
+    ref: cuda-guide
+  - name: Arithmetic intensity
+  - name: Kernel profiling
+    ref: nsight-compute-docs
+stats:
+  - value: ≥ 50 %
+    label: of cuBLAS SGEMM at N = 4,096, tiled
+  - value: < 1e-4
+    label: FP32 relative error against cuBLAS
+  - value: '5'
+    label: shapes benchmarked
+components:
+  - id: host
+    name: Host harness
+    role: Fills A and B with seeded random data and launches each kernel at every shape.
+    tech: C++17 · CUDA 12 · CMake
+    talksTo: [cublas, naive, tiled, wmma]
+    kind: core
+  - id: cublas
+    name: cuBLAS
+    role: Computes the reference C and the speed to compare against.
+    tech: cuBLAS
+    talksTo: [bench]
+    kind: external
+  - id: naive
+    name: Naive kernel
+    role: One thread per output element, reading straight from global memory.
+    tech: CUDA FP32
+    talksTo: [bench]
+    kind: core
+  - id: tiled
+    name: Tiled kernel
+    role: Stages tiles of A and B in shared memory; each thread computes a 4×4 or 8×8 sub-tile.
+    tech: CUDA FP32
+    talksTo: [bench]
+    kind: core
+  - id: wmma
+    name: Tensor-core kernel
+    role: Multiplies 16×16 FP16 fragments on tensor cores with FP32 accumulation.
+    tech: CUDA WMMA
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Check and time
+    role: Compares each result to cuBLAS and times 20 runs after warm-up.
+    tech: CUDA events
+    talksTo: [roofline]
+    kind: core
+  - id: ncu
+    name: Nsight Compute
+    role: Reports achieved FLOP/s, bytes moved, stall reasons and occupancy per kernel.
+    tech: ncu
+    talksTo: [roofline]
+    kind: offline
+  - id: roofline
+    name: Roofline script
+    role: Plots the GPU's ceilings and every kernel at N = 4,096.
+    tech: Python · Matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: host
+    text: >-
+      fills A and B for N = 512, 1,024, 2,048 and 4,096 plus one non-square shape, and runs `cublasSgemm` for the
+      reference.
+  - component: naive
+    text: >-
+      gives each thread one element of C; neighbouring threads read neighbouring columns of B, so loads are
+      **coalesced**.
+  - component: tiled
+    text: >-
+      loads a `BM×BK` tile of A and a `BK×BN` tile of B into shared memory, then reuses each value many times from
+      registers, with bounds checks for odd sizes.
+  - component: wmma
+    text: lets each warp load FP16 fragments and run `wmma::mma_sync` into FP32 accumulators.
+  - component: bench
+    text: >-
+      checks relative error under `1e-4` for FP32 and `1e-2` for FP16 inputs, then reports GFLOP/s from CUDA events
+      over 20 runs.
+  - component: roofline
+    text: >-
+      draws peak FLOP/s and the **measured** DRAM bandwidth, and places each kernel by its FLOP per byte from
+      **Nsight Compute**.
+interface:
+  lang: cuda
+  code: |
+    // C = A·B; A is M×K, B is K×N, row-major
+    template <int BM, int BN, int BK, int TM, int TN>
+    __global__ void sgemm_tiled(int M, int N, int K,
+        const float* __restrict__ A,
+        const float* __restrict__ B,
+        float* __restrict__ C);
+    // grid (N/BN, M/BM), block (BM/TM)*(BN/TN)
+
+    __global__ void hgemm_wmma(int M, int N, int K,
+        const half* A, const half* B, float* C);
+decisions:
+  - choice: Register blocking in the tiled kernel
+    instead: One output per thread from shared memory
+    why: >-
+      One output per thread is limited by shared-memory bandwidth; an 8×8 sub-tile reuses each loaded value eight
+      times, which is what it takes to reach half of cuBLAS at N = 4,096.
+  - choice: WMMA for tensor cores
+    instead: Raw mma.sync PTX or CUTLASS
+    why: >-
+      WMMA is the smallest API that reaches tensor cores and fits the 8 h milestone. Revisit with CUTLASS in the
+      stretch to see how far cuBLAS-level speed needs to go.
+  - choice: Measured bandwidth on the roofline
+    instead: The spec-sheet number alone
+    why: >-
+      Real cards reach less than the datasheet bandwidth, and placing kernels against the wrong ceiling misreads which
+      ones are memory-bound.
+watchOut: >-
+  A slow naive kernel is easy to blame on compute when uncoalesced loads are the cause. Read the memory throughput and
+  stall reasons in Nsight Compute before writing each diagnosis.

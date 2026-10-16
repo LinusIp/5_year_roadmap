@@ -1,0 +1,134 @@
+overview: >-
+  The inference parts of years 2 and 3 joined into one stack on Kubernetes. A cache-aware router sends each request
+  to a replica of your server, which batches continuously over a paged KV cache (attention keys and values stored in
+  fixed-size blocks), speculates with a small draft model and runs quantized weights, each behind a flag. An
+  autoscaler adds replicas as queues grow, and a benchmark controller replays one trace against your stack and vLLM
+  on the same GPUs.
+learn:
+  - name: Paged KV cache
+    ref: vllm-docs
+  - name: Continuous batching
+    ref: batching-effects-gpt
+  - name: Speculative decoding
+    ref: nvidia-inference-optimization
+  - name: Weight quantization
+    ref: mit-6-5940
+  - name: Autoscaling on Kubernetes
+    ref: kubernetes-tutorials
+  - name: Benchmark methodology
+    ref: databricks-inference-best-practices
+stats:
+  - value: 50 of 50
+    label: greedy prompts match, speculation on or off
+  - value: ≤ 2 pts
+    label: eval loss with quantized weights
+  - value: 1 → 3
+    label: replicas scaled under load
+components:
+  - id: bench
+    name: Benchmark controller
+    role: Replays the same trace against both stacks and collects TTFT, ITL, throughput and p99.
+    tech: Python · ShareGPT traces
+    talksTo: [router, vllm]
+    kind: offline
+  - id: router
+    name: Router
+    role: Picks a replica for each request by cached prefix and current load.
+    tech: Go or Rust
+    talksTo: [api]
+    kind: core
+  - id: api
+    name: Server API
+    role: Accepts completion requests, tokenises them and streams tokens back.
+    tech: Python · FastAPI · SSE
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Scheduler
+    role: Admits requests into the running batch while free KV blocks remain, and exports queue depth.
+    tech: Python · paged KV blocks
+    talksTo: [runner, autoscaler]
+    kind: core
+  - id: runner
+    name: Model runner
+    role: Drafts and verifies tokens with int4 or int8 weights over paged attention.
+    tech: PyTorch · Triton or CUDA
+    talksTo: []
+    kind: core
+  - id: autoscaler
+    name: Autoscaler
+    role: Scales server replicas from queue depth.
+    tech: Kubernetes · Prometheus
+    talksTo: []
+    kind: core
+  - id: vllm
+    name: vLLM baseline
+    role: The same model on the same GPU type, at a pinned version and tuned per its docs.
+    tech: vLLM · Helm
+    talksTo: []
+    kind: external
+flow:
+  - component: bench
+    text: >-
+      sends one trace request to your router and, at the same time offset, to the vLLM deployment, at concurrency 1,
+      8, 32 or 128.
+  - component: router
+    text: >-
+      sends it to the replica that already caches the **longest prefix** of the prompt, unless that replica's queue
+      is much longer than the others'.
+  - component: api
+    text: receives `POST /v1/completions` with `stream` on, tokenises the prompt and queues it.
+  - component: scheduler
+    text: >-
+      admits it into the running batch as soon as enough free KV blocks exist, so it joins mid-flight instead of
+      waiting for a batch to end.
+  - component: runner
+    text: >-
+      lets the draft model propose `k` tokens, checks them all in one forward pass of the quantized target model and
+      keeps the accepted prefix; the API streams them out.
+  - component: autoscaler
+    text: >-
+      reads queue depth from Prometheus and grows the deployment from one to three replicas when it stays high.
+  - component: bench
+    text: >-
+      records TTFT and ITL at p50 and p99, tokens per second and p99 latency for both stacks, and turns throughput
+      into **cost per million tokens**.
+interface:
+  lang: shell
+  code: |
+    # one replica, every feature switchable
+    serve --model llama-3.1-8b \
+      --paged-kv --block-size 16 \
+      --continuous-batching \
+      --spec-draft llama-3.2-1b --spec-k 4 \
+      --quant int4
+
+    # same trace, both stacks, same GPU type
+    bench --trace sharegpt.jsonl \
+      --targets router,vllm \
+      --concurrency 1,8,32,128 \
+      --out results/
+decisions:
+  - choice: Every feature behind a flag, tested as a matrix
+    instead: All features always on
+    why: >-
+      The hard bugs are in the interactions, such as speculation inside a mixed batch. The 16 flag combinations run
+      in CI on a small model, and switching one on at a time gives the per-feature ablation.
+  - choice: vLLM pinned and tuned from its docs
+    instead: vLLM with whatever defaults it starts with
+    why: >-
+      A tuned stack against an untuned baseline makes the comparison worthless. Read its batching and memory
+      settings, write them down, and report where vLLM wins.
+  - choice: A separate router in front of the servers
+    instead: Each server balancing its own load
+    why: >-
+      Prefix-aware placement needs a view across all replicas, which no single server has. It is the router from
+      project 43, so it costs little to keep.
+  - choice: Cost from measured throughput, idle replicas included
+    instead: Cost from peak throughput alone
+    why: >-
+      The autoscaler keeps at least one replica up, and it costs the GPU's hourly price whether busy or not. Leaving
+      idle time out makes the cost per million tokens look better than it is.
+watchOut: >-
+  Speculative decoding that is correct alone can break once continuous batching mixes sequences of different lengths.
+  Run the 50-prompt greedy test inside a mixed batch, not one prompt at a time.

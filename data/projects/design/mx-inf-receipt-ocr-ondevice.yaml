@@ -1,0 +1,97 @@
+overview: >-
+  A receipt reader that runs entirely on the device, prototyped on a laptop CPU held to phone-class limits. OpenCV
+  straightens and brightens the photo, a small quantised OCR model finds and reads text lines, and rules pull out
+  merchant, date and total with a confidence for each. Fields under the confidence bar are flagged for the user to
+  check, so a wrong total is caught instead of silently saved.
+learn:
+  - name: Image preprocessing
+  - name: Text detection and recognition
+  - name: Model size versus accuracy
+    ref: mit-6-5940
+  - name: Confidence gating
+  - name: ONNX Runtime on CPU
+    ref: onnx-runtime-docs
+stats:
+  - value: ≥ 92%
+    label: total-amount exact match
+  - value: ≤ 1.5 s
+    label: per receipt on 4 cores
+  - value: ≤ 120 MB
+    label: model bundle
+components:
+  - id: camera
+    name: Phone camera
+    role: Supplies a receipt photo, often skewed, crumpled or taken in poor light.
+    tech: Image input
+    talksTo: [prep]
+    kind: external
+  - id: prep
+    name: Image preprocessor
+    role: Finds the receipt edges, deskews and rotates it, and evens out lighting.
+    tech: OpenCV
+    talksTo: [ocr]
+    kind: core
+  - id: ocr
+    name: OCR model runner
+    role: Detects text lines and reads each one with a character confidence.
+    tech: Small OCR model · ONNX Runtime int8
+    talksTo: [extractor]
+    kind: core
+  - id: extractor
+    name: Field extractor
+    role: Applies rules for merchant, date formats and the total, including decimal-separator handling.
+    tech: Python · regex
+    talksTo: [gate]
+    kind: core
+  - id: gate
+    name: Confidence gate
+    role: Returns JSON and flags any field under 0.8 confidence for review.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: evalh
+    name: Evaluation harness
+    role: Scores fields on the SROIE test split and its degraded copies, kept apart from tuning data.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: prep
+    text: finds the paper's four corners, warps it flat, rotates it upright and boosts contrast on a dim photo.
+  - component: ocr
+    text: >-
+      detects about 40 text lines and reads each in int8; the detector and recogniser together are a few tens of
+      megabytes, inside the 120 MB bundle.
+  - component: extractor
+    text: >-
+      takes the largest amount on a line with `TOTAL` near the bottom, and reads `12,50` as 12.50 when the receipt
+      uses a comma as the decimal sign.
+  - component: gate
+    text: >-
+      returns merchant, date and total with confidences; a total read at 0.64 is sent with `needs_review: true`
+      rather than saved silently.
+interface:
+  lang: json
+  code: |
+    { "merchant": { "value": "CAFE LUNA", "conf": 0.91 },
+      "date":     { "value": "2026-03-14", "conf": 0.97 },
+      "total":    { "value": "18.40",
+                    "currency": "EUR",
+                    "conf": 0.64,
+                    "needs_review": true },
+      "ms": 1120,
+      "model": "ocr-int8-v2" }
+decisions:
+  - choice: Small OCR model plus rules
+    instead: One end-to-end vision-language model
+    why: >-
+      A vision-language model that reads receipts directly is far larger than 120 MB and slower than 1.5 s on CPU.
+      OCR plus rules fits both, and rules are easy to debug.
+  - choice: Int8 only where accuracy holds
+    instead: Quantise every layer
+    why: >-
+      Compare fp32 and int8 on the degraded subset, where small accuracy losses show first, and keep sensitive parts
+      at higher precision if totals drop.
+watchOut: >-
+  Tuning rules or thresholds on the test receipts makes the 92% meaningless. Keep the SROIE test split untouched until
+  the final run and tune on a separate validation split.

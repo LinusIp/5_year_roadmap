@@ -1,0 +1,118 @@
+overview: >-
+  A Python tool that solves simply supported and cantilever beams under any mix of point forces, point moments and
+  distributed loads. It finds the reactions from equilibrium, writes the loads as singularity (Macaulay) functions,
+  terms that switch on at a point along the beam, and integrates them in SymPy to get shear, moment, slope and
+  deflection, then evaluates and plots them with NumPy. Ten textbook problems solved by hand and by the tool must
+  agree within 0.5 %, and the results become the baseline your FEM solver must reproduce.
+learn:
+  - name: Free-body diagrams
+    ref: mit-2-001
+  - name: Euler-Bernoulli beams
+    ref: mit-2-001
+  - name: Singularity functions
+    ref: sympy-tutorial
+  - name: Flexure formula
+    ref: mit-2-001
+  - name: Symbolic to numeric
+    ref: scientific-python-lectures
+stats:
+  - value: ≤ 0.5 %
+    label: tool against hand, 10 problems
+  - value: "1e-9"
+    label: symbolic against numeric
+  - value: "10"
+    label: textbook problems checked
+components:
+  - id: spec
+    name: Beam spec
+    role: Describes length, supports, section, material and loads in SI units.
+    tech: Python dataclasses
+    talksTo: [statics]
+    kind: core
+  - id: statics
+    name: Reactions
+    role: Solves force and moment equilibrium for the support reactions.
+    tech: SymPy
+    talksTo: [loads]
+    kind: core
+  - id: loads
+    name: Load model
+    role: Writes every load and reaction as a singularity function of x.
+    tech: SymPy
+    talksTo: [integrator]
+    kind: core
+  - id: integrator
+    name: Integrator
+    role: Integrates to shear, moment, slope and deflection and fixes the constants from the supports.
+    tech: SymPy
+    talksTo: [section]
+    kind: core
+  - id: section
+    name: Section and stress
+    role: Gives I and Q for rectangular, circular and I-sections, and bending and shear stress.
+    tech: NumPy
+    talksTo: [plots]
+    kind: core
+  - id: plots
+    name: Diagrams
+    role: Plots the four diagrams and reports the maxima.
+    tech: Matplotlib
+    talksTo: [check]
+    kind: core
+  - id: check
+    name: Check table
+    role: Compares every result with the hand solutions and runs the equilibrium checks.
+    tech: pytest
+    talksTo: []
+    kind: offline
+flow:
+  - component: spec
+    text: >-
+      describes a 4 m simply supported beam with a point load and a uniform load, in N and m throughout.
+  - component: statics
+    text: >-
+      solves `ΣF = 0` and `ΣM = 0` for the two reactions.
+  - component: loads
+    text: >-
+      writes each load as a term like `P·<x − a>^-1`, which is zero before `a` and acts from there on.
+  - component: integrator
+    text: >-
+      integrates four times to `V`, `M`, `θ` and `v`; the supports fix the constants (for a cantilever, slope and
+      deflection are **zero at the wall**).
+  - component: section
+    text: >-
+      computes `σ = My/I` and `τ = VQ/(Ib)` about the right bending axis.
+  - component: plots
+    text: >-
+      draws the four diagrams; shear jumps must equal point loads and the area under shear the change in moment.
+interface:
+  lang: python
+  code: |
+    b = Beam(L=4.0, E=200e9,
+             section=Rect(b=0.05, h=0.10),
+             supports=[Pin(0.0), Roller(4.0)])
+    b.add(PointLoad(x=1.5, P=-10e3))     # N
+    b.add(UDL(x0=2.0, x1=4.0, w=-2e3))   # N/m
+    r = b.solve()
+    r.reactions    # {"A": ..., "B": ...} in N
+    r.max_moment, r.max_stress, r.max_deflection
+    r.plot()       # V, M, slope, deflection
+decisions:
+  - choice: Singularity functions
+    instead: Integrating each segment separately
+    why: >-
+      One expression covers the whole beam, so a beam with four load types needs four constants, not four per
+      segment. It is also the form the FEM project's hand checks use.
+  - choice: SymPy first, NumPy for numbers
+    instead: Numerical integration only
+    why: >-
+      Exact expressions are easy to compare with the hand solution term by term, and evaluating them in NumPy gives a
+      second path that must agree to 1e-9.
+  - choice: SI units throughout
+    instead: N·mm as many textbooks use
+    why: >-
+      Mixing N·mm and N·m is a classic factor-of-1,000 error. Convert textbook data at the input and keep N, m and Pa
+      inside.
+watchOut: >-
+  The textbook's sign convention for shear and moment may differ from your code's, giving diagrams that look right
+  but are flipped. Fix one convention, state it in the README, and convert hand results to it before comparing.

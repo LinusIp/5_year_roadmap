@@ -1,0 +1,69 @@
+overview: >-
+  A two-wheel robot tracks its position from wheel encoder ticks (odometry), and a UMBmark-style test, driving the 4 m
+  square clockwise and anticlockwise several times and measuring where it stops, separates the two main systematic
+  errors: unequal wheel diameters and a wrong wheelbase. Correcting both should cut the closing error by at least 50%.
+learn:
+  - name: Differential-drive kinematics
+    ref: modern-robotics
+  - name: Odometry error
+  - name: UMBmark calibration
+  - name: Quadrature encoders
+components:
+  - id: encoders
+    name: Wheel encoders
+    role: Count ticks on each wheel as it turns.
+    tech: Quadrature encoders
+    talksTo: [odom]
+    kind: external
+  - id: odom
+    name: Odometry
+    role: Turns tick changes into a running pose estimate.
+    tech: C / Python
+    talksTo: [driver]
+    kind: core
+  - id: driver
+    name: Path driver
+    role: Drives the square's legs and turns using odometry alone.
+    tech: C · motor driver
+    talksTo: [calib]
+    kind: core
+  - id: calib
+    name: Calibration
+    role: Computes the wheel-diameter ratio and wheelbase correction from end points.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: odom
+    text: every 10 ms computes `ds = (dL + dR)/2` and `dθ = (dR - dL)/b`, then moves the pose along the mid-step heading `θ + dθ/2`.
+  - component: driver
+    text: drives the square 5 times clockwise and 5 times anticlockwise, slowly and with gentle acceleration so the wheels do not slip.
+  - component: calib
+    text: measures each stop point from the start with a tape, and from the **clockwise and anticlockwise clusters** computes the diameter ratio `Ed` and wheelbase scale `Eb`.
+  - component: odom
+    text: reruns the test with corrected `d_left`, `d_right` and `b`; done is the closing error cut by at least 50%.
+interface:
+  lang: python
+  code: |
+    def update(pose, ticks_l, ticks_r, p):
+        """p: tpr (ticks/rev), d_left, d_right, b."""
+        dl = ticks_l * math.pi * p.d_left / p.tpr
+        dr = ticks_r * math.pi * p.d_right / p.tpr
+        ds, dth = (dl + dr) / 2, (dr - dl) / p.b
+        x, y, th = pose
+        x += ds * math.cos(th + dth / 2)
+        y += ds * math.sin(th + dth / 2)
+        return (x, y, th + dth)
+
+    # UMBmark: end-point centroids of CW and CCW runs
+    # give alpha -> wheelbase error E_b,
+    # and  beta  -> diameter ratio E_d
+decisions:
+  - choice: Test both directions
+    instead: Calibrate from runs in one direction only
+    why: >-
+      In one direction, a wrong wheelbase and unequal wheels can cancel and the square looks fine. Clockwise and
+      anticlockwise runs pull the two errors apart so each gets its own correction.
+watchOut: >-
+  Wheel slip at starts and turns adds random error that no calibration can remove and smears the clusters. Drive
+  slowly, accelerate gently, and test on a floor with grip.

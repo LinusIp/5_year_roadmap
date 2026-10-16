@@ -156,15 +156,35 @@ Calendar, tap the block and choose **Edit logged time**: the one place minutes c
 
 ## Tech docs
 
-Every project that is not a weekly build has a tech doc in `data/projects/docs/<id>.md`: goal,
-architecture, stack, milestones, how to measure and report it. Its milestones are checkboxes that count toward the
-project's progress, and "Copy as README skeleton" starts the project's repository README from it. A catalogue build
-shows its brief, approach (steps you can tick), done when, measure and pitfalls the same way.
+A project's tech doc shows how the thing works, not only what it is. Every monthly case, every weekly build (a
+lighter doc) and every plan project with a doc has a **design** in `data/projects/design/<id>.yaml`:
+
+- what you'll build, in two to four plain sentences
+- what you'll learn, linked to the Library
+- its components (what each owns, its tech, what it talks to; core, offline or external)
+- one request, frame or job followed through them, step by step
+- the main interface
+- the key decisions, each against its realistic alternative
+- the one pitfall to watch out for
+
+The doc sheet has a sticky jump bar (**Overview · Design · Build · Checks**) that follows the reading. Design opens
+with a **diagram generated from the components**: the core path numbered top to bottom in flow order, offline parts
+and external services beside it, arrows for what talks to what, and a legend. Tap it for full screen with
+pinch-zoom; screen readers get the flow as its text. Build has the milestones as checkboxes (the next one says Now)
+and the watch-out; Checks has Done when, Ship, Measure, Stretch and "README skeleton", which starts the repository's
+README from the doc. Plan projects keep their Markdown (`data/projects/docs/<id>.md`) for goal, why, scope, stack,
+milestones and the rest; their design replaces the Architecture section.
+
+<p>
+  <img src="screenshots/doc-case-overview-light.png" alt="A case's tech doc: the meta line, the jump bar on Overview, the situation with its numbers in bold, and what you'll build" width="32%">
+  <img src="screenshots/doc-case-design-light.png" alt="The same doc on Design: the generated diagram with numbered core boxes, offline and external parts, the legend, and the first steps" width="32%">
+  <img src="screenshots/doc-case-design-dark.png" alt="The Design part in the dark theme" width="32%">
+</p>
 
 The doc is one tap away: any project card or row opens it in a sheet, in the Deck (before Take it; the doc has Take
 it too), the Library, Plan › Projects, the monthly queue and the weekly slot. On Today, the project's title on the
 Now card, a quiet **Tech doc** next to Start, and a project's Later today row (with "Work on it now")
-open it over Today. The timer keeps running, with its time in the sheet's header; ticks made in the doc show on the
+open it over Today. The timer keeps running, in a pill at the top of the doc; ticks made in the doc show on the
 card at once; closing it leaves Today as it was; and each doc reopens where you left it. Enter or Space opens a doc
 from a focused row, Escape closes it and puts focus back. Challenges open their own screen instead.
 
@@ -193,8 +213,8 @@ Besides the curriculum's own projects, Atlas carries a catalogue of 920 in three
   turns it off. Once all 254 are solved they come round again, to solve in another language. Its streak is its own.
 - **A challenge** shows the statement, input and output, constraints and examples; hints one at a time; Show approach
   for the approach, complexity and edge cases; notes, a link to your solution, and Mark solved.
-- **A build or a case** opens in a sheet. A case reads as a short tech doc whose milestones are checkboxes. Copy as
-  README skeleton starts its repository; it is done only with the repository link filled in.
+- **A build or a case** opens its tech doc (above). README skeleton starts its repository; it is done only with the
+  repository link filled in.
 - **Finding one**: the Deck (Plan › Pick a project) by Daily, Weekly or Monthly, topic or domain, and This phase,
   Earlier or Everything; Library › Projects with search and filters for kind, difficulty, topic or domain, track,
   phase, level and hours; Activity › Projects for what is done per tier and domain and each topic's solve rate.
@@ -318,6 +338,7 @@ statuses and notes reference items by id, so editing the curriculum never loses 
 | `data/roadmaps.yaml` | The five roadmap.sh roadmaps, as sections of nodes, each section with the phase that teaches it |
 | `data/settings.yaml` | The defaults a fresh install starts from |
 | `data/projects/docs/*.md` | One tech doc per project (the file name is the project's id) |
+| `data/projects/design/*.yaml` | One design per case, build and documented plan project: overview, learn, components, flow, interface, decisions, watch-out (`node scripts/check-design.ts [id]` checks one) |
 | `data/projects/*.jsonl` | The project catalogue: daily easy challenges, weekly medium challenges and builds, monthly real cases, one per line |
 
 ### Adding a course, step by step

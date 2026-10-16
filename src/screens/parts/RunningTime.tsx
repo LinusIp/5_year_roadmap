@@ -22,14 +22,14 @@ export function useElapsed(timer: RunningTimer | null | undefined): number {
  * view. The timer lives in the database, not in the screen: opening or closing a sheet never touches it. Nothing
  * shows while no timer runs; a timer on another item names its block.
  */
-export function RunningTime({ atlas, refId }: { atlas: Atlas; refId: string | null }) {
+export function RunningTime({ atlas, refId, pill }: { atlas: Atlas; refId: string | null; pill?: boolean }) {
   const timer = useRunningTimer();
   const elapsed = useElapsed(timer);
   if (!timer) return null;
   const own = timer.refId === refId;
   const block = atlas.settings.core.blocks.find((b) => b.id === timer.block);
   return (
-    <span role="timer" className="shrink-0 text-meta text-ink2 tabular-nums">
+    <span role="timer" className={'shrink-0 tabular-nums ' + (pill ? 'well well-blue rounded-pill px-3 py-1.5 text-meta font-semibold text-blue-deep' : 'text-meta text-ink2')}>
       {(own ? 'Running' : blockShort(block?.name ?? timer.block) + ' running') + ' · ' + formatStopwatch(elapsed)}
     </span>
   );

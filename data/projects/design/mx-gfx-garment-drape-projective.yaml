@@ -1,0 +1,102 @@
+overview: >-
+  A draping preview for Anselm & Rye: 2D pattern pieces from the CAD export are triangulated, placed around a body
+  and stitched along their seam pairs, then simulated as cloth on three body sizes. The solver uses projective
+  dynamics: a local step moves each triangle and hinge to its nearest allowed shape in parallel, and a global step
+  blends those wishes with one sparse linear solve whose matrix is factored once per fabric. Body collision uses a
+  signed distance field (the distance to the body surface at any point, negative inside) with friction.
+learn:
+  - name: Projective dynamics
+  - name: Sparse Cholesky factorisation
+    ref: mit-18-085
+  - name: Signed distance fields
+    ref: iq-articles
+  - name: Bending energy
+  - name: Implicit time stepping
+    ref: witkin-baraff-pbm
+stats:
+  - value: 10 FPS
+    label: 20k vertices on 8 cores
+  - value: < 5%
+    label: stretch in denim at rest
+  - value: 99%
+    label: frames free of body penetration
+components:
+  - id: importer
+    name: Pattern importer
+    role: Reads 2D pattern pieces, seam pairs and grain lines from the CAD export.
+    tech: C++17 · DXF-like
+    talksTo: [mesher]
+    kind: core
+  - id: mesher
+    name: Mesher and stitcher
+    role: Triangulates pieces, places them around the body and adds seam constraints.
+    tech: C++17
+    talksTo: [solver]
+    kind: core
+  - id: presets
+    name: Fabric presets
+    role: Stretch, shear and bend weights, density and friction for silk, denim and jersey.
+    tech: JSON
+    talksTo: [solver]
+    kind: core
+  - id: solver
+    name: Projective solver
+    role: Alternates parallel local projections with a prefactored global solve.
+    tech: C++17 · Eigen · OpenMP
+    talksTo: [sdf, viewer]
+    kind: core
+  - id: sdf
+    name: SDF collision
+    role: Pushes vertices inside the body back to its surface and applies friction.
+    tech: C++17 · 3D grid
+    talksTo: [solver]
+    kind: core
+  - id: viewer
+    name: Viewer
+    role: Shows the drape on each body size, with a stretch heat map.
+    tech: OpenGL
+    talksTo: []
+    kind: core
+flow:
+  - component: importer
+    text: reads the dress pieces with their seam pairs, in millimetres.
+  - component: mesher
+    text: triangulates each piece, wraps it on a cylinder around the body so pieces start **apart**, and pairs seam edges vertex by vertex.
+  - component: presets
+    text: supply the weights; the solver factors `M/h² + Σ w·AᵀA` once for this fabric and time step.
+  - component: solver
+    text: in each iteration projects every triangle to its nearest stretch-free shape and every hinge to its rest angle, on 8 threads.
+  - component: sdf
+    text: looks up each vertex's distance to the body; a negative value moves it out along the gradient and friction slows its sliding.
+  - component: solver
+    text: solves the global system with the stored factor; local, collision and global steps repeat about 10 times per frame.
+  - component: viewer
+    text: draws the drape on the chosen body size with a stretch heat map, so any area of denim stretched over 5% shows red.
+interface:
+  lang: cpp
+  code: |
+    struct Fabric { float stretch, shear, bend;
+                    float density, friction; };
+    class PdSolver {
+     public:
+      // factors M/h^2 + sum w A^T A once
+      void setup(const ClothMesh&, const Fabric&,
+                 float h);
+      void step(const BodySdf& body, int iters = 10);
+      std::span<const vec3> positions() const;
+    };
+    float BodySdf::distance(vec3 p) const; // < 0 in
+    vec3  BodySdf::gradient(vec3 p) const;
+decisions:
+  - choice: Projective dynamics
+    instead: Position-based dynamics
+    why: In position-based dynamics the stiffness depends on the iteration count, so stiff denim stretches more than 5% unless you iterate a lot. Projective dynamics converges to the real energy and stays stable at a large step.
+  - choice: Body as a signed distance field
+    instead: Collide against the body's triangles
+    why: One grid lookup per vertex gives distance and a smooth normal in constant time, and the three body sizes are fixed, so each SDF is built once.
+  - choice: Refactor only when the fabric changes
+    instead: Let stiffness vary per frame
+    why: The 10 FPS budget depends on reusing the factor. A preset change costs one refactor, which is fine because it happens on a click, not every frame.
+watchOut: >-
+  Pieces that start overlapping, or seams pulled shut at full strength at once, tangle and never untangle. Place
+  pieces around the body first and ramp seam stiffness up over the first frames.

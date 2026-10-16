@@ -1,0 +1,106 @@
+overview: >-
+  A motion-matching controller for Sundial Games built from 30 minutes of mocap, replacing hand-authored locomotion
+  graphs. Every 0.1 s the controller describes what it wants as a short feature vector (where the feet are, how fast
+  they and the hips move, and where the stick says the character should be in the next second) and searches 100k
+  database frames for the closest match. When a better frame wins, inertialisation fades out the pose difference
+  over a few frames, and foot IK locks planted feet so they do not slide.
+learn:
+  - name: Motion matching
+  - name: Feature normalisation
+  - name: Nearest-neighbour search
+    ref: skiena-adm
+  - name: Inertialisation
+  - name: Two-bone IK
+    ref: game-engine-architecture
+  - name: SIMD loops
+    ref: mit-6-172
+stats:
+  - value: < 0.3 ms
+    label: search of 100k poses
+  - value: < 150 ms
+    label: stick to visible change
+  - value: < 2 cm
+    label: average foot sliding
+components:
+  - id: pad
+    name: Gamepad
+    role: Gives stick direction and speed each frame.
+    tech: SDL input
+    talksTo: [controller]
+    kind: external
+  - id: database
+    name: Feature extractor
+    role: Imports mocap and computes a 27-float feature per frame, plus foot contact labels.
+    tech: C++17
+    talksTo: [search]
+    kind: offline
+  - id: controller
+    name: Controller
+    role: Predicts the desired trajectory from the stick and builds the query feature.
+    tech: C++17
+    talksTo: [search]
+    kind: core
+  - id: search
+    name: Search structure
+    role: Finds the database frame with the lowest weighted distance to the query.
+    tech: C++17 · SIMD
+    talksTo: [inertialiser]
+    kind: core
+  - id: inertialiser
+    name: Inertialiser
+    role: Jumps to the new frame and decays the pose offset to zero.
+    tech: C++17
+    talksTo: [footik]
+    kind: core
+  - id: footik
+    name: Foot IK
+    role: Locks feet during contact and solves two-bone IK for each leg.
+    tech: C++17
+    talksTo: [dashboard]
+    kind: core
+  - id: dashboard
+    name: Dashboard
+    role: Shows search time, jump rate, foot sliding and which database clips are used.
+    tech: Dear ImGui · OpenGL
+    talksTo: []
+    kind: offline
+flow:
+  - component: controller
+    text: turns the stick into a desired velocity, smooths it with a spring, and predicts positions and facings at +0.33, +0.67 and +1.0 s.
+  - component: controller
+    text: builds the query from the current pose's foot positions and velocities, hip velocity and that trajectory, each part **normalised** by its spread in the database.
+  - component: search
+    text: every 0.1 s scans 100k frames in 64-frame chunks, skipping a chunk when its bounding box is already farther than the best match.
+  - component: inertialiser
+    text: when the best frame beats continuing the current clip, records the offset between old and new poses and decays it with a half-life near 0.1 s.
+  - component: footik
+    text: pins a foot where its contact label starts and bends the leg to keep it there until the label ends.
+interface:
+  lang: cpp
+  code: |
+    struct Feature {               // 27 floats
+      vec3 leftFoot, rightFoot;    // root space
+      vec3 leftFootVel, rightFootVel;
+      vec3 hipVel;
+      vec2 trajPos[3], trajDir[3]; // +0.33/0.67/1 s
+    };
+    // -1: keep playing; else the frame to jump to
+    int search(const Database& db, const Feature& q,
+               float currentCost);
+    void Inertialiser::transition(const Pose& from,
+                                  const Pose& to,
+                                  float halfLife);
+decisions:
+  - choice: Brute-force SIMD with chunk bounds
+    instead: A KD-tree
+    why: KD-trees prune poorly in 27 dimensions and are slow to rebuild when weights change. Per-chunk bounding boxes with a SIMD scan keep 100k poses under 0.3 ms and stay simple.
+  - choice: Inertialisation
+    instead: Cross-fade between old and new clips
+    why: A cross-fade plays two clips at once and blurs foot contacts. Inertialisation plays only the new clip and fades the difference, so it reacts within 150 ms and keeps feet planted.
+  - choice: Search every 0.1 s
+    instead: Search every frame
+    why: Every frame costs more and causes jittery jumps between similar frames; 0.1 s still keeps response under 150 ms.
+watchOut: >-
+  Features with very different scales, such as metres against metres per second, let one term decide every match and
+  the character twitches or ignores the stick. Normalise each feature group by its standard deviation over the
+  database, then tune the weights.

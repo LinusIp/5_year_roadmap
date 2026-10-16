@@ -1,0 +1,129 @@
+overview: >-
+  A complete Pong or Breakout in C99 on raylib, with title and pause screens, score, lives and sound. The main loop
+  adds each frame's real elapsed time to an accumulator and steps the simulation in fixed ticks of 1/120 s, then
+  draws once, blending the last two states so motion stays smooth. All game state lives in one plain struct that
+  update functions change through a pointer and rendering only reads, so a recorded input replay ends identically at
+  any frame rate.
+learn:
+  - name: Fixed-timestep loop
+    ref: gaffer-on-games
+  - name: Render interpolation
+    ref: gaffer-on-games
+  - name: Swept collision tests
+    ref: ericson-rtcd
+  - name: Structs and pointers in C
+    ref: beej-c
+  - name: Makefiles
+    ref: missing-semester
+  - name: Sanitizers
+stats:
+  - value: 1/120 s
+    label: fixed simulation tick
+  - value: '4'
+    label: frame-rate caps, identical replay
+  - value: '0'
+    label: warnings and sanitizer reports
+components:
+  - id: input
+    name: Keyboard
+    role: Reports key state through raylib, read once per tick.
+    tech: raylib input
+    talksTo: [update]
+    kind: external
+  - id: loop
+    name: Main loop
+    role: Adds frame time to the accumulator, clamps it, and runs as many fixed ticks as fit.
+    tech: C99 · GetFrameTime
+    talksTo: [update, render]
+    kind: core
+  - id: update
+    name: Update
+    role: Moves ball and paddles by one tick, applies the rules for score, lives and game states.
+    tech: C99
+    talksTo: [collide, state, audio]
+    kind: core
+  - id: collide
+    name: Collisions
+    role: Swept circle-against-box tests for paddles, walls and bricks.
+    tech: C99
+    talksTo: []
+    kind: core
+  - id: state
+    name: Game state
+    role: One plain struct holding ball, paddles, bricks, score, lives and screen.
+    tech: C struct
+    talksTo: [render]
+    kind: core
+  - id: audio
+    name: Audio
+    role: Plays the three sound effects for events raised during the tick, loaded once at start-up.
+    tech: raylib audio
+    talksTo: []
+    kind: core
+  - id: render
+    name: Renderer
+    role: Draws the blend of the previous and current state, and the menus, without changing either.
+    tech: raylib
+    talksTo: []
+    kind: core
+  - id: replay
+    name: Replay check
+    role: Records input per tick and replays 60 s at 30, 60, 144 fps and uncapped.
+    tech: C99 · ASan · UBSan
+    talksTo: [update]
+    kind: offline
+flow:
+  - component: loop
+    text: >-
+      adds `GetFrameTime()` to `acc`, clamps it at 0.25 s to avoid the **spiral of death**, and runs a tick while
+      `acc ≥ h`.
+  - component: update
+    text: >-
+      reads the keys for this tick, not this frame, and moves everything in `curr` by `h = 1/120 s`; the loop has
+      just saved the old state as `prev`.
+  - component: collide
+    text: >-
+      sweeps the ball's path over the tick against each box, so a fast ball cannot tunnel through a paddle between two
+      ticks.
+  - component: state
+    text: takes the new positions, score and lives; bricks come from the level's text file at load time.
+  - component: audio
+    text: plays a hit, a brick or a lost-life sound for each event the tick raised.
+  - component: render
+    text: >-
+      draws `lerp(prev, curr, acc / h)` once per frame, and the **loop** starts again with the next frame's time.
+interface:
+  lang: c
+  code: |
+    const double h = 1.0 / 120.0;
+    double acc = 0.0;
+    State prev = state, curr = state;
+    while (!WindowShouldClose()) {
+        acc += GetFrameTime();
+        if (acc > 0.25) acc = 0.25;
+        while (acc >= h) {
+            prev = curr;
+            update(&curr, read_input(), h);
+            acc -= h;
+        }
+        render(&prev, &curr, acc / h);
+    }
+decisions:
+  - choice: Fixed 1/120 s ticks
+    instead: Moving everything by each frame's dt
+    why: >-
+      With a variable dt the same inputs give different results at 30 and 144 fps, so the replay test cannot pass.
+      Fixed ticks make the simulation depend only on its inputs.
+  - choice: Swept tests, not overlap tests
+    instead: Checking whether the ball overlaps a box after it moves
+    why: >-
+      A ball that moves more than a paddle's thickness in one tick skips straight through an overlap test. A swept test
+      finds the exact time of contact; revisit only if the ball always moves less than half its radius a tick.
+  - choice: One plain state struct
+    instead: Globals spread across files
+    why: >-
+      Copying one struct gives `prev` for interpolation and a whole snapshot for the replay check, and passing it by
+      pointer shows which functions may change it.
+watchOut: >-
+  Sampling input per frame instead of per tick makes the replay drift between frame rates. Read the keys inside the
+  tick loop and record them with the tick number.

@@ -1,0 +1,53 @@
+overview: >-
+  SimCLR self-supervised pretraining on small images such as CIFAR-10: two random augmentations of each image are
+  pulled together in embedding space and pushed away from every other image in the batch with the NT-Xent loss. A
+  linear probe on frozen features measures quality, and an ablation removes crop or colour augmentation.
+learn:
+  - name: Contrastive learning
+    ref: stanford-cs231n
+  - name: NT-Xent loss
+  - name: Augmentation strength
+  - name: Linear probing
+components:
+  - id: aug
+    name: Augmenter
+    role: Makes two views per image with random crop, flip, colour jitter and greyscale.
+    tech: torchvision transforms
+    talksTo: [encoder]
+    kind: core
+  - id: encoder
+    name: Encoder and head
+    role: ResNet backbone plus a small projection head.
+    tech: PyTorch
+    talksTo: [loss]
+    kind: core
+  - id: loss
+    name: NT-Xent loss
+    role: Scores each view against its pair and all other views in the batch.
+    tech: PyTorch
+    talksTo: []
+    kind: core
+  - id: probe
+    name: Linear probe
+    role: Trains a linear classifier on frozen backbone features per ablation.
+    tech: PyTorch
+    talksTo: []
+    kind: offline
+flow:
+  - component: aug
+    text: turns a batch of 256 images into 512 views, two per image.
+  - component: encoder
+    text: embeds all views and normalizes the projection outputs.
+  - component: loss
+    text: computes cosine similarities divided by temperature `τ = 0.5`, with each view's partner as the positive and the other **510** views as negatives.
+  - component: probe
+    text: drops the projection head, freezes the backbone and reports probe accuracy for full, no-crop and no-colour augmentation.
+decisions:
+  - choice: Batch of 256 with no memory bank
+    instead: A memory bank or queue of past negatives
+    why: >-
+      256 fits on one GPU at 32x32 and gives 510 negatives, enough to see the effects in the ablation. Add a queue
+      only if you must shrink the batch.
+watchOut: >-
+  Weak augmentations let the model match views by colour histogram alone, and probe accuracy stays low. Keep strong
+  colour jitter and random crops in the main run.

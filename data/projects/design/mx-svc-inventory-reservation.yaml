@@ -1,0 +1,115 @@
+overview: >-
+  A stock reservation service for MediCart that takes stock out of the available count when a checkout starts,
+  commits it on payment and gives it back when the cart is abandoned. Every change is one conditional SQL
+  statement, so two checkouts can never both take the last pack, and the same cart id always gives the same result.
+  A movement ledger records every change and must add up to the on-hand count of each SKU.
+learn:
+  - name: Conditional atomic updates
+    ref: cmu-15-445
+  - name: Pessimistic vs optimistic locking
+    ref: ddia
+  - name: Idempotency by business key
+  - name: TTL-based expiry
+  - name: Hot-row contention
+    ref: cmu-15-445
+stats:
+  - value: "0"
+    label: oversells, 500 carts on 20 SKUs
+  - value: < 30 ms
+    label: p99 reserve
+  - value: 1,000/s
+    label: reservations sustained
+components:
+  - id: checkout
+    name: Checkout
+    role: Calls reserve when a cart reaches payment and commit or release after.
+    tech: Shop backend
+    talksTo: [api]
+    kind: external
+  - id: api
+    name: Reservation API
+    role: Exposes reserve, commit and release, keyed by cart id so retries are safe.
+    tech: Go · net/http
+    talksTo: [manager]
+    kind: core
+  - id: manager
+    name: Reservation manager
+    role: Runs each operation as one transaction across stock, reservation and ledger rows.
+    tech: Go · pgx
+    talksTo: [stock, ledger]
+    kind: core
+  - id: stock
+    name: Stock table
+    role: On-hand and reserved counts per SKU and location, with a check that available never goes below zero.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: ledger
+    name: Movement ledger
+    role: Appends one row per reserve, commit, release and receipt, and raises low-stock alerts.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: expiry
+    name: Expiry job
+    role: Releases reservations past their TTL every few seconds.
+    tech: Go · SKIP LOCKED
+    talksTo: [manager]
+    kind: core
+  - id: stress
+    name: Stress tester
+    role: Runs 500 concurrent carts on 20 hot SKUs with 60 percent abandonment, then checks the ledger.
+    tech: k6 · SQL
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: receives `POST /reservations` with `cart_id`, `sku`, `location` and `qty`.
+  - component: manager
+    text: >-
+      inserts the reservation with a unique `(cart_id, sku)`; if it already exists the original result is returned,
+      so a retried checkout cannot reserve twice.
+  - component: stock
+    text: >-
+      runs `UPDATE stock SET reserved = reserved + 2 WHERE sku = … AND on_hand - reserved >= 2`; **0 rows** means not
+      enough stock and the API returns `409 OUT_OF_STOCK`.
+  - component: ledger
+    text: appends a `reserve` movement in the same transaction and flags the SKU if available drops below its low-stock level.
+  - component: manager
+    text: on `POST /reservations/{cart}/commit` lowers both `on_hand` and `reserved` and records a `commit` movement.
+  - component: expiry
+    text: >-
+      if no commit arrives within the 15-minute TTL, picks the reservation with `FOR UPDATE SKIP LOCKED` and releases
+      it through the manager, writing a `release` movement.
+interface:
+  lang: http
+  code: |
+    POST /reservations
+    { "cart_id": "c_7781", "sku": "PARA-500-16",
+      "location": "DC-1", "qty": 2 }
+
+    201 Created
+    { "reservation_id": "r_19a",
+      "expires_at": "2026-10-16T12:15:00Z" }
+
+    409 Conflict
+    { "error": "OUT_OF_STOCK", "available": 1 }
+decisions:
+  - choice: Single conditional UPDATE
+    instead: SELECT ... FOR UPDATE, then a separate UPDATE
+    why: >-
+      Both are safe, but the conditional statement holds the row lock for the shortest time, which matters when 500
+      carts fight over 20 SKUs. The ADR compares the lock wait times of both.
+  - choice: No cache of authoritative stock
+    instead: Redis counters in front of PostgreSQL
+    why: >-
+      The constraint forbids it, and a second copy of the count is a second place to oversell. 1,000 reservations a
+      second fits one PostgreSQL instance.
+  - choice: Reservation rows with a TTL
+    instead: Rely on checkout to call release
+    why: >-
+      60 percent of carts are abandoned and many never send a release. Expiry by time is the only way stock comes
+      back after a client or service crash.
+watchOut: >-
+  Reading the stock level in code and then writing a new value passes every single-user test and oversells under
+  load. Keep the check inside the UPDATE's WHERE clause.

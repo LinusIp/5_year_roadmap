@@ -37,6 +37,25 @@ export async function loadDoc(projectId: string): Promise<string | undefined> {
   return docsCache[projectId];
 }
 
+const designCache = new Map<number, Record<string, import('./design.ts').Design>>();
+
+/** A design already in memory: null when its chunk has not loaded yet, undefined when it has and holds none. */
+export function peekDesign(id: string, bucket: number): import('./design.ts').Design | null | undefined {
+  const designs = designCache.get(bucket);
+  return designs ? designs[id] : null;
+}
+
+/** A project's design (data/projects/design/), loading its bucket's chunk on first use. Undefined when it has none. */
+export async function loadDesign(id: string): Promise<import('./design.ts').Design | undefined> {
+  const { designBucket } = await import('./design-text.ts');
+  const bucket = designBucket(id);
+  if (!designCache.has(bucket)) {
+    const loaders = (await import('virtual:atlas-designs')).default;
+    designCache.set(bucket, (await loaders[bucket]!()).default);
+  }
+  return designCache.get(bucket)![id];
+}
+
 let catalogueCache: import('./catalogue.ts').CatalogueItem[] | null = null;
 let catalogueIndexCache: import('./catalogue.ts').CatalogueEntry[] | null = null;
 

@@ -1,0 +1,123 @@
+overview: >-
+  A caching reverse proxy in front of Harbor Gazette's single origin. Each request gets a cache key from method,
+  host, path and the headers the response names in `Vary`; an in-memory index points to the body in a 20 GB disk
+  store. Hits stream from disk, misses for the same key are collapsed so one request goes to origin over a pooled
+  keep-alive connection, and expired pages keep serving while one background request revalidates them with their
+  ETag (a version tag the origin attaches).
+learn:
+  - name: HTTP caching headers
+  - name: Conditional requests
+  - name: Request collapsing
+  - name: Caching web proxy
+    ref: csapp-labs
+  - name: Connection pooling
+stats:
+  - value: 15k req/s
+    label: cached hits on 2 cores
+  - value: < 5 ms
+    label: hit p99
+  - value: ≥ 90%
+    label: origin load removed
+components:
+  - id: readers
+    name: Readers
+    role: Browsers and apps requesting articles, 1.5 million page views a day.
+    tech: HTTP clients
+    talksTo: [parser]
+    kind: external
+  - id: parser
+    name: Request parser
+    role: Parses HTTP/1.1, keeps client connections alive, builds the cache key.
+    tech: Rust (tokio) or Go
+    talksTo: [index]
+    kind: core
+  - id: index
+    name: Cache index
+    role: Maps each key to its disk location, expiry, ETag and surrogate tags.
+    tech: In-memory hash map
+    talksTo: [store, reval]
+    kind: core
+  - id: store
+    name: Disk store
+    role: Holds response bodies and headers in a 20 GB set of files.
+    tech: Local disk
+    talksTo: []
+    kind: core
+  - id: reval
+    name: Revalidation
+    role: Collapses misses and expiries into one origin request per key.
+    tech: Per-key futures
+    talksTo: [pool]
+    kind: core
+  - id: pool
+    name: Origin pool
+    role: Keeps warm keep-alive connections to origin and applies timeouts.
+    tech: HTTP client pool
+    talksTo: [origin]
+    kind: core
+  - id: origin
+    name: Origin server
+    role: The newspaper's existing CMS, reached over plain HTTP.
+    tech: CMS
+    talksTo: []
+    kind: external
+  - id: purge
+    name: Purge API
+    role: Removes entries by URL or by surrogate tag when editors update a story.
+    tech: HTTP admin endpoint
+    talksTo: [index]
+    kind: offline
+flow:
+  - component: parser
+    text: >-
+      parses `GET /news/flood-warning`, lowercases the host, and normalises `Accept-Encoding` to `gzip`, `br` or
+      none before building the key.
+  - component: index
+    text: >-
+      finds the entry; its `max-age=60` has passed but it is inside `stale-while-revalidate=30`, so it counts as
+      **usable stale**.
+  - component: store
+    text: streams the stale body from disk at once, so the reader never waits for origin.
+  - component: reval
+    text: >-
+      starts one revalidation for the key; the other thousand readers arriving in the same second reuse it
+      instead of reaching origin.
+  - component: pool
+    text: >-
+      sends `If-None-Match` with the stored ETag; `304 Not Modified` just resets the expiry, a `200` is written to
+      disk before the index pointer swaps, and an origin error falls back to `stale-if-error`.
+interface:
+  lang: http
+  code: |
+    GET /news/flood-warning HTTP/1.1
+    Host: harborgazette.local
+    Accept-Encoding: gzip, br
+
+    (proxy to origin, entry stale)
+    GET /news/flood-warning HTTP/1.1
+    If-None-Match: "a41f"
+
+    HTTP/1.1 304 Not Modified
+    Cache-Control: max-age=60,
+      stale-while-revalidate=30, stale-if-error=600
+
+    PURGE /tags/story-8812 HTTP/1.1
+decisions:
+  - choice: Disk store with an in-memory index
+    instead: Keep every object in RAM
+    why: >-
+      20 GB of pages and images will not fit in memory, but an index entry of about 100 bytes does: 200 MB covers
+      roughly two million objects. Revisit with a small RAM tier if the hot set turns out tiny.
+  - choice: Collapse misses per key
+    instead: Let every miss go to origin
+    why: >-
+      A breaking story sends thousands of requests for one URL within a second; collapsing turns that into one
+      origin fetch, which is most of the 90% reduction.
+  - choice: Normalise Vary headers
+    instead: Key on raw header values
+    why: >-
+      Raw `Accept-Encoding` and `User-Agent` strings create thousands of variants of one page. Reducing them to a
+      few classes keeps hit ratio and index memory in budget.
+watchOut: >-
+  Caching a response that carries `Set-Cookie` or `Cache-Control: private` serves one reader's session to everyone.
+  Never store those, and keep a test that proves it.

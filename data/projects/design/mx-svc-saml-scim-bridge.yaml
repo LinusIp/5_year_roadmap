@@ -1,0 +1,122 @@
+overview: >-
+  A bridge that gives Boardwise enterprise login and automatic user management, configured per customer tenant.
+  SAML login checks the identity provider's signed assertion (an XML message saying who the user is) for signature,
+  audience, time window and replay before creating or updating the user. SCIM, a standard REST API identity
+  providers use to add and remove users, applies changes idempotently, and a deactivation publishes a revocation
+  event that ends the user's sessions within seconds.
+learn:
+  - name: SAML assertions
+  - name: XML signature wrapping
+  - name: SCIM provisioning
+  - name: Multi-tenant isolation
+    ref: system-design-primer
+  - name: Event-driven revocation
+    ref: ddia
+stats:
+  - value: < 60 ms
+    label: p99 assertion validation
+  - value: < 5 s
+    label: p99 deprovision to logout
+  - value: < 30 s
+    label: 1,000-user bulk sync
+components:
+  - id: idp
+    name: Mock IdP
+    role: Issues signed, tampered and replayed assertions and sends SCIM calls per tenant.
+    tech: Go test server
+    talksTo: [saml, scim]
+    kind: external
+  - id: tenants
+    name: Tenant config store
+    role: Per-tenant IdP entity id, signing certificate, audience and attribute mapping.
+    tech: PostgreSQL
+    talksTo: [saml, scim]
+    kind: core
+  - id: saml
+    name: SAML validator
+    role: Verifies the signature over the exact assertion it reads, plus audience, time and replay.
+    tech: Go · goxmldsig
+    talksTo: [mapper]
+    kind: core
+  - id: mapper
+    name: Attribute mapper
+    role: Maps IdP attributes to Boardwise name, email, role and groups, and creates users just in time.
+    tech: Go
+    talksTo: [users]
+    kind: core
+  - id: scim
+    name: SCIM API
+    role: Users and Groups endpoints with filter and PATCH, scoped to one tenant by its bearer token.
+    tech: Go · net/http
+    talksTo: [users, bus]
+    kind: core
+  - id: users
+    name: User store
+    role: Users and groups with `tenant_id` on every row and row-level security.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: bus
+    name: Revocation bus
+    role: Carries user-deactivated events to the session service.
+    tech: PostgreSQL LISTEN/NOTIFY
+    talksTo: [sessions]
+    kind: core
+  - id: sessions
+    name: Session service
+    role: Deletes the user's sessions and refuses their tokens from then on.
+    tech: Boardwise app
+    talksTo: []
+    kind: external
+flow:
+  - component: saml
+    text: >-
+      receives a login at `POST /saml/acs` and reads the assertion's `Issuer` to find which tenant it claims to come
+      from, here `acme`.
+  - component: tenants
+    text: supply acme's signing certificate, expected audience and attribute mapping; nothing from another tenant is loaded.
+  - component: saml
+    text: >-
+      verifies the signature over the **exact** assertion it will read, checks audience, `NotOnOrAfter` with 2
+      minutes of clock skew, and that the assertion `ID` was never seen before.
+  - component: mapper
+    text: maps `mail`, `displayName` and `groups` to Boardwise fields and creates the user just in time on first login.
+  - component: users
+    text: stores the user with `tenant_id = acme`; row-level security refuses any query that does not set that tenant.
+  - component: scim
+    text: >-
+      months later receives `PATCH /scim/v2/Users/8812` with `active = false`, marks the user inactive and writes a
+      revocation event in the same transaction; repeating it changes nothing.
+  - component: bus
+    text: notifies the session service, which drops all of the user's sessions well inside 5 s.
+interface:
+  lang: http
+  code: |
+    PATCH /scim/v2/Users/8812
+    Authorization: Bearer <tenant token>
+    Content-Type: application/scim+json
+    { "schemas": ["…:api:messages:2.0:PatchOp"],
+      "Operations": [{ "op": "replace",
+                       "path": "active",
+                       "value": false }] }
+
+    200 OK
+    { "id": "8812", "active": false }
+decisions:
+  - choice: Validate only the signed element you read
+    instead: Check that a signature exists somewhere
+    why: >-
+      Signature wrapping hides a forged assertion next to a validly signed one. Several of the 15 attack cases do
+      exactly this, so the code must read user data only from the element the signature covers.
+  - choice: Tenant id on every row plus row-level security
+    instead: Filtering by tenant in application code only
+    why: >-
+      One forgotten WHERE clause leaks another customer's users. The database refuses cross-tenant reads even if the
+      code has a bug.
+  - choice: Event bus for revocation
+    instead: Sessions expire on their own
+    why: >-
+      Session lifetimes are hours, and enterprise customers expect a fired employee to be locked out within seconds.
+watchOut: >-
+  Never trust an assertion just because it is well-formed and signed. Check the audience is this tenant, the time
+  window allows a little clock skew, and the assertion ID has not been seen.

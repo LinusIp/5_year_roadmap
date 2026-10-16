@@ -1,0 +1,52 @@
+overview: >-
+  A reverse proxy cache that follows HTTP caching rules: it stores responses by URL plus the request headers named
+  in Vary, honours max-age and no-store, revalidates stale entries with conditional requests, and serves stale
+  content while the origin is failing.
+learn:
+  - name: Cache-Control directives
+  - name: Vary and cache keys
+  - name: Conditional requests
+  - name: Stale-while-revalidate
+components:
+  - id: client
+    name: Client
+    role: Sends ordinary GET requests.
+    tech: curl · test suite
+    talksTo: [proxy]
+    kind: external
+  - id: proxy
+    name: Proxy
+    role: Computes the cache key, decides fresh, stale or miss, and forwards when needed.
+    tech: Go, Rust or Python asyncio
+    talksTo: [cache, origin]
+    kind: core
+  - id: cache
+    name: Cache store
+    role: Keeps the response, its headers, store time and validators (`ETag`, `Last-Modified`).
+    tech: In-memory LRU
+    talksTo: []
+    kind: core
+  - id: origin
+    name: Origin
+    role: The real server, which sometimes errors on purpose.
+    tech: Any HTTP server
+    talksTo: []
+    kind: external
+flow:
+  - component: proxy
+    text: builds the key from method, URL and the request values of headers listed in the stored `Vary`, such as `Accept-Encoding`.
+  - component: cache
+    text: returns a fresh entry while age is below `max-age`; entries with `no-store` were never saved.
+  - component: proxy
+    text: revalidates a stale entry with `If-None-Match`; a `304` refreshes it without a new body.
+  - component: proxy
+    text: serves the stale copy if the origin returns 5xx and the response allowed `stale-if-error`.
+decisions:
+  - choice: Follow the caching RFC strictly
+    instead: Cache everything for a fixed time
+    why: >-
+      The conformance tests for max-age, no-store, Vary and stale cases are the done-when. A fixed TTL is simpler
+      but serves wrong or private content.
+watchOut: >-
+  Ignoring Vary serves a gzip body to a client that asked for plain text, or one user's language to another.
+  Always include the Vary headers in the key.

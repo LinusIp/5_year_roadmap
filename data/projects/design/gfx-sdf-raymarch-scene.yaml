@@ -1,0 +1,70 @@
+overview: >-
+  A 3D scene drawn by one fragment shader with no meshes: each primitive is a signed distance function (it returns how
+  far a point is from its surface), and sphere tracing moves each pixel's ray forward by that distance until it is
+  almost touching a surface. Normals come from the gradient of the distance, and the same field gives soft shadows and
+  ambient occlusion with a few extra lookups.
+learn:
+  - name: Signed distance functions
+    ref: iq-articles
+  - name: Sphere tracing
+  - name: Gradient normals
+  - name: SDF soft shadows
+    ref: iq-articles
+components:
+  - id: camera
+    name: Camera uniforms
+    role: Sends the eye position, view basis, resolution and time to the shader each frame.
+    tech: OpenGL host
+    talksTo: [march]
+    kind: core
+  - id: march
+    name: Sphere tracer
+    role: Steps one ray per pixel through the distance field and returns the hit distance.
+    tech: GLSL
+    talksTo: [scene, shade]
+    kind: core
+  - id: scene
+    name: Scene SDF
+    role: "`map(p)`: the minimum distance over 6 or more primitives, with smooth blends."
+    tech: GLSL
+    talksTo: []
+    kind: core
+  - id: shade
+    name: Shading
+    role: Computes normal, light, soft shadow and occlusion at the hit point.
+    tech: GLSL
+    talksTo: [scene]
+    kind: core
+flow:
+  - component: camera
+    text: uploads `ro`, the camera basis and `iTime`; the shader builds a ray `rd` per pixel at 1280x720.
+  - component: march
+    text: repeats `t += map(ro + rd*t)` up to 128 times, stopping when `d < 0.001*t` or `t > 100`; steps per ray go to a debug view.
+  - component: scene
+    text: returns the smallest of the sphere, box, torus, capsule and plane distances, joined with `smin` for soft blends.
+  - component: shade
+    text: takes the normal from central differences of `map`, marches toward the light with `res = min(res, k*h/t)` for a **soft shadow**, and samples 5 points along the normal for AO.
+interface:
+  lang: glsl
+  code: |
+    float sdSphere(vec3 p, float r);
+    float sdBox(vec3 p, vec3 b);
+    float smin(float a, float b, float k);
+
+    float map(vec3 p);            // whole scene
+    float march(vec3 ro, vec3 rd,
+                out int steps);   // t, or -1.0
+    vec3  calcNormal(vec3 p);     // central diff
+    float softShadow(vec3 ro, vec3 rd,
+                     float tmin, float tmax,
+                     float k);    // 0 dark..1 lit
+    float calcAO(vec3 p, vec3 n);
+decisions:
+  - choice: Hit threshold grows with distance
+    instead: A fixed epsilon such as 0.001
+    why: >-
+      A fixed epsilon spends many steps on far surfaces that cover less than a pixel. Scaling it with `t` keeps the
+      error near one pixel and the step count low, which is what decides 60 FPS at 720p.
+watchOut: >-
+  Twisted, displaced or non-uniformly scaled primitives are no longer true distances, so the ray oversteps into them
+  and you see holes. Scale those steps by 0.5 to 0.8, and clamp the shadow step size to stop banding.

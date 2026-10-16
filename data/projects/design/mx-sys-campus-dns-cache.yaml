@@ -1,0 +1,127 @@
+overview: >-
+  A forwarding DNS resolver that answers Eastfield's 6,000 students from memory. An event loop decodes each UDP
+  query, answers campus names from local zones, then checks a sharded TTL cache, and only on a miss asks an upstream
+  resolver; identical questions in flight share one upstream query (coalescing). Answers are cached for their TTL
+  (time to live), failures like NXDOMAIN are cached too (negative caching), and stale entries are served when
+  upstream is down. A stats endpoint shows hit rate and the top failing domains, so IT can see what breaks at 9 a.m.
+learn:
+  - name: DNS message format
+  - name: Name compression pointers
+  - name: TTL and negative caching
+  - name: Request coalescing
+  - name: LRU eviction
+  - name: Fuzz testing
+stats:
+  - value: < 1 ms
+    label: cache-hit p99
+  - value: 20k
+    label: queries per second
+  - value: 256 MB
+    label: memory cap
+components:
+  - id: clients
+    name: Campus clients
+    role: Laptops and lab machines sending queries to port 53.
+    tech: Stub resolvers
+    talksTo: [codec]
+    kind: external
+  - id: codec
+    name: Wire codec
+    role: Decodes and builds DNS messages, rejecting malformed packets safely.
+    tech: Go or Rust
+    talksTo: [zones]
+    kind: core
+  - id: zones
+    name: Local zones
+    role: Answers campus hostnames from an override file.
+    tech: Zone file
+    talksTo: [cache]
+    kind: core
+  - id: cache
+    name: TTL cache
+    role: Holds answers in 16 shards with per-shard LRU and a byte budget.
+    tech: Sharded hash map
+    talksTo: [coalesce, stats]
+    kind: core
+  - id: coalesce
+    name: Coalescing table
+    role: Keeps one in-flight entry per question and the list of clients waiting on it.
+    tech: Hash map of waiters
+    talksTo: [forwarder]
+    kind: core
+  - id: forwarder
+    name: Upstream forwarder
+    role: Sends misses upstream, matches replies, falls back to TCP on truncation.
+    tech: UDP and TCP sockets
+    talksTo: [upstream]
+    kind: core
+  - id: upstream
+    name: Upstream resolvers
+    role: The college's existing recursive resolvers.
+    tech: Recursive DNS
+    talksTo: []
+    kind: external
+  - id: stats
+    name: Stats endpoint
+    role: Serves hit ratio, latency percentiles, top domains and NXDOMAIN counts.
+    tech: HTTP · JSON
+    talksTo: []
+    kind: offline
+flow:
+  - component: codec
+    text: >-
+      reads one datagram, decodes the 12-byte header and the question, and rejects any compression pointer that
+      points forward or revisits an offset.
+  - component: zones
+    text: answers names under `eastfield.edu` from the override file, with no upstream trip.
+  - component: cache
+    text: >-
+      looks up `(qname, qtype, qclass)` in its shard; a hit is copied with the query's `id` and the remaining TTL
+      and sent back in well under 1 ms.
+  - component: coalesce
+    text: >-
+      on a miss, joins the in-flight entry for the same question or creates one, so 400 laptops asking for the
+      learning portal at 9:00 cause **one** upstream query.
+  - component: forwarder
+    text: >-
+      sends it with a random `id` and source port, accepts only a reply whose id, server and question match, and
+      retries over TCP when the `TC` bit is set.
+  - component: coalesce
+    text: >-
+      answers every waiter with its own `id`, stores the answer for its smallest TTL (NXDOMAIN for the SOA
+      minimum), and passes `TTL 0` answers on without caching them.
+interface:
+  lang: c
+  code: |
+    /* DNS header: 12 bytes, big-endian on the wire */
+    struct dns_header {
+      uint16_t id;      /* copied back to the client */
+      uint16_t flags;   /* QR Opcode AA TC RD RA RCODE*/
+      uint16_t qdcount; /* questions, normally 1 */
+      uint16_t ancount; /* answer records */
+      uint16_t nscount; /* authority: SOA on NXDOMAIN */
+      uint16_t arcount; /* additional (EDNS OPT) */
+    };
+    /* QNAME: 3 www 9 eastfield 3 edu 0
+       two bytes 0b11xxxxxx xxxxxxxx = pointer to
+       an earlier offset; follow at most 16 */
+    /* cache key: lowercase(qname), qtype, qclass */
+decisions:
+  - choice: Forwarder, not a full recursive resolver
+    instead: Recursing from the root servers
+    why: >-
+      The upstream resolvers already recurse and no DNSSEC is needed; the 9 a.m. slowdown is repeated questions,
+      which the cache and coalescing remove. Revisit only if upstream itself is the bottleneck.
+  - choice: 16 shards with their own locks
+    instead: One map behind one mutex
+    why: >-
+      20,000 queries a second on 4 cores would queue on one lock. Sharding by name hash keeps each lock short and
+      the hit p99 under 1 ms.
+  - choice: Cap memory by bytes, not entries
+    instead: A fixed maximum number of entries
+    why: >-
+      Answers range from about 50 bytes to several kilobytes, so an entry count cannot promise 256 MB. Each shard
+      tracks its bytes and evicts least recently used entries.
+watchOut: >-
+  Cache poisoning: accept an upstream reply only when its id, source address and port and its question all match
+  the outstanding query, and randomise the source port as well as the id.

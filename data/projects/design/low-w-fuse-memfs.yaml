@@ -1,0 +1,78 @@
+overview: >-
+  A file system that lives in RAM and is mounted through FUSE, which forwards each file operation from the kernel to
+  your program: an inode table holds every file's metadata and bytes, directories map names to inode numbers, and
+  handlers implement getattr, readdir, read, write, rename, unlink and truncate. It must pass a 30-operation POSIX
+  script and 60 seconds of fsstress.
+learn:
+  - name: Inodes and directories
+    ref: ostep
+  - name: FUSE callbacks
+  - name: Link counts
+  - name: Rename semantics
+components:
+  - id: kernel
+    name: Kernel VFS
+    role: Turns system calls on the mount point into FUSE requests.
+    tech: Linux · /dev/fuse
+    talksTo: [handlers]
+    kind: external
+  - id: handlers
+    name: FUSE handlers
+    role: Resolve paths, check that each operation is legal and reply with attributes or an errno.
+    tech: C · libfuse3 (or Rust)
+    talksTo: [inodes]
+    kind: core
+  - id: inodes
+    name: Inode table
+    role: Holds mode, size, link count, data buffer and directory entries per inode.
+    tech: C structs
+    talksTo: []
+    kind: core
+  - id: tests
+    name: Test scripts
+    role: A 30-step POSIX script and a 60-second fsstress run on the mount.
+    tech: shell · fsstress
+    talksTo: [kernel]
+    kind: offline
+flow:
+  - component: kernel
+    text: receives `open`, `write` or `rename` from a program on the mount point and passes it to the daemon as a request.
+  - component: handlers
+    text: >-
+      resolve the path to an inode, check the operation is legal (no `rmdir` on a non-empty directory), and take the
+      one global lock.
+  - component: inodes
+    text: >-
+      update the entry, so `write` grows the buffer and zero-fills any gap, and `unlink` drops `nlink` but frees the
+      inode only once no handle is open.
+  - component: handlers
+    text: >-
+      reply with attributes or an errno like `ENOENT`; `rename` onto an existing name replaces it in **one step**,
+      as POSIX requires.
+interface:
+  lang: c
+  code: |
+    struct inode {
+      ino_t   ino;
+      mode_t  mode;   /* S_IFREG or S_IFDIR | perms */
+      nlink_t nlink;
+      size_t  size;
+      char   *data;   /* file bytes */
+      struct dirent_list *entries; /* directories */
+    };
+
+    static const struct fuse_operations ops = {
+      .getattr = mfs_getattr, .readdir = mfs_readdir,
+      .read    = mfs_read,    .write   = mfs_write,
+      .rename  = mfs_rename,  .unlink  = mfs_unlink,
+    };
+decisions:
+  - choice: One global lock
+    instead: A lock per inode
+    why: >-
+      FUSE calls handlers from several threads while fsstress runs. One mutex makes a rename across directories
+      trivially atomic; per-inode locks are faster but need a lock order to avoid deadlock, which a RAM file system
+      under 60 seconds of stress does not need.
+watchOut: >-
+  A file unlinked while still open must keep its data until the last `release`, so freeing it at `nlink == 0`
+  breaks fsstress. Writes past the end and `truncate` upward must zero-fill the gap.

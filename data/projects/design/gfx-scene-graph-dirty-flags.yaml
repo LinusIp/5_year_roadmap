@@ -1,0 +1,71 @@
+overview: >-
+  A transform hierarchy of 10,000 nodes where moving a node marks it and its subtree dirty, and world matrices are
+  recomputed only for dirty nodes in one pass over an array ordered parents first. The world bounding boxes from that
+  pass are tested against the camera frustum, so off-screen objects are not drawn.
+learn:
+  - name: Transform hierarchies
+    ref: game-engine-architecture
+  - name: Dirty flags
+  - name: Frustum culling
+    ref: learnopengl
+  - name: Bounding box transforms
+    ref: ericson-rtcd
+components:
+  - id: nodes
+    name: Node storage
+    role: Keeps local transforms, parent indices and dirty flags in flat arrays, parents first.
+    tech: C++20
+    talksTo: [update]
+    kind: core
+  - id: update
+    name: Transform update
+    role: Recomputes world matrices for dirty nodes and their children.
+    tech: C++20 · GLM
+    talksTo: [cull, stats]
+    kind: core
+  - id: cull
+    name: Frustum culler
+    role: Builds world boxes and drops those outside the 6 frustum planes.
+    tech: C++20
+    talksTo: []
+    kind: core
+  - id: stats
+    name: Update counter
+    role: Counts matrix updates per frame against a full naive update.
+    tech: C++20
+    talksTo: []
+    kind: offline
+flow:
+  - component: nodes
+    text: sorts nodes so every parent comes before its children; `set_local(i, t)` stores the new transform and sets `dirty[i]`.
+  - component: update
+    text: walks the array once, computing `world[i] = world[parent] * local[i]` when `dirty[i]` or `dirty[parent]` is set, and passes the flag down.
+  - component: cull
+    text: transforms each local box with Arvo's method (absolute matrix entries times the extents), which still **contains** the object under rotation and non-uniform scale, then tests it against the frustum.
+  - component: stats
+    text: reports updates per frame; moving one leaf should cost one update, not 10,000.
+interface:
+  lang: cpp
+  code: |
+    struct SceneGraph {
+      std::vector<int32_t> parent;   // -1 for roots
+      std::vector<Transform> local;
+      std::vector<Mat4> world;
+      std::vector<uint8_t> dirty;
+      std::vector<AABB> localBox, worldBox;
+
+      int  add(int parent, const Transform& t);
+      void set_local(int node, const Transform& t);
+      int  update();   // returns updates done
+    };
+    AABB transform_aabb(const AABB& b, const Mat4& m);
+    bool in_frustum(const Frustum& f, const AABB& b);
+decisions:
+  - choice: Flat parent-first array
+    instead: Node objects with child pointers, updated recursively
+    why: >-
+      One straight pass over 10,000 nodes in contiguous memory is cache-friendly and has no recursion depth to worry
+      about. The cost is re-sorting when a node changes parent, which is rare.
+watchOut: >-
+  Reading `world[i]` after `set_local` but before `update()` returns last frame's matrix, so objects lag or cull wrongly.
+  Run `update()` before anything reads world matrices, or make the getter update up the parent chain.

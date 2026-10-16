@@ -1,0 +1,127 @@
+overview: >-
+  A QUIC-lite transport in Rust for drone telemetry and thumbnails over lossy cellular links. Many independent streams
+  share one UDP connection, so a lost packet only delays the stream whose bytes it carried, unlike TCP where one loss
+  blocks everything behind it (head-of-line blocking). The connection layer packs stream data into numbered packets,
+  learns what arrived from ACK ranges, resends lost data in new packets, and paces sending by a congestion window.
+learn:
+  - name: Head-of-line blocking
+    ref: stanford-cs144
+  - name: ACK ranges
+  - name: RTT estimation
+    ref: stanford-cs144
+  - name: Per-stream flow control
+  - name: Pacing and NewReno
+  - name: Connection migration
+stats:
+  - value: ≥ 85%
+    label: of TCP goodput, clean 50 Mbit/s
+  - value: ≤ 1 RTT
+    label: cross-stream stall at 5% loss
+  - value: < 2 RTT
+    label: to migrate a connection
+components:
+  - id: app
+    name: Drone app
+    role: Writes telemetry and thumbnails, each on its own stream.
+    tech: Rust API
+    talksTo: [streams]
+    kind: external
+  - id: streams
+    name: Stream manager
+    role: Buffers each stream, enforces its flow-control credit and reassembles by offset.
+    tech: Rust
+    talksTo: [framer]
+    kind: core
+  - id: framer
+    name: Packet framer
+    role: Packs frames into datagrams of at most 1,200 bytes with a fresh packet number.
+    tech: Rust · bytes
+    talksTo: [cc]
+    kind: core
+  - id: cc
+    name: Congestion controller
+    role: Keeps the congestion window and paces packets out evenly.
+    tech: NewReno · pacer
+    talksTo: [link]
+    kind: core
+  - id: link
+    name: Cellular link
+    role: The lossy path, emulated with tc netem in tests.
+    tech: UDP socket
+    talksTo: [loss]
+    kind: external
+  - id: loss
+    name: Loss detector
+    role: Reads ACK ranges, updates RTT estimates and declares packets lost.
+    tech: Rust
+    talksTo: [streams, cc]
+    kind: core
+  - id: migration
+    name: Migration logic
+    role: Validates a new peer address and moves the connection to it.
+    tech: Path challenge
+    talksTo: [framer]
+    kind: core
+  - id: netem
+    name: Netem harness
+    role: Runs loss, jitter, reordering and address-change scenarios against TCP baselines.
+    tech: tc netem · scripts
+    talksTo: [link]
+    kind: offline
+flow:
+  - component: streams
+    text: >-
+      takes a write on stream 4 (a thumbnail) if the stream's `MAX_STREAM_DATA` credit and the connection's `MAX_DATA`
+      allow it, and cuts it into `STREAM` frames tagged with their byte offset.
+  - component: framer
+    text: >-
+      packs frames, plus any pending `ACK`, into one datagram with the connection ID and a **new packet number**;
+      numbers are never reused, so an ACK always says which copy arrived.
+  - component: cc
+    text: >-
+      sends only while bytes in flight are under `cwnd`, spacing packets at about `cwnd / srtt` so bursts do not fill
+      the cellular buffer.
+  - component: loss
+    text: >-
+      on each ACK updates `srtt` and marks a packet lost when 3 later ones are acked or it is `9/8 · srtt` overdue;
+      only its frames go back to their stream's queue (the loop that makes it reliable), so other streams keep
+      delivering.
+  - component: migration
+    text: >-
+      when a packet with a known connection ID comes from a new address, sends `PATH_CHALLENGE`, switches on the
+      matching `PATH_RESPONSE` (one round trip) and resets the congestion window.
+interface:
+  lang: rust
+  code: |
+    // header, then frames; one UDP datagram
+    struct Header { conn_id: [u8; 8], pn: u64 }
+    enum Frame {
+        Stream { id: u32, offset: u64,
+                 fin: bool, data: Bytes },
+        Ack { largest: u64, delay_us: u32,
+              ranges: Vec<(u64, u64)> },
+        MaxStreamData { id: u32, max: u64 },
+        MaxData { max: u64 },
+        PathChallenge([u8; 8]),
+        PathResponse([u8; 8]),
+    }
+    // later: AEAD seals the frames, header stays clear
+decisions:
+  - choice: New packet number for every send
+    instead: Resend the same packet as TCP does
+    why: >-
+      With TCP, an ACK for a resent segment cannot tell which copy arrived, which spoils RTT estimates and causes
+      spurious retransmits. Fresh numbers make every ACK unambiguous.
+  - choice: NewReno with pacing
+    instead: BBR-lite
+    why: >-
+      NewReno is short and easy to trace, and the goodput target is on a clean link. Random cellular loss makes it
+      back off too much, so revisit with BBR-lite if field traces show low goodput at 5% loss.
+  - choice: Connection IDs, not the address 4-tuple
+    instead: Identify connections by IP and port
+    why: >-
+      Drones change cell towers and addresses mid-flight. An ID in every header lets the connection survive within
+      2 RTT, and leaves the header ready for AEAD later.
+watchOut: >-
+  ACK-only packets must not themselves ask for an ACK, or the two sides ack each other's acks forever. Mark packets
+  that carry only `ACK` frames as not ack-eliciting.

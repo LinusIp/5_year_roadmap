@@ -1,0 +1,69 @@
+overview: >-
+  Fog that catches light: the view frustum is divided into a froxel grid (frustum voxels, here 160x90x64 cells lined up
+  with the screen), a compute pass stores how much light each cell scatters toward the camera using the shadow map,
+  and a second pass sums the cells front to back. The scene then reads the result with one texture lookup per pixel,
+  giving light shafts in under 2 ms at 1080p.
+learn:
+  - name: Participating media
+    ref: pbr-book
+  - name: Froxel grids
+  - name: Phase functions
+  - name: Temporal reprojection
+components:
+  - id: shadow
+    name: Shadow map
+    role: The light's existing shadow map, reused to decide which froxels are lit.
+    tech: OpenGL / Vulkan
+    talksTo: [inject]
+    kind: core
+  - id: inject
+    name: Light injection
+    role: Computes in-scattered light and density per froxel.
+    tech: Compute shader
+    talksTo: [integrate]
+    kind: core
+  - id: integrate
+    name: Integration pass
+    role: Accumulates light and transmittance front to back along each froxel column.
+    tech: Compute shader
+    talksTo: [apply]
+    kind: core
+  - id: apply
+    name: Apply pass
+    role: Fogs each pixel from the integrated volume at its depth.
+    tech: GLSL
+    talksTo: []
+    kind: core
+flow:
+  - component: shadow
+    text: is rendered as usual by the shadow pass and bound for reading in the fog compute pass.
+  - component: inject
+    text: runs one thread per froxel with exponentially spaced slices, jitters the sample along depth, tests the shadow map and stores `σ · light · phase(cosθ) · visibility` in an `RGBA16F` 3D texture.
+  - component: integrate
+    text: walks each column front to back with `T *= exp(-σ·Δz)`, adding light scattered toward the camera, and writes both per slice.
+  - component: apply
+    text: samples the volume at the pixel's `(uv, depth)` and outputs `colour * T + inscatter`, blending with last frame's volume to hide the jitter; the fog pass is timed.
+interface:
+  lang: glsl
+  code: |
+    layout(local_size_x = 8, local_size_y = 8,
+           local_size_z = 1) in;
+    layout(rgba16f, binding = 0)
+      uniform writeonly image3D scatterDensity;
+    uniform sampler2DShadow shadowMap;
+    uniform float density;   // sigma, per metre
+    uniform float g;         // anisotropy, about 0.6
+    uniform float jitter;    // per-frame depth offset
+
+    float hgPhase(float cosTheta, float g);
+    float sliceToViewZ(float slice);  // exponential
+    void main();  // one invocation per froxel
+decisions:
+  - choice: Froxel grid, not a per-pixel march
+    instead: March every pixel's view ray through the shadow map
+    why: >-
+      Per pixel at 1080p with 64 steps is about 130 million shadow lookups; a 160x90x64 grid is under a million, which
+      fits 2 ms. Fog has little fine detail, so the coarse grid loses almost nothing.
+watchOut: >-
+  With 64 slices and fixed sample positions, fog shows bands and flickers as the camera moves. Jitter samples each
+  frame and blend with the reprojected previous volume, dropping history where it falls off-screen.

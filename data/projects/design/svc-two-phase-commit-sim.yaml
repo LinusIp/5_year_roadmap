@@ -1,0 +1,52 @@
+overview: >-
+  A coordinator and three participants written in asyncio that run two-phase commit (everyone votes in a prepare
+  phase, then the coordinator decides) with durable logs, crashes injected at each step and a recovery routine.
+learn:
+  - name: Two-phase commit
+    ref: kleppmann-distributed-systems
+  - name: Durable decision logs
+  - name: Crash recovery
+  - name: Blocking protocols
+components:
+  - id: coordinator
+    name: Coordinator
+    role: Sends prepare, collects votes, logs the decision and sends commit or abort.
+    tech: Python asyncio
+    talksTo: [participants, log]
+    kind: core
+  - id: participants
+    name: Participants
+    role: Vote, log prepared state, then apply the decision.
+    tech: Python asyncio
+    talksTo: [log]
+    kind: core
+  - id: log
+    name: Logs
+    role: An append-only, fsynced file per node.
+    tech: Files
+    talksTo: []
+    kind: core
+  - id: faults
+    name: Fault injector
+    role: Crashes a chosen node at a chosen step and restarts it.
+    tech: Python
+    talksTo: [coordinator, participants]
+    kind: offline
+flow:
+  - component: coordinator
+    text: sends `PREPARE tx=17` to all three participants.
+  - component: participants
+    text: write `PREPARED 17` to their log before voting yes; once prepared they cannot decide alone.
+  - component: log
+    text: gets the coordinator's `COMMIT 17` record, which is the moment the outcome is fixed.
+  - component: participants
+    text: apply commit; if the coordinator crashed before sending it, they **block** until it recovers and replays its log.
+decisions:
+  - choice: Log before every message
+    instead: Keep protocol state in memory
+    why: >-
+      Recovery reads only what was logged, so a node that forgets it voted yes breaks atomicity. The fsync cost is
+      what makes every crash point recoverable.
+watchOut: >-
+  A participant that restarts and forgets it was prepared may abort on its own while others commit. Read the log on
+  startup before answering anything.

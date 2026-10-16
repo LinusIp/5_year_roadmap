@@ -1,0 +1,71 @@
+overview: >-
+  A viewer that loads a Wavefront OBJ file, turns its separate position, UV and normal index lists into one indexed
+  vertex buffer, computes smooth normals when the file has none, and turns the model with an orbit camera. The target
+  is a 1M-triangle model loaded in under 2 s.
+learn:
+  - name: OBJ file format
+  - name: Vertex deduplication
+  - name: Smooth vertex normals
+  - name: Orbit cameras
+    ref: learnopengl
+components:
+  - id: parser
+    name: OBJ parser
+    role: Reads v, vt, vn and f lines and splits polygons into triangles.
+    tech: C++ / Python
+    talksTo: [dedup]
+    kind: core
+  - id: dedup
+    name: Vertex dedup
+    role: Maps each unique index triple to one vertex and builds the index buffer.
+    tech: Hash map
+    talksTo: [normals]
+    kind: core
+  - id: normals
+    name: Normal builder
+    role: Fills in area-weighted smooth normals when the file has none.
+    tech: C++ / NumPy
+    talksTo: [viewer]
+    kind: core
+  - id: viewer
+    name: Orbit viewer
+    role: Uploads the buffers and orbits the camera around the model's centre.
+    tech: OpenGL
+    talksTo: []
+    kind: core
+flow:
+  - component: parser
+    text: parses numbers with `from_chars` (not streams), turns negative indices into `count + i`, and fan-splits each polygon into triangles.
+  - component: dedup
+    text: keys each corner by its `(v, vt, vn)` triple, so a corner shared by six triangles becomes **one vertex**; it prints the vertex count after dedup.
+  - component: normals
+    text: adds each face's cross product (its length is twice the area, so big faces count more) to its three vertices, then normalises.
+  - component: viewer
+    text: uploads one VBO and IBO, orbits by yaw, pitch and distance around the bounding-box centre, and reports load time.
+interface:
+  lang: cpp
+  code: |
+    struct Vertex { Vec3 pos; Vec2 uv; Vec3 nrm; };
+
+    struct Key { int v, vt, vn; };   // -1 if absent
+    struct KeyHash {
+      size_t operator()(const Key& k) const;
+    };
+
+    struct Mesh {
+      std::vector<Vertex>   vertices;
+      std::vector<uint32_t> indices;  // 3 per tri
+    };
+
+    Mesh load_obj(const std::string& path);
+    void compute_normals(Mesh& m);    // area-weighted
+decisions:
+  - choice: Hash index triples, not vertex values
+    instead: Hash or compare the float positions, UVs and normals
+    why: >-
+      Index triples are exact integers, so no epsilon is needed, and 3M lookups for 1M triangles fit the 2 s budget
+      with a reserved hash map. Weld by position only if a model shows cracks along UV seams.
+watchOut: >-
+  Negative indices count back from the end of the list so far, and all indices start at 1; both cause crashes or
+  scrambled meshes. Convert them once in the parser, and warn on concave polygons, since a fan draws triangles outside
+  them.

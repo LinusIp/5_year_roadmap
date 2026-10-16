@@ -1,0 +1,115 @@
+overview: >-
+  A cited Q&A bot over 140 pages of HR policy. Ingest splits the PDFs into chunks that remember their page, and
+  builds two indexes: BM25 (keyword match) and vectors (meaning match). A question searches both, a reranker keeps
+  the best 5 chunks, the LLM answers only from them with page citations, and it refuses when the evidence is weak. An
+  eval harness scores every configuration on 120 gold questions, so the choice of setup rests on numbers.
+learn:
+  - name: Chunking strategy
+  - name: Hybrid retrieval
+    ref: llm-zoomcamp
+  - name: Cross-encoder reranking
+  - name: Retrieval metrics
+    ref: llm-zoomcamp
+  - name: Faithfulness judging
+  - name: Refusal thresholds
+stats:
+  - value: ≥ 0.90
+    label: recall@5
+  - value: ≥ 0.90
+    label: judged faithfulness
+  - value: < 6 s
+    label: p95 per answer
+components:
+  - id: chunker
+    name: PDF chunker
+    role: Parses the policy PDFs into overlapping chunks tagged with document and page.
+    tech: Python · pypdf
+    talksTo: [bm25, vectors]
+    kind: offline
+  - id: api
+    name: Ask endpoint
+    role: Takes an employee's question and returns the answer with citations.
+    tech: Python
+    talksTo: [bm25, vectors]
+    kind: core
+  - id: bm25
+    name: BM25 index
+    role: Finds chunks that share exact words such as "parental leave" or "Form HR-12".
+    tech: SQLite FTS
+    talksTo: [reranker]
+    kind: core
+  - id: vectors
+    name: Vector index
+    role: Finds chunks with similar meaning even when the wording differs.
+    tech: sentence-transformers · FAISS
+    talksTo: [reranker]
+    kind: core
+  - id: reranker
+    name: Reranker
+    role: Scores each question and chunk pair together and keeps the top 5.
+    tech: Cross-encoder
+    talksTo: [generator]
+    kind: core
+  - id: generator
+    name: Answer generator
+    role: Prompts the LLM with the 5 chunks, refuses on weak evidence, checks every citation.
+    tech: Python
+    talksTo: [llm]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Writes the answer from the given chunks only.
+    tech: Hosted LLM
+    talksTo: []
+    kind: external
+  - id: eval
+    name: Eval harness
+    role: Runs the 120 gold questions per configuration and writes the ablation table.
+    tech: Python CLI
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: receives "How many days of bereavement leave do I get?" and sends it to both indexes.
+  - component: bm25
+    text: returns its top 20 chunks by keyword score.
+  - component: vectors
+    text: embeds the question and returns its top 20 chunks by cosine similarity.
+  - component: reranker
+    text: merges the two lists, rescores each pair with a cross-encoder (a model that reads question and chunk together) and keeps 5.
+  - component: generator
+    text: refuses with "please ask HR" if the best rerank score is below `min_score`; otherwise prompts the LLM to cite `[doc p.N]` and drops any citation not among the 5 chunks.
+  - component: eval
+    text: offline, replays all 120 gold questions and reports **recall@5**, MRR, faithfulness and refusal precision per chunk size and retriever.
+interface:
+  lang: http
+  code: |
+    POST /ask
+    { "question": "How many days of bereavement
+      leave do I get?" }
+
+    200 OK
+    { "answer": "Up to 5 paid days for close
+        family members…",
+      "citations": [
+        { "doc": "leave-policy.pdf", "page": 7 } ],
+      "refused": false }
+decisions:
+  - choice: Hybrid BM25 and vectors
+    instead: Embeddings only
+    why: >-
+      Policy text is full of exact terms (form numbers, "statutory sick pay") that embeddings blur. Keep it only
+      if the ablation table shows recall@5 rising over vectors alone.
+  - choice: Refuse below a rerank threshold
+    instead: Always answer
+    why: >-
+      A wrong answer about leave or pay costs more than "please ask HR". Tune `min_score` on the gold set for
+      refusal precision, and revisit as the policy pages change.
+  - choice: Local embeddings and FAISS
+    instead: A hosted vector database
+    why: >-
+      140 pages make roughly 600 chunks, which fit in memory and rebuild in well under 5 minutes. Documents stay
+      on the machine and the $10 budget goes to LLM calls.
+watchOut: >-
+  Gold questions written while looking at chunks reuse their exact words and flatter retrieval. Write them from
+  the 50 real weekly questions, in employees' wording, before you decide on chunking.

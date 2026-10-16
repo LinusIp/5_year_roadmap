@@ -1,0 +1,120 @@
+overview: >-
+  A key-value service built on your own Raft: clients send Get, Put and Append to a group's leader, the leader puts
+  each operation through the Raft log, and every replica applies it to the same state machine, which remembers the
+  last request per client so retries apply once. A shard controller, itself replicated, publishes numbered
+  configurations that say which group owns which shard. Groups follow them in order and pull shard data and duplicate
+  tables from the old owner through Raft before serving those shards.
+learn:
+  - name: Linearizability
+    ref: kleppmann-distributed-systems
+  - name: Replicated state machines
+    ref: mit-6-5840
+  - name: Exactly-once semantics
+  - name: Sharding and rebalancing
+    ref: ddia
+  - name: State snapshots
+stats:
+  - value: 100×
+    label: every lab 4 and 5 test in a row, race on
+  - value: '0'
+    label: double-applied retries across moves
+components:
+  - id: clerk
+    name: Clerk
+    role: Client library that finds the shard's group, retries on wrong leader or wrong group, and tags requests.
+    tech: Go
+    talksTo: [kvserver, controller]
+    kind: core
+  - id: kvserver
+    name: KV server
+    role: Submits each operation to Raft and answers only once that entry is applied.
+    tech: Go · labrpc
+    talksTo: [raft]
+    kind: core
+  - id: raft
+    name: Raft
+    role: Your Raft from project 37, which orders operations and shard handoffs in one log per group.
+    tech: Go
+    talksTo: [statemachine]
+    kind: core
+  - id: statemachine
+    name: State machine
+    role: Holds the shards' key-value data and the last request id per client, and snapshots both.
+    tech: Go maps · labgob
+    talksTo: []
+    kind: core
+  - id: controller
+    name: Shard controller
+    role: A replicated service holding numbered configurations that map shards to groups.
+    tech: Go · Raft
+    talksTo: [migrator]
+    kind: core
+  - id: migrator
+    name: Shard migrator
+    role: Polls for the next configuration and pulls incoming shards and their duplicate tables from the old owner.
+    tech: goroutine
+    talksTo: [raft]
+    kind: core
+  - id: tests
+    name: Test loop
+    role: Runs the lab 4 and 5 suites 100 times in parallel with the race detector.
+    tech: go test -race · script
+    talksTo: []
+    kind: offline
+flow:
+  - component: clerk
+    text: >-
+      sends `Append(key, value, clientId, seq)` to the group that owns `key2shard(key)` in its cached config, and
+      retries with the same `seq` on `ErrWrongLeader` or `ErrWrongGroup`.
+  - component: kvserver
+    text: >-
+      checks it serves that shard now, calls `Start(op)`, then waits for the entry at **that index** and checks its
+      term before replying.
+  - component: raft
+    text: commits the operation on a majority of the group and delivers it on `applyCh`.
+  - component: statemachine
+    text: >-
+      applies it only if `seq > lastSeq[clientId]`, and snapshots data plus the duplicate table when the Raft state
+      nears `maxraftstate`.
+  - component: controller
+    text: >-
+      publishes config N+1 after a join or leave, moving the **minimum** number of shards; groups poll it about every
+      100 ms.
+  - component: migrator
+    text: >-
+      takes configs strictly in order, pulls each incoming shard and its duplicate table through Raft, serves it, and
+      only then lets the old owner delete it.
+interface:
+  lang: go
+  code: |
+    type PutAppendArgs struct {
+      Key      string
+      Value    string
+      Op       string // "Put" or "Append"
+      ClientId int64
+      Seq      int64  // same on every retry
+    }
+    type Config struct {
+      Num    int              // config number
+      Shards [NShards]int     // shard -> group id
+      Groups map[int][]string // group -> servers
+    }
+decisions:
+  - choice: Duplicate table in the state machine
+    instead: A per-server map kept only in memory
+    why: >-
+      A retried Append can cross a restart, a leader change and a shard move, so the table must travel in the
+      snapshot and the shard transfer or the retry applies twice.
+  - choice: New owner pulls shards through Raft
+    instead: Old owner pushes shards when it notices
+    why: >-
+      The new group knows when it is ready, and logging the shard in Raft makes every replica start serving it at the
+      same point in the log.
+  - choice: Configurations one at a time, in order
+    instead: Jump straight to the latest config
+    why: >-
+      Skipping N+1 loses the handoffs it describes. Revisit for the stretch goal of serving shards that are not
+      moving.
+watchOut: >-
+  A server that replies after losing leadership breaks linearizability. Wait for the entry at the index you submitted
+  and check its term matches, or answer ErrWrongLeader.

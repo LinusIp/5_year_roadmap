@@ -1,0 +1,108 @@
+overview: >-
+  A small serving stack in Docker Compose that puts a safety net around Autoloop's car-price model. A router sends a
+  canary share of requests (say 5%) to a candidate model, scores every request on the candidate in the background
+  as a shadow, and logs both answers. A drift monitor compares input and price distributions with the training data
+  using PSI and KS tests, and a rollback controller pulls the candidate within 60 s when a rule fires.
+learn:
+  - name: Canary and shadow deploys
+    ref: google-sre-book
+  - name: Data drift and PSI
+  - name: Kolmogorov–Smirnov test
+  - name: Model registry
+    ref: mlops-zoomcamp
+  - name: Metrics and alerting
+    ref: prometheus-docs
+stats:
+  - value: < 60 s
+    label: rollback after a rule fires
+  - value: < 5 ms
+    label: router overhead p95
+  - value: < 1 h
+    label: to detect injected drift
+components:
+  - id: client
+    name: Marketplace app
+    role: Asks for a price estimate for each listed car.
+    tech: HTTP client
+    talksTo: [router]
+    kind: external
+  - id: registry
+    name: Registry
+    role: Stores model versions with their metrics and marks which is stable and which is candidate.
+    tech: SQLite · model files
+    talksTo: [router]
+    kind: core
+  - id: router
+    name: Router
+    role: Splits traffic by canary percentage and fires shadow calls without waiting for them.
+    tech: FastAPI
+    talksTo: [models, shadow]
+    kind: core
+  - id: models
+    name: Model servers
+    role: Stable and candidate price models, one container each.
+    tech: scikit-learn · Docker
+    talksTo: []
+    kind: core
+  - id: shadow
+    name: Shadow logger
+    role: Records request id, features and both predictions for every request.
+    tech: Python · Parquet
+    talksTo: [monitor]
+    kind: core
+  - id: monitor
+    name: Drift monitor
+    role: Every 10 minutes computes PSI and KS on inputs and outputs and exports them as metrics.
+    tech: Python · Prometheus
+    talksTo: [rollback]
+    kind: core
+  - id: rollback
+    name: Rollback controller
+    role: Applies the rollback rule and sets the canary share to 0 in the registry.
+    tech: Python · Alertmanager hook
+    talksTo: [registry]
+    kind: core
+flow:
+  - component: registry
+    text: >-
+      serves the current config, e.g. stable `price-v7`, candidate `price-v8`, `canary: 0.05`, which the router
+      reloads every few seconds.
+  - component: router
+    text: receives `POST /predict`, hashes the listing id to pick stable or candidate, and sends a **shadow** copy to the other model.
+  - component: models
+    text: return a price; the router answers the client from the chosen one within the 5 ms overhead budget.
+  - component: shadow
+    text: writes the features and both predictions under the **same** request id, so models are compared on identical cars.
+  - component: monitor
+    text: computes PSI per feature against the training sample and KS on predicted prices; an alert needs `PSI > 0.25` for 3 windows in a row.
+  - component: rollback
+    text: on the alert, sets the candidate's share to 0 and the router stops sending it traffic within 60 s; this is the one loop in the system.
+interface:
+  lang: http
+  code: |
+    POST /predict
+    { "listing_id": "L-55821", "make": "Toyota",
+      "model": "Corolla", "year": 2019,
+      "mileage_km": 64000 }
+
+    200 OK
+    { "price": 14350,
+      "model_version": "price-v8",
+      "route": "canary" }
+decisions:
+  - choice: Shadow scoring on every request
+    instead: Compare canary and stable on their own traffic
+    why: >-
+      A 5% canary sees different cars from the other 95%, so their errors are not comparable. Shadowing scores the same
+      request on both models.
+  - choice: PSI with a persistence rule
+    instead: Alert on any single window over threshold
+    why: >-
+      Single-window PSI on 10 minutes of traffic is noisy and causes alert fatigue. Three windows in a row still
+      catches the injected shift well inside 1 hour.
+  - choice: Docker Compose on one host
+    instead: Kubernetes
+    why: No managed cloud is allowed, and five services fit one machine. Revisit when models need to scale independently.
+watchOut: >-
+  Comparing models on different samples of traffic, or tuning PSI thresholds so tight they fire every day, makes the
+  monitor useless. Join on request id and measure the false alarm rate on a week without injected drift.

@@ -1,0 +1,94 @@
+overview: >-
+  A one-motor bench that measures what a propeller really does: a 5 kg load cell for thrust, a shunt for current
+  and voltage, and an optical pulse for RPM, all sampled at 1 kHz by a Pico while it steps the ESC throttle through
+  a scripted sweep. A hardware E-stop and an over-current trip cut power independently of the firmware. A Python
+  script turns each sweep into an efficiency map in grams of thrust per watt.
+learn:
+  - name: Load-cell bridges
+    ref: art-of-electronics
+  - name: Current sensing
+  - name: ESC PWM control
+  - name: Hardware safety trips
+  - name: Calibration curves
+stats:
+  - value: ±1 %
+    label: thrust error of 5 kg full scale
+  - value: ±2 %
+    label: current error up to 40 A
+  - value: < 20 ms
+    label: E-stop to power off
+components:
+  - id: sensors
+    name: Bench sensors
+    role: Load cell with HX711-class amplifier, 50 A current sensor, voltage divider and optical RPM sensor.
+    tech: Load cell · shunt · IR
+    talksTo: [acq]
+    kind: external
+  - id: acq
+    name: Acquisition loop
+    role: Samples thrust, current, voltage and RPM at 1 kHz and applies calibration.
+    tech: C++ · Pico
+    talksTo: [safety]
+    kind: core
+  - id: safety
+    name: Safety trip
+    role: Opens the contactor on E-stop or over 40 A, in hardware and firmware.
+    tech: Comparator · contactor
+    talksTo: [esc, stream]
+    kind: core
+  - id: esc
+    name: ESC and motor
+    role: Brushless ESC driven by a 50 Hz PWM throttle, spinning the motor and prop behind a guard.
+    tech: ESC · BLDC
+    talksTo: []
+    kind: external
+  - id: stream
+    name: Data stream
+    role: Sends timestamped samples to the PC and runs throttle steps the PC asks for.
+    tech: USB serial
+    talksTo: [sweep]
+    kind: core
+  - id: sweep
+    name: Sweep scripts
+    role: Steps throttle from 10 to 100 percent, holds each step, and writes the CSV.
+    tech: Python
+    talksTo: [analysis]
+    kind: core
+  - id: analysis
+    name: Efficiency analysis
+    role: Averages each step and plots thrust, power and g/W across throttle.
+    tech: pandas · Matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: sweep
+    text: sends the next step, for example `THR 45` with a `3 s` hold, after the motor has spun up.
+  - component: acq
+    text: reads all four signals every `1 ms` and converts raw counts with the calibration, e.g. `grams = (raw − tare) × k`.
+  - component: safety
+    text: trips if current exceeds `40 A` or the E-stop opens; the comparator cuts the contactor **without waiting for firmware**, inside `20 ms`.
+  - component: esc
+    text: receives the throttle as a `1000–2000 µs` pulse; the motor settles before samples count toward the step average.
+  - component: stream
+    text: sends each sample as one CSV line with a time stamp and sequence number to the PC.
+  - component: sweep
+    text: averages the settled part of each step and computes `g/W = thrust_g / (V × I)` for the efficiency map.
+interface:
+  lang: shell
+  code: |
+    # PC -> bench
+    ARM
+    THR 45          # throttle percent
+    STOP
+    # bench -> PC, 1 kHz
+    t_ms,seq,thrust_g,amps,volts,rpm,trip
+    120034,52011,1412.6,18.32,22.41,8850,0
+    120035,52012,1413.1,18.35,22.40,8852,0
+decisions:
+  - choice: Hardware over-current trip
+    instead: Firmware-only cut-off
+    why: A stuck loop or USB hang must not leave 40 A flowing past a spinning prop. The comparator and contactor act on their own, firmware only reports.
+  - choice: Average settled steps, not raw 1 kHz
+    instead: Use every raw sample for the map
+    why: The load cell rings with prop vibration; averaging 2 s of a settled step gives repeatable g/W. Keep the raw log for spotting resonance.
+watchOut: Prop vibration shakes the load cell and shows up as noise many times larger than the 1 percent target. Stiffen the mount and low-pass filter the thrust before trusting a step average.

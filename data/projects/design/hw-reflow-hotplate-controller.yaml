@@ -1,0 +1,70 @@
+overview: >-
+  A hot plate turned into a reflow station: a thermocouple amplifier reads the plate, a PID controller with
+  feed-forward drives a solid-state relay (SSR) that switches the heater in whole mains cycles, and a setpoint generator
+  follows a leaded solder profile of ramp, soak near 150 to 180 °C, peak about 215 °C, then cooling. The target is
+  tracking within 5 °C without overshooting the peak.
+learn:
+  - name: PID control
+    ref: feedback-systems
+  - name: Feed-forward
+  - name: Integral windup
+  - name: Time-proportioning output
+components:
+  - id: plate
+    name: Hot plate
+    role: The heater and plate, with a thermocouple clamped to the surface.
+    tech: Hot plate · thermocouple amp
+    talksTo: [pid]
+    kind: external
+  - id: profile
+    name: Profile generator
+    role: Gives the setpoint and its rate of change every 250 ms.
+    tech: C
+    talksTo: [pid]
+    kind: core
+  - id: pid
+    name: PID with feed-forward
+    role: Turns setpoint, rate and measured temperature into a heater duty.
+    tech: C · MCU
+    talksTo: [ssr]
+    kind: core
+  - id: ssr
+    name: SSR output
+    role: Switches the mains heater on for part of each 2 s window, in an earthed, enclosed box.
+    tech: Zero-cross SSR
+    talksTo: [plate]
+    kind: core
+flow:
+  - component: plate
+    text: gets a full-power step test first, which records heating rate, dead time (the delay before temperature starts rising) and cooling rate to set the gains.
+  - component: profile
+    text: ramps at about 1.5 °C/s to 150 °C, soaks up to 180 °C over 90 s, ramps to a 215 °C peak, then switches the heater off to cool.
+  - component: pid
+    text: adds feed-forward `k_ramp·dSP/dt + k_hold·(SP - 25)` to PID on the error, takes the derivative of the measurement, and **freezes the integral** while the output is saturated.
+  - component: ssr
+    text: turns the 0 to 100% duty into on time in each 2 s window at zero crossings, which closes the loop; the log reports max tracking error and peak temperature.
+interface:
+  lang: c
+  code: |
+    typedef struct {
+      float kp, ki, kd;
+      float k_ramp;   /* duty per degC/s of ramp */
+      float k_hold;   /* duty per degC above room */
+      float integ, prev_temp;
+    } Pid;
+
+    /* called every 250 ms; returns duty 0..1 */
+    float pid_step(Pid* p, float sp, float dsp_dt,
+                   float temp, float dt);
+
+    /* duty -> on-time in a 2 s window of SSR cycles */
+    void ssr_set_duty(float duty);
+decisions:
+  - choice: Feed-forward plus PID
+    instead: PID alone
+    why: >-
+      A hot plate lags by tens of seconds, so PID alone only reacts once it is already behind, then overshoots the peak.
+      Feed-forward from the step test supplies most of the power each ramp needs, leaving PID only small errors to fix.
+watchOut: >-
+  While the heater sits at 100% on a ramp, the integral keeps growing and the plate overshoots the peak by 20 °C or
+  more. Freeze the integral whenever the output is saturated and reset it at each phase change.

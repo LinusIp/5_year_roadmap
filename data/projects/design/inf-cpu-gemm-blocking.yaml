@@ -1,0 +1,48 @@
+overview: >-
+  An fp32 matrix multiply built in stages: naive loops, loop reordering, blocking so tiles fit the L1 and L2 caches,
+  packing panels into contiguous buffers for a vectorized micro-kernel, and OpenMP threads. Each stage is placed on a
+  roofline plot of your measured peaks, with the goal of half the single-core FMA peak.
+learn:
+  - name: Cache blocking
+    ref: mit-6-172
+  - name: Register micro-kernels
+  - name: Roofline model
+    ref: cs149
+  - name: Panel packing
+components:
+  - id: stages
+    name: GEMM stages
+    role: Naive, reordered, blocked, packed and threaded versions behind one interface.
+    tech: C++20 · OpenMP
+    talksTo: [bench]
+    kind: core
+  - id: peaks
+    name: Peak probes
+    role: Measure single-core FMA throughput and memory bandwidth.
+    tech: C++ microbenchmarks
+    talksTo: [bench]
+    kind: offline
+  - id: bench
+    name: Bench and plot
+    role: Times each stage, computes GFLOP/s and draws the roofline.
+    tech: perf · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: stages
+    text: reorder the loops to `i-k-j`, which streams rows of B and C, so the inner loop is unit-stride and vectorizes.
+  - component: stages
+    text: add blocking, with `MC x KC` tiles of A sized for L2 and `KC x NR` panels of B for L1, and pack them into contiguous buffers.
+  - component: stages
+    text: finish with a **micro-kernel** that keeps a `6 x 16` block of C in registers and updates it with FMAs for each k, then split the outer loop across OpenMP threads.
+  - component: bench
+    text: reports GFLOP/s `= 2·n³ / time` and percent of the measured peak, with `perf stat` cache misses per stage.
+decisions:
+  - choice: Measure peaks yourself
+    instead: Use the CPU's spec-sheet numbers
+    why: >-
+      Turbo clocks, power limits and memory setup make datasheet peaks optimistic. A 50% target is only meaningful
+      against what your machine actually achieves.
+watchOut: >-
+  Packing costs time on every call, and for small matrices it can cost more than it saves. Time packing separately and
+  report where in size it starts to pay off.

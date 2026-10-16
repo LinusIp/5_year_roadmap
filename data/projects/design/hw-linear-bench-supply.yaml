@@ -1,0 +1,70 @@
+overview: >-
+  A 1.2 to 15 V, 1 A bench supply: a transformer and bridge rectifier charge a large capacitor, an LM317 regulator
+  holds the output at `1.25 V × (1 + R2/R1)` set by a potentiometer, and a sense resistor with a transistor limits the
+  current to 1 A. You measure load regulation (how far the output sags from 0 to 1 A) and ripple, and size the heatsink
+  for the worst case, low output voltage at full current.
+learn:
+  - name: Rectifiers and filter capacitors
+    ref: learning-the-art-of-electronics
+  - name: Linear regulators
+    ref: art-of-electronics
+  - name: Thermal resistance
+  - name: Load regulation
+components:
+  - id: rect
+    name: Rectifier stage
+    role: Turns mains through a fused transformer into about 24 V of smoothed DC.
+    tech: 18 V transformer · bridge · 4,700 µF
+    talksTo: [reg]
+    kind: core
+  - id: reg
+    name: Regulator
+    role: Holds the set output voltage whatever the load and input ripple.
+    tech: LM317 · heatsink
+    talksTo: [limit]
+    kind: core
+  - id: limit
+    name: Current limiter
+    role: Pulls the regulator's adjust pin down once output current reaches 1 A.
+    tech: 0.6 Ω sense · NPN
+    talksTo: [meas]
+    kind: core
+  - id: meas
+    name: Test bench
+    role: Steps the load and records output voltage and ripple.
+    tech: Meter · scope · load resistors
+    talksTo: []
+    kind: offline
+flow:
+  - component: rect
+    text: gives about 24 V peak with a fuse and the case earthed; ripple is `ΔV = I / (2·f·C)`, about 2.1 V at 1 A and 50 Hz.
+  - component: reg
+    text: sets `Vout = 1.25·(1 + R2/R1)` with `R1 = 220 Ω` and a 2.5 kΩ pot, about 1.25 to 15.5 V, with 10 µF on the adjust pin to cut ripple further.
+  - component: limit
+    text: turns on its NPN when 1 A gives 0.6 V across the sense resistor, which lowers the output so current stays near 1 A.
+  - component: meas
+    text: measures at the output terminals for 0, 0.25, 0.5 and 1 A; done is load regulation **under 1%** and ripple under 5 mV.
+interface:
+  lang: python
+  code: |
+    # design numbers, checked on the bench
+    R1, R2_max, R_sense = 220, 2500, 0.6
+    v_out_max = 1.25 * (1 + R2_max / R1)  # 15.5 V
+    i_limit = 0.6 / R_sense               # 1.0 A
+    ripple = 1.0 / (2 * 50 * 4700e-6)     # 2.1 V
+    p_worst = (23 - 1.2) * 1.0            # about 22 W
+
+    def t_junction(t_amb, p, r_jc, r_cs, r_sa):
+        return t_amb + p * (r_jc + r_cs + r_sa)
+
+    load_reg = (v_0a - v_1a) / v_0a       # under 1%
+decisions:
+  - choice: Heatsink sized for 1.2 V at 1 A
+    instead: A heatsink sized for typical settings
+    why: >-
+      At 1.2 V and 1 A the regulator drops about 22 V, roughly 22 W, and the LM317's own 4 to 5 °C/W from junction to
+      case limits what any heatsink can do. Move the heat into a larger pass transistor, or set a lower current limit
+      below 5 V; check the tab temperature after 10 minutes at full load.
+watchOut: >-
+  At 1 A, 50 mΩ of test leads drops 50 mV, which reads as poor regulation. Measure with a separate pair of sense
+  leads right at the output terminals, and with the scope's ground spring instead of the long lead.

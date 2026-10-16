@@ -1,0 +1,109 @@
+overview: >-
+  A memory layer for Penny's budgeting assistant that keeps a small store of facts about each user instead of the
+  whole chat history. After every turn an extractor pulls out facts like "saving £3,000 for a car by June", and an
+  updater adds, changes or retires stored memories so a newer fact replaces a contradicted one. Before each reply a
+  retriever puts only the top few memories, ranked by relevance and recency, into the prompt, and 100 simulated
+  six-month histories test recall against full-history and summary-only prompts.
+learn:
+  - name: Long-term agent memory
+  - name: Embedding retrieval
+    ref: llm-zoomcamp
+  - name: Recency weighting
+  - name: Contradiction handling
+  - name: Synthetic benchmarks
+stats:
+  - value: ≥ 85%
+    label: recall on 6-month histories
+  - value: ≥ 70%
+    label: fewer prompt tokens
+  - value: < 2 s
+    label: memory update p95
+components:
+  - id: chat
+    name: Chat API
+    role: Takes the user's message and returns the assistant's reply.
+    tech: FastAPI
+    talksTo: [retriever]
+    kind: core
+  - id: retriever
+    name: Retriever
+    role: Scores memories by embedding similarity, recency and importance and returns the top 8.
+    tech: Python · embeddings
+    talksTo: [llm]
+    kind: core
+  - id: llm
+    name: LLM API
+    role: Writes the reply, and in a separate call extracts facts from the finished turn.
+    tech: Hosted LLM
+    talksTo: [extractor]
+    kind: external
+  - id: extractor
+    name: Extractor
+    role: Turns the latest turn into typed facts such as goal, budget, preference, with a date.
+    tech: Python · JSON schema
+    talksTo: [updater]
+    kind: core
+  - id: updater
+    name: Updater
+    role: Compares each new fact with similar stored ones and chooses add, update, forget or ignore.
+    tech: Python · LLM call
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Memory store
+    role: One row per memory with type, text, embedding, valid-from date and superseded-by link.
+    tech: SQLite
+    talksTo: [retriever]
+    kind: core
+  - id: bench
+    name: Benchmark generator
+    role: Builds 100 personas and six months of sessions with planted facts, changes and probe questions.
+    tech: Python · LLM API
+    talksTo: []
+    kind: offline
+flow:
+  - component: chat
+    text: receives "Can I afford the weekend trip?" from user `u-118` in session 41.
+  - component: retriever
+    text: >-
+      embeds the message and returns the top 8 memories by `0.7·similarity + 0.3·recency`, skipping any marked
+      superseded, about 300 tokens instead of the whole history.
+  - component: llm
+    text: answers using those memories, e.g. the current car-savings goal and the monthly eating-out budget.
+  - component: extractor
+    text: >-
+      pulls new facts from the turn as JSON, such as `type = budget` with text `travel budget £200/month` and today's
+      date.
+  - component: updater
+    text: >-
+      finds the old "travel budget £150" memory, marks it **superseded** and adds the new one, inside the 2 s p95;
+      the next turn reads the store again, so memory is a loop across turns.
+  - component: store
+    text: keeps the full change history, so an evaluator can ask "what was the budget in March?" and check the answer.
+interface:
+  lang: json
+  code: |
+    { "id": "m-2291", "user": "u-118",
+      "type": "goal",
+      "text": "Save £3,000 for a car by June",
+      "valid_from": "2026-02-03",
+      "superseded_by": null,
+      "importance": 0.9,
+      "source_turn": "s12-t4" }
+decisions:
+  - choice: Typed fact store
+    instead: A rolling summary of the history
+    why: >-
+      A summary rewritten every session slowly loses or blurs old goals, and you cannot tell which fact changed when.
+      Discrete memories with dates can be updated and retired one by one.
+  - choice: Supersede, do not delete
+    instead: Overwrite the old memory
+    why: Keeping the old fact with a link lets the assistant answer "what did I plan before?" and makes contradiction bugs visible.
+  - choice: SQLite with embeddings in a column
+    instead: A vector database
+    why: >-
+      Each user has hundreds of memories, not millions, so a brute-force similarity scan per user is fast. Revisit if
+      memories per user grow past tens of thousands.
+watchOut: >-
+  Stale memories can outrank new ones and the assistant repeats an abandoned goal. Also, if the benchmark's probe
+  questions repeat the dialogue's wording, recall looks better than it is; phrase probes differently from the facts.

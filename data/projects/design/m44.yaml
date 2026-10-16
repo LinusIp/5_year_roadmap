@@ -1,0 +1,131 @@
+overview: >-
+  A 12 V brushed gearmotor driven through an H-bridge at 20 kHz PWM, with a shunt that measures motor current and a
+  quadrature encoder that measures speed. You first identify the motor's resistance, inductance, back-EMF constant,
+  inertia and friction from bench measurements, then design a PI speed loop on that model in Python and check that
+  the real step response matches the predicted one. A current limiter and a stall supervisor protect the bridge, and
+  you test both on purpose.
+learn:
+  - name: H-bridges and flyback
+    ref: art-of-electronics
+  - name: PWM power stages
+    ref: cu-boulder-power-electronics
+  - name: System identification
+    ref: brian-douglas-control
+  - name: PI design on a model
+    ref: feedback-systems
+  - name: Integrator anti-windup
+    ref: brian-douglas-control
+  - name: DC motor dynamics
+    ref: mit-2-004
+stats:
+  - value: < 1 %
+    label: steady-state speed error, 20–100 % of rated
+  - value: < 200 ms
+    label: stall to bridge trip
+  - value: ±10 %
+    label: model against measured open-loop step
+components:
+  - id: design
+    name: Model and design
+    role: Fits R, L, Ke, J and friction from logged steps and picks the PI gains for the target response.
+    tech: Python · SciPy · python-control
+    talksTo: [pi]
+    kind: offline
+  - id: encoder
+    name: Encoder timer
+    role: Counts quadrature edges in hardware and turns the count difference per period into speed.
+    tech: Timer encoder mode
+    talksTo: [pi]
+    kind: core
+  - id: pi
+    name: PI controller
+    role: Turns the speed error into a voltage command every 1 ms, with anti-windup.
+    tech: C · 1 kHz ISR
+    talksTo: [limiter]
+    kind: core
+  - id: limiter
+    name: Current limiter
+    role: Clamps the command so the measured motor current stays at or below the set limit.
+    tech: C
+    talksTo: [pwm]
+    kind: core
+  - id: pwm
+    name: PWM and bridge
+    role: Converts the duty cycle into motor voltage through centre-aligned 20 kHz PWM.
+    tech: Timer · DRV8871
+    talksTo: [motor, adc]
+    kind: core
+  - id: motor
+    name: Gearmotor
+    role: The plant, a 12 V brushed motor with a quadrature encoder on its shaft.
+    tech: 37 mm gearmotor
+    talksTo: [encoder]
+    kind: external
+  - id: adc
+    name: Shunt ADC
+    role: Samples the amplified shunt voltage at the PWM centre, away from switching edges.
+    tech: INA240 · MCU ADC
+    talksTo: [limiter, supervisor]
+    kind: core
+  - id: supervisor
+    name: Supervisor
+    role: Watches current and speed and disables the bridge on a stall.
+    tech: C
+    talksTo: [pwm]
+    kind: core
+flow:
+  - component: design
+    text: >-
+      fits logged voltage steps to a model of the motor and places the PI gains for a target such as **5 % overshoot**
+      and 150 ms settling.
+  - component: encoder
+    text: >-
+      gives the count every 1 ms; the difference from the last count, times a scale, is the speed estimate `w`.
+  - component: pi
+    text: >-
+      computes `u = Kp*e + Ki*∫e` from `e = w_ref - w`, and stops integrating while the output is clamped.
+  - component: limiter
+    text: >-
+      lowers `u` whenever the shunt current is at the limit, so the motor never draws more than you set.
+  - component: pwm
+    text: >-
+      writes `u / V_bus` as the duty cycle; the bridge drives the motor and the encoder closes the **speed loop**.
+  - component: adc
+    text: >-
+      is triggered at the centre of each PWM period, when the current is steady, and converts the shunt voltage to
+      amps.
+  - component: supervisor
+    text: >-
+      sees high current with near-zero speed for too long and **disables the bridge** within 200 ms.
+interface:
+  lang: c
+  code: |
+    /* 1 kHz control ISR, timer-triggered */
+    void control_isr(void) {
+      int16_t d = (int16_t)(TIM_ENC->CNT - last);
+      last = TIM_ENC->CNT;
+      float w = d * RAD_PER_COUNT / DT;
+      float u = pi_step(&pi, w_ref - w);
+      u = current_limit(u, i_shunt_a);
+      pwm_set_duty(u / V_BUS);
+      supervisor_check(i_shunt_a, w);
+    }
+decisions:
+  - choice: Driver IC first
+    instead: A discrete MOSFET bridge with a gate driver
+    why: >-
+      The DRV8871 class has dead time, flyback paths and protection built in, so the first direction change does not
+      kill the bridge. A discrete bridge is worth it only if you move on to a BLDC.
+  - choice: PI speed loop with a current clamp
+    instead: A cascaded inner current loop
+    why: >-
+      The MVP needs speed control and a tested current limit, which a clamp on the PI output gives. The inner current
+      loop is the stretch goal, and the write-up says what it would buy.
+  - choice: Gains from the identified model
+    instead: Tuning by feel on the bench
+    why: >-
+      The done-when test compares predicted and measured overshoot within 5 points and settling within 20 %, which
+      only makes sense if the gains came from the model.
+watchOut: >-
+  When the current limit saturates the output, a plain integrator keeps growing and the motor overshoots badly once
+  the limit releases. Stop integrating while clamped, and test it with a deliberate stall.

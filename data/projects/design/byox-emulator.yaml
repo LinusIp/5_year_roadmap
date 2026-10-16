@@ -1,0 +1,113 @@
+overview: >-
+  A CHIP-8 interpreter first, then a Game Boy CPU core (the Sharp LR35902) that passes Blargg's public test ROMs, both
+  behind an SDL front end. A loader maps the ROM into memory, a bus routes every read and write to ROM, RAM or I/O
+  registers, and the CPU executes one instruction per step and returns the cycles it took. Timers and interrupts
+  advance by those cycles, and the front end runs one frame's worth of cycles before it draws, plays sound and reads
+  keys at 60 Hz.
+learn:
+  - name: Fetch-decode-execute
+    ref: nand2tetris
+  - name: Flags and two's complement
+    ref: cs61c
+  - name: Memory-mapped I/O
+    ref: harris-ddca
+  - name: Cycle-based timing
+  - name: Test ROMs as oracle
+stats:
+  - value: 11 of 11
+    label: cpu_instrs sub-tests, plus instr_timing
+  - value: 100,000
+    label: instructions matching a known-good trace
+  - value: "10"
+    label: classic CHIP-8 ROMs play
+components:
+  - id: rom
+    name: ROM file
+    role: A game or test ROM, CHIP-8 or Game Boy.
+    tech: Binary file
+    talksTo: [bus]
+    kind: external
+  - id: frontend
+    name: SDL front end
+    role: Runs the core for one frame of cycles, then draws, plays sound and polls keys at 60 Hz.
+    tech: SDL2
+    talksTo: [cpu]
+    kind: core
+  - id: cpu
+    name: CPU core
+    role: Keeps registers and flags and executes one instruction per step, returning its cycles.
+    tech: C17
+    talksTo: [bus, timers]
+    kind: core
+  - id: bus
+    name: Memory bus
+    role: Maps the ROM and routes each address to ROM, RAM or an I/O register.
+    tech: C17
+    talksTo: []
+    kind: core
+  - id: timers
+    name: Timers and interrupts
+    role: Advance DIV and TIMA by consumed cycles and raise interrupt requests.
+    tech: C17
+    talksTo: []
+    kind: core
+  - id: tests
+    name: Test runner
+    role: Runs test ROMs headless in CI and reads their serial output for pass or fail.
+    tech: CI · Blargg and Timendus ROMs
+    talksTo: [cpu]
+    kind: offline
+flow:
+  - component: bus
+    text: >-
+      maps the ROM at `0x0000` for the Game Boy (CHIP-8 programs load at `0x200`) and routes every address to its
+      region.
+  - component: frontend
+    text: >-
+      asks the core to run about `70,224` cycles, one Game Boy frame at 4.19 MHz.
+  - component: cpu
+    text: >-
+      fetches the opcode at `pc`, decodes it (including the `0xCB` prefix), executes it, sets the Z, N, H and C flags,
+      and returns its cycle count.
+  - component: timers
+    text: >-
+      advance by **those cycles, not the host clock**, and set a bit in `IF` when `TIMA` overflows; the CPU takes the
+      interrupt next step if `IME` is on.
+  - component: frontend
+    text: >-
+      after the frame's cycles, draws the frame buffer, plays the sound timer's tone and polls the keys, then
+      starts the next frame.
+interface:
+  lang: c
+  code: |
+    typedef struct {
+      uint8_t a, f, b, c, d, e, h, l;
+      uint16_t sp, pc;
+      bool ime, halted;
+    } Cpu;
+
+    uint8_t bus_read(Bus *b, uint16_t addr);
+    void bus_write(Bus *b, uint16_t addr,
+                   uint8_t v);
+    /* one instruction; returns T-cycles */
+    int  cpu_step(Cpu *c, Bus *b);
+    void timer_tick(Timer *t, Bus *b, int cyc);
+decisions:
+  - choice: Step one instruction, return its cycles
+    instead: A cycle-accurate core stepped per machine cycle
+    why: >-
+      Instruction stepping with exact cycle counts passes cpu_instrs and instr_timing and fits the 35 hours. A PPU
+      that boots Tetris may need finer steps later.
+  - choice: Switchable CHIP-8 quirks
+    instead: One fixed interpretation of each opcode
+    why: >-
+      Interpreters disagree on shifts and load/store, so ten classic ROMs cannot all run under one behaviour. The
+      Timendus quirks test checks each switch.
+  - choice: C17 with SDL2
+    instead: Rust
+    why: >-
+      Bytes, flags and wrap-around read directly in C, and it ties to the CS61C material. Rust works as well; use
+      wrapping arithmetic explicitly if you pick it.
+watchOut: >-
+  The half-carry flag and DAA are what most Game Boy cores get wrong first. Read each test ROM's serial output headless
+  rather than watching the screen, so a failing sub-test points at the opcodes to fix.

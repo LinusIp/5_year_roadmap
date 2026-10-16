@@ -1,0 +1,96 @@
+overview: >-
+  A battery node bolted to each motor wakes every 10 minutes, records a 4 kHz burst from a 3-axis accelerometer
+  and turns it into a few numbers on the MCU: RMS, kurtosis (how spiky the signal is) and the energy at the
+  motor's bearing fault frequencies from a 1024-point FFT. Only that small feature record is sent; a gateway
+  script keeps a learned baseline per motor and warns maintenance when the features rise above it.
+learn:
+  - name: Sampling and aliasing
+    ref: dspguide
+  - name: FFT on a microcontroller
+    ref: think-dsp
+  - name: Bearing fault frequencies
+  - name: DMA capture
+    ref: making-embedded-systems
+  - name: Baselines and false alarms
+stats:
+  - value: 95 %
+    label: recall at 5 % false alarms
+  - value: < 20 ms
+    label: 1024-point FFT on the MCU
+  - value: < 5 mA
+    label: average node current
+components:
+  - id: accel
+    name: Accelerometer
+    role: ADXL-class 3-axis MEMS sensor on a stud mount, with its anti-alias filter set below 2 kHz.
+    tech: ADXL · SPI
+    talksTo: [capture]
+    kind: external
+  - id: capture
+    name: DMA capture
+    role: Fills a 1024-sample buffer per axis at 4 kHz without CPU help.
+    tech: C · Cortex-M4 DMA
+    talksTo: [features]
+    kind: core
+  - id: features
+    name: Feature extractor
+    role: Computes RMS, kurtosis and the FFT spectrum in fixed point.
+    tech: CMSIS-DSP
+    talksTo: [faultfreq]
+    kind: core
+  - id: faultfreq
+    name: Fault bands
+    role: Sums spectrum energy around BPFO and BPFI, computed from the motor's bearing geometry and speed.
+    tech: C
+    talksTo: [packet]
+    kind: core
+  - id: packet
+    name: Telemetry packet
+    role: Packs the features into a 30-byte record with node id and sequence number.
+    tech: C · UART or radio
+    talksTo: [gateway]
+    kind: core
+  - id: gateway
+    name: Baseline and alerts
+    role: Learns each motor's normal feature range and raises a warning when it is exceeded.
+    tech: Python · NumPy
+    talksTo: []
+    kind: core
+  - id: notebook
+    name: Evaluation notebook
+    role: Runs the pipeline on public bearing datasets and injected tones to measure recall and false alarms.
+    tech: Python · SciPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: capture
+    text: wakes on the 10-minute timer, powers the sensor and lets DMA fill `1024` samples per axis at `4 kHz` (about 0.26 s).
+  - component: features
+    text: removes the mean, applies a Hann window and runs `arm_rfft_q15`; RMS and kurtosis come from the same buffer.
+  - component: faultfreq
+    text: computes the bearing tones, for example `BPFO = n/2 · f_r · (1 − d/D · cos φ)`, and sums energy in a band around each.
+  - component: packet
+    text: sends a 30-byte record instead of the 6 KB raw burst, then the node sleeps again.
+  - component: gateway
+    text: compares each feature with that motor's baseline mean and spread, and warns after **2 bursts in a row** above `mean + 4σ`.
+interface:
+  lang: c
+  code: |
+    typedef struct __attribute__((packed)) {
+      uint16_t node_id;
+      uint16_t seq;
+      uint32_t t_s;
+      int16_t  rms_mg[3];     /* per axis */
+      int16_t  kurt_x100[3];
+      uint16_t bpfo_e, bpfi_e, bsf_e;
+      uint16_t batt_mv;
+      uint16_t crc16;
+    } vib_record_t;           /* 30 bytes */
+decisions:
+  - choice: Features on the node, not raw upload
+    instead: Stream raw bursts to the gateway
+    why: Sending 6 KB every 10 minutes from 40 motors costs radio energy that breaks the 5 mA budget. Ship raw bursts only on demand when a warning needs a closer look.
+  - choice: Per-motor learned baseline
+    instead: Fixed ISO-style vibration limits
+    why: Each motor sits on a different mount with its own resonances; a fixed limit either misses faults or alarms all day. Revisit if the fleet grows to identical mounts.
+watchOut: Sensor mount resonance can look exactly like a bearing tone. Tap-test the mount and record its resonance before trusting any fault band near it.

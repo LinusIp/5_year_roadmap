@@ -1,0 +1,69 @@
+overview: >-
+  Simple-tiled Wave Function Collapse fills a 64x64 map: every cell starts with all tiles possible, the cell with the
+  fewest options (lowest entropy) is fixed to one tile by weighted random choice, and adjacency rules then spread out,
+  removing tiles that can no longer fit. If a cell runs out of options (a contradiction), the generator backtracks or
+  restarts, and the restart rate is the measure.
+learn:
+  - name: Constraint propagation
+    ref: cs188
+  - name: Shannon entropy
+  - name: Backtracking
+  - name: Seeded randomness
+components:
+  - id: rules
+    name: Tileset rules
+    role: Loads tiles, weights and edge sockets and builds the allowed-neighbour table.
+    tech: Python / C++
+    talksTo: [solver]
+    kind: core
+  - id: solver
+    name: Solver
+    role: Picks the lowest-entropy cell, collapses it, and backtracks on contradiction.
+    tech: Python / C++
+    talksTo: [propagator, stats]
+    kind: core
+  - id: propagator
+    name: Propagator
+    role: Removes unsupported tiles from neighbours until nothing changes.
+    tech: Bitsets
+    talksTo: []
+    kind: core
+  - id: stats
+    name: Seed stats
+    role: Runs many seeds and records contradictions and restarts.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: rules
+    text: builds `allowed[tile][dir]` as bitsets and checks every rule has its mirror (A right of B means B left of A).
+  - component: solver
+    text: picks the open cell with the lowest entropy `log(Σw) - Σ(w·log w)/Σw`, breaking ties with a tiny seeded noise, and fixes it to one tile.
+  - component: propagator
+    text: keeps a stack of changed cells and strips neighbour tiles with no support, repeating until the stack is **empty**, not just one ring out.
+  - component: solver
+    text: on an empty cell, restores the last snapshot and bans that choice, restarting after 3 failed backtracks; **stats** must show under 5% restarts.
+interface:
+  lang: python
+  code: |
+    Wave = np.ndarray  # (H, W, T) bool: still possible
+
+    def build_rules(tiles: list[Tile]) -> np.ndarray:
+        """allowed[t, d]: tiles allowed next to t in
+        direction d (0 up, 1 right, 2 down, 3 left)."""
+
+    def lowest_entropy(wave: Wave, w: np.ndarray,
+                       rng) -> tuple[int, int] | None: ...
+
+    def propagate(wave: Wave, start: tuple[int, int],
+                  allowed: np.ndarray) -> bool:
+        """False on contradiction (a cell has no tile)."""
+decisions:
+  - choice: Snapshot backtracking with a restart cap
+    instead: Restart from scratch on every contradiction
+    why: >-
+      On 4,096 cells a contradiction near the end throws away the whole run. A snapshot every few dozen collapses is
+      cheap and undoes only the local mistake; a full restart stays as the last resort.
+watchOut: >-
+  Propagation that updates only direct neighbours leaves impossible tiles further out, which turn into contradictions
+  much later and far from the cause. Propagate until nothing changes, and test on a 3x3 grid you can check by hand.

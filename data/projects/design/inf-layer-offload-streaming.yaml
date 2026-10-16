@@ -1,0 +1,58 @@
+overview: >-
+  A runner for a model whose weights do not fit in GPU memory: all layers live in pinned CPU memory, and while the
+  GPU computes layer i a second stream copies layer i+1 over PCIe into a spare buffer. Tokens/s for decode and
+  prefill is compared with a simple model where each layer costs the larger of its copy time and its compute time.
+learn:
+  - name: Weight offloading
+  - name: Double buffering
+    ref: pmpp-book
+  - name: PCIe bandwidth
+  - name: Async copies and events
+    ref: cuda-guide
+components:
+  - id: store
+    name: Pinned weights
+    role: Holds every layer's weights in page-locked CPU memory.
+    tech: PyTorch pin_memory
+    talksTo: [prefetch]
+    kind: core
+  - id: prefetch
+    name: Prefetcher
+    role: Copies the next layer into one of two GPU buffers on a copy stream.
+    tech: CUDA streams · non_blocking copies
+    talksTo: [runner]
+    kind: core
+  - id: runner
+    name: Layer runner
+    role: Waits on the layer's copy event, runs it and frees the buffer for the next prefetch.
+    tech: PyTorch
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: PCIe model
+    role: Predicts tokens/s from layer bytes, PCIe bandwidth and compute time and compares with measurement.
+    tech: Python
+    talksTo: []
+    kind: core
+flow:
+  - component: store
+    text: loads the model to CPU with `pin_memory()` on every layer tensor and allocates two GPU layer buffers.
+  - component: prefetch
+    text: >-
+      on `copy_stream`, copies layer `i + 1` with `non_blocking=True` into the free buffer and records an event; this
+      is **double buffering**.
+  - component: runner
+    text: makes the compute stream wait on layer `i`'s event, runs the layer for a decode step or a whole prompt, and moves on.
+  - component: model
+    text: >-
+      predicts time per layer as `max(bytes / pcie_bw, compute)` and checks measured tokens/s is within 25% for decode
+      and prefill.
+decisions:
+  - choice: Two layer buffers on the GPU
+    instead: Copy each layer into a fresh allocation
+    why: >-
+      Fixed buffers keep memory flat and let copies and compute alternate cleanly. A fresh allocation each layer can
+      trigger the allocator and sync the streams, killing the overlap.
+watchOut: >-
+  In decode, compute per layer is tiny and the PCIe copy dominates, so tokens/s is set by bandwidth. If decode is far
+  below the PCIe model, the prefetch is not overlapping; check the Nsight timeline before tuning anything else.

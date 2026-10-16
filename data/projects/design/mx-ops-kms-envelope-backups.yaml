@@ -1,0 +1,97 @@
+overview: >-
+  Kinbridge moves from one shared key to envelope encryption: each of 1,000 tenants gets its own data key, and that
+  key is itself encrypted, or wrapped, by a master key that never leaves the KMS (key management service). Documents
+  and backups are encrypted with AES-GCM under the tenant's data key, and the wrapped key is stored next to the data.
+  Rotation re-wraps only the small keys, not the documents, and destroying a tenant's key makes every copy of their
+  data unreadable, which is called crypto-shredding.
+learn:
+  - name: Envelope encryption
+  - name: AES-GCM and nonces
+  - name: Key rotation
+  - name: Crypto-shredding
+  - name: KMS transit engines
+  - name: Key audit trails
+stats:
+  - value: "> 400 MB/s"
+    label: per core, AES-GCM
+  - value: < 5 min
+    label: rotate 1,000 tenant keys
+  - value: 50 of 50
+    label: recovery attempts fail after shred
+components:
+  - id: app
+    name: Document service
+    role: Stores tenant documents and runs backups, calling the library for every read and write.
+    tech: Go
+    talksTo: [lib]
+    kind: external
+  - id: lib
+    name: Envelope library
+    role: Encrypts with the tenant's data key, a fresh random nonce per object, and keeps the wrapped key in the header.
+    tech: Go crypto/cipher · AES-256-GCM
+    talksTo: [keys, store]
+    kind: core
+  - id: keys
+    name: Key service
+    role: Creates, wraps, unwraps and destroys tenant data keys, caching unwrapped keys for a few minutes.
+    tech: Go · PostgreSQL
+    talksTo: [kms, audit]
+    kind: core
+  - id: kms
+    name: KMS
+    role: Holds the master key versions and does wrap and unwrap; the master key never leaves it.
+    tech: Vault Transit
+    talksTo: []
+    kind: external
+  - id: store
+    name: Object store
+    role: Holds encrypted documents and backups, each with its wrapped key and key version.
+    tech: MinIO · S3 API
+    talksTo: []
+    kind: core
+  - id: rotation
+    name: Rotation job
+    role: Re-wraps every tenant key under the new master version and shreds a tenant on request.
+    tech: Go CLI
+    talksTo: [keys]
+    kind: offline
+  - id: audit
+    name: Audit trail
+    role: Records every create, unwrap, rotate and destroy with tenant, actor and time.
+    tech: PostgreSQL append-only table
+    talksTo: []
+    kind: offline
+flow:
+  - component: lib
+    text: gets a request to store `contract.pdf` for tenant `t_204` and asks the key service for that tenant's data key.
+  - component: keys
+    text: unwraps the tenant's wrapped key with the KMS, or uses a cached copy, and logs the unwrap in the **audit trail**.
+  - component: lib
+    text: encrypts with AES-256-GCM using a new random 96-bit nonce, and puts `key_id`, `key_version` and the nonce in the object header.
+  - component: store
+    text: saves only ciphertext and the header; database backups go through the same library, so no plaintext key is ever written to a backup.
+  - component: keys
+    text: on a shred request destroys `t_204`'s wrapped key and every cached copy; after that 50 of 50 recovery attempts must fail.
+interface:
+  lang: go
+  code: |
+    type Header struct {
+        TenantID   string // "t_204"
+        KeyVersion int    // master key version
+        WrappedKey []byte // data key, wrapped by KMS
+        Nonce      [12]byte
+    }
+
+    func Seal(ctx context.Context, tenant string,
+        plain []byte) (Header, []byte, error)
+
+    func Open(ctx context.Context, h Header,
+        ct []byte) ([]byte, error)
+decisions:
+  - choice: Envelope keys, not the master key on the data
+    instead: Encrypt every document directly with a KMS call
+    why: Sending gigabytes through the KMS would never reach 400 MB/s per core. Local AES-GCM with a small wrapped key is fast, and rotation touches 1,000 keys instead of every document.
+  - choice: Vetted library primitives only
+    instead: A custom encryption scheme
+    why: The constraint forbids home-made crypto, and small mistakes are invisible until they are exploited. Go's AES-GCM is reviewed and hardware-accelerated.
+watchOut: Reusing a nonce with the same AES-GCM key breaks both confidentiality and integrity. Use a fresh random nonce every time and rotate a data key well before it has encrypted billions of objects.

@@ -1,0 +1,122 @@
+overview: >-
+  Transfer learning on your own photos: a model pretrained on millions of images is adapted to 3–10 classes you
+  collected, 100–300 images each. A cleaning step removes near-duplicates by perceptual hash (a short fingerprint that
+  stays the same when an image is resized or recompressed) and fixes mislabels before a stratified split. Training
+  first fits a new head on the frozen backbone, then the whole network at a lower learning rate, and the model is
+  pushed to the Hugging Face Hub. A public Gradio app on Spaces returns the top 3 classes for an uploaded image.
+learn:
+  - name: Transfer learning
+    ref: fastai-practical-dl
+  - name: Perceptual hashing
+  - name: Discriminative learning rates
+    ref: fastai-practical-dl
+  - name: Linear probe baseline
+  - name: Confusion matrix and F1
+    ref: ml-zoomcamp
+stats:
+  - value: < 3 s
+    label: per image on the free CPU Space
+  - value: ≥ 30
+    label: test images per class
+  - value: ≥ 12
+    label: failure cases explained
+components:
+  - id: sources
+    name: Image sources
+    role: Your own photos, or scraped images with their licences noted.
+    tech: JPEG · PNG
+    talksTo: [collect]
+    kind: external
+  - id: collect
+    name: Collector
+    role: Imports images and writes a manifest with path, label, source and licence.
+    tech: Python · CSV
+    talksTo: [clean]
+    kind: core
+  - id: clean
+    name: Cleaner
+    role: Drops near-duplicates, fixes mislabels by hand and makes a stratified train, validation and test split.
+    tech: Jupyter · imagehash
+    talksTo: [train]
+    kind: core
+  - id: train
+    name: Fine-tuner
+    role: Replaces the pretrained head, trains the head, then the whole network at a lower learning rate.
+    tech: PyTorch · timm or fastai
+    talksTo: [evaluate, hub]
+    kind: core
+  - id: evaluate
+    name: Evaluator
+    role: Scores the test split, draws the confusion matrix and saves the failure gallery.
+    tech: scikit-learn · Matplotlib
+    talksTo: []
+    kind: offline
+  - id: hub
+    name: Model Hub
+    role: Hosts the trained weights and their config under your account.
+    tech: Hugging Face Hub
+    talksTo: [space]
+    kind: external
+  - id: space
+    name: Gradio app
+    role: Loads the model once, preprocesses an upload like training did and returns the top 3 classes.
+    tech: Gradio · Spaces CPU
+    talksTo: []
+    kind: core
+flow:
+  - component: collect
+    text: imports each image and appends a row to `manifest.csv` with its label, source and licence.
+  - component: clean
+    text: >-
+      removes near-duplicates **before** the split by comparing perceptual hashes, fixes mislabels, then splits by
+      class so every class has at least 30 test images.
+  - component: train
+    text: >-
+      loads a pretrained ResNet, ConvNeXt or ViT, swaps the head for one with your class count, trains the head with
+      the backbone frozen, then unfreezes everything at about a tenth of the learning rate.
+  - component: evaluate
+    text: >-
+      runs the held-out test split once and compares accuracy and macro-F1 with a **linear probe** on frozen
+      features and with a second backbone.
+  - component: train
+    text: pushes the chosen weights to the Hub with the class names in the config.
+  - component: space
+    text: >-
+      loads the model from the Hub at start-up, applies the backbone's own resize and normalisation to each upload,
+      and returns the top 3 classes with probabilities.
+interface:
+  lang: python
+  code: |
+    import gradio as gr, timm, torch
+    model = timm.create_model("hf-hub:you/birds",
+                              pretrained=True).eval()
+    cfg = timm.data.resolve_model_data_config(model)
+    tf = timm.data.create_transform(**cfg)
+
+    def predict(img):
+        x = tf(img.convert("RGB")).unsqueeze(0)
+        with torch.no_grad():
+            p = model(x).softmax(-1)[0]
+        return dict(zip(LABELS, p.tolist()))
+
+    gr.Interface(predict, gr.Image(type="pil"),
+                 gr.Label(num_top_classes=3)).launch()
+decisions:
+  - choice: Deduplicate before splitting
+    instead: A random split of the raw folder
+    why: >-
+      Scraped and burst photos contain many near-copies. With only 100–300 images a class, a few copies on both sides
+      of the split inflate test accuracy and hide what the model cannot do.
+  - choice: Head first, then the whole network
+    instead: Fine-tuning everything at once at one learning rate
+    why: >-
+      A fresh random head sends large gradients into the backbone and can wreck its pretrained features. Training the
+      head first, then everything at a lower rate, keeps them.
+  - choice: A linear probe as the baseline
+    instead: Reporting the fine-tuned model alone
+    why: >-
+      A logistic regression on frozen features shows how much fine-tuning actually adds on this small dataset; if it
+      adds little, the probe is cheaper to serve.
+watchOut: >-
+  The app must preprocess exactly as training did. Forgetting the backbone's normalisation in the Gradio app gives
+  confident wrong answers that no test score warned you about.

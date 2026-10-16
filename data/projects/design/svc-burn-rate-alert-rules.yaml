@@ -1,0 +1,61 @@
+overview: >-
+  Prometheus alerting rules for an availability SLO that page on a fast burn and open a ticket on a slow burn, each
+  checking a long and a short window so alerts fire quickly and stop once the problem ends.
+learn:
+  - name: SLIs and SLOs
+    ref: google-sre-book
+  - name: Error budgets
+  - name: Burn rate
+  - name: Multi-window alerts
+    ref: prometheus-docs
+components:
+  - id: service
+    name: Service
+    role: Exports `http_requests_total` labelled by status code.
+    tech: Your API
+    talksTo: [prometheus]
+    kind: core
+  - id: prometheus
+    name: Prometheus
+    role: Precomputes error ratios with recording rules and evaluates alert rules.
+    tech: Prometheus
+    talksTo: [alertmanager]
+    kind: core
+  - id: alertmanager
+    name: Alertmanager
+    role: Routes fast-burn alerts to paging and slow-burn alerts to tickets.
+    tech: Alertmanager
+    talksTo: []
+    kind: core
+  - id: replay
+    name: Incident replay
+    role: Feeds synthetic series for a 5-minute outage, a slow leak and a normal week.
+    tech: promtool test rules
+    talksTo: [prometheus]
+    kind: offline
+flow:
+  - component: service
+    text: reports requests; the SLI is the share of non-5xx responses against a 99.9 percent target.
+  - component: prometheus
+    text: computes burn rate as error ratio divided by 0.001, over 1 h with a 5 m check and over 6 h with a 30 m check.
+  - component: prometheus
+    text: fires the page when both 1 h and 5 m burn exceed **14.4**, and the ticket when 6 h and 30 m exceed 6.
+  - component: alertmanager
+    text: groups and routes the alert; the replay counts false pages over the synthetic week.
+interface:
+  lang: yaml
+  code: |
+    - alert: ErrorBudgetFastBurn
+      expr: |
+        job:slo_errors:ratio_rate1h > 14.4 * 0.001
+        and
+        job:slo_errors:ratio_rate5m > 14.4 * 0.001
+      labels: { severity: page }
+decisions:
+  - choice: Two windows per alert
+    instead: A single threshold on the 5-minute error rate
+    why: >-
+      A short window alone flaps on every blip, and a long window alone keeps firing after recovery. The pair
+      catches both the 5-minute outage and the slow leak.
+watchOut: >-
+  Alerting on causes such as high CPU pages people when users are fine. Alert on the symptom, the SLO burn.

@@ -1,0 +1,72 @@
+overview: >-
+  A simulated 6-DoF arm whose hand follows a target moving around a circle. Damped least-squares IK (inverse
+  kinematics: find the joint changes that move the hand where you want, with a damping term so it stays sane near
+  singular poses) uses MuJoCo's site Jacobian, and an operational-space controller turns hand error into joint torques
+  through the arm's mass matrix; the goal is under 5 mm mean error.
+learn:
+  - name: Manipulator Jacobians
+    ref: modern-robotics
+  - name: Damped least squares
+  - name: Operational space control
+    ref: mit-manipulation
+  - name: MuJoCo API
+    ref: mujoco-docs
+components:
+  - id: target
+    name: Target path
+    role: Moves the target point around a circle in front of the arm.
+    tech: Python
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Arm model
+    role: Gives the hand position, its Jacobian and the mass matrix each step.
+    tech: MuJoCo MJCF
+    talksTo: [controller]
+    kind: core
+  - id: controller
+    name: IK and OSC
+    role: Computes joint targets by IK or joint torques by OSC.
+    tech: NumPy
+    talksTo: [log]
+    kind: core
+  - id: log
+    name: Error log
+    role: Records the hand error every step and reports the mean in mm.
+    tech: NumPy · matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: target
+    text: moves the target around a 10 cm circle at 0.25 Hz, kept well inside the arm's reach.
+  - component: model
+    text: after `mj_forward`, fills the 3x6 position Jacobian with `mj_jacSite` and the 6x6 mass matrix `M` with `mj_fullM`.
+  - component: controller
+    text: in IK mode steps `dq = Jᵀ(JJᵀ + λ²I)⁻¹ e` with `λ = 0.05`; in OSC mode applies `τ = JᵀΛ(Kp·e - Kd·ẋ) + qfrc_bias` with `Λ = (J M⁻¹ Jᵀ)⁻¹`.
+  - component: log
+    text: records the distance from hand to target; done is a **mean under 5 mm** around the circle.
+interface:
+  lang: python
+  code: |
+    def site_jacobian(m, d, site_id):
+        jacp = np.zeros((3, m.nv))
+        jacr = np.zeros((3, m.nv))
+        mujoco.mj_jacSite(m, d, jacp, jacr, site_id)
+        return jacp, jacr
+
+    def dls_ik_step(J, err, lam=0.05):
+        JJt = J @ J.T
+        I = np.eye(JJt.shape[0])
+        return J.T @ np.linalg.solve(JJt + lam**2*I, err)
+
+    def osc_torque(m, d, J, err, vel, kp=200, kd=30):
+        """tau = J^T Lambda (kp*err - kd*vel) + bias"""
+decisions:
+  - choice: Damped least squares
+    instead: The plain pseudo-inverse `np.linalg.pinv(J)`
+    why: >-
+      Near a singular pose, such as the arm fully stretched, the pseudo-inverse asks for huge joint speeds. A damping of
+      0.05 caps them at the cost of a little error there, which a circle well inside the reach rarely touches.
+watchOut: >-
+  IK happily drives joints past their limits; MuJoCo then stops them at the limit and the error spikes. Clamp to
+  `jnt_range` and add a small null-space pull toward mid-range.

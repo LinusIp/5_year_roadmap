@@ -1,0 +1,88 @@
+overview: >-
+  Meridian Clinics' nightly backups have never been restored, so nobody knows if they work. You stream Postgres's
+  write-ahead log (WAL), the record of every change, plus weekly base backups, encrypted, into a bucket in a separate
+  account. A scheduled job then restores the latest backup into a scratch instance, checks row counts and checksums
+  against the source, records how long it took, and destroys the instance, so recovery time (RTO) and data loss
+  window (RPO) become measured numbers the auditors can read.
+learn:
+  - name: RTO and RPO
+    ref: google-sre-book
+  - name: WAL archiving
+  - name: Point-in-time recovery
+  - name: Restore verification
+  - name: Encryption at rest
+stats:
+  - value: < 5 min
+    label: RPO for tier-1 data
+  - value: < 45 min
+    label: RTO for 200 GB
+  - value: < $60
+    label: backup storage a month
+components:
+  - id: primary
+    name: Production Postgres
+    role: The clinic database with patients, appointments and invoices, seeded to 200 GB.
+    tech: PostgreSQL
+    talksTo: [backup]
+    kind: external
+  - id: backup
+    name: Backup pipeline
+    role: Takes base backups and pushes each finished WAL segment, compressed and encrypted.
+    tech: pgBackRest or WAL-G
+    talksTo: [store]
+    kind: core
+  - id: store
+    name: Backup store
+    role: Holds backups in a separate account with versioning and a retention policy.
+    tech: MinIO · S3 API
+    talksTo: [restore]
+    kind: core
+  - id: restore
+    name: Restore job
+    role: Starts a scratch instance, restores the latest or a chosen point in time, and times it.
+    tech: Python · Docker
+    talksTo: [verify]
+    kind: core
+  - id: verify
+    name: Validation checks
+    role: Compares row counts, table checksums and a few app queries with the source.
+    tech: Python · SQL
+    talksTo: [scoreboard]
+    kind: core
+  - id: scoreboard
+    name: Drill scoreboard
+    role: Records each run's RTO, RPO, throughput and pass or fail for the auditors.
+    tech: SQLite · Grafana
+    talksTo: []
+    kind: offline
+flow:
+  - component: backup
+    text: ships each WAL segment within a minute of filling, forced by `archive_timeout = 60`, which keeps RPO well under 5 minutes.
+  - component: store
+    text: keeps the encrypted files in another account, so a breach of production cannot delete them.
+  - component: restore
+    text: runs weekly, restores into a fresh container and replays WAL to a target such as `--target-time "2026-10-14 09:30"` for point-in-time recovery.
+  - component: verify
+    text: compares row counts and checksums per table, then runs app checks such as **appointments for tomorrow match**, before marking the run green.
+  - component: scoreboard
+    text: stores measured RTO, the gap between target and recovered time, and destroys the scratch instance.
+interface:
+  lang: shell
+  code: |
+    $ dr-restore --stanza clinics \
+        --target-time "2026-10-14 09:30:00"
+    restore    200 GB in 31m12s (107 MB/s)
+    wal replay  to 09:29:57 (gap 3 s)
+    verify     412 tables, counts ok,
+               checksums ok, app checks 8/8
+    RTO        38m40s  (target 45m)  PASS
+    RPO        3 s     (target 5m)   PASS
+    teardown   scratch-pg-7f3 destroyed
+decisions:
+  - choice: Automated weekly restore, not trust in backup logs
+    instead: Monitor that the backup job reports success
+    why: A green backup job says nothing about whether the data comes back, and the auditors ask for a measured recovery time. Only a timed restore proves it.
+  - choice: WAL archiving plus base backups
+    instead: Nightly pg_dump files
+    why: A nightly dump loses up to 24 hours of data and a 200 GB reload is slow. WAL replay gets RPO under 5 minutes.
+watchOut: The keys and credentials needed for a restore often live only on the system that just failed. Keep them in a separate vault and run one drill from a clean laptop.

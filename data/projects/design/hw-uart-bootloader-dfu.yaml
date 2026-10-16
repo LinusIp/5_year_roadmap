@@ -1,0 +1,72 @@
+overview: >-
+  A bootloader in the first 16 KB of flash runs at every reset: if a button is held or the app is not valid, it
+  receives a new image over UART in CRC-checked packets, writes it to the app region, checks a CRC over the whole
+  image, and only then marks it valid and jumps to it. A corrupted image is rejected and the board stays in the
+  bootloader waiting for a good one; 64 KB takes about 6 s at 115,200 baud.
+learn:
+  - name: Linker scripts
+    ref: making-embedded-systems
+  - name: Vector tables
+  - name: CRC checks
+  - name: Flash erase and program
+components:
+  - id: host
+    name: PC uploader
+    role: Splits the image into packets, sends them and resends on NAK or timeout.
+    tech: Python · pyserial
+    talksTo: [proto]
+    kind: external
+  - id: proto
+    name: Packet receiver
+    role: Checks each packet's sequence number and CRC-16 and replies ACK or NAK.
+    tech: C · UART
+    talksTo: [flash]
+    kind: core
+  - id: flash
+    name: Flash writer
+    role: Erases the app region once and programs each packet at its offset.
+    tech: C · flash controller
+    talksTo: [boot]
+    kind: core
+  - id: boot
+    name: Boot decision
+    role: Validates the app header and CRC-32, then jumps to the app or stays put.
+    tech: C · CMSIS
+    talksTo: []
+    kind: core
+flow:
+  - component: boot
+    text: checks the button and the app header (`magic`, `size`, `crc32`) at reset; a valid app with no button pressed is started at once.
+  - component: proto
+    text: receives packets `A5 seq len data[≤256] crc16`, answers ACK or NAK, and the host resends on NAK or after 200 ms.
+  - component: flash
+    text: erases the app sectors, programs each packet at `APP_BASE + offset` and reads it back to compare.
+  - component: boot
+    text: computes CRC-32 over the whole image, writes the header **last**, sets `SCB->VTOR = APP_BASE`, loads the app's stack pointer and jumps to its reset handler.
+interface:
+  lang: c
+  code: |
+    #define BOOT_BASE 0x08000000u  /* 16 KB loader */
+    #define APP_BASE  0x08004000u  /* app linked here */
+
+    typedef struct {
+      uint32_t magic;   /* 0xB007AB1E when valid */
+      uint32_t size;    /* image bytes */
+      uint32_t crc32;   /* over the image */
+    } AppHeader;        /* in its own flash sector */
+
+    static void jump_to_app(void) {
+      uint32_t sp = *(uint32_t*)APP_BASE;
+      uint32_t pc = *(uint32_t*)(APP_BASE + 4);
+      __disable_irq();  SCB->VTOR = APP_BASE;
+      __set_MSP(sp);  ((void (*)(void))pc)();
+    }
+decisions:
+  - choice: Write the valid header last
+    instead: Mark the image valid when the update starts
+    why: >-
+      If power fails halfway through an update, a header written first would send the bootloader into half an image.
+      Written after the full CRC check, any interruption leaves an invalid app and the bootloader simply waits for a retry.
+watchOut: >-
+  If the vector table is not moved, the app's interrupts run the bootloader's handlers and crash. Link the app at
+  `APP_BASE`, set `VTOR`, and turn off SysTick and clear pending interrupts before the jump.

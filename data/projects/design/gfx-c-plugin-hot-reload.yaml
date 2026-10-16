@@ -1,0 +1,72 @@
+overview: >-
+  A host program owns the window, the main loop and all game memory, and loads the game code from a shared library
+  (`game.so` or `game.dll`). When a rebuild changes the library, the host copies it to a new name, loads the copy and
+  calls the new code with the same memory block, so the game keeps its state while you edit.
+learn:
+  - name: Shared libraries
+    ref: cmu-15-213
+  - name: Function pointer tables
+  - name: Host-owned memory
+    ref: handmade-hero
+  - name: File watching
+components:
+  - id: watcher
+    name: Library watcher
+    role: Notices a finished rebuild and copies the library to a fresh name.
+    tech: stat / FindFirstFile
+    talksTo: [host]
+    kind: core
+  - id: host
+    name: Host loop
+    role: Unloads the old copy, loads the new one and looks up the game API.
+    tech: dlopen / LoadLibrary
+    talksTo: [game]
+    kind: core
+  - id: game
+    name: Game library
+    role: Holds all game code and no state of its own.
+    tech: C / C++
+    talksTo: [memory]
+    kind: core
+  - id: memory
+    name: Game memory
+    role: One block allocated by the host that holds every piece of game state.
+    tech: mmap / VirtualAlloc
+    talksTo: []
+    kind: core
+flow:
+  - component: watcher
+    text: checks the library's modified time each frame and, once the build's lock file is gone, copies it to `game_<n>.so`, since Windows locks a loaded DLL.
+  - component: host
+    text: calls `dlclose` on the old copy, `dlopen` on the new one and `dlsym("game_api")`; edit-save-see must take **under 2 s** and reload latency is printed.
+  - component: game
+    text: runs `api->update(&memory, &input, dt)` and calls `on_reload` once after a swap to rebuild anything that pointed into the old code.
+  - component: memory
+    text: is a 64 MB block the game carves with a bump allocator; a counter stored in it keeps counting across reloads.
+interface:
+  lang: c
+  code: |
+    typedef struct GameMemory {
+      void*  base;      /* owned by the host */
+      size_t size;      /* 64 MB */
+      int    initialised;
+    } GameMemory;
+
+    typedef struct GameAPI {
+      void (*init)(GameMemory* m);
+      void (*update)(GameMemory* m, const Input* in,
+                     float dt);
+      void (*on_reload)(GameMemory* m);
+    } GameAPI;
+
+    /* the only symbol the host looks up */
+    extern const GameAPI game_api;
+decisions:
+  - choice: One host-owned memory block
+    instead: Keep state in the game library's static variables
+    why: >-
+      Statics live in the library's own data section and vanish when it is unloaded. A host block survives every
+      reload, and as a bonus can be saved to disk to replay a moment.
+watchOut: >-
+  Pointers into the old library (function pointers, vtables, string literals) dangle after a reload and crash later.
+  Store ids or offsets in game memory instead, and re-fetch callbacks in `on_reload`.

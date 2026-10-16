@@ -1,0 +1,104 @@
+overview: >-
+  A C++ vehicle model that Marlow Motorsport drives from Python: load a car and a setup, run a lap, and get 1 kHz
+  telemetry to compare spring, damper and anti-roll bar choices before a track day. The chassis moves in surge, sway,
+  yaw, roll, pitch and heave, four wheel spins ride alongside, and a fixed-step RK4 integrator advances them all. Each step the suspension works out the load on each tyre, the Pacejka tyre model turns slip
+  and load into forces, and a driver controller steers and throttles along the racing line.
+learn:
+  - name: Runge-Kutta 4
+    ref: mit-2-086
+  - name: Pacejka tyre model
+  - name: Load transfer
+  - name: PID control
+    ref: brian-douglas-control
+  - name: Understeer gradient
+  - name: Python bindings
+stats:
+  - value: < 3 s
+    label: to simulate a 90 s lap at 1 kHz
+  - value: ≤ 5%
+    label: understeer gradient error
+  - value: < 1%
+    label: energy drift in a bounce test
+components:
+  - id: binding
+    name: Python binding
+    role: Loads car and setup, runs a lap and returns telemetry as numpy arrays.
+    tech: pybind11 · numpy
+    talksTo: [driver]
+    kind: core
+  - id: driver
+    name: Driver controller
+    role: Sets steering from the path error and throttle and brake from a target speed, with two PID loops.
+    tech: C++17
+    talksTo: [integrator]
+    kind: core
+  - id: integrator
+    name: State and integrator
+    role: Holds chassis and wheel-spin positions and velocities and advances them with fixed-step RK4 at 1 kHz.
+    tech: C++17
+    talksTo: [suspension, telemetry]
+    kind: core
+  - id: suspension
+    name: Suspension model
+    role: Computes spring, damper and anti-roll bar forces and the vertical load on each tyre.
+    tech: C++17
+    talksTo: [tyres]
+    kind: core
+  - id: tyres
+    name: Tyre model
+    role: Turns slip angle, slip ratio and load into tyre forces with the magic formula.
+    tech: C++17
+    talksTo: [integrator]
+    kind: core
+  - id: telemetry
+    name: Telemetry exporter
+    role: Writes speed, yaw rate, roll, slip and loads per step in data-logger column names.
+    tech: C++17 · CSV
+    talksTo: [plots]
+    kind: core
+  - id: plots
+    name: Sweeps and plots
+    role: Runs setup sweeps and plots lap time against each parameter.
+    tech: Python · matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: binding
+    text: receives `run_lap(car, track, dt=1e-3)` and hands the C++ core the car spec, the setup and the circuit centreline.
+  - component: driver
+    text: looks ahead along the centreline and sets steer, throttle and brake from the lateral and speed errors.
+  - component: integrator
+    text: evaluates the derivatives four times per 1 ms step (that is RK4); each evaluation asks the suspension and tyres for forces.
+  - component: suspension
+    text: turns roll, pitch and heave into spring and damper forces, adds the anti-roll bar couple, and gives each corner its vertical **load**.
+  - component: tyres
+    text: compute slip from wheel spin and contact-patch velocity, then lateral and longitudinal force with load sensitivity, which feed back into the integrator.
+  - component: telemetry
+    text: records the step at 1 kHz; after 90,000 steps the lap time and channels go back to Python for plotting.
+interface:
+  lang: python
+  code: |
+    import vdsim
+
+    car = vdsim.Car.from_yaml("gt_car.yaml")
+    car.setup.arb_front = 32_000    # N·m/rad
+    car.setup.damper_rear_bump = 3_500  # N·s/m
+
+    lap = vdsim.run_lap(car, track="circuit.csv",
+                        dt=1e-3, integrator="rk4")
+    lap.time                     # 91.84 (s)
+    lap.channels["yaw_rate"]     # numpy, 1 kHz
+    lap.to_csv("lap.csv")        # data-logger names
+decisions:
+  - choice: Fixed-step RK4 at 1 kHz
+    instead: Semi-implicit Euler, or an adaptive-step solver
+    why: RK4 keeps energy drift under 1% at this step, and a fixed step gives 1 kHz telemetry that lines up with the logger. Four evaluations times 90,000 steps still fits in 3 s in C++. Revisit if tyre stiffness forces a smaller step.
+  - choice: C++ core with pybind11
+    instead: Pure Python with numpy
+    why: The step loop cannot be vectorised, and 360,000 force evaluations in plain Python would take minutes, not under 3 s. Engineers still script sweeps in Python.
+  - choice: Validate on analytic cases before fitting lap data
+    instead: Tune coefficients until the lap matches the logger
+    why: Steady 1 g cornering and the undriven bounce test have known answers; coefficients tuned only to one lap do not transfer to another setup.
+watchOut: >-
+  Slip ratio divides by wheel speed, so near standstill the tyre forces become huge and the step blows up. Use a
+  minimum speed in the denominator (about 1 m/s) or a relaxation length, and start laps from a rolling start.

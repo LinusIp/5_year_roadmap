@@ -1,0 +1,115 @@
+overview: >-
+  Semantic search for Archivist Search over 200M passages on 3 CPU servers, with p99 retrieval under 25 ms and 95%
+  recall@10 against exact search. Raw 768-dimension vectors would take about 614 GB, so each shard holds a compressed
+  IVF-PQ index (vectors grouped into clusters and stored as short codes) plus 8-bit copies for re-scoring the best
+  candidates. A coordinator sends every query to all 3 shards and merges their top 10.
+learn:
+  - name: Inverted file index (IVF)
+  - name: Product quantization
+  - name: Recall vs latency tuning
+  - name: Sharding and merging
+    ref: ddia
+  - name: Filtered vector search
+  - name: Tail latency
+    ref: google-sre-book
+stats:
+  - value: ≥ 95%
+    label: recall@10 vs exact
+  - value: ≤ 25 ms
+    label: p99 at 200 qps
+  - value: ≤ 64 GB
+    label: memory per shard, 3 shards
+components:
+  - id: client
+    name: Search client
+    role: Sends a query vector with optional filters, at up to 200 queries a second.
+    tech: Load test
+    talksTo: [coordinator]
+    kind: external
+  - id: coordinator
+    name: Coordinator
+    role: Sends each query to all 3 shards in parallel and merges their results into one top 10.
+    tech: Python · asyncio
+    talksTo: [shards]
+    kind: core
+  - id: shards
+    name: Shard servers
+    role: Each holds about 67M vectors and scans the closest clusters for candidates that pass the filter.
+    tech: FAISS · Docker
+    talksTo: [refine]
+    kind: core
+  - id: refine
+    name: Re-scorer
+    role: Re-scores each shard's top 200 candidates with 8-bit vectors and returns its top 10.
+    tech: FAISS
+    talksTo: [coordinator]
+    kind: core
+  - id: builder
+    name: Index builder
+    role: Trains cluster centres and PQ codebooks on a sample and encodes all vectors into the 3 shards.
+    tech: FAISS · 1 GPU
+    talksTo: [shards]
+    kind: offline
+  - id: vectors
+    name: Vector generator
+    role: Makes 200M clustered 768-dimension vectors and a smaller real embedded corpus for checks.
+    tech: numpy
+    talksTo: [builder]
+    kind: offline
+  - id: tuner
+    name: Tuning harness
+    role: Sweeps nprobe and re-score depth against exact results for 10k queries.
+    tech: Python · FAISS GPU
+    talksTo: []
+    kind: offline
+flow:
+  - component: coordinator
+    text: sends a query with filter `lang=en` to the 3 shards at once with a `20 ms` deadline.
+  - component: shards
+    text: >-
+      compares the query with 65,536 cluster centres, scans the codes in the closest `nprobe=64`, and skips filtered-out
+      ids **during** the scan rather than after it.
+  - component: refine
+    text: >-
+      re-scores the best 200 with 8-bit vectors; 96-byte PQ codes plus 768-byte 8-bit vectors come to about **58 GB**
+      per shard, under the 64 GB limit.
+  - component: coordinator
+    text: >-
+      merges the three top-10 lists by score; the slowest shard sets the latency, so each must stay under about 20 ms
+      at p99.
+  - component: coordinator
+    text: >-
+      is measured by the **tuning harness**, which raises `nprobe` until recall@10 reaches 95% on 10k queries and
+      checks p99 at 200 qps.
+interface:
+  lang: python
+  code: |
+    res = coordinator.search(
+        q,                    # float32[768]
+        k=10,
+        filter={"lang": "en"},
+        nprobe=64,
+        refine_k=200,
+        deadline_ms=20)
+
+    res.ids, res.scores       # merged top 10
+    res.shard_ms              # [9.1, 11.4, 8.7]
+decisions:
+  - choice: IVF-PQ with re-scoring, not HNSW
+    instead: An HNSW graph index per shard
+    why: >-
+      HNSW needs the full vectors plus graph links in memory, far more than 64 GB for 67M vectors of 768 dimensions.
+      Compressed codes fit, and re-scoring the top 200 wins back the recall PQ loses.
+  - choice: Shard by id hash
+    instead: Shard by cluster
+    why: >-
+      Cluster sharding sends popular topics to one server and skews sizes and load. Hashing keeps the 3 shards equal,
+      at the cost of querying all three every time.
+  - choice: GPU for building only
+    instead: Serve from the GPU too
+    why: >-
+      Training centroids and codebooks is the heavy one-off job; serving fits the CPU budget once tuned. Keep the GPU
+      for rebuilds.
+watchOut: >-
+  Recall measured on clustered synthetic vectors may not transfer to real embeddings, and selective filters can wipe
+  out recall when applied after the search. Validate on the real embedded corpus and apply filters inside the scan.

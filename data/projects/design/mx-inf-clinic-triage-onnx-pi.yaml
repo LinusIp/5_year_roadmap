@@ -1,0 +1,108 @@
+overview: >-
+  A referral-urgency scorer that runs fully offline on a low-cost ARM handheld with 2 GB of RAM. A small classifier
+  over symptom flags, vital signs and a hashed bag of words from the health worker's note is trained on synthetic
+  cases, exported to ONNX and quantised to int8. On the device a thin wrapper validates the input, runs the model in
+  well under 120 ms, calibrates the score into a real probability and applies a threshold chosen to catch at least
+  95% of urgent cases.
+learn:
+  - name: Recall-first thresholds
+    ref: ng-ml-spec
+  - name: Probability calibration
+  - name: ONNX int8 quantisation
+    ref: onnx-runtime-docs
+  - name: Edge latency measurement
+  - name: Synthetic data limits
+stats:
+  - value: ≥ 95%
+    label: urgent recall at ≥ 60% precision
+  - value: ≤ 120 ms
+    label: per case on ARM
+  - value: ≤ 150 MB
+    label: model plus runtime
+components:
+  - id: trainer
+    name: Trainer
+    role: Fits a small MLP on synthetic cases generated from public symptom-disease tables.
+    tech: PyTorch or scikit-learn
+    talksTo: [exporter]
+    kind: offline
+  - id: exporter
+    name: Exporter and quantiser
+    role: Exports to ONNX, quantises to int8 and re-checks recall and calibration after quantisation.
+    tech: ONNX · ONNX Runtime
+    talksTo: [runtime]
+    kind: offline
+  - id: form
+    name: Case form
+    role: Collects age, symptoms, vital signs and a short note on the handheld.
+    tech: Local app
+    talksTo: [features]
+    kind: external
+  - id: features
+    name: Feature pipeline
+    role: Validates ranges and turns the case into a fixed-length vector with the same code used in training.
+    tech: Python · numpy
+    talksTo: [runtime]
+    kind: core
+  - id: runtime
+    name: Edge runtime
+    role: Runs the int8 ONNX model on the 4 ARM cores and returns a raw score.
+    tech: ONNX Runtime · ARM
+    talksTo: [scorer]
+    kind: core
+  - id: scorer
+    name: Calibrated scorer
+    role: Maps the raw score to a probability and applies the urgent threshold.
+    tech: Python
+    talksTo: [log]
+    kind: core
+  - id: log
+    name: Device log
+    role: Records latency, peak memory and CPU time as a battery proxy.
+    tech: SQLite
+    talksTo: []
+    kind: offline
+flow:
+  - component: features
+    text: >-
+      checks that values are plausible, such as a temperature between 30 and 45 °C, then builds a vector of about
+      300 symptom, vital-sign and hashed note features.
+  - component: runtime
+    text: runs the int8 model, a few hundred kilobytes of weights, in a few milliseconds on a 1.5 GHz quad-core ARM.
+  - component: scorer
+    text: >-
+      converts the raw score with the calibration map fitted after quantisation, then marks the case `urgent` when
+      `p ≥ 0.18`, the threshold that gave 95% recall on validation.
+  - component: log
+    text: stores the case's latency, memory and CPU time, so field timings can be compared with the bench and emulator numbers.
+interface:
+  lang: python
+  code: |
+    def score_case(case: Case) -> Triage:
+        x = featurise(case)          # validates ranges
+        raw = session.run(None, {"x": x})[0]
+        p = calibrate(raw)           # isotonic map
+        return Triage(
+            p_urgent=p,
+            urgent=p >= URGENT_THRESHOLD,  # 0.18
+            model="triage-int8-v3",
+            ms=elapsed_ms())
+decisions:
+  - choice: A small MLP, not a transformer
+    instead: A compact transformer on the note text
+    why: >-
+      Most signal is in symptoms and vitals, the MLP fits easily in 150 MB and 120 ms on ARM, and it is easier to
+      explain. Revisit only if notes turn out to carry signal the bag of words misses.
+  - choice: Threshold for recall, not accuracy
+    instead: The default 0.5 cut-off
+    why: >-
+      Missing an urgent case is far worse than an extra referral, so the threshold is set where urgent recall reaches
+      95% and precision is checked to stay at 60% or above.
+  - choice: Recalibrate after quantising
+    instead: Reuse the fp32 calibration
+    why: >-
+      Int8 can shift scores slightly, which moves who falls above the threshold. Fit calibration and the threshold on
+      the int8 model's own outputs.
+watchOut: >-
+  Accuracy on synthetic cases says nothing about clinical validity. State that clearly in the report, and time on a
+  real ARM board, since emulator timings can be far off.

@@ -1,0 +1,72 @@
+overview: >-
+  A directional and a spot light each render the scene's depth into a shadow map, and the main pass compares every
+  pixel's depth as seen from the light with it. PCF (percentage-closer filtering) averages that test over a rotated
+  Poisson disk of samples for soft edges, and PCSS first searches for blockers to estimate how far away the occluder
+  is, so shadows are sharp at contact and widen with distance.
+learn:
+  - name: Shadow mapping
+    ref: learnopengl
+  - name: Percentage-closer filtering
+  - name: Contact-hardening shadows
+    ref: rtr4
+  - name: Light frustum fitting
+components:
+  - id: fit
+    name: Frustum fitter
+    role: Fits each light's projection tightly around what the camera can see.
+    tech: C++ · GLM
+    talksTo: [depth]
+    kind: core
+  - id: depth
+    name: Shadow pass
+    role: Renders depth from the light into a 2048x2048 depth texture.
+    tech: OpenGL 4.6
+    talksTo: [lit]
+    kind: core
+  - id: lit
+    name: Lighting pass
+    role: Runs the shadow test with PCF or PCSS and shades the pixel.
+    tech: GLSL
+    talksTo: [timer]
+    kind: core
+  - id: timer
+    name: GPU timer
+    role: Records shadow pass and filter cost per mode with timer queries.
+    tech: GL_TIME_ELAPSED
+    talksTo: []
+    kind: offline
+flow:
+  - component: fit
+    text: fits the directional light's ortho box to the visible scene bounds and the spot light's perspective to its cone.
+  - component: depth
+    text: renders depth only into `GL_DEPTH_COMPONENT32F`, with slope-scaled `glPolygonOffset` to stop shadow acne (stripes from a surface shadowing itself).
+  - component: lit
+    text: in PCF mode, compares 16 Poisson samples rotated by a per-pixel random angle, which turns banding into fine noise.
+  - component: lit
+    text: in PCSS mode, averages blocker depths `dB` in a search area, sets the width `w = (dR - dB) * lightSize / dB`, then runs PCF with `w`; the **timer** compares both modes.
+interface:
+  lang: glsl
+  code: |
+    uniform sampler2DShadow shadowCmp; // hw compare
+    uniform sampler2D shadowDepth;     // raw depth
+    uniform vec2 poisson[16];
+    uniform float lightSizeUV;
+
+    float pcf(vec3 uvz, float radiusUV, float angle);
+    float findBlocker(vec3 uvz, float searchUV,
+                      out int count);  // mean depth
+    float pcss(vec3 uvz, float angle) {
+      int n; float dB = findBlocker(uvz, lightSizeUV, n);
+      if (n == 0) return 1.0;          // fully lit
+      float w = (uvz.z - dB) * lightSizeUV / dB;
+      return pcf(uvz, w, angle);
+    }
+decisions:
+  - choice: Rotated Poisson disk, not a grid
+    instead: A regular 4x4 grid of PCF taps
+    why: >-
+      A regular grid leaves visible stair-step bands in the penumbra. Sixteen Poisson taps rotated per pixel cost the
+      same and leave only fine noise, which a small blur hides.
+watchOut: >-
+  A light frustum sized for the whole level leaves few shadow texels per metre, so shadows go blocky. Fit it to what
+  the camera sees and print texels per metre while you tune.

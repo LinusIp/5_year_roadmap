@@ -1,0 +1,60 @@
+overview: >-
+  Hooks on a small LLM show that a few input channels of each linear layer are far larger than the rest, which is
+  why naive W8A8 (8-bit weights and activations) loses accuracy. SmoothQuant divides those activation channels by a
+  factor and multiplies the matching weight rows by it, moving the difficulty into the weights, and perplexity is
+  compared for fp16, naive and smoothed.
+learn:
+  - name: Activation outliers
+    ref: mit-6-5940
+  - name: SmoothQuant
+    ref: mit-6-5940
+  - name: Per-channel versus per-tensor scales
+  - name: Perplexity
+    ref: hf-llm-course
+components:
+  - id: hooks
+    name: Activation hooks
+    role: Run a calibration set and record per-channel max of the input to each linear layer.
+    tech: PyTorch forward hooks
+    talksTo: [smooth]
+    kind: core
+  - id: smooth
+    name: Smoother
+    role: Computes the scale per channel and folds it into the layer before and the weights after.
+    tech: PyTorch
+    talksTo: [quant]
+    kind: core
+  - id: quant
+    name: W8A8 quantizer
+    role: Fake-quantizes weights per channel and activations per tensor to int8.
+    tech: PyTorch
+    talksTo: [eval]
+    kind: core
+  - id: eval
+    name: Perplexity eval
+    role: Scores fp16, naive and smoothed models on the same held-out text.
+    tech: PyTorch
+    talksTo: []
+    kind: core
+flow:
+  - component: hooks
+    text: >-
+      feed a few hundred calibration samples, kept apart from the eval text, and plot channel max per layer; a
+      handful of channels stand out by 10x or more.
+  - component: smooth
+    text: >-
+      computes `s_j = max|X_j|^α / max|W_j|^(1-α)` per input channel `j`, divides activations by `s` and multiplies
+      weight rows by `s`.
+  - component: quant
+    text: rounds weights and activations to int8 with their scales, so the maths matches what an int8 kernel would do.
+  - component: eval
+    text: sweeps `α` from 0.3 to 0.9 and checks the smoothed gap to fp16 is at most **half** the naive gap.
+decisions:
+  - choice: Fake quantization in PyTorch
+    instead: Real int8 kernels
+    why: >-
+      The question is accuracy, not speed. Rounding to int8 and back in fp16 gives the same numbers as an int8 kernel
+      on any GPU, without writing kernels. Move to real kernels only to measure speed.
+watchOut: >-
+  A calibration set of a few sentences misses the outlier channels' true range, so the scales look fine on
+  calibration and fail on the eval text. Use a few hundred samples, separate from the eval set.

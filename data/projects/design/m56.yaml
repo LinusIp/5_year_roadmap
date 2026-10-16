@@ -1,0 +1,127 @@
+overview: >-
+  One of your built mechanisms, the inverted pendulum of project 45 or the arm of project 55, rebuilt in a
+  differentiable simulator: one that returns the gradient of its output with respect to its parameters. Logged
+  hardware runs are replayed in NVIDIA Warp, a loss compares simulated and measured trajectories, and gradient descent
+  fits the masses, friction, damping and motor gain. The identified model redesigns the controller, which is then
+  tested on the hardware against your hand-tuned baseline.
+learn:
+  - name: Differentiable simulation
+    ref: pbdl-book
+  - name: Gradient checking
+    ref: nvidia-warp
+  - name: System identification
+    ref: brunton-databook
+  - name: Exploding gradients
+    ref: pbdl-book
+  - name: Sim-to-real validation
+    ref: mit-6-832-underactuated
+stats:
+  - value: ≤ 1 %
+    label: gradients against finite differences
+  - value: ≥ 30 %
+    label: lower held-out error than hand parameters
+  - value: 5 + 5
+    label: hardware runs, baseline and new
+components:
+  - id: hardware
+    name: Mechanism
+    role: The pendulum of project 45 or the arm of project 55, with its telemetry.
+    tech: Existing firmware
+    talksTo: [logs]
+    kind: external
+  - id: logs
+    name: Run logs
+    role: Holds synchronised inputs and measured states, split into training and held-out runs.
+    tech: NumPy · CSV
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Differentiable sim
+    role: Replays the logged inputs from the same initial states with parameters θ.
+    tech: NVIDIA Warp
+    talksTo: [loss]
+    kind: core
+  - id: loss
+    name: Loss
+    role: Measures RMS error between simulated and measured trajectories.
+    tech: Warp kernels
+    talksTo: [optimiser]
+    kind: core
+  - id: optimiser
+    name: Optimiser
+    role: Updates θ from the gradient until the training loss stops falling.
+    tech: Adam · Warp tape
+    talksTo: [sim, redesign]
+    kind: core
+  - id: gradcheck
+    name: Gradient check
+    role: Compares every gradient with central finite differences.
+    tech: NumPy
+    talksTo: []
+    kind: offline
+  - id: redesign
+    name: Controller redesign
+    role: Recomputes the controller on the identified model.
+    tech: python-control
+    talksTo: [hardware]
+    kind: core
+  - id: eval
+    name: Evaluation
+    role: Reports held-out error and the hardware metric over five runs each.
+    tech: Matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: logs
+    text: >-
+      provides recorded inputs `u` and states `x_meas`, aligned in time, with some runs held out from fitting.
+  - component: sim
+    text: >-
+      runs a short window from each recorded initial state with the current `θ`, recording the steps on a **tape**.
+  - component: loss
+    text: >-
+      computes RMS error between `x_sim` and `x_meas` over the window.
+  - component: optimiser
+    text: >-
+      plays the tape backwards for `∂loss/∂θ` and takes an Adam step, repeating until the loss levels off.
+  - component: redesign
+    text: >-
+      designs a new LQR or PID on the identified model and flashes it to the mechanism.
+  - component: eval
+    text: >-
+      checks error on the held-out runs, then compares settling time or RMS angle with the baseline over five runs.
+interface:
+  lang: python
+  code: |
+    import warp as wp
+
+    theta = wp.array(theta0, dtype=float,
+                     requires_grad=True)
+    for it in range(500):
+        tape = wp.Tape()
+        with tape:
+            x_sim = rollout(theta, u_log, x0, H)
+            loss = traj_rmse(x_sim, x_meas)
+        tape.backward(loss)
+        adam_step(theta, theta.grad, lr=1e-2)
+        tape.zero()
+decisions:
+  - choice: System identification
+    instead: Optimising a policy through the simulator
+    why: >-
+      Held-out runs give a clear test (at least 30 % lower error), and the improved model feeds the controller design
+      you already know. Policy optimisation is the stretch goal.
+  - choice: Short windows from recorded states
+    instead: One rollout over the whole recording
+    why: >-
+      Gradients through long rollouts explode, especially for an unstable pendulum. Restarting each window from a
+      measured state, a form of multiple shooting, keeps them usable; report the horizon where they broke.
+  - choice: Smooth friction model
+    instead: A sign function for Coulomb friction
+    why: >-
+      A sign function has zero gradient almost everywhere, so friction would never be fitted. A steep `tanh` keeps
+      the same shape with a usable gradient.
+watchOut: >-
+  If inputs and measured states are offset in time, the optimiser absorbs the delay into physical parameters and
+  fits nonsense that still lowers the loss. Synchronise the logs first, and check fitted values against your hand
+  measurements.

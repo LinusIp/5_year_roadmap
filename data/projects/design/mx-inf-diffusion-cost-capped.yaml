@@ -1,0 +1,114 @@
+overview: >-
+  An image generation service that brings Canvasly's cost from $0.04 to $0.015 per 1,024×1,024 image on one 24 GB
+  GPU. Requests wait in a queue, are batched, and run with a configuration found by a sweep over step count, sampler,
+  precision and compilation. A cost tracker charges each image its share of GPU time, and quality is checked with
+  CLIP score, FID and a blind A/B test so savings never come from worse pictures.
+learn:
+  - name: Diffusion sampling steps
+    ref: hf-diffusion-course
+  - name: Distilled samplers
+    ref: diffusers-repo
+  - name: Mixed precision
+  - name: torch.compile
+    ref: horace-he-brrr
+  - name: CLIP score and FID
+  - name: Queue-based autoscaling
+stats:
+  - value: ≤ $0.015
+    label: per 1,024×1,024 image
+  - value: ≤ 6 s
+    label: p95 latency at 5 img/s
+  - value: ≤ 5%
+    label: quality change vs baseline
+components:
+  - id: api
+    name: API
+    role: Accepts prompt and size and returns the image with its cost.
+    tech: FastAPI
+    talksTo: [queue]
+    kind: core
+  - id: queue
+    name: Request queue
+    role: Groups waiting requests of the same size into batches.
+    tech: Python · asyncio
+    talksTo: [generator]
+    kind: core
+  - id: generator
+    name: Batch generator
+    role: Runs the diffusion pipeline on a batch with the chosen steps, sampler and precision.
+    tech: diffusers · torch.compile
+    talksTo: [cost]
+    kind: core
+  - id: cost
+    name: Cost tracker
+    role: Charges each image its GPU seconds, including warm-up and idle share, at the GPU's price.
+    tech: SQLite
+    talksTo: []
+    kind: core
+  - id: scaler
+    name: Autoscaler
+    role: Adds a worker when the queue grows and removes one after a quiet period.
+    tech: Python
+    talksTo: [generator]
+    kind: offline
+  - id: sweep
+    name: Config sweep
+    role: Tries combinations of steps, sampler, bf16 or fp16 and compilation, and records cost and quality.
+    tech: Python · pandas
+    talksTo: [quality]
+    kind: offline
+  - id: quality
+    name: Quality metrics
+    role: Computes CLIP score and FID on COCO caption prompts and runs blind A/B comparisons.
+    tech: torchmetrics · A/B form
+    talksTo: []
+    kind: offline
+flow:
+  - component: api
+    text: receives `POST /generate` with a prompt and `1024×1024`.
+  - component: queue
+    text: >-
+      waits up to `300 ms` for more requests of the same size and forms a batch of up to 4, which fits in 24 GB
+      at this resolution.
+  - component: generator
+    text: >-
+      runs the configuration the **sweep** picked, for example fewer steps with a distilled sampler in bf16 and a
+      compiled UNet (the network that removes noise at each step).
+  - component: cost
+    text: >-
+      records GPU seconds per image and turns them into dollars, so `$0.015` is checked on every request, not only in
+      a benchmark.
+  - component: api
+    text: returns the image with `cost_usd` and `latency_ms`; the **autoscaler** watches the queue depth.
+interface:
+  lang: http
+  code: |
+    POST /generate
+    { "prompt": "white sneaker on oak table,
+                 soft daylight",
+      "width": 1024, "height": 1024 }
+
+    200 OK
+    { "image": "<png bytes, base64>",
+      "config": "distilled-8step-bf16-compiled",
+      "latency_ms": 3420,
+      "cost_usd": 0.0129 }
+decisions:
+  - choice: Fewer steps with a distilled sampler
+    instead: A smaller, lower-quality model
+    why: >-
+      Most of the cost is the number of denoising steps, and distilled samplers keep quality at a fraction of the
+      steps. Keep the model and check the 5% quality bar for each step count.
+  - choice: Short batching window
+    instead: One image at a time
+    why: >-
+      At 5 img/s requests overlap, and batching raises images per GPU-second. A 300 ms wait is small against a 6 s p95
+      budget.
+  - choice: Warm compiled graphs before taking traffic
+    instead: Compile on the first request
+    why: >-
+      `torch.compile` can take a minute on the first call, which would blow the p95 for whoever arrives first. A new
+      worker reports ready only after a warm-up batch.
+watchOut: >-
+  One quality metric is easy to game: fewer steps can keep CLIP score while images get blurrier. Use CLIP score, FID
+  and a blind A/B test together before accepting a cheaper configuration.

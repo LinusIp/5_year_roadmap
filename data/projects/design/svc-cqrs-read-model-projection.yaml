@@ -1,0 +1,53 @@
+overview: >-
+  A command side that validates commands and appends versioned events to a Postgres event log, and a projector
+  that reads the log in order, updates a read-model table and checkpoints its position, so the read model can be
+  dropped and rebuilt identically.
+learn:
+  - name: CQRS
+  - name: Event logs
+    ref: ddia
+  - name: Projection checkpoints
+  - name: Deterministic replay
+components:
+  - id: commands
+    name: Command handler
+    role: Validates a command against current state and appends events with the next stream version.
+    tech: Python
+    talksTo: [log]
+    kind: core
+  - id: log
+    name: Event log
+    role: Append-only table of events with a global sequence and a unique (stream, version) pair.
+    tech: PostgreSQL
+    talksTo: [projector]
+    kind: core
+  - id: projector
+    name: Projector
+    role: Applies events in sequence order to the read model and saves its last position.
+    tech: Python
+    talksTo: [readmodel]
+    kind: core
+  - id: readmodel
+    name: Read model
+    role: Query-friendly tables, such as order summaries per customer.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+flow:
+  - component: commands
+    text: handles `PlaceOrder` and appends `OrderPlaced` with `version = 4` for that order's stream.
+  - component: log
+    text: assigns global sequence 1,000,231; a second writer at version 4 hits the unique constraint and retries.
+  - component: projector
+    text: reads events after its checkpoint, updates `order_summary` and saves the checkpoint in the same transaction.
+  - component: readmodel
+    text: is truncated and rebuilt from sequence 0 for the test, and a hash of its rows must match the live copy.
+decisions:
+  - choice: Checkpoint in the same transaction
+    instead: Store the checkpoint separately after each batch
+    why: >-
+      A crash between the update and the checkpoint would apply events twice. One transaction makes the projector
+      exactly-once against Postgres; revisit if the read model moves to another store.
+watchOut: >-
+  A projector that uses the current time, random values or outside lookups produces a different read model on
+  rebuild. Use only data in the event.

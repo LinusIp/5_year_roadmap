@@ -1,0 +1,102 @@
+overview: >-
+  A cost and margin model that tells Lumina Notes' CFO whether an AI summary feature at $8 a month stays profitable
+  when some users summarise far more than others. A working prototype measures tokens, GPU time, retries and failures
+  per summary on a real model server. A cohort model with heavy-tailed usage turns those measurements into gross
+  margin per user group, and a calculator shows what caching, routing to a smaller model, or usage caps change.
+learn:
+  - name: Unit economics
+  - name: Gross margin
+  - name: Heavy-tailed distributions
+    ref: blitzstein-hwang-probability
+  - name: Cost per token from utilisation
+    ref: databricks-inference-best-practices
+  - name: Sensitivity analysis
+  - name: Model routing
+stats:
+  - value: ≥ 70%
+    label: margin, median user
+  - value: ≥ 40%
+    label: margin, p95 user
+  - value: ≤ 10%
+    label: model error vs measured cost
+components:
+  - id: prototype
+    name: Feature prototype
+    role: Summarises notes through a real model server, as users would.
+    tech: FastAPI · local model server
+    talksTo: [telemetry]
+    kind: core
+  - id: telemetry
+    name: Telemetry
+    role: Records input and output tokens, GPU seconds, cache hits, retries and failures per summary.
+    tech: Python · SQLite
+    talksTo: [margin]
+    kind: core
+  - id: usage
+    name: Usage generator
+    role: Draws summaries per user per month from a Pareto distribution for each cohort.
+    tech: numpy
+    talksTo: [margin]
+    kind: core
+  - id: margin
+    name: Margin model
+    role: Combines cost per summary and usage into monthly cost and gross margin by cohort and plan.
+    tech: pandas
+    talksTo: [calc]
+    kind: core
+  - id: calc
+    name: Calculator
+    role: Lets the CFO move price, usage, $/token and levers and see margins update.
+    tech: Streamlit or Marimo
+    talksTo: []
+    kind: core
+flow:
+  - component: prototype
+    text: summarises a real 3,000-word note and returns the result as the feature would.
+  - component: telemetry
+    text: >-
+      records the tokens and **GPU seconds** used, including any retry; cost per summary is GPU seconds × the GPU's
+      hourly price ÷ 3,600 at the utilisation actually measured.
+  - component: usage
+    text: >-
+      draws a month for 10,000 users: most make a few dozen summaries, but a small heavy tail makes hundreds, which is
+      where the margin goes.
+  - component: margin
+    text: >-
+      computes `(8.00 − monthly cost) ÷ 8.00` per user; the median must reach `70%` and the p95 user `40%`, so p95 cost
+      stays ≤ $4.80.
+  - component: calc
+    text: >-
+      shows how cache hits, routing easy notes to a smaller model, or a monthly cap move each cohort, and checks the
+      model is within 10% of the prototype's measured cost.
+interface:
+  lang: python
+  code: |
+    def monthly_cost(n: int, c: Costs, lv: Levers):
+        a = min(n, lv.cap)              # usage cap
+        fresh = a * (1 - lv.cache_hit)
+        per = (lv.small_share * c.small
+               + (1 - lv.small_share) * c.big)
+        return fresh * per * (1 + c.retry_rate)
+
+    def margin(n, c, lv, price=8.00) -> float:
+        return (price - monthly_cost(n, c, lv)) / price
+decisions:
+  - choice: Measured cost at real utilisation
+    instead: List price per token
+    why: >-
+      A self-hosted GPU costs the same per hour whether busy or not, so cost per summary depends on how full it runs.
+      List prices give a number that the prototype will not reproduce within 10%.
+  - choice: Cohorts with heavy-tailed usage
+    instead: One average user
+    why: >-
+      Averages hide that a few heavy users can cost more than they pay. Judging the p95 user directly is what the CFO
+      asked for.
+  - choice: Routing and caching before caps
+    instead: Cap usage first
+    why: >-
+      Caps hurt the most engaged users, who are often the best advocates. Use them only if routing and caching cannot
+      bring the p95 margin to 40%.
+watchOut: >-
+  Retries and failed calls cost GPU time but produce nothing the user sees, so leaving them out makes the feature look
+  cheaper than it is. Count them in telemetry and in the model.

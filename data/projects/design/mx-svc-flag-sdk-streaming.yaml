@@ -1,0 +1,117 @@
+overview: >-
+  Flag SDKs for Vendora's apps that evaluate flags on the device instead of calling an API on every screen. A Go
+  server streams numbered ruleset versions over server-sent events (SSE, a one-way HTTP stream), sending small
+  deltas and a checksum, and each SDK keeps the last good ruleset for offline use. A TypeScript and a Python SDK
+  share one engine design and one file of JSON test vectors, so both give identical answers.
+learn:
+  - name: Server-sent events
+  - name: Versioned deltas and checksums
+  - name: Cross-language test vectors
+  - name: Reconnect with jitter
+    ref: google-sre-book
+  - name: Connection fan-out
+    ref: system-design-primer
+stats:
+  - value: < 2 s
+    label: p99 change to 10,000 clients
+  - value: < 50 µs
+    label: local evaluation
+  - value: 10,000
+    label: connections on a 2-core VM
+components:
+  - id: publisher
+    name: Ruleset publisher
+    role: Turns each flag edit into a new version number with a delta and a checksum of the full ruleset.
+    tech: Go · SQLite
+    talksTo: [stream]
+    kind: core
+  - id: stream
+    name: Stream server
+    role: Holds 10,000 SSE connections and writes each delta to every one of them.
+    tech: Go · net/http
+    talksTo: [client-sdk, server-sdk]
+    kind: core
+  - id: client-sdk
+    name: Client SDK
+    role: Applies deltas, checks version and checksum, evaluates locally, caches offline.
+    tech: TypeScript
+    talksTo: [events]
+    kind: core
+  - id: server-sdk
+    name: Server SDK
+    role: The same engine for backend services, run against the same test vectors.
+    tech: Python
+    talksTo: [events]
+    kind: core
+  - id: events
+    name: Evaluation events
+    role: Receives batched counts of which flag and variant each SDK served.
+    tech: Go · SQLite
+    talksTo: []
+    kind: offline
+  - id: vectors
+    name: Test vectors
+    role: JSON cases of ruleset, context and expected variant that both SDKs must pass.
+    tech: JSON
+    talksTo: [client-sdk, server-sdk]
+    kind: offline
+  - id: sim
+    name: Connection simulator
+    role: Opens 10,000 SSE clients, measures propagation and forces mass reconnects.
+    tech: Go
+    talksTo: [stream]
+    kind: offline
+flow:
+  - component: publisher
+    text: >-
+      receives an edit that sets `checkout-v2` to 30 percent and writes version `518` with a delta and a `sha256` of
+      the whole ruleset.
+  - component: stream
+    text: >-
+      writes one `event: delta` frame to all 10,000 connections from a single prepared buffer, so 2 cores can reach
+      everyone in under 2 s.
+  - component: client-sdk
+    text: >-
+      checks the delta's `from` is its own version `517`; if not, it detects a **gap** and asks for the full ruleset
+      with `GET /ruleset`.
+  - component: client-sdk
+    text: >-
+      applies the delta, compares the checksum, saves it as last-known-good, and evaluates the next screen's flags in
+      memory in microseconds.
+  - component: server-sdk
+    text: applies the same delta and gives the same variant for the same user, which the shared test vectors prove.
+  - component: events
+    text: get one batch of "flag, variant, count" every 30 s from each SDK for analytics, not one call per evaluation.
+interface:
+  lang: http
+  code: |
+    GET /stream?env=prod&since=517
+    Accept: text/event-stream
+
+    event: delta
+    id: 518
+    data: { "from": 517, "to": 518,
+      "set": { "checkout-v2": { "rollout": 3000 } },
+      "sha256": "9f2c…" }
+
+    event: ping
+    data: {}
+decisions:
+  - choice: SSE, not WebSocket
+    instead: WebSocket
+    why: >-
+      Rules only flow from server to client, and SSE has reconnect with `Last-Event-ID` built in. One goroutine and
+      a small buffer per connection fit 10,000 on a 2-core VM.
+  - choice: Deltas with a full-ruleset checksum
+    instead: Sending the full ruleset on every change
+    why: >-
+      A delta is a few hundred bytes against tens of kilobytes, which matters on mobile data. The checksum catches
+      any missed or misapplied delta and triggers a resync.
+  - choice: Random backoff on reconnect
+    instead: Reconnect immediately
+    why: >-
+      After a server restart 10,000 apps would reconnect in the same second. Spreading reconnects over 0 to 10 s
+      avoids the herd.
+watchOut: >-
+  The two SDKs can disagree on the hash input, for example UTF-16 vs UTF-8 strings. Put bucket values for tricky ids
+  in the shared vectors, including non-ASCII ones.

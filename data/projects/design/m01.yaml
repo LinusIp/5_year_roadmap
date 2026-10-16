@@ -1,0 +1,111 @@
+overview: >-
+  A tabular model behind a small web service that anyone can call. A notebook explores the data and compares at least
+  three models with cross-validation; `train.py` then rebuilds the winner from the raw CSV and saves the preprocessing
+  and the model together as one artefact file. A FastAPI service in a Docker image loads that file once at start-up and
+  returns a prediction and its probability for each JSON request, on a public cloud host.
+learn:
+  - name: Train, validation, test
+    ref: ml-zoomcamp
+  - name: Data leakage
+    ref: kaggle-learn
+  - name: scikit-learn Pipelines
+    ref: ml-zoomcamp
+  - name: Serving a model over HTTP
+    ref: ml-zoomcamp
+  - name: Docker images
+    ref: docker-get-started
+stats:
+  - value: ≥ 3
+    label: models compared on held-out data
+  - value: < 10 min
+    label: to rebuild the artefact
+  - value: 1,000
+    label: requests for p50 and p99
+components:
+  - id: data
+    name: Dataset
+    role: One public CSV of 5k–100k rows.
+    tech: CSV
+    talksTo: [notebook, train]
+    kind: external
+  - id: notebook
+    name: EDA notebook
+    role: Explores the data, settles the features and picks the model by cross-validation.
+    tech: Jupyter · pandas
+    talksTo: [train]
+    kind: offline
+  - id: train
+    name: train.py
+    role: Rebuilds the chosen pipeline from the raw CSV with the tuned parameters.
+    tech: scikit-learn · XGBoost
+    talksTo: [artefact]
+    kind: core
+  - id: artefact
+    name: Model artefact
+    role: One file holding the fitted preprocessing and the model together.
+    tech: model.bin
+    talksTo: [service]
+    kind: core
+  - id: service
+    name: Prediction service
+    role: Loads the artefact once, validates JSON and returns a prediction and a probability.
+    tech: FastAPI · uvicorn · Docker
+    talksTo: []
+    kind: core
+  - id: host
+    name: Cloud host
+    role: Runs the image at a public HTTPS URL.
+    tech: Cloud Run · Fly.io · Render
+    talksTo: [service]
+    kind: external
+  - id: client
+    name: Client
+    role: Anyone running the README's `curl` request.
+    tech: curl
+    talksTo: [host]
+    kind: external
+flow:
+  - component: notebook
+    text: >-
+      splits off a test set **first**, compares a linear baseline, a tree ensemble and a boosted model with
+      cross-validation, and never tunes on the test set.
+  - component: train
+    text: reads the raw CSV, fits the same `Pipeline` (or `DictVectorizer`) and model, and finishes in under 10 minutes.
+  - component: artefact
+    text: is written as one file, so the service cannot apply different preprocessing from training.
+  - component: service
+    text: starts inside the pinned Docker image and loads `model.bin` once, not per request.
+  - component: client
+    text: sends `POST /predict` with one record as JSON to the public URL.
+  - component: service
+    text: validates the fields, runs the pipeline and returns the prediction and its probability as JSON.
+interface:
+  lang: http
+  code: |
+    POST /predict
+    { "tenure": 12,
+      "contract": "month-to-month",
+      "monthly_charges": 70.35 }
+
+    200 OK
+    { "prediction": "churn",
+      "probability": 0.73 }
+decisions:
+  - choice: Preprocessing saved inside the artefact
+    instead: Preprocessing rewritten in the service
+    why: >-
+      Two copies of the feature code drift apart and the service quietly sees different features. One pipeline
+      object, fitted in `train.py`, removes that risk.
+  - choice: Test set split off before any tuning
+    instead: Choosing the model on the test score
+    why: >-
+      With 5k–100k rows, cross-validation on the training part is enough to tune; the test set then gives one honest
+      number per model.
+  - choice: Locked dependencies in the image
+    instead: Unpinned pip installs
+    why: >-
+      An unpinned library can break the image a month later. A uv or pipenv lock file keeps the deployed service
+      rebuildable.
+watchOut: >-
+  Fitting the scaler or encoder on the whole dataset before the split leaks test information into training and
+  inflates every score. Split first, and fit all preprocessing inside the pipeline on the training part only.

@@ -1,0 +1,46 @@
+overview: >-
+  Clones of cat, wc, head, tail -f and tee in C11 using POSIX calls, with getopt for flags, a shared buffered I/O
+  helper, the same exit codes as GNU, and a script that compares outputs byte for byte on 20 invocations.
+learn:
+  - name: POSIX file I/O
+    ref: cmu-15-213
+  - name: getopt parsing
+  - name: Signals and SIGPIPE
+  - name: inotify
+components:
+  - id: tools
+    name: Tool mains
+    role: One small `main` per tool that parses flags and calls the shared helpers.
+    tech: C11 · getopt
+    talksTo: [io]
+    kind: core
+  - id: io
+    name: I/O helpers
+    role: Read and write loops over a 64 KB buffer that handle partial writes and EINTR.
+    tech: read · write
+    talksTo: []
+    kind: core
+  - id: compare
+    name: Comparison script
+    role: Runs each invocation with your tool and GNU's and diffs stdout and the exit code.
+    tech: Shell
+    talksTo: [tools]
+    kind: offline
+flow:
+  - component: tools
+    text: parse flags such as `head -n 5` and `wc -lw`, exiting 1 with a usage line on bad flags.
+  - component: io
+    text: loops `read` into the buffer and `write` until every byte is out, since one write may send only part.
+  - component: tools
+    text: for `tail -f` read to the end, then wait for changes with inotify, or poll once a second.
+  - component: compare
+    text: runs 20 cases including binary files, a file with no final newline and `cat big | head -1`.
+decisions:
+  - choice: Raw read and write with one buffer
+    instead: stdio fread and fwrite
+    why: >-
+      Direct calls make partial writes and SIGPIPE visible, which is what this build teaches. stdio would hide them
+      behind its own buffering.
+watchOut: >-
+  When `head` exits early, `cat` gets SIGPIPE on its next write. Default behaviour is to die quietly, as GNU does;
+  do not print an error for EPIPE.

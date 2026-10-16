@@ -1,0 +1,121 @@
+overview: >-
+  An embedded key-value store in Rust for industrial controllers: a copy-on-write B+tree in one file, with one writer
+  and any number of readers. A commit never changes a page in place; it writes new copies of the leaf and every page
+  above it up to a new root, then switches to that root by writing one of two checksummed meta pages. Readers keep
+  using the root they started with, a consistent snapshot, without locks, and there are no compaction pauses because
+  nothing is ever merged in the background.
+learn:
+  - name: B+trees
+    ref: cmu-15-445
+  - name: Copy-on-write pages
+    ref: cmu-15-445
+  - name: Snapshot isolation
+    ref: ddia
+  - name: Epoch-based reclamation
+  - name: Torn writes and checksums
+    ref: ostep
+  - name: B-trees vs LSM trees
+    ref: ddia
+stats:
+  - value: 500k/s
+    label: point reads on 4 threads
+  - value: < 5 ms
+    label: commit p99 with fsync
+  - value: 3,000
+    label: crashes, zero corruption
+components:
+  - id: app
+    name: Controller app
+    role: Reads settings and logs often, writes rarely.
+    tech: Rust
+    talksTo: [snapshots, btree]
+    kind: external
+  - id: snapshots
+    name: Reader snapshots
+    role: Pin a transaction id and its root so a reader sees a frozen tree.
+    tech: Atomic reader slots
+    talksTo: [freelist]
+    kind: core
+  - id: btree
+    name: B+tree
+    role: Searches, inserts and deletes by copying the path from leaf to root.
+    tech: 4 KB pages
+    talksTo: [pages]
+    kind: core
+  - id: pages
+    name: Page manager
+    role: Reads pages through mmap and writes new pages to free slots or the file end.
+    tech: mmap · pwrite
+    talksTo: [meta]
+    kind: core
+  - id: freelist
+    name: Free list
+    role: Holds pages freed by each commit until no reader can still see them.
+    tech: Epoch-based
+    talksTo: [pages]
+    kind: core
+  - id: meta
+    name: Meta page recovery
+    role: Writes the new root into the older of two meta pages and picks the newest valid one on open.
+    tech: CRC32C · fsync
+    talksTo: []
+    kind: core
+  - id: crash
+    name: Crash tester
+    role: Cuts writes at random points, reopens and checks the tree against a model.
+    tech: Fault-injecting file
+    talksTo: [pages]
+    kind: offline
+flow:
+  - component: snapshots
+    text: >-
+      starts a read by loading the current meta (root page, txn 812) and recording 812 in a reader slot; lookups then
+      walk that root with no locks.
+  - component: btree
+    text: >-
+      on `put(k, v)` in txn 813 copies the leaf and its 2 to 3 parents into new pages; the old pages stay untouched for
+      readers still on 812.
+  - component: freelist
+    text: >-
+      records the replaced pages as freed at 813, and hands out only pages freed before the **oldest pinned reader**,
+      which keeps the file under 3× live data.
+  - component: pages
+    text: >-
+      writes the new pages to reused slots or the file end and calls `fdatasync`.
+  - component: meta
+    text: >-
+      writes txn 813, the new root and a checksum into the older meta page, then syncs again; on open, a torn meta
+      fails its checksum and the other one is used.
+interface:
+  lang: rust
+  code: |
+    let db = Db::open("plant.db")?; // newest valid meta
+    // readers: any thread, never block the writer
+    let r = db.read();              // pins txn 812
+    let v = r.get(b"valve/17/setpoint")?;
+    for (k, v) in r.prefix(b"valve/17/") { /* ... */ }
+    drop(r);                        // unpins 812
+
+    // one writer at a time
+    let mut w = db.write();         // txn 813
+    w.put(b"valve/17/setpoint", b"42.5")?;
+    w.commit()?;  // pages, fsync, meta, fsync
+decisions:
+  - choice: Copy-on-write B+tree
+    instead: An LSM tree
+    why: >-
+      The workload is read-mostly with strict latency, and LSM compaction causes the pauses the vendor rules out. Copy
+      on write costs a few page writes per commit, which is fine at controller write rates.
+  - choice: Two meta pages instead of a separate log
+    instead: An in-place B+tree with a write-ahead log
+    why: >-
+      Old pages are never overwritten, so the only thing a crash can tear is the meta page, and the other copy covers
+      that. Recovery is just reading two pages, and there is no log to replay.
+  - choice: Lock-free readers pinning a txn id
+    instead: A reader-writer lock
+    why: >-
+      A lock would make readers wait during each commit's fsyncs, up to 5 ms. Pinned snapshots let 4 threads reach
+      500,000 reads a second while the writer commits.
+watchOut: >-
+  Reusing a page that a long-running reader still sees corrupts that reader's view without any error. Free a page only
+  when every pinned txn is newer than the commit that freed it, and test with a reader held open through many commits.

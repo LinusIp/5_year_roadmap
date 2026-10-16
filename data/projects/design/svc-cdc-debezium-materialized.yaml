@@ -1,0 +1,53 @@
+overview: >-
+  Change data capture from Postgres: Debezium reads row changes from the write-ahead log, publishes them to a Kafka
+  or Redpanda topic keyed by primary key, and a consumer upserts or deletes documents in OpenSearch so the index
+  follows the table.
+learn:
+  - name: Change data capture
+    ref: ddia
+  - name: Logical decoding
+  - name: Keyed partitions
+  - name: Snapshot and replay
+components:
+  - id: pg
+    name: Postgres
+    role: Source table with logical decoding turned on.
+    tech: PostgreSQL
+    talksTo: [debezium]
+    kind: core
+  - id: debezium
+    name: Debezium
+    role: Turns WAL changes into events with before and after images.
+    tech: Debezium connector
+    talksTo: [topic]
+    kind: core
+  - id: topic
+    name: Topic
+    role: Keeps change events per primary key in order within a partition.
+    tech: Kafka or Redpanda
+    talksTo: [consumer]
+    kind: core
+  - id: consumer
+    name: Indexer
+    role: Upserts or deletes documents by key and commits offsets after each write.
+    tech: Python · OpenSearch
+    talksTo: []
+    kind: core
+flow:
+  - component: pg
+    text: commits `UPDATE products SET price = 9 WHERE id = 81`.
+  - component: debezium
+    text: emits an event with `op = "u"`, the before and after rows, and key `id = 81`.
+  - component: topic
+    text: places it in the partition for key 81, after every earlier change to that row.
+  - component: consumer
+    text: writes document 81 to the index, or deletes it for `op = "d"`; a rebuild replays from a fresh snapshot.
+decisions:
+  - choice: Key events by primary key
+    instead: Round-robin partitioning
+    why: >-
+      Ordering only holds inside a partition, so all changes to one row must land in the same one. Round-robin
+      would let an old price overwrite a new one.
+watchOut: >-
+  When a row's primary key changes, Debezium sends a delete for the old key and a create for the new one, possibly
+  on different partitions. Handle both, and compare with the table after random writes.

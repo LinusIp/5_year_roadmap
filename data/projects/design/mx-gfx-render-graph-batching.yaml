@@ -1,0 +1,109 @@
+overview: >-
+  A render-graph module for Brindle Works' engine: each pass declares which resources it reads and writes instead of
+  being ordered by hand. Compiling the graph builds a dependency graph (a DAG, no loops), sorts passes so writers run
+  before readers, drops passes whose output nobody uses, and lets short-lived render targets share memory when their
+  lifetimes do not overlap. A draw batcher sorts the scene's 10,000 props and merges them into instanced draws, and a
+  profiler times every pass on the GPU.
+learn:
+  - name: Render graphs
+    ref: vkguide
+  - name: Topological sort
+    ref: mit-6-006
+  - name: Resource lifetimes and aliasing
+  - name: Instanced drawing
+    ref: learnopengl
+  - name: Deferred shading
+    ref: learnopengl
+stats:
+  - value: < 0.5 ms
+    label: compile 40 passes
+  - value: ≥ 30%
+    label: render-target memory saved
+  - value: < 300
+    label: draw calls for 10,000 draws
+components:
+  - id: api
+    name: Graph API
+    role: Lets each pass declare created, read and written resources and its execute function.
+    tech: C++17
+    talksTo: [compiler]
+    kind: core
+  - id: compiler
+    name: Compiler
+    role: Builds the DAG, sorts it, culls unused passes and works out barriers and each resource's first and last use.
+    tech: C++17
+    talksTo: [allocator]
+    kind: core
+  - id: allocator
+    name: Resource allocator
+    role: Gives transient resources real textures from a pool, reusing one when lifetimes do not overlap.
+    tech: C++17 · OpenGL 4.5
+    talksTo: [passes]
+    kind: core
+  - id: passes
+    name: Pass library
+    role: G-buffer, lighting and post passes written against the graph API only.
+    tech: C++17 · GLSL
+    talksTo: [batcher, profiler]
+    kind: core
+  - id: batcher
+    name: Draw batcher
+    role: Sorts draws by shader, material and mesh and merges equal ones into instanced draws.
+    tech: C++17
+    talksTo: [gpu]
+    kind: core
+  - id: gpu
+    name: OpenGL 4.5 GPU
+    role: Runs the draws; a later Vulkan backend sits behind the same API.
+    tech: OpenGL 4.5
+    talksTo: []
+    kind: external
+  - id: profiler
+    name: Profiler
+    role: Times each pass with GPU timer queries and shows an overlay.
+    tech: GL timer queries · ImGui
+    talksTo: []
+    kind: offline
+flow:
+  - component: api
+    text: collects this frame's passes; the G-buffer pass `create`s and `write`s albedo, normal and depth, and lighting `read`s them and writes `hdr`.
+  - component: compiler
+    text: adds an edge from each writer to each reader, sorts the passes in that order, and walks back from `present` to **cull** any pass nothing needs.
+  - component: compiler
+    text: records each transient's first and last pass and the barriers needed between them, in under 0.5 ms for 40 passes.
+  - component: allocator
+    text: hands out pooled textures, reusing one with the same size and format once its previous user's last pass is done.
+  - component: passes
+    text: run in sorted order; the G-buffer pass gives the batcher the visible props.
+  - component: batcher
+    text: sorts 10,000 draws by a 64-bit key of shader, material and mesh and issues one instanced draw per run of equal keys, under 300 in total.
+interface:
+  lang: cpp
+  code: |
+    graph.addPass("gbuffer", [&](PassBuilder& b) {
+        albedo = b.create({1920, 1080, RGBA8});
+        depth  = b.create({1920, 1080, D32F});
+        b.write(albedo); b.write(depth);
+      }, [&](PassContext& c) { batcher.draw(c); });
+    graph.addPass("lighting", [&](PassBuilder& b) {
+        b.read(albedo); b.read(depth);
+        hdr = b.create({1920, 1080, RGBA16F});
+        b.write(hdr);
+      }, lightingPass);
+    graph.present(hdr);
+    graph.compile();   // sort, cull, lifetimes
+    graph.execute();
+decisions:
+  - choice: Declared reads and writes
+    instead: Hand-ordered passes
+    why: Hand ordering is how each game ended up leaking targets and missing barriers. Declarations let the compiler derive order, barriers and lifetimes, and the same declarations map to Vulkan barriers later.
+  - choice: Alias whole textures with equal size and format
+    instead: Byte-level aliasing in one memory heap
+    why: OpenGL 4.5 cannot place two textures in the same memory, and mixing formats is a hazard. Reusing pooled textures by descriptor still reaches 30% in a deferred pipeline; revisit with Vulkan heaps.
+  - choice: Opaque handles, no GL ids in the API
+    instead: Expose GL texture names to passes
+    why: Passes that touch GL directly would have to be rewritten for Vulkan. Handles keep the pass library backend-free.
+watchOut: >-
+  A pass that reads and writes the same resource, or two passes that declare each other's outputs, make a cycle and the
+  sort fails or silently picks an order. Make every write produce a new version of the resource and report cycles with
+  the pass names.

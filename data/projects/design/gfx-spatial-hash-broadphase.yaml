@@ -1,0 +1,73 @@
+overview: >-
+  A broadphase (the cheap first pass of collision detection that finds which pairs might touch) for 50,000 circles:
+  each circle goes into the grid cells it overlaps, keyed by a hash of the cell coordinates, and only circles sharing a
+  cell are tested. A sweep over cell sizes finds the best one, about 2x the radius, and every run's pairs are checked
+  against brute force.
+learn:
+  - name: Broadphase collision
+    ref: ericson-rtcd
+  - name: Spatial hashing
+    ref: ten-minute-physics
+  - name: Counting sort
+  - name: Cache-friendly layout
+    ref: mit-6-172
+components:
+  - id: build
+    name: Grid builder
+    role: Puts every circle's index into the hash buckets of the cells it overlaps.
+    tech: C++20
+    talksTo: [query]
+    kind: core
+  - id: query
+    name: Pair finder
+    role: Tests circles that share a bucket and emits each touching pair once.
+    tech: C++20
+    talksTo: [brute, sweep]
+    kind: core
+  - id: brute
+    name: Brute-force check
+    role: Tests all pairs and compares the sorted pair lists exactly.
+    tech: C++20
+    talksTo: []
+    kind: offline
+  - id: sweep
+    name: Cell-size sweep
+    role: Times pair queries per second across cell sizes and plots them.
+    tech: C++20 · Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: build
+    text: hashes each overlapped cell with `(ix * 73856093) ^ (iy * 19349663)` mod the table size, counts per bucket, takes a prefix sum, and fills one flat array, so a rebuild **allocates nothing**.
+  - component: query
+    text: tests pairs `i < j` inside each bucket and keeps a pair only in the cell holding the low corner of their overlap, so no pair appears twice.
+  - component: brute
+    text: runs the all-pairs test (about 1.25 billion pairs at 50k) once per setting and requires an identical pair list.
+  - component: sweep
+    text: times queries for cell sizes from 0.5x to 8x the radius; the curve should bottom out near 2x.
+interface:
+  lang: cpp
+  code: |
+    struct Circle { float x, y, r; };
+    struct Pair { uint32_t a, b; };     // a < b
+
+    class SpatialHash {
+    public:
+      SpatialHash(float cellSize, uint32_t tableSize);
+      void build(std::span<const Circle> cs);
+      void pairs(std::span<const Circle> cs,
+                 std::vector<Pair>& out) const;
+    private:
+      uint32_t bucket(int ix, int iy) const;
+      std::vector<uint32_t> start_;  // prefix sums
+      std::vector<uint32_t> items_;  // circle ids
+    };
+decisions:
+  - choice: Flat counting-sort table
+    instead: "`std::unordered_map` of cell to `std::vector`"
+    why: >-
+      A map of vectors allocates thousands of small buffers each frame and scatters them in memory. Two flat arrays
+      rebuilt in two passes are allocation-free and read in order; size the table at about twice the circle count.
+watchOut: >-
+  Circles that share two or four cells get reported several times, so counts no longer match brute force. Use the
+  low-corner rule (or sort and remove duplicates) and test against brute force on every change.

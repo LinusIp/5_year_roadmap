@@ -1,0 +1,63 @@
+overview: >-
+  A tiled GEMM kernel is compiled and its PTX (the portable virtual assembly) and SASS (the real machine code for
+  one GPU) are dumped and annotated line by line for the inner loop: shared-memory loads, FMAs (fused multiply-adds)
+  and register use. Changing the unroll factor then shows how the instruction mix moves, and one inefficiency is
+  fixed with a measured gain.
+learn:
+  - name: PTX and SASS
+    ref: cuda-guide
+  - name: Tiled matrix multiply
+    ref: siboehm-cuda-matmul
+  - name: Register pressure
+    ref: pmpp-book
+  - name: Instruction-level profiling
+    ref: nsight-compute-docs
+components:
+  - id: kernel
+    name: Tiled GEMM
+    role: A shared-memory tiled kernel where each thread computes a small block of outputs.
+    tech: CUDA C++
+    talksTo: [dump]
+    kind: core
+  - id: dump
+    name: Disassembly
+    role: Emits PTX with nvcc and SASS with cuobjdump, with line info kept.
+    tech: nvcc -lineinfo · cuobjdump -sass
+    talksTo: [annotate]
+    kind: core
+  - id: annotate
+    name: Annotated loop
+    role: Labels each inner-loop instruction as load, FMA, address maths or branch and counts them.
+    tech: Python script · notes
+    talksTo: [ncu]
+    kind: core
+  - id: ncu
+    name: Nsight Compute
+    role: Confirms per-line instruction counts and stalls, and times before and after.
+    tech: Nsight Compute
+    talksTo: []
+    kind: core
+flow:
+  - component: kernel
+    text: compiles with `-arch=sm_80 -lineinfo` and `--resource-usage` to print registers per thread.
+  - component: dump
+    text: >-
+      writes `nvcc -ptx` output and `cuobjdump -sass` output, and finds the inner loop by the run of `FFMA` lines in
+      SASS and `fma.rn.f32` in PTX.
+  - component: annotate
+    text: >-
+      counts FMAs per iteration and the `LDS` (shared loads) and integer address instructions around them, giving
+      **instructions per FMA**.
+  - component: ncu
+    text: >-
+      checks the counts in the Source view, then compares instructions per FMA and time after a change such as more
+      unrolling or wider `LDS.128` loads.
+decisions:
+  - choice: Read SASS, not only PTX
+    instead: Stop at PTX
+    why: >-
+      PTX is rewritten by the assembler: registers are allocated, loads merged and loops reordered there. The SASS is
+      what runs, so the count that predicts speed comes from it.
+watchOut: >-
+  The compiler reorders and interleaves instructions, so the SASS rarely follows source line order. Use `-lineinfo`
+  and the Nsight Compute Source view to map lines instead of guessing from position.

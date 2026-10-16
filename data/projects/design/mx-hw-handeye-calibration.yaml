@@ -1,0 +1,89 @@
+overview: >-
+  A command-line tool that finds the fixed transform X between the robot's gripper and the camera mounted on it;
+  not knowing X is why Pixelpick's arm misses parts by 6 mm. The arm moves to about 25 poses while the camera sees a
+  calibration board; each pair of motions gives one equation A·X = X·B (A is how the gripper moved, B how the board
+  appeared to move in the camera), and solving all of them together gives X. A reprojection refinement then
+  polishes X, and an evaluator checks the pick error on 50 simulated trials against known ground truth.
+learn:
+  - name: Rigid transforms
+    ref: modern-robotics
+  - name: Camera intrinsics
+  - name: Hand-eye calibration
+  - name: Nonlinear least squares
+    ref: vmls-book
+  - name: Pose diversity
+stats:
+  - value: < 1.5 mm
+    label: pick error, 50 trials
+  - value: < 0.5 px
+    label: reprojection error
+  - value: < 30 s
+    label: for 25 poses
+components:
+  - id: sim
+    name: Simulated cell
+    role: Renders board images from known arm poses, camera intrinsics and ground-truth X, with noise.
+    tech: Python · OpenCV
+    talksTo: [detect]
+    kind: external
+  - id: detect
+    name: Board detection
+    role: Finds board corners in each image with sub-pixel accuracy.
+    tech: OpenCV
+    talksTo: [intrinsics]
+    kind: core
+  - id: intrinsics
+    name: Intrinsics
+    role: Calibrates focal length, centre and lens distortion, then gives the board pose per image.
+    tech: OpenCV calibrateCamera
+    talksTo: [solver]
+    kind: core
+  - id: solver
+    name: Hand-eye solver
+    role: Builds A and B from pose pairs and solves A·X = X·B, rotation first and then translation.
+    tech: NumPy · OpenCV
+    talksTo: [refine]
+    kind: core
+  - id: refine
+    name: Refinement
+    role: Adjusts X to minimise board-corner reprojection error over all images.
+    tech: SciPy least_squares
+    talksTo: [eval]
+    kind: core
+  - id: eval
+    name: Evaluation harness
+    role: Simulates 50 picks with the estimated X and reports error and its spread.
+    tech: Python · pytest
+    talksTo: []
+    kind: core
+flow:
+  - component: detect
+    text: finds the corners in each of the 25 images and drops images where fewer than `80 %` are found.
+  - component: intrinsics
+    text: calibrates the camera to under `0.5 px` reprojection error, then computes the board pose `T_cam←board` per image.
+  - component: solver
+    text: pairs consecutive poses into `A_i` (gripper motion from the robot) and `B_i` (board motion seen by the camera) and solves for `X`.
+  - component: refine
+    text: tunes `X` so that predicted corners land on the detected corners in every image, which spreads noise evenly.
+  - component: eval
+    text: applies `X` to 50 simulated pick targets and fails if the **mean error exceeds 1.5 mm**; it also warns if the poses had too little rotation.
+interface:
+  lang: shell
+  code: |
+    $ handeye calibrate --images run3/ \
+        --robot-poses run3/poses.csv --board 9x6x25mm
+    intrinsics  rms=0.31 px  (25/25 images)
+    rotation spread  48°  ok (min 30°)
+    X (gripper -> camera)
+      t = [ 32.4, -11.8, 61.2 ] mm
+      r = [ 0.4, -1.1, 89.6 ] deg
+    refine      rms=0.29 px
+    eval        pick error 0.9 ± 0.4 mm (50 trials)
+decisions:
+  - choice: Simulation first, hardware optional
+    instead: Calibrate on the real arm from day one
+    why: Ground truth is only known in simulation, so it is the only place to prove 1.5 mm. Real images then only need to match the simulated error.
+  - choice: Closed-form solve plus refinement
+    instead: Refinement only, from a guess
+    why: Nonlinear refinement from a poor guess can settle in a wrong minimum. The closed-form AX = XB answer gives a start close enough to converge every time.
+watchOut: Poses that mostly translate, with little rotation between them, make the hand-eye equations nearly unsolvable and X wanders. Spread the 25 poses over at least 30 degrees of rotation around different axes.

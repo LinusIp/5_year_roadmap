@@ -1,0 +1,132 @@
+overview: >-
+  An embedded key-value engine built as a log-structured merge tree (LSM tree): writes go first to a write-ahead log
+  (WAL) on disk and then to a sorted in-memory table, and a full table is written out as an immutable sorted file
+  called an SSTable. A read checks memory first, then SSTables from newest to oldest, skipping any whose Bloom filter
+  (a small bit array that can say "definitely not here") rules the key out. Background compaction merges files into
+  larger sorted levels, and a manifest replaced by atomic rename records which files are live, so the engine
+  survives kill -9 at any point.
+learn:
+  - name: LSM trees
+    ref: ddia
+  - name: Write-ahead logging
+    ref: cmu-15-445
+  - name: Bloom filters
+  - name: Compaction and amplification
+    ref: ddia
+  - name: Crash consistency
+    ref: ostep
+stats:
+  - value: '200'
+    label: random kill points survived
+  - value: ≥ 95 %
+    label: absent-key reads skipped at 10 bits a key
+  - value: 1M
+    label: mixed operations matching an in-memory map
+components:
+  - id: api
+    name: Engine API
+    role: Exposes put, get, delete and scan, and gives each write a sequence number.
+    tech: Rust
+    talksTo: [wal, reader]
+    kind: core
+  - id: wal
+    name: WAL
+    role: Appends each write as a checksummed record and fsyncs it before the write is acknowledged.
+    tech: CRC32C · fsync
+    talksTo: [memtable]
+    kind: core
+  - id: memtable
+    name: Memtable
+    role: Keeps recent writes sorted in memory, tombstones included, and becomes immutable when full.
+    tech: Skip list
+    talksTo: [sstables]
+    kind: core
+  - id: sstables
+    name: SSTables
+    role: Immutable sorted files of data blocks, a sparse index, a Bloom filter and a footer.
+    tech: Own file format
+    talksTo: [manifest]
+    kind: core
+  - id: manifest
+    name: Manifest
+    role: Lists the live SSTables per level and is replaced by writing a new file and renaming it.
+    tech: Atomic rename
+    talksTo: []
+    kind: core
+  - id: reader
+    name: Merging iterator
+    role: Merges memtables and SSTables newest first for gets and range scans.
+    tech: Rust · binary heap
+    talksTo: []
+    kind: core
+  - id: compaction
+    name: Compaction
+    role: Merges overlapping SSTables into the next level in the background.
+    tech: Levelled or size-tiered
+    talksTo: [sstables, manifest]
+    kind: offline
+  - id: harness
+    name: Crash harness
+    role: Sends SIGKILL at 200 random points and checks every acknowledged write after restart.
+    tech: Python
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: receives `put(k, v)` and gives it the next sequence number.
+  - component: wal
+    text: >-
+      appends `crc | len | seq | key | value`, fsyncs, and only then is the put acknowledged; on recovery a torn final
+      record is cut off, not treated as corruption.
+  - component: memtable
+    text: inserts the key in sorted order; when full it becomes immutable and a new memtable takes the writes.
+  - component: sstables
+    text: >-
+      receive the flushed memtable as a level-0 file with a Bloom filter at 10 bits a key; the file **and its
+      directory** are fsynced.
+  - component: manifest
+    text: >-
+      is rewritten with the new file and renamed into place in one step, and only then is the old WAL segment
+      deleted.
+  - component: reader
+    text: >-
+      answers `get(k)` from the memtables, then SSTables newest to oldest, skipping files whose Bloom filter says no;
+      a tombstone means the key is gone.
+  - component: compaction
+    text: >-
+      merges level-0 files into level 1, keeps only the newest value per key, and drops tombstones only at the last
+      level.
+interface:
+  lang: rust
+  code: |
+    pub trait Store {
+        fn put(&self, k: &[u8], v: &[u8]) -> Result<()>;
+        fn delete(&self, k: &[u8]) -> Result<()>;
+        fn get(&self, k: &[u8])
+            -> Result<Option<Vec<u8>>>;
+        fn scan(&self, from: &[u8], to: &[u8])
+            -> Result<Box<dyn Iterator<Item = Kv> + '_>>;
+    }
+
+    // WAL record on disk
+    // crc32c: u32 | len: u32 | seq: u64 | kind: u8
+    // key_len: u32 | key | value
+decisions:
+  - choice: Levelled compaction first
+    instead: Size-tiered compaction
+    why: >-
+      Levels hold non-overlapping files, so a get reads at most one file per level and space amplification stays low.
+      Tiered writes less; measure write amplification for both, as the report asks.
+  - choice: A manifest swapped by atomic rename
+    instead: Listing the directory at start-up
+    why: >-
+      After a crash the directory can hold half-written or already-compacted files. A manifest that is either the old
+      one or the new one names exactly the live set.
+  - choice: Bloom filters at 10 bits a key
+    instead: Reading every SSTable's index for each get
+    why: >-
+      Absent keys would otherwise touch every file. Ten bits a key gives about a 1 % false-positive rate, enough for
+      the 95 % target, for about 1.2 bytes of memory a key.
+watchOut: >-
+  Fsyncing a new file but not its directory lets a fresh SSTable or manifest vanish after a crash. Fsync the directory
+  after every create and rename, and let the crash harness prove it.

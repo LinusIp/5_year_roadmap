@@ -1,0 +1,90 @@
+overview: >-
+  Every pull request at Sprout Studio gets its own live preview that designers and clients can open, and it
+  disappears on merge. A CI workflow builds the branch's image and calls a small deployer on one 4 GB host, which
+  starts the container with seeded sample data and a label giving its hostname, such as pr-42.preview. A reverse
+  proxy reads those labels to route traffic with a wildcard certificate, and a janitor removes previews that are
+  merged, closed or older than 3 days.
+learn:
+  - name: Ephemeral environments
+  - name: Docker labels and networks
+    ref: docker-get-started
+  - name: Reverse proxy routing
+  - name: CI workflows
+    ref: github-actions-docs
+  - name: Resource limits
+  - name: Wildcard certificates
+stats:
+  - value: < 3 min
+    label: push to preview ready
+  - value: 20 on 4 GB
+    label: concurrent previews
+  - value: "0"
+    label: orphans after 50 PRs
+components:
+  - id: ci
+    name: CI workflow
+    role: Builds the branch image on each push and calls the deployer with the PR number.
+    tech: GitHub Actions
+    talksTo: [deployer]
+    kind: core
+  - id: deployer
+    name: Deployer agent
+    role: Runs one container per PR with a memory limit and refuses new ones past 20.
+    tech: Python · Docker API
+    talksTo: [seed, proxy]
+    kind: core
+  - id: seed
+    name: Data seeding
+    role: Fills each preview's own SQLite file with generated sample data, never real client data.
+    tech: Python script · SQLite
+    talksTo: []
+    kind: core
+  - id: proxy
+    name: Reverse proxy
+    role: Routes each PR hostname to its container from Docker labels, with one wildcard certificate.
+    tech: Traefik
+    talksTo: [bot]
+    kind: core
+  - id: bot
+    name: PR comment bot
+    role: Posts and updates the preview address on the pull request.
+    tech: GitHub API
+    talksTo: []
+    kind: core
+  - id: janitor
+    name: Janitor
+    role: Removes containers, volumes and old images for merged, closed or 3-day-old PRs.
+    tech: cron · shell
+    talksTo: [deployer]
+    kind: offline
+flow:
+  - component: ci
+    text: builds `sprout-web:pr-42-3f1c` on push and calls the deployer with `pr=42` and the image tag.
+  - component: deployer
+    text: replaces any older pr-42 container, starts the new one with `--memory 200m` and labels `preview.pr=42` and `expires` 3 days ahead.
+  - component: seed
+    text: creates `pr-42.db` from the seed script, so the preview shows realistic content without any real client data.
+  - component: proxy
+    text: sees the new container's labels and routes `pr-42.preview.sprout.test` to it, behind basic auth, about 2 minutes after the push.
+  - component: bot
+    text: comments the preview address on the pull request and updates the same comment on later pushes.
+interface:
+  lang: yaml
+  code: |
+    # labels the deployer sets on each preview
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.pr-42.rule: >-
+        Host(`pr-42.preview.sprout.test`)
+      traefik.http.routers.pr-42.tls: "true"
+      traefik.http.routers.pr-42.middlewares: auth
+      preview.pr: "42"
+      preview.expires: "2026-10-19T12:00:00Z"
+decisions:
+  - choice: One host with a deployer, not Kubernetes
+    instead: A small Kubernetes cluster with a namespace per PR
+    why: A 12-person agency with a $10 a month budget gets 20 previews from one 4 GB host. Kubernetes would eat most of that memory itself.
+  - choice: Labels as the source of truth
+    instead: A separate database of running previews
+    why: The proxy and the janitor both read the same Docker labels, so no list can drift from what is really running, which keeps orphans at 0.
+watchOut: Images and volumes from old builds fill the small disk within weeks. Have the janitor prune dangling images and each preview's volume, and alert when disk passes 80 %.

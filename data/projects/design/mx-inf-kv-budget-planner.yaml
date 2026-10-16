@@ -1,0 +1,99 @@
+overview: >-
+  A pure-Python planner that tells Orchard Legal, before deploy, how many contract-review requests fit on a GPU when
+  contexts range from 2k to 64k tokens. It reads the model config, works out KV cache bytes per token, subtracts
+  weights, activation peaks and fragmentation from GPU memory, and simulates admission against a context-length
+  distribution. A validation runner checks the prediction against where a real vLLM run starts to fail on a 24 GB GPU.
+learn:
+  - name: KV cache bytes per token
+    ref: kipply-inference-arithmetic
+  - name: Grouped-query attention
+    ref: transformer-math-101
+  - name: Paged KV blocks
+    ref: vllm-docs
+  - name: Prefill activation peaks
+  - name: Admission control
+stats:
+  - value: ≤ 10%
+    label: concurrency error, 3 configs
+  - value: < 2 s
+    label: per planner run
+  - value: "4"
+    label: KV dtypes including fp8
+components:
+  - id: parser
+    name: Config parser
+    role: Reads layers, KV heads, head size and dtype from a public model config.
+    tech: transformers configs
+    talksTo: [memory]
+    kind: core
+  - id: memory
+    name: Memory model
+    role: Computes weights, KV per token, block rounding, activation peak and a fragmentation factor.
+    tech: Python
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Workload simulator
+    role: Draws request contexts from a lognormal mix and admits requests until the KV budget is full.
+    tech: Python · numpy
+    talksTo: [cli]
+    kind: core
+  - id: cli
+    name: CLI and report
+    role: Prints safe concurrency and a context cap, and plots memory use by part.
+    tech: Python · matplotlib
+    talksTo: []
+    kind: core
+  - id: validate
+    name: Validation runner
+    role: Raises concurrency on a real engine until requests are pre-empted or fail, and compares with the plan.
+    tech: vLLM · 24 GB GPU
+    talksTo: [memory]
+    kind: offline
+flow:
+  - component: parser
+    text: >-
+      reads an 8B config with 32 layers, 8 KV heads of size 128 (grouped-query attention shares each KV head between
+      4 query heads) and a bf16 cache.
+  - component: memory
+    text: >-
+      computes `2 × 32 × 8 × 128 × 2 bytes = 128 KiB` per token, so one 64k request needs **8 GiB**, more than the
+      ~5 GiB left after 16 GB of weights, the prefill activation peak and a safety margin.
+  - component: memory
+    text: rounds every request up to whole 16-token blocks and adds a measured fragmentation factor, the part a simple formula misses.
+  - component: sim
+    text: >-
+      draws 10,000 requests from the context mix and finds the concurrency at which the budget overflows 1% of the
+      time, for each dtype; fp8 halves KV per token.
+  - component: cli
+    text: >-
+      reports, for this mix, a safe concurrency of only 2 in bf16 and 6 in fp8, and the **validation runner** checks
+      that against the real engine.
+interface:
+  lang: shell
+  code: |
+    $ kvplan --config llama-8b.json \
+        --gpu-gb 24 --kv-dtype fp8 \
+        --contexts lognormal:mu=8.0,sigma=0.9 \
+        --max-context 65536
+
+    weights        16.1 GB
+    activations     1.2 GB  (chunked prefill 2k)
+    kv per token   64 KiB   (fp8)
+    kv budget       4.9 GB
+    safe concurrency  6  (1% overflow risk)
+    bf16 cache would allow only 2
+decisions:
+  - choice: Simulate a distribution, not the worst case
+    instead: Assume every request uses 64k
+    why: >-
+      Most contracts are far shorter than 64k, so worst-case planning admits too few. Simulating the real mix gives
+      concurrency at a stated overflow risk.
+  - choice: Calibrate fragmentation on 3 configs
+    instead: Use the textbook formula alone
+    why: >-
+      Block rounding, allocator overhead and CUDA context take a real share of 24 GB, and only measurement shows how
+      much. Re-measure when the engine version changes.
+watchOut: >-
+  Activation memory during prefill of a long prompt can be bigger than you expect, and it is what causes the
+  random-looking OOMs. Model it from the prefill chunk size, not only weights plus KV.

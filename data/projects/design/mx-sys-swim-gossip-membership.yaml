@@ -1,0 +1,115 @@
+overview: >-
+  A Go library that lets 200 edge nodes notice a crashed peer without any central coordinator, using SWIM. Each
+  protocol period a node pings one random peer, asks three others to ping it if there is no answer, and marks it
+  suspect before declaring it dead; news of the change rides on the pings themselves (piggybacking), so there are no
+  extra broadcast messages. The same code runs on a seeded discrete-event simulator, a fake network with a virtual
+  clock, for the experiments, and on real UDP for a 50-process test.
+learn:
+  - name: Failure detectors
+    ref: kleppmann-distributed-systems
+  - name: Gossip dissemination
+    ref: ddia
+  - name: Indirect probing
+  - name: Incarnation numbers
+  - name: Discrete-event simulation
+stats:
+  - value: ≤ 10 periods
+    label: to detect a crash at 200 nodes
+  - value: < 0.1%
+    label: false positives at 5% loss
+  - value: < 5 KB/s
+    label: per node
+components:
+  - id: runner
+    name: Experiment runner
+    role: Runs seeded scenarios of crashes, loss and partitions and sweeps their parameters.
+    tech: Go CLI
+    talksTo: [sim]
+    kind: offline
+  - id: fsm
+    name: State machine
+    role: Owns each member's state (alive, suspect, dead), its incarnation and the probe timers.
+    tech: Go
+    talksTo: [dissem]
+    kind: core
+  - id: dissem
+    name: Update disseminator
+    role: Queues membership updates and attaches the least-sent ones to outgoing messages.
+    tech: Go
+    talksTo: [sim, udp]
+    kind: core
+  - id: sim
+    name: Simulator
+    role: Delivers messages on a virtual clock with seeded loss, delay and partitions.
+    tech: Event queue · seeded RNG
+    talksTo: [metrics]
+    kind: core
+  - id: udp
+    name: UDP transport
+    role: Sends the same messages over real sockets for the 50-process test.
+    tech: Go net · UDP
+    talksTo: [metrics]
+    kind: core
+  - id: metrics
+    name: Metrics collector
+    role: Records detection times, false suspicions and bytes per node.
+    tech: CSV · plots
+    talksTo: []
+    kind: offline
+flow:
+  - component: fsm
+    text: >-
+      at the start of a period picks the next peer from a shuffled list (every peer once per round) and sends `Ping`;
+      with no `Ack` before the timeout it sends `PingReq` to `k = 3` other members, who ping on its behalf.
+  - component: dissem
+    text: >-
+      attaches up to 1,400 bytes of updates to every `Ping`, `Ack` and `PingReq`; each update rides on about
+      `3·log2(n)` messages, roughly 24 at 200 nodes, then is dropped.
+  - component: sim
+    text: >-
+      delivers or drops each message by the seeded RNG; with 5% loss a probe and all three indirect paths fail
+      together well under 0.1% of the time, which is why indirect probes keep false positives low.
+  - component: fsm
+    text: >-
+      on the receiving side applies updates by **incarnation**: a suspected node that hears about itself bumps its
+      incarnation and spreads `Alive`, refuting the suspicion before the timeout confirms it dead.
+  - component: udp
+    text: >-
+      replaces the simulator for the 50-process run through the same `Transport` interface, to check the simulated
+      numbers hold on real sockets.
+interface:
+  lang: go
+  code: |
+    type Msg struct {
+        Kind    Kind     // Ping, Ack, PingReq
+        Seq     uint32   // matches an Ack to its Ping
+        From    NodeID
+        Target  NodeID   // the peer for a PingReq
+        Updates []Update // piggybacked
+    }
+    type Update struct {
+        Node  NodeID
+        State State  // Alive, Suspect, Dead
+        Inc   uint64 // only Node itself bumps it
+    }
+    // Send(to, msg) and Recv(): sim or UDP
+decisions:
+  - choice: Seeded discrete-event simulator for experiments
+    instead: Real processes for every experiment
+    why: >-
+      200 nodes times many seeds and loss rates run in seconds on a virtual clock, and a failing seed replays exactly.
+      The 50-process UDP test then checks the simulator is not lying.
+  - choice: Indirect probes through 3 members
+    instead: Direct pings with a longer timeout
+    why: >-
+      At 5% loss a single lost ping or ack is common. Three other paths make a false suspicion rare without slowing
+      detection, while still sending only a few messages per period.
+  - choice: Suspect before dead, with refutation
+    instead: Declare dead on the first failed probe
+    why: >-
+      The false positive budget is 0.1%. The suspicion window lets a live node clear its name; tune its length against
+      the 10-period detection budget, since too short brings the false positives back.
+watchOut: >-
+  Incarnation rules decide who wins. `Alive` beats `Suspect` only with a higher incarnation, `Suspect` beats `Alive`
+  at an equal or higher one, and `Dead` is final until the node rejoins with a new, higher incarnation; get this
+  wrong and dead nodes come back to life.

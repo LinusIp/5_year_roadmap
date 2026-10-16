@@ -1,0 +1,73 @@
+overview: >-
+  An assembler in Python that turns a text program for a 16-bit toy ISA into machine words: pass one walks the source
+  and records each label's address, pass two encodes every instruction from a table and fills in label addresses, and
+  the result is a listing and a hex file. Five sample programs must run correctly in a reference emulator.
+learn:
+  - name: Instruction encoding
+    ref: nand2tetris
+  - name: Symbol tables
+    ref: nand2tetris
+  - name: Forward references
+  - name: Immediate ranges
+components:
+  - id: parser
+    name: Line parser
+    role: Splits each line into an optional label, a mnemonic or directive, and operands.
+    tech: Python
+    talksTo: [pass1]
+    kind: core
+  - id: pass1
+    name: Pass one
+    role: Keeps a location counter and builds the label-to-address symbol table.
+    tech: Python dict
+    talksTo: [pass2]
+    kind: core
+  - id: pass2
+    name: Pass two
+    role: Encodes each instruction from the ISA table and writes the listing and hex file.
+    tech: Python
+    talksTo: [emu]
+    kind: core
+  - id: emu
+    name: Reference emulator
+    role: Loads the hex file and runs it, so you can check registers and output.
+    tech: Toy ISA emulator
+    talksTo: []
+    kind: external
+flow:
+  - component: parser
+    text: >-
+      splits `loop: ADDI r1, r1, -1` into label, mnemonic and operands, and strips `;` comments.
+  - component: pass1
+    text: >-
+      adds each instruction's size, and the size of `.word` and `.space` directives, to the location counter and
+      records `labels["loop"] = 0x0004`.
+  - component: pass2
+    text: >-
+      looks up the opcode, replaces label operands with addresses, and checks each immediate fits its field
+      (`-32..31` for 6 bits), stopping with the line number if not.
+  - component: pass2
+    text: >-
+      emits 16-bit words and a listing line per instruction (address, hex, source); the **reference emulator** runs
+      the hex file.
+interface:
+  lang: python
+  code: |
+    ISA = {  # mnemonic: (opcode, operand fields)
+        "ADD":  (0x1, ("rd", "rs", "rt")),
+        "ADDI": (0x2, ("rd", "rs", "imm6")),
+        "LOAD": (0x3, ("rd", "addr9")),
+        "JMP":  (0x4, ("addr12",)),
+    }
+
+    def assemble(src: str) -> tuple[list[int], str]:
+        """Return 16-bit words and the listing."""
+decisions:
+  - choice: Two passes, not one pass with backpatching
+    instead: One pass that records holes and patches them at the end
+    why: >-
+      A forward jump names a label that is not defined yet. Two passes over a few hundred lines cost nothing and keep
+      all encoding in one place; backpatching only pays off for very large inputs.
+watchOut: >-
+  If pass one and pass two disagree about an instruction's size (a directive or pseudo-instruction counted
+  differently), every later label is off and jumps land in the wrong place. Compute sizes with one shared function.

@@ -1,0 +1,116 @@
+overview: >-
+  One 7B-class instruct model served by llama.cpp, vLLM and TensorRT-LLM in turn on the same rented GPU, and measured
+  with one load tool. A harness starts each engine in a container with pinned versions and identical sampling, warms
+  it up, and a streaming client timestamps every token at four concurrency levels. A notebook turns the rows into
+  latency percentiles, throughput and cost per million tokens, and a recommendation for chat and for batch work.
+learn:
+  - name: TTFT and inter-token latency
+    ref: databricks-inference-best-practices
+  - name: Latency against throughput
+    ref: batching-effects-gpt
+  - name: Tail percentiles
+    ref: google-sre-book
+  - name: vLLM serving
+    ref: vllm-docs
+  - name: TensorRT-LLM engines
+    ref: tensorrt-llm-docs
+  - name: Cost per token
+stats:
+  - value: 3 × 2 × 4
+    label: engines, prompt sets, concurrency levels
+  - value: ≥ 200
+    label: requests per measured cell
+  - value: < 500 ms
+    label: p99 TTFT target for chat
+components:
+  - id: harness
+    name: Harness
+    role: Starts one engine at a time with pinned versions and the same model, then warms it up.
+    tech: Docker · Python
+    talksTo: [engine, loadgen]
+    kind: core
+  - id: prompts
+    name: Prompt sets
+    role: Chat prompts of about 200 tokens in and 200 out, and long ones of about 2,000 in.
+    tech: JSONL
+    talksTo: [loadgen]
+    kind: core
+  - id: loadgen
+    name: Load generator
+    role: Keeps a fixed number of streaming requests open and timestamps every token.
+    tech: vLLM bench, genai-perf or Locust
+    talksTo: [engine, results]
+    kind: core
+  - id: engine
+    name: Engine under test
+    role: Serves the model on an OpenAI-compatible endpoint with greedy sampling.
+    tech: llama.cpp · vLLM · TensorRT-LLM
+    talksTo: []
+    kind: external
+  - id: results
+    name: Results
+    role: Holds one row per request with TTFT, every inter-token gap and token counts.
+    tech: CSV
+    talksTo: [notebook]
+    kind: core
+  - id: notebook
+    name: Notebook
+    role: Computes percentiles, tokens and requests per second, cost, and draws the charts.
+    tech: pandas · Matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: harness
+    text: >-
+      starts one engine in its container and sends **warm-up** requests, so CUDA graph capture and caching never
+      reach the numbers.
+  - component: prompts
+    text: supply the chat or long-context set, with tokens counted by the model's own tokenizer for every engine.
+  - component: loadgen
+    text: >-
+      holds 1, 4, 16 or 64 requests open against `/v1/completions` with `max_tokens` 200, and watches its own CPU
+      so it never becomes the bottleneck.
+  - component: results
+    text: >-
+      gets one row per request: engine, prompt set, concurrency, `ttft_ms`, every gap in `itl_ms`, and tokens in and
+      out.
+  - component: notebook
+    text: >-
+      reports p50 and p99 for each cell and turns throughput and the GPU's hourly price into **cost per million
+      output tokens**.
+interface:
+  lang: python
+  code: |
+    # one row per request in results.csv
+    row = dict(engine="vllm", prompt_set="chat",
+               concurrency=16, request_id=412,
+               ttft_ms=182.4, itl_ms=[21.3, 20.9],
+               tokens_in=204, tokens_out=200)
+
+    # cost per million output tokens
+    def cost_per_m(usd_per_h, tok_per_s):
+        return usd_per_h / (tok_per_s * 3600) * 1e6
+decisions:
+  - choice: One load tool for all three engines
+    instead: Each engine's own benchmark script
+    why: >-
+      Each tool defines TTFT, warm-up and token counting a little differently. One client against three
+      OpenAI-compatible endpoints makes every number comparable.
+  - choice: Same model and stated precision
+    instead: Whatever format each engine runs fastest
+    why: >-
+      BF16 on vLLM and TensorRT-LLM against F16 GGUF on llama.cpp keeps it fair. A 4-bit llama.cpp run is allowed
+      only when it is labelled as such.
+  - choice: All engines on one rented GPU
+    instead: Each engine on whatever machine is handy
+    why: >-
+      GPU model, driver and CPU change the results as much as the engine does. One L40S, A100 or H100 for all runs
+      takes the hardware out of the comparison.
+  - choice: A recommendation per workload
+    instead: One overall winner
+    why: >-
+      Chat needs p99 TTFT under 500 ms and batch work needs the most tokens per dollar. Different engines can win
+      each.
+watchOut: >-
+  Default batch limits and KV-cache memory fractions differ between engines and can decide the result on their own.
+  Read each engine's defaults, set them to match where you can, and list every flag in the write-up.

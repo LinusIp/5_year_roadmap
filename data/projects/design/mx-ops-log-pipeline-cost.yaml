@@ -1,0 +1,91 @@
+overview: >-
+  Hollis Telehealth pays $14k a month to ship 4 TB of logs that still do not answer incident questions. You measure
+  which services, levels and fields make up the volume, then a collector drops noise, trims fields and samples by
+  trace, keeping or dropping all logs of one request together, while audit logs are never sampled. What is left goes
+  to tiered storage (hot 7 days, warm 30, cold 365), and a benchmark of 20 incident questions proves at least 19 can
+  still be answered.
+learn:
+  - name: Structured logging
+    ref: opentelemetry-docs
+  - name: Trace-based sampling
+    ref: opentelemetry-docs
+  - name: Tiered retention
+  - name: Log volume analysis
+  - name: Query benchmarks
+stats:
+  - value: ≥ 60 %
+    label: less ingest volume
+  - value: < $5.6k
+    label: projected a month
+  - value: 19 of 20
+    label: incident questions answered
+components:
+  - id: analyser
+    name: Volume analyser
+    role: Breaks the 100 GB corpus down by service, level, message template and field size.
+    tech: Python · DuckDB
+    talksTo: [collector]
+    kind: offline
+  - id: services
+    name: Services
+    role: Produce structured JSON logs with trace IDs, checked by the log linter in CI.
+    tech: JSON logs · linter
+    talksTo: [collector]
+    kind: external
+  - id: collector
+    name: Collector pipeline
+    role: Classifies each line, drops or trims low-value ones, samples by trace and routes the rest.
+    tech: Vector
+    talksTo: [hot, cold]
+    kind: core
+  - id: hot
+    name: Hot and warm tier
+    role: Indexed logs searchable for 7 days hot and 30 days warm.
+    tech: Loki
+    talksTo: [bench]
+    kind: core
+  - id: cold
+    name: Cold archive
+    role: Compressed logs for 365 days, including every audit log, restorable on request.
+    tech: MinIO · S3 API
+    talksTo: []
+    kind: core
+  - id: bench
+    name: Query benchmark
+    role: Runs 20 incident questions against the tiers and records answers and latency.
+    tech: Python · LogQL
+    talksTo: []
+    kind: offline
+flow:
+  - component: collector
+    text: drops health-check lines and debug lines from services not in an incident, the biggest waste found by the volume analyser.
+  - component: collector
+    text: keeps a trace whole by hashing `trace_id`, keeping 10 % of successful traces and **every** trace with an error; lines tagged `audit=true` bypass sampling.
+  - component: hot
+    text: stores the kept lines with labels only for `service`, `level` and `env`, so queries stay fast and the index small.
+  - component: cold
+    text: receives a compressed copy of everything kept, plus all audit logs, for 365 days.
+  - component: hot
+    text: is tested by the **query benchmark**, which needs 19 of 20 incident questions answered and hot queries at p95 under 3 s.
+interface:
+  lang: toml
+  code: |
+    [transforms.drop_noise]
+    type = "filter"
+    inputs = ["parse_json"]
+    condition = '.path != "/healthz"'
+
+    [transforms.sample_by_trace]
+    type = "sample"
+    inputs = ["drop_noise"]
+    rate = 10                  # keep 1 in 10
+    key_field = "trace_id"     # whole traces
+    exclude = '.level == "error" || .audit == true'
+decisions:
+  - choice: Sample by trace ID, not by random line
+    instead: Keep a random 10 % of all lines
+    why: Random lines leave every request with gaps, so the one line you need is missing. Hashing the trace ID keeps whole requests and every error.
+  - choice: Cut at the collector, then tier storage
+    instead: Negotiate a cheaper hosted plan for the same 4 TB
+    why: A discount cannot reach 60 % and does not fix the search problem. Dropping noise at the source fixes both and keeps the stack open-source.
+watchOut: Dropping the one line an incident needs. Run the 20-question benchmark before and after every new drop rule, and keep 7 days of raw logs in cold storage while the rules are new.

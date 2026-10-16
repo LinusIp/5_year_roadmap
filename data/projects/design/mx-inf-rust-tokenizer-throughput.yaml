@@ -1,0 +1,124 @@
+overview: >-
+  Scribe AI's GPUs sit at 55% because a Python tokenizer saturates one host core. You profile that, then write a BPE
+  tokenizer (byte-pair encoding: repeatedly merge the most frequent adjacent pair into one token) in Rust, expose it
+  to Python with PyO3, and encode whole batches across 8 cores with the GIL released. An equality test on 1M
+  documents proves every token id matches the reference, and an end-to-end run shows GPU utilisation at 85% or more.
+learn:
+  - name: Byte-pair encoding
+    ref: hf-llm-course
+  - name: Regex pre-tokenization
+  - name: Python GIL
+    ref: fluent-python
+  - name: PyO3 bindings
+  - name: Data parallelism in Rust
+    ref: rust-book
+  - name: Sampling profilers
+stats:
+  - value: ≥ 8x
+    label: faster per core, ≥ 40 MB/s
+  - value: 100%
+    label: token-id equality, 1M docs
+  - value: ≥ 85%
+    label: GPU utilisation end to end
+components:
+  - id: pipeline
+    name: Batch pipeline
+    role: Reads documents, calls the tokenizer in batches and feeds token ids to the summariser.
+    tech: Python
+    talksTo: [bindings]
+    kind: core
+  - id: bindings
+    name: PyO3 bindings
+    role: Converts Python strings to Rust, releases the GIL and returns ids as numpy arrays.
+    tech: PyO3 · maturin
+    talksTo: [batcher]
+    kind: core
+  - id: batcher
+    name: Parallel batcher
+    role: Splits a batch of documents across the 8 cores and joins the results in order.
+    tech: Rust · rayon
+    talksTo: [pretok]
+    kind: core
+  - id: pretok
+    name: Pre-tokenizer
+    role: Splits text into words, numbers, punctuation and spaces with the reference regex.
+    tech: Rust · fancy-regex
+    talksTo: [bpe]
+    kind: core
+  - id: bpe
+    name: BPE merge engine
+    role: Applies merges by rank to each piece's bytes, with a cache for words already seen.
+    tech: Rust
+    talksTo: [gpu]
+    kind: core
+  - id: gpu
+    name: Summariser GPU
+    role: Runs the summarisation model on the token ids it receives.
+    tech: 1 GPU
+    talksTo: []
+    kind: external
+  - id: equality
+    name: Equality tester
+    role: Encodes 1M documents and adversarial Unicode with both tokenizers and reports the first mismatch.
+    tech: Python · pytest
+    talksTo: []
+    kind: offline
+  - id: bench
+    name: Profiler and bench
+    role: Measures MB/s per core with py-spy flame graphs before and after, and samples GPU utilisation.
+    tech: py-spy · NVML
+    talksTo: []
+    kind: offline
+flow:
+  - component: pipeline
+    text: passes 256 documents to `encode_batch` instead of calling the tokenizer once per document.
+  - component: bindings
+    text: >-
+      copies the strings into Rust and calls `allow_threads`, so the **GIL** (Python's one-thread-at-a-time lock) is
+      free while Rust works.
+  - component: batcher
+    text: hands documents to 8 worker threads; each does its documents start to finish, with no shared state.
+  - component: pretok
+    text: >-
+      splits each document with the same pattern as the reference, including its look-ahead for trailing spaces,
+      which the plain Rust `regex` crate cannot express.
+  - component: bpe
+    text: >-
+      looks each piece up in a word cache and, on a miss, merges byte pairs lowest rank first; a priority queue keeps
+      each word at `O(n log n)` instead of rescanning.
+  - component: gpu
+    text: >-
+      receives ids fast enough that the host no longer starves it; the **bench** checks utilisation rose from 55% to
+      ≥ 85%.
+interface:
+  lang: rust
+  code: |
+    #[pyfunction]
+    fn encode_batch(py: Python<'_>,
+                    docs: Vec<String>)
+        -> Vec<Vec<u32>> {
+        py.allow_threads(|| {
+            docs.par_iter()
+                .map(|d| TOK.encode(d))
+                .collect()
+        })
+    }
+decisions:
+  - choice: Rust threads with the GIL released
+    instead: Python multiprocessing over the old tokenizer
+    why: >-
+      Multiprocessing pickles every document and its ids between processes, and 8 processes still give only 8x the
+      slow per-core speed. Rust gives ≥ 8x per core, and threads share one vocabulary in memory.
+  - choice: Word cache in front of BPE merging
+    instead: Merge every word from scratch
+    why: >-
+      Summaries come from natural text, where a small set of words makes up most pieces, so most lookups hit. Measure
+      the hit rate; on code samples it is lower, and the merge engine must be fast on its own.
+  - choice: Equality on 1M documents plus adversarial Unicode
+    instead: A few hundred spot checks
+    why: >-
+      A single wrong id silently changes model input. Rare scripts, combining marks and long whitespace runs only show
+      up at scale, so the test runs on the full million and stops at the first mismatch.
+watchOut: >-
+  Regex semantics and Unicode handling must match the reference exactly. Port the pre-tokenizer pattern unchanged,
+  apply the same normalization, and never rewrite the look-ahead by hand, or whitespace runs split differently.

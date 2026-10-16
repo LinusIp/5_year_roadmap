@@ -1,0 +1,98 @@
+overview: >-
+  Nimbus Telecom's support bot sends a 3,000-token policy prompt and retrieved articles before every question, so
+  most GPU time goes to prefill, the step that reads the prompt and fills the KV cache. This project reorders every
+  prompt as stable prefix first and variable part last, then turns on the engine's prefix cache, which reuses KV
+  blocks already computed for an identical prefix. A dashboard tracks hits and evictions, and an equivalence test
+  proves cached and uncached answers are the same.
+learn:
+  - name: Prefill and decode
+    ref: databricks-inference-best-practices
+  - name: Automatic prefix caching
+    ref: vllm-docs
+  - name: Radix-tree prompt reuse
+    ref: sglang-docs
+  - name: KV cache size per token
+    ref: kipply-inference-arithmetic
+  - name: Prompt layout for caching
+stats:
+  - value: ≥ 60%
+    label: less prefill compute
+  - value: ≥ 45%
+    label: lower p95 TTFT
+  - value: 200 / 200
+    label: identical with cache on and off
+components:
+  - id: gen
+    name: Request generator
+    role: Sends synthetic support questions with retrieved manual snippets at a realistic rate.
+    tech: Python · asyncio
+    talksTo: [assembler]
+    kind: external
+  - id: assembler
+    name: Prompt assembler
+    role: Builds policy, then sorted articles, then the user's question, with no per-user data before the question.
+    tech: Python
+    talksTo: [server]
+    kind: core
+  - id: server
+    name: Cache-enabled server
+    role: Serves the 8B model on a 24 GB GPU and reuses KV blocks for any matching prefix.
+    tech: vLLM or SGLang
+    talksTo: [dash]
+    kind: core
+  - id: dash
+    name: Metrics dashboard
+    role: Shows hit rate, prefill tokens saved, TTFT and the cache's share of GPU memory.
+    tech: Prometheus · Grafana
+    talksTo: []
+    kind: core
+  - id: equiv
+    name: Equivalence tester
+    role: Runs 200 prompts at temperature 0 with caching on and off and compares the tokens.
+    tech: pytest
+    talksTo: [server]
+    kind: offline
+flow:
+  - component: assembler
+    text: >-
+      builds the prompt as `policy (3,000 tokens) → articles sorted by id → question`, so two users with the same
+      retrieved articles share everything except the last few hundred tokens.
+  - component: server
+    text: >-
+      hashes the prompt in 16-token blocks and finds the first 3,000 tokens already cached; at about 128 KB of KV per
+      token for an 8B model, that is roughly 375 MB it does not recompute.
+  - component: server
+    text: >-
+      prefills only the uncached tail, the articles that differ and the question, and starts decoding, which is
+      where the **45%** TTFT cut comes from.
+  - component: dash
+    text: >-
+      counts the hit, the prefill tokens saved and current cache memory, and flags if the policy blocks were evicted
+      under load.
+interface:
+  lang: python
+  code: |
+    def build_prompt(policy: str,
+                     articles: list[Article],
+                     question: str) -> str:
+        # stable first, variable last
+        docs = sorted(articles, key=lambda a: a.id)
+        return "\n\n".join([
+            policy,                 # 3,000 tokens
+            *[a.text for a in docs],
+            "Customer: " + question,
+        ])
+decisions:
+  - choice: Engine prefix cache, not a separate cache
+    instead: An application-level response cache
+    why: >-
+      Questions differ almost every time, so whole answers rarely repeat, but the 3,000-token policy is identical in
+      every request. Reusing its KV blocks saves most of the prefill.
+  - choice: Sort retrieved articles by id
+    instead: Keep retrieval's score order
+    why: >-
+      Score order changes with every question, which breaks the shared prefix after the policy. Sorting makes the
+      same article set produce the same tokens; check answer quality does not move.
+watchOut: >-
+  One timestamp, user id or ticket number near the top of the prompt makes every prefix unique and drops the hit rate
+  to near zero. Keep anything per-request after the shared parts.

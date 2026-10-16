@@ -1,0 +1,64 @@
+overview: >-
+  Two million particles updated entirely on the GPU: a compute shader moves each particle in a shader storage buffer
+  (SSBO) under attractor forces, uses an atomic counter to build a list of live ones, and fills the arguments of an
+  indirect draw so the CPU never needs the count. The CPU's cost per frame stays under 0.2 ms.
+learn:
+  - name: Compute shaders
+    ref: learnopengl
+  - name: Storage buffers
+  - name: Atomic counters
+  - name: Indirect drawing
+components:
+  - id: sim
+    name: Update shader
+    role: Integrates, ages and respawns every particle and lists the live ones.
+    tech: GLSL compute
+    talksTo: [args]
+    kind: core
+  - id: args
+    name: Draw args writer
+    role: Copies the live count into the indirect draw command and resets the counter.
+    tech: GLSL compute
+    talksTo: [draw]
+    kind: core
+  - id: draw
+    name: Particle draw
+    role: Draws the live list as point sprites with one indirect call.
+    tech: OpenGL 4.6
+    talksTo: []
+    kind: core
+flow:
+  - component: sim
+    text: runs one thread per particle in groups of 256, applies up to 4 attractors, and appends live indices with `atomicCounterIncrement`.
+  - component: args
+    text: runs as a one-thread dispatch after a `glMemoryBarrier`, writes the count into `DrawArraysIndirectCommand.count` and zeroes the counter for the next frame.
+  - component: draw
+    text: calls `glDrawArraysIndirect` after a barrier with `GL_COMMAND_BARRIER_BIT`; the vertex shader reads `p[alive[gl_VertexID]]`.
+  - component: draw
+    text: is timed on the CPU around all GL calls; done is 2M particles at 60 FPS with **under 0.2 ms** of CPU time.
+interface:
+  lang: glsl
+  code: |
+    layout(local_size_x = 256) in;
+    struct Particle { vec4 posLife; vec4 velAge; };
+    layout(std430, binding=0) buffer P { Particle p[]; };
+    layout(std430, binding=1) buffer A { uint alive[]; };
+    layout(binding = 0) uniform atomic_uint aliveCount;
+    uniform vec4 attractors[4];  // xyz, strength
+    uniform float dt;
+
+    void main() {
+      uint i = gl_GlobalInvocationID.x;
+      // integrate, age, respawn ...
+      if (p[i].posLife.w > 0.0)
+        alive[atomicCounterIncrement(aliveCount)] = i;
+    }
+decisions:
+  - choice: Indirect draw, no count readback
+    instead: Read the live count back and call glDrawArrays
+    why: >-
+      Reading the count back makes the CPU wait for the GPU to finish the update, a stall of several ms, which breaks
+      the 0.2 ms budget. The indirect command keeps the count on the GPU.
+watchOut: >-
+  Compute writes are not visible to the next stage without `glMemoryBarrier` and the right bits, so particles flicker
+  or lag a frame. Use `SHADER_STORAGE` before the vertex reads and `COMMAND` before the indirect draw.

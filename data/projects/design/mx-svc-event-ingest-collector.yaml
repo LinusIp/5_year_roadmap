@@ -1,0 +1,113 @@
+overview: >-
+  A collector for Pixel Orchard's 40M game events a day that never loses an event it has acknowledged. Each HTTP
+  batch is validated against its schema version, appended to a segmented on-disk buffer and synced with fsync (the
+  call that forces data onto the disk) before the client gets `202`. A flusher turns closed segments into Parquet
+  files partitioned by hour, and invalid events go to a dead-letter file with the reason.
+learn:
+  - name: Write-ahead logging
+    ref: cmu-15-445
+  - name: fsync and durability
+    ref: ostep
+  - name: Back-pressure
+    ref: ddia
+  - name: Columnar files
+    ref: de-zoomcamp
+  - name: Schema versioning
+    ref: ddia
+stats:
+  - value: 10,000/s
+    label: events on 2 cores
+  - value: "0"
+    label: acked events lost, 20 kill -9
+  - value: < 60 s
+    label: flush delay to Parquet
+components:
+  - id: games
+    name: Game clients
+    role: Send batches of up to 500 events with a schema version per event.
+    tech: Mobile SDK
+    talksTo: [intake]
+    kind: external
+  - id: intake
+    name: HTTP intake
+    role: Accepts batches, returns 202 after the buffer write, or 429 when the buffer is full.
+    tech: Go · net/http
+    talksTo: [validator]
+    kind: core
+  - id: validator
+    name: Validator
+    role: Checks each event against its type and version schema and splits good from bad.
+    tech: Go · JSON Schema
+    talksTo: [buffer, deadletter]
+    kind: core
+  - id: buffer
+    name: Disk buffer
+    role: Append-only 64 MB segments with a checksum per record, capped at 5 GB in total.
+    tech: Go · fsync
+    talksTo: [flusher]
+    kind: core
+  - id: deadletter
+    name: Dead-letter store
+    role: Keeps invalid events with the validation error for later inspection.
+    tech: JSON lines
+    talksTo: []
+    kind: offline
+  - id: flusher
+    name: Flusher
+    role: Turns closed segments into Parquet partitioned by hour and schema version, then deletes them.
+    tech: Go · parquet-go
+    talksTo: []
+    kind: core
+  - id: crash
+    name: Crash test
+    role: Kills the collector with kill -9 20 times under load and counts acked events in Parquet.
+    tech: Shell · Go
+    talksTo: [intake]
+    kind: offline
+flow:
+  - component: intake
+    text: receives `POST /events` with a 500-event batch and first checks the buffer is below its 5 GB cap, else answers `429` with `Retry-After`.
+  - component: validator
+    text: checks each event against schema `level_complete` v3; two bad events go to the **dead-letter** file with their error.
+  - component: buffer
+    text: >-
+      appends the 498 good events as one record with a CRC checksum and calls `fsync`; requests that arrive in the
+      same 5 ms share one fsync.
+  - component: intake
+    text: answers `202 Accepted` only now, so anything the client was told is safe is already on disk.
+  - component: flusher
+    text: >-
+      closes the segment after 30 s, writes rows to `dt=2026-10-16/hr=09/v=3/…parquet`, renames the file into place
+      and only then deletes the segment.
+interface:
+  lang: http
+  code: |
+    POST /events
+    Content-Type: application/json
+    { "game": "orchard-rush",
+      "events": [
+        { "id": "e_01H…", "type": "level_complete",
+          "v": 3, "ts": "2026-10-16T09:41:07Z",
+          "props": { "level": 12, "secs": 84 } } ] }
+
+    202 Accepted
+    { "accepted": 498, "rejected": 2 }
+decisions:
+  - choice: Acknowledge after fsync
+    instead: Acknowledge once the batch is in memory
+    why: >-
+      kill -9 throws away everything in memory, and the requirement is zero acked events lost across 20 crashes.
+      Group commit keeps fsync cost low enough for 10,000 events a second.
+  - choice: 429 with Retry-After when full
+    instead: Keep buffering in memory
+    why: >-
+      Unbounded memory batching is how the old script died when the database stalled. A clear 429 lets the SDK keep
+      events on the phone and retry.
+  - choice: One Parquet file per hour and schema version
+    instead: Mixing versions in one file
+    why: >-
+      v2 and v3 events have different columns, and one file can hold only one schema. Partitioning by version keeps
+      readers simple.
+watchOut: >-
+  On restart the last segment may end with a half-written record. Check each record's CRC and truncate at the first
+  bad one, or the flusher will crash or write garbage.

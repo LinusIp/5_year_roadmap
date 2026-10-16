@@ -1,0 +1,107 @@
+overview: >-
+  Finder embeds every search query in 85 ms with PyTorch on CPU, which eats most of a 150 ms search budget. You export
+  the encoder to ONNX, let ONNX Runtime fuse its graph, try int8 dynamic quantisation, and serve it behind a small
+  FastAPI micro-batcher that waits at most 3 ms to group queries. The target is p99 ≤ 20 ms at 200 queries a second
+  on 4 CPU cores, with nDCG@10, a ranking-quality score, no more than 0.5 points below the old model.
+learn:
+  - name: ONNX export and graph fusion
+    ref: onnx-runtime-docs
+  - name: Int8 dynamic quantisation
+    ref: onnx-runtime-docs
+  - name: Micro-batching windows
+  - name: Thread tuning on CPU
+  - name: nDCG ranking quality
+    ref: slp3
+stats:
+  - value: ≤ 20 ms
+    label: p99 at 200 qps
+  - value: ≤ 0.5 pts
+    label: nDCG@10 drop
+  - value: ≤ 3 s
+    label: cold start
+components:
+  - id: exporter
+    name: Exporter
+    role: Exports the encoder to ONNX with dynamic batch and sequence axes and applies graph optimisation.
+    tech: optimum · ONNX
+    talksTo: [quantizer]
+    kind: offline
+  - id: quantizer
+    name: Quantizer
+    role: Makes an int8 dynamic-quantised copy, weights stored as int8 and activations scaled at run time.
+    tech: ONNX Runtime quantization
+    talksTo: [server]
+    kind: offline
+  - id: search
+    name: Search front end
+    role: Sends the user's query text and waits for its vector.
+    tech: Job-board backend
+    talksTo: [server]
+    kind: external
+  - id: server
+    name: Server
+    role: Validates the query, warms the model at start and exposes `/embed` and `/health`.
+    tech: FastAPI
+    talksTo: [batcher]
+    kind: core
+  - id: batcher
+    name: Micro-batcher
+    role: Collects queries for at most 3 ms or 16 items and runs them as one padded batch.
+    tech: Python · asyncio
+    talksTo: [ort]
+    kind: core
+  - id: ort
+    name: ONNX session
+    role: Runs the int8 or fp32 model on 4 cores with fixed intra-op threads.
+    tech: ONNX Runtime CPU
+    talksTo: []
+    kind: core
+  - id: evaluator
+    name: nDCG evaluator
+    role: Ranks MS MARCO passages with old and new embeddings and compares nDCG@10.
+    tech: Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: server
+    text: receives `POST /embed` with a 7-token query such as "remote nurse jobs" and puts it on the batch queue.
+  - component: batcher
+    text: >-
+      waits up to 3 ms; at 200 qps that window catches less than one query on average, so it mostly helps in
+      bursts, and it never holds a query longer than the window.
+  - component: ort
+    text: >-
+      runs the fused int8 graph with `intra_op_num_threads=4` in a single process, so threads never fight over the
+      4 cores, and returns a 384-dimension vector in a few milliseconds.
+  - component: server
+    text: returns the normalised vector; the **nDCG evaluator** has already checked that this model build ranks within 0.5 points of the old one.
+interface:
+  lang: http
+  code: |
+    POST /embed
+    { "queries": ["remote nurse jobs"] }
+
+    200 OK
+    { "model": "enc-int8-v2",
+      "dim": 384,
+      "vectors": [[0.021, -0.113, …]],
+      "ms": 6.4 }
+decisions:
+  - choice: ONNX Runtime on CPU, not a GPU path
+    instead: Move embedding to a GPU
+    why: >-
+      Production has 4 vCPUs and no GPU, and a fused int8 graph on short queries reaches single-digit milliseconds.
+      Keep the GPU path only as a benchmark comparison.
+  - choice: One process with 4 threads
+    instead: Four workers each using all cores
+    why: >-
+      Four processes with 4 threads each means 16 threads on 4 cores, and the context switching shows up in p99.
+      Revisit with 2 workers × 2 threads if one process cannot keep up.
+  - choice: Int8 only if nDCG holds
+    instead: Always ship the quantised model
+    why: >-
+      Int8 usually costs little on average but can move rare queries in the tail of the ranking. Ship it only if the
+      drop stays within 0.5 points.
+watchOut: >-
+  A benchmark with one fixed query length lies. Load-test with the real length mix, from 2-word to 20-word queries,
+  because padding and batching behave very differently across it.

@@ -1,0 +1,58 @@
+overview: >-
+  An events table split into monthly range partitions, with query plans checked for partition pruning (the planner
+  skipping months that cannot match), a job that creates future partitions and detaches old ones, and timings
+  against one monolithic table.
+learn:
+  - name: Range partitioning
+    ref: cmu-15-445
+  - name: Partition pruning
+  - name: Data retention
+components:
+  - id: parent
+    name: Events table
+    role: The partitioned parent, keyed by `created_at`.
+    tech: PostgreSQL
+    talksTo: [parts]
+    kind: core
+  - id: parts
+    name: Monthly partitions
+    role: One child table per month with its own indexes.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: maint
+    name: Maintenance job
+    role: Creates next month's partition and detaches and drops ones past retention.
+    tech: SQL · cron
+    talksTo: [parent]
+    kind: offline
+flow:
+  - component: parent
+    text: receives `SELECT … WHERE created_at >= '2026-09-01' AND created_at < '2026-10-01'`.
+  - component: parts
+    text: are pruned by the planner, so `EXPLAIN` shows only `events_2026_09` being scanned.
+  - component: parent
+    text: routes each new insert to the partition whose range contains its `created_at`.
+  - component: maint
+    text: runs `DETACH PARTITION events_2025_09` and drops it, which takes milliseconds instead of a long `DELETE`.
+interface:
+  lang: sql
+  code: |
+    CREATE TABLE events (
+      id bigint, created_at timestamptz NOT NULL,
+      payload jsonb,
+      PRIMARY KEY (id, created_at)
+    ) PARTITION BY RANGE (created_at);
+
+    CREATE TABLE events_2026_09 PARTITION OF events
+      FOR VALUES FROM ('2026-09-01')
+                   TO ('2026-10-01');
+decisions:
+  - choice: Monthly partitions
+    instead: Daily partitions
+    why: >-
+      Queries and retention work in months, and a few dozen partitions keep planning fast. Go daily only if one
+      month grows past tens of millions of rows.
+watchOut: >-
+  A primary key or unique index on a partitioned table must include the partition key. Plan for `(id, created_at)`
+  from the start.

@@ -1,0 +1,53 @@
+overview: >-
+  Two Postgres containers linked by logical replication (row changes streamed from a publication to a
+  subscription), with lag charted under write load, a broken subscriber used to watch the replication slot hold
+  WAL, and a failover drill.
+learn:
+  - name: Logical replication
+    ref: ddia
+  - name: Replication slots
+  - name: Write-ahead log
+  - name: Failover
+components:
+  - id: load
+    name: Write load
+    role: Inserts and updates rows at a steady rate.
+    tech: pgbench or Python
+    talksTo: [publisher]
+    kind: external
+  - id: publisher
+    name: Publisher
+    role: Primary database with a publication and a replication slot for the subscriber.
+    tech: PostgreSQL
+    talksTo: [subscriber]
+    kind: core
+  - id: subscriber
+    name: Subscriber
+    role: Applies the changes and is promoted to take writes in the drill.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: monitor
+    name: Lag monitor
+    role: Charts lag and retained WAL from `pg_stat_replication` and `pg_replication_slots`, and alerts.
+    tech: SQL · Prometheus
+    talksTo: [publisher]
+    kind: offline
+flow:
+  - component: publisher
+    text: decodes committed changes from WAL for the tables in `CREATE PUBLICATION app_pub`.
+  - component: subscriber
+    text: receives and applies them; normal lag under load is a few tens of milliseconds.
+  - component: subscriber
+    text: is stopped, so the publisher's slot keeps WAL and **retained bytes** climb on the chart.
+  - component: monitor
+    text: alerts when retained WAL passes 1 GB; the drill then promotes the subscriber and repoints clients.
+decisions:
+  - choice: Cap retained WAL per slot
+    instead: Let slots keep WAL without limit
+    why: >-
+      An unbounded slot fills the disk and takes the primary down. `max_slot_wal_keep_size` bounds it, at the cost
+      of rebuilding a subscriber that falls too far behind.
+watchOut: >-
+  An abandoned replication slot keeps WAL forever and fills the disk. Drop slots you no longer use and alert on
+  retained bytes.

@@ -1,0 +1,117 @@
+overview: >-
+  A metering and billing pipeline that charges Lattice Cloud's 60 business units fairly for shared GPUs. The engine
+  splits each batched step's GPU time across the requests in it and adds up each request's share, KV-cache
+  occupancy and cache hits, then emits one usage event when the request ends. An allocation engine turns those
+  events plus idle and reserved capacity into monthly statements that add up to the real fleet bill within 2%.
+learn:
+  - name: Cost allocation rules
+  - name: Prefill vs decode cost
+    ref: kipply-inference-arithmetic
+  - name: KV-cache occupancy
+    ref: vllm-docs
+  - name: Reconciliation
+  - name: Usage metrics
+    ref: prometheus-docs
+  - name: Gini coefficient
+stats:
+  - value: ≤ 2%
+    label: gap to actual fleet cost
+  - value: ≤ 1%
+    label: throughput lost to metering
+  - value: ≤ 60 s
+    label: 60 tenants × 30 days of statements
+components:
+  - id: engine
+    name: Engine hook
+    role: After each batched step, splits its measured time across the requests in it and adds to each request's tally.
+    tech: Python · vLLM
+    talksTo: [ledger]
+    kind: core
+  - id: ledger
+    name: Usage ledger
+    role: Stores one event per finished request with tenant, tokens, GPU-ms share, KV GB-seconds and prefix hits.
+    tech: DuckDB
+    talksTo: [alloc]
+    kind: core
+  - id: fleetcost
+    name: Fleet cost feed
+    role: Gives the real hourly cost of every GPU, reserved or on demand.
+    tech: Billing export
+    talksTo: [alloc]
+    kind: external
+  - id: alloc
+    name: Allocation engine
+    role: Charges direct use, splits shared prefixes, spreads idle cost and assigns reservations to their owners.
+    tech: pandas · DuckDB
+    talksTo: [statements, anomaly]
+    kind: core
+  - id: statements
+    name: Statement generator
+    role: Writes each tenant's monthly statement and the check that all charges add up to the fleet bill.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: anomaly
+    name: Anomaly detector
+    role: Flags tenants whose daily cost per token jumps far above their own history.
+    tech: pandas
+    talksTo: []
+    kind: offline
+  - id: metrics
+    name: Live metrics
+    role: Exposes per-tenant GPU-seconds and the metering overhead for dashboards.
+    tech: Prometheus
+    talksTo: []
+    kind: offline
+flow:
+  - component: engine
+    text: >-
+      measures a 40 ms step with 30 requests and gives each a share by work done in that step, weighting prefill
+      tokens and decode tokens by their calibrated cost, not by raw token count.
+  - component: engine
+    text: >-
+      keeps the tally in memory and emits a single event when the request finishes, so metering stays under **1%** of
+      throughput.
+  - component: ledger
+    text: >-
+      stores the event with `kv_gb_s` (cache held × seconds) and `prefix_hit_tokens`, the work another tenant's
+      cached prompt saved.
+  - component: alloc
+    text: >-
+      charges a shared prefix's compute **once**, split among the tenants who used it; spreads idle time in
+      proportion to use; and bills reserved but unused GPUs to the tenant who reserved them.
+  - component: statements
+    text: >-
+      sums all charges and compares them with the fleet cost feed; a gap above `2%` fails the run before statements
+      are sent.
+interface:
+  lang: json
+  code: |
+    { "req": "r-91f2", "tenant": "bu-17",
+      "gpu": "g03", "model": "llm-8b",
+      "prefill_tok": 2400, "decode_tok": 310,
+      "prefix_hit_tok": 1800,
+      "gpu_ms_share": 812.4,
+      "kv_gb_s": 3.7,
+      "start": "2026-10-03T09:12:44Z",
+      "end": "2026-10-03T09:12:51Z" }
+decisions:
+  - choice: Split each step's measured time
+    instead: Charge a flat price per token
+    why: >-
+      A prefill token and a decode token cost the GPU very different amounts, and per-token prices ignore batch
+      sharing. Splitting real step time keeps the total tied to actual GPU-seconds, which makes the 2% check
+      reachable.
+  - choice: One event per request, not per step
+    instead: Emit an event for every request in every step
+    why: >-
+      At 30 requests a step and 25 steps a second, per-step events would cost more than the 1% overhead allows. A
+      tally in memory costs one addition per step.
+  - choice: Idle cost in proportion to use
+    instead: Charge all idle time to the largest tenant
+    why: >-
+      Idle capacity exists for everyone's peaks, so pinning it on one unit is unfair. Reservations differ: a unit that
+      reserved GPUs pays for them whether used or not.
+watchOut: >-
+  Shared prefixes are easy to double-count: the first request pays for the prefill, and later hits get charged again
+  as if they had computed it. Charge the prefix once and split it among its users, then check the reconciliation.

@@ -1,0 +1,107 @@
+overview: >-
+  A viewer that opens Vantor Aerospace's 40M-triangle engine assemblies on any laptop for line staff. An offline
+  builder splits every part into meshlets (small clusters of up to 124 triangles) and simplifies them into a
+  level-of-detail hierarchy, so each region can be drawn at the coarsest detail that is still under 1 pixel of error. Each frame
+  a compute pass picks clusters, culls those outside the view, facing away or hidden behind last frame's depth, and
+  asks the streamer for any missing detail; a section pass cuts the model and caps the cut.
+learn:
+  - name: Meshlets and clusters
+    ref: rtr4
+  - name: Hierarchical LOD
+    ref: rtr4
+  - name: GPU-driven culling
+    ref: vkguide
+  - name: Hierarchical depth occlusion
+  - name: Stencil section capping
+    ref: learnopengl
+stats:
+  - value: 30 FPS
+    label: 40M triangles on a 6 GB laptop GPU
+  - value: < 5 s
+    label: open to first frame
+  - value: < 1 px
+    label: LOD error on screen
+components:
+  - id: builder
+    name: Meshlet builder
+    role: Clusters triangles into meshlets with bounding spheres and normal cones, and writes cluster pages.
+    tech: C++17
+    talksTo: [lod]
+    kind: offline
+  - id: lod
+    name: LOD hierarchy
+    role: Simplifies groups of clusters with locked shared borders and stores each cluster's error and its parent's.
+    tech: C++17
+    talksTo: [disk]
+    kind: offline
+  - id: disk
+    name: Cluster pages
+    role: The cooked assembly on local disk, coarse levels first.
+    tech: Binary files
+    talksTo: [streamer]
+    kind: external
+  - id: streamer
+    name: Streamer
+    role: Loads requested cluster pages on worker threads into a fixed GPU pool and evicts unused ones.
+    tech: C++17 · thread pool
+    talksTo: [culling]
+    kind: core
+  - id: culling
+    name: GPU culling
+    role: Selects the right LOD per cluster and culls by frustum, normal cone and depth pyramid.
+    tech: GLSL 4.6 compute
+    talksTo: [section, streamer]
+    kind: core
+  - id: section
+    name: Section pass
+    role: Draws visible clusters with clip planes and caps the cut using the stencil buffer.
+    tech: OpenGL 4.6
+    talksTo: []
+    kind: core
+  - id: bench
+    name: Benchmark scenes
+    role: Repeated parametric parts and fixed camera paths to measure FPS, VRAM and pixel error.
+    tech: C++17 · scripts
+    talksTo: []
+    kind: offline
+flow:
+  - component: streamer
+    text: on open loads only the coarsest levels, enough for a full picture of the engine in under 5 s.
+  - component: culling
+    text: draws a cluster when its projected error is under 1 pixel and its parent's is over, a test each cluster runs alone, in parallel.
+  - component: culling
+    text: drops clusters outside the frustum, facing away by their normal cone, or behind the previous frame's **depth pyramid**, and writes indirect draw commands.
+  - component: streamer
+    text: receives the list of wanted clusters that are not resident, which closes a loop with the culling pass, and uploads them within a per-frame budget.
+  - component: section
+    text: draws the selected clusters with the clip plane, and fills the cut where front and back faces leave an odd stencil count.
+interface:
+  lang: glsl
+  code: |
+    struct Cluster {
+      vec4  sphere;        // centre, radius
+      vec4  cone;          // axis, cos(cutoff)
+      float error;         // simplification error
+      float parentError;   // of the coarser group
+      uint  firstTri, triCount;
+    };
+    bool chosen(Cluster c) {     // same cut everywhere
+      return pixels(c.sphere, c.error) <= 1.0 &&
+             pixels(c.sphere, c.parentError) > 1.0;
+    }
+    bool visible(Cluster c) {
+      return inFrustum(c.sphere) && !backFacing(c.cone)
+          && !occluded(c.sphere, u_depthPyramid); }
+decisions:
+  - choice: Cluster DAG with locked group borders
+    instead: Separate LOD meshes per part
+    why: Per-part LODs switch whole parts and crack where neighbours differ. Simplifying groups with their shared borders locked lets neighbouring clusters change level independently without cracks.
+  - choice: GPU selection and culling
+    instead: CPU traversal of the hierarchy
+    why: Hundreds of thousands of clusters per frame are too many for the CPU on a laptop, and the parallel error test needs no tree walk.
+  - choice: Meshlet size as a build parameter
+    instead: One fixed meshlet size
+    why: The best size differs between GPUs. Building with 64 vertices and 124 triangles by default and benchmarking alternatives keeps the choice open.
+watchOut: >-
+  Streaming hitches appear when a camera move asks for many pages at once and uploads stall the frame. Cap uploads per
+  frame, keep coarse parents resident so the picture is never empty, and prefetch along the camera's motion.

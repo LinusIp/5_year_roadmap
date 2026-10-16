@@ -1,0 +1,127 @@
+overview: >-
+  A Git in Python's standard library whose files real git can read. Git is a content-addressed store: every file,
+  directory listing and commit is saved under the SHA-1 hash of its own bytes, compressed with zlib, and a thin layer
+  of refs (names like `main`) points at commit hashes. Your tool writes those exact bytes: blobs for files, a binary
+  index for `add`, nested trees built from the index, and commits that chain to their parents. Real git is the
+  oracle in every test.
+learn:
+  - name: Git's object model
+    ref: missing-semester
+  - name: Content-addressed storage
+  - name: Binary formats with struct
+  - name: zlib compression
+  - name: Commit graphs
+stats:
+  - value: ≥ 50
+    label: files hashed exactly as git does
+  - value: '0'
+    label: git fsck errors
+  - value: '8'
+    label: commands, standard library only
+components:
+  - id: workdir
+    name: Working tree
+    role: The files and nested directories being tracked.
+    tech: File system
+    talksTo: [commands]
+    kind: external
+  - id: commands
+    name: Commands
+    role: Thin functions for init, hash-object, cat-file, add, write-tree, commit, log and checkout.
+    tech: Python · argparse
+    talksTo: [objects, index, refs]
+    kind: core
+  - id: index
+    name: Index
+    role: Reads and writes the version 2 binary index with stat fields, padding and the trailing checksum.
+    tech: struct · hashlib
+    talksTo: [trees]
+    kind: core
+  - id: trees
+    name: Tree builder
+    role: Turns flat index paths into nested tree objects in git's sort order.
+    tech: Python
+    talksTo: [objects]
+    kind: core
+  - id: objects
+    name: Object store
+    role: Hashes `type size\0content` with SHA-1, compresses it and stores it under `.git/objects`.
+    tech: hashlib · zlib
+    talksTo: []
+    kind: core
+  - id: refs
+    name: Refs
+    role: Maps HEAD and branch names to commit hashes.
+    tech: Plain files
+    talksTo: []
+    kind: core
+  - id: tests
+    name: Round-trip tests
+    role: Builds repositories with each tool and checks the other can read them, hash for hash.
+    tech: pytest · CI
+    talksTo: [commands, git]
+    kind: offline
+  - id: git
+    name: Real git
+    role: The oracle; its hashes, `git fsck` and `git log` decide what is correct.
+    tech: git 2.4x
+    talksTo: []
+    kind: external
+flow:
+  - component: commands
+    text: runs `add src/`, opening every file in **binary** mode so no newline translation changes a byte.
+  - component: objects
+    text: >-
+      prefixes each file with `blob <size>\0`, hashes it with SHA-1, compresses it and writes
+      `.git/objects/ab/cdef…`, skipping objects that already exist.
+  - component: index
+    text: >-
+      records path, mode, blob hash and stat fields for each file, pads each entry to an 8-byte boundary and ends with
+      a SHA-1 of the whole file.
+  - component: trees
+    text: >-
+      on `commit`, groups index paths by directory and writes trees bottom-up, mode `40000` for directories and names
+      sorted as if each directory ended in `/`.
+  - component: objects
+    text: >-
+      stores the commit with its tree, parent, author and committer lines, each with a time-zone offset like `+0200`.
+  - component: refs
+    text: moves `refs/heads/main`, which `HEAD` names, to the new commit hash; `log` walks the parents back from here.
+  - component: tests
+    text: >-
+      check that git computes the same hashes for the 50-file test repository, that `git fsck` is clean, and that
+      your `log` and `checkout` read a repository git made.
+interface:
+  lang: python
+  code: |
+    def hash_object(data: bytes, kind: str,
+                    write: bool = True) -> str:
+        full = f"{kind} {len(data)}\0".encode() + data
+        sha = hashlib.sha1(full).hexdigest()
+        if write:
+            p = OBJECTS / sha[:2] / sha[2:]
+            p.parent.mkdir(parents=True, exist_ok=True)
+            if not p.exists():
+                p.write_bytes(zlib.compress(full))
+        return sha
+
+    # tree entry: b"100644 hello.txt\0" + 20 raw bytes
+decisions:
+  - choice: Real git as the test oracle
+    instead: Hand-written expected hashes
+    why: >-
+      Byte compatibility is the whole goal, and only git knows every format detail. Comparing against git catches a
+      wrong sort order or mode string at once.
+  - choice: Loose objects only
+    instead: Writing packfiles
+    why: >-
+      Packfiles add delta compression and their own index, a project on their own. For a 50-file test repository loose
+      objects are small enough; packfile reading is the stretch goal.
+  - choice: Standard library only
+    instead: Building on GitPython or dulwich
+    why: >-
+      Those libraries already implement the formats you are here to learn. hashlib, zlib and struct cover every byte
+      the MVP needs.
+watchOut: >-
+  Tree entries must be sorted as git sorts them, with a directory compared as if its name ended in `/`. Get it wrong
+  and every tree hash differs from git's while the code looks right.

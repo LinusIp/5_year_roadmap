@@ -1,0 +1,108 @@
+overview: >-
+  A non-clinical prototype for the Holloway orthopaedic team: load an anonymised CT, slice it along any oblique plane
+  to measure angles, and pull out a bone surface to print a patient-specific guide. Oblique slices (multi-planar
+  reconstruction, MPR) are drawn on the GPU from a 3D texture. Surface extraction runs marching cubes (a table that
+  turns each 2 × 2 × 2 voxel cell into a few triangles) on 32³ bricks in parallel, welds vertices across brick borders,
+  smooths without shrinking and exports an STL in millimetres.
+learn:
+  - name: Marching cubes
+    ref: scratchapixel
+  - name: Patient coordinates (LPS, RAS)
+  - name: Trilinear resampling
+    ref: learnopengl
+  - name: Taubin smoothing
+  - name: Mesh volume by divergence
+  - name: Thread pools
+    ref: ostep
+stats:
+  - value: < 5 s
+    label: surface from 512 × 512 × 400 on 8 cores
+  - value: ≤ 2%
+    label: mesh volume error on a phantom
+  - value: 60 FPS
+    label: oblique slicing
+components:
+  - id: loader
+    name: Volume loader
+    role: Reads HU values, voxel spacing and the index-to-patient matrix from the header.
+    tech: C++17
+    talksTo: [resampler]
+    kind: core
+  - id: resampler
+    name: Resampler
+    role: Stores the volume in 32³ bricks in patient (LPS) millimetres and uploads it as a 3D texture.
+    tech: C++17 · OpenGL
+    talksTo: [mpr, mc]
+    kind: core
+  - id: mpr
+    name: MPR renderer
+    role: Samples any oblique plane through the volume on the GPU with trilinear filtering.
+    tech: OpenGL · GLSL
+    talksTo: [measure]
+    kind: core
+  - id: measure
+    name: Measurement tools
+    role: Distances and angles between points picked on slices, in millimetres and degrees.
+    tech: C++17 · ImGui
+    talksTo: []
+    kind: core
+  - id: mc
+    name: Marching cubes
+    role: Extracts triangles per brick in a thread pool and welds shared edge vertices.
+    tech: C++17 · thread pool
+    talksTo: [export]
+    kind: core
+  - id: export
+    name: Smooth and export
+    role: Taubin-smooths the mesh, checks its volume and writes a millimetre-scale STL.
+    tech: C++17
+    talksTo: [printer]
+    kind: core
+  - id: printer
+    name: Printing workflow
+    role: Takes the STL into the team's slicer and 3D printer.
+    tech: STL
+    talksTo: []
+    kind: external
+flow:
+  - component: loader
+    text: reads the anonymised CT as 16-bit HU with its spacing (for example 0.7 × 0.7 × 1.0 mm) and its `indexToLps` matrix.
+  - component: resampler
+    text: lays the voxels out in 32³ bricks on the patient axes left, posterior, superior (**LPS**), and uploads the same data as a 3D texture.
+  - component: mpr
+    text: draws an oblique plane by sampling the texture at 60 FPS; the surgeon tilts it to the bone axis.
+  - component: measure
+    text: turns points picked on the slice into millimetres and an angle; the same view sets the bone iso-value, about 300 HU.
+  - component: mc
+    text: runs each brick on its own thread, looks up each cell's triangles by which of its 8 corners are above the iso-value, and keys every vertex by its **global edge id** so border vertices weld into one.
+  - component: export
+    text: smooths with alternating shrink and inflate steps, compares the mesh volume with the phantom's, and writes binary STL in millimetres.
+interface:
+  lang: cpp
+  code: |
+    struct Volume {
+      ivec3 dim;                // 512 x 512 x 400
+      dvec3 spacing;            // mm per voxel
+      dmat4 indexToLps;         // voxel -> patient mm
+      std::vector<int16_t> hu;
+    };
+    Mesh extractIso(const Volume& v, int16_t isoHu,
+                    ThreadPool& pool);  // 32^3 bricks
+    void taubinSmooth(Mesh& m, int iterations,
+                      float lambda, float mu);
+    double meshVolumeMm3(const Mesh& m);
+    void writeStl(const Mesh& m, const Path& p);  // mm
+decisions:
+  - choice: Bricks with vertices keyed by global edge id
+    instead: One thread over the whole volume
+    why: 105M voxels on one thread misses the 5 s target. Keying vertices by the global edge they sit on makes neighbouring bricks produce the same vertex, so there are no cracks between bricks.
+  - choice: Taubin smoothing
+    instead: Plain Laplacian smoothing
+    why: Laplacian smoothing shrinks the mesh every pass, which breaks the 2% volume target and makes guides fit loosely. Taubin alternates a shrink step and an inflate step to remove staircase noise without shrinking.
+  - choice: GPU 3D-texture slicing
+    instead: Resample each oblique slice on the CPU
+    why: Hardware trilinear filtering makes any plane cheap, so 60 FPS is easy; CPU resampling of a 512 × 512 slice per frame is slower and duplicates code.
+watchOut: >-
+  Mixing LPS and RAS (the two patient axis conventions) flips left and right or front and back, and a mirrored bone
+  guide looks fine on screen. Keep one convention, carry the header's matrix to the STL, and test with an asymmetric
+  phantom.

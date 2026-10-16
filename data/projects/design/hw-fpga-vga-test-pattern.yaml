@@ -1,0 +1,72 @@
+overview: >-
+  A VGA signal made in Verilog: two counters run at the 25.175 MHz pixel clock, one across the 800 clocks of each line
+  and one down the 525 lines of each frame, and comparators turn them into hsync, vsync and a visible-area flag. The
+  visible area shows colour bars and a square that bounces once per frame, and a resistor DAC turns the colour bits
+  into the 0 to 0.7 V a monitor expects.
+learn:
+  - name: VGA timing
+    ref: project-f
+  - name: Counters and comparators
+    ref: nandland
+  - name: PLL clocking
+  - name: Resistor DAC
+components:
+  - id: pll
+    name: Pixel clock PLL
+    role: Makes a clock as close to 25.175 MHz as the board's PLL allows.
+    tech: FPGA PLL
+    talksTo: [timing]
+    kind: core
+  - id: timing
+    name: Timing generator
+    role: Counts x and y and produces sync pulses, the visible flag and a frame tick.
+    tech: Verilog
+    talksTo: [pattern]
+    kind: core
+  - id: pattern
+    name: Pattern and sprite
+    role: Chooses each pixel's colour from bars and the moving square.
+    tech: Verilog
+    talksTo: [dac]
+    kind: core
+  - id: dac
+    name: Output stage
+    role: Registers colour and sync and drives the resistor DAC into the monitor.
+    tech: Verilog · resistors
+    talksTo: []
+    kind: core
+flow:
+  - component: pll
+    text: derives the pixel clock from the board oscillator; the error from 25.175 MHz is reported (25.125 MHz from a 12 MHz input is -0.2%).
+  - component: timing
+    text: counts `x` 0 to 799 and `y` 0 to 524; hsync is low for `x` 656 to 751, vsync for `y` 490 and 491, and `visible = x < 640 && y < 480`.
+  - component: pattern
+    text: picks one of 8 bar colours in 80-pixel steps and draws a 32x32 square that moves only on the `frame` tick, bouncing at the edges.
+  - component: dac
+    text: registers every output on the pixel clock and forces colour to **zero outside the visible area**; done is a monitor locked at 640x480 at 60 Hz.
+interface:
+  lang: verilog
+  code: |
+    module vga_timing (
+      input  wire       clk_pix,   // 25.175 MHz
+      output reg  [9:0] x,         // 0..799
+      output reg  [9:0] y,         // 0..524
+      output wire       hsync,     // active low
+      output wire       vsync,     // active low
+      output wire       visible,
+      output wire       frame      // 1 clock per frame
+    );
+      // 640 + 16 front + 96 sync + 48 back = 800
+      // 480 + 10 front + 2 sync + 33 back  = 525
+      assign hsync   = ~(x >= 656 && x < 752);
+      assign vsync   = ~(y >= 490 && y < 492);
+      assign visible = (x < 640) && (y < 480);
+decisions:
+  - choice: Register every output on the pixel clock
+    instead: Drive sync and colour straight from combinational logic
+    why: >-
+      Comparators have different delays, so unregistered sync and colour bits change at slightly different moments and
+      glitch, which some monitors show as jitter. One flip-flop stage aligns them all to the same clock edge.
+watchOut: >-
+  Many monitors measure black from the blanking interval, so any colour sent there makes the picture dim, tinted or
+  unstable. Gate colour with the registered `visible` flag.

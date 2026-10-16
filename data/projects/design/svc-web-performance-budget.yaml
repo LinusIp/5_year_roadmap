@@ -1,0 +1,46 @@
+overview: >-
+  A slow page served by nginx is measured for LCP, CLS and INP (load speed, layout shift and input delay), fixed
+  step by step through render-blocking, images, caching and compression, and then guarded by Lighthouse CI budgets
+  that fail a pull request on regression.
+learn:
+  - name: Core Web Vitals
+  - name: Critical rendering path
+  - name: HTTP caching
+  - name: Performance budgets
+components:
+  - id: page
+    name: Page
+    role: HTML, CSS, JS and images, rebuilt with deferred scripts and sized, modern-format images.
+    tech: HTML · JS
+    talksTo: [nginx]
+    kind: core
+  - id: nginx
+    name: nginx
+    role: Serves files with gzip or brotli and long cache lifetimes for hashed assets.
+    tech: nginx
+    talksTo: [lhci]
+    kind: core
+  - id: lhci
+    name: Lighthouse CI
+    role: Runs three times per build and checks scores and metric budgets.
+    tech: Lighthouse CI · GitHub Actions
+    talksTo: []
+    kind: core
+flow:
+  - component: lhci
+    text: records the baseline, for example LCP 4,800 ms, CLS 0.25, performance score 52.
+  - component: page
+    text: inlines critical CSS, adds `defer` to scripts, sets `width` and `height` on images, and preloads the hero image.
+  - component: nginx
+    text: compresses text and sends `Cache-Control max-age=31536000, immutable` for hashed files.
+  - component: lhci
+    text: asserts the score rose by at least **30 points** and fails the build if LCP passes its 2,500 ms budget.
+decisions:
+  - choice: Budgets enforced in CI
+    instead: A one-off optimisation pass
+    why: >-
+      Pages slow down one dependency at a time, and only a failing check stops that. Run three times and take the
+      median to keep the check stable.
+watchOut: >-
+  Lighthouse runs on a fast machine and network, so a good lab score can still mean slow pages for real users.
+  Test with throttling and compare against field data where you have it.

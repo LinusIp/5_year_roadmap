@@ -1,0 +1,48 @@
+overview: >-
+  An fp16 matrix multiply written in Triton (a Python language for GPU kernels): each program computes one output
+  tile, programs are ordered in groups so neighbouring tiles reuse the same input data from L2 cache, and the
+  autotuner picks tile sizes and pipeline stages per shape. It is compared with cuBLAS on 5 shapes.
+learn:
+  - name: Blocked matmul
+    ref: triton-tutorials
+  - name: L2 cache reuse
+    ref: siboehm-cuda-matmul
+  - name: Autotuning
+    ref: triton-tutorials
+components:
+  - id: kernel
+    name: Matmul kernel
+    role: Loads A and B tiles, accumulates in fp32 with tl.dot and stores C.
+    tech: Triton
+    talksTo: [tuner]
+    kind: core
+  - id: tuner
+    name: Autotuner
+    role: Tries block sizes, warps and stages per shape and caches the best.
+    tech: triton.autotune
+    talksTo: [bench]
+    kind: core
+  - id: bench
+    name: Benchmark
+    role: Times the kernel and torch.matmul (cuBLAS) on 5 shapes and saves the tuning table.
+    tech: triton.testing · PyTorch
+    talksTo: []
+    kind: core
+flow:
+  - component: kernel
+    text: maps each program id to an output tile with **grouped ordering**, `GROUP_M = 8` rows of tiles at a time, so their B tiles stay in L2.
+  - component: kernel
+    text: loops over K in steps of `BLOCK_K`, accumulating `tl.dot(a, b)` in fp32, and stores fp16.
+  - component: tuner
+    text: tries configs such as `BLOCK_M, BLOCK_N, BLOCK_K = 128, 128, 32` with `num_stages` 3 to 5, keyed on `(M, N, K)`.
+  - component: bench
+    text: reports TFLOP/s `= 2·M·N·K / time` against cuBLAS for square and skinny shapes; done is 70% on `4096³`.
+decisions:
+  - choice: Tune per shape, including skinny ones
+    instead: Tune once on 4096³ and reuse
+    why: >-
+      Configs that win on large squares waste work on shapes like `16 x 4096 x 4096`. Keying the cache on shape and
+      including two skinny shapes keeps the table honest.
+watchOut: >-
+  Benchmarking only square shapes hides poor configs for the tall and thin shapes real models use. Include at least
+  one decode-like shape with a small M.

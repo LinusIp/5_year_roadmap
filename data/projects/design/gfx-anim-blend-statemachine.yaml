@@ -1,0 +1,72 @@
+overview: >-
+  Character locomotion from a blend tree and a state machine: a 1D blend space mixes walk and run clips by speed, a 2D
+  one mixes turn and strafe clips by direction, clips share a normalised phase so feet land together, and state changes
+  cross-fade over a set time. Additive layers (clips stored as the difference from a base pose) add leaning or breathing
+  on top, and foot sliding is measured in cm/s.
+learn:
+  - name: Blend spaces
+    ref: game-engine-architecture
+  - name: Phase synchronisation
+  - name: Quaternion blending
+    ref: gamemath-3d-primer
+  - name: Additive animation
+components:
+  - id: fsm
+    name: State machine
+    role: Picks the active state from parameters and runs cross-fades between states.
+    tech: C++20
+    talksTo: [blend]
+    kind: core
+  - id: sampler
+    name: Clip sampler
+    role: Samples glTF clips at a shared phase and extracts root motion.
+    tech: C++20 · glTF
+    talksTo: [blend]
+    kind: core
+  - id: blend
+    name: Blend tree
+    role: Weights the sampled poses by the blend space and adds layers.
+    tech: C++20
+    talksTo: [metrics]
+    kind: core
+  - id: metrics
+    name: Foot-slide meter
+    role: Measures how fast planted feet move in world space.
+    tech: C++20
+    talksTo: []
+    kind: offline
+flow:
+  - component: fsm
+    text: reads `speed` and `direction`, follows rules such as `Idle → Locomotion when speed > 0.1`, and starts a 0.25 s cross-fade.
+  - component: sampler
+    text: samples every clip in the blend space at the same normalised phase `t / duration`, interpolating keys with `slerp`, and takes root motion from the hips' ground movement.
+  - component: blend
+    text: weights clips by `speed` in 1D or by triangle weights in 2D, **flips** any quaternion with `dot(q, q0) < 0` before mixing, then adds the additive layers.
+  - component: metrics
+    text: tracks each foot while it is near the ground and reports its slide in cm/s for walk, run and turn blends.
+interface:
+  lang: cpp
+  code: |
+    struct Pose { std::vector<Quat> rot;
+                  std::vector<Vec3> pos;
+                  Vec3 rootDelta; };
+    struct BlendSpace1D {
+      std::vector<std::pair<float, ClipId>> points;
+      Pose sample(float speed, float phase) const;
+    };
+    using Rule = bool (*)(const Params&);
+    struct Transition { StateId from, to; Rule when;
+                        float fade = 0.25f; };
+
+    Pose blend(const Pose& a, const Pose& b, float w);
+    Pose add_layer(const Pose& base, const Pose& add,
+                   float weight);
+decisions:
+  - choice: Sync clips by normalised phase
+    instead: Play each clip on its own clock
+    why: >-
+      A walk cycle might take 1.1 s and a run 0.7 s; on separate clocks, a 50% blend mixes one clip's left step with
+      the other's right and the feet slide. Sharing a phase stretches both to one cycle length so steps line up.
+watchOut: >-
+  `q` and `-q` are the same rotation, but blending one with the other passes near zero and spins the joint the long
+  way round. Flip quaternions into the same half before every blend, including the cross-fades.

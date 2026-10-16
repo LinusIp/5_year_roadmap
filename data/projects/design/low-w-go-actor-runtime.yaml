@@ -1,0 +1,70 @@
+overview: >-
+  A small actor runtime in Go: each actor is a goroutine reading one buffered channel (its mailbox), others reach it
+  by address with `Tell` (fire and forget) or `Ask` (wait for a reply), and a supervisor restarts any child that
+  panics, one-for-one. A chaos test with 100 crashing actors must finish with every restart done and no deadlock.
+learn:
+  - name: Actor model
+  - name: Goroutines and channels
+    ref: tour-of-go
+  - name: Supervision strategies
+  - name: Backpressure
+components:
+  - id: router
+    name: Router
+    role: Maps addresses to mailboxes and delivers Tell and Ask messages.
+    tech: Go · sync.Map
+    talksTo: [actor]
+    kind: core
+  - id: actor
+    name: Actor
+    role: A goroutine with a bounded mailbox that handles one message at a time.
+    tech: goroutine · chan
+    talksTo: [supervisor]
+    kind: core
+  - id: supervisor
+    name: Supervisor
+    role: Restarts a crashed child at the same address, at most 3 times in 5 seconds.
+    tech: Go
+    talksTo: []
+    kind: core
+  - id: chaos
+    name: Chaos test
+    role: Spawns 100 actors that panic at random and checks every Ask gets a reply or an error.
+    tech: go test
+    talksTo: [router]
+    kind: offline
+flow:
+  - component: router
+    text: >-
+      looks up the address and puts the message on that actor's mailbox; `Ask` adds a reply channel and a timeout,
+      and a full mailbox returns `ErrFull`.
+  - component: actor
+    text: takes one message at a time, so its state needs no lock, and answers on the reply channel if there is one.
+  - component: actor
+    text: panics on a bad message; a deferred `recover` reports the crash to its supervisor instead of killing the program.
+  - component: supervisor
+    text: >-
+      starts a fresh actor with empty state at the same address, and **escalates** to its own parent if restarts
+      exceed 3 in 5 seconds.
+interface:
+  lang: go
+  code: |
+    type Actor interface {
+        Receive(ctx *Context, msg any)
+    }
+
+    func (s *System) Spawn(name string,
+        props func() Actor, sup *Supervisor) Ref
+
+    func (r Ref) Tell(msg any) error // may be ErrFull
+    func (r Ref) Ask(msg any,
+        timeout time.Duration) (any, error)
+decisions:
+  - choice: Bounded mailboxes that refuse when full
+    instead: Unbounded mailboxes
+    why: >-
+      With 100 actors crashing and restarting, a slow actor's unbounded queue grows without limit and hides the
+      problem. A bound of 1,000 messages makes senders see backpressure; revisit the size if real traffic bursts.
+watchOut: >-
+  An actor that panics on every start gets restarted in a tight loop and starves the rest (a restart storm). Cap
+  restarts per time window with a back-off, and make `Ask` time out instead of waiting on a dead mailbox forever.

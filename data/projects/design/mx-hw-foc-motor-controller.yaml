@@ -1,0 +1,108 @@
+overview: >-
+  Firmware that makes a BLDC joint motor behave like a smooth torque source by field-oriented control (FOC):
+  measured phase currents are rotated into the rotor's own frame, where torque is one number (q current) and
+  wasted magnetising current is another (d current), and two PI loops hold them. A 20 kHz interrupt runs that
+  current loop, and slower speed and position loops in the main loop set the torque it should hold. Every gain is
+  first checked against a Python motor and inverter model.
+learn:
+  - name: Clarke and Park transforms
+  - name: Cascaded PI loops
+    ref: brian-douglas-control
+  - name: PWM-synchronous sampling
+  - name: Encoder angle offset
+  - name: Anti-windup at saturation
+    ref: feedback-systems
+stats:
+  - value: ≥ 1 kHz
+    label: current-loop bandwidth
+  - value: < 20 µs
+    label: FOC interrupt at 20 kHz PWM
+  - value: < 0.5°
+    label: hold error at 50 % torque disturbance
+components:
+  - id: shunts
+    name: Phase shunts
+    role: Two low-side shunt amplifiers measure phase currents a and b; c follows from their sum.
+    tech: Shunt amps
+    talksTo: [adc]
+    kind: external
+  - id: adc
+    name: Synced ADC
+    role: Samples both currents at the PWM centre, triggered by the timer.
+    tech: C · Cortex-M4 timer + ADC
+    talksTo: [transforms]
+    kind: core
+  - id: encoder
+    name: Encoder
+    role: Magnetic encoder gives rotor angle; a sensorless observer can replace it later.
+    tech: SPI magnetic encoder
+    talksTo: [transforms]
+    kind: external
+  - id: transforms
+    name: Clarke/Park
+    role: Turns three phase currents into d and q currents in the rotor frame.
+    tech: C · CMSIS-DSP
+    talksTo: [pi]
+    kind: core
+  - id: pi
+    name: d/q PI loops
+    role: Drive d current to zero and q current to the torque command, with clamped integrators.
+    tech: C
+    talksTo: [svpwm]
+    kind: core
+  - id: svpwm
+    name: Inverse Park + PWM
+    role: Turns d/q voltages back into three duty cycles for the gate driver.
+    tech: C · timer PWM
+    talksTo: []
+    kind: core
+  - id: cascade
+    name: Speed/position loops
+    role: Run at 1 kHz in the main loop and set the q current command, with torque and speed limits.
+    tech: C
+    talksTo: [pi]
+    kind: core
+  - id: model
+    name: Plant model
+    role: Simulates motor R, L, flux and inertia with the inverter to tune gains before hardware.
+    tech: Python · NumPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: cascade
+    text: compares position with the target and sets `iq_ref`, the torque the current loop should produce.
+  - component: adc
+    text: samples `ia` and `ib` at the **centre of the PWM period**, when the low-side switches are on and the current is clean.
+  - component: transforms
+    text: computes `iα, iβ` (Clarke), then `id, iq` (Park) with the encoder angle `θ` minus its calibrated offset.
+  - component: pi
+    text: runs one PI step for `id → 0` and `iq → iq_ref`, and stops integrating when the voltage hits the 24 V limit.
+  - component: svpwm
+    text: rotates `vd, vq` back with inverse Park and writes three duty cycles; the whole interrupt must finish in under `20 µs`.
+interface:
+  lang: c
+  code: |
+    typedef struct { float kp, ki, integ, lim; } pi_t;
+
+    typedef struct {
+      float ia, ib;       /* A, from ADC */
+      float theta_e;      /* electrical angle, rad */
+      float iq_ref;       /* from cascade loop */
+      float vbus;         /* V */
+    } foc_in_t;
+
+    /* called from ADC ISR at 20 kHz */
+    void foc_step(const foc_in_t *in,
+                  pi_t *pid, pi_t *piq,
+                  float duty_abc[3]);
+decisions:
+  - choice: Current loop in the ISR, outer loops in main
+    instead: All loops in one 20 kHz ISR
+    why: Speed and position change far slower than current, and running them at 1 kHz keeps the ISR under 20 µs. Move them into a 1 kHz timer task if main-loop jitter shows up.
+  - choice: Encoder first, observer later
+    instead: Sensorless from the start
+    why: Sensorless observers fail at the low speeds a robot joint lives at. The encoder gives a ground-truth angle to test the observer against.
+  - choice: Tune on the model first
+    instead: Tune gains on the bench
+    why: A wrong sign or gain can push 10 A through a stalled motor. The model shows 1 kHz bandwidth and overshoot before power is applied.
+watchOut: If the ADC trigger is not aligned with the PWM centre, current readings catch switching spikes and the loop fights noise. Check the trigger on a scope against the PWM pin.

@@ -1,0 +1,130 @@
+overview: >-
+  A 1–3B Llama-style model split across two GPUs by hand. One process per GPU loads only its half of each weight
+  matrix: in attention each rank owns half the heads and their KV cache, and in the MLP half the columns. A
+  column-parallel layer (each rank computes part of the output) followed by a row-parallel one (each rank holds part of
+  the input) needs just one NCCL all-reduce to sum the halves, so each layer costs two. Logits are gathered on rank 0,
+  which samples and broadcasts the token so both ranks stay in step.
+learn:
+  - name: Column and row parallelism
+    ref: ultra-scale-playbook
+  - name: All-reduce
+    ref: scaling-book
+  - name: Grouped-query attention
+  - name: Bandwidth vs interconnect
+    ref: scaling-book
+  - name: CUDA event timing
+    ref: nsight-compute-docs
+stats:
+  - value: ≤ 1e-4
+    label: max logit diff in float32
+  - value: "2"
+    label: all-reduces per layer
+  - value: 1–64
+    label: batch sizes benchmarked
+components:
+  - id: loader
+    name: Shard loader
+    role: Starts one process per GPU and loads only that rank's slice of every weight.
+    tech: torchrun · safetensors
+    talksTo: [embed]
+    kind: core
+  - id: embed
+    name: Embedding
+    role: Replicated on both ranks, so each starts a step with the full hidden state.
+    tech: PyTorch
+    talksTo: [attn]
+    kind: core
+  - id: attn
+    name: Sharded attention
+    role: Column-parallel QKV over its half of the heads and KV cache, row-parallel output, one all-reduce.
+    tech: PyTorch · torch.distributed
+    talksTo: [mlp, nccl]
+    kind: core
+  - id: mlp
+    name: Sharded MLP
+    role: Column-parallel gate and up projections, row-parallel down projection, one all-reduce.
+    tech: PyTorch · torch.distributed
+    talksTo: [sampler, nccl]
+    kind: core
+  - id: sampler
+    name: Sampler
+    role: Gathers logits on rank 0, picks the token and broadcasts it to rank 1.
+    tech: NCCL gather · broadcast
+    talksTo: [embed]
+    kind: core
+  - id: nccl
+    name: NCCL link
+    role: Carries the all-reduces between the two GPUs over NVLink or PCIe.
+    tech: NCCL · 2 GPUs
+    talksTo: []
+    kind: external
+  - id: reference
+    name: Reference model
+    role: The same model on one GPU, used to compare logits and greedy tokens.
+    tech: PyTorch
+    talksTo: []
+    kind: offline
+  - id: bench
+    name: Benchmark
+    role: Times compute and each all-reduce with CUDA events, checked against an Nsight Systems trace.
+    tech: CUDA events · Nsight Systems
+    talksTo: []
+    kind: offline
+flow:
+  - component: loader
+    text: >-
+      starts two ranks with `torchrun --nproc-per-node 2`; each splits the fused QKV **per head**, so it gets its own
+      Q, K and V.
+  - component: embed
+    text: looks up the token on both ranks, so each holds the full hidden state `x`.
+  - component: attn
+    text: >-
+      computes Q, K and V for its half of the heads, attends with its own KV cache, applies its rows of the output
+      projection and **all-reduces** the partial sums.
+  - component: mlp
+    text: applies its columns of gate and up, its rows of down, and all-reduces again.
+  - component: sampler
+    text: >-
+      gathers logits on rank 0, samples, and broadcasts the token so both ranks decode the same sequence; this decode
+      step **loops**.
+  - component: reference
+    text: >-
+      checks that float32 logits match within `1e-4` and bfloat16 greedy output matches token for token on 20
+      prompts.
+  - component: bench
+    text: >-
+      records TTFT, ITL and tokens per second at batch 1, 4, 16 and 64 and prompt lengths 128 and 2,048, with
+      all-reduce time per layer on its own.
+interface:
+  lang: python
+  code: |
+    class ColumnParallel(nn.Module):
+        # w: [out / world, in]; output stays sharded
+        def forward(self, x):
+            return x @ self.w.T
+
+    class RowParallel(nn.Module):
+        # w: [out, in / world]; input is sharded
+        def forward(self, x_shard):
+            y = x_shard @ self.w.T
+            dist.all_reduce(y)    # sum partial outputs
+            return y
+decisions:
+  - choice: Column then row, one all-reduce
+    instead: Gather after every linear layer
+    why: >-
+      Pairing a column-parallel layer with a row-parallel one keeps the activation sharded between them, so each
+      block needs a single all-reduce instead of a gather after every linear layer.
+  - choice: Sample on rank 0 and broadcast
+    instead: Each rank samples its own token
+    why: >-
+      Two ranks sampling separately can pick different tokens and diverge; one broadcast per step is tiny next to two
+      all-reduces per layer.
+  - choice: Tensor parallel for a 1–3B model
+    instead: Two-stage pipeline parallelism
+    why: >-
+      Tensor parallelism cuts the latency of each step, which matters at batch 1; pipeline parallelism helps
+      throughput at large batch. The pipeline version is the stretch comparison.
+watchOut: >-
+  Timing on the host without synchronising hides the all-reduce and makes two GPUs look faster than they are. Put CUDA
+  events around each all-reduce and confirm the split in an Nsight Systems trace.

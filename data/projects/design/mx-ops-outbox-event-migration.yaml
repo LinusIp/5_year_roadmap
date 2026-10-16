@@ -1,0 +1,94 @@
+overview: >-
+  Gridiron Foods' order service stops calling four services in a row and publishes events instead. The order row and
+  an outbox row describing the event are written in the same database transaction, so either both exist or neither
+  does, and a relay copies outbox rows to the broker, delivering each event at least once. Consumers record the event
+  IDs they have handled so a repeat does nothing, and a saga, a chain of local steps with an undo step for each,
+  coordinates payment and fulfilment and refunds if the warehouse fails.
+learn:
+  - name: Transactional outbox
+    ref: ddia
+  - name: At-least-once delivery
+    ref: ddia
+  - name: Idempotent consumers
+  - name: Sagas and compensation
+  - name: Poison messages
+  - name: Event lag tracing
+    ref: opentelemetry-docs
+stats:
+  - value: 0 lost, 0 duplicated
+    label: order effects in 1M events
+  - value: < 120 ms
+    label: order API p99, downstream down
+  - value: < 2 s
+    label: event lag at 500 orders/s
+components:
+  - id: orders
+    name: Order service
+    role: Accepts orders and writes the order and its outbox event in one transaction.
+    tech: Go · PostgreSQL
+    talksTo: [relay]
+    kind: core
+  - id: relay
+    name: Outbox relay
+    role: Reads unsent outbox rows in order, publishes them, then marks them sent.
+    tech: Go
+    talksTo: [broker]
+    kind: core
+  - id: broker
+    name: Broker
+    role: Stores events durably and redelivers until a consumer acknowledges.
+    tech: NATS JetStream
+    talksTo: [consumers]
+    kind: core
+  - id: consumers
+    name: Idempotent consumers
+    role: Payment, warehouse, email and loyalty handlers that skip event IDs already processed.
+    tech: Go · processed_events table
+    talksTo: [saga]
+    kind: core
+  - id: saga
+    name: Saga orchestrator
+    role: Tracks each order through payment and fulfilment and issues compensations on failure.
+    tech: Go · state table
+    talksTo: []
+    kind: core
+  - id: chaos
+    name: Chaos harness
+    role: Kills services and restarts the broker during a 1M-event run, then counts lost and duplicate effects.
+    tech: Docker Compose · Python
+    talksTo: [broker]
+    kind: offline
+flow:
+  - component: orders
+    text: handles `POST /orders` with one transaction that inserts the order and an `order.placed` outbox row, then returns in well under 120 ms without calling anyone.
+  - component: relay
+    text: selects unsent rows with `FOR UPDATE SKIP LOCKED`, publishes them with the event ID as message ID, and marks them sent; a crash in between only causes a **repeat**, never a loss.
+  - component: broker
+    text: keeps the event until each consumer acknowledges, so a broker restart or a slow warehouse loses nothing.
+  - component: consumers
+    text: insert the event ID into `processed_events` in the same transaction as their own change; a duplicate hits the primary key and is skipped.
+  - component: saga
+    text: moves the order to `paid`, then `packed`; if the warehouse rejects it, it emits `payment.refund` as the compensating step.
+interface:
+  lang: sql
+  code: |
+    BEGIN;
+    INSERT INTO orders (id, customer_id, total)
+      VALUES ('ord_7781', 'c_19', 42.50);
+    INSERT INTO outbox (id, topic, payload)
+      VALUES ('evt_5c1e', 'order.placed',
+              '{"order_id":"ord_7781"}');
+    COMMIT;
+
+    -- in each consumer, same transaction as work
+    INSERT INTO processed_events (event_id)
+      VALUES ('evt_5c1e')
+      ON CONFLICT DO NOTHING;  -- 0 rows: skip
+decisions:
+  - choice: Outbox, not dual writes
+    instead: Save the order, then publish to the broker from the app
+    why: A crash between the two steps loses or invents events, and the broker may be restarted at any time. One transaction makes the event exist exactly when the order does.
+  - choice: Orchestrated saga
+    instead: Choreography where each service reacts to the others' events
+    why: With payment, warehouse and refunds, one place that knows each order's state makes compensation and debugging easier. Revisit if teams need to add steps without touching it.
+watchOut: A poison message, one that always fails, gets retried forever and blocks everything behind it. Cap retries, move it to a dead-letter queue and alert on that queue's size.

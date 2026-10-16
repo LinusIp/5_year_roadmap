@@ -1,0 +1,131 @@
+overview: >-
+  A controlled experiment, not a new model: one trainer, one U-Net, one CIFAR-10 data order and one compute budget,
+  with the method swapped in as a small plugin that decides how to pick a time, mix noise into the image and set the
+  target. Flow matching learns a velocity along a straight path from data to noise; DDPM learns the noise itself
+  (epsilon). Every checkpoint is then sampled at a fixed list of network evaluations (NFE) and scored with FID over
+  three seeds, so the report can say where the gap is bigger than the seed noise.
+learn:
+  - name: Conditional flow matching
+    ref: sander-dieleman-blog
+  - name: DDPM epsilon prediction
+    ref: annotated-diffusion
+  - name: ODE samplers (Euler, Heun)
+    ref: yang-song-score
+  - name: FID and its noise
+  - name: Equal-compute comparisons
+stats:
+  - value: "3"
+    label: seeds per method
+  - value: 4–1,000
+    label: NFE grid, 7 points
+  - value: ≤ 4 pages
+    label: workshop report
+components:
+  - id: config
+    name: Shared config
+    role: Fixes network, optimiser, batch size, training steps, EMA decay and precision for both methods.
+    tech: YAML · project 47 U-Net
+    talksTo: [trainer]
+    kind: core
+  - id: trainer
+    name: Shared trainer
+    role: Runs the identical loop for every method and seed, saving checkpoints and wall-clock time.
+    tech: PyTorch 2.x
+    talksTo: [fm, ddpm, samplers, wandb]
+    kind: core
+  - id: fm
+    name: Flow-matching plugin
+    role: Draws t, builds the point on the straight path and returns the velocity target.
+    tech: PyTorch
+    talksTo: []
+    kind: core
+  - id: ddpm
+    name: DDPM plugin
+    role: Draws a timestep, noises the image with the schedule and returns the epsilon target.
+    tech: PyTorch
+    talksTo: []
+    kind: core
+  - id: samplers
+    name: Samplers
+    role: Euler and Heun for flow matching, ancestral and DDIM for DDPM, all charged by NFE.
+    tech: PyTorch
+    talksTo: [fid]
+    kind: core
+  - id: fid
+    name: FID grid
+    role: Scores 10,000 samples per checkpoint, sampler and NFE, and keeps mean and spread over seeds.
+    tech: clean-fid
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Holds the FID-against-NFE figure, the tested explanation and the reproduce commands.
+    tech: LaTeX workshop template
+    talksTo: []
+    kind: core
+  - id: wandb
+    name: Run tracker
+    role: Logs configs, loss curves and GPU-hours so equal compute can be checked afterwards.
+    tech: Weights & Biases
+    talksTo: []
+    kind: external
+flow:
+  - component: config
+    text: loads one file for both methods; only the `method` field differs between runs, and the seed sets the data order.
+  - component: trainer
+    text: >-
+      takes a batch of images `x0` and fresh noise, asks the active plugin for `t`, the noisy input and the target,
+      and steps the shared U-Net on an MSE loss.
+  - component: fm
+    text: draws `t` uniformly, returns `x_t = (1 - t)·x0 + t·noise` and the **velocity** target `noise - x0`, with `t = 0` as data.
+  - component: ddpm
+    text: draws a step from the 1,000-step schedule, returns `√ᾱ·x0 + √(1 - ᾱ)·noise` and the **epsilon** target `noise`.
+  - component: samplers
+    text: >-
+      turn each checkpoint into images at NFE 4, 8, 16, 32, 64, 128 and 1,000; Heun counts **two** evaluations per
+      step and DDPM uses DDIM at few steps.
+  - component: fid
+    text: computes FID on 10,000 samples per cell of the grid and reports mean and standard deviation over three seeds.
+  - component: report
+    text: states at which NFE the gap exceeds the seed spread and tests one explanation, such as measured trajectory straightness.
+interface:
+  lang: python
+  code: |
+    class Method(Protocol):
+        def sample_t(self, n: int) -> Tensor: ...
+        def noisy(self, x0, noise, t) -> Tensor: ...
+        def target(self, x0, noise, t) -> Tensor: ...
+
+    # one training step, identical for both methods
+    t = method.sample_t(x0.shape[0])
+    x_t = method.noisy(x0, noise, t)
+    y = method.target(x0, noise, t)
+    loss = mse(unet(x_t, t), y)
+
+    # the sampler budget is counted in network calls
+    fid = evaluate(ckpt, sampler="heun", nfe=16)
+decisions:
+  - choice: One trainer with a method plugin
+    instead: Two separate training scripts
+    why: >-
+      Only three lines of maths differ between the methods, so everything else (network, data order, steps,
+      precision) stays shared and any FID gap comes from the method. Revisit only if a stretch method needs its own
+      loss weighting.
+  - choice: Charge samplers by NFE, not steps
+    instead: Compare at equal sampler steps
+    why: >-
+      Heun makes two network calls per step, so equal steps would hand it double the compute. NFE is what costs time
+      at inference.
+  - choice: DDIM for DDPM at few steps
+    instead: Ancestral DDPM sampling at every budget
+    why: >-
+      Ancestral sampling at 4–16 NFE makes diffusion look far worse than it is; DDIM is its fair few-step sampler.
+      Keep ancestral for the 1,000-step point.
+  - choice: Three seeds per method
+    instead: One longer run per method
+    why: >-
+      FID moves between seeds, and with one seed its noise could decide the result. Three seeds per method fit the 8 h
+      training budget on one 24 GB GPU at CIFAR-10 size.
+watchOut: >-
+  Tuning one method more than the other (learning rate, EMA decay, sampler) turns the study into a tuning contest. Fix
+  every hyperparameter in the shared config before the first run and change it for both or neither.

@@ -1,0 +1,52 @@
+overview: >-
+  A script that samples real prompts and outputs from a small app's logs, lets you label 50 of them pass or fail with a
+  short reason, and freezes them as a versioned regression set. A runner scores any new prompt version on the set and
+  must flag a deliberately worse prompt.
+learn:
+  - name: Regression evals
+    ref: llm-zoomcamp
+  - name: Stratified sampling
+  - name: Dataset versioning
+components:
+  - id: logs
+    name: App logs
+    role: Store each prompt, input, output and prompt version as JSONL.
+    tech: JSONL
+    talksTo: [sampler]
+    kind: core
+  - id: sampler
+    name: Sampler and labeller
+    role: Draws 50 cases across input types and records your labels and pass criteria.
+    tech: Python CLI
+    talksTo: [evalset]
+    kind: core
+  - id: evalset
+    name: Frozen eval set
+    role: Versioned file of cases with expected behaviour.
+    tech: JSONL · Git
+    talksTo: [runner]
+    kind: core
+  - id: runner
+    name: Runner
+    role: Runs a prompt version on every case and scores pass or fail.
+    tech: Python · LLM API
+    talksTo: []
+    kind: core
+flow:
+  - component: logs
+    text: are filtered and grouped by input type, for example short, long and multilingual.
+  - component: sampler
+    text: picks cases from **every** group, including failures seen in the logs, and you add `expected` and `check` for each.
+  - component: evalset
+    text: is saved as `evalset-v1.jsonl` and never edited in place; changes create `v2`.
+  - component: runner
+    text: reports pass rate for the current prompt and for a degraded one, which must score clearly lower.
+decisions:
+  - choice: Simple checks before an LLM judge
+    instead: Score every case with an LLM judge
+    why: >-
+      For 50 cases, rules like "contains the order id" or "valid JSON" are exact and free. Use a judge only for cases
+      no rule can check.
+watchOut: >-
+  Sampling uniformly from logs fills the set with easy, repetitive cases that every prompt passes. Sample per input
+  type and deliberately include past failures.

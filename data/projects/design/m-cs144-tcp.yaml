@@ -1,0 +1,120 @@
+overview: >-
+  Your own TCP stack from the Stanford CS144 labs, built one checkpoint at a time until `webget` fetches a real page
+  over it. Outgoing bytes flow from a byte stream into a sender that cuts segments to fit the peer's window and
+  resends lost ones; incoming segments pass through a receiver and a reassembler (which puts out-of-order pieces back
+  in order) into the stream the app reads. Below TCP, a network interface resolves addresses with ARP and a router
+  forwards by longest-prefix match.
+learn:
+  - name: Reliable byte streams
+    ref: stanford-cs144
+  - name: Sequence number wrapping
+  - name: Sliding window
+    ref: stanford-cs144
+  - name: Retransmission timeout
+  - name: ARP
+  - name: Longest-prefix match
+stats:
+  - value: 10 %
+    label: induced loss, transfer still completes
+  - value: = curl
+    label: webget output over your stack
+  - value: 2×
+    label: timeout after each retransmission
+components:
+  - id: app
+    name: webget
+    role: Opens a connection, writes an HTTP request and prints the reply.
+    tech: C++20
+    talksTo: [outstream]
+    kind: core
+  - id: outstream
+    name: Outbound ByteStream
+    role: A bounded buffer of bytes the app has written and the sender has not yet sent.
+    tech: C++20
+    talksTo: [sender]
+    kind: core
+  - id: sender
+    name: TCPSender
+    role: Cuts segments to fit the window, keeps outstanding ones and resends them on timeout.
+    tech: C++20
+    talksTo: [netif]
+    kind: core
+  - id: netif
+    name: Network interface
+    role: Carries segments in IP datagrams, finds next-hop addresses with ARP; your Router forwards in the lab network.
+    tech: C++20 · TUN device
+    talksTo: [internet]
+    kind: core
+  - id: internet
+    name: Real server
+    role: A web server on the internet, reached through the TUN device.
+    tech: Internet
+    talksTo: [receiver]
+    kind: external
+  - id: receiver
+    name: TCPReceiver
+    role: Turns sequence numbers into stream indexes and reports the ackno and window to the sender.
+    tech: C++20
+    talksTo: [reassembler, sender]
+    kind: core
+  - id: reassembler
+    name: Reassembler
+    role: Holds out-of-order pieces within capacity and writes in-order bytes to the stream the app reads.
+    tech: C++20
+    talksTo: []
+    kind: core
+flow:
+  - component: app
+    text: connects and writes `GET /path HTTP/1.1` and its headers into the outbound stream.
+  - component: outstream
+    text: holds the bytes until the sender reads them, up to its capacity.
+  - component: sender
+    text: >-
+      sends a segment with `SYN`, then data up to the peer's window, and starts the retransmission timer if it is not
+      already running.
+  - component: netif
+    text: >-
+      wraps the segment in an IP datagram, looks up or asks ARP for the next hop, and writes it to the TUN device.
+  - component: receiver
+    text: >-
+      unwraps the reply's 32-bit `seqno` into a 64-bit index and hands the payload on; its `ackno` and window tell
+      the sender what to drop and how much more to send.
+  - component: reassembler
+    text: >-
+      writes the bytes that are now in order to the inbound stream, where `webget` reads the page; an early piece
+      waits for the gap to fill.
+interface:
+  lang: cpp
+  code: |
+    struct TCPSenderMessage {
+      Wrap32 seqno;         // 32-bit, wraps around
+      bool SYN;             // takes one seqno
+      std::string payload;
+      bool FIN;             // takes one seqno
+    };
+    struct TCPReceiverMessage {
+      std::optional<Wrap32> ackno;
+      uint16_t window_size;
+    };
+    // the 64-bit index nearest the checkpoint
+    uint64_t Wrap32::unwrap(Wrap32 zero_point,
+                            uint64_t checkpoint) const;
+decisions:
+  - choice: One timer for the oldest outstanding segment
+    instead: Restarting the timer on every send
+    why: >-
+      Restarting on every send keeps pushing the timeout away while data is lost. Restart only when new data is
+      acknowledged, and double the timeout on each retransmission.
+  - choice: 64-bit absolute indexes inside
+    instead: Comparing wrapped 32-bit sequence numbers
+    why: >-
+      Comparisons near the wrap point go wrong silently. Convert at the edge with `unwrap` against a checkpoint, and
+      test right at the wrap.
+  - choice: Treat a zero window as one byte
+    instead: Wait until the peer opens its window
+    why: >-
+      If the window update that reopens it is lost, both sides wait forever. Sending one byte probes the peer, as the
+      checkpoint specifies.
+watchOut: >-
+  SYN and FIN each take one sequence number but carry no stream bytes. Forget that and every ackno is off by one,
+  which passes some tests and fails a real transfer.

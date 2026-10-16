@@ -1,0 +1,124 @@
+overview: >-
+  Your own DreamerV3 on two MuJoCo control tasks. A world model learns the task's dynamics from replayed experience:
+  an RSSM (a recurrent state plus 32 categorical latents of 32 classes each) predicts the next state, and heads
+  predict observation, reward and whether the episode continues. An actor and critic then learn entirely inside that
+  model, on 15-step imagined trajectories, and the actor goes back to the environment to collect more data.
+learn:
+  - name: World models
+    ref: dreamerv3-code
+  - name: RSSM latents
+  - name: KL balancing and free bits
+  - name: Actor-critic
+    ref: berkeley-cs285
+  - name: Symlog and two-hot
+  - name: MuJoCo control tasks
+    ref: mujoco-docs
+stats:
+  - value: ≥ 800
+    label: cartpole swingup return by 200k steps
+  - value: ≥ 85 %
+    label: of the published walker walk score at 500k
+  - value: "3"
+    label: seeds per task
+components:
+  - id: env
+    name: MuJoCo env
+    role: Runs cartpole swingup and walker walk from proprioceptive state.
+    tech: dm_control
+    talksTo: [replay]
+    kind: external
+  - id: replay
+    name: Replay buffer
+    role: Stores transitions and samples sequences for training at a fixed replay ratio.
+    tech: NumPy
+    talksTo: [encoder]
+    kind: core
+  - id: encoder
+    name: Encoder
+    role: Squashes observations with symlog and embeds them.
+    tech: JAX or PyTorch MLP
+    talksTo: [rssm]
+    kind: core
+  - id: rssm
+    name: RSSM
+    role: Rolls the recurrent state forward and holds posterior and prior categorical latents.
+    tech: GRU · categorical latents
+    talksTo: [heads, ac]
+    kind: core
+  - id: heads
+    name: Prediction heads
+    role: Predict observation, reward and continuation from the model state.
+    tech: MLPs · two-hot
+    talksTo: [viz]
+    kind: core
+  - id: ac
+    name: Actor-critic
+    role: Learns a policy and a value on imagined trajectories, then acts in the environment.
+    tech: MLPs · two-hot critic
+    talksTo: [env]
+    kind: core
+  - id: viz
+    name: Visualiser
+    role: Decodes imagined rollouts and plays them next to the real ones.
+    tech: Matplotlib · W&B
+    talksTo: []
+    kind: offline
+flow:
+  - component: replay
+    text: samples a batch of sequences, such as 16 sequences of 64 steps, from the stored transitions.
+  - component: encoder
+    text: applies `symlog` to each observation so large and small values train alike, and embeds it.
+  - component: rssm
+    text: >-
+      advances the recurrent state with each action, forms the posterior from the embedding and the prior without
+      it, and pulls them together with **KL balancing** and 1 nat of free bits.
+  - component: heads
+    text: >-
+      reconstruct the observation, predict reward as a two-hot over symlog bins, and predict continuation; their
+      losses train the world model.
+  - component: ac
+    text: >-
+      imagines 15 steps from replayed start states using only the prior, scales returns by their 5th to 95th
+      percentile range, and updates without changing the world model; the actor then acts, closing the **loop**.
+  - component: viz
+    text: decodes an imagined rollout and shows it beside the real trajectory from the same start.
+interface:
+  lang: python
+  code: |
+    def img_step(h, z, a):
+        """Prior: next state without an observation.
+        h [B, D] GRU state, z [B, 32, 32] one-hot,
+        a [B, A] action."""
+        h = gru(h, concat(flatten(z), a))
+        logits = prior_mlp(h).reshape(-1, 32, 32)
+        return h, sample_st(logits)  # straight-through
+
+    def obs_step(h, z, a, emb):
+        """Posterior: same step, sees the obs."""
+        h, _ = img_step(h, z, a)
+        logits = post_mlp(concat(h, emb))
+        return h, sample_st(logits.reshape(-1, 32, 32))
+decisions:
+  - choice: Proprioceptive state
+    instead: Pixel observations
+    why: >-
+      State inputs fit 40 hours on one GPU and isolate the world model from a CNN encoder. Compare with the paper's
+      state-based curves, not its pixel ones; pixels are the stretch.
+  - choice: World model frozen for the actor's update
+    instead: Actor loss flowing into the world model
+    why: >-
+      Letting actor gradients reach the model makes it predict what the actor wants rather than what happens.
+      Stop the gradient and check that the world-model losses do not move during actor steps.
+  - choice: The paper's replay ratio
+    instead: Training as often as the GPU allows
+    why: >-
+      Sample efficiency is what the curves compare, and it depends directly on how many gradient steps each
+      environment step pays for. Log the ratio with every run.
+  - choice: Your own code, official code for settings only
+    instead: Running the official implementation
+    why: >-
+      The many small tricks are only understood once you have needed them. The write-up lists every change from the
+      paper and what it fixed.
+watchOut: >-
+  Symlog on the wrong quantities, or a prediction used without the inverse `symexp`, quietly scales rewards and values
+  wrongly. Unit-test that symexp undoes symlog and log both the raw and decoded reward predictions.

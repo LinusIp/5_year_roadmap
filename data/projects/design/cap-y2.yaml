@@ -1,0 +1,134 @@
+overview: >-
+  Your 2D physics engine and OpenGL renderer, shared by two players over UDP netcode you wrote. An authoritative
+  server (the one copy of the world everyone trusts) steps the engine at 60 Hz and sends compressed snapshots at
+  20 Hz. Each client moves its own avatar at once from its inputs and corrects it when the server disagrees, while
+  every other body is drawn a little in the past, between two snapshots, so it moves smoothly despite 150 ms of
+  latency and 5 % loss.
+learn:
+  - name: Reliable UDP
+    ref: gaffer-on-games
+  - name: Fixed timestep
+    ref: gaffer-on-games
+  - name: Client-side prediction
+  - name: Snapshot interpolation
+    ref: gaffer-on-games
+  - name: Delta compression
+stats:
+  - value: 150 ms
+    label: added latency, 5 % loss, no desync
+  - value: < 64 kbit/s
+    label: bandwidth per client
+  - value: ≤ 0.1 m
+    label: largest visible correction
+components:
+  - id: client
+    name: Client input
+    role: Samples input each tick, predicts the own avatar at once and keeps unacknowledged inputs in a ring.
+    tech: C++20 or Rust
+    talksTo: [transport, reconciler]
+    kind: core
+  - id: transport
+    name: UDP transport
+    role: Adds connection ids, sequence numbers and ack bitfields, plus a reliable channel for events.
+    tech: Raw UDP sockets
+    talksTo: [netem, metrics]
+    kind: core
+  - id: netem
+    name: Network conditioner
+    role: Adds latency and packet loss between machines.
+    tech: tc netem or clumsy
+    talksTo: [server]
+    kind: external
+  - id: server
+    name: Server
+    role: Applies inputs at their tick, steps the engine at 60 Hz and sends snapshots at 20 Hz.
+    tech: Your 2D engine
+    talksTo: [reconciler, interp]
+    kind: core
+  - id: reconciler
+    name: Reconciler
+    role: Rewinds the own avatar to the server state, replays pending inputs and smooths the correction.
+    tech: C++20 or Rust
+    talksTo: [renderer, metrics]
+    kind: core
+  - id: interp
+    name: Interpolator
+    role: Places remote bodies between the two snapshots around render time, 100 ms behind.
+    tech: C++20 or Rust
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Draws the world with a debug overlay of RTT, loss and corrections.
+    tech: OpenGL · Dear ImGui
+    talksTo: []
+    kind: core
+  - id: metrics
+    name: Metrics log
+    role: Logs bandwidth, RTT, loss and correction size for the write-up.
+    tech: CSV · Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: client
+    text: >-
+      samples the input for tick `n`, applies it to the own avatar **immediately**, and stores it with its sequence
+      number until the server acknowledges it.
+  - component: transport
+    text: >-
+      sends it in a packet with `seq`, `ack` and a 32-bit `ack_bits`, repeating the last few inputs so one lost
+      packet loses nothing.
+  - component: server
+    text: >-
+      applies the input at its tick, steps the engine and, every third tick, sends a snapshot quantised and
+      delta-compressed against the last one the client acknowledged.
+  - component: reconciler
+    text: >-
+      on that snapshot, resets the avatar to the server's state, replays the inputs still pending and blends out any
+      error so nothing snaps more than 0.1 m.
+  - component: interp
+    text: >-
+      draws every other body between the two snapshots bracketing render time, turning angles the short way round.
+  - component: renderer
+    text: draws the frame; both clients under the conditioner should show the same stack falling the same way.
+interface:
+  lang: cpp
+  code: |
+    struct PacketHeader {
+      uint32_t conn_id;
+      uint16_t seq;       // this packet
+      uint16_t ack;       // newest seq received
+      uint32_t ack_bits;  // the 32 before ack
+    };
+    struct InputCmd {     // client -> server, 60 Hz
+      uint32_t tick;      // tick it applies at
+      uint8_t  buttons;   // move, jump, grab
+      int8_t   aim_x, aim_y;
+    };
+    // server -> client, 20 Hz: header, server tick,
+    // last input seq applied, quantised body deltas
+decisions:
+  - choice: Authoritative server
+    instead: Deterministic lockstep between peers
+    why: >-
+      Lockstep needs bit-exact floats on both machines and waits for the slower player's input every tick, so 150 ms
+      of latency is felt on every move. Compare the two in the write-up.
+  - choice: Predict only your own avatar
+    instead: Predict every body nearby
+    why: >-
+      Predicting server-owned bodies the player touches means fighting the server every frame. Interpolate them, and
+      leave ownership hand-off to the stretch.
+  - choice: Quantised delta snapshots at 20 Hz
+    instead: Full state every tick at 60 Hz
+    why: >-
+      Twenty bodies at 24 bytes each, 60 times a second, is about 230 kbit/s, over three times the 64 kbit/s budget.
+      Fewer, smaller snapshots fit with room to spare.
+  - choice: Raw UDP with your own acks
+    instead: TCP
+    why: >-
+      With 5 % loss TCP holds every newer snapshot until the lost one is resent, a round trip of freeze. Old
+      snapshots are useless, so drop them; ENet is a comparison only.
+watchOut: >-
+  Reconciliation replays inputs through the engine, so if a step depends on frame rate or on the order bodies are
+  processed, every snapshot triggers a correction. Step with a fixed `dt` in a fixed order, and test under the
+  conditioner from the first week, not only on localhost.

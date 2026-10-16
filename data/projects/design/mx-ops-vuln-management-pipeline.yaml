@@ -1,0 +1,97 @@
+overview: >-
+  Rowan Bank's 1,900 untriaged scanner findings become a ranked work queue with deadlines. Adapters turn Trivy, Grype
+  and Semgrep output into one schema, a deduper merges the same issue reported by several scanners, and enrichment
+  adds whether the vulnerable code is reachable, whether a public exploit exists and how exposed the service is.
+  Each finding is then scored, given an owner and a deadline by risk, called an SLA, and any accepted exception
+  expires on its own.
+learn:
+  - name: CVSS and its limits
+  - name: Exploitability data
+  - name: Finding deduplication
+  - name: Risk-based SLAs
+  - name: Exception workflows
+stats:
+  - value: ≥ 50 %
+    label: fewer duplicates
+  - value: < 1 h
+    label: owner on a critical finding
+  - value: < 60 s
+    label: process 1,900 findings
+components:
+  - id: scanners
+    name: Scanners
+    role: Dependency, container and configuration scans of the 20 sample services.
+    tech: Trivy · Grype · Semgrep
+    talksTo: [adapters]
+    kind: external
+  - id: adapters
+    name: Scanner adapters
+    role: Convert each tool's JSON into one finding schema.
+    tech: Python
+    talksTo: [dedupe]
+    kind: core
+  - id: dedupe
+    name: Normaliser and deduper
+    role: Builds a fingerprint from package, version, CVE and service and merges matching findings.
+    tech: Python · PostgreSQL
+    talksTo: [enrich]
+    kind: core
+  - id: enrich
+    name: Enrichment and scoring
+    role: Adds known-exploited and exploit-probability data, reachability and asset tier, then scores risk.
+    tech: Python · EPSS and KEV feeds
+    talksTo: [router]
+    kind: core
+  - id: router
+    name: Ticket routing
+    role: Finds the owner from the service catalogue, opens a ticket and starts the SLA timer.
+    tech: Python · GitHub Issues
+    talksTo: [dashboard]
+    kind: core
+  - id: exceptions
+    name: Exception workflow
+    role: Records approved risk acceptances with an approver and an expiry date, after which the ticket reopens.
+    tech: PostgreSQL · cron
+    talksTo: [router]
+    kind: offline
+  - id: dashboard
+    name: SLA dashboard
+    role: SLA compliance, mean time to remediate and open exceptions by team.
+    tech: Grafana
+    talksTo: []
+    kind: offline
+flow:
+  - component: adapters
+    text: read Trivy and Grype reports that both list `CVE-2024-…` in `jackson-databind 2.13.0` for the `payments` image.
+  - component: dedupe
+    text: computes the fingerprint `payments|jackson-databind|2.13.0|CVE-2024-…` and keeps **one** finding with both sources attached.
+  - component: enrich
+    text: adds that the CVE is on the known-exploited list, the vulnerable class is reachable, and `payments` is internet-facing tier 1, so the score becomes `critical`.
+  - component: router
+    text: looks up the owner `team-payments`, opens a ticket within minutes and sets a 7-day deadline for critical.
+  - component: dashboard
+    text: shows the ticket in SLA compliance; an approved exception would carry an expiry date and reopen the ticket on that day.
+interface:
+  lang: json
+  code: |
+    {
+      "service": "payments",
+      "package": "jackson-databind@2.13.0",
+      "cve": "CVE-2024-…",
+      "sources": ["trivy", "grype"],
+      "cvss": 7.5,
+      "known_exploited": true,
+      "reachable": true,
+      "asset_tier": 1,
+      "risk": "critical",
+      "owner": "team-payments",
+      "due": "2026-10-23T09:00:00Z"
+    }
+decisions:
+  - choice: Rank by exploitability and exposure, not CVSS alone
+    instead: Sort by CVSS score
+    why: Ranking 1,900 findings by CVSS puts hundreds at high, and nobody can work through that. Known exploits, reachability and asset tier pick the few that matter first.
+  - choice: Exceptions that expire
+    instead: Permanent suppress flags
+    why: A permanent suppression hides a finding forever, even after the service becomes internet-facing. An expiry forces a fresh decision.
+watchOut: Findings with no owner are never fixed. Fail the pipeline loudly when a service has no catalogue owner instead of routing to a shared queue.

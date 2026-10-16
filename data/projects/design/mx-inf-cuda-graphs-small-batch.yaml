@@ -1,0 +1,108 @@
+overview: >-
+  Nanoworks' 3B assistant decodes at batch 1 to 4, and the GPU sits idle almost half the time while the CPU launches
+  hundreds of small kernels per token. This project records each decode step once as a CUDA graph (a saved sequence
+  of GPU launches that replays with one call) for a few fixed batch sizes, pads odd batches up to the next size, and
+  falls back to normal execution for anything else. Greedy outputs must stay bit-identical while per-token latency
+  drops at least 35%.
+learn:
+  - name: Kernel launch overhead
+    ref: horace-he-brrr
+  - name: CUDA graphs
+    ref: cuda-guide
+  - name: Static shapes and buckets
+  - name: torch.compile modes
+  - name: Timeline profiling
+    ref: nsight-compute-docs
+stats:
+  - value: ≥ 35%
+    label: faster per token at batch 1
+  - value: < 10%
+    label: GPU idle gaps, from over 40%
+  - value: 200 / 200
+    label: greedy outputs bit-identical
+components:
+  - id: selector
+    name: Bucket selector
+    role: Maps the current batch size to bucket 1, 2 or 4, or sends it to the fallback path.
+    tech: Python
+    talksTo: [graphs, fallback]
+    kind: core
+  - id: graphs
+    name: Graph manager
+    role: Captures one decode graph per bucket at start-up with static input and output tensors and a shared memory pool.
+    tech: PyTorch CUDAGraph
+    talksTo: [gpu]
+    kind: core
+  - id: fallback
+    name: Eager fallback
+    role: Runs prefill and unusual shapes the normal way.
+    tech: PyTorch
+    talksTo: [gpu]
+    kind: core
+  - id: gpu
+    name: GPU
+    role: Runs the 3B model's kernels.
+    tech: 24 GB GPU
+    talksTo: []
+    kind: external
+  - id: profile
+    name: Timeline profiler
+    role: Measures GPU busy percent and the gaps between kernels before and after.
+    tech: Nsight Systems
+    talksTo: []
+    kind: offline
+  - id: equality
+    name: Equality tests
+    role: Runs 200 greedy prompts through eager and graph paths and compares every token id.
+    tech: pytest
+    talksTo: []
+    kind: offline
+flow:
+  - component: selector
+    text: >-
+      gets a decode step with 3 sequences and picks bucket `4`, padding one dummy row whose output is thrown away.
+  - component: graphs
+    text: >-
+      copies the 3 new token ids and positions into the graph's **static** input tensors; the graph always reads the
+      same addresses, so new tensors would be ignored.
+  - component: graphs
+    text: >-
+      calls `replay()`: one launch instead of hundreds, so the GPU no longer waits for the CPU between kernels.
+  - component: gpu
+    text: >-
+      writes logits into the static output tensor; the first 3 rows are copied out and sampled, and the KV cache was
+      preallocated so its pointers never change.
+  - component: fallback
+    text: handles prefill and any batch above 4 normally, so odd shapes still work, only slower.
+interface:
+  lang: python
+  code: |
+    ids = torch.zeros(4, 1, dtype=torch.long,
+                      device="cuda")      # static
+    g = torch.cuda.CUDAGraph()
+    with torch.cuda.graph(g, pool=pool):
+        logits = model.decode(ids, pos, kv)
+
+    # each step: batch 3 padded to bucket 4
+    ids[:3].copy_(next_ids)
+    g.replay()
+    out = logits[:3]
+decisions:
+  - choice: Three buckets, not one graph per batch size
+    instead: Capture a graph for every batch size
+    why: >-
+      Each graph keeps its own activation memory, and many buckets grow memory for little gain. At batch 1 to 4,
+      buckets 1, 2 and 4 cost at most one padded row.
+  - choice: Manual capture for decode, compare torch.compile
+    instead: Rely on torch.compile alone
+    why: >-
+      `torch.compile` with `reduce-overhead` also uses CUDA graphs and may get close with less code. Measure both; keep
+      manual capture if it is the only one that stays bit-identical and hits 35%.
+  - choice: Preallocated KV cache
+    instead: Grow the KV cache as sequences get longer
+    why: >-
+      A graph replays fixed memory addresses, so a cache that is reallocated would leave the graph reading stale
+      memory. Allocating it once at start-up rules that out.
+watchOut: >-
+  Hidden CPU syncs such as `.item()` or a print inside the decode step break capture or quietly force a sync. Remove
+  them from the captured region and check the Nsight timeline shows one launch per step.

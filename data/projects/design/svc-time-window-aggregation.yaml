@@ -1,0 +1,53 @@
+overview: >-
+  A stream aggregator that counts events per key in tumbling (back-to-back) and sliding (overlapping) windows by the
+  time each event happened, uses a watermark to decide when a window is complete, and handles late events by an
+  allowed-lateness rule checked against a batch oracle.
+learn:
+  - name: Event time
+    ref: ddia
+  - name: Watermarks
+  - name: Window types
+  - name: Late data
+components:
+  - id: gen
+    name: Event generator
+    role: Emits events with timestamps, shuffled up to 30 s out of order, plus a few very late ones.
+    tech: Python or Rust
+    talksTo: [agg]
+    kind: core
+  - id: agg
+    name: Aggregator
+    role: Assigns events to windows, tracks the watermark and emits closed windows.
+    tech: Python or Rust
+    talksTo: [compare]
+    kind: core
+  - id: oracle
+    name: Batch oracle
+    role: Computes the exact counts from the full sorted event list.
+    tech: Python · pandas
+    talksTo: [compare]
+    kind: offline
+  - id: compare
+    name: Comparator
+    role: Diffs streaming and batch results and lists every difference with a reason.
+    tech: Python
+    talksTo: []
+    kind: core
+flow:
+  - component: gen
+    text: sends events like `{key, event_time}` arriving out of order.
+  - component: agg
+    text: puts each event in its 1-minute tumbling window and its 5-minute windows sliding by 1 minute.
+  - component: agg
+    text: sets watermark = max event time seen − 30 s, closes windows that end before it, and drops events more than 60 s late.
+  - component: compare
+    text: matches streaming output with the oracle except the counted **late drops**.
+decisions:
+  - choice: Watermark with 30 s delay and 60 s lateness
+    instead: Close windows on processing time
+    why: >-
+      Processing time gives different answers on every run with out-of-order data. The delay matches the
+      generator's 30 s disorder; raise it if late drops grow.
+watchOut: >-
+  Using the arrival time instead of the event's own timestamp is easy to do by accident and makes results
+  non-repeatable. Never call the clock inside the aggregator.

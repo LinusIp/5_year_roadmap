@@ -1,0 +1,130 @@
+overview: >-
+  A C++17 renderer on OpenGL 3.3 core, built on your own Shader, Mesh, Texture and Camera classes. Each frame the
+  fly camera turns keyboard and mouse input into view and projection matrices, and the renderer draws at least 10
+  textured objects, each with its model matrix, normal matrix and diffuse and specular maps. One Blinn-Phong fragment
+  shader adds up a directional light, point lights and a spot light per pixel, and the scene must hold the display's
+  refresh rate at 1080p.
+learn:
+  - name: Model, view, projection
+    ref: learnopengl
+  - name: The normal matrix
+    ref: gamemath-3d-primer
+  - name: Blinn-Phong lighting
+    ref: learnopengl
+  - name: Texture units and maps
+    ref: learnopengl
+  - name: Gamma and sRGB
+    ref: learnopengl
+  - name: Frame debugging
+stats:
+  - value: ≥ 10
+    label: textured objects in the scene
+  - value: '3'
+    label: light types lit at once
+  - value: 60–144 Hz
+    label: held at 1080p with vsync on
+components:
+  - id: app
+    name: App loop
+    role: Owns the window, polls input and measures each frame's time.
+    tech: GLFW · glad
+    talksTo: [camera]
+    kind: core
+  - id: camera
+    name: Camera
+    role: Turns yaw, pitch, WASD and scroll into view and perspective matrices.
+    tech: GLM
+    talksTo: [renderer]
+    kind: core
+  - id: scene
+    name: Scene
+    role: Holds each object's mesh, material textures and model matrix, uploaded once at load.
+    tech: VAO · VBO · EBO · stb_image
+    talksTo: [renderer]
+    kind: core
+  - id: lights
+    name: Lights
+    role: Plain structs for one directional light, point lights and a spot light.
+    tech: C++17 structs
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Binds the shader, sets matrices and lights, binds the material textures and issues each draw.
+    tech: OpenGL 3.3 core
+    talksTo: [shader]
+    kind: core
+  - id: shader
+    name: Shader
+    role: Compiles and links GLSL with a uniform cache and hot reload, and lights each fragment.
+    tech: GLSL 330
+    talksTo: [gpu]
+    kind: core
+  - id: gpu
+    name: GPU
+    role: Rasterises the draws into the framebuffer that the window presents.
+    tech: Framebuffer · vsync
+    talksTo: [renderdoc]
+    kind: external
+  - id: renderdoc
+    name: RenderDoc
+    role: Captures a frame to check draw calls and that nothing is re-uploaded per frame.
+    tech: RenderDoc
+    talksTo: []
+    kind: offline
+flow:
+  - component: app
+    text: polls GLFW, measures `dt` and passes the input to the camera.
+  - component: camera
+    text: >-
+      clamps pitch to ±89° so it never flips at the poles, moves by `speed * dt`, and builds `view` and a perspective
+      `proj` from the zoomed field of view.
+  - component: lights
+    text: are uploaded once per frame as uniform arrays, with direction, position, colour and the spot's cutoff angles.
+  - component: scene
+    text: hands the renderer each object's VAO, textures and model matrix; nothing is re-uploaded per frame.
+  - component: renderer
+    text: >-
+      for each object sets `model`, `view`, `proj` and the **normal matrix** `transpose(inverse(mat3(model)))`,
+      binds the diffuse map to unit 0 and the specular map to unit 1, and calls `glDrawElements`.
+  - component: shader
+    text: >-
+      sums ambient, diffuse and Blinn-Phong specular for every light in linear colour, attenuating point lights by
+      distance and fading the spot at its edge.
+  - component: gpu
+    text: >-
+      writes the framebuffer and the window swaps it at the refresh rate; a **RenderDoc** capture confirms the draw
+      count.
+interface:
+  lang: glsl
+  code: |
+    vec3 blinnPhong(vec3 L, vec3 N, vec3 V,
+                    vec3 lightColor) {
+        vec3 albedo = texture(diffuseMap, vUV).rgb;
+        float ks = texture(specularMap, vUV).r;
+        vec3 H = normalize(L + V);
+        float diff = max(dot(N, L), 0.0);
+        float spec = pow(max(dot(N, H), 0.0),
+                         shininess);
+        return lightColor * (diff * albedo
+                             + spec * ks);
+    }
+decisions:
+  - choice: Blinn-Phong, not physically based shading
+    instead: A PBR metallic-roughness model
+    why: >-
+      Diffuse and specular maps are the material inputs this scene has, and Blinn-Phong makes each term visible.
+      Revisit PBR once you have normal maps and an environment map.
+  - choice: Lights as uniform arrays
+    instead: A uniform buffer object
+    why: >-
+      One directional, a few point lights and one spot fit easily in plain uniforms. Switch to a uniform buffer when
+      several shaders share the lights or there are dozens of them.
+  - choice: Euler-angle fly camera with clamped pitch
+    instead: A quaternion camera
+    why: >-
+      Yaw and pitch are easy to reason about for a first camera, and clamping pitch below 90° removes the flip. A free
+      6-degree camera would need quaternions.
+watchOut: >-
+  Transforming normals by the model matrix breaks lighting as soon as an object is scaled unevenly. Use the inverse
+  transpose of the model matrix's upper 3 × 3 for normals.

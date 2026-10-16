@@ -1,0 +1,100 @@
+overview: >-
+  A texture generator for Pixelforge's artists: type a material class like "mossy cobblestone" and get a seamless
+  256 px albedo (base colour) and a matching normal map (per-pixel surface direction for lighting). A small latent
+  diffusion model is fine-tuned on CC0 texture crops with circular padding, so the left edge continues into the
+  right and the top into the bottom, and a seam metric checks every sample when it is tiled.
+learn:
+  - name: Latent diffusion
+    ref: hf-diffusion-course
+  - name: Denoising objective
+    ref: annotated-diffusion
+  - name: Circular padding
+  - name: Normal maps
+    ref: learnopengl
+  - name: Class conditioning
+stats:
+  - value: ≥ 95%
+    label: samples pass seam metric
+  - value: < 3 s
+    label: per 256 px sample
+  - value: < 12 h
+    label: training on 24 GB
+components:
+  - id: prep
+    name: Dataset prep
+    role: Cuts CC0 and DTD textures into 256 px crops with material labels and paired normals where available.
+    tech: Python · Pillow
+    talksTo: [trainer]
+    kind: offline
+  - id: trainer
+    name: Diffusion trainer
+    role: Fine-tunes a small latent diffusion UNet on the crops with the material class as condition.
+    tech: diffusers · PyTorch
+    talksTo: [sampler]
+    kind: offline
+  - id: sampler
+    name: Tiling sampler
+    role: Generates albedo with every convolution set to circular padding in the UNet and VAE.
+    tech: diffusers
+    talksTo: [normals]
+    kind: core
+  - id: normals
+    name: Normal predictor
+    role: A small UNet that predicts a tangent-space normal map from the albedo.
+    tech: PyTorch
+    talksTo: [seam]
+    kind: core
+  - id: seam
+    name: Seam metric
+    role: Tiles the output 2×2 and compares gradient energy across the seams with the interior.
+    tech: NumPy
+    talksTo: []
+    kind: core
+  - id: gpu
+    name: 24 GB GPU
+    role: The one card for training and sampling.
+    tech: Consumer GPU
+    talksTo: []
+    kind: external
+flow:
+  - component: sampler
+    text: >-
+      takes `class="mossy cobblestone"` and a seed, runs 25 denoising steps with **circular padding**, so the image
+      wraps at its edges, and decodes a 256 px albedo in under 3 s.
+  - component: normals
+    text: predicts an RGB-encoded normal map from the albedo, using the same circular padding so normals also tile.
+  - component: seam
+    text: tiles both maps 2×2 and passes them when `seam_score < 1.2`, i.e. the seams are no sharper than the inside.
+  - component: sampler
+    text: regenerates with a new seed if a sample fails, and saves passing pairs as `albedo.png` and `normal.png`.
+interface:
+  lang: python
+  code: |
+    def make_material(cls: str, seed: int = 0,
+                      size: int = 256,
+                      steps: int = 25) -> Material: ...
+
+    # Material(albedo=<256×256 RGB>,
+    #   normal=<256×256 RGB>,
+    #   seam_score=0.94, seconds=2.1)
+
+    for m in unet.modules():
+        if isinstance(m, nn.Conv2d):
+            m.padding_mode = "circular"
+decisions:
+  - choice: Circular padding in the network
+    instead: Blend or mirror the edges afterwards
+    why: >-
+      Blending smears detail and mirroring shows obvious symmetry. Circular convolutions make the model itself produce
+      a tile that wraps, at no extra cost per sample.
+  - choice: Fine-tune a pretrained latent model
+    instead: Train a pixel diffusion model from scratch
+    why: >-
+      CC0 texture sets are small, which leads to mode collapse from scratch, and 12 hours on one GPU is too little.
+      Fine-tuning a pretrained latent model keeps variety.
+  - choice: Separate normal predictor
+    instead: Generate albedo and normal jointly
+    why: Paired normals exist for only part of the data; a small separate network trains on that part and keeps the diffusion model simple.
+watchOut: >-
+  Seams can be hidden by evaluating centre crops or single tiles. Always score the full output tiled 2×2, and look at
+  a grid of samples per class for repeated patterns that signal mode collapse.

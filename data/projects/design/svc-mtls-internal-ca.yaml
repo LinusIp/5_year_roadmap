@@ -1,0 +1,47 @@
+overview: >-
+  A small internal certificate authority (a root plus an intermediate) that issues short-lived certificates to two
+  services, which then require each other's certificates on every TLS connection and renew them before they
+  expire.
+learn:
+  - name: Certificate chains
+    ref: kubernetes-the-hard-way
+  - name: Mutual TLS
+  - name: Subject alternative names
+  - name: Automated renewal
+components:
+  - id: ca
+    name: Internal CA
+    role: An offline root that signs an intermediate, which signs service certificates.
+    tech: step-ca or openssl
+    talksTo: [orders, billing]
+    kind: offline
+  - id: orders
+    name: Orders service
+    role: The client; presents its certificate and checks the server's.
+    tech: Python
+    talksTo: [billing]
+    kind: core
+  - id: billing
+    name: Billing service
+    role: The server; requires a client certificate signed by the intermediate.
+    tech: Python
+    talksTo: []
+    kind: core
+flow:
+  - component: orders
+    text: opens TLS to `billing.internal` with its own cert and key, mounted at runtime and not baked into the image.
+  - component: billing
+    text: presents a cert whose SAN is `billing.internal`, which orders checks against the CA chain.
+  - component: billing
+    text: requires `CERT_REQUIRED` and rejects any client whose cert is missing, expired or from another CA.
+  - component: orders
+    text: renews its 24-hour cert when two thirds of its lifetime has passed and reloads it without a restart.
+decisions:
+  - choice: 24-hour certificates with automatic renewal
+    instead: One-year certificates renewed by hand
+    why: >-
+      A stolen key is only useful for a day, and renewing daily proves the automation works. Revocation lists are
+      then rarely needed.
+watchOut: >-
+  Private keys copied into a Docker image are readable by anyone who pulls it. Mount keys at runtime and keep the
+  root key offline.

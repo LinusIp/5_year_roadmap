@@ -1,0 +1,112 @@
+overview: >-
+  A live speech-to-text service (the speech path; a vision-language path is the alternative). Each client streams
+  microphone audio over a WebSocket in half-second chunks, and a session per stream keeps a rolling window and runs
+  voice activity detection (a small model that says when someone is speaking). Every 500 ms the windows of all streams
+  are batched into one Whisper call, partial text goes straight back, and a pause finalises the segment. Success is
+  measured by real-time factor: compute time divided by audio time, which must stay well below 1 per stream.
+learn:
+  - name: Real-time factor
+  - name: Voice activity detection
+  - name: Speech recognition basics
+    ref: slp3
+  - name: Rolling-window streaming
+  - name: Modality-aware batching
+  - name: WebSockets
+stats:
+  - value: < 0.3
+    label: real-time factor at 16 streams
+  - value: < 1 s
+    label: speech to partial text, p50
+  - value: ≤ 1 point
+    label: WER above offline
+components:
+  - id: client
+    name: Demo client
+    role: Captures the microphone, resamples to 16 kHz mono and shows partial and final text.
+    tech: Browser · Web Audio API
+    talksTo: [ws]
+    kind: external
+  - id: ws
+    name: WebSocket API
+    role: Receives audio chunks and sends partial and final text back on the same socket.
+    tech: FastAPI · WebSockets
+    talksTo: [session, client]
+    kind: core
+  - id: session
+    name: Session manager
+    role: Buffers audio per stream, runs VAD, keeps the rolling window and finalises segments at pauses.
+    tech: Python · Silero VAD
+    talksTo: [batcher]
+    kind: core
+  - id: batcher
+    name: Batcher
+    role: Groups windows from many streams into one call, waiting at most 50 ms.
+    tech: asyncio
+    talksTo: [whisper]
+    kind: core
+  - id: whisper
+    name: Whisper
+    role: Runs encoder and decoder for the whole batch on the GPU.
+    tech: faster-whisper · CTranslate2
+    talksTo: [ws]
+    kind: core
+  - id: loadtest
+    name: Load test
+    role: Replays LibriSpeech at real speed from 1 to 32 streams and logs latency and real-time factor.
+    tech: Python asyncio
+    talksTo: []
+    kind: offline
+  - id: wer
+    name: Accuracy check
+    role: Compares word error rate of streamed finals with offline transcription of the same audio.
+    tech: LibriSpeech test-clean · jiwer
+    talksTo: []
+    kind: offline
+flow:
+  - component: client
+    text: sends `16 kHz` mono PCM in 0.5-second chunks as binary WebSocket messages.
+  - component: ws
+    text: passes each chunk to the stream's session without blocking the event loop.
+  - component: session
+    text: >-
+      appends the chunk, runs VAD, and every 500 ms submits the current window; silence is **not** sent, which stops
+      Whisper inventing text.
+  - component: batcher
+    text: collects windows from all live streams and fires when the batch is full or the oldest has waited `50 ms`.
+  - component: whisper
+    text: transcribes the whole batch in one encoder and decoder call and returns text per stream.
+  - component: ws
+    text: >-
+      sends `partial` text at once; when VAD sees a pause the session sends `final`, drops that audio from the window,
+      and the **loop** continues.
+  - component: loadtest
+    text: >-
+      measures real-time factor **per stream** at 1, 4, 8, 16 and 32 streams, plus speech-to-partial and to-final
+      latency at p50 and p99.
+interface:
+  lang: json
+  code: |
+    → binary: 0.5 s of 16 kHz mono PCM16
+              (16,000 bytes)
+    ← { "type": "partial", "seg": 3,
+        "text": "the quick brown" }
+    ← { "type": "final", "seg": 3,
+        "text": "The quick brown fox.",
+        "start": 12.4, "end": 14.1 }
+decisions:
+  - choice: Batch windows with a 50 ms cap
+    instead: One Whisper call per stream
+    why: >-
+      Sixteen streams each submitting every 500 ms would mean 32 small GPU calls a second; batching uses the GPU
+      far better, and 50 ms is small next to the 1 s partial-latency target.
+  - choice: Finalise segments at VAD pauses
+    instead: Fixed-length windows
+    why: >-
+      Fixed cuts land mid-word, giving flickering partials and duplicated words at joins. Pauses are natural segment
+      ends, and skipping silence removes hallucinated text.
+  - choice: WebSockets
+    instead: HTTP uploads or server-sent events
+    why: Audio goes up and text comes down at the same time, so the stream needs both directions on one connection.
+watchOut: >-
+  A real-time factor measured on one stream and quoted for many hides the cost of batching and contention. Report it
+  per stream under load, at every concurrency level up to 32.

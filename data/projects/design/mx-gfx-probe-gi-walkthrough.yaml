@@ -1,0 +1,106 @@
+overview: >-
+  Dynamic diffuse lighting for Brightline Architects' viewer, so clients can move furniture and close blinds and see
+  the bounce light change. A grid of 8,000 probes each fires 128 rays per frame through a GPU BVH in a compute shader,
+  and the results blend slowly into small octahedral maps (a sphere of directions unfolded onto a square) holding
+  irradiance and distance. Shading reads the 8 probes around each pixel and weights each by whether it can actually
+  see the point, which stops light leaking through walls.
+learn:
+  - name: Irradiance probes
+    ref: rtr4
+  - name: Octahedral mapping
+  - name: BVH traversal on GPU
+    ref: pbr-book
+  - name: Hysteresis blending
+  - name: Chebyshev visibility test
+  - name: Path-traced reference
+    ref: rtiow
+stats:
+  - value: < 3 ms
+    label: update 8,000 probes × 128 rays
+  - value: < 8%
+    label: mean error vs path-traced reference
+  - value: 60 FPS
+    label: at 1080p
+components:
+  - id: client
+    name: Client edits
+    role: Moves furniture, opens and closes blinds and changes lights.
+    tech: Viewer UI
+    talksTo: [bvh]
+    kind: external
+  - id: bvh
+    name: GPU BVH
+    role: Holds the scene's triangles in a tree and refits moved objects each frame.
+    tech: GLSL compute
+    talksTo: [trace]
+    kind: core
+  - id: grid
+    name: Probe grid
+    role: Places probes on a regular grid and nudges any probe stuck inside a wall into open space.
+    tech: C++17
+    talksTo: [trace]
+    kind: core
+  - id: trace
+    name: Ray tracing pass
+    role: Fires 128 rotated rays per probe and shades each hit with direct light plus last frame's probes.
+    tech: GLSL compute
+    talksTo: [update]
+    kind: core
+  - id: update
+    name: Irradiance update
+    role: Blends new results into each probe's irradiance and distance maps with hysteresis.
+    tech: GLSL compute
+    talksTo: [shading]
+    kind: core
+  - id: shading
+    name: Shading integration
+    role: Interpolates the 8 nearest probes by position, facing and visibility.
+    tech: GLSL
+    talksTo: []
+    kind: core
+  - id: reference
+    name: Reference renderer
+    role: Path-traces the same scenes offline for the 8% error check.
+    tech: C++17 · CPU
+    talksTo: []
+    kind: offline
+flow:
+  - component: bvh
+    text: refits the boxes above the sofa the client just moved, without rebuilding the whole tree.
+  - component: grid
+    text: has placed the probes once and moved those inside furniture or walls to the nearest open space.
+  - component: trace
+    text: fires 128 rays per probe in a direction set rotated every frame, and shades each hit with direct light plus last frame's probes, so bounces add up over frames.
+  - component: update
+    text: blends the new results into the old with `hysteresis = 0.97`, lowering it for probes whose light changed a lot, so a closed blind darkens the room within a fraction of a second.
+  - component: shading
+    text: reads the 8 surrounding probes, weights each by distance and facing, and drops probes that **cannot see** the point using the stored mean and squared distance.
+interface:
+  lang: glsl
+  code: |
+    vec3 probeGI(vec3 p, vec3 n) {
+      ivec3 b = ivec3(floor((p - u_origin) / u_step));
+      vec3 sum = vec3(0.0); float wsum = 0.0;
+      for (int i = 0; i < 8; ++i) {
+        ivec3 c = b + ivec3(i & 1, (i>>1) & 1, i>>2);
+        vec3 d = probePos(c) - p;  float r = length(d);
+        float w = trilinear(p, c)
+                * (0.5 + 0.5 * dot(d / r, n))
+                * chebyshev(moments(c, -d / r), r);
+        sum += w * irradiance(c, n);  wsum += w;
+      }
+      return sum / max(wsum, 1e-4);
+    }
+decisions:
+  - choice: Probe grid
+    instead: Per-pixel ray-traced GI
+    why: 8,000 × 128 is about 1M rays a frame and fits 3 ms with compute-shader tracing; per-pixel rays at 1080p would need several million plus a denoiser.
+  - choice: Octahedral irradiance and distance maps
+    instead: Low-order spherical harmonics per probe
+    why: Spherical harmonics store light but not distance, so they cannot tell whether a probe sees the point and leak through walls. Octahedral maps store both in a few texels.
+  - choice: Adaptive hysteresis
+    instead: A fixed blend weight
+    why: A high fixed weight hides noise at 128 rays but makes lights lag; a low one flickers. Lowering it only where light changed gives both.
+watchOut: >-
+  Light leaks through thin walls when a probe on the far side is used for shading. Keep the visibility test, offset the
+  sample point along the normal, move probes out of geometry, and count leak incidents in the three test scenes.

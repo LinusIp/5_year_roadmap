@@ -1,0 +1,106 @@
+overview: >-
+  A teaching viewer that uploads a CT scan into a 3D texture and renders it by ray marching: for each pixel a ray
+  enters the volume's box, steps through it at half the smallest voxel spacing, and builds up colour and opacity from a
+  transfer function, front to back. Rays stop early once nearly opaque, and a MIP mode (maximum intensity projection)
+  keeps the brightest value instead. Three slice views read the same texture at a shared 3D cursor.
+learn:
+  - name: Volume ray marching
+    ref: scratchapixel
+  - name: Front-to-back compositing
+    ref: rtr4
+  - name: Transfer functions
+  - name: Window and level
+  - name: Voxel spacing
+stats:
+  - value: 30 FPS
+    label: 512 × 512 × 300 at 720p
+  - value: ≥ 30%
+    label: frame time saved by early exit
+  - value: 1 frame
+    label: window/level change
+components:
+  - id: loader
+    name: Volume loader
+    role: Reads the raw or NIfTI-like header (size, spacing, orientation) and the 16-bit HU values.
+    tech: C++17
+    talksTo: [upload]
+    kind: core
+  - id: upload
+    name: 3D texture upload
+    role: Stores the scan once as a 16-bit 3D texture of about 157 MB.
+    tech: OpenGL 4.3
+    talksTo: [marcher, slices]
+    kind: core
+  - id: tf
+    name: Transfer function
+    role: Turns intensity into colour and opacity through a 1D lookup texture.
+    tech: OpenGL 4.3
+    talksTo: [marcher]
+    kind: core
+  - id: marcher
+    name: Ray marcher shader
+    role: Intersects each ray with the clip box, marches it and composites front to back or takes the maximum.
+    tech: GLSL 4.3
+    talksTo: [gpu]
+    kind: core
+  - id: slices
+    name: Slice views
+    role: Draws axial, coronal and sagittal slices through the 3D cursor.
+    tech: GLSL 4.3
+    talksTo: [gpu]
+    kind: core
+  - id: ui
+    name: UI
+    role: Edits the transfer function, window/level, clip box and presets, with a non-diagnostic banner.
+    tech: Dear ImGui
+    talksTo: [tf]
+    kind: core
+  - id: gpu
+    name: Mid-range GPU
+    role: Runs the marcher; no CUDA.
+    tech: OpenGL 4.3
+    talksTo: []
+    kind: external
+flow:
+  - component: loader
+    text: has read the scan with its voxel spacing in millimetres, so a 0.7 × 0.7 × 2.5 mm voxel is not drawn as a cube.
+  - component: upload
+    text: holds raw HU values, so presets only change uniforms and never re-upload the volume.
+  - component: ui
+    text: sends a dragged window/level as `u_wl` and re-uploads the 256-entry transfer function only when its curve is edited.
+  - component: tf
+    text: is sampled after window/level maps HU into 0 to 1, giving colour and opacity per step.
+  - component: marcher
+    text: clips the ray to the box, steps at `u_step`, adds each sample weighted by the transparency left, and **stops early** above 0.95 opacity.
+  - component: slices
+    text: sample the same texture on three planes through the cursor, so 3D and slices agree within one voxel.
+interface:
+  lang: glsl
+  code: |
+    uniform sampler3D u_vol;   // HU, 16-bit
+    uniform sampler1D u_tf;    // RGBA by intensity
+    uniform vec2 u_wl;         // window, level
+    uniform float u_step;      // 0.5 x min spacing
+    vec4 march(vec3 p, vec3 dir, float t0, float t1) {
+      vec4 acc = vec4(0.0);
+      for (float t = t0; t < t1; t += u_step) {
+        float hu = texture(u_vol, p + t * dir).r;
+        float x = (hu - u_wl.y) / u_wl.x + 0.5;
+        vec4 s = texture(u_tf, clamp(x, 0.0, 1.0));
+        acc.rgb += (1.0 - acc.a) * s.a * s.rgb;
+        acc.a += (1.0 - acc.a) * s.a;
+        if (acc.a > 0.95) break;   // early exit
+      } return acc; }
+decisions:
+  - choice: Raw HU in the texture, classify per sample
+    instead: Pre-classified RGBA volume
+    why: Window/level must apply within one frame, and a 16-bit volume is half the memory of RGBA8. The cost is one extra 1D lookup per step.
+  - choice: Step size tied to voxel spacing
+    instead: A fixed number of steps per ray
+    why: Half the smallest spacing avoids skipping thin vessels; correct opacity for the step length so changing it does not change brightness. Measure banding against a half-step reference.
+  - choice: Fragment shader marching
+    instead: Compute shader marching
+    why: OpenGL 4.3 fragment shaders give the entry point and blending for free, and 720p at 30 FPS does not need more.
+watchOut: >-
+  Wrong voxel spacing stretches anatomy, and trainees learn the wrong shape. Scale the box by spacing from the header,
+  check it against a phantom with known sizes, and keep the non-diagnostic banner always visible.

@@ -1,0 +1,51 @@
+overview: >-
+  An append-only ledger in Postgres where every transaction is a set of entries whose debits equal its credits,
+  amounts are integer cents, and balances are always derived by summing entries, never stored and edited.
+learn:
+  - name: Double-entry bookkeeping
+  - name: Integer money
+  - name: Database constraints
+  - name: Property-based testing
+components:
+  - id: api
+    name: Ledger API
+    role: Accepts a transfer and writes one transaction with its entries in a single database transaction.
+    tech: Python
+    talksTo: [db]
+    kind: core
+  - id: db
+    name: Ledger tables
+    role: Accounts, transactions and entries, with a deferred constraint trigger that checks each transaction sums to zero.
+    tech: PostgreSQL
+    talksTo: [reports]
+    kind: core
+  - id: reports
+    name: Balances
+    role: Views for account balances and the trial balance, computed from entries.
+    tech: SQL views
+    talksTo: []
+    kind: core
+  - id: proptest
+    name: Property tests
+    role: Fire random transfers and assert the trial balance stays at zero.
+    tech: Hypothesis
+    talksTo: [api]
+    kind: offline
+flow:
+  - component: api
+    text: receives a transfer of 2,500 cents from `cash` to `rent` and opens a database transaction.
+  - component: db
+    text: inserts a debit of -2,500 and a credit of +2,500; at commit the trigger rejects any transaction whose entries do not sum to **0**.
+  - component: reports
+    text: compute a balance as `SUM(amount)` per account and the trial balance as the sum over all accounts.
+  - component: reports
+    text: are reconciled against a naive `balance` column updated in place, to show where it drifts.
+decisions:
+  - choice: Derived balances, append-only entries
+    instead: A balance column updated on each transfer
+    why: >-
+      The entries are the audit trail and the balance can always be recomputed. Add cached balances with a
+      checkpoint only if summing entries gets slow.
+watchOut: >-
+  Floats cannot represent 0.10 exactly, so totals drift by cents. Store integer minor units and fix mistakes with
+  reversing entries, never by updating old rows.

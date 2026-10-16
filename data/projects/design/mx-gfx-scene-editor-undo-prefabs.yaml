@@ -1,0 +1,108 @@
+overview: >-
+  A 3D level editor for Quarry Lane Games' designers, replacing a text file and a guess. The scene graph is plain data,
+  and it changes only through commands: each gizmo drag, prefab override or delete is a small object that knows how to
+  apply and revert itself, which gives exact multi-level undo. Prefab instances store only their overrides on top of
+  the prefab, autosave writes versioned JSON off the main thread, and a file watcher hot-reloads changed meshes,
+  textures and shaders into the editor and the running game.
+learn:
+  - name: Command pattern
+    ref: game-engine-architecture
+  - name: Scene graphs
+    ref: game-engine-architecture
+  - name: Ray picking
+    ref: scratchapixel
+  - name: Prefabs and overrides
+  - name: Format versioning
+  - name: File watching
+stats:
+  - value: 60 FPS
+    label: editing a 20,000-object scene
+  - value: < 2 ms
+    label: gizmo pick
+  - value: < 500 ms
+    label: hot reload visible
+components:
+  - id: gizmos
+    name: Gizmos
+    role: Draws translate, rotate and scale handles and turns a drag into a transform with snapping.
+    tech: OpenGL 3.3 · Dear ImGui
+    talksTo: [commands]
+    kind: core
+  - id: commands
+    name: Command stack
+    role: Applies, reverts and merges commands, and keeps the undo and redo lists.
+    tech: C++17
+    talksTo: [graph]
+    kind: core
+  - id: graph
+    name: Scene graph
+    role: Entities with stable ids, parents, transforms and components, stored as data.
+    tech: C++17
+    talksTo: [prefabs, serial]
+    kind: core
+  - id: prefabs
+    name: Prefab system
+    role: Resolves an instance as the prefab's values plus its own override list.
+    tech: C++17
+    talksTo: []
+    kind: core
+  - id: serial
+    name: Serialisation
+    role: Writes and reads the versioned scene file, migrating old versions, and autosaves in the background.
+    tech: C++17 · JSON
+    talksTo: []
+    kind: core
+  - id: assets
+    name: Asset manager
+    role: Watches the asset folder and swaps changed meshes, textures and shaders behind stable handles.
+    tech: C++17 · file watcher
+    talksTo: [graph, game]
+    kind: core
+  - id: game
+    name: Running game
+    role: Receives reload messages and the saved scene from the editor.
+    tech: Studio engine
+    talksTo: []
+    kind: external
+flow:
+  - component: gizmos
+    text: picks a handle by intersecting the mouse ray with the handle shapes only, not 20,000 props, then captures the mouse so the camera ignores the drag.
+  - component: commands
+    text: gets a `SetTransform` with before and after values on every mouse move, **merges** them into one command, and closes it on release, so one drag is one undo step.
+  - component: graph
+    text: applies the new transform to the entity by its stable id and marks it dirty for drawing.
+  - component: prefabs
+    text: records the change as an override such as `transform.position` when the entity is a prefab instance, leaving the prefab itself untouched.
+  - component: serial
+    text: autosaves by copying the scene data on the main thread (well under 50 ms) and writing JSON with a `version` field on a worker thread.
+  - component: assets
+    text: runs alongside; when an artist saves a mesh, it reloads it within 500 ms and swaps the handle, so the dragged prop updates in place in the editor and the game.
+interface:
+  lang: cpp
+  code: |
+    struct Command {
+      virtual void apply(Scene&) = 0;
+      virtual void revert(Scene&) = 0;
+      // true: absorbed `next` (one drag, one undo)
+      virtual bool merge(const Command& next);
+    };
+    struct SetTransform : Command {
+      EntityId  id;          // stable id, not a pointer
+      Transform before, after;
+    };
+    void CommandStack::push(std::unique_ptr<Command>);
+    void CommandStack::undo();
+    void CommandStack::redo();
+decisions:
+  - choice: Commands with apply and revert
+    instead: A snapshot of the whole scene per undo step
+    why: Snapshots of 20,000 objects cost memory and time on every drag; commands are a few bytes, and the 100k-step random fuzz can check that undo then redo returns the exact same scene.
+  - choice: Stable entity ids everywhere
+    instead: Pointers between entities
+    why: Undoing a delete must bring back the same entity that parents, prefabs and other commands refer to. A delete command keeps the entity's data and restores it under the same id.
+  - choice: Overrides as a property-path list
+    instead: Copy the prefab into each instance
+    why: Copies stop following later changes to the prefab. A list like `{ path, value }` keeps instances in sync and shows designers exactly what they changed.
+watchOut: >-
+  Undo of a delete breaks references when anything holds a raw pointer to the deleted entity. Use ids in every command
+  and component, and let the fuzz test delete, undo and redo at random.

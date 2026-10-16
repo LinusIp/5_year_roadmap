@@ -1,0 +1,56 @@
+overview: >-
+  A simulator of a GPU fleet serving a day of traffic with a daily cycle and sudden bursts. Each new replica takes a
+  cold start (60 s or 300 s) before it can serve, and three autoscaling policies, reactive on utilisation,
+  queue-based and predictive, are scored on GPU-hours spent against the percent of requests that miss the SLO.
+learn:
+  - name: Autoscaling policies
+    ref: google-sre-book
+  - name: Cold start
+  - name: Queueing basics
+    ref: mit-6-041
+  - name: Cost versus SLO trade
+components:
+  - id: trace
+    name: Traffic trace
+    role: Makes a 24-hour request rate with a daily curve plus random bursts.
+    tech: numpy
+    talksTo: [fleet]
+    kind: core
+  - id: fleet
+    name: Fleet sim
+    role: Tracks replicas as starting, ready or draining, and queues requests that no ready replica can take.
+    tech: Python
+    talksTo: [policy, score]
+    kind: core
+  - id: policy
+    name: Policies
+    role: Reactive, queue-based and predictive rules that set the target replica count.
+    tech: Python
+    talksTo: [fleet]
+    kind: core
+  - id: score
+    name: Scorer
+    role: Sums GPU-hours and the share of requests over the latency SLO.
+    tech: pandas
+    talksTo: []
+    kind: core
+flow:
+  - component: trace
+    text: builds per-second arrivals from a sine-shaped daily rate plus bursts of 3x for a few minutes.
+  - component: fleet
+    text: each tick serves what ready replicas can, queues the rest and reports utilisation and queue length.
+  - component: policy
+    text: >-
+      returns a target count; new replicas spend `cold_start` seconds starting before they serve. Fleet and policy
+      form a **control loop** that runs every tick.
+  - component: score
+    text: fills a table of GPU-hours and SLO violation % for each policy at cold starts of 60 s and 300 s.
+decisions:
+  - choice: Count GPU-hours from the moment a replica starts
+    instead: Count only ready time
+    why: >-
+      A starting GPU is billed but serves nothing. With a 300 s cold start this is a large share of the cost of
+      scaling up for short bursts, and it is what makes predictive scaling worth it.
+watchOut: >-
+  With cold start set to zero every policy looks good, since bursts are absorbed instantly. The comparison only means
+  something at the 60 s and 300 s settings, so never report a zero-cold-start row as a result.

@@ -1,0 +1,114 @@
+overview: >-
+  A sending pipeline for Verdict Docs' signing-link emails that stops losing mail silently. Messages wait in a
+  queue, and a scheduler releases them per recipient domain through token buckets (a counter that refills at a set
+  rate), so no single domain is flooded. A feedback parser reads bounces and complaints from the fake mail server,
+  suppresses hard-bounced addresses for good and schedules soft bounces for retry over 48 hours.
+learn:
+  - name: Token bucket throttling
+    ref: bytebytego
+  - name: Hard vs soft bounces
+  - name: Suppression lists
+  - name: Head-of-line blocking
+    ref: system-design-primer
+  - name: Exponential backoff
+    ref: google-sre-book
+stats:
+  - value: 300/s
+    label: emails sent
+  - value: ≤ 2%
+    label: over any domain's cap
+  - value: < 30 s
+    label: p99 feedback processing
+components:
+  - id: app
+    name: Verdict app
+    role: Asks for a signing-link email to be sent to a recipient.
+    tech: Web backend
+    talksTo: [queue]
+    kind: external
+  - id: queue
+    name: Send queue
+    role: Stores each message with recipient domain, attempt count and next-attempt time.
+    tech: PostgreSQL
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Domain scheduler
+    role: Keeps one token bucket per domain and only sends when that domain has a token.
+    tech: Go
+    talksTo: [suppression, mta]
+    kind: core
+  - id: suppression
+    name: Suppression store
+    role: Addresses that hard-bounced or complained, checked before every send.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: mta
+    name: Fake MTA
+    role: Accepts SMTP and produces delays, soft and hard bounces and complaints by profile.
+    tech: Local SMTP test server
+    talksTo: [feedback]
+    kind: external
+  - id: feedback
+    name: Feedback parser
+    role: Reads bounce and complaint messages, classifies them and updates suppression and retry state.
+    tech: Go
+    talksTo: [suppression, queue]
+    kind: core
+  - id: metrics
+    name: Metrics
+    role: Per-domain sent, bounced and complaint rates for the dashboard.
+    tech: Prometheus
+    talksTo: []
+    kind: offline
+flow:
+  - component: queue
+    text: receives the message for `ana@lawfirm.example` with `next_attempt_at = now()`.
+  - component: scheduler
+    text: >-
+      takes due messages grouped by domain, and only sends to `lawfirm.example` while its bucket of, say, 5 a second
+      has a token; other domains keep flowing.
+  - component: suppression
+    text: is checked for the address right before the send; a hit marks the message `suppressed` and nothing goes out.
+  - component: mta
+    text: accepts the message and, a few seconds later, may return a bounce with an SMTP code such as `550 5.1.1`.
+  - component: feedback
+    text: >-
+      classifies `5.x.x` as **hard** and adds the address to suppression; `4.x.x` is **soft** and sets the next
+      attempt at 15 min, 1 h, 4 h, … up to 48 hours.
+  - component: queue
+    text: picks the soft-bounced message up again at its new `next_attempt_at`, or marks it `failed` once 48 hours have passed.
+interface:
+  lang: go
+  code: |
+    type Feedback struct {
+        MessageID string
+        Address   string
+        Kind      string // "bounce" | "complaint"
+        SMTPCode  string // "550 5.1.1"
+        At        time.Time
+    }
+
+    // Hard: suppress for good. Soft: retry later.
+    func Classify(f Feedback) (hard bool,
+        retryIn time.Duration)
+decisions:
+  - choice: One token bucket per domain
+    instead: One global send rate
+    why: >-
+      Mail providers throttle per domain, and 2,000 domains share the 300 a second. A global limit still floods
+      one large firm's server and gets the whole sender blocked.
+  - choice: Hard bounces suppressed for good
+    instead: Retry every bounce the same way
+    why: >-
+      Resending to an address that does not exist hurts sender reputation for every customer. Only `4.x.x` codes
+      earn a retry.
+  - choice: Cap retries at 48 hours
+    instead: Retry until it works
+    why: >-
+      A signing link older than two days is useless, and unbounded retries grow the queue forever. After 48 hours
+      the app is told the email failed.
+watchOut: >-
+  One slow domain must not block the others. If the scheduler waits on a single domain's bucket in a loop, every
+  other message stalls behind it.

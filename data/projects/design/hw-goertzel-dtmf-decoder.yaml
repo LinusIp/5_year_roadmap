@@ -1,0 +1,73 @@
+overview: >-
+  A phone-keypad tone decoder on a microcontroller: the ADC samples a microphone at 8 kHz, and for every block of 205
+  samples eight Goertzel filters (each a two-line recursion that measures the energy at one frequency, far cheaper than
+  a full FFT when you need only a few) measure the four row tones (697 to 941 Hz) and four column tones (1209 to 1633
+  Hz). A key is reported when one row and one column stand out, their levels are close enough, and two blocks in a row
+  agree.
+learn:
+  - name: Goertzel algorithm
+  - name: DTMF signalling
+  - name: DFT bins and block length
+    ref: dspguide
+  - name: Timer-triggered sampling
+components:
+  - id: mic
+    name: Microphone
+    role: An electret mic module that hears the phone speaker.
+    tech: Mic amp module
+    talksTo: [adc]
+    kind: external
+  - id: adc
+    name: ADC sampler
+    role: Samples at exactly 8 kHz into two alternating buffers.
+    tech: Timer · ADC · DMA
+    talksTo: [goertzel]
+    kind: core
+  - id: goertzel
+    name: Goertzel bank
+    role: Computes the power at each of the 8 DTMF frequencies per block.
+    tech: C
+    talksTo: [decide]
+    kind: core
+  - id: decide
+    name: Decision logic
+    role: Picks row and column, checks levels and twist, and debounces keys.
+    tech: C
+    talksTo: []
+    kind: core
+flow:
+  - component: adc
+    text: is triggered by a timer at 8 kHz while DMA fills one 205-sample buffer and the CPU works on the other (**double buffering**).
+  - component: goertzel
+    text: for each tone uses `k = round(N·f/fs)` and `coeff = 2·cos(2πk/N)`, runs `s = x + coeff·s1 - s2` over the block, and takes power `s1² + s2² - coeff·s1·s2`.
+  - component: decide
+    text: picks the strongest row and column, requires each to beat the others in its group by 8 dB, and checks twist (row against column level) is within +4 and -8 dB.
+  - component: decide
+    text: reports a digit only when two blocks agree and silence came before it; detection rate over all 16 keys (target 95%) and CPU load are measured.
+interface:
+  lang: c
+  code: |
+    #define FS 8000
+    #define N  205        /* 25.6 ms per block */
+    static const float tones[8] = {
+      697, 770, 852, 941,          /* rows */
+      1209, 1336, 1477, 1633 };    /* columns */
+
+    float goertzel_power(const int16_t* x, int n,
+                         float coeff) {
+      float s1 = 0, s2 = 0;
+      for (int i = 0; i < n; i++) {
+        float s = x[i] + coeff * s1 - s2;
+        s2 = s1; s1 = s;
+      }
+      return s1*s1 + s2*s2 - coeff*s1*s2;
+    }
+decisions:
+  - choice: Goertzel filters, not an FFT
+    instead: A 256-point FFT per block
+    why: >-
+      Only 8 frequencies matter. Eight Goertzel passes cost about 1,640 multiply-adds per block, fewer than a 256-point
+      FFT, and need no bit-reversed buffers, which keeps CPU load low on a small MCU.
+watchOut: >-
+  With an arbitrary block length the tones fall between bins, their energy leaks, and some keys drop below the
+  threshold. Use N = 205, whose bins land close to all 8 tones, and print each `k` with its actual frequency.

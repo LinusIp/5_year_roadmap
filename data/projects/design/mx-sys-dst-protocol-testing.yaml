@@ -1,0 +1,124 @@
+overview: >-
+  Deterministic simulation testing in Rust for a quorum-replicated counter: the counter's code talks to time, network
+  and disk only through an environment trait, and a simulated environment drives it from a single seed. Each seed
+  generates its own crashes, partitions and disk errors, a recorder logs every operation's start and end, and a
+  linearisability checker asks whether some one-at-a-time order of those operations explains every result. A failing
+  seed replays the bug exactly, every time.
+learn:
+  - name: Quorum reads and writes
+    ref: ddia
+  - name: Linearisability
+    ref: kleppmann-distributed-systems
+  - name: Deterministic simulation
+  - name: Fault injection
+  - name: History checking
+    ref: mit-6-5840
+stats:
+  - value: 10,000 seeds
+    label: checked in < 15 min
+  - value: 3 bugs
+    label: found within 5,000 seeds
+  - value: < 5 s
+    label: to check a 500-op history
+components:
+  - id: driver
+    name: Seed driver
+    role: Runs seeds across cores and writes a report for each failing one.
+    tech: Rust CLI
+    talksTo: [faults]
+    kind: core
+  - id: faults
+    name: Fault generator
+    role: Turns a seed into a schedule of crashes, partitions and disk errors.
+    tech: Seeded RNG
+    talksTo: [env]
+    kind: core
+  - id: env
+    name: Sim environment
+    role: Provides virtual time, a lossy network and a disk that can fail or lose unsynced writes.
+    tech: Rust trait impl
+    talksTo: [counter]
+    kind: core
+  - id: counter
+    name: Counter protocol
+    role: Three replicas serving increments and reads with N=3, W=2, R=2.
+    tech: Rust
+    talksTo: [recorder]
+    kind: core
+  - id: recorder
+    name: History recorder
+    role: Logs each operation's invoke and completion times and its result.
+    tech: Rust
+    talksTo: [checker]
+    kind: core
+  - id: checker
+    name: Linearisability checker
+    role: Searches for a valid sequential order of the history.
+    tech: WGL search · memo
+    talksTo: [driver]
+    kind: core
+flow:
+  - component: driver
+    text: >-
+      picks seed `4127` and builds the environment, 3 replicas and 5 clients, all on one thread; other cores run other
+      seeds.
+  - component: faults
+    text: >-
+      draws the schedule from the seed: crash replica 2 at 300 ms, partition `{1} | {2,3}` at 800 ms, fail the 17th
+      `fsync`.
+  - component: env
+    text: >-
+      advances virtual time event by event, delivers or drops messages, and on a crash keeps only the writes that were
+      fsynced.
+  - component: counter
+    text: >-
+      sends each `incr` to all replicas and acks after 2 durable replies; a `read` asks 2 and returns the highest
+      version, since any 2 of 3 overlap.
+  - component: recorder
+    text: >-
+      logs `invoke` and `ok` per operation; an operation without an `ok` stays **pending**, meaning it may or may not
+      have happened.
+  - component: checker
+    text: >-
+      tries orders that respect real-time order and caches each (operations done, counter value) state it has seen,
+      which stops the search from blowing up on 500 operations.
+  - component: driver
+    text: >-
+      on a failure saves the seed, shrinks the fault schedule while it still fails, and reports the minimal repro;
+      otherwise moves on, at about 11 seeds a second overall.
+interface:
+  lang: rust
+  code: |
+    // the counter sees only this; no real I/O
+    pub trait Env {
+        fn now(&self) -> SimTime;
+        fn send(&mut self, to: NodeId, m: Msg);
+        fn write(&mut self, k: &str, v: &[u8])
+            -> Result<(), DiskError>;
+        fn fsync(&mut self) -> Result<(), DiskError>;
+        fn random(&mut self) -> u64; // seeded
+    }
+    pub struct Op {
+        client: u32, kind: OpKind, // Incr or Read
+        invoke: SimTime, done: Option<SimTime>,
+        result: Option<u64>,
+    }
+decisions:
+  - choice: Simulated environment behind a trait
+    instead: Real sockets and files under fault injection
+    why: >-
+      Real I/O is not reproducible and is far too slow for 10,000 seeds in 15 minutes. The trait is also a constraint
+      check: if the counter compiles without real I/O, nothing leaks in.
+  - choice: Memoised search for the checker
+    instead: Trying every ordering of the history
+    why: >-
+      500 operations have far too many orderings to try. Caching visited states keeps typical histories under 5 s;
+      if one still runs long, time out and report it rather than hang the run.
+  - choice: Planted bugs as the test of the tester
+    instead: Trust that a quiet run means a correct counter
+    why: >-
+      Plant three bugs, such as acking before fsync and reading from one replica, and require all three found within
+      5,000 seeds. A harness that finds none of them is not finding real ones either.
+watchOut: >-
+  A seed that does not reproduce is worse than none. Keep every source of randomness, including hash map order and
+  thread scheduling, inside the seeded environment, and rerun each failing seed twice before reporting it.

@@ -1,0 +1,113 @@
+overview: >-
+  Failover automation for Showtix's ticketing backend across 3 container "regions", plus a harness that runs the
+  drill 20 times and reports recovery time and data loss. Observers in each region vote, and only a majority can
+  declare the primary region dead. The controller then promotes a replica with a new **fencing token** (an epoch
+  number that only goes up, so an old primary's writes are refused) and repoints the proxy.
+learn:
+  - name: RTO and RPO
+    ref: google-sre-book
+  - name: Quorum failure detection
+    ref: mit-6-5840
+  - name: Fencing tokens
+    ref: ddia
+  - name: Split brain
+  - name: Failback and reconciliation
+stats:
+  - value: < 5 min
+    label: RTO in 20 drills
+  - value: < 10 s
+    label: RPO
+  - value: "0"
+    label: split-brain writes
+components:
+  - id: observers
+    name: Health observers
+    role: One per region; each checks the primary every 2 s and votes healthy or failed.
+    tech: Go
+    talksTo: [controller]
+    kind: core
+  - id: controller
+    name: Failover controller
+    role: Acts only on a 2-of-3 vote; promotes the most up-to-date replica and bumps the fencing token.
+    tech: Go
+    talksTo: [fencing, proxy]
+    kind: core
+  - id: fencing
+    name: Fencing tokens
+    role: An epoch number plus a 15 s write lease that the primary must keep renewing from a quorum of observers.
+    tech: Go sidecar · PostgreSQL
+    talksTo: []
+    kind: core
+  - id: proxy
+    name: Traffic switch
+    role: Points the app's database traffic at the new primary through the proxy's runtime API.
+    tech: HAProxy
+    talksTo: [db]
+    kind: core
+  - id: db
+    name: Regional databases
+    role: A primary and streaming replicas, one per emulated region.
+    tech: PostgreSQL · Docker
+    talksTo: [reconciler]
+    kind: external
+  - id: reconciler
+    name: Gap reconciler
+    role: Exports writes the old primary accepted that never reached the new one, for replay or review.
+    tech: Go · SQL
+    talksTo: []
+    kind: offline
+  - id: harness
+    name: Drill harness
+    role: Runs the ticket workload, kills or partitions a region, times recovery and writes the RTO and RPO report.
+    tech: Go · Docker · tc
+    talksTo: [db]
+    kind: offline
+flow:
+  - component: observers
+    text: each probe a write and read on the primary every 2 s; after 3 missed probes in a row an observer votes `failed`.
+  - component: controller
+    text: >-
+      waits for **2 of 3** votes, so one flaky observer cannot cause a failover, then picks the replica with the
+      highest replayed LSN and promotes it.
+  - component: fencing
+    text: >-
+      raises the epoch from `7` to `8` only after the old primary's 15 s lease has run out; a primary that cannot
+      renew its lease from 2 observers turns itself **read-only**, so epoch 7 writes stop even when it is cut off.
+  - component: proxy
+    text: switches the backend to the new primary and drains old connections; the harness stops the RTO clock at the first successful ticket sale.
+  - component: reconciler
+    text: >-
+      after the partition heals, compares the old primary's log past the last replicated LSN with the new primary
+      and lists those writes; their time span is the drill's RPO.
+interface:
+  lang: json
+  code: |
+    // one row of the drill report
+    { "drill": 14,
+      "fault": "partition eu-a",
+      "detected_s": 7.8,
+      "promoted_s": 21.4,
+      "first_sale_s": 38.9,
+      "rto_s": 38.9,
+      "rpo_s": 2.1,
+      "fenced_writes_rejected": 42,
+      "split_brain_writes": 0 }
+decisions:
+  - choice: Quorum of 3 observers
+    instead: A single health checker
+    why: >-
+      A lone checker on a flaky link would fail over a healthy region, which is a pitfall named for this case. A
+      2-of-3 vote costs a few extra seconds, well inside the 5-minute RTO.
+  - choice: Fencing token checked on every write
+    instead: Stop the old primary with a shutdown command
+    why: >-
+      During a partition the shutdown command cannot reach the old primary, and it keeps taking orders. A lease the
+      primary must renew from a quorum stops it on its own; the 15 s wait fits inside the 5-minute RTO.
+  - choice: Export the gap, do not merge it automatically
+    instead: Automatically replay lost writes
+    why: >-
+      Replaying a seat sale that was resold after failover would double-book the seat. Ticket writes need a human or
+      a rule per type; revisit once the reconciled-write counts show what kinds appear.
+watchOut: >-
+  Teams test failover and never failback. Make every drill finish by moving back to the first region and diffing
+  the data, or the second outage is the real test.

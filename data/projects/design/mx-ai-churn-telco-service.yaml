@@ -1,0 +1,110 @@
+overview: >-
+  A monthly batch job on a laptop: build one row of features per subscriber as of the cut-off date, score all 400k
+  rows with a calibrated gradient-boosting model, keep the 3,000 riskiest and attach each one's top three reasons.
+  Training runs separately on a time-aware split (train on older months, test on the newest), so the score you
+  report is the one next month will really get.
+learn:
+  - name: Data leakage
+    ref: kaggle-learn
+  - name: Time-aware validation
+  - name: Gradient boosting
+    ref: ml-zoomcamp
+  - name: Probability calibration
+  - name: Precision at k
+  - name: SHAP reason codes
+    ref: kaggle-learn
+stats:
+  - value: ≥ 2× base rate
+    label: precision@3000
+  - value: < 0.10
+    label: Brier score
+  - value: < 2 min
+    label: score 400k rows
+components:
+  - id: billing
+    name: Subscriber data
+    role: Exports the monthly snapshot of plans, billing and usage time series.
+    tech: CSV · Parquet
+    talksTo: [features]
+    kind: external
+  - id: features
+    name: Feature builder
+    role: Builds one row per customer using only data from before the cut-off date.
+    tech: pandas
+    talksTo: [scorer, trainer]
+    kind: core
+  - id: trainer
+    name: Trainer
+    role: Splits by month, fits logistic regression and LightGBM, keeps the better one by PR-AUC.
+    tech: scikit-learn · LightGBM
+    talksTo: [calibrator]
+    kind: offline
+  - id: calibrator
+    name: Calibrator
+    role: Fits isotonic calibration on the validation month and exports one pickled pipeline.
+    tech: scikit-learn
+    talksTo: [scorer]
+    kind: offline
+  - id: scorer
+    name: Batch scorer
+    role: Loads the pipeline, scores every subscriber and keeps the top 3,000 by probability.
+    tech: Python · LightGBM
+    talksTo: [reasons]
+    kind: core
+  - id: reasons
+    name: Reason coder
+    role: Turns each customer's three largest SHAP values into plain reason codes.
+    tech: SHAP
+    talksTo: [team]
+    kind: core
+  - id: team
+    name: Retention team
+    role: Receives the ranked call list as a CSV once a month.
+    tech: CSV
+    talksTo: []
+    kind: external
+flow:
+  - component: features
+    text: reads the September snapshot and builds tenure, contract type, bill changes and 3-month usage trends, with a hard `cutoff` so nothing after it leaks in.
+  - component: scorer
+    text: loads the pipeline that was trained on earlier months and calibrated, and scores all 400k rows in one vectorised call.
+  - component: scorer
+    text: sorts by `p_churn` and keeps the top 3,000, the number of calls the team can make this month.
+  - component: reasons
+    text: runs SHAP on those 3,000 rows only and maps the top 3 features to codes like `contract_month_to_month`.
+  - component: team
+    text: gets `retention_2026_10.csv`; next month's real churners are joined back to measure **precision@3000**.
+interface:
+  lang: python
+  code: |
+    score_month(
+        snapshot="subs_2026_09.parquet",
+        cutoff="2026-09-30",
+        k=3000,
+    ) -> "retention_2026_10.csv"
+
+    customer_id,rank,p_churn,reasons
+    C104233,1,0.41,month_to_month;bill_up;data_down
+    C088120,2,0.39,tenure_lt_6m;support_calls_3
+decisions:
+  - choice: Split by month, not at random
+    instead: Random k-fold cross-validation
+    why: >-
+      Churn behaviour drifts month to month. A random split mixes future months into training and gives a score the
+      next real month will not match. Train on months 1 to 9, validate on 10, test on 11.
+  - choice: Judge by precision@3000, not AUC
+    instead: Pick the model with the highest AUC
+    why: >-
+      The team only ever calls 3,000 people, so only the top of the ranking matters. With a 2% base rate, 2× means
+      at least 120 true churners in the list. Revisit if call capacity changes.
+  - choice: Isotonic calibration on a held-out month
+    instead: Raw model scores
+    why: >-
+      Brier < 0.10 is a requirement and the cost-benefit sheet multiplies probabilities by customer value. About
+      8k churners a month is enough data for isotonic; fall back to Platt scaling if a month has far fewer.
+  - choice: One CSV a month, not a live API
+    instead: A scoring web service
+    why: The team works from one list a month. Revisit if they want same-day alerts on new risk signals.
+watchOut: >-
+  Features computed after the customer already decided to leave (a cancellation call, a port-out request) make the
+  model look brilliant and useless. Audit every feature's timestamp against the cut-off before training.

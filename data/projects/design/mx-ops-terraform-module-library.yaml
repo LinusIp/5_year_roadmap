@@ -1,0 +1,96 @@
+overview: >-
+  Six vetted modules (network, cluster, database, bucket, queue and IAM role) give Skyline Ads' engineers a safe
+  default for each piece of infrastructure, with few inputs and secure settings built in. Every change runs a plan
+  against LocalStack, a local stand-in for cloud APIs, turns it into JSON, and checks it with Conftest policies that
+  fail on public buckets, missing tags and open security groups. A cost estimate is attached to the same pull
+  request, so no cloud money is spent and no unsafe plan can be applied.
+learn:
+  - name: Terraform modules
+    ref: terraform-tutorials
+  - name: Policy as code
+  - name: Plan as JSON
+  - name: Infrastructure tests
+    ref: terraform-tutorials
+  - name: Semantic versioning
+  - name: Remote state and locking
+stats:
+  - value: 25 of 25
+    label: planted violations blocked
+  - value: < 90 s
+    label: plan plus policy check
+  - value: ≥ 80 %
+    label: resources under test
+components:
+  - id: modules
+    name: Module set
+    role: Six modules with opinionated inputs, required tags and private-by-default resources.
+    tech: OpenTofu · HCL
+    talksTo: [stack]
+    kind: core
+  - id: stack
+    name: Example environment
+    role: A real stack composed only from the modules, and the target of every plan.
+    tech: OpenTofu
+    talksTo: [plan]
+    kind: core
+  - id: plan
+    name: Plan job
+    role: Runs plan against LocalStack and saves it as JSON for the checks.
+    tech: GitHub Actions · LocalStack
+    talksTo: [policy, cost]
+    kind: core
+  - id: policy
+    name: Policy rules
+    role: Rego rules that deny public buckets, missing tags and 0.0.0.0/0 ingress.
+    tech: OPA · Conftest
+    talksTo: []
+    kind: core
+  - id: cost
+    name: Cost estimator
+    role: Prices the resources in the plan and comments the monthly change on the pull request.
+    tech: Python script
+    talksTo: []
+    kind: core
+  - id: tests
+    name: Test harness
+    role: Applies each module to LocalStack and asserts on the created resources.
+    tech: tofu test · Terratest
+    talksTo: [release]
+    kind: offline
+  - id: release
+    name: Release automation
+    role: Tags module versions and writes the changelog and upgrade notes.
+    tech: release-please · Git tags
+    talksTo: []
+    kind: offline
+flow:
+  - component: modules
+    text: expose the `bucket` module with only `name`, `team` and `retention_days`; public access is blocked and cannot be switched on from outside.
+  - component: stack
+    text: uses `source = "…/modules/bucket?ref=v1.3.0"`, pinned to a version so upgrades are deliberate.
+  - component: plan
+    text: runs `tofu plan -out plan.bin` and `tofu show -json plan.bin` against LocalStack, so nothing touches a real cloud.
+  - component: policy
+    text: evaluates the JSON plan and fails the pull request with a message such as **bucket logs-raw has no team tag**.
+  - component: cost
+    text: adds the monthly estimate to the same pull request, and the whole check finishes in under 90 s.
+interface:
+  lang: rego
+  code: |
+    package main
+
+    deny contains msg if {
+      r := input.resource_changes[_]
+      r.type == "aws_s3_bucket"
+      not r.change.after.tags.team
+      msg := sprintf("%s has no team tag",
+                     [r.address])
+    }
+decisions:
+  - choice: Policy on the JSON plan in CI
+    instead: Code review alone, or checks after apply
+    why: Two public buckets already slipped past review. Checking the plan blocks the change before any resource exists, and the JSON plan shows final values that module code hides.
+  - choice: Few inputs, secure defaults
+    instead: Modules that expose every provider option
+    why: A module with dozens of knobs is just the hand-written stacks again. Fewer inputs make the safe path the easy one; add an input only when two teams need it.
+watchOut: Policy rules that block legitimate patterns get bypassed or switched off. Give each rule a documented exception mechanism with an owner and an expiry date.

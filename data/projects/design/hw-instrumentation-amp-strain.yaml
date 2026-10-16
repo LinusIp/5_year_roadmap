@@ -1,0 +1,68 @@
+overview: >-
+  A load cell's Wheatstone bridge gives only about 10 mV at full load, riding on half the supply voltage. A three-op-amp
+  instrumentation amplifier (two buffered gain stages and a difference stage) amplifies just that difference by about
+  200 and rejects the shared voltage, an MCU's ADC reads it, and 5 known masses calibrate it to R² above 0.999.
+learn:
+  - name: Wheatstone bridges
+    ref: all-about-circuits
+  - name: Instrumentation amplifiers
+    ref: art-of-electronics
+  - name: Common-mode rejection
+  - name: Least-squares calibration
+components:
+  - id: bridge
+    name: Load cell
+    role: A strain-gauge bridge whose output difference grows with the load.
+    tech: 1 to 5 kg load cell
+    talksTo: [inamp]
+    kind: external
+  - id: inamp
+    name: In-amp
+    role: Amplifies the bridge difference by about 200 and rejects the common voltage.
+    tech: Quad op-amp · 0.1% resistors
+    talksTo: [adc]
+    kind: core
+  - id: adc
+    name: MCU ADC
+    role: Samples the amplified signal and averages readings.
+    tech: 12-bit ADC
+    talksTo: [cal]
+    kind: core
+  - id: cal
+    name: Calibration fit
+    role: Fits counts to grams from reference masses and reports linearity.
+    tech: Python · NumPy
+    talksTo: []
+    kind: offline
+flow:
+  - component: bridge
+    text: is powered at 5 V and, at 2 mV/V, gives 0 to 10 mV between its outputs, both sitting near 2.5 V.
+  - component: inamp
+    text: gains `1 + 2R/Rg` (201 with `R = 10 kΩ`, `Rg = 100 Ω`) in the **input stage**, then a unity difference stage of four matched resistors; ngspice checks gain and CMRR with a 2.5 V common-mode sweep first.
+  - component: adc
+    text: averages 64 readings per sample, with the in-amp's reference pin at 0.25 V so zero load sits clear of ground.
+  - component: cal
+    text: fits `grams = a·counts + b` to 5 reference masses, reports R², linearity error in % of full scale, and resolution as the spread of 100 readings at a fixed load.
+interface:
+  lang: c
+  code: |
+    /* G = (1 + 2*R/Rg) * (R3/R2), here R3 = R2 */
+    #define R_OHM      10000.0f  /* 0.1% */
+    #define RG_OHM       100.0f  /* gain about 201 */
+    #define VREF_V         0.25f /* zero-load level */
+
+    uint32_t read_avg(adc_t* adc, int n);  /* n = 64 */
+
+    typedef struct { float a, b; } Cal;  /* from fit */
+    static inline float grams(Cal c, uint32_t n) {
+      return c.a * (float)n + c.b;
+    }
+decisions:
+  - choice: All the gain in the input stage
+    instead: Gain in the difference stage, unity input buffers
+    why: >-
+      With 0.1% resistors the difference stage alone rejects the 2.5 V common voltage by only about 54 dB. Putting the
+      gain of 200 before it lifts the wanted signal first, adding roughly 46 dB more rejection.
+watchOut: >-
+  Input bias current flowing through unequal resistances at the two inputs creates an offset that drifts with
+  temperature. Keep both input paths the same impedance, use a low-bias CMOS op-amp, and tare at start-up.

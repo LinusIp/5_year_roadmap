@@ -1,0 +1,58 @@
+overview: >-
+  An extension of a serving simulator in which long prompts are prefilled in chunks that share each step with the
+  running decodes. Sweeping the chunk size from 128 to 8192 tokens shows the trade: big chunks give new requests a
+  fast first token but stall everyone else's next token, small chunks do the reverse.
+learn:
+  - name: Chunked prefill
+    ref: vllm-docs
+  - name: Prefill versus decode
+    ref: kipply-inference-arithmetic
+  - name: Tail latency
+  - name: Pareto front
+components:
+  - id: sim
+    name: Serving sim
+    role: Runs the arrival, queue and decode loop from the base simulator.
+    tech: Python
+    talksTo: [chunker]
+    kind: core
+  - id: chunker
+    name: Chunk scheduler
+    role: Fills each step with all decodes plus up to one chunk of waiting prefill tokens.
+    tech: Python
+    talksTo: [cost]
+    kind: core
+  - id: cost
+    name: Step cost
+    role: Prices a step from decode count, chunk tokens and the context those tokens attend to.
+    tech: numpy
+    talksTo: [sweep]
+    kind: core
+  - id: sweep
+    name: Sweep and plot
+    role: Runs chunk sizes 128 to 8192 and plots TTFT p99 against TPOT p99.
+    tech: matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: sim
+    text: generates a workload with a mix of short chats and prompts of several thousand tokens.
+  - component: chunker
+    text: each step, takes all running decodes and adds the next `chunk_size` tokens of the oldest waiting prompt.
+  - component: cost
+    text: >-
+      adds an **attention term** that grows with how far into the prompt the chunk is, because later chunks attend to
+      all earlier tokens.
+  - component: sweep
+    text: >-
+      plots one point per chunk size, marks the Pareto front and picks the largest chunk whose TPOT p99 still meets
+      the stated SLO.
+decisions:
+  - choice: Recommend a chunk size per SLO
+    instead: One best chunk size
+    why: >-
+      The curve has no single winner: a chat product with a strict TPOT target wants small chunks, a batch summariser
+      wants big ones. Stating the SLO first turns the plot into a decision.
+watchOut: >-
+  If step cost depends only on token count, chunking looks free. Attention cost grows with context, so the last
+  chunks of an 8k prompt are the slowest; leave that term out and every recommendation is too optimistic.

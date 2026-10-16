@@ -1,0 +1,123 @@
+overview: >-
+  First Lorena Barba's twelve steps as Python notebooks, from linear convection to cavity flow, then an
+  incompressible 2D Navier-Stokes solver of your own in C++ or Rust. Each time step moves and diffuses the velocity,
+  solves a pressure Poisson equation, and subtracts the pressure gradient so the flow stays divergence-free (no fluid
+  created or lost), a scheme called projection. The solver must reproduce the published lid-driven cavity data and
+  the exact channel-flow profile, and your own renderer shows velocity, vorticity and streamlines live.
+learn:
+  - name: Finite differences
+    ref: cfd-python-12-steps
+  - name: CFL and diffusion limits
+    ref: cfd-python-12-steps
+  - name: Pressure projection
+    ref: bridson-fluid-sim
+  - name: Staggered grids
+    ref: bridson-fluid-sim
+  - name: Conjugate gradients
+    ref: mit-18-085
+  - name: Benchmark validation
+    ref: mit-2-086
+stats:
+  - value: < 2 %
+    label: RMS error against Ghia, Re 100 and 1,000
+  - value: < 0.5 %
+    label: channel flow against the parabola
+  - value: ≥ 30 FPS
+    label: live at 128 × 128
+components:
+  - id: notebooks
+    name: Twelve steps
+    role: Builds each scheme in small steps, from convection to cavity flow, as runnable notebooks.
+    tech: Python · NumPy · Jupyter
+    talksTo: []
+    kind: offline
+  - id: advect
+    name: Advect and diffuse
+    role: Moves and diffuses the velocity on a staggered grid to an intermediate field.
+    tech: C++20 or Rust
+    talksTo: [pressure]
+    kind: core
+  - id: pressure
+    name: Pressure solve
+    role: Solves the Poisson equation for the pressure that removes the divergence.
+    tech: CG or multigrid
+    talksTo: [project]
+    kind: core
+  - id: project
+    name: Projection
+    role: Subtracts the pressure gradient to make the velocity divergence-free.
+    tech: C++20 or Rust
+    talksTo: [bcs]
+    kind: core
+  - id: bcs
+    name: Boundary conditions
+    role: Sets the moving lid, no-slip walls, or channel inflow and outflow.
+    tech: C++20 or Rust
+    talksTo: [advect, renderer, validate]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Draws speed and vorticity colour maps and streamlines every frame.
+    tech: Your OpenGL or Vulkan renderer
+    talksTo: []
+    kind: core
+  - id: validate
+    name: Validation
+    role: Compares centreline profiles with the Ghia data and the analytical channel profile.
+    tech: Python · Ghia CSV
+    talksTo: []
+    kind: offline
+flow:
+  - component: advect
+    text: >-
+      picks `dt` under both the CFL and the diffusion limit, then moves and diffuses `u` to an intermediate `u*`.
+  - component: pressure
+    text: >-
+      solves `∇²p = ∇·u* / Δt` by conjugate gradients until the residual is small, not after a fixed few iterations.
+  - component: project
+    text: >-
+      sets `u = u* − Δt ∇p`, and checks that the **maximum divergence** is near zero.
+  - component: bcs
+    text: >-
+      sets the lid to speed 1 and the walls to zero, and the next step starts from here, closing the **time-step loop**.
+  - component: renderer
+    text: >-
+      reads the fields each frame and draws `|u|`, vorticity `ω` and streamlines at 30 FPS or more.
+  - component: validate
+    text: >-
+      interpolates the staggered velocities to the benchmark points and reports RMS error at 33², 65² and 129².
+interface:
+  lang: cpp
+  code: |
+    struct Grid {          // staggered (MAC) grid
+      int nx, ny; double h;
+      Field u, v;          // on cell faces
+      Field p;             // at cell centres
+    };
+
+    void step(Grid& g, double dt, double nu) {
+      advect_diffuse(g, dt, nu);     // u*, v*
+      divergence(g, rhs, dt);        // div(u*)/dt
+      solve_poisson(g.p, rhs, 1e-8); // CG
+      subtract_grad(g, dt);          // u* - dt grad p
+      apply_bcs(g);                  // lid, walls
+    }
+decisions:
+  - choice: Staggered (MAC) grid
+    instead: All values at cell centres
+    why: >-
+      With pressure at centres and velocities on faces, the pressure cannot form a checkerboard pattern that the
+      gradient never sees. The cost is interpolating to the Ghia points before comparing.
+  - choice: Conjugate gradients first
+    instead: Multigrid from the start
+    why: >-
+      CG is short to write and easy to check on the twelve-step Poisson problem. Move to multigrid if iterations per
+      step at 129 × 129 keep the renderer under 30 FPS.
+  - choice: Notebooks before the port
+    instead: Writing the solver straight away
+    why: >-
+      Each step adds one idea to a few lines of NumPy, so when the C++ or Rust solver disagrees there is a trusted
+      answer to compare with.
+watchOut: >-
+  A pressure solve stopped too early leaves divergence that looks like extra viscosity and can still roughly match the
+  benchmark. Solve to a tolerance and report the maximum divergence after projection every step.

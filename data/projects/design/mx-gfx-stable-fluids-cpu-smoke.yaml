@@ -1,0 +1,107 @@
+overview: >-
+  A 2D smoke exhibit built on Jos Stam's stable fluids: each frame adds the visitor's forces, moves velocity along
+  itself, removes divergence with a pressure solve, then carries dye and temperature along the result. Moving
+  quantities is done semi-Lagrangian style (trace each cell backwards and sample where the fluid came from), which is
+  stable at any time step. Obstacles are a mask with no-slip walls, and all buffers are allocated once so the exhibit
+  can run all day.
+learn:
+  - name: Stable fluids
+    ref: bridson-fluid-sim
+  - name: Semi-Lagrangian advection
+    ref: bridson-fluid-sim
+  - name: Pressure projection
+    ref: cfd-python-12-steps
+  - name: Red-black Gauss-Seidel
+    ref: mit-18-085
+  - name: Vorticity confinement
+    ref: ten-minute-physics
+stats:
+  - value: 60 FPS
+    label: 256 × 256 grid on 4 cores
+  - value: < 1e-3
+    label: divergence after projection
+  - value: < 5%
+    label: memory growth over 8 hours
+components:
+  - id: input
+    name: Input handler
+    role: Turns mouse drags into force splats and painted cells into obstacles.
+    tech: SDL2
+    talksTo: [fields, masks]
+    kind: core
+  - id: masks
+    name: Obstacle masks
+    role: Marks solid cells and sets wall velocities to zero at their faces.
+    tech: C++17
+    talksTo: [fields]
+    kind: core
+  - id: fields
+    name: Grid fields
+    role: Double-buffered velocity, pressure, dye and temperature arrays, allocated once.
+    tech: C++17 · std::vector
+    talksTo: [advection]
+    kind: core
+  - id: advection
+    name: Advection
+    role: Traces each cell back along velocity and samples the old field bilinearly.
+    tech: C++17 · std::thread
+    talksTo: [pressure]
+    kind: core
+  - id: pressure
+    name: Pressure solver
+    role: Solves for pressure with red-black Gauss-Seidel and subtracts its gradient.
+    tech: C++17 · std::thread
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: Renderer
+    role: Uploads dye as a texture and draws it with obstacles on top.
+    tech: SDL2 or OpenGL
+    talksTo: []
+    kind: core
+  - id: soak
+    name: Soak monitor
+    role: Logs stage timings, divergence and memory every minute during 8-hour runs.
+    tech: CSV
+    talksTo: []
+    kind: offline
+flow:
+  - component: input
+    text: adds a force splat where the visitor dragged and buoyancy from temperature, plus vorticity confinement if switched on.
+  - component: advection
+    text: moves velocity along itself by tracing each cell back by `dt * u` and sampling, split across 4 threads by rows.
+  - component: pressure
+    text: computes divergence, runs red-black sweeps until the residual drops below **1e-3** of the start or 60 iterations, then subtracts the pressure gradient.
+  - component: masks
+    text: zero the velocity at obstacle faces after projection, so smoke flows around obstacles and not through them.
+  - component: fields
+    text: swap their front and back buffers instead of allocating, then dye and temperature are advected along the new velocity.
+  - component: renderer
+    text: copies the dye into a streaming texture and presents the frame.
+interface:
+  lang: cpp
+  code: |
+    struct Grid {         // n x n plus a 1-cell border
+      int n = 256;
+      Field u, v, p, div, dye, temp; // double-buffered
+      std::vector<uint8_t> solid;      // obstacle mask
+    };
+    void addForces(Grid& g, const Input& in, float dt);
+    void advect(Field& q, const Grid& g, float dt);
+    // Red-black Gauss-Seidel; stops when the residual
+    // is below 1e-3 of the start. Returns iterations.
+    int project(Grid& g, int maxIters = 60);
+    void step(Grid& g, const Input& in, float dt);
+decisions:
+  - choice: Red-black Gauss-Seidel
+    instead: Plain Gauss-Seidel, or multigrid from the start
+    why: Colouring cells like a chessboard lets 4 threads update half the cells at once; move to a multigrid cycle only if 60 sweeps cannot reach 1e-3 in the frame budget.
+  - choice: Semi-Lagrangian advection
+    instead: A higher-order advection scheme
+    why: Visitors drag the mouse wildly and the exhibit must never blow up; the cost is smoothing, which vorticity confinement partly gives back.
+  - choice: Buffers allocated once and swapped
+    instead: Temporary arrays per step
+    why: The 8-hour soak allows under 5% memory growth, and per-frame allocation is the usual cause of drift and stutter.
+watchOut: >-
+  Too few pressure iterations leave divergence, and smoke then gains or loses volume and looks wrong. Log the residual
+  every frame and fail the soak test if it ever stays above 1e-3.

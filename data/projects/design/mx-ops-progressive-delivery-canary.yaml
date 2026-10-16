@@ -1,0 +1,91 @@
+overview: >-
+  Luma Commerce's releases stop themselves when they go wrong. A rollout controller sends a new version 1 %, then
+  5 %, 25 % and 100 % of traffic through the ingress, and after each step an analysis job compares the canary, the
+  new version on a small slice of traffic, with the stable baseline running at the same time. If error rate, latency
+  or orders per minute is statistically worse, the controller shifts all traffic back in seconds, so a bad release
+  reaches under 5 % of users.
+learn:
+  - name: Canary releases
+    ref: google-sre-book
+  - name: Traffic splitting
+    ref: kubernetes-tutorials
+  - name: Statistical comparison
+  - name: Automated rollback
+  - name: Blue/green deploys
+stats:
+  - value: < 5 %
+    label: traffic exposed to a bad release
+  - value: < 3 min
+    label: to roll back
+  - value: < 2 %
+    label: false rollbacks on good releases
+components:
+  - id: simulator
+    name: Release simulator
+    role: Publishes good versions and faulty ones with a planted 3 % error rate.
+    tech: Python · CI
+    talksTo: [controller]
+    kind: offline
+  - id: controller
+    name: Rollout controller
+    role: Runs the step plan and promotes or aborts on the analysis result.
+    tech: Argo Rollouts
+    talksTo: [splitter, analysis]
+    kind: core
+  - id: splitter
+    name: Traffic splitter
+    role: Sends the set percentage of requests to the canary pods and the rest to stable.
+    tech: NGINX ingress · kind
+    talksTo: [metrics]
+    kind: core
+  - id: metrics
+    name: Metrics
+    role: Records requests, errors, latency and orders per version label.
+    tech: Prometheus
+    talksTo: [analysis]
+    kind: core
+  - id: analysis
+    name: Canary analysis
+    role: Compares canary and baseline from the same minutes with a statistical test and returns pass or fail.
+    tech: Python · AnalysisTemplate
+    talksTo: [audit]
+    kind: core
+  - id: audit
+    name: Audit trail
+    role: Stores each step, the metrics seen and the decision made for every release.
+    tech: SQLite
+    talksTo: []
+    kind: offline
+flow:
+  - component: controller
+    text: starts release `v2.14.0` and sets the canary weight to `1 %`.
+  - component: splitter
+    text: sends 1 % of requests to canary pods; both versions are labelled so their metrics stay apart.
+  - component: metrics
+    text: collect 2 minutes of errors, p99 latency and orders per minute per version.
+  - component: analysis
+    text: compares canary with the baseline **from the same minutes**, not yesterday's, and fails if errors are significantly higher, for example with a one-sided test at `p < 0.01`.
+  - component: controller
+    text: on a fail sets the weight to `0` and scales the canary down; the planted bad release is gone in under 3 minutes having seen at most 5 % of traffic.
+interface:
+  lang: yaml
+  code: |
+    # Rollout spec.strategy
+    canary:
+      steps:
+        - setWeight: 1
+        - analysis: {templates: [{templateName: check}]}
+        - setWeight: 5
+        - analysis: {templates: [{templateName: check}]}
+        - setWeight: 25
+        - analysis: {templates: [{templateName: check}]}
+        - setWeight: 100
+      abortScaleDownDelaySeconds: 0
+decisions:
+  - choice: Compare against a live baseline
+    instead: Compare against last week's numbers or a fixed threshold
+    why: Traffic and errors change by hour and with sales. Comparing both versions over the same minutes removes that noise, which is what keeps false rollbacks under 2 %.
+  - choice: Small first steps that last long enough
+    instead: Jump straight to 25 % to get data quickly
+    why: At 1 % of traffic a 3 % error rate needs a few minutes to show, but the exposure limit is 5 %. Revisit step lengths with the real request rate.
+watchOut: At 1 % of traffic there may be too few requests to see anything, and the test passes because it saw nothing. Require a minimum request count before analysis is allowed to pass.

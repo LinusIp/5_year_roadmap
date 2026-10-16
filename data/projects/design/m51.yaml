@@ -1,0 +1,124 @@
+overview: >-
+  A mechanism with a job: a two-stage spur gearbox of about 20:1, or a four-bar linkage that traces a set path. The
+  specification (the ratio and output torque, or the target curve) is written first; the kinematic design and CAD
+  follow from it, a motion simulation gives the loads, and the loads size the teeth or pins. The printed mechanism is
+  measured for efficiency or path error, then one part is loaded until it breaks, and the results go back into the
+  next specification.
+learn:
+  - name: Gear geometry
+    ref: mit-2-007
+  - name: Four-bar linkages
+    ref: mit-2-003
+  - name: Lewis bending stress
+    ref: mit-2-001
+  - name: Design for printing
+    ref: mit-2-008
+  - name: Testing to failure
+    ref: mit-2-007
+stats:
+  - value: ~20:1
+    label: gearbox ratio, exact in simulation
+  - value: < 2 mm
+    label: RMS path error, linkage option
+  - value: ±40 %
+    label: failure load against prediction
+components:
+  - id: spec
+    name: Specification
+    role: Fixes the ratio, output torque and module, or the target coupler curve, before any CAD.
+    tech: Markdown · Python
+    talksTo: [kinematics]
+    kind: core
+  - id: kinematics
+    name: Kinematic design
+    role: Chooses tooth counts for the ratio, or synthesises link lengths for the path.
+    tech: Python · NumPy
+    talksTo: [cad]
+    kind: core
+  - id: cad
+    name: CAD model
+    role: Builds involute gears, shafts and housing, or links and pins, with print clearances.
+    tech: Onshape · gear generator
+    talksTo: [sim]
+    kind: core
+  - id: sim
+    name: Motion sim
+    role: Moves the mechanism through its cycle and gives tooth or pin loads.
+    tech: Your engine or CAD motion study
+    talksTo: [sizing]
+    kind: core
+  - id: sizing
+    name: Load sizing
+    role: Checks tooth root or pin stress and sets face width and pin diameter.
+    tech: Python
+    talksTo: [build]
+    kind: core
+  - id: build
+    name: Print and assembly
+    role: Prints parts in PETG or nylon and assembles them on bearings and steel shafts.
+    tech: PrusaSlicer · 608 bearings
+    talksTo: [test]
+    kind: core
+  - id: test
+    name: Test rig
+    role: Measures efficiency or path error, backlash, and the load at which a part fails.
+    tech: Lever arm · scale · camera
+    talksTo: [spec]
+    kind: core
+flow:
+  - component: spec
+    text: >-
+      writes down, for the gearbox, a ratio near 20:1, the output torque and the module, before any modelling.
+  - component: kinematics
+    text: >-
+      picks two stages of 14 and 63 teeth (`4.5² = 20.25`), checking the contact ratio and that no pinion is so small
+      it undercuts.
+  - component: cad
+    text: >-
+      generates the involute gears and adds clearance between mating teeth from your project 48 fit table.
+  - component: sim
+    text: >-
+      turns the train through its cycle; the ratio must match exactly, and the output torque gives the **tooth force**.
+  - component: sizing
+    text: >-
+      estimates root stress with `σ = Ft / (b·m·Y)` and widens the teeth if the margin is thin.
+  - component: build
+    text: >-
+      prints the gears flat on the bed and assembles them; ten output turns must take exactly the designed input turns.
+  - component: test
+    text: >-
+      measures efficiency at three loads, then loads one part **until it fails**; the result feeds the next
+      specification, closing the loop.
+interface:
+  lang: python
+  code: |
+    from math import prod
+
+    stages = [(14, 63), (14, 63)]   # pinion, gear
+    ratio = prod(g / p for p, g in stages)  # 20.25
+
+    def lewis_stress(Ft, m, b, Y):
+        """Tooth root bending stress in Pa.
+        Ft: tangential force N, m: module m,
+        b: face width m, Y: Lewis form factor
+        for the tooth count."""
+        return Ft / (b * m * Y)
+decisions:
+  - choice: Specification before CAD
+    instead: Model first and measure what comes out
+    why: >-
+      The done-when test checks the simulated and printed mechanism against a ratio or curve written down first.
+      Without it there is nothing to be right or wrong about.
+  - choice: Gears printed flat on the bed
+    instead: Printed standing on edge
+    why: >-
+      Flat, each layer carries the tooth bending load in its own plane. On edge, the load crosses layer lines and teeth
+      shear between layers well below the Lewis estimate.
+  - choice: Lewis estimate and a failure test
+    instead: A full FEM model of the tooth
+    why: >-
+      Printed parts vary too much for precise prediction; a hand estimate within ±40 % plus one broken part, explained
+      from its fracture surface, teaches more.
+watchOut: >-
+  Gear clearances drawn for machined parts are too tight for prints, so the train binds. Use the clearances you
+  measured in project 48 and check that the assembly turns by hand before adding the motor.

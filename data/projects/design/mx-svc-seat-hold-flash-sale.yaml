@@ -1,0 +1,120 @@
+overview: >-
+  A ticketing backend for Arcadia Live's 18,000-seat show that lets 60,000 people in at a controlled rate and
+  locks single seats, never the whole event. Seat state lives in memory, split into shards by section, and every
+  change is written to a write-ahead log (a file of changes appended before they are applied) so a restarted node
+  can rebuild it. Paid seats move to PostgreSQL through an outbox, so a confirmed sale is never lost.
+learn:
+  - name: Virtual waiting rooms
+    ref: system-design-primer
+  - name: Token bucket rate limits
+    ref: bytebytego
+  - name: Sharding by key
+    ref: ddia
+  - name: Write-ahead logging
+    ref: cmu-15-445
+  - name: Transactional outbox
+    ref: ddia
+stats:
+  - value: 5,000/s
+    label: seat holds, p99 < 200 ms
+  - value: "0"
+    label: double-sold seats, 60k users
+  - value: "0"
+    label: lost sales after a node kill
+components:
+  - id: room
+    name: Waiting room
+    role: Gives each arriving user a queue position and admits them at a set rate with a token bucket.
+    tech: Go · Redis
+    talksTo: [allocator]
+    kind: core
+  - id: allocator
+    name: Seat allocator
+    role: Finds the requested seats or the best-available group and asks the right shard to hold them.
+    tech: Go
+    talksTo: [shards]
+    kind: core
+  - id: shards
+    name: Seat shards
+    role: Own the free, held and sold state of one section's seats, one writer per shard.
+    tech: Go · in-memory
+    talksTo: [wal, outbox, dashboard]
+    kind: core
+  - id: wal
+    name: WAL and recovery
+    role: Appends every hold, release and sale before it is applied and replays the log after a crash.
+    tech: Append-only file · fsync
+    talksTo: []
+    kind: core
+  - id: outbox
+    name: Sales outbox
+    role: Moves each confirmed sale into the durable sales table exactly once.
+    tech: PostgreSQL
+    talksTo: []
+    kind: core
+  - id: dashboard
+    name: Dashboard feed
+    role: Pushes sold, held and free counts to the organiser every second.
+    tech: WebSocket
+    talksTo: []
+    kind: core
+  - id: sim
+    name: Simulator
+    role: Plays 60,000 users with arrival spikes, abandoned holds and client retries.
+    tech: Go
+    talksTo: [room]
+    kind: offline
+flow:
+  - component: room
+    text: >-
+      gives the user position 31,204 and a signed **admission token** when the bucket allows, so retries keep the
+      same place instead of jumping the queue.
+  - component: allocator
+    text: >-
+      takes `POST /holds` with the token and "4 seats, block C", picks 4 adjacent free seats, and starts from a
+      random row offset so the best seats are not hit by everyone at once.
+  - component: shards
+    text: checks the 4 seats are free, marks them `held` with a 5-minute deadline and answers within the 200 ms budget.
+  - component: wal
+    text: has the hold record appended and flushed before the shard replies, so a restart replays it instead of losing it.
+  - component: shards
+    text: >-
+      on payment success marks the seats `sold` and writes the sale to the **outbox**; if the deadline passes first,
+      they go back to free and the room admits someone new.
+  - component: outbox
+    text: copies the sale into PostgreSQL with the sale id as primary key, so a replay after a crash cannot insert it twice.
+  - component: dashboard
+    text: shows the organiser the new sold, held and free counts for block C.
+interface:
+  lang: http
+  code: |
+    POST /holds
+    Authorization: Admit <token>
+    { "event": "arc-2026-07-11",
+      "section": "C", "count": 4 }
+
+    201 Created
+    { "hold_id": "h_8f2", "seats": ["C12-7", "C12-8",
+      "C12-9", "C12-10"], "expires_in": 300 }
+
+    409 Conflict
+    { "error": "NO_ADJACENT_SEATS" }
+decisions:
+  - choice: In-memory shards with a WAL
+    instead: One PostgreSQL row lock per seat
+    why: >-
+      5,000 holds a second concentrated on a few sections is the load that collapsed the old event-row lock; a
+      single writer per shard needs no locks at all. The WAL keeps the durability a database would give.
+  - choice: Token bucket waiting room
+    instead: Let all 60,000 users hit the seat API
+    why: >-
+      Only 18,000 seats exist, so letting everyone in only makes the herd bigger. Admitting at a set rate keeps the
+      backend in its tested range and makes order match arrival.
+  - choice: Outbox into PostgreSQL
+    instead: Writing the sale to PostgreSQL in the request
+    why: >-
+      Keeps the hold path fast and gives one place to retry from after a crash. Revisit if finance needs sales
+      visible in PostgreSQL in under a second.
+watchOut: >-
+  Holds that live only in memory leak or vanish after a crash. Every hold and release must hit the WAL before the
+  reply, and recovery must re-arm the 5-minute deadlines it replays.

@@ -1,0 +1,69 @@
+overview: >-
+  A Python script runs 1,000 ngspice simulations of a 1 kHz Sallen-Key low-pass filter, each with every resistor and
+  capacitor drawn at random within its tolerance, reads the cutoff frequency from each AC sweep and plots a histogram.
+  Mean, sigma and yield (the share of builds that meet 1 kHz ± 5%) tell you whether 5% parts are good enough or you
+  need 1%.
+learn:
+  - name: Component tolerances
+  - name: Monte Carlo simulation
+  - name: SPICE AC analysis
+    ref: ngspice
+  - name: Yield
+components:
+  - id: gen
+    name: Netlist generator
+    role: Writes one netlist per run with each part's value drawn independently.
+    tech: Python
+    talksTo: [spice]
+    kind: core
+  - id: spice
+    name: ngspice batch
+    role: Runs the AC sweep and measures the -3 dB point of each netlist.
+    tech: ngspice
+    talksTo: [parse]
+    kind: core
+  - id: parse
+    name: Result parser
+    role: Reads the measured cutoff from each log next to the drawn values.
+    tech: Python
+    talksTo: [plot]
+    kind: core
+  - id: plot
+    name: Histogram
+    role: Plots cutoff frequency with mean, sigma and yield for each tolerance.
+    tech: matplotlib
+    talksTo: []
+    kind: offline
+flow:
+  - component: gen
+    text: draws R1, R2, C1 and C2 **separately** per run, for example `R = 10k·(1 + tol·u)` with `u` uniform in -1 to 1, from a seeded generator.
+  - component: spice
+    text: runs `ngspice -b run_0042.cir` with `.ac dec 100 10 100k` and `.meas ac fc WHEN vdb(out)=-3.0103`.
+  - component: parse
+    text: pulls `fc` from each log into one table with the four drawn values, so you can see which part moves `fc` most.
+  - component: plot
+    text: draws the `fc` histogram for 5% and 1% parts and reports mean, sigma and yield against 1 kHz ± 5%.
+interface:
+  lang: spice
+  code: |
+    * Sallen-Key low-pass, run 42, values drawn
+    .param R1=10.37k R2=9.81k C1=22.4n C2=11.1n
+    V1 in 0 AC 1
+    R1 in a {R1}
+    R2 a b {R2}
+    C1 a out {C1}
+    C2 b 0 {C2}
+    E1 out 0 b 0 1
+    .ac dec 100 10 100k
+    .meas ac fc WHEN vdb(out)=-3.0103
+    .end
+decisions:
+  - choice: Python drives batch runs
+    instead: A Monte Carlo loop inside ngspice's control language
+    why: >-
+      Python keeps every drawn value next to its result, so you can see which part matters most, and switching between
+      uniform and Gaussian draws is one line. The built-in loop runs a little faster, but 1,000 small runs take only
+      about a minute either way.
+watchOut: >-
+  Using one random number for every component moves all parts together, so the spread of `fc` comes out wrong.
+  Draw each part independently, and check by plotting R1 against R2 across runs: it should look like a cloud.

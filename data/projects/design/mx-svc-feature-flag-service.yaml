@@ -1,0 +1,107 @@
+overview: >-
+  A small feature-flag service for Tandemly that turns features on by plan, country, user id or percentage without
+  a redeploy. Flags and their rules live in SQLite and are cached in memory, so an evaluation is a quick walk down an
+  ordered rule list. Percentage rollouts hash the user id with the flag key, so the same user always lands in the
+  same bucket, and every change is written to an audit log with who and when.
+learn:
+  - name: Deterministic hashing
+  - name: Ordered rule evaluation
+  - name: In-memory caching
+    ref: system-design-primer
+  - name: Audit logs
+  - name: Distribution testing
+stats:
+  - value: < 10 ms
+    label: p99 evaluation at 1,000/s
+  - value: ± 1%
+    label: rollout accuracy, 100k users
+  - value: 100%
+    label: repeat evaluations stable
+components:
+  - id: apps
+    name: Tandemly apps
+    role: Ask for flag values for the current user and request context.
+    tech: Web and API servers
+    talksTo: [evaluator]
+    kind: external
+  - id: admin
+    name: Admin API
+    role: Creates and edits flags, variants and rules per environment.
+    tech: TypeScript · Fastify
+    talksTo: [store, audit]
+    kind: offline
+  - id: store
+    name: Flag store
+    role: Flags, variants, environments and ordered rules.
+    tech: SQLite
+    talksTo: [cache]
+    kind: offline
+  - id: cache
+    name: Config cache
+    role: Holds the whole ruleset in memory and reloads it when the version number changes.
+    tech: TypeScript
+    talksTo: [evaluator]
+    kind: core
+  - id: evaluator
+    name: Rule evaluator
+    role: Walks rules top to bottom and returns the first match, or the default variant.
+    tech: TypeScript
+    talksTo: [bucketing]
+    kind: core
+  - id: bucketing
+    name: Bucketing hash
+    role: Maps flag key plus user id to a bucket from 0 to 9,999 with a fixed hash.
+    tech: MurmurHash3 32-bit
+    talksTo: []
+    kind: core
+  - id: audit
+    name: Audit log
+    role: Append-only record of every flag change with author, time, before and after.
+    tech: SQLite
+    talksTo: []
+    kind: offline
+flow:
+  - component: evaluator
+    text: receives `POST /evaluate` with `user_id`, `plan=pro` and `country=DE` for environment `production`.
+  - component: cache
+    text: hands over flag `new-billing` from memory; the database is only read when the ruleset `version` has changed.
+  - component: evaluator
+    text: checks rules in order, rule 1 `user_id in [staff]` misses, rule 2 `plan == pro` matches with a 20 percent rollout.
+  - component: bucketing
+    text: >-
+      computes `murmur3("new-billing:" + user_id) % 10000` = 1,342, which is under 2,000, so the user is **in** the
+      rollout and will stay in after any restart.
+  - component: evaluator
+    text: returns variant `on` with reason `rule:2`, which helps when someone asks why a user sees the feature.
+interface:
+  lang: http
+  code: |
+    POST /evaluate
+    { "env": "production",
+      "context": { "user_id": "u_1f93",
+                   "plan": "pro", "country": "DE" } }
+
+    200 OK
+    { "version": 214,
+      "flags": {
+        "new-billing": { "value": "on",
+                         "reason": "rule:2" } } }
+decisions:
+  - choice: Hash flag key plus user id
+    instead: Random assignment stored per user
+    why: >-
+      Hashing needs no storage, gives the same answer after restarts, and including the flag key stops the same 20
+      percent of users getting every new feature.
+  - choice: Whole ruleset cached in memory
+    instead: Query SQLite on every evaluation
+    why: >-
+      A few hundred flags are a few kilobytes. Memory reads keep p99 far under 10 ms at 1,000 requests a second, and
+      a version check makes reloads cheap.
+  - choice: First matching rule wins
+    instead: Combine all matching rules
+    why: >-
+      Order is easy to show in the admin UI and to explain in the `reason` field. Combining rules makes it unclear
+      which one decided.
+watchOut: >-
+  If another language's SDK hashes the string differently, users switch variants. Fix the exact hash, encoding and
+  string format, and keep test vectors of user ids and expected buckets.

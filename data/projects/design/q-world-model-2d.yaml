@@ -1,0 +1,124 @@
+overview: >-
+  A pre-registered test of whether a 50 M-parameter transformer world model, a network that predicts what happens
+  next, can roll your 2D rigid-body engine forward for one second within a tolerance fixed in advance. Each body
+  becomes a token of position, angle, velocities, shape and size; the model attends over the last few frames and
+  predicts each body's change of state, and its own predictions feed back for 60 steps at 60 Hz. Results are broken
+  down by scene type against two simple baselines in a two-page report, and a negative result counts.
+learn:
+  - name: Transformers over sets
+    ref: stanford-cs336
+  - name: World models
+    ref: dreamerv3-code
+  - name: Autoregressive rollouts
+    ref: pbdl-book
+  - name: Train and test splits
+    ref: ml-reproducibility-challenge
+  - name: Pre-registration
+    ref: schulman-research-guide
+stats:
+  - value: 50 M
+    label: parameters, ±10 %, checked
+  - value: 60 steps
+    label: one second at 60 Hz
+  - value: "4"
+    label: scene types reported separately
+components:
+  - id: protocol
+    name: Tolerance and prediction
+    role: Fixes the tolerance, scene mix, splits, model size and metrics before training.
+    tech: Markdown in research/
+    talksTo: [data]
+    kind: core
+  - id: engine
+    name: 2D engine
+    role: Simulates free flight, single collisions, stacks and resting contact with 2 to 10 bodies.
+    tech: Your engine · Python bindings
+    talksTo: [data]
+    kind: external
+  - id: data
+    name: Trajectory dataset
+    role: Stores 60 Hz trajectories split into train, validation and test by scene seed.
+    tech: NumPy
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: World model
+    role: Attends over body tokens of the last k frames and predicts each body's change of state.
+    tech: PyTorch · W&B
+    talksTo: [rollout]
+    kind: core
+  - id: rollout
+    name: Rollout
+    role: Feeds predictions back in for 60 steps on test scenes.
+    tech: PyTorch
+    talksTo: [eval]
+    kind: core
+  - id: baselines
+    name: Baselines
+    role: Constant velocity and gravity-only ballistic motion on the same scenes.
+    tech: NumPy
+    talksTo: [eval]
+    kind: offline
+  - id: eval
+    name: Evaluation
+    role: Measures the share of bodies within tolerance, errors against horizon, drift and interpenetration.
+    tech: NumPy · Matplotlib
+    talksTo: [report]
+    kind: core
+  - id: report
+    name: Report
+    role: Two pages with error against horizon per scene type and the prediction beside the outcome.
+    tech: research/ in the data repo
+    talksTo: []
+    kind: core
+flow:
+  - component: protocol
+    text: >-
+      commits a tolerance and prediction such as "after 60 steps, **80 % of bodies** within 0.1 m and 10° on free
+      flight and single collisions, under 50 % on stacks".
+  - component: data
+    text: >-
+      generates trajectories from the engine and splits them by **scene seed**, so no test scene was ever seen.
+  - component: model
+    text: >-
+      reads the last `k` frames of body tokens and predicts `Δstate` for each body, trained on one-step targets.
+  - component: rollout
+    text: >-
+      adds each prediction to the state and feeds it back, 60 times, starting from a test scene's first frames.
+  - component: eval
+    text: >-
+      compares with engine ground truth at 0.25, 0.5 and 1 s per scene type, alongside both baselines.
+  - component: report
+    text: >-
+      quotes the prediction beside the outcome and names the scene types that need more data or another architecture.
+interface:
+  lang: python
+  code: |
+    # one body = one token of 10 features:
+    # x, y, cos θ, sin θ, vx, vy, ω, shape, w, h
+    def rollout(model, frames, steps=60, k=4):
+        hist = list(frames[-k:])
+        for _ in range(steps):
+            delta = model(stack(hist))  # per body
+            hist.append(apply(hist[-1], delta))
+            hist = hist[-k:]
+            yield hist[-1]
+decisions:
+  - choice: State tokens
+    instead: Predicting pixels
+    why: >-
+      With one token per body, a 50 M model spends its capacity on physics, not on drawing, and errors are in metres
+      and degrees. Pixels are the stretch goal.
+  - choice: Predict changes of state
+    instead: Predict absolute positions
+    why: >-
+      Per-frame changes are small and similar across the arena, so the model learns motion rather than memorising
+      where bodies tend to be.
+  - choice: Split by scene seed
+    instead: Split by frame
+    why: >-
+      Frames from one scene are nearly identical, so a frame split lets the model see the future of its own test
+      scenes and inflates every score.
+watchOut: >-
+  One-step error looks excellent while 60-step rollouts drift apart, because small errors compound. Report error
+  against horizon for every scene type, never one-step error alone.

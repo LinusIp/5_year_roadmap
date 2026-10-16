@@ -1,0 +1,117 @@
+overview: >-
+  A replay harness that plays one synthetic, production-shaped day of traffic against an 8B model on vLLM, once per
+  candidate configuration. Prometheus records time-to-first-token (TTFT), inter-token latency (ITL) and GPU use for
+  every run, and a pandas cost model turns each run into dollars per 1M output tokens. Only configurations that keep
+  p99 TTFT ≤ 1.2 s at 45 req/s and lose ≤ 1% on the eval count as savings against the $38,000 a month baseline.
+learn:
+  - name: Continuous batching
+    ref: vllm-docs
+  - name: Prefix caching
+    ref: sglang-docs
+  - name: TTFT and ITL percentiles
+    ref: databricks-inference-best-practices
+  - name: Weight quantisation
+    ref: nvidia-inference-optimization
+  - name: Goodput at an SLO
+  - name: KV cache sizing
+    ref: kipply-inference-arithmetic
+stats:
+  - value: ≥ 40%
+    label: lower $ per 1M tokens
+  - value: ≤ 1.2 s
+    label: p99 TTFT at 45 req/s
+  - value: ≤ 1%
+    label: eval drop
+components:
+  - id: sweep
+    name: Sweep runner
+    role: Starts one Docker container per candidate config and runs the same trace against it.
+    tech: Python · Docker
+    talksTo: [engine, driver]
+    kind: core
+  - id: trace
+    name: Trace generator
+    role: Builds a seeded day of arrivals with a diurnal curve, bursts and ShareGPT-like prompt lengths.
+    tech: Python · numpy
+    talksTo: [driver]
+    kind: core
+  - id: driver
+    name: Replay driver
+    role: Sends each request at its recorded timestamp and times first and later tokens on the stream.
+    tech: Python · asyncio
+    talksTo: [engine]
+    kind: core
+  - id: engine
+    name: vLLM server
+    role: Serves the 8B model with the batching limits, prefix cache and weight format under test.
+    tech: vLLM or SGLang · rented GPU
+    talksTo: [metrics]
+    kind: core
+  - id: metrics
+    name: Metrics collector
+    role: Scrapes queue time, GPU utilisation, KV cache use and token counts every 5 s.
+    tech: Prometheus
+    talksTo: [cost]
+    kind: core
+  - id: eval
+    name: Quality gate
+    role: Scores each config on 500 held-out prompts and blocks any with more than a 1% drop.
+    tech: Python
+    talksTo: [cost]
+    kind: offline
+  - id: cost
+    name: Cost model
+    role: Converts GPU hours and output tokens to $ per 1M tokens and ranks levers in the report.
+    tech: pandas · notebook
+    talksTo: []
+    kind: core
+flow:
+  - component: sweep
+    text: picks the next config, for example `max_num_seqs=128` with prefix caching on and FP8 weights, and starts it.
+  - component: trace
+    text: replays the **same seed** every time, so the 45 req/s peak and the long-prompt bursts land at the same moments.
+  - component: driver
+    text: sends one request, a 1,800-token prompt sharing the product's system prompt, and stamps when the first token arrives.
+  - component: engine
+    text: >-
+      finds the shared prefix already in the KV cache, so only the new tail is prefilled, then joins the running
+      decode batch; each token of that batch must come back within the 80 ms ITL budget.
+  - component: metrics
+    text: records the request's queue time and TTFT, plus GPU utilisation and KV cache use for the whole run.
+  - component: cost
+    text: >-
+      divides the run's GPU dollars by output tokens and keeps the config only if p99 TTFT is ≤ 1.2 s and the
+      **quality gate** passed.
+interface:
+  lang: json
+  code: |
+    // one line of the replay trace
+    { "t": 36125.48,
+      "prompt_tokens": 1840,
+      "max_tokens": 220,
+      "prefix_id": "sys-v3",
+      "stream": true }
+
+    // one row the cost model writes
+    { "config": "fp8-seq128-prefix",
+      "p99_ttft_s": 1.08, "p99_itl_ms": 61,
+      "usd_per_1m_out": 0.41, "eval_delta": -0.4 }
+decisions:
+  - choice: Replay one seeded trace, not live A/B
+    instead: Split live production traffic between configs
+    why: >-
+      Every lever is compared on identical arrivals, and a full sweep fits on one rented GPU for under $60. Revisit
+      once the winning config is chosen and needs a short live canary.
+  - choice: Rank by $ per 1M tokens at peak
+    instead: Rank by maximum tokens per second
+    why: >-
+      Contracts promise p99 TTFT at 45 req/s; a config that is cheap at 10 req/s but breaks the SLO at peak saves
+      nothing. Revisit if traffic stops having a sharp daily peak.
+  - choice: FP8 weights before 4-bit
+    instead: 4-bit AWQ weights
+    why: >-
+      FP8 halves weight memory (16 GB to 8 GB), freeing room for KV cache, and usually stays well inside the 1% eval
+      budget. Try 4-bit only if FP8 plus batching still misses 40%.
+watchOut: >-
+  Savings that only appear at low load are not savings. Report every lever at the 45 req/s peak and at p99, never as
+  a mean over the quiet hours.

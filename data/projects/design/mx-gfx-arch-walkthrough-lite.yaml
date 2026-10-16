@@ -1,0 +1,105 @@
+overview: >-
+  A first-person viewer for a glTF apartment model. At load the static meshes are merged into one draw batch per
+  material and a triangle BVH (bounding volume hierarchy, a tree of boxes that skips most triangles) is built for
+  collision. Each frame a capsule-shaped player is swept against the BVH and slides along walls, doors swing on key
+  press, and the sun casts shadows from a single shadow map that day and night presets re-light.
+learn:
+  - name: glTF scenes
+    ref: learnopengl
+  - name: Triangle BVH
+    ref: ericson-rtcd
+  - name: Collide and slide
+    ref: ericson-rtcd
+  - name: Shadow mapping
+    ref: learnopengl
+  - name: Draw-call batching
+    ref: game-engine-architecture
+stats:
+  - value: 60 FPS
+    label: 500k triangles at 1080p
+  - value: < 0.2 ms
+    label: collision per frame
+  - value: "0"
+    label: wall escapes in a 10-min fuzz walk
+components:
+  - id: loader
+    name: glTF loader
+    role: Reads meshes, materials, textures and node transforms from the apartment file.
+    tech: tinygltf-style · C++17
+    talksTo: [batcher, controller]
+    kind: core
+  - id: batcher
+    name: Batcher
+    role: Merges static meshes into one vertex buffer and one draw per material.
+    tech: OpenGL 3.3
+    talksTo: [shadow]
+    kind: core
+  - id: controller
+    name: Capsule controller
+    role: Builds the static triangle BVH and moves the player capsule with collide-and-slide and stair snap.
+    tech: C++17 · GLM
+    talksTo: [doors, shadow]
+    kind: core
+  - id: doors
+    name: Door interaction
+    role: Opens and closes doors on a key press and moves their box colliders.
+    tech: C++17
+    talksTo: [controller]
+    kind: core
+  - id: shadow
+    name: Shadow and lighting
+    role: Renders sun depth into a 2048 shadow map, then shades the batches with the day or night preset.
+    tech: GLSL 3.3
+    talksTo: [gpu]
+    kind: core
+  - id: gpu
+    name: Client laptop GPU
+    role: Runs the shadow and main passes.
+    tech: OpenGL 3.3
+    talksTo: []
+    kind: external
+  - id: views
+    name: Viewpoint store
+    role: Saves and restores bookmarked camera positions as JSON.
+    tech: JSON
+    talksTo: []
+    kind: offline
+flow:
+  - component: loader
+    text: has read the apartment once, sending render meshes to the batcher and wall and floor triangles to the controller's BVH.
+  - component: doors
+    text: casts a short ray on `E`, toggles the door it hits and moves that door's collider with its swing.
+  - component: controller
+    text: sweeps the capsule along this frame's move against the BVH and door boxes, slides along each hit up to 3 times, steps up 0.25 m and snaps down to the floor.
+  - component: shadow
+    text: draws the batches from the sun into the shadow map, then draws them again from the eye with **slope-scaled bias** and 4-tap filtering.
+  - component: batcher
+    text: issues about one draw call per material for the whole building instead of one per object.
+interface:
+  lang: cpp
+  code: |
+    struct Capsule { glm::vec3 base; float h, r; };
+    struct Hit { glm::vec3 n; float t; bool hit; };
+
+    // First contact of the capsule moving by `d`
+    // against static triangles; t in [0, 1].
+    Hit sweep(const Bvh& bvh, const Capsule& c,
+              glm::vec3 d);
+
+    // Collide and slide: up to 3 sweeps, step up
+    // 0.25 m, then snap down to the floor.
+    glm::vec3 move(const Bvh& bvh, Capsule& c,
+                   glm::vec3 wish, float dt);
+decisions:
+  - choice: One batch per material
+    instead: One draw per object as exported
+    why: An architectural export has thousands of small objects; per-object draws make the CPU the limit long before 500k triangles do.
+  - choice: Own BVH and capsule
+    instead: A full physics engine
+    why: The only physics is a walking person and swinging doors, and the 0.2 ms budget is easy to measure in your own code.
+  - choice: One fitted shadow map
+    instead: Cascaded shadow maps
+    why: A 3-storey block is about 60 m across, so 2048 texels give roughly 3 cm each. Revisit for whole-site models.
+watchOut: >-
+  Shadow acne and peter-panning pull in opposite directions. Tune slope-scaled bias on the default sun angle first,
+  then check that thin window frames still touch their shadows.

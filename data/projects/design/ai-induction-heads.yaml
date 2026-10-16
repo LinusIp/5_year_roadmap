@@ -1,0 +1,47 @@
+overview: >-
+  A 2-layer attention-only transformer trained on sequences where a random chunk repeats, so the second copy is
+  predictable only by looking back. You measure how much lower the loss is on the repeat, find the heads that attend
+  to "the token after the previous occurrence", and ablate them to show the advantage disappears.
+learn:
+  - name: Induction heads
+    ref: stanford-cs25
+  - name: Attention patterns
+  - name: Head ablation
+  - name: Phase changes
+components:
+  - id: data
+    name: Sequence generator
+    role: Makes random token sequences with the first half repeated.
+    tech: PyTorch
+    talksTo: [model]
+    kind: core
+  - id: model
+    name: Tiny transformer
+    role: Two attention-only layers with several heads and no MLPs.
+    tech: PyTorch
+    talksTo: [analysis]
+    kind: core
+  - id: analysis
+    name: Analysis
+    role: Scores each head's induction pattern and measures loss with heads zeroed.
+    tech: PyTorch hooks · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: data
+    text: produces sequences of 50 random tokens followed by the same 50 tokens.
+  - component: model
+    text: trains past the point where loss on the second half suddenly drops, the **phase change**.
+  - component: analysis
+    text: averages over many sequences each head's attention from position `i` to `i - 50 + 1` (the token after the earlier copy).
+  - component: analysis
+    text: zeroes the top-scoring heads with a forward hook and reports loss on the repeat before and after.
+decisions:
+  - choice: Attention-only model
+    instead: A standard transformer with MLP layers
+    why: >-
+      Without MLPs every path goes through attention, so induction heads are easier to find and ablation effects are
+      clean. Add MLPs only after the basic result holds.
+watchOut: >-
+  Stopping training before the phase change finds no induction heads. Plot repeat-half loss during training and keep
+  going until it drops sharply.

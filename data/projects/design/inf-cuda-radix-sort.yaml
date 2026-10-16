@@ -1,0 +1,53 @@
+overview: >-
+  A GPU radix sort for 32-bit keys with values, built from your own kernels: each pass takes 4 bits, counts digit
+  occurrences per block, scans the counts to get each block's output offsets, and scatters elements stably. Eight
+  passes sort the keys, checked against std::sort and timed against thrust.
+learn:
+  - name: Radix sort
+    ref: pmpp-book
+  - name: Histograms and scans
+    ref: pmpp-book
+  - name: Stable scatter
+components:
+  - id: histogram
+    name: Histogram kernel
+    role: Counts the 16 digit values in each block's chunk for the current 4 bits.
+    tech: CUDA C++
+    talksTo: [scan]
+    kind: core
+  - id: scan
+    name: Offset scan
+    role: Scans counts in digit-major order to give each block a start per digit.
+    tech: CUDA C++
+    talksTo: [scatter]
+    kind: core
+  - id: scatter
+    name: Scatter kernel
+    role: Ranks elements within the block by digit and writes key and value to their final slot.
+    tech: CUDA C++
+    talksTo: [verify]
+    kind: core
+  - id: verify
+    name: Verifier
+    role: Compares with std::sort and checks stability on duplicate keys.
+    tech: C++ · thrust
+    talksTo: []
+    kind: core
+flow:
+  - component: histogram
+    text: counts digit `(key >> shift) & 0xF` for each block's chunk of the input.
+  - component: scan
+    text: scans the `16 x blocks` count table digit by digit, so all zeros of every block come before all ones.
+  - component: scatter
+    text: computes each element's rank among same-digit elements **in input order** and writes it to `offset[digit][block] + rank`, then the buffers swap and `shift += 4`.
+  - component: verify
+    text: after 8 passes checks 1e7 keys against `std::sort`, checks duplicates keep their value order, and reports Mkeys/s against `thrust::sort`.
+decisions:
+  - choice: 4-bit digits, 8 passes
+    instead: 8-bit digits, 4 passes
+    why: >-
+      16 buckets keep the per-block histogram and local ranking small enough for shared memory and simple to write.
+      8-bit digits halve the passes; try them once the 4-bit version is correct.
+watchOut: >-
+  A local ranking that does not keep input order breaks stability, and later passes then scramble earlier digits.
+  Test with many equal keys and check values come out in their original order.

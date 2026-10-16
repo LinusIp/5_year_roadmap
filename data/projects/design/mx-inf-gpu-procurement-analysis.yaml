@@ -1,0 +1,116 @@
+overview: >-
+  A measured answer to whether Kestrel Health should keep renting GPUs at $22,000 a month or buy four servers. A
+  shared vLLM benchmark harness runs the company's model mix on rented candidate GPUs and stores sustained throughput
+  at the latency target, and a parametric total-cost-of-ownership (TCO) model turns those numbers into $ per 1M
+  tokens and break-even months. A calculator and a 4-page memo show the result under three demand scenarios, with a
+  sensitivity chart for the six inputs that move it most.
+learn:
+  - name: Sustained versus peak throughput
+    ref: databricks-inference-best-practices
+  - name: Total cost of ownership
+  - name: Depreciation and break-even
+  - name: Sensitivity analysis
+  - name: Benchmark harness design
+    ref: vllm-docs
+stats:
+  - value: ≤ 5%
+    label: calculator error vs measured
+  - value: "3"
+    label: demand scenarios
+  - value: ≥ 6
+    label: parameters in sensitivity
+components:
+  - id: harness
+    name: Benchmark harness
+    role: Replays the same request mix on each GPU class and finds sustained tokens per second under the latency target.
+    tech: Python · vLLM
+    talksTo: [db]
+    kind: core
+  - id: gpus
+    name: Rented GPUs
+    role: Candidate GPU classes rented by the hour only for the measurements.
+    tech: Cloud instances
+    talksTo: [harness]
+    kind: external
+  - id: db
+    name: Throughput database
+    role: Stores tokens per second per GPU class, model, batch setting and run date.
+    tech: SQLite · pandas
+    talksTo: [tco]
+    kind: core
+  - id: tco
+    name: TCO model
+    role: Adds capex spread over the depreciation period, power, hosting, staff and utilisation into $ per 1M tokens.
+    tech: Python
+    talksTo: [scenarios]
+    kind: core
+  - id: scenarios
+    name: Scenario engine
+    role: Projects monthly token demand under low, expected and high growth and finds break-even months.
+    tech: Python · pandas
+    talksTo: [sens]
+    kind: core
+  - id: sens
+    name: Sensitivity charts
+    role: Moves each input from low to high and draws a tornado chart of the effect on break-even.
+    tech: matplotlib · Streamlit
+    talksTo: [memo]
+    kind: core
+  - id: memo
+    name: Decision memo
+    role: States the recommendation, the assumptions and the risks in at most 4 pages.
+    tech: Markdown · PDF
+    talksTo: []
+    kind: core
+flow:
+  - component: harness
+    text: >-
+      runs the model mix on one candidate GPU and raises concurrency until p95 latency crosses the target, recording
+      **sustained** tokens per second just below it.
+  - component: db
+    text: stores that number with the instance's hourly price, so rent cost per 1M tokens is measured, not quoted.
+  - component: tco
+    text: >-
+      for the buy option adds the four servers' price over 36 months, power at the stated kW and $/kWh, hosting and
+      a share of an engineer's time, divided by tokens at the assumed utilisation.
+  - component: scenarios
+    text: compares that with the $22,000 rental line month by month under three growth curves and reports the break-even month for each.
+  - component: sens
+    text: >-
+      varies utilisation, server price, power price, staff cost, rental price and growth one at a time to show which
+      assumption could flip the answer.
+  - component: memo
+    text: recommends buy, rent or a mix, and names the utilisation threshold below which buying loses money.
+interface:
+  lang: python
+  code: |
+    def cost_per_m_tokens(
+        tokens_s: float,      # measured, sustained
+        utilisation: float,   # 0..1, assumed
+        capex_usd: float,
+        months: int = 36,
+        power_kw: float = 0.0,
+        usd_kwh: float = 0.0,
+        hosting_usd_month: float = 0.0,
+        staff_usd_month: float = 0.0,
+    ) -> float:
+        ...
+decisions:
+  - choice: Sustained throughput at the latency target
+    instead: Peak throughput from a saturated benchmark
+    why: >-
+      Peak numbers come from batch sizes that would break the product's latency, so they flatter every GPU. The 5%
+      match to measured $ per 1M only holds for sustained numbers.
+  - choice: Utilisation as an explicit input
+    instead: Assume servers run flat out
+    why: >-
+      Bought servers cost the same when idle, so utilisation decides whether buying wins; the memo states the
+      threshold rather than hiding it.
+  - choice: Staff and power in the base case
+    instead: Hardware price only
+    why: >-
+      Leaving them out is the most common way buy-versus-rent memos are wrong. Revisit the staff share once the
+      company knows who would run the servers.
+watchOut: >-
+  Assuming 100% utilisation makes buying look far better than it is. Use the company's real usage curve and show how
+  the break-even month moves as utilisation drops.

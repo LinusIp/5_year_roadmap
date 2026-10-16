@@ -1,0 +1,61 @@
+overview: >-
+  A full-screen fragment shader iterates `z = z² + c` for every pixel and colours it by a smooth escape count, with
+  pan and zoom on the mouse. To zoom past plain float's limit of about 1e-6, the view centre and pixel offsets are
+  stored as **double-single** numbers (a pair of floats whose sum carries about 48 bits), which reaches about 1e-12.
+learn:
+  - name: Escape-time fractals
+    ref: iq-articles
+  - name: Smooth colouring
+  - name: Double-single arithmetic
+  - name: Float precision limits
+components:
+  - id: controls
+    name: View controls
+    role: Keeps the centre and scale in doubles on the CPU and uploads them as float pairs.
+    tech: Host code · OpenGL
+    talksTo: [shader]
+    kind: core
+  - id: shader
+    name: Fractal shader
+    role: Iterates each pixel and maps the escape count to a colour.
+    tech: GLSL
+    talksTo: [ds]
+    kind: core
+  - id: ds
+    name: Double-single maths
+    role: Adds and multiplies float pairs without losing the low bits.
+    tech: GLSL functions
+    talksTo: []
+    kind: core
+flow:
+  - component: controls
+    text: splits each double `x` into `hi = float(x)` and `lo = float(x - hi)`; a wheel tick multiplies `scale` by 0.9.
+  - component: shader
+    text: computes `c = centre + offset * scale` per pixel and raises `max_iter` as `100 + 50·log10(1/scale)` so deep views do not turn black.
+  - component: ds
+    text: does each add with **two-sum** and each multiply with a split product, keeping the error term a single float would round away.
+  - component: shader
+    text: colours escaped points by `n + 1 - log2(log2(|z|))`, a smooth count with no colour bands.
+interface:
+  lang: glsl
+  code: |
+    // a double-single number: value = v.x + v.y
+    vec2 ds_add(vec2 a, vec2 b);
+    vec2 ds_mul(vec2 a, vec2 b);
+
+    uniform vec2 centre_x;  // (hi, lo)
+    uniform vec2 centre_y;
+    uniform vec2 scale;     // world units per pixel
+    uniform int max_iter;
+
+    // smooth iteration count, or -1.0 inside
+    float mandel(vec2 cx, vec2 cy, int max_iter);
+decisions:
+  - choice: Double-single floats, not GLSL doubles
+    instead: Native `double` in GLSL 4.0
+    why: >-
+      Many consumer GPUs run doubles at 1/32 or 1/64 of float speed, and some drivers lack them. Float pairs run at
+      near full rate and reach the 1e-12 target; past about 1e-14 switch to perturbation (one precise reference orbit).
+watchOut: >-
+  The compiler may simplify `(a + b) - a` to `b`, which deletes the error term double-single depends on. Mark the
+  maths `precise` and test that `ds_add` keeps the low part of 1.0 + 1e-8; if zoom still stalls at 1e-6, this is why.

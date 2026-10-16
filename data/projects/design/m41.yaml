@@ -1,0 +1,130 @@
+overview: >-
+  A `no_std` Rust sensor node on an ESP32-C3 (or an STM32 with a serial gateway) that reads a BME280 through your own
+  driver crate, written against the embedded-hal traits so it runs on any chip and tests on the host. Two async tasks
+  share a bounded channel: the sensor task makes a reading every 10 s with a node id and sequence number, and the
+  network task keeps Wi-Fi and MQTT alive and publishes. On the backend, Mosquitto receives the messages and a bridge
+  produces them to Kafka, where the project 28 pipeline and dashboard pick them up.
+learn:
+  - name: no_std Rust
+    ref: embedded-rust-book
+  - name: embedded-hal traits
+    ref: embedded-rust-book
+  - name: Async on a microcontroller
+  - name: MQTT sessions and QoS
+  - name: De-duplication by sequence
+    ref: ddia
+  - name: Driver tests with mocks
+stats:
+  - value: ≥ 99.5 %
+    label: sequence numbers in Kafka over 24 h
+  - value: < 30 s
+    label: reconnect after the access point returns
+  - value: 0.01 °C
+    label: match to the datasheet's worked examples
+components:
+  - id: sensor
+    name: BME280
+    role: Measures temperature, pressure and humidity over I2C.
+    tech: Bosch BME280
+    talksTo: [driver]
+    kind: external
+  - id: driver
+    name: Driver crate
+    role: Reads raw values and applies the datasheet compensation, generic over any I2C bus.
+    tech: Rust · embedded-hal 1.0
+    talksTo: [sensortask]
+    kind: core
+  - id: sensortask
+    name: Sensor task
+    role: Takes a reading every 10 s and tags it with node id and sequence number.
+    tech: Embassy
+    talksTo: [channel]
+    kind: core
+  - id: channel
+    name: Bounded channel
+    role: Holds readings between the tasks and through a Wi-Fi outage, with a fixed size.
+    tech: embassy-sync
+    talksTo: [nettask]
+    kind: core
+  - id: nettask
+    name: Network task
+    role: Keeps Wi-Fi and the MQTT session alive and publishes each reading.
+    tech: esp-hal · MQTT
+    talksTo: [broker]
+    kind: core
+  - id: broker
+    name: Mosquitto
+    role: The MQTT broker that receives every node's messages.
+    tech: Mosquitto
+    talksTo: [bridge]
+    kind: core
+  - id: bridge
+    name: MQTT-Kafka bridge
+    role: Stamps broker time and produces each reading to Kafka keyed by node id.
+    tech: Rust or Python
+    talksTo: [pipeline]
+    kind: core
+  - id: pipeline
+    name: Project 28 pipeline
+    role: The existing Kafka topic, stream job and dashboard.
+    tech: Kafka · Grafana
+    talksTo: []
+    kind: external
+flow:
+  - component: driver
+    text: >-
+      reads the raw registers through `embedded_hal::i2c::I2c` and applies Bosch's compensation formulas to get °C,
+      Pa and %RH.
+  - component: sensortask
+    text: >-
+      wakes every 10 s, takes one forced-mode reading so the chip does not self-heat, and adds `node_id` and `seq`.
+  - component: channel
+    text: >-
+      queues the reading; when it is full it drops the oldest and counts the drop, so memory stays fixed during an
+      outage.
+  - component: nettask
+    text: >-
+      publishes to `sensors/<node_id>` with QoS 1 and reconnects within 30 s if the access point disappears.
+  - component: broker
+    text: receives the message and passes it to the bridge's subscription.
+  - component: bridge
+    text: >-
+      stamps the broker time, since the node has no clock, and produces to Kafka with the **node id as key** so one
+      node's readings stay in order.
+  - component: pipeline
+    text: drops duplicate `(node_id, seq)` pairs and shows the readings on the project 28 dashboard.
+interface:
+  lang: rust
+  code: |
+    pub struct Bme280<I2C> {
+        i2c: I2C,
+        addr: u8,
+        calib: Calibration,
+    }
+    impl<I2C: I2c> Bme280<I2C> {
+        pub fn new(i2c: I2C, addr: u8)
+            -> Result<Self, I2C::Error>;
+        pub fn read(&mut self)
+            -> Result<Reading, I2C::Error>;
+    }
+    // MQTT payload on sensors/<node_id>
+    // {"node":"c3-01","seq":4711,"t":21.43,
+    //  "p":101325,"rh":41.2}
+decisions:
+  - choice: MQTT to a broker, then a bridge
+    instead: A Kafka client on the device
+    why: >-
+      There is no practical Kafka client for a `no_std` microcontroller, and MQTT is small and built for links that
+      drop; the bridge is a few dozen lines.
+  - choice: Driver generic over embedded-hal
+    instead: A driver tied to esp-hal
+    why: >-
+      The ten host tests run against a mocked I2C bus with no board attached, and the same crate works on the STM32
+      fallback.
+  - choice: Embassy async tasks
+    instead: A blocking super-loop
+    why: >-
+      The sensor read and the Wi-Fi stack must wait at the same time, and esp-hal's network stack is async already.
+watchOut: >-
+  A blocking I2C call inside an async task starves the network stack, so reconnects and publishes stall. Use the async
+  I2C driver, or keep blocking reads short and yield after them.

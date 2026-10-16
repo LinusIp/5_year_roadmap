@@ -1,0 +1,71 @@
+overview: >-
+  A small immediate-mode GUI: the app calls `button("Save")` every frame and gets back whether it was clicked, so the
+  library keeps almost no state besides which widget is hot (under the mouse) and which is active (being pressed).
+  Widgets are placed by a layout cursor and written into one draw list with clip rectangles, drawn in a few OpenGL
+  calls.
+learn:
+  - name: Immediate-mode UI
+    ref: handmade-hero
+  - name: Hot and active IDs
+  - name: Layout cursor
+  - name: Scissor clipping
+    ref: learnopengl
+components:
+  - id: input
+    name: Input state
+    role: Snapshots mouse, wheel, keys and typed characters once per frame.
+    tech: C++20
+    talksTo: [widgets]
+    kind: core
+  - id: widgets
+    name: Widgets
+    role: Button, slider, checkbox, text input, label and window, each one function.
+    tech: C++20
+    talksTo: [drawlist]
+    kind: core
+  - id: drawlist
+    name: Draw list
+    role: Collects quads and glyphs with their clip rectangle in one vertex array.
+    tech: C++20
+    talksTo: [renderer]
+    kind: core
+  - id: renderer
+    name: GL renderer
+    role: Uploads the draw list and draws it with one call per clip change.
+    tech: OpenGL
+    talksTo: []
+    kind: core
+flow:
+  - component: input
+    text: takes the input snapshot **before** any widget runs, so a click is seen in the same frame it happens, not one frame late.
+  - component: widgets
+    text: hash the label and the parent ID stack into an `id`; under the mouse it becomes `hot`, pressed it becomes `active`, and released while hot the call returns true.
+  - component: drawlist
+    text: appends each widget's quads and glyphs with the current clip rectangle, while the layout cursor moves down by the widget's height.
+  - component: renderer
+    text: uploads one vertex buffer and issues one draw per clip change using `glScissor`; draw calls per frame are shown in the panel.
+interface:
+  lang: cpp
+  code: |
+    using Id = uint32_t;  // hash of label + ID stack
+
+    void begin_frame(const Input& in);
+    bool begin_window(const char* title, Rect& r);
+    bool button(const char* label);
+    bool slider(const char* label, float& v,
+                float lo, float hi);
+    bool checkbox(const char* label, bool& v);
+    bool text_input(const char* label,
+                    std::string& buf);
+    void push_id(int i);  void pop_id();
+    void end_window();
+    const DrawList& end_frame();  // render this
+decisions:
+  - choice: Immediate mode, not a widget tree
+    instead: A retained widget tree with callbacks
+    why: >-
+      A tool panel mostly mirrors the app's own variables, and immediate mode reads and writes them directly with no
+      syncing. Rebuilding a few hundred widgets every frame costs very little.
+watchOut: >-
+  Two widgets with the same label in one window share an ID, so pressing one activates both. Wrap loop items in
+  `push_id(i)`, or allow a hidden suffix such as `"Delete##3"` that is hashed but not shown.

@@ -1,0 +1,122 @@
+overview: >-
+  A small agent on each of Bluefin's 300 store servers that never loses a log line. It tails log files by inode and
+  offset, so rotation is followed rather than restarted, parses lines into structured records that keep multiline
+  stack traces together, and appends them to a segmented on-disk queue capped at 2 GB before anything is sent. A
+  sender drains compressed batches to the central collector and advances the queue only when the collector
+  acknowledges, so a crash or a 30-minute outage means resending, never losing.
+learn:
+  - name: At-least-once delivery
+    ref: ddia
+  - name: Log rotation and inodes
+  - name: Segmented disk queues
+  - name: fsync and durability
+    ref: ostep
+  - name: Backpressure
+  - name: Exponential backoff
+stats:
+  - value: "0"
+    label: lost lines in 100 crashes
+  - value: 50k/s
+    label: lines per node
+  - value: < 30 MB
+    label: idle memory
+components:
+  - id: files
+    name: Log files
+    role: The store applications' rotating log files.
+    tech: Local files
+    talksTo: [tailer]
+    kind: external
+  - id: tailer
+    name: File tailer
+    role: Follows each file by device, inode and offset across rotations.
+    tech: Go or Rust · inotify
+    talksTo: [parser]
+    kind: core
+  - id: parser
+    name: Parser
+    role: Turns lines into records and joins multiline stack traces.
+    tech: Go or Rust
+    talksTo: [queue]
+    kind: core
+  - id: queue
+    name: Segment queue
+    role: Appends records to 64 MB segment files and tracks the acknowledged read point.
+    tech: Disk segments · CRC
+    talksTo: [checkpoint, sender]
+    kind: core
+  - id: checkpoint
+    name: Checkpoint store
+    role: Records which file offsets are safely in the queue.
+    tech: Small file, atomic rename
+    talksTo: []
+    kind: core
+  - id: sender
+    name: Sender
+    role: Sends compressed batches with retries and backoff.
+    tech: HTTP · zstd
+    talksTo: [collector]
+    kind: core
+  - id: collector
+    name: Collector
+    role: Central receiver that acknowledges batches and drops repeats by batch id.
+    tech: Collector stub
+    talksTo: []
+    kind: external
+flow:
+  - component: tailer
+    text: >-
+      reads new bytes from `app.log` by `(device, inode)` and offset; after rotation it finishes the old inode
+      before opening the new file.
+  - component: parser
+    text: >-
+      turns lines into `{ts, level, host, msg}` and glues lines starting with whitespace or `at ` onto the record
+      before, flushing after 500 ms.
+  - component: queue
+    text: appends each record with a length and CRC to the current segment and calls `fsync` every 200 ms.
+  - component: checkpoint
+    text: >-
+      only after that `fsync`, saves the file offset now safe in the queue, so a crash re-reads from there and
+      loses nothing.
+  - component: sender
+    text: >-
+      reads up to 1 MB, compresses it, sends it with a `batch_id` made of segment and offset, and retries with
+      backoff up to 60 s; when the queue reaches 2 GB the tailer pauses.
+  - component: collector
+    text: >-
+      acknowledges the `batch_id` and ignores repeats of it; the sender then moves the read point and deletes fully
+      acknowledged segments.
+interface:
+  lang: http
+  code: |
+    POST /v1/batches
+    Content-Encoding: zstd
+    X-Batch-Id: store-0217/seg-000412/off-8388608
+    X-Records: 3120
+
+    [{"ts":"2026-05-02T10:14:03.120Z",
+      "level":"ERROR","host":"store-0217",
+      "msg":"payment timeout\n  at Pos.charge"}, …]
+
+    200 OK
+    { "acked": "store-0217/seg-000412/off-8388608",
+      "duplicate": false }
+decisions:
+  - choice: Disk queue before sending
+    instead: An in-memory buffer
+    why: >-
+      Idle memory must stay under 30 MB and links drop for 30 minutes, so the buffer has to live on disk. When even
+      2 GB fills, the tailer stops reading and the log files themselves become the buffer.
+  - choice: At-least-once with deduplication
+    instead: Exactly-once delivery
+    why: >-
+      A crash between send and acknowledgement is unavoidable, so some batches are sent twice. A batch id built
+      from segment and offset is the same on every retry, which lets the collector drop the repeat.
+  - choice: Track files by inode
+    instead: Track files by path
+    why: >-
+      Rotation renames `app.log` and creates a new one at the same path. Following the path alone loses the tail
+      of the old file or reads the new one from the wrong offset.
+watchOut: >-
+  Order is everything: checkpoint a file offset only after its records are fsynced into the queue, and advance the
+  queue only after the collector acknowledges. Swap either step and a crash silently loses lines.

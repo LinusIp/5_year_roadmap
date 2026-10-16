@@ -1,0 +1,111 @@
+overview: >-
+  Search over Hireloom's 12M job posts split across 8 shards, each with replicas, so a monthly ranking change no
+  longer means hours of stale results. A coordinator sends every query to one replica of each shard and merges
+  their top results. A reindexer builds the new version beside the old one while a change stream keeps both up to
+  date, then a single version pointer flips all queries to the new index at once.
+learn:
+  - name: Sharding and scatter-gather
+    ref: ddia
+  - name: Replication and failover
+    ref: ddia
+  - name: Change data capture
+    ref: ddia
+  - name: Global scoring statistics
+    ref: slp3
+  - name: Blue-green cutover
+    ref: google-sre-book
+stats:
+  - value: < 80 ms
+    label: p99 at 500 QPS, 8 shards
+  - value: "0"
+    label: failed queries during reindex
+  - value: < 10 s
+    label: update lag
+components:
+  - id: users
+    name: Job seekers
+    role: Send search queries from the job board.
+    tech: Web
+    talksTo: [coordinator]
+    kind: external
+  - id: coordinator
+    name: Coordinator
+    role: Reads the version pointer, fans the query to one replica per shard and merges the top-k.
+    tech: Go
+    talksTo: [pointer, shards]
+    kind: core
+  - id: pointer
+    name: Version pointer
+    role: Names the live index version, for example v42, and changes only by an atomic compare-and-set.
+    tech: etcd-style key · SQLite
+    talksTo: []
+    kind: core
+  - id: shards
+    name: Shard nodes
+    role: Each holds one hash range of documents for one or two index versions, with two replicas.
+    tech: Go · Bleve · Docker
+    talksTo: []
+    kind: core
+  - id: stream
+    name: Change stream
+    role: Ordered log of job created, edited and closed events with offsets.
+    tech: PostgreSQL logical decoding
+    talksTo: [shards, reindexer]
+    kind: offline
+  - id: reindexer
+    name: Reindexer
+    role: Builds the new version from a snapshot, then replays the stream from the snapshot's offset.
+    tech: Go
+    talksTo: [shards]
+    kind: offline
+  - id: checker
+    name: Consistency checker
+    role: Compares document counts and sample results between versions before cutover.
+    tech: Go
+    talksTo: [shards]
+    kind: offline
+flow:
+  - component: coordinator
+    text: receives `GET /search?q=rust backend&loc=berlin` and reads the pointer, which says `v42`.
+  - component: pointer
+    text: stays on `v42` until the reindexer has caught up and the **checker** passes; then one compare-and-set flips it to `v43`.
+  - component: coordinator
+    text: >-
+      first asks every shard for its term counts and sends the global document frequencies with the query, so
+      scores from different shards are comparable.
+  - component: shards
+    text: >-
+      each search their slice of `v42` and return their top 20; if a replica is slow past 60 ms the coordinator asks
+      the other replica and uses whichever answers first.
+  - component: coordinator
+    text: merges the 8 lists into one top 20 with a heap and returns it, under 80 ms p99.
+interface:
+  lang: http
+  code: |
+    GET /search?q=rust+backend&loc=berlin&k=20
+
+    200 OK
+    { "version": "v42",
+      "shards_answered": 8,
+      "took_ms": 41,
+      "hits": [{ "job_id": "J-8812031",
+                 "score": 9.82, "shard": 5 }] }
+decisions:
+  - choice: Version pointer cutover
+    instead: Reindex each shard in place
+    why: >-
+      In-place reindexing serves a mix of old and new ranking for hours, which is the stale-results problem. Two
+      versions side by side plus one flip gives zero failed queries and an instant rollback.
+  - choice: Snapshot then replay from its offset
+    instead: Start the change stream after the build finishes
+    why: >-
+      Any edit between snapshot and stream start is lost for good. Recording the stream offset at snapshot time and
+      replaying from there closes the gap.
+  - choice: Hedged requests to a second replica
+    instead: Wait for the slow replica
+    why: >-
+      The p99 is set by the slowest of 8 shards. Asking the second replica after 60 ms keeps p99 under 150 ms even
+      with one replica killed.
+watchOut: >-
+  Each shard scores with its own term statistics unless you pass global ones, so the merged top-k favours small
+  shards. Check merged results against a single-index run on a sample.

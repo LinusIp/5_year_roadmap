@@ -1,0 +1,116 @@
+overview: >-
+  A lock service whose safety does not depend on clocks. Three nodes run a small replicated state machine that
+  grants leases (locks that expire unless renewed) on named locks and gives every grant a fencing token, a number
+  that only ever goes up. The client library renews in the background and stops using a lock before its local
+  deadline, and the protected resource remembers the highest token it has seen and rejects any write with an older
+  one. So a Corvid Pay worker that wakes from a long GC pause cannot settle an invoice twice.
+learn:
+  - name: Leases
+    ref: ddia
+  - name: Fencing tokens
+    ref: ddia
+  - name: Replicated state machines
+    ref: mit-6-5840
+  - name: Process pauses and clocks
+    ref: kleppmann-distributed-systems
+  - name: History checking
+stats:
+  - value: < 20 ms
+    label: grant p99 at 500 clients
+  - value: "0"
+    label: violations in 100 fault runs
+  - value: < 1 s
+    label: expiry detection
+components:
+  - id: renewer
+    name: Client renewer
+    role: Acquires, renews and releases locks and tracks the local deadline.
+    tech: Go or Rust library
+    talksTo: [lease, resource]
+    kind: core
+  - id: lease
+    name: Lease state machine
+    role: Grants, renews and expires leases through a replicated log.
+    tech: Raft library
+    talksTo: [token]
+    kind: core
+  - id: token
+    name: Token issuer
+    role: Hands out the next fencing token, stored in the same log entry as the grant.
+    tech: Replicated counter
+    talksTo: []
+    kind: core
+  - id: resource
+    name: Fenced resource
+    role: The demo invoice store; rejects writes whose token is older than the highest seen.
+    tech: HTTP service
+    talksTo: [checker]
+    kind: core
+  - id: fault
+    name: Fault injector
+    role: Pauses processes, partitions nodes and jumps clocks.
+    tech: Signals · iptables in netns
+    talksTo: [renewer]
+    kind: offline
+  - id: checker
+    name: History checker
+    role: Replays the write history and counts double-settlements.
+    tech: Go or Rust
+    talksTo: []
+    kind: offline
+flow:
+  - component: renewer
+    text: >-
+      calls `Acquire("invoice-batch-17", ttl=5s)` and notes the time **before** sending, so its deadline is never
+      later than the server's.
+  - component: lease
+    text: >-
+      commits the grant through the log once 2 of 3 nodes have it, if the lock is free or its lease has expired on
+      the leader's monotonic clock.
+  - component: token
+    text: >-
+      assigns `token 4812`, one more than the last grant, inside the same entry, so a new leader after failover can
+      never reissue it.
+  - component: renewer
+    text: >-
+      renews every `ttl/3` and treats the lock as lost at `sent_at + ttl - 1s`, even if the renewal is merely
+      slow.
+  - component: resource
+    text: >-
+      checks `Fencing-Token: 4812` against the highest token stored for that lock and answers `409` to anything
+      lower, so a paused holder's late write fails.
+interface:
+  lang: go
+  code: |
+    type Grant struct {
+        Lock     string
+        Token    uint64    // fencing token, only grows
+        Deadline time.Time // sent_at + TTL - margin
+    }
+    func (c *Client) Acquire(ctx context.Context,
+        lock string, ttl time.Duration) (Grant, error)
+    func (c *Client) Release(g Grant) error
+
+    // protected resource, every write carries it:
+    // POST /invoices/881/settle
+    // Fencing-Token: 4812
+    // 409 Conflict if 4812 < highest seen
+decisions:
+  - choice: Fencing at the resource
+    instead: Rely on lease expiry alone
+    why: >-
+      A GC pause can outlast any lease, and the paused process cannot notice. Only the resource sees the write
+      arrive late, so only it can refuse; the demo proves this by finding a double-write with fencing off.
+  - choice: Token in the replicated log
+    instead: A counter in the leader's memory
+    why: >-
+      After failover an in-memory counter restarts or repeats, and two holders could share a token. Storing it in
+      the grant's log entry makes it survive any node loss.
+  - choice: Reuse a Raft library
+    instead: A single lock server
+    why: >-
+      One server is a single point of failure for every payment worker. A three-node library-backed log keeps
+      grants under 20 ms on a LAN and survives one node down.
+watchOut: >-
+  Local clocks and timeouts only make the lock fast, never safe. If any path writes to the resource without a
+  token check, the GC-pause double-settlement comes straight back.

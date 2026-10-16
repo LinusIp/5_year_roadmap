@@ -1,0 +1,71 @@
+overview: >-
+  Walkable space around polygon obstacles is cut into a navmesh (a mesh of walkable triangles), A* searches from
+  triangle to neighbouring triangle, and the funnel algorithm pulls that corridor into the shortest path through the
+  portals (the edges shared by neighbours), like pulling a string tight. The result is compared with grid A* on the
+  same map.
+learn:
+  - name: Polygon triangulation
+  - name: A* search
+    ref: cs188
+  - name: Funnel algorithm
+  - name: 2D cross product
+    ref: gamemath-3d-primer
+components:
+  - id: tri
+    name: Triangulator
+    role: Triangulates the walkable polygon with obstacle holes and records neighbours.
+    tech: C++ / Python
+    talksTo: [astar]
+    kind: core
+  - id: astar
+    name: Triangle A*
+    role: Finds the corridor of triangles from start to goal.
+    tech: C++ / Python
+    talksTo: [funnel]
+    kind: core
+  - id: funnel
+    name: Funnel
+    role: Turns the corridor's portals into the shortest corner-to-corner path.
+    tech: C++ / Python
+    talksTo: [compare]
+    kind: core
+  - id: compare
+    name: Grid A* baseline
+    role: Runs 8-way grid A* on the same map and checks paths against walls.
+    tech: C++ / Python
+    talksTo: []
+    kind: offline
+flow:
+  - component: tri
+    text: triangulates the area with holes (constrained Delaunay, or ear clipping after bridging holes), drops triangles under `1e-6` area, and stores shared edges.
+  - component: astar
+    text: searches triangles with costs between edge midpoints and straight-line distance as the heuristic, returning a list of **portals**.
+  - component: funnel
+    text: keeps an apex and a left and right side, narrowing them portal by portal; when one side crosses the other, that corner becomes the new apex and joins the path.
+  - component: compare
+    text: reports how much shorter the funnel path is than grid A* and tests every segment against wall edges.
+interface:
+  lang: cpp
+  code: |
+    struct Portal { Vec2 left, right; };  // walking view
+    using Tris = std::vector<int>;
+
+    Tris astar_tris(const NavMesh& m,
+                    int start, int goal);
+    std::vector<Portal> portals(const NavMesh& m,
+                                const Tris& tris,
+                                Vec2 start, Vec2 goal);
+    std::vector<Vec2> funnel(
+        const std::vector<Portal>& p);
+
+    // > 0 when c is left of the line a -> b
+    float cross2(Vec2 a, Vec2 b, Vec2 c);
+decisions:
+  - choice: Navmesh, not a fine grid
+    instead: Grid A* with path smoothing afterwards
+    why: >-
+      A few hundred triangles replace tens of thousands of cells, so search is faster, and the funnel gives the true
+      shortest path within the corridor. Prefer a grid if the obstacles change every frame, since it is easier to update.
+watchOut: >-
+  If portals are not ordered left and right the same way as seen by the walker, the funnel cuts corners through walls.
+  Test an L-shaped corridor in both directions.

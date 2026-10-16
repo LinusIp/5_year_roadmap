@@ -1,0 +1,103 @@
+overview: >-
+  A fully offline pipeline on a laptop: clean up the recording, transcribe it with a local Whisper model, label who
+  spoke when, and ask a local LLM for a short summary and action items with owners. Each meeting becomes one
+  searchable Markdown file, and nothing ever touches the network.
+learn:
+  - name: Voice activity detection
+  - name: Speech recognition and WER
+    ref: slp3
+  - name: Speaker diarisation
+  - name: Map-reduce summaries
+  - name: Quantised local LLMs
+    ref: llama-cpp
+stats:
+  - value: < 12%
+    label: word error rate
+  - value: < 20 min
+    label: per hour of audio
+  - value: '0'
+    label: network calls
+components:
+  - id: recording
+    name: Recording
+    role: The call or meeting audio file from the office recorder.
+    tech: WAV · M4A
+    talksTo: [prep]
+    kind: external
+  - id: prep
+    name: Audio prep
+    role: Converts to 16 kHz mono and cuts silence with voice activity detection.
+    tech: ffmpeg · Silero VAD
+    talksTo: [asr]
+    kind: core
+  - id: asr
+    name: Transcriber
+    role: Turns speech segments into words with timestamps.
+    tech: faster-whisper
+    talksTo: [diarizer]
+    kind: core
+  - id: diarizer
+    name: Diariser
+    role: Decides who spoke when and attaches a speaker label to each word.
+    tech: pyannote
+    talksTo: [summarizer]
+    kind: core
+  - id: summarizer
+    name: Summariser
+    role: Summarises 10-minute chunks, then merges them into actions with owners.
+    tech: llama.cpp
+    talksTo: [writer]
+    kind: core
+  - id: writer
+    name: Markdown writer
+    role: Writes the summary, action items and full transcript per meeting.
+    tech: Python
+    talksTo: []
+    kind: core
+  - id: wer
+    name: WER evaluator
+    role: Scores transcripts against AMI references and times each stage.
+    tech: jiwer
+    talksTo: []
+    kind: offline
+flow:
+  - component: prep
+    text: converts a 1-hour call to 16 kHz mono and drops long silences, often cutting a fifth of the audio.
+  - component: asr
+    text: transcribes the speech segments with an int8 Whisper model on the CPU, keeping word timestamps.
+  - component: diarizer
+    text: finds speaker turns and gives each word the label `SPEAKER_1`, `SPEAKER_2`, which staff rename once per meeting.
+  - component: summarizer
+    text: summarises each 10-minute chunk with its action items, then merges and removes duplicates, so items from minute 5 are not lost.
+  - component: writer
+    text: saves `2026-10-14-client-call.md` with summary, actions and the timestamped transcript for search.
+interface:
+  lang: shell
+  code: |
+    $ notes run calls/2026-10-14.m4a --asr small.en
+    prep 0:58:40 → 0:47:05 speech
+    asr  RTF 0.18 · diarise RTF 0.06 · llm 3m40s
+    → notes/2026-10-14-client-call.md
+
+    ## Action items
+    - [ ] Send revised NDA to client (Maria, Fri)
+    - [ ] Check filing deadline (SPEAKER_2)
+decisions:
+  - choice: Pick the Whisper size by measured speed
+    instead: Always use the largest model
+    why: >-
+      20 minutes per hour means a real-time factor (processing time over audio time) of 0.33 for every stage
+      together. Measure WER and speed for small and medium on AMI and take the smallest under 12%.
+  - choice: Summarise in chunks, then merge
+    instead: One prompt with the whole transcript
+    why: >-
+      An hour is about 9,000 words, too much for a small local model to keep track of. Chunks keep each prompt
+      short and stop items from the middle getting dropped.
+  - choice: Prove offline with the network off
+    instead: Trust that no library phones home
+    why: >-
+      Model downloads and telemetry can hide inside libraries. Run the full test with networking disabled; that
+      check is the "zero network calls" requirement.
+watchOut: >-
+  Two people talking at once wrecks both WER and speaker labels. Report errors on overlap regions separately so a
+  bad score points at the right stage.

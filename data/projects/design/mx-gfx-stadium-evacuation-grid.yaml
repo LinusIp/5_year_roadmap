@@ -1,0 +1,103 @@
+overview: >-
+  A grid model of the stadium: the floor plan becomes 0.4 m cells, each holding at most one person, and a static
+  floor field stores every cell's walking distance to the nearest open exit. Each 0.3 s step, every agent picks a
+  free neighbouring cell that lowers that distance, conflicts over the same cell are settled by a seeded random draw,
+  and all moves happen at once in numpy. Three exit scenarios run with the same seeds and produce an evacuation-time
+  curve and a congestion heatmap against the 8-minute target.
+learn:
+  - name: Cellular automata
+  - name: Distance fields by BFS
+    ref: mit-6-006
+  - name: numpy vectorisation
+    ref: scientific-python-lectures
+  - name: Seeded random streams
+  - name: Flow-rate bounds
+stats:
+  - value: < 60 s
+    label: per 30,000-agent scenario
+  - value: bit-identical
+    label: output for the same seed
+  - value: ≤ 15%
+    label: error vs corridor flow bound
+components:
+  - id: loader
+    name: Plan loader
+    role: Turns the PNG or text plan into a cell grid of walls, seats, stairs and exits.
+    tech: numpy · Pillow
+    talksTo: [field]
+    kind: core
+  - id: field
+    name: Floor-field builder
+    role: Runs a breadth-first search from the open exits to give each cell its distance in cells.
+    tech: numpy · collections.deque
+    talksTo: [stepper]
+    kind: core
+  - id: stepper
+    name: Agent stepper
+    role: Gives every agent a target cell among its free neighbours, weighted towards lower distance.
+    tech: numpy
+    talksTo: [resolver]
+    kind: core
+  - id: resolver
+    name: Conflict resolver
+    role: Lets one agent win each contested cell by seeded draw and applies all moves together.
+    tech: numpy
+    talksTo: [runner]
+    kind: core
+  - id: runner
+    name: Scenario runner
+    role: Runs all-open, one-blocked and one-narrowed layouts with fixed seeds and records exits per step.
+    tech: Python
+    talksTo: [plotter]
+    kind: core
+  - id: plotter
+    name: Curve and heatmap
+    role: Plots people left over time and peak density per cell for each scenario.
+    tech: matplotlib
+    talksTo: [officer]
+    kind: offline
+  - id: officer
+    name: Safety officer
+    role: Compares layouts and decides whether a full agent-based study is needed.
+    tech: Report
+    talksTo: []
+    kind: external
+flow:
+  - component: loader
+    text: reads the plan once, places 30,000 agents on seat cells and marks the exits that this scenario keeps open.
+  - component: field
+    text: floods outward from every open exit, so each cell holds the number of steps to the nearest one; blocking an exit only means rebuilding this field.
+  - component: stepper
+    text: scores each agent's free neighbours by `exp(-k * distance)` and draws a target with the scenario's seeded generator.
+  - component: resolver
+    text: finds cells claimed by more than one agent, keeps one random winner per cell, and leaves the rest standing, so no two people ever **swap through** each other.
+  - component: runner
+    text: removes agents that reached an exit, logs the count for this 0.3 s step, and stops when the stands are empty.
+interface:
+  lang: python
+  code: |
+    CELL_M = 0.4        # one person per cell
+    STEP_S = 0.3        # one cell per step, ~1.3 m/s
+
+    def step(occ: np.ndarray, dist: np.ndarray,
+             agents: np.ndarray, rng: Generator,
+             k: float = 3.0) -> int:
+        """Move all agents one step in parallel.
+
+        occ: bool grid, True where a cell is taken
+        dist: int grid, steps to nearest open exit
+        agents: (n, 2) int cell coordinates
+        Returns how many agents left through an exit."""
+decisions:
+  - choice: Static floor field from BFS
+    instead: A path search per agent
+    why: One flood over the grid serves all 30,000 agents, which is what keeps a scenario under 60 s without compiled code.
+  - choice: Parallel update with random conflict winner
+    instead: Moving agents one by one in a fixed order
+    why: Sequential order favours whoever is first in the array and is a Python loop over 30,000 agents per step.
+  - choice: One seeded generator per scenario
+    instead: Global numpy random state
+    why: The same seed must give bit-identical results, and scenarios must be comparable run against run.
+watchOut: >-
+  This model compares exit layouts; it is not a safety certificate. Say so on every chart, and show the corridor test
+  against the hand-calculated flow bound so the council can see how far to trust it.
