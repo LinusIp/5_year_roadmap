@@ -2,7 +2,10 @@ import { useState } from 'react';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { describeVerdict } from '../../lib/forecast.ts';
 import { monthName } from '../../lib/dates.ts';
-import type { Unit } from '../../seed/schema.ts';
+import type { Goal, Unit } from '../../seed/schema.ts';
+import { goalStatus } from '../../lib/goals.ts';
+import { today } from '../../lib/dates.ts';
+import { longDate } from '../parts/text.ts';
 import { blockColor } from '../../ui/colors.ts';
 import { Button } from '../../ui/Button.tsx';
 import { ProgressLine } from '../../ui/ProgressLine.tsx';
@@ -80,6 +83,8 @@ export function Timeline({
   weekly,
   onLane,
   onReplan,
+  onEdit,
+  onGoal,
 }: {
   atlas: Atlas;
   model: PhaseModel[];
@@ -88,6 +93,8 @@ export function Timeline({
   weekly: string | null;
   onLane: (phaseId: string, block: string) => void;
   onReplan: () => void;
+  onEdit: () => void;
+  onGoal: (goal: Goal) => void;
 }) {
   const [openPhase, setOpenPhase] = useState<string | null>(null);
   const index = model.findIndex((m) => m.phase.id === currentId);
@@ -131,12 +138,31 @@ export function Timeline({
           {phaseRows(later)}
         </RowList>
       )}
-      <div className="mt-3 flex gap-2">
+      {(atlas.seed.goals ?? []).length > 0 && (
+        <RowList flat label="Goals" className="mt-6">
+          {(atlas.seed.goals ?? []).map((goal) => {
+            const status = goalStatus(goal, atlas.seed, atlas.settings, atlas.states, atlas.logs, today());
+            return (
+              <Row
+                key={goal.id}
+                title={goal.title}
+                meta={'By ' + longDate(goal.date) + (status.projected && status.verdict !== 'done' ? ' · projected ' + longDate(status.projected) : '')}
+                trailing={<span className={status.verdict === 'at-risk' ? 'text-[color:var(--behind)]' : undefined}>{status.verdict === 'done' ? 'Done' : status.verdict === 'on-track' ? 'On track' : 'At risk'}</span>}
+                onClick={() => onGoal(goal)}
+              />
+            );
+          })}
+        </RowList>
+      )}
+      <div className="mt-3 flex flex-wrap gap-2">
         <Button size="sm" onClick={onReplan}>
           Re-plan
         </Button>
         <Button size="sm" to="/plan/map">
           Five-year map
+        </Button>
+        <Button size="sm" onClick={onEdit}>
+          Edit plan
         </Button>
       </div>
     </div>

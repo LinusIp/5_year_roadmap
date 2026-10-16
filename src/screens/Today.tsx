@@ -8,6 +8,7 @@ import { useUnits } from '../hooks/useUnits.ts';
 import { addDays, dayName, formatLong, formatStopwatch, startOfWeek, today as todayDate, weekday } from '../lib/dates.ts';
 import { addEntry, editLog, isBlockDone, minutesByBlock, minutesForRef, readLog, toggleBlockDone, totalMinutes } from '../lib/logs.ts';
 import { plannedFor } from '../lib/day-plan.ts';
+import { catchUpMinutes, laneBalance } from '../lib/pace.ts';
 import { planForDay, suggestWeeklyBuild } from '../lib/schedule.ts';
 import type { ScheduledItem, TodayBlock } from '../lib/schedule.ts';
 import { logTimeRequests } from '../lib/shortcuts.ts';
@@ -132,10 +133,21 @@ export function Today() {
   }, []);
 
   const ctx = useMemo(() => (atlas ? { seed: atlas.seed, states: atlas.states, units } : null), [atlas, units]);
-  const plan = useMemo(
-    () => (settings && ctx ? planForDay({ date, settings, weeklyPickId: weekPick?.projectId, ctx }) : null),
-    [date, settings, weekPick, ctx],
-  );
+  const plan = useMemo(() => {
+    if (!settings || !ctx || !atlas) return null;
+    const day = planForDay({ date, settings, weeklyPickId: weekPick?.projectId, ctx });
+    // Lanes that opted into catch-up get their extra minutes on top, up to the cap, while they are behind.
+    if (day.phase && Object.keys(settings.catchUp).length > 0) {
+      let extra = 0;
+      const blocks = day.blocks.map((b) => {
+        const more = catchUpMinutes(settings, laneBalance(settings, atlas.logs, b.id, day.phase!.start, date));
+        extra += more;
+        return more > 0 ? { ...b, targetMinutes: b.targetMinutes + more, catchUp: more } : b;
+      });
+      return { ...day, blocks, targetMinutes: day.targetMinutes + extra };
+    }
+    return day;
+  }, [date, settings, weekPick, ctx, atlas]);
 
   const pickAnother = useCallback(() => {
     if (!plan || !ctx) return;
@@ -271,7 +283,11 @@ export function Today() {
     );
   }
 
-  const allUnits: ChecklistUnit[] = item ? (item.kind === 'project' ? criteriaUnits(item.acceptance ?? []) : (units?.[item.refId] ?? [])) : [];
+  const allUnits: ChecklistUnit[] = item
+    ? item.kind === 'project'
+      ? criteriaUnits(item.acceptance ?? [])
+      : (atlas.seed.resources.find((r) => r.id === item.refId)?.customUnits ?? units?.[item.refId] ?? [])
+    : [];
   const unitsDone = item ? (atlas.states.get(item.refId)?.unitsDone ?? []) : [];
   const resource = item?.kind === 'resource' ? atlas.seed.resources.find((r) => r.id === item.refId) : undefined;
   const otherD =
@@ -282,7 +298,7 @@ export function Today() {
       : undefined;
   const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item ? nameOf(item) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
   const metaLine = nowBlock
-    ? [blockShort(nowBlock.def.name), span(nowMinutes) + ' of ' + span(nowBlock.targetMinutes), detailOf(item), nowDone ? 'done' : null].filter(Boolean).join(' · ')
+    ? [blockShort(nowBlock.def.name), span(nowMinutes) + ' of ' + span(nowBlock.targetMinutes), nowBlock.catchUp ? span(nowBlock.catchUp) + ' of it catch-up' : null, detailOf(item), nowDone ? 'done' : null].filter(Boolean).join(' · ')
     : '';
   const linkClass = 'inline-flex min-h-11 items-center gap-2 text-button font-medium text-accent';
 

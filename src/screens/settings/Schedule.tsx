@@ -9,7 +9,6 @@ import { Chips } from '../../ui/Chips.tsx';
 import { BLOCK_COLOURS, blockColor } from '../../ui/colors.ts';
 import { NumberField } from '../../ui/NumberField.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
-import { SegmentedControl } from '../../ui/SegmentedControl.tsx';
 import { Sheet } from '../../ui/Sheet.tsx';
 import { TextField } from '../../ui/TextField.tsx';
 import { PickerSheet } from '../parts/PickerSheet.tsx';
@@ -450,17 +449,6 @@ export function Blocks({ settings }: { settings: StoredSettings }) {
         <Button onClick={() => setOrdering((v) => !v)} aria-pressed={ordering}>
           {ordering ? 'Done' : 'Reorder'}
         </Button>
-      </div>
-      <div className="mt-3">
-        <SegmentedControl
-          label="Week starts on"
-          value={String(settings.core.weekStartsOn)}
-          onChange={(v) => void saveCore((core) => ((core.weekStartsOn = Number(v) as 0 | 1), core)).then(setProblem)}
-          options={[
-            { value: '1', label: 'Week starts Monday' },
-            { value: '0', label: 'Week starts Sunday' },
-          ]}
-        />
       </div>
       <Problem text={problem} />
       <BlockSheet settings={settings} id={open} onClose={() => setOpen(null)} />

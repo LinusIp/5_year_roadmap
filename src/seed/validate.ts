@@ -346,6 +346,14 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
     if ('cadence' in target && target.cadence === 'weekly') errors.push(planFile + ': "' + ref + '" is a weekly mini-build; those are drawn from the pool, not planned');
   }
 
+  // An alternative is a resource of the library (the Swap sheet offers it in place of this one).
+  for (const res of resourceById.values()) {
+    for (const alt of res.alternatives ?? []) {
+      if (alt === res.id) errors.push('resource "' + res.id + '" lists itself as an alternative');
+      else if (!resourceById.has(alt)) errors.push('resource "' + res.id + '": alternative "' + alt + '" is not a resource');
+    }
+  }
+
   // A planned resource must not sit before a planned prerequisite.
   for (const item of plan) {
     if (!item.resourceId) continue;

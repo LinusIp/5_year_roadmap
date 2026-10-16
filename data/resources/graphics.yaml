@@ -134,6 +134,7 @@
   prerequisites: [learnopengl]
   subject: graphics
   summary: "Begun at the end of year 2 (monthly project 22 is its triangle turned into a model viewer)."
+  alternatives: [vkguide]
 
 - id: vkguide
   title: "Vulkan Guide (vkguide.dev)"
@@ -149,6 +150,7 @@
   prerequisites: [vulkan-tutorial]
   subject: graphics
   summary: "Engine-shaped Vulkan, including the compute-shader chapters used for the particle system of project 30."
+  alternatives: [vulkan-tutorial]
 
 - id: khronos-vulkan-samples
   title: "Khronos Vulkan Samples"

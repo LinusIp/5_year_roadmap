@@ -185,6 +185,10 @@ export const ResourceSchema = z
     reference: z.boolean().optional(),
     /** roadmap.sh nodes this resource teaches; finishing it ticks them. */
     covers: z.array(NodeRef).optional(),
+    /** Resources that can take its place on the plan (fast.ai or CS231n): offered first by Swap. */
+    alternatives: z.array(Slug).optional(),
+    /** Set on a resource the user added in the app. */
+    source: z.literal('user').optional(),
   })
   .superRefine((v, ctx) => {
     checkLink(v, ctx);
@@ -309,6 +313,8 @@ export const PaperSchema = z
     group: z.enum(PAPER_GROUPS),
     estHours: z.number().min(0.5).max(40).default(3),
     note: Text.optional(),
+    /** Set on a paper the user added in the app. */
+    source: z.literal('user').optional(),
   })
   .superRefine(checkLink);
 export type Paper = z.infer<typeof PaperSchema>;
@@ -515,7 +521,8 @@ export interface Seed {
  * The shape the browser sees. The unit checklists are served separately (see
  * scripts/lib/vite-plugin-seed.ts), so a resource carries only the count, which is all a progress bar needs.
  */
-export type AppResource = Omit<Resource, 'units'> & { unitCount: number };
+/** A resource as the app sees it: its checklist split off (count only), except a resource of the user's, which keeps its own. */
+export type AppResource = Omit<Resource, 'units'> & { unitCount: number; customUnits?: Unit[] };
 export type AppSeed = Omit<Seed, 'resources'> & {
   resources: AppResource[];
   /** Set once the user's plan edits are applied (src/lib/plan.ts): items taken off the plan, restorable. */

@@ -19,6 +19,7 @@ import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { DaySheet } from './parts/DaySheet.tsx';
 import { GithubCalendar } from './parts/GithubCalendar.tsx';
+import { trackColor } from '../ui/colors.ts';
 import { PickerSheet } from './parts/PickerSheet.tsx';
 import { dateTitle, hours, plural, span } from './parts/text.ts';
 
@@ -57,7 +58,7 @@ export function Activity() {
   // The whole calendar year, like GitHub's: days before the plan or still ahead are simply empty.
   const range = { from: year + '-01-01', to: year + '-12-31' };
   const track = seed.tracks.find((t) => t.id === trackParam);
-  const color = track ? 'var(--track-' + track.id + ')' : undefined;
+  const color = track ? trackColor(track, seed.tracks) : undefined;
   const weekStartsOn = settings.core.weekStartsOn;
   const gridFor = (y: number) =>
     buildGrid({
@@ -141,7 +142,7 @@ export function Activity() {
 
       {settings.github.showCalendar && !allYears && (
         <div className="mt-4">
-          <GithubCalendar from={range.from} to={range.to} year={String(year)} weekStartsOn={weekStartsOn} username={settings.github.username} atlasDates={atlasDates} />
+          <GithubCalendar from={range.from} to={range.to} year={String(year)} weekStartsOn={weekStartsOn} username={settings.github.username} atlasDates={atlasDates} clock={settings.layout.general.clock} />
         </div>
       )}
 

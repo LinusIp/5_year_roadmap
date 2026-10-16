@@ -111,6 +111,7 @@
   cost: free
   estHours: 100
   subject: c-cpp
+  alternatives: [tour-of-cpp]
 
 - id: tour-of-cpp
   title: "A Tour of C++, 3rd edition (Bjarne Stroustrup)"
@@ -126,6 +127,7 @@
   estHours: 30
   prerequisites: [learncpp]
   subject: c-cpp
+  alternatives: [learncpp]
 
 - id: effective-modern-cpp
   title: "Effective Modern C++ (Scott Meyers)"

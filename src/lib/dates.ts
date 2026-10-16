@@ -174,3 +174,11 @@ export function parseDuration(input: string): number | null {
   if (hoursThenMinutes) return Number(hoursThenMinutes[1]) * 60 + Number(hoursThenMinutes[2]);
   return null;
 }
+
+/** "14:05", or "2:05 pm" on a 12-hour clock (Settings > Layout > General). */
+export function formatClock(date: Date, clock: '24' | '12' = '24'): string {
+  const h = date.getHours();
+  const m = String(date.getMinutes()).padStart(2, '0');
+  if (clock === '24') return String(h).padStart(2, '0') + ':' + m;
+  return ((h + 11) % 12) + 1 + ':' + m + (h < 12 ? ' am' : ' pm');
+}

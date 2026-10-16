@@ -16,6 +16,7 @@ import { TextField } from '../../ui/TextField.tsx';
 import { Checklist, criteriaUnits } from './Checklist.tsx';
 import { NotesField } from './NotesField.tsx';
 import { StatusPill } from './StatusPill.tsx';
+import { AddToPlanSheet } from '../plan/EditSheets.tsx';
 import { blockShort, plural } from './text.ts';
 
 export const ITEM_STATUSES: { value: ItemStatus; label: string }[] = [
@@ -40,12 +41,13 @@ export function ItemStatusPill({ kind, refId, title, state }: { kind: 'resource'
   );
 }
 
-/** "Year 1 · In flight · Block A, Gamedev": where an item sits on the plan. */
+/** "Year 1 · In flight · Block A, Gamedev": where an item sits on the plan, and "Add to the plan". */
 function Placement({ atlas, refId }: { atlas: Atlas; refId: string }) {
+  const [adding, setAdding] = useState(false);
   const items = atlas.seed.plan.filter((i) => (i.resourceId ?? i.projectId) === refId);
-  if (items.length === 0) return <Row title="Not on the plan" meta="Add it to a lane from Plan" />;
   return (
     <>
+      {items.length === 0 && <Row title="Not on the plan" />}
       {items.map((item) => {
         const phase = atlas.seed.phases.find((p) => p.id === item.phaseId);
         const block = atlas.settings.core.blocks.find((b) => b.id === item.block);
@@ -58,6 +60,8 @@ function Placement({ atlas, refId }: { atlas: Atlas; refId: string }) {
           />
         );
       })}
+      <Row title={items.length === 0 ? 'Add to the plan' : 'Add it to another lane too'} meta="Pick a phase, a lane and a position" onClick={() => setAdding(true)} />
+      {adding && <AddToPlanSheet atlas={atlas} refId={refId} open onClose={() => setAdding(false)} />}
     </>
   );
 }
@@ -90,7 +94,8 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
   const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => {
     let live = true;
-    void loadUnits(resource.id).then((list) => live && setUnits(list));
+    if (resource.customUnits) setUnits(resource.customUnits);
+    else void loadUnits(resource.id).then((list) => live && setUnits(list));
     return () => {
       live = false;
     };

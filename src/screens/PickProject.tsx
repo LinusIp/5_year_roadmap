@@ -64,7 +64,7 @@ export function PickProject() {
       kind: [monthly ? 'Monthly project' : 'Weekly build', part, monthly ? '20–40 h' : '2–6 h'].filter(Boolean).join(' · '),
       title: shortTitle(p.title),
       brief: p.brief,
-      footer: [track, p.source ? 'from ' + p.source : null].filter(Boolean).join(' · '),
+      footer: [track, p.source && p.source !== 'user' ? 'from ' + p.source : p.source === 'user' ? 'yours' : null].filter(Boolean).join(' · '),
     };
   });
 

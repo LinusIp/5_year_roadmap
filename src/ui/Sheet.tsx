@@ -1,6 +1,7 @@
 import { createContext, useEffect, useId, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { Button } from './Button.tsx';
+import { UndoToast } from './UndoToast.tsx';
 
 /** Lists inside a sheet sit flat on it: a card on a card of the same colour would only add an inset. */
 export const InSheet = createContext(false);
@@ -59,6 +60,7 @@ export function Sheet({ open, title, onClose, children, footer }: SheetProps) {
           </header>
           <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
             <InSheet.Provider value={true}>{children}</InSheet.Provider>
+            <UndoToast inSheet />
           </div>
           {footer && <footer className="flex flex-wrap gap-2 px-4 pb-4 pt-2">{footer}</footer>}
         </div>

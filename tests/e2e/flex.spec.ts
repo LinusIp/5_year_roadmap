@@ -109,3 +109,131 @@ test('an exam-week date range shifts the forecast', async ({ page }) => {
   await page.goto('./#/?date=2026-09-23');
   await expect(page.getByText(/^0 h of 1 h 30 m today · Exam week/)).toBeVisible();
 });
+
+test('adds, reorders, swaps, drops and restores a plan item, and undoes an edit', async ({ page }) => {
+  // Add Nielsen and Chuang, not on the plan, to Block E of the first phase, from its sheet.
+  await open(page, './#/library/nielsen-chuang');
+  await page.getByRole('button', { name: /^Add to the plan/ }).click();
+  const add = page.getByRole('dialog', { name: /^Add .* to the plan$/ });
+  await add.getByRole('button', { name: /^Lane/ }).click();
+  await page.getByRole('dialog', { name: 'Lane' }).getByRole('button', { name: /^Block E/ }).click();
+  await add.getByRole('button', { name: 'Add to the plan' }).click();
+  await expect(page.getByRole('status').filter({ hasText: /^Added .*Quantum/ })).toBeVisible();
+
+  await open(page, './#/plan?lane=y1-p0.E');
+  const sheet = page.getByRole('dialog', { name: /^Block E · Math/ });
+  const items = sheet.getByRole('list').first().getByRole('listitem');
+  await expect(items.last()).toContainText(/Quantum/);
+
+  // Reorder with the arrows, then undo it from the toast.
+  await sheet.getByRole('button', { name: 'Edit' }).click();
+  const before = await items.allTextContents();
+  await sheet.getByRole('button', { name: /^Move .*Quantum.* up$/ }).click();
+  await expect(page.getByRole('status').filter({ hasText: /Moved .* up/ })).toBeVisible();
+  await expect.poll(async () => (await items.allTextContents()).join('|')).not.toBe(before.join('|'));
+  await page.getByRole('button', { name: 'Undo' }).click();
+  await expect(page.getByText(/^Undone: Moved/)).toBeVisible();
+  await expect.poll(async () => (await items.allTextContents()).join('|')).toBe(before.join('|'));
+
+  // In year 2, swap 6.041 for its named alternative, Stat 110.
+  await open(page, './#/plan?lane=y2.E');
+  const y2 = page.getByRole('dialog', { name: /^Block E · Math/ });
+  await y2.getByRole('button', { name: 'Edit' }).click();
+  await y2.getByRole('button', { name: /^Swap .*6\.041.* for another$/ }).click();
+  const swap = page.getByRole('dialog', { name: /^Swap .* for$/ });
+  await expect(swap.getByRole('list').getByRole('button').first()).toContainText(/Stat 110.*Alternative/);
+  await swap.getByRole('button', { name: /Stat 110.*Alternative/ }).click();
+  await expect(page.getByRole('status').filter({ hasText: /^Swapped .* for .*Stat 110/ })).toBeVisible();
+  await expect(y2).toContainText(/Stat 110/);
+
+  // Drop the first item, then restore it from the Dropped group.
+  const first = (await y2.getByRole('list').first().getByRole('listitem').first().textContent()) ?? '';
+  await y2.getByRole('button', { name: /^Take .* off the plan$/ }).first().click();
+  await expect(y2.getByRole('button', { name: /^Dropped · 1/ })).toBeVisible();
+  await y2.getByRole('button', { name: /^Dropped · 1/ }).click();
+  await y2.getByRole('button', { name: 'Restore' }).click();
+  await expect(y2.getByRole('button', { name: /^Dropped/ })).toHaveCount(0);
+
+  await reload(page);
+  const again = page.getByRole('dialog', { name: /^Block E · Math/ });
+  await expect(again.getByRole('list').first().getByRole('listitem').first()).toContainText(first);
+  await expect(again).toContainText(/Stat 110/);
+});
+
+test('creates a resource of its own and a goal that shows on the Timeline', async ({ page }) => {
+  await open(page, './#/library');
+  await page.getByRole('button', { name: 'Add a resource' }).click();
+  const sheet = page.getByRole('dialog', { name: 'Add a resource' });
+  await sheet.getByRole('textbox', { name: 'Title' }).fill('My numerical methods notes');
+  await sheet.getByRole('textbox', { name: 'Units' }).fill('Floating point\nRoot finding\nQuadrature');
+  await sheet.getByRole('button', { name: 'Add to the library' }).click();
+  await expect(page.getByRole('dialog', { name: 'My numerical methods notes' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'My numerical methods notes' }).getByRole('checkbox', { name: 'Root finding' })).toBeVisible();
+
+  await open(page, './#/plan');
+  await page.getByRole('button', { name: 'Edit plan' }).click();
+  const edit = page.getByRole('dialog', { name: 'Edit the plan' });
+  await edit.getByRole('button', { name: /^Add a goal/ }).click();
+  const goal = page.getByRole('dialog', { name: 'A goal' });
+  await goal.getByRole('textbox', { name: 'Goal' }).fill('Finish linear algebra');
+  await goal.getByRole('textbox', { name: 'By' }).fill('2027-12-31');
+  await goal.getByRole('button', { name: /^What it depends on/ }).click();
+  const picker = page.getByRole('dialog', { name: 'What it depends on' });
+  await picker.getByRole('searchbox', { name: 'Search items and nodes' }).fill('18.06 Linear');
+  await picker.getByRole('checkbox', { name: /^MIT 18\.06 Linear Algebra/ }).click();
+  await picker.getByRole('button', { name: 'Close' }).click();
+  await goal.getByRole('button', { name: 'Save' }).click();
+  await edit.getByRole('button', { name: 'Close' }).click();
+
+  await expect(page.getByRole('button', { name: /^Finish linear algebra By 31 December 2027.*On track/ })).toBeVisible();
+  await reload(page);
+  await expect(page.getByRole('button', { name: /^Finish linear algebra/ })).toBeVisible();
+});
+
+test('pauses a lane, giving its time to another, and resumes it', async ({ page }) => {
+  await open(page, './#/plan?lane=y1-p0.A');
+  const lane = page.getByRole('dialog', { name: /^Block A · Graphics/ });
+  await lane.getByRole('button', { name: /^Pace/ }).click();
+  const pace = page.getByRole('dialog', { name: 'Pace · Graphics' });
+  await pace.getByRole('button', { name: 'Pause this lane' }).click();
+  await pace.getByRole('textbox', { name: 'From' }).fill('2026-09-20');
+  await pace.getByRole('button', { name: /^Its time goes to/ }).click();
+  await page.getByRole('dialog', { name: 'Its time goes to' }).getByRole('button', { name: /^Block C/ }).click();
+  await pace.getByRole('button', { name: 'Pause Graphics' }).click();
+  await expect(pace.getByText(/^Paused since .* until you resume it\. Its time goes to Core\./)).toBeVisible();
+
+  await open(page, './');
+  await expect(laterRow(page, /^ML Zoomcamp Core/)).toContainText('4 h');
+  await expect(page.locator('#now-title')).not.toHaveText('One finished small game');
+
+  await open(page, './#/plan?lane=y1-p0.A');
+  await page.getByRole('dialog', { name: /^Block A · Graphics/ }).getByRole('button', { name: /^Pace/ }).click();
+  await page.getByRole('dialog', { name: 'Pace · Graphics' }).getByRole('button', { name: 'Resume' }).click();
+  await open(page, './');
+  await expect(page.locator('#now-title')).toHaveText('One finished small game');
+});
+
+test('compact Today, other tabs, and a reset to the default layout', async ({ page }) => {
+  await open(page, './#/settings?section=layout');
+  await page.getByRole('radio', { name: 'Compact' }).first().click();
+  await page.getByRole('switch', { name: 'Reviews' }).click();
+  await page.getByRole('switch', { name: 'Library' }).click();
+  await writesSettled(page);
+
+  await open(page, './');
+  const tabs = page.getByRole('navigation', { name: 'Main' }).getByRole('link');
+  await expect(tabs).toHaveText(['Today', 'Plan', 'Activity', 'Reviews']);
+  await expect(laterRow(page, /^30 Days of Python 1 h$/)).toBeVisible();
+  await page.screenshot({ path: 'test-results/flex-compact-today.png' });
+
+  await reload(page);
+  await expect(tabs).toHaveText(['Today', 'Plan', 'Activity', 'Reviews']);
+
+  await open(page, './#/settings?section=layout');
+  for (const section of ['Layout · Today', 'Layout · Tabs']) {
+    await page.locator('section').filter({ has: page.getByRole('heading', { name: section }) }).getByRole('button', { name: 'Reset to default' }).click();
+  }
+  await open(page, './');
+  await expect(tabs).toHaveText(['Today', 'Plan', 'Library', 'Activity']);
+  await expect(laterRow(page, /^30 Days of Python Languages · day 1/)).toBeVisible();
+});

@@ -6,7 +6,7 @@ import { matchPath } from './router/paths.ts';
 import { navigate, useLocation } from './router/router.tsx';
 import { KeyboardShortcuts } from './screens/Shortcuts.tsx';
 import { SyncNotice } from './screens/parts/SyncNotice.tsx';
-import { UndoToast } from './screens/parts/UndoToast.tsx';
+import { UndoToast } from './ui/UndoToast.tsx';
 import { Today } from './screens/Today.tsx';
 import { seed } from './seed/index.ts';
 
@@ -70,6 +70,11 @@ export function App() {
   useEffect(() => {
     if (theme) applyTheme(theme);
   }, [theme]);
+  const density = settings?.layout.general.density;
+  useEffect(() => {
+    if (density === 'compact') document.documentElement.dataset.density = 'compact';
+    else delete document.documentElement.dataset.density;
+  }, [density]);
   useEffect(() => watchSystemTheme(() => theme ?? 'light'), [theme]);
 
   // On navigation, move focus to the new screen so keyboard and screen-reader users land on it. An item's

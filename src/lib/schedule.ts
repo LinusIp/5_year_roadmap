@@ -70,6 +70,8 @@ export interface TodayBlock {
   emptyReason?: string;
   /** Today this block carries the work of another (Change today > swap). */
   swappedWith?: BlockId;
+  /** Extra minutes today from opt-in catch-up (included in targetMinutes). */
+  catchUp?: number;
 }
 
 export interface TodayPlan {
@@ -130,7 +132,7 @@ function describeResource(resource: AppResource, state: UserItemState | undefine
   if (resource.short) item.short = resource.short;
   if (note) item.note = note;
 
-  const list = ctx.units?.[resource.id];
+  const list = resource.customUnits ?? ctx.units?.[resource.id];
   if (list && list.length > 0) {
     const done = new Set(unitsDone);
     const index = list.findIndex((u) => !done.has(u.id));

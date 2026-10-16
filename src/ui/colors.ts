@@ -2,7 +2,7 @@
  * Colours of blocks. Each lane keeps one colour, as in the mockup and the five-year map; a block can be given
  * another colour from the track palette in Settings.
  */
-import type { BlockDef, BlockId, SeedTrackId } from '../seed/schema.ts';
+import type { BlockDef, BlockId, SeedTrackId, Track } from '../seed/schema.ts';
 
 export const LANE_COLOR: Record<string, string> = {
   A: 'var(--track-gamedev)',
@@ -22,4 +22,11 @@ export const BLOCK_COLOURS: readonly SeedTrackId[] = ['ai', 'swe', 'systems', 'g
 export function blockColor(def: Pick<BlockDef, 'id' | 'colour'> | undefined, id?: BlockId): string {
   if (def?.colour) return 'var(--track-' + def.colour + ')';
   return LANE_COLOR[def?.id ?? id ?? ''] ?? 'var(--track-mech)';
+}
+
+/** A track's colour. A track of the user's takes the colour of the first track in its slot. */
+export function trackColor(track: Pick<Track, 'id' | 'slot' | 'source'>, tracks: readonly Pick<Track, 'id' | 'slot' | 'source'>[]): string {
+  if (track.source !== 'user') return 'var(--track-' + track.id + ')';
+  const sibling = tracks.find((t) => t.source !== 'user' && t.slot === track.slot);
+  return 'var(--track-' + (sibling?.id ?? 'mech') + ')';
 }

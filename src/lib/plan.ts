@@ -5,7 +5,7 @@
  * rebuilding keeps them. A patch that no longer applies (its item was renamed away in /data) is ignored
  * rather than crashing the page.
  */
-import { PlanItemSchema, ProjectSchema, ResourceSchema, TrackSchema } from '../seed/schema.ts';
+import { PaperSchema, PlanItemSchema, ProjectSchema, ResourceSchema, TrackSchema } from '../seed/schema.ts';
 import type { AppResource, AppSeed, Goal, Phase, PlanItem, Project, Track } from '../seed/schema.ts';
 import type { CustomEntity, NewPlanPatch, Override, PlanPatch } from '../db/types.ts';
 
@@ -196,7 +196,9 @@ export function resolveSeed(seed: AppSeed, overrides: Override[], customs: Custo
     const parsed = ResourceSchema.safeParse(custom.data);
     if (!parsed.success) continue;
     const { units, ...rest } = parsed.data;
-    resources.push(patched({ ...rest, unitCount: units?.length ?? 0 }, resourcePatches.get(custom.id)?.patch));
+    const app: AppResource = { ...rest, unitCount: units?.length ?? 0 };
+    if (units && units.length > 0) app.customUnits = units;
+    resources.push(patched(app, resourcePatches.get(custom.id)?.patch));
   }
 
   /* ---- projects */
@@ -208,6 +210,13 @@ export function resolveSeed(seed: AppSeed, overrides: Override[], customs: Custo
     projects.push(patched({ ...parsed.data, stage }, projectPatches.get(custom.id)?.patch));
   }
 
+  /* ---- papers of the user's */
+  const papers = [...seed.papers];
+  for (const custom of byKind<CustomEntity>('paper', customs)) {
+    const parsed = PaperSchema.safeParse(custom.data);
+    if (parsed.success && !papers.some((p) => p.id === parsed.data.id)) papers.push(parsed.data);
+  }
+
   /* ---- plan items: edits stored the old way (a backup from before the patches) first, then the patches */
   const legacy = legacyPlanPatches(overrides, customs, '');
   const known = new Set<string>([...resources.map((r) => r.id), ...projects.map((p) => p.id)]);
@@ -217,6 +226,7 @@ export function resolveSeed(seed: AppSeed, overrides: Override[], customs: Custo
     ...seed,
     resources,
     projects,
+    papers,
     tracks: resolved.tracks,
     phases: resolved.phases,
     plan: resolved.plan,

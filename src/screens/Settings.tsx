@@ -6,7 +6,7 @@ import { db } from '../db/db.ts';
 import { disconnectGithub } from '../db/github.ts';
 import { defaultSettings, updateSettings } from '../db/settings.ts';
 import { useMeta, writeMeta } from '../db/state.ts';
-import type { StoredSettings, Theme } from '../db/types.ts';
+import type { StoredSettings } from '../db/types.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { NEW_REPO_URL, NEW_TOKEN_URL } from '../lib/github.ts';
 import { SHORTCUTS_META_KEY } from '../lib/shortcuts.ts';
@@ -26,6 +26,7 @@ import { SegmentedControl } from '../ui/SegmentedControl.tsx';
 import { TextField } from '../ui/TextField.tsx';
 import { NumberField } from '../ui/NumberField.tsx';
 import { Blocks, Schedule } from './settings/Schedule.tsx';
+import { Layout } from './settings/Layout.tsx';
 import { Problem, Section, saveCore } from './settings/shared.tsx';
 import { exportBackup } from './parts/backupActions.ts';
 import { ShortcutRows } from './Shortcuts.tsx';
@@ -74,23 +75,6 @@ function HeatAndStreak({ settings }: { settings: StoredSettings }) {
         />
       </RowList>
       <Problem text={problem} />
-    </Section>
-  );
-}
-
-function Appearance({ settings }: { settings: StoredSettings }) {
-  return (
-    <Section title="Theme">
-      <SegmentedControl
-        label="Theme"
-        value={settings.theme}
-        onChange={(theme: Theme) => void updateSettings(seed.settings, (s) => ({ ...s, theme }))}
-        options={[
-          { value: 'light', label: 'Light' },
-          { value: 'dark', label: 'Dark' },
-          { value: 'system', label: 'Follow the system' },
-        ]}
-      />
     </Section>
   );
 }
@@ -416,7 +400,17 @@ export function Settings() {
           <Schedule settings={atlas.settings} />
           <Blocks settings={atlas.settings} />
           <HeatAndStreak settings={atlas.settings} />
-          <Appearance settings={atlas.settings} />
+          <Layout atlas={atlas} />
+          {(atlas.seed.patchProblems ?? []).length > 0 && (
+            <Section id="plan-edits" title="Plan edits that no longer apply">
+              <RowList>
+                {atlas.seed.patchProblems!.map((p) => (
+                  <Row key={p} title={p} />
+                ))}
+              </RowList>
+              <p className="mt-2 text-meta text-ink2">The curriculum changed under these edits. They are skipped, and kept in case the item comes back.</p>
+            </Section>
+          )}
           <Keyboard />
           <Backup settings={atlas.settings} />
           <Sync settings={atlas.settings} />

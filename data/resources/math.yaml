@@ -107,6 +107,7 @@
   prerequisites: [mit-18-02]
   subject: math-physics
   summary: "The probability course of the plan. Harvard Stat 110 is the alternative: take one."
+  alternatives: [harvard-stat-110]
 
 - id: harvard-stat-110
   title: "Harvard Stat 110: Probability (Joe Blitzstein)"
@@ -122,6 +123,7 @@
   estHours: 120
   subject: math-physics
   summary: "Alternative to MIT 6.041."
+  alternatives: [mit-6-041]
 
 - id: mit-18-065
   title: "MIT 18.065 Matrix Methods in Data Analysis, Signal Processing, and Machine Learning (Spring 2018)"
