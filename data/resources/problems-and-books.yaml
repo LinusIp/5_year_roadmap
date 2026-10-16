@@ -182,7 +182,7 @@
   cost: free
   estHours: 0
   reference: true
-  summary: "A library of open physics texts; a reference for any mechanics or electromagnetism topic."
+  summary: "A library of open physics texts; a reference for any physics topic."
 
 - id: morin-mechanics-problems
   title: "Problems and Solutions in Introductory Mechanics"
