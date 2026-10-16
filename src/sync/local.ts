@@ -6,16 +6,16 @@ import { currentSettings } from '../lib/settings.ts';
 import Dexie from 'dexie';
 import type { AtlasDB } from '../db/db.ts';
 import type {
-  CertState, CustomEntity, DayLog, MilestoneState, Override, PaperState, PlanPatch, ReplanRecord, Review, StoredSettingsInput,
+  CertState, CustomEntity, DayLog, MilestoneState, Override, PaperState, PlanPatch, PracticeAnswer, ReplanRecord, Review, StoredSettingsInput,
   UserItemState, WeekPick,
 } from '../db/types.ts';
 import { renderDayMarkdown, titleIndex } from '../lib/day-markdown.ts';
 import type { AppSeed } from '../seed/schema.ts';
-import { renderDay, renderItems, renderPlan, renderProject, renderReview, renderSettings } from './files.ts';
+import { renderDay, renderItems, renderPlan, renderPractice, renderProject, renderReview, renderSettings } from './files.ts';
 import type { ItemsData, PlanData } from './files.ts';
 import { markSilent } from './middleware.ts';
 import {
-  ITEMS_PATH, PLAN_PATH, SETTINGS_PATH, dateOfLogPath, logMarkdownPath, logPath, projectPath, reviewPath,
+  ITEMS_PATH, PLAN_PATH, PRACTICE_PATH, SETTINGS_PATH, dateOfLogPath, logMarkdownPath, logPath, projectPath, reviewPath,
 } from './paths.ts';
 
 export interface LocalState {
@@ -30,13 +30,14 @@ export interface LocalState {
   weekPicks: WeekPick[];
   replans: ReplanRecord[];
   planPatches: PlanPatch[];
+  practice: PracticeAnswer[];
   settings: StoredSettingsInput[];
 }
 
 export async function readLocal(database: AtlasDB): Promise<LocalState> {
   return database.transaction(
     'r',
-    [database.dayLogs, database.itemStates, database.paperStates, database.certStates, database.milestoneStates, database.customEntities, database.overrides, database.reviews, database.weekPicks, database.replans, database.planPatches, database.settings],
+    [database.dayLogs, database.itemStates, database.paperStates, database.certStates, database.milestoneStates, database.customEntities, database.overrides, database.reviews, database.weekPicks, database.replans, database.planPatches, database.practice, database.settings],
     async () => ({
       dayLogs: await database.dayLogs.toArray(),
       itemStates: await database.itemStates.toArray(),
@@ -49,6 +50,7 @@ export async function readLocal(database: AtlasDB): Promise<LocalState> {
       weekPicks: await database.weekPicks.toArray(),
       replans: await database.replans.toArray(),
       planPatches: await database.planPatches.toArray(),
+      practice: await database.practice.toArray(),
       settings: await database.settings.toArray(),
     }),
   );
@@ -67,6 +69,7 @@ export function allPaths(local: LocalState, seed: AppSeed): string[] {
   const projects = new Set(seed.projects.map((p) => p.id));
   const paths = [ITEMS_PATH, PLAN_PATH];
   if (local.settings.length > 0) paths.push(SETTINGS_PATH);
+  if (local.practice.length > 0) paths.push(PRACTICE_PATH);
   for (const log of local.dayLogs) paths.push(logPath(log.date));
   for (const review of local.reviews) paths.push(reviewPath(review.id));
   for (const state of local.itemStates) if (projects.has(state.refId)) paths.push(projectPath(state.refId));
@@ -87,6 +90,7 @@ export function withCompanions(paths: Iterable<string>): string[] {
 /** A file's content as the device's records have it, or null when the file should not exist. */
 export function renderPath(path: string, local: LocalState, seed: AppSeed): string | null {
   if (path === ITEMS_PATH) return renderItems(itemsOf(local));
+  if (path === PRACTICE_PATH) return local.practice.length > 0 ? renderPractice(local.practice) : null;
   if (path === PLAN_PATH) return renderPlan(planOf(local));
   if (path === SETTINGS_PATH) return local.settings[0] ? renderSettings(local.settings[0]) : null;
 
@@ -168,5 +172,12 @@ export async function writeDay(database: AtlasDB, log: DayLog | null, date: stri
 export async function writeReview(database: AtlasDB, review: Review): Promise<void> {
   await silently(database, [database.reviews], async () => {
     await database.reviews.put(review);
+  });
+}
+
+/** Practice answers from GitHub, merged with this device's by id: an answer is never lost. */
+export async function writePractice(database: AtlasDB, answers: PracticeAnswer[]): Promise<void> {
+  await silently(database, [database.practice], async () => {
+    await database.practice.bulkPut(answers);
   });
 }

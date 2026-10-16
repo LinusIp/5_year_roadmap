@@ -200,6 +200,37 @@ export type PlanPatchOp = PlanPatch['op'];
 /** A patch before it is stored: id, time and group are added by addPlanEdit. */
 export type NewPlanPatch = PlanPatch extends infer P ? (P extends PlanPatch ? Omit<P, 'id' | 'at' | 'group' | 'label' | 'updatedAt' | 'deviceId'> : never) : never;
 
+/* ------------------------------------------------------------------ practice */
+
+/**
+ * One answered practice question. The log is append-only: what comes back for review, each topic's rating and
+ * when a topic is done are all worked out from it (src/lib/practice/history.ts), so two devices' logs merge by id.
+ */
+export const PracticeAnswerSchema = z.strictObject({
+  /** "<set>|<question id>": a question is answered once per set. */
+  id: z.string().min(1),
+  questionId: Slug,
+  subject: Slug,
+  topic: Slug,
+  /** The day it was answered. */
+  date: IsoDate,
+  /** "daily:2026-10-16" for a day's set, "topic:<subject>/<topic>:<started at>" for practice on demand. */
+  set: z.string().min(1),
+  /** Whether it came up as new or as a review. */
+  role: z.enum(['new', 'review']),
+  /** right, wrong, or partly (a proof marked "partly", or a multipart question with some parts right). */
+  result: z.enum(['right', 'wrong', 'partial']),
+  /** The solution was shown before an answer was checked: it counts as wrong. */
+  revealed: z.boolean().optional(),
+  /** A chained part was right only given the user's own earlier part. */
+  followed: z.boolean().optional(),
+  hints: z.number().int().min(0).max(3),
+  seconds: z.number().int().min(0),
+  difficulty: z.number().int().min(1).max(5),
+  ...Stamp,
+});
+export type PracticeAnswer = z.infer<typeof PracticeAnswerSchema>;
+
 const MinutesByBlock = z.record(BlockIdSchema, z.number());
 
 export const ReviewSchema = z.strictObject({
@@ -498,6 +529,8 @@ export const BackupDataSchema = z.strictObject({
   replans: z.array(ReplanRecordSchema),
   /** Plan edits (flexibility brief). Absent from backups made before it. */
   planPatches: z.array(PlanPatchSchema).default([]),
+  /** Practice answers (practice brief). Absent from backups made before it. */
+  practice: z.array(PracticeAnswerSchema).default([]),
   settings: z.array(StoredSettingsSchema),
   meta: z.array(MetaSchema),
 });

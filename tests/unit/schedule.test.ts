@@ -143,7 +143,7 @@ describe('the schedule', () => {
 
   it('adds up to the 8-hour day and the 56-hour week', () => {
     expect(dailyTargetMinutes(settings, FIRST_DAY)).toBe(480);
-    expect(weeklyTargetMinutes(settings)).toBe(56 * 60);
+    expect(weeklyTargetMinutes(settings, FIRST_DAY)).toBe(56 * 60);
   });
 
   it('falls back to the nearest phase outside the plan rather than showing nothing', () => {

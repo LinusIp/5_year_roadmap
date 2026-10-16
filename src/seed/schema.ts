@@ -416,6 +416,8 @@ export const BlockDefSchema = z.strictObject({
   colour: SeedTrackIdSchema.optional(),
   /** The track time in this block is logged against when its item has none (a block the user added). */
   track: TrackIdSchema.optional(),
+  /** `practice`: the Practice block, which exists only between practice.start and practice.end. */
+  role: z.enum(['practice']).optional(),
 });
 export type BlockDef = z.infer<typeof BlockDefSchema>;
 
@@ -447,6 +449,8 @@ const SettingsDefaultsObject = z.strictObject({
   }),
   /** `relative`: a day's intensity is its share of what it planned. `absolute`: minutes against heatmapThresholds. */
   heatmapMode: z.enum(['relative', 'absolute']),
+  /** The Practice block's period (it exists only between these days, inclusive) and the questions per subject. */
+  practice: z.strictObject({ start: IsoDate, end: IsoDate, perSubject: z.number().int().min(3).max(5) }),
   backupReminderDays: z.number().int().min(1),
   /** One paper a week from the first phase of `fromYear`, or from `fromPhase` when it is set (the research cadence starts in Foundations II). */
   paperCadence: z.strictObject({ fromYear: z.literal([1, 2, 3, 4, 5]), fromPhase: Slug.optional(), perWeek: z.number().positive() }),
@@ -470,6 +474,7 @@ export const SettingsDefaultsSchema = SettingsDefaultsObject.superRefine((v, ctx
   v.pattern.forEach((id, day) => {
     if (!templateIds.has(id)) ctx.addIssue({ code: 'custom', path: ['pattern', day], message: 'names template "' + id + '", which is not defined' });
   });
+  if (v.practice.end < v.practice.start) ctx.addIssue({ code: 'custom', path: ['practice', 'end'], message: 'must not be before practice.start' });
   const t = v.heatmapThresholds;
   const ascending = t[0] < t[1] && t[1] < t[2] && t[2] < t[3];
   if (!ascending) ctx.addIssue({ code: 'custom', path: ['heatmapThresholds'], message: 'must be strictly ascending' });
@@ -485,6 +490,7 @@ export const StoredCoreSchema = SettingsDefaultsObject.extend({
   templates: SettingsDefaultsObject.shape.templates.optional(),
   pattern: SettingsDefaultsObject.shape.pattern.optional(),
   heatmapMode: SettingsDefaultsObject.shape.heatmapMode.optional(),
+  practice: SettingsDefaultsObject.shape.practice.optional(),
   streak: SettingsDefaultsObject.shape.streak.extend({ percent: z.number().min(1).max(100).optional() }),
 });
 export type StoredCore = z.infer<typeof StoredCoreSchema>;
@@ -530,4 +536,6 @@ export type AppSeed = Omit<Seed, 'resources'> & {
   goals?: Goal[];
   /** Plan edits that name something the curriculum no longer has, reported once in Settings. */
   patchProblems?: string[];
+  /** The practice subjects and their topics (data/questions/topics.yaml); the questions load with Practice. */
+  practiceSubjects?: import('./questions.ts').PracticeSubject[];
 };

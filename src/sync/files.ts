@@ -9,10 +9,10 @@ import { z } from 'zod';
 import { canonical } from '../db/backup-file.ts';
 import {
   CertStateSchema, CustomEntitySchema, DayLogSchema, MilestoneStateSchema, OverrideSchema, PaperStateSchema,
-  PlanPatchSchema, ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
+  PlanPatchSchema, PracticeAnswerSchema, ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
 } from '../db/types.ts';
 import { legacyPlanPatches } from '../lib/plan.ts';
-import type { DayLog, Review, StoredSettingsInput, UserItemState } from '../db/types.ts';
+import type { DayLog, PracticeAnswer, Review, StoredSettingsInput, UserItemState } from '../db/types.ts';
 import { formatRange, monthName } from '../lib/dates.ts';
 import type { Project } from '../seed/schema.ts';
 
@@ -127,6 +127,23 @@ export function planUpdatedAt(data: PlanData): string {
   return newest;
 }
 
+/* ------------------------------------------------------------------ state/practice.json */
+
+export const PracticeFileSchema = z.strictObject({
+  format: z.literal('atlas-practice'),
+  version: z.literal(1),
+  answers: z.array(PracticeAnswerSchema),
+});
+
+export function renderPractice(answers: readonly PracticeAnswer[]): string {
+  return toJson({ format: 'atlas-practice', version: 1, answers: [...answers].sort((a, b) => (a.date === b.date ? a.id.localeCompare(b.id) : a.date.localeCompare(b.date))) });
+}
+
+export function parsePractice(text: string): ParseResult<PracticeAnswer[]> {
+  const result = parseJson(text, PracticeFileSchema, 'state/practice.json');
+  return result.ok ? { ok: true, value: result.value.answers } : result;
+}
+
 /* ------------------------------------------------------------------ state/settings.json */
 
 export function renderSettings(settings: StoredSettingsInput): string {
@@ -229,7 +246,8 @@ read it here, edit it by hand, or take it elsewhere. Every study session is one 
 |---|---|
 | \`state/items.json\` | The status, ticked units, notes and links of every course, book, project, paper, certificate and milestone |
 | \`state/plan.json\` | Your edits to the plan: moved and added items, re-plans, the builds you picked |
-| \`state/settings.json\` | Blocks, heatmap thresholds, streak rules and theme. Never the token. |
+| \`state/settings.json\` | Blocks, day templates, the weekly pattern, date ranges, pace and layout. Never the token. |
+| \`state/practice.json\` | Every practice question answered: when, right or wrong, hints, time |
 | \`log/YYYY/MM/YYYY-MM-DD.json\` | One day: the time logged, blocks done, reflection and energy |
 | \`log/YYYY/MM/YYYY-MM-DD.md\` | The same day to read on GitHub, generated |
 | \`reviews/\` | Weekly (\`2026-W41.md\`), monthly (\`2026-10.md\`) and quarterly (\`2027-Q1.md\`) reviews |

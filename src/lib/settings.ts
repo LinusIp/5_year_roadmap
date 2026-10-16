@@ -44,15 +44,26 @@ export function defaultSettings(core: SettingsDefaults): StoredSettings {
 export function upgradeSettings(stored: StoredSettingsInput | StoredSettings, defaults: SettingsDefaults): StoredSettings {
   const core = stored.core;
   const complete =
-    stored.version === SETTINGS_VERSION && core.templates && core.pattern && core.heatmapMode && core.streak.percent !== undefined &&
+    stored.version === SETTINGS_VERSION && core.templates && core.pattern && core.heatmapMode && core.streak.percent !== undefined && core.practice &&
     stored.schedule && stored.pace && stored.pauses && stored.catchUp && stored.layout;
   if (complete) return stored as StoredSettings;
 
   const blocks = [...core.blocks];
-  const templates = core.templates ?? structuredClone(defaults.templates);
+  let templates = core.templates ?? structuredClone(defaults.templates);
   if (!core.templates) {
     // Blocks the curriculum's templates use that these settings predate.
     for (const def of defaults.blocks) if (!blocks.some((b) => b.id === def.id)) blocks.push(structuredClone(def));
+  }
+  if (!core.practice) {
+    // Settings from before the practice brief: the Practice block joins, in the templates the curriculum puts it in.
+    for (const def of defaults.blocks.filter((b) => b.role === 'practice')) {
+      if (blocks.some((b) => b.id === def.id)) continue;
+      blocks.push(structuredClone(def));
+      templates = templates.map((t) => {
+        const entry = defaults.templates.find((d) => d.id === t.id)?.blocks.find((b) => b.block === def.id);
+        return entry && !t.blocks.some((b) => b.block === def.id) ? { ...t, blocks: [...t.blocks, { ...entry }] } : t;
+      });
+    }
   }
   const nextCore: SettingsDefaults = {
     ...core,
@@ -60,6 +71,7 @@ export function upgradeSettings(stored: StoredSettingsInput | StoredSettings, de
     templates,
     pattern: core.pattern ?? [...defaults.pattern],
     heatmapMode: core.heatmapMode ?? defaults.heatmapMode,
+    practice: core.practice ?? { ...defaults.practice },
     streak: { ...core.streak, percent: core.streak.percent ?? defaults.streak.percent },
   };
   return {

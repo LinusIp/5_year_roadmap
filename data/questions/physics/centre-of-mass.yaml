@@ -1,0 +1,348 @@
+subject: physics
+topic: centre-of-mass
+questions:
+  - id: phys-com-001
+    difficulty: 1
+    type: numeric
+    prompt: |
+      Two small balls are fixed to the ends of a light rod of length {{L}} m: a {{m1}} kg ball at $x = 0$ and a
+      {{m2}} kg ball at $x = {{L}}\ \text{m}$. Where along the rod is the centre of mass? Give $x_{\text{cm}}$ with units.
+    params:
+      m1: { int: [1, 9] }
+      m2: { int: [1, 9] }
+      L: { real: [0.5, 3], step: 0.1 }
+    answer: "m2 * L / (m1 + m2)"
+    units: "m"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "The centre of mass is the mass-weighted average position: $x_{\\text{cm}} = \\dfrac{\\sum m_i x_i}{\\sum m_i}$."
+      - "The ball at $x = 0$ contributes nothing to the numerator, but its mass still counts in the denominator."
+    solution: |
+      $$x_{\text{cm}} = \frac{m_1 \cdot 0 + m_2 L}{m_1 + m_2} = \frac{ {{m2}} \times {{L}} }{ {{m1 + m2}} } \approx {{round(m2*L/(m1 + m2), 3)}}\ \text{m}.$$
+      It lies closer to the heavier ball, as it should.
+    verify: "solve(m1*(0 - Symbol('X')) + m2*(L - Symbol('X')), Symbol('X'))[0]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 2
+
+  - id: phys-com-002
+    difficulty: 1
+    type: mc
+    prompt: "Where is the centre of mass of a thin uniform ring (a hoop)?"
+    options:
+      - "At the geometric centre of the ring, where there is no material at all"
+      - "Anywhere on the ring itself, since every point is equivalent"
+      - "Nowhere: a centre of mass is only defined for solid objects"
+      - "Halfway between the centre and the rim"
+    answer: 0
+    hints:
+      - "Pair each bit of the ring with the bit diametrically opposite it."
+    solution: |
+      Every element $dm$ at position $\mathbf{r}$ has a partner at $-\mathbf{r}$ (measured from the centre), so
+      $\int \mathbf{r}\,dm = \mathbf{0}$ and the centre of mass is the centre of the ring. Nothing requires the centre
+      of mass to sit inside the material: rings, boomerangs and high jumpers arching over a bar all have it outside.
+    verify: "0 if abs(np.mean(np.cos(np.linspace(0, 2*np.pi, 360, endpoint=False)))) + abs(np.mean(np.sin(np.linspace(0, 2*np.pi, 360, endpoint=False)))) < 1e-9 else 1"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: phys-com-003
+    difficulty: 2
+    type: vector
+    prompt: |
+      Three point masses lie in the $xy$-plane (coordinates in metres):
+      {{m1}} kg at $({{x1}}, {{y1}})$, {{m2}} kg at $({{x2}}, {{y2}})$ and {{m3}} kg at $({{x3}}, {{y3}})$.
+      Find the centre of mass. Enter its coordinates in metres as `x, y`.
+    params:
+      m1: { int: [1, 6] }
+      m2: { int: [1, 6] }
+      m3: { int: [1, 6] }
+      x1: { int: [-4, 4] }
+      y1: { int: [-4, 4] }
+      x2: { int: [-4, 4] }
+      y2: { int: [-4, 4] }
+      x3: { int: [-4, 4] }
+      y3: { int: [-4, 4] }
+    let:
+      Mt: "m1 + m2 + m3"
+      Sx: "m1*x1 + m2*x2 + m3*x3"
+      Sy: "m1*y1 + m2*y2 + m3*y3"
+    answer: "[Sx / Mt, Sy / Mt]"
+    tolerance: { abs: 0.01 }
+    hints:
+      - "Treat $x$ and $y$ separately: each coordinate is a mass-weighted average."
+      - "The total mass is ${{Mt}}$ kg."
+    solution: |
+      Total mass $M = {{m1}} + {{m2}} + {{m3}} = {{Mt}}$ kg.
+      $$x_{\text{cm}} = \frac{ {{m1}}({{x1}}) + {{m2}}({{x2}}) + {{m3}}({{x3}}) }{ {{Mt}} } = \frac{ {{Sx}} }{ {{Mt}} } \approx {{round(Sx/Mt, 3)}}\ \text{m}$$
+      $$y_{\text{cm}} = \frac{ {{m1}}({{y1}}) + {{m2}}({{y2}}) + {{m3}}({{y3}}) }{ {{Mt}} } = \frac{ {{Sy}} }{ {{Mt}} } \approx {{round(Sy/Mt, 3)}}\ \text{m}$$
+    verify: "list(np.average(np.array([[x1, y1], [x2, y2], [x3, y3]], dtype=float), axis=0, weights=[m1, m2, m3]))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: phys-com-004
+    difficulty: 2
+    type: numeric
+    prompt: |
+      A {{m}} kg student stands at one end of a {{M}} kg boat floating at rest on still water. The student walks
+      {{L}} m towards the other end of the boat and stops. Ignoring water resistance, how far does the boat move
+      relative to the water? Give your answer with units.
+    params:
+      m: { int: [50, 90] }
+      M: { int: [100, 400] }
+      L: { real: [2, 6], step: 0.5 }
+    answer: "m * L / (m + M)"
+    units: "m"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "No horizontal external force acts on student + boat, and they start at rest. What does that say about the centre of mass?"
+      - "If the boat moves back a distance $D$, the student moves forward $L - D$ relative to the water."
+    solution: |
+      With no external horizontal force and the system at rest, the centre of mass cannot move. Let the boat move a
+      distance $D$ backwards; the student then moves $L - D$ forwards relative to the water, so
+      $$m(L - D) - M D = 0 \quad\Rightarrow\quad D = \frac{mL}{m + M} = \frac{ {{m}} \times {{L}} }{ {{m + M}} } \approx {{round(m*L/(m + M), 3)}}\ \text{m}.$$
+    verify: "solve(m*(L - Symbol('D')) - M*Symbol('D'), Symbol('D'))[0]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: phys-com-005
+    difficulty: 2
+    type: estimate
+    prompt: |
+      The Earth and the Moon orbit their common centre of mass (the barycentre). Using rough values you know (the
+      Moon's mass is about $1/81$ of the Earth's, and it is about 384 000 km away), estimate how far the barycentre
+      is from the centre of the Earth. Give a value with units.
+    answer: "384000 / 82"
+    units: "km"
+    factor: 2
+    hints:
+      - "Model the Earth and Moon as two point masses."
+      - "$M_E\\, d = M_M (D - d)$ with $D$ the Earth–Moon distance."
+    solution: |
+      Balance the two masses about the barycentre at distance $d$ from Earth's centre:
+      $$M_E d = M_M (D - d) \Rightarrow d = \frac{D}{1 + M_E/M_M} \approx \frac{384\,000\ \text{km}}{82} \approx 4\,700\ \text{km}.$$
+      That is less than the Earth's radius (6 370 km): the barycentre lies inside the Earth, about three quarters of
+      the way out from the centre.
+    verify: "solve(81*Symbol('d') - (384000 - Symbol('d')), Symbol('d'))[0]"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 3
+
+  - id: phys-com-006
+    difficulty: 2
+    type: mc
+    prompt: |
+      Two skaters, initially at rest on frictionless ice, push off each other and glide apart. What does their
+      common centre of mass do?
+    options:
+      - "It stays at rest where it was"
+      - "It moves with the heavier skater"
+      - "It moves with the lighter skater"
+      - "It accelerates during the push and then moves at constant velocity"
+    answer: 0
+    hints:
+      - "The push is an internal force. What is the net external horizontal force?"
+    solution: |
+      The forces the skaters exert on each other are internal and cancel in pairs (Newton's third law). With no
+      net external horizontal force, $M\mathbf{a}_{\text{cm}} = \mathbf{0}$, and since the centre of mass started at
+      rest it stays at rest: the total momentum $m_1 v_1 + m_2 v_2$ is zero at every instant.
+    verify: "0 if abs(60*(-1.5) + 40*(60*1.5/40)) < 1e-12 else 3"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 1
+
+  - id: phys-com-007
+    difficulty: 3
+    type: numeric
+    prompt: |
+      A thin rod of length {{L}} m has a linear mass density that increases along it,
+      $\lambda(x) = \lambda_0 \left(1 + {{k}}\,\dfrac{x}{L}\right)$, for $0 \le x \le L$.
+      How far from the end at $x = 0$ is its centre of mass? Give your answer with units.
+    params:
+      L: { real: [0.5, 2.5], step: 0.1 }
+      k: { int: [1, 5] }
+    answer: "L * (3 + 2*k) / (3 * (2 + k))"
+    units: "m"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "$x_{\\text{cm}} = \\dfrac{\\int_0^L x\\,\\lambda(x)\\,dx}{\\int_0^L \\lambda(x)\\,dx}$."
+      - "Both integrals are of polynomials; $\\lambda_0$ cancels."
+    solution: |
+      $$M = \int_0^L \lambda_0\Big(1 + {{k}}\tfrac{x}{L}\Big)dx = \lambda_0 L\Big(1 + \tfrac{ {{k}} }{2}\Big),\qquad
+      \int_0^L x\lambda\,dx = \lambda_0 L^2\Big(\tfrac12 + \tfrac{ {{k}} }{3}\Big).$$
+      $$x_{\text{cm}} = L\,\frac{\tfrac12 + \tfrac{ {{k}} }{3}}{1 + \tfrac{ {{k}} }{2}} = {{L}} \times \frac{ {{3 + 2*k}} }{ {{3*(2 + k)}} } \approx {{round(L*(3 + 2*k)/(3*(2 + k)), 3)}}\ \text{m}.$$
+      It is past the midpoint, towards the denser end.
+    verify: "integrate(x*(1 + k*x/L), (x, 0, L)) / integrate(1 + k*x/L, (x, 0, L))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 4
+
+  - id: phys-com-008
+    difficulty: 3
+    type: numeric
+    prompt: |
+      A uniform flat disc of radius {{R}} cm has a circular hole of radius {{r}} cm cut out of it. The centre of the
+      hole is {{d}} cm from the centre of the disc. How far from the centre of the original disc is the centre of
+      mass of the remaining plate? Give your answer with units.
+    params:
+      R: { int: [20, 40] }
+      r: { int: [6, 14] }
+      d: { int: [5, 25] }
+    require: ["d + r <= R - 1"]
+    answer: "r^2 * d / (R^2 - r^2)"
+    units: "cm"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "Think of the plate as the full disc plus a disc of *negative* mass where the hole is."
+      - "Mass is proportional to area, so you can use areas in place of masses."
+    solution: |
+      Treat the plate as a full disc (centre of mass at the origin, area $\pi R^2$) plus a "negative" disc of area
+      $-\pi r^2$ centred at $x = {{d}}$ cm:
+      $$x_{\text{cm}} = \frac{\pi R^2 \cdot 0 - \pi r^2 d}{\pi R^2 - \pi r^2} = -\frac{r^2 d}{R^2 - r^2}
+      = -\frac{ {{r^2}} \times {{d}} }{ {{R^2 - r^2}} } \approx -{{round(r^2*d/(R^2 - r^2), 3)}}\ \text{cm}.$$
+      The centre of mass is ${{round(r^2*d/(R^2 - r^2), 3)}}$ cm from the centre, on the side opposite the hole.
+    verify: "integrate(integrate((d + Symbol('rho')*cos(Symbol('ph')))*Symbol('rho'), (Symbol('rho'), 0, r)), (Symbol('ph'), 0, 2*pi)) / (pi*(R**2 - r**2))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: phys-com-009
+    difficulty: 3
+    type: multipart
+    prompt: |
+      Two blocks, {{m1}} kg and {{m2}} kg, are joined by a light spring and rest on a frictionless table. At $t = 0$
+      a constant horizontal force of {{F}} N starts pulling the first block. The spring stretches and the blocks
+      oscillate relative to each other.
+    params:
+      m1: { int: [1, 6] }
+      m2: { int: [1, 6] }
+      F: { int: [5, 40] }
+      tt: { real: [1, 5], step: 0.5 }
+    parts:
+      - prompt: "(a) What is the acceleration of the centre of mass of the two blocks? Give it with units."
+        type: numeric
+        answer: "F / (m1 + m2)"
+        units: "m/s^2"
+        tolerance: { rel: 0.01 }
+        verify: "expand(m1*((F - 3*x)/m1) + m2*(3*x/m2)) / (m1 + m2)"
+      - prompt: "(b) Using your answer to (a), how far has the centre of mass moved after {{tt}} s? Give it with units."
+        type: numeric
+        answer: "0.5 * part1 * tt^2"
+        units: "m"
+        tolerance: { rel: 0.01 }
+        verify: "integrate(integrate(part1, (t, 0, Symbol('s'))), (Symbol('s'), 0, tt))"
+    hints:
+      - "The spring forces are internal. Only the external force changes the total momentum."
+      - "$M a_{\\text{cm}} = F_{\\text{ext}}$ no matter how the blocks jiggle."
+      - "The centre of mass starts from rest and has constant acceleration."
+    solution: |
+      (a) If the spring pulls back on block 1 with force $kx$ it pulls block 2 forward with $kx$:
+      $m_1 a_1 = F - kx$ and $m_2 a_2 = kx$. Adding, $m_1a_1 + m_2a_2 = F$, so
+      $$a_{\text{cm}} = \frac{m_1 a_1 + m_2 a_2}{m_1 + m_2} = \frac{F}{m_1 + m_2} = \frac{ {{F}} }{ {{m1 + m2}} } \approx {{round(F/(m1 + m2), 3)}}\ \text{m/s}^2.$$
+      (b) From rest with constant acceleration, $\Delta x_{\text{cm}} = \tfrac12 a_{\text{cm}} t^2 = \tfrac12 \times {{round(F/(m1 + m2), 3)}} \times {{tt}}^2 \approx {{round(0.5*F/(m1 + m2)*tt^2, 3)}}$ m.
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: phys-com-010
+    difficulty: 3
+    type: numeric
+    prompt: |
+      A thin uniform plate has the shape of a half-disc of radius {{R}} cm, with its straight edge along the
+      $x$-axis. How far above the straight edge is its centre of mass? Give your answer with units.
+    params:
+      R: { int: [5, 50] }
+    answer: "4 * R / (3 * pi)"
+    units: "cm"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "By symmetry $x_{\\text{cm}} = 0$; you need $y_{\\text{cm}} = \\frac{1}{A}\\iint y\\,dA$."
+      - "Use polar coordinates: $y = r\\sin\\theta$ and $dA = r\\,dr\\,d\\theta$ with $0 \\le \\theta \\le \\pi$."
+    solution: |
+      $$\iint y\,dA = \int_0^\pi\!\!\int_0^R r\sin\theta\; r\,dr\,d\theta = \frac{R^3}{3}\cdot 2 = \frac{2R^3}{3},\qquad A = \frac{\pi R^2}{2},$$
+      $$y_{\text{cm}} = \frac{2R^3/3}{\pi R^2/2} = \frac{4R}{3\pi} = \frac{4 \times {{R}}}{3\pi} \approx {{round(4*R/(3*pi), 3)}}\ \text{cm}.$$
+    verify: "integrate(integrate(Symbol('rho')**2*sin(Symbol('ph')), (Symbol('rho'), 0, R)), (Symbol('ph'), 0, pi)) / (pi*R**2/2)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: phys-com-011
+    difficulty: 4
+    type: numeric
+    prompt: |
+      A shell is fired from level ground at {{v0}} m/s, {{th}}° above the horizontal. At the top of its path it
+      explodes into two fragments of equal mass. Just after the explosion one fragment is momentarily at rest and
+      then falls straight down. Ignoring air resistance, how far from the launch point does the other fragment land?
+      Take $g = 9.8\ \text{m/s}^2$ and give your answer with units.
+    params:
+      v0: { int: [20, 60] }
+      th: { int: [20, 70] }
+    let:
+      Rng: "v0^2 * sin(2*th*pi/180) / 9.8"
+    answer: "1.5 * Rng"
+    units: "m"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "Where would the shell have landed had it not exploded? The centre of mass still lands there."
+      - "The first fragment lands directly below the apex, at half the range."
+      - "Both fragments fall from the same height, so they land at the same time."
+    solution: |
+      Without the explosion the range would be $R = \dfrac{v_0^2 \sin 2\theta}{g} \approx {{round(Rng, 2)}}$ m.
+      The explosion is internal, so the centre of mass still follows the parabola and lands at $R$. Fragment 1 drops
+      from the apex and lands at $R/2$. Both land at the same instant, so
+      $$\frac{m\,(R/2) + m\,x_2}{2m} = R \quad\Rightarrow\quad x_2 = \frac{3R}{2} \approx {{round(1.5*Rng, 2)}}\ \text{m}.$$
+      (Check with momentum: at the apex the shell moves at $v_0\cos\theta$; fragment 2 must leave at $2v_0\cos\theta$.)
+    verify: "(lambda vx, tf: vx*tf + 2*vx*tf)(v0*math.cos(math.radians(th)), v0*math.sin(math.radians(th))/9.8)"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6
+
+  - id: phys-com-012
+    difficulty: 4
+    type: numeric
+    prompt: |
+      In an Atwood machine, blocks of {{m1}} kg and {{m2}} kg hang from a light string over a light frictionless
+      pulley and are released from rest. What is the magnitude of the acceleration of the centre of mass of the two
+      blocks? Take $g = 9.8\ \text{m/s}^2$ and give your answer with units.
+    params:
+      m1: { int: [2, 9] }
+      m2: { int: [1, 8] }
+    require: ["m1 > m2"]
+    let:
+      a: "(m1 - m2) * 9.8 / (m1 + m2)"
+    answer: "(m1 - m2) * a / (m1 + m2)"
+    units: "m/s^2"
+    tolerance: { rel: 0.01 }
+    hints:
+      - "First find the acceleration $a$ of each block: one goes down, the other up."
+      - "$a_{\\text{cm}} = \\dfrac{m_1 a_1 + m_2 a_2}{m_1 + m_2}$ with signs."
+    solution: |
+      Newton's second law for each block (heavier going down) gives
+      $a = \dfrac{(m_1 - m_2)g}{m_1 + m_2} \approx {{round(a, 3)}}\ \text{m/s}^2$.
+      Taking down as positive, $a_1 = +a$ and $a_2 = -a$:
+      $$a_{\text{cm}} = \frac{m_1 a - m_2 a}{m_1 + m_2} = \left(\frac{m_1 - m_2}{m_1 + m_2}\right)^2 g \approx {{round((m1 - m2)*a/(m1 + m2), 3)}}\ \text{m/s}^2,$$
+      downwards. Check: the net external force on the pair is $(m_1 + m_2)g - 2T$, which is not zero.
+    verify: "(lambda sol: (m1*sol[Symbol('a')] - m2*sol[Symbol('a')])/(m1 + m2))(solve([m1*9.8 - Symbol('T') - m1*Symbol('a'), Symbol('T') - m2*9.8 - m2*Symbol('a')], [Symbol('a'), Symbol('T')]))"
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 5
+
+  - id: phys-com-013
+    difficulty: 4
+    type: proof
+    prompt: |
+      Show that the centre of mass of a uniform solid right circular cone of height $h$ lies on its axis, a distance
+      $h/4$ above the base.
+    hints:
+      - "Slice the cone into thin discs perpendicular to the axis."
+      - "Measure $z$ from the apex: the slice at height $z$ has radius $r(z) = Rz/h$ and mass proportional to $z^2\\,dz$."
+    solution: |
+      By symmetry the centre of mass is on the axis. Put the apex at $z = 0$ and the base at $z = h$. The disc between
+      $z$ and $z + dz$ has radius $Rz/h$, so $dm = \rho \pi (Rz/h)^2 dz \propto z^2\,dz$. Then
+      $$z_{\text{cm}} = \frac{\int_0^h z \cdot z^2\,dz}{\int_0^h z^2\,dz} = \frac{h^4/4}{h^3/3} = \frac{3h}{4}.$$
+      That is $3h/4$ from the apex, i.e. $h - 3h/4 = h/4$ above the base. $\blacksquare$
+    source: Original
+    license: CC BY-NC-SA 4.0
+    estMinutes: 6

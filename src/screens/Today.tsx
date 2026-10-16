@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../db/db.ts';
 import { updateSettings } from '../db/settings.ts';
 import { clearTimer, editItemState, setItemStatus, setWeekPick, startTimer, useRunningTimer, useWeekPick } from '../db/state.ts';
 import type { RunningTimer } from '../db/types.ts';
@@ -104,6 +105,9 @@ export function Today() {
   const timer = useRunningTimer();
   const elapsed = useElapsed(timer);
   const log = useLiveQuery(() => readLog(date), [date]);
+  // How far today's practice set has got: "4 of 9 answered".
+  const practiceAnswered = useLiveQuery(() => db.practice.where('date').equals(date).filter((a) => a.set === 'daily:' + date).count(), [date]) ?? 0;
+  const practiceMeta = (it: ScheduledItem): string => (practiceAnswered >= it.unitCount ? 'Set done · ' : practiceAnswered > 0 ? practiceAnswered + ' of ' + it.unitCount + ' answered · ' : '') + (it.note ?? '');
   const settings = atlas?.settings;
   const weekStart = useMemo(() => startOfWeek(date, settings?.core.weekStartsOn ?? 1), [date, settings]);
   const weekPick = useWeekPick(weekStart);
@@ -221,6 +225,7 @@ export function Today() {
 
   const rowFor = (block: TodayBlock): { title: string; meta: string; to?: string } => {
     const name = blockShort(block.def.name);
+    if (block.item?.kind === 'practice') return { title: block.def.name, meta: practiceMeta(block.item), to: '/practice' };
     if (block.kind === 'review') return { title: 'Weekly review and paper', meta: name + ' · close the week' };
     const blockItem = focusItem(block, monthlyFirst);
     if (!blockItem) {
@@ -262,6 +267,12 @@ export function Today() {
         Open the review
       </Button>
     );
+  } else if (item?.kind === 'practice' && !nowRunning) {
+    primary = (
+      <Button variant="filled" icon="play" to="/practice">
+        {practiceAnswered > 0 ? 'Go on' : 'Start the set'}
+      </Button>
+    );
   } else if (nowBlock && !item) {
     primary = (
       <Button variant="filled" to={nowBlock.id === 'D' ? '/plan/pick?from=today' : '/plan'}>
@@ -296,7 +307,7 @@ export function Today() {
         ? nowBlock.weeklyBuild
         : nowBlock.item
       : undefined;
-  const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item ? nameOf(item) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
+  const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item?.kind === 'practice' ? practiceMeta(item) : item ? nameOf(item) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
   const metaLine = nowBlock
     ? [blockShort(nowBlock.def.name), span(nowMinutes) + ' of ' + span(nowBlock.targetMinutes), nowBlock.catchUp ? span(nowBlock.catchUp) + ' of it catch-up' : null, detailOf(item), nowDone ? 'done' : null].filter(Boolean).join(' · ')
     : '';

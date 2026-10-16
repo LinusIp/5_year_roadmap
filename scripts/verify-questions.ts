@@ -11,7 +11,8 @@
  * Options: --only <id-prefix> checks a subset; --draws <n> changes the 200; --quotas fails on the launch quotas too.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import katex from 'katex';
 import { loadQuestions } from './lib/load-questions.ts';
@@ -93,13 +94,14 @@ for (const q of selected as BankQuestion[]) {
   out.push(record);
 }
 
-const dir = join(REPO_ROOT, 'node_modules', '.cache', 'atlas');
-mkdirSync(dir, { recursive: true });
+// A file of its own per run, so two runs at once (two worktrees, two terminals) never read each other's draws.
+const dir = mkdtempSync(join(tmpdir(), 'atlas-verify-'));
 const file = join(dir, 'question-draws.json');
 writeFileSync(file, JSON.stringify(out));
 
 const python = process.env.PYTHON ?? (process.platform === 'win32' ? 'python' : 'python3');
 const result = spawnSync(python, [join(REPO_ROOT, 'scripts', 'verify-questions.py'), file], { stdio: 'inherit' });
+rmSync(dir, { recursive: true, force: true });
 if (result.error) {
   console.error('Could not run ' + python + ': ' + result.error.message + '. Install Python 3 with sympy and numpy (pip install sympy numpy).');
   process.exit(1);
