@@ -111,7 +111,17 @@ try {
   await page.locator('#deck-top-title').click();
   await page.getByRole('dialog', { name: title }).getByRole('button', { name: 'Take it' }).waitFor({ timeout: 30_000 });
   step('a tap on the Deck card opens its tech doc, with Take it: ' + title);
+  // The redesigned doc: its jump bar, and the diagram generated from its design.
+  const doc = page.getByRole('dialog', { name: title });
+  await doc.getByRole('radio', { name: 'Design' }).click();
+  await doc.getByRole('img', { name: /^Diagram of / }).waitFor({ timeout: 30_000 });
+  step('the doc jumps to Design and draws its diagram');
   await page.keyboard.press('Escape');
+  // The Library's home: in progress, paths, up next and the shelves.
+  await page.goto(new URL('#/library', url).href);
+  await page.getByRole('heading', { name: 'Your paths' }).waitFor({ timeout: 30_000 });
+  await page.getByRole('button', { name: /^\d+ Courses$/ }).waitFor({ timeout: 30_000 });
+  step('the Library opens on its home, with the paths and the shelves');
   // A full load, not a hash change from the Deck: wait for Today's own Now card, then for its block icons.
   await page.goto(new URL('#/', url).href);
   await page.reload();
