@@ -16,7 +16,7 @@ import type { BankQuestion, ParamSpec, Question, QuestionPart } from '../../seed
 import { rngFrom } from './rng.ts';
 import type { Rng } from './rng.ts';
 
-export const math = create(all, { number: 'number', precision: 64 });
+export const math = create(all!, { number: 'number', precision: 64 });
 
 export type Scope = Record<string, unknown>;
 /** What a param can be drawn as. */

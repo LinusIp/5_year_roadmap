@@ -34,7 +34,7 @@ export function loadDocs(seed: Seed, dataDir: string = DATA_DIR, options: { requ
     ...seed.certs.map((c) => c.id), ...seed.paperSources.map((s) => s.id), ...(options.extraIds ?? []),
   ]);
   const nodes = new Set(seed.roadmaps.flatMap((r) => r.sections.flatMap((s) => s.nodes.map((n) => r.id + '/' + n.id))));
-  const roadmapIds = new Set(seed.roadmaps.map((r) => r.id));
+  const roadmapIds = new Set<string>(seed.roadmaps.map((r) => r.id));
 
   const files = existsSync(dir) ? readdirSync(dir).filter((n) => n.endsWith('.md')).sort() : [];
   for (const name of files) {
