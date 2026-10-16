@@ -2,6 +2,7 @@
 
 - id: vllm-docs
   title: vLLM documentation and source
+  short: "vLLM Docs"
   provider: vLLM project
   type: tutorial
   url: https://docs.vllm.ai/en/latest/
@@ -151,6 +152,7 @@
     - inference-engineering/nims
 - id: nsight-compute-docs
   title: Nsight Systems and Nsight Compute documentation
+  short: "Nsight Systems & Compute"
   provider: NVIDIA
   type: tutorial
   url: https://docs.nvidia.com/nsight-compute/

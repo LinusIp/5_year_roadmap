@@ -3,6 +3,7 @@
 
 - id: 30-days-of-python
   title: "30 Days of Python (Asabeneh Yetayeh)"
+  short: "30 Days of Python"
   provider: "Asabeneh Yetayeh"
   type: tutorial
   url: https://github.com/Asabeneh/30-Days-Of-Python
@@ -60,6 +61,7 @@
 
 - id: beej-c
   title: "Beej's Guide to C Programming"
+  short: "Beej's Guide to C"
   provider: Brian 'Beej' Hall
   type: book
   url: https://beej.us/guide/bgc/
@@ -131,6 +133,7 @@
 
 - id: effective-modern-cpp
   title: "Effective Modern C++ (Scott Meyers)"
+  short: "Effective Modern C++"
   provider: O'Reilly
   type: book
   url: https://www.aristeia.com/EMC++.html
@@ -174,6 +177,7 @@
 
 - id: rust-book
   title: "The Rust Programming Language ('the book')"
+  short: "Rust Book"
   provider: rust-lang.org
   type: book
   url: https://doc.rust-lang.org/book/
@@ -214,6 +218,7 @@
 
 - id: rust-for-rustaceans
   title: "Rust for Rustaceans (Jon Gjengset)"
+  short: "Rust for Rustaceans"
   provider: No Starch Press
   type: book
   url: https://nostarch.com/rust-rustaceans
@@ -272,6 +277,7 @@
 
 - id: learn-go-with-tests
   title: "Learn Go with Tests (Chris James)"
+  short: "Learn Go with Tests"
   provider: quii
   type: book
   url: https://quii.gitbook.io/learn-go-with-tests
@@ -286,6 +292,7 @@
 
 - id: sqlbolt
   title: "SQLBolt: interactive SQL lessons"
+  short: "SQLBolt"
   provider: sqlbolt.com
   type: tutorial
   url: https://sqlbolt.com/
@@ -316,6 +323,7 @@
 
 - id: triton-tutorials
   title: "Triton: official tutorials (GPU kernels in Python)"
+  short: "Triton Tutorials"
   provider: OpenAI
   type: tutorial
   url: https://triton-lang.org/main/getting-started/tutorials/index.html

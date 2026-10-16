@@ -354,6 +354,17 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
     }
   }
 
+  // The Library's paths and Today's rows name a planned resource by its short title: 28 characters at most.
+  const SHORT_MAX = 28;
+  const named = new Set<string>();
+  for (const item of plan) {
+    if (!item.resourceId || named.has(item.resourceId)) continue;
+    named.add(item.resourceId);
+    const res = resourceById.get(item.resourceId);
+    const name = res ? (res.short ?? res.title) : '';
+    if (res && name.length > SHORT_MAX) errors.push('resource "' + res.id + '" is planned, so it needs a `short` title of ' + SHORT_MAX + ' characters or fewer (it shows as "' + name + '", ' + name.length + ')');
+  }
+
   // A planned resource must not sit before a planned prerequisite.
   for (const item of plan) {
     if (!item.resourceId) continue;

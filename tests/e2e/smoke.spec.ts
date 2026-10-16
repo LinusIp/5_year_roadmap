@@ -118,7 +118,8 @@ test('the heatmap is one tab stop, and the arrow keys move through the days', as
 
 test('an empty search offers a way back', async ({ page }) => {
   await open(page, './#/library?q=zzzqqq');
-  await expect(page.getByText(/^Nothing matches/)).toBeVisible();
-  await page.getByRole('button', { name: 'Clear the search and filters' }).click();
-  await expect(page.getByText(/^Nothing matches/)).toHaveCount(0);
+  await expect(page.getByText('No matches. Clear filters.')).toBeVisible();
+  await page.getByRole('button', { name: 'Clear filters' }).click();
+  await expect(page.getByText('No matches. Clear filters.')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Your paths' })).toBeVisible();
 });

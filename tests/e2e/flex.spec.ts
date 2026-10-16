@@ -157,7 +157,7 @@ test('adds, reorders, swaps, drops and restores a plan item, and undoes an edit'
 });
 
 test('creates a resource of its own and a goal that shows on the Timeline', async ({ page }) => {
-  await open(page, './#/library');
+  await open(page, './#/library?type=course');
   await page.getByRole('button', { name: 'Add a resource' }).click();
   const sheet = page.getByRole('dialog', { name: 'Add a resource' });
   await sheet.getByRole('textbox', { name: 'Title' }).fill('My numerical methods notes');

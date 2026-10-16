@@ -807,6 +807,37 @@ was, not what is.
   the app was used (taps and keys mark it, at most once a minute), and Stop now. Keep asks again three hours later
   or at the next midnight.
 
+## The Library organised (pull request #8)
+
+- **A path is a family of tracks**, as tracks.yaml groups them (AI & ML, Languages, Graphics, Math & science,
+  Software & systems, Electrical & embedded, Mechanical & robotics), with the plan's items in plan order (phase
+  start, lane, order in the lane). Career and review is not a path. An item planned twice (LearnOpenGL over two
+  phases) is one step, at its first place.
+- **Paths hold resources only.** The plan's projects are Block D's and the Projects shelf's; on a path they would
+  double the steps and say nothing new. A path's done count and current step are its resources'.
+- **Paths that start more than a year away and have nothing done** (Electrical and embedded, Mechanical and robotics
+  today) fold into one "Later in the plan" row, to keep the home short. Tapping it shows them.
+- **Pause is "back to not started"**, the only status between active and done that keeps an item in the plan; the
+  units ticked and the minutes logged stay. Dropped stays in the item's own sheet: from a card it is too easy to hit.
+- **Up next** is the three steps not started whose phase starts first (then lane, then order), across every path; when
+  the step before it is not done it says "after …", so the order of a path stays readable. Its right side is the
+  month its phase starts, or "Now" once that phase has started (a past month read as overdue).
+- **Shelves** are the existing types folded into seven: lectures and tutorials are Courses; repos, tools and
+  problem sets are Tools; Papers are the paper queue plus papers listed as resources; Projects are the plan's and the
+  catalogue's. **Blogs to follow** are the four resources that are real blogs (Sander Dieleman, Inigo Quilez's
+  articles, Gaffer on Games, Ahead of AI), flagged `blog: true` in data; other articles stay Articles. Counts are the
+  real ones.
+- **The home has at most about fifteen things** (six cards, five paths and a fold row, three up next, seven shelf
+  tiles); everything else is one tap away.
+- **Search** groups by shelf, three per shelf, in the shelves' order; "Show all N" opens that shelf with the same
+  search. Clearing the search goes back to the home.
+- **Add a resource** moved from the home into the shelves (Courses, Books, Articles, Blogs, Tools), the place a
+  resource of that kind would be looked for. Papers and Projects keep their own add flows.
+- **Short titles** (≤ 28 characters) are required for every planned resource and checked in validate:data, so a card
+  or path step fits on one line at 390 px; 75 were added or shortened. The full title stays in the sheet.
+- **The more knob sits above the card's link**: the card's title stretches its tap area over the whole card, and the
+  knob is raised over it, so both are reachable (the E2E caught the knob being covered).
+
 ## The tech doc redesigned (pull request #9)
 
 **Field schema** (`src/seed/design.ts`, one file per item in `data/projects/design/`; validate:data checks them all):
