@@ -6,7 +6,7 @@
  * flat, self-describing JSON document so that another app ("Horizon") can read an export.
  */
 import { z } from 'zod';
-import { BlockIdSchema, DayTemplateSchema, GoalSchema, HttpUrl, IsoDate, PlanItemSchema, Slug, StoredCoreSchema, Text, TrackIdSchema } from '../seed/schema.ts';
+import { BlockIdSchema, ClockTime, DayTemplateSchema, GoalSchema, HttpUrl, IsoDate, PlanItemSchema, Slug, StoredCoreSchema, Text, TrackIdSchema } from '../seed/schema.ts';
 import type { SettingsDefaults } from '../seed/schema.ts';
 
 export const ITEM_STATUSES = ['todo', 'active', 'done', 'dropped'] as const;
@@ -200,11 +200,12 @@ export type PlanPatchOp = PlanPatch['op'];
 /** A patch before it is stored: id, time and group are added by addPlanEdit. */
 export type NewPlanPatch = PlanPatch extends infer P ? (P extends PlanPatch ? Omit<P, 'id' | 'at' | 'group' | 'label' | 'updatedAt' | 'deviceId'> : never) : never;
 
-/* ------------------------------------------------------------------ practice */
+/* ------------------------------------------------------------------ practice (archived) */
 
 /**
- * One answered practice question. The log is append-only: what comes back for review, each topic's rating and
- * when a topic is done are all worked out from it (src/lib/practice/history.ts), so two devices' logs merge by id.
+ * One answered practice question, as the Practice feature stored them until it was removed (pull request #6). The
+ * answers are archived: they stay in their table on the device and travel in backups as they are, and the app no
+ * longer reads or writes them. The schema stays so that those backups still parse.
  */
 export const PracticeAnswerSchema = z.strictObject({
   /** "<set>|<question id>": a question is answered once per set. */
@@ -235,7 +236,7 @@ export type PracticeAnswer = z.infer<typeof PracticeAnswerSchema>;
 
 /**
  * One thing done with a catalogue challenge: solved (in a language), skipped as the day's pick, or hidden for the
- * day ("Not today"). Append-only like the practice log: the daily pick, the cycles through the pool and the
+ * day ("Not today"). Append-only: the daily pick, the cycles through the pool and the
  * daily-challenge streak are worked out from it (src/lib/catalogue/daily.ts), so two devices' logs merge by id.
  */
 export const ChallengeEventSchema = z.strictObject({
@@ -331,8 +332,27 @@ export const DayChangeSchema = z.strictObject({
   toTomorrow: z.array(BlockIdSchema).optional(),
   /** Pairs of blocks that trade items on this day. */
   swaps: z.array(z.tuple([BlockIdSchema, BlockIdSchema])).optional(),
+  /** Calendar: blocks moved to a clock time on this day. */
+  times: z.record(BlockIdSchema, ClockTime).optional(),
+  /** Calendar: the item a block works on this day, instead of the lane's next one. */
+  items: z.record(BlockIdSchema, z.string().min(1)).optional(),
+  /** Calendar: blocks added to this day (from an empty slot, or moved here from another date). */
+  add: z.array(z.strictObject({ block: BlockIdSchema, minutes: z.number().int().min(5).max(720), start: ClockTime.optional() })).optional(),
 });
 export type DayChange = z.infer<typeof DayChangeSchema>;
+
+/** A fixed commitment from Calendar (a class, work): once on a date, or every week on a weekday from a date. */
+export const BusyEventSchema = z.strictObject({
+  id: z.string().min(1),
+  title: z.string().trim().min(1).max(80),
+  start: ClockTime,
+  minutes: z.number().int().min(15).max(720),
+  date: IsoDate.optional(),
+  weekday: z.number().int().min(0).max(6).optional(),
+  from: IsoDate.optional(),
+  until: IsoDate.optional(),
+});
+export type BusyEvent = z.infer<typeof BusyEventSchema>;
 
 /** "Exam week 12–19 Dec": a template for a date or a range. Beats the weekly pattern. */
 export const DateOverrideSchema = z.strictObject({
@@ -380,7 +400,7 @@ export const PauseSchema = z.strictObject({
 });
 export type Pause = z.infer<typeof PauseSchema>;
 
-export const TAB_IDS = ['today', 'plan', 'library', 'activity', 'projects', 'map', 'reviews'] as const;
+export const TAB_IDS = ['today', 'plan', 'calendar', 'library', 'activity', 'projects', 'map', 'reviews'] as const;
 export type TabId = (typeof TAB_IDS)[number];
 export const PLAN_SEGMENTS = ['timeline', 'projects', 'papers', 'credentials', 'roadmaps'] as const;
 
@@ -407,19 +427,22 @@ export const ScheduleStateSchema = z.strictObject({
   overrides: z.array(DateOverrideSchema),
   days: z.record(IsoDate, DayChangeSchema),
   history: z.array(ScheduleVersionSchema),
+  /** Calendar's busy events. Optional so that version 2 schedules parse; version 3 always has it. */
+  busy: z.array(BusyEventSchema).optional(),
 });
 export type ScheduleState = z.infer<typeof ScheduleStateSchema>;
 
-export const SETTINGS_VERSION = 2;
+export const SETTINGS_VERSION = 3;
 
 /**
  * Settings as stored: in IndexedDB, in a backup and in state/settings.json. Version 1 (before the flexibility
- * brief) has none of the schedule, pace or layout fields and a core without templates; it still parses, and
- * `upgradeSettings` (src/db/settings.ts) brings it to version 2 when it is read.
+ * brief) has none of the schedule, pace or layout fields and a core without templates; version 2 (before Calendar)
+ * has no busy events, block start times or calendar fields on a day. Both still parse, and `upgradeSettings`
+ * (src/lib/settings.ts) brings them to version 3 when they are read.
  */
 export const StoredSettingsSchema = z.strictObject({
   id: z.literal('app'),
-  version: z.literal(SETTINGS_VERSION).optional(),
+  version: z.union([z.literal(2), z.literal(SETTINGS_VERSION)]).optional(),
   /** Same shape as data/settings.yaml: blocks, templates, review day, heatmap thresholds, streak rules… */
   core: StoredCoreSchema,
   theme: z.enum(THEMES),
@@ -433,14 +456,14 @@ export const StoredSettingsSchema = z.strictObject({
   layout: LayoutSchema.optional(),
   ...Stamp,
 });
-/** What the parsers accept: version 1 or 2. */
+/** What the parsers accept: version 1, 2 or 3. */
 export type StoredSettingsInput = z.infer<typeof StoredSettingsSchema>;
 
-/** Settings as the app uses them: always version 2, every field present. */
+/** Settings as the app uses them: always version 3, every field present. */
 export interface StoredSettings extends Omit<StoredSettingsInput, 'version' | 'core' | 'schedule' | 'pace' | 'pauses' | 'catchUp' | 'layout'> {
   version: typeof SETTINGS_VERSION;
   core: SettingsDefaults;
-  schedule: ScheduleState;
+  schedule: ScheduleState & { busy: BusyEvent[] };
   pace: Record<string, LanePace>;
   pauses: Pause[];
   catchUp: Record<string, { capMinutes: number }>;
@@ -532,6 +555,8 @@ export const TimerSchema = z.strictObject({
   track: TrackIdSchema,
   refId: z.string().optional(),
   startedAt: z.number(),
+  /** When "Keep" last answered the forgotten-timer question. */
+  keptAt: z.number().optional(),
 });
 export type RunningTimer = z.infer<typeof TimerSchema>;
 
@@ -550,7 +575,7 @@ export const BackupDataSchema = z.strictObject({
   replans: z.array(ReplanRecordSchema),
   /** Plan edits (flexibility brief). Absent from backups made before it. */
   planPatches: z.array(PlanPatchSchema).default([]),
-  /** Practice answers (practice brief). Absent from backups made before it. */
+  /** Practice answers (archived since pull request #6, kept as they are). Absent from backups made before the practice brief. */
   practice: z.array(PracticeAnswerSchema).default([]),
   /** Catalogue challenges solved, skipped or hidden (catalogue brief). Absent from backups made before it. */
   challenges: z.array(ChallengeEventSchema).default([]),

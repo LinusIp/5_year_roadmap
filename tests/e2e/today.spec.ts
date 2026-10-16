@@ -32,7 +32,7 @@ test('the first unfinished block is Now, and the other four wait in Later today'
   expect(errors).toEqual([]);
 });
 
-test('logs time by hand and keeps it across a reload', async ({ page }) => {
+test('logs time with the timer and keeps it across a reload', async ({ page }) => {
   await open(page, './');
   await logTime(page, '1h30');
 
@@ -64,9 +64,17 @@ test('ticking a unit moves the item on to the next one', async ({ page }) => {
   await expect(nowCard(page).getByText(/lecture 2, elimination with matrices/)).toBeVisible();
 });
 
-test('logs something that is not on the plan', async ({ page }) => {
+test('logs something that is not on the plan, from Calendar\'s correction sheet', async ({ page }) => {
+  // Manual minutes live only behind Calendar › day view › a block › Edit logged time.
+  await open(page, './#/calendar?view=day');
+  await page.getByRole('button', { name: /^Graphics ?, \d/ }).click();
+  await page.getByRole('dialog', { name: 'Graphics' }).getByRole('button', { name: /^Edit logged time/ }).click();
+  await page.getByRole('dialog', { name: /^Logged on / }).getByRole('button', { name: 'Add logged time' }).click();
+  const sheet = page.getByRole('dialog', { name: 'Log time' });
+  await sheet.getByRole('textbox', { name: 'What did you do?' }).fill('Read the Raft paper');
+  await sheet.getByRole('textbox', { name: 'Minutes' }).fill('40');
+  await sheet.getByRole('textbox', { name: 'Minutes' }).press('Enter');
   await open(page, './');
-  await logTime(page, '40', 'Read the Raft paper');
   await expect(page.getByText(/^40 m of 8 h today/)).toBeVisible();
 
   // The day's entries, on Activity.

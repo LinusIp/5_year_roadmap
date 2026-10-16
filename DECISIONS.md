@@ -696,3 +696,113 @@ The whole app is restyled to CLAY-STYLE.md and the boards of `Atlas Mockups.html
   preview is set by hand in the repository's settings; the file is there to upload.
 - **Baselines**: every screen in both themes at 390 x 844 and 1280 x 800, drawn on CI's Linux.
 
+
+## Practice removed (pull request #6)
+
+The Practice feature is gone: block P, the daily question sets, the Practice screen and its start screen, Library ›
+Practise a topic, Activity › Practice, Settings › Practice, Today's Practice row and Now card, and the roadmap nodes
+ticked by practice accuracy. The sections above on Practice (the brief of 2026-10-16, pull request #2) describe what
+was, not what is.
+
+- **Removed with it**: the question bank (`data/questions/`, 54 topic files), `src/seed/questions.ts` and the
+  `virtual:atlas-questions` module, the checkers, the set builder, spaced repetition and Elo (`src/lib/practice/`),
+  `npm run verify:questions` (`scripts/verify-questions.ts`, its SymPy half and `scripts/lib/load-questions.ts`), the
+  SymPy `questions` job in CI, the live check's Practice step (it now opens four screens), the resources'
+  `practiceTopics`, the Markdown renderer's `math` and `svg` options (only the bank used them), the `.math-block`
+  style, the pencil and subject icons and `SubjectIcon`, and P's tone. The seeded random generator the daily
+  challenge shares moved to `src/lib/rng.ts`. The 25 books, problem sources and tools the brief added stay in the
+  Library (`data/resources/problems-and-books.yaml`, formerly `practice.yaml`); they were never Practice itself.
+- **KaTeX and mathjs are dropped.** Nothing else renders maths: the tech docs (`data/projects/docs/`) and the
+  catalogue's challenge statements have no `$…$`, and the Markdown renderer that draws docs never had math turned on.
+  Both packages and their own dependencies left package.json and package-lock.json.
+- **The default day is 8 hours again** (A 2 h, B 1 h, C 2 h, D 2 h, E 1 h): `data/settings.yaml` has no P and no
+  `practice` section, and no template names P.
+- **Settings saved with Practice load cleanly** (`withoutPractice` in `src/lib/settings.ts`, run by `upgradeSettings`
+  on every read: IndexedDB, a backup, a synced state/settings.json). The stored schema still accepts a block with
+  `role: practice` and a `practice` section, then drops them: the block leaves the blocks, every template, the copies
+  of earlier schedules, the layout's order, pace, catch-up and day changes; a pause of P goes, a pause whose time went
+  to P gives it to free time. Settings without Practice come back as the same object. Tested against settings the
+  live build with Practice wrote itself (`tests/fixtures/live-2026-10-16/`, `tests/unit/live-upgrade.test.ts`).
+- **Past days lose P's planned minutes, not its logged ones.** Keeping P in the copies of earlier schedules would
+  need the practice period to keep it out of the days before 16 October, so it goes from them too: a day from
+  16 October on now plans what it planned without Practice (8 h instead of 8 h 45 m on a Full day), and its relative
+  heatmap level and streak share are measured against that. Few days are concerned; the alternative kept a dead
+  feature's dates alive.
+- **Minutes logged to P stay**, in their day, the heatmap, the streak, Stats and reviews, under the old name: a
+  retired block keeps its name (`RETIRED_BLOCKS` in `src/lib/retired.ts`). The day sheet says "Block P (Practice)"
+  and titles the entries "Practice · calculus"; Stats lists "Block P · Practice" with its hours while there are any;
+  a review's line of minutes per block adds "Practice"; the day's Markdown twin keeps its "P · Practice" heading.
+- **The user's answers are archived, not deleted.** state/practice.json stays in the data repository as it is: Sync
+  no longer pulls it, renders it or queues it, and an outbox entry for it left by an older build is dropped without
+  touching the file (`ARCHIVED_PATHS` in `src/sync/paths.ts`); a commit builds on the existing tree, so the file
+  is carried along unchanged. The answers on the device stay in the Dexie table `practice`, still declared (version
+  4), and still travel in backups as they are, so restoring a backup keeps them and an old backup with practice
+  records imports as before. Nothing in the app reads them. Deleting everything in Settings clears them with the rest.
+- **A device still on the build with Practice** reads settings without a `practice` section as settings from before
+  Practice and adds P back; if it then saves a setting, its file has P again, and this build drops it again on read.
+  Nothing is lost either way; reloading that device brings the update.
+- **Bundle** (`npx vite build`, the sum of `dist/assets`): 6,590.7 kB before, 3,630.3 kB after, 2,960.4 kB less
+  (−45 %), 104 files down to 40 (the KaTeX fonts went) and 118 precached files down to 54. The Practice chunk (925.7
+  kB, 266.6 kB gzip) and the question bank (908.4 kB, 211.9 kB gzip) are gone; the seed chunk is 670.6 kB (182.2 kB
+  gzip), from 686.2 kB (185.4 kB). The main JS: 360.3 kB to 357.5 kB raw (−2.7 kB), 114.8 kB to 113.8 kB gzip as
+  Vite reports it (−1.0 kB; `gzip -9`: 113.4 to 112.4 kB).
+- **Screenshots** redrawn here (the container renders byte for byte what CI does: the screens without Practice
+  content came out identical): Today in every theme and size ("of 8 h today", "0/5"), Activity, Stats, Settings,
+  the map, the change-today and case sheets, and the tech doc over Today. The eight Practice baselines (the screen in both themes and sizes, and its start, question, solution and summary) are gone.
+
+## Calendar and the timer (pull request #6)
+
+- **Calendar is a tab between Plan and Library.** Settings saved with the old default tabs (Today, Plan, Library,
+  Activity) get it on upgrade; tabs a user chose stay as they were, and Calendar can be switched on under
+  Settings › Layout › Tabs. The `c` key opens it.
+- **Storage is the schedule's, as the prompt asks.** A drag, a resize, a skip, a chosen item, a block added or moved
+  to a date are fields of that date's change (`schedule.days[date]`: `times`, `minutes`, `skip`, `items`, `add`),
+  next to what Change today already wrote there. "Apply to every Monday" edits the template Monday uses, from today
+  on, through the same schedule history that keeps past days as they were. Busy events are `schedule.busy`. All of
+  it syncs in `state/settings.json`. Nothing in Calendar writes minutes.
+- **Settings version 3.** The build before this one reads settings strictly and could not read the new fields, so
+  the version goes to 3. Version 2 upgrades on read (no busy events yet, Calendar in an untouched tab bar). A device
+  still on the old build that writes its version-2 copy is caught on the next pull, as the version-1 copies were:
+  its changes are kept (they are the newer), the calendar's fields it dropped are put back (block start times,
+  per-weekday templates and the pattern that points to them, busy events, each date's times, items and added
+  blocks, the Calendar tab), and the result is written back with the "older Atlas" notice.
+- **"Every Monday" on a template other days share** gives Monday its own copy ("Full day · Monday") and points the
+  pattern at it, so Tuesday's Full day stays as it was. A template used only on Mondays is edited in place. The
+  date's own time and length for that block are cleared, so the template's apply.
+- **Clock times.** A template's block may have a start time (Settings › Schedule); without one, blocks follow each
+  other from 08:00 with 15-minute breaks in the template's order. A date's own time beats the template's. Blocks
+  never overlap each other or busy time: one that would moves to just after (with the break), and blocks without a
+  time fill the gaps in order. Dropping a block onto busy time asks before shifting it ("Shift them"); blocks
+  without a time of their own move out of a busy event's way without asking, which is what "add a weekly busy
+  event and see blocks shift" needs.
+- **Today follows the times**: Now and Later today are in the order of the day's start times. Today shows no clock
+  times itself; they are Calendar's.
+- **Colours.** The prompt's pink is clay's ice (CLAY-STYLE has no pink): today's circle, ice blocks' events and the
+  current-time line are ice / ice-deep. The heatmap's middle steps cannot carry a number at 4.5:1, so a past date
+  is a blue circle when it counted for the streak (as in Today's week strip) and shows its logged time as a small
+  pill in the heatmap's colour underneath, not as the circle's fill. Days outside the month are not dimmed (that
+  failed contrast); their numbers are ink2.
+- **Markers** on a date: a phase starting, a goal's date (the plan's milestones), and the last day of a month with
+  a monthly project in progress (projects have no due date of their own; a monthly one is due with its month).
+- **Tap targets.** Blocks on the time grid are drawn to scale, so a 30-minute block is 24 px tall. Like the
+  heatmap's cells, the acceptance test leaves them out; each opens the same sheet, where time and length are
+  fields, and the grid's day headers and Add are full-size.
+- **Week view** has the same events and moves in narrow columns (icon only); tapping a day's header opens its day.
+  Moving a block from one day to another is done from its sheet (Move to another date), not by dragging sideways.
+- **Export**: "Add to my calendar" writes the next four weeks of blocks to an `.ics` file with floating times (the
+  same clock time wherever it is opened). Busy events are left out: they came from the user's own calendar.
+
+**The timer is the only way to log.**
+
+- **Log time is gone** from the Now card, the block sheet, a past day's Today (its main action is now "Open in
+  Calendar") and the `l` shortcut. Activity's day sheet shows the day without remove buttons and points to the day
+  in Calendar. Manual minutes exist in one place: Calendar › a block › **Edit logged time** (the day's entries,
+  removable, and "Add logged time", which can also log something not on the plan).
+- **The timer** stores its start time on this device (it is a stopwatch, not data: it does not sync). Starting a
+  block while another runs stops the other first and logs its minutes. A stop logs each part of the time on its
+  own date when the timer ran past midnight. Stopping a timer starts an item that was not started; a finished one
+  stays finished.
+- **Forgotten timer**: on opening Atlas (or coming back to its tab), after three hours of running or once the day it
+  started on is over, a sheet asks "Still working on Core? You started at 14:10" with Keep, Stop at the last time
+  the app was used (taps and keys mark it, at most once a minute), and Stop now. Keep asks again three hours later
+  or at the next midnight.

@@ -1,22 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db/db.ts';
 import { useCatalogueIndex, useChallengeEvents } from '../hooks/useCatalogue.ts';
 import { dailyChallenge, isSlotDay, languageOf, weeklyChallenge } from '../lib/catalogue/daily.ts';
 import type { Pick as ChallengePick } from '../lib/catalogue/daily.ts';
 import { groupLabel } from '../lib/catalogue/filters.ts';
 import { updateSettings } from '../db/settings.ts';
-import { clearTimer, editItemState, setItemStatus, setWeekPick, startTimer, useRunningTimer, useWeekPick } from '../db/state.ts';
-import type { RunningTimer } from '../db/types.ts';
+import { editItemState, setWeekPick, useWeekPick } from '../db/state.ts';
+import { startTimer, stopTimer, useRunningTimer } from '../db/timer.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { useUnits } from '../hooks/useUnits.ts';
 import { addDays, dayName, daysBetween, formatLong, formatStopwatch, startOfWeek, today as todayDate, weekday } from '../lib/dates.ts';
-import { addEntry, editLog, isBlockDone, minutesByBlock, minutesForRef, readLog, toggleBlockDone, totalMinutes } from '../lib/logs.ts';
+import { editLog, isBlockDone, minutesByBlock, minutesForRef, readLog, toggleBlockDone, totalMinutes } from '../lib/logs.ts';
 import { plannedFor } from '../lib/day-plan.ts';
 import { catchUpMinutes, laneBalance } from '../lib/pace.ts';
 import { planForDay, suggestWeeklyBuild } from '../lib/schedule.ts';
 import type { ScheduledItem, TodayBlock } from '../lib/schedule.ts';
-import { logTimeRequests } from '../lib/shortcuts.ts';
 import { counts, dailyTotals, streak } from '../lib/streaks.ts';
 import { resolveTheme } from '../lib/theme.ts';
 import { applyUpdate, onUpdateReady } from '../pwa/register.ts';
@@ -37,7 +35,6 @@ import type { ChecklistUnit } from './parts/Checklist.tsx';
 import { ChangeTodaySheet } from './parts/ChangeTodaySheet.tsx';
 import { ItemSheet } from './parts/ItemSheet.tsx';
 import { DayFields } from './parts/DayFields.tsx';
-import { LogTimeSheet } from './parts/LogTimeSheet.tsx';
 import { NotesField } from './parts/NotesField.tsx';
 import { PickerSheet } from './parts/PickerSheet.tsx';
 import { useElapsed } from './parts/RunningTime.tsx';
@@ -45,7 +42,7 @@ import { takenProject } from './parts/taken.ts';
 import { blockShort, dateTitle, nameOf, partOf, span, unitDetail } from './parts/text.ts';
 import { todayLine, tokenDaysLeft, useSyncView } from '../sync/status.ts';
 
-type SheetName = 'log' | 'date' | 'day' | 'note' | 'change' | null;
+type SheetName = 'date' | 'day' | 'note' | 'change' | null;
 
 /** The item a block puts in front of you. Block D carries the week's build first, then the monthly project. */
 function focusItem(block: TodayBlock, monthlyFirst: boolean): ScheduledItem | undefined {
@@ -82,13 +79,6 @@ function rank(order: string[], id: string): number {
   return i < 0 ? order.length : i;
 }
 
-async function stopTimer(timer: RunningTimer, date: string, item: ScheduledItem | undefined): Promise<void> {
-  const minutes = Math.round((Date.now() - timer.startedAt) / 60_000);
-  await clearTimer();
-  if (minutes > 0) await editLog(date, (current) => addEntry(current, { block: timer.block, track: timer.track, refId: timer.refId, minutes }));
-  if (item && item.status === 'todo') await setItemStatus(item.refId, 'active');
-}
-
 export function Today() {
   const [dateParam, setDateParam] = useQueryParam('date');
   const now = todayDate();
@@ -100,15 +90,6 @@ export function Today() {
   const timer = useRunningTimer();
   const elapsed = useElapsed(timer);
   const log = useLiveQuery(() => readLog(date), [date]);
-  // How far today's practice set has got: "1 of 3 subjects". A subject counts once it is finished, which is when its
-  // minutes reach the Practice block under practice:<subject>.
-  const practiceAnswered = useLiveQuery(() => db.practice.where('date').equals(date).filter((a) => a.set === 'daily:' + date).count(), [date]) ?? 0;
-  const practiceMeta = (it: ScheduledItem): string => {
-    const total = atlas?.seed.practiceSubjects?.length ?? 3;
-    const finished = new Set((log?.entries ?? []).filter((e) => e.refId?.startsWith('practice:')).map((e) => e.refId)).size;
-    if (practiceAnswered === 0 && finished === 0) return it.note ?? '';
-    return finished >= total ? 'All ' + total + ' subjects done' : finished + ' of ' + total + ' subjects';
-  };
   const settings = atlas?.settings;
   const weekStart = useMemo(() => startOfWeek(date, settings?.core.weekStartsOn ?? 1), [date, settings]);
   const weekPick = useWeekPick(weekStart);
@@ -130,14 +111,6 @@ export function Today() {
     setChosen(null);
     setExpanded(false);
   }, [date]);
-  // The "l" shortcut: a request made on another page waits until Today is on screen.
-  useEffect(() => {
-    const take = (): void => {
-      if (logTimeRequests.take()) setSheet('log');
-    };
-    take();
-    return logTimeRequests.listen(take);
-  }, []);
 
   const catalogue = useCatalogueIndex();
   const challengeEvents = useChallengeEvents();
@@ -283,7 +256,6 @@ export function Today() {
 
   const rowFor = (block: TodayBlock): { title: string; meta: string; to?: string; doc?: string } => {
     const name = blockShort(block.def.name);
-    if (block.item?.kind === 'practice') return { title: block.def.name, meta: practiceMeta(block.item), to: '/practice' };
     if (block.kind === 'review') return { title: 'Weekly review and paper', meta: name + ' · close the week' };
     const blockItem = focusItem(block, monthlyFirst);
     if (!blockItem) {
@@ -300,22 +272,13 @@ export function Today() {
     if (!nowBlock) return;
     void startTimer({ block: nowBlock.id, track: item?.track ?? 'career', refId: item?.refId });
   };
-  const stop = (): void => {
-    if (!timer) return;
-    const timerItem = blocks.map((b) => focusItem(b, monthlyFirst)).find((i) => i?.refId === timer.refId);
-    void stopTimer(timer, date, timerItem);
-  };
+  // The timer logs each day's part on its own day, so a stop never needs to know which date is on screen.
+  const stop = (): void => void stopTimer();
+  // Starting a block while another runs switches: the other stops and keeps its minutes.
+  const otherName = otherRunning && timer ? blockShort(settings.core.blocks.find((b) => b.id === timer.block)?.name ?? timer.block) : null;
 
   let primary;
-  let primaryLogs = false;
-  if (otherRunning && timer) {
-    const name = blockShort(settings.core.blocks.find((b) => b.id === timer.block)?.name ?? timer.block);
-    primary = (
-      <Button variant="filled" icon="stop" onClick={stop}>
-        Stop {name}
-      </Button>
-    );
-  } else if (nowRunning) {
+  if (nowRunning) {
     primary = (
       <Button variant="filled" icon="stop" onClick={stop}>
         Stop
@@ -327,12 +290,6 @@ export function Today() {
         Open the review
       </Button>
     );
-  } else if (item?.kind === 'practice' && !nowRunning) {
-    primary = (
-      <Button variant="filled" icon="play" to="/practice">
-        {practiceAnswered > 0 ? 'Go on' : 'Start the set'}
-      </Button>
-    );
   } else if (nowBlock && !item) {
     primary = (
       <Button variant="filled" to={nowBlock.id === 'D' ? '/plan/pick?from=today' : '/plan'}>
@@ -340,10 +297,10 @@ export function Today() {
       </Button>
     );
   } else if (!isToday) {
-    primaryLogs = true;
+    // Minutes are the timer's; a past day is corrected in Calendar's day view.
     primary = (
-      <Button variant="filled" onClick={() => setSheet('log')}>
-        Log time
+      <Button variant="filled" icon="calendar" to={'/calendar?view=day&date=' + date}>
+        Open in Calendar
       </Button>
     );
   } else {
@@ -367,7 +324,7 @@ export function Today() {
         ? nowBlock.weeklyBuild
         : nowBlock.item
       : undefined;
-  const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item?.kind === 'practice' ? practiceMeta(item) : item ? nameOf(item) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
+  const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item ? nameOf(item) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
   const metaLine = nowBlock
     ? [
         blockShort(nowBlock.def.name),
@@ -493,8 +450,10 @@ export function Today() {
             </p>
             {!expanded && (
               <div className="-my-1 flex shrink-0 gap-2">
-                {!primaryLogs && (
-                  <Button variant="icon" icon="plus" className="!size-11" label="Log time" onClick={() => setSheet('log')} />
+                {otherName && (
+                  <Button size="sm" icon="stop" name={'Stop ' + otherName} onClick={stop}>
+                    {otherName}
+                  </Button>
                 )}
                 <Button
                   size="sm"
@@ -678,15 +637,6 @@ export function Today() {
           {syncLine}
         </Link>
       )}
-
-      <LogTimeSheet
-        key={(nowBlock?.id ?? '') + date + (item?.refId ?? '')}
-        open={sheet === 'log'}
-        onClose={() => setSheet(null)}
-        date={date}
-        block={nowBlock?.kind === 'item' ? nowBlock.id : undefined}
-        item={nowBlock?.kind === 'item' ? item : undefined}
-      />
 
       <PickerSheet
         open={sheet === 'date'}

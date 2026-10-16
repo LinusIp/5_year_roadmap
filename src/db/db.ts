@@ -25,7 +25,10 @@ export class AtlasDB extends Dexie {
   replans!: EntityTable<ReplanRecord, 'id'>;
   /** Plan edits as an ordered list of patches over the curriculum (flexibility brief). */
   planPatches!: EntityTable<PlanPatch, 'id'>;
-  /** Practice answers, one row per question answered in a set. */
+  /**
+   * Practice answers, one row per question answered in a set. Archived since Practice was removed (pull request #6):
+   * still declared so the user's answers stay on the device, and in backups, but nothing reads or writes them.
+   */
   practice!: EntityTable<PracticeAnswer, 'id'>;
   /** Catalogue challenges solved, skipped or hidden. */
   challenges!: EntityTable<ChallengeEvent, 'id'>;
@@ -78,7 +81,7 @@ export class AtlasDB extends Dexie {
         await tx.table('overrides').where('kind').equals('planItem').delete();
         await tx.table('customEntities').where('kind').equals('planItem').delete();
       });
-    // Version 4, practice: the answers of the daily sets and of practice on demand.
+    // Version 4, practice: the answers of the daily sets and of practice on demand (archived since pull request #6).
     this.version(4).stores({ practice: 'id, date, questionId, topic' });
     // Version 5, the project catalogue: what was done with its challenges.
     this.version(5).stores({ challenges: 'id, date, challengeId' });

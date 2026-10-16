@@ -69,10 +69,10 @@ test.describe('keyboard shortcuts', () => {
     await expect(search).toHaveValue('rust');
     await expect(page.getByRole('heading', { level: 1, name: 'Library' })).toBeVisible();
 
-    // "l" from another screen: Today, with the Log time sheet open.
+    // "c": Calendar.
     await page.locator('main').focus();
-    await page.keyboard.press('l');
-    await expect(page.getByRole('dialog', { name: 'Log time' })).toBeVisible();
+    await page.keyboard.press('c');
+    await expect(page.getByRole('heading', { level: 1, name: 'Calendar' })).toBeVisible();
   });
 
   test('? lists them, and they can be turned off', async ({ page }) => {
@@ -80,7 +80,7 @@ test.describe('keyboard shortcuts', () => {
     await page.keyboard.press('?');
     const dialog = page.getByRole('dialog', { name: 'Keyboard shortcuts' });
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText('Log time on Today')).toBeVisible();
+    await expect(dialog.getByText('Go to Calendar')).toBeVisible();
     // While a sheet is open, keys belong to it.
     await page.keyboard.press('r');
     await expect(page.getByRole('heading', { level: 1, name: 'Wednesday 23 September' })).toBeVisible();

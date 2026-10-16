@@ -270,6 +270,15 @@
   .heat-2 { fill: var(--ramp-2); }
   .heat-3 { fill: var(--ramp-3); }
   .heat-4 { fill: var(--ramp-4); }
+  /* Calendar's time grid: a dashed line every hour, 48 px apart. */
+  .calendar-lines {
+    background-image: repeating-linear-gradient(to bottom, var(--dash) 0 1.5px, transparent 1.5px 48px);
+  }
+  /* The same steps as a background: Calendar's month view marks a past day's time with a small pill. */
+  .heat-bg-1 { background: var(--ramp-1); }
+  .heat-bg-2 { background: var(--ramp-2); }
+  .heat-bg-3 { background: var(--ramp-3); }
+  .heat-bg-4 { background: var(--ramp-4); }
   .heat-swatch-0 { background: var(--ramp-0); }
   .heat-swatch-1 { background: var(--ramp-1); }
   .heat-swatch-2 { background: var(--ramp-2); }
@@ -281,7 +290,7 @@
     max-width: 65ch;
     line-height: 1.55;
   }
-  /* Code and formulas: sunken, 13 px mono. */
+  /* Code: sunken, 13 px mono. */
   .doc-block {
     background: var(--bg);
     border-radius: var(--radius-knob);
@@ -292,15 +301,6 @@
     font-size: 0.8125rem;
     font-weight: 500;
     line-height: 1.55;
-  }
-  .math-block {
-    display: block;
-    background: var(--bg);
-    border-radius: var(--radius-knob);
-    box-shadow: inset 3px 3px 7px var(--lo), inset -3px -3px 7px var(--hi);
-    padding: 1rem;
-    overflow-x: auto;
-    text-align: center;
   }
   /* A small sunken mono pill for a code term in running text. */
   .code-pill {

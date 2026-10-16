@@ -12,7 +12,7 @@ import { useItemStates } from '../db/state.ts';
 import { resolveSeed } from '../lib/plan.ts';
 import { seed as rawSeed } from '../seed/index.ts';
 import type { AppSeed } from '../seed/schema.ts';
-import type { DayLog, PlanPatch, PracticeAnswer, StoredSettings, UserItemState } from '../db/types.ts';
+import type { DayLog, PlanPatch, StoredSettings, UserItemState } from '../db/types.ts';
 
 export interface Atlas {
   /** The curriculum with the user's patches and additions applied. */
@@ -24,8 +24,6 @@ export interface Atlas {
   logs: DayLog[];
   /** The plan edits, for Undo. */
   patches: PlanPatch[];
-  /** Every practice answer, for Activity › Practice and the roadmap nodes practice ticks. */
-  practice: PracticeAnswer[];
 }
 
 /** `undefined` while the first reads are in flight. Pages render a short loading line. */
@@ -36,7 +34,6 @@ export function useAtlas(): Atlas | undefined {
   const customs = useCustomEntities();
   const patches = usePlanPatches();
   const logs = useLiveQuery(() => db.dayLogs.toArray(), []);
-  const practice = useLiveQuery(() => db.practice.toArray(), []);
 
   const resolved = useMemo(
     () => (overrides && customs && patches ? resolveSeed(rawSeed, overrides, customs, patches) : null),
@@ -44,7 +41,7 @@ export function useAtlas(): Atlas | undefined {
   );
 
   return useMemo(() => {
-    if (!settings || !states || !logs || !resolved || !patches || !practice) return undefined;
-    return { seed: resolved, original: rawSeed, settings, states, logs, patches, practice };
-  }, [settings, states, logs, resolved, patches, practice]);
+    if (!settings || !states || !logs || !resolved || !patches) return undefined;
+    return { seed: resolved, original: rawSeed, settings, states, logs, patches };
+  }, [settings, states, logs, resolved, patches]);
 }

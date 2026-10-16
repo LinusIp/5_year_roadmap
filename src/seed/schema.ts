@@ -29,7 +29,7 @@ export const CERT_MODES = ['committed', 'optional', 'investigate'] as const;
 /** One of the sixteen tracks, or a track the user created (`my-…`). */
 export type TrackId = (typeof TRACK_IDS)[number] | `my-${string}`;
 export type SeedTrackId = (typeof TRACK_IDS)[number];
-/** A block's id: A to E by default, P for Practice, any short capitalised id for a block the user adds. */
+/** A block's id: A to E by default, any short capitalised id for a block the user adds. */
 export type BlockId = string;
 export type SeedBlockId = (typeof BLOCK_IDS)[number];
 export type ResourceType = (typeof RESOURCE_TYPES)[number];
@@ -64,6 +64,9 @@ export const IsoDate = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'must be YYYY-MM-DD')
   .refine(isRealIsoDate, 'is not a real calendar date');
+
+/** A clock time, "09:30": a block's start in a template or on a date, a busy event's start. */
+export const ClockTime = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'a time is HH:MM, 00:00 to 23:59');
 
 export function isHttpUrl(s: string): boolean {
   try {
@@ -186,8 +189,6 @@ export const ResourceSchema = z
     reference: z.boolean().optional(),
     /** roadmap.sh nodes this resource teaches; finishing it ticks them. */
     covers: z.array(NodeRef).optional(),
-    /** Practice topics it helps with ("calculus/sequences-series-taylor"): offered under a question's solution. */
-    practiceTopics: z.array(z.string().regex(/^[a-z0-9-]+\/[a-z0-9-]+$/)).optional(),
     /** Resources that can take its place on the plan (fast.ai or CS231n): offered first by Swap. */
     alternatives: z.array(Slug).optional(),
     /** Set on a resource the user added in the app. */
@@ -419,8 +420,6 @@ export const BlockDefSchema = z.strictObject({
   colour: SeedTrackIdSchema.optional(),
   /** The track time in this block is logged against when its item has none (a block the user added). */
   track: TrackIdSchema.optional(),
-  /** `practice`: the Practice block, which exists only between practice.start and practice.end. */
-  role: z.enum(['practice']).optional(),
 });
 export type BlockDef = z.infer<typeof BlockDefSchema>;
 
@@ -428,7 +427,8 @@ export type BlockDef = z.infer<typeof BlockDefSchema>;
 export const DayTemplateSchema = z.strictObject({
   id: Slug,
   name: Text,
-  blocks: z.array(z.strictObject({ block: BlockIdSchema, minutes: z.number().int().min(0).max(720).optional() })),
+  /** `start`: the block's clock time on days of this template; without one it follows the block before it. */
+  blocks: z.array(z.strictObject({ block: BlockIdSchema, minutes: z.number().int().min(0).max(720).optional(), start: ClockTime.optional() })),
 });
 export type DayTemplate = z.infer<typeof DayTemplateSchema>;
 
@@ -452,11 +452,6 @@ const SettingsDefaultsObject = z.strictObject({
   }),
   /** `relative`: a day's intensity is its share of what it planned. `absolute`: minutes against heatmapThresholds. */
   heatmapMode: z.enum(['relative', 'absolute']),
-  /**
-   * The Practice block's period (it exists only between these days, inclusive), the questions per subject, and the
-   * subject the start screen offers first (absent: none). It only suggests; any subject can be done first.
-   */
-  practice: z.strictObject({ start: IsoDate, end: IsoDate, perSubject: z.number().int().min(3).max(5), startWith: Slug.optional() }),
   /** The project catalogue: the daily challenge in Block B (on or off), and the weekdays of Block D's weekly slot. */
   catalogue: z.strictObject({ dailyChallenge: z.boolean(), weeklyDays: z.array(z.number().int().min(0).max(6)).max(7) }),
   backupReminderDays: z.number().int().min(1),
@@ -482,7 +477,6 @@ export const SettingsDefaultsSchema = SettingsDefaultsObject.superRefine((v, ctx
   v.pattern.forEach((id, day) => {
     if (!templateIds.has(id)) ctx.addIssue({ code: 'custom', path: ['pattern', day], message: 'names template "' + id + '", which is not defined' });
   });
-  if (v.practice.end < v.practice.start) ctx.addIssue({ code: 'custom', path: ['practice', 'end'], message: 'must not be before practice.start' });
   const t = v.heatmapThresholds;
   const ascending = t[0] < t[1] && t[1] < t[2] && t[2] < t[3];
   if (!ascending) ctx.addIssue({ code: 'custom', path: ['heatmapThresholds'], message: 'must be strictly ascending' });
@@ -490,15 +484,24 @@ export const SettingsDefaultsSchema = SettingsDefaultsObject.superRefine((v, ctx
 export type SettingsDefaults = z.infer<typeof SettingsDefaultsSchema>;
 
 /**
+ * A block as settings saved by an earlier build may have it. Until pull request #6 the Practice block P carried
+ * `role: practice`; such a block is dropped when the settings are read (src/lib/settings.ts, withoutPractice).
+ */
+export const StoredBlockDefSchema = BlockDefSchema.extend({ role: z.literal('practice').optional() });
+
+/**
  * Settings saved before version 2 (the flexibility brief) have no templates, weekly pattern, heatmap mode or
  * streak percentage. They still parse, from a backup, a sync or IndexedDB, and are brought up to date when read
- * (src/db/settings.ts, upgradeSettings).
+ * (src/db/settings.ts, upgradeSettings). Settings saved while Practice existed (until pull request #6) also carry
+ * its block and a `practice` section (period, questions a subject, Start with); both parse and are dropped on read.
  */
 export const StoredCoreSchema = SettingsDefaultsObject.extend({
+  blocks: z.array(StoredBlockDefSchema).min(1).max(16),
   templates: SettingsDefaultsObject.shape.templates.optional(),
   pattern: SettingsDefaultsObject.shape.pattern.optional(),
   heatmapMode: SettingsDefaultsObject.shape.heatmapMode.optional(),
-  practice: SettingsDefaultsObject.shape.practice.optional(),
+  /** Retired with Practice (pull request #6): read, never written. */
+  practice: z.record(z.string(), z.unknown()).optional(),
   catalogue: SettingsDefaultsObject.shape.catalogue.optional(),
   streak: SettingsDefaultsObject.shape.streak.extend({ percent: z.number().min(1).max(100).optional() }),
 });
@@ -548,6 +551,4 @@ export type AppSeed = Omit<Seed, 'resources' | 'projects'> & {
   goals?: Goal[];
   /** Plan edits that name something the curriculum no longer has, reported once in Settings. */
   patchProblems?: string[];
-  /** The practice subjects and their topics (data/questions/topics.yaml); the questions load with Practice. */
-  practiceSubjects?: import('./questions.ts').PracticeSubject[];
 };

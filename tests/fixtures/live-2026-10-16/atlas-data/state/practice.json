@@ -1,0 +1,37 @@
+{
+  "answers": [
+    {
+      "date": "2026-10-16",
+      "deviceId": "ykj6wo69u3ji",
+      "difficulty": 2,
+      "hints": 0,
+      "id": "daily:2026-10-16|calc-derivative-power",
+      "questionId": "calc-derivative-power",
+      "result": "right",
+      "role": "new",
+      "seconds": 95,
+      "set": "daily:2026-10-16",
+      "subject": "calculus",
+      "topic": "derivatives-and-rules",
+      "updatedAt": "2026-10-16T11:40:02.834Z"
+    },
+    {
+      "date": "2026-10-16",
+      "deviceId": "ykj6wo69u3ji",
+      "difficulty": 3,
+      "hints": 2,
+      "id": "daily:2026-10-16|phys-projectile-range",
+      "questionId": "phys-projectile-range",
+      "result": "wrong",
+      "revealed": true,
+      "role": "new",
+      "seconds": 240,
+      "set": "daily:2026-10-16",
+      "subject": "physics",
+      "topic": "projectile-motion",
+      "updatedAt": "2026-10-16T11:40:02.834Z"
+    }
+  ],
+  "format": "atlas-practice",
+  "version": 1
+}

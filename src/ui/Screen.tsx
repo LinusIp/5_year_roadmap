@@ -8,17 +8,18 @@ import { Link, useLocation } from '../router/router.tsx';
 import { isWithin } from '../router/paths.ts';
 import { seed } from '../seed/index.ts';
 
-/** Every tab Settings > Layout can show. The default four are the mockup's. */
+/** Every tab Settings > Layout can show. The default five: Today, Plan, Calendar, Library, Activity. */
 export const TAB_DEFS: Record<TabId, { to: string; label: string; icon: IconName }> = {
   today: { to: '/', label: 'Today', icon: 'today' },
   plan: { to: '/plan', label: 'Plan', icon: 'plan' },
+  calendar: { to: '/calendar', label: 'Calendar', icon: 'calendar' },
   library: { to: '/library', label: 'Library', icon: 'library' },
   activity: { to: '/activity', label: 'Activity', icon: 'activity' },
   projects: { to: '/plan?view=projects', label: 'Projects', icon: 'projects' },
   map: { to: '/plan/map', label: 'Map', icon: 'map' },
   reviews: { to: '/reviews', label: 'Reviews', icon: 'reviews' },
 };
-const DEFAULT_TABS: TabId[] = ['today', 'plan', 'library', 'activity'];
+const DEFAULT_TABS: TabId[] = ['today', 'plan', 'calendar', 'library', 'activity'];
 
 /**
  * A screen: one column of tiles 18 px apart, 20 px gutters on a phone and 24 px from a tablet up, at most 640 px

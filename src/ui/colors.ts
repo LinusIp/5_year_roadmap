@@ -6,8 +6,8 @@ import type { BlockId } from '../seed/schema.ts';
 
 export type Tone = 'blue' | 'ice';
 
-/** Graphics and projects are ice; languages, the core track, maths and practice are blue. */
-const BLOCK_TONE: Record<string, Tone> = { A: 'ice', B: 'blue', C: 'blue', D: 'ice', E: 'blue', P: 'blue' };
+/** Graphics and projects are ice; languages, the core track and maths are blue. */
+const BLOCK_TONE: Record<string, Tone> = { A: 'ice', B: 'blue', C: 'blue', D: 'ice', E: 'blue' };
 
 export function blockTone(id: BlockId | string | undefined): Tone {
   return BLOCK_TONE[id ?? ''] ?? 'blue';

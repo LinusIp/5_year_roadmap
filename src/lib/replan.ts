@@ -14,7 +14,6 @@ import { plannedOver } from './day-plan.ts';
 import type { AppSeed, BlockId, Phase, PlanItem } from '../seed/schema.ts';
 import type { NewPlanPatch, StoredSettings, UserItemState } from '../db/types.ts';
 import { itemProgress, projectUnitCount } from './progress.ts';
-import { planBlocks } from './settings.ts';
 
 export interface ReplanMove {
   planItemId: string;
@@ -110,7 +109,7 @@ export function replan({ seed, settings, states, asOf }: ReplanInput): ReplanRes
     if (remainingHoursOf(item, seed, states) <= 0) landedIn.set(refId, phaseIndex.get(item.phaseId) ?? 0);
   }
 
-  for (const block of planBlocks(settings.core).map((b) => b.id)) {
+  for (const block of settings.core.blocks.map((b) => b.id)) {
     // Every unfinished item of this lane, in their present order, across every phase.
     const queue = seed.plan
       .filter((i) => i.block === block)

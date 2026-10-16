@@ -3,7 +3,6 @@ import {
   AlignLeft,
   ArrowDown,
   ArrowUp,
-  Atom,
   BookOpen,
   Box,
   Briefcase,
@@ -34,7 +33,6 @@ import {
   Newspaper,
   NotebookPen,
   Pause,
-  Pencil,
   Play,
   Plus,
   Puzzle,
@@ -47,7 +45,6 @@ import {
   Sigma,
   SlidersHorizontal,
   Square,
-  SquareFunction,
   Sun,
   Undo2,
   Wrench,
@@ -57,7 +54,7 @@ import {
 
 /**
  * Icons: lucide-react only (CLAY-STYLE.md), stroke 2.2, imported one by one so the build carries only these. Icons
- * carry meaning: a tab, a block, a subject, a kind of project, a status, or an action next to its label. They are
+ * carry meaning: a tab, a block, a kind of project, a status, or an action next to its label. They are
  * decorative (aria-hidden) because a text label always sits next to them; the few icon-only buttons (the header's
  * knobs, the tabs, a sheet's close) carry an aria-label of their own.
  */
@@ -100,19 +97,14 @@ const LUCIDE = {
   flag: Flag,
   zap: Zap,
   stats: ChartColumn,
-  // Blocks: graphics and simulation, languages, the core track, projects, maths and physics, practice
+  // Blocks: graphics and simulation, languages, the core track, projects, maths and physics
   cube: Box,
   code: Code,
   cpu: Cpu,
   hammer: Hammer,
   sigma: Sigma,
-  pencil: Pencil,
   server: Server,
   layers: Layers,
-  // Subjects
-  grid: Grid3x3,
-  function: SquareFunction,
-  atom: Atom,
   // Kinds of project
   puzzle: Puzzle,
   wrench: Wrench,

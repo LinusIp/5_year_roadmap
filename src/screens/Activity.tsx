@@ -22,7 +22,6 @@ import { GithubCalendar } from './parts/GithubCalendar.tsx';
 import { IconTile } from '../ui/glyphs.tsx';
 import { longDate } from './parts/text.ts';
 import { PickerSheet } from './parts/PickerSheet.tsx';
-import { PracticeActivity } from './parts/PracticeActivity.tsx';
 import { ProjectsActivity } from './parts/ProjectsActivity.tsx';
 import { SegmentedControl } from '../ui/SegmentedControl.tsx';
 import { dateTitle, hours, plural, span } from './parts/text.ts';
@@ -117,15 +116,14 @@ export function Activity() {
         </section>
       </div>
 
-      {/* Practice is a view of its own once there is something to show; a fresh install keeps the mockup. */}
-      {(atlas.practice.length > 0 || anyChallenge || view === 'practice' || view === 'projects') && (
+      {/* Projects is a view of its own once there is something to show; a fresh install keeps the mockup. */}
+      {(anyChallenge || view === 'projects') && (
         <div className="mt-5">
           <SegmentedControl
             label="View"
-            value={view === 'practice' || view === 'projects' ? view : 'time'}
+            value={view === 'projects' ? view : 'time'}
             options={[
               { value: 'time', label: 'Time' },
-              { value: 'practice', label: 'Practice' },
               { value: 'projects', label: 'Projects' },
             ]}
             onChange={(v) => setView(v === 'time' ? null : v)}
@@ -133,9 +131,7 @@ export function Activity() {
         </div>
       )}
 
-      {view === 'practice' ? (
-        <PracticeActivity atlas={atlas} />
-      ) : view === 'projects' ? (
+      {view === 'projects' ? (
         <ProjectsActivity atlas={atlas} />
       ) : (
         <>

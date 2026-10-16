@@ -48,7 +48,7 @@ export function UndoToast({ inSheet = false }: { inSheet?: boolean }) {
 
   const undo = async (): Promise<void> => {
     if (!edit) return;
-    const ok = await undoPlanEdit(edit.group);
+    const ok = edit.undo ? await edit.undo() : await undoPlanEdit(edit.group);
     setEdit(null);
     setUndone(ok ? 'Undone: ' + edit.label : null);
     if (ok) setTimeout(() => setUndone(null), 4_000);

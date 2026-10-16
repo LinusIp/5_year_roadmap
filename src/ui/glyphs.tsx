@@ -4,10 +4,10 @@ import { Icon } from './Icon.tsx';
 import type { IconName } from './Icon.tsx';
 
 /**
- * The icons that carry meaning (DECISIONS.md, "The icon map"): one per block, blue or ice, one per practice
- * subject, one per kind of project with a difficulty mark, and a status. All decorative: a word always says the same.
+ * The icons that carry meaning (DECISIONS.md, "The icon map"): one per block, blue or ice, one per kind of project
+ * with a difficulty mark, and a status. All decorative: a word always says the same.
  */
-const BLOCK_ICON: Record<string, IconName> = { A: 'cube', B: 'code', C: 'cpu', D: 'hammer', E: 'sigma', P: 'pencil' };
+const BLOCK_ICON: Record<string, IconName> = { A: 'cube', B: 'code', C: 'cpu', D: 'hammer', E: 'sigma' };
 
 export function blockIconName(block: string): IconName {
   return BLOCK_ICON[block] ?? 'layers';
@@ -31,12 +31,6 @@ export function IconTile({ icon, tone = 'blue', size = 40 }: { icon: IconName; t
 /** A block's icon in its knob tile. */
 export function BlockTile({ block, size = 40 }: { block: string; size?: number }) {
   return <IconTile icon={blockIconName(block)} tone={blockTone(block)} size={size} />;
-}
-
-const SUBJECT_ICON: Record<string, IconName> = { 'linear-algebra': 'grid', calculus: 'function', physics: 'atom' };
-
-export function SubjectIcon({ subject }: { subject: string }) {
-  return <IconTile icon={SUBJECT_ICON[subject] ?? 'sigma'} tone="blue" />;
 }
 
 const KIND_ICON: Record<string, IconName> = { challenge: 'puzzle', build: 'wrench', case: 'briefcase' };

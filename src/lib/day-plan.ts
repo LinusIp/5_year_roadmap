@@ -9,7 +9,7 @@
  *   3. the day's own change (Change today) names another, or makes it a rest day;
  *   4. lane pace (relaxed, intense, custom minutes) and paused lanes adjust the minutes;
  *   5. the day's change sets single blocks' minutes, skips blocks and moves blocks to tomorrow; blocks moved from
- *      yesterday arrive.
+ *      yesterday arrive, and blocks Calendar added to the date join (their start times are src/lib/calendar.ts's).
  *
  * Days keep the plan they had: templates, the pattern and block minutes are read from the schedule version that
  * was current on the date (settings.schedule.history), and pace and pauses apply from the day they were set.
@@ -146,12 +146,9 @@ function baseBlocks(date: string, settings: StoredSettings, change: DayChange | 
 
   const order = settings.core.blocks.map((b) => b.id);
   let blocks: PlannedBlock[] = [];
-  const practice = settings.core.practice;
   for (const entry of template?.blocks ?? []) {
     const runsOn = config.days.get(entry.block) ?? [0, 1, 2, 3, 4, 5, 6];
     if (!runsOn.includes(day)) continue;
-    // The Practice block exists only in its period.
-    if (defFor(settings, entry.block).role === 'practice' && (date < practice.start || date > practice.end)) continue;
     const base = entry.minutes ?? config.minutes.get(entry.block) ?? defFor(settings, entry.block).minutes;
     const pace = settings.pace[entry.block];
     const applies = pace && (!pace.from || pace.from <= date);
@@ -226,6 +223,13 @@ export function resolveDay(date: string, settings: StoredSettings): ResolvedDay 
     }
   }
 
+  // Blocks Calendar added to this date: from an empty slot, or moved here from another date.
+  for (const extra of change?.add ?? []) {
+    const here = blocks.find((b) => b.id === extra.block);
+    if (here) here.minutes = extra.minutes;
+    else blocks.push({ id: extra.block, def: defFor(settings, extra.block), minutes: extra.minutes });
+  }
+
   const skipped = (change?.skip ?? []).filter((id) => blocks.some((b) => b.id === id));
   const movedOut = (change?.toTomorrow ?? []).filter((id) => blocks.some((b) => b.id === id));
   blocks = blocks.filter((b) => !skipped.includes(b.id) && !movedOut.includes(b.id));
@@ -287,6 +291,9 @@ export function withDayChange(settings: StoredSettings, date: string, change: (c
   if (next.skip && next.skip.length > 0) clean.skip = next.skip;
   if (next.toTomorrow && next.toTomorrow.length > 0) clean.toTomorrow = next.toTomorrow;
   if (next.swaps && next.swaps.length > 0) clean.swaps = next.swaps;
+  if (next.times && Object.keys(next.times).length > 0) clean.times = next.times;
+  if (next.items && Object.keys(next.items).length > 0) clean.items = next.items;
+  if (next.add && next.add.length > 0) clean.add = next.add;
   const days = { ...settings.schedule.days };
   if (Object.keys(clean).length > 0) days[date] = clean;
   else delete days[date];

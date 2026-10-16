@@ -5,6 +5,8 @@
 export interface EditEvent {
   group: string;
   label: string;
+  /** Takes the edit back, for edits that are not plan patches (a calendar change to settings). */
+  undo?: () => Promise<boolean>;
 }
 
 type Listener = (event: EditEvent) => void;

@@ -1,17 +1,17 @@
 /**
- * Single-key shortcuts: t Today, r the Plan (roadmap), / search, l log time, ? the list of them.
+ * Single-key shortcuts: t Today, r the Plan (roadmap), c Calendar, / search, ? the list of them.
  *
  * They never fire while the user is typing, with Ctrl, Alt or Meta held (those belong to the browser and the
  * system), or while a dialog is open. Single-character shortcuts can also be turned off in Settings, which
  * WCAG 2.1.4 asks for: speech-input users can trigger them by accident.
  */
-export type ShortcutAction = 'today' | 'roadmap' | 'search' | 'log' | 'help';
+export type ShortcutAction = 'today' | 'roadmap' | 'calendar' | 'search' | 'help';
 
 export const SHORTCUTS: readonly { key: string; action: ShortcutAction; label: string }[] = [
   { key: 't', action: 'today', label: 'Go to Today' },
   { key: 'r', action: 'roadmap', label: 'Go to the Plan' },
+  { key: 'c', action: 'calendar', label: 'Go to Calendar' },
   { key: '/', action: 'search', label: 'Search the library' },
-  { key: 'l', action: 'log', label: 'Log time on Today' },
   { key: '?', action: 'help', label: 'Show these shortcuts' },
 ];
 
@@ -38,8 +38,8 @@ export function shortcutFor(event: KeyInfo): ShortcutAction | null {
 }
 
 /*
- * "Log time" and "show the shortcuts" are requests from anywhere to a component that may not be on screen yet
- * (Today, after navigating to it). A request waits until something takes it.
+ * "Show the shortcuts" is a request from anywhere to a component that may not be on screen yet. A request waits
+ * until something takes it.
  */
 function channel() {
   let pending = false;
@@ -61,5 +61,4 @@ function channel() {
   };
 }
 
-export const logTimeRequests = channel();
 export const helpRequests = channel();

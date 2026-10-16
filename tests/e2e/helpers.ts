@@ -89,17 +89,21 @@ export function laterRow(page: Page, title: RegExp): Locator {
   return page.getByRole('button', { name: title });
 }
 
-/** Logs minutes on Today through the Log time sheet: against the Now item, unless `something` names another thing. */
-export async function logTime(page: Page, minutes: string, something?: string): Promise<void> {
-  await nowCard(page).getByRole('button', { name: 'Log time', exact: true }).click();
-  const sheet = page.getByRole('dialog', { name: 'Log time' });
-  if (something) {
-    await sheet.getByRole('radio', { name: 'Something else' }).click();
-    await sheet.getByRole('textbox', { name: 'What did you do?' }).fill(something);
-  }
-  await sheet.getByRole('textbox', { name: 'Minutes' }).fill(minutes);
-  await sheet.getByRole('textbox', { name: 'Minutes' }).press('Enter');
-  await expect(sheet).toBeHidden();
+/**
+ * Logs minutes on Today the only way left, the timer: Start on the Now card, the mocked clock moves on, Stop.
+ * "45", "90" or "1h30". The test must have installed the clock (page.clock.install).
+ */
+export async function logTime(page: Page, duration: string): Promise<void> {
+  const m = /^(?:(\d+)h)?\s*(\d+)?$/.exec(duration.trim());
+  const minutes = m ? Number(m[1] ?? 0) * 60 + Number(m[2] ?? 0) : Number(duration);
+  await nowCard(page).getByRole('button', { name: 'Start', exact: true }).click();
+  await writesSettled(page);
+  const before = await page.evaluate(() => Date.now());
+  await page.clock.fastForward(minutes * 60_000);
+  // A fixed clock (setFixedTime) does not move with fastForward: move it by hand.
+  if ((await page.evaluate(() => Date.now())) - before < minutes * 60_000 - 1000) await page.clock.setFixedTime(before + minutes * 60_000);
+  await nowCard(page).getByRole('button', { name: /^Stop/ }).first().click();
+  await writesSettled(page);
 }
 
 /** Makes a "Later today" row the Now item. */

@@ -87,7 +87,7 @@ export function demoBackup(theme: 'light' | 'dark' = 'light'): BackupFile {
       weekPicks: [{ weekStart: '2026-11-16', projectId: 'w-c-ring-buffer', pickedAt: '2026-11-16' }],
       replans: [],
       planPatches: [],
-      practice: [],
+      practice: [], // the archived practice answers: none in the demo
       challenges: [],
       settings: [{ id: 'app', core: seed.settings, theme, github: { username: '', showCalendar: false }, backup: { lastBackupAt: '2026-11-15' } }],
       meta: [],

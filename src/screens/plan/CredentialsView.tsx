@@ -16,7 +16,6 @@ import { LinkField } from '../parts/ItemSheet.tsx';
 import { StatusPill } from '../parts/StatusPill.tsx';
 import { plural, shortTitle } from '../parts/text.ts';
 import { RoadmapSheet, RoadmapsList } from './RoadmapsSection.tsx';
-import { practiceNodes } from '../../lib/practice/history.ts';
 
 const CERT_STATUSES: { value: CertStatus; label: string }[] = [
   { value: 'investigating', label: 'Investigating' },
@@ -165,7 +164,7 @@ export function CredentialsView({
   const [milestoneId, setMilestoneId] = useQueryParam('milestone');
   const [roadmapId, setRoadmapId] = useQueryParam('roadmap');
   const rows = credentialRows(atlas.seed, certStates, milestoneStates, atlas.states);
-  const coverage = roadmapCoverage(atlas.seed, atlas.states, rows, practiceNodes(atlas.seed.practiceSubjects ?? [], atlas.practice));
+  const coverage = roadmapCoverage(atlas.seed, atlas.states, rows);
   const roadmapsInScope = subjectId ? coverage.filter((c) => c.roadmap.subject === subjectId) : coverage;
   const subject = rows.find((r) => r.subject.id === subjectId)?.subject;
   const inScope = subject ? rows.filter((r) => r.subject.id === subject.id) : rows;
