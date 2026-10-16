@@ -8,14 +8,11 @@
  * opened, while `unitCount` is enough for every progress bar. The app imports the second module
  * dynamically, so it becomes its own chunk and never delays Today.
  *
- * Two more lazy modules carry what only one screen needs:
+ * More lazy modules carry what only some screens need:
  *
- *   virtual:atlas-questions  the practice bank (data/questions/), for the Practice screen
  *   virtual:atlas-docs       the projects' tech docs (data/projects/docs/), for a project's sheet
  *   virtual:atlas-catalogue  the three-tier project catalogue (data/projects/*.jsonl), every field
  *   virtual:atlas-catalogue-index  one small entry per catalogue item, for Today, the Deck and the Library list
- *
- * The practice subjects and topics (small) ride in the seed, for Today, Settings and the roadmaps.
  *
  * A schema error or a duplicate id in /data fails `vite build` (and shows the overlay in dev).
  */
@@ -24,7 +21,6 @@ import type { Plugin } from 'vite';
 import { loadCatalogue } from './load-catalogue.ts';
 import { loadDocs } from './load-docs.ts';
 import { entryOf } from '../../src/seed/catalogue.ts';
-import { loadQuestions } from './load-questions.ts';
 import { parseDoc } from '../../src/lib/project-doc.ts';
 import { DATA_DIR, loadSeedOrThrow, splitSeed } from './load-seed.ts';
 
@@ -32,17 +28,10 @@ export { splitSeed } from './load-seed.ts';
 
 const SEED_ID = 'virtual:atlas-seed';
 const UNITS_ID = 'virtual:atlas-units';
-const QUESTIONS_ID = 'virtual:atlas-questions';
 const DOCS_ID = 'virtual:atlas-docs';
 const CATALOGUE_ID = 'virtual:atlas-catalogue';
 const CATALOGUE_INDEX_ID = 'virtual:atlas-catalogue-index';
-const RESOLVED = new Map([SEED_ID, UNITS_ID, QUESTIONS_ID, DOCS_ID, CATALOGUE_ID, CATALOGUE_INDEX_ID].map((id) => [id, '\0' + id]));
-
-function questionsOrThrow() {
-  const { bank, errors } = loadQuestions();
-  if (!bank) throw new Error('The question bank in data/questions/ is invalid:\n  - ' + errors.join('\n  - '));
-  return bank;
-}
+const RESOLVED = new Map([SEED_ID, UNITS_ID, DOCS_ID, CATALOGUE_ID, CATALOGUE_INDEX_ID].map((id) => [id, '\0' + id]));
 
 /** JSON.parse of a string literal starts up markedly faster than a large object literal. */
 function asModule(value: unknown): string {
@@ -58,7 +47,6 @@ export function atlasSeed(): Plugin {
     load(id) {
       if (![...RESOLVED.values()].includes(id)) return undefined;
       const seed = loadSeedOrThrow();
-      if (id === RESOLVED.get(QUESTIONS_ID)) return asModule(questionsOrThrow());
       if (id === RESOLVED.get(DOCS_ID)) return asModule(loadDocs(seed).docs);
       if (id === RESOLVED.get(CATALOGUE_ID) || id === RESOLVED.get(CATALOGUE_INDEX_ID)) {
         const { items, errors } = loadCatalogue(seed);
@@ -73,7 +61,7 @@ export function atlasSeed(): Plugin {
         const count = docs[p.id] ? (parseDoc(docs[p.id]!).doc?.milestones.length ?? 0) : 0;
         return count > 0 ? { ...p, milestoneCount: count } : p;
       });
-      return asModule({ ...app, projects, practiceSubjects: questionsOrThrow().subjects });
+      return asModule({ ...app, projects });
     },
     configureServer(server) {
       server.watcher.add(DATA_DIR);

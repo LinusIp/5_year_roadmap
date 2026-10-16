@@ -14,8 +14,7 @@ import { dailyTargetMinutes, weeklyTargetMinutes } from '../../src/lib/schedule.
 import { freezesSpentInMonth, minutesToCount, relativeLevel, streak } from '../../src/lib/streaks.ts';
 
 const seed = loadSeedOrThrow();
-/** These tests are about the schedule; the Practice block (October to January) is kept out of their dates. */
-const base = defaultSettings({ ...seed.settings, practice: { ...seed.settings.practice, start: '2031-01-01', end: '2031-01-31' } });
+const base = defaultSettings(seed.settings);
 const MONDAY = '2026-10-19';
 const SATURDAY = '2026-10-24';
 
@@ -30,15 +29,15 @@ function log(date: string, minutes: number, extra: Partial<DayLog> = {}): DayLog
 }
 
 describe('template resolution', () => {
-  it('adds the Practice block, 45 minutes, only inside its period', () => {
-    const real = defaultSettings(seed.settings);
-    expect(resolveDay('2026-10-15', real).planned).toBe(480);
-    expect(resolveDay('2026-10-16', real).blocks.at(-1)).toMatchObject({ id: 'P', minutes: 45 });
-    expect(resolveDay('2026-10-16', real).planned).toBe(525);
-    expect(resolveDay('2027-01-31', real).planned).toBe(525);
-    expect(resolveDay('2027-02-01', real).blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
-    expect(real.core.templates.find((t) => t.id === 'university')!.blocks.at(-1)).toEqual({ block: 'P', minutes: 30 });
-    expect(real.core.templates.find((t) => t.id === 'rest')!.blocks).toEqual([]);
+  it('plans 8 hours a day in five blocks, with no Practice block (removed in pull request #6)', () => {
+    for (const date of ['2026-10-15', '2026-10-16', '2027-01-31', '2027-02-01']) {
+      expect(resolveDay(date, base).blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+      expect(resolveDay(date, base).planned).toBe(480);
+    }
+    expect(base.core.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    expect(base.core.templates.flatMap((t) => t.blocks.map((b) => b.block))).not.toContain('P');
+    expect(base.core).not.toHaveProperty('practice');
+    expect(base.core.templates.find((t) => t.id === 'rest')!.blocks).toEqual([]);
   });
 
   it('ships the five templates of the brief, with Full day on every weekday', () => {
@@ -263,10 +262,9 @@ describe('settings v1 → v2', () => {
     expect(upgraded.layout.tabs).toEqual(['today', 'plan', 'library', 'activity']);
     // The Full day follows the blocks' own minutes, so the user's 150 minutes of D survive.
     expect(resolveDay(MONDAY, upgraded).blocks.find((b) => b.id === 'D')!.minutes).toBe(150);
-    // Outside the practice period (from October to January the Practice block adds its 45 minutes).
-    expect(resolveDay('2027-03-01', upgraded).planned).toBe(510);
-    expect(upgraded.core.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E', 'P']);
-    expect(upgraded.core.practice).toEqual(seed.settings.practice);
+    expect(resolveDay(MONDAY, upgraded).planned).toBe(510);
+    expect(upgraded.core.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    expect(upgraded.core).not.toHaveProperty('practice');
     expect(StoredSettingsSchema.safeParse(upgraded).success).toBe(true);
   });
 
@@ -275,17 +273,51 @@ describe('settings v1 → v2', () => {
     expect(upgradeSettings(once, seed.settings)).toBe(once);
   });
 
-  it('brings in the Practice block for settings saved before it, in the templates the curriculum puts it in', () => {
+  it('drops the Practice block and its settings, saved while Practice existed, from everywhere they reach', () => {
     const before = upgradeSettings(v1(), seed.settings);
-    const { practice: _p, ...core } = before.core;
-    const withoutP = {
+    const P = { id: 'P', name: 'Practice', minutes: 45, days: [0, 1, 2, 3, 4, 5, 6], summary: 'Questions.', track: 'math' as const, role: 'practice' as const };
+    const withP = (blocks: { block: string; minutes?: number }[]) => [...blocks, { block: 'P', minutes: 45 }];
+    const saved: StoredSettingsInput = {
       ...before,
-      core: { ...core, blocks: core.blocks.filter((b) => b.id !== 'P'), templates: core.templates.map((t) => ({ ...t, blocks: t.blocks.filter((b) => b.block !== 'P') })) },
+      core: {
+        ...before.core,
+        blocks: [...before.core.blocks, P],
+        templates: before.core.templates.map((t) => (t.id === 'rest' ? t : { ...t, blocks: withP(t.blocks) })),
+        practice: { start: '2026-10-16', end: '2027-01-31', perSubject: 4, startWith: 'calculus' },
+      },
+      schedule: {
+        overrides: [],
+        days: {
+          '2026-10-20': { minutes: { P: 20, A: 90 }, skip: ['P'] },
+          '2026-10-21': { toTomorrow: ['P'] },
+          '2026-10-22': { swaps: [['P', 'E']], template: 'exam' },
+        },
+        history: [{ until: '2026-10-16', templates: before.core.templates.map((t) => ({ ...t, blocks: withP(t.blocks) })), pattern: before.core.pattern, blocks: [...before.core.blocks, P].map((b) => ({ id: b.id, minutes: b.minutes, days: b.days })) }],
+      },
+      pace: { P: { mode: 'relaxed' }, C: { mode: 'intense' } },
+      pauses: [{ id: 'p1', block: 'P', from: '2026-10-20', until: null, to: 'free' }, { id: 'p2', block: 'B', from: '2026-10-20', until: null, to: 'P' }],
+      catchUp: { P: { capMinutes: 30 } },
+      layout: { ...before.layout, today: { ...before.layout.today, order: ['A', 'B', 'C', 'D', 'E', 'P'] } },
     };
-    const upgraded = upgradeSettings(withoutP, seed.settings);
-    expect(upgraded.core.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E', 'P']);
-    expect(upgraded.core.templates.find((t) => t.id === 'exam')!.blocks).toContainEqual({ block: 'P', minutes: 45 });
-    expect(upgraded.core.templates.find((t) => t.id === 'rest')!.blocks).toEqual([]);
+    expect(StoredSettingsSchema.safeParse(saved).success).toBe(true);
+
+    const upgraded = upgradeSettings(saved, seed.settings);
+    expect(upgraded.core.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    expect(upgraded.core.blocks.some((b) => 'role' in b)).toBe(false);
+    expect(upgraded.core).not.toHaveProperty('practice');
+    expect(upgraded.core.templates.flatMap((t) => t.blocks.map((b) => b.block))).not.toContain('P');
+    expect(upgraded.schedule.history[0]!.templates.flatMap((t) => t.blocks.map((b) => b.block))).not.toContain('P');
+    expect(upgraded.schedule.history[0]!.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    expect(upgraded.schedule.days).toEqual({ '2026-10-20': { minutes: { A: 90 } }, '2026-10-22': { template: 'exam' } });
+    expect(upgraded.pace).toEqual({ C: { mode: 'intense' } });
+    expect(upgraded.pauses).toEqual([{ id: 'p2', block: 'B', from: '2026-10-20', until: null, to: 'free' }]);
+    expect(upgraded.catchUp).toEqual({});
+    expect(upgraded.layout.today.order).toEqual(['A', 'B', 'C', 'D', 'E']);
     expect(upgraded.core.blocks.find((b) => b.id === 'D')!.minutes).toBe(150);
+    // Before the change and after it, the default day plans its five blocks and nothing else.
+    expect(resolveDay('2026-10-16', upgraded).blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    expect(StoredSettingsSchema.safeParse(upgraded).success).toBe(true);
+    // Once dropped, nothing is left to drop: the same object comes back.
+    expect(upgradeSettings(upgraded, seed.settings)).toBe(upgraded);
   });
 });

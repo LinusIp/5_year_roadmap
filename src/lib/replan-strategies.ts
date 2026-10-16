@@ -19,7 +19,6 @@ import { shiftPhaseEnd } from './plan-edit.ts';
 import type { PhaseShift } from './plan-edit.ts';
 import { itemPriority } from './pace.ts';
 import { itemProgress, projectUnitCount } from './progress.ts';
-import { planBlocks } from './settings.ts';
 
 export type Strategy = 'push' | 'redistribute' | 'defer';
 
@@ -68,7 +67,7 @@ export function pushDatesBack(input: StrategyInput): PushResult {
   for (const original of openPhases(input.seed.phases, input.asOf)) {
     const phase = phases.find((p) => p.id === original.id)!;
     let extraDays = 0;
-    for (const def of planBlocks(input.settings.core)) {
+    for (const def of input.settings.core.blocks) {
       const { capacity, load } = laneLoad({ ...input, seed: { ...input.seed, phases } }, phase, def.id);
       if (load <= capacity + 0.5) continue;
       const start = input.asOf > phase.start ? input.asOf : phase.start;
@@ -117,7 +116,7 @@ export function redistribute(input: StrategyInput): RedistributeResult {
   if (!phase) return { changes: [], pace: {}, stillShortHours: 0 };
   const start = input.asOf > phase.start ? input.asOf : phase.start;
   const days = daysBetween(start, phase.end) + 1;
-  const lanes = planBlocks(input.settings.core).map((b) => {
+  const lanes = input.settings.core.blocks.map((b) => {
     const { capacity, load } = laneLoad(input, phase, b.id);
     return { block: b.id, perDay: (capacity * 60) / days, needPerDay: (load * 60) / days };
   });
@@ -176,7 +175,7 @@ export function dropOrDefer(input: StrategyInput): DeferResult {
 
   phases.forEach((phase, index) => {
     const next = phases[index + 1] ?? null;
-    for (const def of planBlocks(input.settings.core)) {
+    for (const def of input.settings.core.blocks) {
       const capacity = laneLoad(input, phase, def.id, plan).capacity;
       let load = laneLoad(input, phase, def.id, plan).load;
       if (load <= capacity + 0.5) continue;

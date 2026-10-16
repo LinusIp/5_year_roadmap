@@ -24,6 +24,7 @@ import { Sheet } from '../ui/Sheet.tsx';
 import { TextField } from '../ui/TextField.tsx';
 import { LinkField } from './parts/ItemSheet.tsx';
 import { blockShort, longDate, plural, shortTitle, span } from './parts/text.ts';
+import { blockNameOf, retiredWithMinutes } from '../lib/retired.ts';
 
 async function saveReview(id: string, base: Omit<Review, 'id'>, change: (r: Review) => Review): Promise<void> {
   await db.transaction('rw', db.reviews, async () => {
@@ -42,7 +43,7 @@ function Numbers({ summary, atlas }: { summary: PeriodSummary; atlas: Atlas }) {
         {span(summary.totalMinutes)} of {span(summary.targetMinutes)} ({percent}%) · {summary.daysCounted} of {plural(summary.days, 'day')} counted
         {summary.averageEnergy !== null ? ' · energy ' + summary.averageEnergy.toFixed(1) + ' of 5' : ''}
       </p>
-      <p className="mt-1 text-meta text-ink2">{atlas.settings.core.blocks.map((b) => blockShort(b.name) + ' ' + span(summary.minutesByBlock[b.id] ?? 0)).join(' · ')}</p>
+      <p className="mt-1 text-meta text-ink2">{[...atlas.settings.core.blocks.map((b) => blockShort(b.name) + ' ' + span(summary.minutesByBlock[b.id] ?? 0)), ...retiredWithMinutes(atlas.settings.core, summary.minutesByBlock).map((id) => blockNameOf(atlas.settings.core, id) + ' ' + span(summary.minutesByBlock[id] ?? 0))].join(' · ')}</p>
       {summary.itemsFinished.length > 0 && (
         <RowList label="Finished" className="mt-4">
           {summary.itemsFinished.map((id) => (

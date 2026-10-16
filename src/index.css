@@ -281,7 +281,7 @@
     max-width: 65ch;
     line-height: 1.55;
   }
-  /* Code and formulas: sunken, 13 px mono. */
+  /* Code: sunken, 13 px mono. */
   .doc-block {
     background: var(--bg);
     border-radius: var(--radius-knob);
@@ -292,15 +292,6 @@
     font-size: 0.8125rem;
     font-weight: 500;
     line-height: 1.55;
-  }
-  .math-block {
-    display: block;
-    background: var(--bg);
-    border-radius: var(--radius-knob);
-    box-shadow: inset 3px 3px 7px var(--lo), inset -3px -3px 7px var(--hi);
-    padding: 1rem;
-    overflow-x: auto;
-    text-align: center;
   }
   /* A small sunken mono pill for a code term in running text. */
   .code-pill {

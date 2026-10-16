@@ -17,7 +17,7 @@ import type { ResolvedDay } from './day-plan.ts';
 import type { CatalogueEntry } from '../seed/catalogue.ts';
 import { projectUnitCount } from './progress.ts';
 
-export type ScheduledKind = 'resource' | 'project' | 'practice';
+export type ScheduledKind = 'resource' | 'project';
 
 export interface NextUnit {
   id: string;
@@ -286,8 +286,6 @@ export function planForDay({ date, settings, weeklyPickId, ctx }: TodayInput): T
   const resolved = resolveDay(date, settings);
 
   const blocks: TodayBlock[] = resolved.blocks.map(({ id, def, minutes }) => {
-    // The Practice block carries the day's question set, not a plan item.
-    if (def.role === 'practice') return { id, def, kind: 'item', targetMinutes: minutes, item: practiceItem(settings, ctx.seed) };
     if (isReviewDay && id === review.block) {
       return { id, def, kind: 'review', targetMinutes: minutes };
     }
@@ -346,25 +344,6 @@ export function planForDay({ date, settings, weeklyPickId, ctx }: TodayInput): T
     targetMinutes: resolved.planned,
     isReviewDay,
     resolved,
-  };
-}
-
-/** "Practice · 9 questions · linear algebra, calculus, physics": the Practice block's card. */
-export function practiceItem(settings: StoredSettings, seed: AppSeed): ScheduledItem {
-  const subjects = seed.practiceSubjects ?? [];
-  const count = settings.core.practice.perSubject * subjects.length;
-  return {
-    refId: 'practice',
-    kind: 'practice',
-    title: 'Practice',
-    track: 'math',
-    tracks: ['math', 'physics'],
-    url: null,
-    status: 'active',
-    estHours: 0,
-    unitsDone: 0,
-    unitCount: count,
-    note: count + ' questions · ' + subjects.map((s) => s.short.toLowerCase()).join(', '),
   };
 }
 

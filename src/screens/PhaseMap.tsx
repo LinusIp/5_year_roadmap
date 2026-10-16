@@ -7,7 +7,6 @@ import { span } from './parts/text.ts';
 import { BlockTile } from '../ui/glyphs.tsx';
 import { Icon } from '../ui/Icon.tsx';
 import { today } from '../lib/dates.ts';
-import { planBlocks } from '../lib/settings.ts';
 
 const STAGE_NAME: Record<number, string> = { 1: 'Software engineering mastery', 2: 'Electrical + mechanical' };
 const MAP_LANES: BlockId[] = ['A', 'B', 'C', 'E'];
@@ -67,7 +66,7 @@ export function PhaseMap() {
             </Button>
           </div>
           <ul className="-mt-2 flex flex-wrap gap-x-6 gap-y-3 text-meta text-ink2" aria-label="Lanes">
-            {planBlocks(settings.core).map((b) => (
+            {settings.core.blocks.map((b) => (
               <li key={b.id} className="flex items-center gap-2.5 whitespace-nowrap">
                 <BlockTile block={b.id} size={36} />
                 {b.id} {legendName(b.name)} · {span(b.minutes)}

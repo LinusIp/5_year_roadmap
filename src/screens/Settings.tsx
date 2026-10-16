@@ -27,7 +27,6 @@ import { TextField } from '../ui/TextField.tsx';
 import { NumberField } from '../ui/NumberField.tsx';
 import { Blocks, Schedule } from './settings/Schedule.tsx';
 import { Layout } from './settings/Layout.tsx';
-import { PracticeSettings } from './settings/PracticeSettings.tsx';
 import { ProjectSettings } from './settings/ProjectSettings.tsx';
 import { Problem, Section, saveCore } from './settings/shared.tsx';
 import { exportBackup } from './parts/backupActions.ts';
@@ -401,7 +400,6 @@ export function Settings() {
         <div className="[&>section:first-child]:mt-6">
           <Schedule settings={atlas.settings} />
           <Blocks settings={atlas.settings} />
-          <PracticeSettings settings={atlas.settings} />
           <ProjectSettings settings={atlas.settings} />
           <HeatAndStreak settings={atlas.settings} />
           <Layout atlas={atlas} />

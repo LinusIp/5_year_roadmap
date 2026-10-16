@@ -8,6 +8,10 @@
  *     and is written back in the new formats;
  *   - a device still on the live build, which cannot read the new files, cannot wipe them: when it writes its older
  *     copies, this build merges, writes the newer files back and says a device needs updating.
+ *
+ * And for the removal of Practice (pull request #6), against what the build with Practice wrote
+ * (tests/fixtures/live-2026-10-16/): its settings load without Practice, its backup restores, and state/practice.json
+ * stays in the data repository exactly as it was.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -20,6 +24,9 @@ import { addPlanEdit } from '../../src/db/edits.ts';
 import { readSettings, updateSettings } from '../../src/db/settings.ts';
 import type { DayLog, Review } from '../../src/db/types.ts';
 import { addEntry, editLog } from '../../src/lib/logs.ts';
+import { resolveDay } from '../../src/lib/day-plan.ts';
+import { currentSettings } from '../../src/lib/settings.ts';
+import { parseSettings } from '../../src/sync/files.ts';
 import { resolveSeed } from '../../src/lib/plan.ts';
 import type { AppSeed } from '../../src/seed/schema.ts';
 import { adoptDeviceId } from '../../src/sync/device.ts';
@@ -29,6 +36,7 @@ import { queuedWrites } from '../../src/sync/middleware.ts';
 import { FakeGithub } from '../fake-github.ts';
 
 const FIXTURE = join(import.meta.dirname, '..', 'fixtures', 'live-2026-10-08');
+const WITH_PRACTICE = join(import.meta.dirname, '..', 'fixtures', 'live-2026-10-16');
 const raw = loadSeedOrThrow();
 const seed = splitSeed(raw).app as AppSeed;
 const read = (rel: string): string => readFileSync(join(FIXTURE, rel), 'utf8');
@@ -139,7 +147,7 @@ describe('the live IndexedDB (Dexie version 2) on this build', () => {
     expect(settings.core.blocks.find((b) => b.id === 'C')!.minutes).toBe(90);
     expect(settings.core.streak.minMinutes).toBe(45);
     expect(settings.core.templates.length).toBeGreaterThan(0);
-    expect(settings.core.blocks.some((b) => b.role === 'practice')).toBe(true);
+    expect(settings.core.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
     expect(settings.core.catalogue).toEqual(raw.settings.catalogue);
   });
 
@@ -289,5 +297,118 @@ describe('a device still on the live build', () => {
     tick();
     await sync(laptop);
     expect(((await laptop.db.dayLogs.get('2026-09-22')) as DayLog).entries.some((e) => e.block === 'P')).toBe(false);
+  });
+});
+
+/* ------------------------------------------------------------------ Practice removed (pull request #6) */
+
+const practiceFile = (rel: string): string => readFileSync(join(WITH_PRACTICE, rel), 'utf8');
+
+/** The settings, practice answers and a day with Practice minutes, as the build with Practice wrote them to GitHub. */
+function practiceFake(): FakeGithub {
+  const fake = new FakeGithub({ owner: 'octo-learner', repo: 'atlas-data', token: 'github_pat_live', userId: 4242, name: 'Octo Learner' });
+  fake.commitAsOtherDevice(
+    Object.fromEntries(['state/settings.json', 'state/practice.json', 'log/2026/10/2026-10-16.json'].map((path) => [path, practiceFile('atlas-data/' + path)])),
+    'state: first sync from Atlas',
+  );
+  return fake;
+}
+
+/** What a user of the build with Practice must find after the update, whatever way their settings arrive. */
+function expectNoPractice(settings: Awaited<ReturnType<typeof readSettings>>): void {
+  expect(settings.core.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+  expect(settings.core.blocks.some((b) => 'role' in b)).toBe(false);
+  expect(settings.core).not.toHaveProperty('practice');
+  expect(settings.core.templates.flatMap((t) => t.blocks.map((b) => b.block))).not.toContain('P');
+  expect(settings.schedule.history.flatMap((v) => [...v.blocks.map((b) => b.id), ...v.templates.flatMap((t) => t.blocks.map((b) => b.block))])).not.toContain('P');
+  expect(settings.layout.today.order).not.toContain('P');
+  expect(settings.pace).not.toHaveProperty('P');
+  // The user's own values stay.
+  expect(settings.theme).toBe('dark');
+  expect(settings.core.blocks.find((b) => b.id === 'C')!.minutes).toBe(90);
+  // The default day is 8 hours again: the Full day with the user's 90 minutes of C is 7 h 30 m, the curriculum's 8 h.
+  expect(resolveDay('2026-10-19', settings).planned).toBe(450);
+  expect(resolveDay('2026-10-19', currentSettings(undefined, raw.settings)).planned).toBe(480);
+  expect(resolveDay('2026-10-19', settings).blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+}
+
+describe('settings saved by the live build with Practice (block P, its templates and the practice section)', () => {
+  it('load without the Practice block or any practice key, and plan the 8-hour day', async () => {
+    const text = practiceFile('atlas-data/state/settings.json');
+    // The fixture really is what the build with Practice wrote.
+    const saved = JSON.parse(text);
+    expect(saved.core.blocks.find((b: { id: string }) => b.id === 'P')).toMatchObject({ role: 'practice', name: 'Practice' });
+    expect(saved.core.templates.find((t: { id: string }) => t.id === 'full').blocks).toContainEqual({ block: 'P' });
+    expect(saved.core.practice).toEqual({ start: '2026-10-16', end: '2027-01-31', perSubject: 4, startWith: 'calculus' });
+
+    // As a synced file, read the way Sync reads it.
+    const parsed = parseSettings(text);
+    expect(parsed.ok, JSON.stringify(parsed)).toBe(true);
+    if (!parsed.ok) return;
+    expectNoPractice(currentSettings(parsed.value, raw.settings));
+
+    // As the row in IndexedDB.
+    const db = new AtlasDB('live-practice-settings');
+    databases.push(db);
+    await db.settings.put(parsed.value);
+    expectNoPractice(await readSettings(raw.settings, db));
+  });
+
+  it('a backup with practice answers restores: the answers are kept on the device, P minutes stay in their day', async () => {
+    const db = new AtlasDB('live-practice-backup');
+    databases.push(db);
+    const result = await importBackup(practiceFile('backup.json'), db);
+    expect(result.ok, JSON.stringify(result)).toBe(true);
+    expect(await db.practice.count()).toBe(2);
+    const day = (await db.dayLogs.get('2026-10-16')) as DayLog;
+    expect(day.entries.filter((e) => e.block === 'P').map((e) => e.minutes)).toEqual([14, 16]);
+    expect(((await db.reviews.get('week:2026-10-12')) as Review).snapshot!.minutesByBlock.P).toBe(30);
+    expectNoPractice(await readSettings(raw.settings, db));
+  });
+
+  it('syncs into a new device without reading state/practice.json, and never rewrites or deletes it', async () => {
+    const fake = practiceFake();
+    const practiceJson = fake.files()['state/practice.json'];
+    const laptop = device('laptop', fake);
+    await connect(laptop, fake);
+    expect(await laptop.db.practice.count()).toBe(0);
+    expectNoPractice(await readSettings(raw.settings, laptop.db));
+    expect(((await laptop.db.dayLogs.get('2026-10-16')) as DayLog).entries.some((e) => e.block === 'P')).toBe(true);
+
+    // A setting changed and a day logged: settings.json goes back without Practice, practice.json is left alone.
+    tick();
+    await laptop.as(() => updateSettings(raw.settings, (s) => ({ ...s, core: { ...s.core, heatmapMode: 'absolute' } }), laptop.db));
+    await laptop.as(() => editLog('2026-10-17', (l) => addEntry(l, { block: 'A', track: 'graphics', minutes: 30 }), laptop.db));
+    await sync(laptop);
+    const files = fake.files();
+    const settings = JSON.parse(files['state/settings.json']!);
+    expect(settings.core.blocks.map((b: { id: string }) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    expect(settings.core).not.toHaveProperty('practice');
+    expect(files['state/practice.json']).toBe(practiceJson);
+    expect(files['log/2026/10/2026-10-16.json']).toBe(practiceFile('atlas-data/log/2026/10/2026-10-16.json'));
+  });
+
+  it('leaves state/practice.json alone even with answers on the device and an entry for it left in the outbox', async () => {
+    const fake = practiceFake();
+    const practiceJson = fake.files()['state/practice.json'];
+    const laptop = device('laptop', fake);
+    await connect(laptop, fake);
+    // As an older build could leave them: answers in the table, and the file queued for the next push.
+    const backup = JSON.parse(practiceFile('backup.json')) as { data: { practice: unknown[] } };
+    await laptop.db.practice.bulkPut(backup.data.practice as never[]);
+    await laptop.db.outbox.put({ path: 'state/practice.json', queuedAt: Date.now(), seq: 1 });
+    tick();
+    await laptop.as(() => editLog('2026-10-17', (l) => addEntry(l, { block: 'A', track: 'graphics', minutes: 30 }), laptop.db));
+    await sync(laptop);
+    expect(fake.files()['state/practice.json']).toBe(practiceJson);
+    expect(await laptop.db.outbox.get('state/practice.json')).toBeUndefined();
+    expect(await laptop.db.practice.count()).toBe(2);
+
+    // Removed on GitHub by hand: Atlas does not put it back.
+    tick();
+    fake.commitAsOtherDevice({ 'state/practice.json': null }, 'remove practice.json by hand');
+    await sync(laptop);
+    expect(fake.files()).not.toHaveProperty('state/practice.json');
+    expect(await laptop.db.practice.count()).toBe(2);
   });
 });

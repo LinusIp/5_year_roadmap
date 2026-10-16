@@ -6,6 +6,7 @@
 import type { CertState, DayLog, PaperState, UserItemState } from '../db/types.ts';
 import type { AppSeed, BlockId, SettingsDefaults } from '../seed/schema.ts';
 import { daysBetween, formatLong, formatMinutes, weekday } from './dates.ts';
+import { RETIRED_BLOCKS, retiredRefTitle } from './retired.ts';
 
 export interface DayMarkdownOptions {
   /** Include the day's reflection and energy rating. Off for the public learning log, on for the private data repo. */
@@ -33,13 +34,13 @@ export function titleIndex(seed: Pick<AppSeed, 'resources' | 'projects' | 'paper
   for (const list of [seed.resources, seed.projects, seed.papers, seed.certs] as { id: string; title: string }[][]) {
     for (const item of list) titles.set(item.id, item.title);
   }
-  return { title: (refId) => titles.get(refId) ?? refId };
+  return { title: (refId) => titles.get(refId) ?? retiredRefTitle(refId) ?? refId };
 }
 
 function blockHeading(core: SettingsDefaults, block: BlockId, date: string): string {
   // On the review day, the review takes over its block (Sunday's projects block, by default).
   if (weekday(date) === core.review.day && block === core.review.block) return block + ' · ' + core.review.title;
-  const name = core.blocks.find((b) => b.id === block)?.name;
+  const name = core.blocks.find((b) => b.id === block)?.name ?? RETIRED_BLOCKS[block];
   return name ? block + ' · ' + name : 'Block ' + block;
 }
 

@@ -29,14 +29,6 @@ export function peekUnits(resourceId: string): Unit[] | null {
   return cache ? (cache[resourceId] ?? []) : null;
 }
 
-let bankCache: import('./questions.ts').QuestionBank | null = null;
-
-/** The practice bank, loading its chunk on first use. */
-export async function loadQuestionBank(): Promise<import('./questions.ts').QuestionBank> {
-  bankCache ??= (await import('virtual:atlas-questions')).default;
-  return bankCache;
-}
-
 let docsCache: Record<string, string> | null = null;
 
 /** A project's tech doc (Markdown), loading the docs chunk on first use. Undefined when it has none. */

@@ -28,15 +28,6 @@ blocks:
     minutes: 60
     days: [0, 1, 2, 3, 4, 5, 6]
     summary: The prerequisites of stage 2, running from day one.
-  # The practice brief: a daily set of linear algebra, calculus and physics questions. It exists only between
-  # practice.start and practice.end (below); outside them it leaves every template and Today.
-  - id: P
-    name: Practice
-    minutes: 45
-    days: [0, 1, 2, 3, 4, 5, 6]
-    summary: A daily set of linear algebra, calculus and physics questions, apart from the coding blocks.
-    track: math
-    role: practice
 
 # Day templates: which blocks a day runs, and for how long. A block listed without minutes takes its own
 # (above), so the Full day follows the blocks' minutes. Settings > Schedule edits them; a date or a range of
@@ -44,16 +35,16 @@ blocks:
 templates:
   - id: full
     name: Full day
-    blocks: [{ block: A }, { block: B }, { block: C }, { block: D }, { block: E }, { block: P }]
+    blocks: [{ block: A }, { block: B }, { block: C }, { block: D }, { block: E }]
   - id: university
     name: University day
-    blocks: [{ block: A, minutes: 60 }, { block: B, minutes: 30 }, { block: C, minutes: 60 }, { block: E, minutes: 30 }, { block: P, minutes: 30 }]
+    blocks: [{ block: A, minutes: 60 }, { block: B, minutes: 30 }, { block: C, minutes: 60 }, { block: E, minutes: 30 }]
   - id: weekend
     name: Weekend
-    blocks: [{ block: A, minutes: 120 }, { block: C, minutes: 120 }, { block: D, minutes: 180 }, { block: P, minutes: 45 }]
+    blocks: [{ block: A, minutes: 120 }, { block: C, minutes: 120 }, { block: D, minutes: 180 }]
   - id: exam
     name: Exam week
-    blocks: [{ block: B, minutes: 30 }, { block: E, minutes: 60 }, { block: P, minutes: 45 }]
+    blocks: [{ block: B, minutes: 30 }, { block: E, minutes: 60 }]
   - id: rest
     name: Rest day
     blocks: []
@@ -70,7 +61,6 @@ review:
 weekStartsOn: 1                         # 1 = Monday, so the Sunday review closes the week
 heatmapThresholds: [1, 120, 300, 420]   # absolute mode, minutes for levels 1-4: 1-119, 120-299, 300-419, 420+
 heatmapMode: relative                   # relative: a share of the day's plan (0, <25 %, <60 %, <100 %, 100 %+)
-practice: { start: 2026-10-16, end: 2027-01-31, perSubject: 3 }   # the Practice block runs between these days
 # The project catalogue (data/projects/*.jsonl): an easy challenge a day in Block B, and on these weekdays
 # (0 = Sunday, 6 = Saturday) Block D's weekly slot: the week's medium build and medium challenge.
 catalogue: { dailyChallenge: true, weeklyDays: [6, 0] }

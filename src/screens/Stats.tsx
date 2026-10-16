@@ -14,6 +14,7 @@ import { ProgressLine } from '../ui/ProgressLine.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { blockShort, hours, plural } from './parts/text.ts';
+import { blockNameOf, retiredWithMinutes } from '../lib/retired.ts';
 import { StackedBars } from './stats/StackedBars.tsx';
 import { seriesColour } from '../ui/colors.ts';
 
@@ -103,6 +104,10 @@ export function Stats() {
           <RowList label="Hours per block" className="mt-[18px]">
             {settings.core.blocks.map((b) => (
               <Row key={b.id} title={'Block ' + b.id + ' · ' + blockShort(b.name)} trailing={hours(blocks[b.id] ?? 0)} />
+            ))}
+            {/* A block that no longer exists (P, Practice) keeps the hours logged to it. */}
+            {retiredWithMinutes(settings.core, blocks).map((id) => (
+              <Row key={id} title={'Block ' + id + ' · ' + blockNameOf(settings.core, id)} trailing={hours(blocks[id] ?? 0)} />
             ))}
           </RowList>
           <RowList label="Hours per track" className="mt-[18px]">

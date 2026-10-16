@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db/db.ts';
 import { useCatalogueIndex, useChallengeEvents } from '../hooks/useCatalogue.ts';
 import { dailyChallenge, isSlotDay, languageOf, weeklyChallenge } from '../lib/catalogue/daily.ts';
 import type { Pick as ChallengePick } from '../lib/catalogue/daily.ts';
@@ -100,15 +99,6 @@ export function Today() {
   const timer = useRunningTimer();
   const elapsed = useElapsed(timer);
   const log = useLiveQuery(() => readLog(date), [date]);
-  // How far today's practice set has got: "1 of 3 subjects". A subject counts once it is finished, which is when its
-  // minutes reach the Practice block under practice:<subject>.
-  const practiceAnswered = useLiveQuery(() => db.practice.where('date').equals(date).filter((a) => a.set === 'daily:' + date).count(), [date]) ?? 0;
-  const practiceMeta = (it: ScheduledItem): string => {
-    const total = atlas?.seed.practiceSubjects?.length ?? 3;
-    const finished = new Set((log?.entries ?? []).filter((e) => e.refId?.startsWith('practice:')).map((e) => e.refId)).size;
-    if (practiceAnswered === 0 && finished === 0) return it.note ?? '';
-    return finished >= total ? 'All ' + total + ' subjects done' : finished + ' of ' + total + ' subjects';
-  };
   const settings = atlas?.settings;
   const weekStart = useMemo(() => startOfWeek(date, settings?.core.weekStartsOn ?? 1), [date, settings]);
   const weekPick = useWeekPick(weekStart);
@@ -283,7 +273,6 @@ export function Today() {
 
   const rowFor = (block: TodayBlock): { title: string; meta: string; to?: string; doc?: string } => {
     const name = blockShort(block.def.name);
-    if (block.item?.kind === 'practice') return { title: block.def.name, meta: practiceMeta(block.item), to: '/practice' };
     if (block.kind === 'review') return { title: 'Weekly review and paper', meta: name + ' · close the week' };
     const blockItem = focusItem(block, monthlyFirst);
     if (!blockItem) {
@@ -327,12 +316,6 @@ export function Today() {
         Open the review
       </Button>
     );
-  } else if (item?.kind === 'practice' && !nowRunning) {
-    primary = (
-      <Button variant="filled" icon="play" to="/practice">
-        {practiceAnswered > 0 ? 'Go on' : 'Start the set'}
-      </Button>
-    );
   } else if (nowBlock && !item) {
     primary = (
       <Button variant="filled" to={nowBlock.id === 'D' ? '/plan/pick?from=today' : '/plan'}>
@@ -367,7 +350,7 @@ export function Today() {
         ? nowBlock.weeklyBuild
         : nowBlock.item
       : undefined;
-  const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item?.kind === 'practice' ? practiceMeta(item) : item ? nameOf(item) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
+  const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item ? nameOf(item) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
   const metaLine = nowBlock
     ? [
         blockShort(nowBlock.def.name),

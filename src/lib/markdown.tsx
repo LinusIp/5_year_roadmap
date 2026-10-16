@@ -14,18 +14,10 @@ type Inline =
   | { kind: 'text'; text: string }
   | { kind: 'code'; text: string }
   | { kind: 'strong' | 'em'; children: Inline[] }
-  | { kind: 'link'; href: string; children: Inline[] }
-  | { kind: 'math'; tex: string; display: boolean };
-
-export interface MarkdownOptions {
-  /** `$…$` and `$$…$$` become math, drawn by the caller (the practice bank, with KaTeX). Off for notes. */
-  math?: boolean;
-  /** A block from `<svg` to `</svg>` is drawn as is. Only for trusted text from /data, never for notes. */
-  svg?: boolean;
-}
+  | { kind: 'link'; href: string; children: Inline[] };
 
 /** Parses inline Markdown into a small tree. Unmatched markers stay as literal text. */
-export function parseInline(text: string, options: MarkdownOptions = {}): Inline[] {
+export function parseInline(text: string): Inline[] {
   const out: Inline[] = [];
   let buffer = '';
   const flush = (): void => {
@@ -36,16 +28,6 @@ export function parseInline(text: string, options: MarkdownOptions = {}): Inline
   let i = 0;
   while (i < text.length) {
     const rest = text.slice(i);
-
-    if (options.math) {
-      const math = /^\$\$([\s\S]+?)\$\$/.exec(rest) ?? /^\$([^$]+?)\$/.exec(rest);
-      if (math) {
-        flush();
-        out.push({ kind: 'math', tex: math[1]!.trim(), display: math[0].startsWith('$$') });
-        i += math[0].length;
-        continue;
-      }
-    }
 
     const code = /^`([^`]+)`/.exec(rest);
     if (code) {
@@ -59,7 +41,7 @@ export function parseInline(text: string, options: MarkdownOptions = {}): Inline
     if (link) {
       flush();
       const href = link[2]!;
-      if (SAFE_LINK.test(href)) out.push({ kind: 'link', href, children: parseInline(link[1]!, options) });
+      if (SAFE_LINK.test(href)) out.push({ kind: 'link', href, children: parseInline(link[1]!) });
       else out.push({ kind: 'text', text: link[1]! });
       i += link[0].length;
       continue;
@@ -68,7 +50,7 @@ export function parseInline(text: string, options: MarkdownOptions = {}): Inline
     const strong = /^\*\*([^*]+)\*\*/.exec(rest) ?? /^__([^_]+)__/.exec(rest);
     if (strong) {
       flush();
-      out.push({ kind: 'strong', children: parseInline(strong[1]!, options) });
+      out.push({ kind: 'strong', children: parseInline(strong[1]!) });
       i += strong[0].length;
       continue;
     }
@@ -76,7 +58,7 @@ export function parseInline(text: string, options: MarkdownOptions = {}): Inline
     const em = /^\*([^*\s][^*]*)\*/.exec(rest) ?? /^_([^_\s][^_]*)_(?![a-z0-9])/i.exec(rest);
     if (em && (i === 0 || !/[a-z0-9]/i.test(text[i - 1]!))) {
       flush();
-      out.push({ kind: 'em', children: parseInline(em[1]!, options) });
+      out.push({ kind: 'em', children: parseInline(em[1]!) });
       i += em[0].length;
       continue;
     }
@@ -97,16 +79,12 @@ export function parseInline(text: string, options: MarkdownOptions = {}): Inline
   return out;
 }
 
-export type MathRenderer = (tex: string, display: boolean, key: string) => ReactNode;
-
-function renderInline(nodes: Inline[], keyPrefix: string, math?: MathRenderer): ReactNode[] {
+function renderInline(nodes: Inline[], keyPrefix: string): ReactNode[] {
   return nodes.map((node, index) => {
     const key = keyPrefix + '.' + index;
     switch (node.kind) {
       case 'text':
         return node.text;
-      case 'math':
-        return math ? math(node.tex, node.display, key) : (node.display ? '$$' : '$') + node.tex + (node.display ? '$$' : '$');
       case 'code':
         return (
           <code key={key} className="rounded-knob bg-ice-soft px-1 font-mono">
@@ -114,13 +92,13 @@ function renderInline(nodes: Inline[], keyPrefix: string, math?: MathRenderer): 
           </code>
         );
       case 'strong':
-        return <strong key={key}>{renderInline(node.children, key, math)}</strong>;
+        return <strong key={key}>{renderInline(node.children, key)}</strong>;
       case 'em':
-        return <em key={key}>{renderInline(node.children, key, math)}</em>;
+        return <em key={key}>{renderInline(node.children, key)}</em>;
       case 'link':
         return (
           <a key={key} href={node.href} target="_blank" rel="noreferrer noopener" className="text-blue-deep underline underline-offset-2">
-            {renderInline(node.children, key, math)}
+            {renderInline(node.children, key)}
           </a>
         );
     }
@@ -132,10 +110,9 @@ type Block =
   | { kind: 'paragraph'; text: string }
   | { kind: 'list'; ordered: boolean; items: string[] }
   | { kind: 'quote'; text: string }
-  | { kind: 'code'; text: string }
-  | { kind: 'svg'; markup: string };
+  | { kind: 'code'; text: string };
 
-export function parseBlocks(source: string, options: MarkdownOptions = {}): Block[] {
+export function parseBlocks(source: string): Block[] {
   const lines = source.replace(/\r\n?/g, '\n').split('\n');
   const blocks: Block[] = [];
   let i = 0;
@@ -143,15 +120,6 @@ export function parseBlocks(source: string, options: MarkdownOptions = {}): Bloc
     const line = lines[i]!;
     if (!line.trim()) {
       i++;
-      continue;
-    }
-    if (options.svg && /^\s*<svg[\s>]/.test(line)) {
-      const body: string[] = [];
-      while (i < lines.length) {
-        body.push(lines[i]!);
-        if (/<\/svg>\s*$/.test(lines[i++]!)) break;
-      }
-      blocks.push({ kind: 'svg', markup: body.join('\n') });
       continue;
     }
     if (/^```/.test(line)) {
@@ -191,9 +159,9 @@ export function parseBlocks(source: string, options: MarkdownOptions = {}): Bloc
   return blocks;
 }
 
-export function Markdown({ source, className, options = {}, math }: { source: string; className?: string; options?: MarkdownOptions; math?: MathRenderer }) {
-  const blocks = parseBlocks(source, options);
-  const inline = (text: string, key: string): ReactNode[] => renderInline(parseInline(text, options), key, math);
+export function Markdown({ source, className }: { source: string; className?: string }) {
+  const blocks = parseBlocks(source);
+  const inline = (text: string, key: string): ReactNode[] => renderInline(parseInline(text), key);
   return (
     <div className={'space-y-3 ' + (className ?? '')}>
       {blocks.map((block, index) => {
@@ -221,9 +189,6 @@ export function Markdown({ source, className, options = {}, math }: { source: st
                 {block.text}
               </pre>
             );
-          case 'svg':
-            // Only reachable with options.svg, which only the question bank from /data sets.
-            return <div key={key} className="max-w-full overflow-x-auto [&_svg]:h-auto [&_svg]:max-w-full" dangerouslySetInnerHTML={{ __html: block.markup }} />;
           case 'list': {
             const items = block.items.map((item, j) => <li key={key + '.' + j}>{inline(item, key + '.' + j)}</li>);
             return block.ordered ? (

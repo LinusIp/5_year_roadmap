@@ -146,12 +146,9 @@ function baseBlocks(date: string, settings: StoredSettings, change: DayChange | 
 
   const order = settings.core.blocks.map((b) => b.id);
   let blocks: PlannedBlock[] = [];
-  const practice = settings.core.practice;
   for (const entry of template?.blocks ?? []) {
     const runsOn = config.days.get(entry.block) ?? [0, 1, 2, 3, 4, 5, 6];
     if (!runsOn.includes(day)) continue;
-    // The Practice block exists only in its period.
-    if (defFor(settings, entry.block).role === 'practice' && (date < practice.start || date > practice.end)) continue;
     const base = entry.minutes ?? config.minutes.get(entry.block) ?? defFor(settings, entry.block).minutes;
     const pace = settings.pace[entry.block];
     const applies = pace && (!pace.from || pace.from <= date);

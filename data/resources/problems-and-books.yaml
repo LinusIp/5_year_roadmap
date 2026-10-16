@@ -1,8 +1,7 @@
-# The practice brief of 2026-10-16: books, problem sources and tools for the daily sets and beyond.
+# Books, problem sources and tools for maths, physics and algorithms (added with the brief of 2026-10-16).
 # Every url below was fetched on 2026-10-16 by `npm run check:links -- --titles` on GitHub's runner and its page
 # title checked against the resource. The rest could not be confirmed (a bot check, a missing page, or a title that
 # says nothing) and keep `url: null` with a search hint (DECISIONS.md).
-# `practiceTopics` lists the question topics a resource helps with; the Practice screen offers it under a solution.
 
 - id: axler-ladr
   title: "Linear Algebra Done Right (open-access edition)"
@@ -16,7 +15,6 @@
   level: intermediate
   cost: free
   estHours: 80
-  practiceTopics: [linear-algebra/vector-spaces-and-subspaces, linear-algebra/independence-basis-dimension, linear-algebra/linear-transformations-and-change-of-basis, linear-algebra/eigenvalues-and-eigenvectors, linear-algebra/symmetric-matrices]
   summary: "Determinant-free, proof-first linear algebra; the open-access fourth edition, with exercises after every section."
 
 - id: strang-ila-book
@@ -31,7 +29,6 @@
   level: intro
   cost: paid
   estHours: 60
-  practiceTopics: [linear-algebra/vectors-and-linear-combinations, linear-algebra/matrices-and-elimination, linear-algebra/vector-spaces-and-subspaces, linear-algebra/independence-basis-dimension, linear-algebra/orthogonality-and-projections, linear-algebra/determinants, linear-algebra/eigenvalues-and-eigenvectors, linear-algebra/linear-transformations-and-change-of-basis]
   summary: "The textbook behind 18.06. The book site carries problem sets and solutions that match the lectures."
 
 - id: hefferon-linear-algebra
@@ -46,7 +43,6 @@
   level: intro
   cost: free
   estHours: 60
-  practiceTopics: [linear-algebra/vectors-and-linear-combinations, linear-algebra/matrices-and-elimination, linear-algebra/vector-spaces-and-subspaces, linear-algebra/independence-basis-dimension, linear-algebra/orthogonality-and-projections, linear-algebra/determinants, linear-algebra/eigenvalues-and-eigenvectors, linear-algebra/linear-transformations-and-change-of-basis]
   summary: "A free textbook with a full answer book: a deep well of extra exercises for every topic of the daily set."
 
 - id: vmls-book
@@ -61,7 +57,6 @@
   level: intro
   cost: free
   estHours: 50
-  practiceTopics: [linear-algebra/vectors-and-linear-combinations, linear-algebra/matrix-multiplication-and-inverses, linear-algebra/least-squares, linear-algebra/gram-schmidt-and-qr]
   summary: "Linear algebra for applications: least squares, data fitting and control, with exercises and a Julia companion."
 
 - id: halmos-la-problem-book
@@ -76,7 +71,6 @@
   level: advanced
   cost: paid
   estHours: 40
-  practiceTopics: [linear-algebra/vector-spaces-and-subspaces, linear-algebra/independence-basis-dimension, linear-algebra/linear-transformations-and-change-of-basis, linear-algebra/eigenvalues-and-eigenvectors, linear-algebra/symmetric-matrices]
   summary: "Problems with hints and solutions that lead through the theory; for the proof questions of the daily set."
 
 - id: pauls-online-math-notes
@@ -91,7 +85,6 @@
   level: intro
   cost: free
   estHours: 60
-  practiceTopics: [calculus/limits-and-continuity, calculus/derivatives-and-rules, calculus/chain-rule-and-implicit-differentiation, calculus/applications-of-derivatives, calculus/integrals-and-the-fundamental-theorem, calculus/substitution-and-integration-by-parts, calculus/applications-of-integrals, calculus/exponentials-logarithms-lhopital, calculus/sequences-series-taylor, calculus/vectors-dot-and-cross-product, calculus/partial-derivatives-and-gradients, calculus/directional-derivatives-and-tangent-planes, calculus/multivariable-optimisation-lagrange, calculus/double-and-triple-integrals, calculus/line-integrals-and-greens-theorem, calculus/flux-divergence-curl]
   summary: "Notes with practice and assignment problems, worked solutions for the practice set, for every calculus topic of the daily set."
 
 - id: openstax-calculus
@@ -106,7 +99,6 @@
   level: intro
   cost: free
   estHours: 90
-  practiceTopics: [calculus/limits-and-continuity, calculus/derivatives-and-rules, calculus/chain-rule-and-implicit-differentiation, calculus/applications-of-derivatives, calculus/integrals-and-the-fundamental-theorem, calculus/substitution-and-integration-by-parts, calculus/applications-of-integrals, calculus/exponentials-logarithms-lhopital, calculus/sequences-series-taylor, calculus/vectors-dot-and-cross-product, calculus/partial-derivatives-and-gradients, calculus/directional-derivatives-and-tangent-planes, calculus/multivariable-optimisation-lagrange, calculus/double-and-triple-integrals, calculus/line-integrals-and-greens-theorem, calculus/flux-divergence-curl]
   summary: "A free three-volume calculus text with answers to the odd exercises: single-variable, series, multivariable and vector calculus."
 
 - id: khan-academy-calculus
@@ -121,7 +113,6 @@
   level: intro
   cost: free
   estHours: 60
-  practiceTopics: [calculus/limits-and-continuity, calculus/derivatives-and-rules, calculus/chain-rule-and-implicit-differentiation, calculus/applications-of-derivatives, calculus/integrals-and-the-fundamental-theorem, calculus/substitution-and-integration-by-parts, calculus/applications-of-integrals, calculus/exponentials-logarithms-lhopital, calculus/sequences-series-taylor, calculus/vectors-dot-and-cross-product, calculus/partial-derivatives-and-gradients, calculus/directional-derivatives-and-tangent-planes, calculus/multivariable-optimisation-lagrange, calculus/double-and-triple-integrals, calculus/line-integrals-and-greens-theorem, calculus/flux-divergence-curl]
   summary: "Short videos with mastery exercises; good for a quick second explanation when a topic stalls."
 
 - id: blitzstein-hwang-probability
@@ -163,7 +154,6 @@
   level: intro
   cost: free
   estHours: 100
-  practiceTopics: [physics/units-dimensions-vectors, physics/kinematics-1d-2d, physics/projectile-motion, physics/newtons-laws-free-body-diagrams, physics/friction-and-inclines, physics/circular-motion, physics/work-and-kinetic-energy, physics/potential-energy-and-conservation, physics/momentum-impulse-collisions, physics/centre-of-mass, physics/rotational-kinematics, physics/torque-and-moment-of-inertia, physics/angular-momentum, physics/rolling-motion, physics/static-equilibrium, physics/gravitation-and-orbits, physics/simple-harmonic-motion, physics/damped-and-driven-oscillations]
   summary: "A free calculus-based physics text with answers to the odd problems: mechanics, waves, thermodynamics, E&M, optics and modern physics."
 
 - id: hyperphysics
@@ -178,7 +168,6 @@
   cost: free
   estHours: 0
   reference: true
-  practiceTopics: [physics/units-dimensions-vectors, physics/kinematics-1d-2d, physics/projectile-motion, physics/newtons-laws-free-body-diagrams, physics/friction-and-inclines, physics/circular-motion, physics/work-and-kinetic-energy, physics/potential-energy-and-conservation, physics/momentum-impulse-collisions, physics/centre-of-mass, physics/rotational-kinematics, physics/torque-and-moment-of-inertia, physics/angular-momentum, physics/rolling-motion, physics/static-equilibrium, physics/gravitation-and-orbits, physics/simple-harmonic-motion, physics/damped-and-driven-oscillations]
   summary: "A concept map of physics with short worked explanations; a reference, consulted rather than completed."
 
 - id: physics-libretexts
@@ -193,7 +182,6 @@
   cost: free
   estHours: 0
   reference: true
-  practiceTopics: [physics/units-dimensions-vectors, physics/kinematics-1d-2d, physics/projectile-motion, physics/newtons-laws-free-body-diagrams, physics/friction-and-inclines, physics/circular-motion, physics/work-and-kinetic-energy, physics/potential-energy-and-conservation, physics/momentum-impulse-collisions, physics/centre-of-mass, physics/rotational-kinematics, physics/torque-and-moment-of-inertia, physics/angular-momentum, physics/rolling-motion, physics/static-equilibrium, physics/gravitation-and-orbits, physics/simple-harmonic-motion, physics/damped-and-driven-oscillations]
   summary: "A library of open physics texts; a reference for any topic of the daily set."
 
 - id: morin-mechanics-problems
@@ -208,7 +196,6 @@
   level: intermediate
   cost: paid
   estHours: 60
-  practiceTopics: [physics/units-dimensions-vectors, physics/kinematics-1d-2d, physics/projectile-motion, physics/newtons-laws-free-body-diagrams, physics/friction-and-inclines, physics/circular-motion, physics/work-and-kinetic-energy, physics/potential-energy-and-conservation, physics/momentum-impulse-collisions, physics/centre-of-mass, physics/rotational-kinematics, physics/torque-and-moment-of-inertia, physics/angular-momentum, physics/rolling-motion, physics/static-equilibrium, physics/gravitation-and-orbits, physics/simple-harmonic-motion, physics/damped-and-driven-oscillations]
   summary: "Hundreds of mechanics problems, each with a full solution; harder than the daily set, for topics already done."
 
 - id: walter-lewin-lectures
@@ -223,7 +210,6 @@
   level: intro
   cost: free
   estHours: 100
-  practiceTopics: [physics/units-dimensions-vectors, physics/kinematics-1d-2d, physics/projectile-motion, physics/newtons-laws-free-body-diagrams, physics/friction-and-inclines, physics/circular-motion, physics/work-and-kinetic-energy, physics/potential-energy-and-conservation, physics/momentum-impulse-collisions, physics/centre-of-mass, physics/rotational-kinematics, physics/torque-and-moment-of-inertia, physics/angular-momentum, physics/rolling-motion, physics/static-equilibrium, physics/gravitation-and-orbits, physics/simple-harmonic-motion, physics/damped-and-driven-oscillations]
   summary: "The classic MIT physics lectures with demonstrations, a companion to 8.01 and 8.02."
 
 - id: tong-lecture-notes
@@ -238,7 +224,6 @@
   level: advanced
   cost: free
   estHours: 120
-  practiceTopics: [physics/angular-momentum, physics/gravitation-and-orbits, physics/simple-harmonic-motion]
   summary: "Cambridge lecture notes with example sheets, for after the intro sequence: Lagrangian and Hamiltonian dynamics, E&M, quantum."
 
 - id: book-of-proof
@@ -252,7 +237,6 @@
   level: intro
   cost: free
   estHours: 40
-  practiceTopics: [linear-algebra/vector-spaces-and-subspaces, linear-algebra/independence-basis-dimension, linear-algebra/linear-transformations-and-change-of-basis, linear-algebra/eigenvalues-and-eigenvectors, linear-algebra/symmetric-matrices]
   summary: "A free introduction to proofs: logic, sets, induction, contradiction, with solutions to odd exercises. Behind the proof questions."
 
 - id: cses-problem-set
@@ -307,7 +291,6 @@
   level: intermediate
   cost: free
   estHours: 6
-  practiceTopics: [calculus/partial-derivatives-and-gradients, calculus/chain-rule-and-implicit-differentiation]
   summary: "Jacobians, the vector chain rule and the gradients of neural network layers, worked out by hand."
 
 - id: transformer-math-101
@@ -363,5 +346,4 @@
   level: intro
   cost: free
   estHours: 40
-  practiceTopics: [physics/static-equilibrium, physics/torque-and-moment-of-inertia, physics/centre-of-mass]
   summary: "A free interactive statics text: equilibrium, trusses, friction and moments of inertia, with exercises."

@@ -1,7 +1,6 @@
 /**
- * Seeded randomness for practice sets. A set for a date must come out the same on every device, so nothing here
- * touches Math.random: a string seed ("2026-10-16|linear-algebra") is hashed into a 32-bit state and mulberry32
- * draws from it.
+ * Seeded randomness, for picks that must come out the same on every device (the daily challenge), so nothing here
+ * touches Math.random: a string seed ("daily|2026-10-16|…") is hashed into a 32-bit state and mulberry32 draws from it.
  */
 
 /** FNV-1a over UTF-16 code units, then a final avalanche. Stable across engines. */

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { editLog, isBlockDone, readLog, removeEntry, toggleBlockDone } from '../../lib/logs.ts';
 import { weekday } from '../../lib/dates.ts';
+import { RETIRED_BLOCKS, retiredRefTitle } from '../../lib/retired.ts';
 import type { AppSeed, SettingsDefaults } from '../../seed/schema.ts';
 import { Button } from '../../ui/Button.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
@@ -12,7 +13,7 @@ import { blockShort, shortTitle, span } from './text.ts';
 
 /** Titles come from the curriculum with the user's edits, so items they added show their names. */
 export function titleOf(refId: string, seed: AppSeed): string {
-  return seed.resources.find((r) => r.id === refId)?.title ?? seed.projects.find((p) => p.id === refId)?.title ?? seed.papers.find((p) => p.id === refId)?.title ?? refId;
+  return seed.resources.find((r) => r.id === refId)?.title ?? seed.projects.find((p) => p.id === refId)?.title ?? seed.papers.find((p) => p.id === refId)?.title ?? retiredRefTitle(refId) ?? refId;
 }
 
 /**
@@ -38,7 +39,7 @@ export function DaySheet({ date, title, onClose, seed, blocks }: { date: string 
                   <Row
                     key={index}
                     title={name}
-                    meta={'Block ' + entry.block + ' · ' + trackName(entry.track)}
+                    meta={'Block ' + entry.block + (RETIRED_BLOCKS[entry.block] && !blocks.some((b) => b.id === entry.block) ? ' (' + RETIRED_BLOCKS[entry.block] + ')' : '') + ' · ' + trackName(entry.track)}
                     trailing={span(entry.minutes)}
                     action={<Button variant="icon" icon="x" label={'Remove ' + span(entry.minutes) + ' of ' + name} onClick={() => void editLog(date, (current) => removeEntry(current, index))} />}
                   />

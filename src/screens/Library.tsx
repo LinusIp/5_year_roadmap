@@ -420,7 +420,6 @@ export function Library({ openId }: { openId?: string }) {
         <Button icon="plus" onClick={() => setAdding(true)}>
           Add a resource
         </Button>
-        {(seed.practiceSubjects?.length ?? 0) > 0 && <Button to="/practice?choose=1">Practise a topic</Button>}
       </div>
 
       <ItemSheet atlas={atlas} id={openId ?? null} onClose={() => navigate('/library' + (keep ? '?' + keep : ''))} />
