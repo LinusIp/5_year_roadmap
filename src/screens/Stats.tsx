@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { monthName, today as todayDate } from '../lib/dates.ts';
+import { plannedFor } from '../lib/day-plan.ts';
 import { paceSummary } from '../lib/forecast.ts';
 import { minutesPerBlock, minutesPerTrack } from '../lib/heatmap.ts';
 import { adherence } from '../lib/shipping.ts';
@@ -42,7 +43,7 @@ export function Stats() {
   const { logs, settings, seed } = atlas;
   const total = logs.reduce((sum, l) => sum + l.entries.reduce((s, e) => s + e.minutes, 0), 0);
   const pace = paceSummary(logs, settings, asOf);
-  const streakState = streak(logs, settings.core.streak, asOf);
+  const streakState = streak(logs, settings.core.streak, asOf, plannedFor(settings));
   const blocks = minutesPerBlock(logs);
   const tracks = minutesPerTrack(logs);
   const cadences = (['weekly', 'monthly', 'capstone'] as const).map((c) => adherence(seed.projects, atlas.states, c, model.planStart, asOf, settings.core.weekStartsOn));
@@ -100,7 +101,7 @@ export function Stats() {
         <>
           <RowList label="Hours per block" className="mt-7">
             {settings.core.blocks.map((b) => (
-              <Row key={b.id} title={'Block ' + b.id + ' · ' + blockShort(b.name)} trailing={hours(blocks[b.id])} />
+              <Row key={b.id} title={'Block ' + b.id + ' · ' + blockShort(b.name)} trailing={hours(blocks[b.id] ?? 0)} />
             ))}
           </RowList>
           <RowList label="Hours per track" className="mt-7">

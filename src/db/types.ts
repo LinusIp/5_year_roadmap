@@ -6,7 +6,8 @@
  * flat, self-describing JSON document so that another app ("Horizon") can read an export.
  */
 import { z } from 'zod';
-import { BlockIdSchema, HttpUrl, IsoDate, SettingsDefaultsSchema, Slug, TrackIdSchema } from '../seed/schema.ts';
+import { BlockIdSchema, DayTemplateSchema, HttpUrl, IsoDate, Slug, StoredCoreSchema, TrackIdSchema } from '../seed/schema.ts';
+import type { SettingsDefaults } from '../seed/schema.ts';
 
 export const ITEM_STATUSES = ['todo', 'active', 'done', 'dropped'] as const;
 export const PAPER_STATUSES = ['queued', 'reading', 'read', 'implemented'] as const;
@@ -145,7 +146,8 @@ export const OverrideSchema = z.strictObject({
 });
 export type Override = z.infer<typeof OverrideSchema>;
 
-const MinutesByBlock = z.strictObject({ A: z.number(), B: z.number(), C: z.number(), D: z.number(), E: z.number() });
+/** Minutes per block. Reviews written before blocks were open-ended have exactly A to E. */
+const MinutesByBlock = z.record(BlockIdSchema, z.number());
 
 export const ReviewSchema = z.strictObject({
   /** "week:2026-09-21" (the week's first day), "month:2026-09" or "quarter:2027-Q3". */
@@ -208,16 +210,137 @@ export const ReplanRecordSchema = z.strictObject({
 });
 export type ReplanRecord = z.infer<typeof ReplanRecordSchema>;
 
+/* ------------------------------------------------------------------ settings, version 2 */
+
+/** One date's changes, from Today's "Change today" sheet. History is never rewritten by them: they name a date. */
+export const DayChangeSchema = z.strictObject({
+  /** Another template for this day. */
+  template: Slug.optional(),
+  /** A rest day: nothing planned, and the streak is safe. */
+  rest: z.boolean().optional(),
+  /** Minutes for single blocks on this day. */
+  minutes: z.record(BlockIdSchema, z.number().int().min(0).max(720)).optional(),
+  /** Blocks left out of this day only. */
+  skip: z.array(BlockIdSchema).optional(),
+  /** Blocks moved to the next day, minutes and all. */
+  toTomorrow: z.array(BlockIdSchema).optional(),
+  /** Pairs of blocks that trade items on this day. */
+  swaps: z.array(z.tuple([BlockIdSchema, BlockIdSchema])).optional(),
+});
+export type DayChange = z.infer<typeof DayChangeSchema>;
+
+/** "Exam week 12–19 Dec": a template for a date or a range. Beats the weekly pattern. */
+export const DateOverrideSchema = z.strictObject({
+  id: z.string().min(1),
+  from: IsoDate,
+  to: IsoDate,
+  template: Slug,
+  label: z.string().optional(),
+});
+export type DateOverride = z.infer<typeof DateOverrideSchema>;
+
+/**
+ * The templates, weekly pattern and block minutes as they were before an edit, kept so that days already past
+ * keep the plan they had: a schedule change never rewrites history.
+ */
+export const ScheduleVersionSchema = z.strictObject({
+  /** The last day this version applied to. */
+  until: IsoDate,
+  templates: z.array(DayTemplateSchema),
+  pattern: z.array(Slug).length(7),
+  blocks: z.array(z.strictObject({ id: BlockIdSchema, minutes: z.number().int().min(0), days: z.array(z.number().int().min(0).max(6)) })),
+});
+export type ScheduleVersion = z.infer<typeof ScheduleVersionSchema>;
+
+export const LANE_PACES = ['normal', 'relaxed', 'intense', 'custom'] as const;
+export type LanePaceMode = (typeof LANE_PACES)[number];
+/** relaxed is 25 % less than the template, intense 25 % more; custom is fixed minutes on every day the lane runs. */
+export const LanePaceSchema = z.strictObject({
+  mode: z.enum(LANE_PACES),
+  minutes: z.number().int().min(0).max(720).optional(),
+  /** The day the pace was set: earlier days keep the plan they had. */
+  from: IsoDate.optional(),
+});
+export type LanePace = z.infer<typeof LanePaceSchema>;
+
+/** A lane paused from a date, until another or until resumed; its minutes go to another lane, or free time. */
+export const PauseSchema = z.strictObject({
+  id: z.string().min(1),
+  block: BlockIdSchema,
+  from: IsoDate,
+  /** Null: until resumed. */
+  until: IsoDate.nullable(),
+  /** Where the minutes go: a block, or "free" for free time. */
+  to: z.union([BlockIdSchema, z.literal('free')]),
+});
+export type Pause = z.infer<typeof PauseSchema>;
+
+export const TAB_IDS = ['today', 'plan', 'library', 'activity', 'projects', 'map', 'reviews'] as const;
+export type TabId = (typeof TAB_IDS)[number];
+export const PLAN_SEGMENTS = ['timeline', 'projects', 'papers', 'credentials', 'roadmaps'] as const;
+
+export const LayoutSchema = z.strictObject({
+  today: z.strictObject({
+    stats: z.boolean(),
+    later: z.boolean(),
+    review: z.boolean(),
+    footer: z.boolean(),
+    /** compact: titles only in Later today; detailed: titles, meta and a progress line. */
+    view: z.enum(['detailed', 'compact']),
+    /** What "Now" picks: the first unfinished block, or the first unfinished one in `order`. */
+    now: z.enum(['first', 'order']),
+    order: z.array(BlockIdSchema),
+  }),
+  /** 3 to 5 tabs; Today is always first. */
+  tabs: z.array(z.enum(TAB_IDS)).min(3).max(5),
+  plan: z.strictObject({ segment: z.enum(PLAN_SEGMENTS), showDropped: z.boolean() }),
+  general: z.strictObject({ clock: z.enum(['24', '12']), density: z.enum(['comfortable', 'compact']) }),
+});
+export type Layout = z.infer<typeof LayoutSchema>;
+
+export const ScheduleStateSchema = z.strictObject({
+  overrides: z.array(DateOverrideSchema),
+  days: z.record(IsoDate, DayChangeSchema),
+  history: z.array(ScheduleVersionSchema),
+});
+export type ScheduleState = z.infer<typeof ScheduleStateSchema>;
+
+export const SETTINGS_VERSION = 2;
+
+/**
+ * Settings as stored: in IndexedDB, in a backup and in state/settings.json. Version 1 (before the flexibility
+ * brief) has none of the schedule, pace or layout fields and a core without templates; it still parses, and
+ * `upgradeSettings` (src/db/settings.ts) brings it to version 2 when it is read.
+ */
 export const StoredSettingsSchema = z.strictObject({
   id: z.literal('app'),
-  /** Same shape as data/settings.yaml: blocks, review day, heatmap thresholds, streak rules… */
-  core: SettingsDefaultsSchema,
+  version: z.literal(SETTINGS_VERSION).optional(),
+  /** Same shape as data/settings.yaml: blocks, templates, review day, heatmap thresholds, streak rules… */
+  core: StoredCoreSchema,
   theme: z.enum(THEMES),
   github: z.strictObject({ username: z.string(), showCalendar: z.boolean() }),
   backup: z.strictObject({ lastBackupAt: IsoDate.optional(), snoozedUntil: IsoDate.optional() }),
+  schedule: ScheduleStateSchema.optional(),
+  pace: z.record(BlockIdSchema, LanePaceSchema).optional(),
+  pauses: z.array(PauseSchema).optional(),
+  /** Opt-in catch-up per lane: at most this many extra minutes a day until the lane is no longer behind. */
+  catchUp: z.record(BlockIdSchema, z.strictObject({ capMinutes: z.number().int().min(5).max(240) })).optional(),
+  layout: LayoutSchema.optional(),
   ...Stamp,
 });
-export type StoredSettings = z.infer<typeof StoredSettingsSchema>;
+/** What the parsers accept: version 1 or 2. */
+export type StoredSettingsInput = z.infer<typeof StoredSettingsSchema>;
+
+/** Settings as the app uses them: always version 2, every field present. */
+export interface StoredSettings extends Omit<StoredSettingsInput, 'version' | 'core' | 'schedule' | 'pace' | 'pauses' | 'catchUp' | 'layout'> {
+  version: typeof SETTINGS_VERSION;
+  core: SettingsDefaults;
+  schedule: ScheduleState;
+  pace: Record<string, LanePace>;
+  pauses: Pause[];
+  catchUp: Record<string, { capMinutes: number }>;
+  layout: Layout;
+}
 
 export const MetaSchema = z.strictObject({ key: z.string().min(1), value: z.unknown() });
 export type Meta = z.infer<typeof MetaSchema>;

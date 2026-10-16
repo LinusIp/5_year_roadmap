@@ -38,7 +38,7 @@ function Numbers({ summary, atlas }: { summary: PeriodSummary; atlas: Atlas }) {
         {span(summary.totalMinutes)} of {span(summary.targetMinutes)} ({percent}%) · {summary.daysCounted} of {plural(summary.days, 'day')} counted
         {summary.averageEnergy !== null ? ' · energy ' + summary.averageEnergy.toFixed(1) + ' of 5' : ''}
       </p>
-      <p className="mt-1 text-meta text-ink2">{atlas.settings.core.blocks.map((b) => blockShort(b.name) + ' ' + span(summary.minutesByBlock[b.id])).join(' · ')}</p>
+      <p className="mt-1 text-meta text-ink2">{atlas.settings.core.blocks.map((b) => blockShort(b.name) + ' ' + span(summary.minutesByBlock[b.id] ?? 0)).join(' · ')}</p>
       {summary.itemsFinished.length > 0 && (
         <RowList label="Finished" className="mt-4">
           {summary.itemsFinished.map((id) => (

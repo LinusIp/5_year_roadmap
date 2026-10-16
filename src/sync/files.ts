@@ -11,7 +11,7 @@ import {
   CertStateSchema, CustomEntitySchema, DayLogSchema, MilestoneStateSchema, OverrideSchema, PaperStateSchema,
   ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
 } from '../db/types.ts';
-import type { DayLog, Review, StoredSettings, UserItemState } from '../db/types.ts';
+import type { DayLog, Review, StoredSettingsInput, UserItemState } from '../db/types.ts';
 import { formatRange, monthName } from '../lib/dates.ts';
 import type { Project } from '../seed/schema.ts';
 
@@ -109,11 +109,12 @@ export function planUpdatedAt(data: PlanData): string {
 
 /* ------------------------------------------------------------------ state/settings.json */
 
-export function renderSettings(settings: StoredSettings): string {
+export function renderSettings(settings: StoredSettingsInput): string {
   return toJson(settings);
 }
 
-export function parseSettings(text: string): ParseResult<StoredSettings> {
+/** Version 1 or 2: the app upgrades when it reads (src/lib/settings.ts). */
+export function parseSettings(text: string): ParseResult<StoredSettingsInput> {
   return parseJson(text, StoredSettingsSchema, 'state/settings.json');
 }
 

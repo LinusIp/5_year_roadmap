@@ -116,7 +116,7 @@ export function PhaseMap() {
                         <span aria-hidden="true" className="w-[3px] shrink-0 rounded-cell" style={{ background: LANE_COLOR[lane] }} />
                         <span>
                           <span className="sr-only">Block {lane}: </span>
-                          {p.map?.[lane as 'A' | 'B' | 'C' | 'E'] ?? p.focus[lane]}
+                          {p.map?.[lane as 'A' | 'B' | 'C' | 'E'] ?? (p.focus as Record<string, string>)[lane]}
                         </span>
                       </li>
                     ))}

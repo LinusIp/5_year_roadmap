@@ -2,10 +2,11 @@
  * The local half of GitHub Sync: the device's records as repository files, and repository files applied back
  * to the device. Writes made here are silent (not stamped, not queued): they are GitHub's version, not edits.
  */
+import { currentSettings } from '../lib/settings.ts';
 import Dexie from 'dexie';
 import type { AtlasDB } from '../db/db.ts';
 import type {
-  CertState, CustomEntity, DayLog, MilestoneState, Override, PaperState, ReplanRecord, Review, StoredSettings,
+  CertState, CustomEntity, DayLog, MilestoneState, Override, PaperState, ReplanRecord, Review, StoredSettingsInput,
   UserItemState, WeekPick,
 } from '../db/types.ts';
 import { renderDayMarkdown, titleIndex } from '../lib/day-markdown.ts';
@@ -28,7 +29,7 @@ export interface LocalState {
   reviews: Review[];
   weekPicks: WeekPick[];
   replans: ReplanRecord[];
-  settings: StoredSettings[];
+  settings: StoredSettingsInput[];
 }
 
 export async function readLocal(database: AtlasDB): Promise<LocalState> {
@@ -96,7 +97,7 @@ export function renderPath(path: string, local: LocalState, seed: AppSeed): stri
   if (mdDate) {
     const log = local.dayLogs.find((l) => l.date === mdDate);
     if (!log) return null;
-    const core = local.settings[0]?.core ?? seed.settings;
+    const core = currentSettings(local.settings[0], seed.settings).core;
     return renderDayMarkdown(log, { core, titles: titleIndex(seed), planStart: seed.phases[0]!.start, states: itemsOf(local) }, { reflections: true });
   }
   if (path.startsWith('reviews/')) {
@@ -147,7 +148,7 @@ export async function writePlan(database: AtlasDB, data: PlanData): Promise<void
   });
 }
 
-export async function writeSettings(database: AtlasDB, settings: StoredSettings): Promise<void> {
+export async function writeSettings(database: AtlasDB, settings: StoredSettingsInput): Promise<void> {
   await silently(database, [database.settings], async () => {
     await database.settings.put(settings);
   });

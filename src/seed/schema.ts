@@ -11,6 +11,7 @@ export const TRACK_IDS = [
   'ai', 'swe', 'systems', 'graphics', 'simulation', 'gamedev', 'languages', 'math',
   'physics', 'ee', 'embedded', 'controls', 'mech', 'robotics', 'chem', 'career',
 ] as const;
+/** The five lanes of the curriculum (plan.yaml, the phase table). The user can add blocks of their own beyond them. */
 export const BLOCK_IDS = ['A', 'B', 'C', 'D', 'E'] as const;
 export const RESOURCE_TYPES = ['course', 'lectures', 'book', 'tutorial', 'article', 'paper', 'repo', 'cert'] as const;
 export const LEVELS = ['intro', 'intermediate', 'advanced'] as const;
@@ -25,12 +26,15 @@ const NodeRef = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-
 export const CERT_MODES = ['committed', 'optional', 'investigate'] as const;
 
 export type TrackId = (typeof TRACK_IDS)[number];
-export type BlockId = (typeof BLOCK_IDS)[number];
+/** A block's id: A to E by default, P for Practice, any short capitalised id for a block the user adds. */
+export type BlockId = string;
+export type SeedBlockId = (typeof BLOCK_IDS)[number];
 export type ResourceType = (typeof RESOURCE_TYPES)[number];
 export type Cadence = (typeof CADENCES)[number];
 
 export const TrackIdSchema = z.enum(TRACK_IDS);
-export const BlockIdSchema = z.enum(BLOCK_IDS);
+export const BlockIdSchema = z.string().regex(/^[A-Z][A-Z0-9]{0,7}$/, 'must be a block id: a capital letter, then up to 7 capitals or digits');
+export const SeedBlockIdSchema = z.enum(BLOCK_IDS);
 
 /* ------------------------------------------------------------------ primitives */
 
@@ -389,43 +393,89 @@ const Weekday = z.number().int().min(0).max(6);
 export const BlockDefSchema = z.strictObject({
   id: BlockIdSchema,
   name: Text,
+  /** The block's minutes in a template that does not set its own (the Full day template sets none). */
   minutes: z.number().int().min(0).max(720),
-  /** 0 = Sunday, 6 = Saturday. */
+  /** 0 = Sunday, 6 = Saturday. A block is left out on the other weekdays, whatever the day's template says. */
   days: z.array(Weekday).min(1),
   summary: Text,
   /** Names this block had in earlier curricula: settings that still carry one are brought up to date. */
   formerNames: z.array(Text).optional(),
+  /** Colour from the track palette (1-8). Omitted: the lane's default colour. */
+  slot: z.literal([1, 2, 3, 4, 5, 6, 7, 8]).optional(),
+  /** The track time in this block is logged against when its item has none (a block the user added). */
+  track: TrackIdSchema.optional(),
 });
 export type BlockDef = z.infer<typeof BlockDefSchema>;
 
-export const SettingsDefaultsSchema = z
-  .strictObject({
-    blocks: z.array(BlockDefSchema).length(5),
-    /** On `day`, the content of `block` is replaced by the weekly review and paper reading. */
-    review: z.strictObject({ day: Weekday, block: BlockIdSchema, title: Text }),
-    weekStartsOn: z.literal([0, 1]),
-    /** Minutes at which a day reaches heatmap level 1, 2, 3 and 4. */
-    heatmapThresholds: z.tuple([z.number().int().min(1), z.number().int(), z.number().int(), z.number().int()]),
-    streak: z.strictObject({
-      minMinutes: z.number().int().min(1),
-      freezesPerMonth: z.number().int().min(0).max(31),
-      autoFreeze: z.boolean(),
-    }),
-    backupReminderDays: z.number().int().min(1),
-    /** One paper a week from the first phase of `fromYear`, or from `fromPhase` when it is set (the research cadence starts in Foundations II). */
-    paperCadence: z.strictObject({ fromYear: z.literal([1, 2, 3, 4, 5]), fromPhase: Slug.optional(), perWeek: z.number().positive() }),
-    forecast: z.strictObject({ paceWindowDays: z.number().int().min(7) }),
-    /** Hours of the projects block set aside each week for the weekly mini-build; the rest goes to the monthly project. */
-    weeklyBuildHours: z.number().min(0).max(40),
-  })
-  .superRefine((v, ctx) => {
-    const ids = v.blocks.map((b) => b.id).join('');
-    if (ids !== 'ABCDE') ctx.addIssue({ code: 'custom', path: ['blocks'], message: 'must define blocks A, B, C, D, E in that order' });
-    const t = v.heatmapThresholds;
-    const ascending = t[0] < t[1] && t[1] < t[2] && t[2] < t[3];
-    if (!ascending) ctx.addIssue({ code: 'custom', path: ['heatmapThresholds'], message: 'must be strictly ascending' });
+/** A named day: which blocks run and for how long. A block listed without minutes takes the block's own. */
+export const DayTemplateSchema = z.strictObject({
+  id: Slug,
+  name: Text,
+  blocks: z.array(z.strictObject({ block: BlockIdSchema, minutes: z.number().int().min(0).max(720).optional() })),
+});
+export type DayTemplate = z.infer<typeof DayTemplateSchema>;
+
+const SettingsDefaultsObject = z.strictObject({
+  blocks: z.array(BlockDefSchema).min(1).max(16),
+  /** Day templates (Full day, University day, Weekend, Exam week, Rest day by default). */
+  templates: z.array(DayTemplateSchema).min(1),
+  /** The template of each weekday, Sunday first. */
+  pattern: z.array(Slug).length(7),
+  /** On `day`, the content of `block` is replaced by the weekly review and paper reading. */
+  review: z.strictObject({ day: Weekday, block: BlockIdSchema, title: Text }),
+  weekStartsOn: z.literal([0, 1]),
+  /** Minutes at which a day reaches heatmap level 1, 2, 3 and 4. */
+  heatmapThresholds: z.tuple([z.number().int().min(1), z.number().int(), z.number().int(), z.number().int()]),
+  streak: z.strictObject({
+    minMinutes: z.number().int().min(1),
+    /** A day also counts from this share of its planned minutes, whichever of the two is lower. */
+    percent: z.number().min(1).max(100),
+    freezesPerMonth: z.number().int().min(0).max(31),
+    autoFreeze: z.boolean(),
+  }),
+  /** `relative`: a day's intensity is its share of what it planned. `absolute`: minutes against heatmapThresholds. */
+  heatmapMode: z.enum(['relative', 'absolute']),
+  backupReminderDays: z.number().int().min(1),
+  /** One paper a week from the first phase of `fromYear`, or from `fromPhase` when it is set (the research cadence starts in Foundations II). */
+  paperCadence: z.strictObject({ fromYear: z.literal([1, 2, 3, 4, 5]), fromPhase: Slug.optional(), perWeek: z.number().positive() }),
+  forecast: z.strictObject({ paceWindowDays: z.number().int().min(7) }),
+  /** Hours of the projects block set aside each week for the weekly mini-build; the rest goes to the monthly project. */
+  weeklyBuildHours: z.number().min(0).max(40),
+});
+
+/**
+ * data/settings.yaml: everything editable under Settings, with the defaults a fresh install starts from.
+ */
+export const SettingsDefaultsSchema = SettingsDefaultsObject.superRefine((v, ctx) => {
+  const ids = v.blocks.map((b) => b.id);
+  if (new Set(ids).size !== ids.length) ctx.addIssue({ code: 'custom', path: ['blocks'], message: 'block ids must be unique' });
+  for (const id of BLOCK_IDS) if (!ids.includes(id)) ctx.addIssue({ code: 'custom', path: ['blocks'], message: 'must define block ' + id + ': the curriculum plans into it' });
+  const templateIds = new Set(v.templates.map((t) => t.id));
+  if (templateIds.size !== v.templates.length) ctx.addIssue({ code: 'custom', path: ['templates'], message: 'template ids must be unique' });
+  for (const t of v.templates) {
+    for (const b of t.blocks) if (!ids.includes(b.block)) ctx.addIssue({ code: 'custom', path: ['templates'], message: 'template "' + t.id + '" names block ' + b.block + ', which is not defined' });
+  }
+  v.pattern.forEach((id, day) => {
+    if (!templateIds.has(id)) ctx.addIssue({ code: 'custom', path: ['pattern', day], message: 'names template "' + id + '", which is not defined' });
   });
+  const t = v.heatmapThresholds;
+  const ascending = t[0] < t[1] && t[1] < t[2] && t[2] < t[3];
+  if (!ascending) ctx.addIssue({ code: 'custom', path: ['heatmapThresholds'], message: 'must be strictly ascending' });
+});
 export type SettingsDefaults = z.infer<typeof SettingsDefaultsSchema>;
+
+/**
+ * Settings saved before version 2 (the flexibility brief) have no templates, weekly pattern, heatmap mode or
+ * streak percentage. They still parse, from a backup, a sync or IndexedDB, and are brought up to date when read
+ * (src/db/settings.ts, upgradeSettings).
+ */
+export const StoredCoreSchema = SettingsDefaultsObject.extend({
+  templates: SettingsDefaultsObject.shape.templates.optional(),
+  pattern: SettingsDefaultsObject.shape.pattern.optional(),
+  heatmapMode: SettingsDefaultsObject.shape.heatmapMode.optional(),
+  streak: SettingsDefaultsObject.shape.streak.extend({ percent: z.number().min(1).max(100).optional() }),
+});
+export type StoredCore = z.infer<typeof StoredCoreSchema>;
 
 /* ------------------------------------------------------------------ the seed */
 

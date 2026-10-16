@@ -10,7 +10,7 @@
  *
  * The result is a diff, not a change: the page shows it and the user decides. Pure and deterministic.
  */
-import { daysBetween } from './dates.ts';
+import { plannedOver } from './day-plan.ts';
 import type { AppSeed, BlockId, Phase, PlanItem } from '../seed/schema.ts';
 import type { StoredSettings, UserItemState } from '../db/types.ts';
 import { itemProgress } from './progress.ts';
@@ -62,11 +62,8 @@ export interface ReplanInput {
 
 /** Hours a lane has between two dates, from the block's minutes and the weekdays it runs on. */
 export function laneCapacity(settings: StoredSettings, block: BlockId, start: string, end: string): number {
-  const def = settings.core.blocks.find((b) => b.id === block);
-  if (!def || end < start) return 0;
-  const days = daysBetween(start, end) + 1;
-  // Average over whole weeks rather than counting weekdays one by one: the difference is under a day.
-  return (def.minutes * def.days.length * (days / 7)) / 60;
+  // Day by day from the schedule: templates, date overrides, pace and pauses all change it.
+  return plannedOver(settings, start, end, block) / 60;
 }
 
 function remainingHoursOf(item: PlanItem, seed: AppSeed, states: Map<string, UserItemState>): number {

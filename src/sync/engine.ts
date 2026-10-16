@@ -12,6 +12,7 @@
  * Triggers: a block or item done, a timer stopped, a review saved (3 s later, so the paired writes land);
  * 60 s after any other change; leaving the page; coming back online; every 5 minutes while visible.
  */
+import { currentSettings } from '../lib/settings.ts';
 import type { AtlasDB } from '../db/db.ts';
 import { updateSettings } from '../db/settings.ts';
 import type { SyncCache, SyncConfig, SyncStatus } from '../db/types.ts';
@@ -315,7 +316,7 @@ export class SyncEngine {
         .map((d) => local.dayLogs.find((l) => l.date === d))
         .filter((l) => l !== undefined);
       const summaries = [...outbox].sort((a, b) => a.queuedAt - b.queuedAt).flatMap((e) => (e.summary ? [e.summary] : []));
-      const core = local.settings[0]?.core ?? seed.settings;
+      const core = currentSettings(local.settings[0], seed.settings).core;
       const message = firstSync && days.length > 1 ? 'state: first sync from Atlas, ' + days.length + ' days of log' : commitMessage(days, summaries, core);
       try {
         const result = await commitFiles(client, {

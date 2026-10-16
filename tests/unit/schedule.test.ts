@@ -106,13 +106,11 @@ describe('the schedule', () => {
     }
   });
 
-  it('marks a block as resting on a day it is not scheduled', () => {
+  it('leaves a block out on a weekday it does not run', () => {
     const custom = structuredClone(settings);
     custom.core.blocks[0]!.days = [1, 2, 3, 4, 5];
     const plan = planForDay({ date: '2026-09-26', settings: custom, ctx: context() }); // a Saturday
-    const blockA = plan.blocks.find((b) => b.id === 'A')!;
-    expect(blockA.kind).toBe('rest');
-    expect(blockA.targetMinutes).toBe(0);
+    expect(plan.blocks.find((b) => b.id === 'A')).toBeUndefined();
     expect(plan.targetMinutes).toBe(360);
   });
 

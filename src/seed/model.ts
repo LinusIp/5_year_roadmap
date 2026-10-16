@@ -11,7 +11,8 @@ export type TrackId =
   | 'ai' | 'swe' | 'systems' | 'graphics' | 'simulation' | 'gamedev'
   | 'languages' | 'math' | 'physics' | 'ee' | 'embedded' | 'controls' | 'mech' | 'robotics' | 'chem' | 'career';
 
-export type BlockId = 'A' | 'B' | 'C' | 'D' | 'E';
+/** The brief had 'A' | 'B' | 'C' | 'D' | 'E'. The flexibility brief made blocks open-ended: A-E stay the defaults. */
+export type BlockId = string;
 
 export interface Resource {
   id: string;                 // stable slug, e.g. "mit-18-06"

@@ -27,10 +27,16 @@ export function minimalSeed(): RawSeed {
       file: 'data/settings.yaml',
       data: {
         blocks: ['A', 'B', 'C', 'D', 'E'].map((id) => ({ id, name: 'Block ' + id, minutes: id === 'B' || id === 'E' ? 60 : 120, days, summary: 's' })),
+        templates: [
+          { id: 'full', name: 'Full day', blocks: ['A', 'B', 'C', 'D', 'E'].map((block) => ({ block })) },
+          { id: 'rest', name: 'Rest day', blocks: [] },
+        ],
+        pattern: ['full', 'full', 'full', 'full', 'full', 'full', 'full'],
         review: { day: 0, block: 'D', title: 'Weekly review' },
         weekStartsOn: 1,
         heatmapThresholds: [1, 120, 300, 420],
-        streak: { minMinutes: 60, freezesPerMonth: 2, autoFreeze: true },
+        heatmapMode: 'relative',
+        streak: { minMinutes: 60, percent: 50, freezesPerMonth: 2, autoFreeze: true },
         backupReminderDays: 30,
         paperCadence: { fromYear: 2, perWeek: 1 },
         forecast: { paceWindowDays: 28 },

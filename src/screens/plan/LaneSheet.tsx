@@ -60,7 +60,7 @@ export function LaneSheet({
         {phase && lane && def && (
           <div className="space-y-5">
             <div>
-              <p className="text-body text-ink2">{phase.focus[lane.block as BlockId]}</p>
+              <p className="text-body text-ink2">{(phase.focus as Record<BlockId, string | undefined>)[lane.block]}</p>
               <div className="mt-3">
                 <ProgressLine value={lane.fraction} label={name + ' progress'} />
               </div>

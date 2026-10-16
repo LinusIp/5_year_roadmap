@@ -7,6 +7,7 @@ import { useAtlas } from '../hooks/useAtlas.ts';
 import { useUnits } from '../hooks/useUnits.ts';
 import { addDays, dayName, formatLong, formatStopwatch, startOfWeek, today as todayDate, weekday } from '../lib/dates.ts';
 import { addEntry, editLog, isBlockDone, minutesByBlock, minutesForRef, readLog, toggleBlockDone, totalMinutes } from '../lib/logs.ts';
+import { plannedFor } from '../lib/day-plan.ts';
 import { planForDay, suggestWeeklyBuild } from '../lib/schedule.ts';
 import type { ScheduledItem, TodayBlock } from '../lib/schedule.ts';
 import { logTimeRequests } from '../lib/shortcuts.ts';
@@ -150,7 +151,7 @@ export function Today() {
   }
 
   const isToday = date === now;
-  const blocks = plan.blocks.filter((b) => b.kind !== 'rest');
+  const blocks = plan.blocks;
   const done = (b: TodayBlock): boolean => isBlockDone(log, b.id);
   const timerBlock = isToday && timer ? blocks.find((b) => b.id === timer.block) : undefined;
   const nowBlock = (chosen ? blocks.find((b) => b.id === chosen) : undefined) ?? timerBlock ?? blocks.find((b) => !done(b)) ?? null;
@@ -158,13 +159,13 @@ export function Today() {
   const finished = blocks.filter((b) => b !== nowBlock && done(b));
   const byBlock = minutesByBlock(log);
   const logged = totalMinutes(log);
-  const streakState = streak(atlas.logs, settings.core.streak, date);
+  const streakState = streak(atlas.logs, settings.core.streak, date, plannedFor(settings));
   const nothingPlanned = blocks.every((b) => b.kind === 'empty' && !b.weeklyBuild);
 
   const item = nowBlock ? focusItem(nowBlock, monthlyFirst) : undefined;
   const nowRunning = Boolean(timer && nowBlock && timer.block === nowBlock.id);
   const otherRunning = Boolean(timer && !nowRunning);
-  const nowMinutes = nowBlock ? byBlock[nowBlock.id] + (nowRunning ? elapsed / 60_000 : 0) : 0;
+  const nowMinutes = nowBlock ? (byBlock[nowBlock.id] ?? 0) + (nowRunning ? elapsed / 60_000 : 0) : 0;
   const nowDone = nowBlock ? done(nowBlock) : false;
 
   const reviewDay = settings.core.review.day;

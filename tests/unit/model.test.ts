@@ -22,6 +22,7 @@ const checks = {
   trackIdsBackward: true satisfies Extends<Model.TrackId, TrackId>,
   blockIdsForward: true satisfies Extends<BlockId, Model.BlockId>,
   blockIdsBackward: true satisfies Extends<Model.BlockId, BlockId>,
+  defaultBlocksAreBlocks: true satisfies Extends<(typeof BLOCK_IDS)[number], BlockId>,
 };
 
 describe('authoritative data model', () => {

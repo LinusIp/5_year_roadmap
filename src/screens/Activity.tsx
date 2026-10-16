@@ -2,10 +2,11 @@ import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
-import { addDays, today as todayDate, weekday } from '../lib/dates.ts';
+import { addDays, today as todayDate } from '../lib/dates.ts';
 import { buildGrid, planYears } from '../lib/heatmap.ts';
 import type { HeatCell } from '../lib/heatmap.ts';
 import { isBlockDone, totalMinutes } from '../lib/logs.ts';
+import { plannedFor, resolveDay } from '../lib/day-plan.ts';
 import { freezesSpentInMonth, streak } from '../lib/streaks.ts';
 import { useQueryParam } from '../router/router.tsx';
 import type { TrackId } from '../seed/schema.ts';
@@ -59,11 +60,21 @@ export function Activity() {
   const color = track ? 'var(--track-' + track.id + ')' : undefined;
   const weekStartsOn = settings.core.weekStartsOn;
   const gridFor = (y: number) =>
-    buildGrid({ from: y + '-01-01', to: y + '-12-31', logs, thresholds: settings.core.heatmapThresholds, tracks: track ? [track.id as TrackId] : [], weekStartsOn });
+    buildGrid({
+      from: y + '-01-01',
+      to: y + '-12-31',
+      logs,
+      thresholds: settings.core.heatmapThresholds,
+      tracks: track ? [track.id as TrackId] : [],
+      weekStartsOn,
+      mode: settings.core.heatmapMode,
+      planned,
+    });
 
   const rules = settings.core.streak;
-  const streakState = streak(logs, rules, now);
-  const freezesLeft = Math.max(0, rules.freezesPerMonth - freezesSpentInMonth(logs, rules, now));
+  const planned = plannedFor(settings);
+  const streakState = streak(logs, rules, now, planned);
+  const freezesLeft = Math.max(0, rules.freezesPerMonth - freezesSpentInMonth(logs, rules, now, planned));
   const logged = logs.reduce((sum, log) => sum + totalMinutes(log), 0);
   const reviewedOn = new Set((reviews ?? []).map((r) => r.completedAt).filter(Boolean));
 
@@ -77,7 +88,7 @@ export function Activity() {
   const lastWeek = Array.from({ length: 7 }, (_, i) => addDays(now, -i)).filter((d) => d >= planStart || logs.some((l) => l.date === d));
   const dayRow = (date: string): { title: string; meta: string; minutes: number } => {
     const log = logs.find((l) => l.date === date);
-    const scheduled = settings.core.blocks.filter((b) => b.days.includes(weekday(date)));
+    const scheduled = resolveDay(date, settings).blocks;
     const done = scheduled.filter((b) => isBlockDone(log, b.id)).length;
     const blocks = done + ' of ' + scheduled.length + ' blocks done';
     const meta = log?.frozen ? 'Freeze day' : reviewedOn.has(date) ? 'Review written · ' + done + ' of ' + scheduled.length : blocks;

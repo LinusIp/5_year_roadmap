@@ -11,7 +11,9 @@
 import type { AppResource, AppSeed } from '../seed/index.ts';
 import type { BlockDef, BlockId, Phase, PlanItem, Project, TrackId } from '../seed/schema.ts';
 import type { ItemStatus, StoredSettings, UserItemState } from '../db/types.ts';
-import { isWithinRange, weekday } from './dates.ts';
+import { isWithinRange, startOfWeek, today as todayDate, weekday } from './dates.ts';
+import { plannedMinutes, resolveDay, weekTarget } from './day-plan.ts';
+import type { ResolvedDay } from './day-plan.ts';
 
 export type ScheduledKind = 'resource' | 'project';
 
@@ -52,7 +54,7 @@ export interface ScheduledItem {
   acceptance?: string[];
 }
 
-export type BlockPlanKind = 'item' | 'review' | 'rest' | 'empty';
+export type BlockPlanKind = 'item' | 'review' | 'empty';
 
 export interface TodayBlock {
   id: BlockId;
@@ -66,6 +68,8 @@ export interface TodayBlock {
   weeklyBuild?: ScheduledItem;
   /** Why there is no item: shown instead of a card. */
   emptyReason?: string;
+  /** Today this block carries the work of another (Change today > swap). */
+  swappedWith?: BlockId;
 }
 
 export interface TodayPlan {
@@ -74,6 +78,8 @@ export interface TodayPlan {
   blocks: TodayBlock[];
   targetMinutes: number;
   isReviewDay: boolean;
+  /** The day's template, overrides and changes, as resolved from the schedule. */
+  resolved: ResolvedDay;
 }
 
 export function activePhase(date: string, phases: Phase[]): Phase | null {
@@ -252,21 +258,18 @@ export function planForDay({ date, settings, weeklyPickId, ctx }: TodayInput): T
   const day = weekday(date);
   const review = settings.core.review;
   const isReviewDay = day === review.day;
+  const resolved = resolveDay(date, settings);
 
-  const blocks: TodayBlock[] = settings.core.blocks.map((def) => {
-    const scheduledToday = def.days.includes(day);
-    if (!scheduledToday) {
-      return { id: def.id, def, kind: 'rest', targetMinutes: 0, emptyReason: 'Not scheduled today' };
-    }
-    if (isReviewDay && def.id === review.block) {
-      return { id: def.id, def, kind: 'review', targetMinutes: def.minutes };
+  const blocks: TodayBlock[] = resolved.blocks.map(({ id, def, minutes }) => {
+    if (isReviewDay && id === review.block) {
+      return { id, def, kind: 'review', targetMinutes: minutes };
     }
     if (!phase) {
-      return { id: def.id, def, kind: 'empty', targetMinutes: def.minutes, emptyReason: 'No phase covers this date' };
+      return { id, def, kind: 'empty', targetMinutes: minutes, emptyReason: 'No phase covers this date' };
     }
 
-    const next = nextInLane(phase.id, def.id, ctx);
-    const block: TodayBlock = { id: def.id, def, kind: next ? 'item' : 'empty', targetMinutes: def.minutes };
+    const next = nextInLane(phase.id, id, ctx);
+    const block: TodayBlock = { id, def, kind: next ? 'item' : 'empty', targetMinutes: minutes };
     if (next) {
       const item = describePlanItem(next.planItem, ctx);
       if (item) {
@@ -281,7 +284,7 @@ export function planForDay({ date, settings, weeklyPickId, ctx }: TodayInput): T
     }
 
     // The projects block also carries the week's mini-build.
-    if (def.id === 'D') {
+    if (id === 'D') {
       const weekly = weeklyBuildFor(phase, weeklyPickId, ctx);
       if (weekly) block.weeklyBuild = weekly;
       if (block.kind === 'empty' && weekly) block.kind = 'item';
@@ -289,21 +292,42 @@ export function planForDay({ date, settings, weeklyPickId, ctx }: TodayInput): T
     return block;
   });
 
+  // "Swap two blocks' items" for this date: each block keeps its time and takes the other's work.
+  for (const [a, b] of resolved.swaps) {
+    const x = blocks.find((blk) => blk.id === a);
+    const y = blocks.find((blk) => blk.id === b);
+    if (!x || !y || x.kind === 'review' || y.kind === 'review') continue;
+    const take = (blk: TodayBlock): Pick<TodayBlock, 'kind' | 'item' | 'weeklyBuild' | 'emptyReason'> => ({ kind: blk.kind, item: blk.item, weeklyBuild: blk.weeklyBuild, emptyReason: blk.emptyReason });
+    const fromX = take(x);
+    const fromY = take(y);
+    for (const [target, source] of [[x, fromY], [y, fromX]] as const) {
+      target.kind = source.kind;
+      if (source.item) target.item = source.item;
+      else delete target.item;
+      if (source.weeklyBuild) target.weeklyBuild = source.weeklyBuild;
+      else delete target.weeklyBuild;
+      if (source.emptyReason) target.emptyReason = source.emptyReason;
+      else delete target.emptyReason;
+      target.swappedWith = target === x ? b : a;
+    }
+  }
+
   return {
     date,
     phase,
     blocks,
-    targetMinutes: blocks.reduce((sum, b) => sum + b.targetMinutes, 0),
+    targetMinutes: resolved.planned,
     isReviewDay,
+    resolved,
   };
 }
 
-/** The daily target in minutes, for the week's-hours line and the forecast. */
+/** The daily target in minutes: what the day's template, overrides and changes plan. */
 export function dailyTargetMinutes(settings: StoredSettings, date: string): number {
-  const day = weekday(date);
-  return settings.core.blocks.filter((b) => b.days.includes(day)).reduce((sum, b) => sum + b.minutes, 0);
+  return plannedMinutes(date, settings);
 }
 
-export function weeklyTargetMinutes(settings: StoredSettings): number {
-  return settings.core.blocks.reduce((sum, b) => sum + b.minutes * b.days.length, 0);
+/** The week's target: the planned minutes of the seven days of the week holding `date` (default: this week). */
+export function weeklyTargetMinutes(settings: StoredSettings, date: string = todayDate()): number {
+  return weekTarget(settings, startOfWeek(date, settings.core.weekStartsOn));
 }

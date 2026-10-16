@@ -6,7 +6,7 @@ import Dexie from 'dexie';
 import type { EntityTable, Table } from 'dexie';
 import type {
   CertState, CustomEntity, DayLog, EntityKind, Meta, MilestoneState, OutboxEntry, Override, PaperState,
-  ReplanRecord, Review, Secret, StoredSettings, SyncRow, UserItemState, WeekPick,
+  ReplanRecord, Review, Secret, StoredSettingsInput, SyncRow, UserItemState, WeekPick,
 } from './types.ts';
 import { newId } from '../sync/device.ts';
 import { markSilent, syncMiddleware } from '../sync/middleware.ts';
@@ -22,7 +22,8 @@ export class AtlasDB extends Dexie {
   reviews!: EntityTable<Review, 'id'>;
   weekPicks!: EntityTable<WeekPick, 'weekStart'>;
   replans!: EntityTable<ReplanRecord, 'id'>;
-  settings!: EntityTable<StoredSettings, 'id'>;
+  /** Version 1 or 2 as stored; read through readSettings, which upgrades. */
+  settings!: EntityTable<StoredSettingsInput, 'id'>;
   meta!: EntityTable<Meta, 'key'>;
   secrets!: EntityTable<Secret, 'id'>;
   /** GitHub Sync, local-only: files waiting to be pushed. */
