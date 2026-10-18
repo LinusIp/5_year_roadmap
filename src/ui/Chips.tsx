@@ -25,24 +25,26 @@ export function Chips({ label, items }: { label: string; items: Chip[] }) {
   const row = useRef<HTMLDivElement>(null);
   useEdgeFade(row, 'current');
   return (
-    <div ref={row} role="group" aria-label={label} className="edge-fade -mx-5 flex gap-2.5 overflow-x-auto px-5 py-2 sm:-mx-6 sm:px-6">
-      {items.map((chip) => (
-        <button
-          key={chip.key}
-          type="button"
-          aria-pressed={chip.pressed}
-          onClick={chip.onClick}
-          className={
-            'press inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-pill px-4 text-chip font-medium ' +
-            (chip.pressed ? 'well text-blue-deep' : 'knob text-ink2') +
-            (chip.end ? ' ml-auto' : '')
-          }
-        >
-          {chip.label}
-          {chip.count !== undefined && <span className={chip.pressed ? 'text-blue-deep' : 'text-ink2'}>{chip.count}</span>}
-          {chip.chevron && <Icon name="chevronDown" size={16} />}
-        </button>
-      ))}
+    <div className="fade-strip -mx-5 sm:-mx-6">
+      <div ref={row} role="group" aria-label={label} className="relative flex gap-2.5 overflow-x-auto px-5 py-2 sm:px-6">
+        {items.map((chip) => (
+          <button
+            key={chip.key}
+            type="button"
+            aria-pressed={chip.pressed}
+            onClick={chip.onClick}
+            className={
+              'press inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-pill px-4 text-chip font-medium ' +
+              (chip.pressed ? 'well text-blue-deep' : 'knob text-ink2') +
+              (chip.end ? ' ml-auto' : '')
+            }
+          >
+            {chip.label}
+            {chip.count !== undefined && <span className={chip.pressed ? 'text-blue-deep' : 'text-ink2'}>{chip.count}</span>}
+            {chip.chevron && <Icon name="chevronDown" size={16} />}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

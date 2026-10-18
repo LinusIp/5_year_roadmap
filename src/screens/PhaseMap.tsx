@@ -49,7 +49,7 @@ export function PhaseMap() {
   return (
     <main id="main" tabIndex={-1} className="min-h-dvh bg-bg outline-none">
       {/* Wider than a phone: it opens with the current phase in view and fades at a hidden edge. */}
-      <FadeStrip open="current" className="relative">
+      <FadeStrip open="current" label="Five-year map, scroll for the other phases">
         <div className="flex min-w-[1200px] flex-col gap-7 px-14 py-12">
           <div className="flex items-start justify-between gap-6">
             <div className="flex flex-col gap-1.5">

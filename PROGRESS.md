@@ -981,8 +981,13 @@ Verified on this machine (Linux, Chromium 140):
 
 ## Pull request #15: scrolling in clay
 
-- No visible scrollbars anywhere (`src/index.css`). `src/ui/edgeFade.ts` and `src/ui/FadeStrip.tsx`: the 24 px edge
-  fade on a hidden side, and where a strip opens. Used by the chip rows, the heatmap, Stats' bars and the phase map.
-- `tests/e2e/scrolling.spec.ts`: no scrollbar on the page or a strip and the page still scrolls; the heatmap opens at
-  this week with the fade on the hidden side, moving when scrolled; a chip row opens with the selected chip in view
-  and fades only on the side with more; the phase map opens at the current phase. Baselines redrawn.
+- No visible scrollbars anywhere (`src/index.css`); `docs/CLAY-STYLE.md`, the project's copy of the guide, with the
+  Scrolling rule. `src/ui/edgeFade.ts` and `src/ui/FadeStrip.tsx`: the 24 px fade over a hidden side and where a
+  strip opens. Used by the chip rows, both heatmaps, Stats' bars and the phase map.
+- The heatmaps end at this week, open scrolled to it, and fit the whole year on a wide card. The GitHub calendar and
+  the phase map are labelled regions the keyboard scrolls.
+- `tests/e2e/scrolling.spec.ts`: `scrollbar-width: none` on the page and the strips, Today and Activity scroll to the
+  bottom; the heatmap at its maximum `scrollLeft` with this week in view, the left fade only while earlier weeks are
+  hidden; the whole year unscrolled at 1280 px; a chip row's fades; the phase map at the current phase, reached and
+  scrolled by the keyboard with its focus ring. Baselines: Activity and Today at 412 x 915, light and dark.
+- `docs/before-after/scrollbars/`: Activity at 412 x 915 before and after, drawn with the browser's scrollbars on.
