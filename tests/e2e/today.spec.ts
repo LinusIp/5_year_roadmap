@@ -26,7 +26,7 @@ test('the block of the hour is Now, and the other four wait in Later today by th
   await expect(nowCard(page).getByRole('link', { name: 'Open course' })).toBeVisible();
 
   // Later today: the rest, by start time, the break between the morning and the evening.
-  const rows = page.getByRole('listitem').filter({ has: page.getByRole('button') }).or(page.getByRole('listitem').filter({ hasText: /^Break/ }));
+  const rows = page.getByRole('list').filter({ hasText: 'Break · 12:00 – 18:00' }).getByRole('listitem');
   await expect(laterRow(page, /^ML Zoomcamp ML Zoomcamp · module 1.* 06:00$/)).toBeVisible();
   await expect(laterRow(page, /^Hugging Face LLM Course · 1\. Transformer models 10:00$/)).toBeVisible();
   await expect(laterRow(page, /^Coding lessons 30 Days of Python · day 1, introduction · daily challenge 18:00$/)).toBeVisible();

@@ -63,7 +63,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(page).toHaveURL(/#\/$/);
     // Today's fixed day has no projects block: the case waits in Plan › Projects as the next one in Block D.
     await open(page, './#/plan?view=projects');
-    await expect(page.getByRole('main').getByRole('button', { name: title + ' Next in Block D', exact: false })).toBeVisible();
+    await expect(page.getByRole('main').getByRole('button', { name: title + ' Next in Block D' })).toBeVisible();
   });
 
   test('from the Library and Plan › Projects, with the keyboard: Enter opens, Escape closes, focus returns', async ({ page }) => {
