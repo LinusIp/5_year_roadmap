@@ -7,13 +7,16 @@ import { blockTone } from '../../ui/colors.ts';
 import { BlockIcon } from '../../ui/glyphs.tsx';
 import { span } from '../parts/text.ts';
 
-/** 48 px an hour: 06:00 to 24:00 is 864 px, scrolled inside the page. */
-export const PX_PER_MIN = 0.8;
+/** 56 px an hour, so a 15-minute step is a finger's 14 px: 06:00 to 24:00 is 1,008 px, scrolled inside the page. */
+export const PX_PER_MIN = 56 / 60;
 export const GRID_HEIGHT = (GRID_END - GRID_START) * PX_PER_MIN;
 /** How long a finger rests on an event before it can be dragged; a mouse or pen drags at once. */
 const LONG_PRESS_MS = 350;
 
 const top = (minute: number): number => (minute - GRID_START) * PX_PER_MIN;
+
+/** The week view's 2–4 letter labels, written on an event once it is 48 px tall. */
+const SHORT: Record<string, string> = { C: 'ML', A: 'GD', H: 'HF', B: 'Code', E: 'Math', D: 'Proj' };
 
 export interface ColumnBlock extends PlacedBlock {
   name: string;
@@ -181,13 +184,23 @@ export function DayColumn({
                 onOpenBlock(b.id);
               }}
               onContextMenu={(e) => e.preventDefault()}
-              className={'well relative flex h-full w-full touch-pan-y select-none flex-col items-start overflow-hidden rounded-box px-2 py-1 text-left ' + (tone === 'ice' ? 'text-ice-deep' : 'text-blue-deep')}
+              className={
+                'relative flex h-full w-full touch-pan-y select-none flex-col overflow-hidden rounded-box text-left ' +
+                (tone === 'ice' ? 'text-ice-deep' : 'text-blue-deep') +
+                // The week's narrow columns: filled in the block's tone, the icon and a short label. The day view has
+                // room to tell logged from still to come: logged fills the pill, the rest stays pressed in.
+                (compact ? ' items-center gap-0.5 px-0.5 py-1 ' + (tone === 'ice' ? 'bg-ice-soft' : 'bg-blue-soft') : ' well items-start px-2 py-1')
+              }
             >
-              {/* Time already logged fills the pill from the top; time still to come stays pressed in. */}
-              {filled > 0 && <span aria-hidden="true" className={'absolute inset-x-0 top-0 ' + (tone === 'ice' ? 'bg-ice-soft' : 'bg-blue-soft')} style={{ height: filled * 100 + '%' }} />}
+              {!compact && filled > 0 && <span aria-hidden="true" className={'absolute inset-x-0 top-0 ' + (tone === 'ice' ? 'bg-ice-soft' : 'bg-blue-soft')} style={{ height: filled * 100 + '%' }} />}
               {/* The name starts with what is written on the pill, then says the rest. */}
-              <span className="relative flex min-w-0 items-center gap-1.5 text-meta font-semibold">
+              <span className={'relative flex min-w-0 items-center text-meta font-semibold ' + (compact ? 'flex-col gap-0.5' : 'gap-1.5')}>
                 <BlockIcon block={b.id} size={14} />
+                {compact && minutes * PX_PER_MIN >= 48 && (
+                  <span aria-hidden="true" className="max-w-full truncate text-[0.6875rem] font-bold leading-none">
+                    {SHORT[b.id] ?? b.name.slice(0, 3)}
+                  </span>
+                )}
                 <span className={compact ? 'sr-only' : 'truncate'}>
                   {b.name}
                   <span className="sr-only">{', ' + hm(start) + ' to ' + hm(start + minutes) + (b.item ? ', ' + b.item : '') + (b.logged > 0 ? ', ' + span(b.logged) + ' logged' : '') + '. '}</span>

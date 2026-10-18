@@ -29,7 +29,7 @@ const PHONE = [
   ['pick', './#/plan/pick'],
   ['stats', './#/stats'],
   ['reviews', './#/reviews'],
-  ['calendar', './#/calendar'],
+  ['calendar', './#/calendar?view=month'],
   ['calendar-day', './#/calendar?view=day'],
   ['calendar-week', './#/calendar?view=week'],
 ] as const;
@@ -129,9 +129,10 @@ test('a tech doc over Today, with the timer running, matches the committed scree
   await sheet.getByRole('button', { name: 'Work on it now' }).click();
   const now = page.locator('section[aria-labelledby="now-title"]');
   await now.getByRole('button', { name: 'Start' }).click();
-  await expect(page.getByText('Now · running')).toBeVisible();
+  await expect(page.getByText(/^Running · since /)).toBeVisible();
   await now.getByRole('button', { name: 'Tech doc' }).click();
-  await expect(sheet.getByRole('timer')).toHaveText(/^Running · 0:00$/);
+  // The block's total for today, which the demo's earlier sessions already started.
+  await expect(sheet.getByRole('timer')).toHaveText(/^Running · [\d:]+$/);
   await expect(sheet.getByRole('heading', { name: /^Done when/ }).first()).toBeVisible();
   await expect(page).toHaveScreenshot('tech-doc-today-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });

@@ -902,3 +902,49 @@ prose; the writers picked the two or three that matter.
   mostly endpoints (a screen, a mouse, the internet).
 - **Loading:** the designs ride in 16 lazy chunks (115–197 kB each) by a hash of the id, so a doc loads one sixteenth
   of them; the diagram is its own 11.7 kB chunk. The main chunk grows 10.5 kB (the sheet itself).
+
+## The timer and the layout fixed (pull request #10)
+
+**The timer bug.** Two causes. The big counter showed the current run only (`now − startedAt`), so Stop then Start
+began again at 0:00 while the time was in the log. And every stop rounded to whole minutes, so a session under 30 s
+logged nothing ("0 h of 2 h", "0 h today") and each switch could lose up to half a minute.
+
+- **Totals:** the counter, the Now card's "x of 2 h", its progress, the header and Blocks today all use one total
+  per block for the date: the logged minutes, the carried seconds, and the running timer's part of that date.
+- **The carry:** a log entry stays a whole number of minutes (an older device rejects anything else when it
+  syncs), so a stop logs the whole minutes and keeps the leftover seconds on this device, keyed by date, block and
+  item. The next stop on the same key adds them back. Carries older than two days are dropped. The carry does not
+  sync: it is under a minute, like the timer itself.
+- **One transaction:** a stop writes the log entries, the carry and the cleared timer together, so a reload or a
+  closed tab never keeps half of it. Starts run one after another, so A → B → A within a second neither loses nor
+  doubles a session.
+- **Formats:** "12 m", "1 h 05 m", and "0 m" only when nothing is logged (it read "0 h"). The counter is m:ss under
+  an hour and h:mm:ss from an hour.
+
+**Today:** one header row (the mark, Atlas, "Sun 18 Oct", and the change, settings and theme knobs, 44 px each);
+another day adds a Back to today chip under it, so the row still fits 360 px. The Now label never says "running"
+(the header and Stop do). The two Now buttons share the row equally; below 380 px the second shows only its icon
+and keeps its name for screen readers. On another day the primary is **Calendar**. The week strip is blue for any
+past day with time logged (it showed only days that counted for the streak), pressed in for one without, ice for
+today, with a ring on the day being viewed.
+
+**Bottom padding** is the tab bar's 68 px, the 24 px it floats above the edge, 24 px of air and the safe area, in
+the shared screen layout. It was already 120 px plus the safe area; the reported overlap on an Android phone did
+not reproduce in Chromium at 360, 390 or 412 px, and a layout test now checks it on Today, Calendar and the Library.
+
+**Calendar on phones:** under 600 px it opens on the day. The grid starts at the first block of the days shown (on
+today, around the current time), at 56 px an hour, so a 15-minute step is 14 px. The week view's events are filled
+in their tone with the icon and, from 48 px tall, a short label (ML, GD, HF, Code, Math, Proj, keyed by block id so
+they match the daily schedule's names); pressed-in "still to come" stays in the day view, which has room to say so.
+The date range sits on the title's row between "Calendar" and the arrows.
+
+**Library:** a start month is short ("Feb"); Up next shows the month its phase starts and never "Now". Projects is a
+full-width row under the shelf grid.
+
+**Two races found on CI.** (1) A switch writes the other block's stop and then the new start; the new timer took its
+start from the moment of that second write. A test that moved the clock between the two writes lost a block's
+minutes (on a phone it would only shift the start by milliseconds). The tap's moment is now both the stop and the
+start. (2) After a jump, the tech doc's bar ignores scroll events for 600 ms while the smooth scroll settles. A scroll
+that ended inside that time left the bar on the part jumped to. The bar now reads the position once the time is up.
+Both have tests that failed before the fix.
+

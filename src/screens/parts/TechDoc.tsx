@@ -190,8 +190,16 @@ function useJumpBar(ready: boolean): { refs: Record<DocPart, (el: HTMLElement | 
   useEffect(() => {
     const scroller = bar.current?.closest<HTMLElement>('.overflow-y-auto');
     if (!scroller) return undefined;
+    let settle = 0;
     const onScroll = (): void => {
-      if (Date.now() < jumping.current) return;
+      // While a jump settles the bar keeps the chosen part; a scroll in that time is read once it ends, or a scroll
+      // that stopped inside it would leave the bar on the part jumped to.
+      const wait = jumping.current - Date.now();
+      if (wait > 0) {
+        window.clearTimeout(settle);
+        settle = window.setTimeout(onScroll, wait + 16);
+        return;
+      }
       const base = scroller.getBoundingClientRect().top - scroller.scrollTop;
       const tops = DOC_PARTS.flatMap(({ value }) => {
         const el = els.current[value];
@@ -200,7 +208,10 @@ function useJumpBar(ready: boolean): { refs: Record<DocPart, (el: HTMLElement | 
       setPart(currentPart(tops, { top: scroller.scrollTop, height: scroller.clientHeight, scrollHeight: scroller.scrollHeight }, (bar.current?.offsetHeight ?? 56) + 24));
     };
     scroller.addEventListener('scroll', onScroll, { passive: true });
-    return () => scroller.removeEventListener('scroll', onScroll);
+    return () => {
+      window.clearTimeout(settle);
+      scroller.removeEventListener('scroll', onScroll);
+    };
   }, [ready]);
 
   const jump = (p: DocPart): void => {

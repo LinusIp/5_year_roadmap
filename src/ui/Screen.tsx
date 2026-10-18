@@ -46,7 +46,9 @@ export function Screen({ title, children }: { title: string; children: ReactNode
 
   return (
     <>
-      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[640px] px-5 pb-[calc(7.5rem+env(safe-area-inset-bottom))] outline-none sm:px-6">
+      {/* Room under the last card for the tab bar: its 68 px, the 24 px it floats above the edge, and 24 px of air, plus
+          the phone's safe area. The layout test checks it at 360, 390 and 412 px. */}
+      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[640px] px-5 pb-[calc(68px+24px+24px+env(safe-area-inset-bottom))] outline-none sm:px-6">
         {children}
       </main>
       {/* The tab bar: a raised pill floating 24 px above the bottom; the active tab is pressed in, in blue-deep. */}

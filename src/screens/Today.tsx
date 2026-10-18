@@ -10,13 +10,13 @@ import { editItemState, setWeekPick, useWeekPick } from '../db/state.ts';
 import { startTimer, stopTimer, useRunningTimer } from '../db/timer.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { useUnits } from '../hooks/useUnits.ts';
-import { addDays, dayName, daysBetween, formatLong, formatStopwatch, startOfWeek, today as todayDate, weekday } from '../lib/dates.ts';
+import { addDays, dayName, daysBetween, formatLong, formatStopwatch, monthName, startOfWeek, today as todayDate, weekday } from '../lib/dates.ts';
 import { editLog, isBlockDone, minutesByBlock, minutesForRef, readLog, toggleBlockDone, totalMinutes } from '../lib/logs.ts';
 import { plannedFor } from '../lib/day-plan.ts';
 import { catchUpMinutes, laneBalance } from '../lib/pace.ts';
 import { planForDay, suggestWeeklyBuild } from '../lib/schedule.ts';
 import type { ScheduledItem, TodayBlock } from '../lib/schedule.ts';
-import { counts, dailyTotals, streak } from '../lib/streaks.ts';
+import { dailyTotals, streak } from '../lib/streaks.ts';
 import { resolveTheme } from '../lib/theme.ts';
 import { applyUpdate, onUpdateReady } from '../pwa/register.ts';
 import { Link, useQueryParam } from '../router/router.tsx';
@@ -39,6 +39,8 @@ import { DayFields } from './parts/DayFields.tsx';
 import { NotesField } from './parts/NotesField.tsx';
 import { PickerSheet } from './parts/PickerSheet.tsx';
 import { useElapsed } from './parts/RunningTime.tsx';
+import { useTimerCarry } from '../db/timer.ts';
+import { carriedMs, runningMsOn } from '../lib/timer.ts';
 import { takenProject } from './parts/taken.ts';
 import { blockShort, dateTitle, nameOf, partOf, span, unitDetail } from './parts/text.ts';
 import { todayLine, tokenDaysLeft, useSyncView } from '../sync/status.ts';
@@ -80,6 +82,17 @@ function rank(order: string[], id: string): number {
   return i < 0 ? order.length : i;
 }
 
+/** "Sun 18 Oct": the header's date. */
+function shortDate(date: string): string {
+  return dayName(date, true) + ' ' + Number(date.slice(8, 10)) + ' ' + monthName(Number(date.slice(5, 7)) - 1, true);
+}
+
+/** "08:12": the local clock time of a timestamp. */
+function clockOf(ms: number): string {
+  const d = new Date(ms);
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
 export function Today() {
   const [dateParam, setDateParam] = useQueryParam('date');
   const now = todayDate();
@@ -90,6 +103,7 @@ export function Today() {
   const units = useUnits();
   const timer = useRunningTimer();
   const elapsed = useElapsed(timer);
+  const carry = useTimerCarry();
   const log = useLiveQuery(() => readLog(date), [date]);
   const settings = atlas?.settings;
   const weekStart = useMemo(() => startOfWeek(date, settings?.core.weekStartsOn ?? 1), [date, settings]);
@@ -164,11 +178,15 @@ export function Today() {
   const finished = blocks.filter((b) => b !== nowBlock && done(b));
   const byBlock = minutesByBlock(log);
   const logged = totalMinutes(log);
+  // Every second counts: the logged minutes, the seconds stops carried, and the running timer's part of this date.
+  const runningToday = isToday && timer ? runningMsOn(timer, date, timer.startedAt + elapsed) : 0;
+  const blockMs = (id: string): number => (byBlock[id] ?? 0) * 60_000 + carriedMs(carry, date, id) + (timer?.block === id ? runningToday : 0);
+  const dayMinutes = Math.floor((logged * 60_000 + carriedMs(carry, date) + runningToday) / 60_000);
+  // A block counts as done once it is marked done or its time reaches its target.
+  const reached = (b: TodayBlock): boolean => done(b) || (b.targetMinutes > 0 && blockMs(b.id) >= b.targetMinutes * 60_000);
   const streakState = streak(atlas.logs, settings.core.streak, date, plannedFor(settings));
   // The week strip: the six days before today and today. A day counts as it does for the streak.
-  const weekDays = dailyTotals(atlas.logs, addDays(now, -6), now, plannedFor(settings)).map((t) => ({ date: t.date, counted: counts(t, settings.core.streak) }));
-  // The header widget names what the running timer is on.
-  const timerItemName = ((i) => (i ? nameOf(i) : undefined))(timer ? blocks.map((b) => focusItem(b, monthlyFirst)).find((i) => i && i.refId === timer.refId) : undefined);
+  const weekDays = dailyTotals(atlas.logs, addDays(now, -6), now, plannedFor(settings)).map((t) => ({ date: t.date, minutes: t.minutes }));
   const restDay = plan.resolved.rest;
   const nothingPlanned = !restDay && blocks.every((b) => b.kind === 'empty' && !b.weeklyBuild);
   // The day's template is named in the header only when it is not the usual Full day.
@@ -179,7 +197,7 @@ export function Today() {
   const isProject = item?.kind === 'project';
   const nowRunning = Boolean(timer && nowBlock && timer.block === nowBlock.id);
   const otherRunning = Boolean(timer && !nowRunning);
-  const nowMinutes = nowBlock ? (byBlock[nowBlock.id] ?? 0) + (nowRunning ? elapsed / 60_000 : 0) : 0;
+  const nowMinutes = nowBlock ? Math.floor(blockMs(nowBlock.id) / 60_000) : 0;
   const nowDone = nowBlock ? done(nowBlock) : false;
 
   const reviewDay = settings.core.review.day;
@@ -300,8 +318,8 @@ export function Today() {
   } else if (!isToday) {
     // Minutes are the timer's; a past day is corrected in Calendar's day view.
     primary = (
-      <Button variant="filled" icon="calendar" to={'/calendar?view=day&date=' + date}>
-        Open in Calendar
+      <Button variant="filled" icon="calendar" to={'/calendar?view=day&date=' + date} name={'Open ' + dateTitle(date) + ' in Calendar'}>
+        Calendar
       </Button>
     );
   } else {
@@ -356,45 +374,57 @@ export function Today() {
       >
         {/* The page's title, for screen readers: the date. The mark and wordmark are decoration. */}
         <h1 className="sr-only">{dateTitle(date)}</h1>
-        <div className="-mb-1.5 flex items-center gap-2 pl-1 pt-[max(2.25rem,env(safe-area-inset-top))]">
-          <span aria-hidden="true" className="flex flex-1 items-center gap-2">
-            <img src={'./brand/atlas-mark-' + theme + '.png'} width={30} height={30} alt="" />
-            <span className="text-[1.25rem] font-semibold tracking-[-0.01em]">Atlas</span>
+        {/* One row: the mark, the wordmark, the date, and the three knobs (change, settings, theme), 44 px each. */}
+        <div className="-mb-1.5 flex items-center gap-1 pt-[max(2.25rem,env(safe-area-inset-top))]">
+          <span aria-hidden="true" className="flex shrink-0 items-center gap-1.5 pl-1">
+            <img src={'./brand/atlas-mark-' + theme + '.png'} width={26} height={26} alt="" />
+            <span className="text-[1.125rem] font-semibold tracking-[-0.01em]">Atlas</span>
           </span>
-          <button type="button" className="min-h-11 rounded-pill px-2 text-meta font-semibold text-blue-deep" onClick={() => setSheet('date')} aria-haspopup="dialog">
-            {isToday ? 'Today, ' + dayName(date, true) + ' ' + Number(date.slice(8, 10)) : dateTitle(date)}
+          <button type="button" className="min-h-11 min-w-0 flex-1 truncate rounded-pill px-1.5 text-left text-meta font-semibold text-blue-deep" onClick={() => setSheet('date')} aria-haspopup="dialog" aria-label={(isToday ? 'Today, ' : '') + dateTitle(date) + ', pick a date'}>
+            {shortDate(date)}
           </button>
-          {canChange && <Button variant="icon" icon="sliders" className="!size-11" label={isToday ? 'Change today' : 'Change ' + dateTitle(date)} onClick={() => setSheet('change')} />}
+          <span className="-mr-1.5 flex shrink-0">
+            {canChange && <Button variant="icon" icon="sliders" className="!size-11" label={isToday ? 'Change today' : 'Change ' + dateTitle(date)} onClick={() => setSheet('change')} />}
+            <Button variant="icon" icon="gear" className="!size-11" label="Settings" to="/settings" />
+            <Button
+              variant="icon"
+              icon={theme === 'dark' ? 'sun' : 'moon'}
+              className="!size-11"
+              label={'Switch to the ' + nextTheme + ' theme'}
+              onClick={() => void updateSettings(settings.core, (s) => ({ ...s, theme: nextTheme }))}
+            />
+          </span>
         </div>
-        <div className="mt-4 grid grid-cols-[1fr_48px] gap-4">
+        {!isToday && (
+          <div className="mt-2 flex">
+            <Button size="sm" icon="today" onClick={() => setDate(now)}>
+              Back to today
+            </Button>
+          </div>
+        )}
+        <div className="mt-4">
           <div className="tile flex flex-col items-center justify-center gap-1.5 px-[18px] py-4 text-center">
             {nowRunning || otherRunning ? (
               <p className="flex flex-col items-center gap-1.5">
-                <span className="well well-blue rounded-[14px] px-[18px] py-1.5 text-big font-semibold">{formatStopwatch(elapsed)}</span>{' '}
+                {/* The block's total for today, not this run alone: a restart continues from it. */}
+                <span role="timer" aria-label={'Running, ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'} className="well well-blue rounded-[14px] px-[18px] py-1.5 text-big font-semibold tabular-nums">
+                  {formatStopwatch(blockMs(timer!.block))}
+                </span>{' '}
                 <span className="text-meta text-ink2">
                   <span className="font-semibold text-blue-deep">Running</span>
-                  {' · ' + (timerItemName ?? blockShort(settings.core.blocks.find((b) => b.id === timer?.block)?.name ?? '')) + ' · ' + span(logged) + ' today'}
+                  {' · since ' + clockOf(timer!.startedAt) + ' · ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'}
                 </span>
               </p>
             ) : layout.stats ? (
               <p className="flex flex-col items-center gap-1.5">
-                <span className="well well-ice rounded-[14px] px-[18px] py-1.5 text-big font-semibold">{span(logged)}</span>{' '}
+                <span className="well well-ice rounded-[14px] px-[18px] py-1.5 text-big font-semibold">{span(dayMinutes)}</span>{' '}
                 <span className="text-meta text-ink2">{'of ' + span(plan.targetMinutes) + ' today' + (templateNote ? ' · ' + templateNote : '') + ' · ' + (streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet')}</span>
               </p>
             ) : null}
           </div>
-          <div className="flex flex-col gap-3">
-            <Button variant="icon" icon="gear" label="Settings" to="/settings" />
-            <Button
-              variant="icon"
-              icon={theme === 'dark' ? 'sun' : 'moon'}
-              label={'Switch to the ' + nextTheme + ' theme'}
-              onClick={() => void updateSettings(settings.core, (s) => ({ ...s, theme: nextTheme }))}
-            />
-          </div>
         </div>
         {/* The week so far: a day that counted is blue, today is ice, a day that did not count is pressed in. */}
-        <nav aria-label="This week" className="tile mt-4 flex justify-between px-2.5 py-2.5">
+        <nav aria-label="This week: a blue day has time logged, a pressed-in day has none, today is ice" className="tile mt-4 flex justify-between px-2.5 py-2.5">
           {weekDays.map((d) => (
             <button
               key={d.date}
@@ -408,13 +438,13 @@ export function Today() {
               <span
                 className={
                   'grid size-[34px] place-items-center rounded-pill text-label font-semibold ' +
-                  (d.date === now ? 'fill-ice' : d.counted ? 'fill-blue' : 'well rounded-pill text-ink2') +
-                  (d.date === date && d.date !== now ? ' outline outline-2 outline-offset-2 outline-blue-deep' : '')
+                  (d.date === now ? 'fill-ice' : d.minutes > 0 ? 'fill-blue' : 'well rounded-pill text-ink2') +
+                  (d.date === date && date !== now ? ' outline outline-2 outline-offset-2 outline-blue-deep' : '')
                 }
               >
                 {Number(d.date.slice(8, 10))}
               </span>
-              <span className="sr-only">{', ' + dateTitle(d.date) + (d.date === now ? ', today' : d.counted ? ', counted' : ', not counted')}</span>
+              <span className="sr-only">{', ' + dateTitle(d.date) + (d.date === now ? ', today' : '') + (d.minutes > 0 ? ', ' + span(d.minutes) + ' logged' : ', nothing logged')}</span>
             </button>
           ))}
         </nav>
@@ -440,14 +470,14 @@ export function Today() {
         <section aria-label="Now" className="tile mt-4 flex flex-col gap-1.5 p-[18px]">
           <p className="section-label mb-0">Now</p>
           <p className="text-card font-semibold">All five blocks are done.</p>
-          <p className="text-meta text-ink2">{span(logged)} logged today.</p>
+          <p className="text-meta text-ink2">{span(dayMinutes)} logged today.</p>
         </section>
       ) : (
         <section aria-labelledby="now-title" className={'tile mt-4 flex flex-col gap-1.5 p-[18px]' + (taken && item?.refId === taken.id ? ' taken' : '')}>
           <div className="flex items-center justify-between gap-2">
             <p className="section-label mb-0 flex min-w-0 items-center gap-1.5 uppercase" style={{ color: toneInk(blockTone(nowBlock.id)) }}>
               <BlockIcon block={nowBlock.id} size={18} />
-              <span className="truncate">{(nowRunning ? 'Now · running · ' : 'Now · ') + blockShort(nowBlock.def.name)}</span>
+              <span className="truncate">{'Now · ' + blockShort(nowBlock.def.name)}</span>
             </p>
             {!expanded && (
               <div className="-my-1 flex shrink-0 gap-2">
@@ -536,15 +566,16 @@ export function Today() {
           )}
 
           {/* Start (the one filled button) and the ice secondary: the tech doc, or the course. */}
-          <div className={(expanded ? 'mt-2' : 'mt-3.5') + ' flex items-center gap-3 [&>*]:flex-1'}>
+          {/* Two equal buttons that never leave the card; on the narrowest phones the second keeps only its icon. */}
+          <div className={(expanded ? 'mt-2' : 'mt-3.5') + ' flex items-center gap-3 [&>*]:min-w-0 [&>*]:flex-1'}>
             {primary}
             {isProject && item ? (
-              <Button variant="ice" icon="doc" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })}>
-                Tech doc
+              <Button variant="ice" icon="doc" aria-haspopup="dialog" name="Tech doc" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })}>
+                <span className="truncate max-[379px]:sr-only">Tech doc</span>
               </Button>
             ) : item?.url ? (
-              <Button variant="ice" icon="external" href={item.url}>
-                {resource?.type === 'book' ? 'Open the book' : 'Open course'}
+              <Button variant="ice" icon="external" href={item.url} name={resource?.type === 'book' ? 'Open the book' : 'Open course'}>
+                <span className="truncate max-[379px]:sr-only">{resource?.type === 'book' ? 'Open the book' : 'Open course'}</span>
               </Button>
             ) : null}
           </div>
@@ -557,12 +588,12 @@ export function Today() {
           <div className="tile flex flex-col items-center gap-2 p-3.5">
             <span className="section-label mb-0">Blocks today</span>
             <span className="text-big font-semibold leading-none">
-              {blocks.filter(done).length}
+              {blocks.filter(reached).length}
               <span className="text-ink2">/{blocks.length}</span>
             </span>
             <span aria-hidden="true" className="flex gap-1.5">
               {blocks.map((b) => (
-                <span key={b.id} className={'size-3 rounded-pill ' + (done(b) ? 'fill-blue' : 'well rounded-pill')} />
+                <span key={b.id} className={'size-3 rounded-pill ' + (reached(b) ? 'fill-blue' : 'well rounded-pill')} />
               ))}
             </span>
           </div>
@@ -598,7 +629,7 @@ export function Today() {
                 className={isTaken ? 'taken' : ''}
                 icon={<BlockTile block={block.id} />}
                 title={row.title}
-                meta={layout.view === 'compact' ? undefined : [row.meta, extrasNote(block.id)].filter(Boolean).join(' · ')}
+                meta={layout.view === 'compact' ? undefined : [blockMs(block.id) >= 60_000 ? span(Math.floor(blockMs(block.id) / 60_000)) + ' today' : null, row.meta, extrasNote(block.id)].filter(Boolean).join(' · ')}
                 trailing={span(block.targetMinutes)}
                 to={row.to}
                 onClick={

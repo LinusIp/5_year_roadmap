@@ -141,15 +141,22 @@ paths stay one line.
     day. Blocks never overlap busy time: they move to after it, and a block dropped onto it asks to shift it and
     the blocks after it.
   - The header shows the day's template (tap to switch) and planned against logged time.
-- **Week**: seven narrow columns, with the same moves.
+- **Week**: seven narrow columns ("M 19", today in ice), with the same moves. Events are filled in their block's
+  colour with its icon and, when there is room, a short label (ML, GD, HF, Code, Math).
+- On a phone (narrower than 600 px) Calendar opens on the day; the grid starts at the day's first block (or around
+  the current time on today), at 56 px an hour.
 - **Add to my calendar** downloads the next four weeks of blocks as an `.ics` file.
 
 Changes to one date are that date's own change (as Change today makes); "every weekday" changes the template. Both
 sync with your settings. Nothing in Calendar logs minutes, and Today shows its blocks in the order of their times.
 
 **The timer is how time is logged.** Start on Today's Now card; it stores when it started, so it keeps counting
-through a reload, a closed tab or a locked phone. One runs at a time: starting another block stops the first and
-saves its minutes. A timer left running is caught the next time Atlas opens, after three hours or past midnight:
+through a reload, a closed tab or a locked phone. The big counter shows the block's **total for today**, so Stop
+then Start carries on from it, and the header reads "Running · since 08:12 · 47 m on this block today". One runs
+at a time: starting another block stops the first and saves its minutes, and coming back to it continues from its
+total. Nothing is rounded away: a stop logs whole minutes and keeps the leftover seconds for the next session on
+the same block, so many short sessions add up. Durations read "12 m" and "1 h 05 m"; a block counts as done in
+Blocks today once its time reaches its target. A timer left running is caught the next time Atlas opens, after three hours or past midnight:
 "Still working on Core? You started at 14:10" with **Keep**, **Stop at** the last time the app was used, or
 **Stop now**. A timer that ran past midnight logs each part on its own day. To correct a mistake, open the day in
 Calendar, tap the block and choose **Edit logged time**: the one place minutes can be entered by hand.

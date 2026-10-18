@@ -78,7 +78,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await open(page, './');
     await expect(page.locator('#now-title')).toHaveText('One finished small game');
     await nowCard(page).getByRole('button', { name: 'Start' }).click();
-    await expect(nowCard(page).getByText('Now · running')).toBeVisible();
+    await expect(page.getByText(/^Running · since /)).toBeVisible();
     await page.clock.fastForward('02:00');
 
     // "Tech doc" sits next to Stop and Log time; the title opens the same sheet.
@@ -99,7 +99,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await body.evaluate((el) => el.scrollTo(0, 400));
     await page.keyboard.press('Escape');
     await expect(sheet).toHaveCount(0);
-    await expect(nowCard(page).getByText('Now · running')).toBeVisible();
+    await expect(page.getByText(/^Running · since /)).toBeVisible();
     // The running time sits in Today's header widget, in blue; the Now card keeps Stop.
     await expect(nowCard(page).getByRole('button', { name: /^Stop/ })).toBeVisible();
     await expect(page.getByText(/^3:0\d$/)).toBeVisible();
@@ -113,7 +113,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(page.locator('#now-title')).toBeFocused();
 
     await reload(page);
-    await expect(nowCard(page).getByText('Now · running')).toBeVisible();
+    await expect(page.getByText(/^Running · since /)).toBeVisible();
     await expect(nowCard(page).getByText(/1 of \d+ ticked$/)).toBeVisible();
     await page.locator('#now-title').click();
     await expect(page.getByRole('dialog', { name: GAME }).getByRole('checkbox', { name: /^1\. One-page design/ })).toBeChecked();
@@ -176,6 +176,15 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(full).toBeHidden();
     await expect(sheet).toBeVisible();
     await expect(opener).toBeFocused();
+  });
+
+  test('a scroll made while a jump settles is read once it settles: the bar never stays on the part jumped to', async ({ page }) => {
+    await open(page, './#/library/mx-ai-ticket-triage-llm');
+    const sheet = page.getByRole('dialog', { name: /^Support-ticket triage/ });
+    const bar = sheet.getByRole('radiogroup', { name: 'Jump to a part of the doc' });
+    await bar.getByRole('radio', { name: 'Design' }).click();
+    await sheet.locator('div.overflow-y-auto').evaluate((el) => el.scrollTo(0, el.scrollHeight));
+    await expect(bar.getByRole('radio', { name: 'Checks' })).toHaveAttribute('aria-checked', 'true');
   });
 
   test('a weekly build has the lighter doc: no stat wells, a small design with one decision, approach steps', async ({ page }) => {

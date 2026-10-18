@@ -27,9 +27,11 @@ test('the home shows the four sections, and nothing in progress says what to do'
   await expect(page.getByRole('button', { name: /^AI engineering/ })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Up next' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Browse when you need something' })).toBeVisible();
-  for (const shelf of ['Courses', 'Books', 'Papers', 'Articles', 'Blogs to follow', 'Tools', 'Projects']) {
+  for (const shelf of ['Courses', 'Books', 'Papers', 'Articles', 'Blogs to follow', 'Tools']) {
     await expect(page.getByRole('button', { name: new RegExp('^\\d+ ' + shelf + '$') })).toBeVisible();
   }
+  // Projects is a full-width row under the grid.
+  await expect(page.getByRole('button', { name: /^Projects \d+$/ })).toBeVisible();
 });
 
 test('a path opens grouped by phase, and its step opens the resource', async ({ page }) => {

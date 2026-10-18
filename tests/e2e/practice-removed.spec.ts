@@ -45,7 +45,7 @@ async function expectNoPractice(page: Page): Promise<void> {
 test('a fresh install has no Practice anywhere, and plans the 8-hour day', async ({ page }) => {
   await page.clock.install({ time: new Date(PRACTICE_DAY) });
   await open(page, './');
-  await expect(page.getByText('0 h of 8 h today · no streak yet')).toBeVisible();
+  await expect(page.getByText('0 m of 8 h today · no streak yet')).toBeVisible();
   await expectNoPractice(page);
 });
 
@@ -59,7 +59,7 @@ test('a backup from the build with Practice restores without it, and its Practic
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
   await open(page, './');
-  await expect(page.getByText(/^0 h of 7 h 30 m today/)).toBeVisible();
+  await expect(page.getByText(/^0 m of 7 h 30 m today/)).toBeVisible();
   await expectNoPractice(page);
 
   // 16 October: 1 h of A and 30 minutes of Practice, in the heatmap and in the day.
