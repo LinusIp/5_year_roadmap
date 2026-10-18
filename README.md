@@ -333,7 +333,9 @@ table in `scripts/lib/catalogue-mapping.ts`; CI checks the files match it.
 
 They never fire while you type, or with Ctrl, Alt or Cmd held, and Settings > Keyboard turns them off, for
 anyone using speech input. In the heatmap, Tab lands on one day, the arrow keys move by a day or a week, and
-Enter opens it.
+Enter opens it. The heatmap shows the whole year, January to December: the days still ahead are faint outlines,
+today has an ice ring, and a tick marks the day the plan began. On a phone it opens with this week two thirds across;
+All years shows each year as twelve months.
 
 ## Deploy
 

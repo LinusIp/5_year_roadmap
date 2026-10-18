@@ -1002,3 +1002,16 @@ Verified on this machine (Linux, Chromium 140):
   `tests/e2e/schedule-times.spec.ts`: 09:00 (the Now label, every row's window, the sessions, Earlier with a tap to
   start), the daily challenge row, 22:04 (Earlier with 1 h 22 m of 2 h, Done today folded, the day's card, no empty
   tile). Earlier specs moved to the windows. Baselines: Today at 09:00, 13:00 and 22:04, 412 x 915, light and dark.
+
+## Pull request #17: the heatmaps show the whole year
+
+- `src/ui/Heatmap.tsx`: January to December, 10 px cells with a 3 px gap, opening with this week two thirds across,
+  fitting the year on a wide card; days ahead outlined, today ringed, the plan's start ticked. `src/lib/heatmap.ts`:
+  `cellPhase` and `monthlyTotals`. Activity: All years as a row of months a year; the Sleep strip's no-entry dashes
+  and end labels.
+- `tests/unit/heatmap-year.test.ts`: 2026's grid (53 columns, Monday first, 1 January in the fourth row, 31 December),
+  a Sunday start, each day's phase, the monthly totals. `tests/e2e/heatmap-year.spec.ts`: the months Jan to Dec, the
+  74 days after 18 October outlined, today's ring, the plan-start tick, the opening two thirds across with 10 px
+  cells, the whole year at 1280 px, 2027 all ahead, All years opening a year, the Sleep strip's no-entry nights. The
+  GitHub calendar ends on 31 December (`github.spec.ts`). Baselines redrawn, Activity at 412 x 915 and 1280 x 800.
+- `docs/before-after/heatmap-year/`: Activity before and after.

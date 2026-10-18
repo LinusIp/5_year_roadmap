@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
-import { addDays, today as todayDate } from '../lib/dates.ts';
-import { buildGrid, planYears } from '../lib/heatmap.ts';
+import { addDays, monthName, today as todayDate } from '../lib/dates.ts';
+import { buildGrid, monthlyTotals, planYears } from '../lib/heatmap.ts';
 import type { HeatCell } from '../lib/heatmap.ts';
 import { isBlockDone, totalMinutes } from '../lib/logs.ts';
 import { plannedFor, resolveDay } from '../lib/day-plan.ts';
@@ -27,7 +27,7 @@ import { SegmentedControl } from '../ui/SegmentedControl.tsx';
 import { dateTitle, hours, plural, span } from './parts/text.ts';
 import { Link } from '../router/router.tsx';
 import { useSleep } from '../db/sleep.ts';
-import type { SleepNight } from '../db/types.ts';
+import type { DayLog, SleepNight } from '../db/types.ts';
 import { CHART_MINUTES, averageMinutes, barHours, lengthText, recentBars } from '../lib/sleep.ts';
 
 /**
@@ -43,7 +43,9 @@ function SleepTile({ nights, today }: { nights: SleepNight[] | undefined; today:
   const strip30 =
     '· ' +
     logged.length +
-    ' of the last 30 nights logged' +
+    ' of the last 30 nights logged, ' +
+    (strip.length - logged.length) +
+    ' no entry' +
     (logged.length > 0 ? ', from ' + barHours(Math.min(...logged.map((b) => b.minutes!))) + ' to ' + barHours(Math.max(...logged.map((b) => b.minutes!))) + ' hours' : '');
   return (
     <Link to="/sleep" className="tile mt-4 flex flex-col gap-2.5 p-[18px]">
@@ -54,14 +56,66 @@ function SleepTile({ nights, today }: { nights: SleepNight[] | undefined; today:
           <span className="sr-only">{strip30}</span>
         </span>
       </span>
+      {/* A night with an entry is a bar (last night in ice); a night with none, a short faint dash on the baseline. */}
       <span aria-hidden="true" className="flex h-10 items-end gap-[3px]">
-        {strip.map((b) => (
-          <span key={b.date} className="well relative h-full flex-1 overflow-hidden rounded-[3px]">
-            {b.minutes !== null && <span className="absolute inset-x-0 bottom-0 rounded-[3px]" style={{ height: Math.min(1, b.minutes / CHART_MINUTES) * 100 + '%', background: b.date === today ? 'var(--ice)' : 'var(--deco)' }} />}
-          </span>
-        ))}
+        {strip.map((b) =>
+          b.minutes === null ? (
+            <span key={b.date} className="h-[3px] flex-1 rounded-pill bg-dash" />
+          ) : (
+            <span key={b.date} className="flex-1 rounded-[3px]" style={{ height: Math.min(1, b.minutes / CHART_MINUTES) * 100 + '%', background: b.date === today ? 'var(--ice)' : 'var(--deco)' }} />
+          ),
+        )}
+      </span>
+      <span aria-hidden="true" className="-mt-1 flex justify-between text-small text-ink2">
+        <span>30 nights ago</span>
+        <span>last night</span>
       </span>
     </Link>
+  );
+}
+
+/**
+ * "All years" (HEATMAP-FULL-YEAR): one compact row a year, January to December as twelve blocks shaded by the
+ * month's hours (on the heatmap's ramp, against the busiest month of them all); months still ahead are faint outlines.
+ * A row opens its year.
+ */
+function AllYears({ years, logs, today, onOpen }: { years: number[]; logs: DayLog[]; today: string; onOpen: (year: number) => void }) {
+  const totals = years.map((y) => monthlyTotals(logs, y));
+  const busiest = Math.max(1, ...totals.flat());
+  const thisMonth = today.slice(0, 7);
+  return (
+    <section aria-labelledby="heatmap-all" className="tile mt-[18px] flex flex-col gap-1 p-[18px]">
+      <div className="flex items-center justify-between gap-2 pb-1">
+        <h2 id="heatmap-all" className="section-label mb-0">
+          All years
+        </h2>
+        <HeatLegend />
+      </div>
+      <div aria-hidden="true" className="ml-14 grid grid-cols-12 gap-[3px] text-small text-ink2">
+        {Array.from({ length: 12 }, (_, m) => (
+          <span key={m} className="text-center">
+            {monthName(m, true).slice(0, 1)}
+          </span>
+        ))}
+      </div>
+      {years.map((y, i) => {
+        const months = totals[i]!;
+        const total = months.reduce((sum, m) => sum + m, 0);
+        const busy = months.map((m, k) => (m > 0 ? monthName(k, true) + ' ' + hours(m) : null)).filter(Boolean);
+        return (
+          <button key={y} type="button" onClick={() => onOpen(y)} className="flex min-h-11 items-center gap-2 rounded-box text-left" aria-label={y + ': ' + hours(total) + (busy.length ? ' (' + busy.join(', ') + ')' : '') + '. Open ' + y}>
+            <span className="w-12 shrink-0 text-meta font-semibold">{y}</span>
+            <span aria-hidden="true" className="grid flex-1 grid-cols-12 gap-[3px]">
+              {months.map((m, k) => {
+                const key = y + '-' + String(k + 1).padStart(2, '0');
+                const level = m === 0 ? 0 : Math.min(4, Math.ceil((4 * m) / busiest));
+                return <span key={k} title={monthName(k) + ' ' + y + ': ' + hours(m)} className={'h-4 rounded-cell ' + (key > thisMonth ? 'heat-bg-future' : 'heat-swatch-' + level)} />;
+              })}
+            </span>
+          </button>
+        );
+      })}
+    </section>
   );
 }
 
@@ -177,29 +231,34 @@ export function Activity() {
         <ProjectsActivity atlas={atlas} />
       ) : (
         <>
-          {(allYears ? years : [year]).map((y, index) => {
-            const grid = gridFor(y);
-            return (
-              <section key={y} aria-labelledby={'heatmap-' + y} className="tile mt-[18px] flex flex-col gap-3 p-[18px]">
-                <div className="flex items-center justify-between gap-2">
-                  <h2 id={'heatmap-' + y} className="section-label mb-0">
-                    {y}
-                    {track ? ' · ' + track.name : ''}
-                  </h2>
-                  {index === 0 && <HeatLegend />}
-                </div>
-                <Heatmap
-                  cells={grid.cells}
-                  columns={grid.columns}
-                  months={grid.months}
-                  title={'Time logged in ' + y + (track ? ' on ' + track.name : '')}
-                  label={cellLabel}
-                  onSelect={setOpen}
-                  selected={open ?? undefined}
-                />
-              </section>
-            );
-          })}
+          {allYears ? (
+            <AllYears years={years} logs={logs} today={now} onOpen={(y) => setYear(y === currentYear ? null : String(y))} />
+          ) : (
+            (() => {
+              const grid = gridFor(year);
+              return (
+                <section aria-labelledby={'heatmap-' + year} className="tile mt-[18px] flex flex-col gap-3 p-[18px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 id={'heatmap-' + year} className="section-label mb-0">
+                      {year}
+                      {track ? ' · ' + track.name : ''}
+                    </h2>
+                    <HeatLegend />
+                  </div>
+                  <Heatmap
+                    cells={grid.cells}
+                    columns={grid.columns}
+                    months={grid.months}
+                    title={'Time logged in ' + year + (track ? ' on ' + track.name : '')}
+                    label={cellLabel}
+                    onSelect={setOpen}
+                    selected={open ?? undefined}
+                    mark={planStart.startsWith(String(year)) ? { date: planStart, label: 'Plan started ' + Number(planStart.slice(8, 10)) + ' ' + monthName(Number(planStart.slice(5, 7)) - 1, true) } : undefined}
+                  />
+                </section>
+              );
+            })()
+          )}
 
           <div className="mt-[18px]">
             <Chips

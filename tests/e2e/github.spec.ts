@@ -103,6 +103,9 @@ test('connecting Sync writes the log to the repository as the user, flushes when
   await open(page, './#/activity');
   const calendar = page.getByRole('region', { name: 'GitHub @octo-learner' });
   await expect(calendar.getByText('18 contributions on 4 days · both on 1 of 1 Atlas day')).toBeVisible();
+  // The whole calendar year, like the study heatmap (HEATMAP-FULL-YEAR): it ends on 31 December, the days ahead faint.
+  await expect(calendar.locator('rect[data-date="2026-12-31"]')).toHaveAttribute('data-phase', 'future');
+  await expect(calendar.locator('svg text').filter({ hasText: /^Dec$/ })).toHaveCount(1);
 
   // Neither a backup nor the repository holds the token.
   await open(page, './#/settings');

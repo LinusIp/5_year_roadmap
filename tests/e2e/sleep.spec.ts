@@ -107,7 +107,7 @@ test('the week chart shows each night and the average, with the goal and the bed
 
   // Activity's tile: the last 7 nights' average, and a way to the screen.
   await open(page, './#/activity');
-  const tile = page.getByRole('link', { name: 'Sleep last 7 nights · average 6 h 33 m · 3 of the last 30 nights logged, from 6.0 to 7.0 hours' });
+  const tile = page.getByRole('link', { name: 'Sleep last 7 nights · average 6 h 33 m · 3 of the last 30 nights logged, 27 no entry, from 6.0 to 7.0 hours' });
   await expect(tile).toBeVisible();
   await tile.click();
   await expect(page.getByRole('heading', { level: 1, name: 'Sleep' })).toBeVisible();

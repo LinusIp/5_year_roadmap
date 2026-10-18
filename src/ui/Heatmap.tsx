@@ -22,14 +22,19 @@ interface HeatmapProps<C extends HeatmapCell> {
   selected?: string;
   /** A track's colour replaces the greens when the track filter is on. */
   color?: string;
+  /** A day to mark with a tick above its week, and the tick's accessible name ("Plan started 21 Sep"). */
+  mark?: { date: string; label: string };
 }
 
-/** Weeks across the card at once, as in the mockup; earlier weeks of the year are a sideways scroll away. */
-const WEEKS_SHOWN = 30;
-/** The narrowest cell that still reads: a card wide enough for every week at this size shows them all, unscrolled. */
-const MIN_CELL_W = 8;
-const CELL_H = 9;
-const GAP = 2.5;
+/** A cell stays readable on a phone (HEATMAP-FULL-YEAR): 10 px with a 3 px gap, the strip scrolling. A card with room
+ * for the whole year at 8 px or more (a wide screen; the gap may close to 2 px) shows it all, the cells filling its
+ * width, and does not scroll. */
+const CELL_W = 10;
+const MIN_FIT_W = 8;
+const CELL_H = 10;
+const GAP = 3;
+/** Room above the grid for the tick that marks a day (the plan's start). */
+const TOP = 7;
 const MONTH_ROW = 22; // month names sit under the grid
 const MIN_LABEL_GAP = 28;
 
@@ -51,12 +56,12 @@ export function trackRamp(color: string | undefined): CSSProperties | undefined 
  * Home and End go to the ends, Enter opens the day. Without it (the GitHub calendar) the strip itself is the tab
  * stop when it scrolls, and the arrows scroll it.
  */
-export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, label, onSelect, selected, color }: HeatmapProps<C>) {
+export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, label, onSelect, selected, color, mark }: HeatmapProps<C>) {
   const titleId = useId();
   const hintId = useId();
   const box = useRef<HTMLDivElement>(null);
-  // It opens at its end, this week, and fades at an edge where more weeks are hidden.
-  useEdgeFade(box, 'end');
+  // It fades at an edge where more weeks are hidden; where it opens is set below, once the cells are measured.
+  useEdgeFade(box);
   const svg = useRef<SVGSVGElement>(null);
   const [focused, setFocused] = useState<string>();
   const [boxWidth, setBoxWidth] = useState(326);
@@ -71,16 +76,26 @@ export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, 
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-  // This year's grid stops at this week; a year that is over (or still ahead) keeps all its weeks.
-  const thisWeek = cells.find((c) => c.date === today())?.column;
-  const shown = thisWeek === undefined ? columns : thisWeek + 1;
-  const fitAll = (boxWidth - (shown - 1) * GAP) / shown >= MIN_CELL_W;
-  const cellW = fitAll ? (boxWidth - (shown - 1) * GAP) / shown : Math.max(6, (boxWidth - (WEEKS_SHOWN - 1) * GAP) / WEEKS_SHOWN);
-  const pitch = cellW + GAP;
-  const width = shown * pitch - GAP;
-  const height = 7 * (CELL_H + GAP) - GAP + MONTH_ROW;
+  // The whole calendar year, January to December; days still ahead are cells faint (below).
+  const now = today();
+  const thisWeek = cells.find((c) => c.date === now)?.column;
+  // Fitting the year, the gap may close to 2 px before the cells go under 8 px (a 1280 px screen's card).
+  const fitsAt = (g: number): number => (boxWidth - (columns - 1) * g) / columns;
+  const gap = fitsAt(GAP) >= MIN_FIT_W ? GAP : fitsAt(2) >= MIN_FIT_W ? 2 : GAP;
+  const cellW = fitsAt(gap) >= MIN_FIT_W ? fitsAt(gap) : CELL_W;
+  const pitch = cellW + gap;
+  const width = columns * pitch - gap;
+  const height = TOP + 7 * (CELL_H + gap) - gap + MONTH_ROW;
   const scrolls = width > boxWidth + 0.5;
-  const drawn = useMemo(() => cells.filter((c) => c.column < shown), [cells, shown]);
+  // It opens with this week about two thirds of the way across: the recent past, and a few weeks to come. A year that
+  // is over opens at its end, one still ahead at its start.
+  const allAhead = cells.every((c) => c.outside || c.date > now);
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el || !scrolls) return;
+    el.scrollLeft = thisWeek !== undefined ? Math.max(0, (thisWeek + 0.5) * pitch - (el.clientWidth * 2) / 3) : allAhead ? 0 : el.scrollWidth;
+  }, [thisWeek, pitch, scrolls, allAhead]);
+  const markColumn = mark ? cells.find((c) => c.date === mark.date && !c.outside)?.column : undefined;
 
   // When two month names would touch, the later one stays: the first month of a range is often a sliver.
   const shownMonths = useMemo(() => {
@@ -88,17 +103,17 @@ export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, 
     let nextX = Infinity;
     for (const month of [...months].reverse()) {
       const x = month.column * pitch;
-      if (month.column < shown && nextX - x >= MIN_LABEL_GAP) {
+      if (nextX - x >= MIN_LABEL_GAP) {
         out.unshift(month);
         nextX = x;
       }
     }
     return out;
-  }, [months, shown, pitch]);
+  }, [months, pitch]);
 
-  const days = useMemo(() => new Set(drawn.filter((c) => !c.outside).map((c) => c.date)), [drawn]);
-  const first = drawn.find((c) => !c.outside)?.date;
-  const last = drawn.findLast((c) => !c.outside)?.date;
+  const days = useMemo(() => new Set(cells.filter((c) => !c.outside).map((c) => c.date)), [cells]);
+  const first = cells.find((c) => !c.outside)?.date;
+  const last = cells.findLast((c) => !c.outside)?.date;
   const tabStop = [selected, focused, today(), last].find((d) => d !== undefined && days.has(d));
 
   useEffect(() => setFocused(undefined), [cells]);
@@ -127,28 +142,32 @@ export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, 
   };
 
   // With no days to tab to, the strip itself is the tab stop while it scrolls.
-  const region = !onSelect && scrolls ? { tabIndex: 0, role: 'region', 'aria-label': title + ', scroll for earlier months' } : {};
+  const region = !onSelect && scrolls ? { tabIndex: 0, role: 'region', 'aria-label': title + ', scroll for the other months' } : {};
   return (
     <div className="fade-strip w-full">
       <div ref={box} className="relative w-full overflow-x-auto" {...region}>
         <svg ref={svg} role="group" aria-labelledby={titleId} aria-describedby={onSelect ? hintId : undefined} width={width} height={height} className="heat block" style={trackRamp(color)}>
           <title id={titleId}>{title}</title>
-          {drawn.map((cell) => {
+          {cells.map((cell) => {
             if (cell.outside) return null;
             const isSelected = selected === cell.date;
             const text = label(cell);
+            // Still ahead: a faint outline, "not yet", unlike a day with nothing logged. Today: an ice ring.
+            const ahead = cell.date > now;
+            const isToday = cell.date === now;
             return (
               <rect
                 key={cell.date}
                 data-date={cell.date}
                 x={cell.column * pitch}
-                y={cell.row * (CELL_H + GAP)}
+                y={TOP + cell.row * (CELL_H + gap)}
                 width={cellW}
                 height={CELL_H}
                 rx={2}
-                className={'heat-' + cell.level + (onSelect ? ' cursor-pointer outline-none focus-visible:stroke-[var(--ink)] focus-visible:[stroke-width:2]' : '')}
-                stroke={isSelected ? 'var(--ink)' : cell.frozen ? 'var(--ink2)' : undefined}
-                strokeWidth={isSelected ? 1.5 : cell.frozen ? 1 : undefined}
+                className={(ahead ? 'heat-future' : 'heat-' + cell.level) + (onSelect ? ' cursor-pointer outline-none focus-visible:stroke-[var(--ink)] focus-visible:[stroke-width:2]' : '')}
+                data-phase={ahead ? 'future' : isToday ? 'today' : undefined}
+                stroke={isSelected ? 'var(--ink)' : isToday ? 'var(--ice-deep)' : cell.frozen ? 'var(--ink2)' : undefined}
+                strokeWidth={isSelected ? 1.5 : isToday ? 2 : cell.frozen ? 1 : undefined}
                 tabIndex={onSelect ? (cell.date === tabStop ? 0 : -1) : undefined}
                 role={onSelect ? 'button' : undefined}
                 aria-label={onSelect ? text : undefined}
@@ -160,13 +179,19 @@ export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, 
               </rect>
             );
           })}
+          {markColumn !== undefined && mark && (
+            <g role="img" aria-label={mark.label}>
+              <title>{mark.label}</title>
+              <line x1={markColumn * pitch + cellW / 2} x2={markColumn * pitch + cellW / 2} y1={0} y2={TOP - 2} stroke="var(--blue-deep)" strokeWidth={2} strokeLinecap="round" />
+            </g>
+          )}
           {shownMonths.map((month) => {
-            // The current month's name would run past the grid's last week; it ends there instead.
+            // December's name would run past the grid's last week; it ends there instead.
             const x = month.column * pitch;
             const edge = width;
             const atEdge = x <= edge && x + 22 > edge;
             return (
-              <text key={month.column + month.label} x={atEdge ? edge : x} textAnchor={atEdge ? 'end' : 'start'} y={7 * (CELL_H + GAP) - GAP + 17} className="fill-ink2 text-small">
+              <text key={month.column + month.label} x={atEdge ? edge : x} textAnchor={atEdge ? 'end' : 'start'} y={TOP + 7 * (CELL_H + gap) - gap + 17} className="fill-ink2 text-small">
                 {month.label}
               </text>
             );
