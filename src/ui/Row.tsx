@@ -7,6 +7,8 @@ export interface RowProps {
   title: ReactNode;
   /** One line under the title, 14 px, ink2. */
   meta?: ReactNode;
+  /** Let the meta run to a second line instead of cutting it (a summary that has to be read whole). */
+  metaWraps?: boolean;
   /** Text at the end of the row (hours, a date): part of the row's tap target. */
   trailing?: ReactNode;
   /** A control at the end of the row (a status pill, a remove button): a tap target of its own. */
@@ -86,7 +88,7 @@ export function Switch({ on, onChange, labelledBy, label, disabled }: { on: bool
  */
 const HEIGHT = { 44: 'min-h-11', 48: 'min-h-16 py-2', 52: 'min-h-16 py-2', 56: 'min-h-16 py-2', 60: 'min-h-16 py-2' } as const;
 
-export function Row({ title, meta, trailing, action, onClick, to, href, expanded, check, toggle, selected, children, className = '', height = 56, truncate, plainTitle: _plainTitle, dragRow, icon, chevron }: RowProps) {
+export function Row({ title, meta, metaWraps, trailing, action, onClick, to, href, expanded, check, toggle, selected, children, className = '', height = 56, truncate, plainTitle: _plainTitle, dragRow, icon, chevron }: RowProps) {
   const titleId = useId();
   const titleClass =
     'block text-body leading-[1.25] font-medium' + (check?.checked ? ' text-ink2 line-through' : '') + (truncate ? ' truncate' : ' line-clamp-2');
@@ -98,7 +100,7 @@ export function Row({ title, meta, trailing, action, onClick, to, href, expanded
         <span id={titleId} className={titleClass}>
           {title}
         </span>
-        {meta && <span className="block truncate text-meta text-ink2">{meta}</span>}
+        {meta && <span className={'block text-meta text-ink2 ' + (metaWraps ? 'line-clamp-2' : 'truncate')}>{meta}</span>}
       </span>
       {trailing !== undefined && trailing !== null && <span className="flex shrink-0 items-center gap-1.5 text-meta text-ink2">{trailing}</span>}
       {chevron && <Icon name={expanded ? 'chevronDown' : 'chevronRight'} size={18} className="text-ink2" />}

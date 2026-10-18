@@ -26,13 +26,15 @@ test('the block of the hour is Now, and the other four wait in Later today by th
   await expect(nowCard(page).getByRole('link', { name: 'Open course' })).toBeVisible();
 
   // Later today: the rest, by start time, the break between the morning and the evening.
-  const rows = page.getByRole('list').filter({ hasText: 'Break · 12:00 – 18:00' }).getByRole('listitem');
-  await expect(laterRow(page, /^ML Zoomcamp ML Zoomcamp · Module 1 · 6 of 97 06:00$/)).toBeVisible();
-  await expect(laterRow(page, /^Hugging Face LLM Course · 1\. Transformer models 10:00$/)).toBeVisible();
-  await expect(laterRow(page, /^Coding lessons 30 Days of Python · day 1, introduction · daily challenge 18:00$/)).toBeVisible();
-  await expect(laterRow(page, /^Math and physics 18\.06 Linear Algebra · lecture 1, the geometry of linear equations 20:00$/)).toBeVisible();
-  await expect(rows).toHaveText([/^ML Zoomcamp/, /^Hugging Face/, 'Break · 12:00 – 18:00', /^Coding lessons/, /^Math and physics/, /^Blog post · not yet/]);
-  await expect(page.getByText('Done: 0 of 5')).toBeVisible();
+  const rows = page.getByRole('list').filter({ hasText: 'Break · 12:00–18:00' }).getByRole('listitem');
+  await expect(laterRow(page, /^Hugging Face LLM Course · 1\. Transformer models 10:00–12:00$/)).toBeVisible();
+  await expect(laterRow(page, /^Coding lessons 30 Days of Python · day 1, introduction · daily challenge 18:00–20:00$/)).toBeVisible();
+  await expect(laterRow(page, /^Math and physics 18\.06 Linear Algebra · lecture 1, the geometry of linear equations 20:00–22:00$/)).toBeVisible();
+  await expect(rows).toHaveText(['Session 1 · 06:00–12:00', /^Hugging Face/, 'Break · 12:00–18:00', 'Session 2 · 18:00–22:00', /^Coding lessons/, /^Math and physics/, /^Blog post · not yet/]);
+  await expect(page.getByText('0 of 5 done')).toBeVisible();
+  // ML Zoomcamp's window, 06:00–08:00, is over: it waits under Earlier · not finished, with the time it got.
+  const earlier = page.locator('section:has(h2:text-is("Earlier · not finished"))');
+  await expect(earlier.getByRole('button', { name: /^ML Zoomcamp 0 m of 2 h · ML Zoomcamp · Module 1 · 6 of 97 06:00–08:00$/ })).toBeVisible();
   // Projects (D) is not in the day any more, so there is no weekly build row.
   await expect(laterRow(page, /Weekly build/)).toHaveCount(0);
 
@@ -108,7 +110,7 @@ test('records a reflection, an energy rating and a freeze day', async ({ page })
   await expect(sheet.getByRole('switch', { name: 'Use a freeze day' })).toHaveAttribute('aria-checked', 'true');
 
   await reload(page);
-  await page.getByRole('button', { name: /How was today\? Energy 4 of 5/ }).click();
+  await page.getByRole('button', { name: /^How was today\?.* Energy 4 of 5$/ }).click();
   await expect(sheet.getByRole('textbox', { name: 'One line about today' })).toHaveValue('Linear algebra clicked.');
   await expect(sheet.getByRole('radio', { name: '4 of 5, Good' })).toHaveAttribute('aria-checked', 'true');
   await expect(sheet.getByRole('switch', { name: 'Use a freeze day' })).toHaveAttribute('aria-checked', 'true');
@@ -133,8 +135,11 @@ test('in my order, marking the block done brings the next one up, and folds the 
   await expect(page.locator('#now-title')).toHaveText('ML Zoomcamp');
   await nowCard(page).getByRole('button', { name: 'Mark done' }).click();
   await expect(page.locator('#now-title')).toHaveText('GameDevHQ');
-  await expect(page.getByText('Done: ML Zoomcamp')).toBeVisible();
+  await expect(page.getByText('1 of 5 done')).toBeVisible();
+  // Folded into Done today, at the end.
   await expect(laterRow(page, /^ML Zoomcamp/)).toHaveCount(0);
+  await page.getByText('Done today (1)').click();
+  await expect(laterRow(page, /^ML Zoomcamp 0 m of 2 h · /)).toBeVisible();
 });
 
 test('by the clock, a block marked done stays Now until its window ends', async ({ page }) => {
@@ -143,7 +148,8 @@ test('by the clock, a block marked done stays Now until its window ends', async 
   await expect(page.locator('#now-title')).toHaveText('GameDevHQ');
   await expect(nowCard(page).getByRole('button', { name: 'Mark not done' })).toHaveAttribute('aria-pressed', 'true');
   await expect(nowCard(page).getByText('0 m of 2 h · GameDevHQ Unity course · done')).toBeVisible();
-  await expect(page.getByText('Done: GameDevHQ')).toBeVisible();
+  await expect(page.getByText('1 of 5 done')).toBeVisible();
+  await expect(page.getByText('Done today (1)')).toBeVisible();
 
   // At 10:00 the clock moves Now on to Hugging Face, and GameDevHQ stays folded away.
   await page.clock.fastForward('01:00:30');
@@ -163,7 +169,7 @@ test('Sunday plans the same five courses, and the weekly review is not a Today b
   await expect(laterRow(page, /^Hugging Face/)).toBeVisible();
   await expect(laterRow(page, /^Coding lessons/)).toBeVisible();
   await expect(laterRow(page, /^Math and physics 18\.06 Linear Algebra/)).toBeVisible();
-  await expect(page.getByText('Done: 0 of 5')).toBeVisible();
+  await expect(page.getByText('0 of 5 done')).toBeVisible();
   await expect(laterRow(page, /Weekly review and paper/)).toHaveCount(0);
   await expect(page.getByText(/Projects · close the week/)).toHaveCount(0);
 });

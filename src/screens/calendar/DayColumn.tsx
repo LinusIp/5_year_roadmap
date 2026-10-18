@@ -6,6 +6,7 @@ import type { PlacedBlock } from '../../lib/calendar-layout.ts';
 import { blockTone } from '../../ui/colors.ts';
 import { BlockIcon } from '../../ui/glyphs.tsx';
 import { span } from '../parts/text.ts';
+import { formatWindow } from '../../lib/clock-plan.ts';
 
 /** 56 px an hour, so a 15-minute step is a finger's 14 px: 06:00 to 24:00 is 1,008 px, scrolled inside the page. */
 export const PX_PER_MIN = 56 / 60;
@@ -208,7 +209,7 @@ export function DayColumn({
               </span>
               {!compact && minutes >= 45 && (
                 <span className="relative truncate text-small font-semibold text-ink2">
-                  {hm(start) + ' · ' + span(minutes) + (b.item ? ' · ' + b.item : '')}
+                  {formatWindow(start, minutes) + (b.item ? ' · ' + b.item : '')}
                 </span>
               )}
             </button>

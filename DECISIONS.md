@@ -1185,3 +1185,27 @@ focused day. A second tab stop on its frame would only repeat that, so it gets n
 made of buttons, which scroll into view as they take focus.
 
 **Code blocks** scroll sideways without a bar and without a fade, and stay focusable, so a keyboard scrolls them.
+
+## From-to times on every block (pull request #16)
+
+**The window.** Every block shows when it starts and ends, "06:00–08:00", an en dash and no spaces
+(`formatWindow`, `src/lib/clock-plan.ts`): Later today's rows, the Now label ("NOW · 08:00–10:00"), the break card's
+next block, the session headers, Plan's schedule header ("06:00–12:00 · 18:00–22:00 · 10 h") and each lane's line,
+the phase map's lanes, Calendar's block sheet (beside the date) and the day view's second line. On a phone narrower
+than 400 px a row's window stacks, "06:00" over "08:00", the dash hidden; it never shrinks or cuts. A screen reader
+hears the whole window once. Rows with no window (the blog post) say "any time" in the same place; the daily
+challenge says its length ("20 m").
+
+**Later today, regrouped** (`groupDay`): the label on one line, "3 of 5 done" on the right instead of the list of
+names. Its blocks still to come, by session ("Session 1 · 06:00–12:00", "Break · 12:00–18:00" while it is still
+ahead, "Session 2 · 18:00–22:00"); with one session there are no headers. A block whose window is over and that is not
+done leaves Later today for "Earlier · not finished", with the time it got ("1 h 22 m of 2 h"); a tap still makes it
+Now, to start it. Done blocks fold into a collapsed "Done today (3)" at the end. A past day is all over, a day ahead
+all to come.
+
+**The day's card.** "How was today?" (from 22:00, or once every block is done, or on another day) now says the day in
+a line, up to two: the time logged, the blocks done, last night's sleep, whether the blog post is up. It still opens
+the reflection and the energy rating. It is never an empty tile.
+
+**The daily challenge** goes by its own title on one line; "Daily challenge" leads its meta line (difficulty, topic,
+language), and its length is on the right.

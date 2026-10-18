@@ -5,6 +5,7 @@ import type { BlockId, Phase } from '../seed/schema.ts';
 import { Button } from '../ui/Button.tsx';
 import { BlockTile } from '../ui/glyphs.tsx';
 import { FadeStrip } from '../ui/FadeStrip.tsx';
+import { formatWindow } from '../lib/clock-plan.ts';
 import { scheduleSummary } from './plan/Timeline.tsx';
 import { Icon } from '../ui/Icon.tsx';
 import { today } from '../lib/dates.ts';
@@ -41,7 +42,6 @@ export function PhaseMap() {
   const [, ...parts] = schedule.aside.split(' · ').reverse();
   const daily = schedule.aside.split(' · ').at(-1)!;
   const sessions = parts.reverse().join(' and ');
-  const hh = (m: number): string => String(Math.floor(m / 60)).padStart(2, '0');
   const themes = [...new Set(stage1.map((p) => p.theme).filter(Boolean))].join(' · ');
   const asOf = today();
   const nowId = phases.find((p) => p.start <= asOf && asOf <= p.end)?.id;
@@ -66,7 +66,7 @@ export function PhaseMap() {
             {schedule.windows.map((w) => (
               <li key={w.id} className="flex items-center gap-2.5 whitespace-nowrap">
                 <BlockTile block={w.id} size={36} />
-                {hh(w.start) + '-' + hh(w.start + w.minutes) + ' ' + (settings.core.blocks.find((b) => b.id === w.id)?.name ?? w.id)}
+                {formatWindow(w.start, w.minutes) + ' ' + (settings.core.blocks.find((b) => b.id === w.id)?.name ?? w.id)}
               </li>
             ))}
           </ul>

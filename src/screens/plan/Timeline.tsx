@@ -14,7 +14,7 @@ import { nameOf, span } from '../parts/text.ts';
 import { isOpenItem, itemDetail } from './model.ts';
 import { dayLayout } from '../../lib/calendar.ts';
 import { hm } from '../../lib/calendar-layout.ts';
-import { BREAK_MINUTES } from '../../lib/clock-plan.ts';
+import { BREAK_MINUTES, formatWindow } from '../../lib/clock-plan.ts';
 import type { StoredSettings } from '../../db/types.ts';
 import type { PhaseModel } from './model.ts';
 
@@ -26,7 +26,7 @@ export function laneName(name: string): string {
 
 /**
  * The day's schedule for the Timeline's first group: "Every day" when every weekday has the same template, and
- * "06–12 · 18–22 · 10 h" from its sessions (blocks run back to back; a gap of an hour or more starts a new one).
+ * "06:00–12:00 · 18:00–22:00 · 10 h" from its sessions (blocks run back to back; a gap of an hour or more starts a new one).
  */
 export function scheduleSummary(settings: StoredSettings, date: string): { label: string; aside: string; windows: { id: string; start: number; minutes: number }[] } {
   const windows = dayLayout(date, settings).map((b) => ({ id: b.id, start: b.start, minutes: b.minutes }));
@@ -36,10 +36,9 @@ export function scheduleSummary(settings: StoredSettings, date: string): { label
     if (last && w.start - last[1] < BREAK_MINUTES) last[1] = Math.max(last[1], w.start + w.minutes);
     else sessions.push([w.start, w.start + w.minutes]);
   }
-  const hour = (m: number): string => String(Math.floor(m / 60)).padStart(2, '0') + (m % 60 ? ':' + String(m % 60).padStart(2, '0') : '');
   const total = windows.reduce((sum, w) => sum + w.minutes, 0);
   const same = new Set(settings.core.pattern).size === 1;
-  return { label: same ? 'Every day' : 'Today', aside: [...sessions.map(([a, b]) => hour(a) + '–' + hour(b)), span(total)].join(' · '), windows };
+  return { label: same ? 'Every day' : 'Today', aside: [...sessions.map(([a, b]) => formatWindow(a, b - a)), span(total)].join(' · '), windows };
 }
 
 /** "February → August 2027", or both years when the range crosses one. */

@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 import type { Browser, Locator, Page } from '@playwright/test';
 import { FakeGithub } from '../fake-github.ts';
 import { serveGithub } from './github-route.ts';
-import { laterRow, nowCard, open, pickStatus, reload, writesSettled } from './helpers.ts';
+import { nowCard, open, pickStatus, reload, writesSettled } from './helpers.ts';
 
 /**
  * The fixed daily schedule (DAILY-SCHEDULE): 06–08 ML Zoomcamp, 08–10 GameDevHQ, 10–12 Hugging Face, a break,
@@ -28,7 +28,7 @@ test('at 06:10 ML Zoomcamp is Now, and the day is 10 hours', async ({ page }) =>
   await expect(page.getByText('0 m of 10 h today · no streak yet')).toBeVisible();
   // Later today in the order of the day, with the break between the sessions.
   const later = page.locator('section:has(h2:text-is("Later today")) li');
-  await expect(later).toHaveText([/^GameDevHQ.*08:00$/, /^Hugging Face.*10:00$/, /Break · 12:00 – 18:00/, /^Coding lessons.*18:00$/, /^Math and physics.*20:00$/, /^Blog post · not yet/]);
+  await expect(later).toHaveText(['Session 1 · 06:00–12:00', /^GameDevHQ.*08:00–10:00$/, /^Hugging Face.*10:00–12:00$/, 'Break · 12:00–18:00', 'Session 2 · 18:00–22:00', /^Coding lessons.*18:00–20:00$/, /^Math and physics.*20:00–22:00$/, /^Blog post · not yet/]);
 });
 
 test('at 08:40 GameDevHQ is Now with its course; at 13:00 it is the break, with Coding lessons next', async ({ page }) => {
@@ -80,8 +80,8 @@ test('a running block whose time is up offers to move on: Switch starts the next
   await writesSettled(page);
   await expect(page.locator('#now-title')).toHaveText('GameDevHQ');
   await expect(nowCard(page).getByRole('button', { name: /^Stop/ })).toBeVisible();
-  // ML Zoomcamp kept its 12 minutes.
-  await expect(laterRow(page, /^ML Zoomcamp/)).toContainText('12 m today');
+  // ML Zoomcamp kept its 12 minutes; its window is over, so it waits under Earlier · not finished.
+  await expect(page.locator('section:has(h2:text-is("Earlier · not finished"))').getByRole('button', { name: /^ML Zoomcamp/ })).toContainText('12 m of 2 h');
 });
 
 test('finishing ML Zoomcamp moves lane C on to its next course', async ({ page }) => {

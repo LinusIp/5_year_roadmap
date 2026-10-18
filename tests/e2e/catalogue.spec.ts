@@ -28,11 +28,11 @@ function weeklySlot(page: Page): Locator {
 async function solveTodaysChallenge(page: Page): Promise<string> {
   await open(page, './');
   // The day's challenge lives in Block B, Coding lessons: mentioned on its row, a row of its own on its Now card.
-  await expect(laterRow(page, /^Coding lessons 30 Days of Python · .* · daily challenge 18:00$/)).toBeVisible();
+  await expect(laterRow(page, /^Coding lessons 30 Days of Python · .* · daily challenge 18:00–20:00$/)).toBeVisible();
   await makeNow(page, /^Coding lessons/);
-  const row = nowCard(page).getByRole('link', { name: /^Daily challenge · / });
-  await expect(row).toContainText(/easy · \d+ min · .* · in Python/);
-  const title = ((await row.locator('span[id]').first().innerText()) ?? '').replace(/^Daily challenge · /, '');
+  const row = nowCard(page).getByRole('link', { name: /Daily challenge · / });
+  await expect(row).toContainText(/Daily challenge · easy · .* · in Python/);
+  const title = ((await row.locator('span[id]').first().innerText()) ?? '');
   await row.click();
 
   await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
@@ -59,12 +59,12 @@ test.describe('with the clock on the plan’s first day', () => {
     const title = await solveTodaysChallenge(page);
     await page.screenshot({ path: 'test-results/catalogue-challenge.png', fullPage: true });
     await open(page, './');
-    await expect(laterRow(page, /^Coding lessons 30 Days of Python · .* · daily challenge done 18:00$/)).toBeVisible();
+    await expect(laterRow(page, /^Coding lessons 30 Days of Python · .* · daily challenge done 18:00–20:00$/)).toBeVisible();
     await makeNow(page, /^Coding lessons/);
-    await expect(nowCard(page).getByRole('link', { name: new RegExp('^Daily challenge · ' + title + ' Solved') })).toBeVisible();
+    await expect(nowCard(page).getByRole('link', { name: new RegExp('^' + title + ' Daily challenge · solved') })).toBeVisible();
 
     await reload(page);
-    await expect(laterRow(page, /^Coding lessons .* daily challenge done 18:00$/)).toBeVisible();
+    await expect(laterRow(page, /^Coding lessons .* daily challenge done 18:00–20:00$/)).toBeVisible();
     await open(page, './#/activity?view=projects');
     await expect(page.getByText(/^Daily challenge streak: 1 day/)).toBeVisible();
   });
@@ -72,7 +72,7 @@ test.describe('with the clock on the plan’s first day', () => {
   test('skip moves to another challenge, three times a day; Not today hides it', async ({ page }) => {
     await open(page, './');
     await makeNow(page, /^Coding lessons/);
-    await nowCard(page).getByRole('link', { name: /^Daily challenge · / }).click();
+    await nowCard(page).getByRole('link', { name: /Daily challenge · / }).click();
     const first = await page.getByRole('heading', { level: 1 }).innerText();
     await page.getByRole('button', { name: 'Skip · 3 left' }).click();
     await expect(page.getByRole('heading', { level: 1 })).not.toHaveText(first);
@@ -208,9 +208,9 @@ test('a solved challenge and a taken build reach a second device, and survive a 
   const b = await device(browser, fake);
   await connect(b);
   await open(b, './');
-  await expect(laterRow(b, /^Coding lessons .* daily challenge done 18:00$/)).toBeVisible();
+  await expect(laterRow(b, /^Coding lessons .* daily challenge done 18:00–20:00$/)).toBeVisible();
   await reload(b);
-  await expect(laterRow(b, /^Coding lessons .* daily challenge done 18:00$/)).toBeVisible();
+  await expect(laterRow(b, /^Coding lessons .* daily challenge done 18:00–20:00$/)).toBeVisible();
   // The build is not on Today's fixed day: Plan › Projects carries it, before and after a reload.
   await open(b, './#/plan?view=projects');
   await expect(weeklySlot(b)).toBeVisible();

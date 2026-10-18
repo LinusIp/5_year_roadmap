@@ -176,6 +176,19 @@ for (const theme of ['light', 'dark'] as const) {
 }
 
 for (const theme of ['light', 'dark'] as const) {
+  test('Today with from-to times at 09:00, 13:00 and 22:04, 412 x 915, matches the committed screenshots, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 412, height: 915 });
+    await importDemo(page, theme);
+    for (const time of ['09:00', '13:00', '22:04']) {
+      await page.clock.setFixedTime(new Date(DEMO_TIME.slice(0, 11) + time + ':00+05:00'));
+      await open(page, './');
+      await expect(page.getByText(/ of 5 done$/)).toBeVisible();
+      await expect(page).toHaveScreenshot('today-times-' + time.replace(':', '') + '-' + theme + '.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
+    }
+  });
+}
+
+for (const theme of ['light', 'dark'] as const) {
   test('the blog screen and Today with the blog reminder match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await importDemo(page, theme);

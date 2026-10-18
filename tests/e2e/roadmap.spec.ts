@@ -130,7 +130,7 @@ test('an item of your own added to a lane reaches Today', async ({ page }) => {
   // Finish what is ahead of it in lane C (ML Zoomcamp alone, now that Hugging Face has lane H), and Today's block C is on the new item.
   await pickStatus(page, laneSheet.getByRole('button', { name: /^Status of .*Machine Learning Zoomcamp/ }), 'Done');
   await open(page, './');
-  await expect(laterRow(page, /^ML Zoomcamp Distributed systems reading group/)).toBeVisible();
+  await expect(laterRow(page, /^ML Zoomcamp .*Distributed systems reading group/)).toBeVisible();
 });
 
 test('taking an item off the plan keeps it in the library', async ({ page }) => {
