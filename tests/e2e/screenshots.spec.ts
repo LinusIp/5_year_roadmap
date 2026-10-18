@@ -131,7 +131,8 @@ test('a tech doc over Today, with the timer running, matches the committed scree
   await now.getByRole('button', { name: 'Start' }).click();
   await expect(page.getByText(/^Running · since /)).toBeVisible();
   await now.getByRole('button', { name: 'Tech doc' }).click();
-  await expect(sheet.getByRole('timer')).toHaveText(/^Running · 0:00$/);
+  // The block's total for today, which the demo's earlier sessions already started.
+  await expect(sheet.getByRole('timer')).toHaveText(/^Running · [\d:]+$/);
   await expect(sheet.getByRole('heading', { name: /^Done when/ }).first()).toBeVisible();
   await expect(page).toHaveScreenshot('tech-doc-today-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });
