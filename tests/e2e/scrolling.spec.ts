@@ -13,6 +13,8 @@ const fades = (strip: Locator) => strip.evaluate((el) => [el.dataset.fadeStart, 
 test('no scrollbar is drawn, on the page or a strip, and scrolling still works', async ({ page }) => {
   await page.clock.install({ time: new Date('2026-11-18T10:30:00+05:00') });
   await open(page, './#/activity');
+  // The chip row draws once Activity has its data.
+  await expect(page.getByRole('group', { name: 'Year and track' })).toBeVisible();
   const widths = await page.evaluate(() => [document.documentElement, document.body, document.querySelector('[role="group"][aria-label="Year and track"]')!].map((el) => getComputedStyle(el).scrollbarWidth));
   expect(widths).toEqual(['none', 'none', 'none']);
   // The page still scrolls, with no bar taking width from it.
