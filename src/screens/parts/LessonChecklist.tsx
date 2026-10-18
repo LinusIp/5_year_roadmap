@@ -113,7 +113,7 @@ export function LessonList({ refId, units, done }: { refId: string; units: Unit[
         const c = checklistCounts(module.units, shown);
         return (
           <Fragment key={module.group}>
-            <RowList label={moduleHeading(module)} aside={c.done + ' of ' + c.total}>
+            <RowList label={moduleHeading(module)} aside={<span className="whitespace-nowrap">{c.done + ' of ' + c.total}</span>}>
               {main.map((unit) => (
                 <LessonRow key={unit.id} unit={unit} checked={ticks.has(unit.id)} now={unit === now} onFlip={() => flip(unit)} />
               ))}
