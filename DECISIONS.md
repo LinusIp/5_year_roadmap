@@ -1015,3 +1015,46 @@ pick a date"; it said "Today, Sunday 18 October", which Lighthouse flags as a la
 A weekly build added to a day is titled by its block, like every other row. The deploy's live check waits for any
 Now card, since between 12:00 and 18:00 it is the break and after 22:00 the day-done card. The screenshots' demo
 history follows the daily schedule (five two-hour courses, GameDevHQ finished on 10 October).
+
+## The daily blog helper (pull request #12)
+
+**Atlas does not hold the post.** The user writes it in their own blog through Pages CMS. Atlas keeps only whether
+the day was posted, as `blog/<date>.json` (`posted`, `at`, and `editorLinkUsed` when Open my blog was used in that
+tab first, `auto` when the detection found it). Undo writes `posted: false` instead of deleting the record, so the
+undo reaches the other devices like any newer write. Devices on an older Atlas never read `blog/` (they pull only
+the paths they know) and never delete it (a push sends only the device's own queued files).
+
+**This device's blog settings.** The editor link and the detection switch live on the device (meta, like the token),
+not in `state/settings.json`: a new key there would make an older device's strict parse of the file fail. Set once
+per device.
+
+**The editor link.** Prefilled with `https://app.pagescms.org`, the only address Atlas knows; the user pastes their
+posts collection's own link. Atlas accepts https links only and never makes one up.
+
+**What you did today.** Time comes from the day's log. What was ticked comes from a journal of ticks kept on this
+device (meta `tickLog`, 60 days): item states record which units are done, not when. Items finished that day are
+known on every device from their synced `doneAt`; units ticked on another device show there only. A tick is listed
+under the block whose time was logged on its item, else the block that plans it that day; a unit with a known title
+shows by its title, a milestone as "One finished small game · 2 ticked".
+
+**The outline.** One `##` heading per block with time logged, then its ticks as bullets, then "What I learned:" and
+"Stuck on:" to fill in, under each block (each course has something to say), and once on a day with nothing logged.
+
+**The writing streak.** Days in a row with a post marked, ending today, or yesterday while today's is still to
+write. A day with no study and no post neither counts nor breaks it, the way a rest day spares the study streak; any
+other missed day ends it.
+
+**The reminder.** From the moment the day's last block (by its start time) is marked done or its timer stopped with
+time on it, or from the end of the last block (22:00), whichever is first; gone once posted. A row, never a pop-up.
+The optional 22:00 notification is not built, with the block-start reminders (pull request #11): a web app cannot
+notify reliably while closed.
+
+**Detection.** The blog is `LinusIp/abdullohshavkatjonov`. Its Pages CMS config (`.pages.yml`, read on 2026-10-18)
+has a `posts` collection at `_posts` with a `date` field; the files are Jekyll's `YYYY-MM-DD-title.md`. Atlas lists
+`_posts` through the contents API and looks for a name starting with the date, once an evening (the first time Today
+is open from 21:00) and whenever the blog screen opens on today. Only GETs. The repository is public, so any token
+can read it: a fine-grained token always has read access to public repositories, and with no token at all the read
+goes unauthenticated. If the read fails (a private blog the token was not given), the switch stays off and says how to
+give the token Contents: Read-only on that repository.
+
+**Calendar.** A day view on today or before has a Blog button, "Blog ✓" once posted, which opens that day's screen.

@@ -23,13 +23,13 @@ import type { AppSeed } from '../seed/schema.ts';
 import { commitFiles, commitMessage } from './commit.ts';
 import type { FileChange } from './commit.ts';
 import { adoptDeviceId, deviceId } from './device.ts';
-import { parseDay, parseItems, parseChallenges, parsePlan, parseReview, parseSettings, planUpdatedAt, renderReadme } from './files.ts';
+import { parseBlogPost, parseDay, parseItems, parseChallenges, parsePlan, parseReview, parseSettings, planUpdatedAt, renderReadme } from './files.ts';
 import { GithubClient, GithubError, gitBlobSha } from './github-api.ts';
 import type { Author } from './github-api.ts';
-import { allPaths, itemsOf, planOf, readLocal, renderPath, withCompanions, writeDay, writeItems, writeChallenges, writePlan, writeReview, writeSettings } from './local.ts';
+import { allPaths, itemsOf, planOf, readLocal, renderPath, withCompanions, writeBlogPost, writeDay, writeItems, writeChallenges, writePlan, writeReview, writeSettings } from './local.ts';
 import { lastWriter, mergeDay, mergeItems, mergeRecords } from './merge.ts';
 import { enqueue, onSyncChange, queuedWrites, setSyncVocabulary } from './middleware.ts';
-import { CHALLENGES_PATH, ITEMS_PATH, PLAN_PATH, README_PATH, SETTINGS_PATH, dateOfLogPath, isArchivedPath, isPulledPath } from './paths.ts';
+import { CHALLENGES_PATH, ITEMS_PATH, dateOfBlogPath, PLAN_PATH, README_PATH, SETTINGS_PATH, dateOfLogPath, isArchivedPath, isPulledPath } from './paths.ts';
 
 export const URGENT_DELAY_MS = 3_000;
 export const IDLE_DELAY_MS = 60_000;
@@ -383,6 +383,15 @@ export class SyncEngine {
       const parsed = parseItems(text);
       if (!parsed.ok) return parsed.error;
       await writeItems(db, dirty ? mergeItems(itemsOf(await readLocal(db)), parsed.value) : parsed.value);
+      return;
+    }
+    const blogDate = dateOfBlogPath(path);
+    if (blogDate) {
+      const parsed = parseBlogPost(text, blogDate);
+      if (!parsed.ok) return parsed.error;
+      // The newer of the two marks wins: "I posted it" on one device and Undo on another settle on the later one.
+      const [merged] = mergeRecords((await db.blogPosts.where('date').equals(blogDate).toArray()), [parsed.value], (p) => p.date);
+      if (merged) await writeBlogPost(db, merged);
       return;
     }
     if (path === CHALLENGES_PATH) {

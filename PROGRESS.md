@@ -27,6 +27,7 @@ with each. "Verified" means it was run, not assumed.
 | – | The tech doc redesigned (pull request #9) | **done** |
 | – | The timer and the layout fixed (pull request #10) | **done** |
 | – | The fixed daily schedule (pull request #11) | **done** |
+| – | The daily blog helper (pull request #12) | **done** |
 
 ## Milestone 1 — Scaffold
 
@@ -933,3 +934,16 @@ Verified on this machine (Linux, Chromium 140):
   the earlier specs moved to the new day.
 - Baselines redrawn on CI's Linux, including Today at 08:40, 13:00 and running at 06:24, light and dark; the demo
   history behind them follows the daily schedule.
+
+## Pull request #12: the daily blog helper
+
+- Data: `blogPosts` (Dexie version 6), synced as `blog/<date>.json`, in backups; a device-local journal of ticks.
+- Screen `#/blog` (`?date=` for a past day): day N, the writing streak, what you did, the outline with Copy outline,
+  Open my blog, I posted it with Undo. Today: the reminder row and the Blog post row; the Day done card's link.
+  Calendar: Blog on past days. Settings › Blog: the editor link and the detection.
+- `tests/unit/blog.test.ts`: the day counter, the outline (only blocks with time, the right ticks), the streak (undo,
+  a day with no study) and the reminder. `tests/e2e/blog.spec.ts`: the reminder after the last block and at 22:00,
+  the outline copied (clipboard mocked), Open my blog to the configured link, posted with the Today row and streak,
+  a reload, Undo, a past day from Calendar, two devices, and the detection with a stand-in GitHub (refused, then a
+  dated post found). Baselines: the blog screen and Today with the reminder, light and dark, redrawn on CI's Linux
+  (the demo history marks a post on each of the twelve days before it, so the streak reads 12).

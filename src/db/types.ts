@@ -253,6 +253,25 @@ export const ChallengeEventSchema = z.strictObject({
 });
 export type ChallengeEvent = z.infer<typeof ChallengeEventSchema>;
 
+/* ------------------------------------------------------------------ the daily blog post */
+
+/**
+ * Whether the day's blog post was written (DAILY-BLOG): the post itself lives in the user's own blog, written through
+ * Pages CMS; Atlas keeps only this, as blog/<date>.json. "I posted it" sets `posted`, Undo clears it (the record stays,
+ * so the undo reaches the other devices too). `auto` marks a day found by "Detect my post automatically".
+ */
+export const BlogPostSchema = z.strictObject({
+  date: IsoDate,
+  posted: z.boolean(),
+  /** When it was marked (ISO time). */
+  at: z.string(),
+  /** Whether "Open my blog" was used that day before it was marked. */
+  editorLinkUsed: z.boolean().optional(),
+  auto: z.boolean().optional(),
+  ...Stamp,
+});
+export type BlogPost = z.infer<typeof BlogPostSchema>;
+
 const MinutesByBlock = z.record(BlockIdSchema, z.number());
 
 export const ReviewSchema = z.strictObject({
@@ -579,6 +598,8 @@ export const BackupDataSchema = z.strictObject({
   practice: z.array(PracticeAnswerSchema).default([]),
   /** Catalogue challenges solved, skipped or hidden (catalogue brief). Absent from backups made before it. */
   challenges: z.array(ChallengeEventSchema).default([]),
+  /** Days the blog post was written (daily blog brief). Absent from backups made before it. */
+  blogPosts: z.array(BlogPostSchema).default([]),
   settings: z.array(StoredSettingsSchema),
   meta: z.array(MetaSchema),
 });

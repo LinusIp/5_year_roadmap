@@ -97,7 +97,7 @@ try {
   if (scripts.length === 0 || stale.length > 0) throw new Error('the page runs a script that is not the new build\'s: ' + (stale.join(', ') || 'none found'));
   step('reloaded into version ' + version + ', running ' + scripts.map((p) => p.split('/').pop()).join(', '));
 
-  for (const hash of ['#/', '#/calendar', '#/plan/pick?cadence=daily', '#/library?type=project', '#/activity']) {
+  for (const hash of ['#/', '#/calendar', '#/plan/pick?cadence=daily', '#/library?type=project', '#/activity', '#/blog']) {
     await page.goto(new URL(hash, url).href);
     await page.getByRole('heading', { level: 1 }).first().waitFor({ timeout: 30_000 });
     step('renders ' + hash);

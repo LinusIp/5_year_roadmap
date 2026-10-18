@@ -25,7 +25,9 @@ import type { BlockId } from '../seed/schema.ts';
 import { Button } from '../ui/Button.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Icon } from '../ui/Icon.tsx';
-import { BlockIcon, BlockTile, KindIcon } from '../ui/glyphs.tsx';
+import { BlockIcon, BlockTile, IconTile, KindIcon } from '../ui/glyphs.tsx';
+import { checkBlogPost, useBlogPosts } from '../db/blog.ts';
+import { blogReminderDue } from '../lib/blog.ts';
 import { blockTone, toneInk } from '../ui/colors.ts';
 import { ProgressLine } from '../ui/ProgressLine.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
@@ -129,6 +131,7 @@ export function Today() {
   const atlas = useAtlas();
   const units = useUnits();
   const timer = useRunningTimer();
+  const blogPosts = useBlogPosts();
   const elapsed = useElapsed(timer);
   const carry = useTimerCarry();
   // The minute of the day, for Now by the clock and the prompt to move on.
@@ -140,6 +143,11 @@ export function Today() {
   // "Keep going" answers the prompt to move on for that block's end, for the rest of the session.
   const [keptGoing, setKeptGoing] = useState<Set<string>>(() => readKept());
   const log = useLiveQuery(() => readLog(date), [date]);
+  // "Detect my post automatically", when it is on: once an evening, from 21:00, on today.
+  const eveningCheck = date === now && minuteNow >= 21 * 60;
+  useEffect(() => {
+    if (eveningCheck) void checkBlogPost(now).catch(() => undefined);
+  }, [eveningCheck, now]);
   const settings = atlas?.settings;
   const weekStart = useMemo(() => startOfWeek(date, settings?.core.weekStartsOn ?? 1), [date, settings]);
   const weekPick = useWeekPick(weekStart);
@@ -299,6 +307,11 @@ export function Today() {
   // They live inside their block, so Today still fits one screen: on the block's Now card as rows, and as a mention on
   // its Later today row. Once the block is done, they lead Later today.
   const leadingExtras = blocks.filter((b) => b !== nowBlock && done(b)).flatMap((b) => extrasFor(b.id));
+  // The day's blog post (DAILY-BLOG): written in the user's own blog; Today reminds once the last block is over.
+  const blogPosted = Boolean(blogPosts?.find((p) => p.date === date)?.posted);
+  const blogDue = isToday && blogPosts !== undefined && blogReminderDue({ slots: placed, minute: minuteNow, log, runningBlock: timer?.block, posted: blogPosted });
+  const blogTo = isToday ? '/blog' : '/blog?date=' + date;
+  const showBlogRow = date <= now && blogPosts !== undefined;
   const extrasNote = (id: BlockId): string | null => {
     const rows = extrasFor(id);
     return rows.length ? rows.map((r) => r.key.toLowerCase() + (r.trailing === 'Done' ? ' done' : '')).join(', ') : null;
@@ -568,6 +581,11 @@ export function Today() {
           <p className="section-label mb-0">{clock?.kind === 'done' ? 'Day done' : 'Now'}</p>
           <p className="text-card font-semibold">{clock?.kind === 'done' ? 'That was the day.' : 'Every block is done.'}</p>
           <p className="text-meta text-ink2">{span(dayMinutes) + ' of ' + span(plan.targetMinutes) + ' · ' + blocks.filter(reached).length + ' of ' + blocks.length + ' blocks'}</p>
+          {isToday && (
+            <Button size="sm" icon="blog" className="mt-2 self-start" to="/blog">
+              {blogPosted ? 'Blog post · posted ✓' : 'Today’s blog post'}
+            </Button>
+          )}
         </section>
       ) : (
         <section aria-labelledby="now-title" className={'tile mt-4 flex flex-col gap-1.5 p-[18px]' + (taken && item?.refId === taken.id ? ' taken' : '')}>
@@ -704,12 +722,25 @@ export function Today() {
         </div>
       )}
 
-      {!nothingPlanned && layout.later && (later.length > 0 || leadingExtras.length > 0) && (
+      {!nothingPlanned && layout.later && (later.length > 0 || leadingExtras.length > 0 || showBlogRow) && (
         <RowList
           label="Later today"
           className="mt-4"
           aside={blocks.some(done) ? 'Done: ' + blocks.filter(done).map((b) => blockName(b.id)).join(', ') : 'Done: 0 of ' + blocks.length}
         >
+          {blogDue && (
+            <Row
+              key="blog-due"
+              icon={<IconTile icon="blog" tone="ice" />}
+              title="Write today’s blog post"
+              meta={layout.view === 'compact' ? undefined : 'The day’s outline is ready'}
+              action={
+                <Button size="sm" to={blogTo}>
+                  Open
+                </Button>
+              }
+            />
+          )}
           {leadingExtras.map(extraRow)}
           {later.flatMap((block, i) => {
             const row = rowFor(block);
@@ -751,6 +782,9 @@ export function Today() {
               </Row>,
             ];
           })}
+          {showBlogRow && !blogDue && (
+            <Row key="blog" icon={<IconTile icon="blog" tone={blogPosted ? 'ice' : 'neutral'} />} title={blogPosted ? 'Blog post · posted ✓' : 'Blog post · not yet'} meta={layout.view === 'compact' ? undefined : 'Written in your blog'} to={blogTo} chevron />
+          )}
         </RowList>
       )}
 

@@ -26,6 +26,7 @@ const NotFound = lazy(() => import('./screens/NotFound.tsx').then((m) => ({ defa
 const PhaseMap = lazy(() => import('./screens/PhaseMap.tsx').then((m) => ({ default: m.PhaseMap })));
 const PickProject = lazy(() => import('./screens/PickProject.tsx').then((m) => ({ default: m.PickProject })));
 const Challenge = lazy(() => import('./screens/Challenge.tsx').then((m) => ({ default: m.Challenge })));
+const BlogPost = lazy(() => import('./screens/BlogPost.tsx').then((m) => ({ default: m.BlogPost })));
 const Calendar = lazy(() => import('./screens/Calendar.tsx').then((m) => ({ default: m.Calendar })));
 const DevComponents = lazy(() => import('./screens/DevComponents.tsx').then((m) => ({ default: m.DevComponents })));
 
@@ -47,6 +48,7 @@ const ROUTES: RouteDef[] = [
   { pattern: '/stats', render: () => <Stats /> },
   { pattern: '/settings', render: () => <Settings /> },
   { pattern: '/challenge/:id', render: (p) => <Challenge id={p.id!} /> },
+  { pattern: '/blog', render: () => <BlogPost /> },
   { pattern: '/dev/components', render: () => <DevComponents /> },
 ];
 

@@ -16,6 +16,7 @@ import {
   CircleDot,
   Clock,
   Code,
+  Copy,
   Cpu,
   ExternalLink,
   FileText,
@@ -117,6 +118,7 @@ const LUCIDE = {
   paper: FileText,
   article: Newspaper,
   blog: Rss,
+  copy: Copy,
   // Status
   done: CircleCheck,
   inProgress: CircleDot,

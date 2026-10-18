@@ -7,6 +7,7 @@ import type { AtlasDB } from './db.ts';
 import type { ItemStatus, PaperState, PaperStatus, RunningTimer, UserItemState, WeekPick } from './types.ts';
 import { TimerSchema } from './types.ts';
 import { today } from '../lib/dates.ts';
+import { noteTicks } from './ticks.ts';
 
 /* ------------------------------------------------------------------ item state */
 
@@ -33,10 +34,11 @@ export async function editItemState(
   change: (state: UserItemState) => UserItemState,
   database: AtlasDB = db,
 ): Promise<UserItemState> {
-  return database.transaction('rw', database.itemStates, async () => {
+  return database.transaction('rw', database.itemStates, database.meta, async () => {
     const current = (await database.itemStates.get(refId)) ?? newItemState(refId);
     const next = change(current);
     await database.itemStates.put(next);
+    await noteTicks(current, next, today(), database);
     return next;
   });
 }
