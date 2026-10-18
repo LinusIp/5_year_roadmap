@@ -71,7 +71,7 @@ test('switching A → B → C → A keeps each block’s own total, and the day 
   await page.clock.fastForward('01:00');
   await expect(counter(page)).toHaveText(/^16:0\d$/);
   await expect(laterRow(page, /^Coding lessons/)).toContainText('20 m today');
-  await expect(laterRow(page, /^ML Zoomcamp/)).toContainText('5 m today');
+  await expect(laterRow(page, /^ML Zoomcamp/)).toContainText('5 m of 2 h');
 
   await nowCard(page).getByRole('button', { name: /^Stop/ }).click();
   await writesSettled(page);
@@ -79,7 +79,7 @@ test('switching A → B → C → A keeps each block’s own total, and the day 
   await reload(page);
   await expect(header(page)).toContainText('41 m');
   await expect(laterRow(page, /^Coding lessons/)).toContainText('20 m today');
-  await expect(laterRow(page, /^ML Zoomcamp/)).toContainText('5 m today');
+  await expect(laterRow(page, /^ML Zoomcamp/)).toContainText('5 m of 2 h');
   await expect(nowCard(page)).toContainText('16 m of 2 h');
 });
 

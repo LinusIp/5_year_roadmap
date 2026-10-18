@@ -245,7 +245,7 @@ test.describe('with the clock on the plan’s first day', () => {
     // Today's daily challenge, on Block B's (Coding lessons) Now card, opens the same screen.
     await open(page, './');
     await makeNow(page, /^Coding lessons/);
-    await nowCard(page).getByRole('link', { name: /^Daily challenge · / }).click();
+    await nowCard(page).getByRole('link', { name: /Daily challenge · / }).click();
     await expect(page).toHaveURL(/#\/challenge\/.*daily=1/);
     await expect(page.getByText(/^Daily challenge · easy/)).toBeVisible();
   });

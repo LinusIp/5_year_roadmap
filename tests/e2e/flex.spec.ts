@@ -30,7 +30,7 @@ test('changing today to a University day changes the targets', async ({ page }) 
   await expect(page.getByText('0 m of 3 h today · University day · no streak yet')).toBeVisible();
   await expect(nowCard(page).getByText('0 m of 1 h · GameDevHQ Unity course')).toBeVisible();
   // A University day has four blocks: Hugging Face (H) and Projects (D) are not part of it.
-  await expect(page.getByText('Done: 0 of 4')).toBeVisible();
+  await expect(page.getByText('0 of 4 done')).toBeVisible();
   await expect(laterRow(page, /^Hugging Face/)).toHaveCount(0);
   await expect(laterRow(page, /Weekly build/)).toHaveCount(0);
 
@@ -205,7 +205,7 @@ test('pauses a lane, giving its time to another, and resumes it', async ({ page 
   await expect(page.locator('#now-title')).toHaveText('ML Zoomcamp');
   await expect(nowCard(page).getByText('Now · 06:00–10:00')).toBeVisible();
   await expect(nowCard(page).getByText(/^0 m of 4 h · /)).toBeVisible();
-  await expect(page.getByText('Done: 0 of 4')).toBeVisible();
+  await expect(page.getByText('0 of 4 done')).toBeVisible();
   await expect(laterRow(page, /^GameDevHQ/)).toHaveCount(0);
 
   await open(page, './#/plan?lane=y1-p0.A');
@@ -213,7 +213,7 @@ test('pauses a lane, giving its time to another, and resumes it', async ({ page 
   await page.getByRole('dialog', { name: 'Pace · GameDevHQ' }).getByRole('button', { name: 'Resume' }).click();
   await open(page, './');
   await expect(page.locator('#now-title')).toHaveText('GameDevHQ');
-  await expect(laterRow(page, /^ML Zoomcamp .* 06:00$/)).toBeVisible();
+  await expect(laterRow(page, /^ML Zoomcamp .* 06:00–08:00$/)).toBeVisible();
 });
 
 test('compact Today, other tabs, and a reset to the default layout', async ({ page }) => {
@@ -227,7 +227,7 @@ test('compact Today, other tabs, and a reset to the default layout', async ({ pa
   await open(page, './');
   const tabs = page.getByRole('navigation', { name: 'Main' }).getByRole('link');
   await expect(tabs).toHaveText(['Today', 'Plan', 'Activity', 'Reviews']);
-  await expect(laterRow(page, /^Coding lessons 18:00$/)).toBeVisible();
+  await expect(laterRow(page, /^Coding lessons 18:00–20:00$/)).toBeVisible();
   await page.screenshot({ path: 'test-results/flex-compact-today.png' });
 
   await reload(page);

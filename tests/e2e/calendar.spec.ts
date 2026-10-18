@@ -80,7 +80,7 @@ test('drag a block to 19:00, make it 90 minutes, and Today follows', async ({ pa
   await expect(rows.nth(-2)).toContainText('20:45');
   await expect(rows.last()).toContainText('Blog post · not yet');
   await expect(laterRow(page, /^Coding lessons/)).toContainText('19:00');
-  await expect(page.getByText('Break · 12:00 – 19:00')).toBeVisible();
+  await expect(page.getByText('Break · 12:00–19:00')).toBeVisible();
   await laterRow(page, /^Coding lessons/).click();
   await expect(page.locator('#now-title')).toHaveText('Coding lessons');
   await expect(nowCard(page).getByText(/^0 m of 1 h 30 m · /)).toBeVisible();

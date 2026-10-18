@@ -33,6 +33,7 @@ import { PickerSheet } from '../parts/PickerSheet.tsx';
 import { blockShort, dateTitle, nameOf, span } from '../parts/text.ts';
 import { calendarEdit } from './edit.ts';
 import { itemOf } from './model.ts';
+import { formatWindow } from '../../lib/clock-plan.ts';
 
 const LENGTHS = Array.from({ length: 48 }, (_, i) => (i + 1) * 15);
 
@@ -125,7 +126,7 @@ export function BlockSheet({ atlas, ctx, sheet, today, onClose }: { atlas: Atlas
       <Sheet
         open={sheet !== null && !pickingItem && !editingLog}
         title={name}
-        aside={dateTitle(date)}
+        aside={dateTitle(date) + (placed ? ' · ' + formatWindow(placed.start, placed.minutes) : '')}
         onClose={onClose}
         footer={
           <Button variant="filled" className="w-full" onClick={save}>

@@ -65,8 +65,10 @@ Every day is the same five two-hour courses at fixed times, 10 hours in all:
 
 - **Now follows the clock.** At 08:40 Today's Now is GameDevHQ ("Now · 08:00–10:00"); between 12:00 and 18:00 it is
   the break, with Coding lessons next (a tap starts it early); after 22:00 the day is done. A block tapped in Later
-  today, or the one whose timer runs, comes first. Later today lists the other blocks with their start times and
-  the break between the sessions.
+  today, or the one whose timer runs, comes first. Later today lists the blocks still to come with their windows
+  ("10:00–12:00"), by session around the break, and counts what is done ("2 of 5 done"). A block whose window passed
+  unfinished waits under "Earlier · not finished" with the time it got, still a tap away; the done ones fold into
+  "Done today".
 - **When a block's time is up** and its timer still runs (08:00, 10:00, 20:00, 22:00), Today asks quietly: Switch
   (or Stop at 22:00) or Keep going. No notifications: a web app cannot ring reliably while closed.
 - **Pinned courses.** The first course of each lane is the one above; when it is done, the lane moves on by itself.

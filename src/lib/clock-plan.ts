@@ -74,3 +74,62 @@ export function switchPrompt(slots: readonly Slot[], runningBlock: string | null
   if (next.start !== end || minute >= next.start + next.minutes) return null;
   return { from: runningBlock, to: next.id, at: end };
 }
+
+/** "06:00" from minutes since midnight. */
+function clockOf(minute: number): string {
+  const m = ((minute % 1440) + 1440) % 1440;
+  return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+}
+
+/** A block's window, "06:00–08:00": an en dash, no spaces (SCHEDULE-TIMES). */
+export function formatWindow(start: number, minutes: number): string {
+  return clockOf(start) + '–' + clockOf(start + minutes);
+}
+
+export interface DaySession {
+  /** 1, 2, …: the sessions in the order of the day, split by the breaks. */
+  number: number;
+  from: number;
+  until: number;
+  /** Its blocks still to come today (not Now, not done, not over), in order. */
+  upcoming: string[];
+}
+
+export interface DayGroups {
+  sessions: DaySession[];
+  /** The break before each session but the first that is still ahead (at the minute given). */
+  breaks: { before: number; from: number; until: number }[];
+  /** Blocks whose window is over and that are not done: "Earlier · not finished". */
+  earlier: string[];
+  /** Blocks done today, in the order of the day. */
+  done: string[];
+}
+
+/**
+ * Today's blocks grouped against the clock (SCHEDULE-TIMES): each session's blocks still to come, the breaks between
+ * sessions that are still ahead, the blocks whose window passed unfinished, and the blocks done. `now` (the Now card's
+ * block) is in none of the first three; a done block is only in `done`, whatever the time.
+ */
+export function groupDay(slots: readonly Slot[], minute: number, now: string | null, isDone: (id: string) => boolean): DayGroups {
+  const list = ordered(slots);
+  const sessions: DaySession[] = [];
+  const breaks: DayGroups['breaks'] = [];
+  const earlier: string[] = [];
+  const done: string[] = [];
+  for (const [i, slot] of list.entries()) {
+    const prev = list[i - 1];
+    const end = slot.start + slot.minutes;
+    const gap = prev ? slot.start - (prev.start + prev.minutes) : 0;
+    if (!prev || gap >= BREAK_MINUTES) {
+      if (prev && minute < slot.start - gap) breaks.push({ before: sessions.length + 1, from: prev.start + prev.minutes, until: slot.start });
+      sessions.push({ number: sessions.length + 1, from: slot.start, until: end, upcoming: [] });
+    }
+    const session = sessions.at(-1)!;
+    session.until = Math.max(session.until, end);
+    if (isDone(slot.id)) done.push(slot.id);
+    else if (slot.id === now) continue;
+    else if (end <= minute) earlier.push(slot.id);
+    else session.upcoming.push(slot.id);
+  }
+  return { sessions, breaks, earlier, done };
+}

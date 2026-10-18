@@ -991,3 +991,14 @@ Verified on this machine (Linux, Chromium 140):
   hidden; the whole year unscrolled at 1280 px; a chip row's fades; the phase map at the current phase, reached and
   scrolled by the keyboard with its focus ring. Baselines: Activity and Today at 412 x 915, light and dark.
 - `docs/before-after/scrollbars/`: Activity at 412 x 915 before and after, drawn with the browser's scrollbars on.
+
+## Pull request #16: from-to times on every block
+
+- `formatWindow` and `groupDay` (`src/lib/clock-plan.ts`): "06:00–08:00", and Today's blocks by session, earlier not
+  finished, and done. Today: windows on the rows and the Now label, session headers and the break, "3 of 5 done",
+  Earlier · not finished, Done today (folded), the day's card with its summary, the daily challenge by its title.
+  Plan, the phase map and Calendar show the windows too.
+- `tests/unit/day-groups.test.ts`: the window, and the groups at 05:30, 09:00, 13:00, 19:00 and 22:30.
+  `tests/e2e/schedule-times.spec.ts`: 09:00 (the Now label, every row's window, the sessions, Earlier with a tap to
+  start), the daily challenge row, 22:04 (Earlier with 1 h 22 m of 2 h, Done today folded, the day's card, no empty
+  tile). Earlier specs moved to the windows. Baselines: Today at 09:00, 13:00 and 22:04, 412 x 915, light and dark.

@@ -50,7 +50,7 @@ import { useTimerCarry } from '../db/timer.ts';
 import { carriedMs, runningMsOn } from '../lib/timer.ts';
 import { dayLayout } from '../lib/calendar.ts';
 import { hm } from '../lib/calendar-layout.ts';
-import { breaksOf, clockNow, switchPrompt } from '../lib/clock-plan.ts';
+import { clockNow, formatWindow, groupDay, switchPrompt } from '../lib/clock-plan.ts';
 import { takenProject } from './parts/taken.ts';
 import { blockShort, dateTitle, nameOf, partOf, span, unitDetail } from './parts/text.ts';
 import { todayLine, tokenDaysLeft, useSyncView } from '../sync/status.ts';
@@ -119,6 +119,27 @@ function rank(order: string[], id: string): number {
 /** "Sun 18 Oct": the header's date. */
 function shortDate(date: string): string {
   return dayName(date, true) + ' ' + Number(date.slice(8, 10)) + ' ' + monthName(Number(date.slice(5, 7)) - 1, true);
+}
+
+/**
+ * A block's window on the right of its row, "06:00–08:00" in 14 px ink2 (SCHEDULE-TIMES). On a narrow phone the two
+ * times stack, "06:00" over "08:00"; it never shrinks or cuts. Anything without a window says "any time".
+ */
+function WindowTime({ text }: { text: string }) {
+  const [from, to] = text.split('–');
+  if (!to) return <span className="whitespace-nowrap">{text}</span>;
+  return (
+    <>
+      <span className="sr-only">{text}</span>
+      <span aria-hidden="true" className="flex flex-wrap justify-end whitespace-nowrap text-right tabular-nums max-[400px]:flex-col max-[400px]:items-end max-[400px]:leading-tight">
+        <span>{from}</span>
+        <span>
+          <span className="max-[400px]:hidden">–</span>
+          {to}
+        </span>
+      </span>
+    </>
+  );
 }
 
 /** "08:12": the local clock time of a timestamp. */
@@ -230,10 +251,15 @@ export function Today() {
   const nowOrder = layout.now === 'order' ? [...blocks].sort((a, b) => rank(layout.order, a.id) - rank(layout.order, b.id)) : blocks;
   const clockBlock = clock?.kind === 'block' ? blocks.find((b) => b.id === clock.id) : undefined;
   const nowBlock = (chosen ? blocks.find((b) => b.id === chosen) : undefined) ?? timerBlock ?? (clock ? (clockBlock ?? null) : (nowOrder.find((b) => !done(b)) ?? null));
-  const startOf = (b: TodayBlock): number => windowOf(b.id)?.start ?? 24 * 60;
   const blockName = (id: string): string => settings.core.blocks.find((b) => b.id === id)?.name ?? id;
-  const later = blocks.filter((b) => b !== nowBlock && !done(b)).sort((a, b) => startOf(a) - startOf(b));
-  const dayBreak = breaksOf(placed)[0];
+  // Later today by the clock (SCHEDULE-TIMES): each session's blocks still to come, the break between the sessions
+  // while it is ahead, the blocks whose window passed unfinished, and the ones done. A past day is all over; a day
+  // ahead is all to come. Blocks with no time on the day (not in the schedule) come last, as "any time".
+  const groupMinute = isToday ? minuteNow : date < now ? 24 * 60 : -1;
+  const groups = groupDay(placed, groupMinute, nowBlock?.id ?? null, (id) => blocks.some((b) => b.id === id && done(b)));
+  const unplaced = blocks.filter((b) => !windowOf(b.id) && b !== nowBlock && !done(b));
+  const blockOf = (id: string): TodayBlock => blocks.find((b) => b.id === id)!;
+  const windowText = (id: string): string => (windowOf(id) ? formatWindow(windowOf(id)!.start, windowOf(id)!.minutes) : 'any time');
   const moveOn = isToday && timer ? switchPrompt(placed, timer.block, minuteNow, keptGoing) : null;
   const byBlock = minutesByBlock(log);
   const logged = totalMinutes(log);
@@ -294,10 +320,11 @@ export function Today() {
   const challengeRow = (label: string, pick: ChallengePick, query: string): ExtraRow => ({
     key: label,
     kind: 'challenge',
-    title: label + ' · ' + pick.challenge.title,
+    // Its own short title on one line; what kind of challenge it is leads the meta line (SCHEDULE-TIMES).
+    title: pick.challenge.title,
     meta: pick.solved
-      ? 'Solved'
-      : [pick.challenge.difficulty, (pick.challenge.estMinutes ?? 30) + ' min', groupLabel(pick.challenge.group), (pick.anotherLanguage ? 'in another language: ' : 'in ') + pick.language].join(' · '),
+      ? label + ' · solved'
+      : [label, pick.challenge.difficulty, groupLabel(pick.challenge.group), (pick.anotherLanguage ? 'in another language: ' : 'in ') + pick.language].join(' · '),
     to: '/challenge/' + pick.challenge.id + query,
     trailing: pick.solved ? 'Done' : span(pick.challenge.estMinutes ?? 30),
   });
@@ -433,6 +460,51 @@ export function Today() {
         .join(' · ')
     : '';
   const linkClass = 'inline-flex min-h-11 items-center gap-2 text-button font-medium text-blue-deep';
+
+  // A block's row in Later today and its groups: its window on the right ("06:00–08:00", one line over another on a
+  // narrow phone, never cut). An earlier or done block says how far it got: "1 h 22 m of 2 h".
+  const blockRow = (block: TodayBlock, progress = false) => {
+    const row = rowFor(block);
+    const minutes = Math.floor(blockMs(block.id) / 60_000);
+    const isTaken = Boolean(taken && block.id === 'D' && focusItem(block, monthlyFirst)?.refId === taken.id);
+    const meta = progress
+      ? [span(minutes) + ' of ' + span(block.targetMinutes), row.meta].join(' · ')
+      : [minutes >= 1 ? span(minutes) + ' today' : null, row.meta, extrasNote(block.id)].filter(Boolean).join(' · ');
+    return (
+      <Row
+        key={block.id}
+        className={isTaken ? 'taken' : ''}
+        icon={<BlockTile block={block.id} />}
+        title={row.title}
+        meta={layout.view === 'compact' ? undefined : meta}
+        trailing={<WindowTime text={windowText(block.id)} />}
+        to={row.to}
+        onClick={
+          row.to
+            ? undefined
+            : row.doc
+              ? () => setDoc({ id: row.doc!, block: block.id, from: 'later' })
+              : () => {
+                  setChosen(block.id);
+                  setExpanded(false);
+                  window.scrollTo(0, 0);
+                }
+        }
+      >
+        {isTaken && <span aria-hidden="true" className="taken-line absolute inset-x-0 bottom-0 h-0.5 bg-blue" />}
+      </Row>
+    );
+  };
+  const upcoming = [...groups.sessions.flatMap((g) => g.upcoming), ...unplaced.map((b) => b.id)];
+  // "How was today?": the day in one line, so the card is never empty.
+  const daySummary = [
+    span(dayMinutes) + ' logged',
+    blocks.filter(reached).length + ' of ' + blocks.length + ' blocks done',
+    slept ? 'slept ' + lengthText(slept.minutes) : null,
+    blogPosts !== undefined && date <= now ? (blogPosted ? 'blog posted' : 'blog not yet') : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <Screen title="Today">
@@ -604,7 +676,7 @@ export function Today() {
             const row = rowFor(next);
             return (
               <ul className="rows mt-2 border-t-[1.5px] border-dashed border-dash">
-                <Row icon={<BlockTile block={next.id} />} title={'Next: ' + blockName(next.id)} meta={row.meta} trailing={hm(clock.until)} onClick={() => setChosen(next.id)} />
+                <Row icon={<BlockTile block={next.id} />} title={'Next: ' + blockName(next.id)} meta={row.meta} trailing={<WindowTime text={windowText(next.id)} />} onClick={() => setChosen(next.id)} />
               </ul>
             );
           })()}
@@ -625,7 +697,7 @@ export function Today() {
           <div className="flex items-center justify-between gap-2">
             <p className="section-label mb-0 flex min-w-0 items-center gap-1.5 uppercase" style={{ color: toneInk(blockTone(nowBlock.id)) }}>
               <BlockIcon block={nowBlock.id} size={18} />
-              <span className="truncate">{'Now · ' + (windowOf(nowBlock.id) ? hm(windowOf(nowBlock.id)!.start) + '–' + hm(windowOf(nowBlock.id)!.start + windowOf(nowBlock.id)!.minutes) : blockShort(nowBlock.def.name))}</span>
+              <span className="truncate">{'Now · ' + (windowOf(nowBlock.id) ? windowText(nowBlock.id) : blockShort(nowBlock.def.name))}</span>
             </p>
             {!expanded && (
               <div className="-my-1 flex shrink-0 gap-2">
@@ -771,12 +843,8 @@ export function Today() {
         </div>
       )}
 
-      {!nothingPlanned && layout.later && (later.length > 0 || leadingExtras.length > 0 || showBlogRow) && (
-        <RowList
-          label="Later today"
-          className="mt-4"
-          aside={blocks.some(done) ? 'Done: ' + blocks.filter(done).map((b) => blockName(b.id)).join(', ') : 'Done: 0 of ' + blocks.length}
-        >
+      {!nothingPlanned && layout.later && (upcoming.length > 0 || leadingExtras.length > 0 || showBlogRow) && (
+        <RowList label="Later today" className="mt-4" aside={blocks.filter(done).length + ' of ' + blocks.length + ' done'}>
           {blogDue && (
             <Row
               key="blog-due"
@@ -791,55 +859,65 @@ export function Today() {
             />
           )}
           {leadingExtras.map(extraRow)}
-          {later.flatMap((block, i) => {
-            const row = rowFor(block);
-            // The quiet break between the sessions, where the list crosses it.
-            const prev = later[i - 1];
-            const divider =
-              dayBreak && windowOf(block.id) && windowOf(block.id)!.start >= dayBreak.until && (!prev || startOf(prev) < dayBreak.until) && (prev || (clock?.kind === 'block' && windowOf(clock.id)!.start < dayBreak.until)) ? (
-                <li key="break" className="flex min-h-11 items-center gap-3 py-2 text-meta font-semibold text-ink2">
+          {groups.sessions.flatMap((session) => {
+            if (session.upcoming.length === 0) return [];
+            const pause = groups.breaks.find((b) => b.before === session.number);
+            return [
+              // The quiet break between the sessions, while it is still ahead.
+              pause && (
+                <li key={'break-' + session.number} className="flex min-h-11 items-center gap-3 py-2 text-meta font-semibold text-ink2">
                   <span className="grid w-10 place-items-center">
                     <Icon name="moon" size={18} />
                   </span>
-                  {'Break · ' + hm(dayBreak.from) + ' – ' + hm(dayBreak.until)}
+                  {'Break · ' + formatWindow(pause.from, pause.until - pause.from)}
                 </li>
-              ) : null;
-            const isTaken = Boolean(taken && block.id === 'D' && focusItem(block, monthlyFirst)?.refId === taken.id);
-            return [
-              divider,
-              <Row
-                key={block.id}
-                className={isTaken ? 'taken' : ''}
-                icon={<BlockTile block={block.id} />}
-                title={row.title}
-                meta={layout.view === 'compact' ? undefined : [blockMs(block.id) >= 60_000 ? span(Math.floor(blockMs(block.id) / 60_000)) + ' today' : null, row.meta, extrasNote(block.id)].filter(Boolean).join(' · ')}
-                trailing={windowOf(block.id) ? hm(windowOf(block.id)!.start) : span(block.targetMinutes)}
-                to={row.to}
-                onClick={
-                  row.to
-                    ? undefined
-                    : row.doc
-                      ? () => setDoc({ id: row.doc!, block: block.id, from: 'later' })
-                      : () => {
-                          setChosen(block.id);
-                          setExpanded(false);
-                          window.scrollTo(0, 0);
-                        }
-                }
-              >
-                {isTaken && <span aria-hidden="true" className="taken-line absolute inset-x-0 bottom-0 h-0.5 bg-blue" />}
-              </Row>,
+              ),
+              groups.sessions.length > 1 && (
+                <li key={'session-' + session.number} className="flex min-h-11 items-end pb-1 pt-2">
+                  <h3 className="section-label mb-0">{'Session ' + session.number + ' · ' + formatWindow(session.from, session.until - session.from)}</h3>
+                </li>
+              ),
+              ...session.upcoming.map((id) => blockRow(blockOf(id))),
             ];
           })}
+          {unplaced.map((block) => blockRow(block))}
           {showBlogRow && !blogDue && (
-            <Row key="blog" icon={<IconTile icon="blog" tone={blogPosted ? 'ice' : 'neutral'} />} title={blogPosted ? 'Blog post · posted ✓' : 'Blog post · not yet'} meta={layout.view === 'compact' ? undefined : 'Written in your blog'} to={blogTo} chevron />
+            <Row key="blog" icon={<IconTile icon="blog" tone={blogPosted ? 'ice' : 'neutral'} />} title={blogPosted ? 'Blog post · posted ✓' : 'Blog post · not yet'} meta={layout.view === 'compact' ? undefined : 'Written in your blog'} trailing="any time" to={blogTo} />
           )}
+        </RowList>
+      )}
+
+      {/* Blocks whose window has passed and that are not done: still there to start, but no longer "later". */}
+      {!nothingPlanned && layout.later && groups.earlier.length > 0 && (
+        <RowList label="Earlier · not finished" className="mt-4">
+          {groups.earlier.map((id) => blockRow(blockOf(id), true))}
+        </RowList>
+      )}
+
+      {!nothingPlanned && layout.later && groups.done.length > 0 && (
+        <RowList className="mt-4">
+          <li>
+            <details>
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-meta font-semibold text-ink2">
+                {'Done today (' + groups.done.length + ')'}
+                <Icon name="chevronDown" size={18} />
+              </summary>
+              <ul className="rows">{groups.done.map((id) => blockRow(blockOf(id), true))}</ul>
+            </details>
+          </li>
         </RowList>
       )}
 
       {showDayRow && (
         <RowList className="mt-4">
-          <Row title="How was today?" trailing={log?.energy ? 'Energy ' + log.energy + ' of 5' : undefined} onClick={() => setSheet('day')} />
+          <Row
+            title={isToday ? 'How was today?' : 'How was ' + dateTitle(date) + '?'}
+            meta={daySummary}
+            metaWraps
+            trailing={log?.energy ? 'Energy ' + log.energy + ' of 5' : undefined}
+            onClick={() => setSheet('day')}
+            chevron
+          />
         </RowList>
       )}
 
