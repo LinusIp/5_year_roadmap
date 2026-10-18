@@ -21,7 +21,9 @@ app makes no network calls at all, and everything can still be exported to a sin
 
 The look is soft clay: one calm background, raised tiles, sunken wells, and only blue and ice. Each block has its own
 icon on Today; subjects, kinds of project and their status have theirs too, always next to a word that says the same
-(the icon map and the clay rules are in [DECISIONS.md](DECISIONS.md), the boards in [docs/mockups](docs/mockups)).
+(the style guide is [docs/CLAY-STYLE.md](docs/CLAY-STYLE.md), the icon map and the choices made on it are in
+[DECISIONS.md](DECISIONS.md), the boards in [docs/mockups](docs/mockups)). No scrollbar is drawn anywhere: a strip that
+scrolls sideways opens at its latest item and fades at the edge where more is hidden.
 
 The screenshots show eight weeks of made-up history. They are also the baselines of a screenshot test that CI runs
 on every pull request. They are drawn on CI's Linux: after a change to the UI, commit an empty `screenshots/.redraw`
