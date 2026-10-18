@@ -1091,7 +1091,8 @@ text; the row's knob is "Play 1.7 Introduction to NumPy". The card is taller tha
 buttons sit under the list.
 
 **Links.** The links come from the user's file, not invented. `check:links` now also requests the video links, and
-CI runs it on the checklist as a report (never failing the build). Its run here found one broken notes link, 11.7's
+CI runs it on the checklist as a report (never failing the build), as the last step of `verify`, even after a
+failure, with only the links that did not answer printed, so its summary ends the job's log. Its run here found one broken notes link, 11.7's
 `07-kserve-eks.dm`, fixed to `.md` after the checker fetched it (200, the right page). YouTube cannot be reached
 from the build container; the runner's report covers the videos.
 
