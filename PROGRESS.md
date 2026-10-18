@@ -978,3 +978,11 @@ Verified on this machine (Linux, Chromium 140):
   the week chart's bars and average, the tiles, the goal moving them, Activity's tile; the question gone after 12:00
   and when off; a reload; two devices with the newer edit winning. The Sleep screen joins the smoke tests (axe in both
   themes, 380 px). Baselines: Today with the Slept tile, the Sleep screen and Activity, light and dark.
+
+## Pull request #15: scrolling in clay
+
+- No visible scrollbars anywhere (`src/index.css`). `src/ui/edgeFade.ts` and `src/ui/FadeStrip.tsx`: the 24 px edge
+  fade on a hidden side, and where a strip opens. Used by the chip rows, the heatmap, Stats' bars and the phase map.
+- `tests/e2e/scrolling.spec.ts`: no scrollbar on the page or a strip and the page still scrolls; the heatmap opens at
+  this week with the fade on the hidden side, moving when scrolled; a chip row opens with the selected chip in view
+  and fades only on the side with more; the phase map opens at the current phase. Baselines redrawn.

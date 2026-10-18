@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent } from 'react';
 import { addDays, today } from '../lib/dates.ts';
+import { useEdgeFade } from './edgeFade.ts';
 import type { GridSlot, MonthLabel } from '../lib/heatmap.ts';
 import type { HeatLevel } from '../lib/streaks.ts';
 
@@ -47,6 +48,8 @@ export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, 
   const titleId = useId();
   const hintId = useId();
   const box = useRef<HTMLDivElement>(null);
+  // It opens at this week (below) and fades at an edge where more weeks are hidden.
+  useEdgeFade(box);
   const svg = useRef<SVGSVGElement>(null);
   const [focused, setFocused] = useState<string>();
   const [boxWidth, setBoxWidth] = useState(326);
@@ -118,7 +121,7 @@ export function Heatmap<C extends HeatmapCell>({ cells, columns, months, title, 
   };
 
   return (
-    <div ref={box} className="w-full overflow-x-auto">
+    <div ref={box} className="edge-fade w-full overflow-x-auto">
       <svg ref={svg} role="group" aria-labelledby={titleId} aria-describedby={onSelect ? hintId : undefined} width={width} height={height} className="heat block" style={trackRamp(color)}>
         <title id={titleId}>{title}</title>
         {cells.map((cell) => {

@@ -4,6 +4,7 @@ import { daysBetween, monthName } from '../lib/dates.ts';
 import type { BlockId, Phase } from '../seed/schema.ts';
 import { Button } from '../ui/Button.tsx';
 import { BlockTile } from '../ui/glyphs.tsx';
+import { FadeStrip } from '../ui/FadeStrip.tsx';
 import { scheduleSummary } from './plan/Timeline.tsx';
 import { Icon } from '../ui/Icon.tsx';
 import { today } from '../lib/dates.ts';
@@ -47,7 +48,8 @@ export function PhaseMap() {
 
   return (
     <main id="main" tabIndex={-1} className="min-h-dvh bg-bg outline-none">
-      <div className="relative overflow-x-auto">
+      {/* Wider than a phone: it opens with the current phase in view and fades at a hidden edge. */}
+      <FadeStrip open="current" className="relative">
         <div className="flex min-w-[1200px] flex-col gap-7 px-14 py-12">
           <div className="flex items-start justify-between gap-6">
             <div className="flex flex-col gap-1.5">
@@ -98,7 +100,7 @@ export function PhaseMap() {
             {phases.map((p) => {
               const sameYear = p.start.slice(0, 4) === p.end.slice(0, 4);
               return (
-                <li key={p.id} className="tile flex flex-col gap-4 p-[18px]">
+                <li key={p.id} className="tile flex flex-col gap-4 p-[18px]" aria-current={p.id === nowId ? 'step' : undefined}>
                   <div className="flex flex-col gap-1">
                     <p className="text-meta text-ink2">
                       {day(p.start, !sameYear)} → {day(p.end, true)}
@@ -132,7 +134,7 @@ export function PhaseMap() {
             })}
           </ol>
         </div>
-      </div>
+      </FadeStrip>
     </main>
   );
 }

@@ -1147,3 +1147,29 @@ the 30 nights are logged and their range. Neither the tile nor the screen gives 
 
 **The chart's text.** The week chart is one image whose name lists each night ("Monday 7.0 hours, Tuesday not
 logged, ...") and the goal; the bars and numbers are hidden from screen readers.
+
+## Scrolling in clay (pull request #15)
+
+The style guide's new Scrolling section (CLAY-STYLE, 18 October 2026).
+
+**No scrollbars.** `scrollbar-width: none` and the WebKit equivalent on every element, from the base layer: the page,
+sheets, Calendar's time grid and every strip. Touch, wheel and keyboard scrolling are untouched; the scrollable
+regions that were focusable (code blocks, the time grid) still are.
+
+**The edge fade.** `src/ui/edgeFade.ts` (`useEdgeFade`, and `FadeStrip` around it) marks a horizontal strip with
+`data-fade-start` and `data-fade-end` from its scroll position and size, and `.edge-fade` masks 24 px of the strip
+into transparency on each marked side, so the `--bg` beneath shows through: a fade from the background, on a side
+only while more is hidden there. It is a mask, not an overlay, so nothing sits over a chip or a cell to catch a tap.
+
+**Where strips open.** "The latest item", read per strip:
+- the heatmap: this week, at the right edge (as before; the weeks still to come in the year stay hidden at the right,
+  so a December heatmap fades on the left only);
+- Stats' bars by week or month: the newest, at the right;
+- chip rows (Activity's years and track, the Library's and Plan's filters, Pick a project, the settings): the selected
+  chip in view. For the years that is
+  the current one; scrolling a row to its far end on open would hide the chip that is in use;
+- the five-year phase map, wider than a phone: the current phase in view.
+A strip is placed once, when it first draws: a later selection never moves a row the user has scrolled.
+
+**Code blocks** scroll sideways without a bar and without a fade: a mask would also fade the well's inset shadow, and
+the block is focusable, so a keyboard scrolls it.

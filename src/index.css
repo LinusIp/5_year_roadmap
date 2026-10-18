@@ -144,6 +144,13 @@
 }
 
 @layer base {
+  /* No visible scrollbars anywhere (CLAY-STYLE, Scrolling); scrolling still works by touch, wheel and keyboard. */
+  * {
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
   html {
     background: var(--bg);
     color: var(--ink);
@@ -201,6 +208,18 @@
 }
 
 @layer components {
+  /* A horizontal strip's edge fade (src/ui/edgeFade.ts): 24 px into the background on a side where more is hidden. */
+  .edge-fade {
+    --fade-start: 0px;
+    --fade-end: 0px;
+    mask-image: linear-gradient(to right, transparent 0, black var(--fade-start), black calc(100% - var(--fade-end)), transparent 100%);
+  }
+  .edge-fade[data-fade-start='true'] {
+    --fade-start: 24px;
+  }
+  .edge-fade[data-fade-end='true'] {
+    --fade-end: 24px;
+  }
   /*
    * Depth: raised (.tile, cards and groups), small raised (.knob, icon buttons, icon tiles, chips) and sunken
    * (.well: search, progress tracks, the segmented track, unchecked boxes, the selected chip or tab). No other

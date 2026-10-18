@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import { niceScale } from '../../lib/stats.ts';
 import { Button } from '../../ui/Button.tsx';
+import { FadeStrip } from '../../ui/FadeStrip.tsx';
 
 export interface StackSeries {
   key: number;
@@ -55,7 +56,7 @@ export function StackedBars({ title, series, bars, format, scale = (v) => v, hei
       </ul>
 
       {asTable ? (
-        <div className="mt-3 overflow-x-auto">
+        <FadeStrip className="mt-3">
           <table className="w-full text-left text-small">
             <thead>
               <tr className="text-ink2">
@@ -88,10 +89,11 @@ export function StackedBars({ title, series, bars, format, scale = (v) => v, hei
               ))}
             </tbody>
           </table>
-        </div>
+        </FadeStrip>
       ) : (
         <>
-          <div className="mt-3 overflow-x-auto">
+          {/* The latest weeks or months are at the right: the chart opens there. */}
+          <FadeStrip open="end" className="mt-3">
             <svg role="img" aria-labelledby={titleId} width={width} height={height} className="max-w-none">
               {ticks.map((t) => (
                 <g key={t}>
@@ -138,7 +140,7 @@ export function StackedBars({ title, series, bars, format, scale = (v) => v, hei
                 );
               })}
             </svg>
-          </div>
+          </FadeStrip>
           {shown && (
             <p className="mt-2 text-meta text-ink2" role="status">
               {shown.label}: {format(totals[shownIndex]!)}
