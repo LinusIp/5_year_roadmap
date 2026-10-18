@@ -232,3 +232,23 @@ export function yearRange(year: number, planStart: string, planEnd: string): { f
   const to = year + '-12-31';
   return { from: from < planStart ? planStart : from, to: to > planEnd ? planEnd : to };
 }
+
+/** Where a day of the grid stands (HEATMAP-FULL-YEAR): before the plan began, a day gone, today, or still ahead. */
+export type CellPhase = 'before-plan' | 'past' | 'today' | 'future';
+
+export function cellPhase(date: string, today: string, planStart?: string): CellPhase {
+  if (date === today) return 'today';
+  if (date > today) return 'future';
+  return planStart && date < planStart ? 'before-plan' : 'past';
+}
+
+/** Minutes logged in each month of a year, January first: "All years" shades its month blocks by them. */
+export function monthlyTotals(logs: readonly DayLog[], year: number): number[] {
+  const months = Array.from({ length: 12 }, () => 0);
+  const prefix = String(year) + '-';
+  for (const log of logs) {
+    if (!log.date.startsWith(prefix)) continue;
+    months[Number(log.date.slice(5, 7)) - 1]! += log.entries.reduce((sum, e) => sum + e.minutes, 0);
+  }
+  return months;
+}

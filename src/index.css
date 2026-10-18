@@ -312,6 +312,9 @@
   .heat-2 { fill: var(--ramp-2); }
   .heat-3 { fill: var(--ramp-3); }
   .heat-4 { fill: var(--ramp-4); }
+  /* A day still ahead: no fill, a faint outline (HEATMAP-FULL-YEAR); not the empty cell of a day with nothing logged. */
+  .heat-future { fill: none; stroke: var(--dash); stroke-width: 1; opacity: 0.4; }
+  .heat-bg-future { background: transparent; box-shadow: inset 0 0 0 1px var(--dash); opacity: 0.4; }
   /* Calendar's time grid: a dashed line every hour, 48 px apart. */
   .calendar-lines {
     background-image: repeating-linear-gradient(to bottom, var(--dash) 0 1.5px, transparent 1.5px 48px);

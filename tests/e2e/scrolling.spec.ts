@@ -4,7 +4,7 @@ import { open } from './helpers.ts';
 
 /**
  * Scrolling in clay (CLAY-STYLE, HIDE-SCROLLBARS): no visible scrollbar anywhere, and the page and strips still
- * scroll; horizontal strips open at the latest item, with a 24 px fade from the background over a side where more
+ * scroll; horizontal strips open at the latest item (the heatmap with this week two thirds across, HEATMAP-FULL-YEAR), with a 24 px fade from the background over a side where more
  * is hidden instead of a bar; a card wide enough for the year shows it all; a strip with nothing focusable in it is
  * a labelled region that Tab reaches and the arrow keys scroll.
  */
@@ -31,23 +31,19 @@ test('no scrollbar is drawn on the page or a heatmap, and Today and Activity sti
   }
 });
 
-test('the heatmap opens scrolled to this week, and the left fade shows only while earlier weeks are hidden', async ({ page }) => {
+test('the heatmap opens with this week in view, and fades on whichever side has more', async ({ page }) => {
   await page.clock.install({ time: NOV });
   await open(page, './#/activity');
   const strip = heatmap(page);
   await expect(strip).toBeVisible();
-  // At its end: scrollLeft is the maximum, and this week is the grid's last column.
-  await expect.poll(() => strip.evaluate((el) => Math.abs(el.scrollWidth - el.clientWidth - el.scrollLeft) <= 1 && el.scrollLeft > 0)).toBe(true);
   await expect(strip.locator('rect[data-date="2026-11-18"]')).toBeInViewport();
-  await expect(strip.locator('rect[data-date="2026-11-30"]')).toHaveCount(0);
+  // In November two thirds across would pass December's end: the strip stops there, the earlier months hidden.
   await expect.poll(() => fades(strip)).toBe('true false');
   const before = await strip.evaluate((el) => getComputedStyle(el.parentElement!, '::before').backgroundImage);
   expect(before).toContain('linear-gradient');
-  // Swiped back to January, the left fade goes; scrolled right again, it comes back.
+  // Swiped back to January, the fade moves to the other side.
   await strip.evaluate((el) => (el.scrollLeft = 0));
   await expect.poll(() => fades(strip)).toBe('false true');
-  await strip.evaluate((el) => (el.scrollLeft = 120));
-  await expect.poll(() => fades(strip)).toBe('true true');
 });
 
 test('on a screen wide enough for the year, the heatmap shows it all and does not scroll', async ({ page }) => {

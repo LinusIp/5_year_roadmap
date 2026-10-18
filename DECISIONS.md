@@ -1209,3 +1209,34 @@ the reflection and the energy rating. It is never an empty tile.
 
 **The daily challenge** goes by its own title on one line; "Daily challenge" leads its meta line (difficulty, topic,
 language), and its length is on the right.
+
+## The heatmaps show the whole year (pull request #17)
+
+HEATMAP-FULL-YEAR, seen on the live app: the year looked cut off at this week. This replaces pull request #15's
+choice to end this year's grid at this week.
+
+**The year, January to December.** The study heatmap and the GitHub calendar draw the selected year's 53 week
+columns in the user's week start, every month named. Days still ahead are faint outlines (`.heat-future`: no fill, a
+1 px `--dash` outline at 40 % opacity), unlike a day with nothing logged, which keeps the empty cell; today has a 2 px
+`--ice-deep` ring. Days before the plan began (21 September 2026) are empty cells, and a short `--blue-deep` tick
+above that week marks the start ("Plan started 21 Sep", an image with that name inside the grid).
+
+**Size and where it opens.** On a phone a cell is 10 px with a 3 px gap and the strip scrolls; it opens with this
+week about two thirds of the way across (the recent past, and the weeks just ahead), clamped at the year's ends, so in
+November and December it stops at 31 December. A year that is over opens at its end, one still ahead at its start.
+A card with room for the whole year at 8 px or more shows it all, the cells filling its width, without scrolling; at
+1280 px the card is 552 px, which needs the gap to close to 2 px (8.5 px cells). The fades follow pull request #15:
+on a side only while more is hidden there.
+
+**2027 and 2028** are all ahead: every cell a faint outline. **All years** is one compact row a year, 2026 to 2031,
+twelve month blocks shaded on the heatmap's ramp by the month's hours against the busiest month of all, the months
+still ahead outlined; a row is a button that opens its year, and its name gives the year's hours and the months that
+had any.
+
+**The Sleep strip on Activity**: a night with no entry is a short faint dash on the baseline instead of an empty
+bar; nights with one are `--deco` bars, last night `--ice`; the ends are labelled "30 nights ago" and "last night",
+and its accessible name says how many nights have no entry.
+
+**Keyboard**, as in pull request #15: the study heatmap's days are its one tab stop (arrows move a day or a week and
+the strip follows); the GitHub calendar is a labelled region, "… scroll for the other months", the arrows scrolling
+it.
