@@ -42,10 +42,10 @@ async function expectNoPractice(page: Page): Promise<void> {
   await expect(page.getByText('Nothing lives at /practice.')).toBeVisible();
 }
 
-test('a fresh install has no Practice anywhere, and plans the 8-hour day', async ({ page }) => {
+test('a fresh install has no Practice anywhere, and plans the 10-hour day', async ({ page }) => {
   await page.clock.install({ time: new Date(PRACTICE_DAY) });
   await open(page, './');
-  await expect(page.getByText('0 m of 8 h today · no streak yet')).toBeVisible();
+  await expect(page.getByText('0 m of 10 h today · no streak yet')).toBeVisible();
   await expectNoPractice(page);
 });
 
@@ -55,11 +55,14 @@ test('a backup from the build with Practice restores without it, and its Practic
   await page.getByLabel('Backup file to import').setInputFiles({ name: 'atlas-backup-2026-10-16.json', mimeType: 'application/json', buffer: BACKUP });
   await page.getByRole('button', { name: 'Replace', exact: true }).click();
   await expect(page.getByText(/Restored \d+ records/)).toBeVisible();
-  // The user's own settings came with it: the dark theme, and 90 minutes of C (so 7 h 30 m, not 8 h).
+  // The user's own settings came with it: the dark theme, and 90 minutes of C (so 7 h 30 m, not 8 h) for the days
+  // it planned. They predate the fixed daily schedule, so from today the day is the schedule's 10 hours.
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
+  await open(page, './#/?date=2026-10-16');
+  await expect(page.getByText(/^1 h 30 m of 7 h 30 m/)).toBeVisible();
   await open(page, './');
-  await expect(page.getByText(/^0 m of 7 h 30 m today/)).toBeVisible();
+  await expect(page.getByText(/^0 m of 10 h today/)).toBeVisible();
   await expectNoPractice(page);
 
   // 16 October: 1 h of A and 30 minutes of Practice, in the heatmap and in the day.

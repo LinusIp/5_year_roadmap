@@ -5,7 +5,8 @@ import { FIRST_DAY, laterRow, makeNow, nowCard, open, reload, writesSettled } fr
 /**
  * FIXES-TIMER-LAYOUT: the timer counts the block's total for today, never only the current run. Stop then Start
  * continues from the total; switching blocks saves the one running first; nothing is rounded away or counted twice.
- * Graphics is Now on the plan's first day; Languages, Core and Math wait in Later today.
+ * At 09:00 on the plan's first day the clock makes GameDevHQ (A) Now; ML Zoomcamp (C), Hugging Face (H), Coding
+ * lessons (B) and Math and physics (E) wait in Later today.
  */
 test.use({ timezoneId: 'Asia/Tashkent', serviceWorkers: 'block' });
 
@@ -15,13 +16,6 @@ test.beforeEach(async ({ page }) => {
 
 const counter = (page: Page) => page.getByRole('timer').first();
 const header = (page: Page) => page.locator('main .tile').first();
-
-/** Makes the Graphics project Now again: its Later today row opens its tech doc, whose "Work on it now" does it. */
-async function backToGraphics(page: Page): Promise<void> {
-  await laterRow(page, /^One finished small game/).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Work on it now' }).click();
-  await expect(page.locator('#now-title')).toHaveText(/^One finished small game/);
-}
 
 /** Starts Now's timer and waits until it runs (the switch's stop and the start are separate writes). */
 async function start(page: Page): Promise<void> {
@@ -62,20 +56,21 @@ test('a running timer keeps its total through a reload', async ({ page }) => {
 
 test('switching A → B → C → A keeps each block’s own total, and the day adds up after a reload', async ({ page }) => {
   await open(page, './');
-  await start(page); // A: Graphics
+  await expect(page.locator('#now-title')).toHaveText('GameDevHQ');
+  await start(page); // A: GameDevHQ
   await page.clock.fastForward('15:00');
-  await makeNow(page, /^30 Days of Python/); // B: Languages
+  await makeNow(page, /^Coding lessons/); // B
   await start(page);
   await page.clock.fastForward('20:00');
-  await makeNow(page, /^ML Zoomcamp/); // C: Core
+  await makeNow(page, /^ML Zoomcamp/); // C
   await start(page);
   await page.clock.fastForward('05:00');
-  await backToGraphics(page); // A again
+  await makeNow(page, /^GameDevHQ/); // A again
   await start(page);
   await expect(counter(page)).toHaveText(/^15:0\d$/);
   await page.clock.fastForward('01:00');
   await expect(counter(page)).toHaveText(/^16:0\d$/);
-  await expect(laterRow(page, /^30 Days of Python/)).toContainText('20 m today');
+  await expect(laterRow(page, /^Coding lessons/)).toContainText('20 m today');
   await expect(laterRow(page, /^ML Zoomcamp/)).toContainText('5 m today');
 
   await nowCard(page).getByRole('button', { name: /^Stop/ }).click();
@@ -83,7 +78,7 @@ test('switching A → B → C → A keeps each block’s own total, and the day 
   await expect(header(page)).toContainText('41 m');
   await reload(page);
   await expect(header(page)).toContainText('41 m');
-  await expect(laterRow(page, /^30 Days of Python/)).toContainText('20 m today');
+  await expect(laterRow(page, /^Coding lessons/)).toContainText('20 m today');
   await expect(laterRow(page, /^ML Zoomcamp/)).toContainText('5 m today');
   await expect(nowCard(page)).toContainText('16 m of 2 h');
 });
@@ -92,16 +87,16 @@ test('switching to another block and back within three seconds loses nothing and
   await open(page, './');
   await start(page);
   await page.clock.fastForward('10:00');
-  await makeNow(page, /^30 Days of Python/);
+  await makeNow(page, /^Coding lessons/);
   await start(page);
   await page.clock.fastForward('00:02');
-  await backToGraphics(page);
+  await makeNow(page, /^GameDevHQ/);
   await start(page);
   await page.clock.fastForward('00:01');
   await nowCard(page).getByRole('button', { name: /^Stop/ }).click();
   await writesSettled(page);
   await reload(page);
-  // 10 min and 1 s on Graphics, 2 s on Languages: 10 whole minutes logged, the seconds carried.
+  // 10 min and 1 s on GameDevHQ, 2 s on Coding lessons: 10 whole minutes logged, the seconds carried.
   await expect(header(page)).toContainText('10 m');
   await expect(nowCard(page)).toContainText('10 m of 2 h');
 });

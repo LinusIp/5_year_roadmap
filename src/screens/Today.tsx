@@ -325,7 +325,7 @@ export function Today() {
     }
     // A project's row opens its tech doc; the doc's "Work on it now" makes it Now.
     const doc = blockItem.kind === 'project' ? blockItem.refId : undefined;
-    if (blockItem === block.weeklyBuild) return { title: nameOf(blockItem), meta: 'Weekly build · ' + hoursOn(blockItem.refId) + ' of ' + blockItem.estHours + ' h done', doc };
+    if (blockItem === block.weeklyBuild) return { title: block.def.name, meta: nameOf(blockItem) + ' · weekly build · ' + hoursOn(blockItem.refId) + ' of ' + blockItem.estHours + ' h done', doc };
     // As the boards draw it: the block by name, what it works on underneath ("Hugging Face · LLM Course · chapter 3").
     return { title: block.def.name, meta: [nameOf(blockItem), detailOf(blockItem)].filter(Boolean).join(' · '), doc };
   };
@@ -424,7 +424,7 @@ export function Today() {
             <img src={'./brand/atlas-mark-' + theme + '.png'} width={26} height={26} alt="" />
             <span className="text-[1.125rem] font-semibold tracking-[-0.01em]">Atlas</span>
           </span>
-          <button type="button" className="min-h-11 min-w-0 flex-1 truncate rounded-pill px-1.5 text-left text-meta font-semibold text-blue-deep" onClick={() => setSheet('date')} aria-haspopup="dialog" aria-label={(isToday ? 'Today, ' : '') + dateTitle(date) + ', pick a date'}>
+          <button type="button" className="min-h-11 min-w-0 flex-1 truncate rounded-pill px-1.5 text-left text-meta font-semibold text-blue-deep" onClick={() => setSheet('date')} aria-haspopup="dialog" aria-label={shortDate(date) + (isToday ? ', today' : '') + ', pick a date'}>
             {shortDate(date)}
           </button>
           <span className="-mr-1.5 flex shrink-0">
@@ -558,7 +558,7 @@ export function Today() {
             const row = rowFor(next);
             return (
               <ul className="rows mt-2 border-t-[1.5px] border-dashed border-dash">
-                <Row icon={<BlockTile block={next.id} />} title={'Next: ' + blockName(next.id)} meta={row.title} trailing={hm(clock.until)} onClick={() => setChosen(next.id)} />
+                <Row icon={<BlockTile block={next.id} />} title={'Next: ' + blockName(next.id)} meta={row.meta} trailing={hm(clock.until)} onClick={() => setChosen(next.id)} />
               </ul>
             );
           })()}

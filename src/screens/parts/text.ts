@@ -70,9 +70,12 @@ export function unitShort(title: string): string {
   return /\d/.test(head) && head.length <= 20 ? head.charAt(0).toLowerCase() + head.slice(1) : title;
 }
 
-/** "Gamedev / Graphics / Simulation" -> "Gamedev"; "Math & physics" -> "Math"; "Core track" -> "Core". */
+/**
+ * A block's name where space is short: the part before a "/" or "&" ("Projects / hands-on" -> "Projects"). The
+ * daily schedule's names are short already and stay whole ("Hugging Face", "Coding lessons", "Math and physics").
+ */
 export function blockShort(name: string): string {
-  return name.trim().split(/[\s/&]+/)[0] || name;
+  return name.trim().split(/\s*[/&]\s*/)[0] || name;
 }
 
 export function plural(n: number, one: string, many = one + 's'): string {

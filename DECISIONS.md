@@ -948,3 +948,64 @@ start. (2) After a jump, the tech doc's bar ignores scroll events for 600 ms whi
 that ended inside that time left the bar on the part jumped to. The bar now reads the position once the time is up.
 Both have tests that failed before the fix.
 
+
+## The fixed daily schedule (pull request #11)
+
+**The day.** One template, "Daily schedule" (id `full`, so the stored pattern and every day change keep working), on
+every weekday: C ML Zoomcamp 06–08, A GameDevHQ 08–10, H Hugging Face 10–12, a break, B Coding lessons 18–20, E Math
+and physics 20–22. 10 h a day, 70 h a week. Weekend keeps its id with the three morning courses (6 h); University,
+Exam week and Rest are unchanged. The heatmap's absolute thresholds scale with the day: 1, 150, 375 and 525 minutes.
+
+**Block H and the lanes.** H is a new lane. The Hugging Face courses and the items whose primary track is AI move
+from lane C to lane H in every phase; ML Zoomcamp stays in C (it is the C course of the schedule). Years 4 and 5 have
+no AI items left in C, so their H lanes are empty: H then pulls from later phases as any lane does, and past the
+last phase it says it has nothing. A settings file needs block H only where the plan uses it, so the data of the
+build before (no H) still validates, for `npm run schedule:shift`.
+
+**Pinned courses.** A lane's first item is its course: GameDevHQ goes first in lane A of the first phase, with an
+estimate of 40 h (the course's own length is not published; the item's sheet takes your own). When a course is
+done, the lane moves on to its next item with nothing to set.
+
+**Projects left the day.** The prompt takes block D out of the daily template. D stays defined, so the Deck, the
+catalogue, Plan › Projects and the Library keep working and Calendar can add Projects to any day. The cost, measured
+by `npm run schedule:shift` (`docs/daily-schedule/pace-shift.txt`): 84 items, the projects of lane D and the items
+split with it, have no projected finish any more, because their lane gets no time. The Sunday review replaced D's
+content, so it no longer shows in Today either; the weekly review itself (Reviews) is unchanged.
+
+**Pace.** With every course at 2 h (B and E had 1 h), 112 items in lanes B, C, E and H are projected earlier, most
+by months. Lane A's 26 later items move about three weeks, behind the 40 h of GameDevHQ.
+
+**Now by the clock.** Settings › Layout's first choice for Now, "The first unfinished block", is now "By the clock"
+(the stored value stays `first`): on today, the block of this hour; on another day, the first unfinished one. "In my
+order" keeps the old rule. A block tapped in Later today, or a running timer's, still wins. A gap of an
+hour or more between blocks is a break (12:00 to 18:00); a shorter one leads straight to the next block. Before
+06:00 the first block is Now; after the last block ends, the day is done. Missed blocks (06:00 at 09:00) stay at the
+top of Later today, in time order.
+
+**The prompt to move on.** When the running block's window ends and the next starts at that minute (08:00, 10:00,
+20:00) or the day ends (22:00), Today shows a card: Switch (Stop at 22:00) or Keep going. Nothing at 12:00, where the
+break starts. Keep going is remembered for that block's end until the tab closes (session storage): it is a mood,
+not a setting.
+
+**No reminders.** A web app cannot schedule a notification reliably while closed (no Notification Triggers in
+Chromium, none on iOS), so the optional reminders are skipped rather than built to fail silently.
+
+**Settings from before.** Settings with no block H switch once, decided on the settings as saved (a version 1 file
+gets the curriculum's missing blocks, H included, during its upgrade, so checking afterwards would skip it). The
+schedule as it was is kept in history up to yesterday, so past days keep their plan, heatmap share and streak; A, B,
+C and E take the schedule's minutes, H joins, the Full day and Weekend templates and the pattern become the
+curriculum's, other templates stay. Day changes, busy times, pace, pauses and logs are untouched. A day change can
+now collide with a fixed start: the earlier start keeps its place and the later block follows it (Graphics moved to
+19:00 on a Tuesday lands at 20:15, after Coding lessons). Settings › Schedule › Reset to the daily schedule does the
+same switch from today, whatever was edited since. Tested with a settings file and a backup made by the live build
+(`tests/fixtures/live-2026-10-18/`).
+
+**Apply to every day.** With one template on every weekday, the block sheet's switch reads "Apply to every day" and
+edits that template from today on; with different templates by weekday it stays "Apply to every Monday" and gives
+Monday its own copy, as before.
+
+**Short names.** A block's short name was its first word, made for "Graphics / rendering / simulation". The new
+names are short already, so a name is cut only at "/" or "&": "Hugging Face" and "Coding lessons" stay whole.
+
+**Commit messages** count the blocks of the weekday's template ("5/5 blocks"), not every defined block (D would have
+made it "5/6").

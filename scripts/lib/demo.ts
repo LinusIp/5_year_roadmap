@@ -44,12 +44,13 @@ export function demoBackup(theme: 'light' | 'dark' = 'light'): BackupFile {
       const minutes = Math.round((full * Math.min(1, effort + (rand() - 0.5) * 0.3)) / 5) * 5;
       return minutes > 0 ? { block, track: trackOf(refId), refId, minutes } : null;
     };
+    // The daily schedule: five two-hour courses. GameDevHQ was finished on 10 October; the small game came next.
     const entries = [
-      lane('A', 'a-small-game-1', 120),
-      lane('B', i < 30 ? '30-days-of-python' : 'automate-the-boring-stuff', 60),
       lane('C', 'ml-zoomcamp', 120),
-      sunday ? lane('D', 'paper-attention', 120) : lane('D', 'm01', 120),
-      lane('E', 'mit-18-06', 60),
+      lane('A', date <= '2026-10-10' ? 'gamedevhq' : 'a-small-game-1', 120),
+      lane('H', 'hf-llm-course', 120),
+      lane('B', i < 30 ? '30-days-of-python' : 'automate-the-boring-stuff', 120),
+      lane('E', 'mit-18-06', 120),
     ].filter((entry): entry is DayLogEntry => entry !== null);
     const log: DayLog = { date, entries };
     if (sunday) {
@@ -60,12 +61,14 @@ export function demoBackup(theme: 'light' | 'dark' = 'light'): BackupFile {
   }
 
   const itemStates: UserItemState[] = [
+    { refId: 'gamedevhq', status: 'done', unitsDone: [], startedAt: DEMO_START, doneAt: '2026-10-10' },
+    { refId: 'hf-llm-course', status: 'active', unitsDone: unitIds('hf-llm-course').slice(0, 5), startedAt: DEMO_START },
     { refId: '30-days-of-python', status: 'done', unitsDone: unitIds('30-days-of-python'), startedAt: DEMO_START, doneAt: '2026-10-20' },
     { refId: 'automate-the-boring-stuff', status: 'active', unitsDone: [], startedAt: '2026-10-21' },
     { refId: 'ml-zoomcamp', status: 'active', unitsDone: unitIds('ml-zoomcamp').slice(0, 6), startedAt: DEMO_START },
     { refId: 'mit-18-06', status: 'active', unitsDone: unitIds('mit-18-06').slice(0, 17), startedAt: DEMO_START },
     // In progress, not done: done needs a repository link, and the demo does not invent one.
-    { refId: 'a-small-game-1', status: 'active', unitsDone: [], startedAt: DEMO_START },
+    { refId: 'a-small-game-1', status: 'active', unitsDone: [], startedAt: '2026-10-11' },
     { refId: 'm01', status: 'active', unitsDone: [], startedAt: DEMO_START },
   ];
 

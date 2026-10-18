@@ -43,8 +43,7 @@ test('the schedule, pace, layout and plan edits reach a second device, and survi
   const a = await device(browser, fake);
   await connect(a);
 
-  // Device A: today is a University day, Graphics is paused into Core from yesterday, the tabs change, and the
-  // first item of Languages comes off the plan.
+  // Device A: today is a University day, the tabs change, and the first item of Coding lessons comes off the plan.
   await open(a, './');
   await a.getByRole('button', { name: 'Change today' }).click();
   const change = a.getByRole('dialog', { name: 'Change today' });
@@ -57,7 +56,7 @@ test('the schedule, pace, layout and plan edits reach a second device, and survi
   await a.getByRole('switch', { name: 'Reviews' }).click();
 
   await open(a, './#/plan?lane=y1-p0.B');
-  const laneB = a.getByRole('dialog', { name: /^Block B · Languages/ });
+  const laneB = a.getByRole('dialog', { name: /^Block B · Coding lessons/ });
   await laneB.getByRole('button', { name: 'Edit' }).click();
   await laneB.getByRole('button', { name: /^Take .* off the plan$/ }).first().click();
   await expect(laneB.getByRole('button', { name: /^Dropped · 1/ })).toBeVisible();
@@ -77,14 +76,16 @@ test('the schedule, pace, layout and plan edits reach a second device, and survi
   await open(b, './');
   await expect(b.getByText('0 m of 3 h today · University day · no streak yet')).toBeVisible();
   await expect(b.getByRole('navigation', { name: 'Main' }).getByRole('link')).toHaveText(['Today', 'Plan', 'Library', 'Activity', 'Reviews']);
-  await expect(laterRow(b, /^30 Days of Python/)).toHaveCount(0);
+  // The University day's Coding lessons now starts with what comes after 30 Days of Python.
+  await expect(laterRow(b, /^Coding lessons/)).toHaveCount(1);
+  await expect(laterRow(b, /^Coding lessons/)).not.toContainText('30 Days of Python');
 
   await open(b, './#/plan?lane=y1-p0.B');
-  await expect(b.getByRole('dialog', { name: /^Block B · Languages/ }).getByRole('button', { name: /^Dropped · 1/ })).toBeVisible();
+  await expect(b.getByRole('dialog', { name: /^Block B · Coding lessons/ }).getByRole('button', { name: /^Dropped · 1/ })).toBeVisible();
 
   // And it all survives a reload.
   await reload(b);
-  await expect(b.getByRole('dialog', { name: /^Block B · Languages/ }).getByRole('button', { name: /^Dropped · 1/ })).toBeVisible();
+  await expect(b.getByRole('dialog', { name: /^Block B · Coding lessons/ }).getByRole('button', { name: /^Dropped · 1/ })).toBeVisible();
   await open(b, './');
   await expect(b.getByText('0 m of 3 h today · University day · no streak yet')).toBeVisible();
 });

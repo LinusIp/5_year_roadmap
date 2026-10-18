@@ -103,6 +103,29 @@ test('the Sync section in Settings, off and connected, matches the committed scr
   await expect(section).toHaveScreenshot('settings-sync-on-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });
 
+for (const theme of ['light', 'dark'] as const) {
+  test('Today through the daily schedule (08:40, 13:00, and running at 06:24) matches the committed screenshots, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await importDemo(page, theme);
+    const at = (time: string): Date => new Date(DEMO_TIME.slice(0, 11) + time + ':00+05:00');
+    for (const [name, time] of [['today-0840', '08:40'], ['today-1300', '13:00']] as const) {
+      await page.clock.setFixedTime(at(time));
+      await open(page, './');
+      await expect(page.getByText(/daily challenge/).first()).toBeVisible();
+      await expect(page).toHaveScreenshot(name + '-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+    }
+    // ML Zoomcamp started at 06:00; at 06:24 its counter runs.
+    await page.clock.setFixedTime(at('06:00'));
+    await open(page, './');
+    await page.locator('section[aria-labelledby="now-title"]').getByRole('button', { name: 'Start', exact: true }).click();
+    await page.clock.setFixedTime(at('06:24'));
+    await open(page, './');
+    await expect(page.locator('main .tile').first()).toContainText('Running · since 06:00 · ');
+    await expect(page.getByText(/daily challenge/).first()).toBeVisible();
+    await expect(page).toHaveScreenshot('today-running-0624-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+  });
+}
+
 test('compact Today and the Change today sheet match the committed screenshots', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await importDemo(page, 'light');

@@ -26,6 +26,7 @@ with each. "Verified" means it was run, not assumed.
 | – | The Library organised (pull request #8) | **done** |
 | – | The tech doc redesigned (pull request #9) | **done** |
 | – | The timer and the layout fixed (pull request #10) | **done** |
+| – | The fixed daily schedule (pull request #11) | **done** |
 
 ## Milestone 1 — Scaffold
 
@@ -914,3 +915,19 @@ Verified on this machine (Linux, Chromium 140):
   and 412 px: nothing reaches past the screen, and the last card ends above the tab bar.
 - Before/after at 360, 390 and 412 px, light and dark: `docs/before-after/fixes/`.
 
+
+## Pull request #11: the fixed daily schedule
+
+- Data: block H (Hugging Face) and lane H; the Daily schedule template at fixed times (06–12, 18–22, 10 h); GameDevHQ
+  first in lane A; heatmap thresholds for 10 h. Validator: block H only where the plan uses it.
+- Migration (`withDailySchedule`, `src/lib/settings.ts`): once, for settings without H, history kept up to yesterday;
+  Settings › Schedule › Reset to the daily schedule. `tests/unit/daily-schedule.test.ts` runs it on a settings file
+  and a backup made by the live build (`tests/fixtures/live-2026-10-18/`).
+- Today (`src/lib/clock-plan.ts`): Now by the clock, the break card, Day done, the prompt to move on, Later today with
+  start times and the break, "x of 10 h". `tests/unit/clock-plan.test.ts`.
+- Plan: "Every day · 06–12 · 18–22 · 10 h" with each block's window; the phase map's subtitle and legend.
+- Calendar: Apply to every day.
+- `npm run schedule:shift`: projected finishes moved by more than two weeks (`docs/daily-schedule/pace-shift.txt`).
+- E2E: `tests/e2e/daily-schedule.spec.ts` (06:10, 08:40, 13:00, 22:30, the prompt, a finished course moving its lane,
+  every day from today on and the reset, a live backup switching with its day change and class, two devices), and
+  the earlier specs moved to the new day.

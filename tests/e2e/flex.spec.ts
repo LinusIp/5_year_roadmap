@@ -19,7 +19,7 @@ async function changeToday(page: Page) {
 
 test('changing today to a University day changes the targets', async ({ page }) => {
   await open(page, './');
-  await expect(page.getByText('0 m of 8 h today · no streak yet')).toBeVisible();
+  await expect(page.getByText('0 m of 10 h today · no streak yet')).toBeVisible();
 
   const sheet = await changeToday(page);
   await sheet.getByRole('button', { name: /^Template/ }).click();
@@ -28,8 +28,10 @@ test('changing today to a University day changes the targets', async ({ page }) 
   await sheet.getByRole('button', { name: 'Close' }).click();
 
   await expect(page.getByText('0 m of 3 h today · University day · no streak yet')).toBeVisible();
-  await expect(nowCard(page).getByText('Graphics · 0 m of 1 h')).toBeVisible();
-  // Projects (D) is not part of a University day.
+  await expect(nowCard(page).getByText('0 m of 1 h · GameDevHQ Unity course')).toBeVisible();
+  // A University day has four blocks: Hugging Face (H) and Projects (D) are not part of it.
+  await expect(page.getByText('Done: 0 of 4')).toBeVisible();
+  await expect(laterRow(page, /^Hugging Face/)).toHaveCount(0);
   await expect(laterRow(page, /Weekly build/)).toHaveCount(0);
 
   await reload(page);
@@ -41,34 +43,34 @@ test('skips a block and moves another to tomorrow, for this day only', async ({ 
   await open(page, './');
   const sheet = await changeToday(page);
 
-  await sheet.getByRole('button', { name: /^Math Block E/ }).click();
+  await sheet.getByRole('button', { name: /^Math and physics Block E/ }).click();
   await sheet.getByRole('button', { name: 'Skip today' }).click();
   await expect(sheet.getByText('Skipped today')).toBeVisible();
 
-  await sheet.getByRole('button', { name: /^Core Block C/ }).click();
+  await sheet.getByRole('button', { name: /^ML Zoomcamp Block C/ }).click();
   await sheet.getByRole('button', { name: 'Move to Tuesday' }).click();
   await expect(sheet.getByText('Moved to Tuesday')).toBeVisible();
   await page.screenshot({ path: 'test-results/flex-change-today-sheet.png' });
   await sheet.getByRole('button', { name: 'Close' }).click();
 
-  await expect(page.getByText('0 m of 5 h today · no streak yet')).toBeVisible();
-  await expect(laterRow(page, /^18\.06 Linear Algebra/)).toHaveCount(0);
+  await expect(page.getByText('0 m of 6 h today · no streak yet')).toBeVisible();
+  await expect(laterRow(page, /^Math and physics/)).toHaveCount(0);
   await expect(laterRow(page, /^ML Zoomcamp/)).toHaveCount(0);
 
-  // Tomorrow carries Core twice over.
+  // Tomorrow carries ML Zoomcamp twice over.
   await writesSettled(page);
   await page.goto('./#/?date=2026-09-22');
-  await expect(page.getByText(/of 10 h today/)).toBeVisible();
+  await expect(page.getByText(/of 12 h today/)).toBeVisible();
 });
 
 test('changes one block’s minutes and makes a rest day', async ({ page }) => {
   await open(page, './');
   const sheet = await changeToday(page);
-  await sheet.getByRole('button', { name: /^Graphics/ }).click();
-  const minutes = sheet.getByRole('textbox', { name: /^Minutes for Graphics today/ });
+  await sheet.getByRole('button', { name: /^GameDevHQ/ }).click();
+  const minutes = sheet.getByRole('textbox', { name: /^Minutes for GameDevHQ today/ });
   await minutes.fill('30');
   await minutes.blur();
-  await expect(sheet.getByText('Blocks · 6 h 30 m')).toBeVisible();
+  await expect(sheet.getByText('Blocks · 8 h 30 m')).toBeVisible();
 
   await sheet.getByRole('switch', { name: /^Rest day/ }).click();
   await sheet.getByRole('button', { name: 'Close' }).click();
@@ -79,7 +81,7 @@ test('changes one block’s minutes and makes a rest day', async ({ page }) => {
   const again = await changeToday(page);
   await again.getByRole('button', { name: "Undo today's changes" }).click();
   await again.getByRole('button', { name: 'Close' }).click();
-  await expect(page.getByText('0 m of 8 h today · no streak yet')).toBeVisible();
+  await expect(page.getByText('0 m of 10 h today · no streak yet')).toBeVisible();
 });
 
 test('an exam-week date range shifts the forecast', async ({ page }) => {
@@ -87,8 +89,8 @@ test('an exam-week date range shifts the forecast', async ({ page }) => {
   await logTime(page, '120');
 
   await open(page, './#/plan');
-  const graphics = page.getByRole('button', { name: /^Graphics · 2 h/ });
-  const before = Number(/(\d+) weeks? behind/.exec((await graphics.textContent()) ?? '')?.[1]);
+  const gamedev = page.getByRole('button', { name: /^GameDevHQ \d+ weeks? behind 08:00–10:00/ });
+  const before = Number(/(\d+) weeks? behind/.exec((await gamedev.textContent()) ?? '')?.[1]);
   expect(before).toBeGreaterThan(0);
 
   await open(page, './#/settings?section=schedule');
@@ -101,7 +103,7 @@ test('an exam-week date range shifts the forecast', async ({ page }) => {
   await expect(page.getByRole('button', { name: /^Exam week 22 Sep/ })).toBeVisible();
 
   await open(page, './#/plan');
-  await expect(page.getByRole('button', { name: new RegExp('^Graphics · 2 h.*' + (before + 2) + ' weeks behind') })).toBeVisible();
+  await expect(page.getByRole('button', { name: new RegExp('^GameDevHQ ' + (before + 2) + ' weeks behind 08:00–10:00') })).toBeVisible();
   await page.goto('./#/?date=2026-09-23');
   await expect(page.getByText(/^0 m of 1 h 30 m today · Exam week/)).toBeVisible();
 });
@@ -188,25 +190,30 @@ test('creates a resource of its own and a goal that shows on the Timeline', asyn
 
 test('pauses a lane, giving its time to another, and resumes it', async ({ page }) => {
   await open(page, './#/plan?lane=y1-p0.A');
-  const lane = page.getByRole('dialog', { name: /^Block A · Graphics/ });
+  const lane = page.getByRole('dialog', { name: /^Block A · GameDevHQ/ });
   await lane.getByRole('button', { name: /^Pace/ }).click();
-  const pace = page.getByRole('dialog', { name: 'Pace · Graphics' });
+  const pace = page.getByRole('dialog', { name: 'Pace · GameDevHQ' });
   await pace.getByRole('button', { name: 'Pause this lane' }).click();
   await pace.getByRole('textbox', { name: 'From' }).fill('2026-09-20');
   await pace.getByRole('button', { name: /^Its time goes to/ }).click();
   await page.getByRole('dialog', { name: 'Its time goes to' }).getByRole('button', { name: /^Block C/ }).click();
-  await pace.getByRole('button', { name: 'Pause Graphics' }).click();
-  await expect(pace.getByText(/^Paused since .* until you resume it\. Its time goes to Core\./)).toBeVisible();
+  await pace.getByRole('button', { name: 'Pause GameDevHQ' }).click();
+  await expect(pace.getByText(/^Paused since .* until you resume it\. Its time goes to ML Zoomcamp\./)).toBeVisible();
 
   await open(page, './');
-  await expect(laterRow(page, /^ML Zoomcamp Core/)).toContainText('4 h');
-  await expect(page.locator('#now-title')).not.toHaveText('One finished small game');
+  // ML Zoomcamp takes GameDevHQ's two hours and its window, so at 09:00 it is Now, 06:00 to 10:00.
+  await expect(page.locator('#now-title')).toHaveText('ML Zoomcamp');
+  await expect(nowCard(page).getByText('Now · 06:00–10:00')).toBeVisible();
+  await expect(nowCard(page).getByText(/^0 m of 4 h · /)).toBeVisible();
+  await expect(page.getByText('Done: 0 of 4')).toBeVisible();
+  await expect(laterRow(page, /^GameDevHQ/)).toHaveCount(0);
 
   await open(page, './#/plan?lane=y1-p0.A');
-  await page.getByRole('dialog', { name: /^Block A · Graphics/ }).getByRole('button', { name: /^Pace/ }).click();
-  await page.getByRole('dialog', { name: 'Pace · Graphics' }).getByRole('button', { name: 'Resume' }).click();
+  await page.getByRole('dialog', { name: /^Block A · GameDevHQ/ }).getByRole('button', { name: /^Pace/ }).click();
+  await page.getByRole('dialog', { name: 'Pace · GameDevHQ' }).getByRole('button', { name: 'Resume' }).click();
   await open(page, './');
-  await expect(page.locator('#now-title')).toHaveText('One finished small game');
+  await expect(page.locator('#now-title')).toHaveText('GameDevHQ');
+  await expect(laterRow(page, /^ML Zoomcamp .* 06:00$/)).toBeVisible();
 });
 
 test('compact Today, other tabs, and a reset to the default layout', async ({ page }) => {
@@ -220,7 +227,7 @@ test('compact Today, other tabs, and a reset to the default layout', async ({ pa
   await open(page, './');
   const tabs = page.getByRole('navigation', { name: 'Main' }).getByRole('link');
   await expect(tabs).toHaveText(['Today', 'Plan', 'Activity', 'Reviews']);
-  await expect(laterRow(page, /^30 Days of Python 1 h$/)).toBeVisible();
+  await expect(laterRow(page, /^Coding lessons 18:00$/)).toBeVisible();
   await page.screenshot({ path: 'test-results/flex-compact-today.png' });
 
   await reload(page);
@@ -232,5 +239,5 @@ test('compact Today, other tabs, and a reset to the default layout', async ({ pa
   }
   await open(page, './');
   await expect(tabs).toHaveText(['Today', 'Plan', 'Calendar', 'Library', 'Activity']);
-  await expect(laterRow(page, /^30 Days of Python Languages · day 1/)).toBeVisible();
+  await expect(laterRow(page, /^Coding lessons 30 Days of Python · day 1/)).toBeVisible();
 });
