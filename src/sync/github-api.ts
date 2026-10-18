@@ -96,7 +96,8 @@ export class GithubClient {
         cache: 'no-store',
         headers: {
           Accept: 'application/vnd.github+json',
-          Authorization: 'Bearer ' + this.token,
+          // A public repository can be read with no token (the blog's posts, DAILY-BLOG).
+          ...(this.token ? { Authorization: 'Bearer ' + this.token } : {}),
           'X-GitHub-Api-Version': '2022-11-28',
           ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
         },
@@ -180,6 +181,12 @@ export class GithubClient {
     const json = await this.request<{ tree: TreeEntry[]; truncated?: boolean }>('GET', this.repoPath('/git/trees/' + sha + '?recursive=1'));
     if (json.truncated) throw new GithubError('unexpected', 'The data repository has too many files for one listing.');
     return json.tree.filter((e) => e.type === 'blob');
+  }
+
+  /** The files of a folder (read-only): their names and paths. */
+  async listDirectory(path: string): Promise<{ name: string; path: string; type: string }[]> {
+    const rows = await this.request<{ name: string; path: string; type: string }[] | { type: string }>('GET', this.repoPath('/contents/' + path.split('/').map(encodeURIComponent).join('/')));
+    return Array.isArray(rows) ? rows.map((r) => ({ name: r.name, path: r.path, type: r.type })) : [];
   }
 
   async getBlob(sha: string): Promise<string> {

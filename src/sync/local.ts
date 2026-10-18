@@ -6,16 +6,16 @@ import { currentSettings } from '../lib/settings.ts';
 import Dexie from 'dexie';
 import type { AtlasDB } from '../db/db.ts';
 import type {
-  CertState, CustomEntity, DayLog, MilestoneState, Override, PaperState, PlanPatch, ChallengeEvent, ReplanRecord, Review, StoredSettingsInput,
+  BlogPost, CertState, CustomEntity, DayLog, MilestoneState, Override, PaperState, PlanPatch, ChallengeEvent, ReplanRecord, Review, StoredSettingsInput,
   UserItemState, WeekPick,
 } from '../db/types.ts';
 import { renderDayMarkdown, titleIndex } from '../lib/day-markdown.ts';
 import type { AppSeed } from '../seed/schema.ts';
-import { renderChallenges, renderDay, renderItems, renderPlan, renderProject, renderReview, renderSettings } from './files.ts';
+import { renderBlogPost, renderChallenges, renderDay, renderItems, renderPlan, renderProject, renderReview, renderSettings } from './files.ts';
 import type { ItemsData, PlanData } from './files.ts';
 import { markSilent } from './middleware.ts';
 import {
-  CHALLENGES_PATH, ITEMS_PATH, PLAN_PATH, SETTINGS_PATH, dateOfLogPath, logMarkdownPath, logPath, projectPath, reviewPath,
+  CHALLENGES_PATH, ITEMS_PATH, blogPath, dateOfBlogPath, PLAN_PATH, SETTINGS_PATH, dateOfLogPath, logMarkdownPath, logPath, projectPath, reviewPath,
 } from './paths.ts';
 
 export interface LocalState {
@@ -31,13 +31,14 @@ export interface LocalState {
   replans: ReplanRecord[];
   planPatches: PlanPatch[];
   challenges: ChallengeEvent[];
+  blogPosts: BlogPost[];
   settings: StoredSettingsInput[];
 }
 
 export async function readLocal(database: AtlasDB): Promise<LocalState> {
   return database.transaction(
     'r',
-    [database.dayLogs, database.itemStates, database.paperStates, database.certStates, database.milestoneStates, database.customEntities, database.overrides, database.reviews, database.weekPicks, database.replans, database.planPatches, database.challenges, database.settings],
+    [database.dayLogs, database.itemStates, database.paperStates, database.certStates, database.milestoneStates, database.customEntities, database.overrides, database.reviews, database.weekPicks, database.replans, database.planPatches, database.challenges, database.blogPosts, database.settings],
     async () => ({
       dayLogs: await database.dayLogs.toArray(),
       itemStates: await database.itemStates.toArray(),
@@ -51,6 +52,7 @@ export async function readLocal(database: AtlasDB): Promise<LocalState> {
       replans: await database.replans.toArray(),
       planPatches: await database.planPatches.toArray(),
       challenges: await database.challenges.toArray(),
+      blogPosts: await database.blogPosts.toArray(),
       settings: await database.settings.toArray(),
     }),
   );
@@ -71,6 +73,7 @@ export function allPaths(local: LocalState, seed: AppSeed): string[] {
   if (local.settings.length > 0) paths.push(SETTINGS_PATH);
   if (local.challenges.length > 0) paths.push(CHALLENGES_PATH);
   for (const log of local.dayLogs) paths.push(logPath(log.date));
+  for (const post of local.blogPosts) paths.push(blogPath(post.date));
   for (const review of local.reviews) paths.push(reviewPath(review.id));
   for (const state of local.itemStates) if (projects.has(state.refId)) paths.push(projectPath(state.refId));
   return paths;
@@ -93,6 +96,12 @@ export function renderPath(path: string, local: LocalState, seed: AppSeed): stri
   if (path === CHALLENGES_PATH) return local.challenges.length > 0 ? renderChallenges(local.challenges) : null;
   if (path === PLAN_PATH) return renderPlan(planOf(local));
   if (path === SETTINGS_PATH) return local.settings[0] ? renderSettings(local.settings[0]) : null;
+
+  const blogDate = dateOfBlogPath(path);
+  if (blogDate) {
+    const post = local.blogPosts.find((p) => p.date === blogDate);
+    return post ? renderBlogPost(post) : null;
+  }
 
   const date = dateOfLogPath(path);
   if (date) {
@@ -176,6 +185,12 @@ export async function writeReview(database: AtlasDB, review: Review): Promise<vo
 }
 
 /** Challenge events from GitHub, merged with this device's by id: an event is never lost. */
+export async function writeBlogPost(database: AtlasDB, post: BlogPost): Promise<void> {
+  await silently(database, [database.blogPosts], async () => {
+    await database.blogPosts.put(post);
+  });
+}
+
 export async function writeChallenges(database: AtlasDB, events: ChallengeEvent[]): Promise<void> {
   await silently(database, [database.challenges], async () => {
     await database.challenges.bulkPut(events);

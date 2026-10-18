@@ -11,6 +11,7 @@ import { planForDay } from '../lib/schedule.ts';
 import type { ScheduleContext } from '../lib/schedule.ts';
 import { useQueryParam } from '../router/router.tsx';
 import { Button } from '../ui/Button.tsx';
+import { useBlogPosts } from '../db/blog.ts';
 import { Header } from '../ui/Header.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { SegmentedControl } from '../ui/SegmentedControl.tsx';
@@ -52,6 +53,7 @@ export function Calendar() {
   const atlas = useAtlas();
   const units = useUnits();
   const catalogue = useCatalogueIndex();
+  const blogPosts = useBlogPosts();
   const now = todayDate();
   const [viewParam, setView] = useQueryParam('view');
   const [dateParam, setDate] = useQueryParam('date');
@@ -180,6 +182,12 @@ export function Calendar() {
           <p className="min-w-0 flex-1 text-meta text-ink2">
             {span(resolvedDay.targetMinutes) + ' planned · ' + span(totalMinutes(dayLog)) + ' logged'}
           </p>
+          {date <= now && (
+            // The day's blog post: the facts and outline of that day, and whether it was posted (DAILY-BLOG).
+            <Button size="sm" icon="blog" to={'/blog?date=' + date} name={blogPosts?.some((p) => p.date === date && p.posted) ? 'Blog post, posted' : 'Blog post, not yet'}>
+              {blogPosts?.some((p) => p.date === date && p.posted) ? 'Blog ✓' : 'Blog'}
+            </Button>
+          )}
           <Button size="sm" icon="plus" onClick={() => setSheet({ kind: 'add', date, minute: Math.min(22 * 60, Math.ceil(Math.max(date === now ? minute : 0, 8 * 60) / 30) * 30) })}>
             Add
           </Button>

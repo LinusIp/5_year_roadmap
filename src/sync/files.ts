@@ -9,10 +9,10 @@ import { z } from 'zod';
 import { canonical } from '../db/backup-file.ts';
 import {
   CertStateSchema, CustomEntitySchema, DayLogSchema, MilestoneStateSchema, OverrideSchema, PaperStateSchema,
-  PlanPatchSchema, ChallengeEventSchema, ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
+  PlanPatchSchema, BlogPostSchema, ChallengeEventSchema, ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
 } from '../db/types.ts';
 import { legacyPlanPatches } from '../lib/plan.ts';
-import type { ChallengeEvent, DayLog, Review, StoredSettingsInput, UserItemState } from '../db/types.ts';
+import type { BlogPost, ChallengeEvent, DayLog, Review, StoredSettingsInput, UserItemState } from '../db/types.ts';
 import { formatRange, monthName } from '../lib/dates.ts';
 import type { Project } from '../seed/schema.ts';
 
@@ -142,6 +142,21 @@ export function renderChallenges(events: readonly ChallengeEvent[]): string {
 export function parseChallenges(text: string): ParseResult<ChallengeEvent[]> {
   const result = parseJson(text, ChallengesFileSchema, 'state/challenges.json');
   return result.ok ? { ok: true, value: result.value.events } : result;
+}
+
+/* ------------------------------------------------------------------ blog/<date>.json */
+
+/** A day's blog record as its file holds it: the date is the file's name. */
+export const BlogFileSchema = BlogPostSchema.omit({ date: true });
+
+export function renderBlogPost(post: BlogPost): string {
+  const { date: _date, ...rest } = post;
+  return toJson(rest);
+}
+
+export function parseBlogPost(text: string, date: string): ParseResult<BlogPost> {
+  const result = parseJson(text, BlogFileSchema, 'blog/' + date + '.json');
+  return result.ok ? { ok: true, value: { date, ...result.value } } : result;
 }
 
 /* ------------------------------------------------------------------ state/settings.json */

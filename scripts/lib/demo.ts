@@ -92,6 +92,11 @@ export function demoBackup(theme: 'light' | 'dark' = 'light'): BackupFile {
       planPatches: [],
       practice: [], // the archived practice answers: none in the demo
       challenges: [],
+      // A blog post every evening for the last twelve days: the writing streak the blog screen shows.
+      blogPosts: Array.from({ length: 12 }, (_, i) => {
+        const date = addDays(DEMO_NOW, -(i + 1));
+        return { date, posted: true, at: date + 'T17:30:00.000Z' };
+      }),
       settings: [{ id: 'app', core: seed.settings, theme, github: { username: '', showCalendar: false }, backup: { lastBackupAt: '2026-11-15' } }],
       meta: [],
     },
