@@ -941,3 +941,10 @@ The date range sits on the title's row between "Calendar" and the arrows.
 **Library:** a start month is short ("Feb"); Up next shows the month its phase starts and never "Now". Projects is a
 full-width row under the shelf grid.
 
+**Two races found on CI.** (1) A switch writes the other block's stop and then the new start; the new timer took its
+start from the moment of that second write. A test that moved the clock between the two writes lost a block's
+minutes (on a phone it would only shift the start by milliseconds). The tap's moment is now both the stop and the
+start. (2) After a jump, the tech doc's bar ignores scroll events for 600 ms while the smooth scroll settles. A scroll
+that ended inside that time left the bar on the part jumped to. The bar now reads the position once the time is up.
+Both have tests that failed before the fix.
+
