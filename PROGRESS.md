@@ -931,3 +931,5 @@ Verified on this machine (Linux, Chromium 140):
 - E2E: `tests/e2e/daily-schedule.spec.ts` (06:10, 08:40, 13:00, 22:30, the prompt, a finished course moving its lane,
   every day from today on and the reset, a live backup switching with its day change and class, two devices), and
   the earlier specs moved to the new day.
+- Baselines redrawn on CI's Linux, including Today at 08:40, 13:00 and running at 06:24, light and dark; the demo
+  history behind them follows the daily schedule.
