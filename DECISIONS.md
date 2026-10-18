@@ -1009,3 +1009,9 @@ names are short already, so a name is cut only at "/" or "&": "Hugging Face" and
 
 **Commit messages** count the blocks of the weekday's template ("5/5 blocks"), not every defined block (D would have
 made it "5/6").
+
+**Smaller fixes on the way.** Today's date button now has a name that starts with what it shows ("Sun 18 Oct, today,
+pick a date"; it said "Today, Sunday 18 October", which Lighthouse flags as a label that does not contain its text).
+A weekly build added to a day is titled by its block, like every other row. The deploy's live check waits for any
+Now card, since between 12:00 and 18:00 it is the break and after 22:00 the day-done card. The screenshots' demo
+history follows the daily schedule (five two-hour courses, GameDevHQ finished on 10 October).
