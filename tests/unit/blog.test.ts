@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { BlogPost, DayLog } from '../../src/db/types.ts';
+import { AtlasDB } from '../../src/db/db.ts';
+import { TICK_LOG_KEY, noteTicks } from '../../src/db/ticks.ts';
+import type { BlogPost, DayLog, UserItemState } from '../../src/db/types.ts';
+import { parseBlogPost, renderBlogPost } from '../../src/sync/files.ts';
+import { blogPath, dateOfBlogPath, isPulledPath } from '../../src/sync/paths.ts';
 import { blogDayNumber, blogFacts, blogOutline, blogReminderDue, writingStreak } from '../../src/lib/blog.ts';
 import { span } from '../../src/screens/parts/text.ts';
 
@@ -147,5 +151,35 @@ describe('the reminder on Today', () => {
   it('goes once the post is marked, and never comes on a day with no blocks', () => {
     expect(blogReminderDue({ ...base, minute: at(22, 30), posted: true })).toBe(false);
     expect(blogReminderDue({ ...base, slots: [], minute: at(23) })).toBe(false);
+  });
+});
+
+describe('the synced file and the tick journal', () => {
+  it('writes blog/<date>.json without the date, and reads it back with it', () => {
+    const post: BlogPost = { date: '2026-10-18', posted: true, at: '2026-10-18T17:30:00.000Z', editorLinkUsed: true };
+    expect(blogPath('2026-10-18')).toBe('blog/2026-10-18.json');
+    expect(dateOfBlogPath('blog/2026-10-18.json')).toBe('2026-10-18');
+    expect(isPulledPath('blog/2026-10-18.json')).toBe(true);
+    const text = renderBlogPost(post);
+    expect(JSON.parse(text)).toEqual({ posted: true, at: '2026-10-18T17:30:00.000Z', editorLinkUsed: true });
+    expect(parseBlogPost(text, '2026-10-18')).toEqual({ ok: true, value: post });
+    expect(parseBlogPost('{"posted":"yes"}', '2026-10-18').ok).toBe(false);
+  });
+
+  it('notes ticks as they happen, takes back an untick, and keeps 60 days', async () => {
+    const database = new AtlasDB('blog-ticks-test');
+    await database.open();
+    const read = async () => ((await database.meta.get(TICK_LOG_KEY))?.value ?? {}) as Record<string, unknown[]>;
+    const s = (unitsDone: string[], status: UserItemState['status'] = 'active'): UserItemState => ({ refId: 'ml-zoomcamp', status, unitsDone });
+    await database.meta.put({ key: TICK_LOG_KEY, value: { '2026-08-01': [{ refId: 'old' }] } });
+    await noteTicks(s([]), s(['m1', 'm2']), '2026-10-18', database);
+    await noteTicks(s(['m1', 'm2']), s(['m1']), '2026-10-18', database);
+    await noteTicks(s(['m1']), s(['m1'], 'done'), '2026-10-18', database);
+    expect(await read()).toEqual({ '2026-10-18': [{ refId: 'ml-zoomcamp', unit: 'm1' }, { refId: 'ml-zoomcamp' }] });
+    // roadmap.sh nodes are not study.
+    await noteTicks({ refId: 'roadmap:ai', status: 'todo', unitsDone: [] }, { refId: 'roadmap:ai', status: 'todo', unitsDone: ['n1'] }, '2026-10-18', database);
+    expect((await read())['2026-10-18']).toHaveLength(2);
+    database.close();
+    await database.delete();
   });
 });

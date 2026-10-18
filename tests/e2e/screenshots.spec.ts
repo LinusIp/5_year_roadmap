@@ -126,6 +126,23 @@ for (const theme of ['light', 'dark'] as const) {
   });
 }
 
+for (const theme of ['light', 'dark'] as const) {
+  test('the blog screen and Today with the blog reminder match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await importDemo(page, theme);
+    await open(page, './#/blog');
+    await expect(page.getByLabel('The outline, in Markdown')).toContainText('## ');
+    await expect(page.locator('.tile').filter({ hasText: 'Writing streak' })).toContainText('12');
+    await expect(page).toHaveScreenshot('blog-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+    // At 22:10 the day is done and Today reminds.
+    await page.clock.setFixedTime(new Date(DEMO_TIME.slice(0, 11) + '22:10:00+05:00'));
+    await open(page, './');
+    await expect(page.getByText('Write today’s blog post')).toBeVisible();
+    await page.getByText('Write today’s blog post').scrollIntoViewIfNeeded();
+    await expect(page).toHaveScreenshot('today-blog-reminder-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+  });
+}
+
 test('compact Today and the Change today sheet match the committed screenshots', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await importDemo(page, 'light');

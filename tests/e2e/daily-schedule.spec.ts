@@ -28,7 +28,7 @@ test('at 06:10 ML Zoomcamp is Now, and the day is 10 hours', async ({ page }) =>
   await expect(page.getByText('0 m of 10 h today · no streak yet')).toBeVisible();
   // Later today in the order of the day, with the break between the sessions.
   const later = page.locator('section:has(h2:text-is("Later today")) li');
-  await expect(later).toHaveText([/^GameDevHQ.*08:00$/, /^Hugging Face.*10:00$/, /Break · 12:00 – 18:00/, /^Coding lessons.*18:00$/, /^Math and physics.*20:00$/]);
+  await expect(later).toHaveText([/^GameDevHQ.*08:00$/, /^Hugging Face.*10:00$/, /Break · 12:00 – 18:00/, /^Coding lessons.*18:00$/, /^Math and physics.*20:00$/, /^Blog post · not yet/]);
 });
 
 test('at 08:40 GameDevHQ is Now with its course; at 13:00 it is the break, with Coding lessons next', async ({ page }) => {

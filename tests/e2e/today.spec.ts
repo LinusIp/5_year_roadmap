@@ -31,7 +31,7 @@ test('the block of the hour is Now, and the other four wait in Later today by th
   await expect(laterRow(page, /^Hugging Face LLM Course · 1\. Transformer models 10:00$/)).toBeVisible();
   await expect(laterRow(page, /^Coding lessons 30 Days of Python · day 1, introduction · daily challenge 18:00$/)).toBeVisible();
   await expect(laterRow(page, /^Math and physics 18\.06 Linear Algebra · lecture 1, the geometry of linear equations 20:00$/)).toBeVisible();
-  await expect(rows).toHaveText([/^ML Zoomcamp/, /^Hugging Face/, 'Break · 12:00 – 18:00', /^Coding lessons/, /^Math and physics/]);
+  await expect(rows).toHaveText([/^ML Zoomcamp/, /^Hugging Face/, 'Break · 12:00 – 18:00', /^Coding lessons/, /^Math and physics/, /^Blog post · not yet/]);
   await expect(page.getByText('Done: 0 of 5')).toBeVisible();
   // Projects (D) is not in the day any more, so there is no weekly build row.
   await expect(laterRow(page, /Weekly build/)).toHaveCount(0);

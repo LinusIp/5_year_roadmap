@@ -75,8 +75,10 @@ test('drag a block to 19:00, make it 90 minutes, and Today follows', async ({ pa
   // Today: the rows follow the new times, the break ends at 19:00, and Coding lessons takes 1 h 30 m.
   await open(page, './');
   const rows = page.locator('section:has(h2:text-is("Later today")) li');
-  await expect(rows.last()).toContainText('Math and physics');
-  await expect(rows.last()).toContainText('20:45');
+  // The last block, before the day's blog post row.
+  await expect(rows.nth(-2)).toContainText('Math and physics');
+  await expect(rows.nth(-2)).toContainText('20:45');
+  await expect(rows.last()).toContainText('Blog post · not yet');
   await expect(laterRow(page, /^Coding lessons/)).toContainText('19:00');
   await expect(page.getByText('Break · 12:00 – 19:00')).toBeVisible();
   await laterRow(page, /^Coding lessons/).click();

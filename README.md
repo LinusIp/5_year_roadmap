@@ -79,6 +79,26 @@ Every day is the same five two-hour courses at fixed times, 10 hours in all:
   keep their old plan, your day changes, busy times, pace and logged time stay. `npm run schedule:shift` lists the
   items whose projected finish moved by more than two weeks (`docs/daily-schedule/pace-shift.txt`).
 
+## The daily blog
+
+The day's post is written in your own blog, through Pages CMS, never in Atlas. Atlas helps with the rest:
+
+- **A reminder.** Once the day's last block is marked done or its timer stopped, or at 22:00, Today shows "Write
+  today's blog post" at the top of Later today. The row at the end of the list says "Blog post · not yet" or
+  "posted ✓". No pop-ups, no notifications.
+- **Today's blog post** (from that row, the Day done card, or Blog on any past day in Calendar): "Sun 18 Oct · day
+  28" counted from 21 September 2026, the writing streak, what you did block by block with the time and what you
+  ticked, and a Markdown outline built from it (a heading per block, the ticks as bullets, "What I learned:" and
+  "Stuck on:" to fill in). **Copy outline** copies it.
+- **Open my blog** opens Pages CMS in a new tab. Paste your posts collection's own link in Settings › Blog › Editor
+  link to land straight on it.
+- **I posted it** marks the day (Undo takes it back) and feeds the writing streak. A day with no study and no post
+  neither counts nor breaks it. The mark syncs as `blog/<date>.json`: `{ "posted": true, "at": "…" }`.
+- **Detect my post automatically** (Settings › Blog, off by default): once an evening, from 21:00, and when the blog
+  screen opens, Atlas lists the blog repository's `_posts` folder and marks the day when a post dated that day is
+  there. Read-only: it never writes to the blog. If the token cannot read the repository, the setting says how to
+  give it Contents: Read-only, and stays off.
+
 ## Making it yours
 
 Atlas starts as the plan in `data/`: the same 10-hour day, every day. Real weeks are not like that, so the day,
