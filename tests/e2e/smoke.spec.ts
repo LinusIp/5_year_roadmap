@@ -106,10 +106,13 @@ test('the heatmap is one tab stop, and the arrow keys move through the days', as
   const start = grid.locator('rect[tabindex="0"]');
   await expect(start).toHaveAttribute('data-date', '2026-09-23');
   await start.focus();
-  await page.keyboard.press('ArrowRight');
-  await expect(grid.locator('rect[data-date="2026-09-30"]')).toBeFocused();
+  // This year's grid ends at this week: a week back, then a day back.
+  await page.keyboard.press('ArrowLeft');
+  await expect(grid.locator('rect[data-date="2026-09-16"]')).toBeFocused();
   await page.keyboard.press('ArrowUp');
-  await expect(grid.locator('rect[data-date="2026-09-29"]')).toBeFocused();
+  await expect(grid.locator('rect[data-date="2026-09-15"]')).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect(grid.locator('rect[data-date="2026-09-22"]')).toBeFocused();
   await page.keyboard.press('Home');
   await expect(grid.locator('rect[data-date="2026-01-01"]')).toBeFocused();
   await page.keyboard.press('Enter');

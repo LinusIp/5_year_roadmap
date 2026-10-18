@@ -1147,3 +1147,41 @@ the 30 nights are logged and their range. Neither the tile nor the screen gives 
 
 **The chart's text.** The week chart is one image whose name lists each night ("Monday 7.0 hours, Tuesday not
 logged, ...") and the goal; the bars and numbers are hidden from screen readers.
+
+## Scrolling in clay (pull request #15)
+
+The style guide's new Scrolling section (CLAY-STYLE, 18 October 2026) and HIDE-SCROLLBARS: the grey bar on the page's
+right edge and the thin bars under Activity's heatmaps are gone. The project's copy of the guide is now
+`docs/CLAY-STYLE.md`.
+
+**No scrollbars.** `scrollbar-width: none` on `html`, `body` and every element, and `::-webkit-scrollbar` hidden with
+no width or height, from the base layer: the page, sheets, Calendar's time grid and every strip. Nothing gained
+`overflow: hidden`; touch, wheel and keyboard scrolling are untouched. There was no `scrollbar-gutter` and no
+padding kept for a bar, so nothing else moved.
+
+**The edge fade.** A 24 px gradient from `--bg` to transparent laid over a strip's edge, on a side only while more is
+hidden there (`.fade-strip`, its `::before` and `::after`). `src/ui/edgeFade.ts` (`useEdgeFade`, and `FadeStrip`
+around it) keeps the frame's `data-fade-start` and `data-fade-end` in step with the scroll position and the sizes.
+It lies over the strip with no pointer events, so it catches no tap; an earlier try masked the strip instead, which
+also clipped a focused strip's focus ring.
+
+**The heatmaps** (study time, and GitHub's, which uses the same grid). This year's grid ends at this week: the weeks
+still ahead had nothing to show, and stopping there lets the strip open scrolled fully to the end (`scrollLeft` at
+its maximum) with the current month in view. A year that is over, or still ahead, keeps all its weeks. On a card
+wide enough to give every week a cell of 8 px or more, the cells shrink to fit and the grid does not scroll (a
+desktop shows the whole year). Swiping back to January shows the right-hand fade over the weeks then hidden.
+
+**Other strips** open at their latest item, read per strip: Stats' bars at the newest week or month; chip rows
+(Activity's years and track, the Library's and Plan's filters, Pick a project, the settings) with the selected chip
+in view (for the years that is the current one; scrolling a row to its far end would hide the chip in use); the
+five-year phase map at the current phase. A strip is placed once, when it first draws: a later selection never moves
+a row the user has scrolled.
+
+**Keyboard.** A strip with nothing focusable inside is a region of its own, `tabindex="0"` with a label: the GitHub
+calendar ("GitHub contributions in 2026, scroll for earlier months", while it scrolls) and the phase map ("Five-year
+map, scroll for the other phases"). Tab reaches it, the arrow keys scroll it, and the app's focus ring shows on it.
+The study heatmap is already one tab stop, its days: the arrows move a day or a week and the strip scrolls to the
+focused day. A second tab stop on its frame would only repeat that, so it gets none. Chip rows and Stats' bars are
+made of buttons, which scroll into view as they take focus.
+
+**Code blocks** scroll sideways without a bar and without a fade, and stay focusable, so a keyboard scrolls them.

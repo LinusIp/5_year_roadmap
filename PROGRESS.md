@@ -978,3 +978,16 @@ Verified on this machine (Linux, Chromium 140):
   the week chart's bars and average, the tiles, the goal moving them, Activity's tile; the question gone after 12:00
   and when off; a reload; two devices with the newer edit winning. The Sleep screen joins the smoke tests (axe in both
   themes, 380 px). Baselines: Today with the Slept tile, the Sleep screen and Activity, light and dark.
+
+## Pull request #15: scrolling in clay
+
+- No visible scrollbars anywhere (`src/index.css`); `docs/CLAY-STYLE.md`, the project's copy of the guide, with the
+  Scrolling rule. `src/ui/edgeFade.ts` and `src/ui/FadeStrip.tsx`: the 24 px fade over a hidden side and where a
+  strip opens. Used by the chip rows, both heatmaps, Stats' bars and the phase map.
+- The heatmaps end at this week, open scrolled to it, and fit the whole year on a wide card. The GitHub calendar and
+  the phase map are labelled regions the keyboard scrolls.
+- `tests/e2e/scrolling.spec.ts`: `scrollbar-width: none` on the page and the strips, Today and Activity scroll to the
+  bottom; the heatmap at its maximum `scrollLeft` with this week in view, the left fade only while earlier weeks are
+  hidden; the whole year unscrolled at 1280 px; a chip row's fades; the phase map at the current phase, reached and
+  scrolled by the keyboard with its focus ring. Baselines: Activity and Today at 412 x 915, light and dark.
+- `docs/before-after/scrollbars/`: Activity at 412 x 915 before and after, drawn with the browser's scrollbars on.

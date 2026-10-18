@@ -162,6 +162,20 @@ for (const theme of ['light', 'dark'] as const) {
 }
 
 for (const theme of ['light', 'dark'] as const) {
+  test('Activity and Today at 412 x 915, with no scrollbar, match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 412, height: 915 });
+    await importDemo(page, theme);
+    await open(page, './#/activity');
+    await expect(page.locator('section[aria-labelledby="heatmap-2026"] .fade-strip')).toHaveAttribute('data-fade-start', 'true');
+    await expect(page).toHaveScreenshot('activity-412-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+    await page.clock.setFixedTime(new Date(DEMO_TIME.slice(0, 11) + '08:40:00+05:00'));
+    await open(page, './');
+    await expect(page.getByText(/daily challenge/).first()).toBeVisible();
+    await expect(page).toHaveScreenshot('today-412-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+  });
+}
+
+for (const theme of ['light', 'dark'] as const) {
   test('the blog screen and Today with the blog reminder match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await importDemo(page, theme);

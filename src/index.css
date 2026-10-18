@@ -144,6 +144,17 @@
 }
 
 @layer base {
+  /* No visible scrollbars anywhere (CLAY-STYLE, Scrolling); scrolling still works by touch, wheel and keyboard. */
+  html,
+  body,
+  * {
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
   html {
     background: var(--bg);
     color: var(--ink);
@@ -201,6 +212,37 @@
 }
 
 @layer components {
+  /*
+   * A horizontal strip's edge fade (src/ui/edgeFade.ts): a 24 px gradient from --bg to transparent over a side where
+   * more is hidden. It lies over the strip, so it catches no tap and leaves the strip's focus ring alone.
+   */
+  .fade-strip {
+    position: relative;
+  }
+  .fade-strip::before,
+  .fade-strip::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    width: 24px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 150ms;
+  }
+  .fade-strip::before {
+    left: 0;
+    background: linear-gradient(to right, var(--bg), transparent);
+  }
+  .fade-strip::after {
+    right: 0;
+    background: linear-gradient(to left, var(--bg), transparent);
+  }
+  .fade-strip[data-fade-start='true']::before,
+  .fade-strip[data-fade-end='true']::after {
+    opacity: 1;
+  }
   /*
    * Depth: raised (.tile, cards and groups), small raised (.knob, icon buttons, icon tiles, chips) and sunken
    * (.well: search, progress tracks, the segmented track, unchecked boxes, the selected chip or tab). No other
