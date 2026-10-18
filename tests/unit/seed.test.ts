@@ -172,7 +172,8 @@ describe('splitting the seed for the browser', () => {
     expect(Object.values(units).reduce((n, u) => n + u.length, 0)).toBe(total);
     for (const resource of appSeed.resources) {
       expect(resource.units, resource.id).toBeUndefined();
-      expect(resource.unitCount, resource.id).toBe(units[resource.id]?.length ?? 0);
+      // A lesson checklist counts only what is neither optional nor outdated (ZOOMCAMP-CHECKLIST).
+      expect(resource.unitCount, resource.id).toBe(units[resource.id]?.filter((u) => !u.optional && !u.outdated).length ?? 0);
     }
   });
 

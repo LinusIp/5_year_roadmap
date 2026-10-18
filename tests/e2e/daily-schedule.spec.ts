@@ -24,7 +24,7 @@ test('at 06:10 ML Zoomcamp is Now, and the day is 10 hours', async ({ page }) =>
   await open(page, './');
   await expect(nowLabel(page)).toHaveText('Now · 06:00–08:00');
   await expect(page.locator('#now-title')).toHaveText('ML Zoomcamp');
-  await expect(nowCard(page)).toContainText('0 m of 2 h · module 1');
+  await expect(nowCard(page)).toContainText('0 m of 2 h · Module 1 · 6 of 97 videos done');
   await expect(page.getByText('0 m of 10 h today · no streak yet')).toBeVisible();
   // Later today in the order of the day, with the break between the sessions.
   const later = page.locator('section:has(h2:text-is("Later today")) li');

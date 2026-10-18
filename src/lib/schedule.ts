@@ -114,7 +114,7 @@ export interface ScheduleContext {
   seed: AppSeed;
   states: Map<string, UserItemState>;
   /** Unit checklists, when the chunk is loaded. Without it items still schedule, just without a next unit. */
-  units?: Record<string, { id: string; title: string; url?: string; section?: string }[]>;
+  units?: Record<string, { id: string; title: string; url?: string; section?: string; optional?: boolean; outdated?: boolean }[]>;
   /** The project catalogue's index, when loaded: a week's build can be one of its medium builds. */
   catalogue?: readonly CatalogueEntry[];
 }
@@ -148,7 +148,7 @@ function describeResource(resource: AppResource, state: UserItemState | undefine
     url: resource.url,
     status: state?.status ?? 'todo',
     estHours: resource.estHours,
-    unitsDone: unitsDone.length,
+    unitsDone: resource.checklist ? resource.checklist.counted.filter((u) => unitsDone.includes(u.id)).length : unitsDone.length,
     unitCount: resource.unitCount,
   };
   if (resource.searchHint) item.searchHint = resource.searchHint;
@@ -158,7 +158,8 @@ function describeResource(resource: AppResource, state: UserItemState | undefine
   const list = resource.customUnits ?? ctx.units?.[resource.id];
   if (list && list.length > 0) {
     const done = new Set(unitsDone);
-    const index = list.findIndex((u) => !done.has(u.id));
+    // A lesson checklist's optional and outdated units are never the next one (src/lib/checklist.ts).
+    const index = list.findIndex((u) => !done.has(u.id) && !u.optional && !u.outdated);
     if (index >= 0) {
       const unit = list[index]!;
       const next: NextUnit = { id: unit.id, title: unit.title, position: index + 1, total: list.length };

@@ -33,8 +33,11 @@ import { ProgressLine } from '../ui/ProgressLine.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { Sheet } from '../ui/Sheet.tsx';
+import { LessonList, LessonWindow, playVideo } from './parts/LessonChecklist.tsx';
+import { checklistCounts, checklistMeta, currentUnit, isChecklist } from '../lib/checklist.ts';
 import { Checklist, criteriaUnits } from './parts/Checklist.tsx';
 import type { ChecklistUnit } from './parts/Checklist.tsx';
+import type { Unit } from '../seed/schema.ts';
 import { ChangeTodaySheet } from './parts/ChangeTodaySheet.tsx';
 import { ItemSheet } from './parts/ItemSheet.tsx';
 import { DayFields } from './parts/DayFields.tsx';
@@ -50,7 +53,7 @@ import { takenProject } from './parts/taken.ts';
 import { blockShort, dateTitle, nameOf, partOf, span, unitDetail } from './parts/text.ts';
 import { todayLine, tokenDaysLeft, useSyncView } from '../sync/status.ts';
 
-type SheetName = 'date' | 'day' | 'note' | 'change' | null;
+type SheetName = 'date' | 'day' | 'note' | 'change' | 'lessons' | null;
 
 /** The item a block puts in front of you. Block D carries the week's build first, then the monthly project. */
 function focusItem(block: TodayBlock, monthlyFirst: boolean): ScheduledItem | undefined {
@@ -340,7 +343,10 @@ export function Today() {
     const doc = blockItem.kind === 'project' ? blockItem.refId : undefined;
     if (blockItem === block.weeklyBuild) return { title: block.def.name, meta: nameOf(blockItem) + ' · weekly build · ' + hoursOn(blockItem.refId) + ' of ' + blockItem.estHours + ' h done', doc };
     // As the boards draw it: the block by name, what it works on underneath ("Hugging Face · LLM Course · chapter 3").
-    return { title: block.def.name, meta: [nameOf(blockItem), detailOf(blockItem)].filter(Boolean).join(' · '), doc };
+    // A lesson checklist says where in the course you are ("Module 1 · 6 of 97").
+    const lessons = blockItem.kind === 'resource' ? units?.[blockItem.refId] : undefined;
+    const detail = lessons && isChecklist(lessons) ? checklistMeta(lessons, atlas.states.get(blockItem.refId)?.unitsDone ?? [], true) : detailOf(blockItem);
+    return { title: block.def.name, meta: [nameOf(blockItem), detail].filter(Boolean).join(' · '), doc };
   };
 
   const start = (): void => {
@@ -392,6 +398,11 @@ export function Today() {
       : (atlas.seed.resources.find((r) => r.id === item.refId)?.customUnits ?? units?.[item.refId] ?? [])
     : [];
   const unitsDone = item ? (atlas.states.get(item.refId)?.unitsDone ?? []) : [];
+  // A lesson checklist (ZOOMCAMP-CHECKLIST): its module and count lead the meta line, its progress fills the well, its
+  // lessons show in the card, and its second button plays the current video.
+  const lessons = item?.kind === 'resource' && isChecklist(allUnits) ? (allUnits as Unit[]) : null;
+  const lessonNow = lessons ? currentUnit(lessons, unitsDone) : null;
+  const lessonCounts = lessons ? checklistCounts(lessons, unitsDone) : null;
   const resource = item?.kind === 'resource' ? atlas.seed.resources.find((r) => r.id === item.refId) : undefined;
   const otherD =
     nowBlock?.id === 'D' && nowBlock.item && nowBlock.weeklyBuild && nowBlock.weeklyBuild.status !== 'done'
@@ -406,7 +417,7 @@ export function Today() {
         span(nowMinutes) + ' of ' + span(nowBlock.targetMinutes),
         item && headline !== nameOf(item) ? nameOf(item) : null,
         nowBlock.catchUp ? span(nowBlock.catchUp) + ' of it catch-up' : null,
-        detailOf(item),
+        lessons ? checklistMeta(lessons, unitsDone) : detailOf(item),
         isProject && item.unitCount > 0 ? item.unitsDone + ' of ' + item.unitCount + ' ticked' : null,
         nowDone ? 'done' : null,
       ]
@@ -631,14 +642,24 @@ export function Today() {
           </h2>
           <p className="text-meta text-ink2">{metaLine}</p>
           <div className="mt-2.5">
-            <ProgressLine value={nowBlock.targetMinutes > 0 ? nowMinutes / nowBlock.targetMinutes : 0} label={'Time on ' + blockShort(nowBlock.def.name) + ' today'} />
+            {lessonCounts && item ? (
+              <ProgressLine value={lessonCounts.hours > 0 ? lessonCounts.hoursDone / lessonCounts.hours : 0} label={'Progress on ' + nameOf(item)} />
+            ) : (
+              <ProgressLine value={nowBlock.targetMinutes > 0 ? nowMinutes / nowBlock.targetMinutes : 0} label={'Time on ' + blockShort(nowBlock.def.name) + ' today'} />
+            )}
           </div>
+
+          {lessons && item && (
+            <div className="mt-3">
+              <LessonWindow refId={item.refId} units={lessons} done={unitsDone} onShowAll={() => setSheet('lessons')} />
+            </div>
+          )}
 
           {expanded && (
             <div className="mt-4">
               {item?.brief && <p className="mb-2 text-body text-ink2">{item.brief}</p>}
               {item?.note && <p className="mb-2 text-meta text-ink2">{item.note}</p>}
-              {item && allUnits.length > 0 && <Checklist plain compact refId={item.refId} units={unitWindow(allUnits, unitsDone)} done={unitsDone} />}
+              {item && allUnits.length > 0 && !lessons && <Checklist plain compact refId={item.refId} units={unitWindow(allUnits, unitsDone)} done={unitsDone} />}
               <div className="flex flex-col items-start">
                 {item && (
                   <button type="button" className={linkClass} onClick={() => setSheet('note')}>
@@ -687,6 +708,10 @@ export function Today() {
             {isProject && item ? (
               <Button variant="ice" icon="doc" aria-haspopup="dialog" name="Tech doc" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })}>
                 <span className="truncate max-[379px]:sr-only">Tech doc</span>
+              </Button>
+            ) : lessonNow?.video ? (
+              <Button variant="ice" icon="play" onClick={() => playVideo(lessonNow.video!)}>
+                <span className="truncate max-[379px]:sr-only">{'Play ' + lessonNow.id}</span>
               </Button>
             ) : item?.url ? (
               <Button variant="ice" icon="external" href={item.url} name={resource?.type === 'book' ? 'Open the book' : 'Open course'}>
@@ -868,6 +893,11 @@ export function Today() {
         <DayFields date={date} />
       </Sheet>
 
+      {lessons && item && (
+        <Sheet open={sheet === 'lessons'} title={nameOf(item)} aside={lessonCounts ? lessonCounts.videosDone + ' of ' + lessonCounts.videos + ' videos' : undefined} onClose={() => setSheet(null)}>
+          <LessonList refId={item.refId} units={lessons} done={unitsDone} />
+        </Sheet>
+      )}
       <Sheet open={sheet === 'note'} title={item ? 'Notes on ' + nameOf(item) : 'Notes'} onClose={() => setSheet(null)}>
         {item && (
           <NotesField

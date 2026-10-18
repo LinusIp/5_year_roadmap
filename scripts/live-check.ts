@@ -122,6 +122,17 @@ try {
   await page.getByRole('heading', { name: 'Your paths' }).waitFor({ timeout: 30_000 });
   await page.getByRole('button', { name: /^\d+ Courses$/ }).waitFor({ timeout: 30_000 });
   step('the Library opens on its home, with the paths and the shelves');
+  // The ML Zoomcamp lesson checklist, seeded from its file: 1.1 to 1.6 done, 1.7 now.
+  await page.goto(new URL('#/library/ml-zoomcamp', url).href);
+  const lessons = page.getByRole('dialog');
+  await lessons.getByText(/Module 1 · 6 of 97 videos done · now 1\.7 Introduction to NumPy/).waitFor({ timeout: 30_000 });
+  for (const n of [1, 2, 3, 4, 5, 6]) {
+    if ((await lessons.getByRole('checkbox', { name: new RegExp('^1\\.' + n + ' ') }).getAttribute('aria-checked')) !== 'true') throw new Error('lesson 1.' + n + ' is not ticked');
+  }
+  if ((await lessons.getByRole('checkbox', { name: /^1\.7 / }).getAttribute('aria-checked')) !== 'false') throw new Error('lesson 1.7 is ticked');
+  if (!(await lessons.getByRole('listitem').filter({ hasText: /^1\.7 Introduction to NumPy/ }).last().innerText()).match(/\bnow\b/i)) throw new Error('1.7 is not marked Now');
+  step('ML Zoomcamp: 1.1 to 1.6 done, 1.7 now, 6 of 97 videos');
+  await page.keyboard.press('Escape');
   // A full load, not a hash change from the Deck: wait for Today's own Now card, then for its block icons. Now follows
   // the clock, so between 12:00 and 18:00 it is the break card and after 22:00 the day-done card.
   await page.goto(new URL('#/', url).href);

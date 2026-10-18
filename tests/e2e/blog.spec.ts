@@ -57,16 +57,16 @@ test('the outline lists the blocks with time and what was ticked, and Copy outli
   await page.clock.install({ time: at('06:05') });
   await open(page, './');
   await logTime(page, '50');
-  // A unit of ML Zoomcamp ticked today.
+  // A lesson of ML Zoomcamp ticked today.
   await open(page, './#/library/ml-zoomcamp');
-  await page.getByRole('dialog').getByRole('checkbox').first().check();
+  await page.getByRole('dialog').getByRole('checkbox', { name: '1.7 Introduction to NumPy' }).check();
   await writesSettled(page);
 
   await open(page, './#/blog');
   const outline = page.getByLabel('The outline, in Markdown');
   await expect(outline).toContainText('# Sun 18 Oct · day 28');
   await expect(outline).toContainText('## ML Zoomcamp · 50 m');
-  await expect(outline).toContainText(/^- .+/m);
+  await expect(outline).toContainText('- 1.7 Introduction to NumPy');
   await expect(outline).toContainText('What I learned:');
   await expect(outline).toContainText('Stuck on:');
   // Only blocks with time logged.

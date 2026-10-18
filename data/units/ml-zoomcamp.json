@@ -1,0 +1,1091 @@
+{
+ "resource": "ml-zoomcamp",
+ "title": "Machine Learning Zoomcamp",
+ "playlist": "https://www.youtube.com/playlist?list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+ "repo": "https://github.com/DataTalksClub/machine-learning-zoomcamp",
+ "source_note": "Lesson list taken from the course repo README files (cohort 2026 content); video links from each unit page.",
+ "modules": [
+  {
+   "id": "1",
+   "title": "Introduction to Machine Learning",
+   "folder": "01-intro",
+   "items": [
+    {
+     "id": "1.1",
+     "title": "Introduction to Machine Learning",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=Crm_5n4mvmg&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/01-intro/01-what-is-ml.md",
+     "status": "done"
+    },
+    {
+     "id": "1.2",
+     "title": "ML vs Rule-Based Systems",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=CeukwyUdaz8&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/01-intro/02-ml-vs-rules.md",
+     "status": "done"
+    },
+    {
+     "id": "1.3",
+     "title": "Supervised Machine Learning",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=j9kcEuGcC2Y&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/01-intro/03-supervised-ml.md",
+     "status": "done"
+    },
+    {
+     "id": "1.4",
+     "title": "CRISP-DM",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=dCa3JvmJbr0&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/01-intro/04-crisp-dm.md",
+     "status": "done"
+    },
+    {
+     "id": "1.5",
+     "title": "The Modelling Step (Model Selection Process)",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=OH_R0Sl9neM&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/01-intro/05-model-selection.md",
+     "status": "done"
+    },
+    {
+     "id": "1.6",
+     "title": "Setting up the Environment",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=pqQFlV3f9Bo&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/01-intro/06-environment.md",
+     "status": "done"
+    },
+    {
+     "id": "1.7",
+     "title": "Introduction to NumPy",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=Qa0-jYtRdbY&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/01-intro/07-numpy.md",
+     "status": "current"
+    },
+    {
+     "id": "1.8",
+     "title": "Linear Algebra Refresher",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=zZyKUeOR4Gg&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/01-intro/08-linear-algebra.md",
+     "status": "todo"
+    },
+    {
+     "id": "1.9",
+     "title": "Introduction to Pandas",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=0j3XK5PsnxA&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/01-intro/09-pandas.md",
+     "status": "todo"
+    },
+    {
+     "id": "1.10",
+     "title": "Summary",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=VRrEEVeJ440&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/01-intro/10-summary.md",
+     "status": "todo"
+    },
+    {
+     "id": "1.hw",
+     "title": "Homework 1",
+     "kind": "homework",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2025/01-intro/homework.md",
+     "status": "todo"
+    }
+   ]
+  },
+  {
+   "id": "2",
+   "title": "Machine Learning for Regression",
+   "folder": "02-regression",
+   "items": [
+    {
+     "id": "2.1",
+     "title": "Car price prediction project",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=vM3SqPNlStE&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/01-car-price-intro.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.2",
+     "title": "Data preparation",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=Kd74oR4QWGM&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/02-data-preparation.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.3",
+     "title": "Exploratory data analysis",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=k6k8sQ0GhPM&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/03-eda.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.4",
+     "title": "Setting up the validation framework",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=ck0IfiPaQi0&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/04-validation-framework.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.5",
+     "title": "Linear regression",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=Dn1eTQLsOdA&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/05-linear-regression-simple.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.6",
+     "title": "Linear regression: vector form",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=YkyevnYyAww&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/06-linear-regression-vector.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.7",
+     "title": "Training linear regression: Normal equation",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=hx6nak-Y11g&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/07-linear-regression-training.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.8",
+     "title": "Baseline model for car price prediction project",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=SvPpMMYtYbU&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/08-baseline-model.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.9",
+     "title": "Root mean squared error",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=0LWoFtbzNUM&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/09-rmse.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.10",
+     "title": "Using RMSE on validation data",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=rawGPXg2ofE&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/10-car-price-validation.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.11",
+     "title": "Feature engineering",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=-aEShw4ftB0&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/11-feature-engineering.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.12",
+     "title": "Categorical variables",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=sGLAToAAMa4&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/12-categorical-variables.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.13",
+     "title": "Regularization",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=91ve3EJlHBc&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/13-regularization.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.14",
+     "title": "Tuning the model",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=lW-YVxPgzQw&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/14-tuning-model.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.15",
+     "title": "Using the model",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=KT--uIJozes&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/15-using-model.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.16",
+     "title": "Car price prediction project summary",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=_qI01YXbyro&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/16-summary.md",
+     "status": "todo"
+    },
+    {
+     "id": "2.17",
+     "title": "Explore more",
+     "kind": "reading",
+     "video": null,
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/02-regression/17-explore-more.md",
+     "optional": true,
+     "status": "todo"
+    },
+    {
+     "id": "2.hw",
+     "title": "Homework 2",
+     "kind": "homework",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2025/02-regression/homework.md",
+     "status": "todo"
+    }
+   ]
+  },
+  {
+   "id": "3",
+   "title": "Machine Learning for Classification",
+   "folder": "03-classification",
+   "items": [
+    {
+     "id": "3.1",
+     "title": "Churn prediction project",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=0Zw04wdeTQo&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/01-churn-project.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.2",
+     "title": "Data preparation",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=VSGGU9gYvdg&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/02-data-preparation.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.3",
+     "title": "Setting up the validation framework",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=_lwz34sOnSE&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/03-validation.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.4",
+     "title": "EDA",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=BNF1wjBwTQA&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/04-eda.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.5",
+     "title": "Feature importance: Churn rate and risk ratio",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=fzdzPLlvs40&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/05-risk.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.6",
+     "title": "Feature importance: Mutual information",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=_u2YaGT6RN0&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/06-mutual-info.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.7",
+     "title": "Feature importance: Correlation",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=mz1707QVxiY&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/07-correlation.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.8",
+     "title": "One-hot encoding",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=L-mjQFN5aR0&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/08-ohe.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.9",
+     "title": "Logistic regression",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=7KFE2ltnBAg&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/09-logistic-regression.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.10",
+     "title": "Training logistic regression with Scikit-Learn",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=hae_jXe2fN0&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/10-training-log-reg.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.11",
+     "title": "Model interpretation",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=OUrlxnUAAEA&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/11-log-reg-interpretation.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.12",
+     "title": "Using the model",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=Y-NGmnFpNuM&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/12-using-log-reg.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.13",
+     "title": "Summary",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=Zz6oRGsJkW4&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/13-summary.md",
+     "status": "todo"
+    },
+    {
+     "id": "3.14",
+     "title": "Explore more",
+     "kind": "reading",
+     "video": null,
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/03-classification/14-explore-more.md",
+     "optional": true,
+     "status": "todo"
+    },
+    {
+     "id": "3.hw",
+     "title": "Homework 3",
+     "kind": "homework",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2025/03-classification/homework.md",
+     "status": "todo"
+    }
+   ]
+  },
+  {
+   "id": "4",
+   "title": "Evaluation Metrics for Classification",
+   "folder": "04-evaluation",
+   "items": [
+    {
+     "id": "4.1",
+     "title": "Evaluation metrics: session overview",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=gmg5jw1bM8A&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/04-evaluation/01-overview.md",
+     "status": "todo"
+    },
+    {
+     "id": "4.2",
+     "title": "Accuracy and dummy model",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=FW_l7lB0HUI&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/04-evaluation/02-accuracy.md",
+     "status": "todo"
+    },
+    {
+     "id": "4.3",
+     "title": "Confusion table",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=Jt2dDLSlBng&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/04-evaluation/03-confusion-table.md",
+     "status": "todo"
+    },
+    {
+     "id": "4.4",
+     "title": "Precision and Recall",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=gRLP_mlglMM&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/04-evaluation/04-precision-recall.md",
+     "status": "todo"
+    },
+    {
+     "id": "4.5",
+     "title": "ROC Curves",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=dnBZLk53sQI&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/04-evaluation/05-roc.md",
+     "status": "todo"
+    },
+    {
+     "id": "4.6",
+     "title": "ROC AUC",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=hvIQPAwkVZo&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/04-evaluation/06-auc.md",
+     "status": "todo"
+    },
+    {
+     "id": "4.7",
+     "title": "Cross-Validation",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=BIIZaVtUbf4&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/04-evaluation/07-cross-validation.md",
+     "status": "todo"
+    },
+    {
+     "id": "4.8",
+     "title": "Summary",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=-v8XEQ2AHvQ&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/04-evaluation/08-summary.md",
+     "status": "todo"
+    },
+    {
+     "id": "4.9",
+     "title": "Explore more",
+     "kind": "reading",
+     "video": null,
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/04-evaluation/09-explore-more.md",
+     "optional": true,
+     "status": "todo"
+    },
+    {
+     "id": "4.hw",
+     "title": "Homework 4",
+     "kind": "homework",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2025/04-evaluation/homework.md",
+     "status": "todo"
+    }
+   ]
+  },
+  {
+   "id": "5",
+   "title": "Deploying Machine Learning Models",
+   "folder": "05-deployment",
+   "items": [
+    {
+     "id": "5.1",
+     "title": "Intro / Session overview",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=agIFak9A3m8&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/05-deployment/01-intro.md",
+     "status": "todo"
+    },
+    {
+     "id": "5.2",
+     "title": "Saving and loading the model",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=EJpqZ7OlwFU&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/05-deployment/02-pickle.md",
+     "status": "todo"
+    },
+    {
+     "id": "5.3",
+     "title": "Web services: introduction to Flask",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=W7ubna1Rfv8&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/05-deployment/03-flask-intro.md",
+     "status": "todo"
+    },
+    {
+     "id": "5.4",
+     "title": "Serving the churn model with Flask",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=Q7ZWPgPnRz8&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/05-deployment/04-flask-deployment.md",
+     "status": "todo"
+    },
+    {
+     "id": "5.5",
+     "title": "Python virtual environment: Pipenv",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=BMXh8JGROHM&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/05-deployment/05-pipenv.md",
+     "status": "todo"
+    },
+    {
+     "id": "5.6",
+     "title": "Environment management: Docker",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=wAtyYZ6zvAs&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/05-deployment/06-docker.md",
+     "status": "todo"
+    },
+    {
+     "id": "5.7",
+     "title": "Deployment to the cloud: AWS Elastic Beanstalk (optional)",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=HGPJ4ekhcLg&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/05-deployment/07-aws-eb.md",
+     "status": "todo"
+    },
+    {
+     "id": "5.8",
+     "title": "Summary",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=sSAqYSk7Br4&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/05-deployment/08-summary.md",
+     "status": "todo"
+    },
+    {
+     "id": "5.9",
+     "title": "Explore more",
+     "kind": "reading",
+     "video": null,
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/05-deployment/09-explore-more.md",
+     "optional": true,
+     "status": "todo"
+    },
+    {
+     "id": "5.hw",
+     "title": "Homework 5",
+     "kind": "homework",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2025/05-deployment/homework.md",
+     "status": "todo"
+    }
+   ]
+  },
+  {
+   "id": "6",
+   "title": "Decision Trees and Ensemble Learning",
+   "folder": "06-trees",
+   "items": [
+    {
+     "id": "6.1",
+     "title": "Credit risk scoring project",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=GJGmlfZoCoU&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/06-trees/01-credit-risk.md",
+     "status": "todo"
+    },
+    {
+     "id": "6.2",
+     "title": "Data cleaning and preparation",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=tfuQdI3YO2c&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/06-trees/02-data-prep.md",
+     "status": "todo"
+    },
+    {
+     "id": "6.3",
+     "title": "Decision trees",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=YGiQvFbSIg8&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/06-trees/03-decision-trees.md",
+     "status": "todo"
+    },
+    {
+     "id": "6.4",
+     "title": "Decision tree learning algorithm",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=XODz6LwKY7g&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/06-trees/04-decision-tree-learning.md",
+     "status": "todo"
+    },
+    {
+     "id": "6.5",
+     "title": "Decision trees parameter tuning",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=XJaxwH50Qok&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/06-trees/05-decision-tree-tuning.md",
+     "status": "todo"
+    },
+    {
+     "id": "6.6",
+     "title": "Ensemble learning and random forest",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=FZhcmOfNNZE&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/06-trees/06-random-forest.md",
+     "status": "todo"
+    },
+    {
+     "id": "6.7",
+     "title": "Gradient boosting and XGBoost",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=xFarGClszEM&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/06-trees/07-boosting.md",
+     "status": "todo"
+    },
+    {
+     "id": "6.8",
+     "title": "XGBoost parameter tuning",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=VX6ftRzYROM&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/06-trees/08-xgb-tuning.md",
+     "status": "todo"
+    },
+    {
+     "id": "6.9",
+     "title": "Selecting the best model",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=lqdnyIVQq-M&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/06-trees/09-final-model.md",
+     "status": "todo"
+    },
+    {
+     "id": "6.10",
+     "title": "Summary",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=JZ6sRZ_5j_c&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/06-trees/10-summary.md",
+     "status": "todo"
+    },
+    {
+     "id": "6.11",
+     "title": "Explore more",
+     "kind": "reading",
+     "video": null,
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/06-trees/11-explore-more.md",
+     "optional": true,
+     "status": "todo"
+    },
+    {
+     "id": "6.hw",
+     "title": "Homework 6",
+     "kind": "homework",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2025/06-trees/homework.md",
+     "status": "todo"
+    }
+   ]
+  },
+  {
+   "id": "7",
+   "title": "Midterm project",
+   "folder": "projects",
+   "items": [
+    {
+     "id": "7.p",
+     "title": "Midterm project",
+     "kind": "project",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/projects/README.md",
+     "status": "todo"
+    }
+   ]
+  },
+  {
+   "id": "8",
+   "title": "Neural Networks and Deep Learning",
+   "folder": "08-deep-learning",
+   "items": [
+    {
+     "id": "8.1",
+     "title": "Fashion classification",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=it1Lu7NmMpw&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/01-fashion-classification.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.2",
+     "title": "TensorFlow and Keras",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=R6o_CUmoN9Q&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/02-tensorflow-keras.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.3",
+     "title": "Pre-trained convolutional neural networks",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=qGDXEz-cr6M&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/03-pretrained-models.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.4",
+     "title": "Convolutional neural networks",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=BN-fnYzbdc8&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/04-conv-neural-nets.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.5",
+     "title": "Transfer learning",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=WKHylqfNmq4&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/05-transfer-learning.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.6",
+     "title": "Adjusting the learning rate",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=2gPmRRGz0Hc&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/06-learning-rate.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.7",
+     "title": "Checkpointing",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=NRpGUx0o3Ps&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/07-checkpointing.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.8",
+     "title": "Adding more layers",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=bSRRrorvAZs&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/08-more-layers.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.9",
+     "title": "Regularization and dropout",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=74YmhVM6FTM&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/09-dropout.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.10",
+     "title": "Data augmentation",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=aoPfVsS3BDE&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/10-augmentation.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.11",
+     "title": "Training a larger model",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=_QpDGJwFjYA&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/11-large-model.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.12",
+     "title": "Using the model",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=cM1WHKae1wo&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/12-using-model.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.13",
+     "title": "Summary",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=mn0BcXJlRFM&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/13-summary.md",
+     "status": "todo"
+    },
+    {
+     "id": "8.14",
+     "title": "Explore more",
+     "kind": "reading",
+     "video": null,
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/08-deep-learning/14-explore-more.md",
+     "optional": true,
+     "status": "todo"
+    },
+    {
+     "id": "8.hw",
+     "title": "Homework 8",
+     "kind": "homework",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2025/08-deep-learning/homework.md",
+     "status": "todo"
+    }
+   ]
+  },
+  {
+   "id": "9",
+   "title": "Serverless Deep Learning",
+   "folder": "09-serverless",
+   "items": [
+    {
+     "id": "9.1",
+     "title": "Introduction to Serverless",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=JLIVwIsU6RA&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/09-serverless/01-intro.md",
+     "status": "todo"
+    },
+    {
+     "id": "9.2",
+     "title": "AWS Lambda",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=_UX8-2WhHZo&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/09-serverless/02-aws-lambda.md",
+     "status": "todo"
+    },
+    {
+     "id": "9.3",
+     "title": "TensorFlow Lite",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=OzZA4mSBE0Q&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/09-serverless/03-tensorflow-lite.md",
+     "outdated": true,
+     "optional": true,
+     "status": "todo"
+    },
+    {
+     "id": "9.4",
+     "title": "Preparing the code for Lambda",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=XXBUivsHhec&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/09-serverless/04-preparing-code.md",
+     "outdated": true,
+     "optional": true,
+     "status": "todo"
+    },
+    {
+     "id": "9.5",
+     "title": "Preparing a Docker image",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=y4_YQjfOsDo&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/09-serverless/05-docker-image.md",
+     "outdated": true,
+     "optional": true,
+     "status": "todo"
+    },
+    {
+     "id": "9.6",
+     "title": "Creating the lambda function",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=kBch5oD5BkY&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/09-serverless/06-creating-lambda.md",
+     "outdated": true,
+     "optional": true,
+     "status": "todo"
+    },
+    {
+     "id": "9.7",
+     "title": "API Gateway: exposing the lambda function",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=wyZ9aqQOXvs&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/09-serverless/07-api-gateway.md",
+     "status": "todo"
+    },
+    {
+     "id": "9.8",
+     "title": "Summary",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=bu3nPiHCNLU&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/09-serverless/08-summary.md",
+     "status": "todo"
+    },
+    {
+     "id": "9.9",
+     "title": "Explore more",
+     "kind": "reading",
+     "video": null,
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/09-serverless/09-explore-more.md",
+     "optional": true,
+     "status": "todo"
+    },
+    {
+     "id": "9.hw",
+     "title": "Homework 9",
+     "kind": "homework",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2025/09-serverless/homework.md",
+     "status": "todo"
+    }
+   ]
+  },
+  {
+   "id": "10",
+   "title": "Kubernetes and TensorFlow Serving",
+   "folder": "10-kubernetes",
+   "items": [
+    {
+     "id": "10.1",
+     "title": "Overview",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=mvPER7YfTkw&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/10-kubernetes/01-overview.md",
+     "status": "todo"
+    },
+    {
+     "id": "10.2",
+     "title": "TensorFlow Serving",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=deXR2fThYDw&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/10-kubernetes/02-tensorflow-serving.md",
+     "status": "todo"
+    },
+    {
+     "id": "10.3",
+     "title": "Creating a pre-processing service",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=OIlrS14Zi0o&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/10-kubernetes/03-preprocessing.md",
+     "status": "todo"
+    },
+    {
+     "id": "10.4",
+     "title": "Running everything locally with Docker-compose",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=ZhQQfpWfkKY&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/10-kubernetes/04-docker-compose.md",
+     "status": "todo"
+    },
+    {
+     "id": "10.5",
+     "title": "Introduction to Kubernetes",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=UjVkpszDzgk&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/10-kubernetes/05-kubernetes-intro.md",
+     "status": "todo"
+    },
+    {
+     "id": "10.6",
+     "title": "Deploying a simple service to Kubernetes",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=PPUCVRIV9t8&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/10-kubernetes/06-kubernetes-simple-service.md",
+     "status": "todo"
+    },
+    {
+     "id": "10.7",
+     "title": "Deploying TensorFlow models to Kubernetes",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=6vHLMdnjO2w&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/10-kubernetes/07-kubernetes-tf-serving.md",
+     "status": "todo"
+    },
+    {
+     "id": "10.8",
+     "title": "Deploying to EKS",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=89jxeddZtC0&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/10-kubernetes/08-eks.md",
+     "status": "todo"
+    },
+    {
+     "id": "10.9",
+     "title": "Summary",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=J5LMRTIu4jY&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/10-kubernetes/09-summary.md",
+     "status": "todo"
+    },
+    {
+     "id": "10.10",
+     "title": "Explore more",
+     "kind": "reading",
+     "video": null,
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/10-kubernetes/10-explore-more.md",
+     "optional": true,
+     "status": "todo"
+    },
+    {
+     "id": "10.hw",
+     "title": "Homework 10",
+     "kind": "homework",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2025/10-kubernetes/homework.md",
+     "status": "todo"
+    }
+   ]
+  },
+  {
+   "id": "11",
+   "title": "KServe",
+   "folder": "11-kserve",
+   "items": [
+    {
+     "id": "11.1",
+     "title": "Overview",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=CFWK05dQoGM&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/11-kserve/01-overview.md",
+     "status": "todo"
+    },
+    {
+     "id": "11.2",
+     "title": "Running KServe locally",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=A3tFt14iTEI&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/11-kserve/02-kserve-local.md",
+     "status": "todo"
+    },
+    {
+     "id": "11.3",
+     "title": "Deploying a Scikit-Learn model with KServe",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=8kBIDggLwgE&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/11-kserve/03-kserve-sklearn.md",
+     "status": "todo"
+    },
+    {
+     "id": "11.4",
+     "title": "Deploying custom Scikit-Learn images with KServe",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=REGNWrHZiCw&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/11-kserve/04-kserve-custom-image.md",
+     "status": "todo"
+    },
+    {
+     "id": "11.5",
+     "title": "Serving TensorFlow models with KServe",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=iXwQb2LRKGI&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/11-kserve/05-tensorflow-kserve.md",
+     "status": "todo"
+    },
+    {
+     "id": "11.6",
+     "title": "KServe transformers",
+     "kind": "video",
+     "video": "https://www.youtube.com/watch?v=haowRqeAqJU&list=PL3MmuxUbc_hIhxl5Ji8t4O6lPAOpHaCLR",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/11-kserve/06-kserve-transformers.md",
+     "status": "todo"
+    },
+    {
+     "id": "11.7",
+     "title": "Deploying with KServe and EKS",
+     "kind": "reading",
+     "video": null,
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/11-kserve/07-kserve-eks.md",
+     "status": "todo"
+    },
+    {
+     "id": "11.8",
+     "title": "Summary",
+     "kind": "reading",
+     "video": null,
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/11-kserve/08-summary.md",
+     "status": "todo"
+    },
+    {
+     "id": "11.9",
+     "title": "Explore more",
+     "kind": "reading",
+     "video": null,
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/11-kserve/09-explore-more.md",
+     "optional": true,
+     "status": "todo"
+    }
+   ]
+  },
+  {
+   "id": "12",
+   "title": "Capstone projects",
+   "folder": "projects",
+   "items": [
+    {
+     "id": "12.p1",
+     "title": "Capstone project 1",
+     "kind": "project",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/projects/README.md",
+     "status": "todo"
+    },
+    {
+     "id": "12.p2",
+     "title": "Capstone project 2",
+     "kind": "project",
+     "notes": "https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/projects/README.md",
+     "optional": true,
+     "status": "todo"
+    }
+   ]
+  }
+ ]
+}

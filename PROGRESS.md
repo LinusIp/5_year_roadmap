@@ -947,3 +947,20 @@ Verified on this machine (Linux, Chromium 140):
   a reload, Undo, a past day from Calendar, two devices, and the detection with a stand-in GitHub (refused, then a
   dated post found). Baselines: the blog screen and Today with the reminder, light and dark, redrawn on CI's Linux
   (the demo history marks a post on each of the twelve days before it, so the streak reads 12).
+
+## Pull request #13: the ML Zoomcamp lesson checklist
+
+- Data: `data/units/ml-zoomcamp.json` (replacing `ml-zoomcamp.yaml`), read by `validate:data` (`readChecklist`:
+  the shape, unique ids, links, every video in the course playlist). Generic for any resource.
+- `src/lib/checklist.ts`: what counts, NOW, the module window, the counts and "Module 1 · 6 of 97 videos done", the
+  hours. `src/db/checklist.ts`: the one-time seed of 1.1 to 1.6.
+- Today: the Now card's module checklist with NOW, play knobs, Play 1.7, Show all modules; ticks with Undo, the timer
+  untouched. Library: the sheet's full list and progress, the card's "Module 1 · 6 of 97". Plan: the pace from the
+  checklist's hours. Blog: ticked lessons by their names.
+- `tests/unit/checklist.test.ts`: the file and a bad file, 97 videos, 1.1 to 1.6 done and 1.7 now, advancing past
+  optional units, the module rollover, the hours, the seed (once, on a new device and on a started course, never over
+  a tick). `tests/e2e/zoomcamp.spec.ts`: the Now card at 06:10, tick to 1.8 and "7 of 97", Undo, the play knobs and
+  Play 1.7 (window.open mocked), Show all modules with the Optional fold, the Library sheet and card, a reload, two
+  devices. Baselines: Today with the checklist and the full list, light and dark, redrawn on CI's Linux.
+- `check:links` covers video links; CI reports the checklist's links. The live check requires 1.1 to 1.6 done and 1.7
+  now on the live site.

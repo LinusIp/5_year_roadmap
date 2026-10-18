@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { setItemStatus } from '../../db/state.ts';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { monthName } from '../../lib/dates.ts';
+import { checklistCounts, checklistMeta, isChecklist } from '../../lib/checklist.ts';
 import { buildPaths, inProgress, pathDots, SHELVES, startsMuchLater, upNext } from '../../lib/library-home.ts';
 import type { LibraryPath, ShelfKey } from '../../lib/library-home.ts';
 import { minutesForRef } from '../../lib/logs.ts';
@@ -35,6 +36,11 @@ export function monthOf(date: string, thisYear: string): string {
 /** "Module 6 of 10", "Day 19 of 30", or the next unit's name, and how far along: what an in-progress card shows. */
 export function progressFor(id: string, units: Record<string, Unit[]> | undefined, unitsDone: string[], loggedMinutes: number, estHours: number): { meta: string; fraction: number } {
   const list = units?.[id] ?? [];
+  if (isChecklist(list)) {
+    // A lesson checklist (ZOOMCAMP-CHECKLIST): "Module 1 · 6 of 97", and its share of the course's hours.
+    const c = checklistCounts(list, unitsDone);
+    return { meta: checklistMeta(list, unitsDone, true), fraction: c.hours > 0 ? c.hoursDone / c.hours : 0 };
+  }
   if (list.length > 0) {
     const done = new Set(unitsDone);
     const index = list.findIndex((u) => !done.has(u.id));
