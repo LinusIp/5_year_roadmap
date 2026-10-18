@@ -68,7 +68,7 @@ describe('learning log', () => {
         '- Something not on the plan: 30m',
         '  - Fixed the CI',
         '',
-        '## E · Math & physics (1h 30m)',
+        '## E · Math and physics (1h 30m)',
         '',
         '- ' + titleOf('mit-18-06') + ': 1h 30m',
         '  - Elimination by hand',

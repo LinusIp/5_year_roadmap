@@ -3,8 +3,8 @@ import { useAtlas } from '../hooks/useAtlas.ts';
 import { daysBetween, monthName } from '../lib/dates.ts';
 import type { BlockId, Phase } from '../seed/schema.ts';
 import { Button } from '../ui/Button.tsx';
-import { span } from './parts/text.ts';
 import { BlockTile } from '../ui/glyphs.tsx';
+import { scheduleSummary } from './plan/Timeline.tsx';
 import { Icon } from '../ui/Icon.tsx';
 import { today } from '../lib/dates.ts';
 
@@ -16,16 +16,6 @@ const day = (date: string, withYear: boolean): string => Number(date.slice(8, 10
 const long = (date: string): string => Number(date.slice(8, 10)) + ' ' + monthName(Number(date.slice(5, 7)) - 1) + ' ' + date.slice(0, 4);
 const months = (phase: Phase): number => (daysBetween(phase.start, phase.end) + 1) / 30.44;
 
-/** "graphics / sim", "math / physics", "projects": a block's name as the map's legend writes it. */
-function legendName(name: string): string {
-  const parts = name
-    .toLowerCase()
-    .replace(/ track$/, '')
-    .split(/\s*[/&]\s*/)
-    .filter((p) => p && p !== 'hands-on')
-    .map((p) => (p === 'simulation' ? 'sim' : p));
-  return (parts.length > 2 ? [parts[0], parts.at(-1)] : parts).join(' / ');
-}
 
 /**
  * The five-year map, as the mockup draws it: the two stages, a timeline with a dot per phase, and one card per
@@ -45,7 +35,12 @@ export function PhaseMap() {
   const last = phases.at(-1)!;
   const columns = phases.map((p) => Math.round(months(p) * 100) / 100 + 'fr').join(' ');
   const stage1 = phases.filter((p) => p.stage === 1);
-  const daily = settings.core.blocks.reduce((sum, b) => sum + b.minutes, 0);
+  // The day as the schedule runs it: "10 h a day (06–12 and 18–22)", and a legend of the blocks at their times.
+  const schedule = scheduleSummary(settings, today());
+  const [, ...parts] = schedule.aside.split(' · ').reverse();
+  const daily = schedule.aside.split(' · ').at(-1)!;
+  const sessions = parts.reverse().join(' and ');
+  const hh = (m: number): string => String(Math.floor(m / 60)).padStart(2, '0');
   const themes = [...new Set(stage1.map((p) => p.theme).filter(Boolean))].join(' · ');
   const asOf = today();
   const nowId = phases.find((p) => p.start <= asOf && asOf <= p.end)?.id;
@@ -58,7 +53,7 @@ export function PhaseMap() {
             <div className="flex flex-col gap-1.5">
               <h1 className="text-hero font-semibold">Five years, six phases</h1>
               <p className="text-meta text-ink2">
-                {long(first.start)} → {long(last.end)} · {span(daily)} a day · Stage 1 software{themes ? ': ' + themes : ''} · Stage 2 electrical and mechanical
+                {long(first.start)} → {long(last.end)} · {daily} a day{sessions ? ' (' + sessions + ')' : ''} · Stage 1 software{themes ? ': ' + themes : ''} · Stage 2 electrical and mechanical
               </p>
             </div>
             <Button variant="quiet" to="/plan">
@@ -66,10 +61,10 @@ export function PhaseMap() {
             </Button>
           </div>
           <ul className="-mt-2 flex flex-wrap gap-x-6 gap-y-3 text-meta text-ink2" aria-label="Lanes">
-            {settings.core.blocks.map((b) => (
-              <li key={b.id} className="flex items-center gap-2.5 whitespace-nowrap">
-                <BlockTile block={b.id} size={36} />
-                {b.id} {legendName(b.name)} · {span(b.minutes)}
+            {schedule.windows.map((w) => (
+              <li key={w.id} className="flex items-center gap-2.5 whitespace-nowrap">
+                <BlockTile block={w.id} size={36} />
+                {hh(w.start) + '-' + hh(w.start + w.minutes) + ' ' + (settings.core.blocks.find((b) => b.id === w.id)?.name ?? w.id)}
               </li>
             ))}
           </ul>

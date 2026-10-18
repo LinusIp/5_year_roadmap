@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { DateOverride, StoredSettings } from '../../db/types.ts';
 import { dayName, formatRange, today } from '../../lib/dates.ts';
 import { weeklyTargetMinutes } from '../../lib/schedule.ts';
+import { resetToDailySchedule } from '../../lib/settings.ts';
 import { seed } from '../../seed/index.ts';
 import type { BlockDef, DayTemplate, SettingsDefaults, TrackId } from '../../seed/schema.ts';
 import { Button } from '../../ui/Button.tsx';
@@ -237,7 +238,14 @@ export function Schedule({ settings }: { settings: StoredSettings }) {
 
   return (
     <Section id="schedule" title={'Schedule · ' + span(weeklyTargetMinutes(settings)) + ' this week'} onReset={reset}>
-      <RowList label="Weekly pattern">
+      <RowList>
+        <Row
+          title="Reset to the daily schedule"
+          meta="ML Zoomcamp, GameDevHQ and Hugging Face from 06:00, Coding lessons and Math and physics from 18:00: 10 h every day. Days before today keep theirs."
+          onClick={() => void saveSettings((s) => resetToDailySchedule(s, seed.settings, today()))}
+        />
+      </RowList>
+      <RowList className="mt-4" label="Weekly pattern">
         {days.map((d) => (
           <Row key={d} title={DAY_LONG[d]!} trailing={nameOf(core.pattern[d]!) + (d === core.review.day ? ' · review' : '')} onClick={() => setWeekday(d)} />
         ))}

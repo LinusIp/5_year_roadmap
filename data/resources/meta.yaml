@@ -189,6 +189,7 @@
 
 - id: gamedevhq
   title: "GameDevHQ: Unity game development course"
+  short: "GameDevHQ Unity course"
   provider: GameDevHQ
   type: course
   url: https://gamedevhq.com/

@@ -1,0 +1,64 @@
+/**
+ * Not a test: run once on the build live before the fixed daily schedule (pull request #9, 1fab4eb: copy it to
+ * tests/unit/zz-live-1018.test.ts there) to write a fixture of the live formats into tests/fixtures/live-2026-10-18/:
+ * the settings GitHub Sync writes (state/settings.json, version 3 with Calendar), a day with Block D minutes, and the
+ * backup file. Everything is made with that build's own code.
+ */
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { it } from 'vitest';
+import { loadSeedOrThrow } from '../../scripts/lib/load-seed.ts';
+import { splitSeed } from '../../scripts/lib/vite-plugin-seed.ts';
+import { db } from '../../src/db/db.ts';
+import { createBackup, serialiseBackup } from '../../src/db/backup.ts';
+import { updateSettings } from '../../src/db/settings.ts';
+import { addEntry, editLog, toggleBlockDone } from '../../src/lib/logs.ts';
+import { withScheduleEdit } from '../../src/lib/day-plan.ts';
+import { allPaths, readLocal, renderPath } from '../../src/sync/local.ts';
+
+const OUT = join(import.meta.dirname, '..', 'fixtures', 'live-2026-10-18');
+
+function write(rel: string, text: string): void {
+  const path = join(OUT, rel);
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, text);
+}
+
+it('writes the live-format fixture of 2026-10-18', async () => {
+  const seed = loadSeedOrThrow();
+  const { app } = splitSeed(seed);
+  await db.open();
+
+  // Settings changed in the app: Core's minutes, the theme, a weekly busy class, a start time on the Full day, a day
+  // change for one date (Graphics moved to 19:00), and a schedule edit (so the history keeps a copy of the 8 h day).
+  await updateSettings(seed.settings, (s) => ({
+    ...s,
+    theme: 'dark',
+    github: { ...s.github, username: 'octo-learner' },
+    core: { ...s.core, blocks: s.core.blocks.map((b) => (b.id === 'C' ? { ...b, minutes: 90 } : b)) },
+    schedule: {
+      ...s.schedule,
+      busy: [{ id: 'uni-tue', title: 'University', start: '10:00', minutes: 180, weekday: 2 }],
+      days: { '2026-10-20': { times: { A: '19:00' } } },
+    },
+  }));
+  await updateSettings(seed.settings, (s) =>
+    withScheduleEdit(s, '2026-10-17', (x) => ({
+      ...x,
+      core: { ...x.core, templates: x.core.templates.map((t) => (t.id === 'full' ? { ...t, blocks: t.blocks.map((b) => (b.block === 'A' ? { ...b, start: '07:30' } : b)) } : t)) },
+    })),
+  );
+
+  // A day with Block D (a project) and Block A, A marked done.
+  await editLog('2026-10-17', (l) =>
+    toggleBlockDone(addEntry(addEntry(l, { block: 'A', track: 'graphics', minutes: 120 }), { block: 'D', track: 'ai', refId: 'm01', minutes: 95 }), 'A'),
+  );
+
+  write('backup.json', serialiseBackup(await createBackup(new Date('2026-10-18T12:00:00Z'))));
+  const local = await readLocal(db);
+  for (const path of allPaths(local, app)) {
+    if (!path.startsWith('state/settings') && !path.startsWith('log/')) continue;
+    const text = renderPath(path, local, app);
+    if (text !== null) write('atlas-data/' + path, text);
+  }
+}, 60_000);

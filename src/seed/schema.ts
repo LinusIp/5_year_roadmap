@@ -11,8 +11,9 @@ export const TRACK_IDS = [
   'ai', 'swe', 'systems', 'graphics', 'simulation', 'gamedev', 'languages', 'math',
   'physics', 'ee', 'embedded', 'controls', 'mech', 'robotics', 'chem', 'career',
 ] as const;
-/** The five lanes of the curriculum (plan.yaml, the phase table). The user can add blocks of their own beyond them. */
-export const BLOCK_IDS = ['A', 'B', 'C', 'D', 'E'] as const;
+/** The lanes of the curriculum (plan.yaml, the phase table): the five of the first plan and H, Hugging Face, added with
+ * the fixed daily schedule. The user can add blocks of their own beyond them. */
+export const BLOCK_IDS = ['A', 'B', 'C', 'D', 'E', 'H'] as const;
 /** `problems` is a problem source (problem sets, judges, exercise collections); `tool` is software or a reference site. */
 export const RESOURCE_TYPES = ['course', 'lectures', 'book', 'tutorial', 'article', 'paper', 'repo', 'cert', 'problems', 'tool'] as const;
 export const LEVELS = ['intro', 'intermediate', 'advanced'] as const;
@@ -265,6 +266,7 @@ export const PlanPhaseInputSchema = z.strictObject({
     C: z.array(PlanEntryInput).default([]),
     D: z.array(PlanEntryInput).default([]),
     E: z.array(PlanEntryInput).default([]),
+    H: z.array(PlanEntryInput).default([]),
   }),
 });
 export type PlanPhaseInput = z.infer<typeof PlanPhaseInputSchema>;
@@ -470,7 +472,8 @@ const SettingsDefaultsObject = z.strictObject({
 export const SettingsDefaultsSchema = SettingsDefaultsObject.superRefine((v, ctx) => {
   const ids = v.blocks.map((b) => b.id);
   if (new Set(ids).size !== ids.length) ctx.addIssue({ code: 'custom', path: ['blocks'], message: 'block ids must be unique' });
-  for (const id of BLOCK_IDS) if (!ids.includes(id)) ctx.addIssue({ code: 'custom', path: ['blocks'], message: 'must define block ' + id + ': the curriculum plans into it' });
+  // The five lanes of the first plan are always defined; a later lane (H) is required where the plan uses it (validate.ts).
+  for (const id of BLOCK_IDS.slice(0, 5)) if (!ids.includes(id)) ctx.addIssue({ code: 'custom', path: ['blocks'], message: 'must define block ' + id + ': the curriculum plans into it' });
   const templateIds = new Set(v.templates.map((t) => t.id));
   if (templateIds.size !== v.templates.length) ctx.addIssue({ code: 'custom', path: ['templates'], message: 'template ids must be unique' });
   for (const t of v.templates) {

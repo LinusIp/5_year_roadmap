@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-17",
+  "deviceId": "y3q0hyplyw2r",
+  "doneBlocks": [
+    "A"
+  ],
+  "entries": [
+    {
+      "block": "A",
+      "deviceId": "y3q0hyplyw2r",
+      "id": "ze35xawf1jz1",
+      "minutes": 120,
+      "track": "graphics",
+      "updatedAt": "2026-10-18T09:11:28.717Z"
+    },
+    {
+      "block": "D",
+      "deviceId": "y3q0hyplyw2r",
+      "id": "8yksu440g3f5",
+      "minutes": 95,
+      "refId": "m01",
+      "track": "ai",
+      "updatedAt": "2026-10-18T09:11:28.717Z"
+    }
+  ],
+  "fieldsAt": {
+    "doneBlocks": "2026-10-18T09:11:28.717Z"
+  },
+  "updatedAt": "2026-10-18T09:11:28.717Z"
+}

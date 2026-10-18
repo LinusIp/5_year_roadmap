@@ -8,7 +8,9 @@ import {
   withBlockLength,
   withBlockTime,
   withBusy,
+  withEveryDay,
   withEveryWeekday,
+  usedEveryDay,
   withMovedToDate,
   withoutBusy,
   withRestDay,
@@ -96,6 +98,8 @@ export function BlockSheet({ atlas, ctx, sheet, today, onClose }: { atlas: Atlas
   const laneItems = phase ? lane(atlas.seed, phase.id, block).map((p) => describePlanItem(p, ctx)).filter((i) => i !== null) : [];
   const logged = (atlas.logs.find((l) => l.date === date)?.entries ?? []).filter((e) => e.block === block).reduce((sum, e) => sum + e.minutes, 0);
   const weekdayName = dayName(date);
+  const daily = usedEveryDay(settings, date);
+  const everyLabel = daily ? 'day' : weekdayName;
 
   const save = (): void => {
     if (!placed) return;
@@ -103,7 +107,9 @@ export function BlockSheet({ atlas, ctx, sheet, today, onClose }: { atlas: Atlas
     const changedLength = minutes !== placed.minutes;
     if (!changedTime && !changedLength && !every) return onClose();
     if (every) {
-      void calendarEdit(core, name + ' on every ' + weekdayName + ': ' + hm(start) + ', ' + span(minutes), (s) => withEveryWeekday(s, today, date, block, { start, minutes }));
+      void calendarEdit(core, name + ' on every ' + everyLabel + ': ' + hm(start) + ', ' + span(minutes), (s) =>
+        daily ? withEveryDay(s, today, date, block, { start, minutes }) : withEveryWeekday(s, today, date, block, { start, minutes }),
+      );
     } else {
       void calendarEdit(core, name + ' on ' + dateTitle(date) + ': ' + hm(start) + ', ' + span(minutes), (s) => {
         let next = changedTime ? withBlockTime(s, date, block, start) : s;
@@ -134,8 +140,12 @@ export function BlockSheet({ atlas, ctx, sheet, today, onClose }: { atlas: Atlas
         <RowList label="Works on">
           <Row title={item ? nameOf(item) : 'Nothing planned'} meta={chosenRef ? 'Chosen for this day' : 'The lane’s next item'} chevron onClick={() => setPickingItem(true)} />
         </RowList>
-        <RowList label={'Every ' + weekdayName}>
-          <Row title={'Apply to every ' + weekdayName} meta="Saves the time and length in the day’s template, from today on" toggle={{ on: every, onChange: setEvery }} />
+        <RowList label={'Every ' + everyLabel}>
+          <Row
+            title={'Apply to every ' + everyLabel}
+            meta={daily ? 'Saves the time and length in the daily schedule, from today on' : 'Saves the time and length in the day’s template, from today on'}
+            toggle={{ on: every, onChange: setEvery }}
+          />
         </RowList>
         <RowList label="This day">
           <Row

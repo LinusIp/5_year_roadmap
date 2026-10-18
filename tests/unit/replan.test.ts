@@ -128,10 +128,10 @@ describe('the forecast', () => {
     expect(forecast.verdict).toBe('done');
   });
 
-  it('reports the overall pace against the 8-hour budget', () => {
+  it('reports the overall pace against the 10-hour budget', () => {
     const logs = [log('2026-09-21', 'A', 480), log('2026-09-22', 'A', 480)];
     const pace = paceSummary(logs, settings, '2026-09-22');
-    expect(pace.planned).toBeCloseTo(8);
+    expect(pace.planned).toBeCloseTo(10);
     expect(pace.actual).toBeCloseTo(16 / 28);
     expect(pace.ratio).toBeLessThan(1);
   });
@@ -223,9 +223,9 @@ describe('re-planning', () => {
   });
 
   it('measures lane capacity from the block settings', () => {
-    // Block A is 2 hours every day, so a 7-day phase gives it 14 hours.
+    // Blocks A and B are 2 hours every day, so a 7-day phase gives each 14 hours.
     expect(laneCapacity(settings, 'A', '2026-09-21', '2026-09-27')).toBeCloseTo(14);
-    expect(laneCapacity(settings, 'B', '2026-09-21', '2026-09-27')).toBeCloseTo(7);
+    expect(laneCapacity(settings, 'B', '2026-09-21', '2026-09-27')).toBeCloseTo(14);
     expect(laneCapacity(settings, 'A', '2026-09-27', '2026-09-21')).toBe(0);
   });
 });

@@ -10,7 +10,7 @@ import { editItemState, setWeekPick, useWeekPick } from '../db/state.ts';
 import { startTimer, stopTimer, useRunningTimer } from '../db/timer.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { useUnits } from '../hooks/useUnits.ts';
-import { addDays, dayName, daysBetween, formatLong, formatStopwatch, monthName, startOfWeek, today as todayDate, weekday } from '../lib/dates.ts';
+import { addDays, dayName, daysBetween, formatLong, formatStopwatch, monthName, startOfWeek, today as todayDate } from '../lib/dates.ts';
 import { editLog, isBlockDone, minutesByBlock, minutesForRef, readLog, toggleBlockDone, totalMinutes } from '../lib/logs.ts';
 import { plannedFor } from '../lib/day-plan.ts';
 import { catchUpMinutes, laneBalance } from '../lib/pace.ts';
@@ -41,6 +41,9 @@ import { PickerSheet } from './parts/PickerSheet.tsx';
 import { useElapsed } from './parts/RunningTime.tsx';
 import { useTimerCarry } from '../db/timer.ts';
 import { carriedMs, runningMsOn } from '../lib/timer.ts';
+import { dayLayout } from '../lib/calendar.ts';
+import { hm } from '../lib/calendar-layout.ts';
+import { breaksOf, clockNow, switchPrompt } from '../lib/clock-plan.ts';
 import { takenProject } from './parts/taken.ts';
 import { blockShort, dateTitle, nameOf, partOf, span, unitDetail } from './parts/text.ts';
 import { todayLine, tokenDaysLeft, useSyncView } from '../sync/status.ts';
@@ -77,6 +80,30 @@ function unitWindow(units: ChecklistUnit[], done: string[]): ChecklistUnit[] {
 }
 
 /** Position of a block in a fixed order; blocks not listed go last, in the day's order. */
+/** Minutes since local midnight. */
+function minuteOfDay(): number {
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes();
+}
+
+/** The block ends "Keep going" answered today (this tab's session): "C@480". */
+const KEPT_KEY = 'atlas-kept-going';
+function readKept(): Set<string> {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(KEPT_KEY) ?? '{}') as { date?: string; ends?: string[] };
+    return new Set(saved.date === todayDate() ? (saved.ends ?? []) : []);
+  } catch {
+    return new Set();
+  }
+}
+function saveKept(ends: Set<string>): void {
+  try {
+    sessionStorage.setItem(KEPT_KEY, JSON.stringify({ date: todayDate(), ends: [...ends] }));
+  } catch {
+    // Storage blocked: the answer still holds for this page.
+  }
+}
+
 function rank(order: string[], id: string): number {
   const i = order.indexOf(id);
   return i < 0 ? order.length : i;
@@ -104,6 +131,14 @@ export function Today() {
   const timer = useRunningTimer();
   const elapsed = useElapsed(timer);
   const carry = useTimerCarry();
+  // The minute of the day, for Now by the clock and the prompt to move on.
+  const [minuteNow, setMinuteNow] = useState(minuteOfDay);
+  useEffect(() => {
+    const id = window.setInterval(() => setMinuteNow(minuteOfDay()), 15_000);
+    return () => window.clearInterval(id);
+  }, []);
+  // "Keep going" answers the prompt to move on for that block's end, for the rest of the session.
+  const [keptGoing, setKeptGoing] = useState<Set<string>>(() => readKept());
   const log = useLiveQuery(() => readLog(date), [date]);
   const settings = atlas?.settings;
   const weekStart = useMemo(() => startOfWeek(date, settings?.core.weekStartsOn ?? 1), [date, settings]);
@@ -172,10 +207,19 @@ export function Today() {
   const done = (b: TodayBlock): boolean => isBlockDone(log, b.id);
   const timerBlock = isToday && timer ? blocks.find((b) => b.id === timer.block) : undefined;
   // "Now" is the first unfinished block, in the day's order or in the order set under Settings > Layout.
+  // The day's blocks at their times (the template's, or the date's own). On today, Now follows the clock; a block
+  // tapped in Later today, or the one whose timer runs, comes first. Settings > Layout's own order still wins.
+  const placed = dayLayout(date, settings).filter((p) => blocks.some((b) => b.id === p.id));
+  const windowOf = (id: string) => placed.find((p) => p.id === id);
+  const clock = isToday && layout.now !== 'order' ? clockNow(placed, minuteNow) : null;
   const nowOrder = layout.now === 'order' ? [...blocks].sort((a, b) => rank(layout.order, a.id) - rank(layout.order, b.id)) : blocks;
-  const nowBlock = (chosen ? blocks.find((b) => b.id === chosen) : undefined) ?? timerBlock ?? nowOrder.find((b) => !done(b)) ?? null;
-  const later = blocks.filter((b) => b !== nowBlock && !done(b));
-  const finished = blocks.filter((b) => b !== nowBlock && done(b));
+  const clockBlock = clock?.kind === 'block' ? blocks.find((b) => b.id === clock.id) : undefined;
+  const nowBlock = (chosen ? blocks.find((b) => b.id === chosen) : undefined) ?? timerBlock ?? (clock ? (clockBlock ?? null) : (nowOrder.find((b) => !done(b)) ?? null));
+  const startOf = (b: TodayBlock): number => windowOf(b.id)?.start ?? 24 * 60;
+  const blockName = (id: string): string => settings.core.blocks.find((b) => b.id === id)?.name ?? id;
+  const later = blocks.filter((b) => b !== nowBlock && !done(b)).sort((a, b) => startOf(a) - startOf(b));
+  const dayBreak = breaksOf(placed)[0];
+  const moveOn = isToday && timer ? switchPrompt(placed, timer.block, minuteNow, keptGoing) : null;
   const byBlock = minutesByBlock(log);
   const logged = totalMinutes(log);
   // Every second counts: the logged minutes, the seconds stops carried, and the running timer's part of this date.
@@ -200,8 +244,6 @@ export function Today() {
   const nowMinutes = nowBlock ? Math.floor(blockMs(nowBlock.id) / 60_000) : 0;
   const nowDone = nowBlock ? done(nowBlock) : false;
 
-  const reviewDay = settings.core.review.day;
-  const isReviewDay = weekday(date) === reviewDay;
   // GitHub Sync's one quiet line: changes that cannot go out, or a token about to expire. Nothing otherwise.
   const tokenDays = syncView?.connected ? tokenDaysLeft(syncView.config, now) : null;
   const syncLine =
@@ -256,7 +298,7 @@ export function Today() {
   };
   // They live inside their block, so Today still fits one screen: on the block's Now card as rows, and as a mention on
   // its Later today row. Once the block is done, they lead Later today.
-  const leadingExtras = finished.flatMap((b) => extrasFor(b.id));
+  const leadingExtras = blocks.filter((b) => b !== nowBlock && done(b)).flatMap((b) => extrasFor(b.id));
   const extrasNote = (id: BlockId): string | null => {
     const rows = extrasFor(id);
     return rows.length ? rows.map((r) => r.key.toLowerCase() + (r.trailing === 'Done' ? ' done' : '')).join(', ') : null;
@@ -284,7 +326,8 @@ export function Today() {
     // A project's row opens its tech doc; the doc's "Work on it now" makes it Now.
     const doc = blockItem.kind === 'project' ? blockItem.refId : undefined;
     if (blockItem === block.weeklyBuild) return { title: nameOf(blockItem), meta: 'Weekly build · ' + hoursOn(blockItem.refId) + ' of ' + blockItem.estHours + ' h done', doc };
-    return { title: nameOf(blockItem), meta: [name, detailOf(blockItem)].filter(Boolean).join(' · '), doc };
+    // As the boards draw it: the block by name, what it works on underneath ("Hugging Face · LLM Course · chapter 3").
+    return { title: block.def.name, meta: [nameOf(blockItem), detailOf(blockItem)].filter(Boolean).join(' · '), doc };
   };
 
   const start = (): void => {
@@ -343,11 +386,12 @@ export function Today() {
         ? nowBlock.weeklyBuild
         : nowBlock.item
       : undefined;
-  const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item ? nameOf(item) : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
+  // The block by name; the item it works on leads the line under it, after the time.
+  const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item && nowBlock.weeklyBuild === item ? nameOf(item) : item ? nowBlock.def.name : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
   const metaLine = nowBlock
     ? [
-        blockShort(nowBlock.def.name),
         span(nowMinutes) + ' of ' + span(nowBlock.targetMinutes),
+        item && headline !== nameOf(item) ? nameOf(item) : null,
         nowBlock.catchUp ? span(nowBlock.catchUp) + ' of it catch-up' : null,
         detailOf(item),
         isProject && item.unitCount > 0 ? item.unitsDone + ' of ' + item.unitCount + ' ticked' : null,
@@ -458,6 +502,39 @@ export function Today() {
         </RowList>
       )}
 
+      {moveOn && (
+        // A quiet offer when a running block's time is up: the next block starts now, or the day is over.
+        <section aria-label="Move on" className="tile well-ice mt-4 flex flex-col gap-3 p-[18px]">
+          <p className="text-body font-semibold">
+            {moveOn.to ? 'Move on to ' + (settings.core.blocks.find((b) => b.id === moveOn.to)?.name ?? moveOn.to) + '?' : blockName(moveOn.from) + ' ended at ' + hm(moveOn.at) + '.'}
+          </p>
+          <div className="flex gap-3 [&>*]:min-w-0 [&>*]:flex-1">
+            <Button
+              icon={moveOn.to ? 'play' : 'stop'}
+              onClick={() => {
+                const next = moveOn.to ? blocks.find((b) => b.id === moveOn.to) : undefined;
+                const nextItem = next ? focusItem(next, monthlyFirst) : undefined;
+                if (next) {
+                  setChosen(null);
+                  void startTimer({ block: next.id, track: nextItem?.track ?? 'career', refId: nextItem?.refId });
+                } else void stopTimer();
+              }}
+            >
+              {moveOn.to ? 'Switch' : 'Stop'}
+            </Button>
+            <Button
+              onClick={() => {
+                const next = new Set(keptGoing).add(moveOn.from + '@' + moveOn.at);
+                setKeptGoing(next);
+                saveKept(next);
+              }}
+            >
+              Keep going
+            </Button>
+          </div>
+        </section>
+      )}
+
       {restDay ? (
         <section aria-label="Now" className="tile mt-4 flex flex-col gap-1.5 p-[18px]">
           <p className="section-label mb-0">Now</p>
@@ -466,18 +543,38 @@ export function Today() {
         </section>
       ) : nothingPlanned ? (
         <EmptyState action={<Button to="/plan">Open Plan</Button>}>Nothing scheduled. Open Plan to pick what you&apos;re learning.</EmptyState>
+      ) : !nowBlock && clock?.kind === 'break' ? (
+        // 12:00 to 18:00: the break, with the block after it underneath (a tap starts it early).
+        <section aria-label="Now" className="tile mt-4 flex flex-col gap-1.5 p-[18px]">
+          <p className="section-label mb-0 flex items-center gap-1.5 uppercase">
+            <Icon name="moon" size={18} />
+            {'Break · ' + hm(clock.from) + '–' + hm(clock.until)}
+          </p>
+          <h2 className="mt-1 text-card font-semibold">{'Break until ' + hm(clock.until)}</h2>
+          <p className="text-meta text-ink2">{span(dayMinutes) + ' of ' + span(plan.targetMinutes) + ' so far today'}</p>
+          {(() => {
+            const next = blocks.find((b) => b.id === clock.next);
+            if (!next) return null;
+            const row = rowFor(next);
+            return (
+              <ul className="rows mt-2 border-t-[1.5px] border-dashed border-dash">
+                <Row icon={<BlockTile block={next.id} />} title={'Next: ' + blockName(next.id)} meta={row.title} trailing={hm(clock.until)} onClick={() => setChosen(next.id)} />
+              </ul>
+            );
+          })()}
+        </section>
       ) : !nowBlock ? (
         <section aria-label="Now" className="tile mt-4 flex flex-col gap-1.5 p-[18px]">
-          <p className="section-label mb-0">Now</p>
-          <p className="text-card font-semibold">All five blocks are done.</p>
-          <p className="text-meta text-ink2">{span(dayMinutes)} logged today.</p>
+          <p className="section-label mb-0">{clock?.kind === 'done' ? 'Day done' : 'Now'}</p>
+          <p className="text-card font-semibold">{clock?.kind === 'done' ? 'That was the day.' : 'Every block is done.'}</p>
+          <p className="text-meta text-ink2">{span(dayMinutes) + ' of ' + span(plan.targetMinutes) + ' · ' + blocks.filter(reached).length + ' of ' + blocks.length + ' blocks'}</p>
         </section>
       ) : (
         <section aria-labelledby="now-title" className={'tile mt-4 flex flex-col gap-1.5 p-[18px]' + (taken && item?.refId === taken.id ? ' taken' : '')}>
           <div className="flex items-center justify-between gap-2">
             <p className="section-label mb-0 flex min-w-0 items-center gap-1.5 uppercase" style={{ color: toneInk(blockTone(nowBlock.id)) }}>
               <BlockIcon block={nowBlock.id} size={18} />
-              <span className="truncate">{'Now · ' + blockShort(nowBlock.def.name)}</span>
+              <span className="truncate">{'Now · ' + (windowOf(nowBlock.id) ? hm(windowOf(nowBlock.id)!.start) + '–' + hm(windowOf(nowBlock.id)!.start + windowOf(nowBlock.id)!.minutes) : blockShort(nowBlock.def.name))}</span>
             </p>
             {!expanded && (
               <div className="-my-1 flex shrink-0 gap-2">
@@ -575,7 +672,7 @@ export function Today() {
               </Button>
             ) : item?.url ? (
               <Button variant="ice" icon="external" href={item.url} name={resource?.type === 'book' ? 'Open the book' : 'Open course'}>
-                <span className="truncate max-[379px]:sr-only">{resource?.type === 'book' ? 'Open the book' : 'Open course'}</span>
+                <span className="line-clamp-2 whitespace-normal text-center leading-tight max-[379px]:sr-only">{resource?.type === 'book' ? 'Open the book' : 'Open course'}</span>
               </Button>
             ) : null}
           </div>
@@ -611,26 +708,32 @@ export function Today() {
         <RowList
           label="Later today"
           className="mt-4"
-          aside={
-            layout.review && !isReviewDay ? (
-              <Link to="/reviews" className="-my-3 inline-flex min-h-11 items-center">
-                Review on {dayName(addDays(date, (reviewDay - weekday(date) + 7) % 7))}
-              </Link>
-            ) : undefined
-          }
+          aside={blocks.some(done) ? 'Done: ' + blocks.filter(done).map((b) => blockName(b.id)).join(', ') : 'Done: 0 of ' + blocks.length}
         >
           {leadingExtras.map(extraRow)}
-          {later.flatMap((block) => {
+          {later.flatMap((block, i) => {
             const row = rowFor(block);
+            // The quiet break between the sessions, where the list crosses it.
+            const prev = later[i - 1];
+            const divider =
+              dayBreak && windowOf(block.id) && windowOf(block.id)!.start >= dayBreak.until && (!prev || startOf(prev) < dayBreak.until) && (prev || (clock?.kind === 'block' && windowOf(clock.id)!.start < dayBreak.until)) ? (
+                <li key="break" className="flex min-h-11 items-center gap-3 py-2 text-meta font-semibold text-ink2">
+                  <span className="grid w-10 place-items-center">
+                    <Icon name="moon" size={18} />
+                  </span>
+                  {'Break · ' + hm(dayBreak.from) + ' – ' + hm(dayBreak.until)}
+                </li>
+              ) : null;
             const isTaken = Boolean(taken && block.id === 'D' && focusItem(block, monthlyFirst)?.refId === taken.id);
             return [
+              divider,
               <Row
                 key={block.id}
                 className={isTaken ? 'taken' : ''}
                 icon={<BlockTile block={block.id} />}
                 title={row.title}
                 meta={layout.view === 'compact' ? undefined : [blockMs(block.id) >= 60_000 ? span(Math.floor(blockMs(block.id) / 60_000)) + ' today' : null, row.meta, extrasNote(block.id)].filter(Boolean).join(' · ')}
-                trailing={span(block.targetMinutes)}
+                trailing={windowOf(block.id) ? hm(windowOf(block.id)!.start) : span(block.targetMinutes)}
                 to={row.to}
                 onClick={
                   row.to
@@ -649,12 +752,6 @@ export function Today() {
             ];
           })}
         </RowList>
-      )}
-
-      {layout.footer && finished.length > 0 && (
-        <p className="mt-4 px-1 text-meta text-ink2">
-          Done today: {finished.map((b) => rowFor(b).title).join(', ')}
-        </p>
       )}
 
       {showDayRow && (

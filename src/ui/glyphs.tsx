@@ -7,7 +7,7 @@ import type { IconName } from './Icon.tsx';
  * The icons that carry meaning (DECISIONS.md, "The icon map"): one per block, blue or ice, one per kind of project
  * with a difficulty mark, and a status. All decorative: a word always says the same.
  */
-const BLOCK_ICON: Record<string, IconName> = { A: 'cube', B: 'code', C: 'cpu', D: 'hammer', E: 'sigma' };
+const BLOCK_ICON: Record<string, IconName> = { A: 'cube', B: 'code', C: 'cpu', D: 'hammer', E: 'sigma', H: 'course' };
 
 export function blockIconName(block: string): IconName {
   return BLOCK_ICON[block] ?? 'layers';

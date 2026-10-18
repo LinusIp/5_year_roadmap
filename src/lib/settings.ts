@@ -5,6 +5,7 @@
 import { SETTINGS_VERSION } from '../db/types.ts';
 import type { DayChange, Layout, StoredSettings, StoredSettingsInput } from '../db/types.ts';
 import type { BlockId, SettingsDefaults, StoredCore } from '../seed/schema.ts';
+import { addDays, today as todayDate } from './dates.ts';
 
 /** Layout as a fresh install has it: exactly the mockups. */
 export function defaultLayout(core: Pick<SettingsDefaults, 'blocks'>): Layout {
@@ -167,9 +168,65 @@ export function withoutPractice<S extends StoredSettingsInput | StoredSettings>(
   return next as S;
 }
 
+/** The block the fixed daily schedule added: settings without it predate the schedule. */
+export const DAILY_SCHEDULE_BLOCK = 'H';
+
+/**
+ * Settings from before the fixed daily schedule (DAILY-SCHEDULE) switch to it, once: they are recognised by having
+ * no block H. The schedule as it was is kept in history for the days up to yesterday, so past days keep their plan,
+ * heatmap share and streak. Block H joins; A, B, C and E take the schedule's minutes (and its names, where the user
+ * kept the old default name); the Full day and Weekend templates and the weekly pattern become the curriculum's;
+ * other templates the user made stay. Day changes, busy events, pace, pauses and logged time are untouched.
+ *
+ * Pure: `today` is the first day on the new schedule.
+ */
+export function withDailySchedule(stored: StoredSettings, defaults: SettingsDefaults, today: string, force = false): StoredSettings {
+  const core = stored.core;
+  const fresh = defaults.blocks.find((b) => b.id === DAILY_SCHEDULE_BLOCK);
+  if (!fresh || (!force && core.blocks.some((b) => b.id === DAILY_SCHEDULE_BLOCK))) return stored;
+  const yesterday = addDays(today, -1);
+  const snapshot = {
+    until: yesterday,
+    templates: structuredClone(core.templates),
+    pattern: [...core.pattern],
+    blocks: core.blocks.map((b) => ({ id: b.id, minutes: b.minutes, days: [...b.days] })),
+  };
+  const history = [...stored.schedule.history.filter((v) => v.until < yesterday), snapshot];
+  // The schedule's order (C, A, H, B, E, then any other block), with each block's minutes from the curriculum.
+  const order = defaults.blocks.map((b) => b.id);
+  const blocks = [...core.blocks.filter((b) => b.id !== DAILY_SCHEDULE_BLOCK), structuredClone(fresh)]
+    .map((b) => {
+      const def = defaults.blocks.find((d) => d.id === b.id);
+      return def && b.id !== DAILY_SCHEDULE_BLOCK ? { ...b, minutes: def.minutes, days: [...def.days] } : b;
+    })
+    .sort((a, b) => (order.indexOf(a.id) < 0 ? 99 : order.indexOf(a.id)) - (order.indexOf(b.id) < 0 ? 99 : order.indexOf(b.id)));
+  const replaced = new Set(['full', 'weekend']);
+  const templates = [
+    ...defaults.templates.filter((t) => replaced.has(t.id)).map((t) => structuredClone(t)),
+    ...core.templates.filter((t) => !replaced.has(t.id)),
+  ];
+  const layout = stored.layout.today.order.includes(DAILY_SCHEDULE_BLOCK)
+    ? stored.layout
+    : { ...stored.layout, today: { ...stored.layout.today, order: [...order.filter((id) => blocks.some((b) => b.id === id)), ...stored.layout.today.order.filter((id) => !order.includes(id))] } };
+  return {
+    ...stored,
+    core: { ...core, blocks, templates, pattern: [...defaults.pattern], heatmapThresholds: [...defaults.heatmapThresholds] },
+    schedule: { ...stored.schedule, history },
+    layout,
+  };
+}
+
+/** Back to the fixed daily schedule (Settings > Schedule): the same switch, from today, whatever was edited since. */
+export function resetToDailySchedule(stored: StoredSettings, defaults: SettingsDefaults, today: string): StoredSettings {
+  return withDailySchedule(stored, defaults, today, true);
+}
+
 /** Stored settings, whatever their version, as the app uses them. */
-export function currentSettings(stored: StoredSettingsInput | StoredSettings | undefined, core: SettingsDefaults): StoredSettings {
+export function currentSettings(stored: StoredSettingsInput | StoredSettings | undefined, core: SettingsDefaults, today: string = todayDate()): StoredSettings {
   if (!stored) return defaultSettings(core);
-  return withCurrentPaperCadence(withCurrentBlockNames(upgradeSettings(stored, core), core), core);
+  // Decided on the settings as saved: the upgrade of version 1 settings adds the curriculum's missing blocks, H included.
+  const predates = !stored.core.blocks.some((b) => b.id === DAILY_SCHEDULE_BLOCK);
+  const upgraded = withCurrentPaperCadence(withCurrentBlockNames(upgradeSettings(stored, core), core), core);
+  return predates ? withDailySchedule(upgraded, core, today, true) : upgraded;
 }
 

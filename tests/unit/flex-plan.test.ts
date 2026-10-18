@@ -168,9 +168,10 @@ describe('pace', () => {
 
   it('keeps "behind by" per lane instead of piling minutes onto tomorrow', () => {
     const b = laneBalance(settings, logs, 'E', '2026-09-21', '2026-09-23');
-    expect(b).toMatchObject({ planned: 120, logged: 30, behind: 90 });
-    expect(b.behindDays).toBeCloseTo(1.5);
-    expect(resolveDay('2026-09-23', settings).planned).toBe(480); // tomorrow is not longer
+    // Math and physics plans two hours a day: 240 minutes over the two days, 30 logged.
+    expect(b).toMatchObject({ planned: 240, logged: 30, behind: 210 });
+    expect(b.behindDays).toBeCloseTo(1.75);
+    expect(resolveDay('2026-09-23', settings).planned).toBe(600); // tomorrow is not longer
   });
 
   it('adds catch-up minutes only when opted in, and never more than the cap', () => {
@@ -178,7 +179,7 @@ describe('pace', () => {
     expect(catchUpMinutes(settings, b)).toBe(0);
     const opted: StoredSettings = { ...settings, catchUp: { E: { capMinutes: 30 } } };
     expect(catchUpMinutes(opted, b)).toBe(30);
-    expect(catchUpMinutes({ ...settings, catchUp: { E: { capMinutes: 240 } } }, b)).toBe(90);
+    expect(catchUpMinutes({ ...settings, catchUp: { E: { capMinutes: 240 } } }, b)).toBe(210);
     expect(catchUpMinutes(opted, { ...b, behind: -20 })).toBe(0);
   });
 
