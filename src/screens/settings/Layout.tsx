@@ -126,7 +126,7 @@ export function Layout({ atlas }: { atlas: Atlas }) {
             value={layout.today.now}
             onChange={(now: 'first' | 'order') => saveLayout((l) => ((l.today.now = now), (l.today.order = order), l))}
             options={[
-              { value: 'first', label: 'The first unfinished block' },
+              { value: 'first', label: 'By the clock' },
               { value: 'order', label: 'In my order' },
             ]}
           />

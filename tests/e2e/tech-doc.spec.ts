@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import type { Browser, Page } from '@playwright/test';
 import { FakeGithub } from '../fake-github.ts';
 import { serveGithub } from './github-route.ts';
-import { FIRST_DAY, laterRow, makeNow, nowCard, open, reload, writesSettled } from './helpers.ts';
+import { FIRST_DAY, laterRow, makeNow, nowCard, open, pickStatus, reload, writesSettled } from './helpers.ts';
 
 /**
  * A project's tech doc is one tap away: from the Deck (before Take it, and with Take it in the doc), the Library,
@@ -15,6 +15,20 @@ test.use({ timezoneId: 'Asia/Tashkent' });
 const GAME = 'One finished small game (close the GameDevHQ loop)';
 const BUILD = { id: 'ai-hybrid-retrieval-benchmark', title: 'BM25 versus dense versus hybrid retrieval benchmark' };
 const TOKEN = 'github_pat_techdoc_0123456789';
+
+/**
+ * Lane A opens with the GameDevHQ course and the game project comes after it. Marking the course done in the
+ * Library makes the game project GameDevHQ's item on Today, so its Now card and Later today row open its doc.
+ */
+async function finishGameDevHqCourse(page: Page): Promise<void> {
+  await open(page, './#/library/gamedevhq');
+  const pill = page.getByRole('dialog', { name: /^GameDevHQ: Unity game development course/ }).getByRole('button', { name: /^Status of / }).first();
+  await pickStatus(page, pill, 'Done');
+  await expect(pill).toHaveText('Done');
+}
+
+/** The game project's line under the Now card's title: "3 m of 2 h · One finished small game · 1 of 9 ticked". */
+const gameLine = (ticked: number) => new RegExp('^\\d+ m of 2 h · One finished small game · ' + ticked + ' of \\d+ ticked$');
 
 test.describe('with the clock on the plan’s first day', () => {
   test.beforeEach(async ({ page }) => {
@@ -47,7 +61,9 @@ test.describe('with the clock on the plan’s first day', () => {
     await titleButton.press(' ');
     await sheet.getByRole('button', { name: 'Take it' }).click();
     await expect(page).toHaveURL(/#\/$/);
-    await expect(laterRow(page, /monthly case \d+ h$/)).toBeVisible();
+    // Today's fixed day has no projects block: the case waits in Plan › Projects as the next one in Block D.
+    await open(page, './#/plan?view=projects');
+    await expect(page.getByRole('main').getByRole('button', { name: title + ' Next in Block D' })).toBeVisible();
   });
 
   test('from the Library and Plan › Projects, with the keyboard: Enter opens, Escape closes, focus returns', async ({ page }) => {
@@ -75,8 +91,10 @@ test.describe('with the clock on the plan’s first day', () => {
   });
 
   test('from Today’s Now card with the timer running: tick a milestone in the doc, close, and the timer and progress hold', async ({ page }) => {
+    await finishGameDevHqCourse(page);
     await open(page, './');
-    await expect(page.locator('#now-title')).toHaveText('One finished small game');
+    await expect(page.locator('#now-title')).toHaveText('GameDevHQ');
+    await expect(nowCard(page).getByText(gameLine(0))).toBeVisible();
     await nowCard(page).getByRole('button', { name: 'Start' }).click();
     await expect(page.getByText(/^Running · since /)).toBeVisible();
     await page.clock.fastForward('02:00');
@@ -103,7 +121,7 @@ test.describe('with the clock on the plan’s first day', () => {
     // The running time sits in Today's header widget, in blue; the Now card keeps Stop.
     await expect(nowCard(page).getByRole('button', { name: /^Stop/ })).toBeVisible();
     await expect(page.getByText(/^3:0\d$/)).toBeVisible();
-    await expect(nowCard(page).getByText(/^Graphics · .* · 1 of \d+ ticked$/)).toBeVisible();
+    await expect(nowCard(page).getByText(gameLine(1))).toBeVisible();
 
     // The doc reopens where it was left.
     await page.locator('#now-title').click();
@@ -120,19 +138,33 @@ test.describe('with the clock on the plan’s first day', () => {
   });
 
   test('a Later today project row opens its doc; "Work on it now" makes it Now; a build’s steps tick from the doc', async ({ page }) => {
+    // The game project is GameDevHQ's item; another block is made Now so GameDevHQ waits in Later today.
+    await finishGameDevHqCourse(page);
+    await open(page, './');
+    await makeNow(page, /^ML Zoomcamp/);
+    await laterRow(page, /^GameDevHQ One finished small game/).click();
+    const doc = page.getByRole('dialog', { name: GAME });
+    const milestone = doc.getByRole('checkbox', { name: /^1\. One-page design/ });
+    await milestone.click();
+    await expect(milestone).toBeChecked();
+    await doc.getByRole('button', { name: 'Work on it now' }).click();
+    await expect(doc).toHaveCount(0);
+    await expect(page.locator('#now-title')).toHaveText('GameDevHQ');
+    await expect(nowCard(page).getByText(gameLine(1))).toBeVisible();
+
+    // A weekly build is not on Today's fixed day: its doc opens from Plan › Projects, and its steps tick there.
     await open(page, './#/library/' + BUILD.id);
     await page.getByRole('dialog', { name: BUILD.title }).getByRole('button', { name: "Make it this week's build" }).click();
-    await open(page, './');
-    await laterRow(page, new RegExp('^' + BUILD.title + ' Weekly build')).click();
+    await open(page, './#/plan?view=projects');
+    const slot = page.getByRole('main').getByRole('button', { name: new RegExp('^' + BUILD.title + ' Weekly build') });
+    await slot.click();
     const sheet = page.getByRole('dialog', { name: BUILD.title });
     const steps = sheet.getByRole('checkbox');
     await steps.first().click();
     await expect(steps.first()).toBeChecked();
     await expect(sheet.getByText(/^1 of \d+ steps$/)).toBeVisible();
-    await sheet.getByRole('button', { name: 'Work on it now' }).click();
-    await expect(sheet).toHaveCount(0);
-    await expect(page.locator('#now-title')).toHaveText(BUILD.title);
-    await expect(nowCard(page).getByText(/1 of \d+ ticked$/)).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(slot).toContainText(/1 of \d+ ticked/);
   });
 
   test('a case doc: the jump bar follows the reading and jumps, the diagram opens full screen, decisions and the interface show', async ({ page }) => {
@@ -210,9 +242,9 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Hint', exact: true })).toBeVisible();
 
-    // Today's daily challenge, on Block B's Now card, opens the same screen.
+    // Today's daily challenge, on Block B's (Coding lessons) Now card, opens the same screen.
     await open(page, './');
-    await makeNow(page, /^30 Days of Python/);
+    await makeNow(page, /^Coding lessons/);
     await nowCard(page).getByRole('link', { name: /^Daily challenge · / }).click();
     await expect(page).toHaveURL(/#\/challenge\/.*daily=1/);
     await expect(page.getByText(/^Daily challenge · easy/)).toBeVisible();
@@ -240,7 +272,9 @@ test('a milestone ticked in the doc reaches a second device', async ({ browser }
   const fake = new FakeGithub({ owner: 'octo-learner', repo: 'atlas-data', token: TOKEN, userId: 4242, name: 'Octo Learner' });
   const a = await device(browser, fake);
   await connect(a);
+  await finishGameDevHqCourse(a);
   await open(a, './');
+  await expect(nowCard(a).getByText(gameLine(0))).toBeVisible();
   await a.locator('#now-title').click();
   await a.getByRole('dialog', { name: GAME }).getByRole('checkbox', { name: /^1\. One-page design/ }).click();
   await writesSettled(a);
@@ -251,7 +285,7 @@ test('a milestone ticked in the doc reaches a second device', async ({ browser }
   const b = await device(browser, fake);
   await connect(b);
   await open(b, './');
-  await expect(nowCard(b).getByText(/1 of \d+ ticked$/)).toBeVisible();
+  await expect(nowCard(b).getByText(gameLine(1))).toBeVisible();
   await b.locator('#now-title').click();
   await expect(b.getByRole('dialog', { name: GAME }).getByRole('checkbox', { name: /^1\. One-page design/ })).toBeChecked();
 });

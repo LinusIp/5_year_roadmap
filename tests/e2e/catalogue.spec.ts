@@ -20,11 +20,16 @@ function listUnder(scope: Page | Locator, heading: string | RegExp): Locator {
   return scope.locator('section').filter({ has: root.getByRole('heading', { name: heading }) }).last().getByRole('list');
 }
 
+/** This week's build in Plan › Projects. */
+function weeklySlot(page: Page): Locator {
+  return page.getByRole('main').getByRole('button', { name: new RegExp('^' + BUILD.title + ' Weekly build') });
+}
+
 async function solveTodaysChallenge(page: Page): Promise<string> {
   await open(page, './');
-  // The day's challenge lives in Block B: mentioned on its row, a row of its own on its Now card.
-  await expect(laterRow(page, /^30 Days of Python Languages · .* · daily challenge \d+ h$/)).toBeVisible();
-  await makeNow(page, /^30 Days of Python/);
+  // The day's challenge lives in Block B, Coding lessons: mentioned on its row, a row of its own on its Now card.
+  await expect(laterRow(page, /^Coding lessons 30 Days of Python · .* · daily challenge 18:00$/)).toBeVisible();
+  await makeNow(page, /^Coding lessons/);
   const row = nowCard(page).getByRole('link', { name: /^Daily challenge · / });
   await expect(row).toContainText(/easy · \d+ min · .* · in Python/);
   const title = ((await row.locator('span[id]').first().innerText()) ?? '').replace(/^Daily challenge · /, '');
@@ -54,19 +59,19 @@ test.describe('with the clock on the plan’s first day', () => {
     const title = await solveTodaysChallenge(page);
     await page.screenshot({ path: 'test-results/catalogue-challenge.png', fullPage: true });
     await open(page, './');
-    await expect(laterRow(page, /^30 Days of Python .* daily challenge done \d+ h$/)).toBeVisible();
-    await makeNow(page, /^30 Days of Python/);
+    await expect(laterRow(page, /^Coding lessons 30 Days of Python · .* · daily challenge done 18:00$/)).toBeVisible();
+    await makeNow(page, /^Coding lessons/);
     await expect(nowCard(page).getByRole('link', { name: new RegExp('^Daily challenge · ' + title + ' Solved') })).toBeVisible();
 
     await reload(page);
-    await expect(laterRow(page, /daily challenge done \d+ h$/)).toBeVisible();
+    await expect(laterRow(page, /^Coding lessons .* daily challenge done 18:00$/)).toBeVisible();
     await open(page, './#/activity?view=projects');
     await expect(page.getByText(/^Daily challenge streak: 1 day/)).toBeVisible();
   });
 
   test('skip moves to another challenge, three times a day; Not today hides it', async ({ page }) => {
     await open(page, './');
-    await makeNow(page, /^30 Days of Python/);
+    await makeNow(page, /^Coding lessons/);
     await nowCard(page).getByRole('link', { name: /^Daily challenge · / }).click();
     const first = await page.getByRole('heading', { level: 1 }).innerText();
     await page.getByRole('button', { name: 'Skip · 3 left' }).click();
@@ -74,6 +79,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(page.getByRole('button', { name: 'Skip · 2 left' })).toBeVisible();
     await page.getByRole('button', { name: 'Not today' }).click();
     await expect(page).toHaveURL(/#\/$/);
+    await expect(laterRow(page, /^Coding lessons 30 Days of Python · /)).toBeVisible();
     await expect(laterRow(page, /daily challenge/)).toHaveCount(0);
   });
 
@@ -81,8 +87,9 @@ test.describe('with the clock on the plan’s first day', () => {
     await open(page, './#/library/' + BUILD.id);
     const sheet = page.getByRole('dialog', { name: BUILD.title });
     await sheet.getByRole('button', { name: "Make it this week's build" }).click();
-    await open(page, './');
-    await expect(laterRow(page, new RegExp('^' + BUILD.title + ' Weekly build'))).toBeVisible();
+    // Today's fixed day has no projects block: the week's build shows in Plan › Projects.
+    await open(page, './#/plan?view=projects');
+    await expect(weeklySlot(page)).toBeVisible();
 
     await open(page, './#/library/' + BUILD.id);
     const pill = sheet.getByRole('button', { name: /^Status of / }).first();
@@ -105,10 +112,12 @@ test.describe('with the clock on the plan’s first day', () => {
     const title = await page.locator('#deck-top-title').innerText();
     await page.getByRole('button', { name: 'Take it', exact: true }).click();
     await expect(page).toHaveURL(/#\/$/);
-    await expect(laterRow(page, /monthly case \d+ h$/)).toBeVisible();
 
+    // The case is the next project in Block D, which Plan › Projects shows (Today's day has no projects block).
     await open(page, './#/plan?view=projects');
-    await listUnder(page, 'Monthly queue · real cases').getByRole('button', { name: new RegExp('^' + title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }).click();
+    const queued = listUnder(page, 'Monthly queue · real cases').getByRole('button', { name: new RegExp('^' + title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) });
+    await expect(queued).toContainText('Next in Block D');
+    await queued.click();
     const sheet = page.getByRole('dialog', { name: title });
     await expect(sheet.getByRole('heading', { name: 'Requirements', exact: true })).toBeVisible();
     const milestones = listUnder(sheet, /^Milestones$/);
@@ -199,10 +208,14 @@ test('a solved challenge and a taken build reach a second device, and survive a 
   const b = await device(browser, fake);
   await connect(b);
   await open(b, './');
-  await expect(laterRow(b, /daily challenge done \d+ h$/)).toBeVisible();
-  await expect(laterRow(b, new RegExp('^' + BUILD.title + ' Weekly build'))).toBeVisible();
+  await expect(laterRow(b, /^Coding lessons .* daily challenge done 18:00$/)).toBeVisible();
   await reload(b);
-  await expect(laterRow(b, /daily challenge done \d+ h$/)).toBeVisible();
+  await expect(laterRow(b, /^Coding lessons .* daily challenge done 18:00$/)).toBeVisible();
+  // The build is not on Today's fixed day: Plan › Projects carries it, before and after a reload.
+  await open(b, './#/plan?view=projects');
+  await expect(weeklySlot(b)).toBeVisible();
+  await reload(b);
+  await expect(weeklySlot(b)).toBeVisible();
   await open(b, './#/activity?view=projects');
   await expect(b.getByText(/^Daily challenge streak: 1 day/)).toBeVisible();
 });

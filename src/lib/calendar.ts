@@ -117,7 +117,7 @@ const DAY_ID = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
  * ("Full day · Monday") so the others stay as they were. The date's own time and length for the block are
  * cleared, so the template's apply there too.
  */
-export function withEveryWeekday(settings: StoredSettings, today: string, date: string, block: BlockId, values: { start?: number; minutes?: number }): StoredSettings {
+export function withEveryWeekday(settings: StoredSettings, today: string, date: string, block: BlockId, values: { start?: number; minutes?: number }, everyDay = false): StoredSettings {
   const day = weekday(date);
   const cleared = edit(settings, date, (c) => {
     const times = { ...c.times };
@@ -129,7 +129,7 @@ export function withEveryWeekday(settings: StoredSettings, today: string, date: 
   return withScheduleEdit(cleared, today, (s) => {
     const pattern = [...s.core.pattern];
     const templateId = pattern[day] ?? s.core.templates[0]!.id;
-    const shared = pattern.some((t, i) => i !== day && t === templateId);
+    const shared = !everyDay && pattern.some((t, i) => i !== day && t === templateId);
     let templates = s.core.templates;
     let target = templateId;
     if (shared) {
@@ -157,6 +157,21 @@ export function withEveryWeekday(settings: StoredSettings, today: string, date: 
     });
     return { ...s, core: { ...s.core, templates, pattern } };
   });
+}
+
+/** Whether every weekday uses the date's template (the daily schedule): then the sheet offers "Apply to every day". */
+export function usedEveryDay(settings: StoredSettings, date: string): boolean {
+  const pattern = settings.core.pattern;
+  const own = pattern[weekday(date)];
+  return pattern.length === 7 && pattern.every((t) => t === own);
+}
+
+/**
+ * "Apply to every day": with one template on every weekday, the block's time and length go into that template from
+ * today on, with no per-weekday copy.
+ */
+export function withEveryDay(settings: StoredSettings, today: string, date: string, block: BlockId, values: { start?: number; minutes?: number }): StoredSettings {
+  return withEveryWeekday(settings, today, date, block, values, true);
 }
 
 /** Adds a busy event, or replaces the one with its id. */

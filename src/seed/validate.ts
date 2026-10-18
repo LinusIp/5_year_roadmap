@@ -424,6 +424,12 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
     if (row && !row.item.certs.includes(item.id)) errors.push(file + ' (id: ' + item.id + '): not listed under subject "' + item.subject + '" in data/subjects.yaml');
   }
 
+  if (settings) {
+    const defined = new Set(settings.blocks.map((b) => b.id));
+    for (const block of new Set(plan.map((i) => i.block))) {
+      if (!defined.has(block)) errors.push('data/settings.yaml: blocks: must define block ' + block + ': the curriculum plans into it');
+    }
+  }
   if (settings?.paperCadence.fromPhase && !phaseById.has(settings.paperCadence.fromPhase)) {
     errors.push('data/settings.yaml: paperCadence.fromPhase "' + settings.paperCadence.fromPhase + '" is not a phase');
   }

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { loadSeedOrThrow } from '../../scripts/lib/load-seed.ts';
 import { splitSeed } from '../../scripts/lib/vite-plugin-seed.ts';
 import { defaultSettings } from '../../src/db/settings.ts';
+import { withAddedBlock } from '../../src/lib/calendar.ts';
+import { parseHm } from '../../src/lib/calendar-layout.ts';
 import { activePhase, dailyTargetMinutes, nextInLane, planForDay, suggestWeeklyBuild, weeklyTargetMinutes } from '../../src/lib/schedule.ts';
 import type { ScheduleContext } from '../../src/lib/schedule.ts';
 import type { AppSeed } from '../../src/seed/index.ts';
@@ -34,14 +36,16 @@ describe('the schedule', () => {
 
     expect(plan.phase!.id).toBe('y1-p0');
     expect(plan.isReviewDay).toBe(false); // 2026-09-21 is a Monday
-    expect(plan.targetMinutes).toBe(480); // the 8-hour budget
+    expect(plan.targetMinutes).toBe(600); // the 10-hour daily schedule
+    expect(plan.blocks.map((b) => b.id)).toEqual(['C', 'A', 'H', 'B', 'E']);
 
-    expect(byBlock.get('A')!.item!.title).toMatch(/One finished small game/);
+    // The pinned courses: GameDevHQ first in lane A, the Hugging Face course in the new lane H.
+    expect(byBlock.get('A')!.item!.title).toMatch(/GameDevHQ/);
+    expect(byBlock.get('H')!.item!.title).toMatch(/Hugging Face LLM Course/);
     expect(byBlock.get('B')!.item!.title).toMatch(/30 Days of Python/);
     expect(byBlock.get('B')!.item!.nextUnit).toMatchObject({ position: 1, title: expect.stringContaining('Day 1') });
     expect(byBlock.get('C')!.item!.title).toMatch(/Machine Learning Zoomcamp/);
     expect(byBlock.get('C')!.item!.nextUnit!.title).toMatch(/Module 1/);
-    expect(byBlock.get('D')!.weeklyBuild).toBeDefined(); // the first weekly mini-build
     expect(byBlock.get('E')!.item!.title).toMatch(/18\.06 Linear Algebra/);
     expect(byBlock.get('E')!.item!.nextUnit!.title).toBe('Lecture 1: The geometry of linear equations');
   });
@@ -93,25 +97,24 @@ describe('the schedule', () => {
     expect(block.item!.title).toMatch(/Beej/); // the first item of the next phase's lane B
   });
 
-  it('replaces the projects block with the review on Sundays', () => {
+  it('keeps the five courses on Sundays: the review replaced the projects block, which the daily schedule leaves out', () => {
     const sunday = '2026-09-27';
     const plan = planForDay({ date: sunday, settings, ctx: context() });
     expect(plan.isReviewDay).toBe(true);
-    const blockD = plan.blocks.find((b) => b.id === 'D')!;
+    expect(plan.blocks.map((b) => [b.id, b.kind])).toEqual([['C', 'item'], ['A', 'item'], ['H', 'item'], ['B', 'item'], ['E', 'item']]);
+    // Projects added to a Sunday by hand is still the review.
+    const withD = withAddedBlock(settings, sunday, 'D', 60, parseHm('13:00'));
+    const blockD = planForDay({ date: sunday, settings: withD, ctx: context() }).blocks.find((b) => b.id === 'D')!;
     expect(blockD.kind).toBe('review');
     expect(blockD.item).toBeUndefined();
-    // The other four blocks are untouched.
-    for (const id of ['A', 'B', 'C', 'E'] as const) {
-      expect(plan.blocks.find((b) => b.id === id)!.kind, id).toBe('item');
-    }
   });
 
   it('leaves a block out on a weekday it does not run', () => {
     const custom = structuredClone(settings);
-    custom.core.blocks[0]!.days = [1, 2, 3, 4, 5];
+    custom.core.blocks.find((b) => b.id === 'A')!.days = [1, 2, 3, 4, 5];
     const plan = planForDay({ date: '2026-09-26', settings: custom, ctx: context() }); // a Saturday
     expect(plan.blocks.find((b) => b.id === 'A')).toBeUndefined();
-    expect(plan.targetMinutes).toBe(360);
+    expect(plan.targetMinutes).toBe(480);
   });
 
   it('suggests a weekly build that matches the phase, and keeps suggesting while you skip', () => {
@@ -137,13 +140,15 @@ describe('the schedule', () => {
   });
 
   it('honours the card the user picked for the week', () => {
-    const plan = planForDay({ date: FIRST_DAY, settings, weeklyPickId: 'w-c-ring-buffer', ctx: context() });
+    // Projects is no longer in the daily schedule; added to a day, it carries the week's pick.
+    const withD = withAddedBlock(settings, FIRST_DAY, 'D', 60, parseHm('13:00'));
+    const plan = planForDay({ date: FIRST_DAY, settings: withD, weeklyPickId: 'w-c-ring-buffer', ctx: context() });
     expect(plan.blocks.find((b) => b.id === 'D')!.weeklyBuild!.refId).toBe('w-c-ring-buffer');
   });
 
-  it('adds up to the 8-hour day and the 56-hour week', () => {
-    expect(dailyTargetMinutes(settings, FIRST_DAY)).toBe(480);
-    expect(weeklyTargetMinutes(settings, FIRST_DAY)).toBe(56 * 60);
+  it('adds up to the 10-hour day and the 70-hour week', () => {
+    expect(dailyTargetMinutes(settings, FIRST_DAY)).toBe(600);
+    expect(weeklyTargetMinutes(settings, FIRST_DAY)).toBe(70 * 60);
   });
 
   it('falls back to the nearest phase outside the plan rather than showing nothing', () => {

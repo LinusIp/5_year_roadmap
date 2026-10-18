@@ -2,12 +2,12 @@ import { expect, test } from '@playwright/test';
 import type { Browser, Locator, Page } from '@playwright/test';
 import { FakeGithub } from '../fake-github.ts';
 import { serveGithub } from './github-route.ts';
-import { FIRST_DAY, laterRow, open, reload, writesSettled } from './helpers.ts';
+import { FIRST_DAY, laterRow, nowCard, open, reload, writesSettled } from './helpers.ts';
 
 /**
  * Calendar: the month, a date's day view, and changing it like a calendar app. The clock is the plan's first day
- * (Monday 21 September 2026, 09:00 in Tashkent), a Full day: Graphics, Languages, Core, Projects, Math and physics
- * from 08:00 with 15-minute breaks.
+ * (Monday 21 September 2026, 09:00 in Tashkent), the daily schedule: ML Zoomcamp 06:00, GameDevHQ 08:00, Hugging Face
+ * 10:00, a break from 12:00, Coding lessons 18:00 and Math and physics 20:00, two hours each.
  */
 test.use({ timezoneId: 'Asia/Tashkent', viewport: { width: 390, height: 844 } });
 
@@ -44,9 +44,14 @@ test('a phone opens on the day; the month shows today; a date opens its day, wit
 
   await month.getByRole('button', { name: /^Wednesday 23 September/ }).click();
   await expect(page.getByText('Wed 23 Sep', { exact: true })).toBeVisible();
-  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics ?, 08:00 to 10:00/);
-  await expect(event(page, 'Languages')).toHaveAccessibleName(/^Languages ?, 10:15 to 11:15/);
-  await expect(page.getByText('8 h planned · 0 m logged')).toBeVisible();
+  await expect(event(page, 'ML Zoomcamp')).toHaveAccessibleName(/^ML Zoomcamp ?, 06:00 to 08:00/);
+  await expect(event(page, 'GameDevHQ')).toHaveAccessibleName(/^GameDevHQ ?, 08:00 to 10:00/);
+  await expect(event(page, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 10:00 to 12:00/);
+  await expect(event(page, 'Coding lessons')).toHaveAccessibleName(/^Coding lessons ?, 18:00 to 20:00/);
+  await expect(event(page, 'Math and physics')).toHaveAccessibleName(/^Math and physics ?, 20:00 to 22:00/);
+  // Projects is not in the daily schedule.
+  await expect(event(page, 'Projects')).toHaveCount(0);
+  await expect(page.getByText('10 h planned · 0 m logged')).toBeVisible();
 
   // Arrows move by a day in the day view, and Today comes back.
   await page.getByRole('button', { name: 'Next day' }).click();
@@ -57,29 +62,37 @@ test('a phone opens on the day; the month shows today; a date opens its day, wit
 
 test('drag a block to 19:00, make it 90 minutes, and Today follows', async ({ page }) => {
   await open(page, './#/calendar?view=day');
-  await drag(page, event(page, 'Languages'), 19 * 60 - (10 * 60 + 15));
-  await expect(event(page, 'Languages')).toHaveAccessibleName(/^Languages ?, 19:00 to 20:00/);
-  await expect(page.getByRole('status').getByText('Moved Languages to 19:00')).toBeVisible();
+  await drag(page, event(page, 'Coding lessons'), 19 * 60 - 18 * 60);
+  await expect(event(page, 'Coding lessons')).toHaveAccessibleName(/^Coding lessons ?, 19:00 to 21:00/);
+  await expect(page.getByRole('status').getByText('Moved Coding lessons to 19:00')).toBeVisible();
+  // Math and physics, at 20:00 in the schedule, moves past it with a 15-minute break.
+  await expect(event(page, 'Math and physics')).toHaveAccessibleName(/^Math and physics ?, 21:15 to 23:15/);
 
-  await drag(page, event(page, 'Languages'), 30, 'bottom');
-  await expect(event(page, 'Languages')).toHaveAccessibleName(/^Languages ?, 19:00 to 20:30/);
+  await drag(page, event(page, 'Coding lessons'), -30, 'bottom');
+  await expect(event(page, 'Coding lessons')).toHaveAccessibleName(/^Coding lessons ?, 19:00 to 20:30/);
+  await expect(event(page, 'Math and physics')).toHaveAccessibleName(/^Math and physics ?, 20:45 to 22:45/);
 
-  // Today: Languages is last, in the order of the day's times, and takes 1 h 30 m.
+  // Today: the rows follow the new times, the break ends at 19:00, and Coding lessons takes 1 h 30 m.
   await open(page, './');
   const rows = page.locator('section:has(h2:text-is("Later today")) li');
-  await expect(rows.last()).toContainText('Languages');
-  await expect(laterRow(page, /30 Days of Python/).first()).toContainText('1 h 30 m');
+  await expect(rows.last()).toContainText('Math and physics');
+  await expect(rows.last()).toContainText('20:45');
+  await expect(laterRow(page, /^Coding lessons/)).toContainText('19:00');
+  await expect(page.getByText('Break · 12:00 – 19:00')).toBeVisible();
+  await laterRow(page, /^Coding lessons/).click();
+  await expect(page.locator('#now-title')).toHaveText('Coding lessons');
+  await expect(nowCard(page).getByText(/^0 m of 1 h 30 m · /)).toBeVisible();
 });
 
 test('the block sheet sets the time, and Undo takes it back', async ({ page }) => {
   await open(page, './#/calendar?view=day');
-  await event(page, 'Core').click();
-  const sheet = page.getByRole('dialog', { name: 'Core' });
+  await event(page, 'Hugging Face').click();
+  const sheet = page.getByRole('dialog', { name: 'Hugging Face' });
   await sheet.getByLabel('Starts').fill('16:00');
   await sheet.getByRole('button', { name: 'Save' }).click();
-  await expect(event(page, 'Core')).toHaveAccessibleName(/^Core ?, 16:00 to 18:00/);
+  await expect(event(page, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 16:00 to 18:00/);
   await page.getByRole('button', { name: 'Undo' }).click();
-  await expect(event(page, 'Core')).toHaveAccessibleName(/^Core ?, 11:30 to 13:30/);
+  await expect(event(page, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 10:00 to 12:00/);
 });
 
 test('a weekly busy event on Tuesdays moves the blocks out of its way', async ({ page }) => {
@@ -94,13 +107,17 @@ test('a weekly busy event on Tuesdays moves the blocks out of its way', async ({
   await add.getByRole('button', { name: 'Add busy time' }).click();
 
   await expect(page.getByRole('button', { name: /^Lectures · 09:00 ?, busy, 09:00 to 13:00/ })).toBeVisible();
-  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics ?, 13:15 to 15:15/);
+  // ML Zoomcamp is done before it; GameDevHQ and Hugging Face, which overlap it, go after it.
+  await expect(event(page, 'ML Zoomcamp')).toHaveAccessibleName(/^ML Zoomcamp ?, 06:00 to 08:00/);
+  await expect(event(page, 'GameDevHQ')).toHaveAccessibleName(/^GameDevHQ ?, 13:15 to 15:15/);
+  await expect(event(page, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 15:30 to 17:30/);
   // The next Tuesday too, and not the Wednesday.
   await page.getByRole('button', { name: 'Next day' }).click();
-  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics ?, 08:00/);
+  await expect(event(page, 'GameDevHQ')).toHaveAccessibleName(/^GameDevHQ ?, 08:00/);
   await open(page, './#/calendar?view=day&date=2026-09-29');
   await expect(page.getByRole('button', { name: /^Lectures · 09:00 ?, busy, 09:00 to 13:00/ })).toBeVisible();
-  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics ?, 13:15/);
+  await expect(event(page, 'GameDevHQ')).toHaveAccessibleName(/^GameDevHQ ?, 13:15/);
+  await expect(event(page, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 15:30/);
 });
 
 test('a block dropped on busy time offers to shift it and the blocks after it', async ({ page }) => {
@@ -111,40 +128,80 @@ test('a block dropped on busy time offers to shift it and the blocks after it', 
   await add.getByLabel('Starts').fill('18:00');
   await add.getByRole('textbox', { name: 'What' }).fill('Dentist');
   await add.getByRole('button', { name: 'Add busy time' }).click();
-  await drag(page, event(page, 'Graphics'), 10 * 60);
+  // Coding lessons, at 18:00, already moves out of the Dentist's way.
+  await expect(event(page, 'Coding lessons')).toHaveAccessibleName(/^Coding lessons ?, 19:15 to 21:15/);
+  await drag(page, event(page, 'GameDevHQ'), 10 * 60);
   const conflict = page.getByRole('dialog', { name: 'Busy then' });
-  await expect(conflict).toContainText('Dentist is 18:00–19:00');
+  await expect(conflict).toContainText('Dentist is 18:00–19:00. Shift GameDevHQ and the blocks after it to after 19:00?');
   await conflict.getByRole('button', { name: 'Shift them' }).click();
-  await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics ?, 19:15 to 21:15/);
+  await expect(event(page, 'GameDevHQ')).toHaveAccessibleName(/^GameDevHQ ?, 19:15 to 21:15/);
+  await expect(event(page, 'Coding lessons')).toHaveAccessibleName(/^Coding lessons ?, 21:30 to 23:30/);
 });
 
-test('apply a change to every Monday', async ({ page }) => {
+test('apply a change to every day', async ({ page }) => {
+  // Every weekday uses the daily schedule, so the change goes into it: no copy for Monday.
   await open(page, './#/calendar?view=day');
-  await event(page, 'Math').click();
-  const sheet = page.getByRole('dialog', { name: 'Math' });
-  await sheet.getByLabel('Starts').fill('07:00');
+  await event(page, 'Hugging Face').click();
+  const sheet = page.getByRole('dialog', { name: 'Hugging Face' });
+  await sheet.getByLabel('Starts').fill('14:00');
+  await expect(sheet.getByRole('switch', { name: 'Apply to every Monday' })).toHaveCount(0);
+  await expect(sheet.getByText('Saves the time and length in the daily schedule, from today on')).toBeVisible();
+  await sheet.getByRole('switch', { name: 'Apply to every day' }).click();
+  await sheet.getByRole('button', { name: 'Save' }).click();
+  await expect(event(page, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 14:00 to 16:00/);
+
+  // The next Monday, a Tuesday and a Saturday all have it, and still use the daily schedule itself.
+  for (const date of ['2026-09-28', '2026-09-29', '2026-09-26']) {
+    await open(page, './#/calendar?view=day&date=' + date);
+    await expect(event(page, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 14:00 to 16:00/);
+    await expect(page.getByRole('button', { name: 'Daily schedule', exact: true })).toBeVisible();
+  }
+  // A day before today keeps its plan.
+  await open(page, './#/calendar?view=day&date=2026-09-20');
+  await expect(event(page, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 10:00 to 12:00/);
+});
+
+test('with another template on some weekday, a change applies to every Monday only', async ({ page }) => {
+  // Saturday gets the Weekend template: the weekdays no longer share one template.
+  await open(page, './#/settings?section=schedule');
+  await page.getByRole('button', { name: /^Saturday/ }).click();
+  await page.getByRole('dialog', { name: 'Saturday' }).getByRole('button', { name: /^Weekend/ }).click();
+  await expect(page.getByRole('button', { name: /^Saturday/ })).toContainText('Weekend');
+
+  await open(page, './#/calendar?view=day');
+  await event(page, 'Hugging Face').click();
+  const sheet = page.getByRole('dialog', { name: 'Hugging Face' });
+  await sheet.getByLabel('Starts').fill('14:00');
+  await expect(sheet.getByRole('switch', { name: 'Apply to every day' })).toHaveCount(0);
   await sheet.getByRole('switch', { name: 'Apply to every Monday' }).click();
   await sheet.getByRole('button', { name: 'Save' }).click();
-  await expect(event(page, 'Math')).toHaveAccessibleName(/^Math ?, 07:00 to 08:00/);
+  await expect(event(page, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 14:00 to 16:00/);
 
+  // Monday has its own copy of the daily schedule.
   await open(page, './#/calendar?view=day&date=2026-09-28');
-  await expect(event(page, 'Math')).toHaveAccessibleName(/^Math ?, 07:00/);
-  // Tuesday keeps the Full day as it was.
+  await expect(event(page, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 14:00/);
+  await expect(page.getByRole('button', { name: 'Daily schedule · Monday', exact: true })).toBeVisible();
+  // Tuesday keeps the daily schedule as it was.
   await open(page, './#/calendar?view=day&date=2026-09-29');
-  await expect(event(page, 'Math')).not.toHaveAccessibleName(/^Math ?, 07:00/);
+  await expect(event(page, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 10:00 to 12:00/);
+  await expect(page.getByRole('button', { name: 'Daily schedule', exact: true })).toBeVisible();
 });
 
 test('an empty slot adds a block that is not on the day, or makes it a rest day', async ({ page }) => {
   await open(page, './#/calendar?view=day&date=2026-09-23');
-  await event(page, 'Projects').click();
-  await page.getByRole('dialog', { name: 'Projects' }).getByRole('button', { name: /^Skip it this day/ }).click();
-  await expect(event(page, 'Projects')).toHaveCount(0);
+  // Hugging Face is skipped for this date only.
+  await event(page, 'Hugging Face').click();
+  await page.getByRole('dialog', { name: 'Hugging Face' }).getByRole('button', { name: /^Skip it this day/ }).click();
+  await expect(event(page, 'Hugging Face')).toHaveCount(0);
+  await expect(page.getByText('8 h planned · 0 m logged')).toBeVisible();
 
+  // Projects, not in the daily schedule, goes into the break.
   await page.getByRole('button', { name: 'Add', exact: true }).click();
   const add = page.getByRole('dialog', { name: /^Add at / });
-  await add.getByLabel('Starts').fill('20:00');
+  await add.getByLabel('Starts').fill('14:00');
   await add.getByRole('button', { name: /^Projects/ }).click();
-  await expect(event(page, 'Projects')).toHaveAccessibleName(/^Projects ?, 20:00 to 21:00/);
+  await expect(event(page, 'Projects')).toHaveAccessibleName(/^Projects ?, 14:00 to 15:00/);
+  await expect(page.getByText('9 h planned · 0 m logged')).toBeVisible();
 
   await page.getByRole('button', { name: 'Add', exact: true }).click();
   await add.getByRole('radio', { name: 'Rest day' }).click();
@@ -155,6 +212,8 @@ test('an empty slot adds a block that is not on the day, or makes it a rest day'
 test('the timer is the only way to log: it counts through a reload, one at a time, and a correction lives in Calendar', async ({ page }) => {
   await open(page, './');
   const now = page.locator('section[aria-labelledby="now-title"]');
+  // At 09:00 the clock's block is GameDevHQ.
+  await expect(page.locator('#now-title')).toHaveText('GameDevHQ');
   await expect(now.getByRole('button', { name: 'Log time' })).toHaveCount(0);
   await now.getByRole('button', { name: 'Start' }).click();
   await writesSettled(page);
@@ -163,7 +222,8 @@ test('the timer is the only way to log: it counts through a reload, one at a tim
   await expect(page.getByText(/^0?:?25:0\d$|^25:0\d$/)).toBeVisible();
 
   // Another block: the first stops and keeps its 25 minutes.
-  await laterRow(page, /30 Days of Python/).click();
+  await laterRow(page, /^Coding lessons/).click();
+  await expect(page.locator('#now-title')).toHaveText('Coding lessons');
   await now.getByRole('button', { name: 'Start' }).click();
   await writesSettled(page);
   await expect(page.getByText(/^Running · since \d\d:\d\d · 0 m on this block today$/)).toBeVisible();
@@ -173,8 +233,8 @@ test('the timer is the only way to log: it counts through a reload, one at a tim
 
   // Correcting: Calendar's day view, the block's sheet, Edit logged time.
   await open(page, './#/calendar?view=day');
-  await event(page, 'Graphics').click();
-  await page.getByRole('dialog', { name: 'Graphics' }).getByRole('button', { name: /^Edit logged time/ }).click();
+  await event(page, 'GameDevHQ').click();
+  await page.getByRole('dialog', { name: 'GameDevHQ' }).getByRole('button', { name: /^Edit logged time/ }).click();
   const logged = page.getByRole('dialog', { name: /^Logged on / });
   await logged.getByRole('button', { name: /^Remove 25 m/ }).click();
   await logged.getByRole('button', { name: 'Close' }).click();
@@ -188,7 +248,7 @@ test('a timer left running asks on the next open after three hours', async ({ pa
   await writesSettled(page);
   await page.clock.fastForward('03:10:00');
   await reload(page);
-  const ask = page.getByRole('dialog', { name: 'Still working on Graphics?' });
+  const ask = page.getByRole('dialog', { name: 'Still working on GameDevHQ?' });
   await expect(ask).toContainText('You started at 09:00');
   await ask.getByRole('button', { name: 'Stop now' }).click();
   await expect(page.getByText('3 h 10 m', { exact: true })).toBeVisible();
@@ -231,16 +291,18 @@ test('calendar edits reach a second device', async ({ browser }) => {
   await add.getByRole('textbox', { name: 'What' }).fill('Lectures');
   await add.getByRole('switch', { name: 'Every Tuesday' }).click();
   await add.getByRole('button', { name: 'Add busy time' }).click();
-  await event(a, 'Core').click();
-  await a.getByRole('dialog', { name: 'Core' }).getByLabel('Starts').fill('19:00');
-  await a.getByRole('dialog', { name: 'Core' }).getByRole('button', { name: 'Save' }).click();
+  await expect(event(a, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 15:30/);
+  await event(a, 'Hugging Face').click();
+  await a.getByRole('dialog', { name: 'Hugging Face' }).getByLabel('Starts').fill('16:00');
+  await a.getByRole('dialog', { name: 'Hugging Face' }).getByRole('button', { name: 'Save' }).click();
   await syncNow(a);
 
   const b = await device(browser, fake);
   await syncNow(b, true);
   await open(b, './#/calendar?view=day&date=2026-09-22');
   await expect(b.getByRole('button', { name: /^Lectures · 09:00 ?, busy, 09:00 to 13:00/ })).toBeVisible();
-  await expect(event(b, 'Core')).toHaveAccessibleName(/^Core ?, 19:00/);
+  await expect(event(b, 'GameDevHQ')).toHaveAccessibleName(/^GameDevHQ ?, 13:15/);
+  await expect(event(b, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 16:00 to 18:00/);
   await reload(b);
-  await expect(event(b, 'Core')).toHaveAccessibleName(/^Core ?, 19:00/);
+  await expect(event(b, 'Hugging Face')).toHaveAccessibleName(/^Hugging Face ?, 16:00 to 18:00/);
 });

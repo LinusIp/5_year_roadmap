@@ -22,7 +22,8 @@
     "fetch:units": "node scripts/fetch-units.ts",
     "test:sync": "node scripts/test-sync.ts",
     "map:catalogue": "node scripts/map-catalogue.ts",
-    "check:docs": "node scripts/check-docs.ts"
+    "check:docs": "node scripts/check-docs.ts",
+    "schedule:shift": "node scripts/schedule-shift.ts"
   },
   "dependencies": {
     "@fontsource/nunito": "^5.3.0",

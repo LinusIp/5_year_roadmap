@@ -12,12 +12,34 @@ import { ProgressLine } from '../../ui/ProgressLine.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { nameOf, span } from '../parts/text.ts';
 import { isOpenItem, itemDetail } from './model.ts';
+import { dayLayout } from '../../lib/calendar.ts';
+import { hm } from '../../lib/calendar-layout.ts';
+import { BREAK_MINUTES } from '../../lib/clock-plan.ts';
+import type { StoredSettings } from '../../db/types.ts';
 import type { PhaseModel } from './model.ts';
 
 
 /** "Math & physics" -> "Math and physics", "Core track" -> "Core", "Projects / hands-on" -> "Projects". */
 export function laneName(name: string): string {
   return name.split('/')[0]!.trim().replace(/ track$/i, '').replace(/\s*&\s*/g, ' and ');
+}
+
+/**
+ * The day's schedule for the Timeline's first group: "Every day" when every weekday has the same template, and
+ * "06–12 · 18–22 · 10 h" from its sessions (blocks run back to back; a gap of an hour or more starts a new one).
+ */
+export function scheduleSummary(settings: StoredSettings, date: string): { label: string; aside: string; windows: { id: string; start: number; minutes: number }[] } {
+  const windows = dayLayout(date, settings).map((b) => ({ id: b.id, start: b.start, minutes: b.minutes }));
+  const sessions: [number, number][] = [];
+  for (const w of [...windows].sort((a, b) => a.start - b.start)) {
+    const last = sessions.at(-1);
+    if (last && w.start - last[1] < BREAK_MINUTES) last[1] = Math.max(last[1], w.start + w.minutes);
+    else sessions.push([w.start, w.start + w.minutes]);
+  }
+  const hour = (m: number): string => String(Math.floor(m / 60)).padStart(2, '0') + (m % 60 ? ':' + String(m % 60).padStart(2, '0') : '');
+  const total = windows.reduce((sum, w) => sum + w.minutes, 0);
+  const same = new Set(settings.core.pattern).size === 1;
+  return { label: same ? 'Every day' : 'Today', aside: [...sessions.map(([a, b]) => hour(a) + '–' + hour(b)), span(total)].join(' · '), windows };
 }
 
 /** "February → August 2027", or both years when the range crosses one. */
@@ -31,10 +53,34 @@ function monthRange(start: string, end: string): string {
  * The five lanes of a phase, as on the Plan board: one list group, each lane a row with its block's icon in a knob,
  * the block and its hours, the forecast on the right ("behind" in ice-deep), the item it is on, and a progress well.
  */
-function Lanes({ atlas, model, units, isCurrent, weekly, onLane, label }: { atlas: Atlas; model: PhaseModel; units: Record<string, Unit[]> | undefined; isCurrent: boolean; weekly: string | null; onLane: (block: string) => void; label?: string }) {
+function Lanes({
+  atlas,
+  model,
+  units,
+  isCurrent,
+  weekly,
+  onLane,
+  label,
+  aside,
+  windows,
+}: {
+  atlas: Atlas;
+  model: PhaseModel;
+  units: Record<string, Unit[]> | undefined;
+  isCurrent: boolean;
+  weekly: string | null;
+  onLane: (block: string) => void;
+  label?: string;
+  aside?: string;
+  /** The day's blocks at their times: lanes in that order, each with its window, and only those. */
+  windows?: { id: string; start: number; minutes: number }[];
+}) {
+  const lanes = windows
+    ? windows.flatMap((w) => model.progress.lanes.filter((l) => l.block === w.id))
+    : model.progress.lanes;
   const list = (
     <ul className="rows">
-      {model.progress.lanes.map((lane) => {
+      {lanes.map((lane) => {
         const def = atlas.settings.core.blocks.find((b) => b.id === lane.block)!;
         const next = lane.items.find(isOpenItem);
         const forecast = model.forecast.lanes.find((l) => l.block === lane.block);
@@ -47,7 +93,9 @@ function Lanes({ atlas, model, units, isCurrent, weekly, onLane, label }: { atla
           if (lane.block === 'D' && isCurrent && weekly) meta = 'Weekly: ' + weekly + ' · Monthly: ' + nameOf(next);
         }
         const behind = isCurrent && forecast?.verdict === 'behind';
-        const title = laneName(def.name) + ' · ' + span(def.minutes);
+        const window = windows?.find((w) => w.id === lane.block);
+        if (window) meta = hm(window.start) + '–' + hm(window.start + window.minutes) + ' · ' + meta;
+        const title = window ? def.name : laneName(def.name) + ' · ' + span(def.minutes);
         return (
           <li key={lane.block}>
             <button type="button" onClick={() => onLane(lane.block)} className="flex w-full items-start gap-3 py-3 text-left">
@@ -73,7 +121,10 @@ function Lanes({ atlas, model, units, isCurrent, weekly, onLane, label }: { atla
   if (!label) return list;
   return (
     <section className="tile px-[18px] pb-2 pt-3.5">
-      <h2 className="section-label">{label}</h2>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="section-label">{label}</h2>
+        {aside && <span className="text-meta font-semibold text-ink2">{aside}</span>}
+      </div>
       {list}
     </section>
   );
@@ -105,6 +156,7 @@ export function Timeline({
   onGoal: (goal: Goal) => void;
 }) {
   const [openPhase, setOpenPhase] = useState<string | null>(null);
+  const everyDay = scheduleSummary(atlas.settings, today());
   const index = model.findIndex((m) => m.phase.id === currentId);
   const current = index >= 0 ? model[index] : undefined;
   const earlier = index >= 0 ? model.slice(0, index) : model.filter((m) => m.phase.end < (atlas.seed.phases[0]?.start ?? ''));
@@ -135,7 +187,19 @@ export function Timeline({
 
   return (
     <div className="mt-[18px] flex flex-col gap-[18px]">
-      {current && <Lanes atlas={atlas} model={current} units={units} isCurrent weekly={weekly} label="Today’s lanes" onLane={(block) => onLane(current.phase.id, block)} />}
+      {current && (
+        <Lanes
+          atlas={atlas}
+          model={current}
+          units={units}
+          isCurrent
+          weekly={weekly}
+          label={everyDay.label}
+          aside={everyDay.aside}
+          windows={everyDay.windows}
+          onLane={(block) => onLane(current.phase.id, block)}
+        />
+      )}
       {earlier.length > 0 && (
         <RowList flat label="Earlier">
           {phaseRows(earlier)}

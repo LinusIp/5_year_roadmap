@@ -1,47 +1,61 @@
 # Defaults for everything editable under Settings. The app never hard-codes these:
 # a fresh install starts from this file, and the user's changes are stored on top of it.
 blocks:
-  - id: A
-    name: Graphics / rendering / simulation
-    minutes: 120
-    days: [0, 1, 2, 3, 4, 5, 6]
-    summary: Two hours, every day. Small games are a monthly-project vehicle inside it, not the subject.
-    # Before the brief of 2026-10-07 this block was "Gamedev / Graphics / Simulation".
-    formerNames: [Gamedev / Graphics / Simulation]
-  - id: B
-    name: Languages
-    minutes: 60
-    days: [0, 1, 2, 3, 4, 5, 6]
-    summary: One hour, every day.
+  # The fixed daily schedule (DAILY-SCHEDULE): four two-hour courses in session 1 (06-12) and session 2 (18-22),
+  # 10 hours a day, every day. The ids stay, so past days, the heatmap and the lanes keep their meaning.
   - id: C
-    name: Core track
+    name: ML Zoomcamp
     minutes: 120
     days: [0, 1, 2, 3, 4, 5, 6]
-    summary: ML Zoomcamp for the first four months, then AI inference and AI engineering (priority 1), alternating by phase with software architecture (priority 2).
+    summary: 06:00-08:00. ML Zoomcamp, then the next item of the core lane.
+    formerNames: [Core track]
+  - id: A
+    name: GameDevHQ
+    minutes: 120
+    days: [0, 1, 2, 3, 4, 5, 6]
+    summary: 08:00-10:00. The GameDevHQ Unity course, then the next graphics item.
+    formerNames: [Gamedev / Graphics / Simulation, Graphics / rendering / simulation]
+  - id: H
+    name: Hugging Face
+    minutes: 120
+    days: [0, 1, 2, 3, 4, 5, 6]
+    summary: 10:00-12:00. The Hugging Face LLM Course, then the Agents Course, then the next AI item.
+  - id: B
+    name: Coding lessons
+    minutes: 120
+    days: [0, 1, 2, 3, 4, 5, 6]
+    summary: 18:00-20:00. The languages track in order (30 Days of Python, then CS50x, and on).
+    formerNames: [Languages]
+  - id: E
+    name: Math and physics
+    minutes: 120
+    days: [0, 1, 2, 3, 4, 5, 6]
+    summary: 20:00-22:00. The math and physics track in order (18.06, then 18.01, and on).
+    formerNames: [Math & physics]
   - id: D
     name: Projects / hands-on
     minutes: 120
     days: [0, 1, 2, 3, 4, 5, 6]
-    summary: The current weekly mini-build and monthly project. In stage 2 this is lab, PCB, CAD and build time.
-  - id: E
-    name: Math & physics
-    minutes: 60
-    days: [0, 1, 2, 3, 4, 5, 6]
-    summary: The prerequisites of stage 2, running from day one.
+    summary: Not in the daily schedule. Weekly and monthly projects live in Plan > Projects and the Library; add one to a day from Calendar.
 
-# Day templates: which blocks a day runs, and for how long. A block listed without minutes takes its own
-# (above), so the Full day follows the blocks' minutes. Settings > Schedule edits them; a date or a range of
-# dates can be given another template, and the weekly pattern below says which template each weekday uses.
+# Day templates: which blocks a day runs, for how long, and when. A block listed without minutes takes its own
+# (above). Settings > Schedule edits them; a date or a range of dates can be given another template, and the
+# weekly pattern below says which template each weekday uses.
 templates:
   - id: full
-    name: Full day
-    blocks: [{ block: A }, { block: B }, { block: C }, { block: D }, { block: E }]
+    name: Daily schedule
+    blocks:
+      - { block: C, start: "06:00" }
+      - { block: A, start: "08:00" }
+      - { block: H, start: "10:00" }
+      - { block: B, start: "18:00" }
+      - { block: E, start: "20:00" }
   - id: university
     name: University day
     blocks: [{ block: A, minutes: 60 }, { block: B, minutes: 30 }, { block: C, minutes: 60 }, { block: E, minutes: 30 }]
   - id: weekend
     name: Weekend
-    blocks: [{ block: A, minutes: 120 }, { block: C, minutes: 120 }, { block: D, minutes: 180 }]
+    blocks: [{ block: C, minutes: 120 }, { block: A, minutes: 120 }, { block: H, minutes: 120 }]
   - id: exam
     name: Exam week
     blocks: [{ block: B, minutes: 30 }, { block: E, minutes: 60 }]
@@ -59,7 +73,7 @@ review:
   title: Weekly review + paper reading
 
 weekStartsOn: 1                         # 1 = Monday, so the Sunday review closes the week
-heatmapThresholds: [1, 120, 300, 420]   # absolute mode, minutes for levels 1-4: 1-119, 120-299, 300-419, 420+
+heatmapThresholds: [1, 150, 375, 525]   # absolute mode, minutes for levels 1-4 against the 10-hour day: 1-149, 150-374, 375-524, 525+
 heatmapMode: relative                   # relative: a share of the day's plan (0, <25 %, <60 %, <100 %, 100 %+)
 # The project catalogue (data/projects/*.jsonl): an easy challenge a day in Block B, and on these weekdays
 # (0 = Sunday, 6 = Saturday) Block D's weekly slot: the week's medium build and medium challenge.

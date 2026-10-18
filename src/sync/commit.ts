@@ -55,8 +55,11 @@ export function commitMessage(days: DayLog[], summaries: string[], core: Setting
   let rest = unique;
   if (latest) {
     const minutes = latest.entries.reduce((sum, e) => sum + e.minutes, 0);
-    // The blocks of the weekday.
-    const scheduled = core.blocks.filter((b) => b.days.includes(weekday(latest.date))).length;
+    // The blocks of the weekday's template that run on that weekday (Projects is defined but not in the daily schedule).
+    const day = weekday(latest.date);
+    const template = core.templates.find((t) => t.id === core.pattern[day]);
+    const runs = core.blocks.filter((b) => b.days.includes(day));
+    const scheduled = template ? runs.filter((b) => template.blocks.some((t) => t.block === b.id)).length : runs.length;
     const done = (latest.doneBlocks ?? []).length;
     subject = 'log: ' + latest.date + ' · ' + duration(minutes) + ' · ' + done + '/' + scheduled + ' blocks';
     if (days.length > 1) subject += ' (and ' + (days.length - 1) + ' more ' + (days.length === 2 ? 'day' : 'days') + ')';

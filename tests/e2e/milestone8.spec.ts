@@ -11,7 +11,7 @@ test.describe('reviews', () => {
 
   test('the weekly review fills in its numbers and keeps the three answers', async ({ page }) => {
     await open(page, './');
-    await makeNow(page, /18\.06 Linear Algebra/);
+    await makeNow(page, /^Math and physics/);
     await logTime(page, '90');
 
     await open(page, './#/reviews');
@@ -19,19 +19,19 @@ test.describe('reviews', () => {
     await expect(row).toContainText('This week');
     await row.click();
     const sheet = page.getByRole('dialog', { name: 'Week of 21 to 27 Sep 2026' });
-    await expect(sheet.getByText(/^1 h 30 m of 56 h/)).toBeVisible();
-    await expect(sheet.getByText(/Math 1 h 30 m/)).toBeVisible();
+    await expect(sheet.getByText(/^1 h 30 m of 70 h/)).toBeVisible();
+    await expect(sheet.getByText(/Math and physics 1 h 30 m/)).toBeVisible();
 
     await sheet.getByRole('textbox', { name: 'What worked' }).fill('Linear algebra in the morning.');
-    await sheet.getByRole('textbox', { name: "What didn't" }).fill('Skipped the projects block.');
-    await sheet.getByRole('textbox', { name: 'What changes next week' }).fill('Projects first.');
+    await sheet.getByRole('textbox', { name: "What didn't" }).fill('Skipped the Hugging Face block.');
+    await sheet.getByRole('textbox', { name: 'What changes next week' }).fill('Hugging Face first.');
     await sheet.getByRole('textbox', { name: 'What worked' }).click();
     await sheet.getByRole('button', { name: 'Mark this week reviewed' }).click();
     await expect(sheet.getByText('Reviewed on 21 September.')).toBeVisible();
     await expect(sheet.getByRole('link', { name: /Next week's build/ })).toHaveAttribute('href', /plan\/pick\?week=next/);
 
     await reload(page);
-    await expect(sheet.getByRole('textbox', { name: 'What changes next week' })).toHaveValue('Projects first.');
+    await expect(sheet.getByRole('textbox', { name: 'What changes next week' })).toHaveValue('Hugging Face first.');
   });
 
   test('the monthly review suggests a re-plan and asks whether a project shipped', async ({ page }) => {
@@ -74,15 +74,15 @@ test.describe('settings', () => {
 
   test('block minutes drive Today, and a bad threshold is refused', async ({ page }) => {
     await open(page, './#/settings');
-    await page.getByRole('button', { name: /^Block A · Graphics/ }).click();
+    await page.getByRole('button', { name: /^Block A · GameDevHQ/ }).click();
     const sheet = page.getByRole('dialog', { name: 'Block A' });
     await sheet.getByRole('textbox', { name: 'Minutes a day' }).fill('180');
     await sheet.getByRole('textbox', { name: 'Minutes a day' }).blur();
     await sheet.getByRole('button', { name: 'Close' }).click();
-    await expect(page.getByText('Schedule · 63 h this week')).toBeVisible();
+    await expect(page.getByText('Schedule · 77 h this week')).toBeVisible();
 
     await open(page, './');
-    await expect(page.getByText(/^0 m of 9 h today/)).toBeVisible();
+    await expect(page.getByText(/^0 m of 11 h today/)).toBeVisible();
     await expect(nowCard(page).getByText(/0 m of 3 h/)).toBeVisible();
 
     await open(page, './#/settings');
@@ -95,7 +95,7 @@ test.describe('settings', () => {
   test('export, reset, then import restores everything, byte for byte', async ({ page }) => {
     await page.clock.setFixedTime(new Date('2026-09-21T22:30:00+05:00'));
     await open(page, './');
-    await makeNow(page, /18\.06 Linear Algebra/);
+    await makeNow(page, /^Math and physics/);
     await logTime(page, '75');
     await page.locator('#now-title').click();
     await nowCard(page).getByRole('checkbox', { name: 'Lecture 1: The geometry of linear equations' }).click();
@@ -114,7 +114,7 @@ test.describe('settings', () => {
     await page.getByRole('button', { name: 'Reset everything' }).click();
     await expect(page.getByText('Everything was reset.')).toBeVisible();
     await open(page, './');
-    await expect(page.getByText(/^0 m of 8 h today/)).toBeVisible();
+    await expect(page.getByText(/^0 m of 10 h today/)).toBeVisible();
 
     await open(page, './#/settings');
     await page.getByLabel('Backup file to import').setInputFiles((await firstDownload.path())!);
@@ -127,7 +127,7 @@ test.describe('settings', () => {
     expect(strip(second)).toBe(strip(first));
 
     await open(page, './');
-    await expect(page.getByText(/^1 h 15 m of 8 h today/)).toBeVisible();
+    await expect(page.getByText(/^1 h 15 m of 10 h today/)).toBeVisible();
   });
 
   test('a file that is not a backup changes nothing', async ({ page }) => {
@@ -140,6 +140,8 @@ test.describe('settings', () => {
 
 test.describe('offline', () => {
   test('works offline once it has been opened', async ({ page, context }) => {
+    // At 09:00 a block holds the clock, so there is a Now card to see (not the break or the end of the day).
+    await page.clock.install({ time: new Date(FIRST_DAY) });
     await open(page, './');
     // The worker registers after load, precaches every build file, then claims the page.
     await page.evaluate(async () => {

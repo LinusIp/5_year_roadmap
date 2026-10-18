@@ -30,9 +30,9 @@ describe('authoritative data model', () => {
     expect(Object.values(checks).every(Boolean)).toBe(true);
   });
 
-  it('has the sixteen tracks and five blocks of the brief', () => {
+  it('has the sixteen tracks, the five blocks of the brief and H, Hugging Face (the daily schedule)', () => {
     expect(TRACK_IDS).toHaveLength(16);
     expect(new Set(TRACK_IDS).size).toBe(16);
-    expect([...BLOCK_IDS]).toEqual(['A', 'B', 'C', 'D', 'E']);
+    expect([...BLOCK_IDS]).toEqual(['A', 'B', 'C', 'D', 'E', 'H']);
   });
 });

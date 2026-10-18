@@ -13,6 +13,7 @@ import {
   withBlockLength,
   withBlockTime,
   withBusy,
+  withEveryDay,
   withEveryWeekday,
   withMovedToDate,
   withoutBusy,
@@ -32,25 +33,26 @@ const TUESDAY = '2026-10-20';
 const at = (s: StoredSettings, date: string): string[] => dayLayout(date, s).map((b) => b.id + ' ' + hm(b.start) + '+' + b.minutes);
 
 describe('a date in Calendar', () => {
-  it('lays the Full day out from 08:00 with 15-minute breaks', () => {
-    expect(at(base, MONDAY)).toEqual(['A 08:00+120', 'B 10:15+60', 'C 11:30+120', 'D 13:45+120', 'E 16:00+60']);
+  it('lays the daily schedule out at its fixed times: 06–12 and 18–22', () => {
+    expect(at(base, MONDAY)).toEqual(['C 06:00+120', 'A 08:00+120', 'H 10:00+120', 'B 18:00+120', 'E 20:00+120']);
   });
 
   it('a drag is a time on that date only, written as the date’s change', () => {
     const moved = withBlockTime(base, MONDAY, 'B', parseHm('19:00'));
     expect(moved.schedule.days[MONDAY]).toEqual({ times: { B: '19:00' } });
-    expect(at(moved, MONDAY)).toEqual(['A 08:00+120', 'C 10:15+120', 'D 12:30+120', 'E 14:45+60', 'B 19:00+60']);
-    expect(at(moved, TUESDAY)[1]).toBe('B 10:15+60');
+    // E, fixed at 20:00, moves on past the later B with the usual 15 minutes between.
+    expect(at(moved, MONDAY)).toEqual(['C 06:00+120', 'A 08:00+120', 'H 10:00+120', 'B 19:00+120', 'E 21:15+120']);
+    expect(at(moved, TUESDAY)[3]).toBe('B 18:00+120');
   });
 
   it('a resize is the date’s minutes, and nothing is logged', () => {
-    const longer = withBlockLength(base, MONDAY, 'B', 90);
-    expect(longer.schedule.days[MONDAY]).toEqual({ minutes: { B: 90 } });
-    expect(resolveDay(MONDAY, longer).planned).toBe(base.core.blocks.reduce((sum, b) => sum + b.minutes, 0) + 30);
+    const longer = withBlockLength(base, MONDAY, 'B', 150);
+    expect(longer.schedule.days[MONDAY]).toEqual({ minutes: { B: 150 } });
+    expect(resolveDay(MONDAY, longer).planned).toBe(resolveDay(MONDAY, base).planned + 30);
   });
 
   it('Today orders its blocks by the day’s times', () => {
-    expect(blockOrderByTime(MONDAY, withBlockTime(base, MONDAY, 'A', parseHm('20:00')))).toEqual(['B', 'C', 'D', 'E', 'A']);
+    expect(blockOrderByTime(MONDAY, withBlockTime(base, MONDAY, 'A', parseHm('13:00')))).toEqual(['C', 'H', 'A', 'B', 'E']);
   });
 
   it('an item chosen for one date is kept with the date, and cleared again', () => {
@@ -60,14 +62,14 @@ describe('a date in Calendar', () => {
   });
 
   it('skip, add at a time, move to another date, and a rest day', () => {
-    const skipped = withSkip(base, MONDAY, 'D');
-    expect(at(skipped, MONDAY).map((b) => b[0])).toEqual(['A', 'B', 'C', 'E']);
-    const back = withAddedBlock(skipped, MONDAY, 'D', 60, parseHm('20:00'));
-    expect(at(back, MONDAY).at(-1)).toBe('D 20:00+60');
+    const skipped = withSkip(base, MONDAY, 'H');
+    expect(at(skipped, MONDAY).map((b) => b[0])).toEqual(['C', 'A', 'B', 'E']);
+    const back = withAddedBlock(skipped, MONDAY, 'H', 60, parseHm('13:00'));
+    expect(at(back, MONDAY)[2]).toBe('H 13:00+60');
 
     const moved = withMovedToDate(base, MONDAY, 'E', TUESDAY);
     expect(at(moved, MONDAY).map((b) => b[0])).not.toContain('E');
-    expect(resolveDay(TUESDAY, moved).blocks.filter((b) => b.id === 'E').map((b) => b.minutes)).toEqual([60]);
+    expect(resolveDay(TUESDAY, moved).blocks.filter((b) => b.id === 'E').map((b) => b.minutes)).toEqual([120]);
 
     const rest = withRestDay(back, MONDAY);
     expect(resolveDay(MONDAY, rest).planned).toBe(0);
@@ -76,14 +78,23 @@ describe('a date in Calendar', () => {
 
 describe('every Monday', () => {
   it('writes the template Monday uses, and gives Monday its own copy when other days share it', () => {
-    const next = withEveryWeekday(base, MONDAY, MONDAY, 'E', { start: parseHm('07:00'), minutes: 90 });
+    const next = withEveryWeekday(base, MONDAY, MONDAY, 'E', { start: parseHm('21:00'), minutes: 60 });
     expect(next.core.pattern[1]).toBe('full-mon');
-    expect(next.core.templates.find((t) => t.id === 'full-mon')?.blocks.find((b) => b.block === 'E')).toEqual({ block: 'E', minutes: 90, start: '07:00' });
-    expect(at(next, '2026-10-26')[0]).toBe('E 07:00+90');
-    // Tuesday still uses the shared Full day, unchanged.
-    expect(at(next, TUESDAY).at(-1)).toBe('E 16:00+60');
+    expect(next.core.templates.find((t) => t.id === 'full-mon')?.blocks.find((b) => b.block === 'E')).toEqual({ block: 'E', minutes: 60, start: '21:00' });
+    expect(at(next, '2026-10-26').at(-1)).toBe('E 21:00+60');
+    // Tuesday still uses the shared daily schedule, unchanged.
+    expect(at(next, TUESDAY).at(-1)).toBe('E 20:00+120');
     // Days already past keep their plan.
-    expect(at(next, '2026-10-12').at(-1)).toBe('E 16:00+60');
+    expect(at(next, '2026-10-12').at(-1)).toBe('E 20:00+120');
+  });
+
+  it('every day: with one template on every weekday, writes that template with no copy', () => {
+    const next = withEveryDay(base, MONDAY, MONDAY, 'E', { start: parseHm('21:00'), minutes: 60 });
+    expect(next.core.pattern).toEqual(base.core.pattern);
+    expect(next.core.templates.map((t) => t.id)).toEqual(base.core.templates.map((t) => t.id));
+    expect(at(next, TUESDAY).at(-1)).toBe('E 21:00+60');
+    expect(at(next, '2026-10-24').at(-1)).toBe('E 21:00+60');
+    expect(at(next, '2026-10-12').at(-1)).toBe('E 20:00+120');
   });
 
   it('clears the date’s own time and length for that block, so the template applies', () => {
@@ -98,16 +109,17 @@ describe('busy events', () => {
 
   it('move the blocks out of their way, every week', () => {
     const busy = withBusy(base, lectures);
-    expect(at(busy, TUESDAY)[0]).toBe('A 13:15+120');
-    expect(at(busy, '2026-10-27')[0]).toBe('A 13:15+120');
-    expect(at(busy, MONDAY)[0]).toBe('A 08:00+120');
+    // 09:00–13:00: ML Zoomcamp (06–08) stays; GameDevHQ and Hugging Face move after the lectures.
+    expect(at(busy, TUESDAY).slice(0, 3)).toEqual(['C 06:00+120', 'A 13:15+120', 'H 15:30+120']);
+    expect(at(busy, '2026-10-27')[1]).toBe('A 13:15+120');
+    expect(at(busy, MONDAY)[1]).toBe('A 08:00+120');
   });
 
   it('removed from a week on, keep the weeks before', () => {
     const ended = withoutBusy(withBusy(base, lectures), 'uni', '2026-10-27');
     expect(ended.schedule.busy[0]?.until).toBe('2026-10-26');
-    expect(at(ended, TUESDAY)[0]).toBe('A 13:15+120');
-    expect(at(ended, '2026-10-27')[0]).toBe('A 08:00+120');
+    expect(at(ended, TUESDAY)[1]).toBe('A 13:15+120');
+    expect(at(ended, '2026-10-27')[1]).toBe('A 08:00+120');
     expect(withoutBusy(withBusy(base, lectures), 'uni').schedule.busy).toEqual([]);
   });
 });

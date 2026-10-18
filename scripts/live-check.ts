@@ -122,10 +122,11 @@ try {
   await page.getByRole('heading', { name: 'Your paths' }).waitFor({ timeout: 30_000 });
   await page.getByRole('button', { name: /^\d+ Courses$/ }).waitFor({ timeout: 30_000 });
   step('the Library opens on its home, with the paths and the shelves');
-  // A full load, not a hash change from the Deck: wait for Today's own Now card, then for its block icons.
+  // A full load, not a hash change from the Deck: wait for Today's own Now card, then for its block icons. Now follows
+  // the clock, so between 12:00 and 18:00 it is the break card and after 22:00 the day-done card.
   await page.goto(new URL('#/', url).href);
   await page.reload();
-  await page.locator('#now-title').waitFor({ timeout: 30_000 });
+  await page.locator('#now-title, section[aria-label="Now"]').first().waitFor({ timeout: 30_000 });
   await page.locator('main svg.lucide').first().waitFor({ timeout: 30_000 }).catch(() => undefined);
   const icons = await page.locator('main svg.lucide').count();
   if (icons === 0) throw new Error('Today shows no icons');

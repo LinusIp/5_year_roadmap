@@ -29,24 +29,25 @@ function log(date: string, minutes: number, extra: Partial<DayLog> = {}): DayLog
 }
 
 describe('template resolution', () => {
-  it('plans 8 hours a day in five blocks, with no Practice block (removed in pull request #6)', () => {
+  it('plans 10 hours a day in five courses, with no Practice block (removed in pull request #6) and no Projects block', () => {
     for (const date of ['2026-10-15', '2026-10-16', '2027-01-31', '2027-02-01']) {
-      expect(resolveDay(date, base).blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
-      expect(resolveDay(date, base).planned).toBe(480);
+      expect(resolveDay(date, base).blocks.map((b) => b.id)).toEqual(['C', 'A', 'H', 'B', 'E']);
+      expect(resolveDay(date, base).planned).toBe(600);
     }
-    expect(base.core.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    // Projects (D) stays a block, for Plan and Library, but the daily schedule leaves it out.
+    expect(base.core.blocks.map((b) => b.id)).toEqual(['C', 'A', 'H', 'B', 'E', 'D']);
     expect(base.core.templates.flatMap((t) => t.blocks.map((b) => b.block))).not.toContain('P');
     expect(base.core).not.toHaveProperty('practice');
     expect(base.core.templates.find((t) => t.id === 'rest')!.blocks).toEqual([]);
   });
 
-  it('ships the five templates of the brief, with Full day on every weekday', () => {
-    expect(base.core.templates.map((t) => t.name)).toEqual(['Full day', 'University day', 'Weekend', 'Exam week', 'Rest day']);
+  it('ships five templates, with the daily schedule on every weekday', () => {
+    expect(base.core.templates.map((t) => t.name)).toEqual(['Daily schedule', 'University day', 'Weekend', 'Exam week', 'Rest day']);
     expect(base.core.pattern).toEqual(Array(7).fill('full'));
     const day = resolveDay(MONDAY, base);
-    expect(day.templateName).toBe('Full day');
-    expect(day.blocks.map((b) => [b.id, b.minutes])).toEqual([['A', 120], ['B', 60], ['C', 120], ['D', 120], ['E', 60]]);
-    expect(day.planned).toBe(480);
+    expect(day.templateName).toBe('Daily schedule');
+    expect(day.blocks.map((b) => [b.id, b.minutes])).toEqual([['C', 120], ['A', 120], ['H', 120], ['B', 120], ['E', 120]]);
+    expect(day.planned).toBe(600);
   });
 
   it('uses the weekly pattern, then a date override, then the day’s own change', () => {
@@ -74,7 +75,7 @@ describe('template resolution', () => {
   it('changes one block’s minutes, skips a block, and moves a block to tomorrow', () => {
     let s = withDayChange(base, MONDAY, (c) => ({ ...c, minutes: { A: 90 }, skip: ['E'], toTomorrow: ['C'] }));
     const monday = resolveDay(MONDAY, s);
-    expect(monday.blocks.map((b) => [b.id, b.minutes])).toEqual([['A', 90], ['B', 60], ['D', 120]]);
+    expect(monday.blocks.map((b) => [b.id, b.minutes])).toEqual([['A', 90], ['H', 120], ['B', 120]]);
     expect(monday.skipped).toEqual(['E']);
     expect(monday.movedOut).toEqual(['C']);
     const tuesday = resolveDay('2026-10-20', s);
@@ -88,7 +89,7 @@ describe('template resolution', () => {
   it('records swaps between blocks present on the day', () => {
     const s = withDayChange(base, MONDAY, (c) => ({ ...c, swaps: [['A', 'C']] }));
     expect(resolveDay(MONDAY, s).swaps).toEqual([['A', 'C']]);
-    expect(resolveDay(MONDAY, s).planned).toBe(480);
+    expect(resolveDay(MONDAY, s).planned).toBe(600);
   });
 
   it('removes an empty day change instead of storing it', () => {
@@ -102,8 +103,8 @@ describe('template resolution', () => {
       x.pace.C = { mode: 'intense', from: MONDAY };
       x.pace.E = { mode: 'custom', minutes: 15, from: MONDAY };
     });
-    expect(resolveDay(MONDAY, s).blocks.map((b) => [b.id, b.minutes])).toEqual([['A', 90], ['B', 60], ['C', 150], ['D', 120], ['E', 15]]);
-    expect(resolveDay('2026-10-18', s).planned).toBe(480); // the day before keeps its plan
+    expect(resolveDay(MONDAY, s).blocks.map((b) => [b.id, b.minutes])).toEqual([['C', 150], ['A', 90], ['H', 120], ['B', 120], ['E', 15]]);
+    expect(resolveDay('2026-10-18', s).planned).toBe(600); // the day before keeps its plan
   });
 
   it('gives a paused lane’s minutes to another lane, or to free time, and resumes', () => {
@@ -113,33 +114,35 @@ describe('template resolution', () => {
     });
     const monday = resolveDay(MONDAY, s);
     expect(monday.paused).toEqual(['A', 'E']);
-    expect(monday.blocks.map((b) => [b.id, b.minutes])).toEqual([['B', 60], ['C', 240], ['D', 120]]);
-    expect(resolveDay('2026-10-21', s).blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D']); // A resumed, E still paused
+    expect(monday.blocks.map((b) => [b.id, b.minutes])).toEqual([['C', 240], ['H', 120], ['B', 120]]);
+    expect(resolveDay('2026-10-21', s).blocks.map((b) => b.id)).toEqual(['C', 'A', 'H', 'B']); // A resumed, E still paused
   });
 
   it('keeps past days’ plans when the schedule changes', () => {
     const today = '2026-10-22';
     const s = withScheduleEdit(base, today, (x) => ({ ...x, core: { ...x.core, pattern: Array(7).fill('exam') } }));
-    expect(plannedMinutes('2026-10-21', s)).toBe(480); // yesterday keeps the Full day
+    expect(plannedMinutes('2026-10-21', s)).toBe(600); // yesterday keeps the daily schedule
     expect(plannedMinutes(today, s)).toBe(90); // from today on, Exam week
     // A second edit the same day keeps the one snapshot.
     const again = withScheduleEdit(s, today, (x) => ({ ...x, core: { ...x.core, pattern: Array(7).fill('rest') } }));
     expect(again.schedule.history).toHaveLength(1);
-    expect(plannedMinutes('2026-10-21', again)).toBe(480);
+    expect(plannedMinutes('2026-10-21', again)).toBe(600);
     expect(plannedMinutes(today, again)).toBe(0);
   });
 });
 
 describe('planned minutes and targets', () => {
   it('derives Today’s and the week’s targets from the templates', () => {
-    expect(dailyTargetMinutes(base, MONDAY)).toBe(480);
-    expect(weeklyTargetMinutes(base, MONDAY)).toBe(56 * 60);
+    expect(dailyTargetMinutes(base, MONDAY)).toBe(600);
+    expect(weeklyTargetMinutes(base, MONDAY)).toBe(70 * 60);
     const s = edit((x) => {
       x.core.pattern[0] = 'rest';
       x.core.pattern[6] = 'weekend';
     });
-    expect(weeklyTargetMinutes(s, MONDAY)).toBe(5 * 480 + 420);
-    expect(plannedOver(s, MONDAY, '2026-10-25', 'D')).toBe(5 * 120 + 180);
+    // The weekend template is the three morning courses: 6 h.
+    expect(weeklyTargetMinutes(s, MONDAY)).toBe(5 * 600 + 360);
+    expect(plannedOver(s, MONDAY, '2026-10-25', 'A')).toBe(6 * 120);
+    expect(plannedOver(s, MONDAY, '2026-10-25', 'D')).toBe(0);
   });
 
   it('pushes a lane’s projected finish back by an exam week', () => {
@@ -215,7 +218,7 @@ describe('relative heatmap levels', () => {
   });
 
   it('falls back to absolute minutes on a day that planned nothing', () => {
-    expect(relativeLevel(130, 0, t)).toBe(2);
+    expect(relativeLevel(160, 0, t)).toBe(2); // 150 minutes or more: the second step of the 10-hour scale
   });
 
   it('can be switched back to absolute minutes', () => {
@@ -235,7 +238,7 @@ describe('settings v1 → v2', () => {
     const { percent: _percent, ...streakRules } = core.streak;
     return {
       id: 'app',
-      core: { ...core, streak: streakRules, blocks: core.blocks.map((b) => (b.id === 'D' ? { ...b, minutes: 150 } : b)) },
+      core: { ...core, streak: streakRules, blocks: core.blocks.map((b) => (b.id === 'E' ? { ...b, minutes: 150 } : b)) },
       theme: 'dark',
       github: { username: 'me', showCalendar: true },
       backup: { lastBackupAt: '2026-10-01' },
@@ -260,10 +263,10 @@ describe('settings v1 → v2', () => {
     expect(upgraded.core.heatmapMode).toBe('relative');
     expect(upgraded.schedule).toEqual({ overrides: [], days: {}, history: [], busy: [] });
     expect(upgraded.layout.tabs).toEqual(['today', 'plan', 'calendar', 'library', 'activity']);
-    // The Full day follows the blocks' own minutes, so the user's 150 minutes of D survive.
-    expect(resolveDay(MONDAY, upgraded).blocks.find((b) => b.id === 'D')!.minutes).toBe(150);
-    expect(resolveDay(MONDAY, upgraded).planned).toBe(510);
-    expect(upgraded.core.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    // The daily schedule follows the blocks' own minutes, so the user's 150 minutes of E survive.
+    expect(resolveDay(MONDAY, upgraded).blocks.find((b) => b.id === 'E')!.minutes).toBe(150);
+    expect(resolveDay(MONDAY, upgraded).planned).toBe(630);
+    expect(upgraded.core.blocks.map((b) => b.id)).toEqual(['C', 'A', 'H', 'B', 'E', 'D']);
     expect(upgraded.core).not.toHaveProperty('practice');
     expect(StoredSettingsSchema.safeParse(upgraded).success).toBe(true);
   });
@@ -302,20 +305,20 @@ describe('settings v1 → v2', () => {
     expect(StoredSettingsSchema.safeParse(saved).success).toBe(true);
 
     const upgraded = upgradeSettings(saved, seed.settings);
-    expect(upgraded.core.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    expect(upgraded.core.blocks.map((b) => b.id)).toEqual(['C', 'A', 'H', 'B', 'E', 'D']);
     expect(upgraded.core.blocks.some((b) => 'role' in b)).toBe(false);
     expect(upgraded.core).not.toHaveProperty('practice');
     expect(upgraded.core.templates.flatMap((t) => t.blocks.map((b) => b.block))).not.toContain('P');
     expect(upgraded.schedule.history[0]!.templates.flatMap((t) => t.blocks.map((b) => b.block))).not.toContain('P');
-    expect(upgraded.schedule.history[0]!.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    expect(upgraded.schedule.history[0]!.blocks.map((b) => b.id)).toEqual(['C', 'A', 'H', 'B', 'E', 'D']);
     expect(upgraded.schedule.days).toEqual({ '2026-10-20': { minutes: { A: 90 } }, '2026-10-22': { template: 'exam' } });
     expect(upgraded.pace).toEqual({ C: { mode: 'intense' } });
     expect(upgraded.pauses).toEqual([{ id: 'p2', block: 'B', from: '2026-10-20', until: null, to: 'free' }]);
     expect(upgraded.catchUp).toEqual({});
     expect(upgraded.layout.today.order).toEqual(['A', 'B', 'C', 'D', 'E']);
-    expect(upgraded.core.blocks.find((b) => b.id === 'D')!.minutes).toBe(150);
+    expect(upgraded.core.blocks.find((b) => b.id === 'E')!.minutes).toBe(150);
     // Before the change and after it, the default day plans its five blocks and nothing else.
-    expect(resolveDay('2026-10-16', upgraded).blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    expect(resolveDay('2026-10-16', upgraded).blocks.map((b) => b.id)).toEqual(['C', 'A', 'H', 'B', 'E']);
     expect(StoredSettingsSchema.safeParse(upgraded).success).toBe(true);
     // Once dropped, nothing is left to drop: the same object comes back.
     expect(upgradeSettings(upgraded, seed.settings)).toBe(upgraded);

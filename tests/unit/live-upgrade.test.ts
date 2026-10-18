@@ -22,7 +22,7 @@ import { importBackup } from '../../src/db/backup.ts';
 import { AtlasDB } from '../../src/db/db.ts';
 import { addPlanEdit } from '../../src/db/edits.ts';
 import { readSettings, updateSettings } from '../../src/db/settings.ts';
-import type { DayLog, Review } from '../../src/db/types.ts';
+import type { DayLog, Review, StoredSettings } from '../../src/db/types.ts';
 import { addEntry, editLog } from '../../src/lib/logs.ts';
 import { resolveDay } from '../../src/lib/day-plan.ts';
 import { currentSettings } from '../../src/lib/settings.ts';
@@ -56,6 +56,9 @@ function liveRepo(): Record<string, string> {
   walk(root);
   return out;
 }
+
+/** A block's minutes in the latest schedule kept for past days (the one before the daily schedule). */
+const pastMinutes = (settings: StoredSettings, block: string): number | undefined => settings.schedule.history.at(-1)?.blocks.find((b) => b.id === block)?.minutes;
 
 const databases: AtlasDB[] = [];
 const engines: SyncEngine[] = [];
@@ -144,10 +147,13 @@ describe('the live IndexedDB (Dexie version 2) on this build', () => {
     expect(settings.version).toBe(3);
     expect(settings.theme).toBe('dark');
     expect(settings.github.username).toBe('octo-learner');
-    expect(settings.core.blocks.find((b) => b.id === 'C')!.minutes).toBe(90);
+    // The daily schedule took over from today (2026-10-16): the course minutes are its own; the user's 90 minutes of C
+    // stay with the days before, in the schedule's history.
+    expect(settings.core.blocks.find((b) => b.id === 'C')!.minutes).toBe(120);
+    expect(pastMinutes(settings, 'C')).toBe(90);
     expect(settings.core.streak.minMinutes).toBe(45);
     expect(settings.core.templates.length).toBeGreaterThan(0);
-    expect(settings.core.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    expect(settings.core.blocks.map((b) => b.id)).toEqual(['C', 'A', 'H', 'B', 'E', 'D']);
     expect(settings.core.catalogue).toEqual(raw.settings.catalogue);
   });
 
@@ -158,7 +164,7 @@ describe('the live IndexedDB (Dexie version 2) on this build', () => {
     expect(result.ok, JSON.stringify(result)).toBe(true);
     expect(await db.dayLogs.count()).toBe(3);
     expect((await db.planPatches.toArray()).map((p) => p.op).sort()).toEqual(['drop', 'move']);
-    expect((await readSettings(raw.settings, db)).core.blocks.find((b) => b.id === 'C')!.minutes).toBe(90);
+    expect(pastMinutes(await readSettings(raw.settings, db), 'C')).toBe(90);
   });
 });
 
@@ -207,7 +213,7 @@ describe('the live atlas-data repository on this build', () => {
     await connect(laptop, fake);
     expect(await laptop.db.dayLogs.count()).toBe(3);
     expect((await laptop.db.planPatches.toArray()).map((p) => p.op).sort()).toEqual(['drop', 'move']);
-    expect((await readSettings(raw.settings, laptop.db)).core.blocks.find((b) => b.id === 'C')!.minutes).toBe(90);
+    expect(pastMinutes(await readSettings(raw.settings, laptop.db), 'C')).toBe(90);
 
     tick();
     await laptop.as(() => updateSettings(raw.settings, (s) => ({ ...s, core: { ...s.core, heatmapMode: 'absolute' } }), laptop.db));
@@ -316,7 +322,7 @@ function practiceFake(): FakeGithub {
 
 /** What a user of the build with Practice must find after the update, whatever way their settings arrive. */
 function expectNoPractice(settings: Awaited<ReturnType<typeof readSettings>>): void {
-  expect(settings.core.blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+  expect(settings.core.blocks.map((b) => b.id)).toEqual(['C', 'A', 'H', 'B', 'E', 'D']);
   expect(settings.core.blocks.some((b) => 'role' in b)).toBe(false);
   expect(settings.core).not.toHaveProperty('practice');
   expect(settings.core.templates.flatMap((t) => t.blocks.map((b) => b.block))).not.toContain('P');
@@ -325,15 +331,18 @@ function expectNoPractice(settings: Awaited<ReturnType<typeof readSettings>>): v
   expect(settings.pace).not.toHaveProperty('P');
   // The user's own values stay.
   expect(settings.theme).toBe('dark');
-  expect(settings.core.blocks.find((b) => b.id === 'C')!.minutes).toBe(90);
-  // The default day is 8 hours again: the Full day with the user's 90 minutes of C is 7 h 30 m, the curriculum's 8 h.
-  expect(resolveDay('2026-10-19', settings).planned).toBe(450);
-  expect(resolveDay('2026-10-19', currentSettings(undefined, raw.settings)).planned).toBe(480);
-  expect(resolveDay('2026-10-19', settings).blocks.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+  // The days before the daily schedule keep the 8-hour day with the user's 90 minutes of C: 7 h 30 m.
+  expect(pastMinutes(settings, 'C')).toBe(90);
+  expect(resolveDay('2026-10-15', settings).planned).toBe(450);
+  expect(resolveDay('2026-10-15', settings).blocks.map((b) => b.id).sort()).toEqual(['A', 'B', 'C', 'D', 'E']);
+  // From today on, the daily schedule: 10 hours, as a fresh install has it.
+  expect(resolveDay('2026-10-19', settings).planned).toBe(600);
+  expect(resolveDay('2026-10-19', currentSettings(undefined, raw.settings)).planned).toBe(600);
+  expect(resolveDay('2026-10-19', settings).blocks.map((b) => b.id)).toEqual(['C', 'A', 'H', 'B', 'E']);
 }
 
 describe('settings saved by the live build with Practice (block P, its templates and the practice section)', () => {
-  it('load without the Practice block or any practice key, and plan the 8-hour day', async () => {
+  it('load without the Practice block or any practice key, and plan the daily schedule from today', async () => {
     const text = practiceFile('atlas-data/state/settings.json');
     // The fixture really is what the build with Practice wrote.
     const saved = JSON.parse(text);
@@ -382,7 +391,7 @@ describe('settings saved by the live build with Practice (block P, its templates
     await sync(laptop);
     const files = fake.files();
     const settings = JSON.parse(files['state/settings.json']!);
-    expect(settings.core.blocks.map((b: { id: string }) => b.id)).toEqual(['A', 'B', 'C', 'D', 'E']);
+    expect(settings.core.blocks.map((b: { id: string }) => b.id)).toEqual(['C', 'A', 'H', 'B', 'E', 'D']);
     expect(settings.core).not.toHaveProperty('practice');
     expect(files['state/practice.json']).toBe(practiceJson);
     expect(files['log/2026/10/2026-10-16.json']).toBe(practiceFile('atlas-data/log/2026/10/2026-10-16.json'));

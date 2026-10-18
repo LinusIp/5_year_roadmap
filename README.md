@@ -1,8 +1,8 @@
 # <img src="public/brand/atlas-mark-light.png" alt="" width="40" height="40"> Atlas
 
 A local-first personal learning platform for one five-year plan (2026-09-21 to 2031-08-31). It answers
-one question every morning: **what exactly do I do today?** By default that is an 8-hour day; the day can be
-shaped to fit (see [Making it yours](#making-it-yours)).
+one question every morning: **what exactly do I do today?** By default that is a fixed 10-hour day (see
+[The daily schedule](#the-daily-schedule)); the day can be shaped to fit (see [Making it yours](#making-it-yours)).
 
 No backend and no account. Everything you log is kept in your browser (IndexedDB), and with the optional
 GitHub Sync also in a private repository you own, where each study session becomes a commit. Without it, the
@@ -50,9 +50,38 @@ npm run dev
 | `npm run fetch:units` | Rebuilds the lecture and chapter checklists from the courses own syllabus pages. |
 | `npm run test:sync -- --repo owner/name` | Runs GitHub Sync against the real GitHub, by hand (see below). Never in CI. |
 
+## The daily schedule
+
+Every day is the same five two-hour courses at fixed times, 10 hours in all:
+
+| Time | Block | Works on first |
+|---|---|---|
+| 06:00 to 08:00 | C · ML Zoomcamp | ML Zoomcamp, then the next item of lane C |
+| 08:00 to 10:00 | A · GameDevHQ | the GameDevHQ Unity course, then the small game that closes it |
+| 10:00 to 12:00 | H · Hugging Face | the Hugging Face LLM Course, then the Agents course and the AI-engineer basics |
+| 12:00 to 18:00 | Break | |
+| 18:00 to 20:00 | B · Coding lessons | 30 Days of Python, with the daily challenge |
+| 20:00 to 22:00 | E · Math and physics | MIT 18.06, then the rest of lane E |
+
+- **Now follows the clock.** At 08:40 Today's Now is GameDevHQ ("Now · 08:00–10:00"); between 12:00 and 18:00 it is
+  the break, with Coding lessons next (a tap starts it early); after 22:00 the day is done. A block tapped in Later
+  today, or the one whose timer runs, comes first. Later today lists the other blocks with their start times and
+  the break between the sessions.
+- **When a block's time is up** and its timer still runs (08:00, 10:00, 20:00, 22:00), Today asks quietly: Switch
+  (or Stop at 22:00) or Keep going. No notifications: a web app cannot ring reliably while closed.
+- **Pinned courses.** The first course of each lane is the one above; when it is done, the lane moves on by itself.
+- **Projects (block D)** are no longer in the day. The Deck, the catalogue, Plan › Projects and the Library still
+  hold them; add Projects to a day in Calendar when you want one.
+- **Change it:** Calendar › a block › Apply to every day (from today on), or Settings › Schedule. Settings ›
+  Schedule › Reset to the daily schedule goes back to the table above from today. Days already past keep the plan
+  they had.
+- **Settings from before** (no block H) switch once, the first time this version opens: the days up to yesterday
+  keep their old plan, your day changes, busy times, pace and logged time stay. `npm run schedule:shift` lists the
+  items whose projected finish moved by more than two weeks (`docs/daily-schedule/pace-shift.txt`).
+
 ## Making it yours
 
-Atlas starts as the plan in `data/`: the same 8-hour day, every day. Real weeks are not like that, so the day,
+Atlas starts as the plan in `data/`: the same 10-hour day, every day. Real weeks are not like that, so the day,
 the plan, the pace and the layout can all be changed from the app. Nothing new shows on the main screens until
 you use it: every option sits behind an Edit or Change action in a sheet.
 
@@ -64,7 +93,7 @@ you use it: every option sits behind an Edit or Change action in a sheet.
 | You want to | Where |
 |---|---|
 | Make today a University day, give one block fewer minutes, skip a block, move it to tomorrow, swap two blocks' work, or rest | Today › the sliders icon (Change today) |
-| Change the templates (Full day, University day, Weekend, Exam week, Rest day) or make your own | Settings › Schedule › Day templates |
+| Change the templates (Daily schedule, University day, Weekend, Exam week, Rest day) or make your own | Settings › Schedule › Day templates |
 | Give each weekday a template | Settings › Schedule › Weekly pattern |
 | Give a date or a range another template ("Exam week 12–19 Dec") | Settings › Schedule › Date ranges |
 | Add, rename, recolour or reorder blocks, or give one a track | Settings › Blocks |

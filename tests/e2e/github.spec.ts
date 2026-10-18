@@ -47,7 +47,14 @@ test('connecting Sync writes the log to the repository as the user, flushes when
   const fake = new FakeGithub({ owner: 'octo-learner', repo: 'atlas-data', token: TOKEN, userId: 4242, name: 'Octo Learner', tokenExpiry: '2026-12-23' });
   const authorizations = await serveGithub(page, fake);
 
+  // GameDevHQ, Now at 09:00, works on the lane's game project today instead of the course, so logging time starts it.
+  await open(page, './#/calendar?view=day');
+  await page.getByRole('button', { name: /^GameDevHQ ?, \d/ }).click();
+  await page.getByRole('dialog', { name: 'GameDevHQ' }).getByRole('button', { name: /^GameDevHQ Unity course/ }).click();
+  await page.getByRole('dialog', { name: 'What GameDevHQ works on' }).getByRole('button', { name: /^One finished small game/ }).click();
   await open(page, './');
+  await expect(page.locator('#now-title')).toHaveText('GameDevHQ');
+  await expect(nowCard(page)).toContainText('One finished small game');
   await logTime(page, '120');
 
   await open(page, './#/settings');
@@ -72,7 +79,7 @@ test('connecting Sync writes the log to the repository as the user, flushes when
   ]);
   expect(JSON.parse(fake.files()['log/2026/09/2026-09-24.json']!).entries[0].minutes).toBe(120);
   expect(fake.files()['projects/a-small-game-1.md']).toMatch(/^# One finished small game[\s\S]*Status: active[\s\S]*## Done when\n\n- \[ \] /);
-  expect(fake.log().map((c) => c.message.split('\n')[0])).toEqual([expect.stringMatching(/^log: 2026-09-24 · 2 h · 0\/\d blocks$/), 'Atlas: set up the data repository']);
+  expect(fake.log().map((c) => c.message.split('\n')[0])).toEqual([expect.stringMatching(/^log: 2026-09-24 · 2 h · 0\/5 blocks$/), 'Atlas: set up the data repository']);
   expect(fake.log()[0]!.author).toMatchObject({ name: 'Octo Learner', email: '4242+octo-learner@users.noreply.github.com' });
 
   // GitHub does not let the page read the token's expiry, so it is typed in; the reminder follows it.
@@ -87,7 +94,7 @@ test('connecting Sync writes the log to the repository as the user, flushes when
   await expect(page.getByRole('link', { name: 'The GitHub token expires in 7 days' })).toBeVisible();
   await nowCard(page).getByRole('button', { name: 'Mark done' }).click();
   await page.clock.fastForward(4_000);
-  await expect.poll(() => fake.log()[0]!.message.split('\n')[0]).toMatch(/^log: 2026-09-24 · 2 h · 1\/\d blocks$/);
+  await expect.poll(() => fake.log()[0]!.message.split('\n')[0]).toMatch(/^log: 2026-09-24 · 2 h · 1\/5 blocks$/);
   expect(fake.log()).toHaveLength(3);
 
   // The calendar comes with the same token.
