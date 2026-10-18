@@ -25,6 +25,45 @@ import { PickerSheet } from './parts/PickerSheet.tsx';
 import { ProjectsActivity } from './parts/ProjectsActivity.tsx';
 import { SegmentedControl } from '../ui/SegmentedControl.tsx';
 import { dateTitle, hours, plural, span } from './parts/text.ts';
+import { Link } from '../router/router.tsx';
+import { useSleep } from '../db/sleep.ts';
+import type { SleepNight } from '../db/types.ts';
+import { CHART_MINUTES, averageMinutes, barHours, lengthText, recentBars } from '../lib/sleep.ts';
+
+/**
+ * Sleep on Activity (SLEEP-LOG): the last 7 nights' average and the last 30 as a strip of small bars; it opens the
+ * Sleep screen. Sleep is not study time: it takes no part in the streak or the heatmap.
+ */
+function SleepTile({ nights, today }: { nights: SleepNight[] | undefined; today: string }) {
+  if (!nights) return null;
+  const strip = recentBars(nights, today, 30);
+  const average = averageMinutes(recentBars(nights, today, 7));
+  const logged = strip.filter((b) => b.minutes !== null);
+  // The strip, for screen readers: how many of the 30 nights are logged, and their range.
+  const strip30 =
+    '· ' +
+    logged.length +
+    ' of the last 30 nights logged' +
+    (logged.length > 0 ? ', from ' + barHours(Math.min(...logged.map((b) => b.minutes!))) + ' to ' + barHours(Math.max(...logged.map((b) => b.minutes!))) + ' hours' : '');
+  return (
+    <Link to="/sleep" className="tile mt-4 flex flex-col gap-2.5 p-[18px]">
+      <span className="flex items-baseline justify-between gap-3">
+        <span className="section-label mb-0">Sleep</span>
+        <span className="text-meta text-ink2">
+          {average === null ? 'Log a night' : 'last 7 nights · average ' + lengthText(average)}
+          <span className="sr-only">{strip30}</span>
+        </span>
+      </span>
+      <span aria-hidden="true" className="flex h-10 items-end gap-[3px]">
+        {strip.map((b) => (
+          <span key={b.date} className="well relative h-full flex-1 overflow-hidden rounded-[3px]">
+            {b.minutes !== null && <span className="absolute inset-x-0 bottom-0 rounded-[3px]" style={{ height: Math.min(1, b.minutes / CHART_MINUTES) * 100 + '%', background: b.date === today ? 'var(--ice)' : 'var(--deco)' }} />}
+          </span>
+        ))}
+      </span>
+    </Link>
+  );
+}
 
 /**
  * Activity: the year as a heatmap (year chips underneath, a track filter), the three numbers in one
@@ -39,6 +78,7 @@ export function Activity() {
   const [pickingTrack, setPickingTrack] = useState(false);
   const reviews = useLiveQuery(() => db.reviews.where('kind').equals('week').toArray(), []);
   const anyChallenge = (useLiveQuery(() => db.challenges.count(), []) ?? 0) > 0;
+  const nights = useSleep();
   const logs = atlas?.logs;
   const atlasDates = useMemo(() => (logs ?? []).filter((log) => log.entries.some((e) => e.minutes > 0)).map((log) => log.date), [logs]);
 
@@ -115,6 +155,8 @@ export function Activity() {
           <p className="text-meta text-ink2">{plural(freezesLeft, 'freeze') + ' left this month'}</p>
         </section>
       </div>
+
+      <SleepTile nights={nights} today={now} />
 
       {/* Projects is a view of its own once there is something to show; a fresh install keeps the mockup. */}
       {(anyChallenge || view === 'projects') && (

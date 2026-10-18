@@ -6,16 +6,16 @@ import { currentSettings } from '../lib/settings.ts';
 import Dexie from 'dexie';
 import type { AtlasDB } from '../db/db.ts';
 import type {
-  BlogPost, CertState, CustomEntity, DayLog, MilestoneState, Override, PaperState, PlanPatch, ChallengeEvent, ReplanRecord, Review, StoredSettingsInput,
+  BlogPost, SleepNight, CertState, CustomEntity, DayLog, MilestoneState, Override, PaperState, PlanPatch, ChallengeEvent, ReplanRecord, Review, StoredSettingsInput,
   UserItemState, WeekPick,
 } from '../db/types.ts';
 import { renderDayMarkdown, titleIndex } from '../lib/day-markdown.ts';
 import type { AppSeed } from '../seed/schema.ts';
-import { renderBlogPost, renderChallenges, renderDay, renderItems, renderPlan, renderProject, renderReview, renderSettings } from './files.ts';
+import { renderSleep, renderBlogPost, renderChallenges, renderDay, renderItems, renderPlan, renderProject, renderReview, renderSettings } from './files.ts';
 import type { ItemsData, PlanData } from './files.ts';
 import { markSilent } from './middleware.ts';
 import {
-  CHALLENGES_PATH, ITEMS_PATH, blogPath, dateOfBlogPath, PLAN_PATH, SETTINGS_PATH, dateOfLogPath, logMarkdownPath, logPath, projectPath, reviewPath,
+  CHALLENGES_PATH, ITEMS_PATH, blogPath, dateOfBlogPath, sleepPath, dateOfSleepPath, PLAN_PATH, SETTINGS_PATH, dateOfLogPath, logMarkdownPath, logPath, projectPath, reviewPath,
 } from './paths.ts';
 
 export interface LocalState {
@@ -32,13 +32,14 @@ export interface LocalState {
   planPatches: PlanPatch[];
   challenges: ChallengeEvent[];
   blogPosts: BlogPost[];
+  sleep: SleepNight[];
   settings: StoredSettingsInput[];
 }
 
 export async function readLocal(database: AtlasDB): Promise<LocalState> {
   return database.transaction(
     'r',
-    [database.dayLogs, database.itemStates, database.paperStates, database.certStates, database.milestoneStates, database.customEntities, database.overrides, database.reviews, database.weekPicks, database.replans, database.planPatches, database.challenges, database.blogPosts, database.settings],
+    [database.dayLogs, database.itemStates, database.paperStates, database.certStates, database.milestoneStates, database.customEntities, database.overrides, database.reviews, database.weekPicks, database.replans, database.planPatches, database.challenges, database.blogPosts, database.sleep, database.settings],
     async () => ({
       dayLogs: await database.dayLogs.toArray(),
       itemStates: await database.itemStates.toArray(),
@@ -53,6 +54,7 @@ export async function readLocal(database: AtlasDB): Promise<LocalState> {
       planPatches: await database.planPatches.toArray(),
       challenges: await database.challenges.toArray(),
       blogPosts: await database.blogPosts.toArray(),
+      sleep: await database.sleep.toArray(),
       settings: await database.settings.toArray(),
     }),
   );
@@ -74,6 +76,7 @@ export function allPaths(local: LocalState, seed: AppSeed): string[] {
   if (local.challenges.length > 0) paths.push(CHALLENGES_PATH);
   for (const log of local.dayLogs) paths.push(logPath(log.date));
   for (const post of local.blogPosts) paths.push(blogPath(post.date));
+  for (const night of local.sleep) paths.push(sleepPath(night.date));
   for (const review of local.reviews) paths.push(reviewPath(review.id));
   for (const state of local.itemStates) if (projects.has(state.refId)) paths.push(projectPath(state.refId));
   return paths;
@@ -96,6 +99,12 @@ export function renderPath(path: string, local: LocalState, seed: AppSeed): stri
   if (path === CHALLENGES_PATH) return local.challenges.length > 0 ? renderChallenges(local.challenges) : null;
   if (path === PLAN_PATH) return renderPlan(planOf(local));
   if (path === SETTINGS_PATH) return local.settings[0] ? renderSettings(local.settings[0]) : null;
+
+  const sleepDate = dateOfSleepPath(path);
+  if (sleepDate) {
+    const night = local.sleep.find((n) => n.date === sleepDate);
+    return night ? renderSleep(night) : null;
+  }
 
   const blogDate = dateOfBlogPath(path);
   if (blogDate) {
@@ -188,6 +197,13 @@ export async function writeReview(database: AtlasDB, review: Review): Promise<vo
 export async function writeBlogPost(database: AtlasDB, post: BlogPost): Promise<void> {
   await silently(database, [database.blogPosts], async () => {
     await database.blogPosts.put(post);
+  });
+}
+
+/** A night from GitHub. */
+export async function writeSleep(database: AtlasDB, night: SleepNight): Promise<void> {
+  await silently(database, [database.sleep], async () => {
+    await database.sleep.put(night);
   });
 }
 

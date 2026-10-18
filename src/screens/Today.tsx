@@ -10,7 +10,7 @@ import { editItemState, setWeekPick, useWeekPick } from '../db/state.ts';
 import { startTimer, stopTimer, useRunningTimer } from '../db/timer.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import { useUnits } from '../hooks/useUnits.ts';
-import { addDays, dayName, daysBetween, formatLong, formatStopwatch, monthName, startOfWeek, today as todayDate } from '../lib/dates.ts';
+import { addDays, dayName, formatLong, formatStopwatch, monthName, startOfWeek, today as todayDate } from '../lib/dates.ts';
 import { editLog, isBlockDone, minutesByBlock, minutesForRef, readLog, toggleBlockDone, totalMinutes } from '../lib/logs.ts';
 import { plannedFor } from '../lib/day-plan.ts';
 import { catchUpMinutes, laneBalance } from '../lib/pace.ts';
@@ -28,6 +28,8 @@ import { Icon } from '../ui/Icon.tsx';
 import { BlockIcon, BlockTile, IconTile, KindIcon } from '../ui/glyphs.tsx';
 import { checkBlogPost, useBlogPosts } from '../db/blog.ts';
 import { blogReminderDue } from '../lib/blog.ts';
+import { useSleep, useSleepSettings } from '../db/sleep.ts';
+import { lengthText, timeOf } from '../lib/sleep.ts';
 import { blockTone, toneInk } from '../ui/colors.ts';
 import { ProgressLine } from '../ui/ProgressLine.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
@@ -135,6 +137,8 @@ export function Today() {
   const units = useUnits();
   const timer = useRunningTimer();
   const blogPosts = useBlogPosts();
+  const nights = useSleep();
+  const sleepSettings = useSleepSettings();
   const elapsed = useElapsed(timer);
   const carry = useTimerCarry();
   // The minute of the day, for Now by the clock and the prompt to move on.
@@ -315,6 +319,10 @@ export function Today() {
   const blogDue = isToday && blogPosts !== undefined && blogReminderDue({ slots: placed, minute: minuteNow, log, runningBlock: timer?.block, posted: blogPosted });
   const blogTo = isToday ? '/blog' : '/blog?date=' + date;
   const showBlogRow = date <= now && blogPosts !== undefined;
+  // Sleep (SLEEP-LOG): the night that ended this morning, and the morning question until 12:00, while none is logged.
+  const slept = nights?.find((n) => n.date === date);
+  const sleepTo = date === now ? '/sleep' : '/sleep?date=' + date;
+  const sleepAsk = isToday && nights !== undefined && !slept && sleepSettings?.prompt === true && minuteNow < 12 * 60;
   const extrasNote = (id: BlockId): string | null => {
     const rows = extrasFor(id);
     return rows.length ? rows.map((r) => r.key.toLowerCase() + (r.trailing === 'Done' ? ' done' : '')).join(', ') : null;
@@ -519,6 +527,20 @@ export function Today() {
       </div>
 
       {outside && <p className="mt-2 text-meta text-ink2">{outside}</p>}
+
+      {sleepAsk && (
+        <RowList className="mt-4">
+          <Row
+            icon={<IconTile icon="moon" tone="ice" />}
+            title="How did you sleep?"
+            action={
+              <Button size="sm" to="/sleep">
+                Log sleep
+              </Button>
+            }
+          />
+        </RowList>
+      )}
 
       {updateReady && (
         <RowList className="mt-4">
@@ -737,13 +759,15 @@ export function Today() {
               ))}
             </span>
           </div>
-          {plan.phase && (
-            <div className="tile flex flex-col items-center gap-2 p-3.5">
-              <span className="section-label mb-0 max-w-full truncate">{plan.phase.title.split(' — ')[0]}</span>
-              <span className="well well-blue rounded-[14px] px-3.5 py-1 text-card font-semibold leading-tight text-blue-deep">{Math.max(0, daysBetween(date, plan.phase.end))}</span>
-              <span className="text-meta text-ink2">days left</span>
-            </div>
-          )}
+          {/* Slept: the night that ended on this day's morning (SLEEP-LOG); a tap opens the Sleep screen. */}
+          <Link to={sleepTo} className="tile flex flex-col items-center gap-2 p-3.5">
+            <span className="section-label mb-0">Slept</span>
+            <span className="well-ice rounded-[14px] px-3.5 py-1 text-card font-semibold leading-tight tabular-nums">
+              {slept ? lengthText(slept.minutes) : <span aria-hidden="true">—</span>}
+              {!slept && <span className="sr-only">not logged</span>}
+            </span>
+            <span className="text-meta text-ink2">{slept ? timeOf(slept.bed) + ' → ' + timeOf(slept.wake) : 'Log sleep'}</span>
+          </Link>
         </div>
       )}
 

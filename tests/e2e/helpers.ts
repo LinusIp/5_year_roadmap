@@ -8,6 +8,7 @@ export const FIRST_DAY = '2026-09-21T09:00:00+05:00';
 export const PAGES = [
   './',
   './#/activity',
+  './#/sleep',
   './#/plan',
   './#/plan?view=projects',
   './#/plan?view=papers',

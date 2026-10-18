@@ -9,10 +9,10 @@ import { z } from 'zod';
 import { canonical } from '../db/backup-file.ts';
 import {
   CertStateSchema, CustomEntitySchema, DayLogSchema, MilestoneStateSchema, OverrideSchema, PaperStateSchema,
-  PlanPatchSchema, BlogPostSchema, ChallengeEventSchema, ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
+  PlanPatchSchema, BlogPostSchema, SleepNightSchema, ChallengeEventSchema, ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
 } from '../db/types.ts';
 import { legacyPlanPatches } from '../lib/plan.ts';
-import type { BlogPost, ChallengeEvent, DayLog, Review, StoredSettingsInput, UserItemState } from '../db/types.ts';
+import type { BlogPost, SleepNight, ChallengeEvent, DayLog, Review, StoredSettingsInput, UserItemState } from '../db/types.ts';
 import { formatRange, monthName } from '../lib/dates.ts';
 import type { Project } from '../seed/schema.ts';
 
@@ -156,6 +156,21 @@ export function renderBlogPost(post: BlogPost): string {
 
 export function parseBlogPost(text: string, date: string): ParseResult<BlogPost> {
   const result = parseJson(text, BlogFileSchema, 'blog/' + date + '.json');
+  return result.ok ? { ok: true, value: { date, ...result.value } } : result;
+}
+
+/* ------------------------------------------------------------------ sleep/<date>.json */
+
+/** A night as its file holds it: the wake-up date is the file's name. */
+export const SleepFileSchema = SleepNightSchema.omit({ date: true });
+
+export function renderSleep(night: SleepNight): string {
+  const { date: _date, ...rest } = night;
+  return toJson(rest);
+}
+
+export function parseSleep(text: string, date: string): ParseResult<SleepNight> {
+  const result = parseJson(text, SleepFileSchema, 'sleep/' + date + '.json');
   return result.ok ? { ok: true, value: { date, ...result.value } } : result;
 }
 

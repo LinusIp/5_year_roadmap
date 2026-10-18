@@ -1097,3 +1097,52 @@ from the build container; the runner's report covers the videos.
 
 **Live check.** The deploy's live check opens the course's Library sheet and requires 1.1 to 1.6 ticked, 1.7 not,
 and 1.7 marked Now.
+
+## The sleep log (pull request #14)
+
+**The night's date.** A night belongs to the date it ended on, so last night shows on today. The screen enters two
+times of day: the bedtime is on the evening before when it is later in the day than the wake time (23:00 → 05:40), and
+on the wake-up date when it is earlier (00:30 → 06:00). Times are stored as local wall-clock times without an offset
+("2026-10-17T23:00"), and the minutes are the difference of the two wall clocks: exact in Asia/Tashkent, which has no
+daylight saving.
+
+**Validation.** Wake after bed is required (the two-times entry always gives it; a synced or imported record is
+checked by the schema: positive minutes). Under 1 hour or over 16 hours, Save turns into "Save anyway" with "Are you
+sure? That is 16 h 40 m." above it: asked, never refused. One record per wake-up date: saving replaces it, with Undo.
+
+**Sync.** Table `sleep` (Dexie version 7), one file per night, `sleep/<date>.json`, merged by the newer `updatedAt`
+like the blog marks. Backups carry it.
+
+**Defaults.** The usual bedtime is the median of the last 7 nights logged (times before noon count as after midnight,
+so 23:30 and 00:30 give 00:00), 23:00 before the first. The wake time is now rounded to 5 minutes before noon on that
+morning, else the median wake time, 06:00 before the first.
+
+**The time input.** A native `<input type="time">` lies unseen over the sunken time: a tap opens the phone's own
+picker, a keyboard types into it, and the well shows the time in 24 hours whatever the browser's locale. Calling
+`showPicker()` from a separate button was tried and dropped: the picker it opens keeps the typing from reaching the
+field. The sleep log writes times in 24 hours, as the mockup does, whatever Settings › Layout's clock says.
+
+**The bedtime tile.** "For 8 h by 06:00": the goal before tomorrow's first block (its start in the day's layout, so it
+follows a changed schedule); today's first block when tomorrow has none, 06:00 when neither has.
+
+**Settings.** The goal (6 to 10 h in half hours) and the morning question are this device's (meta `sleepSettings`),
+like the blog settings: they shape how this phone asks, not the data.
+
+**The morning question.** On today, while no night is logged for it, before 12:00 and while it is on: a row under the
+week strip ("How did you sleep?", Log sleep), not a pop-up.
+
+**Today still fits, once answered.** The morning question costs a row (114 px with its tile), and Today had about 15
+px to spare above the tab bar at 390 x 844. The brief asks for the row at the top, so it stays there for the few
+minutes it is up: it goes once the night is logged or at 12:00, and "Today reaches Later today at 390 x 844" is
+checked with last night logged. Putting the question inside Later today (like the blog reminder) would keep the fit
+but hide it below the Now card exactly when it is asked.
+
+**Today.** The Slept tile takes the place of "Foundations I · days left"; the days left moved to Plan's header ("Year
+1 · Foundations I · ends 31 January · 105 days left").
+
+**Activity.** A Sleep tile under the two numbers, linking to the screen: the average of the last 7 nights and the last
+30 as small bars (the same scale and colours as the week chart). Its accessible name says the average, how many of
+the 30 nights are logged and their range. Neither the tile nor the screen gives advice or scores.
+
+**The chart's text.** The week chart is one image whose name lists each night ("Monday 7.0 hours, Tuesday not
+logged, ...") and the goal; the bars and numbers are hidden from screen readers.
