@@ -129,7 +129,7 @@ test('a tech doc over Today, with the timer running, matches the committed scree
   await sheet.getByRole('button', { name: 'Work on it now' }).click();
   const now = page.locator('section[aria-labelledby="now-title"]');
   await now.getByRole('button', { name: 'Start' }).click();
-  await expect(page.getByText('Now · running')).toBeVisible();
+  await expect(page.getByText(/^Running · since /)).toBeVisible();
   await now.getByRole('button', { name: 'Tech doc' }).click();
   await expect(sheet.getByRole('timer')).toHaveText(/^Running · 0:00$/);
   await expect(sheet.getByRole('heading', { name: /^Done when/ }).first()).toBeVisible();

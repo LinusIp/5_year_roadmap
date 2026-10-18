@@ -78,7 +78,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await open(page, './');
     await expect(page.locator('#now-title')).toHaveText('One finished small game');
     await nowCard(page).getByRole('button', { name: 'Start' }).click();
-    await expect(nowCard(page).getByText('Now · running')).toBeVisible();
+    await expect(page.getByText(/^Running · since /)).toBeVisible();
     await page.clock.fastForward('02:00');
 
     // "Tech doc" sits next to Stop and Log time; the title opens the same sheet.
@@ -99,7 +99,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await body.evaluate((el) => el.scrollTo(0, 400));
     await page.keyboard.press('Escape');
     await expect(sheet).toHaveCount(0);
-    await expect(nowCard(page).getByText('Now · running')).toBeVisible();
+    await expect(page.getByText(/^Running · since /)).toBeVisible();
     // The running time sits in Today's header widget, in blue; the Now card keeps Stop.
     await expect(nowCard(page).getByRole('button', { name: /^Stop/ })).toBeVisible();
     await expect(page.getByText(/^3:0\d$/)).toBeVisible();
@@ -113,7 +113,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(page.locator('#now-title')).toBeFocused();
 
     await reload(page);
-    await expect(nowCard(page).getByText('Now · running')).toBeVisible();
+    await expect(page.getByText(/^Running · since /)).toBeVisible();
     await expect(nowCard(page).getByText(/1 of \d+ ticked$/)).toBeVisible();
     await page.locator('#now-title').click();
     await expect(page.getByRole('dialog', { name: GAME }).getByRole('checkbox', { name: /^1\. One-page design/ })).toBeChecked();

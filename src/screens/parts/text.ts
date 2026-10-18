@@ -22,7 +22,7 @@ export function span(minutes: number): string {
   const total = Math.max(0, Math.round(minutes));
   const h = Math.floor(total / 60);
   const m = total % 60;
-  if (total === 0) return '0 h';
+  if (total === 0) return '0 m';
   if (h === 0) return m + ' m';
   return m === 0 ? h + ' h' : h + ' h ' + String(m).padStart(2, '0') + ' m';
 }

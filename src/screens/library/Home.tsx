@@ -205,7 +205,7 @@ export function LibraryHome({
                 icon={<IconTile icon={icon} tone={tone} />}
                 title={u.step.title}
                 meta={type + (u.after ? ' · after ' + u.after : ' · ' + Math.round(u.step.hours) + ' h')}
-                trailing={u.start > today ? monthOf(u.start, thisYear) : 'Now'}
+                trailing={u.start ? monthOf(u.start, thisYear) : undefined}
                 onClick={() => onOpen(u.step.refId)}
               />
             );
@@ -218,7 +218,7 @@ export function LibraryHome({
           Browse when you need something
         </h2>
         <ul className="grid grid-cols-3 gap-4">
-          {SHELVES.map((shelf) => (
+          {SHELVES.filter((shelf) => shelf.key !== 'project').map((shelf) => (
             <li key={shelf.key}>
               <button type="button" onClick={() => onShelf(shelf.key)} className="tile press flex w-full flex-col items-center gap-1 px-2 py-4">
                 <span className={shelf.key === 'paper' || shelf.key === 'blog' || shelf.key === 'project' ? 'text-ice-deep' : 'text-blue-deep'}>
@@ -230,6 +230,13 @@ export function LibraryHome({
             </li>
           ))}
         </ul>
+        {/* Projects, a shelf of its own kind, is a full-width row under the grid. */}
+        <button type="button" onClick={() => onShelf('project')} className="tile press mt-4 flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left">
+          <IconTile icon={SHELF_ICON.project} tone="ice" />
+          <span className="min-w-0 flex-1 text-body font-semibold">Projects</span>
+          <span className="text-meta font-semibold text-ink2">{counts.project}</span>
+          <Icon name="chevronRight" size={18} className="text-ink2" />
+        </button>
       </section>
 
       <Sheet open={menuResource !== undefined} title={menuResource ? (menuResource.short ?? menuResource.title) : ''} onClose={() => setMenu(null)}>

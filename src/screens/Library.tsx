@@ -90,7 +90,7 @@ function buildEntries(
     const start = startOf.get(ref);
     if (!start) return '';
     const [y, m] = start.split('-');
-    return monthName(Number(m) - 1) + (y === thisYear ? '' : ' ' + y);
+    return monthName(Number(m) - 1, true) + (y === thisYear ? '' : ' ' + y);
   };
   const trailingFor = (ref: string, status: ItemStatus): string => (status === 'active' ? 'Active' : status === 'done' ? 'Done' : status === 'dropped' ? 'Dropped' : when(ref));
   const sortFor = (ref: string, status: ItemStatus, title: string): string =>

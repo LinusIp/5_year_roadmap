@@ -19,7 +19,7 @@ async function changeToday(page: Page) {
 
 test('changing today to a University day changes the targets', async ({ page }) => {
   await open(page, './');
-  await expect(page.getByText('0 h of 8 h today · no streak yet')).toBeVisible();
+  await expect(page.getByText('0 m of 8 h today · no streak yet')).toBeVisible();
 
   const sheet = await changeToday(page);
   await sheet.getByRole('button', { name: /^Template/ }).click();
@@ -27,13 +27,13 @@ test('changing today to a University day changes the targets', async ({ page }) 
   await expect(sheet.getByText('Blocks · 3 h')).toBeVisible();
   await sheet.getByRole('button', { name: 'Close' }).click();
 
-  await expect(page.getByText('0 h of 3 h today · University day · no streak yet')).toBeVisible();
-  await expect(nowCard(page).getByText('Graphics · 0 h of 1 h')).toBeVisible();
+  await expect(page.getByText('0 m of 3 h today · University day · no streak yet')).toBeVisible();
+  await expect(nowCard(page).getByText('Graphics · 0 m of 1 h')).toBeVisible();
   // Projects (D) is not part of a University day.
   await expect(laterRow(page, /Weekly build/)).toHaveCount(0);
 
   await reload(page);
-  await expect(page.getByText('0 h of 3 h today · University day · no streak yet')).toBeVisible();
+  await expect(page.getByText('0 m of 3 h today · University day · no streak yet')).toBeVisible();
   await page.screenshot({ path: 'test-results/flex-university-today.png', fullPage: true });
 });
 
@@ -51,7 +51,7 @@ test('skips a block and moves another to tomorrow, for this day only', async ({ 
   await page.screenshot({ path: 'test-results/flex-change-today-sheet.png' });
   await sheet.getByRole('button', { name: 'Close' }).click();
 
-  await expect(page.getByText('0 h of 5 h today · no streak yet')).toBeVisible();
+  await expect(page.getByText('0 m of 5 h today · no streak yet')).toBeVisible();
   await expect(laterRow(page, /^18\.06 Linear Algebra/)).toHaveCount(0);
   await expect(laterRow(page, /^ML Zoomcamp/)).toHaveCount(0);
 
@@ -73,13 +73,13 @@ test('changes one block’s minutes and makes a rest day', async ({ page }) => {
   await sheet.getByRole('switch', { name: /^Rest day/ }).click();
   await sheet.getByRole('button', { name: 'Close' }).click();
   await expect(page.getByText('A rest day.')).toBeVisible();
-  await expect(page.getByText('0 h of 0 h today · rest day · no streak yet')).toBeVisible();
+  await expect(page.getByText('0 m of 0 m today · rest day · no streak yet')).toBeVisible();
 
   // Undo the day's changes from the sheet.
   const again = await changeToday(page);
   await again.getByRole('button', { name: "Undo today's changes" }).click();
   await again.getByRole('button', { name: 'Close' }).click();
-  await expect(page.getByText('0 h of 8 h today · no streak yet')).toBeVisible();
+  await expect(page.getByText('0 m of 8 h today · no streak yet')).toBeVisible();
 });
 
 test('an exam-week date range shifts the forecast', async ({ page }) => {
@@ -103,7 +103,7 @@ test('an exam-week date range shifts the forecast', async ({ page }) => {
   await open(page, './#/plan');
   await expect(page.getByRole('button', { name: new RegExp('^Graphics · 2 h.*' + (before + 2) + ' weeks behind') })).toBeVisible();
   await page.goto('./#/?date=2026-09-23');
-  await expect(page.getByText(/^0 h of 1 h 30 m today · Exam week/)).toBeVisible();
+  await expect(page.getByText(/^0 m of 1 h 30 m today · Exam week/)).toBeVisible();
 });
 
 test('adds, reorders, swaps, drops and restores a plan item, and undoes an edit', async ({ page }) => {

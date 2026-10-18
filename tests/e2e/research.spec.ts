@@ -56,7 +56,7 @@ test('Projects has a research stack that names the first research card before re
 
 test('the quarterly review keeps its research question and is marked reviewed', async ({ page }) => {
   await open(page, './#/reviews?tab=quarter');
-  const row = page.getByRole('button', { name: /^2026 Q3 0 h logged · no research shipped/ });
+  const row = page.getByRole('button', { name: /^2026 Q3 0 m logged · no research shipped/ });
   await expect(row).toContainText('This quarter');
   await row.click();
 
@@ -73,5 +73,5 @@ test('the quarterly review keeps its research question and is marked reviewed', 
   await reload(page);
   await expect(question).toHaveValue('Does speculative decoding help more on code than on prose?');
   await sheet.getByRole('button', { name: 'Close' }).click();
-  await expect(page.getByRole('button', { name: /^2026 Q3 0 h logged · a question asked Reviewed$/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^2026 Q3 0 m logged · a question asked Reviewed$/ })).toBeVisible();
 });

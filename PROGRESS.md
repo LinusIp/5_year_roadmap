@@ -25,6 +25,7 @@ with each. "Verified" means it was run, not assumed.
 | – | Calendar and the timer (pull request #6) | **done** |
 | – | The Library organised (pull request #8) | **done** |
 | – | The tech doc redesigned (pull request #9) | **done** |
+| – | The timer and the layout fixed (pull request #10) | **done** |
 
 ## Milestone 1 — Scaffold
 
@@ -896,4 +897,20 @@ Verified on this machine (Linux, Chromium 140):
   interface), the build's light doc, and the earlier doc tests (Deck, Today with the timer, Library, a milestone after
   a reload and on a second device) on the new sheet. Baselines: a case's Overview and Design, light and dark, and a
   weekly build's doc.
+
+## Pull request #10: the timer and the layout fixed
+
+- Timer: totals per block and day (counter, Now card, header, Blocks today) that include the running time; whole
+  minutes logged with the seconds carried, in one transaction; starts serialised. `tests/unit/timer-carry.test.ts`
+  (the carry, short sessions adding up, midnight split, pruning, running time per date) and
+  `tests/e2e/timer-totals.spec.ts` (stop then start shows 10:00, a reload at 30:00, 40 m of 2 h, A → B → C → A with
+  each total kept and the day adding up after a reload, a switch and back within 3 s, four 20-second sessions).
+- Today: one header row, short Now label, equal Now buttons (icon-only second below 380 px, Calendar on another day),
+  week strip by time logged with a legend in its label.
+- Calendar: day view by default on phones, 56 px an hour, the grid opening on the first block, filled week events
+  with short labels, one-line week headers with today in ice, the date range on the title row.
+- Library: short start months, no "Now", Projects as a full-width row.
+- `tests/e2e/layout.spec.ts`: Today (idle, running, another day), Calendar (day, week) and the Library at 360, 390
+  and 412 px: nothing reaches past the screen, and the last card ends above the tab bar.
+- Before/after at 360, 390 and 412 px, light and dark: `docs/before-after/fixes/`.
 

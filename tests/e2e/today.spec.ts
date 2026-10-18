@@ -17,10 +17,10 @@ test('the first unfinished block is Now, and the other four wait in Later today'
   await open(page, './');
 
   await expect(page.getByRole('heading', { level: 1, name: 'Monday 21 September' })).toBeVisible();
-  await expect(page.getByText('0 h of 8 h today · no streak yet')).toBeVisible();
+  await expect(page.getByText('0 m of 8 h today · no streak yet')).toBeVisible();
 
   await expect(page.locator('#now-title')).toHaveText('One finished small game');
-  await expect(nowCard(page).getByText('Graphics · 0 h of 2 h')).toBeVisible();
+  await expect(nowCard(page).getByText('Graphics · 0 m of 2 h')).toBeVisible();
 
   await expect(laterRow(page, /^30 Days of Python Languages · day 1/)).toBeVisible();
   await expect(laterRow(page, /^ML Zoomcamp Core · module 1/)).toBeVisible();
@@ -46,7 +46,8 @@ test('logs time with the timer and keeps it across a reload', async ({ page }) =
 test('a timer adds the minutes it ran for', async ({ page }) => {
   await open(page, './');
   await nowCard(page).getByRole('button', { name: 'Start' }).click();
-  await expect(nowCard(page).getByText('Now · running')).toBeVisible();
+  await expect(nowCard(page).getByRole('button', { name: /^Stop/ })).toBeVisible();
+  await expect(page.getByText(/^Running · since /)).toBeVisible();
 
   await page.clock.fastForward('25:00');
   await nowCard(page).getByRole('button', { name: /^Stop/ }).click();

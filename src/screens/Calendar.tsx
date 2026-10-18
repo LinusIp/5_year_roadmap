@@ -4,7 +4,7 @@ import { useAtlas } from '../hooks/useAtlas.ts';
 import { useCatalogueIndex } from '../hooks/useCatalogue.ts';
 import { useUnits } from '../hooks/useUnits.ts';
 import { dayLayout, withBlockLength, withBlockTime } from '../lib/calendar.ts';
-import { busyConflict, busyOn, GRID_START, hm } from '../lib/calendar-layout.ts';
+import { busyConflict, busyOn, GRID_END, GRID_START, hm } from '../lib/calendar-layout.ts';
 import { addDays, dayName, eachDay, monthName, startOfMonth, startOfWeek, today as todayDate } from '../lib/dates.ts';
 import { totalMinutes } from '../lib/logs.ts';
 import { planForDay } from '../lib/schedule.ts';
@@ -55,12 +55,16 @@ export function Calendar() {
   const now = todayDate();
   const [viewParam, setView] = useQueryParam('view');
   const [dateParam, setDate] = useQueryParam('date');
-  const view: View = viewParam === 'week' || viewParam === 'day' ? viewParam : 'month';
+  // A phone opens on the day; a wider screen on the month. Week is a tap away on both.
+  const narrow = typeof window !== 'undefined' && window.innerWidth < 600;
+  const view: View = viewParam === 'week' || viewParam === 'day' || viewParam === 'month' ? viewParam : narrow ? 'day' : 'month';
   const date = dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam) ? dateParam : now;
   const [month, setMonth] = useState(() => startOfMonth(date));
   const [sheet, setSheet] = useState<CalendarSheet>(null);
   const [minute, setMinute] = useState(nowMinute);
   const scroller = useRef<HTMLDivElement>(null);
+  // Where the grid opens: the first block of the days shown (set while rendering, read once it is drawn).
+  const firstStart = useRef(GRID_START);
   const weekStartsOn = atlas?.settings.core.weekStartsOn ?? 1;
   const weekStart = startOfWeek(date, weekStartsOn);
   const weekPick = useWeekPick(weekStart);
@@ -71,14 +75,14 @@ export function Calendar() {
     const id = setInterval(() => setMinute(nowMinute()), 60_000);
     return () => clearInterval(id);
   }, []);
-  // The grid opens on the morning, or around the current time on today.
+  // The grid opens on the first block of the days shown, or around the current time on today.
   useEffect(() => {
     if (view === 'month' || !scroller.current) return;
-    const at = date === now ? Math.max(GRID_START, minute - 90) : 7.5 * 60;
+    const at = date === now ? Math.max(firstStart.current, minute - 90) : firstStart.current;
     scroller.current.scrollTop = (at - GRID_START) * PX_PER_MIN;
-    // Only when the day or view changes, not every minute.
+    // Only when the day or view changes (or the data first arrives and the grid is drawn), not every minute.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, date]);
+  }, [view, date, Boolean(atlas && ctx)]);
 
   if (!atlas || !ctx) {
     return (
@@ -93,7 +97,7 @@ export function Calendar() {
   const busyAll = settings.schedule.busy ?? [];
   const go = (next: string, nextView: View = view): void => {
     setDate(next === now ? null : next, { replace: true });
-    setView(nextView === 'month' ? null : nextView, { replace: true });
+    setView(nextView === (narrow ? 'day' : 'month') ? null : nextView, { replace: true });
   };
   const days = view === 'week' ? eachDay(weekStart, addDays(weekStart, 6)) : [date];
   const step = (delta: number): void => {
@@ -115,7 +119,16 @@ export function Calendar() {
     void calendarEdit(core, name + ' is now ' + span(minutes), (s) => withBlockLength(s, d, block, minutes));
   };
 
-  const title = view === 'month' ? monthName(Number(month.slice(5, 7)) - 1) + ' ' + month.slice(0, 4) : view === 'week' ? 'Week of ' + dateTitle(weekStart).split(' ').slice(1).join(' ') : dateTitle(date);
+  const short = (d: string): string => Number(d.slice(8, 10)) + ' ' + monthName(Number(d.slice(5, 7)) - 1, true);
+  const weekEnd = addDays(weekStart, 6);
+  const title =
+    view === 'month'
+      ? monthName(Number(month.slice(5, 7)) - 1) + ' ' + month.slice(0, 4)
+      : view === 'week'
+        ? (weekStart.slice(5, 7) === weekEnd.slice(5, 7) ? Number(weekStart.slice(8, 10)) : short(weekStart)) + '–' + short(weekEnd)
+        : dayName(date, true) + ' ' + short(date);
+  const columns = days.map((d) => ({ date: d, blocks: columnFor(d, atlas, ctx, d >= weekStart && d <= weekEnd ? weekPick?.projectId : undefined) }));
+  firstStart.current = Math.max(GRID_START, Math.min(GRID_END - 120, ...columns.flatMap((c) => c.blocks.map((b) => b.start)), 24 * 60));
   const dayLog = atlas.logs.find((l) => l.date === date);
   const resolvedDay = view === 'day' ? planForDay({ date, settings, ctx, ...(weekPick?.projectId ? { weeklyPickId: weekPick.projectId } : {}) }) : null;
 
@@ -123,9 +136,10 @@ export function Calendar() {
     <Screen title="Calendar">
       <Header
         title="Calendar"
-        sub={title}
         actions={
           <>
+            {/* The date range sits on the title's row, between it and the arrows. */}
+            <span className="text-meta font-semibold text-ink2">{title}</span>
             <Button variant="icon" icon="chevronLeft" label={view === 'month' ? 'Previous month' : view === 'week' ? 'Previous week' : 'Previous day'} onClick={() => step(-1)} />
             <Button variant="icon" icon="chevronRight" label={view === 'month' ? 'Next month' : view === 'week' ? 'Next week' : 'Next day'} onClick={() => step(1)} />
           </>
@@ -180,9 +194,12 @@ export function Calendar() {
           {view === 'week' && (
             <div className="mt-[18px] flex pl-11">
               {days.map((d) => (
-                <button key={d} type="button" onClick={() => go(d, 'day')} className={'min-h-11 flex-1 text-center text-small font-semibold ' + (d === now ? 'text-ice-deep' : 'text-ink2')}>
-                  {dayName(d, true)} {Number(d.slice(8, 10))}
-                  <span className="sr-only">{', open ' + dateTitle(d)}</span>
+                <button key={d} type="button" onClick={() => go(d, 'day')} className="flex min-h-11 min-w-0 flex-1 items-center justify-center">
+                  {/* One line: "M 19". Today's header is ice. */}
+                  <span aria-hidden="true" className={'whitespace-nowrap rounded-pill px-1.5 py-0.5 text-small font-semibold ' + (d === now ? 'fill-ice' : 'text-ink2')}>
+                    {dayName(d, true).charAt(0) + ' ' + Number(d.slice(8, 10))}
+                  </span>
+                  <span className="sr-only">{'Open ' + dateTitle(d) + (d === now ? ', today' : '')}</span>
                 </button>
               ))}
             </div>
@@ -196,12 +213,12 @@ export function Calendar() {
                   </span>
                 ))}
               </div>
-              {days.map((d) => (
+              {columns.map(({ date: d, blocks }) => (
                 <DayColumn
                   key={d}
                   date={d}
                   compact={view === 'week'}
-                  blocks={columnFor(d, atlas, ctx, d >= weekStart && d <= addDays(weekStart, 6) ? weekPick?.projectId : undefined)}
+                  blocks={blocks}
                   busy={busyOn(busyAll, d)}
                   {...(d === now ? { nowMinute: minute } : {})}
                   onOpenBlock={(block) => setSheet({ kind: 'block', date: d, block })}

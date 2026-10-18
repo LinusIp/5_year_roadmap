@@ -75,7 +75,7 @@ test('the schedule, pace, layout and plan edits reach a second device, and survi
   const b = await device(browser, fake);
   await connect(b);
   await open(b, './');
-  await expect(b.getByText('0 h of 3 h today · University day · no streak yet')).toBeVisible();
+  await expect(b.getByText('0 m of 3 h today · University day · no streak yet')).toBeVisible();
   await expect(b.getByRole('navigation', { name: 'Main' }).getByRole('link')).toHaveText(['Today', 'Plan', 'Library', 'Activity', 'Reviews']);
   await expect(laterRow(b, /^30 Days of Python/)).toHaveCount(0);
 
@@ -86,5 +86,5 @@ test('the schedule, pace, layout and plan edits reach a second device, and survi
   await reload(b);
   await expect(b.getByRole('dialog', { name: /^Block B · Languages/ }).getByRole('button', { name: /^Dropped · 1/ })).toBeVisible();
   await open(b, './');
-  await expect(b.getByText('0 h of 3 h today · University day · no streak yet')).toBeVisible();
+  await expect(b.getByText('0 m of 3 h today · University day · no streak yet')).toBeVisible();
 });

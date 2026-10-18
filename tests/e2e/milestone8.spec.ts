@@ -82,8 +82,8 @@ test.describe('settings', () => {
     await expect(page.getByText('Schedule · 63 h this week')).toBeVisible();
 
     await open(page, './');
-    await expect(page.getByText(/^0 h of 9 h today/)).toBeVisible();
-    await expect(nowCard(page).getByText(/0 h of 3 h/)).toBeVisible();
+    await expect(page.getByText(/^0 m of 9 h today/)).toBeVisible();
+    await expect(nowCard(page).getByText(/0 m of 3 h/)).toBeVisible();
 
     await open(page, './#/settings');
     const level2 = page.getByRole('textbox', { name: 'Level 2 from, min' });
@@ -114,7 +114,7 @@ test.describe('settings', () => {
     await page.getByRole('button', { name: 'Reset everything' }).click();
     await expect(page.getByText('Everything was reset.')).toBeVisible();
     await open(page, './');
-    await expect(page.getByText(/^0 h of 8 h today/)).toBeVisible();
+    await expect(page.getByText(/^0 m of 8 h today/)).toBeVisible();
 
     await open(page, './#/settings');
     await page.getByLabel('Backup file to import').setInputFiles((await firstDownload.path())!);

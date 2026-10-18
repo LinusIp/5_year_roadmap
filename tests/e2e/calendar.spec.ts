@@ -18,7 +18,7 @@ test.beforeEach(async ({ page }) => {
 /** A block on the day grid, by its name: its accessible name starts with it. */
 const event = (page: Page, name: string): Locator => page.getByRole('button', { name: new RegExp('^' + name + ' ?, \\d') });
 
-/** Drags a locator vertically by a number of minutes on the grid (0.8 px a minute). */
+/** Drags a locator vertically by a number of minutes on the grid (56 px an hour). */
 async function drag(page: Page, target: Locator, minutes: number, where: 'middle' | 'bottom' = 'middle'): Promise<void> {
   // Away from the tab bar and the toast above it.
   await target.evaluate((el) => el.scrollIntoView({ block: 'center' }));
@@ -28,28 +28,31 @@ async function drag(page: Page, target: Locator, minutes: number, where: 'middle
   await page.mouse.move(x, y);
   await page.mouse.down();
   await page.mouse.move(x, y + 10, { steps: 2 });
-  await page.mouse.move(x, y + minutes * 0.8, { steps: 8 });
+  await page.mouse.move(x, y + (minutes * 56) / 60, { steps: 8 });
   await page.mouse.up();
 }
 
-test('the month opens on today; a date opens its day, with the blocks at their times', async ({ page }) => {
+test('a phone opens on the day; the month shows today; a date opens its day, with the blocks at their times', async ({ page }) => {
   await open(page, './#/calendar');
+  await expect(page.getByRole('radio', { name: 'Day' })).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByText('Mon 21 Sep', { exact: true })).toBeVisible();
+  await page.getByRole('radio', { name: 'Month' }).click();
   await expect(page.getByText('September 2026')).toBeVisible();
   const month = page.getByRole('grid', { name: 'Days' });
   await expect(month.getByRole('button', { name: /^Monday 21 September, today/ })).toBeVisible();
   await expect(month.getByRole('button', { name: /^Tuesday 22 September.*5 blocks planned/ })).toBeVisible();
 
   await month.getByRole('button', { name: /^Wednesday 23 September/ }).click();
-  await expect(page.getByText('Wednesday 23 September')).toBeVisible();
+  await expect(page.getByText('Wed 23 Sep', { exact: true })).toBeVisible();
   await expect(event(page, 'Graphics')).toHaveAccessibleName(/^Graphics ?, 08:00 to 10:00/);
   await expect(event(page, 'Languages')).toHaveAccessibleName(/^Languages ?, 10:15 to 11:15/);
-  await expect(page.getByText('8 h planned · 0 h logged')).toBeVisible();
+  await expect(page.getByText('8 h planned · 0 m logged')).toBeVisible();
 
   // Arrows move by a day in the day view, and Today comes back.
   await page.getByRole('button', { name: 'Next day' }).click();
-  await expect(page.getByText('Thursday 24 September')).toBeVisible();
+  await expect(page.getByText('Thu 24 Sep', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Today', exact: true }).click();
-  await expect(page.getByText('Monday 21 September')).toBeVisible();
+  await expect(page.getByText('Mon 21 Sep', { exact: true })).toBeVisible();
 });
 
 test('drag a block to 19:00, make it 90 minutes, and Today follows', async ({ page }) => {
@@ -146,7 +149,7 @@ test('an empty slot adds a block that is not on the day, or makes it a rest day'
   await page.getByRole('button', { name: 'Add', exact: true }).click();
   await add.getByRole('radio', { name: 'Rest day' }).click();
   await add.getByRole('button', { name: 'Make it a rest day' }).click();
-  await expect(page.getByText('0 h planned · 0 h logged')).toBeVisible();
+  await expect(page.getByText('0 m planned · 0 m logged')).toBeVisible();
 });
 
 test('the timer is the only way to log: it counts through a reload, one at a time, and a correction lives in Calendar', async ({ page }) => {
@@ -163,7 +166,7 @@ test('the timer is the only way to log: it counts through a reload, one at a tim
   await laterRow(page, /30 Days of Python/).click();
   await now.getByRole('button', { name: 'Start' }).click();
   await writesSettled(page);
-  await expect(page.getByText('Running · 30 Days of Python · 25 m today')).toBeVisible();
+  await expect(page.getByText(/^Running · since \d\d:\d\d · 0 m on this block today$/)).toBeVisible();
   await page.clock.fastForward('10:00');
   await now.getByRole('button', { name: /^Stop/ }).click();
   await expect(page.getByText('35 m', { exact: true })).toBeVisible();
