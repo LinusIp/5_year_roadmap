@@ -29,7 +29,7 @@ const PHONE = [
   ['pick', './#/plan/pick'],
   ['stats', './#/stats'],
   ['reviews', './#/reviews'],
-  ['calendar', './#/calendar'],
+  ['calendar', './#/calendar?view=month'],
   ['calendar-day', './#/calendar?view=day'],
   ['calendar-week', './#/calendar?view=week'],
 ] as const;

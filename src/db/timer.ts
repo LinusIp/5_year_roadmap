@@ -72,15 +72,16 @@ export async function stopTimer(stopAt: number = Date.now(), database: AtlasDB =
 /**
  * Starts a block's timer. One runs at a time: a timer on something else is stopped first and its minutes saved,
  * by the same path as Stop. Starting what is already running changes nothing. Starts run one after another, so two
- * quick taps (A to B and back within a second) can neither lose a session nor log one twice.
+ * quick taps (A to B and back within a second) can neither lose a session nor log one twice. The tap's moment is
+ * both the other timer's stop and this one's start, however long the writes before it take.
  */
 let starting: Promise<void> = Promise.resolve();
-export function startTimer(next: Omit<RunningTimer, 'startedAt' | 'keptAt'>, database: AtlasDB = db): Promise<void> {
+export function startTimer(next: Omit<RunningTimer, 'startedAt' | 'keptAt'>, database: AtlasDB = db, at: number = Date.now()): Promise<void> {
   const run = async (): Promise<void> => {
     const running = await readTimer(database);
     if (running && running.block === next.block && running.refId === next.refId) return;
-    if (running) await stopTimer(Date.now(), database);
-    await database.meta.put({ key: TIMER_KEY, value: { ...next, startedAt: Date.now() } });
+    if (running) await stopTimer(Math.max(at, running.startedAt), database);
+    await database.meta.put({ key: TIMER_KEY, value: { ...next, startedAt: at } });
   };
   starting = starting.then(run, run);
   return starting;

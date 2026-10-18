@@ -23,8 +23,10 @@ async function backToGraphics(page: Page): Promise<void> {
   await expect(page.locator('#now-title')).toHaveText(/^One finished small game/);
 }
 
+/** Starts Now's timer and waits until it runs (the switch's stop and the start are separate writes). */
 async function start(page: Page): Promise<void> {
   await nowCard(page).getByRole('button', { name: 'Start' }).click();
+  await expect(nowCard(page).getByRole('button', { name: /^Stop/ })).toBeVisible();
   await writesSettled(page);
 }
 
@@ -40,7 +42,7 @@ test('stop then start continues from the block’s total, and the Now card count
   await start(page);
   await expect(counter(page)).toHaveText('10:00');
   await page.clock.fastForward('00:30');
-  await expect(counter(page)).toHaveText('10:30');
+  await expect(counter(page)).toHaveText(/^10:3\d$/);
   await expect(header(page)).toContainText(/Running · since \d\d:\d\d · 10 m on this block today/);
   await page.clock.fastForward('30:00');
   await expect(nowCard(page)).toContainText('40 m of 2 h');

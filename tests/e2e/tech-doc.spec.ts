@@ -178,6 +178,15 @@ test.describe('with the clock on the plan’s first day', () => {
     await expect(opener).toBeFocused();
   });
 
+  test('a scroll made while a jump settles is read once it settles: the bar never stays on the part jumped to', async ({ page }) => {
+    await open(page, './#/library/mx-ai-ticket-triage-llm');
+    const sheet = page.getByRole('dialog', { name: /^Support-ticket triage/ });
+    const bar = sheet.getByRole('radiogroup', { name: 'Jump to a part of the doc' });
+    await bar.getByRole('radio', { name: 'Design' }).click();
+    await sheet.locator('div.overflow-y-auto').evaluate((el) => el.scrollTo(0, el.scrollHeight));
+    await expect(bar.getByRole('radio', { name: 'Checks' })).toHaveAttribute('aria-checked', 'true');
+  });
+
   test('a weekly build has the lighter doc: no stat wells, a small design with one decision, approach steps', async ({ page }) => {
     await open(page, './#/library/' + BUILD.id);
     const sheet = page.getByRole('dialog', { name: BUILD.title });
