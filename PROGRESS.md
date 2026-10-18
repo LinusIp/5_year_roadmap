@@ -945,4 +945,5 @@ Verified on this machine (Linux, Chromium 140):
   a day with no study) and the reminder. `tests/e2e/blog.spec.ts`: the reminder after the last block and at 22:00,
   the outline copied (clipboard mocked), Open my blog to the configured link, posted with the Today row and streak,
   a reload, Undo, a past day from Calendar, two devices, and the detection with a stand-in GitHub (refused, then a
-  dated post found). Baselines: the blog screen and Today with the reminder, light and dark.
+  dated post found). Baselines: the blog screen and Today with the reminder, light and dark, redrawn on CI's Linux
+  (the demo history marks a post on each of the twelve days before it, so the streak reads 12).
