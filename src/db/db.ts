@@ -5,7 +5,7 @@
 import Dexie from 'dexie';
 import type { EntityTable, Table } from 'dexie';
 import type {
-  BlogPost, CertState, CustomEntity, DayLog, EntityKind, Meta, MilestoneState, OutboxEntry, Override, PaperState, PlanPatch, PracticeAnswer, ChallengeEvent,
+  BlogPost, SleepNight, CertState, CustomEntity, DayLog, EntityKind, Meta, MilestoneState, OutboxEntry, Override, PaperState, PlanPatch, PracticeAnswer, ChallengeEvent,
   ReplanRecord, Review, Secret, StoredSettingsInput, SyncRow, UserItemState, WeekPick,
 } from './types.ts';
 import { legacyPlanPatches } from '../lib/plan.ts';
@@ -34,6 +34,8 @@ export class AtlasDB extends Dexie {
   challenges!: EntityTable<ChallengeEvent, 'id'>;
   /** The days the blog post was written (daily blog brief). */
   blogPosts!: EntityTable<BlogPost, 'date'>;
+  /** Nights of sleep, by wake-up date (sleep log brief). */
+  sleep!: EntityTable<SleepNight, 'date'>;
   /** Version 1 or 2 as stored; read through readSettings, which upgrades. */
   settings!: EntityTable<StoredSettingsInput, 'id'>;
   meta!: EntityTable<Meta, 'key'>;
@@ -89,6 +91,8 @@ export class AtlasDB extends Dexie {
     this.version(5).stores({ challenges: 'id, date, challengeId' });
     // Version 6, the daily blog: which days the post was written.
     this.version(6).stores({ blogPosts: 'date' });
+    // Version 7, the sleep log: one night per wake-up date.
+    this.version(7).stores({ sleep: 'date' });
     this.use(syncMiddleware(this));
   }
 }
@@ -99,7 +103,7 @@ export class AtlasDB extends Dexie {
  */
 export const EXPORTED_TABLES = [
   'dayLogs', 'itemStates', 'paperStates', 'certStates', 'milestoneStates', 'customEntities',
-  'overrides', 'reviews', 'weekPicks', 'replans', 'planPatches', 'practice', 'challenges', 'blogPosts', 'settings', 'meta',
+  'overrides', 'reviews', 'weekPicks', 'replans', 'planPatches', 'practice', 'challenges', 'blogPosts', 'sleep', 'settings', 'meta',
 ] as const;
 export type ExportedTable = (typeof EXPORTED_TABLES)[number];
 

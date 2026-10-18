@@ -142,6 +142,26 @@ for (const theme of ['light', 'dark'] as const) {
 }
 
 for (const theme of ['light', 'dark'] as const) {
+  test('the sleep log on Today, the Sleep screen and Activity match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await importDemo(page, theme);
+    // At 08:40 the Slept widget sits under the Now card.
+    await page.clock.setFixedTime(new Date(DEMO_TIME.slice(0, 11) + '08:40:00+05:00'));
+    await open(page, './');
+    const slept = page.getByRole('link', { name: /^Slept / });
+    await expect(slept).toContainText('6 h 40 m');
+    await slept.scrollIntoViewIfNeeded();
+    await expect(page).toHaveScreenshot('today-slept-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+    await open(page, './#/sleep');
+    await expect(page.getByRole('img', { name: /^This week:/ })).toBeVisible();
+    await expect(page).toHaveScreenshot('sleep-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+    await open(page, './#/activity');
+    await expect(page.getByRole('link', { name: /^Sleep last 7 nights · average/ })).toBeVisible();
+    await expect(page).toHaveScreenshot('activity-sleep-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+  });
+}
+
+for (const theme of ['light', 'dark'] as const) {
   test('the blog screen and Today with the blog reminder match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await importDemo(page, theme);

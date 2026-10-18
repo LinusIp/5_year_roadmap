@@ -11,11 +11,12 @@
  *   reviews/2026-W41.md, reviews/2026-10.md, reviews/2027-Q1.md
  *   projects/<project id>.md      a project's write-up, links and checklist, generated
  *   blog/2026-10-18.json          whether the day's blog post was written (the post is in the user's own blog)
+ *   sleep/2026-10-18.json         the night that ended that morning: bedtime, wake time, minutes
  *
  * state/practice.json (practice answers) may still be there from before Practice was removed (pull request #6). It is
  * archived: Atlas no longer reads it, writes it or deletes it.
  */
-import type { BlogPost, Review } from '../db/types.ts';
+import type { BlogPost, Review, SleepNight } from '../db/types.ts';
 import { addDays } from '../lib/dates.ts';
 
 export const README_PATH = 'README.md';
@@ -27,7 +28,7 @@ export const CHALLENGES_PATH = 'state/challenges.json';
 /** The tables whose records go to the data repository. `meta` (timer, shortcuts) stays on the device. */
 export const SYNCED_TABLES = [
   'dayLogs', 'itemStates', 'paperStates', 'certStates', 'milestoneStates', 'customEntities', 'overrides',
-  'reviews', 'weekPicks', 'replans', 'planPatches', 'challenges', 'blogPosts', 'settings',
+  'reviews', 'weekPicks', 'replans', 'planPatches', 'challenges', 'blogPosts', 'sleep', 'settings',
 ] as const;
 export type SyncedTable = (typeof SYNCED_TABLES)[number];
 
@@ -82,6 +83,16 @@ export function dateOfBlogPath(path: string): string | null {
   return m ? m[1]! : null;
 }
 
+export function sleepPath(date: string): string {
+  return 'sleep/' + date + '.json';
+}
+
+/** The wake-up date a sleep path is for, or null. */
+export function dateOfSleepPath(path: string): string | null {
+  const m = /^sleep\/(\d{4}-\d{2}-\d{2})\.json$/.exec(path);
+  return m ? m[1]! : null;
+}
+
 /** The day a log path is for, or null. */
 export function dateOfLogPath(path: string): string | null {
   const m = /^log\/\d{4}\/\d{2}\/(\d{4}-\d{2}-\d{2})\.json$/.exec(path);
@@ -90,7 +101,7 @@ export function dateOfLogPath(path: string): string | null {
 
 /** Files the app reads back on a pull. Markdown twins and project pages are generated, so they are only written. */
 export function isPulledPath(path: string): boolean {
-  return path === ITEMS_PATH || path === PLAN_PATH || path === SETTINGS_PATH || path === CHALLENGES_PATH || dateOfLogPath(path) !== null || dateOfBlogPath(path) !== null || /^reviews\/[^/]+\.md$/.test(path);
+  return path === ITEMS_PATH || path === PLAN_PATH || path === SETTINGS_PATH || path === CHALLENGES_PATH || dateOfLogPath(path) !== null || dateOfBlogPath(path) !== null || dateOfSleepPath(path) !== null || /^reviews\/[^/]+\.md$/.test(path);
 }
 
 /**
@@ -121,6 +132,8 @@ export function pathsForRecord(table: SyncedTable, key: unknown, record: unknown
       return [CHALLENGES_PATH];
     case 'blogPosts':
       return [blogPath((record as BlogPost | undefined)?.date ?? String(key))];
+    case 'sleep':
+      return [sleepPath((record as SleepNight | undefined)?.date ?? String(key))];
     case 'reviews': {
       const id = (record as Review | undefined)?.id ?? String(key);
       return [reviewPath(id as Review['id'])];

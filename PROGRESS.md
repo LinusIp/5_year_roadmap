@@ -964,3 +964,17 @@ Verified on this machine (Linux, Chromium 140):
   devices. Baselines: Today with the checklist and the full list, light and dark, redrawn on CI's Linux.
 - `check:links` covers video links; CI reports the checklist's links. The live check requires 1.1 to 1.6 done and 1.7
   now on the live site.
+
+## Pull request #14: the sleep log
+
+- Data: `sleep` (Dexie version 7), synced as `sleep/<date>.json`, in backups. `src/lib/sleep.ts`: minutes across
+  midnight, the wake-up date, the checks, the usual bedtime and wake time, the goal's bedtime, the week and 30-day bars.
+- Screen `#/sleep` (`?date=` for a past night): the live result, Bedtime and Woke up with 15-minute knobs and a native
+  time input, Save with Undo, This week, the two tiles, History of 30 nights. Today: the morning question and the
+  Slept tile (days left moved to Plan's header). Activity: the Sleep tile. Settings › Sleep: the goal and the question.
+- `tests/unit/sleep.test.ts`: midnight, a bedtime after midnight, month and year ends, the wake-up date, validation,
+  the median, the defaults, the goal's bedtime, the week, the file and one record per date with Undo.
+  `tests/e2e/sleep.spec.ts`: 05:45, log 23:00 → 05:40 and the widget's 6 h 40 m; edit with Undo; 16 h 40 m asks first;
+  the week chart's bars and average, the tiles, the goal moving them, Activity's tile; the question gone after 12:00
+  and when off; a reload; two devices with the newer edit winning. The Sleep screen joins the smoke tests (axe in both
+  themes, 380 px). Baselines: Today with the Slept tile, the Sleep screen and Activity, light and dark.

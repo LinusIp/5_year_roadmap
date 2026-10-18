@@ -68,7 +68,12 @@ async function smallTargets(page: Page): Promise<string[]> {
 }
 
 test('Today reaches "Later today" at 390 x 844 without scrolling, above the tab bar, and shows exactly one filled button', async ({ page }) => {
+  // Last night logged: until it is, the morning question sits at the top and pushes the day down (DECISIONS.md).
+  await open(page, './#/sleep');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByRole('status').getByText(/^Saved /)).toBeVisible();
   await open(page, './');
+  await expect(page.getByRole('link', { name: /^Slept \d/ })).toBeVisible();
   const later = await page.getByRole('heading', { name: 'Later today' }).boundingBox();
   const tabs = await page.getByRole('navigation', { name: 'Main' }).boundingBox();
   expect(later).not.toBeNull();

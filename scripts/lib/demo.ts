@@ -7,6 +7,10 @@ import type { BackupFile, DayLog, DayLogEntry, UserItemState } from '../../src/d
 import { addDays, daysBetween, weekday } from '../../src/lib/dates.ts';
 import type { BlockId, TrackId } from '../../src/seed/schema.ts';
 import { loadSeedOrThrow } from './load-seed.ts';
+import { nightOf } from '../../src/lib/sleep.ts';
+
+const SLEEP_BEDS = ['23:00', '23:15', '22:45', '23:30', '23:00', '22:50', '23:10'];
+const SLEEP_WAKES = ['05:40', '05:45', '06:00', '05:30', '06:10', '05:50', '05:45'];
 
 export const DEMO_START = '2026-09-21';
 export const DEMO_NOW = '2026-11-18';
@@ -96,6 +100,13 @@ export function demoBackup(theme: 'light' | 'dark' = 'light'): BackupFile {
       blogPosts: Array.from({ length: 12 }, (_, i) => {
         const date = addDays(DEMO_NOW, -(i + 1));
         return { date, posted: true, at: date + 'T17:30:00.000Z' };
+      }),
+      // Thirty nights of sleep, the last one ending this morning: bedtimes around 23:00, up around 05:45.
+      sleep: Array.from({ length: 30 }, (_, i) => {
+        const date = addDays(DEMO_NOW, -i);
+        const bed = SLEEP_BEDS[i % SLEEP_BEDS.length]!;
+        const wake = SLEEP_WAKES[i % SLEEP_WAKES.length]!;
+        return { ...nightOf(date, bed, wake), updatedAt: date + 'T01:00:00.000Z' };
       }),
       settings: [{ id: 'app', core: seed.settings, theme, github: { username: '', showCalendar: false }, backup: { lastBackupAt: '2026-11-15' } }],
       meta: [],

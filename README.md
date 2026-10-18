@@ -119,6 +119,25 @@ DataTalksClub's repository and its YouTube playlist).
 The items marked `"status": "done"` in the file (where you were when it was written) are ticked once on each
 device, never over a tick already there. `npm run validate:data` checks the ids, the links, and that every video is in the playlist.
 
+## Sleep
+
+A phone app cannot see you sleep, so Atlas asks: a bedtime and a wake time, by hand.
+
+- **In the morning** Today asks "How did you sleep?" with **Log sleep**, until it is logged or 12:00. It never blocks
+  anything, and Settings › Sleep turns it off.
+- **The Sleep screen** (from that row, the **Slept** tile on Today, or Activity) shows the night's length, live, with
+  Bedtime and Woke up: − and + move 15 minutes, a tap on the time types it. It starts from your usual bedtime (23:00 at
+  first) and, in the morning, from now. **Save** keeps one night per wake-up date; saving again replaces it. A night
+  under an hour or over 16 hours asks "Are you sure?" first.
+- Under it: **This week** (bars scaled to 9 hours, a dashed line at the goal, the average), **Usual bedtime** (the
+  median of the last 7 nights), the bedtime that gives the goal before the first block ("For 8 h by 06:00 · 22:00"),
+  and the last 30 nights, any of which opens to edit.
+- **Activity** has a Sleep tile: the last 7 nights' average and 30 nights as a strip. Sleep is not study: it takes no
+  part in the streak or the heatmap.
+- **Settings › Sleep**: the goal (6 to 10 h, 8 h at first) and the morning question.
+- A night syncs as `sleep/<wake date>.json`: `{ "bed": "2026-10-17T23:00", "wake": "2026-10-18T05:40", "minutes": 400 }`,
+  local times; the newer edit wins.
+
 ## Making it yours
 
 Atlas starts as the plan in `data/`: the same 10-hour day, every day. Real weeks are not like that, so the day,

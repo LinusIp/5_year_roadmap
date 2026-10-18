@@ -272,6 +272,24 @@ export const BlogPostSchema = z.strictObject({
 });
 export type BlogPost = z.infer<typeof BlogPostSchema>;
 
+/* ------------------------------------------------------------------ the sleep log */
+
+/** A local wall-clock time, "2026-10-17T23:00" (Asia/Tashkent: no daylight saving). */
+const LocalTime = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
+
+/**
+ * One night of sleep (SLEEP-LOG), entered by hand: synced as sleep/<date>.json. `date` is the wake-up date, so last
+ * night shows on today; `minutes` is wake minus bed, across midnight. One per date: an edit replaces it.
+ */
+export const SleepNightSchema = z.strictObject({
+  date: IsoDate,
+  bed: LocalTime,
+  wake: LocalTime,
+  minutes: z.number().int().positive(),
+  ...Stamp,
+});
+export type SleepNight = z.infer<typeof SleepNightSchema>;
+
 const MinutesByBlock = z.record(BlockIdSchema, z.number());
 
 export const ReviewSchema = z.strictObject({
@@ -600,6 +618,8 @@ export const BackupDataSchema = z.strictObject({
   challenges: z.array(ChallengeEventSchema).default([]),
   /** Days the blog post was written (daily blog brief). Absent from backups made before it. */
   blogPosts: z.array(BlogPostSchema).default([]),
+  /** Nights of sleep (sleep log brief). Absent from backups made before it. */
+  sleep: z.array(SleepNightSchema).default([]),
   settings: z.array(StoredSettingsSchema),
   meta: z.array(MetaSchema),
 });

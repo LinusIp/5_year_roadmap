@@ -28,6 +28,7 @@ import { NumberField } from '../ui/NumberField.tsx';
 import { Blocks, Schedule } from './settings/Schedule.tsx';
 import { Layout } from './settings/Layout.tsx';
 import { BlogSettings } from './settings/BlogSettings.tsx';
+import { SleepSettings } from './settings/SleepSettings.tsx';
 import { ProjectSettings } from './settings/ProjectSettings.tsx';
 import { Problem, Section, saveCore } from './settings/shared.tsx';
 import { exportBackup } from './parts/backupActions.ts';
@@ -403,6 +404,7 @@ export function Settings() {
           <Blocks settings={atlas.settings} />
           <ProjectSettings settings={atlas.settings} />
           <BlogSettings />
+          <SleepSettings />
           <HeatAndStreak settings={atlas.settings} />
           <Layout atlas={atlas} />
           {(atlas.seed.patchProblems ?? []).length > 0 && (
