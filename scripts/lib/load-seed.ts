@@ -7,7 +7,8 @@ import { join } from 'node:path';
 import { parse, YAMLParseError } from 'yaml';
 import { SEED_KINDS, validateSeed } from '../../src/seed/validate.ts';
 import type { RawFile, RawSeed, SeedKind, ValidateOptions, ValidationResult } from '../../src/seed/validate.ts';
-import type { AppSeed, Seed, Unit } from '../../src/seed/schema.ts';
+import type { AppSeed, ChecklistSummary, Seed, Unit } from '../../src/seed/schema.ts';
+import { unitHours } from '../../src/lib/checklist.ts';
 
 /** Where each kind of seed data lives. A trailing slash means "every .yaml file in this folder". */
 export const SEED_SOURCES: Record<SeedKind, string> = {
@@ -59,7 +60,8 @@ export function readRawSeed(dataDir: string = DATA_DIR): { raw: RawSeed; errors:
         errors.push('data/' + source + ': folder is missing');
         continue;
       }
-      const names = readdirSync(dir).filter((n) => n.endsWith('.yaml')).sort();
+      // Lesson checklists may be JSON (data/units/<id>.json, ZOOMCAMP-CHECKLIST); YAML parses JSON as it is.
+      const names = readdirSync(dir).filter((n) => n.endsWith('.yaml') || (kind === 'units' && n.endsWith('.json'))).sort();
       for (const name of names) {
         const parsed = readYaml(dataDir, source + name, errors);
         if (parsed) raw[kind].push(parsed);
@@ -100,9 +102,15 @@ export function loadSeedOrThrow(dataDir: string = DATA_DIR): Seed {
 export function splitSeed(seed: Seed): { app: AppSeed; units: Record<string, Unit[]> } {
   const units: Record<string, Unit[]> = {};
   const resources = seed.resources.map((resource) => {
-    const { units: list, ...rest } = resource;
+    const { units: list, checklistMeta, ...rest } = resource;
     if (list && list.length > 0) units[resource.id] = list;
-    return { ...rest, unitCount: list?.length ?? 0 };
+    if (!list || !list.some((u) => u.kind)) return { ...rest, unitCount: list?.length ?? 0 };
+    // A lesson checklist: what counts toward progress (not optional, not outdated), with its hours.
+    const counted = list.filter((u) => !u.optional && !u.outdated).map((u) => ({ id: u.id, hours: unitHours(u), video: u.kind === 'video' }));
+    const checklist: ChecklistSummary = { counted, seedDone: checklistMeta?.seedDone ?? [] };
+    if (checklistMeta?.playlist) checklist.playlist = checklistMeta.playlist;
+    // Its estimate is what the checklist adds up to, so the pace and the Library say the same.
+    return { ...rest, estHours: Math.round(counted.reduce((sum, u) => sum + u.hours, 0)), unitCount: counted.length, checklist };
   });
   return { app: { ...seed, resources } as AppSeed, units };
 }

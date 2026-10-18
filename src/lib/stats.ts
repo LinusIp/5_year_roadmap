@@ -73,7 +73,7 @@ export function completionByYear(seed: AppSeed, states: Map<string, UserItemStat
       const resource = item.resourceId ? seed.resources.find((r) => r.id === item.resourceId) : undefined;
       const project = item.projectId ? seed.projects.find((p) => p.id === item.projectId) : undefined;
       const estHours = item.hours ?? resource?.estHours ?? project?.estHours ?? 0;
-      const progress = itemProgress({ refId, estHours, unitCount: resource?.unitCount ?? (project ? projectUnitCount(project) : 0), state: states.get(refId) });
+      const progress = itemProgress({ refId, estHours, unitCount: resource?.unitCount ?? (project ? projectUnitCount(project) : 0), state: states.get(refId), checklist: resource?.checklist?.counted });
       planned += estHours;
       remaining += progress.remainingHours;
       itemsTotal++;

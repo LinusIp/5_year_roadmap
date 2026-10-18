@@ -72,7 +72,7 @@ function remainingHoursOf(item: PlanItem, seed: AppSeed, states: Map<string, Use
   const project = item.projectId ? seed.projects.find((p) => p.id === item.projectId) : undefined;
   const estHours = item.hours ?? resource?.estHours ?? project?.estHours ?? 0;
   const unitCount = resource?.unitCount ?? (project ? projectUnitCount(project) : 0);
-  return itemProgress({ refId, estHours, unitCount, state: states.get(refId) }).remainingHours;
+  return itemProgress({ refId, estHours, unitCount, state: states.get(refId), checklist: resource?.checklist?.counted }).remainingHours;
 }
 
 function titleOf(item: PlanItem, seed: AppSeed): string {

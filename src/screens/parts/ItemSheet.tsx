@@ -5,7 +5,7 @@ import { editItemState, setItemStatus, useItemState } from '../../db/state.ts';
 import type { ItemStatus, UserItemState } from '../../db/types.ts';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { monthName } from '../../lib/dates.ts';
-import { fractionDone } from '../../lib/progress.ts';
+import { fractionDone, itemProgress } from '../../lib/progress.ts';
 import { hasRepo, repoLinkProblem, statusBlocker } from '../../lib/projects.ts';
 import { loadCatalogue, loadUnits } from '../../seed/index.ts';
 import type { CatalogueItem } from '../../seed/catalogue.ts';
@@ -17,6 +17,8 @@ import { Row, RowList } from '../../ui/Row.tsx';
 import { Sheet } from '../../ui/Sheet.tsx';
 import { TextField } from '../../ui/TextField.tsx';
 import { Checklist, criteriaUnits } from './Checklist.tsx';
+import { LessonList, lessonLabel } from './LessonChecklist.tsx';
+import { checklistMeta, currentUnit, isChecklist } from '../../lib/checklist.ts';
 import { planDocModel, useProjectDoc } from './PlanDoc.tsx';
 import { TechDoc, useDesign } from './TechDoc.tsx';
 import { Markdown } from '../../lib/markdown.tsx';
@@ -137,13 +139,20 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
         </div>
       </div>
 
-      {resource.unitCount > 0 && (
+      {resource.unitCount > 0 && units && isChecklist(units) ? (
+        // A lesson checklist (ZOOMCAMP-CHECKLIST): the course's progress by hours, where you are, every module.
+        <div>
+          <ProgressLine value={itemProgress({ refId: resource.id, estHours: resource.estHours, unitCount: resource.unitCount, state, checklist: resource.checklist?.counted }).fraction} label={'Progress on ' + resource.title} />
+          <p className="mb-3 mt-1.5 text-meta text-ink2">{checklistMeta(units, unitsDone) + (currentUnit(units, unitsDone) ? ' · now ' + lessonLabel(currentUnit(units, unitsDone)!) : '')}</p>
+          <LessonList refId={resource.id} units={units} done={unitsDone} />
+        </div>
+      ) : resource.unitCount > 0 ? (
         <div>
           <ProgressLine value={fractionDone(status, unitsDone.length, resource.unitCount)} label={'Progress on ' + resource.title} />
           <p className="mb-2 mt-1.5 text-meta text-ink2">{unitsDone.length + ' of ' + plural(resource.unitCount, 'unit')} done</p>
           {units ? <Checklist refId={resource.id} units={units} done={unitsDone} /> : <p className="mt-2 text-meta text-ink2">Loading the checklist…</p>}
         </div>
-      )}
+      ) : null}
 
       <NotesField
         label="Notes"

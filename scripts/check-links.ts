@@ -52,7 +52,10 @@ function collectTargets(): Target[] {
   };
   for (const r of seed.resources) {
     add(r.url, 'resource:' + r.id);
-    for (const u of r.units ?? []) add(u.url, 'resource:' + r.id + '#' + u.id);
+    for (const u of r.units ?? []) {
+      add(u.url, 'resource:' + r.id + '#' + u.id);
+      add(u.video, 'resource:' + r.id + '#' + u.id + ' video');
+    }
   }
   for (const p of seed.projects) add(p.sourceUrl, 'project:' + p.id);
   for (const p of seed.papers) add(p.url, 'paper:' + p.id);

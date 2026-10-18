@@ -38,6 +38,12 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+      # The lesson checklists' notes and video links, requested from the runner: a report that never fails the build,
+      # last so its summary ends the log (the links that answered are left out).
+      - name: Link report for the lesson checklists
+        if: always()
+        timeout-minutes: 5
+        run: npm run check:links -- --only ml-zoomcamp | grep -v '^ok '
 
   # Screenshot baselines are drawn here, on CI's Linux, so the comparison in `verify` runs on the same platform.
   # Commit an empty `screenshots/.redraw` to a pull request's branch: this job redraws every baseline, removes the

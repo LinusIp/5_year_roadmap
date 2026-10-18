@@ -27,7 +27,7 @@ test('the block of the hour is Now, and the other four wait in Later today by th
 
   // Later today: the rest, by start time, the break between the morning and the evening.
   const rows = page.getByRole('list').filter({ hasText: 'Break · 12:00 – 18:00' }).getByRole('listitem');
-  await expect(laterRow(page, /^ML Zoomcamp ML Zoomcamp · module 1.* 06:00$/)).toBeVisible();
+  await expect(laterRow(page, /^ML Zoomcamp ML Zoomcamp · Module 1 · 6 of 97 06:00$/)).toBeVisible();
   await expect(laterRow(page, /^Hugging Face LLM Course · 1\. Transformer models 10:00$/)).toBeVisible();
   await expect(laterRow(page, /^Coding lessons 30 Days of Python · day 1, introduction · daily challenge 18:00$/)).toBeVisible();
   await expect(laterRow(page, /^Math and physics 18\.06 Linear Algebra · lecture 1, the geometry of linear equations 20:00$/)).toBeVisible();

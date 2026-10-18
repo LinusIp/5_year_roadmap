@@ -1058,3 +1058,43 @@ goes unauthenticated. If the read fails (a private blog the token was not given)
 give the token Contents: Read-only on that repository.
 
 **Calendar.** A day view on today or before has a Blog button, "Blog ✓" once posted, which opens that day's screen.
+
+## The ML Zoomcamp lesson checklist (pull request #13)
+
+**Generic.** Any resource can have a lesson checklist: `data/units/<id>.json` in the shape of the Zoomcamp file
+(`resource`, `playlist`, `modules[].items[]` with `kind`, `video`, `notes`, `optional`, `outdated`, `hours`,
+`status`). The validator turns it into ordinary units (the module's title as the section, its id as the group, the
+notes as the unit's link), so everything that already reads units (Plan, the blog, sync) keeps working. The old
+`ml-zoomcamp.yaml` ("module N of 10") is gone; progress is stored against the new ids (`1.7`, `1.hw`, `12.p1`).
+
+**What counts.** Videos, homework and projects that are neither optional nor outdated: 97 videos and 110 units for
+ML Zoomcamp. "x of 97 videos done" counts videos. NOW is the first counted unit not ticked, in file order, so
+ticking a module's last unit rolls over to the next module. Optional units can be ticked, never become NOW, and do
+not count.
+
+**The pace.** 15 minutes a video, a homework's or project's `hours` from the file or else 2 h and 20 h, 30 minutes
+for anything else. The course's `estHours` is the sum over the counted units (rounded), and its progress is the share
+of those hours ticked, exactly (no 5 % floor for "started"), capped below done until the course is marked done.
+
+**The seed.** The file's `"status": "done"` items (1.1 to 1.6) are ticked once per device (meta `checklistSeeded`),
+and only into an item state with none of the checklist's units ticked, so a tick is never overwritten. On a device
+with no item state for the course the write is silent and dated 2000-01-01: older than any real edit, so a first
+sync takes the repository's state over it. Where the course was already started (an item state from before the
+checklist), the ticks are added as an ordinary edit, stamped now, so they reach the other devices. Item states merge
+per record, newest wins, as before: a tick on one device and a note on another made between two syncs keep the later
+record.
+
+**The Now card.** Its window is the current module from two units before NOW to the module's end, homework
+included, one line per row, no play knob on a lesson already done (as in the mockup). The full list (Show all
+modules, and the Library sheet) keeps the knob on every video. The second button is "Play 1.7", named by its own
+text; the row's knob is "Play 1.7 Introduction to NumPy". The card is taller than before: like the mockup, its
+buttons sit under the list.
+
+**Links.** The links come from the user's file, not invented. `check:links` now also requests the video links, and
+CI runs it on the checklist as a report (never failing the build), as the last step of `verify`, even after a
+failure, with only the links that did not answer printed, so its summary ends the job's log. Its run here found one broken notes link, 11.7's
+`07-kserve-eks.dm`, fixed to `.md` after the checker fetched it (200, the right page). YouTube cannot be reached
+from the build container; the runner's report covers the videos.
+
+**Live check.** The deploy's live check opens the course's Library sheet and requires 1.1 to 1.6 ticked, 1.7 not,
+and 1.7 marked Now.

@@ -49,10 +49,21 @@ export interface ProgressInput {
   estHours: number;
   unitCount: number;
   state: UserItemState | undefined;
+  /** A lesson checklist's counted units: progress is the share of their hours ticked (ZOOMCAMP-CHECKLIST). */
+  checklist?: readonly { id: string; hours: number }[];
 }
 
-export function itemProgress({ refId, estHours, unitCount, state }: ProgressInput): ItemProgress {
+export function itemProgress({ refId, estHours, unitCount, state, checklist }: ProgressInput): ItemProgress {
   const status = state?.status ?? 'todo';
+  if (checklist && checklist.length > 0) {
+    const ticked = new Set(state?.unitsDone ?? []);
+    const doneUnits = checklist.filter((u) => ticked.has(u.id));
+    const total = checklist.reduce((sum, u) => sum + u.hours, 0);
+    const share = total > 0 ? doneUnits.reduce((sum, u) => sum + u.hours, 0) / total : 0;
+    // The exact share of the course's hours: the pace reads the checklist as it is (an unfinished course never shows done).
+    const fraction = status === 'done' ? 1 : status === 'dropped' ? 0 : Math.min(share, 0.99);
+    return { refId, status, fraction, unitsDone: doneUnits.length, unitCount: checklist.length, estHours, remainingHours: status === 'done' || status === 'dropped' ? 0 : estHours * (1 - fraction) };
+  }
   const unitsDone = Math.min(state?.unitsDone.length ?? 0, unitCount);
   const fraction = fractionDone(status, unitsDone, unitCount);
   return {
@@ -104,7 +115,7 @@ export function buildPlanItemView(
 
   const estHours = planItem.hours ?? resource?.estHours ?? project?.estHours ?? 0;
   const unitCount = resource?.unitCount ?? (project ? projectUnitCount(project) : 0);
-  const base = itemProgress({ refId, estHours, unitCount, state: states.get(refId) });
+  const base = itemProgress({ refId, estHours, unitCount, state: states.get(refId), checklist: resource?.checklist?.counted });
   const prerequisites = resource?.prerequisites ?? [];
 
   const view: PlanItemView = {

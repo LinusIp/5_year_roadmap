@@ -127,6 +127,21 @@ for (const theme of ['light', 'dark'] as const) {
 }
 
 for (const theme of ['light', 'dark'] as const) {
+  test('the ML Zoomcamp lesson checklist on Today and the full list match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await importDemo(page, theme);
+    await page.clock.setFixedTime(new Date(DEMO_TIME.slice(0, 11) + '06:10:00+05:00'));
+    await open(page, './');
+    const card = page.locator('section[aria-labelledby="now-title"]');
+    await expect(card).toContainText('Module 1 · 6 of 97 videos done');
+    await expect(page).toHaveScreenshot('today-checklist-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+    await card.getByRole('button', { name: 'Show all modules' }).click();
+    await expect(page.getByRole('dialog', { name: 'ML Zoomcamp' })).toContainText('6 of 97 videos');
+    await expect(page).toHaveScreenshot('checklist-all-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+  });
+}
+
+for (const theme of ['light', 'dark'] as const) {
   test('the blog screen and Today with the blog reminder match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await importDemo(page, theme);

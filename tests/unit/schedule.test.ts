@@ -45,7 +45,8 @@ describe('the schedule', () => {
     expect(byBlock.get('B')!.item!.title).toMatch(/30 Days of Python/);
     expect(byBlock.get('B')!.item!.nextUnit).toMatchObject({ position: 1, title: expect.stringContaining('Day 1') });
     expect(byBlock.get('C')!.item!.title).toMatch(/Machine Learning Zoomcamp/);
-    expect(byBlock.get('C')!.item!.nextUnit!.title).toMatch(/Module 1/);
+    // The lesson checklist (ZOOMCAMP-CHECKLIST): a fresh install starts at lesson 1.1.
+    expect(byBlock.get('C')!.item!.nextUnit).toMatchObject({ id: '1.1', title: 'Introduction to Machine Learning', section: 'Introduction to Machine Learning' });
     expect(byBlock.get('E')!.item!.title).toMatch(/18\.06 Linear Algebra/);
     expect(byBlock.get('E')!.item!.nextUnit!.title).toBe('Lecture 1: The geometry of linear equations');
   });

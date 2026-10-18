@@ -4,12 +4,12 @@
  */
 import { z } from 'zod';
 import {
-  BLOCK_IDS, CertSchema, PaperSchema, PaperSourceSchema, PhaseSchema, PlanPhaseInputSchema,
+  BLOCK_IDS, CertSchema, ChecklistFileSchema, checklistUnits, PaperSchema, PaperSourceSchema, PhaseSchema, PlanPhaseInputSchema,
   ProjectSchema, ResourceSchema, ROADMAP_IDS, RoadmapSchema, SettingsDefaultsSchema, SubjectSchema, TRACK_IDS, TrackSchema, UnitsInput,
 } from './schema.ts';
 import type {
   Cert, Paper, PaperSource, Phase, PlanItem, PlanPhaseInput, Project, Resource, Roadmap, RoadmapNode, Seed,
-  SettingsDefaults, Subject, Track,
+  SettingsDefaults, Subject, Track, Unit,
 } from './schema.ts';
 
 export interface RawFile {
@@ -109,6 +109,27 @@ function findPrerequisiteCycle(resources: Resource[]): string[] | null {
     if (cycle) return cycle;
   }
   return null;
+}
+
+/**
+ * A lesson checklist file (data/units/<id>.json): its units and the progress it was made with, or what is wrong with
+ * it. Every video needs its link, inside the course playlist when the file names one; the file must name its resource.
+ */
+export function readChecklist(data: unknown, id: string): { units?: Unit[]; meta?: { playlist?: string; seedDone: string[] }; errors: string[] } {
+  const res = ChecklistFileSchema.safeParse(data);
+  if (!res.success) return { errors: res.error.issues.map((issue) => ': ' + describeIssue(issue)) };
+  const errors: string[] = [];
+  if (res.data.resource !== id) errors.push(': "resource" is "' + res.data.resource + '", the file name says "' + id + '"');
+  const listId = res.data.playlist ? new URL(res.data.playlist).searchParams.get('list') : null;
+  if (res.data.playlist && !listId) errors.push(': the playlist link has no list= parameter');
+  for (const m of res.data.modules) {
+    for (const item of m.items) {
+      if (item.kind === 'video' && !item.video) errors.push(' (' + item.id + '): a video needs its video link');
+      if (item.video && listId && new URL(item.video).searchParams.get('list') !== listId) errors.push(' (' + item.id + '): the video is not in the course playlist (list=' + listId + ')');
+    }
+  }
+  const meta = { ...(res.data.playlist ? { playlist: res.data.playlist } : {}), seedDone: res.data.modules.flatMap((m) => m.items.filter((i) => i.status === 'done').map((i) => i.id)) };
+  return { units: checklistUnits(res.data), meta, errors };
 }
 
 function flattenPlan(inputs: { item: PlanPhaseInput; file: string }[], errors: string[]): PlanItem[] {
@@ -251,7 +272,7 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
   }
   /* ---- units files: data/units/<resource-id>.yaml */
   for (const { file, data } of raw.units) {
-    const id = file.split('/').pop()!.replace(/\.yaml$/, '');
+    const id = file.split('/').pop()!.replace(/\.(yaml|json)$/, '');
     const target = resourceById.get(id);
     if (!target) {
       errors.push(file + ': no resource has the id "' + id + '"');
@@ -261,17 +282,28 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
       errors.push(file + ': resource "' + id + '" already lists its units inline');
       continue;
     }
-    const res = UnitsInput.safeParse(data);
-    if (!res.success) {
-      for (const issue of res.error.issues) errors.push(file + ': ' + describeIssue(issue));
-      continue;
+    let units: Unit[];
+    if (file.endsWith('.json')) {
+      // A lesson checklist (ZOOMCAMP-CHECKLIST): modules of videos, readings, homework and projects.
+      const read = readChecklist(data, id);
+      for (const problem of read.errors) errors.push(file + problem);
+      if (!read.units) continue;
+      units = read.units;
+      target.checklistMeta = read.meta!;
+    } else {
+      const res = UnitsInput.safeParse(data);
+      if (!res.success) {
+        for (const issue of res.error.issues) errors.push(file + ': ' + describeIssue(issue));
+        continue;
+      }
+      units = res.data;
     }
     const seenUnits = new Set<string>();
-    for (const u of res.data) {
+    for (const u of units) {
       if (seenUnits.has(u.id)) errors.push(file + ': duplicate unit id "' + u.id + '"');
       seenUnits.add(u.id);
     }
-    target.units = res.data;
+    target.units = units;
   }
 
   const cycle = findPrerequisiteCycle(resourceList);

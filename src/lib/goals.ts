@@ -26,7 +26,7 @@ function remainingOf(seed: AppSeed, refId: string, states: Map<string, UserItemS
   const project = seed.projects.find((p) => p.id === refId);
   const estHours = hours ?? resource?.estHours ?? project?.estHours ?? 0;
   const unitCount = resource?.unitCount ?? (project ? projectUnitCount(project) : 0);
-  return itemProgress({ refId, estHours, unitCount, state: states.get(refId) }).remainingHours;
+  return itemProgress({ refId, estHours, unitCount, state: states.get(refId), checklist: resource?.checklist?.counted }).remainingHours;
 }
 
 /** When an item on the plan is projected to finish, or null when it cannot be said. */

@@ -19,6 +19,7 @@ import { BlockTile } from '../ui/glyphs.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { nameOf, span } from './parts/text.ts';
+import { lessonLabel } from './parts/LessonChecklist.tsx';
 
 /** "Sun 18 Oct": the header's and the outline's date. */
 function shortDate(date: string): string {
@@ -53,7 +54,8 @@ function dayTicks(atlas: Atlas, date: string, notes: readonly TickNote[], units:
   for (const note of notes) {
     if (!note.unit) continue;
     const unit = units?.[note.refId]?.find((u) => u.id === note.unit);
-    if (unit) out.push({ refId: note.refId, label: unit.title, block: blockOf(note.refId) });
+    // A lesson checklist's unit by its number too ("1.7 Introduction to NumPy").
+    if (unit) out.push({ refId: note.refId, label: unit.kind ? lessonLabel(unit) : unit.title, block: blockOf(note.refId) });
     else untitled.set(note.refId, (untitled.get(note.refId) ?? 0) + 1);
   }
   for (const [refId, n] of untitled) out.push({ refId, label: titleOf(refId) + ' · ' + n + ' ticked', block: blockOf(refId) });

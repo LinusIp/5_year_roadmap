@@ -99,6 +99,26 @@ The day's post is written in your own blog, through Pages CMS, never in Atlas. A
   there. Read-only: it never writes to the blog. If the token cannot read the repository, the setting says how to
   give it Contents: Read-only, and stays off.
 
+## Lesson checklists
+
+A resource can carry a lesson checklist: `data/units/<id>.json` lists its modules and, in each, its videos,
+readings, homework and projects, with their links. ML Zoomcamp has one (`data/units/ml-zoomcamp.json`, from
+DataTalksClub's repository and its YouTube playlist).
+
+- **On Today** the Now card says "Module 1 · 6 of 97 videos done" (optional and outdated lessons do not count), the
+  bar shows the course's progress, and the list shows the current module: the lessons done just before, struck
+  through, the current one marked NOW, and the rest with the homework. A tick marks a lesson done and moves NOW on;
+  the last one of a module brings the next. Each tick can be undone from the toast, and the timer is not touched.
+- **Play** knobs open a video in its place in the playlist, in a new tab; the second button plays the current one
+  ("Play 1.7"). A title opens its notes, homework or project page on GitHub.
+- **Show all modules** opens the whole list by module; optional lessons fold under "Optional". The Library's sheet
+  for the course shows the same list and its progress.
+- **The pace** counts 15 minutes a video, the homework and project hours the file gives (else 2 h and 20 h), and half
+  an hour for anything else. Ticks sync like every other item state, and show in the day's blog outline.
+
+The items marked `"status": "done"` in the file (where you were when it was written) are ticked once on each
+device, never over a tick already there. `npm run validate:data` checks the ids, the links, and that every video is in the playlist.
+
 ## Making it yours
 
 Atlas starts as the plan in `data/`: the same 10-hour day, every day. Real weeks are not like that, so the day,
@@ -388,6 +408,7 @@ statuses and notes reference items by id, so editing the curriculum never loses 
 | `data/plan.yaml` | Which item sits in which lane of which phase, in order |
 | `data/resources/*.yaml` | Courses, books, lecture series and repositories |
 | `data/units/*.yaml` | The lecture, chapter and lab checklist of one resource (the file name is its id) |
+| `data/units/*.json` | A lesson checklist by module, with video and notes links (see Lesson checklists) |
 | `data/projects/*.yaml` | Capstones, monthly builds and the weekly mini-build pool |
 | `data/papers.yaml`, `data/paper-sources.yaml` | The reading queue, and where to find more |
 | `data/certs.yaml`, `data/subjects.yaml` | Certifications, and the credential map |

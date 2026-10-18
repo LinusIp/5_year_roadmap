@@ -113,13 +113,67 @@ function checkLink(v: LinkLike, ctx: z.RefinementCtx): void {
 
 /* ------------------------------------------------------------------ units */
 
+export const CHECKLIST_KINDS = ['video', 'reading', 'homework', 'project'] as const;
+export type ChecklistKind = (typeof CHECKLIST_KINDS)[number];
+
 const UnitSchema = z.strictObject({
   id: Slug,
   title: Text,
   section: Text.optional(),
   url: HttpUrl.optional(),
+  /** A lesson checklist's fields (data/units/<id>.json, ZOOMCAMP-CHECKLIST): the module the unit belongs to. */
+  group: z.string().min(1).optional(),
+  kind: z.enum(CHECKLIST_KINDS).optional(),
+  /** A video's own link, inside the course's playlist. */
+  video: HttpUrl.optional(),
+  /** Optional or outdated units neither count toward progress nor become "current". */
+  optional: z.boolean().optional(),
+  outdated: z.boolean().optional(),
+  /** The unit's own estimate; otherwise 15 minutes a video, 2 h a homework, 20 h a project, 30 minutes a reading. */
+  hours: z.number().positive().max(200).optional(),
 });
 export type Unit = z.infer<typeof UnitSchema>;
+
+/**
+ * A lesson checklist as a JSON file in data/units/ (the shape of ml-zoomcamp-checklist.json): modules of items, each a
+ * video, a reading, a homework or a project, with the progress the user had when the file was made (`status`), which is
+ * seeded once into their item state.
+ */
+const ChecklistItemSchema = z.strictObject({
+  id: Slug,
+  title: Text,
+  kind: z.enum(CHECKLIST_KINDS),
+  video: HttpUrl.nullable().optional(),
+  notes: HttpUrl.optional(),
+  hours: z.number().positive().max(200).optional(),
+  optional: z.boolean().optional(),
+  outdated: z.boolean().optional(),
+  status: z.enum(['done', 'current', 'todo']).default('todo'),
+});
+export const ChecklistFileSchema = z.strictObject({
+  resource: Slug,
+  title: Text,
+  playlist: HttpUrl.optional(),
+  repo: HttpUrl.optional(),
+  source_note: Text.optional(),
+  modules: z.array(z.strictObject({ id: z.string().min(1), title: Text, folder: z.string().optional(), items: z.array(ChecklistItemSchema).min(1) })).min(1),
+});
+export type ChecklistFile = z.infer<typeof ChecklistFileSchema>;
+
+/** A checklist file's items as units, in order: the module's title is the section, its id the group. */
+export function checklistUnits(file: ChecklistFile): Unit[] {
+  return file.modules.flatMap((m) =>
+    m.items.map((item): Unit => {
+      const unit: Unit = { id: item.id, title: item.title, section: m.title, group: m.id, kind: item.kind };
+      if (item.notes) unit.url = item.notes;
+      if (item.video) unit.video = item.video;
+      if (item.optional) unit.optional = true;
+      if (item.outdated) unit.outdated = true;
+      if (item.hours) unit.hours = item.hours;
+      return unit;
+    }),
+  );
+}
 
 const UnitGroupSchema = z.strictObject({
   section: Text,
@@ -181,6 +235,8 @@ export const ResourceSchema = z
     estHours: z.number().min(0).max(2000),
     prerequisites: z.array(Slug).default([]),
     units: UnitsInput.optional(),
+    /** Set by the validator from a lesson checklist file (data/units/<id>.json), never written in YAML. */
+    checklistMeta: z.strictObject({ playlist: HttpUrl.optional(), seedDone: z.array(Slug) }).optional(),
     /** Row of the credential map this resource counts towards (required once it is planned). */
     subject: Slug.optional(),
     summary: Text.optional(),
@@ -545,7 +601,17 @@ export interface Seed {
  * scripts/lib/vite-plugin-seed.ts), so a resource carries only the count, which is all a progress bar needs.
  */
 /** A resource as the app sees it: its checklist split off (count only), except a resource of the user's, which keeps its own. */
-export type AppResource = Omit<Resource, 'units'> & { unitCount: number; customUnits?: Unit[] };
+export type AppResource = Omit<Resource, 'units'> & { unitCount: number; customUnits?: Unit[]; checklist?: ChecklistSummary };
+
+/**
+ * What the main bundle knows of a lesson checklist (its units load later): the units that count, with their hours,
+ * which videos they are, the playlist, and the progress the file was made with (seeded once, src/db/checklist.ts).
+ */
+export interface ChecklistSummary {
+  counted: { id: string; hours: number; video: boolean }[];
+  playlist?: string;
+  seedDone: string[];
+}
 /** A project as the app sees it: with the number of milestones its tech doc has, which count toward its progress. */
 export type AppProject = Project & { milestoneCount?: number };
 export type AppSeed = Omit<Seed, 'resources' | 'projects'> & {
