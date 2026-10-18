@@ -4,7 +4,7 @@ import { AtlasDB } from '../../src/db/db.ts';
 import { parseSleep, renderSleep } from '../../src/sync/files.ts';
 import { dateOfSleepPath, sleepPath } from '../../src/sync/paths.ts';
 import {
-  averageMinutes, bedtimeFor, checkNight, defaultTimes, lengthText, medianClock, nightMinutes, nightOf, stepClock, usualBedtime, wakeDateOf, weekBars,
+  averageMinutes, barHours, bedtimeFor, recentBars, checkNight, defaultTimes, lengthText, medianClock, nightMinutes, nightOf, stepClock, usualBedtime, wakeDateOf, weekBars,
 } from '../../src/lib/sleep.ts';
 import type { Night } from '../../src/lib/sleep.ts';
 
@@ -77,6 +77,21 @@ describe('the usual times', () => {
     expect(bars.map((b) => b.minutes)).toEqual([420, null, 360, null, null, null, 400]);
     expect(averageMinutes(bars)).toBe(393);
     expect(averageMinutes(weekBars([], '2026-10-18'))).toBeNull();
+  });
+});
+
+describe("Activity's strip", () => {
+  it('gives the last 30 days oldest first, a gap where no night was logged, and the 7-night average', () => {
+    const nights = [n('2026-10-18', '23:00', '05:40'), n('2026-10-16', '23:00', '07:00'), n('2026-09-18', '23:00', '06:00')];
+    const strip = recentBars(nights, '2026-10-18', 30);
+    expect(strip).toHaveLength(30);
+    expect(strip[0]).toEqual({ date: '2026-09-19', minutes: null });
+    expect(strip.at(-1)).toEqual({ date: '2026-10-18', minutes: 400 });
+    // The night of 18 September is the 31st day back: not in the strip.
+    expect(strip.filter((b) => b.minutes !== null).map((b) => b.date)).toEqual(['2026-10-16', '2026-10-18']);
+    expect(averageMinutes(recentBars(nights, '2026-10-18', 7))).toBe(440);
+    expect(barHours(400)).toBe('6.7');
+    expect(barHours(420)).toBe('7.0');
   });
 });
 
