@@ -146,8 +146,9 @@ test('a tech doc over Today, with the timer running, matches the committed scree
   await importDemo(page, 'light');
   await open(page, './');
   await expect(page.getByText(/daily challenge/).first()).toBeVisible();
-  // Block D's weekly build becomes Now from its doc, its timer starts, and Tech doc opens the doc over it.
-  await page.getByRole('button', { name: / Weekly build · / }).click();
+  // GameDevHQ's project (the small game, once the course is done) becomes Now from its doc, its timer starts, and Tech
+  // doc opens the doc over it.
+  await page.getByRole('button', { name: /^GameDevHQ .*One finished small game/ }).click();
   const sheet = page.getByRole('dialog');
   await sheet.getByRole('button', { name: 'Work on it now' }).click();
   const now = page.locator('section[aria-labelledby="now-title"]');
@@ -194,8 +195,8 @@ test('a calendar event sheet matches the committed screenshot', async ({ page })
   await page.setViewportSize({ width: 390, height: 844 });
   await importDemo(page, 'light');
   await open(page, './#/calendar?view=day');
-  await page.getByRole('button', { name: /^Core ?, \d/ }).click();
-  const sheet = page.getByRole('dialog', { name: 'Core' });
+  await page.getByRole('button', { name: /^ML Zoomcamp ?, \d/ }).click();
+  const sheet = page.getByRole('dialog', { name: 'ML Zoomcamp' });
   await expect(sheet).toBeVisible();
   await expect(sheet).toHaveScreenshot('calendar-event-sheet-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });
