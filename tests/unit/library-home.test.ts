@@ -83,20 +83,23 @@ describe('up next and in progress', () => {
 });
 
 describe('the shelves', () => {
-  it('put lectures and tutorials with courses, repos and problem sets with tools, and blogs on their own', () => {
+  it('put lectures and tutorials with courses, repos with tools, practice and problem sets on Practice, and blogs on their own', () => {
     expect(shelfOf({ type: 'lectures' })).toBe('course');
     expect(shelfOf({ type: 'tutorial' })).toBe('course');
     expect(shelfOf({ type: 'repo' })).toBe('tool');
+    expect(shelfOf({ type: 'practice' })).toBe('practice');
+    expect(shelfOf({ type: 'problems' })).toBe('practice');
     expect(shelfOf({ type: 'article', blog: true })).toBe('blog');
   });
 
   it('count every resource once, papers and projects too', () => {
     const counts = shelfCounts(seed, 10);
-    const resources = counts.course + counts.book + counts.article + counts.blog + counts.tool + seed.resources.filter((r) => r.type === 'paper').length;
+    const resources = counts.course + counts.book + counts.article + counts.blog + counts.tool + counts.practice + seed.resources.filter((r) => r.type === 'paper').length;
     expect(resources).toBe(seed.resources.length);
     expect(counts.paper).toBe(seed.papers.length + seed.resources.filter((r) => r.type === 'paper').length);
     expect(counts.project).toBe(seed.projects.length + 10);
     expect(counts.blog).toBeGreaterThan(0);
+    expect(counts.practice).toBeGreaterThan(30);
   });
 
   it('group search results by shelf, three of each, with the total', () => {

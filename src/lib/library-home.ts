@@ -154,9 +154,12 @@ export function inProgress<R extends { id: string }>(resources: readonly R[], st
     .slice(0, cap);
 }
 
-export type ShelfKey = 'course' | 'book' | 'paper' | 'article' | 'blog' | 'tool' | 'project';
+export type ShelfKey = 'course' | 'book' | 'paper' | 'article' | 'blog' | 'tool' | 'practice' | 'project';
 
-/** The shelf a resource sits on: lectures and tutorials are courses; repos, tools and problem sets are tools. */
+/**
+ * The shelf a resource sits on: lectures and tutorials are courses; repos and tools are tools; things to do by hand,
+ * practice and problem sets, are Practice (RESOURCES-ADD).
+ */
 export function shelfOf(resource: { type: string; blog?: boolean | undefined }): ShelfKey {
   if (resource.blog) return 'blog';
   switch (resource.type) {
@@ -168,8 +171,10 @@ export function shelfOf(resource: { type: string; blog?: boolean | undefined }):
       return 'article';
     case 'repo':
     case 'tool':
-    case 'problems':
       return 'tool';
+    case 'practice':
+    case 'problems':
+      return 'practice';
     default:
       return 'course';
   }
@@ -182,12 +187,13 @@ export const SHELVES: readonly { key: ShelfKey; label: string }[] = [
   { key: 'article', label: 'Articles' },
   { key: 'blog', label: 'Blogs' },
   { key: 'tool', label: 'Tools' },
+  { key: 'practice', label: 'Practice' },
   { key: 'project', label: 'Projects' },
 ];
 
 /** How many things each shelf holds: resources by their shelf, the papers queue, and every project. */
 export function shelfCounts(seed: Pick<AppSeed, 'resources' | 'papers' | 'projects'>, catalogueSize = 0): Record<ShelfKey, number> {
-  const counts: Record<ShelfKey, number> = { course: 0, book: 0, paper: seed.papers.length, article: 0, blog: 0, tool: 0, project: seed.projects.length + catalogueSize };
+  const counts: Record<ShelfKey, number> = { course: 0, book: 0, paper: seed.papers.length, article: 0, blog: 0, tool: 0, practice: 0, project: seed.projects.length + catalogueSize };
   for (const r of seed.resources) counts[shelfOf(r)] += 1;
   return counts;
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Atlas } from '../../hooks/useAtlas.ts';
-import { buildPaths, PATHS, shelfOf } from '../../lib/library-home.ts';
+import { buildPaths, PATHS, SHELVES, shelfOf } from '../../lib/library-home.ts';
 import { Button } from '../../ui/Button.tsx';
 import { Header } from '../../ui/Header.tsx';
 import { Icon } from '../../ui/Icon.tsx';
@@ -8,6 +8,9 @@ import { IconTile } from '../../ui/glyphs.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { plural } from '../parts/text.ts';
 import { SHELF_ICON } from './Home.tsx';
+
+/** A shelf's name for one item: "Book", "Practice". */
+const SHELF_LABEL = Object.fromEntries(SHELVES.map((s) => [s.key, s.key === 'practice' ? 'Practice' : s.label.replace(/s$/, '')]));
 
 const STATUS_LABEL = { todo: '', active: 'Active', done: 'Done', dropped: 'Dropped' } as const;
 
@@ -22,7 +25,8 @@ function StepDot({ state }: { state: 'done' | 'current' | 'later' }) {
 
 /**
  * One path: every step in plan order, grouped by phase, with its dot, kind, hours and status; the current step is
- * highlighted. Alternatives to its steps and the papers of its tracks wait, folded, under "Optional for this path".
+ * highlighted. Alternatives to its steps, the Library's other resources of its family (RESOURCES-ADD, by the year they
+ * fit from) and the papers of its tracks wait, folded, under "Optional for this path".
  */
 export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas; pathId: string; onOpen: (refId: string) => void; onOpenPaper: (id: string) => void }) {
   const { seed, states } = atlas;
@@ -39,8 +43,13 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
     .filter((id) => !inPath.has(id))
     .map((id) => seed.resources.find((r) => r.id === id))
     .filter((r) => r !== undefined);
+  const onPlan = new Set(seed.plan.map((i) => i.resourceId ?? i.projectId));
+  const shown = new Set(alternatives.map((r) => r.id));
+  const library = seed.resources
+    .filter((r) => r.fromYear !== undefined && familyTracks.has(r.tracks[0]!) && !onPlan.has(r.id) && !shown.has(r.id) && states.get(r.id)?.status !== 'dropped')
+    .sort((a, b) => a.fromYear! - b.fromYear! || (a.short ?? a.title).localeCompare(b.short ?? b.title));
   const papers = seed.papers.filter((p) => p.tracks.some((t) => familyTracks.has(t)));
-  const optional = alternatives.length + papers.length;
+  const optional = alternatives.length + library.length + papers.length;
 
   return (
     <>
@@ -87,6 +96,15 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
             <ul className="rows pb-2">
               {alternatives.map((r) => (
                 <Row key={r.id} icon={<IconTile icon={SHELF_ICON[shelfOf(r)]} />} title={r.short ?? r.title} meta={'Alternative · ' + r.estHours + ' h'} onClick={() => onOpen(r.id)} />
+              ))}
+              {library.map((r) => (
+                <Row
+                  key={r.id}
+                  icon={<IconTile icon={SHELF_ICON[shelfOf(r)]} tone={shelfOf(r) === 'practice' ? 'ice' : 'blue'} />}
+                  title={r.short ?? r.title}
+                  meta={'Year ' + r.fromYear + ' · ' + SHELF_LABEL[shelfOf(r)] + ' · ' + r.estHours + ' h'}
+                  onClick={() => onOpen(r.id)}
+                />
               ))}
               {papers.map((p) => (
                 <Row key={p.id} icon={<IconTile icon="paper" tone="ice" />} title={p.title} meta={['Paper', p.year].filter(Boolean).join(' · ')} truncate onClick={() => onOpenPaper(p.id)} />

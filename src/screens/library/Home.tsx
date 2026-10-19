@@ -26,7 +26,7 @@ export const PATH_ICON: Record<string, { icon: IconName; tone: 'blue' | 'ice' }>
   me: { icon: 'wrench', tone: 'ice' },
 };
 
-export const SHELF_ICON: Record<ShelfKey, IconName> = { course: 'course', book: 'book', paper: 'paper', article: 'article', blog: 'blog', tool: 'wrench', project: 'layers' };
+export const SHELF_ICON: Record<ShelfKey, IconName> = { course: 'course', book: 'book', paper: 'paper', article: 'article', blog: 'blog', tool: 'wrench', practice: 'target', project: 'layers' };
 
 /** "Feb 2027", or "Feb" in the current year. */
 export function monthOf(date: string, thisYear: string): string {
@@ -224,7 +224,7 @@ export function LibraryHome({
           Browse when you need something
         </h2>
         <ul className="grid grid-cols-3 gap-4">
-          {SHELVES.filter((shelf) => shelf.key !== 'project').map((shelf) => (
+          {SHELVES.filter((shelf) => shelf.key !== 'project' && shelf.key !== 'practice').map((shelf) => (
             <li key={shelf.key}>
               <button type="button" onClick={() => onShelf(shelf.key)} className="tile press flex w-full flex-col items-center gap-1 px-2 py-4">
                 <span className={shelf.key === 'paper' || shelf.key === 'blog' || shelf.key === 'project' ? 'text-ice-deep' : 'text-blue-deep'}>
@@ -235,6 +235,16 @@ export function LibraryHome({
               </button>
             </li>
           ))}
+          {/* Practice, the seventh shelf (RESOURCES-ADD): a tile across the grid's width, in ice. */}
+          <li className="col-span-3">
+            <button type="button" onClick={() => onShelf('practice')} className="tile press flex w-full items-center justify-center gap-3 px-4 py-3">
+              <span className="text-ice-deep">
+                <Icon name={SHELF_ICON.practice} size={22} />
+              </span>
+              <span className="text-lead font-semibold leading-tight">{counts.practice}</span>
+              <span className="text-small font-semibold text-ink2">Practice</span>
+            </button>
+          </li>
         </ul>
         {/* Projects, a shelf of its own kind, is a full-width row under the grid. */}
         <button type="button" onClick={() => onShelf('project')} className="tile press mt-4 flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left">

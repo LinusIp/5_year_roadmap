@@ -1015,3 +1015,19 @@ Verified on this machine (Linux, Chromium 140):
   cells, the whole year at 1280 px, 2027 all ahead, All years opening a year, the Sleep strip's no-entry nights. The
   GitHub calendar ends on 31 December (`github.spec.ts`). Baselines redrawn, Activity at 412 x 915 and 1280 x 800.
 - `docs/before-after/heatmap-year/`: Activity before and after.
+
+## Pull request #18: a hundred free resources in the Library
+
+- `data/resources/library-additions.yaml`: 100 new resources (25 on Courses, 17 Books, 22 Articles, 36 Practice; AI
+  22 + 6 tagged inference, Graphics 21, Gamedev 19, Systems 23, Languages 9). 52 more matched entries the Library had
+  and filled only their missing fields (10 files). Resources: 318 to 418.
+- `scripts/lib/resource-import.ts`: the mapping, the dedupe and the prerequisite linking, pure; the one-off runner is
+  in `scratch/`. Schema: the `practice` type, `fromYear`, `tags`, `note`, `after`, `doFirst`; short titles at most
+  28 characters; `after` checked against the resources.
+- Library: the Practice shelf and tile (problem sets moved from Tools), the sheet's note, "Do first" and link date,
+  a path's optional list with its family's resources by year, search over tags. `.github/workflows/links.yml`: the
+  weekly link report.
+- `tests/unit/resource-import.test.ts`: the mapping, the dedupe (URL, id, by hand, title; near misses kept apart),
+  the prerequisite links, filling an entry. `validate.test.ts`: the new rules. `tests/e2e/resources-add.spec.ts`: the
+  Practice shelf, search for OSTEP and Vulkan, AI engineering's optional list, the free-to-audit sheet and its link,
+  a free-tier note and a "Do first". Baseline: the Library home in full, light and dark.

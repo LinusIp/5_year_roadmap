@@ -252,6 +252,8 @@
   cost: free
   estHours: 120
   summary: "Some 300 classic algorithm problems with an online judge, grouped by technique."
+  fromYear: 1
+  after: [competitive-programmers-handbook]
 
 - id: codeforces-edu
   title: "Codeforces EDU"

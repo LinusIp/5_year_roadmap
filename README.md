@@ -190,18 +190,26 @@ The Library opens on what matters now, not on all of it:
 - **Your paths**: the plan's courses and books in plan order, one path per family of tracks (AI engineering,
   Languages, Graphics, Math and physics, Systems; Electrical and embedded and Mechanical and robotics wait under
   "Later in the plan" until they come within a year). Each shows a subway line of at most eight stops and "+N", and
-  its next step. A path opens on its own page, grouped by phase, its current step marked; alternatives and the
-  papers of its tracks wait under "Optional for this path".
+  its next step. A path opens on its own page, grouped by phase, its current step marked; alternatives, the
+  Library's other resources of its family (by the year of the plan they fit from) and the papers of its tracks wait
+  under "Optional for this path".
 - **Up next**: the three nearest steps not started, across every path.
-- **Browse when you need something**: shelves for Courses, Books, Papers, Articles, Blogs to follow, Tools and
-  Projects, with their real counts. A shelf is the full list with search and the Active, Not started, Done and Track
+- **Browse when you need something**: shelves for Courses, Books, Papers, Articles, Blogs to follow, Tools,
+  Practice (exercises, puzzles and problem sets) and Projects, with their real counts. A shelf is the full list with search and the Active, Not started, Done and Track
   filters, and it is where you add a resource of your own.
 
 Searching shows the matches grouped by shelf, three of each, with "Show all" to open that shelf on the same search.
 Every planned resource has a short title (28 characters at most, checked by `npm run validate:data`) so cards and
 paths stay one line.
 
+Beyond the plan, `data/resources/library-additions.yaml` holds about a hundred free courses, books, docs and practice
+sites to reach for when you need them (RESOURCES-ADD). They are not in any lane: each says the year it fits from
+(`fromYear`), may name a resource worth doing first (`after`, a soft prerequisite the schedule never enforces, or
+`doFirst` in words), and a sheet shows how it is free ("free to audit", "Free tier") and when its link was checked.
+A weekly job (`.github/workflows/links.yml`) runs `npm run check:links` and reports; it never edits the data.
+
 <p>
+  <img src="screenshots/library-home-full-light.png" alt="The Library home in full: in progress, the paths, up next, and the shelves with their counts and the Practice tile" width="24%">
   <img src="screenshots/library-path-light.png" alt="A path: AI engineering's steps grouped by phase, the current one highlighted" width="32%">
   <img src="screenshots/library-shelf-light.png" alt="The Courses shelf filtered to Active" width="32%">
   <img src="screenshots/library-search-dark.png" alt="Search results grouped by shelf, three of each, with Show all" width="32%">

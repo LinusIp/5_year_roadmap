@@ -34,8 +34,8 @@ import { plural, shortTitle, unitShort } from './parts/text.ts';
 import { PaperSheet } from './plan/PapersView.tsx';
 
 /** One shelf's name, for its own page: "Courses", "Blogs to follow". */
-const SHELF_TITLE: Record<ShelfKey, string> = { course: 'Courses', book: 'Books', paper: 'Papers', article: 'Articles', blog: 'Blogs to follow', tool: 'Tools', project: 'Projects' };
-const SHELF_NOUN: Record<ShelfKey, [string, string]> = { course: ['course', 'courses'], book: ['book', 'books'], paper: ['paper', 'papers'], article: ['article', 'articles'], blog: ['blog', 'blogs'], tool: ['tool', 'tools'], project: ['project', 'projects'] };
+const SHELF_TITLE: Record<ShelfKey, string> = { course: 'Courses', book: 'Books', paper: 'Papers', article: 'Articles', blog: 'Blogs to follow', tool: 'Tools', practice: 'Practice', project: 'Projects' };
+const SHELF_NOUN: Record<ShelfKey, [string, string]> = { course: ['course', 'courses'], book: ['book', 'books'], paper: ['paper', 'papers'], article: ['article', 'articles'], blog: ['blog', 'blogs'], tool: ['tool', 'tools'], practice: ['practice item', 'practice items'], project: ['project', 'projects'] };
 const STATUS_CHIPS: { key: ItemStatus; label: string }[] = [
   { key: 'active', label: 'Active' },
   { key: 'todo', label: 'Not started' },
@@ -103,7 +103,7 @@ function buildEntries(
       kind: 'resource',
       id: r.id,
       title: r.short ?? shortTitle(r.title),
-      body: [r.title, r.provider, r.summary ?? '', r.tracks.join(' '), r.type, state?.notes ?? ''].join(' '),
+      body: [r.title, r.short ?? '', r.provider, r.summary ?? '', r.tracks.join(' '), (r.tags ?? []).join(' '), r.type, state?.notes ?? ''].join(' '),
       type: shelfOf(r),
       tracks: r.tracks,
       status,
@@ -332,7 +332,7 @@ export function Library({ openId }: { openId?: string }) {
         entry.project ? (
           <KindIcon kind={entry.project.kind === 'curriculum' ? (entry.project.group === 'weekly' ? 'build' : 'case') : entry.project.kind} />
         ) : (
-          <IconTile icon={SHELF_ICON[entry.type as ShelfKey] ?? 'course'} tone={entry.kind === 'paper' || entry.type === 'blog' ? 'ice' : 'blue'} />
+          <IconTile icon={SHELF_ICON[entry.type as ShelfKey] ?? 'course'} tone={entry.kind === 'paper' || entry.type === 'blog' || entry.type === 'practice' ? 'ice' : 'blue'} />
         )
       }
       title={entry.title}

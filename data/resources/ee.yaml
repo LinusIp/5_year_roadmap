@@ -61,6 +61,7 @@
   estHours: 130
   subject: fpga
   summary: "Digital design from gates to a pipelined processor. Nand2Tetris is the warm-up; project 43 (a RISC-V subset on an FPGA) is the payoff."
+  after: [nand2tetris]
 
 - id: harris-ddca
   title: "Digital Design and Computer Architecture, RISC-V edition (Harris and Harris)"

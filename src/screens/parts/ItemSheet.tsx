@@ -122,6 +122,7 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
       <div>
         <p className="text-meta text-ink2">{[resource.provider, resource.type, resource.cost === 'audit-free' ? 'free to audit' : resource.cost].join(' · ')}</p>
         {resource.summary && <p className="doc-text mt-2 text-body text-ink2">{resource.summary}</p>}
+        {(resource.note || resource.doFirst) && <p className="mt-2 text-meta text-ink2">{[resource.note, resource.doFirst && 'Do first: ' + resource.doFirst].filter(Boolean).join(' · ')}</p>}
         {resource.url === null && resource.searchHint && <p className="mt-2 text-meta text-ink2">No checked link yet. Search for “{resource.searchHint}”.</p>}
         <div className="mt-4 flex items-center gap-2">
           {resource.url ? (
@@ -171,10 +172,14 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
         <Placement atlas={atlas} refId={resource.id} />
       </RowList>
 
-      {(resource.prerequisites.length > 0 || subject) && (
+      {(resource.prerequisites.length > 0 || (resource.after?.length ?? 0) > 0 || subject) && (
         <RowList label="Related">
           {resource.prerequisites.map((id) => (
             <Row key={id} title={atlas.seed.resources.find((r) => r.id === id)?.title ?? id} meta={atlas.states.get(id)?.status === 'done' ? 'Needed first · done' : 'Needed first'} to={'/library/' + id} />
+          ))}
+          {/* Soft prerequisites (RESOURCES-ADD): worth doing first, never enforced. */}
+          {(resource.after ?? []).map((id) => (
+            <Row key={id} title={atlas.seed.resources.find((r) => r.id === id)?.title ?? id} meta={atlas.states.get(id)?.status === 'done' ? 'Do first · done' : 'Do first'} to={'/library/' + id} />
           ))}
           {subject && <Row title={subject.title} meta="Counts towards" to={'/plan?view=credentials&subject=' + subject.id} />}
         </RowList>

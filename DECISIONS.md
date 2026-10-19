@@ -1240,3 +1240,40 @@ and its accessible name says how many nights have no entry.
 **Keyboard**, as in pull request #15: the study heatmap's days are its one tab stop (arrows move a day or a week and
 the strip follows); the GitHub calendar is a labelled region, "… scroll for the other months", the arrows scrolling
 it.
+
+## A hundred free resources in the Library (pull request #18)
+
+RESOURCES-ADD: 152 free resources (`new-resources.jsonl`) go into the Library's seed data, not the daily plan.
+
+**Mapping.** A video course is `lectures` and a course `course` (both on Courses); a book `book`; docs and tutorials
+are `article` (Articles); practice is a new type, `practice`, on a new **Practice** shelf. The inference track is AI
+with an `inference` tag (search finds it); gamedev is the existing `gamedev` track, in the Graphics family. `year` is
+`fromYear`, the order of a path's optional list. "free audit" is the existing `cost: audit-free` (the sheet's "free to
+audit"); "free tier" is a `note`. `verified` is `lastVerified`, shown as "Link checked …". Every URL is the file's,
+byte for byte; the importer never rewrites one. A short title is the file's `short`.
+
+**Problem sets move to Practice.** The seven `problems` resources (CSES, Halmos, Morin and others) were on Tools; a
+problem set is practice, so they now sit with the 36 new practice items. Tools keeps repos and tools.
+
+**Soft prerequisites.** `after` names a short title. When it matches one the Library has (exactly, ignoring case),
+it is stored as `after: [id]`, shown in the sheet's Related list as "Do first", tappable, and never enforced by the
+schedule (`prerequisites` are). Otherwise the words are kept as `doFirst` and shown as "Do first: …". 55 linked, 16
+kept as words. An entry that already has real prerequisites takes neither.
+
+**Duplicates.** An item is an entry the Library already has when the URL is the same (lowercase, no scheme, no
+`www.`, no trailing slash), the id is the same, it is one of three pairs checked by hand (NVIDIA's renamed CUDA guide,
+the raylib examples page, cs162.org), or the titles share at least 80 % of their words. 52 matched (39 by URL, 5 by
+id, 5 by title, 3 by hand); the entry is kept and takes only the fields it lacks. A planned entry keeps its name (no
+short title) and takes no `fromYear`, so its card and path stay as they were. Near misses were read and kept apart:
+the Fall 2024 LLM Agents course against Spring 2025, the Vulkan ray-tracing tutorial against the Vulkan Tutorial,
+Beej's network guide against Beej's C guide, the async book against the Rust book.
+
+**Where they show.** Not started and in no lane. On their shelf, in search (title, short title, provider, summary,
+tracks and tags), and in the Path view of their first track's family under "Optional for this path", by `fromYear`,
+"Year 2 · Practice · 8 h". The Library home's Practice tile spans the Browse grid's width under the six shelves (seven
+tiles do not fit three across), with the ice icon (a target) that marks things done by hand.
+
+**Validation and links.** `validate:data` now also rejects a short title over 28 characters (it already rejected
+duplicate ids, unchecked links and unknown tracks and types) and an `after` that is not a resource. A weekly job,
+`.github/workflows/links.yml`, runs `npm run check:links` on a runner and uploads the report; it is
+`continue-on-error`, the script exits 0, and nothing writes to `/data`.

@@ -44,6 +44,8 @@
   cost: free
   estHours: 40
   subject: system-design
+  summary: "Free guide to scalability concepts plus worked system design interview exercises with solutions."
+  after: [ddia]
 
 - id: kleppmann-distributed-systems
   title: "Martin Kleppmann: Distributed Systems lecture series (Cambridge, Concurrent and Distributed Systems)"
@@ -58,6 +60,9 @@
   estHours: 20
   subject: system-design
   summary: "Course page with the lecture notes; the videos are linked from it."
+  short: "Kleppmann Dist. Systems"
+  fromYear: 2
+  after: [ddia]
 
 - id: bytebytego
   title: "ByteByteGo / System Design Interview, volumes 1 and 2 (Alex Xu)"
@@ -86,6 +91,10 @@
   cost: free
   estHours: 40
   subject: system-design
+  short: "Google SRE Book"
+  summary: "How large systems are operated: SLOs, monitoring, on-call, incident response and release engineering."
+  fromYear: 3
+  after: [ddia]
 
 - id: docker-get-started
   title: "Docker: official getting-started guides"
@@ -176,6 +185,7 @@
   estHours: 40
   subject: linux-os
   summary: "The Linux Foundation's free introduction (60 hours of material by its own count), the groundwork for the LFCS exam."
+  doFirst: "Missing Semester"
 
 - id: github-actions-docs
   title: "GitHub Actions: official documentation and quickstart (CI/CD)"

@@ -20,6 +20,9 @@ export const TYPE_LABEL: Record<string, string> = {
   paper: 'Paper',
   repo: 'Repository',
   cert: 'Certification',
+  problems: 'Problem set',
+  practice: 'Practice',
+  tool: 'Tool',
 };
 
 const GROUP_LABEL: Record<(typeof PAPER_GROUPS)[number], string> = {

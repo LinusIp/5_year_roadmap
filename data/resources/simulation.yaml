@@ -58,6 +58,7 @@
   estHours: 40
   prerequisites: [mit-18-03]
   subject: simulation
+  summary: "The classic derivation of particle systems, rigid bodies, constraints, and implicit integration."
 
 - id: ericson-rtcd
   title: "Real-Time Collision Detection (Christer Ericson)"
@@ -88,6 +89,7 @@
   estHours: 40
   subject: simulation
   summary: "Position-based dynamics, XPBD, cloth, soft bodies and fluids in short tutorials with code."
+  after: [gaffer-on-games]
 
 - id: bridson-fluid-sim
   title: "Fluid Simulation for Computer Graphics, 2nd edition (Robert Bridson)"

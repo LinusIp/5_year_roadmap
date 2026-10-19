@@ -267,6 +267,10 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
     for (const pre of item.prerequisites) {
       if (!resourceById.has(pre)) errors.push(file + ' (id: ' + item.id + '): prerequisite "' + pre + '" is not a resource');
     }
+    for (const first of item.after ?? []) {
+      if (!resourceById.has(first)) errors.push(file + ' (id: ' + item.id + '): after "' + first + '" is not a resource');
+      if (first === item.id) errors.push(file + ' (id: ' + item.id + '): a resource cannot come after itself');
+    }
     if (item.subject && !subjectIds.has(item.subject)) errors.push(file + ' (id: ' + item.id + '): subject "' + item.subject + '" has no row in data/subjects.yaml');
     if (item.reference && item.estHours > 0) warnings.push(file + ' (id: ' + item.id + '): reference works normally carry estHours: 0');
   }
