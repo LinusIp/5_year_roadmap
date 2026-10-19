@@ -209,6 +209,7 @@ sites to reach for when you need them (RESOURCES-ADD). They are not in any lane:
 A weekly job (`.github/workflows/links.yml`) runs `npm run check:links` and reports; it never edits the data.
 
 <p>
+  <img src="screenshots/library-home-full-light.png" alt="The Library home in full: in progress, the paths, up next, and the shelves with their counts and the Practice tile" width="24%">
   <img src="screenshots/library-path-light.png" alt="A path: AI engineering's steps grouped by phase, the current one highlighted" width="32%">
   <img src="screenshots/library-shelf-light.png" alt="The Courses shelf filtered to Active" width="32%">
   <img src="screenshots/library-search-dark.png" alt="Search results grouped by shelf, three of each, with Show all" width="32%">
