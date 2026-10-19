@@ -1324,4 +1324,8 @@ the Library outgrew its checklists.
 **Links.** The container cannot reach most of these sites, so the pull request's CI runs `npm run check:links --
 --checked 2026-10-19` (a new filter: the links an import dated that day) in a job of its own that never fails, and the
 pull request lists what it reports. A 401, 403 or 429 is listed as "check by hand", not as broken. Nothing edits data.
-The job is for this pull request and is removed before it merges; the weekly report covers every link after that.
+The job ran once, for this pull request, and was removed before it merged; the weekly report covers every link after
+that. Its report on the 490 links dated 2026-10-19 (both imports): 474 answered; 12 turned the checker away (403: to
+open by hand); 4 failed, of which one is a 404 (`paper-dijkstra-1959`, a PDF on a TUM server) and three did not
+connect from the runner (DNS or timeout: `perfbook`, `stam-fluids-for-games`, `erickson-algorithms`, from the first
+import). Nothing was changed: a link is replaced only after someone opens it by hand.
