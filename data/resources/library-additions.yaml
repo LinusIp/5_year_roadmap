@@ -1,0 +1,1595 @@
+# The Library's additions of October 2026 (RESOURCES-ADD): free resources in AI and inference, graphics and game
+# engines, systems and Rust/C/C++, each link checked on 2026-10-19. They sit on their shelves and in search, and under
+# "Optional for this path" in their path (`fromYear` orders them there); none is on the plan. Generated from
+# new-resources.jsonl by scratch/import-resources.ts; resources the Library already had took only missing fields.
+
+# ---- AI and ML (22)
+
+- id: "nyu-deep-learning-2021"
+  title: "NYU Deep Learning (DS-GA 1008, Spring 2021)"
+  short: "NYU Deep Learning"
+  provider: "NYU / Yann LeCun, Alfredo Canziani"
+  type: "lectures"
+  url: "https://atcold.github.io/NYU-DLSP21/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 50
+  summary: "Energy-based, geometric view of DL from LeCun with notebook-driven practicums."
+  fromYear: 2
+  after: [mit-6-s191]
+
+- id: "david-silver-rl"
+  title: "UCL Reinforcement Learning Course (David Silver)"
+  short: "David Silver RL"
+  provider: "David Silver / DeepMind"
+  type: "lectures"
+  url: "https://davidstarsilver.wordpress.com/teaching/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 20
+  summary: "The classic 10-lecture RL foundation: MDPs, dynamic programming, TD, function approximation."
+  fromYear: 2
+
+- id: "berkeley-llm-agents-f24"
+  title: "Large Language Model Agents MOOC (Fall 2024)"
+  short: "LLM Agents MOOC"
+  provider: "UC Berkeley RDI"
+  type: "lectures"
+  url: "https://llmagents-learning.org/f24"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 25
+  summary: "Guest lectures on reasoning, tool use, planning and multi-agent systems from people building them."
+  fromYear: 2
+  doFirst: "HF Agents Course"
+
+- id: "stanford-cs234"
+  title: "Stanford CS234: Reinforcement Learning"
+  short: "CS234 RL"
+  provider: "Stanford"
+  type: "lectures"
+  url: "https://web.stanford.edu/class/cs234/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 40
+  summary: "Rigorous RL from MDPs to policy gradients and RLHF-style methods relevant to LLM post-training."
+  fromYear: 3
+  after: [david-silver-rl]
+
+- id: "coursera-deep-learning-specialization"
+  title: "Deep Learning Specialization"
+  short: "DL Specialization"
+  provider: "DeepLearning.AI"
+  type: "course"
+  url: "https://www.coursera.org/specializations/deep-learning"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "audit-free"
+  estHours: 80
+  summary: "Structured path through backprop, optimization, CNNs, sequence models with graded notebooks."
+  fromYear: 1
+  after: [ng-ml-spec]
+
+- id: "google-ml-crash-course"
+  title: "Machine Learning Crash Course"
+  short: "Google ML Crash Course"
+  provider: "Google for Developers"
+  type: "course"
+  url: "https://developers.google.com/machine-learning/crash-course"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 15
+  summary: "Fast, interactive refresher on core ML concepts and practical pitfalls like data prep and fairness."
+  fromYear: 1
+
+- id: "isl-python"
+  title: "An Introduction to Statistical Learning (with Python)"
+  short: "ISL / ISLP"
+  provider: "James, Witten, Hastie, Tibshirani, Taylor"
+  type: "book"
+  url: "https://www.statlearning.com/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 60
+  summary: "Clear statistical foundations of ML with Python labs; free PDF."
+  fromYear: 1
+
+- id: "sutton-barto-rl"
+  title: "Reinforcement Learning: An Introduction (2nd ed.)"
+  short: "Sutton & Barto RL"
+  provider: "Richard S. Sutton, Andrew G. Barto"
+  type: "book"
+  url: "http://incompleteideas.net/book/the-book-2nd.html"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 80
+  summary: "The RL bible; pairs with David Silver's lectures."
+  fromYear: 2
+  after: [david-silver-rl]
+
+- id: "pytorch-tutorials"
+  title: "PyTorch Tutorials"
+  short: "PyTorch Tutorials"
+  provider: "PyTorch"
+  type: "article"
+  url: "https://docs.pytorch.org/tutorials/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 20
+  summary: "Official hands-on tutorials from tensors to torch.compile, profiling and distributed training."
+  fromYear: 1
+
+- id: "mcp-docs"
+  title: "Model Context Protocol Documentation"
+  short: "MCP Docs"
+  provider: "Model Context Protocol"
+  type: "article"
+  url: "https://modelcontextprotocol.io/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "The open standard for connecting agents to tools and data; build your own servers and clients."
+  fromYear: 2
+  after: [anthropic-building-effective-agents]
+
+- id: "annotated-transformer"
+  title: "The Annotated Transformer"
+  short: "Annotated Transformer"
+  provider: "Harvard NLP"
+  type: "article"
+  url: "https://nlp.seas.harvard.edu/annotated-transformer/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "Line-by-line PyTorch implementation of 'Attention Is All You Need'."
+  fromYear: 2
+  after: [karpathy-zero-to-hero]
+
+- id: "anthropic-building-effective-agents"
+  title: "Building Effective AI Agents"
+  short: "Building Effective Agents"
+  provider: "Anthropic"
+  type: "article"
+  url: "https://www.anthropic.com/engineering/building-effective-agents"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Practical patterns (workflows vs agents, routing, orchestrator-workers) for designing agent harnesses."
+  fromYear: 2
+
+- id: "lilianweng-llm-agents"
+  title: "LLM Powered Autonomous Agents"
+  short: "Lil'Log: LLM Agents"
+  provider: "Lilian Weng"
+  type: "article"
+  url: "https://lilianweng.github.io/posts/2023-06-23-agent/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Survey of planning, memory and tool-use components that make up an agent."
+  fromYear: 2
+
+- id: "numpy-100"
+  title: "100 NumPy Exercises"
+  short: "NumPy 100"
+  provider: "Nicolas Rougier"
+  type: "practice"
+  url: "https://github.com/rougier/numpy-100"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 10
+  summary: "Drills vectorized NumPy thinking that every ML codebase relies on."
+  fromYear: 1
+  after: [30-days-of-python]
+
+- id: "kaggle-titanic"
+  title: "Titanic - Machine Learning from Disaster"
+  short: "Kaggle Titanic"
+  provider: "Kaggle"
+  type: "practice"
+  url: "https://www.kaggle.com/competitions/titanic"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 8
+  summary: "First end-to-end competition: feature engineering, validation, submission."
+  fromYear: 1
+  after: [kaggle-learn]
+
+- id: "deep-ml"
+  title: "Deep-ML"
+  short: "Deep-ML"
+  provider: "Deep-ML"
+  type: "practice"
+  url: "https://www.deep-ml.com/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 30
+  summary: "LeetCode-style problems implementing ML/DL ops and algorithms from scratch."
+  fromYear: 1
+  after: [numpy-100]
+
+- id: "tensor-puzzles"
+  title: "Tensor Puzzles"
+  short: "Tensor Puzzles"
+  provider: "Sasha Rush"
+  type: "practice"
+  url: "https://github.com/srush/Tensor-Puzzles"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "21 puzzles rebuilding PyTorch functions with only broadcasting and indexing."
+  fromYear: 1
+  after: [numpy-100]
+
+- id: "minbpe"
+  title: "minbpe (BPE tokenizer + exercise)"
+  short: "minbpe"
+  provider: "Andrej Karpathy"
+  type: "practice"
+  url: "https://github.com/karpathy/minbpe"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "Build a GPT-4-style BPE tokenizer yourself following exercise.md."
+  fromYear: 2
+  after: [karpathy-zero-to-hero]
+
+- id: "llms-from-scratch"
+  title: "LLMs-from-scratch (code + exercises)"
+  short: "LLMs from Scratch repo"
+  provider: "Sebastian Raschka"
+  type: "practice"
+  url: "https://github.com/rasbt/LLMs-from-scratch"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 40
+  summary: "Chapter notebooks and exercises to code a GPT, pretrain and finetune it in PyTorch."
+  fromYear: 2
+  after: [annotated-transformer]
+
+- id: "arena"
+  title: "ARENA (Alignment Research Engineer Accelerator)"
+  short: "ARENA"
+  provider: "ARENA"
+  type: "practice"
+  url: "https://learn.arena.education/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 100
+  summary: "Hands-on notebooks for transformers from scratch, interpretability, RL and evals."
+  fromYear: 2
+  after: [karpathy-zero-to-hero]
+
+- id: "mini-swe-agent"
+  title: "mini-swe-agent"
+  short: "mini-swe-agent"
+  provider: "SWE-agent team (Princeton/Stanford)"
+  type: "practice"
+  url: "https://github.com/SWE-agent/mini-swe-agent"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "A ~100-line coding agent to read, run and extend as a template for your own harness."
+  fromYear: 2
+  after: [anthropic-building-effective-agents]
+
+- id: "nanochat"
+  title: "nanochat"
+  short: "nanochat"
+  provider: "Andrej Karpathy"
+  type: "practice"
+  url: "https://github.com/karpathy/nanochat"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 30
+  summary: "Full ChatGPT-style pipeline (tokenizer, pretrain, SFT, RL, inference) in one hackable repo."
+  fromYear: 3
+  after: [llms-from-scratch]
+
+# ---- LLM inference and GPUs (track ai, tag inference) (6)
+
+- id: "llm-inference-handbook"
+  title: "LLM Inference Handbook"
+  short: "LLM Inference Handbook"
+  provider: "Modular (formerly BentoML)"
+  type: "article"
+  url: "https://handbook.modular.com/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "Practical map of inference concepts: TTFT, batching, KV cache, quantization, deployment patterns."
+  fromYear: 2
+  tags: [inference]
+
+- id: "visual-guide-quantization"
+  title: "A Visual Guide to Quantization"
+  short: "Visual Quantization Guide"
+  provider: "Maarten Grootendorst"
+  type: "article"
+  url: "https://newsletter.maartengrootendorst.com/p/a-visual-guide-to-quantization"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Illustrated intro to int8/int4, GPTQ, GGUF and QAT before touching quantization code."
+  fromYear: 2
+  tags: [inference]
+
+- id: "minitorch"
+  title: "MiniTorch"
+  short: "MiniTorch"
+  provider: "Sasha Rush (Cornell Tech)"
+  type: "practice"
+  url: "https://minitorch.github.io/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 40
+  summary: "Rebuild a PyTorch-like library: autodiff, tensors, fast CPU/GPU ops."
+  fromYear: 2
+  tags: [inference]
+  after: [tensor-puzzles]
+
+- id: "gpu-puzzles"
+  title: "GPU Puzzles"
+  short: "GPU Puzzles"
+  provider: "Sasha Rush"
+  type: "practice"
+  url: "https://github.com/srush/GPU-Puzzles"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "Interactive puzzles teaching CUDA thread/block/shared-memory thinking via Numba."
+  fromYear: 2
+  tags: [inference]
+  after: [tensor-puzzles]
+
+- id: "triton-puzzles"
+  title: "Triton Puzzles"
+  short: "Triton Puzzles"
+  provider: "Sasha Rush"
+  type: "practice"
+  url: "https://github.com/srush/Triton-Puzzles"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Learn Triton kernels step by step; runs without a GPU."
+  fromYear: 3
+  tags: [inference]
+  after: [gpu-puzzles]
+
+- id: "nano-vllm"
+  title: "Nano-vLLM"
+  short: "Nano-vLLM"
+  provider: "GeeeekExplorer"
+  type: "practice"
+  url: "https://github.com/GeeeekExplorer/nano-vllm"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 15
+  summary: "Small readable vLLM reimplementation: KV-cache paging, batching, scheduling to rebuild yourself."
+  fromYear: 3
+  tags: [inference]
+  after: [vllm-docs]
+
+# ---- Graphics and rendering (21)
+
+- id: "cmu-15462-computer-graphics"
+  title: "Computer Graphics (CMU 15-462/662) Lectures"
+  short: "CMU 15-462 Graphics"
+  provider: "Keenan Crane, Carnegie Mellon University"
+  type: "lectures"
+  url: "https://www.youtube.com/playlist?list=PL9_jI1bdZmz2emSh0UQ5iOdT2xRHFHL7E"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intro"
+  cost: "free"
+  estHours: 40
+  summary: "The clearest full university intro to rasterization, geometry, and rendering, with superb visual intuition."
+  fromYear: 1
+  after: [gamemath-3d-primer]
+
+- id: "cherno-opengl-series"
+  title: "OpenGL Series"
+  short: "Cherno OpenGL"
+  provider: "The Cherno (Yan Chernikov)"
+  type: "lectures"
+  url: "https://www.youtube.com/watch?v=W3gAzLwfIP0"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intro"
+  cost: "free"
+  estHours: 15
+  summary: "A practical C++ walkthrough of buffers, shaders, and abstractions that complements reading LearnOpenGL."
+  fromYear: 1
+  doFirst: "LearnOpenGL"
+
+- id: "sebastian-lague-coding-adventures"
+  title: "Coding Adventures"
+  short: "Coding Adventures"
+  provider: "Sebastian Lague"
+  type: "lectures"
+  url: "https://www.youtube.com/playlist?list=PLFt_AvWsXl0ehjAfLFsp1PGaatzAwo0uK"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 30
+  summary: "Shows how to explore ideas like ray marching, fluids, and rasterizers end to end, great project inspiration."
+  fromYear: 1
+
+- id: "javidx9-3d-engine"
+  title: "Code-It-Yourself! 3D Graphics Engine"
+  short: "OLC 3D Engine"
+  provider: "javidx9 (One Lone Coder)"
+  type: "lectures"
+  url: "https://www.youtube.com/watch?v=ih20l3pJoeU"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intro"
+  cost: "free"
+  estHours: 4
+  summary: "Builds a software 3D engine from scratch in C++ (projection, clipping, depth buffer, texturing)."
+  fromYear: 1
+
+- id: "tu-wien-rendering-course"
+  title: "TU Wien Rendering / Ray Tracing Course"
+  short: "TU Wien Rendering"
+  provider: "Károly Zsolnai-Fehér, TU Wien"
+  type: "lectures"
+  url: "https://users.cg.tuwien.ac.at/zsolnai/gfx/rendering-course"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 25
+  summary: "Teaches the physics and math of global illumination (radiometry, BRDFs, Monte Carlo) behind path tracers."
+  fromYear: 2
+  after: [rtiow]
+
+- id: "cg-from-scratch"
+  title: "Computer Graphics from Scratch"
+  short: "CG from Scratch"
+  provider: "Gabriel Gambetta"
+  type: "book"
+  url: "https://gabrielgambetta.com/computer-graphics-from-scratch/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intro"
+  cost: "free"
+  estHours: 20
+  summary: "Builds a raytracer and a rasterizer from pure math with only a put-pixel function."
+  fromYear: 1
+
+- id: "gpu-gems"
+  title: "GPU Gems (online edition)"
+  short: "GPU Gems"
+  provider: "NVIDIA"
+  type: "book"
+  url: "https://developer.nvidia.com/gpugems/gpugems/foreword"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "advanced"
+  cost: "free"
+  estHours: 50
+  summary: "Classic collection of real-time rendering and GPU techniques from industry practitioners."
+  fromYear: 3
+  after: [utah-cs6610]
+
+- id: "advances-real-time-rendering"
+  title: "Advances in Real-Time Rendering in Games (SIGGRAPH courses)"
+  short: "Advances in RTR"
+  provider: "SIGGRAPH / Natalya Tatarchuk et al."
+  type: "article"
+  url: "https://advances.realtimerendering.com/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "advanced"
+  cost: "free"
+  estHours: 40
+  summary: "Slides from AAA studios on cutting-edge real-time rendering, for research-level reading."
+  fromYear: 3
+  after: [trip-through-graphics-pipeline]
+
+- id: "pbs-siggraph-2013"
+  title: "SIGGRAPH 2013 Course: Physically Based Shading in Theory and Practice"
+  short: "PBS Course 2013"
+  provider: "Stephen Hill, Stephen McAuley et al."
+  type: "article"
+  url: "https://blog.selfshadow.com/publications/s2013-shading-course/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "advanced"
+  cost: "free"
+  estHours: 12
+  summary: "The canonical notes on microfacet BRDFs and PBR as used in engines like Unreal."
+  fromYear: 3
+  doFirst: "LearnOpenGL"
+
+- id: "webgpu-fundamentals"
+  title: "WebGPU Fundamentals"
+  short: "WebGPU Fundamentals"
+  provider: "Gregg Tavares"
+  type: "article"
+  url: "https://webgpufundamentals.org/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intro"
+  cost: "free"
+  estHours: 25
+  summary: "Explains WebGPU and WGSL from first principles with live in-browser examples."
+  fromYear: 1
+
+- id: "learn-webgpu-cpp"
+  title: "Learn WebGPU for C++"
+  short: "Learn WebGPU (C++)"
+  provider: "Elie Michel"
+  type: "article"
+  url: "https://eliemichel.github.io/LearnWebGPU/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 30
+  summary: "A modern native-graphics tutorial using the WebGPU API from C++, a gentler path to explicit APIs."
+  fromYear: 2
+  doFirst: "LearnOpenGL"
+
+- id: "learn-wgpu"
+  title: "Learn Wgpu"
+  short: "Learn Wgpu"
+  provider: "Ben Hansen (sotrh)"
+  type: "article"
+  url: "https://sotrh.github.io/learn-wgpu/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 25
+  summary: "Teaches GPU rendering in Rust with wgpu, combining the student's Rust and graphics goals."
+  fromYear: 2
+  doFirst: "Rust basics"
+
+- id: "trip-through-graphics-pipeline"
+  title: "A Trip through the Graphics Pipeline 2011"
+  short: "Trip through the Pipeline"
+  provider: "Fabian Giesen"
+  type: "article"
+  url: "https://fgiesen.wordpress.com/2011/07/09/a-trip-through-the-graphics-pipeline-2011-index/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Explains what the GPU actually does at each pipeline stage, essential for performance reasoning."
+  fromYear: 2
+  doFirst: "LearnOpenGL"
+
+- id: "lettier-3d-game-shaders"
+  title: "3D Game Shaders For Beginners"
+  short: "3D Game Shaders"
+  provider: "David Lettier"
+  type: "article"
+  url: "https://github.com/lettier/3d-game-shaders-for-beginners"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 20
+  summary: "Step-by-step implementations of SSAO, normal mapping, bloom, depth of field, and other game effects."
+  fromYear: 2
+  doFirst: "LearnOpenGL"
+
+- id: "tinyraytracer"
+  title: "tinyraytracer"
+  short: "tinyraytracer"
+  provider: "Dmitry V. Sokolov (ssloy)"
+  type: "practice"
+  url: "https://github.com/ssloy/tinyraytracer"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intro"
+  cost: "free"
+  estHours: 8
+  summary: "Write a ~256-line C++ raytracer with reflections and refraction in a weekend."
+  fromYear: 1
+
+- id: "tinykaboom"
+  title: "tinykaboom"
+  short: "tinykaboom"
+  provider: "Dmitry V. Sokolov (ssloy)"
+  type: "practice"
+  url: "https://github.com/ssloy/tinykaboom"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intro"
+  cost: "free"
+  estHours: 4
+  summary: "Build a ray-marched procedural explosion in ~180 lines, a fun intro to SDFs and noise."
+  fromYear: 1
+  after: [tinyraytracer]
+
+- id: "shader-school"
+  title: "Shader School"
+  short: "Shader School"
+  provider: "stack.gl"
+  type: "practice"
+  url: "https://github.com/stackgl/shader-school"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intro"
+  cost: "free"
+  estHours: 10
+  summary: "Self-guided GLSL exercises that check your shaders against expected output."
+  fromYear: 1
+  after: [book-of-shaders]
+
+- id: "scotty3d"
+  title: "Scotty3D (CMU 15-462 assignments)"
+  short: "Scotty3D"
+  provider: "CMU Graphics"
+  type: "practice"
+  url: "https://github.com/CMU-Graphics/Scotty3D"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 80
+  summary: "Implement a rasterizer, mesh editor, path tracer, and animation system in one C++ codebase."
+  fromYear: 2
+  after: [cmu-15462-computer-graphics]
+
+- id: "cs184-homework"
+  title: "CS 184/284A Homework (Spring 2025)"
+  short: "CS184 Homework"
+  provider: "UC Berkeley"
+  type: "practice"
+  url: "https://cs184.eecs.berkeley.edu/sp25/hw/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 60
+  summary: "Five graded-style projects: rasterizer, MeshEdit, path tracer, and cloth simulation."
+  fromYear: 2
+  after: [cmu-15462-computer-graphics]
+
+- id: "sascha-willems-vulkan"
+  title: "Vulkan C++ Examples and Demos"
+  short: "Sascha Willems Vulkan"
+  provider: "Sascha Willems"
+  type: "practice"
+  url: "https://github.com/SaschaWillems/Vulkan"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "advanced"
+  cost: "free"
+  estHours: 40
+  summary: "Reference samples from triangle to ray tracing to read, run, and reimplement techniques."
+  fromYear: 3
+  after: [vulkan-tutorial]
+
+- id: "nvpro-vk-raytracing-tutorial"
+  title: "Vulkan Ray Tracing Tutorial (KHR)"
+  short: "Vulkan RT Tutorial"
+  provider: "NVIDIA nvpro-samples"
+  type: "practice"
+  url: "https://github.com/nvpro-samples/vk_raytracing_tutorial_KHR"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [graphics]
+  level: "advanced"
+  cost: "free"
+  estHours: 30
+  summary: "Adds hardware ray tracing to a Vulkan app step by step with 20+ extension samples."
+  fromYear: 3
+  after: [vkguide]
+
+# ---- Game engines and game development (19)
+
+- id: "freya-math-for-game-devs"
+  title: "Math for Game Devs (2022 live course)"
+  short: "Math for Game Devs"
+  provider: "Freya Holmér"
+  type: "lectures"
+  url: "https://www.youtube.com/watch?v=fjOdtSu4Lm4"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 20
+  summary: "Builds strong visual intuition for vectors, dot/cross products, spaces, and interpolation in game code."
+  fromYear: 1
+
+- id: "brackeys-unity-video-game"
+  title: "How to make a Video Game in Unity"
+  short: "Brackeys Unity Game"
+  provider: "Brackeys"
+  type: "lectures"
+  url: "https://www.youtube.com/playlist?list=PLPV2KyIb3jR53Jce9hP7G5xC4O9AgnOuL"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 3
+  summary: "A short, classic complete-game series that makes Unity's workflow click quickly."
+  fromYear: 1
+
+- id: "coding-train-nature-of-code"
+  title: "The Nature of Code (video track)"
+  short: "Nature of Code videos"
+  provider: "Daniel Shiffman, The Coding Train"
+  type: "lectures"
+  url: "https://thecodingtrain.com/tracks/the-nature-of-code-2"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 25
+  summary: "Teaches forces, particles, steering, and physics simulation through friendly creative-coding videos."
+  fromYear: 1
+
+- id: "gdc-vault-free"
+  title: "GDC Vault Free Talks"
+  short: "GDC Vault (free)"
+  provider: "Game Developers Conference"
+  type: "lectures"
+  url: "https://gdcvault.com/free"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 30
+  summary: "Free industry talks on engine architecture, rendering, physics, and design straight from shipped games."
+  fromYear: 2
+
+- id: "unity-essentials"
+  title: "Unity Essentials Pathway"
+  short: "Unity Essentials"
+  provider: "Unity Learn"
+  type: "course"
+  url: "https://learn.unity.com/pathway/unity-essentials"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 15
+  summary: "The official first-steps path to the Unity editor, scenes, assets, and basic scripting."
+  fromYear: 1
+
+- id: "unity-junior-programmer"
+  title: "Junior Programmer Pathway"
+  short: "Unity Junior Programmer"
+  provider: "Unity Learn"
+  type: "course"
+  url: "https://learn.unity.com/pathway/junior-programmer"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 50
+  summary: "Project-based C# in Unity covering gameplay, UI, physics, and OOP, with a final portfolio project."
+  fromYear: 1
+  after: [unity-essentials]
+
+- id: "unity-creative-core"
+  title: "Creative Core Pathway"
+  short: "Unity Creative Core"
+  provider: "Unity Learn"
+  type: "course"
+  url: "https://learn.unity.com/pathway/creative-core"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 40
+  summary: "Covers Unity's art side: lighting, materials, Shader Graph, particles/VFX, animation, and post-processing."
+  fromYear: 1
+  after: [unity-essentials]
+
+- id: "game-programming-patterns"
+  title: "Game Programming Patterns"
+  short: "Game Prog. Patterns"
+  provider: "Robert Nystrom"
+  type: "book"
+  url: "https://gameprogrammingpatterns.com/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 25
+  summary: "Explains the core architecture patterns (game loop, components, update method) used in real engines."
+  fromYear: 1
+
+- id: "nature-of-code-book"
+  title: "The Nature of Code (book)"
+  short: "Nature of Code"
+  provider: "Daniel Shiffman"
+  type: "book"
+  url: "https://natureofcode.com/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 30
+  summary: "A free book on simulating forces, particles, and autonomous agents in code."
+  fromYear: 1
+
+- id: "bridson-fluid-notes"
+  title: "Fluid Simulation (SIGGRAPH 2007 Course Notes)"
+  short: "Bridson Fluid Notes"
+  provider: "Robert Bridson, Matthias Müller-Fischer"
+  type: "article"
+  url: "https://www.cs.ubc.ca/~rbridson/fluidsimulation/fluids_notes.pdf"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "advanced"
+  cost: "free"
+  estHours: 20
+  summary: "A rigorous intro to grid and particle fluid solvers used in graphics."
+  fromYear: 3
+  after: [stam-fluids-for-games]
+
+- id: "red-blob-games"
+  title: "Red Blob Games"
+  short: "Red Blob Games"
+  provider: "Amit Patel"
+  type: "article"
+  url: "https://www.redblobgames.com/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 15
+  summary: "Interactive explanations of hex grids, A* pathfinding, and procedural generation for games."
+  fromYear: 1
+
+- id: "godot-first-2d-game"
+  title: "Godot: Your First 2D Game"
+  short: "Godot First 2D Game"
+  provider: "Godot Engine"
+  type: "article"
+  url: "https://docs.godotengine.org/en/stable/getting_started/first_2d_game/index.html"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 4
+  summary: "Ship a complete small game in an open-source engine to compare against Unity."
+  fromYear: 1
+
+- id: "catlike-coding-unity"
+  title: "Catlike Coding Unity Tutorials"
+  short: "Catlike Coding"
+  provider: "Jasper Flick"
+  type: "article"
+  url: "https://catlikecoding.com/unity/tutorials/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 80
+  summary: "In-depth Unity C# and shader series, including building a custom render pipeline."
+  fromYear: 2
+  after: [unity-junior-programmer]
+
+- id: "tinyraycaster"
+  title: "tinyraycaster"
+  short: "tinyraycaster"
+  provider: "Dmitry V. Sokolov (ssloy)"
+  type: "practice"
+  url: "https://github.com/ssloy/tinyraycaster"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 8
+  summary: "Build a Wolfenstein-style raycasting FPS in under 500 lines of C++."
+  fromYear: 1
+
+- id: "lode-raycasting"
+  title: "Lode's Computer Graphics Tutorial: Raycasting"
+  short: "Lode Raycasting"
+  provider: "Lode Vandevenne"
+  type: "practice"
+  url: "https://lodev.org/cgtutor/raycasting.html"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 6
+  summary: "A hands-on raycaster (untextured then textured) to implement yourself step by step."
+  fromYear: 1
+
+- id: "20-games-challenge"
+  title: "The 20 Games Challenge"
+  short: "20 Games Challenge"
+  provider: "20 Games Challenge"
+  type: "practice"
+  url: "https://20_games_challenge.gitlab.io/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 200
+  summary: "A structured ladder of 20 game clones from Pong upward to build finishing skills."
+  fromYear: 1
+
+- id: "coding-train-challenges"
+  title: "Coding Train Coding Challenges"
+  short: "Coding Challenges"
+  provider: "Daniel Shiffman, The Coding Train"
+  type: "practice"
+  url: "https://thecodingtrain.com/challenges"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 40
+  summary: "One-off creative coding projects (physics, fractals, simulations) to code along and extend."
+  fromYear: 1
+
+- id: "box2d-lite"
+  title: "Box2D-Lite"
+  short: "Box2D-Lite"
+  provider: "Erin Catto"
+  type: "practice"
+  url: "https://github.com/erincatto/box2d-lite"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "advanced"
+  cost: "free"
+  estHours: 20
+  summary: "Study and rebuild a compact rigid-body engine with sequential impulses, the basis of Box2D."
+  fromYear: 2
+  after: [gaffer-on-games]
+
+- id: "stam-fluids-for-games"
+  title: "Real-Time Fluid Dynamics for Games"
+  short: "Stam Stable Fluids"
+  provider: "Jos Stam"
+  type: "practice"
+  url: "http://graphics.cs.cmu.edu/nsp/course/15-464/Fall09/papers/StamFluidforGames.pdf"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "A short paper with code to implement a stable 2D fluid solver yourself."
+  fromYear: 2
+  after: [nature-of-code-book]
+
+# ---- Systems (23)
+
+- id: "princeton-algorithms-part1"
+  title: "Algorithms, Part I (Princeton, Coursera)"
+  short: "Princeton Algorithms I"
+  provider: "Princeton University (Sedgewick & Wayne)"
+  type: "lectures"
+  url: "https://www.coursera.org/learn/algorithms-part1"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intro"
+  cost: "audit-free"
+  estHours: 55
+  summary: "Classic data-structures course with rigorous programming assignments and autograder."
+  fromYear: 1
+  after: [cs50x]
+
+- id: "kurose-ross-lectures"
+  title: "Computer Networking: A Top-Down Approach video lectures"
+  short: "Kurose & Ross Lectures"
+  provider: "Jim Kurose & Keith Ross (UMass)"
+  type: "lectures"
+  url: "https://gaia.cs.umass.edu/kurose_ross/lectures.php"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intro"
+  cost: "free"
+  estHours: 30
+  summary: "Authors' own lecture videos covering the whole network stack before you tackle CS144 labs."
+  fromYear: 1
+  doFirst: "Missing Semester"
+
+- id: "fcc-data-structures-fiset"
+  title: "Data Structures Easy to Advanced Course - Full Tutorial from a Google Engineer"
+  short: "fCC Data Structures"
+  provider: "freeCodeCamp (William Fiset)"
+  type: "lectures"
+  url: "https://www.youtube.com/watch?v=RBSGKlAvoiM"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intro"
+  cost: "free"
+  estHours: 8
+  summary: "Animated walkthrough of every core data structure, from arrays to Fenwick trees and hash tables."
+  fromYear: 1
+
+- id: "ben-eater-8bit-computer"
+  title: "Build an 8-bit computer"
+  short: "Ben Eater 8-bit CPU"
+  provider: "Ben Eater"
+  type: "lectures"
+  url: "https://eater.net/8bit"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intro"
+  cost: "free"
+  estHours: 20
+  summary: "Watch a CPU get built on breadboards, making clocks, buses, registers and microcode tangible."
+  fromYear: 1
+
+- id: "cmu-15721-advanced-databases"
+  title: "CMU 15-721 Advanced Database Systems"
+  short: "CMU 15-721"
+  provider: "Carnegie Mellon (Andy Pavlo)"
+  type: "course"
+  url: "https://www.cs.cmu.edu/~15721-f25/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 90
+  summary: "Research-level tour of modern analytical database internals: columnar storage, vectorized execution, query optimization."
+  fromYear: 3
+  doFirst: "CMU 15-445"
+
+- id: "beej-network-programming"
+  title: "Beej's Guide to Network Programming: Using Internet Sockets"
+  short: "Beej's Network Guide"
+  provider: "Brian \"Beej\" Hall"
+  type: "book"
+  url: "https://beej.us/guide/bgnet/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intro"
+  cost: "free"
+  estHours: 15
+  summary: "Practical C sockets programming guide for writing your own TCP/UDP clients and servers."
+  fromYear: 1
+  after: [beej-c]
+
+- id: "the-linux-command-line"
+  title: "The Linux Command Line"
+  short: "The Linux Command Line"
+  provider: "William Shotts"
+  type: "book"
+  url: "https://linuxcommand.org/tlcl.php"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intro"
+  cost: "free"
+  estHours: 25
+  summary: "Complete free book on the shell, text tools and bash scripting for daily Linux work."
+  fromYear: 1
+  doFirst: "Missing Semester"
+
+- id: "competitive-programmers-handbook"
+  title: "Competitive Programmer's Handbook"
+  short: "CP Handbook"
+  provider: "Antti Laaksonen"
+  type: "book"
+  url: "https://cses.fi/book/book.pdf"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 40
+  summary: "Concise free guide to algorithm techniques that pairs directly with the CSES problem set."
+  fromYear: 1
+  doFirst: "MIT 6.006"
+
+- id: "erickson-algorithms"
+  title: "Algorithms (Jeff Erickson)"
+  short: "Erickson Algorithms"
+  provider: "Jeff Erickson (UIUC)"
+  type: "book"
+  url: "https://jeffe.cs.illinois.edu/teaching/algorithms/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 80
+  summary: "Rigorous free textbook on recursion, DP, graphs and NP-hardness with many exercises."
+  fromYear: 2
+  doFirst: "MIT 6.006"
+
+- id: "computer-networks-systems-approach"
+  title: "Computer Networks: A Systems Approach"
+  short: "Networks: Systems Approach"
+  provider: "Larry Peterson & Bruce Davie"
+  type: "book"
+  url: "https://book.systemsapproach.org/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 50
+  summary: "Free open textbook explaining why networks are designed as they are, from links to congestion control."
+  fromYear: 2
+  after: [kurose-ross-lectures]
+
+- id: "van-steen-distributed-systems"
+  title: "Distributed Systems (4th edition)"
+  short: "van Steen Dist. Systems"
+  provider: "Maarten van Steen & Andrew Tanenbaum"
+  type: "book"
+  url: "https://www.distributed-systems.net/index.php/books/ds4/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 60
+  summary: "Comprehensive textbook on architectures, naming, consistency, replication and fault tolerance."
+  fromYear: 2
+  after: [ddia]
+
+- id: "build-your-own-redis"
+  title: "Build Your Own Redis with C/C++"
+  short: "Build Your Own Redis"
+  provider: "James Smith (build-your-own.org)"
+  type: "book"
+  url: "https://build-your-own.org/redis/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 30
+  summary: "Free online book building a networked key-value server with event loops, hashtables and timers."
+  fromYear: 2
+  after: [beej-network-programming]
+
+- id: "perfbook"
+  title: "Is Parallel Programming Hard, And, If So, What Can You Do About It?"
+  short: "perfbook"
+  provider: "Paul E. McKenney"
+  type: "book"
+  url: "https://mirrors.edge.kernel.org/pub/linux/kernel/people/paulmck/perfbook/perfbook.html"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 60
+  summary: "Linux RCU author's deep treatment of locking, memory barriers and scalable concurrency."
+  fromYear: 3
+  after: [ostep]
+
+- id: "linux-kernel-module-programming-guide"
+  title: "The Linux Kernel Module Programming Guide"
+  short: "LKMPG"
+  provider: "sysprog21 (Salzman, Jiang et al.)"
+  type: "book"
+  url: "https://sysprog21.github.io/lkmpg/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 20
+  summary: "Step-by-step guide to writing loadable kernel modules and drivers for modern Linux."
+  fromYear: 3
+  doFirst: "xv6 (MIT 6.S081)"
+
+- id: "writing-an-os-in-rust"
+  title: "Writing an OS in Rust"
+  short: "Writing an OS in Rust"
+  provider: "Philipp Oppermann"
+  type: "article"
+  url: "https://os.phil-opp.com/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 40
+  summary: "Build a bare-metal x86_64 kernel in Rust with paging, interrupts, heap allocation and async tasks."
+  fromYear: 2
+  after: [ostep]
+
+- id: "lets-build-a-simple-database"
+  title: "Let's Build a Simple Database"
+  short: "Build a Simple Database"
+  provider: "Connor Stack"
+  type: "article"
+  url: "https://cstack.github.io/db_tutorial/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 15
+  summary: "Write a SQLite clone in C, including a pager and B-tree, to see how databases store data."
+  fromYear: 2
+  after: [beej-c]
+
+- id: "overthewire-bandit"
+  title: "OverTheWire Bandit"
+  short: "OverTheWire Bandit"
+  provider: "OverTheWire"
+  type: "practice"
+  url: "https://overthewire.org/wargames/bandit/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intro"
+  cost: "free"
+  estHours: 15
+  summary: "Game-style levels over SSH that build fluency with Linux commands, permissions and pipes."
+  fromYear: 1
+  doFirst: "Missing Semester"
+
+- id: "linux-upskill-challenge"
+  title: "Linux Upskill Challenge"
+  short: "Linux Upskill"
+  provider: "Linux Upskill Challenge community"
+  type: "practice"
+  url: "https://linuxupskillchallenge.org/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intro"
+  cost: "free"
+  estHours: 20
+  summary: "A month of daily tasks running your own Linux server: SSH, firewalls, logs, web server and cron."
+  fromYear: 1
+  after: [the-linux-command-line]
+
+- id: "protohackers"
+  title: "Protohackers"
+  short: "Protohackers"
+  provider: "Protohackers"
+  type: "practice"
+  url: "https://protohackers.com/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 30
+  summary: "Network-server challenges tested against a live checker, great for practicing sockets and async Rust."
+  fromYear: 2
+  after: [beej-network-programming]
+
+- id: "codecrafters"
+  title: "CodeCrafters"
+  short: "CodeCrafters"
+  provider: "CodeCrafters"
+  type: "practice"
+  url: "https://codecrafters.io/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 40
+  summary: "Guided, test-driven builds of Redis, Git, SQLite, HTTP servers and more in your chosen language."
+  fromYear: 2
+  note: "Free tier"
+  doFirst: "build-your-own-x"
+
+- id: "gossip-glomers"
+  title: "Gossip Glomers: Fly.io Distributed Systems Challenge"
+  short: "Gossip Glomers"
+  provider: "Fly.io & Kyle Kingsbury (Maelstrom)"
+  type: "practice"
+  url: "https://fly.io/dist-sys/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 20
+  summary: "Implement broadcast, CRDT counters and Kafka-style logs tested by Maelstrom fault injection."
+  fromYear: 2
+  after: [kleppmann-distributed-systems]
+
+- id: "sadservers"
+  title: "SadServers"
+  short: "SadServers"
+  provider: "SadServers"
+  type: "practice"
+  url: "https://sadservers.com/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 20
+  summary: "Troubleshoot broken real Linux servers in the browser, like LeetCode for DevOps/SRE."
+  fromYear: 2
+  note: "Free tier"
+  after: [overthewire-bandit]
+
+- id: "pingcap-talent-plan"
+  title: "PingCAP Talent Plan"
+  short: "Talent Plan"
+  provider: "PingCAP"
+  type: "practice"
+  url: "https://github.com/pingcap/talent-plan"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 120
+  summary: "Project courses building a Rust key-value store, Raft and a distributed transactional KV (TinyKV)."
+  fromYear: 3
+  after: [rust-book]
+
+# ---- Rust, C and C++ (9)
+
+- id: "stanford-cs110l"
+  title: "Stanford CS 110L: Safety in Systems Programming (Spring 2020)"
+  short: "Stanford CS110L"
+  provider: "Stanford (Ryan Eberhardt, Armin Namavari)"
+  type: "lectures"
+  url: "https://reberhardt.com/cs110l/spring-2020/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 40
+  summary: "Recorded lectures and projects teaching Rust by contrasting it with memory bugs in C/C++ systems code."
+  fromYear: 1
+  after: [rust-book]
+
+- id: "comprehensive-rust"
+  title: "Comprehensive Rust"
+  short: "Comprehensive Rust"
+  provider: "Google"
+  type: "course"
+  url: "https://google.github.io/comprehensive-rust/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 30
+  summary: "Google's multi-day Rust training with exercises, including bare-metal and concurrency modules."
+  fromYear: 1
+
+- id: "rustonomicon"
+  title: "The Rustonomicon: The Dark Arts of Unsafe Rust"
+  short: "Rustonomicon"
+  provider: "The Rust Project"
+  type: "book"
+  url: "https://doc.rust-lang.org/nomicon/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [languages]
+  level: "advanced"
+  cost: "free"
+  estHours: 15
+  summary: "Explains unsafe Rust, layout, variance and drop semantics needed for low-level libraries."
+  fromYear: 2
+  after: [rust-book]
+
+- id: "rust-atomics-and-locks"
+  title: "Rust Atomics and Locks"
+  short: "Rust Atomics and Locks"
+  provider: "Mara Bos"
+  type: "book"
+  url: "https://mara.nl/atomics/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [languages]
+  level: "advanced"
+  cost: "free"
+  estHours: 25
+  summary: "Free online book on memory ordering, atomics and building your own mutexes, channels and Arc."
+  fromYear: 2
+  after: [crust-of-rust]
+
+- id: "rust-async-book"
+  title: "Asynchronous Programming in Rust"
+  short: "Rust Async Book"
+  provider: "The Rust Project"
+  type: "article"
+  url: "https://rust-lang.github.io/async-book/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Explains futures, executors and async/await so you can write async network services in Rust."
+  fromYear: 2
+  after: [rust-book]
+
+- id: "too-many-linked-lists"
+  title: "Learning Rust With Entirely Too Many Linked Lists"
+  short: "Too Many Linked Lists"
+  provider: "Alexis Beingessner"
+  type: "article"
+  url: "https://rust-unofficial.github.io/too-many-lists/"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 12
+  summary: "Teaches ownership, Box, Rc, RefCell and unsafe by implementing linked lists six ways."
+  fromYear: 1
+  after: [rust-book]
+
+- id: "exercism-rust"
+  title: "Exercism Rust Track"
+  short: "Exercism Rust"
+  provider: "Exercism"
+  type: "practice"
+  url: "https://exercism.org/tracks/rust"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 50
+  summary: "99 Rust exercises with optional free human mentoring on idiomatic style."
+  fromYear: 1
+  after: [rustlings]
+
+- id: "exercism-c"
+  title: "Exercism C Track"
+  short: "Exercism C"
+  provider: "Exercism"
+  type: "practice"
+  url: "https://exercism.org/tracks/c"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 30
+  summary: "Test-driven C exercises to practice pointers, strings and memory management."
+  fromYear: 1
+  after: [beej-c]
+
+- id: "exercism-cpp"
+  title: "Exercism C++ Track"
+  short: "Exercism C++"
+  provider: "Exercism"
+  type: "practice"
+  url: "https://exercism.org/tracks/cpp"
+  urlVerified: true
+  lastVerified: 2026-10-19
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 30
+  summary: "Test-driven modern C++ exercises with free mentoring to reinforce learncpp.com."
+  fromYear: 1
+  doFirst: "learncpp.com"

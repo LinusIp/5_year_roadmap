@@ -1,0 +1,159 @@
+/**
+ * Importing a list of resources into the Library (RESOURCES-ADD): the mapping from the import file's fields to the
+ * resource schema, and the rules that find an entry the Library already has. Pure; scratch/import-resources.ts runs it.
+ */
+
+/** One line of new-resources.jsonl. */
+export interface ImportItem {
+  id: string;
+  title: string;
+  short: string;
+  type: 'video-course' | 'course' | 'book' | 'docs' | 'tutorial' | 'practice';
+  track: 'ai' | 'inference' | 'graphics' | 'gamedev' | 'systems' | 'languages';
+  level: 'beginner' | 'intermediate' | 'advanced';
+  hours: number;
+  provider: string;
+  url: string;
+  free: boolean;
+  note: '' | 'free audit' | 'free tier';
+  why: string;
+  after: string;
+  year: 1 | 2 | 3;
+  verified: string;
+}
+
+/** What the Library already has, for the matching. */
+export interface Existing {
+  id: string;
+  title: string;
+  short?: string | undefined;
+  url: string | null;
+}
+
+/** The resource types: a video course is a lecture series, docs and tutorials are read like articles. */
+export const TYPE_OF = { 'video-course': 'lectures', course: 'course', book: 'book', docs: 'article', tutorial: 'article', practice: 'practice' } as const;
+/** The Library's tracks: inference is AI with an `inference` tag; game development has a track of its own. */
+export const TRACK_OF = { ai: 'ai', inference: 'ai', graphics: 'graphics', gamedev: 'gamedev', systems: 'systems', languages: 'languages' } as const;
+export const LEVEL_OF = { beginner: 'intro', intermediate: 'intermediate', advanced: 'advanced' } as const;
+
+/** A URL as the matching compares it: lowercase, no scheme, no `www.`, no trailing slash. */
+export function normaliseUrl(url: string): string {
+  return url
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .replace(/\/+$/, '');
+}
+
+const STOP = new Set(['the', 'a', 'an', 'of', 'and', 'for', 'with', 'to', 'in', 'on', 'from', 'your', 'you', 'how']);
+
+/** A title's words, for the fuzzy match: lowercase, no brackets or punctuation, no small words. */
+export function titleWords(title: string): Set<string> {
+  return new Set(
+    title
+      .toLowerCase()
+      .replace(/\([^)]*\)/g, ' ')
+      .replace(/[^a-z0-9+#]+/g, ' ')
+      .split(' ')
+      .filter((w) => w && !STOP.has(w)),
+  );
+}
+
+/** How alike two titles are: the share of words they have in common (Jaccard), 0 to 1. */
+export function titleLikeness(a: string, b: string): number {
+  const x = titleWords(a);
+  const y = titleWords(b);
+  if (x.size === 0 || y.size === 0) return 0;
+  let both = 0;
+  for (const w of x) if (y.has(w)) both++;
+  return both / (x.size + y.size - both);
+}
+
+/** Two titles this alike are the same resource. */
+export const SAME_TITLE = 0.8;
+
+/**
+ * Pairs looked at by hand and found to be the same resource under another address (the import's id to the Library's):
+ * NVIDIA renamed its CUDA guide, the raylib examples are a page of the raylib site, cs162.org is Berkeley's CS162.
+ */
+export const SAME_AS: Readonly<Record<string, string>> = {
+  'cuda-programming-guide': 'cuda-guide',
+  'raylib-examples': 'raylib',
+  'berkeley-cs162': 'cs162',
+};
+
+/**
+ * The entry the Library already has for an item: the same URL; the same id (the Library's own name for it); a pair
+ * listed in SAME_AS; or a title (or short title) alike enough.
+ */
+export function findExisting(item: Pick<ImportItem, 'id' | 'url' | 'title' | 'short'>, existing: readonly Existing[]): { entry: Existing; by: 'url' | 'id' | 'checked' | 'title' } | null {
+  const url = normaliseUrl(item.url);
+  const byUrl = existing.find((e) => e.url !== null && normaliseUrl(e.url) === url);
+  if (byUrl) return { entry: byUrl, by: 'url' };
+  const byId = existing.find((e) => e.id === item.id);
+  if (byId) return { entry: byId, by: 'id' };
+  const checked = SAME_AS[item.id] ? existing.find((e) => e.id === SAME_AS[item.id]) : undefined;
+  if (checked) return { entry: checked, by: 'checked' };
+  let best: { entry: Existing; score: number } | null = null;
+  for (const e of existing) {
+    const score = Math.max(titleLikeness(item.title, e.title), e.short ? titleLikeness(item.short, e.short) : 0, e.short ? titleLikeness(item.title, e.short) : 0);
+    if (score >= SAME_TITLE && (!best || score > best.score)) best = { entry: e, score };
+  }
+  return best ? { entry: best.entry, by: 'title' } : null;
+}
+
+/** The id an item's `after` names, when it is a short title the Library has (any case); otherwise null. */
+export function resolveAfter(after: string, known: readonly { id: string; short?: string | undefined }[]): string | null {
+  if (!after) return null;
+  const want = after.trim().toLowerCase();
+  return known.find((k) => (k.short ?? '').trim().toLowerCase() === want)?.id ?? null;
+}
+
+/** The resource an item becomes. `afterId` is its soft prerequisite when `after` named one. */
+export function toResource(item: ImportItem, afterId: string | null): Record<string, unknown> {
+  const out: Record<string, unknown> = {
+    id: item.id,
+    title: item.title,
+    short: item.short,
+    provider: item.provider,
+    type: TYPE_OF[item.type],
+    url: item.url,
+    urlVerified: true,
+    lastVerified: item.verified,
+    tracks: [TRACK_OF[item.track]],
+    level: LEVEL_OF[item.level],
+    cost: item.note === 'free audit' ? 'audit-free' : 'free',
+    estHours: item.hours,
+    summary: item.why,
+    fromYear: item.year,
+  };
+  if (item.track === 'inference') out.tags = ['inference'];
+  if (item.note === 'free tier') out.note = 'Free tier';
+  if (afterId) out.after = [afterId];
+  else if (item.after) out.doFirst = item.after;
+  return out;
+}
+
+/**
+ * The fields an entry the Library already has takes from a matching item: only the ones it is missing. An entry on the
+ * plan keeps its name (no short title) and takes no year to fit from; one with prerequisites takes no "do first".
+ */
+export function fillMissing(entry: Record<string, unknown>, item: ImportItem, afterId: string | null, planned: boolean): Record<string, unknown> {
+  const from = toResource(item, afterId);
+  const add: Record<string, unknown> = {};
+  const keys = ['short', 'summary', 'fromYear', 'tags', 'note', 'after', 'doFirst'] as const;
+  for (const key of keys) {
+    if (planned && (key === 'short' || key === 'fromYear')) continue;
+    if ((key === 'after' || key === 'doFirst') && ((entry.prerequisites as unknown[] | undefined)?.length ?? 0) > 0) continue;
+    if (key === 'after' && from.after && (from.after as string[]).includes(String(entry.id))) continue;
+    if (entry[key] === undefined && from[key] !== undefined) add[key] = from[key];
+  }
+  if (entry.lastVerified === undefined && entry.url !== null && normaliseUrl(String(entry.url)) === normaliseUrl(item.url)) add.lastVerified = item.verified;
+  if (entry.url === null) {
+    add.url = item.url;
+    add.urlVerified = true;
+    add.lastVerified = item.verified;
+  }
+  return add;
+}

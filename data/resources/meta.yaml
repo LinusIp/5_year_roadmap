@@ -107,6 +107,8 @@
   estHours: 0
   reference: true
   summary: "Every category has a project card in the pool, linked to its section of this list."
+  short: "Build Your Own X"
+  fromYear: 2
 
 - id: project-based-learning
   title: "practical-tutorials/project-based-learning"

@@ -51,6 +51,15 @@ describe('validateSeed', () => {
     expect(errorsOf((raw) => list(raw.resources[0]).push(resource('r6', { esthours: 3 })))).toMatch(/Unrecognized key/);
   });
 
+  it('rejects a short title over 28 characters, an unknown type or track, a bad link, and a soft prerequisite that is not a resource', () => {
+    expect(errorsOf((raw) => list(raw.resources[0]).push(resource('r6', { short: 'A short title that runs too long' })))).toMatch(/28 characters or fewer/);
+    expect(errorsOf((raw) => list(raw.resources[0]).push(resource('r7', { type: 'podcast' })))).toMatch(/r7/);
+    expect(errorsOf((raw) => list(raw.resources[0]).push(resource('r8', { tracks: ['cooking'] })))).toMatch(/r8/);
+    expect(errorsOf((raw) => list(raw.resources[0]).push(resource('r9', { url: 'not a link' })))).toMatch(/r9/);
+    expect(errorsOf((raw) => list(raw.resources[0]).push(resource('r10', { after: ['nowhere'] })))).toMatch(/after "nowhere" is not a resource/);
+    expect(errorsOf((raw) => list(raw.resources[0]).push(resource('r11', { type: 'practice', after: ['r1'], fromYear: 2, tags: ['inference'], note: 'Free tier', short: 'Practice' })))).toBe('');
+  });
+
   it('rejects a roadmap item whose subject has no credential-map row', () => {
     const missing = errorsOf((raw) => {
       list(raw.resources[0])[0]!.subject = undefined;

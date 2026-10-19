@@ -1,0 +1,35 @@
+name: Links
+
+# Every link under /data, requested from a runner once a week (RESOURCES-ADD). A report only: the job never edits
+# data and never blocks anything; the script exits 0 and the job may not fail a build. Run it by hand from the
+# Actions tab too.
+on:
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # The links that answered are left out, so the log is the list of links to look at.
+      - name: Link report
+        run: npm run check:links -- --json | grep -v '^ok '
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: links-report
+          path: reports/links.json
+          if-no-files-found: ignore
+          retention-days: 30

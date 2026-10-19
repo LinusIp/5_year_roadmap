@@ -189,6 +189,16 @@ for (const theme of ['light', 'dark'] as const) {
 }
 
 for (const theme of ['light', 'dark'] as const) {
+  test('the Library home in full, with the shelf counts and the Practice tile, matches the committed screenshot, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await importDemo(page, theme);
+    await open(page, './#/library');
+    await expect(page.getByRole('button', { name: /^\d+ Practice$/ })).toBeVisible();
+    await expect(page).toHaveScreenshot('library-home-full-' + theme + '.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
+  });
+}
+
+for (const theme of ['light', 'dark'] as const) {
   test('the blog screen and Today with the blog reminder match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await importDemo(page, theme);

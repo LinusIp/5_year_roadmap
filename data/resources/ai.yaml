@@ -132,6 +132,9 @@
   subject: machine-learning
   stretch: true
   alternatives: [ng-ml-spec]
+  short: "CS229 Machine Learning"
+  summary: "The math-first derivations of classic ML (regression, SVMs, EM, learning theory) behind every library call."
+  fromYear: 1
 
 - id: stanford-cs231n
   title: "Stanford CS231n Deep Learning for Computer Vision"
@@ -163,6 +166,9 @@
   estHours: 120
   prerequisites: [mit-18-06, karpathy-zero-to-hero]
   subject: deep-learning
+  short: "CS224N NLP"
+  summary: "The standard NLP course: word vectors to transformers and LLMs, with strong assignments (2024 videos free on YouTube)."
+  fromYear: 2
 
 - id: stanford-cs336
   title: "Stanford CS336 Language Modeling from Scratch"
@@ -192,6 +198,10 @@
   estHours: 20
   subject: deep-learning
   stretch: true
+  short: "CS25 Transformers"
+  summary: "Talks from researchers at frontier labs on current transformer research directions."
+  fromYear: 3
+  after: [stanford-cs224n]
 
 - id: mit-6-s191
   title: "MIT 6.S191 Introduction to Deep Learning"
@@ -206,6 +216,9 @@
   estHours: 25
   subject: deep-learning
   stretch: true
+  short: "MIT Intro to DL"
+  summary: "Compact yearly-updated lectures plus TensorFlow/PyTorch labs covering modern DL end to end."
+  fromYear: 1
 
 - id: mit-6-5940
   title: "MIT 6.5940 TinyML and Efficient Deep Learning Computing (Fall 2024)"
@@ -220,6 +233,11 @@
   estHours: 80
   subject: deep-learning
   stretch: true
+  short: "MIT EfficientML"
+  summary: "Pruning, quantization, distillation and efficient LLM inference taught by the AWQ/SmoothQuant group."
+  fromYear: 3
+  tags: [inference]
+  after: [cmu-10-414]
 
 - id: berkeley-cs285
   title: "UC Berkeley CS 285 Deep Reinforcement Learning"
@@ -248,6 +266,9 @@
   estHours: 40
   subject: deep-learning
   summary: "The advanced follow-up to the Fall 2024 LLM Agents MOOC: reasoning, planning, tool use and agent safety."
+  short: "Advanced LLM Agents"
+  fromYear: 3
+  after: [berkeley-llm-agents-f24]
 
 - id: fsdl
   title: "Full Stack Deep Learning (course and LLM bootcamp)"
@@ -262,6 +283,10 @@
   estHours: 50
   subject: machine-learning
   stretch: true
+  short: "Full Stack DL"
+  summary: "How to take models to production: data, tooling, deployment, monitoring and teams."
+  fromYear: 2
+  after: [mit-6-s191]
 
 - id: llm-zoomcamp
   title: "DataTalksClub LLM Zoomcamp"
@@ -304,6 +329,10 @@
   estHours: 0
   reference: true
   subject: deep-learning
+  short: "Deep Learning (Goodfellow)"
+  summary: "Canonical theory reference for optimization, regularization and the math under neural nets."
+  fromYear: 2
+  after: [d2l]
 
 - id: udl-book
   title: "Understanding Deep Learning (Simon Prince)"
@@ -318,6 +347,10 @@
   estHours: 0
   reference: true
   subject: deep-learning
+  short: "Understanding DL"
+  summary: "Modern, beautifully illustrated DL theory incl. transformers and diffusion, with companion notebooks."
+  fromYear: 2
+  after: [d2l]
 
 - id: d2l
   title: "Dive into Deep Learning (d2l.ai)"
@@ -333,6 +366,7 @@
   estHours: 0
   reference: true
   subject: deep-learning
+  summary: "Interactive book where every concept is runnable PyTorch code, from linear regression to transformers."
 
 - id: pmpp-book
   title: "Programming Massively Parallel Processors, 5th edition (Hwu, Kirk)"
@@ -378,6 +412,8 @@
   cost: free
   estHours: 20
   summary: "Bite-sized notebook courses: pandas, feature engineering, intro deep learning and more."
+  short: "Kaggle Learn"
+  fromYear: 1
 
 - id: fcc-ml
   title: "freeCodeCamp: Machine Learning with Python"
@@ -470,6 +506,8 @@
   estHours: 90
   summary: "The beginner route into machine learning, free to audit."
   alternatives: [stanford-cs229]
+  short: "Andrew Ng ML Spec"
+  fromYear: 1
 
 - id: cs50-ai
   title: "CS50's Introduction to Artificial Intelligence with Python"

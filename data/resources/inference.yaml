@@ -21,6 +21,8 @@
     - inference-engineering/vllm
     - inference-engineering/pagedattention
     - inference-engineering/continuous-batching
+  tags: [inference]
+  after: [llm-inference-handbook]
 - id: sglang-docs
   title: SGLang documentation
   provider: SGLang project
@@ -77,6 +79,8 @@
   summary: Inference in plain C/C++ on CPUs and consumer GPUs; the GGUF format and its quantization schemes.
   covers:
     - inference-engineering/desktop-inference
+  tags: [inference]
+  after: [visual-guide-quantization]
 - id: onnx-runtime-docs
   title: ONNX Runtime documentation
   provider: Microsoft
@@ -188,6 +192,8 @@
     - inference-engineering/tensor-parallelism
     - inference-engineering/pipeline-parallelism
     - inference-engineering/expert-parallelism
+  tags: [inference]
+  after: [scaling-book]
 - id: cmu-10-414
   title: Deep Learning Systems (CMU 10-414/714)
   provider: Carnegie Mellon University
@@ -204,6 +210,10 @@
   prerequisites: []
   subject: deep-learning
   summary: "Build a deep learning framework from the ground up: automatic differentiation, kernels on CPU and GPU, models."
+  short: "CMU DL Systems"
+  fromYear: 2
+  tags: [inference]
+  after: [minitorch]
 - id: nvidia-dli-cuda
   title: Fundamentals of Accelerated Computing with CUDA C/C++
   provider: NVIDIA Deep Learning Institute
@@ -236,6 +246,10 @@
   summary: From a naive kernel to near-cuBLAS speed, one optimisation at a time.
   covers:
     - inference-engineering/writing-custom-kernels
+  short: "CUDA Matmul Worklog"
+  fromYear: 3
+  tags: [inference]
+  after: [gpu-puzzles]
 - id: horace-he-brrr
   title: Making Deep Learning Go Brrrr From First Principles
   provider: Horace He
@@ -288,6 +302,10 @@
   covers:
     - inference-engineering/roofline-model
     - inference-engineering/arithmetic-intensity
+  short: "How to Scale Your Model"
+  fromYear: 3
+  tags: [inference]
+  after: [cmu-10-414]
 - id: databricks-inference-best-practices
   title: "LLM Inference Performance Engineering: Best Practices"
   provider: Databricks

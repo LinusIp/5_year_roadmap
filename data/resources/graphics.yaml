@@ -60,6 +60,10 @@
   estHours: 0
   reference: true
   subject: graphics
+  short: "Scratchapixel"
+  summary: "Long-form lessons deriving rendering math and algorithms in detail, from rays to BRDFs."
+  fromYear: 2
+  after: [cg-from-scratch]
 
 - id: cmu-15-462
   title: "CMU 15-462/662 Computer Graphics"
@@ -104,6 +108,9 @@
   estHours: 60
   subject: graphics
   stretch: true
+  short: "Yuksel Intro to Graphics"
+  summary: "A complete recorded intro course covering the pipeline, transforms, shading, textures, and animation basics."
+  fromYear: 1
 
 - id: utah-cs6610
   title: "Cem Yuksel: Interactive Computer Graphics (University of Utah CS 5610/6610, lecture videos)"
@@ -197,6 +204,9 @@
   reference: true
   subject: graphics
   summary: "Reference, and a stretch read for year 5."
+  short: "PBRT 4th ed."
+  fromYear: 3
+  after: [tu-wien-rendering-course]
 
 - id: rtr4
   title: "Real-Time Rendering, 4th edition (resources page)"
@@ -226,6 +236,8 @@
   estHours: 20
   subject: graphics
   summary: "GLSL, a chapter at a time. Feeds the shader reel of the graphics portfolio milestone."
+  short: "Book of Shaders"
+  fromYear: 1
 
 - id: iq-articles
   title: "Inigo Quilez: articles"
@@ -285,6 +297,9 @@
   reference: true
   subject: gamedev
   summary: "Optional."
+  short: "Handmade Hero"
+  fromYear: 3
+  after: [game-engine-architecture]
 
 - id: raylib
   title: "raylib: cheatsheet and examples"
@@ -300,6 +315,8 @@
   reference: true
   subject: gamedev
   summary: "The library for the games in C of year 1."
+  short: "raylib Examples"
+  fromYear: 1
 
 - id: sdl
   title: "SDL (Simple DirectMedia Layer)"
@@ -344,6 +361,9 @@
   cost: free
   estHours: 100
   summary: "Transformations, curves and surfaces, animation, ray tracing and rasterisation."
+  short: "MIT 6.837 Assignments"
+  fromYear: 2
+  after: [utah-cs4600]
 
 - id: cs248
   title: "Stanford CS248 Interactive Computer Graphics (Winter 2022)"

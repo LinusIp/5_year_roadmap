@@ -14,8 +14,11 @@ export const TRACK_IDS = [
 /** The lanes of the curriculum (plan.yaml, the phase table): the five of the first plan and H, Hugging Face, added with
  * the fixed daily schedule. The user can add blocks of their own beyond them. */
 export const BLOCK_IDS = ['A', 'B', 'C', 'D', 'E', 'H'] as const;
-/** `problems` is a problem source (problem sets, judges, exercise collections); `tool` is software or a reference site. */
-export const RESOURCE_TYPES = ['course', 'lectures', 'book', 'tutorial', 'article', 'paper', 'repo', 'cert', 'problems', 'tool'] as const;
+/**
+ * `problems` is a problem source (problem sets, judges, exercise collections); `practice` is something to build or
+ * drill by hand (puzzles, from-scratch repos, exercise tracks; RESOURCES-ADD); `tool` is software or a reference site.
+ */
+export const RESOURCE_TYPES = ['course', 'lectures', 'book', 'tutorial', 'article', 'paper', 'repo', 'cert', 'problems', 'practice', 'tool'] as const;
 export const LEVELS = ['intro', 'intermediate', 'advanced'] as const;
 export const COSTS = ['free', 'audit-free', 'paid'] as const;
 /** The brief's four cadences: a weekly mini-build, a monthly project, research (a reimplementation, a quarterly question, a paper), a yearly capstone. */
@@ -225,7 +228,7 @@ export const ResourceSchema = z
     id: Slug,
     title: Text,
     /** The name lists show, when the full title is long: "ML Zoomcamp" for "DataTalksClub Machine Learning Zoomcamp". */
-    short: Text.optional(),
+    short: Text.max(28, 'a short title is 28 characters or fewer').optional(),
     provider: Text,
     type: z.enum(RESOURCE_TYPES),
     ...linkFields,
@@ -252,6 +255,16 @@ export const ResourceSchema = z
     alternatives: z.array(Slug).optional(),
     /** Set on a resource the user added in the app. */
     source: z.literal('user').optional(),
+    /** The year of the plan it fits from, for one not on the plan (RESOURCES-ADD): the order of a path's optional list. */
+    fromYear: z.literal([1, 2, 3, 4, 5]).optional(),
+    /** Finer than a track: `inference` on the AI resources about serving and GPUs. */
+    tags: z.array(Slug).optional(),
+    /** One line on how it is free, for the sheet: "Free tier". */
+    note: Text.optional(),
+    /** Soft prerequisites: worth doing first, never enforced by the schedule. */
+    after: z.array(Slug).optional(),
+    /** What to do first, in words, when it is not a resource the Library has. */
+    doFirst: Text.optional(),
   })
   .superRefine((v, ctx) => {
     checkLink(v, ctx);

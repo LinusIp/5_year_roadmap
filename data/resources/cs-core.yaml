@@ -74,6 +74,9 @@
   prerequisites: [mit-6-006]
   subject: algorithms
   stretch: true
+  short: "MIT 6.046"
+  summary: "Next step after 6.006: divide-and-conquer, flows, randomized, approximation and distributed algorithms."
+  fromYear: 2
 
 - id: skiena-adm
   title: "The Algorithm Design Manual (Steven Skiena)"
@@ -102,6 +105,10 @@
   estHours: 100
   subject: algorithms
   summary: "The 150-problem count of the algorithms portfolio milestone comes from here. Done in weekly mini-builds, five problems at a time."
+  short: "NeetCode Roadmap"
+  fromYear: 2
+  note: "Free tier"
+  after: [fcc-data-structures-fiset]
 
 - id: cmu-15-213
   title: "CMU 15-213 Introduction to Computer Systems (lectures with the CS:APP book)"
@@ -157,6 +164,7 @@
   estHours: 90
   subject: fpga
   summary: "From NAND gates to a computer, a compiler and an operating system. Also the warm-up for MIT 6.004 in year 4."
+  after: [cs50x]
 
 - id: mit-6-1810
   title: "MIT 6.1810 (formerly 6.S081) Operating System Engineering (xv6)"
@@ -188,6 +196,9 @@
   reference: true
   subject: linux-os
   summary: "The free textbook to read alongside 6.1810."
+  short: "OSTEP"
+  fromYear: 1
+  after: [cs50x]
 
 - id: cmu-15-445
   title: "CMU 15-445/645 Database Systems (BusTub projects)"
@@ -233,6 +244,9 @@
   estHours: 80
   subject: c-cpp
   summary: "Not on the roadmap by default: a tree-walk interpreter in Java, then a bytecode VM in C. Add it to a lane when you want it."
+  short: "Crafting Interpreters"
+  fromYear: 2
+  doFirst: "K&R"
 
 - id: fcc-youtube
   title: "freeCodeCamp full-length courses on YouTube (Git, Linux, Docker, SQL)"
@@ -263,6 +277,9 @@
   cost: free
   estHours: 120
   summary: "Making code fast, measured: work and span, caches, bit hacks, vectorisation and parallel programming. The CPU half of performance engineering."
+  short: "MIT 6.172"
+  fromYear: 3
+  doFirst: "CS:APP"
 
 - id: cs106b
   title: "Stanford CS106B Programming Abstractions (C++)"
@@ -315,6 +332,9 @@
   cost: free
   estHours: 120
   summary: "Processes, concurrency, memory, file systems and networking: an alternative to MIT 6.1810."
+  short: "Berkeley CS162"
+  fromYear: 2
+  after: [ostep]
 
 - id: cs149
   title: "Stanford CS149 Parallel Computing (Fall 2025)"
@@ -341,6 +361,9 @@
   cost: free
   estHours: 100
   summary: "CMU's parallel computing course, the counterpart of Stanford CS149."
+  short: "CMU 15-418"
+  fromYear: 3
+  doFirst: "CS:APP"
 
 - id: sicp
   title: "Structure and Interpretation of Computer Programs (Abelson and Sussman, full text)"
