@@ -1031,3 +1031,23 @@ Verified on this machine (Linux, Chromium 140):
   the prerequisite links, filling an entry. `validate.test.ts`: the new rules. `tests/e2e/resources-add.spec.ts`: the
   Practice shelf, search for OSTEP and Vulkan, AI engineering's optional list, the free-to-audit sheet and its link,
   a free-tier note and a "Do first". Baseline: the Library home in full, light and dark.
+
+## Pull request #19: five hundred more resources
+
+- `data/resources/library-more.yaml`: 388 new resources (167 papers, 104 articles of which 32 docs and 10
+  tutorials, 52 blogs, 22 books, 16 courses, 27 practice; AI 142 + 32 tagged inference, Systems 83, Robotics 45,
+  Graphics 30, Software architecture 28, Languages 17, Gamedev 11). 119 more matched what the Library had and filled
+  only their missing fields: 57 resources and 62 papers of the reading queue (`data/papers.yaml`). Resources: 418 to
+  806; the Papers shelf 92 to 259.
+- Schema: the `architecture` track; the queue's papers may carry a short name, a summary, a level and a year; a soft
+  prerequisite may name a paper. The converter: papers, blogs and articles, the two tracks, titles compared only on
+  one shelf and never across different numbers, three pairs checked by hand, `fillPaper`.
+- Library: paths by their tracks, Software architecture and Robotics of their own (the first browsable from the home
+  with nothing on the plan), the Papers shelf in the plan's years with level chips, paper rows with their year, a
+  paper's summary in its sheet, a "Do first" that opens a paper. `check:links --checked <date>`, and 403s reported
+  as "check by hand".
+- Tests: the second import's mapping to shelves and tracks, same-shelf titles, numbered titles, the checked pairs,
+  `fillPaper`; the paths of a track, a path's extras; `tests/e2e/more-resources.spec.ts`: the Papers shelf (year 1
+  first, Attention Is All You Need, the level chips, its link), search for FlashAttention, Raft and Diffusion Policy,
+  the Software architecture and Robotics paths, a blog's sheet and link. Baselines: the Papers shelf, the Library
+  home, and the Library screens whose counts changed.

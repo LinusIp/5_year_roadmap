@@ -16,6 +16,7 @@
   cost: free
   estHours: 80
   summary: "Determinant-free, proof-first linear algebra; the open-access fourth edition, with exercises after every section."
+  fromYear: 2
 
 - id: strang-ila-book
   title: "Introduction to Linear Algebra (book site and problem sets)"
@@ -238,6 +239,8 @@
   cost: free
   estHours: 40
   summary: "A free introduction to proofs: logic, sets, induction, contradiction, with solutions to odd exercises."
+  short: "Book of Proof"
+  fromYear: 1
 
 - id: cses-problem-set
   title: "CSES Problem Set"
@@ -267,6 +270,9 @@
   cost: free
   estHours: 60
   summary: "Lessons with graded practice problems on binary search, two pointers, segment trees and more."
+  short: "Codeforces EDU"
+  fromYear: 2
+  after: [competitive-programmers-handbook]
 
 - id: usaco-guide
   title: "USACO Guide"
@@ -280,6 +286,8 @@
   cost: free
   estHours: 100
   summary: "A curated path from bronze to platinum, every module with practice problems and solutions."
+  short: "USACO Guide"
+  fromYear: 1
 
 - id: matrix-calculus-dl
   title: "The Matrix Calculus You Need for Deep Learning"
@@ -294,6 +302,8 @@
   cost: free
   estHours: 6
   summary: "Jacobians, the vector chain rule and the gradients of neural network layers, worked out by hand."
+  fromYear: 1
+  after: [3b1b-calculus]
 
 - id: transformer-math-101
   title: "Transformer Math 101"

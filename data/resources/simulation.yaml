@@ -43,6 +43,7 @@
   cost: free
   estHours: 10
   subject: simulation
+  summary: "The go-to series on game loops, physics integration and networked multiplayer."
 
 - id: witkin-baraff-pbm
   title: "Witkin and Baraff: Physically Based Modeling (SIGGRAPH course notes)"

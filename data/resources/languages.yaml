@@ -72,6 +72,7 @@
   cost: free
   estHours: 40
   subject: c-cpp
+  summary: "A friendly, humorous C tutorial and library reference that covers pointers and memory without the dread."
 
 - id: kr-c
   title: "The C Programming Language, 2nd edition (Kernighan and Ritchie)"
@@ -116,6 +117,7 @@
   estHours: 100
   subject: c-cpp
   alternatives: [tour-of-cpp]
+  summary: "A thorough, up-to-date free course that takes you from zero to modern C++ with clear explanations."
 
 - id: tour-of-cpp
   title: "A Tour of C++, 3rd edition (Bjarne Stroustrup)"
@@ -194,6 +196,7 @@
   cost: free
   estHours: 60
   subject: rust-go
+  summary: "The official introduction to Rust, covering ownership, borrowing, traits and error handling step by step."
 
 - id: rustlings
   title: "Rustlings"

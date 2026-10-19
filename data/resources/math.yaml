@@ -153,6 +153,8 @@
   cost: free
   estHours: 100
   subject: math-physics
+  summary: "Linear algebra, calculus, probability and optimization written specifically as ML prerequisites, free PDF."
+  after: [3b1b-linear-algebra]
 
 - id: mit-6-042j
   title: "MIT 6.042J (now 6.1200J) Mathematics for Computer Science (Fall 2010)"
@@ -169,6 +171,8 @@
   summary: "Proofs, induction, graphs, counting, probability. The Spring 2024 edition is on OCW under the new number 6.1200J."
 
 # ---------------------------------------------------------------- added 2026-10-07
+  short: "MIT 6.042J Math for CS"
+  fromYear: 1
 
 - id: mit-18-085
   title: "MIT 18.085 Computational Science and Engineering I (Gilbert Strang, Fall 2008)"

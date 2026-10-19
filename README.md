@@ -187,16 +187,20 @@ The Library opens on what matters now, not on all of it:
 
 - **In progress**: what is started (at most six cards), each with how far it is ("Module 6 of 10") and a menu to
   Pause (back to not started; its progress stays) or Mark done. A long press on a card opens the same menu.
-- **Your paths**: the plan's courses and books in plan order, one path per family of tracks (AI engineering,
-  Languages, Graphics, Math and physics, Systems; Electrical and embedded and Mechanical and robotics wait under
+- **Your paths**: the plan's courses and books in plan order, one path per group of tracks (AI engineering,
+  Languages, Graphics, Math and physics, Systems; Electrical and embedded, Mechanical and Robotics wait under
   "Later in the plan" until they come within a year). Each shows a subway line of at most eight stops and "+N", and
   its next step. A path opens on its own page, grouped by phase, its current step marked; alternatives, the
-  Library's other resources of its family (by the year of the plan they fit from) and the papers of its tracks wait
-  under "Optional for this path".
+  Library's other resources of its tracks (by the year of the plan they fit from) and the papers of its tracks wait
+  under "Optional for this path". Software architecture has nothing on the plan yet: it is listed as "Not on the plan
+  · N to browse" and opens on that list.
 - **Up next**: the three nearest steps not started, across every path.
 - **Browse when you need something**: shelves for Courses, Books, Papers, Articles, Blogs to follow, Tools,
-  Practice (exercises, puzzles and problem sets) and Projects, with their real counts. A shelf is the full list with search and the Active, Not started, Done and Track
-  filters, and it is where you add a resource of your own.
+  Practice (exercises, puzzles and problem sets) and Projects, with their real counts. A shelf is the full list
+  (windowed, so a few hundred rows stay quick on a phone) with search and the Active, Not started, Done and Track
+  filters, and it is where you add a resource of your own. Papers, the reading queue and the papers of the imports
+  together, read in the plan's years (year 1's foundations first) and filter by level: Beginner, Intermediate,
+  Advanced.
 
 Searching shows the matches grouped by shelf, three of each, with "Show all" to open that shelf on the same search.
 Every planned resource has a short title (28 characters at most, checked by `npm run validate:data`) so cards and
@@ -206,10 +210,15 @@ Beyond the plan, `data/resources/library-additions.yaml` holds about a hundred f
 sites to reach for when you need them (RESOURCES-ADD). They are not in any lane: each says the year it fits from
 (`fromYear`), may name a resource worth doing first (`after`, a soft prerequisite the schedule never enforces, or
 `doFirst` in words), and a sheet shows how it is free ("free to audit", "Free tier") and when its link was checked.
+A second set, `data/resources/library-more.yaml` (MORE-RESOURCES), adds close to four hundred papers, blogs,
+articles, books, courses, docs and practice across AI, inference, systems, software architecture (a track of its own)
+and robotics; papers the reading queue already had took only their missing fields (a short name, why, a level, a year).
 A weekly job (`.github/workflows/links.yml`) runs `npm run check:links` and reports; it never edits the data.
+`npm run check:links -- --checked 2026-10-19` checks only the links an import dated that day.
 
 <p>
   <img src="screenshots/library-home-full-light.png" alt="The Library home in full: in progress, the paths, up next, and the shelves with their counts and the Practice tile" width="24%">
+  <img src="screenshots/library-papers-light.png" alt="The Papers shelf on a phone: year 1 first, the level chips" width="24%">
   <img src="screenshots/library-path-light.png" alt="A path: AI engineering's steps grouped by phase, the current one highlighted" width="32%">
   <img src="screenshots/library-shelf-light.png" alt="The Courses shelf filtered to Active" width="32%">
   <img src="screenshots/library-search-dark.png" alt="Search results grouped by shelf, three of each, with Show all" width="32%">

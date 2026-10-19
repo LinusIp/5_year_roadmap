@@ -31,6 +31,7 @@
     - { id: in-one-weekend, title: "Ray Tracing in One Weekend", url: "https://raytracing.github.io/books/RayTracingInOneWeekend.html" }
     - { id: the-next-week, title: "Ray Tracing: The Next Week", url: "https://raytracing.github.io/books/RayTracingTheNextWeek.html" }
     - { id: the-rest-of-your-life, title: "Ray Tracing: The Rest of Your Life", url: "https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html" }
+  summary: "Three short books that take you from zero to a Monte Carlo path tracer in plain C++."
 
 - id: tinyrenderer
   title: "tinyrenderer: a brief computer graphics / rendering course (ssloy)"
@@ -222,6 +223,8 @@
   reference: true
   subject: graphics
   summary: "The book's resource page, a standing index of real-time rendering material. The site answers scripts with a bot challenge, so `npm run check:links` reports 403 for it; it was verified in a browser."
+  short: "RTR Resources"
+  fromYear: 2
 
 - id: book-of-shaders
   title: "The Book of Shaders"
@@ -253,6 +256,10 @@
   estHours: 0
   reference: true
   subject: graphics
+  short: "Inigo Quilez"
+  summary: "Dense articles on SDFs, raymarching, noise and procedural modeling from the co-creator of Shadertoy."
+  fromYear: 2
+  doFirst: "The Book of Shaders"
 
 - id: shadertoy
   title: "Shadertoy"
@@ -268,6 +275,9 @@
   reference: true
   subject: graphics
   summary: "Not verified: the site answered every request with a bot challenge on 2026-09-20."
+  short: "Shadertoy"
+  fromYear: 1
+  doFirst: "The Book of Shaders"
 
 - id: game-engine-architecture
   title: "Game Engine Architecture (Jason Gregory)"

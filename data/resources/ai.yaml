@@ -29,6 +29,7 @@
   estHours: 50
   subject: deep-learning
   summary: "In progress when the plan starts."
+  after: [pytorch-tutorials]
 
 - id: hf-agents-course
   title: "Hugging Face AI Agents Course"
@@ -58,6 +59,9 @@
   estHours: 60
   subject: deep-learning
   stretch: true
+  short: "HF Deep RL Course"
+  summary: "Hands-on units from Q-learning to PPO with notebooks, environments and agents you can publish."
+  fromYear: 1
 
 - id: hf-diffusion-course
   title: "Hugging Face Diffusion Models Course"
@@ -72,6 +76,8 @@
   cost: free
   estHours: 30
   subject: deep-learning
+  summary: "Notebook-driven units take you from training a tiny diffusion model to fine-tuning, guidance and Stable Diffusion with diffusers."
+  doFirst: "Practical DL (fast.ai)"
 
 - id: hf-mcp-course
   title: "Hugging Face Model Context Protocol (MCP) Course"
@@ -100,6 +106,7 @@
   estHours: 40
   prerequisites: [30-days-of-python]
   subject: deep-learning
+  summary: "Builds backprop, language models and GPT from scratch in code, line by line."
 
 - id: fastai-practical-dl
   title: "fast.ai: Practical Deep Learning for Coders"
@@ -116,6 +123,7 @@
   prerequisites: [30-days-of-python]
   subject: deep-learning
   alternatives: [stanford-cs231n]
+  summary: "Top-down, code-first course that gets you training strong models in week one, then explains why."
 
 - id: stanford-cs229
   title: "Stanford CS229 Machine Learning"
@@ -152,6 +160,7 @@
   subject: deep-learning
   stretch: true
   alternatives: [fastai-practical-dl]
+  summary: "Builds CNNs, optimization and vision models from scratch in NumPy and PyTorch assignments."
 
 - id: stanford-cs224n
   title: "Stanford CS224n Natural Language Processing with Deep Learning"
@@ -184,6 +193,7 @@
   estHours: 200
   prerequisites: [stanford-cs224n]
   subject: deep-learning
+  summary: "Build tokenizer, transformer, training, scaling and alignment yourself in demanding assignments."
 
 - id: stanford-cs25
   title: "Stanford CS25 Transformers United (seminar)"
@@ -252,6 +262,8 @@
   cost: free
   estHours: 120
   subject: deep-learning
+  summary: "The deepest free deep RL course: policy gradients, actor-critic, model-based, offline RL and more."
+  after: [stanford-cs234]
 
 - id: berkeley-llm-agents
   title: "UC Berkeley Advanced Large Language Model Agents MOOC (Spring 2025)"
@@ -534,6 +546,9 @@
   cost: free
   estHours: 40
   summary: "Key concepts, the main algorithms and clean implementations: a companion to CS285."
+  short: "Spinning Up"
+  fromYear: 2
+  after: [sutton-barto-rl]
 
 - id: slp3
   title: "Speech and Language Processing, 3rd edition draft (Jurafsky and Martin)"
@@ -562,3 +577,6 @@
   estHours: 0
   reference: true
   summary: "The probabilistic view of machine learning, free from Microsoft Research."
+  short: "Bishop PRML"
+  fromYear: 2
+  after: [mml-book]

@@ -1,5 +1,5 @@
 /**
- * The Library's home, organised: what is in progress, the plan's paths (one per family of tracks, its items in plan
+ * The Library's home, organised: what is in progress, the plan's paths (one per group of tracks, its items in plan
  * order), the next few steps across all of them, and the shelves to browse when something else is needed. Built
  * from the resolved plan, so the user's edits (moves, drops, additions) show; dropped items stay off the home.
  *
@@ -9,24 +9,48 @@ import type { ItemStatus, UserItemState } from '../db/types.ts';
 import type { AppSeed } from '../seed/index.ts';
 import type { BlockId } from '../seed/schema.ts';
 
-/** A path: a family of tracks as the plan teaches it. Career and review is not a path. */
+/** A path: a group of tracks as the plan teaches it. Career and review is not a path. */
 export interface PathDef {
   id: string;
   name: string;
-  /** The track family (tracks.yaml) it gathers. */
-  family: string;
+  /** The tracks it gathers; a track of the user's joins the path of a track of its family. */
+  tracks: readonly string[];
 }
 
-/** In the board's order: the lanes of the first year first, then the second stage. */
+/**
+ * In the board's order: the lanes of the first year first, then the second stage. Software architecture and Robotics
+ * are paths of their own (MORE-RESOURCES), the first with nothing on the plan yet: its view is the Library's to browse.
+ */
 export const PATHS: readonly PathDef[] = [
-  { id: 'ai', name: 'AI engineering', family: 'AI & ML' },
-  { id: 'languages', name: 'Languages', family: 'Languages' },
-  { id: 'graphics', name: 'Graphics', family: 'Graphics, simulation & games' },
-  { id: 'math', name: 'Math and physics', family: 'Math & science' },
-  { id: 'systems', name: 'Systems', family: 'Software & systems' },
-  { id: 'ee', name: 'Electrical and embedded', family: 'Electrical & embedded' },
-  { id: 'me', name: 'Mechanical and robotics', family: 'Mechanical & robotics' },
+  { id: 'ai', name: 'AI engineering', tracks: ['ai'] },
+  { id: 'languages', name: 'Languages', tracks: ['languages'] },
+  { id: 'graphics', name: 'Graphics', tracks: ['graphics', 'simulation', 'gamedev'] },
+  { id: 'math', name: 'Math and physics', tracks: ['math', 'physics', 'chem'] },
+  { id: 'systems', name: 'Systems', tracks: ['swe', 'systems'] },
+  { id: 'architecture', name: 'Software architecture', tracks: ['architecture'] },
+  { id: 'ee', name: 'Electrical and embedded', tracks: ['ee', 'embedded', 'controls'] },
+  { id: 'me', name: 'Mechanical', tracks: ['mech'] },
+  { id: 'robotics', name: 'Robotics', tracks: ['robotics'] },
 ];
+
+/** The path a track belongs to: its own, or for a track of the user's, the path of a track of the same family. */
+export function pathOfTrack(seed: Pick<AppSeed, 'tracks'>, track: string): PathDef | undefined {
+  const own = PATHS.find((p) => p.tracks.includes(track));
+  if (own) return own;
+  const family = seed.tracks.find((t) => t.id === track)?.family;
+  return PATHS.find((p) => p.tracks.some((t) => seed.tracks.find((x) => x.id === t)?.family === family));
+}
+
+/**
+ * The Library's resources a path offers beyond its steps: not on the plan, with a year they fit from, their first
+ * track the path's. In that year's order, then by name.
+ */
+export function pathExtras(seed: AppSeed, states: ReadonlyMap<string, UserItemState>, pathId: string): AppSeed['resources'] {
+  const onPlan = new Set(seed.plan.map((i) => i.resourceId ?? i.projectId));
+  return seed.resources
+    .filter((r) => r.fromYear !== undefined && !onPlan.has(r.id) && states.get(r.id)?.status !== 'dropped' && pathOfTrack(seed, r.tracks[0]!)?.id === pathId)
+    .sort((a, b) => a.fromYear! - b.fromYear! || (a.short ?? a.title).localeCompare(b.short ?? b.title));
+}
 
 export interface PathStep {
   refId: string;
@@ -77,7 +101,6 @@ export function planInOrder(seed: AppSeed): AppSeed['plan'] {
  * projects are the Projects shelf's and Block D's). Dropped items are left out.
  */
 export function buildPaths(seed: AppSeed, states: ReadonlyMap<string, UserItemState>): LibraryPath[] {
-  const familyOf = new Map(seed.tracks.map((t) => [t.id, t.family]));
   const byPath = new Map<string, PathStep[]>(PATHS.map((p) => [p.id, []]));
   for (const item of planInOrder(seed)) {
     if (!item.resourceId) continue;
@@ -87,8 +110,7 @@ export function buildPaths(seed: AppSeed, states: ReadonlyMap<string, UserItemSt
     if (status === 'dropped') continue;
     const source = kind === 'resource' ? seed.resources.find((r) => r.id === refId) : seed.projects.find((p) => p.id === refId);
     if (!source) continue;
-    const family = familyOf.get(source.tracks[0]!);
-    const path = PATHS.find((p) => p.family === family);
+    const path = pathOfTrack(seed, source.tracks[0]!);
     if (!path) continue;
     const hours = item.hours ?? source.estHours;
     const type = kind === 'resource' ? (seed.resources.find((r) => r.id === refId)?.type ?? 'course') : 'project';

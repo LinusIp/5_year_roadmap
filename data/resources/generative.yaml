@@ -18,6 +18,7 @@
   summary: VAEs, GANs, normalizing flows, autoregressive and energy models, score matching and diffusion.
   covers:
     - inference-engineering/diffusion-models
+  after: [udl-book]
 - id: mit-6-s978
   title: Deep Generative Models (MIT 6.S978)
   provider: MIT
@@ -48,6 +49,9 @@
   prerequisites: []
   subject: deep-learning
   summary: The derivations behind DDPM, score matching and guidance in one place.
+  short: "Lil'Log: Diffusion"
+  fromYear: 1
+  after: [udl-book]
 - id: annotated-diffusion
   title: The Annotated Diffusion Model
   provider: Hugging Face
@@ -63,6 +67,9 @@
   prerequisites: []
   subject: deep-learning
   summary: DDPM implemented line by line in PyTorch, next to the paper.
+  short: "Annotated Diffusion"
+  fromYear: 1
+  after: [annotated-transformer]
 - id: yang-song-score
   title: Generative Modeling by Estimating Gradients of the Data Distribution
   provider: Yang Song
@@ -78,6 +85,9 @@
   prerequisites: []
   subject: deep-learning
   summary: Score-based generative modelling and SDEs, from the author.
+  short: "Yang Song: Score Models"
+  fromYear: 1
+  after: [lilian-weng-diffusion]
 - id: sander-dieleman-blog
   title: Sander Dieleman's blog
   provider: Sander Dieleman
@@ -94,6 +104,9 @@
   prerequisites: []
   subject: deep-learning
   summary: "Long essays on diffusion: guidance, noise schedules, perspectives on what diffusion is."
+  short: "Sander Dieleman blog"
+  fromYear: 3
+  after: [lilian-weng-diffusion]
 - id: fastai-part-2
   title: From Deep Learning Foundations to Stable Diffusion
   provider: fast.ai
@@ -109,6 +122,9 @@
   prerequisites: []
   subject: deep-learning
   summary: "Part 2 of the fast.ai course: rebuild the pieces of Stable Diffusion from scratch."
+  short: "fast.ai Part 2"
+  fromYear: 2
+  doFirst: "Practical DL (fast.ai)"
 - id: diffusers-repo
   title: huggingface/diffusers
   provider: Hugging Face
@@ -141,6 +157,9 @@
   prerequisites: []
   subject: deep-learning
   summary: A compact DDPM implementation to read before writing your own.
+  short: "lucidrains DDPM repo"
+  fromYear: 1
+  after: [annotated-diffusion]
 - id: facebookresearch-dit
   title: facebookresearch/DiT
   provider: Meta AI

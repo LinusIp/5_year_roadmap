@@ -4,6 +4,7 @@ import {
   ArrowDown,
   ArrowUp,
   BookOpen,
+  Bot,
   Box,
   Briefcase,
   CalendarDays,
@@ -34,6 +35,7 @@ import {
   MoreHorizontal,
   Moon,
   Newspaper,
+  Network,
   NotebookPen,
   Pause,
   Play,
@@ -112,6 +114,9 @@ const LUCIDE = {
   sigma: Sigma,
   server: Server,
   layers: Layers,
+  // Paths of their own: Software architecture and Robotics
+  network: Network,
+  bot: Bot,
   // Kinds of project
   puzzle: Puzzle,
   wrench: Wrench,

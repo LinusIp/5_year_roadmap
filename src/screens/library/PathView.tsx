@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Atlas } from '../../hooks/useAtlas.ts';
-import { buildPaths, PATHS, SHELVES, shelfOf } from '../../lib/library-home.ts';
+import { buildPaths, pathExtras, pathOfTrack, PATHS, SHELVES, shelfOf } from '../../lib/library-home.ts';
 import { Button } from '../../ui/Button.tsx';
 import { Header } from '../../ui/Header.tsx';
 import { Icon } from '../../ui/Icon.tsx';
@@ -25,37 +25,34 @@ function StepDot({ state }: { state: 'done' | 'current' | 'later' }) {
 
 /**
  * One path: every step in plan order, grouped by phase, with its dot, kind, hours and status; the current step is
- * highlighted. Alternatives to its steps, the Library's other resources of its family (RESOURCES-ADD, by the year they
- * fit from) and the papers of its tracks wait, folded, under "Optional for this path".
+ * highlighted. Alternatives to its steps, the Library's other resources of its tracks (RESOURCES-ADD, by the year they
+ * fit from) and the papers of its tracks wait, folded, under "Optional for this path". A path with nothing on the plan
+ * (Software architecture) is that list alone, open.
  */
 export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas; pathId: string; onOpen: (refId: string) => void; onOpenPaper: (id: string) => void }) {
   const { seed, states } = atlas;
-  const [extras, setExtras] = useState(false);
-  const path = buildPaths(seed, states).find((p) => p.id === pathId);
   const def = PATHS.find((p) => p.id === pathId);
+  const path = buildPaths(seed, states).find((p) => p.id === pathId) ?? (def ? { ...def, steps: [], current: -1, done: 0 } : undefined);
+  const [extras, setExtras] = useState(path?.steps.length === 0);
   if (!path || !def) {
     return <Header title="Library" back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />} sub="This path has no steps." />;
   }
   const phases = seed.phases.filter((ph) => path.steps.some((s) => s.phaseId === ph.id));
   const inPath = new Set(path.steps.map((s) => s.refId));
-  const familyTracks = new Set(seed.tracks.filter((t) => t.family === def.family).map((t) => t.id));
   const alternatives = [...new Set(path.steps.flatMap((s) => seed.resources.find((r) => r.id === s.refId)?.alternatives ?? []))]
     .filter((id) => !inPath.has(id))
     .map((id) => seed.resources.find((r) => r.id === id))
     .filter((r) => r !== undefined);
-  const onPlan = new Set(seed.plan.map((i) => i.resourceId ?? i.projectId));
   const shown = new Set(alternatives.map((r) => r.id));
-  const library = seed.resources
-    .filter((r) => r.fromYear !== undefined && familyTracks.has(r.tracks[0]!) && !onPlan.has(r.id) && !shown.has(r.id) && states.get(r.id)?.status !== 'dropped')
-    .sort((a, b) => a.fromYear! - b.fromYear! || (a.short ?? a.title).localeCompare(b.short ?? b.title));
-  const papers = seed.papers.filter((p) => p.tracks.some((t) => familyTracks.has(t)));
+  const library = pathExtras(seed, states, pathId).filter((r) => !shown.has(r.id));
+  const papers = seed.papers.filter((p) => p.tracks.some((t) => pathOfTrack(seed, t)?.id === pathId));
   const optional = alternatives.length + library.length + papers.length;
 
   return (
     <>
       <Header
         title={def.name}
-        sub={plural(path.steps.length, 'step') + ' · ' + path.done + ' done'}
+        sub={path.steps.length > 0 ? plural(path.steps.length, 'step') + ' · ' + path.done + ' done' : 'Not on the plan · ' + optional + ' to browse'}
         back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />}
       />
       {phases.map((phase) => (
@@ -100,14 +97,14 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
               {library.map((r) => (
                 <Row
                   key={r.id}
-                  icon={<IconTile icon={SHELF_ICON[shelfOf(r)]} tone={shelfOf(r) === 'practice' ? 'ice' : 'blue'} />}
+                  icon={<IconTile icon={SHELF_ICON[shelfOf(r)]} tone={shelfOf(r) === 'practice' || shelfOf(r) === 'paper' || shelfOf(r) === 'blog' ? 'ice' : 'blue'} />}
                   title={r.short ?? r.title}
                   meta={'Year ' + r.fromYear + ' · ' + SHELF_LABEL[shelfOf(r)] + ' · ' + r.estHours + ' h'}
                   onClick={() => onOpen(r.id)}
                 />
               ))}
               {papers.map((p) => (
-                <Row key={p.id} icon={<IconTile icon="paper" tone="ice" />} title={p.title} meta={['Paper', p.year].filter(Boolean).join(' · ')} truncate onClick={() => onOpenPaper(p.id)} />
+                <Row key={p.id} icon={<IconTile icon="paper" tone="ice" />} title={p.short ?? p.title} meta={[p.fromYear ? 'Year ' + p.fromYear : null, 'Paper', p.year].filter(Boolean).join(' · ')} truncate onClick={() => onOpenPaper(p.id)} />
               ))}
             </ul>
           )}

@@ -3,7 +3,7 @@ import { loadSeedOrThrow } from '../../scripts/lib/load-seed.ts';
 import { splitSeed } from '../../scripts/lib/vite-plugin-seed.ts';
 import type { AppSeed } from '../../src/seed/schema.ts';
 import type { UserItemState } from '../../src/db/types.ts';
-import { buildPaths, groupResults, inProgress, pathDots, planInOrder, shelfCounts, shelfOf, startsMuchLater, upNext } from '../../src/lib/library-home.ts';
+import { buildPaths, groupResults, inProgress, pathDots, pathExtras, pathOfTrack, planInOrder, shelfCounts, shelfOf, startsMuchLater, upNext } from '../../src/lib/library-home.ts';
 import type { PathStep } from '../../src/lib/library-home.ts';
 
 const seed = splitSeed(loadSeedOrThrow()).app as AppSeed;
@@ -12,7 +12,7 @@ const steps = (n: number, done: number): PathStep[] =>
   Array.from({ length: n }, (_, i) => ({ refId: 'r' + i, kind: 'resource', title: 'R' + i, status: i < done ? 'done' : 'todo', phaseId: 'p', block: 'A', hours: 1, type: 'course' }));
 
 describe('the paths', () => {
-  it('gather the plan’s resources by track family, in plan order, without projects', () => {
+  it('gather the plan’s resources by their tracks, in plan order, without projects', () => {
     const paths = buildPaths(seed, new Map());
     expect(paths.map((p) => p.id).slice(0, 5)).toEqual(['ai', 'languages', 'graphics', 'math', 'systems']);
     expect(paths.every((p) => p.steps.every((s) => s.kind === 'resource'))).toBe(true);
@@ -37,6 +37,35 @@ describe('the paths', () => {
     const later = paths.filter((p) => startsMuchLater(p, seed, '2026-10-16')).map((p) => p.id);
     expect(later).toEqual(expect.arrayContaining(['ee', 'me']));
     expect(later).not.toContain('ai');
+  });
+});
+
+describe('Software architecture and Robotics (MORE-RESOURCES)', () => {
+  it('are paths of their own: robotics apart from mechanical, architecture apart from systems', () => {
+    expect(pathOfTrack(seed, 'robotics')?.id).toBe('robotics');
+    expect(pathOfTrack(seed, 'mech')?.id).toBe('me');
+    expect(pathOfTrack(seed, 'architecture')?.id).toBe('architecture');
+    expect(pathOfTrack(seed, 'swe')?.id).toBe('systems');
+    expect(pathOfTrack(seed, 'gamedev')?.id).toBe('graphics');
+    // A track of the user's joins the path of a track of its family.
+    expect(pathOfTrack({ tracks: [...seed.tracks, { id: 'my-llm', name: 'Mine', family: 'AI & ML', slot: 1, summary: 'x' }] }, 'my-llm')?.id).toBe('ai');
+  });
+
+  it('offer the Library’s resources of their tracks, off the plan, by the year they fit from', () => {
+    for (const id of ['architecture', 'robotics']) {
+      const extras = pathExtras(seed, new Map(), id);
+      expect(extras.length, id).toBeGreaterThan(20);
+      expect(extras.every((r) => pathOfTrack(seed, r.tracks[0]!)?.id === id)).toBe(true);
+      expect(extras.map((r) => r.fromYear)).toEqual([...extras.map((r) => r.fromYear)].sort());
+    }
+    const onPlan = new Set(seed.plan.map((i) => i.resourceId));
+    expect(pathExtras(seed, new Map(), 'ai').some((r) => onPlan.has(r.id))).toBe(false);
+    const first = pathExtras(seed, new Map(), 'robotics')[0]!;
+    expect(pathExtras(seed, new Map([state(first.id, 'dropped')]), 'robotics').some((r) => r.id === first.id)).toBe(false);
+  });
+
+  it('architecture has nothing on the plan yet, so it is not among the plan’s paths', () => {
+    expect(buildPaths(seed, new Map()).some((p) => p.id === 'architecture')).toBe(false);
   });
 });
 

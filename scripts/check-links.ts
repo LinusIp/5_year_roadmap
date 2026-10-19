@@ -7,6 +7,7 @@
  *   default    HEAD request, falling back to GET when a server refuses HEAD
  *   --titles   GET every page and print its <title>, to confirm a link still points at the right thing
  *   --only x   restrict to URLs or ids containing x
+ *   --checked YYYY-MM-DD   restrict to the resources and papers whose link was last checked that day (an import's)
  *   --json     also write reports/links.json
  *   --candidates file.json   also check proposed links ({ "resource-id": ["https://…", …] }) for resources that
  *              have none yet, so a link is only ever added after this run fetched it and its title was confirmed
@@ -34,6 +35,8 @@ const wantTitles = args.includes('--titles');
 const wantJson = args.includes('--json');
 const onlyIndex = args.indexOf('--only');
 const only = onlyIndex >= 0 ? (args[onlyIndex + 1] ?? '') : '';
+const checkedIndex = args.indexOf('--checked');
+const checkedOn = checkedIndex >= 0 ? (args[checkedIndex + 1] ?? '') : '';
 const candidatesIndex = args.indexOf('--candidates');
 const candidatesFile = candidatesIndex >= 0 ? args[candidatesIndex + 1] : undefined;
 
@@ -44,21 +47,23 @@ const CONCURRENCY = 6;
 function collectTargets(): Target[] {
   const seed = loadSeedOrThrow();
   const byUrl = new Map<string, string[]>();
-  const add = (url: string | null | undefined, ref: string): void => {
+  const dated = new Set<string>();
+  const add = (url: string | null | undefined, ref: string, lastVerified?: string): void => {
     if (!url) return;
+    if (lastVerified && lastVerified === checkedOn) dated.add(url);
     const list = byUrl.get(url) ?? [];
     list.push(ref);
     byUrl.set(url, list);
   };
   for (const r of seed.resources) {
-    add(r.url, 'resource:' + r.id);
+    add(r.url, 'resource:' + r.id, r.lastVerified);
     for (const u of r.units ?? []) {
       add(u.url, 'resource:' + r.id + '#' + u.id);
       add(u.video, 'resource:' + r.id + '#' + u.id + ' video');
     }
   }
   for (const p of seed.projects) add(p.sourceUrl, 'project:' + p.id);
-  for (const p of seed.papers) add(p.url, 'paper:' + p.id);
+  for (const p of seed.papers) add(p.url, 'paper:' + p.id, p.lastVerified);
   for (const s of seed.paperSources) add(s.url, 'source:' + s.id);
   for (const c of seed.certs) add(c.url, 'cert:' + c.id);
   if (candidatesFile) {
@@ -67,7 +72,8 @@ function collectTargets(): Target[] {
   }
   return [...byUrl.entries()]
     .map(([url, refs]) => ({ url, refs }))
-    .filter((t) => !only || t.url.includes(only) || t.refs.some((r) => r.includes(only)));
+    .filter((t) => !only || t.url.includes(only) || t.refs.some((r) => r.includes(only)))
+    .filter((t) => !checkedOn || dated.has(t.url));
 }
 
 function decodeEntities(s: string): string {
@@ -147,10 +153,17 @@ async function run(): Promise<void> {
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
   const failed = results.filter((r) => !r.ok);
-  console.log('\n' + (results.length - failed.length) + ' ok, ' + failed.length + ' failed');
-  if (failed.length > 0) {
-    console.log('\nFailed (a 403 or 429 often means "no bots", not "gone": open those in a browser before changing anything):');
-    for (const r of failed) console.log('  ' + String(r.status ?? 'ERR').padEnd(4) + r.url + '  [' + r.refs.join(', ') + ']');
+  // A 401, 403 or 429 usually means the site turns bots away, not that the page is gone: those are to open by hand.
+  const byHand = failed.filter((r) => r.status === 401 || r.status === 403 || r.status === 429);
+  const broken = failed.filter((r) => !byHand.includes(r));
+  console.log('\n' + (results.length - failed.length) + ' ok, ' + broken.length + ' failed, ' + byHand.length + ' to check by hand');
+  if (broken.length > 0) {
+    console.log('\nFailed (open each in a browser before changing anything; nothing here edits the data):');
+    for (const r of broken) console.log('  ' + String(r.status ?? 'ERR').padEnd(4) + r.url + '  [' + r.refs.join(', ') + ']' + (r.error ? '  ' + r.error : ''));
+  }
+  if (byHand.length > 0) {
+    console.log('\nCheck by hand (the site turned the checker away):');
+    for (const r of byHand) console.log('  ' + String(r.status).padEnd(4) + r.url + '  [' + r.refs.join(', ') + ']');
   }
   if (wantJson) {
     const dir = join(REPO_ROOT, 'reports');
