@@ -92,6 +92,8 @@
   prerequisites: []
   subject: research
   summary: Curated reading lists and monthly summaries of new LLM research.
+  short: "Ahead of AI (Raschka)"
+  fromYear: 2
 - id: hf-papers
   title: Papers with Code, now Hugging Face Papers
   provider: Hugging Face

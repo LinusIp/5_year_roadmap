@@ -1,6 +1,7 @@
 /**
- * Importing a list of resources into the Library (RESOURCES-ADD): the mapping from the import file's fields to the
- * resource schema, and the rules that find an entry the Library already has. Pure; scratch/import-resources.ts runs it.
+ * Importing a list of resources into the Library (RESOURCES-ADD, MORE-RESOURCES): the mapping from the import file's
+ * fields to the resource schema, and the rules that find an entry the Library already has. Pure; the one-off runners
+ * in scratch/ use it.
  */
 
 /** One line of new-resources.jsonl. */
@@ -8,8 +9,8 @@ export interface ImportItem {
   id: string;
   title: string;
   short: string;
-  type: 'video-course' | 'course' | 'book' | 'docs' | 'tutorial' | 'practice';
-  track: 'ai' | 'inference' | 'graphics' | 'gamedev' | 'systems' | 'languages';
+  type: 'video-course' | 'course' | 'book' | 'docs' | 'tutorial' | 'practice' | 'paper' | 'blog' | 'article';
+  track: 'ai' | 'inference' | 'graphics' | 'gamedev' | 'systems' | 'languages' | 'architecture' | 'robotics';
   level: 'beginner' | 'intermediate' | 'advanced';
   hours: number;
   provider: string;
@@ -28,12 +29,48 @@ export interface Existing {
   title: string;
   short?: string | undefined;
   url: string | null;
+  /** Its shelf ("course", "paper", "blog"): titles are only compared within one. */
+  shelf?: string | undefined;
 }
 
-/** The resource types: a video course is a lecture series, docs and tutorials are read like articles. */
-export const TYPE_OF = { 'video-course': 'lectures', course: 'course', book: 'book', docs: 'article', tutorial: 'article', practice: 'practice' } as const;
-/** The Library's tracks: inference is AI with an `inference` tag; game development has a track of its own. */
-export const TRACK_OF = { ai: 'ai', inference: 'ai', graphics: 'graphics', gamedev: 'gamedev', systems: 'systems', languages: 'languages' } as const;
+/**
+ * The resource types: a video course is a lecture series, docs and tutorials are read like articles; a blog is an
+ * article marked `blog` (the Blogs shelf), a paper a paper (the Papers shelf).
+ */
+export const TYPE_OF = {
+  'video-course': 'lectures',
+  course: 'course',
+  book: 'book',
+  docs: 'article',
+  tutorial: 'article',
+  practice: 'practice',
+  paper: 'paper',
+  blog: 'article',
+  article: 'article',
+} as const;
+/** The shelf an item lands on, as `shelfOf` in src/lib/library-home.ts files the resource it becomes. */
+export const SHELF_OF = {
+  'video-course': 'course',
+  course: 'course',
+  book: 'book',
+  docs: 'article',
+  tutorial: 'article',
+  practice: 'practice',
+  paper: 'paper',
+  blog: 'blog',
+  article: 'article',
+} as const;
+/** The Library's tracks: inference is AI with an `inference` tag; the others are tracks of their own. */
+export const TRACK_OF = {
+  ai: 'ai',
+  inference: 'ai',
+  graphics: 'graphics',
+  gamedev: 'gamedev',
+  systems: 'systems',
+  languages: 'languages',
+  architecture: 'architecture',
+  robotics: 'robotics',
+} as const;
 export const LEVEL_OF = { beginner: 'intro', intermediate: 'intermediate', advanced: 'advanced' } as const;
 
 /** A URL as the matching compares it: lowercase, no scheme, no `www.`, no trailing slash. */
@@ -60,11 +97,16 @@ export function titleWords(title: string): Set<string> {
   );
 }
 
-/** How alike two titles are: the share of words they have in common (Jaccard), 0 to 1. */
+/**
+ * How alike two titles are: the share of words they have in common (Jaccard), 0 to 1. Titles whose numbers differ
+ * are different things whatever their words (GPU Gems 2 and GPU Gems 3).
+ */
 export function titleLikeness(a: string, b: string): number {
   const x = titleWords(a);
   const y = titleWords(b);
   if (x.size === 0 || y.size === 0) return 0;
+  const numbers = (words: Set<string>): string => [...words].filter((w) => /^\d+$/.test(w)).sort().join(' ');
+  if (numbers(x) !== numbers(y)) return 0;
   let both = 0;
   for (const w of x) if (y.has(w)) both++;
   return both / (x.size + y.size - both);
@@ -76,18 +118,24 @@ export const SAME_TITLE = 0.8;
 /**
  * Pairs looked at by hand and found to be the same resource under another address (the import's id to the Library's):
  * NVIDIA renamed its CUDA guide, the raylib examples are a page of the raylib site, cs162.org is Berkeley's CS162.
+ * From the second import: the Roofline technical report is the paper the queue has without a link, OpenAI's "world
+ * simulators" page is the Sora report the queue has without a link, and iquilezles.org is the site of its articles.
  */
 export const SAME_AS: Readonly<Record<string, string>> = {
   'cuda-programming-guide': 'cuda-guide',
   'raylib-examples': 'raylib',
   'berkeley-cs162': 'cs162',
+  'paper-roofline': 'roofline',
+  'article-openai-sora-world-simulators': 'sora-report',
+  'blog-inigo-quilez': 'iq-articles',
 };
 
 /**
  * The entry the Library already has for an item: the same URL; the same id (the Library's own name for it); a pair
- * listed in SAME_AS; or a title (or short title) alike enough.
+ * listed in SAME_AS; or a title (or short title) alike enough on the same shelf, so a paper and a post of one title
+ * both stay.
  */
-export function findExisting(item: Pick<ImportItem, 'id' | 'url' | 'title' | 'short'>, existing: readonly Existing[]): { entry: Existing; by: 'url' | 'id' | 'checked' | 'title' } | null {
+export function findExisting(item: Pick<ImportItem, 'id' | 'url' | 'title' | 'short'> & { type?: ImportItem['type'] }, existing: readonly Existing[]): { entry: Existing; by: 'url' | 'id' | 'checked' | 'title' } | null {
   const url = normaliseUrl(item.url);
   const byUrl = existing.find((e) => e.url !== null && normaliseUrl(e.url) === url);
   if (byUrl) return { entry: byUrl, by: 'url' };
@@ -96,7 +144,9 @@ export function findExisting(item: Pick<ImportItem, 'id' | 'url' | 'title' | 'sh
   const checked = SAME_AS[item.id] ? existing.find((e) => e.id === SAME_AS[item.id]) : undefined;
   if (checked) return { entry: checked, by: 'checked' };
   let best: { entry: Existing; score: number } | null = null;
+  const shelf = item.type ? SHELF_OF[item.type] : undefined;
   for (const e of existing) {
+    if (shelf && e.shelf && e.shelf !== shelf) continue;
     const score = Math.max(titleLikeness(item.title, e.title), e.short ? titleLikeness(item.short, e.short) : 0, e.short ? titleLikeness(item.title, e.short) : 0);
     if (score >= SAME_TITLE && (!best || score > best.score)) best = { entry: e, score };
   }
@@ -128,11 +178,28 @@ export function toResource(item: ImportItem, afterId: string | null): Record<str
     summary: item.why,
     fromYear: item.year,
   };
+  if (item.type === 'blog') out.blog = true;
   if (item.track === 'inference') out.tags = ['inference'];
   if (item.note === 'free tier') out.note = 'Free tier';
   if (afterId) out.after = [afterId];
   else if (item.after) out.doFirst = item.after;
   return out;
+}
+
+/** The fields a paper in the reading queue (papers.yaml) takes from a matching item, when it lacks them. */
+export const PAPER_FILLS = ['short', 'summary', 'level', 'fromYear'] as const;
+
+/** What a queue paper takes from a matching item: the fields it is missing, and the item's link when it has none. */
+export function fillPaper(paper: Record<string, unknown>, item: ImportItem): Record<string, unknown> {
+  const from = toResource(item, null);
+  const add: Record<string, unknown> = {};
+  for (const key of PAPER_FILLS) if (paper[key] === undefined && from[key] !== undefined) add[key] = from[key];
+  if (paper.url === null) {
+    add.url = item.url;
+    add.urlVerified = true;
+    add.lastVerified = item.verified;
+  } else if (paper.lastVerified === undefined) add.lastVerified = item.verified;
+  return add;
 }
 
 /**

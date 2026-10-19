@@ -188,6 +188,8 @@
   estHours: 0
   reference: true
   summary: "One day's puzzle in the language of the month is a standing weekly mini-build."
+  short: "Advent of Code"
+  fromYear: 1
 
 - id: gamedevhq
   title: "GameDevHQ: Unity game development course"

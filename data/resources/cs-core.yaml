@@ -59,6 +59,8 @@
   cost: free
   estHours: 120
   subject: algorithms
+  summary: "The standard first algorithms course: asymptotics, sorting, hashing, graphs and DP taught with problem sets and full lecture videos."
+  doFirst: "MIT 6.042J"
 
 - id: mit-6-046j
   title: "MIT 6.046J (now 6.1220J) Design and Analysis of Algorithms (Spring 2015)"
@@ -150,6 +152,7 @@
     - { id: shlab, title: "Shell Lab", url: "https://csapp.cs.cmu.edu/3e/shlab.pdf" }
     - { id: malloclab, title: "Malloc Lab", url: "https://csapp.cs.cmu.edu/3e/malloclab.pdf" }
     - { id: proxylab, title: "Proxy Lab", url: "https://csapp.cs.cmu.edu/3e/proxylab.pdf" }
+  summary: "The famous bomb, attack, cache, shell and malloc labs that make machine-level programming concrete."
 
 - id: nand2tetris
   title: "Nand2Tetris, parts I and II"
@@ -348,6 +351,10 @@
   cost: free
   estHours: 100
   summary: "Parallel programming from SIMD and multicore CPUs to GPUs, judged by performance."
+  short: "Stanford CS149"
+  fromYear: 1
+  tags: [inference]
+  doFirst: "MIT 6.006"
 
 - id: cmu-15-418
   title: "CMU 15-418/618 Parallel Computer Architecture and Programming"

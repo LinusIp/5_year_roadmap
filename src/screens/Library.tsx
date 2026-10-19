@@ -58,7 +58,17 @@ interface Entry {
   sortKey: string;
   /** Projects: what Library › Projects filters on. A curriculum project has no catalogue entry. */
   project?: Filterable;
+  /** Resources and papers that have them (MORE-RESOURCES): what Library › Papers filters and orders on. */
+  level?: 'intro' | 'intermediate' | 'advanced' | undefined;
+  fromYear?: number | undefined;
 }
+
+/** The Papers shelf's level chips: the data's levels, as a learner names them. */
+const LEVEL_CHIPS = [
+  { key: 'intro', label: 'Beginner' },
+  { key: 'intermediate', label: 'Intermediate' },
+  { key: 'advanced', label: 'Advanced' },
+] as const;
 
 /** "day 19", or "55%" when the units have no numbered names. */
 function progressOf(id: string, unitsDone: string[], units: Record<string, Unit[]> | undefined): string | null {
@@ -107,9 +117,11 @@ function buildEntries(
       type: shelfOf(r),
       tracks: r.tracks,
       status,
-      meta: [r.provider, r.estHours > 0 ? r.estHours + ' h' : null, progressOf(r.id, state?.unitsDone ?? [], units)].filter(Boolean).join(' · '),
+      meta: [r.type === 'paper' && r.fromYear ? 'Year ' + r.fromYear : null, r.provider, r.estHours > 0 ? r.estHours + ' h' : null, progressOf(r.id, state?.unitsDone ?? [], units)].filter(Boolean).join(' · '),
       trailing: trailingFor(r.id, status),
       sortKey: sortFor(r.id, status, r.title),
+      level: r.level,
+      fromYear: r.fromYear,
     };
   });
   const papers: Entry[] = seed.papers.map((p) => {
@@ -118,14 +130,16 @@ function buildEntries(
     return {
       kind: 'paper',
       id: p.id,
-      title: p.title,
-      body: [p.authors ?? '', p.note ?? '', String(p.year ?? '')].join(' '),
+      title: p.short ?? p.title,
+      body: [p.title, p.authors ?? '', p.note ?? '', p.summary ?? '', p.tracks.join(' '), String(p.year ?? '')].join(' '),
       type: 'paper',
       tracks: p.tracks,
       status,
-      meta: [p.authors, p.year].filter(Boolean).join(' · '),
+      meta: [p.fromYear ? 'Year ' + p.fromYear : null, p.authors, p.year].filter(Boolean).join(' · '),
       trailing: PAPER_LABEL[paperStatus],
       sortKey: (status === 'active' ? '0' : status === 'todo' ? '2' : '3') + p.title.toLowerCase(),
+      level: p.level,
+      fromYear: p.fromYear,
     };
   });
   // Projects follow everything else in the default order ("5…"), so the list opens as it always has; the Projects
@@ -275,6 +289,8 @@ export function Library({ openId }: { openId?: string }) {
   const [phaseParam, setPhase] = useQueryParam('phase');
   const [level, setLevel] = useQueryParam('level');
   const [hours, setHours] = useQueryParam('hours');
+  // Library › Papers: the level (MORE-RESOURCES).
+  const [paperLevel, setPaperLevel] = useQueryParam('lvl');
   const [picking, setPicking] = useState<null | 'kind' | 'difficulty' | 'group' | 'phase' | 'level' | 'hours'>(null);
   const catalogue = useCatalogueIndex();
   const events = useChallengeEvents();
@@ -303,8 +319,13 @@ export function Library({ openId }: { openId?: string }) {
   };
   const projectFiltersOn = Boolean(kind || difficulty || group || phaseParam || level || hours);
   const matchesProject = (e: Entry): boolean => !projectFiltersOn || (e.project ? matchesFilter(e.project, projectFilter) : false);
-  const filtered = search(index, query ?? '').filter((e) => (!type || e.type === type) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && matchesProject(e));
-  const results = query ? filtered : [...filtered].sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+  const filtered = search(index, query ?? '').filter(
+    (e) => (!type || e.type === type) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && matchesProject(e),
+  );
+  // The Papers shelf reads in the plan's years: what is being read, then year 1's foundations before year 3's research.
+  const byYear = (a: Entry, b: Entry): number =>
+    Number(b.status === 'active') - Number(a.status === 'active') || (a.fromYear ?? 9) - (b.fromYear ?? 9) || a.title.localeCompare(b.title);
+  const results = query ? filtered : [...filtered].sort(type === 'paper' ? byYear : (a, b) => a.sortKey.localeCompare(b.sortKey));
   const trackName = seed.tracks.find((t) => t.id === track)?.name;
   const keep = params.toString();
   const open = (entry: Entry): void => {
@@ -313,12 +334,12 @@ export function Library({ openId }: { openId?: string }) {
     else navigate('/library/' + entry.id + (keep ? '?' + keep : ''));
   };
   const clear = (): void => {
-    for (const set of [setQuery, setType, setTrack, setStatus, setKind, setDifficulty, setGroup, setPhase, setLevel, setHours]) set(null);
+    for (const set of [setQuery, setType, setTrack, setStatus, setKind, setDifficulty, setGroup, setPhase, setLevel, setHours, setPaperLevel]) set(null);
     setDraft(null);
   };
 
   const shelf = (type as ShelfKey | null) ?? null;
-  const filtersOn = Boolean(type || track || status || projectFiltersOn);
+  const filtersOn = Boolean(type || track || status || paperLevel || projectFiltersOn);
   const mode: 'home' | 'path' | 'search' | 'shelf' = pathId ? 'path' : query && !filtersOn ? 'search' : filtersOn ? 'shelf' : 'home';
   const counts = shelfCounts(seed, catalogue?.length ?? 0);
   const goShelf = (key: ShelfKey): void => navigate('/library?type=' + key + (query ? '&q=' + encodeURIComponent(query) : ''), { replace: false });
@@ -332,7 +353,7 @@ export function Library({ openId }: { openId?: string }) {
         entry.project ? (
           <KindIcon kind={entry.project.kind === 'curriculum' ? (entry.project.group === 'weekly' ? 'build' : 'case') : entry.project.kind} />
         ) : (
-          <IconTile icon={SHELF_ICON[entry.type as ShelfKey] ?? 'course'} tone={entry.kind === 'paper' || entry.type === 'blog' || entry.type === 'practice' ? 'ice' : 'blue'} />
+          <IconTile icon={SHELF_ICON[entry.type as ShelfKey] ?? 'course'} tone={entry.kind === 'paper' || entry.type === 'paper' || entry.type === 'blog' || entry.type === 'practice' ? 'ice' : 'blue'} />
         )
       }
       title={entry.title}
@@ -427,6 +448,14 @@ export function Library({ openId }: { openId?: string }) {
               ]}
             />
           </div>
+          {(type === 'paper' || paperLevel) && (
+            <div className="mt-2">
+              <Chips
+                label="Level"
+                items={LEVEL_CHIPS.map((chip) => ({ key: chip.key, label: chip.label, pressed: paperLevel === chip.key, onClick: () => setPaperLevel(paperLevel === chip.key ? null : chip.key) }))}
+              />
+            </div>
+          )}
           {(type === 'project' || projectFiltersOn) && (
             <div className="mt-2">
               <Chips
@@ -439,7 +468,7 @@ export function Library({ openId }: { openId?: string }) {
             </div>
           )}
           {results.length === 0 ? (
-            <EmptyState action={<Button onClick={() => { for (const set of [setQuery, setTrack, setStatus, setKind, setDifficulty, setGroup, setPhase, setLevel, setHours]) set(null); setDraft(null); }}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>
+            <EmptyState action={<Button onClick={() => { for (const set of [setQuery, setTrack, setStatus, setKind, setDifficulty, setGroup, setPhase, setLevel, setHours, setPaperLevel]) set(null); setDraft(null); }}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>
           ) : (
             <VirtualList items={results} label={results.length + ' of ' + shelfTotal} keyOf={(entry) => entry.kind + entry.id} render={row} />
           )}

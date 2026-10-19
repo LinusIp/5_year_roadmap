@@ -178,6 +178,7 @@
   estHours: 40
   prerequisites: [rust-book]
   subject: embedded
+  summary: "Teaches bare-metal Rust on microcontrollers: no_std, peripherals, interrupts and memory-mapped registers."
 
 - id: phils-lab
   title: "Phil's Lab: STM32 firmware and KiCad PCB design"

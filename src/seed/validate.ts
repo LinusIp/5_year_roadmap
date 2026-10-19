@@ -246,7 +246,7 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
   claim('paper', papers);
   claim('cert', certs);
 
-  /* ---- tracks: exactly the sixteen ids of the data model */
+  /* ---- tracks: exactly the seventeen ids of the data model (the brief's sixteen and architecture) */
   const trackIds = new Set(tracks.map((t) => t.item.id));
   if (requireComplete) {
     for (const id of TRACK_IDS) if (!trackIds.has(id)) errors.push('data/tracks.yaml: track "' + id + '" is missing');
@@ -268,7 +268,7 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
       if (!resourceById.has(pre)) errors.push(file + ' (id: ' + item.id + '): prerequisite "' + pre + '" is not a resource');
     }
     for (const first of item.after ?? []) {
-      if (!resourceById.has(first)) errors.push(file + ' (id: ' + item.id + '): after "' + first + '" is not a resource');
+      if (!resourceById.has(first) && !papers.some((p) => p.item.id === first)) errors.push(file + ' (id: ' + item.id + '): after "' + first + '" is not a resource or a paper');
       if (first === item.id) errors.push(file + ' (id: ' + item.id + '): a resource cannot come after itself');
     }
     if (item.subject && !subjectIds.has(item.subject)) errors.push(file + ' (id: ' + item.id + '): subject "' + item.subject + '" has no row in data/subjects.yaml');

@@ -1277,3 +1277,51 @@ tiles do not fit three across), with the ice icon (a target) that marks things d
 duplicate ids, unchecked links and unknown tracks and types) and an `after` that is not a resource. A weekly job,
 `.github/workflows/links.yml`, runs `npm run check:links` on a runner and uploads the report; it is
 `continue-on-error`, the script exits 0, and nothing writes to `/data`.
+
+## Five hundred more resources (pull request #19)
+
+MORE-RESOURCES: 507 free resources (`more-resources.jsonl`) into the seed data, not the daily plan, with the first
+import's converter (`scripts/lib/resource-import.ts`).
+
+**Papers are resources on the Papers shelf; the reading queue keeps its own.** A new paper becomes a resource of type
+`paper` (the schema had the type; `shelfOf` already put it on Papers), with the same sheet, status, level, year and
+soft prerequisites as everything else. The 92 papers of `data/papers.yaml` stay the reading queue, with their reading
+statuses and the one-a-week cadence; a new paper that is one of them (same URL, same id, or checked by hand) is not
+added again, and the queue's paper takes only what it lacks: a short name, the import's "why" as `summary` (shown in
+its sheet), its level and the year it fits from (new optional fields of the paper schema). Two queue papers had no
+link (Roofline, the Sora report); they take the import's, exactly as given. Appending to the queue instead would have
+changed what Plan › Papers offers next week, which is the plan's business. The Papers shelf shows both, 259 in all.
+
+**Blogs and articles.** A blog is an `article` with `blog: true` (the existing "Blogs to follow" shelf, rss icon); an
+article is an article. The Papers and Blogs tiles already existed, so the Browse grid only shows the new counts.
+
+**Tracks and paths.** `architecture` is a new track (the seventeenth; family Software & systems, so charts keep its
+colour with systems). `robotics` was already a track. Paths now name their tracks instead of a family, so both are
+paths of their own: Software architecture (`architecture`) and Robotics (`robotics`), split from Mechanical (`mech`,
+id `me`, so old links still open it). A track of the user's still joins the path of a track of its family.
+Software architecture has nothing on the plan, so the plan's paths cannot list it: the home shows it under Your
+paths as "Not on the plan · 28 to browse", and its view is the optional list, open. Icons: network and bot.
+
+**Duplicates.** As before, then two rules more: titles are only compared on the same shelf (Yang Song's post and the
+NCSN paper share a title and both stay; the FlashAttention-3 paper and Tri Dao's post about it too), and titles whose
+numbers differ never match (GPU Gems 2 and 3, 6.006 and 6.046). 119 matched (102 by URL, 10 by title, 4 by id, 3
+checked by hand: the Roofline report, OpenAI's "world simulators" page as the Sora report, iquilezles.org as
+Inigo Quilez's articles); 62 of them are queue papers. Title matches read by hand and kept: another offering of the
+same course (6.042J 2015 for 2010, CS149 fall 24 for fall 25, CS336's two sites), the same book or course under
+another address (PRML, Modern Robotics, 3Blue1Brown's two series, Kipply's arithmetic, the Hugging Face diffusion
+course, the 3D Gaussian Splatting paper).
+
+**The Papers shelf** orders by the plan's years: what is being read, then `fromYear` 1, 2, 3, then papers with no
+year, by name. Three level chips (Beginner, Intermediate, Advanced; the data's `intro`, `intermediate`, `advanced`)
+filter it, in the URL as `lvl` (the project filters already use `level` for 1 to 5). A row says "Year 2 · authors".
+
+**Speed.** The shelves were already windowed (`VirtualList`: only the rows near the viewport are drawn) and search
+already shows three per shelf, so a list of 259 papers draws about forty rows. The seed chunk grows from 186 kB to
+237 kB gzipped (705 kB to 923 kB raw). The unit test that wanted the main payload under 70 % of the whole seed now
+checks what the split is for, that the checklists' weight leaves the main payload: the ratio stopped meaning much once
+the Library outgrew its checklists.
+
+**Links.** The container cannot reach most of these sites, so the pull request's CI runs `npm run check:links --
+--checked 2026-10-19` (a new filter: the links an import dated that day) in a job of its own that never fails, and the
+pull request lists what it reports. A 401, 403 or 429 is listed as "check by hand", not as broken. Nothing edits data.
+The job is for this pull request and is removed before it merges; the weekly report covers every link after that.

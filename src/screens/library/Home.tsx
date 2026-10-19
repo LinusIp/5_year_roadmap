@@ -3,7 +3,7 @@ import { setItemStatus } from '../../db/state.ts';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { monthName } from '../../lib/dates.ts';
 import { checklistCounts, checklistMeta, isChecklist } from '../../lib/checklist.ts';
-import { buildPaths, inProgress, pathDots, SHELVES, startsMuchLater, upNext } from '../../lib/library-home.ts';
+import { buildPaths, inProgress, pathDots, pathExtras, PATHS, SHELVES, startsMuchLater, upNext } from '../../lib/library-home.ts';
 import type { LibraryPath, ShelfKey } from '../../lib/library-home.ts';
 import { minutesForRef } from '../../lib/logs.ts';
 import type { Unit } from '../../seed/schema.ts';
@@ -24,6 +24,8 @@ export const PATH_ICON: Record<string, { icon: IconName; tone: 'blue' | 'ice' }>
   systems: { icon: 'server', tone: 'ice' },
   ee: { icon: 'zap', tone: 'blue' },
   me: { icon: 'wrench', tone: 'ice' },
+  architecture: { icon: 'network', tone: 'blue' },
+  robotics: { icon: 'bot', tone: 'blue' },
 };
 
 export const SHELF_ICON: Record<ShelfKey, IconName> = { course: 'course', book: 'book', paper: 'paper', article: 'article', blog: 'blog', tool: 'wrench', practice: 'target', project: 'layers' };
@@ -106,6 +108,10 @@ export function LibraryHome({
   const paths = buildPaths(seed, states);
   const laterPaths = paths.filter((p) => startsMuchLater(p, seed, today));
   const shownPaths = showLater ? paths : paths.filter((p) => !laterPaths.includes(p));
+  // Paths with nothing on the plan (Software architecture): the Library's resources for them, to browse.
+  const browsePaths = PATHS.filter((def) => !paths.some((p) => p.id === def.id))
+    .map((def) => ({ def, count: pathExtras(seed, states, def.id).length }))
+    .filter((p) => p.count > 0);
   const active = inProgress(seed.resources, states);
   const next = upNext(paths, seed);
   const pathOfRef = (refId: string): string | undefined => paths.find((p) => p.steps.some((s) => s.refId === refId))?.id;
@@ -197,6 +203,10 @@ export function LibraryHome({
           {laterPaths.length > 0 && !showLater && (
             <Row title="Later in the plan" meta={laterPaths.map((p) => p.name).join(' · ')} chevron height={44} onClick={() => setShowLater(true)} />
           )}
+          {browsePaths.map(({ def, count }) => {
+            const { icon, tone } = PATH_ICON[def.id] ?? { icon: 'course', tone: 'blue' };
+            return <Row key={def.id} icon={<IconTile icon={icon} tone={tone} />} title={def.name} meta={'Not on the plan · ' + count + ' to browse'} chevron onClick={() => onPath(def.id)} />;
+          })}
         </ul>
       </section>
 

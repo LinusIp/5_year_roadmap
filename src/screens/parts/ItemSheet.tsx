@@ -178,9 +178,15 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
             <Row key={id} title={atlas.seed.resources.find((r) => r.id === id)?.title ?? id} meta={atlas.states.get(id)?.status === 'done' ? 'Needed first · done' : 'Needed first'} to={'/library/' + id} />
           ))}
           {/* Soft prerequisites (RESOURCES-ADD): worth doing first, never enforced. */}
-          {(resource.after ?? []).map((id) => (
-            <Row key={id} title={atlas.seed.resources.find((r) => r.id === id)?.title ?? id} meta={atlas.states.get(id)?.status === 'done' ? 'Do first · done' : 'Do first'} to={'/library/' + id} />
-          ))}
+          {(resource.after ?? []).map((id) => {
+            // A paper of the reading queue opens its own sheet (MORE-RESOURCES).
+            const paper = atlas.seed.papers.find((p) => p.id === id);
+            return paper ? (
+              <Row key={id} title={paper.short ?? paper.title} meta="Do first" to={'/library?paper=' + id} />
+            ) : (
+              <Row key={id} title={atlas.seed.resources.find((r) => r.id === id)?.title ?? id} meta={atlas.states.get(id)?.status === 'done' ? 'Do first · done' : 'Do first'} to={'/library/' + id} />
+            );
+          })}
           {subject && <Row title={subject.title} meta="Counts towards" to={'/plan?view=credentials&subject=' + subject.id} />}
         </RowList>
       )}

@@ -42,6 +42,8 @@
   covers:
     - inference-engineering/sglang
     - inference-engineering/caching-approaches
+  tags: [inference]
+  after: [sglang-radixattention]
 - id: tensorrt-llm-docs
   title: TensorRT-LLM documentation
   provider: NVIDIA
@@ -61,6 +63,8 @@
   covers:
     - inference-engineering/tensorrt-llm
     - inference-engineering/tensorrt
+  tags: [inference]
+  after: [vllm-docs]
 - id: llama-cpp
   title: llama.cpp
   provider: ggml.org
@@ -268,6 +272,9 @@
   summary: "Compute, memory bandwidth and overhead: the three things that bound a deep learning workload."
   covers:
     - inference-engineering/llm-bottlenecks
+  short: "DL Go Brrrr"
+  fromYear: 1
+  tags: [inference]
 - id: hazy-gpus-go-brrr
   title: GPUs Go Brrr
   provider: Hazy Research (Stanford)
@@ -283,6 +290,10 @@
   prerequisites: []
   subject: gpu
   summary: What it takes to keep an H100 busy, and the ThunderKittens approach to kernels.
+  short: "GPUs Go Brrr"
+  fromYear: 2
+  tags: [inference]
+  after: [horace-he-brrr]
 - id: scaling-book
   title: How to Scale Your Model (the Scaling Book)
   provider: Google DeepMind
@@ -353,6 +364,10 @@
   summary: "Back-of-the-envelope latency and memory for transformer inference: FLOPs, bytes and the KV cache."
   covers:
     - inference-engineering/ops-byte-ratio
+  short: "Transformer Inference Arith"
+  fromYear: 1
+  tags: [inference]
+  after: [horace-he-brrr]
 - id: batching-effects-gpt
   title: Dissecting Batching Effects in GPT Inference
   provider: Lequn Chen
@@ -383,3 +398,7 @@
   prerequisites: []
   subject: deep-learning
   summary: Distillation, quantization, pruning, sparsity and architectural tricks for faster inference.
+  short: "Lil'Log Inference Opt."
+  fromYear: 1
+  tags: [inference]
+  after: [annotated-transformer]

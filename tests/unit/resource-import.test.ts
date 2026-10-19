@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { fillMissing, findExisting, normaliseUrl, resolveAfter, toResource, type ImportItem } from '../../scripts/lib/resource-import.ts';
+import { fillMissing, fillPaper, findExisting, normaliseUrl, resolveAfter, SHELF_OF, titleLikeness, toResource, type ImportItem } from '../../scripts/lib/resource-import.ts';
+import { shelfOf } from '../../src/lib/library-home.ts';
 import { ResourceSchema } from '../../src/seed/schema.ts';
 
 const item = (over: Partial<ImportItem> = {}): ImportItem => ({
@@ -129,5 +130,64 @@ describe('filling an entry the Library has', () => {
 
   it('never makes an entry come after itself', () => {
     expect(fillMissing({ id: 'rust-book', url: null, prerequisites: [] }, item(), 'rust-book', false).after).toBeUndefined();
+  });
+});
+
+describe('the second import (MORE-RESOURCES)', () => {
+  it('maps papers, blogs and articles to their shelves, and architecture and robotics to their tracks', () => {
+    const shelf = (type: ImportItem['type']) => shelfOf(toResource(item({ type }), null) as { type: string; blog?: boolean });
+    expect(shelf('paper')).toBe('paper');
+    expect(shelf('blog')).toBe('blog');
+    expect(shelf('article')).toBe('article');
+    expect(shelf('docs')).toBe('article');
+    expect(shelf('video-course')).toBe('course');
+    expect(shelf('practice')).toBe('practice');
+    for (const type of Object.keys(SHELF_OF) as ImportItem['type'][]) expect(shelf(type)).toBe(SHELF_OF[type]);
+    expect(toResource(item({ type: 'blog' }), null)).toMatchObject({ type: 'article', blog: true });
+    expect(toResource(item({ track: 'architecture' }), null).tracks).toEqual(['architecture']);
+    expect(toResource(item({ track: 'robotics' }), null).tracks).toEqual(['robotics']);
+    expect(ResourceSchema.safeParse({ ...toResource(item({ type: 'paper', track: 'robotics' }), null), prerequisites: [] }).success).toBe(true);
+  });
+
+  it('compares titles only on the same shelf: a paper and a post of one title both stay', () => {
+    const library = [{ id: 'yang-song-score', title: 'Generative Modeling by Estimating Gradients of the Data Distribution', url: 'https://yang-song.net/blog/2021/score/', shelf: 'article' }];
+    const paper = item({ id: 'paper-ncsn', type: 'paper', title: 'Generative Modeling by Estimating Gradients of the Data Distribution', short: 'NCSN', url: 'https://arxiv.org/abs/1907.05600' });
+    expect(findExisting(paper, library)).toBeNull();
+    expect(findExisting({ ...paper, type: 'article' }, library)).toMatchObject({ entry: { id: 'yang-song-score' }, by: 'title' });
+  });
+
+  it('never merges numbered titles that differ', () => {
+    expect(titleLikeness('GPU Gems 2', 'GPU Gems 3')).toBe(0);
+    expect(titleLikeness('GPU Gems 3', 'GPU Gems 3')).toBe(1);
+    const library = [{ id: 'gpu-gems-2', title: 'GPU Gems 2', url: 'https://developer.nvidia.com/gpugems/gpugems2', shelf: 'book' }];
+    expect(findExisting(item({ id: 'gpu-gems-3', type: 'book', title: 'GPU Gems 3', short: 'GPU Gems 3', url: 'https://developer.nvidia.com/gpugems/gpugems3' }), library)).toBeNull();
+  });
+
+  it('still matches by URL across shelves, and by the pairs checked by hand', () => {
+    const library = [
+      { id: 'sora-report', title: 'Video generation models as world simulators (Sora technical report)', url: null, shelf: 'paper' },
+      { id: 'iq-articles', title: 'Inigo Quilez: articles', url: 'https://iquilezles.org/articles/', shelf: 'blog' },
+    ];
+    expect(findExisting(item({ id: 'article-openai-sora-world-simulators', type: 'article', title: 'Video generation models as world simulators', url: 'https://openai.com/index/video-generation-models-as-world-simulators/' }), library)).toMatchObject({ entry: { id: 'sora-report' }, by: 'checked' });
+    expect(findExisting(item({ id: 'blog-x', type: 'blog', title: 'Something', url: 'https://iquilezles.org/articles' }), library)).toMatchObject({ entry: { id: 'iq-articles' }, by: 'url' });
+  });
+
+  it('gives a queue paper only what it lacks, and a link only when it has none', () => {
+    const queued = { id: 'roofline', url: null, urlVerified: false, searchHint: 'Roofline' };
+    expect(fillPaper(queued, item({ type: 'paper', short: 'Roofline Model', url: 'https://example.org/roofline', year: 1, level: 'beginner' }))).toEqual({
+      short: 'Roofline Model',
+      summary: 'The free operating systems book.',
+      level: 'intro',
+      fromYear: 1,
+      url: 'https://example.org/roofline',
+      urlVerified: true,
+      lastVerified: '2026-10-18',
+    });
+    const linked = { id: 'paper-attention', url: 'https://arxiv.org/abs/1706.03762', lastVerified: '2026-09-20', short: 'Attention' };
+    const add = fillPaper(linked, item({ type: 'paper', url: 'https://arxiv.org/abs/1706.03762' }));
+    expect(add.short).toBeUndefined();
+    expect(add.url).toBeUndefined();
+    expect(add.lastVerified).toBeUndefined();
+    expect(add).toMatchObject({ level: 'intermediate', fromYear: 2 });
   });
 });

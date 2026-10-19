@@ -177,8 +177,10 @@ describe('splitting the seed for the browser', () => {
     }
   });
 
-  it('makes the main payload meaningfully smaller', () => {
+  it('makes the main payload smaller by the checklists it moves out', () => {
+    // A ratio of the whole seed stopped meaning much once the Library's imports (MORE-RESOURCES) outgrew the
+    // checklists: what the split owes is that the checklists' weight leaves the main payload.
     const size = (v: unknown): number => JSON.stringify(v).length;
-    expect(size(app)).toBeLessThan(size(seed) * 0.7);
+    expect(size(seed) - size(app)).toBeGreaterThan(size(units) * 0.9);
   });
 });

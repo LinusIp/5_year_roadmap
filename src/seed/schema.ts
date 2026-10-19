@@ -10,6 +10,8 @@ import { z } from 'zod';
 export const TRACK_IDS = [
   'ai', 'swe', 'systems', 'graphics', 'simulation', 'gamedev', 'languages', 'math',
   'physics', 'ee', 'embedded', 'controls', 'mech', 'robotics', 'chem', 'career',
+  // MORE-RESOURCES: software architecture, system design, engineering practice and SRE.
+  'architecture',
 ] as const;
 /** The lanes of the curriculum (plan.yaml, the phase table): the five of the first plan and H, Hugging Face, added with
  * the fixed daily schedule. The user can add blocks of their own beyond them. */
@@ -30,7 +32,7 @@ export const ROADMAP_IDS = ['inference-engineering', 'ai-engineer', 'ai-agents',
 const NodeRef = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must look like roadmap-id/node-id');
 export const CERT_MODES = ['committed', 'optional', 'investigate'] as const;
 
-/** One of the sixteen tracks, or a track the user created (`my-…`). */
+/** One of the seventeen tracks, or a track the user created (`my-…`). */
 export type TrackId = (typeof TRACK_IDS)[number] | `my-${string}`;
 export type SeedTrackId = (typeof TRACK_IDS)[number];
 /** A block's id: A to E by default, any short capitalised id for a block the user adds. */
@@ -261,7 +263,7 @@ export const ResourceSchema = z
     tags: z.array(Slug).optional(),
     /** One line on how it is free, for the sheet: "Free tier". */
     note: Text.optional(),
-    /** Soft prerequisites: worth doing first, never enforced by the schedule. */
+    /** Soft prerequisites, resources or papers: worth doing first, never enforced by the schedule. */
     after: z.array(Slug).optional(),
     /** What to do first, in words, when it is not a resource the Library has. */
     doFirst: Text.optional(),
@@ -390,6 +392,11 @@ export const PaperSchema = z
     group: z.enum(PAPER_GROUPS),
     estHours: z.number().min(0.5).max(40).default(3),
     note: Text.optional(),
+    /** From the Library's imports (MORE-RESOURCES): a short name, why read it, its level and the year it fits from. */
+    short: Text.max(28, 'a short title is 28 characters or fewer').optional(),
+    summary: Text.optional(),
+    level: z.enum(LEVELS).optional(),
+    fromYear: z.literal([1, 2, 3, 4, 5]).optional(),
     /** Set on a paper the user added in the app. */
     source: z.literal('user').optional(),
   })
