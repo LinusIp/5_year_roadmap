@@ -114,3 +114,28 @@ export function splitSeed(seed: Seed): { app: AppSeed; units: Record<string, Uni
   });
   return { app: { ...seed, resources } as AppSeed, units };
 }
+
+/**
+ * The curriculum's core and the Library's long tail (ATLAS-LIBRARY). The core is what the day-to-day plan touches:
+ * every resource on the plan or named by a certification, with a checklist, covering a roadmap.sh node or counting
+ * towards a subject, and whatever those name as a prerequisite, an alternative or a soft prerequisite. The rest, about
+ * nine tenths of 2,400 resources, only ever appears in the Library; the Vite plugin serves it as its own chunk, so it
+ * never delays Today.
+ */
+export function splitLibrary(app: AppSeed): { core: AppSeed; library: AppSeed['resources'] } {
+  const byId = new Map(app.resources.map((r) => [r.id, r]));
+  const core = new Set<string>();
+  const keep = (id: string): void => {
+    const resource = byId.get(id);
+    if (!resource || core.has(id)) return;
+    core.add(id);
+    for (const next of [...resource.prerequisites, ...(resource.alternatives ?? []), ...(resource.after ?? [])]) keep(next);
+  };
+  for (const item of app.plan) if (item.resourceId) keep(item.resourceId);
+  for (const cert of app.certs) for (const id of cert.prepResources) keep(id);
+  for (const r of app.resources) if (r.unitCount > 0 || (r.covers?.length ?? 0) > 0 || r.subject) keep(r.id);
+  return {
+    core: { ...app, resources: app.resources.filter((r) => core.has(r.id)) },
+    library: app.resources.filter((r) => !core.has(r.id)),
+  };
+}

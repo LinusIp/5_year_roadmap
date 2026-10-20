@@ -1,10 +1,11 @@
-# The sixteen tracks of the data model, and architecture (MORE-RESOURCES). `slot` picks one of the eight validated categorical
+# The sixteen tracks of the data model, architecture (MORE-RESOURCES) and devops (ATLAS-LIBRARY). `slot` picks one of the eight validated categorical
 # colours (src/index.css: --series-1 … --series-8). Tracks of one family share a colour; the
 # name carries the identity. Order here is the order used in legends and stacked charts.
 - { id: ai,         name: AI & ML,              family: AI & ML,                      slot: 1, summary: "Machine learning, deep learning, LLMs and agents." }
 - { id: swe,        name: Software engineering, family: Software & systems,           slot: 2, summary: "CS foundations, tooling, algorithms and engineering practice." }
 - { id: systems,    name: Systems & scale,      family: Software & systems,           slot: 2, summary: "Operating systems, databases, networks, distributed and scalable systems." }
 - { id: architecture, name: Software architecture, family: Software & systems,          slot: 2, summary: "Software architecture, system design, engineering practice and SRE." }
+- { id: devops,       name: DevOps & MLOps,       family: Software & systems,           slot: 2, summary: "Containers, CI/CD, infrastructure as code, observability and MLOps." }
 - { id: graphics,   name: Graphics,             family: "Graphics, simulation & games", slot: 3, summary: "OpenGL, Vulkan, rendering and shaders." }
 - { id: simulation, name: Simulation,           family: "Graphics, simulation & games", slot: 3, summary: "Custom physics engines: rigid bodies, cloth, fluids, FEM." }
 - { id: gamedev,    name: Game development,     family: "Graphics, simulation & games", slot: 3, summary: "Finished games, jams and engine work." }

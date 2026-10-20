@@ -3,7 +3,7 @@
  * about the content itself, which the schema alone cannot express.
  */
 import { describe, expect, it } from 'vitest';
-import { loadSeed } from '../../scripts/lib/load-seed.ts';
+import { loadSeed, splitLibrary } from '../../scripts/lib/load-seed.ts';
 import { MIN_WEEKLY_PROJECTS, MIN_WEEKLY_STAGE2 } from '../../src/seed/validate.ts';
 import { splitSeed } from '../../scripts/lib/vite-plugin-seed.ts';
 
@@ -177,10 +177,25 @@ describe('splitting the seed for the browser', () => {
     }
   });
 
-  it('makes the main payload smaller by the checklists it moves out', () => {
-    // A ratio of the whole seed stopped meaning much once the Library's imports (MORE-RESOURCES) outgrew the
-    // checklists: what the split owes is that the checklists' weight leaves the main payload.
+  it('keeps the main payload to what the plan touches: no checklists, no Library long tail', () => {
+    // The checklists and the Library's long tail (ATLAS-LIBRARY) each ride in a chunk of their own.
     const size = (v: unknown): number => JSON.stringify(v).length;
-    expect(size(seed) - size(app)).toBeGreaterThan(size(units) * 0.9);
+    const { core, library } = splitLibrary(app);
+    expect(size(core)).toBeLessThan(size(seed) * 0.4);
+    expect(JSON.stringify(core)).not.toContain('"units":');
+    expect(core.resources.length + library.length).toBe(app.resources.length);
+  });
+
+  it('keeps in the core every resource the plan, a certification or a core resource names', () => {
+    const { core, library } = splitLibrary(app);
+    const inCore = new Set(core.resources.map((r) => r.id));
+    for (const item of app.plan) if (item.resourceId) expect(inCore.has(item.resourceId), item.resourceId).toBe(true);
+    for (const cert of app.certs) for (const id of cert.prepResources) expect(inCore.has(id), id).toBe(true);
+    for (const r of core.resources) {
+      for (const id of [...r.prerequisites, ...(r.alternatives ?? [])]) expect(inCore.has(id), r.id + ' needs ' + id).toBe(true);
+      for (const id of r.after ?? []) if (app.resources.some((x) => x.id === id)) expect(inCore.has(id), r.id + ' after ' + id).toBe(true);
+    }
+    expect(library.some((r) => r.unitCount > 0 || r.covers || r.subject)).toBe(false);
+    expect(library.length).toBeGreaterThan(2000);
   });
 });

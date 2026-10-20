@@ -15,6 +15,10 @@
   prerequisites: []
   subject: research
   summary: "Why some people do important work: the famous talk."
+  short: "Hamming: You & Research"
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
 - id: karpathy-phd-guide
   title: A Survival Guide to a PhD
   provider: Andrej Karpathy
@@ -30,6 +34,11 @@
   prerequisites: []
   subject: research
   summary: "Choosing problems, writing papers, giving talks: practical advice that applies outside a PhD."
+  short: "Karpathy: PhD Guide"
+  fromYear: 2
+  after: [keshav-how-to-read]
+  priority: 1
+  roadmap: "ai-engineer"
 - id: schulman-research-guide
   title: An Opinionated Guide to ML Research
   provider: John Schulman
@@ -46,6 +55,11 @@
   prerequisites: []
   subject: research
   summary: Problem selection, idea-driven against goal-driven research, keeping a notebook.
+  short: "Schulman: ML Research"
+  fromYear: 2
+  after: [karpathy-phd-guide]
+  priority: 1
+  roadmap: "ai-engineer"
 - id: nielsen-principles
   title: Principles of Effective Research
   provider: Michael Nielsen
@@ -94,6 +108,8 @@
   summary: Curated reading lists and monthly summaries of new LLM research.
   short: "Ahead of AI (Raschka)"
   fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
 - id: hf-papers
   title: Papers with Code, now Hugging Face Papers
   provider: Hugging Face
@@ -126,6 +142,11 @@
   subject: research
   summary: arXiv with discussion threads on each paper.
   reference: true
+  short: "alphaXiv"
+  fromYear: 3
+  after: [practice-hf-daily-papers]
+  priority: 1
+  roadmap: "ai-engineer"
 - id: zotero
   title: Zotero
   provider: Corporation for Digital Scholarship
@@ -173,6 +194,10 @@
   prerequisites: []
   subject: research
   summary: The three-pass method for reading research papers.
+  short: "How to Read a Paper"
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
 - id: ml-reproducibility-challenge
   title: ML Reproducibility Challenge
   provider: ML Reproducibility Challenge

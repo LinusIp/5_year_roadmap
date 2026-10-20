@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { fillMissing, fillPaper, findExisting, normaliseUrl, resolveAfter, SHELF_OF, titleLikeness, toResource, type ImportItem } from '../../scripts/lib/resource-import.ts';
 import { shelfOf } from '../../src/lib/library-home.ts';
+import { loadSeedOrThrow, splitSeed } from '../../scripts/lib/load-seed.ts';
+import { resolveSeed } from '../../src/lib/plan.ts';
+import type { AppSeed } from '../../src/seed/schema.ts';
 import { ResourceSchema } from '../../src/seed/schema.ts';
 
 const item = (over: Partial<ImportItem> = {}): ImportItem => ({
@@ -189,5 +192,67 @@ describe('the second import (MORE-RESOURCES)', () => {
     expect(add.url).toBeUndefined();
     expect(add.lastVerified).toBeUndefined();
     expect(add).toMatchObject({ level: 'intermediate', fromYear: 2 });
+  });
+});
+
+describe('the whole library (ATLAS-LIBRARY)', () => {
+  it('maps every type to its shelf and the new tracks to theirs, with the plan-alignment fields', () => {
+    const shelf = (type: ImportItem['type']) => shelfOf(toResource(item({ type }), null) as { type: string; blog?: boolean });
+    expect(['video-course', 'course'].map((t) => shelf(t as ImportItem['type']))).toEqual(['course', 'course']);
+    expect(shelf('book')).toBe('book');
+    expect(['docs', 'tutorial', 'article'].map((t) => shelf(t as ImportItem['type']))).toEqual(['article', 'article', 'article']);
+    expect(shelf('practice')).toBe('practice');
+    expect(shelf('paper')).toBe('paper');
+    expect(shelf('blog')).toBe('blog');
+    expect(toResource(item({ track: 'devops' }), null).tracks).toEqual(['devops']);
+    expect(toResource(item({ track: 'simulation' }), null).tracks).toEqual(['simulation']);
+    expect(toResource(item({ track: 'inference' }), null)).toMatchObject({ tracks: ['ai'], tags: ['inference'] });
+    const aligned = toResource(item({ priority: 1, roadmap: 'inference-engineering', research: 'diffusion' }), null);
+    expect(aligned).toMatchObject({ priority: 1, roadmap: 'inference-engineering', research: 'diffusion' });
+    expect(ResourceSchema.safeParse({ ...aligned, prerequisites: [] }).success).toBe(true);
+    // An empty roadmap or research area is no field at all.
+    const plain = toResource(item({ priority: 2, roadmap: '', research: '' }), null);
+    expect(plain.roadmap).toBeUndefined();
+    expect(plain.research).toBeUndefined();
+  });
+
+  it('collapses arXiv abstract, PDF and HTML links, any version, to the paper', () => {
+    const abs = normaliseUrl('https://arxiv.org/abs/1706.03762');
+    for (const url of ['https://arxiv.org/pdf/1706.03762', 'https://arxiv.org/pdf/1706.03762v7', 'http://arxiv.org/pdf/1706.03762.pdf', 'https://arxiv.org/html/1706.03762v2', 'https://arxiv.org/abs/1706.03762v5/', 'https://export.arxiv.org/abs/1706.03762']) {
+      expect(normaliseUrl(url), url).toBe(abs);
+    }
+    expect(normaliseUrl('https://arxiv.org/abs/cs/0112017v1')).toBe('arxiv.org/abs/cs/0112017');
+    expect(normaliseUrl('https://arxiv.org/pdf/1706.03763')).not.toBe(abs);
+    const library = [{ id: 'paper-attention', title: 'Attention Is All You Need', url: 'https://arxiv.org/abs/1706.03762', shelf: 'paper' }];
+    expect(findExisting(item({ id: 'transformer', type: 'paper', title: 'The Transformer', url: 'https://arxiv.org/pdf/1706.03762v7' }), library)).toMatchObject({ entry: { id: 'paper-attention' }, by: 'url' });
+  });
+
+  it('never merges titles that differ only in symbols or numbers, nor pairs read by hand as different', () => {
+    expect(titleLikeness('Exercism C Track', 'Exercism C++ Track')).toBe(0);
+    expect(titleLikeness('Exercism C# Track', 'Exercism C++ Track')).toBe(0);
+    const library = [
+      { id: 'exercism-c', title: 'Exercism C Track', url: 'https://exercism.org/tracks/c', shelf: 'practice' },
+      { id: 'orca', title: 'Orca: A Distributed Serving System for Transformer-Based Generative Models', url: 'https://www.usenix.org/conference/osdi22/presentation/yu', shelf: 'paper' },
+    ];
+    expect(findExisting(item({ id: 'exercism-cpp', type: 'practice', title: 'Exercism C++ Track', url: 'https://exercism.org/tracks/cpp' }), library)).toBeNull();
+    expect(findExisting(item({ id: 'paper-orca', type: 'paper', title: 'Orca', short: 'Orca', url: 'https://arxiv.org/abs/2306.02707' }), [{ ...library[1]!, title: 'Orca', short: 'Orca' }])).toBeNull();
+  });
+
+  it('keeps an entry what it has, and the user what they did: an upsert only adds', () => {
+    const entry = { id: 'rust-book', title: 'The Rust Programming Language', url: 'https://doc.rust-lang.org/book/', summary: 'Mine.', estHours: 40, prerequisites: [], doFirst: 'C' };
+    const add = fillMissing(entry, item({ id: 'rust-book', title: 'Rust Book (2nd ed.)', url: 'https://example.org/other', hours: 99, after: 'OSTEP', priority: 2, roadmap: 'software-architect' }), 'ostep', false);
+    // Only fields the entry lacks: never its title, link, hours, summary, or its "do first".
+    expect(Object.keys(add).sort()).toEqual(['fromYear', 'priority', 'roadmap', 'short']);
+    // The user's progress and edits are keyed by the entry's id, which never changes, so they still apply.
+    const seed = splitSeed(loadSeedOrThrow()).app as AppSeed;
+    const original = seed.resources.find((r) => r.id === 'rust-book')!;
+    const upserted: AppSeed = { ...seed, resources: seed.resources.map((r) => (r.id === 'rust-book' ? { ...r, ...add } : r)) };
+    const edit = { kind: 'resource' as const, id: 'rust-book', patch: { estHours: 7 }, updatedAt: '2026-10-01T00:00:00.000Z', deviceId: 'd' };
+    const resolved = resolveSeed(upserted, [edit], []).resources.find((r) => r.id === 'rust-book')!;
+    expect(resolved.estHours).toBe(7);
+    expect(resolved.title).toBe(original.title);
+    expect(resolved.url).toBe(original.url);
+    const states = new Map([['rust-book', { refId: 'rust-book', status: 'active' as const, unitsDone: ['ch-1'] }]]);
+    expect(states.get(resolved.id)?.unitsDone).toEqual(['ch-1']);
   });
 });

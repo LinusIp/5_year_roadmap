@@ -120,3 +120,13 @@ export async function pickStatus(page: Page, pill: Locator, status: string): Pro
   await list.getByRole('button', { name: new RegExp('^' + status) }).click();
   await writesSettled(page);
 }
+
+/** A path's optional list shows forty at a time (ATLAS-LIBRARY): "Show 40 more" until the row is there. */
+export async function showMoreUntil(page: Page, row: Locator): Promise<void> {
+  for (let i = 0; i < 60 && !(await row.isVisible()); i++) {
+    const more = page.getByRole('button', { name: /^Show \d+ more/ });
+    if (!(await more.isVisible())) break;
+    await more.click();
+  }
+  await expect(row).toBeVisible();
+}

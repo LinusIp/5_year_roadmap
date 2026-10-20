@@ -4,12 +4,39 @@
  * Unit checklists are not part of this module: they are two fifths of the payload and are only needed
  * once an item is opened, so they live in a separate chunk behind `loadUnits`. Every resource carries
  * `unitCount`, which is all a progress bar needs.
+ *
+ * Nor is the Library's long tail (ATLAS-LIBRARY): the resources only the Library shows load as their own chunk
+ * right after the first screen, through `loadLibrary`, and `useAtlas` adds them to the curriculum.
  */
 import seed from 'virtual:atlas-seed';
-import type { Unit } from './schema.ts';
+import type { AppResource, Unit } from './schema.ts';
 
 export { seed };
 export type * from './schema.ts';
+
+let library: AppResource[] | null = null;
+let libraryLoad: Promise<AppResource[]> | null = null;
+const libraryListeners = new Set<() => void>();
+
+/** The Library's long tail, loading its chunk on first use; everyone subscribed hears when it arrives. */
+export function loadLibrary(): Promise<AppResource[]> {
+  libraryLoad ??= import('virtual:atlas-library').then((m) => {
+    library = m.default;
+    for (const listener of libraryListeners) listener();
+    return library;
+  });
+  return libraryLoad;
+}
+
+/** The long tail if it has loaded, else null. */
+export function peekLibrary(): AppResource[] | null {
+  return library;
+}
+
+export function subscribeLibrary(listener: () => void): () => void {
+  libraryListeners.add(listener);
+  return () => libraryListeners.delete(listener);
+}
 
 let cache: Record<string, Unit[]> | null = null;
 

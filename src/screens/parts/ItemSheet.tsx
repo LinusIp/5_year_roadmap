@@ -27,6 +27,7 @@ import { RunningTime } from './RunningTime.tsx';
 import { StatusPill } from './StatusPill.tsx';
 import { AddToPlanSheet } from '../plan/EditSheets.tsx';
 import { blockShort, plural } from './text.ts';
+import { RESEARCH } from '../../lib/library-home.ts';
 
 export const ITEM_STATUSES: { value: ItemStatus; label: string }[] = [
   { value: 'todo', label: 'To do' },
@@ -123,6 +124,19 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
         <p className="text-meta text-ink2">{[resource.provider, resource.type, resource.cost === 'audit-free' ? 'free to audit' : resource.cost].join(' · ')}</p>
         {resource.summary && <p className="doc-text mt-2 text-body text-ink2">{resource.summary}</p>}
         {(resource.note || resource.doFirst) && <p className="mt-2 text-meta text-ink2">{[resource.note, resource.doFirst && 'Do first: ' + resource.doFirst].filter(Boolean).join(' · ')}</p>}
+        {/* How it fits the plan (ATLAS-LIBRARY): its priority, its year, its roadmap.sh roadmap, its research area. */}
+        {(resource.priority || resource.roadmap || resource.research) && (
+          <p className="mt-2 text-meta text-ink2">
+            {[
+              resource.priority && 'Priority ' + resource.priority,
+              resource.fromYear && 'Year ' + resource.fromYear,
+              resource.roadmap && (atlas.seed.roadmaps.find((r) => r.id === resource.roadmap)?.title ?? resource.roadmap) + ' roadmap',
+              resource.research && 'Research: ' + (RESEARCH.find((a) => a.id === resource.research)?.name ?? resource.research),
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+        )}
         {resource.url === null && resource.searchHint && <p className="mt-2 text-meta text-ink2">No checked link yet. Search for “{resource.searchHint}”.</p>}
         <div className="mt-4 flex items-center gap-2">
           {resource.url ? (
@@ -137,6 +151,12 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
           <span className="ml-auto">
             <ItemStatusPill kind="resource" refId={resource.id} title={resource.title} state={state} />
           </span>
+        </div>
+        {/* The day's log entry about it (ATLAS-LIBRARY): the blog post screen, its outline started with this resource. */}
+        <div className="mt-2">
+          <Button to={'/blog?ref=' + resource.id} icon="doc">
+            Write log entry
+          </Button>
         </div>
       </div>
 

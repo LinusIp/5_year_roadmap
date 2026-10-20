@@ -7,7 +7,7 @@
  */
 import type { ItemStatus, UserItemState } from '../db/types.ts';
 import type { AppSeed } from '../seed/index.ts';
-import type { BlockId } from '../seed/schema.ts';
+import type { BlockId, ResearchArea, RoadmapId } from '../seed/schema.ts';
 
 /** A path: a group of tracks as the plan teaches it. Career and review is not a path. */
 export interface PathDef {
@@ -15,19 +15,27 @@ export interface PathDef {
   name: string;
   /** The tracks it gathers; a track of the user's joins the path of a track of its family. */
   tracks: readonly string[];
+  /** A tag that claims a resource for this path before its track does: `inference` for Inference engineering. */
+  tag?: string;
+  /** The roadmap.sh roadmaps it follows (ATLAS-LIBRARY): their official pages head its view, their items join it. */
+  roadmaps?: readonly RoadmapId[];
 }
 
 /**
- * In the board's order: the lanes of the first year first, then the second stage. Software architecture and Robotics
- * are paths of their own (MORE-RESOURCES), the first with nothing on the plan yet: its view is the Library's to browse.
+ * In the board's order: the lanes of the first year first, then the second stage. Inference engineering, Software
+ * architecture, DevOps, Simulation and Robotics are paths of their own (MORE-RESOURCES, ATLAS-LIBRARY); a path with
+ * nothing on the plan is the Library's to browse.
  */
 export const PATHS: readonly PathDef[] = [
-  { id: 'ai', name: 'AI engineering', tracks: ['ai'] },
+  { id: 'ai', name: 'AI engineering', tracks: ['ai'], roadmaps: ['ai-engineer', 'ai-agents'] },
+  { id: 'inference', name: 'Inference engineering', tracks: [], tag: 'inference', roadmaps: ['inference-engineering'] },
   { id: 'languages', name: 'Languages', tracks: ['languages'] },
-  { id: 'graphics', name: 'Graphics', tracks: ['graphics', 'simulation', 'gamedev'] },
+  { id: 'graphics', name: 'Graphics', tracks: ['graphics', 'gamedev'], roadmaps: ['game-developer'] },
+  { id: 'simulation', name: 'Simulation', tracks: ['simulation'] },
   { id: 'math', name: 'Math and physics', tracks: ['math', 'physics', 'chem'] },
   { id: 'systems', name: 'Systems', tracks: ['swe', 'systems'] },
-  { id: 'architecture', name: 'Software architecture', tracks: ['architecture'] },
+  { id: 'architecture', name: 'Software architecture', tracks: ['architecture'], roadmaps: ['software-architect'] },
+  { id: 'devops', name: 'DevOps', tracks: ['devops'] },
   { id: 'ee', name: 'Electrical and embedded', tracks: ['ee', 'embedded', 'controls'] },
   { id: 'me', name: 'Mechanical', tracks: ['mech'] },
   { id: 'robotics', name: 'Robotics', tracks: ['robotics'] },
@@ -41,15 +49,79 @@ export function pathOfTrack(seed: Pick<AppSeed, 'tracks'>, track: string): PathD
   return PATHS.find((p) => p.tracks.some((t) => seed.tracks.find((x) => x.id === t)?.family === family));
 }
 
+/** The path a resource belongs to: the path its tag names (inference), else the path of its first track. */
+export function pathOf(seed: Pick<AppSeed, 'tracks'>, resource: { tracks: readonly string[]; tags?: readonly string[] | undefined }): PathDef | undefined {
+  return PATHS.find((p) => p.tag !== undefined && (resource.tags ?? []).includes(p.tag)) ?? pathOfTrack(seed, resource.tracks[0]!);
+}
+
 /**
- * The Library's resources a path offers beyond its steps: not on the plan, with a year they fit from, their first
- * track the path's. In that year's order, then by name.
+ * Priority for years 1 to 3 (ATLAS-LIBRARY): 1 inference and the AI feeding it, 2 architecture, systems, languages and
+ * DevOps, 3 graphics, simulation and robotics, 4 game development. An item the import gave none takes its track's.
+ */
+const PRIORITY_OF_TRACK: Readonly<Record<string, number>> = { ai: 1, swe: 2, systems: 2, architecture: 2, devops: 2, languages: 2, graphics: 3, simulation: 3, robotics: 3, gamedev: 4 };
+export function priorityOf(item: { priority?: number | undefined; tracks: readonly string[] }): number {
+  return item.priority ?? PRIORITY_OF_TRACK[item.tracks[0] ?? ''] ?? 3;
+}
+
+const LEVEL_RANK: Readonly<Record<string, number>> = { intro: 0, intermediate: 1, advanced: 2 };
+
+/** What the Library sorts by: priority, then the plan year it fits, then level (beginner first). */
+export interface Fit {
+  priority: number;
+  year?: number | undefined;
+  level?: string | undefined;
+}
+
+/** Priority, then year (none last), then level (none between beginner and advanced). */
+export function byFit(a: Fit, b: Fit): number {
+  return a.priority - b.priority || (a.year ?? 9) - (b.year ?? 9) || (LEVEL_RANK[a.level ?? ''] ?? 1) - (LEVEL_RANK[b.level ?? ''] ?? 1);
+}
+
+/** A resource's fit: its own priority (or its track's), the year it fits from, its level. */
+export function fitOf(r: { priority?: number | undefined; tracks: readonly string[]; fromYear?: number | undefined; level?: string | undefined }): Fit {
+  return { priority: priorityOf(r), year: r.fromYear, level: r.level };
+}
+
+/** The resource rows of a roadmap.sh roadmap's official page, by the roadmap's id. */
+export function roadmapPage(seed: Pick<AppSeed, 'resources'>, roadmap: RoadmapId): AppSeed['resources'][number] | undefined {
+  return seed.resources.find((r) => r.url === 'https://roadmap.sh/' + roadmap);
+}
+
+/**
+ * The Library's resources a path offers beyond its steps: not on the plan and not dropped, either its own (its tag or
+ * first track) or serving one of its roadmaps; never a roadmap's own page, which heads the view instead. By fit, then
+ * name.
  */
 export function pathExtras(seed: AppSeed, states: ReadonlyMap<string, UserItemState>, pathId: string): AppSeed['resources'] {
+  const def = PATHS.find((p) => p.id === pathId);
   const onPlan = new Set(seed.plan.map((i) => i.resourceId ?? i.projectId));
+  const pages = new Set((def?.roadmaps ?? []).map((id) => 'https://roadmap.sh/' + id));
   return seed.resources
-    .filter((r) => r.fromYear !== undefined && !onPlan.has(r.id) && states.get(r.id)?.status !== 'dropped' && pathOfTrack(seed, r.tracks[0]!)?.id === pathId)
-    .sort((a, b) => a.fromYear! - b.fromYear! || (a.short ?? a.title).localeCompare(b.short ?? b.title));
+    .filter((r) => !onPlan.has(r.id) && states.get(r.id)?.status !== 'dropped' && !pages.has(r.url ?? ''))
+    .filter((r) => pathOf(seed, r)?.id === pathId || (r.roadmap !== undefined && (def?.roadmaps ?? []).includes(r.roadmap)))
+    .sort((a, b) => byFit(fitOf(a), fitOf(b)) || (a.short ?? a.title).localeCompare(b.short ?? b.title));
+}
+
+/** The year 3 research areas (ATLAS-LIBRARY), in the order the Research view shows them. */
+export const RESEARCH: readonly { id: ResearchArea; name: string }[] = [
+  { id: 'inference', name: 'Inference' },
+  { id: 'world-models', name: 'World models' },
+  { id: 'diffusion', name: 'Diffusion' },
+  { id: 'genai', name: 'Generative AI' },
+];
+
+/**
+ * The Research view: every resource with a research area, by area, papers first, the foundations (years 1 and 2)
+ * before the frontier (year 3), then by fit and name. Dropped ones stay out.
+ */
+export function researchAreas(seed: AppSeed, states: ReadonlyMap<string, UserItemState>): { id: ResearchArea; name: string; items: AppSeed['resources'] }[] {
+  const frontier = (r: { fromYear?: number | undefined }): number => ((r.fromYear ?? 3) >= 3 ? 1 : 0);
+  return RESEARCH.map((area) => ({
+    ...area,
+    items: seed.resources
+      .filter((r) => r.research === area.id && states.get(r.id)?.status !== 'dropped')
+      .sort((a, b) => Number(b.type === 'paper') - Number(a.type === 'paper') || frontier(a) - frontier(b) || byFit(fitOf(a), fitOf(b)) || (a.short ?? a.title).localeCompare(b.short ?? b.title)),
+  }));
 }
 
 export interface PathStep {
@@ -62,6 +134,8 @@ export interface PathStep {
   hours: number;
   /** The resource type ("course", "book") or "project". */
   type: string;
+  /** Its fit (ATLAS-LIBRARY): priority, the year of its phase, its level. */
+  fit: Fit;
 }
 
 export interface LibraryPath extends PathDef {
@@ -110,11 +184,13 @@ export function buildPaths(seed: AppSeed, states: ReadonlyMap<string, UserItemSt
     if (status === 'dropped') continue;
     const source = kind === 'resource' ? seed.resources.find((r) => r.id === refId) : seed.projects.find((p) => p.id === refId);
     if (!source) continue;
-    const path = pathOfTrack(seed, source.tracks[0]!);
+    const path = kind === 'resource' ? pathOf(seed, source as AppSeed['resources'][number]) : pathOfTrack(seed, source.tracks[0]!);
     if (!path) continue;
     const hours = item.hours ?? source.estHours;
     const type = kind === 'resource' ? (seed.resources.find((r) => r.id === refId)?.type ?? 'course') : 'project';
-    byPath.get(path.id)!.push({ refId, kind, title: titleOf(seed, kind, refId), status, phaseId: item.phaseId, block: item.block, hours, type });
+    const phaseYear = seed.phases.find((ph) => ph.id === item.phaseId)?.year;
+    const fit: Fit = kind === 'resource' ? { ...fitOf(source as AppSeed['resources'][number]), year: phaseYear } : { priority: priorityOf(source), year: phaseYear };
+    byPath.get(path.id)!.push({ refId, kind, title: titleOf(seed, kind, refId), status, phaseId: item.phaseId, block: item.block, hours, type, fit });
   }
   return PATHS.flatMap((def) => {
     const steps = byPath.get(def.id)!;
@@ -149,7 +225,7 @@ export interface UpNext {
 }
 
 /**
- * The next steps across every path: steps not started, nearest first (by when the plan reaches them), never the
+ * The next steps across every path: steps not started, nearest first (by when the plan reaches them, then by fit), never the
  * current step of a path that is already in progress twice over.
  */
 export function upNext(paths: readonly LibraryPath[], seed: AppSeed, count = 3): UpNext[] {
@@ -164,8 +240,9 @@ export function upNext(paths: readonly LibraryPath[], seed: AppSeed, count = 3):
       all.push(item);
     });
   }
-  const order = (u: UpNext): string => u.start + u.step.block + String(u.path.steps.indexOf(u.step)).padStart(4, '0');
-  return all.sort((a, b) => order(a).localeCompare(order(b))).slice(0, count);
+  // When the plan reaches it first; among steps of one start, by fit (priority, year, level), then lane and place.
+  const order = (u: UpNext): string => u.step.block + String(u.path.steps.indexOf(u.step)).padStart(4, '0');
+  return all.sort((a, b) => a.start.localeCompare(b.start) || byFit(a.step.fit, b.step.fit) || order(a).localeCompare(order(b))).slice(0, count);
 }
 
 /** The resources in progress, at most `cap`, the ones started earliest first. */

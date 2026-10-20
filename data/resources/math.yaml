@@ -16,6 +16,8 @@
   estHours: 120
   subject: math-physics
   summary: "35 video lectures, problem sets and exams. The OCW Scholar edition (18.06SC, Fall 2011) adds recitation videos to the same lectures."
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: 3b1b-linear-algebra
   title: "3Blue1Brown: Essence of Linear Algebra"
@@ -31,6 +33,8 @@
   estHours: 8
   subject: math-physics
   summary: "Geometric intuition for 18.06. Watch alongside the first ten lectures."
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: 3b1b-calculus
   title: "3Blue1Brown: Essence of Calculus"
@@ -46,6 +50,8 @@
   estHours: 7
   subject: math-physics
   summary: "Geometric intuition for 18.01."
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: mit-18-01
   title: "MIT 18.01SC Single Variable Calculus (Fall 2010)"
@@ -75,6 +81,9 @@
   estHours: 120
   prerequisites: [mit-18-01]
   subject: math-physics
+  summary: "Self-paced version of MIT's multivariable calculus with lectures, recitation videos and problem sets with solutions, covering the gradients and partial derivatives that backprop relies on."
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: mit-18-03
   title: "MIT 18.03SC Differential Equations (Fall 2011)"
@@ -91,6 +100,8 @@
   prerequisites: [mit-18-01]
   subject: math-physics
   summary: "Prerequisite of every stage 2 engineering course: circuits, signals, control, dynamics."
+  priority: 3
+  roadmap: "game-developer"
 
 - id: mit-6-041
   title: "MIT 6.041SC Probabilistic Systems Analysis and Applied Probability (Fall 2013)"
@@ -108,6 +119,8 @@
   subject: math-physics
   summary: "The probability course of the plan. Harvard Stat 110 is the alternative: take one."
   alternatives: [harvard-stat-110]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: harvard-stat-110
   title: "Harvard Stat 110: Probability (Joe Blitzstein)"
@@ -124,6 +137,9 @@
   subject: math-physics
   summary: "Alternative to MIT 6.041."
   alternatives: [mit-6-041]
+  after: [3b1b-calculus]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: mit-18-065
   title: "MIT 18.065 Matrix Methods in Data Analysis, Signal Processing, and Machine Learning (Spring 2018)"
@@ -155,6 +171,8 @@
   subject: math-physics
   summary: "Linear algebra, calculus, probability and optimization written specifically as ML prerequisites, free PDF."
   after: [3b1b-linear-algebra]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: mit-6-042j
   title: "MIT 6.042J (now 6.1200J) Mathematics for Computer Science (Fall 2010)"
@@ -173,6 +191,7 @@
 # ---------------------------------------------------------------- added 2026-10-07
   short: "MIT 6.042J Math for CS"
   fromYear: 1
+  priority: 2
 
 - id: mit-18-085
   title: "MIT 18.085 Computational Science and Engineering I (Gilbert Strang, Fall 2008)"
@@ -189,6 +208,8 @@
   prerequisites: [mit-18-06]
   subject: math-physics
   summary: "Applied linear algebra and differential equations as engineers use them, with video lectures: the bridge from 18.06 to simulation and stage 2."
+  priority: 3
+  roadmap: "game-developer"
 
 - id: cvxbook
   title: "Convex Optimization (Boyd and Vandenberghe, free PDF)"
@@ -202,3 +223,8 @@
   cost: free
   estHours: 100
   summary: "The standard text on convex optimisation, free from the authors."
+  short: "Boyd & Vandenberghe CvxOpt"
+  fromYear: 2
+  after: [mit-18-06]
+  priority: 1
+  roadmap: "ai-engineer"

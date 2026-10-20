@@ -19,6 +19,8 @@
   covers:
     - inference-engineering/diffusion-models
   after: [udl-book]
+  priority: 1
+  roadmap: "ai-engineer"
 - id: mit-6-s978
   title: Deep Generative Models (MIT 6.S978)
   provider: MIT
@@ -34,6 +36,12 @@
   prerequisites: []
   subject: deep-learning
   summary: Kaiming He's course on the modern generative model families.
+  short: "MIT 6.S978 (Kaiming He)"
+  fromYear: 3
+  doFirst: "MIT 6.S184"
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "diffusion"
 - id: lilian-weng-diffusion
   title: What are Diffusion Models?
   provider: Lilian Weng
@@ -52,6 +60,9 @@
   short: "Lil'Log: Diffusion"
   fromYear: 1
   after: [udl-book]
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "diffusion"
 - id: annotated-diffusion
   title: The Annotated Diffusion Model
   provider: Hugging Face
@@ -70,6 +81,8 @@
   short: "Annotated Diffusion"
   fromYear: 1
   after: [annotated-transformer]
+  priority: 1
+  roadmap: "ai-engineer"
 - id: yang-song-score
   title: Generative Modeling by Estimating Gradients of the Data Distribution
   provider: Yang Song
@@ -88,6 +101,9 @@
   short: "Yang Song: Score Models"
   fromYear: 1
   after: [lilian-weng-diffusion]
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "diffusion"
 - id: sander-dieleman-blog
   title: Sander Dieleman's blog
   provider: Sander Dieleman
@@ -107,6 +123,9 @@
   short: "Sander Dieleman blog"
   fromYear: 3
   after: [lilian-weng-diffusion]
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "diffusion"
 - id: fastai-part-2
   title: From Deep Learning Foundations to Stable Diffusion
   provider: fast.ai
@@ -125,6 +144,8 @@
   short: "fast.ai Part 2"
   fromYear: 2
   doFirst: "Practical DL (fast.ai)"
+  priority: 1
+  roadmap: "ai-engineer"
 - id: diffusers-repo
   title: huggingface/diffusers
   provider: Hugging Face
@@ -160,6 +181,8 @@
   short: "lucidrains DDPM repo"
   fromYear: 1
   after: [annotated-diffusion]
+  priority: 1
+  roadmap: "ai-engineer"
 - id: facebookresearch-dit
   title: facebookresearch/DiT
   provider: Meta AI
@@ -175,6 +198,12 @@
   prerequisites: []
   subject: deep-learning
   summary: The official diffusion-transformer code.
+  short: "DiT code"
+  fromYear: 3
+  after: [repo-mindiffusion]
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "diffusion"
 - id: dreamerv3-code
   title: danijar/dreamerv3
   provider: Danijar Hafner

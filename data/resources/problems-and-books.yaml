@@ -17,6 +17,8 @@
   estHours: 80
   summary: "Determinant-free, proof-first linear algebra; the open-access fourth edition, with exercises after every section."
   fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: strang-ila-book
   title: "Introduction to Linear Algebra (book site and problem sets)"
@@ -241,6 +243,7 @@
   summary: "A free introduction to proofs: logic, sets, induction, contradiction, with solutions to odd exercises."
   short: "Book of Proof"
   fromYear: 1
+  priority: 2
 
 - id: cses-problem-set
   title: "CSES Problem Set"
@@ -257,6 +260,7 @@
   summary: "Some 300 classic algorithm problems with an online judge, grouped by technique."
   fromYear: 1
   after: [competitive-programmers-handbook]
+  priority: 2
 
 - id: codeforces-edu
   title: "Codeforces EDU"
@@ -273,6 +277,7 @@
   short: "Codeforces EDU"
   fromYear: 2
   after: [competitive-programmers-handbook]
+  priority: 2
 
 - id: usaco-guide
   title: "USACO Guide"
@@ -288,6 +293,7 @@
   summary: "A curated path from bronze to platinum, every module with practice problems and solutions."
   short: "USACO Guide"
   fromYear: 1
+  priority: 2
 
 - id: matrix-calculus-dl
   title: "The Matrix Calculus You Need for Deep Learning"
@@ -304,6 +310,8 @@
   summary: "Jacobians, the vector chain rule and the gradients of neural network layers, worked out by hand."
   fromYear: 1
   after: [3b1b-calculus]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: transformer-math-101
   title: "Transformer Math 101"
@@ -331,6 +339,9 @@
   cost: free
   estHours: 20
   summary: "Free system design guides and worked problems in the interview format."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
 
 - id: all-about-circuits
   title: "All About Circuits: textbook and worksheets"

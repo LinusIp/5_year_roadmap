@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { FIRST_DAY, open } from './helpers.ts';
+import { FIRST_DAY, open, showMoreUntil } from './helpers.ts';
 
 /**
  * The 152 free resources (RESOURCES-ADD): a Practice shelf, search that finds them, a path's optional list that holds
@@ -21,7 +21,11 @@ test('the Practice tile opens a shelf of practice and problem sets', async ({ pa
   await expect(page).toHaveURL(/type=practice/);
   await expect(page.getByRole('heading', { level: 1, name: 'Practice' })).toBeVisible();
   await expect(page.getByText(new RegExp('^' + count + ' practice items$'))).toBeVisible();
+  // Hundreds of them since ATLAS-LIBRARY: the shelf's search finds the two.
+  const search = page.getByRole('searchbox', { name: 'Search practice' });
+  await search.fill('GPU Puzzles');
   await expect(page.getByRole('button', { name: /^GPU Puzzles/ })).toBeVisible();
+  await search.fill('CSES');
   await expect(page.getByRole('button', { name: /^CSES/ })).toBeVisible();
 });
 
@@ -42,8 +46,11 @@ test('a path lists the new resources under Optional, by the year they fit from',
   await optional.click();
   await expect(optional).toHaveAttribute('aria-expanded', 'true');
   const dl = page.getByRole('button', { name: /^DL Specialization/ });
+  await showMoreUntil(page, dl);
   await expect(dl).toContainText('Year 1 · Course');
-  await expect(page.getByRole('button', { name: /^CS234 RL/ })).toContainText('Year 3');
+  const cs234 = page.getByRole('button', { name: /^CS234 RL/ });
+  await showMoreUntil(page, cs234);
+  await expect(cs234).toContainText('Year 3');
   await dl.click();
   await expect(page.getByRole('dialog', { name: /Deep Learning Specialization/ })).toBeVisible();
 });

@@ -23,6 +23,8 @@
     - inference-engineering/continuous-batching
   tags: [inference]
   after: [llm-inference-handbook]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: sglang-docs
   title: SGLang documentation
   provider: SGLang project
@@ -44,6 +46,8 @@
     - inference-engineering/caching-approaches
   tags: [inference]
   after: [sglang-radixattention]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: tensorrt-llm-docs
   title: TensorRT-LLM documentation
   provider: NVIDIA
@@ -65,6 +69,8 @@
     - inference-engineering/tensorrt
   tags: [inference]
   after: [vllm-docs]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: llama-cpp
   title: llama.cpp
   provider: ggml.org
@@ -85,6 +91,8 @@
     - inference-engineering/desktop-inference
   tags: [inference]
   after: [visual-guide-quantization]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: onnx-runtime-docs
   title: ONNX Runtime documentation
   provider: Microsoft
@@ -198,6 +206,8 @@
     - inference-engineering/expert-parallelism
   tags: [inference]
   after: [scaling-book]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: cmu-10-414
   title: Deep Learning Systems (CMU 10-414/714)
   provider: Carnegie Mellon University
@@ -218,6 +228,8 @@
   fromYear: 2
   tags: [inference]
   after: [minitorch]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: nvidia-dli-cuda
   title: Fundamentals of Accelerated Computing with CUDA C/C++
   provider: NVIDIA Deep Learning Institute
@@ -254,6 +266,8 @@
   fromYear: 3
   tags: [inference]
   after: [gpu-puzzles]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: horace-he-brrr
   title: Making Deep Learning Go Brrrr From First Principles
   provider: Horace He
@@ -275,6 +289,8 @@
   short: "DL Go Brrrr"
   fromYear: 1
   tags: [inference]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: hazy-gpus-go-brrr
   title: GPUs Go Brrr
   provider: Hazy Research (Stanford)
@@ -294,6 +310,8 @@
   fromYear: 2
   tags: [inference]
   after: [horace-he-brrr]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: scaling-book
   title: How to Scale Your Model (the Scaling Book)
   provider: Google DeepMind
@@ -317,6 +335,8 @@
   fromYear: 3
   tags: [inference]
   after: [cmu-10-414]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: databricks-inference-best-practices
   title: "LLM Inference Performance Engineering: Best Practices"
   provider: Databricks
@@ -368,6 +388,8 @@
   fromYear: 1
   tags: [inference]
   after: [horace-he-brrr]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: batching-effects-gpt
   title: Dissecting Batching Effects in GPT Inference
   provider: Lequn Chen
@@ -402,3 +424,5 @@
   fromYear: 1
   tags: [inference]
   after: [annotated-transformer]
+  priority: 1
+  roadmap: "inference-engineering"

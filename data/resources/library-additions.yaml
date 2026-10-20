@@ -20,6 +20,8 @@
   summary: "Energy-based, geometric view of DL from LeCun with notebook-driven practicums."
   fromYear: 2
   after: [mit-6-s191]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "david-silver-rl"
   title: "UCL Reinforcement Learning Course (David Silver)"
@@ -35,6 +37,8 @@
   estHours: 20
   summary: "The classic 10-lecture RL foundation: MDPs, dynamic programming, TD, function approximation."
   fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "berkeley-llm-agents-f24"
   title: "Large Language Model Agents MOOC (Fall 2024)"
@@ -51,6 +55,8 @@
   summary: "Guest lectures on reasoning, tool use, planning and multi-agent systems from people building them."
   fromYear: 2
   doFirst: "HF Agents Course"
+  priority: 1
+  roadmap: "ai-agents"
 
 - id: "stanford-cs234"
   title: "Stanford CS234: Reinforcement Learning"
@@ -67,6 +73,8 @@
   summary: "Rigorous RL from MDPs to policy gradients and RLHF-style methods relevant to LLM post-training."
   fromYear: 3
   after: [david-silver-rl]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "coursera-deep-learning-specialization"
   title: "Deep Learning Specialization"
@@ -83,6 +91,8 @@
   summary: "Structured path through backprop, optimization, CNNs, sequence models with graded notebooks."
   fromYear: 1
   after: [ng-ml-spec]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "google-ml-crash-course"
   title: "Machine Learning Crash Course"
@@ -98,6 +108,8 @@
   estHours: 15
   summary: "Fast, interactive refresher on core ML concepts and practical pitfalls like data prep and fairness."
   fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "isl-python"
   title: "An Introduction to Statistical Learning (with Python)"
@@ -113,6 +125,8 @@
   estHours: 60
   summary: "Clear statistical foundations of ML with Python labs; free PDF."
   fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "sutton-barto-rl"
   title: "Reinforcement Learning: An Introduction (2nd ed.)"
@@ -129,6 +143,8 @@
   summary: "The RL bible; pairs with David Silver's lectures."
   fromYear: 2
   after: [david-silver-rl]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "pytorch-tutorials"
   title: "PyTorch Tutorials"
@@ -144,6 +160,8 @@
   estHours: 20
   summary: "Official hands-on tutorials from tensors to torch.compile, profiling and distributed training."
   fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "mcp-docs"
   title: "Model Context Protocol Documentation"
@@ -160,6 +178,8 @@
   summary: "The open standard for connecting agents to tools and data; build your own servers and clients."
   fromYear: 2
   after: [anthropic-building-effective-agents]
+  priority: 1
+  roadmap: "ai-agents"
 
 - id: "annotated-transformer"
   title: "The Annotated Transformer"
@@ -176,6 +196,8 @@
   summary: "Line-by-line PyTorch implementation of 'Attention Is All You Need'."
   fromYear: 2
   after: [karpathy-zero-to-hero]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "anthropic-building-effective-agents"
   title: "Building Effective AI Agents"
@@ -191,6 +213,8 @@
   estHours: 1
   summary: "Practical patterns (workflows vs agents, routing, orchestrator-workers) for designing agent harnesses."
   fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
 
 - id: "lilianweng-llm-agents"
   title: "LLM Powered Autonomous Agents"
@@ -206,6 +230,8 @@
   estHours: 2
   summary: "Survey of planning, memory and tool-use components that make up an agent."
   fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
 
 - id: "numpy-100"
   title: "100 NumPy Exercises"
@@ -222,6 +248,8 @@
   summary: "Drills vectorized NumPy thinking that every ML codebase relies on."
   fromYear: 1
   after: [30-days-of-python]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "kaggle-titanic"
   title: "Titanic - Machine Learning from Disaster"
@@ -238,6 +266,8 @@
   summary: "First end-to-end competition: feature engineering, validation, submission."
   fromYear: 1
   after: [kaggle-learn]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "deep-ml"
   title: "Deep-ML"
@@ -254,6 +284,8 @@
   summary: "LeetCode-style problems implementing ML/DL ops and algorithms from scratch."
   fromYear: 1
   after: [numpy-100]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "tensor-puzzles"
   title: "Tensor Puzzles"
@@ -270,6 +302,8 @@
   summary: "21 puzzles rebuilding PyTorch functions with only broadcasting and indexing."
   fromYear: 1
   after: [numpy-100]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "minbpe"
   title: "minbpe (BPE tokenizer + exercise)"
@@ -286,6 +320,8 @@
   summary: "Build a GPT-4-style BPE tokenizer yourself following exercise.md."
   fromYear: 2
   after: [karpathy-zero-to-hero]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "llms-from-scratch"
   title: "LLMs-from-scratch (code + exercises)"
@@ -302,6 +338,8 @@
   summary: "Chapter notebooks and exercises to code a GPT, pretrain and finetune it in PyTorch."
   fromYear: 2
   after: [annotated-transformer]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "arena"
   title: "ARENA (Alignment Research Engineer Accelerator)"
@@ -318,6 +356,8 @@
   summary: "Hands-on notebooks for transformers from scratch, interpretability, RL and evals."
   fromYear: 2
   after: [karpathy-zero-to-hero]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "mini-swe-agent"
   title: "mini-swe-agent"
@@ -334,6 +374,8 @@
   summary: "A ~100-line coding agent to read, run and extend as a template for your own harness."
   fromYear: 2
   after: [anthropic-building-effective-agents]
+  priority: 1
+  roadmap: "ai-agents"
 
 - id: "nanochat"
   title: "nanochat"
@@ -352,6 +394,8 @@
   after: [llms-from-scratch]
 
 # ---- LLM inference and GPUs (track ai, tag inference) (6)
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: "llm-inference-handbook"
   title: "LLM Inference Handbook"
@@ -368,6 +412,8 @@
   summary: "Practical map of inference concepts: TTFT, batching, KV cache, quantization, deployment patterns."
   fromYear: 2
   tags: [inference]
+  priority: 1
+  roadmap: "inference-engineering"
 
 - id: "visual-guide-quantization"
   title: "A Visual Guide to Quantization"
@@ -384,6 +430,8 @@
   summary: "Illustrated intro to int8/int4, GPTQ, GGUF and QAT before touching quantization code."
   fromYear: 2
   tags: [inference]
+  priority: 1
+  roadmap: "inference-engineering"
 
 - id: "minitorch"
   title: "MiniTorch"
@@ -401,6 +449,8 @@
   fromYear: 2
   tags: [inference]
   after: [tensor-puzzles]
+  priority: 1
+  roadmap: "inference-engineering"
 
 - id: "gpu-puzzles"
   title: "GPU Puzzles"
@@ -418,6 +468,8 @@
   fromYear: 2
   tags: [inference]
   after: [tensor-puzzles]
+  priority: 1
+  roadmap: "inference-engineering"
 
 - id: "triton-puzzles"
   title: "Triton Puzzles"
@@ -435,6 +487,8 @@
   fromYear: 3
   tags: [inference]
   after: [gpu-puzzles]
+  priority: 1
+  roadmap: "inference-engineering"
 
 - id: "nano-vllm"
   title: "Nano-vLLM"
@@ -454,6 +508,8 @@
   after: [vllm-docs]
 
 # ---- Graphics and rendering (21)
+  priority: 1
+  roadmap: "inference-engineering"
 
 - id: "cmu-15462-computer-graphics"
   title: "Computer Graphics (CMU 15-462/662) Lectures"
@@ -470,6 +526,8 @@
   summary: "The clearest full university intro to rasterization, geometry, and rendering, with superb visual intuition."
   fromYear: 1
   after: [gamemath-3d-primer]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "cherno-opengl-series"
   title: "OpenGL Series"
@@ -486,6 +544,8 @@
   summary: "A practical C++ walkthrough of buffers, shaders, and abstractions that complements reading LearnOpenGL."
   fromYear: 1
   doFirst: "LearnOpenGL"
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "sebastian-lague-coding-adventures"
   title: "Coding Adventures"
@@ -501,6 +561,8 @@
   estHours: 30
   summary: "Shows how to explore ideas like ray marching, fluids, and rasterizers end to end, great project inspiration."
   fromYear: 1
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "javidx9-3d-engine"
   title: "Code-It-Yourself! 3D Graphics Engine"
@@ -516,6 +578,8 @@
   estHours: 4
   summary: "Builds a software 3D engine from scratch in C++ (projection, clipping, depth buffer, texturing)."
   fromYear: 1
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "tu-wien-rendering-course"
   title: "TU Wien Rendering / Ray Tracing Course"
@@ -532,6 +596,8 @@
   summary: "Teaches the physics and math of global illumination (radiometry, BRDFs, Monte Carlo) behind path tracers."
   fromYear: 2
   after: [rtiow]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "cg-from-scratch"
   title: "Computer Graphics from Scratch"
@@ -547,6 +613,8 @@
   estHours: 20
   summary: "Builds a raytracer and a rasterizer from pure math with only a put-pixel function."
   fromYear: 1
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "gpu-gems"
   title: "GPU Gems (online edition)"
@@ -563,6 +631,8 @@
   summary: "Classic collection of real-time rendering and GPU techniques from industry practitioners."
   fromYear: 3
   after: [utah-cs6610]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "advances-real-time-rendering"
   title: "Advances in Real-Time Rendering in Games (SIGGRAPH courses)"
@@ -579,6 +649,8 @@
   summary: "Slides from AAA studios on cutting-edge real-time rendering, for research-level reading."
   fromYear: 3
   after: [trip-through-graphics-pipeline]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "pbs-siggraph-2013"
   title: "SIGGRAPH 2013 Course: Physically Based Shading in Theory and Practice"
@@ -595,6 +667,8 @@
   summary: "The canonical notes on microfacet BRDFs and PBR as used in engines like Unreal."
   fromYear: 3
   doFirst: "LearnOpenGL"
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "webgpu-fundamentals"
   title: "WebGPU Fundamentals"
@@ -610,6 +684,8 @@
   estHours: 25
   summary: "Explains WebGPU and WGSL from first principles with live in-browser examples."
   fromYear: 1
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "learn-webgpu-cpp"
   title: "Learn WebGPU for C++"
@@ -626,6 +702,8 @@
   summary: "A modern native-graphics tutorial using the WebGPU API from C++, a gentler path to explicit APIs."
   fromYear: 2
   doFirst: "LearnOpenGL"
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "learn-wgpu"
   title: "Learn Wgpu"
@@ -642,6 +720,8 @@
   summary: "Teaches GPU rendering in Rust with wgpu, combining the student's Rust and graphics goals."
   fromYear: 2
   doFirst: "Rust basics"
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "trip-through-graphics-pipeline"
   title: "A Trip through the Graphics Pipeline 2011"
@@ -658,6 +738,8 @@
   summary: "Explains what the GPU actually does at each pipeline stage, essential for performance reasoning."
   fromYear: 2
   doFirst: "LearnOpenGL"
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "lettier-3d-game-shaders"
   title: "3D Game Shaders For Beginners"
@@ -674,6 +756,8 @@
   summary: "Step-by-step implementations of SSAO, normal mapping, bloom, depth of field, and other game effects."
   fromYear: 2
   doFirst: "LearnOpenGL"
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "tinyraytracer"
   title: "tinyraytracer"
@@ -689,6 +773,8 @@
   estHours: 8
   summary: "Write a ~256-line C++ raytracer with reflections and refraction in a weekend."
   fromYear: 1
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "tinykaboom"
   title: "tinykaboom"
@@ -705,6 +791,8 @@
   summary: "Build a ray-marched procedural explosion in ~180 lines, a fun intro to SDFs and noise."
   fromYear: 1
   after: [tinyraytracer]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "shader-school"
   title: "Shader School"
@@ -721,6 +809,8 @@
   summary: "Self-guided GLSL exercises that check your shaders against expected output."
   fromYear: 1
   after: [book-of-shaders]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "scotty3d"
   title: "Scotty3D (CMU 15-462 assignments)"
@@ -737,6 +827,8 @@
   summary: "Implement a rasterizer, mesh editor, path tracer, and animation system in one C++ codebase."
   fromYear: 2
   after: [cmu-15462-computer-graphics]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "cs184-homework"
   title: "CS 184/284A Homework (Spring 2025)"
@@ -753,6 +845,8 @@
   summary: "Five graded-style projects: rasterizer, MeshEdit, path tracer, and cloth simulation."
   fromYear: 2
   after: [cmu-15462-computer-graphics]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "sascha-willems-vulkan"
   title: "Vulkan C++ Examples and Demos"
@@ -769,6 +863,8 @@
   summary: "Reference samples from triangle to ray tracing to read, run, and reimplement techniques."
   fromYear: 3
   after: [vulkan-tutorial]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "nvpro-vk-raytracing-tutorial"
   title: "Vulkan Ray Tracing Tutorial (KHR)"
@@ -787,6 +883,8 @@
   after: [vkguide]
 
 # ---- Game engines and game development (19)
+  priority: 3
+  roadmap: "game-developer"
 
 - id: "freya-math-for-game-devs"
   title: "Math for Game Devs (2022 live course)"
@@ -802,6 +900,8 @@
   estHours: 20
   summary: "Builds strong visual intuition for vectors, dot/cross products, spaces, and interpolation in game code."
   fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "brackeys-unity-video-game"
   title: "How to make a Video Game in Unity"
@@ -817,6 +917,8 @@
   estHours: 3
   summary: "A short, classic complete-game series that makes Unity's workflow click quickly."
   fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "coding-train-nature-of-code"
   title: "The Nature of Code (video track)"
@@ -832,6 +934,8 @@
   estHours: 25
   summary: "Teaches forces, particles, steering, and physics simulation through friendly creative-coding videos."
   fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "gdc-vault-free"
   title: "GDC Vault Free Talks"
@@ -847,6 +951,8 @@
   estHours: 30
   summary: "Free industry talks on engine architecture, rendering, physics, and design straight from shipped games."
   fromYear: 2
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "unity-essentials"
   title: "Unity Essentials Pathway"
@@ -862,6 +968,8 @@
   estHours: 15
   summary: "The official first-steps path to the Unity editor, scenes, assets, and basic scripting."
   fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "unity-junior-programmer"
   title: "Junior Programmer Pathway"
@@ -878,6 +986,8 @@
   summary: "Project-based C# in Unity covering gameplay, UI, physics, and OOP, with a final portfolio project."
   fromYear: 1
   after: [unity-essentials]
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "unity-creative-core"
   title: "Creative Core Pathway"
@@ -894,6 +1004,8 @@
   summary: "Covers Unity's art side: lighting, materials, Shader Graph, particles/VFX, animation, and post-processing."
   fromYear: 1
   after: [unity-essentials]
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "game-programming-patterns"
   title: "Game Programming Patterns"
@@ -909,6 +1021,8 @@
   estHours: 25
   summary: "Explains the core architecture patterns (game loop, components, update method) used in real engines."
   fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "nature-of-code-book"
   title: "The Nature of Code (book)"
@@ -924,6 +1038,8 @@
   estHours: 30
   summary: "A free book on simulating forces, particles, and autonomous agents in code."
   fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "bridson-fluid-notes"
   title: "Fluid Simulation (SIGGRAPH 2007 Course Notes)"
@@ -940,6 +1056,8 @@
   summary: "A rigorous intro to grid and particle fluid solvers used in graphics."
   fromYear: 3
   after: [stam-fluids-for-games]
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "red-blob-games"
   title: "Red Blob Games"
@@ -955,6 +1073,8 @@
   estHours: 15
   summary: "Interactive explanations of hex grids, A* pathfinding, and procedural generation for games."
   fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "godot-first-2d-game"
   title: "Godot: Your First 2D Game"
@@ -970,6 +1090,8 @@
   estHours: 4
   summary: "Ship a complete small game in an open-source engine to compare against Unity."
   fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "catlike-coding-unity"
   title: "Catlike Coding Unity Tutorials"
@@ -986,6 +1108,8 @@
   summary: "In-depth Unity C# and shader series, including building a custom render pipeline."
   fromYear: 2
   after: [unity-junior-programmer]
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "tinyraycaster"
   title: "tinyraycaster"
@@ -1001,6 +1125,8 @@
   estHours: 8
   summary: "Build a Wolfenstein-style raycasting FPS in under 500 lines of C++."
   fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "lode-raycasting"
   title: "Lode's Computer Graphics Tutorial: Raycasting"
@@ -1016,6 +1142,8 @@
   estHours: 6
   summary: "A hands-on raycaster (untextured then textured) to implement yourself step by step."
   fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "20-games-challenge"
   title: "The 20 Games Challenge"
@@ -1031,6 +1159,8 @@
   estHours: 200
   summary: "A structured ladder of 20 game clones from Pong upward to build finishing skills."
   fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "coding-train-challenges"
   title: "Coding Train Coding Challenges"
@@ -1046,6 +1176,8 @@
   estHours: 40
   summary: "One-off creative coding projects (physics, fractals, simulations) to code along and extend."
   fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "box2d-lite"
   title: "Box2D-Lite"
@@ -1062,6 +1194,8 @@
   summary: "Study and rebuild a compact rigid-body engine with sequential impulses, the basis of Box2D."
   fromYear: 2
   after: [gaffer-on-games]
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "stam-fluids-for-games"
   title: "Real-Time Fluid Dynamics for Games"
@@ -1080,6 +1214,8 @@
   after: [nature-of-code-book]
 
 # ---- Systems (23)
+  priority: 4
+  roadmap: "game-developer"
 
 - id: "princeton-algorithms-part1"
   title: "Algorithms, Part I (Princeton, Coursera)"
@@ -1096,6 +1232,7 @@
   summary: "Classic data-structures course with rigorous programming assignments and autograder."
   fromYear: 1
   after: [cs50x]
+  priority: 2
 
 - id: "kurose-ross-lectures"
   title: "Computer Networking: A Top-Down Approach video lectures"
@@ -1112,6 +1249,7 @@
   summary: "Authors' own lecture videos covering the whole network stack before you tackle CS144 labs."
   fromYear: 1
   doFirst: "Missing Semester"
+  priority: 2
 
 - id: "fcc-data-structures-fiset"
   title: "Data Structures Easy to Advanced Course - Full Tutorial from a Google Engineer"
@@ -1127,6 +1265,7 @@
   estHours: 8
   summary: "Animated walkthrough of every core data structure, from arrays to Fenwick trees and hash tables."
   fromYear: 1
+  priority: 2
 
 - id: "ben-eater-8bit-computer"
   title: "Build an 8-bit computer"
@@ -1142,6 +1281,7 @@
   estHours: 20
   summary: "Watch a CPU get built on breadboards, making clocks, buses, registers and microcode tangible."
   fromYear: 1
+  priority: 2
 
 - id: "cmu-15721-advanced-databases"
   title: "CMU 15-721 Advanced Database Systems"
@@ -1158,6 +1298,8 @@
   summary: "Research-level tour of modern analytical database internals: columnar storage, vectorized execution, query optimization."
   fromYear: 3
   doFirst: "CMU 15-445"
+  priority: 2
+  roadmap: "software-architect"
 
 - id: "beej-network-programming"
   title: "Beej's Guide to Network Programming: Using Internet Sockets"
@@ -1174,6 +1316,7 @@
   summary: "Practical C sockets programming guide for writing your own TCP/UDP clients and servers."
   fromYear: 1
   after: [beej-c]
+  priority: 2
 
 - id: "the-linux-command-line"
   title: "The Linux Command Line"
@@ -1190,6 +1333,7 @@
   summary: "Complete free book on the shell, text tools and bash scripting for daily Linux work."
   fromYear: 1
   doFirst: "Missing Semester"
+  priority: 2
 
 - id: "competitive-programmers-handbook"
   title: "Competitive Programmer's Handbook"
@@ -1206,6 +1350,7 @@
   summary: "Concise free guide to algorithm techniques that pairs directly with the CSES problem set."
   fromYear: 1
   doFirst: "MIT 6.006"
+  priority: 2
 
 - id: "erickson-algorithms"
   title: "Algorithms (Jeff Erickson)"
@@ -1222,6 +1367,7 @@
   summary: "Rigorous free textbook on recursion, DP, graphs and NP-hardness with many exercises."
   fromYear: 2
   doFirst: "MIT 6.006"
+  priority: 2
 
 - id: "computer-networks-systems-approach"
   title: "Computer Networks: A Systems Approach"
@@ -1238,6 +1384,7 @@
   summary: "Free open textbook explaining why networks are designed as they are, from links to congestion control."
   fromYear: 2
   after: [kurose-ross-lectures]
+  priority: 2
 
 - id: "van-steen-distributed-systems"
   title: "Distributed Systems (4th edition)"
@@ -1254,6 +1401,8 @@
   summary: "Comprehensive textbook on architectures, naming, consistency, replication and fault tolerance."
   fromYear: 2
   after: [ddia]
+  priority: 2
+  roadmap: "software-architect"
 
 - id: "build-your-own-redis"
   title: "Build Your Own Redis with C/C++"
@@ -1270,6 +1419,7 @@
   summary: "Free online book building a networked key-value server with event loops, hashtables and timers."
   fromYear: 2
   after: [beej-network-programming]
+  priority: 2
 
 - id: "perfbook"
   title: "Is Parallel Programming Hard, And, If So, What Can You Do About It?"
@@ -1286,6 +1436,8 @@
   summary: "Linux RCU author's deep treatment of locking, memory barriers and scalable concurrency."
   fromYear: 3
   after: [ostep]
+  priority: 2
+  roadmap: "software-architect"
 
 - id: "linux-kernel-module-programming-guide"
   title: "The Linux Kernel Module Programming Guide"
@@ -1302,6 +1454,7 @@
   summary: "Step-by-step guide to writing loadable kernel modules and drivers for modern Linux."
   fromYear: 3
   doFirst: "xv6 (MIT 6.S081)"
+  priority: 2
 
 - id: "writing-an-os-in-rust"
   title: "Writing an OS in Rust"
@@ -1318,6 +1471,7 @@
   summary: "Build a bare-metal x86_64 kernel in Rust with paging, interrupts, heap allocation and async tasks."
   fromYear: 2
   after: [ostep]
+  priority: 2
 
 - id: "lets-build-a-simple-database"
   title: "Let's Build a Simple Database"
@@ -1334,6 +1488,8 @@
   summary: "Write a SQLite clone in C, including a pager and B-tree, to see how databases store data."
   fromYear: 2
   after: [beej-c]
+  priority: 2
+  roadmap: "software-architect"
 
 - id: "overthewire-bandit"
   title: "OverTheWire Bandit"
@@ -1350,6 +1506,7 @@
   summary: "Game-style levels over SSH that build fluency with Linux commands, permissions and pipes."
   fromYear: 1
   doFirst: "Missing Semester"
+  priority: 2
 
 - id: "linux-upskill-challenge"
   title: "Linux Upskill Challenge"
@@ -1366,6 +1523,7 @@
   summary: "A month of daily tasks running your own Linux server: SSH, firewalls, logs, web server and cron."
   fromYear: 1
   after: [the-linux-command-line]
+  priority: 2
 
 - id: "protohackers"
   title: "Protohackers"
@@ -1382,6 +1540,7 @@
   summary: "Network-server challenges tested against a live checker, great for practicing sockets and async Rust."
   fromYear: 2
   after: [beej-network-programming]
+  priority: 2
 
 - id: "codecrafters"
   title: "CodeCrafters"
@@ -1399,6 +1558,8 @@
   fromYear: 2
   note: "Free tier"
   doFirst: "build-your-own-x"
+  priority: 2
+  roadmap: "software-architect"
 
 - id: "gossip-glomers"
   title: "Gossip Glomers: Fly.io Distributed Systems Challenge"
@@ -1415,6 +1576,8 @@
   summary: "Implement broadcast, CRDT counters and Kafka-style logs tested by Maelstrom fault injection."
   fromYear: 2
   after: [kleppmann-distributed-systems]
+  priority: 2
+  roadmap: "software-architect"
 
 - id: "sadservers"
   title: "SadServers"
@@ -1432,6 +1595,8 @@
   fromYear: 2
   note: "Free tier"
   after: [overthewire-bandit]
+  priority: 2
+  roadmap: "software-architect"
 
 - id: "pingcap-talent-plan"
   title: "PingCAP Talent Plan"
@@ -1450,6 +1615,8 @@
   after: [rust-book]
 
 # ---- Rust, C and C++ (9)
+  priority: 2
+  roadmap: "software-architect"
 
 - id: "stanford-cs110l"
   title: "Stanford CS 110L: Safety in Systems Programming (Spring 2020)"
@@ -1466,6 +1633,7 @@
   summary: "Recorded lectures and projects teaching Rust by contrasting it with memory bugs in C/C++ systems code."
   fromYear: 1
   after: [rust-book]
+  priority: 2
 
 - id: "comprehensive-rust"
   title: "Comprehensive Rust"
@@ -1481,6 +1649,7 @@
   estHours: 30
   summary: "Google's multi-day Rust training with exercises, including bare-metal and concurrency modules."
   fromYear: 1
+  priority: 2
 
 - id: "rustonomicon"
   title: "The Rustonomicon: The Dark Arts of Unsafe Rust"
@@ -1497,6 +1666,7 @@
   summary: "Explains unsafe Rust, layout, variance and drop semantics needed for low-level libraries."
   fromYear: 2
   after: [rust-book]
+  priority: 2
 
 - id: "rust-atomics-and-locks"
   title: "Rust Atomics and Locks"
@@ -1513,6 +1683,7 @@
   summary: "Free online book on memory ordering, atomics and building your own mutexes, channels and Arc."
   fromYear: 2
   after: [crust-of-rust]
+  priority: 2
 
 - id: "rust-async-book"
   title: "Asynchronous Programming in Rust"
@@ -1529,6 +1700,7 @@
   summary: "Explains futures, executors and async/await so you can write async network services in Rust."
   fromYear: 2
   after: [rust-book]
+  priority: 2
 
 - id: "too-many-linked-lists"
   title: "Learning Rust With Entirely Too Many Linked Lists"
@@ -1545,6 +1717,7 @@
   summary: "Teaches ownership, Box, Rc, RefCell and unsafe by implementing linked lists six ways."
   fromYear: 1
   after: [rust-book]
+  priority: 2
 
 - id: "exercism-rust"
   title: "Exercism Rust Track"
@@ -1561,6 +1734,7 @@
   summary: "99 Rust exercises with optional free human mentoring on idiomatic style."
   fromYear: 1
   after: [rustlings]
+  priority: 2
 
 - id: "exercism-c"
   title: "Exercism C Track"
@@ -1577,6 +1751,7 @@
   summary: "Test-driven C exercises to practice pointers, strings and memory management."
   fromYear: 1
   after: [beej-c]
+  priority: 2
 
 - id: "exercism-cpp"
   title: "Exercism C++ Track"
@@ -1593,3 +1768,4 @@
   summary: "Test-driven modern C++ exercises with free mentoring to reinforce learncpp.com."
   fromYear: 1
   doFirst: "learncpp.com"
+  priority: 2

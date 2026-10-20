@@ -76,6 +76,8 @@ export function BlogPost() {
   const units = useUnits();
   const today = todayDate();
   const [dateParam] = useQueryParam('date');
+  // "Write log entry" on a resource's sheet (ATLAS-LIBRARY): the outline starts with that resource.
+  const [refParam] = useQueryParam('ref');
   const date = dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam) && dateParam <= today ? dateParam : today;
   const notes = useDayTicks(date);
   const [copied, setCopied] = useState<string | null>(null);
@@ -97,8 +99,10 @@ export function BlogPost() {
     const blocks = [...order, ...atlas.settings.core.blocks.filter((b) => !order.some((o) => o.id === b.id)).map((b) => ({ id: b.id, name: b.name }))];
     const facts = blogFacts(atlas.logs.find((l) => l.date === date), blocks, dayTicks(atlas, date, notes, units));
     const heading = shortDate(date) + ' · day ' + blogDayNumber(date);
-    return { facts, heading, outline: blogOutline(facts, heading, span) };
-  }, [atlas, notes, units, date]);
+    const resource = refParam ? atlas.seed.resources.find((r) => r.id === refParam) : undefined;
+    const topic = resource ? { title: resource.title, url: resource.url, track: atlas.seed.tracks.find((t) => t.id === resource.tracks[0])?.name ?? resource.tracks[0]! } : undefined;
+    return { facts, heading, topic, outline: blogOutline(facts, heading, span, topic) };
+  }, [atlas, notes, units, date, refParam]);
 
   const isToday = date === today;
   const title = isToday ? 'Today’s blog post' : 'Blog post';
