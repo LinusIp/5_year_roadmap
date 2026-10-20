@@ -1417,3 +1417,25 @@ and the browse-only paths' lists on every render. Now the home's paths, browse r
 line are worked out once per change to the curriculum or the user's progress, and search runs on a deferred query
 (`useDeferredValue`), which also decides when home turns into results, so a keystroke only waits for the field: the
 first about 0.3 s, the next ones 0.1 to 0.25 s, at 4x.
+
+**The new rows' links, from the runner.** A one-off `links-atlas-2` job checked the 928 new URLs on the pull request
+(run 39419915696) and was then removed: 874 answered, 20 turned the checker away and 34 failed. No URL was changed:
+each stays exactly as the file gave it, and these are for opening in a browser.
+
+- Check by hand (403 or 429, the site refused a script): five USENIX paper pages (dLoRA, nnScaler, Unity, Anvil,
+  SIEVE), six DeepLearning.AI courses (Agentic AI, smolagents, Finetuning LLMs, long-term agentic memory, RFT with
+  GRPO, post-training), W3C ActivityPub, the OpenMP specifications, Newman's Computational Physics chapters,
+  probabilitycourse.com, Preskill's Ph219, the Pico C SDK docs, the CTMS control tutorials and two MIT DSpace papers
+  (Katz's actuator, Wensing's Cheetah actuator).
+- Not found (404), the likeliest to have moved: three Berkeley Lab roofline pages (the ECP21 NVIDIA PDF, the roofline
+  page and the Empirical Roofline Tool), the NCFMF fluid mechanics films page, MIT OCW 2.008 (2004) and Orfanidis's
+  Electromagnetic Waves and Antennas.
+- No answer from the runner: eleven pages on MIT CSAIL hosts (the 6.5840 labs, guidance, quizzes and notes, which
+  the existing 6.5840 entry also links, and the Kademlia, Chord and Algorand PDFs), plus the Gateway API inference
+  extension, José Javier González's "Debugging by pretty printing", the SICM book, artcompsci.org, MIT Open Learning's
+  Thermal-Fluids course and MIT's How to Make (Almost) Anything 2024; a timeout says the host was unreachable then,
+  not that the page is gone.
+- Other errors: seven tensorflow.org guides redirect in a loop for a script (serving, autodiff, tf.data,
+  distributed training, tf.function, TFX, tutorials); docs.libp2p.io served a certificate for another host; Penn
+  State's STAT 414 sent an incomplete certificate chain; Andrew Childs's quantum algorithms notes dropped the
+  connection; Greg Wooledge's BashGuide answered 502.
