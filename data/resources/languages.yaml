@@ -31,6 +31,7 @@
   estHours: 40
   subject: python
   summary: "The 'small CLI tools' half of the first phase: every chapter ends in a script worth keeping."
+  priority: 2
 
 - id: fcc-scientific-computing-python
   title: "freeCodeCamp: Scientific Computing with Python (certification course)"
@@ -294,6 +295,7 @@
   estHours: 10
   subject: rust-go
   summary: "Placed first in year 3 because the MIT 6.5840 labs are written in Go."
+  priority: 2
 
 - id: learn-go-with-tests
   title: "Learn Go with Tests (Chris James)"
@@ -326,6 +328,7 @@
   summary: "An evening of SQL before the CMU 15-445 homework."
 
 # ---------------------------------------------------------------- GPU programming (added 2026-10-07)
+  priority: 2
 
 - id: cuda-guide
   title: "CUDA C++ Programming Guide"

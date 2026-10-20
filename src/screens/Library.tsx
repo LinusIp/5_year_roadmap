@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useCertStates } from '../db/credentials.ts';
 import { usePaperStates } from '../db/state.ts';
@@ -18,7 +18,7 @@ import { Chips } from '../ui/Chips.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
 import { DifficultyDots, IconTile, KindIcon, StatusIcon } from '../ui/glyphs.tsx';
-import { buildPaths, byFit, fitOf, inProgress, priorityOf, shelfCounts, groupResults, shelfOf, upNext } from '../lib/library-home.ts';
+import { buildPaths, byFit, fitOf, inProgress, PATH_ALIASES, priorityOf, shelfCounts, groupResults, shelfOf, upNext } from '../lib/library-home.ts';
 import type { Fit } from '../lib/library-home.ts';
 import type { ShelfKey } from '../lib/library-home.ts';
 import { LibraryHome, SHELF_ICON } from './library/Home.tsx';
@@ -302,7 +302,9 @@ export function Library({ openId }: { openId?: string }) {
   const [track, setTrack] = useQueryParam('track');
   const [status, setStatus] = useQueryParam('status');
   const [paperId, setPaperId] = useQueryParam('paper');
-  const [pathId] = useQueryParam('path');
+  const [pathParam] = useQueryParam('path');
+  // An old link to Electrical and embedded or Mechanical opens Engineering (ATLAS-LIBRARY).
+  const pathId = pathParam ? (PATH_ALIASES[pathParam] ?? pathParam) : pathParam;
   const [draft, setDraft] = useState<string | null>(null);
   const [pickingTrack, setPickingTrack] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -324,8 +326,21 @@ export function Library({ openId }: { openId?: string }) {
 
   const entries = useMemo(() => (atlas && paperStates && library ? buildEntries(atlas, units, paperStates, catalogue, solved) : []), [atlas, library, units, paperStates, catalogue, solved]);
   const index = useMemo(() => buildIndex(entries), [entries]);
+  // A few thousand entries (ATLAS-LIBRARY): the search runs on a deferred query, so typing never waits for the results.
+  const deferredQuery = useDeferredValue(query ?? '');
+  const matched = useMemo(() => search(index, deferredQuery), [index, deferredQuery]);
+  // The home's counts and line, once per change to the curriculum or the user's progress.
+  const summary = useMemo(() => {
+    if (!atlas) return null;
+    const activeCount = inProgress(atlas.seed.resources, atlas.states, Infinity).length;
+    const nextCount = upNext(buildPaths(atlas.seed, atlas.states), atlas.seed).length;
+    return {
+      counts: shelfCounts(atlas.seed, catalogue?.length ?? 0),
+      homeSub: activeCount + ' in progress · ' + nextCount + ' up next · ' + Math.max(0, atlas.seed.resources.length - activeCount - nextCount) + ' more when you need them',
+    };
+  }, [atlas, catalogue]);
 
-  if (!atlas || !paperStates || !certStates || !library) {
+  if (!atlas || !paperStates || !certStates || !library || !summary) {
     return (
       <Screen title="Library">
         <Header title="Library" />
@@ -345,12 +360,12 @@ export function Library({ openId }: { openId?: string }) {
   };
   const projectFiltersOn = Boolean(kind || difficulty || group || phaseParam || level || hours);
   const matchesProject = (e: Entry): boolean => !projectFiltersOn || (e.project ? matchesFilter(e.project, projectFilter) : false);
-  const filtered = search(index, query ?? '').filter(
+  const filtered = matched.filter(
     (e) => (!type || e.type === type) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
   );
   // Every shelf but Projects reads by fit: in progress first, then priority, year and level (ATLAS-LIBRARY). Projects
   // keep their order: the plan's first, then the catalogue.
-  const results = query ? filtered : type === 'project' ? [...filtered].sort((a, b) => a.sortKey.localeCompare(b.sortKey)) : filtered;
+  const results = deferredQuery ? filtered : type === 'project' ? [...filtered].sort((a, b) => a.sortKey.localeCompare(b.sortKey)) : filtered;
   const trackName = seed.tracks.find((t) => t.id === track)?.name;
   const keep = params.toString();
   const open = (entry: Entry): void => {
@@ -365,8 +380,9 @@ export function Library({ openId }: { openId?: string }) {
 
   const shelf = (type as ShelfKey | null) ?? null;
   const filtersOn = Boolean(type || track || status || projectFiltersOn);
-  const mode: 'home' | 'path' | 'search' | 'shelf' = pathId ? 'path' : query && !filtersOn ? 'search' : filtersOn ? 'shelf' : 'home';
-  const counts = shelfCounts(seed, catalogue?.length ?? 0);
+  // The deferred query switches home to results too, so the first keystroke only updates the field.
+  const mode: 'home' | 'path' | 'search' | 'shelf' = pathId ? 'path' : deferredQuery && !filtersOn ? 'search' : filtersOn ? 'shelf' : 'home';
+  const { counts, homeSub } = summary;
   const goShelf = (key: ShelfKey): void => navigate('/library?type=' + key + (query ? '&q=' + encodeURIComponent(query) : ''), { replace: false });
 
   const row = (entry: Entry): ReactNode => (
@@ -431,10 +447,7 @@ export function Library({ openId }: { openId?: string }) {
     </div>
   );
 
-  // The home's line: what is in progress, what is next, and how much more waits on the shelves.
-  const activeCount = inProgress(seed.resources, atlas.states, Infinity).length;
-  const nextCount = upNext(buildPaths(seed, atlas.states), seed).length;
-  const homeSub = activeCount + ' in progress · ' + nextCount + ' up next · ' + Math.max(0, seed.resources.length - activeCount - nextCount) + ' more when you need them';
+  // A shelf's line: how many it holds and how many are active.
   const shelfTotal = shelf ? entries.filter((e) => e.type === shelf).length : entries.length;
   const shelfActive = shelf ? entries.filter((e) => e.type === shelf && e.status === 'active').length : 0;
 

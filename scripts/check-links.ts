@@ -8,6 +8,7 @@
  *   --titles   GET every page and print its <title>, to confirm a link still points at the right thing
  *   --only x   restrict to URLs or ids containing x
  *   --checked YYYY-MM-DD   restrict to the resources and papers whose link was last checked that day (an import's)
+ *   --in data/resources/x.yaml   restrict to the resources that file defines (an import's new rows)
  *   --json     also write reports/links.json
  *   --candidates file.json   also check proposed links ({ "resource-id": ["https://…", …] }) for resources that
  *              have none yet, so a link is only ever added after this run fetched it and its title was confirmed
@@ -37,12 +38,19 @@ const onlyIndex = args.indexOf('--only');
 const only = onlyIndex >= 0 ? (args[onlyIndex + 1] ?? '') : '';
 const checkedIndex = args.indexOf('--checked');
 const checkedOn = checkedIndex >= 0 ? (args[checkedIndex + 1] ?? '') : '';
+const inIndex = args.indexOf('--in');
+const inFile = inIndex >= 0 ? args[inIndex + 1] : undefined;
 const candidatesIndex = args.indexOf('--candidates');
 const candidatesFile = candidatesIndex >= 0 ? args[candidatesIndex + 1] : undefined;
 
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
 const TIMEOUT_MS = 25_000;
 const CONCURRENCY = 6;
+
+/** The ids a data file defines, for `--in`. */
+const inIds = inFile
+  ? new Set([...readFileSync(join(REPO_ROOT, inFile), 'utf8').matchAll(/^- id: "?([a-z0-9-]+)"?$/gm)].map((m) => m[1]!))
+  : null;
 
 function collectTargets(): Target[] {
   const seed = loadSeedOrThrow();
@@ -73,7 +81,8 @@ function collectTargets(): Target[] {
   return [...byUrl.entries()]
     .map(([url, refs]) => ({ url, refs }))
     .filter((t) => !only || t.url.includes(only) || t.refs.some((r) => r.includes(only)))
-    .filter((t) => !checkedOn || dated.has(t.url));
+    .filter((t) => !checkedOn || dated.has(t.url))
+    .filter((t) => !inIds || t.refs.some((r) => inIds.has(r.replace(/^resource:/, ''))));
 }
 
 function decodeEntities(s: string): string {

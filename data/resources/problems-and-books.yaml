@@ -47,6 +47,8 @@
   cost: free
   estHours: 60
   summary: "A free textbook with a full answer book: a deep well of extra exercises for every topic."
+  fromYear: 1
+  priority: 2
 
 - id: vmls-book
   title: "Introduction to Applied Linear Algebra: Vectors, Matrices, and Least Squares"
@@ -61,6 +63,8 @@
   cost: free
   estHours: 50
   summary: "Linear algebra for applications: least squares, data fitting and control, with exercises and a Julia companion."
+  fromYear: 1
+  priority: 2
 
 - id: halmos-la-problem-book
   title: "Linear Algebra Problem Book"
@@ -89,6 +93,8 @@
   cost: free
   estHours: 60
   summary: "Notes with practice and assignment problems, and worked solutions, for every calculus topic."
+  fromYear: 1
+  priority: 2
 
 - id: openstax-calculus
   title: "OpenStax Calculus, volumes 1-3"
@@ -144,6 +150,9 @@
   cost: free
   estHours: 4
   summary: "Interactive visual introduction to probability and statistics."
+  short: "Seeing Theory"
+  fromYear: 1
+  priority: 2
 
 - id: openstax-university-physics
   title: "OpenStax University Physics, volumes 1-3"
@@ -172,6 +181,9 @@
   estHours: 0
   reference: true
   summary: "A concept map of physics with short worked explanations; a reference, consulted rather than completed."
+  short: "HyperPhysics"
+  fromYear: 1
+  priority: 2
 
 - id: physics-libretexts
   title: "Physics LibreTexts"
@@ -186,6 +198,9 @@
   estHours: 0
   reference: true
   summary: "A library of open physics texts; a reference for any physics topic."
+  short: "Physics LibreTexts"
+  fromYear: 1
+  priority: 2
 
 - id: morin-mechanics-problems
   title: "Problems and Solutions in Introductory Mechanics"
@@ -228,6 +243,9 @@
   cost: free
   estHours: 120
   summary: "Cambridge lecture notes with example sheets, for after the intro sequence: Lagrangian and Hamiltonian dynamics, E&M, quantum."
+  fromYear: 3
+  doFirst: "MIT 8.01SC"
+  priority: 2
 
 - id: book-of-proof
   title: "Book of Proof"
@@ -348,14 +366,17 @@
   short: "All About Circuits"
   provider: "All About Circuits"
   type: book
-  url: null
-  urlVerified: false
+  url: "https://www.allaboutcircuits.com/textbook/"
+  urlVerified: true
   searchHint: "All About Circuits textbook worksheets"
   tracks: [ee]
   level: intro
   cost: free
   estHours: 60
   summary: "A free electronics textbook in six volumes, with worksheets that come with answers."
+  fromYear: 1
+  priority: 4
+  lastVerified: 2026-10-20
 
 - id: engineering-statics-open
   title: "Engineering Statics: Open and Interactive"
@@ -370,3 +391,5 @@
   cost: free
   estHours: 40
   summary: "A free interactive statics text: equilibrium, trusses, friction and moments of inertia, with exercises."
+  fromYear: 1
+  priority: 4

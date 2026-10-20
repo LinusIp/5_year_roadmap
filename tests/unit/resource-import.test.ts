@@ -206,6 +206,8 @@ describe('the whole library (ATLAS-LIBRARY)', () => {
     expect(shelf('blog')).toBe('blog');
     expect(toResource(item({ track: 'devops' }), null).tracks).toEqual(['devops']);
     expect(toResource(item({ track: 'simulation' }), null).tracks).toEqual(['simulation']);
+    expect(toResource(item({ track: 'math' }), null).tracks).toEqual(['math']);
+    expect(toResource(item({ track: 'engineering' }), null).tracks).toEqual(['engineering']);
     expect(toResource(item({ track: 'inference' }), null)).toMatchObject({ tracks: ['ai'], tags: ['inference'] });
     const aligned = toResource(item({ priority: 1, roadmap: 'inference-engineering', research: 'diffusion' }), null);
     expect(aligned).toMatchObject({ priority: 1, roadmap: 'inference-engineering', research: 'diffusion' });
@@ -236,6 +238,8 @@ describe('the whole library (ATLAS-LIBRARY)', () => {
     ];
     expect(findExisting(item({ id: 'exercism-cpp', type: 'practice', title: 'Exercism C++ Track', url: 'https://exercism.org/tracks/cpp' }), library)).toBeNull();
     expect(findExisting(item({ id: 'paper-orca', type: 'paper', title: 'Orca', short: 'Orca', url: 'https://arxiv.org/abs/2306.02707' }), [{ ...library[1]!, title: 'Orca', short: 'Orca' }])).toBeNull();
+    // Two "Agents" by different authors stay two.
+    expect(findExisting(item({ id: 'whitepaper-google-agents', type: 'article', title: 'Agents', short: 'Agents', url: 'https://www.kaggle.com/whitepaper-agents' }), [{ id: 'article-chip-huyen-agents', title: 'Agents', short: 'Agents', url: 'https://huyenchip.com/2025/01/07/agents.html', shelf: 'article' }])).toBeNull();
   });
 
   it('keeps an entry what it has, and the user what they did: an upsert only adds', () => {

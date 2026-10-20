@@ -16,6 +16,7 @@
   prerequisites: [mit-8-02, mit-18-03]
   subject: circuits
   summary: "26 video lectures, labs and problem sets. The MITx 6.002x series on edX no longer resolves (see the certification card)."
+  priority: 4
 
 - id: mit-6-003
   title: "MIT 6.003 Signals and Systems (Fall 2011)"
@@ -31,6 +32,8 @@
   estHours: 130
   prerequisites: [mit-18-03]
   subject: signals-control
+  summary: "Builds the transform toolkit (Laplace, Z, Fourier) and system thinking that every control, DSP and robotics course assumes."
+  priority: 4
 
 - id: mit-6-011
   title: "MIT 6.011 Signals, Systems and Inference (Spring 2018)"
@@ -92,6 +95,8 @@
   estHours: 30
   subject: fpga
   summary: "FPGA, VHDL and Verilog from the beginning. The site answers scripts with a bot challenge, so `npm run check:links` reports 403 for it; it was verified in a browser."
+  after: [nand2tetris]
+  priority: 4
 
 - id: getting-started-with-fpgas
   title: "Getting Started with FPGAs (Russell Merrick)"
@@ -135,6 +140,11 @@
   estHours: 0
   reference: true
   subject: fpga
+  short: "fpga4fun"
+  summary: "Short project-based FPGA lessons on UART, VGA, PWM and more, each small enough to finish in an evening."
+  fromYear: 1
+  after: [nandland]
+  priority: 4
 
 - id: ut-embedded-shape-the-world
   title: "UT Austin: Embedded Systems, Shape the World (Valvano and Yerraballi)"
@@ -195,6 +205,9 @@
   cost: free
   estHours: 40
   subject: embedded
+  summary: "Professional-grade PCB, mixed-signal and embedded DSP design walkthroughs from schematic to working hardware."
+  after: [tutorial-kicad-getting-started]
+  priority: 4
 
 - id: art-of-electronics
   title: "The Art of Electronics, 3rd edition (Horowitz and Hill)"
@@ -269,6 +282,7 @@
   prerequisites: [mit-18-03, mit-6-003]
   subject: signals-control
   summary: "MIT 6.302 Feedback Systems is the electrical-engineering flavoured alternative."
+  priority: 4
 
 - id: mit-6-302
   title: "MIT 6.302 Feedback Systems (Spring 2007)"
@@ -284,6 +298,10 @@
   reference: true
   subject: signals-control
   summary: "Alternative to MIT 2.004; the hours are counted once, on 2.004."
+  short: "MIT 6.302 Feedback"
+  fromYear: 2
+  after: [mit-6-003]
+  priority: 4
 
 - id: brunton-control-bootcamp
   title: "Steve Brunton: Control Bootcamp"
@@ -315,6 +333,9 @@
   estHours: 40
   subject: signals-control
   summary: "The reading for the signal/DSP visualiser of block A and the FFT analyser of project 40."
+  short: "DSP Guide (Smith)"
+  fromYear: 1
+  priority: 4
 
 - id: think-dsp
   title: "Think DSP (Allen Downey)"
@@ -328,6 +349,11 @@
   cost: free
   estHours: 30
   subject: signals-control
+  short: "Think DSP"
+  summary: "Teaches signal processing through Python code and sound experiments, a natural fit for a programmer."
+  fromYear: 1
+  doFirst: "Python"
+  priority: 4
 
 - id: mit-6-013
   title: "MIT 6.013 Electromagnetics and Applications (Spring 2009)"

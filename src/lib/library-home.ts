@@ -23,8 +23,8 @@ export interface PathDef {
 
 /**
  * In the board's order: the lanes of the first year first, then the second stage. Inference engineering, Software
- * architecture, DevOps, Simulation and Robotics are paths of their own (MORE-RESOURCES, ATLAS-LIBRARY); a path with
- * nothing on the plan is the Library's to browse.
+ * architecture, DevOps, Simulation and Robotics are paths of their own (MORE-RESOURCES, ATLAS-LIBRARY), and Engineering
+ * gathers electrical, embedded and mechanical; a path with nothing on the plan is the Library's to browse.
  */
 export const PATHS: readonly PathDef[] = [
   { id: 'ai', name: 'AI engineering', tracks: ['ai'], roadmaps: ['ai-engineer', 'ai-agents'] },
@@ -36,10 +36,12 @@ export const PATHS: readonly PathDef[] = [
   { id: 'systems', name: 'Systems', tracks: ['swe', 'systems'] },
   { id: 'architecture', name: 'Software architecture', tracks: ['architecture'], roadmaps: ['software-architect'] },
   { id: 'devops', name: 'DevOps', tracks: ['devops'] },
-  { id: 'ee', name: 'Electrical and embedded', tracks: ['ee', 'embedded', 'controls'] },
-  { id: 'me', name: 'Mechanical', tracks: ['mech'] },
+  { id: 'engineering', name: 'Engineering', tracks: ['engineering', 'ee', 'embedded', 'controls', 'mech'] },
   { id: 'robotics', name: 'Robotics', tracks: ['robotics'] },
 ];
+
+/** Paths that became part of another: "Electrical and embedded" and "Mechanical" are Engineering (ATLAS-LIBRARY). */
+export const PATH_ALIASES: Readonly<Record<string, string>> = { ee: 'engineering', me: 'engineering' };
 
 /** The path a track belongs to: its own, or for a track of the user's, the path of a track of the same family. */
 export function pathOfTrack(seed: Pick<AppSeed, 'tracks'>, track: string): PathDef | undefined {
@@ -55,10 +57,30 @@ export function pathOf(seed: Pick<AppSeed, 'tracks'>, resource: { tracks: readon
 }
 
 /**
- * Priority for years 1 to 3 (ATLAS-LIBRARY): 1 inference and the AI feeding it, 2 architecture, systems, languages and
- * DevOps, 3 graphics, simulation and robotics, 4 game development. An item the import gave none takes its track's.
+ * Priority for years 1 to 3 (ATLAS-LIBRARY): 1 inference and the AI feeding it, 2 architecture, systems, languages,
+ * DevOps and math and physics, 3 graphics, simulation and robotics, 4 game development and electrical and mechanical
+ * engineering (whose years come after year 3). An item the import gave none takes its track's.
  */
-const PRIORITY_OF_TRACK: Readonly<Record<string, number>> = { ai: 1, swe: 2, systems: 2, architecture: 2, devops: 2, languages: 2, graphics: 3, simulation: 3, robotics: 3, gamedev: 4 };
+const PRIORITY_OF_TRACK: Readonly<Record<string, number>> = {
+  ai: 1,
+  swe: 2,
+  systems: 2,
+  architecture: 2,
+  devops: 2,
+  languages: 2,
+  math: 2,
+  physics: 2,
+  chem: 2,
+  graphics: 3,
+  simulation: 3,
+  robotics: 3,
+  gamedev: 4,
+  engineering: 4,
+  ee: 4,
+  embedded: 4,
+  controls: 4,
+  mech: 4,
+};
 export function priorityOf(item: { priority?: number | undefined; tracks: readonly string[] }): number {
   return item.priority ?? PRIORITY_OF_TRACK[item.tracks[0] ?? ''] ?? 3;
 }

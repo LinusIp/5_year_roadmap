@@ -12,8 +12,9 @@ export const TRACK_IDS = [
   'physics', 'ee', 'embedded', 'controls', 'mech', 'robotics', 'chem', 'career',
   // MORE-RESOURCES: software architecture, system design, engineering practice and SRE.
   'architecture',
-  // ATLAS-LIBRARY: containers, CI/CD, infrastructure and MLOps.
+  // ATLAS-LIBRARY: containers, CI/CD, infrastructure and MLOps; electrical and mechanical engineering.
   'devops',
+  'engineering',
 ] as const;
 /** The lanes of the curriculum (plan.yaml, the phase table): the five of the first plan and H, Hugging Face, added with
  * the fixed daily schedule. The user can add blocks of their own beyond them. */
@@ -35,7 +36,7 @@ export type RoadmapId = (typeof ROADMAP_IDS)[number];
 const NodeRef = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must look like roadmap-id/node-id');
 export const CERT_MODES = ['committed', 'optional', 'investigate'] as const;
 
-/** One of the eighteen tracks, or a track the user created (`my-…`). */
+/** One of the nineteen tracks, or a track the user created (`my-…`). */
 export type TrackId = (typeof TRACK_IDS)[number] | `my-${string}`;
 export type SeedTrackId = (typeof TRACK_IDS)[number];
 /** A block's id: A to E by default, any short capitalised id for a block the user adds. */

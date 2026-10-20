@@ -66,6 +66,8 @@
   cost: free
   estHours: 120
   subject: math-physics
+  summary: "Self-paced first-semester calculus with lecture videos, recitations and worked problem sets you can check yourself against."
+  priority: 2
 
 - id: mit-18-02
   title: "MIT 18.02SC Multivariable Calculus (Fall 2010)"
@@ -155,6 +157,8 @@
   estHours: 90
   prerequisites: [mit-18-06]
   subject: math-physics
+  summary: "Strang connects SVD, low-rank approximation, least squares and gradient descent directly to how data and deep learning work."
+  priority: 2
 
 - id: mml-book
   title: "Mathematics for Machine Learning (Deisenroth, Faisal, Ong)"

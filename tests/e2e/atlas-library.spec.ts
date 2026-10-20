@@ -3,8 +3,8 @@ import { FIRST_DAY, open, showMoreUntil } from './helpers.ts';
 
 /**
  * The whole Atlas Library (ATLAS-LIBRARY): about 2,400 resources, loaded after the first screen, in the plan's order
- * (priority, year, level), with Level and Roadmap chips, a Research view, Inference engineering, DevOps and Simulation
- * paths, roadmap.sh's pages at the head of their paths, and "Write log entry" on a resource's sheet.
+ * (priority, year, level), with Level and Roadmap chips, a Research view, Inference engineering, DevOps, Simulation,
+ * Math and Engineering paths, roadmap.sh's pages at the head of their paths, and "Write log entry" on a resource's sheet.
  */
 test.use({ timezoneId: 'Asia/Tashkent', serviceWorkers: 'block' });
 
@@ -82,6 +82,24 @@ test('the DevOps and Simulation paths list their resources under Optional', asyn
   const optional = page.getByRole('button', { name: /^Optional for this path/ });
   if ((await optional.getAttribute('aria-expanded')) === 'false') await optional.click();
   await showMoreUntil(page, page.getByRole('button', { name: /^NVIDIA Warp Year/ }));
+});
+
+test('the Math and Engineering paths list their resources under Optional, and old Engineering links open', async ({ page }) => {
+  await open(page, './#/library?path=math');
+  await expect(page.getByRole('heading', { level: 1, name: 'Math and physics' })).toBeVisible();
+  const math = page.getByRole('button', { name: /^Optional for this path/ });
+  if ((await math.getAttribute('aria-expanded')) === 'false') await math.click();
+  await showMoreUntil(page, page.getByRole('button', { name: /^Joy of Cryptography/ }));
+
+  await open(page, './#/library?path=engineering');
+  await expect(page.getByRole('heading', { level: 1, name: 'Engineering' })).toBeVisible();
+  const engineering = page.getByRole('button', { name: /^Optional for this path/ });
+  if ((await engineering.getAttribute('aria-expanded')) === 'false') await engineering.click();
+  await showMoreUntil(page, page.getByRole('button', { name: /^Berkeley EECS 16A/ }));
+
+  // Electrical and embedded and Mechanical are part of Engineering now.
+  await open(page, './#/library?path=ee');
+  await expect(page.getByRole('heading', { level: 1, name: 'Engineering' })).toBeVisible();
 });
 
 test('a blog card opens its sheet with its link, and Write log entry starts the outline with it', async ({ page }) => {

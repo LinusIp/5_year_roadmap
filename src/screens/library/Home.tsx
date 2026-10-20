@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { setItemStatus } from '../../db/state.ts';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { monthName } from '../../lib/dates.ts';
@@ -24,6 +24,7 @@ export const PATH_ICON: Record<string, { icon: IconName; tone: 'blue' | 'ice' }>
   systems: { icon: 'server', tone: 'ice' },
   ee: { icon: 'zap', tone: 'blue' },
   me: { icon: 'wrench', tone: 'ice' },
+  engineering: { icon: 'zap', tone: 'blue' },
   architecture: { icon: 'network', tone: 'blue' },
   robotics: { icon: 'bot', tone: 'blue' },
   inference: { icon: 'gauge', tone: 'ice' },
@@ -109,15 +110,22 @@ export function LibraryHome({
   const thisYear = today.slice(0, 4);
   const [menu, setMenu] = useState<string | null>(null);
   const [showLater, setShowLater] = useState(false);
-  const paths = buildPaths(seed, states);
+  // Over thousands of resources (ATLAS-LIBRARY): worked out once per change to the curriculum or the user's progress,
+  // not on every render (a keystroke in search renders the home until the results take over).
+  const { paths, browsePaths, researchCount } = useMemo(() => {
+    const paths = buildPaths(seed, states);
+    return {
+      paths,
+      // Paths with nothing on the plan (Software architecture): the Library's resources for them, to browse.
+      browsePaths: PATHS.filter((def) => !paths.some((p) => p.id === def.id))
+        .map((def) => ({ def, count: pathExtras(seed, states, def.id).length }))
+        .filter((p) => p.count > 0),
+      // The Research view (ATLAS-LIBRARY): year 3's reading on inference, world models, diffusion and generative AI.
+      researchCount: researchAreas(seed, states).reduce((n, a) => n + a.items.length, 0),
+    };
+  }, [seed, states]);
   const laterPaths = paths.filter((p) => startsMuchLater(p, seed, today));
   const shownPaths = showLater ? paths : paths.filter((p) => !laterPaths.includes(p));
-  // Paths with nothing on the plan (Software architecture): the Library's resources for them, to browse.
-  const browsePaths = PATHS.filter((def) => !paths.some((p) => p.id === def.id))
-    .map((def) => ({ def, count: pathExtras(seed, states, def.id).length }))
-    .filter((p) => p.count > 0);
-  // The Research view (ATLAS-LIBRARY): year 3's reading on inference, world models, diffusion and generative AI.
-  const researchCount = researchAreas(seed, states).reduce((n, a) => n + a.items.length, 0);
   const active = inProgress(seed.resources, states);
   const next = upNext(paths, seed);
   const pathOfRef = (refId: string): string | undefined => paths.find((p) => p.steps.some((s) => s.refId === refId))?.id;

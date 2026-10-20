@@ -14,6 +14,8 @@
   estHours: 130
   prerequisites: [mit-8-01, mit-18-02]
   subject: mechanics-fea-cfd
+  summary: "MIT's core sophomore course on forces, stress, strain and deformation of structures, the base for every later design class."
+  priority: 4
 
 - id: mit-2-002
   title: "MIT 2.002 Mechanics and Materials II (Spring 2004)"
@@ -29,6 +31,10 @@
   prerequisites: [mit-2-001]
   subject: mechanics-fea-cfd
   stretch: true
+  short: "MIT 2.002 Mech & Materials"
+  summary: "Continues into plasticity, fracture, fatigue and how real materials fail, which matters when choosing parts for a robot."
+  fromYear: 2
+  priority: 4
 
 - id: mit-2-003
   title: "MIT 2.003SC Engineering Dynamics (Fall 2011)"
@@ -45,6 +51,7 @@
   prerequisites: [mit-8-01, mit-18-03]
   subject: mechanics-fea-cfd
   summary: "Newtonian and Lagrangian dynamics, vibration. The formulation used by the robot arm simulator of project 54."
+  priority: 4
 
 - id: mit-2-005
   title: "MITx 2.005.1x Thermal-Fluids Engineering 1: Basics of Thermodynamics and Hydrostatics"
@@ -105,6 +112,11 @@
   estHours: 0
   reference: true
   subject: cad
+  short: "MIT 2.007 Design & Mfg I"
+  summary: "MIT's famous robot-building design class: concept generation, mechanisms, prototyping and machining a competition machine."
+  fromYear: 1
+  doFirst: "MIT 2.001"
+  priority: 4
 
 - id: mit-2-086
   title: "MIT 2.086 Numerical Computation for Mechanical Engineers (Fall 2014)"
@@ -121,6 +133,8 @@
   prerequisites: [mit-18-03, mit-18-06]
   subject: mechanics-fea-cfd
   summary: "Taught in MATLAB (GNU Octave runs most of it): the MATLAB/Octave part of block B in year 5."
+  priority: 3
+  roadmap: "game-developer"
 
 - id: fish-belytschko-fem
   title: "A First Course in Finite Elements (Fish and Belytschko)"
@@ -245,6 +259,8 @@
   subject: cad
   summary: "Stands in for 'vendor tutorials for the chosen CAD' until you choose one (SolidWorks, Fusion, Onshape or FreeCAD)."
   alternatives: [solidworks-tutorials, fusion-learning, freecad-docs]
+  note: "Free tier"
+  priority: 4
 
 - id: solidworks-tutorials
   title: "SOLIDWORKS tutorials (built into the software)"
@@ -305,6 +321,8 @@
   estHours: 30
   subject: cad
   summary: "The 'CAD scripting' part of block B in year 5."
+  after: [docs-openscad]
+  priority: 4
 
 - id: brunton-databook
   title: "Steve Brunton: Data-Driven Science and Engineering (book and lectures)"
@@ -394,6 +412,8 @@
   estHours: 100
   subject: robotics
   summary: "Robot design and control from the hardware side: actuators and drives, mechanisms, kinematics, statics, dynamics and force control, with lecture notes, problem sets and projects."
+  doFirst: "MIT 2.003SC"
+  priority: 4
 
 - id: mit-manipulation
   title: "MIT 6.4210 Robotic Manipulation (Russ Tedrake, Drake notebooks)"
@@ -437,6 +457,11 @@
   estHours: 0
   reference: true
   summary: "One of the two open solvers to validate your own FEM solver against (project 50)."
+  short: "CalculiX"
+  fromYear: 2
+  after: [docs-freecad-manual]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: fenics
   title: "FEniCS: open-source finite-element platform"

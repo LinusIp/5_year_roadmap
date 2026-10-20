@@ -35,7 +35,7 @@ describe('the paths', () => {
   it('fold the ones that start more than a year away', () => {
     const paths = buildPaths(seed, new Map());
     const later = paths.filter((p) => startsMuchLater(p, seed, '2026-10-16')).map((p) => p.id);
-    expect(later).toEqual(expect.arrayContaining(['ee', 'me']));
+    expect(later).toEqual(expect.arrayContaining(['engineering']));
     expect(later).not.toContain('ai');
   });
 });
@@ -43,7 +43,7 @@ describe('the paths', () => {
 describe('Software architecture and Robotics (MORE-RESOURCES)', () => {
   it('are paths of their own: robotics apart from mechanical, architecture apart from systems', () => {
     expect(pathOfTrack(seed, 'robotics')?.id).toBe('robotics');
-    expect(pathOfTrack(seed, 'mech')?.id).toBe('me');
+    expect(pathOfTrack(seed, 'mech')?.id).toBe('engineering');
     expect(pathOfTrack(seed, 'architecture')?.id).toBe('architecture');
     expect(pathOfTrack(seed, 'swe')?.id).toBe('systems');
     expect(pathOfTrack(seed, 'gamedev')?.id).toBe('graphics');
@@ -81,7 +81,11 @@ describe('the plan\'s order (ATLAS-LIBRARY)', () => {
     expect([...items].sort(byFit).map((i) => i.id)).toEqual(['p1-y1-beg', 'p1-y1-mid', 'p1-y1-adv', 'p1-y3', 'p1-none', 'p2']);
   });
 
-  it('gives an item without a priority its track\'s: AI 1, systems and architecture 2, graphics 3, game development 4', () => {
+  it('gives an item without a priority its track\'s: AI 1, systems, architecture and math 2, graphics 3, game development and engineering 4', () => {
+    expect(priorityOf({ tracks: ['math'] })).toBe(2);
+    expect(priorityOf({ tracks: ['physics'] })).toBe(2);
+    expect(priorityOf({ tracks: ['ee'] })).toBe(4);
+    expect(priorityOf({ tracks: ['engineering'] })).toBe(4);
     expect(priorityOf({ tracks: ['ai'] })).toBe(1);
     expect(priorityOf({ tracks: ['architecture'] })).toBe(2);
     expect(priorityOf({ tracks: ['devops'] })).toBe(2);
@@ -91,7 +95,7 @@ describe('the plan\'s order (ATLAS-LIBRARY)', () => {
   });
 
   it('orders every path\'s optional list by fit', () => {
-    for (const id of ['ai', 'inference', 'architecture', 'devops', 'simulation', 'robotics', 'graphics']) {
+    for (const id of ['ai', 'inference', 'architecture', 'devops', 'simulation', 'robotics', 'graphics', 'math', 'engineering']) {
       const extras = pathExtras(seed, new Map(), id).map(fitOf);
       expect(extras.length, id).toBeGreaterThan(10);
       for (let i = 1; i < extras.length; i++) expect(byFit(extras[i - 1]!, extras[i]!), id + ' at ' + i).toBeLessThanOrEqual(0);
@@ -116,6 +120,10 @@ describe('Inference engineering, DevOps, Simulation and Research (ATLAS-LIBRARY)
     expect(pathOfTrack(seed, 'devops')?.id).toBe('devops');
     expect(pathOfTrack(seed, 'simulation')?.id).toBe('simulation');
     expect(pathOfTrack(seed, 'gamedev')?.id).toBe('graphics');
+    // Engineering gathers electrical, embedded, controls and mechanical, and the file's engineering track.
+    for (const track of ['engineering', 'ee', 'embedded', 'controls', 'mech']) expect(pathOfTrack(seed, track)?.id, track).toBe('engineering');
+    expect(pathOfTrack(seed, 'math')?.id).toBe('math');
+    expect(pathOfTrack(seed, 'physics')?.id).toBe('math');
   });
 
   it('heads the roadmap paths with roadmap.sh\'s official pages, and keeps them out of the optional list', () => {
