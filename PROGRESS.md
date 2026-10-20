@@ -1071,9 +1071,9 @@ Verified on this machine (Linux, Chromium 140):
 
 ## Pull request #21: the Atlas Library's second file
 
-- `data/resources/library-atlas-2.yaml`: 927 new resources (366 articles with docs and tutorials, 189 papers, 130
-  courses, 128 practice, 105 books, 9 blogs; AI 297 + 176 inference, Systems 178, Math 94, Engineering 87,
-  Architecture 49, Languages 26, Simulation 20). 51 more matched what the Library had. Resources: 2,488 to 3,415.
+- `data/resources/library-atlas-2.yaml`: 928 new resources (367 articles with docs and tutorials, 189 papers, 130
+  courses, 128 practice, 105 books, 9 blogs; AI 297 + 177 inference, Systems 178, Math 94, Engineering 87,
+  Architecture 49, Languages 26, Simulation 20). 50 more matched what the Library had. Resources: 2,488 to 3,416.
 - The `engineering` track; one Engineering path for electrical, embedded and mechanical (old links still open it);
   math and physics priority 2, engineering 4; four more pairs in `NOT_SAME`; `check:links --in <file>`.
 - Search on a deferred query and the home's work memoised: a keystroke at 4x is 0.1 to 0.3 s.

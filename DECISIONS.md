@@ -1394,14 +1394,15 @@ someone opens it by hand and finds the page.
 
 ATLAS-LIBRARY again, with a 3,386-row `atlas-resources.jsonl`. Its first 2,408 rows are pull request #20's file,
 unchanged: the upsert found every one's entry again and filled nothing, which is what an upsert by id owes. Of the 978
-rows it adds, 927 are new (`data/resources/library-atlas-2.yaml`, so the first file's stays as it was) and 51 matched
-entries the Library had (40 by URL, 7 by title, 4 by id), listed in `docs/imports-atlas-library-2.md`. No URL changed;
+rows it adds, 928 are new (`data/resources/library-atlas-2.yaml`, so the first file's stays as it was) and 50 matched
+entries the Library had (40 by URL, 6 by title, 4 by id), listed in `docs/imports-atlas-library-2.md`. No URL changed;
 the one link written is All About Circuits', which had none. `scripts/check-links.ts --in <file>` checks only the
 rows a data file defines, for this pull request's one-off report.
 
 **Four more pairs kept apart.** Short titles alike are not the same work: Google's "Agents" whitepaper and Chip
 Huyen's "Agents", Karpathy's tokenizer video and his "Let's build GPT", Lilian Weng's "Harness Engineering" and
-OpenAI's, SGLang's structured outputs and Anthropic's, all now in `NOT_SAME`.
+OpenAI's, SGLang's structured outputs and Anthropic's or OpenAI's, all now in `NOT_SAME` (a row may name several
+entries it is not).
 
 **Math and engineering.** The file's `math` track is the Library's `math` (its Math and physics path already gathered
 math, physics and chemistry). `engineering` is a new track (the nineteenth; family Electrical & embedded). Its rows

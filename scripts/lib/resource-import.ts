@@ -151,16 +151,16 @@ export const SAME_AS: Readonly<Record<string, string>> = {
  * Library's): Microsoft's Orca (learning from GPT-4) is not the Orca serving paper, Dasgupta, Papadimitriou and
  * Vazirani's Algorithms is not Erickson's, LangChain's "Context Engineering" is not Anthropic's. From the 3,386-row file:
  * Google's "Agents" whitepaper is not Chip Huyen's "Agents", Karpathy's tokenizer video is not "Let's build GPT",
- * Lilian Weng's "Harness Engineering" is not OpenAI's, SGLang's structured outputs are not Anthropic's.
+ * Lilian Weng's "Harness Engineering" is not OpenAI's, SGLang's structured outputs are neither Anthropic's nor OpenAI's.
  */
-export const NOT_SAME: Readonly<Record<string, string>> = {
-  'paper-orca': 'orca',
-  'dpv-algorithms': 'erickson-algorithms',
-  'article-langchain-context-engineering': 'article-anthropic-context-engineering',
-  'whitepaper-google-agents': 'article-chip-huyen-agents',
-  'video-karpathy-gpt-tokenizer': 'video-karpathy-lets-build-gpt',
-  'article-weng-harness-engineering': 'article-openai-harness-engineering',
-  'docs-sglang-structured-outputs': 'docs-anthropic-structured-outputs',
+export const NOT_SAME: Readonly<Record<string, readonly string[]>> = {
+  'paper-orca': ['orca'],
+  'dpv-algorithms': ['erickson-algorithms'],
+  'article-langchain-context-engineering': ['article-anthropic-context-engineering'],
+  'whitepaper-google-agents': ['article-chip-huyen-agents'],
+  'video-karpathy-gpt-tokenizer': ['video-karpathy-lets-build-gpt'],
+  'article-weng-harness-engineering': ['article-openai-harness-engineering'],
+  'docs-sglang-structured-outputs': ['docs-anthropic-structured-outputs', 'docs-openai-structured-outputs'],
 };
 
 /**
@@ -180,7 +180,7 @@ export function findExisting(item: Pick<ImportItem, 'id' | 'url' | 'title' | 'sh
   const shelf = item.type ? SHELF_OF[item.type] : undefined;
   for (const e of existing) {
     if (shelf && e.shelf && e.shelf !== shelf) continue;
-    if (NOT_SAME[item.id] === e.id) continue;
+    if (NOT_SAME[item.id]?.includes(e.id)) continue;
     const score = Math.max(titleLikeness(item.title, e.title), e.short ? titleLikeness(item.short, e.short) : 0, e.short ? titleLikeness(item.title, e.short) : 0);
     if (score >= SAME_TITLE && (!best || score > best.score)) best = { entry: e, score };
   }

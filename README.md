@@ -220,7 +220,7 @@ articles, books, courses, docs and practice across AI, inference, systems, softw
 and robotics; papers the reading queue already had took only their missing fields (a short name, why, a level, a year).
 The whole Atlas Library (ATLAS-LIBRARY) came next: 2,408 rows upserted by id, 1,682 of them new, in
 `data/resources/library-atlas.yaml`, each with its priority, its roadmap.sh roadmap and its year 3 research area
-(`docs/imports-atlas-library.md` lists every merge and update). Its second file (3,386 rows) added 927 more,
+(`docs/imports-atlas-library.md` lists every merge and update). Its second file (3,386 rows) added 928 more,
 among them math and physics and electrical and mechanical engineering, in `data/resources/library-atlas-2.yaml`
 (`docs/imports-atlas-library-2.md`). About 2,200 resources only ever appear in the Library;
 they ride in a chunk of their own that loads right after the first screen, so Today starts as fast as before.

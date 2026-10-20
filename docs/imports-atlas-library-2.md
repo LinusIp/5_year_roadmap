@@ -2,10 +2,10 @@
 
 `scratch/import-atlas.ts` upserted the 3,386-row `atlas-resources.jsonl` into `data/`. Its first 2,408 rows are the
 file of pull request #20, unchanged: every one found its entry again (`docs/imports-atlas-library.md`) and nothing
-was filled. Of the 978 rows it adds, 927 are new (`data/resources/library-atlas-2.yaml`) and 51 matched an entry the
+was filled. Of the 978 rows it adds, 928 are new (`data/resources/library-atlas-2.yaml`) and 50 matched an entry the
 Library had; those kept everything they had and took only the fields they were missing. No URL was changed.
 
-## The 51 rows the Library already had
+## The 50 rows the Library already had
 
 | Import id | Library entry | Matched by | Fields filled |
 |---|---|---|---|
@@ -32,7 +32,6 @@ Library had; those kept everything they had and took only the fields they were m
 | `tutorial-fpga4fun` | `fpga4fun` | url | short, summary, fromYear, after, priority |
 | `article-nvidia-mastering-llm-inference-optimization` | `nvidia-inference-optimization` | url | short, fromYear, tags, after, priority, roadmap |
 | `article-databricks-llm-inference-perf-engineering` | `databricks-inference-best-practices` | url | short, fromYear, tags, doFirst, priority, roadmap |
-| `docs-sglang-structured-outputs` | `docs-openai-structured-outputs` | title | tags |
 | `mit-1801sc-single-variable-calculus` | `mit-18-01` | url | summary, priority |
 | `mit-18065-matrix-methods` | `mit-18-065` | url | summary, priority |
 | `seeing-theory-brown` | `seeing-theory` | url | short, fromYear, priority |

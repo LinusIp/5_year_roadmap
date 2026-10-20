@@ -5,7 +5,7 @@
 # path" and in the Research view. Generated from atlas-resources.jsonl by scratch/import-atlas.ts; rows the Library
 # already had only filled in what their entries were missing.
 
-# ---- Inference engineering: serving, kernels, GPUs (track ai, tag inference) (176)
+# ---- Inference engineering: serving, kernels, GPUs (track ai, tag inference) (177)
 
 - id: "docs-nvidia-gpu-performance-background"
   title: "GPU Performance Background User's Guide"
@@ -405,6 +405,25 @@
   tags: [inference]
   after: [article-hf-assisted-generation]
 
+- id: "docs-sglang-structured-outputs"
+  title: "Structured Outputs (SGLang docs)"
+  short: "SGLang: Structured Output"
+  provider: "SGLang project"
+  type: "article"
+  url: "https://docs.sglang.io/docs/advanced_features/structured_outputs"
+  urlVerified: true
+  lastVerified: 2026-10-20
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Hands-on guide to grammar-constrained decoding with JSON schema, regex and EBNF via XGrammar, Outlines or llguidance backends."
+  fromYear: 2
+  priority: 1
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "SGLang Documentation"
+
 - id: "docs-trtllm-paged-attention-ifb-scheduler"
   title: "Paged Attention, IFB, and Request Scheduling (TensorRT LLM)"
   short: "TRT-LLM: In-flight Batch"
@@ -706,7 +725,7 @@
   priority: 1
   roadmap: "inference-engineering"
   tags: [inference]
-  after: [docs-openai-structured-outputs]
+  after: [docs-sglang-structured-outputs]
 
 - id: "docs-trtllm-architecture-overview"
   title: "Architecture Overview (TensorRT LLM)"
