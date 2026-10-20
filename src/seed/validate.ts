@@ -246,7 +246,7 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
   claim('paper', papers);
   claim('cert', certs);
 
-  /* ---- tracks: exactly the eighteen ids of the data model (the brief's sixteen, architecture and devops) */
+  /* ---- tracks: exactly the nineteen ids of the data model (the brief's sixteen, architecture, devops, engineering) */
   const trackIds = new Set(tracks.map((t) => t.item.id));
   if (requireComplete) {
     for (const id of TRACK_IDS) if (!trackIds.has(id)) errors.push('data/tracks.yaml: track "' + id + '" is missing');

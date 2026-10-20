@@ -352,6 +352,12 @@
   prerequisites: []
   subject: deep-learning
   summary: The metrics that matter for serving (TTFT, TPOT, throughput) and how hardware and batching move them.
+  short: "Databricks Inference Guide"
+  fromYear: 2
+  tags: [inference]
+  doFirst: "Transformer Inference Arithmetic"
+  priority: 1
+  roadmap: "inference-engineering"
 - id: nvidia-inference-optimization
   title: "Mastering LLM Techniques: Inference Optimization"
   provider: NVIDIA Technical Blog
@@ -367,6 +373,12 @@
   prerequisites: []
   subject: deep-learning
   summary: A survey of batching, KV caching, parallelism, quantization and speculative decoding.
+  short: "Mastering LLM Inference"
+  fromYear: 2
+  tags: [inference]
+  after: [docs-nvidia-gpu-performance-background]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: kipply-inference-arithmetic
   title: Transformer Inference Arithmetic
   provider: kipply

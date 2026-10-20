@@ -15,6 +15,7 @@
   estHours: 100
   subject: c-cpp
   summary: "Weeks 1 to 5 are the C part of block B; the later weeks (Python, SQL, web) are revision by then."
+  priority: 2
 
 - id: missing-semester
   title: "MIT: The Missing Semester of Your CS Education"
@@ -30,6 +31,7 @@
   estHours: 20
   subject: linux-os
   summary: "Shell, editors, Git, debugging, packaging. Also the Bash part of the languages list."
+  priority: 2
 
 - id: current-dsa-course
   title: "Current algorithms and data structures course (the one already in progress)"
@@ -243,6 +245,8 @@
   estHours: 120
   prerequisites: [cmu-15-213]
   subject: networking
+  summary: "You implement a TCP stack and IP router in modern C++ through staged labs that make networking concrete."
+  priority: 2
 
 - id: crafting-interpreters
   title: "Crafting Interpreters (Robert Nystrom)"
@@ -402,3 +406,7 @@
   cost: free
   estHours: 120
   summary: "The classic, free online from MIT Press."
+  short: "SICP"
+  fromYear: 2
+  after: [book-composing-programs]
+  priority: 2

@@ -522,6 +522,11 @@
   cost: free
   estHours: 60
   summary: "Stanford's course on doing deep learning well: structuring projects, debugging models and shipping them."
+  short: "Stanford CS230"
+  fromYear: 1
+  after: [coursera-deep-learning-specialization]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: cs224w
   title: "Stanford CS224W Machine Learning with Graphs"
@@ -535,6 +540,11 @@
   cost: free
   estHours: 80
   summary: "Graph neural networks and machine learning on graphs."
+  short: "Stanford CS224W"
+  fromYear: 2
+  doFirst: "Stanford CS229"
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: cmu-10-714
   title: "CMU 10-414/714 Deep Learning Systems"
@@ -592,6 +602,11 @@
   cost: free
   estHours: 70
   summary: "Search, logic, probability, optimisation and machine learning, in Python, with projects."
+  short: "CS50 AI"
+  fromYear: 1
+  after: [course-harvard-cs50p]
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: spinning-up
   title: "Spinning Up in Deep RL"

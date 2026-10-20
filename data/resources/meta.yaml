@@ -114,6 +114,11 @@
   cost: free
   estHours: 0
   reference: true
+  short: "mlabonne LLM Course"
+  summary: "A roadmap of LLM fundamentals, the LLM scientist and the LLM engineer, with linked Colab notebooks for finetuning, merging and quantizing."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: build-your-own-x
   title: "codecrafters-io/build-your-own-x"
@@ -145,6 +150,11 @@
   cost: free
   estHours: 0
   reference: true
+  short: "Project Based Learning"
+  summary: "A curated index of build-something tutorials across languages, including a large ML/AI section for picking weekly projects."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: karan-projects
   title: "karan/Projects: practical projects to solve in any language"

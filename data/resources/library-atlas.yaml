@@ -6938,6 +6938,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [docs-openai-function-calling]
+  tags: [inference]
 
 - id: "docs-openai-migrate-responses"
   title: "Migrate to the Responses API"

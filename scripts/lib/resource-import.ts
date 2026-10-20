@@ -10,7 +10,7 @@ export interface ImportItem {
   title: string;
   short: string;
   type: 'video-course' | 'course' | 'book' | 'docs' | 'tutorial' | 'practice' | 'paper' | 'blog' | 'article';
-  track: 'ai' | 'inference' | 'graphics' | 'gamedev' | 'systems' | 'languages' | 'architecture' | 'robotics' | 'devops' | 'simulation';
+  track: 'ai' | 'inference' | 'graphics' | 'gamedev' | 'systems' | 'languages' | 'architecture' | 'robotics' | 'devops' | 'simulation' | 'math' | 'engineering';
   level: 'beginner' | 'intermediate' | 'advanced';
   hours: number;
   provider: string;
@@ -22,7 +22,7 @@ export interface ImportItem {
   year: 1 | 2 | 3;
   verified: string;
   /** ATLAS-LIBRARY's plan alignment: 1 inference and the AI feeding it, 2 architecture and systems, 3 graphics,
-   * simulation and robotics, 4 game development. */
+   * simulation and robotics, 4 game development and electrical and mechanical engineering. */
   priority?: 1 | 2 | 3 | 4;
   /** The roadmap.sh roadmap it serves, or "". */
   roadmap?: '' | 'inference-engineering' | 'ai-engineer' | 'ai-agents' | 'software-architect' | 'game-developer';
@@ -79,6 +79,8 @@ export const TRACK_OF = {
   robotics: 'robotics',
   devops: 'devops',
   simulation: 'simulation',
+  math: 'math',
+  engineering: 'engineering',
 } as const;
 export const LEVEL_OF = { beginner: 'intro', intermediate: 'intermediate', advanced: 'advanced' } as const;
 
@@ -147,12 +149,18 @@ export const SAME_AS: Readonly<Record<string, string>> = {
 /**
  * Pairs whose titles are alike but which were read by hand and are different things (the import's id to the
  * Library's): Microsoft's Orca (learning from GPT-4) is not the Orca serving paper, Dasgupta, Papadimitriou and
- * Vazirani's Algorithms is not Erickson's, LangChain's "Context Engineering" is not Anthropic's.
+ * Vazirani's Algorithms is not Erickson's, LangChain's "Context Engineering" is not Anthropic's. From the 3,386-row file:
+ * Google's "Agents" whitepaper is not Chip Huyen's "Agents", Karpathy's tokenizer video is not "Let's build GPT",
+ * Lilian Weng's "Harness Engineering" is not OpenAI's, SGLang's structured outputs are not Anthropic's.
  */
 export const NOT_SAME: Readonly<Record<string, string>> = {
   'paper-orca': 'orca',
   'dpv-algorithms': 'erickson-algorithms',
   'article-langchain-context-engineering': 'article-anthropic-context-engineering',
+  'whitepaper-google-agents': 'article-chip-huyen-agents',
+  'video-karpathy-gpt-tokenizer': 'video-karpathy-lets-build-gpt',
+  'article-weng-harness-engineering': 'article-openai-harness-engineering',
+  'docs-sglang-structured-outputs': 'docs-anthropic-structured-outputs',
 };
 
 /**

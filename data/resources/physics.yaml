@@ -15,6 +15,8 @@
   estHours: 130
   prerequisites: [mit-18-01]
   subject: math-physics
+  summary: "Self-paced Newtonian mechanics with short concept videos and problem-solving walk-throughs, the base for any physics sim."
+  priority: 2
 
 - id: mit-8-02
   title: "MIT 8.02 Physics II: Electricity and Magnetism (Spring 2019)"
@@ -31,6 +33,7 @@
   prerequisites: [mit-8-01, mit-18-02]
   subject: math-physics
   summary: "Three modules (electrostatics, magnetic fields and forces, Maxwell's equations) with lecture videos. MITx publishes the same course in three parts on MIT Learn (8.02.1x to 8.02.3x, no certificate)."
+  priority: 2
 
 - id: mit-8-03
   title: "MIT 8.03SC Physics III: Vibrations and Waves (Fall 2016)"
@@ -64,6 +67,8 @@
   estHours: 130
   prerequisites: [mit-8-03, mit-18-03, mit-18-06]
   subject: math-physics
+  summary: "Zwiebach's carefully built lectures on wavefunctions, the Schrodinger equation and operators, heavy on linear algebra."
+  priority: 2
 
 - id: mit-8-04-adams
   title: "MIT 8.04 Quantum Physics I (Allan Adams, Spring 2013)"
@@ -95,6 +100,8 @@
   prerequisites: [mit-8-04]
   subject: math-physics
   stretch: true
+  summary: "Recasts quantum mechanics in the linear-algebra language of Hilbert spaces, Dirac notation, spin and addition of angular momentum."
+  priority: 2
 
 - id: mit-8-06
   title: "MIT 8.06 Quantum Physics III (Spring 2018)"
@@ -110,6 +117,10 @@
   prerequisites: [mit-8-05]
   subject: math-physics
   stretch: true
+  short: "MIT 8.06 Quantum III"
+  summary: "Covers the approximation toolkit of real quantum physics: perturbation theory, WKB, adiabatic evolution and scattering."
+  fromYear: 3
+  priority: 2
 
 - id: susskind-classical-mechanics
   title: "Leonard Susskind: The Theoretical Minimum, Classical Mechanics (Fall 2011)"
@@ -125,6 +136,7 @@
   estHours: 30
   subject: math-physics
   summary: "Lagrangians and Hamiltonians: the formulation the simulation and robotics work uses later."
+  priority: 2
 
 - id: susskind-quantum-mechanics
   title: "Leonard Susskind: The Theoretical Minimum, Quantum Mechanics (Winter 2012)"
@@ -138,6 +150,11 @@
   cost: free
   estHours: 30
   subject: math-physics
+  short: "TM Quantum Mechanics"
+  summary: "Starts quantum theory from spins, states and operators rather than wavefunctions, building the minimal formal core."
+  fromYear: 2
+  after: [susskind-classical-mechanics]
+  priority: 2
 
 - id: feynman-lectures
   title: "The Feynman Lectures on Physics (online edition)"

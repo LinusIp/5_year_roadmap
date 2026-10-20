@@ -1068,3 +1068,14 @@ Verified on this machine (Linux, Chromium 140):
   `tests/e2e/atlas-library.spec.ts`: Papers by level, search for FlashAttention, Raft, Diffusion Policy and Dreamer
   with the Roadmap chip, the Research view, Inference engineering's roadmap.sh page, DevOps and Simulation, a blog's
   sheet and Write log entry, priority order. Baselines: the Library home, the Papers shelf, the Research view.
+
+## Pull request #21: the Atlas Library's second file
+
+- `data/resources/library-atlas-2.yaml`: 927 new resources (366 articles with docs and tutorials, 189 papers, 130
+  courses, 128 practice, 105 books, 9 blogs; AI 297 + 176 inference, Systems 178, Math 94, Engineering 87,
+  Architecture 49, Languages 26, Simulation 20). 51 more matched what the Library had. Resources: 2,488 to 3,415.
+- The `engineering` track; one Engineering path for electrical, embedded and mechanical (old links still open it);
+  math and physics priority 2, engineering 4; four more pairs in `NOT_SAME`; `check:links --in <file>`.
+- Search on a deferred query and the home's work memoised: a keystroke at 4x is 0.1 to 0.3 s.
+- Tests: math and engineering mapping, the Engineering and Math paths, their default priorities, two "Agents" kept
+  apart; `tests/e2e/atlas-library.spec.ts`: the Math and Engineering paths and an old `?path=ee` link.

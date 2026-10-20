@@ -1389,3 +1389,30 @@ is gone or moved, among them `paper-kung-why-systolic`, `article-kreps-the-log`,
 and 17 did not answer the runner properly (a certificate it could not verify, a redirect loop, a timeout, a refused
 connection, a 400 and a 522), which a browser often gets past. Nothing was changed: a link is replaced only after
 someone opens it by hand and finds the page.
+
+## The Atlas Library's second file (pull request #21)
+
+ATLAS-LIBRARY again, with a 3,386-row `atlas-resources.jsonl`. Its first 2,408 rows are pull request #20's file,
+unchanged: the upsert found every one's entry again and filled nothing, which is what an upsert by id owes. Of the 978
+rows it adds, 927 are new (`data/resources/library-atlas-2.yaml`, so the first file's stays as it was) and 51 matched
+entries the Library had (40 by URL, 7 by title, 4 by id), listed in `docs/imports-atlas-library-2.md`. No URL changed;
+the one link written is All About Circuits', which had none. `scripts/check-links.ts --in <file>` checks only the
+rows a data file defines, for this pull request's one-off report.
+
+**Four more pairs kept apart.** Short titles alike are not the same work: Google's "Agents" whitepaper and Chip
+Huyen's "Agents", Karpathy's tokenizer video and his "Let's build GPT", Lilian Weng's "Harness Engineering" and
+OpenAI's, SGLang's structured outputs and Anthropic's, all now in `NOT_SAME`.
+
+**Math and engineering.** The file's `math` track is the Library's `math` (its Math and physics path already gathered
+math, physics and chemistry). `engineering` is a new track (the nineteenth; family Electrical & embedded). Its rows
+are electrical, embedded and mechanical alike, so Engineering is one path that gathers `engineering`, `ee`,
+`embedded`, `controls` and `mech`: "Electrical and embedded" and "Mechanical" were two paths of the plan's later
+years and are now its one Engineering path, and an old `?path=ee` or `?path=me` opens it. Default priorities follow
+the file: math, physics and chemistry 2, the engineering tracks 4 ("the engineering years come after year 3").
+
+**Speed.** The Library's chunk grows to 377 kB gzipped; Today's seed is unchanged (180 kB). With some 4,600 entries
+to search, the first keystroke cost about half a second at a 4x CPU slowdown, mostly the home recomputing its paths
+and the browse-only paths' lists on every render. Now the home's paths, browse rows, Research count, shelf counts and
+line are worked out once per change to the curriculum or the user's progress, and search runs on a deferred query
+(`useDeferredValue`), which also decides when home turns into results, so a keystroke only waits for the field: the
+first about 0.3 s, the next ones 0.1 to 0.25 s, at 4x.
