@@ -1329,3 +1329,63 @@ that. Its report on the 490 links dated 2026-10-19 (both imports): 474 answered;
 open by hand); 4 failed, of which one is a 404 (`paper-dijkstra-1959`, a PDF on a TUM server) and three did not
 connect from the runner (DNS or timeout: `perfbook`, `stam-fluids-for-games`, `erickson-algorithms`, from the first
 import). Nothing was changed: a link is replaced only after someone opens it by hand.
+
+## The whole Atlas Library (pull request #20)
+
+ATLAS-LIBRARY: `atlas-resources.jsonl`, 2,408 rows, the two earlier imports and everything since, with three
+plan-alignment fields on every row. Library items stay out of the daily plan.
+
+**Upsert by id, then the old rules.** A row whose id the Library has (530 resources, 29 papers of the reading queue)
+is an update: the entry takes the new fields and whatever it lacks, never anything it has, and its id never changes,
+so the user's status, notes, progress and edits, all keyed by id, carry over untouched. Every other row is matched as
+before (normalised URL, now with arXiv abstract, PDF and HTML links of any version collapsed to the paper; then a
+title alike enough on the same shelf, never across different numbers or symbols, "Exercism C" and "C++"). 167
+merged (142 by URL, 21 by title, 4 by hand), 1,682 are new. Three title matches were read by hand and are different
+things, now listed in `NOT_SAME`: Microsoft's Orca and the Orca serving paper, Dasgupta-Papadimitriou-Vazirani's and
+Erickson's *Algorithms*, LangChain's and Anthropic's "Context Engineering". An entry with a "do first" in either form
+keeps it. Every merge and update is in `docs/imports-atlas-library.md`; the pull request lists the merges.
+
+**Fields and tracks.** `priority` (1 to 4), `roadmap` (the five roadmap.sh ids the Credentials view already knew) and
+`research` (inference, world-models, diffusion, genai) are optional on resources and on the queue's papers. `devops`
+is a new track (Software & systems family, slot 2); `simulation` already was one. The file's `inference` track stays
+AI with the `inference` tag, as before.
+
+**Paths.** A path names its tracks, may claim a tag, and may follow roadmaps. Inference engineering claims the
+`inference` tag (so the plan's GPU MODE, Triton and vLLM steps move to it from AI engineering) and follows the
+Inference Engineering roadmap; AI engineering follows AI Engineer and AI Agents; Software architecture follows Software
+Architect; Graphics (with game development) follows Game Developer. Simulation leaves Graphics for a path of its own,
+and DevOps is new. A roadmap path opens with roadmap.sh's official page (a row of the file, opened in the sheet), and an
+item serving the path's roadmap joins its optional list whatever its track. The optional list shows forty at a time
+with "Show 40 more": AI engineering offers hundreds. **Research** is a view of its own (`?path=research`, a row under
+Your paths): the four areas, papers first, years 1 and 2 before year 3, twelve each with "Show all".
+
+**Order.** Priority, then year, then level, everywhere a list has no better order. Shelves: in progress first, then by
+fit, done and dropped last (Projects keep their own order, the plan's first and then the catalogue). Search: relevance
+first, then that order, because the list it searches is kept in it. Up next: when the plan reaches a step first,
+then by fit, because "next" means soonest. An item the file gave no priority (the original resources, the queue's
+other papers) takes its track's: AI 1; software, systems, architecture, languages, DevOps 2; graphics, simulation,
+robotics, and the rest 3; game development 4. A planned item fits the year of its phase.
+
+**Chips.** Level (Beginner, Intermediate, Advanced) and Roadmap (a picker) on every shelf but Projects and on search,
+in the URL as `lvl` and `roadmap`. They narrow; they do not turn a search into a shelf.
+
+**Speed.** The seed would have grown to 445 kB gzipped (1.9 MB), all of it before Today. Now the resources only the
+Library shows (2,222: not on the plan or named by a certification, no checklist, no roadmap.sh node, no subject, and
+not a prerequisite, alternative or soft prerequisite of one that is) are their own chunk, `virtual:atlas-library`
+(266 kB gzipped), asked for right after the first render and precached by the service worker. Today's seed chunk is
+179 kB gzipped, smaller than before pull request #18. `useAtlas` adds the chunk to the curriculum when it arrives; a
+plan edit that names a resource outside the core makes the plan wait for it rather than resolve without it, and the
+Library screen waits for it too. At a 4x CPU slowdown on a 390 px phone: Today 1.25 s to its heading, the Papers shelf
+(864 rows, windowed) 1.2 s, a keystroke in search 120 to 250 ms.
+
+**Write log entry.** The daily blog flow existed (DAILY-BLOG), so a resource's sheet opens it at `/blog?ref=<id>`,
+and the outline starts with a section for that resource: its title and track, its link, "What I learned" and
+"Stuck on".
+
+**Links.** As in pull request #19, a one-off CI job ran `check:links --checked 2026-10-19` (every row of the file is
+dated that day) once and was removed before the merge; the pull request carries the report. Of 2,173 links, 2,090
+answered and 49 turned the checker away (401, 403, 429: to open by hand). 34 failed: 17 answered 404 or 410 (the page
+is gone or moved, among them `paper-kung-why-systolic`, `article-kreps-the-log`, `paper-apic`, `paper-dijkstra-1959`),
+and 17 did not answer the runner properly (a certificate it could not verify, a redirect loop, a timeout, a refused
+connection, a 400 and a 522), which a browser often gets past. Nothing was changed: a link is replaced only after
+someone opens it by hand and finds the page.

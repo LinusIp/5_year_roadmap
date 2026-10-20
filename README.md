@@ -188,19 +188,24 @@ The Library opens on what matters now, not on all of it:
 - **In progress**: what is started (at most six cards), each with how far it is ("Module 6 of 10") and a menu to
   Pause (back to not started; its progress stays) or Mark done. A long press on a card opens the same menu.
 - **Your paths**: the plan's courses and books in plan order, one path per group of tracks (AI engineering,
-  Languages, Graphics, Math and physics, Systems; Electrical and embedded, Mechanical and Robotics wait under
-  "Later in the plan" until they come within a year). Each shows a subway line of at most eight stops and "+N", and
-  its next step. A path opens on its own page, grouped by phase, its current step marked; alternatives, the
-  Library's other resources of its tracks (by the year of the plan they fit from) and the papers of its tracks wait
-  under "Optional for this path". Software architecture has nothing on the plan yet: it is listed as "Not on the plan
-  · N to browse" and opens on that list.
-- **Up next**: the three nearest steps not started, across every path.
+  Inference engineering, Languages, Graphics, Simulation, Math and physics, Systems; Electrical and embedded,
+  Mechanical and Robotics wait under "Later in the plan" until they come within a year). Each shows a subway line of
+  at most eight stops and "+N", and its next step. A path opens on its own page, grouped by phase, its current step
+  marked; a path that follows roadmap.sh roadmaps (AI engineering, Inference engineering, Software architecture,
+  Graphics) opens with their official pages. Alternatives, the Library's other resources of its tracks and roadmaps
+  and the papers of its tracks wait under "Optional for this path", forty at a time. Software architecture and DevOps
+  have nothing on the plan yet: they are listed as "Not on the plan · N to browse" and open on that list. **Research**
+  lists year 3's reading by area (Inference, World models, Diffusion, Generative AI), papers first, the foundations
+  before the frontier.
+- **Up next**: the three nearest steps not started, across every path; steps the plan reaches together go by priority.
 - **Browse when you need something**: shelves for Courses, Books, Papers, Articles, Blogs to follow, Tools,
   Practice (exercises, puzzles and problem sets) and Projects, with their real counts. A shelf is the full list
   (windowed, so a few hundred rows stay quick on a phone) with search and the Active, Not started, Done and Track
-  filters, and it is where you add a resource of your own. Papers, the reading queue and the papers of the imports
-  together, read in the plan's years (year 1's foundations first) and filter by level: Beginner, Intermediate,
-  Advanced.
+  filters, and it is where you add a resource of your own. Every shelf but Projects, and search, also filter by Level
+  (Beginner, Intermediate, Advanced) and by roadmap.sh Roadmap, and every list reads in the plan's order: priority
+  for years 1 to 3 (1 inference and the AI feeding it, 2 architecture, systems, languages and DevOps, 3 graphics,
+  simulation and robotics, 4 game development), then the year it fits, then level. A resource's sheet says how it fits
+  the plan and has **Write log entry**, which opens the day's blog post with the outline started on that resource.
 
 Searching shows the matches grouped by shelf, three of each, with "Show all" to open that shelf on the same search.
 Every planned resource has a short title (28 characters at most, checked by `npm run validate:data`) so cards and
@@ -213,12 +218,17 @@ sites to reach for when you need them (RESOURCES-ADD). They are not in any lane:
 A second set, `data/resources/library-more.yaml` (MORE-RESOURCES), adds close to four hundred papers, blogs,
 articles, books, courses, docs and practice across AI, inference, systems, software architecture (a track of its own)
 and robotics; papers the reading queue already had took only their missing fields (a short name, why, a level, a year).
+The whole Atlas Library (ATLAS-LIBRARY) came next: 2,408 rows upserted by id, 1,682 of them new, in
+`data/resources/library-atlas.yaml`, each with its priority, its roadmap.sh roadmap and its year 3 research area
+(`docs/imports-atlas-library.md` lists every merge and update). About 2,200 resources only ever appear in the Library;
+they ride in a chunk of their own that loads right after the first screen, so Today starts as fast as before.
 A weekly job (`.github/workflows/links.yml`) runs `npm run check:links` and reports; it never edits the data.
 `npm run check:links -- --checked 2026-10-19` checks only the links an import dated that day.
 
 <p>
   <img src="screenshots/library-home-full-light.png" alt="The Library home in full: in progress, the paths, up next, and the shelves with their counts and the Practice tile" width="24%">
-  <img src="screenshots/library-papers-light.png" alt="The Papers shelf on a phone: year 1 first, the level chips" width="24%">
+  <img src="screenshots/library-papers-light.png" alt="The Papers shelf on a phone: in the plan's order, the level and roadmap chips" width="24%">
+  <img src="screenshots/library-research-light.png" alt="Research: year 3's reading by area, papers first" width="24%">
   <img src="screenshots/library-path-light.png" alt="A path: AI engineering's steps grouped by phase, the current one highlighted" width="32%">
   <img src="screenshots/library-shelf-light.png" alt="The Courses shelf filtered to Active" width="32%">
   <img src="screenshots/library-search-dark.png" alt="Search results grouped by shelf, three of each, with Show all" width="32%">

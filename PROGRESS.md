@@ -1051,3 +1051,20 @@ Verified on this machine (Linux, Chromium 140):
   first, Attention Is All You Need, the level chips, its link), search for FlashAttention, Raft and Diffusion Policy,
   the Software architecture and Robotics paths, a blog's sheet and link. Baselines: the Papers shelf, the Library
   home, and the Library screens whose counts changed.
+
+## Pull request #20: the whole Atlas Library
+
+- `data/resources/library-atlas.yaml`: 1,682 new resources (605 papers, 608 articles of which docs and tutorials,
+  264 practice, 96 courses, 55 books, 54 blogs). 559 rows updated entries by id and 167 merged into entries under
+  another id, filling only what they lacked (`docs/imports-atlas-library.md`). Resources: 806 to 2,488.
+- Schema: `priority`, `roadmap` and `research` on resources and papers; the `devops` track. The converter: arXiv links
+  collapsed, symbols in titles, `NOT_SAME`, upsert by id (`scratch/import-atlas.ts`).
+- The Library's long tail in its own chunk (`splitLibrary`, `virtual:atlas-library`, `loadLibrary`, `useLibrary`).
+- Library: Inference engineering, Simulation and DevOps paths; roadmap.sh pages at the head of roadmap paths; the
+  optional list forty at a time; the Research view; priority, year and level order on shelves, search, Up next and
+  optional lists; Level and Roadmap chips on shelves and search; the fit line and Write log entry on a sheet.
+- Tests: mapping to shelves and tracks, arXiv collapsing, symbol titles, the upsert keeping user progress, the sort
+  order, the new paths and research areas, the outline's resource section, the core-and-Library split;
+  `tests/e2e/atlas-library.spec.ts`: Papers by level, search for FlashAttention, Raft, Diffusion Policy and Dreamer
+  with the Roadmap chip, the Research view, Inference engineering's roadmap.sh page, DevOps and Simulation, a blog's
+  sheet and Write log entry, priority order. Baselines: the Library home, the Papers shelf, the Research view.

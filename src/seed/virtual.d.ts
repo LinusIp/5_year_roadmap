@@ -14,6 +14,12 @@ declare module 'virtual:atlas-units' {
   export default units;
 }
 
+declare module 'virtual:atlas-library' {
+  /** The resources only the Library shows (ATLAS-LIBRARY), loaded right after the first screen. */
+  const resources: import('./schema.ts').AppResource[];
+  export default resources;
+}
+
 declare module 'virtual:atlas-docs' {
   /** Each project's tech doc, as Markdown, by project id. Loaded with a project's sheet. */
   const docs: Record<string, string>;

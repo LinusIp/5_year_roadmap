@@ -3,18 +3,18 @@ import { loadSeedOrThrow } from '../../scripts/lib/load-seed.ts';
 import { splitSeed } from '../../scripts/lib/vite-plugin-seed.ts';
 import type { AppSeed } from '../../src/seed/schema.ts';
 import type { UserItemState } from '../../src/db/types.ts';
-import { buildPaths, groupResults, inProgress, pathDots, pathExtras, pathOfTrack, planInOrder, shelfCounts, shelfOf, startsMuchLater, upNext } from '../../src/lib/library-home.ts';
+import { buildPaths, byFit, fitOf, groupResults, inProgress, pathDots, pathExtras, pathOf, pathOfTrack, planInOrder, priorityOf, researchAreas, roadmapPage, shelfCounts, shelfOf, startsMuchLater, upNext } from '../../src/lib/library-home.ts';
 import type { PathStep } from '../../src/lib/library-home.ts';
 
 const seed = splitSeed(loadSeedOrThrow()).app as AppSeed;
 const state = (refId: string, status: UserItemState['status'], startedAt?: string): [string, UserItemState] => [refId, { refId, status, unitsDone: [], ...(startedAt ? { startedAt } : {}) } as UserItemState];
 const steps = (n: number, done: number): PathStep[] =>
-  Array.from({ length: n }, (_, i) => ({ refId: 'r' + i, kind: 'resource', title: 'R' + i, status: i < done ? 'done' : 'todo', phaseId: 'p', block: 'A', hours: 1, type: 'course' }));
+  Array.from({ length: n }, (_, i) => ({ refId: 'r' + i, kind: 'resource', title: 'R' + i, status: i < done ? 'done' : 'todo', phaseId: 'p', block: 'A', hours: 1, type: 'course', fit: { priority: 1 } }));
 
 describe('the paths', () => {
   it('gather the plan’s resources by their tracks, in plan order, without projects', () => {
     const paths = buildPaths(seed, new Map());
-    expect(paths.map((p) => p.id).slice(0, 5)).toEqual(['ai', 'languages', 'graphics', 'math', 'systems']);
+    expect(paths.map((p) => p.id).slice(0, 5)).toEqual(['ai', 'inference', 'languages', 'graphics', 'simulation']);
     expect(paths.every((p) => p.steps.every((s) => s.kind === 'resource'))).toBe(true);
     const ai = paths.find((p) => p.id === 'ai')!;
     expect(ai.steps[0]!.refId).toBe('ml-zoomcamp');
@@ -51,12 +51,11 @@ describe('Software architecture and Robotics (MORE-RESOURCES)', () => {
     expect(pathOfTrack({ tracks: [...seed.tracks, { id: 'my-llm', name: 'Mine', family: 'AI & ML', slot: 1, summary: 'x' }] }, 'my-llm')?.id).toBe('ai');
   });
 
-  it('offer the Library’s resources of their tracks, off the plan, by the year they fit from', () => {
+  it('offer the Library’s resources of their tracks or roadmaps, off the plan', () => {
     for (const id of ['architecture', 'robotics']) {
       const extras = pathExtras(seed, new Map(), id);
       expect(extras.length, id).toBeGreaterThan(20);
-      expect(extras.every((r) => pathOfTrack(seed, r.tracks[0]!)?.id === id)).toBe(true);
-      expect(extras.map((r) => r.fromYear)).toEqual([...extras.map((r) => r.fromYear)].sort());
+      expect(extras.every((r) => pathOfTrack(seed, r.tracks[0]!)?.id === id || r.roadmap === 'software-architect')).toBe(true);
     }
     const onPlan = new Set(seed.plan.map((i) => i.resourceId));
     expect(pathExtras(seed, new Map(), 'ai').some((r) => onPlan.has(r.id))).toBe(false);
@@ -66,6 +65,78 @@ describe('Software architecture and Robotics (MORE-RESOURCES)', () => {
 
   it('architecture has nothing on the plan yet, so it is not among the plan’s paths', () => {
     expect(buildPaths(seed, new Map()).some((p) => p.id === 'architecture')).toBe(false);
+  });
+});
+
+describe('the plan\'s order (ATLAS-LIBRARY)', () => {
+  it('sorts by priority, then year (none last), then level (beginner first)', () => {
+    const items = [
+      { id: 'p2', priority: 2, year: 1, level: 'intro' },
+      { id: 'p1-y3', priority: 1, year: 3, level: 'intro' },
+      { id: 'p1-y1-adv', priority: 1, year: 1, level: 'advanced' },
+      { id: 'p1-y1-beg', priority: 1, year: 1, level: 'intro' },
+      { id: 'p1-none', priority: 1 },
+      { id: 'p1-y1-mid', priority: 1, year: 1, level: 'intermediate' },
+    ];
+    expect([...items].sort(byFit).map((i) => i.id)).toEqual(['p1-y1-beg', 'p1-y1-mid', 'p1-y1-adv', 'p1-y3', 'p1-none', 'p2']);
+  });
+
+  it('gives an item without a priority its track\'s: AI 1, systems and architecture 2, graphics 3, game development 4', () => {
+    expect(priorityOf({ tracks: ['ai'] })).toBe(1);
+    expect(priorityOf({ tracks: ['architecture'] })).toBe(2);
+    expect(priorityOf({ tracks: ['devops'] })).toBe(2);
+    expect(priorityOf({ tracks: ['graphics'] })).toBe(3);
+    expect(priorityOf({ tracks: ['gamedev'] })).toBe(4);
+    expect(priorityOf({ priority: 1, tracks: ['gamedev'] })).toBe(1);
+  });
+
+  it('orders every path\'s optional list by fit', () => {
+    for (const id of ['ai', 'inference', 'architecture', 'devops', 'simulation', 'robotics', 'graphics']) {
+      const extras = pathExtras(seed, new Map(), id).map(fitOf);
+      expect(extras.length, id).toBeGreaterThan(10);
+      for (let i = 1; i < extras.length; i++) expect(byFit(extras[i - 1]!, extras[i]!), id + ' at ' + i).toBeLessThanOrEqual(0);
+    }
+  });
+
+  it('orders Up next by when the plan reaches it, then by fit', () => {
+    const next = upNext(buildPaths(seed, new Map()), seed, 10);
+    const start = new Map(seed.phases.map((p) => [p.id, p.start]));
+    for (let i = 1; i < next.length; i++) {
+      const [a, b] = [next[i - 1]!, next[i]!];
+      expect((start.get(a.step.phaseId) ?? '') <= (start.get(b.step.phaseId) ?? '')).toBe(true);
+      if (a.start === b.start) expect(byFit(a.step.fit, b.step.fit)).toBeLessThanOrEqual(0);
+    }
+  });
+});
+
+describe('Inference engineering, DevOps, Simulation and Research (ATLAS-LIBRARY)', () => {
+  it('files an inference-tagged resource under Inference engineering, DevOps and Simulation under their own', () => {
+    expect(pathOf(seed, { tracks: ['ai'], tags: ['inference'] })?.id).toBe('inference');
+    expect(pathOf(seed, { tracks: ['ai'] })?.id).toBe('ai');
+    expect(pathOfTrack(seed, 'devops')?.id).toBe('devops');
+    expect(pathOfTrack(seed, 'simulation')?.id).toBe('simulation');
+    expect(pathOfTrack(seed, 'gamedev')?.id).toBe('graphics');
+  });
+
+  it('heads the roadmap paths with roadmap.sh\'s official pages, and keeps them out of the optional list', () => {
+    for (const id of ['inference-engineering', 'ai-engineer', 'ai-agents', 'software-architect', 'game-developer'] as const) {
+      expect(roadmapPage(seed, id)?.url, id).toBe('https://roadmap.sh/' + id);
+    }
+    expect(pathExtras(seed, new Map(), 'inference').some((r) => r.url === 'https://roadmap.sh/inference-engineering')).toBe(false);
+    // An item serving the path's roadmap joins it, whatever its track.
+    expect(pathExtras(seed, new Map(), 'architecture').every((r) => pathOf(seed, r)?.id === 'architecture' || r.roadmap === 'software-architect')).toBe(true);
+  });
+
+  it('groups the research areas in order, papers first, the foundations before the frontier', () => {
+    const areas = researchAreas(seed, new Map());
+    expect(areas.map((a) => a.name)).toEqual(['Inference', 'World models', 'Diffusion', 'Generative AI']);
+    for (const area of areas) {
+      expect(area.items.length, area.name).toBeGreaterThan(10);
+      const papers = area.items.filter((r) => r.type === 'paper');
+      expect(area.items.slice(0, papers.length).every((r) => r.type === 'paper'), area.name).toBe(true);
+      const frontier = papers.findIndex((r) => (r.fromYear ?? 3) >= 3);
+      if (frontier >= 0) expect(papers.slice(frontier).every((r) => (r.fromYear ?? 3) >= 3), area.name).toBe(true);
+    }
   });
 });
 

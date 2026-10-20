@@ -203,9 +203,19 @@ for (const theme of ['light', 'dark'] as const) {
     await page.setViewportSize({ width: 390, height: 844 });
     await importDemo(page, theme);
     await open(page, './#/library?type=paper');
-    await expect(page.getByRole('group', { name: 'Level' })).toBeVisible();
+    await expect(page.getByRole('group', { name: 'Level and roadmap' })).toBeVisible();
     await expect(page.locator('main ul.rows > *').nth(1)).toContainText('Year 1');
     await expect(page).toHaveScreenshot('library-papers-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+  });
+}
+
+for (const theme of ['light', 'dark'] as const) {
+  test('the Research view on a phone, by area, papers first, matches the committed screenshot, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await importDemo(page, theme);
+    await open(page, './#/library?path=research');
+    await expect(page.getByRole('heading', { name: /^Generative AI · \d+$/ })).toBeVisible();
+    await expect(page).toHaveScreenshot('library-research-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
   });
 }
 

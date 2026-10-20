@@ -30,6 +30,8 @@
   prerequisites: [mit-6-1810]
   subject: system-design
   summary: "The units are the labs: MapReduce, key/value server, Raft, KV Raft, sharded KV. The labs are in Go: do A Tour of Go (10 h, block B) first. Most of the systems papers in the reading queue are assigned here."
+  priority: 2
+  roadmap: "software-architect"
 
 - id: system-design-primer
   title: "The System Design Primer (donnemartin)"
@@ -46,6 +48,8 @@
   subject: system-design
   summary: "Free guide to scalability concepts plus worked system design interview exercises with solutions."
   after: [ddia]
+  priority: 2
+  roadmap: "software-architect"
 
 - id: kleppmann-distributed-systems
   title: "Martin Kleppmann: Distributed Systems lecture series (Cambridge, Concurrent and Distributed Systems)"
@@ -63,6 +67,8 @@
   short: "Kleppmann Dist. Systems"
   fromYear: 2
   after: [ddia]
+  priority: 2
+  roadmap: "software-architect"
 
 - id: bytebytego
   title: "ByteByteGo / System Design Interview, volumes 1 and 2 (Alex Xu)"
@@ -95,6 +101,8 @@
   summary: "How large systems are operated: SLOs, monitoring, on-call, incident response and release engineering."
   fromYear: 3
   after: [ddia]
+  priority: 2
+  roadmap: "software-architect"
 
 - id: docker-get-started
   title: "Docker: official getting-started guides"
@@ -109,6 +117,9 @@
   cost: free
   estHours: 10
   subject: containers-iac
+  summary: "The official walkthrough of images, containers, Dockerfiles and Compose, which is the base for packaging any model server."
+  priority: 2
+  roadmap: "software-architect"
 
 - id: kubernetes-tutorials
   title: "Kubernetes: official tutorials"
@@ -139,6 +150,9 @@
   estHours: 15
   prerequisites: [kubernetes-tutorials]
   subject: containers-iac
+  summary: "Bootstrapping every cluster component by hand shows you what managed Kubernetes hides: certs, etcd, kubelet, networking."
+  priority: 2
+  roadmap: "software-architect"
 
 - id: aws-skill-builder
   title: "AWS Skill Builder (free digital training; the prep for the AWS certifications)"
@@ -170,6 +184,10 @@
   summary: "Not on the roadmap by default; it is the certificate of the data engineering row and pairs with project 28."
 
 # ---------------------------------------------------------------- the DevOps block of year 2 (added 2026-10-07)
+  short: "DE Zoomcamp"
+  fromYear: 2
+  priority: 2
+  roadmap: "ai-engineer"
 
 - id: lfs101-intro-linux
   title: "Introduction to Linux (LFS101), Linux Foundation"
@@ -186,6 +204,7 @@
   subject: linux-os
   summary: "The Linux Foundation's free introduction (60 hours of material by its own count), the groundwork for the LFCS exam."
   doFirst: "Missing Semester"
+  priority: 2
 
 - id: github-actions-docs
   title: "GitHub Actions: official documentation and quickstart (CI/CD)"
@@ -201,6 +220,8 @@
   estHours: 10
   subject: containers-iac
   summary: "Continuous integration and delivery: build, test and deploy on every push, as this app's own repository does."
+  priority: 2
+  roadmap: "ai-engineer"
 
 - id: terraform-tutorials
   title: "Terraform: official tutorials"
@@ -216,6 +237,8 @@
   estHours: 20
   subject: containers-iac
   summary: "Infrastructure as code: the Get Started collections (AWS, Docker and others), then the configuration language, modules and state. Leads to the Terraform Associate exam."
+  priority: 2
+  roadmap: "software-architect"
 
 - id: opentelemetry-docs
   title: "OpenTelemetry: official documentation"
@@ -231,6 +254,9 @@
   estHours: 15
   subject: containers-iac
   summary: "The vendor-neutral standard for traces, metrics and logs: instrument a service and see where its time goes."
+  after: [prometheus-docs]
+  priority: 2
+  roadmap: "software-architect"
 
 - id: prometheus-docs
   title: "Prometheus: official documentation and getting-started guide"
@@ -246,3 +272,5 @@
   estHours: 10
   subject: containers-iac
   summary: "Metrics and alerting for the services you run: the monitoring half of observability."
+  priority: 2
+  roadmap: "software-architect"

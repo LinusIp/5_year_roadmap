@@ -1,7 +1,7 @@
 /**
- * Importing a list of resources into the Library (RESOURCES-ADD, MORE-RESOURCES): the mapping from the import file's
- * fields to the resource schema, and the rules that find an entry the Library already has. Pure; the one-off runners
- * in scratch/ use it.
+ * Importing a list of resources into the Library (RESOURCES-ADD, MORE-RESOURCES, ATLAS-LIBRARY): the mapping from the
+ * import file's fields to the resource schema, and the rules that find an entry the Library already has. Pure; the
+ * one-off runners in scratch/ use it.
  */
 
 /** One line of new-resources.jsonl. */
@@ -10,7 +10,7 @@ export interface ImportItem {
   title: string;
   short: string;
   type: 'video-course' | 'course' | 'book' | 'docs' | 'tutorial' | 'practice' | 'paper' | 'blog' | 'article';
-  track: 'ai' | 'inference' | 'graphics' | 'gamedev' | 'systems' | 'languages' | 'architecture' | 'robotics';
+  track: 'ai' | 'inference' | 'graphics' | 'gamedev' | 'systems' | 'languages' | 'architecture' | 'robotics' | 'devops' | 'simulation';
   level: 'beginner' | 'intermediate' | 'advanced';
   hours: number;
   provider: string;
@@ -21,6 +21,13 @@ export interface ImportItem {
   after: string;
   year: 1 | 2 | 3;
   verified: string;
+  /** ATLAS-LIBRARY's plan alignment: 1 inference and the AI feeding it, 2 architecture and systems, 3 graphics,
+   * simulation and robotics, 4 game development. */
+  priority?: 1 | 2 | 3 | 4;
+  /** The roadmap.sh roadmap it serves, or "". */
+  roadmap?: '' | 'inference-engineering' | 'ai-engineer' | 'ai-agents' | 'software-architect' | 'game-developer';
+  /** The year 3 research area, or "". */
+  research?: '' | 'inference' | 'world-models' | 'diffusion' | 'genai';
 }
 
 /** What the Library already has, for the matching. */
@@ -70,16 +77,22 @@ export const TRACK_OF = {
   languages: 'languages',
   architecture: 'architecture',
   robotics: 'robotics',
+  devops: 'devops',
+  simulation: 'simulation',
 } as const;
 export const LEVEL_OF = { beginner: 'intro', intermediate: 'intermediate', advanced: 'advanced' } as const;
 
-/** A URL as the matching compares it: lowercase, no scheme, no `www.`, no trailing slash. */
+/**
+ * A URL as the matching compares it: lowercase, no scheme, no `www.`, no trailing slash, and an arXiv paper by its id
+ * alone (its abstract, PDF and HTML pages, any version, are one paper).
+ */
 export function normaliseUrl(url: string): string {
   return url
     .trim()
     .toLowerCase()
     .replace(/^https?:\/\//, '')
     .replace(/^www\./, '')
+    .replace(/^(?:export\.)?arxiv\.org\/(?:abs|pdf|html)\/([a-z-]+\/\d{7}|\d{4}\.\d{4,5})(?:v\d+)?(?:\.pdf)?\/?$/, 'arxiv.org/abs/$1')
     .replace(/\/+$/, '');
 }
 
@@ -105,8 +118,9 @@ export function titleLikeness(a: string, b: string): number {
   const x = titleWords(a);
   const y = titleWords(b);
   if (x.size === 0 || y.size === 0) return 0;
-  const numbers = (words: Set<string>): string => [...words].filter((w) => /^\d+$/.test(w)).sort().join(' ');
-  if (numbers(x) !== numbers(y)) return 0;
+  // Numbers and symbols name different things: GPU Gems 2 and 3, the Exercism C and C++ tracks.
+  const marked = (words: Set<string>): string => [...words].filter((w) => /^\d+$/.test(w) || /[+#]/.test(w)).sort().join(' ');
+  if (marked(x) !== marked(y)) return 0;
   let both = 0;
   for (const w of x) if (y.has(w)) both++;
   return both / (x.size + y.size - both);
@@ -131,6 +145,17 @@ export const SAME_AS: Readonly<Record<string, string>> = {
 };
 
 /**
+ * Pairs whose titles are alike but which were read by hand and are different things (the import's id to the
+ * Library's): Microsoft's Orca (learning from GPT-4) is not the Orca serving paper, Dasgupta, Papadimitriou and
+ * Vazirani's Algorithms is not Erickson's, LangChain's "Context Engineering" is not Anthropic's.
+ */
+export const NOT_SAME: Readonly<Record<string, string>> = {
+  'paper-orca': 'orca',
+  'dpv-algorithms': 'erickson-algorithms',
+  'article-langchain-context-engineering': 'article-anthropic-context-engineering',
+};
+
+/**
  * The entry the Library already has for an item: the same URL; the same id (the Library's own name for it); a pair
  * listed in SAME_AS; or a title (or short title) alike enough on the same shelf, so a paper and a post of one title
  * both stay.
@@ -147,6 +172,7 @@ export function findExisting(item: Pick<ImportItem, 'id' | 'url' | 'title' | 'sh
   const shelf = item.type ? SHELF_OF[item.type] : undefined;
   for (const e of existing) {
     if (shelf && e.shelf && e.shelf !== shelf) continue;
+    if (NOT_SAME[item.id] === e.id) continue;
     const score = Math.max(titleLikeness(item.title, e.title), e.short ? titleLikeness(item.short, e.short) : 0, e.short ? titleLikeness(item.title, e.short) : 0);
     if (score >= SAME_TITLE && (!best || score > best.score)) best = { entry: e, score };
   }
@@ -178,6 +204,9 @@ export function toResource(item: ImportItem, afterId: string | null): Record<str
     summary: item.why,
     fromYear: item.year,
   };
+  if (item.priority) out.priority = item.priority;
+  if (item.roadmap) out.roadmap = item.roadmap;
+  if (item.research) out.research = item.research;
   if (item.type === 'blog') out.blog = true;
   if (item.track === 'inference') out.tags = ['inference'];
   if (item.note === 'free tier') out.note = 'Free tier';
@@ -187,7 +216,7 @@ export function toResource(item: ImportItem, afterId: string | null): Record<str
 }
 
 /** The fields a paper in the reading queue (papers.yaml) takes from a matching item, when it lacks them. */
-export const PAPER_FILLS = ['short', 'summary', 'level', 'fromYear'] as const;
+export const PAPER_FILLS = ['short', 'summary', 'level', 'fromYear', 'priority', 'roadmap', 'research'] as const;
 
 /** What a queue paper takes from a matching item: the fields it is missing, and the item's link when it has none. */
 export function fillPaper(paper: Record<string, unknown>, item: ImportItem): Record<string, unknown> {
@@ -209,10 +238,12 @@ export function fillPaper(paper: Record<string, unknown>, item: ImportItem): Rec
 export function fillMissing(entry: Record<string, unknown>, item: ImportItem, afterId: string | null, planned: boolean): Record<string, unknown> {
   const from = toResource(item, afterId);
   const add: Record<string, unknown> = {};
-  const keys = ['short', 'summary', 'fromYear', 'tags', 'note', 'after', 'doFirst'] as const;
+  const keys = ['short', 'summary', 'fromYear', 'tags', 'note', 'after', 'doFirst', 'priority', 'roadmap', 'research'] as const;
   for (const key of keys) {
     if (planned && (key === 'short' || key === 'fromYear')) continue;
     if ((key === 'after' || key === 'doFirst') && ((entry.prerequisites as unknown[] | undefined)?.length ?? 0) > 0) continue;
+    // One way of saying what comes first: an entry with either keeps it.
+    if ((key === 'after' || key === 'doFirst') && (entry.after !== undefined || entry.doFirst !== undefined)) continue;
     if (key === 'after' && from.after && (from.after as string[]).includes(String(entry.id))) continue;
     if (entry[key] === undefined && from[key] !== undefined) add[key] = from[key];
   }

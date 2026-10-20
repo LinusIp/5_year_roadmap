@@ -14,6 +14,9 @@
   estHours: 0
   reference: true
   summary: "Meta-roadmap: nine subjects, one book and one lecture series each."
+  short: "Teach Yourself CS"
+  fromYear: 1
+  priority: 2
 
 - id: ossu-computer-science
   title: "OSSU Computer Science"
@@ -28,6 +31,9 @@
   estHours: 0
   reference: true
   summary: "Meta-roadmap: a free self-taught CS degree."
+  short: "OSSU CS"
+  fromYear: 1
+  priority: 2
 
 - id: roadmap-sh-backend
   title: "roadmap.sh: Backend Developer roadmap"
@@ -41,6 +47,11 @@
   cost: free
   estHours: 0
   reference: true
+  short: "Backend Roadmap"
+  summary: "Maps APIs, databases, caching and deployment skills needed to put any model or service online."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
 
 - id: roadmap-sh-devops
   title: "roadmap.sh: DevOps roadmap"
@@ -54,6 +65,11 @@
   cost: free
   estHours: 0
   reference: true
+  short: "DevOps Roadmap"
+  summary: "A map of what to learn in DevOps and in what order, useful for spotting gaps and planning the track."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
 
 - id: roadmap-sh-system-design
   title: "roadmap.sh: System Design roadmap"
@@ -67,6 +83,11 @@
   cost: free
   estHours: 0
   reference: true
+  short: "System Design Roadmap"
+  summary: "A topic checklist for caches, queues, load balancers and scaling patterns to pair with system design reading."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
 
 - id: roadmap-sh-ai-engineer
   title: "roadmap.sh: AI Engineer roadmap"
@@ -109,6 +130,8 @@
   summary: "Every category has a project card in the pool, linked to its section of this list."
   short: "Build Your Own X"
   fromYear: 2
+  priority: 3
+  roadmap: "game-developer"
 
 - id: project-based-learning
   title: "practical-tutorials/project-based-learning"
@@ -190,6 +213,7 @@
   summary: "One day's puzzle in the language of the month is a standing weekly mini-build."
   short: "Advent of Code"
   fromYear: 1
+  priority: 2
 
 - id: gamedevhq
   title: "GameDevHQ: Unity game development course"

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Atlas } from '../../hooks/useAtlas.ts';
-import { buildPaths, pathExtras, pathOfTrack, PATHS, SHELVES, shelfOf } from '../../lib/library-home.ts';
+import { buildPaths, byFit, fitOf, pathExtras, pathOfTrack, PATHS, roadmapPage, SHELVES, shelfOf } from '../../lib/library-home.ts';
 import { Button } from '../../ui/Button.tsx';
 import { Header } from '../../ui/Header.tsx';
 import { Icon } from '../../ui/Icon.tsx';
@@ -11,6 +11,9 @@ import { SHELF_ICON } from './Home.tsx';
 
 /** A shelf's name for one item: "Book", "Practice". */
 const SHELF_LABEL = Object.fromEntries(SHELVES.map((s) => [s.key, s.key === 'practice' ? 'Practice' : s.label.replace(/s$/, '')]));
+
+/** How many optional rows show at a time: a path can offer hundreds (ATLAS-LIBRARY). */
+const PAGE = 40;
 
 const STATUS_LABEL = { todo: '', active: 'Active', done: 'Done', dropped: 'Dropped' } as const;
 
@@ -25,15 +28,17 @@ function StepDot({ state }: { state: 'done' | 'current' | 'later' }) {
 
 /**
  * One path: every step in plan order, grouped by phase, with its dot, kind, hours and status; the current step is
- * highlighted. Alternatives to its steps, the Library's other resources of its tracks (RESOURCES-ADD, by the year they
- * fit from) and the papers of its tracks wait, folded, under "Optional for this path". A path with nothing on the plan
- * (Software architecture) is that list alone, open.
+ * highlighted. A path that follows roadmap.sh roadmaps opens with their official pages (ATLAS-LIBRARY). Alternatives to
+ * its steps, then the Library's other resources of its tracks and roadmaps and the papers of its tracks, by priority,
+ * year and level, wait, folded, under "Optional for this path", forty at a time. A path with nothing on the plan
+ * (Inference engineering, Software architecture, DevOps) is that list alone, open.
  */
 export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas; pathId: string; onOpen: (refId: string) => void; onOpenPaper: (id: string) => void }) {
   const { seed, states } = atlas;
   const def = PATHS.find((p) => p.id === pathId);
   const path = buildPaths(seed, states).find((p) => p.id === pathId) ?? (def ? { ...def, steps: [], current: -1, done: 0 } : undefined);
   const [extras, setExtras] = useState(path?.steps.length === 0);
+  const [shownCount, setShownCount] = useState(PAGE);
   if (!path || !def) {
     return <Header title="Library" back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />} sub="This path has no steps." />;
   }
@@ -44,9 +49,16 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
     .map((id) => seed.resources.find((r) => r.id === id))
     .filter((r) => r !== undefined);
   const shown = new Set(alternatives.map((r) => r.id));
-  const library = pathExtras(seed, states, pathId).filter((r) => !shown.has(r.id));
-  const papers = seed.papers.filter((p) => p.tracks.some((t) => pathOfTrack(seed, t)?.id === pathId));
-  const optional = alternatives.length + library.length + papers.length;
+  const pages = (def.roadmaps ?? []).map((id) => roadmapPage(seed, id)).filter((r) => r !== undefined);
+  // The Library's resources and the reading queue's papers in one list, by fit.
+  const more = [
+    ...pathExtras(seed, states, pathId)
+      .filter((r) => !shown.has(r.id))
+      .map((r) => ({ kind: 'resource' as const, item: r })),
+    ...seed.papers.filter((p) => p.tracks.some((t) => pathOfTrack(seed, t)?.id === pathId)).map((p) => ({ kind: 'paper' as const, item: p })),
+  ].sort((a, b) => byFit(fitOf(a.item), fitOf(b.item)) || (a.item.short ?? a.item.title).localeCompare(b.item.short ?? b.item.title));
+  const optional = alternatives.length + more.length;
+  const visible = more.slice(0, Math.max(0, shownCount - alternatives.length));
 
   return (
     <>
@@ -55,6 +67,13 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
         sub={path.steps.length > 0 ? plural(path.steps.length, 'step') + ' · ' + path.done + ' done' : 'Not on the plan · ' + optional + ' to browse'}
         back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />}
       />
+      {pages.length > 0 && (
+        <RowList label="roadmap.sh" className="mt-[18px]">
+          {pages.map((r) => (
+            <Row key={r.id} icon={<IconTile icon="map" />} title={r.short ?? r.title} meta="The official roadmap · roadmap.sh" onClick={() => onOpen(r.id)} />
+          ))}
+        </RowList>
+      )}
       {phases.map((phase) => (
         <RowList key={phase.id} label={'Year ' + phase.year + ' · ' + phase.title} className="mt-[18px]">
           {path.steps
@@ -94,18 +113,22 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
               {alternatives.map((r) => (
                 <Row key={r.id} icon={<IconTile icon={SHELF_ICON[shelfOf(r)]} />} title={r.short ?? r.title} meta={'Alternative · ' + r.estHours + ' h'} onClick={() => onOpen(r.id)} />
               ))}
-              {library.map((r) => (
-                <Row
-                  key={r.id}
-                  icon={<IconTile icon={SHELF_ICON[shelfOf(r)]} tone={shelfOf(r) === 'practice' || shelfOf(r) === 'paper' || shelfOf(r) === 'blog' ? 'ice' : 'blue'} />}
-                  title={r.short ?? r.title}
-                  meta={'Year ' + r.fromYear + ' · ' + SHELF_LABEL[shelfOf(r)] + ' · ' + r.estHours + ' h'}
-                  onClick={() => onOpen(r.id)}
-                />
-              ))}
-              {papers.map((p) => (
-                <Row key={p.id} icon={<IconTile icon="paper" tone="ice" />} title={p.short ?? p.title} meta={[p.fromYear ? 'Year ' + p.fromYear : null, 'Paper', p.year].filter(Boolean).join(' · ')} truncate onClick={() => onOpenPaper(p.id)} />
-              ))}
+              {visible.map(({ kind, item: r }) =>
+                kind === 'paper' ? (
+                  <Row key={r.id} icon={<IconTile icon="paper" tone="ice" />} title={r.short ?? r.title} meta={[r.fromYear ? 'Year ' + r.fromYear : null, 'Paper', r.year].filter(Boolean).join(' · ')} truncate onClick={() => onOpenPaper(r.id)} />
+                ) : (
+                  <Row
+                    key={r.id}
+                    icon={<IconTile icon={SHELF_ICON[shelfOf(r)]} tone={shelfOf(r) === 'practice' || shelfOf(r) === 'paper' || shelfOf(r) === 'blog' ? 'ice' : 'blue'} />}
+                    title={r.short ?? r.title}
+                    meta={[r.fromYear ? 'Year ' + r.fromYear : null, SHELF_LABEL[shelfOf(r)], r.estHours + ' h'].filter(Boolean).join(' · ')}
+                    onClick={() => onOpen(r.id)}
+                  />
+                ),
+              )}
+              {alternatives.length + visible.length < optional && (
+                <Row title={'Show ' + Math.min(PAGE, optional - alternatives.length - visible.length) + ' more'} meta={optional - alternatives.length - visible.length + ' not shown yet'} chevron height={44} onClick={() => setShownCount(shownCount + PAGE)} />
+              )}
             </ul>
           )}
         </section>

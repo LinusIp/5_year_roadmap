@@ -62,19 +62,32 @@ export function blogFacts(log: DayLog | undefined, blocks: readonly { id: string
   return { blocks: out, totalMinutes: out.reduce((sum, b) => sum + b.minutes, 0) };
 }
 
+/** A resource the entry is about (ATLAS-LIBRARY's "Write log entry"): its title, its link and its track. */
+export interface BlogTopic {
+  title: string;
+  url: string | null;
+  track: string;
+}
+
 /**
  * The Markdown outline to start the post from: one "##" heading per block with its time, the ticked items as
- * bullets, then empty "What I learned:" and "Stuck on:" lines to fill in.
+ * bullets, then empty "What I learned:" and "Stuck on:" lines to fill in. A resource the entry is about comes first,
+ * with its link.
  */
-export function blogOutline(facts: BlogFacts, heading: string, span: (minutes: number) => string): string {
+export function blogOutline(facts: BlogFacts, heading: string, span: (minutes: number) => string, topic?: BlogTopic): string {
   const lines = ['# ' + heading, ''];
+  if (topic) {
+    lines.push('## ' + topic.title + ' · ' + topic.track, '');
+    if (topic.url) lines.push(topic.url, '');
+    lines.push('What I learned:', '', 'Stuck on:', '');
+  }
   for (const block of facts.blocks) {
     lines.push('## ' + block.name + ' · ' + span(block.minutes), '');
     for (const item of block.ticked) lines.push('- ' + item);
     if (block.ticked.length > 0) lines.push('');
     lines.push('What I learned:', '', 'Stuck on:', '');
   }
-  if (facts.blocks.length === 0) lines.push('What I learned:', '', 'Stuck on:', '');
+  if (facts.blocks.length === 0 && !topic) lines.push('What I learned:', '', 'Stuck on:', '');
   return lines.join('\n').trimEnd() + '\n';
 }
 

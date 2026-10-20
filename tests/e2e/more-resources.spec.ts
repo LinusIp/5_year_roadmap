@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { FIRST_DAY, open } from './helpers.ts';
+import { FIRST_DAY, open, showMoreUntil } from './helpers.ts';
 
 /**
  * The 507 more resources (MORE-RESOURCES): the Papers shelf in the plan's years with a level filter, search across
@@ -24,7 +24,7 @@ test('the Papers shelf lists Attention Is All You Need, year 1 first, and filter
   await expect(attention).toBeVisible();
   await expect(attention).toContainText('Year 2');
   await search.fill('');
-  const levels = page.getByRole('group', { name: 'Level' });
+  const levels = page.getByRole('group', { name: 'Level and roadmap' });
   await levels.getByRole('button', { name: 'Advanced' }).click();
   await expect(page).toHaveURL(/lvl=advanced/);
   await search.fill('Attention Is All You Need');
@@ -60,14 +60,18 @@ test('Robotics and Software architecture list their new resources under Optional
   await expect(page.getByRole('heading', { level: 1, name: 'Software architecture' })).toBeVisible();
   const optional = page.getByRole('button', { name: /^Optional for this path/ });
   await expect(optional).toHaveAttribute('aria-expanded', 'true');
-  await expect(page.getByRole('button', { name: /^No Silver Bullet/ })).toContainText('Year 1 · Paper');
+  const noSilverBullet = page.getByRole('button', { name: /^No Silver Bullet/ });
+  await showMoreUntil(page, noSilverBullet);
+  await expect(noSilverBullet).toContainText('Year 1 · Paper');
 
   await open(page, './#/library?path=robotics');
   await expect(page.getByRole('heading', { level: 1, name: 'Robotics' })).toBeVisible();
   const more = page.getByRole('button', { name: /^Optional for this path/ });
   if ((await more.getAttribute('aria-expanded')) === 'false') await more.click();
-  await expect(page.getByRole('button', { name: /^Underactuated Robotics/ })).toContainText('Year 2 · Book');
-  await expect(page.getByRole('button', { name: /^Diffusion Policy/ })).toBeVisible();
+  const underactuated = page.getByRole('button', { name: /^Underactuated Robotics/ });
+  await showMoreUntil(page, underactuated);
+  await expect(underactuated).toContainText('Year 2 · Book');
+  await showMoreUntil(page, page.getByRole('button', { name: /^Diffusion Policy/ }));
 });
 
 test('a blog opens its sheet with its link', async ({ page }) => {

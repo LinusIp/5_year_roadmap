@@ -12,6 +12,8 @@ export const TRACK_IDS = [
   'physics', 'ee', 'embedded', 'controls', 'mech', 'robotics', 'chem', 'career',
   // MORE-RESOURCES: software architecture, system design, engineering practice and SRE.
   'architecture',
+  // ATLAS-LIBRARY: containers, CI/CD, infrastructure and MLOps.
+  'devops',
 ] as const;
 /** The lanes of the curriculum (plan.yaml, the phase table): the five of the first plan and H, Hugging Face, added with
  * the fixed daily schedule. The user can add blocks of their own beyond them. */
@@ -27,12 +29,13 @@ export const COSTS = ['free', 'audit-free', 'paid'] as const;
 export const CADENCES = ['weekly', 'monthly', 'research', 'capstone'] as const;
 export const PAPER_GROUPS = ['classics', 'llm', 'systems', 'graphics-sim', 'inference', 'generative'] as const;
 export const ROADMAP_IDS = ['inference-engineering', 'ai-engineer', 'ai-agents', 'software-architect', 'game-developer'] as const;
+export type RoadmapId = (typeof ROADMAP_IDS)[number];
 
 /** A roadmap.sh node an item teaches: "inference-engineering/kv-cache". */
 const NodeRef = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must look like roadmap-id/node-id');
 export const CERT_MODES = ['committed', 'optional', 'investigate'] as const;
 
-/** One of the seventeen tracks, or a track the user created (`my-…`). */
+/** One of the eighteen tracks, or a track the user created (`my-…`). */
 export type TrackId = (typeof TRACK_IDS)[number] | `my-${string}`;
 export type SeedTrackId = (typeof TRACK_IDS)[number];
 /** A block's id: A to E by default, any short capitalised id for a block the user adds. */
@@ -225,6 +228,19 @@ export const TrackSchema = z.strictObject({
 });
 export type Track = z.infer<typeof TrackSchema>;
 
+/**
+ * How an item serves the plan (ATLAS-LIBRARY): its priority for years 1 to 3 (1 inference and the AI feeding it, 2
+ * architecture, systems, languages and DevOps, 3 graphics, simulation and robotics, 4 game development), the
+ * roadmap.sh roadmap it serves, and the year 3 research area it belongs to.
+ */
+export const RESEARCH_AREAS = ['inference', 'world-models', 'diffusion', 'genai'] as const;
+export type ResearchArea = (typeof RESEARCH_AREAS)[number];
+const alignmentFields = {
+  priority: z.literal([1, 2, 3, 4]).optional(),
+  roadmap: z.enum(ROADMAP_IDS).optional(),
+  research: z.enum(RESEARCH_AREAS).optional(),
+};
+
 export const ResourceSchema = z
   .strictObject({
     id: Slug,
@@ -263,6 +279,7 @@ export const ResourceSchema = z
     tags: z.array(Slug).optional(),
     /** One line on how it is free, for the sheet: "Free tier". */
     note: Text.optional(),
+    ...alignmentFields,
     /** Soft prerequisites, resources or papers: worth doing first, never enforced by the schedule. */
     after: z.array(Slug).optional(),
     /** What to do first, in words, when it is not a resource the Library has. */
@@ -397,6 +414,7 @@ export const PaperSchema = z
     summary: Text.optional(),
     level: z.enum(LEVELS).optional(),
     fromYear: z.literal([1, 2, 3, 4, 5]).optional(),
+    ...alignmentFields,
     /** Set on a paper the user added in the app. */
     source: z.literal('user').optional(),
   })

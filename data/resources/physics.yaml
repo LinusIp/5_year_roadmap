@@ -46,6 +46,9 @@
   estHours: 130
   prerequisites: [mit-8-02, mit-18-03]
   subject: math-physics
+  summary: "Coupled oscillators, normal modes, the wave equation and Fourier analysis, which are the core ideas behind vibration analysis, signals and many simulations."
+  priority: 3
+  roadmap: "game-developer"
 
 - id: mit-8-04
   title: "MIT 8.04 Quantum Physics I (Barton Zwiebach, Spring 2016)"
@@ -150,6 +153,11 @@
   reference: true
   subject: math-physics
   summary: "The full text, free online from Caltech. The site answers scripts with a bot challenge, so `npm run check:links` reports 403 for it; it was verified in a browser."
+  short: "Feynman Lectures"
+  fromYear: 2
+  after: [book-strang-calculus]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: ibm-quantum-learning
   title: "IBM Quantum Learning (Qiskit courses)"

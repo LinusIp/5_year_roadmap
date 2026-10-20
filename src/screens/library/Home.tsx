@@ -3,7 +3,7 @@ import { setItemStatus } from '../../db/state.ts';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { monthName } from '../../lib/dates.ts';
 import { checklistCounts, checklistMeta, isChecklist } from '../../lib/checklist.ts';
-import { buildPaths, inProgress, pathDots, pathExtras, PATHS, SHELVES, startsMuchLater, upNext } from '../../lib/library-home.ts';
+import { buildPaths, inProgress, pathDots, pathExtras, PATHS, researchAreas, SHELVES, startsMuchLater, upNext } from '../../lib/library-home.ts';
 import type { LibraryPath, ShelfKey } from '../../lib/library-home.ts';
 import { minutesForRef } from '../../lib/logs.ts';
 import type { Unit } from '../../seed/schema.ts';
@@ -26,6 +26,10 @@ export const PATH_ICON: Record<string, { icon: IconName; tone: 'blue' | 'ice' }>
   me: { icon: 'wrench', tone: 'ice' },
   architecture: { icon: 'network', tone: 'blue' },
   robotics: { icon: 'bot', tone: 'blue' },
+  inference: { icon: 'gauge', tone: 'ice' },
+  devops: { icon: 'container', tone: 'blue' },
+  simulation: { icon: 'atom', tone: 'ice' },
+  research: { icon: 'flask', tone: 'ice' },
 };
 
 export const SHELF_ICON: Record<ShelfKey, IconName> = { course: 'course', book: 'book', paper: 'paper', article: 'article', blog: 'blog', tool: 'wrench', practice: 'target', project: 'layers' };
@@ -112,6 +116,8 @@ export function LibraryHome({
   const browsePaths = PATHS.filter((def) => !paths.some((p) => p.id === def.id))
     .map((def) => ({ def, count: pathExtras(seed, states, def.id).length }))
     .filter((p) => p.count > 0);
+  // The Research view (ATLAS-LIBRARY): year 3's reading on inference, world models, diffusion and generative AI.
+  const researchCount = researchAreas(seed, states).reduce((n, a) => n + a.items.length, 0);
   const active = inProgress(seed.resources, states);
   const next = upNext(paths, seed);
   const pathOfRef = (refId: string): string | undefined => paths.find((p) => p.steps.some((s) => s.refId === refId))?.id;
@@ -207,6 +213,7 @@ export function LibraryHome({
             const { icon, tone } = PATH_ICON[def.id] ?? { icon: 'course', tone: 'blue' };
             return <Row key={def.id} icon={<IconTile icon={icon} tone={tone} />} title={def.name} meta={'Not on the plan · ' + count + ' to browse'} chevron onClick={() => onPath(def.id)} />;
           })}
+          {researchCount > 0 && <Row icon={<IconTile icon="flask" tone="ice" />} title="Research" meta={'Year 3 · ' + researchCount + ' to read'} chevron onClick={() => onPath('research')} />}
         </ul>
       </section>
 

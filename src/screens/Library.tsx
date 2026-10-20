@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useCertStates } from '../db/credentials.ts';
 import { usePaperStates } from '../db/state.ts';
 import type { ItemStatus, PaperStatus } from '../db/types.ts';
-import { useAtlas } from '../hooks/useAtlas.ts';
+import { useAtlas, useLibrary } from '../hooks/useAtlas.ts';
 import type { Atlas } from '../hooks/useAtlas.ts';
 import { useUnits } from '../hooks/useUnits.ts';
 import { useCatalogueIndex, useChallengeEvents } from '../hooks/useCatalogue.ts';
@@ -18,10 +18,12 @@ import { Chips } from '../ui/Chips.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
 import { DifficultyDots, IconTile, KindIcon, StatusIcon } from '../ui/glyphs.tsx';
-import { buildPaths, inProgress, shelfCounts, groupResults, shelfOf, upNext } from '../lib/library-home.ts';
+import { buildPaths, byFit, fitOf, inProgress, priorityOf, shelfCounts, groupResults, shelfOf, upNext } from '../lib/library-home.ts';
+import type { Fit } from '../lib/library-home.ts';
 import type { ShelfKey } from '../lib/library-home.ts';
 import { LibraryHome, SHELF_ICON } from './library/Home.tsx';
 import { PathView } from './library/PathView.tsx';
+import { ResearchView } from './library/ResearchView.tsx';
 
 import { Button } from '../ui/Button.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
@@ -58,12 +60,20 @@ interface Entry {
   sortKey: string;
   /** Projects: what Library › Projects filters on. A curriculum project has no catalogue entry. */
   project?: Filterable;
-  /** Resources and papers that have them (MORE-RESOURCES): what Library › Papers filters and orders on. */
+  /** Resources and papers that have them: what the Level and Roadmap chips filter on (MORE-RESOURCES, ATLAS-LIBRARY). */
   level?: 'intro' | 'intermediate' | 'advanced' | undefined;
-  fromYear?: number | undefined;
+  roadmap?: string | undefined;
+  /** Priority, year and level: the order of every list (ATLAS-LIBRARY). */
+  fit: Fit;
 }
 
-/** The Papers shelf's level chips: the data's levels, as a learner names them. */
+/** The order of every list but Projects' (ATLAS-LIBRARY): what is in progress, then by fit, done and dropped last. */
+const STATUS_RANK: Record<ItemStatus, number> = { active: 0, todo: 1, done: 2, dropped: 3 };
+function byPlanFit(a: Entry, b: Entry): number {
+  return STATUS_RANK[a.status] - STATUS_RANK[b.status] || byFit(a.fit, b.fit) || a.title.localeCompare(b.title);
+}
+
+/** The level chips of the shelves and search: the data's levels, as a learner names them. */
 const LEVEL_CHIPS = [
   { key: 'intro', label: 'Beginner' },
   { key: 'intermediate', label: 'Intermediate' },
@@ -103,6 +113,13 @@ function buildEntries(
     return monthName(Number(m) - 1, true) + (y === thisYear ? '' : ' ' + y);
   };
   const trailingFor = (ref: string, status: ItemStatus): string => (status === 'active' ? 'Active' : status === 'done' ? 'Done' : status === 'dropped' ? 'Dropped' : when(ref));
+  // A planned item fits the year of its phase; one off the plan, the year the Library gives it.
+  const planYear = new Map<string, number>();
+  for (const item of seed.plan) {
+    const ref = item.resourceId ?? item.projectId!;
+    const year = seed.phases.find((p) => p.id === item.phaseId)?.year;
+    if (year && !planYear.has(ref)) planYear.set(ref, year);
+  }
   const sortFor = (ref: string, status: ItemStatus, title: string): string =>
     (status === 'active' ? '0' : status === 'todo' && startOf.has(ref) ? '1' + startOf.get(ref) : status === 'todo' ? '2' : '3') + title.toLowerCase();
 
@@ -121,7 +138,8 @@ function buildEntries(
       trailing: trailingFor(r.id, status),
       sortKey: sortFor(r.id, status, r.title),
       level: r.level,
-      fromYear: r.fromYear,
+      roadmap: r.roadmap,
+      fit: { ...fitOf(r), year: planYear.get(r.id) ?? r.fromYear },
     };
   });
   const papers: Entry[] = seed.papers.map((p) => {
@@ -139,7 +157,8 @@ function buildEntries(
       trailing: PAPER_LABEL[paperStatus],
       sortKey: (status === 'active' ? '0' : status === 'todo' ? '2' : '3') + p.title.toLowerCase(),
       level: p.level,
-      fromYear: p.fromYear,
+      roadmap: p.roadmap,
+      fit: fitOf(p),
     };
   });
   // Projects follow everything else in the default order ("5…"), so the list opens as it always has; the Projects
@@ -157,6 +176,7 @@ function buildEntries(
       meta: ['Curriculum ' + p.cadence, p.estHours + ' h'].join(' · '),
       trailing: trailingFor(p.id, status),
       sortKey: '5' + sortFor(p.id, status, p.title),
+      fit: { priority: priorityOf(p), year: planYear.get(p.id) },
       project: { kind: 'curriculum', group: p.cadence, phaseId: p.phaseId, hours: p.estHours, tracks: p.tracks },
     };
   });
@@ -175,13 +195,15 @@ function buildEntries(
       meta: [KIND_LABEL[e.kind] + ' · ' + e.difficulty, groupLabel(e.group), phase ? 'Year ' + phase.year : null, size].filter(Boolean).join(' · '),
       trailing: status === 'done' ? (e.kind === 'challenge' ? 'Solved' : 'Done') : status === 'active' ? 'Active' : '',
       sortKey: '5' + (status === 'active' ? '0' : status === 'done' ? '3' : '2') + e.title.toLowerCase(),
+      fit: { priority: priorityOf(e), year: phase?.year },
       project: { kind: e.kind, difficulty: e.difficulty, group: e.group, hours: e.hours, tracks: e.tracks },
     };
     if (e.phaseId) entry.project!.phaseId = e.phaseId;
     if (e.level) entry.project!.level = e.level;
     return entry;
   });
-  return [...resources, ...papers, ...projects, ...fromCatalogue];
+  // In the Library's order, so that search, which keeps the order among equal matches, follows it too.
+  return [...[...resources, ...papers].sort(byPlanFit), ...projects, ...fromCatalogue];
 }
 
 /**
@@ -269,6 +291,8 @@ function filterOptions(key: FilterKey, seed: Atlas['seed'], catalogue: readonly 
  */
 export function Library({ openId }: { openId?: string }) {
   const atlas = useAtlas();
+  // The Library's long tail (ATLAS-LIBRARY) loads right after the first screen; the Library waits for it.
+  const library = useLibrary();
   const units = useUnits();
   const paperStates = usePaperStates();
   const certStates = useCertStates();
@@ -289,17 +313,19 @@ export function Library({ openId }: { openId?: string }) {
   const [phaseParam, setPhase] = useQueryParam('phase');
   const [level, setLevel] = useQueryParam('level');
   const [hours, setHours] = useQueryParam('hours');
-  // Library › Papers: the level (MORE-RESOURCES).
+  // The shelves' and search's level and roadmap (MORE-RESOURCES, ATLAS-LIBRARY).
   const [paperLevel, setPaperLevel] = useQueryParam('lvl');
+  const [roadmap, setRoadmap] = useQueryParam('roadmap');
+  const [pickingRoadmap, setPickingRoadmap] = useState(false);
   const [picking, setPicking] = useState<null | 'kind' | 'difficulty' | 'group' | 'phase' | 'level' | 'hours'>(null);
   const catalogue = useCatalogueIndex();
   const events = useChallengeEvents();
   const solved = useMemo(() => solvedSet(events ?? []), [events]);
 
-  const entries = useMemo(() => (atlas && paperStates ? buildEntries(atlas, units, paperStates, catalogue, solved) : []), [atlas, units, paperStates, catalogue, solved]);
+  const entries = useMemo(() => (atlas && paperStates && library ? buildEntries(atlas, units, paperStates, catalogue, solved) : []), [atlas, library, units, paperStates, catalogue, solved]);
   const index = useMemo(() => buildIndex(entries), [entries]);
 
-  if (!atlas || !paperStates || !certStates) {
+  if (!atlas || !paperStates || !certStates || !library) {
     return (
       <Screen title="Library">
         <Header title="Library" />
@@ -320,12 +346,11 @@ export function Library({ openId }: { openId?: string }) {
   const projectFiltersOn = Boolean(kind || difficulty || group || phaseParam || level || hours);
   const matchesProject = (e: Entry): boolean => !projectFiltersOn || (e.project ? matchesFilter(e.project, projectFilter) : false);
   const filtered = search(index, query ?? '').filter(
-    (e) => (!type || e.type === type) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && matchesProject(e),
+    (e) => (!type || e.type === type) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
   );
-  // The Papers shelf reads in the plan's years: what is being read, then year 1's foundations before year 3's research.
-  const byYear = (a: Entry, b: Entry): number =>
-    Number(b.status === 'active') - Number(a.status === 'active') || (a.fromYear ?? 9) - (b.fromYear ?? 9) || a.title.localeCompare(b.title);
-  const results = query ? filtered : [...filtered].sort(type === 'paper' ? byYear : (a, b) => a.sortKey.localeCompare(b.sortKey));
+  // Every shelf but Projects reads by fit: in progress first, then priority, year and level (ATLAS-LIBRARY). Projects
+  // keep their order: the plan's first, then the catalogue.
+  const results = query ? filtered : type === 'project' ? [...filtered].sort((a, b) => a.sortKey.localeCompare(b.sortKey)) : filtered;
   const trackName = seed.tracks.find((t) => t.id === track)?.name;
   const keep = params.toString();
   const open = (entry: Entry): void => {
@@ -334,12 +359,12 @@ export function Library({ openId }: { openId?: string }) {
     else navigate('/library/' + entry.id + (keep ? '?' + keep : ''));
   };
   const clear = (): void => {
-    for (const set of [setQuery, setType, setTrack, setStatus, setKind, setDifficulty, setGroup, setPhase, setLevel, setHours, setPaperLevel]) set(null);
+    for (const set of [setQuery, setType, setTrack, setStatus, setKind, setDifficulty, setGroup, setPhase, setLevel, setHours, setPaperLevel, setRoadmap]) set(null);
     setDraft(null);
   };
 
   const shelf = (type as ShelfKey | null) ?? null;
-  const filtersOn = Boolean(type || track || status || paperLevel || projectFiltersOn);
+  const filtersOn = Boolean(type || track || status || projectFiltersOn);
   const mode: 'home' | 'path' | 'search' | 'shelf' = pathId ? 'path' : query && !filtersOn ? 'search' : filtersOn ? 'shelf' : 'home';
   const counts = shelfCounts(seed, catalogue?.length ?? 0);
   const goShelf = (key: ShelfKey): void => navigate('/library?type=' + key + (query ? '&q=' + encodeURIComponent(query) : ''), { replace: false });
@@ -392,6 +417,20 @@ export function Library({ openId }: { openId?: string }) {
     />
   );
 
+  // Level and roadmap (ATLAS-LIBRARY): on every shelf but Projects, and on search.
+  const roadmapName = seed.roadmaps.find((r) => r.id === roadmap)?.title;
+  const fitChips = (
+    <div className="mt-2">
+      <Chips
+        label="Level and roadmap"
+        items={[
+          ...LEVEL_CHIPS.map((chip) => ({ key: chip.key, label: chip.label, pressed: paperLevel === chip.key, onClick: () => setPaperLevel(paperLevel === chip.key ? null : chip.key) })),
+          { key: 'roadmap', label: roadmapName ?? 'Roadmap', pressed: Boolean(roadmapName), chevron: true, onClick: () => setPickingRoadmap(true) },
+        ]}
+      />
+    </div>
+  );
+
   // The home's line: what is in progress, what is next, and how much more waits on the shelves.
   const activeCount = inProgress(seed.resources, atlas.states, Infinity).length;
   const nextCount = upNext(buildPaths(seed, atlas.states), seed).length;
@@ -401,13 +440,15 @@ export function Library({ openId }: { openId?: string }) {
 
   return (
     <Screen title="Library">
-      {mode === 'path' && pathId && <PathView atlas={atlas} pathId={pathId} onOpen={(id) => navigate('/library/' + id + (keep ? '?' + keep : ''))} onOpenPaper={(id) => setPaperId(id, { replace: false })} />}
+      {mode === 'path' && pathId === 'research' && <ResearchView atlas={atlas} onOpen={(id) => navigate('/library/' + id + (keep ? '?' + keep : ''))} onOpenPaper={(id) => setPaperId(id, { replace: false })} />}
+      {mode === 'path' && pathId && pathId !== 'research' && <PathView atlas={atlas} pathId={pathId} onOpen={(id) => navigate('/library/' + id + (keep ? '?' + keep : ''))} onOpenPaper={(id) => setPaperId(id, { replace: false })} />}
 
       {/* Home and search share one header and one search box, so typing the first letter keeps focus. */}
       {(mode === 'home' || mode === 'search') && (
         <>
           <Header title="Library" sub={mode === 'home' ? homeSub : plural(results.length, 'match', 'matches')} />
           {searchField}
+          {mode === 'search' && fitChips}
           {mode === 'home' ? (
             <LibraryHome
               atlas={atlas}
@@ -448,14 +489,7 @@ export function Library({ openId }: { openId?: string }) {
               ]}
             />
           </div>
-          {(type === 'paper' || paperLevel) && (
-            <div className="mt-2">
-              <Chips
-                label="Level"
-                items={LEVEL_CHIPS.map((chip) => ({ key: chip.key, label: chip.label, pressed: paperLevel === chip.key, onClick: () => setPaperLevel(paperLevel === chip.key ? null : chip.key) }))}
-              />
-            </div>
-          )}
+          {type !== 'project' && fitChips}
           {(type === 'project' || projectFiltersOn) && (
             <div className="mt-2">
               <Chips
@@ -468,7 +502,7 @@ export function Library({ openId }: { openId?: string }) {
             </div>
           )}
           {results.length === 0 ? (
-            <EmptyState action={<Button onClick={() => { for (const set of [setQuery, setTrack, setStatus, setKind, setDifficulty, setGroup, setPhase, setLevel, setHours, setPaperLevel]) set(null); setDraft(null); }}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>
+            <EmptyState action={<Button onClick={() => { for (const set of [setQuery, setTrack, setStatus, setKind, setDifficulty, setGroup, setPhase, setLevel, setHours, setPaperLevel, setRoadmap]) set(null); setDraft(null); }}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>
           ) : (
             <VirtualList items={results} label={results.length + ' of ' + shelfTotal} keyOf={(entry) => entry.kind + entry.id} render={row} />
           )}
@@ -494,6 +528,16 @@ export function Library({ openId }: { openId?: string }) {
         options={seed.tracks.map((t) => ({ value: t.id, label: t.name, keywords: t.summary }))}
         onPick={(v) => setTrack(v)}
         onClose={() => setPickingTrack(false)}
+      />
+      <PickerSheet
+        open={pickingRoadmap}
+        title="Roadmap"
+        searchLabel="Search roadmaps"
+        value={roadmap}
+        clearLabel="Every roadmap"
+        options={seed.roadmaps.map((r) => ({ value: r.id, label: r.title + ' (roadmap.sh)' }))}
+        onPick={(v) => setRoadmap(v)}
+        onClose={() => setPickingRoadmap(false)}
       />
       {picking && (
         <PickerSheet

@@ -15,6 +15,7 @@
   estHours: 60
   subject: python
   summary: "In progress when the plan starts. Tick off the days already done and Today picks up at the next one."
+  priority: 2
 
 - id: automate-the-boring-stuff
   title: "Automate the Boring Stuff with Python (Al Sweigart)"
@@ -73,6 +74,7 @@
   estHours: 40
   subject: c-cpp
   summary: "A friendly, humorous C tutorial and library reference that covers pointers and memory without the dread."
+  priority: 2
 
 - id: kr-c
   title: "The C Programming Language, 2nd edition (Kernighan and Ritchie)"
@@ -103,6 +105,7 @@
   subject: c-cpp
   summary: "Up-to-date C23 book covering the language precisely, from basics to threads and atomics."
   doFirst: "K&R"
+  priority: 2
 
 - id: learncpp
   title: "learncpp.com"
@@ -118,6 +121,7 @@
   subject: c-cpp
   alternatives: [tour-of-cpp]
   summary: "A thorough, up-to-date free course that takes you from zero to modern C++ with clear explanations."
+  priority: 2
 
 - id: tour-of-cpp
   title: "A Tour of C++, 3rd edition (Bjarne Stroustrup)"
@@ -182,6 +186,7 @@
   summary: "Authoritative rules for writing safe, modern C++ with RAII, ownership and resource management."
   fromYear: 2
   doFirst: "learncpp.com"
+  priority: 2
 
 - id: rust-book
   title: "The Rust Programming Language ('the book')"
@@ -197,6 +202,7 @@
   estHours: 60
   subject: rust-go
   summary: "The official introduction to Rust, covering ownership, borrowing, traits and error handling step by step."
+  priority: 2
 
 - id: rustlings
   title: "Rustlings"
@@ -211,6 +217,7 @@
   estHours: 20
   subject: rust-go
   summary: "Small exercises to do chapter by chapter alongside the book."
+  priority: 2
 
 - id: rust-by-example
   title: "Rust by Example"
@@ -225,6 +232,7 @@
   estHours: 20
   subject: rust-go
   summary: "Runnable examples for every Rust feature, a fast companion and reference to the Rust Book."
+  priority: 2
 
 - id: rust-for-rustaceans
   title: "Rust for Rustaceans (Jon Gjengset)"
@@ -255,6 +263,7 @@
   prerequisites: [rust-book]
   subject: rust-go
   summary: "Live-coded deep dives into lifetimes, iterators, smart pointers, channels and atomics in real Rust."
+  priority: 2
 
 - id: zero2prod
   title: "Zero To Production in Rust (Luca Palmieri)"
@@ -335,6 +344,8 @@
   fromYear: 2
   tags: [inference]
   after: [pmpp-book]
+  priority: 1
+  roadmap: "inference-engineering"
 
 - id: triton-tutorials
   title: "Triton: official tutorials (GPU kernels in Python)"
@@ -352,3 +363,5 @@
   summary: "Write GPU kernels in Python: vector addition, fused softmax, matrix multiplication, dropout, layer normalisation."
   tags: [inference]
   after: [triton-puzzles]
+  priority: 1
+  roadmap: "inference-engineering"

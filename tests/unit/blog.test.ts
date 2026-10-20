@@ -96,6 +96,13 @@ describe('the outline', () => {
   it('still gives the two lines on a day with nothing logged', () => {
     expect(blogOutline(blogFacts(undefined, BLOCKS, []), 'Mon 19 Oct · day 29', span)).toBe('# Mon 19 Oct · day 29\n\nWhat I learned:\n\nStuck on:\n');
   });
+
+  it('starts with the resource a log entry is about, its track and its link (ATLAS-LIBRARY)', () => {
+    const topic = { title: 'FlashAttention', url: 'https://arxiv.org/abs/2205.14135', track: 'AI & ML' };
+    expect(blogOutline(blogFacts(undefined, BLOCKS, []), 'Mon 19 Oct · day 29', span, topic)).toBe(
+      '# Mon 19 Oct · day 29\n\n## FlashAttention · AI & ML\n\nhttps://arxiv.org/abs/2205.14135\n\nWhat I learned:\n\nStuck on:\n',
+    );
+  });
 });
 
 describe('the writing streak', () => {

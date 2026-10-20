@@ -15,6 +15,8 @@
   prerequisites: []
   subject: deep-learning
   summary: "The applied half of priority 1: APIs, embeddings, vector search, RAG, open models and Ollama, prompting, safety. Its checklist is under Plan > Credentials > Roadmaps."
+  priority: 1
+  roadmap: "ai-engineer"
 - id: roadmap-ai-agents
   title: AI Agents roadmap
   provider: roadmap.sh
@@ -30,6 +32,8 @@
   prerequisites: []
   subject: deep-learning
   summary: The agent loop, tool calling, MCP, memory, architectures, evals, observability and guardrails, in full.
+  priority: 1
+  roadmap: "ai-agents"
 - id: roadmap-software-architect
   title: Software Architect roadmap
   provider: roadmap.sh
@@ -46,6 +50,8 @@
   prerequisites: []
   subject: system-design
   summary: "Priority 2: patterns, DDD, CQRS, microservices, messaging, cloud design patterns, security and the soft skills of the role."
+  priority: 2
+  roadmap: "software-architect"
 - id: roadmap-inference-engineering
   title: Inference Engineering roadmap
   provider: roadmap.sh
@@ -63,6 +69,11 @@
   subject: deep-learning
   summary: "Priority 1: the map the year 2 and year 3 inference work follows."
   reference: true
+  short: "Inference Eng Roadmap"
+  fromYear: 1
+  tags: [inference]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: roadmap-game-developer
   title: Game Developer roadmap
   provider: roadmap.sh
@@ -80,6 +91,10 @@
   subject: graphics
   summary: Used for its mathematics, physics, graphics and game-AI nodes, inside Block A.
   reference: true
+  short: "Game Dev Roadmap"
+  fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
 - id: gamemath-3d-primer
   title: 3D Math Primer for Graphics and Game Development
   short: "3D Math Primer"
@@ -104,6 +119,8 @@
     - game-developer/orientation
     - game-developer/quaternion
     - game-developer/euler-angle
+  priority: 3
+  roadmap: "game-developer"
 - id: boyd-convex-optimization
   title: Convex Optimization
   provider: Stephen Boyd and Lieven Vandenberghe

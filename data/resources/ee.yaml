@@ -62,6 +62,7 @@
   subject: fpga
   summary: "Digital design from gates to a pipelined processor. Nand2Tetris is the warm-up; project 43 (a RISC-V subset on an FPGA) is the payoff."
   after: [nand2tetris]
+  priority: 2
 
 - id: harris-ddca
   title: "Digital Design and Computer Architecture, RISC-V edition (Harris and Harris)"
@@ -179,6 +180,7 @@
   prerequisites: [rust-book]
   subject: embedded
   summary: "Teaches bare-metal Rust on microcontrollers: no_std, peripherals, interrupts and memory-mapped registers."
+  priority: 2
 
 - id: phils-lab
   title: "Phil's Lab: STM32 firmware and KiCad PCB design"
@@ -298,6 +300,7 @@
   prerequisites: [mit-18-06, mit-18-03]
   subject: signals-control
   summary: "State space, LQR and Kalman filtering: what the inverted pendulum of project 45 needs."
+  priority: 3
 
 - id: dspguide
   title: "The Scientist and Engineer's Guide to Digital Signal Processing (Steven W. Smith)"
@@ -398,3 +401,6 @@
   estHours: 0
   reference: true
   summary: "The control-theory textbook, free from the authors. A reference beside MIT 2.004 and the Brian Douglas lectures."
+  short: "Feedback Systems"
+  fromYear: 2
+  priority: 3

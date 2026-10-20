@@ -14,6 +14,9 @@
   estHours: 30
   subject: simulation
   summary: "Sequential impulses, soft constraints, continuous collision. The theory behind the 2D rigid-body engine of project 15."
+  after: [box2d-lite]
+  priority: 4
+  roadmap: "game-developer"
 
 - id: millington-game-physics
   title: "Game Physics Engine Development, 2nd edition (Ian Millington)"
@@ -44,6 +47,8 @@
   estHours: 10
   subject: simulation
   summary: "The go-to series on game loops, physics integration and networked multiplayer."
+  priority: 4
+  roadmap: "game-developer"
 
 - id: witkin-baraff-pbm
   title: "Witkin and Baraff: Physically Based Modeling (SIGGRAPH course notes)"
@@ -60,6 +65,8 @@
   prerequisites: [mit-18-03]
   subject: simulation
   summary: "The classic derivation of particle systems, rigid bodies, constraints, and implicit integration."
+  priority: 4
+  roadmap: "game-developer"
 
 - id: ericson-rtcd
   title: "Real-Time Collision Detection (Christer Ericson)"
@@ -91,6 +98,8 @@
   subject: simulation
   summary: "Position-based dynamics, XPBD, cloth, soft bodies and fluids in short tutorials with code."
   after: [gaffer-on-games]
+  priority: 4
+  roadmap: "game-developer"
 
 - id: bridson-fluid-sim
   title: "Fluid Simulation for Computer Graphics, 2nd edition (Robert Bridson)"
@@ -125,6 +134,9 @@
   summary: "Differentiable and learned simulators; the reading for project 56."
 
 # ---------------------------------------------------------------- robotics simulation (year 3) and simulation tools (added 2026-10-07)
+  after: [paper-pinn]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: mujoco-docs
   title: "MuJoCo: official documentation"
@@ -140,6 +152,7 @@
   estHours: 20
   subject: robotics
   summary: "Multi-joint dynamics with contact: the physics engine much of robotics research runs on, and a reference to measure your own engine against."
+  priority: 3
 
 - id: gazebo-docs
   title: "Gazebo: official documentation"
@@ -195,6 +208,11 @@
   cost: free
   estHours: 20
   summary: "Differentiable GPU kernels written in Python. One of the two options for the learned-simulator project of year 5."
+  short: "NVIDIA Warp"
+  fromYear: 2
+  after: [ten-minute-physics]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: brax
   title: "Brax: differentiable physics in JAX"
