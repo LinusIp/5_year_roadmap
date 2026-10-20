@@ -3124,6 +3124,7 @@
   url: "https://crd.lbl.gov/assets/Uploads/ECP21-Roofline-2-NVIDIA.pdf"
   urlVerified: true
   lastVerified: 2026-10-20
+  linkCheck: "manual-ok"
   tracks: [ai]
   level: "intermediate"
   cost: "free"
@@ -9875,6 +9876,7 @@
   url: "https://docs.libp2p.io/"
   urlVerified: true
   lastVerified: 2026-10-20
+  linkCheck: "manual-ok"
   tracks: [systems]
   level: "intermediate"
   cost: "free"
@@ -10027,6 +10029,7 @@
   url: "https://crd.lbl.gov/divisions/amcr/computer-science-amcr/par/research/roofline/"
   urlVerified: true
   lastVerified: 2026-10-20
+  linkCheck: "manual-ok"
   tracks: [systems]
   level: "intermediate"
   cost: "free"
@@ -11620,6 +11623,7 @@
   url: "https://crd.lbl.gov/divisions/amcr/computer-science-amcr/par/research/roofline/software/ert"
   urlVerified: true
   lastVerified: 2026-10-20
+  linkCheck: "manual-ok"
   tracks: [systems]
   level: "advanced"
   cost: "free"
@@ -13989,6 +13993,7 @@
   url: "https://online.stat.psu.edu/stat414/"
   urlVerified: true
   lastVerified: 2026-10-20
+  linkCheck: "manual-ok"
   tracks: [math]
   level: "intermediate"
   cost: "free"
@@ -14786,6 +14791,7 @@
   url: "https://www.cs.umd.edu/~amchilds/qa/"
   urlVerified: true
   lastVerified: 2026-10-20
+  linkCheck: "manual-ok"
   tracks: [math]
   level: "advanced"
   cost: "free"
@@ -15510,6 +15516,7 @@
   url: "https://web.mit.edu/hml/ncfmf.html"
   urlVerified: true
   lastVerified: 2026-10-20
+  linkCheck: "manual-ok"
   tracks: [engineering]
   level: "intermediate"
   cost: "free"
@@ -15727,6 +15734,7 @@
   url: "https://ocw.mit.edu/courses/2-008-design-and-manufacturing-ii-spring-2004/"
   urlVerified: true
   lastVerified: 2026-10-20
+  linkCheck: "manual-ok"
   tracks: [engineering]
   level: "intermediate"
   cost: "free"
@@ -16078,6 +16086,7 @@
   url: "https://www.ece.rutgers.edu/~orfanidi/ewa/"
   urlVerified: true
   lastVerified: 2026-10-20
+  linkCheck: "manual-ok"
   tracks: [engineering]
   level: "advanced"
   cost: "free"

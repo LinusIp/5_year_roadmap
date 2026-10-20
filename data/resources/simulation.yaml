@@ -226,3 +226,8 @@
   cost: free
   estHours: 20
   summary: "A massively parallel physics engine for reinforcement learning. The other option for the learned-simulator project."
+  short: "Brax (repo)"
+  fromYear: 3
+  after: [paper-brax]
+  priority: 3
+  roadmap: "game-developer"

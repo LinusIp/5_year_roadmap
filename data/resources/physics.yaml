@@ -84,6 +84,10 @@
   reference: true
   subject: math-physics
   summary: "The other recorded version of 8.04. Pick whichever lecturer suits you; the hours are counted once, on the Zwiebach edition."
+  short: "MIT 8.04 (Adams 2013)"
+  fromYear: 1
+  doFirst: "MIT 18.03"
+  priority: 2
 
 - id: mit-8-05
   title: "MIT 8.05 Quantum Physics II (Fall 2013)"
@@ -222,6 +226,7 @@
   subject: quantum
   stretch: true
   summary: "The archived MITx course (no certificate). Parts 2 and 3 sit next to it in the Open Learning Library."
+  priority: 4
 
 - id: mit-3-091
   title: "MIT 3.091SC Introduction to Solid State Chemistry (Fall 2010)"
@@ -266,3 +271,5 @@
   estHours: 100
   prerequisites: [mit-18-02]
   subject: math-physics
+  summary: "Video lectures on the laws of thermodynamics, free energy, equilibrium and reaction rates, a gentle base before statistical mechanics."
+  priority: 2

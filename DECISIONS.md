@@ -1439,3 +1439,43 @@ each stays exactly as the file gave it, and these are for opening in a browser.
   distributed training, tf.function, TFX, tutorials); docs.libp2p.io served a certificate for another host; Penn
   State's STAT 414 sent an incomplete certificate chain; Andrew Childs's quantum algorithms notes dropped the
   connection; Greg Wooledge's BashGuide answered 502.
+
+## The Atlas Library's third file (pull request #22)
+
+ATLAS-LIBRARY a third time, with a 3,811-row `atlas-resources.jsonl`. Its first 3,386 rows are pull request #21's
+file, unchanged: the upsert found every one's entry again and filled nothing. Of the 425 rows it adds, 418 are new
+(`data/resources/library-atlas-3.yaml`) and 7 matched entries the Library had (6 by URL, 1 by id), listed in
+`docs/imports-atlas-library-3.md`. No URL changed. Resources: 3,416 to 3,834.
+
+**Three more pairs kept apart.** Fitzpatrick's PHY 329 notes and Newman's book are both "Computational Physics", and
+David Tong's notes on topics in, and on supersymmetric, quantum mechanics read like his Quantum Mechanics to the
+matcher; all three are other works, now in `NOT_SAME`.
+
+**Hardware and quantum.** Two new tracks, the twentieth and twenty-first: `hardware` (chip design, CPU, GPU and NPU,
+RTL to tape-out; family Electrical & embedded, priority 3 as the file says) and `quantum` (quantum computing and
+programming; family Math & science, priority 4). Each is a path of its own, Hardware and chip design (a chip icon)
+and Quantum computing (an orbit), rather than part of Engineering or Math and physics: their rows are neither
+circuits nor physics courses, and their priorities differ from those paths'. The file's physics, nuclear and fusion
+rows are its `math` track, so they join Math and physics.
+
+**Links opened by hand.** The nine links the last check could not reach and the user opened by hand on 2026-10-20
+(the three Berkeley Lab roofline pages, the NCFMF films, MIT OCW 2.008, Orfanidis, the libp2p docs, Penn State's
+STAT 414 and Childs's notes) are marked `linkCheck: manual-ok` in the data, a field the schema allows only on a link.
+`scripts/lib/link-policy.ts` lists their addresses too, so a later row on the same pages stays quiet, and
+`check:links` requests neither ("leaving 9 opened by hand"). It also names the hosts whose failures are the script's:
+tensorflow.org (a redirect loop for a script), Greg Wooledge's wiki (502) and MIT CSAIL's servers (timeouts from a
+runner); a failure there is listed to check by hand, never as broken. A unit test keeps the data's marks and the list
+in step. Nothing edits a URL.
+
+**Speed.** The Library chunk grows to 426 kB gzipped; Today's seed stays at 181 kB. At 4x CPU on a 390 px screen,
+Today shows its heading in 1.5 to 1.7 s, the Papers shelf in 1.3 to 1.4 s, and a search keystroke takes 0.19 to
+0.31 s, as before.
+
+**The new rows' links, from the runner.** A one-off `links-atlas-3` job checked the 418 new URLs on the pull request
+(run 39431548594) and was then removed: 409 answered, 7 are to check by hand and 2 failed. No URL was changed.
+
+- Check by hand: the MOOSE framework site, the IAEA's LiveChart and online courses and PPPL's plasma and fusion page,
+  Xschem's page and The Chip Letter (all 403, the site refusing a script), and TensorFlow Quantum (tensorflow.org's
+  redirect loop, which the link policy now lists to check by hand instead of as broken).
+- Failed: WikiChip refused the connection, and the TVM page on VTA's hardware answered 404; both are for opening in a
+  browser, and neither is marked until someone has.

@@ -208,10 +208,16 @@ describe('the whole library (ATLAS-LIBRARY)', () => {
     expect(toResource(item({ track: 'simulation' }), null).tracks).toEqual(['simulation']);
     expect(toResource(item({ track: 'math' }), null).tracks).toEqual(['math']);
     expect(toResource(item({ track: 'engineering' }), null).tracks).toEqual(['engineering']);
+    expect(toResource(item({ track: 'hardware' }), null).tracks).toEqual(['hardware']);
+    expect(toResource(item({ track: 'quantum' }), null).tracks).toEqual(['quantum']);
     expect(toResource(item({ track: 'inference' }), null)).toMatchObject({ tracks: ['ai'], tags: ['inference'] });
     const aligned = toResource(item({ priority: 1, roadmap: 'inference-engineering', research: 'diffusion' }), null);
     expect(aligned).toMatchObject({ priority: 1, roadmap: 'inference-engineering', research: 'diffusion' });
     expect(ResourceSchema.safeParse({ ...aligned, prerequisites: [] }).success).toBe(true);
+    // A link opened by hand is marked so; a mark needs a link.
+    expect(ResourceSchema.safeParse({ ...aligned, prerequisites: [], linkCheck: 'manual-ok' }).success).toBe(true);
+    expect(ResourceSchema.safeParse({ ...aligned, prerequisites: [], linkCheck: 'broken' }).success).toBe(false);
+    expect(ResourceSchema.safeParse({ ...aligned, prerequisites: [], url: null, urlVerified: false, searchHint: 'x', linkCheck: 'manual-ok' }).success).toBe(false);
     // An empty roadmap or research area is no field at all.
     const plain = toResource(item({ priority: 2, roadmap: '', research: '' }), null);
     expect(plain.roadmap).toBeUndefined();
@@ -240,6 +246,9 @@ describe('the whole library (ATLAS-LIBRARY)', () => {
     expect(findExisting(item({ id: 'paper-orca', type: 'paper', title: 'Orca', short: 'Orca', url: 'https://arxiv.org/abs/2306.02707' }), [{ ...library[1]!, title: 'Orca', short: 'Orca' }])).toBeNull();
     // Two "Agents" by different authors stay two.
     expect(findExisting(item({ id: 'whitepaper-google-agents', type: 'article', title: 'Agents', short: 'Agents', url: 'https://www.kaggle.com/whitepaper-agents' }), [{ id: 'article-chip-huyen-agents', title: 'Agents', short: 'Agents', url: 'https://huyenchip.com/2025/01/07/agents.html', shelf: 'article' }])).toBeNull();
+    // Two books called "Computational Physics" by different authors stay two.
+    const newman = { id: 'newman-computational-physics-chapters', title: 'Computational Physics (free sample chapters)', url: 'https://websites.umich.edu/~mejn/cp/chapters.html', shelf: 'book' };
+    expect(findExisting(item({ id: 'fitzpatrick-computational-physics-329', type: 'book', title: 'Computational Physics (PHY 329 lecture notes)', url: 'https://farside.ph.utexas.edu/teaching/329/329.html' }), [newman])).toBeNull();
   });
 
   it('keeps an entry what it has, and the user what they did: an upsert only adds', () => {

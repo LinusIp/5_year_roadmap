@@ -36,11 +36,13 @@ import {
   Minus,
   Lightbulb,
   Map,
+  Microchip,
   MoreHorizontal,
   Moon,
   Newspaper,
   Network,
   NotebookPen,
+  Orbit,
   Pause,
   Play,
   Plus,
@@ -121,11 +123,13 @@ const LUCIDE = {
   // Paths of their own: Software architecture and Robotics
   network: Network,
   bot: Bot,
-  // ATLAS-LIBRARY: Inference engineering, DevOps, Simulation and the Research view
+  // ATLAS-LIBRARY: Inference engineering, DevOps, Simulation, the Research view, Hardware and Quantum computing
   gauge: Gauge,
   container: Container,
   atom: Atom,
   flask: FlaskConical,
+  chip: Microchip,
+  orbit: Orbit,
   // Kinds of project
   puzzle: Puzzle,
   wrench: Wrench,

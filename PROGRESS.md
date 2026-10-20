@@ -1079,3 +1079,15 @@ Verified on this machine (Linux, Chromium 140):
 - Search on a deferred query and the home's work memoised: a keystroke at 4x is 0.1 to 0.3 s.
 - Tests: math and engineering mapping, the Engineering and Math paths, their default priorities, two "Agents" kept
   apart; `tests/e2e/atlas-library.spec.ts`: the Math and Engineering paths and an old `?path=ee` link.
+
+## Pull request #22: the Atlas Library's third file
+
+- `data/resources/library-atlas-3.yaml`: 418 new resources (128 articles with docs and tutorials, 90 papers, 88
+  practice, 68 courses, 36 books, 8 blogs; Quantum 128, Hardware 117, Math 89, Simulation 81, AI 3). 7 more matched
+  what the Library had. Resources: 3,416 to 3,834.
+- The `hardware` and `quantum` tracks, each with a path, a colour and an icon; hardware priority 3, quantum 4; three
+  more pairs in `NOT_SAME`.
+- `linkCheck: manual-ok` on the nine links opened by hand; `scripts/lib/link-policy.ts` lists them and the hosts
+  that fail scripts, and `check:links` leaves the first alone and lists the second's failures to check by hand.
+- Tests: hardware and quantum mapping, paths and priorities; the link policy and its marks in the data; a third
+  "kept apart" pair; `tests/e2e/atlas-library.spec.ts`: the Hardware and Quantum computing paths.

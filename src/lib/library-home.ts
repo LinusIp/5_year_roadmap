@@ -23,8 +23,9 @@ export interface PathDef {
 
 /**
  * In the board's order: the lanes of the first year first, then the second stage. Inference engineering, Software
- * architecture, DevOps, Simulation and Robotics are paths of their own (MORE-RESOURCES, ATLAS-LIBRARY), and Engineering
- * gathers electrical, embedded and mechanical; a path with nothing on the plan is the Library's to browse.
+ * architecture, DevOps, Simulation, Robotics, Hardware and chip design and Quantum computing are paths of their own
+ * (MORE-RESOURCES, ATLAS-LIBRARY), and Engineering gathers electrical, embedded and mechanical; a path with nothing on
+ * the plan is the Library's to browse.
  */
 export const PATHS: readonly PathDef[] = [
   { id: 'ai', name: 'AI engineering', tracks: ['ai'], roadmaps: ['ai-engineer', 'ai-agents'] },
@@ -38,6 +39,8 @@ export const PATHS: readonly PathDef[] = [
   { id: 'devops', name: 'DevOps', tracks: ['devops'] },
   { id: 'engineering', name: 'Engineering', tracks: ['engineering', 'ee', 'embedded', 'controls', 'mech'] },
   { id: 'robotics', name: 'Robotics', tracks: ['robotics'] },
+  { id: 'hardware', name: 'Hardware and chip design', tracks: ['hardware'] },
+  { id: 'quantum', name: 'Quantum computing', tracks: ['quantum'] },
 ];
 
 /** Paths that became part of another: "Electrical and embedded" and "Mechanical" are Engineering (ATLAS-LIBRARY). */
@@ -58,8 +61,9 @@ export function pathOf(seed: Pick<AppSeed, 'tracks'>, resource: { tracks: readon
 
 /**
  * Priority for years 1 to 3 (ATLAS-LIBRARY): 1 inference and the AI feeding it, 2 architecture, systems, languages,
- * DevOps and math and physics, 3 graphics, simulation and robotics, 4 game development and electrical and mechanical
- * engineering (whose years come after year 3). An item the import gave none takes its track's.
+ * DevOps and math and physics, 3 graphics, simulation, robotics and hardware and chip design, 4 game development,
+ * quantum computing and electrical and mechanical engineering (whose years come after year 3). An item the import gave
+ * none takes its track's.
  */
 const PRIORITY_OF_TRACK: Readonly<Record<string, number>> = {
   ai: 1,
@@ -74,7 +78,9 @@ const PRIORITY_OF_TRACK: Readonly<Record<string, number>> = {
   graphics: 3,
   simulation: 3,
   robotics: 3,
+  hardware: 3,
   gamedev: 4,
+  quantum: 4,
   engineering: 4,
   ee: 4,
   embedded: 4,

@@ -12,9 +12,13 @@
  *   --json     also write reports/links.json
  *   --candidates file.json   also check proposed links ({ "resource-id": ["https://…", …] }) for resources that
  *              have none yet, so a link is only ever added after this run fetched it and its title was confirmed
+ *
+ * A link marked `linkCheck: manual-ok`, or on an address of scripts/lib/link-policy.ts's MANUAL_OK, was opened by hand
+ * and is not requested; a failure on one of its SCRIPT_SIDE hosts is listed to check by hand, not as failed.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { linkPolicy } from './lib/link-policy.ts';
 import { loadSeedOrThrow, REPO_ROOT } from './lib/load-seed.ts';
 
 interface Target {
@@ -52,37 +56,44 @@ const inIds = inFile
   ? new Set([...readFileSync(join(REPO_ROOT, inFile), 'utf8').matchAll(/^- id: "?([a-z0-9-]+)"?$/gm)].map((m) => m[1]!))
   : null;
 
+/** The links opened by hand (see the header), counted but not requested. */
+let skipped = 0;
+
 function collectTargets(): Target[] {
   const seed = loadSeedOrThrow();
   const byUrl = new Map<string, string[]>();
   const dated = new Set<string>();
-  const add = (url: string | null | undefined, ref: string, lastVerified?: string): void => {
+  const manual = new Set<string>();
+  const add = (url: string | null | undefined, ref: string, lastVerified?: string, linkCheck?: string): void => {
     if (!url) return;
     if (lastVerified && lastVerified === checkedOn) dated.add(url);
+    if (linkPolicy(url, linkCheck) === 'skip') manual.add(url);
     const list = byUrl.get(url) ?? [];
     list.push(ref);
     byUrl.set(url, list);
   };
   for (const r of seed.resources) {
-    add(r.url, 'resource:' + r.id, r.lastVerified);
+    add(r.url, 'resource:' + r.id, r.lastVerified, r.linkCheck);
     for (const u of r.units ?? []) {
       add(u.url, 'resource:' + r.id + '#' + u.id);
       add(u.video, 'resource:' + r.id + '#' + u.id + ' video');
     }
   }
   for (const p of seed.projects) add(p.sourceUrl, 'project:' + p.id);
-  for (const p of seed.papers) add(p.url, 'paper:' + p.id, p.lastVerified);
+  for (const p of seed.papers) add(p.url, 'paper:' + p.id, p.lastVerified, p.linkCheck);
   for (const s of seed.paperSources) add(s.url, 'source:' + s.id);
   for (const c of seed.certs) add(c.url, 'cert:' + c.id);
   if (candidatesFile) {
     const candidates = JSON.parse(readFileSync(join(REPO_ROOT, candidatesFile), 'utf8')) as Record<string, string[]>;
     for (const [id, urls] of Object.entries(candidates)) for (const url of urls) add(url, 'candidate:' + id);
   }
-  return [...byUrl.entries()]
+  const picked = [...byUrl.entries()]
     .map(([url, refs]) => ({ url, refs }))
     .filter((t) => !only || t.url.includes(only) || t.refs.some((r) => r.includes(only)))
     .filter((t) => !checkedOn || dated.has(t.url))
     .filter((t) => !inIds || t.refs.some((r) => inIds.has(r.replace(/^resource:/, ''))));
+  skipped = picked.filter((t) => manual.has(t.url)).length;
+  return picked.filter((t) => !manual.has(t.url));
 }
 
 function decodeEntities(s: string): string {
@@ -145,7 +156,7 @@ async function check(target: Target): Promise<Result> {
 
 async function run(): Promise<void> {
   const targets = collectTargets();
-  console.log('Checking ' + targets.length + ' distinct URLs' + (wantTitles ? ' (GET, with titles)' : '') + '…\n');
+  console.log('Checking ' + targets.length + ' distinct URLs' + (wantTitles ? ' (GET, with titles)' : '') + (skipped ? ', leaving ' + skipped + ' opened by hand' : '') + '…\n');
   const results: Result[] = [];
   let next = 0;
   const worker = async (): Promise<void> => {
@@ -162,8 +173,9 @@ async function run(): Promise<void> {
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
   const failed = results.filter((r) => !r.ok);
-  // A 401, 403 or 429 usually means the site turns bots away, not that the page is gone: those are to open by hand.
-  const byHand = failed.filter((r) => r.status === 401 || r.status === 403 || r.status === 429);
+  // A 401, 403 or 429 usually means the site turns bots away, not that the page is gone, and some hosts fail any
+  // script (link-policy.ts): those are to open by hand.
+  const byHand = failed.filter((r) => r.status === 401 || r.status === 403 || r.status === 429 || linkPolicy(r.url) === 'script-side');
   const broken = failed.filter((r) => !byHand.includes(r));
   console.log('\n' + (results.length - failed.length) + ' ok, ' + broken.length + ' failed, ' + byHand.length + ' to check by hand');
   if (broken.length > 0) {
@@ -171,8 +183,8 @@ async function run(): Promise<void> {
     for (const r of broken) console.log('  ' + String(r.status ?? 'ERR').padEnd(4) + r.url + '  [' + r.refs.join(', ') + ']' + (r.error ? '  ' + r.error : ''));
   }
   if (byHand.length > 0) {
-    console.log('\nCheck by hand (the site turned the checker away):');
-    for (const r of byHand) console.log('  ' + String(r.status).padEnd(4) + r.url + '  [' + r.refs.join(', ') + ']');
+    console.log('\nCheck by hand (the site turned the checker away, or its host fails scripts):');
+    for (const r of byHand) console.log('  ' + String(r.status ?? 'ERR').padEnd(4) + r.url + '  [' + r.refs.join(', ') + ']' + (r.error ? '  ' + r.error : ''));
   }
   if (wantJson) {
     const dir = join(REPO_ROOT, 'reports');

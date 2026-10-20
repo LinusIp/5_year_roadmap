@@ -10,7 +10,7 @@ export interface ImportItem {
   title: string;
   short: string;
   type: 'video-course' | 'course' | 'book' | 'docs' | 'tutorial' | 'practice' | 'paper' | 'blog' | 'article';
-  track: 'ai' | 'inference' | 'graphics' | 'gamedev' | 'systems' | 'languages' | 'architecture' | 'robotics' | 'devops' | 'simulation' | 'math' | 'engineering';
+  track: 'ai' | 'inference' | 'graphics' | 'gamedev' | 'systems' | 'languages' | 'architecture' | 'robotics' | 'devops' | 'simulation' | 'math' | 'engineering' | 'hardware' | 'quantum';
   level: 'beginner' | 'intermediate' | 'advanced';
   hours: number;
   provider: string;
@@ -22,7 +22,7 @@ export interface ImportItem {
   year: 1 | 2 | 3;
   verified: string;
   /** ATLAS-LIBRARY's plan alignment: 1 inference and the AI feeding it, 2 architecture and systems, 3 graphics,
-   * simulation and robotics, 4 game development and electrical and mechanical engineering. */
+   * simulation, robotics and hardware, 4 game development, quantum computing and electrical and mechanical engineering. */
   priority?: 1 | 2 | 3 | 4;
   /** The roadmap.sh roadmap it serves, or "". */
   roadmap?: '' | 'inference-engineering' | 'ai-engineer' | 'ai-agents' | 'software-architect' | 'game-developer';
@@ -81,6 +81,8 @@ export const TRACK_OF = {
   simulation: 'simulation',
   math: 'math',
   engineering: 'engineering',
+  hardware: 'hardware',
+  quantum: 'quantum',
 } as const;
 export const LEVEL_OF = { beginner: 'intro', intermediate: 'intermediate', advanced: 'advanced' } as const;
 
@@ -152,6 +154,8 @@ export const SAME_AS: Readonly<Record<string, string>> = {
  * Vazirani's Algorithms is not Erickson's, LangChain's "Context Engineering" is not Anthropic's. From the 3,386-row file:
  * Google's "Agents" whitepaper is not Chip Huyen's "Agents", Karpathy's tokenizer video is not "Let's build GPT",
  * Lilian Weng's "Harness Engineering" is not OpenAI's, SGLang's structured outputs are neither Anthropic's nor OpenAI's.
+ * From the 3,811-row file: Fitzpatrick's PHY 329 notes are not Newman's Computational Physics, and David Tong's notes
+ * on topics in and on supersymmetric quantum mechanics are not his Quantum Mechanics.
  */
 export const NOT_SAME: Readonly<Record<string, readonly string[]>> = {
   'paper-orca': ['orca'],
@@ -161,6 +165,9 @@ export const NOT_SAME: Readonly<Record<string, readonly string[]>> = {
   'video-karpathy-gpt-tokenizer': ['video-karpathy-lets-build-gpt'],
   'article-weng-harness-engineering': ['article-openai-harness-engineering'],
   'docs-sglang-structured-outputs': ['docs-anthropic-structured-outputs', 'docs-openai-structured-outputs'],
+  'fitzpatrick-computational-physics-329': ['newman-computational-physics-chapters'],
+  'tong-topics-in-quantum-mechanics': ['tong-quantum-mechanics'],
+  'tong-supersymmetric-qm': ['tong-quantum-mechanics'],
 };
 
 /**

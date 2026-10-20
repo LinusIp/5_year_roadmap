@@ -15,6 +15,9 @@ export const TRACK_IDS = [
   // ATLAS-LIBRARY: containers, CI/CD, infrastructure and MLOps; electrical and mechanical engineering.
   'devops',
   'engineering',
+  // The Atlas Library's third file: chip design (CPU, GPU and NPU, RTL to tape-out); quantum computing and programming.
+  'hardware',
+  'quantum',
 ] as const;
 /** The lanes of the curriculum (plan.yaml, the phase table): the five of the first plan and H, Hugging Face, added with
  * the fixed daily schedule. The user can add blocks of their own beyond them. */
@@ -36,7 +39,7 @@ export type RoadmapId = (typeof ROADMAP_IDS)[number];
 const NodeRef = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must look like roadmap-id/node-id');
 export const CERT_MODES = ['committed', 'optional', 'investigate'] as const;
 
-/** One of the nineteen tracks, or a track the user created (`my-…`). */
+/** One of the twenty-one tracks, or a track the user created (`my-…`). */
 export type TrackId = (typeof TRACK_IDS)[number] | `my-${string}`;
 export type SeedTrackId = (typeof TRACK_IDS)[number];
 /** A block's id: A to E by default, any short capitalised id for a block the user adds. */
@@ -95,12 +98,16 @@ export const Text = z.string().trim().min(1);
  * Section 7, rule 1: never invent a URL. A link is either verified (url set, urlVerified
  * true, lastVerified dated) or absent (url null, urlVerified false, searchHint set).
  * There is deliberately no third state: an unverified URL cannot be written into the seed.
+ * `linkCheck: manual-ok` marks a link opened by hand that the site's server refuses to a script (a 403, a redirect loop,
+ * a certificate the checker's runtime rejects): `check:links` leaves it alone instead of reporting it as broken.
  */
+export const LINK_CHECKS = ['manual-ok'] as const;
 const linkFields = {
   url: HttpUrl.nullable(),
   urlVerified: z.boolean(),
   searchHint: Text.optional(),
   lastVerified: IsoDate.optional(),
+  linkCheck: z.enum(LINK_CHECKS).optional(),
 };
 
 interface LinkLike {
@@ -108,12 +115,14 @@ interface LinkLike {
   urlVerified: boolean;
   searchHint?: string | undefined;
   lastVerified?: string | undefined;
+  linkCheck?: string | undefined;
 }
 
 function checkLink(v: LinkLike, ctx: z.RefinementCtx): void {
   if (v.url === null) {
     if (v.urlVerified) ctx.addIssue({ code: 'custom', path: ['urlVerified'], message: 'must be false when url is null' });
     if (!v.searchHint) ctx.addIssue({ code: 'custom', path: ['searchHint'], message: 'is required when url is null (brief section 7, rule 1)' });
+    if (v.linkCheck) ctx.addIssue({ code: 'custom', path: ['linkCheck'], message: 'marks a link: it needs a url' });
   } else {
     if (!v.urlVerified) ctx.addIssue({ code: 'custom', path: ['url'], message: 'an unverified url may not be stored: verify it, or set url to null and add a searchHint' });
     if (!v.lastVerified) ctx.addIssue({ code: 'custom', path: ['lastVerified'], message: 'is required when a url is set' });
