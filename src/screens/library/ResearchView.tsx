@@ -13,10 +13,10 @@ const FIRST = 12;
 const SHELF_LABEL = Object.fromEntries(SHELVES.map((s) => [s.key, s.key === 'practice' ? 'Practice' : s.label.replace(/s$/, '')]));
 
 /**
- * Research (ATLAS-LIBRARY): year 3's reading, by area (Inference, World models, Diffusion, Generative AI), papers first
+ * Research (ATLAS-LIBRARY): year 3's reading, resources and the reading queue's papers, by area (Inference, World models, Diffusion, Generative AI), papers first
  * and the foundations (years 1 and 2) before the frontier (year 3). Each area shows twelve and opens in full.
  */
-export function ResearchView({ atlas, onOpen }: { atlas: Atlas; onOpen: (refId: string) => void }) {
+export function ResearchView({ atlas, onOpen, onOpenPaper }: { atlas: Atlas; onOpen: (refId: string) => void; onOpenPaper: (id: string) => void }) {
   const areas = researchAreas(atlas.seed, atlas.states);
   const [open, setOpen] = useState<Set<string>>(new Set());
   const total = areas.reduce((n, a) => n + a.items.length, 0);
@@ -29,17 +29,17 @@ export function ResearchView({ atlas, onOpen }: { atlas: Atlas; onOpen: (refId: 
         return (
           <RowList key={area.id} label={area.name + ' · ' + area.items.length} className="mt-[18px]">
             {shown.map((r) => {
-              const shelf = shelfOf(r);
-              const status = atlas.states.get(r.id)?.status;
+              const shelf = r.kind === 'paper' ? 'paper' : shelfOf(r);
+              const status = r.kind === 'resource' ? atlas.states.get(r.id)?.status : undefined;
               return (
                 <Row
                   key={r.id}
                   icon={<IconTile icon={SHELF_ICON[shelf]} tone={shelf === 'paper' || shelf === 'blog' || shelf === 'practice' ? 'ice' : 'blue'} />}
-                  title={r.short ?? r.title}
-                  meta={[r.fromYear ? 'Year ' + r.fromYear : null, SHELF_LABEL[shelf], r.provider].filter(Boolean).join(' · ')}
+                  title={r.title}
+                  meta={[r.fromYear ? 'Year ' + r.fromYear : null, SHELF_LABEL[shelf], r.by].filter(Boolean).join(' · ')}
                   trailing={status === 'active' ? 'Active' : status === 'done' ? 'Done' : undefined}
                   truncate
-                  onClick={() => onOpen(r.id)}
+                  onClick={() => (r.kind === 'paper' ? onOpenPaper(r.id) : onOpen(r.id))}
                 />
               );
             })}

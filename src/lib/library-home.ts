@@ -110,17 +110,39 @@ export const RESEARCH: readonly { id: ResearchArea; name: string }[] = [
   { id: 'genai', name: 'Generative AI' },
 ];
 
+/** One item of the Research view: a resource, or a paper of the reading queue (which opens its own sheet). */
+export interface ResearchItem {
+  kind: 'resource' | 'paper';
+  id: string;
+  title: string;
+  /** The resource type; "paper" for the queue's. */
+  type: string;
+  blog?: boolean | undefined;
+  fromYear?: number | undefined;
+  /** Its provider, or the paper's authors. */
+  by?: string | undefined;
+  fit: Fit;
+}
+
 /**
- * The Research view: every resource with a research area, by area, papers first, the foundations (years 1 and 2)
- * before the frontier (year 3), then by fit and name. Dropped ones stay out.
+ * The Research view: every resource and every paper of the reading queue with a research area, by area, papers first,
+ * the foundations (years 1 and 2) before the frontier (year 3), then by fit and name. Dropped resources stay out.
  */
-export function researchAreas(seed: AppSeed, states: ReadonlyMap<string, UserItemState>): { id: ResearchArea; name: string; items: AppSeed['resources'] }[] {
-  const frontier = (r: { fromYear?: number | undefined }): number => ((r.fromYear ?? 3) >= 3 ? 1 : 0);
+export function researchAreas(seed: AppSeed, states: ReadonlyMap<string, UserItemState>): { id: ResearchArea; name: string; items: ResearchItem[] }[] {
+  const frontier = (r: ResearchItem): number => ((r.fromYear ?? 3) >= 3 ? 1 : 0);
+  const items: (ResearchItem & { area: ResearchArea })[] = [
+    ...seed.resources
+      .filter((r) => r.research !== undefined && states.get(r.id)?.status !== 'dropped')
+      .map((r) => ({ kind: 'resource' as const, id: r.id, title: r.short ?? r.title, type: r.type, blog: r.blog, fromYear: r.fromYear, by: r.provider, fit: fitOf(r), area: r.research! })),
+    ...seed.papers
+      .filter((p) => p.research !== undefined)
+      .map((p) => ({ kind: 'paper' as const, id: p.id, title: p.short ?? p.title, type: 'paper', fromYear: p.fromYear, by: p.authors, fit: fitOf(p), area: p.research! })),
+  ];
   return RESEARCH.map((area) => ({
     ...area,
-    items: seed.resources
-      .filter((r) => r.research === area.id && states.get(r.id)?.status !== 'dropped')
-      .sort((a, b) => Number(b.type === 'paper') - Number(a.type === 'paper') || frontier(a) - frontier(b) || byFit(fitOf(a), fitOf(b)) || (a.short ?? a.title).localeCompare(b.short ?? b.title)),
+    items: items
+      .filter((r) => r.area === area.id)
+      .sort((a, b) => Number(b.type === 'paper') - Number(a.type === 'paper') || frontier(a) - frontier(b) || byFit(a.fit, b.fit) || a.title.localeCompare(b.title)),
   }));
 }
 

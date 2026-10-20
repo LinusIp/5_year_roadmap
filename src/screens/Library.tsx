@@ -440,7 +440,7 @@ export function Library({ openId }: { openId?: string }) {
 
   return (
     <Screen title="Library">
-      {mode === 'path' && pathId === 'research' && <ResearchView atlas={atlas} onOpen={(id) => navigate('/library/' + id + (keep ? '?' + keep : ''))} />}
+      {mode === 'path' && pathId === 'research' && <ResearchView atlas={atlas} onOpen={(id) => navigate('/library/' + id + (keep ? '?' + keep : ''))} onOpenPaper={(id) => setPaperId(id, { replace: false })} />}
       {mode === 'path' && pathId && pathId !== 'research' && <PathView atlas={atlas} pathId={pathId} onOpen={(id) => navigate('/library/' + id + (keep ? '?' + keep : ''))} onOpenPaper={(id) => setPaperId(id, { replace: false })} />}
 
       {/* Home and search share one header and one search box, so typing the first letter keeps focus. */}
