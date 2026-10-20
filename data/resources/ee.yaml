@@ -126,6 +126,8 @@
   estHours: 40
   subject: fpga
   summary: "The reading for project 42 (UART and a VGA/HDMI pattern generator)."
+  after: [practice-hdlbits]
+  priority: 3
 
 - id: fpga4fun
   title: "fpga4fun.com"
@@ -413,6 +415,10 @@
   estHours: 0
   reference: true
   summary: "The open-source alternative to LTspice, scriptable from the command line."
+  short: "ngspice"
+  fromYear: 2
+  after: [xschem]
+  priority: 3
 
 - id: feedback-systems
   title: "Feedback Systems (Åström and Murray, free PDF)"

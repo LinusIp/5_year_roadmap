@@ -30,6 +30,8 @@ export const PATH_ICON: Record<string, { icon: IconName; tone: 'blue' | 'ice' }>
   inference: { icon: 'gauge', tone: 'ice' },
   devops: { icon: 'container', tone: 'blue' },
   simulation: { icon: 'atom', tone: 'ice' },
+  hardware: { icon: 'chip', tone: 'blue' },
+  quantum: { icon: 'orbit', tone: 'ice' },
   research: { icon: 'flask', tone: 'ice' },
 };
 

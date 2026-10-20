@@ -10,7 +10,7 @@
 /** The brief's sixteen tracks, `architecture` (MORE-RESOURCES) and `devops` and `engineering` (ATLAS-LIBRARY); the flexibility brief adds tracks the user creates (`my-…`). */
 export type TrackId =
   | 'ai' | 'swe' | 'systems' | 'graphics' | 'simulation' | 'gamedev'
-  | 'languages' | 'math' | 'physics' | 'ee' | 'embedded' | 'controls' | 'mech' | 'robotics' | 'chem' | 'career' | 'architecture' | 'devops' | 'engineering' | `my-${string}`;
+  | 'languages' | 'math' | 'physics' | 'ee' | 'embedded' | 'controls' | 'mech' | 'robotics' | 'chem' | 'career' | 'architecture' | 'devops' | 'engineering' | 'hardware' | 'quantum' | `my-${string}`;
 
 /** The brief had 'A' | 'B' | 'C' | 'D' | 'E'. The flexibility brief made blocks open-ended: A-E stay the defaults. */
 export type BlockId = string;

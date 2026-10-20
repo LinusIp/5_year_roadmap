@@ -4,7 +4,8 @@ import { FIRST_DAY, open, showMoreUntil } from './helpers.ts';
 /**
  * The whole Atlas Library (ATLAS-LIBRARY): about 2,400 resources, loaded after the first screen, in the plan's order
  * (priority, year, level), with Level and Roadmap chips, a Research view, Inference engineering, DevOps, Simulation,
- * Math and Engineering paths, roadmap.sh's pages at the head of their paths, and "Write log entry" on a resource's sheet.
+ * Math, Engineering, Hardware and Quantum computing paths, roadmap.sh's pages at the head of their paths, and "Write log
+ * entry" on a resource's sheet.
  */
 test.use({ timezoneId: 'Asia/Tashkent', serviceWorkers: 'block' });
 
@@ -100,6 +101,20 @@ test('the Math and Engineering paths list their resources under Optional, and ol
   // Electrical and embedded and Mechanical are part of Engineering now.
   await open(page, './#/library?path=ee');
   await expect(page.getByRole('heading', { level: 1, name: 'Engineering' })).toBeVisible();
+});
+
+test('the Hardware and Quantum computing paths list their resources under Optional', async ({ page }) => {
+  await open(page, './#/library?path=hardware');
+  await expect(page.getByRole('heading', { level: 1, name: 'Hardware and chip design' })).toBeVisible();
+  const hardware = page.getByRole('button', { name: /^Optional for this path/ });
+  if ((await hardware.getAttribute('aria-expanded')) === 'false') await hardware.click();
+  await showMoreUntil(page, page.getByRole('button', { name: /^Build a RISC-V Core/ }));
+
+  await open(page, './#/library?path=quantum');
+  await expect(page.getByRole('heading', { level: 1, name: 'Quantum computing' })).toBeVisible();
+  const quantum = page.getByRole('button', { name: /^Optional for this path/ });
+  if ((await quantum.getAttribute('aria-expanded')) === 'false') await quantum.click();
+  await showMoreUntil(page, page.getByRole('button', { name: /^IBM Quantum Composer/ }));
 });
 
 test('a blog card opens its sheet with its link, and Write log entry starts the outline with it', async ({ page }) => {

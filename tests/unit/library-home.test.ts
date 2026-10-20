@@ -91,11 +91,13 @@ describe('the plan\'s order (ATLAS-LIBRARY)', () => {
     expect(priorityOf({ tracks: ['devops'] })).toBe(2);
     expect(priorityOf({ tracks: ['graphics'] })).toBe(3);
     expect(priorityOf({ tracks: ['gamedev'] })).toBe(4);
+    expect(priorityOf({ tracks: ['hardware'] })).toBe(3);
+    expect(priorityOf({ tracks: ['quantum'] })).toBe(4);
     expect(priorityOf({ priority: 1, tracks: ['gamedev'] })).toBe(1);
   });
 
   it('orders every path\'s optional list by fit', () => {
-    for (const id of ['ai', 'inference', 'architecture', 'devops', 'simulation', 'robotics', 'graphics', 'math', 'engineering']) {
+    for (const id of ['ai', 'inference', 'architecture', 'devops', 'simulation', 'robotics', 'graphics', 'math', 'engineering', 'hardware', 'quantum']) {
       const extras = pathExtras(seed, new Map(), id).map(fitOf);
       expect(extras.length, id).toBeGreaterThan(10);
       for (let i = 1; i < extras.length; i++) expect(byFit(extras[i - 1]!, extras[i]!), id + ' at ' + i).toBeLessThanOrEqual(0);
@@ -124,6 +126,9 @@ describe('Inference engineering, DevOps, Simulation and Research (ATLAS-LIBRARY)
     for (const track of ['engineering', 'ee', 'embedded', 'controls', 'mech']) expect(pathOfTrack(seed, track)?.id, track).toBe('engineering');
     expect(pathOfTrack(seed, 'math')?.id).toBe('math');
     expect(pathOfTrack(seed, 'physics')?.id).toBe('math');
+    // Hardware and chip design, and Quantum computing, are paths of their own, not Engineering's or Math and physics'.
+    expect(pathOfTrack(seed, 'hardware')?.id).toBe('hardware');
+    expect(pathOfTrack(seed, 'quantum')?.id).toBe('quantum');
   });
 
   it('heads the roadmap paths with roadmap.sh\'s official pages, and keeps them out of the optional list', () => {
