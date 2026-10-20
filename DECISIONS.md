@@ -1382,5 +1382,10 @@ Library screen waits for it too. At a 4x CPU slowdown on a 390 px phone: Today 1
 and the outline starts with a section for that resource: its title and track, its link, "What I learned" and
 "Stuck on".
 
-**Links.** As in pull request #19, a one-off CI job runs `check:links --checked 2026-10-19` (every row of the file is
-dated that day) and the pull request carries the report; 401, 403 and 429 are "check by hand"; nothing edits data.
+**Links.** As in pull request #19, a one-off CI job ran `check:links --checked 2026-10-19` (every row of the file is
+dated that day) once and was removed before the merge; the pull request carries the report. Of 2,173 links, 2,090
+answered and 49 turned the checker away (401, 403, 429: to open by hand). 34 failed: 17 answered 404 or 410 (the page
+is gone or moved, among them `paper-kung-why-systolic`, `article-kreps-the-log`, `paper-apic`, `paper-dijkstra-1959`),
+and 17 did not answer the runner properly (a certificate it could not verify, a redirect loop, a timeout, a refused
+connection, a 400 and a 522), which a browser often gets past. Nothing was changed: a link is replaced only after
+someone opens it by hand and finds the page.
