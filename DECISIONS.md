@@ -1470,3 +1470,12 @@ in step. Nothing edits a URL.
 **Speed.** The Library chunk grows to 426 kB gzipped; Today's seed stays at 181 kB. At 4x CPU on a 390 px screen,
 Today shows its heading in 1.5 to 1.7 s, the Papers shelf in 1.3 to 1.4 s, and a search keystroke takes 0.19 to
 0.31 s, as before.
+
+**The new rows' links, from the runner.** A one-off `links-atlas-3` job checked the 418 new URLs on the pull request
+(run 39431548594) and was then removed: 409 answered, 7 are to check by hand and 2 failed. No URL was changed.
+
+- Check by hand: the MOOSE framework site, the IAEA's LiveChart and online courses and PPPL's plasma and fusion page,
+  Xschem's page and The Chip Letter (all 403, the site refusing a script), and TensorFlow Quantum (tensorflow.org's
+  redirect loop, which the link policy now lists to check by hand instead of as broken).
+- Failed: WikiChip refused the connection, and the TVM page on VTA's hardware answered 404; both are for opening in a
+  browser, and neither is marked until someone has.
