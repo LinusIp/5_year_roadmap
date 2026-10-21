@@ -7,6 +7,7 @@ import { navigate, useLocation } from './router/router.tsx';
 import { KeyboardShortcuts } from './screens/Shortcuts.tsx';
 import { ForgottenTimer } from './screens/parts/ForgottenTimer.tsx';
 import { SyncNotice } from './screens/parts/SyncNotice.tsx';
+import { UpdateNotice } from './screens/parts/UpdateNotice.tsx';
 import { UndoToast } from './ui/UndoToast.tsx';
 import { Today } from './screens/Today.tsx';
 import { seed } from './seed/index.ts';
@@ -121,6 +122,7 @@ export function App() {
       <KeyboardShortcuts />
       {settings && <ForgottenTimer blocks={settings.core.blocks} clock={settings.layout.general.clock} />}
       <SyncNotice />
+      <UpdateNotice />
       <UndoToast />
     </>
   );

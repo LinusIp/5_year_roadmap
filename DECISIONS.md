@@ -1634,3 +1634,32 @@ has opened it.
   Data Parallel C++ at OAPEN, Pat Helland's Substack, DOAJ, Princeton's Hidden Symmetries school, Big Think, Symmetry
   Magazine, Gelman's Statistical Modeling blog, the Engineering ToolBox, Everyday Astronaut, engineering.com, Nordic's
   DevZone, All About Circuits, RF Cafe and TSMC's CoWoS page (403); and HashiCorp's two pages (429 past the retry).
+
+## The update that never came (pull request #26)
+
+A phone stayed on the build before pull request #24 for a day, through dozens of reloads, with no update prompt on
+Today. Two gaps in the page's side of the service worker (`src/pwa/register.ts`), and no way out once a new version
+would not install:
+
+- **The prompt lived on Today alone**, so a reload on the Library never showed it. It is a pill above the tab bar
+  now (`UpdateNotice`, in the app shell), on every screen, until tapped: one secondary pill, so a screen keeps its
+  own filled button. The live check finds it by the same name.
+- **An install under way when the page loaded was never announced.** The 83 files take a while on a phone; a reload
+  meanwhile gives a page for which `updatefound` fired before it existed, and the worker's later "installed" went
+  unheard until the next full navigation. The page now follows `registration.installing` at load as well.
+- **A failed install waited for the next navigation.** Pull request #24's deploy showed what one looks like (one
+  503 from GitHub Pages); on a device the browser tries again only when the page is navigated to. The page now asks
+  the site for a newer version itself when it opens and when it comes back into view (at most once a minute), and
+  after a failed install tries again after 20 s, 60 s and 3 min. The worker tells the open pages which file failed
+  before it is dropped (`installFailed`), and answers `version` over a port with its build, so the page can say.
+- **Settings > Atlas on this device**: the build the device runs (from the worker serving it; "Not kept offline yet"
+  on a first visit), "Check for updates" with what it found ("This is the latest version", "A new version is ready",
+  or the failed file), and "Reset offline copy", which unregisters every worker, deletes the `atlas-*` caches and
+  reloads from the site. That is the way out when a new version keeps failing to install: the page then loads from
+  the network, uncontrolled, and runs the current build whether or not the next install succeeds. The user's data
+  is in IndexedDB and is not touched; the row says so.
+
+Tests: `tests/unit/register.test.ts` runs the page side against fakes (an update waiting at load, one found later,
+an install under way at load, a first install never offered, a failed install's reason and retry, the version
+question, the reset); `tests/unit/sw.test.ts` the worker's failure report and version answer; `tests/e2e/shell.spec.ts`
+the Settings section on the built app (the version after a reload, a check that finds nothing newer).

@@ -383,6 +383,12 @@ The deploy checks itself (`scripts/live-check.ts`): before deploying, a browser 
 user on the old build; after it, the app's update prompt must appear, Reload must bring in the new version (its
 service-worker cache), and the main screens must render without an error. If not, the deploy run fails.
 
+On a device, the new version downloads in the background and a pill above the tab bar, on every screen, offers
+Reload once it is in. The app asks the site for a newer version when it opens and when it comes back into view,
+and tries a failed download again a little later. Settings > "Atlas on this device" names the build the device
+runs, checks for updates on demand (saying which file failed, when one did) and can drop the offline copy and
+reload from the site, which keeps your data: it lives in the browser's database, not the cache.
+
 ## GitHub Sync (optional)
 
 Off until you connect it. With it on, a private GitHub repository is where your log and progress live, and the

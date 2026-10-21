@@ -30,6 +30,7 @@ import { Layout } from './settings/Layout.tsx';
 import { BlogSettings } from './settings/BlogSettings.tsx';
 import { SleepSettings } from './settings/SleepSettings.tsx';
 import { ProjectSettings } from './settings/ProjectSettings.tsx';
+import { About } from './settings/About.tsx';
 import { Problem, Section, saveCore } from './settings/shared.tsx';
 import { exportBackup } from './parts/backupActions.ts';
 import { ShortcutRows } from './Shortcuts.tsx';
@@ -420,6 +421,7 @@ export function Settings() {
           <Keyboard />
           <Backup settings={atlas.settings} />
           <Sync settings={atlas.settings} />
+          <About />
         </div>
       )}
     </Screen>
