@@ -1488,7 +1488,7 @@ and by title within a shelf, the matches listed, its URLs copied exactly. It is 
 agent harnesses, evaluation and benchmarks, and self-improving agents. None of its ids was in the Library and, once
 three short-title matches were read and kept apart, nothing matched: all 226 are new, in
 `data/resources/library-harness.yaml` (98 papers, 73 articles with 4 docs, 55 practice codebases). Resources: 3,834 to
-4,060. No track, path or screen changes: they join AI engineering, the AI Agents (168) and AI Engineer (55)
+4,060. No track, path or screen changes: they join AI engineering, the AI Agents (171) and AI Engineer (55)
 roadmaps, and the Research view (45 more under Generative AI, one each under World models and Diffusion, all as the
 file gives them).
 
