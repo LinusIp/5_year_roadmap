@@ -1498,3 +1498,8 @@ like "Weak-to-Strong". All three are in `NOT_SAME`.
 
 **Speed.** The Library chunk grows to 453 kB gzipped; Today's seed stays at 181 kB. At 4x CPU on a 390 px screen,
 Today shows its heading in 1.5 s, the Papers shelf in 1.2 s and a search keystroke takes 0.21 to 0.23 s.
+
+**The new rows' links, from the runner.** A one-off `links-harness` job checked the 226 new URLs on the pull request
+(run 39546069621) and was then removed: 225 answered and 1 failed. AgentScope's docs page
+(`https://doc.agentscope.io/en/index.html`, `docs-agentscope`) answered 404; it is for opening in a browser, and its
+URL stays as the file gave it.
