@@ -1617,4 +1617,20 @@ counts the attempts.
 there, and a search answers in 0.2 to 0.4 s: the same as pull request #24, within noise.
 
 **The new rows' links, from the runner.** A one-off `links-atlas-5` job checked the 954 new URLs on the pull request
-and was then removed; its report is below.
+twice (runs 39625645361 and 39625985694) and was then removed. The first run read 885 of the links as fine, 17 as
+failed and 52 as ones to open by hand; the second 892, 12 and 50. No URL was changed; nothing is marked until someone
+has opened it.
+
+- Failed in both runs (12): four 404s (Goose's architecture page, Prime Intellect's verifiers environments, Frostbite's
+  rendering-pipeline post, NPTEL's rocket propulsion course); docs.kubos.com, not found by DNS; neptune.ai, whose
+  certificate has expired; wikichip's fuse, refusing the connection; KTH's DH2323 labs (502) and TU Delft's spacecraft
+  technology course (503); and three timeouts (the STREAM benchmark page at Virginia, Score-P at vi-hps.org, GAMES101 at
+  UCSB).
+- Failed in one run only (5): four Khronos blog posts answered 503 in the first run and fine in the second (as pull
+  request #24's three did); Tanya Khovanova's blog timed out in the first.
+- To check by hand (52 and 50): docs.vulkan.org's 28 pages (the Vulkan Guide, Tutorial and Samples, answering 403 to
+  a script as in pull request #24), Etsy's and DoorDash's engineering blogs, MPICH's guides, ALCF's Aurora docs, the
+  ATPESC archive, the SYCL 2020 spec at Khronos' registry, Foster's Designing and Building Parallel Programs at ANL,
+  Data Parallel C++ at OAPEN, Pat Helland's Substack, DOAJ, Princeton's Hidden Symmetries school, Big Think, Symmetry
+  Magazine, Gelman's Statistical Modeling blog, the Engineering ToolBox, Everyday Astronaut, engineering.com, Nordic's
+  DevZone, All About Circuits, RF Cafe and TSMC's CoWoS page (403); and HashiCorp's two pages (429 past the retry).
