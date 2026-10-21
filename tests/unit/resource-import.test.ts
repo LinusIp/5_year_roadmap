@@ -249,6 +249,9 @@ describe('the whole library (ATLAS-LIBRARY)', () => {
     // Two books called "Computational Physics" by different authors stay two.
     const newman = { id: 'newman-computational-physics-chapters', title: 'Computational Physics (free sample chapters)', url: 'https://websites.umich.edu/~mejn/cp/chapters.html', shelf: 'book' };
     expect(findExisting(item({ id: 'fitzpatrick-computational-physics-329', type: 'book', title: 'Computational Physics (PHY 329 lecture notes)', url: 'https://farside.ph.utexas.edu/teaching/329/329.html' }), [newman])).toBeNull();
+    // A meta-agent paper whose short title, brackets dropped, reads like another's: "Weak-for-Strong (W4S)".
+    const weakToStrong = { id: 'paper-weak-to-strong-generalization', title: 'Weak-to-Strong Generalization: Eliciting Strong Capabilities With Weak Supervision', short: 'Weak-to-Strong', url: 'https://arxiv.org/abs/2312.09390', shelf: 'paper' };
+    expect(findExisting(item({ id: 'paper-weak-for-strong', type: 'paper', title: 'Weak-for-Strong: Training Weak Meta-Agent to Harness Strong Executors', short: 'Weak-for-Strong (W4S)', url: 'https://arxiv.org/abs/2504.04785' }), [weakToStrong])).toBeNull();
   });
 
   it('keeps an entry what it has, and the user what they did: an upsert only adds', () => {

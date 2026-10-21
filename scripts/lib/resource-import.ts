@@ -155,7 +155,9 @@ export const SAME_AS: Readonly<Record<string, string>> = {
  * Google's "Agents" whitepaper is not Chip Huyen's "Agents", Karpathy's tokenizer video is not "Let's build GPT",
  * Lilian Weng's "Harness Engineering" is not OpenAI's, SGLang's structured outputs are neither Anthropic's nor OpenAI's.
  * From the 3,811-row file: Fitzpatrick's PHY 329 notes are not Newman's Computational Physics, and David Tong's notes
- * on topics in and on supersymmetric quantum mechanics are not his Quantum Mechanics.
+ * on topics in and on supersymmetric quantum mechanics are not his Quantum Mechanics. From the harness additions: Sakana's
+ * MASS (recursive self-improvement) is not "Multi-Agent Design" (MASS too), Fowler's "Context Engineering for Coding
+ * Agents" is not HumanLayer's "Advanced" one, and Weak-for-Strong (a meta-agent) is not Weak-to-Strong Generalization.
  */
 export const NOT_SAME: Readonly<Record<string, readonly string[]>> = {
   'paper-orca': ['orca'],
@@ -168,6 +170,9 @@ export const NOT_SAME: Readonly<Record<string, readonly string[]>> = {
   'fitzpatrick-computational-physics-329': ['newman-computational-physics-chapters'],
   'tong-topics-in-quantum-mechanics': ['tong-quantum-mechanics'],
   'tong-supersymmetric-qm': ['tong-quantum-mechanics'],
+  'paper-sakana-mass': ['paper-mass-multi-agent-design'],
+  'article-fowler-context-engineering-coding-agents': ['article-humanlayer-advanced-context-engineering'],
+  'paper-weak-for-strong': ['paper-weak-to-strong-generalization'],
 };
 
 /**

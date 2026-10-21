@@ -4,8 +4,8 @@ import { FIRST_DAY, open, showMoreUntil } from './helpers.ts';
 /**
  * The whole Atlas Library (ATLAS-LIBRARY): about 2,400 resources, loaded after the first screen, in the plan's order
  * (priority, year, level), with Level and Roadmap chips, a Research view, Inference engineering, DevOps, Simulation,
- * Math, Engineering, Hardware and Quantum computing paths, roadmap.sh's pages at the head of their paths, and "Write log
- * entry" on a resource's sheet.
+ * Math, Engineering, Hardware and Quantum computing paths, roadmap.sh's pages at the head of their paths, "Write log
+ * entry" on a resource's sheet, and the harness additions in search.
  */
 test.use({ timezoneId: 'Asia/Tashkent', serviceWorkers: 'block' });
 
@@ -58,6 +58,20 @@ test('the Research view shows all four areas, papers first', async ({ page }) =>
   }
   const worldModels = page.locator('section', { has: page.getByRole('heading', { name: /^World models/ }) });
   await expect(worldModels.getByRole('button').first()).toContainText('Paper');
+});
+
+test('search finds the harness additions: Meta-Harness, the Darwin Gödel Machine, under AI Agents', async ({ page }) => {
+  await open(page, './#/library');
+  const search = page.getByRole('searchbox', { name: 'Search the library' });
+  await search.fill('Meta-Harness');
+  await expect(page.getByRole('button', { name: /^Meta-Harness/ }).first()).toBeVisible();
+  await search.fill('Darwin Gödel');
+  await expect(page.getByRole('button', { name: /^Darwin Gödel Machine/ }).first()).toBeVisible();
+  // Both serve roadmap.sh's AI Agents roadmap, so its chip keeps them.
+  await page.getByRole('group', { name: 'Level and roadmap' }).getByRole('button', { name: /^Roadmap/ }).click();
+  await page.getByRole('dialog', { name: 'Roadmap' }).getByRole('button', { name: /^AI Agents/ }).click();
+  await expect(page).toHaveURL(/roadmap=ai-agents/);
+  await expect(page.getByRole('button', { name: /^Darwin Gödel Machine/ }).first()).toBeVisible();
 });
 
 test('the Inference engineering path opens with the roadmap.sh page', async ({ page }) => {

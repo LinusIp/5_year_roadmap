@@ -1091,3 +1091,12 @@ Verified on this machine (Linux, Chromium 140):
   that fail scripts, and `check:links` leaves the first alone and lists the second's failures to check by hand.
 - Tests: hardware and quantum mapping, paths and priorities; the link policy and its marks in the data; a third
   "kept apart" pair; `tests/e2e/atlas-library.spec.ts`: the Hardware and Quantum computing paths.
+
+## Pull request #23: the Atlas Library's harness additions
+
+- `data/resources/library-harness.yaml`: 226 new resources, all AI (98 papers, 73 articles with 4 docs, 55 practice
+  codebases): agent harnesses, evaluation and benchmarks, self-improving agents. Resources: 3,834 to 4,060.
+- Three more pairs in `NOT_SAME` (two MASS papers, two context-engineering articles, Weak-for-Strong and
+  Weak-to-Strong).
+- Tests: Weak-for-Strong kept apart; `tests/e2e/atlas-library.spec.ts`: search finds Meta-Harness and the Darwin
+  Gödel Machine, and the AI Agents roadmap chip keeps them.
