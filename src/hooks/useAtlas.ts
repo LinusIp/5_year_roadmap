@@ -26,9 +26,25 @@ export interface Atlas {
   patches: PlanPatch[];
 }
 
-/** The Library's long tail (ATLAS-LIBRARY): null until its chunk, asked for after the first render, has loaded. */
-export function useLibrary(): AppSeed['resources'] | null {
-  useEffect(() => void loadLibrary(), []);
+/** Runs `fn` once the browser is idle, within two seconds; the few browsers without idle callbacks wait a moment. */
+function whenIdle(fn: () => void): () => void {
+  if (typeof requestIdleCallback === 'function') {
+    const handle = requestIdleCallback(fn, { timeout: 2000 });
+    return () => cancelIdleCallback(handle);
+  }
+  const handle = setTimeout(fn, 600);
+  return () => clearTimeout(handle);
+}
+
+/**
+ * The Library's long tail (ATLAS-LIBRARY): null until its chunk has loaded. A screen that needs it at once (the
+ * Library) says so; otherwise `useAtlas` asks for it once the first screen has its plan and the browser is idle, since
+ * ten thousand resources parse for a good part of a second on a slow phone and would hold up Today's first screen.
+ */
+export function useLibrary(now = false): AppSeed['resources'] | null {
+  useEffect(() => {
+    if (now) void loadLibrary();
+  }, [now]);
   return useSyncExternalStore(subscribeLibrary, peekLibrary);
 }
 
@@ -57,6 +73,16 @@ export function useAtlas(): Atlas | undefined {
     () => (overrides && customs && patches && !waiting ? resolveSeed(rawSeed, overrides, customs, patches) : null),
     [rawSeed, overrides, customs, patches, waiting],
   );
+  // The long tail: at once when the plan names it, else once the first screen has its plan and the browser is idle.
+  const ready = resolved !== null;
+  useEffect(() => {
+    if (peekLibrary()) return undefined;
+    if (waiting) {
+      void loadLibrary();
+      return undefined;
+    }
+    return ready ? whenIdle(() => void loadLibrary()) : undefined;
+  }, [ready, waiting]);
 
   return useMemo(() => {
     if (!settings || !states || !logs || !resolved || !patches) return undefined;

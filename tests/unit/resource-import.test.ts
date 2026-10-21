@@ -102,6 +102,13 @@ describe('the prerequisite links', () => {
     expect(resolveAfter(' OSTEP ', known)).toBe('ostep');
   });
 
+  it('prefer the same case when short titles differ only in case: ReST is not REST', () => {
+    const papers = [{ id: 'paper-rest-retrieval-spec', short: 'REST' }, { id: 'paper-rest-reinforced-self-training', short: 'ReST' }];
+    expect(resolveAfter('ReST', papers)).toBe('paper-rest-reinforced-self-training');
+    expect(resolveAfter('REST', papers)).toBe('paper-rest-retrieval-spec');
+    expect(resolveAfter('rest', papers)).toBe('paper-rest-retrieval-spec');
+  });
+
   it('resolve nothing for an empty or unknown name', () => {
     expect(resolveAfter('', known)).toBeNull();
     expect(resolveAfter('Rust', known)).toBeNull();
@@ -252,6 +259,24 @@ describe('the whole library (ATLAS-LIBRARY)', () => {
     // A meta-agent paper whose short title, brackets dropped, reads like another's: "Weak-for-Strong (W4S)".
     const weakToStrong = { id: 'paper-weak-to-strong-generalization', title: 'Weak-to-Strong Generalization: Eliciting Strong Capabilities With Weak Supervision', short: 'Weak-to-Strong', url: 'https://arxiv.org/abs/2312.09390', shelf: 'paper' };
     expect(findExisting(item({ id: 'paper-weak-for-strong', type: 'paper', title: 'Weak-for-Strong: Training Weak Meta-Agent to Harness Strong Executors', short: 'Weak-for-Strong (W4S)', url: 'https://arxiv.org/abs/2504.04785' }), [weakToStrong])).toBeNull();
+  });
+
+  it('needs more than a word or two to call titles alike (the 10,436-row file)', () => {
+    // One-word short titles name different papers: GEM the gym and GEM the continual-learning method.
+    const gem = { id: 'paper-gem-gym-agentic-llms', title: 'GEM: A Gym for Agentic LLMs', short: 'GEM', url: 'https://arxiv.org/abs/2510.01051', shelf: 'paper' };
+    expect(findExisting(item({ id: 'paper-gem', type: 'paper', title: 'Gradient Episodic Memory for Continual Learning', short: 'GEM', url: 'https://arxiv.org/abs/1706.08840' }), [gem])).toBeNull();
+    // Two-word titles, their brackets dropped, are too generic: every API has structured outputs.
+    const sglang = { id: 'docs-sglang-structured-outputs', title: 'Structured Outputs (SGLang)', short: 'SGLang Structured Out.', url: 'https://docs.sglang.ai/advanced_features/structured_outputs.html', shelf: 'article' };
+    expect(findExisting(item({ id: 'docs-gemini-structured-output', type: 'docs', title: 'Structured outputs (Gemini API)', short: 'Gemini Structured Output', url: 'https://ai.google.dev/gemini-api/docs/generate-content/structured-output' }), [sglang])).toBeNull();
+    // A title is never read against a short title: "Bevy ECS (crate README)" is not "Bevy ECS Quickstart"'s short name.
+    const bevy = { id: 'docs-bevy-ecs-quickstart', title: 'Bevy ECS Quick Start', short: 'Bevy ECS', url: 'https://bevyengine.org/learn/quick-start/getting-started/ecs/', shelf: 'article' };
+    expect(findExisting(item({ id: 'docs-bevy-ecs-readme', type: 'docs', title: 'Bevy ECS (crate README)', short: 'Bevy ECS README', url: 'https://github.com/bevyengine/bevy/tree/main/crates/bevy_ecs' }), [bevy])).toBeNull();
+    // Two-word short titles alike still match: the Essence of Calculus is 3b1b's calculus.
+    const calculus = { id: '3b1b-calculus', title: 'Essence of Calculus (3Blue1Brown)', short: 'Essence of Calculus', url: 'https://www.3blue1brown.com/topics/calculus', shelf: 'course' };
+    expect(findExisting(item({ id: 'course-3b1b-essence-calculus', type: 'video-course', title: 'Essence of Calculus (3Blue1Brown playlist)', short: 'Essence of Calculus', url: 'https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr' }), [calculus])).not.toBeNull();
+    // Full titles alike, three words in common: CS224W's course site is the Library's CS224W.
+    const cs224w = { id: 'cs224w', title: 'Stanford CS224W Machine Learning with Graphs', short: 'Stanford CS224W', url: 'https://snap.stanford.edu/class/cs224w-2020/', shelf: 'course' };
+    expect(findExisting(item({ id: 'course-stanford-cs224w-site', type: 'course', title: 'CS224W: Machine Learning with Graphs (course site)', short: 'CS224W course site', url: 'https://web.stanford.edu/class/cs224w/index.html' }), [cs224w])).toMatchObject({ entry: { id: 'cs224w' }, by: 'title' });
   });
 
   it('keeps an entry what it has, and the user what they did: an upsert only adds', () => {

@@ -292,7 +292,7 @@ function filterOptions(key: FilterKey, seed: Atlas['seed'], catalogue: readonly 
 export function Library({ openId }: { openId?: string }) {
   const atlas = useAtlas();
   // The Library's long tail (ATLAS-LIBRARY) loads right after the first screen; the Library waits for it.
-  const library = useLibrary();
+  const library = useLibrary(true);
   const units = useUnits();
   const paperStates = usePaperStates();
   const certStates = useCertStates();

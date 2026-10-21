@@ -194,6 +194,11 @@
   cost: free
   estHours: 0
   reference: true
+  short: "CS Video Courses list"
+  summary: "Huge index of university courses that have recorded lectures, with strong ML, DL, NLP, vision and RL sections to find more classes."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: awesome-courses
   title: "prakhar1989/awesome-courses"

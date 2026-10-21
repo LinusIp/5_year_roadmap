@@ -4,7 +4,7 @@
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { parse, YAMLParseError } from 'yaml';
+import { CORE_SCHEMA, load, YAMLException } from 'js-yaml';
 import { SEED_KINDS, validateSeed } from '../../src/seed/validate.ts';
 import type { RawFile, RawSeed, SeedKind, ValidateOptions, ValidationResult } from '../../src/seed/validate.ts';
 import type { AppSeed, ChecklistSummary, Seed, Unit } from '../../src/seed/schema.ts';
@@ -37,11 +37,13 @@ function readYaml(dataDir: string, relPath: string, errors: string[]): RawFile |
     return null;
   }
   try {
-    return { file, data: parse(readFileSync(abs, 'utf8')) };
+    // js-yaml's core schema reads the same values as `yaml` did (dates stay strings) in a tenth of the time, which
+    // the 10,000-resource Library made matter: every build, test run and check loads these files.
+    return { file, data: load(readFileSync(abs, 'utf8'), { schema: CORE_SCHEMA, filename: file }) };
   } catch (err) {
-    if (err instanceof YAMLParseError) {
-      const where = err.linePos?.[0] ? ' (line ' + err.linePos[0].line + ', column ' + err.linePos[0].col + ')' : '';
-      errors.push(file + where + ': ' + err.message.split('\n')[0]);
+    if (err instanceof YAMLException) {
+      const where = err.mark ? ' (line ' + (err.mark.line + 1) + ', column ' + (err.mark.column + 1) + ')' : '';
+      errors.push(file + where + ': ' + err.reason);
     } else {
       errors.push(file + ': ' + String(err));
     }

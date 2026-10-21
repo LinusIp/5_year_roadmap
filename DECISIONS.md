@@ -1503,3 +1503,40 @@ Today shows its heading in 1.5 s, the Papers shelf in 1.2 s and a search keystro
 (run 39546069621) and was then removed: 225 answered and 1 failed. AgentScope's docs page
 (`https://doc.agentscope.io/en/index.html`, `docs-agentscope`) answered 404; it is for opening in a browser, and its
 URL stays as the file gave it.
+
+## The whole Atlas Library (pull request #24)
+
+ATLAS-LIBRARY's complete file: 10,436 rows. Its first 3,811 are pull request #22's file and its next 226 the harness
+additions, unchanged: the upsert found every one's entry again and filled nothing. Of the 6,399 rows it adds, 6,388
+are new (`data/resources/library-atlas-4.yaml`, 3.5 MB) and 11 matched entries the Library had (10 by URL, 1 by
+title), listed in `docs/imports-atlas-library-4.md`. No URL changed. Resources: 4,060 to 10,448, most of the growth
+in AI (3,023, and 900 more tagged inference), systems (804), architecture (468), robotics (290), languages (269)
+and graphics (230). One row's id carried a capital and is lowercased: an id is the Library's own name, and its slugs
+are lowercase.
+
+**The title rule, tightened.** The first run matched 30 new rows by title and 29 were other works, nearly all on a
+one-word short title ("GEM" and "GEM"), a two-word title with its bracketed part dropped ("Structured outputs
+(Gemini API)" and SGLang's) or a title read against a short title. At ten thousand rows those paths find more
+namesakes than duplicates, so a full-title match now needs three words in common (or the same two words when
+neither title had a bracketed part, "Crafting Interpreters"), a short-title match needs two words on each side, and
+a title is never read against a short title. Every title match the earlier imports made still holds (the 25 of them
+were re-run), and the rule has tests. Eleven pairs that still match on their full titles were read and are different
+works (the Qwen2.5 Coder, VL and 1M reports beside the Qwen2.5 report, FSDP2 beside FSDP, a course's 2024 or 2025
+offering beside the Library's, and so on), now in `NOT_SAME`; CS224W's course site merged into the Library's CS224W.
+
+**A soft prerequisite by the same case.** 57 short titles are shared by several rows (a paper and its code, REST and
+ReST), so an `after` that names one now takes the row whose short title matches in the same case before any case.
+
+**Reading the data.** The `yaml` library took 3.5 s to read the 10 MB of data, which every build (seven reads),
+test run, validation and check paid; `js-yaml`'s core schema reads the same values (dates stay strings, checked on
+every file) in 0.5 s. It is a dev dependency of `scripts/lib/load-seed.ts` alone; `yaml` stays where documents are
+read or written elsewhere. The build fell from 74 s to 11 s and the unit tests that load the seed no longer time out.
+
+**The long tail's moment.** The Library chunk is 5.8 MB (1.2 MB gzipped) and parses for most of a second at a 4x CPU
+slowdown. Asked for right after the first render, that parse landed before Today's plan had loaded and held its first
+screen to 2.0 to 2.3 s. It is now asked for once the first screen has its plan and the browser is idle (at once
+when a plan edit names a Library resource, or on the Library screen itself), and Today shows its heading in 1.2 to
+1.5 s, as before. The Papers shelf opened the moment Today shows, while the chunk still loads, takes 2.2 to 2.7 s; with
+the chunk there, the usual case, 1.9 s (1.3 s before: ten thousand entries to build and index). Search keeps each item's words as one space-led string and scans it
+(`includes`) instead of walking a word array per term: a keystroke over 10,500 items takes 0.3 to 0.4 s at 4x. The
+service worker precaches the chunk as before, so the Library is offline too.

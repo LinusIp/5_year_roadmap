@@ -129,6 +129,10 @@
   covers:
     - inference-engineering/nvidia-dynamo
     - inference-engineering/disaggregation
+  tags: [inference]
+  after: [mooncake]
+  priority: 1
+  roadmap: "inference-engineering"
 - id: nvidia-modelopt
   title: NVIDIA Model Optimizer (ModelOpt)
   provider: NVIDIA

@@ -569,6 +569,13 @@
   tracks:
     - ai
   group: generative
+  short: "Imagen Video"
+  summary: "The cascaded spatial/temporal super-resolution design and v-prediction tricks behind early HD video diffusion."
+  level: "advanced"
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "diffusion"
 - id: movie-gen
   title: "Movie Gen: A Cast of Media Foundation Models"
   authors: Polyak et al. (Meta)
