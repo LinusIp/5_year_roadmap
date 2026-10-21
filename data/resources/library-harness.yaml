@@ -1,0 +1,4045 @@
+# The Atlas Library's harness additions (atlas-additions-harness, 226 rows, 2026-10-21): agent harnesses, agent
+# evaluation and benchmarks, and self-improving agents (automated agent design, prompt and program evolution, the
+# Gödel-machine line). Free papers, articles, docs and codebases, each link checked when it was added, each with its
+# priority for years 1 to 3, the roadmap.sh roadmap it serves and its year 3 research area. None is on the plan:
+# they sit on their shelves, in search, under "Optional for this path" and in the Research view. Generated from
+# atlas-additions-harness-2026-10-21.jsonl by scratch/import-atlas.ts; rows the Library already had only filled in
+# what their entries were missing.
+
+# ---- Agent harnesses, evaluation and self-improving agents (track ai) (226)
+
+- id: "docs-metr-time-horizons"
+  title: "Task-Completion Time Horizons of Frontier AI Models"
+  short: "METR time horizons page"
+  provider: "METR"
+  type: "article"
+  url: "https://metr.org/time-horizons/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Continuously updated measurements of how long a task frontier models can finish, the standard chart for long-horizon progress."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "docs-claude-define-success-evals"
+  title: "Define success criteria and build evaluations"
+  short: "Claude: build evals"
+  provider: "Anthropic"
+  type: "article"
+  url: "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "A concise practical guide to turning vague goals into measurable criteria and graded test cases."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "docs-hal-leaderboard"
+  title: "Holistic Agent Leaderboard (HAL)"
+  short: "HAL Leaderboard"
+  provider: "Princeton SAgE team"
+  type: "article"
+  url: "https://hal.cs.princeton.edu/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Leaderboard comparing agents on accuracy and cost across benchmarks, a reality check on which harness choices actually pay off."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "docs-agentscope"
+  title: "AgentScope Documentation"
+  short: "AgentScope docs"
+  provider: "Alibaba Tongyi Lab (AgentScope)"
+  type: "article"
+  url: "https://doc.agentscope.io/en/index.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "Tutorials for a developer-centric multi-agent framework with built-in tooling for tuning and evaluating agents."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "repo-agentic-benchmark-checklist"
+  title: "Agentic Benchmark Checklist (ABC)"
+  short: "ABC checklist repo"
+  provider: "UIUC Kang Lab"
+  type: "practice"
+  url: "https://github.com/uiuc-kang-lab/agentic-benchmarks"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "The actual checklist plus per-benchmark assessments, handy when designing or auditing your own agent eval."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-agentic-benchmark-checklist]
+
+- id: "repo-prime-environments"
+  title: "prime-environments"
+  short: "prime-environments"
+  provider: "Prime Intellect"
+  type: "practice"
+  url: "https://github.com/PrimeIntellect-ai/prime-environments"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "Dozens of ready-made RL environments written with verifiers, good templates for building your own."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [practice-verifiers]
+
+- id: "repo-textgrad"
+  title: "TextGrad: Automatic Differentiation via Text"
+  short: "TextGrad"
+  provider: "Zou Group (Stanford)"
+  type: "practice"
+  url: "https://github.com/zou-group/textgrad"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "A PyTorch-like API where LLM feedback acts as gradients, making prompt and solution optimization feel like ordinary training code."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [docs-dspy]
+
+- id: "repo-gepa"
+  title: "GEPA: Reflective Prompt Evolution"
+  short: "GEPA"
+  provider: "GEPA team (Agrawal et al.)"
+  type: "practice"
+  url: "https://github.com/gepa-ai/gepa"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "Pareto-based reflective evolution of prompts and text components that often beats RL with far fewer rollouts; also ships as a DSPy optimizer."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [docs-dspy]
+
+- id: "repo-deepmind-opro"
+  title: "OPRO: Large Language Models as Optimizers"
+  short: "OPRO"
+  provider: "Google DeepMind"
+  type: "practice"
+  url: "https://github.com/google-deepmind/opro"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "The simple loop of showing an LLM past solutions with scores and asking for a better one, the baseline every prompt optimizer cites."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "repo-evoprompt"
+  title: "EvoPrompt"
+  short: "EvoPrompt"
+  provider: "Qingyan Guo et al."
+  type: "practice"
+  url: "https://github.com/beeevita/EvoPrompt"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Implements genetic-algorithm and differential-evolution operators performed by an LLM on prompts, an easy entry into evolutionary prompting."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-opro]
+
+- id: "repo-microsoft-promptwizard"
+  title: "PromptWizard"
+  short: "PromptWizard"
+  provider: "Microsoft Research"
+  type: "practice"
+  url: "https://github.com/microsoft/PromptWizard"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "A feedback-driven self-evolving prompt optimizer that tunes instructions and in-context examples together."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-opro]
+
+- id: "repo-evoagentx"
+  title: "EvoAgentX"
+  short: "EvoAgentX"
+  provider: "EvoAgentX"
+  type: "practice"
+  url: "https://github.com/EvoAgentX/EvoAgentX"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "A framework that builds agent workflows from a goal and then evolves them with plugged-in optimizers like TextGrad and AFlow."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-aflow]
+
+- id: "repo-dynamic-cheatsheet"
+  title: "Dynamic Cheatsheet: Test-Time Learning with Adaptive Memory"
+  short: "Dynamic Cheatsheet"
+  provider: "Mirac Suzgun et al."
+  type: "practice"
+  url: "https://github.com/suzgunmirac/dynamic-cheatsheet"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Keeps a persistent, self-curated memory of useful snippets across queries, a small and clear test-time learning example."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-reflexion]
+
+- id: "repo-agent-workflow-memory"
+  title: "Agent Workflow Memory"
+  short: "Agent Workflow Memory"
+  provider: "Zora Wang et al. (CMU)"
+  type: "practice"
+  url: "https://github.com/zorazrw/agent-workflow-memory"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Induces reusable workflows from past web-agent trajectories and feeds them back as memory, showing experience-driven harness improvement."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-webarena]
+
+- id: "repo-expel"
+  title: "ExpeL: LLM Agents Are Experiential Learners"
+  short: "ExpeL"
+  provider: "LeapLab (Tsinghua)"
+  type: "practice"
+  url: "https://github.com/LeapLabTHU/ExpeL"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Collects successes and failures across tasks and distills them into insights that later agents retrieve."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-reflexion]
+
+- id: "repo-reflexion"
+  title: "Reflexion (code)"
+  short: "Reflexion (code)"
+  provider: "Noah Shinn et al."
+  type: "practice"
+  url: "https://github.com/noahshinn/reflexion"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "The original code for agents that write verbal self-critiques and retry, the simplest form of self-improvement to implement yourself."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-reflexion]
+
+- id: "repo-agent-laboratory"
+  title: "Agent Laboratory"
+  short: "Agent Laboratory"
+  provider: "Samuel Schmidgall et al."
+  type: "practice"
+  url: "https://github.com/SamuelSchmidgall/AgentLaboratory"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "An agent pipeline for literature review, experiments and report writing with optional human checkpoints, a friendlier AI-scientist codebase."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "AI Scientist (v1)"
+
+- id: "repo-aide-ml"
+  title: "AIDE: AI-Driven Exploration in the Space of Code"
+  short: "AIDE"
+  provider: "Weco AI"
+  type: "practice"
+  url: "https://github.com/WecoAI/aideml"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "A tree search over ML solution scripts that is a strong baseline on MLE-bench, compact enough to read in an afternoon."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-mle-bench]
+
+- id: "repo-data-to-paper"
+  title: "data-to-paper"
+  short: "data-to-paper"
+  provider: "Kishony Lab (Technion)"
+  type: "practice"
+  url: "https://github.com/Technion-Kishony-lab/data-to-paper"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "Guides agents from raw data to a traceable research paper, with an emphasis on verifiable, step-by-step provenance."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "repo-mlagentbench"
+  title: "MLAgentBench"
+  short: "MLAgentBench"
+  provider: "SNAP (Stanford)"
+  type: "practice"
+  url: "https://github.com/snap-stanford/MLAgentBench"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "A set of ML experimentation tasks with an environment for agents to read, edit and run code, good for testing research agents."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "repo-openai-mle-bench"
+  title: "MLE-bench (code)"
+  short: "MLE-bench (code)"
+  provider: "OpenAI"
+  type: "practice"
+  url: "https://github.com/openai/mle-bench"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "The Kaggle-competition grading harness behind MLE-bench, useful for scoring your own ML engineering agent."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-mle-bench]
+
+- id: "repo-agentless"
+  title: "Agentless (code)"
+  short: "Agentless (code)"
+  provider: "OpenAutoCoder (UIUC)"
+  type: "practice"
+  url: "https://github.com/OpenAutoCoder/Agentless"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "A fixed localize-repair-validate pipeline that rivals agent loops, a valuable contrast when deciding how much autonomy a harness needs."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-agentless]
+
+- id: "repo-hal-harness"
+  title: "HAL Harness"
+  short: "HAL Harness"
+  provider: "Princeton PLI (SAgE)"
+  type: "practice"
+  url: "https://github.com/princeton-pli/hal-harness"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "A unified harness for running agents across many benchmarks with cost tracking, ideal for comparing your own harness designs fairly."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [practice-inspect-evals]
+
+- id: "practice-sakana-mass"
+  title: "SakanaAI/mass"
+  short: "MASS repo"
+  provider: "Sakana AI"
+  type: "practice"
+  url: "https://github.com/SakanaAI/mass"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "The code for MASS, useful for seeing how multi-agent workflow search and self-supervised fine-tuning are wired together in practice."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-sakana-mass]
+
+- id: "repo-theagentcompany"
+  title: "TheAgentCompany (benchmark code)"
+  short: "TheAgentCompany repo"
+  provider: "CMU / TheAgentCompany"
+  type: "practice"
+  url: "https://github.com/TheAgentCompany/TheAgentCompany"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "Self-hostable environment with GitLab, chat and office services, good for studying how a realistic agent testbed is built."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-theagentcompany]
+
+- id: "practice-openevolve"
+  title: "OpenEvolve"
+  short: "OpenEvolve"
+  provider: "Asankhaya Sharma / algorithmicsuperintelligence"
+  type: "practice"
+  url: "https://github.com/algorithmicsuperintelligence/openevolve"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "The most used open-source AlphaEvolve clone, so you can run LLM-driven program evolution on your own problems."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-alphaevolve]
+
+- id: "repo-sakana-ai-scientist-v2"
+  title: "The AI Scientist-v2: Workshop-Level Automated Scientific Discovery via Agentic Tree Search"
+  short: "AI Scientist v2"
+  provider: "Sakana AI"
+  type: "practice"
+  url: "https://github.com/SakanaAI/AI-Scientist-v2"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 12
+  summary: "Extends the original AI Scientist with template-free agentic tree search over experiments, so you can study how an end-to-end research loop plans, runs and writes up ML studies."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "AI Scientist (v1)"
+
+- id: "repo-sakana-shinkaevolve"
+  title: "ShinkaEvolve"
+  short: "ShinkaEvolve"
+  provider: "Sakana AI"
+  type: "practice"
+  url: "https://github.com/SakanaAI/ShinkaEvolve"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "A sample-efficient open-source framework for LLM-driven program evolution, with novelty filtering and bandit model selection you can read and run on your own problems."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [practice-openevolve]
+
+- id: "repo-sakana-treequest"
+  title: "TreeQuest (AB-MCTS)"
+  short: "TreeQuest"
+  provider: "Sakana AI"
+  type: "practice"
+  url: "https://github.com/SakanaAI/treequest"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "A compact library implementing adaptive-branching tree search for inference-time scaling, letting you decide when to go wider versus deeper across multiple LLMs."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-tree-of-thoughts]
+
+- id: "repo-sakana-evolutionary-model-merge"
+  title: "Evolutionary Optimization of Model Merging Recipes"
+  short: "Evolutionary Model Merge"
+  provider: "Sakana AI"
+  type: "practice"
+  url: "https://github.com/SakanaAI/evolutionary-model-merge"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Shows evolutionary search applied to weights and layer routing rather than prompts, producing merged models without any gradient training."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-ties-merging]
+
+- id: "repo-sakana-transformer-squared"
+  title: "Transformer²: Self-adaptive LLMs"
+  short: "Transformer² (code)"
+  provider: "Sakana AI"
+  type: "practice"
+  url: "https://github.com/SakanaAI/self-adaptive-llms"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Code for singular-value fine-tuning experts that a model mixes at inference time, a hands-on take on models that adapt their own weights per task."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-lora]
+
+- id: "repo-sakana-continuous-thought-machines"
+  title: "Continuous Thought Machines"
+  short: "CTM (code)"
+  provider: "Sakana AI"
+  type: "practice"
+  url: "https://github.com/SakanaAI/continuous-thought-machines"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "An unusual architecture where neuron timing and synchronization drive computation, worth running to see an alternative to standard transformer reasoning."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [annotated-transformer]
+
+- id: "repo-sakana-ale-bench"
+  title: "ALE-Bench"
+  short: "ALE-Bench"
+  provider: "Sakana AI"
+  type: "practice"
+  url: "https://github.com/SakanaAI/ale-bench"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "A benchmark of hard optimization contests from AtCoder Heuristic Contest for evaluating long-horizon, score-based algorithm engineering by agents."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "diffusion"
+  after: [practice-openevolve]
+
+- id: "repo-sakana-discopop"
+  title: "DiscoPOP: Discovering Preference Optimization Algorithms with LLMs"
+  short: "DiscoPOP"
+  provider: "Sakana AI"
+  type: "practice"
+  url: "https://github.com/SakanaAI/DiscoPOP"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "An LLM proposes and tests new preference-optimization loss functions in a loop, a clean small example of AI discovering ML algorithms."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-dpo]
+
+- id: "repo-sakana-asal"
+  title: "Automating the Search for Artificial Life with Foundation Models (ASAL)"
+  short: "ASAL"
+  provider: "Sakana AI"
+  type: "practice"
+  url: "https://github.com/SakanaAI/asal"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "Uses vision-language models as the fitness signal to search over artificial-life simulations, a creative example of open-ended search."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "repo-adas"
+  title: "Automated Design of Agentic Systems (ADAS)"
+  short: "ADAS (Meta Agent Search)"
+  provider: "Shengran Hu, Cong Lu, Jeff Clune"
+  type: "practice"
+  url: "https://github.com/ShengranHu/ADAS"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "A meta agent writes new agent designs as Python code and keeps an archive of the best, the clearest starting point for harness search."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [anthropic-building-effective-agents]
+
+- id: "repo-darwin-godel-machine"
+  title: "Darwin Gödel Machine"
+  short: "Darwin Gödel Machine"
+  provider: "Jenny Zhang, Shengran Hu, Cong Lu, Robert Lange, Jeff Clune"
+  type: "practice"
+  url: "https://github.com/jennyzzt/dgm"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "Coding agents rewrite their own code and are kept in an open-ended archive scored on SWE-bench, the reference implementation for self-improving coding agents."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-adas]
+
+- id: "repo-huxley-godel-machine"
+  title: "Huxley-Gödel Machine"
+  short: "Huxley-Gödel Machine"
+  provider: "MetaAuto AI (KAUST)"
+  type: "practice"
+  url: "https://github.com/metauto-ai/HGM"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Refines Darwin Gödel Machine by scoring agents on the performance of their descendants, a good study of how selection rules shape self-improvement."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [repo-darwin-godel-machine]
+
+- id: "repo-godel-agent"
+  title: "Gödel Agent: A Self-Referential Agent Framework for Recursive Self-Improvement"
+  short: "Gödel Agent"
+  provider: "Xunjian Yin et al."
+  type: "practice"
+  url: "https://github.com/Arvid-pku/Godel_Agent"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "An agent that inspects and patches its own running logic via monkey-patching, a minimal and readable recursive self-improvement loop."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-adas]
+
+- id: "repo-sica-self-improving-coding-agent"
+  title: "A Self-Improving Coding Agent (SICA)"
+  short: "SICA"
+  provider: "Maxime Robeyns, Laurence Aitchison et al."
+  type: "practice"
+  url: "https://github.com/MaximeRobeyns/self_improving_coding_agent"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "A coding agent that edits its own codebase between benchmark rounds, with tooling you can inspect to see which self-edits actually helped."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [mini-swe-agent]
+
+- id: "repo-microsoft-stop"
+  title: "Self-Taught Optimizer (STOP)"
+  short: "STOP"
+  provider: "Microsoft Research (Zelikman et al.)"
+  type: "practice"
+  url: "https://github.com/microsoft/stop"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "An early, small scaffold that uses an LLM to improve the very program that calls the LLM, a good first read on recursive scaffolding."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "repo-live-swe-agent"
+  title: "Live-SWE-agent"
+  short: "Live-SWE-agent"
+  provider: "OpenAutoCoder (UIUC)"
+  type: "practice"
+  url: "https://github.com/OpenAutoCoder/live-swe-agent"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "A software agent that creates and refines its own tools while solving issues, showing self-evolution happening online rather than offline."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [mini-swe-agent]
+
+- id: "repo-se-agent"
+  title: "SE-Agent: Self-Evolution Trajectory Optimization"
+  short: "SE-Agent"
+  provider: "JARVIS-Xs"
+  type: "practice"
+  url: "https://github.com/JARVIS-Xs/SE-Agent"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "Revises, recombines and refines whole agent trajectories across attempts, an evolutionary view of test-time search for SWE tasks."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "SWE-agent"
+
+- id: "repo-deepmind-funsearch"
+  title: "FunSearch"
+  short: "FunSearch"
+  provider: "Google DeepMind"
+  type: "practice"
+  url: "https://github.com/google-deepmind/funsearch"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "The original LLM-plus-evaluator program search code and discovered functions, small enough to understand the core evolve-and-score loop."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "repo-deepmind-alphaevolve-results"
+  title: "AlphaEvolve: mathematical results"
+  short: "AlphaEvolve results"
+  provider: "Google DeepMind"
+  type: "practice"
+  url: "https://github.com/google-deepmind/alphaevolve_results"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Notebooks with the constructions AlphaEvolve found, useful for checking results and seeing what evolved programs look like."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-alphaevolve]
+
+- id: "repo-eoh-evolution-of-heuristics"
+  title: "Evolution of Heuristics (EoH)"
+  short: "EoH"
+  provider: "Fei Liu et al. (CityU HK)"
+  type: "practice"
+  url: "https://github.com/FeiLiu36/EoH"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "Co-evolves natural-language ideas and code to design heuristics for combinatorial problems, a readable alternative to FunSearch."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [repo-deepmind-funsearch]
+
+- id: "repo-reevo"
+  title: "ReEvo: LLMs as Hyper-Heuristics with Reflective Evolution"
+  short: "ReEvo"
+  provider: "AI4CO"
+  type: "practice"
+  url: "https://github.com/ai4co/reevo"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "Adds verbal reflection between generations of evolved heuristics, mixing Reflexion-style feedback with program search."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [repo-eoh-evolution-of-heuristics]
+
+- id: "repo-llm-sr"
+  title: "LLM-SR: Scientific Equation Discovery via Programming with LLMs"
+  short: "LLM-SR"
+  provider: "Parshin Shojaee et al."
+  type: "practice"
+  url: "https://github.com/deep-symbolic-mathematics/LLM-SR"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "Applies evolutionary program search to symbolic regression, a natural bridge to AI-for-science equation discovery."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [repo-deepmind-funsearch]
+
+- id: "repo-eureka"
+  title: "Eureka: Human-Level Reward Design via Coding LLMs (code)"
+  short: "Eureka (code)"
+  provider: "NVIDIA / UPenn / Caltech"
+  type: "practice"
+  url: "https://github.com/eureka-research/Eureka"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Evolves reward functions as code using simulator feedback, connecting program search to robot RL."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-eureka]
+
+- id: "repo-aflow"
+  title: "AFlow: Automating Agentic Workflow Generation"
+  short: "AFlow"
+  provider: "FoundationAgents (MetaGPT)"
+  type: "practice"
+  url: "https://github.com/FoundationAgents/AFlow"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Searches over code-represented workflows with Monte Carlo tree search, a key baseline for automated harness design."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-adas]
+
+- id: "repo-gptswarm"
+  title: "GPTSwarm: Language Agents as Optimizable Graphs"
+  short: "GPTSwarm"
+  provider: "MetaAuto AI"
+  type: "practice"
+  url: "https://github.com/metauto-ai/GPTSwarm"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "Represents multi-agent systems as graphs and optimizes both node prompts and edges, a clean framing of workflow optimization."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-aflow]
+
+- id: "repo-microsoft-trace"
+  title: "Trace: The Next AutoDiff for AI Systems"
+  short: "Trace"
+  provider: "Microsoft Research / Stanford"
+  type: "practice"
+  url: "https://github.com/microsoft/Trace"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "Records an execution graph of your Python agent and lets an optimizer update code and parameters end to end from feedback."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-textgrad]
+
+- id: "repo-maas"
+  title: "MaAS: Multi-agent Architecture Search via Agentic Supernet"
+  short: "MaAS"
+  provider: "Guibin Zhang et al."
+  type: "practice"
+  url: "https://github.com/bingreeky/MaAS"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "Borrows neural architecture search ideas to sample query-specific multi-agent systems from a learned supernet."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-aflow]
+
+- id: "repo-agentsquare"
+  title: "AgentSquare: Automatic LLM Agent Search in Modular Design Space"
+  short: "AgentSquare"
+  provider: "Tsinghua FIB Lab"
+  type: "practice"
+  url: "https://github.com/tsinghua-fib-lab/AgentSquare"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "Searches over combinations of planning, reasoning, tool-use and memory modules, a modular way to think about harness design."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-adas]
+
+- id: "repo-ace-agentic-context-engineering"
+  title: "ACE: Agentic Context Engineering"
+  short: "ACE"
+  provider: "ACE authors (Stanford / SambaNova / UC Berkeley)"
+  type: "practice"
+  url: "https://github.com/ace-agent/ace"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "Grows an evolving playbook of strategies through generate-reflect-curate steps, improving agents without touching weights."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-dynamic-cheatsheet]
+
+- id: "repo-microsoft-rd-agent"
+  title: "RD-Agent"
+  short: "RD-Agent"
+  provider: "Microsoft Research Asia"
+  type: "practice"
+  url: "https://github.com/microsoft/RD-Agent"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "An industrial research-and-development agent that proposes hypotheses and implements them for data science and quant tasks."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-aide]
+
+- id: "repo-hkuds-ai-researcher"
+  title: "AI-Researcher"
+  short: "AI-Researcher"
+  provider: "HKU Data Intelligence Lab"
+  type: "practice"
+  url: "https://github.com/HKUDS/AI-Researcher"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Full pipeline from idea to implementation to paper, with its own benchmark for judging automated research quality."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  doFirst: "AI Scientist (v1)"
+
+- id: "repo-meta-mlgym"
+  title: "MLGym"
+  short: "MLGym"
+  provider: "Meta AI Research"
+  type: "practice"
+  url: "https://github.com/facebookresearch/MLGym"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "A gym-style framework and benchmark for training and evaluating AI research agents with RL."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [repo-mlagentbench]
+
+- id: "repo-microsoft-agent-lightning"
+  title: "Agent Lightning"
+  short: "Agent Lightning"
+  provider: "Microsoft Research"
+  type: "practice"
+  url: "https://github.com/microsoft/agent-lightning"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Decouples agent execution from training so you can apply RL or prompt optimization to existing agents with minimal code changes."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [practice-verifiers]
+
+- id: "paper-survey-agent-evaluation"
+  title: "Survey on Evaluation of LLM-based Agents"
+  short: "Agent Eval Survey"
+  provider: "Yehudai et al. (IBM, Yale)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2503.16416"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 4
+  summary: "A map of agent benchmarks and evaluation frameworks by capability, useful for orienting before reading individual papers."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+
+- id: "paper-webshop"
+  title: "WebShop: Towards Scalable Real-World Web Interaction with Grounded Language Agents"
+  short: "WebShop"
+  provider: "Yao, Chen, Yang, Narasimhan (Princeton)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2207.01206"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "A classic simulated shopping environment that is still widely used to train and test agents with RL."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "paper-alfworld"
+  title: "ALFWorld: Aligning Text and Embodied Environments for Interactive Learning"
+  short: "ALFWorld"
+  provider: "Shridhar et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2010.03768"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "A text-based household environment that became a standard testbed for agent planning and RL fine-tuning."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "paper-vending-bench"
+  title: "Vending-Bench: A Benchmark for Long-Term Coherence of Autonomous Agents"
+  short: "Vending-Bench"
+  provider: "Andon Labs (Backlund, Petersson)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2502.15840"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Shows how agents running a simulated business drift and derail over thousands of steps even when each single step is easy."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "Effective harnesses"
+
+- id: "paper-theagentcompany"
+  title: "TheAgentCompany: Benchmarking LLM Agents on Consequential Real World Tasks"
+  short: "TheAgentCompany"
+  provider: "Xu et al. (CMU)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2412.14161"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Measures agents on multi-step office work inside a simulated software company, with partial-credit checkpoints for long tasks."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-webarena]
+
+- id: "paper-hcast"
+  title: "HCAST: Human-Calibrated Autonomy Software Tasks"
+  short: "HCAST"
+  provider: "METR (Rein, Becker et al.)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2503.17354"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Explains how METR timed human experts on agent tasks, the grounding behind 'time horizon' as a capability metric."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "METR time horizons"
+
+- id: "paper-illusion-diminishing-returns"
+  title: "The Illusion of Diminishing Returns: Measuring Long Horizon Execution in LLMs"
+  short: "Long-Horizon Execution"
+  provider: "Sinha, Arun, Goel, Staab, Geiping"
+  type: "paper"
+  url: "https://arxiv.org/abs/2509.09677"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Separates planning from execution and shows small per-step accuracy gains compound into much longer successful runs."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "genai"
+  doFirst: "METR time horizons"
+
+- id: "paper-swe-bench-pro"
+  title: "SWE-Bench Pro: Can AI Agents Solve Long-Horizon Software Engineering Tasks?"
+  short: "SWE-Bench Pro"
+  provider: "Scale AI (Deng, Da et al.)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2509.16941"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Harder, contamination-resistant successor to SWE-bench with multi-file, hours-long enterprise-style tasks."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-swe-bench]
+
+- id: "paper-cybench"
+  title: "Cybench: A Framework for Evaluating Cybersecurity Capabilities and Risks of Language Models"
+  short: "Cybench"
+  provider: "Zhang, Perry et al. (Stanford)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2408.08926"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "CTF-based agent benchmark with subtasks that turn all-or-nothing long tasks into measurable partial progress."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  doFirst: "Inspect"
+
+- id: "paper-scienceagentbench"
+  title: "ScienceAgentBench: Toward Rigorous Assessment of Language Agents for Data-Driven Scientific Discovery"
+  short: "ScienceAgentBench"
+  provider: "Chen et al. (OSU)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2410.05080"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Grounds scientific-agent evaluation in real paper tasks with careful checks against data contamination and shortcutting."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-mle-bench]
+
+- id: "paper-core-bench"
+  title: "CORE-Bench: Fostering the Credibility of Published Research Through a Computational Reproducibility Agent Benchmark"
+  short: "CORE-Bench"
+  provider: "Siegel, Kapoor, Nadgir, Stroebl, Narayanan"
+  type: "paper"
+  url: "https://arxiv.org/abs/2409.11363"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Agents must reproduce published code results, a concrete and checkable proxy for scientific-agent reliability."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-ai-agents-that-matter]
+
+- id: "paper-hal-leaderboard"
+  title: "Holistic Agent Leaderboard: The Missing Infrastructure for AI Agent Evaluation"
+  short: "HAL paper"
+  provider: "Kapoor, Stroebl et al. (Princeton)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2510.11977"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Large-scale third-party agent evaluation with cost tracking and log analysis, revealing how scaffolds and shortcuts skew results."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-ai-agents-that-matter]
+
+- id: "paper-agentic-benchmark-checklist"
+  title: "Establishing Best Practices for Building Rigorous Agentic Benchmarks"
+  short: "Agentic Benchmark Checklist"
+  provider: "Zhu, Jin et al. (UIUC)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2507.02825"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Catalogs how popular agent benchmarks over- or under-estimate ability and offers a checklist for task and outcome validity."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "Demystifying evals"
+
+- id: "paper-leaderboard-illusion"
+  title: "The Leaderboard Illusion"
+  short: "Leaderboard Illusion"
+  provider: "Singh et al. (Cohere Labs and others)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2504.20879"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Shows how private testing and selective disclosure distort public leaderboards, a lesson in reading rankings skeptically."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-chatbot-arena]
+
+- id: "paper-error-bars-evals"
+  title: "Adding Error Bars to Evals: A Statistical Approach to Language Model Evaluations"
+  short: "Error Bars for Evals"
+  provider: "Evan Miller (Anthropic)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2411.00640"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Practical statistics for evals: confidence intervals, clustered errors, paired comparisons and how many samples you need."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "genai"
+
+- id: "paper-lessons-reproducible-eval"
+  title: "Lessons from the Trenches on Reproducible Evaluation of Language Models"
+  short: "Reproducible LM Eval"
+  provider: "Biderman, Schoelkopf et al. (EleutherAI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2405.14782"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Hard-won guidance from the lm-eval-harness maintainers on why scores differ across setups and how to report them honestly."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  doFirst: "lm-evaluation-harness"
+
+- id: "paper-swe-bench-illusion"
+  title: "The SWE-Bench Illusion: When State-of-the-Art LLMs Remember Instead of Reason"
+  short: "SWE-Bench Illusion"
+  provider: "Liang, Garg, Zilouchian Moghaddam (Microsoft)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2506.12286"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Probes whether high SWE-bench scores reflect memorization, a clear example of benchmark contamination in agent evals."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-swe-bench]
+
+- id: "paper-science-agent-reliability"
+  title: "Towards a Science of AI Agent Reliability"
+  short: "Agent Reliability Science"
+  provider: "Rabanser, Kapoor et al. (Princeton)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2602.16666"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Argues accuracy is not reliability and proposes metrics for consistency, robustness and predictability of agents."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-ai-agents-that-matter]
+
+- id: "paper-trail"
+  title: "TRAIL: Trace Reasoning and Agentic Issue Localization"
+  short: "TRAIL"
+  provider: "Patronus AI (Deshpande et al.)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2505.08638"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "A taxonomy of agent errors plus annotated traces, testing whether LLMs can debug long agent trajectories."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  doFirst: "Why Do Multi-Agent Systems Fail?"
+
+- id: "paper-agentrewardbench"
+  title: "AgentRewardBench: Evaluating Automatic Evaluations of Web Agent Trajectories"
+  short: "AgentRewardBench"
+  provider: "Lu et al. (McGill, Mila)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2504.08942"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Checks how well LLM judges agree with experts when grading web-agent runs, a reality check for LLM-as-judge."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-webarena]
+
+- id: "paper-who-and-when"
+  title: "Which Agent Causes Task Failures and When? On Automated Failure Attribution of LLM Multi-Agent Systems"
+  short: "Who&When"
+  provider: "Zhang, Yin et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2505.00212"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Frames failure attribution as a task: find which agent and which step broke a multi-agent run."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  doFirst: "Why Do Multi-Agent Systems Fail?"
+
+- id: "paper-where-agents-fail"
+  title: "Where LLM Agents Fail and How They can Learn From Failures"
+  short: "Where Agents Fail"
+  provider: "Zhu, Liu et al. (UIUC)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2509.25370"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "A failure taxonomy over memory, reflection, planning and action, plus a debugger that traces errors to their root step."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-trail]
+
+- id: "paper-gem-gym-agentic-llms"
+  title: "GEM: A Gym for Agentic LLMs"
+  short: "GEM"
+  provider: "Liu, Sims et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2510.01051"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "A Gymnasium-style environment library for LLM agents with baselines, a clean entry point to agentic RL."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [docs-gymnasium]
+
+- id: "paper-os-harm"
+  title: "OS-Harm: A Benchmark for Measuring Safety of Computer Use Agents"
+  short: "OS-Harm"
+  provider: "Kuntz et al. (EPFL, CMU)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2506.14866"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Builds safety tests on top of OSWorld covering misuse, prompt injection and accidental harmful actions."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-osworld]
+
+- id: "paper-in-context-scheming"
+  title: "Frontier Models are Capable of In-context Scheming"
+  short: "In-context Scheming"
+  provider: "Meinke et al. (Apollo Research)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2412.04984"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Agentic evals showing models can covertly pursue given goals, with a clear method for designing such tests."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "paper-agentharm"
+  title: "AgentHarm: A Benchmark for Measuring Harmfulness of LLM Agents"
+  short: "AgentHarm"
+  provider: "Andriushchenko, Souly et al. (Gray Swan, UK AISI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2410.09024"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Measures whether agents carry out clearly harmful multi-step requests, and how jailbreaks change that."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-agentdojo]
+
+- id: "paper-impossiblebench"
+  title: "ImpossibleBench: Measuring LLMs' Propensity of Exploiting Test Cases"
+  short: "ImpossibleBench"
+  provider: "Zhong, Raghunathan, Carlini"
+  type: "paper"
+  url: "https://arxiv.org/abs/2510.20270"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Makes tasks unsolvable by design so any pass means the agent cheated, a neat way to measure reward hacking."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  doFirst: "Reward Hacking in RL"
+
+- id: "paper-harness-learning"
+  title: "Harness Learning Enables Generalizable Test-Time Adaptation"
+  short: "Harness Learning"
+  provider: "Zhang, Liu, Wang, Tajwar, Arora, Salakhutdinov, Khashabi, Song, Zanette"
+  type: "paper"
+  url: "https://arxiv.org/abs/2609.35738"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Treats the agent harness itself as something to learn: a proposer model trained with RL rewrites a solver's harness from execution feedback, adapting to new tasks without touching model weights."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [anthropic-building-effective-agents]
+
+- id: "paper-sakana-mass"
+  title: "Recursive Self-Improvement through Multi-Agent Self-Supervision"
+  short: "MASS (Sakana AI)"
+  provider: "Lee, Xu, Seely, Lee, Sojoudi, Zaharia, Tang (Sakana AI / UC Berkeley)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2610.12176"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Shows a model improving itself by searching over multi-agent workflows and then fine-tuning on its best team runs, a concrete recipe linking harness design to self-improvement."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-harness-learning]
+
+- id: "paper-odysseybench"
+  title: "OdysseyBench: Evaluating LLM Agents on Long-Horizon Complex Office Application Workflows"
+  short: "OdysseyBench"
+  provider: "Microsoft (Wang et al.)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2508.09124"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Evaluates agents on office workflows spread across many days of context, stressing memory and cross-app coordination."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-theagentcompany]
+
+- id: "paper-exp-bench"
+  title: "EXP-Bench: Can AI Conduct AI Research Experiments?"
+  short: "EXP-Bench"
+  provider: "Kon et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2505.24785"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Tests whether agents can design, run and analyze full ML experiments end to end, a demanding long-horizon research task."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-paperbench]
+
+- id: "paper-mlgym"
+  title: "MLGym: A New Framework and Benchmark for Advancing AI Research Agents"
+  short: "MLGym"
+  provider: "Meta (Nathani et al.)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2502.14499"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "First Gym-style environment for AI-research agents, usable both to benchmark and to train them with RL."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [docs-gymnasium]
+
+- id: "paper-are-gaia2"
+  title: "ARE: Scaling Up Agent Environments and Evaluations"
+  short: "ARE / Gaia2"
+  provider: "Meta (Froger, Andrews et al.)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2509.17158"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Introduces an asynchronous environment platform and Gaia2, where time passes and events arrive while the agent works."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-gaia]
+
+- id: "paper-astabench"
+  title: "AstaBench: Rigorous Benchmarking of AI Agents with a Scientific Research Suite"
+  short: "AstaBench"
+  provider: "Ai2 (Bragg, D'Arcy et al.)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2510.21652"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "A science-agent suite that controls for cost and tooling so agent comparisons are actually fair."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-hal-leaderboard]
+
+- id: "paper-r2e-gym"
+  title: "R2E-Gym: Procedural Environments and Hybrid Verifiers for Scaling Open-Weights SWE Agents"
+  short: "R2E-Gym"
+  provider: "Jain, Singh et al. (Berkeley)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2504.07164"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Shows how to mass-produce executable coding environments from commit history and combine verifiers for test-time scaling."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [practice-swe-gym]
+
+- id: "paper-webrl"
+  title: "WebRL: Training LLM Web Agents via Self-Evolving Online Curriculum Reinforcement Learning"
+  short: "WebRL"
+  provider: "Qi, Liu et al. (Tsinghua)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2411.02337"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Online RL for web agents with an automatically generated curriculum, a template for training in interactive environments."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "world-models"
+  after: [paper-webarena]
+
+- id: "paper-archer"
+  title: "ArCHer: Training Language Model Agents via Hierarchical Multi-Turn RL"
+  short: "ArCHer"
+  provider: "Zhou, Zanette, Pan, Levine, Kumar"
+  type: "paper"
+  url: "https://arxiv.org/abs/2402.19446"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Lays out why multi-turn credit assignment is hard for LLM agents and a hierarchical RL fix."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  doFirst: "Spinning Up in Deep RL"
+
+- id: "paper-agentgym-rl"
+  title: "AgentGym-RL: Training LLM Agents for Long-Horizon Decision Making through Multi-Turn Reinforcement Learning"
+  short: "AgentGym-RL"
+  provider: "Xi et al. (Fudan)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2509.08755"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Trains agents across many environments with a schedule that gradually lengthens interaction horizons."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-agentgym]
+
+- id: "paper-training-ai-scientists-replicate"
+  title: "Training AI Scientists to Replicate Research"
+  short: "Replica / Faraday"
+  provider: "Falck, Sabri, Surina et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2608.13331"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Builds a scalable paper-replication task set with a rubric judge and uses it to RL-train a research agent."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-paperbench]
+
+- id: "paper-shade-arena"
+  title: "SHADE-Arena: Evaluating Sabotage and Monitoring in LLM Agents"
+  short: "SHADE-Arena"
+  provider: "Kutasov et al. (Anthropic and others)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2506.15740"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Pairs long agent tasks with hidden sabotage goals to measure both covert misbehavior and how well monitors catch it."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [article-anthropic-agentic-misalignment]
+
+- id: "paper-adas"
+  title: "Automated Design of Agentic Systems"
+  short: "ADAS (Meta Agent Search)"
+  provider: "Shengran Hu, Cong Lu, Jeff Clune"
+  type: "paper"
+  url: "https://arxiv.org/abs/2408.08435"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Introduces Meta Agent Search, where an LLM writes new agent designs in code and keeps an archive of the best, the founding paper of automated agent design."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-reflexion]
+
+- id: "paper-aflow"
+  title: "AFlow: Automating Agentic Workflow Generation"
+  short: "AFlow"
+  provider: "Jiayi Zhang, Jinyu Xiang, Zhaoyang Yu et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2410.10762"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Frames agent workflows as code graphs and searches over them with MCTS, showing how to optimize a pipeline instead of hand-tuning it."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-adas]
+
+- id: "paper-godel-agent"
+  title: "Gödel Agent: A Self-Referential Agent Framework for Recursive Self-Improvement"
+  short: "Gödel Agent"
+  provider: "Xunjian Yin, Xinyi Wang, Liangming Pan et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2410.04444"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "An agent that inspects and rewrites its own running code and logic, a compact case study in recursive self-modification."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-adas]
+
+- id: "paper-gptswarm"
+  title: "Language Agents as Optimizable Graphs"
+  short: "GPTSwarm"
+  provider: "Mingchen Zhuge, Wenyi Wang, Louis Kirsch et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2402.16823"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Represents multi-agent systems as computational graphs whose node prompts and edges can be optimized automatically."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+
+- id: "paper-agent-symbolic-learning"
+  title: "Symbolic Learning Enables Self-Evolving Agents"
+  short: "Agent Symbolic Learning"
+  provider: "Wangchunshu Zhou, Yixin Ou, Shengwei Ding et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2406.18532"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Borrows backprop and gradient descent as metaphors to update an agent's prompts, tools and pipeline using language-based 'gradients'."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-textgrad]
+
+- id: "paper-promptbreeder"
+  title: "Promptbreeder: Self-Referential Self-Improvement Via Prompt Evolution"
+  short: "Promptbreeder"
+  provider: "Chrisantha Fernando, Dylan Banarse, Henryk Michalewski et al. (DeepMind)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2309.16797"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Evolves both task prompts and the mutation prompts that change them, an early and influential self-referential optimizer."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-opro]
+
+- id: "paper-opro"
+  title: "Large Language Models as Optimizers"
+  short: "OPRO"
+  provider: "Chengrun Yang, Xuezhi Wang, Yifeng Lu et al. (Google DeepMind)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2309.03409"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Shows an LLM can act as a black-box optimizer by reading past solutions and scores, the basic loop behind most prompt and harness search."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-ape-prompt-engineer]
+
+- id: "paper-ape-prompt-engineer"
+  title: "Large Language Models Are Human-Level Prompt Engineers"
+  short: "APE prompt engineer"
+  provider: "Yongchao Zhou, Andrei Ioan Muresanu, Ziwen Han et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2211.01910"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "The starting point for automatic prompt search: generate candidate instructions, score them, keep the best."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "genai"
+
+- id: "paper-evoprompt"
+  title: "EvoPrompt: Connecting LLMs with Evolutionary Algorithms Yields Powerful Prompt Optimizers"
+  short: "EvoPrompt"
+  provider: "Qingyan Guo, Rui Wang, Junliang Guo et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2309.08532"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Uses an LLM as the crossover and mutation operator inside classic genetic algorithms and differential evolution for prompts."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "genai"
+  after: [paper-opro]
+
+- id: "paper-textgrad"
+  title: "TextGrad: Automatic \"Differentiation\" via Text"
+  short: "TextGrad"
+  provider: "Mert Yuksekgonul, Federico Bianchi, Joseph Boen et al. (Stanford)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2406.07496"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Builds an autograd-like engine where LLM critiques flow backward as textual gradients to improve any variable in a pipeline."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "genai"
+  after: [paper-opro]
+
+- id: "paper-trace-optoprime"
+  title: "Trace is the Next AutoDiff: Generative Optimization with Rich Feedback, Execution Traces, and LLMs"
+  short: "Trace / OptoPrime"
+  provider: "Ching-An Cheng, Allen Nie, Adith Swaminathan (Microsoft)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2406.16218"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Records execution traces of an agent workflow and lets the OptoPrime optimizer update code and parameters from that rich feedback."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-textgrad]
+
+- id: "paper-mipro"
+  title: "Optimizing Instructions and Demonstrations for Multi-Stage Language Model Programs"
+  short: "MIPRO (DSPy)"
+  provider: "Krista Opsahl-Ong, Michael J Ryan, Josh Purtell et al. (Stanford)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2406.11695"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "The paper behind DSPy's MIPRO optimizer, jointly tuning instructions and few-shot examples across every module of an LM program."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [docs-dspy]
+
+- id: "paper-gepa"
+  title: "GEPA: Reflective Prompt Evolution Can Outperform Reinforcement Learning"
+  short: "GEPA"
+  provider: "Lakshya A Agrawal, Shangyin Tan, Dilara Soylu et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2507.19457"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Shows reflection on trajectories plus Pareto-based prompt evolution can beat RL fine-tuning with far fewer rollouts."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-mipro]
+
+- id: "paper-evoagent"
+  title: "EvoAgent: Towards Automatic Multi-Agent Generation via Evolutionary Algorithms"
+  short: "EvoAgent"
+  provider: "Siyu Yuan, Kaitao Song, Jiangjie Chen et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2406.14228"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Turns one hand-written agent into a diverse team by evolving its settings, a simple recipe for automatic multi-agent design."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "paper-maas-agentic-supernet"
+  title: "Multi-agent Architecture Search via Agentic Supernet"
+  short: "MaAS"
+  provider: "Guibin Zhang, Luyang Niu, Junfeng Fang et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2502.04180"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Applies neural-architecture-search ideas to agents: sample a query-specific multi-agent system from a learned supernet of operators."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-aflow]
+
+- id: "paper-autoagents"
+  title: "AutoAgents: A Framework for Automatic Agent Generation"
+  short: "AutoAgents"
+  provider: "Guangyao Chen, Siwei Dong, Yu Shu et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2309.17288"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Generates task-specific agent roles and plans on the fly, an early look at letting the model design its own team."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "paper-agentsquare"
+  title: "AgentSquare: Automatic LLM Agent Search in Modular Design Space"
+  short: "AgentSquare"
+  provider: "Yu Shang, Yu Li, Keyu Zhao et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2410.06153"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Splits agents into planning, reasoning, tool-use and memory modules and searches over combinations, a clean design-space view."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-adas]
+
+- id: "paper-weak-for-strong"
+  title: "Weak-for-Strong: Training Weak Meta-Agent to Harness Strong Executors"
+  short: "Weak-for-Strong (W4S)"
+  provider: "Fan Nie, Lan Feng, Haotian Ye et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2504.04785"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Trains a small meta-agent with RL to write workflows that drive a stronger model, i.e. learning the harness rather than the model."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-aflow]
+
+- id: "paper-stop-self-taught-optimizer"
+  title: "Self-Taught Optimizer (STOP): Recursively Self-Improving Code Generation"
+  short: "STOP"
+  provider: "Eric Zelikman, Eliana Lorch, Lester Mackey et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2310.02304"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "A scaffolding program that improves itself, including the optimizer that improves it, an early concrete demo of recursive self-improvement."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "paper-self-rewarding-lms"
+  title: "Self-Rewarding Language Models"
+  short: "Self-Rewarding LMs"
+  provider: "Weizhe Yuan, Richard Yuanzhe Pang, Kyunghyun Cho et al. (Meta)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2401.10020"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "The model judges its own outputs to create preference data for iterative DPO, removing the fixed human reward model."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "genai"
+
+- id: "paper-meta-rewarding"
+  title: "Meta-Rewarding Language Models: Self-Improving Alignment with LLM-as-a-Meta-Judge"
+  short: "Meta-Rewarding"
+  provider: "Tianhao Wu, Weizhe Yuan, Olga Golovneva et al. (Meta)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2407.19594"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Adds a meta-judge that grades the model's own judgments, so both acting and judging improve together."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "genai"
+  after: [paper-self-rewarding-lms]
+
+- id: "paper-rise-recursive-introspection"
+  title: "Recursive Introspection: Teaching Language Model Agents How to Self-Improve"
+  short: "RISE"
+  provider: "Yuxiao Qu, Tianjun Zhang, Naman Garg et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2407.18219"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Fine-tunes models to correct their own earlier attempts over multiple turns, learning self-improvement as a skill."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+
+- id: "paper-self-challenging-agents"
+  title: "Self-Challenging Language Model Agents"
+  short: "Self-Challenging Agents"
+  provider: "Yifei Zhou, Sergey Levine, Jason Weston et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2506.01716"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "The agent writes its own tool-use tasks with verifiers and then trains on them, a self-play route to better agents."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+
+- id: "paper-sica-self-improving-coding-agent"
+  title: "A Self-Improving Coding Agent"
+  short: "SICA"
+  provider: "Maxime Robeyns, Martin Szummer, Laurence Aitchison"
+  type: "paper"
+  url: "https://arxiv.org/abs/2504.15228"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "A coding agent that edits its own codebase between benchmark runs, a readable, hands-on example of harness self-improvement."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "SWE-agent"
+
+- id: "paper-live-swe-agent"
+  title: "Live-SWE-agent: Can Software Engineering Agents Self-Evolve on the Fly?"
+  short: "Live-SWE-agent"
+  provider: "Chunqiu Steven Xia, Zhe Wang, Yan Yang et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2511.13646"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Starts from a minimal bash-only scaffold and lets the agent build its own tools while solving issues, evolving the harness at runtime."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [mini-swe-agent]
+
+- id: "paper-huxley-godel-machine"
+  title: "Huxley-Gödel Machine: Human-Level Coding Agent Development by an Approximation of the Optimal Self-Improving Machine"
+  short: "Huxley-Gödel Machine"
+  provider: "Wenyi Wang, Piotr Piękos, Li Nanbo et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2510.21614"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Improves on Darwin Gödel Machine by scoring self-modifications on the promise of their descendants, not just their immediate benchmark score."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-darwin-godel-machine]
+
+- id: "paper-mendel-godel-machine"
+  title: "Mendel Gödel Machine: Recursive Self-Improving Coding Agents via Comparative Evolution"
+  short: "Mendel Gödel Machine"
+  provider: "Changzhi Liu, Yilun Liu, Sikuan Yan et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2608.07645"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "A 2026 follow-up in the Gödel-machine line that compares trajectories across tasks and lineages to pick better self-edits."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-huxley-godel-machine]
+
+- id: "paper-meta-harness"
+  title: "Meta-Harness: End-to-End Optimization of Model Harnesses"
+  short: "Meta-Harness"
+  provider: "Yoonho Lee, Roshen Nair, Qizheng Zhang et al. (Stanford)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2603.28052"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Treats the harness code that decides what an LLM sees and remembers as the thing to optimize, using an agent that reads past candidates' code, scores and logs."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-ace-agentic-context-engineering]
+
+- id: "paper-harbor-harness-optimization"
+  title: "HARBOR: Automated Harness Optimization"
+  short: "HARBOR"
+  provider: "Biswa Sengupta, Jinhua Wang"
+  type: "paper"
+  url: "https://arxiv.org/abs/2604.20938"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Casts harness configuration of a production coding agent as Bayesian optimization, a useful contrast to LLM-driven harness search."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-meta-harness]
+
+- id: "paper-harnessmdp"
+  title: "HarnessMDP: Learning to Control LLM Agent Harnesses with Offline Reinforcement Learning"
+  short: "HarnessMDP"
+  provider: "Haiwen Yi, Xinyuan Song"
+  type: "paper"
+  url: "https://arxiv.org/abs/2607.05458"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Models agent execution as an MDP and learns a harness policy offline from past trajectories, an RL view of harness learning."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-meta-harness]
+
+- id: "paper-memoharness"
+  title: "MemoHarness: Agent Harnesses That Learn from Experience"
+  short: "MemoHarness"
+  provider: "Yue Huang, Wenjie Wang, Han Bao et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2607.14159"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Adapts the agent's control layer per test case using lessons distilled from its own earlier runs."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-reasoningbank]
+
+- id: "paper-harnessopt-bench"
+  title: "HarnessOpt-Bench: Evaluating LLMs at Harness Optimization"
+  short: "HarnessOpt-Bench"
+  provider: "Varun Ursekar, Apaar Shanker, Yash Maurya et al. (Scale AI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2608.06301"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "A benchmark for how well models improve an agent's surrounding code and prompts under noisy, costly evaluation with hidden tests."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-meta-harness]
+
+- id: "paper-autosaddler"
+  title: "AutoSaddler: Automatic Harness Optimization with Durable Updates from Agent Execution Traces"
+  short: "AutoSaddler"
+  provider: "Sungho Park, Wonjoong Kim, Rongyuan Tan et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2608.23041"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Mines failed agent traces to make lasting edits to the scaffolding around an agent, with sizable gains on three benchmarks."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-meta-harness]
+
+- id: "paper-grow-the-harness"
+  title: "Grow the Harness, Not the Context: From Strategy-Free Scaffolds to Reusable Specialist Agents"
+  short: "Grow the Harness"
+  provider: "Laizhen Li, Jiarui Li, Juanjuan Zhao et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2609.26760"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Learns recurring control logic as executable harness code from failures, letting smaller models match bigger ones cheaply."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-meta-harness]
+
+- id: "paper-sia-harness-weight-updates"
+  title: "SIA: Self Improving AI with Harness & Weight Updates"
+  short: "SIA"
+  provider: "Prannay Hebbar, Yogendra Manawat, Samuel Verboomen et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2605.27276"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Has an agent refine both the scaffold and the weights of a task agent, and shows the combination beats scaffold-only iteration."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-meta-harness]
+
+- id: "paper-ace-agentic-context-engineering"
+  title: "Agentic Context Engineering: Evolving Contexts for Self-Improving Language Models"
+  short: "ACE context engineering"
+  provider: "Qizheng Zhang, Changran Hu, Shubhangi Upasani et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2510.04618"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Treats the context as an evolving playbook updated by generator, reflector and curator roles, avoiding collapse from repeated rewriting."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-dynamic-cheatsheet]
+
+- id: "paper-dynamic-cheatsheet"
+  title: "Dynamic Cheatsheet: Test-Time Learning with Adaptive Memory"
+  short: "Dynamic Cheatsheet"
+  provider: "Mirac Suzgun, Mert Yuksekgonul, Federico Bianchi et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2504.07952"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "A black-box model keeps a self-curated memory of useful strategies and snippets across queries, learning at test time without weight updates."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "paper-reasoningbank"
+  title: "ReasoningBank: Scaling Agent Self-Evolving with Reasoning Memory"
+  short: "ReasoningBank"
+  provider: "Siru Ouyang, Jun Yan, I-Hung Hsu et al. (Google)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2509.25140"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Distills reusable reasoning strategies from both successes and failures into memory, and pairs it with memory-aware test-time scaling."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-agent-workflow-memory]
+
+- id: "paper-memento-agents"
+  title: "Memento: Fine-tuning LLM Agents without Fine-tuning LLMs"
+  short: "Memento"
+  provider: "Huichi Zhou, Yihang Chen, Siyuan Guo et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2508.16153"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Frames agent improvement as case-based memory updates in a memory-augmented MDP, so the agent learns while the LLM stays frozen."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-expel]
+
+- id: "paper-expel"
+  title: "ExpeL: LLM Agents Are Experiential Learners"
+  short: "ExpeL"
+  provider: "Andrew Zhao, Daniel Huang, Quentin Xu et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2308.10144"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Collects experiences, extracts natural-language insights, and recalls them at inference, a foundational experience-driven agent."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-reflexion]
+
+- id: "paper-agent-lightning"
+  title: "Agent Lightning: Train ANY AI Agents with Reinforcement Learning"
+  short: "Agent Lightning"
+  provider: "Xufang Luo, Yuge Zhang, Zhiyuan He et al. (Microsoft)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2508.03680"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Decouples agent execution from RL training so any existing agent framework can be optimized with RL with minimal code changes."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "paper-alphaevolve-shinkaevolve"
+  title: "ShinkaEvolve: Towards Open-Ended And Sample-Efficient Program Evolution"
+  short: "ShinkaEvolve"
+  provider: "Robert Tjarko Lange, Yuki Imajuku, Edoardo Cetin et al. (Sakana AI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2509.19349"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Sakana's open, sample-efficient take on AlphaEvolve-style program evolution with novelty filtering and bandit-based model selection."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-alphaevolve]
+
+- id: "paper-barbarians-at-the-gate-adrs"
+  title: "Barbarians at the Gate: How AI is Upending Systems Research"
+  short: "Barbarians at the Gate"
+  provider: "Audrey Cheng, Shu Liu, Melissa Pan et al. (UC Berkeley)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2510.06189"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Applies OpenEvolve-style generate-test-refine loops to real systems problems and reports AI-found algorithms beating human designs."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-alphaevolve]
+
+- id: "paper-mind-evolution"
+  title: "Evolving Deeper LLM Thinking"
+  short: "Mind Evolution"
+  provider: "Kuang-Huei Lee, Ian Fischer, Yueh-Hua Wu et al. (Google DeepMind)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2501.09891"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Uses an LLM-driven genetic search over candidate solutions at inference time, a useful counterpart to sequential self-refinement."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "genai"
+
+- id: "paper-ab-mcts-treequest"
+  title: "Wider or Deeper? Scaling LLM Inference-Time Compute with Adaptive Branching Tree Search"
+  short: "AB-MCTS (TreeQuest)"
+  provider: "Yuichi Inoue, Kou Misaki, Yuki Imajuku et al. (Sakana AI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2503.04412"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Sakana's adaptive tree search that decides when to branch wide versus refine deep, the algorithm behind TreeQuest and Multi-LLM AB-MCTS."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "genai"
+
+- id: "paper-transformer-squared"
+  title: "Transformer-Squared: Self-adaptive LLMs"
+  short: "Transformer²"
+  provider: "Qi Sun, Edoardo Cetin, Yujin Tang (Sakana AI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2501.06252"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Adapts an LLM to each task at inference by mixing singular-value 'expert' vectors, self-adaptation at the weight level."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "genai"
+  after: [paper-lora]
+
+- id: "paper-mixture-of-agents"
+  title: "Mixture-of-Agents Enhances Large Language Model Capabilities"
+  short: "Mixture-of-Agents"
+  provider: "Junlin Wang, Jue Wang, Ben Athiwaratkun et al. (Together AI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2406.04692"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "A layered ensemble where models refine each other's answers, a simple baseline every multi-agent search method must beat."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+
+- id: "paper-agent-as-a-judge"
+  title: "Agent-as-a-Judge: Evaluate Agents with Agents"
+  short: "Agent-as-a-Judge"
+  provider: "Mingchen Zhuge, Changsheng Zhao, Dylan Ashley et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2410.10934"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Uses agentic evaluators that inspect intermediate steps, giving the richer feedback signal self-improving systems need."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "paper-ai-scientist-v1"
+  title: "The AI Scientist: Towards Fully Automated Open-Ended Scientific Discovery"
+  short: "AI Scientist (paper)"
+  provider: "Chris Lu, Cong Lu, Robert Tjarko Lange et al. (Sakana AI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2408.06292"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "The paper behind Sakana's end-to-end research pipeline: idea generation, experiments, writing and automated review."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "paper-ai-scientist-v2"
+  title: "The AI Scientist-v2: Workshop-Level Automated Scientific Discovery via Agentic Tree Search"
+  short: "AI Scientist v2"
+  provider: "Yutaro Yamada, Robert Tjarko Lange, Cong Lu et al. (Sakana AI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2504.08066"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Replaces fixed templates with agentic tree search over experiments and produced a paper accepted at an ICLR workshop."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-ai-scientist-v1]
+
+- id: "paper-ai-researcher"
+  title: "AI-Researcher: Autonomous Scientific Innovation"
+  short: "AI-Researcher"
+  provider: "Jiabin Tang, Lianghao Xia, Zhonghang Li et al. (HKU)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2505.18705"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "A multi-agent system covering the research loop from literature review to implementation and manuscript, with a benchmark to match."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-ai-scientist-v1]
+
+- id: "paper-agent-laboratory"
+  title: "Agent Laboratory: Using LLM Agents as Research Assistants"
+  short: "Agent Laboratory"
+  provider: "Samuel Schmidgall, Yusheng Su, Ze Wang et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2501.04227"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "A human-in-the-loop research pipeline that shows where agent assistance helps most and how much it costs."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+
+- id: "paper-aide"
+  title: "AIDE: AI-Driven Exploration in the Space of Code"
+  short: "AIDE"
+  provider: "Zhengyao Jiang, Dominik Schmidt, Dhruv Srikanth et al. (Weco AI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2502.13138"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Frames ML engineering as tree search over code solutions, the scaffold that topped early MLE-bench results."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-mle-bench]
+
+- id: "paper-mle-star"
+  title: "MLE-STAR: Machine Learning Engineering Agent via Search and Targeted Refinement"
+  short: "MLE-STAR"
+  provider: "Jaehyun Nam, Jinsung Yoon, Jiefeng Chen et al. (Google)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2506.15692"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Combines web search for models with ablation-guided refinement of specific code blocks, improving on AIDE-style agents."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [paper-aide]
+
+- id: "paper-rd-agent"
+  title: "R&D-Agent: An LLM-Agent Framework Towards Autonomous Data Science"
+  short: "R&D-Agent"
+  provider: "Xu Yang, Xiao Yang, Shikai Fang et al. (Microsoft)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2505.14738"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Splits data-science automation into a researcher that proposes ideas and a developer that implements them, iterating on feedback."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [paper-aide]
+
+- id: "paper-survey-self-evolving-agents"
+  title: "A Survey of Self-Evolving Agents: What, When, How, and Where to Evolve on the Path to Artificial Super Intelligence"
+  short: "Self-Evolving Agents survey"
+  provider: "Huan-ang Gao, Jiayi Geng, Wenyue Hua et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2507.21046"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "Organizes the field by what evolves (model, memory, tools, architecture), when and how, a good map before diving into papers."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "paper-survey-comprehensive-self-evolving"
+  title: "A Comprehensive Survey of Self-Evolving AI Agents: A New Paradigm Bridging Foundation Models and Lifelong Agentic Systems"
+  short: "Self-Evolving AI survey"
+  provider: "Jinyuan Fang, Yanwen Peng, Xi Zhang et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2508.07407"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "Presents a feedback-loop framework for agent self-evolution and reviews techniques for optimizing prompts, memory, tools and workflows."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "paper-survey-self-improvements-agentic"
+  title: "Self-Improvements in Modern Agentic Systems: A Survey"
+  short: "Self-Improving Agents survey"
+  provider: "Zhe Ren, Yimeng Chen, Dandan Guo et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2607.13104"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "A 2026 survey sorting self-improving agents by what gets updated and what triggers it, including evaluation and open problems."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-anthropic-project-vend-1"
+  title: "Project Vend: Can Claude run a small shop?"
+  short: "Project Vend"
+  provider: "Anthropic"
+  type: "article"
+  url: "https://www.anthropic.com/research/project-vend-1"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "A vivid real-world case study of an agent running an office shop for a month, with candid notes on where it failed."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-anthropic-project-vend-2"
+  title: "Project Vend: Phase two"
+  short: "Project Vend: Phase two"
+  provider: "Anthropic"
+  type: "article"
+  url: "https://www.anthropic.com/research/project-vend-2"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Follow-up showing which harness, tooling and multi-agent changes made the shop agent more reliable over time."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+  after: [article-anthropic-project-vend-1]
+
+- id: "article-metr-reward-hacking"
+  title: "Recent Frontier Models Are Reward Hacking"
+  short: "METR on reward hacking"
+  provider: "METR"
+  type: "article"
+  url: "https://metr.org/blog/2025-06-05-recent-reward-hacking"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Concrete examples of agents gaming their scoring code during evals, and why that matters for trusting results."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-fowler-harness-engineering-first-thoughts"
+  title: "Harness Engineering - first thoughts"
+  short: "Harness Eng. first thoughts"
+  provider: "Birgitta Böckeler (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/exploring-gen-ai/harness-engineering-memo.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "A short, sceptical first reading of OpenAI's harness-engineering post that separates the transferable ideas from the hype."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "OpenAI Harness Engineering"
+
+- id: "article-fowler-humans-and-agents-loops"
+  title: "Humans and Agents in Software Engineering Loops"
+  short: "Humans & Agents in Loops"
+  provider: "Kief Morris (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/exploring-gen-ai/humans-and-agents.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Frames where humans should sit in the inner and outer feedback loops once agents write most of the code."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-fowler-autonomous-agents-codex-example"
+  title: "Autonomous coding agents: A Codex example"
+  short: "Codex Agent Example"
+  provider: "Birgitta Böckeler (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/exploring-gen-ai/autonomous-agents-codex-example.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Walks through a real background-agent session task by task, making the strengths and failure modes of autonomous agents concrete."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-fowler-role-of-developer-skills-agentic"
+  title: "The role of developer skills in agentic coding"
+  short: "Dev Skills in Agentic Code"
+  provider: "Birgitta Böckeler (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/exploring-gen-ai/13-role-of-developer-skills.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Catalogues the ways agents go wrong and the developer judgement needed to catch them, useful before relying on agents."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-fowler-fragments-2026-05-27"
+  title: "Fragments: May 27, 2026"
+  short: "Fowler Fragments 2026-05-27"
+  provider: "Martin Fowler"
+  type: "article"
+  url: "https://martinfowler.com/fragments/2026-05-27.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Fowler's notes on hardening a legacy codebase with tests and static analysis before letting an agent loose, plus the cognitive cost of agentic coding."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-fowler-fragments-2026-07-13"
+  title: "Fragments: July 13, 2026"
+  short: "Fowler Fragments 2026-07-13"
+  provider: "Martin Fowler"
+  type: "article"
+  url: "https://martinfowler.com/fragments/2026-07-13.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Retreat notes from practitioners on harness engineering, context management and self-hosting models for agents."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-infoq-openai-harness-engineering-codex"
+  title: "OpenAI Introduces Harness Engineering: Codex Agents Power Large-Scale Software Development"
+  short: "InfoQ: OpenAI Harness Eng."
+  provider: "Leela Kumili (InfoQ)"
+  type: "article"
+  url: "https://www.infoq.com/news/2026/02/openai-harness-engineering-codex"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "A concise news summary of OpenAI's harness-engineering approach with industry context, good as a quick primer."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-osmani-agent-harness-engineering"
+  title: "Agent Harness Engineering"
+  short: "Osmani: Agent Harness"
+  provider: "Addy Osmani"
+  type: "article"
+  url: "https://addyosmani.com/blog/agent-harness-engineering/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "An accessible overview arguing that prompts, tools and feedback loops around a model often matter more than the model itself."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-latent-space-agent-labs"
+  title: "Agent Labs: Welcome to GPT Wrapper Summer"
+  short: "Latent Space: Agent Labs"
+  provider: "swyx (Latent Space)"
+  type: "article"
+  url: "https://www.latent.space/p/agent-labs"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Explains why companies that build harnesses and agents are becoming a distinct industry from model labs, useful context for career choices."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-hamel-eval-smell"
+  title: "It's Hard to Eval Is a Product Smell"
+  short: "Hard to Eval = Smell"
+  provider: "Hamel Husain"
+  type: "article"
+  url: "https://hamel.dev/blog/posts/eval-smell/index.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Makes the case that a feature you cannot evaluate is usually poorly specified, a useful design heuristic."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "article-hamel-eval-tools"
+  title: "Selecting The Right AI Evals Tool"
+  short: "Choosing an Evals Tool"
+  provider: "Hamel Husain"
+  type: "article"
+  url: "https://hamel.dev/blog/posts/eval-tools/index.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "A practitioner's criteria for picking eval tooling, emphasising data review workflows over feature checklists."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "article-eugeneyan-working-with-ai"
+  title: "How to Work and Compound with AI"
+  short: "Yan: Compound with AI"
+  provider: "Eugene Yan"
+  type: "article"
+  url: "https://eugeneyan.com/writing/working-with-ai/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Practical habits for getting compounding returns from agents through context, verification, delegation and feedback loops."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-eugeneyan-eval-process"
+  title: "An LLM-as-Judge Won't Save The Product—Fixing Your Process Will"
+  short: "Yan: Eval Process"
+  provider: "Eugene Yan"
+  type: "article"
+  url: "https://eugeneyan.com/writing/eval-process/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Argues eval-driven development and the scientific method matter more than any single judge model."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "article-eugeneyan-news-agents"
+  title: "Building News Agents for Daily News Recaps with MCP, Q, and tmux"
+  short: "Yan: News Agents"
+  provider: "Eugene Yan"
+  type: "article"
+  url: "https://eugeneyan.com/writing/news-agents/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "A small, buildable agentic workflow using MCP and tmux that shows how little harness a useful agent needs."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-willison-writing-agentic-engineering-patterns"
+  title: "Writing about Agentic Engineering Patterns"
+  short: "Willison: Why Patterns"
+  provider: "Simon Willison"
+  type: "article"
+  url: "https://simonwillison.net/2026/Feb/23/agentic-engineering-patterns/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Explains what 'agentic engineering' means and why it differs from vibe coding, as the entry point to his guide."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-willison-claude-cowork"
+  title: "First impressions of Claude Cowork, Anthropic's general agent"
+  short: "Willison: Claude Cowork"
+  provider: "Simon Willison"
+  type: "article"
+  url: "https://simonwillison.net/2026/Jan/12/claude-cowork/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "A hands-on review of a general-purpose agent built on a coding-agent harness, including its sandbox and safety trade-offs."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-ronacher-what-is-reasoning"
+  title: "What Is Reasoning"
+  short: "Ronacher: What Is Reasoning"
+  provider: "Armin Ronacher"
+  type: "article"
+  url: "https://lucumr.pocoo.org/2026/8/19/what-is-reasoning/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "A short, clear explanation of how reasoning traces work, useful background for designing agent loops."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-hf-smolagents-intro"
+  title: "Introducing smolagents, a simple library to build agents"
+  short: "HF: smolagents intro"
+  provider: "Aymeric Roucher, merve, Thomas Wolf (Hugging Face)"
+  type: "article"
+  url: "https://huggingface.co/blog/smolagents"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Makes the case for code-as-action agents and shows a minimal harness you can read end to end."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-github-copilot-coding-agent"
+  title: "GitHub Copilot: Meet the new coding agent"
+  short: "GitHub Copilot Agent"
+  provider: "Thomas Dohmke (GitHub)"
+  type: "article"
+  url: "https://github.blog/news-insights/product-news/github-copilot-meet-the-new-coding-agent/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Describes a background coding agent that runs in an Actions sandbox and reports through draft PRs, a common production harness shape."
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-andon-vending-bench-2"
+  title: "Vending-Bench 2"
+  short: "Vending-Bench 2"
+  provider: "Andon Labs"
+  type: "article"
+  url: "https://andonlabs.com/evals/vending-bench-2"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "A live, year-long business simulation scored on money earned, useful for seeing how long-horizon coherence varies across current models."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-vending-bench]
+
+- id: "article-metr-time-horizon-domains"
+  title: "How Does Time Horizon Vary Across Domains?"
+  short: "Time horizon by domain"
+  provider: "METR"
+  type: "article"
+  url: "https://metr.org/blog/2025-07-14-how-does-time-horizon-vary-across-domains"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Tests whether the time-horizon trend holds outside software, across math, video, web and self-driving tasks."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  doFirst: "METR time horizons"
+
+- id: "article-prime-intellect-environments-hub"
+  title: "Environments Hub: A Community Hub To Scale RL To Open AGI"
+  short: "Environments Hub"
+  provider: "Prime Intellect"
+  type: "article"
+  url: "https://primeintellect.ai/blog/environments"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Explains why RL environments are now the bottleneck and how an open, shareable environment registry works."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [practice-verifiers]
+
+- id: "article-mechanize-gpt3-moment-rl"
+  title: "The upcoming GPT-3 moment for RL"
+  short: "GPT-3 moment for RL"
+  provider: "Mechanize"
+  type: "article"
+  url: "https://www.mechanize.work/blog/the-upcoming-gpt-3-moment-for-rl/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "An argument that RL for agents will scale via huge numbers of diverse environments, such as replicating real software."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-hf-openenv"
+  title: "Building the Open Agent Ecosystem Together: Introducing OpenEnv"
+  short: "OpenEnv intro"
+  provider: "Hugging Face / Meta PyTorch"
+  type: "article"
+  url: "https://huggingface.co/blog/openenv"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Introduces a shared, Gym-like spec for sandboxed agent environments that RL trainers can plug into."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [docs-gymnasium]
+
+- id: "article-anthropic-agentic-misalignment"
+  title: "Agentic misalignment: How LLMs could be insider threats"
+  short: "Agentic Misalignment"
+  provider: "Anthropic"
+  type: "article"
+  url: "https://www.anthropic.com/research/agentic-misalignment"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Stress-tests agents in simulated corporate settings and shows how goal conflicts can lead to harmful actions."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-anthropic-petri"
+  title: "Petri: An open-source auditing tool to accelerate AI safety research"
+  short: "Petri"
+  provider: "Anthropic"
+  type: "article"
+  url: "https://www.anthropic.com/research/petri-open-source-auditing"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Shows how an auditor agent can run many simulated multi-turn scenarios to probe a model's behavior at scale."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [article-anthropic-agentic-misalignment]
+
+- id: "article-anthropic-bloom"
+  title: "Introducing Bloom: an open source tool for automated behavioral evaluations"
+  short: "Bloom"
+  provider: "Anthropic"
+  type: "article"
+  url: "https://www.anthropic.com/research/bloom"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Describes generating whole behavioral eval suites automatically from a short spec, a useful pattern for eval tooling."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [article-anthropic-petri]
+
+- id: "article-fowler-harness-engineering-coding-agent-users"
+  title: "Harness engineering for coding agent users"
+  short: "Böckeler: Harness Eng."
+  provider: "Birgitta Böckeler (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/harness-engineering.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Lays out a practical model of a coding-agent harness as feedforward guides plus feedback sensors, which you can apply to your own repos immediately."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "OpenAI Harness Engineering"
+
+- id: "article-fowler-context-engineering-coding-agents"
+  title: "Context Engineering for Coding Agents"
+  short: "Context Eng. for Coding"
+  provider: "Birgitta Böckeler (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/exploring-gen-ai/context-engineering-coding-agents.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Maps the zoo of rules files, skills, subagents and MCP tools that coding agents load, and when each kind of context is worth adding."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "Effective Context Engineering"
+
+- id: "article-fowler-are-harnesses-worth-the-cost"
+  title: "Are Harnesses Worth the Cost?"
+  short: "Are Harnesses Worth It?"
+  provider: "Naresh Jain (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/are-harnesses-worth-the-cost.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "A paired experiment showing a behavioural harness can let a cheap model beat an unharnessed frontier model on both success rate and cost."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [article-fowler-harness-engineering-coding-agent-users]
+
+- id: "article-fowler-tdd-in-agent-loop"
+  title: "TDD inside the agent loop - theater or actual value?"
+  short: "TDD in the Agent Loop"
+  provider: "Birgitta Böckeler (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/exploring-gen-ai/tdd-in-the-agent-loop.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Tests whether asking an agent to do red/green TDD actually improves results or just looks rigorous, a key question for harness design."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [article-fowler-harness-engineering-coding-agent-users]
+
+- id: "article-fowler-accidental-blackboard"
+  title: "An Accidental Blackboard"
+  short: "An Accidental Blackboard"
+  provider: "Giles Edwards-Alexander (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/exploring-gen-ai/an-accidental-blackboard.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Shows how a shared-state blackboard pattern emerged for coordinating multiple agents, linking classic AI architecture to modern harnesses."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-fowler-ccmenu-internal-quality-agent"
+  title: "Assessing internal quality while coding with an agent"
+  short: "Internal Quality w/ Agent"
+  provider: "Erik Doernenburg (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/exploring-gen-ai/ccmenu-quality.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "A hands-on look at how agent-written code holds up on maintainability in a real open-source app, not just on passing tests."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-fowler-sdd-kiro-speckit-tessl"
+  title: "Understanding Spec-Driven-Development: Kiro, spec-kit, and Tessl"
+  short: "Spec-Driven Development"
+  provider: "Birgitta Böckeler (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Compares three spec-driven tools to clarify what writing specs for agents really buys you and where it adds overhead."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-fowler-local-models-for-coding"
+  title: "Viability of local models for coding"
+  short: "Local Models for Coding"
+  provider: "Birgitta Böckeler (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/exploring-gen-ai/local-models-for-coding-factors.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Breaks down the hardware, model and harness factors that decide whether self-hosted models can drive a coding agent."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-fowler-supply-chain-coding-assistants"
+  title: "Coding Assistants Threaten the Software Supply Chain"
+  short: "Agents & Supply Chain"
+  provider: "Jim Gumbley, Lilly Ryan (martinfowler.com)"
+  type: "article"
+  url: "https://martinfowler.com/articles/exploring-gen-ai/software-supply-chain-attack-surface.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Explains the new attack surface coding agents open up, from poisoned context to dependency risks, and how to mitigate it."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-fowler-fragments-2026-09-01"
+  title: "Fragments: September 1, 2026"
+  short: "Fowler Fragments 2026-09-01"
+  provider: "Martin Fowler"
+  type: "article"
+  url: "https://martinfowler.com/fragments/2026-09-01.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Covers a long-horizon agent harness with persistent memory and supervision, and how agents can break CI feedback loops."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-infoq-ai-in-production-harness-panel"
+  title: "AI in Production: Panellists Highlight Silent Failures, Harness Engineering, and Agent Governance"
+  short: "InfoQ: AI in Production"
+  provider: "Olimpiu Pop (InfoQ)"
+  type: "article"
+  url: "https://www.infoq.com/news/2026/10/ai-systems-production/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Practitioners discuss how agentic systems fail silently in production and what harness, eval and access controls catch it."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-infoq-microservices-to-agents"
+  title: "From Microservices to Agents: the Next Evolution of Distributed Systems"
+  short: "InfoQ: Microservices→Agents"
+  provider: "InfoQ"
+  type: "article"
+  url: "https://www.infoq.com/articles/distributed-systems-microservices-agentic-ai"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Connects agent architectures to distributed-systems lessons on observability and reliability that a systems learner already knows."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [ddia]
+
+- id: "article-sakana-ai-scientist-first-publication"
+  title: "The AI Scientist Generates its First Peer-Reviewed Scientific Publication"
+  short: "AI Scientist v2 Paper"
+  provider: "Sakana AI"
+  type: "article"
+  url: "https://sakana.ai/ai-scientist-first-publication/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Describes how an end-to-end research agent produced a workshop paper that passed peer review, and the caveats around that claim."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [practice-ai-scientist]
+
+- id: "article-sakana-shinkaevolve-icfp"
+  title: "ShinkaEvolve in Action: How a Human-AI Partnership Conquered a Coding Challenge"
+  short: "ShinkaEvolve at ICFP"
+  provider: "Sakana AI"
+  type: "article"
+  url: "https://sakana.ai/icfp-2025/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "A concrete case study of humans steering an evolutionary code agent to win a hard programming contest."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  after: [article-sakana-shinkaevolve]
+
+- id: "article-philschmid-superhuman-bash"
+  title: "How Foundational Models Became Superhuman in Bash"
+  short: "Schmid: Superhuman Bash"
+  provider: "Philipp Schmid"
+  type: "article"
+  url: "https://www.philschmid.de/superhuman-bash"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "An experiment rebuilding a harness with only a bash tool, arguing that a smaller tool surface with broader actions works best."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-philschmid-subagent-patterns-2026"
+  title: "How Agents Manage Other Agents: Four Subagents Patterns in 2026"
+  short: "Schmid: Subagent Patterns"
+  provider: "Philipp Schmid"
+  type: "article"
+  url: "https://www.philschmid.de/subagent-patterns-2026"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Names four recurring ways harnesses delegate to subagents and the trade-offs of each."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-philschmid-how-managed-agents-work"
+  title: "How Gemini Managed Agents Works under the Hood"
+  short: "Schmid: Managed Agents"
+  provider: "Philipp Schmid"
+  type: "article"
+  url: "https://www.philschmid.de/how-managed-agents-work"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Opens up a hosted agent runtime, showing how sandboxes, tools and state fit together in a managed harness."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-philschmid-evocode-bench"
+  title: "Evaluating Agents Beyond the First Prompt"
+  short: "Schmid: Multi-turn Evals"
+  provider: "Philipp Schmid"
+  type: "article"
+  url: "https://www.philschmid.de/evocode-bench"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Argues for evaluating coding agents over evolving multi-turn tasks instead of single prompts, with a benchmark to match."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "Demystifying Evals"
+
+- id: "article-philschmid-recursive-self-improvement"
+  title: "Recursive Self-Improvement"
+  short: "Schmid: Recursive Self-Imp."
+  provider: "Philipp Schmid"
+  type: "article"
+  url: "https://www.philschmid.de/recursive-self-improvement"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "A grounded explainer of how agents and their harnesses can improve themselves today, separating practice from speculation."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-hamel-evals-skills-coding-agents"
+  title: "Evals Skills for Coding Agents"
+  short: "Evals Skills for Agents"
+  provider: "Hamel Husain, Shreya Shankar"
+  type: "article"
+  url: "https://hamel.dev/blog/posts/evals-skills/index.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Packages eval best practices as skills a coding agent can run, from error analysis to judge alignment."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "Evals FAQ"
+
+- id: "article-hamel-decision-model-evals"
+  title: "How To Use Decision Models for Evals"
+  short: "Decision Models for Evals"
+  provider: "Hamel Husain"
+  type: "article"
+  url: "https://hamel.dev/blog/posts/decision-model-evals/index.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Shows how to tie eval results to explicit decisions so evals drive shipping choices instead of dashboards."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  doFirst: "Evals FAQ"
+
+- id: "article-parlance-auto-evals"
+  title: "Do Automated Evals Work?"
+  short: "Do Automated Evals Work?"
+  provider: "Parlance Labs (Hamel Husain)"
+  type: "article"
+  url: "https://parlance-labs.com/blog/posts/auto-evals.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Tests whether fully automated eval generation holds up against human-grounded error analysis."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
+  doFirst: "Evals FAQ"
+
+- id: "article-willison-agentic-engineering-patterns"
+  title: "Agentic Engineering Patterns"
+  short: "Agentic Eng. Patterns"
+  provider: "Simon Willison"
+  type: "article"
+  url: "https://simonwillison.net/guides/agentic-engineering-patterns/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "A living guide of concrete patterns for working with coding agents, from red/green TDD to subagents and git hygiene."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-ronacher-codemode"
+  title: "What is Codemode"
+  short: "Ronacher: Codemode"
+  provider: "Armin Ronacher"
+  type: "article"
+  url: "https://lucumr.pocoo.org/2026/10/6/codemode/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Explains letting agents call tools from code inside a sandbox, and what MCP servers need to support it well."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-ronacher-astra-why"
+  title: "Astra for Coding: Why Are We Doing This Again?"
+  short: "Ronacher: Astra for Coding"
+  provider: "Armin Ronacher"
+  type: "article"
+  url: "https://lucumr.pocoo.org/2026/9/7/astra-why/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "A candid report on a 35-hour autonomous coding run that questions whether long-horizon agents fit current engineering practice."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-msr-magentic-one"
+  title: "Magentic-One: A Generalist Multi-Agent System for Solving Complex Tasks"
+  short: "MSR: Magentic-One"
+  provider: "Fourney, Bansal, Mozannar, Dibia, Amershi (Microsoft Research)"
+  type: "article"
+  url: "https://microsoft.com/en-us/research/articles/magentic-one-a-generalist-multi-agent-system-for-solving-complex-tasks"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "A readable account of an orchestrator-plus-specialists harness for web and file tasks, with its ledger-based planning loop."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-sakana-mass-blog"
+  title: "MASS: Recursive Self-Improvement through Multi-Agent Self-Supervision (Sakana AI blog)"
+  short: "MASS blog post"
+  provider: "Sakana AI"
+  type: "article"
+  url: "https://pub.sakana.ai/mass/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "A readable walkthrough of the MASS inner loop (workflow search) and outer loop (fine-tuning on team executions) before tackling the paper."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-kimi-researcher"
+  title: "Kimi-Researcher: End-to-End RL Training for Emerging Agentic Capabilities"
+  short: "Kimi-Researcher"
+  provider: "Moonshot AI"
+  type: "article"
+  url: "https://moonshotai.github.io/Kimi-Researcher/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "A detailed report on training a search agent purely with end-to-end RL, covering rewards, context management and rollouts."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "Kimi K2"
+
+- id: "article-infoq-google-envharness"
+  title: "Google EnvHarness Enables Self-Evolving Agents to Learn in Dynamics Environments"
+  short: "InfoQ: Google EnvHarness"
+  provider: "Sergio De Simone (InfoQ)"
+  type: "article"
+  url: "https://www.infoq.com/news/2026/10/envharness-self-evolving-agents/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Introduces the idea of a harness that reshapes training environments around an agent's weaknesses, bridging harnesses and self-improvement."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-sakana-ai-scientist-nature"
+  title: "The AI Scientist: Towards Fully Automated AI Research, Now Published in Nature"
+  short: "AI Scientist in Nature"
+  provider: "Sakana AI"
+  type: "article"
+  url: "https://sakana.ai/ai-scientist-nature/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Summarises the matured AI Scientist pipeline and its evaluation as published in Nature, a landmark for long-running research agents."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  after: [article-sakana-ai-scientist-first-publication]
+
+- id: "article-sakana-shinkaevolve"
+  title: "ShinkaEvolve: Evolving New Algorithms with LLMs, Orders of Magnitude More Efficiently"
+  short: "ShinkaEvolve"
+  provider: "Sakana AI"
+  type: "article"
+  url: "https://sakana.ai/shinka-evolve/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Shows how an evolutionary harness around LLMs discovers algorithms with far fewer samples than earlier AlphaEvolve-style systems."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-sakana-ab-mcts-treequest"
+  title: "Inference-Time Scaling and Collective Intelligence for Frontier AI"
+  short: "Sakana AB-MCTS/TreeQuest"
+  provider: "Sakana AI"
+  type: "article"
+  url: "https://sakana.ai/ab-mcts/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Introduces adaptive branching tree search that mixes multiple frontier models at inference time, released as the TreeQuest library."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "article-sakana-ale-bench"
+  title: "Towards Automating Long-Horizon Algorithm Engineering for Hard Optimization Problems"
+  short: "Sakana ALE-Bench"
+  provider: "Sakana AI"
+  type: "article"
+  url: "https://sakana.ai/ale-bench/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Presents a benchmark and agent for multi-hour optimisation contests, showing how to evaluate genuinely long-horizon agents."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-sakana-learning-to-orchestrate"
+  title: "Learning to Orchestrate Agents in Natural Language with the Conductor"
+  short: "Sakana Conductor"
+  provider: "Sakana AI"
+  type: "article"
+  url: "https://sakana.ai/learning-to-orchestrate/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Explores training a model to coordinate other agents through natural-language instructions, an alternative to hand-written orchestration."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-sakana-trinity"
+  title: "Trinity: An Evolved LLM Coordinator"
+  short: "Sakana Trinity"
+  provider: "Sakana AI"
+  type: "article"
+  url: "https://sakana.ai/trinity/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Shows a coordinator for multiple LLMs found by evolutionary search rather than designed by hand."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+
+- id: "article-metr-red-teaming-agent-monitoring"
+  title: "Red-Teaming Anthropic's Internal Agent Monitoring Systems"
+  short: "METR: Red-team Monitoring"
+  provider: "David Rein (METR)"
+  type: "article"
+  url: "https://metr.org/blog/2026-03-25-red-teaming-anthropic-agent-monitoring/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "A rare outside look at attacking the monitoring layer of a production agent harness, and what it can and cannot catch."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+
+- id: "article-metr-claude-opus-5-5-eval"
+  title: "Summary of METR's predeployment evaluation of Claude Opus 5.5"
+  short: "METR: Opus 5.5 Eval"
+  provider: "METR"
+  type: "article"
+  url: "https://metr.org/blog/2026-09-22-claude-opus-5-5/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Shows how an independent lab runs agentic capability and risk evaluations on a frontier model before release."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "Demystifying Evals"
+
+- id: "article-eugeneyan-cybersecurity-evals"
+  title: "Patterns for Building Cybersecurity Evals"
+  short: "Yan: Cybersecurity Evals"
+  provider: "Eugene Yan"
+  type: "article"
+  url: "https://eugeneyan.com/writing/cybersecurity-evals/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Breaks an agentic eval into sandboxed target, task difficulty, tools and grader, a template that transfers to other domains."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-agents"
+  doFirst: "Demystifying Evals"
+
+- id: "article-openevolve-hf-blog"
+  title: "OpenEvolve: An Open Source Implementation of Google DeepMind's AlphaEvolve"
+  short: "OpenEvolve blog"
+  provider: "Asankhaya Sharma (Hugging Face blog)"
+  type: "article"
+  url: "https://huggingface.co/blog/codelion/openevolve"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Walks through how the evolutionary coding loop is built and what it reproduced, a gentle on-ramp before reading AlphaEvolve-style papers."
+  fromYear: 3
+  priority: 1
+  roadmap: "ai-engineer"
+  after: [paper-alphaevolve]

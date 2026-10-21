@@ -1479,3 +1479,27 @@ Today shows its heading in 1.5 to 1.7 s, the Papers shelf in 1.3 to 1.4 s, and a
   redirect loop, which the link policy now lists to check by hand instead of as broken).
 - Failed: WikiChip refused the connection, and the TVM page on VTA's hardware answered 404; both are for opening in a
   browser, and neither is marked until someone has.
+
+## The Atlas Library's harness additions (pull request #23)
+
+A 226-row `atlas-additions-harness-2026-10-21.jsonl` (with its list, `atlas-additions-harness.md`) came without a
+prompt of its own, so it is imported like the Atlas Library's files: upserted by id, matched by URL (arXiv collapsed)
+and by title within a shelf, the matches listed, its URLs copied exactly. It is all AI (track `ai`, priority 1):
+agent harnesses, evaluation and benchmarks, and self-improving agents. None of its ids was in the Library and, once
+three short-title matches were read and kept apart, nothing matched: all 226 are new, in
+`data/resources/library-harness.yaml` (98 papers, 73 articles with 4 docs, 55 practice codebases). Resources: 3,834 to
+4,060. No track, path or screen changes: they join AI engineering, the AI Agents (171) and AI Engineer (55)
+roadmaps, and the Research view (45 more under Generative AI, one each under World models and Diffusion, all as the
+file gives them).
+
+**Three more pairs kept apart.** Sakana's MASS is not "Multi-Agent Design", also called MASS; Fowler's "Context
+Engineering for Coding Agents" is not HumanLayer's "Advanced" one; "Weak-for-Strong (W4S)", its brackets dropped, read
+like "Weak-to-Strong". All three are in `NOT_SAME`.
+
+**Speed.** The Library chunk grows to 453 kB gzipped; Today's seed stays at 181 kB. At 4x CPU on a 390 px screen,
+Today shows its heading in 1.5 s, the Papers shelf in 1.2 s and a search keystroke takes 0.21 to 0.23 s.
+
+**The new rows' links, from the runner.** A one-off `links-harness` job checked the 226 new URLs on the pull request
+(run 39546069621) and was then removed: 225 answered and 1 failed. AgentScope's docs page
+(`https://doc.agentscope.io/en/index.html`, `docs-agentscope`) answered 404; it is for opening in a browser, and its
+URL stays as the file gave it.
