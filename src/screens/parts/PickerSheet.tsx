@@ -13,9 +13,12 @@ export interface PickerOption {
   keywords?: string;
 }
 
+/** Rows shown before "Show 50 more": the swap and dependency pickers offer the Library's ten thousand resources. */
+const PAGE = 50;
+
 /**
- * Anything with more than six options: a sheet with a search field and a list of rows. Choosing closes it.
- * With `multi`, rows tick on and off and the sheet stays open.
+ * Anything with more than six options: a sheet with a search field and a list of rows, a page at a time. Choosing
+ * closes it. With `multi`, rows tick on and off and the sheet stays open.
  */
 export function PickerSheet({
   open,
@@ -41,17 +44,24 @@ export function PickerSheet({
   searchLabel?: string;
 }) {
   const [query, setQuery] = useState('');
+  const [pages, setPages] = useState(1);
   const chosen = new Set(Array.isArray(value) ? value : value ? [value] : []);
   const words = query.trim().toLowerCase();
   const shown = words ? options.filter((o) => (o.label + ' ' + (o.meta ?? '') + ' ' + (o.keywords ?? '')).toLowerCase().includes(words)) : options;
+  const listed = shown.slice(0, pages * PAGE);
+  const search = (next: string): void => {
+    setQuery(next);
+    setPages(1);
+  };
   const close = (): void => {
     setQuery('');
+    setPages(1);
     onClose();
   };
 
   return (
     <Sheet open={open} title={title} onClose={close}>
-      {options.length > 6 && <TextField label={searchLabel} value={query} onChange={setQuery} type="search" className="mb-3" />}
+      {options.length > 6 && <TextField label={searchLabel} value={query} onChange={search} type="search" className="mb-3" />}
       <RowList>
         {clearLabel && !words && (
           <Row
@@ -63,7 +73,7 @@ export function PickerSheet({
             }}
           />
         )}
-        {shown.map((option) =>
+        {listed.map((option) =>
           multi ? (
             <Row key={option.value} title={option.label} meta={option.meta} trailing={option.trailing} check={{ checked: chosen.has(option.value), onChange: () => onPick(option.value) }} />
           ) : (
@@ -79,6 +89,9 @@ export function PickerSheet({
               }}
             />
           ),
+        )}
+        {shown.length > listed.length && (
+          <Row title={'Show ' + Math.min(PAGE, shown.length - listed.length) + ' more'} meta={listed.length + ' of ' + shown.length} chevron height={44} onClick={() => setPages(pages + 1)} />
         )}
         {shown.length === 0 && <Row title={'Nothing matches "' + query.trim() + '"'} />}
       </RowList>

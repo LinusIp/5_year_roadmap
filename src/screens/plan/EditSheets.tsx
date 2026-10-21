@@ -135,12 +135,16 @@ export function AddToPlanSheet({ atlas, refId, open, onClose }: { atlas: Atlas; 
 export function SwapSheet({ atlas, planItem, onClose }: { atlas: Atlas; planItem: PlanItem | null; onClose: () => void }) {
   const refId = planItem ? (planItem.resourceId ?? planItem.projectId!) : '';
   const candidates = useMemo(() => (planItem ? swapCandidates(atlas.seed, refId) : { named: [], others: [] }), [atlas.seed, planItem, refId]);
-  const named = new Set(candidates.named);
-  const options = [...candidates.named, ...candidates.others].map((id) => ({
-    value: id,
-    label: titleOf(atlas, id),
-    meta: named.has(id) ? 'Alternative' : (atlas.seed.resources.find((r) => r.id === id)?.provider ?? 'Project'),
-  }));
+  // Every resource is a candidate (ten thousand, ATLAS-LIBRARY): one pass with maps, once per curriculum.
+  const options = useMemo(() => {
+    const resources = new Map(atlas.seed.resources.map((r) => [r.id, r]));
+    const projects = new Map(atlas.seed.projects.map((p) => [p.id, p.title]));
+    const named = new Set(candidates.named);
+    return [...candidates.named, ...candidates.others].map((id) => {
+      const resource = resources.get(id);
+      return { value: id, label: resource?.title ?? projects.get(id) ?? id, meta: named.has(id) ? 'Alternative' : (resource?.provider ?? 'Project') };
+    });
+  }, [atlas.seed, candidates]);
   return (
     <PickerSheet
       open={planItem !== null}

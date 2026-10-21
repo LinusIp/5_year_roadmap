@@ -1535,8 +1535,14 @@ read or written elsewhere. The build fell from 74 s to 11 s and the unit tests t
 **The long tail's moment.** The Library chunk is 5.8 MB (1.2 MB gzipped) and parses for most of a second at a 4x CPU
 slowdown. Asked for right after the first render, that parse landed before Today's plan had loaded and held its first
 screen to 2.0 to 2.3 s. It is now asked for once the first screen has its plan and the browser is idle (at once
-when a plan edit names a Library resource, or on the Library screen itself), and Today shows its heading in 1.2 to
-1.5 s, as before. The Papers shelf opened the moment Today shows, while the chunk still loads, takes 2.2 to 2.7 s; with
+when a plan edit names a Library resource, on the Library screen itself, and on the Plan screen, whose pickers offer
+every resource and whose sheets would otherwise reset under an edit when the chunk landed), and Today shows its
+heading in 1.2 to 1.5 s, as before. The Papers shelf opened the moment Today shows, while the chunk still loads, takes 2.2 to 2.7 s; with
 the chunk there, the usual case, 1.9 s (1.3 s before: ten thousand entries to build and index). Search keeps each item's words as one space-led string and scans it
 (`includes`) instead of walking a word array per term: a keystroke over 10,500 items takes 0.3 to 0.4 s at 4x. The
 service worker precaches the chunk as before, so the Library is offline too.
+
+**The plan's pickers.** The swap sheet offered every resource at once: ten thousand rows in one sheet, each labelled
+by a scan of the whole list, which froze the sheet for seconds and the test that swaps an item. `PickerSheet` now
+lists fifty rows and a "Show 50 more" row (the search narrows it as before), which every picker built on it gets, and
+the swap sheet labels its rows from maps built once.

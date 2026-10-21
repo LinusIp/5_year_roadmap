@@ -1110,6 +1110,7 @@ Verified on this machine (Linux, Chromium 140):
 - The title rule tightened (three words in common, two-word short titles, no title against a short title), eleven
   pairs in `NOT_SAME`; `after` resolved by the same case first; ids lowercased.
 - `js-yaml` reads the data in 0.5 s instead of 3.5 s (build 74 s to 11 s); the Library chunk loads once the first
-  screen has its plan and the browser is idle; search scans one string per item.
+  screen has its plan and the browser is idle (at once on the Library and Plan screens); search scans one string per
+  item; `PickerSheet` pages fifty rows at a time and the swap sheet labels its ten thousand candidates from maps.
 - Tests: the tightened rule and case-aware `after`; the search; `tests/e2e/atlas-library.spec.ts`: the fourth file
   in search and a pair kept apart.
