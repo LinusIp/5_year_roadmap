@@ -1100,3 +1100,17 @@ Verified on this machine (Linux, Chromium 140):
   Weak-to-Strong).
 - Tests: Weak-for-Strong kept apart; `tests/e2e/atlas-library.spec.ts`: search finds Meta-Harness and the Darwin
   Gödel Machine, and the AI Agents roadmap chip keeps them.
+
+## Pull request #24: the whole Atlas Library
+
+- `data/resources/library-atlas-4.yaml`: 6,388 new resources (2,823 papers, 1,737 practice, 1,551 articles with docs
+  and tutorials, 166 courses, 90 books, 21 blogs; AI 3,023 + 900 inference, Systems 804, Architecture 468, Robotics
+  290, Languages 269, Graphics 230, Simulation 93, Hardware 83, Game development 65, Engineering 64, Math 53,
+  DevOps 46). 11 more matched what the Library had. Resources: 4,060 to 10,448.
+- The title rule tightened (three words in common, two-word short titles, no title against a short title), eleven
+  pairs in `NOT_SAME`; `after` resolved by the same case first; ids lowercased.
+- `js-yaml` reads the data in 0.5 s instead of 3.5 s (build 74 s to 11 s); the Library chunk loads once the first
+  screen has its plan and the browser is idle (at once on the Library and Plan screens); search scans one string per
+  item; `PickerSheet` pages fifty rows at a time and the swap sheet labels its ten thousand candidates from maps.
+- Tests: the tightened rule and case-aware `after`; the search; `tests/e2e/atlas-library.spec.ts`: the fourth file
+  in search and a pair kept apart.

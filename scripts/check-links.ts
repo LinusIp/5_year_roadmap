@@ -14,7 +14,8 @@
  *              have none yet, so a link is only ever added after this run fetched it and its title was confirmed
  *
  * A link marked `linkCheck: manual-ok`, or on an address of scripts/lib/link-policy.ts's MANUAL_OK, was opened by hand
- * and is not requested; a failure on one of its SCRIPT_SIDE hosts is listed to check by hand, not as failed.
+ * and is not requested; a failure on one of its SCRIPT_SIDE hosts is listed to check by hand, not as failed. A 429 is
+ * tried once more after a few seconds: a burst of requests to one host is rate-limited, not refused.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -139,6 +140,9 @@ async function request(url: string, method: 'HEAD' | 'GET'): Promise<{ status: n
   return { status: res.status, finalUrl: res.url, body };
 }
 
+/** How long to wait before the one retry of a 429: a burst of requests to one host (github.com, with 200 links) is rate-limited for a few seconds. */
+const RETRY_AFTER_MS = 4000;
+
 async function check(target: Target): Promise<Result> {
   const base: Result = { ...target, status: null, ok: false, finalUrl: target.url, title: '', error: '', method: 'HEAD' };
   try {
@@ -146,7 +150,11 @@ async function check(target: Target): Promise<Result> {
       const head = await request(target.url, 'HEAD');
       if (head.status < 400) return { ...base, status: head.status, ok: true, finalUrl: head.finalUrl };
     }
-    const get = await request(target.url, 'GET');
+    let get = await request(target.url, 'GET');
+    if (get.status === 429) {
+      await new Promise((resolve) => setTimeout(resolve, RETRY_AFTER_MS));
+      get = await request(target.url, 'GET');
+    }
     return { ...base, method: 'GET', status: get.status, ok: get.status < 400, finalUrl: get.finalUrl, title: extractTitle(get.body) };
   } catch (err) {
     const cause = err instanceof Error && err.cause instanceof Error ? ' (' + err.cause.message + ')' : '';

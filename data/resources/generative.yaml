@@ -163,6 +163,11 @@
   summary: The reference library for diffusion pipelines; worth reading as code.
   covers:
     - inference-engineering/transformers-and-diffusers
+  short: "diffusers source"
+  fromYear: 2
+  after: [hf-diffusion-course]
+  priority: 1
+  roadmap: "ai-engineer"
 - id: denoising-diffusion-pytorch
   title: lucidrains/denoising-diffusion-pytorch
   provider: Phil Wang
@@ -251,3 +256,9 @@
   prerequisites: []
   subject: deep-learning
   summary: "The V-JEPA code: self-supervised video representations by prediction in latent space."
+  short: "V-JEPA code"
+  fromYear: 3
+  doFirst: "V-JEPA paper"
+  priority: 1
+  roadmap: "ai-engineer"
+  research: "world-models"

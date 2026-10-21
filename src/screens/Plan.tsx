@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useCertStates, useMilestoneStates } from '../db/credentials.ts';
 import { usePaperStates, useWeekPick } from '../db/state.ts';
-import { useAtlas } from '../hooks/useAtlas.ts';
+import { useAtlas, useLibrary } from '../hooks/useAtlas.ts';
 import { useCatalogueIndex } from '../hooks/useCatalogue.ts';
 import { useUnits } from '../hooks/useUnits.ts';
 import { daysBetween, startOfWeek, today as todayDate } from '../lib/dates.ts';
@@ -36,6 +36,8 @@ const VIEWS: { value: View; label: string }[] = [
  */
 export function Plan() {
   const atlas = useAtlas();
+  // The plan's pickers (add, swap, a goal's dependencies) offer every resource: ask for the Library's long tail at once.
+  useLibrary(true);
   const units = useUnits();
   const paperStates = usePaperStates();
   const certStates = useCertStates();

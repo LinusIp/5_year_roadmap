@@ -158,6 +158,11 @@ export const SAME_AS: Readonly<Record<string, string>> = {
  * on topics in and on supersymmetric quantum mechanics are not his Quantum Mechanics. From the harness additions: Sakana's
  * MASS (recursive self-improvement) is not "Multi-Agent Design" (MASS too), Fowler's "Context Engineering for Coding
  * Agents" is not HumanLayer's "Advanced" one, and Weak-for-Strong (a meta-agent) is not Weak-to-Strong Generalization.
+ * From the 10,436-row file, where a bracketed edition or form is dropped before titles are compared: Sanglard's Doom3
+ * BFG review is not his Doom3 one; the FSDP2 tutorial is not FSDP's; MIT 6.851's Spring 2014 videos are not OCW's
+ * 2012 lectures; two CRDT papers (Preguiça's overview, the approaches survey) are not Shapiro's; the Qwen2.5 Coder, VL
+ * and 1M reports are not the Qwen2.5 report; the CP Handbook's LaTeX source is not the PDF; MIT 18.06's 2025 course
+ * repo is not OCW's 2010 course; CMU 15-721's Spring 2024 lectures are not its course site.
  */
 export const NOT_SAME: Readonly<Record<string, readonly string[]>> = {
   'paper-orca': ['orca'],
@@ -173,6 +178,17 @@ export const NOT_SAME: Readonly<Record<string, readonly string[]>> = {
   'paper-sakana-mass': ['paper-mass-multi-agent-design'],
   'article-fowler-context-engineering-coding-agents': ['article-humanlayer-advanced-context-engineering'],
   'paper-weak-for-strong': ['paper-weak-to-strong-generalization'],
+  'article-sanglard-doom3-bfg-review': ['article-sanglard-doom3-review'],
+  'docs-pytorch-fsdp2-tutorial': ['tutorial-pytorch-fsdp'],
+  'mit-6851-spring14': ['mit-6851-advanced-data-structures'],
+  'paper-approaches-to-crdts': ['paper-crdts-shapiro'],
+  'paper-crdt-overview-preguica': ['paper-crdts-shapiro'],
+  'paper-qwen2-5-coder': ['paper-qwen2-5-report'],
+  'paper-qwen2-5-vl': ['paper-qwen2-5-report'],
+  'paper-qwen25-1m': ['paper-qwen2-5-report'],
+  'repo-cphb-source': ['competitive-programmers-handbook'],
+  'repo-mitmath-1806-2025': ['mit-18-06'],
+  'video-cmu-15721-spring2024': ['cmu-15721-advanced-databases'],
 };
 
 /**
@@ -190,20 +206,44 @@ export function findExisting(item: Pick<ImportItem, 'id' | 'url' | 'title' | 'sh
   if (checked) return { entry: checked, by: 'checked' };
   let best: { entry: Existing; score: number } | null = null;
   const shelf = item.type ? SHELF_OF[item.type] : undefined;
+  const itemShort = titleWords(item.short).size >= 2 ? item.short : null;
   for (const e of existing) {
     if (shelf && e.shelf && e.shelf !== shelf) continue;
     if (NOT_SAME[item.id]?.includes(e.id)) continue;
-    const score = Math.max(titleLikeness(item.title, e.title), e.short ? titleLikeness(item.short, e.short) : 0, e.short ? titleLikeness(item.title, e.short) : 0);
+    // Full titles alike with three words in common (or the same two words, when neither title dropped a bracketed
+    // part: "Crafting Interpreters"), or short titles alike when each has two words or more. "GEM" and "GEM",
+    // "Structured outputs (Gemini API)" and SGLang's, "Prompt engineering (OpenAI API)" and Lilian Weng's are too
+    // little to go on (the 10,436-row file), and a title is never read against a short title.
+    const full = titleLikeness(item.title, e.title);
+    const short = itemShort && e.short && titleWords(e.short).size >= 2 ? titleLikeness(itemShort, e.short) : 0;
+    const score = Math.max(full >= SAME_TITLE && (wordsInCommon(item.title, e.title) >= 3 || (full === 1 && !hasBrackets(item.title) && !hasBrackets(e.title))) ? full : 0, short);
     if (score >= SAME_TITLE && (!best || score > best.score)) best = { entry: e, score };
   }
   return best ? { entry: best.entry, by: 'title' } : null;
 }
 
-/** The id an item's `after` names, when it is a short title the Library has (any case); otherwise null. */
+/** Whether a title carries a bracketed part, which `titleWords` drops: an edition, a form, a provider. */
+function hasBrackets(title: string): boolean {
+  return /\([^)]*\)/.test(title);
+}
+
+/** How many words two titles share. */
+function wordsInCommon(a: string, b: string): number {
+  const x = titleWords(a);
+  let n = 0;
+  for (const w of titleWords(b)) if (x.has(w)) n++;
+  return n;
+}
+
+/**
+ * The id an item's `after` names, when it is a short title the Library has; otherwise null. The same case first
+ * (ReST, the self-training paper, is not REST, the retrieval one), then any case.
+ */
 export function resolveAfter(after: string, known: readonly { id: string; short?: string | undefined }[]): string | null {
   if (!after) return null;
-  const want = after.trim().toLowerCase();
-  return known.find((k) => (k.short ?? '').trim().toLowerCase() === want)?.id ?? null;
+  const exact = after.trim();
+  const want = exact.toLowerCase();
+  return known.find((k) => (k.short ?? '').trim() === exact)?.id ?? known.find((k) => (k.short ?? '').trim().toLowerCase() === want)?.id ?? null;
 }
 
 /** The resource an item becomes. `afterId` is its soft prerequisite when `after` named one. */

@@ -5,7 +5,7 @@ import { FIRST_DAY, open, showMoreUntil } from './helpers.ts';
  * The whole Atlas Library (ATLAS-LIBRARY): about 2,400 resources, loaded after the first screen, in the plan's order
  * (priority, year, level), with Level and Roadmap chips, a Research view, Inference engineering, DevOps, Simulation,
  * Math, Engineering, Hardware and Quantum computing paths, roadmap.sh's pages at the head of their paths, "Write log
- * entry" on a resource's sheet, and the harness additions in search.
+ * entry" on a resource's sheet, and the harness additions and the fourth file in search.
  */
 test.use({ timezoneId: 'Asia/Tashkent', serviceWorkers: 'block' });
 
@@ -72,6 +72,20 @@ test('search finds the harness additions: Meta-Harness, the Darwin Gödel Machin
   await page.getByRole('dialog', { name: 'Roadmap' }).getByRole('button', { name: /^AI Agents/ }).click();
   await expect(page).toHaveURL(/roadmap=ai-agents/);
   await expect(page.getByRole('button', { name: /^Darwin Gödel Machine/ }).first()).toBeVisible();
+});
+
+test('search reaches the fourth file, and keeps a title pair the matcher read as one apart', async ({ page }) => {
+  await open(page, './#/library');
+  const search = page.getByRole('searchbox', { name: 'Search the library' });
+  // A full title finds a row listed by its short one: Gradient Episodic Memory is "GEM" (and not the GEM gym).
+  await search.fill('Gradient Episodic');
+  await expect(page.getByRole('button', { name: /^GEM/ }).first()).toBeVisible();
+  await search.fill('Bullshark');
+  // Bullshark and its partially synchronous version are two papers.
+  await expect(page.getByRole('button', { name: /^Bullshark/ })).toHaveCount(2);
+  await search.fill('Qwen2.5');
+  await expect(page.getByRole('button', { name: /^Qwen2\.5-Coder report/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Qwen2\.5 Report/ })).toBeVisible();
 });
 
 test('the Inference engineering path opens with the roadmap.sh page', async ({ page }) => {

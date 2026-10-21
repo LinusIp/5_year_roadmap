@@ -28,7 +28,9 @@ test('the Papers shelf lists Attention Is All You Need, year 1 first, and filter
   await levels.getByRole('button', { name: 'Advanced' }).click();
   await expect(page).toHaveURL(/lvl=advanced/);
   await search.fill('Attention Is All You Need');
-  await expect(page.getByText('No matches. Clear filters.')).toBeVisible();
+  // The paper is intermediate, so the Advanced chip hides it (other papers carry its words: "Tensor Product
+  // Attention Is All You Need" came with the whole Atlas Library).
+  await expect(attention).toHaveCount(0);
   await levels.getByRole('button', { name: 'Intermediate' }).click();
   await expect(page).toHaveURL(/lvl=intermediate/);
   await expect(attention).toBeVisible();
@@ -71,7 +73,8 @@ test('Robotics and Software architecture list their new resources under Optional
   const underactuated = page.getByRole('button', { name: /^Underactuated Robotics/ });
   await showMoreUntil(page, underactuated);
   await expect(underactuated).toContainText('Year 2 · Book');
-  await showMoreUntil(page, page.getByRole('button', { name: /^Diffusion Policy/ }));
+  // The fourth Atlas file adds a second row that starts "Diffusion Policy"; the paper is the first by fit.
+  await showMoreUntil(page, page.getByRole('button', { name: /^Diffusion Policy/ }).first());
 });
 
 test('a blog opens its sheet with its link', async ({ page }) => {

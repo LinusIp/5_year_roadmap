@@ -225,9 +225,10 @@ among them math and physics and electrical and mechanical engineering, in `data/
 (`docs/imports-atlas-library-2.md`), and its third (3,811 rows) 418 more, among them hardware and chip design and
 quantum computing, in `data/resources/library-atlas-3.yaml` (`docs/imports-atlas-library-3.md`). Its harness
 additions (226 rows on agent harnesses, evaluation and self-improving agents) are in
-`data/resources/library-harness.yaml` (`docs/imports-atlas-harness.md`). About 3,800 resources only ever appear in
-the Library; they ride in a chunk of their own that loads right after the first screen, so Today starts as fast as
-before.
+`data/resources/library-harness.yaml` (`docs/imports-atlas-harness.md`), and its whole, 10,436-row file adds 6,388
+more in `data/resources/library-atlas-4.yaml` (`docs/imports-atlas-library-4.md`): 10,448 resources in all. About
+10,200 of them only ever appear in the Library; they ride in a chunk of their own that loads once the first screen
+has its plan and the browser is idle, so Today starts as fast as before.
 A weekly job (`.github/workflows/links.yml`) runs `npm run check:links` and reports; it never edits the data.
 `npm run check:links -- --checked 2026-10-19` checks only the links an import dated that day, and `--in <file>` only
 the rows one data file defines. A link opened by hand is marked `linkCheck: manual-ok` and not requested; the

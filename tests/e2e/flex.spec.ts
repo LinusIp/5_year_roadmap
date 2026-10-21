@@ -178,7 +178,8 @@ test('creates a resource of its own and a goal that shows on the Timeline', asyn
   await goal.getByRole('button', { name: /^What it depends on/ }).click();
   const picker = page.getByRole('dialog', { name: 'What it depends on' });
   await picker.getByRole('searchbox', { name: 'Search items and nodes' }).fill('18.06 Linear');
-  await picker.getByRole('checkbox', { name: /^MIT 18\.06 Linear Algebra/ }).click();
+  // The whole Atlas Library adds the 2025 course repo beside OCW's course.
+  await picker.getByRole('checkbox', { name: /^MIT 18\.06 Linear Algebra \(Gilbert Strang/ }).click();
   await picker.getByRole('button', { name: 'Close' }).click();
   await goal.getByRole('button', { name: 'Save' }).click();
   await edit.getByRole('button', { name: 'Close' }).click();

@@ -48,11 +48,15 @@ test('a path lists the new resources under Optional, by the year they fit from',
   const dl = page.getByRole('button', { name: /^DL Specialization/ });
   await showMoreUntil(page, dl);
   await expect(dl).toContainText('Year 1 · Course');
-  const cs234 = page.getByRole('button', { name: /^CS234 RL/ });
-  await showMoreUntil(page, cs234);
-  await expect(cs234).toContainText('Year 3');
   await dl.click();
   await expect(page.getByRole('dialog', { name: /Deep Learning Specialization/ })).toBeVisible();
+  // A year 3 course sits thousands of rows down the AI path's optional list since the whole Atlas Library came
+  // (ATLAS-LIBRARY): found on the Courses shelf, its sheet says the year it fits from.
+  await open(page, './#/library?type=course&q=CS234');
+  const cs234 = page.getByRole('button', { name: /^CS234 RL/ });
+  await expect(cs234).toBeVisible();
+  await cs234.click();
+  await expect(page.getByRole('dialog', { name: /CS234/ }).getByText(/Year 3/)).toBeVisible();
 });
 
 test('a sheet says how a resource is free and links to it exactly', async ({ page }) => {

@@ -192,6 +192,9 @@
   estHours: 30
   prerequisites: [vkguide]
   subject: graphics
+  summary: "Official, maintained samples covering API features, extensions and performance best practices with explanatory docs per sample."
+  priority: 3
+  roadmap: "game-developer"
 
 - id: khronos-vulkan-tutorial
   title: "Khronos Vulkan Tutorial (the official one)"
@@ -207,6 +210,11 @@
   reference: true
   subject: graphics
   summary: "The maintained successor of vulkan-tutorial.com. Use it in place of the original if you prefer; the hours are counted once."
+  short: "Khronos Vulkan Tutorial"
+  fromYear: 2
+  after: [learnopengl]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: pbr-book
   title: "Physically Based Rendering: From Theory to Implementation (pbr-book.org)"

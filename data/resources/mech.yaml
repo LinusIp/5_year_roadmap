@@ -166,6 +166,10 @@
   estHours: 30
   subject: mechanics-fea-cfd
   stretch: true
+  summary: "Short focused videos on FEM practice, adaptivity, solvers, parallel computing and software engineering for scientific codes."
+  after: [mit-18-085]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: cfd-python-12-steps
   title: "Lorena Barba: CFD Python, 12 Steps to Navier-Stokes"
@@ -443,6 +447,11 @@
   cost: free
   estHours: 30
   summary: "Finite-element programs worked step by step; pairs with Bangerth's video lectures."
+  short: "deal.II tutorial steps"
+  fromYear: 2
+  after: [bangerth-dealii-lectures]
+  priority: 3
+  roadmap: "game-developer"
 
 - id: calculix
   title: "CalculiX: open-source finite-element solver"

@@ -1503,3 +1503,73 @@ Today shows its heading in 1.5 s, the Papers shelf in 1.2 s and a search keystro
 (run 39546069621) and was then removed: 225 answered and 1 failed. AgentScope's docs page
 (`https://doc.agentscope.io/en/index.html`, `docs-agentscope`) answered 404; it is for opening in a browser, and its
 URL stays as the file gave it.
+
+## The whole Atlas Library (pull request #24)
+
+ATLAS-LIBRARY's complete file: 10,436 rows. Its first 3,811 are pull request #22's file and its next 226 the harness
+additions, unchanged: the upsert found every one's entry again and filled nothing. Of the 6,399 rows it adds, 6,388
+are new (`data/resources/library-atlas-4.yaml`, 3.5 MB) and 11 matched entries the Library had (10 by URL, 1 by
+title), listed in `docs/imports-atlas-library-4.md`. No URL changed. Resources: 4,060 to 10,448, most of the growth
+in AI (3,023, and 900 more tagged inference), systems (804), architecture (468), robotics (290), languages (269)
+and graphics (230). One row's id carried a capital and is lowercased: an id is the Library's own name, and its slugs
+are lowercase.
+
+**The title rule, tightened.** The first run matched 30 new rows by title and 29 were other works, nearly all on a
+one-word short title ("GEM" and "GEM"), a two-word title with its bracketed part dropped ("Structured outputs
+(Gemini API)" and SGLang's) or a title read against a short title. At ten thousand rows those paths find more
+namesakes than duplicates, so a full-title match now needs three words in common (or the same two words when
+neither title had a bracketed part, "Crafting Interpreters"), a short-title match needs two words on each side, and
+a title is never read against a short title. Every title match the earlier imports made still holds (the 25 of them
+were re-run), and the rule has tests. Eleven pairs that still match on their full titles were read and are different
+works (the Qwen2.5 Coder, VL and 1M reports beside the Qwen2.5 report, FSDP2 beside FSDP, a course's 2024 or 2025
+offering beside the Library's, and so on), now in `NOT_SAME`; CS224W's course site merged into the Library's CS224W.
+
+**A soft prerequisite by the same case.** 57 short titles are shared by several rows (a paper and its code, REST and
+ReST), so an `after` that names one now takes the row whose short title matches in the same case before any case.
+
+**Reading the data.** The `yaml` library took 3.5 s to read the 10 MB of data, which every build (seven reads),
+test run, validation and check paid; `js-yaml`'s core schema reads the same values (dates stay strings, checked on
+every file) in 0.5 s. It is a dev dependency of `scripts/lib/load-seed.ts` alone; `yaml` stays where documents are
+read or written elsewhere. The build fell from 74 s to 11 s and the unit tests that load the seed no longer time out.
+
+**The long tail's moment.** The Library chunk is 5.8 MB (1.2 MB gzipped) and parses for most of a second at a 4x CPU
+slowdown. Asked for right after the first render, that parse landed before Today's plan had loaded and held its first
+screen to 2.0 to 2.3 s. It is now asked for once the first screen has its plan and the browser is idle (at once
+when a plan edit names a Library resource, on the Library screen itself, and on the Plan screen, whose pickers offer
+every resource and whose sheets would otherwise reset under an edit when the chunk landed), and Today shows its
+heading in 1.2 to 1.5 s, as before. The Papers shelf opened the moment Today shows, while the chunk still loads, takes 2.2 to 2.7 s; with
+the chunk there, the usual case, 1.9 s (1.3 s before: ten thousand entries to build and index). Search keeps each item's words as one space-led string and scans it
+(`includes`) instead of walking a word array per term: a keystroke over 10,500 items takes 0.3 to 0.4 s at 4x. The
+service worker precaches the chunk as before, so the Library is offline too.
+
+**The plan's pickers.** The swap sheet offered every resource at once: ten thousand rows in one sheet, each labelled
+by a scan of the whole list, which froze the sheet for seconds and the test that swaps an item. `PickerSheet` now
+lists fifty rows and a "Show 50 more" row (the search narrows it as before), which every picker built on it gets, and
+the swap sheet labels its rows from maps built once.
+
+**The new rows' links, from the runner.** A one-off `links-atlas-4` job checked the 6,388 new URLs on the pull
+request twice (runs 39614523389 and 39616173817) and was then removed. The first run listed 200 GitHub links to check
+by hand: six requests at a time to one host answer 429 for a few seconds, so `check:links` now tries a 429 once more
+after a four-second pause, and the second run read 6,220 of the links as fine, 63 as failed and 105 as ones to open by
+hand. No URL was changed; nothing is marked until someone has opened it.
+
+- Failed in both runs (53): fourteen 404s, the likeliest to have moved (llm-d's prefix-cache routing page,
+  Transformer Engine's FP8 primer, FlashInfer's cascade API, Cohere's prompt-engineering basics, TorchRec's docs,
+  Llama 3.1's prompt format, MATS's mech-interp hub, Uber's predictive-to-generative post, OWASP's threat modeling
+  project, LinkedIn's scaling history, the RUM conjecture PDF, Frostbite's volumetrics talk, Roy's MMS paper, Smith's
+  1981 branch prediction paper); fourteen servers not answering (503, 502, 522: Heidelberg's GPU course, TUM's MVG
+  course and RGB-D pages, Collins's COMS 4705, Mozilla's TLS wiki, three Khronos blog posts, three Analog Devices wiki
+  pages, KITTI, 3dgep); four Meta blog posts answering 400 to a script; four ai.google.dev pages looping their
+  redirects for a script, as tensorflow.org does (if they open fine, the host belongs with the link policy's
+  script-side hosts); four hosts serving another host's certificate (freetechbooks.com, probmods.org, archagon.net,
+  kernel.dk); blog.junchengyang.com, not found by DNS (the blog and three posts); and nine timeouts or dropped
+  connections (Princeton's COS 597G and the photo-caching paper, CNAM's flow-matching slides, Triplit, SDU's DM823,
+  the GC Handbook, Dostoevsky at Harvard, Heitz's sampler page, and codeforces.net, which the runner resolved to
+  127.0.0.1).
+- Failed in one run only (11): ten MIT pages (6.851's Spring 2014 site, 6.5830, 6.7480 and its book, three
+  Underactuated Robotics chapters, visionbook.mit.edu) with research.google and osti.gov timed out in the second
+  run and answered in the first; DianNao's PDF at NUS dropped the connection in the first and answered in the second.
+- To check by hand (105): thirty USENIX pages, Etsy's and DoorDash's engineering blogs, cppreference, isocpp,
+  DeepLearning.AI, Loro, the Vulkan docs, GNU Radio's wiki, MOOSE, lcamtuf's Substack and others answering 403; ten
+  429s that the one retry did not clear (five GitHub, three vLLM docs, a Lightning notebook, bioRxiv); and nine on
+  hosts the link policy lists as failing scripts (MIT CSAIL, tensorflow.org).

@@ -639,6 +639,10 @@
   estHours: 0
   reference: true
   summary: "The NLP textbook, free as a draft. A reference for CS224n."
+  short: "Jurafsky & Martin SLP3"
+  fromYear: 1
+  priority: 1
+  roadmap: "ai-engineer"
 
 - id: prml
   title: "Pattern Recognition and Machine Learning (Bishop, free PDF)"
