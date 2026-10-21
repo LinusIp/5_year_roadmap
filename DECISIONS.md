@@ -1573,3 +1573,48 @@ hand. No URL was changed; nothing is marked until someone has opened it.
   DeepLearning.AI, Loro, the Vulkan docs, GNU Radio's wiki, MOOSE, lcamtuf's Substack and others answering 403; ten
   429s that the one retry did not clear (five GitHub, three vLLM docs, a Lightning notebook, bioRxiv); and nine on
   hosts the link policy lists as failing scripts (MIT CSAIL, tensorflow.org).
+
+## The Atlas Library's fifth file (pull request #25)
+
+ATLAS-LIBRARY's 11,389-row file. Its first 10,436 rows are pull request #24's, unchanged: the upsert found every
+one's entry again and filled nothing. Of the 953 rows it adds, all 953 are new (`data/resources/library-atlas-5.yaml`):
+none matched an entry by URL, and the eleven that matched one by title were read and are other works
+(`docs/imports-atlas-library-5.md`). No URL changed. Resources: 10,448 to 11,402, most of the growth in engineering
+(192, with the aerospace rows), systems (112), AI (103), graphics (100), hardware (93), math (87), simulation (87) and
+robotics (73); 184 of the rows are blogs, so every track has some.
+
+**Two bracketed years are two offerings.** Eight of the eleven title matches were SIGGRAPH's "Advances in Real-Time
+Rendering in Games" courses of 2015 to 2022 against the Library's 2023 course: `titleWords` drops a bracketed part,
+so eight different years read as one title. Before two titles are compared, the numbers of their bracketed parts now
+have to agree, as the numbers of their words already had to ("GPU Gems 2" and "GPU Gems 3"); a title without
+brackets beside one with brackets says nothing, because an import often brackets what the Library's title leaves
+out ("CS229: Machine Learning (Autumn 2018)" is still Stanford's CS229). Every title match of the earlier imports
+holds under the rule but one: MIT 8.02's Spring 2007 offering had merged into `mit-8-02`, whose page is the Spring
+2019 one, and is its own row now, as 6.851's and 15-721's other offerings are beside their courses since pull
+request #24. The three other pairs (Callen's plasma lectures and EPFL's course, the HELM evaluation framework and the
+Helm package manager, NERSC's roofline page and Berkeley Lab's) are in `NOT_SAME`.
+
+**The engineering track reads "Electrical, mechanical & aerospace".** The file's `engineering` track now also holds
+rocket propulsion, astrodynamics, spacecraft and satellites, and the prompt asks for that label. `data/tracks.yaml`
+carries the name and the summary, so every track picker, chip and the Activity screen show it; the Library's path of
+the same id, which gathers the electrical, embedded, controls and mechanical tracks, is named the same, and its id
+and the old `ee` and `me` links stay. The "Engineering" path's screenshots are redrawn by the CI job.
+
+**Blogs by track.** The prompt asks that the Blogs shelf filter by track now that every track has blogs. Every shelf
+already carried the Status and track chips, the Blogs shelf among them (48 of its 332 blogs are engineering's); an
+end-to-end test now holds it to that, by the shelf's own "N of M" count, since the list below is virtualised.
+
+**The service worker tries again.** Pull request #24's deploy failed its live check: GitHub Pages answered 503 for
+one icon (`brand/atlas-favicon-dark-16.png`) in the minute after the deploy, `cache.addAll` failed with it, the
+install failed, and the returning user's page stayed on the old build with no update prompt within two minutes. The
+job's re-run passed (the build was already live, so a fresh install stored it). The install now fetches each file
+itself and tries a file that fails up to three times, two then four seconds apart, before giving up, so one hiccup
+of the host does not cost the update; three failures still fail the install, as before. `tests/unit/sw.test.ts`
+counts the attempts.
+
+**Speed.** The Library chunk is 6.4 MB (1.3 MB gzipped). At a 4x CPU slowdown Today's first heading is at 1.3 s
+(2.9 s on a cold start of the preview server), the Papers shelf's rows at 3.7 s on a cold load and 1.9 s with the chunk
+there, and a search answers in 0.2 to 0.4 s: the same as pull request #24, within noise.
+
+**The new rows' links, from the runner.** A one-off `links-atlas-5` job checked the 954 new URLs on the pull request
+and was then removed; its report is below.

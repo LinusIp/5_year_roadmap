@@ -125,6 +125,11 @@ export function titleLikeness(a: string, b: string): number {
   // Numbers and symbols name different things: GPU Gems 2 and 3, the Exercism C and C++ tracks.
   const marked = (words: Set<string>): string => [...words].filter((w) => /^\d+$/.test(w) || /[+#]/.test(w)).sort().join(' ');
   if (marked(x) !== marked(y)) return 0;
+  // So do the numbers of two bracketed parts, which `titleWords` drops: "(SIGGRAPH 2015)" and "(SIGGRAPH 2023)" are
+  // two years of one course, "(Spring 2014)" and "(Spring 2012)" two offerings. One side without brackets says nothing.
+  const bracketed = (title: string): string[] => (title.match(/\(([^)]*)\)/g) ?? []).flatMap((part) => part.match(/\d+/g) ?? []).sort();
+  const [p, q] = [bracketed(a), bracketed(b)];
+  if (p.length > 0 && q.length > 0 && p.join(' ') !== q.join(' ')) return 0;
   let both = 0;
   for (const w of x) if (y.has(w)) both++;
   return both / (x.size + y.size - both);
@@ -162,7 +167,9 @@ export const SAME_AS: Readonly<Record<string, string>> = {
  * BFG review is not his Doom3 one; the FSDP2 tutorial is not FSDP's; MIT 6.851's Spring 2014 videos are not OCW's
  * 2012 lectures; two CRDT papers (Preguiça's overview, the approaches survey) are not Shapiro's; the Qwen2.5 Coder, VL
  * and 1M reports are not the Qwen2.5 report; the CP Handbook's LaTeX source is not the PDF; MIT 18.06's 2025 course
- * repo is not OCW's 2010 course; CMU 15-721's Spring 2024 lectures are not its course site.
+ * repo is not OCW's 2010 course; CMU 15-721's Spring 2024 lectures are not its course site. From the 11,389-row file:
+ * Callen's plasma physics lectures are not EPFL's course, CRFM's HELM (the evaluation framework) is not Helm (the
+ * Kubernetes package manager), NERSC's roofline page is not Berkeley Lab's.
  */
 export const NOT_SAME: Readonly<Record<string, readonly string[]>> = {
   'paper-orca': ['orca'],
@@ -189,6 +196,9 @@ export const NOT_SAME: Readonly<Record<string, readonly string[]>> = {
   'repo-cphb-source': ['competitive-programmers-handbook'],
   'repo-mitmath-1806-2025': ['mit-18-06'],
   'video-cmu-15721-spring2024': ['cmu-15721-advanced-databases'],
+  'video-callen-intro-plasma-physics': ['course-epfl-plasma-physics-intro'],
+  'docs-crfm-helm': ['docs-helm'],
+  'nersc-roofline-docs': ['docs-roofline-crd'],
 };
 
 /**

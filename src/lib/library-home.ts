@@ -24,8 +24,8 @@ export interface PathDef {
 /**
  * In the board's order: the lanes of the first year first, then the second stage. Inference engineering, Software
  * architecture, DevOps, Simulation, Robotics, Hardware and chip design and Quantum computing are paths of their own
- * (MORE-RESOURCES, ATLAS-LIBRARY), and Engineering gathers electrical, embedded and mechanical; a path with nothing on
- * the plan is the Library's to browse.
+ * (MORE-RESOURCES, ATLAS-LIBRARY), and Electrical, mechanical & aerospace (the `engineering` path) gathers electrical,
+ * embedded, mechanical and, since the 11,389-row file, aerospace; a path with nothing on the plan is the Library's to browse.
  */
 export const PATHS: readonly PathDef[] = [
   { id: 'ai', name: 'AI engineering', tracks: ['ai'], roadmaps: ['ai-engineer', 'ai-agents'] },
@@ -37,13 +37,13 @@ export const PATHS: readonly PathDef[] = [
   { id: 'systems', name: 'Systems', tracks: ['swe', 'systems'] },
   { id: 'architecture', name: 'Software architecture', tracks: ['architecture'], roadmaps: ['software-architect'] },
   { id: 'devops', name: 'DevOps', tracks: ['devops'] },
-  { id: 'engineering', name: 'Engineering', tracks: ['engineering', 'ee', 'embedded', 'controls', 'mech'] },
+  { id: 'engineering', name: 'Electrical, mechanical & aerospace', tracks: ['engineering', 'ee', 'embedded', 'controls', 'mech'] },
   { id: 'robotics', name: 'Robotics', tracks: ['robotics'] },
   { id: 'hardware', name: 'Hardware and chip design', tracks: ['hardware'] },
   { id: 'quantum', name: 'Quantum computing', tracks: ['quantum'] },
 ];
 
-/** Paths that became part of another: "Electrical and embedded" and "Mechanical" are Engineering (ATLAS-LIBRARY). */
+/** Paths that became part of another: "Electrical and embedded" and "Mechanical" are the `engineering` path (ATLAS-LIBRARY). */
 export const PATH_ALIASES: Readonly<Record<string, string>> = { ee: 'engineering', me: 'engineering' };
 
 /** The path a track belongs to: its own, or for a track of the user's, the path of a track of the same family. */

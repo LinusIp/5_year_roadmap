@@ -88,6 +88,30 @@ test('search reaches the fourth file, and keeps a title pair the matcher read as
   await expect(page.getByRole('button', { name: /^Qwen2\.5 Report/ })).toBeVisible();
 });
 
+test('the Blogs shelf filters by track, and the engineering track reads Electrical, mechanical & aerospace', async ({ page }) => {
+  await open(page, './#/library?type=blog');
+  await expect(page.getByRole('heading', { level: 1, name: 'Blogs to follow' })).toBeVisible();
+  // The shelf's own count, "48 of 332": the list below it is virtualised, so its rows say nothing about the total.
+  const counted = async (): Promise<[number, number]> => {
+    const text = await page.getByRole('heading', { name: /^\d+ of \d+$/ }).innerText();
+    return text.split(' of ').map(Number) as [number, number];
+  };
+  const [, all] = await counted();
+  await page.getByRole('button', { name: 'Track', exact: true }).click();
+  const picker = page.getByRole('dialog', { name: 'Track' });
+  await picker.getByRole('searchbox', { name: 'Search tracks' }).fill('aerospace');
+  await picker.getByRole('button', { name: 'Electrical, mechanical & aerospace' }).click();
+  await expect(page).toHaveURL(/track=engineering/);
+  // Every track has blogs now (the 11,389-row file): the engineering ones are a few of the shelf's.
+  await expect(page.getByRole('heading', { name: /^\d+ of \d+$/ })).not.toHaveText(all + ' of ' + all);
+  const [shown, total] = await counted();
+  expect(total).toBe(all);
+  expect(shown).toBeGreaterThan(5);
+  expect(shown).toBeLessThan(all);
+  await expect(page.locator('main ul.rows > *').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Electrical, mechanical & aerospace' })).toBeVisible();
+});
+
 test('the Inference engineering path opens with the roadmap.sh page', async ({ page }) => {
   await open(page, './#/library?path=inference');
   await expect(page.getByRole('heading', { level: 1, name: 'Inference engineering' })).toBeVisible();
@@ -121,14 +145,14 @@ test('the Math and Engineering paths list their resources under Optional, and ol
   await showMoreUntil(page, page.getByRole('button', { name: /^Joy of Cryptography/ }));
 
   await open(page, './#/library?path=engineering');
-  await expect(page.getByRole('heading', { level: 1, name: 'Engineering' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Electrical, mechanical & aerospace' })).toBeVisible();
   const engineering = page.getByRole('button', { name: /^Optional for this path/ });
   if ((await engineering.getAttribute('aria-expanded')) === 'false') await engineering.click();
   await showMoreUntil(page, page.getByRole('button', { name: /^Berkeley EECS 16A/ }));
 
-  // Electrical and embedded and Mechanical are part of Engineering now.
+  // Electrical and embedded and Mechanical are part of that path now.
   await open(page, './#/library?path=ee');
-  await expect(page.getByRole('heading', { level: 1, name: 'Engineering' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Electrical, mechanical & aerospace' })).toBeVisible();
 });
 
 test('the Hardware and Quantum computing paths list their resources under Optional', async ({ page }) => {

@@ -188,8 +188,8 @@ The Library opens on what matters now, not on all of it:
 - **In progress**: what is started (at most six cards), each with how far it is ("Module 6 of 10") and a menu to
   Pause (back to not started; its progress stays) or Mark done. A long press on a card opens the same menu.
 - **Your paths**: the plan's courses and books in plan order, one path per group of tracks (AI engineering,
-  Inference engineering, Languages, Graphics, Simulation, Math and physics, Systems; Engineering, which gathers
-  electrical, embedded and mechanical, and Robotics wait under "Later in the plan" until they come within a year). Each shows a subway line of
+  Inference engineering, Languages, Graphics, Simulation, Math and physics, Systems; Electrical, mechanical & aerospace,
+  which gathers electrical, embedded, mechanical and aerospace, and Robotics wait under "Later in the plan" until they come within a year). Each shows a subway line of
   at most eight stops and "+N", and its next step. A path opens on its own page, grouped by phase, its current step
   marked; a path that follows roadmap.sh roadmaps (AI engineering, Inference engineering, Software architecture,
   Graphics) opens with their official pages. Alternatives, the Library's other resources of its tracks and roadmaps
@@ -226,8 +226,9 @@ among them math and physics and electrical and mechanical engineering, in `data/
 quantum computing, in `data/resources/library-atlas-3.yaml` (`docs/imports-atlas-library-3.md`). Its harness
 additions (226 rows on agent harnesses, evaluation and self-improving agents) are in
 `data/resources/library-harness.yaml` (`docs/imports-atlas-harness.md`), and its whole, 10,436-row file adds 6,388
-more in `data/resources/library-atlas-4.yaml` (`docs/imports-atlas-library-4.md`): 10,448 resources in all. About
-10,200 of them only ever appear in the Library; they ride in a chunk of their own that loads once the first screen
+more in `data/resources/library-atlas-4.yaml` (`docs/imports-atlas-library-4.md`), and its 11,389-row file 954 more,
+many of them blogs, in `data/resources/library-atlas-5.yaml` (`docs/imports-atlas-library-5.md`): 11,402 resources in
+all, and every track has blogs, so the Blogs shelf filters by track like the others. About 11,100 of them only ever appear in the Library; they ride in a chunk of their own that loads once the first screen
 has its plan and the browser is idle, so Today starts as fast as before.
 A weekly job (`.github/workflows/links.yml`) runs `npm run check:links` and reports; it never edits the data.
 `npm run check:links -- --checked 2026-10-19` checks only the links an import dated that day, and `--in <file>` only
