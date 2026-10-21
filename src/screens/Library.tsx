@@ -303,7 +303,7 @@ export function Library({ openId }: { openId?: string }) {
   const [status, setStatus] = useQueryParam('status');
   const [paperId, setPaperId] = useQueryParam('paper');
   const [pathParam] = useQueryParam('path');
-  // An old link to Electrical and embedded or Mechanical opens Engineering (ATLAS-LIBRARY).
+  // An old link to Electrical and embedded or Mechanical opens Electrical, mechanical & aerospace (ATLAS-LIBRARY).
   const pathId = pathParam ? (PATH_ALIASES[pathParam] ?? pathParam) : pathParam;
   const [draft, setDraft] = useState<string | null>(null);
   const [pickingTrack, setPickingTrack] = useState(false);

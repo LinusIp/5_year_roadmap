@@ -1114,3 +1114,18 @@ Verified on this machine (Linux, Chromium 140):
   item; `PickerSheet` pages fifty rows at a time and the swap sheet labels its ten thousand candidates from maps.
 - Tests: the tightened rule and case-aware `after`; the search; `tests/e2e/atlas-library.spec.ts`: the fourth file
   in search and a pair kept apart.
+
+## Pull request #25: the Atlas Library's fifth file
+
+- `data/resources/library-atlas-5.yaml`: 954 new resources (385 articles with docs and tutorials, 184 blogs, 179
+  practice, 105 papers, 73 courses, 28 books; Engineering 192, Systems 112, AI 103, Graphics 100, Hardware 93, Math
+  87, Simulation 87, Robotics 73, DevOps 59, Architecture 47, Game development 1). None matched what the Library had.
+  Resources: 10,448 to 11,402.
+- Two bracketed years are two offerings in the title rule (eight SIGGRAPH courses kept apart; MIT 8.02's Spring
+  2007 offering its own row); three pairs in `NOT_SAME`.
+- The engineering track and path read "Electrical, mechanical & aerospace", with aerospace in the summary; the Blogs
+  shelf filters by track (it did; a test holds it to that).
+- The service worker's install fetches each file itself and tries a failed one three times (pull request #24's
+  deploy failed its live check on one 503).
+- Tests: the bracketed-years rule; the install's attempts; `tests/e2e/atlas-library.spec.ts`: the Blogs shelf by
+  track and the renamed path.

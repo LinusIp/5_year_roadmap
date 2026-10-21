@@ -14,16 +14,17 @@ class FakeRequest {
 }
 
 /** Runs the generated service worker against fakes of `self` and `caches`. */
-function boot(files: string[], version: string, existingCaches: string[] = []) {
+function boot(files: string[], version: string, existingCaches: string[] = [], answers: Record<string, number[]> = {}) {
   const handlers = new Map<string, Handler>();
   const stored = new Map<string, string[]>(existingCaches.map((name) => [name, []]));
   const modes: string[] = [];
+  const attempts: string[] = [];
   let skipped = false;
   const caches = {
     open: async (name: string) => ({
-      addAll: async (requests: FakeRequest[]) => {
-        stored.set(name, requests.map((r) => r.url));
-        modes.push(...requests.map((r) => r.cache ?? 'default'));
+      put: async (url: string, response: { ok: boolean }) => {
+        if (!response.ok) throw new Error('put of a failed response');
+        stored.set(name, [...(stored.get(name) ?? []), url]);
       },
     }),
     keys: async () => [...stored.keys()],
@@ -45,8 +46,17 @@ function boot(files: string[], version: string, existingCaches: string[] = []) {
     },
     addEventListener: (type: string, handler: Handler) => handlers.set(type, handler),
   };
-  vm.runInNewContext(buildServiceWorkerSource(files, version), { self, caches, URL, Promise, Request: FakeRequest, fetch: async (r: { url: string }) => 'network:' + r.url });
-  return { handlers, stored, modes, wasSkipped: () => skipped };
+  // The install's fetches answer as `answers` says for that URL (a status per attempt, 200 once the list runs out);
+  // a page's fetch falls through to the network.
+  const fetch = async (r: FakeRequest | { url: string }) => {
+    if (!(r instanceof FakeRequest)) return 'network:' + r.url;
+    modes.push(r.cache ?? 'default');
+    attempts.push(r.url);
+    const status = answers[r.url]?.shift() ?? 200;
+    return { ok: status >= 200 && status < 300, status, url: r.url };
+  };
+  vm.runInNewContext(buildServiceWorkerSource(files, version), { self, caches, URL, Promise, Request: FakeRequest, fetch, Error, setTimeout: (fn: () => void) => fn() });
+  return { handlers, stored, modes, attempts, wasSkipped: () => skipped };
 }
 
 async function dispatch(handler: Handler | undefined, event: Record<string, unknown>): Promise<unknown> {
@@ -71,7 +81,18 @@ describe('generated service worker', () => {
   it('precaches every built file, relative to its own location', async () => {
     const sw = boot(files, 'v1');
     await dispatch(sw.handlers.get('install'), {});
-    expect(sw.stored.get('atlas-v1')).toEqual(['./', './assets/index-abc.js', './assets/index-abc.css', './index.html', './manifest.webmanifest']);
+    expect([...sw.stored.get('atlas-v1')!].sort()).toEqual(['./', './assets/index-abc.css', './assets/index-abc.js', './index.html', './manifest.webmanifest']);
+  });
+
+  it('tries a file that fails again, a few times, so a host\'s hiccup after a deploy cannot leave users on the old build', async () => {
+    const sw = boot(files, 'v1', [], { './index.html': [503], './manifest.webmanifest': [503, 500] });
+    await dispatch(sw.handlers.get('install'), {});
+    expect(sw.stored.get('atlas-v1')).toHaveLength(5);
+    expect(sw.attempts.filter((u) => u === './index.html')).toHaveLength(2);
+    expect(sw.attempts.filter((u) => u === './manifest.webmanifest')).toHaveLength(3);
+    // Three failures are a failed install, as before.
+    const broken = boot(files, 'v2', [], { './index.html': [503, 503, 503] });
+    await expect(dispatch(broken.handlers.get('install'), {})).rejects.toThrow(/answered 503/);
   });
 
   it('fetches them past the HTTP cache, so a fresh install never stores the old build\'s page', async () => {

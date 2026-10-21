@@ -35,8 +35,11 @@ test('search finds OSTEP and Vulkan', async ({ page }) => {
   await search.fill('OSTEP');
   await expect(page.getByRole('heading', { name: /^Books · \d+$/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /^OSTEP/ })).toBeVisible();
-  await search.fill('Vulkan');
+  // Seventy rows say Vulkan since the Atlas Library's fifth file, and a search shows three per shelf: the tutorial is
+  // found by its own name.
+  await search.fill('vulkan-tutorial.com');
   await expect(page.getByRole('button', { name: /^Vulkan Tutorial/ })).toBeVisible();
+  await search.fill('Vulkan');
   await expect(page.getByRole('button', { name: /Vulkan/ }).nth(2)).toBeVisible();
 });
 

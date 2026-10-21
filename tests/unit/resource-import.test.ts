@@ -245,6 +245,11 @@ describe('the whole library (ATLAS-LIBRARY)', () => {
   it('never merges titles that differ only in symbols or numbers, nor pairs read by hand as different', () => {
     expect(titleLikeness('Exercism C Track', 'Exercism C++ Track')).toBe(0);
     expect(titleLikeness('Exercism C# Track', 'Exercism C++ Track')).toBe(0);
+    // Two bracketed years are two editions, though the brackets are dropped from the words compared; a title without
+    // brackets beside one with says nothing (the 11,389-row file).
+    expect(titleLikeness('Advances in Real-Time Rendering in Games (SIGGRAPH 2015)', 'Advances in Real-Time Rendering in Games (SIGGRAPH 2023)')).toBe(0);
+    expect(titleLikeness('MIT 6.851 Advanced Data Structures (Spring 2012)', '6.851: Advanced Data Structures (Spring 2012)')).toBeGreaterThan(0.8);
+    expect(titleLikeness('CS229: Machine Learning (Autumn 2018)', 'Stanford CS229 Machine Learning')).toBeGreaterThan(0.7);
     const library = [
       { id: 'exercism-c', title: 'Exercism C Track', url: 'https://exercism.org/tracks/c', shelf: 'practice' },
       { id: 'orca', title: 'Orca: A Distributed Serving System for Transformer-Based Generative Models', url: 'https://www.usenix.org/conference/osdi22/presentation/yu', shelf: 'paper' },
