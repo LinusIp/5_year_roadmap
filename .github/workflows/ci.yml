@@ -45,25 +45,6 @@ jobs:
         timeout-minutes: 5
         run: npm run check:links -- --only ml-zoomcamp | grep -v '^ok '
 
-  # The links of the Atlas Library's fourth file (ATLAS-LIBRARY, 10,436 rows): the rows it adds, requested from the
-  # runner for the pull request's report. A job of its own so a slow site cannot hold up `verify`; report only, it
-  # never fails and never edits the data. It runs once for the pull request and goes before it merges.
-  links-atlas-4:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - name: Link report
-        continue-on-error: true
-        timeout-minutes: 55
-        run: npm run check:links -- --in data/resources/library-atlas-4.yaml | grep -v '^ok ' | grep -v '^        '
-
   # Screenshot baselines are drawn here, on CI's Linux, so the comparison in `verify` runs on the same platform.
   # Commit an empty `screenshots/.redraw` to a pull request's branch: this job redraws every baseline, removes the
   # marker and pushes the result to the branch. Nothing happens without the marker.

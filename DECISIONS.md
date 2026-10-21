@@ -1546,3 +1546,30 @@ service worker precaches the chunk as before, so the Library is offline too.
 by a scan of the whole list, which froze the sheet for seconds and the test that swaps an item. `PickerSheet` now
 lists fifty rows and a "Show 50 more" row (the search narrows it as before), which every picker built on it gets, and
 the swap sheet labels its rows from maps built once.
+
+**The new rows' links, from the runner.** A one-off `links-atlas-4` job checked the 6,388 new URLs on the pull
+request twice (runs 39614523389 and 39616173817) and was then removed. The first run listed 200 GitHub links to check
+by hand: six requests at a time to one host answer 429 for a few seconds, so `check:links` now tries a 429 once more
+after a four-second pause, and the second run read 6,220 of the links as fine, 63 as failed and 105 as ones to open by
+hand. No URL was changed; nothing is marked until someone has opened it.
+
+- Failed in both runs (53): fourteen 404s, the likeliest to have moved (llm-d's prefix-cache routing page,
+  Transformer Engine's FP8 primer, FlashInfer's cascade API, Cohere's prompt-engineering basics, TorchRec's docs,
+  Llama 3.1's prompt format, MATS's mech-interp hub, Uber's predictive-to-generative post, OWASP's threat modeling
+  project, LinkedIn's scaling history, the RUM conjecture PDF, Frostbite's volumetrics talk, Roy's MMS paper, Smith's
+  1981 branch prediction paper); fourteen servers not answering (503, 502, 522: Heidelberg's GPU course, TUM's MVG
+  course and RGB-D pages, Collins's COMS 4705, Mozilla's TLS wiki, three Khronos blog posts, three Analog Devices wiki
+  pages, KITTI, 3dgep); four Meta blog posts answering 400 to a script; four ai.google.dev pages looping their
+  redirects for a script, as tensorflow.org does (if they open fine, the host belongs with the link policy's
+  script-side hosts); four hosts serving another host's certificate (freetechbooks.com, probmods.org, archagon.net,
+  kernel.dk); blog.junchengyang.com, not found by DNS (the blog and three posts); and nine timeouts or dropped
+  connections (Princeton's COS 597G and the photo-caching paper, CNAM's flow-matching slides, Triplit, SDU's DM823,
+  the GC Handbook, Dostoevsky at Harvard, Heitz's sampler page, and codeforces.net, which the runner resolved to
+  127.0.0.1).
+- Failed in one run only (11): ten MIT pages (6.851's Spring 2014 site, 6.5830, 6.7480 and its book, three
+  Underactuated Robotics chapters, visionbook.mit.edu) with research.google and osti.gov timed out in the second
+  run and answered in the first; DianNao's PDF at NUS dropped the connection in the first and answered in the second.
+- To check by hand (105): thirty USENIX pages, Etsy's and DoorDash's engineering blogs, cppreference, isocpp,
+  DeepLearning.AI, Loro, the Vulkan docs, GNU Radio's wiki, MOOSE, lcamtuf's Substack and others answering 403; ten
+  429s that the one retry did not clear (five GitHub, three vLLM docs, a Lightning notebook, bioRxiv); and nine on
+  hosts the link policy lists as failing scripts (MIT CSAIL, tensorflow.org).
