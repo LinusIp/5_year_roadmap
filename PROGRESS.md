@@ -1129,3 +1129,12 @@ Verified on this machine (Linux, Chromium 140):
   deploy failed its live check on one 503).
 - Tests: the bracketed-years rule; the install's attempts; `tests/e2e/atlas-library.spec.ts`: the Blogs shelf by
   track and the renamed path.
+
+## Pull request #26: the update that never came
+
+- The update prompt is a pill above the tab bar on every screen; the page follows an install already under way
+  when it loads, asks the site for updates on open and on return, and retries a failed install (20 s, 60 s, 3 min).
+- The worker reports a failed install's file to the open pages and answers its version over a port.
+- Settings > Atlas on this device: the running build, Check for updates (with the failure's reason), Reset offline
+  copy (keeps the data).
+- Tests: `tests/unit/register.test.ts` (new), `tests/unit/sw.test.ts`, `tests/e2e/shell.spec.ts`.

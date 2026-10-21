@@ -38,9 +38,10 @@ function boot(files: string[], version: string, existingCaches: string[] = [], a
       return cached.some((u) => url.endsWith(u.replace(/^\.\//, ''))) ? 'cached:' + url : undefined;
     },
   };
+  const told: unknown[] = [];
   const self = {
     location: { origin: 'https://linusip.github.io' },
-    clients: { claim: async () => undefined },
+    clients: { claim: async () => undefined, matchAll: async () => [{ postMessage: (m: unknown) => told.push(m) }] },
     skipWaiting: () => {
       skipped = true;
     },
@@ -56,7 +57,7 @@ function boot(files: string[], version: string, existingCaches: string[] = [], a
     return { ok: status >= 200 && status < 300, status, url: r.url };
   };
   vm.runInNewContext(buildServiceWorkerSource(files, version), { self, caches, URL, Promise, Request: FakeRequest, fetch, Error, setTimeout: (fn: () => void) => fn() });
-  return { handlers, stored, modes, attempts, wasSkipped: () => skipped };
+  return { handlers, stored, modes, attempts, told, wasSkipped: () => skipped };
 }
 
 async function dispatch(handler: Handler | undefined, event: Record<string, unknown>): Promise<unknown> {
@@ -90,9 +91,19 @@ describe('generated service worker', () => {
     expect(sw.stored.get('atlas-v1')).toHaveLength(5);
     expect(sw.attempts.filter((u) => u === './index.html')).toHaveLength(2);
     expect(sw.attempts.filter((u) => u === './manifest.webmanifest')).toHaveLength(3);
-    // Three failures are a failed install, as before.
+    // Three failures are a failed install, as before, and the open pages are told which file, so Settings can say.
     const broken = boot(files, 'v2', [], { './index.html': [503, 503, 503] });
     await expect(dispatch(broken.handlers.get('install'), {})).rejects.toThrow(/answered 503/);
+    expect(broken.told).toEqual([{ installFailed: './index.html answered 503' }]);
+  });
+
+  it('tells a page its version when asked, over the port the page sends', () => {
+    const sw = boot(files, 'v7');
+    const answers: unknown[] = [];
+    sw.handlers.get('message')!({ data: 'version', ports: [{ postMessage: (m: unknown) => answers.push(m) }] });
+    expect(answers).toEqual(['v7']);
+    sw.handlers.get('message')!({ data: 'version', ports: [] });
+    expect(answers).toEqual(['v7']);
   });
 
   it('fetches them past the HTTP cache, so a fresh install never stores the old build\'s page', async () => {

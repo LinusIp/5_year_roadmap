@@ -18,7 +18,6 @@ import { planForDay, suggestWeeklyBuild } from '../lib/schedule.ts';
 import type { ScheduledItem, TodayBlock } from '../lib/schedule.ts';
 import { dailyTotals, streak } from '../lib/streaks.ts';
 import { resolveTheme } from '../lib/theme.ts';
-import { applyUpdate, onUpdateReady } from '../pwa/register.ts';
 import { Link, useQueryParam } from '../router/router.tsx';
 import { isRealIsoDate } from '../seed/schema.ts';
 import type { BlockId } from '../seed/schema.ts';
@@ -189,10 +188,8 @@ export function Today() {
   const [sheet, setSheet] = useState<SheetName>(null);
   // A project's tech doc over Today, opened from the Now card or a Later today row. Today stays as it was under it.
   const [doc, setDoc] = useState<{ id: string; block: BlockId; from: 'now' | 'later' } | null>(null);
-  const [updateReady, setUpdateReady] = useState(false);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
-  useEffect(() => onUpdateReady(() => setUpdateReady(true)), []);
   useEffect(() => {
     setChosen(null);
     setExpanded(false);
@@ -611,12 +608,6 @@ export function Today() {
               </Button>
             }
           />
-        </RowList>
-      )}
-
-      {updateReady && (
-        <RowList className="mt-4">
-          <Row title="A new version of Atlas is ready" trailing="Reload" onClick={applyUpdate} />
         </RowList>
       )}
 

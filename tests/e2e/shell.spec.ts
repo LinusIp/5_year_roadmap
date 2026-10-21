@@ -43,6 +43,20 @@ test.describe('app shell', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible();
   });
 
+  test('Settings names the build this device runs and checks the site for a newer one', async ({ page }) => {
+    // The first visit installs the offline copy; a reload is the first page it serves, so the version is known.
+    await open(page, './');
+    await page.evaluate(() => navigator.serviceWorker.ready);
+    await reload(page);
+    await open(page, './#/settings');
+    const about = page.locator('section#about');
+    await expect(about.getByRole('heading', { name: 'Atlas on this device' })).toBeVisible();
+    await expect(about.getByText(/^[0-9a-f]{12}$/)).toBeVisible();
+    await about.getByRole('button', { name: /^Check for updates/ }).click();
+    await expect(about.getByText('This is the latest version')).toBeVisible();
+    await expect(page.getByRole('button', { name: /A new version of Atlas is ready/ })).toHaveCount(0);
+  });
+
   test('addresses from before the redesign still land in the right place', async ({ page }) => {
     await open(page, './#/roadmap');
     await expect(page).toHaveURL(/#\/plan$/);
