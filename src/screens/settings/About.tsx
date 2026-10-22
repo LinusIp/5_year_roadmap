@@ -7,7 +7,7 @@ import { Section } from './shared.tsx';
 const RESULT: Record<UpdateCheck, string> = {
   ready: 'A new version is ready: tap Reload below',
   latest: 'This is the latest version',
-  failed: 'The new version could not be downloaded',
+  failed: 'The site could not be reached for a new version',
   unavailable: 'Updates come with the installed site, not the dev server',
 };
 

@@ -159,6 +159,60 @@ describe('service worker registration on the page', () => {
     await expect(sw.checkForUpdate()).resolves.toBe('latest');
   });
 
+  it('tries a failed registration again: on a check, on a timer, and uses one the browser already holds', async () => {
+    const { swListeners } = setUp(new FakeWorker('activated'));
+    const attempts: number[] = [];
+    let fails = 2;
+    const fresh = new FakeRegistration();
+    Object.assign(navigator.serviceWorker, {
+      getRegistration: async () => undefined,
+      register: async () => {
+        attempts.push(Date.now());
+        if (fails > 0) {
+          fails -= 1;
+          throw new TypeError('Failed to fetch');
+        }
+        return fresh;
+      },
+    });
+    const sw = await load();
+    // Opened from the cache with the network away: register rejects, the reason is kept, nothing is attached.
+    await expect(sw.ensureRegistration()).resolves.toBeNull();
+    expect(sw.failure()).toBe('Failed to fetch');
+    expect(attempts).toHaveLength(1);
+    // The Settings check registers first and reports the failure, with its reason.
+    await expect(sw.checkForUpdate()).resolves.toBe('failed');
+    expect(attempts).toHaveLength(2);
+    // The timer tries again; this time the site answers, the registration is attached and checked.
+    await vi.advanceTimersByTimeAsync(20_000);
+    expect(attempts).toHaveLength(3);
+    expect(fresh.updates).toBe(1);
+    await expect(sw.checkForUpdate()).resolves.toBe('latest');
+    expect(attempts).toHaveLength(3);
+    expect(swListeners.has('message')).toBe(true);
+  });
+
+  it('attaches to the registration the browser already holds rather than registering again', async () => {
+    setUp(new FakeWorker('activated'));
+    const held = new FakeRegistration();
+    held.waiting = new FakeWorker('installed');
+    let registered = 0;
+    Object.assign(navigator.serviceWorker, {
+      getRegistration: async () => held,
+      register: async () => {
+        registered += 1;
+        return held;
+      },
+    });
+    const sw = await load();
+    const ready = vi.fn();
+    sw.onUpdateReady(ready);
+    await expect(sw.ensureRegistration()).resolves.toBe(held);
+    expect(registered).toBe(0);
+    expect(ready).toHaveBeenCalled();
+    await expect(sw.checkForUpdate()).resolves.toBe('ready');
+  });
+
   it('asks the running worker for its version, and has none without a worker', async () => {
     vi.useRealTimers();
     setUp(new FakeWorker('activated'));

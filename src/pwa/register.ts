@@ -8,8 +8,12 @@
  * The page asks for updates itself (on open, and when it comes back into view) rather than leaving it all to
  * the browser's check on navigation, watches an install that was already under way when the page loaded (the
  * page was reloaded while the files downloaded: `updatefound` fired then, not now), and tries again a little
- * later when an install fails, since a failed install is otherwise only retried on the next navigation.
- * Settings shows the running version, checks on demand, and can drop the offline copy when nothing else helps.
+ * later when an install fails, since a failed install is otherwise only retried on the next navigation. A
+ * registration that fails (the app opened from its cache while the network was away, so `register` could not fetch
+ * sw.js, though the old worker kept serving) is tried again later too, when the network is back and when the page
+ * comes back into view: without that the page never asked for an update again for as long as it stayed open, and a
+ * phone fell builds behind. Settings shows the running version, checks on demand (registering first if that failed),
+ * and can drop the offline copy when nothing else helps.
  */
 type Listener = () => void;
 
@@ -20,6 +24,9 @@ let registration: ServiceWorkerRegistration | null = null;
 let lastFailure: string | null = null;
 let lastCheck = 0;
 let retries = 0;
+/** A registration under way, so a second ask joins it instead of registering twice. */
+let registering: Promise<ServiceWorkerRegistration | null> | null = null;
+let registerRetries = 0;
 const RETRY_AFTER_MS = [20_000, 60_000, 180_000];
 const CHECK_EVERY_MS = 60_000;
 
@@ -116,12 +123,65 @@ export function attach(reg: ServiceWorkerRegistration): void {
   void check(reg);
 }
 
-/** Asks the browser for a new version now and says what it found; `failure()` has the reason after 'failed'. */
+function canRegister(): boolean {
+  return typeof navigator !== 'undefined' && 'serviceWorker' in navigator && typeof navigator.serviceWorker?.register === 'function';
+}
+
+/**
+ * The registration, made now if the page has none yet: the one the browser already holds for this scope (the worker
+ * serving the page), else a fresh `register`, which fetches sw.js and rejects when the site cannot be reached. A
+ * rejection keeps the reason for Settings and tries again later: in 20 s, a minute and three minutes, and when the
+ * network comes back or the page comes back into view (`attachRetries`).
+ */
+export function ensureRegistration(): Promise<ServiceWorkerRegistration | null> {
+  if (registration) return Promise.resolve(registration);
+  if (registering) return registering;
+  if (!canRegister()) return Promise.resolve(null);
+  const sw = navigator.serviceWorker;
+  registering = (typeof sw.getRegistration === 'function' ? sw.getRegistration('./').catch(() => undefined) : Promise.resolve(undefined))
+    .then((existing) => existing ?? sw.register('./sw.js', { scope: './' }))
+    .then((reg) => {
+      lastFailure = null;
+      registerRetries = 0;
+      attach(reg);
+      return reg;
+    })
+    .catch((error: unknown) => {
+      lastFailure = error instanceof Error ? error.message : String(error);
+      const delay = RETRY_AFTER_MS[registerRetries];
+      if (delay !== undefined) {
+        registerRetries += 1;
+        setTimeout(() => void ensureRegistration(), delay);
+      }
+      return null;
+    })
+    .finally(() => {
+      registering = null;
+    });
+  return registering;
+}
+
+/** The network back, or the page back in view, is a reason to try a failed registration again. */
+function attachRetries(): void {
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') window.addEventListener('online', () => void ensureRegistration());
+  if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && !registration && !registering) void ensureRegistration();
+    });
+  }
+}
+
+/**
+ * Asks the browser for a new version now and says what it found; `failure()` has the reason after 'failed'. Without
+ * a registration (it failed when the page opened, or never ran) it registers first; 'unavailable' is a page that
+ * cannot register at all, the dev server or a browser without service workers.
+ */
 export function checkForUpdate(): Promise<UpdateCheck> {
-  if (!registration) return Promise.resolve('unavailable');
   if (waiting) return Promise.resolve('ready');
   lastFailure = null;
-  return check(registration);
+  if (registration) return check(registration);
+  if (!canRegister()) return Promise.resolve('unavailable');
+  return ensureRegistration().then((reg) => (reg ? (waiting ? 'ready' : check(reg)) : 'failed'));
 }
 
 export function failure(): string | null {
@@ -161,14 +221,10 @@ export async function resetOfflineCopy(): Promise<void> {
 }
 
 export function registerServiceWorker(): void {
-  if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
-  window.addEventListener('load', () => {
-    // Relative to the page, so it works under /5_year_roadmap/ on GitHub Pages and anywhere else.
-    navigator.serviceWorker
-      .register('./sw.js', { scope: './' })
-      .then(attach)
-      .catch(() => {
-        /* Offline support is a bonus; the app works without it. */
-      });
-  });
+  if (!import.meta.env.PROD || !canRegister()) return;
+  attachRetries();
+  // Relative to the page, so it works under /5_year_roadmap/ on GitHub Pages and anywhere else. After `load` so the
+  // first paint is not competing with the worker's install; now if the page has already loaded.
+  if (document.readyState === 'complete') void ensureRegistration();
+  else window.addEventListener('load', () => void ensureRegistration());
 }
