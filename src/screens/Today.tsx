@@ -28,6 +28,8 @@ import { BlockIcon, BlockTile, IconTile, KindIcon } from '../ui/glyphs.tsx';
 import { checkBlogPost, useBlogPosts } from '../db/blog.ts';
 import { blogReminderDue } from '../lib/blog.ts';
 import { useSleep, useSleepSettings } from '../db/sleep.ts';
+import { useInternSummaries } from '../hooks/useInternships.ts';
+import { roleName } from '../lib/internships.ts';
 import { lengthText, timeOf } from '../lib/sleep.ts';
 import { blockTone, toneInk } from '../ui/colors.ts';
 import { ProgressLine } from '../ui/ProgressLine.tsx';
@@ -159,6 +161,9 @@ export function Today() {
   const blogPosts = useBlogPosts();
   const nights = useSleep();
   const sleepSettings = useSleepSettings();
+  // Internships: the first goal with an upcoming application has a card.
+  const internSummary = useInternSummaries(now)?.find((g) => g.card) ?? null;
+  const internCard = internSummary?.card ? { goal: internSummary.goal, name: internSummary.name, card: internSummary.card } : null;
   const elapsed = useElapsed(timer);
   const carry = useTimerCarry();
   // The minute of the day, for Now by the clock and the prompt to move on.
@@ -876,6 +881,31 @@ export function Today() {
             <Row key="blog" icon={<IconTile icon="blog" tone={blogPosted ? 'ice' : 'neutral'} />} title={blogPosted ? 'Blog post · posted ✓' : 'Blog post · not yet'} meta={layout.view === 'compact' ? undefined : 'Written in your blog'} trailing="any time" to={blogTo} />
           )}
         </RowList>
+      )}
+
+      {/* Internships (INTERNSHIPS): while a target has an upcoming apply date, the next role, the gate, the phase and the one thing for today. Under Later today, so the day's list stays above the fold (ui-acceptance). */}
+      {isToday && internCard && (
+        <section aria-labelledby="intern-card-title" className="tile mt-4 flex flex-col gap-1.5 p-[18px]">
+          <p className="section-label mb-0">{'Internships · ' + internCard.name}</p>
+          <p id="intern-card-title" className="text-card font-semibold leading-tight">
+            {roleName(internCard.card.target) + ' · ' + (internCard.card.days === 0 ? 'apply today' : 'apply in ' + internCard.card.days + (internCard.card.days === 1 ? ' day' : ' days'))}
+          </p>
+          <p className="text-meta text-ink2">{'Gate ticked ' + internCard.card.gate.done + ' of ' + internCard.card.gate.total + ' · Phase ' + internCard.card.phase.n + ', ' + internCard.card.week}</p>
+          {internCard.card.line && (
+            <>
+              <p className="section-label mb-0 mt-1 uppercase">{'Today in ' + internCard.card.block}</p>
+              <p className="text-body">{internCard.card.line}</p>
+            </>
+          )}
+          <div className="mt-2 flex gap-3 [&>*]:min-w-0 [&>*]:flex-1">
+            <Button variant="ice" icon="briefcase" to={'/internships?goal=' + internCard.goal.goal.id}>
+              Open
+            </Button>
+            <Button icon="check" to={'/internships?goal=' + internCard.goal.goal.id + '&tab=roadmap'}>
+              Checklist
+            </Button>
+          </div>
+        </section>
       )}
 
       {/* Blocks whose window has passed and that are not done: still there to start, but no longer "later". */}

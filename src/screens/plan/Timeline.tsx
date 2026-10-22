@@ -4,6 +4,8 @@ import { describeVerdict } from '../../lib/forecast.ts';
 import { monthName } from '../../lib/dates.ts';
 import type { Goal, Unit } from '../../seed/schema.ts';
 import { goalStatus } from '../../lib/goals.ts';
+import { useInternSummaries } from '../../hooks/useInternships.ts';
+import { daysToApply, roleName } from '../../lib/internships.ts';
 import { today } from '../../lib/dates.ts';
 import { longDate } from '../parts/text.ts';
 import { BlockTile, IconTile } from '../../ui/glyphs.tsx';
@@ -156,6 +158,7 @@ export function Timeline({
 }) {
   const [openPhase, setOpenPhase] = useState<string | null>(null);
   const everyDay = scheduleSummary(atlas.settings, today());
+  const internships = useInternSummaries(today()) ?? [];
   const index = model.findIndex((m) => m.phase.id === currentId);
   const current = index >= 0 ? model[index] : undefined;
   const earlier = index >= 0 ? model.slice(0, index) : model.filter((m) => m.phase.end < (atlas.seed.phases[0]?.start ?? ''));
@@ -204,8 +207,19 @@ export function Timeline({
           {phaseRows(earlier)}
         </RowList>
       )}
-      {later.length > 0 && (
+      {(later.length > 0 || internships.length > 0) && (
         <RowList flat label="Next">
+          {/* Internships (INTERNSHIPS): a row per goal, with the next application and its gate. */}
+          {internships.map((g) => (
+            <Row
+              key={g.goal.goal.id}
+              title={'Internships · ' + g.name}
+              meta={g.card ? roleName(g.card.target) + ' · ' + daysToApply(g.card.days) + ' · gate ' + g.card.gate.done + ' of ' + g.card.gate.total : 'Every dated application is in'}
+              icon={<IconTile icon="briefcase" tone="ice" />}
+              chevron
+              to={'/internships?goal=' + g.goal.goal.id}
+            />
+          ))}
           {phaseRows(later)}
         </RowList>
       )}

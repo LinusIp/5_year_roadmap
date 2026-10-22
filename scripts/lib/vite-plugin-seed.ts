@@ -17,6 +17,7 @@
  *   virtual:atlas-catalogue  the three-tier project catalogue (data/projects/*.jsonl), every field
  *   virtual:atlas-catalogue-index  one small entry per catalogue item, for Today, the Deck and the Library list
  *   virtual:atlas-designs    a loader per bucket; virtual:atlas-designs/<n> holds the designs of bucket n
+ *   virtual:atlas-internships  the internship goals (data/internships*.json, INTERNSHIPS)
  *
  * A schema error or a duplicate id in /data fails `vite build` (and shows the overlay in dev).
  */
@@ -25,6 +26,7 @@ import type { Plugin } from 'vite';
 import { loadCatalogue } from './load-catalogue.ts';
 import { loadDesigns } from './load-designs.ts';
 import { loadDocs } from './load-docs.ts';
+import { loadInternships } from './load-internships.ts';
 import { DESIGN_BUCKETS, designBucket } from '../../src/seed/design.ts';
 import { entryOf } from '../../src/seed/catalogue.ts';
 import { parseDoc } from '../../src/lib/project-doc.ts';
@@ -39,8 +41,9 @@ const DOCS_ID = 'virtual:atlas-docs';
 const CATALOGUE_ID = 'virtual:atlas-catalogue';
 const CATALOGUE_INDEX_ID = 'virtual:atlas-catalogue-index';
 const DESIGNS_ID = 'virtual:atlas-designs';
+const INTERNSHIPS_ID = 'virtual:atlas-internships';
 const BUCKET_IDS = Array.from({ length: DESIGN_BUCKETS }, (_, n) => DESIGNS_ID + '/' + n);
-const RESOLVED = new Map([SEED_ID, UNITS_ID, LIBRARY_ID, DOCS_ID, CATALOGUE_ID, CATALOGUE_INDEX_ID, DESIGNS_ID, ...BUCKET_IDS].map((id) => [id, '\0' + id]));
+const RESOLVED = new Map([SEED_ID, UNITS_ID, LIBRARY_ID, DOCS_ID, CATALOGUE_ID, CATALOGUE_INDEX_ID, DESIGNS_ID, INTERNSHIPS_ID, ...BUCKET_IDS].map((id) => [id, '\0' + id]));
 
 /** JSON.parse of a string literal starts up markedly faster than a large object literal. */
 function asModule(value: unknown): string {
@@ -70,6 +73,11 @@ export function atlasSeed(): Plugin {
         return asModule(Object.fromEntries(Object.entries(designs).filter(([key]) => designBucket(key) === bucket)));
       }
       if (id === RESOLVED.get(DOCS_ID)) return asModule(loadDocs(seed).docs);
+      if (id === RESOLVED.get(INTERNSHIPS_ID)) {
+        const { goals, errors } = loadInternships(seed);
+        if (errors.length > 0) throw new Error('The internship goals in data/internships*.json are invalid:\n  - ' + errors.join('\n  - '));
+        return asModule(goals);
+      }
       if (id === RESOLVED.get(CATALOGUE_ID) || id === RESOLVED.get(CATALOGUE_INDEX_ID)) {
         const { items, errors } = loadCatalogue(seed);
         if (errors.length > 0) throw new Error('The project catalogue in data/projects/*.jsonl is invalid:\n  - ' + errors.join('\n  - '));
@@ -90,7 +98,7 @@ export function atlasSeed(): Plugin {
     configureServer(server) {
       server.watcher.add(DATA_DIR);
       const onChange = (file: string): void => {
-        if (!normalizePath(file).includes('/data/') || !(file.endsWith('.yaml') || file.endsWith('.md') || file.endsWith('.jsonl'))) return;
+        if (!normalizePath(file).includes('/data/') || !(file.endsWith('.yaml') || file.endsWith('.md') || file.endsWith('.jsonl') || file.endsWith('.json'))) return;
         designsRead = null;
         for (const resolved of RESOLVED.values()) {
           const mod = server.moduleGraph.getModuleById(resolved);

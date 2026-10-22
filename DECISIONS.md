@@ -1919,3 +1919,68 @@ could come back with the old build. Tests: `tests/unit/register.test.ts` (the fr
 named and the load still happens), `tests/e2e/shell.spec.ts` (the button drops the worker: the page comes back with
 no version until the next install takes over).
 
+
+## The Internships screen (pull request #33)
+
+**One file per goal, loaded generically.** `data/internships.json` is the file the brief attached (NVIDIA 2027), read
+by `scripts/lib/load-internships.ts` with every `data/internships*.json` beside it, so a second goal is a second file,
+not a code change. The screen shows one goal at a time and a row of chips to pick when there is more than one. The
+goals are their own chunk (`virtual:atlas-internships`, 8 kB), loaded by the screen, Today's card and Plan's row
+through one cache (`src/hooks/useInternships.ts`), so Today never carries the file. `validate:data` refuses a file
+whose ids repeat across targets, phases, gate items, projects, open-source items and interview areas, whose phase or
+open-source item names something the library does not have, whose dates are not ISO (or null), whose fit is not
+strong, medium or stretch, or whose project names a target the file lacks (`src/seed/internships.ts`, zod strict).
+
+**"In the library" means a resource or a reading-queue paper.** Nine of the file's 25 library ids were not the
+Library's: eight name the same resource under the id the Library already had, and the file now uses those ids
+(`course-karpathy-zero-to-hero` → `karpathy-zero-to-hero`, `course-hf-llm-course` → `hf-llm-course`,
+`tutorial-learncpp` → `learncpp`, `practice-csapp-labs` → `csapp-labs`, `docs-tensorrt-llm` → `tensorrt-llm-docs`,
+`paper-flashattention-2` → `flashattention-2`, `paper-pagedattention-vllm` → `pagedattention`, `paper-roofline` →
+`roofline`); `paper-flashattention` was already a paper's id. Four of the phases' items (the Roofline paper, the two
+FlashAttention papers, PagedAttention) are papers of the reading queue (data/papers.yaml), not resources, so the
+check and the screen take both: a resource opens the Library's sheet over the screen (`?item=`), a paper the reading
+queue's sheet (`/library?paper=`). No resource was added and no URL written: a goal can only name what the library
+has, and the Library's rules keep the links.
+
+**Progress is the device's, keyed by the file's ids.** One `meta` row per goal (`internships:<goal id>`) holds the
+gate ticks, each project's status and progress once changed, the interview ratings (0 to 3), the resume ticks (by
+line position: the lines have no ids) and a target's status once changed; the file's own values show until then,
+and nothing is ever written into the file. `meta` is in every backup, so the progress survives an export and import,
+and a row that is not an object reads as empty rather than breaking the screen. It is not synced between devices:
+`meta` stays on the device by design (the timer, shortcuts), and giving the progress a synced table and a file format
+is a change of its own for when a second device needs it. The pull request says so.
+
+**The arithmetic (`src/lib/internships.ts`), as the brief set it.** The next application is the open target (not
+applied, not declined) with the soonest apply date on or after today; a past date is skipped, a null date never
+counts. The current phase is the one whose dates hold today (an open end runs on), else the first with an unfinished
+gate, else the last; the dates win over a slipped gate so the screen says what the calendar says, and the locked
+line under the phase's title names what is left. The week is counted from the phase's start, out of the weeks its
+dates span (none for an open end); before the start the title says when it starts. "Gate to apply" on the Targets
+tab and on Today's card is the current phase's gate, which is what the brief's "ticking a gate item updates the bar
+on Targets and the Today card" means. Today's one line is the current phase's first unfinished gate item, else the
+first project being built ("Build …"), else nothing. The card shows while any target has an upcoming apply date and
+goes when every dated one is applied or past.
+
+**The screen.** The four tabs are the existing segmented control, in the URL as `tab=`; the Roadmap tab's phase is a
+second segmented control of the phase numbers, in the URL as `phase=`, so "Open roadmap" and a Roadmap row land on
+the phase they name. Gate items and resume lines are rows with the clay checkbox (44 px); the interview confidence is
+one 44 px knob holding three dots, a tap moving it on from "Not yet" round to "Ready", its name read out with the
+rating; a project's status is a small button that cycles later → next → building → done, and a building project
+shows the progress bar with − and + knobs in steps of a tenth. The only filled button is "Open roadmap" on Targets;
+Today's card has an ice "Open" and a quiet "Checklist", since Today's one filled button is Start. Today's card sits
+under Later today, so the day's list stays above the fold at 390 × 844 (the ui-acceptance rule), and its gate line
+reads "Gate ticked 1 of 5" so Later today's "0 of 5 done" stays the only such text; Plan's row is the first row of the Timeline's "Next"
+list, with the next role, the days to apply and the gate's count, and it stays once every application is in so the
+screen keeps an entry. Lighthouse accessibility is 100 on every tab, light and dark.
+
+**No reminders.** Atlas has no notifications of its own (nothing asks for permission, nothing schedules), and a
+reminder a week before an apply date would be the first. The brief said to add one only if reminders existed, so
+none was added; the card and the row carry the days.
+
+Tests: `tests/unit/internships.test.ts` (the file reads, every library id resolves, the next application skips past
+dates and applied targets, the current phase by dates and by gates, the week and the gate counts, Today's card and
+its line, the progress store through a backup and its import, the validator's refusals);
+`tests/e2e/internships.spec.ts` (Plan's row opens the screen; a gate tick moves the bar on Targets and Today's card
+and Phase 2 reads as locked; the Roadmap tab lists "Andrej Karpathy: Neural Networks, Zero to Hero" and opens its
+sheet; ratings, resume ticks and a project's status and progress survive a reload; axe on every tab, light and dark).
+Screenshots: Targets, Roadmap and Prep at phone width in both themes, redrawn on CI.
