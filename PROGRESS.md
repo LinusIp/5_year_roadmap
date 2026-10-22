@@ -1148,3 +1148,10 @@ Verified on this machine (Linux, Chromium 140):
 - Bracketed roman numerals count as numbers in the title rule (PINNs Part I and Part II apart).
 - Developer essentials: `src/lib/essentials.ts`, a row on the Library's home and `?pick=essentials` (311 resources).
 - Tests: `tests/unit/essentials.test.ts` (new), the title rule, `tests/e2e/atlas-library.spec.ts`.
+
+## Pull request #28: engineering resources found on the web
+
+- `data/resources/library-engineering-web.yaml`: 82 new engineering resources found by web search (69 courses,
+  6 books, 7 articles and docs; MIT OCW and MITx, NPTEL and Ansys Innovation Space, TU Delft, open textbooks, tool
+  docs). Four matched what the Library had. Resources: 12,751 to 12,833; engineering 397 to 479.
+- Every URL as a search result returned it; the one-off link job checked them on the runner.

@@ -229,8 +229,9 @@ additions (226 rows on agent harnesses, evaluation and self-improving agents) ar
 more in `data/resources/library-atlas-4.yaml` (`docs/imports-atlas-library-4.md`), and its 11,389-row file 954 more,
 many of them blogs, in `data/resources/library-atlas-5.yaml` (`docs/imports-atlas-library-5.md`), and its 12,744-row
 file 1,349 more (developer essentials and a gap fill) in `data/resources/library-atlas-6.yaml`
-(`docs/imports-atlas-library-6.md`): 12,751 resources in all, and every track has blogs, so the Blogs shelf filters
-by track like the others. "Developer essentials", a row under the shelves, gathers the resources whose title or tags
+(`docs/imports-atlas-library-6.md`), and 82 engineering resources found on the web
+(`data/resources/library-engineering-web.yaml`, `docs/imports-engineering-web.md`): 12,833 resources in all, and
+every track has blogs, so the Blogs shelf filters by track like the others. "Developer essentials", a row under the shelves, gathers the resources whose title or tags
 name the terminal, Git, Linux, SQL, Postgres or the web (HTML, CSS, JavaScript, TypeScript, React, HTTP) from every
 shelf, with the shelves' chips. About 12,400 of them only ever appear in the Library; they ride in a chunk of their
 own that loads once the first screen has its plan and the browser is idle, so Today starts as fast as before.

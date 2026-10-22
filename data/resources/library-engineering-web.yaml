@@ -1,0 +1,1354 @@
+# Engineering resources found on the web (pull request #28): electrical, mechanical and aerospace courses, books,
+# docs and tutorials that fill the gaps the Atlas Library had (vibration, heat transfer, thermodynamics,
+# electromagnetics, finite elements, structures, aerodynamics, flight and space mechanics, materials, manufacturing,
+# batteries, machines and drives). Found by web search on 22 October 2026, each URL as the search returned it and
+# checked on the runner; free, most with a paid certificate that is optional. None is on the plan: they sit on
+# their shelves, in search and under "Optional for this path". Generated from scratch/eng-resources.jsonl by
+# scratch/import-eng.ts.
+
+# ---- Electrical and mechanical engineering (82)
+
+- id: "braeunig-rocket-space-technology"
+  title: "Rocket and Space Technology (Braeunig)"
+  short: "Rocket & Space Technology"
+  provider: "Robert A. Braeunig"
+  type: "article"
+  url: "http://www.braeunig.us/space/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 15
+  summary: "The long-running reference site: orbital mechanics with worked problems, propellants, propulsion, spacecraft systems and launch vehicles."
+  fromYear: 1
+  priority: 4
+
+- id: "jpl-basics-of-space-flight"
+  title: "Basics of Space Flight (NASA JPL)"
+  short: "JPL Basics of Space Flight"
+  provider: "NASA Jet Propulsion Laboratory / David Doody"
+  type: "article"
+  url: "https://science.nasa.gov/learn/basics-of-space-flight/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 20
+  summary: "JPL's self-paced tutorial for its own operators: the solar system, trajectories, spacecraft, navigation, telecommunications, launch and cruise, with quizzes."
+  fromYear: 1
+  priority: 4
+
+- id: "ellingson-open-electromagnetics-project"
+  title: "Open Electromagnetics Project (Virginia Tech)"
+  short: "Open Electromagnetics"
+  provider: "Steven W. Ellingson / Virginia Tech"
+  type: "article"
+  url: "https://www.faculty.ece.vt.edu/swe/oem/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "The project page for the two volumes: PDFs, LaTeX sources, problem sets and the solution manual."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-heat-mass-transfer-iitb"
+  title: "Heat and Mass Transfer (NPTEL, IIT Bombay, S.P. Sukhatme and U.N. Gaitonde)"
+  short: "NPTEL Heat & Mass Transfer"
+  provider: "NPTEL / IIT Bombay, S.P. Sukhatme and U.N. Gaitonde"
+  type: "lectures"
+  url: "https://nptel.ac.in/courses/112101097"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 40
+  summary: "The classic lecture course on conduction, convection, radiation and mass transfer, by the authors of the standard Indian textbook."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-mechanics-of-materials-saravanan"
+  title: "Mechanics of Materials (NPTEL, IIT Madras, Saravanan U)"
+  short: "NPTEL Mechanics of Materials"
+  provider: "NPTEL / IIT Madras, Saravanan U"
+  type: "lectures"
+  url: "https://nptel.ac.in/courses/105106172/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 40
+  summary: "A lecture course on deformable solids under small strains, the companion to a statics course."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-power-electronics-iitkgp"
+  title: "Power Electronics (NPTEL, IIT Kharagpur)"
+  short: "NPTEL Power Electronics"
+  provider: "NPTEL / IIT Kharagpur"
+  type: "lectures"
+  url: "https://nptel.ac.in/courses/108105066"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 40
+  summary: "Rectifiers, AC controllers, DC-DC converters and inverters, and the devices behind them, in the original lecture course."
+  fromYear: 2
+  priority: 4
+
+- id: "mit-res-2-002-fe-linear"
+  title: "Finite Element Procedures for Solids and Structures: Linear Analysis (MIT RES.2-002, Bathe)"
+  short: "Bathe FE Linear"
+  provider: "MIT OpenCourseWare / Klaus-Jürgen Bathe"
+  type: "lectures"
+  url: "https://ocw.mit.edu/courses/res-2-002-finite-element-procedures-for-solids-and-structures-spring-2010/video_galleries/linear"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 30
+  summary: "Bathe's own lectures on the finite element method for linear elastic analysis, from the principle of virtual work to implementation and convergence."
+  fromYear: 3
+  priority: 4
+
+- id: "mit-res-2-002-fe-nonlinear"
+  title: "Finite Element Procedures for Solids and Structures: Nonlinear Analysis (MIT RES.2-002, Bathe)"
+  short: "Bathe FE Nonlinear"
+  provider: "MIT OpenCourseWare / Klaus-Jürgen Bathe"
+  type: "lectures"
+  url: "https://ocw.mit.edu/courses/res-2-002-finite-element-procedures-for-solids-and-structures-spring-2010/video_galleries/nonlinear"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 30
+  summary: "The sequel: large displacements, buckling and collapse, plasticity and contact, the way commercial solvers do it."
+  fromYear: 3
+  priority: 4
+  after: [mit-res-2-002-fe-linear]
+
+- id: "nptel-vehicle-dynamics"
+  title: "Vehicle Dynamics (NPTEL, IIT Madras, R. Krishnakumar)"
+  short: "NPTEL Vehicle Dynamics"
+  provider: "NPTEL / IIT Madras, R. Krishnakumar"
+  type: "lectures"
+  url: "https://nptel.ac.in/courses/107106080"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 40
+  summary: "Longitudinal, lateral and vertical dynamics, tyre mechanics and noise, vibration and harshness, with Pacejka and Wong as references."
+  fromYear: 3
+  priority: 4
+  after: [nptel-intro-mechanical-vibration]
+
+- id: "nptel-mems-microsystems"
+  title: "MEMS and Microsystems (NPTEL, IIT Kharagpur, Santiram Kal)"
+  short: "NPTEL MEMS & Microsystems"
+  provider: "NPTEL / IIT Kharagpur, Santiram Kal"
+  type: "lectures"
+  url: "https://nptel.ac.in/courses/117105082/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 40
+  summary: "Microfabrication, sensing and actuation at the micro scale, and the design of microsystems, as a lecture course."
+  fromYear: 3
+  priority: 4
+
+- id: "mitx-16-00x-astronautics"
+  title: "MITx 16.00x Introduction to Aerospace Engineering: Astronautics and Human Spaceflight (Open Learning Library)"
+  short: "MITx 16.00x Astronautics"
+  provider: "MIT Open Learning Library / Jeffrey Hoffman"
+  type: "course"
+  url: "https://openlearninglibrary.mit.edu/courses/course-v1:MITx+16.00x+2T2019/about"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 30
+  summary: "A former astronaut's survey of rockets, orbits, life support, risk and spacewalks; the free archived run with no certificate."
+  fromYear: 1
+  priority: 4
+
+- id: "nptel-thermodynamics-kale"
+  title: "Thermodynamics (NPTEL, IIT Delhi, S.R. Kale)"
+  short: "NPTEL Thermodynamics (IITD)"
+  provider: "NPTEL / IIT Delhi, S.R. Kale"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_me78/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 36
+  summary: "Basic engineering thermodynamics: the first and second laws for single-component systems, then gas mixtures, psychrometry and combustion."
+  fromYear: 1
+  priority: 4
+
+- id: "nptel-thermodynamics-palakkad"
+  title: "Thermodynamics (NPTEL, IIT Palakkad, Anand T N C)"
+  short: "NPTEL Thermo (IIT Palakkad)"
+  provider: "NPTEL / IIT Palakkad, Anand T N C"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc24_me98/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 36
+  summary: "A first thermodynamics course following the AICTE model syllabus, for first- and second-year students."
+  fromYear: 1
+  priority: 4
+
+- id: "nptel-airplane-performance"
+  title: "Introduction to Airplane Performance (NPTEL, IIT Kanpur, A.K. Ghosh)"
+  short: "NPTEL Airplane Performance"
+  provider: "NPTEL / IIT Kanpur, A.K. Ghosh"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc24_ae13/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 24
+  summary: "An eight-week start on how an airplane flies and performs, with design and flight testing in view and no prerequisites."
+  fromYear: 1
+  priority: 4
+
+- id: "nptel-materials-science-prasad"
+  title: "Introduction to Materials Science and Engineering (NPTEL, IIT Delhi, Rajesh Prasad)"
+  short: "NPTEL Materials Science"
+  provider: "NPTEL / IIT Delhi, Rajesh Prasad"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_mm17/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 40
+  summary: "Crystal structure and defects, phase diagrams, diffusion, heat treatment and strengthening: microstructure and mechanical properties for engineers."
+  fromYear: 1
+  priority: 4
+
+- id: "nptel-digital-circuits"
+  title: "Digital Circuits (NPTEL, IIT Kharagpur, Santanu Chattopadhyay)"
+  short: "NPTEL Digital Circuits"
+  provider: "NPTEL / IIT Kharagpur, Santanu Chattopadhyay"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc19_ee51/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 36
+  summary: "Number systems, combinational and sequential design, data converters and memories, ending with the 8085 as a system."
+  fromYear: 1
+  priority: 4
+
+- id: "nptel-intro-em-theory-harbola"
+  title: "Introduction to Electromagnetic Theory (NPTEL, IIT Kanpur, Manoj Harbola)"
+  short: "NPTEL Intro EM Theory"
+  provider: "NPTEL / IIT Kanpur, Manoj Harbola"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc19_ph08/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 24
+  summary: "Electromagnetism with vector calculus for first- and second-year students, in eight weeks."
+  fromYear: 1
+  priority: 4
+
+- id: "nptel-engineering-mechanics-roy"
+  title: "Engineering Mechanics: Statics and Dynamics (NPTEL, IIT Madras, Anubhab Roy)"
+  short: "NPTEL Engineering Mechanics"
+  provider: "NPTEL / IIT Madras, Anubhab Roy"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_me20/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 36
+  summary: "The first mechanics course: static and dynamic systems and the principles of dynamics, over twelve weeks."
+  fromYear: 1
+  priority: 4
+
+- id: "nptel-manufacturing-processes-dwivedi"
+  title: "Fundamentals of Manufacturing Processes (NPTEL, IIT Roorkee, D.K. Dwivedi)"
+  short: "NPTEL Manufacturing Basics"
+  provider: "NPTEL / IIT Roorkee, D.K. Dwivedi"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc24_me84/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 36
+  summary: "Casting, forming, joining and machining, with heat treatment and surface modification, for anyone interested."
+  fromYear: 1
+  priority: 4
+
+- id: "ansys-ev-battery-technology"
+  title: "Electric Vehicle Battery Technology (NPTEL on Ansys Innovation Space, IIT Madras)"
+  short: "EV Battery Technology"
+  provider: "NPTEL on Ansys Innovation Space / IIT Madras, Ashok Jhunjhunwala"
+  type: "course"
+  url: "https://innovationspace.ansys.com/product/electric-vehicle-battery-technology/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 5
+  summary: "Capacity, charge and discharge rates, temperature and depth of discharge for lithium-ion cells, and where batteries are going."
+  fromYear: 1
+  priority: 4
+
+- id: "ansys-engineering-mechanics-statics-dynamics"
+  title: "Engineering Mechanics: Statics and Dynamics (NPTEL on Ansys Innovation Space, IIT Madras)"
+  short: "Eng Mechanics (Ansys)"
+  provider: "NPTEL on Ansys Innovation Space / IIT Madras, Mahesh Panchagnula"
+  type: "course"
+  url: "https://innovationspace.ansys.com/product/engineering-mechanics-statics-and-dynamics/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 6
+  summary: "A six-hour pass over statics and dynamics of rigid bodies, from an earlier run of the IIT Madras course."
+  fromYear: 1
+  priority: 4
+
+- id: "tudelft-intro-aeronautical-engineering"
+  title: "Introduction to Aeronautical Engineering (TU Delft, edX)"
+  short: "TU Delft Intro Aeronautics"
+  provider: "TU Delft / edX"
+  type: "course"
+  url: "https://online-learning.tudelft.nl/courses/introduction-aeronautical-engineering"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "audit-free"
+  estHours: 40
+  summary: "Flight history, aerodynamics and flight mechanics in three self-paced blocks, with high-school maths and physics as the only prerequisite."
+  fromYear: 1
+  priority: 4
+
+- id: "simulink-onramp"
+  title: "Simulink Onramp"
+  short: "Simulink Onramp"
+  provider: "MathWorks"
+  type: "course"
+  url: "https://www.mathworks.com/matlabcentral/fileexchange/69056-simulink-onramp"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 3
+  summary: "MathWorks' free three-hour interactive introduction to modelling, signals and simulation in Simulink, without a licence through the online version."
+  fromYear: 1
+  priority: 4
+
+- id: "mit-16-01-unified-engineering"
+  title: "MIT 16.01 Unified Engineering I, II, III and IV (Fall 2005 to Spring 2006)"
+  short: "MIT 16.01 Unified Eng"
+  provider: "MIT OpenCourseWare"
+  type: "course"
+  url: "https://ocw.mit.edu/courses/16-01-unified-engineering-i-ii-iii-iv-fall-2005-spring-2006/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 200
+  summary: "A year of aerospace fundamentals taught together: materials and structures, fluids, thermodynamics, propulsion, signals and systems, with the links between them."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-heat-transfer-viswanathan"
+  title: "Heat Transfer (NPTEL, IIT Bombay, Ganesh Viswanathan)"
+  short: "NPTEL Heat Transfer (IITB)"
+  provider: "NPTEL / IIT Bombay, Ganesh Viswanathan"
+  type: "course"
+  url: "https://nptel.ac.in/courses/103101137"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 30
+  summary: "An undergraduate heat transfer course from conduction and fins to convection and exchangers, with weekly problem sets."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-intro-mechanical-vibration"
+  title: "Introduction to Mechanical Vibration (NPTEL, IIT Roorkee, Anil Kumar)"
+  short: "NPTEL Mechanical Vibration"
+  provider: "NPTEL / IIT Roorkee, Anil Kumar"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc22_me76/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 20
+  summary: "Free and forced, damped and undamped vibration of one, two and many degrees of freedom, absorbers and instruments, in eight weeks."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-electrical-machines-iitd"
+  title: "Electrical Machines (NPTEL, IIT Delhi, G. Bhuvaneshwari)"
+  short: "NPTEL Electrical Machines"
+  provider: "NPTEL / IIT Delhi, G. Bhuvaneshwari"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc21_ee24/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Transformers, DC and AC rotating machines as generators and motors, in twelve weeks."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-electrical-machines-ii-iitkgp"
+  title: "Electrical Machines II (NPTEL, IIT Kharagpur, Tapas Kumar Bhattacharya)"
+  short: "NPTEL Electrical Machines II"
+  provider: "NPTEL / IIT Kharagpur, Tapas Kumar Bhattacharya"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc23_ee55/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Three-phase and single-phase induction machines and synchronous machines, the second half of a machines sequence."
+  fromYear: 2
+  priority: 4
+  after: [nptel-electrical-machines-iitd]
+
+- id: "nptel-aerodynamics-roy"
+  title: "Fundamentals of Theoretical and Experimental Aerodynamics (NPTEL, IIT Kharagpur, Arnab Roy)"
+  short: "NPTEL Aerodynamics (IITKGP)"
+  provider: "NPTEL / IIT Kharagpur, Arnab Roy"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc24_ae04/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Flow around a wing, the standard atmosphere and wind-tunnel methods: theory and experiment together, without the full graduate weight."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-power-system-analysis"
+  title: "Power System Analysis (NPTEL, IIT Kharagpur, Debapriya Das)"
+  short: "NPTEL Power System Analysis"
+  provider: "NPTEL / IIT Kharagpur, Debapriya Das"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc21_ee77/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Per-unit systems, line models, load flow, fault analysis and stability: the third-year power course."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-strength-of-materials-ramesh"
+  title: "Strength of Materials (NPTEL, IIT Madras, K. Ramesh)"
+  short: "NPTEL Strength of Materials"
+  provider: "NPTEL / IIT Madras, K. Ramesh"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_me73/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Stresses in torsion, bending and shear of slender members, and the stability of columns, taught by a photoelasticity specialist."
+  fromYear: 2
+  priority: 4
+  after: [nptel-engineering-mechanics-roy]
+
+- id: "nptel-foundation-of-cfd"
+  title: "Foundation of Computational Fluid Dynamics (NPTEL, IIT Madras, Vengadesan)"
+  short: "NPTEL Foundation of CFD"
+  provider: "NPTEL / IIT Madras, Vengadesan"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc23_me75/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 24
+  summary: "An eight-week introduction to CFD with no prerequisites and MATLAB access for the run."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-analog-circuits-mandal"
+  title: "Analog Electronic Circuits (NPTEL, IIT Kharagpur, Pradip Mandal)"
+  short: "NPTEL Analog Circuits (KGP)"
+  provider: "NPTEL / IIT Kharagpur, Pradip Mandal"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc23_ee48/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "The core undergraduate analog course and a refresher for designers: biasing, amplifiers, frequency response, feedback and op-amps."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-analog-circuits-pavan"
+  title: "Analog Electronic Circuits (NPTEL, IIT Madras, Shanthi Pavan)"
+  short: "NPTEL Analog Circuits (IITM)"
+  provider: "NPTEL / IIT Madras, Shanthi Pavan"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_ee05/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Analog circuits taught by a data-converter designer: a twelve-week core course with a circuit designer's intuition throughout."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-kinematics-mechanisms"
+  title: "Kinematics of Mechanisms and Machines (NPTEL, IIT Kharagpur, Anirvan DasGupta)"
+  short: "NPTEL Kinematics of Machines"
+  provider: "NPTEL / IIT Kharagpur, Anirvan DasGupta"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_me46/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Velocity, acceleration and force analysis of linkages, planar robots and gear trains."
+  fromYear: 2
+  priority: 4
+  after: [nptel-engineering-mechanics-roy]
+
+- id: "nptel-ic-engines-gas-turbines"
+  title: "IC Engines and Gas Turbines (NPTEL, IIT Guwahati)"
+  short: "NPTEL IC Engines & Turbines"
+  provider: "NPTEL / IIT Guwahati"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_me36/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Gas power cycles for automobiles and aircraft engines, carburation and injection, compressors and turbines."
+  fromYear: 2
+  priority: 4
+  after: [nptel-thermodynamics-kale]
+
+- id: "nptel-em-theory-pradeep-kumar"
+  title: "Electromagnetic Theory (NPTEL, IIT Kanpur, Pradeep Kumar)"
+  short: "NPTEL EM Theory"
+  provider: "NPTEL / IIT Kanpur, Pradeep Kumar"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc21_ee83/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "The electrical engineering core course: waves, transmission lines, waveguides and antennas."
+  fromYear: 2
+  priority: 4
+  after: [nptel-intro-em-theory-harbola]
+
+- id: "nptel-fluid-mechanics-mittal"
+  title: "Fluid Mechanics (NPTEL, IIT Kanpur, Sanjay Mittal)"
+  short: "NPTEL Fluid Mechanics"
+  provider: "NPTEL / IIT Kanpur, Sanjay Mittal"
+  type: "course"
+  url: "https://nptel.ac.in/courses/101104808"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Mass and force balances, dimensional analysis and similitude, and flow past cylinders and sports balls, for aerospace and mechanical students."
+  fromYear: 2
+  priority: 4
+  after: [nptel-engineering-mechanics-roy]
+
+- id: "nptel-refrigeration-ac"
+  title: "Refrigeration and Air-conditioning (NPTEL, IIT Roorkee, Ravi Kumar)"
+  short: "NPTEL Refrigeration & AC"
+  provider: "NPTEL / IIT Roorkee, Ravi Kumar"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc24_me90/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 24
+  summary: "Refrigeration cycles, including aircraft ones, psychrometrics, cooling loads and air distribution, in eight weeks."
+  fromYear: 2
+  priority: 4
+  after: [nptel-thermodynamics-kale]
+
+- id: "nptel-physics-renewable-energy"
+  title: "Physics of Renewable Energy Systems (NPTEL, IIT Kharagpur)"
+  short: "NPTEL Renewable Energy"
+  provider: "NPTEL / IIT Kharagpur"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc22_ph44/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Solar cells, wind, water, tidal and geothermal power and energy storage, from the physics up."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-uav-design-fixed-wing"
+  title: "Design of Fixed Wing Unmanned Aerial Vehicles (NPTEL, IIT Kanpur, Saderla Subrahmanyam)"
+  short: "NPTEL Fixed Wing UAV Design"
+  provider: "NPTEL / IIT Kanpur, Saderla Subrahmanyam"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc24_ae15/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 24
+  summary: "Initial design and sizing of a fixed-wing UAV, its performance and stability, and prototype testing, in eight weeks."
+  fromYear: 2
+  priority: 4
+  after: [nptel-airplane-performance]
+
+- id: "nptel-mechatronics-pathak"
+  title: "Mechatronics (NPTEL, IIT Roorkee, Pushparaj Mani Pathak)"
+  short: "NPTEL Mechatronics"
+  provider: "NPTEL / IIT Roorkee, Pushparaj Mani Pathak"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_me91/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Sensors and transducers, actuators and mechanisms, signal conditioning, microcontrollers, and modelling the system's response."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-control-engineering-pasumarthy"
+  title: "Control Engineering (NPTEL, IIT Madras, Ramkrishna Pasumarthy)"
+  short: "NPTEL Control Engineering"
+  provider: "NPTEL / IIT Madras, Ramkrishna Pasumarthy"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_ee15/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Modelling and control of linear time-invariant systems through Laplace transforms, with a short state-space treatment and Åström and Murray as the text."
+  fromYear: 2
+  priority: 4
+
+- id: "nptel-ev-vehicle-dynamics-drives"
+  title: "EV: Vehicle Dynamics and Electric Motor Drives (NPTEL, IIT Delhi, Amit Jain and Avanish Tripathi)"
+  short: "NPTEL EV Dynamics & Drives"
+  provider: "NPTEL / IIT Delhi, Amit Jain and Avanish Tripathi"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc24_ee30/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 24
+  summary: "An introductory electric vehicle course that demonstrates each topic in Simulink, in eight weeks."
+  fromYear: 2
+  priority: 4
+  after: [simulink-onramp]
+
+- id: "nptel-industrial-automation"
+  title: "Industrial Automation and Control (NPTEL, IIT Kharagpur)"
+  short: "NPTEL Industrial Automation"
+  provider: "NPTEL / IIT Kharagpur"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc26_ee47/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 36
+  summary: "Automation architecture, sensors and signal conditioning, PLCs, hydraulic, pneumatic and electric actuators, industrial communication and CNC."
+  fromYear: 2
+  priority: 4
+  after: [nptel-control-engineering-pasumarthy]
+
+- id: "ansys-satellite-communication-systems"
+  title: "Satellite Communication Systems (NPTEL on Ansys Innovation Space, IIT Kharagpur)"
+  short: "Satellite Comm Systems"
+  provider: "NPTEL on Ansys Innovation Space / IIT Kharagpur, Kalyankumar Bandyopadhyay"
+  type: "course"
+  url: "https://innovationspace.ansys.com/product/satellite-communication-systems/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "Orbits, space and ground segments, propagation, link budgets and multiple access, in a few hours."
+  fromYear: 2
+  priority: 4
+
+- id: "ansys-ev-renewable-energy"
+  title: "Electric Vehicles and Renewable Energy (NPTEL on Ansys Innovation Space, IIT Madras)"
+  short: "EV & Renewable Energy"
+  provider: "NPTEL on Ansys Innovation Space / IIT Madras"
+  type: "course"
+  url: "https://innovationspace.ansys.com/product/electric-vehicles-and-renewable-energy/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 30
+  summary: "Nineteen short courses from vehicle subsystems through cells and packs, motors, controllers and chargers to renewable energy and storage."
+  fromYear: 2
+  priority: 4
+  after: [ansys-ev-battery-technology]
+
+- id: "ansys-renewable-energy-sustainability"
+  title: "Renewable Energy and Sustainability (NPTEL on Ansys Innovation Space, IIT Madras)"
+  short: "Renewable Energy (Ansys)"
+  provider: "NPTEL on Ansys Innovation Space / IIT Madras, Ashok Jhunjhunwala"
+  type: "course"
+  url: "https://innovationspace.ansys.com/product/renewable-energy-and-sustainability/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "Solar and wind technology and the economics of a grid that runs on them."
+  fromYear: 2
+  priority: 4
+
+- id: "ansys-aerodynamics-theory-applications"
+  title: "Aerodynamics: Theory and Applications (NPTEL on Ansys Innovation Space)"
+  short: "Aerodynamics (Ansys/NPTEL)"
+  provider: "NPTEL on Ansys Innovation Space"
+  type: "course"
+  url: "https://innovationspace.ansys.com/product/aerodynamics-theory-and-applications/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "A compact course on airflow around a wing, the standard atmosphere and wind-tunnel methods."
+  fromYear: 2
+  priority: 4
+
+- id: "ansys-fundamentals-fe-method"
+  title: "Fundamentals of Finite Element Method (NPTEL on Ansys Innovation Space, IIT Guwahati)"
+  short: "FE Method Fundamentals"
+  provider: "NPTEL on Ansys Innovation Space / IIT Guwahati, Swarup Bag"
+  type: "course"
+  url: "https://innovationspace.ansys.com/product/fundamentals-of-finite-element-fe-method/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "A few hours on what a finite element is and how a solver assembles and solves a model."
+  fromYear: 2
+  priority: 4
+
+- id: "mit-16-100-aerodynamics"
+  title: "MIT 16.100 Aerodynamics (Fall 2005): lecture notes"
+  short: "MIT 16.100 Aerodynamics"
+  provider: "MIT OpenCourseWare / David Darmofal"
+  type: "course"
+  url: "https://ocw.mit.edu/courses/16-100-aerodynamics-fall-2005/pages/lecture-notes"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 50
+  summary: "Thirty-five lectures from fluid kinematics to thin airfoil theory, lifting lines, boundary layers and compressible flow, with problem sets."
+  fromYear: 3
+  priority: 4
+
+- id: "mit-16-20-structural-mechanics"
+  title: "MIT 16.20 Structural Mechanics (Fall 2002)"
+  short: "MIT 16.20 Structures"
+  provider: "MIT OpenCourseWare / Paul Lagace"
+  type: "course"
+  url: "https://ocw.mit.edu/courses/16-20-structural-mechanics-fall-2002/pages/syllabus"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 50
+  summary: "Elasticity, plane stress and strain, torsion, beams, thin-walled shells and buckling for aerospace structures, with design exercises."
+  fromYear: 3
+  priority: 4
+  after: [mit-16-01-unified-engineering]
+
+- id: "mitx-2-25-1x-fluids-fundamentals"
+  title: "MITx 2.25.1x Advanced Fluid Mechanics: Fundamentals"
+  short: "MITx 2.25.1x Fluids"
+  provider: "MITx Online"
+  type: "course"
+  url: "https://learn.mit.edu/courses/course-v1:MITxT+2.25.1x"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "audit-free"
+  estHours: 40
+  summary: "The first of three self-paced modules from MIT's graduate fluids course: kinematics, conservation laws and dimensional analysis, free to audit."
+  fromYear: 3
+  priority: 4
+
+- id: "mit-2-810-manufacturing-processes"
+  title: "MIT 2.810 Manufacturing Processes and Systems"
+  short: "MIT 2.810 Manufacturing"
+  provider: "MIT / Tim Gutowski"
+  type: "course"
+  url: "https://web.mit.edu/2.810/www/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 40
+  summary: "Lecture slides and project briefs on machining, casting, moulding, forming and assembly, and how physics and randomness set quality, rate and cost."
+  fromYear: 3
+  priority: 4
+
+- id: "nptel-vibration-structural-dynamics"
+  title: "Vibration and Structural Dynamics (NPTEL, IIT Kharagpur, Mira Mitra)"
+  short: "NPTEL Structural Dynamics"
+  provider: "NPTEL / IIT Kharagpur, Mira Mitra"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_ae17/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 30
+  summary: "Single and multi degree of freedom systems, continuous systems and analytical methods, aimed at aerospace structures."
+  fromYear: 3
+  priority: 4
+  after: [nptel-intro-mechanical-vibration]
+
+- id: "nptel-aircraft-stability-control"
+  title: "Aircraft Stability and Control (NPTEL, IIT Kanpur, A.K. Ghosh)"
+  short: "NPTEL Aircraft Stability"
+  provider: "NPTEL / IIT Kanpur, A.K. Ghosh"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc21_ae08/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 36
+  summary: "Longitudinal and lateral dynamics, the short-period, phugoid, roll, spiral and Dutch roll modes, handling qualities and stability augmentation."
+  fromYear: 3
+  priority: 4
+  after: [nptel-airplane-performance]
+
+- id: "nptel-cfd-jayanti"
+  title: "Computational Fluid Dynamics (NPTEL, IIT Madras, Sreenivas Jayanti)"
+  short: "NPTEL CFD (Jayanti)"
+  provider: "NPTEL / IIT Madras, Sreenivas Jayanti"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc23_ch10/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 36
+  summary: "Numerical solution of the fluid flow equations for mechanical, chemical, civil and aerospace students who have had one fluids course."
+  fromYear: 3
+  priority: 4
+  after: [nptel-fluid-mechanics-mittal]
+
+- id: "nptel-antennas-girish-kumar"
+  title: "Antennas (NPTEL, IIT Bombay, Girish Kumar)"
+  short: "NPTEL Antennas"
+  provider: "NPTEL / IIT Bombay, Girish Kumar"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc22_ee22/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 36
+  summary: "Dipoles, loops, slots, arrays, microstrip, helical, horn, Yagi-Uda, log-periodic and reflector antennas, from a microstrip antenna researcher."
+  fromYear: 3
+  priority: 4
+  after: [nptel-em-theory-pradeep-kumar]
+
+- id: "nptel-aircraft-design"
+  title: "Aircraft Design (NPTEL, IIT Kanpur, A.K. Ghosh)"
+  short: "NPTEL Aircraft Design"
+  provider: "NPTEL / IIT Kanpur, A.K. Ghosh"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_ae02/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 36
+  summary: "Conceptual design from requirements through sizing, layout, loads, weights and stability, by the head of IIT Kanpur's flight laboratory."
+  fromYear: 3
+  priority: 4
+  after: [nptel-airplane-performance]
+
+- id: "nptel-electric-drives"
+  title: "Fundamentals of Electric Drives (NPTEL, IIT Kanpur, Shyama Prasad Das)"
+  short: "NPTEL Electric Drives"
+  provider: "NPTEL / IIT Kanpur, Shyama Prasad Das"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc22_ee94/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 24
+  summary: "Chopper-fed DC drives, VSI and CSI induction motor drives, synchronous, brushless DC, stepper and switched reluctance drives."
+  fromYear: 3
+  priority: 4
+  after: [nptel-electrical-machines-iitd]
+
+- id: "nptel-advance-power-electronics"
+  title: "Advance Power Electronics and Control (NPTEL, IIT Roorkee, Avik Bhattacharya)"
+  short: "NPTEL Advanced Power Elec"
+  provider: "NPTEL / IIT Roorkee, Avik Bhattacharya"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc24_ee88/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 36
+  summary: "Modern switches and topologies, space vector modulation, AC-AC converters and the linear and nonlinear control of converters."
+  fromYear: 3
+  priority: 4
+  after: [nptel-power-electronics-iitkgp]
+
+- id: "nptel-intro-turbomachinery"
+  title: "Introduction to Turbomachinery (NPTEL, IIT Kanpur, Subrata Sarkar)"
+  short: "NPTEL Turbomachinery"
+  provider: "NPTEL / IIT Kanpur, Subrata Sarkar"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc21_me127/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 36
+  summary: "One treatment for every kind of turbomachine: the Euler equation, the gas turbine cycle, similarity, cascades, compressor and turbine flows."
+  fromYear: 3
+  priority: 4
+  after: [nptel-fluid-mechanics-mittal]
+
+- id: "nptel-satellite-attitude"
+  title: "Satellite Attitude Dynamics and Control (NPTEL, IIT Kharagpur, Manoranjan Sinha)"
+  short: "NPTEL Satellite Attitude"
+  provider: "NPTEL / IIT Kharagpur, Manoranjan Sinha"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc22_ae08/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 36
+  summary: "Attitude kinematics and rigid-body dynamics, gravity gradient and spin stabilisation, then control with wheels, gyros, magnetic torquers and thrusters."
+  fromYear: 3
+  priority: 4
+  after: [course-nptel-space-flight-mechanics]
+
+- id: "nptel-frp-composites-iitg"
+  title: "Mechanics of Fiber Reinforced Polymer Composite Structures (NPTEL, IIT Guwahati, Debabrata Chakraborty)"
+  short: "NPTEL FRP Composites"
+  provider: "NPTEL / IIT Guwahati, Debabrata Chakraborty"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc23_me54/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 36
+  summary: "Stress-strain and load-deformation of fibre composites, laminates, and the failure modes and theories, after a strength of materials course."
+  fromYear: 3
+  priority: 4
+  after: [nptel-strength-of-materials-ramesh]
+
+- id: "nptel-fem-iitkgp"
+  title: "Finite Element Method (NPTEL, IIT Kharagpur, Biswanath Banerjee and Amit Shaw)"
+  short: "NPTEL Finite Element Method"
+  provider: "NPTEL / IIT Kharagpur, Biswanath Banerjee and Amit Shaw"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_ce21/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 36
+  summary: "The formulation and, hands-on, its translation into MATLAB code, over twelve weeks."
+  fromYear: 3
+  priority: 4
+  after: [nptel-strength-of-materials-ramesh]
+
+- id: "nptel-fem-structural-dynamics"
+  title: "Finite Element Method and Computational Structural Dynamics (NPTEL, IIT Roorkee, Manish Shrikhande)"
+  short: "NPTEL FEM & Struct Dynamics"
+  provider: "NPTEL / IIT Roorkee, Manish Shrikhande"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc22_ce95/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 36
+  summary: "Finite elements with the emphasis on effective computer implementation, through tutorial problems on public-domain tools."
+  fromYear: 3
+  priority: 4
+  after: [nptel-fem-iitkgp]
+
+- id: "nptel-launch-vehicle-design"
+  title: "Introduction to Launch Vehicle Analysis and Design (NPTEL, IIT Bombay, Ashok Joshi)"
+  short: "NPTEL Launch Vehicle Design"
+  provider: "NPTEL / IIT Bombay, Ashok Joshi"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc25_ae15/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 24
+  summary: "Ascent trajectory design and the configuration of a launch vehicle, and how to synthesise both for a mission."
+  fromYear: 3
+  priority: 4
+  after: [course-nptel-space-flight-mechanics]
+
+- id: "nptel-uav-design-part-2"
+  title: "UAV Design Part II (NPTEL, IIT Kanpur)"
+  short: "NPTEL UAV Design Part II"
+  provider: "NPTEL / IIT Kanpur"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc22_ae16/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 24
+  summary: "Simulation and experimental design, and static and dynamic stability analysis of the UAV from part one."
+  fromYear: 3
+  priority: 4
+  after: [nptel-uav-design-fixed-wing]
+
+- id: "nptel-power-system-protection"
+  title: "Power System Protection and Switchgear (NPTEL, IIT Roorkee, Bhaveshkumar Bhalja)"
+  short: "NPTEL Power Sys Protection"
+  provider: "NPTEL / IIT Roorkee, Bhaveshkumar Bhalja"
+  type: "course"
+  url: "https://onlinecourses.nptel.ac.in/noc24_ee89/preview"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 36
+  summary: "Relays, overcurrent, distance and differential protection and switchgear, after a power systems course."
+  fromYear: 3
+  priority: 4
+  after: [nptel-power-system-analysis]
+
+- id: "ansys-advanced-strength-of-materials"
+  title: "Advanced Strength of Materials (NPTEL on Ansys Innovation Space)"
+  short: "Adv Strength of Materials"
+  provider: "NPTEL on Ansys Innovation Space"
+  type: "course"
+  url: "https://innovationspace.ansys.com/product/advanced-strength-of-materials/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Beyond the first course: unsymmetric bending, curved beams, energy methods and thick cylinders."
+  fromYear: 3
+  priority: 4
+  after: [nptel-strength-of-materials-ramesh]
+
+- id: "ansys-electric-machines-modelling"
+  title: "Modelling and Analysis of Electric Machines (NPTEL on Ansys Innovation Space)"
+  short: "Electric Machines Modelling"
+  provider: "NPTEL on Ansys Innovation Space"
+  type: "course"
+  url: "https://innovationspace.ansys.com/product/modelling-and-analysis-of-electric-machines/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Dynamic models of machines for drives and simulation, after a machines course."
+  fromYear: 3
+  priority: 4
+  after: [nptel-electrical-machines-iitd]
+
+- id: "ansys-frp-composite-structures"
+  title: "Mechanics of Fiber Reinforced Polymer Composite Structures (NPTEL on Ansys Innovation Space)"
+  short: "FRP Composite Structures"
+  provider: "NPTEL on Ansys Innovation Space / IIT Guwahati, Debabrata Chakraborty"
+  type: "course"
+  url: "https://innovationspace.ansys.com/product/mechanics-of-fiber-reinforced-polymer-composite-structures/"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "The short form of the IIT Guwahati composites course: plies, laminates and failure theories."
+  fromYear: 3
+  priority: 4
+
+- id: "alderliesten-aerospace-structures-materials"
+  title: "Introduction to Aerospace Structures and Materials (Alderliesten, TU Delft Open)"
+  short: "Aerospace Structures & Mat."
+  provider: "René Alderliesten / TU Delft Open"
+  type: "book"
+  url: "https://books.open.tudelft.nl/home/catalog/book/197"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 40
+  summary: "From material physics and manufacturing to aircraft and spacecraft structures, loads, design principles and durability, for readers new to the field."
+  fromYear: 1
+  priority: 4
+
+- id: "leishman-aerospace-flight-vehicles"
+  title: "Introduction to Aerospace Flight Vehicles (Leishman, Embry-Riddle)"
+  short: "Aerospace Flight Vehicles"
+  provider: "J. Gordon Leishman / Embry-Riddle Aeronautical University"
+  type: "book"
+  url: "https://eaglepubs.erau.edu/introductiontoaerospaceflightvehicles"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 60
+  summary: "An open webbook of lecture-sized lessons with problems and quizzes, from the atmosphere and airfoils to helicopters, electric aircraft and space vehicles."
+  fromYear: 1
+  priority: 4
+
+- id: "soler-fundamentals-aerospace-engineering"
+  title: "Fundamentals of Aerospace Engineering: An Introductory Course to Aeronautical Engineering (Soler)"
+  short: "Fundamentals of Aerospace"
+  provider: "Manuel Soler / Universidad Carlos III de Madrid"
+  type: "book"
+  url: "https://e-archivo.uc3m.es/entities/publication/6c7edbb2-d512-4fb1-b2e6-a7851ccb76bf/full"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 40
+  summary: "A first-year textbook under Creative Commons: aerodynamics, structures, instruments, propulsion, flight mechanics, air transport and navigation."
+  fromYear: 1
+  priority: 4
+
+- id: "douglas-fundamentals-of-control-theory"
+  title: "The Fundamentals of Control Theory (Brian Douglas, Engineering Media)"
+  short: "Fundamentals of Control"
+  provider: "Brian Douglas / Engineering Media"
+  type: "book"
+  url: "https://engineeringmedia.com/books"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 12
+  summary: "The free Creative Commons book behind the Control Systems Lectures: the refined version of the videos, in about 150 pages."
+  fromYear: 1
+  priority: 4
+
+- id: "ellingson-electromagnetics-vol-1"
+  title: "Electromagnetics, Volume 1 (Ellingson, Virginia Tech Publishing)"
+  short: "Electromagnetics Vol. 1"
+  provider: "Steven W. Ellingson / Virginia Tech Publishing"
+  type: "book"
+  url: "https://doi.org/10.21061/electromagnetics-vol-1"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 60
+  summary: "A peer-reviewed open textbook for the first semester of engineering electromagnetics, with problem sets and solutions under CC BY-SA."
+  fromYear: 2
+  priority: 4
+
+- id: "ellingson-electromagnetics-vol-2"
+  title: "Electromagnetics, Volume 2 (Ellingson, Virginia Tech Publishing)"
+  short: "Electromagnetics Vol. 2"
+  provider: "Steven W. Ellingson / Virginia Tech Publishing"
+  type: "book"
+  url: "https://doi.org/10.21061/electromagnetics-vol-2"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 60
+  summary: "The second semester: waves in media, transmission lines, waveguides, antennas and radiation."
+  fromYear: 3
+  priority: 4
+  after: [ellingson-electromagnetics-vol-1]
+
+- id: "getting-to-blinky-kicad-5"
+  title: "Getting to Blinky with KiCad 5 (Contextual Electronics)"
+  short: "Getting to Blinky (KiCad)"
+  provider: "Chris Gammell / Contextual Electronics, via OSH Park"
+  type: "article"
+  url: "https://blog.oshpark.com/2019/10/16/getting-to-blinky-with-kicad-5"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 4
+  summary: "Ten short videos that take a 555 LED blinker from an empty KiCad project to a finished board."
+  fromYear: 1
+  priority: 4
+
+- id: "simon-bramble-ltspice-tutorials"
+  title: "LTspice Tutorials (Simon Bramble)"
+  short: "LTspice Tutorials"
+  provider: "Simon Bramble"
+  type: "article"
+  url: "https://www.simonbramble.co.uk/lt_spice/ltspice_lt_spice.html"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 6
+  summary: "A six-part series from installing and running an example to the simulations an engineer uses daily."
+  fromYear: 1
+  priority: 4
+
+- id: "openfoam-wiki-basics"
+  title: "OpenFOAM wiki: Collection of the basics"
+  short: "OpenFOAM Basics"
+  provider: "OpenFOAM wiki"
+  type: "article"
+  url: "https://wiki.openfoam.com/Collection_of_the_basics"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 12
+  summary: "The official beginner tutorials: the elbow case and the basic CFD workflow, with introductory videos by Hrvoje Jasak."
+  fromYear: 2
+  priority: 4
+  after: [nptel-foundation-of-cfd]
+
+- id: "adi-get-up-and-running-ltspice"
+  title: "Get Up and Running with LTspice (Analog Dialogue)"
+  short: "Get Running with LTspice"
+  provider: "Analog Devices"
+  type: "article"
+  url: "https://analog.com/en/analog-dialogue/articles/get-up-and-running-with-ltspice.html"
+  urlVerified: true
+  lastVerified: 2026-10-22
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "How to start from the demo circuits and test jigs instead of a blank schematic."
+  fromYear: 1
+  priority: 4

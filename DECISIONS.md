@@ -1714,3 +1714,28 @@ someone has opened it.
   the W3C ARIA Authoring Practices, Database Design at opentextbc, the NVMe specifications, ACM Queue, OpenSource
   Connections, Linux Journey at labex, explainshell, LÖVE's wiki and Riehl's Category Theory in Context (403); and
   Ansible's two docs pages (429 past the retry).
+
+## Engineering resources found on the web (pull request #28)
+
+Asked for more engineering resources, Claude found them rather than being handed a file: web searches for free
+electrical, mechanical and aerospace material in the subjects the engineering track was thinnest in. The track had
+397 resources against AI's 4,577, with nothing on vibration, two rows on heat transfer, three on thermodynamics, two on
+electromagnetics, three on finite elements and one on aircraft. 82 new rows (`data/resources/library-engineering-web.yaml`,
+`docs/imports-engineering-web.md`): 69 courses, 6 books, 7 articles and docs; the engineering track is 479.
+
+**Only URLs a search returned.** The rule "never change or invent a URL" holds for found resources too: a URL that
+a model types from memory is a guess. Every URL in the file is one a search result carried verbatim; a page a search
+only described was looked for again or left out (Razavi's lectures, Khan Academy's circuits course, a free dynamics
+textbook). The container cannot reach most sites, so the one-off `links-engineering-web` job checked the file on the
+runner before merge, like the imports' jobs.
+
+**What was taken.** MIT OpenCourseWare and MITx for the courses MIT teaches openly; NPTEL for the breadth the IITs
+teach free (forty-six courses, each free to learn with an optional paid certificate, the short Ansys-hosted versions
+of eleven more under CC BY-SA); open textbooks (Alderliesten, Leishman, Soler, Ellingson, Douglas) where one exists;
+the official docs of the tools (KiCad, LTspice, Simulink, OpenFOAM). Courses carry the institute and lecturer in the
+title and provider, so two courses of one name stay apart (two Analog Electronic Circuits, two Thermodynamics, two
+Electrical Machines), and the shorts say which. Soft prerequisites (`after`) point within the file, by short title.
+
+**Dedupe.** The usual runner upserted the rows: four matched entries the Library had, two by URL (MITx 2.005.1x, the
+space environment course) and two by title (Space Flight Mechanics under an older NPTEL id, KiCad's guide a release
+on); the Library's URLs stay. Fifteen more of the searches' finds were already there and were left out of the file.
