@@ -1182,3 +1182,14 @@ Verified on this machine (Linux, Chromium 140):
   and on return to view); `checkForUpdate()` registers first; the dev-server message only when the page cannot register.
 - Tests: `tests/unit/register.test.ts`.- Settings: "Reset offline copy" is a button with feedback; the reset loads the page afresh past the HTTP cache.
 
+
+## Pull request #33: the Internships screen
+
+- `data/internships.json` (NVIDIA 2027: 3 targets, 5 phases with gates, 6 projects, 3 open-source items, 7 interview
+  areas, the resume checklist, the recruiter's questions, the Intern Prep block), read with every `internships*.json`
+  and checked by `validate:data` (`src/seed/internships.ts`, `scripts/lib/load-internships.ts`); eight ids moved to
+  the Library's own ids for the same resources.
+- `/internships` (`src/screens/Internships.tsx`): Targets, Roadmap, Projects and Prep behind the segmented control;
+  progress in `meta` by the file's ids (`src/db/internships.ts`), the arithmetic in `src/lib/internships.ts`.
+- Today's card while an application is upcoming; Plan's row under Next.
+- Tests: `tests/unit/internships.test.ts` (new), `tests/e2e/internships.spec.ts` (new); screenshots of three tabs.

@@ -38,6 +38,12 @@ declare module 'virtual:atlas-catalogue-index' {
   export default entries;
 }
 
+declare module 'virtual:atlas-internships' {
+  /** The internship goals (INTERNSHIPS, data/internships*.json), loaded with the screen, Today's card or Plan's row. */
+  const goals: import('./internships.ts').InternshipGoal[];
+  export default goals;
+}
+
 declare module 'virtual:atlas-designs' {
   const loaders: (() => Promise<{ default: Record<string, import('./design.ts').Design> }>)[];
   export default loaders;

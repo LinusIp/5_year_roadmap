@@ -6,6 +6,7 @@
 import { loadCatalogue } from './lib/load-catalogue.ts';
 import { loadDesigns } from './lib/load-designs.ts';
 import { loadDocs } from './lib/load-docs.ts';
+import { loadInternships } from './lib/load-internships.ts';
 import { loadSeed } from './lib/load-seed.ts';
 
 const result = loadSeed();
@@ -27,6 +28,9 @@ if (catalogue) errors.push(...catalogue.errors);
 // counts, its flow and talksTo resolving, every core component on the flow, decisions with an alternative, no URLs.
 const designs = seed && catalogue ? loadDesigns(seed, catalogue.items) : null;
 if (designs) errors.push(...designs.errors);
+// The internship goals (data/internships*.json): unique ids, every named resource in the library, dates in order.
+const internships = seed ? loadInternships(seed) : null;
+if (internships) errors.push(...internships.errors);
 
 for (const w of warnings) console.warn('warning  ' + w);
 
@@ -50,6 +54,7 @@ const lines: [string, string | number][] = [
   ['tech docs', Object.keys(docs?.parsed ?? {}).length + ' of ' + seed.projects.filter((p) => p.cadence !== 'weekly').length + ' projects'],
   ['project catalogue', catalogueSummary()],
   ['designs', designSummary()],
+  ['internship goals', (internships?.goals ?? []).map((g) => g.goal.title + ' (' + g.targets.length + ' targets, ' + g.phases.length + ' phases)').join('; ') || 'none'],
   ['roadmap.sh roadmaps', seed.roadmaps.length + ' (' + seed.roadmaps.reduce((n, r) => n + r.sections.reduce((m, s) => m + s.nodes.length, 0), 0) + ' nodes)'],
 ];
 console.log('/data is valid');

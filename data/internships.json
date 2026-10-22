@@ -1,0 +1,426 @@
+{
+  "version": 1,
+  "updated": "2026-10-22",
+  "source_doc": "https://claude.ai/artifact/3g8gJzwdyr8asGbEcqDvGf",
+  "goal": {
+    "id": "nvidia-2027",
+    "title": "NVIDIA internships 2027",
+    "company": "NVIDIA",
+    "primary_track": "TensorRT-LLM inference, with CUDA kernels as the depth skill",
+    "skip_for_now": "TensorRT compiler track"
+  },
+  "targets": [
+    {
+      "id": "nv-ai-agent",
+      "order": 1,
+      "title": "AI Agent Engineer Intern, AI Enablement Process",
+      "req": "JR2025834",
+      "location": "Beijing",
+      "degree": "B.S. or higher",
+      "fit": "strong",
+      "fit_note": "You already build agents, harnesses and simulation platforms with coding agents",
+      "apply": {
+        "label": "Early Dec 2026",
+        "date": "2026-12-01"
+      },
+      "wave": 1,
+      "status": "preparing",
+      "evidence": [
+        "proj-a",
+        "simforge-case-study",
+        "localspace-case-study"
+      ]
+    },
+    {
+      "id": "nv-ad-gpu",
+      "order": 2,
+      "title": "GPU Computing SW Engineering Intern, Autonomous Driving",
+      "req": "JR2026546",
+      "location": "Shanghai (+1)",
+      "degree": "B.S. or higher",
+      "fit": "medium",
+      "fit_note": "Needs C/C++, Linux shell, Makefile, PyTorch; CUDA is a bonus",
+      "apply": {
+        "label": "Mar 2027",
+        "date": "2027-03-01"
+      },
+      "wave": 2,
+      "status": "later",
+      "evidence": [
+        "proj-b",
+        "proj-2"
+      ]
+    },
+    {
+      "id": "nv-ai-computing",
+      "order": 3,
+      "title": "AI Computing SW Development Intern",
+      "req": "JR2026164",
+      "location": "Shanghai (+1)",
+      "degree": "M.S. or Ph.D.",
+      "fit": "stretch",
+      "fit_note": "Needs CUDA and inference depth plus a degree exception",
+      "apply": {
+        "label": "Light now, strong Jul 2027",
+        "date": "2027-07-01"
+      },
+      "wave": 3,
+      "status": "apply-light-now",
+      "evidence": [
+        "proj-2",
+        "proj-3",
+        "proj-4"
+      ]
+    }
+  ],
+  "phases": [
+    {
+      "id": "p1",
+      "n": 1,
+      "name": "Foundations",
+      "start": "2026-11-01",
+      "end": "2026-12-31",
+      "weeks": [
+        {
+          "range": "1–3",
+          "focus": "Python to fluency; WSL2 Ubuntu with CUDA"
+        },
+        {
+          "range": "4–8",
+          "focus": "Zero to Hero through the GPT lecture; project 1; Hugging Face LLM course alongside"
+        }
+      ],
+      "gate": [
+        {
+          "id": "p1-wsl",
+          "text": "WSL2 Ubuntu with CUDA working"
+        },
+        {
+          "id": "p1-py",
+          "text": "Python fluency"
+        },
+        {
+          "id": "p1-gpt",
+          "text": "Project 1 tiny GPT trains"
+        },
+        {
+          "id": "p1-pa",
+          "text": "Project A public with numbers"
+        },
+        {
+          "id": "p1-apply",
+          "text": "Applied to JR2025834 and JR2026164"
+        }
+      ],
+      "resources": [
+        "docs-python-tutorial",
+        "tutorial-wsl-dev-environment",
+        "karpathy-zero-to-hero",
+        "hf-llm-course",
+        "ostep",
+        "kurose-ross-lectures",
+        "repo-ddia-references",
+        "pytest-docs",
+        "paper-swe-bench"
+      ]
+    },
+    {
+      "id": "p2",
+      "n": 2,
+      "name": "Systems",
+      "start": "2027-01-01",
+      "end": "2027-02-28",
+      "weeks": [
+        {
+          "range": "1–8",
+          "focus": "C++ core, CMake, CS:APP ch. 1–6, CPU matmul ladder, 1 LeetCode a day"
+        }
+      ],
+      "gate": [
+        {
+          "id": "p2-cpp",
+          "text": "Modern C++ basics: RAII, templates, move semantics"
+        },
+        {
+          "id": "p2-matmul",
+          "text": "CPU matmul: naive → reordered → tiled → threaded, with timings and a Makefile"
+        },
+        {
+          "id": "p2-linux",
+          "text": "Comfortable in Linux: bash, grep/sed/awk, ssh, git"
+        }
+      ],
+      "resources": [
+        "learncpp",
+        "csapp-labs",
+        "leetcode"
+      ]
+    },
+    {
+      "id": "p3",
+      "n": 3,
+      "name": "CUDA core",
+      "start": "2027-03-01",
+      "end": "2027-04-30",
+      "weeks": [
+        {
+          "range": "1–8",
+          "focus": "PMPP ch. 1–6 + reduction/scan/GEMM; GPU MODE; kernel ladder with Nsight; roofline"
+        }
+      ],
+      "gate": [
+        {
+          "id": "p3-ladder",
+          "text": "Project 2 kernel ladder with Nsight numbers"
+        },
+        {
+          "id": "p3-roofline",
+          "text": "Roofline applied to each kernel"
+        },
+        {
+          "id": "p3-issue",
+          "text": "First small issue filed on TensorRT-LLM or CUTLASS"
+        },
+        {
+          "id": "p3-apply",
+          "text": "Applied to JR2026546 with Project B"
+        }
+      ],
+      "resources": [
+        "video-gpu-mode",
+        "siboehm-cuda-matmul",
+        "docs-nsight-compute",
+        "roofline",
+        "docs-cutlass",
+        "tensorrt-llm-docs"
+      ]
+    },
+    {
+      "id": "p4",
+      "n": 4,
+      "name": "Specialize",
+      "start": "2027-05-01",
+      "end": "2027-06-30",
+      "weeks": [
+        {
+          "range": "1–8",
+          "focus": "CuTe DSL GEMM and fused attention; inference engine with KV cache, batching, quantization"
+        }
+      ],
+      "gate": [
+        {
+          "id": "p4-cute",
+          "text": "Project 3 CuTe DSL kernels benchmarked"
+        },
+        {
+          "id": "p4-engine",
+          "text": "Project 4 inference engine vs TensorRT-LLM"
+        },
+        {
+          "id": "p4-pr",
+          "text": "First merged PR"
+        }
+      ],
+      "resources": [
+        "docs-cute-dsl-guides",
+        "tutorial-cute-dsl-notebooks",
+        "paper-flashattention",
+        "flashattention-2",
+        "pagedattention",
+        "docs-trtllm-paged-attention-ifb-scheduler"
+      ]
+    },
+    {
+      "id": "p5",
+      "n": 5,
+      "name": "Apply",
+      "start": "2027-07-01",
+      "end": null,
+      "weeks": [
+        {
+          "range": "ongoing",
+          "focus": "Resume around numbers; blog posts; referrals; interview drills; keep shipping PRs"
+        }
+      ],
+      "gate": [
+        {
+          "id": "p5-resume",
+          "text": "Resume rewritten around benchmark numbers"
+        },
+        {
+          "id": "p5-referral",
+          "text": "Asked GPU MODE and GitHub contacts for referrals"
+        },
+        {
+          "id": "p5-apply",
+          "text": "Applied to every matching NVIDIA intern posting"
+        }
+      ],
+      "resources": []
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj-a",
+      "code": "A",
+      "title": "Measured developer-productivity agent",
+      "roles": [
+        "nv-ai-agent"
+      ],
+      "phase": "p1",
+      "duration": "4 weeks",
+      "proves": "Find a bottleneck, prototype, measure",
+      "done_when": "20–50 task benchmark, 3–5 runs per task; pass rate, variance, latency, cost; one failure-driven fix that moves the number",
+      "status": "building",
+      "progress": 0.3
+    },
+    {
+      "id": "proj-b",
+      "code": "B",
+      "title": "Issue-analysis report",
+      "roles": [
+        "nv-ad-gpu"
+      ],
+      "phase": "p2-p3",
+      "duration": "~3 weeks",
+      "proves": "Reproduce and root-cause a GPU inference issue",
+      "done_when": "PyTorch vs ONNX Runtime vs TensorRT at FP32/FP16/INT8; minimal repro; written report",
+      "status": "later",
+      "progress": 0
+    },
+    {
+      "id": "proj-1",
+      "code": "1",
+      "title": "Tiny GPT from scratch in PyTorch",
+      "roles": [
+        "nv-ai-computing",
+        "nv-ai-agent"
+      ],
+      "phase": "p1",
+      "proves": "PyTorch fluency, transformer internals",
+      "done_when": "Trains on a small text set; you can explain every tensor shape",
+      "status": "next",
+      "progress": 0
+    },
+    {
+      "id": "proj-2",
+      "code": "2",
+      "title": "CUDA kernel ladder",
+      "roles": [
+        "nv-ai-computing",
+        "nv-ad-gpu"
+      ],
+      "phase": "p3",
+      "proves": "CUDA, memory hierarchy, profiling",
+      "done_when": "Each step has Nsight Compute numbers and % of cuBLAS on the RTX 3050 Ti",
+      "status": "later",
+      "progress": 0
+    },
+    {
+      "id": "proj-3",
+      "code": "3",
+      "title": "CuTe DSL kernels: GEMM and fused attention",
+      "roles": [
+        "nv-ai-computing"
+      ],
+      "phase": "p4",
+      "proves": "The CuTe DSL track",
+      "done_when": "Correct vs PyTorch; benchmarked; write-up on layouts and tiling",
+      "status": "later",
+      "progress": 0
+    },
+    {
+      "id": "proj-4",
+      "code": "4",
+      "title": "Mini inference engine (flagship)",
+      "roles": [
+        "nv-ai-computing"
+      ],
+      "phase": "p4",
+      "proves": "TensorRT-LLM track end to end",
+      "done_when": "KV cache, continuous batching, paged KV, INT8/INT4, one custom kernel; tokens/s before vs after; vs TensorRT-LLM on a cloud GPU",
+      "status": "later",
+      "progress": 0,
+      "note": "Can live inside localSpace"
+    }
+  ],
+  "open_source": [
+    {
+      "id": "os-trtllm",
+      "name": "TensorRT-LLM",
+      "plan": "Read the PyTorch backend 2 weeks; open an issue first; docs fixes, failing examples, small bugs; then a kernel or model integration",
+      "target": "First merged PR by 2027-06-30",
+      "resource": "tensorrt-llm-docs"
+    },
+    {
+      "id": "os-cutlass",
+      "name": "CUTLASS / CuTe DSL",
+      "plan": "Run the Python CuTe DSL examples on sm_86; report and fix breakage; contribute an example or doc",
+      "resource": "repo-cutlass"
+    },
+    {
+      "id": "os-gpumode",
+      "name": "GPU MODE",
+      "plan": "Follow lectures; enter kernel competitions",
+      "resource": "video-gpu-mode"
+    }
+  ],
+  "interview_areas": [
+    {
+      "id": "cuda",
+      "name": "CUDA and GPU architecture",
+      "be_able_to": "Warps, SMs, coalescing, bank conflicts, occupancy, Tensor Cores, roofline"
+    },
+    {
+      "id": "kernels",
+      "name": "Kernels",
+      "be_able_to": "Write a reduction or softmax on a whiteboard; walk through GEMM tiling"
+    },
+    {
+      "id": "inference",
+      "name": "LLM inference",
+      "be_able_to": "KV cache, paged attention, continuous batching, FlashAttention, quantization, prefill vs decode"
+    },
+    {
+      "id": "cpp",
+      "name": "C++",
+      "be_able_to": "Pointers and memory, RAII, templates, move semantics, a small class cleanly"
+    },
+    {
+      "id": "pytorch",
+      "name": "Python and PyTorch",
+      "be_able_to": "Tensor shapes, autograd, attention layer from memory"
+    },
+    {
+      "id": "coding",
+      "name": "Coding",
+      "be_able_to": "LeetCode easy–medium"
+    },
+    {
+      "id": "projects",
+      "name": "Your projects",
+      "be_able_to": "Defend every number in your READMEs"
+    }
+  ],
+  "resume_checklist": [
+    "Top line names the track: GPU inference and CUDA kernels",
+    "One line with a number per project",
+    "Links: GitHub, merged PRs, blog posts"
+  ],
+  "recruiter_questions": [
+    "Are undergrads considered for the AI Computing role?",
+    "Which location is the +1?",
+    "How long is the on-site commitment?",
+    "What eligibility applies to international students?"
+  ],
+  "schedule": {
+    "block": "Intern Prep",
+    "hours_per_day": 4,
+    "slots": 8,
+    "slot_minutes": 30,
+    "guardrails": [
+      "At least half of every week goes to code you write and run",
+      "Consider pausing ML Zoomcamp until after applications"
+    ]
+  }
+}

@@ -9,6 +9,7 @@
  * right after the first screen, through `loadLibrary`, and `useAtlas` adds them to the curriculum.
  */
 import seed from 'virtual:atlas-seed';
+import type { InternshipGoal } from './internships.ts';
 import type { AppResource, Unit } from './schema.ts';
 
 export { seed };
@@ -36,6 +37,30 @@ export function peekLibrary(): AppResource[] | null {
 export function subscribeLibrary(listener: () => void): () => void {
   libraryListeners.add(listener);
   return () => libraryListeners.delete(listener);
+}
+
+let internships: InternshipGoal[] | null = null;
+let internshipsLoad: Promise<InternshipGoal[]> | null = null;
+const internshipListeners = new Set<() => void>();
+
+/** The internship goals (INTERNSHIPS), loading their chunk on first use; everyone subscribed hears when they arrive. */
+export function loadInternships(): Promise<InternshipGoal[]> {
+  internshipsLoad ??= import('virtual:atlas-internships').then((m) => {
+    internships = m.default;
+    for (const listener of internshipListeners) listener();
+    return internships;
+  });
+  return internshipsLoad;
+}
+
+/** The goals if they have loaded, else null. */
+export function peekInternships(): InternshipGoal[] | null {
+  return internships;
+}
+
+export function subscribeInternships(listener: () => void): () => void {
+  internshipListeners.add(listener);
+  return () => internshipListeners.delete(listener);
 }
 
 let cache: Record<string, Unit[]> | null = null;

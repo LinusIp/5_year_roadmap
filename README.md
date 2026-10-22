@@ -142,6 +142,29 @@ A phone app cannot see you sleep, so Atlas asks: a bedtime and a wake time, by h
 - A night syncs as `sleep/<wake date>.json`: `{ "bed": "2026-10-17T23:00", "wake": "2026-10-18T05:40", "minutes": 400 }`,
   local times; the newer edit wins.
 
+## Internships
+
+An internship goal is a file, `data/internships.json` (one more goal is one more `data/internships-<name>.json`): the
+company's roles in the order to apply, the phases with the gate to tick before the next, the projects that prove the
+fit, the open-source plans, what the interviews cover, the resume checklist and the questions for the recruiter.
+`npm run validate:data` checks it: unique ids, every resource it names in the Library (or a paper of the reading
+queue), ISO dates, a fit of strong, medium or stretch.
+
+- **Plan › Next** has a row per goal ("Internships · NVIDIA 2027", the next role, the days to apply, the gate's
+  count); **Today** shows a card while a role has an upcoming apply date: the role and the days, the gate and the
+  phase's week, the one thing for today in the Intern Prep block, **Open** and **Checklist**.
+- **Targets**: the next application with the gate to apply and **Open roadmap**; the roles in order with their fit
+  (a tap opens the note, the evidence and **Mark applied**); the phases with the current one marked; open source.
+- **Roadmap**: a phase at a time; its gate as checkboxes with the count and the bar; the next phase says it is
+  locked until the gate is done, but opens; the weeks; **From your library**, the items the phase names with their
+  status, a tap opening the sheet.
+- **Projects**: code, title, roles, phase and duration; a tap on the status moves it on (later, next, building,
+  done); a building project has a bar with − and +; Proves and Done when.
+- **Prep**: the interview areas with a confidence of three dots (a tap moves it on; "ready" is three), the resume
+  checklist and the questions for the recruiter.
+- Ticks, ratings and statuses stay on this device, by the file's ids, and go into every backup; the file is never
+  written. They do not sync between devices yet.
+
 ## Making it yours
 
 Atlas starts as the plan in `data/`: the same 10-hour day, every day. Real weeks are not like that, so the day,
