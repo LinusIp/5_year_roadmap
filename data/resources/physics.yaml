@@ -242,6 +242,7 @@
   estHours: 100
   subject: math-physics
   summary: "The chemistry course of year 4. MIT 5.111 is the alternative: take one."
+  priority: 4
 
 - id: mit-5-111
   title: "MIT 5.111SC Principles of Chemical Science (Fall 2014)"
