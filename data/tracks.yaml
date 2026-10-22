@@ -17,7 +17,7 @@
 - { id: ee,         name: Electrical,           family: Electrical & embedded,        slot: 6, summary: "Circuits, electronics, signals, power, PCB design." }
 - { id: embedded,   name: Embedded,             family: Electrical & embedded,        slot: 6, summary: "Microcontrollers, firmware, FPGAs and digital design." }
 - { id: controls,   name: Controls,             family: Electrical & embedded,        slot: 6, summary: "Feedback systems, DSP and control theory." }
-- { id: engineering,  name: "Electrical, mechanical & aerospace", family: Electrical & embedded, slot: 6, summary: "Electrical, mechanical and aerospace engineering: circuits, signals, embedded systems, machines, rocket propulsion, astrodynamics, spacecraft and satellites." }
+- { id: engineering,  name: "Electrical, mechanical & aerospace", family: Electrical & embedded, slot: 6, summary: "Electrical, mechanical, aerospace, chemical & nuclear engineering: circuits, signals, embedded systems, machines, materials, thermo-fluids, CAD and manufacturing, power and energy, control, rockets and spacecraft, process and reactor engineering." }
 - { id: hardware,   name: Hardware & chip design, family: Electrical & embedded,      slot: 6, summary: "Chip design: CPU, GPU and NPU architecture, RTL to tape-out." }
 - { id: mech,       name: Mechanical,           family: Mechanical & robotics,        slot: 7, summary: "Mechanics of materials, dynamics, thermal-fluids, CAD, manufacturing." }
 - { id: robotics,   name: Robotics,             family: Mechanical & robotics,        slot: 7, summary: "Kinematics, planning, ROS 2 and mechatronics." }

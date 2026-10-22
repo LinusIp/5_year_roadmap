@@ -234,7 +234,11 @@ nuclear, chemical and aerospace engineering, in `data/resources/library-atlas-7.
 (`docs/imports-atlas-library-7.md`): 13,845 resources in all, and every track has blogs, so the Blogs shelf filters
 by track like the others. "Developer essentials", a row under the shelves, gathers the resources whose title or tags
 name the terminal, Git, Linux, SQL, Postgres or the web (HTML, CSS, JavaScript, TypeScript, React, HTTP) from every
-shelf, with the shelves' chips. About 13,500 of them only ever appear in the Library; they ride in a chunk of their
+shelf, with the shelves' chips, and "Compact power & energy conversion" the fusion, direct conversion, superconductor,
+pulsed power and plasma rows of the engineering, simulation, math and hardware tracks. The Electrical, mechanical &
+aerospace path has chips for its areas (Mechanics, Materials, Thermo-fluids, Design & CAD, Manufacturing, Electronics
+& PCB, Power & energy, Control, Aerospace, Chemical & nuclear, Practice), read from each row's title and summary.
+About 13,500 of them only ever appear in the Library; they ride in a chunk of their
 own that loads once the first screen has its plan and the browser is idle, so Today starts as fast as before.
 A weekly job (`.github/workflows/links.yml`) runs `npm run check:links` and reports; it never edits the data.
 `npm run check:links -- --checked 2026-10-19` checks only the links an import dated that day, and `--in <file>` only

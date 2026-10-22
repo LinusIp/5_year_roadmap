@@ -25,7 +25,8 @@ export interface PathDef {
  * In the board's order: the lanes of the first year first, then the second stage. Inference engineering, Software
  * architecture, DevOps, Simulation, Robotics, Hardware and chip design and Quantum computing are paths of their own
  * (MORE-RESOURCES, ATLAS-LIBRARY), and Electrical, mechanical & aerospace (the `engineering` path) gathers electrical,
- * embedded, mechanical and, since the 11,389-row file, aerospace; a path with nothing on the plan is the Library's to browse.
+ * embedded, mechanical and, since the 11,389-row file, aerospace, and since the 13,839-row file chemical and nuclear
+ * engineering, with chips for its areas (src/lib/engineering-topics.ts); a path with nothing on the plan is the Library's to browse.
  */
 export const PATHS: readonly PathDef[] = [
   { id: 'ai', name: 'AI engineering', tracks: ['ai'], roadmaps: ['ai-engineer', 'ai-agents'] },

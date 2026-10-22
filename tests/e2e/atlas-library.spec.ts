@@ -217,3 +217,49 @@ test('shelves read in the plan\'s order: priority 1 first', async ({ page }) => 
   await first.getByRole('button').click();
   await expect(page.getByRole('dialog').getByText(/^Priority 1 · /)).toBeVisible();
 });
+
+test('the Engineering path offers area chips that narrow its optional list, in the URL', async ({ page }) => {
+  await open(page, './#/library?path=engineering');
+  await expect(page.getByRole('heading', { level: 1, name: 'Electrical, mechanical & aerospace' })).toBeVisible();
+  const areas = page.getByRole('group', { name: 'Area' });
+  for (const label of ['Mechanics', 'Materials', 'Thermo-fluids', 'Design & CAD', 'Manufacturing', 'Electronics & PCB', 'Power & energy', 'Control', 'Aerospace', 'Chemical & nuclear', 'Practice']) {
+    await expect(areas.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' \\d+$') })).toBeVisible();
+  }
+  const optional = page.getByRole('button', { name: /^Optional for this path/ });
+  const all = Number((await optional.innerText()).replace(/\D/g, ''));
+  await areas.getByRole('button', { name: /^Aerospace \d+$/ }).click();
+  await expect(page).toHaveURL(/topic=aerospace/);
+  await expect(areas.getByRole('button', { name: /^Aerospace \d+$/ })).toHaveAttribute('aria-pressed', 'true');
+  const some = Number((await optional.innerText()).replace(/\D/g, ''));
+  expect(some).toBeGreaterThan(40);
+  expect(some).toBeLessThan(all);
+  await expect(optional).toHaveAttribute('aria-expanded', 'true');
+  await showMoreUntil(page, page.getByRole('button', { name: /Rocket Propulsion/ }));
+  // The chip again clears it.
+  await areas.getByRole('button', { name: /^Aerospace \d+$/ }).click();
+  await expect(page).not.toHaveURL(/topic=/);
+  expect(Number((await optional.innerText()).replace(/\D/g, ''))).toBe(all);
+});
+
+test('Compact power & energy conversion gathers fusion, superconductors and plasma from the energy tracks', async ({ page }) => {
+  await open(page, './#/library');
+  const row = page.getByRole('button', { name: /^Compact power & energy conversion \d+$/ });
+  await expect(row).toBeVisible();
+  const count = Number((await row.innerText()).replace(/\D/g, ''));
+  expect(count).toBeGreaterThan(50);
+  await row.click();
+  await expect(page).toHaveURL(/pick=energy/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Compact power & energy conversion' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + count + ' of ' + count + '$') })).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Search power and energy conversion' }).fill('Tokamak');
+  await expect(page.getByRole('button', { name: /Tokamak/ }).first()).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Search power and energy conversion' }).fill('');
+  // Kernel fusion is not fusion energy: the AI track stays out.
+  await page.getByRole('button', { name: 'Track', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Track' }).getByRole('button', { name: 'Simulation' }).click();
+  await expect(page).toHaveURL(/track=simulation/);
+  const [shown, total] = (await page.getByRole('heading', { name: /^\d+ of \d+$/ }).innerText()).split(' of ').map(Number);
+  expect(total).toBe(count);
+  expect(shown).toBeGreaterThan(20);
+});
+

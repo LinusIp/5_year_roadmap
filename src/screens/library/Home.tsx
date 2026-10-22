@@ -101,6 +101,8 @@ export function LibraryHome({
   onShelf,
   essentials,
   onEssentials,
+  energy,
+  onEnergy,
 }: {
   atlas: Atlas;
   units: Record<string, Unit[]> | undefined;
@@ -112,6 +114,9 @@ export function LibraryHome({
   /** Developer essentials (ATLAS-LIBRARY, 12,744 rows): how many, and the row that opens them. */
   essentials: number;
   onEssentials: () => void;
+  /** Compact power & energy conversion (ATLAS-LIBRARY, 14,547 rows): how many, and the row that opens them. */
+  energy: number;
+  onEnergy: () => void;
 }) {
   const { seed, states, logs } = atlas;
   const thisYear = today.slice(0, 4);
@@ -290,6 +295,13 @@ export function LibraryHome({
           <IconTile icon="code" tone="blue" />
           <span className="min-w-0 flex-1 text-body font-semibold">Developer essentials</span>
           <span className="text-meta font-semibold text-ink2">{essentials}</span>
+          <Icon name="chevronRight" size={18} className="text-ink2" />
+        </button>
+        {/* Compact power & energy conversion: fusion, direct conversion, superconductors, pulsed power and plasma, from the engineering, simulation, math and hardware tracks. */}
+        <button type="button" onClick={onEnergy} className="tile press mt-4 flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left">
+          <IconTile icon="zap" tone="ice" />
+          <span className="min-w-0 flex-1 text-body font-semibold">Compact power & energy conversion</span>
+          <span className="text-meta font-semibold text-ink2">{energy}</span>
           <Icon name="chevronRight" size={18} className="text-ink2" />
         </button>
       </section>

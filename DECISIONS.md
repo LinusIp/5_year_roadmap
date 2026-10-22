@@ -1764,3 +1764,44 @@ someone has opened it.
   thermal resistance article (403 in the first run, fine in the second) and three NASA Systems Engineering Handbook
   appendices (429, one in the first run, two in the second).
 
+## The Atlas Library's eighth file: engineering areas and the energy cluster (pull request #30)
+
+ATLAS-LIBRARY's 14,547-row prompt, with two asks that need no data and one that does.
+
+**The engineering track's description.** `data/tracks.yaml` now reads "Electrical, mechanical, aerospace, chemical &
+nuclear engineering: circuits, signals, embedded systems, machines, materials, thermo-fluids, CAD and manufacturing,
+power and energy, control, rockets and spacecraft, process and reactor engineering." The name stays "Electrical,
+mechanical & aerospace": it is the path's heading and the track picker's label, and a six-word name would not fit a
+chip or a tile.
+
+**Areas on the Engineering path.** The path offers the prompt's eleven chips (Mechanics, Materials, Thermo-fluids,
+Design & CAD, Manufacturing, Electronics & PCB, Power & energy, Control, Aerospace, Chemical & nuclear, Practice) above
+"Optional for this path", each with its count, in the URL as `topic=`. `src/lib/engineering-topics.ts` reads an
+item's areas from its title and summary (the file's `why`): word starts, so "vibrat" is vibration and vibrations and
+"cad" is CAD but not OpenSCAD's "scad"; an item can belong to several areas; Practice is the Practice shelf. No field
+was added to the data: the rows read the same with or without one, and the words can change without an import.
+Electronics & PCB also gathers the digital, FPGA, DSP, radio and lithography rows (about 180 of the path's 1,462
+resources named no other area). Under a chip the list is that area alone, the plan's alternatives aside, and the
+section opens. Today: Electronics & PCB 374, Power & energy 230, Control 201, Design & CAD 192, Mechanics 189,
+Thermo-fluids 143, Practice 136 by keyword and 332 on the shelf, Chemical & nuclear 129, Materials 123, Aerospace
+106, Manufacturing 99.
+
+**Compact power & energy conversion.** A row under Developer essentials on the Library's home, opening
+`#/library?pick=energy`: the prompt's words (fusion, aneutronic, direct conversion, thermoelectric, thermionic,
+thermophotovoltaic, betavoltaic, RTG, radioisotope, Kilopower, microreactor, nuclear thermal, pulsed power,
+superconduct, HTS, MHD, Stirling, accelerator, plasma) matched on title and summary by `src/lib/energy.ts`. The
+prompt spreads the cluster across the engineering, simulation, math and hardware tracks, so the filter is over those
+tracks and the ones they gather: elsewhere "fusion" is kernel fusion (FLUX, XLA) and an "accelerator" a GPU, and in
+the quantum track Fusion Blossom is a decoder. In the hardware track those two words do not count either, since an
+accelerator there is an NPU. An acronym (RTG, HTS, MHD) is a whole word in its own case; the other words match at
+their start, so "superconduct" finds superconductors and superconducting. Today 75 resources, 42 of them simulation
+(OpenMC, PlasmaPy, FreeGS, DESC, PROCESS, bluemira) and 26 math and physics (plasma physics, the Lawson criterion,
+ARC); the 708 rows of the eighth file add the rest.
+
+Tests: `tests/unit/engineering-topics.test.ts` (the chips, word starts, the coverage of the track),
+`tests/unit/energy.test.ts` (the words, acronyms, kernel fusion and GPUs left out, the data);
+`tests/e2e/atlas-library.spec.ts` picks Aerospace on the path and finds Rocket Propulsion, opens the energy row,
+finds a tokamak and filters by Simulation.
+
+DATA_PENDING
+
