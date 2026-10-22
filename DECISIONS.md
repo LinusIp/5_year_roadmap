@@ -1663,3 +1663,54 @@ Tests: `tests/unit/register.test.ts` runs the page side against fakes (an update
 an install under way at load, a first install never offered, a failed install's reason and retry, the version
 question, the reset); `tests/unit/sw.test.ts` the worker's failure report and version answer; `tests/e2e/shell.spec.ts`
 the Settings section on the built app (the version after a reload, a check that finds nothing newer).
+
+## The Atlas Library's sixth file (pull request #27)
+
+ATLAS-LIBRARY's 12,744-row file. Its first 11,389 rows are pull request #25's, unchanged: the upsert found every one's
+entry again and filled nothing. Of the 1,355 rows it adds (515 developer essentials: terminal and shell, Git, Linux,
+databases, frontend and backend web; 840 gap fill: free classics, Go and Python, data engineering, discrete math and
+numerical linear algebra, quantum hardware, classic computer vision, storage, game physics, search engines, embedded
+and FPGA projects), 1,349 are new (`data/resources/library-atlas-6.yaml`) and six matched an entry by URL or id
+(`docs/imports-atlas-library-6.md`). No URL changed. Resources: 11,402 to 12,751, most of the growth in systems
+(284), DevOps (245), languages (209), architecture (182), game development (95), quantum (95), AI (76), math (57) and
+engineering (54). Two ids ended in a hyphen, which the slug rule refuses; the runner trims it.
+
+**Bracketed roman numerals are numbers.** One title match was Raissi's PINNs Part II against Part I: "(Part I)" and
+"(Part II)" are bracketed parts without digits, so the rule of pull request #25 saw nothing. Roman numerals in a
+bracketed part now count with the digits, and the pair is two papers.
+
+**Developer essentials.** The file has no web track: JavaScript and TypeScript sit under languages, web app
+engineering under architecture, terminal, Git and Linux under DevOps. The prompt asks for a quick filter that shows
+items whose title or tags mention shell, terminal, Git, Linux, Ubuntu, SQL, Postgres, HTML, CSS, JavaScript,
+TypeScript, React or HTTP. `src/lib/essentials.ts` matches those as whole words of the title or a tag (PostgreSQL,
+HTTPS and Bash as the forms they take in titles), so "digital" is not Git, "GitHub" is not either, and "ReAct", the
+agents paper in the Papers queue, is not React: 311 resources
+(212 articles, 35 practice, 25 courses, 21 papers, 17 books, one blog; systems 126, DevOps 93, languages 36,
+architecture 35). It is a row under the shelves on the Library's home, "Developer essentials · 311", opening
+`#/library?pick=essentials`: a list across every shelf with the Status and track and Level and roadmap chips and the
+shelf search, like a shelf. A tile among the shelves would have read as an eighth shelf, which it is not: the rows
+stay on their shelves.
+
+Tests: `tests/unit/essentials.test.ts` (whole words, tags, the count on the data); `tests/e2e/atlas-library.spec.ts`
+opens the row, counts, finds Pro Git, filters by DevOps and sees that "Digital Design" is not an essential.
+
+**The new rows' links, from the runner.** A one-off `links-atlas-6` job checked the 1,349 new URLs on the pull request
+twice (runs 39740880475 and 39741364956) and was then removed. The first run read 1,280 of the links as fine, 25 as
+failed and 44 as ones to open by hand; the second 1,283, 22 and 44. No URL was changed; nothing is marked until
+someone has opened it.
+
+- Failed in both runs (20): three 404s (Gunicorn's design page, the CRUSH paper at ceph.io, mewo2's fantasy maps
+  notes); the four Coding for SSDs parts at codecapsule.com (503); five hosts whose certificate the runner could not
+  verify (Beazley's three dabeaz.com pages, Clemson's Visual Algebra videos, the IRLbot paper at TAMU, expired) and
+  trillia.com, which speaks an SSL version Node refuses; RankLib at lemurproject.org (timeout, then a certificate);
+  Milvus's architecture page (timeout, then a redirect loop); the query auto-completion survey at UvA (refused); and
+  timeouts at UCSC's RADOS page, learnyouahaskell.com, MIT SIPB's safe shell page and tenthousandmeters.com.
+- Failed in one run only (7): CMU 15-445's homework 1, three GitHub repositories (elasticsearch-learning-to-rank,
+  ann-benchmarks, VectorDBBench) and Red Hat's RHEL 9 monitoring guide timed out in the first run and answered in the
+  second; CMU RI's Lucas-Kanade page and MathWorks' Moler chapters the other way round.
+- To check by hand (44 in both): fifteen USENIX pages (as in pull requests #24 and #25), four Nordic Academy courses,
+  three RogueBasin articles, three Substacks (Osmani, Seattle Data Guy, Practical Data Modeling), two Real Python
+  pages, two zsh.sourceforge.io pages, OpenCV's Python tutorials, LearnOpenCV, UCL Discovery, dataengineering.wiki,
+  the W3C ARIA Authoring Practices, Database Design at opentextbc, the NVMe specifications, ACM Queue, OpenSource
+  Connections, Linux Journey at labex, explainshell, LÖVE's wiki and Riehl's Category Theory in Context (403); and
+  Ansible's two docs pages (429 past the retry).

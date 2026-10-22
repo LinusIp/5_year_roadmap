@@ -311,6 +311,8 @@
   estHours: 40
   prerequisites: [tour-of-go]
   subject: rust-go
+  summary: "Teaches Go and TDD together, chapter by chapter, through small test-first programs."
+  priority: 2
 
 - id: sqlbolt
   title: "SQLBolt: interactive SQL lessons"

@@ -248,6 +248,8 @@ describe('the whole library (ATLAS-LIBRARY)', () => {
     // Two bracketed years are two editions, though the brackets are dropped from the words compared; a title without
     // brackets beside one with says nothing (the 11,389-row file).
     expect(titleLikeness('Advances in Real-Time Rendering in Games (SIGGRAPH 2015)', 'Advances in Real-Time Rendering in Games (SIGGRAPH 2023)')).toBe(0);
+    // Roman numerals in brackets are numbers too: the two PINNs papers.
+    expect(titleLikeness('Physics Informed Deep Learning (Part I): Data-driven Solutions of Nonlinear Partial Differential Equations', 'Physics Informed Deep Learning (Part II): Data-driven Discovery of Nonlinear Partial Differential Equations')).toBe(0);
     expect(titleLikeness('MIT 6.851 Advanced Data Structures (Spring 2012)', '6.851: Advanced Data Structures (Spring 2012)')).toBeGreaterThan(0.8);
     expect(titleLikeness('CS229: Machine Learning (Autumn 2018)', 'Stanford CS229 Machine Learning')).toBeGreaterThan(0.7);
     const library = [
