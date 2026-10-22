@@ -263,3 +263,33 @@ test('Compact power & energy conversion gathers fusion, superconductors and plas
   expect(shown).toBeGreaterThan(20);
 });
 
+test('Security & defence gathers the cyber defence rows, with area chips over the list', async ({ page }) => {
+  await open(page, './#/library');
+  const row = page.getByRole('button', { name: /^Security & defence \d+$/ });
+  await expect(row).toBeVisible();
+  const count = Number((await row.innerText()).replace(/\D/g, ''));
+  expect(count).toBeGreaterThan(600);
+  await row.click();
+  await expect(page).toHaveURL(/pick=security/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Security & defence' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + count + ' of ' + count + '$') })).toBeVisible();
+  const areas = page.getByRole('group', { name: 'Area' });
+  for (const label of ['Foundations', 'Hardening', 'Malware', 'Detection & response', 'Network & web', 'Secure development', 'AI for defence']) {
+    await expect(areas.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' \\d+$') })).toBeVisible();
+  }
+  await areas.getByRole('button', { name: /^Malware \d+$/ }).click();
+  await expect(page).toHaveURL(/area=malware/);
+  const [shown, total] = (await page.getByRole('heading', { name: /^\d+ of \d+$/ }).innerText()).split(' of ').map(Number);
+  expect(total).toBe(count);
+  expect(shown).toBeGreaterThan(60);
+  expect(shown).toBeLessThan(count);
+  await page.getByRole('searchbox', { name: 'Search security and defence' }).fill('YARA');
+  await expect(page.getByRole('button', { name: /YARA/ }).first()).toBeVisible();
+  // Object detection is not security: the AI track's vision papers stay out.
+  await page.getByRole('searchbox', { name: 'Search security and defence' }).fill('');
+  await areas.getByRole('button', { name: /^Malware \d+$/ }).click();
+  await expect(page).not.toHaveURL(/area=/);
+  await page.getByRole('searchbox', { name: 'Search security and defence' }).fill('object detection');
+  await expect(page.getByText('No matches. Clear filters.')).toBeVisible();
+});
+

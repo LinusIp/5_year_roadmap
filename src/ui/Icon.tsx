@@ -52,6 +52,7 @@ import {
   Search,
   Server,
   Settings,
+  ShieldCheck,
   Shuffle,
   Sigma,
   SlidersHorizontal,
@@ -110,6 +111,7 @@ const LUCIDE = {
   hint: Lightbulb,
   flag: Flag,
   zap: Zap,
+  shield: ShieldCheck,
   stats: ChartColumn,
   more: MoreHorizontal,
   // Blocks: graphics and simulation, languages, the core track, projects, maths and physics

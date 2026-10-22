@@ -1167,3 +1167,12 @@ Verified on this machine (Linux, Chromium 140):
   practice, 38 courses, 35 books, 2 blogs; Engineering 433, Simulation 136, Math 87, Hardware 47, AI 5), none
   matching what the Library had. Resources: 13,845 to 14,553. Compact power & energy conversion: 75 to 388.
 
+## Pull request #31: the Atlas Library's ninth file, cyber defence
+
+- `data/resources/library-atlas-9.yaml`: 557 new resources, every one tagged `security` (306 articles with docs and
+  tutorials, 100 practice, 98 papers, 22 books, 16 courses, 15 blogs; Systems 176, DevOps 128, Architecture 115, AI 99,
+  Hardware 20, Languages 19). None matched what the Library had. Resources: 14,553 to 15,110.
+- "Security & defence", a row on the Library's home and `?pick=security` (`src/lib/security.ts`): 706 resources, with
+  seven area chips (`area=`).
+- Tests: `tests/unit/security.test.ts` (new), `tests/e2e/atlas-library.spec.ts`.
+
