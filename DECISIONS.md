@@ -1879,5 +1879,14 @@ Tests: `tests/unit/security.test.ts` (the words and areas, the tag, acronyms, th
 tracks, the data: 557 tagged, every area with dozens); `tests/e2e/atlas-library.spec.ts` opens the row, counts,
 picks Malware, finds YARA and sees that object detection is not security.
 
-**The new rows' links, from the runner.** LINKS_PENDING
+**The new rows' links, from the runner.** A one-off `links-atlas-9` job checked the 557 new URLs on the pull request twice
+(runs 39795685130 and 39797265158) and was then removed. Both runs read 543 of the links as fine, 2 as failed and 12
+as ones to open by hand, the same ones each time. No URL was changed; nothing is marked until someone has opened it.
+
+- Failed in both runs (2): Abadi's control-flow integrity paper at UCSC (timeout) and Android's ARM MTE page (a
+  redirect loop).
+- To check by hand (12 in both runs): three USENIX Security papers (Mirai, site isolation, Capsicum, as the USENIX
+  pages of earlier files), eight Cloudflare Learning Center pages (DMARC, DDoS and its mitigation, microsegmentation,
+  DNSSEC, DNS over TLS, bot management) and MalwareTech's WannaCry kill-switch post (403), and TryHackMe's Pre Security
+  path (429).
 

@@ -238,8 +238,8 @@ defence cluster, tagged `security`, in `data/resources/library-atlas-9.yaml` (`d
 name the terminal, Git, Linux, SQL, Postgres or the web (HTML, CSS, JavaScript, TypeScript, React, HTTP) from every
 shelf, with the shelves' chips, and "Compact power & energy conversion" the fusion, direct conversion, superconductor,
 pulsed power and plasma rows of the engineering, simulation, math and hardware tracks, and "Security & defence" the
-cyber defence rows (tagged `security`, plus the older rows its words find), with chips for its seven areas. The Electrical, mechanical &
-aerospace path has chips for its areas (Mechanics, Materials, Thermo-fluids, Design & CAD, Manufacturing, Electronics
+cyber defence rows (tagged `security`, plus the older rows its words find), with chips for its seven areas. The
+Electrical, mechanical & aerospace path has chips for its areas (Mechanics, Materials, Thermo-fluids, Design & CAD, Manufacturing, Electronics
 & PCB, Power & energy, Control, Aerospace, Chemical & nuclear, Practice), read from each row's title and summary.
 About 14,750 of them only ever appear in the Library; they ride in a chunk of their
 own that loads once the first screen has its plan and the browser is idle, so Today starts as fast as before.
