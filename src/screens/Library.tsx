@@ -20,6 +20,7 @@ import { Header } from '../ui/Header.tsx';
 import { DifficultyDots, IconTile, KindIcon, StatusIcon } from '../ui/glyphs.tsx';
 import { buildPaths, byFit, fitOf, inProgress, PATH_ALIASES, priorityOf, shelfCounts, groupResults, shelfOf, upNext } from '../lib/library-home.ts';
 import { isEssential } from '../lib/essentials.ts';
+import { isEnergy } from '../lib/energy.ts';
 import type { Fit } from '../lib/library-home.ts';
 import type { ShelfKey } from '../lib/library-home.ts';
 import { LibraryHome, SHELF_ICON } from './library/Home.tsx';
@@ -68,6 +69,8 @@ interface Entry {
   fit: Fit;
   /** Names one of the everyday tools: what Developer essentials shows (ATLAS-LIBRARY, 12,744 rows). */
   essential: boolean;
+  /** Fusion, direct conversion, superconductors, pulsed power, plasma: what Compact power & energy conversion shows (ATLAS-LIBRARY, 14,547 rows). */
+  energy: boolean;
 }
 
 /** The order of every list but Projects' (ATLAS-LIBRARY): what is in progress, then by fit, done and dropped last. */
@@ -144,6 +147,7 @@ function buildEntries(
       roadmap: r.roadmap,
       fit: { ...fitOf(r), year: planYear.get(r.id) ?? r.fromYear },
       essential: isEssential(r.title, r.tags),
+      energy: isEnergy(r.title, r.summary, r.tracks[0]),
     };
   });
   const papers: Entry[] = seed.papers.map((p) => {
@@ -164,6 +168,7 @@ function buildEntries(
       roadmap: p.roadmap,
       fit: fitOf(p),
       essential: isEssential(p.title),
+      energy: isEnergy(p.title, p.summary, p.tracks[0]),
     };
   });
   // Projects follow everything else in the default order ("5…"), so the list opens as it always has; the Projects
@@ -184,6 +189,7 @@ function buildEntries(
       fit: { priority: priorityOf(p), year: planYear.get(p.id) },
       project: { kind: 'curriculum', group: p.cadence, phaseId: p.phaseId, hours: p.estHours, tracks: p.tracks },
       essential: false,
+      energy: false,
     };
   });
   const fromCatalogue: Entry[] = (catalogue ?? []).map((e) => {
@@ -193,6 +199,7 @@ function buildEntries(
     const entry: Entry = {
       kind: 'catalogue',
       essential: false,
+      energy: false,
       id: e.id,
       title: e.title,
       body: [e.title, e.kind, e.difficulty, e.group, groupLabel(e.group), e.tracks.join(' ')].join(' '),
@@ -313,6 +320,8 @@ export function Library({ openId }: { openId?: string }) {
   // Developer essentials (ATLAS-LIBRARY, 12,744 rows): the quick filter across every shelf, in the URL like a shelf.
   const [pick, setPick] = useQueryParam('pick');
   const essentials = pick === 'essentials';
+  // Compact power & energy conversion (ATLAS-LIBRARY, 14,547 rows): the energy and extreme physics cluster, the same way.
+  const energy = pick === 'energy';
   // An old link to Electrical and embedded or Mechanical opens Electrical, mechanical & aerospace (ATLAS-LIBRARY).
   const pathId = pathParam ? (PATH_ALIASES[pathParam] ?? pathParam) : pathParam;
   const [draft, setDraft] = useState<string | null>(null);
@@ -347,6 +356,7 @@ export function Library({ openId }: { openId?: string }) {
     return {
       counts: shelfCounts(atlas.seed, catalogue?.length ?? 0),
       essentialCount: atlas.seed.resources.filter((r) => isEssential(r.title, r.tags)).length + atlas.seed.papers.filter((p) => isEssential(p.title)).length,
+      energyCount: atlas.seed.resources.filter((r) => isEnergy(r.title, r.summary, r.tracks[0])).length + atlas.seed.papers.filter((p) => isEnergy(p.title, p.summary, p.tracks[0])).length,
       homeSub: activeCount + ' in progress · ' + nextCount + ' up next · ' + Math.max(0, atlas.seed.resources.length - activeCount - nextCount) + ' more when you need them',
     };
   }, [atlas, catalogue]);
@@ -372,7 +382,7 @@ export function Library({ openId }: { openId?: string }) {
   const projectFiltersOn = Boolean(kind || difficulty || group || phaseParam || level || hours);
   const matchesProject = (e: Entry): boolean => !projectFiltersOn || (e.project ? matchesFilter(e.project, projectFilter) : false);
   const filtered = matched.filter(
-    (e) => (!type || e.type === type) && (!essentials || e.essential) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
+    (e) => (!type || e.type === type) && (!essentials || e.essential) && (!energy || e.energy) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
   );
   // Every shelf but Projects reads by fit: in progress first, then priority, year and level (ATLAS-LIBRARY). Projects
   // keep their order: the plan's first, then the catalogue.
@@ -390,10 +400,10 @@ export function Library({ openId }: { openId?: string }) {
   };
 
   const shelf = (type as ShelfKey | null) ?? null;
-  const filtersOn = Boolean(type || track || status || projectFiltersOn || essentials);
+  const filtersOn = Boolean(type || track || status || projectFiltersOn || essentials || energy);
   // The deferred query switches home to results too, so the first keystroke only updates the field.
   const mode: 'home' | 'path' | 'search' | 'shelf' = pathId ? 'path' : deferredQuery && !filtersOn ? 'search' : filtersOn ? 'shelf' : 'home';
-  const { counts, homeSub, essentialCount } = summary;
+  const { counts, homeSub, essentialCount, energyCount } = summary;
   const goShelf = (key: ShelfKey): void => navigate('/library?type=' + key + (query ? '&q=' + encodeURIComponent(query) : ''), { replace: false });
 
   const row = (entry: Entry): ReactNode => (
@@ -433,8 +443,8 @@ export function Library({ openId }: { openId?: string }) {
   const searchField = (
     <SearchField
       className="mt-5"
-      label={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : essentials ? 'Search developer essentials' : 'Search the library'}
-      placeholder={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : essentials ? 'Search developer essentials' : 'Search courses, books, papers'}
+      label={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : essentials ? 'Search developer essentials' : energy ? 'Search power and energy conversion' : 'Search the library'}
+      placeholder={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : essentials ? 'Search developer essentials' : energy ? 'Search power and energy conversion' : 'Search courses, books, papers'}
       searchBox
       value={text}
       onChange={(v) => {
@@ -459,7 +469,7 @@ export function Library({ openId }: { openId?: string }) {
   );
 
   // A shelf's line: how many it holds and how many are active.
-  const shelfTotal = shelf ? entries.filter((e) => e.type === shelf).length : essentials ? entries.filter((e) => e.essential).length : entries.length;
+  const shelfTotal = shelf ? entries.filter((e) => e.type === shelf).length : essentials ? entries.filter((e) => e.essential).length : energy ? entries.filter((e) => e.energy).length : entries.length;
   const shelfActive = shelf ? entries.filter((e) => e.type === shelf && e.status === 'active').length : 0;
 
   return (
@@ -484,6 +494,8 @@ export function Library({ openId }: { openId?: string }) {
               onShelf={goShelf}
               essentials={essentialCount}
               onEssentials={() => navigate('/library?pick=essentials', { replace: false })}
+              energy={energyCount}
+              onEnergy={() => navigate('/library?pick=energy', { replace: false })}
             />
           ) : results.length === 0 ? (
             <EmptyState action={<Button onClick={clear}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>
@@ -501,8 +513,16 @@ export function Library({ openId }: { openId?: string }) {
       {mode === 'shelf' && (
         <>
           <Header
-            title={shelf ? SHELF_TITLE[shelf] : essentials ? 'Developer essentials' : 'Library'}
-            sub={shelf ? plural(shelfTotal, ...SHELF_NOUN[shelf]) + (shelfActive > 0 ? ' · ' + shelfActive + ' active' : '') : essentials ? plural(shelfTotal, 'resource', 'resources') + ' on the terminal, Git, Linux, SQL and the web' : plural(results.length, 'match', 'matches')}
+            title={shelf ? SHELF_TITLE[shelf] : essentials ? 'Developer essentials' : energy ? 'Compact power & energy conversion' : 'Library'}
+            sub={
+              shelf
+                ? plural(shelfTotal, ...SHELF_NOUN[shelf]) + (shelfActive > 0 ? ' · ' + shelfActive + ' active' : '')
+                : essentials
+                  ? plural(shelfTotal, 'resource', 'resources') + ' on the terminal, Git, Linux, SQL and the web'
+                  : energy
+                    ? plural(shelfTotal, 'resource', 'resources') + ' on fusion, direct conversion, superconductors, pulsed power and plasma'
+                    : plural(results.length, 'match', 'matches')
+            }
             back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />}
           />
           {searchField}

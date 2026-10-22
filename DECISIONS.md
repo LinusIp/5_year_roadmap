@@ -1764,3 +1764,79 @@ someone has opened it.
   thermal resistance article (403 in the first run, fine in the second) and three NASA Systems Engineering Handbook
   appendices (429, one in the first run, two in the second).
 
+## The Atlas Library's eighth file: engineering areas and the energy cluster (pull request #30)
+
+ATLAS-LIBRARY's 14,547-row prompt, with two asks that need no data and one that does.
+
+**The engineering track's description.** `data/tracks.yaml` now reads "Electrical, mechanical, aerospace, chemical &
+nuclear engineering: circuits, signals, embedded systems, machines, materials, thermo-fluids, CAD and manufacturing,
+power and energy, control, rockets and spacecraft, process and reactor engineering." The name stays "Electrical,
+mechanical & aerospace": it is the path's heading and the track picker's label, and a six-word name would not fit a
+chip or a tile.
+
+**Areas on the Engineering path.** The path offers the prompt's eleven chips (Mechanics, Materials, Thermo-fluids,
+Design & CAD, Manufacturing, Electronics & PCB, Power & energy, Control, Aerospace, Chemical & nuclear, Practice) above
+"Optional for this path", each with its count, in the URL as `topic=`. `src/lib/engineering-topics.ts` reads an
+item's areas from its title and summary (the file's `why`): word starts, so "vibrat" is vibration and vibrations and
+"cad" is CAD but not OpenSCAD's "scad"; an item can belong to several areas; Practice is the Practice shelf. No field
+was added to the data: the rows read the same with or without one, and the words can change without an import.
+Electronics & PCB also gathers the digital, FPGA, DSP, radio and lithography rows (140 of the path's 1,462 resources
+named no area before that). Under a chip the list is that area alone, the plan's alternatives aside, and the
+section opens. Today: Electronics & PCB 374, Power & energy 230, Control 201, Design & CAD 192, Mechanics 189,
+Thermo-fluids 143, Practice 136 by keyword and 332 on the shelf, Chemical & nuclear 129, Materials 123, Aerospace
+106, Manufacturing 99.
+
+**Compact power & energy conversion.** A row under Developer essentials on the Library's home, opening
+`#/library?pick=energy`: the prompt's words (fusion, aneutronic, direct conversion, thermoelectric, thermionic,
+thermophotovoltaic, betavoltaic, RTG, radioisotope, Kilopower, microreactor, nuclear thermal, pulsed power,
+superconduct, HTS, MHD, Stirling, accelerator, plasma) matched on title and summary by `src/lib/energy.ts`. The
+prompt spreads the cluster across the engineering, simulation, math and hardware tracks, so the filter is over those
+tracks and the ones they gather: elsewhere "fusion" is kernel fusion (FLUX, XLA) and an "accelerator" a GPU, and in
+the quantum track Fusion Blossom is a decoder. In the hardware track those two words do not count either, since an
+accelerator there is an NPU. An acronym (RTG, HTS, MHD) is a whole word in its own case; the other words match at
+their start, so "superconduct" finds superconductors and superconducting. Today 75 resources, 42 of them simulation
+(OpenMC, PlasmaPy, FreeGS, DESC, PROCESS, bluemira) and 26 math and physics (plasma physics, the Lawson criterion,
+ARC); the 708 rows of the eighth file add the rest.
+
+Tests: `tests/unit/engineering-topics.test.ts` (the chips, word starts, the coverage of the track),
+`tests/unit/energy.test.ts` (the words, acronyms, kernel fusion and GPUs left out, the data);
+`tests/e2e/atlas-library.spec.ts` picks Aerospace on the path and finds Rocket Propulsion, opens the energy row,
+finds a tokamak and filters by Simulation.
+
+**The eighth file.** The 14,547-row `atlas-resources.jsonl` arrived twice cut off (973 rows, every one already in
+the Library) before it arrived whole. Its first 13,839 rows are pull request #29's, unchanged: the upsert found every
+one's entry again and filled nothing. All 708 rows it adds are new (`data/resources/library-atlas-8.yaml`,
+`docs/imports-atlas-library-8.md`): the energy and extreme physics cluster, NASA technical reports on radioisotope and
+space nuclear power, the CERN Accelerator School, semiconductor physics, superconductors, compact and aneutronic
+fusion with direct conversion, thermoelectrics, thermophotovoltaics, thermionics, MHD and Stirling, pulsed power and
+high-energy-density physics, materials for extreme environments, high-power storage and high-voltage engineering.
+No URL changed. Resources: 13,845 to 14,553; engineering 1,413 to 1,846, simulation 395 to 531, math and physics 407
+to 494, hardware 329 to 376. "Compact power & energy conversion" grows from 75 to 388 resources, and the Engineering
+path's chips cover 1,895 resources, 208 of them under no area.
+
+**The new rows' links, from the runner.** A one-off `links-atlas-8` job checked the 708 new URLs on the pull request twice
+(runs 39779341301 and 39780297493) and was then removed. The first run read 644 of the links as fine, 30 as failed
+and 34 as ones to open by hand; the second 643, 32 and 33. No URL was changed; nothing is marked until someone has
+opened it.
+
+- Failed in both runs (29): six NREL addresses the runner could not resolve (the Storage Futures Study page and its
+  key learnings at research-hub, the grid battery FAQ and three storage PDFs at www.nrel.gov); five nanoHUB courses
+  (From Atoms to Materials, Nanophotonic Modeling, Thermal Energy at the Nanoscale, Thermoelectricity, Fundamentals
+  of Nanotransistors, timeout then refused); two LANL hosts not found (the DeltaEC guide at neno.lanl.gov, the
+  nuclear thermal rocket article at discover.lanl.gov); Rochester's OMEGA users guide (404) and Craxton's direct-drive
+  review (timeout); two energy.gov pages (the thermionic solar project profile and the SFS grid impacts, 404); Barr's
+  and Moir's direct conversion PDFs at askmar.com (404); two redirect loops (NASA's fission surface power page, MIT
+  6.763 Applied Superconductivity on OCW); the Bmad manual, CERN's "how an accelerator works" and the GSFC radiation
+  test database (404); Belyaev's neutronless fusion paper (fire.pppl.gov not found), LIFE-HTS at Liège and
+  Starrydata2 (timeout), the EUROfusion roadmap (certificate) and the 2011 USPAS accelerator physics notes at JLab
+  (522).
+- Failed in one run only (3): the European XFEL overview timed out in the first run and answered in the second; two
+  NASA NTRS citations (lunar surface reactor shielding, the 2025 particle-bed NTP trade) the other way round. Beyond
+  NERVA answered 403 in the first run and 522 in the second.
+- To check by hand (33 in both runs): six INL pages (TMAP8 and its tutorial and V&V, NSUF, MARVEL, Atomic Power in
+  Space II), two IAEA nuclear data pages (FENDL, the CRP on primary damage), three USPAS pages, two Feynman Lectures
+  chapters, Pellegrini's XFEL review at APS, Michigan's Ion Beam Laboratory, the BCC cryogenic materials database,
+  the OECD-NEA heat-pipe microreactor benchmark, three All About Circuits chapters, four RSC articles, two CORE and
+  two DOAJ records, Fermilab's accelerator complex, Symmetry magazine, 1CFE's Substack, ORNL's plutonium-238 story
+  and Leicester's space power story (all 403).
+

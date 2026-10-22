@@ -1156,3 +1156,14 @@ Verified on this machine (Linux, Chromium 140):
   Library had. Resources: 12,751 to 13,845; engineering 397 to 1,413.
 - Pull request #28 (82 web-found engineering rows) closed without merging: the curated file supersedes it.
 
+## Pull request #30: engineering areas, the energy cluster and the Atlas Library's eighth file
+
+- The engineering track describes itself as electrical, mechanical, aerospace, chemical & nuclear engineering.
+- The Engineering path has eleven area chips (`src/lib/engineering-topics.ts`), by title and summary words, in the URL.
+- "Compact power & energy conversion", a row on the Library's home and `?pick=energy` (`src/lib/energy.ts`), over the
+  engineering, simulation, math and hardware tracks.
+- Tests: `tests/unit/engineering-topics.test.ts` and `tests/unit/energy.test.ts` (new), `tests/e2e/atlas-library.spec.ts`.
+- `data/resources/library-atlas-8.yaml`: 708 new resources (332 papers, 207 articles with docs and tutorials, 94
+  practice, 38 courses, 35 books, 2 blogs; Engineering 433, Simulation 136, Math 87, Hardware 47, AI 5), none
+  matching what the Library had. Resources: 13,845 to 14,553. Compact power & energy conversion: 75 to 388.
+

@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import type { Atlas } from '../../hooks/useAtlas.ts';
+import { TOPICS, topicsOf } from '../../lib/engineering-topics.ts';
+import { useQueryParam } from '../../router/router.tsx';
+import { Chips } from '../../ui/Chips.tsx';
 import { buildPaths, byFit, fitOf, pathExtras, pathOfTrack, PATHS, roadmapPage, SHELVES, shelfOf } from '../../lib/library-home.ts';
 import { Button } from '../../ui/Button.tsx';
 import { Header } from '../../ui/Header.tsx';
@@ -37,7 +40,10 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
   const { seed, states } = atlas;
   const def = PATHS.find((p) => p.id === pathId);
   const path = buildPaths(seed, states).find((p) => p.id === pathId) ?? (def ? { ...def, steps: [], current: -1, done: 0 } : undefined);
-  const [extras, setExtras] = useState(path?.steps.length === 0);
+  // The Engineering path's areas (ATLAS-LIBRARY, 13,839 rows): a chip narrows the optional list, in the URL like a filter.
+  const [topic, setTopic] = useQueryParam('topic');
+  const topics = pathId === 'engineering' ? TOPICS : [];
+  const [extras, setExtras] = useState(path?.steps.length === 0 || Boolean(topic));
   const [shownCount, setShownCount] = useState(PAGE);
   if (!path || !def) {
     return <Header title="Library" back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />} sub="This path has no steps." />;
@@ -51,14 +57,26 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
   const shown = new Set(alternatives.map((r) => r.id));
   const pages = (def.roadmaps ?? []).map((id) => roadmapPage(seed, id)).filter((r) => r !== undefined);
   // The Library's resources and the reading queue's papers in one list, by fit.
-  const more = [
+  const everything = [
     ...pathExtras(seed, states, pathId)
       .filter((r) => !shown.has(r.id))
       .map((r) => ({ kind: 'resource' as const, item: r })),
     ...seed.papers.filter((p) => p.tracks.some((t) => pathOfTrack(seed, t)?.id === pathId)).map((p) => ({ kind: 'paper' as const, item: p })),
   ].sort((a, b) => byFit(fitOf(a.item), fitOf(b.item)) || (a.item.short ?? a.item.title).localeCompare(b.item.short ?? b.item.title));
-  const optional = alternatives.length + more.length;
-  const visible = more.slice(0, Math.max(0, shownCount - alternatives.length));
+  // An item's areas, by its title and summary; the Practice chip is the Practice shelf.
+  const areasOf = (entry: (typeof everything)[number]): string[] => {
+    const areas = topicsOf(entry.item.title, entry.item.summary ?? '');
+    if (entry.kind === 'resource' && shelfOf(entry.item) === 'practice') areas.push('practice');
+    return areas;
+  };
+  const counted = topics.length > 0 ? everything.map((entry) => ({ entry, areas: areasOf(entry) })) : [];
+  const topicCount = Object.fromEntries(topics.map((t) => [t.key, counted.filter((c) => c.areas.includes(t.key)).length]));
+  const picked = topic && topics.length > 0 ? topic : null;
+  const more = picked ? counted.filter((c) => c.areas.includes(picked)).map((c) => c.entry) : everything;
+  // Under a chip the list is that area alone: the plan's alternatives belong to no area.
+  const shownAlternatives = picked ? [] : alternatives;
+  const optional = shownAlternatives.length + more.length;
+  const visible = more.slice(0, Math.max(0, shownCount - shownAlternatives.length));
 
   return (
     <>
@@ -101,6 +119,14 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
             })}
         </RowList>
       ))}
+      {topics.length > 0 && (
+        <div className="mt-3">
+          <Chips
+            label="Area"
+            items={topics.map((t) => ({ key: t.key, label: t.label, count: topicCount[t.key], pressed: topic === t.key, onClick: () => { setTopic(topic === t.key ? null : t.key); setExtras(true); setShownCount(PAGE); } }))}
+          />
+        </div>
+      )}
       {optional > 0 && (
         <section className="tile mt-[18px] px-[18px] py-1">
           <button type="button" aria-expanded={extras} onClick={() => setExtras(!extras)} className="flex min-h-14 w-full items-center gap-3 text-left">
@@ -110,7 +136,7 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
           </button>
           {extras && (
             <ul className="rows pb-2">
-              {alternatives.map((r) => (
+              {shownAlternatives.map((r) => (
                 <Row key={r.id} icon={<IconTile icon={SHELF_ICON[shelfOf(r)]} />} title={r.short ?? r.title} meta={'Alternative · ' + r.estHours + ' h'} onClick={() => onOpen(r.id)} />
               ))}
               {visible.map(({ kind, item: r }) =>
@@ -126,8 +152,8 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
                   />
                 ),
               )}
-              {alternatives.length + visible.length < optional && (
-                <Row title={'Show ' + Math.min(PAGE, optional - alternatives.length - visible.length) + ' more'} meta={optional - alternatives.length - visible.length + ' not shown yet'} chevron height={44} onClick={() => setShownCount(shownCount + PAGE)} />
+              {shownAlternatives.length + visible.length < optional && (
+                <Row title={'Show ' + Math.min(PAGE, optional - shownAlternatives.length - visible.length) + ' more'} meta={optional - shownAlternatives.length - visible.length + ' not shown yet'} chevron height={44} onClick={() => setShownCount(shownCount + PAGE)} />
               )}
             </ul>
           )}
