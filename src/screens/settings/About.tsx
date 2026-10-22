@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { checkForUpdate, failure, resetOfflineCopy, runningVersion } from '../../pwa/register.ts';
 import type { UpdateCheck } from '../../pwa/register.ts';
+import { Button } from '../../ui/Button.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { Section } from './shared.tsx';
 
 const RESULT: Record<UpdateCheck, string> = {
   ready: 'A new version is ready: tap Reload below',
   latest: 'This is the latest version',
-  failed: 'The new version could not be downloaded',
+  failed: 'The site could not be reached for a new version',
   unavailable: 'Updates come with the installed site, not the dev server',
 };
 
@@ -20,6 +21,7 @@ export function About() {
   const [version, setVersion] = useState<string | null | undefined>(undefined);
   const [result, setResult] = useState<string>('');
   const [checking, setChecking] = useState(false);
+  const [resetting, setResetting] = useState<string>('');
   useEffect(() => {
     let live = true;
     void runningVersion().then((v) => {
@@ -39,13 +41,25 @@ export function About() {
     setChecking(false);
   };
 
+  // The reset is a button, not a row: it is the one action here that changes the device, and it says what it did.
+  const reset = async (): Promise<void> => {
+    setResetting('Dropping the offline copy…');
+    const problem = await resetOfflineCopy();
+    setResetting(problem ? 'Could not drop it all (' + problem + '); loading from the site anyway' : 'Loading from the site…');
+  };
+
   return (
     <Section id="about" title="Atlas on this device">
       <RowList>
         <Row title="Version" meta={version === undefined ? '…' : (version ?? 'Not kept offline yet')} plainTitle />
         <Row title="Check for updates" meta={result || 'Asks the site for a newer version now'} metaWraps onClick={checking ? undefined : () => void check()} />
-        <Row title="Reset offline copy" meta="Drops the cached build and reloads from the site. Your data stays." metaWraps onClick={() => void resetOfflineCopy()} />
       </RowList>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <Button onClick={() => void reset()} disabled={Boolean(resetting)}>
+          Reset offline copy
+        </Button>
+        <span className="min-w-0 flex-1 text-meta text-ink2">{resetting || 'Drops the cached build and loads the site afresh. Your data stays.'}</span>
+      </div>
     </Section>
   );
 }

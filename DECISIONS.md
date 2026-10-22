@@ -1890,3 +1890,32 @@ as ones to open by hand, the same ones each time. No URL was changed; nothing is
   DNSSEC, DNS over TLS, bot management) and MalwareTech's WannaCry kill-switch post (403), and TryHackMe's Pre Security
   path (429).
 
+## A failed registration is tried again (pull request #32)
+
+A phone that had reached the 13,845 build stayed on it through two later deploys. Its Settings page said "Updates
+come with the installed site, not the dev server" under Check for updates: the page had no registration at all, so
+it never asked for an update, and only the browser's own occasional check on navigation moved it forward. The cause
+is in `src/pwa/register.ts`: `register('./sw.js')` fetches the worker script, and when the app opens from its cache
+while the network is away (a phone on the move), the fetch fails and `register` rejects, although the old worker
+keeps serving the page. The rejection was swallowed and nothing tried again for as long as the page stayed open; an
+installed app's page stays open for days.
+
+Now `ensureRegistration()` takes the registration the browser already holds for the scope (`getRegistration`), else
+registers; a rejection keeps its reason for Settings and tries again in 20 s, a minute and three minutes, when the
+network comes back (`online`) and when the page comes back into view. `checkForUpdate()` registers first when the page
+has none and reports 'failed' with the reason; 'unavailable' is only a page that cannot register at all (the dev
+server, a browser without service workers), so the message under the row is right in each case. `registerServiceWorker`
+registers at once when the page has already loaded rather than waiting for a `load` that fired. Tests:
+`tests/unit/register.test.ts` (a registration that fails twice, then the check and the timer bring it in; one the
+browser holds is attached without registering), `tests/e2e/shell.spec.ts` as before.
+
+**The reset is a button and says what it did.** "Reset offline copy" was a row like the two above it, with nothing to
+show it could be tapped and nothing to say it had been; a tap that did nothing visible read as broken. It is now a
+button under the rows, disabled while it works, with a line that reads "Dropping the offline copy…" and then
+"Loading from the site…", or names the step a browser refused. `resetOfflineCopy` tries each step on its own
+(unregister, then the caches) and loads the page afresh either way, with `?reset=<time>` before the hash so the
+HTTP cache cannot hand back the index.html it already has: GitHub Pages caches it for ten minutes, and a plain reload
+could come back with the old build. Tests: `tests/unit/register.test.ts` (the fresh address; a refused step is
+named and the load still happens), `tests/e2e/shell.spec.ts` (the button drops the worker: the page comes back with
+no version until the next install takes over).
+

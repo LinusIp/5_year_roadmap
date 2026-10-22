@@ -55,6 +55,10 @@ test.describe('app shell', () => {
     await about.getByRole('button', { name: /^Check for updates/ }).click();
     await expect(about.getByText('This is the latest version')).toBeVisible();
     await expect(page.getByRole('button', { name: /A new version of Atlas is ready/ })).toHaveCount(0);
+    // The reset drops the worker and loads the page afresh: no version until the next install has taken over.
+    await about.getByRole('button', { name: 'Reset offline copy' }).click();
+    await expect(page).toHaveURL(/\?reset=\d+#\/settings/);
+    await expect(page.locator('section#about').getByText('Not kept offline yet')).toBeVisible();
   });
 
   test('addresses from before the redesign still land in the right place', async ({ page }) => {
