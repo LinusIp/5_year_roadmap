@@ -112,6 +112,34 @@ test('the Blogs shelf filters by track, and the engineering track reads Electric
   await expect(page.getByRole('button', { name: 'Electrical, mechanical & aerospace' })).toBeVisible();
 });
 
+test('Developer essentials gathers the terminal, Git, Linux, SQL and web resources from every shelf, and filters by track', async ({ page }) => {
+  await open(page, './#/library');
+  const row = page.getByRole('button', { name: /^Developer essentials \d+$/ });
+  await expect(row).toBeVisible();
+  const count = Number((await row.innerText()).replace(/\D/g, ''));
+  expect(count).toBeGreaterThan(300);
+  await row.click();
+  await expect(page).toHaveURL(/pick=essentials/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Developer essentials' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + count + ' of ' + count + '$') })).toBeVisible();
+  // Git and SQL from the sixth file, on different shelves.
+  await page.getByRole('searchbox', { name: 'Search developer essentials' }).fill('Pro Git');
+  await expect(page.getByRole('button', { name: /^Pro Git/ })).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Search developer essentials' }).fill('');
+  await page.getByRole('button', { name: 'Track', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Track' }).getByRole('button', { name: 'DevOps & MLOps' }).click();
+  await expect(page).toHaveURL(/track=devops/);
+  const [shown, total] = (await page.getByRole('heading', { name: /^\d+ of \d+$/ }).innerText()).split(' of ').map(Number);
+  expect(total).toBe(count);
+  expect(shown).toBeGreaterThan(50);
+  expect(shown).toBeLessThan(count);
+  // A title that only contains one of the words is not an essential.
+  await page.getByRole('button', { name: 'DevOps & MLOps' }).click();
+  await page.getByRole('dialog', { name: 'Track' }).getByRole('button', { name: 'Every track' }).click();
+  await page.getByRole('searchbox', { name: 'Search developer essentials' }).fill('Digital Design');
+  await expect(page.getByRole('button', { name: /^Digital Design and Computer Architecture/ })).toHaveCount(0);
+});
+
 test('the Inference engineering path opens with the roadmap.sh page', async ({ page }) => {
   await open(page, './#/library?path=inference');
   await expect(page.getByRole('heading', { level: 1, name: 'Inference engineering' })).toBeVisible();

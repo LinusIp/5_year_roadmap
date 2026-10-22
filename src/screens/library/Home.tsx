@@ -99,6 +99,8 @@ export function LibraryHome({
   onOpen,
   onPath,
   onShelf,
+  essentials,
+  onEssentials,
 }: {
   atlas: Atlas;
   units: Record<string, Unit[]> | undefined;
@@ -107,6 +109,9 @@ export function LibraryHome({
   onOpen: (refId: string) => void;
   onPath: (pathId: string) => void;
   onShelf: (shelf: ShelfKey) => void;
+  /** Developer essentials (ATLAS-LIBRARY, 12,744 rows): how many, and the row that opens them. */
+  essentials: number;
+  onEssentials: () => void;
 }) {
   const { seed, states, logs } = atlas;
   const thisYear = today.slice(0, 4);
@@ -278,6 +283,13 @@ export function LibraryHome({
           <IconTile icon={SHELF_ICON.project} tone="ice" />
           <span className="min-w-0 flex-1 text-body font-semibold">Projects</span>
           <span className="text-meta font-semibold text-ink2">{counts.project}</span>
+          <Icon name="chevronRight" size={18} className="text-ink2" />
+        </button>
+        {/* Developer essentials: the terminal, Git, Linux, SQL and the web, across every shelf; a row like Projects'. */}
+        <button type="button" onClick={onEssentials} className="tile press mt-4 flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left">
+          <IconTile icon="code" tone="blue" />
+          <span className="min-w-0 flex-1 text-body font-semibold">Developer essentials</span>
+          <span className="text-meta font-semibold text-ink2">{essentials}</span>
           <Icon name="chevronRight" size={18} className="text-ink2" />
         </button>
       </section>

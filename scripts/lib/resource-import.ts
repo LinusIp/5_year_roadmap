@@ -127,7 +127,9 @@ export function titleLikeness(a: string, b: string): number {
   if (marked(x) !== marked(y)) return 0;
   // So do the numbers of two bracketed parts, which `titleWords` drops: "(SIGGRAPH 2015)" and "(SIGGRAPH 2023)" are
   // two years of one course, "(Spring 2014)" and "(Spring 2012)" two offerings. One side without brackets says nothing.
-  const bracketed = (title: string): string[] => (title.match(/\(([^)]*)\)/g) ?? []).flatMap((part) => part.match(/\d+/g) ?? []).sort();
+  // Roman numerals count as numbers there too: "(Part I)" and "(Part II)" are two papers (the PINNs pair).
+  const bracketed = (title: string): string[] =>
+    (title.match(/\(([^)]*)\)/g) ?? []).flatMap((part) => (part.match(/\d+|\b[ivx]+\b/gi) ?? []).map((n) => n.toLowerCase())).sort();
   const [p, q] = [bracketed(a), bracketed(b)];
   if (p.length > 0 && q.length > 0 && p.join(' ') !== q.join(' ')) return 0;
   let both = 0;

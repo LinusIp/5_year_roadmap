@@ -386,6 +386,8 @@
   estHours: 50
   prerequisites: [30-days-of-python]
   subject: python
+  summary: "Community tutorials on NumPy, SciPy, Matplotlib and SymPy for doing numerical work in Python."
+  priority: 2
 
 - id: sympy-tutorial
   title: "SymPy introductory tutorial"

@@ -168,6 +168,9 @@
   estHours: 60
   subject: cloud
   summary: "The 'cloud' step of year 3. Work through the Solutions Architect learning plan while building project 32 on AWS."
+  note: "Free tier"
+  priority: 2
+  roadmap: "software-architect"
 
 - id: de-zoomcamp
   title: "DataTalksClub Data Engineering Zoomcamp"

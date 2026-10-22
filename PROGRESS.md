@@ -1138,3 +1138,13 @@ Verified on this machine (Linux, Chromium 140):
 - Settings > Atlas on this device: the running build, Check for updates (with the failure's reason), Reset offline
   copy (keeps the data).
 - Tests: `tests/unit/register.test.ts` (new), `tests/unit/sw.test.ts`, `tests/e2e/shell.spec.ts`.
+
+## Pull request #27: the Atlas Library's sixth file
+
+- `data/resources/library-atlas-6.yaml`: 1,349 new resources (703 articles with docs and tutorials, 231 practice,
+  213 papers, 88 books, 80 courses, 34 blogs; Systems 284, DevOps 245, Languages 209, Architecture 182, Game
+  development 95, Quantum 95, AI 76, Math 57, Engineering 54, Hardware 36). Six matched what the Library had.
+  Resources: 11,402 to 12,751.
+- Bracketed roman numerals count as numbers in the title rule (PINNs Part I and Part II apart).
+- Developer essentials: `src/lib/essentials.ts`, a row on the Library's home and `?pick=essentials` (311 resources).
+- Tests: `tests/unit/essentials.test.ts` (new), the title rule, `tests/e2e/atlas-library.spec.ts`.
