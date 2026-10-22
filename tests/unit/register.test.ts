@@ -59,9 +59,10 @@ function setUp(controller: FakeWorker | null) {
     },
   });
   vi.stubGlobal('document', { visibilityState: 'visible', addEventListener: () => undefined });
-  vi.stubGlobal('window', { location: { reload: () => reloads.push(Date.now()) } });
+  const replaced: string[] = [];
+  vi.stubGlobal('window', { location: { reload: () => reloads.push(Date.now()), replace: (url: string) => replaced.push(url), origin: 'https://example.test', pathname: '/atlas/', hash: '#/settings' }, addEventListener: () => undefined });
   vi.stubGlobal('caches', { keys: async () => ['atlas-old', 'someone-else'], delete: async (k: string) => deleted.push(k) });
-  return { swListeners, reloads, registrations, deleted };
+  return { swListeners, reloads, registrations, deleted, replaced };
 }
 
 async function load() {
@@ -223,11 +224,24 @@ describe('service worker registration on the page', () => {
     await expect(bare.runningVersion()).resolves.toBeNull();
   });
 
-  it('resets the offline copy: every registration and Atlas cache goes, then the page reloads from the site', async () => {
-    const { reloads, deleted } = setUp(new FakeWorker('activated'));
+  it('resets the offline copy: every registration and Atlas cache goes, then the page loads afresh from the site', async () => {
+    const { deleted, replaced } = setUp(new FakeWorker('activated'));
     const sw = await load();
-    await sw.resetOfflineCopy();
+    await expect(sw.resetOfflineCopy()).resolves.toBeNull();
     expect(deleted).toEqual(['atlas-old']);
-    expect(reloads).toHaveLength(1);
+    expect(replaced).toHaveLength(1);
+    expect(replaced[0]).toMatch(/^https:\/\/example\.test\/atlas\/\?reset=\d+#\/settings$/);
+  });
+
+  it('still loads the page afresh when a step of the reset is refused, and says which', async () => {
+    const { replaced } = setUp(new FakeWorker('activated'));
+    vi.stubGlobal('caches', {
+      keys: async () => {
+        throw new Error('no storage');
+      },
+    });
+    const sw = await load();
+    await expect(sw.resetOfflineCopy()).resolves.toBe('caches: no storage');
+    expect(replaced).toHaveLength(1);
   });
 });

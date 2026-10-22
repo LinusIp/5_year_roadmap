@@ -1909,3 +1909,13 @@ registers at once when the page has already loaded rather than waiting for a `lo
 `tests/unit/register.test.ts` (a registration that fails twice, then the check and the timer bring it in; one the
 browser holds is attached without registering), `tests/e2e/shell.spec.ts` as before.
 
+**The reset is a button and says what it did.** "Reset offline copy" was a row like the two above it, with nothing to
+show it could be tapped and nothing to say it had been; a tap that did nothing visible read as broken. It is now a
+button under the rows, disabled while it works, with a line that reads "Dropping the offline copy…" and then
+"Loading from the site…", or names the step a browser refused. `resetOfflineCopy` tries each step on its own
+(unregister, then the caches) and loads the page afresh either way, with `?reset=<time>` before the hash so the
+HTTP cache cannot hand back the index.html it already has: GitHub Pages caches it for ten minutes, and a plain reload
+could come back with the old build. Tests: `tests/unit/register.test.ts` (the fresh address; a refused step is
+named and the load still happens), `tests/e2e/shell.spec.ts` (the button drops the worker: the page comes back with
+no version until the next install takes over).
+

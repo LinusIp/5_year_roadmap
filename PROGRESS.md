@@ -1180,5 +1180,5 @@ Verified on this machine (Linux, Chromium 140):
 
 - `src/pwa/register.ts`: `ensureRegistration()` (the held registration, else register; retries on a timer, on `online`
   and on return to view); `checkForUpdate()` registers first; the dev-server message only when the page cannot register.
-- Tests: `tests/unit/register.test.ts`.
+- Tests: `tests/unit/register.test.ts`.- Settings: "Reset offline copy" is a button with feedback; the reset loads the page afresh past the HTTP cache.
 

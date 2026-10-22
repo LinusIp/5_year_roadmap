@@ -205,19 +205,38 @@ export function runningVersion(): Promise<string | null> {
 }
 
 /**
- * Drops the offline copy (every registration and cache of the app) and reloads from the site: the way out when a
- * new version keeps failing to install. The user's data lives in IndexedDB and is not touched.
+ * Drops the offline copy (every registration and cache of the app) and loads the page again from the site: the way
+ * out when a new version keeps failing to install. The user's data lives in IndexedDB and is not touched. Each step
+ * is tried on its own, so a browser that refuses one does not stop the rest, and the page is fetched with a fresh
+ * address (`?reset=<time>` before the hash) so the HTTP cache cannot hand back the index.html it already has.
+ * Resolves with what went wrong when a step failed, for the screen to show; the navigation follows either way.
  */
-export async function resetOfflineCopy(): Promise<void> {
-  if ('serviceWorker' in navigator) {
-    const regs = await navigator.serviceWorker.getRegistrations();
-    await Promise.all(regs.map((r) => r.unregister()));
+export async function resetOfflineCopy(): Promise<string | null> {
+  const problems: string[] = [];
+  const say = (step: string, error: unknown): void => {
+    problems.push(step + ': ' + (error instanceof Error ? error.message : String(error)));
+  };
+  if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && typeof navigator.serviceWorker.getRegistrations === 'function') {
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    } catch (error) {
+      say('unregister', error);
+    }
   }
   if ('caches' in globalThis) {
-    const keys = await caches.keys();
-    await Promise.all(keys.filter((k) => k.startsWith('atlas-')).map((k) => caches.delete(k)));
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((k) => k.startsWith('atlas-')).map((k) => caches.delete(k)));
+    } catch (error) {
+      say('caches', error);
+    }
   }
-  window.location.reload();
+  registration = null;
+  waiting = null;
+  const { origin, pathname, hash } = window.location;
+  window.location.replace(origin + pathname + '?reset=' + Date.now() + hash);
+  return problems.length > 0 ? problems.join('; ') : null;
 }
 
 export function registerServiceWorker(): void {
