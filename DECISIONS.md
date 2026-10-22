@@ -1714,3 +1714,26 @@ someone has opened it.
   the W3C ARIA Authoring Practices, Database Design at opentextbc, the NVMe specifications, ACM Queue, OpenSource
   Connections, Linux Journey at labex, explainshell, LÖVE's wiki and Riehl's Category Theory in Context (403); and
   Ansible's two docs pages (429 past the retry).
+
+## The Atlas Library's seventh file (pull request #29)
+
+ATLAS-LIBRARY's 13,839-row file, sent without a prompt. Its first 12,744 rows are pull request #27's, unchanged: the
+upsert found every one's entry again and filled nothing. Of the 1,095 rows it adds (1,017 electrical, mechanical,
+nuclear, chemical and aerospace engineering: control systems, power electronics and motors, batteries and energy,
+KiCad and PCB design, FreeCAD and CadQuery, machine design, materials, heat transfer, finite elements, reactors and
+process safety, with practice codebases, vendor docs, handbooks and NPTEL and MIT courses; 69 physics simulation:
+finite elements, topology optimization, differentiable solvers; 9 robotics: actuators, drives, open humanoids),
+1,094 are new (`data/resources/library-atlas-7.yaml`) and one matched an entry by URL (`docs/imports-atlas-library-7.md`).
+No URL changed. Resources: 12,751 to 13,845; engineering 397 to 1,413.
+
+**The web-found engineering rows go.** Pull request #28 had 82 engineering resources found by web search, started
+when the Library's engineering track held 397 rows and stopped at the user's word before its link report. This file
+brings 1,017 curated engineering rows, with ids, short titles and prerequisites of its own, and seven of the 82 are
+among them: the curated file supersedes the search. Pull request #28 is closed without merging and the branch starts
+again from main; its commit stays reachable as the pull request's head.
+
+**A prerequisite that names itself.** `linuxcnc-kinematics` gives its own short title as its `after`. A resource
+cannot come after itself, so the runner leaves that one as "Do first" text, like any `after` it cannot resolve.
+
+**The new rows' links, from the runner.** LINKS_PENDING
+

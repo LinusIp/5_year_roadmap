@@ -1148,3 +1148,11 @@ Verified on this machine (Linux, Chromium 140):
 - Bracketed roman numerals count as numbers in the title rule (PINNs Part I and Part II apart).
 - Developer essentials: `src/lib/essentials.ts`, a row on the Library's home and `?pick=essentials` (311 resources).
 - Tests: `tests/unit/essentials.test.ts` (new), the title rule, `tests/e2e/atlas-library.spec.ts`.
+
+## Pull request #29: the Atlas Library's seventh file
+
+- `data/resources/library-atlas-7.yaml`: 1,094 new resources (456 articles with docs and tutorials, 291 practice,
+  212 courses, 76 books, 44 papers, 15 blogs; Engineering 1,016, Simulation 69, Robotics 9). One matched what the
+  Library had. Resources: 12,751 to 13,845; engineering 397 to 1,413.
+- Pull request #28 (82 web-found engineering rows) closed without merging: the curated file supersedes it.
+
