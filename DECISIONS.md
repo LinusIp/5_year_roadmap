@@ -1693,3 +1693,24 @@ stay on their shelves.
 
 Tests: `tests/unit/essentials.test.ts` (whole words, tags, the count on the data); `tests/e2e/atlas-library.spec.ts`
 opens the row, counts, finds Pro Git, filters by DevOps and sees that "Digital Design" is not an essential.
+
+**The new rows' links, from the runner.** A one-off `links-atlas-6` job checked the 1,349 new URLs on the pull request
+twice (runs 39740880475 and 39741364956) and was then removed. The first run read 1,280 of the links as fine, 25 as
+failed and 44 as ones to open by hand; the second 1,283, 22 and 44. No URL was changed; nothing is marked until
+someone has opened it.
+
+- Failed in both runs (20): three 404s (Gunicorn's design page, the CRUSH paper at ceph.io, mewo2's fantasy maps
+  notes); the four Coding for SSDs parts at codecapsule.com (503); five hosts whose certificate the runner could not
+  verify (Beazley's three dabeaz.com pages, Clemson's Visual Algebra videos, the IRLbot paper at TAMU, expired) and
+  trillia.com, which speaks an SSL version Node refuses; RankLib at lemurproject.org (timeout, then a certificate);
+  Milvus's architecture page (timeout, then a redirect loop); the query auto-completion survey at UvA (refused); and
+  timeouts at UCSC's RADOS page, learnyouahaskell.com, MIT SIPB's safe shell page and tenthousandmeters.com.
+- Failed in one run only (7): CMU 15-445's homework 1, three GitHub repositories (elasticsearch-learning-to-rank,
+  ann-benchmarks, VectorDBBench) and Red Hat's RHEL 9 monitoring guide timed out in the first run and answered in the
+  second; CMU RI's Lucas-Kanade page and MathWorks' Moler chapters the other way round.
+- To check by hand (44 in both): fifteen USENIX pages (as in pull requests #24 and #25), four Nordic Academy courses,
+  three RogueBasin articles, three Substacks (Osmani, Seattle Data Guy, Practical Data Modeling), two Real Python
+  pages, two zsh.sourceforge.io pages, OpenCV's Python tutorials, LearnOpenCV, UCL Discovery, dataengineering.wiki,
+  the W3C ARIA Authoring Practices, Database Design at opentextbc, the NVMe specifications, ACM Queue, OpenSource
+  Connections, Linux Journey at labex, explainshell, LÖVE's wiki and Riehl's Category Theory in Context (403); and
+  Ansible's two docs pages (429 past the retry).
