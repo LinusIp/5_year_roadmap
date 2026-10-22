@@ -1840,3 +1840,44 @@ opened it.
   two DOAJ records, Fermilab's accelerator complex, Symmetry magazine, 1CFE's Substack, ORNL's plutonium-238 story
   and Leicester's space power story (all 403).
 
+## The Atlas Library's ninth file: cyber defence (pull request #31)
+
+ATLAS-LIBRARY's 15,104-row file. Its first 14,547 rows are pull request #30's, unchanged: the upsert found every
+one's entry again and filled nothing. All 557 rows it adds are new (`data/resources/library-atlas-9.yaml`,
+`docs/imports-atlas-library-9.md`): the cyber defence cluster, security foundations and frameworks, system hardening,
+malware defence and analysis for defenders, detection and incident response, network and web defence, secure
+development and LLMs and agents for defence, all defensive, across the systems, DevOps, architecture, AI, hardware
+and languages tracks. No URL changed. Resources: 14,553 to 15,110; systems 1,739 to 1,915, DevOps 409 to 537,
+architecture 986 to 1,101, AI 4,582 to 4,681.
+
+**The rows carry a tag.** The prompt's words (security, secure, hardening, malware, ransomware, phishing, detection,
+incident, SIEM, forensic, threat, vulnerability, fuzz, CVE, zero trust, firewall, DDoS, WAF, prompt injection, red
+team, ATT&CK, YARA, Sigma) name only 349 of the 557 on title and summary: Syft, CodeQL, Semgrep, Sysmon, Zeek,
+Suricata, the CIS Benchmarks, Vault and the TPM guides say what they do without saying "security". The file is the
+cyber defence set, so the runner tags every row `security`, as the first import tagged inference rows, and the tag is
+what the filter reads first. No row was edited by hand and no URL changed.
+
+**Security & defence.** A row under Compact power & energy conversion on the Library's home, opening
+`#/library?pick=security` (`src/lib/security.ts`): the tagged rows, plus the older rows the prompt's words find in the
+cluster's tracks, matched on title and summary. Outside those tracks the words mean other things (a black-hole
+firewall in physics, Six Sigma in engineering), so the filter stays in systems, DevOps, architecture, AI, hardware and
+languages. "detection" and "incident" count only beside another word: alone they are object detection, failure
+detection and SRE postmortems. An acronym (SIEM, CVE, DDoS, WAF, YARA) and Sigma are whole words in their own case,
+so "the sigma of a Gaussian" and "waffle" stay out; the other words match at their start. 706 resources: 557 tagged,
+149 by words (Meltdown and Spectre, Security Engineering, BeyondCorp, QUIC, the prompt injection papers, the Web
+Security Academy, MIT 6.858, and a few blockchain papers that call themselves secure).
+
+**Seven areas as chips over the list** (Foundations, Hardening, Malware, Detection & response, Network & web, Secure
+development, AI for defence), in the URL as `area=`, each with its count, like the Engineering path's: a set of words
+of its own matched on title and summary (SAST tools, SBOMs and advisories are Secure development; Sysmon, Zeek,
+Sigma, honeypots and threat intelligence are Detection & response; CIS, OpenSCAP, TPM, secrets and kernel defences
+are Hardening; prompt injection, guardrails, MCP and content safety are AI for defence). An item can be in several;
+21 of the 706 are in none. Foundations 258, Secure development 225, Network & web 187, Detection & response 179,
+Hardening 179, AI for defence 135, Malware 105.
+
+Tests: `tests/unit/security.test.ts` (the words and areas, the tag, acronyms, the two words that need company, the
+tracks, the data: 557 tagged, every area with dozens); `tests/e2e/atlas-library.spec.ts` opens the row, counts,
+picks Malware, finds YARA and sees that object detection is not security.
+
+**The new rows' links, from the runner.** LINKS_PENDING
+
