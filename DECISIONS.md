@@ -1735,5 +1735,32 @@ again from main; its commit stays reachable as the pull request's head.
 **A prerequisite that names itself.** `linuxcnc-kinematics` gives its own short title as its `after`. A resource
 cannot come after itself, so the runner leaves that one as "Do first" text, like any `after` it cannot resolve.
 
-**The new rows' links, from the runner.** LINKS_PENDING
+**The new rows' links, from the runner.** A one-off `links-atlas-7` job checked the 1,094 new URLs on the pull request
+twice (runs 39768919928 and 39769622936) and was then removed. The first run read 967 of the links as fine, 63 as
+failed and 64 as ones to open by hand; the second 981, 55 and 58. No URL was changed; nothing is marked until
+someone has opened it.
+
+- Failed in both runs (53): ten gen-4.org pages (the Generation IV criteria page, its six reactor pages, the
+  resources page and two webinars, all 404); six NREL addresses (PVWatts, SAM and ATB, whose hosts the runner could
+  not resolve, the SAM description PDF at www.nrel.gov likewise, and FASTSim and ReEDS at nrel.github.io, 404); eight
+  NPTEL archive courses (500); Brown's EN4 course page and three of its notes (404); five MIT addresses that time out
+  (the STAMP tutorials, the CAST and STPA handbooks and the STAMP tutorial PDF at psas.scripts.mit.edu, Sontag's
+  Mathematical Control Theory at stuff.mit.edu); TU Delft's two electric-cars courses (404); Lund's automatic control
+  notes and PID slides, Skogestad's SIMC lecture (404) and Ljung's plenaries (host not found); three certificates
+  (the Therac-25 paper at UChicago and the ASME V&V overview at Dynamore, expired; the Bilbao Crystallographic
+  Server, whose certificate is for ehu.eus); and the 3MF core specification PDF, the OpenSees examples manual, the
+  NRC NuScale page, the PyBaMM getting-started tutorial and the Signal Integrity Journal talk (404), OQMD (502), the
+  JANIS brochure (host not found), RELAP5-3D (timeout), Ruina and Pratap's book (fetch failed), the PyBaMM JORS
+  paper (timeout at the journal) and Purdue's ME274 visualizing mechanics (reset).
+- Failed in one run only (12): Slocum's FUNdaMENTALS of Design, its eight pages at pergatory.mit.edu, Arnold's
+  numerical disasters at UMN (certificate) and LearnChemE's screencasts timed out in the first run and answered in
+  the second; NASA's Li-ion battery aging datasets and Microchip's AN1078 the other way round.
+- To check by hand (56 in both runs): nine INL, ANL and VTT pages (MOOSE, BISON, Cardinal, the Virtual Test Bed,
+  Serpent), eight SEBoK pages, four Fogler and Michigan pages, four ASQ pages, three Engineering ToolBox pages,
+  three ISO pages, two Caltech CDS 110 pages, two ngspice pages, two ReliaWiki pages, two BYU compliant mechanisms
+  pages, two Ember pages, the AIChE UPSEI and CCPS beacon pages, INCOSE, IEA's EV outlook, OAPEN's Engineering a
+  Safer World, the Online Ethics Center and its Hyatt Regency case, MatWeb, KiCad's library conventions, OSArch,
+  Metal AM, OSH Park's blog and IAEA's Fukushima report (403); and Analog Devices' six MT tutorials and its package
+  thermal resistance article (403 in the first run, fine in the second) and three NASA Systems Engineering Handbook
+  appendices (429, one in the first run, two in the second).
 
