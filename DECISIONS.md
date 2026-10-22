@@ -1814,5 +1814,29 @@ No URL changed. Resources: 13,845 to 14,553; engineering 1,413 to 1,846, simulat
 to 494, hardware 329 to 376. "Compact power & energy conversion" grows from 75 to 388 resources, and the Engineering
 path's chips cover 1,895 resources, 208 of them under no area.
 
-**The new rows' links, from the runner.** LINKS_PENDING
+**The new rows' links, from the runner.** A one-off `links-atlas-8` job checked the 708 new URLs on the pull request twice
+(runs 39779341301 and 39780297493) and was then removed. The first run read 644 of the links as fine, 30 as failed
+and 34 as ones to open by hand; the second 643, 32 and 33. No URL was changed; nothing is marked until someone has
+opened it.
+
+- Failed in both runs (29): six NREL addresses the runner could not resolve (the Storage Futures Study page and its
+  key learnings at research-hub, the grid battery FAQ and three storage PDFs at www.nrel.gov); five nanoHUB courses
+  (From Atoms to Materials, Nanophotonic Modeling, Thermal Energy at the Nanoscale, Thermoelectricity, Fundamentals
+  of Nanotransistors, timeout then refused); two LANL hosts not found (the DeltaEC guide at neno.lanl.gov, the
+  nuclear thermal rocket article at discover.lanl.gov); Rochester's OMEGA users guide (404) and Craxton's direct-drive
+  review (timeout); two energy.gov pages (the thermionic solar project profile and the SFS grid impacts, 404); Barr's
+  and Moir's direct conversion PDFs at askmar.com (404); two redirect loops (NASA's fission surface power page, MIT
+  6.763 Applied Superconductivity on OCW); the Bmad manual, CERN's "how an accelerator works" and the GSFC radiation
+  test database (404); Belyaev's neutronless fusion paper (fire.pppl.gov not found), LIFE-HTS at Liège and
+  Starrydata2 (timeout), the EUROfusion roadmap (certificate) and the 2011 USPAS accelerator physics notes at JLab
+  (522).
+- Failed in one run only (3): the European XFEL overview timed out in the first run and answered in the second; two
+  NASA NTRS citations (lunar surface reactor shielding, the 2025 particle-bed NTP trade) the other way round. Beyond
+  NERVA answered 403 in the first run and 522 in the second.
+- To check by hand (33 in both runs): six INL pages (TMAP8 and its tutorial and V&V, NSUF, MARVEL, Atomic Power in
+  Space II), two IAEA nuclear data pages (FENDL, the CRP on primary damage), three USPAS pages, two Feynman Lectures
+  chapters, Pellegrini's XFEL review at APS, Michigan's Ion Beam Laboratory, the BCC cryogenic materials database,
+  the OECD-NEA heat-pipe microreactor benchmark, three All About Circuits chapters, four RSC articles, two CORE and
+  two DOAJ records, Fermilab's accelerator complex, Symmetry magazine, 1CFE's Substack, ORNL's plutonium-238 story
+  and Leicester's space power story (all 403).
 
