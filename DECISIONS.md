@@ -1780,8 +1780,8 @@ Design & CAD, Manufacturing, Electronics & PCB, Power & energy, Control, Aerospa
 item's areas from its title and summary (the file's `why`): word starts, so "vibrat" is vibration and vibrations and
 "cad" is CAD but not OpenSCAD's "scad"; an item can belong to several areas; Practice is the Practice shelf. No field
 was added to the data: the rows read the same with or without one, and the words can change without an import.
-Electronics & PCB also gathers the digital, FPGA, DSP, radio and lithography rows (about 180 of the path's 1,462
-resources named no other area). Under a chip the list is that area alone, the plan's alternatives aside, and the
+Electronics & PCB also gathers the digital, FPGA, DSP, radio and lithography rows (140 of the path's 1,462 resources
+named no area before that). Under a chip the list is that area alone, the plan's alternatives aside, and the
 section opens. Today: Electronics & PCB 374, Power & energy 230, Control 201, Design & CAD 192, Mechanics 189,
 Thermo-fluids 143, Practice 136 by keyword and 332 on the shelf, Chemical & nuclear 129, Materials 123, Aerospace
 106, Manufacturing 99.
@@ -1803,5 +1803,16 @@ Tests: `tests/unit/engineering-topics.test.ts` (the chips, word starts, the cove
 `tests/e2e/atlas-library.spec.ts` picks Aerospace on the path and finds Rocket Propulsion, opens the energy row,
 finds a tokamak and filters by Simulation.
 
-DATA_PENDING
+**The eighth file.** The 14,547-row `atlas-resources.jsonl` arrived twice cut off (973 rows, every one already in
+the Library) before it arrived whole. Its first 13,839 rows are pull request #29's, unchanged: the upsert found every
+one's entry again and filled nothing. All 708 rows it adds are new (`data/resources/library-atlas-8.yaml`,
+`docs/imports-atlas-library-8.md`): the energy and extreme physics cluster, NASA technical reports on radioisotope and
+space nuclear power, the CERN Accelerator School, semiconductor physics, superconductors, compact and aneutronic
+fusion with direct conversion, thermoelectrics, thermophotovoltaics, thermionics, MHD and Stirling, pulsed power and
+high-energy-density physics, materials for extreme environments, high-power storage and high-voltage engineering.
+No URL changed. Resources: 13,845 to 14,553; engineering 1,413 to 1,846, simulation 395 to 531, math and physics 407
+to 494, hardware 329 to 376. "Compact power & energy conversion" grows from 75 to 388 resources, and the Engineering
+path's chips cover 1,895 resources, 208 of them under no area.
+
+**The new rows' links, from the runner.** LINKS_PENDING
 
