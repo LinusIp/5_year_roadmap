@@ -105,6 +105,8 @@ export function LibraryHome({
   onEnergy,
   security,
   onSecurity,
+  agents,
+  onAgents,
 }: {
   atlas: Atlas;
   units: Record<string, Unit[]> | undefined;
@@ -122,6 +124,9 @@ export function LibraryHome({
   /** Security & defence (ATLAS-LIBRARY, 15,104 rows): how many, and the row that opens them. */
   security: number;
   onSecurity: () => void;
+  /** Agents & MCP (ATLAS-LIBRARY, 15,364 rows): how many, and the row that opens them. */
+  agents: number;
+  onAgents: () => void;
 }) {
   const { seed, states, logs } = atlas;
   const thisYear = today.slice(0, 4);
@@ -144,7 +149,7 @@ export function LibraryHome({
   const laterPaths = paths.filter((p) => startsMuchLater(p, seed, today));
   const shownPaths = showLater ? paths : paths.filter((p) => !laterPaths.includes(p));
   const active = inProgress(seed.resources, states);
-  const next = upNext(paths, seed);
+  const next = upNext(paths, seed, 3, states);
   const pathOfRef = (refId: string): string | undefined => paths.find((p) => p.steps.some((s) => s.refId === refId))?.id;
   const iconFor = (refId: string): { icon: IconName; tone: 'blue' | 'ice' } => PATH_ICON[pathOfRef(refId) ?? ''] ?? { icon: 'course', tone: 'blue' };
   const menuResource = menu ? seed.resources.find((r) => r.id === menu) : undefined;
@@ -314,6 +319,13 @@ export function LibraryHome({
           <IconTile icon="shield" tone="blue" />
           <span className="min-w-0 flex-1 text-body font-semibold">Security & defence</span>
           <span className="text-meta font-semibold text-ink2">{security}</span>
+          <Icon name="chevronRight" size={18} className="text-ink2" />
+        </button>
+        {/* Agents & MCP: the agents, MCP and harnesses cluster (building blocks, tool calling, sandboxing, evals, frameworks, books), from the software tracks. */}
+        <button type="button" onClick={onAgents} className="tile press mt-4 flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left">
+          <IconTile icon="bot" tone="ice" />
+          <span className="min-w-0 flex-1 text-body font-semibold">Agents & MCP</span>
+          <span className="text-meta font-semibold text-ink2">{agents}</span>
           <Icon name="chevronRight" size={18} className="text-ink2" />
         </button>
       </section>

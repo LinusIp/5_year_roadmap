@@ -209,6 +209,12 @@
   estHours: 0
   reference: true
   subject: quantum
+  short: "Nielsen & Chuang"
+  summary: "The definitive quantum computing textbook, covering circuits, algorithms, noise and error correction rigorously enough to read research papers."
+  fromYear: 3
+  note: "Paid"
+  after: [book-griffiths-quantum-mechanics-3e]
+  priority: 4
 
 - id: mitx-8-370
   title: "MITx 8.370.1x Quantum Information Science I, Part 1"

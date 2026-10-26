@@ -1984,3 +1984,55 @@ its line, the progress store through a backup and its import, the validator's re
 and Phase 2 reads as locked; the Roadmap tab lists "Andrej Karpathy: Neural Networks, Zero to Hero" and opens its
 sheet; ratings, resume ticks and a project's status and progress survive a reload; axe on every tab, light and dark).
 Screenshots: Targets, Roadmap and Prep at phone width in both themes, redrawn on CI.
+
+## The Atlas Library's tenth file: the books round, the audit and Agents & MCP (pull request #34)
+
+**Paid rows, at last.** Every earlier row was free; the books round brings 184 paid books and one paid Coursera
+specialization, `free: false` with `note: "paid"`. The importer turns that into `cost: paid` with `note: Paid` and refuses
+any other non-free row before touching the data; `validate:data` holds the same line on the Library's own files
+(`data/resources/library*.yaml`, `paidRowProblems` in `src/seed/validate.ts`): a paid row there says so in its note,
+and nothing there is non-free any other way. The curated files are not under that rule: the plan already named 28 paid
+books (DDIA, PMPP, K&R, Fluent Python, Bridson's fluids) with notes of their own, and forcing "Paid" on them would have
+lost those notes. Resources the user adds may be paid without a note.
+
+**What a paid book looks like.** A "Paid" badge on its row (the first word of the meta line) and in its sheet (a well
+pill before the provider), a Free / Paid chip row on the Books shelf (`cost=`; nothing pressed is All), and an "I own
+this" switch in the sheet, which goes into the item state (`owned`, `src/db/types.ts`, synced and backed up like the
+rest of it). "Up next" on the Library's home leaves a paid book out until it is owned; the shelves, search and a path's
+optional list still show it, as the brief said. Today suggests no Library items of its own, so nothing changed there.
+
+**The audit's removals take their progress with them.** Twelve rows left the data, and version 8 of the database
+(`REMOVED_RESOURCE_IDS`, `src/db/db.ts`) deletes the item states and overrides a device kept on them, silently: every
+device drops the same rows on its own upgrade, so nothing needs to sync. The rows that came after a removed one lost
+that `after` in every file, not only the removed row's own.
+
+**Whose catalogue fields the file corrects.** The brief says the audited rows' title, url, track, type, provider and
+cost come from the file for existing ids. The Library's own files (the earlier imports of this same file) take them:
+thirteen rows changed (docs/imports-atlas-library-10.md lists them). The curated files and the reading queue do not:
+their 58 differences are the file's coarser vocabulary (a "video-course" for a lecture series, "gamedev" for Ten
+Minute Physics, no "swe" track), shorter titles, and alternative addresses for the same paper (MapReduce at Google's
+older URL, Kafka at an MIT mirror that is a script-side host, Stable Fluids at a course mirror), and their links were
+opened by hand when the plan was written. The pull request lists them so any real correction can be taken by hand.
+
+**"Agents & MCP" as a quick filter**, the fourth row under the shelves (`src/lib/agents.ts`): the prompt's ten words,
+matched at a word's start on the title and summary, in the software tracks only (AI, inference, systems, DevOps,
+architecture, languages, hardware). The tracks matter more here than for the other filters: "agent" names an RL agent
+in robotics, an agent-based model in simulation and a noise agent in game development, none of which the cluster is;
+and MCP is a whole word in its own case, so MCPTox and "reagent" stay out. 1,017 resources. Six chips: MCP, Harness &
+loop (harness, the agent loop, coding agents, Codex, Claude Code, goose, context engineering, compaction, prompt
+caching, subagents), Tools & sandbox (tool and function calling, sandboxes, seccomp, Firecracker, Hyperlight, bubblewrap,
+Landlock, gVisor, JSON-RPC, PTY, grammars, permissions), Evals (evals, benchmarks, SWE-bench, Terminal-Bench, BFCL,
+trajectories, OpenTelemetry, tracing), Frameworks (framework, Rig, Swiftide, LangGraph, LangChain, smolagents, the
+Agents SDK, AutoGen, CrewAI, Pydantic AI, DSPy, mistral.rs, llama.cpp, rmcp, SDK) and Books, which is the shelf.
+A name that is also a word (Rig, Codex, goose) is read in its own case as a whole word.
+
+**The links follow-up was already done.** The seven hosts the brief lists went into `MANUAL_OK` with pull request #22,
+and tensorflow.org, Wooledge and CSAIL are script-side there; the checker skips the first and reads the second as
+"check by hand". Nothing to change.
+
+Tests: `tests/unit/agents.test.ts` (new: the words, the tracks, the acronym, the areas, the data), `tests/unit/removed-rows.test.ts`
+(new: the rows are gone, nothing comes after them, a version 7 database loses their states and overrides on the
+upgrade and keeps the rest), `tests/unit/resource-import.test.ts` (a paid row's cost and note, the files' rule),
+`tests/unit/library-home.test.ts` (Up next and an owned book), `tests/unit/live-upgrade.test.ts` (version 8);
+`tests/e2e/atlas-library.spec.ts` (the Books shelf's chip, a paid row's badge, "I own this" after a reload; the
+Agents & MCP row, its chips, rmcp found, an RL agent not).

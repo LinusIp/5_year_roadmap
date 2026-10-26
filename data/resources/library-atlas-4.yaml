@@ -67817,9 +67817,9 @@
   after: [paper-animatediff]
 
 - id: "paper-framepack"
-  title: "Packing Input Frame Context in Next-Frame Prediction Models for Video Generation"
+  title: "Frame Context Packing and Drift Prevention in Next-Frame-Prediction Video Diffusion Models"
   short: "FramePack"
-  provider: "Zhang, Agrawala (Stanford)"
+  provider: "Zhang, Cai, Li et al."
   type: "paper"
   url: "https://arxiv.org/abs/2504.12626"
   urlVerified: true
@@ -69307,7 +69307,7 @@
 - id: "paper-wbench-interactive"
   title: "WBench: A Comprehensive Multi-turn Benchmark for Interactive Video World Model Evaluation"
   short: "WBench"
-  provider: "WBench authors"
+  provider: "Ying, Hu, Ren et al."
   type: "paper"
   url: "https://arxiv.org/abs/2605.25874"
   urlVerified: true
@@ -80221,8 +80221,8 @@
 - id: "article-kleppmann-json-crdt-move"
   title: "Extending JSON CRDTs with Move Operations"
   short: "JSON CRDT move ops"
-  provider: "Martin Kleppmann et al."
-  type: "article"
+  provider: "Liangrun Da, Martin Kleppmann"
+  type: "paper"
   url: "https://martin.kleppmann.com/2024/04/22/json-crdt-move.html"
   urlVerified: true
   lastVerified: 2026-10-21
@@ -94172,7 +94172,7 @@
 - id: "article-crdb-parallel-commits"
   title: "Parallel Commits: An atomic commit protocol for globally distributed transactions"
   short: "CRDB parallel commits"
-  provider: "Cockroach Labs"
+  provider: "Nathan VanBenschoten (Cockroach Labs)"
   type: "article"
   url: "https://www.cockroachlabs.com/blog/parallel-commits/"
   urlVerified: true
@@ -95871,7 +95871,7 @@
   url: "https://www.agner.org/optimize/instruction_tables.pdf"
   urlVerified: true
   lastVerified: 2026-10-21
-  tracks: [languages]
+  tracks: [hardware]
   level: "advanced"
   cost: "free"
   estHours: 3
@@ -103693,7 +103693,6 @@
   fromYear: 3
   priority: 3
   roadmap: "game-developer"
-  after: [paper-tiled-clustered-forward-shading]
 
 - id: "talk-restir-sss-2025"
   title: "Real-Time Subsurface Scattering via Hybrid ReSTIR-Path-Tracing and Diffusion"
@@ -113750,7 +113749,7 @@
   short: "gem5 Bootcamp 2024"
   provider: "gem5 project (UC Davis)"
   type: "course"
-  url: "https://m5sim.org/events/bootcamp-2024"
+  url: "https://www.gem5.org/events/bootcamp-2024"
   urlVerified: true
   lastVerified: 2026-10-21
   tracks: [hardware]

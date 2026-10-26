@@ -87,6 +87,8 @@ export const UserItemStateSchema = z.strictObject({
   budget: z.string().optional(),
   startedAt: IsoDate.optional(),
   doneAt: IsoDate.optional(),
+  /** "I own this" on a paid book (ATLAS-LIBRARY, 15,364 rows): then it may be suggested like a free one. */
+  owned: z.boolean().optional(),
   ...Stamp,
 });
 export type UserItemState = z.infer<typeof UserItemStateSchema>;

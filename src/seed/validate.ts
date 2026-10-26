@@ -75,6 +75,21 @@ function parseList<S extends z.ZodType>(files: RawFile[], schema: S, errors: str
   return out;
 }
 
+/**
+ * The books round (ATLAS-LIBRARY, 15,364 rows): in the Library's imported files (data/resources/library*.yaml) a paid
+ * row says so in its note ("Paid"), and that is the only way a row there is not free. The curated files keep their own
+ * notes on the few paid books the plan names.
+ */
+export function paidRowProblems(entries: readonly { item: { id: string; cost: string; note?: string | undefined }; file: string }[]): string[] {
+  const problems: string[] = [];
+  for (const { item, file } of entries) {
+    if (!/\/library[^/]*\.yaml$/.test(file)) continue;
+    if (item.cost === 'paid' && item.note !== 'Paid') problems.push(file + ' (id: ' + item.id + '): a paid row needs note "Paid"');
+    if (item.cost !== 'paid' && item.cost !== 'free' && item.cost !== 'audit-free') problems.push(file + ' (id: ' + item.id + '): cost "' + item.cost + '" is not free, audit-free or paid');
+  }
+  return problems;
+}
+
 function findDuplicates<T extends { item: { id: string }; file: string }>(kind: string, entries: T[], errors: string[]): void {
   const seen = new Map<string, string>();
   for (const e of entries) {
@@ -205,6 +220,7 @@ export function validateSeed(raw: RawSeed, options: ValidateOptions = {}): Valid
   const tracks = parseList(raw.tracks, TrackSchema, errors);
   const phases = parseList(raw.phases, PhaseSchema, errors);
   const resources = parseList(raw.resources, ResourceSchema, errors);
+  errors.push(...paidRowProblems(resources));
   const planInputs = parseList(raw.plan, PlanPhaseInputSchema, errors);
   const projects = parseList(raw.projects, ProjectSchema, errors);
   const papers = parseList(raw.papers, PaperSchema, errors);

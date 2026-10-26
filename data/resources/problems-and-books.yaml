@@ -33,6 +33,9 @@
   cost: paid
   estHours: 60
   summary: "The textbook behind 18.06. The book site carries problem sets and solutions that match the lectures."
+  fromYear: 1
+  note: "Paid"
+  priority: 2
 
 - id: hefferon-linear-algebra
   title: "Linear Algebra (Hefferon), with answers to exercises"

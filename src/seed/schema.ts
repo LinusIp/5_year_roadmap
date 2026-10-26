@@ -287,7 +287,7 @@ export const ResourceSchema = z
     fromYear: z.literal([1, 2, 3, 4, 5]).optional(),
     /** Finer than a track: `inference` on the AI resources about serving and GPUs. */
     tags: z.array(Slug).optional(),
-    /** One line on how it is free, for the sheet: "Free tier". */
+    /** One line on how it is free, for the sheet: "Free tier"; "Paid" on a paid row (required then). */
     note: Text.optional(),
     ...alignmentFields,
     /** Soft prerequisites, resources or papers: worth doing first, never enforced by the schedule. */

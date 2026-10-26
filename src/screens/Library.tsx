@@ -22,6 +22,7 @@ import { buildPaths, byFit, fitOf, inProgress, PATH_ALIASES, priorityOf, shelfCo
 import { isEssential } from '../lib/essentials.ts';
 import { isEnergy } from '../lib/energy.ts';
 import { isSecurity, SECURITY_AREAS, securityAreasOf } from '../lib/security.ts';
+import { AGENT_AREAS, agentAreasOf, isAgents } from '../lib/agents.ts';
 import type { Fit } from '../lib/library-home.ts';
 import type { ShelfKey } from '../lib/library-home.ts';
 import { LibraryHome, SHELF_ICON } from './library/Home.tsx';
@@ -75,6 +76,11 @@ interface Entry {
   /** The cyber defence cluster (ATLAS-LIBRARY, 15,104 rows): what Security & defence shows, and its areas for the chips over it. */
   security: boolean;
   securityAreas: string[];
+  /** The agents, MCP and harnesses cluster (ATLAS-LIBRARY, 15,364 rows): what Agents & MCP shows, and its areas. */
+  agents: boolean;
+  agentAreas: string[];
+  /** A paid book (the books round): a Paid badge, the Books shelf's Free / Paid chip, and out of Up next until owned. */
+  paid: boolean;
 }
 
 /** The order of every list but Projects' (ATLAS-LIBRARY): what is in progress, then by fit, done and dropped last. */
@@ -144,7 +150,7 @@ function buildEntries(
       type: shelfOf(r),
       tracks: r.tracks,
       status,
-      meta: [r.type === 'paper' && r.fromYear ? 'Year ' + r.fromYear : null, r.provider, r.estHours > 0 ? r.estHours + ' h' : null, progressOf(r.id, state?.unitsDone ?? [], units)].filter(Boolean).join(' · '),
+      meta: [r.cost === 'paid' ? 'Paid' : null, r.type === 'paper' && r.fromYear ? 'Year ' + r.fromYear : null, r.provider, r.estHours > 0 ? r.estHours + ' h' : null, progressOf(r.id, state?.unitsDone ?? [], units)].filter(Boolean).join(' · '),
       trailing: trailingFor(r.id, status),
       sortKey: sortFor(r.id, status, r.title),
       level: r.level,
@@ -154,6 +160,9 @@ function buildEntries(
       energy: isEnergy(r.title, r.summary, r.tracks[0]),
       security: isSecurity(r.title, r.summary, r.tracks[0], r.tags),
       securityAreas: securityAreasOf(r.title, r.summary),
+      agents: isAgents(r.title, r.summary, r.tracks[0]),
+      agentAreas: agentAreasOf(r.title, r.summary, shelfOf(r)),
+      paid: r.cost === 'paid',
     };
   });
   const papers: Entry[] = seed.papers.map((p) => {
@@ -177,6 +186,9 @@ function buildEntries(
       energy: isEnergy(p.title, p.summary, p.tracks[0]),
       security: isSecurity(p.title, p.summary, p.tracks[0]),
       securityAreas: securityAreasOf(p.title, p.summary),
+      agents: isAgents(p.title, p.summary, p.tracks[0]),
+      agentAreas: agentAreasOf(p.title, p.summary, 'paper'),
+      paid: false,
     };
   });
   // Projects follow everything else in the default order ("5…"), so the list opens as it always has; the Projects
@@ -200,6 +212,9 @@ function buildEntries(
       energy: false,
       security: false,
       securityAreas: [],
+      agents: false,
+      agentAreas: [],
+      paid: false,
     };
   });
   const fromCatalogue: Entry[] = (catalogue ?? []).map((e) => {
@@ -212,6 +227,9 @@ function buildEntries(
       energy: false,
       security: false,
       securityAreas: [],
+      agents: false,
+      agentAreas: [],
+      paid: false,
       id: e.id,
       title: e.title,
       body: [e.title, e.kind, e.difficulty, e.group, groupLabel(e.group), e.tracks.join(' ')].join(' '),
@@ -336,8 +354,14 @@ export function Library({ openId }: { openId?: string }) {
   const energy = pick === 'energy';
   // Security & defence (ATLAS-LIBRARY, 15,104 rows): the cyber defence cluster, with its areas as chips (`area=`).
   const security = pick === 'security';
+  // Agents & MCP (ATLAS-LIBRARY, 15,364 rows): the agents, MCP and harnesses cluster, with its areas as chips (`area=`).
+  const agents = pick === 'agents';
   const [area, setArea] = useQueryParam('area');
   const securityArea = security ? area : null;
+  const agentArea = agents ? area : null;
+  // The Books shelf's Free / Paid chip (the books round); nothing pressed is All.
+  const [cost, setCost] = useQueryParam('cost');
+  const paidOnly = cost === 'paid' ? true : cost === 'free' ? false : null;
   // An old link to Electrical and embedded or Mechanical opens Electrical, mechanical & aerospace (ATLAS-LIBRARY).
   const pathId = pathParam ? (PATH_ALIASES[pathParam] ?? pathParam) : pathParam;
   const [draft, setDraft] = useState<string | null>(null);
@@ -368,12 +392,13 @@ export function Library({ openId }: { openId?: string }) {
   const summary = useMemo(() => {
     if (!atlas) return null;
     const activeCount = inProgress(atlas.seed.resources, atlas.states, Infinity).length;
-    const nextCount = upNext(buildPaths(atlas.seed, atlas.states), atlas.seed).length;
+    const nextCount = upNext(buildPaths(atlas.seed, atlas.states), atlas.seed, 3, atlas.states).length;
     return {
       counts: shelfCounts(atlas.seed, catalogue?.length ?? 0),
       essentialCount: atlas.seed.resources.filter((r) => isEssential(r.title, r.tags)).length + atlas.seed.papers.filter((p) => isEssential(p.title)).length,
       energyCount: atlas.seed.resources.filter((r) => isEnergy(r.title, r.summary, r.tracks[0])).length + atlas.seed.papers.filter((p) => isEnergy(p.title, p.summary, p.tracks[0])).length,
       securityCount: atlas.seed.resources.filter((r) => isSecurity(r.title, r.summary, r.tracks[0], r.tags)).length + atlas.seed.papers.filter((p) => isSecurity(p.title, p.summary, p.tracks[0])).length,
+      agentsCount: atlas.seed.resources.filter((r) => isAgents(r.title, r.summary, r.tracks[0])).length + atlas.seed.papers.filter((p) => isAgents(p.title, p.summary, p.tracks[0])).length,
       homeSub: activeCount + ' in progress · ' + nextCount + ' up next · ' + Math.max(0, atlas.seed.resources.length - activeCount - nextCount) + ' more when you need them',
     };
   }, [atlas, catalogue]);
@@ -399,7 +424,7 @@ export function Library({ openId }: { openId?: string }) {
   const projectFiltersOn = Boolean(kind || difficulty || group || phaseParam || level || hours);
   const matchesProject = (e: Entry): boolean => !projectFiltersOn || (e.project ? matchesFilter(e.project, projectFilter) : false);
   const filtered = matched.filter(
-    (e) => (!type || e.type === type) && (!essentials || e.essential) && (!energy || e.energy) && (!security || e.security) && (!securityArea || e.securityAreas.includes(securityArea)) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
+    (e) => (!type || e.type === type) && (!essentials || e.essential) && (!energy || e.energy) && (!security || e.security) && (!securityArea || e.securityAreas.includes(securityArea)) && (!agents || e.agents) && (!agentArea || e.agentAreas.includes(agentArea)) && (paidOnly === null || e.paid === paidOnly) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
   );
   // Every shelf but Projects reads by fit: in progress first, then priority, year and level (ATLAS-LIBRARY). Projects
   // keep their order: the plan's first, then the catalogue.
@@ -417,10 +442,10 @@ export function Library({ openId }: { openId?: string }) {
   };
 
   const shelf = (type as ShelfKey | null) ?? null;
-  const filtersOn = Boolean(type || track || status || projectFiltersOn || essentials || energy || security);
+  const filtersOn = Boolean(type || track || status || projectFiltersOn || essentials || energy || security || agents || paidOnly !== null);
   // The deferred query switches home to results too, so the first keystroke only updates the field.
   const mode: 'home' | 'path' | 'search' | 'shelf' = pathId ? 'path' : deferredQuery && !filtersOn ? 'search' : filtersOn ? 'shelf' : 'home';
-  const { counts, homeSub, essentialCount, energyCount, securityCount } = summary;
+  const { counts, homeSub, essentialCount, energyCount, securityCount, agentsCount } = summary;
   const goShelf = (key: ShelfKey): void => navigate('/library?type=' + key + (query ? '&q=' + encodeURIComponent(query) : ''), { replace: false });
 
   const row = (entry: Entry): ReactNode => (
@@ -460,8 +485,8 @@ export function Library({ openId }: { openId?: string }) {
   const searchField = (
     <SearchField
       className="mt-5"
-      label={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : essentials ? 'Search developer essentials' : energy ? 'Search power and energy conversion' : security ? 'Search security and defence' : 'Search the library'}
-      placeholder={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : essentials ? 'Search developer essentials' : energy ? 'Search power and energy conversion' : security ? 'Search security and defence' : 'Search courses, books, papers'}
+      label={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : essentials ? 'Search developer essentials' : energy ? 'Search power and energy conversion' : security ? 'Search security and defence' : agents ? 'Search agents and MCP' : 'Search the library'}
+      placeholder={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : essentials ? 'Search developer essentials' : energy ? 'Search power and energy conversion' : security ? 'Search security and defence' : agents ? 'Search agents and MCP' : 'Search courses, books, papers'}
       searchBox
       value={text}
       onChange={(v) => {
@@ -486,7 +511,7 @@ export function Library({ openId }: { openId?: string }) {
   );
 
   // A shelf's line: how many it holds and how many are active.
-  const shelfTotal = shelf ? entries.filter((e) => e.type === shelf).length : essentials ? entries.filter((e) => e.essential).length : energy ? entries.filter((e) => e.energy).length : security ? entries.filter((e) => e.security).length : entries.length;
+  const shelfTotal = shelf ? entries.filter((e) => e.type === shelf).length : essentials ? entries.filter((e) => e.essential).length : energy ? entries.filter((e) => e.energy).length : security ? entries.filter((e) => e.security).length : agents ? entries.filter((e) => e.agents).length : entries.length;
   const shelfActive = shelf ? entries.filter((e) => e.type === shelf && e.status === 'active').length : 0;
 
   return (
@@ -515,6 +540,8 @@ export function Library({ openId }: { openId?: string }) {
               onEnergy={() => navigate('/library?pick=energy', { replace: false })}
               security={securityCount}
               onSecurity={() => navigate('/library?pick=security', { replace: false })}
+              agents={agentsCount}
+              onAgents={() => navigate('/library?pick=agents', { replace: false })}
             />
           ) : results.length === 0 ? (
             <EmptyState action={<Button onClick={clear}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>
@@ -532,7 +559,7 @@ export function Library({ openId }: { openId?: string }) {
       {mode === 'shelf' && (
         <>
           <Header
-            title={shelf ? SHELF_TITLE[shelf] : essentials ? 'Developer essentials' : energy ? 'Compact power & energy conversion' : security ? 'Security & defence' : 'Library'}
+            title={shelf ? SHELF_TITLE[shelf] : essentials ? 'Developer essentials' : energy ? 'Compact power & energy conversion' : security ? 'Security & defence' : agents ? 'Agents & MCP' : 'Library'}
             sub={
               shelf
                 ? plural(shelfTotal, ...SHELF_NOUN[shelf]) + (shelfActive > 0 ? ' · ' + shelfActive + ' active' : '')
@@ -542,7 +569,9 @@ export function Library({ openId }: { openId?: string }) {
                     ? plural(shelfTotal, 'resource', 'resources') + ' on fusion, direct conversion, superconductors, pulsed power and plasma'
                     : security
                       ? plural(shelfTotal, 'resource', 'resources') + ' on hardening, malware, detection and response, the network and the web, secure development and AI for defence'
-                      : plural(results.length, 'match', 'matches')
+                      : agents
+                        ? plural(shelfTotal, 'resource', 'resources') + ' on agent loops, MCP, tool calling, sandboxes, evals and frameworks'
+                        : plural(results.length, 'match', 'matches')
             }
             back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />}
           />
@@ -562,6 +591,25 @@ export function Library({ openId }: { openId?: string }) {
               <Chips
                 label="Area"
                 items={SECURITY_AREAS.map((a) => ({ key: a.key, label: a.label, count: entries.filter((e) => e.security && e.securityAreas.includes(a.key)).length, pressed: area === a.key, onClick: () => setArea(area === a.key ? null : a.key) }))}
+              />
+            </div>
+          )}
+          {agents && (
+            <div className="mt-2">
+              <Chips
+                label="Area"
+                items={AGENT_AREAS.map((a) => ({ key: a.key, label: a.label, count: entries.filter((e) => e.agents && e.agentAreas.includes(a.key)).length, pressed: area === a.key, onClick: () => setArea(area === a.key ? null : a.key) }))}
+              />
+            </div>
+          )}
+          {type === 'book' && (
+            <div className="mt-2">
+              <Chips
+                label="Cost"
+                items={[
+                  { key: 'free', label: 'Free', count: entries.filter((e) => e.type === 'book' && !e.paid).length, pressed: cost === 'free', onClick: () => setCost(cost === 'free' ? null : 'free') },
+                  { key: 'paid', label: 'Paid', count: entries.filter((e) => e.type === 'book' && e.paid).length, pressed: cost === 'paid', onClick: () => setCost(cost === 'paid' ? null : 'paid') },
+                ]}
               />
             </div>
           )}

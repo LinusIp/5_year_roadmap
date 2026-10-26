@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { FIRST_DAY, open, showMoreUntil } from './helpers.ts';
+import { FIRST_DAY, open, reload, showMoreUntil, writesSettled } from './helpers.ts';
 
 /**
  * The whole Atlas Library (ATLAS-LIBRARY): about 2,400 resources, loaded after the first screen, in the plan's order
@@ -293,3 +293,72 @@ test('Security & defence gathers the cyber defence rows, with area chips over th
   await expect(page.getByText('No matches. Clear filters.')).toBeVisible();
 });
 
+
+test('the Books shelf has a Free / Paid chip, a paid book wears its badge, and "I own this" survives a reload', async ({ page }) => {
+  await open(page, './#/library?type=book');
+  const costs = page.getByRole('group', { name: 'Cost' });
+  const free = costs.getByRole('button', { name: /^Free \d+$/ });
+  const paid = costs.getByRole('button', { name: /^Paid \d+$/ });
+  await expect(free).toBeVisible();
+  await expect(paid).toBeVisible();
+  const paidCount = Number((await paid.innerText()).replace(/\D/g, ''));
+  expect(paidCount).toBeGreaterThan(200);
+  await paid.click();
+  await expect(page).toHaveURL(/cost=paid/);
+  await expect(page.getByRole('heading', { name: new RegExp('^' + paidCount + ' of \\d+$') })).toBeVisible();
+  // Every row shown is a paid book, and says so first.
+  const firstRow = page.getByRole('list').getByRole('button').first();
+  await expect(firstRow).toContainText('Paid ·');
+  await page.getByRole('searchbox', { name: 'Search books' }).fill('Eureka Machine');
+  const eureka = page.getByRole('button', { name: /Eureka Machine/ }).first();
+  await expect(eureka).toContainText('Paid');
+  await eureka.click();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet.getByText('Paid', { exact: true }).first()).toBeVisible();
+  const own = sheet.getByRole('switch', { name: 'I own this' });
+  await expect(own).toHaveAttribute('aria-checked', 'false');
+  await own.click();
+  await expect(own).toHaveAttribute('aria-checked', 'true');
+  await expect(sheet.getByText('Suggested like a free book')).toBeVisible();
+  await writesSettled(page);
+  await reload(page);
+  await expect(page.getByRole('dialog').getByRole('switch', { name: 'I own this' })).toHaveAttribute('aria-checked', 'true');
+  // Free shows no paid row; All (nothing pressed) shows them all.
+  await page.getByRole('button', { name: 'Close' }).first().click().catch(() => page.keyboard.press('Escape'));
+  await page.getByRole('searchbox', { name: 'Search books' }).fill('');
+  await paid.click();
+  await free.click();
+  await expect(page).toHaveURL(/cost=free/);
+  await expect(page.getByRole('list').getByRole('button').first()).not.toContainText('Paid ·');
+});
+
+test('Agents & MCP gathers the agents, MCP and harnesses rows, with area chips over the list', async ({ page }) => {
+  await open(page, './#/library');
+  const row = page.getByRole('button', { name: /^Agents & MCP \d+$/ });
+  await expect(row).toBeVisible();
+  const count = Number((await row.innerText()).replace(/\D/g, ''));
+  expect(count).toBeGreaterThan(800);
+  await row.click();
+  await expect(page).toHaveURL(/pick=agents/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Agents & MCP' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + count + ' of ' + count + '$') })).toBeVisible();
+  const areas = page.getByRole('group', { name: 'Area' });
+  for (const label of ['MCP', 'Harness & loop', 'Tools & sandbox', 'Evals', 'Frameworks', 'Books']) {
+    await expect(areas.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' \\d+$') })).toBeVisible();
+  }
+  await areas.getByRole('button', { name: /^MCP \d+$/ }).click();
+  await expect(page).toHaveURL(/area=mcp/);
+  const [shown, total] = (await page.getByRole('heading', { name: /^\d+ of \d+$/ }).innerText()).split(' of ').map(Number);
+  expect(total).toBe(count);
+  expect(shown).toBeGreaterThan(10);
+  expect(shown).toBeLessThan(count);
+  await page.getByRole('searchbox', { name: 'Search agents and MCP' }).fill('rmcp');
+  await expect(page.getByRole('button', { name: /rmcp|Rust SDK/i }).first()).toBeVisible();
+  // An RL agent in robotics is not the cluster.
+  await page.getByRole('searchbox', { name: 'Search agents and MCP' }).fill('');
+  await areas.getByRole('button', { name: /^MCP \d+$/ }).click();
+  await page.getByRole('searchbox', { name: 'Search agents and MCP' }).fill('Training with an RL Agent');
+  await expect(page.getByRole('button', { name: /^Training with an RL Agent/ })).toHaveCount(0);
+  await page.getByRole('searchbox', { name: 'Search agents and MCP' }).fill('GPUDrive');
+  await expect(page.getByRole('button', { name: /GPUDrive/ })).toHaveCount(0);
+});

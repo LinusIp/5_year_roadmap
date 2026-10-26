@@ -4979,25 +4979,6 @@
   roadmap: "software-architect"
   blog: true
 
-- id: "blog-hashicorp"
-  title: "HashiCorp Blog"
-  short: "HashiCorp Blog"
-  provider: "HashiCorp"
-  type: "article"
-  url: "https://www.hashicorp.com/blog"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "Covers Terraform, Vault, Consul and Nomad patterns, making it a steady source for infrastructure-as-code practice."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  blog: true
-  doFirst: "Terraform basics"
-
 - id: "blog-grafana-labs"
   title: "Grafana Labs blog"
   short: "Grafana Labs Blog"
@@ -10603,7 +10584,7 @@
   url: "https://lmf.llnl.gov/science/achieving-fusion-ignition"
   urlVerified: true
   lastVerified: 2026-10-21
-  tracks: [math]
+  tracks: [engineering]
   level: "intro"
   cost: "free"
   estHours: 1

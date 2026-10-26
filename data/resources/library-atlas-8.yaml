@@ -6472,23 +6472,6 @@
   priority: 4
   after: [paper-ecas-mhd-summary]
 
-- id: "paper-liquid-metal-piston-mhd"
-  title: "Liquid-metal-piston MHD generator"
-  short: "Liquid-Piston MHD"
-  provider: "J. P. Palmer (NASA Tech Brief)"
-  type: "paper"
-  url: "https://ntrs.nasa.gov/citations/19690000654"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "A short tech brief on a potassium-vapour-driven oscillating liquid-metal piston generating AC directly."
-  fromYear: 2
-  priority: 4
-  after: [paper-liquid-mhd-power-conversion-1966]
-
 - id: "paper-white-sayma-orc-working-fluids"
   title: "A generalised assessment of working fluids and radial turbines for organic Rankine cycles"
   short: "ORC Fluids and Turbines"
@@ -8475,7 +8458,6 @@
   summary: "A 2025 open-access review of liquid-metal MHD generators driven by engines, waves or thermoacoustic oscillations."
   fromYear: 3
   priority: 4
-  after: [paper-liquid-metal-piston-mhd]
 
 - id: "paper-hts-magnetic-suspension-mcmichael"
   title: "High temperature superconductors for magnetic suspension applications"

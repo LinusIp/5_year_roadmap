@@ -256,12 +256,18 @@ file 1,349 more (developer essentials and a gap fill) in `data/resources/library
 nuclear, chemical and aerospace engineering, in `data/resources/library-atlas-7.yaml`
 (`docs/imports-atlas-library-7.md`), and its 14,547-row file 708 more, the energy and extreme physics cluster, in
 `data/resources/library-atlas-8.yaml` (`docs/imports-atlas-library-8.md`), and its 15,104-row file 557 more, the cyber
-defence cluster, tagged `security`, in `data/resources/library-atlas-9.yaml` (`docs/imports-atlas-library-9.md`):
-15,110 resources in all, and every track has blogs, so the Blogs shelf filters by track like the others. "Developer essentials", a row under the shelves, gathers the resources whose title or tags
+defence cluster, tagged `security`, in `data/resources/library-atlas-9.yaml` (`docs/imports-atlas-library-9.md`), and
+its 15,364-row file 260 more, the books round and the agents, MCP and harnesses cluster, less the twelve rows its
+quality audit removed, in `data/resources/library-atlas-10.yaml` (`docs/imports-atlas-library-10.md`):
+15,358 resources in all, and every track has blogs, so the Blogs shelf filters by track like the others. 213 of them
+are paid books (and one specialization): each wears a **Paid** badge, the Books shelf has a Free / Paid chip, and a
+paid book stays out of "Up next" until **I own this** is on in its sheet. "Developer essentials", a row under the shelves, gathers the resources whose title or tags
 name the terminal, Git, Linux, SQL, Postgres or the web (HTML, CSS, JavaScript, TypeScript, React, HTTP) from every
 shelf, with the shelves' chips, and "Compact power & energy conversion" the fusion, direct conversion, superconductor,
 pulsed power and plasma rows of the engineering, simulation, math and hardware tracks, and "Security & defence" the
-cyber defence rows (tagged `security`, plus the older rows its words find), with chips for its seven areas. The
+cyber defence rows (tagged `security`, plus the older rows its words find), with chips for its seven areas, and
+"Agents & MCP" the agent loops, MCP, tool calling, sandboxes, evals and frameworks of the software tracks, with chips
+for its six areas. The
 Electrical, mechanical & aerospace path has chips for its areas (Mechanics, Materials, Thermo-fluids, Design & CAD, Manufacturing, Electronics
 & PCB, Power & energy, Control, Aerospace, Chemical & nuclear, Practice), read from each row's title and summary.
 About 14,750 of them only ever appear in the Library; they ride in a chunk of their

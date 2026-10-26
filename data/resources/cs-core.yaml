@@ -98,6 +98,12 @@
   estHours: 0
   reference: true
   subject: algorithms
+  short: "Algorithm Design Manual"
+  summary: "Practical, war-story-driven algorithms with a catalogue of problems and how to recognise them, the more applied counterpart to CLRS."
+  fromYear: 2
+  note: "Paid"
+  doFirst: "MIT 6.006"
+  priority: 2
 
 - id: neetcode-roadmap
   title: "NeetCode roadmap (practice problems by pattern)"

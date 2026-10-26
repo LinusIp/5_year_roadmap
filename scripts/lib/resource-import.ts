@@ -16,7 +16,8 @@ export interface ImportItem {
   provider: string;
   url: string;
   free: boolean;
-  note: '' | 'free audit' | 'free tier';
+  /** How it is free; `paid` (with `free: false`) on the books round's rows (ATLAS-LIBRARY, 15,364 rows). */
+  note: '' | 'free audit' | 'free tier' | 'paid';
   why: string;
   after: string;
   year: 1 | 2 | 3;
@@ -271,7 +272,7 @@ export function toResource(item: ImportItem, afterId: string | null): Record<str
     lastVerified: item.verified,
     tracks: [TRACK_OF[item.track]],
     level: LEVEL_OF[item.level],
-    cost: item.note === 'free audit' ? 'audit-free' : 'free',
+    cost: item.free === false ? 'paid' : item.note === 'free audit' ? 'audit-free' : 'free',
     estHours: item.hours,
     summary: item.why,
     fromYear: item.year,
@@ -282,6 +283,8 @@ export function toResource(item: ImportItem, afterId: string | null): Record<str
   if (item.type === 'blog') out.blog = true;
   if (item.track === 'inference') out.tags = ['inference'];
   if (item.note === 'free tier') out.note = 'Free tier';
+  // A paid row says so in its note, which validate:data requires of every paid row (the books round).
+  if (item.free === false) out.note = 'Paid';
   if (afterId) out.after = [afterId];
   else if (item.after) out.doFirst = item.after;
   return out;

@@ -5,6 +5,7 @@ import { loadSeedOrThrow, splitSeed } from '../../scripts/lib/load-seed.ts';
 import { resolveSeed } from '../../src/lib/plan.ts';
 import type { AppSeed } from '../../src/seed/schema.ts';
 import { ResourceSchema } from '../../src/seed/schema.ts';
+import { paidRowProblems } from '../../src/seed/validate.ts';
 
 const item = (over: Partial<ImportItem> = {}): ImportItem => ({
   id: 'ostep',
@@ -50,6 +51,18 @@ describe('the mapping', () => {
   it('makes a free audit "audit-free" and keeps a free tier as a note', () => {
     expect(toResource(item({ note: 'free audit' }), null)).toMatchObject({ cost: 'audit-free' });
     expect(toResource(item({ note: 'free tier' }), null)).toMatchObject({ cost: 'free', note: 'Free tier' });
+  });
+
+  it('makes a paid row cost "paid" with the note the data requires, and refuses a non-free row without it', () => {
+    const paid = toResource(item({ free: false, note: 'paid' }), null);
+    expect(paid).toMatchObject({ cost: 'paid', note: 'Paid' });
+    expect(ResourceSchema.safeParse({ ...paid, prerequisites: [] }).success).toBe(true);
+    // The data's rule (the books round): in the Library's files a paid row says so in its note; the curated files keep theirs.
+    const { note: _n, ...noNote } = paid;
+    expect(paidRowProblems([{ item: paid as { id: string; cost: string; note?: string }, file: 'data/resources/library-atlas-10.yaml' }])).toEqual([]);
+    expect(paidRowProblems([{ item: noNote as { id: string; cost: string; note?: string }, file: 'data/resources/library-atlas-10.yaml' }])).toEqual(['data/resources/library-atlas-10.yaml (id: ostep): a paid row needs note "Paid"']);
+    expect(paidRowProblems([{ item: noNote as { id: string; cost: string; note?: string }, file: 'data/resources/system-design.yaml' }])).toEqual([]);
+    expect(toResource(item({ free: true, note: '' }), null).cost).toBe('free');
   });
 
   it('links "after" as a soft prerequisite when it names a resource, and keeps it as words when not', () => {

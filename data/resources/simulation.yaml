@@ -82,6 +82,10 @@
   estHours: 80
   subject: simulation
   summary: "Broadphase, GJK, EPA: the theory behind the 3D rigid bodies of project 27."
+  note: "Paid"
+  after: [book-foundations-game-engine-dev]
+  priority: 4
+  roadmap: "game-developer"
 
 - id: ten-minute-physics
   title: "Ten Minute Physics (Matthias Muller)"

@@ -6706,12 +6706,13 @@
   lastVerified: 2026-10-21
   tracks: [engineering]
   level: "intermediate"
-  cost: "audit-free"
+  cost: "paid"
   estHours: 120
   summary: "The standard structured path from cell basics through equivalent-circuit models, Kalman-filter SOC estimation, SOH and pack balancing algorithms."
   fromYear: 2
   priority: 4
   doFirst: "Battery University"
+  note: "Paid"
 
 - id: "course-mit-2-60j-advanced-energy-conversion"
   title: "Fundamentals of Advanced Energy Conversion (2.60J, Spring 2020)"
@@ -9661,7 +9662,7 @@
   short: "Purdue Visualizing Mech"
   provider: "Purdue University ME 274"
   type: "article"
-  url: "https://www.purdue.edu/freeform/me274/visualizing-mechanics"
+  url: "https://www.purdue.edu/freeform/me274/course-material/visualizing-mechanics/"
   urlVerified: true
   lastVerified: 2026-10-21
   tracks: [engineering]
@@ -16430,23 +16431,6 @@
   priority: 4
   after: [docs-nrc-student-corner]
 
-- id: "article-nrc-bwr"
-  title: "The Boiling Water Reactor (BWR)"
-  short: "NRC: BWR Explainer"
-  provider: "U.S. NRC"
-  type: "article"
-  url: "https://www.nrc.gov/education-regulatory-research/the-student-corner/the-boiling-water-reactor-bwr"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how a BWR boils water directly in the core and what that means for plant layout and control."
-  fromYear: 1
-  priority: 4
-  after: [docs-nrc-student-corner]
-
 - id: "article-nrc-tmi-backgrounder"
   title: "Backgrounder on the Three Mile Island Accident"
   short: "NRC TMI Backgrounder"
@@ -18303,23 +18287,6 @@
   priority: 4
   blog: true
 
-- id: "blog-azom"
-  title: "AZoM: Materials Science and Engineering articles"
-  short: "AZoM"
-  provider: "AZoNetwork"
-  type: "article"
-  url: "https://www.azom.com/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intro"
-  cost: "free"
-  estHours: 10
-  summary: "Large free archive of articles on specific alloys, ceramics, polymers and testing methods."
-  fromYear: 1
-  priority: 4
-  blog: true
-
 - id: "blog-kicad-forum"
   title: "KiCad.info Forums"
   short: "KiCad Forum"
@@ -18336,24 +18303,6 @@
   fromYear: 1
   priority: 4
   blog: true
-
-- id: "blog-gdandtbasics-advice"
-  title: "GD&T Advice & Blog"
-  short: "GD&T Basics Blog"
-  provider: "GD&T Basics"
-  type: "article"
-  url: "https://www.gdandtbasics.com/gdt-advice/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "Ongoing practical Q&A on applying and inspecting GD&T callouts in real parts."
-  fromYear: 2
-  priority: 4
-  blog: true
-  after: [article-gdandtbasics-what-is-gdt]
 
 - id: "byu-compliant-mechanisms-research"
   title: "BYU Compliant Mechanisms Research (CMR)"

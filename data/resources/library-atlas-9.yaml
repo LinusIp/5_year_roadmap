@@ -4491,23 +4491,6 @@
   priority: 2
   tags: [security]
 
-- id: "docs-nsa-wpa3-technical-report"
-  title: "NSA Cybersecurity Technical Report: WPA3"
-  short: "NSA WPA3 Report"
-  provider: "NSA"
-  type: "article"
-  url: "https://media.defense.gov/2019/Jul/16/2002158109/-1/-1/0/CTR-CYBERSECURITY-TECHNICAL-REPORT-WPA3.PDF"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Explains what WPA3 changes (SAE, PMF, Enterprise 192-bit) and how to configure it securely."
-  fromYear: 1
-  priority: 2
-  tags: [security]
-
 - id: "kernel-landlock"
   title: "Landlock: unprivileged access control"
   short: "Landlock"
@@ -6433,7 +6416,6 @@
   summary: "Security analysis of WPA3's SAE handshake that led to fixes in the standard; shows how side channels undermine protocol designs."
   fromYear: 3
   priority: 2
-  after: [docs-nsa-wpa3-technical-report]
   tags: [security]
 
 - id: "paper-lampson-confinement"
@@ -7052,7 +7034,6 @@
   summary: "Critique of WPA3's design process from the KRACK researcher, useful for seeing why open, reviewed standards matter."
   fromYear: 2
   priority: 2
-  after: [docs-nsa-wpa3-technical-report]
   tags: [security]
 
 - id: "article-arm-mte-serebryany"
