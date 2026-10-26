@@ -139,6 +139,9 @@
   prerequisites: [learncpp]
   subject: c-cpp
   alternatives: [learncpp]
+  summary: "A compact overview of C++20 from its creator, including modules, concepts and coroutines, the quickest way to see what modern C++ looks like."
+  note: "Paid"
+  priority: 2
 
 - id: effective-modern-cpp
   title: "Effective Modern C++ (Scott Meyers)"
@@ -154,6 +157,9 @@
   estHours: 50
   prerequisites: [learncpp]
   subject: c-cpp
+  summary: "Clears up move semantics, perfect forwarding, smart pointers, lambdas and auto, the features that trip up nearly everyone writing modern C++."
+  note: "Paid"
+  priority: 2
 
 - id: cppcon-back-to-basics
   title: "CppCon: Back to Basics talks"
@@ -249,6 +255,9 @@
   estHours: 50
   prerequisites: [rust-book]
   subject: rust-go
+  summary: "The step after the Rust Book: memory layout, trait design, unsafe, async internals and API design for crates other people will use."
+  note: "Paid"
+  priority: 2
 
 - id: crust-of-rust
   title: "Jon Gjengset: Crust of Rust"
@@ -281,6 +290,10 @@
   subject: rust-go
   stretch: true
   summary: "Paid and optional: backend development in Rust, end to end."
+  short: "Zero To Production (Rust)"
+  fromYear: 2
+  note: "Paid"
+  priority: 2
 
 - id: tour-of-go
   title: "A Tour of Go"

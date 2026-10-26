@@ -80,6 +80,11 @@
   estHours: 0
   reference: true
   subject: fpga
+  short: "Harris & Harris RISC-V"
+  summary: "Goes from logic gates and SystemVerilog to a working pipelined RISC-V CPU, the most hands-on first book for someone who wants to design chips."
+  fromYear: 1
+  note: "Paid"
+  priority: 3
 
 - id: nandland
   title: "Nandland: FPGA, VHDL and Verilog tutorials"
@@ -224,6 +229,11 @@
   estHours: 0
   reference: true
   subject: circuits
+  short: "Art of Electronics"
+  summary: "The practitioner's bible of analog and digital circuit design, full of real design rules for building sensors, drivers and robot electronics that work."
+  fromYear: 2
+  note: "Paid"
+  priority: 4
 
 - id: learning-the-art-of-electronics
   title: "Learning the Art of Electronics: A Hands-On Lab Course (Hayes and Abrams)"

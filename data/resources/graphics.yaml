@@ -327,6 +327,10 @@
   cost: paid
   estHours: 80
   subject: graphics
+  summary: "A Naughty Dog lead's two-volume tour of every engine subsystem, from memory and the game loop to rendering, animation, audio and physics."
+  note: "Paid"
+  priority: 4
+  roadmap: "game-developer"
 
 - id: handmade-hero
   title: "Handmade Hero: episode guide (selected episodes)"

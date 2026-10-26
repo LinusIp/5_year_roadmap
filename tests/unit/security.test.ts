@@ -50,7 +50,8 @@ describe('Security & defence', () => {
     const seed = loadSeedOrThrow();
     const hits = seed.resources.filter((r) => isSecurity(r.title, r.summary, r.tracks[0], r.tags));
     const tagged = hits.filter((r) => r.tags?.includes('security'));
-    expect(tagged.length).toBe(557);
+    // 557 in the ninth file; the quality audit of the tenth (ATLAS-LIBRARY, 15,364 rows) removed the NSA WPA3 report.
+    expect(tagged.length).toBe(556);
     expect(hits.length).toBeGreaterThan(650);
     const tracks = new Set<string>(hits.map((r) => r.tracks[0]!));
     for (const t of ['systems', 'devops', 'architecture', 'ai']) expect(tracks.has(t)).toBe(true);

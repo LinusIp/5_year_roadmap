@@ -229,3 +229,17 @@ describe('the shelves', () => {
     expect(groups[0]!.total).toBe(4);
   });
 });
+
+describe('Up next and paid books (ATLAS-LIBRARY, 15,364 rows)', () => {
+  it('leaves a paid book out until the user owns it', () => {
+    const next = upNext(buildPaths(seed, new Map()), seed, 10, new Map());
+    const step = next.find((u) => u.step.kind === 'resource')!;
+    expect(step).toBeDefined();
+    const paidSeed: AppSeed = { ...seed, resources: seed.resources.map((r) => (r.id === step.step.refId ? { ...r, cost: 'paid' as const, note: 'Paid' } : r)) };
+    expect(upNext(buildPaths(paidSeed, new Map()), paidSeed, 10, new Map()).some((u) => u.step.refId === step.step.refId)).toBe(false);
+    // Without the states (a caller that has none) the rule still holds.
+    expect(upNext(buildPaths(paidSeed, new Map()), paidSeed, 10).some((u) => u.step.refId === step.step.refId)).toBe(false);
+    const owned = new Map<string, UserItemState>([[step.step.refId, { refId: step.step.refId, status: 'todo', unitsDone: [], owned: true }]]);
+    expect(upNext(buildPaths(paidSeed, owned), paidSeed, 10, owned).some((u) => u.step.refId === step.step.refId)).toBe(true);
+  });
+});

@@ -15326,7 +15326,7 @@
   title: "Python Names and Values (PyCon 2015)"
   short: "Python Names and Values"
   provider: "Ned Batchelder"
-  type: "lectures"
+  type: "article"
   url: "https://nedbatchelder.com/text/names1"
   urlVerified: true
   lastVerified: 2026-10-21

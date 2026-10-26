@@ -12,6 +12,15 @@ import { legacyPlanPatches } from '../lib/plan.ts';
 import { newId } from '../sync/device.ts';
 import { markSilent, syncMiddleware } from '../sync/middleware.ts';
 
+/**
+ * Resources the Library's quality audit removed (ATLAS-LIBRARY, 15,364 rows): broken, paywalled, superseded or thin.
+ * Their rows left /data; version 8 drops the progress a device kept on them.
+ */
+export const REMOVED_RESOURCE_IDS: readonly string[] = [
+  'blog-azom', 'paper-liquid-metal-piston-mhd', 'article-transformer-family-v1', 'blog-hashicorp', 'paper-pfnn', 'paper-tiled-clustered-forward-shading',
+  'article-mocz-wave-equation', 'docs-nsa-wpa3-technical-report', 'article-wafer-kernelarena', 'blog-gdandtbasics-advice', 'docs-nvidia-cuda-training', 'article-nrc-bwr',
+];
+
 export class AtlasDB extends Dexie {
   dayLogs!: EntityTable<DayLog, 'date'>;
   itemStates!: EntityTable<UserItemState, 'refId'>;
@@ -93,6 +102,13 @@ export class AtlasDB extends Dexie {
     this.version(6).stores({ blogPosts: 'date' });
     // Version 7, the sleep log: one night per wake-up date.
     this.version(7).stores({ sleep: 'date' });
+    // Version 8, the Library's quality audit (ATLAS-LIBRARY, 15,364 rows): the rows the audit removed take their
+    // progress with them. Silent: every device drops the same rows on its own upgrade.
+    this.version(8).upgrade(async (tx) => {
+      markSilent(tx);
+      await tx.table('itemStates').bulkDelete([...REMOVED_RESOURCE_IDS]);
+      await tx.table('overrides').bulkDelete(REMOVED_RESOURCE_IDS.map((id) => ['resource', id] as [EntityKind, string]));
+    });
     this.use(syncMiddleware(this));
   }
 }

@@ -44,24 +44,6 @@
   tags: [inference]
   after: [article-nvidia-even-easier-cuda]
 
-- id: "docs-nvidia-cuda-training"
-  title: "CUDA Training and Existing University Courses"
-  short: "NVIDIA CUDA Training Hub"
-  provider: "NVIDIA"
-  type: "article"
-  url: "https://developer.nvidia.com/cuda-training"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "NVIDIA's index of CUDA courses, recorded lectures and university syllabi, handy for finding further structured material once you outgrow intros."
-  fromYear: 1
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-
 - id: "docs-cloud-tpu-system-architecture"
   title: "TPU architecture (Cloud TPU documentation)"
   short: "Cloud TPU Architecture"
@@ -4852,25 +4834,6 @@
   tags: [inference]
   after: [article-maharshi-softmax-worklog]
 
-- id: "article-wafer-kernelarena"
-  title: "Introducing KernelArena"
-  short: "KernelArena"
-  provider: "Wafer"
-  type: "article"
-  url: "https://www.wafer.ai/blog/introducing-kernelarena"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Introduces a public arena for benchmarking GPU kernels against each other, another venue to test your work on real problems."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [practice-leetgpu]
-
 - id: "article-aman-flashattention-primer"
   title: "Primers: FlashAttention"
   short: "FlashAttention Primer"
@@ -4929,7 +4892,7 @@
   after: [llm-inference-handbook]
 
 - id: "article-together-custom-spec-decoding"
-  title: "Customized Speculative Decoding"
+  title: "Boosting DeepSeek-R1's Speed with Customized Speculative Decoding"
   short: "Together Spec Decoding"
   provider: "Together AI"
   type: "article"
@@ -15834,24 +15797,6 @@
   roadmap: "ai-engineer"
   after: [annotated-transformer]
 
-- id: "article-transformer-family-v1"
-  title: "The Transformer Family"
-  short: "Transformer Family (2020)"
-  provider: "Lilian Weng"
-  type: "article"
-  url: "https://lilianweng.github.io/posts/2020-04-07-the-transformer-family/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "The original 2020 survey post on Transformer-XL, adaptive attention spans, sparse and reformer-style attention, with clear math."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [annotated-transformer]
-
 - id: "article-zoom-in-circuits"
   title: "Zoom In: An Introduction to Circuits"
   short: "Zoom In: Circuits"
@@ -23524,7 +23469,7 @@
   short: "FFS (McKusick)"
   provider: "M. K. McKusick, W. N. Joy, S. J. Leffler, R. S. Fabry"
   type: "paper"
-  url: "https://docs.freebsd.org/44doc/smm/05.fastfs/paper.html"
+  url: "https://docs-archive.freebsd.org/44doc/smm/05.fastfs/paper.html"
   urlVerified: true
   lastVerified: 2026-10-19
   tracks: [systems]
@@ -27088,24 +27033,6 @@
   roadmap: "game-developer"
   after: [learnopengl]
 
-- id: "paper-tiled-clustered-forward-shading"
-  title: "Tiled and Clustered Forward Shading: Supporting Transparency and MSAA"
-  short: "Tiled/Clustered Forward+"
-  provider: "Ola Olsson, Markus Billeter, Ulf Assarsson"
-  type: "paper"
-  url: "https://research.chalmers.se/en/publication/161726"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Shows how to extend light culling to forward rendering so that transparency and MSAA keep working, which classic deferred shading struggles with."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  after: [paper-clustered-deferred-forward-shading]
-
 - id: "paper-pcss"
   title: "Percentage-Closer Soft Shadows"
   short: "PCSS"
@@ -30256,24 +30183,6 @@
   cost: "free"
   estHours: 4
   summary: "Replaces motion matching's large database with small neural networks, showing how ML fits into a shipping animation pipeline."
-  fromYear: 3
-  priority: 4
-  roadmap: "game-developer"
-  after: [video-clavet-motion-matching-gdc]
-
-- id: "paper-pfnn"
-  title: "Phase-Functioned Neural Networks for Character Control"
-  short: "PFNN"
-  provider: "Daniel Holden, Taku Komura, Jun Saito"
-  type: "paper"
-  url: "https://www.ipab.inf.ed.ac.uk/cgvu/phasefunction.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "A landmark neural character controller whose weights vary with the gait phase, the root of much later learned-locomotion work."
   fromYear: 3
   priority: 4
   roadmap: "game-developer"

@@ -1336,24 +1336,6 @@
   roadmap: "game-developer"
   after: [fitzpatrick-classical-mechanics-301]
 
-- id: "article-mocz-wave-equation"
-  title: "Create Your Own Finite Difference Wave Equation Simulation (With Python)"
-  short: "Mocz: Wave Equation"
-  provider: "Philip Mocz"
-  type: "article"
-  url: "https://philip-mocz.medium.com/create-your-own-finite-difference-wave-equation-simulation-with-python-3971617f825e"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [simulation]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Discretises the wave equation on a grid to show reflection and diffraction, linking Physics 2 waves to numerical methods."
-  fromYear: 1
-  priority: 3
-  roadmap: "game-developer"
-  after: [fitzpatrick-oscillations-waves-315]
-
 - id: "article-brieda-vlasov-solvers"
   title: "Introduction to Vlasov Solvers"
   short: "Intro to Vlasov Solvers"

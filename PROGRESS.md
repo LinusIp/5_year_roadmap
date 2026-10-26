@@ -1193,3 +1193,14 @@ Verified on this machine (Linux, Chromium 140):
   progress in `meta` by the file's ids (`src/db/internships.ts`), the arithmetic in `src/lib/internships.ts`.
 - Today's card while an application is upcoming; Plan's row under Next.
 - Tests: `tests/unit/internships.test.ts` (new), `tests/e2e/internships.spec.ts` (new); screenshots of three tabs.
+
+## Pull request #34: the Atlas Library's tenth file, the books round, the audit and Agents & MCP
+
+- `data/resources/library-atlas-10.yaml`: 260 new resources (184 paid books, the agents, MCP and harnesses cluster);
+  12 rows removed by the audit, 13 corrected; 32 merged by title, 211 by URL. Resources: 15,110 to 15,358.
+- Paid books: `cost: paid` with `note: Paid` (the rule in `validate:data` for the Library's files), a Paid badge, the
+  Books shelf's Free / Paid chip, "I own this" in the sheet (`owned` on the item state), out of Up next until owned.
+- Version 8 of the database drops progress on the removed rows (`REMOVED_RESOURCE_IDS`).
+- "Agents & MCP", a row on the Library's home with six area chips (`src/lib/agents.ts`): 1,017 resources.
+- Tests: `tests/unit/agents.test.ts`, `tests/unit/removed-rows.test.ts` (new); import, library-home, live-upgrade,
+  security units; `tests/e2e/atlas-library.spec.ts`.

@@ -121,9 +121,13 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-meta text-ink2">{[resource.provider, resource.type, resource.cost === 'audit-free' ? 'free to audit' : resource.cost].join(' · ')}</p>
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-ink2">
+          {/* A paid book (ATLAS-LIBRARY, 15,364 rows) wears a badge; the rest say how they are free. */}
+          {resource.cost === 'paid' && <span className="well rounded-pill px-2.5 py-0.5 text-small font-semibold text-ink">Paid</span>}
+          <span>{[resource.provider, resource.type, resource.cost === 'audit-free' ? 'free to audit' : resource.cost === 'paid' ? null : resource.cost].filter(Boolean).join(' · ')}</span>
+        </p>
         {resource.summary && <p className="doc-text mt-2 text-body text-ink2">{resource.summary}</p>}
-        {(resource.note || resource.doFirst) && <p className="mt-2 text-meta text-ink2">{[resource.note, resource.doFirst && 'Do first: ' + resource.doFirst].filter(Boolean).join(' · ')}</p>}
+        {((resource.note && resource.note !== 'Paid') || resource.doFirst) && <p className="mt-2 text-meta text-ink2">{[resource.note !== 'Paid' && resource.note, resource.doFirst && 'Do first: ' + resource.doFirst].filter(Boolean).join(' · ')}</p>}
         {/* How it fits the plan (ATLAS-LIBRARY): its priority, its year, its roadmap.sh roadmap, its research area. */}
         {(resource.priority || resource.roadmap || resource.research) && (
           <p className="mt-2 text-meta text-ink2">
@@ -152,6 +156,12 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
             <ItemStatusPill kind="resource" refId={resource.id} title={resource.title} state={state} />
           </span>
         </div>
+        {/* "I own this" on a paid book: then Up next may suggest it like a free one; kept in the item state, by id. */}
+        {resource.cost === 'paid' && (
+          <ul className="rows mt-3 border-t-[1.5px] border-dashed border-dash">
+            <Row height={48} title="I own this" meta={state?.owned ? 'Suggested like a free book' : 'Not suggested until it is owned'} toggle={{ on: state?.owned === true, onChange: (on) => void editItemState(resource.id, (s) => (on ? { ...s, owned: true } : (({ owned: _o, ...rest }) => rest)(s))) }} />
+          </ul>
+        )}
         {/* The day's log entry about it (ATLAS-LIBRARY): the blog post screen, its outline started with this resource. */}
         <div className="mt-2">
           <Button to={'/blog?ref=' + resource.id} icon="doc">

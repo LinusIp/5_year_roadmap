@@ -277,14 +277,17 @@ export interface UpNext {
 
 /**
  * The next steps across every path: steps not started, nearest first (by when the plan reaches them, then by fit), never the
- * current step of a path that is already in progress twice over.
+ * current step of a path that is already in progress twice over, and never a paid book the user has not marked as owned.
  */
-export function upNext(paths: readonly LibraryPath[], seed: AppSeed, count = 3): UpNext[] {
+export function upNext(paths: readonly LibraryPath[], seed: AppSeed, count = 3, states?: ReadonlyMap<string, UserItemState>): UpNext[] {
   const start = new Map(seed.phases.map((p) => [p.id, p.start]));
+  // A paid book (ATLAS-LIBRARY, 15,364 rows) is not suggested until the user owns it.
+  const paid = new Set(seed.resources.filter((r) => r.cost === 'paid').map((r) => r.id));
   const all: UpNext[] = [];
   for (const path of paths) {
     path.steps.forEach((step, i) => {
       if (step.status !== 'todo') return;
+      if (paid.has(step.refId) && !states?.get(step.refId)?.owned) return;
       const before = path.steps[i - 1];
       const item: UpNext = { step, path, start: start.get(step.phaseId) ?? '' };
       if (before && before.status !== 'done') item.after = before.title;
