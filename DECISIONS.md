@@ -2030,6 +2030,20 @@ A name that is also a word (Rig, Codex, goose) is read in its own case as a whol
 and tensorflow.org, Wooledge and CSAIL are script-side there; the checker skips the first and reads the second as
 "check by hand". Nothing to change.
 
+**The new rows' links, from the runner.** A one-off `links-atlas-10` job checked the 260 new URLs on the pull request twice
+(runs 40373221135 and 40375562366) and was then removed. Both runs read 236 of the links as fine, 4 as failed and 20
+as ones to open by hand, the same ones each time. No URL was changed; nothing is marked until someone has opened it.
+
+- Failed in both runs (4): three pages of the Rig docs (docs.rig.rs: the agent and tool concepts and the flight
+  assistant guide, 404: the site has moved its pages) and Nilsson's "The Quest for Artificial Intelligence" PDF at
+  ai.stanford.edu (a connection timeout from the runner, as CSAIL's).
+- To check by hand (20 in both runs, publishers' pages that turn scripts away with 403, four of them 429 in the first
+  run): eleven Simon & Schuster pages (How to Read a Book, The Art of Learning, The Innovators, Where Wizards Stay Up
+  Late, A Mind at Play, The Making of the Atomic Bomb, The Prize, Dark Sun, Apple in China, The Star Builders, Chip
+  War), three Princeton University Press pages (AI Snake Oil, Alan Turing: The Enigma, QED), two Macmillan pages
+  (Supremacy, Artificial Intelligence: A Guide for Thinking Humans), two Packt pages (LLM Engineer's Handbook, Building
+  Agentic AI Systems), Chelsea Green's Thinking in Systems and Rutgers University Press's Ignition!.
+
 Tests: `tests/unit/agents.test.ts` (new: the words, the tracks, the acronym, the areas, the data), `tests/unit/removed-rows.test.ts`
 (new: the rows are gone, nothing comes after them, a version 7 database loses their states and overrides on the
 upgrade and keeps the rest), `tests/unit/resource-import.test.ts` (a paid row's cost and note, the files' rule),

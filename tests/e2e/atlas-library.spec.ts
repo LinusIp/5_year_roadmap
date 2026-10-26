@@ -323,13 +323,13 @@ test('the Books shelf has a Free / Paid chip, a paid book wears its badge, and "
   await writesSettled(page);
   await reload(page);
   await expect(page.getByRole('dialog').getByRole('switch', { name: 'I own this' })).toHaveAttribute('aria-checked', 'true');
-  // Free shows no paid row; All (nothing pressed) shows them all.
-  await page.getByRole('button', { name: 'Close' }).first().click().catch(() => page.keyboard.press('Escape'));
-  await page.getByRole('searchbox', { name: 'Search books' }).fill('');
-  await paid.click();
-  await free.click();
-  await expect(page).toHaveURL(/cost=free/);
-  await expect(page.getByRole('list').getByRole('button').first()).not.toContainText('Paid ·');
+  // Free shows the free books only, as many as its chip says; All (nothing pressed) shows them all.
+  await open(page, './#/library?type=book&cost=free');
+  const freeCount = Number((await page.getByRole('group', { name: 'Cost' }).getByRole('button', { name: /^Free \d+$/ }).innerText()).replace(/\D/g, ''));
+  await expect(page.getByRole('heading', { name: new RegExp('^' + freeCount + ' of ' + (freeCount + paidCount) + '$') })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Eureka Machine/ })).toHaveCount(0);
+  await open(page, './#/library?type=book');
+  await expect(page.getByRole('heading', { name: new RegExp('^' + (freeCount + paidCount) + ' of ' + (freeCount + paidCount) + '$') })).toBeVisible();
 });
 
 test('Agents & MCP gathers the agents, MCP and harnesses rows, with area chips over the list', async ({ page }) => {

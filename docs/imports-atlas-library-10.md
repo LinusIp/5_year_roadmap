@@ -59,7 +59,9 @@ the Library already had under its earlier id (`scratch/atlas10-report.json` list
 in the software tracks, with six area chips: Harness & loop 353, Evals 251, Tools & sandbox 155, Frameworks 132, MCP
 69, Books 20; 307 are in none of the five word areas.
 
-**Links.** The 260 new links were checked on the runner by a one-off `links-atlas-10` job, twice; the report is in
-DECISIONS.md. The hosts the earlier follow-up asked for (the Berkeley Lab roofline pages, the NCFMF films, MIT OCW
+**Links.** The 260 new links were checked on the runner by a one-off `links-atlas-10` job, twice, with the same result
+each time: 236 fine, 4 failed (three Rig docs pages, 404; Nilsson's Quest for AI PDF at Stanford, a timeout) and 20 to
+open by hand (publishers' pages that refuse scripts: Simon & Schuster, Princeton, Macmillan, Packt, Chelsea Green,
+Rutgers); the list is in DECISIONS.md. The hosts the earlier follow-up asked for (the Berkeley Lab roofline pages, the NCFMF films, MIT OCW
 2.008, Orfanidis, libp2p, STAT 414, Childs) have been `MANUAL_OK` in `scripts/lib/link-policy.ts` since pull request
 #22, with tensorflow.org, Wooledge and CSAIL as script-side hosts; nothing changed there.
