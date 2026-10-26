@@ -127,7 +127,7 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
           <span>{[resource.provider, resource.type, resource.cost === 'audit-free' ? 'free to audit' : resource.cost === 'paid' ? null : resource.cost].filter(Boolean).join(' · ')}</span>
         </p>
         {resource.summary && <p className="doc-text mt-2 text-body text-ink2">{resource.summary}</p>}
-        {(resource.note || resource.doFirst) && <p className="mt-2 text-meta text-ink2">{[resource.note, resource.doFirst && 'Do first: ' + resource.doFirst].filter(Boolean).join(' · ')}</p>}
+        {((resource.note && resource.note !== 'Paid') || resource.doFirst) && <p className="mt-2 text-meta text-ink2">{[resource.note !== 'Paid' && resource.note, resource.doFirst && 'Do first: ' + resource.doFirst].filter(Boolean).join(' · ')}</p>}
         {/* How it fits the plan (ATLAS-LIBRARY): its priority, its year, its roadmap.sh roadmap, its research area. */}
         {(resource.priority || resource.roadmap || resource.research) && (
           <p className="mt-2 text-meta text-ink2">
