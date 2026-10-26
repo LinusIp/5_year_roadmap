@@ -116,17 +116,18 @@ test('adds, reorders, swaps, drops and restores a plan item, and undoes an edit'
   await add.getByRole('button', { name: /^Lane/ }).click();
   await page.getByRole('dialog', { name: 'Lane' }).getByRole('button', { name: /^Block E/ }).click();
   await add.getByRole('button', { name: 'Add to the plan' }).click();
-  await expect(page.getByRole('status').filter({ hasText: /^Added .*Quantum/ })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: /^Added .*(Quantum|Nielsen)/ })).toBeVisible();
 
   await open(page, './#/plan?lane=y1-p0.E');
   const sheet = page.getByRole('dialog', { name: /^Block E · Math/ });
   const items = sheet.getByRole('list').first().getByRole('listitem');
-  await expect(items.last()).toContainText(/Quantum/);
+  // The row's short title since the tenth Atlas file (ATLAS-LIBRARY): "Nielsen & Chuang".
+  await expect(items.last()).toContainText(/Quantum|Nielsen/);
 
   // Reorder with the arrows, then undo it from the toast.
   await sheet.getByRole('button', { name: 'Edit' }).click();
   const before = await items.allTextContents();
-  await sheet.getByRole('button', { name: /^Move .*Quantum.* up$/ }).click();
+  await sheet.getByRole('button', { name: /^Move .*(Quantum|Nielsen).* up$/ }).click();
   await expect(page.getByRole('status').filter({ hasText: /Moved .* up/ })).toBeVisible();
   await expect.poll(async () => (await items.allTextContents()).join('|')).not.toBe(before.join('|'));
   await page.getByRole('button', { name: 'Undo' }).click();
