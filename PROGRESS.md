@@ -1214,6 +1214,16 @@ Verified on this machine (Linux, Chromium 140):
   interviews, Research skills, Communication, Open source, Mandarin (the language).
 - Tests: `tests/unit/quick-filters.test.ts` (new); `tests/e2e/atlas-library.spec.ts`.
 
+## Pull request #36: the "N weeks behind" forecast
+
+- `src/lib/forecast.ts`: the pace window starts at the latest of 28 days back, the phase start and the first log
+  (`paceWindow`); `early` ("Too early to tell") under seven days or three logged days; `over-planned` ("Plan too
+  full by N h", a line and a Re-plan button on the current phase) when the remaining hours exceed `capacityHours`;
+  past twelve weeks "Finishes ~Mon YYYY (N months late)"; the lane sheet shows the month it finishes in.
+- `src/lib/goals.ts` projects with the same window.
+- Tests: `tests/unit/forecast.test.ts`, `tests/e2e/forecast.spec.ts` (new); replan unit, flex and roadmap e2e.
+- Before and after: `docs/before-after/forecast/`.
+
 ## Pull request #37: the UI polish pass
 
 - `src/ui/Screen.tsx`: tab names under the icons, a ground fade behind the floating bar. `src/ui/SegmentedControl.tsx`:
@@ -1225,12 +1235,3 @@ Verified on this machine (Linux, Chromium 140):
   in-progress cards. Light ink2 darkened to #575D6E for 4.5:1 on every ground.
 - Tests: `tests/unit/polish.test.ts`, `tests/e2e/polish.spec.ts` (new); layout e2e. Before/after:
   `docs/before-after/polish/`.
-## Pull request #36: the "N weeks behind" forecast
-
-- `src/lib/forecast.ts`: the pace window starts at the latest of 28 days back, the phase start and the first log
-  (`paceWindow`); `early` ("Too early to tell") under seven days or three logged days; `over-planned` ("Plan too
-  full by N h", a line and a Re-plan button on the current phase) when the remaining hours exceed `capacityHours`;
-  past twelve weeks "Finishes ~Mon YYYY (N months late)"; the lane sheet shows the month it finishes in.
-- `src/lib/goals.ts` projects with the same window.
-- Tests: `tests/unit/forecast.test.ts`, `tests/e2e/forecast.spec.ts` (new); replan unit, flex and roadmap e2e.
-- Before and after: `docs/before-after/forecast/`.
