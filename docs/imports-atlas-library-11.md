@@ -40,5 +40,15 @@ Developer essentials 344, Compact power & energy conversion 394, Security & defe
 Certificates 49 (35 paid exams, 9 free to learn with a paid certificate, 5 free), Career & interviews 94, Research
 skills 144, Communication 257, Open source 47, Mandarin (the language) 24.
 
-**Links.** The 587 new links were checked on the runner by a one-off `links-atlas-11` job, twice; the report is in
-DECISIONS.md.
+**Links.** The container cannot reach most of these sites, so the pull request's CI ran `npm run check:links -- --in
+data/resources/library-atlas-11.yaml` in a one-off `links-atlas-11` job, twice (run 41008718175 on the first commit,
+run 41008956921 on the redraw commit), 587 distinct URLs each time; the job was removed before the merge. Run 1: 548
+ok, 5 failed, 34 to check by hand. Run 2: 548 ok, 6 failed, 33 to check by hand. Failed both times (nothing was
+edited; each is to be opened in a browser): `book-writing-science-schimel` (oupjapan.co.jp, the runner's Node cannot
+verify the site's certificate chain), `book-venture-deals` (feld.com answers 404), `article-kayvon-systems-paper-beautiful`
+and `article-kayvon-clear-talk-tips` (graphics.stanford.edu, a connect timeout), `cert-solidworks-cswa` (solidworks.com,
+a timeout). Failed once: `article-nanda-how-to-write-ml-papers` (greaterwrong.com, "fetch failed" on run 2, ok on run
+1). To check by hand, all 403, so never counted as broken: the 12 Tech Interview Handbook pages, 9 cppreference pages,
+2 isocpp.org pages, 3 AllSet Learning Chinese wiki pages, Simon & Schuster, Guy Kawasaki's 10/20/30 rule, the W3C
+trace-context recommendation, Harvard's CLP vocabulary page, the 2 Autodesk certification pages, and on run 1 only
+KDnuggets (ok on run 2). Every URL is the file's; none was changed.
