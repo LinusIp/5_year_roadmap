@@ -158,8 +158,9 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
             <ItemStatusPill kind="resource" refId={resource.id} title={resource.title} state={state} />
           </span>
         </div>
-        {/* "I own this" on a paid book: then Up next may suggest it like a free one; kept in the item state, by id. */}
-        {resource.cost === 'paid' && (
+        {/* "I own this" on a paid book: then Up next may suggest it like a free one; kept in the item state, by id. A paid
+            certificate exam is earned, not owned: its sheet has Earned below instead. */}
+        {resource.cost === 'paid' && !isCertificate(resource.id) && (
           <ul className="rows mt-3 border-t-[1.5px] border-dashed border-dash">
             <Row height={48} title="I own this" meta={state?.owned ? 'Suggested like a free book' : 'Not suggested until it is owned'} toggle={{ on: state?.owned === true, onChange: (on) => void editItemState(resource.id, (s) => (on ? { ...s, owned: true } : (({ owned: _o, ...rest }) => rest)(s))) }} />
           </ul>
