@@ -2110,6 +2110,50 @@ exclusions, the data's counts); `tests/e2e/atlas-library.spec.ts` (the ten rows 
 badge, Earned with its date after a reload, the count on Plan › Credentials; Mandarin and Research skills with their
 exclusions).
 
+## The UI polish pass: hidden content, overflow and numbers that disagreed (ATLAS-UI-POLISH, pull request #37)
+
+**The tab bar names its tabs, and the ground rises behind it.** Five icons alone left the calendar and the grid
+ambiguous; each tab now carries its name under its icon (`src/ui/Screen.tsx`, 12 px semibold, ink2, blue-deep when
+current), inside the same 52 px target and the same 68 px bar. The room under the last card was already the bar's
+height plus its float plus air plus the safe area, and the layout test now checks that end on Plan and Activity too,
+on all three phones; what the screenshots showed was content passing under the floating bar, which is what a floating
+bar does. A short fade to the ground behind the bar (`.tab-bar-fade`) keeps passing content from clashing with it.
+
+**A segment is never cut.** `SegmentedControl` shares the track between its segments while they fit and scrolls
+sideways under the clay edge fade past that, instead of truncating; a segment can carry a short label with its full
+name for assistive tech (`name`), which Plan uses: Timeline · Projects · Papers · Certs, the fourth read as
+"Credentials" and headed so.
+
+**Numbers that agree.** An in-progress card never writes "43 of 40 h": past the estimate it says "43 h logged · over
+estimate" with a full bar (units, when the resource has them, come first as before). Blocks today counts a block done
+at its target or when marked, and a block under way (minutes short of the target, or the timer on it) as such: a
+half-filled dot and "N in progress" under the count (`src/lib/blocks-today.ts`). Counts that can pass a thousand
+carry their separator (`count()` in `src/screens/parts/text.ts`): the Library's "15,938 more", its shelf and
+quick-filter counts, its list labels, the research and path counts. The absurd lane verdicts the brief mentions were
+the forecast's and went with pull request #36.
+
+**Today.** The week strip shades each day by its share of its plan on the heatmap's own steps (nothing: pressed in;
+under a quarter and under 60 %: the ramp's first two steps with ink on them; the plan met: blue-deep with the fill's
+text, so every number keeps 4.5:1), today is a ring, and a dot under a day says it met its plan or kept the streak.
+The hours sit on the tile as a large number with "of 10 h today · 57-day streak" under it, one nesting level fewer;
+the running timer and the Slept figure lose their inner pills the same way. "Open course" is "Open" with its icon and
+the full name for assistive tech. The Slept tile opens the Sleep screen, so it carries a chevron after its times: the
+brief lists it with the static tiles, but a tappable tile with no cue was the thing being fixed. The in-progress
+cards of the Library carry a chevron after their title, the tap.
+
+**Contrast.** ink2 was 4.46:1 on the blue well and 4.30:1 on the ice fill in the light theme; it is now #575D6E
+(4.97 and 4.79, 5.41 on the ground). Dark ink2 already passed everywhere it sits. Lighthouse accessibility stays at
+100 on Today, Plan and the Library in both themes.
+
+**Not changed.** The ice button's gradient in dark mode: its text is the dark ground at over 7:1 and the active and
+today states of the week strip are now a filled blue-deep and a ring, which were the states the brief could not tell
+apart; the gradient itself stays. The Library's shelf tiles and path rows keep their cues (press and chevrons).
+
+Tests: `tests/unit/polish.test.ts` (new: the hours wording, the blocks tally with a running block, the count
+formatter); `tests/e2e/polish.spec.ts` (new: every tabbed screen ends above the bar at 390 × 844 and 412 × 915, the
+tab names are drawn, Plan's segments are not clipped and the fourth reads as Credentials, Today's numbers agree and
+Open is one word, the Library's counts carry separators); `tests/e2e/layout.spec.ts` (Plan and Activity added).
+Before and after, Today, Plan and the Library, light and dark, at 390 and 412: `docs/before-after/polish/`.
 ## The "N weeks behind" forecast (ATLAS-FORECAST-FIX, pull request #36)
 
 **What the table showed.** `scratch/forecast-debug.ts` (kept out of git with the rest of `scratch/`) prints, for a

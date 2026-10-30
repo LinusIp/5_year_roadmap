@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { researchAreas, SHELVES, shelfOf } from '../../lib/library-home.ts';
 import { Button } from '../../ui/Button.tsx';
+import { count } from '../parts/text.ts';
 import { Header } from '../../ui/Header.tsx';
 import { IconTile } from '../../ui/glyphs.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
@@ -22,7 +23,7 @@ export function ResearchView({ atlas, onOpen, onOpenPaper }: { atlas: Atlas; onO
   const total = areas.reduce((n, a) => n + a.items.length, 0);
   return (
     <>
-      <Header title="Research" sub={'Year 3 · ' + total + ' to read across ' + areas.filter((a) => a.items.length > 0).length + ' areas'} back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />} />
+      <Header title="Research" sub={'Year 3 · ' + count(total) + ' to read across ' + areas.filter((a) => a.items.length > 0).length + ' areas'} back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />} />
       {areas.map((area) => {
         const all = open.has(area.id);
         const shown = all ? area.items : area.items.slice(0, FIRST);

@@ -11,7 +11,8 @@
 /*
  * Soft clay (CLAY-STYLE.md): every surface is the background colour, raised out of it or pressed into it by a
  * light top-left and a shadow bottom-right. The only colours are a dusty periwinkle blue and an ice aqua; the rest
- * is sage grey and ink. Every text pair is at least 4.5:1; --ink3, --deco and --ice never carry text.
+ * is sage grey and ink. Every text pair is at least 4.5:1 on every ground it sits on (ink2 on the soft wells and the
+ * ice fills included); --ink3, --deco and --ice never carry text.
  */
 :root,
 :root[data-theme="light"] {
@@ -21,7 +22,7 @@
   --lo: #C3CBC6;
   --edge: rgba(255, 255, 255, .55);
   --ink: #3B404B;
-  --ink2: #5E6476;
+  --ink2: #575D6E;
   --ink3: #7F8590;
   --blue: #5A72AB;
   --blue-deep: #465E9A;
@@ -243,6 +244,10 @@
   .fade-strip[data-fade-end='true']::after {
     opacity: 1;
   }
+  /* The ground rising behind the floating tab bar (src/ui/Screen.tsx): solid under the bar, gone 40 px above it. */
+  .tab-bar-fade {
+    background: linear-gradient(to top, var(--bg) 60%, transparent);
+  }
   /*
    * Depth: raised (.tile, cards and groups), small raised (.knob, icon buttons, icon tiles, chips) and sunken
    * (.well: search, progress tracks, the segmented track, unchecked boxes, the selected chip or tab). No other
@@ -291,6 +296,19 @@
     background: linear-gradient(180deg, var(--ice-top), var(--ice));
     color: var(--on-ice);
   }
+  /*
+   * The week strip's days (src/screens/Today.tsx): nothing logged is pressed in; under a quarter, under 60 % and under
+   * the plan take the heatmap's first steps with ink on them; the plan met is blue-deep with the fill's text, so every
+   * number stays at 4.5:1. Today is a ring.
+   */
+  .day-0 { box-shadow: inset 3px 3px 7px var(--lo), inset -3px -3px 7px var(--hi); color: var(--ink2); }
+  .day-1 { background: var(--ramp-1); color: var(--ink); }
+  .day-2 { background: var(--ramp-2); color: var(--ink); }
+  .day-3 { background: var(--blue-deep); color: var(--on-blue); }
+  .day-4 { background: var(--blue-deep); color: var(--on-blue); }
+  .day-ring { box-shadow: inset 0 0 0 2.5px var(--blue-deep); color: var(--ink); }
+  /* A block under way (Blocks today): the pressed-in dot, half filled. */
+  .half-dot { background: linear-gradient(to right, var(--blue-deep) 50%, var(--bg) 50%); }
   /* Progress: a 14 px well with 3 px padding and an ice-to-deco pill. */
   .progress-fill {
     background: linear-gradient(90deg, var(--ice), var(--deco));

@@ -13,7 +13,7 @@ import { IconTile } from '../../ui/glyphs.tsx';
 import { ProgressLine } from '../../ui/ProgressLine.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { Sheet } from '../../ui/Sheet.tsx';
-import { plural } from '../parts/text.ts';
+import { count, plural } from '../parts/text.ts';
 
 /** Each path's icon and tone, the same glyphs Today gives the blocks that teach them. */
 export const PATH_ICON: Record<string, { icon: IconName; tone: 'blue' | 'ice' }> = {
@@ -59,6 +59,8 @@ export function progressFor(id: string, units: Record<string, Unit[]> | undefine
     return { meta, fraction: unitsDone.length / list.length };
   }
   const hours = Math.round(loggedMinutes / 60);
+  // Past the estimate the hours say so (ATLAS-UI-POLISH); "43 of 40 h" is never written.
+  if (estHours > 0 && hours >= estHours) return { meta: hours + ' h logged · over estimate', fraction: 1 };
   return { meta: hours > 0 ? hours + ' of ' + estHours + ' h' : 'Started', fraction: estHours > 0 ? Math.min(1, loggedMinutes / 60 / estHours) : 0 };
 }
 
@@ -173,6 +175,7 @@ export function LibraryHome({
                     className="line-clamp-2 min-h-11 text-left text-body font-medium leading-tight after:absolute after:inset-0 after:content-['']"
                   >
                     {title}
+                    <Icon name="chevronRight" size={16} className="ml-0.5 inline-block align-[-2px] text-ink2" />
                   </button>
                   <span className="mt-auto text-meta text-ink2">{meta}</span>
                   <ProgressLine value={fraction} label={title + ' progress'} />
@@ -224,11 +227,11 @@ export function LibraryHome({
           {laterPaths.length > 0 && !showLater && (
             <Row title="Later in the plan" meta={laterPaths.map((p) => p.name).join(' · ')} chevron height={44} onClick={() => setShowLater(true)} />
           )}
-          {browsePaths.map(({ def, count }) => {
+          {browsePaths.map(({ def, count: n }) => {
             const { icon, tone } = PATH_ICON[def.id] ?? { icon: 'course', tone: 'blue' };
-            return <Row key={def.id} icon={<IconTile icon={icon} tone={tone} />} title={def.name} meta={'Not on the plan · ' + count + ' to browse'} chevron onClick={() => onPath(def.id)} />;
+            return <Row key={def.id} icon={<IconTile icon={icon} tone={tone} />} title={def.name} meta={'Not on the plan · ' + count(n) + ' to browse'} chevron onClick={() => onPath(def.id)} />;
           })}
-          {researchCount > 0 && <Row icon={<IconTile icon="flask" tone="ice" />} title="Research" meta={'Year 3 · ' + researchCount + ' to read'} chevron onClick={() => onPath('research')} />}
+          {researchCount > 0 && <Row icon={<IconTile icon="flask" tone="ice" />} title="Research" meta={'Year 3 · ' + count(researchCount) + ' to read'} chevron onClick={() => onPath('research')} />}
         </ul>
       </section>
 
@@ -262,7 +265,7 @@ export function LibraryHome({
                 <span className={shelf.key === 'paper' || shelf.key === 'blog' || shelf.key === 'project' ? 'text-ice-deep' : 'text-blue-deep'}>
                   <Icon name={SHELF_ICON[shelf.key]} size={22} />
                 </span>
-                <span className="text-lead font-semibold leading-tight">{counts[shelf.key]}</span>
+                <span className="text-lead font-semibold leading-tight">{count(counts[shelf.key])}</span>
                 <span className="text-small font-semibold text-ink2">{shelf.key === 'blog' ? 'Blogs to follow' : shelf.label}</span>
               </button>
             </li>
@@ -273,7 +276,7 @@ export function LibraryHome({
               <span className="text-ice-deep">
                 <Icon name={SHELF_ICON.practice} size={22} />
               </span>
-              <span className="text-lead font-semibold leading-tight">{counts.practice}</span>
+              <span className="text-lead font-semibold leading-tight">{count(counts.practice)}</span>
               <span className="text-small font-semibold text-ink2">Practice</span>
             </button>
           </li>
@@ -290,7 +293,7 @@ export function LibraryHome({
       {/* The quick filters (ATLAS-LIBRARY): ten clusters across every shelf, one row each, in the order of the registry. */}
       <RowList label="Quick filters" className="mt-[18px]" aside="across every shelf">
         {quick.map((q) => (
-          <Row key={q.key} icon={<IconTile icon={q.icon} tone={q.tone} />} title={q.label} trailing={String(q.count)} chevron onClick={() => onPick(q.key)} />
+          <Row key={q.key} icon={<IconTile icon={q.icon} tone={q.tone} />} title={q.label} trailing={count(q.count)} chevron onClick={() => onPick(q.key)} />
         ))}
       </RowList>
 

@@ -23,11 +23,11 @@ import { ReplanSheet } from './plan/ReplanSheet.tsx';
 import { Timeline } from './plan/Timeline.tsx';
 
 type View = 'timeline' | 'projects' | 'papers' | 'credentials';
-const VIEWS: { value: View; label: string }[] = [
+const VIEWS: { value: View; label: string; name?: string }[] = [
   { value: 'timeline', label: 'Timeline' },
   { value: 'projects', label: 'Projects' },
   { value: 'papers', label: 'Papers' },
-  { value: 'credentials', label: 'Credentials' },
+  { value: 'credentials', label: 'Certs', name: 'Credentials' },
 ];
 
 /**

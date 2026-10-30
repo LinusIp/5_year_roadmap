@@ -35,7 +35,7 @@ import { SearchField } from '../ui/TextField.tsx';
 import { AddResourceSheet } from './library/AddResourceSheet.tsx';
 import { ItemSheet } from './parts/ItemSheet.tsx';
 import { PickerSheet } from './parts/PickerSheet.tsx';
-import { plural, shortTitle, unitShort } from './parts/text.ts';
+import { count, plural, shortTitle, unitShort } from './parts/text.ts';
 import { PaperSheet } from './plan/PapersView.tsx';
 
 /** One shelf's name, for its own page: "Courses", "Blogs to follow". */
@@ -381,7 +381,7 @@ export function Library({ openId }: { openId?: string }) {
     const nextCount = upNext(buildPaths(atlas.seed, atlas.states), atlas.seed, 3, atlas.states).length;
     return {
       counts: shelfCounts(atlas.seed, catalogue?.length ?? 0),
-      homeSub: activeCount + ' in progress · ' + nextCount + ' up next · ' + Math.max(0, atlas.seed.resources.length - activeCount - nextCount) + ' more when you need them',
+      homeSub: count(activeCount) + ' in progress · ' + count(nextCount) + ' up next · ' + count(Math.max(0, atlas.seed.resources.length - activeCount - nextCount)) + ' more when you need them',
     };
   }, [atlas, catalogue]);
   // The quick filters' counts, for the rows on the home: once per change to the entries.
@@ -593,7 +593,7 @@ export function Library({ openId }: { openId?: string }) {
           {results.length === 0 ? (
             <EmptyState action={<Button onClick={() => { for (const set of [setQuery, setTrack, setStatus, setKind, setDifficulty, setGroup, setPhase, setLevel, setHours, setPaperLevel, setRoadmap]) set(null); setDraft(null); }}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>
           ) : (
-            <VirtualList items={results} label={results.length + ' of ' + shelfTotal} keyOf={(entry) => entry.kind + entry.id} render={row} />
+            <VirtualList items={results} label={count(results.length) + ' of ' + count(shelfTotal)} keyOf={(entry) => entry.kind + entry.id} render={row} />
           )}
           {type !== 'project' && type !== 'paper' && (
             <div className="mt-5 flex flex-wrap gap-2">

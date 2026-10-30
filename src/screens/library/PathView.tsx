@@ -9,7 +9,7 @@ import { Header } from '../../ui/Header.tsx';
 import { Icon } from '../../ui/Icon.tsx';
 import { IconTile } from '../../ui/glyphs.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
-import { plural } from '../parts/text.ts';
+import { count, plural } from '../parts/text.ts';
 import { SHELF_ICON } from './Home.tsx';
 
 /** A shelf's name for one item: "Book", "Practice". */
@@ -153,7 +153,7 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
                 ),
               )}
               {shownAlternatives.length + visible.length < optional && (
-                <Row title={'Show ' + Math.min(PAGE, optional - shownAlternatives.length - visible.length) + ' more'} meta={optional - shownAlternatives.length - visible.length + ' not shown yet'} chevron height={44} onClick={() => setShownCount(shownCount + PAGE)} />
+                <Row title={'Show ' + Math.min(PAGE, optional - shownAlternatives.length - visible.length) + ' more'} meta={count(optional - shownAlternatives.length - visible.length) + ' not shown yet'} chevron height={44} onClick={() => setShownCount(shownCount + PAGE)} />
               )}
             </ul>
           )}
