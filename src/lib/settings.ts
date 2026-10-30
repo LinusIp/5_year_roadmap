@@ -13,7 +13,7 @@ export function defaultLayout(core: Pick<SettingsDefaults, 'blocks'>): Layout {
     today: { stats: true, later: true, review: true, footer: true, view: 'detailed', now: 'first', order: core.blocks.map((b) => b.id) },
     tabs: ['today', 'plan', 'calendar', 'library', 'activity'],
     plan: { segment: 'timeline', showDropped: true },
-    general: { clock: '24', density: 'comfortable' },
+    general: { clock: '24', density: 'comfortable', illustrations: true },
   };
 }
 

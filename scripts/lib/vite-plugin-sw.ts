@@ -19,8 +19,13 @@ function walk(dir: string, prefix = ''): string[] {
   return out;
 }
 
+/** Precached with the build: the manifest and the Today header's set. The other illustrations are cached on first view. */
+export function precachedArt(file: string): boolean {
+  return !file.startsWith('art/') || file === 'art/art.json' || /^art\/(today|season|track)-/.test(file);
+}
+
 export function buildServiceWorkerSource(files: string[], version: string): string {
-  const assets = ['./'].concat(files.map((f) => './' + f));
+  const assets = ['./'].concat(files.filter(precachedArt).map((f) => './' + f));
   return [
     '/* Atlas service worker. Generated at build time: do not edit. */',
     'const VERSION = ' + JSON.stringify(version) + ';',
@@ -88,6 +93,20 @@ export function buildServiceWorkerSource(files: string[], version: string): stri
     '  if (url.origin !== self.location.origin) return;',
     "  if (request.mode === 'navigate') {",
     "    event.respondWith(caches.match('./index.html', MATCH).then((hit) => hit || fetch(request)));",
+    '    return;',
+    '  }',
+    '  // An illustration outside the precached set (ATLAS-ART): kept once seen, under the same version.',
+    "  if (url.pathname.includes('/art/')) {",
+    '    event.respondWith(',
+    '      caches.match(request, MATCH).then(',
+    '        (hit) =>',
+    '          hit ||',
+    '          fetch(request).then((response) => {',
+    '            if (response.ok) caches.open(CACHE).then((cache) => cache.put(request, response.clone()));',
+    '            return response;',
+    '          }),',
+    '      ),',
+    '    );',
     '    return;',
     '  }',
     '  event.respondWith(caches.match(request, MATCH).then((hit) => hit || fetch(request)));',

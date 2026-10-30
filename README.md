@@ -165,6 +165,17 @@ queue), ISO dates, a fit of strong, medium or stretch.
 - Ticks, ratings and statuses stay on this device, by the file's ids, and go into every backup; the file is never
   written. They do not sync between devices yet.
 
+## Illustrations
+
+Calm ink-wash landscapes sit in a few places and nowhere else: Today's header (the picture follows the hour, or
+the season, or the current block's track, as Settings › Layout says), each phase of the plan, one long river behind
+the five-year map, a card on the day a streak reaches 7, 30 or 100 or a path or phase finishes, the empty states,
+and a path's header. Until you supply images every slot draws a placeholder in the theme's colours. Your own
+pictures go in `art-src/`, named after their slot (`today-morning.png`, …); `npm run art:build` writes the AVIF
+and WebP into `public/art/` and a row for each into `public/art/art.json`, where the alt text, the focal point and
+the credit go (only images you have the rights to; `public/art/CREDITS.md` lists them). The Illustrations switch in
+Settings › Layout turns the whole thing off.
+
 ## Making it yours
 
 Atlas starts as the plan in `data/`: the same 10-hour day, every day. Real weeks are not like that, so the day,
@@ -196,6 +207,7 @@ you use it: every option sits behind an Edit or Change action in a sheet.
 | Choose 3 to 5 tabs and their order | Settings › Layout › Tabs |
 | Plan's first view, dropped items shown or not | Settings › Layout › Plan |
 | Theme, week start, 12- or 24-hour clock, density | Settings › Layout › General |
+| Illustrations on or off; what Today's picture follows (the hour, the season, the block's track) | Settings › Layout › Today |
 | Add a resource, project, paper or track of your own | Library › a shelf › Add a resource |
 | Turn the daily challenge off, or move the weekly slot to other days | Settings › Projects |
 

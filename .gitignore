@@ -19,6 +19,9 @@ reports/
 # Throwaway scripts and notes for local work
 scratch/
 
+# The illustrations' originals (ATLAS-ART): npm run art:build writes public/art/ from them
+art-src/
+
 # The deploy's live check writes these when it fails
 live-check.png
 live-check.log

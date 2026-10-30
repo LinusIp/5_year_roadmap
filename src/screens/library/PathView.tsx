@@ -10,6 +10,8 @@ import { Icon } from '../../ui/Icon.tsx';
 import { IconTile } from '../../ui/glyphs.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { count, plural } from '../parts/text.ts';
+import { ArtPanel } from '../../ui/ArtPanel.tsx';
+import { pathSlot } from '../../lib/art.ts';
 import { SHELF_ICON } from './Home.tsx';
 
 /** A shelf's name for one item: "Book", "Practice". */
@@ -82,8 +84,9 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
     <>
       <Header
         title={def.name}
-        sub={path.steps.length > 0 ? plural(path.steps.length, 'step') + ' · ' + path.done + ' done' : 'Not on the plan · ' + optional + ' to browse'}
+        sub={path.steps.length > 0 ? plural(path.steps.length, 'step') + ' · ' + path.done + ' done' : 'Not on the plan · ' + count(optional) + ' to browse'}
         back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />}
+        actions={pathSlot(def.id) ? <ArtPanel slot={pathSlot(def.id)!} aspect="1 / 1" decorative className="w-14" /> : undefined}
       />
       {pages.length > 0 && (
         <RowList label="roadmap.sh" className="mt-[18px]">

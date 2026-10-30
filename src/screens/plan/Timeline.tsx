@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { describeVerdict, verdictTone } from '../../lib/forecast.ts';
+import { ArtPanel } from '../../ui/ArtPanel.tsx';
+import { phaseSlot } from '../../lib/art.ts';
 import { monthName } from '../../lib/dates.ts';
 import type { Goal, Unit } from '../../seed/schema.ts';
 import { goalStatus } from '../../lib/goals.ts';
@@ -210,6 +212,8 @@ export function Timeline({
         <Row key={m.phase.id} height={52} icon={<IconTile icon="flag" tone={position === 0 ? 'blue' : 'ice'} />} title={m.phase.title} meta={phaseMeta(m, position)} expanded={open} chevron onClick={() => setOpenPhase(open ? null : m.phase.id)}>
           {open && (
             <div className="pb-4">
+              {/* The phase's landscape (ATLAS-ART): the river a little further along with each year. */}
+              <ArtPanel slot={phaseSlot(m.phase)} aspect="2 / 1" className="mb-3" alt={'Year ' + m.phase.year + ' of the plan'} />
               {m.phase.theme && <p className="mb-1 text-meta font-medium">{m.phase.theme}</p>}
               <p className="mb-2 text-meta text-ink2">{m.phase.goal}</p>
               <Lanes atlas={atlas} model={m} units={units} isCurrent={false} weekly={null} onLane={(block) => onLane(m.phase.id, block)} />
@@ -221,6 +225,9 @@ export function Timeline({
 
   return (
     <div className="mt-[18px] flex flex-col gap-[18px]">
+      {current && (
+        <ArtPanel slot={phaseSlot(current.phase)} aspect="3 / 1" alt={'Year ' + current.phase.year + ' of the plan'} bottom={<p className="text-meta font-semibold">{current.phase.theme ?? 'Year ' + current.phase.year}</p>} />
+      )}
       {current && (
         <Lanes
           atlas={atlas}

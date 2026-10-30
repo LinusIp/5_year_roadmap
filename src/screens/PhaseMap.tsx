@@ -8,6 +8,7 @@ import { FadeStrip } from '../ui/FadeStrip.tsx';
 import { formatWindow } from '../lib/clock-plan.ts';
 import { scheduleSummary } from './plan/Timeline.tsx';
 import { Icon } from '../ui/Icon.tsx';
+import { ArtPanel } from '../ui/ArtPanel.tsx';
 import { today } from '../lib/dates.ts';
 
 const STAGE_NAME: Record<number, string> = { 1: 'Software engineering mastery', 2: 'Electrical + mechanical' };
@@ -50,7 +51,11 @@ export function PhaseMap() {
     <main id="main" tabIndex={-1} className="min-h-dvh bg-bg outline-none">
       {/* Wider than a phone: it opens with the current phase in view and fades at a hidden edge. */}
       <FadeStrip open="current" label="Five-year map, scroll for the other phases">
-        <div className="flex min-w-[1200px] flex-col gap-7 px-14 py-12">
+        <div className="relative isolate flex min-w-[1200px] flex-col gap-7 px-14 py-12">
+          {/* The journey's river (ATLAS-ART): one long illustration behind the stage bands and the phases, decoration only. */}
+          <div className="pointer-events-none absolute inset-y-6 left-1/2 -z-10 w-56 -translate-x-1/2 opacity-40" aria-hidden="true">
+            <ArtPanel slot="map-river-long" aspect="1 / 3" decorative className="w-full !border-0 !shadow-none" />
+          </div>
           <div className="flex items-start justify-between gap-6">
             <div className="flex flex-col gap-1.5">
               <h1 className="text-hero font-semibold">Five years, six phases</h1>
