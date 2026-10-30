@@ -1223,3 +1223,15 @@ Verified on this machine (Linux, Chromium 140):
 - `src/lib/goals.ts` projects with the same window.
 - Tests: `tests/unit/forecast.test.ts`, `tests/e2e/forecast.spec.ts` (new); replan unit, flex and roadmap e2e.
 - Before and after: `docs/before-after/forecast/`.
+
+## Pull request #37: the UI polish pass
+
+- `src/ui/Screen.tsx`: tab names under the icons, a ground fade behind the floating bar. `src/ui/SegmentedControl.tsx`:
+  never truncates, scrolls under the edge fade; Plan's "Certs" reads as Credentials.
+- Today: the week strip shaded by share of plan with today a ring and a dot for a day that met its plan or kept the
+  streak; the hours and the Slept figure on their tiles without inner pills; "Open"; Blocks today with the blocks under
+  way (`src/lib/blocks-today.ts`).
+- Library: "43 h logged · over estimate" instead of "43 of 40 h"; thousands separators (`count()`); a chevron on the
+  in-progress cards. Light ink2 darkened to #575D6E for 4.5:1 on every ground.
+- Tests: `tests/unit/polish.test.ts`, `tests/e2e/polish.spec.ts` (new); layout e2e. Before/after:
+  `docs/before-after/polish/`.

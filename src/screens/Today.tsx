@@ -16,7 +16,8 @@ import { plannedFor } from '../lib/day-plan.ts';
 import { catchUpMinutes, laneBalance } from '../lib/pace.ts';
 import { planForDay, suggestWeeklyBuild } from '../lib/schedule.ts';
 import type { ScheduledItem, TodayBlock } from '../lib/schedule.ts';
-import { dailyTotals, streak } from '../lib/streaks.ts';
+import { counts as dayCounts, dailyTotals, heatLevel, relativeLevel, streak } from '../lib/streaks.ts';
+import { blockTally } from '../lib/blocks-today.ts';
 import { resolveTheme } from '../lib/theme.ts';
 import { Link, useQueryParam } from '../router/router.tsx';
 import { isRealIsoDate } from '../seed/schema.ts';
@@ -272,8 +273,17 @@ export function Today() {
   // A block counts as done once it is marked done or its time reaches its target.
   const reached = (b: TodayBlock): boolean => done(b) || (b.targetMinutes > 0 && blockMs(b.id) >= b.targetMinutes * 60_000);
   const streakState = streak(atlas.logs, settings.core.streak, date, plannedFor(settings));
-  // The week strip: the six days before today and today. A day counts as it does for the streak.
-  const weekDays = dailyTotals(atlas.logs, addDays(now, -6), now, plannedFor(settings)).map((t) => ({ date: t.date, minutes: t.minutes }));
+  // The week strip: the six days before today and today, each shaded by its share of its plan on the heatmap's ramp,
+  // with a dot under a day that met its plan or kept the streak (ATLAS-UI-POLISH).
+  const weekDays = dailyTotals(atlas.logs, addDays(now, -6), now, plannedFor(settings)).map((t) => ({
+    date: t.date,
+    minutes: t.minutes,
+    level: settings.core.heatmapMode === 'relative' ? relativeLevel(t.minutes, t.planned ?? 0, settings.core.heatmapThresholds) : heatLevel(t.minutes, settings.core.heatmapThresholds),
+    met: t.minutes > 0 && ((t.planned ?? 0) > 0 ? t.minutes >= (t.planned ?? 0) : false),
+    counted: dayCounts(t, settings.core.streak),
+  }));
+  // Blocks today: done, under way (minutes short of the target, or the timer on it), or not yet.
+  const tally = blockTally(blocks, (id) => Math.floor(blockMs(id) / 60_000), (id) => blocks.some((b) => b.id === id && done(b)), timer?.block ?? null);
   const restDay = plan.resolved.rest;
   const nothingPlanned = !restDay && blocks.every((b) => b.kind === 'empty' && !b.weeklyBuild);
   // The day's template is named in the header only when it is not the usual Full day.
@@ -557,7 +567,7 @@ export function Today() {
             {nowRunning || otherRunning ? (
               <p className="flex flex-col items-center gap-1.5">
                 {/* The block's total for today, not this run alone: a restart continues from it. */}
-                <span role="timer" aria-label={'Running, ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'} className="well well-blue rounded-[14px] px-[18px] py-1.5 text-big font-semibold tabular-nums">
+                <span role="timer" aria-label={'Running, ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'} className="text-big font-semibold tabular-nums text-blue-deep">
                   {formatStopwatch(blockMs(timer!.block))}
                 </span>{' '}
                 <span className="text-meta text-ink2">
@@ -567,34 +577,38 @@ export function Today() {
               </p>
             ) : layout.stats ? (
               <p className="flex flex-col items-center gap-1.5">
-                <span className="well well-ice rounded-[14px] px-[18px] py-1.5 text-big font-semibold">{span(dayMinutes)}</span>{' '}
+                <span className="text-big font-semibold">{span(dayMinutes)}</span>{' '}
                 <span className="text-meta text-ink2">{'of ' + span(plan.targetMinutes) + ' today' + (templateNote ? ' · ' + templateNote : '') + ' · ' + (streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet')}</span>
               </p>
             ) : null}
           </div>
         </div>
-        {/* The week so far: a day that counted is blue, today is ice, a day that did not count is pressed in. */}
-        <nav aria-label="This week: a blue day has time logged, a pressed-in day has none, today is ice" className="tile mt-4 flex justify-between px-2.5 py-2.5">
+        {/* The week so far: each day shaded by its share of its plan (the heatmap's ramp), today a ring, a dot under a
+            day that met its plan or kept the streak. */}
+        <nav aria-label="This week: a day is shaded by its share of its plan, today is a ring, a dot marks a day that met its plan or kept the streak" className="tile mt-4 flex justify-between px-2.5 py-2.5">
           {weekDays.map((d) => (
             <button
               key={d.date}
               type="button"
               onClick={() => setDate(d.date)}
               aria-current={d.date === date ? 'date' : undefined}
-              className="flex min-w-11 flex-col items-center gap-1.5"
+              className="flex min-w-11 flex-col items-center gap-1"
             >
               {/* The visible "Sat 10" starts the name; the full date and whether it counted follow for screen readers. */}
               <span className="text-small font-semibold text-ink2">{dayName(d.date, true)}</span>
               <span
                 className={
                   'grid size-[34px] place-items-center rounded-pill text-label font-semibold ' +
-                  (d.date === now ? 'fill-ice' : d.minutes > 0 ? 'fill-blue' : 'well rounded-pill text-ink2') +
-                  (d.date === date && date !== now ? ' outline outline-2 outline-offset-2 outline-blue-deep' : '')
+                  (d.date === now ? 'day-ring' : 'day-' + d.level) +
+                  (d.date === date && date !== now ? ' outline outline-2 outline-dashed outline-offset-2 outline-blue-deep' : '')
                 }
               >
                 {Number(d.date.slice(8, 10))}
               </span>
-              <span className="sr-only">{', ' + dateTitle(d.date) + (d.date === now ? ', today' : '') + (d.minutes > 0 ? ', ' + span(d.minutes) + ' logged' : ', nothing logged')}</span>
+              <span aria-hidden="true" className={'size-1.5 rounded-pill ' + (d.met || d.counted ? 'bg-blue-deep' : 'bg-transparent')} />
+              <span className="sr-only">
+                {', ' + dateTitle(d.date) + (d.date === now ? ', today' : '') + (d.minutes > 0 ? ', ' + span(d.minutes) + ' logged' : ', nothing logged') + (d.met ? ', plan met' : d.counted ? ', streak kept' : '')}
+              </span>
             </button>
           ))}
         </nav>
@@ -805,7 +819,7 @@ export function Today() {
               </Button>
             ) : item?.url ? (
               <Button variant="ice" icon="external" href={item.url} name={resource?.type === 'book' ? 'Open the book' : 'Open course'}>
-                <span className="line-clamp-2 whitespace-normal text-center leading-tight max-[379px]:sr-only">{resource?.type === 'book' ? 'Open the book' : 'Open course'}</span>
+                <span className="truncate max-[379px]:sr-only">Open</span>
               </Button>
             ) : null}
           </div>
@@ -815,26 +829,31 @@ export function Today() {
 
       {!restDay && !nothingPlanned && (
         <div className="mt-4 grid grid-cols-2 gap-4">
-          <div className="tile flex flex-col items-center gap-2 p-3.5">
+          <div className="tile flex flex-col items-center gap-1.5 p-3.5">
             <span className="section-label mb-0">Blocks today</span>
-            <span className="text-big font-semibold leading-none">
-              {blocks.filter(reached).length}
-              <span className="text-ink2">/{blocks.length}</span>
+            <span className="text-card font-semibold leading-none">
+              {tally.done}
+              <span className="text-ink2">/{tally.total}</span>
             </span>
             <span aria-hidden="true" className="flex gap-1.5">
-              {blocks.map((b) => (
-                <span key={b.id} className={'size-3 rounded-pill ' + (reached(b) ? 'fill-blue' : 'well rounded-pill')} />
-              ))}
+              {blocks.map((b) => {
+                const state = tally.states.get(b.id);
+                return <span key={b.id} className={'size-3 rounded-pill ' + (state === 'done' ? 'fill-blue' : state === 'in-progress' ? 'well half-dot' : 'well rounded-pill')} />;
+              })}
             </span>
+            <span className="text-meta text-ink2">{tally.inProgress > 0 ? tally.inProgress + ' in progress' : tally.done === tally.total ? 'All done' : 'None under way'}</span>
           </div>
           {/* Slept: the night that ended on this day's morning (SLEEP-LOG); a tap opens the Sleep screen. */}
-          <Link to={sleepTo} className="tile flex flex-col items-center gap-2 p-3.5">
+          <Link to={sleepTo} className="tile flex flex-col items-center gap-1.5 p-3.5">
             <span className="section-label mb-0">Slept</span>
-            <span className="well-ice rounded-[14px] px-3.5 py-1 text-card font-semibold leading-tight tabular-nums">
+            <span className="text-card font-semibold leading-none tabular-nums">
               {slept ? lengthText(slept.minutes) : <span aria-hidden="true">—</span>}
               {!slept && <span className="sr-only">not logged</span>}
             </span>
-            <span className="text-meta text-ink2">{slept ? timeOf(slept.bed) + ' → ' + timeOf(slept.wake) : 'Log sleep'}</span>
+            <span className="flex items-center gap-0.5 text-meta text-ink2">
+              {slept ? timeOf(slept.bed) + ' → ' + timeOf(slept.wake) : 'Log sleep'}
+              <Icon name="chevronRight" size={16} className="text-ink2" />
+            </span>
           </Link>
         </div>
       )}

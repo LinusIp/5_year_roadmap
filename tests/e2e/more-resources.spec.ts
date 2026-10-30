@@ -13,7 +13,7 @@ test.beforeEach(async ({ page }) => {
 
 test('the Papers shelf lists Attention Is All You Need, year 1 first, and filters by level', async ({ page }) => {
   await open(page, './#/library');
-  await page.getByRole('button', { name: /^\d+ Papers$/ }).click();
+  await page.getByRole('button', { name: /^[\d,]+ Papers$/ }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Papers' })).toBeVisible();
   const rows = page.locator('main ul.rows > *');
   // In the plan's years: the first paper is one for year 1.
@@ -55,7 +55,7 @@ test('search finds FlashAttention, Raft and Diffusion Policy', async ({ page }) 
 test('Robotics and Software architecture list their new resources under Optional', async ({ page }) => {
   await open(page, './#/library');
   // Architecture has nothing on the plan: the home offers it to browse.
-  const architecture = page.getByRole('button', { name: /^Software architecture Not on the plan · \d+ to browse$/ });
+  const architecture = page.getByRole('button', { name: /^Software architecture Not on the plan · [\d,]+ to browse$/ });
   await expect(architecture).toBeVisible();
   await architecture.click();
   await expect(page).toHaveURL(/path=architecture/);

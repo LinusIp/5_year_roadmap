@@ -47,11 +47,14 @@ export function Screen({ title, children }: { title: string; children: ReactNode
   return (
     <>
       {/* Room under the last card for the tab bar: its 68 px, the 24 px it floats above the edge, and 24 px of air, plus
-          the phone's safe area. The layout test checks it at 360, 390 and 412 px. */}
+          the phone's safe area. The layout test checks it at 360, 390 and 412 px on every screen with the bar. */}
       <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[640px] px-5 pb-[calc(68px+24px+24px+env(safe-area-inset-bottom))] outline-none sm:px-6">
         {children}
       </main>
-      {/* The tab bar: a raised pill floating 24 px above the bottom; the active tab is pressed in, in blue-deep. */}
+      {/* A short fade to the ground behind the bar (ATLAS-UI-POLISH): content passing under it does not clash with it. */}
+      <div aria-hidden="true" className="tab-bar-fade pointer-events-none fixed inset-x-0 bottom-0 z-[9] h-[calc(68px+24px+16px+env(safe-area-inset-bottom))]" />
+      {/* The tab bar: a raised pill floating 24 px above the bottom, each tab its icon over its name; the active tab is
+          pressed in, in blue-deep. */}
       <nav aria-label="Main" className="pointer-events-none fixed inset-x-0 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] z-10 px-5 sm:px-6">
         <ul className="tile pointer-events-auto mx-auto flex max-w-[600px] items-center justify-around rounded-pill p-2">
           {tabs.map((tab) => (
@@ -59,10 +62,10 @@ export function Screen({ title, children }: { title: string; children: ReactNode
               <Link
                 to={tab.to}
                 aria-current={tab.to === active ? 'page' : undefined}
-                className="press flex h-12 w-[60px] items-center justify-center rounded-[18px] text-ink2 aria-[current=page]:text-blue-deep aria-[current=page]:[box-shadow:inset_3px_3px_7px_var(--lo),inset_-3px_-3px_7px_var(--hi)]"
+                className="press flex h-[52px] w-[60px] flex-col items-center justify-center gap-0.5 rounded-[18px] text-ink2 aria-[current=page]:text-blue-deep aria-[current=page]:[box-shadow:inset_3px_3px_7px_var(--lo),inset_-3px_-3px_7px_var(--hi)]"
               >
-                <Icon name={tab.icon} size={22} />
-                <span className="sr-only">{tab.label}</span>
+                <Icon name={tab.icon} size={20} />
+                <span className="text-small font-semibold leading-none">{tab.label}</span>
               </Link>
             </li>
           ))}

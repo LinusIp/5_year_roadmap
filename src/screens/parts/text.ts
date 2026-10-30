@@ -27,6 +27,11 @@ export function span(minutes: number): string {
   return m === 0 ? h + ' h' : h + ' h ' + String(m).padStart(2, '0') + ' m';
 }
 
+/** A count with its thousands separator: 15938 -> "15,938" (ATLAS-UI-POLISH). */
+export function count(n: number): string {
+  return new Intl.NumberFormat('en-GB').format(n);
+}
+
 /** Whole hours for large totals: 24720 -> "412 h". */
 export function hours(minutes: number): string {
   return Math.round(minutes / 60).toLocaleString('en-GB') + ' h';

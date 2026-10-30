@@ -13,9 +13,9 @@ test.beforeEach(async ({ page }) => {
 
 test('the Practice tile opens a shelf of practice and problem sets', async ({ page }) => {
   await open(page, './#/library');
-  const tile = page.getByRole('button', { name: /^\d+ Practice$/ });
+  const tile = page.getByRole('button', { name: /^[\d,]+ Practice$/ });
   await expect(tile).toBeVisible();
-  const count = Number((await tile.innerText()).match(/\d+/)![0]);
+  const count = Number((await tile.innerText()).replace(/,/g, '').match(/\d+/)![0]);
   expect(count).toBeGreaterThan(30);
   await tile.click();
   await expect(page).toHaveURL(/type=practice/);
