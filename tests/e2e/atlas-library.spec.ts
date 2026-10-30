@@ -367,7 +367,8 @@ test('the quick filters are one list on the home; Certificates wears its badge, 
   await open(page, './#/library');
   const list = page.getByRole('list', { name: 'Quick filters' }).or(page.locator('section', { hasText: 'Quick filters' }).first());
   for (const label of ['Developer essentials', 'Compact power & energy conversion', 'Security & defence', 'Agents & MCP', 'Certificates', 'Career & interviews', 'Research skills', 'Communication', 'Open source', 'Mandarin (the language)']) {
-    await expect(page.getByRole('button', { name: new RegExp('^' + label.replace(/[()&]/g, '\\$&') + ' \\d+$') })).toBeVisible();
+    // The count carries a thousands separator past a thousand (ATLAS-UI-POLISH): "Agents & MCP 1,023".
+    await expect(page.getByRole('button', { name: new RegExp('^' + label.replace(/[()&]/g, '\\$&') + ' [\\d,]+$') })).toBeVisible();
   }
   await expect(list.first()).toBeVisible();
   const certs = page.getByRole('button', { name: /^Certificates \d+$/ });
