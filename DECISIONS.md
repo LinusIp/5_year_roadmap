@@ -2246,6 +2246,11 @@ lists, rows or the tab bar.
 (`precachedArt` in `scripts/lib/vite-plugin-sw.ts`). `tests/e2e/art.spec.ts` watches layout-shift entries while
 Today loads: under 0.05, and the panel's box is its aspect ratio, not its picture.
 
+**The live check after the polish pass.** The deploy of pull request #37's merge served the new build and then
+failed its own live check: `scripts/live-check.ts` waited for the Library's Courses tile as "1176 Courses", and the
+tile has said "1,176 Courses" since that pass. The pattern now takes the separator; the fix rides this pull request,
+the first to reach main after it.
+
 Tests: `tests/unit/art.test.ts` (the manifest's rules and the committed file, the slot for an hour, a season, a
 track and a year, the fallback to the placeholder and the list of slots still on it, a motif for every slot, the
 precache rule); `tests/e2e/art.spec.ts` (the header on its picture and the plain row with the setting off, the
