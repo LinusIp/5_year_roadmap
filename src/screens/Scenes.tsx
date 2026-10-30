@@ -97,7 +97,7 @@ export function Scenes() {
                 className={'relative block aspect-[3/4] w-full overflow-hidden rounded-[18px] ' + (selected?.id === s.id ? 'outline outline-[3px] outline-offset-2 outline-blue-deep' : '')}
               >
                 <ScenePanel slot="scenes-cell" scene={s} thumb bare focal="50% 40%" className="absolute inset-0" />
-                {today && <span className="absolute left-1.5 top-1.5 rounded-pill bg-[var(--l0)] px-1.5 text-[10px] font-semibold leading-4 text-[#FFFFFF]">TODAY</span>}
+                {today && <span className="absolute left-1.5 top-1.5 rounded-pill bg-[var(--l0)] px-1.5 text-[10px] font-semibold leading-4 text-[var(--on-lane)]">TODAY</span>}
                 {(isStarred(s.id) || prefs.pinned === s.id) && (
                   <span className="scene-chip absolute right-1.5 top-1.5 grid size-5 place-items-center !rounded-pill text-ink">
                     <Icon name={prefs.pinned === s.id ? 'pin' : 'star'} size={12} />

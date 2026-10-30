@@ -47,6 +47,8 @@
    * The five lanes (ATLAS-DAILY-SCENES): a scene sets --l (a fill with white text), --t (a soft tint), --x (text on
    * the tint) and --d (decoration) for each; without one they fall back to the clay's blue and ice.
    */
+  /* Text on a lane fill is always white: every lane colour reads with it at 4.5:1 (scripts/scenes.ts). */
+  --on-lane: #FFFFFF;
   --l0: var(--blue-deep); --t0: var(--blue-soft); --x0: var(--blue-deep); --d0: var(--deco);
   --l1: var(--ice-deep); --t1: var(--ice-soft); --x1: var(--ice-deep); --d1: var(--ice);
   --l2: var(--blue-deep); --t2: var(--blue-soft); --x2: var(--blue-deep); --d2: var(--deco);
