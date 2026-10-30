@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { serveYouTube } from './focus-route.ts';
 import { open, PAGES, reload } from './helpers.ts';
 
 /**
@@ -36,6 +37,8 @@ for (const theme of ['light', 'dark'] as const) {
 
 test('every screen fits a 380 px screen and logs no errors', async ({ page }) => {
   test.setTimeout(90_000);
+  // Focus's thumbnails come from YouTube (ATLAS-FOCUS-MUSIC): stood in for, so an offline runner logs no failed load.
+  await serveYouTube(page);
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(String(error)));
   page.on('console', (message) => {

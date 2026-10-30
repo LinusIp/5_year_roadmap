@@ -188,6 +188,18 @@ ones; the Daily scenes page (also behind Today's header) shows them all with the
 `scenes-src/` (only images you have the rights to; `public/scenes/CREDITS.md` lists them); `npm run scenes` writes
 the files and the palettes into `public/scenes/`, and fails if a palette cannot be made readable.
 
+## Focus
+
+The sixth tab plays calm, long music sessions to study to: lofi, piano, classical, ambient, rain and nature, jazz,
+and your own YouTube links, through YouTube's official player on `youtube-nocookie.com` (nothing is downloaded,
+and nothing plays until you tap). The player stays on screen while it plays, docked above the tab bar on the other
+screens. A session timer runs 25, 50, 60 or 90 minutes or until the block ends, then fades the music out. Atlas
+sounds (white, pink and brown noise, soft rain, an ambient pad) are generated in the browser, so they play offline
+and with the screen locked, alone or under a video. Settings › Schedule gives each block a default mix; Today's
+block card opens Focus with it, Start asks once whether to start the music too, and Stop fades it out. The starter
+list is checked against YouTube's oEmbed endpoint on CI, weekly and on every pull request. Focus minutes count for
+nothing: only the block timer logs time.
+
 ## Making it yours
 
 Atlas starts as the plan in `data/`: the same 10-hour day, every day. Real weeks are not like that, so the day,
@@ -221,6 +233,7 @@ you use it: every option sits behind an Edit or Change action in a sheet.
 | Theme, week start, 12- or 24-hour clock, density | Settings › Layout › General |
 | Illustrations on or off; what Today's picture follows (the hour, the season, the block's track) | Settings › Layout › Today |
 | The daily scene on or off, pinned, skipped for today, or favourites only | Settings › Appearance, and the Daily scenes page |
+| A block's Focus music, offered when its timer starts | Settings › Schedule › Focus music |
 | Add a resource, project, paper or track of your own | Library › a shelf › Add a resource |
 | Turn the daily challenge off, or move the weekly slot to other days | Settings › Projects |
 

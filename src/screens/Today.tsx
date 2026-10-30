@@ -24,6 +24,12 @@ import { useArtSettings } from '../hooks/useArt.ts';
 import { SCENES, useCurrentScene } from '../hooks/useScenes.ts';
 import { laneSlot, pickScene, shiftDate } from '../lib/scenes.ts';
 import { applyScene } from '../lib/theme.ts';
+import { blockEndsAt, mixFor, shouldOffer } from '../lib/focus.ts';
+import { blockStopped, play as playFocus } from '../lib/focus-player.ts';
+import { categoryLabel } from '../seed/focus.ts';
+import type { FocusCategory } from '../seed/focus.ts';
+import { firstOf } from '../lib/focus-sessions.ts';
+import { saveFocusPrefs } from './settings/shared.tsx';
 import { ScenePanel, SceneSwatches } from '../ui/ScenePanel.tsx';
 import { phaseSlot, streakSlot, todaySlot } from '../lib/art.ts';
 import type { ArtSlot } from '../seed/art.ts';
@@ -195,6 +201,7 @@ export function Today() {
   // and is never saved.
   const current = useCurrentScene();
   const [sceneShift, setSceneShift] = useState(0);
+  const [offer, setOffer] = useState<{ block: string; mix: string } | null>(null);
   const previewDay = sceneShift === 0 ? null : shiftDate(current.day, sceneShift);
   const previewScene = previewDay ? (pickScene(SCENES, previewDay, { ...current.prefs, pinned: undefined, skipped: undefined })?.scene ?? null) : null;
   const sceneShown = previewScene ?? current.scene;
@@ -449,9 +456,17 @@ export function Today() {
   const start = (): void => {
     if (!nowBlock) return;
     void startTimer({ block: nowBlock.id, track: item?.track ?? 'career', refId: item?.refId });
+    // "Start with Lofi?" (ATLAS-FOCUS-MUSIC): once per block with a saved mix, remembered either way.
+    const mix = shouldOffer(settings.focus, nowBlock.id);
+    if (mix) setOffer({ block: nowBlock.id, mix });
   };
-  // The timer logs each day's part on its own day, so a stop never needs to know which date is on screen.
-  const stop = (): void => void stopTimer();
+  // The timer logs each day's part on its own day, so a stop never needs to know which date is on screen. A Focus
+  // session started for the block fades out with it.
+  const stop = (): void => {
+    if (timer) blockStopped(timer.block);
+    setOffer(null);
+    void stopTimer();
+  };
   // Starting a block while another runs switches: the other stops and keeps its minutes.
   const otherName = otherRunning && timer ? blockShort(settings.core.blocks.find((b) => b.id === timer.block)?.name ?? timer.block) : null;
 
@@ -807,6 +822,8 @@ export function Today() {
             </p>
             {!expanded && (
               <div className="-my-1 flex shrink-0 gap-2">
+                {/* Focus music (ATLAS-FOCUS-MUSIC): opens the tab with the block's mix. */}
+                {isToday && <Button variant="icon" icon="headphones" className="!size-11" label={'Focus music' + (mixFor(settings.focus, nowBlock.id) ? ' · ' + categoryLabel(mixFor(settings.focus, nowBlock.id)!) : '') + ' for ' + blockShort(nowBlock.def.name)} to={'/focus?block=' + nowBlock.id} />}
                 {otherName && (
                   <Button size="sm" icon="stop" name={'Stop ' + otherName} onClick={stop}>
                     {otherName}
@@ -848,6 +865,32 @@ export function Today() {
               <ProgressLine value={nowBlock.targetMinutes > 0 ? nowMinutes / nowBlock.targetMinutes : 0} label={'Time on ' + blockShort(nowBlock.def.name) + ' today'} lane={laneSlot(nowBlock.id)} />
             )}
           </div>
+          {offer && offer.block === nowBlock.id && (
+            <div role="status" className="mt-3 flex flex-wrap items-center gap-2 rounded-knob bg-blue-soft px-3 py-2">
+              <span className="flex-1 text-meta font-medium">{'Start with ' + categoryLabel(offer.mix) + '?'}</span>
+              <Button
+                size="sm"
+                icon="headphones"
+                onClick={() => {
+                  const session = firstOf(offer.mix as FocusCategory, settings.focus);
+                  if (session) playFocus(session, { timer: 'block', blockEndsAt: blockEndsAt(windowOf(offer.block), new Date()), block: offer.block });
+                  saveFocusPrefs((p) => ({ ...p, offered: { ...p.offered, [offer.block]: true } }));
+                  setOffer(null);
+                }}
+              >
+                Yes
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  saveFocusPrefs((p) => ({ ...p, offered: { ...p.offered, [offer.block]: false } }));
+                  setOffer(null);
+                }}
+              >
+                Not now
+              </Button>
+            </div>
+          )}
 
           {lessons && item && (
             <div className="mt-3">

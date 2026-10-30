@@ -7,6 +7,8 @@ import { seed } from '../../seed/index.ts';
 import { SettingsDefaultsSchema } from '../../seed/schema.ts';
 import type { SettingsDefaults } from '../../seed/schema.ts';
 import { Button } from '../../ui/Button.tsx';
+import { DEFAULT_FOCUS_PREFS } from '../../lib/focus.ts';
+import type { FocusPrefs } from '../../lib/focus.ts';
 
 export const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export const DAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -39,6 +41,11 @@ export async function saveCore(change: (core: SettingsDefaults) => SettingsDefau
 /** Saves a change to the settings outside the core (schedule, pace, layout). */
 export async function saveSettings(change: (current: StoredSettings) => StoredSettings): Promise<void> {
   await updateSettings(seed.settings, change);
+}
+
+/** Saves a change to the Focus tab's preferences (ATLAS-FOCUS-MUSIC). */
+export function saveFocusPrefs(change: (prefs: FocusPrefs) => FocusPrefs): void {
+  void saveSettings((s) => ({ ...s, focus: change(structuredClone(s.focus ?? DEFAULT_FOCUS_PREFS)) }));
 }
 
 export function Section({ id, title, children, onReset }: { id?: string; title: string; children: ReactNode; onReset?: () => void }) {

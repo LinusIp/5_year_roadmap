@@ -20,6 +20,7 @@ const SCREENS: [string, string][] = [
   ['Calendar', './#/calendar'],
   ['Calendar day', './#/calendar?view=day'],
   ['Library', './#/library'],
+  ['Focus', './#/focus'],
   ['Settings', './#/settings'],
 ];
 

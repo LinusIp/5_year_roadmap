@@ -9,6 +9,7 @@ import { ForgottenTimer } from './screens/parts/ForgottenTimer.tsx';
 import { SyncNotice } from './screens/parts/SyncNotice.tsx';
 import { UpdateNotice } from './screens/parts/UpdateNotice.tsx';
 import { UndoToast } from './ui/UndoToast.tsx';
+import { FocusPlayer } from './ui/FocusPlayer.tsx';
 import { Today } from './screens/Today.tsx';
 import { seed } from './seed/index.ts';
 import { useCurrentScene } from './hooks/useScenes.ts';
@@ -20,6 +21,7 @@ import { useCurrentScene } from './hooks/useScenes.ts';
  */
 const Activity = lazy(() => import('./screens/Activity.tsx').then((m) => ({ default: m.Activity })));
 const Plan = lazy(() => import('./screens/Plan.tsx').then((m) => ({ default: m.Plan })));
+const Focus = lazy(() => import('./screens/Focus.tsx').then((m) => ({ default: m.Focus })));
 const Scenes = lazy(() => import('./screens/Scenes.tsx').then((m) => ({ default: m.Scenes })));
 const Library = lazy(() => import('./screens/Library.tsx').then((m) => ({ default: m.Library })));
 const Reviews = lazy(() => import('./screens/Reviews.tsx').then((m) => ({ default: m.Reviews })));
@@ -53,6 +55,7 @@ const ROUTES: RouteDef[] = [
   { pattern: '/stats', render: () => <Stats /> },
   { pattern: '/settings', render: () => <Settings /> },
   { pattern: '/scenes', render: () => <Scenes /> },
+  { pattern: '/focus', render: () => <Focus /> },
   { pattern: '/challenge/:id', render: (p) => <Challenge id={p.id!} /> },
   { pattern: '/blog', render: () => <BlogPost /> },
   { pattern: '/sleep', render: () => <Sleep /> },
@@ -139,6 +142,7 @@ export function App() {
       <Suspense fallback={<Loading />}>{page}</Suspense>
       <KeyboardShortcuts />
       {settings && <ForgottenTimer blocks={settings.core.blocks} clock={settings.layout.general.clock} />}
+      <FocusPlayer />
       <SyncNotice />
       <UpdateNotice />
       <UndoToast />

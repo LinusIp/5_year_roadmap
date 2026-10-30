@@ -443,7 +443,7 @@ export const PauseSchema = z.strictObject({
 });
 export type Pause = z.infer<typeof PauseSchema>;
 
-export const TAB_IDS = ['today', 'plan', 'calendar', 'library', 'activity', 'projects', 'map', 'reviews'] as const;
+export const TAB_IDS = ['today', 'plan', 'calendar', 'library', 'activity', 'focus', 'projects', 'map', 'reviews'] as const;
 export type TabId = (typeof TAB_IDS)[number];
 export const PLAN_SEGMENTS = ['timeline', 'projects', 'papers', 'credentials', 'roadmaps'] as const;
 
@@ -461,8 +461,8 @@ export const LayoutSchema = z.strictObject({
     /** What the header's illustration follows (ATLAS-ART): the hour (default), the season or the current block's track. */
     art: z.enum(['time', 'season', 'track']).optional(),
   }),
-  /** 3 to 5 tabs; Today is always first. */
-  tabs: z.array(z.enum(TAB_IDS)).min(3).max(5),
+  /** 3 to 6 tabs; Today is always first. */
+  tabs: z.array(z.enum(TAB_IDS)).min(3).max(6),
   plan: z.strictObject({ segment: z.enum(PLAN_SEGMENTS), showDropped: z.boolean() }),
   general: z.strictObject({
     clock: z.enum(['24', '12']),
@@ -474,6 +474,25 @@ export const LayoutSchema = z.strictObject({
 export type Layout = z.infer<typeof LayoutSchema>;
 
 /** The daily scene's preferences (ATLAS-DAILY-SCENES): src/lib/scenes.ts ScenePrefs, absent in settings saved before them. */
+/** The Focus tab's preferences (ATLAS-FOCUS-MUSIC): src/lib/focus.ts FocusPrefs, absent in settings saved before it. */
+export const FocusPrefsSchema = z.strictObject({
+  sessions: z.array(
+    z.strictObject({
+      id: z.string().min(1),
+      url: z.string().url(),
+      videoId: z.string().min(1),
+      kind: z.enum(['video', 'playlist']),
+      title: z.string().min(1).max(200),
+      channel: z.string().max(120),
+      thumbnail: z.string(),
+      addedAt: z.string(),
+    }),
+  ),
+  mixes: z.record(BlockIdSchema, z.enum(['mine', 'lofi', 'piano', 'classical', 'ambient', 'rain', 'jazz', 'brown'])),
+  offered: z.record(BlockIdSchema, z.boolean()),
+  volume: z.number().int().min(0).max(100),
+  layerVolume: z.number().int().min(0).max(100),
+});
 export const ScenePrefsSchema = z.strictObject({
   on: z.boolean(),
   pinned: z.string().optional(),
@@ -514,6 +533,7 @@ export const StoredSettingsSchema = z.strictObject({
   catchUp: z.record(BlockIdSchema, z.strictObject({ capMinutes: z.number().int().min(5).max(240) })).optional(),
   layout: LayoutSchema.optional(),
   scenes: ScenePrefsSchema.optional(),
+  focus: FocusPrefsSchema.optional(),
   ...Stamp,
 });
 /** What the parsers accept: version 1, 2 or 3. */

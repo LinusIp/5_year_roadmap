@@ -2343,3 +2343,76 @@ preview buttons, a skip and Favourites only, the setting off, and axe over Today
 a colourful and a monochrome scene in both themes). Pictures: `docs/before-after/scenes/`; the screenshot baselines
 add Today, Plan and the Library under those three scenes and the page itself.
 
+## Focus: calm music sessions in the study flow (ATLAS-FOCUS-MUSIC, pull request #40)
+
+**YouTube only through its own player, and nothing on page load.** Every session is a YouTube video or playlist
+played by the official IFrame Player on `youtube-nocookie.com` (`src/ui/FocusPlayer.tsx`), created the first time a
+session is tapped: no script of YouTube's loads before that, nothing ever autoplays, no ad is touched, and the
+title and channel sit beside the player wherever it is. Nothing is downloaded, ripped or re-hosted;
+`public/audio/CREDITS.md` says the app ships no audio file at all. The player is one for the whole app, mounted in
+the shell (`src/lib/focus-player.ts` holds the state, the Focus screen and Today act on it): on the Focus tab it
+fills the Now playing tile (the tile registers where, the embed sits over it), and on every other screen it docks
+above the tab bar at 200 × 200 px, the policy's smallest size, with its title, channel, pause and stop. It is never
+hidden or covered while anything plays, which is what lets a session started from Today's block card keep going.
+
+**A pasted link is YouTube's word, not ours.** `parseYouTubeUrl` reads a watch, youtu.be, shorts, embed, live or
+playlist address and rebuilds the canonical one; only that is asked of oEmbed
+(`https://www.youtube.com/oembed?url=…&format=json`), and only an answer with a title, a channel and an iframe is
+saved (a 401 is "YouTube does not allow this video to be embedded", a 404 "YouTube cannot find that video").
+The user's sessions, their order, each block's mix and the once-only offers live in the settings (`settings.focus`,
+optional, so nothing migrates) and sync with the rest; a separate table would have meant a new file kind in the
+data repository for a dozen rows.
+
+**The starter list is the brief's, and only the brief's.** YouTube is outside this session's network, so no
+address could be confirmed from here; the brief lists fourteen ids it checked through oEmbed on 30 October 2026,
+and `data/focus-sessions.json` carries exactly those, their canonical addresses rebuilt from the ids, two to four
+per category where the brief had them (My sessions, Lofi, Piano, Classical, Ambient, Rain & nature, Jazz). Nothing
+was invented to reach "about twenty"; Brown noise is a category of the Atlas sounds, not of YouTube. The
+confirmation the brief asks for at build time runs on CI, where YouTube is reachable: `npm run focus:verify`
+(`scripts/focus-verify.ts`) asks oEmbed about every row and fails on any that is gone or refuses embedding, as the
+`focus-oembed` job of every pull request and the weekly `focus-check` workflow, which opens (or extends) an issue
+listing the failures. `validate:data` checks the shape on every build. Duration labels are only what the brief
+gave ("LIVE", "2 h"): there is no Data API key, so the rest are left empty rather than guessed.
+
+**Atlas sounds are generated.** A YouTube embed pauses when the phone locks, so the Focus tab also offers sounds the
+browser makes itself with the Web Audio API (`src/lib/sounds.ts`): white, pink and brown noise as looped buffers
+(Park–Miller seeded, so the unit test can check them), soft rain as band-passed pink noise with random droplets, a
+pad of detuned oscillators through a low-pass filter and a generated reverb. One at a time, a 5 s ramp in and out,
+their own volume and a second volume for a sound layered under a video; the Media Session API names them on the
+lock screen ("Atlas · Brown noise"). They need no file and no licence.
+
+**Tied to the block, counting for nothing.** The session timer is 25, 50, 60 or 90 minutes or "Till 12:00", the
+block's end from the day's schedule; at its end everything fades out over five seconds. Today's block card has a
+headphones knob that opens Focus with the block's mix (Settings › Schedule › Focus music, a category per block);
+Start on a block with a mix asks "Start with Lofi?" once, in the card, and remembers Yes or Not now per block;
+Stop on the block fades out a session started for it. Focus minutes log nothing: only the block timer and the
+check-ins do.
+
+**Six tabs.** Focus joins the tab bar as the sixth default (`withCalendarTab` adds it for everyone on the five
+defaults; chosen tabs stay; Settings › Layout allows up to six). At 360 px the pill is 320 px wide; with six tabs its
+side padding gives way to 4 px, each tab is 52 px wide and 52 px tall, and the widest label ("Calendar", 51 px)
+fits, so the brief's question ("if they don't fit, ask") did not arise; `tests/e2e/focus.spec.ts` measures it.
+
+**The theme.** The scenes brief said the Focus screen is always dark on the scene's dark set; this brief says
+dark looks good there by default and to follow the user's theme setting. The screen follows the theme, like every
+other: a user in the light theme gets the light scene palette, one in the dark theme the dark set.
+
+**Privacy.** The Focus tab is the one screen that talks to a third party without a token: the rows' thumbnails
+come from `i.ytimg.com` and the player from YouTube once tapped. The no-foreign-requests test in
+`tests/e2e/github.spec.ts` keeps covering every other screen. The app sets no Content-Security-Policy (GitHub
+Pages sends none); if one is added, `img-src` must allow `i.ytimg.com`, `frame-src` `www.youtube-nocookie.com` and
+`script-src` `www.youtube.com`.
+
+Tests: `tests/unit/focus.test.ts` (the addresses, the oEmbed reading, the timer and the block's end, the mix and
+the once-only offer, the starter list's shape, the player's state machine with the fades, the sound buffers, the
+sixth tab); `tests/e2e/focus.spec.ts` with YouTube stood in for (`tests/e2e/focus-route.ts`: a stub IFrame API, oEmbed
+answering 200, 401 and 404, thumbnails as a pixel): the tab bar at 360 px, a session through the embed on
+youtube-nocookie.com and docked on Today, a pasted link confirmed, saved, reordered and removed, the timer stopping
+playback, Today's card opening Focus with the mix, the once-only offer and the block's Stop, the noise generator
+starting and stopping with its lock-screen metadata. Pictures: `docs/before-after/focus/`.
+
+Known limits: iOS pauses a YouTube embed when the phone locks or the PWA goes to the background (the Atlas sounds
+carry on); on a phone the first play after the API loads can need a second tap, since the tap that loaded the API
+is not the one that starts the video; no durations without a Data API key; the starter list could not be confirmed
+from this session and is confirmed by CI instead.
+

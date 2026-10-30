@@ -1,0 +1,43 @@
+name: Focus sessions check
+
+# The Focus tab's starter list (data/focus-sessions.json, ATLAS-FOCUS-MUSIC) is asked of YouTube's oEmbed endpoint
+# once a week: a live stream's id changes, an upload can stop allowing embeds. A failure opens an issue listing the
+# dead or non-embeddable entries (one open issue at a time).
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  oembed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - id: verify
+        run: |
+          set +e
+          npm run -s focus:verify > focus-report.md 2> focus-summary.txt
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+          cat focus-report.md
+          cat focus-summary.txt
+      - name: Open an issue when an entry fails
+        if: steps.verify.outputs.code != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Focus sessions: an entry no longer embeds ($(date -u +%Y-%m-%d))"
+          body="$(printf 'The weekly oEmbed check of data/focus-sessions.json failed.\n\n%s\n\n%s\n\nFix: replace the entry with one oEmbed confirms, or remove it; never invent an address.\n' "$(cat focus-summary.txt)" "$(cat focus-report.md)")"
+          existing=$(gh issue list --state open --search "Focus sessions: an entry no longer embeds in:title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then gh issue comment "$existing" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
+      - name: Fail the run when an entry fails
+        if: steps.verify.outputs.code != '0'
+        run: exit 1

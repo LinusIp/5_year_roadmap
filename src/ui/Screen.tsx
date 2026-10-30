@@ -15,11 +15,12 @@ export const TAB_DEFS: Record<TabId, { to: string; label: string; icon: IconName
   calendar: { to: '/calendar', label: 'Calendar', icon: 'calendar' },
   library: { to: '/library', label: 'Library', icon: 'library' },
   activity: { to: '/activity', label: 'Activity', icon: 'activity' },
+  focus: { to: '/focus', label: 'Focus', icon: 'headphones' },
   projects: { to: '/plan?view=projects', label: 'Projects', icon: 'projects' },
   map: { to: '/plan/map', label: 'Map', icon: 'map' },
   reviews: { to: '/reviews', label: 'Reviews', icon: 'reviews' },
 };
-const DEFAULT_TABS: TabId[] = ['today', 'plan', 'calendar', 'library', 'activity'];
+const DEFAULT_TABS: TabId[] = ['today', 'plan', 'calendar', 'library', 'activity', 'focus'];
 
 /**
  * A screen: one column of tiles 18 px apart, 20 px gutters on a phone and 24 px from a tablet up, at most 640 px
@@ -56,13 +57,15 @@ export function Screen({ title, children }: { title: string; children: ReactNode
       {/* The tab bar: a raised pill floating 24 px above the bottom, each tab its icon over its name; the active tab is
           pressed in, in blue-deep. */}
       <nav aria-label="Main" className="pointer-events-none fixed inset-x-0 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] z-10 px-5 sm:px-6">
-        <ul className="tile pointer-events-auto mx-auto flex max-w-[600px] items-center justify-around rounded-pill p-2">
+        {/* Six tabs (ATLAS-FOCUS-MUSIC) share the pill's width: at 360 px each is 52 px wide, the widest label 51, every
+            target 52 px tall; the side padding gives way to 4 px for them. */}
+        <ul className={'tile pointer-events-auto mx-auto flex max-w-[600px] items-center justify-around rounded-pill py-2 ' + (tabs.length >= 6 ? 'px-1' : 'px-2')}>
           {tabs.map((tab) => (
             <li key={tab.to}>
               <Link
                 to={tab.to}
                 aria-current={tab.to === active ? 'page' : undefined}
-                className="press flex h-[52px] w-[60px] flex-col items-center justify-center gap-0.5 rounded-[18px] text-ink2 aria-[current=page]:text-blue-deep aria-[current=page]:[box-shadow:inset_3px_3px_7px_var(--lo),inset_-3px_-3px_7px_var(--hi)]"
+                className={'press flex h-[52px] flex-col items-center justify-center gap-0.5 rounded-[18px] text-ink2 aria-[current=page]:text-blue-deep aria-[current=page]:[box-shadow:inset_3px_3px_7px_var(--lo),inset_-3px_-3px_7px_var(--hi)] ' + (tabs.length >= 6 ? 'min-w-11 flex-1' : 'w-[60px]')}
               >
                 <Icon name={tab.icon} size={20} />
                 <span className="text-small font-semibold leading-none">{tab.label}</span>

@@ -10,6 +10,7 @@ import { loadInternships } from './lib/load-internships.ts';
 import { loadSeed } from './lib/load-seed.ts';
 import { loadArtManifest } from './lib/load-art.ts';
 import { loadScenes } from './lib/load-scenes.ts';
+import { loadFocusSessions } from './lib/load-focus.ts';
 
 const result = loadSeed();
 const { seed } = result;
@@ -41,6 +42,9 @@ errors.push(...art.errors);
 // every file present and under 180 KB.
 const scenes = loadScenes();
 errors.push(...scenes.errors);
+// The Focus tab's starter sessions (data/focus-sessions.json, ATLAS-FOCUS-MUSIC): the shape; oEmbed is asked on CI.
+const focus = loadFocusSessions();
+errors.push(...focus.errors);
 
 for (const w of warnings) console.warn('warning  ' + w);
 
@@ -65,6 +69,7 @@ const lines: [string, string | number][] = [
   ['project catalogue', catalogueSummary()],
   ['designs', designSummary()],
   ['internship goals', (internships?.goals ?? []).map((g) => g.goal.title + ' (' + g.targets.length + ' targets, ' + g.phases.length + ' phases)').join('; ') || 'none'],
+  ['focus sessions', (focus.sessions ?? []).length + ' (oEmbed re-checked by CI)'],
   ['daily scenes', (scenes.scenes ?? []).length + ' (every contrast check passed)'],
   ['roadmap.sh roadmaps', seed.roadmaps.length + ' (' + seed.roadmaps.reduce((n, r) => n + r.sections.reduce((m, s) => m + s.nodes.length, 0), 0) + ' nodes)'],
 ];

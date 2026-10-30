@@ -97,7 +97,7 @@ export function Layout({ atlas }: { atlas: Atlas }) {
   const toggleTab = (id: TabId, on: boolean): void =>
     saveLayout((l) => {
       const tabs = on ? [...l.tabs, id] : l.tabs.filter((t) => t !== id);
-      if (tabs.length < 3 || tabs.length > 5) return l;
+      if (tabs.length < 3 || tabs.length > 6) return l;
       return { ...l, tabs };
     });
 
@@ -151,12 +151,12 @@ export function Layout({ atlas }: { atlas: Atlas }) {
         <RowList>
           {TAB_IDS.map((id) => {
             const on = layout.tabs.includes(id);
-            const locked = id === 'today' || (on && layout.tabs.length <= 3) || (!on && layout.tabs.length >= 5);
+            const locked = id === 'today' || (on && layout.tabs.length <= 3) || (!on && layout.tabs.length >= 6);
             return (
               <Row
                 key={id}
                 title={TAB_DEFS[id].label}
-                meta={id === 'today' ? 'Always first' : locked ? (on ? 'At least three tabs' : 'At most five tabs') : undefined}
+                meta={id === 'today' ? 'Always first' : locked ? (on ? 'At least three tabs' : 'At most six tabs') : undefined}
                 toggle={{ on, disabled: locked, onChange: (next) => toggleTab(id, next) }}
               />
             );

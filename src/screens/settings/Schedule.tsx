@@ -13,7 +13,8 @@ import { Sheet } from '../../ui/Sheet.tsx';
 import { TextField } from '../../ui/TextField.tsx';
 import { PickerSheet } from '../parts/PickerSheet.tsx';
 import { blockShort, span } from '../parts/text.ts';
-import { DATE_OF_DAY, DAY_LONG, DAY_SHORT, Problem, Section, describeDays, parseDateInput, saveCore, saveSettings } from './shared.tsx';
+import { DATE_OF_DAY, DAY_LONG, DAY_SHORT, Problem, Section, describeDays, parseDateInput, saveCore, saveFocusPrefs, saveSettings } from './shared.tsx';
+import { categoryLabel, FOCUS_CATEGORIES } from '../../seed/focus.ts';
 
 function templateMinutes(t: DayTemplate, blocks: BlockDef[]): number {
   return t.blocks.reduce((sum, b) => sum + (b.minutes ?? blocks.find((d) => d.id === b.block)?.minutes ?? 0), 0);
@@ -391,6 +392,7 @@ export function Blocks({ settings }: { settings: StoredSettings }) {
   const [open, setOpen] = useState<string | null>(null);
   const [ordering, setOrdering] = useState(false);
   const [pickingDay, setPickingDay] = useState(false);
+  const [mixing, setMixing] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const blocks = settings.core.blocks;
   const move = (from: number, to: number): void =>
@@ -426,6 +428,45 @@ export function Blocks({ settings }: { settings: StoredSettings }) {
         ))}
         <Row title="Weekly review" trailing={dayName(DATE_OF_DAY[settings.core.review.day]!)} onClick={() => setPickingDay(true)} />
       </RowList>
+      {/* Each block's default mix (ATLAS-FOCUS-MUSIC): offered once when its timer starts, and Today's music action opens it. */}
+      <RowList className="mt-4" label="Focus music" aside="offered when the block starts">
+        {blocks.map((block) => {
+          const mix = settings.focus?.mixes[block.id];
+          return <Row key={block.id} title={blockShort(block.name)} trailing={mix ? categoryLabel(mix) : 'None'} chevron onClick={() => setMixing(block.id)} />;
+        })}
+      </RowList>
+      <Sheet open={mixing !== null} title={'Focus music for ' + blockShort(blocks.find((b) => b.id === mixing)?.name ?? '')} onClose={() => setMixing(null)}>
+        <RowList>
+          <Row
+            title="None"
+            meta="Nothing is offered when the block starts"
+            selected={mixing !== null && !settings.focus?.mixes[mixing]}
+            onClick={() => {
+              saveFocusPrefs((p) => {
+                const { [mixing!]: _gone, ...mixes } = p.mixes;
+                const { [mixing!]: _asked, ...offered } = p.offered;
+                return { ...p, mixes, offered };
+              });
+              setMixing(null);
+            }}
+          />
+          {FOCUS_CATEGORIES.map((c) => (
+            <Row
+              key={c.key}
+              title={c.label}
+              selected={mixing !== null && settings.focus?.mixes[mixing] === c.key}
+              onClick={() => {
+                saveFocusPrefs((p) => {
+                  const { [mixing!]: _asked, ...offered } = p.offered;
+                  return { ...p, mixes: { ...p.mixes, [mixing!]: c.key }, offered };
+                });
+                setMixing(null);
+              }}
+            />
+          ))}
+        </RowList>
+        <p className="mt-3 text-meta text-ink2">When this block's timer starts, Today asks once whether to start the music too, and remembers the answer.</p>
+      </Sheet>
       <div className="mt-3 flex flex-wrap gap-2">
         <Button
           icon="plus"
