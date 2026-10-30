@@ -55,7 +55,7 @@ test('search finds FlashAttention, Raft and Diffusion Policy', async ({ page }) 
 test('Robotics and Software architecture list their new resources under Optional', async ({ page }) => {
   await open(page, './#/library');
   // Architecture has nothing on the plan: the home offers it to browse.
-  const architecture = page.getByRole('button', { name: /^Software architecture Not on the plan · \d+ to browse$/ });
+  const architecture = page.getByRole('button', { name: /^Software architecture Not on the plan · [\d,]+ to browse$/ });
   await expect(architecture).toBeVisible();
   await architecture.click();
   await expect(page).toHaveURL(/path=architecture/);

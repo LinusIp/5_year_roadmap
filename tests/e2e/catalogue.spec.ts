@@ -156,7 +156,7 @@ test.describe('with the clock on the plan’s first day', () => {
     await pickFilter('Phase', /^Year 2/);
     await expect(page).toHaveURL(/kind=case/);
     await expect(page).toHaveURL(/phase=y2/);
-    const count = Number((await page.getByText(/^\d+ of \d+$/).innerText()).split(' ')[0]);
+    const count = Number((await page.getByText(/^[\d,]+ of [\d,]+$/).innerText()).split(' ')[0]!.replace(/,/g, ''));
     expect(count).toBeGreaterThan(0);
     const rows = page.locator('main ul').last().getByRole('listitem');
     await expect(rows).toHaveCount(count);
@@ -166,7 +166,7 @@ test.describe('with the clock on the plan’s first day', () => {
   test('the long Library list is windowed: about 1,600 entries, a few dozen rows drawn', async ({ page }) => {
     await open(page, './#/library');
     await page.getByRole('button', { name: /^Projects \d+$/ }).click();
-    const count = Number((await page.getByText(/^\d+ of \d+$/).innerText()).split(' ')[0]);
+    const count = Number((await page.getByText(/^[\d,]+ of [\d,]+$/).innerText()).split(' ')[0]!.replace(/,/g, ''));
     expect(count).toBeGreaterThan(1100);
     expect(await page.locator('main ul').last().getByRole('listitem').count()).toBeLessThan(120);
     await page.mouse.wheel(0, 30_000);

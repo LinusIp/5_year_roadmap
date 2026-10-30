@@ -50,7 +50,7 @@ test('search finds FlashAttention, Raft, Diffusion Policy and Dreamer', async ({
 
 test('the Research view shows all four areas, papers first', async ({ page }) => {
   await open(page, './#/library');
-  await page.getByRole('button', { name: /^Research Year 3 · \d+ to read$/ }).click();
+  await page.getByRole('button', { name: /^Research Year 3 · [\d,]+ to read$/ }).click();
   await expect(page).toHaveURL(/path=research/);
   await expect(page.getByRole('heading', { level: 1, name: 'Research' })).toBeVisible();
   for (const area of ['Inference', 'World models', 'Diffusion', 'Generative AI']) {
@@ -93,8 +93,8 @@ test('the Blogs shelf filters by track, and the engineering track reads Electric
   await expect(page.getByRole('heading', { level: 1, name: 'Blogs to follow' })).toBeVisible();
   // The shelf's own count, "48 of 332": the list below it is virtualised, so its rows say nothing about the total.
   const counted = async (): Promise<[number, number]> => {
-    const text = await page.getByRole('heading', { name: /^\d+ of \d+$/ }).innerText();
-    return text.split(' of ').map(Number) as [number, number];
+    const text = await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText();
+    return text.split(' of ').map((n) => Number(n.replace(/,/g, ''))) as [number, number];
   };
   const [, all] = await counted();
   await page.getByRole('button', { name: 'Track', exact: true }).click();
@@ -103,7 +103,7 @@ test('the Blogs shelf filters by track, and the engineering track reads Electric
   await picker.getByRole('button', { name: 'Electrical, mechanical & aerospace' }).click();
   await expect(page).toHaveURL(/track=engineering/);
   // Every track has blogs now (the 11,389-row file): the engineering ones are a few of the shelf's.
-  await expect(page.getByRole('heading', { name: /^\d+ of \d+$/ })).not.toHaveText(all + ' of ' + all);
+  await expect(page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ })).not.toHaveText(all + ' of ' + all);
   const [shown, total] = await counted();
   expect(total).toBe(all);
   expect(shown).toBeGreaterThan(5);
@@ -129,7 +129,7 @@ test('Developer essentials gathers the terminal, Git, Linux, SQL and web resourc
   await page.getByRole('button', { name: 'Track', exact: true }).click();
   await page.getByRole('dialog', { name: 'Track' }).getByRole('button', { name: 'DevOps & MLOps' }).click();
   await expect(page).toHaveURL(/track=devops/);
-  const [shown, total] = (await page.getByRole('heading', { name: /^\d+ of \d+$/ }).innerText()).split(' of ').map(Number);
+  const [shown, total] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
   expect(total).toBe(count);
   expect(shown).toBeGreaterThan(50);
   expect(shown).toBeLessThan(count);
@@ -258,7 +258,7 @@ test('Compact power & energy conversion gathers fusion, superconductors and plas
   await page.getByRole('button', { name: 'Track', exact: true }).click();
   await page.getByRole('dialog', { name: 'Track' }).getByRole('button', { name: 'Simulation' }).click();
   await expect(page).toHaveURL(/track=simulation/);
-  const [shown, total] = (await page.getByRole('heading', { name: /^\d+ of \d+$/ }).innerText()).split(' of ').map(Number);
+  const [shown, total] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
   expect(total).toBe(count);
   expect(shown).toBeGreaterThan(20);
 });
@@ -279,7 +279,7 @@ test('Security & defence gathers the cyber defence rows, with area chips over th
   }
   await areas.getByRole('button', { name: /^Malware \d+$/ }).click();
   await expect(page).toHaveURL(/area=malware/);
-  const [shown, total] = (await page.getByRole('heading', { name: /^\d+ of \d+$/ }).innerText()).split(' of ').map(Number);
+  const [shown, total] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
   expect(total).toBe(count);
   expect(shown).toBeGreaterThan(60);
   expect(shown).toBeLessThan(count);
@@ -348,7 +348,7 @@ test('Agents & MCP gathers the agents, MCP and harnesses rows, with area chips o
   }
   await areas.getByRole('button', { name: /^MCP \d+$/ }).click();
   await expect(page).toHaveURL(/area=mcp/);
-  const [shown, total] = (await page.getByRole('heading', { name: /^\d+ of \d+$/ }).innerText()).split(' of ').map(Number);
+  const [shown, total] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
   expect(total).toBe(count);
   expect(shown).toBeGreaterThan(10);
   expect(shown).toBeLessThan(count);

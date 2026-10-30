@@ -24,7 +24,7 @@ test.describe('library', () => {
     await page.getByRole('dialog', { name: 'Track' }).getByRole('button', { name: 'Embedded' }).click();
     await expect(page).toHaveURL(/track=embedded/);
     await expect(page.getByRole('button', { name: /^18\.06/ })).toBeHidden();
-    await expect(page.getByText(/^\d+ of \d+$/)).toBeVisible();
+    await expect(page.getByText(/^[\d,]+ of [\d,]+$/)).toBeVisible();
   });
 
   test('an item without a checked link says so, and offers a search instead', async ({ page }) => {

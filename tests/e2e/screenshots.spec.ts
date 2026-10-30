@@ -196,7 +196,7 @@ for (const theme of ['light', 'dark'] as const) {
     await page.setViewportSize({ width: 390, height: 844 });
     await importDemo(page, theme);
     await open(page, './#/library');
-    await expect(page.getByRole('button', { name: /^\d+ Practice$/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^[\d,]+ Practice$/ })).toBeVisible();
     await expect(page).toHaveScreenshot('library-home-full-' + theme + '.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
   });
 }

@@ -21,7 +21,7 @@ async function start(page: Page, id: string): Promise<void> {
 
 test('the home shows the four sections, ML Zoomcamp in progress from its checklist', async ({ page }) => {
   await open(page, './#/library');
-  await expect(page.getByText(/^1 in progress · 3 up next · \d+ more when you need them$/)).toBeVisible();
+  await expect(page.getByText(/^1 in progress · 3 up next · [\d,]+ more when you need them$/)).toBeVisible();
   await expect(page.getByText('Module 1 · 6 of 97', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Your paths' })).toBeVisible();
   await expect(page.getByRole('button', { name: /^AI engineering/ })).toBeVisible();
