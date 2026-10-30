@@ -1205,6 +1205,15 @@ Verified on this machine (Linux, Chromium 140):
 - Tests: `tests/unit/agents.test.ts`, `tests/unit/removed-rows.test.ts` (new); import, library-home, live-upgrade,
   security units; `tests/e2e/atlas-library.spec.ts`.
 
+## Pull request #35: the Atlas Library's eleventh file, the plan gap fill and six more quick filters
+
+- `data/resources/library-atlas-11.yaml`: 587 new resources (46 paid; 49 certificate rows, 3 of the file's 53 left
+  out as the plan's own certifications); 6 new title merges, 212 by URL. Resources: 15,358 to 15,945.
+- Quick filters as a registry (`src/lib/quick-filters.ts`) and one list of ten rows on the Library's home:
+  Certificates (by id, a badge, Earned with a date and a link in the sheet, a count on Plan › Credentials), Career &
+  interviews, Research skills, Communication, Open source, Mandarin (the language).
+- Tests: `tests/unit/quick-filters.test.ts` (new); `tests/e2e/atlas-library.spec.ts`.
+
 ## Pull request #36: the "N weeks behind" forecast
 
 - `src/lib/forecast.ts`: the pace window starts at the latest of 28 days back, the phase start and the first log
@@ -1214,11 +1223,3 @@ Verified on this machine (Linux, Chromium 140):
 - `src/lib/goals.ts` projects with the same window.
 - Tests: `tests/unit/forecast.test.ts`, `tests/e2e/forecast.spec.ts` (new); replan unit, flex and roadmap e2e.
 - Before and after: `docs/before-after/forecast/`.
-## Pull request #35: the Atlas Library's eleventh file, the plan gap fill and six more quick filters
-
-- `data/resources/library-atlas-11.yaml`: 587 new resources (46 paid; 49 certificate rows, 3 of the file's 53 left
-  out as the plan's own certifications); 6 new title merges, 212 by URL. Resources: 15,358 to 15,945.
-- Quick filters as a registry (`src/lib/quick-filters.ts`) and one list of ten rows on the Library's home:
-  Certificates (by id, a badge, Earned with a date and a link in the sheet, a count on Plan › Credentials), Career &
-  interviews, Research skills, Communication, Open source, Mandarin (the language).
-- Tests: `tests/unit/quick-filters.test.ts` (new); `tests/e2e/atlas-library.spec.ts`.
