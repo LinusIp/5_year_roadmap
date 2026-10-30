@@ -1,0 +1,971 @@
+[
+ {
+  "id": "lakehouse",
+  "name": "Lake house",
+  "image": "lakehouse.webp",
+  "width": 736,
+  "height": 976,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#E8EDF0",
+  "shadowDark": "#C7CDD1",
+  "shadowLight": "#FFFFFF",
+  "ink": "#282B23",
+  "ink2": "#5E6258",
+  "primary": "#7C7720",
+  "lanes": [
+   "#7C7720",
+   "#457A9F",
+   "#9E6937",
+   "#5274B6",
+   "#008569"
+  ],
+  "tints": [
+   "#E9E3C6",
+   "#D8E4F0",
+   "#F6DECC",
+   "#DBE2FA",
+   "#CAE9DE"
+  ],
+  "tintText": [
+   "#575500",
+   "#225778",
+   "#794610",
+   "#1F5295",
+   "#006247"
+  ],
+  "deco": [
+   "#969031",
+   "#709EC2",
+   "#BB8049",
+   "#688CD6",
+   "#129F80"
+  ],
+  "dark": {
+   "bg": "#1D2413",
+   "surface": "#2A311F",
+   "text": "#E6EFF4",
+   "text2": "#B8BDAF",
+   "accent": "#969031"
+  },
+  "checks": {
+   "ink/paper": 12.19,
+   "ink2/paper": 5.29,
+   "white/primary": 4.65,
+   "minWhite/lanes": 4.61,
+   "minTintText": 5.72,
+   "darkText2": 7.02
+  }
+ },
+ {
+  "id": "chalet",
+  "name": "Snow chalet",
+  "image": "chalet.webp",
+  "width": 736,
+  "height": 1104,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#ECECEE",
+  "shadowDark": "#CBCCCE",
+  "shadowLight": "#FFFFFF",
+  "ink": "#222B30",
+  "ink2": "#586268",
+  "primary": "#1E7595",
+  "lanes": [
+   "#1E7595",
+   "#526E9B",
+   "#017980",
+   "#8F6345",
+   "#7A6491"
+  ],
+  "tints": [
+   "#D7E4EC",
+   "#DEE2EE",
+   "#D5E6E7",
+   "#EDE0D9",
+   "#E6E0EB"
+  ],
+  "tintText": [
+   "#25586E",
+   "#415372",
+   "#1B5B5F",
+   "#6A4C37",
+   "#5B4C6B"
+  ],
+  "deco": [
+   "#5A8AA1",
+   "#7384A6",
+   "#528D92",
+   "#9F7D66",
+   "#8E7D9E"
+  ],
+  "dark": {
+   "bg": "#0C242F",
+   "surface": "#1A313C",
+   "text": "#ECEEF5",
+   "text2": "#ADBEC8",
+   "accent": "#5A8AA1"
+  },
+  "checks": {
+   "ink/paper": 12.22,
+   "ink2/paper": 5.29,
+   "white/primary": 5.21,
+   "minWhite/lanes": 5.17,
+   "minTintText": 6,
+   "darkText2": 7.09
+  }
+ },
+ {
+  "id": "alpine",
+  "name": "Alpine sketch",
+  "image": "alpine.webp",
+  "width": 736,
+  "height": 1308,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#EEECE9",
+  "shadowDark": "#CECCC8",
+  "shadowLight": "#FFFFFF",
+  "ink": "#2B2A22",
+  "ink2": "#626158",
+  "primary": "#887242",
+  "lanes": [
+   "#887242",
+   "#6C7A4E",
+   "#996953",
+   "#5178A0",
+   "#4D7F62"
+  ],
+  "tints": [
+   "#ECE1D0",
+   "#E0E4D5",
+   "#F2DFD7",
+   "#D9E3F2",
+   "#D6E6DC"
+  ],
+  "tintText": [
+   "#64501D",
+   "#49582C",
+   "#754732",
+   "#27557D",
+   "#285C40"
+  ],
+  "deco": [
+   "#A78E58",
+   "#889767",
+   "#BA856D",
+   "#6C94C0",
+   "#679C7C"
+  ],
+  "dark": {
+   "bg": "#232211",
+   "surface": "#2F2F1E",
+   "text": "#F1EEE6",
+   "text2": "#BDBCAD",
+   "accent": "#A78E58"
+  },
+  "checks": {
+   "ink/paper": 12.22,
+   "ink2/paper": 5.28,
+   "white/primary": 4.63,
+   "minWhite/lanes": 4.62,
+   "minTintText": 5.98,
+   "darkText2": 7.09
+  }
+ },
+ {
+  "id": "willow",
+  "name": "Green willow",
+  "image": "willow.webp",
+  "width": 736,
+  "height": 981,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#EBEEE2",
+  "shadowDark": "#CACEBF",
+  "shadowLight": "#FFFFFF",
+  "ink": "#1E2D24",
+  "ink2": "#54655A",
+  "primary": "#56801A",
+  "lanes": [
+   "#56801A",
+   "#2F7C9E",
+   "#8C711A",
+   "#7B68BA",
+   "#008380"
+  ],
+  "tints": [
+   "#DCE7C9",
+   "#D5E5EF",
+   "#F0E1C5",
+   "#E7DEFB",
+   "#BDEBE9"
+  ],
+  "tintText": [
+   "#375C00",
+   "#005977",
+   "#665000",
+   "#564696",
+   "#006463"
+  ],
+  "deco": [
+   "#91BF4F",
+   "#4B8BAB",
+   "#CFAD4E",
+   "#BAA2FF",
+   "#00C9C5"
+  ],
+  "dark": {
+   "bg": "#0C2718",
+   "surface": "#193424",
+   "text": "#EDEFE7",
+   "text2": "#B0BFB5",
+   "accent": "#91BF4F"
+  },
+  "checks": {
+   "ink/paper": 12.27,
+   "ink2/paper": 5.27,
+   "white/primary": 4.67,
+   "minWhite/lanes": 4.61,
+   "minTintText": 5.4,
+   "darkText2": 7.04
+  }
+ },
+ {
+  "id": "moonsea",
+  "name": "Moon over the sea",
+  "image": "moonsea.webp",
+  "width": 736,
+  "height": 1308,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#EFECE1",
+  "shadowDark": "#D0CCBD",
+  "shadowLight": "#FFFFFF",
+  "ink": "#2D2926",
+  "ink2": "#64605C",
+  "primary": "#8E6F4A",
+  "lanes": [
+   "#8E6F4A",
+   "#75784A",
+   "#9D675A",
+   "#437A9E",
+   "#577E5A"
+  ],
+  "tints": [
+   "#ECE1D6",
+   "#E3E3D8",
+   "#EFDFDB",
+   "#D9E4ED",
+   "#DCE5DC"
+  ],
+  "tintText": [
+   "#674E2E",
+   "#535534",
+   "#70493F",
+   "#2F5671",
+   "#3D593F"
+  ],
+  "deco": [
+   "#CBAB88",
+   "#B2B38E",
+   "#D5A69A",
+   "#90B5D3",
+   "#9AB89B"
+  ],
+  "dark": {
+   "bg": "#292015",
+   "surface": "#372C21",
+   "text": "#F0EEE6",
+   "text2": "#C6B9AD",
+   "accent": "#CBAB88"
+  },
+  "checks": {
+   "ink/paper": 12.19,
+   "ink2/paper": 5.27,
+   "white/primary": 4.64,
+   "minWhite/lanes": 4.62,
+   "minTintText": 5.98,
+   "darkText2": 7.09
+  }
+ },
+ {
+  "id": "lonetree",
+  "name": "Lone green tree",
+  "image": "lonetree.webp",
+  "width": 735,
+  "height": 911,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#ECEDEC",
+  "shadowDark": "#CBCCCB",
+  "shadowLight": "#FFFFFF",
+  "ink": "#1B2C36",
+  "ink2": "#52636F",
+  "primary": "#717B03",
+  "lanes": [
+   "#717B03",
+   "#278537",
+   "#A2680E",
+   "#4A70CF",
+   "#00846A"
+  ],
+  "tints": [
+   "#E5E4C5",
+   "#D1E9CF",
+   "#F7DEC6",
+   "#DDE1FF",
+   "#C0EBE0"
+  ],
+  "tintText": [
+   "#4E5800",
+   "#02601D",
+   "#774800",
+   "#264F9F",
+   "#00644E"
+  ],
+  "deco": [
+   "#B0B841",
+   "#63C56B",
+   "#E9A245",
+   "#8BABFF",
+   "#00CBAA"
+  ],
+  "dark": {
+   "bg": "#002536",
+   "surface": "#0D3243",
+   "text": "#EAEFE9",
+   "text2": "#AEBEC9",
+   "accent": "#B0B841"
+  },
+  "checks": {
+   "ink/paper": 12.25,
+   "ink2/paper": 5.3,
+   "white/primary": 4.63,
+   "minWhite/lanes": 4.63,
+   "minTintText": 5.52,
+   "darkText2": 7.08
+  }
+ },
+ {
+  "id": "goldenwalk",
+  "name": "Golden walk",
+  "image": "goldenwalk.webp",
+  "width": 736,
+  "height": 981,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#EDEDE7",
+  "shadowDark": "#CCCCC5",
+  "shadowLight": "#FFFFFF",
+  "ink": "#252B2D",
+  "ink2": "#5B6264",
+  "primary": "#8B7200",
+  "lanes": [
+   "#8B7200",
+   "#2A796A",
+   "#5F7C55",
+   "#0079C6",
+   "#008657"
+  ],
+  "tints": [
+   "#EFE1C4",
+   "#D6E6E1",
+   "#DDE5DA",
+   "#D3E4FF",
+   "#C9EAD8"
+  ],
+  "tintText": [
+   "#645100",
+   "#285B50",
+   "#43583C",
+   "#0057A3",
+   "#006235"
+  ],
+  "deco": [
+   "#CFAE3C",
+   "#5A8D81",
+   "#A0B797",
+   "#5BB5FF",
+   "#45C68F"
+  ],
+  "dark": {
+   "bg": "#0E252A",
+   "surface": "#1B3137",
+   "text": "#EEEEE6",
+   "text2": "#AABFC5",
+   "accent": "#CFAE3C"
+  },
+  "checks": {
+   "ink/paper": 12.22,
+   "ink2/paper": 5.29,
+   "white/primary": 4.66,
+   "minWhite/lanes": 4.61,
+   "minTintText": 5.64,
+   "darkText2": 7.12
+  }
+ },
+ {
+  "id": "autumnmist",
+  "name": "Autumn mist",
+  "image": "autumnmist.webp",
+  "width": 736,
+  "height": 1308,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#EDECEB",
+  "shadowDark": "#CDCCCA",
+  "shadowLight": "#FFFFFF",
+  "ink": "#2C2929",
+  "ink2": "#63605F",
+  "primary": "#A56611",
+  "lanes": [
+   "#A56611",
+   "#AE5149",
+   "#C15143",
+   "#007ABF",
+   "#348436"
+  ],
+  "tints": [
+   "#F8DEC6",
+   "#FDDBD6",
+   "#FFD9D1",
+   "#C7E7FF",
+   "#D2E9CE"
+  ],
+  "tintText": [
+   "#794600",
+   "#8E3530",
+   "#933027",
+   "#005E9E",
+   "#0F601A"
+  ],
+  "deco": [
+   "#DC9239",
+   "#C8685F",
+   "#FC7C69",
+   "#00B1FF",
+   "#5EB55C"
+  ],
+  "dark": {
+   "bg": "#2C1E1C",
+   "surface": "#392B29",
+   "text": "#F4EDE7",
+   "text2": "#CBB7B4",
+   "accent": "#DC9239"
+  },
+  "checks": {
+   "ink/paper": 12.22,
+   "ink2/paper": 5.28,
+   "white/primary": 4.66,
+   "minWhite/lanes": 4.63,
+   "minTintText": 5.27,
+   "darkText2": 7.07
+  }
+ },
+ {
+  "id": "frost",
+  "name": "Frosted grass",
+  "image": "frost.webp",
+  "width": 675,
+  "height": 1200,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#ECEDE9",
+  "shadowDark": "#CCCCC8",
+  "shadowLight": "#FFFFFF",
+  "ink": "#0F2E37",
+  "ink2": "#49656F",
+  "primary": "#0D7791",
+  "lanes": [
+   "#0D7791",
+   "#45709B",
+   "#107979",
+   "#936149",
+   "#716795"
+  ],
+  "tints": [
+   "#D6E5EB",
+   "#DCE3EE",
+   "#D5E6E5",
+   "#EEE0DA",
+   "#E4E1EC"
+  ],
+  "tintText": [
+   "#1F596B",
+   "#395472",
+   "#1E5B5B",
+   "#6D4A3A",
+   "#554E6E"
+  ],
+  "deco": [
+   "#568B9E",
+   "#6C86A6",
+   "#538D8D",
+   "#A27B69",
+   "#877FA1"
+  ],
+  "dark": {
+   "bg": "#002633",
+   "surface": "#013340",
+   "text": "#EDEFE7",
+   "text2": "#ABBFC7",
+   "accent": "#568B9E"
+  },
+  "checks": {
+   "ink/paper": 12.18,
+   "ink2/paper": 5.29,
+   "white/primary": 5.17,
+   "minWhite/lanes": 5.15,
+   "minTintText": 6.02,
+   "darkText2": 7.11
+  }
+ },
+ {
+  "id": "larches",
+  "name": "Orange larches",
+  "image": "larches.webp",
+  "width": 736,
+  "height": 1472,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#E3EEF7",
+  "shadowDark": "#C0CEDA",
+  "shadowLight": "#FFFFFF",
+  "ink": "#1B2C36",
+  "ink2": "#51636F",
+  "primary": "#B9592B",
+  "lanes": [
+   "#B9592B",
+   "#407AA0",
+   "#C14D60",
+   "#007DAB",
+   "#5F7E25"
+  ],
+  "tints": [
+   "#FFDBCB",
+   "#D5E4F2",
+   "#FFD8DB",
+   "#BFE9F9",
+   "#DDE6C8"
+  ],
+  "tintText": [
+   "#8A3A13",
+   "#00587F",
+   "#98273F",
+   "#006290",
+   "#3B5C00"
+  ],
+  "deco": [
+   "#D46A37",
+   "#5F9CC6",
+   "#DD5E71",
+   "#009BCF",
+   "#719332"
+  ],
+  "dark": {
+   "bg": "#002536",
+   "surface": "#0C3243",
+   "text": "#E8EFF5",
+   "text2": "#AEBEC9",
+   "accent": "#D46A37"
+  },
+  "checks": {
+   "ink/paper": 12.22,
+   "ink2/paper": 5.3,
+   "white/primary": 4.64,
+   "minWhite/lanes": 4.64,
+   "minTintText": 5.16,
+   "darkText2": 7.09
+  }
+ },
+ {
+  "id": "snowtree",
+  "name": "Snow tree",
+  "image": "snowtree.webp",
+  "width": 736,
+  "height": 1312,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#E9EDF0",
+  "shadowDark": "#C8CDD0",
+  "shadowLight": "#FFFFFF",
+  "ink": "#262A33",
+  "ink2": "#5D616B",
+  "primary": "#4F78A0",
+  "lanes": [
+   "#4F78A0",
+   "#776F9B",
+   "#2A7E95",
+   "#877248",
+   "#936688"
+  ],
+  "tints": [
+   "#DCE3EE",
+   "#E4E1EC",
+   "#D6E5EB",
+   "#E9E2D7",
+   "#EBDFE7"
+  ],
+  "tintText": [
+   "#385572",
+   "#544E6E",
+   "#1E596A",
+   "#605033",
+   "#694860"
+  ],
+  "deco": [
+   "#97B3D4",
+   "#B3ACD0",
+   "#82B9CC",
+   "#C2AE8C",
+   "#CBA6C1"
+  ],
+  "dark": {
+   "bg": "#182233",
+   "surface": "#252E40",
+   "text": "#E7EFF5",
+   "text2": "#B6BBCA",
+   "accent": "#97B3D4"
+  },
+  "checks": {
+   "ink/paper": 12.21,
+   "ink2/paper": 5.27,
+   "white/primary": 4.64,
+   "minWhite/lanes": 4.63,
+   "minTintText": 6,
+   "darkText2": 7.09
+  }
+ },
+ {
+  "id": "waterfall",
+  "name": "Blossom waterfall",
+  "image": "waterfall.webp",
+  "width": 736,
+  "height": 1104,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#EDECEB",
+  "shadowDark": "#CDCCCA",
+  "shadowLight": "#FFFFFF",
+  "ink": "#2E2922",
+  "ink2": "#666058",
+  "primary": "#717747",
+  "lanes": [
+   "#717747",
+   "#517D59",
+   "#8C6E45",
+   "#6D6F9F",
+   "#2C8074"
+  ],
+  "tints": [
+   "#E3E4D5",
+   "#DAE5DB",
+   "#EBE1D6",
+   "#E2E1EE",
+   "#D4E6E3"
+  ],
+  "tintText": [
+   "#50562B",
+   "#395A3F",
+   "#654F30",
+   "#4E4F73",
+   "#1D5C53"
+  ],
+  "deco": [
+   "#82875A",
+   "#698C6F",
+   "#99805F",
+   "#8080A7",
+   "#528E85"
+  ],
+  "dark": {
+   "bg": "#292011",
+   "surface": "#362D1D",
+   "text": "#F3EDE6",
+   "text2": "#C3BAAD",
+   "accent": "#82875A"
+  },
+  "checks": {
+   "ink/paper": 12.22,
+   "ink2/paper": 5.27,
+   "white/primary": 4.74,
+   "minWhite/lanes": 4.72,
+   "minTintText": 5.99,
+   "darkText2": 7.06
+  }
+ },
+ {
+  "id": "sunsetgrass",
+  "name": "Sunset grass",
+  "image": "sunsetgrass.webp",
+  "width": 736,
+  "height": 1288,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#EAEDEE",
+  "shadowDark": "#CACCCE",
+  "shadowLight": "#FFFFFF",
+  "ink": "#2D2929",
+  "ink2": "#646060",
+  "primary": "#936E34",
+  "lanes": [
+   "#936E34",
+   "#717940",
+   "#A56450",
+   "#307BAA",
+   "#4B8056"
+  ],
+  "tints": [
+   "#F1E0CC",
+   "#E3E4D0",
+   "#F7DDD5",
+   "#D3E5F6",
+   "#D5E7D7"
+  ],
+  "tintText": [
+   "#6E4C0B",
+   "#4D571B",
+   "#80402E",
+   "#005989",
+   "#235D33"
+  ],
+  "deco": [
+   "#D7A967",
+   "#AEB675",
+   "#EA9E87",
+   "#6FB8EE",
+   "#82BE8D"
+  ],
+  "dark": {
+   "bg": "#2D1E1F",
+   "surface": "#3A2A2B",
+   "text": "#E7EFF4",
+   "text2": "#CCB7B8",
+   "accent": "#D7A967"
+  },
+  "checks": {
+   "ink/paper": 12.22,
+   "ink2/paper": 5.27,
+   "white/primary": 4.65,
+   "minWhite/lanes": 4.63,
+   "minTintText": 5.84,
+   "darkText2": 7.14
+  }
+ },
+ {
+  "id": "greyhills",
+  "name": "Grey hills",
+  "image": "greyhills.webp",
+  "width": 736,
+  "height": 1472,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#ECECEB",
+  "shadowDark": "#CCCCCA",
+  "shadowLight": "#FFFFFF",
+  "ink": "#252B30",
+  "ink2": "#5B6268",
+  "primary": "#38729A",
+  "lanes": [
+   "#38729A",
+   "#676998",
+   "#00788C",
+   "#85683F",
+   "#885F87"
+  ],
+  "tints": [
+   "#DAE4ED",
+   "#E2E1ED",
+   "#D5E5EA",
+   "#EAE1D7",
+   "#EADFE9"
+  ],
+  "tintText": [
+   "#325671",
+   "#4E5070",
+   "#1B5A67",
+   "#634F33",
+   "#654964"
+  ],
+  "deco": [
+   "#6587A5",
+   "#8081A4",
+   "#538C9A",
+   "#978062",
+   "#987A97"
+  ],
+  "dark": {
+   "bg": "#122330",
+   "surface": "#20303D",
+   "text": "#EEEEE7",
+   "text2": "#B0BDCA",
+   "accent": "#6587A5"
+  },
+  "checks": {
+   "ink/paper": 12.11,
+   "ink2/paper": 5.24,
+   "white/primary": 5.2,
+   "minWhite/lanes": 5.17,
+   "minTintText": 6,
+   "darkText2": 7.08
+  }
+ },
+ {
+  "id": "moonlake",
+  "name": "Moon lake",
+  "image": "moonlake.webp",
+  "width": 720,
+  "height": 1280,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#EAEDED",
+  "shadowDark": "#C9CDCD",
+  "shadowLight": "#FFFFFF",
+  "ink": "#282A2E",
+  "ink2": "#5F6165",
+  "primary": "#877248",
+  "lanes": [
+   "#877248",
+   "#6C7A4D",
+   "#9A6954",
+   "#4F78A0",
+   "#4E7F61"
+  ],
+  "tints": [
+   "#E9E2D7",
+   "#E1E4D8",
+   "#EEE0DA",
+   "#DCE3EE",
+   "#DAE5DD"
+  ],
+  "tintText": [
+   "#605033",
+   "#4D5636",
+   "#6D4A3B",
+   "#385572",
+   "#375A44"
+  ],
+  "deco": [
+   "#C2AE8C",
+   "#ABB591",
+   "#D2A795",
+   "#97B3D4",
+   "#93BAA0"
+  ],
+  "dark": {
+   "bg": "#1A222E",
+   "surface": "#272F3B",
+   "text": "#E5F0F0",
+   "text2": "#B4BCCA",
+   "accent": "#C2AE8C"
+  },
+  "checks": {
+   "ink/paper": 12.21,
+   "ink2/paper": 5.27,
+   "white/primary": 4.64,
+   "minWhite/lanes": 4.63,
+   "minTintText": 5.99,
+   "darkText2": 7.06
+  }
+ },
+ {
+  "id": "pastel",
+  "name": "Pastel trees",
+  "image": "pastel.webp",
+  "width": 736,
+  "height": 1270,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#F0ECEA",
+  "shadowDark": "#D0CBC8",
+  "shadowLight": "#FFFFFF",
+  "ink": "#352530",
+  "ink2": "#6E5C68",
+  "primary": "#9F6373",
+  "lanes": [
+   "#9F6373",
+   "#976A51",
+   "#936386",
+   "#348076",
+   "#8E6F4A"
+  ],
+  "tints": [
+   "#F3DDE2",
+   "#EDE0D9",
+   "#EBDFE7",
+   "#D3E7E3",
+   "#ECE1D5"
+  ],
+  "tintText": [
+   "#7C4051",
+   "#6C4B38",
+   "#694860",
+   "#135C54",
+   "#684D2E"
+  ],
+  "deco": [
+   "#C68394",
+   "#D0A893",
+   "#9D7993",
+   "#5FA298",
+   "#B0916E"
+  ],
+  "dark": {
+   "bg": "#311A2B",
+   "surface": "#3E2738",
+   "text": "#F5ECE7",
+   "text2": "#C6B7C2",
+   "accent": "#C68394"
+  },
+  "checks": {
+   "ink/paper": 12.27,
+   "ink2/paper": 5.27,
+   "white/primary": 4.66,
+   "minWhite/lanes": 4.64,
+   "minTintText": 6,
+   "darkText2": 7.06
+  }
+ },
+ {
+  "id": "bridge",
+  "name": "Lilac bridge",
+  "image": "bridge.webp",
+  "width": 736,
+  "height": 1308,
+  "credit": "Supplied by the user with the brief (atlas-daily-scenes.zip, 30 Oct 2026); the user holds the rights",
+  "paper": "#EEECEA",
+  "shadowDark": "#CECCCA",
+  "shadowLight": "#FFFFFF",
+  "ink": "#312824",
+  "ink2": "#695F59",
+  "primary": "#7F6D97",
+  "lanes": [
+   "#7F6D97",
+   "#986582",
+   "#5976A0",
+   "#657B51",
+   "#A06468"
+  ],
+  "tints": [
+   "#E7E0EF",
+   "#EEDEE6",
+   "#DDE3F0",
+   "#DEE5D8",
+   "#F1DEDE"
+  ],
+  "tintText": [
+   "#5C4A75",
+   "#70455E",
+   "#3A5377",
+   "#455834",
+   "#764448"
+  ],
+  "deco": [
+   "#9E8AB8",
+   "#B4859F",
+   "#7C93BB",
+   "#859972",
+   "#BC8486"
+  ],
+  "dark": {
+   "bg": "#2E1E14",
+   "surface": "#3C2A21",
+   "text": "#F3EDE6",
+   "text2": "#C9B8AF",
+   "accent": "#9E8AB8"
+  },
+  "checks": {
+   "ink/paper": 12.21,
+   "ink2/paper": 5.27,
+   "white/primary": 4.63,
+   "minWhite/lanes": 4.63,
+   "minTintText": 6.01,
+   "darkText2": 7.09
+  }
+ }
+]

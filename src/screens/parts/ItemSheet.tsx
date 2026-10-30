@@ -15,6 +15,7 @@ import type { AppResource, Project, Unit } from '../../seed/schema.ts';
 import { Button } from '../../ui/Button.tsx';
 import { ProgressLine } from '../../ui/ProgressLine.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
+import { ScenePanel } from '../../ui/ScenePanel.tsx';
 import { Sheet } from '../../ui/Sheet.tsx';
 import { TextField } from '../../ui/TextField.tsx';
 import { Checklist, criteriaUnits } from './Checklist.tsx';
@@ -416,7 +417,11 @@ export function ItemSheet({ atlas, id, onClose, onTake, footer, after }: { atlas
   return (
     <Sheet open={id !== null} title={title} onClose={onClose} scrollKey={id ? 'item:' + id : undefined} aside={resource ? <RunningTime atlas={atlas} refId={id} /> : undefined} footer={actions}>
       {resource ? (
-        <ResourceBody key={resource.id} atlas={atlas} resource={resource} />
+        <>
+          {/* The scene's header strip (ATLAS-DAILY-SCENES), decoration above the resource. */}
+          <ScenePanel slot="resource" aspect="3 / 1" focal="50% 55%" decorative className="mb-4" />
+          <ResourceBody key={resource.id} atlas={atlas} resource={resource} />
+        </>
       ) : project ? (
         <ProjectBody key={project.id} atlas={atlas} project={project} />
       ) : fromCatalogue ? (

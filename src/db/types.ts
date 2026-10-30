@@ -473,6 +473,15 @@ export const LayoutSchema = z.strictObject({
 });
 export type Layout = z.infer<typeof LayoutSchema>;
 
+/** The daily scene's preferences (ATLAS-DAILY-SCENES): src/lib/scenes.ts ScenePrefs, absent in settings saved before them. */
+export const ScenePrefsSchema = z.strictObject({
+  on: z.boolean(),
+  pinned: z.string().optional(),
+  skipped: z.strictObject({ date: IsoDate, steps: z.number().int().min(1).max(100) }).optional(),
+  favourites: z.array(z.string()),
+  favouritesOnly: z.boolean(),
+});
+
 export const ScheduleStateSchema = z.strictObject({
   overrides: z.array(DateOverrideSchema),
   days: z.record(IsoDate, DayChangeSchema),
@@ -504,6 +513,7 @@ export const StoredSettingsSchema = z.strictObject({
   /** Opt-in catch-up per lane: at most this many extra minutes a day until the lane is no longer behind. */
   catchUp: z.record(BlockIdSchema, z.strictObject({ capMinutes: z.number().int().min(5).max(240) })).optional(),
   layout: LayoutSchema.optional(),
+  scenes: ScenePrefsSchema.optional(),
   ...Stamp,
 });
 /** What the parsers accept: version 1, 2 or 3. */

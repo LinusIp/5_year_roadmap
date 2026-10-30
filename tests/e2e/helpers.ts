@@ -31,6 +31,7 @@ export const PAGES = [
   './#/reviews?tab=quarter&open=quarter:2026-Q3',
   './#/stats',
   './#/settings',
+  './#/scenes',
   './#/no-such-page',
 ];
 

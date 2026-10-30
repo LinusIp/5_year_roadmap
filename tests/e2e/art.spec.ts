@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { DEMO_TIME, demoBackupText } from '../../scripts/lib/demo.ts';
 import { FIRST_DAY, open, writesSettled } from './helpers.ts';
 
@@ -10,8 +11,16 @@ import { FIRST_DAY, open, writesSettled } from './helpers.ts';
  */
 test.use({ timezoneId: 'Asia/Tashkent', serviceWorkers: 'block' });
 
+/** The daily scene (ATLAS-DAILY-SCENES) takes the header first; off, the illustration's slot shows again. */
+async function sceneOff(page: Page): Promise<void> {
+  await open(page, './#/settings?section=appearance');
+  await page.getByRole('switch', { name: 'Daily scene' }).click();
+  await writesSettled(page);
+}
+
 test('Today shows the art panel with the header on it, and hides it when the setting is off', async ({ page }) => {
   await page.clock.install({ time: new Date(FIRST_DAY) }); // 09:00: the morning
+  await sceneOff(page);
   await open(page, './');
   const panel = page.locator('[data-art-slot]').first();
   await expect(panel).toHaveAttribute('data-art-slot', 'today-morning');
@@ -34,6 +43,7 @@ test('Today shows the art panel with the header on it, and hides it when the set
 
 test('the header follows the hour, the season or the track as Settings says', async ({ page }) => {
   await page.clock.install({ time: new Date('2026-09-21T19:30:00+05:00') });
+  await sceneOff(page);
   await open(page, './');
   await expect(page.locator('[data-art-slot]').first()).toHaveAttribute('data-art-slot', 'today-evening');
   await open(page, './#/settings?section=layout');
@@ -58,6 +68,7 @@ for (const theme of ['light', 'dark'] as const) {
     await page.getByRole('button', { name: 'Replace', exact: true }).click();
     await expect(page.getByText(/Restored \d+ records/)).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+    await sceneOff(page);
     await open(page, './');
     await expect(page.locator('[data-art-slot]').first()).toBeVisible();
     const results = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze();
@@ -79,6 +90,7 @@ test('the panel reserves its space: nothing shifts while Today loads', async ({ 
     }).observe({ type: 'layout-shift', buffered: true });
   });
   await page.clock.install({ time: new Date(FIRST_DAY) });
+  await sceneOff(page);
   await open(page, './');
   await expect(page.locator('[data-art-slot]').first()).toBeVisible();
   await page.waitForTimeout(800);
@@ -91,6 +103,7 @@ test('the panel reserves its space: nothing shifts while Today loads', async ({ 
 
 test('the phases, the map, an empty search and a path show their art', async ({ page }) => {
   await page.clock.install({ time: new Date(FIRST_DAY) });
+  await sceneOff(page);
   await open(page, './#/plan');
   await expect(page.locator('[data-art-slot="phase-y1-foundations"]').first()).toBeVisible();
   await page.getByRole('button', { name: /^Foundations II/ }).click();

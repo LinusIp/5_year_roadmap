@@ -9,6 +9,8 @@ import { formatWindow } from '../lib/clock-plan.ts';
 import { scheduleSummary } from './plan/Timeline.tsx';
 import { Icon } from '../ui/Icon.tsx';
 import { ArtPanel } from '../ui/ArtPanel.tsx';
+import { ScenePanel } from '../ui/ScenePanel.tsx';
+import { useCurrentScene } from '../hooks/useScenes.ts';
 import { today } from '../lib/dates.ts';
 
 const STAGE_NAME: Record<number, string> = { 1: 'Software engineering mastery', 2: 'Electrical + mechanical' };
@@ -30,6 +32,7 @@ export function PhaseMap() {
   useEffect(() => {
     document.title = 'Five-year map · Atlas';
   }, []);
+  const { scene } = useCurrentScene();
   if (!atlas) return <main id="main" className="min-h-dvh bg-bg" />;
 
   const { seed, settings } = atlas;
@@ -53,11 +56,18 @@ export function PhaseMap() {
       <FadeStrip open="current" label="Five-year map, scroll for the other phases">
         <div className="relative isolate flex min-w-[1200px] flex-col gap-7 px-14 py-12">
           {/* The journey's river (ATLAS-ART): one long illustration behind the stage bands and the phases, decoration only. */}
-          <div className="pointer-events-none absolute inset-y-6 left-1/2 -z-10 w-56 -translate-x-1/2 opacity-40" aria-hidden="true">
-            <ArtPanel slot="map-river-long" aspect="1 / 3" decorative className="w-full !border-0 !shadow-none" />
-          </div>
+          {scene ? (
+            <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+              <ScenePanel slot="map" decorative bare focal="50% 50%" className="h-full w-full" sizes="1200px" />
+              <div className="absolute inset-0 bg-[var(--bg)] opacity-35" />
+            </div>
+          ) : (
+            <div className="pointer-events-none absolute inset-y-6 left-1/2 -z-10 w-56 -translate-x-1/2 opacity-40" aria-hidden="true">
+              <ArtPanel slot="map-river-long" aspect="1 / 3" decorative className="w-full !border-0 !shadow-none" />
+            </div>
+          )}
           <div className="flex items-start justify-between gap-6">
-            <div className="flex flex-col gap-1.5">
+            <div className={'flex flex-col gap-1.5' + (scene ? ' scene-chip -mx-3.5 -my-2 px-3.5 py-2' : '')}>
               <h1 className="text-hero font-semibold">Five years, six phases</h1>
               <p className="text-meta text-ink2">
                 {long(first.start)} → {long(last.end)} · {daily} a day{sessions ? ' (' + sessions + ')' : ''} · Stage 1 software{themes ? ': ' + themes : ''} · Stage 2 electrical and mechanical
@@ -67,7 +77,7 @@ export function PhaseMap() {
               Close
             </Button>
           </div>
-          <ul className="-mt-2 flex flex-wrap gap-x-6 gap-y-3 text-meta text-ink2" aria-label="Lanes">
+          <ul className={'-mt-2 flex flex-wrap gap-x-6 gap-y-3 text-meta text-ink2' + (scene ? ' scene-chip w-fit px-4 py-2.5' : '')} aria-label="Lanes">
             {schedule.windows.map((w) => (
               <li key={w.id} className="flex items-center gap-2.5 whitespace-nowrap">
                 <BlockTile block={w.id} size={36} />
@@ -87,9 +97,9 @@ export function PhaseMap() {
             )}
           </div>
 
-          <div className="relative h-14" aria-hidden="true">
-            <div className="well absolute inset-x-0 top-[25px] h-1.5 rounded-pill" />
-            <div className="absolute inset-x-0 top-0 grid gap-4" style={{ gridTemplateColumns: columns }}>
+          <div className={'relative h-14' + (scene ? ' scene-chip -mx-4 px-4' : '')} aria-hidden="true">
+            <div className={'well absolute top-[25px] h-1.5 rounded-pill ' + (scene ? 'inset-x-4' : 'inset-x-0')} />
+            <div className={'absolute top-0 grid gap-4 ' + (scene ? 'inset-x-4' : 'inset-x-0')} style={{ gridTemplateColumns: columns }}>
               {phases.map((p) => (
                 <div key={p.id} className="flex flex-col items-start gap-1.5">
                   <span className="h-4 text-label text-ink2">{short(p.start)}</span>
@@ -98,7 +108,7 @@ export function PhaseMap() {
                 </div>
               ))}
             </div>
-            <span className="absolute right-0 top-0 text-label text-ink2">{short(last.end)}</span>
+            <span className={'absolute top-0 text-label text-ink2 ' + (scene ? 'right-4' : 'right-0')}>{short(last.end)}</span>
           </div>
 
           <ol className="grid gap-4" style={{ gridTemplateColumns: columns }}>

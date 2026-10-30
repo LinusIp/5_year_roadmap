@@ -21,6 +21,10 @@ import { counts as dayCounts, dailyTotals, heatLevel, relativeLevel, streak } fr
 import { blockTally } from '../lib/blocks-today.ts';
 import { ArtPanel } from '../ui/ArtPanel.tsx';
 import { useArtSettings } from '../hooks/useArt.ts';
+import { SCENES, useCurrentScene } from '../hooks/useScenes.ts';
+import { laneSlot, pickScene, shiftDate } from '../lib/scenes.ts';
+import { applyScene } from '../lib/theme.ts';
+import { ScenePanel, SceneSwatches } from '../ui/ScenePanel.tsx';
 import { phaseSlot, streakSlot, todaySlot } from '../lib/art.ts';
 import type { ArtSlot } from '../seed/art.ts';
 import { buildPaths } from '../lib/library-home.ts';
@@ -187,6 +191,19 @@ export function Today() {
   const atlas = useAtlas();
   // The illustrations' settings (ATLAS-ART): read with the other hooks, before the loading return.
   const art = useArtSettings();
+  // The day's scene (ATLAS-DAILY-SCENES) and a preview of another day's, which colours the screen while it is shown
+  // and is never saved.
+  const current = useCurrentScene();
+  const [sceneShift, setSceneShift] = useState(0);
+  const previewDay = sceneShift === 0 ? null : shiftDate(current.day, sceneShift);
+  const previewScene = previewDay ? (pickScene(SCENES, previewDay, { ...current.prefs, pinned: undefined, skipped: undefined })?.scene ?? null) : null;
+  const sceneShown = previewScene ?? current.scene;
+  useEffect(() => {
+    if (!previewScene) return undefined;
+    const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+    applyScene(previewScene, theme);
+    return () => applyScene(current.scene, theme);
+  }, [previewScene, current.scene]);
   const units = useUnits();
   const timer = useRunningTimer();
   const blogPosts = useBlogPosts();
@@ -612,7 +629,35 @@ export function Today() {
         {/* One row: the mark, the wordmark, the date, and the three knobs (change, settings, theme), 44 px each. With
             the illustrations on it sits on the picture's upper fade and the day's hours on its lower one (one panel
             in place of a header and a tile, so "Later today" stays above the fold at 390 x 844). */}
-        {art.on ? (
+        {current.scene && sceneShown ? (
+          <ScenePanel
+            slot="today"
+            scene={sceneShown}
+            aspect="2 / 1"
+            focal="50% 45%"
+            eager
+            alt={(previewDay ? 'Scene for ' + shortDate(todayDate(previewDay)) : 'Today’s scene') + ': ' + sceneShown.name}
+            className="mt-[max(0.75rem,env(safe-area-inset-top))]"
+            top={<div className="flex items-center gap-1">{headerRow}</div>}
+            bottom={
+              <div className="flex items-end justify-between gap-3">
+                {/* The day's hours on the left (the hours tile folded in, as with the illustrations), the scene on the right. */}
+                <div className="min-w-0 flex-1 [&_p]:!items-start [&_p]:text-left">{hero ?? <p className="text-meta text-ink2">{dateTitle(date)}</p>}</div>
+                <Link to="/scenes" className="flex min-h-11 shrink-0 flex-col items-end justify-center gap-0.5 rounded-knob text-right">
+                  <span className="max-w-[9.5rem] truncate text-meta font-semibold leading-tight">{previewDay ? (sceneShift === 1 ? 'Tomorrow' : sceneShift === -1 ? 'Yesterday' : shortDate(todayDate(previewDay))) + ' · ' + sceneShown.name : sceneShown.name}</span>
+                  <SceneSwatches scene={sceneShown} size={12} />
+                  <span className="text-small text-ink2">{previewDay ? 'A preview, not saved' : current.why === 'pinned' ? 'Pinned scene' : 'Today’s scene'}</span>
+                </Link>
+              </div>
+            }
+          >
+            {/* Previous and next day's scenes, a look only: two paper knobs on the picture's right, between the fades. */}
+            <span className="absolute right-3 top-[58px] flex gap-2">
+              <Button variant="icon" icon="chevronLeft" className="scene-chip !size-11 !rounded-pill text-ink" label="Preview the previous day's scene" onClick={() => setSceneShift((n) => n - 1)} />
+              <Button variant="icon" icon="chevronRight" className="scene-chip !size-11 !rounded-pill text-ink" label="Preview the next day's scene" onClick={() => setSceneShift((n) => n + 1)} />
+            </span>
+          </ScenePanel>
+        ) : art.on ? (
           <ArtPanel slot={todaySlot(art.todayBy, new Date(), item?.track)} aspect="2 / 1" eager alt="" className="mt-[max(0.75rem,env(safe-area-inset-top))]" top={<div className="flex items-center gap-1">{headerRow}</div>} bottom={layout.stats || nowRunning || otherRunning ? hero : undefined} />
         ) : (
           <div className="-mb-1.5 flex items-center gap-1 pt-[max(2.25rem,env(safe-area-inset-top))]">{headerRow}</div>
@@ -624,7 +669,7 @@ export function Today() {
             </Button>
           </div>
         )}
-        {!art.on && (
+        {!current.scene && !art.on && (
         <div className="mt-4">
           <div className="tile flex flex-col items-center justify-center gap-1.5 px-[18px] py-4 text-center">
             {hero}
@@ -798,9 +843,9 @@ export function Today() {
           <p className="text-meta text-ink2">{metaLine}</p>
           <div className="mt-2.5">
             {lessonCounts && item ? (
-              <ProgressLine value={lessonCounts.hours > 0 ? lessonCounts.hoursDone / lessonCounts.hours : 0} label={'Progress on ' + nameOf(item)} />
+              <ProgressLine value={lessonCounts.hours > 0 ? lessonCounts.hoursDone / lessonCounts.hours : 0} label={'Progress on ' + nameOf(item)} lane={laneSlot(nowBlock.id)} />
             ) : (
-              <ProgressLine value={nowBlock.targetMinutes > 0 ? nowMinutes / nowBlock.targetMinutes : 0} label={'Time on ' + blockShort(nowBlock.def.name) + ' today'} />
+              <ProgressLine value={nowBlock.targetMinutes > 0 ? nowMinutes / nowBlock.targetMinutes : 0} label={'Time on ' + blockShort(nowBlock.def.name) + ' today'} lane={laneSlot(nowBlock.id)} />
             )}
           </div>
 

@@ -4,7 +4,7 @@
  * the whole offline story is the ~40 lines of service worker below.
  */
 import { createHash } from 'node:crypto';
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import type { Plugin } from 'vite';
 
@@ -24,13 +24,49 @@ export function precachedArt(file: string): boolean {
   return !file.startsWith('art/') || file === 'art/art.json' || /^art\/(today|season|track)-/.test(file);
 }
 
-export function buildServiceWorkerSource(files: string[], version: string): string {
-  const assets = ['./'].concat(files.filter(precachedArt).map((f) => './' + f));
+/** Scene images (ATLAS-DAILY-SCENES) are never in the build's precache list: the worker picks today's and tomorrow's. */
+export function precachedScene(file: string): boolean {
+  return !file.startsWith('scenes/');
+}
+
+/** The scene ids in the manifest's order (the cycle's order): what the worker's own picker runs over. */
+export function sceneIdsFrom(manifest: unknown): string[] {
+  return Array.isArray(manifest) ? manifest.map((s: { id?: unknown }) => (typeof s.id === 'string' ? s.id : '')).filter(Boolean) : [];
+}
+
+export function buildServiceWorkerSource(files: string[], version: string, sceneIds: string[] = []): string {
+  const assets = ['./'].concat(files.filter((f) => precachedArt(f) && precachedScene(f)).map((f) => './' + f));
   return [
     '/* Atlas service worker. Generated at build time: do not edit. */',
     'const VERSION = ' + JSON.stringify(version) + ';',
     "const CACHE = 'atlas-' + VERSION;",
     'const ASSETS = ' + JSON.stringify(assets) + ';',
+    '// The daily scenes (ATLAS-DAILY-SCENES), in the cycle\'s order, with the same picker as src/lib/scenes.ts: the',
+    '// install caches today\'s and tomorrow\'s files, every other scene is kept once seen, and the page may ask for more.',
+    'const SCENES = ' + JSON.stringify(sceneIds) + ';',
+    'function sceneIndex(day, n) {',
+    '  const doy = Math.round((Date.UTC(day.getFullYear(), day.getMonth(), day.getDate()) - Date.UTC(day.getFullYear(), 0, 0)) / 86400000);',
+    '  const order = Array.from({ length: n }, (_, i) => i);',
+    '  let seed = day.getFullYear() * 97 + Math.floor(doy / n) + 1;',
+    '  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };',
+    '  for (let i = n - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const t = order[i]; order[i] = order[j]; order[j] = t; }',
+    '  return order[doy % n];',
+    '}',
+    'function sceneFiles(id) {',
+    "  return ['./scenes/' + id + '.avif', './scenes/' + id + '.webp', './scenes/' + id + '-thumb.avif', './scenes/' + id + '-thumb.webp'];",
+    '}',
+    'function upcomingSceneFiles() {',
+    '  if (SCENES.length === 0) return [];',
+    '  const now = new Date();',
+    '  const ids = new Set();',
+    '  for (const shift of [0, 1]) ids.add(SCENES[sceneIndex(new Date(now.getFullYear(), now.getMonth(), now.getDate() + shift), SCENES.length)]);',
+    '  return [...ids].flatMap(sceneFiles);',
+    '}',
+    '// Best effort: a scene that fails to arrive never fails the install.',
+    'async function cacheScenes(urls) {',
+    '  const cache = await caches.open(CACHE);',
+    '  await Promise.all(urls.map((url) => caches.match(url, MATCH).then((hit) => hit || fetch(url).then((r) => (r.ok ? cache.put(url, r) : undefined)).catch(() => undefined))));',
+    '}',
     '// Every entry is a build file with a content hash in its name (or the page itself), so the Vary header can be',
     '// ignored. Hosts that send "Vary: Origin" would otherwise miss the cache for every crossorigin script and',
     '// stylesheet Vite emits, which is all of them, and the app would not start offline.',
@@ -67,6 +103,7 @@ export function buildServiceWorkerSource(files: string[], version: string): stri
     '    caches',
     '      .open(CACHE)',
     '      .then((cache) => Promise.all(ASSETS.map((url) => fetchFresh(url).then((response) => cache.put(url, response)))))',
+    '      .then(() => cacheScenes(upcomingSceneFiles()))',
     '      .catch(reportFailure),',
     '  );',
     '});',
@@ -83,6 +120,8 @@ export function buildServiceWorkerSource(files: string[], version: string): stri
     "  if (event.data === 'skip-waiting') self.skipWaiting();",
     '  // The page asks which build it runs: Settings shows it beside Check for updates.',
     "  if (event.data === 'version' && event.ports[0]) event.ports[0].postMessage(VERSION);",
+    '  // The page names scene files to keep (the pinned scene, a preview): cached when they are not already.',
+    "  if (event.data && Array.isArray(event.data.cacheScenes)) event.waitUntil(cacheScenes(event.data.cacheScenes.filter((u) => typeof u === 'string' && u.includes('/scenes/'))));",
     '});',
     '',
     "self.addEventListener('fetch', (event) => {",
@@ -95,8 +134,9 @@ export function buildServiceWorkerSource(files: string[], version: string): stri
     "    event.respondWith(caches.match('./index.html', MATCH).then((hit) => hit || fetch(request)));",
     '    return;',
     '  }',
-    '  // An illustration outside the precached set (ATLAS-ART): kept once seen, under the same version.',
-    "  if (url.pathname.includes('/art/')) {",
+    '  // An illustration outside the precached set (ATLAS-ART) or a scene image (ATLAS-DAILY-SCENES): kept once seen,',
+    '  // under the same version.',
+    "  if (url.pathname.includes('/art/') || url.pathname.includes('/scenes/')) {",
     '    event.respondWith(',
     '      caches.match(request, MATCH).then(',
     '        (hit) =>',
@@ -134,7 +174,9 @@ export function atlasServiceWorker(): Plugin {
         hash.update(readFileSync(join(outDir, f)));
       }
       const version = hash.digest('hex').slice(0, 12);
-      writeFileSync(join(outDir, 'sw.js'), buildServiceWorkerSource(files, version));
+      const manifest = join(outDir, 'scenes', 'scenes.json');
+      const sceneIds = existsSync(manifest) ? sceneIdsFrom(JSON.parse(readFileSync(manifest, 'utf8'))) : [];
+      writeFileSync(join(outDir, 'sw.js'), buildServiceWorkerSource(files, version, sceneIds));
       this.info('service worker: ' + files.length + ' files precached, version ' + version);
     },
   };

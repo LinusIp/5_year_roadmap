@@ -176,6 +176,18 @@ and WebP into `public/art/` and a row for each into `public/art/art.json`, where
 the credit go (only images you have the rights to; `public/art/CREDITS.md` lists them). The Illustrations switch in
 Settings › Layout turns the whole thing off.
 
+## Daily scenes
+
+Every day Atlas shows one scene, a calm painting from `public/scenes/`, and takes its colours from it: the paper,
+the inks, the five lane colours and the dark set are drawn from the image when it is built and adjusted so every
+text pairing reads. Today's header carries the scene with its name and swatches (the two knobs on its edge preview
+the previous and next day's, without saving); Plan, the Library, a resource's sheet, Stats, Internships and the
+five-year map show it too. The order is a shuffle that repeats no scene until every one has shown. Settings ›
+Appearance turns the daily scene off (the fixed clay theme), pins one, skips today's or keeps to the starred
+ones; the Daily scenes page (also behind Today's header) shows them all with their palettes. Your own images go in
+`scenes-src/` (only images you have the rights to; `public/scenes/CREDITS.md` lists them); `npm run scenes` writes
+the files and the palettes into `public/scenes/`, and fails if a palette cannot be made readable.
+
 ## Making it yours
 
 Atlas starts as the plan in `data/`: the same 10-hour day, every day. Real weeks are not like that, so the day,
@@ -208,6 +220,7 @@ you use it: every option sits behind an Edit or Change action in a sheet.
 | Plan's first view, dropped items shown or not | Settings › Layout › Plan |
 | Theme, week start, 12- or 24-hour clock, density | Settings › Layout › General |
 | Illustrations on or off; what Today's picture follows (the hour, the season, the block's track) | Settings › Layout › Today |
+| The daily scene on or off, pinned, skipped for today, or favourites only | Settings › Appearance, and the Daily scenes page |
 | Add a resource, project, paper or track of your own | Library › a shelf › Add a resource |
 | Turn the daily challenge off, or move the weekly slot to other days | Settings › Projects |
 

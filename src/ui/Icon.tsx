@@ -1,6 +1,9 @@
 import type { ComponentType, SVGProps } from 'react';
 import {
   AlignLeft,
+  Image,
+  Pin,
+  Star,
   ArrowDown,
   ArrowUp,
   BookOpen,
@@ -148,6 +151,9 @@ const LUCIDE = {
   inProgress: CircleDot,
   clock: Clock,
   flame: Flame,
+  image: Image,
+  pin: Pin,
+  star: Star,
 } satisfies Record<string, Glyph>;
 
 export type IconName = keyof typeof LUCIDE;
