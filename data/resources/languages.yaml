@@ -175,6 +175,7 @@
   prerequisites: [learncpp]
   subject: c-cpp
   summary: "The channel's playlists page; pick the 'Back to Basics' playlist of the latest year."
+  priority: 2
 
 - id: cpp-core-guidelines
   title: "C++ Core Guidelines"

@@ -259,15 +259,19 @@ nuclear, chemical and aerospace engineering, in `data/resources/library-atlas-7.
 defence cluster, tagged `security`, in `data/resources/library-atlas-9.yaml` (`docs/imports-atlas-library-9.md`), and
 its 15,364-row file 260 more, the books round and the agents, MCP and harnesses cluster, less the twelve rows its
 quality audit removed, in `data/resources/library-atlas-10.yaml` (`docs/imports-atlas-library-10.md`):
-15,358 resources in all, and every track has blogs, so the Blogs shelf filters by track like the others. 213 of them
-are paid books (and one specialization): each wears a **Paid** badge, the Books shelf has a Free / Paid chip, and a
-paid book stays out of "Up next" until **I own this** is on in its sheet. "Developer essentials", a row under the shelves, gathers the resources whose title or tags
+and its 15,961-row file 587 more, the plan gap fill, in `data/resources/library-atlas-11.yaml`
+(`docs/imports-atlas-library-11.md`): 15,945 resources in all, and every track has blogs, so the Blogs shelf filters by track like the others. 259 of them
+are paid (books, certificate exams and one specialization): each wears a **Paid** badge, the Books shelf has a Free / Paid chip, and a
+paid book stays out of "Up next" until **I own this** is on in its sheet. **Quick filters**, one list of ten rows under
+the shelves, gather resources across every shelf: "Developer essentials" the resources whose title or tags
 name the terminal, Git, Linux, SQL, Postgres or the web (HTML, CSS, JavaScript, TypeScript, React, HTTP) from every
 shelf, with the shelves' chips, and "Compact power & energy conversion" the fusion, direct conversion, superconductor,
 pulsed power and plasma rows of the engineering, simulation, math and hardware tracks, and "Security & defence" the
 cyber defence rows (tagged `security`, plus the older rows its words find), with chips for its seven areas, and
 "Agents & MCP" the agent loops, MCP, tool calling, sandboxes, evals and frameworks of the software tracks, with chips
-for its six areas. The
+for its six areas; "Certificates" the rows whose id starts with `cert-` (a Certificate badge, and **Earned** in the
+sheet with the day and the credential's link, counted on Plan › Credentials); "Career & interviews", "Research
+skills", "Communication", "Open source" and "Mandarin (the language)" by their words. The
 Electrical, mechanical & aerospace path has chips for its areas (Mechanics, Materials, Thermo-fluids, Design & CAD, Manufacturing, Electronics
 & PCB, Power & energy, Control, Aerospace, Chemical & nuclear, Practice), read from each row's title and summary.
 About 14,750 of them only ever appear in the Library; they ride in a chunk of their

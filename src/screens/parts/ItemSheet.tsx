@@ -4,7 +4,8 @@ import { deleteCustomEntity, patchEntity, resetEntity } from '../../db/edits.ts'
 import { editItemState, setItemStatus, useItemState } from '../../db/state.ts';
 import type { ItemStatus, UserItemState } from '../../db/types.ts';
 import type { Atlas } from '../../hooks/useAtlas.ts';
-import { monthName } from '../../lib/dates.ts';
+import { monthName, today } from '../../lib/dates.ts';
+import { isCertificate } from '../../lib/quick-filters.ts';
 import { fractionDone, itemProgress } from '../../lib/progress.ts';
 import { hasRepo, repoLinkProblem, statusBlocker } from '../../lib/projects.ts';
 import { loadCatalogue, loadUnits } from '../../seed/index.ts';
@@ -26,7 +27,7 @@ import { NotesField } from './NotesField.tsx';
 import { RunningTime } from './RunningTime.tsx';
 import { StatusPill } from './StatusPill.tsx';
 import { AddToPlanSheet } from '../plan/EditSheets.tsx';
-import { blockShort, plural } from './text.ts';
+import { blockShort, longDate, plural } from './text.ts';
 import { RESEARCH } from '../../lib/library-home.ts';
 
 export const ITEM_STATUSES: { value: ItemStatus; label: string }[] = [
@@ -123,6 +124,7 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
       <div>
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-ink2">
           {/* A paid book (ATLAS-LIBRARY, 15,364 rows) wears a badge; the rest say how they are free. */}
+          {isCertificate(resource.id) && <span className="well-ice rounded-pill px-2.5 py-0.5 text-small font-semibold text-ink">Certificate</span>}
           {resource.cost === 'paid' && <span className="well rounded-pill px-2.5 py-0.5 text-small font-semibold text-ink">Paid</span>}
           <span>{[resource.provider, resource.type, resource.cost === 'audit-free' ? 'free to audit' : resource.cost === 'paid' ? null : resource.cost].filter(Boolean).join(' · ')}</span>
         </p>
@@ -160,6 +162,35 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
         {resource.cost === 'paid' && (
           <ul className="rows mt-3 border-t-[1.5px] border-dashed border-dash">
             <Row height={48} title="I own this" meta={state?.owned ? 'Suggested like a free book' : 'Not suggested until it is owned'} toggle={{ on: state?.owned === true, onChange: (on) => void editItemState(resource.id, (s) => (on ? { ...s, owned: true } : (({ owned: _o, ...rest }) => rest)(s))) }} />
+          </ul>
+        )}
+        {/* "Earned" on a certificate row (the plan gap fill): the day and the credential's link when given, in the item state. */}
+        {isCertificate(resource.id) && (
+          <ul className="rows mt-3 border-t-[1.5px] border-dashed border-dash">
+            <Row
+              height={48}
+              title="Earned"
+              meta={state?.earned ? (state.earnedOn ? 'On ' + longDate(state.earnedOn) : 'Counted on Plan › Credentials') : 'Not earned yet'}
+              toggle={{ on: state?.earned === true, onChange: (on) => void editItemState(resource.id, (s) => (on ? { ...s, earned: true } : (({ earned: _e, earnedOn: _d, credentialUrl: _u, ...rest }) => rest)(s))) }}
+            />
+            {state?.earned && (
+              <li className="flex flex-col gap-3 py-3">
+                <label className="flex items-center justify-between gap-3">
+                  <span className="text-body font-medium">Earned on</span>
+                  <input
+                    type="date"
+                    value={state.earnedOn ?? ''}
+                    max={today()}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      void editItemState(resource.id, (s) => (value ? { ...s, earnedOn: value } : (({ earnedOn: _d, ...rest }) => rest)(s)));
+                    }}
+                    className="well h-11 rounded-[14px] px-3 text-body tabular-nums"
+                  />
+                </label>
+                <LinkField label="Credential link" value={state.credentialUrl} onSave={(v) => void editItemState(resource.id, (s) => (v ? { ...s, credentialUrl: v } : (({ credentialUrl: _u, ...rest }) => rest)(s)))} />
+              </li>
+            )}
           </ul>
         )}
         {/* The day's log entry about it (ATLAS-LIBRARY): the blog post screen, its outline started with this resource. */}

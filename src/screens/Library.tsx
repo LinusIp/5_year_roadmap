@@ -19,10 +19,9 @@ import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
 import { DifficultyDots, IconTile, KindIcon, StatusIcon } from '../ui/glyphs.tsx';
 import { buildPaths, byFit, fitOf, inProgress, PATH_ALIASES, priorityOf, shelfCounts, groupResults, shelfOf, upNext } from '../lib/library-home.ts';
-import { isEssential } from '../lib/essentials.ts';
-import { isEnergy } from '../lib/energy.ts';
-import { isSecurity, SECURITY_AREAS, securityAreasOf } from '../lib/security.ts';
-import { AGENT_AREAS, agentAreasOf, isAgents } from '../lib/agents.ts';
+import { SECURITY_AREAS, securityAreasOf } from '../lib/security.ts';
+import { AGENT_AREAS, agentAreasOf } from '../lib/agents.ts';
+import { isCertificate, QUICK_FILTERS, quickFilterOf, quickPicks } from '../lib/quick-filters.ts';
 import type { Fit } from '../lib/library-home.ts';
 import type { ShelfKey } from '../lib/library-home.ts';
 import { LibraryHome, SHELF_ICON } from './library/Home.tsx';
@@ -69,18 +68,15 @@ interface Entry {
   roadmap?: string | undefined;
   /** Priority, year and level: the order of every list (ATLAS-LIBRARY). */
   fit: Fit;
-  /** Names one of the everyday tools: what Developer essentials shows (ATLAS-LIBRARY, 12,744 rows). */
-  essential: boolean;
-  /** Fusion, direct conversion, superconductors, pulsed power, plasma: what Compact power & energy conversion shows (ATLAS-LIBRARY, 14,547 rows). */
-  energy: boolean;
-  /** The cyber defence cluster (ATLAS-LIBRARY, 15,104 rows): what Security & defence shows, and its areas for the chips over it. */
-  security: boolean;
+  /** The quick filters it is in (src/lib/quick-filters.ts), by key: the rows under the shelves, `pick=` in the URL. */
+  picks: string[];
+  /** The areas of Security & defence and Agents & MCP, for the chips over those two lists. */
   securityAreas: string[];
-  /** The agents, MCP and harnesses cluster (ATLAS-LIBRARY, 15,364 rows): what Agents & MCP shows, and its areas. */
-  agents: boolean;
   agentAreas: string[];
   /** A paid book (the books round): a Paid badge, the Books shelf's Free / Paid chip, and out of Up next until owned. */
   paid: boolean;
+  /** A certificate row (the plan gap fill): a Certificate badge, and Earned in its sheet. */
+  certificate: boolean;
 }
 
 /** The order of every list but Projects' (ATLAS-LIBRARY): what is in progress, then by fit, done and dropped last. */
@@ -150,19 +146,17 @@ function buildEntries(
       type: shelfOf(r),
       tracks: r.tracks,
       status,
-      meta: [r.cost === 'paid' ? 'Paid' : null, r.type === 'paper' && r.fromYear ? 'Year ' + r.fromYear : null, r.provider, r.estHours > 0 ? r.estHours + ' h' : null, progressOf(r.id, state?.unitsDone ?? [], units)].filter(Boolean).join(' · '),
+      meta: [isCertificate(r.id) ? 'Certificate' : null, r.cost === 'paid' ? 'Paid' : null, r.type === 'paper' && r.fromYear ? 'Year ' + r.fromYear : null, r.provider, r.estHours > 0 ? r.estHours + ' h' : null, progressOf(r.id, state?.unitsDone ?? [], units)].filter(Boolean).join(' · '),
       trailing: trailingFor(r.id, status),
       sortKey: sortFor(r.id, status, r.title),
       level: r.level,
       roadmap: r.roadmap,
       fit: { ...fitOf(r), year: planYear.get(r.id) ?? r.fromYear },
-      essential: isEssential(r.title, r.tags),
-      energy: isEnergy(r.title, r.summary, r.tracks[0]),
-      security: isSecurity(r.title, r.summary, r.tracks[0], r.tags),
+      picks: quickPicks({ id: r.id, title: r.title, summary: r.summary, track: r.tracks[0], tags: r.tags, shelf: shelfOf(r) }),
       securityAreas: securityAreasOf(r.title, r.summary),
-      agents: isAgents(r.title, r.summary, r.tracks[0]),
       agentAreas: agentAreasOf(r.title, r.summary, shelfOf(r)),
       paid: r.cost === 'paid',
+      certificate: isCertificate(r.id),
     };
   });
   const papers: Entry[] = seed.papers.map((p) => {
@@ -182,13 +176,11 @@ function buildEntries(
       level: p.level,
       roadmap: p.roadmap,
       fit: fitOf(p),
-      essential: isEssential(p.title),
-      energy: isEnergy(p.title, p.summary, p.tracks[0]),
-      security: isSecurity(p.title, p.summary, p.tracks[0]),
+      picks: quickPicks({ id: p.id, title: p.title, summary: p.summary, track: p.tracks[0], shelf: 'paper' }),
       securityAreas: securityAreasOf(p.title, p.summary),
-      agents: isAgents(p.title, p.summary, p.tracks[0]),
       agentAreas: agentAreasOf(p.title, p.summary, 'paper'),
       paid: false,
+      certificate: false,
     };
   });
   // Projects follow everything else in the default order ("5…"), so the list opens as it always has; the Projects
@@ -208,13 +200,11 @@ function buildEntries(
       sortKey: '5' + sortFor(p.id, status, p.title),
       fit: { priority: priorityOf(p), year: planYear.get(p.id) },
       project: { kind: 'curriculum', group: p.cadence, phaseId: p.phaseId, hours: p.estHours, tracks: p.tracks },
-      essential: false,
-      energy: false,
-      security: false,
+      picks: [],
       securityAreas: [],
-      agents: false,
       agentAreas: [],
       paid: false,
+      certificate: false,
     };
   });
   const fromCatalogue: Entry[] = (catalogue ?? []).map((e) => {
@@ -223,13 +213,11 @@ function buildEntries(
     const phase = e.phaseId ? seed.phases.find((p) => p.id === e.phaseId) : undefined;
     const entry: Entry = {
       kind: 'catalogue',
-      essential: false,
-      energy: false,
-      security: false,
+      picks: [],
       securityAreas: [],
-      agents: false,
       agentAreas: [],
       paid: false,
+      certificate: false,
       id: e.id,
       title: e.title,
       body: [e.title, e.kind, e.difficulty, e.group, groupLabel(e.group), e.tracks.join(' ')].join(' '),
@@ -347,14 +335,12 @@ export function Library({ openId }: { openId?: string }) {
   const [status, setStatus] = useQueryParam('status');
   const [paperId, setPaperId] = useQueryParam('paper');
   const [pathParam] = useQueryParam('path');
-  // Developer essentials (ATLAS-LIBRARY, 12,744 rows): the quick filter across every shelf, in the URL like a shelf.
-  const [pick, setPick] = useQueryParam('pick');
-  const essentials = pick === 'essentials';
-  // Compact power & energy conversion (ATLAS-LIBRARY, 14,547 rows): the energy and extreme physics cluster, the same way.
-  const energy = pick === 'energy';
-  // Security & defence (ATLAS-LIBRARY, 15,104 rows): the cyber defence cluster, with its areas as chips (`area=`).
+  // The quick filters (ATLAS-LIBRARY, src/lib/quick-filters.ts): a cluster across every shelf, in the URL like a shelf;
+  // Security & defence and Agents & MCP have areas as chips (`area=`).
+  const [pickParam, setPick] = useQueryParam('pick');
+  const quick = quickFilterOf(pickParam);
+  const pick = quick?.key ?? null;
   const security = pick === 'security';
-  // Agents & MCP (ATLAS-LIBRARY, 15,364 rows): the agents, MCP and harnesses cluster, with its areas as chips (`area=`).
   const agents = pick === 'agents';
   const [area, setArea] = useQueryParam('area');
   const securityArea = security ? area : null;
@@ -395,13 +381,11 @@ export function Library({ openId }: { openId?: string }) {
     const nextCount = upNext(buildPaths(atlas.seed, atlas.states), atlas.seed, 3, atlas.states).length;
     return {
       counts: shelfCounts(atlas.seed, catalogue?.length ?? 0),
-      essentialCount: atlas.seed.resources.filter((r) => isEssential(r.title, r.tags)).length + atlas.seed.papers.filter((p) => isEssential(p.title)).length,
-      energyCount: atlas.seed.resources.filter((r) => isEnergy(r.title, r.summary, r.tracks[0])).length + atlas.seed.papers.filter((p) => isEnergy(p.title, p.summary, p.tracks[0])).length,
-      securityCount: atlas.seed.resources.filter((r) => isSecurity(r.title, r.summary, r.tracks[0], r.tags)).length + atlas.seed.papers.filter((p) => isSecurity(p.title, p.summary, p.tracks[0])).length,
-      agentsCount: atlas.seed.resources.filter((r) => isAgents(r.title, r.summary, r.tracks[0])).length + atlas.seed.papers.filter((p) => isAgents(p.title, p.summary, p.tracks[0])).length,
       homeSub: activeCount + ' in progress · ' + nextCount + ' up next · ' + Math.max(0, atlas.seed.resources.length - activeCount - nextCount) + ' more when you need them',
     };
   }, [atlas, catalogue]);
+  // The quick filters' counts, for the rows on the home: once per change to the entries.
+  const quickCounts = useMemo(() => QUICK_FILTERS.map((f) => ({ key: f.key, label: f.label, icon: f.icon, tone: f.tone, count: entries.filter((e) => e.picks.includes(f.key)).length })), [entries]);
 
   if (!atlas || !paperStates || !certStates || !library || !summary) {
     return (
@@ -424,7 +408,7 @@ export function Library({ openId }: { openId?: string }) {
   const projectFiltersOn = Boolean(kind || difficulty || group || phaseParam || level || hours);
   const matchesProject = (e: Entry): boolean => !projectFiltersOn || (e.project ? matchesFilter(e.project, projectFilter) : false);
   const filtered = matched.filter(
-    (e) => (!type || e.type === type) && (!essentials || e.essential) && (!energy || e.energy) && (!security || e.security) && (!securityArea || e.securityAreas.includes(securityArea)) && (!agents || e.agents) && (!agentArea || e.agentAreas.includes(agentArea)) && (paidOnly === null || e.paid === paidOnly) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
+    (e) => (!type || e.type === type) && (!pick || e.picks.includes(pick)) && (!securityArea || e.securityAreas.includes(securityArea)) && (!agentArea || e.agentAreas.includes(agentArea)) && (paidOnly === null || e.paid === paidOnly) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
   );
   // Every shelf but Projects reads by fit: in progress first, then priority, year and level (ATLAS-LIBRARY). Projects
   // keep their order: the plan's first, then the catalogue.
@@ -442,10 +426,10 @@ export function Library({ openId }: { openId?: string }) {
   };
 
   const shelf = (type as ShelfKey | null) ?? null;
-  const filtersOn = Boolean(type || track || status || projectFiltersOn || essentials || energy || security || agents || paidOnly !== null);
+  const filtersOn = Boolean(type || track || status || projectFiltersOn || pick || paidOnly !== null);
   // The deferred query switches home to results too, so the first keystroke only updates the field.
   const mode: 'home' | 'path' | 'search' | 'shelf' = pathId ? 'path' : deferredQuery && !filtersOn ? 'search' : filtersOn ? 'shelf' : 'home';
-  const { counts, homeSub, essentialCount, energyCount, securityCount, agentsCount } = summary;
+  const { counts, homeSub } = summary;
   const goShelf = (key: ShelfKey): void => navigate('/library?type=' + key + (query ? '&q=' + encodeURIComponent(query) : ''), { replace: false });
 
   const row = (entry: Entry): ReactNode => (
@@ -485,8 +469,8 @@ export function Library({ openId }: { openId?: string }) {
   const searchField = (
     <SearchField
       className="mt-5"
-      label={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : essentials ? 'Search developer essentials' : energy ? 'Search power and energy conversion' : security ? 'Search security and defence' : agents ? 'Search agents and MCP' : 'Search the library'}
-      placeholder={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : essentials ? 'Search developer essentials' : energy ? 'Search power and energy conversion' : security ? 'Search security and defence' : agents ? 'Search agents and MCP' : 'Search courses, books, papers'}
+      label={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : quick ? quick.search : 'Search the library'}
+      placeholder={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : quick ? quick.search : 'Search courses, books, papers'}
       searchBox
       value={text}
       onChange={(v) => {
@@ -511,7 +495,7 @@ export function Library({ openId }: { openId?: string }) {
   );
 
   // A shelf's line: how many it holds and how many are active.
-  const shelfTotal = shelf ? entries.filter((e) => e.type === shelf).length : essentials ? entries.filter((e) => e.essential).length : energy ? entries.filter((e) => e.energy).length : security ? entries.filter((e) => e.security).length : agents ? entries.filter((e) => e.agents).length : entries.length;
+  const shelfTotal = shelf ? entries.filter((e) => e.type === shelf).length : pick ? entries.filter((e) => e.picks.includes(pick)).length : entries.length;
   const shelfActive = shelf ? entries.filter((e) => e.type === shelf && e.status === 'active').length : 0;
 
   return (
@@ -534,14 +518,8 @@ export function Library({ openId }: { openId?: string }) {
               onOpen={(id) => navigate('/library/' + id)}
               onPath={(id) => navigate('/library?path=' + id, { replace: false })}
               onShelf={goShelf}
-              essentials={essentialCount}
-              onEssentials={() => navigate('/library?pick=essentials', { replace: false })}
-              energy={energyCount}
-              onEnergy={() => navigate('/library?pick=energy', { replace: false })}
-              security={securityCount}
-              onSecurity={() => navigate('/library?pick=security', { replace: false })}
-              agents={agentsCount}
-              onAgents={() => navigate('/library?pick=agents', { replace: false })}
+              quick={quickCounts}
+              onPick={(key) => navigate('/library?pick=' + key, { replace: false })}
             />
           ) : results.length === 0 ? (
             <EmptyState action={<Button onClick={clear}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>
@@ -559,20 +537,8 @@ export function Library({ openId }: { openId?: string }) {
       {mode === 'shelf' && (
         <>
           <Header
-            title={shelf ? SHELF_TITLE[shelf] : essentials ? 'Developer essentials' : energy ? 'Compact power & energy conversion' : security ? 'Security & defence' : agents ? 'Agents & MCP' : 'Library'}
-            sub={
-              shelf
-                ? plural(shelfTotal, ...SHELF_NOUN[shelf]) + (shelfActive > 0 ? ' · ' + shelfActive + ' active' : '')
-                : essentials
-                  ? plural(shelfTotal, 'resource', 'resources') + ' on the terminal, Git, Linux, SQL and the web'
-                  : energy
-                    ? plural(shelfTotal, 'resource', 'resources') + ' on fusion, direct conversion, superconductors, pulsed power and plasma'
-                    : security
-                      ? plural(shelfTotal, 'resource', 'resources') + ' on hardening, malware, detection and response, the network and the web, secure development and AI for defence'
-                      : agents
-                        ? plural(shelfTotal, 'resource', 'resources') + ' on agent loops, MCP, tool calling, sandboxes, evals and frameworks'
-                        : plural(results.length, 'match', 'matches')
-            }
+            title={shelf ? SHELF_TITLE[shelf] : quick ? quick.label : 'Library'}
+            sub={shelf ? plural(shelfTotal, ...SHELF_NOUN[shelf]) + (shelfActive > 0 ? ' · ' + shelfActive + ' active' : '') : quick ? plural(shelfTotal, 'resource', 'resources') + ' ' + quick.sub : plural(results.length, 'match', 'matches')}
             back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />}
           />
           {searchField}
@@ -590,7 +556,7 @@ export function Library({ openId }: { openId?: string }) {
             <div className="mt-2">
               <Chips
                 label="Area"
-                items={SECURITY_AREAS.map((a) => ({ key: a.key, label: a.label, count: entries.filter((e) => e.security && e.securityAreas.includes(a.key)).length, pressed: area === a.key, onClick: () => setArea(area === a.key ? null : a.key) }))}
+                items={SECURITY_AREAS.map((a) => ({ key: a.key, label: a.label, count: entries.filter((e) => e.picks.includes('security') && e.securityAreas.includes(a.key)).length, pressed: area === a.key, onClick: () => setArea(area === a.key ? null : a.key) }))}
               />
             </div>
           )}
@@ -598,7 +564,7 @@ export function Library({ openId }: { openId?: string }) {
             <div className="mt-2">
               <Chips
                 label="Area"
-                items={AGENT_AREAS.map((a) => ({ key: a.key, label: a.label, count: entries.filter((e) => e.agents && e.agentAreas.includes(a.key)).length, pressed: area === a.key, onClick: () => setArea(area === a.key ? null : a.key) }))}
+                items={AGENT_AREAS.map((a) => ({ key: a.key, label: a.label, count: entries.filter((e) => e.picks.includes('agents') && e.agentAreas.includes(a.key)).length, pressed: area === a.key, onClick: () => setArea(area === a.key ? null : a.key) }))}
               />
             </div>
           )}

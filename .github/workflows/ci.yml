@@ -45,6 +45,23 @@ jobs:
         timeout-minutes: 5
         run: npm run check:links -- --only ml-zoomcamp | grep -v '^ok '
 
+  # One-off (ATLAS-LIBRARY, 15,961 rows): the eleventh file's new links, reported on the pull request; removed before the merge.
+  links-atlas-11:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Link report
+        continue-on-error: true
+        timeout-minutes: 25
+        run: npm run check:links -- --in data/resources/library-atlas-11.yaml | grep -v '^ok ' | grep -v '^        '
+
   # Screenshot baselines are drawn here, on CI's Linux, so the comparison in `verify` runs on the same platform.
   # Commit an empty `screenshots/.redraw` to a pull request's branch: this job redraws every baseline, removes the
   # marker and pushes the result to the branch. Nothing happens without the marker.

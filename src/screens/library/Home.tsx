@@ -99,14 +99,8 @@ export function LibraryHome({
   onOpen,
   onPath,
   onShelf,
-  essentials,
-  onEssentials,
-  energy,
-  onEnergy,
-  security,
-  onSecurity,
-  agents,
-  onAgents,
+  quick,
+  onPick,
 }: {
   atlas: Atlas;
   units: Record<string, Unit[]> | undefined;
@@ -115,18 +109,9 @@ export function LibraryHome({
   onOpen: (refId: string) => void;
   onPath: (pathId: string) => void;
   onShelf: (shelf: ShelfKey) => void;
-  /** Developer essentials (ATLAS-LIBRARY, 12,744 rows): how many, and the row that opens them. */
-  essentials: number;
-  onEssentials: () => void;
-  /** Compact power & energy conversion (ATLAS-LIBRARY, 14,547 rows): how many, and the row that opens them. */
-  energy: number;
-  onEnergy: () => void;
-  /** Security & defence (ATLAS-LIBRARY, 15,104 rows): how many, and the row that opens them. */
-  security: number;
-  onSecurity: () => void;
-  /** Agents & MCP (ATLAS-LIBRARY, 15,364 rows): how many, and the row that opens them. */
-  agents: number;
-  onAgents: () => void;
+  /** The quick filters (ATLAS-LIBRARY, src/lib/quick-filters.ts), each with its count: the rows under the shelves. */
+  quick: readonly { key: string; label: string; icon: IconName; tone: 'blue' | 'ice'; count: number }[];
+  onPick: (key: string) => void;
 }) {
   const { seed, states, logs } = atlas;
   const thisYear = today.slice(0, 4);
@@ -300,35 +285,14 @@ export function LibraryHome({
           <span className="text-meta font-semibold text-ink2">{counts.project}</span>
           <Icon name="chevronRight" size={18} className="text-ink2" />
         </button>
-        {/* Developer essentials: the terminal, Git, Linux, SQL and the web, across every shelf; a row like Projects'. */}
-        <button type="button" onClick={onEssentials} className="tile press mt-4 flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left">
-          <IconTile icon="code" tone="blue" />
-          <span className="min-w-0 flex-1 text-body font-semibold">Developer essentials</span>
-          <span className="text-meta font-semibold text-ink2">{essentials}</span>
-          <Icon name="chevronRight" size={18} className="text-ink2" />
-        </button>
-        {/* Compact power & energy conversion: fusion, direct conversion, superconductors, pulsed power and plasma, from the engineering, simulation, math and hardware tracks. */}
-        <button type="button" onClick={onEnergy} className="tile press mt-4 flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left">
-          <IconTile icon="zap" tone="ice" />
-          <span className="min-w-0 flex-1 text-body font-semibold">Compact power & energy conversion</span>
-          <span className="text-meta font-semibold text-ink2">{energy}</span>
-          <Icon name="chevronRight" size={18} className="text-ink2" />
-        </button>
-        {/* Security & defence: the cyber defence cluster, all defensive, from the systems, DevOps, architecture, AI, hardware and languages tracks. */}
-        <button type="button" onClick={onSecurity} className="tile press mt-4 flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left">
-          <IconTile icon="shield" tone="blue" />
-          <span className="min-w-0 flex-1 text-body font-semibold">Security & defence</span>
-          <span className="text-meta font-semibold text-ink2">{security}</span>
-          <Icon name="chevronRight" size={18} className="text-ink2" />
-        </button>
-        {/* Agents & MCP: the agents, MCP and harnesses cluster (building blocks, tool calling, sandboxing, evals, frameworks, books), from the software tracks. */}
-        <button type="button" onClick={onAgents} className="tile press mt-4 flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left">
-          <IconTile icon="bot" tone="ice" />
-          <span className="min-w-0 flex-1 text-body font-semibold">Agents & MCP</span>
-          <span className="text-meta font-semibold text-ink2">{agents}</span>
-          <Icon name="chevronRight" size={18} className="text-ink2" />
-        </button>
       </section>
+
+      {/* The quick filters (ATLAS-LIBRARY): ten clusters across every shelf, one row each, in the order of the registry. */}
+      <RowList label="Quick filters" className="mt-[18px]" aside="across every shelf">
+        {quick.map((q) => (
+          <Row key={q.key} icon={<IconTile icon={q.icon} tone={q.tone} />} title={q.label} trailing={String(q.count)} chevron onClick={() => onPick(q.key)} />
+        ))}
+      </RowList>
 
       <Sheet open={menuResource !== undefined} title={menuResource ? (menuResource.short ?? menuResource.title) : ''} onClose={() => setMenu(null)}>
         <RowList>

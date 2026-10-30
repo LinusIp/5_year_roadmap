@@ -8458,6 +8458,7 @@
   summary: "A 2025 open-access review of liquid-metal MHD generators driven by engines, waves or thermoacoustic oscillations."
   fromYear: 3
   priority: 4
+  doFirst: "Liquid-Piston MHD"
 
 - id: "paper-hts-magnetic-suspension-mcmichael"
   title: "High temperature superconductors for magnetic suspension applications"

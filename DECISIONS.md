@@ -2050,3 +2050,49 @@ upgrade and keeps the rest), `tests/unit/resource-import.test.ts` (a paid row's 
 `tests/unit/library-home.test.ts` (Up next and an owned book), `tests/unit/live-upgrade.test.ts` (version 8);
 `tests/e2e/atlas-library.spec.ts` (the Books shelf's chip, a paid row's badge, "I own this" after a reload; the
 Agents & MCP row, its chips, rmcp found, an RL agent not).
+
+## The Atlas Library's eleventh file: the plan gap fill and six more quick filters (pull request #35)
+
+**Ten quick filters are one list.** Four rows of tiles under the shelves were already a lot; ten would have been a
+screen. The quick filters are now a registry (`src/lib/quick-filters.ts`: key, label, icon, the header's line, the
+search field's name, and the match) and one list of rows on the Library's home, "Quick filters", in the registry's
+order, each with its count; the Library reads a `pick=` against the registry, so a new cluster is a new entry, not
+new code in the screen. The four older filters keep their modules (`essentials`, `energy`, `security`, `agents`) and
+their areas; the registry only names them. Nothing changes in their addresses.
+
+**Certificates are rows, found by their id.** The gap fill's 53 certificate rows have ids that start with `cert-`, and
+that is the filter: no words, no tags. Three of them carry the id of a certification the plan already tracks
+(`data/certs.yaml`, Plan › Credentials: the AWS Cloud Practitioner, the two Unity programmer certifications), and ids
+are unique across kinds, so those three were not imported; the plan's own rows stay the place for them, and a row
+that came "after" one of them keeps that as text. A certificate row wears a "Certificate" badge (an ice pill before
+the Paid one), and its sheet has **Earned**, a switch with, once on, the day it was earned (a date field) and the
+credential's link, all three on the item state (`earned`, `earnedOn`, `credentialUrl` in `src/db/types.ts`, synced and
+backed up like the rest). Plan › Credentials shows "Certificates in the Library · N of 49 earned", a row that opens the
+filter: the brief asked for the count on the Plan screen, and Credentials is where the plan's own certifications
+already are. The Plan's certifications and the Library's certificate rows stay two things: one is a commitment with a
+target quarter, the other a resource with a badge.
+
+**Five word filters, each narrower than its word list.** The brief's words name the clusters, but three of the lists
+would have named most of the Library: "paper", "research" and "checklist" are in every paper, "docs", "blog" and
+"writing" in every documentation row and every blog, "fork" in every code fork (fbtriton, DiffRL). So Research skills
+takes the specific words as given (reviewer, reproducibility, random seeds, LaTeX, Overleaf, arXiv, cold email, PhD,
+and the phrases of the new rows: research taste, research process, reading papers, best paper, peer review) and
+counts "research", "paper" and "checklist" only in a title that also says how (advice, a guide, tips, rules, a
+process, writing, reading, finding): 144 rows, "How to Find Research Problems" in, "Attention Is All You Need" out.
+Communication takes speaking, speech, presentation, pitch, investor, fundraising, startup, technical writing, a style
+guide, error messages, Diátaxis, blogging and the whole words SAFE, YC and CFP, never bare "docs", "blog" or
+"writing": 257 rows, "Technical Writing One" in, "vLLM Documentation" out. Open source takes the act (contributing,
+contribution, pull request, good first issue, GSoC, Outreachy, LFX, DCO, "fork a", forking, syncing a fork) in the
+software tracks: 47 rows. Mandarin takes the brief's words on the languages track only, so a Chinese benchmark in AI
+or Deep Speech's Mandarin stay out: 24 rows, and the row is labelled "Mandarin (the language)" so it is not read as a
+programming language beside the Languages path. Career & interviews takes the words as given on every track (STAR as
+a whole word): 94 rows. Each list and its exclusions are in `tests/unit/quick-filters.test.ts`.
+
+**The generative filters need no extension.** The Research view groups by the file's `research` field, not by words:
+the 59 new diffusion rows (distillation, caching, quantization, parallel inference) and the ComfyUI, LoRA, video and
+3D rows carry `diffusion` and `genai` and land in their areas on their own.
+
+Tests: `tests/unit/quick-filters.test.ts` (new: the registry, the four older filters, each new filter's words and
+exclusions, the data's counts); `tests/e2e/atlas-library.spec.ts` (the ten rows on the home; Certificates with its
+badge, Earned with its date after a reload, the count on Plan › Credentials; Mandarin and Research skills with their
+exclusions).

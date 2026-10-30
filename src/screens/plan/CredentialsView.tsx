@@ -6,6 +6,7 @@ import { credentialRows, describeQuarter, expiryWarnings } from '../../lib/crede
 import { roadmapCoverage } from '../../lib/roadmaps.ts';
 import type { MilestoneView, SubjectRow } from '../../lib/credentials.ts';
 import { today } from '../../lib/dates.ts';
+import { isCertificate } from '../../lib/quick-filters.ts';
 import { useQueryParam } from '../../router/router.tsx';
 import { Button } from '../../ui/Button.tsx';
 import { Chips } from '../../ui/Chips.tsx';
@@ -176,6 +177,7 @@ export function CredentialsView({
   const milestones = inScope.flatMap((r) => r.milestones.map((m) => ({ m, subject: r.subject.title })));
   const allMilestones = rows.flatMap((r) => r.milestones);
   const warnings = expiryWarnings(atlas.seed.certs, certStates, today());
+  const libraryCerts = atlas.seed.resources.filter((r) => isCertificate(r.id));
   const openCert = certId ? (allCerts.find((c) => c.id === certId) ?? null) : null;
   const openMilestone = milestoneId ? (milestones.find((x) => x.m.id === milestoneId) ?? rows.flatMap((r) => r.milestones.map((m) => ({ m, subject: r.subject.title }))).find((x) => x.m.id === milestoneId)) : undefined;
 
@@ -185,6 +187,13 @@ export function CredentialsView({
         {allCerts.filter((c) => c.status === 'earned').length} of {plural(allCerts.filter((c) => c.mode === 'committed').length, 'certificate')} earned ·{' '}
         {allMilestones.filter((m) => m.status === 'done').length} of {plural(allMilestones.length, 'milestone')} done
       </p>
+
+      {/* The Library's certificate rows (ATLAS-LIBRARY, the plan gap fill): how many are marked Earned in their sheets. */}
+      {libraryCerts.length > 0 && (
+        <RowList label="Library certificates" aside="marked Earned in their sheets">
+          <Row title="Certificates in the Library" meta="Exams, specializations and graded courses, with Earned in each sheet" trailing={libraryCerts.filter((r) => atlas.states.get(r.id)?.earned).length + ' of ' + libraryCerts.length + ' earned'} chevron to="/library?pick=certificates" />
+        </RowList>
+      )}
 
       {!year && roadmapsInScope.length > 0 && <RoadmapsList coverage={roadmapsInScope} onOpen={(id) => setRoadmapId(id, { replace: false })} />}
 

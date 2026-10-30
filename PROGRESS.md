@@ -1204,3 +1204,12 @@ Verified on this machine (Linux, Chromium 140):
 - "Agents & MCP", a row on the Library's home with six area chips (`src/lib/agents.ts`): 1,017 resources.
 - Tests: `tests/unit/agents.test.ts`, `tests/unit/removed-rows.test.ts` (new); import, library-home, live-upgrade,
   security units; `tests/e2e/atlas-library.spec.ts`.
+
+## Pull request #35: the Atlas Library's eleventh file, the plan gap fill and six more quick filters
+
+- `data/resources/library-atlas-11.yaml`: 587 new resources (46 paid; 49 certificate rows, 3 of the file's 53 left
+  out as the plan's own certifications); 6 new title merges, 212 by URL. Resources: 15,358 to 15,945.
+- Quick filters as a registry (`src/lib/quick-filters.ts`) and one list of ten rows on the Library's home:
+  Certificates (by id, a badge, Earned with a date and a link in the sheet, a count on Plan › Credentials), Career &
+  interviews, Research skills, Communication, Open source, Mandarin (the language).
+- Tests: `tests/unit/quick-filters.test.ts` (new); `tests/e2e/atlas-library.spec.ts`.
