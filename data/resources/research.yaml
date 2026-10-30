@@ -75,6 +75,11 @@
   prerequisites: []
   subject: research
   summary: Self-development, problem creation and problem solving as the three parts of research. The original page is gone; this is the Internet Archive copy.
+  short: "Nielsen: Effective Research"
+  fromYear: 1
+  doFirst: "You and Your Research"
+  priority: 1
+  roadmap: "ai-engineer"
 - id: steinhardt-research-taste
   title: Research as a Stochastic Decision Process
   provider: Jacob Steinhardt
@@ -90,6 +95,10 @@
   prerequisites: []
   subject: research
   summary: How to order the risky parts of a project so that it fails fast or succeeds.
+  short: "Research as Decision Proc."
+  fromYear: 2
+  priority: 1
+  roadmap: "ai-engineer"
 - id: raschka-ahead-of-ai
   title: Ahead of AI (reading lists and research summaries)
   provider: Sebastian Raschka

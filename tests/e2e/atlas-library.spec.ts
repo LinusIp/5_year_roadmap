@@ -362,3 +362,50 @@ test('Agents & MCP gathers the agents, MCP and harnesses rows, with area chips o
   await page.getByRole('searchbox', { name: 'Search agents and MCP' }).fill('GPUDrive');
   await expect(page.getByRole('button', { name: /GPUDrive/ })).toHaveCount(0);
 });
+
+test('the quick filters are one list on the home; Certificates wears its badge, Earned persists and Plan › Credentials counts it', async ({ page }) => {
+  await open(page, './#/library');
+  const list = page.getByRole('list', { name: 'Quick filters' }).or(page.locator('section', { hasText: 'Quick filters' }).first());
+  for (const label of ['Developer essentials', 'Compact power & energy conversion', 'Security & defence', 'Agents & MCP', 'Certificates', 'Career & interviews', 'Research skills', 'Communication', 'Open source', 'Mandarin (the language)']) {
+    await expect(page.getByRole('button', { name: new RegExp('^' + label.replace(/[()&]/g, '\\$&') + ' \\d+$') })).toBeVisible();
+  }
+  await expect(list.first()).toBeVisible();
+  const certs = page.getByRole('button', { name: /^Certificates \d+$/ });
+  const count = Number((await certs.innerText()).replace(/\D/g, ''));
+  expect(count).toBeGreaterThan(40);
+  await certs.click();
+  await expect(page).toHaveURL(/pick=certificates/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Certificates' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + count + ' of ' + count + '$') })).toBeVisible();
+  await expect(page.getByRole('list').getByRole('button').first()).toContainText('Certificate ·');
+  await page.getByRole('searchbox', { name: 'Search certificates' }).fill('NCA-GENL');
+  await page.getByRole('button', { name: /NCA-GENL/ }).first().click();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet.getByText('Certificate', { exact: true }).first()).toBeVisible();
+  const earned = sheet.getByRole('switch', { name: 'Earned' });
+  await expect(earned).toHaveAttribute('aria-checked', 'false');
+  await earned.click();
+  await expect(earned).toHaveAttribute('aria-checked', 'true');
+  await sheet.getByLabel('Earned on').fill('2027-03-01');
+  await expect(sheet.getByText('On 1 March 2027')).toBeVisible();
+  await writesSettled(page);
+  await reload(page);
+  await expect(page.getByRole('dialog').getByRole('switch', { name: 'Earned' })).toHaveAttribute('aria-checked', 'true');
+  await open(page, './#/plan?view=credentials');
+  await expect(page.getByRole('link', { name: /Certificates in the Library/ })).toContainText('1 of ' + count + ' earned');
+});
+
+test('Mandarin is its own quick filter, on the languages track, and Research skills leaves the papers themselves out', async ({ page }) => {
+  await open(page, './#/library?pick=mandarin');
+  await expect(page.getByRole('heading', { level: 1, name: 'Mandarin (the language)' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Chinese Grammar Wiki|HSK|pinyin/i }).first()).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Search Mandarin' }).fill('benchmark');
+  await expect(page.getByRole('button', { name: /CRUD-RAG/ })).toHaveCount(0);
+  await open(page, './#/library?pick=research');
+  await expect(page.getByRole('heading', { level: 1, name: 'Research skills' })).toBeVisible();
+  // The list is virtualised: search for a row rather than scrolling to it.
+  await page.getByRole('searchbox', { name: 'Search research skills' }).fill('Research Problems');
+  await expect(page.getByRole('button', { name: /Eisner: Find Problems/ }).first()).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Search research skills' }).fill('Attention Is All You Need');
+  await expect(page.getByRole('button', { name: /^Attention Is All You Need/ })).toHaveCount(0);
+});

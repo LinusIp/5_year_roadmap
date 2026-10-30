@@ -6417,6 +6417,7 @@
   fromYear: 3
   priority: 2
   tags: [security]
+  doFirst: "NSA WPA3 Report"
 
 - id: "paper-lampson-confinement"
   title: "A Note on the Confinement Problem"
@@ -7035,6 +7036,7 @@
   fromYear: 2
   priority: 2
   tags: [security]
+  doFirst: "NSA WPA3 Report"
 
 - id: "article-arm-mte-serebryany"
   title: "ARM Memory Tagging Extension and How It Improves C/C++ Memory Safety"

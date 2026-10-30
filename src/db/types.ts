@@ -89,6 +89,10 @@ export const UserItemStateSchema = z.strictObject({
   doneAt: IsoDate.optional(),
   /** "I own this" on a paid book (ATLAS-LIBRARY, 15,364 rows): then it may be suggested like a free one. */
   owned: z.boolean().optional(),
+  /** "Earned" on a certificate row (ATLAS-LIBRARY, 15,961 rows), with the day and the credential's link when given. */
+  earned: z.boolean().optional(),
+  earnedOn: IsoDate.optional(),
+  credentialUrl: OptionalUrl,
   ...Stamp,
 });
 export type UserItemState = z.infer<typeof UserItemStateSchema>;

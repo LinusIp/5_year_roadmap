@@ -103693,6 +103693,7 @@
   fromYear: 3
   priority: 3
   roadmap: "game-developer"
+  doFirst: "Tiled/Clustered Forward+"
 
 - id: "talk-restir-sss-2025"
   title: "Real-Time Subsurface Scattering via Hybrid ReSTIR-Path-Tracing and Diffusion"
