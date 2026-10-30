@@ -12,7 +12,7 @@ import { useRunningTimer } from '../db/timer.ts';
 import { dayLayout } from '../lib/calendar.ts';
 import { clockNow } from '../lib/clock-plan.ts';
 import { formatClock, today } from '../lib/dates.ts';
-import { blockEndsAt, DEFAULT_FOCUS_PREFS, mixFor, oembedUrl, parseYouTubeUrl, readOembed, reorder, timeLeft, timerLabel, TIMER_OPTIONS } from '../lib/focus.ts';
+import { blockEndsAt, DEFAULT_FOCUS_PREFS, mixFor, oembedUrl, parseYouTubeUrl, readOembed, reorder, thumbnailFor, timeLeft, timerLabel, TIMER_OPTIONS } from '../lib/focus.ts';
 import type { TimerOption, UserSession } from '../lib/focus.ts';
 import { play, resume, pause, setLayerVolume, setTimer, setVolume, stop, toggleSound, useFocusPlayer } from '../lib/focus-player.ts';
 import type { PlayerSession } from '../lib/focus-player.ts';
@@ -118,7 +118,17 @@ export function Focus() {
         setProblem('YouTube did not confirm that link. Nothing was added.');
         return;
       }
-      const session: UserSession = { id: ref.kind + '-' + ref.id, url: ref.url, videoId: ref.id, kind: ref.kind, title: info.title, channel: info.channel, thumbnail: info.thumbnail, addedAt: new Date().toISOString() };
+      // A live stream's oEmbed answer carries the player alone: it is named after its kind until YouTube says more.
+      const session: UserSession = {
+        id: ref.kind + '-' + ref.id,
+        url: ref.url,
+        videoId: ref.id,
+        kind: ref.kind,
+        title: info.title || 'YouTube ' + (ref.kind === 'playlist' ? 'playlist' : 'live stream') + ' ' + ref.id,
+        channel: info.channel,
+        thumbnail: info.thumbnail || (ref.kind === 'video' ? thumbnailFor(ref.id) : ''),
+        addedAt: new Date().toISOString(),
+      };
       savePrefs((p) => ({ ...p, sessions: [...p.sessions.filter((s) => s.id !== session.id), session] }));
       setLink('');
       setCategory('mine');

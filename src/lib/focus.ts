@@ -48,13 +48,16 @@ export interface OembedInfo {
   thumbnail: string;
 }
 
-/** What an oEmbed answer must carry to count as confirmed: a title, an author and an iframe to embed with. */
+/**
+ * What an oEmbed answer must carry to count as confirmed: an iframe to embed with. A video answers with its title,
+ * channel and thumbnail too; a live stream answers with the iframe alone (YouTube leaves the rest out while it is
+ * on air), so those come back empty and the caller names it.
+ */
 export function readOembed(body: unknown): OembedInfo | null {
   if (!body || typeof body !== 'object') return null;
   const o = body as Record<string, unknown>;
-  if (typeof o.title !== 'string' || typeof o.author_name !== 'string' || typeof o.html !== 'string') return null;
-  if (!/<iframe\b/i.test(o.html)) return null;
-  return { title: o.title, channel: o.author_name, thumbnail: typeof o.thumbnail_url === 'string' ? o.thumbnail_url : '' };
+  if (typeof o.html !== 'string' || !/<iframe\b/i.test(o.html)) return null;
+  return { title: typeof o.title === 'string' ? o.title : '', channel: typeof o.author_name === 'string' ? o.author_name : '', thumbnail: typeof o.thumbnail_url === 'string' ? o.thumbnail_url : '' };
 }
 
 /** The thumbnail YouTube keeps for every video, without any key. */

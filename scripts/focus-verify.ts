@@ -30,7 +30,15 @@ for (const s of sessions) {
     const read = response.ok ? readOembed(body) : null;
     // A 200 that does not read: say what came back, so the row can be judged from the log.
     const shape = body && typeof body === 'object' ? 'keys ' + Object.keys(body as object).join(',') + (typeof (body as { html?: unknown }).html === 'string' ? '; html ' + (body as { html: string }).html.slice(0, 80).replace(/\|/g, '/') : '; no html') : 'not JSON: ' + text.slice(0, 80).replace(/\|/g, '/');
-    rows.push({ id: s.id, url: s.url, status: response.status, ok: Boolean(read), title: read?.title, channel: read?.channel, reason: read ? undefined : response.status === 401 ? 'embedding not allowed' : response.status === 404 ? 'not found' : response.ok ? 'oEmbed answered 200 but ' + shape : 'oEmbed answered ' + response.status });
+    rows.push({
+      id: s.id,
+      url: s.url,
+      status: response.status,
+      ok: Boolean(read),
+      title: read ? read.title || '(no title from oEmbed: a live stream, named as the data names it)' : undefined,
+      channel: read?.channel,
+      reason: read ? undefined : response.status === 401 ? 'embedding not allowed' : response.status === 404 ? 'not found' : response.ok ? 'oEmbed answered 200 but ' + shape : 'oEmbed answered ' + response.status,
+    });
   } catch (err) {
     rows.push({ id: s.id, url: s.url, status: 'error', ok: false, reason: err instanceof Error ? err.message : String(err) });
   }

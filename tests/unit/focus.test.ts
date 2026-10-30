@@ -31,6 +31,8 @@ describe('a pasted address', () => {
     expect(readOembed({ title: 'lofi', author_name: 'Lofi Girl', thumbnail_url: 'https://i.ytimg.com/vi/jfKfPfyJRdk/hqdefault.jpg', html: '<iframe src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>' })).toEqual({ title: 'lofi', channel: 'Lofi Girl', thumbnail: 'https://i.ytimg.com/vi/jfKfPfyJRdk/hqdefault.jpg' });
     expect(readOembed({ title: 'x', author_name: 'y', html: 'no player' })).toBeNull();
     expect(readOembed({ title: 'x' })).toBeNull();
+    // A live stream on air: the player alone, which still confirms the embed.
+    expect(readOembed({ type: 'video', version: '1.0', provider_name: 'YouTube', html: '<iframe width="200" height="150" src="https://www.youtube.com/embed/jfKfPfyJRdk?feature=oembed"></iframe>' })).toEqual({ title: '', channel: '', thumbnail: '' });
     expect(readOembed(null)).toBeNull();
     expect(readOembed('Unauthorized')).toBeNull();
     expect(thumbnailFor('jfKfPfyJRdk')).toBe('https://i.ytimg.com/vi/jfKfPfyJRdk/hqdefault.jpg');

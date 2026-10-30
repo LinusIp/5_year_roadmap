@@ -2357,8 +2357,11 @@ hidden or covered while anything plays, which is what lets a session started fro
 
 **A pasted link is YouTube's word, not ours.** `parseYouTubeUrl` reads a watch, youtu.be, shorts, embed, live or
 playlist address and rebuilds the canonical one; only that is asked of oEmbed
-(`https://www.youtube.com/oembed?url=…&format=json`), and only an answer with a title, a channel and an iframe is
-saved (a 401 is "YouTube does not allow this video to be embedded", a 404 "YouTube cannot find that video").
+(`https://www.youtube.com/oembed?url=…&format=json`), and only an answer with an iframe is saved (a 401 is
+"YouTube does not allow this video to be embedded", a 404 "YouTube cannot find that video"). A video's answer
+carries its title, channel and thumbnail; a live stream on air answers with the player alone (CI found this on
+the two Lofi Girl radios: `type`, `version`, `provider_name`, `provider_url` and `html`, nothing else), so the
+embed counts as confirmed and the session is named after its kind and id until YouTube says more.
 The user's sessions, their order, each block's mix and the once-only offers live in the settings (`settings.focus`,
 optional, so nothing migrates) and sync with the rest; a separate table would have meant a new file kind in the
 data repository for a dozen rows.
