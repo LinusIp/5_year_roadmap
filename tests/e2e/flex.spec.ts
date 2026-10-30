@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { FIRST_DAY, laterRow, logTime, nowCard, open, reload, writesSettled } from './helpers.ts';
+import { FIRST_DAY, laterRow, nowCard, open, reload, writesSettled } from './helpers.ts';
 
 /**
  * The flexibility brief, through the real UI: the day's schedule, plan editing, pace and layout. The clock is
@@ -85,8 +85,27 @@ test('changes one block’s minutes and makes a rest day', async ({ page }) => {
 });
 
 test('an exam-week date range shifts the forecast', async ({ page }) => {
-  await open(page, './');
-  await logTime(page, '120');
+  // A verdict needs a week of window and three logged days (ATLAS-FORECAST-FIX): a week in, with GameDevHQ hours
+  // on three past days, logged from Calendar's day view.
+  await page.clock.setFixedTime(new Date('2026-09-28T09:00:00+05:00'));
+  for (const date of ['2026-09-22', '2026-09-24', '2026-09-26']) {
+    await open(page, './#/calendar?view=day&date=' + date);
+    await page.getByRole('button', { name: /^GameDevHQ ?, \d/ }).click();
+    await page.getByRole('dialog', { name: 'GameDevHQ' }).getByRole('button', { name: /^Edit logged time/ }).click();
+    await page.getByRole('dialog', { name: /^Logged on / }).getByRole('button', { name: 'Add logged time' }).click();
+    const sheet = page.getByRole('dialog', { name: 'Log time' });
+    await sheet.getByRole('button', { name: 'Block A', exact: true }).click();
+    await sheet.getByRole('textbox', { name: 'What did you do?' }).fill('GameDevHQ');
+    await sheet.getByRole('textbox', { name: 'Minutes' }).fill('150');
+    await sheet.getByRole('textbox', { name: 'Minutes' }).press('Enter');
+    await writesSettled(page);
+    // Whatever sheets are left open close on Escape, so the next day's view is not behind one.
+    for (let i = 0; i < 3 && (await page.getByRole('dialog').count()) > 0; i++) {
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(150);
+    }
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  }
 
   await open(page, './#/plan');
   const gamedev = page.getByRole('button', { name: /^GameDevHQ \d+ weeks? behind 08:00–10:00/ });
@@ -97,14 +116,14 @@ test('an exam-week date range shifts the forecast', async ({ page }) => {
   await page.getByRole('button', { name: /^Give a date or a range another template/ }).click();
   const sheet = page.getByRole('dialog', { name: 'Give dates another template' });
   await sheet.getByRole('textbox', { name: 'Name' }).fill('Exam week');
-  await sheet.getByRole('textbox', { name: 'First day' }).fill('2026-09-22');
-  await sheet.getByRole('textbox', { name: 'Last day' }).fill('2026-10-05');
+  await sheet.getByRole('textbox', { name: 'First day' }).fill('2026-10-06');
+  await sheet.getByRole('textbox', { name: 'Last day' }).fill('2026-10-19');
   await sheet.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByRole('button', { name: /^Exam week 22 Sep/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Exam week 6/ })).toBeVisible();
 
   await open(page, './#/plan');
   await expect(page.getByRole('button', { name: new RegExp('^GameDevHQ ' + (before + 2) + ' weeks behind 08:00–10:00') })).toBeVisible();
-  await page.goto('./#/?date=2026-09-23');
+  await page.goto('./#/?date=2026-10-07');
   await expect(page.getByText(/^0 m of 1 h 30 m today · Exam week/)).toBeVisible();
 });
 

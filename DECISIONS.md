@@ -2109,3 +2109,50 @@ Tests: `tests/unit/quick-filters.test.ts` (new: the registry, the four older fil
 exclusions, the data's counts); `tests/e2e/atlas-library.spec.ts` (the ten rows on the home; Certificates with its
 badge, Earned with its date after a reload, the count on Plan › Credentials; Mandarin and Research skills with their
 exclusions).
+
+## The "N weeks behind" forecast (ATLAS-FORECAST-FIX, pull request #36)
+
+**What the table showed.** `scratch/forecast-debug.ts` (kept out of git with the rest of `scratch/`) prints, for a
+backup, what `forecastPhase` sees lane by lane. On a backup like the user's (the fixed daily schedule, logging begun
+six days ago at full pace, exported on 2026-10-30) every lane read 10 to 43 weeks behind: the pace window was the
+last 28 days, so 21 days before tracking started counted as planned and missed, the efficiency came out at 0.21 to
+0.25, and the remaining hours were stretched four to five times over. The live fixture of 2026-10-18 (one logged
+day) read 301 to 345 weeks behind by the same arithmetic, and two of its lanes carried more hours than the days left
+held (150 h against 106 h, 175 h against 106 h on the old 8 h day), a thing no pace can mend. The demo's eight weeks
+of history, which the screenshots use, were fine before and after (two weeks behind at worst): the bug only shows
+while the window reaches back before the logs. Cause (a) and cause (c) of the brief were real; (b) is the same data
+seen from the other side; (d) did not apply to either backup (every minute sat on a block of the plan with its item,
+nothing without a block, which the table lists all the same); (e) was a display rule, now in.
+
+**The pace window starts where tracking started.** `paceWindow` (src/lib/forecast.ts) begins the window at the
+latest of 28 days back, the phase start and the first day anything was logged, and both the pace and the planned
+hours it is divided by use that same window, so a user six days in at full pace is on track, not 40 weeks behind.
+`paceForBlock` takes the window's start as an optional fifth argument and keeps its old meaning without it. Goals
+(src/lib/goals.ts) project with the same window, so a goal is not "at risk" from day one either.
+
+**Too early to tell.** Under seven days of window or under three days with hours, every lane says "Too early to
+tell" (`early`, muted) instead of a number; the lanes of the current phase carry one line under them saying what
+would change that. Before anything at all is logged a lane still says "Not started": there is nothing to be early
+about. The threshold is the brief's; `MIN_WINDOW_DAYS` and `MIN_LOGGED_DAYS` name it.
+
+**Plan overflow is its own verdict.** `capacityHours` is what the schedule plans for the lane from today to the
+phase end; when the remaining hours exceed it the lane says "Plan too full by N h" (`over-planned`, warning tone),
+never a count of weeks, and the current phase's lanes get a line, "1 lane over-planned", with a button straight to
+Re-plan. The phase's own projected end then comes from the lanes whose plan fits. The Projects block (D) is outside
+the daily schedule by design, so it has no capacity and reads over-planned in the data; the Timeline shows only the
+scheduled lanes and counts only those for its line.
+
+**A long delay names the month.** Past twelve weeks a lane says "Finishes ~Mar 2028 (13 months late)" instead of
+"57 weeks behind"; the sheet of a lane in the current phase shows its verdict and "finishes about March 2028 at this
+pace" in every case that has a date, so the number can be checked against the plan.
+
+**Not changed.** An exam week or a pause still moves the projected end by exactly its length (the schedule plans
+nothing for the lane on those days). Nothing is moved between lanes: the brief's (d) asks for a report, and the
+report is that nothing needed one.
+
+Tests: `tests/unit/forecast.test.ts` (new: the window's three clamps, on track six days in, early under a week or
+under three logged days, overflow at 100 % pace, the clamped wording, the exam week's exact shift);
+`tests/unit/replan.test.ts` (the on-track and behind cases on the clamped window); `tests/e2e/forecast.spec.ts` (new:
+the demo's eight weeks give no lane past four weeks behind, and a fresh install with one day of logs says too early);
+`tests/e2e/flex.spec.ts` (the exam-week case logs three past days first). Before and after, Plan › Timeline at
+390 px, light: `docs/before-after/forecast/`.

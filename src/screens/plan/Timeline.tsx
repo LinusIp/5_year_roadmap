@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Atlas } from '../../hooks/useAtlas.ts';
-import { describeVerdict } from '../../lib/forecast.ts';
+import { describeVerdict, verdictTone } from '../../lib/forecast.ts';
 import { monthName } from '../../lib/dates.ts';
 import type { Goal, Unit } from '../../seed/schema.ts';
 import { goalStatus } from '../../lib/goals.ts';
@@ -61,6 +61,7 @@ function Lanes({
   isCurrent,
   weekly,
   onLane,
+  onReplan,
   label,
   aside,
   windows,
@@ -71,6 +72,8 @@ function Lanes({
   isCurrent: boolean;
   weekly: string | null;
   onLane: (block: string) => void;
+  /** With the current phase: the lanes whose plan does not fit the days left can go straight to Re-plan. */
+  onReplan?: () => void;
   label?: string;
   aside?: string;
   /** The day's blocks at their times: lanes in that order, each with its window, and only those. */
@@ -93,7 +96,7 @@ function Lanes({
           meta = nameOf(next) + (detail ? ', ' + detail : '');
           if (lane.block === 'D' && isCurrent && weekly) meta = 'Weekly: ' + weekly + ' · Monthly: ' + nameOf(next);
         }
-        const behind = isCurrent && forecast?.verdict === 'behind';
+        const behind = isCurrent && forecast !== undefined && verdictTone(forecast.verdict) === 'warning';
         const window = windows?.find((w) => w.id === lane.block);
         if (window) meta = hm(window.start) + '–' + hm(window.start + window.minutes) + ' · ' + meta;
         const title = window ? def.name : laneName(def.name) + ' · ' + span(def.minutes);
@@ -105,7 +108,7 @@ function Lanes({
                 <span className="flex items-baseline justify-between gap-3">
                   <span className="text-body font-medium leading-[1.3]">{title}</span>
                   <span className={'shrink-0 text-meta ' + (behind ? 'font-semibold text-ice-deep' : 'text-ink2')}>
-                    {isCurrent && forecast ? describeVerdict(forecast.verdict, forecast.weeksLate) : Math.round(lane.totalHours) + ' h'}
+                    {isCurrent && forecast ? describeVerdict(forecast.verdict, forecast.weeksLate, { projectedEnd: forecast.projectedEnd, overflowHours: forecast.overflowHours }) : Math.round(lane.totalHours) + ' h'}
                   </span>
                 </span>
                 <span className="text-meta text-ink2">{meta}</span>
@@ -119,7 +122,35 @@ function Lanes({
       })}
     </ul>
   );
-  if (!label) return list;
+  // The phase in one line, only when a pace alone cannot mend it: lanes planned past the days left, or too little
+  // logged yet to say anything. Over the lanes shown here: a block outside the daily schedule (Projects, fed from
+  // Calendar) has no days to hold its hours and is not the point.
+  const shown = lanes.map((lane) => model.forecast.lanes.find((l) => l.block === lane.block)).filter((f) => f !== undefined);
+  const lanesOver = shown.filter((f) => f.verdict === 'over-planned').length;
+  const open = shown.filter((f) => f.verdict !== 'done');
+  const note =
+    isCurrent && lanesOver > 0
+      ? describeVerdict('over-planned', null, { lanesOver }) + ': more hours on the plan than the days left hold.'
+      : isCurrent && open.length > 0 && open.every((f) => f.verdict === 'early')
+        ? 'Too early to tell: a week of logs, three days with hours, and the lanes get a verdict.'
+        : null;
+  const footer = note && (
+    <div className="flex flex-wrap items-center justify-between gap-2 pb-2 pt-1">
+      <p className={'text-meta ' + (lanesOver > 0 ? 'font-semibold text-ice-deep' : 'text-ink2')}>{note}</p>
+      {lanesOver > 0 && onReplan && (
+        <Button size="sm" variant="ice" onClick={onReplan}>
+          Re-plan these lanes
+        </Button>
+      )}
+    </div>
+  );
+  if (!label)
+    return (
+      <>
+        {list}
+        {footer}
+      </>
+    );
   return (
     <section className="tile px-[18px] pb-2 pt-3.5">
       <div className="flex items-baseline justify-between gap-3">
@@ -127,6 +158,7 @@ function Lanes({
         {aside && <span className="text-meta font-semibold text-ink2">{aside}</span>}
       </div>
       {list}
+      {footer}
     </section>
   );
 }
@@ -200,6 +232,7 @@ export function Timeline({
           aside={everyDay.aside}
           windows={everyDay.windows}
           onLane={(block) => onLane(current.phase.id, block)}
+          onReplan={onReplan}
         />
       )}
       {earlier.length > 0 && (

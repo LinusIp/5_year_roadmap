@@ -1213,3 +1213,13 @@ Verified on this machine (Linux, Chromium 140):
   Certificates (by id, a badge, Earned with a date and a link in the sheet, a count on Plan › Credentials), Career &
   interviews, Research skills, Communication, Open source, Mandarin (the language).
 - Tests: `tests/unit/quick-filters.test.ts` (new); `tests/e2e/atlas-library.spec.ts`.
+
+## Pull request #36: the "N weeks behind" forecast
+
+- `src/lib/forecast.ts`: the pace window starts at the latest of 28 days back, the phase start and the first log
+  (`paceWindow`); `early` ("Too early to tell") under seven days or three logged days; `over-planned` ("Plan too
+  full by N h", a line and a Re-plan button on the current phase) when the remaining hours exceed `capacityHours`;
+  past twelve weeks "Finishes ~Mon YYYY (N months late)"; the lane sheet shows the month it finishes in.
+- `src/lib/goals.ts` projects with the same window.
+- Tests: `tests/unit/forecast.test.ts`, `tests/e2e/forecast.spec.ts` (new); replan unit, flex and roadmap e2e.
+- Before and after: `docs/before-after/forecast/`.

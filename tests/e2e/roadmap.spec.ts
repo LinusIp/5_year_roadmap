@@ -76,7 +76,7 @@ test('the forecast reads as a verdict once the lane has hours and progress', asy
   await nowCard(page).getByRole('checkbox', { name: 'Lecture 1: The geometry of linear equations' }).click();
 
   await open(page, './#/plan');
-  await expect(lane(page, 'Math and physics')).toContainText(/On track|weeks? (behind|early)|No hours logged lately/);
+  await expect(lane(page, 'Math and physics')).toContainText(/On track|weeks? (behind|early)|No hours logged lately|Too early to tell/);
 });
 
 test('re-plan shows a diff first, applies only when asked, and is then a no-op', async ({ page }) => {

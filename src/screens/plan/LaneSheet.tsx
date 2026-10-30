@@ -3,6 +3,8 @@ import { addPlanEdit, removePlanItem, restorePlanItem } from '../../db/edits.ts'
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { reorderLane } from '../../lib/plan.ts';
 import type { LaneProgress } from '../../lib/progress.ts';
+import { describeVerdict, monthYear } from '../../lib/forecast.ts';
+import type { LaneForecast } from '../../lib/forecast.ts';
 import type { BlockId, Phase, Unit } from '../../seed/schema.ts';
 import { Button } from '../../ui/Button.tsx';
 import { Icon } from '../../ui/Icon.tsx';
@@ -27,6 +29,7 @@ export function LaneSheet({
   atlas,
   phase,
   lane,
+  forecast = null,
   units,
   onClose,
   onOpenItem,
@@ -34,6 +37,8 @@ export function LaneSheet({
   atlas: Atlas;
   phase: Phase | null;
   lane: LaneProgress | null;
+  /** The lane's forecast, for the current phase only: its verdict and the month it finishes in at this pace. */
+  forecast?: LaneForecast | null;
   units: Record<string, Unit[]> | undefined;
   onClose: () => void;
   onOpenItem: (refId: string) => void;
@@ -91,6 +96,13 @@ export function LaneSheet({
               <p className="mt-1.5 text-meta text-ink2">
                 {Math.round(lane.totalHours)} h planned of {Math.round(lane.budgetHours)} h this phase gives it{overBudget ? ' · over budget' : ''}
               </p>
+              {forecast && (
+                <p className="mt-1 text-meta text-ink2" data-testid="lane-forecast">
+                  {describeVerdict(forecast.verdict, forecast.weeksLate, { projectedEnd: forecast.projectedEnd, overflowHours: forecast.overflowHours })}
+                  {forecast.verdict === 'over-planned' ? ' · ' + Math.round(forecast.remainingHours) + ' h left, the days left hold ' + Math.round(forecast.capacityHours) + ' h' : ''}
+                  {forecast.projectedEnd && forecast.verdict !== 'done' ? ' · finishes about ' + monthYear(forecast.projectedEnd) + ' at this pace' : ''}
+                </p>
+              )}
             </div>
 
             {lane.items.length === 0 ? (
