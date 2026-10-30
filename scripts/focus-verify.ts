@@ -20,9 +20,17 @@ const rows: { id: string; url: string; status: number | string; ok: boolean; tit
 for (const s of sessions) {
   try {
     const response = await fetch(oembedUrl(s.url), { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(20_000) });
-    const body = response.ok ? await response.json() : null;
+    const text = await response.text();
+    let body: unknown = null;
+    try {
+      body = JSON.parse(text);
+    } catch {
+      body = null;
+    }
     const read = response.ok ? readOembed(body) : null;
-    rows.push({ id: s.id, url: s.url, status: response.status, ok: Boolean(read), title: read?.title, channel: read?.channel, reason: read ? undefined : response.status === 401 ? 'embedding not allowed' : response.status === 404 ? 'not found' : 'oEmbed answered ' + response.status });
+    // A 200 that does not read: say what came back, so the row can be judged from the log.
+    const shape = body && typeof body === 'object' ? 'keys ' + Object.keys(body as object).join(',') + (typeof (body as { html?: unknown }).html === 'string' ? '; html ' + (body as { html: string }).html.slice(0, 80).replace(/\|/g, '/') : '; no html') : 'not JSON: ' + text.slice(0, 80).replace(/\|/g, '/');
+    rows.push({ id: s.id, url: s.url, status: response.status, ok: Boolean(read), title: read?.title, channel: read?.channel, reason: read ? undefined : response.status === 401 ? 'embedding not allowed' : response.status === 404 ? 'not found' : response.ok ? 'oEmbed answered 200 but ' + shape : 'oEmbed answered ' + response.status });
   } catch (err) {
     rows.push({ id: s.id, url: s.url, status: 'error', ok: false, reason: err instanceof Error ? err.message : String(err) });
   }
