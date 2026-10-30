@@ -21,9 +21,16 @@
     <meta name="twitter:card" content="summary_large_image" />
     <title>Atlas</title>
     <script src="/theme-init.js"></script>
+    <!-- The launch screen (ATLAS-ART): the app icon over a soft wash, in place until the app mounts. -->
+    <style>
+      .splash { min-height: 100dvh; display: grid; place-items: center; background: radial-gradient(circle at 50% 35%, #dceff4 0%, #e6eae7 60%); }
+      html[data-theme='dark'] .splash { background: radial-gradient(circle at 50% 35%, #2d4249 0%, #2b2f36 60%); }
+      .splash img { width: 96px; height: 96px; border-radius: 24px; box-shadow: 6px 6px 14px #c3cbc6, -6px -6px 14px #ffffff; }
+      html[data-theme='dark'] .splash img { box-shadow: 6px 6px 14px #1f2227, -6px -6px 14px #363b44; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="splash" aria-hidden="true"><img src="/brand/atlas-icon-light-192.png" alt="" width="96" height="96" /></div></div>
     <noscript>Atlas needs JavaScript: it is a local-first app that runs entirely in your browser.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>

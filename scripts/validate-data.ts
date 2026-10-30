@@ -8,6 +8,7 @@ import { loadDesigns } from './lib/load-designs.ts';
 import { loadDocs } from './lib/load-docs.ts';
 import { loadInternships } from './lib/load-internships.ts';
 import { loadSeed } from './lib/load-seed.ts';
+import { loadArtManifest } from './lib/load-art.ts';
 
 const result = loadSeed();
 const { seed } = result;
@@ -31,6 +32,10 @@ if (designs) errors.push(...designs.errors);
 // The internship goals (data/internships*.json): unique ids, every named resource in the library, dates in order.
 const internships = seed ? loadInternships(seed) : null;
 if (internships) errors.push(...internships.errors);
+// The illustrations' manifest (public/art/art.json, ATLAS-ART): its shape, one image per slot and theme, every
+// file present.
+const art = loadArtManifest();
+errors.push(...art.errors);
 
 for (const w of warnings) console.warn('warning  ' + w);
 

@@ -2201,3 +2201,53 @@ formatter); `tests/e2e/polish.spec.ts` (new: every tabbed screen ends above the 
 tab names are drawn, Plan's segments are not clipped and the fourth reads as Credentials, Today's numbers agree and
 Open is one word, the Library's counts carry separators); `tests/e2e/layout.spec.ts` (Plan and Activity added).
 Before and after, Today, Plan and the Library, light and dark, at 390 and 412: `docs/before-after/polish/`.
+
+## Illustrations: calm ink-wash art in a slot system (ATLAS-ART, pull request #38)
+
+**Slots first, pictures later.** Nothing is shipped that the user does not have the rights to, and no image was
+downloaded or copied from anywhere: `public/art/art.json` (checked by `validate:data`: the schema, one image per
+slot and theme, every file present) starts empty, and every slot draws its own stand-in, an inline SVG in the
+theme's colours (`src/ui/ArtPlaceholder.tsx`: layered ridges in mist, a brush stroke of water, a boat, a moon,
+bamboo, a mill wheel, a lighthouse, a shoot, a pine, a summit, a lantern). The user's images go in `art-src/`,
+named after their slot; `npm run art:build` (sharp, installed on that machine only) writes the AVIF and WebP at
+twice each slot's size and under 150 KB, and adds a row to the manifest with its alt, focal point, theme and credit
+to fill in; `public/art/CREDITS.md` repeats the credits. The slots and their sizes are those of the image-prompt
+sheet, so the generated set drops straight in.
+
+**One component.** `ArtPanel` (`src/ui/ArtPanel.tsx`) is a tile-radius card that reserves its aspect ratio before
+anything loads, draws the placeholder, and lays the manifest's image over it lazily (`<picture>`, AVIF then WebP,
+`object-fit: cover` from the focal point), blurring the placeholder beneath as the low-quality picture until the
+file lands. Text never sits on the art: `top` and `bottom` go on fades to the ground over the panel's upper or lower
+third, so every token keeps its contrast (axe's colour-contrast rule runs over Today and Plan in both themes in
+`tests/e2e/art.spec.ts`). In the dark theme an image made for that theme comes first, then one made for both, and
+a light-only image is dimmed under the fade. There is no parallax, so there is nothing to reduce; the setting
+asked for is met by having no motion. With Illustrations off in Settings › Layout the panel renders nothing, and
+every screen reads as it did before.
+
+**Today's header is the picture.** The brief wants a wide panel above the hours tile and, standing, that "Later
+today" stays above the fold at 390 × 844. A 140 px panel on top of the header row and the hours tile would have
+pushed it under. So with the illustrations on, the one 2:1 panel carries both: the header row (the mark, the date,
+the three knobs) on its upper fade and the day's hours, or the running timer, on its lower one; it replaces the
+header's top padding and the hours tile, and the fold check in `ui-acceptance.spec.ts` still passes. The picture
+follows the hour by default (morning until 11, midday until 17, evening until 21, night), or the season, or the
+current block's track, as Settings › Layout says (`layout.today.art`; `layout.general.illustrations` is the
+switch, both optional in the stored shape so no settings migrate).
+
+**Where else, and nowhere else.** The current phase's landscape above its lanes on Plan › Timeline, and each
+phase's inside its expanded row, one stretch of the river per year (`phaseSlot`); one long river behind the
+five-year map's phases, `aria-hidden`; a card on Today on the day a streak reaches 7, 30 or 100, a path's last step
+is ticked or the phase's lanes are all done (`finishCard` in Today.tsx, the phase model cached per atlas and day);
+a small vignette over every empty state (`EmptyState`); a thumbnail in a path's header, never on its rows. The
+launch screen is the icon over a soft wash, static markup in `index.html` until the app mounts. Nothing behind
+lists, rows or the tab bar.
+
+**Loading.** The service worker precaches the manifest and the Today header's set (`today-`, `season-`,
+`track-`) with the build; every other illustration is cached when first seen, under the same cache version
+(`precachedArt` in `scripts/lib/vite-plugin-sw.ts`). `tests/e2e/art.spec.ts` watches layout-shift entries while
+Today loads: under 0.05, and the panel's box is its aspect ratio, not its picture.
+
+Tests: `tests/unit/art.test.ts` (the manifest's rules and the committed file, the slot for an hour, a season, a
+track and a year, the fallback to the placeholder and the list of slots still on it, a motif for every slot, the
+precache rule); `tests/e2e/art.spec.ts` (the header on its picture and the plain row with the setting off, the
+hour/season/track setting, axe colour contrast in both themes, no layout shift, the phases, the map, an empty
+search and a path). Pictures: `docs/before-after/art/`.

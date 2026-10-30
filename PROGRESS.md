@@ -1235,3 +1235,14 @@ Verified on this machine (Linux, Chromium 140):
   in-progress cards. Light ink2 darkened to #575D6E for 4.5:1 on every ground.
 - Tests: `tests/unit/polish.test.ts`, `tests/e2e/polish.spec.ts` (new); layout e2e. Before/after:
   `docs/before-after/polish/`.
+
+## Pull request #38: illustrations
+
+- `public/art/art.json` (empty; checked by `validate:data` via `scripts/lib/load-art.ts`), `public/art/CREDITS.md`,
+  `scripts/art-build.ts` (`npm run art:build`, sharp from `art-src/`), `src/seed/art.ts` (the schema and the slots).
+- `src/ui/ArtPanel.tsx`, `src/ui/ArtPlaceholder.tsx`, `src/hooks/useArt.ts`, `src/lib/art.ts` (the slot for the hour,
+  season, track, year, streak and path; the image for a slot and theme).
+- Today's header on its picture with the hours on the lower fade; finish cards; Plan's phase landscapes; the map's
+  river; empty-state vignettes; path thumbnails; the launch screen; Settings › Layout: Illustrations and what the
+  header follows; the service worker precaches the Today set.
+- Tests: `tests/unit/art.test.ts`, `tests/e2e/art.spec.ts` (new). Pictures: `docs/before-after/art/`.

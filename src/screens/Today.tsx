@@ -9,6 +9,7 @@ import { updateSettings } from '../db/settings.ts';
 import { editItemState, setWeekPick, useWeekPick } from '../db/state.ts';
 import { startTimer, stopTimer, useRunningTimer } from '../db/timer.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
+import type { Atlas } from '../hooks/useAtlas.ts';
 import { useUnits } from '../hooks/useUnits.ts';
 import { addDays, dayName, formatLong, formatStopwatch, monthName, startOfWeek, today as todayDate } from '../lib/dates.ts';
 import { editLog, isBlockDone, minutesByBlock, minutesForRef, readLog, toggleBlockDone, totalMinutes } from '../lib/logs.ts';
@@ -18,6 +19,13 @@ import { planForDay, suggestWeeklyBuild } from '../lib/schedule.ts';
 import type { ScheduledItem, TodayBlock } from '../lib/schedule.ts';
 import { counts as dayCounts, dailyTotals, heatLevel, relativeLevel, streak } from '../lib/streaks.ts';
 import { blockTally } from '../lib/blocks-today.ts';
+import { ArtPanel } from '../ui/ArtPanel.tsx';
+import { useArtSettings } from '../hooks/useArt.ts';
+import { phaseSlot, streakSlot, todaySlot } from '../lib/art.ts';
+import type { ArtSlot } from '../seed/art.ts';
+import { buildPaths } from '../lib/library-home.ts';
+import { buildModel } from './plan/model.ts';
+import { activePhase } from '../lib/schedule.ts';
 import { resolveTheme } from '../lib/theme.ts';
 import { Link, useQueryParam } from '../router/router.tsx';
 import { isRealIsoDate } from '../seed/schema.ts';
@@ -60,6 +68,26 @@ import { todayLine, tokenDaysLeft, useSyncView } from '../sync/status.ts';
 type SheetName = 'date' | 'day' | 'note' | 'change' | 'lessons' | null;
 
 /** The item a block puts in front of you. Block D carries the week's build first, then the monthly project. */
+/**
+ * The finish card (ATLAS-ART): on the day a streak reaches 7, 30 or 100, a path's last step is ticked, or the
+ * current phase's lanes are all done. The phase model is Plan's arithmetic; it is kept per atlas and day.
+ */
+const modelCache = new WeakMap<object, { date: string; model: ReturnType<typeof buildModel> }>();
+function finishCard(atlas: Atlas, date: string, streakDays: number): { slot: ArtSlot; line: string; alt: string } | null {
+  const streakMilestone = streakSlot(streakDays);
+  if (streakMilestone) return { slot: streakMilestone, line: streakDays + ' days in a row', alt: 'A streak of ' + streakDays + ' days' };
+  const path = buildPaths(atlas.seed, atlas.states).find((p) => p.steps.length > 0 && p.done === p.steps.length && p.steps.some((st) => atlas.states.get(st.refId)?.doneAt === date));
+  if (path) return { slot: 'path-complete', line: path.name + ': every step done', alt: 'The ' + path.name + ' path, finished' };
+  const phase = activePhase(date, atlas.seed.phases);
+  if (!phase) return null;
+  const hit = modelCache.get(atlas);
+  const model = hit && hit.date === date ? hit.model : buildModel(atlas, date);
+  modelCache.set(atlas, { date, model });
+  const current = model.find((m) => m.phase.id === phase.id);
+  if (current && current.progress.totalHours > 0 && current.progress.remainingHours <= 0) return { slot: phaseSlot(current.phase), line: current.phase.title + ': every lane done', alt: 'The phase ' + current.phase.title + ', finished' };
+  return null;
+}
+
 function focusItem(block: TodayBlock, monthlyFirst: boolean): ScheduledItem | undefined {
   if (block.kind === 'review') return undefined;
   const weekly = block.weeklyBuild && block.weeklyBuild.status !== 'done' ? block.weeklyBuild : undefined;
@@ -157,6 +185,8 @@ export function Today() {
   const setDate = (next: string): void => setDateParam(next >= now ? null : next);
 
   const atlas = useAtlas();
+  // The illustrations' settings (ATLAS-ART): read with the other hooks, before the loading return.
+  const art = useArtSettings();
   const units = useUnits();
   const timer = useRunningTimer();
   const blogPosts = useBlogPosts();
@@ -315,6 +345,9 @@ export function Today() {
         : null;
 
   const theme = resolveTheme(settings.theme);
+  // The illustrations (ATLAS-ART): the header's picture by the hour, the season or the block's track, and a card
+  // on the day a streak reaches 7, 30 or 100, a path's last step is ticked, or the phase's lanes are all done.
+  const finish = art.on && isToday ? finishCard(atlas, date, streakState.current) : null;
   const nextTheme = theme === 'dark' ? 'light' : 'dark';
 
   /** Hours already put into a project, over every day: "2 of 4 h done". */
@@ -518,6 +551,48 @@ export function Today() {
     .filter(Boolean)
     .join(' · ');
 
+  // The header row and the day's hours: on the illustration's fades, or on their own when the art is off.
+  const headerRow = (
+    <>
+    <span aria-hidden="true" className="flex shrink-0 items-center gap-1.5 pl-1">
+      <img src={'./brand/atlas-mark-' + theme + '.png'} width={26} height={26} alt="" />
+      <span className="text-[1.125rem] font-semibold tracking-[-0.01em]">Atlas</span>
+    </span>
+    <button type="button" className="min-h-11 min-w-0 flex-1 truncate rounded-pill px-1.5 text-left text-meta font-semibold text-blue-deep" onClick={() => setSheet('date')} aria-haspopup="dialog" aria-label={shortDate(date) + (isToday ? ', today' : '') + ', pick a date'}>
+      {shortDate(date)}
+    </button>
+    <span className="-mr-1.5 flex shrink-0">
+      {canChange && <Button variant="icon" icon="sliders" className="!size-11" label={isToday ? 'Change today' : 'Change ' + dateTitle(date)} onClick={() => setSheet('change')} />}
+      <Button variant="icon" icon="gear" className="!size-11" label="Settings" to="/settings" />
+      <Button
+        variant="icon"
+        icon={theme === 'dark' ? 'sun' : 'moon'}
+        className="!size-11"
+        label={'Switch to the ' + nextTheme + ' theme'}
+        onClick={() => void updateSettings(settings.core, (s) => ({ ...s, theme: nextTheme }))}
+      />
+    </span>
+    </>
+  );
+  const hero =
+    nowRunning || otherRunning ? (
+      <p className="flex flex-col items-center gap-1.5">
+        {/* The block's total for today, not this run alone: a restart continues from it. */}
+        <span role="timer" aria-label={'Running, ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'} className="text-big font-semibold tabular-nums text-blue-deep">
+          {formatStopwatch(blockMs(timer!.block))}
+        </span>{' '}
+        <span className="text-meta text-ink2">
+          <span className="font-semibold text-blue-deep">Running</span>
+          {' · since ' + clockOf(timer!.startedAt) + ' · ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'}
+        </span>
+      </p>
+    ) : layout.stats ? (
+      <p className="flex flex-col items-center gap-1.5">
+        <span className="text-big font-semibold">{span(dayMinutes)}</span>{' '}
+        <span className="text-meta text-ink2">{'of ' + span(plan.targetMinutes) + ' today' + (templateNote ? ' · ' + templateNote : '') + ' · ' + (streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet')}</span>
+      </p>
+    ) : null;
+
   return (
     <Screen title="Today">
       <div
@@ -534,27 +609,14 @@ export function Today() {
       >
         {/* The page's title, for screen readers: the date. The mark and wordmark are decoration. */}
         <h1 className="sr-only">{dateTitle(date)}</h1>
-        {/* One row: the mark, the wordmark, the date, and the three knobs (change, settings, theme), 44 px each. */}
-        <div className="-mb-1.5 flex items-center gap-1 pt-[max(2.25rem,env(safe-area-inset-top))]">
-          <span aria-hidden="true" className="flex shrink-0 items-center gap-1.5 pl-1">
-            <img src={'./brand/atlas-mark-' + theme + '.png'} width={26} height={26} alt="" />
-            <span className="text-[1.125rem] font-semibold tracking-[-0.01em]">Atlas</span>
-          </span>
-          <button type="button" className="min-h-11 min-w-0 flex-1 truncate rounded-pill px-1.5 text-left text-meta font-semibold text-blue-deep" onClick={() => setSheet('date')} aria-haspopup="dialog" aria-label={shortDate(date) + (isToday ? ', today' : '') + ', pick a date'}>
-            {shortDate(date)}
-          </button>
-          <span className="-mr-1.5 flex shrink-0">
-            {canChange && <Button variant="icon" icon="sliders" className="!size-11" label={isToday ? 'Change today' : 'Change ' + dateTitle(date)} onClick={() => setSheet('change')} />}
-            <Button variant="icon" icon="gear" className="!size-11" label="Settings" to="/settings" />
-            <Button
-              variant="icon"
-              icon={theme === 'dark' ? 'sun' : 'moon'}
-              className="!size-11"
-              label={'Switch to the ' + nextTheme + ' theme'}
-              onClick={() => void updateSettings(settings.core, (s) => ({ ...s, theme: nextTheme }))}
-            />
-          </span>
-        </div>
+        {/* One row: the mark, the wordmark, the date, and the three knobs (change, settings, theme), 44 px each. With
+            the illustrations on it sits on the picture's upper fade and the day's hours on its lower one (one panel
+            in place of a header and a tile, so "Later today" stays above the fold at 390 x 844). */}
+        {art.on ? (
+          <ArtPanel slot={todaySlot(art.todayBy, new Date(), item?.track)} aspect="2 / 1" eager alt="" className="mt-[max(0.75rem,env(safe-area-inset-top))]" top={<div className="flex items-center gap-1">{headerRow}</div>} bottom={layout.stats || nowRunning || otherRunning ? hero : undefined} />
+        ) : (
+          <div className="-mb-1.5 flex items-center gap-1 pt-[max(2.25rem,env(safe-area-inset-top))]">{headerRow}</div>
+        )}
         {!isToday && (
           <div className="mt-2 flex">
             <Button size="sm" icon="today" onClick={() => setDate(now)}>
@@ -562,27 +624,16 @@ export function Today() {
             </Button>
           </div>
         )}
+        {!art.on && (
         <div className="mt-4">
           <div className="tile flex flex-col items-center justify-center gap-1.5 px-[18px] py-4 text-center">
-            {nowRunning || otherRunning ? (
-              <p className="flex flex-col items-center gap-1.5">
-                {/* The block's total for today, not this run alone: a restart continues from it. */}
-                <span role="timer" aria-label={'Running, ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'} className="text-big font-semibold tabular-nums text-blue-deep">
-                  {formatStopwatch(blockMs(timer!.block))}
-                </span>{' '}
-                <span className="text-meta text-ink2">
-                  <span className="font-semibold text-blue-deep">Running</span>
-                  {' · since ' + clockOf(timer!.startedAt) + ' · ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'}
-                </span>
-              </p>
-            ) : layout.stats ? (
-              <p className="flex flex-col items-center gap-1.5">
-                <span className="text-big font-semibold">{span(dayMinutes)}</span>{' '}
-                <span className="text-meta text-ink2">{'of ' + span(plan.targetMinutes) + ' today' + (templateNote ? ' · ' + templateNote : '') + ' · ' + (streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet')}</span>
-              </p>
-            ) : null}
+            {hero}
           </div>
         </div>
+        )}
+        {finish && (
+          <ArtPanel slot={finish.slot} aspect="5 / 2" className="mt-4" alt={finish.alt} bottom={<p className="text-body font-semibold">{finish.line}</p>} />
+        )}
         {/* The week so far: each day shaded by its share of its plan (the heatmap's ramp), today a ring, a dot under a
             day that met its plan or kept the streak. */}
         <nav aria-label="This week: a day is shaded by its share of its plan, today is a ring, a dot marks a day that met its plan or kept the streak" className="tile mt-4 flex justify-between px-2.5 py-2.5">

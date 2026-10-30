@@ -458,11 +458,18 @@ export const LayoutSchema = z.strictObject({
     /** What "Now" picks: the first unfinished block, or the first unfinished one in `order`. */
     now: z.enum(['first', 'order']),
     order: z.array(BlockIdSchema),
+    /** What the header's illustration follows (ATLAS-ART): the hour (default), the season or the current block's track. */
+    art: z.enum(['time', 'season', 'track']).optional(),
   }),
   /** 3 to 5 tabs; Today is always first. */
   tabs: z.array(z.enum(TAB_IDS)).min(3).max(5),
   plan: z.strictObject({ segment: z.enum(PLAN_SEGMENTS), showDropped: z.boolean() }),
-  general: z.strictObject({ clock: z.enum(['24', '12']), density: z.enum(['comfortable', 'compact']) }),
+  general: z.strictObject({
+    clock: z.enum(['24', '12']),
+    density: z.enum(['comfortable', 'compact']),
+    /** The illustrations (ATLAS-ART), on unless switched off; absent in settings saved before them. */
+    illustrations: z.boolean().optional(),
+  }),
 });
 export type Layout = z.infer<typeof LayoutSchema>;
 

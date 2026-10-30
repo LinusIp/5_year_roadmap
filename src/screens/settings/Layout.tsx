@@ -110,6 +110,7 @@ export function Layout({ atlas }: { atlas: Atlas }) {
           <Row title="Later today" toggle={{ on: layout.today.later, onChange: (on) => saveLayout((l) => ((l.today.later = on), l)) }} />
           <Row title="The weekly-review line" toggle={{ on: layout.today.review, onChange: (on) => saveLayout((l) => ((l.today.review = on), l)) }} />
           <Row title="The footer" meta="What is done today, and sync notices" toggle={{ on: layout.today.footer, onChange: (on) => saveLayout((l) => ((l.today.footer = on), l)) }} />
+          <Row title="Illustrations" meta="The header's picture, the phases' landscapes, the finish cards" toggle={{ on: layout.general.illustrations ?? true, onChange: (on) => saveLayout((l) => ((l.general.illustrations = on), l)) }} />
         </RowList>
         <div className="mt-3 space-y-3">
           <SegmentedControl
@@ -121,6 +122,18 @@ export function Layout({ atlas }: { atlas: Atlas }) {
               { value: 'compact', label: 'Compact' },
             ]}
           />
+          {(layout.general.illustrations ?? true) && (
+            <SegmentedControl
+              label="The header's picture follows"
+              value={layout.today.art ?? 'time'}
+              onChange={(art: 'time' | 'season' | 'track') => saveLayout((l) => ((l.today.art = art), l))}
+              options={[
+                { value: 'time', label: 'The hour' },
+                { value: 'season', label: 'The season' },
+                { value: 'track', label: 'The track' },
+              ]}
+            />
+          )}
           <SegmentedControl
             label="Now is"
             value={layout.today.now}
