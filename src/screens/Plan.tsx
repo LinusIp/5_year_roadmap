@@ -108,7 +108,15 @@ export function Plan() {
         </div>
       )}
 
-      <LaneSheet atlas={atlas} phase={laneModel?.phase ?? null} lane={itemParam ? null : lane} units={units} onClose={() => setLane(null)} onOpenItem={openItem} />
+      <LaneSheet
+        atlas={atlas}
+        phase={laneModel?.phase ?? null}
+        lane={itemParam ? null : lane}
+        forecast={laneModel && laneModel.phase.id === phase?.id ? (laneModel.forecast.lanes.find((l) => l.block === laneBlock) ?? null) : null}
+        units={units}
+        onClose={() => setLane(null)}
+        onOpenItem={openItem}
+      />
       <ItemSheet atlas={atlas} id={itemParam} onClose={() => setItem(null)} />
       <EditPlanSheet atlas={atlas} open={editOpen} onClose={() => setEditOpen(false)} />
       {goalOpen && <GoalSheet key={goalOpen.id} atlas={atlas} goal={goalOpen} onClose={() => setGoalOpen(null)} />}

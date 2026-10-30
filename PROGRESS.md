@@ -1205,6 +1205,15 @@ Verified on this machine (Linux, Chromium 140):
 - Tests: `tests/unit/agents.test.ts`, `tests/unit/removed-rows.test.ts` (new); import, library-home, live-upgrade,
   security units; `tests/e2e/atlas-library.spec.ts`.
 
+## Pull request #36: the "N weeks behind" forecast
+
+- `src/lib/forecast.ts`: the pace window starts at the latest of 28 days back, the phase start and the first log
+  (`paceWindow`); `early` ("Too early to tell") under seven days or three logged days; `over-planned` ("Plan too
+  full by N h", a line and a Re-plan button on the current phase) when the remaining hours exceed `capacityHours`;
+  past twelve weeks "Finishes ~Mon YYYY (N months late)"; the lane sheet shows the month it finishes in.
+- `src/lib/goals.ts` projects with the same window.
+- Tests: `tests/unit/forecast.test.ts`, `tests/e2e/forecast.spec.ts` (new); replan unit, flex and roadmap e2e.
+- Before and after: `docs/before-after/forecast/`.
 ## Pull request #35: the Atlas Library's eleventh file, the plan gap fill and six more quick filters
 
 - `data/resources/library-atlas-11.yaml`: 587 new resources (46 paid; 49 certificate rows, 3 of the file's 53 left

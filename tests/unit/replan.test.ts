@@ -3,7 +3,8 @@ import { loadSeedOrThrow } from '../../scripts/lib/load-seed.ts';
 import { splitSeed } from '../../scripts/lib/vite-plugin-seed.ts';
 import { defaultSettings } from '../../src/db/settings.ts';
 import { budgetHoursBetween, fractionDone, itemProgress, laneProgress, phaseProgress } from '../../src/lib/progress.ts';
-import { describeVerdict, forecastPhase, paceForBlock, paceSummary } from '../../src/lib/forecast.ts';
+import { describeVerdict, forecastPhase, paceForBlock, paceSummary, plannedHoursPerDay } from '../../src/lib/forecast.ts';
+import { daysBetween } from '../../src/lib/dates.ts';
 import { laneCapacity, replan, replanToPatches } from '../../src/lib/replan.ts';
 import { nextOrder, reorderLane, resolveSeed, stampPatches, takeIntoLane } from '../../src/lib/plan.ts';
 import type { AppSeed, PlanItem } from '../../src/seed/schema.ts';
@@ -97,18 +98,20 @@ describe('the forecast', () => {
   });
 
   it('says on track when the work lands just inside the phase', () => {
-    // Pace and remaining hours chosen so the projected end falls in the phase's final week.
+    // Two hours a day for ten days, the plan's two hours: the pace window runs from the phase start (not 28 days
+    // back), so the efficiency is 1 and the remaining hours chosen to run out in the phase's final days.
     const logs = Array.from({ length: 10 }, (_, i) => log('2026-09-' + String(21 + i).padStart(2, '0'), 'A', 120));
-    const pace = paceForBlock(logs, 'A', '2026-09-30', settings.core.forecast.paceWindowDays);
-    const daysLeft = 120; // 2026-09-30 to roughly the end of the phase
-    const forecast = forecastPhase({ phase, lanes: [lane('A', pace * daysLeft)], logs, settings, asOf: '2026-09-30' });
+    const pace = paceForBlock(logs, 'A', '2026-09-30', settings.core.forecast.paceWindowDays, '2026-09-21');
+    expect(pace).toBeCloseTo(2);
+    const hoursLeft = plannedHoursPerDay(settings, 'A', '2026-09-30', phase.end) * (daysBetween('2026-09-30', phase.end) + 1) - 2;
+    const forecast = forecastPhase({ phase, lanes: [lane('A', hoursLeft)], logs, settings, asOf: '2026-09-30' });
     expect(forecast.lanes[0]!.verdict).toBe('on-track');
   });
 
   it('counts the weeks when the pace will not finish in time', () => {
-    const logs = [log('2026-09-21', 'A', 60)];
-    // 300 hours left at a very low pace runs long past the phase.
-    const forecast = forecastPhase({ phase, lanes: [lane('A', 300)], logs, settings, asOf: '2026-09-21' });
+    // A week in, with three logged days of an hour: 120 hours left at half the plan's pace runs past the phase.
+    const logs = [log('2026-09-21', 'A', 60), log('2026-09-23', 'A', 60), log('2026-09-27', 'A', 60)];
+    const forecast = forecastPhase({ phase, lanes: [lane('A', 120)], logs, settings, asOf: '2026-09-27' });
     expect(forecast.lanes[0]!.verdict).toBe('behind');
     expect(forecast.lanes[0]!.weeksLate).toBeGreaterThan(0);
     expect(describeVerdict('behind', 6)).toBe('6 weeks behind');

@@ -7,8 +7,9 @@
 import type { DayLog, StoredSettings, UserItemState } from '../db/types.ts';
 import type { AppSeed, Goal } from '../seed/schema.ts';
 import { addDays } from './dates.ts';
-import { paceForBlock, plannedHoursPerDay, projectEnd } from './forecast.ts';
+import { paceForBlock, paceWindow, plannedHoursPerDay, projectEnd } from './forecast.ts';
 import { itemProgress, projectUnitCount } from './progress.ts';
+import { activePhase } from './schedule.ts';
 
 export type GoalVerdict = 'done' | 'on-track' | 'at-risk';
 
@@ -43,8 +44,10 @@ export function projectedFinish(seed: AppSeed, settings: StoredSettings, states:
       .filter((i) => i.block === block && (phaseIndex(i.phaseId) < phaseIndex(item.phaseId) || (i.phaseId === item.phaseId && i.order <= item.order)))
       .reduce((sum, i) => sum + remainingOf(seed, i.resourceId ?? i.projectId!, states, i.hours), 0);
     const window = settings.core.forecast.paceWindowDays;
-    const pace = paceForBlock(logs, block, asOf, window);
-    const planned = plannedHoursPerDay(settings, block, addDays(asOf, -(window - 1)), asOf);
+    // The same window as the lane forecast: never before the phase started or before the first log.
+    const { from } = paceWindow(logs, activePhase(asOf, seed.phases)?.start ?? addDays(asOf, -(window - 1)), asOf, window);
+    const pace = paceForBlock(logs, block, asOf, window, from);
+    const planned = plannedHoursPerDay(settings, block, from, asOf);
     // With nothing logged lately, assume the plan is followed: the projection is then what the plan promises.
     const efficiency = pace > 0 && planned > 0 ? pace / planned : 1;
     const end = projectEnd(settings, block, asOf, ahead, efficiency);
