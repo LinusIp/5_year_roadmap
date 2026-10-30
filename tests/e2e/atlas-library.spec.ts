@@ -13,15 +13,18 @@ test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date(FIRST_DAY) });
 });
 
+/** A count as the screen writes it: with its thousands separator (ATLAS-UI-POLISH). */
+const fmt = (n: number): string => n.toLocaleString('en-GB');
+
 test('the Papers shelf filters by level, and every row is of that level', async ({ page }) => {
   await open(page, './#/library?type=paper');
   const count = page.locator('main section .section-label').last();
-  const all = Number((await count.innerText()).split(' of ')[1]);
+  const all = Number((await count.innerText()).split(' of ')[1]!.replace(/,/g, ''));
   expect(all).toBeGreaterThan(700);
   const chips = page.getByRole('group', { name: 'Level and roadmap' });
   await chips.getByRole('button', { name: 'Beginner' }).click();
   await expect(page).toHaveURL(/lvl=intro/);
-  const beginners = Number((await count.innerText()).split(' of ')[0]);
+  const beginners = Number((await count.innerText()).split(' of ')[0]!.replace(/,/g, ''));
   expect(beginners).toBeGreaterThan(0);
   expect(beginners).toBeLessThan(all);
   await chips.getByRole('button', { name: 'Beginner' }).click();
@@ -121,7 +124,7 @@ test('Developer essentials gathers the terminal, Git, Linux, SQL and web resourc
   await row.click();
   await expect(page).toHaveURL(/pick=essentials/);
   await expect(page.getByRole('heading', { level: 1, name: 'Developer essentials' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: new RegExp('^' + count + ' of ' + count + '$') })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + fmt(count) + ' of ' + fmt(count) + '$') })).toBeVisible();
   // Git and SQL from the sixth file, on different shelves.
   await page.getByRole('searchbox', { name: 'Search developer essentials' }).fill('Pro Git');
   await expect(page.getByRole('button', { name: /^Pro Git/ })).toBeVisible();
@@ -223,7 +226,7 @@ test('the Engineering path offers area chips that narrow its optional list, in t
   await expect(page.getByRole('heading', { level: 1, name: 'Electrical, mechanical & aerospace' })).toBeVisible();
   const areas = page.getByRole('group', { name: 'Area' });
   for (const label of ['Mechanics', 'Materials', 'Thermo-fluids', 'Design & CAD', 'Manufacturing', 'Electronics & PCB', 'Power & energy', 'Control', 'Aerospace', 'Chemical & nuclear', 'Practice']) {
-    await expect(areas.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' \\d+$') })).toBeVisible();
+    await expect(areas.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' [\\d,]+$') })).toBeVisible();
   }
   const optional = page.getByRole('button', { name: /^Optional for this path/ });
   const all = Number((await optional.innerText()).replace(/\D/g, ''));
@@ -250,7 +253,7 @@ test('Compact power & energy conversion gathers fusion, superconductors and plas
   await row.click();
   await expect(page).toHaveURL(/pick=energy/);
   await expect(page.getByRole('heading', { level: 1, name: 'Compact power & energy conversion' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: new RegExp('^' + count + ' of ' + count + '$') })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + fmt(count) + ' of ' + fmt(count) + '$') })).toBeVisible();
   await page.getByRole('searchbox', { name: 'Search power and energy conversion' }).fill('Tokamak');
   await expect(page.getByRole('button', { name: /Tokamak/ }).first()).toBeVisible();
   await page.getByRole('searchbox', { name: 'Search power and energy conversion' }).fill('');
@@ -272,10 +275,10 @@ test('Security & defence gathers the cyber defence rows, with area chips over th
   await row.click();
   await expect(page).toHaveURL(/pick=security/);
   await expect(page.getByRole('heading', { level: 1, name: 'Security & defence' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: new RegExp('^' + count + ' of ' + count + '$') })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + fmt(count) + ' of ' + fmt(count) + '$') })).toBeVisible();
   const areas = page.getByRole('group', { name: 'Area' });
   for (const label of ['Foundations', 'Hardening', 'Malware', 'Detection & response', 'Network & web', 'Secure development', 'AI for defence']) {
-    await expect(areas.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' \\d+$') })).toBeVisible();
+    await expect(areas.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' [\\d,]+$') })).toBeVisible();
   }
   await areas.getByRole('button', { name: /^Malware \d+$/ }).click();
   await expect(page).toHaveURL(/area=malware/);
@@ -334,19 +337,19 @@ test('the Books shelf has a Free / Paid chip, a paid book wears its badge, and "
 
 test('Agents & MCP gathers the agents, MCP and harnesses rows, with area chips over the list', async ({ page }) => {
   await open(page, './#/library');
-  const row = page.getByRole('button', { name: /^Agents & MCP \d+$/ });
+  const row = page.getByRole('button', { name: /^Agents & MCP [\d,]+$/ });
   await expect(row).toBeVisible();
   const count = Number((await row.innerText()).replace(/\D/g, ''));
   expect(count).toBeGreaterThan(800);
   await row.click();
   await expect(page).toHaveURL(/pick=agents/);
   await expect(page.getByRole('heading', { level: 1, name: 'Agents & MCP' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: new RegExp('^' + count + ' of ' + count + '$') })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + fmt(count) + ' of ' + fmt(count) + '$') })).toBeVisible();
   const areas = page.getByRole('group', { name: 'Area' });
   for (const label of ['MCP', 'Harness & loop', 'Tools & sandbox', 'Evals', 'Frameworks', 'Books']) {
-    await expect(areas.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' \\d+$') })).toBeVisible();
+    await expect(areas.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' [\\d,]+$') })).toBeVisible();
   }
-  await areas.getByRole('button', { name: /^MCP \d+$/ }).click();
+  await areas.getByRole('button', { name: /^MCP [\d,]+$/ }).click();
   await expect(page).toHaveURL(/area=mcp/);
   const [shown, total] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
   expect(total).toBe(count);
@@ -356,7 +359,7 @@ test('Agents & MCP gathers the agents, MCP and harnesses rows, with area chips o
   await expect(page.getByRole('button', { name: /rmcp|Rust SDK/i }).first()).toBeVisible();
   // An RL agent in robotics is not the cluster.
   await page.getByRole('searchbox', { name: 'Search agents and MCP' }).fill('');
-  await areas.getByRole('button', { name: /^MCP \d+$/ }).click();
+  await areas.getByRole('button', { name: /^MCP [\d,]+$/ }).click();
   await page.getByRole('searchbox', { name: 'Search agents and MCP' }).fill('Training with an RL Agent');
   await expect(page.getByRole('button', { name: /^Training with an RL Agent/ })).toHaveCount(0);
   await page.getByRole('searchbox', { name: 'Search agents and MCP' }).fill('GPUDrive');
@@ -377,7 +380,7 @@ test('the quick filters are one list on the home; Certificates wears its badge, 
   await certs.click();
   await expect(page).toHaveURL(/pick=certificates/);
   await expect(page.getByRole('heading', { level: 1, name: 'Certificates' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: new RegExp('^' + count + ' of ' + count + '$') })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + fmt(count) + ' of ' + fmt(count) + '$') })).toBeVisible();
   await expect(page.getByRole('list').getByRole('button').first()).toContainText('Certificate ·');
   await page.getByRole('searchbox', { name: 'Search certificates' }).fill('NCA-GENL');
   await page.getByRole('button', { name: /NCA-GENL/ }).first().click();

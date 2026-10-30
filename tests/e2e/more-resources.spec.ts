@@ -13,7 +13,7 @@ test.beforeEach(async ({ page }) => {
 
 test('the Papers shelf lists Attention Is All You Need, year 1 first, and filters by level', async ({ page }) => {
   await open(page, './#/library');
-  await page.getByRole('button', { name: /^\d+ Papers$/ }).click();
+  await page.getByRole('button', { name: /^[\d,]+ Papers$/ }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Papers' })).toBeVisible();
   const rows = page.locator('main ul.rows > *');
   // In the plan's years: the first paper is one for year 1.

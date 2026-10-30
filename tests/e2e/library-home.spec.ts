@@ -28,10 +28,10 @@ test('the home shows the four sections, ML Zoomcamp in progress from its checkli
   await expect(page.getByRole('heading', { name: 'Up next' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Browse when you need something' })).toBeVisible();
   for (const shelf of ['Courses', 'Books', 'Papers', 'Articles', 'Blogs to follow', 'Tools']) {
-    await expect(page.getByRole('button', { name: new RegExp('^\\d+ ' + shelf + '$') })).toBeVisible();
+    await expect(page.getByRole('button', { name: new RegExp('^[\\d,]+ ' + shelf + '$') })).toBeVisible();
   }
   // Projects is a full-width row under the grid.
-  await expect(page.getByRole('button', { name: /^Projects \d+$/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Projects [\d,]+$/ })).toBeVisible();
 });
 
 test('a path opens grouped by phase, and its step opens the resource', async ({ page }) => {
@@ -63,12 +63,12 @@ test('a card in progress pauses from its menu, back to not started', async ({ pa
 test('a shelf filters by status, in the URL, and says when nothing matches', async ({ page }) => {
   await start(page, 'ml-zoomcamp');
   await open(page, './#/library');
-  await page.getByRole('button', { name: /^\d+ Courses$/ }).click();
+  await page.getByRole('button', { name: /^[\d,]+ Courses$/ }).click();
   await expect(page).toHaveURL(/type=course/);
   await expect(page.getByRole('heading', { level: 1, name: 'Courses' })).toBeVisible();
   await page.getByRole('button', { name: 'Active', exact: true }).click();
   await expect(page).toHaveURL(/status=active/);
-  await expect(page.getByText(/^1 of \d+$/)).toBeVisible();
+  await expect(page.getByText(/^1 of [\d,]+$/)).toBeVisible();
   await expect(page.getByRole('button', { name: /ML Zoomcamp/ })).toBeVisible();
   await page.getByRole('searchbox').fill('no such course anywhere');
   await expect(page.getByText('No matches. Clear filters.')).toBeVisible();
@@ -80,7 +80,7 @@ test('search groups by shelf, three of each, and Show all opens the shelf', asyn
   const courses = page.getByRole('heading', { name: /^Courses · \d+$/ });
   await expect(courses).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Your paths' })).toBeHidden();
-  const total = Number((await courses.innerText()).split('·')[1]!.trim());
+  const total = Number((await courses.innerText()).split('·')[1]!.trim().replace(/,/g, ''));
   if (total > 3) {
     await page.getByRole('button', { name: 'Show all ' + total, exact: true }).first().click();
     await expect(page).toHaveURL(/type=course/);
