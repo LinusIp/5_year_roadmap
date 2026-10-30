@@ -1246,3 +1246,17 @@ Verified on this machine (Linux, Chromium 140):
   river; empty-state vignettes; path thumbnails; the launch screen; Settings › Layout: Illustrations and what the
   header follows; the service worker precaches the Today set.
 - Tests: `tests/unit/art.test.ts`, `tests/e2e/art.spec.ts` (new). Pictures: `docs/before-after/art/`.
+
+## Pull request #39: daily scenes
+
+- `scripts/scenes.ts` (`npm run scenes`, sharp from `scenes-src/`: k-means palettes with the contrast guarantees),
+  `public/scenes/` (17 scenes, AVIF and WebP at 736 and 300 px, `scenes.json`, `CREDITS.md`), `src/seed/scenes.ts`
+  (the schema and the contrast re-check), `scripts/lib/load-scenes.ts` (`validate:data`), `src/lib/color.ts`.
+- `src/lib/scenes.ts` (the mockup's order, pin, skip, favourites, the tokens per theme, the lane slots),
+  `src/hooks/useScenes.ts`, `src/lib/theme.ts` (`applyScene`), `public/theme-init.js` (the first paint),
+  `src/ui/ScenePanel.tsx`, the lane classes in `src/index.css`.
+- Today's header on the scene with the preview knobs; Plan's phase header; the Library banner; the resource strip;
+  Stats' week banner and streak card; the Internships countdown; the map full-bleed; the Daily scenes page
+  (`/scenes`); Settings › Appearance; the service worker precaches today's and tomorrow's scene.
+- Tests: `tests/unit/scenes.test.ts`, `tests/e2e/scenes.spec.ts` (new). Pictures: `docs/before-after/scenes/`.
+

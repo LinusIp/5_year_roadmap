@@ -15,6 +15,7 @@ import { Button } from '../ui/Button.tsx';
 import { Chips } from '../ui/Chips.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
+import { ScenePanel } from '../ui/ScenePanel.tsx';
 import { ProgressLine } from '../ui/ProgressLine.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
@@ -50,7 +51,24 @@ function Targets({ goal, progress, today, atlas, onRoadmap }: GoalProps & { atla
   const firstOpenSource = goal.open_source.find((o) => o.target);
   return (
     <>
-      <section aria-labelledby="intern-next" className="tile mt-6 flex flex-col gap-2 p-[18px]">
+      <section aria-labelledby="intern-next" className="tile mt-6 flex flex-col gap-2 overflow-hidden p-[18px]">
+        {/* The countdown (ATLAS-DAILY-SCENES): the days to the next application over the scene, on its fade. */}
+        {next && (
+          <ScenePanel
+            slot="internships"
+            aspect="8 / 3"
+            focal="50% 35%"
+            decorative
+            bare
+            className="-mx-[18px] -mt-[18px] mb-1 rounded-t-[24px]"
+            bottom={
+              <p className="flex items-baseline gap-2">
+                <span className="text-[2.5rem] font-semibold leading-none text-blue-deep">{Math.max(0, next.days)}</span>
+                <span className="text-body font-medium">{(next.days === 1 ? 'day' : 'days') + ' to the next application'}</span>
+              </p>
+            }
+          />
+        )}
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
           <p className="section-label mb-0">Next application</p>
           {next && <span className="text-meta text-ink2">{'wave ' + next.target.wave + ' of ' + waves + ' · ' + daysToApply(next.days) + ' · ' + next.target.apply.label}</span>}

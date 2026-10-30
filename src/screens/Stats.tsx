@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useAtlas } from '../hooks/useAtlas.ts';
-import { monthName, today as todayDate } from '../lib/dates.ts';
+import { addDays, monthName, startOfWeek, today as todayDate } from '../lib/dates.ts';
 import { plannedFor } from '../lib/day-plan.ts';
 import { paceSummary } from '../lib/forecast.ts';
 import { minutesPerBlock, minutesPerTrack } from '../lib/heatmap.ts';
@@ -10,6 +10,8 @@ import { streak } from '../lib/streaks.ts';
 import { Button } from '../ui/Button.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
+import { ScenePanel } from '../ui/ScenePanel.tsx';
+import { useCurrentScene } from '../hooks/useScenes.ts';
 import { ProgressLine } from '../ui/ProgressLine.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
@@ -24,6 +26,7 @@ const PERIOD = { weekly: 'week', monthly: 'month', research: 'quarter', capstone
 /** Stats: hours per track family by month, completion by year, cadences, and where the hours went. */
 export function Stats() {
   const atlas = useAtlas();
+  const { scene } = useCurrentScene();
   const asOf = todayDate();
   const model = useMemo(() => {
     if (!atlas) return null;
@@ -49,6 +52,11 @@ export function Stats() {
   const blocks = minutesPerBlock(logs);
   const tracks = minutesPerTrack(logs);
   const cadences = (['weekly', 'monthly', 'capstone'] as const).map((c) => adherence(seed.projects, atlas.states, c, model.planStart, asOf, settings.core.weekStartsOn));
+  const weekStart = startOfWeek(asOf, settings.core.weekStartsOn);
+  const weekMinutes = logs.filter((l) => l.date >= weekStart && l.date <= asOf).reduce((sum, l) => sum + l.entries.reduce((s, e) => s + e.minutes, 0), 0);
+  const planned = plannedFor(settings);
+  let weekPlanned = 0;
+  for (let d = weekStart; d <= asOf; d = addDays(d, 1)) weekPlanned += planned(d);
 
   return (
     <Screen title="Stats">
@@ -57,6 +65,26 @@ export function Stats() {
         sub={hours(total) + ' logged · ' + pace.actual.toFixed(1) + ' h a day over the last ' + pace.windowDays + ' days, the plan says ' + pace.planned.toFixed(0) + ' · longest streak ' + plural(streakState.longest, 'day')}
       />
 
+      {/* The week's banner and the streak card (ATLAS-DAILY-SCENES): the scene behind the numbers, on paper chips. */}
+      {scene && total > 0 && (
+        <>
+          <ScenePanel slot="stats-week" aspect="16 / 9" focal="50% 20%" decorative className="mt-[18px]">
+            <div className="scene-chip absolute bottom-4 left-4 flex flex-col px-3.5 py-2.5">
+              <span className="section-label mb-0">This week</span>
+              <span className="text-hero font-semibold leading-[1.05]">{hours(weekMinutes)}</span>
+              <span className="text-meta text-ink2">{'of ' + hours(weekPlanned) + ' planned'}</span>
+            </div>
+          </ScenePanel>
+          <section className="tile mt-[18px] flex min-h-[132px] overflow-hidden !p-0" aria-label="Streak">
+            <ScenePanel slot="stats-streak" focal="80% 70%" decorative bare className="w-[118px] shrink-0" />
+            <div className="flex flex-col justify-center gap-0.5 px-[18px] py-4">
+              <span className="section-label mb-0">Streak</span>
+              <span className="text-hero font-semibold leading-[1.05]">{plural(streakState.current, 'day')}</span>
+              <span className="text-meta text-ink2">{'longest ' + plural(streakState.longest, 'day')}</span>
+            </div>
+          </section>
+        </>
+      )}
       {total === 0 ? (
         <EmptyState action={<Button to="/">Go to Today</Button>}>The charts fill in as you log time.</EmptyState>
       ) : (

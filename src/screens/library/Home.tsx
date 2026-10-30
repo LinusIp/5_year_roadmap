@@ -12,6 +12,7 @@ import type { IconName } from '../../ui/Icon.tsx';
 import { IconTile } from '../../ui/glyphs.tsx';
 import { ProgressLine } from '../../ui/ProgressLine.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
+import { ScenePanel } from '../../ui/ScenePanel.tsx';
 import { Sheet } from '../../ui/Sheet.tsx';
 import { count, plural } from '../parts/text.ts';
 
@@ -143,6 +144,20 @@ export function LibraryHome({
 
   return (
     <>
+      {/* This week's picks (ATLAS-DAILY-SCENES): the scene's banner over what is in progress, with the next step named. */}
+      <ScenePanel
+        slot="library"
+        aspect="12 / 5"
+        focal="50% 30%"
+        alt=""
+        className="mt-[18px]"
+        bottom={
+          <div className="flex flex-col">
+            <p className="text-lead font-semibold">This week's picks</p>
+            <p className="text-meta text-ink2">{active.length === 0 ? 'Start the next step of a path' : plural(active.length, 'item') + ' in progress' + (active[0] ? ' · next: ' + (active[0].short ?? active[0].title) : '')}</p>
+          </div>
+        }
+      />
       <section aria-labelledby="in-progress" className="mt-[18px]">
         <h2 id="in-progress" className="section-label px-1">
           In progress

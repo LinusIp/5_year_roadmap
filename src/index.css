@@ -43,6 +43,15 @@
   /* The filled button's inner top highlight. */
   --gloss: rgba(255, 255, 255, .35);
   --scrim: rgba(59, 64, 75, .35);
+  /*
+   * The five lanes (ATLAS-DAILY-SCENES): a scene sets --l (a fill with white text), --t (a soft tint), --x (text on
+   * the tint) and --d (decoration) for each; without one they fall back to the clay's blue and ice.
+   */
+  --l0: var(--blue-deep); --t0: var(--blue-soft); --x0: var(--blue-deep); --d0: var(--deco);
+  --l1: var(--ice-deep); --t1: var(--ice-soft); --x1: var(--ice-deep); --d1: var(--ice);
+  --l2: var(--blue-deep); --t2: var(--blue-soft); --x2: var(--blue-deep); --d2: var(--deco);
+  --l3: var(--ice-deep); --t3: var(--ice-soft); --x3: var(--ice-deep); --d3: var(--ice);
+  --l4: var(--blue-deep); --t4: var(--blue-soft); --x4: var(--blue-deep); --d4: var(--deco);
 }
 
 :root[data-theme="dark"] {
@@ -72,6 +81,11 @@
   --ramp-4: #8EA3D6;
   --gloss: rgba(255, 255, 255, .18);
   --scrim: rgba(0, 0, 0, .45);
+  --l0: #52638F; --t0: var(--blue-soft); --x0: var(--blue-deep); --d0: var(--deco);
+  --l1: #2B6A7C; --t1: var(--ice-soft); --x1: var(--ice-deep); --d1: var(--ice);
+  --l2: #52638F; --t2: var(--blue-soft); --x2: var(--blue-deep); --d2: var(--deco);
+  --l3: #2B6A7C; --t3: var(--ice-soft); --x3: var(--ice-deep); --d3: var(--ice);
+  --l4: #52638F; --t4: var(--blue-soft); --x4: var(--blue-deep); --d4: var(--deco);
 }
 
 @theme inline {
@@ -251,6 +265,20 @@
   .art-fade-top {
     background: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 45%, color-mix(in srgb, var(--bg) 60%, transparent) 75%, transparent 100%);
   }
+  /* A paper-coloured chip behind text that sits over a scene image (src/ui/ScenePanel.tsx). */
+  .scene-chip {
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    border-radius: var(--radius-knob);
+  }
+  /* A lane's colours (ATLAS-DAILY-SCENES): the block's fill, tint, text on the tint and decoration. */
+  .lane-0 { --lane: var(--l0); --lane-tint: var(--t0); --lane-text: var(--x0); --lane-deco: var(--d0); }
+  .lane-1 { --lane: var(--l1); --lane-tint: var(--t1); --lane-text: var(--x1); --lane-deco: var(--d1); }
+  .lane-2 { --lane: var(--l2); --lane-tint: var(--t2); --lane-text: var(--x2); --lane-deco: var(--d2); }
+  .lane-3 { --lane: var(--l3); --lane-tint: var(--t3); --lane-text: var(--x3); --lane-deco: var(--d3); }
+  .lane-4 { --lane: var(--l4); --lane-tint: var(--t4); --lane-text: var(--x4); --lane-deco: var(--d4); }
+  /* While a scene is on, a block's tile sits on its lane's tint and its progress pill is its lane's colour. */
+  html[data-scene] .lane-tile { background: var(--lane-tint); color: var(--lane-text); box-shadow: none; }
+  html[data-scene] .lane-fill { background: var(--lane); }
   /* The ground rising behind the floating tab bar (src/ui/Screen.tsx): solid under the bar, gone 40 px above it. */
   .tab-bar-fade {
     background: linear-gradient(to top, var(--bg) 60%, transparent);
@@ -406,6 +434,14 @@
   .prose-notes a { color: var(--blue-deep); text-decoration: underline; }
   .prose-notes code { font-family: var(--font-mono); }
   .prose-notes pre { overflow-x: auto; }
+}
+
+/* A new scene's palette fades in over 300 ms (src/lib/theme.ts applyScene adds the class for the duration). */
+html.scene-fade,
+html.scene-fade *,
+html.scene-fade *::before,
+html.scene-fade *::after {
+  transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease, box-shadow 300ms ease, fill 300ms ease, stroke 300ms ease !important;
 }
 
 /*

@@ -3,6 +3,8 @@ import type { Atlas } from '../../hooks/useAtlas.ts';
 import { describeVerdict, verdictTone } from '../../lib/forecast.ts';
 import { ArtPanel } from '../../ui/ArtPanel.tsx';
 import { phaseSlot } from '../../lib/art.ts';
+import { laneSlot } from '../../lib/scenes.ts';
+import { ScenePanel } from '../../ui/ScenePanel.tsx';
 import { monthName } from '../../lib/dates.ts';
 import type { Goal, Unit } from '../../seed/schema.ts';
 import { goalStatus } from '../../lib/goals.ts';
@@ -115,7 +117,7 @@ function Lanes({
                 </span>
                 <span className="text-meta text-ink2">{meta}</span>
                 <span className="mt-1.5 block">
-                  <ProgressLine value={lane.fraction} label={laneName(def.name) + ' progress'} />
+                  <ProgressLine value={lane.fraction} label={laneName(def.name) + ' progress'} lane={laneSlot(lane.block)} />
                 </span>
               </span>
             </button>
@@ -226,7 +228,22 @@ export function Timeline({
   return (
     <div className="mt-[18px] flex flex-col gap-[18px]">
       {current && (
-        <ArtPanel slot={phaseSlot(current.phase)} aspect="3 / 1" alt={'Year ' + current.phase.year + ' of the plan'} bottom={<p className="text-meta font-semibold">{current.phase.theme ?? 'Year ' + current.phase.year}</p>} />
+        <ScenePanel
+          slot="plan"
+          aspect="2 / 1"
+          focal="50% 70%"
+          alt=""
+          bottom={
+            <div className="flex flex-col gap-1">
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="text-lead font-semibold">{current.phase.title}</p>
+                <span className="text-meta font-semibold text-blue-deep">{Math.round(current.progress.fraction * 100) + '%'}</span>
+              </div>
+              <p className="text-meta text-ink2">{current.phase.theme ?? 'Year ' + current.phase.year + ' · ' + monthRange(current.phase.start, current.phase.end)}</p>
+            </div>
+          }
+          fallback={<ArtPanel slot={phaseSlot(current.phase)} aspect="3 / 1" alt={'Year ' + current.phase.year + ' of the plan'} bottom={<p className="text-meta font-semibold">{current.phase.theme ?? 'Year ' + current.phase.year}</p>} />}
+        />
       )}
       {current && (
         <Lanes

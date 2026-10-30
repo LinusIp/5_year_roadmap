@@ -26,3 +26,5 @@ art-src/
 live-check.png
 live-check.log
 live-check.pid
+# The daily scenes' originals (ATLAS-DAILY-SCENES): npm run scenes writes public/scenes/ from them
+scenes-src/

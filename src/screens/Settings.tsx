@@ -26,6 +26,7 @@ import { SegmentedControl } from '../ui/SegmentedControl.tsx';
 import { TextField } from '../ui/TextField.tsx';
 import { NumberField } from '../ui/NumberField.tsx';
 import { Blocks, Schedule } from './settings/Schedule.tsx';
+import { Appearance } from './settings/Appearance.tsx';
 import { Layout } from './settings/Layout.tsx';
 import { BlogSettings } from './settings/BlogSettings.tsx';
 import { SleepSettings } from './settings/SleepSettings.tsx';
@@ -407,6 +408,7 @@ export function Settings() {
           <BlogSettings />
           <SleepSettings />
           <HeatAndStreak settings={atlas.settings} />
+          <Appearance settings={atlas.settings} />
           <Layout atlas={atlas} />
           {(atlas.seed.patchProblems ?? []).length > 0 && (
             <Section id="plan-edits" title="Plan edits that no longer apply">

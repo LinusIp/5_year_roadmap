@@ -35,6 +35,7 @@ const PHONE = [
   ['internships', './#/internships'],
   ['internships-roadmap', './#/internships?tab=roadmap'],
   ['internships-prep', './#/internships?tab=prep'],
+  ['scenes', './#/scenes'],
 ] as const;
 
 /** The same screens on a 1280 x 800 desktop, and the five-year map that only fits there. */
@@ -331,3 +332,30 @@ test('a challenge, a case sheet and the Deck on Daily match the committed screen
   await expect(page.locator('#deck-top-title')).not.toHaveText('');
   await expect(page).toHaveScreenshot('deck-daily-light.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
 });
+
+/** Three scenes (ATLAS-DAILY-SCENES), a light one, a colourful one and a monochrome one, pinned in turn. */
+const THREE_SCENES = [
+  ['snowtree', 'Snow tree'],
+  ['willow', 'Green willow'],
+  ['greyhills', 'Grey hills'],
+] as const;
+
+for (const theme of ['light', 'dark'] as const) {
+  test('Today, Plan and the Library under three pinned scenes match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await importDemo(page, theme);
+    for (const [id, name] of THREE_SCENES) {
+      await open(page, './#/scenes');
+      await page.getByRole('button', { name: new RegExp('^Preview scene ' + name) }).click();
+      await page.getByRole('button', { name: 'Pin', exact: true }).click();
+      await expect(page.getByRole('button', { name: 'Pinned', exact: true })).toBeVisible();
+      for (const [screen, path] of [['today', './'], ['plan', './#/plan'], ['library', './#/library']] as const) {
+        await open(page, path);
+        await expect(page.locator('html')).toHaveAttribute('data-scene', id);
+        if (screen === 'today') await expect(page.getByText(/daily challenge/).first()).toBeVisible();
+        await expect(page.locator('[data-scene-panel]').first()).toHaveAttribute('data-scene-image', 'shown');
+        await expect(page).toHaveScreenshot('scene-' + id + '-' + screen + '-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+      }
+    }
+  });
+}

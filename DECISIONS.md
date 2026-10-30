@@ -2256,3 +2256,90 @@ track and a year, the fallback to the placeholder and the list of slots still on
 precache rule); `tests/e2e/art.spec.ts` (the header on its picture and the plain row with the setting off, the
 hour/season/track setting, axe colour contrast in both themes, no layout shift, the phases, the map, an empty
 search and a path). Pictures: `docs/before-after/art/`.
+
+## Daily scenes: one image and its palette a day (ATLAS-DAILY-SCENES, pull request #39)
+
+**The palette is built, not styled.** `npm run scenes` (`scripts/scenes.ts`, a port of the brief's
+`extract_palette.py` to Node with sharp, now a devDependency) reads every image in `scenes-src/` (git-ignored, like
+`art-src/`), writes `public/scenes/<id>.avif` and `.webp` at 900 px wide at most (the images supplied are 736 px, and
+nothing is enlarged) and `<id>-thumb.*` at 300 px, each under 180 KB with the quality stepped down until it fits,
+and draws the palette the original drew: k-means in Lab (k = 8, four seeded k-means++ starts, Park–Miller so the
+clusters are the same on every machine) over a 120 px copy; paper from the lightest substantial cluster at L 93.5;
+accents as the most colourful clusters with hues at least 28° apart and nothing near black, filled with analogous
+and complementary hues of the first, a gently tinted palette from the darkest hue for a monochrome image; the five
+lane colours, tints, tint texts, decoration and the dark set at the original's lightness and chroma; and every text
+colour moved in lightness, never hue, until it reads (`fit` in `src/lib/color.ts`, shared by the build, the app and
+validate:data). The build fails on a broken promise, and `validate:data` re-measures every ratio of the table (ink
+on paper 12, ink2 on paper 5, white on every lane 4.5, tint text on its tint 5, dark text2 on the dark surface 5)
+on every run (`src/seed/scenes.ts`, `scripts/lib/load-scenes.ts`), so a hand-edited manifest cannot pass with a
+colour that does not read. The seventeen images came with the brief; `public/scenes/CREDITS.md` says so, and the
+user owns the rights to them. The manifest keeps the brief's order (a new image joins at the end), because the
+order is the cycle's order.
+
+**The order is the mockup's code.** `src/lib/scenes.ts` has it line for line: for each cycle of N days a
+Fisher–Yates shuffle over a Park–Miller stream seeded with year × 97 + cycle + 1, and the day's index is
+order[day-of-year mod N], so no scene repeats until every one has shown. The one departure: the day of the year is
+counted in UTC from the local date rather than by dividing local midnights, which the original did and which gives
+two days the same number after a spring clock change. The unit test holds the mockup's numbers for 30 October 2026
+(day 303, order [11, 5, 14, 15, 7, 16, 3, 4, 8, 12, 13, 2, 0, 1, 10, 6, 9], the eleventh scene) so the port cannot
+drift. The scene changes at local midnight (`useLocalDay` re-reads the date every minute and when the tab comes
+back; Settings has no day-start hour, so there is nothing else to follow). A pin wins over everything; a skip
+(Settings › Appearance) moves that date, and only that date, one place further along the order each tap;
+Favourites only runs the same shuffle over the starred scenes alone, and over all of them when none is starred.
+The preferences live in the settings (`scenes`, optional in the stored shape, so nothing migrates; they sync like
+the rest).
+
+**Tokens over tokens.** A scene does not replace the stylesheet: `applyScene` (`src/lib/theme.ts`) sets the
+brief's custom properties on `<html>` as inline styles (`--paper`, `--sd`, `--ink`, `--ink2`, `--l0…4`, `--t0…4`,
+`--x0…4`, `--d0…4`, `--dbg`, `--dsf`, `--dtx`, `--dtx2`, `--dac`) and, beside them, the app's own tokens swapped onto
+the scene (`sceneTokens`): the ground is the paper, the shadows its dark shadow and white, the text its inks, blue
+is the first lane and blue-deep its tint text, the ice role the second lane's, the ramp the shadow, the first tint,
+the first decoration, the first lane and its text. Where the fixed themes promise a text pairing the scene cannot
+(ink on the second ramp step, the accent on the dark ground, the deep text on the soft fills), the colour is moved
+in lightness at run time with the same `fit`, so every pairing the stylesheet relies on reads at 4.5:1 or better
+in both themes, measured over every shipped scene in `tests/unit/scenes.test.ts` (`tokenPairs`). Clearing the
+properties brings the fixed clay theme back untouched. The dark theme takes the scene's dark set; `<meta
+name="theme-color">` follows the paper or the dark ground; a new scene fades in over 300 ms (a class on `<html>` for
+the duration; reduced motion zeroes it with every other transition). The last palette is mirrored to localStorage
+so `public/theme-init.js` paints it before the app mounts, as it does the theme: no flash of clay on a scene day.
+The manifest itself is bundled (`import` of `public/scenes/scenes.json`), not fetched, so the day's scene is known
+before the first render and the tests are deterministic.
+
+**Lanes.** Each block keeps a slot of the brief's table (`laneSlot`: ML Zoomcamp 0, Coding 1, GameDevHQ 2, Hugging
+Face 3, Math and physics 4; the project block builds what Coding teaches and shares its lane; any other block takes
+its place in the plan's order). `.lane-N` sets `--lane`, `--lane-tint`, `--lane-text` and `--lane-deco`; a block's
+tile takes its tint and text and a progress pill its colour while a scene is on, and the fixed blue and ice stand in
+for the five when it is off, so the clay rule that colour never names a track holds exactly as before with the
+scene off.
+
+**Where the image goes** (`ScenePanel`, `src/ui/ScenePanel.tsx`, each slot with its own focal point, a scene's own
+`focal` winning): Today's header with the header row on its upper fade and, on its lower, the day's hours on the
+left and the scene's name and five swatches on the right, and two paper knobs on the picture's edge that preview
+the previous and next day's scene, palette included, without saving. The brief draws it about 250 px tall over a
+separate hours tile; the standing rule that "Later today" stays above the fold at 390 × 844 does not survive that
+(at 3:2 the heading landed 53 px under the tab bar), so the panel is 2:1 (about 175 px) with the hours tile folded
+in, exactly the geometry the illustrations' header passed the fold check with; Plan's phase header; the Library's
+"This week's picks" banner; a strip above a resource's sheet; Stats' week banner and streak card (the numbers on
+paper chips over the picture); the Internships countdown; the five-year map full-bleed behind the route, with
+every line of text on a paper chip. Text never sits on the image: a fade to the paper, or a chip. The thumbnail
+shows at once, blurred, until the large file lands; each slot reserves its aspect ratio. Focus comes with the next
+pull request and will take the scene for its covers.
+
+**Loading.** Scene files are never in the build's precache list: the service worker carries the manifest's ids
+and the same picker, caches today's and tomorrow's four files at install (best effort: a missing image never fails
+the install), keeps every scene file once seen under the same cache version, and takes a list to cache from the
+page. The unit test runs the worker's picker against the app's for every day of two years.
+
+**The Daily scenes page** (`/scenes`, from Settings › Appearance and from Today's header): the picked scene large
+with its name, when it next shows ("Today", "Tomorrow", "In 5 days", "Later this cycle") and its paper, ink and lane
+swatches, Star and Pin, then every scene in a grid of four with its three first lanes and today's marked; a tap
+previews it, palette and all, until the page is left.
+
+Tests: `tests/unit/scenes.test.ts` (the order, the mockup's numbers, pin, skip, favourites, every shipped palette's
+promises, the tokens' pairings in both themes, the lane slots, applying and clearing the properties, the worker's
+picker, the palette build's accent rules and the monochrome fallback); `tests/e2e/scenes.spec.ts` (Today names the
+scene and Plan, the Library and the page show the same, a pin across a reload and the days, the dark set, the
+preview buttons, a skip and Favourites only, the setting off, and axe over Today, Plan and the Library for a light,
+a colourful and a monochrome scene in both themes). Pictures: `docs/before-after/scenes/`; the screenshot baselines
+add Today, Plan and the Library under those three scenes and the page itself.
+
