@@ -17,7 +17,7 @@ app makes no network calls at all, and everything can still be exported to a sin
   <img src="screenshots/library-light.png" alt="Library: what is in progress, this week's picks, the plan's paths and Browse all" width="24%">
 </p>
 
-![The five-year map: the day's scene with a winding route, a pin and a card per phase, the finish at the end](screenshots/map-light.png)
+![The five-year map: a winding route down the paper, a pin and a card per phase, the finish at the end](screenshots/map-light.png)
 
 The look is soft clay drawn to the redesign mockup (pull request #43): one calm ground that the day's scene colours,
 raised tiles, sunken wells, and five lane colours from the scene's palette. Each block has its own icon and lane;

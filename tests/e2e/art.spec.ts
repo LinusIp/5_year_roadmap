@@ -110,11 +110,10 @@ test('the phases, the map, an empty search and a path show their art', async ({ 
   await page.getByRole('button', { name: /^Building/ }).click();
   await expect(page.locator('[data-art-slot="phase-y2-building"]')).toBeVisible();
 
+  // The map draws no picture at all: the route reads better on the paper (pull request #46).
   await page.setViewportSize({ width: 1280, height: 900 });
   await open(page, './#/plan/map');
-  const river = page.locator('[data-art-slot="map-river-long"]');
-  await expect(river).toHaveCount(1);
-  await expect(river).toHaveAttribute('aria-hidden', 'true');
+  await expect(page.locator('[data-art-slot], [data-scene-panel]')).toHaveCount(0);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await open(page, './#/library?type=book');

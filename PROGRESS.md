@@ -1317,3 +1317,11 @@ Verified on this machine (Linux, Chromium 140):
 
 - `tests/e2e/focus.spec.ts`: the scroll-and-measure of the docked player on Today polls until the page's height holds.
 
+## Pull request #46: Focus in the theme, the map on the paper
+
+- `src/screens/Focus.tsx`: a screen like the others (light by default; the dark set with the dark theme). `Screen`
+  loses `dark`; index.css loses the `[data-dark-screen]` remap and gains `--over-image`.
+- `src/screens/PhaseMap.tsx`: no scene or river behind the route; the road in the first lane's tint, tiles for the
+  phases, the current one edged in its lane.
+- Tests: `tests/e2e/art.spec.ts` (the map draws no picture). Screenshots redrawn on CI.
+
