@@ -99,7 +99,7 @@ test('connecting Sync writes the log to the repository as the user, flushes when
 
   // The calendar comes with the same token.
   await open(page, './#/settings');
-  await section.getByRole('switch', { name: 'Show my GitHub calendar on Activity' }).click();
+  await section.getByRole('switch', { name: 'Show my GitHub calendar on Stats' }).click();
   await open(page, './#/activity');
   const calendar = page.getByRole('region', { name: 'GitHub @octo-learner' });
   await expect(calendar.getByText('18 contributions on 4 days · both on 1 of 1 Atlas day')).toBeVisible();

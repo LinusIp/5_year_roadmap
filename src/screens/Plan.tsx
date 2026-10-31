@@ -4,16 +4,16 @@ import { usePaperStates, useWeekPick } from '../db/state.ts';
 import { useAtlas, useLibrary } from '../hooks/useAtlas.ts';
 import { useCatalogueIndex } from '../hooks/useCatalogue.ts';
 import { useUnits } from '../hooks/useUnits.ts';
-import { daysBetween, startOfWeek, today as todayDate } from '../lib/dates.ts';
+import { startOfWeek, today as todayDate } from '../lib/dates.ts';
 import { weeklyBuildFor } from '../lib/schedule.ts';
-import { useQueryParam } from '../router/router.tsx';
+import { Link, useQueryParam } from '../router/router.tsx';
 import type { BlockId, Goal } from '../seed/schema.ts';
 import { EditPlanSheet, GoalSheet } from './plan/EditSheets.tsx';
 import { Header } from '../ui/Header.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { SegmentedControl } from '../ui/SegmentedControl.tsx';
 import { ItemSheet } from './parts/ItemSheet.tsx';
-import { longDate, nameOf, plural } from './parts/text.ts';
+import { nameOf } from './parts/text.ts';
 import { CredentialsView } from './plan/CredentialsView.tsx';
 import { LaneSheet } from './plan/LaneSheet.tsx';
 import { buildModel, currentPhase } from './plan/model.ts';
@@ -67,11 +67,6 @@ export function Plan() {
   }
 
   const phase = currentPhase(atlas, asOf);
-  // "ends 31 January", as in the mockup: the year is only written when the end is more than a year away.
-  const endsIn = phase ? daysBetween(asOf, phase.end) : 0;
-  const ends = phase ? (endsIn < 365 ? longDate(phase.end).replace(/ \d{4}$/, '') : longDate(phase.end)) : '';
-  // The days left in the phase (once a widget on Today, SLEEP-LOG moved it here).
-  const sub = phase ? 'Year ' + phase.year + ' · ' + phase.title + ' · ends ' + ends + ' · ' + plural(Math.max(0, endsIn), 'day') + ' left' : 'The five years are done';
   // The week's build, which can be one of the catalogue's medium builds once its index has loaded.
   const weekly = weeklyBuildFor(phase, weekPick?.projectId, { seed: atlas.seed, states: atlas.states, ...(catalogue ? { catalogue } : {}) });
 
@@ -82,8 +77,16 @@ export function Plan() {
 
   return (
     <Screen title="Plan">
-      <Header title="Plan" sub={sub} />
-      <div className="mt-5">
+      {/* The mockup's header: the title, and the way to the five-year map on the right; the phase sits on the scene below. */}
+      <Header
+        title="Plan"
+        actions={
+          <Link to="/plan/map" className="flex min-h-11 items-center text-meta font-semibold text-[var(--x0)]">
+            Five-year map
+          </Link>
+        }
+      />
+      <div className="mt-4">
         <SegmentedControl label="View" value={view} onChange={(v) => setView(v === fallback ? null : v)} options={VIEWS} />
       </div>
 

@@ -21,9 +21,11 @@ async function logFullDay(page: Page): Promise<void> {
 
 test('an empty year says so, with the year chips under the grid', async ({ page }) => {
   await open(page, './#/activity');
-  await expect(page.getByRole('heading', { level: 1, name: 'Activity' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Stats' })).toBeVisible();
   await expect(page.getByText(/^Nothing logged yet/)).toBeVisible();
-  await expect(page.getByRole('button', { name: '2026', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  // The recent weeks by default (the redesign mockup); a year chip opens that year.
+  await expect(page.getByRole('img', { name: /^Heatmap of study time over the last 22 weeks/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: '2026', exact: true })).toHaveAttribute('aria-pressed', 'false');
   // As in the mockup, the chips reach two years ahead; the rest is under All years.
   await expect(page.getByRole('button', { name: '2028', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: '2029', exact: true })).toHaveCount(0);
@@ -32,19 +34,20 @@ test('an empty year says so, with the year chips under the grid', async ({ page 
 
 test('a full day of 10 hours lights the day up at the top step, and the sentence counts it', async ({ page }) => {
   await logFullDay(page);
-  await open(page, './#/activity');
+  await open(page, './#/activity?year=2026');
 
   const cell = page.getByRole('button', { name: 'Monday 21 September: 10 h' });
   await expect(cell).toHaveClass(/heat-4/);
-  await expect(page.getByRole('region', { name: 'Logged' })).toContainText('10 h');
-  await expect(page.getByText('Since 21 September · longest streak 1 day')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'This week' })).toContainText('10 h');
+  await expect(page.getByText('10 h logged since 21 September')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Streak' })).toContainText('1 day');
   await expect(page.getByText('2 freezes left this month')).toBeVisible();
   await expect(page.getByRole('button', { name: /^Today 0 of 5 blocks done 10 h$/ })).toBeVisible();
 });
 
 test('a day opens in a sheet to look at; corrections are Calendar\'s', async ({ page }) => {
   await logFullDay(page);
-  await open(page, './#/activity');
+  await open(page, './#/activity?year=2026');
 
   await page.getByRole('button', { name: 'Monday 21 September: 10 h' }).click();
   const sheet = page.getByRole('dialog', { name: 'Monday 21 September' });
@@ -63,7 +66,7 @@ test('a day opens in a sheet to look at; corrections are Calendar\'s', async ({ 
 
 test('the track filter counts only that track', async ({ page }) => {
   await logFullDay(page);
-  await open(page, './#/activity');
+  await open(page, './#/activity?year=2026');
 
   await page.getByRole('button', { name: 'By track', exact: true }).click();
   await page.getByRole('dialog', { name: 'Track' }).getByRole('button', { name: 'Mathematics' }).click();
@@ -86,7 +89,7 @@ test('a freeze day is marked on the grid and spends a freeze', async ({ page }) 
   // 30 minutes is under the 60-minute minimum, so the day does not count on its own: the freeze is what keeps the streak.
   await open(page, './');
   await logTime(page, '30');
-  await open(page, './#/activity');
+  await open(page, './#/activity?year=2026');
   await page.getByRole('button', { name: 'Monday 21 September: 30 m' }).click();
   const sheet = page.getByRole('dialog', { name: 'Monday 21 September' });
   await sheet.getByRole('switch', { name: 'Use a freeze day' }).click();

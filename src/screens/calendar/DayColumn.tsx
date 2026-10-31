@@ -3,10 +3,8 @@ import type { PointerEvent as ReactPointerEvent } from 'react';
 import type { BusyEvent } from '../../db/types.ts';
 import { GRID_END, GRID_START, hm, parseHm, snap, SNAP } from '../../lib/calendar-layout.ts';
 import type { PlacedBlock } from '../../lib/calendar-layout.ts';
-import { blockTone } from '../../ui/colors.ts';
 import { BlockIcon } from '../../ui/glyphs.tsx';
 import { span } from '../parts/text.ts';
-import { formatWindow } from '../../lib/clock-plan.ts';
 
 /** 56 px an hour, so a 15-minute step is a finger's 14 px: 06:00 to 24:00 is 1,008 px, scrolled inside the page. */
 export const PX_PER_MIN = 56 / 60;
@@ -23,6 +21,12 @@ export interface ColumnBlock extends PlacedBlock {
   name: string;
   item?: string;
   logged: number;
+  /** The block's lane (ATLAS-DAILY-SCENES), for its colours. */
+  lane?: number;
+  /** Marked done on the day. */
+  done?: boolean;
+  /** The timer runs on it now. */
+  running?: boolean;
 }
 
 interface Drag {
@@ -146,17 +150,23 @@ export function DayColumn({
 
   return (
     <div className="relative min-w-0 flex-1" style={{ height: GRID_HEIGHT }}>
-      {/* Half-hour lines, and the empty grid a tap adds to. */}
-      <div aria-hidden="true" className="calendar-lines absolute inset-0" onPointerUp={emptyTap} data-testid={'grid-' + date} />
+      {/* A line every two hours (the mockup's), and the empty grid a tap adds to. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{ backgroundImage: 'repeating-linear-gradient(to bottom, var(--sd) 0 1px, transparent 1px ' + 120 * PX_PER_MIN + 'px)' }}
+        onPointerUp={emptyTap}
+        data-testid={'grid-' + date}
+      />
       {busy.map((e) => (
         <button
           key={e.id}
           type="button"
           onClick={() => onOpenBusy(e.id)}
-          className="knob absolute inset-x-1 flex items-start overflow-hidden rounded-box px-2.5 py-1 text-left text-meta"
+          className={'absolute flex items-start overflow-hidden rounded-[16px] border-2 border-dashed border-[var(--sd)] text-left text-meta text-ink2 ' + (compact ? 'inset-x-0.5 px-1.5 py-1' : 'inset-x-0 px-3 py-2')}
           style={{ top: top(parseHm(e.start)), height: Math.max(22, e.minutes * PX_PER_MIN) }}
         >
-          <span className="truncate font-semibold text-ink2">{compact ? e.title.slice(0, 3) : e.title + ' · ' + e.start}</span>
+          <span className="truncate font-semibold">{compact ? e.title.slice(0, 3) : e.title + ' · ' + e.start}</span>
           <span className="sr-only">{(compact ? e.title.slice(3) : '') + ', busy, ' + e.start + ' to ' + hm(parseHm(e.start) + e.minutes)}</span>
         </button>
       ))}
@@ -164,12 +174,32 @@ export function DayColumn({
         const live = drag?.block === b.id && drag.active ? drag : null;
         const start = live ? live.nextStart : b.start;
         const minutes = live ? live.nextMinutes : b.minutes;
-        const tone = blockTone(b.id);
+        const lane = b.lane ?? 0;
         const filled = Math.min(1, b.logged / Math.max(1, minutes));
+        // The block's state, as the mockup colours it: done (its hours, or marked) is the lane's fill; under way (the
+        // timer on it, or the hour) the fill with a ring; partly (past, some hours) the tint with a strip; planned (nothing
+        // yet) the tint with a dashed edge.
+        const over = nowMinute !== undefined ? start + minutes <= nowMinute : date < new Date().toISOString().slice(0, 10);
+        const state: 'done' | 'now' | 'partly' | 'planned' = b.done || (b.logged > 0 && b.logged >= minutes) ? 'done' : b.running || (nowMinute !== undefined && start <= nowMinute && nowMinute < start + minutes) ? 'now' : b.logged > 0 ? 'partly' : over ? 'partly' : 'planned';
+        const sub =
+          state === 'done'
+            ? span(minutes) + (b.item ? ' · ' + b.item : '')
+            : state === 'now'
+              ? (b.logged > 0 ? span(b.logged) + ' logged' : 'now') + (b.running ? ' · timer running' : '')
+              : state === 'partly'
+                ? (b.logged > 0 ? span(b.logged) + ' of ' + span(minutes) : 'nothing logged') + (b.item ? ' · ' + b.item : '')
+                : (b.item ?? 'planned');
+        const cls =
+          'relative flex h-full w-full touch-pan-y select-none flex-col overflow-hidden text-left lane-' +
+          lane +
+          (state === 'done' || state === 'now' ? ' lane-fill text-[var(--on-lane)]' : ' lane-tile') +
+          (state === 'planned' ? ' border-2 border-dashed border-[var(--lane-deco)]' : '') +
+          (state === 'now' ? ' shadow-[0_0_0_3px_var(--bg),0_0_0_5px_var(--lane)]' : '') +
+          (compact ? ' items-center gap-0.5 rounded-[10px] px-0.5 py-1' : ' gap-0.5 rounded-[16px] px-3 py-2');
         return (
           <div
             key={b.id}
-            className={'absolute inset-x-1 ' + (live ? 'z-10 drop-shadow-lg' : '')}
+            className={'absolute ' + (compact ? 'inset-x-0.5' : 'inset-x-0') + (live ? ' z-10 drop-shadow-lg' : '')}
             style={{ top: top(start), height: Math.max(24, minutes * PX_PER_MIN) }}
           >
             <button
@@ -185,20 +215,13 @@ export function DayColumn({
                 onOpenBlock(b.id);
               }}
               onContextMenu={(e) => e.preventDefault()}
-              className={
-                'relative flex h-full w-full touch-pan-y select-none flex-col overflow-hidden rounded-box text-left ' +
-                (tone === 'ice' ? 'text-ice-deep' : 'text-blue-deep') +
-                // The week's narrow columns: filled in the block's tone, the icon and a short label. The day view has
-                // room to tell logged from still to come: logged fills the pill, the rest stays pressed in.
-                (compact ? ' items-center gap-0.5 px-0.5 py-1 ' + (tone === 'ice' ? 'bg-ice-soft' : 'bg-blue-soft') : ' well items-start px-2 py-1')
-              }
+              className={cls}
             >
-              {!compact && filled > 0 && <span aria-hidden="true" className={'absolute inset-x-0 top-0 ' + (tone === 'ice' ? 'bg-ice-soft' : 'bg-blue-soft')} style={{ height: filled * 100 + '%' }} />}
               {/* The name starts with what is written on the pill, then says the rest. */}
-              <span className={'relative flex min-w-0 items-center text-meta font-semibold ' + (compact ? 'flex-col gap-0.5' : 'gap-1.5')}>
-                <BlockIcon block={b.id} size={14} />
+              <span className={'relative flex min-w-0 items-center font-semibold ' + (compact ? 'flex-col gap-0.5 text-meta' : 'gap-1.5 text-meta')}>
+                {compact && <BlockIcon block={b.id} size={14} />}
                 {compact && minutes * PX_PER_MIN >= 48 && (
-                  <span aria-hidden="true" className="max-w-full truncate text-[0.6875rem] font-bold leading-none">
+                  <span aria-hidden="true" className="max-w-full truncate text-[11px] font-bold leading-none">
                     {SHORT[b.id] ?? b.name.slice(0, 3)}
                   </span>
                 )}
@@ -207,11 +230,9 @@ export function DayColumn({
                   <span className="sr-only">{', ' + hm(start) + ' to ' + hm(start + minutes) + (b.item ? ', ' + b.item : '') + (b.logged > 0 ? ', ' + span(b.logged) + ' logged' : '') + '. '}</span>
                 </span>
               </span>
-              {!compact && minutes >= 45 && (
-                <span className="relative truncate text-small font-semibold text-ink2">
-                  {formatWindow(start, minutes) + (b.item ? ' · ' + b.item : '')}
-                </span>
-              )}
+              {!compact && minutes >= 45 && <span className="relative truncate text-small font-medium">{sub}</span>}
+              {/* A block partly done: a strip along the bottom, its share of the hours. */}
+              {!compact && state === 'partly' && filled > 0 && <span aria-hidden="true" className="lane-fill absolute bottom-0 left-0 h-1.5 rounded-tr-[6px]" style={{ width: filled * 100 + '%' }} />}
             </button>
             {/* The bottom edge: drag to change the length. */}
             <span
@@ -229,8 +250,8 @@ export function DayColumn({
       })}
       {nowMinute !== undefined && nowMinute >= GRID_START && nowMinute <= GRID_END && (
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 z-20 flex items-center" style={{ top: top(nowMinute) - 1 }}>
-          <span className="-ml-1 size-2.5 rounded-pill bg-ice-deep" />
-          <span className="h-0.5 flex-1 bg-ice-deep" />
+          <span className="-ml-1 size-2.5 rounded-pill bg-[var(--x0)]" />
+          <span className="h-0.5 flex-1 bg-[var(--x0)]" />
         </div>
       )}
     </div>

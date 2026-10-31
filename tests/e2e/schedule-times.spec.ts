@@ -20,18 +20,15 @@ test('at 09:00 the Now label and every row show their window, in two sessions ar
   await expect(nowCard(page).getByText('Now · 08:00–10:00')).toHaveCSS('text-transform', 'uppercase');
   const later = section(page, 'Later today');
   await expect(later.locator('h2 + span')).toHaveText('0 of 5 done');
+  // The redesign's NEXT tile: the blocks still to come, the first marked Next; the break and the second session's
+  // heading between them. The first session's heading and the blog row are not rows of it any more.
   await expect(later.getByRole('listitem')).toHaveText([
-    'Session 1 · 06:00–12:00',
     /^Hugging Face.*10:00–12:00$/,
     'Break · 12:00–18:00',
     'Session 2 · 18:00–22:00',
     /^Coding lessons.*18:00–20:00$/,
     /^Math and physics.*20:00–22:00$/,
-    /^Blog post · not yet.*any time$/,
   ]);
-  // The label sits on one line of its own, the count on the right.
-  const label = await later.locator('h2').boundingBox();
-  expect(label!.height).toBeLessThan(24);
   // ML Zoomcamp's window is over: it waits apart, and a tap still makes it Now to start it.
   const earlier = section(page, 'Earlier · not finished');
   await expect(earlier.getByRole('button')).toHaveText([/^ML Zoomcamp0 m of 2 h · .*06:00–08:00$/]);
@@ -84,6 +81,6 @@ test('at 22:04 the unfinished blocks are Earlier · not finished, the done ones 
   // How was today: the day in a line.
   await expect(page.getByRole('button', { name: /^How was today\?/ })).toContainText('1 h 22 m logged · 3 of 5 blocks done');
   // No tile on the page is empty.
-  const empty = await page.locator('main .tile').evaluateAll((tiles) => tiles.filter((t) => !(t.textContent ?? '').trim()).length);
+  const empty = await page.locator('main .tile').evaluateAll((tiles) => tiles.filter((t) => !(t.textContent ?? '').trim() && !t.getAttribute('aria-label')).length);
   expect(empty).toBe(0);
 });

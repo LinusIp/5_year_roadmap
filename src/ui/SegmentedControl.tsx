@@ -9,12 +9,12 @@ export interface Segment<T extends string> {
 }
 
 /**
- * Views, sort and group: one control, never a dropdown. Arrow keys move between segments. A sunken pill track; the
- * selected segment is a raised pill in blue-deep. Each segment's tap target is 44 px tall. A label is never cut:
- * the segments share the width while they fit, and past it the track scrolls sideways under an edge fade
- * (ATLAS-UI-POLISH).
+ * Views, sort and group: one control, never a dropdown (the mockup's .seg). Arrow keys move between segments. A
+ * sunken pill track with 5 px of padding; the selected segment is a flat pill in the lane's colour with white text,
+ * the others 15/700 ink2. Each segment's tap target is 44 px tall. A label is never cut: the segments share the width
+ * while they fit, and past it the track scrolls sideways under an edge fade (ATLAS-UI-POLISH).
  */
-export function SegmentedControl<T extends string>({ label, options, value, onChange }: { label: string; options: Segment<T>[]; value: T; onChange: (value: T) => void }) {
+export function SegmentedControl<T extends string>({ label, options, value, onChange, lane = 0 }: { label: string; options: Segment<T>[]; value: T; onChange: (value: T) => void; lane?: number }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const strip = useRef<HTMLDivElement>(null);
   useEdgeFade(strip, 'current');
@@ -27,7 +27,7 @@ export function SegmentedControl<T extends string>({ label, options, value, onCh
   };
 
   return (
-    <div className="well fade-strip rounded-pill p-[5px]">
+    <div className={'well fade-strip rounded-pill p-[5px] lane-' + lane}>
       <div ref={strip} role="radiogroup" aria-label={label} className="flex gap-1 overflow-x-auto rounded-pill [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {options.map((option, i) => {
         const checked = i === index;
@@ -52,7 +52,7 @@ export function SegmentedControl<T extends string>({ label, options, value, onCh
                 move(i - 1);
               }
             }}
-            className={'min-h-11 flex-1 shrink-0 whitespace-nowrap rounded-pill px-3 text-chip ' + (checked ? 'knob rounded-pill font-semibold text-blue-deep' : 'font-medium text-ink2 hover:text-ink')}
+            className={'min-h-11 flex-1 shrink-0 whitespace-nowrap rounded-pill px-3 text-chip ' + (checked ? 'lane-fill font-semibold text-[var(--on-lane)]' : 'font-medium text-ink2 hover:text-ink')}
           >
             {option.label}
           </button>

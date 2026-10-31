@@ -25,7 +25,7 @@ async function expectNoPractice(page: Page): Promise<void> {
   await expect(page.getByRole('radio', { name: 'Practice' })).toHaveCount(0);
   await open(page, './#/activity?view=practice');
   await expect(page.getByRole('radio', { name: 'Practice' })).toHaveCount(0);
-  await expect(page.getByRole('region', { name: 'Logged' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'This week' }).first()).toBeVisible();
 
   await open(page, './#/settings');
   await expect(page.getByRole('heading', { name: 'Schedule' }).first()).toBeVisible();
@@ -65,8 +65,8 @@ test('a backup from the build with Practice restores without it, and its Practic
   await expect(page.getByText(/^0 m of 10 h today/)).toBeVisible();
   await expectNoPractice(page);
 
-  // 16 October: 1 h of A and 30 minutes of Practice, in the heatmap and in the day.
-  await open(page, './#/activity');
+  // 16 October: 1 h of A and 30 minutes of Practice, in the year's heatmap and in the day.
+  await open(page, './#/activity?year=2026');
   const cell = page.getByRole('button', { name: /^Friday 16 October: 1 h 30 m/ });
   await expect(cell).toBeVisible();
   await cell.click();

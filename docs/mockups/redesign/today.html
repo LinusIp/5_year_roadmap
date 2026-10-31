@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Atlas Today</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>/* fonts: Nunito normal 600, Nunito normal 700, Nunito normal 800, Nunito normal 900 */
+</style>
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+a{color:inherit;text-decoration:none}
+a:hover{opacity:.85}
+.tile{background:var(--paper);border-radius:26px;box-shadow:6px 6px 14px var(--sd),-6px -6px 14px #FFFFFF;border:2px solid rgba(255,255,255,.6);box-sizing:border-box}
+.well{background:var(--paper);border-radius:16px;box-shadow:inset 3px 3px 7px var(--sd),inset -3px -3px 7px #FFFFFF}
+.lbl{margin:0;font-size:13px;font-weight:800;color:var(--ink2);letter-spacing:.03em}
+.rt{font-size:16px;font-weight:700;line-height:1.25;color:var(--ink)}
+.meta{font-size:14px;font-weight:600;color:var(--ink2);line-height:1.35}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 18px;border-radius:999px;font:800 16px 'Nunito',system-ui,sans-serif;box-sizing:border-box;border:0;cursor:pointer;color:var(--ink);background:var(--paper);box-shadow:3px 3px 7px var(--sd),-3px -3px 7px #FFFFFF}
+.btn.p{background:var(--l0);color:#FFFFFF}
+.btn.q{background:var(--l1);color:#FFFFFF}
+.ico{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:none;border:0}
+.bar{height:14px;border-radius:999px;padding:3px;box-sizing:border-box;display:flex}
+.bar > i{display:block;border-radius:999px}
+.tabs{position:absolute;left:12px;right:12px;bottom:16px;display:flex;justify-content:space-between;padding:6px;border-radius:28px;background:var(--paper);box-shadow:6px 6px 14px var(--sd),-6px -6px 14px #FFFFFF;border:2px solid rgba(255,255,255,.7)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:52px;border-radius:20px;font-size:11px;font-weight:800;color:var(--ink2)}
+.tab.on{color:var(--x0);background:var(--t0)}
+.day{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--ink2)}
+.dot{width:34px;height:34px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.nav{width:44px;height:44px;border-radius:999px;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.82);color:var(--ink)}
+</style>
+</helmet>
+<div style="width:390px;height:1440px;position:relative;box-sizing:border-box;background:var(--paper);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;padding:44px 20px 120px 20px;display:flex;flex-direction:column;gap:18px;overflow:hidden;{{vars}}">
+
+<header style="display:flex;align-items:center;gap:10px;padding:0 4px">
+<span style="font-size:24px;font-weight:900;color:var(--ink);letter-spacing:-.01em">Atlas</span>
+<span style="font-size:14px;font-weight:800;color:var(--x0);flex:1">{{dateLabel}}</span>
+<a href="Themes.dc.html" class="ico tile" style="border-radius:14px;color:var(--x0)" aria-label="Daily scenes"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"></rect><path d="m3 16 5-5 4 4 3-3 6 6"></path><circle cx="16" cy="9" r="1.6"></circle></svg></a>
+</header>
+
+<section class="tile" style="padding:0;overflow:hidden;position:relative;height:250px">
+<img src="{{img}}" alt="{{sceneAlt}}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%">
+<div style="position:absolute;left:0;right:0;bottom:0;height:110px;background:linear-gradient(180deg,rgba(0,0,0,0),var(--paper) 78%)"></div>
+<div style="position:absolute;right:12px;top:12px;display:flex;gap:8px">
+<button class="nav" sc-camel-on-click="{{prev}}" aria-label="Preview the previous day's scene"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+<button class="nav" sc-camel-on-click="{{next}}" aria-label="Preview the next day's scene"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg></button>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:14px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px">
+<span style="display:flex;flex-direction:column"><span style="font-size:22px;font-weight:900;color:var(--ink)">Good morning</span><span class="meta" style="font-size:13px">Today's scene · {{sceneName}}</span></span>
+<span style="display:flex;gap:4px;flex:none" aria-hidden="true"><i style="width:14px;height:14px;border-radius:999px;background:var(--l0)"></i><i style="width:14px;height:14px;border-radius:999px;background:var(--l1)"></i><i style="width:14px;height:14px;border-radius:999px;background:var(--l2)"></i><i style="width:14px;height:14px;border-radius:999px;background:var(--l3)"></i><i style="width:14px;height:14px;border-radius:999px;background:var(--l4)"></i></span>
+</div>
+</section>
+
+<section class="tile" style="padding:18px 20px;display:flex;align-items:center;gap:18px">
+<svg sc-camel-view-box="0 0 64 64" style="width:64px;height:64px;flex:none" role="img" aria-label="37 percent of today's plan">
+<circle cx="32" cy="32" r="26" fill="none" stroke="var(--sd)" stroke-width="8"></circle>
+<circle cx="32" cy="32" r="26" fill="none" stroke="var(--l0)" stroke-width="8" stroke-linecap="round" stroke-dasharray="60 164" transform="rotate(-90 32 32)"></circle>
+</svg>
+<div style="display:flex;flex-direction:column;flex:1">
+<span style="font-size:36px;font-weight:900;line-height:1;color:var(--ink)">3 h 40 m</span>
+<span class="meta" style="margin-top:6px">of 10 h today · 57-day streak</span>
+</div>
+</section>
+
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">
+<a class="tile" href="Sleep.dc.html" style="padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-height:108px">
+<span style="display:flex;align-items:center;gap:6px;color:var(--x1)"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg><span class="lbl" style="color:var(--x1)">SLEEP</span></span>
+<span style="font-size:24px;font-weight:900;line-height:1.1">6 h 40 m</span>
+<span class="meta" style="font-size:12px">23:00 → 05:40 · log tonight</span>
+</a>
+<a class="tile" href="Log.dc.html" style="padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-height:108px">
+<span style="display:flex;align-items:center;gap:6px;color:var(--x2)"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg><span class="lbl" style="color:var(--x2)">TODAY'S LOG</span></span>
+<span style="font-size:18px;font-weight:900;line-height:1.15">Not written yet</span>
+<span class="meta" style="font-size:12px">3 topics to write about</span>
+</a>
+</div>
+
+<section class="tile" style="padding:14px">
+<div style="display:flex;justify-content:space-between">
+<div class="day">Fri<span class="dot" style="background:var(--l0);color:#FFF">24</span></div>
+<div class="day">Sat<span class="dot" style="background:var(--d0);color:var(--ink)">25</span></div>
+<div class="day">Sun<span class="dot" style="background:var(--t0);color:var(--x0)">26</span></div>
+<div class="day">Mon<span class="dot" style="background:var(--l0);color:#FFF">27</span></div>
+<div class="day">Tue<span class="dot" style="background:var(--d0);color:var(--ink)">28</span></div>
+<div class="day">Wed<span class="dot" style="background:var(--l0);color:#FFF">29</span></div>
+<div class="day" style="color:var(--x0)">Thu<span class="dot" style="background:var(--t0);color:var(--x0);box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--l0)">30</span></div>
+</div>
+</section>
+
+<sc-if value="{{showAsk}}" hint-placeholder-val="{{ true }}">
+<section class="tile" style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<span class="ico" style="background:var(--t4);color:var(--x4)"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px" aria-hidden="true"><path d="M18 5H7l6 7-6 7h11"></path></svg></span>
+<div style="display:flex;flex-direction:column;gap:2px">
+<span class="lbl" style="color:var(--x4)">LAST NIGHT · 20:00–22:00</span>
+<span class="rt">Math and physics: how did it go?</span>
+<span class="meta" style="font-size:13px">No timer ran. One tap logs it.</span>
+</div>
+</div>
+<div style="display:flex;gap:8px">
+<button class="btn" style="flex:1.3;padding:0 10px;background:var(--l4);color:#FFFFFF" sc-camel-on-click="{{planned}}">As planned</button>
+<button class="btn" style="flex:1;padding:0 10px" sc-camel-on-click="{{partly}}">Partly</button>
+<button class="btn" style="flex:1;padding:0 10px" sc-camel-on-click="{{skipped}}">Skipped</button>
+</div>
+</section>
+</sc-if>
+<sc-if value="{{showDone}}" hint-placeholder-val="{{ false }}">
+<section class="tile" style="padding:14px 18px;display:flex;align-items:center;gap:12px">
+<span class="ico" style="background:var(--t4);color:var(--x4)"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span>
+<span style="flex:1;display:flex;flex-direction:column"><span class="rt" style="font-size:15px">{{doneText}}</span><span class="meta" style="font-size:13px">18.06 Linear Algebra, lecture 18</span></span>
+<button class="btn" style="min-height:44px;padding:0 14px;font-size:14px" sc-camel-on-click="{{undo}}">Undo</button>
+</section>
+</sc-if>
+
+<section class="tile" style="padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:12px">
+<span class="ico" style="background:var(--t3);color:var(--x3)"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg></span>
+<span style="flex:1;display:flex;flex-direction:column"><span class="lbl" style="color:var(--x3)">NOW · 10:00–12:00</span><span style="font-size:22px;font-weight:900;color:var(--ink)">Hugging Face</span></span>
+<a href="Focus.dc.html" style="display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:999px;background:var(--t3);color:var(--x3);font-size:13px;font-weight:800"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3"></path><rect x="3" y="14" width="4" height="6" rx="1.5"></rect><rect x="17" y="14" width="4" height="6" rx="1.5"></rect></svg>Lofi</a>
+</div>
+<span class="meta">LLM Course · chapter 6 of 12 · Tokenizers</span>
+<div class="well bar"><i style="width:46%;background:var(--l3)"></i></div>
+<span class="meta" style="font-size:13px">55 m of 2 h</span>
+<div style="display:flex;gap:10px">
+<button class="btn p" style="flex:1"><svg sc-camel-view-box="0 0 24 24" fill="currentColor" style="width:16px;height:16px" aria-hidden="true"><path d="M7 4v16l13-8z"></path></svg>Start</button>
+<button class="btn" style="flex:1"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg>Open</button>
+</div>
+</section>
+
+<section class="tile" style="padding:4px 18px">
+<a href="Plan.dc.html" style="display:flex;align-items:center;gap:12px;min-height:64px">
+<span class="ico" style="background:var(--t1);color:var(--x1)"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"></path></svg></span>
+<span style="flex:1;display:flex;flex-direction:column"><span class="lbl">NEXT · 18:00</span><span class="rt" style="font-size:15px">Coding: Automate the Boring Stuff, ch. 12</span></span>
+<svg sc-camel-view-box="0 0 24 24" fill="none" stroke="var(--x0)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+</a>
+</section>
+
+<nav class="tabs" aria-label="Main">
+<a class="tab on" href="Main.dc.html"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:22px;height:22px" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Today</a>
+<a class="tab" href="Plan.dc.html"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:22px;height:22px" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h13"></path></svg>Plan</a>
+<a class="tab" href="Calendar.dc.html"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:22px;height:22px" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>Calendar</a>
+<a class="tab" href="Library.dc.html"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:22px;height:22px" aria-hidden="true"><path d="M5 4v16M10 4v16M15 5l4 15"></path></svg>Library</a>
+<a class="tab" href="Stats.dc.html"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:22px;height:22px" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>Stats</a>
+<a class="tab" href="Focus.dc.html"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3"></path><rect x="3" y="14" width="4" height="6" rx="1.5"></rect><rect x="17" y="14" width="4" height="6" rx="1.5"></rect></svg>Focus</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;day&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;min&quot;:-30,&quot;max&quot;:30,&quot;section&quot;:&quot;Scene&quot;},&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:1440}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { answer: null, shift: 0 };
+  }
+  scene(shift) {
+    const TH = [{"n":"Lake house","i":"(the scene image)","p":"#E8EDF0","s":"#C7CDD1","k":"#282B23","k2":"#5E6258","L":["#7C7721","#457A9F","#9D6937","#5374B6","#008569"],"T":["#E8E3C7","#D8E4F0","#F5DECD","#DBE2FA","#CAE9DE"],"X":["#565500","#225778","#784711","#215295","#006247"],"D":["#958F32","#709EC3","#BB8049","#698CD5","#139F80"],"d":["#1D2413","#2A311F","#E6EFF4","#B8BDAF","#958F32"]},{"n":"Snow chalet","i":"(the scene image)","p":"#ECECEE","s":"#CBCCCE","k":"#222B30","k2":"#586268","L":["#1E7595","#526E9B","#017980","#8F6345","#7A6491"],"T":["#D7E4EC","#DEE2EE","#D5E6E7","#EDE0D9","#E6E0EB"],"X":["#25586E","#415372","#1B5B5F","#6A4C37","#5C4C6B"],"D":["#5A8AA1","#7384A6","#528D92","#9F7D66","#8E7D9E"],"d":["#0C242F","#1A313C","#ECEEF5","#ADBEC8","#5A8AA1"]},{"n":"Alpine sketch","i":"(the scene image)","p":"#EEECE9","s":"#CECCC8","k":"#2B2A21","k2":"#626157","L":["#8A713F","#6C7A4C","#9B6953","#4E78A1","#4D7F60"],"T":["#ECE1CF","#E0E4D4","#F3DED6","#D8E3F3","#D6E7DB"],"X":["#654F1A","#495829","#774630","#205680","#265C3E"],"D":["#A88C54","#879663","#BB836A","#6793C1","#649B79"],"d":["#232310","#2F2F1D","#F1EEE6","#BDBCAD","#A88C54"]},{"n":"Green willow","i":"(the scene image)","p":"#EBEEE2","s":"#CACEBF","k":"#1E2D24","k2":"#54655A","L":["#56801B","#2F7C9E","#8C721A","#7C67B9","#008381"],"T":["#DCE7C9","#D5E5EF","#EFE1C5","#E8DEFB","#BDEBE9"],"X":["#375C00","#005977","#665000","#574595","#006464"],"D":["#90BF50","#4B8BAB","#CEAD4F","#BBA2FF","#00C9C5"],"d":["#0C2718","#193424","#EDEFE7","#B0BFB5","#90BF50"]},{"n":"Moon over the sea","i":"(the scene image)","p":"#EFEDE1","s":"#D0CCBD","k":"#2D2926","k2":"#64605C","L":["#8D6F4A","#74784A","#9D6759","#447A9F","#577E5A"],"T":["#ECE1D6","#E3E3D8","#EFDFDB","#DAE4ED","#DBE5DC"],"X":["#674E2F","#525534","#70493F","#305671","#3D593F"],"D":["#CAAB88","#B2B38E","#D4A69A","#90B5D3","#99B89B"],"d":["#292015","#372C22","#F0EEE6","#C6B9AD","#CAAB88"]},{"n":"Lone green tree","i":"(the scene image)","p":"#ECECEC","s":"#CCCCCB","k":"#192C36","k2":"#4F646F","L":["#717B03","#39729A","#A2680E","#4970CF","#00846A"],"T":["#E5E4C5","#DAE4ED","#F7DEC6","#DDE1FF","#C0EBE0"],"X":["#4E5700","#325671","#774800","#264F9F","#00644E"],"D":["#B0B741","#6587A5","#E9A245","#8AABFF","#00CBAA"],"d":["#002535","#083242","#EBEFE8","#ADBEC8","#B0B741"]},{"n":"Golden walk","i":"(the scene image)","p":"#EDEDE7","s":"#CCCCC5","k":"#252B2D","k2":"#5B6264","L":["#8B7200","#2B7969","#607C54","#0079C5","#008657"],"T":["#EFE1C4","#D6E6E1","#DDE5DA","#D3E4FF","#C9EAD8"],"X":["#645100","#295B50","#43583B","#0057A3","#006235"],"D":["#CFAE3D","#5B8D81","#A0B796","#5DB5FF","#47C68F"],"d":["#0F252A","#1C3137","#EEEEE7","#AABFC5","#CFAE3D"]},{"n":"Autumn mist","i":"(the scene image)","p":"#EDECEB","s":"#CDCCCA","k":"#2C2929","k2":"#636060","L":["#A56611","#AE5149","#C05243","#0079BE","#358437"],"T":["#F8DEC6","#FDDBD6","#FFD9D1","#C7E7FF","#D2E9CE"],"X":["#794600","#8E3530","#933027","#005E9E","#0F601A"],"D":["#DB9137","#C8685F","#F97B69","#00B0FF","#5EB35C"],"d":["#2C1E1C","#392B29","#F4EDE7","#CBB7B4","#DB9137"]},{"n":"Frosted grass","i":"(the scene image)","p":"#ECEDE9","s":"#CCCCC8","k":"#0F2E37","k2":"#49656F","L":["#0D7791","#45709B","#107979","#936149","#716795"],"T":["#D6E5EB","#DCE3EE","#D5E6E5","#EEE0DA","#E4E1EC"],"X":["#1F596B","#395472","#1E5B5B","#6D4A3A","#554E6E"],"D":["#568B9E","#6C86A6","#538D8D","#A27B69","#877FA1"],"d":["#002632","#013340","#EDEFE7","#ABBFC7","#568B9E"]},{"n":"Orange larches","i":"(the scene image)","p":"#E3EEF7","s":"#C0CEDA","k":"#1B2C36","k2":"#51636F","L":["#B9592B","#407AA0","#C14E60","#007DAB","#5F7E25"],"T":["#FFDBCB","#D5E4F2","#FFD8DB","#BFE9F9","#DDE6C8"],"X":["#8A3A13","#00587F","#98273F","#006290","#3B5C00"],"D":["#D36A37","#5F9CC6","#DD5E71","#009ACF","#719332"],"d":["#002536","#0C3243","#E8EFF5","#AEBEC9","#D36A37"]},{"n":"Snow tree","i":"(the scene image)","p":"#E9EDF0","s":"#C8CDD0","k":"#262A33","k2":"#5D616B","L":["#5078A0","#776F9B","#2A7E96","#877248","#936688"],"T":["#DCE3EE","#E4E1EC","#D6E5EB","#E8E2D7","#EBDFE7"],"X":["#385572","#544E6E","#1E596A","#605033","#694860"],"D":["#97B3D4","#B4ACD0","#82B9CC","#C2AE8C","#CBA6C0"],"d":["#182233","#252E40","#E7EFF5","#B6BBCA","#97B3D4"]},{"n":"Blossom waterfall","i":"(the scene image)","p":"#EDECEB","s":"#CDCCCB","k":"#2E2922","k2":"#666057","L":["#717648","#547F5B","#8E7048","#6C6F9D","#307F73"],"T":["#E3E3D5","#DBE5DC","#EAE1D7","#E2E1ED","#D5E6E2"],"X":["#51562D","#3B5940","#644F32","#4E5071","#235B53"],"D":["#83875C","#6B8C6F","#988061","#8081A5","#568E84"],"d":["#292010","#362D1D","#F2EDE6","#C3BAAD","#83875C"]},{"n":"Sunset grass","i":"(the scene image)","p":"#EAEDEE","s":"#CACCCE","k":"#2D2929","k2":"#646060","L":["#936E34","#717940","#A46451","#317BAA","#4B8056"],"T":["#F1E0CC","#E2E4D0","#F7DDD5","#D4E4F6","#D5E7D7"],"X":["#6E4C0C","#4D571C","#80402E","#005988","#245D33"],"D":["#D6A967","#AEB675","#EA9E87","#70B8EE","#83BE8D"],"d":["#2D1E1F","#3A2A2B","#E7EFF4","#CCB7B7","#D6A967"]},{"n":"Grey hills","i":"(the scene image)","p":"#ECECEB","s":"#CCCCCA","k":"#252B30","k2":"#5B6268","L":["#37729A","#666998","#00788B","#86683F","#886087"],"T":["#DAE4ED","#E2E1ED","#D5E5EA","#EAE1D7","#E9DFE9"],"X":["#315671","#4E5070","#1B5A67","#644F33","#654964"],"D":["#6488A5","#8081A4","#538C9A","#988062","#987A97"],"d":["#122330","#1F303D","#EEEEE7","#B0BDC9","#6488A5"]},{"n":"Moon lake","i":"(the scene image)","p":"#EAEDED","s":"#C9CDCD","k":"#282A2E","k2":"#5F6165","L":["#877248","#6C7A4D","#9A6954","#5078A0","#4E7F61"],"T":["#E8E2D7","#E1E4D8","#EEE0DA","#DCE3EE","#D9E5DD"],"X":["#605033","#4C5636","#6D4A3B","#385572","#375A44"],"D":["#C2AE8C","#ABB591","#D2A795","#97B3D4","#93BAA0"],"d":["#1A222E","#272F3B","#E5F0F0","#B4BCCA","#C2AE8C"]},{"n":"Pastel trees","i":"(the scene image)","p":"#F0ECEA","s":"#D0CBC9","k":"#342530","k2":"#6D5C68","L":["#9E6474","#966B50","#8E688D","#368075","#8F6E4B"],"T":["#F3DDE2","#EDE0D9","#EBDFEA","#D4E6E2","#ECE0D6"],"X":["#7B4052","#6B4C38","#684867","#185C53","#684D2F"],"D":["#C08092","#CFA992","#AA87A9","#5D9E92","#AC8C6B"],"d":["#311A2B","#3E2738","#F5ECE8","#C6B7C2","#C08092"]},{"n":"Lilac bridge","i":"(the scene image)","p":"#EEECEA","s":"#CECCCA","k":"#312825","k2":"#695F5A","L":["#816B9C","#996582","#5A76A1","#657B51","#A16467"],"T":["#E8DFF1","#F0DEE7","#DCE3F2","#DEE5D6","#F4DDDE"],"X":["#5E497A","#75425F","#34547D","#42592F","#7C4146"],"D":["#917AAF","#AA7392","#6885B2","#738B5E","#B37276"],"d":["#2F1E16","#3C2A22","#F3EDE6","#CAB8B0","#917AAF"]}];
+    const now = new Date();
+    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + shift);
+    const doy = Math.floor((day - new Date(day.getFullYear(), 0, 0)) / 86400000);
+    const n = TH.length;
+    let seed = day.getFullYear() * 97 + Math.floor(doy / n) + 1;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const order = TH.map((_, i) => i);
+    for (let i = n - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const t = order[i]; order[i] = order[j]; order[j] = t; }
+    const t = TH[order[doy % n]];
+    let v = '--paper:' + t.p + ';--sd:' + t.s + ';--ink:' + t.k + ';--ink2:' + t.k2 + ';';
+    for (let i = 0; i < 5; i++) v += '--l' + i + ':' + t.L[i] + ';--t' + i + ':' + t.T[i] + ';--x' + i + ':' + t.X[i] + ';--d' + i + ':' + t.D[i] + ';';
+    v += '--dbg:' + t.d[0] + ';--dsf:' + t.d[1] + ';--dtx:' + t.d[2] + ';--dtx2:' + t.d[3] + ';--dac:' + t.d[4] + ';';
+    const label = day.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    return { t: t, vars: v, label: label };
+  }
+  renderVals() {
+    const s = this.scene((this.props.day ?? 0) + this.state.shift);
+    const a = this.state.answer;
+    const text = a === 'planned' ? 'Logged 2 h to Math and physics' : a === 'partly' ? 'Logged 1 h to Math and physics' : 'Marked as skipped';
+    return {
+      vars: s.vars, img: s.t.i, sceneName: s.t.n, sceneAlt: 'Today’s scene: ' + s.t.n,
+      dateLabel: this.state.shift === 0 ? s.label : s.label + ' (preview)',
+      prev: () => this.setState({ shift: this.state.shift - 1 }),
+      next: () => this.setState({ shift: this.state.shift + 1 }),
+      showAsk: a === null, showDone: a !== null, doneText: text,
+      planned: () => this.setState({ answer: 'planned' }),
+      partly: () => this.setState({ answer: 'partly' }),
+      skipped: () => this.setState({ answer: 'skipped' }),
+      undo: () => this.setState({ answer: null })
+    };
+  }
+}
+</script>
+
+
+</body></html>

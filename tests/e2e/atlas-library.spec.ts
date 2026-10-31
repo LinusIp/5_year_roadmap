@@ -209,7 +209,7 @@ test('a blog card opens its sheet with its link, and Write log entry starts the 
   await expect(sheet.getByText(/^Priority 1 · /)).toBeVisible();
   await sheet.getByRole('link', { name: 'Write log entry' }).click();
   await expect(page).toHaveURL(/#\/blog\?ref=blog-import-ai/);
-  const outline = page.getByLabel('The outline, in Markdown');
+  const outline = page.getByLabel('The post, in Markdown');
   await expect(outline).toContainText('Import AI');
   await expect(outline).toContainText('https://importai.substack.com');
 });
@@ -368,12 +368,13 @@ test('Agents & MCP gathers the agents, MCP and harnesses rows, with area chips o
 
 test('the quick filters are one list on the home; Certificates wears its badge, Earned persists and Plan › Credentials counts it', async ({ page }) => {
   await open(page, './#/library');
-  const list = page.getByRole('list', { name: 'Quick filters' }).or(page.locator('section', { hasText: 'Quick filters' }).first());
+  // The quick filters are the chips under the search (the redesign mockup).
+  const list = page.getByRole('group', { name: 'Quick filters' });
   for (const label of ['Developer essentials', 'Compact power & energy conversion', 'Security & defence', 'Agents & MCP', 'Certificates', 'Career & interviews', 'Research skills', 'Communication', 'Open source', 'Mandarin (the language)']) {
     // The count carries a thousands separator past a thousand (ATLAS-UI-POLISH): "Agents & MCP 1,023".
     await expect(page.getByRole('button', { name: new RegExp('^' + label.replace(/[()&]/g, '\\$&') + ' [\\d,]+$') })).toBeVisible();
   }
-  await expect(list.first()).toBeVisible();
+  await expect(list).toBeVisible();
   const certs = page.getByRole('button', { name: /^Certificates \d+$/ });
   const count = Number((await certs.innerText()).replace(/\D/g, ''));
   expect(count).toBeGreaterThan(40);

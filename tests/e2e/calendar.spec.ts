@@ -51,7 +51,7 @@ test('a phone opens on the day; the month shows today; a date opens its day, wit
   await expect(event(page, 'Math and physics')).toHaveAccessibleName(/^Math and physics ?, 20:00 to 22:00/);
   // Projects is not in the daily schedule.
   await expect(event(page, 'Projects')).toHaveCount(0);
-  await expect(page.getByText('10 h planned · 0 m logged')).toBeVisible();
+  await expect(page.getByText('0 m of 10 h')).toBeVisible();
 
   // Arrows move by a day in the day view, and Today comes back.
   await page.getByRole('button', { name: 'Next day' }).click();
@@ -75,10 +75,9 @@ test('drag a block to 19:00, make it 90 minutes, and Today follows', async ({ pa
   // Today: the rows follow the new times, the break ends at 19:00, and Coding lessons takes 1 h 30 m.
   await open(page, './');
   const rows = page.locator('section:has(h2:text-is("Later today")) li');
-  // The last block, before the day's blog post row.
-  await expect(rows.nth(-2)).toContainText('Math and physics');
-  await expect(rows.nth(-2)).toContainText('20:45');
-  await expect(rows.last()).toContainText('Blog post · not yet');
+  // The last block of the day (the log lives on its tile, not in the list).
+  await expect(rows.last()).toContainText('Math and physics');
+  await expect(rows.last()).toContainText('20:45');
   await expect(laterRow(page, /^Coding lessons/)).toContainText('19:00');
   await expect(page.getByText('Break · 12:00–19:00')).toBeVisible();
   await laterRow(page, /^Coding lessons/).click();
@@ -99,7 +98,7 @@ test('the block sheet sets the time, and Undo takes it back', async ({ page }) =
 
 test('a weekly busy event on Tuesdays moves the blocks out of its way', async ({ page }) => {
   await open(page, './#/calendar?view=day&date=2026-09-22');
-  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.getByRole('button', { name: 'Add time', exact: true }).click();
   const add = page.getByRole('dialog', { name: /^Add at / });
   await add.getByRole('radio', { name: 'Busy' }).click();
   await add.getByLabel('Starts').fill('09:00');
@@ -124,7 +123,7 @@ test('a weekly busy event on Tuesdays moves the blocks out of its way', async ({
 
 test('a block dropped on busy time offers to shift it and the blocks after it', async ({ page }) => {
   await open(page, './#/calendar?view=day&date=2026-09-22');
-  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.getByRole('button', { name: 'Add time', exact: true }).click();
   const add = page.getByRole('dialog', { name: /^Add at / });
   await add.getByRole('radio', { name: 'Busy' }).click();
   await add.getByLabel('Starts').fill('18:00');
@@ -195,20 +194,20 @@ test('an empty slot adds a block that is not on the day, or makes it a rest day'
   await event(page, 'Hugging Face').click();
   await page.getByRole('dialog', { name: 'Hugging Face' }).getByRole('button', { name: /^Skip it this day/ }).click();
   await expect(event(page, 'Hugging Face')).toHaveCount(0);
-  await expect(page.getByText('8 h planned · 0 m logged')).toBeVisible();
+  await expect(page.getByText('0 m of 8 h')).toBeVisible();
 
   // Projects, not in the daily schedule, goes into the break.
-  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.getByRole('button', { name: 'Add time', exact: true }).click();
   const add = page.getByRole('dialog', { name: /^Add at / });
   await add.getByLabel('Starts').fill('14:00');
   await add.getByRole('button', { name: /^Projects/ }).click();
   await expect(event(page, 'Projects')).toHaveAccessibleName(/^Projects ?, 14:00 to 15:00/);
-  await expect(page.getByText('9 h planned · 0 m logged')).toBeVisible();
+  await expect(page.getByText('0 m of 9 h')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.getByRole('button', { name: 'Add time', exact: true }).click();
   await add.getByRole('radio', { name: 'Rest day' }).click();
   await add.getByRole('button', { name: 'Make it a rest day' }).click();
-  await expect(page.getByText('0 m planned · 0 m logged')).toBeVisible();
+  await expect(page.getByText(/· rest day · 0 m logged$/)).toBeVisible();
 });
 
 test('the timer is the only way to log: it counts through a reload, one at a time, and a correction lives in Calendar', async ({ page }) => {
@@ -285,7 +284,7 @@ test('calendar edits reach a second device', async ({ browser }) => {
   const a = await device(browser, fake);
   await syncNow(a, true);
   await open(a, './#/calendar?view=day&date=2026-09-22');
-  await a.getByRole('button', { name: 'Add', exact: true }).click();
+  await a.getByRole('button', { name: 'Add time', exact: true }).click();
   const add = a.getByRole('dialog', { name: /^Add at / });
   await add.getByRole('radio', { name: 'Busy' }).click();
   await add.getByLabel('Starts').fill('09:00');

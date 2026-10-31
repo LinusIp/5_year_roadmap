@@ -10,13 +10,13 @@ import { seed } from '../seed/index.ts';
 import { useFocusPlayer } from '../lib/focus-player.ts';
 import { readCachedTabs, writeCachedTabs } from '../lib/tabs-cache.ts';
 
-/** Every tab Settings > Layout can show. The default five: Today, Plan, Calendar, Library, Activity. */
+/** Every tab Settings > Layout can show. The default six: Today, Plan, Calendar, Library, Stats, Focus (the redesign mockup). */
 export const TAB_DEFS: Record<TabId, { to: string; label: string; icon: IconName }> = {
   today: { to: '/', label: 'Today', icon: 'today' },
   plan: { to: '/plan', label: 'Plan', icon: 'plan' },
   calendar: { to: '/calendar', label: 'Calendar', icon: 'calendar' },
   library: { to: '/library', label: 'Library', icon: 'library' },
-  activity: { to: '/activity', label: 'Activity', icon: 'activity' },
+  activity: { to: '/activity', label: 'Stats', icon: 'stats' },
   focus: { to: '/focus', label: 'Focus', icon: 'headphones' },
   projects: { to: '/plan?view=projects', label: 'Projects', icon: 'projects' },
   map: { to: '/plan/map', label: 'Map', icon: 'map' },
@@ -24,14 +24,25 @@ export const TAB_DEFS: Record<TabId, { to: string; label: string; icon: IconName
 };
 const DEFAULT_TABS: TabId[] = ['today', 'plan', 'calendar', 'library', 'activity', 'focus'];
 
+/** The tab bar's height (6 px padding, 52 px tabs, the 2 px rim) and how far it floats above the bottom. */
+export const TAB_BAR = { height: 68, bottom: 16 } as const;
+
 /**
- * A screen: one column of tiles 18 px apart, 20 px gutters on a phone and 24 px from a tablet up, at most 640 px
- * wide and centred, over the floating tab bar. Settings has no tab: it sits behind the gear in Today's header.
+ * A screen, as the redesign mockup draws it: one column of tiles 16 to 18 px apart, 20 px gutters, 44 px of air at
+ * the top, at most 640 px wide and centred, over the floating tab bar. `dark` is the Focus screen's ground: the
+ * scene's dark set takes over every token while it is open (index.css [data-dark-screen]).
  */
-export function Screen({ title, children }: { title: string; children: ReactNode }) {
+export function Screen({ title, children, dark = false }: { title: string; children: ReactNode; dark?: boolean }) {
   useEffect(() => {
     document.title = title + ' · Atlas';
   }, [title]);
+  useEffect(() => {
+    if (!dark) return undefined;
+    document.documentElement.dataset.darkScreen = 'true';
+    return () => {
+      delete document.documentElement.dataset.darkScreen;
+    };
+  }, [dark]);
   const settings = useSettings(seed.settings);
   // Until IndexedDB answers, the tabs the user last saw (mirrored to localStorage), so the bar never flashes the defaults.
   const tabIds = settings?.layout.tabs ?? readCachedTabs() ?? DEFAULT_TABS;
@@ -58,28 +69,26 @@ export function Screen({ title, children }: { title: string; children: ReactNode
 
   return (
     <>
-      {/* Room under the last card for the tab bar: its 68 px, the 24 px it floats above the edge, and 24 px of air, plus
+      {/* Room under the last card for the tab bar: its 68 px, the 16 px it floats above the edge, and 24 px of air, plus
           the phone's safe area. The layout test checks it at 360, 390 and 412 px on every screen with the bar. */}
-      <main id="main" tabIndex={-1} className={'mx-auto w-full max-w-[640px] px-5 outline-none sm:px-6 ' + (dockedPlayer ? 'pb-[calc(68px+24px+24px+232px+env(safe-area-inset-bottom))]' : 'pb-[calc(68px+24px+24px+env(safe-area-inset-bottom))]')}>
+      <main id="main" tabIndex={-1} className={'mx-auto w-full max-w-[640px] px-5 outline-none ' + (dockedPlayer ? 'pb-[calc(68px+16px+24px+232px+env(safe-area-inset-bottom))]' : 'pb-[calc(68px+16px+24px+env(safe-area-inset-bottom))]')}>
         {children}
       </main>
       {/* A short fade to the ground behind the bar (ATLAS-UI-POLISH): content passing under it does not clash with it. */}
-      <div aria-hidden="true" className="tab-bar-fade pointer-events-none fixed inset-x-0 bottom-0 z-[9] h-[calc(68px+24px+16px+env(safe-area-inset-bottom))]" />
-      {/* The tab bar: a raised pill floating 24 px above the bottom, each tab its icon over its name; the active tab is
-          pressed in, in blue-deep. */}
-      <nav aria-label="Main" className="pointer-events-none fixed inset-x-0 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] z-10 px-5 sm:px-6">
-        {/* Six tabs (ATLAS-FOCUS-MUSIC) share the pill's width: at 360 px each is 52 px wide, the widest label 51, every
-            target 52 px tall; the side padding gives way to 4 px for them. */}
-        <ul className={'tile pointer-events-auto mx-auto flex max-w-[600px] items-center justify-around rounded-pill py-2 ' + (tabs.length >= 6 ? 'px-1' : 'px-2')}>
+      <div aria-hidden="true" className="tab-bar-fade pointer-events-none fixed inset-x-0 bottom-0 z-[9] h-[calc(68px+16px+16px+env(safe-area-inset-bottom))]" />
+      {/* The tab bar (the mockup's .tabs): a raised pill 12 px from the sides, 16 px above the bottom, each tab its icon
+          over its name; the active tab sits on the first lane's tint in its text colour. */}
+      <nav aria-label="Main" className="pointer-events-none fixed inset-x-3 bottom-[calc(16px+env(safe-area-inset-bottom))] z-10">
+        <ul className="tile pointer-events-auto mx-auto flex max-w-[600px] items-center justify-between rounded-[28px] p-1.5">
           {tabs.map((tab) => (
-            <li key={tab.to}>
+            <li key={tab.to} className="min-w-0 flex-1">
               <Link
                 to={tab.to}
                 aria-current={tab.to === active ? 'page' : undefined}
-                className={'press flex h-[52px] flex-col items-center justify-center gap-0.5 rounded-[18px] text-ink2 aria-[current=page]:text-blue-deep aria-[current=page]:[box-shadow:inset_3px_3px_7px_var(--lo),inset_-3px_-3px_7px_var(--hi)] ' + (tabs.length >= 6 ? 'min-w-11 flex-1' : 'w-[60px]')}
+                className="flex min-h-[52px] w-full flex-col items-center justify-center gap-0.5 rounded-[20px] text-ink2 aria-[current=page]:bg-[var(--tab-on-bg)] aria-[current=page]:text-[var(--tab-on-text)]"
               >
-                <Icon name={tab.icon} size={20} />
-                <span className="text-small font-semibold leading-none">{tab.label}</span>
+                <Icon name={tab.icon} size={22} />
+                <span className="text-[11px] font-semibold leading-none">{tab.label}</span>
               </Link>
             </li>
           ))}

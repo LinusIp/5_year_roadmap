@@ -264,7 +264,7 @@ function Sync({ settings }: { settings: StoredSettings }) {
 
   const calendarRow = (
     <Row
-      title="Show my GitHub calendar on Activity"
+      title="Show my GitHub calendar on Stats"
       meta={settings.github.username ? 'As @' + settings.github.username : 'From your GitHub account'}
       toggle={{
         on: showCalendar,
@@ -392,7 +392,7 @@ export function Settings() {
   const atlas = useAtlas();
   const [section] = useQueryParam('section');
   const ready = atlas !== undefined;
-  // Links such as "Add it in Settings" on Activity land on the right section.
+  // Links such as "Add it in Settings" on Stats land on the right section.
   useEffect(() => {
     if (ready && section) document.getElementById(section)?.scrollIntoView({ block: 'start' });
   }, [ready, section]);

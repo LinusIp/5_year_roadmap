@@ -15,8 +15,9 @@ function lane(page: Page, name: string) {
 
 test('the current phase shows its five lanes, and the other phases open in place', async ({ page }) => {
   await open(page, './#/plan');
-  // The phase's end is under a year away, so it drops the year.
-  await expect(page.getByText('Year 1 · Foundations I — in flight · ends 31 January')).toBeVisible();
+  // The phase's tile: the year and title, then its end as a short day with the days left.
+  await expect(page.getByText('Year 1 · Foundations I — in flight', { exact: true })).toBeVisible();
+  await expect(page.getByText(/^Ends 31 Jan · \d+ days left$/)).toBeVisible();
   // The fixed day: five 2-hour blocks at their times. Projects is not one of them.
   const day = [
     ['ML Zoomcamp', '06:00–08:00'],
@@ -33,8 +34,8 @@ test('the current phase shows its five lanes, and the other phases open in place
   await expect(later).toHaveAttribute('aria-expanded', 'false');
   await later.click();
   await expect(later).toHaveAttribute('aria-expanded', 'true');
-  // The opened phase lists its own lanes, without times, next to the current phase's.
-  await expect(page.getByRole('button', { name: /^GameDevHQ · 2 h/ })).toHaveCount(1);
+  // The opened phase lists its own lanes, with the phase's hours in place of a verdict, next to the current phase's.
+  await expect(page.getByRole('button', { name: /^GameDevHQ \d+ h/ })).toHaveCount(1);
   await expect(lane(page, 'GameDevHQ')).toBeVisible();
 });
 

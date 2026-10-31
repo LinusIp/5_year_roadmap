@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
 
 const SCREENS: [string, string][] = [
   ['Today', './'],
-  ['Activity', './#/activity'],
+  ['Stats', './#/activity'],
   ['Plan', './#/plan'],
   ['Calendar', './#/calendar'],
   ['Calendar day', './#/calendar?view=day'],
@@ -25,10 +25,10 @@ const SCREENS: [string, string][] = [
 ];
 
 /**
- * The type scale since the polish of pull request #3: tab 12, section label 13, meta and button 15, body 17, lead 18,
- * card 24, headline 26, hero 30 (body was 16 and meta 14 before).
+ * The type scale of the redesign mockup (pull request #43): 10 and 11 for the smallest chips and the tab names, 12 to
+ * 20 for the running text, labels and row titles, 22 to 28 for titles, 30 to 40 for the big numbers.
  */
-const TYPE_SCALE = [12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 30, 32];
+const TYPE_SCALE = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 32, 36, 38, 40];
 
 /** Distinct font sizes of the visible text on the page, in px. */
 async function fontSizes(page: Page): Promise<number[]> {
@@ -68,18 +68,18 @@ async function smallTargets(page: Page): Promise<string[]> {
   });
 }
 
-test('Today reaches "Later today" at 390 x 844 without scrolling, above the tab bar, and shows exactly one filled button', async ({ page }) => {
-  // Last night logged: until it is, the morning question sits at the top and pushes the day down (DECISIONS.md).
+test('Today reaches the week strip at 390 x 844 without scrolling, above the tab bar, and shows exactly one filled button', async ({ page }) => {
+  // The redesign mockup's first screenful: the header, the scene, the hours, the two small tiles and the week strip.
   await open(page, './#/sleep');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('button', { name: 'Save night', exact: true }).click();
   await expect(page.getByRole('status').getByText(/^Saved /)).toBeVisible();
   await open(page, './');
-  await expect(page.getByRole('link', { name: /^Slept \d/ })).toBeVisible();
-  const later = await page.getByRole('heading', { name: 'Later today' }).boundingBox();
+  await expect(page.getByRole('link', { name: /^Sleep \d/ })).toBeVisible();
+  const strip = await page.getByRole('navigation', { name: /^This week/ }).boundingBox();
   const tabs = await page.getByRole('navigation', { name: 'Main' }).boundingBox();
-  expect(later).not.toBeNull();
+  expect(strip).not.toBeNull();
   expect(tabs).not.toBeNull();
-  expect(later!.y + later!.height).toBeLessThanOrEqual(tabs!.y);
+  expect(strip!.y + strip!.height).toBeLessThanOrEqual(tabs!.y);
   await expect(page.locator('[data-variant="filled"]')).toHaveCount(1);
 });
 
@@ -93,9 +93,9 @@ test('every screen draws its text from the type scale', async ({ page }) => {
     report[name] = sizes;
     for (const size of sizes) expect(TYPE_SCALE, name + ' uses ' + size + ' px').toContain(size);
   }
-  // The clay Today board sets seven sizes (32 time, 24 Now title, 20 wordmark, 16 rows and buttons, 14 meta,
-  // 13 labels, 12 week days); DECISIONS.md records why. Nothing may add sizes beyond the board's.
-  expect(report.Today!.length).toBeLessThanOrEqual(7);
+  // The redesign's Today board sets ten sizes (36 hours, 24 wordmark and sleep, 22 greeting and Now, 18 log, 16 rows
+  // and buttons, 15 row titles, 14 meta, 13 labels, 12 small meta and week days, 11 tab names). Nothing may add to them.
+  expect(report.Today!.length).toBeLessThanOrEqual(10);
   test.info().annotations.push({ type: 'font sizes', description: JSON.stringify(report) });
   console.log('font sizes ' + JSON.stringify(report));
 });

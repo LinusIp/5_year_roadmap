@@ -1,5 +1,5 @@
 import type { Difficulty } from '../seed/catalogue.ts';
-import { blockTone, toneInk } from './colors.ts';
+import { blockTone } from './colors.ts';
 import { laneSlot } from '../lib/scenes.ts';
 import { Icon } from './Icon.tsx';
 import type { IconName } from './Icon.tsx';
@@ -14,25 +14,31 @@ export function blockIconName(block: string): IconName {
   return BLOCK_ICON[block] ?? 'layers';
 }
 
-/** A block's bare icon, 20 px, in its tone's deep colour (the Now card's label). */
+/** A block's bare icon, 20 px, in its lane's text colour (the Now card's label). */
 export function BlockIcon({ block, size = 20 }: { block: string; size?: number }) {
-  return <Icon name={blockIconName(block)} size={size} color={toneInk(blockTone(block))} />;
+  return <Icon name={blockIconName(block)} size={size} color={'var(--x' + laneSlot(block) + ')'} />;
+}
+
+/** The lane a tone stands for where no block names one: blue is the first lane, ice the second. */
+function laneOfTone(tone: 'blue' | 'ice' | 'neutral'): number {
+  return tone === 'ice' ? 1 : 0;
 }
 
 /**
- * A 40 px knob tile with an icon in it: the start of a row in a list group. With a `lane` (ATLAS-DAILY-SCENES) it
- * takes the lane's tint and text colour while a scene is on (index.css .lane-tile).
+ * The mockup's .ico: a 40 to 44 px tile with 14 px corners on a lane's tint, the icon in the lane's text colour,
+ * flat (no shadow). The start of a row in a list group, the Now card's badge. `neutral` sits on the shadow colour.
  */
 export function IconTile({ icon, tone = 'blue', size = 40, lane }: { icon: IconName; tone?: 'blue' | 'ice' | 'neutral'; size?: number; lane?: number }) {
-  const color = tone === 'neutral' ? 'var(--ink2)' : toneInk(tone);
+  const slot = lane ?? laneOfTone(tone);
+  const neutral = tone === 'neutral' && lane === undefined;
   return (
-    <span aria-hidden="true" className={'knob grid shrink-0 place-items-center' + (lane === undefined ? '' : ' lane-tile lane-' + lane)} style={{ width: size, height: size, color, borderRadius: Math.round(size * 0.35) }}>
-      <Icon name={icon} size={size < 40 ? 16 : 20} />
+    <span aria-hidden="true" className={'grid shrink-0 place-items-center ' + (neutral ? 'pill-neutral' : 'lane-tile lane-' + slot)} style={{ width: size, height: size, borderRadius: size >= 36 ? 14 : Math.round(size * 0.35) }}>
+      <Icon name={icon} size={size < 36 ? 16 : size >= 44 ? 20 : 18} />
     </span>
   );
 }
 
-/** A block's icon in its knob tile, in its lane's colours while a scene is on. */
+/** A block's icon in its tile, in its lane's colours. */
 export function BlockTile({ block, size = 40 }: { block: string; size?: number }) {
   return <IconTile icon={blockIconName(block)} tone={blockTone(block)} size={size} lane={laneSlot(block)} />;
 }
@@ -51,7 +57,7 @@ export function DifficultyDots({ difficulty }: { difficulty: Difficulty }) {
   return (
     <span aria-hidden="true" className="inline-flex shrink-0 items-center gap-0.5 align-middle">
       {[1, 2, 3].map((i) => (
-        <span key={i} className={'size-1.5 rounded-pill ' + (i <= n ? 'bg-blue' : 'well')} />
+        <span key={i} className={'size-1.5 rounded-pill ' + (i <= n ? 'bg-[var(--l0)]' : 'well')} />
       ))}
     </span>
   );

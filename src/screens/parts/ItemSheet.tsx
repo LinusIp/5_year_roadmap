@@ -29,7 +29,11 @@ import { RunningTime } from './RunningTime.tsx';
 import { StatusPill } from './StatusPill.tsx';
 import { AddToPlanSheet } from '../plan/EditSheets.tsx';
 import { blockShort, longDate, plural } from './text.ts';
-import { RESEARCH } from '../../lib/library-home.ts';
+import { pathOf, RESEARCH, shelfOf } from '../../lib/library-home.ts';
+import { SHELF_ICON } from '../library/Home.tsx';
+import { laneSlot } from '../../lib/scenes.ts';
+import { minutesForRef } from '../../lib/logs.ts';
+import { Icon } from '../../ui/Icon.tsx';
 
 export const ITEM_STATUSES: { value: ItemStatus; label: string }[] = [
   { value: 'todo', label: 'To do' },
@@ -120,45 +124,90 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
   const subject = atlas.seed.subjects.find((s) => s.id === resource.subject);
   const hoursProblem = hoursDraft !== null && !(Number(hoursDraft) >= 0 && Number(hoursDraft) <= 2000) ? 'Enter a number of hours, like 40.' : null;
 
+  // The resource's lane (its colours) and path: the block that plans it, the path that holds it.
+  const planItem = atlas.seed.plan.find((i) => i.resourceId === resource.id);
+  const lane = planItem ? laneSlot(planItem.block) : 0;
+  const path = pathOf(atlas.seed, resource);
+  const progress = resource.unitCount > 0 && units ? (isChecklist(units) ? itemProgress({ refId: resource.id, estHours: resource.estHours, unitCount: resource.unitCount, state, checklist: resource.checklist?.counted }).fraction : fractionDone(status, unitsDone.length, resource.unitCount)) : null;
+  const unitNoun = resource.type === 'book' ? 'chapter' : 'unit';
+  const loggedMinutes = atlas.logs.reduce((sum, l) => sum + minutesForRef(l, resource.id), 0);
+  const openLabel = resource.type === 'book' ? 'Open the book' : resource.type === 'course' ? 'Open course' : 'Open';
+  const levelLabel = resource.level === 'intro' ? 'Beginner' : resource.level === 'intermediate' ? 'Intermediate' : resource.level === 'advanced' ? 'Advanced' : null;
+
   return (
     <div className="space-y-6">
-      <div>
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-ink2">
-          {/* A paid book (ATLAS-LIBRARY, 15,364 rows) wears a badge; the rest say how they are free. */}
-          {isCertificate(resource.id) && <span className="well-ice rounded-pill px-2.5 py-0.5 text-small font-semibold text-ink">Certificate</span>}
-          {resource.cost === 'paid' && <span className="well rounded-pill px-2.5 py-0.5 text-small font-semibold text-ink">Paid</span>}
-          <span>{[resource.provider, resource.type, resource.cost === 'audit-free' ? 'free to audit' : resource.cost === 'paid' ? null : resource.cost].filter(Boolean).join(' · ')}</span>
-        </p>
-        {resource.summary && <p className="doc-text mt-2 text-body text-ink2">{resource.summary}</p>}
-        {((resource.note && resource.note !== 'Paid') || resource.doFirst) && <p className="mt-2 text-meta text-ink2">{[resource.note !== 'Paid' && resource.note, resource.doFirst && 'Do first: ' + resource.doFirst].filter(Boolean).join(' · ')}</p>}
-        {/* How it fits the plan (ATLAS-LIBRARY): its priority, its year, its roadmap.sh roadmap, its research area. */}
-        {(resource.priority || resource.roadmap || resource.research) && (
-          <p className="mt-2 text-meta text-ink2">
-            {[
-              resource.priority && 'Priority ' + resource.priority,
-              resource.fromYear && 'Year ' + resource.fromYear,
-              resource.roadmap && (atlas.seed.roadmaps.find((r) => r.id === resource.roadmap)?.title ?? resource.roadmap) + ' roadmap',
-              resource.research && 'Research: ' + (RESEARCH.find((a) => a.id === resource.research)?.name ?? resource.research),
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </p>
-        )}
-        {resource.url === null && resource.searchHint && <p className="mt-2 text-meta text-ink2">No checked link yet. Search for “{resource.searchHint}”.</p>}
-        <div className="mt-4 flex items-center gap-2">
-          {resource.url ? (
-            <Button href={resource.url} icon="external">
-              Open
-            </Button>
-          ) : resource.searchHint ? (
-            <Button href={'https://duckduckgo.com/?q=' + encodeURIComponent(resource.searchHint)} icon="search">
-              Find a link
-            </Button>
-          ) : null}
-          <span className="ml-auto">
-            <ItemStatusPill kind="resource" refId={resource.id} title={resource.title} state={state} />
+      {/* The head (the mockup's resource sheet): the scene's strip with the lane's icon knob on it, the provider line, the
+          tags, the progress and the two buttons. */}
+      <section className={'tile overflow-hidden !p-0 lane-' + lane}>
+        <div className="relative h-[130px]">
+          <ScenePanel slot="resource" decorative bare focal="50% 55%" className="absolute inset-0 rounded-t-[24px]" fallback={<div className="lane-tile absolute inset-0 rounded-t-[24px]" />} />
+          <div className="art-fade-bottom absolute inset-x-0 bottom-0 h-[70px]" aria-hidden="true" />
+          <span aria-hidden="true" className={'absolute left-[18px] top-4 grid size-[52px] place-items-center rounded-[16px] bg-bg text-[var(--x' + lane + ')] shadow-[3px_3px_8px_rgba(0,0,0,.18)]'}>
+            <Icon name={SHELF_ICON[shelfOf(resource)] ?? 'course'} size={24} />
           </span>
         </div>
+        <div className="flex flex-col gap-2.5 px-5 pb-5 pt-1">
+          <p className="section-label mb-0">{'Library' + (path ? ' · ' + path.name : '')}</p>
+          <p className="text-meta text-ink2">{[resource.provider, resource.type, resource.estHours > 0 ? '~' + resource.estHours + ' h' : null, resource.cost === 'audit-free' ? 'free to audit' : resource.cost === 'paid' ? 'paid' : resource.cost].filter(Boolean).join(' · ')}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {path && <span className="pill-tint lane-0 rounded-pill px-2.5 py-1 text-small font-semibold">{path.name}</span>}
+            {levelLabel && <span className="pill-neutral rounded-pill px-2.5 py-1 text-small font-semibold">{levelLabel}</span>}
+            {isCertificate(resource.id) && <span className="pill-tint lane-4 rounded-pill px-2.5 py-1 text-small font-semibold">Certificate</span>}
+            {resource.cost === 'paid' && <span className="pill-neutral rounded-pill px-2.5 py-1 text-small font-semibold">Paid</span>}
+          </div>
+          {progress !== null && (
+            <>
+              <ProgressLine value={progress} label={'Progress on ' + resource.title} lane={lane} size={12} />
+              <p className="-mt-1 text-label text-ink2">
+                {units && isChecklist(units) ? checklistMeta(units, unitsDone) : unitsDone.length + ' of ' + plural(resource.unitCount, unitNoun)}
+                {loggedMinutes > 0 ? ' · ' + Math.round(loggedMinutes / 60) + ' h logged' : ''}
+              </p>
+            </>
+          )}
+          {((resource.note && resource.note !== 'Paid') || resource.doFirst) && <p className="text-meta text-ink2">{[resource.note !== 'Paid' && resource.note, resource.doFirst && 'Do first: ' + resource.doFirst].filter(Boolean).join(' · ')}</p>}
+          {resource.url === null && resource.searchHint && <p className="text-meta text-ink2">No checked link yet. Search for “{resource.searchHint}”.</p>}
+          <div className="flex gap-2.5 [&>*]:min-w-0 [&>*]:flex-1">
+            {resource.url ? (
+              <Button variant="filled" lane={lane as 0 | 1 | 2 | 3 | 4} href={resource.url} icon="external" name={openLabel} className="!flex-[1.25] !px-3">
+                <span className="truncate">{openLabel}</span>
+              </Button>
+            ) : resource.searchHint ? (
+              <Button variant="filled" lane={lane as 0 | 1 | 2 | 3 | 4} href={'https://duckduckgo.com/?q=' + encodeURIComponent(resource.searchHint)} icon="search">
+                Find a link
+              </Button>
+            ) : null}
+            {/* The day's log entry about it (ATLAS-LIBRARY): the blog post screen, its outline started with this resource. */}
+            <Button to={'/blog?ref=' + resource.id} icon="doc" name="Write log entry" className="!px-3">
+              Write log
+            </Button>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <ItemStatusPill kind="resource" refId={resource.id} title={resource.title} state={state} />
+          </div>
+        </div>
+      </section>
+
+      {/* Why it is on the plan (the mockup's tile): the summary, and how it fits. */}
+      {(resource.summary || resource.priority || resource.roadmap || resource.research) && (
+        <section className="tile flex flex-col gap-1.5 px-[18px] py-3.5">
+          <h3 className="section-label mb-0 uppercase">Why it&apos;s on your plan</h3>
+          {resource.summary && <p className="doc-text text-meta">{resource.summary}</p>}
+          {(resource.priority || resource.roadmap || resource.research) && (
+            <p className="text-meta text-ink2">
+              {[
+                resource.priority && 'Priority ' + resource.priority,
+                resource.fromYear && 'Year ' + resource.fromYear,
+                resource.roadmap && (atlas.seed.roadmaps.find((r) => r.id === resource.roadmap)?.title ?? resource.roadmap) + ' roadmap',
+                resource.research && 'Research: ' + (RESEARCH.find((a) => a.id === resource.research)?.name ?? resource.research),
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
+          )}
+        </section>
+      )}
+
+      <div>
         {/* "I own this" on a paid book: then Up next may suggest it like a free one; kept in the item state, by id. A paid
             certificate exam is earned, not owned: its sheet has Earned below instead. */}
         {resource.cost === 'paid' && !isCertificate(resource.id) && (
@@ -195,26 +244,17 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
             )}
           </ul>
         )}
-        {/* The day's log entry about it (ATLAS-LIBRARY): the blog post screen, its outline started with this resource. */}
-        <div className="mt-2">
-          <Button to={'/blog?ref=' + resource.id} icon="doc">
-            Write log entry
-          </Button>
-        </div>
       </div>
 
       {resource.unitCount > 0 && units && isChecklist(units) ? (
         // A lesson checklist (ZOOMCAMP-CHECKLIST): the course's progress by hours, where you are, every module.
         <div>
-          <ProgressLine value={itemProgress({ refId: resource.id, estHours: resource.estHours, unitCount: resource.unitCount, state, checklist: resource.checklist?.counted }).fraction} label={'Progress on ' + resource.title} />
-          <p className="mb-3 mt-1.5 text-meta text-ink2">{checklistMeta(units, unitsDone) + (currentUnit(units, unitsDone) ? ' · now ' + lessonLabel(currentUnit(units, unitsDone)!) : '')}</p>
+          <p className="mb-3 text-meta text-ink2">{checklistMeta(units, unitsDone) + (currentUnit(units, unitsDone) ? ' · now ' + lessonLabel(currentUnit(units, unitsDone)!) : '')}</p>
           <LessonList refId={resource.id} units={units} done={unitsDone} />
         </div>
       ) : resource.unitCount > 0 ? (
         <div>
-          <ProgressLine value={fractionDone(status, unitsDone.length, resource.unitCount)} label={'Progress on ' + resource.title} />
-          <p className="mb-2 mt-1.5 text-meta text-ink2">{unitsDone.length + ' of ' + plural(resource.unitCount, 'unit')} done</p>
-          {units ? <Checklist refId={resource.id} units={units} done={unitsDone} /> : <p className="mt-2 text-meta text-ink2">Loading the checklist…</p>}
+          {units ? <Checklist label={resource.type === 'book' ? 'Chapters' : 'Units'} aside="tap to tick" refId={resource.id} units={units} done={unitsDone} /> : <p className="mt-2 text-meta text-ink2">Loading the checklist…</p>}
         </div>
       ) : null}
 
@@ -418,8 +458,6 @@ export function ItemSheet({ atlas, id, onClose, onTake, footer, after }: { atlas
     <Sheet open={id !== null} title={title} onClose={onClose} scrollKey={id ? 'item:' + id : undefined} aside={resource ? <RunningTime atlas={atlas} refId={id} /> : undefined} footer={actions}>
       {resource ? (
         <>
-          {/* The scene's header strip (ATLAS-DAILY-SCENES), decoration above the resource. */}
-          <ScenePanel slot="resource" aspect="3 / 1" focal="50% 55%" decorative className="mb-4" />
           <ResourceBody key={resource.id} atlas={atlas} resource={resource} />
         </>
       ) : project ? (

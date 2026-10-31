@@ -17,7 +17,7 @@ const heatmap = (page: Page) => page.locator('section[aria-labelledby="heatmap-2
 
 test('no scrollbar is drawn on the page or a heatmap, and Today and Activity still scroll to the bottom', async ({ page }) => {
   await page.clock.install({ time: NOV });
-  for (const path of ['./', './#/activity']) {
+  for (const path of ['./', './#/activity?year=2026']) {
     await open(page, path);
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible();
     if (path.includes('activity')) await expect(heatmap(page)).toBeVisible();
@@ -33,7 +33,7 @@ test('no scrollbar is drawn on the page or a heatmap, and Today and Activity sti
 
 test('the heatmap opens with this week in view, and fades on whichever side has more', async ({ page }) => {
   await page.clock.install({ time: NOV });
-  await open(page, './#/activity');
+  await open(page, './#/activity?year=2026');
   const strip = heatmap(page);
   await expect(strip).toBeVisible();
   await expect(strip.locator('rect[data-date="2026-11-18"]')).toBeInViewport();
@@ -49,7 +49,7 @@ test('the heatmap opens with this week in view, and fades on whichever side has 
 test('on a screen wide enough for the year, the heatmap shows it all and does not scroll', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.clock.install({ time: NOV });
-  await open(page, './#/activity');
+  await open(page, './#/activity?year=2026');
   const strip = heatmap(page);
   await expect(strip.locator('rect[data-date="2026-01-01"]')).toBeInViewport();
   expect(await strip.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
@@ -58,7 +58,7 @@ test('on a screen wide enough for the year, the heatmap shows it all and does no
 
 test('a chip row opens with the selected chip in view, and fades only on a side with more chips', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
-  await open(page, './#/activity');
+  await open(page, './#/activity?year=2026');
   const row = page.getByRole('group', { name: 'Year and track' });
   await expect(row.getByRole('button', { name: '2026', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await expect.poll(() => fades(row)).toBe('false true');
@@ -66,23 +66,17 @@ test('a chip row opens with the selected chip in view, and fades only on a side 
   await expect.poll(() => fades(row)).toBe('true false');
 });
 
-test('the phase map opens at the current phase, and is a region that Tab reaches and the arrow keys scroll', async ({ page }) => {
+test('the phase map opens at the current phase, whose card is wholly on the screen', async ({ page }) => {
+  // The redesign's map is one vertical route down the page: the page scrolls, and it opens with the current phase's
+  // card in the middle of the screen (the route runs on above and below it).
   await page.clock.install({ time: new Date('2027-09-15T10:30:00+05:00') });
   await open(page, './#/plan/map');
-  const strip = page.getByRole('region', { name: 'Five-year map, scroll for the other phases' });
-  const now = page.locator('li[aria-current="step"]');
-  await expect(now).toContainText('Now');
-  // Wholly in view across: the card is taller than the screen, so only its width is measured.
-  const box = (await now.boundingBox())!;
-  expect(box.x).toBeGreaterThanOrEqual(0);
-  expect(box.x + box.width).toBeLessThanOrEqual(412);
-  expect(await fades(strip)).toBe('true true');
-
-  await strip.focus();
-  await expect(strip).toBeFocused();
-  const outline = await strip.evaluate((el) => getComputedStyle(el).outlineStyle);
-  expect(outline).toBe('solid');
-  const from = await strip.evaluate((el) => el.scrollLeft);
-  await page.keyboard.press('ArrowRight');
-  await expect.poll(() => strip.evaluate((el) => el.scrollLeft)).toBeGreaterThan(from);
+  const now = page.locator('li[aria-current="step"] > div');
+  await expect(now).toContainText(/you are here/i);
+  await expect.poll(async () => {
+    const box = (await now.boundingBox())!;
+    return box.x >= 0 && box.x + box.width <= 412 && box.y >= 0 && box.y + box.height <= 915;
+  }).toBe(true);
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBe(0);
 });

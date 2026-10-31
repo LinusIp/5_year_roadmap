@@ -18,6 +18,7 @@ test.describe('library', () => {
     await expect(page.getByRole('button', { name: /^Rust Book/ })).toBeHidden();
 
     await search.fill('');
+    await page.getByRole('button', { name: /^Browse all/ }).click();
     await page.getByRole('button', { name: /^[\d,]+ Courses$/ }).click();
     await expect(page).toHaveURL(/type=course/);
     await page.getByRole('button', { name: 'Track', exact: true }).click();

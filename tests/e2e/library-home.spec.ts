@@ -21,17 +21,16 @@ async function start(page: Page, id: string): Promise<void> {
 
 test('the home shows the four sections, ML Zoomcamp in progress from its checklist', async ({ page }) => {
   await open(page, './#/library');
-  await expect(page.getByText(/^1 in progress · 3 up next · [\d,]+ more when you need them$/)).toBeVisible();
+  await expect(page.getByText(/^1 in progress · [\d,]+ resources · 3 up next$/)).toBeVisible();
   await expect(page.getByText('Module 1 · 6 of 97', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Your paths' })).toBeVisible();
   await expect(page.getByRole('button', { name: /^AI engineering/ })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Up next' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Browse when you need something' })).toBeVisible();
-  for (const shelf of ['Courses', 'Books', 'Papers', 'Articles', 'Blogs to follow', 'Tools']) {
+  await expect(page.getByRole('heading', { name: "This week's picks" })).toBeVisible();
+  // Browse all (the redesign mockup) opens the shelves in place.
+  await page.getByRole('button', { name: /^Browse all/ }).click();
+  for (const shelf of ['Courses', 'Books', 'Papers', 'Articles', 'Blogs', 'Tools', 'Practice', 'Projects']) {
     await expect(page.getByRole('button', { name: new RegExp('^[\\d,]+ ' + shelf + '$') })).toBeVisible();
   }
-  // Projects is a full-width row under the grid.
-  await expect(page.getByRole('button', { name: /^Projects [\d,]+$/ })).toBeVisible();
 });
 
 test('a path opens grouped by phase, and its step opens the resource', async ({ page }) => {
@@ -63,6 +62,7 @@ test('a card in progress pauses from its menu, back to not started', async ({ pa
 test('a shelf filters by status, in the URL, and says when nothing matches', async ({ page }) => {
   await start(page, 'ml-zoomcamp');
   await open(page, './#/library');
+  await page.getByRole('button', { name: /^Browse all/ }).click();
   await page.getByRole('button', { name: /^[\d,]+ Courses$/ }).click();
   await expect(page).toHaveURL(/type=course/);
   await expect(page.getByRole('heading', { level: 1, name: 'Courses' })).toBeVisible();

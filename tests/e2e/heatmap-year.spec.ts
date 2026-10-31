@@ -14,7 +14,7 @@ const heatmap = (page: Page, year = 2026): Locator => page.locator('section[aria
 
 test('2026 runs January to December, the days after today faint, today ringed, the plan start marked', async ({ page }) => {
   await page.clock.install({ time: OCT });
-  await open(page, './#/activity');
+  await open(page, './#/activity?year=2026');
   const strip = heatmap(page);
   await expect(strip.locator('svg text')).toHaveText(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
   await expect(strip.locator('rect[data-date="2026-01-01"]')).toHaveCount(1);
@@ -35,7 +35,7 @@ test('2026 runs January to December, the days after today faint, today ringed, t
 
 test('the strip opens with this week about two thirds across, and fades on both sides', async ({ page }) => {
   await page.clock.install({ time: OCT });
-  await open(page, './#/activity');
+  await open(page, './#/activity?year=2026');
   const strip = heatmap(page);
   const week = strip.locator('rect[data-date="2026-10-18"]');
   await expect(week).toBeInViewport();
@@ -62,7 +62,7 @@ test('the strip opens with this week about two thirds across, and fades on both 
 test('on a wide screen the whole year fits without scrolling', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.clock.install({ time: OCT });
-  await open(page, './#/activity');
+  await open(page, './#/activity?year=2026');
   const strip = heatmap(page);
   await expect(strip.locator('rect[data-date="2026-12-31"]')).toBeInViewport();
   await expect(strip.locator('rect[data-date="2026-01-01"]')).toBeInViewport();
@@ -90,7 +90,7 @@ test('2027 is all ahead, and All years shows a row of months a year that opens i
 test("the Sleep strip shows a night with no entry as a faint dash, and says so", async ({ page }) => {
   await page.clock.install({ time: OCT });
   await open(page, './#/sleep');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('button', { name: 'Save night', exact: true }).click();
   await expect(page.getByRole('status').getByText(/^Saved /)).toBeVisible();
   await open(page, './#/activity');
   const tile = page.getByRole('link', { name: /^Sleep / });

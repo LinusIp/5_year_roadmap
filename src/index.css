@@ -54,6 +54,22 @@
   --l2: var(--blue-deep); --t2: var(--blue-soft); --x2: var(--blue-deep); --d2: var(--deco);
   --l3: var(--ice-deep); --t3: var(--ice-soft); --x3: var(--ice-deep); --d3: var(--ice);
   --l4: var(--blue-deep); --t4: var(--blue-soft); --x4: var(--blue-deep); --d4: var(--deco);
+  /*
+   * The redesign mockup (pull request #43) styles with the scene's names: --paper is the ground and --sd the shadow;
+   * without a scene they are the clay's. The dark set (--dbg, --dsf, --dtx, --dtx2, --dac) is the Focus screen's; --dak
+   * is the text on its accent.
+   */
+  --paper: var(--bg);
+  --sd: var(--lo);
+  --dbg: #2B2F36;
+  --dsf: #363B44;
+  --dtx: #E9ECF1;
+  --dtx2: #B1B7C2;
+  --dac: #8EA3D6;
+  --dak: #111111;
+  /* The active tab and the pressed chip: a lane tint, or on the dark screen the accent. */
+  --tab-on-bg: var(--t0);
+  --tab-on-text: var(--x0);
 }
 
 :root[data-theme="dark"] {
@@ -88,6 +104,62 @@
   --l2: #52638F; --t2: var(--blue-soft); --x2: var(--blue-deep); --d2: var(--deco);
   --l3: #2B6A7C; --t3: var(--ice-soft); --x3: var(--ice-deep); --d3: var(--ice);
   --l4: #52638F; --t4: var(--blue-soft); --x4: var(--blue-deep); --d4: var(--deco);
+  --paper: var(--bg);
+  --sd: var(--lo);
+}
+
+/*
+ * The dark screen (the mockup's Focus): the scene's dark set as the ground, surfaces and text, while the tab bar
+ * and every tile keep their shape. Set by Screen with `dark` on <html data-dark-screen>; the tokens go on body,
+ * under the scene's inline ones on <html>, so they win for everything drawn.
+ */
+:root[data-dark-screen] {
+  color-scheme: dark;
+  background: var(--dbg);
+}
+:root[data-dark-screen] body {
+  color: var(--dtx);
+  --bg: var(--dbg);
+  --hi: rgba(255, 255, 255, .05);
+  --lo: rgba(0, 0, 0, .35);
+  --edge: rgba(255, 255, 255, .06);
+  --ink: var(--dtx);
+  --ink2: var(--dtx2);
+  --ink3: var(--dtx2);
+  --blue: var(--dac);
+  --blue-deep: var(--dac);
+  --blue-soft: rgba(255, 255, 255, .08);
+  --ice: var(--dac);
+  --ice-deep: var(--dac);
+  --ice-soft: rgba(255, 255, 255, .08);
+  --on-blue: var(--dak);
+  --on-ice: var(--dak);
+  --dash: rgba(255, 255, 255, .08);
+  --sd: rgba(255, 255, 255, .08);
+  --scrim: rgba(0, 0, 0, .6);
+  --tab-on-bg: var(--dac);
+  --tab-on-text: var(--dak);
+  --t0: rgba(255, 255, 255, .08); --t1: rgba(255, 255, 255, .08); --t2: rgba(255, 255, 255, .08); --t3: rgba(255, 255, 255, .08); --t4: rgba(255, 255, 255, .08);
+  --x0: var(--dtx); --x1: var(--dtx); --x2: var(--dtx); --x3: var(--dtx); --x4: var(--dtx);
+  --l0: var(--dac); --l1: var(--dac); --l2: var(--dac); --l3: var(--dac); --l4: var(--dac);
+  --on-lane: var(--dak);
+}
+:root[data-dark-screen] .tile {
+  background: var(--dsf);
+  border: 1px solid rgba(255, 255, 255, .06);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .28);
+}
+:root[data-dark-screen] .knob {
+  background: var(--dsf);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .28);
+}
+:root[data-dark-screen] .well {
+  background: var(--dbg);
+  box-shadow: none;
+}
+:root[data-dark-screen] .well.lane-fill,
+:root[data-dark-screen] .btn-fill {
+  background: var(--dac);
 }
 
 @theme inline {
@@ -104,7 +176,7 @@
   --color-dash: var(--dash);
   --color-transparent: transparent;
 
-  /* Nunito 600, 700 and 800, self-hosted (DECISIONS.md), with system fonts behind it. */
+  /* Nunito 600, 700, 800 and 900, self-hosted (DECISIONS.md), with system fonts behind it. */
   --font-*: initial;
   --font-sans: "Nunito", system-ui, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
@@ -137,12 +209,13 @@
   --text-big: 2rem;
   --text-big--line-height: 1.1;
 
-  /* Nunito's three weights: 600 is the text, 700 a row title, 800 a heading or a number. */
+  /* Nunito's four weights: 600 is the text, 700 a row title, 800 a label or a button, 900 a title or a number. */
   --font-weight-*: initial;
   --font-weight-normal: 600;
   --font-weight-medium: 700;
   --font-weight-semibold: 800;
   --font-weight-bold: 800;
+  --font-weight-black: 900;
 
   /* 26 px tiles, 16 px knobs and wells, 12 px boxes in a diagram, 999 px pills. */
   --radius-*: initial;
@@ -262,7 +335,7 @@
   }
   /* Text over an illustration (src/ui/ArtPanel.tsx) sits on a fade to the ground over the panel's top or bottom third. */
   .art-fade-bottom {
-    background: linear-gradient(to top, var(--bg) 0%, var(--bg) 45%, color-mix(in srgb, var(--bg) 60%, transparent) 75%, transparent 100%);
+    background: linear-gradient(to bottom, transparent 0%, var(--bg) 78%);
   }
   .art-fade-top {
     background: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 45%, color-mix(in srgb, var(--bg) 60%, transparent) 75%, transparent 100%);
@@ -278,9 +351,12 @@
   .lane-2 { --lane: var(--l2); --lane-tint: var(--t2); --lane-text: var(--x2); --lane-deco: var(--d2); }
   .lane-3 { --lane: var(--l3); --lane-tint: var(--t3); --lane-text: var(--x3); --lane-deco: var(--d3); }
   .lane-4 { --lane: var(--l4); --lane-tint: var(--t4); --lane-text: var(--x4); --lane-deco: var(--d4); }
-  /* While a scene is on, a block's tile sits on its lane's tint and its progress pill is its lane's colour. */
-  html[data-scene] .lane-tile { background: var(--lane-tint); color: var(--lane-text); box-shadow: none; }
-  html[data-scene] .lane-fill { background: var(--lane); }
+  /* A block's tile sits on its lane's tint (the mockup's .ico); a progress pill is its lane's colour (.bar > i). */
+  .lane-tile { background: var(--lane-tint); color: var(--lane-text); }
+  .lane-fill { background: var(--lane); }
+  /* A verdict or status pill in a lane's tint, or neutral on the shadow colour. */
+  .pill-tint { background: var(--lane-tint); color: var(--lane-text); }
+  .pill-neutral { background: color-mix(in srgb, var(--ink) 9%, transparent); color: var(--ink); }
   /* The ground rising behind the floating tab bar (src/ui/Screen.tsx): solid under the bar, gone 40 px above it. */
   .tab-bar-fade {
     background: linear-gradient(to top, var(--bg) 60%, transparent);
@@ -313,16 +389,26 @@
     box-shadow: inset 3px 3px 7px var(--lo), inset -3px -3px 7px var(--hi);
     transition: box-shadow 120ms;
   }
-  /* The one primary action: a blue gradient pill with a top highlight. */
+  /* The one primary action (the mockup's .btn.p): a flat fill in a lane's colour with white text, raised. */
+  .btn-fill {
+    background: var(--lane, var(--l0));
+    color: var(--on-lane);
+    box-shadow: 3px 3px 7px var(--lo), -3px -3px 7px var(--hi);
+  }
+  /* A secondary action (the mockup's Lofi and Swap pills): the lane's tint with its text, flat. */
+  .btn-tint {
+    background: var(--lane-tint, var(--t0));
+    color: var(--lane-text, var(--x0));
+  }
+  /* Kept for the few places that still name them: the same two looks. */
   .btn-blue {
-    background: linear-gradient(180deg, var(--blue), var(--blue-deep));
-    color: var(--on-blue);
-    box-shadow: 3px 3px 7px var(--lo), -3px -3px 7px var(--hi), inset 0 2px 0 var(--gloss);
+    background: var(--l0);
+    color: var(--on-lane);
+    box-shadow: 3px 3px 7px var(--lo), -3px -3px 7px var(--hi);
   }
   .btn-ice {
-    background: linear-gradient(180deg, var(--ice-top), var(--ice));
-    color: var(--on-ice);
-    box-shadow: 3px 3px 7px var(--lo), -3px -3px 7px var(--hi), inset 0 2px 0 var(--gloss);
+    background: var(--t1);
+    color: var(--x1);
   }
   /* A filled blue mark: a checked box, a done day, a done stop. */
   .fill-blue {
@@ -338,21 +424,21 @@
    * the plan take the heatmap's first steps with ink on them; the plan met is blue-deep with the fill's text, so every
    * number stays at 4.5:1. Today is a ring.
    */
-  .day-0 { box-shadow: inset 3px 3px 7px var(--lo), inset -3px -3px 7px var(--hi); color: var(--ink2); }
-  .day-1 { background: var(--ramp-1); color: var(--ink); }
+  .day-0 { background: var(--t0); color: var(--x0); }
+  .day-1 { background: var(--ramp-2); color: var(--ink); }
   .day-2 { background: var(--ramp-2); color: var(--ink); }
-  .day-3 { background: var(--blue-deep); color: var(--on-blue); }
-  .day-4 { background: var(--blue-deep); color: var(--on-blue); }
-  .day-ring { box-shadow: inset 0 0 0 2.5px var(--blue-deep); color: var(--ink); }
+  .day-3 { background: var(--l0); color: var(--on-lane); }
+  .day-4 { background: var(--l0); color: var(--on-lane); }
+  .day-ring { background: var(--t0); color: var(--x0); box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--l0); }
   /* A block under way (Blocks today): the pressed-in dot, half filled. */
   .half-dot { background: linear-gradient(to right, var(--blue-deep) 50%, var(--bg) 50%); }
-  /* Progress: a 14 px well with 3 px padding and an ice-to-deco pill. */
+  /* Progress: a well with 3 px padding and a pill in the lane's colour (src/ui/ProgressLine.tsx). */
   .progress-fill {
-    background: linear-gradient(90deg, var(--ice), var(--deco));
+    background: var(--lane, var(--l0));
   }
   /* Rows in a list group: 1.5 px dashed dividers. */
   .rows > * + * {
-    border-top: 1.5px dashed var(--dash);
+    border-top: 1.5px dashed var(--sd);
   }
   @media (prefers-contrast: more) {
     .tile, .knob { outline: 1px solid var(--ink2); }
@@ -417,7 +503,7 @@
     font-size: var(--text-label);
     line-height: 1.3;
     font-weight: 800;
-    letter-spacing: .02em;
+    letter-spacing: .03em;
     color: var(--ink2);
     margin-bottom: 0.5rem;
   }

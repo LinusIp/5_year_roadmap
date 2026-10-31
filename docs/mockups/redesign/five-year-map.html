@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Atlas five-year map</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>/* fonts: Nunito normal 600, Nunito normal 700, Nunito normal 800, Nunito normal 900 */
+</style>
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+a{color:inherit;text-decoration:none}
+.stop{position:absolute;display:flex;flex-direction:column;gap:2px;padding:10px 14px;border-radius:18px;background:var(--paper);box-shadow:4px 4px 14px rgba(0,0,0,.18);max-width:196px;box-sizing:border-box}
+.yr{font-size:12px;font-weight:900;letter-spacing:.04em}
+.nm{font-size:15px;font-weight:800;color:var(--ink);line-height:1.2}
+.mt{font-size:12px;font-weight:700;color:var(--ink2)}
+.pin{position:absolute;width:18px;height:18px;border-radius:999px;box-shadow:0 0 0 4px rgba(255,255,255,.92)}
+</style>
+</helmet>
+<div style="width:390px;height:1300px;position:relative;box-sizing:border-box;background:var(--paper);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;overflow:hidden;{{vars}}">
+<img src="{{img}}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15),rgba(255,255,255,0) 40%,rgba(0,0,0,.08))"></div>
+<svg sc-camel-view-box="0 0 390 1300" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true">
+<path d="M196 270 C150 300 120 320 177 347 C250 380 290 430 249 479 C200 540 110 580 149 649 C180 700 260 740 235 889 C215 960 140 1000 179 1069 C210 1120 220 1170 195 1205" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="10" stroke-linecap="round"></path>
+<path d="M196 270 C150 300 120 320 177 347 C250 380 290 430 249 479 C200 540 110 580 149 649 C180 700 260 740 235 889 C215 960 140 1000 179 1069 C210 1120 220 1170 195 1205" fill="none" stroke="var(--l0)" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 12"></path>
+</svg>
+
+<header style="position:absolute;left:16px;right:16px;top:40px;display:flex;align-items:center;gap:12px">
+<a href="Plan.dc.html" aria-label="Back to Plan" style="width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--paper);color:var(--x0);box-shadow:3px 3px 10px rgba(0,0,0,.18)"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+<span style="display:flex;flex-direction:column;background:var(--paper);padding:6px 14px;border-radius:16px;box-shadow:3px 3px 10px rgba(0,0,0,.14)"><span style="font-size:20px;font-weight:900">Five-year map</span><span class="mt">Sep 2026 → Aug 2031 · today's scene: {{sceneName}}</span></span>
+</header>
+
+<span class="pin" style="left:187px;top:261px;background:var(--l4)"></span>
+<div class="stop" style="left:18px;top:214px"><span class="yr" style="color:var(--x4)">START</span><span class="nm">Sep 2026</span></div>
+
+<span class="pin" style="left:165px;top:335px;background:var(--l2);width:24px;height:24px"></span>
+<div class="stop" style="left:200px;top:300px"><span class="yr" style="color:var(--x2)">YEAR 1 · YOU ARE HERE</span><span class="nm">Strong foundations</span><span class="mt">Python, ML, LLMs, linear algebra · 31%</span></div>
+
+<span class="pin" style="left:240px;top:470px;background:var(--l0)"></span>
+<div class="stop" style="left:18px;top:440px"><span class="yr" style="color:var(--x0)">YEAR 2</span><span class="nm">Building</span><span class="mt">CUDA, inference engine, NVIDIA internship</span></div>
+
+<span class="pin" style="left:140px;top:640px;background:var(--l3)"></span>
+<div class="stop" style="left:176px;top:610px"><span class="yr" style="color:var(--x3)">YEAR 3</span><span class="nm">Scalable systems + research</span><span class="mt">Architecture, inference, world models</span></div>
+
+<div style="position:absolute;left:18px;right:18px;top:780px;display:flex;align-items:center;gap:10px"><span style="flex:1;height:2px;background:rgba(255,255,255,.8)"></span><span style="font-size:12px;font-weight:900;color:var(--ink);background:var(--paper);padding:4px 10px;border-radius:999px">STAGE 2 · ENGINEERING</span><span style="flex:1;height:2px;background:rgba(255,255,255,.8)"></span></div>
+
+<span class="pin" style="left:226px;top:880px;background:var(--l1)"></span>
+<div class="stop" style="left:18px;top:850px"><span class="yr" style="color:var(--x1)">YEAR 4</span><span class="nm">Electrical</span><span class="mt">Circuits, power, embedded</span></div>
+
+<span class="pin" style="left:170px;top:1060px;background:var(--l4)"></span>
+<div class="stop" style="left:206px;top:1030px"><span class="yr" style="color:var(--x4)">YEAR 5</span><span class="nm">Mechanical</span><span class="mt">Mechanics, CAD, final capstone</span></div>
+
+<div class="stop" style="left:105px;top:1200px;max-width:180px;align-items:center;text-align:center"><span class="yr" style="color:var(--x0)">THE FINISH</span><span class="nm">Aug 2031</span></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;day&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;min&quot;:-30,&quot;max&quot;:30,&quot;section&quot;:&quot;Scene&quot;},&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:1300}}">
+class Component extends DCLogic {
+  renderVals() {
+    const TH = [{"n":"Lake house","i":"(the scene image)","p":"#E8EDF0","s":"#C7CDD1","k":"#282B23","k2":"#5E6258","L":["#7C7721","#457A9F","#9D6937","#5374B6","#008569"],"T":["#E8E3C7","#D8E4F0","#F5DECD","#DBE2FA","#CAE9DE"],"X":["#565500","#225778","#784711","#215295","#006247"],"D":["#958F32","#709EC3","#BB8049","#698CD5","#139F80"],"d":["#1D2413","#2A311F","#E6EFF4","#B8BDAF","#958F32"]},{"n":"Snow chalet","i":"(the scene image)","p":"#ECECEE","s":"#CBCCCE","k":"#222B30","k2":"#586268","L":["#1E7595","#526E9B","#017980","#8F6345","#7A6491"],"T":["#D7E4EC","#DEE2EE","#D5E6E7","#EDE0D9","#E6E0EB"],"X":["#25586E","#415372","#1B5B5F","#6A4C37","#5C4C6B"],"D":["#5A8AA1","#7384A6","#528D92","#9F7D66","#8E7D9E"],"d":["#0C242F","#1A313C","#ECEEF5","#ADBEC8","#5A8AA1"]},{"n":"Alpine sketch","i":"(the scene image)","p":"#EEECE9","s":"#CECCC8","k":"#2B2A21","k2":"#626157","L":["#8A713F","#6C7A4C","#9B6953","#4E78A1","#4D7F60"],"T":["#ECE1CF","#E0E4D4","#F3DED6","#D8E3F3","#D6E7DB"],"X":["#654F1A","#495829","#774630","#205680","#265C3E"],"D":["#A88C54","#879663","#BB836A","#6793C1","#649B79"],"d":["#232310","#2F2F1D","#F1EEE6","#BDBCAD","#A88C54"]},{"n":"Green willow","i":"(the scene image)","p":"#EBEEE2","s":"#CACEBF","k":"#1E2D24","k2":"#54655A","L":["#56801B","#2F7C9E","#8C721A","#7C67B9","#008381"],"T":["#DCE7C9","#D5E5EF","#EFE1C5","#E8DEFB","#BDEBE9"],"X":["#375C00","#005977","#665000","#574595","#006464"],"D":["#90BF50","#4B8BAB","#CEAD4F","#BBA2FF","#00C9C5"],"d":["#0C2718","#193424","#EDEFE7","#B0BFB5","#90BF50"]},{"n":"Moon over the sea","i":"(the scene image)","p":"#EFEDE1","s":"#D0CCBD","k":"#2D2926","k2":"#64605C","L":["#8D6F4A","#74784A","#9D6759","#447A9F","#577E5A"],"T":["#ECE1D6","#E3E3D8","#EFDFDB","#DAE4ED","#DBE5DC"],"X":["#674E2F","#525534","#70493F","#305671","#3D593F"],"D":["#CAAB88","#B2B38E","#D4A69A","#90B5D3","#99B89B"],"d":["#292015","#372C22","#F0EEE6","#C6B9AD","#CAAB88"]},{"n":"Lone green tree","i":"(the scene image)","p":"#ECECEC","s":"#CCCCCB","k":"#192C36","k2":"#4F646F","L":["#717B03","#39729A","#A2680E","#4970CF","#00846A"],"T":["#E5E4C5","#DAE4ED","#F7DEC6","#DDE1FF","#C0EBE0"],"X":["#4E5700","#325671","#774800","#264F9F","#00644E"],"D":["#B0B741","#6587A5","#E9A245","#8AABFF","#00CBAA"],"d":["#002535","#083242","#EBEFE8","#ADBEC8","#B0B741"]},{"n":"Golden walk","i":"(the scene image)","p":"#EDEDE7","s":"#CCCCC5","k":"#252B2D","k2":"#5B6264","L":["#8B7200","#2B7969","#607C54","#0079C5","#008657"],"T":["#EFE1C4","#D6E6E1","#DDE5DA","#D3E4FF","#C9EAD8"],"X":["#645100","#295B50","#43583B","#0057A3","#006235"],"D":["#CFAE3D","#5B8D81","#A0B796","#5DB5FF","#47C68F"],"d":["#0F252A","#1C3137","#EEEEE7","#AABFC5","#CFAE3D"]},{"n":"Autumn mist","i":"(the scene image)","p":"#EDECEB","s":"#CDCCCA","k":"#2C2929","k2":"#636060","L":["#A56611","#AE5149","#C05243","#0079BE","#358437"],"T":["#F8DEC6","#FDDBD6","#FFD9D1","#C7E7FF","#D2E9CE"],"X":["#794600","#8E3530","#933027","#005E9E","#0F601A"],"D":["#DB9137","#C8685F","#F97B69","#00B0FF","#5EB35C"],"d":["#2C1E1C","#392B29","#F4EDE7","#CBB7B4","#DB9137"]},{"n":"Frosted grass","i":"(the scene image)","p":"#ECEDE9","s":"#CCCCC8","k":"#0F2E37","k2":"#49656F","L":["#0D7791","#45709B","#107979","#936149","#716795"],"T":["#D6E5EB","#DCE3EE","#D5E6E5","#EEE0DA","#E4E1EC"],"X":["#1F596B","#395472","#1E5B5B","#6D4A3A","#554E6E"],"D":["#568B9E","#6C86A6","#538D8D","#A27B69","#877FA1"],"d":["#002632","#013340","#EDEFE7","#ABBFC7","#568B9E"]},{"n":"Orange larches","i":"(the scene image)","p":"#E3EEF7","s":"#C0CEDA","k":"#1B2C36","k2":"#51636F","L":["#B9592B","#407AA0","#C14E60","#007DAB","#5F7E25"],"T":["#FFDBCB","#D5E4F2","#FFD8DB","#BFE9F9","#DDE6C8"],"X":["#8A3A13","#00587F","#98273F","#006290","#3B5C00"],"D":["#D36A37","#5F9CC6","#DD5E71","#009ACF","#719332"],"d":["#002536","#0C3243","#E8EFF5","#AEBEC9","#D36A37"]},{"n":"Snow tree","i":"(the scene image)","p":"#E9EDF0","s":"#C8CDD0","k":"#262A33","k2":"#5D616B","L":["#5078A0","#776F9B","#2A7E96","#877248","#936688"],"T":["#DCE3EE","#E4E1EC","#D6E5EB","#E8E2D7","#EBDFE7"],"X":["#385572","#544E6E","#1E596A","#605033","#694860"],"D":["#97B3D4","#B4ACD0","#82B9CC","#C2AE8C","#CBA6C0"],"d":["#182233","#252E40","#E7EFF5","#B6BBCA","#97B3D4"]},{"n":"Blossom waterfall","i":"(the scene image)","p":"#EDECEB","s":"#CDCCCB","k":"#2E2922","k2":"#666057","L":["#717648","#547F5B","#8E7048","#6C6F9D","#307F73"],"T":["#E3E3D5","#DBE5DC","#EAE1D7","#E2E1ED","#D5E6E2"],"X":["#51562D","#3B5940","#644F32","#4E5071","#235B53"],"D":["#83875C","#6B8C6F","#988061","#8081A5","#568E84"],"d":["#292010","#362D1D","#F2EDE6","#C3BAAD","#83875C"]},{"n":"Sunset grass","i":"(the scene image)","p":"#EAEDEE","s":"#CACCCE","k":"#2D2929","k2":"#646060","L":["#936E34","#717940","#A46451","#317BAA","#4B8056"],"T":["#F1E0CC","#E2E4D0","#F7DDD5","#D4E4F6","#D5E7D7"],"X":["#6E4C0C","#4D571C","#80402E","#005988","#245D33"],"D":["#D6A967","#AEB675","#EA9E87","#70B8EE","#83BE8D"],"d":["#2D1E1F","#3A2A2B","#E7EFF4","#CCB7B7","#D6A967"]},{"n":"Grey hills","i":"(the scene image)","p":"#ECECEB","s":"#CCCCCA","k":"#252B30","k2":"#5B6268","L":["#37729A","#666998","#00788B","#86683F","#886087"],"T":["#DAE4ED","#E2E1ED","#D5E5EA","#EAE1D7","#E9DFE9"],"X":["#315671","#4E5070","#1B5A67","#644F33","#654964"],"D":["#6488A5","#8081A4","#538C9A","#988062","#987A97"],"d":["#122330","#1F303D","#EEEEE7","#B0BDC9","#6488A5"]},{"n":"Moon lake","i":"(the scene image)","p":"#EAEDED","s":"#C9CDCD","k":"#282A2E","k2":"#5F6165","L":["#877248","#6C7A4D","#9A6954","#5078A0","#4E7F61"],"T":["#E8E2D7","#E1E4D8","#EEE0DA","#DCE3EE","#D9E5DD"],"X":["#605033","#4C5636","#6D4A3B","#385572","#375A44"],"D":["#C2AE8C","#ABB591","#D2A795","#97B3D4","#93BAA0"],"d":["#1A222E","#272F3B","#E5F0F0","#B4BCCA","#C2AE8C"]},{"n":"Pastel trees","i":"(the scene image)","p":"#F0ECEA","s":"#D0CBC9","k":"#342530","k2":"#6D5C68","L":["#9E6474","#966B50","#8E688D","#368075","#8F6E4B"],"T":["#F3DDE2","#EDE0D9","#EBDFEA","#D4E6E2","#ECE0D6"],"X":["#7B4052","#6B4C38","#684867","#185C53","#684D2F"],"D":["#C08092","#CFA992","#AA87A9","#5D9E92","#AC8C6B"],"d":["#311A2B","#3E2738","#F5ECE8","#C6B7C2","#C08092"]},{"n":"Lilac bridge","i":"(the scene image)","p":"#EEECEA","s":"#CECCCA","k":"#312825","k2":"#695F5A","L":["#816B9C","#996582","#5A76A1","#657B51","#A16467"],"T":["#E8DFF1","#F0DEE7","#DCE3F2","#DEE5D6","#F4DDDE"],"X":["#5E497A","#75425F","#34547D","#42592F","#7C4146"],"D":["#917AAF","#AA7392","#6885B2","#738B5E","#B37276"],"d":["#2F1E16","#3C2A22","#F3EDE6","#CAB8B0","#917AAF"]}];
+    const now = new Date();
+    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (this.props.day ?? 0));
+    const doy = Math.floor((day - new Date(day.getFullYear(), 0, 0)) / 86400000);
+    const n = TH.length;
+    let seed = day.getFullYear() * 97 + Math.floor(doy / n) + 1;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const order = TH.map((_, i) => i);
+    for (let i = n - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const x = order[i]; order[i] = order[j]; order[j] = x; }
+    const t = TH[order[doy % n]];
+    let v = '--paper:' + t.p + ';--sd:' + t.s + ';--ink:' + t.k + ';--ink2:' + t.k2 + ';';
+    for (let i = 0; i < 5; i++) v += '--l' + i + ':' + t.L[i] + ';--t' + i + ':' + t.T[i] + ';--x' + i + ':' + t.X[i] + ';--d' + i + ':' + t.D[i] + ';';
+    return { vars: v, img: t.i, sceneName: t.n };
+  }
+}
+</script>
+
+
+</body></html>

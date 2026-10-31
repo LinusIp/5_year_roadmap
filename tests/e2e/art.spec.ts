@@ -25,11 +25,10 @@ test('Today shows the art panel with the header on it, and hides it when the set
   const panel = page.locator('[data-art-slot]').first();
   await expect(panel).toHaveAttribute('data-art-slot', 'today-morning');
   await expect(panel).toHaveAttribute('data-art', 'placeholder');
-  // The header's controls sit on the picture's fade and still work.
-  await expect(panel.getByRole('button', { name: /pick a date/ })).toBeVisible();
-  await expect(panel.getByRole('link', { name: 'Settings' })).toBeVisible();
-  await expect(panel.getByText(/of 10 h today/)).toBeVisible();
-  // No tile for the hours beside it: the panel took its place.
+  // The greeting sits on the picture's fade (the redesign mockup); the header row and the hours tile are their own.
+  await expect(panel.getByText('Good morning')).toBeVisible();
+  await expect(page.getByRole('button', { name: /pick a date/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Settings' })).toBeVisible();
   await expect(page.getByText(/of 10 h today/)).toHaveCount(1);
 
   await open(page, './#/settings?section=layout');

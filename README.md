@@ -13,16 +13,18 @@ app makes no network calls at all, and everything can still be exported to a sin
 <p>
   <img src="screenshots/today-light.png" alt="Today: the one block to do now, large, and the other blocks as a list, each with its block's icon" width="24%">
   <img src="screenshots/plan-light.png" alt="Plan: the current phase's five lanes, each with its item, progress line and forecast" width="24%">
-  <img src="screenshots/activity-dark.png" alt="Activity in the dark theme: the year's heatmap and the last seven days" width="24%">
-  <img src="screenshots/library-light.png" alt="Library: what is in progress, the plan's paths as subway lines, the next three steps and the shelves to browse" width="24%">
+  <img src="screenshots/activity-dark.png" alt="Stats in the dark theme: this week on the scene, the streak, the last 22 weeks and the hours by lane" width="24%">
+  <img src="screenshots/library-light.png" alt="Library: what is in progress, this week's picks, the plan's paths and Browse all" width="24%">
 </p>
 
-![The five-year map: six phases on a timeline, with each lane's work, what ships and the credentials](screenshots/map-light.png)
+![The five-year map: the day's scene with a winding route, a pin and a card per phase, the finish at the end](screenshots/map-light.png)
 
-The look is soft clay: one calm background, raised tiles, sunken wells, and only blue and ice. Each block has its own
-icon on Today; subjects, kinds of project and their status have theirs too, always next to a word that says the same
-(the style guide is [docs/CLAY-STYLE.md](docs/CLAY-STYLE.md), the icon map and the choices made on it are in
-[DECISIONS.md](DECISIONS.md), the boards in [docs/mockups](docs/mockups)). No scrollbar is drawn anywhere: a strip that
+The look is soft clay drawn to the redesign mockup (pull request #43): one calm ground that the day's scene colours,
+raised tiles, sunken wells, and five lane colours from the scene's palette. Each block has its own icon and lane;
+subjects, kinds of project and their status have theirs too, always next to a word that says the same (the style
+guide is [docs/CLAY-STYLE.md](docs/CLAY-STYLE.md), the icon map and the choices made on it are in
+[DECISIONS.md](DECISIONS.md), the boards in [docs/mockups](docs/mockups) and the redesign's twelve in
+[docs/mockups/redesign](docs/mockups/redesign)). The tab bar holds Today, Plan, Calendar, Library, Stats and Focus. No scrollbar is drawn anywhere: a strip that
 scrolls sideways opens at its latest item and fades at the edge where more is hidden.
 
 The screenshots show eight weeks of made-up history. They are also the baselines of a screenshot test that CI runs
@@ -66,11 +68,13 @@ Every day is the same five two-hour courses at fixed times, 10 hours in all:
 | 20:00 to 22:00 | E · Math and physics | MIT 18.06, then the rest of lane E |
 
 - **Now follows the clock.** At 08:40 Today's Now is GameDevHQ ("Now · 08:00–10:00"); between 12:00 and 18:00 it is
-  the break, with Coding lessons next (a tap starts it early); after 22:00 the day is done. A block tapped in Later
-  today, or the one whose timer runs, comes first. Later today lists the blocks still to come with their windows
-  ("10:00–12:00"), by session around the break, and counts what is done ("2 of 5 done"). A block whose window passed
-  unfinished waits under "Earlier · not finished" with the time it got, still a tap away; the done ones fold into
-  "Done today".
+  the break, with Coding lessons next (a tap starts it early); after 22:00 the day is done. A block tapped in the list
+  under the Now card, or the one whose timer runs, comes first. That list (the mockup's "NEXT · 18:00–20:00" row,
+  then the rest) holds the blocks still to come with their windows, by session around the break. A block whose
+  window passed unfinished waits under "Earlier · not finished" with the time it got, still a tap away; the done ones
+  fold into "Done today".
+- **The check-in.** The last block whose window passed with nothing logged (today's, or last night's) asks "how did
+  it go?" once: **As planned** logs its hours, **Partly** half of them, **Skipped** lets it go, each with Undo.
 - **When a block's time is up** and its timer still runs (08:00, 10:00, 20:00, 22:00), Today asks quietly: Switch
   (or Stop at 22:00) or Keep going. No notifications: a web app cannot ring reliably while closed.
 - **Pinned courses.** The first course of each lane is the one above; when it is done, the lane moves on by itself.
@@ -87,17 +91,21 @@ Every day is the same five two-hour courses at fixed times, 10 hours in all:
 
 The day's post is written in your own blog, through Pages CMS, never in Atlas. Atlas helps with the rest:
 
-- **A reminder.** Once the day's last block is marked done or its timer stopped, or at 22:00, Today shows "Write
-  today's blog post" at the top of Later today. The row at the end of the list says "Blog post · not yet" or
-  "posted ✓". No pop-ups, no notifications.
-- **Today's blog post** (from that row, the Day done card, or Blog on any past day in Calendar): "Sun 18 Oct · day
-  28" counted from 21 September 2026, the writing streak, what you did block by block with the time and what you
-  ticked, and a Markdown outline built from it (a heading per block, the ticks as bullets, "What I learned:" and
-  "Stuck on:" to fill in). **Copy outline** copies it.
-- **Open my blog** opens Pages CMS in a new tab. Paste your posts collection's own link in Settings › Blog › Editor
-  link to land straight on it.
-- **I posted it** marks the day (Undo takes it back) and feeds the writing streak. A day with no study and no post
-  neither counts nor breaks it. The mark syncs as `blog/<date>.json`: `{ "posted": true, "at": "…" }`.
+- **The log tile on Today** says "Not written yet · 3 topics to write about" (the blocks with time), "The day's
+  outline is ready" once the day's last block is done or its timer stopped, or at 22:00, and "Posted ✓" after. No
+  pop-ups, no notifications.
+- **Today's log** (from that tile, the Day done card, or Blog on any past day in Calendar): "Day 28 · Sun 18 Oct"
+  counted from 21 September 2026 with the writing streak, what you studied from your logs as pills, and the post's
+  fields: a title, "What did I learn?", "Where did I get stuck?" and "Tomorrow". They are the day's draft, kept on
+  the device and in your sync (`blog/<date>.json`); **Save draft** and leaving a field store them.
+- **Publish** (with "Publish to my blog" on) composes the post as Markdown (the fields under their headings, then the
+  day's facts: a heading per block with its time and the ticks as bullets), copies it, opens Pages CMS in a new tab
+  to paste it, and marks the day posted (tap again to undo). Paste your posts collection's own link in Settings ›
+  Blog › Editor link to land straight on it. With the switch off, Publish only saves. "The post as Markdown" below
+  shows it, with **Copy outline**. Atlas never writes to the blog itself.
+- **Attach today's photo** remembers the photo's name for the gallery on your site; the file is added in the editor.
+- A posted day feeds the writing streak. A day with no study and no post neither counts nor breaks it. The mark
+  syncs with the draft: `{ "posted": true, "at": "…", "title": "…", "learned": "…" }`.
 - **Detect my post automatically** (Settings › Blog, off by default): once an evening, from 21:00, and when the blog
   screen opens, Atlas lists the blog repository's `_posts` folder and marks the day when a post dated that day is
   there. Read-only: it never writes to the blog. If the token cannot read the repository, the setting says how to
@@ -127,19 +135,20 @@ device, never over a tick already there. `npm run validate:data` checks the ids,
 
 A phone app cannot see you sleep, so Atlas asks: a bedtime and a wake time, by hand.
 
-- **In the morning** Today asks "How did you sleep?" with **Log sleep**, until it is logged or 12:00. It never blocks
-  anything, and Settings › Sleep turns it off.
-- **The Sleep screen** (from that row, the **Slept** tile on Today, or Activity) shows the night's length, live, with
-  Bedtime and Woke up: − and + move 15 minutes, a tap on the time types it. It starts from your usual bedtime (23:00 at
-  first) and, in the morning, from now. **Save** keeps one night per wake-up date; saving again replaces it. A night
-  under an hour or over 16 hours asks "Are you sure?" first.
-- Under it: **This week** (bars scaled to 9 hours, a dashed line at the goal, the average), **Usual bedtime** (the
-  median of the last 7 nights), the bedtime that gives the goal before the first block ("For 8 h by 06:00 · 22:00"),
-  and the last 30 nights, any of which opens to edit.
-- **Activity** has a Sleep tile: the last 7 nights' average and 30 nights as a strip. Sleep is not study: it takes no
+- **The Sleep tile on Today** shows last night ("6 h 40 m · 23:00 → 05:40 · log tonight") or "Not logged · Log last
+  night". It never blocks anything.
+- **The Sleep screen** (from that tile, or Stats) shows the night on the day's scene, live, and "Log a night": Went
+  to bed and Woke up (− and + move 15 minutes, a tap on the time types it), **How rested do you feel?** (Awful to
+  Great) and **Save night**. It starts from your usual bedtime (23:00 at first) and, in the morning, from now. One
+  night per wake-up date; saving again replaces it. A night under an hour or over 16 hours asks "Are you sure?" first.
+- Under it: **Last 7 nights** (bars scaled to 9 hours, a dashed line at the target, the nights that met it in the
+  lane's colour), what the nights say about the next day's study once there are three of each kind to compare, and
+  the last 30 nights, any of which opens to edit. The header says the target and the bedtime that gives it before the
+  first block ("bed by 22:00").
+- **Stats** has a Sleep tile: the last 7 nights' average and 30 nights as a strip. Sleep is not study: it takes no
   part in the streak or the heatmap.
-- **Settings › Sleep**: the goal (6 to 10 h, 8 h at first) and the morning question.
-- A night syncs as `sleep/<wake date>.json`: `{ "bed": "2026-10-17T23:00", "wake": "2026-10-18T05:40", "minutes": 400 }`,
+- **Settings › Sleep**: the goal (6 to 10 h, 8 h at first).
+- A night syncs as `sleep/<wake date>.json`: `{ "bed": "2026-10-17T23:00", "wake": "2026-10-18T05:40", "minutes": 400, "rested": 3 }`,
   local times; the newer edit wins.
 
 ## Internships
@@ -437,7 +446,7 @@ Besides the curriculum's own projects, Atlas carries a catalogue of 920 in three
   repository link filled in.
 - **Finding one**: the Deck (Plan › Pick a project) by Daily, Weekly or Monthly, topic or domain, and This phase,
   Earlier or Everything; Library › Projects with search and filters for kind, difficulty, topic or domain, track,
-  phase, level and hours; Activity › Projects for what is done per tier and domain and each topic's solve rate.
+  phase, level and hours; Stats › Projects for what is done per tier and domain and each topic's solve rate.
 
 `npm run map:catalogue` fills each item's `refs` (courses) and `covers` (roadmap nodes) from the reviewed keyword
 table in `scripts/lib/catalogue-mapping.ts`; CI checks the files match it.
@@ -532,7 +541,7 @@ README that Atlas writes into it explains each file.
 **The token** stays in this browser's IndexedDB. It is never exported, never written to either repository, and
 sent only to `api.github.com`. Anyone who can use the device could read it, which is why it should reach only
 this one repository and expire after 90 days. The calendar switch in Settings > Sync uses the same token to draw
-your real GitHub contribution calendar under the Atlas heatmap on Activity.
+your real GitHub contribution calendar under the Atlas heatmap on Stats.
 
 **Checking it against the real GitHub.** `npm run test:sync` runs one full cycle with two in-memory devices:
 connect, write, flush, a second device pulls, both edit the same day, merge. It works on a throwaway branch of a

@@ -48,12 +48,45 @@ export function useBlogPosts(): BlogPost[] | undefined {
   return useLiveQuery(() => db.blogPosts.toArray(), []);
 }
 
-/** "I posted it" (posted: true) and its Undo (posted: false). The record stays, so an undo reaches other devices. */
+/** The draft's fields (the redesign mockup's log): what Save draft and the fields' blur write. */
+export type BlogDraft = Pick<BlogPost, 'title' | 'learned' | 'stuck' | 'next' | 'photo' | 'publish'>;
+
+/** "I posted it" (posted: true) and its Undo (posted: false). The record stays, so an undo reaches other devices; the draft stays with it. */
 export async function setBlogPosted(date: string, posted: boolean, extra: { editorLinkUsed?: boolean; auto?: boolean } = {}, database: AtlasDB = db): Promise<void> {
-  const record: BlogPost = { date, posted, at: new Date().toISOString() };
-  if (extra.editorLinkUsed) record.editorLinkUsed = true;
-  if (extra.auto) record.auto = true;
-  await database.blogPosts.put(record);
+  await database.transaction('rw', database.blogPosts, async () => {
+    const before = await database.blogPosts.get(date);
+    const record: BlogPost = { ...draftOf(before), date, posted, at: new Date().toISOString() };
+    if (extra.editorLinkUsed) record.editorLinkUsed = true;
+    if (extra.auto) record.auto = true;
+    await database.blogPosts.put(record);
+  });
+}
+
+function draftOf(post: BlogPost | undefined): BlogDraft {
+  const out: BlogDraft = {};
+  if (!post) return out;
+  for (const key of ['title', 'learned', 'stuck', 'next', 'photo', 'publish'] as const) {
+    const value = post[key];
+    if (value !== undefined && value !== '') (out as Record<string, unknown>)[key] = value;
+  }
+  return out;
+}
+
+/** Saves the day's draft, keeping whether it was posted; an empty field is dropped from the record. */
+export async function saveBlogDraft(date: string, change: (draft: BlogDraft) => BlogDraft, database: AtlasDB = db): Promise<void> {
+  await database.transaction('rw', database.blogPosts, async () => {
+    const before = await database.blogPosts.get(date);
+    const next = change(draftOf(before));
+    const record: BlogPost = { date, posted: before?.posted ?? false, at: before?.at ?? new Date().toISOString() };
+    if (before?.editorLinkUsed) record.editorLinkUsed = true;
+    if (before?.auto) record.auto = true;
+    for (const key of ['title', 'learned', 'stuck', 'next', 'photo'] as const) {
+      const value = next[key];
+      if (value !== undefined && value !== '') record[key] = value;
+    }
+    if (next.publish !== undefined) record.publish = next.publish;
+    await database.blogPosts.put(record);
+  });
 }
 
 /**

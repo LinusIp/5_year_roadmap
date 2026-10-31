@@ -1,31 +1,50 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAtlas } from '../hooks/useAtlas.ts';
-import { daysBetween, monthName } from '../lib/dates.ts';
-import type { BlockId, Phase } from '../seed/schema.ts';
-import { Button } from '../ui/Button.tsx';
-import { BlockTile } from '../ui/glyphs.tsx';
-import { FadeStrip } from '../ui/FadeStrip.tsx';
-import { formatWindow } from '../lib/clock-plan.ts';
-import { scheduleSummary } from './plan/Timeline.tsx';
-import { Icon } from '../ui/Icon.tsx';
+import { monthName, today } from '../lib/dates.ts';
+import type { Phase } from '../seed/schema.ts';
 import { ArtPanel } from '../ui/ArtPanel.tsx';
+import { BackKnob } from '../ui/Header.tsx';
 import { ScenePanel } from '../ui/ScenePanel.tsx';
 import { useCurrentScene } from '../hooks/useScenes.ts';
-import { today } from '../lib/dates.ts';
+import { buildModel } from './plan/model.ts';
 
-const STAGE_NAME: Record<number, string> = { 1: 'Software engineering mastery', 2: 'Electrical + mechanical' };
-const MAP_LANES: BlockId[] = ['A', 'B', 'C', 'E'];
+const STAGE_NAME: Record<number, string> = { 1: 'Software', 2: 'Engineering' };
 
 const short = (date: string): string => monthName(Number(date.slice(5, 7)) - 1, true) + ' ' + date.slice(0, 4);
-const day = (date: string, withYear: boolean): string => Number(date.slice(8, 10)) + ' ' + monthName(Number(date.slice(5, 7)) - 1, true) + (withYear ? ' ' + date.slice(0, 4) : '');
-const long = (date: string): string => Number(date.slice(8, 10)) + ' ' + monthName(Number(date.slice(5, 7)) - 1) + ' ' + date.slice(0, 4);
-const months = (phase: Phase): number => (daysBetween(phase.start, phase.end) + 1) / 30.44;
 
+/** The route's width: the mockup's phone canvas, centred on a wider screen. */
+const WIDTH = 390;
+/** Where each pin sits, left to right, repeating; the card goes on the other side. */
+const PIN_X = [165, 240, 140, 226, 170, 230, 150];
+const TOP = 261;
+const STEP = 180;
+
+interface Stop {
+  phase: Phase;
+  x: number;
+  y: number;
+  /** The card's left edge: 18 (left of the route) or past the pin (right of it). */
+  cardLeft: number;
+  lane: number;
+}
+
+/** A smooth route through the pins: one cubic curve between each pair, bowing to the side the route turns from. */
+function routePath(points: { x: number; y: number }[]): string {
+  if (points.length === 0) return '';
+  let d = 'M' + points[0]!.x + ' ' + points[0]!.y;
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1]!;
+    const b = points[i]!;
+    const dx = b.x > a.x ? -45 : 45;
+    d += ' C' + (a.x + dx) + ' ' + (a.y + 60) + ' ' + (b.x - dx) + ' ' + (b.y - 60) + ' ' + b.x + ' ' + b.y;
+  }
+  return d;
+}
 
 /**
- * The five-year map, as the mockup draws it: the two stages, a timeline with a dot per phase, and one card per
- * phase with what each lane does, what ships and which credentials it earns. It is the plan's one wide view;
- * on a phone it scrolls sideways.
+ * The five-year map, as the redesign mockup draws it: the day's scene full-bleed with a dashed route winding down it,
+ * a pin and a paper card per phase ("YEAR 1 · YOU ARE HERE", the title, what it covers), a divider where the second
+ * stage begins, and the finish at the end. One column, phone-wide, centred.
  */
 export function PhaseMap() {
   const atlas = useAtlas();
@@ -33,128 +52,99 @@ export function PhaseMap() {
     document.title = 'Five-year map · Atlas';
   }, []);
   const { scene } = useCurrentScene();
+  // The map opens at the current phase: its card in the middle of the screen, the route above and below it.
+  const hereRef = useRef<HTMLDivElement>(null);
+  const ready = atlas !== undefined;
+  useEffect(() => {
+    if (ready) hereRef.current?.scrollIntoView({ block: 'center' });
+  }, [ready]);
   if (!atlas) return <main id="main" className="min-h-dvh bg-bg" />;
 
-  const { seed, settings } = atlas;
+  const { seed } = atlas;
   const phases = seed.phases;
   const first = phases[0]!;
   const last = phases.at(-1)!;
-  // Each phase's column is its months' share of the width, never under 200 px, and the map is as wide as that
-  // needs (the padding and the gaps included), so the last card never runs past the edge.
-  const columns = phases.map((p) => 'minmax(200px, ' + Math.round(months(p) * 100) / 100 + 'fr)').join(' ');
-  const minWidth = Math.max(1200, phases.length * 200 + (phases.length - 1) * 16 + 112);
-  const stage1 = phases.filter((p) => p.stage === 1);
-  // The day as the schedule runs it: "10 h a day (06–12 and 18–22)", and a legend of the blocks at their times.
-  const schedule = scheduleSummary(settings, today());
-  const [, ...parts] = schedule.aside.split(' · ').reverse();
-  const daily = schedule.aside.split(' · ').at(-1)!;
-  const sessions = parts.reverse().join(' and ');
-  const themes = [...new Set(stage1.map((p) => p.theme).filter(Boolean))].join(' · ');
   const asOf = today();
+  const model = buildModel(atlas, asOf);
   const nowId = phases.find((p) => p.start <= asOf && asOf <= p.end)?.id;
+  const stops: Stop[] = phases.map((phase, i) => {
+    const x = PIN_X[i % PIN_X.length]!;
+    return { phase, x, y: TOP + 74 + i * STEP, cardLeft: x > WIDTH / 2 ? 18 : x + 36, lane: (i + 1) % 5 };
+  });
+  const start = { x: 187, y: TOP };
+  const finishY = TOP + 74 + phases.length * STEP;
+  const height = finishY + 120;
+  const points = [start, ...stops.map((s) => ({ x: s.x, y: s.y })), { x: 195, y: finishY }];
+  const stageTwo = stops.find((s) => s.phase.stage === 2);
+  const dividerY = stageTwo ? stageTwo.y - STEP / 2 - 10 : null;
 
   return (
-    <main id="main" tabIndex={-1} className="min-h-dvh bg-bg outline-none">
-      {/* Wider than a phone: it opens with the current phase in view and fades at a hidden edge. */}
-      <FadeStrip open="current" label="Five-year map, scroll for the other phases">
-        <div className="relative isolate flex flex-col gap-7 px-14 py-12" style={{ minWidth }}>
-          {/* The journey's river (ATLAS-ART): one long illustration behind the stage bands and the phases, decoration only. */}
-          {/* The day's scene (ATLAS-DAILY-SCENES) as a banner behind the title, fading into the paper above the route: a
-              full-bleed picture under six phases of text read as a muddy wash on a phone, so the map below is plain. */}
-          {scene ? (
-            <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[260px]" aria-hidden="true">
-              <ScenePanel slot="map" decorative bare focal="50% 40%" className="h-full w-full" sizes="1200px" />
-              <div className="art-fade-bottom absolute inset-x-0 bottom-0 h-[60%]" />
-            </div>
-          ) : (
-            <div className="pointer-events-none absolute inset-y-6 left-1/2 -z-10 w-56 -translate-x-1/2 opacity-40" aria-hidden="true">
-              <ArtPanel slot="map-river-long" aspect="1 / 3" decorative className="w-full !border-0 !shadow-none" />
-            </div>
-          )}
-          <div className="flex items-start justify-between gap-6">
-            <div className={'flex flex-col gap-1.5' + (scene ? ' scene-chip -mx-3.5 -my-2 px-3.5 py-2' : '')}>
-              <h1 className="text-hero font-semibold">Five years, six phases</h1>
-              <p className="text-meta text-ink2">
-                {long(first.start)} → {long(last.end)} · {daily} a day{sessions ? ' (' + sessions + ')' : ''} · Stage 1 software{themes ? ': ' + themes : ''} · Stage 2 electrical and mechanical
-              </p>
-            </div>
-            <Button variant="quiet" to="/plan">
-              Close
-            </Button>
-          </div>
-          <ul className={'-mt-2 flex flex-wrap gap-x-6 gap-y-3 text-meta text-ink2' + (scene ? ' scene-chip w-fit px-4 py-2.5' : '')} aria-label="Lanes">
-            {schedule.windows.map((w) => (
-              <li key={w.id} className="flex items-center gap-2.5 whitespace-nowrap">
-                <BlockTile block={w.id} size={36} />
-                {formatWindow(w.start, w.minutes) + ' ' + (settings.core.blocks.find((b) => b.id === w.id)?.name ?? w.id)}
-              </li>
-            ))}
-          </ul>
-
-          <div className="grid gap-4" style={{ gridTemplateColumns: columns }}>
-            <div className="knob flex h-9 items-center rounded-pill !bg-blue-soft px-4 text-label text-blue-deep" style={{ gridColumn: '1 / ' + (stage1.length + 1) }}>
-              Stage 1 · {STAGE_NAME[1]} · {short(stage1[0]!.start)} → {short(stage1.at(-1)!.end)}
-            </div>
-            {phases.length > stage1.length && (
-              <div className="knob flex h-9 items-center rounded-pill !bg-ice-soft px-4 text-label text-ice-deep" style={{ gridColumn: stage1.length + 1 + ' / ' + (phases.length + 1) }}>
-                Stage 2 · {STAGE_NAME[2]} · {short(phases[stage1.length]!.start)} → {short(last.end)}
-              </div>
-            )}
-          </div>
-
-          <div className="relative h-14" aria-hidden="true">
-            <div className="well absolute inset-x-0 top-[25px] h-1.5 rounded-pill" />
-            <div className="absolute inset-x-0 top-0 grid gap-4" style={{ gridTemplateColumns: columns }}>
-              {phases.map((p) => (
-                <div key={p.id} className="flex flex-col items-start gap-1.5">
-                  <span className="h-4 text-label text-ink2">{short(p.start)}</span>
-                  <span className={'size-4 rounded-pill ' + (p.id === nowId ? 'fill-ice' : 'fill-blue')} />
-                  <span className="text-label text-ink2">{Math.round(months(p))} months</span>
-                </div>
-              ))}
-            </div>
-            <span className="absolute right-0 top-0 text-label text-ink2">{short(last.end)}</span>
-          </div>
-
-          <ol className="grid gap-4" style={{ gridTemplateColumns: columns }}>
-            {phases.map((p) => {
-              const sameYear = p.start.slice(0, 4) === p.end.slice(0, 4);
-              return (
-                <li key={p.id} className="tile flex flex-col gap-4 p-[18px]" aria-current={p.id === nowId ? 'step' : undefined}>
-                  <div className="flex flex-col gap-1">
-                    <p className="text-meta text-ink2">
-                      {day(p.start, !sameYear)} → {day(p.end, true)}
-                    </p>
-                    {p.id === nowId && <span className="w-fit rounded-pill bg-ice-soft px-2.5 py-0.5 text-label text-ice-deep">Now</span>}
-                    <h2 className="text-lead font-semibold leading-[1.3]">{p.title}</h2>
-                  </div>
-                  <ul className="flex flex-col gap-4 text-meta">
-                    {MAP_LANES.map((lane) => (
-                      <li key={lane} className="flex gap-3">
-                        <BlockTile block={lane} size={36} />
-                        <span className="pt-1.5">
-                          <span className="sr-only">Block {lane}: </span>
-                          {p.map?.[lane as 'A' | 'B' | 'C' | 'E'] ?? (p.focus as Record<string, string>)[lane]}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  {p.map && (
-                    <div className="knob mt-auto flex flex-col gap-1.5 rounded-[18px] p-3.5">
-                      <p className="flex items-center gap-1.5 text-label text-ice-deep">
-                        <Icon name="hammer" size={16} />
-                        Ships
-                      </p>
-                      <p className="text-meta font-medium leading-[1.4]">{p.map.ships}</p>
-                      <p className="text-small text-ink2">{p.map.credentials}</p>
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
+    <main id="main" tabIndex={-1} className="relative min-h-dvh overflow-hidden bg-bg outline-none" style={{ minHeight: height }}>
+      {/* The scene, full-bleed, under a light wash; without one, the journey's river (ATLAS-ART) as decoration. */}
+      {scene ? (
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <ScenePanel slot="map" decorative bare focal="50% 40%" className="h-full w-full" sizes="640px" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,.15),rgba(255,255,255,0)_40%,rgba(0,0,0,.08))]" />
         </div>
-      </FadeStrip>
+      ) : (
+        <div className="pointer-events-none absolute inset-y-6 left-1/2 -z-10 w-56 -translate-x-1/2 opacity-40" aria-hidden="true">
+          <ArtPanel slot="map-river-long" aspect="1 / 3" decorative className="w-full !border-0 !shadow-none" />
+        </div>
+      )}
+      <div className="relative mx-auto" style={{ width: WIDTH, height }}>
+        <svg viewBox={'0 0 ' + WIDTH + ' ' + height} width={WIDTH} height={height} className="absolute inset-0" aria-hidden="true">
+          <path d={routePath(points)} fill="none" stroke="rgba(255,255,255,.9)" strokeWidth="10" strokeLinecap="round" />
+          <path d={routePath(points)} fill="none" stroke="var(--l0)" strokeWidth="4" strokeLinecap="round" strokeDasharray="2 12" />
+        </svg>
+
+        <header className="absolute left-4 right-4 top-10 flex items-center gap-3">
+          <span className="[&>a]:shadow-[3px_3px_10px_rgba(0,0,0,.18)]">
+            <BackKnob to="/plan" label="Back to Plan" />
+          </span>
+          <span className="flex min-w-0 flex-col rounded-[16px] bg-bg px-3.5 py-1.5 shadow-[3px_3px_10px_rgba(0,0,0,.14)]">
+            <h1 className="text-[20px] font-black leading-tight">Five-year map</h1>
+            <p className="truncate text-small font-medium text-ink2">{short(first.start) + ' → ' + short(last.end) + (scene ? ' · today’s scene: ' + scene.name : '')}</p>
+          </span>
+        </header>
+
+        <span className="absolute size-[18px] rounded-pill shadow-[0_0_0_4px_rgba(255,255,255,.92)]" style={{ left: start.x, top: start.y, background: 'var(--l4)' }} aria-hidden="true" />
+        <div className="absolute flex max-w-[196px] flex-col gap-0.5 rounded-[18px] bg-bg px-3.5 py-2.5 shadow-[4px_4px_14px_rgba(0,0,0,.18)]" style={{ left: 18, top: start.y - 47 }}>
+          <span className="text-small font-black tracking-[.04em] text-[var(--x4)]">START</span>
+          <span className="text-chip font-semibold leading-tight">{short(first.start)}</span>
+        </div>
+
+        {dividerY !== null && stageTwo && (
+          <div className="absolute left-[18px] right-[18px] flex items-center gap-2.5" style={{ top: dividerY }} aria-hidden="true">
+            <span className="h-0.5 flex-1 bg-[rgba(255,255,255,.8)]" />
+            <span className="rounded-pill bg-bg px-2.5 py-1 text-small font-black uppercase tracking-[.04em]">{'Stage 2 · ' + STAGE_NAME[2]}</span>
+            <span className="h-0.5 flex-1 bg-[rgba(255,255,255,.8)]" />
+          </div>
+        )}
+
+        <ol>
+          {stops.map((s) => {
+            const here = s.phase.id === nowId;
+            const m = model.find((x) => x.phase.id === s.phase.id);
+            const topics = s.phase.topics ?? s.phase.theme ?? '';
+            const size = here ? 24 : 18;
+            return (
+              <li key={s.phase.id} aria-current={here ? 'step' : undefined}>
+                <span className="absolute rounded-pill shadow-[0_0_0_4px_rgba(255,255,255,.92)]" style={{ left: s.x - (size - 18) / 2, top: s.y - (size - 18) / 2, width: size, height: size, background: 'var(--l' + s.lane + ')' }} aria-hidden="true" />
+                <div ref={here ? hereRef : undefined} className="absolute flex max-w-[196px] flex-col gap-0.5 rounded-[18px] bg-bg px-3.5 py-2.5 shadow-[4px_4px_14px_rgba(0,0,0,.18)]" style={{ left: s.cardLeft, top: s.y - 35 }}>
+                  <span className={'text-small font-black uppercase tracking-[.04em] text-[var(--x' + s.lane + ')]'}>{'Year ' + s.phase.year + (here ? ' · you are here' : '')}</span>
+                  <h2 className="text-chip font-semibold leading-tight">{s.phase.title}</h2>
+                  <span className="text-small font-medium text-ink2">{topics + (here && m ? (topics ? ' · ' : '') + Math.round(m.progress.fraction * 100) + '%' : '')}</span>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+
+        <div className="absolute flex max-w-[180px] flex-col items-center gap-0.5 rounded-[18px] bg-bg px-3.5 py-2.5 text-center shadow-[4px_4px_14px_rgba(0,0,0,.18)]" style={{ left: 105, top: finishY - 5 }}>
+          <span className="text-small font-black tracking-[.04em] text-[var(--x0)]">THE FINISH</span>
+          <span className="text-chip font-semibold leading-tight">{short(last.end)}</span>
+        </div>
+      </div>
     </main>
   );
 }

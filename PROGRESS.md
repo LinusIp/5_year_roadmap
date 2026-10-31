@@ -1281,3 +1281,23 @@ Verified on this machine (Linux, Chromium 140):
 - Today: the Focus knob in the Start/Open row, the header's height floor, the wordmark hidden under 380 px; Plan's
   lane verdicts wrap.
 
+## Pull request #42: the scene shows on Today
+
+- Today's header row on a paper chip over the picture, the hours on one line, the panel kept at 2:1 by the fold rule.
+
+## Pull request #43: the redesign mockup
+
+- `docs/mockups/redesign/` (the twelve boards, unpacked). The system: scene-name tokens with clay fallbacks, the dark
+  set and `--dak`, Nunito 900, flat lane fills on buttons, progress and the segmented control, tinted icon tiles and
+  chips, the floating tab bar (`src/index.css`, `src/ui/Screen.tsx`, `Header.tsx`, `Button.tsx`, `Chips.tsx`,
+  `SegmentedControl.tsx`, `ProgressLine.tsx`, `glyphs.tsx`).
+- Today: the header row, the 250 px scene with the greeting, the ring tile, Sleep and Today's log tiles, the week
+  strip, the check-in card, the Now card, the NEXT list. Plan: the phase on the scene, lane rows with verdict pills, the
+  re-plan preview. The five-year map as the vertical route. Calendar: the week strip, the day line, the grid by state.
+  Library: quick-filter chips, picks with Swap, paths with Now, Browse all. The resource sheet's head. Stats (Activity
+  renamed): this week, the streak, 22 weeks, hours by lane; the charts page is Charts. Focus as the dark screen.
+  Internships' countdown and gate. Sleep with "How rested" and the insight. The daily log with its fields and Publish.
+- Records: `rested` on a night, the draft fields and `publish` on a blog record (`src/db/types.ts`, `sleep.ts`, `blog.ts`).
+- Tests: the e2e specs that pinned the old layout follow the boards; `tests/unit/sleep.test.ts` and `blog.test.ts` for the
+  records. Screenshots redrawn on CI. Before and after pictures: `docs/before-after/redesign/`.
+

@@ -2465,3 +2465,105 @@ meta), so the fade under them is low; the plain tile and the illustrations' pane
 lines. A taller panel was tried and refused by the fold rule: at 5:3 "Later today" landed 29 px under the tab bar
 at 390 × 844, and the fold check allows about 6 px over the 2:1 panel, so the panel stays 2:1 (with the 190 px floor
 under 380 px for the preview knobs) and the picture's clear band roughly doubles instead.
+
+## The redesign mockup: twelve boards drawn into the app (pull request #43)
+
+The user supplied "Atlas — Redesign mockup", one bundled page of twelve 390 px boards (Today, Plan, Five-year map,
+Calendar, Daily scenes, Library, Resource sheet, Stats, Focus, Internships, Sleep, Daily log), and asked that the UI
+follow it exactly. The boards are kept, unpacked, in `docs/mockups/redesign/`; each screen was redrawn to its board.
+Where a board and the app's behaviour pulled apart, the board won on everything visible, and the behaviour the board
+has no room for stayed in the board's own language. The departures, each with its reason:
+
+**The system.** The boards style with the scene's names (`--paper`, `--sd`, `--l0…4`, `--t0…4`, `--x0…4`, `--d0…4`, the
+dark set), so those now have clay fallbacks and every component reads them: a block's tile is its lane's tint with
+its text (no knob shadow), a progress pill is the lane's flat colour, the primary button is a flat fill in a lane's
+colour with white text (the gradient went), a secondary one the lane's tint, chips are tinted and the pressed one
+filled, the segmented control's chosen segment is a lane fill. Nunito 900 joined the weights for titles and numbers.
+The tab bar floats 12 px from the sides and 16 px above the bottom, with the active tab on the first lane's tint. The
+header row sits 44 px down. The boards draw their own line icons; the app keeps lucide's equivalents (the same
+glyphs: clock, lines, calendar, library, bars, headphones), as CLAY-STYLE asks for one icon set.
+
+**Today.** The board's header has one knob (Daily scenes); Settings and Change today have no other home, so their
+knobs stay beside it, and the theme switch lives in Settings › Appearance alone. The hours moved off the picture into
+the ring tile; the small tiles are Sleep and Today's log (Blocks today went: the ring and the week strip say the
+same). The board shows one NEXT row; the app keeps the rest of the day's blocks as rows of the same tile (a tap still
+makes a block Now, which the tests and the day depend on), with "Earlier · not finished" and "Done today" under it,
+since the board has no other place for a block that slipped. The check-in card ("Math and physics: how did it go?")
+is new: the last block whose window passed with nothing logged, today's or last night's, logs its planned hours, half
+of them, or is marked skipped (kept on the device), each with Undo. The fold rule becomes the board's: the week strip
+ends above the tab bar at 390 × 844; the type scale check takes the board's sizes (10 to 40 px).
+
+**Plan.** The phase sits on the scene tile with its percentage, end and days left; the lanes carry their window, the
+item and a verdict pill (on track in the fifth lane's tint, behind in the first, "Plan too full" in the third, nothing
+to say yet neutral; a verdict clamped at twelve weeks reads "Far behind"); a lane planned past the days left says by
+how much. The re-plan preview tile (the board's) appears when a lane is over-planned, with Review changes (the
+re-plan sheet, whose diff shows first) and Not now (for the session). The map link moved to the header.
+
+**Five-year map.** The wide six-column map is gone: the board's vertical route over the full-bleed scene, a pin and a
+paper card per phase with its year, title and topics ("YOU ARE HERE" with the percentage on the current one), the
+stage divider, START and THE FINISH. The route is one canvas 390 px wide, centred on wider screens; without a scene
+the river illustration stays behind it.
+
+**Calendar.** The header carries the month and ISO week and Add time, the week strip the seven days, the day line the
+hours against the plan with the Done and Planned legend; the grid has a line and a label every two hours and colours
+each block by its state: done in the lane's fill, under way with a ring, partly done on the tint with a strip, planned
+on the tint with a dashed edge, busy events dashed and empty. The Month and Week views stay behind the segmented
+control, with the previous and next knobs beside it (the board has only the day).
+
+**Library.** The quick filters are the chips under the search; the in-progress cards, "This week's picks" (the next
+steps of the paths, three at a time from a pool of twelve, Swap turning a row to the next three down), "Your paths"
+with a lane dot and Now on the path being worked, "N more paths" folding the later and off-plan ones and Research, and
+"Browse all" opening the shelves in place. The subway lines left the home (a path's own page keeps its dots).
+
+**Resource sheet.** It stays a sheet (it opens from Plan, Internships and Today as well as the Library), with the
+board's head inside it: the scene strip with the shelf's icon on a paper knob, the path line, the provider line,
+the tags, the progress and Open course beside Write log; "Why it's on your plan" is the summary; the chapters are the
+checklist. The status is the pill under the buttons, where it was.
+
+**Stats.** The Activity tab is named Stats (the route stays `/activity`); the charts page behind it is Charts. The top
+is the board's: this week on the scene with its hours against the plan and last week, the streak beside its picture
+with the next milestone and the freezes left, "Study time · 22 weeks" (a CSS grid of 10 px cells, the ramp from the
+shadow colour to the first lane's text, no cell is a tap target) and "Hours by lane · this phase". The year chips
+below open the whole year's heatmap as before (HEATMAP-FULL-YEAR), now behind a chip rather than the default.
+
+**Focus.** The board's dark screen: `Screen dark` sets `data-dark-screen` on the root, and index.css remaps every
+token on `body` (under the scene's inline tokens on `<html>`) to the scene's dark set: `--dbg` the ground, `--dsf`
+the tiles, `--dtx` and `--dtx2` the text, `--dac` the accent with `--dak` (near black) on it; without a scene the
+fixed dark clay stands in. Near black on the accent reads at 5:1 or better on every shipped scene (checked). The
+cover carries the YouTube badge, the length or LIVE, and the play knob; the timer pills and the chips take the accent.
+
+**Internships.** The countdown on the scene in the second lane's colour, the gate as a list with its progress, Open
+roadmap in the lane's fill, the fit pills (Strong in the second lane's tint, Medium the first, Stretch the third).
+
+**Sleep.** Last night on the scene, "Log a night" with Went to bed and Woke up, the new "How rested do you feel?"
+(Awful to Great, kept as `rested` 0 to 4 on the night), Save night; "Last 7 nights" with the nights that met the
+target in the lane's fill; the board's insight line, computed once three nights of each kind exist (the average
+study on days after nights at or over the target against the rest). The header carries the target and "bed by"; the
+Usual bedtime tile went (the median still seeds a new night).
+
+**Daily log.** The board writes the post in Atlas; the app had only the outline and a mark. The fields (title, what I
+learned, where I got stuck, tomorrow) are now the day's draft on the blog record (`blog/<date>.json`, synced), saved
+on blur and by Save draft. Publish composes the post (the fields under headings, then the day's facts), copies it,
+opens the blog's editor in a new tab and marks the day posted; with "Publish to my blog" off it only saves. Atlas
+still never writes to the blog. "Attach today's photo" keeps the photo's name on the record for the gallery (the
+file itself is added in the editor: the record is JSON and syncs as such).
+
+**Smaller calls made on the way.** The NEXT tile lists the blocks to come with the break and the second session's
+heading between them; the first session's heading (the tile opens inside it) and the blog row (now the Today's log
+tile) are not rows of it. A decorative scene panel hides its pictures from assistive tech, not the text laid over
+them (the "This week" tile and the picks' heading sit on one). The neutral pill's ground is the ink at nine percent
+over the surface (`color-mix`), since a scene's shadow colour is not always darker than its paper (snowtree's dark
+set failed axe on `--sd`). A rest day's line in Calendar reads "rest day · 0 m logged" rather than "0 m of 0 m". The
+resource sheet's provider line ends with how it is free, after the hours. The icon knobs of Today's header are tiles
+with a label and no text, which the "no empty tile" check now allows. The Now title and the picks' rows grew to the
+44 px target. The map opens with the current phase's card in the middle of the screen (the vertical route runs on
+above and below it; its test no longer asks for a horizontal strip). Focus's block pill reads "Block" while no block
+is running, since "Till the block ends" does not fit beside the four lengths on a 380 px screen; its name keeps the
+full wording, and "Till 12:00" shows as before when a block is under way. The later phases' lanes on Plan carry the
+phase's hours in the pill where the current phase has its verdict.
+
+**Tests.** The Later today heading is read by assistive tech only (the board has no label); the Slept tile became
+the Sleep tile; the fold check watches the week strip; the Stats tab's names changed; Calendar's day line reads
+"0 m of 10 h"; the Sleep screen's labels are the board's; the year heatmap's tests open `#/activity?year=2026`; the
+shelf tests open Browse all first. The screenshot baselines were redrawn on CI. Before and after pictures of the
+twelve screens are in `docs/before-after/redesign/`.

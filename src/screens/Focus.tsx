@@ -37,8 +37,8 @@ import { saveFocusPrefs as savePrefs } from './settings/shared.tsx';
 function Cover({ session, large = false }: { session: PlayerSession; large?: boolean }) {
   const [failed, setFailed] = useState<string | null>(null);
   const bad = !session.thumbnail || failed === session.thumbnail;
-  const cls = large ? 'absolute inset-0 h-full w-full object-cover' : 'h-10 w-14 shrink-0 rounded-[10px] object-cover';
-  if (bad) return <ScenePanel slot={large ? 'focus-cover' : 'focus-thumb'} thumb bare decorative className={large ? 'absolute inset-0' : 'h-10 w-14 shrink-0 rounded-[10px]'} />;
+  const cls = large ? 'absolute inset-0 h-full w-full object-cover' : 'h-12 w-[84px] shrink-0 rounded-[12px] object-cover';
+  if (bad) return <ScenePanel slot={large ? 'focus-cover' : 'focus-thumb'} thumb bare decorative className={large ? 'absolute inset-0' : 'h-12 w-[84px] shrink-0 rounded-[12px]'} />;
   return <img src={session.thumbnail} alt="" loading="lazy" decoding="async" className={cls} onError={() => setFailed(session.thumbnail)} />;
 }
 
@@ -139,25 +139,33 @@ export function Focus() {
     }
   };
 
-  const timerPills = TIMER_OPTIONS.map((option) => ({ option, label: timerLabel(option, endsAt, hm) }));
+  const timerPills = TIMER_OPTIONS.map((option) => ({ option, label: timerLabel(option, endsAt, hm), short: option === 'block' && !endsAt ? 'Block' : null }));
   const timeLeftText = player.timer && Number.isFinite(player.timer.endsAt) ? timeLeft(player.timer.endsAt, now) : null;
   const sub = blockDef ? blockShort(blockDef.name) + ' block' + (endsAt ? ' · ends ' + hm(endsAt) : '') : 'No block running';
 
-  return (
-    <Screen title="Focus">
-      <Header title="Focus" sub={sub} actions={timeLeftText ? <span className="rounded-pill bg-blue px-3 py-1.5 text-label font-semibold text-on-blue">{timeLeftText}</span> : undefined} />
+  // A starter session's length, for the badge on the cover and the rows: "LIVE", "2 h".
+  const lengthOf = (s: PlayerSession): string | null => (s.kind === 'live' ? 'LIVE' : (STARTER.find((x) => x.id === s.id)?.durationLabel ?? null));
+  const cover = current ?? listed[0] ?? null;
 
-      {/* Now playing: the embed goes over the anchor (src/ui/FocusPlayer.tsx); before any tap it holds the cover. */}
-      <section aria-labelledby="now-playing" className="tile mt-[18px] flex flex-col gap-3 p-3">
-        <div ref={anchor} className="relative aspect-video w-full overflow-hidden rounded-[18px] bg-[var(--lo)]" data-focus-anchor>
+  return (
+    // The mockup's Focus is the dark screen: the scene's dark set as the ground, the accent on what is on.
+    <Screen title="Focus" dark>
+      <Header title="Focus" sub={sub} actions={timeLeftText ? <span className="rounded-pill bg-[var(--dac)] px-3 py-1.5 text-label font-semibold text-[var(--dak)]">{timeLeftText}</span> : undefined} />
+
+      {/* Now playing: the embed goes over the anchor (src/ui/FocusPlayer.tsx); before any tap it holds the cover with
+          the YouTube badge, the length, and a play knob in the middle. */}
+      <section aria-labelledby="now-playing" className="tile mt-4 flex flex-col gap-3 p-3">
+        <div ref={anchor} className="relative aspect-video w-full overflow-hidden rounded-[18px] bg-[var(--dbg)]" data-focus-anchor>
           {!current && (
             <>
               <Cover session={listed[0] ?? { id: 'none', videoId: '', kind: 'video', title: '', channel: '', thumbnail: '', category: shown }} large />
-              <span className="scene-chip absolute left-2.5 top-2.5 flex items-center gap-1.5 px-2.5 py-1 text-small font-semibold">
+              <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_50%,rgba(0,0,0,.55))]" />
+              <span className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-pill bg-[rgba(0,0,0,.55)] px-2.5 py-1 text-small font-semibold text-[var(--dtx)]">
                 <Icon name="play" size={12} />
                 YouTube
               </span>
-              <button type="button" aria-label={listed[0] ? 'Play ' + listed[0].title : 'Pick a session'} onClick={() => listed[0] && start(listed[0])} className="scene-chip absolute left-1/2 top-1/2 grid size-16 -translate-x-1/2 -translate-y-1/2 place-items-center !rounded-pill text-ink">
+              {cover && lengthOf(cover) && <span className={'absolute bottom-2.5 right-2.5 rounded-[8px] px-2 py-0.5 text-small font-semibold text-[var(--dtx)] ' + (lengthOf(cover) === 'LIVE' ? 'bg-[var(--dac)] !text-[var(--dak)]' : 'bg-[rgba(0,0,0,.65)]')}>{lengthOf(cover)}</span>}
+              <button type="button" aria-label={listed[0] ? 'Play ' + listed[0].title : 'Pick a session'} onClick={() => listed[0] && start(listed[0])} className="absolute left-1/2 top-1/2 grid size-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-pill bg-[var(--dtx)] text-[var(--dak)] shadow-[0_6px_18px_rgba(0,0,0,.35)]">
                 <Icon name="play" size={26} />
               </button>
             </>
@@ -165,10 +173,10 @@ export function Focus() {
         </div>
         <div className="flex items-center gap-2 px-1">
           <div className="min-w-0 flex-1">
-            <h2 id="now-playing" className="line-clamp-2 text-body font-medium leading-tight">
+            <h2 id="now-playing" className="line-clamp-2 text-[17px] font-semibold leading-tight">
               {current ? current.title : (listed[0]?.title ?? 'Nothing playing')}
             </h2>
-            <p className="truncate text-meta text-ink2">{current ? current.channel + ' · YouTube' : listed[0] ? listed[0].channel + ' · tap to play' : 'Pick a category'}</p>
+            <p className="truncate text-label text-ink2">{current ? current.channel + ' · YouTube' : listed[0] ? listed[0].channel + ' · tap to play' : 'Pick a category'}</p>
           </div>
           {current && (
             <span className="-mr-1 flex shrink-0">
@@ -177,30 +185,30 @@ export function Focus() {
             </span>
           )}
         </div>
-        <div role="group" aria-label="Session timer" className="well flex gap-1 rounded-pill p-1">
+        {/* The timer (the mockup's .tm pills): the accent on the one chosen. */}
+        <div role="group" aria-label="Session timer" className="flex gap-1 rounded-pill bg-[var(--dbg)] p-[5px]">
           {timerPills.map((p) => (
             <button
               key={p.option}
               type="button"
               aria-pressed={timerOption === p.option}
+              aria-label={p.short ? p.label : undefined}
               onClick={() => setTimer(p.option, endsAt)}
-              className={'min-h-11 flex-1 whitespace-nowrap rounded-pill px-1 text-small font-semibold ' + (timerOption === p.option ? 'knob text-blue-deep' : 'text-ink2')}
+              className={'min-h-11 min-w-11 flex-1 whitespace-nowrap rounded-pill px-1 text-meta font-semibold ' + (timerOption === p.option ? 'bg-[var(--dac)] text-[var(--dak)]' : 'text-ink2')}
             >
-              {p.label}
+              {p.short ?? p.label}
             </button>
           ))}
         </div>
       </section>
 
-      {/* The categories over the day's scene: a calm panel, the chips on the paper below it. */}
-      <ScenePanel slot="focus" aspect="21 / 9" focal="50% 60%" decorative className="mt-[18px]" bottom={<p className="text-meta font-semibold">{categoryLabel(shown) + (mix && blockDef ? ' · ' + blockShort(blockDef.name) + "'s mix" : '')}</p>} />
-      <div className="mt-2">
+      <div className="mt-4">
         <Chips label="Category" items={FOCUS_CATEGORIES.map((c) => ({ key: c.key, label: c.label, pressed: shown === c.key, onClick: () => setCategory(c.key) }))} />
       </div>
 
-      <section aria-labelledby="sessions" className="tile mt-2 px-4 py-1">
-        <h2 id="sessions" className="section-label pt-2.5">
-          {shown === 'brown' ? 'Brown noise is an Atlas sound' : categoryLabel(shown)}
+      <section aria-labelledby="sessions" className="tile mt-3 px-4 py-1">
+        <h2 id="sessions" className="section-label pt-2.5 uppercase">
+          {shown === 'brown' ? 'Brown noise is an Atlas sound' : categoryLabel(shown) + (mix === shown && blockDef ? ' · ' + blockShort(blockDef.name) + "'s mix" : '')}
         </h2>
         {shown === 'brown' ? (
           <p className="pb-3 text-meta text-ink2">Generated below, so it plays offline and with the screen locked. No YouTube needed.</p>
@@ -214,8 +222,8 @@ export function Focus() {
                   key={s.id}
                   icon={<Cover session={s} />}
                   title={s.title}
-                  meta={s.channel + (s.kind === 'live' ? ' · LIVE' : STARTER.find((x) => x.id === s.id)?.durationLabel ? ' · ' + STARTER.find((x) => x.id === s.id)!.durationLabel : '')}
-                  trailing={current?.id === s.id ? <span className="rounded-pill bg-blue px-2 py-0.5 text-small font-semibold text-on-blue">ON</span> : undefined}
+                  meta={s.channel + (lengthOf(s) ? ' · ' + lengthOf(s) : '')}
+                  trailing={current?.id === s.id ? <span className="rounded-pill bg-[var(--dac)] px-2 py-0.5 text-[11px] font-black text-[var(--dak)]">ON</span> : undefined}
                   action={
                     isUser && current?.id !== s.id ? (
                       <span className="-mr-2 flex shrink-0">
@@ -250,9 +258,9 @@ export function Focus() {
       </section>
 
       {/* Atlas sounds: generated, so they play offline and with the screen locked; one at a time, under a video if one plays. */}
-      <section aria-labelledby="atlas-sounds" className="tile mt-[18px] px-4 pb-3 pt-1">
+      <section aria-labelledby="atlas-sounds" className="tile mt-4 px-4 pb-3 pt-1">
         <div className="flex items-baseline justify-between pt-2.5">
-          <h2 id="atlas-sounds" className="section-label mb-0">
+          <h2 id="atlas-sounds" className="section-label mb-0 uppercase">
             Atlas sounds
           </h2>
           <span className="text-small text-ink2">plays with the screen locked</span>
@@ -265,11 +273,11 @@ export function Focus() {
         <div className="mt-2 flex flex-col gap-2">
           <label className="flex min-h-11 items-center gap-3 text-meta text-ink2">
             <span className="w-28 shrink-0">Volume</span>
-            <input type="range" min={0} max={100} value={player.volume} onChange={(e) => setVolume(Number(e.target.value))} className="h-11 w-full accent-[var(--blue-deep)]" aria-label="Volume" />
+            <input type="range" min={0} max={100} value={player.volume} onChange={(e) => setVolume(Number(e.target.value))} className="h-11 w-full accent-[var(--dac)]" aria-label="Volume" />
           </label>
           <label className="flex min-h-11 items-center gap-3 text-meta text-ink2">
             <span className="w-28 shrink-0">Layer under video</span>
-            <input type="range" min={0} max={100} value={player.layerVolume} onChange={(e) => setLayerVolume(Number(e.target.value))} className="h-11 w-full accent-[var(--blue-deep)]" aria-label="Volume of the Atlas sound under a video" />
+            <input type="range" min={0} max={100} value={player.layerVolume} onChange={(e) => setLayerVolume(Number(e.target.value))} className="h-11 w-full accent-[var(--dac)]" aria-label="Volume of the Atlas sound under a video" />
           </label>
         </div>
         <p className="mt-1 text-small text-ink2">Focus minutes count as nothing on their own: the block timer and the check-ins log study time.</p>

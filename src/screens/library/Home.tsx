@@ -4,6 +4,8 @@ import type { Atlas } from '../../hooks/useAtlas.ts';
 import { monthName } from '../../lib/dates.ts';
 import { checklistCounts, checklistMeta, isChecklist } from '../../lib/checklist.ts';
 import { buildPaths, inProgress, pathDots, pathExtras, PATHS, researchAreas, SHELVES, startsMuchLater, upNext } from '../../lib/library-home.ts';
+import { laneSlot } from '../../lib/scenes.ts';
+import { Button } from '../../ui/Button.tsx';
 import type { LibraryPath, ShelfKey } from '../../lib/library-home.ts';
 import { minutesForRef } from '../../lib/logs.ts';
 import type { Unit } from '../../seed/schema.ts';
@@ -102,8 +104,6 @@ export function LibraryHome({
   onOpen,
   onPath,
   onShelf,
-  quick,
-  onPick,
 }: {
   atlas: Atlas;
   units: Record<string, Unit[]> | undefined;
@@ -112,14 +112,13 @@ export function LibraryHome({
   onOpen: (refId: string) => void;
   onPath: (pathId: string) => void;
   onShelf: (shelf: ShelfKey) => void;
-  /** The quick filters (ATLAS-LIBRARY, src/lib/quick-filters.ts), each with its count: the rows under the shelves. */
-  quick: readonly { key: string; label: string; icon: IconName; tone: 'blue' | 'ice'; count: number }[];
-  onPick: (key: string) => void;
 }) {
   const { seed, states, logs } = atlas;
   const thisYear = today.slice(0, 4);
   const [menu, setMenu] = useState<string | null>(null);
   const [showLater, setShowLater] = useState(false);
+  const [browsing, setBrowsing] = useState(false);
+  const [swaps, setSwaps] = useState([0, 0, 0]);
   // Over thousands of resources (ATLAS-LIBRARY): worked out once per change to the curriculum or the user's progress,
   // not on every render (a keystroke in search renders the home until the results take over).
   const { paths, browsePaths, researchCount } = useMemo(() => {
@@ -137,27 +136,27 @@ export function LibraryHome({
   const laterPaths = paths.filter((p) => startsMuchLater(p, seed, today));
   const shownPaths = showLater ? paths : paths.filter((p) => !laterPaths.includes(p));
   const active = inProgress(seed.resources, states);
-  const next = upNext(paths, seed, 3, states);
   const pathOfRef = (refId: string): string | undefined => paths.find((p) => p.steps.some((s) => s.refId === refId))?.id;
   const iconFor = (refId: string): { icon: IconName; tone: 'blue' | 'ice' } => PATH_ICON[pathOfRef(refId) ?? ''] ?? { icon: 'course', tone: 'blue' };
+  // A path's lane (its colours): the block that teaches it on the plan, else its place in the list.
+  const laneOfPath = (pathId: string, index: number): number => {
+    const block = seed.plan.find((i) => paths.find((p) => p.id === pathId)?.steps.some((st) => st.refId === (i.resourceId ?? i.projectId)))?.block;
+    return block ? laneSlot(block) : index % 5;
+  };
+  const laneOf = (refId: string, index: number): number => {
+    const id = pathOfRef(refId);
+    return id ? laneOfPath(id, index) : index % 5;
+  };
   const menuResource = menu ? seed.resources.find((r) => r.id === menu) : undefined;
+
+  // This week's picks (the mockup's): the next steps of the paths, three at a time; Swap turns a row to the next
+  // candidate down the list. New on Monday: the pool follows the plan, so it changes as steps are ticked.
+  const pool = upNext(paths, seed, 12, states);
+  const picks = [0, 1, 2].map((i) => pool[(i + swaps[i]! * 3) % Math.max(1, pool.length)]).filter((p) => p !== undefined);
+  const nowPath = paths.find((p) => p.steps.some((st) => states.get(st.refId)?.status === 'active'));
 
   return (
     <>
-      {/* This week's picks (ATLAS-DAILY-SCENES): the scene's banner over what is in progress, with the next step named. */}
-      <ScenePanel
-        slot="library"
-        aspect="12 / 5"
-        focal="50% 30%"
-        alt=""
-        className="mt-[18px]"
-        bottom={
-          <div className="flex flex-col">
-            <p className="text-lead font-semibold">This week's picks</p>
-            <p className="text-meta text-ink2">{active.length === 0 ? 'Start the next step of a path' : plural(active.length, 'item') + ' in progress' + (active[0] ? ' · next: ' + (active[0].short ?? active[0].title) : '')}</p>
-          </div>
-        }
-      />
       <section aria-labelledby="in-progress" className="mt-[18px]">
         <h2 id="in-progress" className="section-label px-1">
           In progress
@@ -165,16 +164,17 @@ export function LibraryHome({
         {active.length === 0 ? (
           <p className="tile px-[18px] py-4 text-meta text-ink2">Nothing in progress. Start the next step of a path.</p>
         ) : (
-          <ul className="grid grid-cols-2 gap-4">
-            {active.map((r) => {
+          <ul className="grid grid-cols-2 gap-3.5">
+            {active.map((r, i) => {
               const state = states.get(r.id);
               const { meta, fraction } = progressFor(r.id, units, state?.unitsDone ?? [], logs.reduce((sum, l) => sum + minutesForRef(l, r.id), 0), r.estHours);
-              const { icon, tone } = iconFor(r.id);
+              const { icon } = iconFor(r.id);
+              const lane = laneOf(r.id, i);
               const title = r.short ?? r.title;
               return (
-                <li key={r.id} className="tile relative flex min-h-[168px] flex-col gap-2 p-4">
+                <li key={r.id} className="tile relative flex min-h-[156px] flex-col gap-2 p-3.5">
                   <span className="flex items-start justify-between">
-                    <IconTile icon={icon} tone={tone} />
+                    <IconTile icon={icon} lane={lane} />
                     <button type="button" aria-label={'More for ' + title} aria-haspopup="dialog" onClick={() => setMenu(r.id)} className="relative z-10 -mr-2 -mt-2 grid size-11 place-items-center rounded-pill text-ink2">
                       <Icon name="more" size={20} />
                     </button>
@@ -190,10 +190,9 @@ export function LibraryHome({
                     className="line-clamp-2 min-h-11 text-left text-body font-medium leading-tight after:absolute after:inset-0 after:content-['']"
                   >
                     {title}
-                    <Icon name="chevronRight" size={16} className="ml-0.5 inline-block align-[-2px] text-ink2" />
                   </button>
-                  <span className="mt-auto text-meta text-ink2">{meta}</span>
-                  <ProgressLine value={fraction} label={title + ' progress'} />
+                  <span className="mt-auto text-label text-ink2">{meta}</span>
+                  <ProgressLine value={fraction} label={title + ' progress'} lane={lane} size={10} />
                 </li>
               );
             })}
@@ -201,116 +200,118 @@ export function LibraryHome({
         )}
       </section>
 
-      <section aria-labelledby="your-paths" className="tile mt-[18px] px-4 py-1">
-        <h2 id="your-paths" className="section-label pt-2.5">
+      {/* This week's picks (the mockup's): the scene over the title, then three next steps with Swap. */}
+      <section aria-labelledby="picks" className="tile mt-[18px] overflow-hidden !p-0">
+        <ScenePanel
+          slot="library"
+          focal="50% 30%"
+          decorative
+          bare
+          className="h-[150px] rounded-t-[24px]"
+          fallback={<div className="h-4" />}
+          bottom={
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 id="picks" className="text-[19px] font-black">
+                This week&apos;s picks
+              </h2>
+              <span className="text-small text-ink2">new on Monday</span>
+            </div>
+          }
+        />
+        <ul className="px-[18px] pb-1.5">
+          {picks.length === 0 && <li className="py-4 text-meta text-ink2">Every step of every path is done.</li>}
+          {picks.map((u, i) => {
+            const type = u.step.type === 'project' ? 'Project' : u.step.type.charAt(0).toUpperCase() + u.step.type.slice(1);
+            const lane = laneOfPath(u.path.id, i);
+            return (
+              <li key={u.step.refId} className="flex min-h-[60px] items-center gap-3 border-t-[1.5px] border-dashed border-[var(--sd)] py-2 first:border-t-0">
+                <IconTile icon="star" lane={lane} />
+                <button type="button" onClick={() => onOpen(u.step.refId)} className="flex min-h-11 min-w-0 flex-1 flex-col justify-center gap-0.5 text-left">
+                  <span className="truncate text-chip font-medium leading-tight">{u.step.title}</span>
+                  <span className="truncate text-label text-ink2">{u.path.name + ' · ' + type + (u.after ? ' · after ' + u.after : ' · ' + Math.round(u.step.hours) + ' h')}</span>
+                </button>
+                <Button variant="ice" size="sm" name={'Swap pick: ' + u.step.title} onClick={() => setSwaps((s) => s.map((n, k) => (k === i ? n + 1 : n)))}>
+                  Swap
+                </Button>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <section aria-labelledby="your-paths" className="tile mt-[18px] px-[18px] py-2">
+        <h2 id="your-paths" className="section-label pb-0.5 pt-2">
           Your paths
         </h2>
         <ul className="rows">
-          {shownPaths.map((path) => {
-            const { icon, tone } = PATH_ICON[path.id] ?? { icon: 'course', tone: 'blue' };
+          {shownPaths.map((path, i) => {
             const nextStep = path.current >= 0 ? path.steps[path.current] : undefined;
             const startsLater = path.done === 0 && nextStep ? seed.phases.find((p) => p.id === nextStep.phaseId)?.start : undefined;
             const later = startsLater && startsLater > today ? 'From ' + monthOf(startsLater, thisYear) : null;
+            const lane = laneOfPath(path.id, i);
+            const isNow = nowPath?.id === path.id;
             return (
               <li key={path.id}>
-                <button type="button" onClick={() => onPath(path.id)} className="flex w-full flex-col gap-2.5 py-3 text-left">
-                  <span className="flex w-full items-center gap-3">
-                    <IconTile icon={icon} tone={tone} />
-                    <span className="min-w-0 flex-1 text-body font-medium">{path.name}</span>
-                    <span className="shrink-0 text-meta text-ink2">{plural(path.steps.length, 'step')}</span>
-                    <Icon name="chevronRight" size={18} className="text-ink2" />
-                  </span>
-                  <span className="block pl-[52px] pr-1">
-                    <SubwayLine path={path} />
-                  </span>
-                  <span className="flex justify-between gap-3 pl-[52px] text-meta text-ink2">
-                    <span className="shrink-0">{path.done > 0 ? path.done + ' done' : (later ?? 'Not started')}</span>
-                    <span className="min-w-0 truncate text-right">
-                      {nextStep ? (
-                        <>
-                          Next: <span className="font-semibold text-ink">{nextStep.title}</span>
-                        </>
-                      ) : (
-                        'Every step done'
-                      )}
+                <button type="button" onClick={() => onPath(path.id)} className="flex min-h-[60px] w-full items-center gap-3 py-2 text-left">
+                  <span aria-hidden="true" className="size-2.5 shrink-0 rounded-pill" style={{ background: 'var(--l' + lane + ')' }} />
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="text-chip font-medium leading-tight">{path.name}</span>
+                    <span className="truncate text-label text-ink2">
+                      {plural(path.steps.length, 'step') + (path.done > 0 ? ' · ' + path.done + ' done' : later ? ' · ' + later.toLowerCase() : '') + (nextStep ? ' · next: ' + nextStep.title : ' · every step done')}
                     </span>
                   </span>
+                  {isNow ? <span className={'lane-fill lane-' + lane + ' rounded-pill px-2.5 py-[3px] text-small font-black text-[var(--on-lane)]'}>Now</span> : <Icon name="chevronRight" size={16} className="text-[var(--x0)]" />}
                 </button>
               </li>
             );
           })}
-          {laterPaths.length > 0 && !showLater && (
-            <Row title="Later in the plan" meta={laterPaths.map((p) => p.name).join(' · ')} chevron height={44} onClick={() => setShowLater(true)} />
-          )}
-          {browsePaths.map(({ def, count: n }) => {
-            const { icon, tone } = PATH_ICON[def.id] ?? { icon: 'course', tone: 'blue' };
-            return <Row key={def.id} icon={<IconTile icon={icon} tone={tone} />} title={def.name} meta={'Not on the plan · ' + count(n) + ' to browse'} chevron onClick={() => onPath(def.id)} />;
-          })}
-          {researchCount > 0 && <Row icon={<IconTile icon="flask" tone="ice" />} title="Research" meta={'Year 3 · ' + count(researchCount) + ' to read'} chevron onClick={() => onPath('research')} />}
-        </ul>
-      </section>
-
-      {next.length > 0 && (
-        <RowList label="Up next" className="mt-[18px]">
-          {next.map((u) => {
-            const { icon, tone } = PATH_ICON[u.path.id] ?? { icon: 'course', tone: 'blue' };
-            const type = u.step.type === 'project' ? 'Project' : u.step.type.charAt(0).toUpperCase() + u.step.type.slice(1);
-            return (
-              <Row
-                key={u.step.refId}
-                icon={<IconTile icon={icon} tone={tone} />}
-                title={u.step.title}
-                meta={type + (u.after ? ' · after ' + u.after : ' · ' + Math.round(u.step.hours) + ' h')}
-                trailing={u.start ? monthOf(u.start, thisYear) : undefined}
-                onClick={() => onOpen(u.step.refId)}
-              />
-            );
-          })}
-        </RowList>
-      )}
-
-      <section aria-labelledby="browse" className="mt-[18px]">
-        <h2 id="browse" className="section-label px-1">
-          Browse when you need something
-        </h2>
-        <ul className="grid grid-cols-3 gap-4">
-          {SHELVES.filter((shelf) => shelf.key !== 'project' && shelf.key !== 'practice').map((shelf) => (
-            <li key={shelf.key}>
-              <button type="button" onClick={() => onShelf(shelf.key)} className="tile press flex w-full flex-col items-center gap-1 px-2 py-4">
-                <span className={shelf.key === 'paper' || shelf.key === 'blog' || shelf.key === 'project' ? 'text-ice-deep' : 'text-blue-deep'}>
-                  <Icon name={SHELF_ICON[shelf.key]} size={22} />
+          {researchCount > 0 && <Row icon={<IconTile icon="flask" tone="neutral" />} title="Research" meta={'Year 3 · ' + count(researchCount) + ' to read'} chevron onClick={() => onPath('research')} />}
+          {(laterPaths.length > 0 || browsePaths.length > 0) && !showLater && (
+            <li>
+              <button type="button" onClick={() => setShowLater(true)} className="flex min-h-[60px] w-full items-center gap-3 py-2 text-left">
+                <span aria-hidden="true" className="size-2.5 shrink-0 rounded-pill bg-[var(--sd)]" />
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="text-chip font-medium leading-tight">{plural(laterPaths.length + browsePaths.length, 'more path')}</span>
+                  <span className="truncate text-label text-ink2">{[...laterPaths.map((p) => p.name), ...browsePaths.map((b) => b.def.name)].join(', ')}</span>
                 </span>
-                <span className="text-lead font-semibold leading-tight">{count(counts[shelf.key])}</span>
-                <span className="text-small font-semibold text-ink2">{shelf.key === 'blog' ? 'Blogs to follow' : shelf.label}</span>
+                <Icon name="chevronRight" size={16} className="text-[var(--x0)]" />
               </button>
             </li>
-          ))}
-          {/* Practice, the seventh shelf (RESOURCES-ADD): a tile across the grid's width, in ice. */}
-          <li className="col-span-3">
-            <button type="button" onClick={() => onShelf('practice')} className="tile press flex w-full items-center justify-center gap-3 px-4 py-3">
-              <span className="text-ice-deep">
-                <Icon name={SHELF_ICON.practice} size={22} />
-              </span>
-              <span className="text-lead font-semibold leading-tight">{count(counts.practice)}</span>
-              <span className="text-small font-semibold text-ink2">Practice</span>
-            </button>
-          </li>
+          )}
+          {showLater &&
+            browsePaths.map(({ def, count: n }) => {
+              const { icon } = PATH_ICON[def.id] ?? { icon: 'course' };
+              return <Row key={def.id} icon={<IconTile icon={icon} tone="neutral" />} title={def.name} meta={'Not on the plan · ' + count(n) + ' to browse'} chevron onClick={() => onPath(def.id)} />;
+            })}
         </ul>
-        {/* Projects, a shelf of its own kind, is a full-width row under the grid. */}
-        <button type="button" onClick={() => onShelf('project')} className="tile press mt-4 flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left">
-          <IconTile icon={SHELF_ICON.project} tone="ice" />
-          <span className="min-w-0 flex-1 text-body font-semibold">Projects</span>
-          <span className="text-meta font-semibold text-ink2">{counts.project}</span>
-          <Icon name="chevronRight" size={18} className="text-ink2" />
-        </button>
       </section>
 
-      {/* The quick filters (ATLAS-LIBRARY): ten clusters across every shelf, one row each, in the order of the registry. */}
-      <RowList label="Quick filters" className="mt-[18px]" aside="across every shelf">
-        {quick.map((q) => (
-          <Row key={q.key} icon={<IconTile icon={q.icon} tone={q.tone} />} title={q.label} trailing={count(q.count)} chevron onClick={() => onPick(q.key)} />
-        ))}
-      </RowList>
+      {/* Browse all (the mockup's row): the shelves open under it. */}
+      <section aria-labelledby="browse" className="tile mt-[18px] px-[18px] py-1">
+        <button type="button" aria-expanded={browsing} onClick={() => setBrowsing((v) => !v)} className="flex min-h-[60px] w-full items-center gap-3 py-2 text-left">
+          <IconTile icon="projects" lane={2} />
+          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <h2 id="browse" className="text-chip font-medium leading-tight">
+              Browse all
+            </h2>
+            <span className="truncate text-label text-ink2">Courses, books, papers, blogs, practice, projects</span>
+          </span>
+          <Icon name={browsing ? 'chevronDown' : 'chevronRight'} size={16} className="text-[var(--x0)]" />
+        </button>
+        {browsing && (
+          <ul className="grid grid-cols-3 gap-3 pb-3 pt-1">
+            {SHELVES.map((shelf) => (
+              <li key={shelf.key}>
+                <button type="button" onClick={() => onShelf(shelf.key)} className="lane-tile lane-0 flex min-h-[72px] w-full flex-col items-center justify-center gap-0.5 rounded-[14px] px-2 py-2">
+                  <Icon name={SHELF_ICON[shelf.key]} size={18} />
+                  <span className="text-chip font-semibold leading-tight">{count(counts[shelf.key])}</span>
+                  <span className="text-[11px] font-semibold">{shelf.key === 'blog' ? 'Blogs' : shelf.label}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <Sheet open={menuResource !== undefined} title={menuResource ? (menuResource.short ?? menuResource.title) : ''} onClose={() => setMenu(null)}>
         <RowList>

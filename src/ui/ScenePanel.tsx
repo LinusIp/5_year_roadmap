@@ -55,10 +55,9 @@ export function ScenePanel({ slot, scene: given, aspect, focal = '50% 50%', alt 
       data-scene-panel={slot}
       data-scene={scene.id}
       data-scene-image={thumb || shown ? 'shown' : 'loading'}
-      aria-hidden={decorative || undefined}
     >
       {/* The thumbnail is the picture until the large file lands, and the whole picture in a grid cell. */}
-      <picture>
+      <picture aria-hidden={decorative || undefined}>
         <source type="image/avif" srcSet={src.thumbAvif} />
         <img
           src={src.thumbWebp}
@@ -72,7 +71,7 @@ export function ScenePanel({ slot, scene: given, aspect, focal = '50% 50%', alt 
         />
       </picture>
       {!thumb && (
-        <picture>
+        <picture aria-hidden={decorative || undefined}>
           <source type="image/avif" srcSet={src.avif} sizes={sizes} />
           <img
             src={src.webp}

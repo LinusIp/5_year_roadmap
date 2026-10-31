@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { checkBlogPost, setBlogPosted, useBlogPosts, useBlogSettings } from '../db/blog.ts';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { checkBlogPost, saveBlogDraft, setBlogPosted, useBlogPosts, useBlogSettings } from '../db/blog.ts';
+import type { BlogDraft } from '../db/blog.ts';
 import { useDayTicks } from '../db/ticks.ts';
 import type { TickNote } from '../db/ticks.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
@@ -10,13 +11,13 @@ import type { DayTick } from '../lib/blog.ts';
 import { dayLayout } from '../lib/calendar.ts';
 import { dayName, monthName, today as todayDate } from '../lib/dates.ts';
 import { announceEdit } from '../lib/edit-events.ts';
+import { laneSlot } from '../lib/scenes.ts';
 import { planForDay } from '../lib/schedule.ts';
 import { useQueryParam } from '../router/router.tsx';
 import type { Unit } from '../seed/schema.ts';
 import { Button } from '../ui/Button.tsx';
 import { Header } from '../ui/Header.tsx';
-import { BlockTile } from '../ui/glyphs.tsx';
-import { Row, RowList } from '../ui/Row.tsx';
+import { Switch } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
 import { nameOf, span } from './parts/text.ts';
 import { lessonLabel } from './parts/LessonChecklist.tsx';
@@ -27,7 +28,7 @@ function shortDate(date: string): string {
   return dayName(date, true) + ' ' + d + ' ' + monthName(m - 1, true);
 }
 
-/** Whether "Open my blog" was used on a date, in this tab: it goes with the day's mark as `editorLinkUsed`. */
+/** Whether "Publish" opened the blog on a date, in this tab: it goes with the day's mark as `editorLinkUsed`. */
 const OPENED_KEY = (date: string): string => 'atlas-blog-opened-' + date;
 function wasOpened(date: string): boolean {
   try {
@@ -64,10 +65,41 @@ function dayTicks(atlas: Atlas, date: string, notes: readonly TickNote[], units:
   return out;
 }
 
+/** The post as Markdown: the draft's fields under their headings, then the day's facts (the outline of DAILY-BLOG). */
+function composePost(draft: BlogDraft, heading: string, outline: string): string {
+  const lines = ['# ' + (draft.title?.trim() || heading), ''];
+  const section = (title: string, text: string | undefined): void => {
+    if (!text?.trim()) return;
+    lines.push('## ' + title, '', text.trim(), '');
+  };
+  section('What I learned', draft.learned);
+  section('Where I got stuck', draft.stuck);
+  section('Tomorrow', draft.next);
+  // The facts' outline minus its own heading line.
+  lines.push(...outline.split('\n').slice(2));
+  return lines.join('\n').trimEnd() + '\n';
+}
+
+/** A sunken text field of the log (the mockup's .well): the title in 17/800, the answers in 15/600. */
+function Field({ label, value, placeholder, onChange, onBlur, title = false, rows = 3 }: { label: string; value: string; placeholder: string; onChange: (v: string) => void; onBlur: () => void; title?: boolean; rows?: number }) {
+  const id = 'log-' + label.toLowerCase().replace(/[^a-z]+/g, '-');
+  return (
+    <label htmlFor={id} className="flex flex-col gap-1.5">
+      {title ? <span className="section-label mb-0 uppercase">{label}</span> : <span className="text-chip font-medium">{label}</span>}
+      {title ? (
+        <input id={id} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} onBlur={onBlur} className="well min-h-12 w-full rounded-knob px-3.5 text-[17px] font-semibold text-ink outline-none placeholder:text-ink2 focus-visible:outline-2 focus-visible:outline-[var(--x2)]" />
+      ) : (
+        <textarea id={id} value={value} placeholder={placeholder} rows={rows} onChange={(e) => onChange(e.target.value)} onBlur={onBlur} className="well w-full resize-none rounded-knob px-3.5 py-3 text-chip leading-[1.45] text-ink outline-none placeholder:text-ink2 focus-visible:outline-2 focus-visible:outline-[var(--x2)]" />
+      )}
+    </label>
+  );
+}
+
 /**
- * "Today's blog post" (DAILY-BLOG): the day's facts and an outline built from them to start the post from, the writing
- * streak, Open my blog (the screen's one filled button: Pages CMS, or the link set in Settings › Blog) and I posted
- * it. The post is written in the user's own blog; Atlas keeps only whether it was.
+ * The daily log (DAILY-BLOG, redrawn to the redesign mockup): what the day's logs say, the post's title and three
+ * answers written here and kept as the day's draft, the photo's name for the gallery, and Publish: the post goes to
+ * the clipboard, the blog's editor opens (Pages CMS, or the link set in Settings › Blog) and the day is marked posted.
+ * Atlas never writes to the blog itself.
  */
 export function BlogPost() {
   const atlas = useAtlas();
@@ -81,16 +113,31 @@ export function BlogPost() {
   const date = dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam) && dateParam <= today ? dateParam : today;
   const notes = useDayTicks(date);
   const [copied, setCopied] = useState<string | null>(null);
+  const [draft, setDraft] = useState<BlogDraft | null>(null);
+  const [saved, setSaved] = useState<string | null>(null);
+  const photoInput = useRef<HTMLInputElement>(null);
 
   // Detection, when it is on: look now, for today, in case the post went up since the evening's check.
   useEffect(() => {
     if (date === today) void checkBlogPost(date, { force: true }).catch(() => undefined);
   }, [date, today]);
   useEffect(() => {
-    if (!copied) return undefined;
-    const id = window.setTimeout(() => setCopied(null), 3_000);
+    if (!copied && !saved) return undefined;
+    const id = window.setTimeout(() => {
+      setCopied(null);
+      setSaved(null);
+    }, 3_000);
     return () => window.clearTimeout(id);
-  }, [copied]);
+  }, [copied, saved]);
+
+  const record = posts?.find((p) => p.date === date);
+  // The fields start from the stored draft, once; typing keeps them here until a blur or Save draft stores them.
+  useEffect(() => {
+    if (posts === undefined) return;
+    setDraft((d) => d ?? { title: record?.title ?? '', learned: record?.learned ?? '', stuck: record?.stuck ?? '', next: record?.next ?? '', photo: record?.photo, publish: record?.publish ?? true });
+    // The stored record only seeds the fields.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [posts === undefined, date]);
 
   const view = useMemo(() => {
     if (!atlas || !notes) return null;
@@ -105,12 +152,13 @@ export function BlogPost() {
   }, [atlas, notes, units, date, refParam]);
 
   const isToday = date === today;
-  const title = isToday ? 'Today’s blog post' : 'Blog post';
-  const back = <Button variant="icon" icon="chevronLeft" label={isToday ? 'Back to Today' : 'Back to the day in Calendar'} to={isToday ? '/' : '/calendar?view=day&date=' + date} />;
-  if (!atlas || !posts || !blog || !view) {
+  const title = isToday ? 'Today’s log' : 'The day’s log';
+  const backTo = isToday ? '/' : '/calendar?view=day&date=' + date;
+  const backLabel = isToday ? 'Back to Today' : 'Back to the day in Calendar';
+  if (!atlas || !posts || !blog || !view || !draft) {
     return (
       <Screen title={title}>
-        <Header title={title} back={back} />
+        <Header title={title} backTo={backTo} backLabel={backLabel} />
         <p className="pt-6 text-meta text-ink2" role="status">
           Loading the day…
         </p>
@@ -118,99 +166,154 @@ export function BlogPost() {
     );
   }
 
-  const record = posts.find((p) => p.date === date);
   const posted = Boolean(record?.posted);
   const studied = (d: string): boolean => (atlas.logs.find((l) => l.date === d)?.entries ?? []).some((e) => e.minutes > 0);
   const streak = writingStreak(posts, studied, today);
+  const post = composePost(draft, view.heading, view.outline);
+  const publish = draft.publish ?? true;
 
-  const markPosted = async (): Promise<void> => {
-    if (posted) {
-      await setBlogPosted(date, false);
-      return;
-    }
-    await setBlogPosted(date, true, { editorLinkUsed: wasOpened(date) });
-    announceEdit({ group: 'blog:' + date, label: 'Marked the blog post as posted', undo: async () => (await setBlogPosted(date, false), true) });
+  const store = (next: BlogDraft): void => void saveBlogDraft(date, () => next);
+  const set = (key: keyof BlogDraft) => (value: string) => setDraft((d) => (d ? { ...d, [key]: value } : d));
+  const saveDraft = (): void => {
+    store(draft);
+    setSaved('Draft saved');
   };
   const copy = async (): Promise<void> => {
     try {
-      await navigator.clipboard.writeText(view.outline);
+      await navigator.clipboard.writeText(post);
       setCopied('Copied');
     } catch {
       setCopied('Could not reach the clipboard. Allow it for this site and try again.');
     }
   };
+  const publishPost = async (): Promise<void> => {
+    store(draft);
+    if (posted) {
+      await setBlogPosted(date, false);
+      return;
+    }
+    if (!publish) {
+      setSaved('Saved');
+      return;
+    }
+    await copy();
+    try {
+      sessionStorage.setItem(OPENED_KEY(date), '1');
+    } catch {
+      // Storage blocked: the mark simply goes without editorLinkUsed.
+    }
+    window.open(blog.editorLink, '_blank', 'noopener');
+    await setBlogPosted(date, true, { editorLinkUsed: wasOpened(date) });
+    announceEdit({ group: 'blog:' + date, label: 'Marked the blog post as posted', undo: async () => (await setBlogPosted(date, false), true) });
+  };
+  const blockNameOf = (id: string): string => atlas.settings.core.blocks.find((b) => b.id === id)?.name ?? id;
 
   return (
     <Screen title={title}>
-      <Header title={title} back={back} sub={shortDate(date) + ' · day ' + blogDayNumber(date) + ' · written in your blog'} />
+      <Header
+        title={title}
+        backTo={backTo}
+        backLabel={backLabel}
+        sub={'Day ' + blogDayNumber(date) + ' · ' + shortDate(date) + (streak > 0 ? ' · ' + streak + (streak === 1 ? ' day' : ' days') + ' in a row' : '') + (posted && record?.auto ? ' · found in your blog' : '')}
+        actions={<span className="pill-tint lane-2 rounded-pill px-2.5 py-1 text-small font-black">{posted ? 'Done' : 'Draft'}</span>}
+      />
 
-      <div className="mt-6 grid grid-cols-2 gap-4">
-        <div className="tile flex flex-col items-center gap-2 p-3.5">
-          <span className="section-label mb-0">Writing streak</span>
-          <span className="well well-blue rounded-[14px] px-3.5 py-1 text-card font-semibold leading-tight text-blue-deep">{streak}</span>
-          <span className="text-meta text-ink2">{streak === 1 ? 'day' : 'days'} in a row</span>
-        </div>
-        <div className="tile flex flex-col items-center gap-2 p-3.5">
-          <span className="section-label mb-0">This post</span>
-          <span className="text-card font-semibold leading-tight">{posted ? 'Posted ✓' : 'Not yet'}</span>
-          <span className="text-meta text-ink2">{posted && record?.auto ? 'found in your blog' : posted ? 'marked by you' : 'write it in your blog'}</span>
-        </div>
-      </div>
-
-      <RowList className="mt-6" label={isToday ? 'What you did today' : 'What you did that day'} aside={span(view.facts.totalMinutes)}>
+      {/* What the day's logs say (the mockup's pills): each block with time, its first tick and its minutes. */}
+      <section className="tile mt-4 flex flex-col gap-2.5 px-[18px] py-3.5" aria-labelledby="studied-title">
+        <h2 id="studied-title" className="section-label mb-0 uppercase">
+          {(isToday ? 'What you studied today' : 'What you studied that day') + ' (from your logs)'}
+        </h2>
         {view.facts.blocks.length === 0 ? (
-          <Row title="Nothing logged" meta="Time on the timer shows here, block by block" />
+          <p className="text-meta text-ink2">Nothing logged yet · time on the timer shows here, block by block</p>
         ) : (
-          view.facts.blocks.map((b) => (
-            <Row
-              key={b.id}
-              icon={<BlockTile block={b.id} />}
-              title={b.name}
-              meta={b.ticked.length > 0 ? b.ticked.join(' · ') : 'Nothing ticked'}
-              trailing={span(b.minutes)}
-              truncate
-            />
-          ))
+          <ul className="flex flex-wrap gap-2">
+            {view.facts.blocks.map((b) => (
+              <li key={b.id} className={'pill-tint lane-' + laneSlot(b.id) + ' inline-flex min-h-10 items-center rounded-pill px-3.5 text-label font-semibold'}>
+                {blockNameOf(b.id) + (b.ticked[0] ? ' · ' + b.ticked[0] : '') + ' · ' + span(b.minutes)}
+              </li>
+            ))}
+          </ul>
         )}
-      </RowList>
+      </section>
 
-      <section className="mt-6 flex flex-col gap-3" aria-labelledby="outline-title">
-        <div className="flex items-center justify-between gap-3">
-          <h2 id="outline-title" className="section-label mb-0">
-            Outline to start from
-          </h2>
+      <section className="tile mt-4 flex flex-col gap-3 px-[18px] py-3.5" aria-label="The post">
+        <Field label="Title" title value={draft.title ?? ''} placeholder={'Day ' + blogDayNumber(date) + ': what today was about'} onChange={set('title')} onBlur={() => store(draft)} />
+        <Field label="What did I learn?" value={draft.learned ?? ''} placeholder="One idea per line" onChange={set('learned')} onBlur={() => store(draft)} rows={3} />
+        <Field label="Where did I get stuck?" value={draft.stuck ?? ''} placeholder="Questions to come back to" onChange={set('stuck')} onBlur={() => store(draft)} rows={2} />
+        <Field label="Tomorrow" value={draft.next ?? ''} placeholder="The first thing to do" onChange={set('next')} onBlur={() => store(draft)} rows={2} />
+      </section>
+
+      <section className="tile mt-4 px-[18px] py-1">
+        <ul className="rows">
+          <li className="flex min-h-[60px] items-center gap-3 py-1">
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span id="publish-label" className="text-chip font-medium">
+                Publish to my blog
+              </span>
+              <span className="truncate text-small text-ink2">{blog.repo.split('/')[1] ?? blog.repo} · GitHub Pages</span>
+            </span>
+            <Switch
+              on={publish}
+              labelledBy="publish-label"
+              onChange={(on) => {
+                const next = { ...draft, publish: on };
+                setDraft(next);
+                store(next);
+              }}
+            />
+          </li>
+          <li className="flex min-h-[60px] items-center gap-3 py-1">
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="text-chip font-medium">Attach today&apos;s photo</span>
+              <span className="truncate text-small text-ink2">{draft.photo ? draft.photo + ' · add it in your blog’s editor' : 'For the gallery on your site'}</span>
+            </span>
+            <input
+              ref={photoInput}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              aria-label="Pick today's photo"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const next = { ...draft, photo: file.name };
+                setDraft(next);
+                store(next);
+              }}
+            />
+            <Button variant="ice" lane={1} size="sm" className="!min-h-10" onClick={() => photoInput.current?.click()}>
+              {draft.photo ? 'Change photo' : 'Add photo'}
+            </Button>
+          </li>
+        </ul>
+      </section>
+
+      <div className="mt-4 flex gap-2.5">
+        <Button className="flex-1" onClick={saveDraft}>
+          Save draft
+        </Button>
+        <Button variant="filled" lane={2} className="flex-[1.4]" aria-pressed={posted} name={posted ? 'Published, tap to undo' : publish ? 'Publish: copy the post, open my blog and mark it posted' : 'Save the draft'} onClick={() => void publishPost()}>
+          {posted ? 'Published ✓' : publish ? 'Publish' : 'Save'}
+        </Button>
+      </div>
+      <p className="mt-3 text-small text-ink2">
+        {publish ? 'Publish copies the post, opens ' + blog.editorLink.replace(/^https:\/\//, '') + ' in a new tab to paste it, and marks the day posted. Change the link in Settings › Blog.' : 'Only the draft is kept, on this device and in your sync.'}
+      </p>
+
+      <details className="mt-4">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-1 text-meta font-semibold text-ink2">
+          The post as Markdown
           <Button size="sm" icon="copy" onClick={() => void copy()}>
             Copy outline
           </Button>
-        </div>
-        <pre className="doc-block whitespace-pre-wrap" aria-label="The outline, in Markdown">
-          {view.outline}
+        </summary>
+        <pre className="doc-block mt-2 whitespace-pre-wrap" aria-label="The post, in Markdown">
+          {post}
         </pre>
-      </section>
-
-      <div className="mt-6 flex gap-3 [&>*]:min-w-0 [&>*]:flex-1">
-        <Button icon={posted ? 'check' : undefined} aria-pressed={posted} name={posted ? 'Posted, tap to undo' : 'I posted it'} onClick={() => void markPosted()}>
-          {posted ? 'Posted ✓' : 'I posted it'}
-        </Button>
-        <Button
-          variant="filled"
-          icon="external"
-          href={blog.editorLink}
-          onClick={() => {
-            try {
-              sessionStorage.setItem(OPENED_KEY(date), '1');
-            } catch {
-              // Storage blocked: the mark simply goes without editorLinkUsed.
-            }
-          }}
-        >
-          Open my blog
-        </Button>
-      </div>
-      <p className="mt-3 text-meta text-ink2">Opens {blog.editorLink.replace(/^https:\/\//, '')} in a new tab. Change the link in Settings › Blog.</p>
+      </details>
 
       <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-[calc(7rem+env(safe-area-inset-bottom))] z-20 mx-auto max-w-[640px] px-5">
-        {copied && <p className="pointer-events-auto flex min-h-11 items-center knob rounded-pill px-5 text-meta text-ink">{copied}</p>}
+        {(copied ?? saved) && <p className="pointer-events-auto flex min-h-11 items-center knob rounded-pill px-5 text-meta text-ink">{copied ?? saved}</p>}
       </div>
     </Screen>
   );
