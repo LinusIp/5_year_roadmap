@@ -1260,3 +1260,15 @@ Verified on this machine (Linux, Chromium 140):
   (`/scenes`); Settings › Appearance; the service worker precaches today's and tomorrow's scene.
 - Tests: `tests/unit/scenes.test.ts`, `tests/e2e/scenes.spec.ts` (new). Pictures: `docs/before-after/scenes/`.
 
+## Pull request #40: the Focus tab
+
+- `data/focus-sessions.json` (the brief's fourteen verified sessions), `src/seed/focus.ts`, `scripts/lib/load-focus.ts`
+  (`validate:data`), `scripts/focus-verify.ts` (`npm run focus:verify`: oEmbed on CI, the `focus-oembed` job and the
+  weekly `focus-check` workflow that opens an issue), `public/audio/CREDITS.md` (no files).
+- `src/lib/focus.ts` (addresses, oEmbed, the timer, the mix), `src/lib/focus-player.ts` (the app-wide player state),
+  `src/lib/sounds.ts` (the generated sounds), `src/lib/focus-sessions.ts`, `src/ui/FocusPlayer.tsx` (the embed on
+  youtube-nocookie.com, in the tile or docked), `src/screens/Focus.tsx`, the sixth tab, Today's music knob and
+  "Start with Lofi?", Settings › Schedule › Focus music, `settings.focus`.
+- Tests: `tests/unit/focus.test.ts`, `tests/e2e/focus.spec.ts` and `tests/e2e/focus-route.ts` (new). Pictures:
+  `docs/before-after/focus/`.
+

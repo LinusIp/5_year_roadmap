@@ -170,7 +170,8 @@ test('with the daily scene off the fixed theme and the illustrations come back',
   await open(page, './');
   await expect(page.locator('[data-scene-panel]')).toHaveCount(0);
   await expect(page.locator('html')).not.toHaveAttribute('data-scene', /./);
-  expect(await token(page, '--bg')).toBe('#E6EAE7');
+  // The first paint may still carry the palette theme-init.js kept; the app clears it once the settings are read.
+  await expect.poll(() => token(page, '--bg')).toBe('#E6EAE7');
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#E6EAE7');
   await expect(page.locator('[data-art-slot]').first()).toHaveAttribute('data-art-slot', 'today-morning');
   await open(page, './#/scenes');

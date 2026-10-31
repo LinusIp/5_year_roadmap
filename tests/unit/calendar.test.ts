@@ -137,7 +137,7 @@ describe('settings from before Calendar', () => {
     const up = upgradeSettings(v2(), seed.settings);
     expect(up.version).toBe(3);
     expect(up.schedule.busy).toEqual([]);
-    expect(up.layout.tabs).toEqual(['today', 'plan', 'calendar', 'library', 'activity']);
+    expect(up.layout.tabs).toEqual(['today', 'plan', 'calendar', 'library', 'activity', 'focus']);
   });
 
   it('keep tabs the user chose', () => {

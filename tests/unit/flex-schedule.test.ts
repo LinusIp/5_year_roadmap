@@ -262,7 +262,7 @@ describe('settings v1 → v2', () => {
     expect(upgraded.core.streak.percent).toBe(50);
     expect(upgraded.core.heatmapMode).toBe('relative');
     expect(upgraded.schedule).toEqual({ overrides: [], days: {}, history: [], busy: [] });
-    expect(upgraded.layout.tabs).toEqual(['today', 'plan', 'calendar', 'library', 'activity']);
+    expect(upgraded.layout.tabs).toEqual(['today', 'plan', 'calendar', 'library', 'activity', 'focus']);
     // The daily schedule follows the blocks' own minutes, so the user's 150 minutes of E survive.
     expect(resolveDay(MONDAY, upgraded).blocks.find((b) => b.id === 'E')!.minutes).toBe(150);
     expect(resolveDay(MONDAY, upgraded).planned).toBe(630);

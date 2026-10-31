@@ -65,7 +65,7 @@ test('the schedule, pace, layout and plan edits reach a second device, and survi
   const settings = JSON.parse(fake.files()['state/settings.json']!);
   expect(settings.version).toBe(3);
   expect(settings.schedule.days['2026-09-21']).toEqual({ template: 'university' });
-  expect(settings.layout.tabs).toEqual(['today', 'plan', 'library', 'activity', 'reviews']);
+  expect(settings.layout.tabs).toEqual(['today', 'plan', 'library', 'activity', 'focus', 'reviews']);
   const plan = JSON.parse(fake.files()['state/plan.json']!);
   expect(plan.version).toBe(2);
   expect(plan.patches).toMatchObject([{ op: 'drop' }]);
@@ -75,7 +75,7 @@ test('the schedule, pace, layout and plan edits reach a second device, and survi
   await connect(b);
   await open(b, './');
   await expect(b.getByText('0 m of 3 h today · University day · no streak yet')).toBeVisible();
-  await expect(b.getByRole('navigation', { name: 'Main' }).getByRole('link')).toHaveText(['Today', 'Plan', 'Library', 'Activity', 'Reviews']);
+  await expect(b.getByRole('navigation', { name: 'Main' }).getByRole('link')).toHaveText(['Today', 'Plan', 'Library', 'Activity', 'Focus', 'Reviews']);
   // The University day's Coding lessons now starts with what comes after 30 Days of Python.
   await expect(laterRow(b, /^Coding lessons/)).toHaveCount(1);
   await expect(laterRow(b, /^Coding lessons/)).not.toContainText('30 Days of Python');

@@ -36,6 +36,7 @@ const PHONE = [
   ['internships-roadmap', './#/internships?tab=roadmap'],
   ['internships-prep', './#/internships?tab=prep'],
   ['scenes', './#/scenes'],
+  ['focus', './#/focus'],
 ] as const;
 
 /** The same screens on a 1280 x 800 desktop, and the five-year map that only fits there. */

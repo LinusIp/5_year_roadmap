@@ -247,18 +247,18 @@ test('compact Today, other tabs, and a reset to the default layout', async ({ pa
 
   await open(page, './');
   const tabs = page.getByRole('navigation', { name: 'Main' }).getByRole('link');
-  await expect(tabs).toHaveText(['Today', 'Plan', 'Activity', 'Reviews']);
+  await expect(tabs).toHaveText(['Today', 'Plan', 'Activity', 'Focus', 'Reviews']);
   await expect(laterRow(page, /^Coding lessons 18:00–20:00$/)).toBeVisible();
   await page.screenshot({ path: 'test-results/flex-compact-today.png' });
 
   await reload(page);
-  await expect(tabs).toHaveText(['Today', 'Plan', 'Activity', 'Reviews']);
+  await expect(tabs).toHaveText(['Today', 'Plan', 'Activity', 'Focus', 'Reviews']);
 
   await open(page, './#/settings?section=layout');
   for (const section of ['Layout · Today', 'Layout · Tabs']) {
     await page.locator('section').filter({ has: page.getByRole('heading', { name: section }) }).getByRole('button', { name: 'Reset to default' }).click();
   }
   await open(page, './');
-  await expect(tabs).toHaveText(['Today', 'Plan', 'Calendar', 'Library', 'Activity']);
+  await expect(tabs).toHaveText(['Today', 'Plan', 'Calendar', 'Library', 'Activity', 'Focus']);
   await expect(laterRow(page, /^Coding lessons 30 Days of Python · day 1/)).toBeVisible();
 });

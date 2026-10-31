@@ -12,6 +12,7 @@
     "validate:data": "node scripts/validate-data.ts",
     "art:build": "node scripts/art-build.ts",
     "scenes": "node scripts/scenes.ts",
+    "focus:verify": "node scripts/focus-verify.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "npm run validate:data && npm run typecheck && vite build",
     "preview": "vite preview",

@@ -1,6 +1,7 @@
 import type { ComponentType, SVGProps } from 'react';
 import {
   AlignLeft,
+  Headphones,
   Image,
   Pin,
   Star,
@@ -152,6 +153,7 @@ const LUCIDE = {
   clock: Clock,
   flame: Flame,
   image: Image,
+  headphones: Headphones,
   pin: Pin,
   star: Star,
 } satisfies Record<string, Glyph>;

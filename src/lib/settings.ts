@@ -11,7 +11,7 @@ import { addDays, today as todayDate } from './dates.ts';
 export function defaultLayout(core: Pick<SettingsDefaults, 'blocks'>): Layout {
   return {
     today: { stats: true, later: true, review: true, footer: true, view: 'detailed', now: 'first', order: core.blocks.map((b) => b.id) },
-    tabs: ['today', 'plan', 'calendar', 'library', 'activity'],
+    tabs: ['today', 'plan', 'calendar', 'library', 'activity', 'focus'],
     plan: { segment: 'timeline', showDropped: true },
     general: { clock: '24', density: 'comfortable', illustrations: true },
   };
@@ -52,7 +52,10 @@ export function upgradeSettings(saved: StoredSettingsInput | StoredSettings, def
   const complete =
     stored.version === SETTINGS_VERSION && core.templates && core.pattern && core.heatmapMode && core.streak.percent !== undefined && core.catalogue &&
     stored.schedule?.busy && stored.pace && stored.pauses && stored.catchUp && stored.layout;
-  if (complete) return stored as StoredSettings;
+  if (complete) {
+    const layout = withCalendarTab((stored as StoredSettings).layout);
+    return layout === (stored as StoredSettings).layout ? (stored as StoredSettings) : { ...(stored as StoredSettings), layout };
+  }
 
   const blocks = [...core.blocks];
   const templates = core.templates ?? structuredClone(defaults.templates);
@@ -81,16 +84,19 @@ export function upgradeSettings(saved: StoredSettingsInput | StoredSettings, def
   };
 }
 
-/** The tabs before Calendar, as a fresh install had them. */
+/** The tabs before Calendar, and before Focus, as a fresh install had them. */
 const OLD_DEFAULT_TABS = ['today', 'plan', 'library', 'activity'];
+const FIVE_DEFAULT_TABS = ['today', 'plan', 'calendar', 'library', 'activity'];
 
 /**
- * Calendar joins the tab bar between Plan and Library for everyone who kept the old default tabs; tabs the user
- * chose stay as they are (Calendar can be added under Settings > Layout).
+ * Calendar joins the tab bar between Plan and Library for everyone who kept the old default tabs, and Focus
+ * (ATLAS-FOCUS-MUSIC) joins at the end for everyone on the five defaults; tabs the user chose stay as they are
+ * (either can be added under Settings > Layout).
  */
 function withCalendarTab(layout: Layout): Layout {
-  if (layout.tabs.join() !== OLD_DEFAULT_TABS.join()) return layout;
-  return { ...layout, tabs: ['today', 'plan', 'calendar', 'library', 'activity'] };
+  const tabs = layout.tabs.join();
+  if (tabs === OLD_DEFAULT_TABS.join() || tabs === FIVE_DEFAULT_TABS.join()) return { ...layout, tabs: ['today', 'plan', 'calendar', 'library', 'activity', 'focus'] };
+  return layout;
 }
 
 /**

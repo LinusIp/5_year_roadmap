@@ -32,6 +32,7 @@ export const PAGES = [
   './#/stats',
   './#/settings',
   './#/scenes',
+  './#/focus',
   './#/no-such-page',
 ];
 
