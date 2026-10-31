@@ -49,6 +49,7 @@ conversion 394, Security & defence 726, Agents & MCP 1,023, Certificates 49, Car
 145, Communication 258, Open source 47, Mandarin (the language) 24, Build & ship 131.
 
 **Links.** The container cannot reach these sites (every request fails to resolve), so the pull request's CI ran
-`npm run check:links -- --in data/resources/library-atlas-12.yaml` in a one-off `links-atlas-12` job; the job was
-removed before the merge. The run's result is in the pull request and in DECISIONS.md. Every URL is the file's; none
-was changed.
+`npm run check:links -- --in data/resources/library-atlas-12.yaml` in a one-off `links-atlas-12` job (run 41197132463
+on the first commit); the job was removed before the merge. 115 distinct URLs: 114 ok, 0 failed, 1 to check by hand:
+the NSIS Users Manual (`docs-nsis`, nsis.sourceforge.io answers 403 to the checker), never counted as broken. Every
+URL is the file's; none was changed.

@@ -2603,9 +2603,9 @@ redesign's home keeps behind "Browse all"; the site was serving the new build wh
 opens Browse all first. It rides this pull request rather than one of its own, since this one was ready.
 
 **Links.** The container cannot resolve any of the new rows' hosts, so the pull request's CI ran
-`npm run check:links -- --in data/resources/library-atlas-12.yaml` in a one-off `links-atlas-12` job (removed before
-the merge); the result is in the pull request and `docs/imports-atlas-library-12.md`. Every URL is the file's; none
-was changed.
+`npm run check:links -- --in data/resources/library-atlas-12.yaml` in a one-off `links-atlas-12` job (run
+41197132463, removed before the merge): 115 distinct URLs, 114 ok, 0 failed, 1 to check by hand (the NSIS Users
+Manual, a 403 to scripts, never counted as broken). Every URL is the file's; none was changed.
 
 Tests: `tests/unit/build-ship.test.ts` (new: the words, the areas, the phrases and exclusions, the data's counts);
 `tests/unit/quick-filters.test.ts` (the eleventh key); `tests/e2e/atlas-library.spec.ts` (the row on the home, the
