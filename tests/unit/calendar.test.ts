@@ -140,9 +140,9 @@ describe('settings from before Calendar', () => {
     expect(up.layout.tabs).toEqual(['today', 'plan', 'calendar', 'library', 'activity', 'focus']);
   });
 
-  it('keep tabs the user chose', () => {
-    const chosen = { ...v2(), layout: { ...base.layout, tabs: ['today', 'activity', 'reviews'] } } as StoredSettingsInput;
-    expect(upgradeSettings(chosen, seed.settings).layout.tabs).toEqual(['today', 'activity', 'reviews']);
+  it('keep tabs the user chose (Focus joins once at the end, ATLAS-FOCUS-MUSIC)', () => {
+    const chosen = { ...v2(), layout: { ...base.layout, tabs: ['today', 'activity', 'reviews'], general: { ...base.layout.general, focusTabOffered: undefined } } } as StoredSettingsInput;
+    expect(upgradeSettings(chosen, seed.settings).layout.tabs).toEqual(['today', 'activity', 'reviews', 'focus']);
   });
 
   it('a copy written by a device before Calendar keeps its changes and gets the calendar’s back', () => {

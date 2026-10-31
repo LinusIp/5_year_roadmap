@@ -7,6 +7,8 @@ import type { TabId } from '../db/types.ts';
 import { Link, useLocation } from '../router/router.tsx';
 import { isWithin } from '../router/paths.ts';
 import { seed } from '../seed/index.ts';
+import { useFocusPlayer } from '../lib/focus-player.ts';
+import { readCachedTabs, writeCachedTabs } from '../lib/tabs-cache.ts';
 
 /** Every tab Settings > Layout can show. The default five: Today, Plan, Calendar, Library, Activity. */
 export const TAB_DEFS: Record<TabId, { to: string; label: string; icon: IconName }> = {
@@ -31,7 +33,16 @@ export function Screen({ title, children }: { title: string; children: ReactNode
     document.title = title + ' · Atlas';
   }, [title]);
   const settings = useSettings(seed.settings);
-  const tabs = (settings?.layout.tabs ?? DEFAULT_TABS).map((id) => TAB_DEFS[id]);
+  // Until IndexedDB answers, the tabs the user last saw (mirrored to localStorage), so the bar never flashes the defaults.
+  const tabIds = settings?.layout.tabs ?? readCachedTabs() ?? DEFAULT_TABS;
+  useEffect(() => {
+    if (settings) writeCachedTabs(settings.layout.tabs);
+  }, [settings]);
+  const tabs = tabIds.map((id) => TAB_DEFS[id]);
+  // The docked Focus player (ATLAS-FOCUS-MUSIC) takes 232 px above the tab bar: the page keeps that room under its
+  // last card, so nothing sits under the player.
+  const player = useFocusPlayer();
+  const dockedPlayer = player.session !== null && player.docked;
   const location = useLocation();
   // The tab that matches the address most closely: Projects (/plan?view=projects) and Map (/plan/map) beat Plan.
   const score = (to: string): number => {
@@ -49,7 +60,7 @@ export function Screen({ title, children }: { title: string; children: ReactNode
     <>
       {/* Room under the last card for the tab bar: its 68 px, the 24 px it floats above the edge, and 24 px of air, plus
           the phone's safe area. The layout test checks it at 360, 390 and 412 px on every screen with the bar. */}
-      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[640px] px-5 pb-[calc(68px+24px+24px+env(safe-area-inset-bottom))] outline-none sm:px-6">
+      <main id="main" tabIndex={-1} className={'mx-auto w-full max-w-[640px] px-5 outline-none sm:px-6 ' + (dockedPlayer ? 'pb-[calc(68px+24px+24px+232px+env(safe-area-inset-bottom))]' : 'pb-[calc(68px+24px+24px+env(safe-area-inset-bottom))]')}>
         {children}
       </main>
       {/* A short fade to the ground behind the bar (ATLAS-UI-POLISH): content passing under it does not clash with it. */}

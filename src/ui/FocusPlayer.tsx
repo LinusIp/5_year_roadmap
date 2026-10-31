@@ -35,6 +35,15 @@ declare global {
   }
 }
 
+/** The player's error codes (IFrame API reference), in words. */
+export function errorText(code: number): string {
+  if (code === 2) return 'YouTube did not accept this video id (error 2).';
+  if (code === 5) return "YouTube's player hit an error (error 5). Try again, or open it on YouTube.";
+  if (code === 100) return 'YouTube cannot find this video: it may be private or removed (error 100).';
+  if (code === 101 || code === 150) return 'Its owner does not allow this video to play inside other sites (error ' + code + '). Open it on YouTube.';
+  return 'YouTube could not play this one (error ' + code + ').';
+}
+
 let apiLoading: Promise<YTStatic> | null = null;
 
 /** Loads the IFrame API once, on the first play. */
@@ -76,6 +85,11 @@ function measure(): Box {
   return { top: r.top + window.scrollY, left: r.left + window.scrollX, width: r.width, height: r.height };
 }
 
+/** The video's own page, rebuilt from its id: the address oEmbed confirmed. */
+function watchUrl(session: PlayerSession): string {
+  return session.kind === 'playlist' ? 'https://www.youtube.com/playlist?list=' + session.videoId : 'https://www.youtube.com/watch?v=' + session.videoId;
+}
+
 export function FocusPlayer() {
   const player = useFocusPlayer();
   const holder = useRef<HTMLDivElement>(null);
@@ -83,6 +97,8 @@ export function FocusPlayer() {
   const [box, setBox] = useState<Box>(measure);
   const [failed, setFailed] = useState<string | null>(null);
   const active = player.session !== null;
+  const sessionId = player.session?.id;
+  useEffect(() => setFailed(null), [sessionId]);
 
   // Follow the Focus tile while it is on screen; dock otherwise.
   useEffect(() => {
@@ -152,7 +168,7 @@ export function FocusPlayer() {
               else if (e.data === YT.PlayerState.PAUSED) embedReported('paused');
               else if (e.data === YT.PlayerState.ENDED) embedReported('ended');
             },
-            onError: () => setFailed('YouTube could not play this one. It may not allow embedding.'),
+            onError: (e: { data: number }) => setFailed(errorText(e.data)),
           },
         });
       })
@@ -185,7 +201,14 @@ export function FocusPlayer() {
                 {player.session!.title}
               </Link>
               <p className="line-clamp-2 text-small text-ink2">{player.session!.channel + ' · YouTube'}</p>
-              {failed && <p className="text-small text-ink2">{failed}</p>}
+              {failed && (
+                <p className="text-small text-ink2">
+                  {failed + ' '}
+                  <a href={watchUrl(player.session!)} target="_blank" rel="noreferrer noopener" className="font-semibold text-blue-deep underline">
+                    Open on YouTube
+                  </a>
+                </p>
+              )}
             </div>
             <div className="-ml-2 flex">
               <Button variant="icon" icon={player.status === 'playing' ? 'pause' : 'play'} className="!size-11" label={player.status === 'playing' ? 'Pause' : 'Play'} onClick={() => (player.status === 'playing' ? pause() : resume())} />
@@ -197,7 +220,12 @@ export function FocusPlayer() {
       {!docked && failed && (
         <p className="scene-chip absolute inset-x-3 bottom-3 flex items-center gap-2 px-3 py-2 text-small text-ink2">
           <Icon name="hint" size={14} />
-          {failed}
+          <span>
+            {failed + ' '}
+            <a href={watchUrl(player.session!)} target="_blank" rel="noreferrer noopener" className="font-semibold text-blue-deep underline">
+              Open on YouTube
+            </a>
+          </span>
         </p>
       )}
     </div>

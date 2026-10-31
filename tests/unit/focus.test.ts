@@ -15,6 +15,7 @@ import type { EmbedControls } from '../../src/lib/focus-player.ts';
 import { AtlasSounds, brownNoise, peak, pinkNoise, reverbImpulse, whiteNoise } from '../../src/lib/sounds.ts';
 import { defaultLayout, upgradeSettings } from '../../src/lib/settings.ts';
 import { StoredSettingsSchema } from '../../src/db/types.ts';
+import { readCachedTabs, writeCachedTabs } from '../../src/lib/tabs-cache.ts';
 
 describe('a pasted address', () => {
   it('reads a video from its watch, short, shorts, embed and live addresses, and rebuilds the canonical one', () => {
@@ -234,9 +235,33 @@ describe('the sixth tab', () => {
     expect(base.layout.tabs).toContain('focus');
     const five = { ...base, layout: { ...base.layout, tabs: ['today', 'plan', 'calendar', 'library', 'activity'] as typeof base.layout.tabs } };
     expect(upgradeSettings(five, seed.settings).layout.tabs).toEqual(['today', 'plan', 'calendar', 'library', 'activity', 'focus']);
-    const chosen = { ...base, layout: { ...base.layout, tabs: ['today', 'activity', 'reviews'] as typeof base.layout.tabs } };
-    expect(upgradeSettings(chosen, seed.settings)).toBe(chosen);
+    // A chosen set gets Focus once, where there is room; taking it out again sticks; a full set is left alone.
+    const chosen = { ...base, layout: { ...base.layout, tabs: ['today', 'activity', 'reviews'] as typeof base.layout.tabs, general: { ...base.layout.general, focusTabOffered: undefined } } };
+    const offered = upgradeSettings(chosen, seed.settings);
+    expect(offered.layout.tabs).toEqual(['today', 'activity', 'reviews', 'focus']);
+    expect(offered.layout.general.focusTabOffered).toBe(true);
+    const removed = { ...offered, layout: { ...offered.layout, tabs: ['today', 'activity', 'reviews'] as typeof base.layout.tabs } };
+    expect(upgradeSettings(removed, seed.settings)).toBe(removed);
+    const full = { ...chosen, layout: { ...chosen.layout, tabs: ['today', 'plan', 'calendar', 'library', 'activity', 'reviews'] as typeof base.layout.tabs } };
+    expect(upgradeSettings(full, seed.settings).layout.tabs).toEqual(['today', 'plan', 'calendar', 'library', 'activity', 'reviews']);
     expect(StoredSettingsSchema.safeParse({ ...base, layout: { ...base.layout, tabs: [...base.layout.tabs, 'map'] } }).success).toBe(false);
     expect(StoredSettingsSchema.safeParse({ ...base, focus: DEFAULT_FOCUS_PREFS }).success).toBe(true);
+  });
+});
+
+describe('the tab bar’s mirror', () => {
+  it('reads back what was written, and nothing that is not a list of three to six tab ids', () => {
+    const store = new Map<string, string>();
+    const storage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v) };
+    expect(readCachedTabs(storage)).toBeNull();
+    writeCachedTabs(['today', 'plan', 'calendar', 'library', 'focus'], storage);
+    expect(readCachedTabs(storage)).toEqual(['today', 'plan', 'calendar', 'library', 'focus']);
+    store.set('atlas.tabs', JSON.stringify(['today', 'nope', 'plan']));
+    expect(readCachedTabs(storage)).toBeNull();
+    store.set('atlas.tabs', JSON.stringify(['today']));
+    expect(readCachedTabs(storage)).toBeNull();
+    store.set('atlas.tabs', '{');
+    expect(readCachedTabs(storage)).toBeNull();
+    expect(readCachedTabs(null)).toBeNull();
   });
 });

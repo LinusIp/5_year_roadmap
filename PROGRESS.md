@@ -1272,3 +1272,12 @@ Verified on this machine (Linux, Chromium 140):
 - Tests: `tests/unit/focus.test.ts`, `tests/e2e/focus.spec.ts` and `tests/e2e/focus-route.ts` (new). Pictures:
   `docs/before-after/focus/`.
 
+## Pull request #41: what the phone showed
+
+- Room under the docked Focus player on every screen; YouTube's error named with its code and a link.
+- Focus added once to chosen tab sets with room (`general.focusTabOffered`); the tab bar's first paint from a
+  localStorage mirror (`src/lib/tabs-cache.ts`), no flash of the defaults.
+- The map: the scene as a banner behind the title, columns with a 200 px floor, the map as wide as they need.
+- Today: the Focus knob in the Start/Open row, the header's height floor, the wordmark hidden under 380 px; Plan's
+  lane verdicts wrap.
+

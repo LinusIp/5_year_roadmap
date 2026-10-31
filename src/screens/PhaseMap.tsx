@@ -39,7 +39,10 @@ export function PhaseMap() {
   const phases = seed.phases;
   const first = phases[0]!;
   const last = phases.at(-1)!;
-  const columns = phases.map((p) => Math.round(months(p) * 100) / 100 + 'fr').join(' ');
+  // Each phase's column is its months' share of the width, never under 200 px, and the map is as wide as that
+  // needs (the padding and the gaps included), so the last card never runs past the edge.
+  const columns = phases.map((p) => 'minmax(200px, ' + Math.round(months(p) * 100) / 100 + 'fr)').join(' ');
+  const minWidth = Math.max(1200, phases.length * 200 + (phases.length - 1) * 16 + 112);
   const stage1 = phases.filter((p) => p.stage === 1);
   // The day as the schedule runs it: "10 h a day (06–12 and 18–22)", and a legend of the blocks at their times.
   const schedule = scheduleSummary(settings, today());
@@ -54,12 +57,14 @@ export function PhaseMap() {
     <main id="main" tabIndex={-1} className="min-h-dvh bg-bg outline-none">
       {/* Wider than a phone: it opens with the current phase in view and fades at a hidden edge. */}
       <FadeStrip open="current" label="Five-year map, scroll for the other phases">
-        <div className="relative isolate flex min-w-[1200px] flex-col gap-7 px-14 py-12">
+        <div className="relative isolate flex flex-col gap-7 px-14 py-12" style={{ minWidth }}>
           {/* The journey's river (ATLAS-ART): one long illustration behind the stage bands and the phases, decoration only. */}
+          {/* The day's scene (ATLAS-DAILY-SCENES) as a banner behind the title, fading into the paper above the route: a
+              full-bleed picture under six phases of text read as a muddy wash on a phone, so the map below is plain. */}
           {scene ? (
-            <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-              <ScenePanel slot="map" decorative bare focal="50% 50%" className="h-full w-full" sizes="1200px" />
-              <div className="absolute inset-0 bg-[var(--bg)] opacity-35" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[260px]" aria-hidden="true">
+              <ScenePanel slot="map" decorative bare focal="50% 40%" className="h-full w-full" sizes="1200px" />
+              <div className="art-fade-bottom absolute inset-x-0 bottom-0 h-[60%]" />
             </div>
           ) : (
             <div className="pointer-events-none absolute inset-y-6 left-1/2 -z-10 w-56 -translate-x-1/2 opacity-40" aria-hidden="true">
@@ -97,9 +102,9 @@ export function PhaseMap() {
             )}
           </div>
 
-          <div className={'relative h-14' + (scene ? ' scene-chip -mx-4 px-4' : '')} aria-hidden="true">
-            <div className={'well absolute top-[25px] h-1.5 rounded-pill ' + (scene ? 'inset-x-4' : 'inset-x-0')} />
-            <div className={'absolute top-0 grid gap-4 ' + (scene ? 'inset-x-4' : 'inset-x-0')} style={{ gridTemplateColumns: columns }}>
+          <div className="relative h-14" aria-hidden="true">
+            <div className="well absolute inset-x-0 top-[25px] h-1.5 rounded-pill" />
+            <div className="absolute inset-x-0 top-0 grid gap-4" style={{ gridTemplateColumns: columns }}>
               {phases.map((p) => (
                 <div key={p.id} className="flex flex-col items-start gap-1.5">
                   <span className="h-4 text-label text-ink2">{short(p.start)}</span>
@@ -108,7 +113,7 @@ export function PhaseMap() {
                 </div>
               ))}
             </div>
-            <span className={'absolute top-0 text-label text-ink2 ' + (scene ? 'right-4' : 'right-0')}>{short(last.end)}</span>
+            <span className="absolute right-0 top-0 text-label text-ink2">{short(last.end)}</span>
           </div>
 
           <ol className="grid gap-4" style={{ gridTemplateColumns: columns }}>

@@ -252,6 +252,9 @@ test('compact Today, other tabs, and a reset to the default layout', async ({ pa
   await page.screenshot({ path: 'test-results/flex-compact-today.png' });
 
   await reload(page);
+  // The first paint already shows the chosen tabs (mirrored to localStorage), never the six defaults.
+  await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+  expect(await tabs.allTextContents()).toEqual(['Today', 'Plan', 'Activity', 'Focus', 'Reviews']);
   await expect(tabs).toHaveText(['Today', 'Plan', 'Activity', 'Focus', 'Reviews']);
 
   await open(page, './#/settings?section=layout');

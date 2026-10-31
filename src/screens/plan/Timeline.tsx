@@ -110,8 +110,9 @@ function Lanes({
               <BlockTile block={lane.block} />
               <span className="flex min-w-0 flex-1 flex-col gap-1">
                 <span className="flex items-baseline justify-between gap-3">
-                  <span className="text-body font-medium leading-[1.3]">{title}</span>
-                  <span className={'shrink-0 text-meta ' + (behind ? 'font-semibold text-ice-deep' : 'text-ink2')}>
+                  <span className="min-w-0 text-body font-medium leading-[1.3]">{title}</span>
+                  {/* A long verdict ("Finishes ~Jun 2028 (17 months late)") wraps on the right, never past the tile. */}
+                  <span className={'min-w-0 max-w-[60%] shrink text-right text-meta ' + (behind ? 'font-semibold text-ice-deep' : 'text-ink2')}>
                     {isCurrent && forecast ? describeVerdict(forecast.verdict, forecast.weeksLate, { projectedEnd: forecast.projectedEnd, overflowHours: forecast.overflowHours }) : Math.round(lane.totalHours) + ' h'}
                   </span>
                 </span>

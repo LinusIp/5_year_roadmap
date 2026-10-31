@@ -469,6 +469,8 @@ export const LayoutSchema = z.strictObject({
     density: z.enum(['comfortable', 'compact']),
     /** The illustrations (ATLAS-ART), on unless switched off; absent in settings saved before them. */
     illustrations: z.boolean().optional(),
+    /** Focus (ATLAS-FOCUS-MUSIC) has been added to a chosen tab set once; after that the user's choice stands. */
+    focusTabOffered: z.boolean().optional(),
   }),
 });
 export type Layout = z.infer<typeof LayoutSchema>;
