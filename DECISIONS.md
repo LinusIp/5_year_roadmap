@@ -2611,3 +2611,12 @@ Tests: `tests/unit/build-ship.test.ts` (new: the words, the areas, the phrases a
 `tests/unit/quick-filters.test.ts` (the eleventh key); `tests/e2e/atlas-library.spec.ts` (the row on the home, the
 area chips, the search, CleanRL out). Screenshots of the Library's home redrawn on CI (one more chip).
 
+## The docked player's check waits for Today to settle (pull request #45)
+
+The CI run on main after pull request #44 failed one e2e test, twice in a row: the Focus session that keeps playing,
+docked, on Today, at the line that scrolls to the bottom and checks that the last card ends above the docked player.
+The same tree had passed the check on the pull request. Today's cards arrive as their reads land (the check-in, the
+log tile, the internship card), so a scroll to the bottom can land before the page has its full height, and the
+measure that follows sees a card below the player. The check now scrolls and measures until the two agree (an
+`expect.poll`), which is what a reader does; nothing in the app changed.
+

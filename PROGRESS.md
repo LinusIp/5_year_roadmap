@@ -1313,3 +1313,7 @@ Verified on this machine (Linux, Chromium 140):
 - Tests: `tests/unit/build-ship.test.ts` (new), `tests/unit/quick-filters.test.ts`, `tests/e2e/atlas-library.spec.ts`.
   Screenshots redrawn on CI.
 
+## Pull request #45: the docked player's check waits for Today to settle
+
+- `tests/e2e/focus.spec.ts`: the scroll-and-measure of the docked player on Today polls until the page's height holds.
+
