@@ -67,6 +67,8 @@
   --dtx2: #B1B7C2;
   --dac: #8EA3D6;
   --dak: #111111;
+  /* Text on a darkened picture (the Focus cover's badges): light in both themes. */
+  --over-image: #FFFFFF;
   /* The active tab and the pressed chip: a lane tint, or on the dark screen the accent. */
   --tab-on-bg: var(--t0);
   --tab-on-text: var(--x0);
@@ -106,60 +108,6 @@
   --l4: #52638F; --t4: var(--blue-soft); --x4: var(--blue-deep); --d4: var(--deco);
   --paper: var(--bg);
   --sd: var(--lo);
-}
-
-/*
- * The dark screen (the mockup's Focus): the scene's dark set as the ground, surfaces and text, while the tab bar
- * and every tile keep their shape. Set by Screen with `dark` on <html data-dark-screen>; the tokens go on body,
- * under the scene's inline ones on <html>, so they win for everything drawn.
- */
-:root[data-dark-screen] {
-  color-scheme: dark;
-  background: var(--dbg);
-}
-:root[data-dark-screen] body {
-  color: var(--dtx);
-  --bg: var(--dbg);
-  --hi: rgba(255, 255, 255, .05);
-  --lo: rgba(0, 0, 0, .35);
-  --edge: rgba(255, 255, 255, .06);
-  --ink: var(--dtx);
-  --ink2: var(--dtx2);
-  --ink3: var(--dtx2);
-  --blue: var(--dac);
-  --blue-deep: var(--dac);
-  --blue-soft: rgba(255, 255, 255, .08);
-  --ice: var(--dac);
-  --ice-deep: var(--dac);
-  --ice-soft: rgba(255, 255, 255, .08);
-  --on-blue: var(--dak);
-  --on-ice: var(--dak);
-  --dash: rgba(255, 255, 255, .08);
-  --sd: rgba(255, 255, 255, .08);
-  --scrim: rgba(0, 0, 0, .6);
-  --tab-on-bg: var(--dac);
-  --tab-on-text: var(--dak);
-  --t0: rgba(255, 255, 255, .08); --t1: rgba(255, 255, 255, .08); --t2: rgba(255, 255, 255, .08); --t3: rgba(255, 255, 255, .08); --t4: rgba(255, 255, 255, .08);
-  --x0: var(--dtx); --x1: var(--dtx); --x2: var(--dtx); --x3: var(--dtx); --x4: var(--dtx);
-  --l0: var(--dac); --l1: var(--dac); --l2: var(--dac); --l3: var(--dac); --l4: var(--dac);
-  --on-lane: var(--dak);
-}
-:root[data-dark-screen] .tile {
-  background: var(--dsf);
-  border: 1px solid rgba(255, 255, 255, .06);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, .28);
-}
-:root[data-dark-screen] .knob {
-  background: var(--dsf);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .28);
-}
-:root[data-dark-screen] .well {
-  background: var(--dbg);
-  box-shadow: none;
-}
-:root[data-dark-screen] .well.lane-fill,
-:root[data-dark-screen] .btn-fill {
-  background: var(--dac);
 }
 
 @theme inline {

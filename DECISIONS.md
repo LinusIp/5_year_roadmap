@@ -2620,3 +2620,20 @@ log tile, the internship card), so a scroll to the bottom can land before the pa
 measure that follows sees a card below the player. The check now scrolls and measures until the two agree (an
 `expect.poll`), which is what a reader does; nothing in the app changed.
 
+## Focus in the theme, the map on the paper (pull request #46)
+
+**Focus follows the theme.** The redesign board drew Focus as a dark screen on the scene's dark set, and the app
+did the same whatever the theme; the user does not want it dark by default. Focus is now a screen like the others:
+the light theme's palette by default, the dark set only when the theme is dark. The `dark` switch on `Screen`
+and the `[data-dark-screen]` remap in index.css went with it (nothing else used them); the dark-set tokens stay,
+since the dark theme and the scenes' palettes read them. The cover's badges keep light text on their darkened
+picture through one token (`--over-image`), the timer well and its chosen pill take the first lane, and "ON",
+"LIVE" and the time left take the lane's fill with its text.
+
+**The map draws no picture.** The route over the day's scene was hard to read: the photo fought the dashes, the
+pins and the cards, and the user said so. The five-year map now draws on the paper: a pale road in the first
+lane's tint with the dashes in its colour, the phases as tiles (the current one edged in its lane's colour), the
+pins ringed in the paper, the stage divider on the shadow colour, and a plain header. The river illustration of
+ATLAS-ART, which stood behind the route without a scene, is not drawn either: the user asked for no given image
+behind the route, and the paper reads best. The road starts closer to the header now that nothing sits above it.
+

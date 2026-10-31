@@ -29,20 +29,12 @@ export const TAB_BAR = { height: 68, bottom: 16 } as const;
 
 /**
  * A screen, as the redesign mockup draws it: one column of tiles 16 to 18 px apart, 20 px gutters, 44 px of air at
- * the top, at most 640 px wide and centred, over the floating tab bar. `dark` is the Focus screen's ground: the
- * scene's dark set takes over every token while it is open (index.css [data-dark-screen]).
+ * the top, at most 640 px wide and centred, over the floating tab bar.
  */
-export function Screen({ title, children, dark = false }: { title: string; children: ReactNode; dark?: boolean }) {
+export function Screen({ title, children }: { title: string; children: ReactNode }) {
   useEffect(() => {
     document.title = title + ' · Atlas';
   }, [title]);
-  useEffect(() => {
-    if (!dark) return undefined;
-    document.documentElement.dataset.darkScreen = 'true';
-    return () => {
-      delete document.documentElement.dataset.darkScreen;
-    };
-  }, [dark]);
   const settings = useSettings(seed.settings);
   // Until IndexedDB answers, the tabs the user last saw (mirrored to localStorage), so the bar never flashes the defaults.
   const tabIds = settings?.layout.tabs ?? readCachedTabs() ?? DEFAULT_TABS;
