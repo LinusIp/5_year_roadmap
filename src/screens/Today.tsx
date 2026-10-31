@@ -584,8 +584,11 @@ export function Today() {
     .join(' · ');
 
   // The header row and the day's hours: on the illustration's fades, or on their own when the art is off.
-  const headerRow = (
+  // On the scene's picture (ATLAS-DAILY-SCENES) the mark and the date sit on one paper chip, so no fade is needed
+  // over the top of the picture; the knobs are paper already.
+  const headerRowFor = (onImage: boolean) => (
     <>
+    <span className={'flex min-w-0 flex-1 items-center gap-1' + (onImage ? ' scene-chip !rounded-pill py-1 pr-1' : '')}>
     <span aria-hidden="true" className="flex shrink-0 items-center gap-1.5 pl-1">
       <img src={'./brand/atlas-mark-' + theme + '.png'} width={26} height={26} alt="" />
       <span className="text-[1.125rem] font-semibold tracking-[-0.01em] max-[379px]:sr-only">Atlas</span>
@@ -593,6 +596,7 @@ export function Today() {
     <button type="button" className="min-h-11 min-w-0 flex-1 truncate rounded-pill px-1.5 text-left text-meta font-semibold text-blue-deep" onClick={() => setSheet('date')} aria-haspopup="dialog" aria-label={shortDate(date) + (isToday ? ', today' : '') + ', pick a date'}>
       {shortDate(date)}
     </button>
+    </span>
     <span className="-mr-1.5 flex shrink-0">
       {canChange && <Button variant="icon" icon="sliders" className="!size-11" label={isToday ? 'Change today' : 'Change ' + dateTitle(date)} onClick={() => setSheet('change')} />}
       <Button variant="icon" icon="gear" className="!size-11" label="Settings" to="/settings" />
@@ -625,6 +629,26 @@ export function Today() {
       </p>
     ) : null;
 
+  // On the scene's picture the hours are one line, so the fade under them stays low and the picture shows: the
+  // number in the lead size, the rest as meta. The plain tile and the illustrations' panel keep the big number.
+  const heroCompact =
+    nowRunning || otherRunning ? (
+      <p className="text-meta text-ink2">
+        <span role="timer" aria-label={'Running, ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'} className="text-lead font-semibold tabular-nums text-blue-deep">
+          {formatStopwatch(blockMs(timer!.block))}
+        </span>{' '}
+        <span>
+          <span className="font-semibold text-blue-deep">Running</span>
+          {' · since ' + clockOf(timer!.startedAt) + ' · ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'}
+        </span>
+      </p>
+    ) : layout.stats ? (
+      <p className="text-meta text-ink2">
+        <span className="text-lead font-semibold text-ink">{span(dayMinutes)}</span>
+        {' of ' + span(plan.targetMinutes) + ' today' + (templateNote ? ' · ' + templateNote : '') + ' · ' + (streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet')}
+      </p>
+    ) : null;
+
   return (
     <Screen title="Today">
       <div
@@ -653,11 +677,10 @@ export function Today() {
             eager
             alt={(previewDay ? 'Scene for ' + shortDate(todayDate(previewDay)) : 'Today’s scene') + ': ' + sceneShown.name}
             className="mt-[max(0.75rem,env(safe-area-inset-top))] w-full max-[379px]:min-h-[190px]"
-            top={<div className="flex items-center gap-1">{headerRow}</div>}
             bottom={
               <div className="flex items-end justify-between gap-3">
                 {/* The day's hours on the left (the hours tile folded in, as with the illustrations), the scene on the right. */}
-                <div className="min-w-0 flex-1 [&_p]:!items-start [&_p]:text-left">{hero ?? <p className="text-meta text-ink2">{dateTitle(date)}</p>}</div>
+                <div className="min-w-0 flex-1">{heroCompact ?? <p className="text-meta text-ink2">{dateTitle(date)}</p>}</div>
                 <Link to="/scenes" className="flex min-h-11 shrink-0 flex-col items-end justify-center gap-0.5 rounded-knob text-right">
                   <span className="max-w-[9.5rem] truncate text-meta font-semibold leading-tight">{previewDay ? (sceneShift === 1 ? 'Tomorrow' : sceneShift === -1 ? 'Yesterday' : shortDate(todayDate(previewDay))) + ' · ' + sceneShown.name : sceneShown.name}</span>
                   <SceneSwatches scene={sceneShown} size={12} />
@@ -666,16 +689,19 @@ export function Today() {
               </div>
             }
           >
-            {/* Previous and next day's scenes, a look only: two paper knobs on the picture's right, between the fades. */}
+            {/* The header row on the picture itself, no fade: the mark and the date on a paper chip, the knobs are paper
+                already. The picture shows from the top down to the hours' fade. */}
+            <div className="absolute inset-x-0 top-0 flex items-center gap-1 px-[18px] pt-2">{headerRowFor(true)}</div>
+            {/* Previous and next day's scenes, a look only: two paper knobs on the picture's right, under the header row. */}
             <span className="absolute right-3 top-[58px] flex gap-2">
               <Button variant="icon" icon="chevronLeft" className="scene-chip !size-11 !rounded-pill text-ink" label="Preview the previous day's scene" onClick={() => setSceneShift((n) => n - 1)} />
               <Button variant="icon" icon="chevronRight" className="scene-chip !size-11 !rounded-pill text-ink" label="Preview the next day's scene" onClick={() => setSceneShift((n) => n + 1)} />
             </span>
           </ScenePanel>
         ) : art.on ? (
-          <ArtPanel slot={todaySlot(art.todayBy, new Date(), item?.track)} aspect="2 / 1" eager alt="" className="mt-[max(0.75rem,env(safe-area-inset-top))]" top={<div className="flex items-center gap-1">{headerRow}</div>} bottom={layout.stats || nowRunning || otherRunning ? hero : undefined} />
+          <ArtPanel slot={todaySlot(art.todayBy, new Date(), item?.track)} aspect="2 / 1" eager alt="" className="mt-[max(0.75rem,env(safe-area-inset-top))]" top={<div className="flex items-center gap-1">{headerRowFor(false)}</div>} bottom={layout.stats || nowRunning || otherRunning ? hero : undefined} />
         ) : (
-          <div className="-mb-1.5 flex items-center gap-1 pt-[max(2.25rem,env(safe-area-inset-top))]">{headerRow}</div>
+          <div className="-mb-1.5 flex items-center gap-1 pt-[max(2.25rem,env(safe-area-inset-top))]">{headerRowFor(false)}</div>
         )}
         {!isToday && (
           <div className="mt-2 flex">
