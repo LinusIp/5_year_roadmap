@@ -41,10 +41,12 @@ export function useSleep(): SleepNight[] | undefined {
 }
 
 /** Saves a night under its wake-up date, replacing what was there. Returns the night it replaced, for Undo. */
-export async function saveNight(night: Pick<SleepNight, 'date' | 'bed' | 'wake'>, database: AtlasDB = db): Promise<SleepNight | undefined> {
+export async function saveNight(night: Pick<SleepNight, 'date' | 'bed' | 'wake'> & { rested?: SleepNight['rested'] }, database: AtlasDB = db): Promise<SleepNight | undefined> {
   return database.transaction('rw', database.sleep, async () => {
     const before = await database.sleep.get(night.date);
-    await database.sleep.put({ date: night.date, bed: night.bed, wake: night.wake, minutes: nightMinutes(night.bed, night.wake) });
+    const record: SleepNight = { date: night.date, bed: night.bed, wake: night.wake, minutes: nightMinutes(night.bed, night.wake) };
+    if (night.rested !== undefined) record.rested = night.rested;
+    await database.sleep.put(record);
     return before;
   });
 }

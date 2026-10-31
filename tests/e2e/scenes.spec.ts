@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { FIRST_DAY, open, reload, writesSettled } from './helpers.ts';
+import { FIRST_DAY, open, reload, writesSettled, setTheme } from './helpers.ts';
 import scenes from '../../public/scenes/scenes.json' with { type: 'json' };
 
 /**
@@ -40,14 +40,14 @@ test('Today names the day’s scene and Plan shows the same image', async ({ pag
   const scene = byId(id!);
   await expect(header).toContainText(scene.name);
   await expect(header.getByText('Today’s scene')).toBeVisible();
-  await expect(header.getByText(/of 10 h today/)).toBeVisible();
+  await expect(page.getByText(/of 10 h today/)).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('data-scene', scene.id);
   expect(await token(page, '--bg')).toBe(scene.paper);
   expect(await token(page, '--l0')).toBe(scene.lanes[0]);
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', scene.paper);
   // The header's controls still work on the picture.
-  await expect(header.getByRole('button', { name: /pick a date/ })).toBeVisible();
-  await expect(header.getByRole('link', { name: 'Settings' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /pick a date/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Settings' })).toBeVisible();
   // The plan's phase header: the same scene.
   await open(page, './#/plan');
   await expect(page.locator('[data-scene-panel="plan"]')).toHaveAttribute('data-scene', scene.id);
@@ -86,18 +86,16 @@ test('a pin keeps the scene across a reload and the days; unpinning lets the day
 test('the dark theme takes the scene’s dark set', async ({ page }) => {
   await page.clock.install({ time: new Date(FIRST_DAY) });
   await pin(page, byId('lakehouse').name);
+  await setTheme(page, 'dark');
   await open(page, './');
-  await page.getByRole('button', { name: 'Switch to the dark theme' }).click();
-  await writesSettled(page);
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   const s = byId('lakehouse');
   expect(await token(page, '--bg')).toBe(s.dark.bg);
   expect(await token(page, '--ink')).toBe(s.dark.text);
   expect(await token(page, '--ink2')).toBe(s.dark.text2);
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', s.dark.bg);
   // Back to light: the paper.
-  await page.getByRole('button', { name: 'Switch to the light theme' }).click();
-  await writesSettled(page);
+  await setTheme(page, 'light');
+  await open(page, './');
   expect(await token(page, '--bg')).toBe(s.paper);
 });
 
@@ -182,11 +180,8 @@ for (const theme of ['light', 'dark'] as const) {
   test('axe finds no contrast failure on Today, Plan and the Library for a light, a colourful and a monochrome scene, ' + theme + ' theme', async ({ page }) => {
     test.setTimeout(240_000); // nine axe runs
     await page.clock.install({ time: new Date(FIRST_DAY) });
+    if (theme === 'dark') await setTheme(page, 'dark');
     await open(page, './');
-    if (theme === 'dark') {
-      await page.getByRole('button', { name: 'Switch to the dark theme' }).click();
-      await writesSettled(page);
-    }
     for (const scene of THREE) {
       await pin(page, scene.name);
       for (const path of ['./', './#/plan', './#/library']) {

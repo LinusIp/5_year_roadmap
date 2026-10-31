@@ -30,8 +30,8 @@ test('the block of the hour is Now, and the other four wait in Later today by th
   await expect(laterRow(page, /^Hugging Face LLM Course · 1\. Transformer models 10:00–12:00$/)).toBeVisible();
   await expect(laterRow(page, /^Coding lessons 30 Days of Python · day 1, introduction · daily challenge 18:00–20:00$/)).toBeVisible();
   await expect(laterRow(page, /^Math and physics 18\.06 Linear Algebra · lecture 1, the geometry of linear equations 20:00–22:00$/)).toBeVisible();
-  await expect(rows).toHaveText(['Session 1 · 06:00–12:00', /^Hugging Face/, 'Break · 12:00–18:00', 'Session 2 · 18:00–22:00', /^Coding lessons/, /^Math and physics/, /^Blog post · not yet/]);
-  await expect(page.getByText('0 of 5 done')).toBeVisible();
+  await expect(rows).toHaveText([/^Hugging Face/, 'Break · 12:00–18:00', 'Session 2 · 18:00–22:00', /^Coding lessons/, /^Math and physics/]);
+  await expect(page.getByText('0 of 5 done')).toBeAttached();
   // ML Zoomcamp's window, 06:00–08:00, is over: it waits under Earlier · not finished, with the time it got.
   const earlier = page.locator('section:has(h2:text-is("Earlier · not finished"))');
   await expect(earlier.getByRole('button', { name: /^ML Zoomcamp 0 m of 2 h · ML Zoomcamp · Module 1 · 6 of 97 06:00–08:00$/ })).toBeVisible();

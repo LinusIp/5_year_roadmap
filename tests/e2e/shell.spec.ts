@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { FIRST_DAY, open, reload } from './helpers.ts';
+import { FIRST_DAY, open, reload, setTheme } from './helpers.ts';
 
 test.use({ timezoneId: 'Asia/Tashkent' });
 
@@ -21,9 +21,8 @@ test.describe('app shell', () => {
     await expect(page).toHaveTitle(/Plan/);
     await expect(page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Plan' })).toHaveAttribute('aria-current', 'page');
 
+    await setTheme(page, 'dark');
     await open(page, './');
-    await page.getByRole('button', { name: 'Switch to the dark theme' }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await reload(page);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 

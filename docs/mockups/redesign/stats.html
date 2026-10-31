@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Atlas Stats</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>/* fonts: Nunito normal 600, Nunito normal 700, Nunito normal 800, Nunito normal 900 */
+</style>
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+a{color:inherit;text-decoration:none}
+a:hover{opacity:.85}
+.tile{background:var(--paper);border-radius:26px;box-shadow:6px 6px 14px var(--sd),-6px -6px 14px #FFFFFF;border:2px solid rgba(255,255,255,.6);box-sizing:border-box}
+.lbl{margin:0;font-size:13px;font-weight:800;color:var(--ink2);letter-spacing:.03em}
+.rt{font-size:16px;font-weight:700;line-height:1.25;color:var(--ink)}
+.meta{font-size:14px;font-weight:600;color:var(--ink2);line-height:1.35}
+.hm{display:grid;grid-template-columns:repeat(22,minmax(0,1fr));grid-auto-flow:column;grid-template-rows:repeat(7,10px);gap:3px}
+.hm i{border-radius:3px;display:block}
+.lane{display:flex;flex-direction:column;gap:6px}
+.track{height:12px;border-radius:999px;background:var(--sd);overflow:hidden;display:flex}
+.track i{display:block;height:100%;border-radius:999px}
+.tabs{position:absolute;left:12px;right:12px;bottom:16px;display:flex;justify-content:space-between;padding:6px;border-radius:28px;background:var(--paper);box-shadow:6px 6px 14px var(--sd),-6px -6px 14px #FFFFFF;border:2px solid rgba(255,255,255,.7)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:52px;border-radius:20px;font-size:11px;font-weight:800;color:var(--ink2)}
+.tab.on{color:var(--x0);background:var(--t0)}
+</style>
+</helmet>
+<div style="width:390px;height:1300px;position:relative;box-sizing:border-box;background:var(--paper);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;padding:44px 20px 120px 20px;display:flex;flex-direction:column;gap:16px;overflow:hidden;{{vars}}">
+
+<header style="padding:0 4px"><h1 style="margin:0;font-size:28px;font-weight:900">Stats</h1></header>
+
+<section class="tile" style="padding:0;overflow:hidden;position:relative;height:200px">
+<img src="{{img}}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 20%">
+<div style="position:absolute;left:16px;bottom:16px;display:flex;flex-direction:column;background:var(--paper);opacity:.94;padding:10px 14px;border-radius:18px">
+<span class="lbl">THIS WEEK</span>
+<span style="font-size:32px;font-weight:900;line-height:1.05">31 h 20 m</span>
+<span class="meta" style="font-size:13px">of 70 h planned · +4 h on last week</span>
+</div>
+</section>
+
+<section class="tile" style="padding:0;overflow:hidden;display:flex;min-height:140px">
+<img src="{{img}}" alt="" style="width:118px;object-fit:cover;object-position:80% 70%;flex:none">
+<div style="padding:16px 18px;display:flex;flex-direction:column;gap:4px;justify-content:center">
+<span class="lbl" style="color:var(--x4)">STREAK</span>
+<span style="font-size:30px;font-weight:900;line-height:1.05">57 days</span>
+<span class="meta" style="font-size:13px">43 more to 100. Longest so far: 57.</span>
+</div>
+</section>
+
+<section class="tile" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">STUDY TIME · 22 WEEKS</span><span class="meta" style="font-size:12px">May → Oct</span></div>
+<div class="hm" role="img" aria-label="Heatmap of study time over 22 weeks">
+<sc-for list="{{cells}}" as="c" hint-placeholder-count="154"><i style="background:{{c}}"></i></sc-for>
+</div>
+<div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;font-size:11px;font-weight:800;color:var(--ink2)">Less <i style="width:10px;height:10px;border-radius:3px;background:var(--sd)"></i><i style="width:10px;height:10px;border-radius:3px;background:var(--t0)"></i><i style="width:10px;height:10px;border-radius:3px;background:var(--d0)"></i><i style="width:10px;height:10px;border-radius:3px;background:var(--l0)"></i><i style="width:10px;height:10px;border-radius:3px;background:var(--x0)"></i> More</div>
+</section>
+
+<section class="tile" style="padding:16px 18px;display:flex;flex-direction:column;gap:14px">
+<span class="lbl">HOURS BY LANE · THIS PHASE</span>
+<div class="lane"><div style="display:flex;justify-content:space-between"><span class="rt" style="font-size:14px">ML Zoomcamp</span><span class="meta" style="font-size:13px">96 h</span></div><div class="track"><i style="width:82%;background:var(--l0)"></i></div></div>
+<div class="lane"><div style="display:flex;justify-content:space-between"><span class="rt" style="font-size:14px">Hugging Face</span><span class="meta" style="font-size:13px">88 h</span></div><div class="track"><i style="width:75%;background:var(--l3)"></i></div></div>
+<div class="lane"><div style="display:flex;justify-content:space-between"><span class="rt" style="font-size:14px">Math and physics</span><span class="meta" style="font-size:13px">84 h</span></div><div class="track"><i style="width:72%;background:var(--l4)"></i></div></div>
+<div class="lane"><div style="display:flex;justify-content:space-between"><span class="rt" style="font-size:14px">Coding</span><span class="meta" style="font-size:13px">79 h</span></div><div class="track"><i style="width:67%;background:var(--l1)"></i></div></div>
+<div class="lane"><div style="display:flex;justify-content:space-between"><span class="rt" style="font-size:14px">GameDevHQ</span><span class="meta" style="font-size:13px">61 h</span></div><div class="track"><i style="width:52%;background:var(--l2)"></i></div></div>
+</section>
+
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="Main.dc.html"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:22px;height:22px" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Today</a>
+<a class="tab" href="Plan.dc.html"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:22px;height:22px" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h13"></path></svg>Plan</a>
+<a class="tab" href="Calendar.dc.html"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:22px;height:22px" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>Calendar</a>
+<a class="tab" href="Library.dc.html"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:22px;height:22px" aria-hidden="true"><path d="M5 4v16M10 4v16M15 5l4 15"></path></svg>Library</a>
+<a class="tab on" href="Stats.dc.html"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:22px;height:22px" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>Stats</a>
+<a class="tab" href="Focus.dc.html"><svg sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3"></path><rect x="3" y="14" width="4" height="6" rx="1.5"></rect><rect x="17" y="14" width="4" height="6" rx="1.5"></rect></svg>Focus</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;day&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;min&quot;:-30,&quot;max&quot;:30,&quot;section&quot;:&quot;Scene&quot;},&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:1300}}">
+class Component extends DCLogic {
+  renderVals() {
+    const TH = [{"n":"Lake house","i":"(the scene image)","p":"#E8EDF0","s":"#C7CDD1","k":"#282B23","k2":"#5E6258","L":["#7C7721","#457A9F","#9D6937","#5374B6","#008569"],"T":["#E8E3C7","#D8E4F0","#F5DECD","#DBE2FA","#CAE9DE"],"X":["#565500","#225778","#784711","#215295","#006247"],"D":["#958F32","#709EC3","#BB8049","#698CD5","#139F80"],"d":["#1D2413","#2A311F","#E6EFF4","#B8BDAF","#958F32"]},{"n":"Snow chalet","i":"(the scene image)","p":"#ECECEE","s":"#CBCCCE","k":"#222B30","k2":"#586268","L":["#1E7595","#526E9B","#017980","#8F6345","#7A6491"],"T":["#D7E4EC","#DEE2EE","#D5E6E7","#EDE0D9","#E6E0EB"],"X":["#25586E","#415372","#1B5B5F","#6A4C37","#5C4C6B"],"D":["#5A8AA1","#7384A6","#528D92","#9F7D66","#8E7D9E"],"d":["#0C242F","#1A313C","#ECEEF5","#ADBEC8","#5A8AA1"]},{"n":"Alpine sketch","i":"(the scene image)","p":"#EEECE9","s":"#CECCC8","k":"#2B2A21","k2":"#626157","L":["#8A713F","#6C7A4C","#9B6953","#4E78A1","#4D7F60"],"T":["#ECE1CF","#E0E4D4","#F3DED6","#D8E3F3","#D6E7DB"],"X":["#654F1A","#495829","#774630","#205680","#265C3E"],"D":["#A88C54","#879663","#BB836A","#6793C1","#649B79"],"d":["#232310","#2F2F1D","#F1EEE6","#BDBCAD","#A88C54"]},{"n":"Green willow","i":"(the scene image)","p":"#EBEEE2","s":"#CACEBF","k":"#1E2D24","k2":"#54655A","L":["#56801B","#2F7C9E","#8C721A","#7C67B9","#008381"],"T":["#DCE7C9","#D5E5EF","#EFE1C5","#E8DEFB","#BDEBE9"],"X":["#375C00","#005977","#665000","#574595","#006464"],"D":["#90BF50","#4B8BAB","#CEAD4F","#BBA2FF","#00C9C5"],"d":["#0C2718","#193424","#EDEFE7","#B0BFB5","#90BF50"]},{"n":"Moon over the sea","i":"(the scene image)","p":"#EFEDE1","s":"#D0CCBD","k":"#2D2926","k2":"#64605C","L":["#8D6F4A","#74784A","#9D6759","#447A9F","#577E5A"],"T":["#ECE1D6","#E3E3D8","#EFDFDB","#DAE4ED","#DBE5DC"],"X":["#674E2F","#525534","#70493F","#305671","#3D593F"],"D":["#CAAB88","#B2B38E","#D4A69A","#90B5D3","#99B89B"],"d":["#292015","#372C22","#F0EEE6","#C6B9AD","#CAAB88"]},{"n":"Lone green tree","i":"(the scene image)","p":"#ECECEC","s":"#CCCCCB","k":"#192C36","k2":"#4F646F","L":["#717B03","#39729A","#A2680E","#4970CF","#00846A"],"T":["#E5E4C5","#DAE4ED","#F7DEC6","#DDE1FF","#C0EBE0"],"X":["#4E5700","#325671","#774800","#264F9F","#00644E"],"D":["#B0B741","#6587A5","#E9A245","#8AABFF","#00CBAA"],"d":["#002535","#083242","#EBEFE8","#ADBEC8","#B0B741"]},{"n":"Golden walk","i":"(the scene image)","p":"#EDEDE7","s":"#CCCCC5","k":"#252B2D","k2":"#5B6264","L":["#8B7200","#2B7969","#607C54","#0079C5","#008657"],"T":["#EFE1C4","#D6E6E1","#DDE5DA","#D3E4FF","#C9EAD8"],"X":["#645100","#295B50","#43583B","#0057A3","#006235"],"D":["#CFAE3D","#5B8D81","#A0B796","#5DB5FF","#47C68F"],"d":["#0F252A","#1C3137","#EEEEE7","#AABFC5","#CFAE3D"]},{"n":"Autumn mist","i":"(the scene image)","p":"#EDECEB","s":"#CDCCCA","k":"#2C2929","k2":"#636060","L":["#A56611","#AE5149","#C05243","#0079BE","#358437"],"T":["#F8DEC6","#FDDBD6","#FFD9D1","#C7E7FF","#D2E9CE"],"X":["#794600","#8E3530","#933027","#005E9E","#0F601A"],"D":["#DB9137","#C8685F","#F97B69","#00B0FF","#5EB35C"],"d":["#2C1E1C","#392B29","#F4EDE7","#CBB7B4","#DB9137"]},{"n":"Frosted grass","i":"(the scene image)","p":"#ECEDE9","s":"#CCCCC8","k":"#0F2E37","k2":"#49656F","L":["#0D7791","#45709B","#107979","#936149","#716795"],"T":["#D6E5EB","#DCE3EE","#D5E6E5","#EEE0DA","#E4E1EC"],"X":["#1F596B","#395472","#1E5B5B","#6D4A3A","#554E6E"],"D":["#568B9E","#6C86A6","#538D8D","#A27B69","#877FA1"],"d":["#002632","#013340","#EDEFE7","#ABBFC7","#568B9E"]},{"n":"Orange larches","i":"(the scene image)","p":"#E3EEF7","s":"#C0CEDA","k":"#1B2C36","k2":"#51636F","L":["#B9592B","#407AA0","#C14E60","#007DAB","#5F7E25"],"T":["#FFDBCB","#D5E4F2","#FFD8DB","#BFE9F9","#DDE6C8"],"X":["#8A3A13","#00587F","#98273F","#006290","#3B5C00"],"D":["#D36A37","#5F9CC6","#DD5E71","#009ACF","#719332"],"d":["#002536","#0C3243","#E8EFF5","#AEBEC9","#D36A37"]},{"n":"Snow tree","i":"(the scene image)","p":"#E9EDF0","s":"#C8CDD0","k":"#262A33","k2":"#5D616B","L":["#5078A0","#776F9B","#2A7E96","#877248","#936688"],"T":["#DCE3EE","#E4E1EC","#D6E5EB","#E8E2D7","#EBDFE7"],"X":["#385572","#544E6E","#1E596A","#605033","#694860"],"D":["#97B3D4","#B4ACD0","#82B9CC","#C2AE8C","#CBA6C0"],"d":["#182233","#252E40","#E7EFF5","#B6BBCA","#97B3D4"]},{"n":"Blossom waterfall","i":"(the scene image)","p":"#EDECEB","s":"#CDCCCB","k":"#2E2922","k2":"#666057","L":["#717648","#547F5B","#8E7048","#6C6F9D","#307F73"],"T":["#E3E3D5","#DBE5DC","#EAE1D7","#E2E1ED","#D5E6E2"],"X":["#51562D","#3B5940","#644F32","#4E5071","#235B53"],"D":["#83875C","#6B8C6F","#988061","#8081A5","#568E84"],"d":["#292010","#362D1D","#F2EDE6","#C3BAAD","#83875C"]},{"n":"Sunset grass","i":"(the scene image)","p":"#EAEDEE","s":"#CACCCE","k":"#2D2929","k2":"#646060","L":["#936E34","#717940","#A46451","#317BAA","#4B8056"],"T":["#F1E0CC","#E2E4D0","#F7DDD5","#D4E4F6","#D5E7D7"],"X":["#6E4C0C","#4D571C","#80402E","#005988","#245D33"],"D":["#D6A967","#AEB675","#EA9E87","#70B8EE","#83BE8D"],"d":["#2D1E1F","#3A2A2B","#E7EFF4","#CCB7B7","#D6A967"]},{"n":"Grey hills","i":"(the scene image)","p":"#ECECEB","s":"#CCCCCA","k":"#252B30","k2":"#5B6268","L":["#37729A","#666998","#00788B","#86683F","#886087"],"T":["#DAE4ED","#E2E1ED","#D5E5EA","#EAE1D7","#E9DFE9"],"X":["#315671","#4E5070","#1B5A67","#644F33","#654964"],"D":["#6488A5","#8081A4","#538C9A","#988062","#987A97"],"d":["#122330","#1F303D","#EEEEE7","#B0BDC9","#6488A5"]},{"n":"Moon lake","i":"(the scene image)","p":"#EAEDED","s":"#C9CDCD","k":"#282A2E","k2":"#5F6165","L":["#877248","#6C7A4D","#9A6954","#5078A0","#4E7F61"],"T":["#E8E2D7","#E1E4D8","#EEE0DA","#DCE3EE","#D9E5DD"],"X":["#605033","#4C5636","#6D4A3B","#385572","#375A44"],"D":["#C2AE8C","#ABB591","#D2A795","#97B3D4","#93BAA0"],"d":["#1A222E","#272F3B","#E5F0F0","#B4BCCA","#C2AE8C"]},{"n":"Pastel trees","i":"(the scene image)","p":"#F0ECEA","s":"#D0CBC9","k":"#342530","k2":"#6D5C68","L":["#9E6474","#966B50","#8E688D","#368075","#8F6E4B"],"T":["#F3DDE2","#EDE0D9","#EBDFEA","#D4E6E2","#ECE0D6"],"X":["#7B4052","#6B4C38","#684867","#185C53","#684D2F"],"D":["#C08092","#CFA992","#AA87A9","#5D9E92","#AC8C6B"],"d":["#311A2B","#3E2738","#F5ECE8","#C6B7C2","#C08092"]},{"n":"Lilac bridge","i":"(the scene image)","p":"#EEECEA","s":"#CECCCA","k":"#312825","k2":"#695F5A","L":["#816B9C","#996582","#5A76A1","#657B51","#A16467"],"T":["#E8DFF1","#F0DEE7","#DCE3F2","#DEE5D6","#F4DDDE"],"X":["#5E497A","#75425F","#34547D","#42592F","#7C4146"],"D":["#917AAF","#AA7392","#6885B2","#738B5E","#B37276"],"d":["#2F1E16","#3C2A22","#F3EDE6","#CAB8B0","#917AAF"]}];
+    const now = new Date();
+    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (this.props.day ?? 0));
+    const doy = Math.floor((day - new Date(day.getFullYear(), 0, 0)) / 86400000);
+    const n = TH.length;
+    let seed = day.getFullYear() * 97 + Math.floor(doy / n) + 1;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const order = TH.map((_, i) => i);
+    for (let i = n - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const x = order[i]; order[i] = order[j]; order[j] = x; }
+    const t = TH[order[doy % n]];
+    let v = '--paper:' + t.p + ';--sd:' + t.s + ';--ink:' + t.k + ';--ink2:' + t.k2 + ';';
+    for (let i = 0; i < 5; i++) v += '--l' + i + ':' + t.L[i] + ';--t' + i + ':' + t.T[i] + ';--x' + i + ':' + t.X[i] + ';--d' + i + ':' + t.D[i] + ';';
+    const ramp = ['var(--sd)', 'var(--t0)', 'var(--d0)', 'var(--l0)', 'var(--x0)'];
+    const cells = [];
+    let s = 7;
+    for (let i = 0; i < 154; i++) {
+      s = (s * 9301 + 49297) % 233280;
+      const r = s / 233280;
+      const week = Math.floor(i / 7);
+      let lvl = r < 0.12 ? 0 : r < 0.3 ? 1 : r < 0.55 + week / 220 ? 2 : r < 0.85 ? 3 : 4;
+      if (week > 13) lvl = Math.max(lvl, 2);
+      cells.push(ramp[lvl]);
+    }
+    return { vars: v, img: t.i, cells: cells };
+  }
+}
+</script>
+
+
+</body></html>

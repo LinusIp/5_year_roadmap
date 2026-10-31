@@ -23,7 +23,7 @@ const SCREENS: { name: string; path: string; running?: boolean }[] = [
   { name: 'Calendar, week', path: './#/calendar?view=week' },
   { name: 'Library', path: './#/library' },
   { name: 'Plan', path: './#/plan' },
-  { name: 'Activity', path: './#/activity' },
+  { name: 'Stats', path: './#/activity' },
 ];
 
 /** Elements whose box reaches past the viewport, leaving out what a horizontal scroller or sr-only clips. */

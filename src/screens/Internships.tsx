@@ -12,6 +12,7 @@ import type { InternProgress, Rating } from '../lib/internships.ts';
 import { useQueryParam } from '../router/router.tsx';
 import type { InternProject, InternshipGoal, Target } from '../seed/internships.ts';
 import { Button } from '../ui/Button.tsx';
+import { Icon } from '../ui/Icon.tsx';
 import { Chips } from '../ui/Chips.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
@@ -51,51 +52,57 @@ function Targets({ goal, progress, today, atlas, onRoadmap }: GoalProps & { atla
   const firstOpenSource = goal.open_source.find((o) => o.target);
   return (
     <>
-      <section aria-labelledby="intern-next" className="tile mt-6 flex flex-col gap-2 overflow-hidden p-[18px]">
-        {/* The countdown (ATLAS-DAILY-SCENES): the days to the next application over the scene, on its fade. */}
+      <section aria-labelledby="intern-next" className="tile mt-4 flex flex-col overflow-hidden !p-0">
+        {/* The countdown (the mockup's): the days to the next application in the second lane's text colour, over the scene. */}
         {next && (
-          <ScenePanel
-            slot="internships"
-            aspect="8 / 3"
-            focal="50% 35%"
-            decorative
-            bare
-            className="-mx-[18px] -mt-[18px] mb-1 rounded-t-[24px]"
-            bottom={
-              <p className="flex items-baseline gap-2">
-                <span className="text-[2.5rem] font-semibold leading-none text-blue-deep">{Math.max(0, next.days)}</span>
-                <span className="text-body font-medium">{(next.days === 1 ? 'day' : 'days') + ' to the next application'}</span>
-              </p>
-            }
-          />
+          <div className="relative h-[130px]">
+            <ScenePanel slot="internships" decorative bare focal="50% 35%" className="absolute inset-0 rounded-t-[24px]" fallback={<div className="lane-tile lane-1 absolute inset-0 rounded-t-[24px]" />} />
+            <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_25%,var(--bg)_92%)]" />
+            <p className="absolute bottom-1.5 left-[18px] flex items-baseline gap-2">
+              <span className="text-[40px] font-black leading-none text-[var(--x1)]">{Math.max(0, next.days)}</span>
+              <span className="text-body font-semibold">{(next.days === 1 ? 'day' : 'days') + ' to the next application'}</span>
+            </p>
+          </div>
         )}
-        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <p className="section-label mb-0">Next application</p>
-          {next && <span className="text-meta text-ink2">{'wave ' + next.target.wave + ' of ' + waves + ' · ' + daysToApply(next.days) + ' · ' + next.target.apply.label}</span>}
-        </div>
-        {next ? (
-          <>
-            <h2 id="intern-next" className="text-card font-semibold leading-tight">
-              {next.target.title}
+        <div className="flex flex-col gap-2.5 px-[18px] pb-[18px] pt-1">
+          {next ? (
+            <>
+              <h2 id="intern-next" className="text-[17px] font-semibold leading-tight">
+                {next.target.title}
+              </h2>
+              <p className="text-label text-ink2">{[next.target.location, next.target.req, next.target.degree, 'wave ' + next.target.wave + ' of ' + waves + ' · ' + daysToApply(next.days) + ' · ' + next.target.apply.label].join(' · ')}</p>
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="section-label mb-0 uppercase">Gate to apply</span>
+                <span className="text-label font-semibold text-[var(--x1)] tabular-nums">{gate.done + ' of ' + gate.total}</span>
+              </div>
+              <ProgressLine value={gate.total ? gate.done / gate.total : 0} label={'Gate to apply: ' + gate.done + ' of ' + gate.total + ' done'} lane={1} size={12} />
+              <ul className="flex flex-col gap-2">
+                {phase.gate.map((g) => {
+                  const done = progress.gates[g.id] === true;
+                  return (
+                    <li key={g.id} className="flex items-center gap-2.5">
+                      <span aria-hidden="true" className={'grid size-[22px] shrink-0 place-items-center rounded-[7px] ' + (done ? 'lane-fill lane-1 text-[var(--on-lane)]' : 'well !rounded-[7px]')}>{done && <Icon name="check" size={12} />}</span>
+                      <span className={'text-meta ' + (done ? '' : 'text-ink2')}>
+                        {g.text}
+                        <span className="sr-only">{done ? ', done' : ', to do'}</span>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+              <Button variant="filled" lane={1} icon="plan" className="mt-1 w-full" onClick={() => onRoadmap(phase.id)}>
+                Open roadmap
+              </Button>
+            </>
+          ) : (
+            <h2 id="intern-next" className="pt-3 text-body font-medium">
+              Every dated application is in, or its date has passed.
             </h2>
-            <p className="text-meta text-ink2">{next.target.location + ' · ' + next.target.req + ' · ' + next.target.degree}</p>
-            <div className="mt-2 flex items-baseline justify-between gap-3">
-              <span className="text-body font-medium">Gate to apply</span>
-              <span className="text-meta text-ink2 tabular-nums">{gate.done + ' of ' + gate.total + ' done'}</span>
-            </div>
-            <ProgressLine value={gate.total ? gate.done / gate.total : 0} label={'Gate to apply: ' + gate.done + ' of ' + gate.total + ' done'} />
-            <Button variant="filled" icon="plan" className="mt-2 w-full" onClick={() => onRoadmap(phase.id)}>
-              Open roadmap
-            </Button>
-          </>
-        ) : (
-          <h2 id="intern-next" className="text-body font-medium">
-            Every dated application is in, or its date has passed.
-          </h2>
-        )}
+          )}
+        </div>
       </section>
 
-      <RowList label="Targets" className="mt-4" aside="apply in this order">
+      <RowList label={'Targets · ' + plural(targets.length, 'role')} className="mt-4" aside="apply in this order">
         {targets.map((t) => {
           const status = targetStatus(t, progress);
           const expanded = open === t.id;
@@ -105,7 +112,7 @@ function Targets({ goal, progress, today, atlas, onRoadmap }: GoalProps & { atla
               title={t.title}
               meta={'Wave ' + t.wave + ' · ' + t.location + ' · ' + t.apply.label + ' · ' + targetStatusLabel(status)}
               metaWraps
-              trailing={<span className={t.fit === 'strong' ? 'font-semibold text-blue-deep' : t.fit === 'stretch' ? 'font-semibold text-ice-deep' : undefined}>{fitLabel(t.fit)}</span>}
+              trailing={<span className={'rounded-pill px-2.5 py-[3px] text-small font-semibold pill-tint ' + (t.fit === 'strong' ? 'lane-1' : t.fit === 'stretch' ? 'lane-2' : 'lane-0')}>{fitLabel(t.fit)}</span>}
               expanded={expanded}
               onClick={() => setOpen(expanded ? null : t.id)}
             >
@@ -185,7 +192,7 @@ function Roadmap({ goal, progress, today, atlas, phaseId, onPhase, onItem }: Goa
   return (
     <>
       <div className="mt-6">
-        <SegmentedControl label="Phase" value={phase.id} onChange={onPhase} options={phases.map((p) => ({ value: p.id, label: String(p.n) }))} />
+        <SegmentedControl label="Phase" value={phase.id} onChange={onPhase} options={phases.map((p) => ({ value: p.id, label: String(p.n) }))} lane={1} />
       </div>
       <section aria-labelledby="intern-phase" className="tile mt-4 flex flex-col gap-1.5 p-[18px]">
         <h2 id="intern-phase" className="text-card font-semibold leading-tight">
@@ -262,7 +269,7 @@ function ProjectCard({ goal, project, progress }: { goal: InternshipGoal; projec
         <div className="flex items-center gap-2.5">
           <Button variant="icon" icon="minus" className={knob} label={'Project ' + project.code + ' progress down'} onClick={() => void setProjectProgress(goal.goal.id, project.id, value - 0.1)} />
           <div className="flex-1">
-            <ProgressLine value={value} label={'Project ' + project.code + ' progress'} />
+            <ProgressLine value={value} label={'Project ' + project.code + ' progress'} lane={1} size={12} />
           </div>
           <span className="w-10 text-right text-meta text-ink2 tabular-nums">{Math.round(value * 100) + '%'}</span>
           <Button variant="icon" icon="plus" className={knob} label={'Project ' + project.code + ' progress up'} onClick={() => void setProjectProgress(goal.goal.id, project.id, value + 0.1)} />
@@ -376,12 +383,11 @@ export function Internships() {
   const progress = useInternProgress(goal?.goal.id ?? null);
   const today = todayDate();
   const tab: Tab = TABS.some((t) => t.value === tabParam) ? (tabParam as Tab) : 'targets';
-  const back = <Button variant="icon" icon="chevronLeft" label="Back to Plan" to="/plan" />;
 
   if (!atlas || goals === null || (goal && !progress)) {
     return (
       <Screen title="Internships">
-        <Header title="Internships" back={back} />
+        <Header title="Internships" backTo="/plan" backLabel="Back to Plan" />
         <p className="pt-6 text-meta text-ink2" role="status">
           Loading…
         </p>
@@ -391,7 +397,7 @@ export function Internships() {
   if (!goal || !progress) {
     return (
       <Screen title="Internships">
-        <Header title="Internships" back={back} sub="No goal yet" />
+        <Header title="Internships" backTo="/plan" backLabel="Back to Plan" sub="No goal yet" />
         <EmptyState>No internship goal yet. Add one as data/internships.json and rebuild.</EmptyState>
       </Screen>
     );
@@ -406,14 +412,14 @@ export function Internships() {
 
   return (
     <Screen title="Internships">
-      <Header title="Internships" back={back} sub={sub} />
+      <Header title="Internships" backTo="/plan" backLabel="Back to Plan" sub={sub} />
       {goals.length > 1 && (
         <div className="mt-3">
           <Chips label="Goal" items={goals.map((g) => ({ key: g.goal.id, label: g.goal.title, pressed: g.goal.id === goal.goal.id, onClick: () => setGoalParam(g.goal.id === goals[0]!.goal.id ? null : g.goal.id) }))} />
         </div>
       )}
-      <div className="mt-5">
-        <SegmentedControl label="Section" value={tab} onChange={(v) => setTab(v === 'targets' ? null : v)} options={TABS} />
+      <div className="mt-4">
+        <SegmentedControl label="Section" value={tab} onChange={(v) => setTab(v === 'targets' ? null : v)} options={TABS} lane={1} />
       </div>
       {tab === 'targets' && <Targets goal={goal} progress={progress} today={today} atlas={atlas} onRoadmap={openRoadmap} />}
       {tab === 'roadmap' && <Roadmap goal={goal} progress={progress} today={today} atlas={atlas} phaseId={phaseParam} onPhase={(id) => setPhase(id)} onItem={(id) => setItem(id, { replace: false })} />}

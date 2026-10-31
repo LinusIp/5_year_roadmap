@@ -33,7 +33,6 @@ export function SleepSettings() {
             </span>
           }
         />
-        <Row title="Ask how I slept" meta="A row at the top of Today in the morning, until 12:00" toggle={{ on: sleep.prompt, onChange: (on) => void saveSleepSettings((s) => ({ ...s, prompt: on })) }} />
       </RowList>
     </Section>
   );

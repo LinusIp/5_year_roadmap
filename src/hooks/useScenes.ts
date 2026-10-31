@@ -60,11 +60,14 @@ export interface CurrentScene {
   day: Date;
 }
 
-/** Today's scene, or null with the daily scene switched off. */
-export function useCurrentScene(): CurrentScene {
-  const prefs = useScenePrefs();
-  const day = useLocalDay();
+/** The scene for a day under some preferences (the pure half of `useCurrentScene`). */
+export function currentSceneFor(prefs: ScenePrefs, day: Date): CurrentScene {
   if (!prefs.on) return { scene: null, why: null, prefs, day };
   const picked = pickScene(SCENES, day, prefs);
   return { scene: picked?.scene ?? null, why: picked?.why ?? null, prefs, day };
+}
+
+/** Today's scene, or null with the daily scene switched off. */
+export function useCurrentScene(): CurrentScene {
+  return currentSceneFor(useScenePrefs(), useLocalDay());
 }

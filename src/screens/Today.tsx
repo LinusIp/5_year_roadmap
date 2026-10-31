@@ -5,20 +5,19 @@ import { useCatalogueIndex, useChallengeEvents } from '../hooks/useCatalogue.ts'
 import { dailyChallenge, isSlotDay, languageOf, weeklyChallenge } from '../lib/catalogue/daily.ts';
 import type { Pick as ChallengePick } from '../lib/catalogue/daily.ts';
 import { groupLabel } from '../lib/catalogue/filters.ts';
-import { updateSettings } from '../db/settings.ts';
 import { editItemState, setWeekPick, useWeekPick } from '../db/state.ts';
 import { startTimer, stopTimer, useRunningTimer } from '../db/timer.ts';
 import { useAtlas } from '../hooks/useAtlas.ts';
 import type { Atlas } from '../hooks/useAtlas.ts';
 import { useUnits } from '../hooks/useUnits.ts';
 import { addDays, dayName, formatLong, formatStopwatch, monthName, startOfWeek, today as todayDate } from '../lib/dates.ts';
-import { editLog, isBlockDone, minutesByBlock, minutesForRef, readLog, toggleBlockDone, totalMinutes } from '../lib/logs.ts';
+import { editLog, emptyLog, isBlockDone, minutesByBlock, minutesForRef, readLog, setBlockMinutes, toggleBlockDone, totalMinutes } from '../lib/logs.ts';
 import { plannedFor } from '../lib/day-plan.ts';
 import { catchUpMinutes, laneBalance } from '../lib/pace.ts';
 import { planForDay, suggestWeeklyBuild } from '../lib/schedule.ts';
 import type { ScheduledItem, TodayBlock } from '../lib/schedule.ts';
+import type { DayLog } from '../db/types.ts';
 import { counts as dayCounts, dailyTotals, heatLevel, relativeLevel, streak } from '../lib/streaks.ts';
-import { blockTally } from '../lib/blocks-today.ts';
 import { ArtPanel } from '../ui/ArtPanel.tsx';
 import { useArtSettings } from '../hooks/useArt.ts';
 import { SCENES, useCurrentScene } from '../hooks/useScenes.ts';
@@ -39,18 +38,17 @@ import { activePhase } from '../lib/schedule.ts';
 import { resolveTheme } from '../lib/theme.ts';
 import { Link, useQueryParam } from '../router/router.tsx';
 import { isRealIsoDate } from '../seed/schema.ts';
-import type { BlockId } from '../seed/schema.ts';
+import type { BlockId, TrackId } from '../seed/schema.ts';
 import { Button } from '../ui/Button.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Icon } from '../ui/Icon.tsx';
-import { BlockIcon, BlockTile, IconTile, KindIcon } from '../ui/glyphs.tsx';
+import { blockIconName, BlockTile, IconTile, KindIcon } from '../ui/glyphs.tsx';
 import { checkBlogPost, useBlogPosts } from '../db/blog.ts';
 import { blogReminderDue } from '../lib/blog.ts';
-import { useSleep, useSleepSettings } from '../db/sleep.ts';
+import { useSleep } from '../db/sleep.ts';
 import { useInternSummaries } from '../hooks/useInternships.ts';
 import { roleName } from '../lib/internships.ts';
 import { lengthText, timeOf } from '../lib/sleep.ts';
-import { blockTone, toneInk } from '../ui/colors.ts';
 import { ProgressLine } from '../ui/ProgressLine.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
 import { Screen } from '../ui/Screen.tsx';
@@ -76,6 +74,43 @@ import { blockShort, dateTitle, nameOf, partOf, span, unitDetail } from './parts
 import { todayLine, tokenDaysLeft, useSyncView } from '../sync/status.ts';
 
 type SheetName = 'date' | 'day' | 'note' | 'change' | 'lessons' | null;
+
+/**
+ * The check-in (the redesign mockup's "how did it go?" card): the last block whose window passed with nothing logged,
+ * today's or last night's, with one tap to log its hours as planned, half of them, or to mark it skipped.
+ */
+interface CheckIn {
+  date: string;
+  block: BlockId;
+  lane: number;
+  name: string;
+  item: string | null;
+  window: string;
+  target: number;
+  track: TrackId;
+  refId: string | undefined;
+  answer: 'planned' | 'partly' | 'skipped' | null;
+  /** The day as it was before the answer logged to it, for Undo. */
+  before?: DayLog;
+}
+
+/** Check-ins marked skipped ("2026-10-30:E"), on this device, the last thirty. */
+const SKIPPED_KEY = 'atlas.checkins';
+function readSkipped(): string[] {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(SKIPPED_KEY) ?? '[]');
+    return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+function writeSkipped(list: string[]): void {
+  try {
+    localStorage.setItem(SKIPPED_KEY, JSON.stringify(list.slice(-30)));
+  } catch {
+    // Storage blocked: the answer still holds for this page.
+  }
+}
 
 /** The item a block puts in front of you. Block D carries the week's build first, then the monthly project. */
 /**
@@ -215,7 +250,6 @@ export function Today() {
   const timer = useRunningTimer();
   const blogPosts = useBlogPosts();
   const nights = useSleep();
-  const sleepSettings = useSleepSettings();
   // Internships: the first goal with an upcoming application has a card.
   const internSummary = useInternSummaries(now)?.find((g) => g.card) ?? null;
   const internCard = internSummary?.card ? { goal: internSummary.goal, name: internSummary.name, card: internSummary.card } : null;
@@ -230,6 +264,11 @@ export function Today() {
   // "Keep going" answers the prompt to move on for that block's end, for the rest of the session.
   const [keptGoing, setKeptGoing] = useState<Set<string>>(() => readKept());
   const log = useLiveQuery(() => readLog(date), [date]);
+  // Last night's block for the check-in: yesterday's log, and the answer given (or being undone).
+  const yesterday = addDays(now, -1);
+  const yesterdayLog = useLiveQuery(() => readLog(yesterday), [yesterday]);
+  const [checkIn, setCheckIn] = useState<CheckIn | null>(null);
+  const [skippedList, setSkippedList] = useState<string[]>(() => readSkipped());
   // "Detect my post automatically", when it is on: once an evening, from 21:00, on today.
   const eveningCheck = date === now && minuteNow >= 21 * 60;
   useEffect(() => {
@@ -273,6 +312,9 @@ export function Today() {
     }
     return day;
   }, [date, settings, weekPick, ctx, atlas]);
+
+  // Yesterday's plan, for the check-in's target and item.
+  const yesterdayPlan = useMemo(() => (settings && ctx ? planForDay({ date: yesterday, settings, weeklyPickId: weekPick?.projectId, ctx }) : null), [yesterday, settings, weekPick, ctx]);
 
   const pickAnother = useCallback(() => {
     if (!plan || !ctx) return;
@@ -336,8 +378,6 @@ export function Today() {
     met: t.minutes > 0 && ((t.planned ?? 0) > 0 ? t.minutes >= (t.planned ?? 0) : false),
     counted: dayCounts(t, settings.core.streak),
   }));
-  // Blocks today: done, under way (minutes short of the target, or the timer on it), or not yet.
-  const tally = blockTally(blocks, (id) => Math.floor(blockMs(id) / 60_000), (id) => blocks.some((b) => b.id === id && done(b)), timer?.block ?? null);
   const restDay = plan.resolved.rest;
   const nothingPlanned = !restDay && blocks.every((b) => b.kind === 'empty' && !b.weeklyBuild);
   // The day's template is named in the header only when it is not the usual Full day.
@@ -372,7 +412,6 @@ export function Today() {
   // The illustrations (ATLAS-ART): the header's picture by the hour, the season or the block's track, and a card
   // on the day a streak reaches 7, 30 or 100, a path's last step is ticked, or the phase's lanes are all done.
   const finish = art.on && isToday ? finishCard(atlas, date, streakState.current) : null;
-  const nextTheme = theme === 'dark' ? 'light' : 'dark';
 
   /** Hours already put into a project, over every day: "2 of 4 h done". */
   const hoursOn = (refId: string): number => Math.round(atlas.logs.reduce((sum, l) => sum + minutesForRef(l, refId), 0) / 60);
@@ -415,10 +454,58 @@ export function Today() {
   const blogDue = isToday && blogPosts !== undefined && blogReminderDue({ slots: placed, minute: minuteNow, log, runningBlock: timer?.block, posted: blogPosted });
   const blogTo = isToday ? '/blog' : '/blog?date=' + date;
   const showBlogRow = date <= now && blogPosts !== undefined;
-  // Sleep (SLEEP-LOG): the night that ended this morning, and the morning question until 12:00, while none is logged.
+  // Sleep (SLEEP-LOG): the night that ended this morning.
   const slept = nights?.find((n) => n.date === date);
   const sleepTo = date === now ? '/sleep' : '/sleep?date=' + date;
-  const sleepAsk = isToday && nights !== undefined && !slept && sleepSettings?.prompt === true && minuteNow < 12 * 60;
+  // The check-in's candidate: today's latest block whose window passed with nothing logged and not marked done, else
+  // last night's; one marked skipped is not asked again; an answer given shows its card until Undo.
+  if (isToday && checkIn === null && yesterdayLog !== undefined) {
+    const candidateOn = (d: string, dayPlan: typeof plan | null, dayLog: DayLog | undefined, endBefore: number): CheckIn | null => {
+      if (!dayPlan) return null;
+      const minutesOn = minutesByBlock(dayLog);
+      const slots = dayLayout(d, settings)
+        .filter((p) => p.start + p.minutes <= endBefore && (minutesOn[p.id] ?? 0) === 0 && !isBlockDone(dayLog, p.id) && !skippedList.includes(d + ':' + p.id))
+        .sort((a, b) => b.start + b.minutes - (a.start + a.minutes));
+      const slot = slots[0];
+      const block = slot ? dayPlan.blocks.find((b) => b.id === slot.id) : undefined;
+      if (!slot || !block || block.kind === 'review' || block.kind === 'empty' || block.targetMinutes <= 0) return null;
+      const blockItem = focusItem(block, monthlyFirst);
+      return { date: d, block: block.id, lane: laneSlot(block.id), name: blockShort(block.def.name), item: blockItem ? nameOf(blockItem) : null, window: formatWindow(slot.start, slot.minutes), target: block.targetMinutes, track: blockItem?.track ?? 'career', refId: blockItem?.refId, answer: null };
+    };
+    const candidate = candidateOn(date, plan, log, minuteNow) ?? (!dayLayout(yesterday, settings).length ? null : candidateOn(yesterday, yesterdayPlan, yesterdayLog, 24 * 60 + 1));
+    if (candidate && (checkIn as CheckIn | null)?.block !== candidate.block) setCheckIn(candidate);
+  }
+  const answerCheckIn = async (answer: 'planned' | 'partly' | 'skipped'): Promise<void> => {
+    const c = checkIn;
+    if (!c || c.answer) return;
+    if (answer === 'skipped') {
+      const next = [...skippedList, c.date + ':' + c.block];
+      setSkippedList(next);
+      writeSkipped(next);
+      setCheckIn({ ...c, answer });
+      return;
+    }
+    const minutes = answer === 'planned' ? c.target : Math.round(c.target / 2 / 5) * 5;
+    let before: DayLog | undefined;
+    await editLog(c.date, (l) => {
+      before = l;
+      return setBlockMinutes(l, c.block, c.track, c.refId, minutes);
+    });
+    setCheckIn({ ...c, answer, before });
+  };
+  const undoCheckIn = async (): Promise<void> => {
+    const c = checkIn;
+    if (!c || !c.answer) return;
+    if (c.answer === 'skipped') {
+      const next = skippedList.filter((k) => k !== c.date + ':' + c.block);
+      setSkippedList(next);
+      writeSkipped(next);
+    } else {
+      const before = c.before;
+      await editLog(c.date, () => before ?? emptyLog(c.date));
+    }
+    setCheckIn(null);
+  };
   const extrasNote = (id: BlockId): string | null => {
     const rows = extrasFor(id);
     return rows.length ? rows.map((r) => r.key.toLowerCase() + (r.trailing === 'Done' ? ' done' : '')).join(', ') : null;
@@ -524,52 +611,181 @@ export function Today() {
       : undefined;
   // The block by name; the item it works on leads the line under it, after the time.
   const headline = nowBlock ? (nowBlock.kind === 'review' ? 'Weekly review and paper' : item && nowBlock.weeklyBuild === item ? nameOf(item) : item ? nowBlock.def.name : nowBlock.id === 'D' ? 'No project this week' : (nowBlock.emptyReason ?? 'Nothing planned')) : '';
-  const metaLine = nowBlock
+  const linkClass = 'inline-flex min-h-11 items-center gap-2 text-button font-medium text-blue-deep';
+
+
+  // The header row (the mockup's): the wordmark, the date (a tap picks a day), and the knobs. The mockup has one knob,
+  // Daily scenes; Settings and Change today have no other home, so their knobs stay (DECISIONS.md, pull request #43).
+  const knobClass = 'tile grid size-11 shrink-0 place-items-center rounded-[14px] text-[var(--x0)]';
+  const headerRow = (
+    <header className="flex items-center gap-2.5 px-1 pt-[max(44px,env(safe-area-inset-top))]">
+      <span aria-hidden="true" className="flex shrink-0 items-center gap-1.5">
+        <img src={'./brand/atlas-mark-' + theme + '.png'} width={26} height={26} alt="" className="max-[359px]:hidden" />
+        <span className="text-[24px] font-black tracking-[-0.01em]">Atlas</span>
+      </span>
+      <button type="button" className="min-h-11 min-w-0 flex-1 truncate text-left text-meta font-semibold text-[var(--x0)]" onClick={() => setSheet('date')} aria-haspopup="dialog" aria-label={shortDate(date) + (isToday ? ', today' : '') + ', pick a date'}>
+        {shortDate(date) + (previewDay ? ' (preview)' : '')}
+      </button>
+      <span className="flex shrink-0 gap-2">
+        {canChange && (
+          <button type="button" className={knobClass} aria-label={isToday ? 'Change today' : 'Change ' + dateTitle(date)} aria-haspopup="dialog" onClick={() => setSheet('change')}>
+            <Icon name="sliders" size={20} />
+          </button>
+        )}
+        <Link to="/settings" className={knobClass} aria-label="Settings">
+          <Icon name="gear" size={20} />
+        </Link>
+        <Link to="/scenes" className={knobClass} aria-label="Daily scenes">
+          <Icon name="image" size={20} />
+        </Link>
+      </span>
+    </header>
+  );
+
+  // The greeting on the picture, by the clock; another day is named instead.
+  const greeting = !isToday ? dateTitle(date) : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const sceneLine = sceneShown
+    ? previewDay
+      ? (sceneShift === 1 ? 'Tomorrow' : sceneShift === -1 ? 'Yesterday' : shortDate(todayDate(previewDay))) + ' · ' + sceneShown.name
+      : (current.why === 'pinned' ? 'Pinned scene · ' : 'Today’s scene · ') + sceneShown.name
+    : '';
+
+  // The day's hours (the mockup's ring tile): the number in 36/900 with a ring of the day's share, or the running
+  // timer with when it started.
+  const dayFraction = plan.targetMinutes > 0 ? Math.min(1, dayMinutes / plan.targetMinutes) : 0;
+  const RING = 2 * Math.PI * 26;
+  const hoursTile =
+    layout.stats || nowRunning || otherRunning ? (
+      <section aria-label="Today's hours" className="tile mt-[18px] flex items-center gap-[18px] px-5 py-[18px]">
+        <svg viewBox="0 0 64 64" className="size-16 shrink-0" role="img" aria-label={Math.round(dayFraction * 100) + " percent of today's plan"}>
+          <circle cx="32" cy="32" r="26" fill="none" stroke="var(--sd)" strokeWidth="8" />
+          <circle cx="32" cy="32" r="26" fill="none" stroke="var(--l0)" strokeWidth="8" strokeLinecap="round" strokeDasharray={dayFraction * RING + ' ' + RING} transform="rotate(-90 32 32)" />
+        </svg>
+        {nowRunning || otherRunning ? (
+          <p className="flex min-w-0 flex-1 flex-col">
+            {/* The block's total for today, not this run alone: a restart continues from it. */}
+            <span role="timer" aria-label={'Running, ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'} className="text-[36px] font-black leading-none tabular-nums text-[var(--x0)]">
+              {formatStopwatch(blockMs(timer!.block))}
+            </span>{' '}
+            <span className="mt-1.5 text-meta text-ink2">
+              <span className="font-semibold text-[var(--x0)]">Running</span>
+              {' · since ' + clockOf(timer!.startedAt) + ' · ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'}
+            </span>
+          </p>
+        ) : (
+          <p className="flex min-w-0 flex-1 flex-col">
+            <span className="text-[36px] font-black leading-none">{span(dayMinutes)}</span>{' '}
+            <span className="mt-1.5 text-meta text-ink2">{'of ' + span(plan.targetMinutes) + ' today' + (templateNote ? ' · ' + templateNote : '') + ' · ' + (streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet')}</span>
+          </p>
+        )}
+      </section>
+    ) : null;
+
+  // The check-in (the mockup's "how did it go?" card): the last block whose window passed with nothing logged, today's
+  // or last night's; one tap logs its hours as planned, half of them, or marks it skipped, with Undo.
+  const checkInCard = checkIn ? (
+    checkIn.answer ? (
+      <section aria-label="Check-in" className="tile mt-4 flex items-center gap-3 px-[18px] py-3.5">
+        <IconTile icon="check" size={44} lane={checkIn.lane} />
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="text-chip font-medium leading-tight">{checkIn.answer === 'planned' ? 'Logged ' + span(checkIn.target) + ' to ' + checkIn.name : checkIn.answer === 'partly' ? 'Logged ' + span(Math.round(checkIn.target / 2 / 5) * 5) + ' to ' + checkIn.name : 'Marked as skipped'}</span>
+          {checkIn.item && <span className="truncate text-label text-ink2">{checkIn.item}</span>}
+        </span>
+        <Button size="sm" onClick={() => void undoCheckIn()}>
+          Undo
+        </Button>
+      </section>
+    ) : (
+      <section aria-label="Check-in" className="tile mt-4 flex flex-col gap-3 px-[18px] py-4">
+        <div className="flex items-start gap-3">
+          <IconTile icon={blockIconName(checkIn.block)} size={44} lane={checkIn.lane} />
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className={'section-label mb-0 uppercase text-[var(--x' + checkIn.lane + ')]'}>{(checkIn.date === now ? 'Earlier' : 'Last night') + ' · ' + checkIn.window}</span>
+            <span className="text-body font-medium leading-tight">{checkIn.name + ': how did it go?'}</span>
+            <span className="text-label text-ink2">No timer ran. One tap logs it.</span>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="filled" lane={checkIn.lane as 0 | 1 | 2 | 3 | 4} className="flex-[1.3] !px-2.5" name={'As planned: log ' + span(checkIn.target) + ' to ' + checkIn.name} onClick={() => void answerCheckIn('planned')}>
+            As planned
+          </Button>
+          <Button className="flex-1 !px-2.5" name={'Partly: log ' + span(Math.round(checkIn.target / 2 / 5) * 5) + ' to ' + checkIn.name} onClick={() => void answerCheckIn('partly')}>
+            Partly
+          </Button>
+          <Button className="flex-1 !px-2.5" name={'Skipped ' + checkIn.name} onClick={() => void answerCheckIn('skipped')}>
+            Skipped
+          </Button>
+        </div>
+      </section>
+    )
+  ) : null;
+
+  const nowLane = nowBlock ? laneSlot(nowBlock.id) : 0;
+  // The line under the bar (the mockup's "55 m of 2 h", with what the block works on after it): the hours, the item,
+  // the catch-up, where in it you are, and done.
+  const nowHours = nowBlock
     ? [
         span(nowMinutes) + ' of ' + span(nowBlock.targetMinutes),
         item && headline !== nameOf(item) ? nameOf(item) : null,
         nowBlock.catchUp ? span(nowBlock.catchUp) + ' of it catch-up' : null,
         lessons ? checklistMeta(lessons, unitsDone) : detailOf(item),
-        isProject && item.unitCount > 0 ? item.unitsDone + ' of ' + item.unitCount + ' ticked' : null,
+        isProject && item && item.unitCount > 0 ? item.unitsDone + ' of ' + item.unitCount + ' ticked' : null,
         nowDone ? 'done' : null,
       ]
         .filter(Boolean)
         .join(' · ')
     : '';
-  const linkClass = 'inline-flex min-h-11 items-center gap-2 text-button font-medium text-blue-deep';
+  const mix = nowBlock ? mixFor(settings.focus, nowBlock.id) : null;
 
-  // A block's row in Later today and its groups: its window on the right ("06:00–08:00", one line over another on a
-  // narrow phone, never cut). An earlier or done block says how far it got: "1 h 22 m of 2 h".
-  const blockRow = (block: TodayBlock, progress = false) => {
+  // A block's row in Later today and its groups (the mockup's NEXT row): its lane tile, its window as the label ("NEXT ·
+  // 18:00–20:00" on the first), the block and what it works on, a chevron. An earlier or done block says how far it got.
+  const blockRow = (block: TodayBlock, progress = false, first = false) => {
     const row = rowFor(block);
     const minutes = Math.floor(blockMs(block.id) / 60_000);
     const isTaken = Boolean(taken && block.id === 'D' && focusItem(block, monthlyFirst)?.refId === taken.id);
     const meta = progress
       ? [span(minutes) + ' of ' + span(block.targetMinutes), row.meta].join(' · ')
       : [minutes >= 1 ? span(minutes) + ' today' : null, row.meta, extrasNote(block.id)].filter(Boolean).join(' · ');
+    const body = (
+      <>
+        <BlockTile block={block.id} size={42} />
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="text-chip font-medium leading-tight">{row.title}</span>
+          {layout.view !== 'compact' && <span className="truncate text-label text-ink2">{meta}</span>}
+          <span className={'section-label mb-0 -order-1 whitespace-nowrap uppercase ' + (first ? 'text-[var(--x' + laneSlot(block.id) + ')]' : '')}>
+            {first && <span aria-hidden="true">Next · </span>}
+            {windowText(block.id)}
+          </span>
+        </span>
+        <Icon name="chevronRight" size={18} className="text-[var(--x0)]" />
+      </>
+    );
+    const cls = 'flex min-h-16 w-full items-center gap-3 py-2 text-left';
     return (
-      <Row
-        key={block.id}
-        className={isTaken ? 'taken' : ''}
-        icon={<BlockTile block={block.id} />}
-        title={row.title}
-        meta={layout.view === 'compact' ? undefined : meta}
-        trailing={<WindowTime text={windowText(block.id)} />}
-        to={row.to}
-        onClick={
-          row.to
-            ? undefined
-            : row.doc
-              ? () => setDoc({ id: row.doc!, block: block.id, from: 'later' })
-              : () => {
-                  setChosen(block.id);
-                  setExpanded(false);
-                  window.scrollTo(0, 0);
-                }
-        }
-      >
-        {isTaken && <span aria-hidden="true" className="taken-line absolute inset-x-0 bottom-0 h-0.5 bg-blue" />}
-      </Row>
+      <li key={block.id} className={'relative ' + (isTaken ? 'taken' : '')}>
+        {row.to ? (
+          <Link to={row.to} className={cls}>
+            {body}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className={cls}
+            onClick={
+              row.doc
+                ? () => setDoc({ id: row.doc!, block: block.id, from: 'later' })
+                : () => {
+                    setChosen(block.id);
+                    setExpanded(false);
+                    window.scrollTo(0, 0);
+                  }
+            }
+          >
+            {body}
+          </button>
+        )}
+        {isTaken && <span aria-hidden="true" className="taken-line absolute inset-x-0 bottom-0 h-0.5 bg-[var(--l0)]" />}
+      </li>
     );
   };
   const upcoming = [...groups.sessions.flatMap((g) => g.upcoming), ...unplaced.map((b) => b.id)];
@@ -582,72 +798,8 @@ export function Today() {
   ]
     .filter(Boolean)
     .join(' · ');
-
-  // The header row and the day's hours: on the illustration's fades, or on their own when the art is off.
-  // On the scene's picture (ATLAS-DAILY-SCENES) the mark and the date sit on one paper chip, so no fade is needed
-  // over the top of the picture; the knobs are paper already.
-  const headerRowFor = (onImage: boolean) => (
-    <>
-    <span className={'flex min-w-0 flex-1 items-center gap-1' + (onImage ? ' scene-chip !rounded-pill py-1 pr-1' : '')}>
-    <span aria-hidden="true" className="flex shrink-0 items-center gap-1.5 pl-1">
-      <img src={'./brand/atlas-mark-' + theme + '.png'} width={26} height={26} alt="" />
-      <span className="text-[1.125rem] font-semibold tracking-[-0.01em] max-[379px]:sr-only">Atlas</span>
-    </span>
-    <button type="button" className="min-h-11 min-w-0 flex-1 truncate rounded-pill px-1.5 text-left text-meta font-semibold text-blue-deep" onClick={() => setSheet('date')} aria-haspopup="dialog" aria-label={shortDate(date) + (isToday ? ', today' : '') + ', pick a date'}>
-      {shortDate(date)}
-    </button>
-    </span>
-    <span className="-mr-1.5 flex shrink-0">
-      {canChange && <Button variant="icon" icon="sliders" className="!size-11" label={isToday ? 'Change today' : 'Change ' + dateTitle(date)} onClick={() => setSheet('change')} />}
-      <Button variant="icon" icon="gear" className="!size-11" label="Settings" to="/settings" />
-      <Button
-        variant="icon"
-        icon={theme === 'dark' ? 'sun' : 'moon'}
-        className="!size-11"
-        label={'Switch to the ' + nextTheme + ' theme'}
-        onClick={() => void updateSettings(settings.core, (s) => ({ ...s, theme: nextTheme }))}
-      />
-    </span>
-    </>
-  );
-  const hero =
-    nowRunning || otherRunning ? (
-      <p className="flex flex-col items-center gap-1.5">
-        {/* The block's total for today, not this run alone: a restart continues from it. */}
-        <span role="timer" aria-label={'Running, ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'} className="text-big font-semibold tabular-nums text-blue-deep">
-          {formatStopwatch(blockMs(timer!.block))}
-        </span>{' '}
-        <span className="text-meta text-ink2">
-          <span className="font-semibold text-blue-deep">Running</span>
-          {' · since ' + clockOf(timer!.startedAt) + ' · ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'}
-        </span>
-      </p>
-    ) : layout.stats ? (
-      <p className="flex flex-col items-center gap-1.5">
-        <span className="text-big font-semibold">{span(dayMinutes)}</span>{' '}
-        <span className="text-meta text-ink2">{'of ' + span(plan.targetMinutes) + ' today' + (templateNote ? ' · ' + templateNote : '') + ' · ' + (streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet')}</span>
-      </p>
-    ) : null;
-
-  // On the scene's picture the hours are one line, so the fade under them stays low and the picture shows: the
-  // number in the lead size, the rest as meta. The plain tile and the illustrations' panel keep the big number.
-  const heroCompact =
-    nowRunning || otherRunning ? (
-      <p className="text-meta text-ink2">
-        <span role="timer" aria-label={'Running, ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'} className="text-lead font-semibold tabular-nums text-blue-deep">
-          {formatStopwatch(blockMs(timer!.block))}
-        </span>{' '}
-        <span>
-          <span className="font-semibold text-blue-deep">Running</span>
-          {' · since ' + clockOf(timer!.startedAt) + ' · ' + span(Math.floor(blockMs(timer!.block) / 60_000)) + ' on this block today'}
-        </span>
-      </p>
-    ) : layout.stats ? (
-      <p className="text-meta text-ink2">
-        <span className="text-lead font-semibold text-ink">{span(dayMinutes)}</span>
-        {' of ' + span(plan.targetMinutes) + ' today' + (templateNote ? ' · ' + templateNote : '') + ' · ' + (streakState.current > 0 ? streakState.current + '-day streak' : 'no streak yet')}
-      </p>
-    ) : null;
+  // The log tile: the blocks with hours are the topics the post has to write about.
+  const topics = Object.values(byBlock).filter((m) => m > 0).length;
 
   return (
     <Screen title="Today">
@@ -665,84 +817,95 @@ export function Today() {
       >
         {/* The page's title, for screen readers: the date. The mark and wordmark are decoration. */}
         <h1 className="sr-only">{dateTitle(date)}</h1>
-        {/* One row: the mark, the wordmark, the date, and the three knobs (change, settings, theme), 44 px each. With
-            the illustrations on it sits on the picture's upper fade and the day's hours on its lower one (one panel
-            in place of a header and a tile, so "Later today" stays above the fold at 390 x 844). */}
+        {headerRow}
+        {/* The scene (the mockup's 250 px tile): the picture from the top, the greeting and the scene's name on its fade,
+            the swatches on the right, the preview knobs at the top right. */}
         {current.scene && sceneShown ? (
           <ScenePanel
             slot="today"
             scene={sceneShown}
-            aspect="2 / 1"
             focal="50% 45%"
             eager
             alt={(previewDay ? 'Scene for ' + shortDate(todayDate(previewDay)) : 'Today’s scene') + ': ' + sceneShown.name}
-            className="mt-[max(0.75rem,env(safe-area-inset-top))] w-full max-[379px]:min-h-[190px]"
+            className="mt-[18px] h-[250px] w-full"
             bottom={
               <div className="flex items-end justify-between gap-3">
-                {/* The day's hours on the left (the hours tile folded in, as with the illustrations), the scene on the right. */}
-                <div className="min-w-0 flex-1">{heroCompact ?? <p className="text-meta text-ink2">{dateTitle(date)}</p>}</div>
-                <Link to="/scenes" className="flex min-h-11 shrink-0 flex-col items-end justify-center gap-0.5 rounded-knob text-right">
-                  <span className="max-w-[9.5rem] truncate text-meta font-semibold leading-tight">{previewDay ? (sceneShift === 1 ? 'Tomorrow' : sceneShift === -1 ? 'Yesterday' : shortDate(todayDate(previewDay))) + ' · ' + sceneShown.name : sceneShown.name}</span>
-                  <SceneSwatches scene={sceneShown} size={12} />
-                  <span className="text-small text-ink2">{previewDay ? 'A preview, not saved' : current.why === 'pinned' ? 'Pinned scene' : 'Today’s scene'}</span>
+                <Link to="/scenes" className="flex min-w-0 flex-1 flex-col rounded-knob">
+                  <span className="text-[22px] font-black leading-tight">{greeting}</span>
+                  <span className="truncate text-label text-ink2">{sceneLine}</span>
+                  {previewDay && <span className="text-label text-ink2">A preview, not saved</span>}
                 </Link>
+                <SceneSwatches scene={sceneShown} size={14} />
               </div>
             }
           >
-            {/* The header row on the picture itself, no fade: the mark and the date on a paper chip, the knobs are paper
-                already. The picture shows from the top down to the hours' fade. */}
-            <div className="absolute inset-x-0 top-0 flex items-center gap-1 px-[18px] pt-2">{headerRowFor(true)}</div>
-            {/* Previous and next day's scenes, a look only: two paper knobs on the picture's right, under the header row. */}
-            <span className="absolute right-3 top-[58px] flex gap-2">
+            {/* Previous and next day's scenes, a look only: two paper knobs at the picture's top right. */}
+            <span className="absolute right-3 top-3 flex gap-2">
               <Button variant="icon" icon="chevronLeft" className="scene-chip !size-11 !rounded-pill text-ink" label="Preview the previous day's scene" onClick={() => setSceneShift((n) => n - 1)} />
               <Button variant="icon" icon="chevronRight" className="scene-chip !size-11 !rounded-pill text-ink" label="Preview the next day's scene" onClick={() => setSceneShift((n) => n + 1)} />
             </span>
           </ScenePanel>
         ) : art.on ? (
-          <ArtPanel slot={todaySlot(art.todayBy, new Date(), item?.track)} aspect="2 / 1" eager alt="" className="mt-[max(0.75rem,env(safe-area-inset-top))]" top={<div className="flex items-center gap-1">{headerRowFor(false)}</div>} bottom={layout.stats || nowRunning || otherRunning ? hero : undefined} />
-        ) : (
-          <div className="-mb-1.5 flex items-center gap-1 pt-[max(2.25rem,env(safe-area-inset-top))]">{headerRowFor(false)}</div>
-        )}
+          <ArtPanel slot={todaySlot(art.todayBy, new Date(), item?.track)} aspect="2 / 1" eager alt="" className="mt-[18px]" bottom={<p className="text-[22px] font-black leading-tight">{greeting}</p>} />
+        ) : null}
         {!isToday && (
-          <div className="mt-2 flex">
+          <div className="mt-3 flex">
             <Button size="sm" icon="today" onClick={() => setDate(now)}>
               Back to today
             </Button>
           </div>
         )}
-        {!current.scene && !art.on && (
-        <div className="mt-4">
-          <div className="tile flex flex-col items-center justify-center gap-1.5 px-[18px] py-4 text-center">
-            {hero}
-          </div>
-        </div>
-        )}
+        {hoursTile}
         {finish && (
           <ArtPanel slot={finish.slot} aspect="5 / 2" className="mt-4" alt={finish.alt} bottom={<p className="text-body font-semibold">{finish.line}</p>} />
         )}
-        {/* The week so far: each day shaded by its share of its plan (the heatmap's ramp), today a ring, a dot under a
-            day that met its plan or kept the streak. */}
-        <nav aria-label="This week: a day is shaded by its share of its plan, today is a ring, a dot marks a day that met its plan or kept the streak" className="tile mt-4 flex justify-between px-2.5 py-2.5">
+        {/* The two small tiles (the mockup's): last night's sleep, and today's log. */}
+        <div className="mt-4 grid grid-cols-2 gap-3.5">
+          <Link to={sleepTo} className="tile flex min-h-[108px] flex-col gap-1 px-4 py-3.5">
+            <span className="flex items-center gap-1.5 text-[var(--x1)]">
+              <Icon name="moon" size={16} />
+              <span className="section-label mb-0 uppercase text-[var(--x1)]">Sleep</span>
+            </span>
+            <span className="text-[24px] font-black leading-[1.1] tabular-nums">{slept ? lengthText(slept.minutes) : 'Not logged'}</span>
+            <span className="truncate text-small text-ink2">{slept ? timeOf(slept.bed) + ' → ' + timeOf(slept.wake) + (isToday ? ' · log tonight' : '') : isToday ? 'Log last night' : 'Nothing logged'}</span>
+          </Link>
+          {showBlogRow || isToday ? (
+            <Link to={blogTo} className="tile flex min-h-[108px] flex-col gap-1 px-4 py-3.5">
+              <span className="flex items-center gap-1.5 text-[var(--x2)]">
+                <Icon name="doc" size={16} />
+                <span className="section-label mb-0 uppercase text-[var(--x2)]">{isToday ? 'Today’s log' : 'The day’s log'}</span>
+              </span>
+              <span className="text-[18px] font-black leading-[1.15]">{blogPosted ? 'Posted ✓' : 'Not written yet'}</span>
+              <span className="truncate text-small text-ink2">{blogPosted ? 'Written in your blog' : blogDue ? 'The day’s outline is ready' : topics > 0 ? topics + (topics === 1 ? ' topic' : ' topics') + ' to write about' : 'Nothing to write about yet'}</span>
+            </Link>
+          ) : (
+            <div className="tile flex min-h-[108px] flex-col gap-1 px-4 py-3.5">
+              <span className="section-label mb-0 uppercase text-[var(--x2)]">Log</span>
+              <span className="text-[18px] font-black leading-[1.15]">A day ahead</span>
+            </div>
+          )}
+        </div>
+        {/* The week so far (the mockup's strip): each day shaded by its share of its plan, today a ring. */}
+        <nav aria-label="This week: a day is shaded by its share of its plan, today is a ring" className="tile mt-4 flex justify-between px-2.5 py-3.5">
           {weekDays.map((d) => (
             <button
               key={d.date}
               type="button"
               onClick={() => setDate(d.date)}
               aria-current={d.date === date ? 'date' : undefined}
-              className="flex min-w-11 flex-col items-center gap-1"
+              className={'flex min-w-11 flex-col items-center gap-1.5 text-small font-semibold ' + (d.date === now ? 'text-[var(--x0)]' : 'text-ink2')}
             >
               {/* The visible "Sat 10" starts the name; the full date and whether it counted follow for screen readers. */}
-              <span className="text-small font-semibold text-ink2">{dayName(d.date, true)}</span>
+              <span>{dayName(d.date, true)}</span>
               <span
                 className={
                   'grid size-[34px] place-items-center rounded-pill text-label font-semibold ' +
                   (d.date === now ? 'day-ring' : 'day-' + d.level) +
-                  (d.date === date && date !== now ? ' outline outline-2 outline-dashed outline-offset-2 outline-blue-deep' : '')
+                  (d.date === date && date !== now ? ' outline outline-2 outline-dashed outline-offset-2 outline-[var(--x0)]' : '')
                 }
               >
                 {Number(d.date.slice(8, 10))}
               </span>
-              <span aria-hidden="true" className={'size-1.5 rounded-pill ' + (d.met || d.counted ? 'bg-blue-deep' : 'bg-transparent')} />
               <span className="sr-only">
                 {', ' + dateTitle(d.date) + (d.date === now ? ', today' : '') + (d.minutes > 0 ? ', ' + span(d.minutes) + ' logged' : ', nothing logged') + (d.met ? ', plan met' : d.counted ? ', streak kept' : '')}
               </span>
@@ -753,23 +916,11 @@ export function Today() {
 
       {outside && <p className="mt-2 text-meta text-ink2">{outside}</p>}
 
-      {sleepAsk && (
-        <RowList className="mt-4">
-          <Row
-            icon={<IconTile icon="moon" tone="ice" />}
-            title="How did you sleep?"
-            action={
-              <Button size="sm" to="/sleep">
-                Log sleep
-              </Button>
-            }
-          />
-        </RowList>
-      )}
+      {checkInCard}
 
       {moveOn && (
         // A quiet offer when a running block's time is up: the next block starts now, or the day is over.
-        <section aria-label="Move on" className="tile well-ice mt-4 flex flex-col gap-3 p-[18px]">
+        <section aria-label="Move on" className="tile lane-1 lane-tile mt-4 flex flex-col gap-3 p-[18px]">
           <p className="text-body font-semibold">
             {moveOn.to ? 'Move on to ' + (settings.core.blocks.find((b) => b.id === moveOn.to)?.name ?? moveOn.to) + '?' : blockName(moveOn.from) + ' ended at ' + hm(moveOn.at) + '.'}
           </p>
@@ -802,8 +953,8 @@ export function Today() {
 
       {restDay ? (
         <section aria-label="Now" className="tile mt-4 flex flex-col gap-1.5 p-[18px]">
-          <p className="section-label mb-0">Now</p>
-          <p className="text-card font-semibold">A rest day.</p>
+          <p className="section-label mb-0 uppercase">Now</p>
+          <p className="text-[22px] font-black">A rest day.</p>
           <p className="text-meta text-ink2">Nothing is planned, and the streak is safe.{logged > 0 ? ' ' + span(logged) + ' logged anyway.' : ''}</p>
         </section>
       ) : nothingPlanned ? (
@@ -815,14 +966,14 @@ export function Today() {
             <Icon name="moon" size={18} />
             {'Break · ' + hm(clock.from) + '–' + hm(clock.until)}
           </p>
-          <h2 className="mt-1 text-card font-semibold">{'Break until ' + hm(clock.until)}</h2>
+          <h2 className="mt-1 text-[22px] font-black">{'Break until ' + hm(clock.until)}</h2>
           <p className="text-meta text-ink2">{span(dayMinutes) + ' of ' + span(plan.targetMinutes) + ' so far today'}</p>
           {(() => {
             const next = blocks.find((b) => b.id === clock.next);
             if (!next) return null;
             const row = rowFor(next);
             return (
-              <ul className="rows mt-2 border-t-[1.5px] border-dashed border-dash">
+              <ul className="rows mt-2 border-t-[1.5px] border-dashed border-[var(--sd)]">
                 <Row icon={<BlockTile block={next.id} />} title={'Next: ' + blockName(next.id)} meta={row.meta} trailing={<WindowTime text={windowText(next.id)} />} onClick={() => setChosen(next.id)} />
               </ul>
             );
@@ -830,8 +981,8 @@ export function Today() {
         </section>
       ) : !nowBlock ? (
         <section aria-label="Now" className="tile mt-4 flex flex-col gap-1.5 p-[18px]">
-          <p className="section-label mb-0">{clock?.kind === 'done' ? 'Day done' : 'Now'}</p>
-          <p className="text-card font-semibold">{clock?.kind === 'done' ? 'That was the day.' : 'Every block is done.'}</p>
+          <p className="section-label mb-0 uppercase">{clock?.kind === 'done' ? 'Day done' : 'Now'}</p>
+          <p className="text-[22px] font-black">{clock?.kind === 'done' ? 'That was the day.' : 'Every block is done.'}</p>
           <p className="text-meta text-ink2">{span(dayMinutes) + ' of ' + span(plan.targetMinutes) + ' · ' + blocks.filter(reached).length + ' of ' + blocks.length + ' blocks'}</p>
           {isToday && (
             <Button size="sm" icon="blog" className="mt-2 self-start" to="/blog">
@@ -840,57 +991,41 @@ export function Today() {
           )}
         </section>
       ) : (
-        <section aria-labelledby="now-title" className={'tile mt-4 flex flex-col gap-1.5 p-[18px]' + (taken && item?.refId === taken.id ? ' taken' : '')}>
-          <div className="flex items-center justify-between gap-2">
-            <p className="section-label mb-0 flex min-w-0 items-center gap-1.5 uppercase" style={{ color: toneInk(blockTone(nowBlock.id)) }}>
-              <BlockIcon block={nowBlock.id} size={18} />
-              <span className="truncate">{'Now · ' + (windowOf(nowBlock.id) ? windowText(nowBlock.id) : blockShort(nowBlock.def.name))}</span>
-            </p>
-            {!expanded && (
-              <div className="-my-1 flex shrink-0 gap-2">
-                {otherName && (
-                  <Button size="sm" icon="stop" name={'Stop ' + otherName} onClick={stop}>
-                    {otherName}
-                  </Button>
+        <section aria-labelledby="now-title" className={'tile mt-4 flex flex-col gap-3 px-5 py-[18px]' + (taken && item?.refId === taken.id ? ' taken' : '')}>
+          {/* The mockup's Now card: the block's tile, "NOW · 10:00–12:00" in the lane's colour over the block's name, the
+              Focus mix as a tinted pill on the right. */}
+          <div className="flex items-center gap-3">
+            <IconTile icon={blockIconName(nowBlock.id)} size={44} lane={nowLane} />
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className={'section-label mb-0 truncate uppercase text-[var(--x' + nowLane + ')]'}>{'Now · ' + (windowOf(nowBlock.id) ? windowText(nowBlock.id) : blockShort(nowBlock.def.name))}</span>
+              <h2 className="text-[22px] font-black leading-tight">
+                {isProject && item ? (
+                  // A project's title opens its tech doc; everything else unfolds in place.
+                  <button id="now-title" type="button" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })} className="-my-2 flex min-h-11 w-full items-center py-1 text-left text-[22px] font-black">
+                    <span className="line-clamp-2">{headline}</span>
+                  </button>
+                ) : (
+                  <button id="now-title" type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className="-my-2 flex min-h-11 w-full items-center py-1 text-left text-[22px] font-black">
+                    <span className="line-clamp-2">{headline}</span>
+                  </button>
                 )}
-                <Button
-                  size="sm"
-                  icon="check"
-                  name={nowDone ? 'Mark not done' : 'Mark done'}
-                  aria-pressed={nowDone}
-                onClick={() => {
-                  void editLog(date, (current) => toggleBlockDone(current, nowBlock.id));
-                  setChosen(null);
-                  setExpanded(false);
-                }}
-              >
-                  {nowDone ? 'Undo' : 'Done'}
-                </Button>
-              </div>
+              </h2>
+            </span>
+            {isToday && (
+              <Link to={'/focus?block=' + nowBlock.id} aria-label={'Focus music' + (mix ? ' · ' + categoryLabel(mix) : '') + ' for ' + blockShort(nowBlock.def.name)} className={'lane-tile lane-' + nowLane + ' flex min-h-11 shrink-0 items-center gap-1.5 rounded-pill px-3 text-label font-semibold'}>
+                <Icon name="headphones" size={16} />
+                {mix ? categoryLabel(mix) : 'Focus'}
+              </Link>
             )}
           </div>
-          <h2 className="mt-1 text-card">
-            {isProject && item ? (
-              // A project's title opens its tech doc; everything else unfolds in place.
-              <button id="now-title" type="button" aria-haspopup="dialog" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })} className="-my-1 line-clamp-2 min-h-11 w-full py-1 text-left text-card font-semibold">
-                {headline}
-              </button>
-            ) : (
-              <button id="now-title" type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className="-my-1 line-clamp-2 min-h-11 w-full py-1 text-left text-card font-semibold">
-                {headline}
-              </button>
-            )}
-          </h2>
-          <p className="text-meta text-ink2">{metaLine}</p>
-          <div className="mt-2.5">
-            {lessonCounts && item ? (
-              <ProgressLine value={lessonCounts.hours > 0 ? lessonCounts.hoursDone / lessonCounts.hours : 0} label={'Progress on ' + nameOf(item)} lane={laneSlot(nowBlock.id)} />
-            ) : (
-              <ProgressLine value={nowBlock.targetMinutes > 0 ? nowMinutes / nowBlock.targetMinutes : 0} label={'Time on ' + blockShort(nowBlock.def.name) + ' today'} lane={laneSlot(nowBlock.id)} />
-            )}
-          </div>
+          {lessonCounts && item ? (
+            <ProgressLine value={lessonCounts.hours > 0 ? lessonCounts.hoursDone / lessonCounts.hours : 0} label={'Progress on ' + nameOf(item)} lane={nowLane} />
+          ) : (
+            <ProgressLine value={nowBlock.targetMinutes > 0 ? nowMinutes / nowBlock.targetMinutes : 0} label={'Time on ' + blockShort(nowBlock.def.name) + ' today'} lane={nowLane} />
+          )}
+          <p className="-mt-1 text-meta text-ink2">{nowHours}</p>
           {offer && offer.block === nowBlock.id && (
-            <div role="status" className="mt-3 flex flex-wrap items-center gap-2 rounded-knob bg-blue-soft px-3 py-2">
+            <div role="status" className={'lane-tile lane-' + nowLane + ' flex flex-wrap items-center gap-2 rounded-knob px-3 py-2'}>
               <span className="flex-1 text-meta font-medium">{'Start with ' + categoryLabel(offer.mix) + '?'}</span>
               <Button
                 size="sm"
@@ -916,14 +1051,10 @@ export function Today() {
             </div>
           )}
 
-          {lessons && item && (
-            <div className="mt-3">
-              <LessonWindow refId={item.refId} units={lessons} done={unitsDone} onShowAll={() => setSheet('lessons')} />
-            </div>
-          )}
+          {lessons && item && <LessonWindow refId={item.refId} units={lessons} done={unitsDone} onShowAll={() => setSheet('lessons')} />}
 
           {expanded && (
-            <div className="mt-4">
+            <div>
               {item?.brief && <p className="mb-2 text-body text-ink2">{item.brief}</p>}
               {item?.note && <p className="mb-2 text-meta text-ink2">{item.note}</p>}
               {item && allUnits.length > 0 && !lessons && <Checklist plain compact refId={item.refId} units={unitWindow(allUnits, unitsDone)} done={unitsDone} />}
@@ -968,110 +1099,86 @@ export function Today() {
             </div>
           )}
 
-          {/* Start (the one filled button) and the ice secondary: the tech doc, or the course. */}
-          {/* Two equal buttons that never leave the card; on the narrowest phones the second keeps only its icon. */}
-          <div className={(expanded ? 'mt-2' : 'mt-3.5') + ' flex items-center gap-3 [&>*]:min-w-0 [&>*]:flex-1'}>
+          {/* Start (the one filled button, in the first lane's colour) and the raised secondary: the course, the tech doc
+              or the lesson's video; Done is the knob at the end. Each keeps its width; on the narrowest phones the
+              secondary keeps only its icon. */}
+          <div className="flex items-center gap-2.5 [&>*]:min-w-0 [&>*]:flex-1">
             {primary}
-            {/* Focus music (ATLAS-FOCUS-MUSIC): a knob at the row's end that opens the tab with the block's mix. */}
-            {isToday && <Button variant="icon" icon="headphones" className="knob !size-11 !flex-none" label={'Focus music' + (mixFor(settings.focus, nowBlock.id) ? ' · ' + categoryLabel(mixFor(settings.focus, nowBlock.id)!) : '') + ' for ' + blockShort(nowBlock.def.name)} to={'/focus?block=' + nowBlock.id} />}
+            {otherName && (
+              <Button size="sm" icon="stop" className="!flex-none" name={'Stop ' + otherName} onClick={stop}>
+                {otherName}
+              </Button>
+            )}
             {isProject && item ? (
-              <Button variant="ice" icon="doc" aria-haspopup="dialog" name="Tech doc" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })}>
+              <Button icon="doc" aria-haspopup="dialog" name="Tech doc" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })}>
                 <span className="truncate max-[379px]:sr-only">Tech doc</span>
               </Button>
             ) : lessonNow?.video ? (
-              <Button variant="ice" icon="play" onClick={() => playVideo(lessonNow.video!)}>
+              <Button icon="play" onClick={() => playVideo(lessonNow.video!)}>
                 <span className="truncate max-[379px]:sr-only">{'Play ' + lessonNow.id}</span>
               </Button>
             ) : item?.url ? (
-              <Button variant="ice" icon="external" href={item.url} name={resource?.type === 'book' ? 'Open the book' : 'Open course'}>
+              <Button icon="external" href={item.url} name={resource?.type === 'book' ? 'Open the book' : 'Open course'}>
                 <span className="truncate max-[379px]:sr-only">Open</span>
               </Button>
             ) : null}
+            <Button
+              variant="icon"
+              icon="check"
+              className={'knob !size-12 !flex-none !rounded-knob ' + (nowDone ? 'text-[var(--x0)]' : 'text-ink2')}
+              label={nowDone ? 'Mark not done' : 'Mark done'}
+              aria-pressed={nowDone}
+              onClick={() => {
+                void editLog(date, (current) => toggleBlockDone(current, nowBlock.id));
+                setChosen(null);
+                setExpanded(false);
+              }}
+            />
           </div>
-          {extrasFor(nowBlock.id).length > 0 && <ul className="rows mt-3 border-t-[1.5px] border-dashed border-dash">{extrasFor(nowBlock.id).map(extraRow)}</ul>}
+          {extrasFor(nowBlock.id).length > 0 && <ul className="rows border-t-[1.5px] border-dashed border-[var(--sd)]">{extrasFor(nowBlock.id).map(extraRow)}</ul>}
         </section>
       )}
 
-      {!restDay && !nothingPlanned && (
-        <div className="mt-4 grid grid-cols-2 gap-4">
-          <div className="tile flex flex-col items-center gap-1.5 p-3.5">
-            <span className="section-label mb-0">Blocks today</span>
-            <span className="text-card font-semibold leading-none">
-              {tally.done}
-              <span className="text-ink2">/{tally.total}</span>
-            </span>
-            <span aria-hidden="true" className="flex gap-1.5">
-              {blocks.map((b) => {
-                const state = tally.states.get(b.id);
-                return <span key={b.id} className={'size-3 rounded-pill ' + (state === 'done' ? 'fill-blue' : state === 'in-progress' ? 'well half-dot' : 'well rounded-pill')} />;
-              })}
-            </span>
-            <span className="text-meta text-ink2">{tally.inProgress > 0 ? tally.inProgress + ' in progress' : tally.done === tally.total ? 'All done' : 'None under way'}</span>
-          </div>
-          {/* Slept: the night that ended on this day's morning (SLEEP-LOG); a tap opens the Sleep screen. */}
-          <Link to={sleepTo} className="tile flex flex-col items-center gap-1.5 p-3.5">
-            <span className="section-label mb-0">Slept</span>
-            <span className="text-card font-semibold leading-none tabular-nums">
-              {slept ? lengthText(slept.minutes) : <span aria-hidden="true">—</span>}
-              {!slept && <span className="sr-only">not logged</span>}
-            </span>
-            <span className="flex items-center gap-0.5 text-meta text-ink2">
-              {slept ? timeOf(slept.bed) + ' → ' + timeOf(slept.wake) : 'Log sleep'}
-              <Icon name="chevronRight" size={16} className="text-ink2" />
-            </span>
-          </Link>
-        </div>
+      {/* What is left today (the mockup's NEXT tile): the blocks still to come, the first one marked Next; a tap makes a
+          block Now. The sessions' breaks and headings stay as rows between them. */}
+      {!nothingPlanned && layout.later && (upcoming.length > 0 || leadingExtras.length > 0) && (
+        <section className="tile mt-4 px-[18px] py-1" aria-label="Later today">
+          <h2 className="sr-only">Later today</h2>
+          <span className="sr-only">{blocks.filter(done).length + ' of ' + blocks.length + ' done'}</span>
+          <ul className="rows">
+            {leadingExtras.map(extraRow)}
+            {groups.sessions.flatMap((session, k) => {
+              if (session.upcoming.length === 0) return [];
+              const pause = groups.breaks.find((b) => b.before === session.number);
+              const firstUpcoming = upcoming[0];
+              return [
+                // The quiet break between the sessions, while it is still ahead.
+                pause && (
+                  <li key={'break-' + session.number} className="flex min-h-11 items-center gap-3 py-2 text-meta font-semibold text-ink2">
+                    <span className="grid w-[42px] place-items-center">
+                      <Icon name="moon" size={18} />
+                    </span>
+                    {'Break · ' + formatWindow(pause.from, pause.until - pause.from)}
+                  </li>
+                ),
+                groups.sessions.length > 1 && k > 0 && (
+                  <li key={'session-' + session.number} className="flex min-h-11 items-end pb-1 pt-2">
+                    <h3 className="section-label mb-0">{'Session ' + session.number + ' · ' + formatWindow(session.from, session.until - session.from)}</h3>
+                  </li>
+                ),
+                ...session.upcoming.map((id) => blockRow(blockOf(id), false, id === firstUpcoming && leadingExtras.length === 0)),
+              ];
+            })}
+            {unplaced.map((block) => blockRow(block, false, upcoming[0] === block.id && leadingExtras.length === 0))}
+          </ul>
+        </section>
       )}
 
-      {!nothingPlanned && layout.later && (upcoming.length > 0 || leadingExtras.length > 0 || showBlogRow) && (
-        <RowList label="Later today" className="mt-4" aside={blocks.filter(done).length + ' of ' + blocks.length + ' done'}>
-          {blogDue && (
-            <Row
-              key="blog-due"
-              icon={<IconTile icon="blog" tone="ice" />}
-              title="Write today’s blog post"
-              meta={layout.view === 'compact' ? undefined : 'The day’s outline is ready'}
-              action={
-                <Button size="sm" to={blogTo}>
-                  Open
-                </Button>
-              }
-            />
-          )}
-          {leadingExtras.map(extraRow)}
-          {groups.sessions.flatMap((session) => {
-            if (session.upcoming.length === 0) return [];
-            const pause = groups.breaks.find((b) => b.before === session.number);
-            return [
-              // The quiet break between the sessions, while it is still ahead.
-              pause && (
-                <li key={'break-' + session.number} className="flex min-h-11 items-center gap-3 py-2 text-meta font-semibold text-ink2">
-                  <span className="grid w-10 place-items-center">
-                    <Icon name="moon" size={18} />
-                  </span>
-                  {'Break · ' + formatWindow(pause.from, pause.until - pause.from)}
-                </li>
-              ),
-              groups.sessions.length > 1 && (
-                <li key={'session-' + session.number} className="flex min-h-11 items-end pb-1 pt-2">
-                  <h3 className="section-label mb-0">{'Session ' + session.number + ' · ' + formatWindow(session.from, session.until - session.from)}</h3>
-                </li>
-              ),
-              ...session.upcoming.map((id) => blockRow(blockOf(id))),
-            ];
-          })}
-          {unplaced.map((block) => blockRow(block))}
-          {showBlogRow && !blogDue && (
-            <Row key="blog" icon={<IconTile icon="blog" tone={blogPosted ? 'ice' : 'neutral'} />} title={blogPosted ? 'Blog post · posted ✓' : 'Blog post · not yet'} meta={layout.view === 'compact' ? undefined : 'Written in your blog'} trailing="any time" to={blogTo} />
-          )}
-        </RowList>
-      )}
-
-      {/* Internships (INTERNSHIPS): while a target has an upcoming apply date, the next role, the gate, the phase and the one thing for today. Under Later today, so the day's list stays above the fold (ui-acceptance). */}
+      {/* Internships (INTERNSHIPS): while a target has an upcoming apply date, the next role, the gate, the phase and the one thing for today. */}
       {isToday && internCard && (
         <section aria-labelledby="intern-card-title" className="tile mt-4 flex flex-col gap-1.5 p-[18px]">
-          <p className="section-label mb-0">{'Internships · ' + internCard.name}</p>
-          <p id="intern-card-title" className="text-card font-semibold leading-tight">
+          <p className="section-label mb-0 uppercase text-[var(--x1)]">{'Internships · ' + internCard.name}</p>
+          <p id="intern-card-title" className="text-[22px] font-black leading-tight">
             {roleName(internCard.card.target) + ' · ' + (internCard.card.days === 0 ? 'apply today' : 'apply in ' + internCard.card.days + (internCard.card.days === 1 ? ' day' : ' days'))}
           </p>
           <p className="text-meta text-ink2">{'Gate ticked ' + internCard.card.gate.done + ' of ' + internCard.card.gate.total + ' · Phase ' + internCard.card.phase.n + ', ' + internCard.card.week}</p>
@@ -1082,7 +1189,7 @@ export function Today() {
             </>
           )}
           <div className="mt-2 flex gap-3 [&>*]:min-w-0 [&>*]:flex-1">
-            <Button variant="ice" icon="briefcase" to={'/internships?goal=' + internCard.goal.goal.id}>
+            <Button variant="ice" lane={1} icon="briefcase" to={'/internships?goal=' + internCard.goal.goal.id}>
               Open
             </Button>
             <Button icon="check" to={'/internships?goal=' + internCard.goal.goal.id + '&tab=roadmap'}>
@@ -1094,23 +1201,24 @@ export function Today() {
 
       {/* Blocks whose window has passed and that are not done: still there to start, but no longer "later". */}
       {!nothingPlanned && layout.later && groups.earlier.length > 0 && (
-        <RowList label="Earlier · not finished" className="mt-4">
-          {groups.earlier.map((id) => blockRow(blockOf(id), true))}
-        </RowList>
+        <section className="tile mt-4 px-[18px] py-1" aria-labelledby="earlier-title">
+          <h2 id="earlier-title" className="section-label mb-0 pt-3">
+            Earlier · not finished
+          </h2>
+          <ul className="rows">{groups.earlier.map((id) => blockRow(blockOf(id), true))}</ul>
+        </section>
       )}
 
       {!nothingPlanned && layout.later && groups.done.length > 0 && (
-        <RowList className="mt-4">
-          <li>
-            <details>
-              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-meta font-semibold text-ink2">
-                {'Done today (' + groups.done.length + ')'}
-                <Icon name="chevronDown" size={18} />
-              </summary>
-              <ul className="rows">{groups.done.map((id) => blockRow(blockOf(id), true))}</ul>
-            </details>
-          </li>
-        </RowList>
+        <section className="tile mt-4 px-[18px] py-1">
+          <details>
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-meta font-semibold text-ink2">
+              {'Done today (' + groups.done.length + ')'}
+              <Icon name="chevronDown" size={18} />
+            </summary>
+            <ul className="rows">{groups.done.map((id) => blockRow(blockOf(id), true))}</ul>
+          </details>
+        </section>
       )}
 
       {showDayRow && (

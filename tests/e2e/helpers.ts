@@ -72,6 +72,14 @@ export async function writesSettled(page: Page): Promise<void> {
   );
 }
 
+/** The theme switch lives in Settings (the redesign mockup): Light, Dark or System. */
+export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<void> {
+  await open(page, './#/settings');
+  await page.getByRole('radio', { name: theme === 'dark' ? 'Dark' : 'Light' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+  await writesSettled(page);
+}
+
 /** Reloads once the page's writes are committed. */
 export async function reload(page: Page): Promise<void> {
   await writesSettled(page);

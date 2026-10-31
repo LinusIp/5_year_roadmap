@@ -12,7 +12,8 @@ import { UndoToast } from './ui/UndoToast.tsx';
 import { FocusPlayer } from './ui/FocusPlayer.tsx';
 import { Today } from './screens/Today.tsx';
 import { seed } from './seed/index.ts';
-import { useCurrentScene } from './hooks/useScenes.ts';
+import { currentSceneFor, useLocalDay } from './hooks/useScenes.ts';
+import { DEFAULT_SCENE_PREFS } from './lib/scenes.ts';
 
 /*
  * Today is what the app opens on, so it ships in the main chunk. Every other screen is its own chunk, fetched
@@ -89,7 +90,10 @@ export function App() {
     if (theme) applyTheme(theme);
   }, [theme]);
   // The day's scene lays its palette over the theme (ATLAS-DAILY-SCENES), and again when the theme or the day changes.
-  const { scene } = useCurrentScene();
+  // Picked from the same settings read as the theme: a second read of the record could land later and show the day's
+  // scene for a moment where a pin or a skip holds another.
+  const day = useLocalDay();
+  const scene = settings ? currentSceneFor(settings.scenes ?? DEFAULT_SCENE_PREFS, day).scene : null;
   useEffect(() => {
     if (theme) applyScene(scene, resolveTheme(theme));
   }, [scene, theme]);

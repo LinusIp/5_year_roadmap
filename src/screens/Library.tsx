@@ -381,7 +381,7 @@ export function Library({ openId }: { openId?: string }) {
     const nextCount = upNext(buildPaths(atlas.seed, atlas.states), atlas.seed, 3, atlas.states).length;
     return {
       counts: shelfCounts(atlas.seed, catalogue?.length ?? 0),
-      homeSub: count(activeCount) + ' in progress · ' + count(nextCount) + ' up next · ' + count(Math.max(0, atlas.seed.resources.length - activeCount - nextCount)) + ' more when you need them',
+      homeSub: count(activeCount) + ' in progress · ' + count(atlas.seed.resources.length + atlas.seed.papers.length) + ' resources' + (nextCount > 0 ? ' · ' + count(nextCount) + ' up next' : ''),
     };
   }, [atlas, catalogue]);
   // The quick filters' counts, for the rows on the home: once per change to the entries.
@@ -468,7 +468,7 @@ export function Library({ openId }: { openId?: string }) {
 
   const searchField = (
     <SearchField
-      className="mt-5"
+      className="mt-4"
       label={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : quick ? quick.search : 'Search the library'}
       placeholder={shelf ? 'Search ' + SHELF_TITLE[shelf].toLowerCase() : quick ? quick.search : 'Search courses, books, papers'}
       searchBox
@@ -509,6 +509,12 @@ export function Library({ openId }: { openId?: string }) {
           <Header title="Library" sub={mode === 'home' ? homeSub : plural(results.length, 'match', 'matches')} />
           {searchField}
           {mode === 'search' && fitChips}
+          {/* The quick filters (ATLAS-LIBRARY) as the mockup's chips, each in a lane's tint with its count. */}
+          {mode === 'home' && (
+            <div className="mt-2.5">
+              <Chips label="Quick filters" items={quickCounts.map((q, i) => ({ key: q.key, label: q.label, count: count(q.count), lane: i % 5, pressed: false, onClick: () => navigate('/library?pick=' + q.key, { replace: false }) }))} />
+            </div>
+          )}
           {mode === 'home' ? (
             <LibraryHome
               atlas={atlas}
@@ -518,8 +524,6 @@ export function Library({ openId }: { openId?: string }) {
               onOpen={(id) => navigate('/library/' + id)}
               onPath={(id) => navigate('/library?path=' + id, { replace: false })}
               onShelf={goShelf}
-              quick={quickCounts}
-              onPick={(key) => navigate('/library?pick=' + key, { replace: false })}
             />
           ) : results.length === 0 ? (
             <EmptyState action={<Button onClick={clear}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>

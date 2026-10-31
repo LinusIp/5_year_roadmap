@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 const counter = (page: Page) => page.getByRole('timer').first();
-const header = (page: Page) => page.locator('main .tile').first();
+const header = (page: Page) => page.getByRole('region', { name: "Today's hours" });
 
 /** Starts Now's timer and waits until it runs (the switch's stop and the start are separate writes). */
 async function start(page: Page): Promise<void> {

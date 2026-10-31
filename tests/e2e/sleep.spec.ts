@@ -13,34 +13,33 @@ import { open, reload, writesSettled } from './helpers.ts';
 test.use({ timezoneId: 'Asia/Tashkent', serviceWorkers: 'block', viewport: { width: 390, height: 844 } });
 
 const at = (time: string, date = '2026-10-18'): Date => new Date(date + 'T' + time + ':00+05:00');
-const ask = (page: Page) => page.getByRole('listitem').filter({ hasText: 'How did you sleep?' });
-const widget = (page: Page) => page.getByRole('link', { name: /^Slept/ });
+/** Today's Sleep tile (the redesign mockup): last night, or "Not logged · Log last night". */
+const widget = (page: Page) => page.getByRole('link', { name: /^Sleep/ });
 
-async function typeTime(page: Page, label: 'Bedtime' | 'Woke up', time: string): Promise<void> {
+async function typeTime(page: Page, label: 'Went to bed' | 'Woke up', time: string): Promise<void> {
   await page.getByRole('textbox', { name: label, exact: true }).fill(time);
   await expect(page.getByRole('textbox', { name: label, exact: true })).toHaveValue(time);
 }
 
 async function logNight(page: Page, date: string | null, bed: string, wake: string): Promise<void> {
   await open(page, date ? './#/sleep?date=' + date : './#/sleep');
-  await typeTime(page, 'Bedtime', bed);
+  await typeTime(page, 'Went to bed', bed);
   await typeTime(page, 'Woke up', wake);
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('button', { name: 'Save night', exact: true }).click();
   await expect(page.getByRole('status').getByText(/^Saved /)).toBeVisible();
   await writesSettled(page);
 }
 
-test('at 05:45 Today asks, the Sleep screen logs 23:00 to 05:40, and the widget shows 6 h 40 m', async ({ page }) => {
+test('at 05:45 the Sleep tile asks, the Sleep screen logs 23:00 to 05:40, and the tile shows 6 h 40 m', async ({ page }) => {
   await page.clock.install({ time: at('05:45') });
   await open(page, './');
-  await expect(ask(page)).toBeVisible();
-  await expect(widget(page)).toHaveAccessibleName('Slept not logged Log sleep');
-  await ask(page).getByRole('link', { name: 'Log sleep' }).click();
+  await expect(widget(page)).toHaveAccessibleName('Sleep Not logged Log last night');
+  await widget(page).click();
 
   await expect(page.getByRole('heading', { level: 1, name: 'Sleep' })).toBeVisible();
-  await expect(page.getByText('Last night · Sat 17 → Sun 18 Oct')).toBeVisible();
+  await expect(page.getByText('Target 8 h · bed by 22:00 · Sat 17 → Sun 18 Oct')).toBeVisible();
   // The defaults: 23:00 at first, and now rounded to 5 minutes.
-  await expect(page.getByRole('textbox', { name: 'Bedtime', exact: true })).toHaveValue('23:00');
+  await expect(page.getByRole('textbox', { name: 'Went to bed', exact: true })).toHaveValue('23:00');
   await expect(page.getByRole('textbox', { name: 'Woke up', exact: true })).toHaveValue('05:45');
   await expect(page.locator('output')).toHaveText('6 h 45 m');
   // The knobs step 15 minutes, and the result follows.
@@ -49,16 +48,17 @@ test('at 05:45 Today asks, the Sleep screen logs 23:00 to 05:40, and the widget 
   await typeTime(page, 'Woke up', '05:40');
   await expect(page.locator('output')).toHaveText('6 h 40 m');
   await expect(page.locator('main [data-variant="filled"]')).toHaveCount(1);
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  // How rested: Good, kept with the night.
+  await page.getByRole('radio', { name: 'Rested: Good' }).click();
+  await page.getByRole('button', { name: 'Save night', exact: true }).click();
   await expect(page.getByRole('status').getByText('Saved 6 h 40 m for Sat 17 → Sun 18 Oct')).toBeVisible();
-  await expect(page.getByRole('listitem').filter({ hasText: 'Sunday 18 October' })).toContainText('23:00 → 05:40');
+  await expect(page.getByRole('listitem').filter({ hasText: 'Sunday 18 October' })).toContainText('23:00 → 05:40 · good');
 
   await page.getByRole('link', { name: 'Back to Today' }).click();
   await expect(widget(page)).toContainText('6 h 40 m');
   await expect(widget(page)).toContainText('23:00 → 05:40');
-  await expect(ask(page)).toHaveCount(0);
   await reload(page);
-  await expect(widget(page)).toHaveAccessibleName('Slept 6 h 40 m 23:00 → 05:40');
+  await expect(widget(page)).toHaveAccessibleName('Sleep 6 h 40 m 23:00 → 05:40 · log tonight');
 });
 
 test('last night can be edited, and a night over 16 hours asks first', async ({ page }) => {
@@ -66,17 +66,17 @@ test('last night can be edited, and a night over 16 hours asks first', async ({ 
   await logNight(page, null, '23:00', '05:40');
   await open(page, './');
   await widget(page).click();
-  await expect(page.getByRole('textbox', { name: 'Bedtime', exact: true })).toHaveValue('23:00');
-  await page.getByRole('button', { name: 'Bedtime 15 minutes later' }).click();
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByRole('textbox', { name: 'Went to bed', exact: true })).toHaveValue('23:00');
+  await page.getByRole('button', { name: 'Went to bed 15 minutes later' }).click();
+  await page.getByRole('button', { name: 'Save night', exact: true }).click();
   await expect(page.getByRole('listitem').filter({ hasText: 'Sunday 18 October' })).toContainText('6 h 25 m');
   // Undo puts the night back.
   await page.getByRole('status').getByRole('button', { name: 'Undo' }).click();
   await expect(page.getByRole('listitem').filter({ hasText: 'Sunday 18 October' })).toContainText('6 h 40 m');
 
-  await typeTime(page, 'Bedtime', '13:00');
+  await typeTime(page, 'Went to bed', '13:00');
   await expect(page.locator('output')).toHaveText('16 h 40 m');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('button', { name: 'Save night', exact: true }).click();
   await expect(page.getByRole('alert')).toHaveText('Are you sure? That is 16 h 40 m. Save again to keep it.');
   await expect(page.getByRole('listitem').filter({ hasText: 'Sunday 18 October' })).toContainText('6 h 40 m');
   await page.getByRole('button', { name: 'Save anyway' }).click();
@@ -89,21 +89,20 @@ test('the week chart shows each night and the average, with the goal and the bed
   await logNight(page, '2026-10-14', '23:00', '05:00');
   await logNight(page, null, '23:00', '05:40');
   await open(page, './#/sleep');
-  const chart = page.getByRole('img', { name: /^This week:/ });
+  const chart = page.getByRole('img', { name: /^Last 7 nights:/ });
   await expect(chart).toHaveAccessibleName(
-    'This week: Monday 7.0 hours, Tuesday not logged, Wednesday 6.0 hours, Thursday not logged, Friday not logged, Saturday not logged, Sunday 6.7 hours. Goal 8 h.',
+    'Last 7 nights: Monday 7.0 hours, Tuesday not logged, Wednesday 6.0 hours, Thursday not logged, Friday not logged, Saturday not logged, Sunday 6.7 hours. Target 8 h.',
   );
-  await expect(page.getByText('average 6 h 33 m · goal 8 h')).toBeVisible();
-  await expect(page.getByRole('region', { name: 'Usual bedtime' })).toContainText('23:00');
-  await expect(page.getByRole('region', { name: 'For 8 h by 06:00' })).toContainText('22:00');
+  await expect(page.getByText('avg 6 h 33 m · target 8 h')).toBeVisible();
+  await expect(page.getByText(/^Target 8 h · bed by 22:00/)).toBeVisible();
 
   // The goal, in Settings › Sleep, moves the line and the bedtime.
   await open(page, './#/settings?section=sleep');
   await page.getByRole('button', { name: 'Goal half an hour shorter' }).click();
   await expect(page.locator('section#sleep')).toContainText('7 h 30 m');
   await open(page, './#/sleep');
-  await expect(page.getByText('average 6 h 33 m · goal 7 h 30 m')).toBeVisible();
-  await expect(page.getByRole('region', { name: 'For 7 h 30 m by 06:00' })).toContainText('22:30');
+  await expect(page.getByText('avg 6 h 33 m · target 7 h 30 m')).toBeVisible();
+  await expect(page.getByText(/^Target 7 h 30 m · bed by 22:30/)).toBeVisible();
 
   // Activity's tile: the last 7 nights' average, and a way to the screen.
   await open(page, './#/activity');
@@ -113,25 +112,15 @@ test('the week chart shows each night and the average, with the goal and the bed
   await expect(page.getByRole('heading', { level: 1, name: 'Sleep' })).toBeVisible();
 });
 
-test('the question is gone after 12:00, and when turned off', async ({ page }) => {
+test('the tile says the night is not logged all day, and the days left in the phase are on Plan', async ({ page }) => {
   await page.clock.install({ time: at('12:05') });
   await open(page, './');
   await expect(page.locator('#now-title, section[aria-label="Now"]').first()).toBeVisible();
-  await expect(ask(page)).toHaveCount(0);
-  await expect(widget(page)).toContainText('Log sleep');
-  // The days left in the phase, no longer on Today, are in Plan's header.
+  await expect(widget(page)).toContainText('Log last night');
+  // The days left in the phase, no longer on Today, are on Plan's phase tile.
   await open(page, './#/plan');
-  await expect(page.getByText('Year 1 · Foundations I — in flight · ends 31 January · 105 days left')).toBeVisible();
-
-  await page.clock.setFixedTime(at('06:30', '2026-10-19'));
-  await open(page, './');
-  await expect(ask(page)).toBeVisible();
-  await open(page, './#/settings?section=sleep');
-  await page.locator('section#sleep').getByRole('switch', { name: 'Ask how I slept' }).click();
-  await writesSettled(page);
-  await open(page, './');
-  await expect(widget(page)).toBeVisible();
-  await expect(ask(page)).toHaveCount(0);
+  await expect(page.getByText('Year 1 · Foundations I — in flight', { exact: true })).toBeVisible();
+  await expect(page.getByText('Ends 31 Jan · 105 days left')).toBeVisible();
 });
 
 const TOKEN = 'github_pat_sleep_0123456789';

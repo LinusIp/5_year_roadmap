@@ -39,8 +39,8 @@ export function Stats() {
 
   if (!atlas || !model) {
     return (
-      <Screen title="Stats">
-        <Header title="Stats" />
+      <Screen title="Charts">
+        <Header title="Charts" />
       </Screen>
     );
   }
@@ -59,9 +59,9 @@ export function Stats() {
   for (let d = weekStart; d <= asOf; d = addDays(d, 1)) weekPlanned += planned(d);
 
   return (
-    <Screen title="Stats">
+    <Screen title="Charts">
       <Header
-        title="Stats"
+        title="Charts"
         sub={hours(total) + ' logged · ' + pace.actual.toFixed(1) + ' h a day over the last ' + pace.windowDays + ' days, the plan says ' + pace.planned.toFixed(0) + ' · longest streak ' + plural(streakState.longest, 'day')}
       />
 

@@ -271,6 +271,15 @@ export const BlogPostSchema = z.strictObject({
   posted: z.boolean(),
   /** When it was marked (ISO time). */
   at: z.string(),
+  /** The draft written in Atlas (the redesign mockup's log): the title, what was learned, where it got stuck, tomorrow. */
+  title: z.string().max(200).optional(),
+  learned: z.string().max(20_000).optional(),
+  stuck: z.string().max(20_000).optional(),
+  next: z.string().max(20_000).optional(),
+  /** The name of the photo picked for the day, for the gallery on the blog (the file itself stays on the device). */
+  photo: z.string().max(200).optional(),
+  /** Whether Publish goes to the blog (on) or only saves the draft (off). */
+  publish: z.boolean().optional(),
   /** Whether "Open my blog" was used that day before it was marked. */
   editorLinkUsed: z.boolean().optional(),
   auto: z.boolean().optional(),
@@ -292,6 +301,8 @@ export const SleepNightSchema = z.strictObject({
   bed: LocalTime,
   wake: LocalTime,
   minutes: z.number().int().positive(),
+  /** "How rested do you feel?" (the redesign mockup): 0 awful to 4 great. Absent from nights logged before it. */
+  rested: z.literal([0, 1, 2, 3, 4]).optional(),
   ...Stamp,
 });
 export type SleepNight = z.infer<typeof SleepNightSchema>;

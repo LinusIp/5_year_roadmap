@@ -6,6 +6,9 @@ import { useUnits } from '../hooks/useUnits.ts';
 import { dayLayout, withBlockLength, withBlockTime } from '../lib/calendar.ts';
 import { busyConflict, busyOn, GRID_END, GRID_START, hm } from '../lib/calendar-layout.ts';
 import { addDays, dayName, eachDay, monthName, startOfMonth, startOfWeek, today as todayDate } from '../lib/dates.ts';
+import { laneSlot } from '../lib/scenes.ts';
+import { isBlockDone } from '../lib/logs.ts';
+import { useRunningTimer } from '../db/timer.ts';
 import { totalMinutes } from '../lib/logs.ts';
 import { planForDay } from '../lib/schedule.ts';
 import type { ScheduleContext } from '../lib/schedule.ts';
@@ -54,6 +57,7 @@ export function Calendar() {
   const units = useUnits();
   const catalogue = useCatalogueIndex();
   const blogPosts = useBlogPosts();
+  const timer = useRunningTimer();
   const now = todayDate();
   const [viewParam, setView] = useQueryParam('view');
   const [dateParam, setDate] = useQueryParam('date');
@@ -129,68 +133,121 @@ export function Calendar() {
       : view === 'week'
         ? (weekStart.slice(5, 7) === weekEnd.slice(5, 7) ? Number(weekStart.slice(8, 10)) : short(weekStart)) + '–' + short(weekEnd)
         : dayName(date, true) + ' ' + short(date);
+  // The header's line (the mockup's): the month and the ISO week of the date in view.
+  const shownMonth = view === 'month' ? month : date;
+  const isoWeek = (d: string): number => {
+    const t = new Date(Date.UTC(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, Number(d.slice(8, 10))));
+    const dayNum = t.getUTCDay() || 7;
+    t.setUTCDate(t.getUTCDate() + 4 - dayNum);
+    const yearStart = Date.UTC(t.getUTCFullYear(), 0, 1);
+    return Math.ceil(((t.getTime() - yearStart) / 86400000 + 1) / 7);
+  };
+  const headerLine = monthName(Number(shownMonth.slice(5, 7)) - 1) + ' ' + shownMonth.slice(0, 4) + ' · week ' + isoWeek(view === 'month' ? month : date);
   const columns = days.map((d) => ({ date: d, blocks: columnFor(d, atlas, ctx, d >= weekStart && d <= weekEnd ? weekPick?.projectId : undefined) }));
   firstStart.current = Math.max(GRID_START, Math.min(GRID_END - 120, ...columns.flatMap((c) => c.blocks.map((b) => b.start)), 24 * 60));
   const dayLog = atlas.logs.find((l) => l.date === date);
   const resolvedDay = view === 'day' ? planForDay({ date, settings, ctx, ...(weekPick?.projectId ? { weeklyPickId: weekPick.projectId } : {}) }) : null;
+  const weekDays = eachDay(weekStart, weekEnd);
+  const addAt = (): void => setSheet({ kind: 'add', date, minute: Math.min(22 * 60, Math.ceil(Math.max(date === now ? minute : 0, 8 * 60) / 30) * 30) });
 
   return (
     <Screen title="Calendar">
+      {/* The mockup's header: the title over the month and week, and Add time (the screen's one filled button). */}
       <Header
         title="Calendar"
+        sub={headerLine}
         actions={
-          <>
-            {/* The date range sits on the title's row, between it and the arrows. */}
-            <span className="text-meta font-semibold text-ink2">{title}</span>
-            <Button variant="icon" icon="chevronLeft" label={view === 'month' ? 'Previous month' : view === 'week' ? 'Previous week' : 'Previous day'} onClick={() => step(-1)} />
-            <Button variant="icon" icon="chevronRight" label={view === 'month' ? 'Next month' : view === 'week' ? 'Next week' : 'Next day'} onClick={() => step(1)} />
-          </>
+          <Button variant="filled" size="sm" icon="plus" onClick={addAt}>
+            Add time
+          </Button>
         }
       />
-      <div className="mt-5 flex items-center gap-3">
+      <div className="mt-4 flex items-center gap-2.5">
         <div className="min-w-0 flex-1">
           <SegmentedControl label="View" value={view} options={VIEWS} onChange={(v) => go(date, v)} />
         </div>
-        <Button
-          size="sm"
-          onClick={() => {
-            setMonth(startOfMonth(now));
-            go(now);
-          }}
-        >
-          Today
-        </Button>
+        <Button variant="icon" icon="chevronLeft" className="!size-11" label={view === 'month' ? 'Previous month' : view === 'week' ? 'Previous week' : 'Previous day'} onClick={() => step(-1)} />
+        <Button variant="icon" icon="chevronRight" className="!size-11" label={view === 'month' ? 'Next month' : view === 'week' ? 'Next week' : 'Next day'} onClick={() => step(1)} />
       </div>
 
       {view === 'month' && (
         <>
           <MonthView atlas={atlas} month={month} selected={date} today={now} onPick={(d) => go(d, 'day')} onMonth={(delta) => setMonth(shiftMonth(month, delta))} />
-          <div className="mt-[18px] flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-3">
             <Button variant="ice" icon="calendar" onClick={() => downloadIcs(atlas, ctx, now)}>
               Add to my calendar
             </Button>
+            {date !== now && (
+              <Button
+                onClick={() => {
+                  setMonth(startOfMonth(now));
+                  go(now);
+                }}
+              >
+                Today
+              </Button>
+            )}
           </div>
           <p className="mt-2 px-1 text-meta text-ink2">The next four weeks of blocks, as a file your calendar app opens.</p>
         </>
       )}
 
+      {view === 'day' && (
+        // The week strip (the mockup's): the seven days of the week, the one in view filled.
+        <nav aria-label="This week" className="tile mt-4 flex gap-1 p-2">
+          {weekDays.map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => go(d, 'day')}
+              aria-current={d === date ? 'date' : undefined}
+              className={'flex min-h-11 min-w-0 flex-1 flex-col items-center gap-1 rounded-knob py-2 text-small font-semibold ' + (d === date ? 'bg-[var(--l0)] text-[var(--on-lane)]' : 'text-ink2')}
+            >
+              <span aria-hidden="true">{dayName(d, true)}</span>
+              <b className={'text-body font-semibold ' + (d === date ? '' : 'text-ink')}>{Number(d.slice(8, 10))}</b>
+              <span className="sr-only">{dateTitle(d) + (d === now ? ', today' : '')}</span>
+            </button>
+          ))}
+        </nav>
+      )}
+
       {view === 'day' && resolvedDay && (
-        <section aria-label="Day" className="mt-[18px] flex flex-wrap items-center gap-x-3 gap-y-1 px-1">
-          <button type="button" aria-haspopup="dialog" onClick={() => setSheet({ kind: 'template', date })} className="knob min-h-11 rounded-pill px-4 text-meta font-semibold">
-            {resolvedDay.resolved.rest ? 'Rest day' : resolvedDay.resolved.templateName}
-          </button>
-          <p className="min-w-0 flex-1 text-meta text-ink2">
-            {span(resolvedDay.targetMinutes) + ' planned · ' + span(totalMinutes(dayLog)) + ' logged'}
+        // The day's line (the mockup's): its hours against the plan, and the legend; the template and the blog on the right.
+        <section aria-label="Day" className="tile mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
+          <p className="min-w-0 flex-1 text-label font-semibold">
+            <span>{title}</span>
+            {resolvedDay.resolved.rest ? ' · rest day · ' + span(totalMinutes(dayLog)) + ' logged' : ' · ' + span(totalMinutes(dayLog)) + ' of ' + span(resolvedDay.targetMinutes) + (resolvedDay.resolved.templateId !== 'full' ? ' · ' + resolvedDay.resolved.templateName : '')}
           </p>
-          {date <= now && (
-            // The day's blog post: the facts and outline of that day, and whether it was posted (DAILY-BLOG).
-            <Button size="sm" icon="blog" to={'/blog?date=' + date} name={blogPosts?.some((p) => p.date === date && p.posted) ? 'Blog post, posted' : 'Blog post, not yet'}>
-              {blogPosts?.some((p) => p.date === date && p.posted) ? 'Blog ✓' : 'Blog'}
-            </Button>
-          )}
-          <Button size="sm" icon="plus" onClick={() => setSheet({ kind: 'add', date, minute: Math.min(22 * 60, Math.ceil(Math.max(date === now ? minute : 0, 8 * 60) / 30) * 30) })}>
-            Add
-          </Button>
+          <span className="flex items-center gap-1.5 text-small font-semibold text-ink2" aria-hidden="true">
+            <i className="size-2.5 rounded-[3px] bg-[var(--l0)]" />
+            Done
+          </span>
+          <span className="flex items-center gap-1.5 text-small font-semibold text-ink2" aria-hidden="true">
+            <i className="size-2.5 rounded-[3px] bg-[var(--t0)] outline-dashed outline-2 outline-[var(--d0)]" />
+            Planned
+          </span>
+          <span className="flex basis-full flex-wrap gap-2">
+            <button type="button" aria-haspopup="dialog" onClick={() => setSheet({ kind: 'template', date })} className="knob min-h-11 rounded-pill px-3.5 text-meta font-semibold">
+              {resolvedDay.resolved.rest ? 'Rest day' : resolvedDay.resolved.templateName}
+            </button>
+            {date <= now && (
+              // The day's blog post: the facts and outline of that day, and whether it was posted (DAILY-BLOG).
+              <Button size="sm" icon="blog" to={'/blog?date=' + date} name={blogPosts?.some((p) => p.date === date && p.posted) ? 'Blog post, posted' : 'Blog post, not yet'}>
+                {blogPosts?.some((p) => p.date === date && p.posted) ? 'Blog ✓' : 'Blog'}
+              </Button>
+            )}
+            {date !== now && (
+              <Button
+                size="sm"
+                onClick={() => {
+                  setMonth(startOfMonth(now));
+                  go(now);
+                }}
+              >
+                Today
+              </Button>
+            )}
+          </span>
         </section>
       )}
 
@@ -200,24 +257,37 @@ export function Calendar() {
             Drag to move it, drag its bottom edge to change its length, or open it to set its time and length.
           </p>
           {view === 'week' && (
-            <div className="mt-[18px] flex pl-11">
+            <div className="mt-4 flex pl-11">
               {days.map((d) => (
                 <button key={d} type="button" onClick={() => go(d, 'day')} className="flex min-h-11 min-w-0 flex-1 items-center justify-center">
-                  {/* One line: "M 19". Today's header is ice. */}
-                  <span aria-hidden="true" className={'whitespace-nowrap rounded-pill px-1.5 py-0.5 text-small font-semibold ' + (d === now ? 'fill-ice' : 'text-ink2')}>
+                  {/* One line: "M 19". Today's header is the first lane's fill. */}
+                  <span aria-hidden="true" className={'whitespace-nowrap rounded-pill px-1.5 py-0.5 text-small font-semibold ' + (d === now ? 'bg-[var(--l0)] text-[var(--on-lane)]' : 'text-ink2')}>
                     {dayName(d, true).charAt(0) + ' ' + Number(d.slice(8, 10))}
                   </span>
                   <span className="sr-only">{'Open ' + dateTitle(d) + (d === now ? ', today' : '')}</span>
                 </button>
               ))}
+              {date !== now && (
+                <Button
+                  size="sm"
+                  className="shrink-0"
+                  onClick={() => {
+                    setMonth(startOfMonth(now));
+                    go(now);
+                  }}
+                >
+                  Today
+                </Button>
+              )}
             </div>
           )}
-          <div ref={scroller} data-calendar-grid className="tile mt-2 overflow-y-auto px-1.5 py-2" style={{ maxHeight: 'calc(100dvh - 19rem)' }}>
+          {/* The time grid (the mockup's): a line and a label every two hours; the blocks in their lanes' colours. */}
+          <div ref={scroller} data-calendar-grid className={'mt-4 overflow-y-auto ' + (view === 'week' ? 'tile px-1.5 py-2' : 'px-0.5')} style={{ maxHeight: 'calc(100dvh - 21rem)' }}>
             <div className="flex" style={{ height: GRID_HEIGHT }}>
-              <div aria-hidden="true" className="relative w-10 shrink-0">
-                {Array.from({ length: 18 }, (_, i) => (
-                  <span key={i} className="absolute right-1 -translate-y-1/2 text-small font-semibold text-ink2" style={{ top: i * 60 * PX_PER_MIN }}>
-                    {i === 0 ? '' : hm(GRID_START + i * 60)}
+              <div aria-hidden="true" className="relative w-12 shrink-0">
+                {Array.from({ length: 10 }, (_, i) => (
+                  <span key={i} className="absolute left-0 -translate-y-1/2 text-[11px] font-semibold text-ink2" style={{ top: i * 120 * PX_PER_MIN }}>
+                    {hm(GRID_START + i * 120)}
                   </span>
                 ))}
               </div>
@@ -226,7 +296,7 @@ export function Calendar() {
                   key={d}
                   date={d}
                   compact={view === 'week'}
-                  blocks={blocks}
+                  blocks={blocks.map((b) => ({ ...b, lane: laneSlot(b.id), done: isBlockDone(atlas.logs.find((l) => l.date === d), b.id), running: d === now && timer?.block === b.id }))}
                   busy={busyOn(busyAll, d)}
                   {...(d === now ? { nowMinute: minute } : {})}
                   onOpenBlock={(block) => setSheet({ kind: 'block', date: d, block })}

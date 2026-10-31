@@ -20,11 +20,11 @@ export function criteriaUnits(acceptance: string[]): ChecklistUnit[] {
  * 44 px version with regular-weight titles. A unit with a link
  * opens it from its title; the circle ticks it. A tick shows at once and is stored behind it.
  */
-export function Checklist({ refId, units, done, label, plain, compact }: { refId: string; units: ChecklistUnit[]; done: string[]; label?: string; plain?: boolean; compact?: boolean }) {
+export function Checklist({ refId, units, done, label, aside, plain, compact }: { refId: string; units: ChecklistUnit[]; done: string[]; label?: string; aside?: string; plain?: boolean; compact?: boolean }) {
   const ticks = useOptimisticSet(done);
   let lastSection: string | undefined;
   return (
-    <RowList label={label} plain={plain}>
+    <RowList label={label} aside={aside} plain={plain}>
       {units.map((unit) => {
         const section = unit.section && unit.section !== lastSection ? unit.section : null;
         lastSection = unit.section;

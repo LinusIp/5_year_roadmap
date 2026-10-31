@@ -13,6 +13,7 @@ test.beforeEach(async ({ page }) => {
 
 test('the Practice tile opens a shelf of practice and problem sets', async ({ page }) => {
   await open(page, './#/library');
+  await page.getByRole('button', { name: /^Browse all/ }).click();
   const tile = page.getByRole('button', { name: /^[\d,]+ Practice$/ });
   await expect(tile).toBeVisible();
   const count = Number((await tile.innerText()).replace(/,/g, '').match(/\d+/)![0]);

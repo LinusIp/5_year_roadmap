@@ -103,7 +103,7 @@ test.describe('keyboard shortcuts', () => {
 });
 
 test('the heatmap is one tab stop, and the arrow keys move through the days', async ({ page }) => {
-  await open(page, './#/activity');
+  await open(page, './#/activity?year=2026');
   const grid = page.getByRole('group', { name: 'Time logged in 2026' });
   await expect(grid.locator('rect[tabindex="0"]')).toHaveCount(1);
   const start = grid.locator('rect[tabindex="0"]');

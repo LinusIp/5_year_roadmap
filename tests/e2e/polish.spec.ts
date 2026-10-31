@@ -14,7 +14,7 @@ const TABBED = [
   ['Plan', './#/plan'],
   ['Calendar', './#/calendar'],
   ['Library', './#/library'],
-  ['Activity', './#/activity'],
+  ['Stats', './#/activity'],
 ] as const;
 
 /** How far the last card's bottom is above the tab bar's top, with the page scrolled to the end. */
@@ -51,7 +51,7 @@ test('the tab bar names its tabs, and Plan\'s segments are never clipped at 390 
   await page.clock.install({ time: new Date(FIRST_DAY) });
   await open(page, './#/plan');
   const bar = page.getByRole('navigation', { name: 'Main' });
-  for (const name of ['Today', 'Plan', 'Calendar', 'Library', 'Activity']) {
+  for (const name of ['Today', 'Plan', 'Calendar', 'Library', 'Stats']) {
     const link = bar.getByRole('link', { name, exact: true });
     await expect(link).toBeVisible();
     // The name is drawn, not only read: the label's box has a height.
@@ -79,9 +79,8 @@ test('Today\'s numbers agree: blocks under way are counted, the hours sit on the
   await page.getByRole('button', { name: 'Replace', exact: true }).click();
   await expect(page.getByText(/Restored \d+ records/)).toBeVisible();
   await open(page, './');
-  // The demo's morning: three blocks with minutes short of their two hours.
-  await expect(page.getByText(/^\d in progress$/)).toBeVisible();
-  await expect(page.getByText('0/5')).toBeVisible();
+  // The demo's morning: the hours against the plan on the ring tile.
+  await expect(page.getByText(/^\d h \d+ m of 10 h today/)).toBeVisible();
   const openLink = page.getByRole('link', { name: 'Open course' });
   await expect(openLink).toBeVisible();
   await expect(openLink).toHaveText(/^Open$/);
@@ -93,7 +92,7 @@ test('Today\'s numbers agree: blocks under way are counted, the hours sit on the
   expect(await strip.locator('[class*="day-"]').count()).toBe(7);
 
   await open(page, './#/library');
-  await expect(page.getByText(/15,\d{3} more when you need them/)).toBeVisible();
+  await expect(page.getByText(/· 1\d,\d{3} resources/)).toBeVisible();
   await expect(page.getByText(/\d+ h logged · over estimate/)).toBeVisible();
   await expect(page.getByText(/\d+ of \d+ h$/)).toHaveCount(0);
 });

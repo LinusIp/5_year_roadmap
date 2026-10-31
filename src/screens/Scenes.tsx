@@ -38,16 +38,16 @@ export function Scenes() {
 
   return (
     <Screen title="Daily scenes">
-      <Header title="Daily scenes" sub={prefs.on ? 'A new image and palette every day' : 'The daily scene is off in Settings › Appearance'} back={<Button variant="icon" icon="chevronLeft" label="Back to Today" to="/" />} />
+      <Header title="Daily scenes" sub={prefs.on ? 'A new image and palette every day' : 'The daily scene is off in Settings › Appearance'} backTo="/" backLabel="Back to Today" />
       {selected && (
-        <section aria-labelledby="scene-name" className="tile mt-[18px] overflow-hidden !p-0">
-          <ScenePanel slot="scenes-page" scene={selected} aspect="16 / 9" focal="50% 40%" bare className="rounded-t-[24px]" eager alt={'Scene: ' + selected.name} />
+        <section aria-labelledby="scene-name" className="tile mt-4 overflow-hidden !p-0">
+          <ScenePanel slot="scenes-page" scene={selected} focal="50% 40%" bare className="h-[200px] rounded-t-[24px]" eager alt={'Scene: ' + selected.name} />
           <div className="flex flex-col gap-2.5 px-[18px] pb-[18px] pt-3.5">
             <div className="flex items-baseline justify-between gap-3">
-              <h2 id="scene-name" className="text-lead font-semibold">
+              <h2 id="scene-name" className="text-[19px] font-black">
                 {selected.name}
               </h2>
-              <span className="text-small font-semibold text-blue-deep">{prefs.pinned === selected.id ? 'Pinned' : prefs.skipped?.date === isoOf(day) && selected.id === todays?.id ? 'Today (skipped to)' : whenText(next.get(selected.id))}</span>
+              <span className="text-small font-semibold text-[var(--x0)]">{prefs.pinned === selected.id ? 'Pinned' : prefs.skipped?.date === isoOf(day) && selected.id === todays?.id ? 'Today (skipped to)' : whenText(next.get(selected.id))}</span>
             </div>
             <ul className="flex gap-1.5" aria-label={'Palette of ' + selected.name}>
               {[
@@ -79,8 +79,8 @@ export function Scenes() {
         </section>
       )}
 
-      <div className="mt-[18px] flex items-baseline justify-between px-1">
-        <h2 className="section-label mb-0">{'All ' + SCENES.length + ' scene' + (SCENES.length === 1 ? '' : 's')}</h2>
+      <div className="mt-4 flex items-baseline justify-between px-1">
+        <h2 className="section-label mb-0 uppercase">{'All ' + SCENES.length + ' scene' + (SCENES.length === 1 ? '' : 's')}</h2>
         <span className="text-small text-ink2">tap to preview</span>
       </div>
       <ul className="mt-2 grid grid-cols-4 gap-2.5" aria-label="Every scene">
@@ -94,7 +94,7 @@ export function Scenes() {
                 onClick={() => setPick(s.id)}
                 aria-pressed={selected?.id === s.id}
                 aria-label={'Preview scene ' + s.name + (today ? ', today' : days !== undefined ? ', in ' + days + ' days' : '') + (isStarred(s.id) ? ', starred' : '') + (prefs.pinned === s.id ? ', pinned' : '')}
-                className={'relative block aspect-[3/4] w-full overflow-hidden rounded-[18px] ' + (selected?.id === s.id ? 'outline outline-[3px] outline-offset-2 outline-blue-deep' : '')}
+                className={'relative block aspect-[3/4] w-full overflow-hidden rounded-[18px] ' + (selected?.id === s.id ? 'shadow-[0_0_0_3px_var(--bg),0_0_0_6px_var(--l0)]' : '')}
               >
                 <ScenePanel slot="scenes-cell" scene={s} thumb bare focal="50% 40%" className="absolute inset-0" />
                 {today && <span className="absolute left-1.5 top-1.5 rounded-pill bg-[var(--l0)] px-1.5 text-[10px] font-semibold leading-4 text-[var(--on-lane)]">TODAY</span>}
