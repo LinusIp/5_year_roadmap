@@ -2560,7 +2560,9 @@ with a label and no text, which the "no empty tile" check now allows. The Now ti
 above and below it; its test no longer asks for a horizontal strip). Focus's block pill reads "Block" while no block
 is running, since "Till the block ends" does not fit beside the four lengths on a 380 px screen; its name keeps the
 full wording, and "Till 12:00" shows as before when a block is under way. The later phases' lanes on Plan carry the
-phase's hours in the pill where the current phase has its verdict.
+phase's hours in the pill where the current phase has its verdict. The app picks the day's scene from the same
+settings read as the theme (App.tsx): two live reads of one record could land apart, and the second showed the day's
+scene for a moment where a pin held another, which CI caught in the dark-theme scene test.
 
 **Tests.** The Later today heading is read by assistive tech only (the board has no label); the Slept tile became
 the Sleep tile; the fold check watches the week strip; the Stats tab's names changed; Calendar's day line reads
