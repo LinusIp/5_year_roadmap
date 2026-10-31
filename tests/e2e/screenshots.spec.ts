@@ -125,7 +125,7 @@ for (const theme of ['light', 'dark'] as const) {
     await page.locator('section[aria-labelledby="now-title"]').getByRole('button', { name: 'Start', exact: true }).click();
     await page.clock.setFixedTime(at('06:24'));
     await open(page, './');
-    await expect(page.locator('main .tile').first()).toContainText('Running · since 06:00 · ');
+    await expect(page.getByRole('region', { name: "Today's hours" })).toContainText('Running · since 06:00 · ');
     await expect(page.getByText(/daily challenge/).first()).toBeVisible();
     await expect(page).toHaveScreenshot('today-running-0624-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
   });
@@ -158,7 +158,7 @@ for (const theme of ['light', 'dark'] as const) {
     await slept.scrollIntoViewIfNeeded();
     await expect(page).toHaveScreenshot('today-slept-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
     await open(page, './#/sleep');
-    await expect(page.getByRole('img', { name: /^This week:/ })).toBeVisible();
+    await expect(page.getByRole('img', { name: /^Last 7 nights:/ })).toBeVisible();
     await expect(page).toHaveScreenshot('sleep-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
     await open(page, './#/activity');
     await expect(page.getByRole('link', { name: /^Sleep last 7 nights · average/ })).toBeVisible();
@@ -187,7 +187,7 @@ for (const theme of ['light', 'dark'] as const) {
     for (const time of ['09:00', '13:00', '22:04']) {
       await page.clock.setFixedTime(new Date(DEMO_TIME.slice(0, 11) + time + ':00+05:00'));
       await open(page, './');
-      await expect(page.getByText(/ of 5 done$/)).toBeVisible();
+      await expect(page.getByRole('navigation', { name: /^This week:/ })).toBeVisible();
       await expect(page).toHaveScreenshot('today-times-' + time.replace(':', '') + '-' + theme + '.png', { animations: 'disabled', fullPage: true, maxDiffPixelRatio: 0.002 });
     }
   });
@@ -230,14 +230,15 @@ for (const theme of ['light', 'dark'] as const) {
     await page.setViewportSize({ width: 390, height: 844 });
     await importDemo(page, theme);
     await open(page, './#/blog');
-    await expect(page.getByLabel('The outline, in Markdown')).toContainText('## ');
-    await expect(page.locator('.tile').filter({ hasText: 'Writing streak' })).toContainText('12');
+    await expect(page.getByLabel('The post, in Markdown')).toContainText('## ');
+    await expect(page.getByText(/· 12 days in a row/)).toBeVisible();
     await expect(page).toHaveScreenshot('blog-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
     // At 22:10 the day is done and Today reminds.
     await page.clock.setFixedTime(new Date(DEMO_TIME.slice(0, 11) + '22:10:00+05:00'));
     await open(page, './');
-    await expect(page.getByText('Write today’s blog post')).toBeVisible();
-    await page.getByText('Write today’s blog post').scrollIntoViewIfNeeded();
+    // The log tile says the outline is ready once the day is done (the redesign's Today's log tile).
+    await expect(page.getByText('The day’s outline is ready')).toBeVisible();
+    await page.getByText('The day’s outline is ready').scrollIntoViewIfNeeded();
     await expect(page).toHaveScreenshot('today-blog-reminder-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
   });
 }
