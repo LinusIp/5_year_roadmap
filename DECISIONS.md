@@ -2455,3 +2455,13 @@ picture keeps a 190 px floor (with its width pinned, or `aspect-ratio` would wid
 knobs clear the scene's name at 360 px; at 390 px the 2:1 panel stays, since 15 px more would put "Later today"
 under the tab bar; and the "Atlas" wordmark hides under 380 px so the date fits.
 
+## The scene barely showed on Today (pull request #42)
+
+With the header row on a fade at the top and the big hours over two lines on a fade at the bottom, the 2:1 panel
+left a strip of picture about 40 px tall. The top fade is gone: the mark and the date sit on one paper chip on
+the picture itself (the knobs are paper already), so the picture shows from the top edge, around the chip and the
+knobs. The hours are one line on the picture (the number in the lead size, "of 10 h today · 57-day streak" as
+meta), so the fade under them is low; the plain tile and the illustrations' panel keep the big number over two
+lines. A taller panel was tried and refused by the fold rule: at 5:3 "Later today" landed 29 px under the tab bar
+at 390 × 844, and the fold check allows about 6 px over the 2:1 panel, so the panel stays 2:1 (with the 190 px floor
+under 380 px for the preview knobs) and the picture's clear band roughly doubles instead.
