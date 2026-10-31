@@ -45,6 +45,23 @@ jobs:
         timeout-minutes: 5
         run: npm run check:links -- --only ml-zoomcamp | grep -v '^ok '
 
+  # One-off (ATLAS-LIBRARY, 16,076 rows): the twelfth file's new links, reported on the pull request; removed before the merge.
+  links-atlas-12:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Link report
+        continue-on-error: true
+        timeout-minutes: 25
+        run: npm run check:links -- --in data/resources/library-atlas-12.yaml | grep -v '^ok ' | grep -v '^        '
+
   # The Focus tab's starter sessions (data/focus-sessions.json, ATLAS-FOCUS-MUSIC) asked of YouTube's oEmbed endpoint
   # from the runner: the build-time check that each still exists and allows embedding. Red when one does not; the
   # weekly focus-check workflow opens an issue for the same.

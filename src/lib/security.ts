@@ -58,10 +58,23 @@ function normalise(text: string): string {
 }
 
 /** The areas an item belongs to, from its title and summary. */
+// Each area's words as one expression, compiled once: the Library reads the areas of sixteen thousand rows at a time,
+// and a test per area costs a tenth of a search per word. The acronyms are whole words in their own case on the raw
+// text; the other words follow a space in the normalised text, as `includes(' ' + word)` did.
+const escape = (w: string): string => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const AREA_MATCHERS = SECURITY_AREAS.map((a) => {
+  const isAcronym = (w: string): boolean => w === w.toUpperCase() && /^[A-Z0-9 ]+$/.test(w);
+  const acronyms = a.words.filter(isAcronym);
+  const plain = a.words.filter((w) => !isAcronym(w));
+  return {
+    key: a.key,
+    acronyms: acronyms.length ? new RegExp('(^|[^A-Za-z])(' + acronyms.map(escape).join('|') + ')(?![A-Za-z])') : null,
+    plain: plain.length ? new RegExp(' (' + plain.map(escape).join('|') + ')') : null,
+  };
+});
+
 export function securityAreasOf(title: string, summary = ''): string[] {
   const text = normalise(title + ' ' + summary);
   const raw = title + ' ' + summary;
-  return SECURITY_AREAS.filter((a) =>
-    a.words.some((w) => (w === w.toUpperCase() && /^[A-Z0-9 ]+$/.test(w) ? new RegExp('(^|[^A-Za-z])' + w + '(?![A-Za-z])').test(raw) : text.includes(' ' + w))),
-  ).map((a) => a.key);
+  return AREA_MATCHERS.filter((a) => (a.acronyms !== null && a.acronyms.test(raw)) || (a.plain !== null && a.plain.test(text))).map((a) => a.key);
 }

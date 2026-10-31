@@ -1,0 +1,2037 @@
+# The Atlas Library's eleventh file (ATLAS-LIBRARY, 15,961 rows): the rows the first ten files did not have, the plan
+# gap fill: inference-stack depth (TensorRT-LLM, Dynamo, Triton Inference Server, PyTorch internals), interview prep,
+# research skills, diffusion inference and hands-on image generation, video and 3D generation tooling, communication
+# (public speaking, pitching and fundraising, technical writing, blogging), open-source contribution, Mandarin basics,
+# certificates (ids `cert-…`, a Certificate badge and an Earned toggle) and backend auth, observability and testing.
+# Papers, articles, docs, practice, books, blogs and courses, each link checked when it was added (October 2026), each
+# with its priority for years 1 to 3, the roadmap.sh roadmap it serves and its year 3 research area; a paid row says so
+# (`cost: paid`, `note: Paid`). None is on the plan: they sit on their shelves, in search, under "Optional for this path"
+# and in the Research view. Generated from atlas-resources.jsonl by scratch/import-atlas.ts; rows the Library already
+# had only filled in what their entries were missing, or took the file's corrections.
+
+# ---- DevOps and MLOps (78)
+
+- id: "docs-gha-understand"
+  title: "Understanding GitHub Actions"
+  short: "Understand GH Actions"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/get-started/understand-github-actions"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Defines workflows, events, jobs, steps, runners and actions so every later Actions page makes sense."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-github-flow]
+
+- id: "docs-gha-matrix"
+  title: "Running variations of jobs in a workflow (matrix)"
+  short: "Actions Matrix Jobs"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/run-job-variations"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Shows how one job definition fans out across OS, language-version and config combinations with include/exclude and fail-fast."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-github-actions-workflow-syntax]
+
+- id: "docs-gha-dependency-caching"
+  title: "Dependency caching reference"
+  short: "Actions Dependency Cache"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Explains cache keys, restore-keys, scope and eviction rules so CI stops re-downloading dependencies every run."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-github-actions-workflow-syntax]
+
+- id: "docs-gha-contexts"
+  title: "Contexts reference"
+  short: "Actions Contexts"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/reference/workflows-and-actions/contexts"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Lists github, env, matrix, needs, secrets and other contexts and where each one is available in a workflow."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-github-actions-workflow-syntax]
+
+- id: "docs-gha-expressions"
+  title: "Expressions reference"
+  short: "Actions Expressions"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/reference/workflows-and-actions/expressions"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Covers operators, status functions like success()/always() and helpers such as fromJSON and hashFiles for conditional logic."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-contexts]
+
+- id: "docs-gha-events"
+  title: "Events that trigger workflows"
+  short: "Workflow Trigger Events"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "Complete list of triggers (push, pull_request, schedule, workflow_dispatch, release, workflow_run) with their filters and caveats."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-understand]
+
+- id: "docs-gha-manual-run"
+  title: "Manually running a workflow (workflow_dispatch)"
+  short: "Manually Run a Workflow"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "How to expose a button, CLI or API trigger with typed inputs for on-demand builds and releases."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-events]
+
+- id: "docs-gha-use-secrets"
+  title: "Using secrets in GitHub Actions"
+  short: "Using Actions Secrets"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "How to create repo, environment and org secrets and pass them safely into steps."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-understand]
+
+- id: "docs-gha-debug-logging"
+  title: "Enabling debug logging"
+  short: "Actions Debug Logging"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/how-tos/monitor-workflows/enable-debug-logging"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Turns on runner and step debug logs, the first move when a workflow fails mysteriously."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-understand]
+
+- id: "docs-gh-pages-custom-workflows"
+  title: "Using custom workflows with GitHub Pages"
+  short: "Pages Custom Workflows"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Shows the configure-pages, upload-pages-artifact and deploy-pages flow for publishing any static site generator output."
+  fromYear: 1
+  priority: 2
+  roadmap: "ai-engineer"
+  after: [docs-gha-understand]
+
+- id: "docs-gh-about-rulesets"
+  title: "About rulesets"
+  short: "About Rulesets"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Explains rulesets for branches and tags (required checks, reviews, linear history) and how they layer over classic protection."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-github-flow]
+
+- id: "docs-gh-protected-branches"
+  title: "About protected branches"
+  short: "Protected Branches"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Lists the classic branch protection options like required status checks and signed commits that gate merges to main."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-github-flow]
+
+- id: "docs-gh-projects-quickstart"
+  title: "Quickstart for Projects"
+  short: "GitHub Projects Quickstart"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/quickstart-for-projects"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Gets a board/table project running with custom fields and views to plan solo or team work next to the code."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+
+- id: "docs-gh-cli-manual"
+  title: "GitHub CLI manual"
+  short: "GitHub CLI Manual"
+  provider: "GitHub"
+  type: "article"
+  url: "https://cli.github.com/manual/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "Reference for gh: drive PRs, issues, releases, runs and the API from the terminal and inside workflows."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-github-flow]
+
+- id: "docs-gh-cli-run"
+  title: "gh run (GitHub CLI manual)"
+  short: "gh run"
+  provider: "GitHub"
+  type: "article"
+  url: "https://cli.github.com/manual/gh_run"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "List, watch, rerun and download artifacts from workflow runs without opening the browser."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gh-cli-manual]
+
+- id: "docs-gh-cli-workflow"
+  title: "gh workflow (GitHub CLI manual)"
+  short: "gh workflow"
+  provider: "GitHub"
+  type: "article"
+  url: "https://cli.github.com/manual/gh_workflow"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Trigger workflow_dispatch runs with inputs and enable/disable workflows from the command line."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gh-cli-manual]
+
+- id: "docs-gh-cli-release"
+  title: "gh release (GitHub CLI manual)"
+  short: "gh release"
+  provider: "GitHub"
+  type: "article"
+  url: "https://cli.github.com/manual/gh_release"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Create releases and upload binary assets in one command, handy as a final step of a release workflow."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gh-cli-manual]
+
+- id: "docs-msix-overview"
+  title: "What is MSIX?"
+  short: "MSIX Overview"
+  provider: "Microsoft"
+  type: "article"
+  url: "https://learn.microsoft.com/en-us/windows/msix/overview"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Introduces Windows' modern package format: clean install/uninstall, containerised writes and Store/App Installer delivery."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+
+- id: "docs-inno-setup-help"
+  title: "Inno Setup Help"
+  short: "Inno Setup Help"
+  provider: "Jordan Russell / jrsoftware"
+  type: "article"
+  url: "https://jrsoftware.org/ishelp/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "Documentation for the free script-driven Windows installer builder widely used for indie and open-source apps."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+
+- id: "docs-winget-manifest"
+  title: "Create your package manifest (WinGet)"
+  short: "WinGet Manifest"
+  provider: "Microsoft"
+  type: "article"
+  url: "https://learn.microsoft.com/en-us/windows/package-manager/package/manifest"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "How to write the YAML manifest needed to list your app in the Windows Package Manager community repo."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+
+- id: "docs-homebrew-tap"
+  title: "How to Create and Maintain a Tap"
+  short: "Homebrew Tap Guide"
+  provider: "Homebrew"
+  type: "article"
+  url: "https://docs.brew.sh/How-to-Create-and-Maintain-a-Tap"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Run your own tap repository so users can install your tool before (or instead of) homebrew-core."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-homebrew-formula-cookbook]
+
+- id: "docs-gha-reuse-workflows"
+  title: "Reuse workflows"
+  short: "Reusable Workflows"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Teaches workflow_call with inputs, secrets and outputs so a team can keep one canonical build/deploy pipeline."
+  fromYear: 2
+  priority: 2
+  roadmap: "ai-engineer"
+  after: [docs-github-actions-workflow-syntax]
+
+- id: "docs-gha-metadata-syntax"
+  title: "Metadata syntax reference (action.yml)"
+  short: "action.yml Metadata Syntax"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "The reference for inputs, outputs, runs.using and branding when authoring any custom action."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-composite-action]
+
+- id: "docs-gha-concurrency"
+  title: "Control workflow concurrency"
+  short: "Actions Concurrency"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Uses concurrency groups and cancel-in-progress to stop duplicate deploys and wasted CI minutes."
+  fromYear: 2
+  priority: 2
+  roadmap: "ai-engineer"
+  after: [docs-github-actions-workflow-syntax]
+
+- id: "docs-gha-manage-environments"
+  title: "Managing environments for deployment"
+  short: "Deployment Environments"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Sets up staging/production environments with required reviewers, wait timers, branch rules and environment secrets."
+  fromYear: 2
+  priority: 2
+  roadmap: "ai-engineer"
+  after: [docs-github-actions-workflow-syntax]
+
+- id: "docs-gha-github-token"
+  title: "GITHUB_TOKEN (concepts)"
+  short: "GITHUB_TOKEN Explained"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/concepts/security/github_token"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Explains the automatic per-job token and why you should scope its permissions down explicitly."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-use-secrets]
+
+- id: "docs-gha-oidc"
+  title: "OpenID Connect in GitHub Actions"
+  short: "Actions OIDC Concepts"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/concepts/security/openid-connect"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Explains how workflows exchange short-lived OIDC tokens for cloud credentials instead of storing long-lived keys."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-use-secrets]
+
+- id: "docs-gha-oidc-aws"
+  title: "Configuring OpenID Connect in Amazon Web Services"
+  short: "Actions OIDC to AWS"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Step-by-step IAM identity provider and role trust policy setup for keyless AWS deploys from Actions."
+  fromYear: 2
+  priority: 2
+  roadmap: "ai-engineer"
+  after: [docs-gha-oidc]
+
+- id: "docs-gha-oidc-gcp"
+  title: "Configuring OpenID Connect in Google Cloud Platform"
+  short: "Actions OIDC to GCP"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-google-cloud-platform"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Sets up Workload Identity Federation so Actions jobs can deploy to GCP without service-account key files."
+  fromYear: 2
+  priority: 2
+  roadmap: "ai-engineer"
+  after: [docs-gha-oidc]
+
+- id: "docs-gha-oidc-azure"
+  title: "Configuring OpenID Connect in Azure"
+  short: "Actions OIDC to Azure"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-azure"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Federated credentials setup so workflows log into Azure with azure/login and no stored client secret."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-oidc]
+
+- id: "docs-gha-secure-use"
+  title: "Secure use reference (security hardening for GitHub Actions)"
+  short: "Actions Secure Use"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/reference/security/secure-use"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "GitHub's hardening checklist: pin actions to SHAs, minimise token permissions, avoid script injection and handle untrusted checkouts."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-use-secrets]
+
+- id: "docs-gha-pull-request-target"
+  title: "Securely using pull_request_target"
+  short: "Safe pull_request_target"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/reference/security/securely-using-pull_request_target"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Explains why pull_request_target runs with secrets on fork PRs and the patterns that keep it from becoming a pwn request."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-secure-use]
+
+- id: "docs-gha-script-injections"
+  title: "Script injections (concepts)"
+  short: "Actions Script Injections"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/concepts/security/script-injections"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Shows how attacker-controlled titles and branch names become shell commands via ${{ }} interpolation and how to avoid it."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-secure-use]
+
+- id: "docs-gha-self-hosted-runners"
+  title: "Self-hosted runners (concepts)"
+  short: "Self-Hosted Runners"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/concepts/runners/self-hosted-runners"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "When to run jobs on your own machines (GPUs, special hardware, private networks) and the security trade-offs involved."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-understand]
+
+- id: "docs-gha-larger-runners"
+  title: "Larger runners (concepts)"
+  short: "Larger Runners"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/concepts/runners/larger-runners"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Describes GitHub-managed bigger machines, including GPU-powered runners, with static IPs and runner groups."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-self-hosted-runners]
+
+- id: "docs-gha-artifact-attestations"
+  title: "Using artifact attestations to establish provenance for builds"
+  short: "Artifact Attestations"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Generates signed SLSA build provenance for binaries and images, then verifies it with gh attestation verify."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-secure-use]
+
+- id: "docs-gha-workflow-commands"
+  title: "Workflow commands reference"
+  short: "Actions Workflow Commands"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "How steps set outputs, env vars, masks, annotations and job summaries via GITHUB_OUTPUT and friends."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-github-actions-workflow-syntax]
+
+- id: "docs-gh-projects-actions"
+  title: "Automating Projects using Actions"
+  short: "Automate Projects w/ Actions"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Uses the GraphQL API from a workflow to add and update project items automatically."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gh-projects-quickstart]
+
+- id: "docs-docker-build-github-actions"
+  title: "Docker Build GitHub Actions"
+  short: "Docker Build w/ GH Actions"
+  provider: "Docker"
+  type: "article"
+  url: "https://docs.docker.com/build/ci/github-actions/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Docker's own guide set for Buildx in Actions: multi-platform builds, tags/labels, secrets, attestations and push."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docker-get-started]
+
+- id: "docs-docker-gha-cache"
+  title: "Cache management with GitHub Actions"
+  short: "Docker Cache in GH Actions"
+  provider: "Docker"
+  type: "article"
+  url: "https://docs.docker.com/build/ci/github-actions/cache/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Compares gha, registry and inline cache backends so container builds in CI reuse layers."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-docker-build-github-actions]
+
+- id: "docs-goreleaser-actions"
+  title: "GoReleaser: GitHub Actions"
+  short: "GoReleaser in Actions"
+  provider: "GoReleaser"
+  type: "article"
+  url: "https://goreleaser.com/customization/ci/actions/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Wires GoReleaser into a tag-triggered workflow to publish releases on every version tag."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-goreleaser-quick-start]
+
+- id: "docs-tauri-distribute"
+  title: "Tauri: Distribute"
+  short: "Tauri Distribute"
+  provider: "Tauri"
+  type: "article"
+  url: "https://v2.tauri.app/distribute/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Overview of shipping Tauri apps as MSI/NSIS, DMG, AppImage, deb, RPM and store packages, with signing guides."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [rust-book]
+
+- id: "docs-tauri-updater"
+  title: "Tauri Updater plugin"
+  short: "Tauri Updater"
+  provider: "Tauri"
+  type: "article"
+  url: "https://v2.tauri.app/plugin/updater/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Adds signed in-app auto-updates driven by a static JSON or update server."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-tauri-distribute]
+
+- id: "docs-tauri-github-pipeline"
+  title: "Tauri: GitHub pipeline"
+  short: "Tauri GitHub Pipeline"
+  provider: "Tauri"
+  type: "article"
+  url: "https://v2.tauri.app/distribute/pipelines/github/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Uses tauri-action to build all platform bundles in a matrix and publish them to a GitHub release."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-tauri-distribute]
+
+- id: "docs-electron-forge-makers"
+  title: "Electron Forge: Makers"
+  short: "Electron Forge Makers"
+  provider: "Electron Forge"
+  type: "article"
+  url: "https://www.electronforge.io/config/makers"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Reference for each output format (Squirrel.Windows, MSI, DMG, deb, rpm, Flatpak, Snap) Forge can produce."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-electron-packaging-tutorial]
+
+- id: "docs-electron-forge-code-signing"
+  title: "Electron Forge: Code Signing"
+  short: "Electron Code Signing"
+  provider: "Electron Forge"
+  type: "article"
+  url: "https://www.electronforge.io/guides/code-signing"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Guides for signing and notarizing Electron apps on macOS and signing on Windows."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-electron-packaging-tutorial]
+
+- id: "docs-electron-builder"
+  title: "electron-builder documentation"
+  short: "electron-builder"
+  provider: "electron-userland"
+  type: "article"
+  url: "https://www.electron.build/docs/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Alternative packager with built-in auto-update, code signing and many installer targets."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-electron-packaging-tutorial]
+
+- id: "docs-nsis"
+  title: "NSIS Users Manual"
+  short: "NSIS Manual"
+  provider: "NSIS project"
+  type: "article"
+  url: "https://nsis.sourceforge.io/Docs/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Manual for the scriptable Nullsoft installer system used by many Windows apps and by Electron/Tauri bundlers."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+
+- id: "docs-signtool"
+  title: "SignTool"
+  short: "SignTool"
+  provider: "Microsoft"
+  type: "article"
+  url: "https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Reference for Authenticode signing, timestamping and verifying Windows executables and installers."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+
+- id: "docs-apple-notarization"
+  title: "Notarizing macOS software before distribution"
+  short: "macOS Notarization"
+  provider: "Apple"
+  type: "article"
+  url: "https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Apple's guide to submitting signed apps for notarization so Gatekeeper lets users run them."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+
+- id: "docs-homebrew-formula-cookbook"
+  title: "Homebrew Formula Cookbook"
+  short: "Homebrew Formula Cookbook"
+  provider: "Homebrew"
+  type: "article"
+  url: "https://docs.brew.sh/Formula-Cookbook"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Write a Homebrew formula to build and install your CLI tool on macOS and Linux."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+
+- id: "docs-homebrew-cask-cookbook"
+  title: "Homebrew Cask Cookbook"
+  short: "Homebrew Cask Cookbook"
+  provider: "Homebrew"
+  type: "article"
+  url: "https://docs.brew.sh/Cask-Cookbook"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Describes casks for distributing prebuilt macOS GUI apps through brew install --cask."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-homebrew-formula-cookbook]
+
+- id: "docs-appimage-packaging-guide"
+  title: "AppImage Packaging Guide"
+  short: "AppImage Packaging"
+  provider: "AppImage project"
+  type: "article"
+  url: "https://docs.appimage.org/packaging-guide/index.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "How to bundle a Linux app into one portable AppImage file, with linuxdeploy and testing advice."
+  fromYear: 2
+  priority: 2
+  roadmap: "ai-engineer"
+
+- id: "docs-gha-arc"
+  title: "Actions Runner Controller"
+  short: "Actions Runner Controller"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/concepts/runners/actions-runner-controller"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Explains autoscaling ephemeral self-hosted runners on Kubernetes with runner scale sets."
+  fromYear: 3
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-self-hosted-runners]
+
+- id: "docs-gha-store-share-data"
+  title: "Storing and sharing data from a workflow"
+  short: "Actions Artifacts"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/tutorials/store-and-share-data"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Walks through uploading build outputs as artifacts and passing files between jobs, the basis of any build-then-release pipeline."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-github-actions-workflow-syntax]
+
+- id: "docs-gha-build-test-python"
+  title: "Building and testing Python"
+  short: "Actions: Python CI"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/tutorials/build-and-test-code/python"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "A ready CI template for Python: setup-python, pip caching, version matrix and running pytest."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-understand]
+
+- id: "docs-gha-build-test-rust"
+  title: "Building and testing Rust"
+  short: "Actions: Rust CI"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/tutorials/build-and-test-code/rust"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Template workflow for cargo build/test, caching and publishing Rust binaries as artifacts."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-understand]
+
+- id: "docs-goreleaser-quick-start"
+  title: "GoReleaser Quick Start"
+  short: "GoReleaser Quick Start"
+  provider: "GoReleaser"
+  type: "article"
+  url: "https://goreleaser.com/quick-start/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Automates cross-compiled builds, archives, checksums and GitHub releases for Go (and Rust/Zig) projects."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-go-compile-install]
+
+- id: "docs-electron-packaging-tutorial"
+  title: "Packaging Your Application (Electron tutorial)"
+  short: "Electron Packaging"
+  provider: "Electron"
+  type: "article"
+  url: "https://www.electronjs.org/docs/latest/tutorial/tutorial-packaging"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Uses Electron Forge to turn an app into platform installers and explains why code signing matters."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+
+- id: "docs-flatpak-first-build"
+  title: "Building your first Flatpak"
+  short: "First Flatpak"
+  provider: "Flatpak"
+  type: "article"
+  url: "https://docs.flatpak.org/en/latest/first-build.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Builds, installs and runs a hello-world Flatpak from a manifest in a few commands."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-flatpak-basic-concepts]
+
+- id: "docs-gha-composite-action"
+  title: "Creating a composite action"
+  short: "Composite Action Tutorial"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/tutorials/create-actions/create-a-composite-action"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Packages repeated shell steps into a versioned action.yml you can call from many repositories."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-reuse-workflows]
+
+- id: "docs-gha-javascript-action"
+  title: "Creating a JavaScript action"
+  short: "JavaScript Action Tutorial"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/tutorials/create-actions/create-a-javascript-action"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Builds a Node-based action with the actions toolkit, inputs/outputs and a bundled dist, the most common custom action type."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-composite-action]
+
+- id: "docs-gha-docker-action"
+  title: "Creating a Docker container action"
+  short: "Docker Container Action"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/tutorials/use-containerized-services/create-a-docker-container-action"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Shows how to ship an action as a container image so it can use any language or toolchain."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-composite-action]
+
+- id: "docs-gha-publish-docker-images"
+  title: "Publishing Docker images"
+  short: "Publish Docker Images"
+  provider: "GitHub"
+  type: "article"
+  url: "https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Builds and pushes images to Docker Hub and GHCR from a workflow with metadata tags and login actions."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docker-get-started]
+
+- id: "docs-electron-publishing-updating"
+  title: "Publishing and Updating (Electron tutorial)"
+  short: "Electron Publish & Update"
+  provider: "Electron"
+  type: "article"
+  url: "https://www.electronjs.org/docs/latest/tutorial/tutorial-publishing-updating"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Publishes releases to GitHub and wires up auto-updates with update.electronjs.org."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-electron-packaging-tutorial]
+
+- id: "docs-wix-tutorial"
+  title: "WiX Toolset tutorial"
+  short: "WiX Tutorial"
+  provider: "FireGiant / WiX"
+  type: "article"
+  url: "https://docs.firegiant.com/wix/tutorial/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Builds a real MSI step by step with WiX v4+/v5, from project setup through upgrades."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+
+- id: "repo-softprops-action-gh-release"
+  title: "action-gh-release"
+  short: "action-gh-release"
+  provider: "softprops"
+  type: "practice"
+  url: "https://github.com/softprops/action-gh-release"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Popular action for creating a GitHub Release from a tag and attaching built binaries as assets."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-store-share-data]
+
+- id: "repo-actions-deploy-pages"
+  title: "actions/deploy-pages"
+  short: "deploy-pages action"
+  provider: "GitHub"
+  type: "practice"
+  url: "https://github.com/actions/deploy-pages"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "The official action that publishes an uploaded Pages artifact; its README documents required permissions and environments."
+  fromYear: 1
+  priority: 2
+  roadmap: "ai-engineer"
+  after: [docs-gh-pages-custom-workflows]
+
+- id: "repo-actions-cache"
+  title: "actions/cache"
+  short: "actions/cache"
+  provider: "GitHub"
+  type: "practice"
+  url: "https://github.com/actions/cache"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "The cache action itself; its README has per-language examples for npm, pip, cargo, Gradle and more."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-dependency-caching]
+
+- id: "repo-rust-cache"
+  title: "Swatinem/rust-cache"
+  short: "rust-cache"
+  provider: "Arpad Borsos"
+  type: "practice"
+  url: "https://github.com/Swatinem/rust-cache"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Smart cargo/target caching for Rust CI that cuts build times with almost no configuration."
+  fromYear: 1
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-build-test-rust]
+
+- id: "repo-docker-build-push-action"
+  title: "docker/build-push-action"
+  short: "build-push-action"
+  provider: "Docker"
+  type: "practice"
+  url: "https://github.com/docker/build-push-action"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Buildx-based action for multi-platform image builds with GHA cache export, the standard way to ship containers from CI."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-publish-docker-images]
+
+- id: "repo-actions-typescript-action"
+  title: "actions/typescript-action template"
+  short: "TypeScript Action Template"
+  provider: "GitHub"
+  type: "practice"
+  url: "https://github.com/actions/typescript-action"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Official template repo with tests, bundling and release setup for writing your own TypeScript action."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-javascript-action]
+
+- id: "repo-harden-runner"
+  title: "harden-runner"
+  short: "harden-runner"
+  provider: "StepSecurity"
+  type: "practice"
+  url: "https://github.com/step-security/harden-runner"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Adds network egress monitoring and blocking to runners, catching supply-chain exfiltration in CI."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-secure-use]
+
+- id: "repo-attest-build-provenance"
+  title: "actions/attest-build-provenance"
+  short: "attest-build-provenance"
+  provider: "GitHub"
+  type: "practice"
+  url: "https://github.com/actions/attest-build-provenance"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Generates signed provenance attestations for release artifacts in a single workflow step."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-artifact-attestations]
+
+- id: "article-securitylab-pwn-requests"
+  title: "Keeping your GitHub Actions and workflows secure Part 1: Preventing pwn requests"
+  short: "GHSL: Pwn Requests"
+  provider: "Jaroslav Lobačevski / GitHub Security Lab"
+  type: "article"
+  url: "https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "The classic explanation of how pull_request_target plus checkout of fork code leaks secrets, with safe split-workflow patterns."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [docs-gha-secure-use]
+
+- id: "article-securitylab-untrusted-input"
+  title: "Keeping your GitHub Actions and workflows secure Part 2: Untrusted input"
+  short: "GHSL: Untrusted Input"
+  provider: "GitHub Security Lab"
+  type: "article"
+  url: "https://securitylab.github.com/research/github-actions-untrusted-input/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Catalogues which event fields attackers control and how they lead to command injection in run steps."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [article-securitylab-pwn-requests]
+
+- id: "article-securitylab-building-blocks"
+  title: "Keeping your GitHub Actions and workflows secure Part 3: How to trust your building blocks"
+  short: "GHSL: Building Blocks"
+  provider: "GitHub Security Lab"
+  type: "article"
+  url: "https://securitylab.github.com/research/github-actions-building-blocks/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Covers third-party action supply-chain risk, SHA pinning and self-hosted runner exposure."
+  fromYear: 2
+  priority: 2
+  roadmap: "software-architect"
+  after: [article-securitylab-untrusted-input]
+
+- id: "article-securitylab-new-patterns"
+  title: "Keeping your GitHub Actions and workflows secure Part 4: New vulnerability patterns and mitigation strategies"
+  short: "GHSL: New Patterns"
+  provider: "GitHub Security Lab"
+  type: "article"
+  url: "https://securitylab.github.com/resources/github-actions-new-patterns-and-mitigations/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Newer attack patterns found in real workflows (artifact poisoning, TOCTOU on approvals) and how to mitigate them."
+  fromYear: 3
+  priority: 2
+  roadmap: "software-architect"
+  after: [article-securitylab-building-blocks]
+
+# ---- Languages (34)
+
+- id: "docs-pyinstaller-usage"
+  title: "Using PyInstaller"
+  short: "PyInstaller Usage"
+  provider: "PyInstaller"
+  type: "article"
+  url: "https://pyinstaller.org/en/stable/usage.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "Command-line options for turning a Python script into a one-folder or one-file executable, including hidden imports and data files."
+  fromYear: 1
+  priority: 2
+  after: [pypug-overview]
+
+- id: "docs-cx-freeze-overview"
+  title: "cx_Freeze documentation overview"
+  short: "cx_Freeze Overview"
+  provider: "Anthony Tuininga / Marcelo Duarte"
+  type: "article"
+  url: "https://cx-freeze.readthedocs.io/en/stable/overview.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Cross-platform freezer that also produces MSI, DMG and AppImage outputs from a setup script."
+  fromYear: 1
+  priority: 2
+  after: [docs-pyinstaller-usage]
+
+- id: "docs-pypi-trusted-publishers"
+  title: "PyPI Trusted Publishers"
+  short: "PyPI Trusted Publishers"
+  provider: "PyPI"
+  type: "article"
+  url: "https://docs.pypi.org/trusted-publishers/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Publish to PyPI from CI via OIDC with no API tokens; covers setup and the security model."
+  fromYear: 1
+  priority: 2
+  after: [pypug-packaging-projects]
+
+- id: "docs-cargo-profiles"
+  title: "Profiles (The Cargo Book)"
+  short: "Cargo Profiles"
+  provider: "Rust project"
+  type: "article"
+  url: "https://doc.rust-lang.org/cargo/reference/profiles.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Tune release builds with opt-level, LTO, codegen-units, panic and strip for size and speed."
+  fromYear: 1
+  priority: 2
+  after: [rust-book]
+
+- id: "docs-dotnet-deploying"
+  title: ".NET application publishing overview"
+  short: "NET Publishing Overview"
+  provider: "Microsoft"
+  type: "article"
+  url: "https://learn.microsoft.com/en-us/dotnet/core/deploying/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Compares framework-dependent vs self-contained publishing and the main dotnet publish options."
+  fromYear: 1
+  priority: 2
+
+- id: "docs-pyinstaller-spec-files"
+  title: "Using Spec Files (PyInstaller)"
+  short: "PyInstaller Spec Files"
+  provider: "PyInstaller"
+  type: "article"
+  url: "https://pyinstaller.org/en/stable/spec-files.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "How to edit the generated .spec to add data, binaries, multiple entry points and custom build steps."
+  fromYear: 2
+  priority: 2
+  after: [docs-pyinstaller-usage]
+
+- id: "docs-pyinstaller-operating-mode"
+  title: "What PyInstaller Does and How It Does It"
+  short: "How PyInstaller Works"
+  provider: "PyInstaller"
+  type: "article"
+  url: "https://pyinstaller.org/en/stable/operating-mode.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Explains dependency analysis and the one-folder vs one-file bootloader trade-offs (start-up time, temp extraction)."
+  fromYear: 2
+  priority: 2
+  after: [docs-pyinstaller-usage]
+
+- id: "docs-nuitka-user-manual"
+  title: "Nuitka User Manual"
+  short: "Nuitka User Manual"
+  provider: "Kay Hayen / Nuitka"
+  type: "article"
+  url: "https://nuitka.net/user-documentation/user-manual.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Compiles Python to C for standalone/onefile binaries; the manual covers modes, plugins, data files and platform quirks."
+  fromYear: 2
+  priority: 2
+  after: [docs-pyinstaller-usage]
+
+- id: "docs-nuitka-common-issues"
+  title: "Nuitka: Solutions to the Common Issues"
+  short: "Nuitka Common Issues"
+  provider: "Nuitka"
+  type: "article"
+  url: "https://nuitka.net/user-documentation/common-issue-solutions.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Practical fixes for missing data files, DLLs and anti-virus false positives when shipping compiled Python."
+  fromYear: 2
+  priority: 2
+  after: [docs-nuitka-user-manual]
+
+- id: "docs-cibuildwheel"
+  title: "cibuildwheel documentation"
+  short: "cibuildwheel"
+  provider: "PyPA"
+  type: "article"
+  url: "https://cibuildwheel.pypa.io/en/stable/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Builds compiled-extension wheels for every OS, architecture and Python version on CI with one action."
+  fromYear: 2
+  priority: 2
+  after: [pypug-overview]
+
+- id: "docs-maturin-guide"
+  title: "Maturin User Guide"
+  short: "Maturin User Guide"
+  provider: "PyO3"
+  type: "article"
+  url: "https://www.maturin.rs/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Builds and publishes Rust-backed Python packages (PyO3/cffi) as wheels, including CI generation."
+  fromYear: 2
+  priority: 2
+  after: [rust-book]
+
+- id: "docs-cmake-presets"
+  title: "cmake-presets(7)"
+  short: "CMake Presets"
+  provider: "Kitware"
+  type: "article"
+  url: "https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Reference for CMakePresets.json so configure/build/test/package settings are shared across machines and CI."
+  fromYear: 2
+  priority: 2
+  after: [docs-cmake-tutorial]
+
+- id: "docs-cpack"
+  title: "cpack(1) manual"
+  short: "CPack Manual"
+  provider: "Kitware"
+  type: "article"
+  url: "https://cmake.org/cmake/help/latest/manual/cpack.1.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "How CMake projects produce installers and archives (NSIS, WiX, DEB, RPM, DMG, ZIP) through CPack generators."
+  fromYear: 2
+  priority: 2
+  after: [docs-cmake-tutorial]
+
+- id: "docs-ninja-manual"
+  title: "The Ninja build system manual"
+  short: "Ninja Manual"
+  provider: "Ninja project"
+  type: "article"
+  url: "https://ninja-build.org/manual.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Explains the minimal, fast build executor CMake and Meson generate for, and how its build files work."
+  fromYear: 2
+  priority: 2
+  after: [docs-cmake-tutorial]
+
+- id: "docs-cargo-dist-book"
+  title: "dist (cargo-dist) book"
+  short: "cargo-dist Book"
+  provider: "axo.dev"
+  type: "article"
+  url: "https://axodotdev.github.io/cargo-dist/book/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Generates release CI, archives and shell/PowerShell/MSI/Homebrew installers for Rust binaries."
+  fromYear: 2
+  priority: 2
+  after: [docs-cargo-profiles]
+
+- id: "docs-go-install-source-goos"
+  title: "Installing Go from source (GOOS/GOARCH table)"
+  short: "Go GOOS/GOARCH Targets"
+  provider: "Go team"
+  type: "article"
+  url: "https://go.dev/doc/install/source"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Its environment-variable section lists every valid GOOS/GOARCH pair you can target when cross-compiling."
+  fromYear: 2
+  priority: 2
+  after: [docs-go-compile-install]
+
+- id: "docs-qt-windows-deployment"
+  title: "Qt for Windows - Deployment"
+  short: "Qt Windows Deployment"
+  provider: "Qt Group"
+  type: "article"
+  url: "https://doc.qt.io/qt-6/windows-deployment.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Explains windeployqt and which Qt DLLs, plugins and runtimes must ship beside your executable."
+  fromYear: 2
+  priority: 2
+  after: [docs-cmake-tutorial]
+
+- id: "docs-dotnet-single-file"
+  title: "Single-file deployment (.NET)"
+  short: "NET Single-File Publish"
+  provider: "Microsoft"
+  type: "article"
+  url: "https://learn.microsoft.com/en-us/dotnet/core/deploying/single-file/overview"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Bundles an app and its dependencies into one executable and covers its API caveats."
+  fromYear: 2
+  priority: 2
+  after: [docs-dotnet-deploying]
+
+- id: "docs-dotnet-trimming"
+  title: "Trim self-contained deployments and executables"
+  short: "NET Trimming"
+  provider: "Microsoft"
+  type: "article"
+  url: "https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Shrinks self-contained apps by removing unused code, and explains reflection-related trimming warnings."
+  fromYear: 2
+  priority: 2
+  after: [docs-dotnet-single-file]
+
+- id: "docs-dotnet-native-aot"
+  title: "Native AOT deployment"
+  short: "NET Native AOT"
+  provider: "Microsoft"
+  type: "article"
+  url: "https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Ahead-of-time compiles .NET to a native binary for fast startup and no runtime dependency."
+  fromYear: 2
+  priority: 2
+  after: [docs-dotnet-trimming]
+
+- id: "book-modern-cmake"
+  title: "An Introduction to Modern CMake"
+  short: "Modern CMake"
+  provider: "Henry Schreiner et al."
+  type: "book"
+  url: "https://cliutils.gitlab.io/modern-cmake/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 5
+  summary: "Free, opinionated guide to target-based CMake 3.15+ practice, packaging and common library integration."
+  fromYear: 2
+  priority: 2
+  after: [docs-cmake-tutorial]
+
+- id: "docs-briefcase-tutorial"
+  title: "BeeWare Briefcase tutorial"
+  short: "Briefcase Tutorial"
+  provider: "BeeWare"
+  type: "article"
+  url: "https://briefcase.beeware.org/en/stable/tutorial/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 3
+  summary: "Turns a Python app into native installers for Windows, macOS, Linux, iOS and Android with one tool."
+  fromYear: 1
+  priority: 2
+  after: [pypug-overview]
+
+- id: "docs-pypug-publish-gha"
+  title: "Publishing package distribution releases using GitHub Actions CI/CD workflows"
+  short: "PyPUG: Publish via Actions"
+  provider: "Python Packaging Authority"
+  type: "article"
+  url: "https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "End-to-end workflow that builds sdists/wheels and uploads to TestPyPI and PyPI using trusted publishing."
+  fromYear: 1
+  priority: 2
+  after: [docs-pypi-trusted-publishers]
+
+- id: "docs-cmake-tutorial"
+  title: "CMake Tutorial (official)"
+  short: "CMake Tutorial"
+  provider: "Kitware"
+  type: "article"
+  url: "https://cmake.org/cmake/help/latest/guide/tutorial/index.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 6
+  summary: "Kitware's step-by-step path from a first CMakeLists.txt through targets, testing, installation and finding dependencies."
+  fromYear: 1
+  priority: 2
+  doFirst: "learncpp"
+
+- id: "docs-vcpkg-get-started"
+  title: "Install and use packages with CMake (vcpkg)"
+  short: "vcpkg Get Started"
+  provider: "Microsoft"
+  type: "article"
+  url: "https://learn.microsoft.com/en-us/vcpkg/get_started/get-started"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Adds third-party C++ libraries to a CMake project via a vcpkg manifest and toolchain file."
+  fromYear: 1
+  priority: 2
+  after: [docs-cmake-tutorial]
+
+- id: "docs-msbuild-tutorial"
+  title: "Tutorial: Use MSBuild"
+  short: "MSBuild Tutorial"
+  provider: "Microsoft"
+  type: "article"
+  url: "https://learn.microsoft.com/en-us/visualstudio/msbuild/walkthrough-using-msbuild"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "Teaches MSBuild project files, targets, tasks, properties and items, the engine behind Visual Studio builds."
+  fromYear: 1
+  priority: 2
+
+- id: "docs-go-compile-install"
+  title: "Compile and install the application (Go tutorial)"
+  short: "Go: Compile and Install"
+  provider: "Go team"
+  type: "article"
+  url: "https://go.dev/doc/tutorial/compile-install"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Shows go build and go install and how Go produces single static-ish binaries you can ship."
+  fromYear: 1
+  priority: 2
+  after: [tour-of-go]
+
+- id: "docs-vcpkg-packaging"
+  title: "Package a library with vcpkg"
+  short: "vcpkg Packaging Tutorial"
+  provider: "Microsoft"
+  type: "article"
+  url: "https://learn.microsoft.com/en-us/vcpkg/get_started/get-started-packaging"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Shows how to write a port so your own library can be consumed through vcpkg."
+  fromYear: 2
+  priority: 2
+  after: [docs-vcpkg-get-started]
+
+- id: "docs-conan-tutorial"
+  title: "Conan 2 tutorial"
+  short: "Conan 2 Tutorial"
+  provider: "JFrog / Conan"
+  type: "article"
+  url: "https://docs.conan.io/2/tutorial.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Consume, create and cross-build C/C++ packages with Conan 2 profiles and CMake integration."
+  fromYear: 2
+  priority: 2
+  after: [docs-cmake-tutorial]
+
+- id: "docs-conan-cross-building"
+  title: "Cross-building with Conan (host and build contexts)"
+  short: "Conan Cross-Building"
+  provider: "JFrog / Conan"
+  type: "article"
+  url: "https://docs.conan.io/2/tutorial/consuming_packages/cross_building_with_conan.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Clear introduction to host vs build profiles when compiling C++ for another OS or architecture."
+  fromYear: 2
+  priority: 2
+  after: [docs-conan-tutorial]
+
+- id: "repo-gh-action-pypi-publish"
+  title: "pypa/gh-action-pypi-publish"
+  short: "gh-action-pypi-publish"
+  provider: "PyPA"
+  type: "practice"
+  url: "https://github.com/pypa/gh-action-pypi-publish"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "The official action for uploading wheels to PyPI with trusted publishing and automatic attestations."
+  fromYear: 1
+  priority: 2
+  after: [docs-pypi-trusted-publishers]
+
+- id: "repo-ccache"
+  title: "ccache"
+  short: "ccache"
+  provider: "ccache project"
+  type: "practice"
+  url: "https://github.com/ccache/ccache"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Compiler cache that makes repeated C/C++ builds, locally and in CI, dramatically faster."
+  fromYear: 1
+  priority: 2
+  after: [docs-cmake-tutorial]
+
+- id: "repo-cross-rs"
+  title: "cross: zero-setup cross compilation for Rust"
+  short: "cross-rs"
+  provider: "cross-rs"
+  type: "practice"
+  url: "https://github.com/cross-rs/cross"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Drop-in cargo replacement that cross-compiles and tests Rust for other targets inside prebuilt containers."
+  fromYear: 2
+  priority: 2
+  after: [docs-cargo-profiles]
+
+- id: "repo-cargo-wix"
+  title: "cargo-wix"
+  short: "cargo-wix"
+  provider: "volks73"
+  type: "practice"
+  url: "https://github.com/volks73/cargo-wix"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Cargo subcommand that builds Windows MSI installers for Rust projects using the WiX Toolset."
+  fromYear: 2
+  priority: 2
+  after: [docs-cargo-dist-book]
+
+# ---- Game development (3)
+
+- id: "docs-godot-exporting-projects"
+  title: "Exporting projects (Godot)"
+  short: "Godot Exporting"
+  provider: "Godot Engine"
+  type: "article"
+  url: "https://docs.godotengine.org/en/stable/tutorials/export/exporting_projects.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Covers export presets, templates, PCK files and command-line export for shipping a Godot game."
+  fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
+  doFirst: "Godot: Your First 2D Game"
+
+- id: "docs-unity-build-profiles"
+  title: "Introduction to build profiles (Unity 6)"
+  short: "Unity Build Profiles"
+  provider: "Unity"
+  type: "article"
+  url: "https://docs.unity3d.com/Manual/build-profiles.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Unity 6's way of configuring per-platform build settings, scenes and player options for shipping builds."
+  fromYear: 1
+  priority: 4
+  roadmap: "game-developer"
+
+- id: "docs-unreal-packaging-cooking"
+  title: "Packaging and Cooking Games in Unreal Engine"
+  short: "Unreal Packaging"
+  provider: "Epic Games"
+  type: "article"
+  url: "https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-and-cooking-games-in-unreal-engine"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Explains cooking content and packaging a distributable Unreal build, including build configurations."
+  fromYear: 2
+  priority: 4
+  roadmap: "game-developer"

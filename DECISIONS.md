@@ -2569,3 +2569,45 @@ the Sleep tile; the fold check watches the week strip; the Stats tab's names cha
 "0 m of 10 h"; the Sleep screen's labels are the board's; the year heatmap's tests open `#/activity?year=2026`; the
 shelf tests open Browse all first. The screenshot baselines were redrawn on CI. Before and after pictures of the
 twelve screens are in `docs/before-after/redesign/`.
+
+## The Atlas Library's twelfth file: build & ship (pull request #44)
+
+**One cluster, named by its tools.** The twelfth file adds 115 rows on building executables and installers and on
+GitHub Actions, and asks for a "Build & ship" quick filter with six sub-chips from a list of keywords. Half of the
+list would have named most of the Library: "build" is in every build-your-own row, "release" in every release note
+and paper release, "workflow" in every Git, Temporal and Argo workflow, "package" in every package manager, "runner"
+in every runtime, "deploy" in every deployment of a model, "executable" in every executable specification or
+notebook. So the filter (`src/lib/build-ship.ts`) takes the tools and formats as given (PyInstaller, Nuitka, CMake,
+CPack, vcpkg, Conan, cargo-dist, GoReleaser, Tauri, Electron, WiX, MSIX, Inno Setup, NSIS, code signing,
+notarization, Homebrew formulas, casks and taps, AppImage, Flatpak, GitHub Actions, the workflow and action syntax,
+runners, Pages, releases through the gh CLI, trusted publishing…) and the broad words only in the phrases that mean
+shipping ("go build and go install", "building and testing", "release pipeline", "packaging guide", "for
+deployment", "static binaries", "wheels for"…), in the software tracks (DevOps, languages, game dev, architecture,
+systems): a single-file RL implementation in AI, a build in robotics and the Homebrew Computer Club stay out. 131
+rows: the 115 new ones and 16 the Library already had, every one a build or a ship (`tests/unit/build-ship.test.ts`
+lists the exclusions). The six areas are chips over the list like Security & defence's and Agents & MCP's (`area=` in
+the URL), each a set of words, and every row of the cluster is in at least one; the Library screen's three area
+families are three `if`s, not a registry, since each has its own module and the rows are few.
+
+**A word list is one expression.** The Library reads every quick filter and every area of its sixteen thousand rows
+when it opens, so a matcher's cost is paid in full on each visit. Build & ship compiles each of its lists (the tools,
+the phrases, each area's words) into one alternation per case rule, two tests on a row rather than one per word, and
+reads in 20 ms; Security & defence's areas, which built a regular expression per acronym per row and searched each
+word on its own, took two seconds of every Library visit and now take a sixth of one, with the same areas on every
+row (checked over the whole Library before the change was kept). Two tests that reload the Library had been running
+up to their thirty seconds since the eleventh file; they have room again.
+
+**The deploy's live check follows the redesign.** The merge of pull request #43 deployed the redesign, but the live
+check that follows a deploy (`scripts/live-check.ts`) waited for the Library's "Courses" shelf tile, which the
+redesign's home keeps behind "Browse all"; the site was serving the new build when the check failed. The check now
+opens Browse all first. It rides this pull request rather than one of its own, since this one was ready.
+
+**Links.** The container cannot resolve any of the new rows' hosts, so the pull request's CI ran
+`npm run check:links -- --in data/resources/library-atlas-12.yaml` in a one-off `links-atlas-12` job (removed before
+the merge); the result is in the pull request and `docs/imports-atlas-library-12.md`. Every URL is the file's; none
+was changed.
+
+Tests: `tests/unit/build-ship.test.ts` (new: the words, the areas, the phrases and exclusions, the data's counts);
+`tests/unit/quick-filters.test.ts` (the eleventh key); `tests/e2e/atlas-library.spec.ts` (the row on the home, the
+area chips, the search, CleanRL out). Screenshots of the Library's home redrawn on CI (one more chip).
+

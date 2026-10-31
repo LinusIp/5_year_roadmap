@@ -1301,3 +1301,15 @@ Verified on this machine (Linux, Chromium 140):
 - Tests: the e2e specs that pinned the old layout follow the boards; `tests/unit/sleep.test.ts` and `blog.test.ts` for the
   records. Screenshots redrawn on CI. Before and after pictures: `docs/before-after/redesign/`.
 
+## Pull request #44: the Atlas Library's twelfth file, build & ship, and the deploy's live check
+
+- `data/resources/library-atlas-12.yaml`: 115 new resources (all free): executables and installers, GitHub Actions.
+  Resources: 15,945 to 16,060. No new merges; no corrections (`docs/imports-atlas-library-12.md`).
+- "Build & ship", the eleventh quick filter (`src/lib/build-ship.ts`, the registry in `src/lib/quick-filters.ts`): 131
+  rows, six area chips on the Library screen (Executables, Installers & signing, Desktop apps, Game builds, GitHub
+  Actions, Releases & deploys).
+- `scripts/live-check.ts` opens Browse all before it waits for the Courses tile (the deploy of #43 failed its check there).
+- `src/lib/security.ts`: the areas' words as one expression per area (two seconds off every Library visit; the same areas).
+- Tests: `tests/unit/build-ship.test.ts` (new), `tests/unit/quick-filters.test.ts`, `tests/e2e/atlas-library.spec.ts`.
+  Screenshots redrawn on CI.
+

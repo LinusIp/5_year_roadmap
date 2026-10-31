@@ -3,12 +3,12 @@ import { loadSeedOrThrow } from '../../scripts/lib/load-seed.ts';
 import { shelfOf } from '../../src/lib/library-home.ts';
 import { isCertificate, QUICK_FILTER_KEYS, QUICK_FILTERS, quickFilterOf, quickPicks } from '../../src/lib/quick-filters.ts';
 
-/** The quick filters (ATLAS-LIBRARY, the plan gap fill of 15,961 rows): the registry and the six it adds. */
+/** The quick filters (ATLAS-LIBRARY): the registry, the six the plan gap fill (15,961 rows) added, and Build & ship (16,076 rows). */
 const item = (title: string, summary = '', track = 'ai', id = 'x', shelf = 'article') => ({ id, title, summary, track, shelf });
 
 describe('the registry', () => {
-  it('lists the ten filters in the order of the rows, each with a label, an icon and a search name', () => {
-    expect(QUICK_FILTER_KEYS).toEqual(['essentials', 'energy', 'security', 'agents', 'certificates', 'career', 'research', 'communication', 'opensource', 'mandarin']);
+  it('lists the eleven filters in the order of the rows, each with a label, an icon and a search name', () => {
+    expect(QUICK_FILTER_KEYS).toEqual(['essentials', 'energy', 'security', 'agents', 'certificates', 'career', 'research', 'communication', 'opensource', 'mandarin', 'buildship']);
     for (const f of QUICK_FILTERS) {
       expect(f.label.length).toBeGreaterThan(3);
       expect(f.search.startsWith('Search ')).toBe(true);
@@ -24,6 +24,13 @@ describe('the registry', () => {
     expect(quickPicks(item('Compact fusion reactors', 'Aneutronic fuel cycles.', 'engineering'))).toContain('energy');
     expect(quickPicks(item('YARA rules', 'Malware detection with YARA.', 'systems'))).toContain('security');
     expect(quickPicks(item('rmcp', 'The Rust MCP SDK.', 'languages'))).toContain('agents');
+  });
+
+  it('adds Build & ship (the twelfth file) by its module', () => {
+    expect(quickPicks(item('GoReleaser Quick Start', 'Cross-compiled builds and GitHub releases.', 'devops'))).toContain('buildship');
+    expect(quickPicks(item('Using PyInstaller', 'A one-file executable.', 'languages'))).toContain('buildship');
+    expect(quickPicks(item('CleanRL', 'Single-file implementations of PPO.', 'ai'))).not.toContain('buildship');
+    expect(quickFilterOf('buildship')?.search).toBe('Search build and ship');
   });
 });
 
@@ -94,5 +101,7 @@ describe('the six new filters', () => {
     expect(counts.get('essentials')).toBeGreaterThan(300);
     expect(counts.get('security')).toBeGreaterThan(600);
     expect(counts.get('agents')).toBeGreaterThan(800);
+    expect(counts.get('buildship')).toBeGreaterThan(120);
+    expect(counts.get('buildship')).toBeLessThan(200);
   });
 });
