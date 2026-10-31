@@ -2419,3 +2419,39 @@ carry on); on a phone the first play after the API loads can need a second tap, 
 is not the one that starts the video; no durations without a Data API key; the starter list could not be confirmed
 from this session and is confirmed by CI instead.
 
+## What the phone showed: the docked player, the map, the tabs (pull request #41)
+
+The user's first day with #39 and #40 on a phone found five things, fixed together here.
+
+**The docked player covered the page.** It floated over Today's and Plan's lower cards. Now, while a session is
+docked, every screen keeps 232 px of room under its last card (`Screen.tsx`), so the player sits in reserved space
+and nothing is under it. It still shows the whole time anything plays, as the policy asks; its only buttons are
+pause and stop, and the title is the way to Focus. YouTube's error is named with its code and a link to the video's
+own page (`errorText`): 101 and 150 mean the owner does not allow playing inside other sites, which oEmbed cannot
+see in advance.
+
+**Chosen tab sets never got Focus.** The sixth tab joined only the five defaults; a user who had picked their own
+tabs (Today, Plan, Calendar, Library, Map) could reach Focus only from Today's knob. `withFocusTab` now adds Focus
+once at the end of any tab set with room, and `general.focusTabOffered` records that it was offered, so taking it
+out again sticks; this runs on every read, which is why a flag rather than a check is needed. A full set of six
+is left alone.
+
+**The tab bar flashed the defaults.** The settings come from IndexedDB, so the first paint of a screen drew the
+six default tabs (Activity and Focus among them) and swapped to the user's own a moment later, visibly on the
+Library, whose data takes longest. The tabs are mirrored to localStorage (`src/lib/tabs-cache.ts`) and the first
+paint reads them, as the theme has always been; the settings stay the truth and overwrite the mirror on every read.
+
+**The map's full-bleed scene read as a muddy wash.** A portrait painting stretched across 1,200 px under six
+columns of text, with a 35 % paper overlay, was a grey smear on a phone. The scene is now a 260 px banner behind
+the title, fading into the paper, and the route and cards sit on plain paper; the title keeps its chip. The last
+phase card also ran 52 px past the map's edge: the columns had no floor, so the 4-month phase was starved and the
+others' minimum content pushed the grid wider than its container. Each column is now `minmax(200px, Nfr)` and
+the map's minimum width follows from that (phases × 200 + gaps + padding).
+
+**Two things on Today.** The Focus knob sat in the NOW label's row and truncated the time ("NOW · 08:00–1…"); it
+moved to the end of the Start/Open row. The verdict on Plan's lane rows ("Finishes ~Jun 2028 (17 months late)")
+was `shrink-0` and ran out of the tile; it now wraps on the right within 60 % of the row. Under 380 px the header's
+picture keeps a 190 px floor (with its width pinned, or `aspect-ratio` would widen it instead), so the preview
+knobs clear the scene's name at 360 px; at 390 px the 2:1 panel stays, since 15 px more would put "Later today"
+under the tab bar; and the "Atlas" wordmark hides under 380 px so the date fits.
+

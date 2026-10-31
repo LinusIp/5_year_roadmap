@@ -588,7 +588,7 @@ export function Today() {
     <>
     <span aria-hidden="true" className="flex shrink-0 items-center gap-1.5 pl-1">
       <img src={'./brand/atlas-mark-' + theme + '.png'} width={26} height={26} alt="" />
-      <span className="text-[1.125rem] font-semibold tracking-[-0.01em]">Atlas</span>
+      <span className="text-[1.125rem] font-semibold tracking-[-0.01em] max-[379px]:sr-only">Atlas</span>
     </span>
     <button type="button" className="min-h-11 min-w-0 flex-1 truncate rounded-pill px-1.5 text-left text-meta font-semibold text-blue-deep" onClick={() => setSheet('date')} aria-haspopup="dialog" aria-label={shortDate(date) + (isToday ? ', today' : '') + ', pick a date'}>
       {shortDate(date)}
@@ -652,7 +652,7 @@ export function Today() {
             focal="50% 45%"
             eager
             alt={(previewDay ? 'Scene for ' + shortDate(todayDate(previewDay)) : 'Today’s scene') + ': ' + sceneShown.name}
-            className="mt-[max(0.75rem,env(safe-area-inset-top))]"
+            className="mt-[max(0.75rem,env(safe-area-inset-top))] w-full max-[379px]:min-h-[190px]"
             top={<div className="flex items-center gap-1">{headerRow}</div>}
             bottom={
               <div className="flex items-end justify-between gap-3">
@@ -822,8 +822,6 @@ export function Today() {
             </p>
             {!expanded && (
               <div className="-my-1 flex shrink-0 gap-2">
-                {/* Focus music (ATLAS-FOCUS-MUSIC): opens the tab with the block's mix. */}
-                {isToday && <Button variant="icon" icon="headphones" className="!size-11" label={'Focus music' + (mixFor(settings.focus, nowBlock.id) ? ' · ' + categoryLabel(mixFor(settings.focus, nowBlock.id)!) : '') + ' for ' + blockShort(nowBlock.def.name)} to={'/focus?block=' + nowBlock.id} />}
                 {otherName && (
                   <Button size="sm" icon="stop" name={'Stop ' + otherName} onClick={stop}>
                     {otherName}
@@ -948,6 +946,8 @@ export function Today() {
           {/* Two equal buttons that never leave the card; on the narrowest phones the second keeps only its icon. */}
           <div className={(expanded ? 'mt-2' : 'mt-3.5') + ' flex items-center gap-3 [&>*]:min-w-0 [&>*]:flex-1'}>
             {primary}
+            {/* Focus music (ATLAS-FOCUS-MUSIC): a knob at the row's end that opens the tab with the block's mix. */}
+            {isToday && <Button variant="icon" icon="headphones" className="knob !size-11 !flex-none" label={'Focus music' + (mixFor(settings.focus, nowBlock.id) ? ' · ' + categoryLabel(mixFor(settings.focus, nowBlock.id)!) : '') + ' for ' + blockShort(nowBlock.def.name)} to={'/focus?block=' + nowBlock.id} />}
             {isProject && item ? (
               <Button variant="ice" icon="doc" aria-haspopup="dialog" name="Tech doc" onClick={() => setDoc({ id: item.refId, block: nowBlock.id, from: 'now' })}>
                 <span className="truncate max-[379px]:sr-only">Tech doc</span>

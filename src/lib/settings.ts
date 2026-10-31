@@ -13,7 +13,7 @@ export function defaultLayout(core: Pick<SettingsDefaults, 'blocks'>): Layout {
     today: { stats: true, later: true, review: true, footer: true, view: 'detailed', now: 'first', order: core.blocks.map((b) => b.id) },
     tabs: ['today', 'plan', 'calendar', 'library', 'activity', 'focus'],
     plan: { segment: 'timeline', showDropped: true },
-    general: { clock: '24', density: 'comfortable', illustrations: true },
+    general: { clock: '24', density: 'comfortable', illustrations: true, focusTabOffered: true },
   };
 }
 
@@ -96,7 +96,17 @@ const FIVE_DEFAULT_TABS = ['today', 'plan', 'calendar', 'library', 'activity'];
 function withCalendarTab(layout: Layout): Layout {
   const tabs = layout.tabs.join();
   if (tabs === OLD_DEFAULT_TABS.join() || tabs === FIVE_DEFAULT_TABS.join()) return { ...layout, tabs: ['today', 'plan', 'calendar', 'library', 'activity', 'focus'] };
-  return layout;
+  return withFocusTab(layout);
+}
+
+/**
+ * A chosen tab set gets Focus once, at the end, when it has room (at most six tabs); the flag keeps the user's later
+ * choice to take it out, since this runs on every read.
+ */
+function withFocusTab(layout: Layout): Layout {
+  if (layout.general.focusTabOffered) return layout;
+  const tabs = layout.tabs.includes('focus') || layout.tabs.length >= 6 ? layout.tabs : [...layout.tabs, 'focus' as const];
+  return { ...layout, tabs, general: { ...layout.general, focusTabOffered: true } };
 }
 
 /**
