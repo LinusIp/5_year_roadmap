@@ -137,10 +137,15 @@ test('a session plays from a tap through the embed on youtube-nocookie.com, and 
   expect(box.height).toBeGreaterThanOrEqual(200);
   await expect(page.locator('iframe[data-yt-stub]')).toHaveAttribute('data-yt-state', '1');
   // Nothing sits under it: the page keeps room for the card above the tab bar, and the last card ends above it.
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  const card = (await docked.boundingBox())!;
-  const contentBottom = await page.evaluate(() => Math.max(...[...document.querySelectorAll('main > *')].map((e) => e.getBoundingClientRect().bottom)));
-  expect(contentBottom).toBeLessThanOrEqual(card.y + 1);
+  // Today's cards arrive as their reads land, so the page can grow after a scroll: scroll and measure until it holds.
+  await expect
+    .poll(async () => {
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      const card = (await docked.boundingBox())!;
+      const contentBottom = await page.evaluate(() => Math.max(...[...document.querySelectorAll('main > *')].map((e) => e.getBoundingClientRect().bottom)));
+      return contentBottom - card.y;
+    })
+    .toBeLessThanOrEqual(1);
   await docked.getByRole('button', { name: 'Stop the music' }).click();
   await expect(docked).toHaveCount(0);
 });
