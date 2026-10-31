@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { DEMO_TIME, demoBackupText } from '../../scripts/lib/demo.ts';
 import { FakeGithub } from '../fake-github.ts';
 import { serveGithub } from './github-route.ts';
+import { serveYouTube } from './focus-route.ts';
 import { open } from './helpers.ts';
 
 /**
@@ -52,15 +53,23 @@ async function importDemo(page: Page, theme: 'light' | 'dark'): Promise<void> {
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
 }
 
+/** Every picture on the screen has loaded or failed, so a cover or a scene is not caught half way. */
+async function imagesSettled(page: Page): Promise<void> {
+  await page.waitForFunction(() => [...document.querySelectorAll('main img')].every((img) => (img as HTMLImageElement).complete));
+}
+
 for (const theme of ['light', 'dark'] as const) {
   test('the phone screens match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
+    // Focus's covers come from YouTube: stood in for, so the picture is the same in every run.
+    await serveYouTube(page);
     await importDemo(page, theme);
     for (const [name, path] of PHONE) {
       await open(page, path);
       await expect(page.locator('main .text-meta').first()).toBeVisible();
       // The catalogue index loads after the day: wait for Block B's daily challenge.
       if (name === 'today') await expect(page.getByText(/daily challenge/).first()).toBeVisible();
+      await imagesSettled(page);
       await expect(page).toHaveScreenshot(name + '-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
     }
   });
@@ -69,11 +78,13 @@ for (const theme of ['light', 'dark'] as const) {
 for (const theme of ['light', 'dark'] as const) {
   test('the desktop screens match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
+    await serveYouTube(page);
     await importDemo(page, theme);
     for (const [name, path] of DESKTOP) {
       await open(page, path);
       await expect(page.locator('main h1').first()).toBeVisible();
       if (name === 'today') await expect(page.getByText(/daily challenge/).first()).toBeVisible();
+      await imagesSettled(page);
       await expect(page).toHaveScreenshot(name + '-desktop-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
     }
   });
