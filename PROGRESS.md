@@ -1325,3 +1325,8 @@ Verified on this machine (Linux, Chromium 140):
   phases, the current one edged in its lane.
 - Tests: `tests/e2e/art.spec.ts` (the map draws no picture). Screenshots redrawn on CI.
 
+## Pull request #47: the screenshots stand in for YouTube
+
+- `tests/e2e/screenshots.spec.ts`: `serveYouTube` before the phone and desktop screens, and every picture settled
+  before a screenshot. Focus baselines redrawn on CI.
+

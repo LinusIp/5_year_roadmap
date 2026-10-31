@@ -2637,3 +2637,13 @@ pins ringed in the paper, the stage divider on the shadow colour, and a plain he
 ATLAS-ART, which stood behind the route without a scene, is not drawn either: the user asked for no given image
 behind the route, and the paper reads best. The road starts closer to the header now that nothing sits above it.
 
+## The screenshots stand in for YouTube (pull request #47)
+
+The CI run on main after pull request #46 failed the dark phone screenshots on Focus by four percent of the
+pixels, twice, while the same tree had passed on the pull request. The cover's picture is the session's thumbnail
+from YouTube, fetched over the runner's own network and drawn when it lands, so the screenshot caught it loaded on
+one run and not on the next. The screenshot spec now stands in for YouTube the way the Focus spec does
+(`serveYouTube`: a fixed picture for every thumbnail, nothing asked of youtube.com), and waits for every picture on
+the screen to have loaded or failed before it takes a screenshot. The Focus baselines were redrawn with the stub's
+picture; nothing in the app changed.
+
