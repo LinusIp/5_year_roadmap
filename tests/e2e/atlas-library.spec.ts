@@ -366,11 +366,39 @@ test('Agents & MCP gathers the agents, MCP and harnesses rows, with area chips o
   await expect(page.getByRole('button', { name: /GPUDrive/ })).toHaveCount(0);
 });
 
+test('Build & ship gathers the executables, installers and GitHub Actions rows, with area chips over the list', async ({ page }) => {
+  await open(page, './#/library');
+  const row = page.getByRole('button', { name: /^Build & ship [\d,]+$/ });
+  await expect(row).toBeVisible();
+  const count = Number((await row.innerText()).replace(/\D/g, ''));
+  expect(count).toBeGreaterThan(120);
+  await row.click();
+  await expect(page).toHaveURL(/pick=buildship/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Build & ship' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + fmt(count) + ' of ' + fmt(count) + '$') })).toBeVisible();
+  const areas = page.getByRole('group', { name: 'Area' });
+  for (const label of ['Executables', 'Installers & signing', 'Desktop apps', 'Game builds', 'GitHub Actions', 'Releases & deploys']) {
+    await expect(areas.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' [\\d,]+$') })).toBeVisible();
+  }
+  await areas.getByRole('button', { name: /^GitHub Actions [\d,]+$/ }).click();
+  await expect(page).toHaveURL(/area=actions/);
+  const [shown, total] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
+  expect(total).toBe(count);
+  expect(shown).toBeGreaterThan(40);
+  expect(shown).toBeLessThan(count);
+  await page.getByRole('searchbox', { name: 'Search build and ship' }).fill('matrix');
+  await expect(page.getByRole('button', { name: /matrix/i }).first()).toBeVisible();
+  // A single-file RL implementation is not a single-file deployment: not the cluster.
+  await areas.getByRole('button', { name: /^GitHub Actions [\d,]+$/ }).click();
+  await page.getByRole('searchbox', { name: 'Search build and ship' }).fill('CleanRL');
+  await expect(page.getByRole('button', { name: /^CleanRL/ })).toHaveCount(0);
+});
+
 test('the quick filters are one list on the home; Certificates wears its badge, Earned persists and Plan › Credentials counts it', async ({ page }) => {
   await open(page, './#/library');
   // The quick filters are the chips under the search (the redesign mockup).
   const list = page.getByRole('group', { name: 'Quick filters' });
-  for (const label of ['Developer essentials', 'Compact power & energy conversion', 'Security & defence', 'Agents & MCP', 'Certificates', 'Career & interviews', 'Research skills', 'Communication', 'Open source', 'Mandarin (the language)']) {
+  for (const label of ['Developer essentials', 'Compact power & energy conversion', 'Security & defence', 'Agents & MCP', 'Certificates', 'Career & interviews', 'Research skills', 'Communication', 'Open source', 'Mandarin (the language)', 'Build & ship']) {
     // The count carries a thousands separator past a thousand (ATLAS-UI-POLISH): "Agents & MCP 1,023".
     await expect(page.getByRole('button', { name: new RegExp('^' + label.replace(/[()&]/g, '\\$&') + ' [\\d,]+$') })).toBeVisible();
   }

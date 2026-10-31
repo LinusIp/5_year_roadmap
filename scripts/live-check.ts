@@ -120,6 +120,8 @@ try {
   // The Library's home: in progress, paths, up next and the shelves.
   await page.goto(new URL('#/library', url).href);
   await page.getByRole('heading', { name: 'Your paths' }).waitFor({ timeout: 30_000 });
+  // The shelves open under Browse all (the redesign mockup).
+  await page.getByRole('button', { name: /^Browse all/ }).click();
   await page.getByRole('button', { name: /^[\d,]+ Courses$/ }).waitFor({ timeout: 30_000 });
   step('the Library opens on its home, with the paths and the shelves');
   // The ML Zoomcamp lesson checklist, seeded from its file: 1.1 to 1.6 done, 1.7 now.

@@ -3,9 +3,11 @@
  * what they are about, in the URL as `pick=`. Four have modules of their own (Developer essentials, Compact power &
  * energy conversion, Security & defence, Agents & MCP); the plan gap fill (15,961 rows) adds six: Certificates (by
  * id), Career & interviews, Research skills, Communication, Open source and Mandarin, each a set of words matched on
- * an item's title and summary, some held to the tracks the cluster lives in. The list here is the order of the rows.
+ * an item's title and summary, some held to the tracks the cluster lives in; the twelfth file (16,076 rows) adds
+ * Build & ship, with a module of its own. The list here is the order of the rows.
  */
 import { isAgents } from './agents.ts';
+import { isBuildShip } from './build-ship.ts';
 import { isEnergy } from './energy.ts';
 import { isEssential } from './essentials.ts';
 import { isSecurity } from './security.ts';
@@ -92,6 +94,7 @@ export const QUICK_FILTERS: readonly QuickFilter[] = [
   { key: 'communication', label: 'Communication', icon: 'doc', tone: 'ice', sub: 'on speaking, pitching, fundraising, technical writing and blogging', search: 'Search communication', match: (i) => communication(text(i)) },
   { key: 'opensource', label: 'Open source', icon: 'puzzle', tone: 'blue', sub: 'on contributing: forks, pull requests, first issues, mentorships', search: 'Search open source', match: openSource },
   { key: 'mandarin', label: 'Mandarin (the language)', icon: 'course', tone: 'ice', sub: 'of Mandarin Chinese: HSK, pinyin, tones, grammar', search: 'Search Mandarin', match: mandarin },
+  { key: 'buildship', label: 'Build & ship', icon: 'hammer', tone: 'blue', sub: 'on executables, installers and signing, desktop and game builds, GitHub Actions, releases and deploys', search: 'Search build and ship', match: (i) => isBuildShip(i.title, i.summary, i.track) },
 ];
 
 export const QUICK_FILTER_KEYS: readonly string[] = QUICK_FILTERS.map((f) => f.key);
