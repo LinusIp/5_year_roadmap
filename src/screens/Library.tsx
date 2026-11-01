@@ -19,10 +19,8 @@ import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
 import { DifficultyDots, IconTile, KindIcon, StatusIcon } from '../ui/glyphs.tsx';
 import { buildPaths, byFit, fitOf, inProgress, PATH_ALIASES, priorityOf, shelfCounts, groupResults, shelfOf, upNext } from '../lib/library-home.ts';
-import { SECURITY_AREAS, securityAreasOf } from '../lib/security.ts';
-import { AGENT_AREAS, agentAreasOf } from '../lib/agents.ts';
-import { BUILD_AREAS, buildAreasOf } from '../lib/build-ship.ts';
 import { isCertificate, QUICK_FILTERS, quickFilterOf, quickPicks } from '../lib/quick-filters.ts';
+import type { QuickInput } from '../lib/quick-filters.ts';
 import type { Fit } from '../lib/library-home.ts';
 import type { ShelfKey } from '../lib/library-home.ts';
 import { LibraryHome, SHELF_ICON } from './library/Home.tsx';
@@ -71,10 +69,8 @@ interface Entry {
   fit: Fit;
   /** The quick filters it is in (src/lib/quick-filters.ts), by key: the rows under the shelves, `pick=` in the URL. */
   picks: string[];
-  /** The areas of Security & defence, Agents & MCP and Build & ship, for the chips over those three lists. */
-  securityAreas: string[];
-  agentAreas: string[];
-  buildAreas: string[];
+  /** What the quick filters read (resources and papers): the areas of the open pick are computed from it. */
+  quick?: QuickInput | undefined;
   /** A paid book (the books round): a Paid badge, the Books shelf's Free / Paid chip, and out of Up next until owned. */
   paid: boolean;
   /** A certificate row (the plan gap fill): a Certificate badge, and Earned in its sheet. */
@@ -140,6 +136,7 @@ function buildEntries(
   const resources: Entry[] = seed.resources.map((r) => {
     const state = states.get(r.id);
     const status = state?.status ?? 'todo';
+    const quick: QuickInput = { id: r.id, title: r.title, summary: r.summary, track: r.tracks[0], tags: r.tags, shelf: shelfOf(r) };
     return {
       kind: 'resource',
       id: r.id,
@@ -154,10 +151,8 @@ function buildEntries(
       level: r.level,
       roadmap: r.roadmap,
       fit: { ...fitOf(r), year: planYear.get(r.id) ?? r.fromYear },
-      picks: quickPicks({ id: r.id, title: r.title, summary: r.summary, track: r.tracks[0], tags: r.tags, shelf: shelfOf(r) }),
-      securityAreas: securityAreasOf(r.title, r.summary),
-      agentAreas: agentAreasOf(r.title, r.summary, shelfOf(r)),
-      buildAreas: buildAreasOf(r.title, r.summary),
+      picks: quickPicks(quick),
+      quick,
       paid: r.cost === 'paid',
       certificate: isCertificate(r.id),
     };
@@ -165,6 +160,7 @@ function buildEntries(
   const papers: Entry[] = seed.papers.map((p) => {
     const paperStatus = paperStates.get(p.id)?.status ?? 'queued';
     const status = PAPER_AS_ITEM[paperStatus];
+    const quick: QuickInput = { id: p.id, title: p.title, summary: p.summary, track: p.tracks[0], shelf: 'paper' };
     return {
       kind: 'paper',
       id: p.id,
@@ -179,10 +175,8 @@ function buildEntries(
       level: p.level,
       roadmap: p.roadmap,
       fit: fitOf(p),
-      picks: quickPicks({ id: p.id, title: p.title, summary: p.summary, track: p.tracks[0], shelf: 'paper' }),
-      securityAreas: securityAreasOf(p.title, p.summary),
-      agentAreas: agentAreasOf(p.title, p.summary, 'paper'),
-      buildAreas: buildAreasOf(p.title, p.summary),
+      picks: quickPicks(quick),
+      quick,
       paid: false,
       certificate: false,
     };
@@ -205,9 +199,6 @@ function buildEntries(
       fit: { priority: priorityOf(p), year: planYear.get(p.id) },
       project: { kind: 'curriculum', group: p.cadence, phaseId: p.phaseId, hours: p.estHours, tracks: p.tracks },
       picks: [],
-      securityAreas: [],
-      agentAreas: [],
-      buildAreas: [],
       paid: false,
       certificate: false,
     };
@@ -219,9 +210,6 @@ function buildEntries(
     const entry: Entry = {
       kind: 'catalogue',
       picks: [],
-      securityAreas: [],
-      agentAreas: [],
-      buildAreas: [],
       paid: false,
       certificate: false,
       id: e.id,
@@ -342,17 +330,11 @@ export function Library({ openId }: { openId?: string }) {
   const [paperId, setPaperId] = useQueryParam('paper');
   const [pathParam] = useQueryParam('path');
   // The quick filters (ATLAS-LIBRARY, src/lib/quick-filters.ts): a cluster across every shelf, in the URL like a shelf;
-  // Security & defence, Agents & MCP and Build & ship have areas as chips (`area=`).
+  // a filter with areas (Security & defence, Agents & MCP, Build & ship, the craft round's) has them as chips (`area=`).
   const [pickParam, setPick] = useQueryParam('pick');
   const quick = quickFilterOf(pickParam);
   const pick = quick?.key ?? null;
-  const security = pick === 'security';
-  const agents = pick === 'agents';
-  const buildShip = pick === 'buildship';
   const [area, setArea] = useQueryParam('area');
-  const securityArea = security ? area : null;
-  const agentArea = agents ? area : null;
-  const buildArea = buildShip ? area : null;
   // The Books shelf's Free / Paid chip (the books round); nothing pressed is All.
   const [cost, setCost] = useQueryParam('cost');
   const paidOnly = cost === 'paid' ? true : cost === 'free' ? false : null;
@@ -393,6 +375,13 @@ export function Library({ openId }: { openId?: string }) {
     };
   }, [atlas, catalogue]);
   // The quick filters' counts, for the rows on the home: once per change to the entries.
+  // The areas of the open pick, per entry of the pick (computed once per pick; the chips count them, the list filters by them).
+  const pickAreas = useMemo(() => {
+    if (!pick || !quick?.areasOf) return null;
+    const areasOf = quick.areasOf;
+    return new Map(entries.filter((e) => e.quick && e.picks.includes(pick)).map((e) => [e.id, areasOf(e.quick!)]));
+  }, [entries, pick, quick]);
+  const pickArea = area && pickAreas ? pickAreas : null;
   const quickCounts = useMemo(() => QUICK_FILTERS.map((f) => ({ key: f.key, label: f.label, icon: f.icon, tone: f.tone, count: entries.filter((e) => e.picks.includes(f.key)).length })), [entries]);
 
   if (!atlas || !paperStates || !certStates || !library || !summary) {
@@ -416,7 +405,7 @@ export function Library({ openId }: { openId?: string }) {
   const projectFiltersOn = Boolean(kind || difficulty || group || phaseParam || level || hours);
   const matchesProject = (e: Entry): boolean => !projectFiltersOn || (e.project ? matchesFilter(e.project, projectFilter) : false);
   const filtered = matched.filter(
-    (e) => (!type || e.type === type) && (!pick || e.picks.includes(pick)) && (!securityArea || e.securityAreas.includes(securityArea)) && (!agentArea || e.agentAreas.includes(agentArea)) && (!buildArea || e.buildAreas.includes(buildArea)) && (paidOnly === null || e.paid === paidOnly) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
+    (e) => (!type || e.type === type) && (!pick || e.picks.includes(pick)) && (!pickArea || pickArea.get(e.id)?.includes(area!) === true) && (paidOnly === null || e.paid === paidOnly) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
   );
   // Every shelf but Projects reads by fit: in progress first, then priority, year and level (ATLAS-LIBRARY). Projects
   // keep their order: the plan's first, then the catalogue.
@@ -564,27 +553,11 @@ export function Library({ openId }: { openId?: string }) {
             />
           </div>
           {type !== 'project' && fitChips}
-          {security && (
+          {quick?.areas && pickAreas && (
             <div className="mt-2">
               <Chips
                 label="Area"
-                items={SECURITY_AREAS.map((a) => ({ key: a.key, label: a.label, count: entries.filter((e) => e.picks.includes('security') && e.securityAreas.includes(a.key)).length, pressed: area === a.key, onClick: () => setArea(area === a.key ? null : a.key) }))}
-              />
-            </div>
-          )}
-          {agents && (
-            <div className="mt-2">
-              <Chips
-                label="Area"
-                items={AGENT_AREAS.map((a) => ({ key: a.key, label: a.label, count: entries.filter((e) => e.picks.includes('agents') && e.agentAreas.includes(a.key)).length, pressed: area === a.key, onClick: () => setArea(area === a.key ? null : a.key) }))}
-              />
-            </div>
-          )}
-          {buildShip && (
-            <div className="mt-2">
-              <Chips
-                label="Area"
-                items={BUILD_AREAS.map((a) => ({ key: a.key, label: a.label, count: entries.filter((e) => e.picks.includes('buildship') && e.buildAreas.includes(a.key)).length, pressed: area === a.key, onClick: () => setArea(area === a.key ? null : a.key) }))}
+                items={quick.areas.map((a) => ({ key: a.key, label: a.label, count: [...pickAreas.values()].filter((v) => v.includes(a.key)).length, pressed: area === a.key, onClick: () => setArea(area === a.key ? null : a.key) }))}
               />
             </div>
           )}

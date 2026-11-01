@@ -91,6 +91,8 @@
   estHours: 60
   subject: c-cpp
   summary: "Do the exercises: they are the point of the book."
+  note: "Paid"
+  priority: 2
 
 - id: modern-c
   title: "Modern C (Jens Gustedt)"

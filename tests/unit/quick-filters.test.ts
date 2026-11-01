@@ -3,12 +3,12 @@ import { loadSeedOrThrow } from '../../scripts/lib/load-seed.ts';
 import { shelfOf } from '../../src/lib/library-home.ts';
 import { isCertificate, QUICK_FILTER_KEYS, QUICK_FILTERS, quickFilterOf, quickPicks } from '../../src/lib/quick-filters.ts';
 
-/** The quick filters (ATLAS-LIBRARY): the registry, the six the plan gap fill (15,961 rows) added, and Build & ship (16,076 rows). */
+/** The quick filters (ATLAS-LIBRARY): the registry, the six the plan gap fill (15,961 rows) added, Build & ship (16,076 rows) and the seven of the thirteenth file (17,283 rows). */
 const item = (title: string, summary = '', track = 'ai', id = 'x', shelf = 'article') => ({ id, title, summary, track, shelf });
 
 describe('the registry', () => {
-  it('lists the eleven filters in the order of the rows, each with a label, an icon and a search name', () => {
-    expect(QUICK_FILTER_KEYS).toEqual(['essentials', 'energy', 'security', 'agents', 'certificates', 'career', 'research', 'communication', 'opensource', 'mandarin', 'buildship']);
+  it('lists the eighteen filters in the order of the rows, each with a label, an icon and a search name', () => {
+    expect(QUICK_FILTER_KEYS).toEqual(['essentials', 'energy', 'security', 'agents', 'certificates', 'career', 'research', 'communication', 'opensource', 'mandarin', 'buildship', 'buildyourself', 'lowlevel', 'science', 'gpu', 'sdk', 'fusion', 'aerospace']);
     for (const f of QUICK_FILTERS) {
       expect(f.label.length).toBeGreaterThan(3);
       expect(f.search.startsWith('Search ')).toBe(true);
@@ -31,6 +31,23 @@ describe('the registry', () => {
     expect(quickPicks(item('Using PyInstaller', 'A one-file executable.', 'languages'))).toContain('buildship');
     expect(quickPicks(item('CleanRL', 'Single-file implementations of PPO.', 'ai'))).not.toContain('buildship');
     expect(quickFilterOf('buildship')?.search).toBe('Search build and ship');
+  });
+
+  it('carries the areas of a filter that has them, and the seven of the thirteenth file by their module', () => {
+    expect(QUICK_FILTERS.filter((f) => f.areas).map((f) => f.key)).toEqual(['security', 'agents', 'buildship', 'buildyourself', 'lowlevel', 'science', 'fusion', 'aerospace']);
+    expect(quickFilterOf('security')?.areas?.map((a) => a.label)).toContain('Hardening');
+    expect(quickFilterOf('fusion')?.areas?.map((a) => a.label)).toEqual(['Plasma', 'Energy conversion', 'Magnets', 'Accelerators']);
+    expect(quickFilterOf('gpu')?.areas).toBeUndefined();
+    expect(quickFilterOf('buildship')?.areasOf?.(item('Nuitka User Manual', 'Compiles Python to C for standalone binaries.', 'languages'))).toEqual(['executables']);
+    expect(quickFilterOf('aerospace')?.areasOf?.(item('Apollo Lunar-Descent Guidance', '', 'engineering'))).toEqual(['astro', 'gnc', 'space']);
+    expect(quickPicks(item('Crafting Interpreters', '', 'languages'))).toContain('buildyourself');
+    expect(quickPicks(item('perf Examples', '', 'systems'))).toContain('lowlevel');
+    expect(quickPicks(item('Probability: Theory and Examples', '', 'math'))).toContain('science');
+    expect(quickPicks(item('CUDA Programming Guide', '', 'inference'))).toContain('gpu');
+    expect(quickPicks(item('AIP-180: Backwards compatibility', '', 'architecture'))).toContain('sdk');
+    expect(quickPicks(item('Plasma Physics and Fusion Energy', '', 'engineering'))).toContain('fusion');
+    expect(quickPicks(item('Fundamentals of Astrodynamics', '', 'engineering'))).toContain('aerospace');
+    for (const key of ['buildyourself', 'lowlevel', 'science', 'gpu', 'sdk', 'fusion', 'aerospace']) expect(quickFilterOf(key)?.search.startsWith('Search ')).toBe(true);
   });
 });
 
@@ -103,5 +120,12 @@ describe('the six new filters', () => {
     expect(counts.get('agents')).toBeGreaterThan(800);
     expect(counts.get('buildship')).toBeGreaterThan(120);
     expect(counts.get('buildship')).toBeLessThan(200);
-  });
+    expect(counts.get('buildyourself')).toBeGreaterThan(200);
+    expect(counts.get('lowlevel')).toBeGreaterThan(500);
+    expect(counts.get('science')).toBeGreaterThan(400);
+    expect(counts.get('gpu')).toBeGreaterThan(500);
+    expect(counts.get('sdk')).toBeGreaterThan(150);
+    expect(counts.get('fusion')).toBeGreaterThan(350);
+    expect(counts.get('aerospace')).toBeGreaterThan(300);
+  }, 60_000);
 });
