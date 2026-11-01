@@ -4,6 +4,8 @@ import type { UpdateCheck } from '../../pwa/register.ts';
 import { Button } from '../../ui/Button.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { Section } from './shared.tsx';
+import { QUALITY_SCALE, StarRating } from '../../ui/StarRating.tsx';
+import type { Quality } from '../../ui/StarRating.tsx';
 
 const RESULT: Record<UpdateCheck, string> = {
   ready: 'A new version is ready: tap Reload below',
@@ -60,6 +62,25 @@ export function About() {
         </Button>
         <span className="min-w-0 flex-1 text-meta text-ink2">{resetting || 'Drops the cached build and loads the site afresh. Your data stays.'}</span>
       </div>
+    </Section>
+  );
+}
+
+/**
+ * How quality is rated (ATLAS-STAR-RATING): the stars on the Library's rows are the audit's grade of each resource, on
+ * one strict scale, never the user's own; a row the audit did not grade shows none.
+ */
+export function QualityNote() {
+  return (
+    <Section id="quality" title="How quality is rated">
+      <p className="mb-3 text-meta text-ink2">
+        Every resource in the Library was graded by hand on one strict 1 to 5 scale, by opening it and comparing it with the other resources on its topic. The stars show that grade. They are not a personal rating, and a resource that was not graded shows none.
+      </p>
+      <RowList>
+        {([5, 4, 3, 2, 1] as Quality[]).map((q) => (
+          <Row key={q} height={48} icon={<StarRating value={q} size="sm" />} title={QUALITY_SCALE[q].label} meta={QUALITY_SCALE[q].tip} metaWraps />
+        ))}
+      </RowList>
     </Section>
   );
 }

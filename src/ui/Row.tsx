@@ -42,6 +42,11 @@ export interface RowProps {
   dragRow?: boolean;
   /** A trailing chevron: the row opens something (it turns down while the row is expanded). */
   chevron?: boolean;
+  /**
+   * What the row's icon says, read after its name (the type tile and its stars: "Article, quality 5 of 5: Canon"); it
+   * describes the row rather than naming it, so the name stays the title, meta and trailing text.
+   */
+  describe?: string;
 }
 
 /** The clay checkbox: a 24 px sunken square with 8 px corners; checked, a filled blue gradient with a white tick. */
@@ -88,8 +93,10 @@ export function Switch({ on, onChange, labelledBy, label, disabled }: { on: bool
  */
 const HEIGHT = { 44: 'min-h-11', 48: 'min-h-16 py-2', 52: 'min-h-16 py-2', 56: 'min-h-16 py-2', 60: 'min-h-16 py-2' } as const;
 
-export function Row({ title, meta, metaWraps, trailing, action, onClick, to, href, expanded, check, toggle, selected, children, className = '', height = 56, truncate, plainTitle: _plainTitle, dragRow, icon, chevron }: RowProps) {
+export function Row({ title, meta, metaWraps, trailing, action, onClick, to, href, expanded, check, toggle, selected, children, className = '', height = 56, truncate, plainTitle: _plainTitle, dragRow, icon, chevron, describe }: RowProps) {
   const titleId = useId();
+  const describeId = useId();
+  const describedBy = describe ? describeId : undefined;
   const titleClass =
     'block text-body leading-[1.25] font-medium' + (check?.checked ? ' text-ink2 line-through' : '') + (truncate ? ' truncate' : ' line-clamp-2');
   const body = (
@@ -111,19 +118,19 @@ export function Row({ title, meta, metaWraps, trailing, action, onClick, to, hre
   let main: ReactNode;
   if (to) {
     main = (
-      <Link to={to} className={mainClass} onClick={onClick}>
+      <Link to={to} className={mainClass} onClick={onClick} aria-describedby={describedBy}>
         {body}
       </Link>
     );
   } else if (href) {
     main = (
-      <a href={href} target="_blank" rel="noreferrer noopener" className={mainClass}>
+      <a href={href} target="_blank" rel="noreferrer noopener" className={mainClass} aria-describedby={describedBy}>
         {body}
       </a>
     );
   } else if (onClick) {
     main = (
-      <button type="button" className={mainClass} onClick={onClick} aria-expanded={expanded} aria-pressed={selected}>
+      <button type="button" className={mainClass} onClick={onClick} aria-expanded={expanded} aria-pressed={selected} aria-describedby={describedBy}>
         {body}
       </button>
     );
@@ -152,6 +159,11 @@ export function Row({ title, meta, metaWraps, trailing, action, onClick, to, hre
         {action}
         {toggle && <Switch on={toggle.on} onChange={toggle.onChange} labelledBy={titleId} disabled={toggle.disabled} />}
       </div>
+      {describe && (
+        <span id={describeId} hidden>
+          {describe}
+        </span>
+      )}
       {children}
     </li>
   );

@@ -497,15 +497,16 @@ test('the fourteenth file\'s filters: Mechanics & materials has its four chips, 
   expect(w).toBeGreaterThan(15);
 });
 
-test('the quality pass: canon rows wear a Canon badge, "Canon only" narrows a shelf, and a path folds the grade-3 rows under "More resources"', async ({ page }) => {
+test('the quality pass: canon rows wear a Canon badge, the ★5 rating narrows a shelf, and a path folds the grade-3 rows under "More resources"', async ({ page }) => {
   await open(page, './#/library?type=course');
   const heading = page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ });
   const [all] = (await heading.innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
-  const toggle = page.getByRole('group', { name: 'Level and roadmap' }).getByRole('button', { name: 'Canon only' });
-  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
-  await toggle.click();
-  await expect(page).toHaveURL(/canon=1/);
-  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  // "Canon only" became the ★5 rating (ATLAS-STAR-RATING).
+  const five = page.getByRole('radiogroup', { name: 'Minimum rating' }).getByRole('radio', { name: /^5 stars, [\d,]+$/ });
+  await expect(five).toHaveAttribute('aria-checked', 'false');
+  await five.click();
+  await expect(page).toHaveURL(/rating=5/);
+  await expect(five).toHaveAttribute('aria-checked', 'true');
   await expect(async () => {
     const [shown] = (await heading.innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
     expect(shown).toBeGreaterThan(20);
@@ -514,10 +515,10 @@ test('the quality pass: canon rows wear a Canon badge, "Canon only" narrows a sh
   // Every row shown is canon, and says so first.
   await expect(page.getByRole('list').getByRole('button').first()).toContainText('Canon ·');
   await page.getByRole('list').getByRole('button').first().click();
-  await expect(page.getByRole('dialog').getByText('Canon', { exact: true })).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('Canon', { exact: true }).first()).toBeVisible();
   // DevOps has nothing on the plan: its optional list is open, and the grade-3 rows wait, folded, at its end.
   await open(page, './#/library?path=devops');
-  const more = page.getByRole('button', { name: /^More resources [\d,]+$/ });
+  const more = page.getByRole('button', { name: /^More resources 3 stars and below [\d,]+$/ });
   await expect(more).toHaveAttribute('aria-expanded', 'false');
   const before = await page.locator('ul.rows > li').count();
   await more.click();

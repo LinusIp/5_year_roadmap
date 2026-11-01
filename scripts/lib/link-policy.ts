@@ -22,6 +22,9 @@ export const MANUAL_OK: readonly string[] = [
   'docs.libp2p.io/',
   'online.stat.psu.edu/stat414',
   'cs.umd.edu/~amchilds/qa',
+  // NVIDIA's CUB documentation (ATLAS-STAR-RATING): the audit's canonical URL, verified live; the page's own canonical
+  // link points to it. The checker's 404 is a false positive.
+  'nvidia.github.io/cccl/cub/index.html',
 ];
 
 /** Hosts whose failures are the script's, not the page's: tensorflow.org loops a script's redirects, Greg Wooledge's

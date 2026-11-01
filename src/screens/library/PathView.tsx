@@ -7,7 +7,8 @@ import { buildPaths, byFit, fitOf, isCanon, isLesser, pathExtras, pathOfTrack, P
 import { Button } from '../../ui/Button.tsx';
 import { Header } from '../../ui/Header.tsx';
 import { Icon } from '../../ui/Icon.tsx';
-import { IconTile } from '../../ui/glyphs.tsx';
+import { TypeTile } from '../../ui/glyphs.tsx';
+import { Stars, tileDescription } from '../../ui/StarRating.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { count, plural } from '../parts/text.ts';
 import { ArtPanel } from '../../ui/ArtPanel.tsx';
@@ -93,11 +94,12 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
       : [isCanon(entry.item.quality) ? 'Canon' : null, entry.item.fromYear ? 'Year ' + entry.item.fromYear : null, SHELF_LABEL[shelfOf(entry.item)], entry.item.estHours + ' h'].filter(Boolean).join(' · ');
   const rowOf = (entry: (typeof everything)[number]) =>
     entry.kind === 'paper' ? (
-      <Row key={entry.item.id} icon={<IconTile icon="paper" tone="ice" />} title={entry.item.short ?? entry.item.title} meta={metaOf(entry)} truncate onClick={() => onOpenPaper(entry.item.id)} />
+      <Row key={entry.item.id} icon={<TypeTile icon="paper" tone="ice" quality={entry.item.quality} />} describe={tileDescription('Paper', entry.item.quality)} title={entry.item.short ?? entry.item.title} meta={metaOf(entry)} truncate onClick={() => onOpenPaper(entry.item.id)} />
     ) : (
       <Row
         key={entry.item.id}
-        icon={<IconTile icon={SHELF_ICON[shelfOf(entry.item)]} tone={shelfOf(entry.item) === 'practice' || shelfOf(entry.item) === 'paper' || shelfOf(entry.item) === 'blog' ? 'ice' : 'blue'} />}
+        icon={<TypeTile icon={SHELF_ICON[shelfOf(entry.item)]} tone={shelfOf(entry.item) === 'practice' || shelfOf(entry.item) === 'paper' || shelfOf(entry.item) === 'blog' ? 'ice' : 'blue'} quality={entry.item.quality} />}
+        describe={tileDescription(SHELF_LABEL[shelfOf(entry.item)] ?? 'Resource', entry.item.quality)}
         title={entry.item.short ?? entry.item.title}
         meta={metaOf(entry)}
         onClick={() => onOpen(entry.item.id)}
@@ -115,7 +117,7 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
       {pages.length > 0 && (
         <RowList label="roadmap.sh" className="mt-[18px]">
           {pages.map((r) => (
-            <Row key={r.id} icon={<IconTile icon="map" />} title={r.short ?? r.title} meta="The official roadmap · roadmap.sh" onClick={() => onOpen(r.id)} />
+            <Row key={r.id} icon={<TypeTile icon="map" quality={r.quality} />} describe={tileDescription('Roadmap', r.quality)} title={r.short ?? r.title} meta="The official roadmap · roadmap.sh" onClick={() => onOpen(r.id)} />
           ))}
         </RowList>
       )}
@@ -126,7 +128,8 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
             .filter(({ step }) => step.phaseId === phase.id)
             .map(({ step, index }) => {
               const state = index === path.current ? 'current' : step.status === 'done' ? 'done' : 'later';
-              const shelf = step.kind === 'project' ? 'project' : shelfOf(seed.resources.find((r) => r.id === step.refId) ?? { type: step.type });
+              const resource = step.kind === 'project' ? undefined : seed.resources.find((r) => r.id === step.refId);
+              const shelf = step.kind === 'project' ? 'project' : shelfOf(resource ?? { type: step.type });
               return (
                 <Row
                   key={step.refId}
@@ -134,9 +137,10 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
                   icon={
                     <span className="flex items-center gap-2">
                       <StepDot state={state} />
-                      <IconTile icon={SHELF_ICON[shelf]} tone={shelf === 'project' || shelf === 'paper' ? 'ice' : 'blue'} />
+                      <TypeTile icon={SHELF_ICON[shelf]} tone={shelf === 'project' || shelf === 'paper' ? 'ice' : 'blue'} quality={resource?.quality} />
                     </span>
                   }
+                  describe={resource ? tileDescription(SHELF_LABEL[shelf] ?? 'Resource', resource.quality) : undefined}
                   title={step.title}
                   meta={(step.kind === 'project' ? 'Project' : step.type.charAt(0).toUpperCase() + step.type.slice(1)) + ' · ' + Math.round(step.hours) + ' h' + (state === 'current' ? ' · now' : '')}
                   trailing={STATUS_LABEL[step.status] || undefined}
@@ -164,7 +168,7 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
           {extras && (
             <ul className="rows pb-2">
               {shownAlternatives.map((r) => (
-                <Row key={r.id} icon={<IconTile icon={SHELF_ICON[shelfOf(r)]} />} title={r.short ?? r.title} meta={'Alternative · ' + r.estHours + ' h'} onClick={() => onOpen(r.id)} />
+                <Row key={r.id} icon={<TypeTile icon={SHELF_ICON[shelfOf(r)]} quality={r.quality} />} describe={tileDescription(SHELF_LABEL[shelfOf(r)] ?? 'Resource', r.quality)} title={r.short ?? r.title} meta={'Alternative · ' + r.estHours + ' h'} onClick={() => onOpen(r.id)} />
               ))}
               {visible.map(rowOf)}
               {shownAlternatives.length + visible.length < main && (
@@ -174,6 +178,11 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
                 <li>
                   <button type="button" aria-expanded={lesserOpen} onClick={() => setLesserOpen(!lesserOpen)} className="flex min-h-11 w-full items-center gap-3 text-left">
                     <span className="min-w-0 flex-1 text-body font-medium">More resources</span>
+                    <span className="flex items-center gap-1 text-meta text-ink2">
+                      <Stars filled={3} total={3} size="sm" />
+                      <span className="sr-only">3 stars</span>
+                      <span>and below</span>
+                    </span>
                     <span className="text-meta text-ink2">{count(lesser.length)}</span>
                     <Icon name={lesserOpen ? 'chevronDown' : 'chevronRight'} size={18} className="text-ink2" />
                   </button>

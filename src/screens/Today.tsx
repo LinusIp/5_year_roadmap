@@ -1,3 +1,4 @@
+import { StarRating } from '../ui/StarRating.tsx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { stepsTicked } from '../seed/catalogue.ts';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -1023,7 +1024,10 @@ export function Today() {
           ) : (
             <ProgressLine value={nowBlock.targetMinutes > 0 ? nowMinutes / nowBlock.targetMinutes : 0} label={'Time on ' + blockShort(nowBlock.def.name) + ' today'} lane={nowLane} />
           )}
-          <p className="-mt-1 text-meta text-ink2">{nowHours}</p>
+          <div className="-mt-1 flex items-center gap-2">
+            <p className="text-meta text-ink2">{nowHours}</p>
+            {resource?.quality !== undefined && <StarRating value={resource.quality} size="sm" />}
+          </div>
           {offer && offer.block === nowBlock.id && (
             <div role="status" className={'lane-tile lane-' + nowLane + ' flex flex-wrap items-center gap-2 rounded-knob px-3 py-2'}>
               <span className="flex-1 text-meta font-medium">{'Start with ' + categoryLabel(offer.mix) + '?'}</span>

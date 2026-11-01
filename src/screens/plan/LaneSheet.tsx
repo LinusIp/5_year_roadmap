@@ -1,3 +1,4 @@
+import { RatedMeta } from '../../ui/RatedMeta.tsx';
 import { useEffect, useState } from 'react';
 import { addPlanEdit, removePlanItem, restorePlanItem } from '../../db/edits.ts';
 import type { Atlas } from '../../hooks/useAtlas.ts';
@@ -126,7 +127,7 @@ export function LaneSheet({
                       dragRow
                       className={drag?.over === index && drag.from !== index ? 'shadow-[inset_0_2px_0_var(--blue)]' : drag?.from === index ? 'opacity-60' : ''}
                       title={nameOf(item)}
-                      meta={meta}
+                      meta={<RatedMeta text={meta} quality={atlas.seed.resources.find((r) => r.id === item.refId)?.quality} />}
                       onClick={editing ? undefined : () => onOpenItem(item.refId)}
                       action={
                         editing ? (

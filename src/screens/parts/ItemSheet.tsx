@@ -13,6 +13,7 @@ import type { CatalogueItem } from '../../seed/catalogue.ts';
 import { CatalogueBody } from './CatalogueBody.tsx';
 import type { AppResource, Project, Unit } from '../../seed/schema.ts';
 import { Button } from '../../ui/Button.tsx';
+import { QualityLine } from '../../ui/QualityLine.tsx';
 import { ProgressLine } from '../../ui/ProgressLine.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { ScenePanel } from '../../ui/ScenePanel.tsx';
@@ -156,6 +157,7 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
             {isCertificate(resource.id) && <span className="pill-tint lane-4 rounded-pill px-2.5 py-1 text-small font-semibold">Certificate</span>}
             {resource.cost === 'paid' && <span className="pill-neutral rounded-pill px-2.5 py-1 text-small font-semibold">Paid</span>}
           </div>
+          <QualityLine quality={resource.quality} />
           {progress !== null && (
             <>
               <ProgressLine value={progress} label={'Progress on ' + resource.title} lane={lane} size={12} />

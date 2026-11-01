@@ -1371,3 +1371,14 @@ Verified on this machine (Linux, Chromium 140):
 - Glaser et al.'s 2015 review and Koch et al.'s 2022 report are listed as distinct in the matcher.
 - Tests: `tests/unit/quality-pass.test.ts`; count floors re-based in eight unit tests; e2e searches name rows still there.
   Screenshots redrawn on CI.
+
+## Pull request #52: quality as a star rating
+
+- `src/ui/StarRating.tsx`: five inline SVG stars at three sizes, `role="img"` with "Quality 4 of 5: Strong", a tooltip
+  on hover or long press, nothing without a grade; `--star` and `--star-empty` in both themes.
+- Stars under the type tile of the Library's rows, search, paths, Research, This week's picks and In progress (the row
+  describes them); small ones on Today's Now card, Plan's lane rows and Calendar's blocks; md with the word on the
+  resource and paper sheets, linked to "How quality is rated" in Settings.
+- Minimum rating (All, ★3+, ★4+, ★5, with live counts) replaces Canon only (`canon=1` opens ★5); Sort offers Rating
+  (high → low); More resources says "★★★ and below". The CUB link is allowlisted as checked by hand.
+- Tests: `tests/unit/star-rating.test.ts`, `tests/e2e/star-rating.spec.ts` (new); two new screenshots.
