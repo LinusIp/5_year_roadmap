@@ -248,6 +248,11 @@
   estHours: 80
   subject: circuits
   summary: "The bench course. Its labs are a ready source of weekly mini-builds in year 4."
+  short: "Learning the Art of Elec."
+  fromYear: 2
+  note: "Paid"
+  doFirst: "The Art of Electronics (3rd ed.)"
+  priority: 4
 
 - id: cu-boulder-power-electronics
   title: "CU Boulder: Power Electronics specialization"
@@ -383,6 +388,10 @@
   stretch: true
 
 # ---------------------------------------------------------------- tools and books from Appendix A (added 2026-10-07)
+  short: "MIT 6.013 EM & Applications"
+  summary: "Staelin's EM course ships with a full open textbook, problem sets and demos, covering waves, transmission lines, antennas and EM forces engineers actually use."
+  fromYear: 2
+  priority: 4
 
 - id: kicad
   title: "KiCad: open-source schematic and PCB design"
@@ -411,6 +420,9 @@
   estHours: 0
   reference: true
   summary: "The simulator for \"measured vs. simulated\" in project 36, and the yardstick for your own solver in project 37."
+  short: "LTspice (ADI)"
+  fromYear: 1
+  priority: 4
 
 - id: ngspice
   title: "ngspice: open-source SPICE simulator"

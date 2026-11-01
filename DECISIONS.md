@@ -2673,6 +2673,40 @@ and exclusions, the data's counts); `tests/unit/quick-filters.test.ts` (eighteen
 with its chips and search, the other six from the home, two without an Area row). Screenshots of the Library's home
 redrawn on CI (seven more chips).
 
+## The Atlas Library's fourteenth file: engineering-physics foundations and software depth (pull request #49)
+
+**Four filters and a chip from the prompt's lists.** The round adds 561 rows and asks for "Electronics & EM",
+"Mechanics & materials" with Fluids, Solids, Materials and Nuclear chips, "Scientific computing", "Formal methods"
+and a "Research writing" chip under Research & science. They live in `src/lib/foundations.ts` beside the craft
+round's module and use the same matcher (`src/lib/words.ts`) and the same registry fields (`areas`, `areasOf`), so the
+Library screen needed no change. As before, the lists were tuned against the data: a script counted the new rows each
+filter caught and the older rows it pulled in, named the word responsible, and narrowed the words that meant
+something else on another track. "DNS" (the name system), "mesh" (a service mesh) and "solvers" (SAT solvers) left
+Scientific computing; "proof" (proof of stake), "proving" and "verified" left Formal methods except in their phrases,
+and "Lean" counts only as Lean 4, the Lean prover or mathlib; "flow", "structures", "radiation", "material" and the
+fusion words left Mechanics & materials (it fell from 1,282 rows to 1,032, and Fusion & accelerators already gathers
+the fusion rows); "poster" became its phrases when it turned out to match every Bayesian posterior.
+
+**Mechanics & materials is large on purpose.** A thousand rows is most of the engineering track's mechanics and
+materials, which is what the filter is for; the chips split it into four lists of 240 to 370, and every row of the
+cluster is in at least one (`tests/unit/foundations.test.ts`). Electronics & EM, Scientific computing and Formal
+methods carry no chips, since the prompt names none.
+
+**Research writing joins Research & science.** Its rows (writing guides, LaTeX, figures, reviewing) are on the AI and
+math tracks and named no theory, so they were in Research skills but not in Research & science. Its words now admit a
+row on the research tracks (AI, math, simulation, engineering, physics) as well as naming the area; Research & science
+grows from 840 to 964 rows, Research writing has 69.
+
+**Links.** The container cannot resolve any of the new rows' hosts, so the pull request's CI ran
+`npm run check:links -- --in data/resources/library-atlas-14.yaml` in a one-off `links-atlas-14` job, removed before
+the merge: LINKS-RESULT Every URL is the file's; none was changed.
+
+Tests: `tests/unit/foundations.test.ts` (new: each filter's inclusions and exclusions, the four areas, Research
+writing, the data's counts); `tests/unit/quick-filters.test.ts` (twenty-two keys); `tests/unit/craft.test.ts` (six
+Research & science areas); `tests/e2e/atlas-library.spec.ts` (Mechanics & materials with its chips and search, the
+other three without an Area row, Research writing pressed from a link). Screenshots of the Library's home redrawn on
+CI (four more chips).
+
 ## The docked player's check waits for Today to settle (pull request #45)
 
 The CI run on main after pull request #44 failed one e2e test, twice in a row: the Focus session that keeps playing,

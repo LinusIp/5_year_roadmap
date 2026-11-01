@@ -6,12 +6,14 @@
  * an item's title and summary, some held to the tracks the cluster lives in; the twelfth file (16,076 rows) adds
  * Build & ship, with a module of its own; the thirteenth file (17,283 rows) adds seven from `src/lib/craft.ts`: Build it
  * yourself, Low-level & performance, Research & science, GPU & CUDA, SDK & API design, Fusion & accelerators and
- * Aerospace. A filter can carry areas: chips over its list, each a set of words of its own (`area=` in the URL). The
+ * Aerospace; the fourteenth file (17,848 rows) adds four from `src/lib/foundations.ts`: Electronics & EM, Mechanics &
+ * materials, Scientific computing and Formal methods (and Research & science gains a Research writing area). A filter can carry areas: chips over its list, each a set of words of its own (`area=` in the URL). The
  * list here is the order of the rows.
  */
 import { AGENT_AREAS, agentAreasOf, isAgents } from './agents.ts';
 import { BUILD_AREAS, buildAreasOf, isBuildShip } from './build-ship.ts';
 import { AEROSPACE_AREAS, aerospaceAreasOf, BUILD_YOURSELF_AREAS, buildYourselfAreasOf, FUSION_AREAS, fusionAreasOf, isAerospace, isBuildYourself, isFusion, isGpuCuda, isLowLevel, isResearchScience, isSdkApi, LOW_LEVEL_AREAS, lowLevelAreasOf, RESEARCH_SCIENCE_AREAS, researchScienceAreasOf } from './craft.ts';
+import { isElectronics, isFormalMethods, isMechanics, isScientificComputing, MECHANICS_AREAS, mechanicsAreasOf } from './foundations.ts';
 import { isEnergy } from './energy.ts';
 import { isEssential } from './essentials.ts';
 import { isSecurity, SECURITY_AREAS, securityAreasOf } from './security.ts';
@@ -116,6 +118,10 @@ export const QUICK_FILTERS: readonly QuickFilter[] = [
   { key: 'sdk', label: 'SDK & API design', icon: 'layers', tone: 'ice', sub: 'on SDKs, API guidelines, versioning and deprecation, the ABI, FFI and bindings, protobuf and OpenAPI', search: 'Search SDK and API design', match: (i) => isSdkApi(i.title, i.summary, i.track) },
   { key: 'fusion', label: 'Fusion & accelerators', icon: 'atom', tone: 'blue', sub: 'on plasma, blankets and tritium, direct energy conversion, magnets, beams, linacs, SRF and FELs', search: 'Search fusion and accelerators', match: (i) => isFusion(i.title, i.summary, i.track), areas: named(FUSION_AREAS), areasOf: (i) => fusionAreasOf(i.title, i.summary) },
   { key: 'aerospace', label: 'Aerospace', icon: 'orbit', tone: 'ice', sub: 'on rockets and propulsion, astrodynamics, guidance and navigation, aerodynamics and structures, spacecraft', search: 'Search aerospace', match: (i) => isAerospace(i.title, i.summary, i.track), areas: named(AEROSPACE_AREAS), areasOf: (i) => aerospaceAreasOf(i.title, i.summary) },
+  { key: 'electronics', label: 'Electronics & EM', icon: 'chip', tone: 'blue', sub: 'on circuits, op amps and data converters, RF and microwave, EMC and probing, fields and waves, detector front ends', search: 'Search electronics and EM', match: (i) => isElectronics(i.title, i.summary, i.track) },
+  { key: 'mechanics', label: 'Mechanics & materials', icon: 'cube', tone: 'ice', sub: 'on fluids and turbulence, solids and fracture, materials science and the nuclear codes and standards', search: 'Search mechanics and materials', match: (i) => isMechanics(i.title, i.summary, i.track), areas: named(MECHANICS_AREAS), areasOf: (i) => mechanicsAreasOf(i.title, i.summary) },
+  { key: 'scicomp', label: 'Scientific computing', icon: 'sigma', tone: 'blue', sub: 'on numerical methods and solvers, PETSc, SUNDIALS, AMReX and MFEM, HPC, uncertainty quantification and scientific ML', search: 'Search scientific computing', match: (i) => isScientificComputing(i.title, i.summary, i.track) },
+  { key: 'formal', label: 'Formal methods', icon: 'check', tone: 'ice', sub: 'on TLA+, model checking, proof assistants, seL4, CompCert, Verus, Iris, SPARK and DO-178C', search: 'Search formal methods', match: (i) => isFormalMethods(i.title, i.summary, i.track) },
 ];
 
 export const QUICK_FILTER_KEYS: readonly string[] = QUICK_FILTERS.map((f) => f.key);

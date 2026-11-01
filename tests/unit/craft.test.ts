@@ -36,7 +36,7 @@ describe('the prompt\'s words and the areas', () => {
   it('offers the sub-chips the prompt names', () => {
     expect(BUILD_YOURSELF_AREAS.map((a) => a.label)).toEqual(['Languages & compilers', 'OS & kernels', 'Networking', 'Databases & storage', 'Emulators & graphics', 'AI from scratch']);
     expect(LOW_LEVEL_AREAS.map((a) => a.label)).toEqual(['Assembly & ISA', 'Microarchitecture', 'Debugging & profiling', 'Linux kernel', 'Networking']);
-    expect(RESEARCH_SCIENCE_AREAS.map((a) => a.label)).toEqual(['Rigorous math', 'ML theory', 'Physics', 'How science works', 'Great lectures']);
+    expect(RESEARCH_SCIENCE_AREAS.map((a) => a.label)).toEqual(['Rigorous math', 'ML theory', 'Physics', 'How science works', 'Research writing', 'Great lectures']);
     expect(FUSION_AREAS.map((a) => a.label)).toEqual(['Plasma', 'Energy conversion', 'Magnets', 'Accelerators']);
     expect(AEROSPACE_AREAS.map((a) => a.label)).toEqual(['Propulsion', 'Astrodynamics', 'GNC', 'Aero & structures', 'Space systems']);
   });
