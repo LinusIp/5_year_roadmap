@@ -15,8 +15,9 @@
   prerequisites: []
   subject: deep-learning
   summary: "The applied half of priority 1: APIs, embeddings, vector search, RAG, open models and Ollama, prompting, safety. Its checklist is under Plan > Credentials > Roadmaps."
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 2
 - id: roadmap-ai-agents
   title: AI Agents roadmap
   provider: roadmap.sh
@@ -32,8 +33,9 @@
   prerequisites: []
   subject: deep-learning
   summary: The agent loop, tool calling, MCP, memory, architectures, evals, observability and guardrails, in full.
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
+  quality: 2
 - id: roadmap-software-architect
   title: Software Architect roadmap
   provider: roadmap.sh
@@ -50,8 +52,9 @@
   prerequisites: []
   subject: system-design
   summary: "Priority 2: patterns, DDD, CQRS, microservices, messaging, cloud design patterns, security and the soft skills of the role."
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 - id: roadmap-inference-engineering
   title: Inference Engineering roadmap
   provider: roadmap.sh
@@ -72,8 +75,9 @@
   short: "Inference Eng Roadmap"
   fromYear: 1
   tags: [inference]
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
+  quality: 2
 - id: roadmap-game-developer
   title: Game Developer roadmap
   provider: roadmap.sh

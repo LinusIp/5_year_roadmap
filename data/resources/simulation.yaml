@@ -144,8 +144,9 @@
 
 # ---------------------------------------------------------------- robotics simulation (year 3) and simulation tools (added 2026-10-07)
   after: [paper-pinn]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: mujoco-docs
   title: "MuJoCo: official documentation"
@@ -220,8 +221,9 @@
   short: "NVIDIA Warp"
   fromYear: 2
   after: [ten-minute-physics]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: brax
   title: "Brax: differentiable physics in JAX"
@@ -238,5 +240,6 @@
   short: "Brax (repo)"
   fromYear: 3
   after: [paper-brax]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4

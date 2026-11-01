@@ -247,6 +247,12 @@ export const RESEARCH_AREAS = ['inference', 'world-models', 'diffusion', 'genai'
 export type ResearchArea = (typeof RESEARCH_AREAS)[number];
 const alignmentFields = {
   priority: z.literal([1, 2, 3, 4]).optional(),
+  /**
+   * The quality pass (ATLAS-QUALITY-AUDIT, 16,448 rows), on a strict 1 to 5 scale: 5 canon (a Canon badge, first after
+   * priority), 4 strong, 3 useful but not essential (under "More resources" in a path, never in Up next). A row the pass
+   * did not re-grade has none and counts as 4.
+   */
+  quality: z.literal([1, 2, 3, 4, 5]).optional(),
   roadmap: z.enum(ROADMAP_IDS).optional(),
   research: z.enum(RESEARCH_AREAS).optional(),
 };

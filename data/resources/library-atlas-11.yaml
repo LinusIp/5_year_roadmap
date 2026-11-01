@@ -25,10 +25,11 @@
   estHours: 2
   summary: "Official checklist of reduced precision, SDPA, torch.compile, fused QKV and dynamic quantization for diffusion pipelines."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-hf-diffusers]
+  quality: 3
 
 - id: "docs-diffusers-memory"
   title: "Reduce memory usage (Diffusers docs)"
@@ -44,104 +45,11 @@
   estHours: 2
   summary: "Explains CPU/model/group offloading, VAE tiling and layerwise casting so big models fit on small GPUs."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-hf-diffusers]
-
-- id: "docs-nim-llm-overview"
-  title: "NVIDIA NIM for LLM and VLM Documentation"
-  short: "NIM for LLMs overview"
-  provider: "NVIDIA"
-  type: "article"
-  url: "https://docs.nvidia.com/nim/large-language-models/2.1.4/about-nim-llm/overview.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how NVIDIA packages open engines such as vLLM and SGLang into containerized microservices with model profiles."
-  fromYear: 1
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-
-- id: "docs-diffusers-caching"
-  title: "Caching (Diffusers docs)"
-  short: "Diffusers: caching"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/optimization/cache"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how to switch on Pyramid Attention Broadcast, FasterCache, FirstBlockCache and MagCache in real pipelines."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [paper-deepcache]
-
-- id: "docs-diffusers-quantization"
-  title: "Quantization: Getting started (Diffusers docs)"
-  short: "Diffusers: quantization"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/quantization/overview"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "How to quantize whole pipelines with bitsandbytes, GGUF, torchao or Quanto via one config object."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-hf-diffusers]
-
-- id: "docs-diffusers-attention-backends"
-  title: "Attention backends (Diffusers docs)"
-  short: "Diffusers: attention"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/optimization/attention_backends"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Swap between FlashAttention, SageAttention, xFormers and SDPA kernels per pipeline to benchmark them."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [paper-sageattention]
-
-- id: "docs-diffusers-para-attn"
-  title: "ParaAttention (Diffusers docs)"
-  short: "Diffusers: ParaAttention"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/optimization/para_attn"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Worked FLUX and HunyuanVideo example stacking caching, fp8 and context parallelism with measured speedups."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-diffusers-accelerate-inference]
+  quality: 3
 
 - id: "docs-diffusers-distributed-inference"
   title: "Distributed inference (Diffusers docs)"
@@ -157,10 +65,11 @@
   estHours: 1
   summary: "Covers data parallel, device_map sharding and Ring/Ulysses context parallel attention for diffusion pipelines."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-hf-diffusers]
+  quality: 3
 
 - id: "docs-trtllm-pytorch-arch-overview"
   title: "TensorRT-LLM Architecture Overview (PyTorch backend)"
@@ -176,10 +85,11 @@
   estHours: 1
   summary: "Maps how the LLM API, PyExecutor, model engine, scheduler and KV cache manager fit together in the PyTorch-based runtime."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "TRT-LLM docs"
+  quality: 3
 
 - id: "docs-trtllm-kv-cache-manager"
   title: "TensorRT-LLM KV Cache Manager"
@@ -195,10 +105,11 @@
   estHours: 1
   summary: "Explains the C++ block pool behind TensorRT-LLM's paged KV cache and how the Python runtime allocates and frees blocks per request."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "PagedAttention paper"
+  quality: 3
 
 - id: "docs-trtllm-scheduler"
   title: "TensorRT-LLM Scheduler"
@@ -214,10 +125,11 @@
   estHours: 1
   summary: "Shows how capacity and micro-batch scheduling decide which requests enter each in-flight batching iteration."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-trtllm-pytorch-arch-overview]
+  quality: 3
 
 - id: "docs-trtllm-custom-kernels"
   title: "Integrating Custom Kernels in TensorRT-LLM"
@@ -233,10 +145,11 @@
   estHours: 3
   summary: "Walks through registering your own CUDA/Triton kernels as torch custom ops so a production serving runtime can call them."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [tutorial-pytorch-cpp-custom-ops]
+  quality: 3
 
 - id: "docs-trtllm-speculative-decoding"
   title: "TensorRT-LLM Speculative Decoding"
@@ -252,10 +165,11 @@
   estHours: 2
   summary: "Covers how draft-target, EAGLE-3, MTP and n-gram drafting are wired into the runtime and which knobs matter."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Speculative decoding paper"
+  quality: 3
 
 - id: "docs-trtllm-quantization"
   title: "TensorRT-LLM Quantization"
@@ -271,9 +185,10 @@
   estHours: 1
   summary: "Reference for which FP8, FP4/NVFP4, INT4 AWQ and KV-cache quantization recipes are supported on which GPUs."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
+  quality: 3
 
 - id: "docs-trtllm-kv-cache-system"
   title: "TensorRT-LLM KV Cache System"
@@ -293,6 +208,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-trtllm-kv-cache-manager]
+  quality: 4
 
 - id: "docs-trtllm-torch-compile-cuda-graph"
   title: "Torch Compile & Prefill CUDA Graph (TensorRT-LLM)"
@@ -308,10 +224,11 @@
   estHours: 2
   summary: "Shows how a serving stack combines torch.compile with piecewise CUDA graphs to cut CPU launch overhead in prefill and decode."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "CUDA graphs in PyTorch"
+  quality: 3
 
 - id: "docs-trtllm-overlap-scheduler"
   title: "TensorRT-LLM Overlap Scheduler"
@@ -327,10 +244,11 @@
   estHours: 1
   summary: "Short explanation of hiding CPU scheduling work behind the previous GPU step, a key trick for decode throughput."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-trtllm-scheduler]
+  quality: 3
 
 - id: "docs-trtllm-parallelism"
   title: "Parallelism in TensorRT LLM"
@@ -346,10 +264,11 @@
   estHours: 2
   summary: "Compares tensor, pipeline, expert and attention data parallelism and when each helps throughput or latency."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Megatron-LM paper"
+  quality: 3
 
 - id: "docs-trtllm-attention"
   title: "Multi-Head, Multi-Query, and Group-Query Attention (TensorRT-LLM)"
@@ -369,6 +288,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "FlashAttention paper"
+  quality: 4
 
 - id: "docs-trtllm-kv-cache-connector"
   title: "TensorRT-LLM KV Cache Connector"
@@ -384,10 +304,11 @@
   estHours: 3
   summary: "Explains the plug-in interface for moving KV blocks to external stores, the basis for offloading and cross-engine reuse."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-trtllm-kv-cache-system]
+  quality: 3
 
 - id: "docs-trtllm-perf-analysis"
   title: "TensorRT-LLM Performance Analysis"
@@ -403,10 +324,11 @@
   estHours: 2
   summary: "Practical recipe for profiling a serving engine with Nsight Systems and NVTX ranges to find where iterations spend time."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Nsight Systems"
+  quality: 3
 
 - id: "docs-trtllm-moe-perf-guide"
   title: "TensorRT-LLM MoE Performance Guide"
@@ -422,10 +344,11 @@
   estHours: 3
   summary: "Guides tuning MoE backends, expert parallel layout and communication for large mixture-of-experts serving."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [paper-megablocks]
+  quality: 3
 
 - id: "docs-trtllm-autodeploy"
   title: "AutoDeploy (TensorRT-LLM)"
@@ -441,10 +364,11 @@
   estHours: 2
   summary: "Shows a compiler-style path that takes an unmodified Hugging Face PyTorch model, captures it as a graph and rewrites it into an optimized serving model."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "torch.export"
+  quality: 3
 
 - id: "docs-dynamo-architecture"
   title: "NVIDIA Dynamo Architecture"
@@ -464,44 +388,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-nvidia-dynamo]
-
-- id: "docs-dynamo-request-migration"
-  title: "Dynamo Request Migration Architecture"
-  short: "Dynamo request migration"
-  provider: "NVIDIA Dynamo team"
-  type: "article"
-  url: "https://github.com/ai-dynamo/dynamo/blob/main/docs/fern/pages/developer-guide/knowledge-base/concepts/fault-tolerance/request-migration-architecture.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how in-flight generation requests survive worker failure by migrating to another worker, a key reliability pattern."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-dynamo-architecture]
-
-- id: "docs-dynamo-trtllm-kv-transfer"
-  title: "Dynamo KV Cache Transfer (TensorRT-LLM backend)"
-  short: "Dynamo KV transfer"
-  provider: "NVIDIA Dynamo team"
-  type: "article"
-  url: "https://github.com/ai-dynamo/dynamo/blob/main/docs/fern/pages/developer-guide/additional-resources/tensorrt-llm-details/kv-cache-transfer.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Describes how KV blocks move between prefill and decode workers over NIXL/UCX in disaggregated mode."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-nixl-architecture]
+  quality: 4
 
 - id: "docs-triton-server-architecture"
   title: "Triton Architecture"
@@ -521,6 +408,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Triton Inference Server"
+  quality: 4
 
 - id: "docs-triton-server-batchers"
   title: "Triton Batchers (dynamic and sequence batching)"
@@ -536,10 +424,11 @@
   estHours: 1
   summary: "Covers dynamic batching delays, preferred sizes and sequence batching for stateful models, core serving concepts."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-triton-server-architecture]
+  quality: 3
 
 - id: "docs-triton-server-decoupled"
   title: "Decoupled Backends and Models (Triton)"
@@ -555,29 +444,11 @@
   estHours: 1
   summary: "Shows how a model can stream many responses per request, the mechanism behind token streaming in Triton."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-triton-server-architecture]
-
-- id: "docs-triton-server-bls"
-  title: "Business Logic Scripting (Triton)"
-  short: "Triton BLS"
-  provider: "NVIDIA Triton Inference Server team"
-  type: "article"
-  url: "https://github.com/triton-inference-server/server/blob/main/docs/user_guide/bls.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Explains composing multiple models with Python control flow inside the server instead of in the client."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-triton-server-architecture]
+  quality: 3
 
 - id: "docs-triton-server-perf-tuning"
   title: "Deploying your trained model using Triton (performance tuning)"
@@ -593,10 +464,11 @@
   estHours: 1
   summary: "Step-by-step tuning loop with Model Analyzer and Perf Analyzer for instance counts and batching."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-triton-server-batchers]
+  quality: 3
 
 - id: "docs-pytorch-aotinductor"
   title: "AOTInductor: Ahead-Of-Time Compilation for Torch.Export-ed Models"
@@ -612,10 +484,11 @@
   estHours: 2
   summary: "Shows how to compile an exported model into a self-contained artifact runnable from C++ without Python, the PT2 deployment path."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "torch.export"
+  quality: 3
 
 - id: "docs-pytorch-cudagraph-trees"
   title: "CUDAGraph Trees"
@@ -631,10 +504,11 @@
   estHours: 1
   summary: "Explains how torch.compile's reduce-overhead mode records and shares memory pools across many CUDA graphs."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "CUDA graphs in PyTorch"
+  quality: 3
 
 - id: "docs-pytorch-dynamic-shapes-concepts"
   title: "Dynamic Shapes Core Concepts (torch.compile)"
@@ -654,6 +528,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "torch.compiler docs"
+  quality: 4
 
 - id: "docs-cutile-python"
   title: "cuTile Python"
@@ -669,10 +544,11 @@
   estHours: 3
   summary: "Official reference for NVIDIA's tile-based Python kernel language, an alternative to Triton for writing GPU kernels."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [tutorial-triton-server-tutorials]
+  quality: 3
 
 - id: "docs-flashinfer-kv-layout"
   title: "KV-Cache Layout in FlashInfer"
@@ -688,10 +564,11 @@
   estHours: 1
   summary: "Precise description of ragged and paged KV tensors and index arrays that attention kernels consume in serving engines."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "FlashInfer paper"
+  quality: 3
 
 - id: "docs-nsight-compute-profiling-guide"
   title: "Nsight Compute Profiling Guide"
@@ -711,6 +588,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-cuda-best-practices]
+  quality: 5
 
 - id: "docs-vllm-adding-a-model"
   title: "vLLM: Adding a new model (contributing/model)"
@@ -726,10 +604,11 @@
   estHours: 4
   summary: "The guide to porting a model architecture into vLLM, one of the most common substantial community PRs."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-vllm-contributing]
+  quality: 3
 
 - id: "docs-llamacpp-howto-add-model"
   title: "Add a new model architecture to llama.cpp"
@@ -749,6 +628,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-llamacpp-contributing]
+  quality: 4
 
 - id: "docs-diffusers-lcm-distill"
   title: "Latent Consistency Distillation (Diffusers docs)"
@@ -764,11 +644,12 @@
   estHours: 3
   summary: "A runnable script for distilling your own few-step LCM, the fastest way to learn distillation by doing."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-latent-consistency-models]
+  quality: 3
 
 - id: "docs-dynamo-router-design"
   title: "Dynamo KV Router Design"
@@ -784,10 +665,11 @@
   estHours: 2
   summary: "Internals of KV-aware routing: per-worker block tracking, the overlap-vs-load cost function and KV event handling."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-dynamo-kv-aware-routing]
+  quality: 3
 
 - id: "docs-cutlass-programming-guidelines"
   title: "CUTLASS Programming Guidelines"
@@ -803,10 +685,11 @@
   estHours: 2
   summary: "The naming, layout and template conventions CUTLASS code follows, required reading before proposing a kernel change."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-cutlass-python-contribute]
+  quality: 3
 
 - id: "cert-nvidia-nca-aiio"
   title: "NVIDIA-Certified Associate: AI Infrastructure and Operations (NCA-AIIO)"
@@ -822,11 +705,12 @@
   estHours: 30
   summary: "Proves you understand GPU data-center basics: AI compute, networking, storage and cluster operations; 1-hour exam listed at US$125, a good first infra badge for inference work."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   note: "Paid"
   doFirst: "Intro to Kubernetes (LFS158)"
+  quality: 2
 
 - id: "cert-dli-cuda-cpp"
   title: "Getting Started with Accelerated Computing with CUDA C/C++ (DLI)"
@@ -842,11 +726,12 @@
   estHours: 8
   summary: "The self-paced version of DLI's flagship CUDA C/C++ course; passing the coding assessment earns an NVIDIA certificate of competency, listed at US$90."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   note: "Paid"
   doFirst: "An Even Easier Intro to CUDA"
+  quality: 3
 
 - id: "cert-dli-cuda-python"
   title: "Fundamentals of Accelerated Computing with CUDA Python (DLI)"
@@ -862,11 +747,12 @@
   estHours: 8
   summary: "Certifies that you can write and launch GPU kernels from Python with Numba and manage device memory; 8-hour course with certificate, listed at US$90."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   note: "Paid"
   doFirst: "Python"
+  quality: 3
 
 - id: "cert-nvidia-ncp-ads"
   title: "NVIDIA-Certified Professional: Accelerated Data Science (NCP-ADS)"
@@ -882,11 +768,12 @@
   estHours: 60
   summary: "Shows you can speed up data pipelines and ML on GPUs with RAPIDS (cuDF, cuML) and related tools; 2-hour exam listed at US$200."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   note: "Paid"
   doFirst: "DLI CUDA Python"
+  quality: 2
 
 - id: "cert-dli-multi-gpu-cuda"
   title: "Scaling Workloads Across Multiple GPUs with CUDA C++ (DLI)"
@@ -902,11 +789,12 @@
   estHours: 4
   summary: "Short certificate course proving you can split CUDA work across several GPUs with streams and peer copies; listed at US$30."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   note: "Paid"
   after: [cert-dli-cuda-cpp]
+  quality: 3
 
 - id: "cert-dli-cuda-streams"
   title: "Accelerating CUDA C++ Applications with Concurrent Streams (DLI)"
@@ -922,11 +810,12 @@
   estHours: 4
   summary: "Certificate course on overlapping copies and compute with CUDA streams, a core skill for fast inference pipelines; listed at US$30."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   note: "Paid"
   after: [cert-dli-cuda-cpp]
+  quality: 3
 
 - id: "tutorial-triton-server-tutorials"
   title: "Triton Inference Server Tutorials"
@@ -942,9 +831,10 @@
   estHours: 6
   summary: "Hands-on conceptual guide from first deployment through ensembles, batching and LLM serving."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
+  quality: 3
 
 - id: "tutorial-pytorch-cpp-custom-ops"
   title: "Custom C++ and CUDA Operators"
@@ -964,6 +854,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Custom C++ and CUDA Extensions"
+  quality: 4
 
 - id: "repo-tomesd"
   title: "tomesd: Token Merging for Stable Diffusion"
@@ -979,10 +870,11 @@
   estHours: 3
   summary: "A tiny, readable patch library you can apply to a pipeline in one line and profile yourself."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [paper-token-merging-sd]
+  quality: 3
 
 - id: "repo-teacache"
   title: "TeaCache (official code)"
@@ -998,10 +890,11 @@
   estHours: 4
   summary: "Drop-in timestep-aware caching for FLUX, HunyuanVideo, Wan and others, with ComfyUI nodes, so you can measure speed/quality yourself."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "TeaCache paper"
+  quality: 3
 
 - id: "repo-stable-diffusion-cpp"
   title: "stable-diffusion.cpp"
@@ -1017,10 +910,11 @@
   estHours: 6
   summary: "Pure C/C++ ggml inference for SD1.x to FLUX with GGUF quantization; the llama.cpp of image models to read and hack."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [llama-cpp]
+  quality: 3
 
 - id: "repo-paraattention"
   title: "ParaAttention"
@@ -1036,29 +930,11 @@
   estHours: 4
   summary: "First Block Cache plus context parallelism for FLUX and video DiTs, with clear benchmarks to reproduce."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "torch.compile"
-
-- id: "repo-stable-fast"
-  title: "stable-fast"
-  short: "stable-fast"
-  provider: "Cheng Zeyi"
-  type: "practice"
-  url: "https://github.com/chengzeyi/stable-fast"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "A lightweight Diffusers inference optimizer using CUDA graphs, fused kernels and tracing; useful to see what compilers buy you."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "torch.compile"
+  quality: 3
 
 - id: "repo-flux-fast"
   title: "flux-fast"
@@ -1074,29 +950,11 @@
   estHours: 3
   summary: "A small recipe repo stacking torch.compile, FA3, fp8 quantization and CUDA graphs to make FLUX ~2.5x faster in pure PyTorch."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Accelerating GenAI Pt III"
-
-- id: "repo-onediff"
-  title: "OneDiff"
-  short: "OneDiff"
-  provider: "SiliconFlow"
-  type: "practice"
-  url: "https://github.com/siliconflow/onediff"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "An out-of-the-box compiler-based acceleration library for Diffusers and ComfyUI, a useful comparison point to torch.compile."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "torch.compile"
+  quality: 3
 
 - id: "practice-aiperf"
   title: "AIPerf"
@@ -1112,9 +970,10 @@
   estHours: 4
   summary: "Benchmarking tool for generative-AI endpoints that measures TTFT, ITL and throughput the way serving teams report them."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
+  quality: 3
 
 - id: "practice-triton-backend-api"
   title: "Triton Inference Server Backend"
@@ -1130,10 +989,11 @@
   estHours: 4
   summary: "C API and examples for writing a custom inference backend, showing exactly how a server hands tensors to your code."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-triton-server-architecture]
+  quality: 3
 
 - id: "practice-triton-python-backend"
   title: "Triton Python Backend"
@@ -1149,10 +1009,11 @@
   estHours: 3
   summary: "Lets you serve arbitrary Python models and pre/post-processing; the README explains the IPC and shared-memory design."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-triton-server-architecture]
+  quality: 3
 
 - id: "practice-triton-tensorrtllm-backend"
   title: "TensorRT-LLM Backend for Triton"
@@ -1168,10 +1029,11 @@
   estHours: 3
   summary: "Shows how an LLM engine with in-flight batching is exposed through Triton's decoupled streaming interface."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-trtllm-pytorch-arch-overview]
+  quality: 3
 
 - id: "practice-tlparse"
   title: "tlparse: torch.compile structured log parser"
@@ -1187,10 +1049,11 @@
   estHours: 2
   summary: "Turns TORCH_TRACE logs into browsable reports of graph breaks, recompiles and generated code when debugging compilation."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [article-ezyang-ways-to-use-torch-compile]
+  quality: 3
 
 - id: "repo-q-diffusion"
   title: "Q-Diffusion (official code)"
@@ -1206,11 +1069,12 @@
   estHours: 4
   summary: "Reference implementation of timestep-aware calibration and shortcut-splitting quantization for U-Nets."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-q-diffusion]
+  quality: 3
 
 - id: "repo-deepcompressor"
   title: "DeepCompressor: model compression toolbox (SVDQuant)"
@@ -1226,11 +1090,12 @@
   estHours: 6
   summary: "The quantization side of SVDQuant/Nunchaku; read it to see how 4-bit diffusion checkpoints are actually produced."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-svdquant]
+  quality: 3
 
 - id: "repo-distrifuser"
   title: "DistriFuser (DistriFusion code)"
@@ -1246,10 +1111,11 @@
   estHours: 4
   summary: "Compact multi-GPU SDXL implementation to study patch parallelism and asynchronous communication."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [paper-distrifusion]
+  quality: 3
 
 - id: "repo-ditfastattn"
   title: "DiTFastAttn: Attention Compression for Diffusion Transformer Models"
@@ -1265,11 +1131,12 @@
   estHours: 3
   summary: "Code for window attention plus step/CFG redundancy sharing in DiT attention, a training-free attention speedup."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-sageattention]
+  quality: 3
 
 - id: "practice-nvidia-nccl"
   title: "NCCL (NVIDIA Collective Communications Library)"
@@ -1289,6 +1156,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "NCCL user guide"
+  quality: 5
 
 - id: "paper-lcm-lora"
   title: "LCM-LoRA: A Universal Stable-Diffusion Acceleration Module"
@@ -1304,11 +1172,12 @@
   estHours: 3
   summary: "Shows how few-step consistency distillation can be packaged as a plug-in LoRA that speeds up any fine-tuned Stable Diffusion checkpoint."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-latent-consistency-models]
+  quality: 3
 
 - id: "paper-align-your-steps"
   title: "Align Your Steps: Optimizing Sampling Schedules in Diffusion Models"
@@ -1324,11 +1193,12 @@
   estHours: 3
   summary: "Treats the timestep schedule itself as something to optimize, giving better few-step samples with any solver for free."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-dpm-solver-pp]
+  quality: 3
 
 - id: "paper-token-merging-sd"
   title: "Token Merging for Fast Stable Diffusion"
@@ -1344,11 +1214,12 @@
   estHours: 2
   summary: "A training-free token-reduction trick for U-Net attention; short paper that teaches where diffusion compute actually goes."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   doFirst: "Stable Diffusion basics"
+  quality: 3
 
 - id: "paper-fora"
   title: "FORA: Fast-Forward Caching in Diffusion Transformer Acceleration"
@@ -1364,11 +1235,12 @@
   estHours: 2
   summary: "Simple training-free reuse of attention/MLP outputs across DiT steps; a good first caching paper before TeaCache-style methods."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-deepcache]
+  quality: 3
 
 - id: "paper-torchao"
   title: "TorchAO: PyTorch-Native Training-to-Serving Model Optimization"
@@ -1388,6 +1260,7 @@
   roadmap: "inference-engineering"
   research: "inference"
   tags: [inference]
+  quality: 4
 
 - id: "paper-instaflow"
   title: "InstaFlow: One Step is Enough for High-Quality Diffusion-Based Text-to-Image Generation"
@@ -1403,11 +1276,12 @@
   estHours: 4
   summary: "Applies rectified-flow reflow plus distillation to Stable Diffusion, the clearest case study of straightening trajectories for one-step generation."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [rectified-flow]
+  quality: 3
 
 - id: "paper-sdxl-lightning"
   title: "SDXL-Lightning: Progressive Adversarial Diffusion Distillation"
@@ -1423,11 +1297,12 @@
   estHours: 3
   summary: "Combines progressive distillation with an adversarial loss to reach 1-8 step SDXL, and explains why pure MSE distillation blurs."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-progressive-distillation]
+  quality: 3
 
 - id: "paper-ladd"
   title: "Fast High-Resolution Image Synthesis with Latent Adversarial Diffusion Distillation"
@@ -1443,11 +1318,12 @@
   estHours: 3
   summary: "The latent-space successor to ADD used for SD3-Turbo, removing the pixel-space discriminator bottleneck."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   doFirst: "Adversarial Diffusion Distill."
+  quality: 3
 
 - id: "paper-hyper-sd"
   title: "Hyper-SD: Trajectory Segmented Consistency Model for Efficient Image Synthesis"
@@ -1463,11 +1339,12 @@
   estHours: 3
   summary: "Segments the ODE trajectory for consistency distillation and adds human feedback, a strong reference for 1-8 step LoRAs."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-lcm-lora]
+  quality: 3
 
 - id: "paper-phased-consistency-model"
   title: "Phased Consistency Model"
@@ -1483,11 +1360,12 @@
   estHours: 3
   summary: "Diagnoses why LCMs degrade with CFG and more steps, and fixes it by splitting the trajectory into phases."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-latent-consistency-models]
+  quality: 3
 
 - id: "paper-sana-sprint"
   title: "SANA-Sprint: One-Step Diffusion with Continuous-Time Consistency Distillation"
@@ -1503,11 +1381,12 @@
   estHours: 3
   summary: "A 2025 recipe mixing continuous-time consistency and adversarial distillation to get sub-second 1024px images."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   doFirst: "sCM (continuous-time CMs)"
+  quality: 3
 
 - id: "paper-learning-to-cache"
   title: "Learning-to-Cache: Accelerating Diffusion Transformer via Layer Caching"
@@ -1523,11 +1402,12 @@
   estHours: 3
   summary: "Learns which DiT layers can be skipped and reused per step, contrasting learned with heuristic cache policies."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-fora]
+  quality: 3
 
 - id: "paper-fastercache"
   title: "FasterCache: Training-Free Video Diffusion Model Acceleration with High Quality"
@@ -1543,11 +1423,12 @@
   estHours: 3
   summary: "Extends feature caching to video DiTs and to the CFG branch, now one of the cache modes built into Diffusers."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   doFirst: "TeaCache paper"
+  quality: 3
 
 - id: "paper-q-diffusion"
   title: "Q-Diffusion: Quantizing Diffusion Models"
@@ -1563,11 +1444,12 @@
   estHours: 3
   summary: "The foundational post-training quantization paper for diffusion, explaining why timestep-varying activations break LLM-style PTQ."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   doFirst: "Quantization basics"
+  quality: 3
 
 - id: "paper-ptq4dit"
   title: "PTQ4DiT: Post-training Quantization for Diffusion Transformers"
@@ -1583,11 +1465,12 @@
   estHours: 3
   summary: "Shows how DiT weights and activations differ from U-Nets and how channel balancing makes W8A8 DiTs work."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-q-diffusion]
+  quality: 3
 
 - id: "paper-vidit-q"
   title: "ViDiT-Q: Efficient and Accurate Quantization of Diffusion Transformers for Image and Video Generation"
@@ -1603,11 +1486,12 @@
   estHours: 3
   summary: "Covers mixed-precision quantization for image and video DiTs with real kernel speedups, not just simulated accuracy."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-ptq4dit]
+  quality: 3
 
 - id: "paper-distrifusion"
   title: "DistriFusion: Distributed Parallel Inference for High-Resolution Diffusion Models"
@@ -1628,6 +1512,7 @@
   research: "diffusion"
   tags: [inference]
   doFirst: "DiT paper"
+  quality: 4
 
 - id: "paper-pipefusion"
   title: "PipeFusion: Patch-level Pipeline Parallelism for Diffusion Transformers Inference"
@@ -1643,11 +1528,12 @@
   estHours: 3
   summary: "Pipeline-parallel DiT inference exploiting temporal redundancy between steps; the core idea inside xDiT."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-distrifusion]
+  quality: 3
 
 - id: "paper-asyncdiff"
   title: "AsyncDiff: Parallelizing Diffusion Models by Asynchronous Denoising"
@@ -1663,31 +1549,12 @@
   estHours: 3
   summary: "Splits the denoiser across devices and runs components asynchronously, a different axis from patch parallelism."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "diffusion"
   tags: [inference]
   after: [paper-distrifusion]
-
-- id: "blog-hf-lcm-lora-sdxl"
-  title: "SDXL in 4 steps with Latent Consistency LoRAs"
-  short: "HF: SDXL in 4 steps"
-  provider: "Hugging Face (Cuenca, Patil, Paul et al.)"
-  type: "article"
-  url: "https://huggingface.co/blog/lcm_lora"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Hands-on walkthrough of running and combining LCM-LoRAs in Diffusers, with timings on consumer GPUs."
-  fromYear: 1
-  priority: 1
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [docs-hf-diffusers]
+  quality: 3
 
 - id: "article-nvidia-intro-speculative-decoding"
   title: "An Introduction to Speculative Decoding for Reducing Latency in AI Inference"
@@ -1703,9 +1570,10 @@
   estHours: 1
   summary: "Gentle explainer of draft-and-verify decoding and its variants before diving into engine docs."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
+  quality: 3
 
 - id: "article-nvidia-university-recruiting"
   title: "University Recruiting and Early-Talent Programs | NVIDIA"
@@ -1721,9 +1589,10 @@
   estHours: 1
   summary: "NVIDIA's official page on internships, the Ignite programme and new-grad tracks, so you know the formats and timing you are preparing for."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
+  quality: 2
 
 - id: "blog-nvidia-perf-metrics"
   title: "How to Implement Performance Metrics in CUDA C/C++"
@@ -1739,10 +1608,11 @@
   estHours: 1
   summary: "Timing kernels with CUDA events and computing effective bandwidth and FLOP/s, the basics of any perf discussion."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Even Easier Intro to CUDA"
+  quality: 3
 
 - id: "blog-nvidia-device-properties-errors"
   title: "How to Query Device Properties and Handle Errors in CUDA C/C++"
@@ -1758,10 +1628,11 @@
   estHours: 1
   summary: "Shows proper error checking and device queries, habits interviewers look for in any CUDA code you write."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Even Easier Intro to CUDA"
+  quality: 3
 
 - id: "article-hanlab-svdquant"
   title: "SVDQuant: Accurate 4-Bit Quantization Powers 12B FLUX on a 16GB 4090 Laptop with 3x Speedup"
@@ -1777,29 +1648,11 @@
   estHours: 1
   summary: "An accessible illustrated explanation of the low-rank outlier branch and the Nunchaku kernel fusion behind it."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [paper-svdquant]
-
-- id: "article-hf-diffusers-quantization"
-  title: "Exploring Quantization Backends in Diffusers"
-  short: "HF: quant backends"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/blog/diffusers-quantization"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Side-by-side comparison of bitsandbytes, torchao, GGUF and Quanto on FLUX with memory and latency numbers."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-hf-diffusers]
+  quality: 3
 
 - id: "article-trtllm-ngram-spec-decoding"
   title: "N-Gram Speculative Decoding in TensorRT LLM"
@@ -1815,86 +1668,11 @@
   estHours: 1
   summary: "Data-driven analysis of when draft-free n-gram speculation pays off and how to enable it automatically."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-trtllm-speculative-decoding]
-
-- id: "article-trtllm-cuda-graph-batch-sizes"
-  title: "Tuning CUDA Graph Batch Sizes for Higher Output Throughput"
-  short: "CUDA graph batch sizes"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog20_Tuning_CUDA_Graph_Batch_Sizes_for_Higher_Output_Throughput.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Shows why the set of captured CUDA graph sizes matters for decode throughput and how to choose it."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "CUDA graphs in PyTorch"
-
-- id: "article-nvidia-trtllm-spec-decoding-3x"
-  title: "TensorRT-LLM Speculative Decoding Boosts Inference Throughput by up to 3.6x"
-  short: "TRT-LLM spec decode 3.6x"
-  provider: "NVIDIA Technical Blog"
-  type: "article"
-  url: "https://developer.nvidia.com/blog/tensorrt-llm-speculative-decoding-boosts-inference-throughput-by-up-to-3-6x/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Benchmarks draft-target speculation with real model pairs and shows how batch size changes the payoff."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [article-nvidia-intro-speculative-decoding]
-
-- id: "article-nvidia-llama33-spec-decoding"
-  title: "Boost Llama 3.3 70B Inference Throughput 3x with NVIDIA TensorRT-LLM Speculative Decoding"
-  short: "Llama 3.3 spec decoding"
-  provider: "NVIDIA Technical Blog"
-  type: "article"
-  url: "https://developer.nvidia.com/blog/boost-llama-3-3-70b-inference-throughput-3x-with-nvidia-tensorrt-llm-speculative-decoding"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Worked example comparing draft model sizes and lookahead settings for a 70B deployment."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [article-nvidia-intro-speculative-decoding]
-
-- id: "article-nvidia-dynamo-llm-d"
-  title: "NVIDIA Dynamo Accelerates llm-d Community Initiatives for Advancing Large-Scale Distributed Inference"
-  short: "Dynamo and llm-d"
-  provider: "NVIDIA Technical Blog"
-  type: "article"
-  url: "https://developer.nvidia.com/blog/nvidia-dynamo-accelerates-llm-d-community-initiatives-for-advancing-large-scale-distributed-inference"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how Dynamo pieces such as NIXL plug into the Kubernetes-native llm-d stack."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-nvidia-dynamo]
+  quality: 3
 
 - id: "article-ezyang-ways-to-use-torch-compile"
   title: "Ways to use torch.compile"
@@ -1914,6 +1692,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "torch.compiler docs"
+  quality: 4
 
 - id: "blog-nvidia-occupancy-api"
   title: "CUDA Pro Tip: Occupancy API Simplifies Launch Configuration"
@@ -1929,10 +1708,11 @@
   estHours: 1
   summary: "Explains occupancy and how to choose block sizes with the runtime API, a standard CUDA interview topic."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Even Easier Intro to CUDA"
+  quality: 3
 
 - id: "blog-leimao-shared-memory-bank"
   title: "CUDA Shared Memory Bank"
@@ -1952,6 +1732,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Using Shared Memory"
+  quality: 4
 
 - id: "blog-leimao-coalesced-access"
   title: "CUDA Coalesced Memory Access"
@@ -1967,9 +1748,10 @@
   estHours: 1
   summary: "Measures coalesced vs strided global memory access so you can explain the effect with numbers, not slogans."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
+  quality: 3
 
 - id: "blog-leimao-occupancy-calculation"
   title: "CUDA Occupancy Calculation"
@@ -1985,10 +1767,11 @@
   estHours: 1
   summary: "Works through computing occupancy by hand from registers, shared memory and block size limits."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [blog-nvidia-occupancy-api]
+  quality: 3
 
 - id: "article-dieleman-paradox-distillation"
   title: "The paradox of diffusion distillation"
@@ -2009,6 +1792,7 @@
   research: "diffusion"
   tags: [inference]
   doFirst: "Perspectives on diffusion"
+  quality: 4
 
 - id: "article-dieleman-flow-maps"
   title: "Learning the integral of a diffusion model"
@@ -2029,6 +1813,7 @@
   research: "diffusion"
   tags: [inference]
   after: [article-dieleman-paradox-distillation]
+  quality: 4
 
 - id: "article-trtllm-deepseek-r1-mtp"
   title: "DeepSeek R1 MTP Implementation and Optimization"
@@ -2044,10 +1829,11 @@
   estHours: 2
   summary: "Concrete look at implementing multi-token prediction as speculative decoding inside a real engine, with acceptance-rate tuning."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-trtllm-speculative-decoding]
+  quality: 3
 
 - id: "article-trtllm-deepseek-r1-throughput-blackwell"
   title: "Optimizing DeepSeek R1 Throughput on NVIDIA Blackwell GPUs: A Deep Dive for Developers"
@@ -2067,6 +1853,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-trtllm-parallelism]
+  quality: 4
 
 - id: "article-trtllm-guided-plus-spec-decoding"
   title: "Combining Guided Decoding and Speculative Decoding: Making CPU and GPU Cooperate Seamlessly"
@@ -2082,28 +1869,11 @@
   estHours: 2
   summary: "Shows the CPU/GPU synchronization problems that arise when grammar masks meet speculative drafts and how they were solved."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "XGrammar paper"
-
-- id: "article-trtllm-inference-time-compute"
-  title: "Inference Time Compute Implementation in TensorRT LLM"
-  short: "TRT-LLM test-time compute"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog13_Inference_Time_Compute_Implementation_in_TensorRT-LLM.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Describes a framework for running best-of-N and other test-time scaling methods efficiently on top of a serving engine."
-  fromYear: 3
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
+  quality: 3
 
 - id: "article-trtllm-skip-softmax-attention"
   title: "Accelerating Long-Context Inference with Skip Softmax Attention"
@@ -2119,10 +1889,11 @@
   estHours: 2
   summary: "Explains a training-free sparse attention trick that skips negligible blocks inside the attention kernel for long contexts."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "FlashAttention-2 paper"
+  quality: 3
 
 - id: "article-trtllm-sparse-attention"
   title: "Sparse Attention in TensorRT LLM"
@@ -2138,10 +1909,11 @@
   estHours: 2
   summary: "Surveys how sparse attention methods are integrated into a production runtime, including KV cache and kernel implications."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-trtllm-attention]
+  quality: 3
 
 - id: "article-trtllm-moe-as-dense-gemm"
   title: "MoE as Dense GEMM: Optimizing Low-Latency MoE Inference on NVIDIA Blackwell"
@@ -2157,10 +1929,11 @@
   estHours: 2
   summary: "Kernel-level case study of reformulating small-batch MoE as dense GEMMs to win at low-latency decode."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [paper-megablocks]
+  quality: 3
 
 - id: "article-trtllm-kv-cache-compression"
   title: "KV Cache Compression in TensorRT LLM"
@@ -2176,10 +1949,11 @@
   estHours: 2
   summary: "Recent look at compressing KV cache in a production engine and the accuracy/memory trade-offs involved."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-trtllm-kv-cache-system]
+  quality: 3
 
 - id: "article-trtllm-deepseek-v32-blackwell"
   title: "Optimizing DeepSeek-V3.2 on NVIDIA Blackwell GPUs"
@@ -2195,48 +1969,11 @@
   estHours: 2
   summary: "Shows how a sparse-attention model (DSA indexer plus MLA) is mapped onto Blackwell kernels and the runtime."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [article-trtllm-deepseek-r1-throughput-blackwell]
-
-- id: "article-nvidia-redrafter-trtllm"
-  title: "NVIDIA TensorRT-LLM Now Supports Recurrent Drafting for Optimizing LLM Inference"
-  short: "ReDrafter in TRT-LLM"
-  provider: "NVIDIA Technical Blog"
-  type: "article"
-  url: "https://developer.nvidia.com/blog/nvidia-tensorrt-llm-now-supports-recurrent-drafting-for-optimizing-llm-inference"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how beam-search-style drafting and tree verification were moved fully on-GPU inside the engine."
-  fromYear: 3
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [paper-redrafter]
-
-- id: "article-nvidia-nccl-2-27"
-  title: "Enabling Fast Inference and Resilient Training with NCCL 2.27"
-  short: "NCCL 2.27 for inference"
-  provider: "NVIDIA Technical Blog"
-  type: "article"
-  url: "https://developer.nvidia.com/blog/enabling-fast-inference-and-resilient-training-with-nccl-2-27"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Covers the low-latency collective kernels and symmetric memory added for small-message tensor-parallel inference."
-  fromYear: 3
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "NCCL user guide"
+  quality: 3
 
 - id: "article-nvidia-low-latency-comm-jax"
   title: "Optimizing for Low-Latency Communication in Inference Workloads with JAX and XLA"
@@ -2252,10 +1989,11 @@
   estHours: 1
   summary: "Shows why decode all-reduces are latency-bound and how custom one-shot collectives beat ring algorithms."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "NCCL user guide"
+  quality: 3
 
 - id: "article-umd-beyond-nccl"
   title: "Beyond NCCL: Faster Inter-Node All-Reduce for Decode-Heavy LLM Inference"
@@ -2271,10 +2009,11 @@
   estHours: 1
   summary: "Research-group write-up measuring multi-node all-reduce latency in decode and a faster alternative design."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "NCCL user guide"
+  quality: 3
 
 - id: "article-dynamo-flash-indexer"
   title: "Flash Indexer: A Story of Inter-Galactic KV Routing"
@@ -2290,10 +2029,11 @@
   estHours: 2
   summary: "Data-structure design story of a concurrent global prefix index that tracks KV blocks across a whole cluster."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-dynamo-router-design]
+  quality: 3
 
 - id: "article-dynamo-agentic-inference"
   title: "Full-Stack Optimizations for Agentic Inference with Dynamo"
@@ -2309,10 +2049,11 @@
   estHours: 1
   summary: "Shows how multi-turn agent workloads change caching, routing and offload decisions in a serving stack."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-dynamo-architecture]
+  quality: 3
 
 - id: "article-dynamo-dynosim"
   title: "DynoSim: Simulating the Pareto Frontier"
@@ -2328,10 +2069,11 @@
   estHours: 1
   summary: "Explains simulating serving configurations to find throughput-latency Pareto points without burning GPU hours."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-dynamo-architecture]
+  quality: 3
 
 - id: "article-pytorch-triton-moe-grouped-gemm"
   title: "Accelerating MoE's with a Triton Persistent Cache-Aware Grouped GEMM Kernel"
@@ -2347,10 +2089,11 @@
   estHours: 1
   summary: "Walks through writing a persistent grouped GEMM in Triton with cache-aware tile ordering for MoE layers."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [tutorial-triton-server-tutorials]
+  quality: 3
 
 - id: "article-pytorch-accelerating-moe-model"
   title: "Accelerating MoE model inference with Locality-Aware Kernel Design"
@@ -2366,12 +2109,13 @@
   estHours: 1
   summary: "Shows how column-major tile scheduling and SplitK improve a Triton fused MoE kernel at small batch sizes."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [tutorial-triton-server-tutorials]
 
 # ---- AI, ML, LLMs and agents (153)
+  quality: 3
 
 - id: "docs-comfyui"
   title: "ComfyUI Official Documentation"
@@ -2387,8 +2131,9 @@
   estHours: 5
   summary: "Install, interface, built-in node reference and workflow tutorials for image, video and audio models."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "docs-overleaf-learn-latex-30-min"
   title: "Learn LaTeX in 30 minutes"
@@ -2406,24 +2151,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
-
-- id: "docs-overleaf-bibtex"
-  title: "Bibliography management with bibtex"
-  short: "Overleaf: BibTeX"
-  provider: "Overleaf"
-  type: "article"
-  url: "https://www.overleaf.com/learn/latex/Bibliography_management_with_bibtex"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "How to manage citations with BibTeX and natbib, a skill every paper draft needs."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [docs-overleaf-learn-latex-30-min]
+  quality: 3
 
 - id: "tool-semantic-scholar"
   title: "Semantic Scholar"
@@ -2441,6 +2169,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "tool-connected-papers"
   title: "Connected Papers"
@@ -2456,10 +2185,11 @@
   estHours: 1
   summary: "Builds a visual similarity graph around a seed paper so you can find prior and derivative work fast."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Free tier"
   after: [tool-semantic-scholar]
+  quality: 3
 
 - id: "docs-diffusers-video-generation"
   title: "Video generation (Diffusers guide)"
@@ -2475,27 +2205,10 @@
   estHours: 2
   summary: "Quick practical tour of running Wan, HunyuanVideo, LTX-Video and CogVideoX with offloading, quantization and torch.compile."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-hf-diffusers]
-
-- id: "docs-comfyui-custom-nodes"
-  title: "ComfyUI Custom Node Types and Architecture"
-  short: "ComfyUI custom nodes"
-  provider: "Comfy Org"
-  type: "article"
-  url: "https://docs.comfy.org/custom-nodes/overview"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Explains the Python server / JS client split so you can extend ComfyUI with your own samplers or tools."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [docs-comfyui]
+  quality: 3
 
 - id: "docs-diffusers-train-lora"
   title: "LoRA training (Diffusers docs)"
@@ -2511,45 +2224,10 @@
   estHours: 2
   summary: "Walks through the text-to-image LoRA script line by line, your first fine-tune on a single GPU."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-hf-diffusers]
-
-- id: "docs-diffusers-train-dreambooth"
-  title: "DreamBooth training (Diffusers docs)"
-  short: "Diffusers: DreamBooth"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/training/dreambooth"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Practical subject-personalization guide with prior preservation, memory tricks and LoRA/SDXL variants."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  doFirst: "DreamBooth paper"
-
-- id: "docs-diffusers-train-textual-inversion"
-  title: "Textual Inversion training (Diffusers docs)"
-  short: "Diffusers: text. inversion"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/training/text_inversion"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Learn a new token embedding from a handful of images, the cheapest personalization method to try."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [docs-hf-diffusers]
+  quality: 3
 
 - id: "docs-diffusers-train-controlnet"
   title: "ControlNet training (Diffusers docs)"
@@ -2565,9 +2243,10 @@
   estHours: 2
   summary: "Shows how to train a ControlNet for a new condition type, including the SDXL variant."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "ControlNet paper"
+  quality: 3
 
 - id: "docs-transformers-add-new-model"
   title: "How to add a model to Transformers"
@@ -2583,9 +2262,10 @@
   estHours: 6
   summary: "Hugging Face's full workflow for porting a model, including matching outputs against the original implementation."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-transformers-contributing]
+  quality: 3
 
 - id: "docs-neurips-paper-checklist"
   title: "NeurIPS Paper Checklist Guidelines"
@@ -2603,6 +2283,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "docs-neurips-2025-reviewer-guidelines"
   title: "NeurIPS 2025 Reviewer Guidelines"
@@ -2621,6 +2302,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [docs-neurips-paper-checklist]
+  quality: 4
 
 - id: "docs-iclr-2025-reviewer-guide"
   title: "ICLR 2025 Reviewer Guide"
@@ -2636,9 +2318,10 @@
   estHours: 1
   summary: "A step-by-step guide to writing a useful review, and good practice for critically reading any paper."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [keshav-how-to-read]
+  quality: 3
 
 - id: "docs-arxiv-submission-guidelines"
   title: "arXiv Submission Guidelines"
@@ -2654,45 +2337,10 @@
   estHours: 1
   summary: "Walks through preparing and submitting a preprint, including formats, metadata, licensing and moderation."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-overleaf-learn-latex-30-min]
-
-- id: "docs-arxiv-endorsement"
-  title: "arXiv Endorsement"
-  short: "arXiv Endorsement"
-  provider: "arXiv"
-  type: "article"
-  url: "https://info.arxiv.org/help/endorsement.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Explains the endorsement system that first-time and unaffiliated authors must clear before posting to cs categories."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [docs-arxiv-submission-guidelines]
-
-- id: "docs-diffusers-wan-pipeline"
-  title: "Wan pipelines (Diffusers API docs)"
-  short: "Diffusers Wan docs"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/api/pipelines/wan"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Reference for T2V, I2V, first-last-frame, VACE and Wan-Animate pipelines plus practical frame-count and shift tips."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [docs-diffusers-video-generation]
+  quality: 3
 
 - id: "video-spj-great-research-talk"
   title: "How to Give a Great Research Talk"
@@ -2711,6 +2359,7 @@
   priority: 1
   roadmap: "ai-engineer"
   doFirst: "How to Write a Great Research Paper"
+  quality: 4
 
 - id: "cert-nvidia-nca-genl"
   title: "NVIDIA-Certified Associate: Generative AI LLMs (NCA-GENL)"
@@ -2726,10 +2375,11 @@
   estHours: 40
   summary: "Entry-level NVIDIA credential proving you understand LLM fundamentals, prompting, fine-tuning basics and NVIDIA's GenAI stack; the official listing puts the 1-hour exam at US$125."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   doFirst: "Deep Learning Specialization"
+  quality: 3
 
 - id: "cert-dli-getting-started-dl"
   title: "Getting Started with Deep Learning (DLI)"
@@ -2745,10 +2395,11 @@
   estHours: 8
   summary: "Hands-on GPU deep learning course ending in an assessed NVIDIA certificate; useful as a quick, recognisable DL credential, listed at US$90."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   doFirst: "Python"
+  quality: 3
 
 - id: "cert-coursera-ibm-ai-engineering"
   title: "IBM AI Engineering Professional Certificate"
@@ -2764,10 +2415,11 @@
   estHours: 160
   summary: "A long IBM program running from classic ML through deep learning, transformers, RAG and agents; the certificate shows applied breadth (Coursera subscription)."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   note: "Paid"
   doFirst: "Python"
+  quality: 2
 
 - id: "cert-hf-agents-course"
   title: "Hugging Face Agents Course: Certificate of Excellence"
@@ -2783,9 +2435,10 @@
   estHours: 40
   summary: "Free certificate for passing the Agents Course final unit, showing you can build and evaluate tool-using agents with smolagents, LlamaIndex and LangGraph."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   doFirst: "HF LLM Course"
+  quality: 2
 
 - id: "cert-aws-ai-practitioner"
   title: "AWS Certified AI Practitioner"
@@ -2801,10 +2454,11 @@
   estHours: 20
   summary: "Foundational AWS exam on AI/ML and generative-AI concepts and the AWS services built on them; a light first cloud-AI badge."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   doFirst: "AWS Cloud Practitioner"
+  quality: 2
 
 - id: "course-stanford-cs197-cs-research"
   title: "CS197: Computer Science Research"
@@ -2822,6 +2476,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "cert-nvidia-ncp-genl"
   title: "NVIDIA-Certified Professional: Generative AI LLMs (NCP-GENL)"
@@ -2841,6 +2496,7 @@
   roadmap: "ai-engineer"
   note: "Paid"
   after: [cert-nvidia-nca-genl]
+  quality: 3
 
 - id: "cert-nvidia-nca-genm"
   title: "NVIDIA-Certified Associate: Generative AI Multimodal (NCA-GENM)"
@@ -2856,10 +2512,11 @@
   estHours: 40
   summary: "Associate credential covering multimodal generative models (image, audio, text-vision) on NVIDIA platforms; 1-hour exam listed at US$125."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   after: [cert-nvidia-nca-genl]
+  quality: 2
 
 - id: "cert-nvidia-nca-amad"
   title: "NVIDIA-Certified Associate: AI Models and Application Development (NCA-AMAD)"
@@ -2875,10 +2532,11 @@
   estHours: 40
   summary: "Associate credential for building applications on top of AI models with NVIDIA's developer stack; 1-hour exam listed at US$125."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   after: [cert-nvidia-nca-genl]
+  quality: 3
 
 - id: "cert-coursera-genai-llms"
   title: "Generative AI with Large Language Models"
@@ -2894,10 +2552,11 @@
   estHours: 17
   summary: "Shareable Coursera certificate showing you understand the LLM lifecycle: pretraining, fine-tuning, RLHF and deployment trade-offs; Coursera subscription required for the certificate."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   doFirst: "Deep Learning Specialization"
+  quality: 3
 
 - id: "cert-coursera-pytorch-dl"
   title: "PyTorch for Deep Learning Professional Certificate"
@@ -2913,10 +2572,11 @@
   estHours: 60
   summary: "DeepLearning.AI's professional certificate in building, training and deploying PyTorch models; a recognisable framework credential (Coursera subscription)."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   doFirst: "Deep Learning Specialization"
+  quality: 3
 
 - id: "cert-hf-deep-rl-course"
   title: "Hugging Face Deep RL Course Certification"
@@ -2932,9 +2592,10 @@
   estHours: 60
   summary: "Free completion and honors certificates for training and uploading RL agents across the course units, useful for the robotics track."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   doFirst: "Deep Learning Specialization"
+  quality: 2
 
 - id: "cert-ms-ai-103"
   title: "Exam AI-103: Developing AI Apps and Agents on Azure"
@@ -2950,10 +2611,11 @@
   estHours: 50
   summary: "Microsoft's current Azure AI developer exam, replacing the retired AI-102; it shows you can build generative-AI apps and agents on Azure AI Foundry."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   note: "Paid"
   after: [cert-aws-ai-practitioner]
+  quality: 2
 
 - id: "program-eleutherai-soar"
   title: "Summer of Open AI Research (SOAR)"
@@ -2969,9 +2631,10 @@
   estHours: 100
   summary: "A fully online summer program pairing beginners, including self-taught researchers, with mentors on publishable open-science projects."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [course-stanford-cs197-cs-research]
+  quality: 3
 
 - id: "program-ml-collective"
   title: "ML Collective"
@@ -2987,8 +2650,9 @@
   estHours: 20
   summary: "A free, open research community offering mentorship, reading groups, research jams and compute help for unaffiliated researchers."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "cert-nvidia-ncp-aai"
   title: "NVIDIA-Certified Professional: Agentic AI (NCP-AAI)"
@@ -3004,10 +2668,11 @@
   estHours: 60
   summary: "Shows you can architect, build and evaluate agentic AI systems with NVIDIA tooling; 2-hour professional exam listed at US$200."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   note: "Paid"
   after: [cert-hf-agents-course]
+  quality: 3
 
 - id: "program-cohere-labs-scholars"
   title: "Cohere Labs Scholars Program"
@@ -3026,6 +2691,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [course-stanford-cs197-cs-research]
+  quality: 4
 
 - id: "program-mats"
   title: "MATS Research Fellowship"
@@ -3044,6 +2710,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [article-nanda-explore-understand-distill]
+  quality: 4
 
 - id: "book-good-research-code-handbook"
   title: "The Good Research Code Handbook"
@@ -3061,6 +2728,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "book-craft-of-research-5e"
   title: "The Craft of Research, Fifth Edition"
@@ -3079,6 +2747,7 @@
   priority: 1
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 4
 
 - id: "book-ml-system-design-interview"
   title: "Machine Learning System Design Interview"
@@ -3094,10 +2763,11 @@
   estHours: 12
   summary: "Ten end-to-end ML design case studies (search, recommendations, ads, harmful content) in a consistent interview framework."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   after: [hi-ml-system-design-intro]
+  quality: 3
 
 - id: "book-writing-science-schimel"
   title: "Writing Science: How to Write Papers That Get Cited and Proposals That Get Funded"
@@ -3117,41 +2787,7 @@
   roadmap: "ai-engineer"
   note: "Paid"
   doFirst: "Ten simple rules for structuring papers"
-
-- id: "tutorial-comfyui-text-to-image"
-  title: "ComfyUI Text to Image Workflow"
-  short: "ComfyUI: text-to-image"
-  provider: "Comfy Org"
-  type: "article"
-  url: "https://docs.comfy.org/tutorials/basic/text-to-image"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Maps each core node (checkpoint, CLIP encode, KSampler, VAE decode) onto the diffusion pipeline it implements."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [docs-comfyui]
-
-- id: "tutorial-comfyui-wan-examples"
-  title: "Wan 2.1 Models (ComfyUI examples)"
-  short: "ComfyUI Wan examples"
-  provider: "comfyanonymous"
-  type: "article"
-  url: "https://comfyanonymous.github.io/ComfyUI_examples/wan/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Ready-to-load ComfyUI workflows for text-to-video, image-to-video, VACE and camera control with Wan."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
+  quality: 4
 
 - id: "tutorial-comfyui-custom-node-walkthrough"
   title: "Creating Custom Nodes in ComfyUI"
@@ -3167,9 +2803,9 @@
   estHours: 2
   summary: "Step-by-step build of a working custom node, the shortest path to wiring your own research code into a UI."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-  after: [docs-comfyui-custom-nodes]
+  quality: 3
 
 - id: "hi-ml-video-recommendations"
   title: "Video Recommendations (ML System Design Breakdown)"
@@ -3185,9 +2821,10 @@
   estHours: 1
   summary: "A worked recommender-system design answer covering candidate generation, ranking, features and evaluation."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [hi-ml-system-design-intro]
+  quality: 2
 
 - id: "repo-comfyui"
   title: "ComfyUI"
@@ -3206,6 +2843,7 @@
   priority: 1
   roadmap: "ai-engineer"
   doFirst: "Illustrated Stable Diffusion"
+  quality: 4
 
 - id: "repo-comfyui-examples"
   title: "ComfyUI Examples"
@@ -3221,26 +2859,10 @@
   estHours: 4
   summary: "Drag-and-drop example workflows for LoRA, ControlNet, inpainting, upscaling, SDXL, SD3 and FLUX."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-comfyui]
-
-- id: "repo-a1111-webui"
-  title: "Stable Diffusion web UI (AUTOMATIC1111)"
-  short: "A1111 web UI"
-  provider: "AUTOMATIC1111"
-  type: "practice"
-  url: "https://github.com/AUTOMATIC1111/stable-diffusion-webui"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 6
-  summary: "The classic Gradio front-end; its source and extension ecosystem show how samplers, LoRAs and hires-fix are glued together."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
+  quality: 3
 
 - id: "repo-arxiv-sanity-lite"
   title: "arxiv-sanity-lite"
@@ -3256,26 +2878,9 @@
   estHours: 3
   summary: "Self-host Karpathy's tool to tag papers and get SVM-ranked arXiv recommendations; also a small, readable codebase."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-
-- id: "repo-comfyui-wanvideowrapper"
-  title: "ComfyUI-WanVideoWrapper"
-  short: "ComfyUI Wan wrapper"
-  provider: "kijai"
-  type: "practice"
-  url: "https://github.com/kijai/ComfyUI-WanVideoWrapper"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "The go-to ComfyUI node pack for running Wan-family models with block swapping, VACE and many community add-ons."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [tutorial-comfyui-wan-examples]
+  quality: 3
 
 - id: "repo-controlnet"
   title: "ControlNet (official code)"
@@ -3294,6 +2899,7 @@
   priority: 1
   roadmap: "ai-engineer"
   doFirst: "ControlNet paper"
+  quality: 4
 
 - id: "repo-kohya-sd-scripts"
   title: "sd-scripts"
@@ -3309,9 +2915,10 @@
   estHours: 8
   summary: "The community-standard trainer for LoRA, DreamBooth and full fine-tunes of SD/SDXL/SD3/FLUX."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-diffusers-train-lora]
+  quality: 3
 
 - id: "repo-ai-toolkit"
   title: "AI Toolkit"
@@ -3327,9 +2934,10 @@
   estHours: 6
   summary: "Config-driven LoRA and fine-tuning suite popular for FLUX, Qwen-Image and video models, with a web UI."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-diffusers-train-lora]
+  quality: 3
 
 - id: "repo-black-forest-labs-flux"
   title: "FLUX.1 (official inference repo)"
@@ -3345,9 +2953,10 @@
   estHours: 4
   summary: "Minimal reference code for the FLUX.1 family; reading the sampling loop clarifies rectified-flow DiT inference."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "Scaling Rectified Flow"
+  quality: 3
 
 - id: "repo-sd3-5"
   title: "Stable Diffusion 3.5 (reference implementation)"
@@ -3363,9 +2972,10 @@
   estHours: 3
   summary: "Lean inference reference for SD3.5 MMDiT, including text encoders and sampler code."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "Scaling Rectified Flow"
+  quality: 3
 
 - id: "repo-qwen-image"
   title: "Qwen-Image"
@@ -3381,9 +2991,10 @@
   estHours: 3
   summary: "Open weights and code for the Qwen-Image generation and editing models."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-qwen-image]
+  quality: 3
 
 - id: "repo-geneval"
   title: "GenEval (benchmark code)"
@@ -3399,9 +3010,10 @@
   estHours: 3
   summary: "Run the benchmark on your own model or fine-tune to get numbers comparable to published reports."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-geneval]
+  quality: 3
 
 - id: "repo-ml-system-design-case-studies"
   title: "A Curated List of ML System Design Case Studies"
@@ -3417,9 +3029,10 @@
   estHours: 20
   summary: "300+ real company write-ups of production ML systems, grouped by domain, to ground ML design answers in reality."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [hi-ml-system-design-intro]
+  quality: 2
 
 - id: "repo-releasing-research-code"
   title: "Tips for Publishing Research Code (ML Code Completeness Checklist)"
@@ -3435,9 +3048,10 @@
   estHours: 1
   summary: "A checklist and README template for releasing reproducible research code that others will actually use."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "Good Research Code Handbook"
+  quality: 3
 
 - id: "repo-hunyuanvideo-1-5"
   title: "HunyuanVideo-1.5: lightweight video generation model"
@@ -3453,9 +3067,10 @@
   estHours: 6
   summary: "A smaller 8B-class open video model that runs on consumer GPUs, good for hands-on experiments with modern video DiTs."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [repo-hunyuanvideo]
+  quality: 3
 
 - id: "repo-lightricks-ltx-video"
   title: "LTX-Video (official repository)"
@@ -3471,9 +3086,10 @@
   estHours: 6
   summary: "The fastest family of open video DiTs; its configs and distilled checkpoints are a practical way to iterate quickly on a single GPU."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "LTX-Video paper"
+  quality: 3
 
 - id: "repo-cogvideo"
   title: "CogVideo & CogVideoX (official code)"
@@ -3489,9 +3105,10 @@
   estHours: 8
   summary: "Well-documented open T2V/I2V models with SAT and diffusers training scripts, a common starting point for LoRA fine-tuning."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "CogVideoX paper"
+  quality: 3
 
 - id: "repo-animatediff"
   title: "AnimateDiff (official code)"
@@ -3507,9 +3124,10 @@
   estHours: 5
   summary: "Plug a motion module into personalized Stable Diffusion checkpoints and learn how temporal layers are trained separately."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "AnimateDiff paper"
+  quality: 3
 
 - id: "repo-stability-generative-models"
   title: "Generative Models by Stability AI (SVD, SV3D, SV4D code)"
@@ -3525,9 +3143,10 @@
   estHours: 8
   summary: "Official inference and sampling code for Stable Video Diffusion plus the SV3D/SV4D multi-view video models."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "SVD paper"
+  quality: 3
 
 - id: "repo-liveportrait"
   title: "LivePortrait: Efficient Portrait Animation with Stitching and Retargeting Control"
@@ -3543,8 +3162,9 @@
   estHours: 4
   summary: "A fast, non-diffusion keypoint-based face animation system that is fun to run and shows where implicit-keypoint methods still win."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "repo-diffsynth-studio"
   title: "DiffSynth-Studio"
@@ -3560,9 +3180,10 @@
   estHours: 8
   summary: "Unified engine for inference and full/LoRA training of Wan, HunyuanVideo, CogVideoX and image models with low-VRAM tricks."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-diffusers-video-generation]
+  quality: 3
 
 - id: "repo-finetrainers"
   title: "finetrainers: training library for video diffusion models"
@@ -3578,9 +3199,10 @@
   estHours: 6
   summary: "Diffusers-based scripts for LoRA and full fine-tuning of LTX-Video, HunyuanVideo, Wan and CogVideoX with parallelism options."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-diffusers-video-generation]
+  quality: 3
 
 - id: "repo-diffusion-pipe"
   title: "diffusion-pipe: pipeline-parallel training for diffusion models"
@@ -3596,27 +3218,10 @@
   estHours: 5
   summary: "Popular LoRA trainer that shards large video models (Wan, HunyuanVideo, LTX) across GPUs with DeepSpeed pipeline parallelism."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [repo-finetrainers]
-
-- id: "repo-musubi-tuner"
-  title: "Musubi Tuner"
-  short: "Musubi Tuner"
-  provider: "kohya-ss"
-  type: "practice"
-  url: "https://github.com/kohya-ss/musubi-tuner"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 5
-  summary: "Memory-efficient LoRA training for HunyuanVideo, Wan and FramePack with latent and text-encoder pre-caching."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [repo-finetrainers]
+  quality: 3
 
 - id: "repo-latte-video"
   title: "Latte: Latent Diffusion Transformer for Video Generation (code)"
@@ -3632,27 +3237,10 @@
   estHours: 5
   summary: "Compact, readable training and sampling code for a video DiT; small enough to study before the giant open models."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "DiT paper"
-
-- id: "repo-videocrafter"
-  title: "VideoCrafter: open diffusion models for video generation"
-  short: "VideoCrafter repo"
-  provider: "Tencent AI Lab (AILab-CVC)"
-  type: "practice"
-  url: "https://github.com/AILab-CVC/VideoCrafter"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "UNet-era text-to-video and image-to-video baselines that are still handy for cheap experiments and ablations."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [paper-video-diffusion-models]
+  quality: 3
 
 - id: "repo-simpletuner"
   title: "SimpleTuner"
@@ -3668,10 +3256,11 @@
   estHours: 8
   summary: "A research-friendly trainer with documented recipes for many diffusion architectures, multi-GPU and aspect bucketing."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   after: [repo-kohya-sd-scripts]
+  quality: 3
 
 - id: "repo-wan-video-wan22"
   title: "Wan2.2: Open and Advanced Large-Scale Video Generative Models (code)"
@@ -3690,6 +3279,7 @@
   priority: 1
   roadmap: "ai-engineer"
   doFirst: "Wan paper"
+  quality: 4
 
 - id: "repo-hunyuanvideo"
   title: "HunyuanVideo (official code)"
@@ -3708,25 +3298,7 @@
   priority: 1
   roadmap: "ai-engineer"
   doFirst: "HunyuanVideo paper"
-
-- id: "repo-hunyuanvideo-i2v"
-  title: "HunyuanVideo-I2V: image-to-video generation"
-  short: "HunyuanVideo-I2V"
-  provider: "Tencent Hunyuan"
-  type: "practice"
-  url: "https://github.com/Tencent/HunyuanVideo-I2V"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Shows how an image-conditioning path and LoRA effects training are bolted onto a text-to-video base model."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [repo-hunyuanvideo]
+  quality: 4
 
 - id: "repo-lightricks-ltx-2"
   title: "LTX-2: joint audio-video generation model (code)"
@@ -3742,10 +3314,11 @@
   estHours: 6
   summary: "Open audio+video foundation model with training and inference code, useful for seeing how synchronized sound is added to video diffusion."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   after: [repo-lightricks-ltx-video]
+  quality: 3
 
 - id: "repo-open-sora"
   title: "Open-Sora (code)"
@@ -3764,6 +3337,7 @@
   priority: 1
   roadmap: "ai-engineer"
   doFirst: "Open-Sora paper"
+  quality: 4
 
 - id: "repo-open-sora-plan"
   title: "Open-Sora Plan (code)"
@@ -3779,10 +3353,11 @@
   estHours: 8
   summary: "A second fully open video generation stack with its own wavelet VAE and training recipes to compare against Open-Sora."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "Open-Sora Plan paper"
+  quality: 3
 
 - id: "repo-causvid"
   title: "CausVid: fast autoregressive video diffusion (code)"
@@ -3798,10 +3373,11 @@
   estHours: 6
   summary: "Code for distilling a bidirectional video DiT into a few-step causal generator that streams frames in real time."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "CausVid paper"
+  quality: 3
 
 - id: "repo-self-forcing"
   title: "Self Forcing (official code)"
@@ -3820,6 +3396,7 @@
   priority: 1
   roadmap: "ai-engineer"
   doFirst: "Self Forcing paper"
+  quality: 4
 
 - id: "repo-diffusion-forcing"
   title: "Diffusion Forcing (official code)"
@@ -3839,6 +3416,7 @@
   roadmap: "ai-engineer"
   research: "world-models"
   doFirst: "Diffusion Forcing paper"
+  quality: 4
 
 - id: "repo-cameractrl"
   title: "CameraCtrl (official code)"
@@ -3854,10 +3432,11 @@
   estHours: 4
   summary: "Shows how Plucker-embedding camera trajectories are injected into a video diffusion model for controllable camera motion."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "CameraCtrl paper"
+  quality: 3
 
 - id: "repo-magi-1"
   title: "MAGI-1: Autoregressive Video Generation at Scale (code)"
@@ -3873,13 +3452,14 @@
   estHours: 6
   summary: "Open weights and inference for a chunk-wise autoregressive video model, a production-scale example of causal video diffusion."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "MAGI-1 paper"
+  quality: 3
 
 - id: "repo-skyreels-v2"
-  title: "SkyReels V2: Infinite-Length Film Generative Model"
+  title: "SkyReels V2: Infinite-Length Film Generative Model (code)"
   short: "SkyReels V2 repo"
   provider: "Skywork AI"
   type: "practice"
@@ -3892,10 +3472,11 @@
   estHours: 5
   summary: "Diffusion-forcing based open model for arbitrarily long videos, with weights and inference code to try extension yourself."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   after: [repo-diffusion-forcing]
+  quality: 3
 
 - id: "repo-matrix-game"
   title: "Matrix-Game: streaming neural rendering for playable games"
@@ -3911,9 +3492,10 @@
   estHours: 5
   summary: "Open interactive world-model code that turns keyboard and mouse actions into streamed game frames."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [repo-diamond]
+  quality: 3
 
 - id: "repo-hunyuanworld-1"
   title: "HunyuanWorld 1.0: generating explorable 3D worlds"
@@ -3929,8 +3511,9 @@
   estHours: 5
   summary: "Generates panoramic, mesh-exportable 3D worlds from text or images, bridging video-style generation and 3D scenes."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "repo-cosmos-predict1"
   title: "Cosmos-Predict1"
@@ -3946,10 +3529,11 @@
   estHours: 6
   summary: "Diffusion and autoregressive world foundation models with post-training scripts for robotics and driving data."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "world-models"
   doFirst: "Cosmos paper"
+  quality: 3
 
 - id: "repo-nvlabs-longlive"
   title: "LongLive: real-time interactive long video generation (code)"
@@ -3965,10 +3549,11 @@
   estHours: 5
   summary: "Frame-level autoregressive generator with KV re-caching that lets you switch prompts mid-stream at interactive speed."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   after: [repo-self-forcing]
+  quality: 3
 
 - id: "repo-xdit"
   title: "xDiT: inference engine for Diffusion Transformers with massive parallelism"
@@ -3984,10 +3569,11 @@
   estHours: 5
   summary: "Hands-on sequence, patch and CFG parallel inference for video DiTs across many GPUs."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   after: [docs-diffusers-video-generation]
+  quality: 3
 
 - id: "paper-clipscore"
   title: "CLIPScore: A Reference-free Evaluation Metric for Image Captioning"
@@ -4006,6 +3592,7 @@
   priority: 1
   roadmap: "ai-engineer"
   doFirst: "CLIP paper"
+  quality: 4
 
 - id: "paper-lones-avoid-ml-pitfalls"
   title: "How to avoid machine learning pitfalls: a guide for academic researchers"
@@ -4023,23 +3610,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
-
-- id: "paper-manual-seed-3407"
-  title: "Torch.manual_seed(3407) is all you need: On the influence of random seeds in deep learning architectures for computer vision"
-  short: "Seed 3407 Study"
-  provider: "David Picard"
-  type: "paper"
-  url: "https://arxiv.org/abs/2109.08203"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A short, memorable experiment showing how far results swing across seeds, a warning against cherry-picking."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
+  quality: 4
 
 - id: "paper-ten-simple-rules-structuring-papers"
   title: "Ten simple rules for structuring papers"
@@ -4057,25 +3628,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
-
-- id: "paper-playground-v2-5"
-  title: "Playground v2.5: Three Insights towards Enhancing Aesthetic Quality in Text-to-Image Generation"
-  short: "Playground v2.5"
-  provider: "Li et al. (Playground)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2402.17245"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Practical lessons on noise schedules (EDM), aspect-ratio balancing and human-preference alignment for SDXL-class models."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  doFirst: "SDXL paper"
+  quality: 4
 
 - id: "paper-textual-inversion"
   title: "An Image is Worth One Word: Personalizing Text-to-Image Generation using Textual Inversion"
@@ -4095,6 +3648,7 @@
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "Latent Diffusion"
+  quality: 4
 
 - id: "paper-instructpix2pix"
   title: "InstructPix2Pix: Learning to Follow Image Editing Instructions"
@@ -4114,6 +3668,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   after: [paper-prompt-to-prompt]
+  quality: 4
 
 - id: "paper-ip-adapter"
   title: "IP-Adapter: Text Compatible Image Prompt Adapter for Text-to-Image Diffusion Models"
@@ -4133,6 +3688,7 @@
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "ControlNet paper"
+  quality: 4
 
 - id: "paper-t2i-adapter"
   title: "T2I-Adapter: Learning Adapters to Dig out More Controllable Ability for Text-to-Image Diffusion Models"
@@ -4148,10 +3704,11 @@
   estHours: 2
   summary: "A lighter alternative to ControlNet for spatial conditioning; compare their cost and fidelity."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "ControlNet paper"
+  quality: 3
 
 - id: "paper-maskgit"
   title: "MaskGIT: Masked Generative Image Transformer"
@@ -4171,6 +3728,7 @@
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "Taming Transformers"
+  quality: 4
 
 - id: "paper-geneval"
   title: "GenEval: An Object-Focused Framework for Evaluating Text-to-Image Alignment"
@@ -4186,10 +3744,11 @@
   estHours: 2
   summary: "Uses object detectors to score counting, colors and positions, now a standard benchmark in model reports."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   after: [paper-clipscore]
+  quality: 3
 
 - id: "paper-imagereward"
   title: "ImageReward: Learning and Evaluating Human Preferences for Text-to-Image Generation"
@@ -4205,10 +3764,11 @@
   estHours: 3
   summary: "Introduces a human-preference reward model and ReFL fine-tuning for text-to-image."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   after: [paper-clipscore]
+  quality: 3
 
 - id: "paper-hpsv2"
   title: "Human Preference Score v2: A Solid Benchmark for Evaluating Human Preferences of Text-to-Image Synthesis"
@@ -4224,10 +3784,11 @@
   estHours: 2
   summary: "A large preference dataset and scorer widely used to evaluate and reward-tune image models."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   after: [paper-imagereward]
+  quality: 3
 
 - id: "paper-pick-a-pic"
   title: "Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation"
@@ -4243,10 +3804,11 @@
   estHours: 2
   summary: "Real user preference data and the PickScore metric, the dataset behind Diffusion-DPO."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   after: [paper-clipscore]
+  quality: 3
 
 - id: "paper-troubling-trends-ml-scholarship"
   title: "Troubling Trends in Machine Learning Scholarship"
@@ -4265,6 +3827,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [keshav-how-to-read]
+  quality: 4
 
 - id: "paper-accounting-variance-ml-benchmarks"
   title: "Accounting for Variance in Machine Learning Benchmarks"
@@ -4283,6 +3846,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-deep-rl-that-matters]
+  quality: 4
 
 - id: "paper-pineau-improving-reproducibility"
   title: "Improving Reproducibility in Machine Learning Research (A Report from the NeurIPS 2019 Reproducibility Program)"
@@ -4298,8 +3862,9 @@
   estHours: 2
   summary: "The origin story of the ML reproducibility checklist and code-submission policy you will meet at every major venue."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "paper-show-your-work-reporting"
   title: "Show Your Work: Improved Reporting of Experimental Results"
@@ -4315,9 +3880,10 @@
   estHours: 2
   summary: "Introduces expected validation performance as a function of tuning budget, so comparisons account for how much compute each method got."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "Accounting for Variance"
+  quality: 3
 
 - id: "paper-melis-sota-evaluation-lms"
   title: "On the State of the Art of Evaluation in Neural Language Models"
@@ -4337,6 +3903,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   doFirst: "Deep Learning Tuning Playbook"
+  quality: 4
 
 - id: "paper-are-gans-created-equal"
   title: "Are GANs Created Equal? A Large-Scale Study"
@@ -4355,6 +3922,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "genai"
+  quality: 4
 
 - id: "paper-reforms-reporting-standards"
   title: "REFORMS: Reporting Standards for Machine Learning Based Science"
@@ -4373,6 +3941,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [docs-neurips-paper-checklist]
+  quality: 3
 
 - id: "paper-metric-learning-reality-check"
   title: "A Metric Learning Reality Check"
@@ -4388,9 +3957,10 @@
   estHours: 2
   summary: "Case study in how flawed experimental setups produced years of illusory progress, and how a fair benchmark erased it."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "Accounting for Variance"
+  quality: 3
 
 - id: "paper-reporting-score-distributions"
   title: "Reporting Score Distributions Makes a Difference: Performance Study of LSTM-networks for Sequence Tagging"
@@ -4406,8 +3976,9 @@
   estHours: 2
   summary: "Demonstrates that seed variance alone can flip conclusions, motivating reporting distributions instead of single best runs."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "paper-how-many-random-seeds"
   title: "How Many Random Seeds? Statistical Power Analysis in Deep Reinforcement Learning Experiments"
@@ -4423,9 +3994,10 @@
   estHours: 2
   summary: "A hands-on guide to choosing the number of seeds and the right statistical test when comparing noisy training runs."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-deep-rl-that-matters]
+  quality: 3
 
 - id: "paper-sources-irreproducibility-ml"
   title: "Sources of Irreproducibility in Machine Learning: A Review"
@@ -4441,26 +4013,10 @@
   estHours: 2
   summary: "Maps every place nondeterminism and undocumented choices creep into ML pipelines, useful when designing your experiment setup."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "PyTorch Reproducibility notes"
-
-- id: "paper-neurips-2021-consistency-experiment"
-  title: "Has the Machine Learning Review Process Become More Arbitrary as the Field Has Grown? The NeurIPS 2021 Consistency Experiment"
-  short: "NeurIPS 2021 Review Exp."
-  provider: "Beygelzimer, Dauphin, Liang, Vaughan"
-  type: "paper"
-  url: "https://arxiv.org/abs/2306.03262"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Measures how noisy conference acceptance really is, so you can calibrate how to react to rejections."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-agents"
+  quality: 3
 
 - id: "paper-neurips-2014-experiment-revisited"
   title: "Inconsistency in Conference Peer Review: Revisiting the 2014 NeurIPS Experiment"
@@ -4476,8 +4032,9 @@
   estHours: 2
   summary: "The original duplicate-review experiment revisited, showing reviewers agree poorly and scores barely predict later impact."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "paper-hitchhikers-statistical-significance-nlp"
   title: "The Hitchhiker's Guide to Testing Statistical Significance in Natural Language Processing"
@@ -4495,6 +4052,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "paper-demsar-comparing-classifiers"
   title: "Statistical Comparisons of Classifiers over Multiple Data Sets"
@@ -4512,6 +4070,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "paper-qwen-image"
   title: "Qwen-Image Technical Report"
@@ -4527,9 +4086,10 @@
   estHours: 5
   summary: "A 2025 open model report notable for text rendering and editing, with data pipeline and training curriculum details."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "SD3 paper"
+  quality: 3
 
 - id: "paper-pixart-alpha"
   title: "PixArt-α: Fast Training of Diffusion Transformer for Photorealistic Text-to-Image Synthesis"
@@ -4549,6 +4109,7 @@
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "DiT paper"
+  quality: 4
 
 - id: "paper-pixart-sigma"
   title: "PixArt-Σ: Weak-to-Strong Training of Diffusion Transformer for 4K Text-to-Image Generation"
@@ -4564,48 +4125,11 @@
   estHours: 4
   summary: "Adds KV token compression and weak-to-strong fine-tuning to reach 4K images with a small DiT."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   after: [paper-pixart-alpha]
-
-- id: "paper-hunyuan-dit"
-  title: "Hunyuan-DiT: A Powerful Multi-Resolution Diffusion Transformer with Fine-Grained Chinese Understanding"
-  short: "Hunyuan-DiT"
-  provider: "Tencent Hunyuan"
-  type: "paper"
-  url: "https://arxiv.org/abs/2405.08748"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Detailed open report on bilingual text encoding, data curation and multi-resolution DiT training."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  doFirst: "DiT paper"
-
-- id: "paper-hunyuanimage-3"
-  title: "HunyuanImage 3.0 Technical Report"
-  short: "HunyuanImage 3.0"
-  provider: "Tencent Hunyuan"
-  type: "paper"
-  url: "https://arxiv.org/abs/2509.23951"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 5
-  summary: "Describes a large native-multimodal MoE that unifies understanding and image generation autoregressively."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "genai"
-  after: [paper-transfusion]
+  quality: 3
 
 - id: "paper-wuerstchen"
   title: "Würstchen: An Efficient Architecture for Large-Scale Text-to-Image Diffusion Models"
@@ -4621,10 +4145,11 @@
   estHours: 3
   summary: "Explains extreme latent compression in a three-stage cascade, the basis of Stable Cascade."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "Latent Diffusion"
+  quality: 3
 
 - id: "paper-sana-1-5"
   title: "SANA 1.5: Efficient Scaling of Training-Time and Inference-Time Compute in Linear Diffusion Transformer"
@@ -4640,10 +4165,11 @@
   estHours: 3
   summary: "Studies depth growing, pruning and inference-time scaling for an efficient linear-attention DiT."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "SANA paper"
+  quality: 3
 
 - id: "paper-null-text-inversion"
   title: "Null-text Inversion for Editing Real Images using Guided Diffusion Models"
@@ -4659,10 +4185,11 @@
   estHours: 3
   summary: "Shows how to invert a real photo under CFG so attention-based editing works on it, a key editing building block."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   after: [paper-prompt-to-prompt]
+  quality: 3
 
 - id: "paper-diffusion-dpo"
   title: "Diffusion Model Alignment Using Direct Preference Optimization"
@@ -4682,6 +4209,7 @@
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "DPO paper"
+  quality: 4
 
 - id: "paper-omnigen"
   title: "OmniGen: Unified Image Generation"
@@ -4697,9 +4225,10 @@
   estHours: 3
   summary: "One model for generation, editing and subject-driven tasks without extra adapters, a sign of where tooling is heading."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-ip-adapter]
+  quality: 3
 
 - id: "paper-dynamicrafter"
   title: "DynamiCrafter: Animating Open-domain Images with Video Diffusion Priors"
@@ -4715,10 +4244,11 @@
   estHours: 3
   summary: "Clear recipe for image animation by feeding a context image into a video diffusion prior through dual conditioning."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "SVD paper"
+  quality: 3
 
 - id: "paper-vace"
   title: "VACE: All-in-One Video Creation and Editing"
@@ -4734,9 +4264,10 @@
   estHours: 3
   summary: "Explains a single unit for reference, mask and control signals so one video model handles many editing tasks."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "Wan paper"
+  quality: 3
 
 - id: "paper-streamdiffusionv2"
   title: "StreamDiffusionV2: A Streaming System for Dynamic and Interactive Video Generation"
@@ -4752,10 +4283,11 @@
   estHours: 3
   summary: "Systems view of live video generation: SLO-aware batching, rolling KV cache and pipeline parallelism for real-time streams."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "Self Forcing paper"
+  quality: 3
 
 - id: "paper-turbodiffusion"
   title: "TurboDiffusion: Accelerating Video Diffusion Models by 100-200 Times"
@@ -4771,10 +4303,11 @@
   estHours: 3
   summary: "Combines quantized/sparse attention and step distillation to show how far video diffusion latency can be pushed."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
   after: [paper-sparse-videogen]
+  quality: 3
 
 - id: "article-illustrated-stable-diffusion"
   title: "The Illustrated Stable Diffusion"
@@ -4794,6 +4327,7 @@
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "The Illustrated Transformer"
+  quality: 4
 
 - id: "article-steinhardt-film-study-research"
   title: "Film Study for Research"
@@ -4809,8 +4343,9 @@
   estHours: 1
   summary: "Borrows deliberate-practice habits from athletes to show how to learn research skill from others' recorded thinking."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "article-eisner-write-paper-first"
   title: "Write the Paper First"
@@ -4826,8 +4361,9 @@
   estHours: 1
   summary: "Argues for drafting the paper before the experiments so writing guides what you actually need to run."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "article-eisner-find-research-problems"
   title: "How to Find Research Problems"
@@ -4843,8 +4379,9 @@
   estHours: 1
   summary: "Practical tactics for generating research ideas from reading, gaps and dissatisfaction with existing work."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "article-eisner-research-with-professor"
   title: "How to Do Research With a Professor"
@@ -4860,8 +4397,9 @@
   estHours: 1
   summary: "Sets expectations for students starting research under a faculty member: meetings, initiative and communication."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "article-eisner-advice-index"
   title: "Advice for Researchers and Would-Be Researchers"
@@ -4879,6 +4417,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "article-dettmers-ml-phd-applications"
   title: "Machine Learning PhD Applications — Everything You Need to Know"
@@ -4894,8 +4433,9 @@
   estHours: 2
   summary: "Explains what ML admissions actually weigh (research, letters, publications), which shapes how you spend undergrad years."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "article-vinitsky-cold-emailing"
   title: "A Guide to Cold Emailing"
@@ -4911,43 +4451,9 @@
   estHours: 1
   summary: "A professor's view on writing cold emails that get replies: show you know the work, make a specific ask, attach evidence."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-
-- id: "article-ng-reading-papers-career-advice"
-  title: "Advice on building a machine learning career and reading research papers by Prof. Andrew Ng"
-  short: "Ng: Reading Papers"
-  provider: "Mohamed Ali Habib (summary of Andrew Ng, CS230)"
-  type: "article"
-  url: "https://www.kdnuggets.com/2019/09/advice-building-machine-learning-career-research-papers-andrew-ng.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Summarizes Andrew Ng's multi-pass method for reading batches of papers and his advice on building an ML career."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-
-- id: "article-hf-state-open-video-gen"
-  title: "State of open video generation models in Diffusers"
-  short: "HF open video models"
-  provider: "Sayak Paul, Aryan V S, Dhruv Nair"
-  type: "article"
-  url: "https://huggingface.co/blog/video_gen"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A survey of the open video model landscape with memory numbers, optimizations and fine-tuning options."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "diffusion"
+  quality: 3
 
 - id: "article-dieleman-guidance"
   title: "Guidance: a cheat code for diffusion models"
@@ -4967,6 +4473,7 @@
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "What are Diffusion Models?"
+  quality: 4
 
 - id: "article-dieleman-diffusion-autoencoders"
   title: "Diffusion models are autoencoders"
@@ -4986,6 +4493,7 @@
   roadmap: "ai-engineer"
   research: "diffusion"
   doFirst: "What are Diffusion Models?"
+  quality: 4
 
 - id: "hi-ml-system-design-intro"
   title: "ML System Design in a Hurry: Introduction"
@@ -5001,9 +4509,10 @@
   estHours: 2
   summary: "Explains the applied ML system design round and gives a delivery framework from problem framing to monitoring."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [book-designing-ml-systems]
+  quality: 3
 
 - id: "article-olah-research-taste-exercises"
   title: "Research Taste Exercises"
@@ -5022,6 +4531,7 @@
   priority: 1
   roadmap: "ai-engineer"
   doFirst: "An Opinionated Guide to ML Research"
+  quality: 4
 
 - id: "article-nanda-how-to-write-ml-papers"
   title: "Highly Opinionated Advice on How to Write ML Papers"
@@ -5040,6 +4550,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-troubling-trends-ml-scholarship]
+  quality: 4
 
 - id: "article-nanda-explore-understand-distill"
   title: "How I Think About My Research Process: Explore, Understand, Distill"
@@ -5055,9 +4566,10 @@
   estHours: 2
   summary: "Breaks a research project into explore, understand and distill stages, with what to optimize in each."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "An Opinionated Guide to ML Research"
+  quality: 3
 
 - id: "article-nanda-key-research-mindsets"
   title: "My Research Process: Key Mindsets - Truth-Seeking, Prioritisation, Moving Fast"
@@ -5073,9 +4585,10 @@
   estHours: 1
   summary: "Mindsets for avoiding self-deception, prioritizing ruthlessly and iterating fast on empirical projects."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [article-nanda-explore-understand-distill]
+  quality: 3
 
 - id: "article-nanda-cultivating-research-taste"
   title: "My Research Process: Understanding and Cultivating Research Taste"
@@ -5094,6 +4607,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [article-olah-research-taste-exercises]
+  quality: 4
 
 - id: "article-steinhardt-advice-for-authors"
   title: "Advice for Authors"
@@ -5111,6 +4625,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "article-carlini-best-paper-award"
   title: "How to win a best paper award (or, an opinionated take on how to do important research that matters)"
@@ -5129,6 +4644,7 @@
   priority: 1
   roadmap: "ai-engineer"
   doFirst: "You and Your Research"
+  quality: 4
 
 - id: "article-kayvon-systems-paper-beautiful"
   title: "What Makes a (Graphics) Systems Paper Beautiful"
@@ -5148,6 +4664,7 @@
   roadmap: "ai-engineer"
 
 # ---- Software architecture and system design (131)
+  quality: 4
 
 - id: "owasp-authentication-cheat-sheet"
   title: "Authentication Cheat Sheet (OWASP)"
@@ -5165,6 +4682,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "owasp-forgot-password-cheat-sheet"
   title: "Forgot Password Cheat Sheet (OWASP)"
@@ -5180,9 +4698,10 @@
   estHours: 1
   summary: "Password reset is a common account-takeover path; this shows how to build reset tokens and flows correctly."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [owasp-authentication-cheat-sheet]
+  quality: 3
 
 - id: "auth0-which-oauth-flow"
   title: "Which OAuth 2.0 Flow Should I Use? (Auth0 Docs)"
@@ -5198,9 +4717,10 @@
   estHours: 1
   summary: "A decision guide mapping app types (SPA, native, machine-to-machine, server web app) to the right grant."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-parecki-oauth2-simplified]
+  quality: 3
 
 - id: "auth0-auth-code-pkce-flow"
   title: "Authorization Code Flow with Proof Key for Code Exchange (Auth0 Docs)"
@@ -5216,9 +4736,10 @@
   estHours: 1
   summary: "Clear sequence diagram of the flow every SPA and mobile app should use, step by step."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [auth0-which-oauth-flow]
+  quality: 3
 
 - id: "stripe-idempotent-requests-docs"
   title: "Idempotent requests (Stripe API reference)"
@@ -5237,6 +4758,7 @@
   priority: 2
   roadmap: "software-architect"
   doFirst: "Stripe Idempotency Post"
+  quality: 4
 
 - id: "docs-write-the-docs-guide"
   title: "Software documentation guide"
@@ -5252,8 +4774,9 @@
   estHours: 6
   summary: "The community hub for documentation practice: how to start, tools, API docs, docs-as-code and style guides."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "rfc-8725-jwt-bcp"
   title: "RFC 8725: JSON Web Token Best Current Practices"
@@ -5272,6 +4795,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [rfc-7519-jwt]
+  quality: 4
 
 - id: "rfc-6750-bearer-tokens"
   title: "The OAuth 2.0 Authorization Framework: Bearer Token Usage (RFC 6750)"
@@ -5287,9 +4811,10 @@
   estHours: 2
   summary: "Defines how resource servers accept access tokens via the Authorization header and how to signal token errors."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [rfc-6749-oauth2]
+  quality: 3
 
 - id: "rfc-8628-device-grant"
   title: "OAuth 2.0 Device Authorization Grant (RFC 8628)"
@@ -5305,9 +4830,10 @@
   estHours: 1
   summary: "The flow behind 'enter this code on your phone' logins for TVs and CLIs, worth knowing when building CLI tools."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [rfc-6749-oauth2]
+  quality: 3
 
 - id: "rfc-8252-oauth-native-apps"
   title: "OAuth 2.0 for Native Apps (RFC 8252)"
@@ -5323,9 +4849,10 @@
   estHours: 1
   summary: "Explains why native and desktop apps must use the system browser plus PKCE instead of embedded webviews."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-parecki-oauth2-simplified]
+  quality: 3
 
 - id: "rfc-7662-token-introspection"
   title: "OAuth 2.0 Token Introspection (RFC 7662)"
@@ -5341,9 +4868,10 @@
   estHours: 1
   summary: "Shows how APIs check opaque tokens against the authorization server, the main alternative to self-contained JWTs."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [rfc-6749-oauth2]
+  quality: 3
 
 - id: "owasp-authorization-cheat-sheet"
   title: "Authorization Cheat Sheet (OWASP)"
@@ -5362,6 +4890,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [owasp-authentication-cheat-sheet]
+  quality: 4
 
 - id: "owasp-mfa-cheat-sheet"
   title: "Multifactor Authentication Cheat Sheet (OWASP)"
@@ -5377,9 +4906,10 @@
   estHours: 1
   summary: "Compares TOTP, SMS, push and hardware keys and explains how to implement MFA enrollment and recovery safely."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [owasp-authentication-cheat-sheet]
+  quality: 3
 
 - id: "owasp-oauth2-cheat-sheet"
   title: "OAuth 2.0 Protocol Cheat Sheet (OWASP)"
@@ -5395,9 +4925,10 @@
   estHours: 1
   summary: "Condenses the OAuth security BCP into concrete do and don't items for clients and authorization servers."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-parecki-oauth2-simplified]
+  quality: 3
 
 - id: "nist-sp-800-63b"
   title: "NIST SP 800-63B: Authentication and Authenticator Management"
@@ -5416,6 +4947,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [owasp-authentication-cheat-sheet]
+  quality: 4
 
 - id: "google-passkeys-developers"
   title: "Passkeys (Google for Developers)"
@@ -5431,9 +4963,10 @@
   estHours: 3
   summary: "Developer guides for adding passkey registration and sign-in to web and Android apps, with UX recommendations."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "webauthn.guide"
+  quality: 3
 
 - id: "pact-how-pact-works"
   title: "How Pact works"
@@ -5449,9 +4982,10 @@
   estHours: 1
   summary: "Walks through consumer tests generating a contract that the provider later verifies, without end-to-end environments."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [fowler-contract-test]
+  quality: 3
 
 - id: "hypothesis-docs"
   title: "Hypothesis documentation"
@@ -5469,7 +5003,7 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
-  after: [article-hypothesis-what-is-hypothesis]
+  quality: 4
 
 - id: "docs-yc-safe"
   title: "The SAFE: the open standard for startup fundraising"
@@ -5485,9 +5019,10 @@
   estHours: 2
   summary: "The actual post-money SAFE templates and user guide with conversion math, so you understand what you would sign."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-yc-seed-fundraising-guide]
+  quality: 3
 
 - id: "docs-google-dev-style-guide"
   title: "Google developer documentation style guide"
@@ -5506,6 +5041,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [course-google-tech-writing-one]
+  quality: 4
 
 - id: "docs-diataxis"
   title: "Diataxis: a systematic approach to technical documentation"
@@ -5524,6 +5060,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [article-wtd-beginners-guide]
+  quality: 4
 
 - id: "rfc-9068-jwt-access-tokens"
   title: "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens (RFC 9068)"
@@ -5539,9 +5076,10 @@
   estHours: 1
   summary: "Standardises the claims and validation steps for JWT-formatted access tokens so APIs verify them consistently."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [rfc-8725-jwt-bcp]
+  quality: 3
 
 - id: "oidc-discovery-spec"
   title: "OpenID Connect Discovery 1.0"
@@ -5557,9 +5095,10 @@
   estHours: 1
   summary: "Explains the .well-known/openid-configuration document and JWKS lookup that let clients auto-configure against any provider."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "OpenID Connect Core"
+  quality: 3
 
 - id: "ietf-idempotency-key-header"
   title: "The Idempotency-Key HTTP Header Field (IETF draft)"
@@ -5575,9 +5114,10 @@
   estHours: 1
   summary: "The emerging standard for idempotency keys in HTTP APIs, including error codes for conflicts and reuse."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [stripe-idempotent-requests-docs]
+  quality: 3
 
 - id: "ietf-ratelimit-headers"
   title: "RateLimit header fields for HTTP (IETF draft)"
@@ -5593,9 +5133,10 @@
   estHours: 1
   summary: "Standard headers for telling clients their quota and reset time so they can back off gracefully."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [brandur-rate-limiting-gcra]
+  quality: 3
 
 - id: "video-oauth-oidc-plain-english"
   title: "OAuth 2.0 and OpenID Connect (in plain English)"
@@ -5613,6 +5154,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "video-winston-how-to-speak"
   title: "How to Speak (RES.TLL-005, IAP 2018)"
@@ -5630,6 +5172,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "video-ted-anderson-public-speaking"
   title: "TED's secret to great public speaking"
@@ -5645,8 +5188,9 @@
   estHours: 1
   summary: "An eight-minute summary of how great talks transfer one idea by building it piece by piece in the listener's mind."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "video-ted-duarte-structure"
   title: "The secret structure of great talks"
@@ -5662,8 +5206,9 @@
   estHours: 1
   summary: "Shows the 'what is vs what could be' contour shared by persuasive speeches, a pattern you can reuse in pitches."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "video-yc-hale-how-to-pitch"
   title: "How to Pitch Your Startup"
@@ -5679,9 +5224,10 @@
   estHours: 1
   summary: "A lecture on making a pitch legible and simple, with examples of rewriting confusing startup descriptions."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-yc-how-to-pitch-your-company]
+  quality: 2
 
 - id: "video-yc-how-to-talk-to-users"
   title: "How to talk to users"
@@ -5697,8 +5243,9 @@
   estHours: 1
   summary: "Teaches customer interviews that surface real problems, the listening half of founder communication."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "oso-authorization-academy"
   title: "Authorization Academy"
@@ -5717,6 +5264,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [owasp-authorization-cheat-sheet]
+  quality: 4
 
 - id: "course-yc-startup-school"
   title: "Startup School"
@@ -5732,8 +5280,9 @@
   estHours: 20
   summary: "YC's free online course for founders, covering ideas, users, pitching and fundraising with weekly progress tracking."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "course-google-tech-writing-one"
   title: "Technical Writing One"
@@ -5751,6 +5300,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "course-google-error-messages"
   title: "Writing Helpful Error Messages"
@@ -5766,9 +5316,10 @@
   estHours: 2
   summary: "Teaches error messages that explain what went wrong and how to fix it, a direct win for localSpace's UX."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [course-google-tech-writing-one]
+  quality: 3
 
 - id: "course-google-tw-accessibility"
   title: "Tech Writing for Accessibility"
@@ -5784,9 +5335,10 @@
   estHours: 2
   summary: "Self-study course on writing docs that work for screen readers and readers with different needs."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [course-google-tech-writing-one]
+  quality: 3
 
 - id: "cert-aws-solutions-architect-associate"
   title: "AWS Certified Solutions Architect - Associate"
@@ -5802,10 +5354,11 @@
   estHours: 80
   summary: "The most widely recognised cloud architecture credential; it shows you can design cost- and performance-optimised systems on AWS (65 questions, 130 minutes, US$150)."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   doFirst: "AWS Cloud Practitioner"
+  quality: 3
 
 - id: "cert-coursera-software-design-architecture"
   title: "Software Design and Architecture Specialization"
@@ -5821,9 +5374,10 @@
   estHours: 52
   summary: "Four courses on OO design, design patterns, software architecture and SOA; the certificate gives structured proof for the architecture year (financial aid available)."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "course-google-tech-writing-two"
   title: "Technical Writing Two"
@@ -5839,9 +5393,10 @@
   estHours: 4
   summary: "Drafting, self-editing, organizing long documents, figures, sample code and tutorials for engineers."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [course-google-tech-writing-one]
+  quality: 3
 
 - id: "cert-gcp-pro-cloud-architect"
   title: "Google Cloud Professional Cloud Architect"
@@ -5857,10 +5412,11 @@
   estHours: 80
   summary: "Shows you can design secure, reliable cloud architectures following the Google Cloud Well-Architected Framework; 2-hour exam listed at US$200."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [cert-gcp-associate-cloud-engineer]
+  quality: 2
 
 - id: "book-altman-startup-playbook"
   title: "Startup Playbook"
@@ -5876,8 +5432,9 @@
   estHours: 2
   summary: "A short free book whose fundraising and execution chapters summarize what investors look for in founders."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "book-strunk-elements-of-style"
   title: "The Elements of Style"
@@ -5893,8 +5450,9 @@
   estHours: 2
   summary: "The original short rulebook on concise English usage, free and readable in one sitting."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "book-presentation-zen-3e"
   title: "Presentation Zen: Simple Ideas on Presentation Design and Delivery (3rd Edition)"
@@ -5910,9 +5468,10 @@
   estHours: 8
   summary: "Teaches restraint and story in slides so your technical and pitch talks feel clear instead of bullet-heavy."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-think-faster-talk-smarter"
   title: "Think Faster, Talk Smarter: How to Speak Successfully When You're Put on the Spot"
@@ -5928,9 +5487,10 @@
   estHours: 7
   summary: "Trains impromptu speaking for interviews, investor Q&A and hallway conversations where you cannot prepare slides."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 2
 
 - id: "book-resonate"
   title: "Resonate: Present Visual Stories That Transform Audiences"
@@ -5946,9 +5506,10 @@
   estHours: 8
   summary: "Gives you a story structure for persuasive talks, the backbone of a founder pitch or product launch."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-venture-deals"
   title: "Venture Deals: Be Smarter Than Your Lawyer and Venture Capitalist"
@@ -5964,10 +5525,11 @@
   estHours: 10
   summary: "Explains term sheets, valuation and negotiation so you understand what a raise for localSpace really commits you to."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [article-yc-seed-fundraising-guide]
+  quality: 3
 
 - id: "book-docs-for-developers"
   title: "Docs for Developers: An Engineer's Field Guide to Technical Writing"
@@ -5983,10 +5545,11 @@
   estHours: 8
   summary: "Walks a project from user research to shipped, maintained docs, a full playbook for documenting your own product."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [course-google-tech-writing-one]
+  quality: 3
 
 - id: "book-system-design-interview-xu"
   title: "System Design Interview – An Insider's Guide (Volumes 1 and 2)"
@@ -6002,10 +5565,11 @@
   estHours: 20
   summary: "The most widely used system design interview book pair, with 28 worked designs from rate limiters to stock exchanges."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [bbg-scale-zero-to-millions]
+  quality: 3
 
 - id: "testcontainers-getting-started"
   title: "Getting started with Testcontainers"
@@ -6021,9 +5585,10 @@
   estHours: 2
   summary: "Shows how to spin up real Postgres, Redis or Kafka in Docker for integration tests instead of mocking them."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-practical-test-pyramid]
+  quality: 3
 
 - id: "site-speaking-io"
   title: "speaking.io: Tips for Public Speaking"
@@ -6039,8 +5604,9 @@
   estHours: 3
   summary: "An engineer's practical guide to conference talks, from finding an idea and writing the CFP to slides, demos and questions."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "tutorial-garr-reynolds-tips"
   title: "How do you make a great presentation? (Presentation Tips)"
@@ -6056,8 +5622,9 @@
   estHours: 2
   summary: "Concise guidance plus slide makeovers that show how to cut clutter and design slides for clarity."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "tutorial-make-a-readme"
   title: "Make a README"
@@ -6073,8 +5640,9 @@
   estHours: 1
   summary: "A template and checklist for READMEs, the first thing visitors to your repos read."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "repo-jakes-resume"
   title: "Jake's Resume (LaTeX template)"
@@ -6090,27 +5658,10 @@
   estHours: 2
   summary: "The clean single-column LaTeX template most student SWE resumes are built on; ATS-friendly and easy to edit."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tih-swe-interview-resume]
-
-- id: "openfga-getting-started"
-  title: "Getting Started (OpenFGA Docs)"
-  short: "OpenFGA Getting Started"
-  provider: "OpenFGA"
-  type: "article"
-  url: "https://openfga.dev/docs/getting-started"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Hands-on setup: run the server, write an authorization model, add relationship tuples and make check calls."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  doFirst: "OpenFGA Concepts"
+  quality: 2
 
 - id: "hi-design-bitly"
   title: "Design a URL Shortener Like Bit.ly"
@@ -6126,9 +5677,10 @@
   estHours: 1
   summary: "A full worked answer to the classic warm-up design question, with what is expected at each seniority level."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "System Design in a Hurry"
+  quality: 3
 
 - id: "hi-design-ticketmaster"
   title: "Design a Ticket Booking Site Like Ticketmaster"
@@ -6144,9 +5696,10 @@
   estHours: 1
   summary: "Shows how to handle seat contention, reservations and surge traffic in one of the most common design prompts."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [hi-design-bitly]
+  quality: 3
 
 - id: "hi-design-rate-limiter"
   title: "Design a Distributed Rate Limiter"
@@ -6162,9 +5715,10 @@
   estHours: 1
   summary: "Walks through token bucket vs sliding window and how to keep counters consistent across many nodes."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [hi-design-bitly]
+  quality: 3
 
 - id: "tih-behavioral-questions"
   title: "Common behavioral questions to practice"
@@ -6180,9 +5734,10 @@
   estHours: 3
   summary: "A ready list of the questions big-tech loops actually ask, ideal for rehearsing STAR answers aloud."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tih-behavioral-interview]
+  quality: 2
 
 - id: "repo-awesome-low-level-design"
   title: "Awesome Low-Level Design"
@@ -6198,8 +5753,9 @@
   estHours: 30
   summary: "OOP principles, design patterns and worked LLD interview problems (parking lot, elevator, LRU) with code in several languages."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "oauth-net-pkce"
   title: "PKCE: Proof Key for Code Exchange (oauth.net)"
@@ -6215,9 +5771,10 @@
   estHours: 1
   summary: "Short explainer of the code_verifier/code_challenge mechanism with links to the spec and tutorials."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-parecki-oauth2-simplified]
+  quality: 3
 
 - id: "okta-what-the-heck-is-oauth"
   title: "What the Heck is OAuth?"
@@ -6233,8 +5790,9 @@
   estHours: 1
   summary: "A friendly long-form introduction to OAuth and OIDC terminology, history and flows for newcomers."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "fowler-contract-test"
   title: "Contract Test"
@@ -6250,9 +5808,10 @@
   estHours: 1
   summary: "Short explanation of how contract tests keep your test doubles honest about external services."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-fowler-test-double]
+  quality: 3
 
 - id: "article-speaking-io-cfp"
   title: "Writing the CFP"
@@ -6268,9 +5827,10 @@
   estHours: 1
   summary: "How to write a talk proposal that conference committees accept, useful when pitching localSpace talks at meetups."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [site-speaking-io]
+  quality: 3
 
 - id: "article-speaking-io-live-demos"
   title: "Live Tech Demos"
@@ -6286,9 +5846,10 @@
   estHours: 1
   summary: "Advice on whether and how to run a live demo without it derailing the talk, directly relevant for product demos."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [site-speaking-io]
+  quality: 3
 
 - id: "article-speaking-io-questions"
   title: "Handling Questions"
@@ -6304,9 +5865,10 @@
   estHours: 1
   summary: "Techniques for fielding audience questions calmly, including hostile or off-topic ones."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [site-speaking-io]
+  quality: 3
 
 - id: "article-speaking-io-nervousness"
   title: "Dealing with Nervousness"
@@ -6322,9 +5884,10 @@
   estHours: 1
   summary: "Reassuring, concrete ways to manage stage fright before and during a talk."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [site-speaking-io]
+  quality: 3
 
 - id: "article-toastmasters-write-deliver-speech"
   title: "How to Write and Deliver a Speech"
@@ -6340,8 +5903,9 @@
   estHours: 1
   summary: "A plain starter guide to planning, writing and rehearsing a speech from the world's largest speaking club."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "article-toastmasters-fear"
   title: "How to Overcome Your Fear of Public Speaking"
@@ -6357,8 +5921,9 @@
   estHours: 1
   summary: "Practical confidence-building habits for anyone who freezes in front of an audience."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "article-kawasaki-10-20-30"
   title: "The 10/20/30 Rule of PowerPoint"
@@ -6374,8 +5939,9 @@
   estHours: 1
   summary: "The classic pitch constraint: ten slides, twenty minutes, thirty-point font, which forces you to know your story."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "article-yc-seed-fundraising-guide"
   title: "A guide to seed fundraising"
@@ -6393,6 +5959,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "article-yc-seed-pitch-deck"
   title: "How to build your seed round pitch deck"
@@ -6408,9 +5975,10 @@
   estHours: 1
   summary: "Slide-by-slide advice on structuring and designing a seed deck that investors can read in minutes."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-yc-seed-fundraising-guide]
+  quality: 3
 
 - id: "article-yc-how-to-pitch-your-company"
   title: "How to Pitch Your Company"
@@ -6426,8 +5994,9 @@
   estHours: 1
   summary: "How to explain what your company does in two sentences and answer the questions every investor asks."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-yc-essential-startup-advice"
   title: "YC's essential startup advice"
@@ -6443,8 +6012,9 @@
   estHours: 1
   summary: "A compact list of YC's core rules for founders, a good frame for what to say in any pitch."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-sequoia-business-plan"
   title: "Writing a Business Plan"
@@ -6460,8 +6030,9 @@
   estHours: 1
   summary: "Sequoia's ten-part pitch outline (purpose, problem, solution, why now, market...) used as a template by countless decks."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-pg-startup-growth"
   title: "Startup = Growth"
@@ -6479,6 +6050,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "article-pg-present-to-investors"
   title: "How to Present to Investors"
@@ -6494,8 +6066,9 @@
   estHours: 1
   summary: "Practical presentation advice for demo-day style pitches: explain what you do first, be concrete, skip the fluff."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "article-pg-do-things-dont-scale"
   title: "Do Things that Don't Scale"
@@ -6513,6 +6086,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "article-wtd-beginners-guide"
   title: "How to write software documentation"
@@ -6528,8 +6102,9 @@
   estHours: 1
   summary: "Why your project needs docs and what a first README and docs set should contain."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-pg-how-to-write-usefully"
   title: "How to Write Usefully"
@@ -6545,8 +6120,9 @@
   estHours: 1
   summary: "Defines useful writing as saying important things correctly, clearly and boldly, a standard for every blog post."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-pg-writing-and-speaking"
   title: "Writing and Speaking"
@@ -6562,8 +6138,9 @@
   estHours: 1
   summary: "Contrasts writing and speaking ability and explains which matters for ideas versus persuasion."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-pg-write-simply"
   title: "Write Simply"
@@ -6579,8 +6156,9 @@
   estHours: 1
   summary: "A short case for plain words and short sentences, especially when your readers are non-native English speakers."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-pg-putting-ideas-into-words"
   title: "Putting Ideas into Words"
@@ -6596,8 +6174,9 @@
   estHours: 1
   summary: "Argues that writing is how you discover whether you understand something, the core reason to keep a daily blog."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-pg-writing-briefly"
   title: "Writing, Briefly"
@@ -6613,8 +6192,9 @@
   estHours: 1
   summary: "A compressed list of writing rules: cut, rewrite, read aloud, and write for one reader."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-pg-writes-and-write-nots"
   title: "Writes and Write-Nots"
@@ -6630,8 +6210,9 @@
   estHours: 1
   summary: "Why, with AI drafting text, the ability to write well and therefore think well becomes a sharper divide."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-orwell-politics-english"
   title: "Politics and the English Language"
@@ -6649,6 +6230,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "article-swyx-learn-in-public"
   title: "Learn In Public"
@@ -6666,6 +6248,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "article-willison-what-to-blog-about"
   title: "What to blog about"
@@ -6683,6 +6266,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-jvns-blog-struggled"
   title: "Blog about what you've struggled with"
@@ -6698,8 +6282,9 @@
   estHours: 1
   summary: "Your hardest-won lessons make the most useful posts, because others are stuck in the same place."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-jvns-blogging-myths"
   title: "Some blogging myths"
@@ -6715,8 +6300,9 @@
   estHours: 1
   summary: "Debunks beliefs like 'you need to be original' or 'you need to be an expert' that stop people from posting."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-jvns-blogging-principles"
   title: "Blogging principles I use"
@@ -6732,8 +6318,9 @@
   estHours: 1
   summary: "A short set of principles for honest, specific, enthusiastic technical posts."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-jvns-measuring-blog-success"
   title: "Measuring a blog's success: focus on conversations, not page views"
@@ -6749,8 +6336,9 @@
   estHours: 1
   summary: "Reframes blog success around the conversations and connections posts create, not traffic numbers."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "article-eugeneyan-writing-online"
   title: "What I Learned from Writing Online - For Fellow Non-Writers"
@@ -6766,8 +6354,9 @@
   estHours: 1
   summary: "An ML engineer's lessons from years of writing: consistency, structure and writing for your past self."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-karlsson-blog-search-query"
   title: "A blog post is a very long and complex search query to find fascinating people and make them route interesting stuff to your inbox"
@@ -6783,8 +6372,9 @@
   estHours: 1
   summary: "Explains how publishing your thinking attracts the collaborators and mentors you could not find otherwise."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "tih-swe-interview-resume"
   title: "Practical guide to writing FAANG-ready software engineer resumes"
@@ -6800,8 +6390,9 @@
   estHours: 2
   summary: "A concrete, section-by-section recipe for a one-page SWE resume that survives recruiter skims and ATS filters."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "tih-behavioral-interview"
   title: "Behavioral interview preparation, step-by-step"
@@ -6817,8 +6408,9 @@
   estHours: 2
   summary: "Explains what behavioural rounds score and how to build a bank of reusable stories before the loop."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "tih-mock-interviews"
   title: "Mock coding interviews"
@@ -6834,8 +6426,9 @@
   estHours: 1
   summary: "Compares free and paid mock-interview options and explains why live practice beats silent grinding."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "bbg-scale-zero-to-millions"
   title: "Scale From Zero To Millions Of Users"
@@ -6851,8 +6444,9 @@
   estHours: 2
   summary: "The free first chapter of the best-known system design interview book, growing one server into a scaled architecture step by step."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "repo-reverse-interview"
   title: "Reverse interview: questions to ask the company"
@@ -6868,8 +6462,9 @@
   estHours: 1
   summary: "A categorised list of questions to ask your interviewers about team, tech and process so you can judge the role too."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-amazon-leadership-principles"
   title: "Amazon Leadership Principles"
@@ -6885,9 +6480,10 @@
   estHours: 1
   summary: "The 16 principles that structure Amazon's behavioural interviews; a useful template for preparing stories for any big-tech loop."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tih-behavioral-interview]
+  quality: 2
 
 - id: "article-dartmouth-star-method"
   title: "Using the STAR Method for Your Next Behavioral Interview"
@@ -6905,6 +6501,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 3
 
 - id: "oauth-net-oauth-2-1"
   title: "OAuth 2.1 (oauth.net overview)"
@@ -6920,9 +6517,10 @@
   estHours: 1
   summary: "Summarises what OAuth 2.1 drops (implicit, password grant) and makes mandatory (PKCE), so you build to the modern profile."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-parecki-oauth2-simplified]
+  quality: 3
 
 - id: "oso-academy-rebac"
   title: "Relationship-Based Access Control (ReBAC) - Authorization Academy"
@@ -6938,9 +6536,10 @@
   estHours: 1
   summary: "Shows how ownership, hierarchy and sharing relationships become permissions, the model behind Zanzibar-style systems."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [oso-authorization-academy]
+  quality: 3
 
 - id: "fowler-microservice-testing"
   title: "Testing Strategies in a Microservice Architecture"
@@ -6959,6 +6558,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [article-practical-test-pyramid]
+  quality: 4
 
 - id: "brandur-rate-limiting-gcra"
   title: "Rate Limiting, Cells, and GCRA"
@@ -6977,6 +6577,7 @@
   priority: 2
   roadmap: "software-architect"
   doFirst: "Stripe Rate Limiters"
+  quality: 4
 
 - id: "article-kayvon-clear-talk-tips"
   title: "Tips for Giving Clear Talks"
@@ -6995,6 +6596,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [video-winston-how-to-speak]
+  quality: 4
 
 - id: "article-tao-talks-not-papers"
   title: "Talks are not the same as papers"
@@ -7010,8 +6612,9 @@
   estHours: 1
   summary: "Explains why a talk should convey intuition and motivation rather than reproduce every detail of the written work."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-a16z-16-startup-metrics"
   title: "16 Startup Metrics"
@@ -7027,8 +6630,9 @@
   estHours: 1
   summary: "Defines the metrics investors expect in a pitch and the common ways founders present them misleadingly."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "article-pg-how-to-raise-money"
   title: "How to Raise Money"
@@ -7044,8 +6648,9 @@
   estHours: 1
   summary: "The definitive essay on how seed fundraising actually unfolds and how founders should run the process."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-pg-convince-investors"
   title: "How to Convince Investors"
@@ -7061,8 +6666,9 @@
   estHours: 1
   summary: "Argues that you convince investors by being a formidable founder with a plausible path to a huge market."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-pg-fundraising-survival"
   title: "A Fundraising Survival Guide"
@@ -7078,8 +6684,9 @@
   estHours: 1
   summary: "Tactics for staying sane and solvent during a fundraise, including how to handle rejection and drawn-out deals."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-pg-investor-herd"
   title: "Investor Herd Dynamics"
@@ -7095,8 +6702,9 @@
   estHours: 1
   summary: "Explains why investors follow each other and how that shapes the sequencing of your meetings."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "article-wtd-docs-as-code"
   title: "Docs as Code"
@@ -7112,9 +6720,10 @@
   estHours: 1
   summary: "Treat documentation like source: version control, review, CI and plain-text markup alongside the code."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-wtd-beginners-guide]
+  quality: 3
 
 - id: "article-pg-best-essay"
   title: "The Best Essay"
@@ -7130,8 +6739,9 @@
   estHours: 1
   summary: "Walks through how a good essay grows from a question by following the most surprising thread."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-pg-persuade-xor-discover"
   title: "Persuade xor Discover"
@@ -7147,8 +6757,9 @@
   estHours: 1
   summary: "Separates writing to persuade from writing to find truth, a useful distinction between pitches and blog posts."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-jvns-tactics-writing-public"
   title: "Some tactics for writing in public"
@@ -7164,8 +6775,9 @@
   estHours: 1
   summary: "How to write posts that attract fewer bad-faith comments by anticipating objections and scoping claims."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-jvns-confusing-explanations"
   title: "Patterns in confusing explanations"
@@ -7183,6 +6795,7 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "article-jvns-good-examples"
   title: "Write good examples by starting with real code"
@@ -7198,8 +6811,9 @@
   estHours: 1
   summary: "How to pick realistic, surprising examples that make technical writing click."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "tih-understanding-compensation"
   title: "Understanding compensation and offer negotiation"
@@ -7215,8 +6829,9 @@
   estHours: 1
   summary: "Decodes base, bonus, RSUs and vesting so you can compare intern and new-grad offers properly."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "tih-negotiation-rules"
   title: "Negotiation rules"
@@ -7232,9 +6847,10 @@
   estHours: 1
   summary: "A compact checklist of offer-negotiation rules to keep open during recruiter calls."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tih-understanding-compensation]
+  quality: 2
 
 - id: "tih-system-design-guide"
   title: "System design interview preparation guide"
@@ -7250,8 +6866,9 @@
   estHours: 2
   summary: "A short map of what the system design round is, how it is graded and which resources to study in what order."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "hi-numbers-to-know"
   title: "Numbers to Know (System Design Core Concepts)"
@@ -7267,9 +6884,10 @@
   estHours: 1
   summary: "Updated latency, throughput and capacity figures for modern hardware so your back-of-envelope estimates are credible."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "System Design in a Hurry"
+  quality: 3
 
 - id: "hi-pattern-contention"
   title: "Dealing with Contention (System Design Pattern)"
@@ -7285,9 +6903,10 @@
   estHours: 1
   summary: "Collects the locking, optimistic concurrency and queueing options interviewers probe when many users hit one record."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [hi-design-ticketmaster]
+  quality: 3
 
 - id: "hi-low-level-design-intro"
   title: "Low-Level Design in a Hurry: Introduction"
@@ -7303,8 +6922,9 @@
   estHours: 1
   summary: "Introduces the object-oriented design round (classes, interfaces, patterns) that many new-grad loops include."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-haseeb-ten-rules-negotiation"
   title: "Ten Rules for Negotiating a Job Offer"
@@ -7322,6 +6942,7 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "article-haseeb-dont-bomb-negotiation"
   title: "How Not to Bomb Your Offer Negotiation"
@@ -7337,9 +6958,10 @@
   estHours: 1
   summary: "Part two of the negotiation series, with scripts for the recruiter conversations where offers are actually won or lost."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-haseeb-ten-rules-negotiation]
+  quality: 3
 
 - id: "article-patio11-salary-negotiation"
   title: "Salary Negotiation: Make More Money, Be More Valued"
@@ -7357,6 +6979,7 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "article-orosz-prep-sd-coding"
   title: "Preparing for the Systems Design and Coding Interview"
@@ -7374,6 +6997,7 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-interviewingio-sd-guide"
   title: "A Senior Engineer's Guide to the System Design Interview"
@@ -7392,6 +7016,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [system-design-primer]
+  quality: 3
 
 - id: "podcast-think-fast-talk-smart"
   title: "Think Fast, Talk Smart: The Podcast"
@@ -7407,9 +7032,10 @@
   estHours: 10
   summary: "Short episodes on handling nerves, impromptu speaking, Q&A and persuasive structure, ideal for commute listening."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   blog: true
+  quality: 2
 
 - id: "blog-presentation-zen"
   title: "Presentation Zen"
@@ -7425,9 +7051,10 @@
   estHours: 10
   summary: "The home of the simplicity-and-story approach to slides that changed how many engineers design presentations."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   blog: true
+  quality: 2
 
 - id: "blog-duarte"
   title: "Presentation and Communication Blog"
@@ -7443,11 +7070,12 @@
   estHours: 10
   summary: "Articles on story structure, data storytelling and slide design from the firm behind many famous keynotes."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   blog: true
 
 # ---- Systems: low-level programming, OS kernels, algorithms (14)
+  quality: 2
 
 - id: "cppref-condition-variable"
   title: "std::condition_variable (cppreference)"
@@ -7499,7 +7127,7 @@
   priority: 2
 
 - id: "article-bctci-nine-free-chapters"
-  title: "Cracking the Coding Interview (6th Edition)"
+  title: "Beyond Cracking the Coding Interview: nine free chapters"
   short: "BCtCI Free Chapters"
   provider: "Aline Lerner, Gayle Laakmann McDowell, Mike Mroczka, Nil Mamano (interviewing.io)"
   type: "book"
@@ -7696,9 +7324,10 @@
   estHours: 1
   summary: "Conventions for units, suffixes like _total and _seconds, and label design that keep metrics queryable."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [prometheus-metric-types]
+  quality: 3
 
 - id: "prometheus-querying-basics"
   title: "Querying Prometheus (PromQL basics)"
@@ -7717,6 +7346,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [prometheus-getting-started]
+  quality: 4
 
 - id: "prometheus-metric-types"
   title: "Metric types (Prometheus)"
@@ -7732,8 +7362,9 @@
   estHours: 1
   summary: "Short reference for counters, gauges, histograms and summaries and when each is appropriate."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "otel-concepts-traces"
   title: "Traces (OpenTelemetry concepts)"
@@ -7749,8 +7380,9 @@
   estHours: 1
   summary: "Defines spans, span context, attributes, events and links: the vocabulary for any distributed tracing work."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "structlog-docs"
   title: "structlog documentation"
@@ -7766,9 +7398,10 @@
   estHours: 2
   summary: "The standard Python library for key-value structured logs, with a good intro on why context-rich logs beat strings."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [py-howto-logging]
+  quality: 3
 
 - id: "k6-docs"
   title: "Grafana k6 documentation"
@@ -7784,8 +7417,9 @@
   estHours: 4
   summary: "Script load tests in JavaScript, set thresholds as pass/fail criteria, and run them in CI."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "locust-docs"
   title: "Locust Documentation"
@@ -7801,8 +7435,9 @@
   estHours: 3
   summary: "Write load tests as plain Python user classes and scale them across workers; natural for Python backends."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "docs-github-contributing-to-open-source"
   title: "Contributing to open source (GitHub Docs)"
@@ -7818,9 +7453,10 @@
   estHours: 1
   summary: "GitHub's own walkthrough of finding a project, reading its guidelines and opening your first issue or PR."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "How to Contribute to OSS"
+  quality: 3
 
 - id: "docs-github-fork-a-repo"
   title: "Fork a repository (GitHub Docs)"
@@ -7836,8 +7472,9 @@
   estHours: 1
   summary: "The exact steps to fork, clone and add an upstream remote, the setup every outside PR to PyTorch or vLLM starts from."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "docs-github-syncing-a-fork"
   title: "Syncing a fork (GitHub Docs)"
@@ -7853,9 +7490,10 @@
   estHours: 1
   summary: "Shows how to keep your fork current with upstream so fast-moving repos don't leave your branch in merge-conflict hell."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-github-fork-a-repo]
+  quality: 2
 
 - id: "docs-github-pr-from-fork"
   title: "Creating a pull request from a fork (GitHub Docs)"
@@ -7871,9 +7509,10 @@
   estHours: 1
   summary: "Covers opening a cross-repo PR and letting maintainers push to your branch, which speeds up review on big projects."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-github-fork-a-repo]
+  quality: 2
 
 - id: "docs-github-pull-request-reviews"
   title: "Pull request reviews (GitHub Docs)"
@@ -7889,9 +7528,10 @@
   estHours: 1
   summary: "Explains comment, approve and request-changes states plus required reviews, so you can read what reviewers expect from you."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-github-pr-from-fork]
+  quality: 2
 
 - id: "docs-github-commit-signature-verification"
   title: "About commit signature verification (GitHub Docs)"
@@ -7907,9 +7547,10 @@
   estHours: 1
   summary: "Explains GPG/SSH-signed commits and the Verified badge, which some NVIDIA and LF projects require alongside sign-off."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-github-fork-a-repo]
+  quality: 3
 
 - id: "docs-developer-certificate-of-origin"
   title: "Developer Certificate of Origin"
@@ -7925,8 +7566,9 @@
   estHours: 1
   summary: "The short legal text you agree to with `git commit -s`; TensorRT-LLM and many LF projects block PRs without it."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "docs-gsoc-home"
   title: "Google Summer of Code"
@@ -7945,6 +7587,7 @@
   priority: 2
   roadmap: "software-architect"
   doFirst: "How to Contribute to OSS"
+  quality: 3
 
 - id: "docs-gsoc-guide-what-is-gsoc"
   title: "What is Google Summer of Code? (GSoC Contributor Guide)"
@@ -7960,9 +7603,10 @@
   estHours: 2
   summary: "Google's guide for applicants on choosing an org, talking to mentors early and what a GSoC summer actually looks like."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gsoc-home]
+  quality: 3
 
 - id: "docs-gsoc-guide-writing-a-proposal"
   title: "Writing a proposal (GSoC Contributor Guide)"
@@ -7981,6 +7625,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-gsoc-guide-what-is-gsoc]
+  quality: 4
 
 - id: "docs-outreachy-applicant-guide"
   title: "Applicant Guide (Outreachy Documentation)"
@@ -7999,6 +7644,7 @@
   priority: 2
   roadmap: "software-architect"
   doFirst: "How to Contribute to OSS"
+  quality: 3
 
 - id: "docs-lfx-mentorship"
   title: "LFX Mentorship (Linux Foundation docs)"
@@ -8017,6 +7663,7 @@
   priority: 2
   roadmap: "software-architect"
   doFirst: "How to Contribute to OSS"
+  quality: 3
 
 - id: "docs-transformers-contributing"
   title: "Contribute to Transformers (CONTRIBUTING.md)"
@@ -8035,6 +7682,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-github-fork-a-repo]
+  quality: 4
 
 - id: "prometheus-instrumentation-practices"
   title: "Instrumentation (Prometheus best practices)"
@@ -8053,6 +7701,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [prometheus-docs]
+  quality: 4
 
 - id: "prometheus-histograms-summaries"
   title: "Histograms and summaries (Prometheus)"
@@ -8071,6 +7720,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [prometheus-metric-types]
+  quality: 4
 
 - id: "prometheus-alerting-practices"
   title: "Alerting (Prometheus best practices)"
@@ -8089,6 +7739,7 @@
   priority: 2
   roadmap: "software-architect"
   doFirst: "SRE Book Ch. 6"
+  quality: 4
 
 - id: "prometheus-alertmanager-overview"
   title: "Alerting overview (Prometheus Alertmanager)"
@@ -8104,9 +7755,10 @@
   estHours: 1
   summary: "Explains how alert rules flow into Alertmanager for grouping, inhibition, silencing and routing to receivers."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [prometheus-alerting-practices]
+  quality: 3
 
 - id: "otel-collector-docs"
   title: "OpenTelemetry Collector"
@@ -8125,6 +7777,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [otel-concepts-traces]
+  quality: 4
 
 - id: "jaeger-docs"
   title: "Jaeger Documentation"
@@ -8140,9 +7793,10 @@
   estHours: 3
   summary: "The open-source tracing backend's docs: architecture, deployment and using its UI to find slow spans."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   after: [otel-concepts-traces]
+  quality: 3
 
 - id: "loki-get-started"
   title: "Get started with Grafana Loki"
@@ -8158,9 +7812,10 @@
   estHours: 2
   summary: "Introduces label-indexed log aggregation and walks through shipping and querying logs with LogQL."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [grafana-fundamentals-tutorial]
+  quality: 3
 
 - id: "docs-pytorch-contributing-md"
   title: "Contributing to PyTorch (CONTRIBUTING.md)"
@@ -8179,6 +7834,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-github-fork-a-repo]
+  quality: 4
 
 - id: "docs-pytorch-wiki-ultimate-guide"
   title: "The Ultimate Guide to PyTorch Contributions (PyTorch wiki)"
@@ -8197,6 +7853,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-pytorch-contributing-md]
+  quality: 4
 
 - id: "docs-pytorch-wiki-contribution-process"
   title: "The PyTorch Contribution Process (PyTorch wiki)"
@@ -8212,9 +7869,10 @@
   estHours: 1
   summary: "Up-to-date description of how bugs, features and PRs move through triage and review in PyTorch."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-pytorch-contributing-md]
+  quality: 3
 
 - id: "docs-pytorch-wiki-code-review-values"
   title: "Code review values (PyTorch wiki)"
@@ -8230,9 +7888,10 @@
   estHours: 1
   summary: "Lists what PyTorch reviewers check for, so you can pre-empt their comments before you hit submit."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-pytorch-contributing-md]
+  quality: 3
 
 - id: "docs-pytorch-wiki-pr-review-etiquette"
   title: "Pull request review etiquette (PyTorch wiki)"
@@ -8248,9 +7907,10 @@
   estHours: 1
   summary: "Short norms on request-changes, re-review SLAs and pinging, which tell an outside author how to keep a PR moving."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-pytorch-contributing-md]
+  quality: 2
 
 - id: "docs-vllm-contributing"
   title: "Contributing to vLLM"
@@ -8269,6 +7929,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-github-fork-a-repo]
+  quality: 4
 
 - id: "docs-vllm-incremental-build"
   title: "vLLM Incremental Compilation Workflow"
@@ -8287,6 +7948,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-vllm-contributing]
+  quality: 3
 
 - id: "docs-sglang-contribution-guide"
   title: "SGLang Contribution Guide"
@@ -8305,6 +7967,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-github-fork-a-repo]
+  quality: 3
 
 - id: "docs-sglang-dev-docker"
   title: "SGLang Development Guide Using Docker"
@@ -8320,9 +7983,10 @@
   estHours: 1
   summary: "The reproducible container plus remote-VSCode setup SGLang maintainers use, handy when you rent a GPU box to test a PR."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-sglang-contribution-guide]
+  quality: 2
 
 - id: "docs-llamacpp-contributing"
   title: "llama.cpp CONTRIBUTING.md"
@@ -8341,6 +8005,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-github-fork-a-repo]
+  quality: 3
 
 - id: "docs-triton-contributing"
   title: "Triton CONTRIBUTING.md (governance and contribution rules)"
@@ -8359,6 +8024,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-github-fork-a-repo]
+  quality: 3
 
 - id: "docs-tensorrt-llm-contributing"
   title: "TensorRT-LLM Contribution Rules"
@@ -8377,6 +8043,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-developer-certificate-of-origin]
+  quality: 3
 
 - id: "docs-cutlass-python-contribute"
   title: "Contributing (CUTLASS Python docs)"
@@ -8392,9 +8059,10 @@
   estHours: 1
   summary: "CUTLASS's short contribution page: file issues first, use Discussions for questions and send fixes as PRs."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-github-fork-a-repo]
+  quality: 2
 
 - id: "docs-hydra-getting-started"
   title: "Hydra: Getting started"
@@ -8410,8 +8078,9 @@
   estHours: 2
   summary: "Composable configs and command-line overrides make sweeps reproducible and keep experiment settings out of your code."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "w3c-trace-context"
   title: "Trace Context (W3C Recommendation)"
@@ -8430,6 +8099,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [otel-concepts-traces]
+  quality: 4
 
 - id: "cert-lf-kcna"
   title: "Kubernetes and Cloud Native Associate (KCNA)"
@@ -8445,9 +8115,10 @@
   estHours: 30
   summary: "Entry-level CNCF credential on Kubernetes and cloud-native basics; you can prepare with the free LFS158 course, and the exam is listed at US$250."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "Intro to Kubernetes (LFS158)"
+  quality: 1
 
 - id: "cert-lf-lfcs"
   title: "Linux Foundation Certified System Administrator (LFCS)"
@@ -8463,9 +8134,10 @@
   estHours: 60
   summary: "Hands-on Linux admin exam covering users, storage, networking and services; free prep is available through LFS101, and the exam is listed at US$445."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "Intro to Linux (LFS101)"
+  quality: 2
 
 - id: "cert-coursera-ml-in-production"
   title: "Machine Learning in Production"
@@ -8481,9 +8153,10 @@
   estHours: 10
   summary: "Andrew Ng's MLOps course; auditing is free, while the paid certificate shows you can scope, deploy and monitor ML systems."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "ML Specialization"
+  quality: 3
 
 - id: "cert-lf-cka"
   title: "Certified Kubernetes Administrator (CKA)"
@@ -8499,10 +8172,11 @@
   estHours: 60
   summary: "The best-known hands-on Kubernetes exam, proving you can install, run and troubleshoot clusters from the command line; listed at US$445."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [cert-lf-kcna]
+  quality: 3
 
 - id: "cert-lf-ckad"
   title: "Certified Kubernetes Application Developer (CKAD)"
@@ -8518,10 +8192,11 @@
   estHours: 50
   summary: "Performance-based exam proving you can design, deploy and debug applications on Kubernetes; listed at US$445."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   after: [cert-lf-kcna]
+  quality: 2
 
 - id: "cert-lf-kcsa"
   title: "Kubernetes and Cloud Native Security Associate (KCSA)"
@@ -8537,10 +8212,11 @@
   estHours: 25
   summary: "Multiple-choice associate exam on cloud-native security concepts, a lighter step before CKS; listed at US$250."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [cert-lf-kcna]
+  quality: 1
 
 - id: "cert-lf-pca"
   title: "Prometheus Certified Associate (PCA)"
@@ -8556,10 +8232,11 @@
   estHours: 25
   summary: "Shows you understand metrics, PromQL, alerting and instrumentation with Prometheus, the core of cloud-native observability; listed at US$250."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [cert-lf-kcna]
+  quality: 2
 
 - id: "cert-aws-ml-engineer-associate"
   title: "AWS Certified Machine Learning Engineer - Associate"
@@ -8575,10 +8252,11 @@
   estHours: 70
   summary: "Shows you can put ML workloads into production and operate them on AWS; the current exam is listed at US$150, with an updated beta version at US$75."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [cert-coursera-ml-in-production]
+  quality: 2
 
 - id: "cert-aws-cloudops-associate"
   title: "AWS Certified CloudOps Engineer - Associate"
@@ -8594,10 +8272,11 @@
   estHours: 70
   summary: "Operations-focused AWS associate credential (successor to SysOps) on deploying, monitoring and automating AWS workloads."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   doFirst: "AWS Cloud Practitioner"
+  quality: 2
 
 - id: "cert-gcp-associate-cloud-engineer"
   title: "Google Cloud Associate Cloud Engineer"
@@ -8613,9 +8292,10 @@
   estHours: 50
   summary: "Hands-on associate credential for deploying, securing and operating workloads on Google Cloud; 2-hour exam listed at US$125 and valid for 3 years."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 2
 
 - id: "cert-hashicorp-terraform-associate"
   title: "HashiCorp Certified: Terraform Associate"
@@ -8631,9 +8311,10 @@
   estHours: 25
   summary: "Hour-long exam proving foundational infrastructure-as-code skills with Terraform; HashiCorp's own tutorials are free for preparation."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [cert-lf-cka]
+  quality: 2
 
 - id: "cert-lf-cks"
   title: "Certified Kubernetes Security Specialist (CKS)"
@@ -8649,10 +8330,11 @@
   estHours: 60
   summary: "Advanced hands-on exam on hardening clusters, supply-chain security and runtime protection; requires an active CKA and is listed at US$445."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [cert-lf-cka]
+  quality: 2
 
 - id: "cert-gcp-pro-ml-engineer"
   title: "Google Cloud Professional Machine Learning Engineer"
@@ -8668,10 +8350,11 @@
   estHours: 80
   summary: "Professional exam covering architecting, serving, scaling, automating and monitoring ML on Google Cloud; 2 hours, listed at US$200 and valid for 2 years."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   after: [cert-coursera-ml-in-production]
+  quality: 2
 
 - id: "prometheus-getting-started"
   title: "Getting started (Prometheus)"
@@ -8687,8 +8370,9 @@
   estHours: 2
   summary: "Install Prometheus, scrape itself and sample targets, and run recording rules in under an hour."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "otel-python-getting-started"
   title: "Getting Started (OpenTelemetry Python)"
@@ -8704,8 +8388,9 @@
   estHours: 2
   summary: "Instrument a Flask app with traces, metrics and logs, first automatically and then by hand."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "grafana-fundamentals-tutorial"
   title: "Grafana fundamentals"
@@ -8721,9 +8406,10 @@
   estHours: 2
   summary: "Guided lab that connects Prometheus and Loki, builds a dashboard, and sets up an alert end to end."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [prometheus-getting-started]
+  quality: 3
 
 - id: "otel-go-getting-started"
   title: "Getting Started (OpenTelemetry Go)"
@@ -8739,9 +8425,10 @@
   estHours: 2
   summary: "Builds a small Go HTTP service and wires up the OTel SDK for traces, metrics and logs explicitly."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "Go Tour"
+  quality: 3
 
 - id: "practice-goodfirstissue-dev"
   title: "Good First Issue"
@@ -8757,9 +8444,10 @@
   estHours: 5
   summary: "Curated feed of beginner-labelled issues from popular repos, filterable by language, to find a realistic first PR."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "How to Contribute to OSS"
+  quality: 2
 
 - id: "practice-up-for-grabs"
   title: "Up For Grabs"
@@ -8775,9 +8463,10 @@
   estHours: 5
   summary: "Directory of projects that tag tasks specifically for newcomers, a second source when goodfirstissue.dev comes up dry."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "How to Contribute to OSS"
+  quality: 2
 
 - id: "repo-lightning-hydra-template"
   title: "Lightning-Hydra-Template"
@@ -8793,9 +8482,10 @@
   estHours: 3
   summary: "A ready project skeleton combining PyTorch Lightning, Hydra configs and loggers for clean, repeatable experiments."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-hydra-getting-started]
+  quality: 3
 
 - id: "k6-load-test-types"
   title: "Load test types (k6 testing guides)"
@@ -8811,9 +8501,10 @@
   estHours: 1
   summary: "Defines smoke, average-load, stress, soak, spike and breakpoint tests and when each answers a real question."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [k6-docs]
+  quality: 3
 
 - id: "docs-opensource-guide-code-of-conduct"
   title: "Your Code of Conduct (Open Source Guides)"
@@ -8829,9 +8520,10 @@
   estHours: 1
   summary: "Explains why projects adopt codes of conduct and how enforcement works, so you know the norms you're joining."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "How to Contribute to OSS"
+  quality: 2
 
 - id: "sridharan-monitoring-observability"
   title: "Monitoring and Observability"
@@ -8852,6 +8544,7 @@
   doFirst: "SRE Book Ch. 6"
 
 # ---- Languages (38)
+  quality: 4
 
 - id: "cppref-raii"
   title: "RAII (cppreference)"
@@ -8869,6 +8562,7 @@
   fromYear: 1
   priority: 2
   doFirst: "learncpp"
+  quality: 4
 
 - id: "cppref-virtual"
   title: "virtual function specifier (cppreference)"
@@ -8884,7 +8578,8 @@
   estHours: 1
   summary: "Rules of dynamic dispatch, override, final and virtual destructors, a staple of C++ interview questions."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "docs-chinesetest-hsk"
   title: "HSK (Chinese Tests Service Website)"
@@ -8901,6 +8596,7 @@
   summary: "Official source on the HSK levels, including the new three-stage nine-level framework, to set a concrete target."
   fromYear: 1
   priority: 2
+  quality: 3
 
 - id: "docs-allset-chinese-pronunciation-wiki"
   title: "Chinese Pronunciation Wiki"
@@ -8918,6 +8614,7 @@
   fromYear: 1
   priority: 2
   after: [tutorial-yoyo-pinyin-chart]
+  quality: 4
 
 - id: "docs-allset-chinese-grammar-wiki"
   title: "Chinese Grammar Wiki"
@@ -8935,6 +8632,7 @@
   fromYear: 1
   priority: 2
   after: [course-coursera-pku-chinese-for-beginners]
+  quality: 4
 
 - id: "docs-allset-a1-grammar-points"
   title: "A1 grammar points (Chinese Grammar Wiki)"
@@ -8950,8 +8648,9 @@
   estHours: 8
   summary: "Checklist of the absolute-beginner grammar patterns to work through alongside a course."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [docs-allset-chinese-grammar-wiki]
+  quality: 3
 
 - id: "docs-mdbg-cc-cedict"
   title: "CC-CEDICT (MDBG Chinese Dictionary)"
@@ -8968,6 +8667,7 @@
   summary: "The open CC BY-SA Chinese-English dictionary behind most apps, usable directly or to build your own study tools."
   fromYear: 1
   priority: 2
+  quality: 3
 
 - id: "docs-anki-manual"
   title: "Anki Docs (manual)"
@@ -8984,6 +8684,7 @@
   summary: "Official docs for the spaced-repetition app most Mandarin learners use for vocabulary and character review."
   fromYear: 1
   priority: 2
+  quality: 4
 
 - id: "cppref-rule-of-three-five-zero"
   title: "The rule of three/five/zero (cppreference)"
@@ -9001,6 +8702,7 @@
   fromYear: 2
   priority: 2
   after: [cppref-raii]
+  quality: 4
 
 - id: "cppref-value-categories"
   title: "Value categories (cppreference)"
@@ -9017,6 +8719,7 @@
   summary: "Precise lvalue/prvalue/xvalue rules, the foundation for answering any move-semantics question correctly."
   fromYear: 2
   priority: 2
+  quality: 4
 
 - id: "cppref-move-constructor"
   title: "Move constructors (cppreference)"
@@ -9034,6 +8737,7 @@
   fromYear: 2
   priority: 2
   after: [cppref-value-categories]
+  quality: 4
 
 - id: "cppref-templates"
   title: "Templates (cppreference)"
@@ -9050,6 +8754,7 @@
   summary: "Reference for class, function, alias and variable templates and how instantiation works."
   fromYear: 2
   priority: 2
+  quality: 4
 
 - id: "cppref-undefined-behavior"
   title: "Undefined behavior (cppreference)"
@@ -9066,6 +8771,7 @@
   summary: "Lists the kinds of UB and shows how optimisers exploit it, which explains many trick interview snippets."
   fromYear: 2
   priority: 2
+  quality: 4
 
 - id: "cppref-memory-order"
   title: "std::memory_order (cppreference)"
@@ -9081,8 +8787,9 @@
   estHours: 2
   summary: "The authoritative description of relaxed, acquire/release and seq_cst ordering with the standard publication examples."
   fromYear: 2
-  priority: 2
+  priority: 1
   after: [article-preshing-acquire-release]
+  quality: 5
 
 - id: "docs-isocpp-faq-cpp11-language"
   title: "C++11 Language Extensions: General Features (isocpp FAQ)"
@@ -9098,7 +8805,8 @@
   estHours: 3
   summary: "FAQ-style answers on auto, lambdas, rvalue references, move semantics and other C++11 features written by the committee community."
   fromYear: 2
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "docs-tensorrt-llm-coding-guidelines"
   title: "TensorRT-LLM Coding Guidelines"
@@ -9114,8 +8822,9 @@
   estHours: 2
   summary: "The C++ and Python style rules NVIDIA reviewers enforce, worth reading before your first kernel or runtime PR."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-tensorrt-llm-contributing]
+  quality: 3
 
 - id: "article-josuttis-b2b-templates"
   title: "CppCon 2022: Back to Basics: Templates in C++"
@@ -9131,8 +8840,9 @@
   estHours: 1
   summary: "A one-hour introduction to function and class templates from a co-author of the standard C++ templates book."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [cppref-templates]
+  quality: 3
 
 - id: "article-sutter-atomic-weapons"
   title: "atomic<> Weapons: The C++ Memory Model and Modern Hardware"
@@ -9148,8 +8858,9 @@
   estHours: 3
   summary: "The definitive two-part talk on the C++ memory model and how it maps to real CPUs, with slides."
   fromYear: 3
-  priority: 2
+  priority: 1
   after: [cppref-memory-order]
+  quality: 5
 
 - id: "course-coursera-pku-chinese-for-beginners"
   title: "Chinese for Beginners"
@@ -9165,7 +8876,8 @@
   estHours: 20
   summary: "Peking University's intro course on pinyin, tones and survival phrases, taught in English for total beginners."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "course-coursera-pku-more-chinese-for-beginners"
   title: "More Chinese for Beginners"
@@ -9181,8 +8893,9 @@
   estHours: 20
   summary: "The follow-on PKU course extending everyday vocabulary and sentence patterns after the first course."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [course-coursera-pku-chinese-for-beginners]
+  quality: 3
 
 - id: "course-mit-ocw-21g101-chinese-i"
   title: "Chinese I (Regular): A First-Semester Introduction to Mandarin"
@@ -9198,7 +8911,8 @@
   estHours: 40
   summary: "MIT's first-semester Mandarin materials, a structured university syllabus you can follow on your own."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "course-mit-ocw-21g102-chinese-ii"
   title: "Chinese II (Regular)"
@@ -9214,8 +8928,9 @@
   estHours: 40
   summary: "The second-semester MIT course, continuing grammar and conversation once Chinese I is done."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [course-mit-ocw-21g101-chinese-i]
+  quality: 3
 
 - id: "tutorial-yoyo-pinyin-chart"
   title: "Yoyo Chinese Interactive Pinyin Chart"
@@ -9231,8 +8946,9 @@
   estHours: 3
   summary: "Click-to-hear chart of every pinyin syllable with video for the tricky sounds, a good first week of pronunciation work."
   fromYear: 1
-  priority: 2
+  priority: 3
   note: "Free tier"
+  quality: 1
 
 - id: "practice-sinosplice-tone-pair-drills"
   title: "Mandarin Chinese Tone Pair Drills"
@@ -9248,8 +8964,9 @@
   estHours: 4
   summary: "Free audio drills of two-syllable tone combinations, the practical way to make tones stick in real words."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [docs-allset-chinese-pronunciation-wiki]
+  quality: 3
 
 - id: "practice-duolingo-chinese"
   title: "Duolingo Chinese course"
@@ -9265,8 +8982,9 @@
   estHours: 30
   summary: "Short daily gamified lessons that build a habit and basic vocabulary; pair it with a real course for depth."
   fromYear: 1
-  priority: 2
+  priority: 3
   note: "Free tier"
+  quality: 2
 
 - id: "practice-complete-hsk-vocabulary"
   title: "Complete HSK Vocabulary (HSK 2.0/3.0 lists in JSON)"
@@ -9284,6 +9002,7 @@
   fromYear: 1
   priority: 2
   after: [docs-chinesetest-hsk]
+  quality: 3
 
 - id: "article-hacking-chinese-pronunciation-beginner"
   title: "Learning pronunciation as a beginner"
@@ -9301,6 +9020,7 @@
   fromYear: 1
   priority: 2
   after: [tutorial-yoyo-pinyin-chart]
+  quality: 3
 
 - id: "article-hacking-chinese-tones-not-optional"
   title: "Learning tones in Mandarin is not optional"
@@ -9316,7 +9036,8 @@
   estHours: 1
   summary: "Explains why tones carry meaning and why skipping them early makes you hard to understand later."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "article-hacking-chinese-tone-pairs"
   title: "Focusing on tone pairs to improve your Mandarin pronunciation"
@@ -9332,8 +9053,9 @@
   estHours: 1
   summary: "Shows why practising tones in two-syllable words beats drilling isolated syllables."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [article-hacking-chinese-tones-not-optional]
+  quality: 3
 
 - id: "article-hacking-chinese-pinyin-traps"
   title: "A guide to Pinyin traps and pitfalls"
@@ -9351,6 +9073,7 @@
   fromYear: 1
   priority: 2
   after: [tutorial-yoyo-pinyin-chart]
+  quality: 3
 
 - id: "article-hacking-chinese-characters-beginner"
   title: "How to learn Chinese characters as a beginner"
@@ -9368,6 +9091,7 @@
   fromYear: 1
   priority: 2
   after: [article-hacking-chinese-pronunciation-beginner]
+  quality: 4
 
 - id: "article-hacking-chinese-beginner-listening"
   title: "Beginner Chinese listening practice: What to listen to and how"
@@ -9385,6 +9109,7 @@
   fromYear: 1
   priority: 2
   after: [blog-hacking-chinese]
+  quality: 3
 
 - id: "article-harvard-clp-vocabulary-study"
   title: "Vocabulary (Harvard Chinese Language Curriculum)"
@@ -9400,8 +9125,9 @@
   estHours: 1
   summary: "Harvard's Chinese program's own recommendation of Pleco and Anki for vocabulary study, with how to use each."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [docs-anki-manual]
+  quality: 3
 
 - id: "article-china-briefing-996-work-culture"
   title: "The 996 Work Culture That's Causing a Burnout in China's Tech World"
@@ -9417,7 +9143,8 @@
   estHours: 1
   summary: "Background on long-hours norms in Chinese tech and the legal context, useful before accepting an offer there."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 2
 
 - id: "article-sixth-tone-tech-worker-overtime"
   title: "'I'll Resign': A Tech Worker Counters China's Overtime Culture"
@@ -9433,8 +9160,9 @@
   estHours: 1
   summary: "A first-person view from inside a Chinese tech firm, showing how workplace expectations and pushback play out."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [article-china-briefing-996-work-culture]
+  quality: 1
 
 - id: "article-becker-rvalue-references"
   title: "C++ Rvalue References Explained"
@@ -9452,6 +9180,7 @@
   fromYear: 2
   priority: 2
   after: [cppref-value-categories]
+  quality: 4
 
 - id: "article-fluentu-chinese-technical-terms"
   title: "140+ Technical Terms in Chinese to Sound Like a Tech-savvy Native Speaker"
@@ -9467,8 +9196,9 @@
   estHours: 2
   summary: "Computer, internet and software vocabulary an engineer will hear in a Chinese office from day one."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [course-coursera-pku-chinese-for-beginners]
+  quality: 2
 
 - id: "blog-hacking-chinese"
   title: "Hacking Chinese"
@@ -9488,6 +9218,7 @@
   blog: true
 
 # ---- Graphics and rendering (52)
+  quality: 4
 
 - id: "docs-nerfstudio"
   title: "Nerfstudio documentation"
@@ -10547,7 +10278,8 @@
   estHours: 94
   summary: "Linear algebra, calculus and probability for ML; you can audit for free, and the paid specialization certificate shows your math foundations are in place."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "cert-mitx-sds-micromasters"
   title: "MITx MicroMasters Program in Statistics and Data Science"
@@ -10567,6 +10299,7 @@
   after: [cert-coursera-math-for-ml]
 
 # ---- Electrical and mechanical engineering (3)
+  quality: 4
 
 - id: "cert-autodesk-aca-fusion"
   title: "Autodesk Certified Associate in CAD for Mechanical Design"
@@ -10584,6 +10317,7 @@
   fromYear: 1
   priority: 4
   note: "Paid"
+  quality: 2
 
 - id: "cert-solidworks-cswa"
   title: "Certified SOLIDWORKS Design Associate (CSWA)"
@@ -10601,6 +10335,7 @@
   fromYear: 1
   priority: 4
   note: "Paid"
+  quality: 2
 
 - id: "cert-autodesk-acp-dfm"
   title: "Autodesk Certified Professional in Design for Manufacturing"
@@ -10614,8 +10349,9 @@
   level: "intermediate"
   cost: "paid"
   estHours: 200
-  summary: "Professional-level Fusion credential for design-for-manufacturing workflows, the next step after the ACA."
+  summary: "Professional-level Fusion credential for design-for-manufacturing workflows, the next step after the ACA. A paid proctored certification exam, not a course."
   fromYear: 2
   priority: 4
   note: "Paid"
   after: [cert-autodesk-aca-fusion]
+  quality: 2

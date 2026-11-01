@@ -3,32 +3,32 @@
 # paper's title (the Baraff-Witkin PDF is a scan, so it was confirmed through the author's publication list).
 
 # ---- year 1-2 classics
-- { id: paper-alexnet, title: "ImageNet Classification with Deep Convolutional Neural Networks (AlexNet)", authors: "Krizhevsky, Sutskever, Hinton", year: 2012, url: "https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "AlexNet", summary: "The 2012 result that kicked off the deep learning era, and a readable tour of GPU-trained CNN tricks.", level: "intro", fromYear: 1, priority: 1, roadmap: "ai-engineer" }
-- { id: paper-word2vec, title: "Efficient Estimation of Word Representations in Vector Space (word2vec)", authors: "Mikolov, Chen, Corrado, Dean", year: 2013, url: "https://arxiv.org/abs/1301.3781", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "word2vec", summary: "The paper that made dense word embeddings mainstream, with the famous vector-arithmetic analogies.", level: "intro", fromYear: 1, priority: 1, roadmap: "ai-engineer" }
-- { id: paper-vae, title: "Auto-Encoding Variational Bayes (VAE)", authors: "Kingma, Welling", year: 2013, url: "https://arxiv.org/abs/1312.6114", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "VAE (Kingma)", summary: "Introduces the reparameterization trick and the VAE, a core idea for latent-variable and diffusion models.", level: "advanced", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "diffusion" }
-- { id: paper-gan, title: "Generative Adversarial Networks", authors: "Goodfellow et al.", year: 2014, url: "https://arxiv.org/abs/1406.2661", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "GANs (Goodfellow 2014)", summary: "The original minimax game between generator and discriminator, short and foundational for generative modeling.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai" }
-- { id: paper-dropout, title: "Dropout: A Simple Way to Prevent Neural Networks from Overfitting", authors: "Srivastava, Hinton, Krizhevsky, Sutskever, Salakhutdinov", year: 2014, url: "https://jmlr.org/papers/v15/srivastava14a.html", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "Dropout", summary: "The classic regularizer explained with both intuition and extensive experiments.", level: "intro", fromYear: 1, priority: 1, roadmap: "ai-engineer" }
-- { id: paper-adam, title: "Adam: A Method for Stochastic Optimization", authors: "Kingma, Ba", year: 2014, url: "https://arxiv.org/abs/1412.6980", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai, math], group: classics, short: "Adam", summary: "The default optimizer of deep learning; read it to know what its moment estimates and bias correction do.", level: "intermediate", fromYear: 1, priority: 1, roadmap: "ai-engineer" }
-- { id: paper-batchnorm, title: "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift", authors: "Ioffe, Szegedy", year: 2015, url: "https://arxiv.org/abs/1502.03167", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "Batch Norm", summary: "Introduces the normalization layer that made deep CNN training fast and stable.", level: "intermediate", fromYear: 1, priority: 1, roadmap: "ai-engineer" }
-- { id: paper-unet, title: "U-Net: Convolutional Networks for Biomedical Image Segmentation", authors: "Ronneberger, Fischer, Brox", year: 2015, url: "https://arxiv.org/abs/1505.04597", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "U-Net", summary: "The encoder-decoder with skip connections behind segmentation and, later, every diffusion model's denoiser.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "diffusion" }
-- { id: paper-resnet, title: "Deep Residual Learning for Image Recognition (ResNet)", authors: "He, Zhang, Ren, Sun", year: 2015, url: "https://arxiv.org/abs/1512.03385", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "ResNet", summary: "Skip connections are now in nearly every deep model; this shows why they make very deep nets trainable.", level: "intermediate", fromYear: 1, priority: 1, roadmap: "ai-engineer" }
-- { id: paper-attention, title: "Attention Is All You Need", authors: "Vaswani et al.", year: 2017, url: "https://arxiv.org/abs/1706.03762", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "Attention Is All You Need", summary: "The original Transformer paper; every modern LLM is a variation on the architecture it introduced.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai" }
+- { id: paper-alexnet, title: "ImageNet Classification with Deep Convolutional Neural Networks (AlexNet)", authors: "Krizhevsky, Sutskever, Hinton", year: 2012, url: "https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "AlexNet", summary: "The 2012 result that kicked off the deep learning era, and a readable tour of GPU-trained CNN tricks.", level: "intro", fromYear: 1, priority: 1, roadmap: "ai-engineer", quality: 5 }
+- { id: paper-word2vec, title: "Efficient Estimation of Word Representations in Vector Space (word2vec)", authors: "Mikolov, Chen, Corrado, Dean", year: 2013, url: "https://arxiv.org/abs/1301.3781", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "word2vec", summary: "The paper that made dense word embeddings mainstream, with the famous vector-arithmetic analogies.", level: "intro", fromYear: 1, priority: 1, roadmap: "ai-engineer", quality: 5 }
+- { id: paper-vae, title: "Auto-Encoding Variational Bayes (VAE)", authors: "Kingma, Welling", year: 2013, url: "https://arxiv.org/abs/1312.6114", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "VAE (Kingma)", summary: "Introduces the reparameterization trick and the VAE, a core idea for latent-variable and diffusion models.", level: "advanced", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "diffusion", quality: 5 }
+- { id: paper-gan, title: "Generative Adversarial Networks", authors: "Goodfellow et al.", year: 2014, url: "https://arxiv.org/abs/1406.2661", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "GANs (Goodfellow 2014)", summary: "The original minimax game between generator and discriminator, short and foundational for generative modeling.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai", quality: 5 }
+- { id: paper-dropout, title: "Dropout: A Simple Way to Prevent Neural Networks from Overfitting", authors: "Srivastava, Hinton, Krizhevsky, Sutskever, Salakhutdinov", year: 2014, url: "https://jmlr.org/papers/v15/srivastava14a.html", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "Dropout", summary: "The classic regularizer explained with both intuition and extensive experiments.", level: "intro", fromYear: 1, priority: 1, roadmap: "ai-engineer", quality: 5 }
+- { id: paper-adam, title: "Adam: A Method for Stochastic Optimization", authors: "Kingma, Ba", year: 2014, url: "https://arxiv.org/abs/1412.6980", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai, math], group: classics, short: "Adam", summary: "The default optimizer of deep learning; read it to know what its moment estimates and bias correction do.", level: "intermediate", fromYear: 1, priority: 1, roadmap: "ai-engineer", quality: 5 }
+- { id: paper-batchnorm, title: "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift", authors: "Ioffe, Szegedy", year: 2015, url: "https://arxiv.org/abs/1502.03167", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "Batch Norm", summary: "Introduces the normalization layer that made deep CNN training fast and stable.", level: "intermediate", fromYear: 1, priority: 1, roadmap: "ai-engineer", quality: 5 }
+- { id: paper-unet, title: "U-Net: Convolutional Networks for Biomedical Image Segmentation", authors: "Ronneberger, Fischer, Brox", year: 2015, url: "https://arxiv.org/abs/1505.04597", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "U-Net", summary: "The encoder-decoder with skip connections behind segmentation and, later, every diffusion model's denoiser.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "diffusion", quality: 5 }
+- { id: paper-resnet, title: "Deep Residual Learning for Image Recognition (ResNet)", authors: "He, Zhang, Ren, Sun", year: 2015, url: "https://arxiv.org/abs/1512.03385", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "ResNet", summary: "Skip connections are now in nearly every deep model; this shows why they make very deep nets trainable.", level: "intermediate", fromYear: 1, priority: 1, roadmap: "ai-engineer", quality: 5 }
+- { id: paper-attention, title: "Attention Is All You Need", authors: "Vaswani et al.", year: 2017, url: "https://arxiv.org/abs/1706.03762", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: classics, short: "Attention Is All You Need", summary: "The original Transformer paper; every modern LLM is a variation on the architecture it introduced.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai", quality: 5 }
 
 # ---- the LLM era
-- { id: paper-gpt2, title: "Language Models are Unsupervised Multitask Learners (GPT-2)", authors: "Radford et al.", year: 2019, url: "https://openai.com/index/better-language-models/", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "GPT-2", summary: "The paper that argued a big enough next-token predictor learns many tasks without task-specific training.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai" }
-- { id: paper-scaling-laws, title: "Scaling Laws for Neural Language Models", authors: "Kaplan et al.", year: 2020, url: "https://arxiv.org/abs/2001.08361", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "Kaplan Scaling Laws", summary: "Empirical power laws linking loss to parameters, data and compute; the basis for planning training runs.", level: "advanced", fromYear: 3, priority: 1, roadmap: "ai-engineer", research: "genai" }
-- { id: paper-gpt3, title: "Language Models are Few-Shot Learners (GPT-3)", authors: "Brown et al.", year: 2020, url: "https://arxiv.org/abs/2005.14165", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "GPT-3", summary: "Introduced in-context few-shot prompting at 175B scale and kicked off the modern LLM era.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai" }
-- { id: paper-rag, title: "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks", authors: "Lewis et al.", year: 2020, url: "https://arxiv.org/abs/2005.11401", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "RAG (Lewis 2020)", summary: "The original RAG paper: couple a retriever to a generator so the model can look things up instead of memorizing.", level: "intermediate", fromYear: 1, priority: 1, roadmap: "ai-engineer" }
-- { id: paper-lora, title: "LoRA: Low-Rank Adaptation of Large Language Models", authors: "Hu et al.", year: 2021, url: "https://arxiv.org/abs/2106.09685", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "LoRA", summary: "The standard trick for cheap fine-tuning: freeze weights and train small low-rank update matrices.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai" }
-- { id: paper-chain-of-thought, title: "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models", authors: "Wei et al.", year: 2022, url: "https://arxiv.org/abs/2201.11903", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "Chain-of-Thought", summary: "Shows that asking a model to write intermediate steps dramatically improves multi-step reasoning.", level: "intro", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai" }
-- { id: paper-instructgpt, title: "Training language models to follow instructions with human feedback (InstructGPT)", authors: "Ouyang et al.", year: 2022, url: "https://arxiv.org/abs/2203.02155", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "InstructGPT", summary: "The recipe of SFT, reward modeling and PPO that turned base models into helpful assistants.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai" }
-- { id: paper-chinchilla, title: "Training Compute-Optimal Large Language Models (Chinchilla)", authors: "Hoffmann et al.", year: 2022, url: "https://arxiv.org/abs/2203.15556", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "Chinchilla", summary: "Corrected earlier scaling advice by showing models should be trained on far more tokens per parameter.", level: "advanced", fromYear: 3, priority: 1, roadmap: "ai-engineer", research: "genai" }
-- { id: paper-flashattention, title: "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness", authors: "Dao et al.", year: 2022, url: "https://arxiv.org/abs/2205.14135", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai, systems], group: llm, short: "FlashAttention", summary: "Shows how tiling attention to avoid HBM round-trips gives exact attention far faster, the textbook case of IO-aware kernel design.", level: "advanced", fromYear: 2, priority: 1, roadmap: "inference-engineering", research: "inference" }
-- { id: paper-react, title: "ReAct: Synergizing Reasoning and Acting in Language Models", authors: "Yao et al.", year: 2022, url: "https://arxiv.org/abs/2210.03629", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "ReAct", summary: "The thought-action-observation loop that nearly every modern tool-using agent still runs on.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-agents", research: "genai" }
-- { id: paper-toolformer, title: "Toolformer: Language Models Can Teach Themselves to Use Tools", authors: "Schick et al.", year: 2023, url: "https://arxiv.org/abs/2302.04761", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "Toolformer", summary: "Shows how a model can learn when and how to call APIs from self-labeled data, an early blueprint for tool use.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-agents", research: "genai" }
-- { id: paper-dpo, title: "Direct Preference Optimization: Your Language Model is Secretly a Reward Model", authors: "Rafailov et al.", year: 2023, url: "https://arxiv.org/abs/2305.18290", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "DPO", summary: "Derives a simple classification-style loss that aligns models to preferences without RL or a separate reward model.", level: "advanced", fromYear: 3, priority: 1, roadmap: "ai-engineer", research: "genai" }
-- { id: paper-mamba, title: "Mamba: Linear-Time Sequence Modeling with Selective State Spaces", authors: "Gu, Dao", year: 2023, url: "https://arxiv.org/abs/2312.00752", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "Mamba", summary: "The leading alternative to attention: selective state-space layers that scale linearly with sequence length.", level: "advanced", fromYear: 3, priority: 1, roadmap: "ai-engineer" }
-- { id: paper-mixtral, title: "Mixtral of Experts", authors: "Jiang et al.", year: 2024, url: "https://arxiv.org/abs/2401.04088", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "Mixtral", summary: "A compact description of a strong sparse mixture-of-experts model with open weights.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer" }
+- { id: paper-gpt2, title: "Language Models are Unsupervised Multitask Learners (GPT-2)", authors: "Radford et al.", year: 2019, url: "https://openai.com/index/better-language-models/", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "GPT-2", summary: "The paper that argued a big enough next-token predictor learns many tasks without task-specific training.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai", quality: 5 }
+- { id: paper-scaling-laws, title: "Scaling Laws for Neural Language Models", authors: "Kaplan et al.", year: 2020, url: "https://arxiv.org/abs/2001.08361", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "Kaplan Scaling Laws", summary: "Empirical power laws linking loss to parameters, data and compute; the basis for planning training runs.", level: "advanced", fromYear: 3, priority: 1, roadmap: "ai-engineer", research: "genai", quality: 5 }
+- { id: paper-gpt3, title: "Language Models are Few-Shot Learners (GPT-3)", authors: "Brown et al.", year: 2020, url: "https://arxiv.org/abs/2005.14165", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "GPT-3", summary: "Introduced in-context few-shot prompting at 175B scale and kicked off the modern LLM era.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai", quality: 5 }
+- { id: paper-rag, title: "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks", authors: "Lewis et al.", year: 2020, url: "https://arxiv.org/abs/2005.11401", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "RAG (Lewis 2020)", summary: "The original RAG paper: couple a retriever to a generator so the model can look things up instead of memorizing.", level: "intermediate", fromYear: 1, priority: 1, roadmap: "ai-engineer", quality: 5 }
+- { id: paper-lora, title: "LoRA: Low-Rank Adaptation of Large Language Models", authors: "Hu et al.", year: 2021, url: "https://arxiv.org/abs/2106.09685", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "LoRA", summary: "The standard trick for cheap fine-tuning: freeze weights and train small low-rank update matrices.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai", quality: 5 }
+- { id: paper-chain-of-thought, title: "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models", authors: "Wei et al.", year: 2022, url: "https://arxiv.org/abs/2201.11903", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "Chain-of-Thought", summary: "Shows that asking a model to write intermediate steps dramatically improves multi-step reasoning.", level: "intro", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai", quality: 5 }
+- { id: paper-instructgpt, title: "Training language models to follow instructions with human feedback (InstructGPT)", authors: "Ouyang et al.", year: 2022, url: "https://arxiv.org/abs/2203.02155", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "InstructGPT", summary: "The recipe of SFT, reward modeling and PPO that turned base models into helpful assistants.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", research: "genai", quality: 5 }
+- { id: paper-chinchilla, title: "Training Compute-Optimal Large Language Models (Chinchilla)", authors: "Hoffmann et al.", year: 2022, url: "https://arxiv.org/abs/2203.15556", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "Chinchilla", summary: "Corrected earlier scaling advice by showing models should be trained on far more tokens per parameter.", level: "advanced", fromYear: 3, priority: 1, roadmap: "ai-engineer", research: "genai", quality: 5 }
+- { id: paper-flashattention, title: "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness", authors: "Dao et al.", year: 2022, url: "https://arxiv.org/abs/2205.14135", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai, systems], group: llm, short: "FlashAttention", summary: "Shows how tiling attention to avoid HBM round-trips gives exact attention far faster, the textbook case of IO-aware kernel design.", level: "advanced", fromYear: 2, priority: 1, roadmap: "inference-engineering", research: "inference", quality: 5 }
+- { id: paper-react, title: "ReAct: Synergizing Reasoning and Acting in Language Models", authors: "Yao et al.", year: 2022, url: "https://arxiv.org/abs/2210.03629", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "ReAct", summary: "The thought-action-observation loop that nearly every modern tool-using agent still runs on.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-agents", research: "genai", quality: 5 }
+- { id: paper-toolformer, title: "Toolformer: Language Models Can Teach Themselves to Use Tools", authors: "Schick et al.", year: 2023, url: "https://arxiv.org/abs/2302.04761", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "Toolformer", summary: "Shows how a model can learn when and how to call APIs from self-labeled data, an early blueprint for tool use.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-agents", research: "genai", quality: 5 }
+- { id: paper-dpo, title: "Direct Preference Optimization: Your Language Model is Secretly a Reward Model", authors: "Rafailov et al.", year: 2023, url: "https://arxiv.org/abs/2305.18290", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "DPO", summary: "Derives a simple classification-style loss that aligns models to preferences without RL or a separate reward model.", level: "advanced", fromYear: 3, priority: 1, roadmap: "ai-engineer", research: "genai", quality: 5 }
+- { id: paper-mamba, title: "Mamba: Linear-Time Sequence Modeling with Selective State Spaces", authors: "Gu, Dao", year: 2023, url: "https://arxiv.org/abs/2312.00752", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "Mamba", summary: "The leading alternative to attention: selective state-space layers that scale linearly with sequence length.", level: "advanced", fromYear: 3, priority: 1, roadmap: "ai-engineer", quality: 5 }
+- { id: paper-mixtral, title: "Mixtral of Experts", authors: "Jiang et al.", year: 2024, url: "https://arxiv.org/abs/2401.04088", urlVerified: true, lastVerified: 2026-09-20, tracks: [ai], group: llm, short: "Mixtral", summary: "A compact description of a strong sparse mixture-of-experts model with open weights.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "ai-engineer", quality: 4 }
 
 # ---- systems (most are assigned reading in MIT 6.5840)
 - { id: paper-time-clocks, title: "Time, Clocks, and the Ordering of Events in a Distributed System", authors: "Lamport", year: 1978, url: "https://lamport.azurewebsites.net/pubs/time-clocks.pdf", urlVerified: true, lastVerified: 2026-09-20, tracks: [systems], group: systems, short: "Lamport Clocks", summary: "Introduces happened-before and logical clocks, the vocabulary every later distributed-systems paper assumes.", level: "intermediate", fromYear: 2, priority: 2, roadmap: "software-architect" }
@@ -41,14 +41,14 @@
 - { id: paper-raft, title: "In Search of an Understandable Consensus Algorithm (Raft)", authors: "Ongaro, Ousterhout", year: 2014, url: "https://raft.github.io/raft.pdf", urlVerified: true, lastVerified: 2026-09-20, tracks: [systems], group: systems, note: "Read it before project 24.", short: "Raft paper", summary: "Consensus designed for teachability; reading it is the prerequisite for the Raft labs in MIT 6.5840.", level: "intermediate", fromYear: 2, priority: 2, roadmap: "software-architect" }
 
 # ---- graphics and simulation
-- { id: paper-large-steps-cloth, title: "Large Steps in Cloth Simulation", authors: "Baraff, Witkin", year: 1998, url: "https://www.cs.cmu.edu/~baraff/papers/sig98.pdf", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation], group: graphics-sim, short: "Large Steps in Cloth", summary: "Landmark implicit-integration cloth paper that made big stable time steps possible; the basis of many later cloth solvers.", level: "advanced", fromYear: 3, priority: 3, roadmap: "game-developer" }
-- { id: paper-stable-fluids, title: "Stable Fluids", authors: "Stam", year: 1999, url: "http://www.dgp.toronto.edu/people/stam/reality/Research/pdf/ns.pdf", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation], group: graphics-sim, short: "Stable Fluids", summary: "The semi-Lagrangian advection plus pressure-projection scheme that made unconditionally stable grid fluids standard in graphics.", level: "intermediate", fromYear: 2, priority: 3, roadmap: "game-developer" }
+- { id: paper-large-steps-cloth, title: "Large Steps in Cloth Simulation", authors: "Baraff, Witkin", year: 1998, url: "https://www.cs.cmu.edu/~baraff/papers/sig98.pdf", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation], group: graphics-sim, short: "Large Steps in Cloth", summary: "Landmark implicit-integration cloth paper that made big stable time steps possible; the basis of many later cloth solvers.", level: "advanced", fromYear: 3, priority: 1, roadmap: "game-developer", quality: 5 }
+- { id: paper-stable-fluids, title: "Stable Fluids", authors: "Stam", year: 1999, url: "http://www.dgp.toronto.edu/people/stam/reality/Research/pdf/ns.pdf", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation], group: graphics-sim, short: "Stable Fluids", summary: "The semi-Lagrangian advection plus pressure-projection scheme that made unconditionally stable grid fluids standard in graphics.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "game-developer", quality: 5 }
 - { id: paper-iterative-dynamics, title: "Iterative Dynamics with Temporal Coherence", authors: "Catto", year: 2005, url: "https://box2d.org/files/ErinCatto_IterativeDynamics_GDC2005.pdf", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation], group: graphics-sim, note: "Read it before project 15.", short: "Catto: Iterative Dynamics", summary: "Derives the projected Gauss-Seidel constraint solver from first principles and shows why reusing last frame's impulses converges fast.", level: "advanced", fromYear: 2, priority: 4, roadmap: "game-developer" }
-- { id: paper-pbd, title: "Position Based Dynamics", authors: "Muller, Heidelberger, Hennix, Ratcliff", year: 2006, url: "https://matthias-research.github.io/pages/publications/posBasedDyn.pdf", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation], group: graphics-sim, short: "PBD (Müller 2006)", summary: "The original paper behind the position-projection approach now used in cloth, soft bodies and game physics everywhere.", level: "intermediate", fromYear: 2, priority: 3, roadmap: "game-developer" }
+- { id: paper-pbd, title: "Position Based Dynamics", authors: "Muller, Heidelberger, Hennix, Ratcliff", year: 2006, url: "https://matthias-research.github.io/pages/publications/posBasedDyn.pdf", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation], group: graphics-sim, short: "PBD (Müller 2006)", summary: "The original paper behind the position-projection approach now used in cloth, soft bodies and game physics everywhere.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "game-developer", quality: 5 }
 - { id: paper-microfacet, title: "Microfacet Models for Refraction through Rough Surfaces", authors: "Walter, Marschner, Li, Torrance", year: 2007, url: "https://www.graphics.cornell.edu/~bjw/microfacetbsdf.pdf", urlVerified: true, lastVerified: 2026-09-20, tracks: [graphics], group: graphics-sim, note: "The GGX distribution used by the PBR chapter of LearnOpenGL." }
-- { id: paper-xpbd, title: "XPBD: Position-Based Simulation of Compliant Constrained Dynamics", authors: "Macklin, Muller, Chentanez", year: 2016, url: "https://matthias-research.github.io/pages/publications/XPBD.pdf", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation], group: graphics-sim, note: "Read it before project 34.", short: "XPBD", summary: "Fixes PBD's stiffness-depends-on-iterations problem with a compliance term, giving a physically meaningful constraint solver in a few lines of code.", level: "intermediate", fromYear: 2, priority: 3, roadmap: "game-developer" }
-- { id: paper-pinn, title: "Physics Informed Deep Learning (Part I): Data-driven Solutions of Nonlinear Partial Differential Equations", authors: "Raissi, Perdikaris, Karniadakis", year: 2017, url: "https://arxiv.org/abs/1711.10561", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation, ai], group: graphics-sim, note: "The arXiv precursor of the 2019 'Physics-Informed Neural Networks' paper.", short: "PINNs", summary: "Introduces physics-informed neural networks that put the PDE residual in the loss; worth knowing well, including where it falls short of classic solvers.", level: "intermediate", fromYear: 3, priority: 3, roadmap: "game-developer" }
-- { id: paper-learning-to-simulate, title: "Learning to Simulate Complex Physics with Graph Networks", authors: "Sanchez-Gonzalez et al.", year: 2020, url: "https://arxiv.org/abs/2002.09405", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation, ai], group: graphics-sim, short: "GNS", summary: "Particle simulators learned by message-passing networks that generalize to larger, longer rollouts than they were trained on.", level: "advanced", fromYear: 3, priority: 3, roadmap: "game-developer" }
+- { id: paper-xpbd, title: "XPBD: Position-Based Simulation of Compliant Constrained Dynamics", authors: "Macklin, Muller, Chentanez", year: 2016, url: "https://matthias-research.github.io/pages/publications/XPBD.pdf", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation], group: graphics-sim, note: "Read it before project 34.", short: "XPBD", summary: "Fixes PBD's stiffness-depends-on-iterations problem with a compliance term, giving a physically meaningful constraint solver in a few lines of code.", level: "intermediate", fromYear: 2, priority: 1, roadmap: "game-developer", quality: 5 }
+- { id: paper-pinn, title: "Physics Informed Deep Learning (Part I): Data-driven Solutions of Nonlinear Partial Differential Equations", authors: "Raissi, Perdikaris, Karniadakis", year: 2017, url: "https://arxiv.org/abs/1711.10561", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation, ai], group: graphics-sim, note: "The arXiv precursor of the 2019 'Physics-Informed Neural Networks' paper.", short: "PINNs", summary: "Introduces physics-informed neural networks that put the PDE residual in the loss; worth knowing well, including where it falls short of classic solvers.", level: "intermediate", fromYear: 3, priority: 1, roadmap: "game-developer", quality: 5 }
+- { id: paper-learning-to-simulate, title: "Learning to Simulate Complex Physics with Graph Networks", authors: "Sanchez-Gonzalez et al.", year: 2020, url: "https://arxiv.org/abs/2002.09405", urlVerified: true, lastVerified: 2026-09-20, tracks: [simulation, ai], group: graphics-sim, short: "GNS", summary: "Particle simulators learned by message-passing networks that generalize to larger, longer rollouts than they were trained on.", level: "advanced", fromYear: 3, priority: 1, roadmap: "game-developer", quality: 5 }
 - { id: paper-nerf, title: "NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis", authors: "Mildenhall et al.", year: 2020, url: "https://arxiv.org/abs/2003.08934", urlVerified: true, lastVerified: 2026-09-20, tracks: [graphics, ai], group: graphics-sim, short: "NeRF", summary: "Launched neural rendering by fitting a volumetric MLP to photos and rendering it with classic volume integration.", level: "advanced", fromYear: 3, priority: 3, roadmap: "game-developer" }
 - { id: paper-3dgs, title: "3D Gaussian Splatting for Real-Time Radiance Field Rendering", authors: "Kerbl, Kopanas, Leimkuhler, Drettakis", year: 2023, url: "https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/", urlVerified: true, lastVerified: 2026-09-20, tracks: [graphics, ai], group: graphics-sim, short: "3D Gaussian Splatting", summary: "Replaces neural fields with differentiable rasterized Gaussians, hitting real-time frame rates at NeRF quality.", level: "advanced", fromYear: 3, priority: 3, roadmap: "game-developer" }
 
@@ -80,6 +80,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: flashattention-3
   title: "FlashAttention-3: Fast and Accurate Attention with Asynchrony and Low-precision"
   authors: Shah, Bikshandi, Zhang, Thakkar, Ramani, Dao
@@ -97,6 +98,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: pagedattention
   title: Efficient Memory Management for Large Language Model Serving with PagedAttention (vLLM)
   authors: Kwon et al.
@@ -114,6 +116,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: orca
   title: "Orca: A Distributed Serving System for Transformer-Based Generative Models"
   authors: Yu, Jeong, Kim, Kim, Chun
@@ -132,6 +135,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: speculative-decoding-leviathan
   title: Fast Inference from Transformers via Speculative Decoding
   authors: Leviathan, Kalman, Matias
@@ -149,6 +153,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: speculative-sampling-chen
   title: Accelerating Large Language Model Decoding with Speculative Sampling
   authors: Chen, Borgeaud, Irving, Lespiau, Sifre, Jumper
@@ -166,6 +171,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: eagle
   title: "EAGLE: Speculative Sampling Requires Rethinking Feature Uncertainty"
   authors: Li, Wei, Zhang, Zhang
@@ -183,6 +189,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: medusa
   title: "Medusa: Simple LLM Inference Acceleration Framework with Multiple Decoding Heads"
   authors: Cai et al.
@@ -200,6 +207,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 4
 - id: gptq
   title: "GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers"
   authors: Frantar, Ashkboos, Hoefler, Alistarh
@@ -217,6 +225,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: awq
   title: "AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration"
   authors: Lin et al.
@@ -234,6 +243,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: smoothquant
   title: "SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models"
   authors: Xiao, Lin, Seznec, Wu, Demouth, Han
@@ -251,6 +261,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: llm-int8
   title: "LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale"
   authors: Dettmers, Lewis, Belkada, Zettlemoyer
@@ -268,6 +279,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: distserve
   title: "DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving"
   authors: Zhong et al.
@@ -285,6 +297,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: splitwise
   title: "Splitwise: Efficient Generative LLM Inference Using Phase Splitting"
   authors: Patel et al.
@@ -302,6 +315,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 4
 - id: mooncake
   title: "Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving"
   authors: Qin et al.
@@ -319,6 +333,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: sglang-radixattention
   title: "SGLang: Efficient Execution of Structured Language Model Programs (RadixAttention)"
   authors: Zheng et al.
@@ -336,6 +351,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: roofline
   title: "Roofline: An Insightful Visual Performance Model for Multicore Architectures"
   authors: Williams, Waterman, Patterson
@@ -354,6 +370,7 @@
   priority: 1
   roadmap: "inference-engineering"
   research: "inference"
+  quality: 5
 - id: ddpm
   title: Denoising Diffusion Probabilistic Models
   authors: Ho, Jain, Abbeel
@@ -371,6 +388,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 5
 - id: ddim
   title: Denoising Diffusion Implicit Models
   authors: Song, Meng, Ermon
@@ -388,6 +406,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 5
 - id: improved-ddpm
   title: Improved Denoising Diffusion Probabilistic Models
   authors: Nichol, Dhariwal
@@ -405,6 +424,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 4
 - id: score-sde
   title: Score-Based Generative Modeling through Stochastic Differential Equations
   authors: Song et al.
@@ -422,6 +442,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 5
 - id: classifier-free-guidance
   title: Classifier-Free Diffusion Guidance
   authors: Ho, Salimans
@@ -439,6 +460,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 5
 - id: latent-diffusion
   title: High-Resolution Image Synthesis with Latent Diffusion Models (Stable Diffusion)
   authors: Rombach, Blattmann, Lorenz, Esser, Ommer
@@ -456,6 +478,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 5
 - id: flow-matching
   title: Flow Matching for Generative Modeling
   authors: Lipman, Chen, Ben-Hamu, Nickel, Le
@@ -473,6 +496,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 5
 - id: rectified-flow
   title: "Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow"
   authors: Liu, Gong, Liu
@@ -490,6 +514,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 4
 - id: dit
   title: Scalable Diffusion Models with Transformers (DiT)
   authors: Peebles, Xie
@@ -507,6 +532,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 5
 - id: consistency-models
   title: Consistency Models
   authors: Song, Dhariwal, Chen, Sutskever
@@ -524,6 +550,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 4
 - id: stable-video-diffusion
   title: "Stable Video Diffusion: Scaling Latent Video Diffusion Models to Large Datasets"
   authors: Blattmann et al.
@@ -538,9 +565,10 @@
   summary: "Explains why data curation matters as much as architecture when turning an image model into a video model."
   level: "advanced"
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 3
 - id: sora-report
   title: Video generation models as world simulators (Sora technical report)
   authors: OpenAI
@@ -559,6 +587,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 4
 - id: imagen-video
   title: "Imagen Video: High Definition Video Generation with Diffusion Models"
   authors: Ho et al.
@@ -576,6 +605,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 4
 - id: movie-gen
   title: "Movie Gen: A Cast of Media Foundation Models"
   authors: Polyak et al. (Meta)
@@ -592,6 +622,7 @@
   fromYear: 3
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 - id: world-models
   title: World Models
   authors: Ha, Schmidhuber
@@ -609,6 +640,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "world-models"
+  quality: 5
 - id: planet
   title: Learning Latent Dynamics for Planning from Pixels (PlaNet)
   authors: Hafner et al.
@@ -626,6 +658,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "world-models"
+  quality: 4
 - id: dreamer
   title: "Dream to Control: Learning Behaviors by Latent Imagination (Dreamer)"
   authors: Hafner, Lillicrap, Ba, Norouzi
@@ -643,6 +676,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "world-models"
+  quality: 4
 - id: dreamerv2
   title: Mastering Atari with Discrete World Models (DreamerV2)
   authors: Hafner, Lillicrap, Norouzi, Ba
@@ -660,6 +694,7 @@
   priority: 1
   roadmap: "ai-agents"
   research: "world-models"
+  quality: 4
 - id: dreamerv3
   title: Mastering Diverse Domains through World Models (DreamerV3)
   authors: Hafner, Pasukonis, Ba, Lillicrap
@@ -677,6 +712,7 @@
   priority: 1
   roadmap: "ai-agents"
   research: "world-models"
+  quality: 5
 - id: muzero
   title: Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model (MuZero)
   authors: Schrittwieser et al.
@@ -693,6 +729,7 @@
   fromYear: 3
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 - id: lecun-jepa
   title: A Path Towards Autonomous Machine Intelligence (JEPA)
   authors: LeCun
@@ -711,6 +748,7 @@
   roadmap: "ai-agents"
   research: "world-models"
   lastVerified: 2026-10-19
+  quality: 4
 - id: i-jepa
   title: Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture (I-JEPA)
   authors: Assran et al.
@@ -728,6 +766,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "world-models"
+  quality: 4
 - id: v-jepa
   title: Revisiting Feature Prediction for Learning Visual Representations from Video (V-JEPA)
   authors: Bardes et al.
@@ -745,6 +784,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "world-models"
+  quality: 4
 - id: genie
   title: "Genie: Generative Interactive Environments"
   authors: Bruce et al.
@@ -762,6 +802,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "world-models"
+  quality: 4
 - id: genie-2
   title: "Genie 2: A large-scale foundation world model"
   authors: Google DeepMind
@@ -789,6 +830,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "world-models"
+  quality: 4
 - id: cosmos
   title: Cosmos World Foundation Model Platform for Physical AI
   authors: NVIDIA
@@ -806,6 +848,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "world-models"
+  quality: 4
 - id: unisim
   title: Learning Interactive Real-World Simulators (UniSim)
   authors: Yang et al.
@@ -823,6 +866,7 @@
   priority: 1
   roadmap: "ai-agents"
   research: "world-models"
+  quality: 4
 - id: meshgraphnets
   title: Learning Mesh-Based Simulation with Graph Networks (MeshGraphNets)
   authors: Pfaff, Fortunato, Sanchez-Gonzalez, Battaglia
@@ -838,8 +882,9 @@
   summary: "Extends learned simulators to meshes for cloth, structures and aerodynamics, including adaptive remeshing."
   level: "advanced"
   fromYear: 3
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 - id: fourier-neural-operator
   title: Fourier Neural Operator for Parametric Partial Differential Equations
   authors: Li et al.
@@ -855,8 +900,9 @@
   summary: "Learns solution operators of PDE families in Fourier space, producing fast, resolution-independent surrogates for solvers like Navier-Stokes."
   level: "advanced"
   fromYear: 3
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 - id: td-mpc2
   title: "TD-MPC2: Scalable, Robust World Models for Continuous Control"
   authors: Hansen, Su, Wang
@@ -874,6 +920,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "world-models"
+  quality: 4
 - id: diamond
   title: "Diffusion for World Modeling: Visual Details Matter in Atari (DIAMOND)"
   authors: Alonso et al.
@@ -891,3 +938,4 @@
   priority: 1
   roadmap: "ai-agents"
   research: "world-models"
+  quality: 4

@@ -19,6 +19,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 - id: karpathy-phd-guide
   title: A Survival Guide to a PhD
   provider: Andrej Karpathy
@@ -39,6 +40,7 @@
   after: [keshav-how-to-read]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 - id: schulman-research-guide
   title: An Opinionated Guide to ML Research
   provider: John Schulman
@@ -60,6 +62,7 @@
   after: [karpathy-phd-guide]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 - id: nielsen-principles
   title: Principles of Effective Research
   provider: Michael Nielsen
@@ -80,6 +83,7 @@
   doFirst: "You and Your Research"
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 - id: steinhardt-research-taste
   title: Research as a Stochastic Decision Process
   provider: Jacob Steinhardt
@@ -99,6 +103,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 - id: raschka-ahead-of-ai
   title: Ahead of AI (reading lists and research summaries)
   provider: Sebastian Raschka
@@ -119,6 +124,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 - id: hf-papers
   title: Papers with Code, now Hugging Face Papers
   provider: Hugging Face
@@ -154,8 +160,9 @@
   short: "alphaXiv"
   fromYear: 3
   after: [practice-hf-daily-papers]
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 - id: zotero
   title: Zotero
   provider: Corporation for Digital Scholarship
@@ -207,6 +214,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 - id: ml-reproducibility-challenge
   title: ML Reproducibility Challenge
   provider: ML Reproducibility Challenge

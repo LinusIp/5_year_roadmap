@@ -267,14 +267,17 @@ The Library opens on what matters now, not on all of it:
   have nothing on the plan yet: they are listed as "Not on the plan · N to browse" and open on that list. **Research**
   lists year 3's reading by area (Inference, World models, Diffusion, Generative AI), papers first, the foundations
   before the frontier.
-- **Up next**: the three nearest steps not started, across every path; steps the plan reaches together go by priority.
+- **Up next**: the three nearest steps not started, across every path; steps the plan reaches together go by priority,
+  then quality. A step the quality pass graded 3 or lower stays on the plan but is never suggested here.
 - **Browse when you need something**: shelves for Courses, Books, Papers, Articles, Blogs to follow, Tools,
   Practice (exercises, puzzles and problem sets) and Projects, with their real counts. A shelf is the full list
   (windowed, so a few hundred rows stay quick on a phone) with search and the Active, Not started, Done and Track
   filters, and it is where you add a resource of your own. Every shelf but Projects, and search, also filter by Level
-  (Beginner, Intermediate, Advanced) and by roadmap.sh Roadmap, and every list reads in the plan's order: priority
-  for years 1 to 3 (1 inference and the AI feeding it, 2 architecture, systems, languages and DevOps, 3 graphics,
-  simulation and robotics, 4 game development), then the year it fits, then level. A resource's sheet says how it fits
+  (Beginner, Intermediate, Advanced) and by roadmap.sh Roadmap, with a **Canon only** toggle, and every list reads in
+  the plan's order: priority for years 1 to 3 (1 inference and the AI feeding it, 2 architecture, systems, languages and
+  DevOps, 3 graphics, simulation and robotics, 4 game development), then quality (the quality pass's 1 to 5 grade, canon
+  first, an ungraded row as 4), then the year it fits, then level. A row graded 5 wears a **Canon** badge; in a path's
+  optional list and in the Research view the rows graded 3 or lower wait, folded, under **More resources**. A resource's sheet says how it fits
   the plan and has **Write log entry**, which opens the day's blog post with the outline started on that resource.
 
 Searching shows the matches grouped by shelf, three of each, with "Show all" to open that shelf on the same search.
@@ -310,7 +313,8 @@ and its 15,961-row file 587 more, the plan gap fill, in `data/resources/library-
 (`docs/imports-atlas-library-11.md`), and its 16,076-row file 115 more, build & ship, in `data/resources/library-atlas-12.yaml`
 (`docs/imports-atlas-library-12.md`), and its 17,283-row file 1,197 more, the cracked dev and researcher round and the frontier engineer and scientist round, in `data/resources/library-atlas-13.yaml`
 (`docs/imports-atlas-library-13.md`), and its 17,848-row file 561 more, engineering-physics foundations and software depth, in `data/resources/library-atlas-14.yaml`
-(`docs/imports-atlas-library-14.md`): 17,818 resources in all, and every track has blogs, so the Blogs shelf filters by track like the others. 380 of them
+(`docs/imports-atlas-library-14.md`); then its 16,448-row quality pass dropped 1,412 of those rows and added 16, in `data/resources/library-atlas-15.yaml`
+(`docs/imports-atlas-library-15.md`): 16,422 resources in all, and every track has blogs, so the Blogs shelf filters by track like the others. 361 of them
 are paid (books, certificate exams and one specialization): each wears a **Paid** badge, the Books shelf has a Free / Paid chip, and a
 paid book stays out of "Up next" until **I own this** is on in its sheet. **Quick filters**, one list of twenty-two rows under
 the shelves, gather resources across every shelf: "Developer essentials" the resources whose title or tags

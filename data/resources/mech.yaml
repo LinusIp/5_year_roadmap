@@ -15,7 +15,8 @@
   prerequisites: [mit-8-01, mit-18-02]
   subject: mechanics-fea-cfd
   summary: "MIT's core sophomore course on forces, stress, strain and deformation of structures, the base for every later design class."
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: mit-2-002
   title: "MIT 2.002 Mechanics and Materials II (Spring 2004)"
@@ -35,6 +36,7 @@
   summary: "Continues into plasticity, fracture, fatigue and how real materials fail, which matters when choosing parts for a robot."
   fromYear: 2
   priority: 4
+  quality: 3
 
 - id: mit-2-003
   title: "MIT 2.003SC Engineering Dynamics (Fall 2011)"
@@ -51,7 +53,8 @@
   prerequisites: [mit-8-01, mit-18-03]
   subject: mechanics-fea-cfd
   summary: "Newtonian and Lagrangian dynamics, vibration. The formulation used by the robot arm simulator of project 54."
-  priority: 4
+  priority: 1
+  quality: 5
 
 - id: mit-2-005
   title: "MITx 2.005.1x Thermal-Fluids Engineering 1: Basics of Thermodynamics and Hydrostatics"
@@ -116,7 +119,8 @@
   summary: "MIT's famous robot-building design class: concept generation, mechanisms, prototyping and machining a competition machine."
   fromYear: 1
   doFirst: "MIT 2.001"
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: mit-2-086
   title: "MIT 2.086 Numerical Computation for Mechanical Engineers (Fall 2014)"
@@ -133,8 +137,9 @@
   prerequisites: [mit-18-03, mit-18-06]
   subject: mechanics-fea-cfd
   summary: "Taught in MATLAB (GNU Octave runs most of it): the MATLAB/Octave part of block B in year 5."
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: fish-belytschko-fem
   title: "A First Course in Finite Elements (Fish and Belytschko)"
@@ -168,8 +173,9 @@
   stretch: true
   summary: "Short focused videos on FEM practice, adaptivity, solvers, parallel computing and software engineering for scientific codes."
   after: [mit-18-085]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: cfd-python-12-steps
   title: "Lorena Barba: CFD Python, 12 Steps to Navier-Stokes"
@@ -265,6 +271,7 @@
   alternatives: [solidworks-tutorials, fusion-learning, freecad-docs]
   note: "Free tier"
   priority: 4
+  quality: 3
 
 - id: solidworks-tutorials
   title: "SOLIDWORKS tutorials (built into the software)"
@@ -326,7 +333,8 @@
   subject: cad
   summary: "The 'CAD scripting' part of block B in year 5."
   after: [docs-openscad]
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: brunton-databook
   title: "Steve Brunton: Data-Driven Science and Engineering (book and lectures)"
@@ -343,6 +351,11 @@
   subject: signals-control
   stretch: true
   summary: "Links machine learning, dynamics and control."
+  short: "Data-Driven Sci & Eng"
+  fromYear: 2
+  priority: 2
+  roadmap: "game-developer"
+  quality: 4
 
 - id: matlab-onramp
   title: "MATLAB Onramp"
@@ -388,6 +401,7 @@
   subject: python
   summary: "Community tutorials on NumPy, SciPy, Matplotlib and SymPy for doing numerical work in Python."
   priority: 2
+  quality: 4
 
 - id: sympy-tutorial
   title: "SymPy introductory tutorial"
@@ -420,6 +434,7 @@
   summary: "Robot design and control from the hardware side: actuators and drives, mechanisms, kinematics, statics, dynamics and force control, with lecture notes, problem sets and projects."
   doFirst: "MIT 2.003SC"
   priority: 4
+  quality: 3
 
 - id: mit-manipulation
   title: "MIT 6.4210 Robotic Manipulation (Russ Tedrake, Drake notebooks)"
@@ -452,8 +467,9 @@
   short: "deal.II tutorial steps"
   fromYear: 2
   after: [bangerth-dealii-lectures]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: calculix
   title: "CalculiX: open-source finite-element solver"
@@ -473,6 +489,7 @@
   after: [docs-freecad-manual]
   priority: 3
   roadmap: "game-developer"
+  quality: 3
 
 - id: fenics
   title: "FEniCS: open-source finite-element platform"

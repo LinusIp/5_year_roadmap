@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Atlas } from '../../hooks/useAtlas.ts';
-import { researchAreas, SHELVES, shelfOf } from '../../lib/library-home.ts';
+import { isCanon, isLesser, researchAreas, SHELVES, shelfOf } from '../../lib/library-home.ts';
 import { Button } from '../../ui/Button.tsx';
 import { count } from '../parts/text.ts';
 import { Header } from '../../ui/Header.tsx';
@@ -20,16 +20,21 @@ const SHELF_LABEL = Object.fromEntries(SHELVES.map((s) => [s.key, s.key === 'pra
 export function ResearchView({ atlas, onOpen, onOpenPaper }: { atlas: Atlas; onOpen: (refId: string) => void; onOpenPaper: (id: string) => void }) {
   const areas = researchAreas(atlas.seed, atlas.states);
   const [open, setOpen] = useState<Set<string>>(new Set());
+  // The quality pass (ATLAS-QUALITY-AUDIT): an area's rows graded 3 or lower wait under "More resources", folded.
+  const [lesserOpen, setLesserOpen] = useState<Set<string>>(new Set());
   const total = areas.reduce((n, a) => n + a.items.length, 0);
   return (
     <>
       <Header title="Research" sub={'Year 3 · ' + count(total) + ' to read across ' + areas.filter((a) => a.items.length > 0).length + ' areas'} back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />} />
       {areas.map((area) => {
         const all = open.has(area.id);
-        const shown = all ? area.items : area.items.slice(0, FIRST);
+        const main = area.items.filter((r) => !isLesser(r.fit.quality));
+        const lesser = area.items.filter((r) => isLesser(r.fit.quality));
+        const shown = all ? main : main.slice(0, FIRST);
+        const lesserShown = lesserOpen.has(area.id);
         return (
           <RowList key={area.id} label={area.name + ' · ' + area.items.length} className="mt-[18px]">
-            {shown.map((r) => {
+            {[...shown, ...(lesserShown ? lesser : [])].map((r) => {
               const shelf = r.kind === 'paper' ? 'paper' : shelfOf(r);
               const status = r.kind === 'resource' ? atlas.states.get(r.id)?.status : undefined;
               return (
@@ -37,14 +42,17 @@ export function ResearchView({ atlas, onOpen, onOpenPaper }: { atlas: Atlas; onO
                   key={r.id}
                   icon={<IconTile icon={SHELF_ICON[shelf]} tone={shelf === 'paper' || shelf === 'blog' || shelf === 'practice' ? 'ice' : 'blue'} />}
                   title={r.title}
-                  meta={[r.fromYear ? 'Year ' + r.fromYear : null, SHELF_LABEL[shelf], r.by].filter(Boolean).join(' · ')}
+                  meta={[isCanon(r.fit.quality) ? 'Canon' : null, r.fromYear ? 'Year ' + r.fromYear : null, SHELF_LABEL[shelf], r.by].filter(Boolean).join(' · ')}
                   trailing={status === 'active' ? 'Active' : status === 'done' ? 'Done' : undefined}
                   truncate
                   onClick={() => (r.kind === 'paper' ? onOpenPaper(r.id) : onOpen(r.id))}
                 />
               );
             })}
-            {!all && area.items.length > FIRST && <Row title={'Show all ' + area.items.length} chevron height={44} onClick={() => setOpen(new Set([...open, area.id]))} />}
+            {!all && main.length > FIRST && <Row title={'Show all ' + main.length} chevron height={44} onClick={() => setOpen(new Set([...open, area.id]))} />}
+            {lesser.length > 0 && !lesserShown && (all || main.length <= FIRST) && (
+              <Row title="More resources" meta={count(lesser.length) + ' graded useful but not essential'} chevron height={44} onClick={() => setLesserOpen(new Set([...lesserOpen, area.id]))} />
+            )}
           </RowList>
         );
       })}

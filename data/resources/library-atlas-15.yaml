@@ -1,0 +1,327 @@
+# The Atlas Library's eleventh file (ATLAS-LIBRARY, 15,961 rows): the rows the first ten files did not have, the plan
+# gap fill: inference-stack depth (TensorRT-LLM, Dynamo, Triton Inference Server, PyTorch internals), interview prep,
+# research skills, diffusion inference and hands-on image generation, video and 3D generation tooling, communication
+# (public speaking, pitching and fundraising, technical writing, blogging), open-source contribution, Mandarin basics,
+# certificates (ids `cert-…`, a Certificate badge and an Earned toggle) and backend auth, observability and testing.
+# Papers, articles, docs, practice, books, blogs and courses, each link checked when it was added (October 2026), each
+# with its priority for years 1 to 3, the roadmap.sh roadmap it serves and its year 3 research area; a paid row says so
+# (`cost: paid`, `note: Paid`). None is on the plan: they sit on their shelves, in search, under "Optional for this path"
+# and in the Research view. Generated from atlas-resources.jsonl by scratch/import-atlas.ts; rows the Library already
+# had only filled in what their entries were missing, or took the file's corrections.
+
+# ---- AI, ML, LLMs and agents (14)
+
+- id: "repo-openai-clip"
+  title: "CLIP (Contrastive Language-Image Pretraining)"
+  short: "OpenAI CLIP repo"
+  provider: "OpenAI"
+  type: "practice"
+  url: "https://github.com/openai/CLIP"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 5
+  summary: "Official code and weights for CLIP; run zero-shot classification yourself to see how contrastive image-text embeddings work."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+  doFirst: "CLIP paper"
+
+- id: "repo-segment-anything"
+  title: "Segment Anything"
+  short: "SAM repo"
+  provider: "Meta AI (facebookresearch)"
+  type: "practice"
+  url: "https://github.com/facebookresearch/segment-anything"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 5
+  summary: "Official SAM inference code and notebooks for promptable segmentation, a good hands-on look at a vision foundation model."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+  after: [paper-segment-anything]
+
+- id: "paper-gelu"
+  title: "Gaussian Error Linear Units (GELUs)"
+  short: "GELU"
+  provider: "Dan Hendrycks, Kevin Gimpel"
+  type: "paper"
+  url: "https://arxiv.org/abs/1606.08415"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Explains the smooth, probabilistically motivated activation used in BERT, GPT and nearly every transformer since."
+  fromYear: 1
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+  research: "genai"
+  after: [karpathy-zero-to-hero]
+
+- id: "paper-dcgan"
+  title: "Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks"
+  short: "DCGAN"
+  provider: "Alec Radford, Luke Metz, Soumith Chintala"
+  type: "paper"
+  url: "https://arxiv.org/abs/1511.06434"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "The architectural recipe that first made GAN training stable for images, plus the famous latent-space arithmetic demos."
+  fromYear: 1
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+  research: "genai"
+  doFirst: "GANs (Goodfellow)"
+
+- id: "paper-pytorch-imperative"
+  title: "PyTorch: An Imperative Style, High-Performance Deep Learning Library"
+  short: "PyTorch paper"
+  provider: "Adam Paszke, Sam Gross, Francisco Massa, Adam Lerer et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/1912.01703"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Explains the design choices behind PyTorch's eager execution, autograd, memory allocator and multiprocessing, useful for understanding the tool you use daily."
+  fromYear: 1
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+  after: [karpathy-zero-to-hero]
+
+- id: "paper-t5-text-to-text"
+  title: "Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer"
+  short: "T5"
+  provider: "Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, Peter J. Liu"
+  type: "paper"
+  url: "https://arxiv.org/abs/1910.10683"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "A huge controlled study of pre-training objectives, architectures and data that casts every NLP task as text-to-text and introduced C4."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+  research: "genai"
+  after: [annotated-transformer]
+
+- id: "paper-glu-variants-transformer"
+  title: "GLU Variants Improve Transformer"
+  short: "GLU Variants (SwiGLU)"
+  provider: "Noam Shazeer"
+  type: "paper"
+  url: "https://arxiv.org/abs/2002.05202"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Short note introducing the SwiGLU/GEGLU feed-forward layers now used in Llama, PaLM and most modern LLMs."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+  research: "genai"
+  after: [annotated-transformer]
+
+- id: "paper-electra"
+  title: "ELECTRA: Pre-training Text Encoders as Discriminators Rather Than Generators"
+  short: "ELECTRA"
+  provider: "Kevin Clark, Minh-Thang Luong, Quoc V. Le, Christopher D. Manning"
+  type: "paper"
+  url: "https://arxiv.org/abs/2003.10555"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Replaced-token detection makes encoder pre-training far more compute-efficient than masked language modeling."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+  research: "genai"
+  after: [paper-bert]
+
+- id: "paper-deberta"
+  title: "DeBERTa: Decoding-enhanced BERT with Disentangled Attention"
+  short: "DeBERTa"
+  provider: "Pengcheng He, Xiaodong Liu, Jianfeng Gao, Weizhu Chen"
+  type: "paper"
+  url: "https://arxiv.org/abs/2006.03654"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Separates content and position in attention and adds an enhanced mask decoder, a strong lesson in positional encoding design."
+  fromYear: 2
+  priority: 1
+  quality: 4
+  roadmap: "ai-engineer"
+  after: [paper-bert]
+
+- id: "paper-cyclegan"
+  title: "Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks"
+  short: "CycleGAN"
+  provider: "Jun-Yan Zhu, Taesung Park, Phillip Isola, Alexei A. Efros"
+  type: "paper"
+  url: "https://arxiv.org/abs/1703.10593"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Shows how a cycle-consistency loss lets you translate between image domains without any paired examples."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+  after: [paper-pix2pix]
+
+- id: "paper-pix2pix"
+  title: "Image-to-Image Translation with Conditional Adversarial Networks"
+  short: "pix2pix"
+  provider: "Phillip Isola, Jun-Yan Zhu, Tinghui Zhou, Alexei A. Efros"
+  type: "paper"
+  url: "https://arxiv.org/abs/1611.07004"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "The general conditional-GAN framework with U-Net generator and PatchGAN discriminator for paired image translation."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+  research: "genai"
+  after: [paper-dcgan]
+
+- id: "paper-mistral-7b"
+  title: "Mistral 7B"
+  short: "Mistral 7B"
+  provider: "Albert Q. Jiang, Alexandre Sablayrolles, Arthur Mensch, Chris Bamford et al. (Mistral AI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2310.06825"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Compact report on how grouped-query and sliding-window attention let a 7B model beat larger ones while staying cheap to serve."
+  fromYear: 2
+  priority: 1
+  quality: 4
+  roadmap: "ai-engineer"
+  doFirst: "Llama 2 paper"
+
+- id: "paper-universal-transformers"
+  title: "Universal Transformers"
+  short: "Universal Transformers"
+  provider: "Mostafa Dehghani, Stephan Gouws, Oriol Vinyals, Jakob Uszkoreit, Łukasz Kaiser"
+  type: "paper"
+  url: "https://arxiv.org/abs/1807.03819"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Ties weights across depth and adds adaptive computation time, the root of today's looped and recurrent-depth transformer ideas."
+  fromYear: 3
+  priority: 1
+  quality: 4
+  roadmap: "ai-engineer"
+  research: "genai"
+  after: [annotated-transformer]
+
+- id: "paper-ul2"
+  title: "UL2: Unifying Language Learning Paradigms"
+  short: "UL2"
+  provider: "Yi Tay, Mostafa Dehghani, Vinh Q. Tran, Xavier Garcia, Jason Wei et al. (Google)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2205.05131"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Proposes a mixture-of-denoisers objective that unifies span corruption and causal LM training, clarifying how pre-training objectives shape models."
+  fromYear: 3
+  priority: 1
+  quality: 4
+  roadmap: "ai-engineer"
+  research: "diffusion"
+  after: [paper-t5-text-to-text]
+
+# ---- Software architecture and system design (1)
+
+- id: "article-akidau-streaming-101"
+  title: "Streaming 101: The world beyond batch"
+  short: "Streaming 101"
+  provider: "Tyler Akidau (O'Reilly Radar)"
+  type: "article"
+  url: "https://www.oreilly.com/radar/the-world-beyond-batch-streaming-101/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [architecture]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "The classic explanation of event time vs processing time, windowing and watermarks that underpins Beam, Flink and modern stream processing."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "software-architect"
+  after: [ddia]
+
+# ---- Hardware and chip design: CPU, GPU and NPU, RTL to tape-out (1)
+
+- id: "docs-nxp-um10204-i2c"
+  title: "I2C-bus specification and user manual (UM10204)"
+  short: "I2C spec UM10204"
+  provider: "NXP Semiconductors"
+  type: "article"
+  url: "https://www.nxp.com/docs/en/user-guide/UM10204.pdf"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [hardware]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "The authoritative I2C reference covering timing, arbitration, clock stretching and speed modes, essential when designing or verifying an I2C controller."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  doFirst: "Digital Design (Harris)"

@@ -10,25 +10,6 @@
 
 # ---- Inference engineering: serving, kernels, GPUs (track ai, tag inference) (12)
 
-- id: "docs-llamacpp-function-calling"
-  title: "llama.cpp: Function Calling"
-  short: "llama.cpp function calling"
-  provider: "ggml-org"
-  type: "article"
-  url: "https://github.com/ggml-org/llama.cpp/blob/master/docs/function-calling.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Explains how llama-server exposes OpenAI-style tool calls across model families with native and generic handlers, making it a local agent backend."
-  fromYear: 2
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "llama.cpp HTTP server README"
-
 - id: "docs-llamacpp-gbnf"
   title: "GBNF Guide (llama.cpp grammars)"
   short: "llama.cpp GBNF grammars"
@@ -43,48 +24,10 @@
   estHours: 2
   summary: "Teaches GBNF grammars and JSON-schema conversion so a local model's output is forced into a parseable tool-call or data shape."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
-  after: [docs-llamacpp-function-calling]
-
-- id: "docs-llamacpp-autoparser"
-  title: "llama.cpp: Auto-Parser Architecture"
-  short: "llama.cpp auto-parser"
-  provider: "ggml-org"
-  type: "article"
-  url: "https://github.com/ggml-org/llama.cpp/blob/master/docs/autoparser.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Describes how llama.cpp diffs chat templates to infer how to parse content, reasoning and tool calls from any model's output."
-  fromYear: 3
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-llamacpp-function-calling]
-
-- id: "docs-llamacpp-llguidance"
-  title: "LLGuidance Support in llama.cpp"
-  short: "llama.cpp + LLGuidance"
-  provider: "ggml-org"
-  type: "article"
-  url: "https://github.com/ggml-org/llama.cpp/blob/master/docs/llguidance.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how a Rust constrained-decoding engine plugs into a C++ inference server for Lark grammars and full JSON Schema."
-  fromYear: 3
-  priority: 1
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-llamacpp-gbnf]
+  quality: 3
 
 - id: "book-inference-engineering-kiely"
   title: "Inference Engineering"
@@ -100,9 +43,10 @@
   estHours: 7
   summary: "A free, practitioner-written overview of the serving stack under every agent: GPUs, CUDA, vLLM-style engines, quantization, speculative decoding and production infrastructure."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
+  quality: 3
 
 - id: "book-pmpp-4e"
   title: "Programming Massively Parallel Processors: A Hands-on Approach (4th ed.)"
@@ -123,6 +67,7 @@
   tags: [inference]
   note: "Paid"
   doFirst: "CS:APP"
+  quality: 5
 
 - id: "book-ai-systems-performance-engineering"
   title: "AI Systems Performance Engineering"
@@ -138,11 +83,12 @@
   estHours: 35
   summary: "A thousand-page reference on co-tuning hardware, CUDA kernels, PyTorch and multinode training/inference, ending in a 175-item optimization checklist, aimed squarely at an aspiring inference engineer."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   note: "Paid"
   after: [book-inference-engineering-kiely]
+  quality: 3
 
 - id: "repo-mistral-rs"
   title: "mistral.rs: fast, flexible LLM inference in Rust"
@@ -158,10 +104,11 @@
   estHours: 20
   summary: "A full Rust inference engine with OpenAI/Anthropic-compatible servers, tool calling, MCP and sandboxed code execution: a self-hostable agent backend written in Rust."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [rust-book]
+  quality: 3
 
 - id: "repo-llama-cpp-rs"
   title: "llama-cpp-rs: Rust bindings to llama.cpp"
@@ -177,10 +124,11 @@
   estHours: 5
   summary: "Safe-ish Rust wrappers over llama.cpp so a Rust harness can embed a local GGUF model in-process instead of calling a server."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [llama-cpp]
+  quality: 3
 
 - id: "repo-ort-rust"
   title: "ort: ONNX Runtime bindings for Rust"
@@ -196,10 +144,11 @@
   estHours: 5
   summary: "Run ONNX models (embedders, rerankers, classifiers) from Rust with hardware acceleration, a common building block inside agent tooling."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [rust-book]
+  quality: 3
 
 - id: "repo-xgrammar"
   title: "XGrammar: fast, flexible structured generation"
@@ -219,6 +168,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-llamacpp-gbnf]
+  quality: 4
 
 - id: "repo-outlines-core"
   title: "outlines-core: Rust core of Outlines structured generation"
@@ -234,29 +184,13 @@
   estHours: 5
   summary: "The Rust implementation that turns regexes and JSON schemas into token-level automata for guaranteed-valid model output."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-llamacpp-gbnf]
 
 # ---- AI, ML, LLMs and agents (95)
-
-- id: "docs-swiftide-what-is"
-  title: "What is Swiftide?"
-  short: "Swiftide docs"
-  provider: "Bosun AI"
-  type: "article"
-  url: "https://swiftide.rs/what-is-swiftide/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Short orientation to Swiftide's indexing, query and agent building blocks before diving into the code."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-agents"
+  quality: 3
 
 - id: "docs-rig-agents"
   title: "Rig Agents: High-Level LLM Orchestration"
@@ -272,45 +206,10 @@
   estHours: 2
   summary: "Explains how Rig composes a model, preamble, context and tools into an agent and how multi-turn tool calling is driven."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [repo-rig-rust]
-
-- id: "docs-rig-tools"
-  title: "Rig concepts: Tools"
-  short: "Rig docs: Tools"
-  provider: "Rig"
-  type: "article"
-  url: "https://docs.rig.rs/docs/concepts/tools"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Shows the Tool trait, how a Rust type becomes a JSON-schema tool definition and how calls are dispatched back into typed code."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [docs-rig-agents]
-
-- id: "docs-mistral-rs-coding-agents"
-  title: "mistral.rs: Use Codex and Claude Code"
-  short: "mistral.rs for coding agents"
-  provider: "Eric Buehler"
-  type: "article"
-  url: "https://github.com/EricLBuehler/mistral.rs/blob/master/docs/src/content/docs/guides/serve/coding-agents.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Shows which API surfaces (Responses, Messages) coding-agent clients need so you can point them at a local Rust server."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-agents"
-  after: [repo-mistral-rs]
+  quality: 3
 
 - id: "docs-hf-tokenizers-rust"
   title: "tokenizers (Rust crate documentation)"
@@ -326,45 +225,10 @@
   estHours: 2
   summary: "API docs for the Rust core of Hugging Face tokenizers, to load any model's tokenizer.json natively in a Rust agent or server."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [repo-tiktoken-rs]
-
-- id: "docs-rig-coding-agent"
-  title: "The rig coding agent (agent guide)"
-  short: "rig coding agent guide"
-  provider: "0xPlaygrounds"
-  type: "article"
-  url: "https://github.com/0xPlaygrounds/rig/blob/main/docs/agent.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Design notes for a terminal coding agent built as plugins on an ECS kernel, an unusual and instructive harness architecture in Rust."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-agents"
-  after: [repo-rig-rust]
-
-- id: "docs-mistral-rs-agentic-runtime"
-  title: "mistral.rs: Agentic runtime for apps"
-  short: "mistral.rs agentic runtime"
-  provider: "Eric Buehler"
-  type: "article"
-  url: "https://github.com/EricLBuehler/mistral.rs/blob/master/docs/src/content/docs/guides/agents/agentic-runtime.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Describes how an inference server can also run tools, shell, code execution and sessions server-side, and what event stream the client sees."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-agents"
-  after: [repo-mistral-rs]
+  quality: 3
 
 - id: "docs-codex-protocol-v1"
   title: "Codex core protocol overview (protocol_v1)"
@@ -380,9 +244,10 @@
   estHours: 1
   summary: "Defines the session/task/turn vocabulary and the submission-queue/event-queue split between UI and agent core in Codex's Rust engine."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   doFirst: "Unrolling the Codex agent loop"
+  quality: 3
 
 - id: "docs-codex-execpolicy"
   title: "codex-execpolicy: command approval policy engine"
@@ -398,27 +263,10 @@
   estHours: 1
   summary: "Shows how a harness decides allow/prompt/forbid for shell commands with Starlark prefix rules that carry their own test examples."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [docs-codex-linux-sandbox]
-
-- id: "docs-codex-stream-parser"
-  title: "codex-utils-stream-parser: incremental parsing of streamed model text"
-  short: "Codex stream parser"
-  provider: "OpenAI"
-  type: "article"
-  url: "https://github.com/openai/codex/blob/main/codex-rs/utils/stream-parser/README.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Explains why hidden tags split across stream chunks need stateful parsers and how to handle UTF-8 boundaries when rendering tokens live."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [docs-codex-utils-pty]
+  quality: 3
 
 - id: "book-eureka-machine-socher"
   title: "The Eureka Machine: Why AI Is the Key to Unlocking a New Era of Scientific Discoveries"
@@ -434,64 +282,10 @@
   estHours: 8
   summary: "Argues from inside the field that AI will speed up discovery in physics, materials and biology, the exact overlap of your AI, simulation and fusion interests."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
-
-- id: "book-genesis-kissinger-schmidt-mundie"
-  title: "Genesis: Artificial Intelligence, Hope, and the Human Spirit"
-  short: "Genesis (Kissinger et al.)"
-  provider: "Henry A. Kissinger, Eric Schmidt, Craig Mundie (Little, Brown, 2024)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/henry-a-kissinger/genesis/9780316581295/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 7
-  summary: "A statesman-and-technologist view of how AI reshapes science, security and geopolitics, useful framing for where the compute you optimise will be pointed."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
-  after: [book-age-of-ai-kissinger]
-
-- id: "book-age-of-ai-kissinger"
-  title: "The Age of AI: And Our Human Future"
-  short: "The Age of AI"
-  provider: "Henry A. Kissinger, Eric Schmidt, Daniel Huttenlocher (Little, Brown, 2021)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/henry-a-kissinger-2/the-age-of-ai/9780316273992/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 7
-  summary: "A short, big-picture take on how AI changes knowledge, strategy and power, written before ChatGPT and a good baseline to compare with Genesis."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
-
-- id: "book-co-intelligence-mollick"
-  title: "Co-Intelligence: Living and Working with AI"
-  short: "Co-Intelligence"
-  provider: "Ethan Mollick (Portfolio, 2024)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/741805"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 6
-  summary: "Practical rules for working alongside LLMs day to day, a quick way to sharpen how you use models as a study and coding partner."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
+  quality: 3
 
 - id: "book-coming-wave-suleyman"
   title: "The Coming Wave: Technology, Power, and the Twenty-first Century's Greatest Dilemma"
@@ -507,27 +301,10 @@
   estHours: 9
   summary: "The DeepMind co-founder's case that AI and synthetic biology need containment, the clearest insider statement of the governance problem."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
-
-- id: "book-nexus-harari"
-  title: "Nexus: A Brief History of Information Networks from the Stone Age to AI"
-  short: "Nexus"
-  provider: "Yuval Noah Harari (Random House, 2024)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/762444/nexus-by-yuval-noah-harari/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 12
-  summary: "Places AI in the long history of information networks, giving you a historian's lens on why autonomous agents differ from earlier media."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-agents"
-  note: "Paid"
+  quality: 3
 
 - id: "book-life-3-tegmark"
   title: "Life 3.0: Being Human in the Age of Artificial Intelligence"
@@ -543,27 +320,10 @@
   estHours: 10
   summary: "A physicist's tour of AI futures from compute limits to cosmic scales, an easy fit for someone coming at AI from physics."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
-
-- id: "book-master-algorithm-domingos"
-  title: "The Master Algorithm: How the Quest for the Ultimate Learning Machine Will Remake Our World"
-  short: "The Master Algorithm"
-  provider: "Pedro Domingos (Basic Books, 2015)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/pedro-domingos/the-master-algorithm/9780465061921/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 9
-  summary: "Surveys the five tribes of ML (symbolists, connectionists, evolutionaries, Bayesians, analogizers), a good map of the field beyond deep learning."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
+  quality: 3
 
 - id: "book-genius-makers-metz"
   title: "Genius Makers: The Mavericks Who Brought AI to Google, Facebook, and the World"
@@ -579,9 +339,10 @@
   estHours: 10
   summary: "The story of Hinton, LeCun, Bengio, Hassabis and the 2012 to 2020 deep learning boom, the human backstory to the papers you study."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 3
 
 - id: "book-empire-of-ai-hao"
   title: "Empire of AI: Dreams and Nightmares in Sam Altman's OpenAI"
@@ -597,28 +358,11 @@
   estHours: 13
   summary: "A deeply reported, critical history of OpenAI and the scaling playbook, including the labour, data and energy costs behind frontier models."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   after: [book-genius-makers-metz]
-
-- id: "book-supremacy-olson"
-  title: "Supremacy: AI, ChatGPT, and the Race That Will Change the World"
-  short: "Supremacy"
-  provider: "Parmy Olson (St. Martin's Press, 2024)"
-  type: "book"
-  url: "https://us.macmillan.com/books/9781250337740/supremacy/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 9
-  summary: "Contrasts Altman and Hassabis and the Big Tech deals behind OpenAI and DeepMind, a fast read on how the AI industry got its shape."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
+  quality: 3
 
 - id: "book-infinity-machine-mallaby"
   title: "The Infinity Machine: Demis Hassabis, DeepMind, and the Quest for Superintelligence"
@@ -634,28 +378,11 @@
   estHours: 13
   summary: "The definitive DeepMind story from AlphaGo to AlphaFold, the best account of AI-for-science as a research strategy."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   after: [book-genius-makers-metz]
-
-- id: "book-optimist-hagey"
-  title: "The Optimist: Sam Altman, OpenAI, and the Race to Invent the Future"
-  short: "The Optimist"
-  provider: "Keach Hagey (W. W. Norton, 2025)"
-  type: "book"
-  url: "https://wwnorton.com/books/9781324075974"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 11
-  summary: "A biography of Altman and OpenAI's governance crisis that pairs well with Empire of AI for a balanced picture of the leading lab."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
+  quality: 3
 
 - id: "book-ai-snake-oil-narayanan"
   title: "AI Snake Oil: What Artificial Intelligence Can Do, What It Can't, and How to Tell the Difference"
@@ -671,117 +398,10 @@
   estHours: 9
   summary: "Two Princeton researchers separate working generative AI from failing predictive AI, a calibration tool against both hype and doom."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
-
-- id: "book-ai-con-bender-hanna"
-  title: "The AI Con: How to Fight Big Tech's Hype and Create the Future We Want"
-  short: "The AI Con"
-  provider: "Emily M. Bender, Alex Hanna (Harper, 2025)"
-  type: "book"
-  url: "https://thecon.ai/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 7
-  summary: "The sharpest skeptical critique of LLM hype from a computational linguist, useful as the counterweight to lab-insider books."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
-
-- id: "book-singularity-is-nearer-kurzweil"
-  title: "The Singularity Is Nearer: When We Merge with AI"
-  short: "Singularity Is Nearer"
-  provider: "Ray Kurzweil (Viking, 2024)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/535433/the-singularity-is-nearer-by-ray-kurzweil/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 10
-  summary: "Kurzweil updates his exponential-trends forecast for the LLM era, the canonical techno-optimist view to test against the data."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
-
-- id: "book-deep-learning-revolution-sejnowski"
-  title: "The Deep Learning Revolution"
-  short: "Deep Learning Revolution"
-  provider: "Terrence J. Sejnowski (MIT Press, 2018)"
-  type: "book"
-  url: "https://mitpress.mit.edu/9780262038034/the-deep-learning-revolution/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 9
-  summary: "An insider history of neural networks from Boltzmann machines to deep learning by one of its pioneers, linking AI to neuroscience."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
-
-- id: "book-rebooting-ai-marcus-davis"
-  title: "Rebooting AI: Building Artificial Intelligence We Can Trust"
-  short: "Rebooting AI"
-  provider: "Gary Marcus, Ernest Davis (Pantheon, 2019)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/603982/rebooting-ai-by-gary-marcus-and-ernest-davis/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 7
-  summary: "The classic case that deep learning lacks common sense and causal models, useful for spotting failure modes in robots and agents."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-agents"
-  note: "Paid"
-
-- id: "book-atlas-of-ai-crawford"
-  title: "Atlas of AI: Power, Politics, and the Planetary Costs of Artificial Intelligence"
-  short: "Atlas of AI"
-  provider: "Kate Crawford (Yale University Press, 2021)"
-  type: "book"
-  url: "https://yalebooks.yale.edu/book/9780300264630/atlas-of-ai/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 9
-  summary: "Traces AI's material footprint (minerals, energy, labour, data), grounding the compute you will build in its physical costs."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
-
-- id: "book-power-and-prediction-agrawal"
-  title: "Power and Prediction: The Disruptive Economics of Artificial Intelligence"
-  short: "Power and Prediction"
-  provider: "Ajay Agrawal, Joshua Gans, Avi Goldfarb (Harvard Business Review Press, 2022)"
-  type: "book"
-  url: "https://www.predictionmachines.ai/power-prediction"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 8
-  summary: "Economists explain why AI's payoff comes from redesigning whole systems, not swapping in a model, a clear lens on AI's industry impact."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
+  quality: 3
 
 - id: "book-ai-guide-thinking-humans-mitchell"
   title: "Artificial Intelligence: A Guide for Thinking Humans"
@@ -797,27 +417,10 @@
   estHours: 9
   summary: "A clear-eyed tour of vision, games and language by a complexity scientist, the best grounded introduction to what AI does and does not understand."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
-
-- id: "book-thousand-brains-hawkins"
-  title: "A Thousand Brains: A New Theory of Intelligence"
-  short: "A Thousand Brains"
-  provider: "Jeff Hawkins (Basic Books, 2021)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/jeff-hawkins/a-thousand-brains/9781541675797/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 8
-  summary: "Hawkins' cortical-column theory of reference frames and sensorimotor models, a stimulating alternative view for robotics and embodied AI."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
+  quality: 3
 
 - id: "book-atomic-human-lawrence"
   title: "The Atomic Human: What Makes Us Unique in the Age of AI"
@@ -833,45 +436,10 @@
   estHours: 11
   summary: "A Cambridge ML professor (ex-Amazon) contrasts human and machine information bandwidth, a thoughtful practitioner's view of AI's limits."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
-
-- id: "book-deep-thinking-kasparov"
-  title: "Deep Thinking: Where Machine Intelligence Ends and Human Creativity Begins"
-  short: "Deep Thinking"
-  provider: "Garry Kasparov (PublicAffairs, 2017)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/garry-kasparov/deep-thinking/9781541773646/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 7
-  summary: "Kasparov's first-hand account of losing to Deep Blue and what search-based AI taught him about human-machine teamwork."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
-
-- id: "book-you-look-like-a-thing-shane"
-  title: "You Look Like a Thing and I Love You: How Artificial Intelligence Works and Why It's Making the World a Weirder Place"
-  short: "You Look Like a Thing"
-  provider: "Janelle Shane (Voracious, 2019)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/janelle-shane/you-look-like-a-thing-and-i-love-you/9780316525220/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 6
-  summary: "A funny, accurate catalogue of how ML models fail (reward hacking, shortcut learning), great intuition for debugging your own models."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
+  quality: 3
 
 - id: "book-hands-on-llms"
   title: "Hands-On Large Language Models: Language Understanding and Generation"
@@ -890,6 +458,7 @@
   priority: 1
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 4
 
 - id: "book-hands-on-ml-3e"
   title: "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow (3rd ed.)"
@@ -908,6 +477,7 @@
   priority: 1
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 4
 
 - id: "book-prompt-engineering-for-llms"
   title: "Prompt Engineering for LLMs: The Art and Science of Building Large Language Model-Based Applications"
@@ -923,45 +493,10 @@
   estHours: 8
   summary: "Written by the GitHub Copilot engineers, it treats prompts as engineered context and shows how to structure, assemble and evaluate them inside an agent harness."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   note: "Paid"
-
-- id: "book-principles-of-building-ai-agents"
-  title: "Principles of Building AI Agents"
-  short: "Principles of AI Agents"
-  provider: "Sam Bhagwat (Mastra, 2025)"
-  type: "book"
-  url: "https://mastra.ai/books/principles-of-building-ai-agents"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "A short, free orientation to tools, memory, workflows, RAG, evals and deployment that maps the agent landscape before you commit to a longer book."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-agents"
-
-- id: "book-learning-langchain"
-  title: "Learning LangChain: Building AI and LLM Applications with LangChain and LangGraph"
-  short: "Learning LangChain"
-  provider: "Mayo Oshin, Nuno Campos (O'Reilly, 2025)"
-  type: "book"
-  url: "https://www.oreilly.com/library/view/-/9781098167271/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 8
-  summary: "Co-written by a LangGraph engineer, it walks from RAG to stateful LangGraph agents with memory and human-in-the-loop, the most common production stack you will meet."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-agents"
-  note: "Paid"
-  after: [book-hands-on-llms]
+  quality: 3
 
 - id: "book-human-compatible-russell"
   title: "Human Compatible: Artificial Intelligence and the Problem of Control"
@@ -980,6 +515,7 @@
   priority: 1
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 4
 
 - id: "book-alignment-problem-christian"
   title: "The Alignment Problem: Machine Learning and Human Values"
@@ -998,6 +534,7 @@
   priority: 1
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 4
 
 - id: "book-superintelligence-bostrom"
   title: "Superintelligence: Paths, Dangers, Strategies"
@@ -1016,6 +553,7 @@
   priority: 1
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 3
 
 - id: "book-brief-history-of-intelligence-bennett"
   title: "A Brief History of Intelligence: Evolution, AI, and the Five Breakthroughs That Made Our Brains"
@@ -1031,9 +569,10 @@
   estHours: 10
   summary: "Ties RL, world models and language to five evolutionary leaps in the brain, a rich source of intuitions for agent and robot design."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   note: "Paid"
+  quality: 3
 
 - id: "book-scaling-era-patel"
   title: "The Scaling Era: An Oral History of AI, 2019–2025"
@@ -1049,9 +588,10 @@
   estHours: 10
   summary: "Frontier researchers explain scaling laws, compute, RL and alignment in their own words, with annotations, the closest thing to sitting in on lab debates."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 3
 
 - id: "book-why-machines-learn-ananthaswamy"
   title: "Why Machines Learn: The Elegant Math Behind Modern AI"
@@ -1067,9 +607,10 @@
   estHours: 13
   summary: "Tells ML's history through its actual math (perceptrons, SVMs, backprop, kernels), a satisfying bridge between story and the equations you study."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 3
 
 - id: "book-if-anyone-builds-it-yudkowsky"
   title: "If Anyone Builds It, Everyone Dies: Why Superhuman AI Would Kill Us All"
@@ -1085,10 +626,11 @@
   estHours: 7
   summary: "The strongest statement of the AI doom argument from its originators, worth knowing precisely even if you end up disagreeing."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   after: [book-superintelligence-bostrom]
+  quality: 3
 
 - id: "book-book-of-why-pearl"
   title: "The Book of Why: The New Science of Cause and Effect"
@@ -1107,24 +649,7 @@
   priority: 1
   roadmap: "ai-engineer"
   note: "Paid"
-
-- id: "book-possible-minds-brockman"
-  title: "Possible Minds: Twenty-Five Ways of Looking at AI"
-  short: "Possible Minds"
-  provider: "John Brockman, ed. (Penguin Press, 2019)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/565703/possible-minds-by-edited-by-john-brockman/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 10
-  summary: "Essays by Russell, Pearl, Tegmark, Dennett, Pinker and others reacting to Wiener, a fast sampler of how serious thinkers disagree on AI."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
+  quality: 4
 
 - id: "book-these-strange-new-minds-summerfield"
   title: "These Strange New Minds: How AI Learned to Talk and What It Means"
@@ -1140,26 +665,10 @@
   estHours: 10
   summary: "An Oxford and DeepMind neuroscientist explains how LLMs work and whether they think, a careful, technically honest account of the LLM era."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
-
-- id: "book-what-is-intelligence-aguera-y-arcas"
-  title: "What Is Intelligence? Lessons from AI About Evolution, Computing, and Minds"
-  short: "What Is Intelligence?"
-  provider: "Blaise Agüera y Arcas (Antikythera / MIT Press, 2025)"
-  type: "book"
-  url: "https://whatisintelligence.antikythera.org/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 15
-  summary: "A Google researcher's sweeping argument that intelligence is prediction all the way down, from abiogenesis to transformers, readable in full online."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
+  quality: 3
 
 - id: "book-quest-for-ai-nilsson"
   title: "The Quest for Artificial Intelligence: A History of Ideas and Achievements"
@@ -1175,26 +684,9 @@
   estHours: 20
   summary: "A pioneer's detailed history of AI from logic and search to robotics and learning, the free reference for how the field's ideas evolved."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-
-- id: "book-the-line-boyle"
-  title: "The Line: AI and the Future of Personhood"
-  short: "The Line"
-  provider: "James Boyle (MIT Press, 2024)"
-  type: "book"
-  url: "https://mitpress.mit.edu/9780262049160/the-line/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 8
-  summary: "A legal scholar asks when machines might deserve moral or legal status, an open-access treatment of a question frontier models now raise."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
+  quality: 3
 
 - id: "book-emergent-mind-suri-mcclelland"
   title: "The Emergent Mind: How Intelligence Arises in People and Machines"
@@ -1210,9 +702,10 @@
   estHours: 9
   summary: "Co-written by a founder of parallel distributed processing, it shows how minds and neural nets both emerge from simple interacting units."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 3
 
 - id: "book-dream-machine-waldrop"
   title: "The Dream Machine"
@@ -1231,6 +724,7 @@
   priority: 1
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 4
 
 - id: "book-godel-escher-bach"
   title: "Godel, Escher, Bach: An Eternal Golden Braid"
@@ -1249,6 +743,7 @@
   priority: 1
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 4
 
 - id: "book-ai-engineering-huyen"
   title: "AI Engineering: Building Applications with Foundation Models"
@@ -1268,6 +763,7 @@
   roadmap: "ai-agents"
   note: "Paid"
   after: [book-hands-on-llms]
+  quality: 5
 
 - id: "book-designing-ml-systems"
   title: "Designing Machine Learning Systems: An Iterative Process for Production-Ready Applications"
@@ -1287,6 +783,7 @@
   roadmap: "ai-engineer"
   note: "Paid"
   doFirst: "Hands-On ML"
+  quality: 5
 
 - id: "book-build-llm-from-scratch"
   title: "Build a Large Language Model (From Scratch)"
@@ -1306,6 +803,7 @@
   roadmap: "ai-engineer"
   note: "Paid"
   after: [karpathy-zero-to-hero]
+  quality: 5
 
 - id: "book-llm-engineers-handbook"
   title: "LLM Engineer's Handbook: Master the Art of Engineering Large Language Models from Concept to Production"
@@ -1321,10 +819,11 @@
   estHours: 14
   summary: "End-to-end project book that builds a full LLM system with data collection, fine-tuning, RAG, deployment and LLMOps, useful as a template for real portfolio projects."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   after: [book-hands-on-llms]
+  quality: 3
 
 - id: "book-generative-deep-learning-2e"
   title: "Generative Deep Learning: Teaching Machines to Paint, Write, Compose, and Play (2nd ed.)"
@@ -1340,29 +839,11 @@
   estHours: 14
   summary: "Builds VAEs, GANs, autoregressive models, normalizing flows, energy-based and diffusion models one by one, giving a clear map of the generative-model family."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   doFirst: "Hands-On ML"
-
-- id: "book-ai-agents-in-action"
-  title: "AI Agents in Action: Build, Orchestrate, and Deploy Autonomous Multi-Agent Systems"
-  short: "AI Agents in Action"
-  provider: "Micheal Lanham (Manning, 2025)"
-  type: "book"
-  url: "https://www.manning.com/books/ai-agents-in-action"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 10
-  summary: "A project-driven tour of agent memory, knowledge, feedback loops and multi-agent setups that lets you compare frameworks like AutoGen and CrewAI by building with them."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-agents"
-  note: "Paid"
-  after: [book-hands-on-llms]
+  quality: 3
 
 - id: "book-building-applications-with-ai-agents"
   title: "Building Applications with AI Agents: Designing and Implementing Multiagent Systems"
@@ -1378,10 +859,11 @@
   estHours: 10
   summary: "A research-grounded design guide to agent components and their trade-offs, useful for deciding when one agent is enough and when a team of agents earns its complexity."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   note: "Paid"
   doFirst: "AI Engineering"
+  quality: 3
 
 - id: "book-build-an-ai-agent-from-scratch"
   title: "Build an AI Agent (From Scratch)"
@@ -1397,10 +879,11 @@
   estHours: 12
   summary: "You write the agent loop, tool calling, memory, MCP, CodeAct sandboxing, A2A orchestration and an eval pipeline yourself in plain Python, so you understand what every harness framework is hiding."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   note: "Paid"
   doFirst: "Build a LLM (From Scratch)"
+  quality: 3
 
 - id: "book-agentic-design-patterns-gulli"
   title: "Agentic Design Patterns: A Hands-On Guide to Building Intelligent Systems"
@@ -1416,10 +899,11 @@
   estHours: 12
   summary: "Twenty-one agent patterns from prompt chaining and tool use to reflection and multi-agent collaboration, each with runnable code, giving you a shared vocabulary for designing harnesses."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   note: "Paid"
   after: [book-hands-on-llms]
+  quality: 3
 
 - id: "book-generative-ai-design-patterns"
   title: "Generative AI Design Patterns: Solutions to Common Challenges When Building GenAI Agents and Applications"
@@ -1435,10 +919,11 @@
   estHours: 14
   summary: "Thirty-two named patterns for hallucination, output control, self-correction and tool-using agents, each with code and trade-offs, written by the authors of Machine Learning Design Patterns."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   note: "Paid"
   doFirst: "AI Engineering"
+  quality: 3
 
 - id: "book-ai-agents-with-mcp"
   title: "AI Agents with MCP"
@@ -1454,10 +939,11 @@
   estHours: 10
   summary: "The book-length treatment of the Model Context Protocol: building MCP servers and clients with the Python SDK and wiring tools, prompts and data into agent workflows."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   note: "Paid"
   after: [mcp-docs]
+  quality: 3
 
 - id: "book-evals-for-ai-engineers"
   title: "Evals for AI Engineers"
@@ -1477,25 +963,7 @@
   roadmap: "ai-agents"
   note: "Paid"
   doFirst: "AI Engineering"
-
-- id: "book-building-agentic-ai-systems"
-  title: "Building Agentic AI Systems: Create intelligent, autonomous AI agents that can reason, plan, and adapt"
-  short: "Building Agentic AI Systems"
-  provider: "Anjanava Biswas, Wrick Talukdar (Packt, 2025)"
-  type: "book"
-  url: "https://www.packtpub.com/en-us/product/9781803238753"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 8
-  summary: "Covers planning, reflection, tool integration and coordinator/worker/delegator architectures, plus a section on trust and safety for agents that act on their own."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-agents"
-  note: "Paid"
-  after: [book-ai-agents-in-action]
+  quality: 4
 
 - id: "book-designing-llm-applications"
   title: "Designing Large Language Model Applications: A Holistic Approach to LLMs"
@@ -1511,10 +979,11 @@
   estHours: 10
   summary: "Connects model internals, fine-tuning, RAG and agents to their failure modes, helping you reason about LLM apps from the model up rather than only from the API down."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   note: "Paid"
   after: [book-hands-on-llms]
+  quality: 3
 
 - id: "book-llms-in-production"
   title: "LLMs in Production: From Language Models to Successful Products"
@@ -1530,10 +999,11 @@
   estHours: 13
   summary: "Takes you through the whole LLM product lifecycle, from data and finetuning to serving, load testing, cost control and edge deployment on a Raspberry Pi."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   after: [book-hands-on-llms]
+  quality: 3
 
 - id: "book-building-genai-services-fastapi"
   title: "Building Generative AI Services with FastAPI: A Practical Approach to Developing Context-Rich Generative AI Applications"
@@ -1549,10 +1019,11 @@
   estHours: 14
   summary: "The backend-engineering side of AI apps: streaming, concurrency, caching, auth, RAG, testing nondeterministic outputs and Docker deployment of model-backed APIs."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   after: [docs-fastapi-tutorial]
+  quality: 3
 
 - id: "book-developers-playbook-llm-security"
   title: "The Developer's Playbook for Large Language Model Security: Building Secure AI Applications"
@@ -1568,10 +1039,11 @@
   estHours: 5
   summary: "From the lead of the OWASP Top 10 for LLM Applications, a compact map of prompt injection, excessive agency and trust boundaries to secure before giving agents tools."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   note: "Paid"
   doFirst: "AI Engineering"
+  quality: 3
 
 - id: "book-build-a-reasoning-model-from-scratch"
   title: "Build a Reasoning Model (From Scratch)"
@@ -1591,25 +1063,7 @@
   roadmap: "ai-agents"
   note: "Paid"
   doFirst: "Build a LLM (From Scratch)"
-
-- id: "book-deep-utopia-bostrom"
-  title: "Deep Utopia: Life and Meaning in a Solved World"
-  short: "Deep Utopia"
-  provider: "Nick Bostrom (Ideapress, 2024)"
-  type: "book"
-  url: "https://nickbostrom.com/deep-utopia/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 12
-  summary: "Bostrom's counterpart to Superintelligence, asking what purpose remains if AI succeeds, a provocative philosophical stretch."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
-  after: [book-superintelligence-bostrom]
+  quality: 4
 
 - id: "tut-rig-flight-agent"
   title: "Build a Flight Search AI Agent with Rig"
@@ -1625,9 +1079,9 @@
   estHours: 3
   summary: "A hands-on build of a tool-using agent in Rust that calls a real external API, good first end-to-end project."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
-  after: [docs-rig-tools]
+  quality: 3
 
 - id: "tut-shuttle-stdio-mcp-rust"
   title: "How to Build a stdio MCP Server in Rust"
@@ -1643,9 +1097,10 @@
   estHours: 2
   summary: "Step-by-step rmcp server over the stdio transport exposing a DNS lookup tool, a clean first MCP project in Rust."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   doFirst: "MCP spec"
+  quality: 3
 
 - id: "tut-learn-claude-code-rs"
   title: "learn-claude-code-rs: a progressive agent harness tutorial in Rust"
@@ -1661,9 +1116,10 @@
   estHours: 25
   summary: "Twenty runnable Rust crates that grow a coding-agent harness from a bare loop to tools, permissions, compaction, subagents, worktrees and MCP."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [rust-book]
+  quality: 3
 
 - id: "tut-rup12-rmcp-guide"
   title: "Building MCP Servers in Rust with rmcp: A Complete Guide"
@@ -1679,9 +1135,10 @@
   estHours: 2
   summary: "Covers rmcp's tool router and handler macros, typed parameters and testing with MCP Inspector before wiring the server into an agent."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [tut-shuttle-stdio-mcp-rust]
+  quality: 3
 
 - id: "tut-tensorzero-gateway"
   title: "TensorZero Gateway Tutorial"
@@ -1697,9 +1154,10 @@
   estHours: 2
   summary: "Walks through routing LLM calls through a gateway with schemas, templates and logged inferences, a pattern worth copying in any harness."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [repo-tensorzero]
+  quality: 3
 
 - id: "repo-async-openai"
   title: "async-openai: Rust library for OpenAI-compatible APIs"
@@ -1715,63 +1173,10 @@
   estHours: 4
   summary: "The standard async Rust client for OpenAI-style APIs, including streaming and tool calls; the usual base for a hand-rolled Rust agent loop."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [rust-book]
-
-- id: "repo-rust-genai"
-  title: "rust-genai: multi-provider generative AI client for Rust"
-  short: "rust-genai"
-  provider: "Jeremy Chone"
-  type: "practice"
-  url: "https://github.com/jeremychone/rust-genai"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "One ergonomic Rust API over many LLM providers (OpenAI, Anthropic, Gemini, Ollama...), handy when a harness must be provider-agnostic."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-agents"
-  after: [rust-book]
-
-- id: "repo-ollama-rs"
-  title: "ollama-rs: Rust library for the Ollama API"
-  short: "ollama-rs"
-  provider: "pepperoni21"
-  type: "practice"
-  url: "https://github.com/pepperoni21/ollama-rs"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 3
-  summary: "Simple Rust bindings for driving local models through Ollama, including function calling, for offline agent experiments."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-agents"
-  after: [rust-book]
-
-- id: "repo-aichat"
-  title: "AIChat: all-in-one LLM CLI tool"
-  short: "aichat"
-  provider: "sigoden"
-  type: "practice"
-  url: "https://github.com/sigoden/aichat"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 5
-  summary: "A popular Rust LLM CLI with shell assistant, REPL, RAG, function calling and agents; small enough to read end to end."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-agents"
-  after: [rust-book]
+  quality: 3
 
 - id: "repo-tiktoken-rs"
   title: "tiktoken-rs: OpenAI tokenizers for Rust"
@@ -1787,9 +1192,10 @@
   estHours: 2
   summary: "Count and split tokens in Rust for context-window budgeting and compaction decisions inside a harness."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [rust-book]
+  quality: 3
 
 - id: "repo-rig-rust"
   title: "Rig: build modular LLM applications in Rust"
@@ -1803,11 +1209,12 @@
   level: "intermediate"
   cost: "free"
   estHours: 15
-  summary: "The most widely used Rust agent framework: providers, tools, RAG and agents behind typed traits, now with its own coding-agent harness crates to study."
+  summary: "A widely used Rust LLM framework (pre-1.0): agents, tools and RAG pipelines with typed provider abstractions."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [rust-book]
+  quality: 3
 
 - id: "repo-swiftide"
   title: "Swiftide: fast, streaming indexing, query and agentic LLM applications in Rust"
@@ -1823,27 +1230,10 @@
   estHours: 12
   summary: "A Rust library for streaming RAG pipelines plus an agent framework with tools and hooks, useful to read for async pipeline design."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [rust-book]
-
-- id: "repo-langchain-rust"
-  title: "langchain-rust: LangChain for Rust"
-  short: "langchain-rust"
-  provider: "Abraxas-365"
-  type: "practice"
-  url: "https://github.com/Abraxas-365/langchain-rust"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "A Rust port of LangChain's chains, agents and vector-store abstractions; useful to compare idioms against the Python original."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-agents"
-  after: [rust-book]
+  quality: 3
 
 - id: "repo-kalosm-floneum"
   title: "Floneum / Kalosm: local-first AI in Rust"
@@ -1859,27 +1249,10 @@
   estHours: 8
   summary: "Kalosm runs local language, audio and vision models in pure Rust and offers grammar-constrained structured generation into Rust types."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [rust-book]
-
-- id: "repo-forgecode"
-  title: "Forge: AI-enhanced terminal development environment"
-  short: "Forge coding agent"
-  provider: "Tailcall / Antinomy"
-  type: "practice"
-  url: "https://github.com/tailcallhq/forgecode"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "An actively developed open-source terminal coding agent written in Rust, worth reading for its agent modes, tool layer and TUI."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-agents"
-  after: [tut-learn-claude-code-rs]
+  quality: 3
 
 - id: "repo-tabby"
   title: "Tabby: self-hosted AI coding assistant"
@@ -1895,9 +1268,10 @@
   estHours: 10
   summary: "A self-hosted Copilot alternative with a Rust server, showing how code completion and chat backends are built and indexed."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [rust-book]
+  quality: 3
 
 - id: "repo-tensorzero"
   title: "TensorZero: open-source LLMOps stack (gateway, observability, evals)"
@@ -1913,9 +1287,10 @@
   estHours: 8
   summary: "A Rust LLM gateway with structured inference logging, experiments and optimization loops, showing how to wrap model calls in production."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [rust-book]
+  quality: 3
 
 - id: "repo-agentgateway"
   title: "agentgateway: proxy for agentic AI (MCP, A2A, LLM traffic)"
@@ -1931,46 +1306,10 @@
   estHours: 10
   summary: "A Rust data plane that multiplexes, authenticates and observes MCP and A2A traffic, showing what production agent networking needs."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   doFirst: "MCP spec"
-
-- id: "article-infoq-codex-rust-rewrite"
-  title: "OpenAI Rewrites Codex CLI in Rust"
-  short: "Codex CLI Rust rewrite"
-  provider: "InfoQ"
-  type: "article"
-  url: "https://www.infoq.com/news/2025/06/codex-cli-rust-native-rewrite"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Summarises why OpenAI moved its agent CLI from Node to native Rust: startup, memory, sandboxing and a reusable protocol core."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-agents"
-
-- id: "article-rig-agentic-patterns"
-  title: "Implementing Design Patterns for Agentic AI with Rig & Rust"
-  short: "Agentic patterns with Rig"
-  provider: "Josh Mo"
-  type: "article"
-  url: "https://dev.to/joshmo_dev/implementing-design-patterns-for-agentic-ai-with-rig-rust-1o71"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Translates the classic agent workflow patterns (chaining, routing, orchestrator-worker, evaluator loops) into concrete Rust code."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-agents"
-  after: [anthropic-building-effective-agents]
-
-# ---- Software architecture and system design (46)
+  quality: 3
 
 - id: "book-make-it-stick"
   title: "Make It Stick: The Science of Successful Learning"
@@ -1989,6 +1328,7 @@
   priority: 2
   roadmap: "software-architect"
   note: "Paid"
+  quality: 4
 
 - id: "book-ultralearning"
   title: "Ultralearning: Master Hard Skills, Outsmart the Competition, and Accelerate Your Career"
@@ -2004,10 +1344,11 @@
   estHours: 8
   summary: "A playbook for aggressive, project-driven self-study that maps directly onto teaching yourself a CS degree's worth of material outside class."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [book-make-it-stick]
+  quality: 3
 
 - id: "book-peak-ericsson"
   title: "Peak: Secrets from the New Science of Expertise"
@@ -2023,9 +1364,10 @@
   estHours: 8
   summary: "The researcher behind deliberate practice explains how real expertise is built, which helps you design drills for coding, math and kernel work instead of just logging hours."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-deep-work"
   title: "Deep Work: Rules for Focused Success in a Distracted World"
@@ -2041,9 +1383,10 @@
   estHours: 7
   summary: "Gives concrete rules for protecting long, undistracted blocks, which is the only way to make progress on hard material while juggling classes and a startup."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-so-good-they-cant-ignore-you"
   title: "So Good They Can't Ignore You: Why Skills Trump Passion in the Quest for Work You Love"
@@ -2059,10 +1402,11 @@
   estHours: 6
   summary: "Reframes career planning around building rare, valuable skills (career capital), a useful lens for choosing between inference, graphics and robotics depth."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [book-deep-work]
+  quality: 3
 
 - id: "book-a-mind-for-numbers"
   title: "A Mind for Numbers: How to Excel at Math and Science (Even If You Flunked Algebra)"
@@ -2078,9 +1422,10 @@
   estHours: 8
   summary: "Practical techniques (focused vs diffuse thinking, chunking, beating procrastination) for grinding through linear algebra, physics and calculus on your own."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-how-to-read-a-book"
   title: "How to Read a Book: The Classic Guide to Intelligent Reading"
@@ -2096,27 +1441,10 @@
   estHours: 11
   summary: "Teaches inspectional and analytical reading, the skill that lets you get the real argument out of dense textbooks and papers fast."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
-
-- id: "book-the-art-of-learning"
-  title: "The Art of Learning: An Inner Journey to Optimal Performance"
-  short: "The Art of Learning"
-  provider: "Josh Waitzkin (Free Press, 2008)"
-  type: "book"
-  url: "https://www.simonandschuster.com/books/The-Art-of-Learning/Josh-Waitzkin/9780743277464"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "paid"
-  estHours: 7
-  summary: "A chess and martial-arts champion's account of mastering fundamentals deeply and handling pressure, a good mindset counterweight to rushing through topics."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  note: "Paid"
+  quality: 3
 
 - id: "book-range-epstein"
   title: "Range: Why Generalists Triumph in a Specialized World"
@@ -2132,9 +1460,10 @@
   estHours: 9
   summary: "Makes the case for broad sampling before specializing, which speaks directly to a learner spanning AI, graphics, robotics, chips and physics."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-thinking-in-systems"
   title: "Thinking in Systems: A Primer"
@@ -2153,6 +1482,7 @@
   priority: 2
   roadmap: "software-architect"
   note: "Paid"
+  quality: 4
 
 - id: "book-making-of-a-manager"
   title: "The Making of a Manager: What to Do When Everyone Looks to You"
@@ -2168,9 +1498,10 @@
   estHours: 7
   summary: "A warm, practical first-time-manager guide on feedback, one-on-ones, meetings and hiring for when you start leading people."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-software-engineers-guidebook"
   title: "The Software Engineer's Guidebook: Navigating Senior, Tech Lead, Staff and Principal Positions at Tech Companies and Startups"
@@ -2186,9 +1517,10 @@
   estHours: 14
   summary: "A broad, current field guide to how engineering careers, promotions and practices really work at big tech and startups, ideal before an NVIDIA-style internship."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-the-effective-engineer"
   title: "The Effective Engineer: How to Leverage Your Efforts in Software Engineering to Make a Disproportionate and Meaningful Impact"
@@ -2204,9 +1536,10 @@
   estHours: 7
   summary: "Frames engineering work around leverage (iteration speed, tooling, measurement), a habit that compounds early in a career."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-the-phoenix-project"
   title: "The Phoenix Project: A Novel about IT, DevOps, and Helping Your Business Win"
@@ -2222,9 +1555,10 @@
   estHours: 9
   summary: "A novel that makes flow, bottlenecks and unplanned work intuitive before you meet them for real in a production team."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-the-goal-goldratt"
   title: "The Goal: A Process of Ongoing Improvement (30th Anniversary Edition)"
@@ -2240,9 +1574,10 @@
   estHours: 9
   summary: "The original theory-of-constraints novel; learning to find the bottleneck applies equally to factories, teams and GPU pipelines."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-zero-to-one"
   title: "Zero to One: Notes on Startups, or How to Build the Future"
@@ -2258,9 +1593,10 @@
   estHours: 5
   summary: "A sharp argument for building genuinely new technology and owning a niche monopoly, useful for thinking about where a product like a local-AI platform can win."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-the-lean-startup"
   title: "The Lean Startup: How Today's Entrepreneurs Use Continuous Innovation to Create Radically Successful Businesses"
@@ -2276,9 +1612,10 @@
   estHours: 8
   summary: "Introduces build-measure-learn, MVPs and validated learning so you test product assumptions before sinking months of engineering into them."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-the-mom-test"
   title: "The Mom Test: How to Talk to Customers & Learn If Your Business Is a Good Idea When Everyone Is Lying to You"
@@ -2297,6 +1634,7 @@
   priority: 2
   roadmap: "software-architect"
   note: "Paid"
+  quality: 4
 
 - id: "book-shape-up"
   title: "Shape Up: Stop Running in Circles and Ship Work that Matters"
@@ -2312,8 +1650,9 @@
   estHours: 4
   summary: "A free, concrete product-development process (shaping, betting, six-week cycles) a small founding team can adopt immediately."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "book-hackers-and-painters"
   title: "Hackers & Painters: Big Ideas from the Computer Age"
@@ -2329,9 +1668,10 @@
   estHours: 7
   summary: "Graham's essays on programming as craft, startups as wealth creation and language choice still shape how founders think about building."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-fundamentals-software-architecture-2e"
   title: "Fundamentals of Software Architecture: A Modern Engineering Approach (2nd ed.)"
@@ -2350,6 +1690,7 @@
   priority: 2
   roadmap: "software-architect"
   note: "Paid"
+  quality: 4
 
 - id: "book-philosophy-of-software-design-2e"
   title: "A Philosophy of Software Design (2nd ed.)"
@@ -2365,9 +1706,10 @@
   estHours: 5
   summary: "A short, opinionated book on managing complexity with deep modules and information hiding, the most direct lever on code you can still understand in a year."
   fromYear: 1
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   note: "Paid"
+  quality: 5
 
 - id: "book-pragmatic-programmer-20th"
   title: "The Pragmatic Programmer: Your Journey to Mastery (20th Anniversary Edition)"
@@ -2383,9 +1725,10 @@
   estHours: 9
   summary: "Timeless habits (DRY, tracer bullets, orthogonality, automation, owning your craft) that shape how a self-taught engineer works day to day."
   fromYear: 1
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   note: "Paid"
+  quality: 5
 
 - id: "book-thinking-fast-and-slow"
   title: "Thinking, Fast and Slow"
@@ -2401,9 +1744,10 @@
   estHours: 16
   summary: "The canonical map of cognitive biases, useful for better technical estimates, debugging judgement and founder decisions under uncertainty."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-sense-of-style"
   title: "The Sense of Style: The Thinking Person's Guide to Writing in the 21st Century"
@@ -2419,9 +1763,10 @@
   estHours: 10
   summary: "Explains clear writing through cognitive science, which pays off in design docs, blog posts and investor updates."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-staff-engineers-path"
   title: "The Staff Engineer's Path: A Guide for Individual Contributors Navigating Growth and Change"
@@ -2437,10 +1782,11 @@
   estHours: 10
   summary: "Shows what senior technical leadership looks like day to day (big-picture thinking, executing projects, leveling others up) so you know what to grow toward."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   doFirst: "Software Engineer's Guidebook"
+  quality: 3
 
 - id: "book-staff-engineer-larson"
   title: "Staff Engineer: Leadership Beyond the Management Track"
@@ -2456,10 +1802,11 @@
   estHours: 8
   summary: "Interviews and guides on how staff-plus engineers set direction and earn influence; most of the material is also readable free on staffeng.com."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   doFirst: "Software Engineer's Guidebook"
+  quality: 3
 
 - id: "book-an-elegant-puzzle"
   title: "An Elegant Puzzle: Systems of Engineering Management"
@@ -2475,10 +1822,11 @@
   estHours: 9
   summary: "Treats engineering organizations as systems to design, with concrete tools on team sizing, migrations and planning you will need as your startup grows."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [book-the-managers-path]
+  quality: 3
 
 - id: "book-the-managers-path"
   title: "The Manager's Path: A Guide for Tech Leaders Navigating Growth and Change"
@@ -2494,9 +1842,10 @@
   estHours: 7
   summary: "Walks through each rung from mentor to tech lead to CTO, which is exactly the path a technical founder climbs while hiring a first team."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-mythical-man-month"
   title: "The Mythical Man-Month: Essays on Software Engineering, Anniversary Edition"
@@ -2512,9 +1861,10 @@
   estHours: 9
   summary: "The classic on why adding people to late projects backfires and why conceptual integrity matters, lessons that still govern how teams ship."
   fromYear: 2
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   note: "Paid"
+  quality: 5
 
 - id: "book-peopleware"
   title: "Peopleware: Productive Projects and Teams (3rd Edition)"
@@ -2530,10 +1880,11 @@
   estHours: 7
   summary: "Argues that software's hardest problems are human ones and shows how environment and team chemistry drive productivity."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [book-mythical-man-month]
+  quality: 3
 
 - id: "book-accelerate"
   title: "Accelerate: The Science of Lean Software and DevOps: Building and Scaling High Performing Technology Organizations"
@@ -2549,10 +1900,11 @@
   estHours: 7
   summary: "Research-backed evidence on which delivery practices (small batches, CI, trunk-based work) predict high-performing teams, useful for setting up your own."
   fromYear: 2
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   note: "Paid"
   after: [book-the-phoenix-project]
+  quality: 5
 
 - id: "book-high-output-management"
   title: "High Output Management"
@@ -2571,6 +1923,7 @@
   priority: 2
   roadmap: "software-architect"
   note: "Paid"
+  quality: 4
 
 - id: "book-scaling-people"
   title: "Scaling People: Tactics for Management and Company Building"
@@ -2586,10 +1939,11 @@
   estHours: 12
   summary: "Stripe's former COO hands over the operating frameworks, templates and planning rituals that keep a growing company aligned."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [book-the-managers-path]
+  quality: 3
 
 - id: "book-inspired-cagan"
   title: "INSPIRED: How to Create Tech Products Customers Love (2nd Edition)"
@@ -2605,10 +1959,11 @@
   estHours: 10
   summary: "Explains how strong product teams discover what to build and work with engineering, filling the product-management gap most engineers have."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [book-the-lean-startup]
+  quality: 3
 
 - id: "book-good-strategy-bad-strategy"
   title: "Good Strategy Bad Strategy: The Difference and Why It Matters"
@@ -2624,9 +1979,10 @@
   estHours: 9
   summary: "Defines strategy as diagnosis, guiding policy and coherent action, a tool for cutting through vague plans in a startup or a research agenda."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-working-in-public"
   title: "Working in Public: The Making and Maintenance of Open Source Software"
@@ -2642,9 +1998,10 @@
   estHours: 8
   summary: "Explains how open-source projects are really produced and maintained, essential context if you build on or release open-source AI tooling."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-poor-charlies-almanack"
   title: "Poor Charlie's Almanack: The Essential Wit and Wisdom of Charles T. Munger"
@@ -2660,10 +2017,11 @@
   estHours: 12
   summary: "Munger's latticework of mental models and talks on avoiding stupidity, a durable toolkit for judgement as a founder."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [book-thinking-fast-and-slow]
+  quality: 3
 
 - id: "book-ddia-2e"
   title: "Designing Data-Intensive Applications: The Big Ideas Behind Reliable, Scalable, and Maintainable Systems (2nd ed.)"
@@ -2679,9 +2037,10 @@
   estHours: 25
   summary: "The updated edition of the book every backend and system-design interview leans on: storage engines, replication, partitioning, transactions and stream processing, now with cloud-native and vector-data material."
   fromYear: 2
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   note: "Paid"
+  quality: 5
 
 - id: "book-software-architecture-hard-parts"
   title: "Software Architecture: The Hard Parts: Modern Trade-Off Analyses for Distributed Architectures"
@@ -2701,6 +2060,7 @@
   roadmap: "software-architect"
   note: "Paid"
   after: [book-fundamentals-software-architecture-2e]
+  quality: 4
 
 - id: "book-building-microservices-2e"
   title: "Building Microservices: Designing Fine-Grained Systems (2nd ed.)"
@@ -2719,6 +2079,7 @@
   priority: 2
   roadmap: "software-architect"
   note: "Paid"
+  quality: 4
 
 - id: "book-release-it-2e"
   title: "Release It!: Design and Deploy Production-Ready Software (2nd ed.)"
@@ -2734,9 +2095,10 @@
   estHours: 10
   summary: "War stories plus stability patterns (circuit breakers, bulkheads, timeouts, back-pressure) that keep services alive under real traffic and partial failure."
   fromYear: 2
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   note: "Paid"
+  quality: 5
 
 - id: "book-clean-architecture"
   title: "Clean Architecture: A Craftsman's Guide to Software Structure and Design"
@@ -2752,10 +2114,11 @@
   estHours: 10
   summary: "Explains dependency rules, component boundaries and keeping business logic independent of frameworks, ideas worth knowing even where you later disagree."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [book-philosophy-of-software-design-2e]
+  quality: 3
 
 - id: "book-domain-driven-design-evans"
   title: "Domain-Driven Design: Tackling Complexity in the Heart of Software"
@@ -2771,10 +2134,11 @@
   estHours: 18
   summary: "The source of bounded contexts, aggregates and ubiquitous language, the ideas behind most modern service boundaries."
   fromYear: 2
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   note: "Paid"
   after: [book-fundamentals-software-architecture-2e]
+  quality: 5
 
 - id: "book-high-growth-handbook"
   title: "High Growth Handbook: Scaling Startups from 10 to 10,000 People"
@@ -2790,10 +2154,11 @@
   estHours: 10
   summary: "Interviews and advice on hiring, boards, M&A and executive roles for the stage after a startup finds traction."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
   after: [book-zero-to-one]
+  quality: 3
 
 - id: "book-implementing-ddd"
   title: "Implementing Domain-Driven Design"
@@ -2815,6 +2180,7 @@
   after: [book-domain-driven-design-evans]
 
 # ---- Systems: low-level programming, OS kernels, algorithms (38)
+  quality: 4
 
 - id: "docs-codex-utils-pty"
   title: "codex-utils-pty: spawn processes under a PTY or pipes"
@@ -3490,8 +2856,9 @@
   estHours: 1
   summary: "Instrument a small Rust service with traces, metrics and logs, the starting point for tracing every turn and tool call of an agent."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "repo-opentelemetry-rust"
   title: "OpenTelemetry Rust"
@@ -3507,9 +2874,10 @@
   estHours: 4
   summary: "The official Rust OpenTelemetry SDK and exporters to emit GenAI-convention spans from a Rust harness."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-otel-rust-getting-started]
+  quality: 3
 
 - id: "repo-tracing-opentelemetry"
   title: "tracing-opentelemetry"
@@ -3525,11 +2893,12 @@
   estHours: 2
   summary: "Bridges the tracing crate to OpenTelemetry so existing spans in an async Rust agent become exportable distributed traces."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-opentelemetry-rust]
 
 # ---- Languages (14)
+  quality: 3
 
 - id: "book-programming-rust-2e"
   title: "Programming Rust: Fast, Safe Systems Development (2nd ed.)"
@@ -3548,6 +2917,7 @@
   priority: 2
   note: "Paid"
   after: [rust-book]
+  quality: 4
 
 - id: "book-rust-in-action"
   title: "Rust in Action: Systems Programming Concepts and Techniques"
@@ -3563,9 +2933,10 @@
   estHours: 14
   summary: "Learns Rust by building systems pieces (a key-value store, a CPU emulator, networking, a tiny OS kernel), which doubles as a systems-programming primer."
   fromYear: 2
-  priority: 2
+  priority: 3
   note: "Paid"
   after: [rust-book]
+  quality: 3
 
 - id: "book-cpp-concurrency-in-action-2e"
   title: "C++ Concurrency in Action (2nd ed.)"
@@ -3581,9 +2952,10 @@
   estHours: 18
   summary: "The standard guide to threads, atomics, the C++ memory model and lock-free structures, needed for engine, runtime and inference-server code."
   fromYear: 2
-  priority: 2
+  priority: 1
   note: "Paid"
   after: [effective-modern-cpp]
+  quality: 5
 
 - id: "book-fluent-python-2e"
   title: "Fluent Python: Clear, Concise, and Effective Programming (2nd ed.)"
@@ -3599,8 +2971,9 @@
   estHours: 25
   summary: "Explains Python's data model, iterators, decorators, typing and concurrency in depth, so the language you use for ML stops being a black box."
   fromYear: 2
-  priority: 2
+  priority: 1
   note: "Paid"
+  quality: 5
 
 - id: "book-high-performance-python-2e"
   title: "High Performance Python: Practical Performant Programming for Humans (2nd ed.)"
@@ -3619,6 +2992,7 @@
   priority: 2
   note: "Paid"
   after: [book-fluent-python-2e]
+  quality: 4
 
 - id: "book-engineering-a-compiler-3e"
   title: "Engineering a Compiler (3rd ed.)"
@@ -3634,9 +3008,10 @@
   estHours: 35
   summary: "A modern compiler text focused on IR, optimization, instruction selection and register allocation, the background for working on ML compilers like Triton or MLIR."
   fromYear: 3
-  priority: 2
+  priority: 1
   note: "Paid"
   after: [crafting-interpreters]
+  quality: 5
 
 - id: "repo-schemars"
   title: "Schemars: generate JSON Schema from Rust types"
@@ -3652,8 +3027,9 @@
   estHours: 2
   summary: "Derives JSON Schema from serde types, the usual way Rust agents and MCP servers publish typed tool parameters."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [rust-book]
+  quality: 3
 
 - id: "repo-ratatui"
   title: "Ratatui: build terminal user interfaces in Rust"
@@ -3669,42 +3045,9 @@
   estHours: 8
   summary: "The TUI library behind several Rust coding agents (including Codex), for building a chat and diff interface around your harness."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [rust-book]
-
-- id: "repo-fastmcpp"
-  title: "fastmcpp: C++ implementation of the Model Context Protocol"
-  short: "fastmcpp (C++ MCP)"
-  provider: "0xeb"
-  type: "practice"
-  url: "https://github.com/0xeb/fastmcpp"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "A modern C++ port of the FastMCP ideas for writing MCP servers and clients, for harnesses that live in C++ codebases."
-  fromYear: 2
-  priority: 2
-  doFirst: "MCP spec"
-
-- id: "repo-cpp-mcp"
-  title: "cpp-mcp: lightweight C++ MCP SDK"
-  short: "cpp-mcp"
-  provider: "hkr04"
-  type: "practice"
-  url: "https://github.com/hkr04/cpp-mcp"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "A small C++ MCP server/client library; compact enough to see how JSON-RPC messages and transports are implemented by hand."
-  fromYear: 2
-  priority: 2
-  doFirst: "MCP spec"
+  quality: 3
 
 - id: "repo-jiter"
   title: "jiter: fast iterable JSON parser (with partial JSON support)"
@@ -3720,8 +3063,9 @@
   estHours: 3
   summary: "A Rust JSON parser that can parse incomplete JSON, exactly what you need to show streamed tool-call arguments before they finish."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [rust-book]
+  quality: 3
 
 - id: "repo-jsonrpsee"
   title: "jsonrpsee: JSON-RPC client and server in Rust"
@@ -3737,8 +3081,9 @@
   estHours: 4
   summary: "A mature async JSON-RPC 2.0 library to study before writing your own MCP or ACP transport layer."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [spec-json-rpc-2]
+  quality: 3
 
 - id: "repo-lsp-server-rust-analyzer"
   title: "lsp-server (rust-analyzer)"
@@ -3754,8 +3099,9 @@
   estHours: 2
   summary: "A tiny synchronous JSON-RPC-over-stdio framework; a clean model for the stdio message loop every MCP or LSP server needs."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [spec-json-rpc-2]
+  quality: 3
 
 - id: "repo-ast-grep"
   title: "ast-grep: structural code search, lint and rewrite"
@@ -3771,10 +3117,11 @@
   estHours: 4
   summary: "A Rust tree-sitter tool for syntax-aware search and rewrite, a powerful code-editing tool to expose to a coding agent."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "tree-sitter"
 
 # ---- Graphics and rendering (1)
+  quality: 3
 
 - id: "book-real-time-rendering-4e"
   title: "Real-Time Rendering (4th ed.)"
@@ -3853,6 +3200,7 @@
   fromYear: 1
   priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-surely-youre-joking"
   title: "\"Surely You're Joking, Mr. Feynman!\": Adventures of a Curious Character"
@@ -3868,8 +3216,9 @@
   estHours: 8
   summary: "Feynman's stories model a habit of playful, hands-on curiosity that keeps physics and engineering fun."
   fromYear: 1
-  priority: 2
+  priority: 3
   note: "Paid"
+  quality: 3
 
 - id: "book-qed-feynman"
   title: "QED: The Strange Theory of Light and Matter"
@@ -3887,40 +3236,7 @@
   fromYear: 1
   priority: 2
   note: "Paid"
-
-- id: "book-six-easy-pieces"
-  title: "Six Easy Pieces: Essentials of Physics Explained by Its Most Brilliant Teacher"
-  short: "Six Easy Pieces"
-  provider: "Richard P. Feynman, Robert B. Leighton & Matthew Sands (Basic Books, 1994)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/richard-p-feynman/six-easy-pieces/9780465025275/?lens=basic-books"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [math]
-  level: "intro"
-  cost: "paid"
-  estHours: 5
-  summary: "Six of the most accessible Feynman Lectures on atoms, energy conservation, gravity and quantum behavior, a short physics reset."
-  fromYear: 1
-  priority: 2
-  note: "Paid"
-
-- id: "book-fabric-of-the-cosmos"
-  title: "The Fabric of the Cosmos: Space, Time, and the Texture of Reality"
-  short: "Fabric of the Cosmos"
-  provider: "Brian Greene (Knopf, 2004)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/71273/the-fabric-of-the-cosmos-by-brian-greene/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [math]
-  level: "intro"
-  cost: "paid"
-  estHours: 16
-  summary: "A conceptual tour of relativity, entropy and the arrow of time, quantum entanglement and cosmology."
-  fromYear: 1
-  priority: 2
-  note: "Paid"
+  quality: 4
 
 - id: "book-chaos-gleick"
   title: "Chaos: Making a New Science"
@@ -3936,8 +3252,9 @@
   estHours: 10
   summary: "How Lorenz, Feigenbaum and Mandelbrot discovered sensitive dependence and strange attractors, crucial intuition for any simulation work."
   fromYear: 1
-  priority: 2
+  priority: 3
   note: "Paid"
+  quality: 3
 
 - id: "book-dark-sun"
   title: "Dark Sun: The Making of the Hydrogen Bomb"
@@ -3953,9 +3270,10 @@
   estHours: 22
   summary: "Covers the Teller-Ulam design, early Monte Carlo computing and thermonuclear physics, the dark twin of fusion energy."
   fromYear: 2
-  priority: 2
+  priority: 3
   note: "Paid"
   after: [book-making-of-the-atomic-bomb]
+  quality: 3
 
 - id: "book-genius-gleick"
   title: "Genius: The Life and Science of Richard Feynman"
@@ -3971,9 +3289,10 @@
   estHours: 14
   summary: "A scientific biography that explains Feynman diagrams, Los Alamos computing and the Challenger inquiry alongside the man."
   fromYear: 2
-  priority: 2
+  priority: 3
   note: "Paid"
   after: [book-surely-youre-joking]
+  quality: 3
 
 - id: "book-theoretical-minimum"
   title: "The Theoretical Minimum: What You Need to Know to Start Doing Physics"
@@ -3989,9 +3308,10 @@
   estHours: 12
   summary: "Classical mechanics via Lagrangians and Hamiltonians with real equations, a compact base for simulation and robotics dynamics."
   fromYear: 2
-  priority: 2
+  priority: 3
   note: "Paid"
   doFirst: "Calculus"
+  quality: 3
 
 - id: "book-theoretical-minimum-quantum"
   title: "Quantum Mechanics: The Theoretical Minimum"
@@ -4007,9 +3327,10 @@
   estHours: 12
   summary: "Spins, states, operators and entanglement taught with linear algebra, the shortest honest path to the math of quantum computing."
   fromYear: 2
-  priority: 2
+  priority: 3
   note: "Paid"
   after: [book-theoretical-minimum]
+  quality: 3
 
 - id: "book-something-deeply-hidden"
   title: "Something Deeply Hidden: Quantum Worlds and the Emergence of Spacetime"
@@ -4025,9 +3346,10 @@
   estHours: 10
   summary: "A careful case for the many-worlds reading of quantum mechanics that clarifies measurement, decoherence and the wave function."
   fromYear: 2
-  priority: 2
+  priority: 3
   note: "Paid"
   after: [book-qed-feynman]
+  quality: 3
 
 - id: "book-structure-of-scientific-revolutions"
   title: "The Structure of Scientific Revolutions (50th Anniversary Edition)"
@@ -4045,6 +3367,7 @@
   fromYear: 2
   priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-beginning-of-infinity"
   title: "The Beginning of Infinity: Explanations That Transform the World"
@@ -4060,8 +3383,9 @@
   estHours: 14
   summary: "A quantum-computing pioneer argues that good explanations drive unbounded progress, touching computation, physics and AI."
   fromYear: 2
-  priority: 2
+  priority: 3
   note: "Paid"
+  quality: 3
 
 - id: "book-concrete-mathematics"
   title: "Concrete Mathematics: A Foundation for Computer Science (2nd ed.)"
@@ -4077,9 +3401,10 @@
   estHours: 40
   summary: "Sums, recurrences, number theory, binomials and generating functions taught for algorithm analysis, with famously good exercises."
   fromYear: 2
-  priority: 2
+  priority: 1
   note: "Paid"
   doFirst: "MIT 6.042J"
+  quality: 5
 
 - id: "book-griffiths-electrodynamics-5e"
   title: "Introduction to Electrodynamics (5th ed.)"
@@ -4095,8 +3420,9 @@
   estHours: 45
   summary: "The clearest undergraduate treatment of fields, potentials and Maxwell's equations, needed for electronics, plasma and fusion physics."
   fromYear: 2
-  priority: 2
+  priority: 1
   note: "Paid"
+  quality: 5
 
 - id: "book-griffiths-quantum-mechanics-3e"
   title: "Introduction to Quantum Mechanics (3rd ed.)"
@@ -4112,11 +3438,12 @@
   estHours: 40
   summary: "The standard first course in wavefunctions, operators, spin and perturbation theory, preparing you for quantum computing and semiconductor physics."
   fromYear: 2
-  priority: 2
+  priority: 1
   note: "Paid"
   after: [book-griffiths-electrodynamics-5e]
 
 # ---- Electrical and mechanical engineering (20)
+  quality: 5
 
 - id: "book-apple-in-china"
   title: "Apple in China: The Capture of the World's Greatest Company"
@@ -4135,6 +3462,7 @@
   priority: 4
   note: "Paid"
   after: [book-chip-war-miller]
+  quality: 3
 
 - id: "book-breakneck"
   title: "Breakneck: China's Quest to Engineer the Future"
@@ -4152,6 +3480,7 @@
   fromYear: 1
   priority: 4
   note: "Paid"
+  quality: 3
 
 - id: "book-star-builders"
   title: "The Star Builders: Nuclear Fusion and the Race to Power the Planet"
@@ -4169,6 +3498,7 @@
   fromYear: 1
   priority: 4
   note: "Paid"
+  quality: 3
 
 - id: "book-a-piece-of-the-sun"
   title: "A Piece of the Sun: The Quest for Fusion Energy"
@@ -4186,6 +3516,7 @@
   fromYear: 1
   priority: 4
   note: "Paid"
+  quality: 3
 
 - id: "book-skunk-works"
   title: "Skunk Works: A Personal Memoir of My Years at Lockheed"
@@ -4201,8 +3532,9 @@
   estHours: 10
   summary: "How a small team built the U-2, SR-71 and F-117 stealth fighter, a model for fast, lean aerospace engineering."
   fromYear: 1
-  priority: 4
+  priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-reentry-berger"
   title: "Reentry: SpaceX, Elon Musk, and the Reusable Rockets That Launched a Second Space Age"
@@ -4220,6 +3552,7 @@
   fromYear: 1
   priority: 4
   note: "Paid"
+  quality: 3
 
 - id: "book-pieces-of-the-action"
   title: "Pieces of the Action"
@@ -4237,6 +3570,7 @@
   fromYear: 1
   priority: 4
   note: "Paid"
+  quality: 3
 
 - id: "book-art-of-doing-science-and-engineering"
   title: "The Art of Doing Science and Engineering: Learning to Learn"
@@ -4252,8 +3586,9 @@
   estHours: 14
   summary: "Hamming's Bell Labs lessons on coding theory, digital filters, simulation and above all how to pick important problems."
   fromYear: 1
-  priority: 4
+  priority: 1
   note: "Paid"
+  quality: 5
 
 - id: "book-engineering-in-plain-sight"
   title: "Engineering in Plain Sight: An Illustrated Field Guide to the Constructed Environment"
@@ -4271,6 +3606,7 @@
   fromYear: 1
   priority: 4
   note: "Paid"
+  quality: 3
 
 - id: "book-how-the-world-really-works"
   title: "How the World Really Works: The Science Behind How We Got Here and Where We're Going"
@@ -4286,8 +3622,9 @@
   estHours: 8
   summary: "Grounds you in the hard numbers of energy, food, steel, cement, plastics and ammonia that every engineering plan rests on."
   fromYear: 1
-  priority: 4
+  priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-electrify-griffith"
   title: "Electrify: An Optimist's Playbook for Our Clean Energy Future"
@@ -4305,6 +3642,7 @@
   fromYear: 1
   priority: 4
   note: "Paid"
+  quality: 3
 
 - id: "book-sustainable-energy-without-hot-air"
   title: "Sustainable Energy - Without the Hot Air"
@@ -4320,7 +3658,8 @@
   estHours: 12
   summary: "A physicist's free, numbers-first book that sizes every energy source in kWh per day per person; the best training in energy estimation."
   fromYear: 1
-  priority: 4
+  priority: 1
+  quality: 5
 
 - id: "book-material-world"
   title: "Material World: The Six Raw Materials That Shape Modern Civilization"
@@ -4338,6 +3677,7 @@
   fromYear: 1
   priority: 4
   note: "Paid"
+  quality: 3
 
 - id: "book-ignition-clark"
   title: "Ignition!: An Informal History of Liquid Rocket Propellants"
@@ -4353,8 +3693,9 @@
   estHours: 6
   summary: "A chemist's funny, frank insider account of rocket-fuel development, beloved by propulsion engineers for its hard-won lessons."
   fromYear: 2
-  priority: 4
+  priority: 1
   note: "Paid"
+  quality: 5
 
 - id: "book-digital-apollo"
   title: "Digital Apollo: Human and Machine in Spaceflight"
@@ -4370,8 +3711,9 @@
   estHours: 10
   summary: "How the Apollo Guidance Computer and fly-by-wire control were designed and how astronauts and software shared authority, relevant to robotics autonomy."
   fromYear: 2
-  priority: 4
+  priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-where-is-my-flying-car"
   title: "Where Is My Flying Car?"
@@ -4390,6 +3732,7 @@
   priority: 4
   note: "Paid"
   after: [book-how-the-world-really-works]
+  quality: 3
 
 - id: "book-how-big-things-get-done"
   title: "How Big Things Get Done: The Surprising Factors That Determine the Fate of Every Project, from Home Renovations to Space Exploration"
@@ -4405,8 +3748,9 @@
   estHours: 7
   summary: "Data from thousands of megaprojects on why big builds overrun and how modular, planned-then-fast delivery succeeds."
   fromYear: 2
-  priority: 4
+  priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-energy-and-civilization"
   title: "Energy and Civilization: A History"
@@ -4422,9 +3766,10 @@
   estHours: 16
   summary: "A quantitative history of energy conversion from muscle to fossil fuels and electricity, the long view behind compute and fusion."
   fromYear: 2
-  priority: 4
+  priority: 2
   note: "Paid"
   after: [book-how-the-world-really-works]
+  quality: 4
 
 - id: "book-the-prize-yergin"
   title: "The Prize: The Epic Quest for Oil, Money & Power"
@@ -4440,8 +3785,9 @@
   estHours: 30
   summary: "Pulitzer-winning history of oil as the energy system that powered the 20th century and shaped its geopolitics."
   fromYear: 2
-  priority: 4
+  priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-rocket-propulsion-elements-9e"
   title: "Rocket Propulsion Elements (9th ed.)"
@@ -4457,10 +3803,11 @@
   estHours: 40
   summary: "The standard reference on nozzle theory, liquid and solid motors, propellants and electric propulsion, grounding any aerospace or propulsion side project."
   fromYear: 3
-  priority: 4
+  priority: 1
   note: "Paid"
 
 # ---- Hardware and chip design: CPU, GPU and NPU, RTL to tape-out (13)
+  quality: 5
 
 - id: "book-thinking-machine-witt"
   title: "The Thinking Machine: Jensen Huang, Nvidia, and the World's Most Coveted Microchip"
@@ -4478,6 +3825,7 @@
   fromYear: 1
   priority: 3
   note: "Paid"
+  quality: 3
 
 - id: "book-nvidia-way-kim"
   title: "The Nvidia Way: Jensen Huang and the Making of a Tech Giant"
@@ -4495,6 +3843,7 @@
   fromYear: 1
   priority: 3
   note: "Paid"
+  quality: 3
 
 - id: "book-chip-war-miller"
   title: "Chip War: The Fight for the World's Most Critical Technology"
@@ -4510,8 +3859,9 @@
   estHours: 12
   summary: "The history and geopolitics of semiconductors from Fairchild to TSMC and ASML, the backdrop for every AI compute decision."
   fromYear: 1
-  priority: 3
+  priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-idea-factory"
   title: "The Idea Factory: Bell Labs and the Great Age of American Innovation"
@@ -4527,8 +3877,9 @@
   estHours: 11
   summary: "Shows how one lab produced the transistor, information theory and the laser, and what kind of organization made that possible."
   fromYear: 1
-  priority: 3
+  priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-crystal-fire"
   title: "Crystal Fire: The Invention of the Transistor and the Birth of the Information Age"
@@ -4544,8 +3895,9 @@
   estHours: 9
   summary: "The physics-heavy origin story of the transistor, from quantum theory of solids to the first point-contact device."
   fromYear: 1
-  priority: 3
+  priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-moores-law-gordon-moore"
   title: "Moore's Law: The Life of Gordon Moore, Silicon Valley's Quiet Revolutionary"
@@ -4563,6 +3915,7 @@
   fromYear: 1
   priority: 3
   note: "Paid"
+  quality: 3
 
 - id: "book-the-big-score"
   title: "The Big Score: The Billion-Dollar Story of Silicon Valley"
@@ -4580,6 +3933,7 @@
   fromYear: 1
   priority: 3
   note: "Paid"
+  quality: 3
 
 - id: "book-soul-of-a-new-machine"
   title: "The Soul of a New Machine"
@@ -4595,8 +3949,9 @@
   estHours: 9
   summary: "A Pulitzer-winning inside look at engineers racing to design and debug a 32-bit minicomputer, the closest thing to living through a CPU project."
   fromYear: 1
-  priority: 3
+  priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-code-petzold-2e"
   title: "Code: The Hidden Language of Computer Hardware and Software (2nd Edition)"
@@ -4612,8 +3967,9 @@
   estHours: 14
   summary: "Builds a working computer from relays and logic gates up to a CPU and memory, the gentlest bridge into computer architecture."
   fromYear: 1
-  priority: 3
+  priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-computer-organization-design-riscv-2e"
   title: "Computer Organization and Design RISC-V Edition: The Hardware Software Interface (2nd ed.)"
@@ -4629,9 +3985,10 @@
   estHours: 35
   summary: "Builds a RISC-V processor from ISA to pipeline and caches, the standard undergraduate path into how hardware executes software."
   fromYear: 1
-  priority: 3
+  priority: 1
   note: "Paid"
   doFirst: "CS:APP"
+  quality: 5
 
 - id: "book-only-the-paranoid-survive"
   title: "Only the Paranoid Survive: How to Exploit the Crisis Points That Challenge Every Company"
@@ -4649,6 +4006,7 @@
   fromYear: 2
   priority: 3
   note: "Paid"
+  quality: 3
 
 - id: "book-computer-architecture-quantitative-7e"
   title: "Computer Architecture: A Quantitative Approach (7th ed.)"
@@ -4664,9 +4022,10 @@
   estHours: 45
   summary: "The graduate standard on ILP, memory hierarchy, data-level parallelism, GPUs and domain-specific accelerators, now updated for AI-era hardware."
   fromYear: 3
-  priority: 3
+  priority: 1
   note: "Paid"
   after: [book-computer-organization-design-riscv-2e]
+  quality: 5
 
 - id: "book-cmos-vlsi-design-4e"
   title: "CMOS VLSI Design: A Circuits and Systems Perspective (4th ed.)"
@@ -4682,6 +4041,7 @@
   estHours: 40
   summary: "Covers transistors, logic families, timing, power, memories and the physical design flow, the text that connects RTL to actual silicon."
   fromYear: 3
-  priority: 3
+  priority: 1
   note: "Paid"
   after: [harris-ddca]
+  quality: 5

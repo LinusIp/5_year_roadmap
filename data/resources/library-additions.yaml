@@ -22,6 +22,7 @@
   after: [mit-6-s191]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "david-silver-rl"
   title: "UCL Reinforcement Learning Course (David Silver)"
@@ -39,6 +40,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: "berkeley-llm-agents-f24"
   title: "Large Language Model Agents MOOC (Fall 2024)"
@@ -57,6 +59,7 @@
   doFirst: "HF Agents Course"
   priority: 1
   roadmap: "ai-agents"
+  quality: 4
 
 - id: "stanford-cs234"
   title: "Stanford CS234: Reinforcement Learning"
@@ -75,6 +78,7 @@
   after: [david-silver-rl]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "coursera-deep-learning-specialization"
   title: "Deep Learning Specialization"
@@ -93,6 +97,7 @@
   after: [ng-ml-spec]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "google-ml-crash-course"
   title: "Machine Learning Crash Course"
@@ -108,8 +113,9 @@
   estHours: 15
   summary: "Fast, interactive refresher on core ML concepts and practical pitfalls like data prep and fairness."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "isl-python"
   title: "An Introduction to Statistical Learning (with Python)"
@@ -127,6 +133,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: "sutton-barto-rl"
   title: "Reinforcement Learning: An Introduction (2nd ed.)"
@@ -145,6 +152,7 @@
   after: [david-silver-rl]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: "pytorch-tutorials"
   title: "PyTorch Tutorials"
@@ -162,6 +170,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "mcp-docs"
   title: "Model Context Protocol Documentation"
@@ -180,6 +189,7 @@
   after: [anthropic-building-effective-agents]
   priority: 1
   roadmap: "ai-agents"
+  quality: 4
 
 - id: "annotated-transformer"
   title: "The Annotated Transformer"
@@ -198,6 +208,7 @@
   after: [karpathy-zero-to-hero]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: "anthropic-building-effective-agents"
   title: "Building Effective AI Agents"
@@ -215,6 +226,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-agents"
+  quality: 5
 
 - id: "lilianweng-llm-agents"
   title: "LLM Powered Autonomous Agents"
@@ -232,6 +244,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-agents"
+  quality: 4
 
 - id: "numpy-100"
   title: "100 NumPy Exercises"
@@ -248,26 +261,9 @@
   summary: "Drills vectorized NumPy thinking that every ML codebase relies on."
   fromYear: 1
   after: [30-days-of-python]
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-
-- id: "kaggle-titanic"
-  title: "Titanic - Machine Learning from Disaster"
-  short: "Kaggle Titanic"
-  provider: "Kaggle"
-  type: "practice"
-  url: "https://www.kaggle.com/competitions/titanic"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 8
-  summary: "First end-to-end competition: feature engineering, validation, submission."
-  fromYear: 1
-  after: [kaggle-learn]
-  priority: 1
-  roadmap: "ai-engineer"
+  quality: 3
 
 - id: "deep-ml"
   title: "Deep-ML"
@@ -284,8 +280,9 @@
   summary: "LeetCode-style problems implementing ML/DL ops and algorithms from scratch."
   fromYear: 1
   after: [numpy-100]
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "tensor-puzzles"
   title: "Tensor Puzzles"
@@ -304,6 +301,7 @@
   after: [numpy-100]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "minbpe"
   title: "minbpe (BPE tokenizer + exercise)"
@@ -322,6 +320,7 @@
   after: [karpathy-zero-to-hero]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "llms-from-scratch"
   title: "LLMs-from-scratch (code + exercises)"
@@ -340,6 +339,7 @@
   after: [annotated-transformer]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: "arena"
   title: "ARENA (Alignment Research Engineer Accelerator)"
@@ -358,6 +358,7 @@
   after: [karpathy-zero-to-hero]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: "mini-swe-agent"
   title: "mini-swe-agent"
@@ -376,6 +377,7 @@
   after: [anthropic-building-effective-agents]
   priority: 1
   roadmap: "ai-agents"
+  quality: 4
 
 - id: "nanochat"
   title: "nanochat"
@@ -396,6 +398,7 @@
 # ---- LLM inference and GPUs (track ai, tag inference) (6)
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: "llm-inference-handbook"
   title: "LLM Inference Handbook"
@@ -414,6 +417,7 @@
   tags: [inference]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 4
 
 - id: "visual-guide-quantization"
   title: "A Visual Guide to Quantization"
@@ -432,6 +436,7 @@
   tags: [inference]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 4
 
 - id: "minitorch"
   title: "MiniTorch"
@@ -451,6 +456,7 @@
   after: [tensor-puzzles]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 
 - id: "gpu-puzzles"
   title: "GPU Puzzles"
@@ -470,6 +476,7 @@
   after: [tensor-puzzles]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 
 - id: "triton-puzzles"
   title: "Triton Puzzles"
@@ -489,6 +496,7 @@
   after: [gpu-puzzles]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 
 - id: "nano-vllm"
   title: "Nano-vLLM"
@@ -510,6 +518,7 @@
 # ---- Graphics and rendering (21)
   priority: 1
   roadmap: "inference-engineering"
+  quality: 4
 
 - id: "cmu-15462-computer-graphics"
   title: "Computer Graphics (CMU 15-462/662) Lectures"
@@ -887,7 +896,7 @@
   roadmap: "game-developer"
 
 - id: "freya-math-for-game-devs"
-  title: "Math for Game Devs (2022 live course)"
+  title: "Math for Game Devs (2022 live course) (part 1 of 4)"
   short: "Math for Game Devs"
   provider: "Freya Holmér"
   type: "lectures"
@@ -1176,7 +1185,7 @@
   estHours: 40
   summary: "One-off creative coding projects (physics, fractals, simulations) to code along and extend."
   fromYear: 1
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
 
 - id: "box2d-lite"
@@ -1634,6 +1643,7 @@
   fromYear: 1
   after: [rust-book]
   priority: 2
+  quality: 4
 
 - id: "comprehensive-rust"
   title: "Comprehensive Rust"
@@ -1649,7 +1659,8 @@
   estHours: 30
   summary: "Google's multi-day Rust training with exercises, including bare-metal and concurrency modules."
   fromYear: 1
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "rustonomicon"
   title: "The Rustonomicon: The Dark Arts of Unsafe Rust"
@@ -1666,7 +1677,8 @@
   summary: "Explains unsafe Rust, layout, variance and drop semantics needed for low-level libraries."
   fromYear: 2
   after: [rust-book]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "rust-atomics-and-locks"
   title: "Rust Atomics and Locks"
@@ -1683,7 +1695,8 @@
   summary: "Free online book on memory ordering, atomics and building your own mutexes, channels and Arc."
   fromYear: 2
   after: [crust-of-rust]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "rust-async-book"
   title: "Asynchronous Programming in Rust"
@@ -1701,6 +1714,7 @@
   fromYear: 2
   after: [rust-book]
   priority: 2
+  quality: 4
 
 - id: "too-many-linked-lists"
   title: "Learning Rust With Entirely Too Many Linked Lists"
@@ -1717,7 +1731,8 @@
   summary: "Teaches ownership, Box, Rc, RefCell and unsafe by implementing linked lists six ways."
   fromYear: 1
   after: [rust-book]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "exercism-rust"
   title: "Exercism Rust Track"
@@ -1735,6 +1750,7 @@
   fromYear: 1
   after: [rustlings]
   priority: 2
+  quality: 4
 
 - id: "exercism-c"
   title: "Exercism C Track"
@@ -1751,10 +1767,11 @@
   summary: "Test-driven C exercises to practice pointers, strings and memory management."
   fromYear: 1
   after: [beej-c]
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "exercism-cpp"
-  title: "Exercism C++ Track"
+  title: "Exercism C++ track"
   short: "Exercism C++"
   provider: "Exercism"
   type: "practice"
@@ -1768,4 +1785,5 @@
   summary: "Test-driven modern C++ exercises with free mentoring to reinforce learncpp.com."
   fromYear: 1
   doFirst: "learncpp.com"
-  priority: 2
+  priority: 3
+  quality: 3

@@ -25,6 +25,8 @@ export interface ImportItem {
   /** ATLAS-LIBRARY's plan alignment: 1 inference and the AI feeding it, 2 architecture and systems, 3 graphics,
    * simulation, robotics and hardware, 4 game development, quantum computing and electrical and mechanical engineering. */
   priority?: 1 | 2 | 3 | 4;
+  /** The quality pass (ATLAS-QUALITY-AUDIT): 5 canon, 4 strong, 3 useful but not essential, 1 and 2 kept for a topic asked for. */
+  quality?: 1 | 2 | 3 | 4 | 5;
   /** The roadmap.sh roadmap it serves, or "". */
   roadmap?: '' | 'inference-engineering' | 'ai-engineer' | 'ai-agents' | 'software-architect' | 'game-developer';
   /** The year 3 research area, or "". */
@@ -278,6 +280,7 @@ export function toResource(item: ImportItem, afterId: string | null): Record<str
     fromYear: item.year,
   };
   if (item.priority) out.priority = item.priority;
+  if (item.quality) out.quality = item.quality;
   if (item.roadmap) out.roadmap = item.roadmap;
   if (item.research) out.research = item.research;
   if (item.type === 'blog') out.blog = true;

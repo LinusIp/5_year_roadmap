@@ -24,6 +24,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [article-deepmind-tcv-plasma-control]
+  quality: 4
 
 - id: "paper-disruption-prediction-deep-learning"
   title: "Predicting disruptive instabilities in controlled fusion plasmas through deep learning"
@@ -42,6 +43,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [article-deepmind-tcv-plasma-control]
+  quality: 4
 
 - id: "article-deepmind-tcv-plasma-control"
   title: "Accelerating fusion science through learned plasma control"
@@ -62,6 +64,7 @@
   doFirst: "Spinning Up in Deep RL"
 
 # ---- Simulation (81)
+  quality: 4
 
 - id: "docs-vpython"
   title: "VPython documentation"
@@ -80,6 +83,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [web-vpython-glowscript]
+  quality: 3
 
 - id: "docs-openmc"
   title: "The OpenMC Monte Carlo Code"
@@ -95,9 +99,10 @@
   estHours: 20
   summary: "User guide, theory manual and Python API for a modern open-source Monte Carlo neutron and photon transport code used for reactor and fusion neutronics."
   fromYear: 2
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   after: [course-mit-22-05-reactor-physics]
+  quality: 5
 
 - id: "docs-geant4"
   title: "Geant4 Documentation"
@@ -113,9 +118,10 @@
   estHours: 30
   summary: "Guides, physics reference and examples for the standard toolkit simulating particle passage through matter, used across nuclear, medical and space physics."
   fromYear: 2
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   after: [course-mit-22-01-nuclear-eng]
+  quality: 5
 
 - id: "docs-lammps"
   title: "LAMMPS Documentation"
@@ -131,9 +137,10 @@
   estHours: 20
   summary: "Manual for the most widely used classical MD code, including howtos and tutorials on force fields, thermostats and analysis."
   fromYear: 2
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   after: [repo-allen-tildesley-examples]
+  quality: 5
 
 - id: "docs-openmm"
   title: "OpenMM User's Manual and Theory Guide"
@@ -149,8 +156,9 @@
   estHours: 12
   summary: "Explains running GPU-accelerated MD from Python and documents the theory behind integrators, force fields and custom forces."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "docs-ase"
   title: "Atomic Simulation Environment (ASE) documentation"
@@ -166,8 +174,9 @@
   estHours: 10
   summary: "Python toolkit for setting up, running and analysing atomistic simulations, with tutorials on MD, optimisation and calculators."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "docs-hoomd-blue"
   title: "HOOMD-blue documentation"
@@ -183,8 +192,9 @@
   estHours: 10
   summary: "GPU particle simulation toolkit with step-by-step tutorials on MD, rigid bodies and active matter driven entirely from Python."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "docs-pyscf"
   title: "PySCF: Quantum chemistry with Python"
@@ -200,9 +210,10 @@
   estHours: 12
   summary: "Readable Python quantum chemistry package covering Hartree-Fock, DFT and correlated methods, great for scripting electronic-structure calculations."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [article-burke-abc-of-dft]
+  quality: 4
 
 - id: "docs-psi4"
   title: "PSI4: Open-Source Quantum Chemistry manual"
@@ -218,9 +229,10 @@
   estHours: 10
   summary: "Manual and tutorials for using Psi4 as a program or Python module to run ab initio and DFT calculations on molecules."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [article-burke-abc-of-dft]
+  quality: 4
 
 - id: "docs-materials-project"
   title: "Materials Project Documentation"
@@ -236,9 +248,10 @@
   estHours: 6
   summary: "Explains how the Materials Project computes and serves DFT properties for hundreds of thousands of materials and how to query them."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-ase]
+  quality: 4
 
 - id: "docs-torax"
   title: "TORAX: Tokamak transport simulation in JAX"
@@ -254,9 +267,10 @@
   estHours: 10
   summary: "Installation, tutorials and physics guides for running and extending a differentiable tokamak simulator, directly reusable in an AI harness."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [paper-torax]
+  quality: 4
 
 - id: "docs-warpx"
   title: "WarpX Documentation"
@@ -272,9 +286,10 @@
   estHours: 20
   summary: "Docs for an exascale-ready GPU particle-in-cell code, including tutorials and a theory section on PIC algorithms and field solvers."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [repo-pic-python]
+  quality: 4
 
 - id: "docs-smilei"
   title: "Smilei Documentation"
@@ -290,9 +305,10 @@
   estHours: 15
   summary: "Open PIC code docs with an unusually good background-theory section on the PIC method, collisions and ionization."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [repo-pic-python]
+  quality: 4
 
 - id: "docs-bout-plus-plus"
   title: "BOUT++ Documentation"
@@ -308,9 +324,10 @@
   estHours: 15
   summary: "Framework for fluid simulations of edge and divertor plasmas in curvilinear field-aligned coordinates, with guides to writing your own models."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [notes-hutchinson-intro-plasma-physics]
+  quality: 4
 
 - id: "docs-gkeyll"
   title: "Gkeyll Documentation"
@@ -326,9 +343,10 @@
   estHours: 15
   summary: "Multi-physics framework docs covering moment, Vlasov and gyrokinetic solvers, showing continuum alternatives to particle methods."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [article-brieda-vlasov-solvers]
+  quality: 4
 
 - id: "docs-moose"
   title: "MOOSE: Multiphysics Object-Oriented Simulation Environment"
@@ -344,9 +362,10 @@
   estHours: 25
   summary: "INL's parallel finite-element multiphysics framework behind many nuclear simulation apps, with thorough tutorials."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [course-mit-22-06-nuclear-systems]
+  quality: 4
 
 - id: "docs-palabos"
   title: "Palabos (lattice Boltzmann library)"
@@ -365,6 +384,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [repo-mocz-latticeboltzmann]
+  quality: 3
 
 - id: "docs-quantum-espresso"
   title: "Quantum ESPRESSO documentation"
@@ -380,9 +400,10 @@
   estHours: 12
   summary: "Reference for a leading open-source plane-wave DFT suite used for periodic solids and materials research."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [article-burke-abc-of-dft]
+  quality: 4
 
 - id: "course-krauth-smac"
   title: "Statistical Mechanics: Algorithms and Computations"
@@ -398,9 +419,10 @@
   estHours: 40
   summary: "Teaches statistical physics through Monte Carlo and molecular-dynamics algorithms you code yourself, from hard disks to quantum systems."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "MIT 8.044"
+  quality: 4
 
 - id: "fitzpatrick-computational-physics-329"
   title: "Computational Physics (PHY 329 lecture notes)"
@@ -416,9 +438,10 @@
   estHours: 30
   summary: "Hands-on numerical methods for ODEs, PDEs and Monte Carlo applied to classic physics problems, written for physics undergraduates."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [fitzpatrick-classical-mechanics-301]
+  quality: 4
 
 - id: "book-owen-monte-carlo"
   title: "Monte Carlo theory, methods and examples"
@@ -434,9 +457,10 @@
   estHours: 60
   summary: "Rigorous yet readable free book on random number generation, variance reduction, importance sampling, MCMC and quasi-Monte Carlo."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "MIT 6.041SC"
+  quality: 4
 
 - id: "article-burke-abc-of-dft"
   title: "The ABC of DFT"
@@ -452,9 +476,10 @@
   estHours: 15
   summary: "Free, informal text introducing density functional theory from the ground up, written by one of the field's leading figures."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "MIT 8.04"
+  quality: 4
 
 - id: "repo-pic-python"
   title: "pmocz/pic-python"
@@ -470,8 +495,9 @@
   estHours: 3
   summary: "A short vectorized Python particle-in-cell code reproducing the two-stream instability, the clearest first PIC program to read."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "repo-openmc-notebooks"
   title: "openmc-dev/openmc-notebooks"
@@ -487,9 +513,10 @@
   estHours: 10
   summary: "Example Jupyter notebooks for pin cells, depletion, tallies and more, the fastest way to get OpenMC models running."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-openmc]
+  quality: 4
 
 - id: "repo-fusion-neutronics-workshop"
   title: "fusion-energy/neutronics-workshop"
@@ -505,9 +532,10 @@
   estHours: 20
   summary: "Hands-on task notebooks for fusion neutronics with OpenMC, DAGMC and Paramak: tritium breeding, shielding and heating."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [repo-openmc-notebooks]
+  quality: 4
 
 - id: "tutorial-gromacs"
   title: "GROMACS tutorials"
@@ -523,8 +551,9 @@
   estHours: 15
   summary: "Notebook tutorials from an introduction to biomolecular MD up to umbrella sampling and free-energy methods with the GROMACS engine."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "burke-learn-dft"
   title: "Learn Density Functional Theory"
@@ -543,6 +572,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [article-burke-abc-of-dft]
+  quality: 3
 
 - id: "web-vpython-glowscript"
   title: "Web VPython (GlowScript)"
@@ -560,6 +590,7 @@
   fromYear: 1
   priority: 3
   roadmap: "game-developer"
+  quality: 3
 
 - id: "repo-paramak"
   title: "fusion-energy/paramak"
@@ -578,6 +609,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [repo-fusion-neutronics-workshop]
+  quality: 3
 
 - id: "repo-plasmapy"
   title: "PlasmaPy/PlasmaPy"
@@ -593,9 +625,10 @@
   estHours: 10
   summary: "Community Python package of plasma parameters, formulary functions and diagnostics, a friendly entry point for computational plasma physics."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [notes-hutchinson-intro-plasma-physics]
+  quality: 4
 
 - id: "repo-freegs"
   title: "freegs-plasma/freegs"
@@ -611,9 +644,10 @@
   estHours: 6
   summary: "Small Python free-boundary Grad-Shafranov solver that computes tokamak equilibria and coil currents, easy to read and hack."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [notes-hutchinson-intro-plasma-physics]
+  quality: 4
 
 - id: "repo-openmc-data"
   title: "openmc-dev/data"
@@ -632,6 +666,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-openmc]
+  quality: 3
 
 - id: "repo-allen-tildesley-examples"
   title: "Computer Simulation of Liquids: example programs"
@@ -647,9 +682,10 @@
   estHours: 20
   summary: "Companion code to the classic simulation textbook implementing MD and Monte Carlo of simple liquids in Python and Fortran, ideal for learning MD from scratch."
   fromYear: 2
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   after: [fitzpatrick-thermo-stat-mech]
+  quality: 5
 
 - id: "repo-mocz-latticeboltzmann"
   title: "latticeboltzmann-python: Create Your Own Lattice Boltzmann Simulation"
@@ -665,9 +701,10 @@
   estHours: 3
   summary: "A minimal D2Q9 lattice Boltzmann code simulating flow past a cylinder, the quickest way to see how LBM works."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [article-mocz-nbody]
+  quality: 4
 
 - id: "repo-mocz-finitevolume"
   title: "finitevolume-python: Create Your Own Finite Volume Fluid Simulation"
@@ -683,9 +720,10 @@
   estHours: 3
   summary: "A compact compressible-flow solver reproducing the Kelvin-Helmholtz instability, teaching flux-based conservation methods."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [article-mocz-navier-stokes-spectral]
+  quality: 4
 
 - id: "repo-mocz-quantumspectral"
   title: "quantumspectral-python: Create Your Own Quantum Mechanics Simulation"
@@ -704,6 +742,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [article-mocz-navier-stokes-spectral]
+  quality: 3
 
 - id: "repo-pymatgen"
   title: "pymatgen (Python Materials Genomics)"
@@ -722,6 +761,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-materials-project]
+  quality: 3
 
 - id: "repo-mdanalysis"
   title: "MDAnalysis"
@@ -737,9 +777,10 @@
   estHours: 8
   summary: "Python library for reading and analysing trajectories from GROMACS, LAMMPS, OpenMM and others, the standard tool for post-processing MD runs."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [tutorial-gromacs]
+  quality: 4
 
 - id: "repo-torax"
   title: "google-deepmind/torax"
@@ -755,9 +796,10 @@
   estHours: 15
   summary: "Readable open-source JAX code for tokamak transport, a great reference for building differentiable physics into agent pipelines."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-torax]
+  quality: 4
 
 - id: "repo-fusion-surrogates"
   title: "google-deepmind/fusion_surrogates"
@@ -776,6 +818,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [repo-torax]
+  quality: 3
 
 - id: "repo-openmc"
   title: "openmc-dev/openmc"
@@ -791,9 +834,10 @@
   estHours: 20
   summary: "C++/Python source of a production transport code, worth studying for how Monte Carlo particle tracking is engineered at scale."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-openmc]
+  quality: 4
 
 - id: "repo-epoch"
   title: "Warwick-Plasma/epoch"
@@ -809,9 +853,10 @@
   estHours: 10
   summary: "Widely used Fortran particle-in-cell code for laser-plasma and fusion studies, a solid example of a research PIC implementation."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-smilei]
+  quality: 4
 
 - id: "repo-freegsnke"
   title: "FusionComputingLab/freegsnke"
@@ -830,6 +875,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [repo-freegs]
+  quality: 3
 
 - id: "repo-desc-stellarator"
   title: "PlasmaControl/DESC"
@@ -845,9 +891,10 @@
   estHours: 8
   summary: "JAX-based 3D MHD equilibrium and stellarator optimization code, a good example of autodiff-driven fusion design."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [repo-freegs]
+  quality: 4
 
 - id: "repo-simsopt"
   title: "hiddenSymmetries/simsopt"
@@ -866,6 +913,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [repo-desc-stellarator]
+  quality: 3
 
 - id: "repo-fuse-jl"
   title: "ProjectTorreyPines/FUSE.jl"
@@ -884,6 +932,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [paper-arc-compact-fusion]
+  quality: 3
 
 - id: "repo-omas"
   title: "gafusion/omas"
@@ -902,6 +951,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [repo-fuse-jl]
+  quality: 3
 
 - id: "repo-process"
   title: "ukaea/PROCESS"
@@ -920,6 +970,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [paper-arc-compact-fusion]
+  quality: 3
 
 - id: "repo-bluemira"
   title: "Fusion-Power-Plant-Framework/bluemira"
@@ -938,6 +989,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [repo-process]
+  quality: 3
 
 - id: "repo-openfusiontoolkit"
   title: "OpenFUSIONToolkit/OpenFUSIONToolkit"
@@ -953,27 +1005,10 @@
   estHours: 8
   summary: "Finite-element suite (incl. TokaMaker equilibrium solver) for tokamak equilibria, eddy currents and MHD."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [repo-freegs]
-
-- id: "repo-cardinal"
-  title: "neams-th-coe/cardinal"
-  short: "Cardinal"
-  provider: "Argonne / NEAMS"
-  type: "practice"
-  url: "https://github.com/neams-th-coe/cardinal"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [simulation]
-  level: "advanced"
-  cost: "free"
-  estHours: 8
-  summary: "Couples OpenMC neutronics and NekRS CFD inside MOOSE, a model for building multiphysics reactor simulations."
-  fromYear: 3
-  priority: 3
-  roadmap: "game-developer"
-  after: [docs-moose]
+  quality: 4
 
 - id: "repo-openmoc"
   title: "mit-crpg/OpenMOC"
@@ -992,6 +1027,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-openmc]
+  quality: 3
 
 - id: "repo-warpx"
   title: "ECP-WarpX/WarpX"
@@ -1007,9 +1043,10 @@
   estHours: 15
   summary: "Source of a GPU-accelerated, mesh-refined particle-in-cell code, useful for seeing how PIC is engineered for exascale machines."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-warpx]
+  quality: 4
 
 - id: "repo-smilei"
   title: "SmileiPIC/Smilei"
@@ -1028,6 +1065,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-smilei]
+  quality: 3
 
 - id: "repo-openmm"
   title: "OpenMM"
@@ -1043,9 +1081,10 @@
   estHours: 15
   summary: "A clean, scriptable, GPU-first MD toolkit whose plugin architecture is a good model of how to design a simulation library."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-openmm]
+  quality: 4
 
 - id: "repo-jax-md"
   title: "JAX MD"
@@ -1061,9 +1100,10 @@
   estHours: 12
   summary: "Hardware-accelerated, differentiable MD in JAX, letting you take gradients through whole simulations for learning potentials or design."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "JAX docs"
+  quality: 4
 
 - id: "repo-phiflow"
   title: "PhiFlow: A differentiable PDE solving framework"
@@ -1079,9 +1119,10 @@
   estHours: 10
   summary: "Differentiable fluid and PDE solver that pairs with Physics-based Deep Learning for training networks through simulations."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [pbdl-book]
+  quality: 4
 
 - id: "repo-lammps"
   title: "LAMMPS"
@@ -1097,9 +1138,10 @@
   estHours: 20
   summary: "Source of a production-scale parallel MD engine; reading its pair styles and integrators shows how real codes scale beyond toy simulations."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-lammps]
+  quality: 4
 
 - id: "repo-psi4"
   title: "Psi4"
@@ -1118,6 +1160,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-psi4]
+  quality: 3
 
 - id: "repo-espresso-md"
   title: "ESPResSo"
@@ -1136,6 +1179,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-hoomd-blue]
+  quality: 3
 
 - id: "repo-dftk-jl"
   title: "DFTK.jl: The density-functional toolkit"
@@ -1151,9 +1195,10 @@
   estHours: 10
   summary: "Compact plane-wave DFT code in Julia that is small enough to read end to end, bridging DFT theory and implementation."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [article-burke-abc-of-dft]
+  quality: 4
 
 - id: "repo-difftaichi"
   title: "DiffTaichi examples"
@@ -1172,6 +1217,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [paper-difftaichi]
+  quality: 3
 
 - id: "paper-metropolis-1953"
   title: "Equation of State Calculations by Fast Computing Machines"
@@ -1187,9 +1233,10 @@
   estHours: 3
   summary: "The short original paper introducing the Metropolis algorithm, still the clearest place to see why importance sampling of states works."
   fromYear: 2
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   after: [fitzpatrick-thermo-stat-mech]
+  quality: 5
 
 - id: "paper-changa-intro"
   title: "Simulating gravitational motion, gas dynamics, and structure in the cosmos"
@@ -1209,6 +1256,7 @@
   roadmap: "game-developer"
   research: "world-models"
   after: [article-barnes-hut-galaxy-simulator]
+  quality: 3
 
 - id: "paper-pysph"
   title: "PySPH: a Python-based framework for smoothed particle hydrodynamics"
@@ -1227,6 +1275,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [article-mocz-sph]
+  quality: 3
 
 - id: "paper-torax"
   title: "TORAX: A Fast and Differentiable Tokamak Transport Simulator in JAX"
@@ -1242,9 +1291,10 @@
   estHours: 4
   summary: "Shows how a JAX-based, differentiable core-transport solver enables fast pulse design and ML-coupled tokamak modeling."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [paper-sparc-overview]
+  quality: 4
 
 - id: "paper-jax-md"
   title: "JAX, M.D.: A Framework for Differentiable Physics"
@@ -1260,9 +1310,10 @@
   estHours: 3
   summary: "Describes how MD primitives were rebuilt to be functional and differentiable, a key reference for differentiable physics."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [repo-allen-tildesley-examples]
+  quality: 4
 
 - id: "paper-gadget-4"
   title: "Simulating cosmic structure formation with the GADGET-4 code"
@@ -1278,9 +1329,10 @@
   estHours: 6
   summary: "Detailed description of a state-of-the-art cosmological N-body/SPH code, showing how tree, PM and FMM gravity are combined at scale."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [paper-changa-intro]
+  quality: 4
 
 - id: "paper-brax"
   title: "Brax -- A Differentiable Physics Engine for Large Scale Rigid Body Simulation"
@@ -1296,9 +1348,10 @@
   estHours: 3
   summary: "Introduces a JAX rigid-body engine that runs thousands of environments on accelerators and supports gradients through dynamics."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [paper-jax-md]
+  quality: 4
 
 - id: "paper-pyscf-recent-developments"
   title: "Recent developments in the PySCF program package"
@@ -1317,24 +1370,26 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-pyscf]
+  quality: 3
 
 - id: "article-mocz-nbody"
   title: "Create Your Own N-body Simulation (With Python)"
   short: "Mocz: N-body"
   provider: "Philip Mocz"
-  type: "article"
-  url: "https://medium.com/swlh/create-your-own-n-body-simulation-with-python-f417234885e9"
+  type: "practice"
+  url: "https://github.com/pmocz/nbody-python"
   urlVerified: true
   lastVerified: 2026-10-20
   tracks: [simulation]
   level: "intro"
   cost: "free"
   estHours: 1
-  summary: "Builds a gravitational N-body code with leapfrog integration and energy tracking, the classic first physics simulation."
+  summary: "Builds a gravitational N-body code with leapfrog integration and energy tracking, the classic first physics simulation. Links the free companion code; the Medium write-up is member-only."
   fromYear: 1
   priority: 3
   roadmap: "game-developer"
   after: [fitzpatrick-classical-mechanics-301]
+  quality: 3
 
 - id: "article-brieda-vlasov-solvers"
   title: "Introduction to Vlasov Solvers"
@@ -1353,6 +1408,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [repo-pic-python]
+  quality: 3
 
 - id: "article-mocz-sph"
   title: "Create Your Own Smoothed-Particle Hydrodynamics Simulation (With Python)"
@@ -1364,13 +1420,15 @@
   lastVerified: 2026-10-20
   tracks: [simulation]
   level: "intermediate"
-  cost: "free"
+  cost: "paid"
   estHours: 1
-  summary: "Shows how a fluid can be modelled with particles and smoothing kernels by simulating a toy star settling into equilibrium."
+  summary: "Shows how a fluid can be modelled with particles and smoothing kernels by simulating a toy star settling into equilibrium. Medium member-only article."
   fromYear: 2
   priority: 3
   roadmap: "game-developer"
   after: [article-mocz-nbody]
+  note: "Paid"
+  quality: 3
 
 - id: "article-mocz-navier-stokes-spectral"
   title: "Create Your Own Navier-Stokes Spectral Method Fluid Simulation (With Python)"
@@ -1382,13 +1440,15 @@
   lastVerified: 2026-10-20
   tracks: [simulation]
   level: "intermediate"
-  cost: "free"
+  cost: "paid"
   estHours: 1
-  summary: "Solves incompressible flow with FFTs, a compact introduction to spectral methods for PDEs."
+  summary: "Solves incompressible flow with FFTs, a compact introduction to spectral methods for PDEs. Medium member-only article; the code is free on the author's GitHub."
   fromYear: 2
   priority: 3
   roadmap: "game-developer"
   doFirst: "12 steps to Navier-Stokes"
+  note: "Paid"
+  quality: 3
 
 - id: "article-mocz-metropolis-hastings"
   title: "Create Your Own Metropolis-Hastings Markov Chain Monte Carlo Algorithm for Bayesian Inference (With Python)"
@@ -1400,13 +1460,15 @@
   lastVerified: 2026-10-20
   tracks: [simulation]
   level: "intermediate"
-  cost: "free"
+  cost: "paid"
   estHours: 1
-  summary: "Implements MCMC from scratch to fit a model, making the Metropolis idea concrete in a few dozen lines."
+  summary: "Implements MCMC from scratch to fit a model, making the Metropolis idea concrete in a few dozen lines. Medium member-only article; the code is free on the author's GitHub."
   fromYear: 2
   priority: 3
   roadmap: "game-developer"
   after: [paper-metropolis-1953]
+  note: "Paid"
+  quality: 3
 
 - id: "article-barnes-hut-galaxy-simulator"
   title: "The Barnes-Hut Galaxy Simulator"
@@ -1425,6 +1487,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [article-mocz-nbody]
+  quality: 3
 
 - id: "article-mocz-riemann-solver"
   title: "Create Your Own Riemann Solver (With Python)"
@@ -1436,13 +1499,15 @@
   lastVerified: 2026-10-20
   tracks: [simulation]
   level: "advanced"
-  cost: "free"
+  cost: "paid"
   estHours: 1
-  summary: "Walks through the exact solution of the shock-tube problem that underpins modern finite-volume hydrodynamics codes."
+  summary: "Walks through the exact solution of the shock-tube problem that underpins modern finite-volume hydrodynamics codes. Medium member-only article; the code is free on the author's GitHub."
   fromYear: 3
   priority: 3
   roadmap: "game-developer"
   after: [repo-mocz-finitevolume]
+  note: "Paid"
+  quality: 3
 
 - id: "article-mocz-differentiable-nbody"
   title: "Create Your Own Differentiable N-body Simulation (With Python/JAX)"
@@ -1454,13 +1519,15 @@
   lastVerified: 2026-10-20
   tracks: [simulation]
   level: "advanced"
-  cost: "free"
+  cost: "paid"
   estHours: 1
-  summary: "Rewrites an N-body code in JAX and optimises initial conditions by backpropagating through time, a hands-on intro to differentiable physics."
+  summary: "Rewrites an N-body code in JAX and optimises initial conditions by backpropagating through time, a hands-on intro to differentiable physics. Medium member-only article; the code is free on the author's GitHub."
   fromYear: 3
   priority: 3
   roadmap: "game-developer"
   after: [article-mocz-nbody]
+  note: "Paid"
+  quality: 3
 
 - id: "blog-particleincell"
   title: "Plasma Physics and Scientific Computing Blog"
@@ -1480,26 +1547,7 @@
   roadmap: "game-developer"
   blog: true
   after: [repo-pic-python]
-
-- id: "blog-philip-mocz"
-  title: "Philip Mocz on Medium"
-  short: "Philip Mocz Blog"
-  provider: "Philip Mocz"
-  type: "article"
-  url: "https://philip-mocz.medium.com/"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [simulation]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "A series of short 'create your own' posts that each build a working physics simulation in about a hundred lines of Python."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  blog: true
-
-# ---- Math and physics (89)
+  quality: 3
 
 - id: "docs-nndc-nudat3"
   title: "NuDat 3 (National Nuclear Data Center)"
@@ -1516,6 +1564,7 @@
   summary: "Interactive chart of nuclides with half-lives, decay modes, levels and masses, the go-to lookup for any isotope a simulation needs."
   fromYear: 1
   priority: 2
+  quality: 4
 
 - id: "docs-iaea-livechart"
   title: "LiveChart of Nuclides (IAEA Nuclear Data Section)"
@@ -1532,6 +1581,7 @@
   summary: "IAEA's interactive nuclide chart and gateway to evaluated nuclear data, handy for checking decay and reaction data from a browser."
   fromYear: 1
   priority: 2
+  quality: 4
 
 - id: "course-mit-22-01-nuclear-eng"
   title: "Introduction to Nuclear Engineering and Ionizing Radiation (MIT 22.01, Fall 2016)"
@@ -1549,6 +1599,7 @@
   fromYear: 1
   priority: 2
   doFirst: "University Physics Volume 3"
+  quality: 4
 
 - id: "course-epfl-plasma-physics-intro"
   title: "Plasma Physics: Introduction (EPFLx)"
@@ -1566,6 +1617,7 @@
   fromYear: 1
   priority: 2
   doFirst: "University Physics Volume 2"
+  quality: 4
 
 - id: "yale-phys-200-shankar"
   title: "Fundamentals of Physics I (PHYS 200)"
@@ -1582,6 +1634,7 @@
   summary: "Shankar's famously lucid lectures on Newtonian mechanics, relativity, oscillations and thermodynamics, with problem sets and exams to work through."
   fromYear: 1
   priority: 2
+  quality: 4
 
 - id: "yale-phys-201-shankar"
   title: "Fundamentals of Physics II (PHYS 201)"
@@ -1599,6 +1652,7 @@
   fromYear: 1
   priority: 2
   after: [yale-phys-200-shankar]
+  quality: 4
 
 - id: "susskind-quantum-entanglement-2006"
   title: "Quantum Entanglements (Stanford, Fall 2006)"
@@ -1614,7 +1668,8 @@
   estHours: 20
   summary: "A gentle lecture series on entanglement, Bell inequalities and quantum states aimed at motivated non-specialists."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "course-mit-8-701-nuclear-particle"
   title: "Introduction to Nuclear and Particle Physics (MIT 8.701, Fall 2020)"
@@ -1632,6 +1687,7 @@
   fromYear: 2
   priority: 2
   after: [course-mit-22-02-applied-nuclear]
+  quality: 4
 
 - id: "mit-8-286-early-universe"
   title: "MIT 8.286 The Early Universe (Fall 2013)"
@@ -1649,6 +1705,7 @@
   fromYear: 2
   priority: 2
   doFirst: "MIT 8.20 Special Relativity"
+  quality: 4
 
 - id: "susskind-advanced-quantum-mechanics"
   title: "The Theoretical Minimum: Advanced Quantum Mechanics (Fall 2013)"
@@ -1664,8 +1721,9 @@
   estHours: 20
   summary: "Susskind extends basic QM to many particles, spin, fermions and second quantization with his trademark intuitive explanations."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "TM: Quantum Mechanics"
+  quality: 3
 
 - id: "susskind-particle-physics-1"
   title: "The Theoretical Minimum: Particle Physics 1: Basic Concepts (Fall 2009)"
@@ -1681,8 +1739,9 @@
   estHours: 20
   summary: "Introduces fields, particles and symmetries conceptually before the mathematics of QFT gets heavy."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [susskind-advanced-quantum-mechanics]
+  quality: 3
 
 - id: "susskind-particle-physics-2-standard-model"
   title: "The Theoretical Minimum: Particle Physics 2: Standard Model (Winter 2010)"
@@ -1698,25 +1757,9 @@
   estHours: 20
   summary: "Walks through gauge theories, the electroweak theory and QCD with intuition-first lectures."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [susskind-particle-physics-1]
-
-- id: "susskind-cosmology-black-holes"
-  title: "The Theoretical Minimum: Cosmology and Black Holes (Winter 2011)"
-  short: "Susskind: Cosmo & BH"
-  provider: "Leonard Susskind (Stanford)"
-  type: "lectures"
-  url: "https://theoreticalminimum.com/courses/cosmology-and-black-holes/2011/winter"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [math]
-  level: "intermediate"
-  cost: "free"
-  estHours: 20
-  summary: "Covers black hole thermodynamics and horizons, the territory where gravity and quantum mechanics collide."
-  fromYear: 2
-  priority: 2
-  doFirst: "TM: General Relativity"
+  quality: 3
 
 - id: "simon-oxford-solid-state-basics"
   title: "The Oxford Solid State Basics (lecture series)"
@@ -1734,6 +1777,7 @@
   fromYear: 2
   priority: 2
   doFirst: "Tong: Quantum Mechanics"
+  quality: 4
 
 - id: "mit-8-323-relativistic-qft-i-2023"
   title: "MIT 8.323 Relativistic Quantum Field Theory I (Spring 2023)"
@@ -1751,6 +1795,7 @@
   fromYear: 3
   priority: 2
   after: [mit-8-321-quantum-theory-i-2017]
+  quality: 4
 
 - id: "mit-8-421-atomic-optical-physics-i"
   title: "MIT 8.421 Atomic and Optical Physics I (Spring 2014)"
@@ -1768,6 +1813,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 8.06"
+  quality: 4
 
 - id: "mit-8-422-atomic-optical-physics-ii"
   title: "MIT 8.422 Atomic and Optical Physics II (Spring 2013)"
@@ -1785,6 +1831,7 @@
   fromYear: 3
   priority: 2
   after: [mit-8-421-atomic-optical-physics-i]
+  quality: 4
 
 - id: "tong-qft-video-lectures"
   title: "David Tong: Video Lectures on Quantum Field Theory"
@@ -1800,8 +1847,9 @@
   estHours: 30
   summary: "Recorded lecture series that tracks Tong's QFT notes, useful for hearing the reasoning behind each derivation."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [tong-topics-in-quantum-mechanics]
+  quality: 3
 
 - id: "susskind-string-theory-2010"
   title: "The Theoretical Minimum: String Theory (Fall 2010)"
@@ -1817,8 +1865,9 @@
   estHours: 20
   summary: "One of string theory's founders explains its core ideas and motivations in accessible lecture form."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [susskind-particle-physics-2-standard-model]
+  quality: 3
 
 - id: "course-iaea-online-learning"
   title: "IAEA Online Courses and Webinars"
@@ -1834,7 +1883,8 @@
   estHours: 20
   summary: "Catalog of 120+ free self-paced IAEA courses on nuclear science, safety, technology and applications after registering with the Nucleus portal."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "course-mit-22-01-nuclear-eng-2024"
   title: "Introduction to Nuclear Engineering and Ionizing Radiation (MIT 22.01, Spring 2024)"
@@ -1850,8 +1900,9 @@
   estHours: 50
   summary: "Newer run of Short's intro course with updated lecture notes, problem sets, exams and podcasts, a good complement to the 2016 videos."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [course-mit-22-01-nuclear-eng]
+  quality: 3
 
 - id: "mitx-8-01x-mechanics-program"
   title: "MITx 8.01x Mechanics (three-part program: 8.01.1x, 8.01.2x, 8.01.3x)"
@@ -1867,8 +1918,9 @@
   estHours: 150
   summary: "MIT's calculus-based first-year mechanics split into three graded online courses with auto-checked problems, the closest thing to taking 8.01 for real."
   fromYear: 1
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.01SC"
+  quality: 3
 
 - id: "mitx-8-01-1x-kinematics-dynamics"
   title: "Mechanics: Kinematics and Dynamics (MITx 8.01.1x)"
@@ -1884,8 +1936,9 @@
   estHours: 50
   summary: "First part of the MITx mechanics sequence: vectors, 1D/2D motion, Newton's laws and circular motion with immediate feedback on every problem."
   fromYear: 1
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.01SC"
+  quality: 3
 
 - id: "mitx-8-02-1x-electrostatics"
   title: "Electricity and Magnetism: Electrostatics (MITx 8.02.1x)"
@@ -1901,41 +1954,9 @@
   estHours: 50
   summary: "Graded online version of MIT 8.02's opening unit on charges, fields, Gauss's law and potential, ideal for practising E&M problems with instant checking."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [mitx-8-01x-mechanics-program]
-
-- id: "khan-ap-physics-1"
-  title: "AP Physics 1 (Khan Academy)"
-  short: "Khan AP Physics 1"
-  provider: "Khan Academy"
-  type: "course"
-  url: "https://www.khanacademy.org/science/ap-physics-1"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [math]
-  level: "intro"
-  cost: "free"
-  estHours: 40
-  summary: "Algebra-based mechanics organised by AP units with short videos and lots of auto-graded exercises, a gentle on-ramp before calculus-based courses."
-  fromYear: 1
-  priority: 2
-
-- id: "khan-ap-physics-2"
-  title: "AP Physics 2 (Khan Academy)"
-  short: "Khan AP Physics 2"
-  provider: "Khan Academy"
-  type: "course"
-  url: "https://www.khanacademy.org/science/ap-physics-2"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [math]
-  level: "intro"
-  cost: "free"
-  estHours: 40
-  summary: "Covers fluids, thermodynamics, electrostatics, circuits, magnetism, optics and modern physics with practice sets, making it a broad Physics 2 warm-up."
-  fromYear: 1
-  priority: 2
-  after: [khan-ap-physics-1]
+  quality: 3
 
 - id: "mitx-8-04x-qm-first-course"
   title: "Quantum Mechanics: A First Course (MITx 8.04x)"
@@ -1951,8 +1972,9 @@
   estHours: 120
   summary: "Zwiebach's online version of MIT's first quantum course, with auto-graded problems that force you to actually solve the Schrodinger equation."
   fromYear: 1
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.06"
+  quality: 3
 
 - id: "course-mit-22-02-applied-nuclear"
   title: "Introduction to Applied Nuclear Physics (MIT 22.02, Spring 2012)"
@@ -1970,6 +1992,7 @@
   fromYear: 2
   priority: 2
   after: [course-mit-22-01-nuclear-eng]
+  quality: 4
 
 - id: "course-mit-22-05-reactor-physics"
   title: "Neutron Science and Reactor Physics (MIT 22.05, Fall 2009)"
@@ -1985,8 +2008,9 @@
   estHours: 50
   summary: "Covers neutron cross sections, slowing down, diffusion theory and criticality, the physics that neutron-transport codes like OpenMC solve."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [course-mit-22-02-applied-nuclear]
+  quality: 3
 
 - id: "course-mit-22-06-nuclear-systems"
   title: "Engineering of Nuclear Systems (MIT 22.06, Fall 2010)"
@@ -2002,8 +2026,9 @@
   estHours: 50
   summary: "Connects reactor physics to real plant design: fuel heat transfer, coolant flow, power cycles, safety and reactor dynamics."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [course-mit-22-05-reactor-physics]
+  quality: 3
 
 - id: "course-mit-22-611j-plasma-2006"
   title: "Introduction to Plasma Physics I (MIT 22.611J, Fall 2006)"
@@ -2021,6 +2046,7 @@
   fromYear: 2
   priority: 2
   after: [tong-electromagnetism]
+  quality: 4
 
 - id: "notes-hutchinson-intro-plasma-physics"
   title: "Introduction to Plasma Physics I: Lecture Notes (MIT 22.611J, Fall 2003)"
@@ -2038,6 +2064,7 @@
   fromYear: 2
   priority: 2
   after: [tong-electromagnetism]
+  quality: 4
 
 - id: "mit-2-71-optics"
   title: "MIT 2.71 Optics (Spring 2009)"
@@ -2055,6 +2082,7 @@
   fromYear: 2
   priority: 2
   after: [fitzpatrick-em-optics-302l]
+  quality: 4
 
 - id: "mitx-8-05x-mastering-qm"
   title: "Mastering Quantum Mechanics (MITx 8.05x)"
@@ -2070,8 +2098,9 @@
   estHours: 120
   summary: "Builds the Dirac-notation, operator and angular-momentum machinery of QM with graded exercises in an interactive format."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [mitx-8-04x-qm-first-course]
+  quality: 3
 
 - id: "mitx-8-06x-applications-qm"
   title: "Applications of Quantum Mechanics (MITx 8.06x)"
@@ -2087,8 +2116,9 @@
   estHours: 120
   summary: "Perturbation theory, WKB, adiabatic evolution and scattering taught as tools you apply to real atomic and solid-state problems."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [mitx-8-05x-mastering-qm]
+  quality: 3
 
 - id: "mit-8-231-physics-of-solids-i"
   title: "MIT 8.231 Physics of Solids I (Fall 2006)"
@@ -2104,8 +2134,9 @@
   estHours: 60
   summary: "Undergraduate solid-state physics with problem sets from a leading condensed-matter theorist: lattices, phonons, bands and electrons in metals."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 8.05"
+  quality: 3
 
 - id: "mit-8-321-quantum-theory-i-2017"
   title: "MIT 8.321 Quantum Theory I (Fall 2017)"
@@ -2123,6 +2154,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 8.06"
+  quality: 4
 
 - id: "mit-8-251-string-theory-undergrads"
   title: "MIT 8.251 String Theory for Undergraduates (Spring 2007)"
@@ -2138,8 +2170,9 @@
   estHours: 80
   summary: "Shows that string theory is approachable after undergraduate QM and relativity, with notes and problem sets built on Zwiebach's textbook."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 8.05"
+  quality: 3
 
 - id: "mcgreevy-physics-215a-qft"
   title: "Physics 215A: Quantum Field Theory (Fall 2017)"
@@ -2157,6 +2190,7 @@
   fromYear: 3
   priority: 2
   after: [tong-topics-in-quantum-mechanics]
+  quality: 4
 
 - id: "littlejohn-physics-221ab-notes"
   title: "Physics 221AB: Quantum Mechanics (Berkeley lecture notes)"
@@ -2172,8 +2206,9 @@
   estHours: 120
   summary: "Exceptionally careful graduate QM notes on rotations, symmetry, perturbation theory and scattering, valued for mathematical precision."
   fromYear: 3
-  priority: 2
+  priority: 1
   after: [binney-skinner-physics-of-qm]
+  quality: 5
 
 - id: "fitzpatrick-classical-mechanics-301"
   title: "Classical Mechanics (PHY 301 lecture notes)"
@@ -2189,7 +2224,8 @@
   estHours: 25
   summary: "Concise freshman-level mechanics text with worked examples, a free alternative textbook for Physics 1."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "fitzpatrick-em-optics-302l"
   title: "Electromagnetism and Optics (PHY 316 lecture notes)"
@@ -2205,8 +2241,9 @@
   estHours: 25
   summary: "Lower-division E&M plus geometric and wave optics in one free set of notes, matching a typical Physics 2 syllabus."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [fitzpatrick-classical-mechanics-301]
+  quality: 3
 
 - id: "fitzpatrick-oscillations-waves-315"
   title: "Oscillations and Waves (PHY 315 lecture notes)"
@@ -2222,8 +2259,9 @@
   estHours: 25
   summary: "Builds from simple harmonic motion to coupled oscillators, normal modes, travelling waves and wave optics with careful derivations."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [fitzpatrick-classical-mechanics-301]
+  quality: 3
 
 - id: "binney-skinner-physics-of-qm"
   title: "The Physics of Quantum Mechanics"
@@ -2241,6 +2279,7 @@
   fromYear: 1
   priority: 2
   doFirst: "MIT 8.04"
+  quality: 4
 
 - id: "book-fitzpatrick-plasma-physics"
   title: "Plasma Physics (lecture notes)"
@@ -2258,6 +2297,7 @@
   fromYear: 2
   priority: 2
   after: [notes-hutchinson-intro-plasma-physics]
+  quality: 4
 
 - id: "fitzpatrick-intermediate-college-physics-355"
   title: "Intermediate College Physics (PHY 355 lecture notes)"
@@ -2273,8 +2313,9 @@
   estHours: 30
   summary: "Revisits intro mechanics and E&M at a more mathematical level, a good bridge between first-year physics and upper-division courses."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [fitzpatrick-em-optics-302l]
+  quality: 3
 
 - id: "fitzpatrick-newtonian-dynamics-336k"
   title: "Newtonian Dynamics (PHY 336K lecture notes)"
@@ -2290,8 +2331,9 @@
   estHours: 35
   summary: "Upper-division mechanics covering orbits, rotating frames, rigid bodies and Lagrangian methods, the natural next step after Physics 1."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 8.01SC"
+  quality: 3
 
 - id: "fitzpatrick-classical-em-352k"
   title: "Classical Electromagnetism (PHY 352K lecture notes)"
@@ -2307,8 +2349,9 @@
   estHours: 40
   summary: "Junior-level E&M built on vector calculus, from electrostatics through Maxwell's equations and radiation, free in full."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 8.02"
+  quality: 3
 
 - id: "fitzpatrick-thermo-stat-mech"
   title: "Thermodynamics and Statistical Mechanics (PHY 369 lecture notes)"
@@ -2326,6 +2369,7 @@
   fromYear: 2
   priority: 2
   after: [fitzpatrick-classical-mechanics-301]
+  quality: 4
 
 - id: "fitzpatrick-celestial-mechanics"
   title: "Celestial Mechanics (PHY 336M lecture notes)"
@@ -2341,8 +2385,9 @@
   estHours: 30
   summary: "Applies Newtonian gravity to orbits, tides and perturbations, giving the physics behind N-body and orbital simulation codes."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [fitzpatrick-newtonian-dynamics-336k]
+  quality: 3
 
 - id: "tong-topics-in-quantum-mechanics"
   title: "David Tong: Lectures on Topics in Quantum Mechanics"
@@ -2360,6 +2405,7 @@
   fromYear: 2
   priority: 2
   doFirst: "Tong: Quantum Mechanics"
+  quality: 4
 
 - id: "tong-cosmology"
   title: "David Tong: Lectures on Cosmology"
@@ -2377,6 +2423,7 @@
   fromYear: 2
   priority: 2
   doFirst: "Tong: Dynamics and Relativity"
+  quality: 4
 
 - id: "tong-particle-physics"
   title: "David Tong: Lectures on Particle Physics"
@@ -2394,6 +2441,7 @@
   fromYear: 2
   priority: 2
   doFirst: "Tong: Quantum Mechanics"
+  quality: 4
 
 - id: "carroll-lecture-notes-gr"
   title: "Lecture Notes on General Relativity"
@@ -2409,8 +2457,9 @@
   estHours: 60
   summary: "The free precursor to Carroll's textbook: a readable graduate introduction to manifolds, curvature and Einstein's equations."
   fromYear: 2
-  priority: 2
+  priority: 1
   doFirst: "MIT 8.20 Special Relativity"
+  quality: 5
 
 - id: "tong-quantum-field-theory"
   title: "David Tong: Lectures on Quantum Field Theory"
@@ -2426,8 +2475,9 @@
   estHours: 60
   summary: "Arguably the clearest free first course in QFT: canonical quantization, free fields, interactions and QED in compact notes."
   fromYear: 3
-  priority: 2
+  priority: 1
   after: [tong-topics-in-quantum-mechanics]
+  quality: 5
 
 - id: "tong-gauge-theory"
   title: "David Tong: Lectures on Gauge Theory"
@@ -2445,6 +2495,7 @@
   fromYear: 3
   priority: 2
   after: [tong-quantum-field-theory]
+  quality: 4
 
 - id: "tong-statistical-field-theory"
   title: "David Tong: Lectures on Statistical Field Theory"
@@ -2462,6 +2513,7 @@
   fromYear: 3
   priority: 2
   doFirst: "Tong: Statistical Physics"
+  quality: 4
 
 - id: "tong-quantum-hall-effect"
   title: "David Tong: Lectures on the Quantum Hall Effect"
@@ -2479,6 +2531,7 @@
   fromYear: 3
   priority: 2
   after: [tong-topics-in-quantum-mechanics]
+  quality: 4
 
 - id: "tong-standard-model"
   title: "David Tong: Lectures on the Standard Model"
@@ -2496,6 +2549,7 @@
   fromYear: 3
   priority: 2
   after: [tong-quantum-field-theory]
+  quality: 4
 
 - id: "tong-string-theory"
   title: "David Tong: Lectures on String Theory"
@@ -2511,8 +2565,9 @@
   estHours: 50
   summary: "Graduate introduction to the bosonic string, conformal field theory and D-branes, widely used as a first string theory text."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [tong-quantum-field-theory]
+  quality: 3
 
 - id: "tong-supersymmetric-qm"
   title: "David Tong: Lectures on Supersymmetric Quantum Mechanics"
@@ -2528,8 +2583,9 @@
   estHours: 25
   summary: "Shows supersymmetry in its simplest setting, where it connects quantum mechanics to index theorems and geometry."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [tong-topics-in-quantum-mechanics]
+  quality: 3
 
 - id: "srednicki-quantum-field-theory"
   title: "Quantum Field Theory (Srednicki, draft)"
@@ -2545,8 +2601,9 @@
   estHours: 200
   summary: "A complete graduate QFT text in short modular chapters with explicit prerequisites, freely available as a prepublication draft."
   fromYear: 3
-  priority: 2
+  priority: 1
   after: [tong-quantum-field-theory]
+  quality: 5
 
 - id: "paper-coleman-qft-lectures"
   title: "Notes from Sidney Coleman's Physics 253a: Quantum Field Theory"
@@ -2562,8 +2619,9 @@
   estHours: 100
   summary: "Legendary Harvard QFT lectures prized for their physical insight and wit, typeset from student notes."
   fromYear: 3
-  priority: 2
+  priority: 1
   after: [tong-quantum-field-theory]
+  quality: 5
 
 - id: "siegel-fields"
   title: "Fields"
@@ -2579,8 +2637,9 @@
   estHours: 200
   summary: "An encyclopedic, unconventional free QFT text covering symmetry, quantization, gauge theory and beyond for ambitious readers."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [srednicki-quantum-field-theory]
+  quality: 3
 
 - id: "steck-quantum-atom-optics"
   title: "Quantum and Atom Optics"
@@ -2598,6 +2657,7 @@
   fromYear: 3
   priority: 2
   after: [mit-8-421-atomic-optical-physics-i]
+  quality: 4
 
 - id: "blau-lecture-notes-gr"
   title: "Lecture Notes on General Relativity (Blau)"
@@ -2615,22 +2675,7 @@
   fromYear: 3
   priority: 2
   after: [carroll-lecture-notes-gr]
-
-- id: "physics-classroom"
-  title: "The Physics Classroom"
-  short: "Physics Classroom"
-  provider: "The Physics Classroom (Tom Henderson)"
-  type: "practice"
-  url: "https://www.physicsclassroom.com/"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [math]
-  level: "intro"
-  cost: "free"
-  estHours: 40
-  summary: "Clear conceptual tutorials plus Concept Builders, Minds On drills and Calc Pad problems that target the classic misconceptions in intro mechanics and circuits."
-  fromYear: 1
-  priority: 2
+  quality: 4
 
 - id: "paper-wurzel-hsu-lawson-progress"
   title: "Progress toward fusion energy breakeven and gain as measured against the Lawson criterion"
@@ -2648,6 +2693,7 @@
   fromYear: 2
   priority: 2
   after: [article-iter-what-is-fusion]
+  quality: 4
 
 - id: "paper-schlosshauer-decoherence-interpretations"
   title: "Decoherence, the measurement problem, and interpretations of quantum mechanics"
@@ -2663,8 +2709,9 @@
   estHours: 5
   summary: "Clarifies what decoherence does and does not solve about measurement, and how each major interpretation uses it."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [sep-qm]
+  quality: 3
 
 - id: "paper-witten-mini-intro-information-theory"
   title: "A Mini-Introduction To Information Theory"
@@ -2680,8 +2727,9 @@
   estHours: 4
   summary: "Bridges classical and quantum entropy, relative entropy and strong subadditivity in a short physicist-friendly review."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 8.05"
+  quality: 3
 
 - id: "paper-arc-compact-fusion"
   title: "ARC: A compact, high-field, fusion nuclear science facility and demonstration power plant with demountable magnets"
@@ -2697,8 +2745,9 @@
   estHours: 5
   summary: "The MIT design study showing how high-field REBCO magnets shrink a fusion power plant, the origin of the ARC concept."
   fromYear: 3
-  priority: 2
+  priority: 1
   after: [course-mit-22-611j-plasma-2006]
+  quality: 5
 
 - id: "paper-sparc-overview"
   title: "Overview of the SPARC tokamak"
@@ -2716,6 +2765,7 @@
   fromYear: 3
   priority: 2
   after: [paper-arc-compact-fusion]
+  quality: 4
 
 - id: "paper-townsend-black-holes"
   title: "Black Holes (lecture notes)"
@@ -2733,6 +2783,7 @@
   fromYear: 3
   priority: 2
   after: [carroll-lecture-notes-gr]
+  quality: 4
 
 - id: "paper-asboth-topological-insulators"
   title: "A Short Course on Topological Insulators"
@@ -2750,6 +2801,7 @@
   fromYear: 3
   priority: 2
   after: [tong-quantum-hall-effect]
+  quality: 4
 
 - id: "paper-zurek-decoherence-einselection"
   title: "Decoherence, einselection, and the quantum origins of the classical"
@@ -2767,6 +2819,7 @@
   fromYear: 3
   priority: 2
   after: [sep-qm-decoherence]
+  quality: 4
 
 - id: "paper-witten-entanglement-qft"
   title: "Notes on Some Entanglement Properties of Quantum Field Theory"
@@ -2784,6 +2837,7 @@
   fromYear: 3
   priority: 2
   after: [tong-quantum-field-theory]
+  quality: 4
 
 - id: "paper-harlow-jerusalem-black-holes-qi"
   title: "Jerusalem Lectures on Black Holes and Quantum Information"
@@ -2801,6 +2855,7 @@
   fromYear: 3
   priority: 2
   after: [carroll-lecture-notes-gr]
+  quality: 4
 
 - id: "article-iter-what-is-fusion"
   title: "What is Fusion?"
@@ -2816,7 +2871,8 @@
   estHours: 1
   summary: "Short official primer on why light nuclei fuse, which fuels matter and what conditions a reactor must reach."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "article-iter-what-is-tokamak"
   title: "What is a Tokamak?"
@@ -2832,8 +2888,9 @@
   estHours: 1
   summary: "Plain-language explanation of how a tokamak's magnetic coils confine a hot plasma, with context from the world's largest device."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [article-iter-what-is-fusion]
+  quality: 3
 
 - id: "article-pppl-plasma-and-fusion"
   title: "Plasma and Fusion: Harnessing the Sun's Power on Earth"
@@ -2849,23 +2906,8 @@
   estHours: 1
   summary: "A national lab's quick introduction to what plasma is and how magnetic confinement aims to make fusion power."
   fromYear: 1
-  priority: 2
-
-- id: "article-doe-fusion-energy-sciences"
-  title: "Fusion Energy Sciences (US DOE Office of Science)"
-  short: "DOE Fusion Energy Sciences"
-  provider: "US Department of Energy"
-  type: "article"
-  url: "https://www.energy.gov/science/fes/fusion-energy-sciences"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [math]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Overview of the US fusion research program and its priorities, including simulation and AI, useful for seeing where the field is heading."
-  fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "article-wurzel-suli-lawson-talk"
   title: "Fusion and the Lawson Criterion (SULI 2024 lecture slides)"
@@ -2883,6 +2925,7 @@
   fromYear: 1
   priority: 2
   after: [article-iter-what-is-fusion]
+  quality: 4
 
 - id: "sep-qm"
   title: "Quantum Mechanics (Stanford Encyclopedia of Philosophy)"
@@ -2898,7 +2941,8 @@
   estHours: 3
   summary: "A clean conceptual summary of the formalism and the measurement problem, ideal for knowing what the interpretations disagree about."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "sep-qt-issues"
   title: "Philosophical Issues in Quantum Theory (Stanford Encyclopedia of Philosophy)"
@@ -2914,8 +2958,9 @@
   estHours: 3
   summary: "Maps the open foundational questions in quantum theory and how the main proposals try to answer them."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 8.04"
+  quality: 3
 
 - id: "sep-bell-theorem"
   title: "Bell's Theorem (Stanford Encyclopedia of Philosophy)"
@@ -2931,8 +2976,9 @@
   estHours: 3
   summary: "Explains Bell inequalities, their assumptions and the experiments testing them, the core of quantum nonlocality."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 8.04"
+  quality: 3
 
 - id: "sep-qm-copenhagen"
   title: "Copenhagen Interpretation of Quantum Mechanics (Stanford Encyclopedia of Philosophy)"
@@ -2948,8 +2994,9 @@
   estHours: 3
   summary: "Untangles what Bohr and Heisenberg actually claimed, as opposed to the textbook caricature."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 8.04"
+  quality: 3
 
 - id: "sep-qm-manyworlds"
   title: "Many-Worlds Interpretation of Quantum Mechanics (Stanford Encyclopedia of Philosophy)"
@@ -2965,8 +3012,9 @@
   estHours: 3
   summary: "Lays out Everett's no-collapse picture and the probability problem it must solve."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 8.04"
+  quality: 3
 
 - id: "sep-qm-bohm"
   title: "Bohmian Mechanics (Stanford Encyclopedia of Philosophy)"
@@ -2982,8 +3030,9 @@
   estHours: 3
   summary: "Presents the pilot-wave theory, a deterministic alternative that reproduces quantum predictions with explicit nonlocality."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 8.04"
+  quality: 3
 
 - id: "sep-qm-decoherence"
   title: "The Role of Decoherence in Quantum Mechanics (Stanford Encyclopedia of Philosophy)"
@@ -2999,10 +3048,11 @@
   estHours: 3
   summary: "Explains how decoherence works physically and why it matters for every interpretation of measurement."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 8.04"
 
 # ---- Hardware and chip design: CPU, GPU and NPU, RTL to tape-out (117)
+  quality: 3
 
 - id: "cocotb-docs"
   title: "cocotb Documentation"
@@ -3018,8 +3068,9 @@
   estHours: 12
   summary: "Lets you write testbenches for Verilog/VHDL in Python with coroutines, a natural fit for software people and widely used in open-source silicon."
   fromYear: 1
-  priority: 3
+  priority: 2
   after: [practice-hdlbits]
+  quality: 4
 
 - id: "icarus-verilog-docs"
   title: "Icarus Verilog Documentation"
@@ -3036,6 +3087,7 @@
   summary: "The easiest event-driven Verilog simulator to install and run, the usual first tool for simulating testbenches and dumping waveforms."
   fromYear: 1
   priority: 3
+  quality: 3
 
 - id: "gtkwave"
   title: "GTKWave Wave Viewer"
@@ -3053,23 +3105,7 @@
   fromYear: 1
   priority: 3
   after: [icarus-verilog-docs]
-
-- id: "surfer-waveform-viewer"
-  title: "Surfer: An Extensible and Snappy Waveform Viewer"
-  short: "Surfer Waveforms"
-  provider: "Linköping University / Surfer project"
-  type: "article"
-  url: "https://surfer-project.org/"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [hardware]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "A modern, fast waveform viewer that also runs in the browser, a pleasant alternative to GTKWave for day-to-day debugging."
-  fromYear: 1
-  priority: 3
-  after: [icarus-verilog-docs]
+  quality: 3
 
 - id: "oss-cad-suite"
   title: "OSS CAD Suite"
@@ -3085,7 +3121,8 @@
   estHours: 2
   summary: "One prebuilt bundle of Yosys, nextpnr, Verilator, Icarus, GTKWave, SymbiYosys and cocotb, so setting up an open hardware toolchain takes minutes."
   fromYear: 1
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "verification-academy-uvm-cookbook"
   title: "UVM Cookbook (Verification Methodology Cookbooks)"
@@ -3101,9 +3138,10 @@
   estHours: 30
   summary: "The standard industry reference for building UVM testbenches (agents, sequences, scoreboards and coverage), which is how most ASIC verification jobs work."
   fromYear: 2
-  priority: 3
+  priority: 2
   note: "Free tier"
   after: [cocotb-docs]
+  quality: 4
 
 - id: "symbiyosys-docs"
   title: "SymbiYosys (sby) Documentation"
@@ -3119,8 +3157,9 @@
   estHours: 8
   summary: "The front end for open-source formal verification of RTL, covering bounded and unbounded proofs, cover traces and liveness with SVA."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [zipcpu-formal-tutorial]
+  quality: 4
 
 - id: "magic-vlsi"
   title: "Magic VLSI Layout Tool"
@@ -3138,6 +3177,7 @@
   fromYear: 2
   priority: 3
   after: [hmc-e158-cmos-vlsi]
+  quality: 3
 
 - id: "klayout"
   title: "KLayout Layout Viewer and Editor"
@@ -3153,8 +3193,9 @@
   estHours: 10
   summary: "A fast GDS/OASIS viewer and editor with scripted DRC/LVS, the tool you open to inspect any finished chip layout."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [magic-vlsi]
+  quality: 4
 
 - id: "xschem"
   title: "Xschem: Schematic Capture and Netlisting EDA Tool"
@@ -3172,6 +3213,7 @@
   fromYear: 2
   priority: 3
   after: [hajimiri-analog-circuit-design]
+  quality: 3
 
 - id: "skywater-sky130-pdk-docs"
   title: "SkyWater SKY130 PDK Documentation"
@@ -3187,8 +3229,9 @@
   estHours: 15
   summary: "Documents the first fully open 130nm process (design rules, devices, standard cell libraries), the foundation of most open-source tape-outs."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [tutorial-tiny-tapeout-digital-design]
+  quality: 4
 
 - id: "gf180mcu-pdk-docs"
   title: "GF180MCU PDK Documentation"
@@ -3206,6 +3249,7 @@
   fromYear: 2
   priority: 3
   after: [skywater-sky130-pdk-docs]
+  quality: 3
 
 - id: "librelane"
   title: "LibreLane"
@@ -3221,8 +3265,9 @@
   estHours: 10
   summary: "The community continuation of OpenLane 2, packaging Yosys, OpenROAD, Magic and KLayout into one ASIC flow used for current open shuttles."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [docs-openlane2]
+  quality: 4
 
 - id: "siliconcompiler-docs"
   title: "SiliconCompiler Documentation"
@@ -3240,6 +3285,7 @@
   fromYear: 2
   priority: 3
   after: [openroad-flow-scripts]
+  quality: 3
 
 - id: "spinalhdl-docs"
   title: "SpinalHDL Documentation"
@@ -3257,6 +3303,7 @@
   fromYear: 2
   priority: 3
   after: [practice-hdlbits]
+  quality: 3
 
 - id: "amaranth-hdl-docs"
   title: "Amaranth HDL Documentation"
@@ -3272,8 +3319,9 @@
   estHours: 12
   summary: "A Python-based HDL with a tutorial and clean synchronous semantics, a friendly way for Python programmers to write synthesizable hardware."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [practice-hdlbits]
+  quality: 4
 
 - id: "project-icestorm"
   title: "Project IceStorm"
@@ -3289,8 +3337,9 @@
   estHours: 6
   summary: "The reverse-engineered bitstream documentation and tools for Lattice iCE40, which made the first fully open FPGA toolchain possible."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [practice-yosys]
+  quality: 4
 
 - id: "nextpnr"
   title: "nextpnr: Portable FPGA Place and Route"
@@ -3306,8 +3355,9 @@
   estHours: 6
   summary: "The open place-and-route tool for iCE40, ECP5 and more that completes the Yosys flow, and a readable example of timing-driven P&R."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [project-icestorm]
+  quality: 4
 
 - id: "fusesoc"
   title: "FuseSoC Package Manager and Build System"
@@ -3325,6 +3375,7 @@
   fromYear: 2
   priority: 3
   after: [oss-cad-suite]
+  quality: 3
 
 - id: "docs-serv"
   title: "SERV user manual"
@@ -3342,6 +3393,7 @@
   fromYear: 2
   priority: 3
   after: [picorv32]
+  quality: 3
 
 - id: "docs-ibex"
   title: "Ibex: An embedded 32 bit RISC-V CPU core"
@@ -3357,8 +3409,9 @@
   estHours: 10
   summary: "Production-grade documentation of a taped-out SystemVerilog core, including its pipeline, CSRs, PMP and verification flow."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [picorv32]
+  quality: 4
 
 - id: "docs-cva6"
   title: "CVA6 user manual"
@@ -3376,6 +3429,7 @@
   fromYear: 2
   priority: 3
   after: [docs-ibex]
+  quality: 3
 
 - id: "docs-boom"
   title: "RISCV-BOOM documentation"
@@ -3391,8 +3445,9 @@
   estHours: 12
   summary: "Walks through every stage of a real out-of-order core: fetch and prediction, rename, ROB, issue queues and the LSU."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [paper-smith-sohi-superscalar]
+  quality: 4
 
 - id: "site-wikichip"
   title: "WikiChip"
@@ -3408,8 +3463,9 @@
   estHours: 10
   summary: "Reference wiki of real microarchitectures (pipelines, cache sizes, ports) to compare your designs against shipping chips."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [article-lighterra-modern-microprocessors]
+  quality: 4
 
 - id: "docs-cfu-playground"
   title: "CFU Playground documentation"
@@ -3427,6 +3483,7 @@
   fromYear: 2
   priority: 3
   doFirst: "Build a RISC-V CPU Core"
+  quality: 3
 
 - id: "docs-hls4ml"
   title: "hls4ml documentation"
@@ -3443,6 +3500,7 @@
   summary: "Turns trained Keras/PyTorch models into FPGA firmware via HLS, showing how layer choices map onto hardware resources."
   fromYear: 2
   priority: 3
+  quality: 3
 
 - id: "docs-finn"
   title: "FINN documentation"
@@ -3459,6 +3517,7 @@
   summary: "Compiler and tutorials for building per-network dataflow accelerators for quantized networks on FPGAs."
   fromYear: 2
   priority: 3
+  quality: 3
 
 - id: "docs-nvdla-primer"
   title: "NVDLA Primer"
@@ -3474,8 +3533,9 @@
   estHours: 3
   summary: "Concise tour of a production inference accelerator's blocks, integration modes and sizing knobs before you read its RTL."
   fromYear: 2
-  priority: 3
+  priority: 2
   doFirst: "Efficient Processing of DNNs"
+  quality: 4
 
 - id: "ihp-sg13g2-open-pdk-docs"
   title: "IHP SG13G2 130nm BiCMOS Open Source PDK Documentation"
@@ -3491,8 +3551,9 @@
   estHours: 10
   summary: "A European open BiCMOS PDK with analog, RF and digital flows, which shows how a full PDK supports mixed-signal and high-frequency design."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [skywater-sky130-pdk-docs]
+  quality: 4
 
 - id: "openram"
   title: "OpenRAM: Open-Source SRAM Compiler"
@@ -3508,8 +3569,9 @@
   estHours: 10
   summary: "Generates SRAM macros for open PDKs and shows how memories are assembled from bitcells, decoders and sense amps."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [hmc-e158-cmos-vlsi]
+  quality: 4
 
 - id: "circt-docs"
   title: "CIRCT: Circuit IR Compilers and Tools"
@@ -3525,8 +3587,9 @@
   estHours: 15
   summary: "Brings MLIR to hardware with dialects for FIRRTL, HW, comb and seq, showing how modern HDL compilers like Chisel's back end are built."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [docs-chisel]
+  quality: 4
 
 - id: "chipyard-docs"
   title: "Chipyard Documentation"
@@ -3542,8 +3605,9 @@
   estHours: 25
   summary: "Berkeley's framework for building full RISC-V SoCs with Rocket/BOOM cores and accelerators, then simulating, running FireSim and sending them to VLSI."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [rocket-chip]
+  quality: 4
 
 - id: "bluespec-bsc"
   title: "Bluespec Compiler (bsc)"
@@ -3561,6 +3625,7 @@
   fromYear: 3
   priority: 3
   after: [mit-6375-complex-digital-systems]
+  quality: 3
 
 - id: "clash-compiler"
   title: "Clash: Haskell to Hardware Compiler"
@@ -3578,6 +3643,7 @@
   fromYear: 3
   priority: 3
   after: [amaranth-hdl-docs]
+  quality: 3
 
 - id: "vtr-docs"
   title: "Verilog-to-Routing (VTR) Documentation"
@@ -3593,8 +3659,9 @@
   estHours: 15
   summary: "The academic FPGA CAD flow (synthesis, packing, placement, routing) with an architecture description language, for learning how FPGA tools and fabrics work."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [coursera-vlsi-cad-layout]
+  quality: 4
 
 - id: "docs-xiangshan-design"
   title: "XiangShan Design Document"
@@ -3610,8 +3677,9 @@
   estHours: 20
   summary: "Detailed English design document of a high-performance open RISC-V core: frontend predictors, backend scheduling, memory and L2."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [docs-boom]
+  quality: 4
 
 - id: "docs-vta-hardware"
   title: "VTA Hardware Guide"
@@ -3629,6 +3697,7 @@
   fromYear: 3
   priority: 3
   doFirst: "Gemmini"
+  quality: 3
 
 - id: "nptel-hardware-modeling-verilog"
   title: "Hardware Modeling Using Verilog"
@@ -3645,6 +3714,7 @@
   summary: "A structured Verilog course from gates through FSMs, datapath/controller design and a pipelined processor, useful as a slower companion to online practice."
   fromYear: 1
   priority: 3
+  quality: 3
 
 - id: "asianometry"
   title: "Asianometry"
@@ -3660,7 +3730,8 @@
   estHours: 20
   summary: "Deeply researched videos on lithography, fabs, EDA companies and semiconductor history that set the industry context around chip design."
   fromYear: 1
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "nptel-vlsi-design-flow-rtl-to-gds"
   title: "VLSI Design Flow: RTL to GDS"
@@ -3676,8 +3747,9 @@
   estHours: 30
   summary: "A full lecture series on the industrial flow from RTL through synthesis, STA, DFT, floorplanning, placement, CTS and routing to GDS sign-off."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [practice-hdlbits]
+  quality: 4
 
 - id: "hajimiri-analog-circuit-design"
   title: "Analog Circuit Design (Prof. Ali Hajimiri, Caltech)"
@@ -3693,8 +3765,9 @@
   estHours: 50
   summary: "Clear, intuition-heavy lectures on transistor amplifiers, feedback, frequency response and noise, which is the analog base every chip designer needs for I/O, clocks and mixed-signal work."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [course-mit-6012-microelectronic-devices]
+  quality: 4
 
 - id: "razavi-noise-electronic-circuits"
   title: "Noise in Electronic Circuits (Behzad Razavi)"
@@ -3710,8 +3783,9 @@
   estHours: 10
   summary: "Razavi's analysis of thermal and flicker noise in amplifiers sharpens the analog intuition that matters once you design ADCs, PLLs and LNAs."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [hajimiri-analog-circuit-design]
+  quality: 4
 
 - id: "lf-building-riscv-cpu-core"
   title: "Building a RISC-V CPU Core (LFD111x)"
@@ -3729,22 +3803,7 @@
   fromYear: 1
   priority: 3
   after: [nand2tetris]
-
-- id: "course-lfd110x-intro-riscv"
-  title: "Introduction to RISC-V (LFD110x)"
-  short: "Intro to RISC-V (LFD110x)"
-  provider: "Linux Foundation / RISC-V International"
-  type: "course"
-  url: "https://www.edx.org/course/introduction-to-risc-v"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [hardware]
-  level: "intro"
-  cost: "audit-free"
-  estHours: 10
-  summary: "Orients you in the RISC-V ecosystem, specs and extensions before you start implementing cores against them."
-  fromYear: 1
-  priority: 3
+  quality: 3
 
 - id: "course-rvfpga"
   title: "RVfpga: Understanding Computer Architecture"
@@ -3762,6 +3821,7 @@
   fromYear: 1
   priority: 3
   doFirst: "Build a RISC-V CPU Core"
+  quality: 3
 
 - id: "hmc-e158-cmos-vlsi"
   title: "E158: Introduction to CMOS VLSI Design"
@@ -3777,8 +3837,9 @@
   estHours: 45
   summary: "The lecture slides behind Weste and Harris's textbook cover transistors, logical effort, power, datapaths, SRAM and clocking, which is the circuit-level core of digital VLSI."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [mit-6-004]
+  quality: 4
 
 - id: "berkeley-ee141-icbook-courses"
   title: "Digital Integrated Circuits: Complete Courses (Rabaey book site, Berkeley EECS 141)"
@@ -3796,6 +3857,7 @@
   fromYear: 2
   priority: 3
   after: [course-mit-6012-microelectronic-devices]
+  quality: 3
 
 - id: "mit-6375-complex-digital-systems"
   title: "6.375 Complex Digital Systems (2019)"
@@ -3811,8 +3873,9 @@
   estHours: 60
   summary: "Arvind's course designs pipelined processors and accelerators in Bluespec, teaching you to think of hardware as guarded atomic actions rather than wires."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [mit-6-004]
+  quality: 4
 
 - id: "mit-65900-computer-system-architecture"
   title: "6.5900 [6.823] Computer System Architecture - Lecture Notes (Fall 2021)"
@@ -3828,8 +3891,9 @@
   estHours: 50
   summary: "Graduate architecture lectures on pipelining, out-of-order execution, caches, virtual memory, vectors and multicore give you the microarchitecture to put into RTL."
   fromYear: 2
-  priority: 3
+  priority: 1
   doFirst: "CS61C"
+  quality: 5
 
 - id: "coursera-vlsi-cad-logic"
   title: "VLSI CAD Part I: Logic"
@@ -3845,8 +3909,9 @@
   estHours: 40
   summary: "Explains the algorithms inside synthesis tools, such as BDDs, SAT, two-level and multilevel minimization and technology mapping, so EDA tools stop being black boxes."
   fromYear: 2
-  priority: 3
+  priority: 2
   doFirst: "Discrete math"
+  quality: 4
 
 - id: "coursera-vlsi-cad-layout"
   title: "VLSI CAD Part II: Layout"
@@ -3862,8 +3927,9 @@
   estHours: 40
   summary: "Covers the algorithms behind physical design, including placement, routing and timing analysis, which OpenROAD and commercial tools implement."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [coursera-vlsi-cad-logic]
+  quality: 4
 
 - id: "berkeley-eecs151-fpga-labs"
   title: "EECS 151/251A FPGA Labs (Spring 2024)"
@@ -3879,8 +3945,9 @@
   estHours: 40
   summary: "Hands-on Verilog labs on a real FPGA board that build up from simple I/O to UART and memory, mirroring Berkeley's digital design course."
   fromYear: 1
-  priority: 3
+  priority: 2
   after: [practice-hdlbits]
+  quality: 4
 
 - id: "zipcpu-beginner-tutorial"
   title: "Verilog, Formal Verification and Verilator Beginner's Tutorial"
@@ -3896,8 +3963,9 @@
   estHours: 20
   summary: "Ten lessons that teach Verilog together with Verilator simulation and formal proofs from day one, building up to a serial port and FIFO."
   fromYear: 1
-  priority: 3
+  priority: 2
   after: [practice-hdlbits]
+  quality: 4
 
 - id: "learn-fpga-brunolevy"
   title: "learn-fpga: From Blinker to RISC-V"
@@ -3913,8 +3981,9 @@
   estHours: 25
   summary: "A step-by-step tutorial that grows a blinking LED into a working RISC-V processor running C programs on cheap open-toolchain FPGAs."
   fromYear: 1
-  priority: 3
+  priority: 1
   after: [practice-hdlbits]
+  quality: 5
 
 - id: "tutorial-from-blinker-to-riscv"
   title: "From Blinker to RISC-V"
@@ -3930,8 +3999,9 @@
   estHours: 15
   summary: "Grows a blinking LED into a working RV32I core one tiny Verilog change at a time, so every step is understandable."
   fromYear: 1
-  priority: 3
+  priority: 1
   after: [practice-hdlbits]
+  quality: 5
 
 - id: "berkeley-eecs151-asic-labs"
   title: "EECS 151/251A ASIC Labs (Spring 2024)"
@@ -3947,8 +4017,9 @@
   estHours: 40
   summary: "Berkeley's lab sequence takes RTL through simulation, synthesis, place-and-route and timing sign-off with a real VLSI flow, showing what each back-end step does."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [mit-6-004]
+  quality: 4
 
 - id: "zipcpu-formal-tutorial"
   title: "ZipCPU Formal Verification Course"
@@ -3964,8 +4035,9 @@
   estHours: 15
   summary: "A practical course in SystemVerilog assertions and induction with SymbiYosys, showing how formal methods find bugs simulation misses."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [zipcpu-beginner-tutorial]
+  quality: 4
 
 - id: "makerchip"
   title: "Makerchip"
@@ -3982,6 +4054,7 @@
   summary: "A browser IDE for Verilog and TL-Verilog with linked waveform and diagram views, so you can simulate designs with nothing installed."
   fromYear: 1
   priority: 3
+  quality: 3
 
 - id: "ripes"
   title: "Ripes: Graphical Processor Simulator"
@@ -3997,8 +4070,9 @@
   estHours: 5
   summary: "A visual simulator for single-cycle and pipelined RISC-V that animates hazards, forwarding and caches before you write any RTL."
   fromYear: 1
-  priority: 3
+  priority: 2
   doFirst: "CS61C"
+  quality: 4
 
 - id: "logisim-evolution"
   title: "Logisim-evolution"
@@ -4015,6 +4089,7 @@
   summary: "A schematic-level digital logic simulator that can export to VHDL/Verilog, good for drawing and testing small datapaths visually."
   fromYear: 1
   priority: 3
+  quality: 3
 
 - id: "repo-lf-building-riscv-cpu-core"
   title: "LF-Building-a-RISC-V-CPU-Core (course labs)"
@@ -4032,23 +4107,7 @@
   fromYear: 1
   priority: 3
   doFirst: "Build a RISC-V CPU Core"
-
-- id: "repo-darkriscv"
-  title: "DarkRISCV"
-  short: "DarkRISCV"
-  provider: "Marcelo Samsoniuk"
-  type: "practice"
-  url: "https://github.com/darklife/darkriscv"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [hardware]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "A tiny 2/3-stage pipelined Verilog RISC-V core famously written in one night, good for studying a minimal pipeline."
-  fromYear: 1
-  priority: 3
-  after: [picorv32]
+  quality: 3
 
 - id: "repo-tiny-gpu"
   title: "tiny-gpu"
@@ -4064,8 +4123,9 @@
   estHours: 6
   summary: "A minimal, heavily documented Verilog GPU that teaches SIMT execution, thread scheduling and memory coalescing in an afternoon."
   fromYear: 1
-  priority: 3
+  priority: 2
   after: [tutorial-from-blinker-to-riscv]
+  quality: 4
 
 - id: "openroad-flow-scripts"
   title: "OpenROAD-flow-scripts (ORFS)"
@@ -4081,8 +4141,9 @@
   estHours: 20
   summary: "Ready-made RTL-to-GDS flows for several open PDKs where you can push example designs through synthesis, floorplan, CTS and routing and read the reports."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [docs-openroad]
+  quality: 4
 
 - id: "picorv32"
   title: "PicoRV32 - A Size-Optimized RISC-V CPU"
@@ -4098,8 +4159,9 @@
   estHours: 8
   summary: "A compact, readable RV32IMC core in one Verilog file that is easy to study, simulate and drop into FPGA or ASIC projects."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [lf-building-riscv-cpu-core]
+  quality: 4
 
 - id: "riscv-sodor"
   title: "RISC-V Sodor Educational Processors"
@@ -4115,8 +4177,9 @@
   estHours: 10
   summary: "A set of 1- to 5-stage RISC-V cores in Chisel built for teaching, showing how the same ISA maps onto different pipeline depths."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [tutorial-chisel-bootcamp]
+  quality: 4
 
 - id: "neorv32"
   title: "NEORV32 RISC-V Processor"
@@ -4132,8 +4195,9 @@
   estHours: 10
   summary: "A small, very well-documented RISC-V microcontroller SoC in VHDL that runs on almost any FPGA, ideal for a first complete system."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [learn-fpga-brunolevy]
+  quality: 4
 
 - id: "repo-riscv-mini"
   title: "riscv-mini"
@@ -4151,6 +4215,7 @@
   fromYear: 2
   priority: 3
   after: [tutorial-chisel-bootcamp]
+  quality: 3
 
 - id: "repo-vexriscv"
   title: "VexRiscv"
@@ -4166,8 +4231,9 @@
   estHours: 12
   summary: "A plugin-based, highly configurable pipelined core in SpinalHDL that shows how CPU features can be composed as modules."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [picorv32]
+  quality: 4
 
 - id: "repo-veer-eh1"
   title: "VeeR EH1 RISC-V Core"
@@ -4185,6 +4251,7 @@
   fromYear: 2
   priority: 3
   after: [course-rvfpga]
+  quality: 3
 
 - id: "repo-biriscv"
   title: "biRISC-V: 32-bit dual-issue RISC-V CPU"
@@ -4202,6 +4269,7 @@
   fromYear: 2
   priority: 3
   after: [docs-ibex]
+  quality: 3
 
 - id: "repo-riscv-formal"
   title: "riscv-formal"
@@ -4217,8 +4285,9 @@
   estHours: 8
   summary: "Formal verification framework that checks a core against the RISC-V spec, teaching you how CPU bugs are actually caught."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [picorv32]
+  quality: 4
 
 - id: "repo-tiny-tpu"
   title: "tiny-tpu"
@@ -4236,40 +4305,7 @@
   fromYear: 2
   priority: 3
   doFirst: "Why Systolic Architectures?"
-
-- id: "efabless-caravel"
-  title: "Caravel SoC Harness"
-  short: "Caravel Harness"
-  provider: "Efabless"
-  type: "practice"
-  url: "https://github.com/efabless/caravel"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [hardware]
-  level: "advanced"
-  cost: "free"
-  estHours: 15
-  summary: "The RISC-V management SoC and padframe that wrapped user projects on open MPW shuttles, a real example of chip-level integration around your design."
-  fromYear: 3
-  priority: 3
-  after: [librelane]
-
-- id: "efabless-caravel-user-project"
-  title: "Caravel User Project Template"
-  short: "Caravel User Project"
-  provider: "Efabless"
-  type: "practice"
-  url: "https://github.com/efabless/caravel_user_project"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [hardware]
-  level: "advanced"
-  cost: "free"
-  estHours: 20
-  summary: "The template for hardening your own macro into the Caravel user area, with verification and precheck steps like a real tape-out submission."
-  fromYear: 3
-  priority: 3
-  after: [efabless-caravel]
+  quality: 3
 
 - id: "rocket-chip"
   title: "Rocket Chip Generator"
@@ -4285,8 +4321,9 @@
   estHours: 25
   summary: "The Chisel generator for in-order RISC-V cores and SoCs that has been taped out many times, a study in parameterized, production-grade hardware."
   fromYear: 3
-  priority: 3
+  priority: 1
   after: [tutorial-chisel-bootcamp]
+  quality: 5
 
 - id: "ucb-hammer"
   title: "Hammer: Highly Agile Masks Made Effortlessly from RTL"
@@ -4304,6 +4341,7 @@
   fromYear: 3
   priority: 3
   after: [berkeley-eecs151-asic-labs]
+  quality: 3
 
 - id: "lowrisc-ibex"
   title: "Ibex RISC-V Core"
@@ -4319,8 +4357,9 @@
   estHours: 15
   summary: "A production-quality 32-bit SystemVerilog core with thorough documentation and a full UVM/formal verification setup, a model of industrial RTL practice."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [picorv32]
+  quality: 4
 
 - id: "openhw-cva6"
   title: "CVA6 RISC-V Application-Class Core"
@@ -4336,8 +4375,9 @@
   estHours: 20
   summary: "A 6-stage, Linux-capable 64-bit RISC-V core in SystemVerilog with MMU and caches, showing what an application processor really contains."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [lowrisc-ibex]
+  quality: 4
 
 - id: "openhw-core-v-verif"
   title: "CORE-V Verification (core-v-verif)"
@@ -4355,6 +4395,7 @@
   fromYear: 3
   priority: 3
   after: [verification-academy-uvm-cookbook]
+  quality: 3
 
 - id: "riscv-boom"
   title: "BOOM: Berkeley Out-of-Order Machine"
@@ -4370,8 +4411,9 @@
   estHours: 25
   summary: "An open superscalar out-of-order RISC-V core in Chisel whose rename, issue and ROB logic you can read after studying them in lectures."
   fromYear: 3
-  priority: 3
+  priority: 1
   after: [mit-65900-computer-system-architecture]
+  quality: 5
 
 - id: "lowrisc-opentitan"
   title: "OpenTitan"
@@ -4387,8 +4429,9 @@
   estHours: 30
   summary: "A full open-source silicon root-of-trust SoC with its RTL, DV plans and sign-off checklists, showing an industrial chip project from start to finish."
   fromYear: 3
-  priority: 3
+  priority: 1
   after: [lowrisc-ibex]
+  quality: 5
 
 - id: "repo-ara"
   title: "Ara: RISC-V vector unit"
@@ -4404,8 +4447,9 @@
   estHours: 15
   summary: "Open RTL for an RVV vector processor coupled to CVA6, the place to study vector lanes and register-file banking."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [paper-ara-vector]
+  quality: 4
 
 - id: "repo-xiangshan"
   title: "XiangShan open-source high-performance RISC-V processor"
@@ -4421,8 +4465,9 @@
   estHours: 30
   summary: "The most ambitious open high-performance core, with its agile verification tooling, for studying industrial-scale OoO design."
   fromYear: 3
-  priority: 3
+  priority: 1
   after: [docs-xiangshan-design]
+  quality: 5
 
 - id: "repo-chipyard"
   title: "Chipyard"
@@ -4438,8 +4483,9 @@
   estHours: 25
   summary: "Hands-on SoC framework where you can attach a custom RoCC accelerator to Rocket or BOOM and run real software on it."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [chipyard-docs]
+  quality: 4
 
 - id: "repo-openpiton"
   title: "OpenPiton"
@@ -4455,8 +4501,9 @@
   estHours: 20
   summary: "An open manycore research platform with a scalable cache-coherent network-on-chip, for learning multicore and interconnect design."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [chipyard-docs]
+  quality: 4
 
 - id: "repo-vortex"
   title: "Vortex: open-source RISC-V GPGPU"
@@ -4472,8 +4519,9 @@
   estHours: 25
   summary: "A full RISC-V-based GPGPU with OpenCL support that runs on FPGAs, the main open platform for GPU microarchitecture research."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [repo-tiny-gpu]
+  quality: 4
 
 - id: "repo-nyuzi"
   title: "Nyuzi Processor"
@@ -4489,8 +4537,9 @@
   estHours: 20
   summary: "An experimental multicore GPGPU with wide vector units and a software 3D renderer, built to study GPU design trade-offs."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [repo-tiny-gpu]
+  quality: 4
 
 - id: "repo-miaow"
   title: "MIAOW: open-source GPGPU"
@@ -4508,6 +4557,7 @@
   fromYear: 3
   priority: 3
   after: [repo-vortex]
+  quality: 3
 
 - id: "repo-ventus-gpgpu"
   title: "Ventus GPGPU"
@@ -4525,6 +4575,7 @@
   fromYear: 3
   priority: 3
   after: [repo-vortex]
+  quality: 3
 
 - id: "repo-circuit-training"
   title: "Circuit Training"
@@ -4542,6 +4593,7 @@
   fromYear: 3
   priority: 3
   after: [paper-chip-placement-deep-rl]
+  quality: 3
 
 - id: "paper-rocket-chip-generator"
   title: "The Rocket Chip Generator"
@@ -4557,8 +4609,9 @@
   estHours: 3
   summary: "Explains the generator philosophy (parameterized Chisel, TileLink, RoCC) behind Rocket, BOOM and Chipyard."
   fromYear: 2
-  priority: 3
+  priority: 1
   after: [tutorial-chisel-bootcamp]
+  quality: 5
 
 - id: "paper-tomasulo"
   title: "An Efficient Algorithm for Exploiting Multiple Arithmetic Units"
@@ -4574,8 +4627,9 @@
   estHours: 2
   summary: "The original description of register renaming via reservation stations, the root of every out-of-order core."
   fromYear: 2
-  priority: 3
+  priority: 1
   after: [article-lighterra-modern-microprocessors]
+  quality: 5
 
 - id: "paper-smith-sohi-superscalar"
   title: "The Microarchitecture of Superscalar Processors"
@@ -4591,8 +4645,9 @@
   estHours: 4
   summary: "A clear, classic survey of fetch, decode, rename, issue, execute and commit in superscalar machines."
   fromYear: 2
-  priority: 3
+  priority: 1
   after: [paper-tomasulo]
+  quality: 5
 
 - id: "paper-yeh-patt-two-level"
   title: "A Comparison of Dynamic Branch Predictors that use Two Levels of Branch History"
@@ -4608,8 +4663,9 @@
   estHours: 3
   summary: "Lays out the taxonomy of two-level adaptive predictors (global vs per-address history) that modern designs build on."
   fromYear: 2
-  priority: 3
+  priority: 1
   doFirst: "Dan Luu branch prediction"
+  quality: 5
 
 - id: "paper-nvidia-tesla"
   title: "NVIDIA Tesla: A Unified Graphics and Computing Architecture"
@@ -4625,8 +4681,9 @@
   estHours: 3
   summary: "The paper that introduced unified shaders and the SIMT model behind every CUDA GPU since."
   fromYear: 2
-  priority: 3
+  priority: 1
   after: [article-nvidia-life-of-a-triangle]
+  quality: 5
 
 - id: "whitepaper-nvidia-fermi"
   title: "NVIDIA's Next Generation CUDA Compute Architecture: Fermi"
@@ -4642,8 +4699,9 @@
   estHours: 3
   summary: "Shows how GPUs grew caches, ECC and dual warp schedulers for compute, the template for modern SM design."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [paper-nvidia-tesla]
+  quality: 4
 
 - id: "paper-cfu-playground"
   title: "CFU Playground: Full-Stack Open-Source Framework for Tiny Machine Learning (tinyML) Acceleration on FPGAs"
@@ -4661,6 +4719,7 @@
   fromYear: 2
   priority: 3
   after: [docs-cfu-playground]
+  quality: 3
 
 - id: "paper-ariane-cva6"
   title: "The Cost of Application-Class Processing: Energy and Performance Analysis of a Linux-ready 1.7GHz 64bit RISC-V Core in 22nm FDSOI Technology"
@@ -4676,8 +4735,9 @@
   estHours: 3
   summary: "Shows where area and energy actually go in an in-order Linux-class core, grounding design trade-offs in silicon data."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [docs-cva6]
+  quality: 4
 
 - id: "paper-snitch"
   title: "Snitch: A tiny Pseudo Dual-Issue Processor for Area and Energy Efficient Execution of Floating-Point Intensive Workloads"
@@ -4693,8 +4753,9 @@
   estHours: 3
   summary: "A lesson in designing a minimal integer core that keeps an FPU busy via stream semantics, a key idea for compute clusters."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [docs-cva6]
+  quality: 4
 
 - id: "paper-ara-vector"
   title: "Ara: A 1 GHz+ Scalable and Energy-Efficient RISC-V Vector Processor with Multi-Precision Floating Point Support in 22 nm FD-SOI"
@@ -4710,8 +4771,9 @@
   estHours: 3
   summary: "Explains how to build a scalable vector unit with lanes alongside a scalar core, bridging CPUs and data-parallel accelerators."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [docs-cva6]
+  quality: 4
 
 - id: "paper-sonicboom"
   title: "SonicBOOM: The 3rd Generation Berkeley Out-of-Order Machine"
@@ -4727,8 +4789,9 @@
   estHours: 3
   summary: "Describes the microarchitectural changes that took an academic OoO core to competitive IPC, a case study in tuning."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [docs-boom]
+  quality: 4
 
 - id: "paper-tage"
   title: "A Case for (Partially) TAgged GEometric History Length Branch Prediction"
@@ -4744,8 +4807,9 @@
   estHours: 4
   summary: "Introduces TAGE, the geometric-history tagged predictor family used in essentially every high-performance core today."
   fromYear: 3
-  priority: 3
+  priority: 1
   after: [paper-yeh-patt-two-level]
+  quality: 5
 
 - id: "paper-branch-prediction-survey"
   title: "A Survey of Techniques for Dynamic Branch Prediction"
@@ -4763,6 +4827,7 @@
   fromYear: 3
   priority: 3
   after: [paper-tage]
+  quality: 3
 
 - id: "paper-vortex"
   title: "Vortex: Extending the RISC-V ISA for GPGPU and 3D-Graphics"
@@ -4778,8 +4843,9 @@
   estHours: 3
   summary: "Explains the minimal ISA additions and microarchitecture needed to turn RISC-V cores into a SIMT GPU."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [repo-tiny-gpu]
+  quality: 4
 
 - id: "paper-dynamic-warp-formation"
   title: "Dynamic Warp Formation and Scheduling for Efficient GPU Control Flow"
@@ -4795,8 +4861,9 @@
   estHours: 3
   summary: "Classic study of branch divergence in SIMT pipelines and how regrouping threads recovers lost throughput."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [paper-nvidia-tesla]
+  quality: 4
 
 - id: "paper-finn"
   title: "FINN: A Framework for Fast, Scalable Binarized Neural Network Inference"
@@ -4812,8 +4879,9 @@
   estHours: 3
   summary: "Introduces the streaming dataflow style of accelerator, a contrast to the overlay/systolic approach of TPUs."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [docs-finn]
+  quality: 4
 
 - id: "paper-vta"
   title: "A Hardware-Software Blueprint for Flexible Deep Learning Specialization"
@@ -4829,8 +4897,9 @@
   estHours: 3
   summary: "Shows how an accelerator ISA and a compiler stack are co-designed so new models can run without new hardware."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [docs-vta-hardware]
+  quality: 4
 
 - id: "paper-chipnemo"
   title: "ChipNeMo: Domain-Adapted LLMs for Chip Design"
@@ -4846,7 +4915,8 @@
   estHours: 3
   summary: "NVIDIA's account of adapting LLMs to internal chip-design tasks, a key reference where AI meets hardware engineering."
   fromYear: 3
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "paper-verilogeval"
   title: "VerilogEval: Evaluating Large Language Models for Verilog Code Generation"
@@ -4862,8 +4932,9 @@
   estHours: 2
   summary: "The standard benchmark for measuring how well LLMs write Verilog, built on HDLBits problems."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [practice-hdlbits]
+  quality: 4
 
 - id: "paper-rtlcoder"
   title: "RTLCoder: Outperforming GPT-3.5 in Design RTL Generation with Our Open-Source Dataset and Lightweight Solution"
@@ -4881,6 +4952,7 @@
   fromYear: 3
   priority: 3
   after: [paper-verilogeval]
+  quality: 3
 
 - id: "paper-chip-placement-deep-rl"
   title: "Chip Placement with Deep Reinforcement Learning"
@@ -4896,7 +4968,8 @@
   estHours: 3
   summary: "The preprint behind AlphaChip, framing macro placement as an RL problem with a graph-network policy."
   fromYear: 3
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "paper-false-dawn"
   title: "The False Dawn: Reevaluating Google's Reinforcement Learning for Chip Macro Placement"
@@ -4912,24 +4985,9 @@
   estHours: 3
   summary: "A detailed critique of the AlphaChip claims that teaches how to evaluate ML-for-EDA results skeptically."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [paper-chip-placement-deep-rl]
-
-- id: "article-alphachip"
-  title: "How AlphaChip transformed computer chip design"
-  short: "AlphaChip blog"
-  provider: "Google DeepMind"
-  type: "article"
-  url: "https://deepmind.google/discover/blog/how-alphachip-transformed-computer-chip-design/"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [hardware]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Google's own summary of using RL for TPU floorplanning, useful context before reading the paper and its critics."
-  fromYear: 2
-  priority: 3
+  quality: 4
 
 - id: "the-chip-letter"
   title: "The Chip Letter"
@@ -4945,8 +5003,9 @@
   estHours: 10
   summary: "A newsletter on processor history and architecture that explains why chips such as the 4004, ARM1 and x86 look the way they do."
   fromYear: 1
-  priority: 3
+  priority: 2
   blog: true
+  quality: 4
 
 - id: "sam-zeloof-homemade-ics"
   title: "Sam Zeloof - Homemade Integrated Circuits"
@@ -4964,6 +5023,7 @@
   fromYear: 2
   priority: 3
   blog: true
+  quality: 3
 
 - id: "blog-jbush-project-log"
   title: "project log (Jeff Bush)"
@@ -4984,39 +5044,7 @@
   after: [repo-tiny-gpu]
 
 # ---- Quantum computing and programming (128)
-
-- id: "docs-ibm-quantum-composer"
-  title: "IBM Quantum Composer documentation"
-  short: "IBM Quantum Composer"
-  provider: "IBM Quantum"
-  type: "article"
-  url: "https://quantum.cloud.ibm.com/docs/en/guides/composer"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [quantum]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Visual circuit builder that shows the matching OpenQASM and can send circuits to real IBM hardware."
-  fromYear: 1
-  priority: 4
-  note: "Free tier"
-
-- id: "ref-google-quantum-ai-resources"
-  title: "Educational Resources | Google Quantum AI"
-  short: "Google Quantum AI Edu"
-  provider: "Google Quantum AI"
-  type: "article"
-  url: "https://quantumai.google/resources"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [quantum]
-  level: "intro"
-  cost: "free"
-  estHours: 5
-  summary: "A hub with Google's whitepaper, learning map from NISQ to error correction, videos and its QEC course."
-  fromYear: 1
-  priority: 4
+  quality: 3
 
 - id: "docs-qiskit-aer"
   title: "Qiskit Aer documentation"
@@ -5034,6 +5062,7 @@
   fromYear: 2
   priority: 4
   after: [docs-qiskit]
+  quality: 3
 
 - id: "docs-qiskit-ibm-runtime"
   title: "Qiskit IBM Runtime client API documentation"
@@ -5052,6 +5081,7 @@
   priority: 4
   note: "Free tier"
   after: [docs-qiskit]
+  quality: 3
 
 - id: "docs-qiskit-machine-learning"
   title: "Qiskit Machine Learning documentation"
@@ -5069,6 +5099,7 @@
   fromYear: 2
   priority: 4
   after: [docs-qiskit]
+  quality: 3
 
 - id: "docs-qiskit-optimization"
   title: "Qiskit Optimization documentation"
@@ -5086,6 +5117,7 @@
   fromYear: 2
   priority: 4
   after: [docs-qiskit]
+  quality: 3
 
 - id: "docs-cirq"
   title: "Cirq documentation"
@@ -5101,8 +5133,9 @@
   estHours: 15
   summary: "Google's Python framework for NISQ circuits, with good tutorials on moments, devices, noise and simulation."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [quantum-country]
+  quality: 4
 
 - id: "docs-pennylane"
   title: "PennyLane documentation"
@@ -5118,8 +5151,9 @@
   estHours: 12
   summary: "Differentiable quantum programming: QNodes, devices and autodiff through circuits with JAX, PyTorch or TensorFlow."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [quantum-country]
+  quality: 4
 
 - id: "docs-cuda-q"
   title: "NVIDIA CUDA-Q documentation"
@@ -5135,8 +5169,9 @@
   estHours: 12
   summary: "Kernel-based quantum programming in C++ and Python with GPU-accelerated simulators and multi-GPU scaling."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "CUDA by Example"
+  quality: 4
 
 - id: "docs-amazon-braket"
   title: "Amazon Braket Developer Guide"
@@ -5155,6 +5190,7 @@
   priority: 4
   note: "Free tier"
   after: [docs-qiskit]
+  quality: 3
 
 - id: "docs-azure-quantum-qdk"
   title: "Microsoft Quantum documentation: QDK and Q#"
@@ -5172,6 +5208,7 @@
   fromYear: 2
   priority: 4
   after: [practice-microsoft-quantum-katas]
+  quality: 3
 
 - id: "docs-pytket"
   title: "pytket documentation"
@@ -5189,6 +5226,7 @@
   fromYear: 2
   priority: 4
   after: [docs-qiskit]
+  quality: 3
 
 - id: "docs-pyquil"
   title: "pyQuil documentation"
@@ -5206,23 +5244,7 @@
   fromYear: 2
   priority: 4
   after: [docs-qiskit]
-
-- id: "docs-projectq"
-  title: "ProjectQ documentation"
-  short: "ProjectQ"
-  provider: "ProjectQ (ETH Zurich)"
-  type: "article"
-  url: "https://projectq.readthedocs.io/en/latest/"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [quantum]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "An open framework whose compiler-engine pipeline is a clear example of how quantum programs are decomposed and mapped."
-  fromYear: 2
-  priority: 4
-  after: [docs-qiskit]
+  quality: 3
 
 - id: "docs-openqasm-spec"
   title: "OpenQASM Live Specification"
@@ -5238,8 +5260,9 @@
   estHours: 6
   summary: "The language spec most tools exchange circuits in, including classical control flow, timing and pulse extensions."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [docs-qiskit]
+  quality: 4
 
 - id: "docs-silq"
   title: "Silq: a high-level quantum language"
@@ -5257,6 +5280,7 @@
   fromYear: 2
   priority: 4
   doFirst: "Q# basics"
+  quality: 3
 
 - id: "docs-classiq"
   title: "Classiq Documentation"
@@ -5275,6 +5299,7 @@
   priority: 4
   note: "Free tier"
   after: [docs-qiskit]
+  quality: 3
 
 - id: "docs-qiskit-nature"
   title: "Qiskit Nature documentation"
@@ -5292,6 +5317,7 @@
   fromYear: 3
   priority: 4
   after: [docs-qiskit-machine-learning]
+  quality: 3
 
 - id: "docs-qsim"
   title: "qsim and qsimcirq: Quantum Simulator"
@@ -5309,6 +5335,7 @@
   fromYear: 3
   priority: 4
   after: [docs-cirq]
+  quality: 3
 
 - id: "docs-tensorflow-quantum"
   title: "TensorFlow Quantum"
@@ -5326,6 +5353,7 @@
   fromYear: 3
   priority: 4
   after: [docs-cirq]
+  quality: 3
 
 - id: "docs-openfermion"
   title: "OpenFermion"
@@ -5343,6 +5371,7 @@
   fromYear: 3
   priority: 4
   after: [docs-cirq]
+  quality: 3
 
 - id: "docs-pymatching"
   title: "PyMatching 2 documentation"
@@ -5358,8 +5387,9 @@
   estHours: 4
   summary: "Fast minimum-weight perfect matching decoder that pairs naturally with Stim for surface-code threshold studies."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [tutorial-stim-getting-started]
+  quality: 4
 
 - id: "docs-sinter"
   title: "sinter: Monte Carlo sampling of QEC circuits"
@@ -5375,8 +5405,9 @@
   estHours: 3
   summary: "Batch-runs Stim circuits through decoders across many cores and plots logical error rates, so you can estimate thresholds yourself."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [tutorial-stim-getting-started]
+  quality: 4
 
 - id: "docs-pennylane-catalyst"
   title: "Catalyst: quantum just-in-time compiler"
@@ -5394,6 +5425,7 @@
   fromYear: 3
   priority: 4
   after: [docs-pennylane]
+  quality: 3
 
 - id: "docs-cuquantum"
   title: "NVIDIA cuQuantum SDK documentation (cuStateVec, cuTensorNet)"
@@ -5409,8 +5441,9 @@
   estHours: 10
   summary: "Low-level GPU libraries for state-vector and tensor-network simulation that power most accelerated quantum simulators."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [docs-cuda-q]
+  quality: 4
 
 - id: "docs-yao-jl"
   title: "Yao.jl: extensible quantum simulation in Julia"
@@ -5428,6 +5461,7 @@
   fromYear: 3
   priority: 4
   after: [paper-simulator-from-scratch]
+  quality: 3
 
 - id: "docs-qir-spec"
   title: "QIR Specification (Quantum Intermediate Representation)"
@@ -5445,6 +5479,7 @@
   fromYear: 3
   priority: 4
   after: [docs-openqasm-spec]
+  quality: 3
 
 - id: "docs-quimb"
   title: "quimb documentation"
@@ -5460,8 +5495,9 @@
   estHours: 8
   summary: "Tensor-network library for simulating large circuits and many-body states with contraction-path optimization and GPU backends."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [paper-simulator-from-scratch]
+  quality: 4
 
 - id: "ref-quantum-algorithm-zoo"
   title: "Quantum Algorithm Zoo"
@@ -5477,8 +5513,9 @@
   estHours: 10
   summary: "A catalogue of known quantum algorithms with their speedups and references, ideal for checking what is actually faster."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [paper-montanaro-algorithms-overview]
+  quality: 4
 
 - id: "ref-error-correction-zoo"
   title: "The Error Correction Zoo"
@@ -5494,8 +5531,9 @@
   estHours: 10
   summary: "An organized encyclopedia of classical and quantum codes showing how families relate to each other."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [course-ibm-foundations-quantum-error-correction]
+  quality: 4
 
 - id: "video-nielsen-qc-for-the-determined"
   title: "Quantum computing for the determined"
@@ -5512,6 +5550,7 @@
   summary: "Twenty-two short videos from the co-author of Nielsen & Chuang that build qubits, gates and teleportation from scratch."
   fromYear: 1
   priority: 4
+  quality: 3
 
 - id: "video-cmu-15-859bb-odonnell"
   title: "15-859BB: Quantum Computation and Quantum Information (2018)"
@@ -5527,24 +5566,9 @@
   estHours: 40
   summary: "Crisp, CS-flavored video lectures with notes, unusually clear on the math behind algorithms and lower bounds."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-ibm-basics-quantum-information]
-
-- id: "course-ms-learn-first-qsharp"
-  title: "Create your first Q# program with the Quantum Development Kit"
-  short: "MS Learn: First Q#"
-  provider: "Microsoft Learn"
-  type: "course"
-  url: "https://learn.microsoft.com/en-us/training/modules/qsharp-create-first-quantum-development-kit"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [quantum]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A short guided module that gets a Q# program running and teaches the basic syntax and measurement model."
-  fromYear: 1
-  priority: 4
+  quality: 4
 
 - id: "course-ibm-quantum-computing-in-practice"
   title: "Quantum Computing in Practice"
@@ -5562,6 +5586,7 @@
   fromYear: 1
   priority: 4
   after: [course-ibm-basics-quantum-information]
+  quality: 3
 
 - id: "course-ms-learn-azure-quantum"
   title: "Get started with Azure Quantum (learning path)"
@@ -5578,6 +5603,7 @@
   summary: "Short guided modules on superposition, entanglement, teleportation and resource estimation in Q#."
   fromYear: 1
   priority: 4
+  quality: 3
 
 - id: "course-cuda-q-academic"
   title: "CUDA-Q Academic"
@@ -5595,23 +5621,7 @@
   fromYear: 2
   priority: 4
   after: [docs-cuda-q]
-
-- id: "course-qiskit-global-summer-school-2024"
-  title: "Qiskit Global Summer School 2024"
-  short: "QGSS 2024"
-  provider: "IBM Quantum"
-  type: "course"
-  url: "https://github.com/qiskit-community/qgss-2024"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [quantum]
-  level: "intermediate"
-  cost: "free"
-  estHours: 30
-  summary: "Lab notebooks from IBM's summer school covering utility-scale circuits, error mitigation and dynamic circuits."
-  fromYear: 2
-  priority: 4
-  after: [docs-qiskit-tutorials]
+  quality: 3
 
 - id: "course-ibm-general-formulation-quantum-information"
   title: "General Formulation of Quantum Information"
@@ -5627,8 +5637,9 @@
   estHours: 15
   summary: "Moves from pure states to density matrices, channels and measurements, the language every serious quantum text assumes."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-ibm-basics-quantum-information]
+  quality: 4
 
 - id: "course-ibm-foundations-quantum-error-correction"
   title: "Foundations of Quantum Error Correction"
@@ -5644,8 +5655,9 @@
   estHours: 15
   summary: "A careful, proof-level walk through repetition, Shor, CSS, stabilizer and toric codes plus the threshold idea."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-ibm-general-formulation-quantum-information]
+  quality: 4
 
 - id: "course-ibm-variational-algorithm-design"
   title: "Variational Algorithm Design"
@@ -5663,6 +5675,7 @@
   fromYear: 2
   priority: 4
   after: [course-ibm-fundamentals-quantum-algorithms]
+  quality: 3
 
 - id: "course-mit-8-370x-ocw"
   title: "8.370x Quantum Information Science I (Spring 2018)"
@@ -5678,8 +5691,9 @@
   estHours: 60
   summary: "Chuang and Shor's graduate sequence on qubits, protocols, algorithms and quantum communication, archived free."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-berkeley-cs191-vazirani]
+  quality: 4
 
 - id: "course-mit-18-435j-quantum-computation"
   title: "18.435J Quantum Computation (Fall 2003)"
@@ -5697,6 +5711,7 @@
   fromYear: 2
   priority: 4
   after: [course-mit-8-370x-ocw]
+  quality: 3
 
 - id: "course-google-hands-on-qec"
   title: "Hands-on quantum error correction with Google Quantum AI"
@@ -5712,8 +5727,9 @@
   estHours: 29
   summary: "Taught by a surface-code pioneer, it has you simulate and decode codes yourself with Stim and Crumble."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-ibm-foundations-quantum-error-correction]
+  quality: 4
 
 - id: "course-ibm-quantum-diagonalization-algorithms"
   title: "Quantum Diagonalization Algorithms"
@@ -5731,6 +5747,7 @@
   fromYear: 3
   priority: 4
   after: [course-ibm-variational-algorithm-design]
+  quality: 3
 
 - id: "course-berkeley-cs294-66-vazirani"
   title: "CS294-66 Quantum Computation (Fall 2019)"
@@ -5744,26 +5761,11 @@
   level: "advanced"
   cost: "free"
   estHours: 40
-  summary: "Vazirani's graduate course page linking his edX notes and readings on algorithms, Hamiltonian complexity and verification."
+  summary: "Course hub linking Vazirani's edX notes, Preskill/Aaronson/Watrous notes, problem sets and project ideas in quantum computation."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [course-berkeley-cs191-vazirani]
-
-- id: "book-qiskit-textbook-legacy"
-  title: "Qiskit Textbook (legacy source)"
-  short: "Qiskit Textbook (legacy)"
-  provider: "Qiskit community"
-  type: "book"
-  url: "https://github.com/qiskit-community/qiskit-textbook"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [quantum]
-  level: "intro"
-  cost: "free"
-  estHours: 40
-  summary: "The archived classic textbook notebooks, still a solid algorithm-by-algorithm walkthrough with runnable code (older API)."
-  fromYear: 1
-  priority: 4
+  quality: 4
 
 - id: "notes-watrous-quantum-computation-calgary"
   title: "Quantum Computation lecture notes (Calgary)"
@@ -5780,6 +5782,7 @@
   summary: "Compact undergraduate notes covering circuits through Shor and Grover with a computer scientist's precision."
   fromYear: 1
   priority: 4
+  quality: 3
 
 - id: "notes-aaronson-intro-qis"
   title: "Introduction to Quantum Information Science (lecture notes)"
@@ -5795,7 +5798,8 @@
   estHours: 30
   summary: "Witty, intuition-first undergraduate notes that also explain why quantum speedups are subtle and often oversold."
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "notes-mermin-cs483"
   title: "Phys481/681/CS483 Quantum Computation lecture notes"
@@ -5811,7 +5815,8 @@
   estHours: 20
   summary: "Mermin's famously clear notes, written for computer scientists who know no physics, with homework sets."
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "book-watrous-theory-of-quantum-information"
   title: "The Theory of Quantum Information"
@@ -5827,8 +5832,9 @@
   estHours: 80
   summary: "The rigorous mathematical reference for states, channels, entropy and entanglement, free as a personal-use manuscript."
   fromYear: 3
-  priority: 4
+  priority: 1
   after: [course-ibm-general-formulation-quantum-information]
+  quality: 5
 
 - id: "notes-watrous-cs766-tqi"
   title: "Theory of Quantum Information (CS 766/QIC 820 lecture notes)"
@@ -5846,6 +5852,7 @@
   fromYear: 3
   priority: 4
   after: [course-ibm-general-formulation-quantum-information]
+  quality: 3
 
 - id: "notes-aaronson-barbados-quantum-states"
   title: "Lecture Notes on the Complexity of Quantum States and Transformations"
@@ -5861,8 +5868,9 @@
   estHours: 15
   summary: "Research-level notes on how hard it is to prepare, describe and transform quantum states, a bridge to complexity theory."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [notes-aaronson-democritus]
+  quality: 4
 
 - id: "docs-qiskit-tutorials"
   title: "IBM Quantum Documentation: Tutorials"
@@ -5878,8 +5886,9 @@
   estHours: 20
   summary: "End-to-end notebooks (CHSH, Grover, Shor, QAOA, SQD, error mitigation) that take you from a circuit idea to a run on real hardware."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [docs-qiskit]
+  quality: 4
 
 - id: "tutorial-stim-getting-started"
   title: "Stim getting started notebook"
@@ -5895,8 +5904,9 @@
   estHours: 3
   summary: "Walks you from a first stabilizer circuit to sampling detection events and decoding a repetition and surface code."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [docs-qiskit-tutorials]
+  quality: 4
 
 - id: "tutorial-pennylane-demos"
   title: "PennyLane Demos"
@@ -5912,8 +5922,9 @@
   estHours: 30
   summary: "Hundreds of runnable notebooks covering VQE, QML, QAOA, quantum chemistry and recent research results."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-pennylane-codebook]
+  quality: 4
 
 - id: "repo-amazon-braket-examples"
   title: "Amazon Braket Examples"
@@ -5931,6 +5942,7 @@
   fromYear: 2
   priority: 4
   after: [repo-amazon-braket-sdk]
+  quality: 3
 
 - id: "repo-qiskit-qgss-2025"
   title: "Qiskit Global Summer School 2025 labs"
@@ -5948,6 +5960,7 @@
   fromYear: 2
   priority: 4
   after: [docs-qiskit]
+  quality: 3
 
 - id: "course-pennylane-codebook"
   title: "PennyLane Codebook"
@@ -5963,7 +5976,8 @@
   estHours: 30
   summary: "Interactive, code-graded lessons from single qubits up to Grover, QPE and Shor, ideal for learning by writing circuits."
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "practice-quirk"
   title: "Quirk: Quantum Circuit Simulator"
@@ -5979,7 +5993,8 @@
   estHours: 3
   summary: "Drag-and-drop browser simulator with live amplitude and Bloch displays; the fastest way to build intuition for gates."
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "repo-qiskit"
   title: "Qiskit SDK (source repository)"
@@ -5995,8 +6010,9 @@
   estHours: 15
   summary: "Reading the transpiler, circuit library and primitives source shows how a production quantum SDK is actually structured."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [docs-qiskit]
+  quality: 4
 
 - id: "repo-cirq"
   title: "Cirq (source repository)"
@@ -6014,6 +6030,7 @@
   fromYear: 2
   priority: 4
   after: [docs-cirq]
+  quality: 3
 
 - id: "repo-amazon-braket-sdk"
   title: "Amazon Braket Python SDK"
@@ -6031,6 +6048,7 @@
   fromYear: 2
   priority: 4
   after: [docs-amazon-braket]
+  quality: 3
 
 - id: "repo-microsoft-qsharp"
   title: "Microsoft Quantum Development Kit (qsharp repository)"
@@ -6048,40 +6066,7 @@
   fromYear: 2
   priority: 4
   after: [docs-azure-quantum-qdk]
-
-- id: "repo-quirk"
-  title: "Quirk (source repository)"
-  short: "Quirk repo"
-  provider: "Craig Gidney"
-  type: "practice"
-  url: "https://github.com/Strilanc/Quirk"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [quantum]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "A JavaScript/WebGL simulator that computes circuits on the GPU in shaders, a fun codebase for a graphics-curious learner."
-  fromYear: 2
-  priority: 4
-  after: [practice-quirk]
-
-- id: "repo-tensornetwork"
-  title: "TensorNetwork"
-  short: "TensorNetwork"
-  provider: "Google"
-  type: "practice"
-  url: "https://github.com/google/TensorNetwork"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [quantum]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "A small library that makes tensor-network contraction concrete, good for learning before moving to quimb or ITensor."
-  fromYear: 2
-  priority: 4
-  after: [paper-simulator-from-scratch]
+  quality: 3
 
 - id: "repo-mitiq"
   title: "Mitiq: error mitigation toolkit"
@@ -6097,8 +6082,9 @@
   estHours: 6
   summary: "Hands-on zero-noise extrapolation, probabilistic error cancellation and more, working across Qiskit, Cirq, Braket and PennyLane."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [docs-qiskit-tutorials]
+  quality: 4
 
 - id: "practice-ibm-quantum-challenge-2024"
   title: "IBM Quantum Challenge 2024"
@@ -6116,23 +6102,7 @@
   fromYear: 2
   priority: 4
   after: [docs-qiskit-tutorials]
-
-- id: "repo-openqasm"
-  title: "OpenQASM (repository and grammar)"
-  short: "OpenQASM repo"
-  provider: "OpenQASM TSC"
-  type: "practice"
-  url: "https://github.com/openqasm/openqasm"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [quantum]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Holds the ANTLR grammar and reference AST, useful if you want to write your own QASM parser or simulator front end."
-  fromYear: 2
-  priority: 4
-  after: [docs-openqasm-spec]
+  quality: 3
 
 - id: "repo-stim"
   title: "Stim: fast stabilizer circuit simulator (repository)"
@@ -6148,8 +6118,9 @@
   estHours: 10
   summary: "The go-to tool for simulating error-correction circuits with millions of shots per second; essential for QEC experiments."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "Stabilizer formalism"
+  quality: 4
 
 - id: "repo-cuda-q"
   title: "CUDA-Q (source repository)"
@@ -6165,8 +6136,9 @@
   estHours: 10
   summary: "Open-source MLIR-based compiler and runtime; a good place to see how quantum kernels are lowered and dispatched to GPU simulators."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [docs-cuda-q]
+  quality: 4
 
 - id: "repo-cuquantum"
   title: "cuQuantum Python and samples (repository)"
@@ -6184,6 +6156,7 @@
   fromYear: 3
   priority: 4
   after: [docs-cuquantum]
+  quality: 3
 
 - id: "repo-quest"
   title: "QuEST: Quantum Exact Simulation Toolkit"
@@ -6201,6 +6174,7 @@
   fromYear: 3
   priority: 4
   after: [paper-simulator-from-scratch]
+  quality: 3
 
 - id: "repo-qulacs"
   title: "Qulacs"
@@ -6218,6 +6192,7 @@
   fromYear: 3
   priority: 4
   after: [paper-simulator-from-scratch]
+  quality: 3
 
 - id: "repo-itensors-jl"
   title: "ITensors.jl"
@@ -6233,8 +6208,9 @@
   estHours: 8
   summary: "The standard library for MPS/DMRG tensor-network computations, now in Julia."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [docs-quimb]
+  quality: 4
 
 - id: "repo-fusion-blossom"
   title: "Fusion Blossom: fast MWPM decoder for QEC"
@@ -6252,6 +6228,7 @@
   fromYear: 3
   priority: 4
   after: [docs-pymatching]
+  quality: 3
 
 - id: "paper-quantum-algorithm-implementations-beginners"
   title: "Quantum Algorithm Implementations for Beginners"
@@ -6267,8 +6244,9 @@
   estHours: 12
   summary: "Walks through 20+ algorithms with explanations and actual implementations and results on IBM hardware."
   fromYear: 1
-  priority: 4
+  priority: 2
   after: [quantum-country]
+  quality: 4
 
 - id: "paper-grover-search"
   title: "A fast quantum mechanical algorithm for database search"
@@ -6284,8 +6262,9 @@
   estHours: 2
   summary: "A short original paper presenting the quadratic search speedup that underlies amplitude amplification."
   fromYear: 1
-  priority: 4
+  priority: 1
   after: [course-ibm-basics-quantum-information]
+  quality: 5
 
 - id: "paper-preskill-nisq"
   title: "Quantum Computing in the NISQ era and beyond"
@@ -6301,7 +6280,8 @@
   estHours: 2
   summary: "The essay that named the NISQ era and sets realistic expectations for near-term machines."
   fromYear: 1
-  priority: 4
+  priority: 1
+  quality: 5
 
 - id: "paper-devitt-qec-for-beginners"
   title: "Quantum Error Correction for Beginners"
@@ -6317,8 +6297,9 @@
   estHours: 5
   summary: "A friendly, circuit-level introduction to how quantum codes detect and fix errors."
   fromYear: 1
-  priority: 4
+  priority: 2
   after: [course-ibm-basics-quantum-information]
+  quality: 4
 
 - id: "paper-schuld-intro-qml"
   title: "An introduction to quantum machine learning"
@@ -6336,6 +6317,7 @@
   fromYear: 1
   priority: 4
   after: [course-ibm-basics-quantum-information]
+  quality: 3
 
 - id: "paper-simulator-from-scratch"
   title: "How to Write a Simulator for Quantum Circuits from Scratch: A Tutorial"
@@ -6351,8 +6333,9 @@
   estHours: 6
   summary: "Step-by-step guide to building your own state-vector simulator, the best way to really understand what SDKs do under the hood."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [quantum-country]
+  quality: 4
 
 - id: "paper-pennylane"
   title: "PennyLane: Automatic differentiation of hybrid quantum-classical computations"
@@ -6370,6 +6353,7 @@
   fromYear: 2
   priority: 4
   after: [docs-pennylane]
+  quality: 3
 
 - id: "paper-openqasm-3"
   title: "OpenQASM 3: A broader and deeper quantum assembly language"
@@ -6387,6 +6371,7 @@
   fromYear: 2
   priority: 4
   after: [docs-openqasm-spec]
+  quality: 3
 
 - id: "paper-mitiq"
   title: "Mitiq: A software package for error mitigation on noisy quantum computers"
@@ -6404,6 +6389,7 @@
   fromYear: 2
   priority: 4
   after: [repo-mitiq]
+  quality: 3
 
 - id: "paper-quantum-computing-with-qiskit"
   title: "Quantum computing with Qiskit"
@@ -6421,6 +6407,7 @@
   fromYear: 2
   priority: 4
   after: [docs-qiskit]
+  quality: 3
 
 - id: "paper-shor-factoring"
   title: "Polynomial-Time Algorithms for Prime Factorization and Discrete Logarithms on a Quantum Computer"
@@ -6436,8 +6423,9 @@
   estHours: 6
   summary: "The paper that made quantum computing matter, reducing factoring to period finding with the quantum Fourier transform."
   fromYear: 2
-  priority: 4
+  priority: 1
   after: [course-ibm-fundamentals-quantum-algorithms]
+  quality: 5
 
 - id: "paper-qaoa"
   title: "A Quantum Approximate Optimization Algorithm"
@@ -6453,8 +6441,9 @@
   estHours: 4
   summary: "Defines the alternating-operator ansatz for combinatorial optimization, a staple NISQ benchmark."
   fromYear: 2
-  priority: 4
+  priority: 1
   after: [course-ibm-variational-algorithm-design]
+  quality: 5
 
 - id: "paper-vqe-peruzzo"
   title: "A variational eigenvalue solver on a quantum processor"
@@ -6470,8 +6459,9 @@
   estHours: 3
   summary: "The first variational eigensolver experiment, launching the hybrid approach to quantum chemistry."
   fromYear: 2
-  priority: 4
+  priority: 1
   after: [course-ibm-variational-algorithm-design]
+  quality: 5
 
 - id: "paper-dawson-nielsen-solovay-kitaev"
   title: "The Solovay-Kitaev algorithm"
@@ -6487,8 +6477,9 @@
   estHours: 4
   summary: "A pedagogical account of why a small gate set can approximate any unitary efficiently, with code-level detail."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-ibm-basics-quantum-information]
+  quality: 4
 
 - id: "paper-montanaro-algorithms-overview"
   title: "Quantum algorithms: an overview"
@@ -6504,8 +6495,9 @@
   estHours: 3
   summary: "A concise map of the main algorithm families and where real speedups are expected."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-ibm-fundamentals-quantum-algorithms]
+  quality: 4
 
 - id: "paper-georgescu-quantum-simulation"
   title: "Quantum Simulation"
@@ -6521,8 +6513,9 @@
   estHours: 5
   summary: "A broad review of Feynman's original motivation, simulating quantum systems, across platforms and applications."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-ibm-basics-quantum-information]
+  quality: 4
 
 - id: "paper-cerezo-variational-quantum-algorithms"
   title: "Variational Quantum Algorithms"
@@ -6538,8 +6531,9 @@
   estHours: 5
   summary: "A readable review of variational algorithms that is candid about barren plateaus and trainability issues."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-ibm-variational-algorithm-design]
+  quality: 4
 
 - id: "paper-biamonte-quantum-machine-learning"
   title: "Quantum Machine Learning"
@@ -6555,8 +6549,9 @@
   estHours: 3
   summary: "The widely cited overview of how quantum subroutines might accelerate learning, and what it would take."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [paper-hhl-linear-systems]
+  quality: 4
 
 - id: "paper-gottesman-intro-qec-ft"
   title: "An Introduction to Quantum Error Correction and Fault-Tolerant Quantum Computation"
@@ -6572,8 +6567,9 @@
   estHours: 5
   summary: "A compact tutorial on stabilizer codes, fault-tolerant gadgets and the threshold theorem."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [paper-devitt-qec-for-beginners]
+  quality: 4
 
 - id: "paper-preskill-reliable-quantum-computers"
   title: "Reliable Quantum Computers"
@@ -6589,8 +6585,9 @@
   estHours: 4
   summary: "An early, lucid explanation of how fault tolerance lets imperfect hardware compute reliably."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [paper-devitt-qec-for-beginners]
+  quality: 4
 
 - id: "paper-fowler-surface-codes"
   title: "Surface codes: Towards practical large-scale quantum computation"
@@ -6606,8 +6603,9 @@
   estHours: 8
   summary: "The engineer's guide to the surface code, from stabilizer measurement to logical gates and overheads."
   fromYear: 2
-  priority: 4
+  priority: 1
   after: [paper-devitt-qec-for-beginners]
+  quality: 5
 
 - id: "paper-aaronson-gottesman-chp"
   title: "Improved Simulation of Stabilizer Circuits"
@@ -6623,8 +6621,9 @@
   estHours: 4
   summary: "Shows how Clifford circuits are simulated efficiently with tableaus, the trick inside Stim and every QEC simulator."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [paper-gottesman-stabilizer-thesis]
+  quality: 4
 
 - id: "paper-google-willow-below-threshold"
   title: "Quantum error correction below the surface code threshold"
@@ -6640,8 +6639,9 @@
   estHours: 4
   summary: "The experiment showing logical error falling as surface codes grow, the milestone result for practical QEC."
   fromYear: 2
-  priority: 4
+  priority: 1
   after: [paper-fowler-surface-codes]
+  quality: 5
 
 - id: "paper-krantz-superconducting-qubits-guide"
   title: "A Quantum Engineer's Guide to Superconducting Qubits"
@@ -6657,8 +6657,9 @@
   estHours: 10
   summary: "The standard tutorial on transmons, control, readout and noise for the platform behind IBM and Google machines."
   fromYear: 2
-  priority: 4
+  priority: 1
   after: [course-ibm-basics-quantum-information]
+  quality: 5
 
 - id: "paper-bruzewicz-trapped-ions"
   title: "Trapped-Ion Quantum Computing: Progress and Challenges"
@@ -6674,8 +6675,9 @@
   estHours: 6
   summary: "Explains how ion-trap qubits are built, gated and scaled, and what still limits them."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-ibm-basics-quantum-information]
+  quality: 4
 
 - id: "paper-henriet-neutral-atoms"
   title: "Quantum computing with neutral atoms"
@@ -6691,8 +6693,9 @@
   estHours: 5
   summary: "A clear review of Rydberg-atom arrays for both digital and analog quantum computing."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-ibm-basics-quantum-information]
+  quality: 4
 
 - id: "paper-slussarenko-photonic-qip"
   title: "Photonic quantum information processing: a concise review"
@@ -6708,8 +6711,9 @@
   estHours: 4
   summary: "Surveys how photons encode, manipulate and measure quantum information, rounding out the hardware picture."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [course-ibm-basics-quantum-information]
+  quality: 4
 
 - id: "paper-stim"
   title: "Stim: a fast stabilizer circuit simulator"
@@ -6725,8 +6729,9 @@
   estHours: 4
   summary: "Explains the tableau tricks and reference-frame sampling that make Stim orders of magnitude faster than generic simulators."
   fromYear: 3
-  priority: 4
+  priority: 1
   after: [tutorial-stim-getting-started]
+  quality: 5
 
 - id: "paper-sparse-blossom"
   title: "Sparse Blossom: correcting a million errors per core second with minimum-weight matching"
@@ -6742,8 +6747,9 @@
   estHours: 5
   summary: "The algorithm behind PyMatching 2 and a great case study in engineering a real-time QEC decoder."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [docs-pymatching]
+  quality: 4
 
 - id: "paper-quipper"
   title: "Quipper: A Scalable Quantum Programming Language"
@@ -6761,6 +6767,7 @@
   fromYear: 3
   priority: 4
   after: [docs-silq]
+  quality: 3
 
 - id: "paper-cuquantum"
   title: "cuQuantum SDK: A High-Performance Library for Accelerating Quantum Science"
@@ -6778,6 +6785,7 @@
   fromYear: 3
   priority: 4
   after: [docs-cuquantum]
+  quality: 3
 
 - id: "paper-quest"
   title: "QuEST and High Performance Simulation of Quantum Computers"
@@ -6795,6 +6803,7 @@
   fromYear: 3
   priority: 4
   after: [paper-quest-query-aware-sparsity]
+  quality: 3
 
 - id: "paper-kitaev-phase-estimation"
   title: "Quantum measurements and the Abelian Stabilizer Problem"
@@ -6810,8 +6819,9 @@
   estHours: 5
   summary: "Introduces phase estimation, the subroutine that unifies Shor, simulation and many later algorithms."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [paper-shor-factoring]
+  quality: 4
 
 - id: "paper-hhl-linear-systems"
   title: "Quantum algorithm for solving linear systems of equations"
@@ -6827,8 +6837,9 @@
   estHours: 4
   summary: "The linear-systems algorithm behind much quantum ML hype; read it to learn both its power and its fine print."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [paper-kitaev-phase-estimation]
+  quality: 4
 
 - id: "paper-childs-theory-of-trotter-error"
   title: "A Theory of Trotter Error"
@@ -6844,8 +6855,9 @@
   estHours: 6
   summary: "Gives tight error bounds for product-formula simulation, the workhorse method for simulating physics on quantum computers."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [paper-georgescu-quantum-simulation]
+  quality: 4
 
 - id: "paper-bharti-nisq-algorithms"
   title: "Noisy intermediate-scale quantum (NISQ) algorithms"
@@ -6861,8 +6873,9 @@
   estHours: 8
   summary: "A long review covering variational methods, error mitigation and benchmarking for today's noisy devices."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [paper-preskill-nisq]
+  quality: 4
 
 - id: "paper-bauer-quantum-chemistry-materials"
   title: "Quantum algorithms for quantum chemistry and quantum materials science"
@@ -6878,8 +6891,9 @@
   estHours: 6
   summary: "Separates hype from substance on where quantum computers could beat classical methods in chemistry and materials."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [paper-cerezo-variational-quantum-algorithms]
+  quality: 4
 
 - id: "paper-mcardle-quantum-computational-chemistry"
   title: "Quantum computational chemistry"
@@ -6895,8 +6909,9 @@
   estHours: 8
   summary: "A thorough Reviews of Modern Physics tutorial on mapping molecules to qubits and the algorithms that follow."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [paper-vqe-peruzzo]
+  quality: 4
 
 - id: "paper-gottesman-stabilizer-thesis"
   title: "Stabilizer Codes and Quantum Error Correction"
@@ -6912,8 +6927,9 @@
   estHours: 15
   summary: "The thesis that founded the stabilizer formalism, still the cleanest route into quantum codes."
   fromYear: 3
-  priority: 4
+  priority: 1
   after: [course-ibm-foundations-quantum-error-correction]
+  quality: 5
 
 - id: "paper-kitaev-anyons-toric-code"
   title: "Fault-tolerant quantum computation by anyons"
@@ -6929,8 +6945,9 @@
   estHours: 6
   summary: "Introduces the toric code and topological protection, the seed of today's surface-code architectures."
   fromYear: 3
-  priority: 4
+  priority: 1
   after: [paper-gottesman-stabilizer-thesis]
+  quality: 5
 
 - id: "paper-dennis-topological-quantum-memory"
   title: "Topological quantum memory"
@@ -6946,8 +6963,9 @@
   estHours: 8
   summary: "Works out surface-code decoding and thresholds in detail; the classic reference for topological QEC."
   fromYear: 3
-  priority: 4
+  priority: 1
   after: [paper-kitaev-anyons-toric-code]
+  quality: 5
 
 - id: "paper-terhal-qec-quantum-memories"
   title: "Quantum Error Correction for Quantum Memories"
@@ -6963,8 +6981,9 @@
   estHours: 8
   summary: "A Reviews of Modern Physics survey of codes and decoders aimed at storing quantum information reliably."
   fromYear: 3
-  priority: 4
+  priority: 1
   after: [paper-fowler-surface-codes]
+  quality: 5
 
 - id: "paper-bravyi-kitaev-magic-states"
   title: "Universal Quantum Computation with ideal Clifford gates and noisy ancillas"
@@ -6980,8 +6999,9 @@
   estHours: 5
   summary: "Introduces magic-state distillation, the standard way fault-tolerant machines get non-Clifford gates."
   fromYear: 3
-  priority: 4
+  priority: 1
   after: [paper-gottesman-intro-qec-ft]
+  quality: 5
 
 - id: "paper-bravyi-gross-code"
   title: "High-threshold and low-overhead fault-tolerant quantum memory"
@@ -6997,8 +7017,9 @@
   estHours: 6
   summary: "IBM's bivariate-bicycle qLDPC codes that cut qubit overhead versus the surface code, a key recent direction."
   fromYear: 3
-  priority: 4
+  priority: 1
   after: [paper-fowler-surface-codes]
+  quality: 5
 
 - id: "paper-gidney-ekera-rsa-20m"
   title: "How to factor 2048 bit RSA integers in 8 hours using 20 million noisy qubits"
@@ -7014,8 +7035,9 @@
   estHours: 6
   summary: "A full resource estimate for breaking RSA, showing how algorithms and surface-code costs combine in practice."
   fromYear: 3
-  priority: 4
+  priority: 1
   after: [paper-shor-factoring]
+  quality: 5
 
 - id: "paper-gidney-rsa-under-million"
   title: "How to factor 2048 bit RSA integers with less than a million noisy qubits"
@@ -7031,8 +7053,9 @@
   estHours: 6
   summary: "The 2025 update that cuts the estimate by about twenty times, essential context for post-quantum crypto timelines."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [paper-gidney-ekera-rsa-20m]
+  quality: 4
 
 - id: "paper-zhong-jiuzhang-photonic-advantage"
   title: "Quantum computational advantage using photons"
@@ -7048,8 +7071,9 @@
   estHours: 4
   summary: "The Gaussian boson sampling experiment that brought quantum-advantage claims to photonic hardware."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [paper-slussarenko-photonic-qip]
+  quality: 4
 
 - id: "paper-aharonov-ben-or-threshold"
   title: "Fault-Tolerant Quantum Computation With Constant Error Rate"
@@ -7065,57 +7089,9 @@
   estHours: 8
   summary: "One of the founding proofs of the threshold theorem, showing scalable quantum computing is possible in principle."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [paper-gottesman-intro-qec-ft]
-
-- id: "list-awesome-quantum-software"
-  title: "Awesome Quantum Software"
-  short: "awesome-quantum-software"
-  provider: "Quantum Open Source Foundation (QOSF)"
-  type: "article"
-  url: "https://github.com/qosf/awesome-quantum-software"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [quantum]
-  level: "intro"
-  cost: "free"
-  estHours: 3
-  summary: "A curated map of open-source quantum SDKs, simulators, compilers and QEC tools for finding the right library."
-  fromYear: 1
-  priority: 4
-
-- id: "list-awesome-quantum-computing"
-  title: "Awesome Quantum Computing"
-  short: "awesome-quantum-computing"
-  provider: "Desiree Vogt-Lee"
-  type: "article"
-  url: "https://github.com/desireevl/awesome-quantum-computing"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [quantum]
-  level: "intro"
-  cost: "free"
-  estHours: 3
-  summary: "A broad, community-maintained list of quantum courses, books, tools and papers."
-  fromYear: 1
-  priority: 4
-
-- id: "org-unitary-foundation"
-  title: "Unitary Foundation"
-  short: "Unitary Foundation"
-  provider: "Unitary Foundation"
-  type: "article"
-  url: "https://unitary.foundation/"
-  urlVerified: true
-  lastVerified: 2026-10-20
-  tracks: [quantum]
-  level: "intro"
-  cost: "free"
-  estHours: 10
-  summary: "Nonprofit funding open-source quantum software with microgrants, a community and projects you can contribute to."
-  fromYear: 1
-  priority: 4
-  blog: true
+  quality: 4
 
 - id: "blog-shtetl-optimized"
   title: "Shtetl-Optimized"
@@ -7131,9 +7107,10 @@
   estHours: 10
   summary: "The go-to sanity check on quantum advantage claims, written by a leading complexity theorist."
   fromYear: 2
-  priority: 4
+  priority: 2
   blog: true
   after: [notes-aaronson-intro-qis]
+  quality: 4
 
 - id: "blog-algassert-gidney"
   title: "Algorithmic Assertions: Craig Gidney's blog"
@@ -7149,6 +7126,7 @@
   estHours: 10
   summary: "Clear, often code-driven posts on quantum algorithms, error correction and simulator tricks from Stim's author."
   fromYear: 3
-  priority: 4
+  priority: 2
   blog: true
   after: [practice-quirk]
+  quality: 4

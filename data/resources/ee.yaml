@@ -16,7 +16,8 @@
   prerequisites: [mit-8-02, mit-18-03]
   subject: circuits
   summary: "26 video lectures, labs and problem sets. The MITx 6.002x series on edX no longer resolves (see the certification card)."
-  priority: 4
+  priority: 1
+  quality: 5
 
 - id: mit-6-003
   title: "MIT 6.003 Signals and Systems (Fall 2011)"
@@ -33,7 +34,8 @@
   prerequisites: [mit-18-03]
   subject: signals-control
   summary: "Builds the transform toolkit (Laplace, Z, Fourier) and system thinking that every control, DSP and robotics course assumes."
-  priority: 4
+  priority: 1
+  quality: 5
 
 - id: mit-6-011
   title: "MIT 6.011 Signals, Systems and Inference (Spring 2018)"
@@ -84,7 +86,8 @@
   summary: "Goes from logic gates and SystemVerilog to a working pipelined RISC-V CPU, the most hands-on first book for someone who wants to design chips."
   fromYear: 1
   note: "Paid"
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: nandland
   title: "Nandland: FPGA, VHDL and Verilog tutorials"
@@ -102,6 +105,7 @@
   summary: "FPGA, VHDL and Verilog from the beginning. The site answers scripts with a bot challenge, so `npm run check:links` reports 403 for it; it was verified in a browser."
   after: [nand2tetris]
   priority: 4
+  quality: 3
 
 - id: getting-started-with-fpgas
   title: "Getting Started with FPGAs (Russell Merrick)"
@@ -132,7 +136,8 @@
   subject: fpga
   summary: "The reading for project 42 (UART and a VGA/HDMI pattern generator)."
   after: [practice-hdlbits]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: fpga4fun
   title: "fpga4fun.com"
@@ -152,6 +157,7 @@
   fromYear: 1
   after: [nandland]
   priority: 4
+  quality: 3
 
 - id: ut-embedded-shape-the-world
   title: "UT Austin: Embedded Systems, Shape the World (Valvano and Yerraballi)"
@@ -198,6 +204,7 @@
   subject: embedded
   summary: "Teaches bare-metal Rust on microcontrollers: no_std, peripherals, interrupts and memory-mapped registers."
   priority: 2
+  quality: 4
 
 - id: phils-lab
   title: "Phil's Lab: STM32 firmware and KiCad PCB design"
@@ -214,7 +221,8 @@
   subject: embedded
   summary: "Professional-grade PCB, mixed-signal and embedded DSP design walkthroughs from schematic to working hardware."
   after: [tutorial-kicad-getting-started]
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: art-of-electronics
   title: "The Art of Electronics, 3rd edition (Horowitz and Hill)"
@@ -233,7 +241,8 @@
   summary: "The practitioner's bible of analog and digital circuit design, full of real design rules for building sensors, drivers and robot electronics that work."
   fromYear: 2
   note: "Paid"
-  priority: 4
+  priority: 1
+  quality: 5
 
 - id: learning-the-art-of-electronics
   title: "Learning the Art of Electronics: A Hands-On Lab Course (Hayes and Abrams)"
@@ -252,7 +261,8 @@
   fromYear: 2
   note: "Paid"
   doFirst: "The Art of Electronics (3rd ed.)"
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: cu-boulder-power-electronics
   title: "CU Boulder: Power Electronics specialization"
@@ -300,6 +310,7 @@
   subject: signals-control
   summary: "MIT 6.302 Feedback Systems is the electrical-engineering flavoured alternative."
   priority: 4
+  quality: 3
 
 - id: mit-6-302
   title: "MIT 6.302 Feedback Systems (Spring 2007)"
@@ -318,7 +329,8 @@
   short: "MIT 6.302 Feedback"
   fromYear: 2
   after: [mit-6-003]
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: brunton-control-bootcamp
   title: "Steve Brunton: Control Bootcamp"
@@ -352,7 +364,8 @@
   summary: "The reading for the signal/DSP visualiser of block A and the FFT analyser of project 40."
   short: "DSP Guide (Smith)"
   fromYear: 1
-  priority: 4
+  priority: 1
+  quality: 5
 
 - id: think-dsp
   title: "Think DSP (Allen Downey)"
@@ -370,7 +383,8 @@
   summary: "Teaches signal processing through Python code and sound experiments, a natural fit for a programmer."
   fromYear: 1
   doFirst: "Python"
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: mit-6-013
   title: "MIT 6.013 Electromagnetics and Applications (Spring 2009)"
@@ -391,7 +405,8 @@
   short: "MIT 6.013 EM & Applications"
   summary: "Staelin's EM course ships with a full open textbook, problem sets and demos, covering waves, transmission lines, antennas and EM forces engineers actually use."
   fromYear: 2
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: kicad
   title: "KiCad: open-source schematic and PCB design"
@@ -422,7 +437,8 @@
   summary: "The simulator for \"measured vs. simulated\" in project 36, and the yardstick for your own solver in project 37."
   short: "LTspice (ADI)"
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: ngspice
   title: "ngspice: open-source SPICE simulator"
@@ -440,7 +456,8 @@
   short: "ngspice"
   fromYear: 2
   after: [xschem]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: feedback-systems
   title: "Feedback Systems (Åström and Murray, free PDF)"

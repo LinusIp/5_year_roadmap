@@ -29,6 +29,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   after: [ultra-scale-playbook]
+  quality: 4
 
 - id: "pytorch-fully-shard-docs"
   title: "torch.distributed.fsdp.fully_shard (FSDP2)"
@@ -48,6 +49,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "FSDP2 tutorial"
+  quality: 4
 
 - id: "pytorch-torchrun-docs"
   title: "torchrun (Elastic Launch)"
@@ -63,10 +65,11 @@
   estHours: 1
   summary: "How multi-node jobs get rendezvous, ranks, restarts and elastic membership, the first thing to debug when a launch hangs."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "DDP tutorial"
+  quality: 3
 
 - id: "pytorch-distributed-docs"
   title: "Distributed communication package - torch.distributed"
@@ -86,6 +89,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Writing Distributed Apps (PyTorch)"
+  quality: 4
 
 - id: "pytorch-ddp-notes"
   title: "Distributed Data Parallel (design notes)"
@@ -105,6 +109,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "DDP tutorial"
+  quality: 4
 
 - id: "mosaicml-streaming-docs"
   title: "Streaming (MosaicML) documentation"
@@ -120,10 +125,11 @@
   estHours: 3
   summary: "Deterministic, resumable, elastic data streaming from cloud storage for multi-node training, with mid-epoch resumption."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [webdataset-repo]
+  quality: 3
 
 - id: "ray-train-docs"
   title: "Ray Train: Scalable Model Training"
@@ -139,10 +145,11 @@
   estHours: 3
   summary: "Wraps PyTorch, DeepSpeed and others with worker orchestration, fault tolerance and checkpoint management on Ray clusters."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [pytorch-distributed-overview]
+  quality: 3
 
 - id: "ray-data-docs"
   title: "Ray Data: Scalable Data Processing for AI Workloads"
@@ -158,10 +165,11 @@
   estHours: 3
   summary: "Streaming, heterogeneous CPU/GPU data pipelines that keep accelerators fed during training and batch inference."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [ray-train-docs]
+  quality: 3
 
 - id: "pytorch-pipelining-docs"
   title: "Pipeline Parallelism (torch.distributed.pipelining)"
@@ -177,10 +185,11 @@
   estHours: 2
   summary: "Shows how to split a model into stages and run GPipe, 1F1B, interleaved and zero-bubble schedules natively in PyTorch."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [paper-gpipe]
+  quality: 3
 
 - id: "pytorch-dcp-docs"
   title: "Distributed Checkpoint - torch.distributed.checkpoint"
@@ -196,10 +205,11 @@
   estHours: 2
   summary: "Reference for saving and resharding sharded state dicts in parallel, including async save, which large-run checkpointing depends on."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "DCP tutorial"
+  quality: 3
 
 - id: "megatron-core-parallelism-guide"
   title: "Parallelism Strategies Guide (Megatron Core)"
@@ -219,6 +229,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Megatron-LM paper"
+  quality: 4
 
 - id: "jax-explicit-sharding"
   title: "Explicit sharding (JAX docs)"
@@ -238,6 +249,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Distributed arrays (JAX)"
+  quality: 4
 
 - id: "pytorch-distributed-overview"
   title: "PyTorch Distributed Overview"
@@ -253,9 +265,10 @@
   estHours: 1
   summary: "A map of every PyTorch parallelism tool (DDP, FSDP2, TP, PP, DCP) and when to choose each."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
+  quality: 3
 
 - id: "webdataset-repo"
   title: "WebDataset"
@@ -271,10 +284,11 @@
   estHours: 3
   summary: "Streams training samples from sharded tar files with sequential I/O, a simple pattern that scales data loading to object storage."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "PyTorch DataLoader"
+  quality: 3
 
 - id: "orbax-repo"
   title: "Orbax - Checkpointing for JAX Models"
@@ -290,10 +304,11 @@
   estHours: 3
   summary: "The JAX ecosystem's checkpointing library with async, sharded saves, the counterpart to PyTorch DCP."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [jax-explicit-sharding]
+  quality: 3
 
 - id: "grain-repo"
   title: "Grain - Feeding JAX Models"
@@ -309,10 +324,11 @@
   estHours: 3
   summary: "Deterministic, checkpointable data pipelines for JAX training, worth comparing to PyTorch DataLoader designs."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [orbax-repo]
+  quality: 3
 
 - id: "torchft-repo"
   title: "torchft: Easy Per Step Fault Tolerance for PyTorch"
@@ -328,10 +344,11 @@
   estHours: 4
   summary: "Per-step fault tolerance where failed replica groups drop out and rejoin without restarting the whole job; good to study alongside TorchTitan."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   tags: [inference]
   after: [repo-torchtitan]
+  quality: 3
 
 - id: "imbue-cluster-health"
   title: "Training Infrastructure Scripts (Imbue cluster-health)"
@@ -351,6 +368,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   after: [repo-nccl-tests]
+  quality: 4
 
 - id: "paper-megatron-turing-nlg-530b"
   title: "Using DeepSpeed and Megatron to Train Megatron-Turing NLG 530B, A Large-Scale Generative Language Model"
@@ -371,6 +389,7 @@
   research: "inference"
   tags: [inference]
   doFirst: "Megatron-LM paper"
+  quality: 4
 
 - id: "paper-checkfreq"
   title: "CheckFreq: Frequent, Fine-Grained DNN Checkpointing"
@@ -386,11 +405,12 @@
   estHours: 3
   summary: "Pipelines snapshot and persist phases and tunes checkpoint frequency automatically, a key idea behind modern async checkpointing."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "inference"
   tags: [inference]
   doFirst: "DCP tutorial"
+  quality: 3
 
 - id: "paper-gemini-inmemory-checkpoint"
   title: "Gemini: Fast Failure Recovery in Distributed Training with In-Memory Checkpoints"
@@ -406,11 +426,12 @@
   estHours: 3
   summary: "Checkpoints to peer CPU memory with traffic interleaved into training, cutting recovery time for large runs by an order of magnitude."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
   research: "inference"
   tags: [inference]
   after: [paper-checkfreq]
+  quality: 3
 
 - id: "pytorch-activation-checkpointing-blog"
   title: "Current and New Activation Checkpointing Techniques in PyTorch"
@@ -430,6 +451,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Reducing Activation Recomputation"
+  quality: 4
 
 - id: "meta-genai-infrastructure"
   title: "Building Meta's GenAI Infrastructure"
@@ -449,6 +471,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "RDMA over Ethernet at Meta"
+  quality: 4
 
 - id: "torchtitan-async-tp"
   title: "[Distributed w/ TorchTitan] Introducing Async Tensor Parallelism in PyTorch"
@@ -470,6 +493,7 @@
   after: [repo-torchtitan]
 
 # ---- AI, ML, LLMs and agents (78)
+  quality: 4
 
 - id: "docs-colorbrewer"
   title: "ColorBrewer: Color Advice for Maps"
@@ -485,8 +509,9 @@
   estHours: 1
   summary: "An interactive tool for picking sequential, diverging and qualitative palettes that stay readable in print and for colour-blind readers."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "docs-matplotlib-choosing-colormaps"
   title: "Choosing Colormaps in Matplotlib"
@@ -502,9 +527,10 @@
   estHours: 1
   summary: "Explains perceptual uniformity and the rationale behind viridis and friends, with lightness plots for every built-in colormap."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-matplotlib-tutorials]
+  quality: 3
 
 - id: "docs-latexdiff"
   title: "latexdiff: mark up significant differences between LaTeX files"
@@ -520,8 +546,9 @@
   estHours: 1
   summary: "Generates a marked-up PDF of changes between two versions of a paper, what journals and co-authors expect alongside a revision."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "docs-booktabs"
   title: "Booktabs: Publication quality tables in LaTeX"
@@ -537,8 +564,9 @@
   estHours: 1
   summary: "Its manual is also a short essay on table design (no vertical rules, few horizontal ones) that makes results tables look professional."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "docs-typst"
   title: "Typst Documentation"
@@ -554,26 +582,9 @@
   estHours: 4
   summary: "Docs for the fast modern alternative to LaTeX with readable markup and instant preview, good for notes, reports and some venues that accept it."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-
-- id: "docs-typst-guide-latex-users"
-  title: "Guide for LaTeX Users (Typst)"
-  short: "Typst for LaTeX Users"
-  provider: "Typst GmbH"
-  type: "article"
-  url: "https://typst.app/docs/guides/guide-for-latex-users/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Maps familiar LaTeX concepts to Typst so you can move a document over in an afternoon."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [docs-typst]
+  quality: 3
 
 - id: "docs-zotero"
   title: "Zotero Documentation"
@@ -589,26 +600,9 @@
   estHours: 2
   summary: "Official docs for the free reference manager: capture papers from the browser, annotate PDFs and export citations to BibTeX or Word."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-
-- id: "docs-arxiv-tex-submissions"
-  title: "arXiv: TeX Submissions"
-  short: "arXiv TeX Submissions"
-  provider: "arXiv"
-  type: "article"
-  url: "https://info.arxiv.org/help/submit_tex.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Details how arXiv compiles your LaTeX source, which packages and figure formats work, and how to avoid common processing failures."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [docs-arxiv-submission-guidelines]
+  quality: 3
 
 - id: "docs-quarto-guide"
   title: "Quarto Guide"
@@ -624,8 +618,9 @@
   estHours: 4
   summary: "Publish notebooks and markdown as articles, blogs and websites with citations, cross-references and equations, a strong base for a research blog."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "docs-pgf-tikz-manual"
   title: "PGF/TikZ Manual (PGF: Create PostScript and PDF graphics in TeX)"
@@ -641,9 +636,10 @@
   estHours: 20
   summary: "The authoritative manual with step-by-step tutorials for drawing diagrams, network architectures and plots natively in LaTeX."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [book-lshort-not-so-short-latex]
+  quality: 3
 
 - id: "docs-biblatex"
   title: "BibLaTeX: Sophisticated Bibliographies in LaTeX"
@@ -659,9 +655,9 @@
   estHours: 3
   summary: "The reference manual for the modern bibliography system used in theses and many journals, for when plain BibTeX styles run out."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-  after: [docs-overleaf-bibtex]
+  quality: 3
 
 - id: "docs-arr-reviewer-guidelines"
   title: "ARR Reviewer Guidelines"
@@ -680,6 +676,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-ten-simple-rules-reviewers]
+  quality: 4
 
 - id: "docs-arr-author-guidelines"
   title: "ARR Authors Guidelines"
@@ -695,8 +692,9 @@
   estHours: 1
   summary: "Explains the submission, author response and commitment process at ACL venues, including what a response can and cannot do."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "docs-cvpr-2026-reviewer-training"
   title: "CVPR 2026 Reviewer Training Material"
@@ -712,62 +710,10 @@
   estHours: 2
   summary: "Shows how a top vision venue wants reviews structured, with examples of acceptable and unacceptable justifications for each score."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-ten-simple-rules-reviewers]
-
-- id: "docs-cvpr-2026-author-guidelines"
-  title: "CVPR 2026 Author Guidelines"
-  short: "CVPR'26 Author Guidelines"
-  provider: "CVPR 2026 Program Chairs"
-  type: "article"
-  url: "https://cvpr.thecvf.com/Conferences/2026/AuthorGuidelines"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Official submission and one-page rebuttal policies, useful for learning what reviewers will and will not consider in a response."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [paper-ten-simple-rules-response-to-reviewers]
-
-- id: "docs-icml-2025-reviewer-instructions"
-  title: "ICML 2025 Reviewer Instructions"
-  short: "ICML'25 Reviewer Instr."
-  provider: "ICML 2025"
-  type: "article"
-  url: "https://icml.cc/Conferences/2025/ReviewerInstructions"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "ICML's own explanation of review criteria and the author-reviewer discussion, which tells you how your ML paper will be read."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-
-- id: "docs-iclr-2026-author-guide"
-  title: "ICLR 2026 Author Guide"
-  short: "ICLR'26 Author Guide"
-  provider: "ICLR 2026"
-  type: "article"
-  url: "https://iclr.cc/Conferences/2026/AuthorGuide"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Covers ICLR's open discussion phase, revision rules and rebuttal limits, the most public rebuttal process in ML."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [docs-openreview-iclr]
+  quality: 3
 
 - id: "docs-manim-community"
   title: "Manim Community Edition"
@@ -783,8 +729,9 @@
   estHours: 6
   summary: "The animation engine popularized by 3Blue1Brown, for producing math and ML explainer videos and talk animations from Python."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "docs-neuraloperator"
   title: "neuraloperator: Neural Operators in PyTorch"
@@ -803,6 +750,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-neural-operator-function-spaces]
+  quality: 4
 
 - id: "course-stanford-writing-in-the-sciences"
   title: "Writing in the Sciences"
@@ -820,6 +768,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "video-morrison-better-poster"
   title: "How to create a better research poster in less time"
@@ -835,9 +784,9 @@
   estHours: 1
   summary: "The widely adopted #betterposter redesign: one big takeaway sentence for passers-by, with details moved to the margins."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-  after: [paper-ten-simple-rules-poster]
+  quality: 3
 
 - id: "book-wilke-fundamentals-data-visualization"
   title: "Fundamentals of Data Visualization"
@@ -855,23 +804,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
-
-- id: "book-healy-data-visualization"
-  title: "Data Visualization: A Practical Introduction"
-  short: "Healy: Data Viz"
-  provider: "Kieran Healy"
-  type: "book"
-  url: "https://socviz.co/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 15
-  summary: "Readable online, this book teaches the principles of effective graphics and how perception shapes what a plot communicates."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
+  quality: 4
 
 - id: "book-lshort-not-so-short-latex"
   title: "The Not So Short Introduction to LaTeX2e"
@@ -890,6 +823,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [docs-overleaf-learn-latex-30-min]
+  quality: 3
 
 - id: "book-tufte-visual-display"
   title: "The Visual Display of Quantitative Information (2nd ed.)"
@@ -908,6 +842,7 @@
   priority: 1
   roadmap: "ai-engineer"
   note: "Paid"
+  quality: 4
 
 - id: "practice-rougier-scientific-visualization-book"
   title: "Scientific Visualization: Python + Matplotlib"
@@ -926,6 +861,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [docs-matplotlib-tutorials]
+  quality: 4
 
 - id: "book-williams-bizup-style"
   title: "Style: Lessons in Clarity and Grace (12th ed.)"
@@ -945,6 +881,7 @@
   roadmap: "ai-engineer"
   note: "Paid"
   after: [article-gopen-swan-science-of-scientific-writing]
+  quality: 4
 
 - id: "book-munzner-visualization-analysis-design"
   title: "Visualization Analysis and Design"
@@ -960,10 +897,11 @@
   estHours: 15
   summary: "A systematic framework (what, why, how) for choosing visual encodings and interactions, with free figures, slides and lecture videos on the author's page."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
   after: [book-wilke-fundamentals-data-visualization]
+  quality: 3
 
 - id: "practice-zotero-better-bibtex"
   title: "Better BibTeX for Zotero"
@@ -979,9 +917,10 @@
   estHours: 1
   summary: "Keeps an auto-updating .bib file with stable citation keys from your Zotero library, the standard bridge between Zotero and LaTeX."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-zotero]
+  quality: 3
 
 - id: "practice-arxiv-latex-cleaner"
   title: "arxiv_latex_cleaner"
@@ -997,9 +936,9 @@
   estHours: 1
   summary: "Strips comments, unused files and oversized images from a paper's source before you post it, avoiding leaked notes and size limits."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-  after: [docs-arxiv-tex-submissions]
+  quality: 3
 
 - id: "practice-matplotlib-cheatsheets"
   title: "Matplotlib cheatsheets and handouts"
@@ -1015,8 +954,9 @@
   estHours: 1
   summary: "One-page references for plot types, colormaps, styles and layout tricks to keep beside you while making figures."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "repo-cgcnn"
   title: "CGCNN: Crystal Graph Convolutional Neural Networks"
@@ -1035,6 +975,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-cgcnn]
+  quality: 4
 
 - id: "repo-matbench"
   title: "matbench"
@@ -1053,6 +994,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-cgcnn]
+  quality: 4
 
 - id: "repo-orb-models"
   title: "orb-models"
@@ -1068,9 +1010,10 @@
   estHours: 6
   summary: "Pretrained Orb potentials with an ASE calculator, an easy way to run fast universal MD."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-ase]
+  quality: 3
 
 - id: "repo-mattersim"
   title: "MatterSim"
@@ -1086,9 +1029,10 @@
   estHours: 6
   summary: "Official code and checkpoints for the MatterSim universal potential."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-mattersim]
+  quality: 3
 
 - id: "repo-mace-mp"
   title: "MACE-MP foundation models"
@@ -1107,6 +1051,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-mace]
+  quality: 4
 
 - id: "repo-sevennet"
   title: "SevenNet"
@@ -1122,9 +1067,10 @@
   estHours: 6
   summary: "NequIP-based potential built for parallel LAMMPS MD, showing how to scale equivariant models across GPUs."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "NequIP"
+  quality: 3
 
 - id: "repo-flare"
   title: "FLARE: Fast Learning of Atomistic Rare Events"
@@ -1140,9 +1086,10 @@
   estHours: 8
   summary: "Active-learning potential that uses uncertainty to decide when to call DFT during an MD run."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "NequIP"
+  quality: 3
 
 - id: "repo-pdebench"
   title: "PDEBench (code and datasets)"
@@ -1161,6 +1108,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-pdebench]
+  quality: 4
 
 - id: "paper-whitesides-writing-a-paper"
   title: "Whitesides' Group: Writing a Paper"
@@ -1178,6 +1126,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "paper-ten-simple-rules-better-figures"
   title: "Ten Simple Rules for Better Figures"
@@ -1196,6 +1145,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [docs-matplotlib-tutorials]
+  quality: 3
 
 - id: "paper-ten-simple-rules-reviewers"
   title: "Ten Simple Rules for Reviewers"
@@ -1211,8 +1161,9 @@
   estHours: 1
   summary: "A quick primer on the ethics and mechanics of peer review for when you get your first reviewing assignment."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "paper-ten-simple-rules-oral-presentations"
   title: "Ten Simple Rules for Making Good Oral Presentations"
@@ -1228,25 +1179,9 @@
   estHours: 1
   summary: "Two pages of talk advice (know the audience, less is more, practice) that work as a pre-talk checklist."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-
-- id: "paper-ten-simple-rules-poster"
-  title: "Ten Simple Rules for a Good Poster Presentation"
-  short: "10 Rules: Posters"
-  provider: "Thomas C. Erren, Philip E. Bourne (PLOS Comp Biol, 2007)"
-  type: "paper"
-  url: "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.0030102"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Covers poster layout, message and how to work the poster session, useful for workshop and conference poster slots."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
+  quality: 3
 
 - id: "paper-misuse-of-colour-science-communication"
   title: "The misuse of colour in science communication"
@@ -1262,8 +1197,9 @@
   estHours: 1
   summary: "Shows how rainbow colormaps distort data and exclude colour-blind readers, and gives a decision path for picking perceptually uniform maps for heatmaps and fields."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "paper-cgcnn"
   title: "Crystal Graph Convolutional Neural Networks for an Accurate and Interpretable Prediction of Material Properties"
@@ -1282,6 +1218,7 @@
   priority: 1
   roadmap: "ai-engineer"
   doFirst: "Deep Learning for Molecules & Materials"
+  quality: 4
 
 - id: "paper-levin-redell-good-systems-paper"
   title: "An Evaluation of the Ninth SOSP Submissions -or- How (and How Not) to Write a Good Systems Paper"
@@ -1299,6 +1236,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "paper-ten-simple-rules-response-to-reviewers"
   title: "Ten simple rules for writing a response to reviewers"
@@ -1316,23 +1254,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-engineer"
-
-- id: "paper-ten-simple-rules-getting-grants"
-  title: "Ten Simple Rules for Getting Grants"
-  short: "10 Rules: Grants"
-  provider: "Philip E. Bourne, Leo M. Chalupa (PLOS Comp Biol, 2006)"
-  type: "paper"
-  url: "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.0020012"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Short practical advice on preparing funding and fellowship proposals, from reading the call carefully to writing for tired reviewers."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
+  quality: 3
 
 - id: "paper-pinn-review-cuomo"
   title: "Scientific Machine Learning through Physics-Informed Neural Networks: Where we are and What's next"
@@ -1348,9 +1270,10 @@
   estHours: 5
   summary: "Broad survey of PINN variants, training tricks and applications that maps the field before you specialise."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "Physics-informed neural networks"
+  quality: 3
 
 - id: "paper-omat24"
   title: "Open Materials 2024 (OMat24) Inorganic Materials Dataset and Models"
@@ -1366,9 +1289,10 @@
   estHours: 4
   summary: "Describes the 100M+ DFT calculation dataset with off-equilibrium structures and the models trained on it, now a base for universal potentials."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-mace-mp-0]
+  quality: 3
 
 - id: "paper-oc20"
   title: "The Open Catalyst 2020 (OC20) Dataset and Community Challenges"
@@ -1387,6 +1311,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-cgcnn]
+  quality: 4
 
 - id: "paper-mace-mp-0"
   title: "A foundation model for atomistic materials chemistry"
@@ -1405,6 +1330,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-mace]
+  quality: 4
 
 - id: "paper-allegro"
   title: "Learning Local Equivariant Representations for Large-Scale Atomistic Dynamics"
@@ -1420,9 +1346,10 @@
   estHours: 4
   summary: "Strictly local equivariant potential designed to scale MD to millions of atoms on GPUs, a lesson in ML-for-HPC design."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "NequIP"
+  quality: 3
 
 - id: "paper-chgnet"
   title: "CHGNet: Pretrained universal neural network potential for charge-informed atomistic modeling"
@@ -1438,9 +1365,10 @@
   estHours: 4
   summary: "Adds magnetic-moment supervision to a universal potential so it can track charge states during simulations."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "M3GNet"
+  quality: 3
 
 - id: "paper-m3gnet"
   title: "A Universal Graph Deep Learning Interatomic Potential for the Periodic Table"
@@ -1456,9 +1384,10 @@
   estHours: 4
   summary: "One of the first universal ML potentials trained on Materials Project relaxations, covering almost the whole periodic table."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-cgcnn]
+  quality: 3
 
 - id: "paper-matbench-discovery"
   title: "Matbench Discovery -- A framework to evaluate machine learning crystal stability predictions"
@@ -1474,9 +1403,10 @@
   estHours: 3
   summary: "Explains why regression metrics mislead in materials discovery and how to benchmark stability prediction honestly."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "M3GNet"
+  quality: 3
 
 - id: "paper-mattersim"
   title: "MatterSim: A Deep Learning Atomistic Model Across Elements, Temperatures and Pressures"
@@ -1492,9 +1422,10 @@
   estHours: 4
   summary: "Universal potential trained on data sampled across temperatures and pressures, relevant to extreme-condition materials."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-mace-mp-0]
+  quality: 3
 
 - id: "paper-orb"
   title: "Orb: A Fast, Scalable Neural Network Potential"
@@ -1510,9 +1441,10 @@
   estHours: 3
   summary: "Shows that a non-equivariant architecture plus smart training can match equivariant models at much higher speed."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-mace-mp-0]
+  quality: 3
 
 - id: "paper-uma"
   title: "UMA: A Family of Universal Models for Atoms"
@@ -1531,6 +1463,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-omat24]
+  quality: 4
 
 - id: "paper-equiformer-v2"
   title: "EquiformerV2: Improved Equivariant Transformer for Scaling to Higher-Degree Representations"
@@ -1546,10 +1479,11 @@
   estHours: 4
   summary: "Shows how to make equivariant attention cheap enough at high angular degree to top the OC20 leaderboard."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "genai"
   doFirst: "OC20"
+  quality: 3
 
 - id: "paper-gnome-nature"
   title: "Scaling deep learning for materials discovery"
@@ -1568,6 +1502,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-cgcnn]
+  quality: 4
 
 - id: "paper-kovesi-good-colour-maps"
   title: "Good Colour Maps: How to Design Them"
@@ -1586,6 +1521,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-misuse-of-colour-science-communication]
+  quality: 4
 
 - id: "paper-deeponet"
   title: "DeepONet: Learning nonlinear operators for identifying differential equations based on the universal approximation theorem of operators"
@@ -1604,6 +1540,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-deepxde]
+  quality: 4
 
 - id: "paper-neural-operator-function-spaces"
   title: "Neural Operator: Learning Maps Between Function Spaces"
@@ -1622,6 +1559,7 @@
   priority: 1
   roadmap: "ai-engineer"
   doFirst: "Fourier Neural Operator"
+  quality: 4
 
 - id: "paper-pdebench"
   title: "PDEBench: An Extensive Benchmark for Scientific Machine Learning"
@@ -1637,9 +1575,10 @@
   estHours: 3
   summary: "Shows how to evaluate ML surrogates honestly across many PDEs, a corrective to cherry-picked SciML results."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "Fourier Neural Operator"
+  quality: 3
 
 - id: "paper-pinn-failure-modes"
   title: "Characterizing possible failure modes in physics-informed neural networks"
@@ -1658,6 +1597,7 @@
   priority: 1
   roadmap: "ai-engineer"
   after: [paper-deepxde]
+  quality: 4
 
 - id: "article-gopen-swan-science-of-scientific-writing"
   title: "The Science of Scientific Writing"
@@ -1675,6 +1615,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: "article-widom-tips-technical-papers"
   title: "Tips for Writing Technical Papers"
@@ -1692,6 +1633,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: "article-koopman-how-to-write-abstract"
   title: "How to Write an Abstract"
@@ -1707,8 +1649,9 @@
   estHours: 1
   summary: "The classic five-part template (motivation, problem, approach, results, conclusions) for the paragraph most readers will ever see of your paper."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "article-hill-oral-presentation-advice"
   title: "Oral Presentation Advice"
@@ -1724,8 +1667,9 @@
   estHours: 1
   summary: "A computer architect's short guide to conference talks, bundled with Patterson's satirical How to Give a Bad Talk, ideal before your first 20-minute slot."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "article-victor-explorable-explanations"
   title: "Explorable Explanations"
@@ -1741,8 +1685,9 @@
   estHours: 1
   summary: "The essay that argues for reactive documents where readers play with a model's parameters, the idea behind much of modern interactive research communication."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: "article-ernst-write-technical-paper"
   title: "How to write a technical paper or a research paper"
@@ -1758,9 +1703,10 @@
   estHours: 1
   summary: "Dense, concrete advice on organization, claims, evaluation and wording from a prolific systems/PL researcher, good to reread before every submission."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [article-spj-great-research-paper]
+  quality: 3
 
 - id: "article-ernst-giving-talk"
   title: "How to give a technical presentation (how to give a scientific talk)"
@@ -1776,9 +1722,10 @@
   estHours: 1
   summary: "Practical guidance on slides, practice runs and handling questions that complements Winston and Peyton Jones with many specific do's and don'ts."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [video-winston-how-to-speak]
+  quality: 3
 
 - id: "article-bostock-visualizing-algorithms"
   title: "Visualizing Algorithms"
@@ -1796,24 +1743,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-engineer"
-
-- id: "article-distill-interactive-articles"
-  title: "Communicating with Interactive Articles"
-  short: "Distill: Interactive Art."
-  provider: "Fred Hohman, Matthew Conlen, Jeffrey Heer, Duen Horng Chau (Distill, 2020)"
-  type: "article"
-  url: "https://distill.pub/2020/communicating-with-interactive-articles/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Surveys the research and practice of interactive explanations, with design lessons for anyone writing explorable ML or physics posts."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [article-research-debt]
+  quality: 4
 
 - id: "article-kraicer-art-of-grantsmanship"
   title: "Art of Grantsmanship"
@@ -1829,29 +1759,9 @@
   estHours: 2
   summary: "A classic guide from a former HFSP grants director on how reviewers read proposals and how to write aims and summaries that survive them."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-  after: [paper-ten-simple-rules-getting-grants]
-
-- id: "blog-better-posters"
-  title: "Better Posters"
-  short: "Better Posters Blog"
-  provider: "Zen Faulkes"
-  type: "article"
-  url: "https://betterposters.blogspot.com/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 5
-  summary: "A long-running blog critiquing real conference posters, good for training your eye for layout, type and hierarchy."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  blog: true
-
-# ---- Software architecture and system design (22)
+  quality: 3
 
 - id: "docs-tla-cheat-sheet"
   title: "TLA+ Summary (cheat sheet)"
@@ -1867,9 +1777,10 @@
   estHours: 1
   summary: "Seven-page summary of TLA+ operators and syntax to keep open while writing specs."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tutorial-learntla]
+  quality: 3
 
 - id: "docs-pluscal-manual-c-syntax"
   title: "A PlusCal User's Manual (C-syntax)"
@@ -1885,9 +1796,10 @@
   estHours: 4
   summary: "Precise reference for every PlusCal construct and how it translates to TLA+, for when tutorials run out."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tutorial-lamport-pluscal-tutorial]
+  quality: 3
 
 - id: "docs-apalache"
   title: "Apalache Documentation"
@@ -1903,9 +1815,10 @@
   estHours: 8
   summary: "Symbolic SMT-based model checker for TLA+ that handles larger state spaces and type-checks specs."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tutorial-learntla]
+  quality: 3
 
 - id: "docs-quint"
   title: "Quint Documentation"
@@ -1921,9 +1834,10 @@
   estHours: 8
   summary: "A modern, programmer-friendly syntax over TLA+ semantics with a REPL, simulator and model-based testing."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tutorial-learntla]
+  quality: 3
 
 - id: "book-logic-for-programmers-wayne"
   title: "Logic for Programmers"
@@ -1939,9 +1853,10 @@
   estHours: 8
   summary: "Practical logic for working engineers: specs, contracts, testing and databases, a bridge into formal methods."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-lamport-specifying-systems"
   title: "Specifying Systems: The TLA+ Language and Tools for Hardware and Software Engineers"
@@ -1957,9 +1872,10 @@
   estHours: 30
   summary: "The definitive TLA+ reference from its creator, with a free personal-use PDF covering specs, refinement and TLC."
   fromYear: 2
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   doFirst: "TLA+ Video Course"
+  quality: 5
 
 - id: "book-lamport-tla-hyperbook"
   title: "The TLA+ Hyperbook"
@@ -1975,9 +1891,10 @@
   estHours: 20
   summary: "Unfinished but valuable; its proof track is the best guide to writing structured TLA+ proofs checked by TLAPS."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "TLA+ Video Course"
+  quality: 3
 
 - id: "book-practical-tla-wayne"
   title: "Practical TLA+: Planning Driven Development"
@@ -1997,6 +1914,7 @@
   roadmap: "software-architect"
   note: "Paid"
   after: [tutorial-learntla]
+  quality: 4
 
 - id: "book-software-abstractions-jackson"
   title: "Software Abstractions: Logic, Language, and Analysis (Revised Edition)"
@@ -2015,6 +1933,7 @@
   priority: 2
   roadmap: "software-architect"
   note: "Paid"
+  quality: 4
 
 - id: "book-lamport-science-concurrent-programs"
   title: "A Science of Concurrent Programs"
@@ -2033,6 +1952,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [book-lamport-specifying-systems]
+  quality: 4
 
 - id: "tutorial-lamport-pluscal-tutorial"
   title: "The PlusCal Tutorial"
@@ -2050,6 +1970,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "tutorial-coderefinery-lessons"
   title: "CodeRefinery lessons"
@@ -2065,9 +1986,10 @@
   estHours: 15
   summary: "Research-software training on version control, testing, documentation and reproducibility aimed squarely at scientists who code."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "Software Carpentry Lessons"
+  quality: 3
 
 - id: "practice-tlaplus-tools-repo"
   title: "tlaplus/tlaplus: TLC model checker, SANY and Toolbox"
@@ -2086,6 +2008,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [tutorial-learntla]
+  quality: 4
 
 - id: "practice-tlapm-proof-system"
   title: "TLAPS: the TLA+ Proof System (tlapm)"
@@ -2101,9 +2024,10 @@
   estHours: 15
   summary: "Lets you go beyond model checking to machine-checked TLA+ proofs that hold for unbounded parameters."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [book-lamport-specifying-systems]
+  quality: 3
 
 - id: "article-tla-industrial-use"
   title: "Industrial Use of TLA+"
@@ -2119,8 +2043,9 @@
   estHours: 1
   summary: "Curated reports from Intel, Amazon, Microsoft, Elastic and others on real bugs TLA+ found before shipping."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "article-hillel-why-dont-people-use-fm"
   title: "Why Don't People Use Formal Methods?"
@@ -2138,6 +2063,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "article-hillel-safety-liveness"
   title: "Safety and Liveness Properties"
@@ -2156,6 +2082,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [tutorial-learntla]
+  quality: 4
 
 - id: "article-hillel-fairness"
   title: "Weak and Strong Fairness"
@@ -2171,9 +2098,10 @@
   estHours: 1
   summary: "Untangles fairness assumptions, the subtle part of checking liveness in TLA+."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-hillel-safety-liveness]
+  quality: 3
 
 - id: "article-hillel-refinement"
   title: "Specification Refinement"
@@ -2189,9 +2117,10 @@
   estHours: 1
   summary: "Shows how one spec implements another, the core idea behind IronFleet, seL4 and TLA+ proofs."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tutorial-learntla]
+  quality: 3
 
 - id: "blog-tla-foundation"
   title: "TLA+ Foundation"
@@ -2207,27 +2136,10 @@
   estHours: 5
   summary: "Hub for the TLA+ community: industrial-use stories, grants, conference talks and tool news (NVIDIA and AWS are members)."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   blog: true
-
-- id: "blog-us-rse"
-  title: "US-RSE: United States Research Software Engineer Association"
-  short: "US-RSE"
-  provider: "US-RSE"
-  type: "article"
-  url: "https://us-rse.org/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 5
-  summary: "Community hub for the research software engineer career path with working groups, events and job listings at labs and universities."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  blog: true
+  quality: 3
 
 - id: "blog-bssw"
   title: "Better Scientific Software (BSSw)"
@@ -2249,6 +2161,7 @@
   doFirst: "Good enough practices in scientific computing"
 
 # ---- Systems: low-level programming, OS kernels, algorithms (15)
+  quality: 3
 
 - id: "docs-sel4-verification"
   title: "seL4 Verification"
@@ -2527,9 +2440,10 @@
   estHours: 4
   summary: "How the community packages compiled scientific libraries (MPI, PETSc, HDF5) so others can install them, and how to contribute recipes."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "Spack Tutorial: Spack 101"
+  quality: 3
 
 - id: "slurm-gres-docs"
   title: "Slurm Workload Manager - Generic Resource (GRES) Scheduling"
@@ -2548,6 +2462,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [slurm-quickstart]
+  quality: 4
 
 - id: "kueue-repo"
   title: "Kueue: Kubernetes-native job queueing"
@@ -2563,9 +2478,10 @@
   estHours: 4
   summary: "The upstream Kubernetes answer to batch/GPU quota, fair sharing and gang admission for training jobs."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "Kubernetes basics"
+  quality: 3
 
 - id: "volcano-repo"
   title: "Volcano: cloud native batch scheduling system"
@@ -2581,9 +2497,10 @@
   estHours: 4
   summary: "A CNCF batch scheduler adding gang scheduling, queues and topology-aware placement for distributed training on Kubernetes."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [kueue-repo]
+  quality: 3
 
 - id: "kubeflow-trainer-repo"
   title: "Kubeflow Trainer"
@@ -2599,9 +2516,10 @@
   estHours: 4
   summary: "Kubernetes operator and SDK for launching PyTorch, JAX, DeepSpeed and MPI training jobs as managed runtimes."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [kueue-repo]
+  quality: 3
 
 - id: "paper-pollux"
   title: "Pollux: Co-adaptive Cluster Scheduling for Goodput-Optimized Deep Learning"
@@ -2620,6 +2538,7 @@
   priority: 2
   roadmap: "software-architect"
   doFirst: "Tiresias"
+  quality: 4
 
 - id: "paper-gandiva"
   title: "Gandiva: Introspective Cluster Scheduling for Deep Learning"
@@ -2638,6 +2557,7 @@
   priority: 2
   roadmap: "software-architect"
   doFirst: "Analysis of multi-tenant GPU clusters"
+  quality: 4
 
 - id: "paper-tiresias"
   title: "Tiresias: A GPU Cluster Manager for Distributed Deep Learning"
@@ -2658,6 +2578,7 @@
   doFirst: "Gandiva"
 
 # ---- Languages (63)
+  quality: 4
 
 - id: "docs-spin-model-checker"
   title: "Spin: Formal Verification"
@@ -2674,6 +2595,7 @@
   summary: "The classic explicit-state model checker for concurrent software, with Promela, courses and the books that taught the field."
   fromYear: 2
   priority: 2
+  quality: 4
 
 - id: "docs-cbmc"
   title: "CBMC: Bounded Model Checking for Software"
@@ -2690,6 +2612,7 @@
   summary: "Bit-precise bounded model checker for C/C++ used in industry (incl. AWS) to prove memory safety of low-level code."
   fromYear: 2
   priority: 2
+  quality: 4
 
 - id: "docs-alloy-docs-hillel"
   title: "Alloy Documentation"
@@ -2706,6 +2629,7 @@
   summary: "Practical reference for Alloy 6 relational modeling, great for quickly finding design flaws in data models and protocols."
   fromYear: 2
   priority: 2
+  quality: 4
 
 - id: "docs-verus-guide"
   title: "Verus Tutorial and Reference"
@@ -2723,6 +2647,7 @@
   fromYear: 2
   priority: 2
   after: [rust-book]
+  quality: 4
 
 - id: "docs-frama-c-wp"
   title: "Frama-C WP plug-in"
@@ -2738,7 +2663,8 @@
   estHours: 6
   summary: "Deductive verification of ACSL-annotated C, the industrial workhorse for proving embedded C code."
   fromYear: 2
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "docs-rocq-prover"
   title: "Rocq Prover Documentation"
@@ -2756,6 +2682,7 @@
   fromYear: 2
   priority: 2
   after: [book-software-foundations]
+  quality: 4
 
 - id: "docs-isabelle-prog-prove"
   title: "Programming and Proving in Isabelle/HOL"
@@ -2772,6 +2699,7 @@
   summary: "Compact official tutorial to Isabelle/HOL, the prover behind seL4; doubles as part one of Concrete Semantics."
   fromYear: 2
   priority: 2
+  quality: 4
 
 - id: "pep-734-multiple-interpreters"
   title: "PEP 734 – Multiple Interpreters in the Stdlib"
@@ -2787,8 +2715,9 @@
   estHours: 2
   summary: "The user-facing API for running isolated interpreters in one process, a third concurrency model beside threads and processes."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [pep-684-per-interpreter-gil]
+  quality: 3
 
 - id: "python-sys-monitoring-docs"
   title: "sys.monitoring — Execution event monitoring"
@@ -2804,8 +2733,9 @@
   estHours: 1
   summary: "Reference for the event API you would use to write your own fast profiler, tracer or coverage tool."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [pep-669-low-impact-monitoring]
+  quality: 3
 
 - id: "pep-492-async-await"
   title: "PEP 492 – Coroutines with async and await syntax"
@@ -2823,6 +2753,7 @@
   fromYear: 2
   priority: 2
   doFirst: "A Conceptual Overview of asyncio"
+  quality: 4
 
 - id: "pep-779-free-threaded-supported"
   title: "PEP 779 – Criteria for supported status for free-threaded Python"
@@ -2838,8 +2769,9 @@
   estHours: 1
   summary: "The performance and stability bars free-threaded CPython had to meet to graduate from experimental, useful for judging when to adopt it."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [pep-703-gil-optional]
+  quality: 3
 
 - id: "python-extending-assorted-topics"
   title: "Using the C API: Assorted topics (Extending and Embedding)"
@@ -2857,6 +2789,7 @@
   fromYear: 2
   priority: 2
   doFirst: "C API and ABI Stability"
+  quality: 4
 
 - id: "python-asyncio-event-loop-docs"
   title: "Event loop (asyncio)"
@@ -2872,8 +2805,9 @@
   estHours: 3
   summary: "The low-level loop API (callbacks, transports, executors, signal handling) that higher-level asyncio code sits on."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "Coroutines and Tasks (asyncio)"
+  quality: 3
 
 - id: "memray-docs"
   title: "Memray: the endgame memory profiler"
@@ -2889,8 +2823,9 @@
   estHours: 2
   summary: "Tracks every allocation in Python and native extensions, the tool to reach for when a training or data job leaks memory."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [repo-py-spy]
+  quality: 3
 
 - id: "docs-nuxmv"
   title: "nuXmv symbolic model checker"
@@ -2906,8 +2841,9 @@
   estHours: 8
   summary: "SAT/SMT-based symbolic model checker for finite and infinite-state systems, widely used for avionics and hardware requirements."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [paper-spin-self-play-finetuning]
+  quality: 3
 
 - id: "docs-compcert"
   title: "CompCert: formally verified C compiler"
@@ -2925,6 +2861,7 @@
   fromYear: 3
   priority: 2
   after: [book-software-foundations]
+  quality: 4
 
 - id: "docs-viper-eth"
   title: "Viper: Verification Infrastructure for Permission-based Reasoning"
@@ -2940,8 +2877,9 @@
   estHours: 6
   summary: "Intermediate verification language with permissions that underlies Prusti, Gobra and Nagini; its tutorial runs in-browser."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [paper-ohearn-separation-logic-cacm]
+  quality: 3
 
 - id: "docs-iris-project"
   title: "Iris Project"
@@ -2960,6 +2898,7 @@
   priority: 2
   research: "world-models"
   after: [paper-ohearn-separation-logic-cacm]
+  quality: 4
 
 - id: "docs-why3"
   title: "Why3: Where Programs Meet Provers"
@@ -2975,8 +2914,9 @@
   estHours: 10
   summary: "Deductive verification platform with WhyML that dispatches proof obligations to many SMT solvers and Coq."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [tutorial-dafny-getting-started]
+  quality: 3
 
 - id: "pep-703-gil-optional"
   title: "PEP 703 – Making the Global Interpreter Lock Optional in CPython"
@@ -2994,6 +2934,7 @@
   fromYear: 3
   priority: 2
   doFirst: "Understanding the Python GIL"
+  quality: 4
 
 - id: "pep-659-specializing-interpreter"
   title: "PEP 659 – Specializing Adaptive Interpreter"
@@ -3011,6 +2952,7 @@
   fromYear: 3
   priority: 2
   after: [cpython-internaldocs]
+  quality: 4
 
 - id: "pep-684-per-interpreter-gil"
   title: "PEP 684 – A Per-Interpreter GIL"
@@ -3026,8 +2968,9 @@
   estHours: 2
   summary: "Shows how CPython moved global runtime state into interpreters so each subinterpreter can run with its own lock."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [pep-703-gil-optional]
+  quality: 3
 
 - id: "pep-669-low-impact-monitoring"
   title: "PEP 669 – Low Impact Monitoring for CPython"
@@ -3043,8 +2986,9 @@
   estHours: 2
   summary: "Why sys.settrace was slow and how bytecode-level instrumentation lets debuggers, coverage and profilers run at near-zero cost."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [pep-659-specializing-interpreter]
+  quality: 3
 
 - id: "pep-523-frame-evaluation-api"
   title: "PEP 523 – Adding a frame evaluation API to CPython"
@@ -3060,8 +3004,9 @@
   estHours: 1
   summary: "The hook that lets tools replace CPython's frame evaluator; it is exactly what TorchDynamo uses to capture graphs for torch.compile."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [docs-torchdynamo-deep-dive]
+  quality: 3
 
 - id: "pep-683-immortal-objects"
   title: "PEP 683 – Immortal Objects, Using a Fixed Refcount"
@@ -3077,8 +3022,9 @@
   estHours: 1
   summary: "Explains immortal reference counts, a small change that was key to per-interpreter GIL and fork-friendly memory in big Python services."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [pep-684-per-interpreter-gil]
+  quality: 3
 
 - id: "python-free-threading-c-extensions"
   title: "C API Extension Support for Free Threading"
@@ -3096,6 +3042,7 @@
   fromYear: 3
   priority: 2
   doFirst: "Python support for free threading"
+  quality: 4
 
 - id: "cpython-internaldocs-asyncio"
   title: "CPython InternalDocs: asyncio"
@@ -3111,8 +3058,9 @@
   estHours: 1
   summary: "How CPython implements asyncio tasks and the per-thread task bookkeeping internally, including changes made for free threading."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [python-asyncio-event-loop-docs]
+  quality: 3
 
 - id: "cpython-internaldocs-parser"
   title: "CPython InternalDocs: Guide to the parser"
@@ -3130,6 +3078,7 @@
   fromYear: 3
   priority: 2
   after: [crafting-interpreters]
+  quality: 4
 
 - id: "cpython-internaldocs-frames"
   title: "CPython InternalDocs: Frames"
@@ -3145,8 +3094,9 @@
   estHours: 1
   summary: "Describes the lazily materialized interpreter frames that replaced heap frame objects and made calls much cheaper."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "InternalDocs: interpreter"
+  quality: 3
 
 - id: "cpython-internaldocs-exception-handling"
   title: "CPython InternalDocs: Description of exception handling"
@@ -3162,8 +3112,9 @@
   estHours: 1
   summary: "Explains the zero-cost exception table that lets try blocks cost nothing until something is actually raised."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "InternalDocs: compiler"
+  quality: 3
 
 - id: "cpython-internaldocs-generators"
   title: "CPython InternalDocs: Generators and Coroutines"
@@ -3179,8 +3130,9 @@
   estHours: 1
   summary: "Shows how generator and coroutine frames are embedded, suspended and resumed, demystifying what await compiles to."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [pep-492-async-await]
+  quality: 3
 
 - id: "cpython-internaldocs-jit"
   title: "CPython InternalDocs: The JIT"
@@ -3198,6 +3150,7 @@
   fromYear: 3
   priority: 2
   doFirst: "PEP 744 JIT"
+  quality: 4
 
 - id: "cpython-internaldocs-qsbr"
   title: "CPython InternalDocs: Quiescent-State Based Reclamation (QSBR)"
@@ -3213,8 +3166,9 @@
   estHours: 1
   summary: "A compact, real example of safe memory reclamation for lock-free reads, as used by free-threaded CPython's lists and dicts."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [pep-703-gil-optional]
+  quality: 3
 
 - id: "course-adacore-intro-to-spark"
   title: "Introduction to SPARK"
@@ -3230,7 +3184,8 @@
   estHours: 12
   summary: "Interactive course on SPARK, the Ada subset used in aerospace and rail to prove absence of runtime errors."
   fromYear: 2
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "course-cmu-15-414"
   title: "CMU 15-414: Bug Catching: Automated Program Verification and Testing"
@@ -3247,6 +3202,7 @@
   summary: "Undergrad course with public notes on contracts, ghost state, SMT, temporal logic and model checking."
   fromYear: 2
   priority: 2
+  quality: 4
 
 - id: "dabeaz-python-mastery"
   title: "Advanced Python Mastery"
@@ -3264,6 +3220,7 @@
   fromYear: 2
   priority: 2
   after: [book-python-distilled]
+  quality: 4
 
 - id: "book-python-distilled"
   title: "Python Distilled"
@@ -3281,6 +3238,7 @@
   fromYear: 1
   priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-effective-python-3e"
   title: "Effective Python: 125 Specific Ways to Write Better Python, 3rd edition"
@@ -3299,6 +3257,7 @@
   priority: 2
   note: "Paid"
   after: [book-python-distilled]
+  quality: 4
 
 - id: "book-iris-lecture-notes"
   title: "Iris Lecture Notes"
@@ -3317,6 +3276,7 @@
   priority: 2
   research: "world-models"
   after: [book-software-foundations]
+  quality: 4
 
 - id: "book-chlipala-cpdt"
   title: "Certified Programming with Dependent Types"
@@ -3334,6 +3294,7 @@
   fromYear: 3
   priority: 2
   after: [book-software-foundations]
+  quality: 4
 
 - id: "book-chlipala-frap"
   title: "Formal Reasoning About Programs"
@@ -3351,6 +3312,7 @@
   fromYear: 3
   priority: 2
   after: [book-software-foundations]
+  quality: 4
 
 - id: "book-sergey-programs-and-proofs"
   title: "Programs and Proofs: Mechanizing Mathematics with Dependent Types"
@@ -3366,8 +3328,9 @@
   estHours: 25
   summary: "Lecture notes building up to verifying imperative programs with separation logic in Coq/SSReflect."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [book-software-foundations]
+  quality: 3
 
 - id: "book-concrete-semantics"
   title: "Concrete Semantics: With Isabelle/HOL"
@@ -3385,6 +3348,7 @@
   fromYear: 3
   priority: 2
   after: [book-software-foundations]
+  quality: 4
 
 - id: "tutorial-frama-c-wp-blanchard"
   title: "Introduction to C Program Proof with Frama-C and its WP Plugin"
@@ -3402,6 +3366,7 @@
   fromYear: 2
   priority: 2
   doFirst: "C programming"
+  quality: 4
 
 - id: "practice-kani-repo"
   title: "Kani Rust Verifier"
@@ -3419,6 +3384,7 @@
   fromYear: 2
   priority: 2
   after: [rust-book]
+  quality: 4
 
 - id: "practice-acsl-by-example"
   title: "ACSL by Example"
@@ -3434,8 +3400,9 @@
   estHours: 15
   summary: "Dozens of STL-style C algorithms fully specified in ACSL and proven with Frama-C, a great pattern library."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [tutorial-frama-c-wp-blanchard]
+  quality: 3
 
 - id: "practice-hitchhikers-logical-verification"
   title: "The Hitchhiker's Guide to Logical Verification (2025 edition)"
@@ -3453,6 +3420,7 @@
   fromYear: 2
   priority: 2
   after: [book-functional-programming-in-lean]
+  quality: 4
 
 - id: "pyperformance-benchmarks"
   title: "pyperformance: the Python Performance Benchmark Suite"
@@ -3468,8 +3436,9 @@
   estHours: 3
   summary: "The official benchmark suite used to measure CPython speedups; learn how interpreter performance is actually tracked."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [pyperf-toolkit]
+  quality: 3
 
 - id: "pyperf-toolkit"
   title: "pyperf: toolkit to write, run and analyze benchmarks"
@@ -3486,6 +3455,7 @@
   summary: "Teaches statistically careful microbenchmarking (calibration, warmups, worker processes) instead of naive timeit numbers."
   fromYear: 2
   priority: 2
+  quality: 4
 
 - id: "practice-verify-rust-std"
   title: "Verify the Rust Standard Library challenge"
@@ -3501,8 +3471,9 @@
   estHours: 30
   summary: "Open challenges (some with prizes) to verify memory safety of real Rust std code with Kani, VeriFast and Flux."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [tutorial-kani]
+  quality: 3
 
 - id: "practice-prusti"
   title: "Prusti: static verifier for Rust"
@@ -3518,8 +3489,9 @@
   estHours: 8
   summary: "Contract-based Rust verifier built on Viper; a different design point from Verus worth comparing."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [rust-book]
+  quality: 3
 
 - id: "practice-creusot"
   title: "Creusot: deductive verifier for Rust"
@@ -3535,8 +3507,9 @@
   estHours: 8
   summary: "Translates Rust with prophecy-based specs to Why3, letting you prove functional correctness of safe Rust."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [docs-why3]
+  quality: 3
 
 - id: "practice-iris-tutorial-rocq"
   title: "Iris tutorial in Rocq"
@@ -3555,6 +3528,7 @@
   priority: 2
   research: "world-models"
   after: [book-iris-lecture-notes]
+  quality: 4
 
 - id: "practice-vst"
   title: "VST: Verified Software Toolchain"
@@ -3572,6 +3546,7 @@
   fromYear: 3
   priority: 2
   after: [book-software-foundations]
+  quality: 4
 
 - id: "practice-hacl-star"
   title: "HACL*: verified cryptographic library"
@@ -3589,6 +3564,7 @@
   fromYear: 3
   priority: 2
   after: [tutorial-fstar]
+  quality: 4
 
 - id: "practice-saw-script"
   title: "SAW: Software Analysis Workbench"
@@ -3604,7 +3580,8 @@
   estHours: 10
   summary: "Proves C, Java and LLVM code equivalent to Cryptol specs; used by AWS to verify s2n and AWS-LC."
   fromYear: 3
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "faster-cpython-ideas"
   title: "Faster CPython Ideas"
@@ -3620,8 +3597,9 @@
   estHours: 6
   summary: "The issue tracker and slide archive where the specializing interpreter, JIT and frame redesign were worked out in public."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [pep-659-specializing-interpreter]
+  quality: 3
 
 - id: "paper-quickcheck"
   title: "QuickCheck: A Lightweight Tool for Random Testing of Haskell Programs"
@@ -3637,7 +3615,8 @@
   estHours: 2
   summary: "The paper that introduced property-based testing, the cheapest step from tests toward specifications."
   fromYear: 1
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "paper-ohearn-separation-logic-cacm"
   title: "Separation Logic"
@@ -3655,6 +3634,7 @@
   fromYear: 2
   priority: 2
   doFirst: "Hoare logic basics"
+  quality: 4
 
 - id: "paper-leroy-compcert-cacm"
   title: "Formal Verification of a Realistic Compiler"
@@ -3670,8 +3650,9 @@
   estHours: 3
   summary: "Readable overview of how CompCert's semantic preservation proof is structured in Coq across many compiler passes."
   fromYear: 3
-  priority: 2
+  priority: 1
   after: [book-software-foundations]
+  quality: 5
 
 - id: "paper-iris-from-the-ground-up"
   title: "Iris from the Ground Up: A Modular Foundation for Higher-Order Concurrent Separation Logic"
@@ -3690,6 +3671,7 @@
   priority: 2
   research: "world-models"
   after: [book-iris-lecture-notes]
+  quality: 4
 
 - id: "paper-reynolds-separation-logic-lics02"
   title: "Separation Logic: A Logic for Shared Mutable Data Structures"
@@ -3705,8 +3687,9 @@
   estHours: 4
   summary: "The foundational paper defining separating conjunction and the frame rule for reasoning about pointers."
   fromYear: 3
-  priority: 2
+  priority: 1
   after: [paper-ohearn-separation-logic-cacm]
+  quality: 5
 
 - id: "structured-concurrency-notes"
   title: "Notes on structured concurrency, or: Go statement considered harmful"
@@ -3722,10 +3705,11 @@
   estHours: 2
   summary: "The essay that shaped Trio, asyncio TaskGroups and Kotlin/Swift concurrency by arguing spawned tasks must have a scope."
   fromYear: 2
-  priority: 2
+  priority: 1
   doFirst: "A Conceptual Overview of asyncio"
 
 # ---- Simulation (87)
+  quality: 5
 
 - id: "docs-pymatgen-usage"
   title: "pymatgen Usage guide"
@@ -3743,6 +3727,7 @@
   fromYear: 1
   priority: 3
   roadmap: "game-developer"
+  quality: 3
 
 - id: "docs-pymatgen"
   title: "pymatgen documentation"
@@ -3758,9 +3743,10 @@
   estHours: 8
   summary: "Official docs for the Python library behind the Materials Project: structures, phase diagrams, I/O for DFT codes."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [repo-pymatgen-tutorials]
+  quality: 4
 
 - id: "docs-firedrake"
   title: "Firedrake: Getting started and documentation"
@@ -3776,9 +3762,10 @@
   estHours: 10
   summary: "Docs and tutorials for a UFL-based FEM system with tight PETSc integration and strong support for geophysical and plasma models."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "The FEniCSx Tutorial"
+  quality: 4
 
 - id: "docs-chaospy"
   title: "Chaospy documentation"
@@ -3797,6 +3784,7 @@
   priority: 3
   roadmap: "game-developer"
   doFirst: "Monte Carlo theory, methods and examples"
+  quality: 3
 
 - id: "docs-salib"
   title: "SALib - Sensitivity Analysis Library in Python"
@@ -3815,6 +3803,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-chaospy]
+  quality: 3
 
 - id: "docs-differentialequations-jl"
   title: "DifferentialEquations.jl documentation"
@@ -3830,9 +3819,10 @@
   estHours: 10
   summary: "Docs for the broadest ODE/SDE/DAE solver suite available, including solver-choice guidance for stiff problems."
   fromYear: 2
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   doFirst: "SciML Book"
+  quality: 5
 
 - id: "docs-deepxde"
   title: "DeepXDE documentation"
@@ -3848,9 +3838,10 @@
   estHours: 6
   summary: "User guide and worked examples for PINNs and DeepONets on forward and inverse problems."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [paper-deepxde]
+  quality: 4
 
 - id: "docs-clawpack"
   title: "Clawpack documentation"
@@ -3866,9 +3857,10 @@
   estHours: 8
   summary: "Docs for the finite volume conservation-law package that accompanies LeVeque's book, including PyClaw, AMRClaw and GeoClaw."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [book-leveque-fvm-hyperbolic]
+  quality: 4
 
 - id: "docs-chebfun-examples"
   title: "Chebfun Examples"
@@ -3884,9 +3876,10 @@
   estHours: 10
   summary: "Hundreds of short worked examples in approximation, ODEs, PDEs and rootfinding that make spectral ideas tangible."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-chebfun-guide]
+  quality: 4
 
 - id: "jhtdb-turbulence-database"
   title: "Johns Hopkins Turbulence Databases (JHTDB)"
@@ -3902,9 +3895,10 @@
   estHours: 10
   summary: "Query petabytes of DNS data (isotropic, channel, MHD, boundary layer) directly, so you can test turbulence statistics and models on real fields."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [mit-2-27-turbulent-flow]
+  quality: 4
 
 - id: "docs-vasp-wiki"
   title: "The VASP Manual (VASP Wiki)"
@@ -3920,9 +3914,10 @@
   estHours: 15
   summary: "Free reference and tutorials for the most used plane-wave DFT code in materials, even if the code itself is licensed."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [paper-capelle-dft-birds-eye]
+  quality: 4
 
 - id: "docs-gpaw"
   title: "GPAW: DFT and beyond within the projector-augmented wave method"
@@ -3941,6 +3936,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-ase]
+  quality: 3
 
 - id: "docs-pelec"
   title: "PeleC: an adaptive mesh refinement solver for compressible reacting flows"
@@ -3959,6 +3955,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [repo-amrex-tutorials]
+  quality: 3
 
 - id: "docs-sundials"
   title: "SUNDIALS Documentation"
@@ -3974,9 +3971,10 @@
   estHours: 10
   summary: "Manuals for CVODE, IDA, ARKODE and KINSOL, the stiff ODE/DAE and nonlinear solvers inside many multiphysics codes."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [book-hairer-wanner-stiff-odes]
+  quality: 4
 
 - id: "docs-hypre"
   title: "hypre Documentation"
@@ -3992,9 +3990,10 @@
   estHours: 8
   summary: "Reference for BoomerAMG and other scalable preconditioners that make implicit solves on millions of unknowns feasible."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "PETSc User-Guide"
+  quality: 4
 
 - id: "docs-amrex"
   title: "AMReX Documentation"
@@ -4010,8 +4009,9 @@
   estHours: 10
   summary: "Guide to the adaptive mesh refinement framework under WarpX, Castro and Pele: grids, particles, GPU parallel-for and load balancing."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "docs-mfem-examples"
   title: "MFEM Examples and Miniapps"
@@ -4027,9 +4027,10 @@
   estHours: 10
   summary: "Dozens of short, well-commented high-order FEM drivers (Poisson to Maxwell to hyperbolic DG) that double as a curriculum."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [book-fenics-book]
+  quality: 4
 
 - id: "docs-libceed"
   title: "libCEED User Manual"
@@ -4048,6 +4049,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-mfem-examples]
+  quality: 3
 
 - id: "docs-openturns"
   title: "OpenTURNS documentation"
@@ -4066,6 +4068,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-chaospy]
+  quality: 3
 
 - id: "docs-dakota"
   title: "Dakota: optimization and uncertainty quantification toolkit"
@@ -4081,9 +4084,10 @@
   estHours: 10
   summary: "Sandia's black-box driver for design studies, calibration and UQ around any simulation code, with extensive manuals."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [book-oberkampf-roy-vvuq]
+  quality: 4
 
 - id: "docs-dedalus"
   title: "Dedalus Project documentation"
@@ -4099,9 +4103,10 @@
   estHours: 8
   summary: "Tutorials and examples for writing spectral PDE solvers symbolically, from Rayleigh-Benard to MHD."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [book-boyd-chebyshev-fourier-spectral]
+  quality: 4
 
 - id: "docs-hermes-3"
   title: "Hermes-3 documentation"
@@ -4120,6 +4125,7 @@
   priority: 3
   roadmap: "game-developer"
   doFirst: "BOUT++ Documentation"
+  quality: 3
 
 - id: "mit-3320-atomistic-modeling"
   title: "Atomistic Computer Modeling of Materials (3.320 / SMA 5107, Spring 2005)"
@@ -4135,9 +4141,10 @@
   estHours: 40
   summary: "Two leaders of computational materials teach energy models, DFT, molecular dynamics and Monte Carlo with recorded lectures and hands-on labs."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "MIT 3.091"
+  quality: 4
 
 - id: "mit-3021j-modeling-simulation"
   title: "Introduction to Modeling and Simulation (3.021J, Spring 2012)"
@@ -4153,9 +4160,10 @@
   estHours: 35
   summary: "Walks the full length scale ladder, from continuum to molecular dynamics to quantum mechanics, so you know which method fits which question."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "MIT 3.091"
+  quality: 4
 
 - id: "course-mitmath-18s096-performance"
   title: "18.S096 Performance Computing in a High Level Language (IAP 2018)"
@@ -4173,6 +4181,7 @@
   fromYear: 2
   priority: 3
   roadmap: "game-developer"
+  quality: 3
 
 - id: "mit-16-225-computational-mechanics-materials"
   title: "Computational Mechanics of Materials (MIT 16.225, Fall 2003)"
@@ -4191,6 +4200,7 @@
   priority: 3
   roadmap: "game-developer"
   doFirst: "MIT 2.092"
+  quality: 3
 
 - id: "course-mitmath-18336-fast-methods"
   title: "MIT 18.336J Fast Methods for Partial Differential and Integral Equations (Spring 2026)"
@@ -4206,9 +4216,10 @@
   estHours: 45
   summary: "Current course repo on near-linear-time solvers: spectral methods, fast multipole, boundary integral equations for fluids and electromagnetics."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "MIT 18.335J"
+  quality: 4
 
 - id: "course-mitmath-18337-2026"
   title: "MIT 18.337 Parallel Computing, Scientific Machine Learning, and Modern Agentic Modelling (Spring 2026)"
@@ -4224,9 +4235,10 @@
   estHours: 45
   summary: "The latest edition of the Julia course joining parallel performance, differential equation solvers and scientific ML, with lectures and homework."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "SciML Book"
+  quality: 4
 
 - id: "kelly-intro-fem"
   title: "An Introduction to the Finite Element Method (Kelly lecture notes)"
@@ -4245,6 +4257,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [kelly-solid-mechanics-part-ii]
+  quality: 3
 
 - id: "book-leveque-fdm-ode-pde"
   title: "Finite Difference Methods for Ordinary and Partial Differential Equations: Steady-State and Time-Dependent Problems"
@@ -4260,10 +4273,11 @@
   estHours: 25
   summary: "A compact, rigorous course in stability, consistency and convergence of finite difference schemes, with stiffness and boundary-value problems treated clearly."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   note: "Paid"
   after: [course-mit-18330-numerical-analysis]
+  quality: 4
 
 - id: "book-trefethen-atap"
   title: "Approximation Theory and Approximation Practice, Extended Edition"
@@ -4279,10 +4293,11 @@
   estHours: 20
   summary: "Chebyshev interpolation and approximation taught through runnable Chebfun code, the foundation of spectral solvers; the first six chapters are free on this page."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   note: "Paid"
   after: [docs-chebfun-guide]
+  quality: 4
 
 - id: "book-fenics-book"
   title: "Automated Solution of Differential Equations by the Finite Element Method: The FEniCS Book"
@@ -4301,6 +4316,7 @@
   priority: 3
   roadmap: "game-developer"
   doFirst: "The FEniCSx Tutorial"
+  quality: 3
 
 - id: "book-leveque-fvm-hyperbolic"
   title: "Finite Volume Methods for Hyperbolic Problems"
@@ -4316,10 +4332,11 @@
   estHours: 30
   summary: "The standard text on high-resolution Godunov-type schemes, limiters and Riemann solvers that underpin shock, MHD and plasma-fluid codes."
   fromYear: 3
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   note: "Paid"
   doFirst: "Riemann Problems and Jupyter Solutions"
+  quality: 5
 
 - id: "book-hairer-wanner-stiff-odes"
   title: "Solving Ordinary Differential Equations II: Stiff and Differential-Algebraic Problems"
@@ -4335,10 +4352,11 @@
   estHours: 40
   summary: "The reference behind implicit Runge-Kutta, Rosenbrock and DAE solvers you will meet in SUNDIALS and DifferentialEquations.jl when chemistry or circuits make problems stiff."
   fromYear: 3
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   note: "Paid"
   after: [book-leveque-fdm-ode-pde]
+  quality: 5
 
 - id: "book-brenner-scott-fem-theory"
   title: "The Mathematical Theory of Finite Element Methods"
@@ -4354,10 +4372,11 @@
   estHours: 40
   summary: "The graduate standard on Sobolev spaces, error estimates and multigrid theory, for when you need to know why an FEM discretization converges."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   note: "Paid"
   after: [book-fenics-book]
+  quality: 4
 
 - id: "book-oberkampf-roy-vvuq"
   title: "Verification, Validation, and Uncertainty Quantification in Scientific Computing (2nd ed.)"
@@ -4373,10 +4392,11 @@
   estHours: 35
   summary: "The field's main textbook on proving a code solves its equations right and that they are the right equations, essential before trusting a simulation for a real device."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   note: "Paid"
   after: [paper-sandia-vv-cfd]
+  quality: 4
 
 - id: "book-birdsall-langdon-plasma-sim"
   title: "Plasma Physics via Computer Simulation"
@@ -4392,10 +4412,11 @@
   estHours: 30
   summary: "The classic derivation of particle-in-cell methods (weighting, field solves, aliasing, numerical heating) that every modern PIC code still follows."
   fromYear: 3
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   note: "Paid"
   doFirst: "Plasma Physics and Scientific Computing Blog"
+  quality: 5
 
 - id: "book-boyd-chebyshev-fourier-spectral"
   title: "Chebyshev and Fourier Spectral Methods (2nd ed.)"
@@ -4411,9 +4432,10 @@
   estHours: 40
   summary: "A practical, rule-of-thumb heavy guide to pseudospectral methods, the approach behind Dedalus, GX and DESC-style plasma and fluid solvers."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [book-trefethen-atap]
+  quality: 4
 
 - id: "docs-matgenb"
   title: "matgenb: pymatgen example notebooks"
@@ -4432,6 +4454,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-pymatgen]
+  quality: 3
 
 - id: "tutorial-enccs-julia-for-hpc"
   title: "Julia for high-performance scientific computing"
@@ -4450,6 +4473,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [course-mitmath-18s096-performance]
+  quality: 3
 
 - id: "tutorial-moose-workshop"
   title: "MOOSE Workshop"
@@ -4465,9 +4489,10 @@
   estHours: 12
   summary: "INL's full training deck covering FEM basics, the MOOSE object system and a step-by-step porous-flow app, the path into fusion and fission multiphysics codes."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "MOOSE Examples & Tutorials"
+  quality: 4
 
 - id: "tutorial-petsc-tutorials"
   title: "PETSc Tutorials"
@@ -4483,9 +4508,10 @@
   estHours: 10
   summary: "Curated PETSc examples by physics and solver type plus performance-analysis guides, the practical way into the PETSc manual."
   fromYear: 2
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   doFirst: "PETSc User-Guide"
+  quality: 5
 
 - id: "tutorial-dolfinx-demos"
   title: "DOLFINx Python Demos"
@@ -4501,9 +4527,10 @@
   estHours: 10
   summary: "Official runnable FEniCSx examples from Poisson to Stokes, solvers and electromagnetics, kept current with the library."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "The FEniCSx Tutorial"
+  quality: 4
 
 - id: "tutorial-ngsolve-i-tutorials"
   title: "Interactive NGSolve Tutorial (i-tutorials)"
@@ -4519,8 +4546,9 @@
   estHours: 12
   summary: "Jupyter lessons from basic finite elements to DG, MPI, GPUs and boundary elements in a high-performance FEM package."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "docs-abinit-tutorials"
   title: "ABINIT tutorials"
@@ -4539,6 +4567,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [paper-capelle-dft-birds-eye]
+  quality: 3
 
 - id: "repo-pymatgen-tutorials"
   title: "pymatgen_tutorials"
@@ -4557,6 +4586,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [repo-pymatgen]
+  quality: 3
 
 - id: "repo-waterlily-jl"
   title: "WaterLily.jl: fast, simple Cartesian-grid fluid simulator in Julia"
@@ -4575,6 +4605,7 @@
   priority: 3
   roadmap: "game-developer"
   doFirst: "CFD Python 12 steps"
+  quality: 3
 
 - id: "repo-dualsphysics"
   title: "DualSPHysics: GPU SPH solver"
@@ -4590,8 +4621,9 @@
   estHours: 15
   summary: "Mature GPU SPH code with many validated examples for sloshing, waves and free-surface flows."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "repo-polyfem"
   title: "PolyFEM: simple C++ and Python finite element library"
@@ -4607,9 +4639,10 @@
   estHours: 10
   summary: "Modern FEM library for elasticity, contact and fluids with a JSON interface and Python bindings, easy to experiment with."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [kelly-intro-fem]
+  quality: 4
 
 - id: "repo-sfepy"
   title: "SfePy: Simple Finite Elements in Python"
@@ -4628,6 +4661,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [kelly-intro-fem]
+  quality: 3
 
 - id: "repo-gridap-jl"
   title: "Gridap.jl: grid-based approximation of PDEs in Julia"
@@ -4643,9 +4677,10 @@
   estHours: 10
   summary: "Write weak forms almost as on paper for elasticity, Stokes and Navier-Stokes problems in Julia."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [kelly-intro-fem]
+  quality: 4
 
 - id: "repo-pysph"
   title: "PySPH: Python framework for smoothed particle hydrodynamics"
@@ -4663,6 +4698,7 @@
   fromYear: 2
   priority: 3
   roadmap: "game-developer"
+  quality: 3
 
 - id: "repo-spglib"
   title: "spglib"
@@ -4678,9 +4714,10 @@
   estHours: 3
   summary: "The library most materials tools use to find crystal symmetry and space groups."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "Crystallography (DoITPoMS TLP)"
+  quality: 4
 
 - id: "practice-trefethen-spectral-matlab-programs"
   title: "Spectral Methods in MATLAB (programs)"
@@ -4696,9 +4733,10 @@
   estHours: 10
   summary: "The 40 short programs from Trefethen's spectral methods book, each a complete differentiation-matrix PDE solver worth reading line by line."
   fromYear: 2
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   after: [book-trefethen-atap]
+  quality: 5
 
 - id: "repo-hyperpython"
   title: "HyperPython: a practical introduction to hyperbolic conservation laws"
@@ -4714,9 +4752,10 @@
   estHours: 6
   summary: "Short notebook course that builds finite volume solvers for traffic and gas dynamics from scratch, a gentle bridge to LeVeque and Clawpack."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [course-cfd-python-12-steps]
+  quality: 4
 
 - id: "repo-uqpy"
   title: "UQpy: Uncertainty Quantification with Python"
@@ -4735,6 +4774,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-chaospy]
+  quality: 3
 
 - id: "repo-sphinxsys"
   title: "SPHinXsys: multi-physics SPH library"
@@ -4752,6 +4792,7 @@
   fromYear: 3
   priority: 3
   roadmap: "game-developer"
+  quality: 3
 
 - id: "repo-mfc-multiphase"
   title: "MFC: exascale multiphase/multiphysics compressible flow solver"
@@ -4767,9 +4808,10 @@
   estHours: 15
   summary: "GPU-accelerated solver for compressible multiphase flows, bubbles and cavitation; the computational partner to Brennen's books."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [brennen-fundamentals-multiphase-flow]
+  quality: 4
 
 - id: "repo-pelec"
   title: "PeleC: compressible reacting flow solver (AMReX)"
@@ -4788,6 +4830,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [repo-amrex]
+  quality: 3
 
 - id: "repo-pelelmex"
   title: "PeleLMeX: low-Mach reacting flow solver (AMReX)"
@@ -4806,6 +4849,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [repo-pelec]
+  quality: 3
 
 - id: "repo-incompact3d"
   title: "Xcompact3d (Incompact3d): high-order DNS/LES solver"
@@ -4821,9 +4865,10 @@
   estHours: 15
   summary: "Sixth-order compact finite differences for turbulence DNS and LES at scale, a reference code for research-grade turbulence work."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [mit-2-27-turbulent-flow]
+  quality: 4
 
 - id: "repo-fluidity"
   title: "Fluidity: adaptive unstructured-mesh CFD"
@@ -4841,6 +4886,7 @@
   fromYear: 3
   priority: 3
   roadmap: "game-developer"
+  quality: 3
 
 - id: "repo-lethe"
   title: "Lethe: open-source CFD-DEM and CFD software"
@@ -4859,6 +4905,7 @@
   priority: 3
   roadmap: "game-developer"
   doFirst: "deal.II tutorials"
+  quality: 3
 
 - id: "repo-oomph-lib"
   title: "oomph-lib: object-oriented multi-physics finite-element library"
@@ -4874,9 +4921,10 @@
   estHours: 15
   summary: "Research FEM library with superb documented examples on fluid-structure interaction, free surfaces and large-displacement solids."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [kelly-intro-fem]
+  quality: 4
 
 - id: "repo-openfast"
   title: "OpenFAST: multi-physics wind turbine simulation"
@@ -4892,9 +4940,10 @@
   estHours: 15
   summary: "Couples aerodynamics, structural dynamics and control of flexible rotating blades, a real-world example of aeroelastic and rotordynamic modelling."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [mit-2-080j-structural-mechanics]
+  quality: 4
 
 - id: "repo-deepmd-kit"
   title: "DeePMD-kit"
@@ -4910,9 +4959,10 @@
   estHours: 15
   summary: "Widely used package for training deep potentials and running them in LAMMPS for large MD studies."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "LAMMPS"
+  quality: 4
 
 - id: "repo-pyiron"
   title: "pyiron"
@@ -4931,6 +4981,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-ase]
+  quality: 3
 
 - id: "repo-kim-api"
   title: "KIM API"
@@ -4949,6 +5000,7 @@
   priority: 3
   roadmap: "game-developer"
   doFirst: "LAMMPS"
+  quality: 3
 
 - id: "repo-p4pdes"
   title: "p4pdes: code for PETSc for Partial Differential Equations"
@@ -4964,9 +5016,10 @@
   estHours: 20
   summary: "All example codes from Bueler's SIAM book on solving PDEs with PETSc and Firedrake: KSP, SNES, TS, DMDA and multigrid in working C."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [tutorial-petsc-tutorials]
+  quality: 4
 
 - id: "repo-amrex-tutorials"
   title: "AMReX Tutorials"
@@ -4982,9 +5035,10 @@
   estHours: 10
   summary: "Hands-on examples of block-structured adaptive mesh refinement, particles and GPU offload in the framework behind WarpX and Castro."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-amrex]
+  quality: 4
 
 - id: "repo-cabana"
   title: "Cabana: performance portable library for particle-based simulations"
@@ -5003,6 +5057,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [video-kokkos-lecture-series]
+  quality: 3
 
 - id: "repo-uqtk"
   title: "UQTk: Uncertainty Quantification Toolkit"
@@ -5021,6 +5076,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [docs-chaospy]
+  quality: 3
 
 - id: "repo-neuralpde-jl"
   title: "NeuralPDE.jl: physics-informed neural network solvers"
@@ -5039,6 +5095,7 @@
   priority: 3
   roadmap: "game-developer"
   doFirst: "Universal Differential Equations"
+  quality: 3
 
 - id: "repo-modelingtoolkit-jl"
   title: "ModelingToolkit.jl: acausal modeling and symbolic-numeric compiler"
@@ -5054,27 +5111,10 @@
   estHours: 10
   summary: "Equation-based modeling with automatic index reduction and code generation, the modern way to build multiphysics system models."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "DifferentialEquations.jl docs"
-
-- id: "repo-hermes-3"
-  title: "Hermes-3: multifluid edge plasma model"
-  short: "Hermes-3 repo"
-  provider: "boutproject"
-  type: "practice"
-  url: "https://github.com/boutproject/hermes-3"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [simulation]
-  level: "advanced"
-  cost: "free"
-  estHours: 10
-  summary: "Source and tests for a modern modular edge-plasma code, good for seeing how a fusion simulation is structured."
-  fromYear: 3
-  priority: 3
-  roadmap: "game-developer"
-  after: [docs-hermes-3]
+  quality: 4
 
 - id: "paper-ml-for-fluid-mechanics"
   title: "Machine Learning for Fluid Mechanics"
@@ -5090,9 +5130,10 @@
   estHours: 4
   summary: "Widely cited review mapping ML techniques to flow modelling, optimisation and control; the entry point for data-driven fluids."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "MIT 2.06"
+  quality: 4
 
 - id: "paper-materials-project-commentary"
   title: "Commentary: The Materials Project: A materials genome approach to accelerating materials innovation"
@@ -5108,8 +5149,9 @@
   estHours: 2
   summary: "Explains the design and goals of the Materials Project database that most ML-for-materials work trains on."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "paper-capelle-dft-birds-eye"
   title: "A bird's-eye view of density-functional theory"
@@ -5125,9 +5167,10 @@
   estHours: 4
   summary: "A readable conceptual tour of Hohenberg-Kohn, Kohn-Sham and functionals before you run a DFT code."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "Learn Density Functional Theory"
+  quality: 4
 
 - id: "paper-deepxde"
   title: "DeepXDE: A deep learning library for solving differential equations"
@@ -5143,9 +5186,10 @@
   estHours: 3
   summary: "Clear tutorial-style presentation of PINNs with residual-based adaptive refinement and the library design behind them."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "Physics-informed neural networks"
+  quality: 4
 
 - id: "ctr-annual-research-briefs-2025"
   title: "CTR Annual Research Briefs 2025"
@@ -5164,6 +5208,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [stanford-ctr]
+  quality: 3
 
 - id: "paper-turbulence-modeling-age-of-data"
   title: "Turbulence Modeling in the Age of Data"
@@ -5179,9 +5224,10 @@
   estHours: 4
   summary: "Explains RANS/LES closure uncertainty and how data can improve models without breaking physics."
   fromYear: 3
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   after: [mit-2-27-turbulent-flow]
+  quality: 5
 
 - id: "ctr-summer-program-2024"
   title: "Proceedings of the 2024 Summer Program (Center for Turbulence Research)"
@@ -5200,6 +5246,7 @@
   priority: 3
   roadmap: "game-developer"
   after: [stanford-ctr]
+  quality: 3
 
 - id: "paper-universal-differential-equations"
   title: "Universal Differential Equations for Scientific Machine Learning"
@@ -5215,9 +5262,10 @@
   estHours: 4
   summary: "Argues for embedding small learned terms inside known physics equations and shows how adjoint solvers make that trainable."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "SciML Book"
+  quality: 4
 
 - id: "paper-sandia-vv-cfd"
   title: "Verification and Validation in Computational Fluid Dynamics (SAND2002-0529)"
@@ -5233,9 +5281,10 @@
   estHours: 6
   summary: "The foundational Sandia report defining code verification, solution verification and validation metrics that later standards built on."
   fromYear: 3
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   doFirst: "Code Verification by the Method of Manufactured Solutions"
+  quality: 5
 
 - id: "paper-sandia-vv-benchmarks"
   title: "Verification and Validation Benchmarks (SAND2007-2952C)"
@@ -5251,9 +5300,10 @@
   estHours: 2
   summary: "Explains how to design benchmarks that genuinely test a simulation code rather than just compare codes to each other."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [paper-sandia-vv-cfd]
+  quality: 4
 
 - id: "article-moreland-color-map-advice"
   title: "Color Map Advice for Scientific Visualization"
@@ -5269,8 +5319,9 @@
   estHours: 1
   summary: "Ready-to-use colormaps with downloadable tables and the reasoning behind each, from the designer of ParaView's default cool-warm map."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "stanford-ctr"
   title: "Center for Turbulence Research (Stanford)"
@@ -5292,6 +5343,7 @@
   after: [mit-2-27-turbulent-flow]
 
 # ---- Game development (12)
+  quality: 3
 
 - id: "unreal-gameplay-framework"
   title: "Gameplay Framework in Unreal Engine"
@@ -5523,8 +5575,9 @@
   estHours: 2
   summary: "Typesets numbers, units and uncertainties consistently, essential for physics and engineering papers full of measured quantities."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [book-lshort-not-so-short-latex]
+  quality: 3
 
 - id: "docs-ams-short-math-guide"
   title: "Short Math Guide for LaTeX"
@@ -5542,22 +5595,7 @@
   fromYear: 1
   priority: 2
   after: [docs-overleaf-learn-latex-30-min]
-
-- id: "docs-aps-journals-style-guide"
-  title: "APS Journals Style Guide for Authors"
-  short: "APS Style Guide"
-  provider: "American Physical Society"
-  type: "article"
-  url: "https://res.cloudinary.com/apsphysics/image/upload/APS_Journals_Style_Guide_Authors022326_rwlapn.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [math]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "The official Physical Review conventions for units, symbols, equations, figures and references, the reference to follow when writing physics or fusion-related papers."
-  fromYear: 2
-  priority: 2
+  quality: 4
 
 - id: "docs-nist-dlmf"
   title: "NIST Digital Library of Mathematical Functions"
@@ -5573,7 +5611,8 @@
   estHours: 20
   summary: "The authoritative reference for Bessel, Legendre, hypergeometric and other special functions, with identities, asymptotics and plots."
   fromYear: 2
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "docs-scipy-special"
   title: "Special functions (scipy.special)"
@@ -5589,8 +5628,9 @@
   estHours: 4
   summary: "The practical way to evaluate Bessel, Airy, elliptic and orthogonal-polynomial functions in your own simulations."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-nist-dlmf]
+  quality: 3
 
 - id: "docs-mpmath-functions"
   title: "Mathematical functions (mpmath documentation)"
@@ -5606,8 +5646,9 @@
   estHours: 4
   summary: "Arbitrary-precision special functions, useful for checking asymptotic approximations and hard numerical edge cases."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-nist-dlmf]
+  quality: 3
 
 - id: "video-borcherds-youtube-channel"
   title: "Richard E. Borcherds (YouTube lecture channel)"
@@ -5623,7 +5664,8 @@
   estHours: 80
   summary: "Full recorded course lectures by Borcherds on Lie groups, complex analysis, algebra and more, filmed by the lecturer himself."
   fromYear: 3
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "video-schuller-geometric-anatomy"
   title: "Lectures on the Geometric Anatomy of Theoretical Physics (2013/2014)"
@@ -5641,6 +5683,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 18.101"
+  quality: 4
 
 - id: "video-bender-psi-mathematical-physics"
   title: "Mathematical Physics (Perimeter Institute PSI lectures)"
@@ -5658,6 +5701,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 18.04"
+  quality: 4
 
 - id: "mit-3016-math-materials"
   title: "Mathematics for Materials Scientists and Engineers (3.016, Fall 2005)"
@@ -5673,8 +5717,9 @@
   estHours: 30
   summary: "Linear algebra, ODE/PDE and tensor tools taught directly on materials problems, a good bridge into modeling coursework."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.06"
+  quality: 3
 
 - id: "course-mit-18-112-complex-variable"
   title: "MIT 18.112 Functions of a Complex Variable (Fall 2008)"
@@ -5690,8 +5735,9 @@
   estHours: 60
   summary: "The rigorous graduate-level sequel to 18.04: Cauchy theory, conformal maps, Riemann mapping and analytic continuation done properly."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.04"
+  quality: 3
 
 - id: "course-mit-18-152-intro-pde"
   title: "MIT 18.152 Introduction to Partial Differential Equations (Fall 2011)"
@@ -5707,8 +5753,9 @@
   estHours: 60
   summary: "A proof-based first PDE course on heat, Laplace and wave equations with maximum principles and energy methods, the core of every field theory."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.03"
+  quality: 3
 
 - id: "course-mit-18-950-differential-geometry"
   title: "MIT 18.950 Differential Geometry (Fall 2008)"
@@ -5724,8 +5771,9 @@
   estHours: 50
   summary: "Curves and surfaces in R^3, curvature and geodesics: the concrete geometry to master before abstract manifolds and GR."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.02"
+  quality: 3
 
 - id: "course-mit-18-385j-nonlinear-dynamics-chaos"
   title: "MIT 18.385J Nonlinear Dynamics and Chaos (Fall 2014)"
@@ -5741,8 +5789,9 @@
   estHours: 50
   summary: "Phase planes, bifurcations, limit cycles and chaos at graduate pace, useful for plasma instabilities and particle-beam dynamics."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "Strogatz"
+  quality: 3
 
 - id: "course-mit-18-101-analysis-ii"
   title: "MIT 18.101 Analysis II (Fall 2005)"
@@ -5758,8 +5807,9 @@
   estHours: 60
   summary: "Multivariable analysis that ends in differential forms and Stokes' theorem on manifolds, the bridge from vector calculus to geometry."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.100A"
+  quality: 3
 
 - id: "course-mit-18-311-principles-applied-math"
   title: "MIT 18.311 Principles of Applied Mathematics (Spring 2014)"
@@ -5775,8 +5825,9 @@
   estHours: 50
   summary: "Conservation laws, traffic flow, shocks and dispersion: an approachable first look at nonlinear waves."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.03"
+  quality: 3
 
 - id: "course-mit-18-336-numerical-pde"
   title: "MIT 18.336 Numerical Methods for Partial Differential Equations (Spring 2009)"
@@ -5792,8 +5843,9 @@
   estHours: 50
   summary: "Finite differences, stability, conservation-law schemes and spectral methods, connecting PDE theory to the codes that solve it."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.152"
+  quality: 3
 
 - id: "course-skinner-cambridge-mathematical-methods"
   title: "Mathematical Methods (Cambridge Part IB lecture notes)"
@@ -5811,6 +5863,7 @@
   fromYear: 2
   priority: 2
   after: [tong-vector-calculus]
+  quality: 4
 
 - id: "course-skinner-principles-quantum-mechanics"
   title: "Principles of Quantum Mechanics (Cambridge lecture notes)"
@@ -5828,6 +5881,7 @@
   fromYear: 2
   priority: 2
   after: [course-skinner-cambridge-mathematical-methods]
+  quality: 4
 
 - id: "course-hunter-applied-math-notes"
   title: "Applied Mathematics (lecture notes)"
@@ -5843,8 +5897,9 @@
   estHours: 25
   summary: "Graduate applied-math notes on dimensional analysis, calculus of variations, Sturm-Liouville and stochastic processes."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.03"
+  quality: 3
 
 - id: "course-mit-18-306-advanced-pde"
   title: "MIT 18.306 Advanced Partial Differential Equations with Applications (Fall 2009)"
@@ -5860,8 +5915,9 @@
   estHours: 60
   summary: "Characteristics, shocks, dispersive waves and nonlinear PDE techniques of the kind used for plasma and fluid wave problems."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.152"
+  quality: 3
 
 - id: "course-mit-18-305-advanced-analytic-methods"
   title: "MIT 18.305 Advanced Analytic Methods in Science and Engineering (Fall 2004)"
@@ -5877,8 +5933,9 @@
   estHours: 60
   summary: "Asymptotic expansions, WKB, steepest descent and boundary layers, the toolbox for getting answers out of equations you cannot solve exactly."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.04"
+  quality: 3
 
 - id: "course-mit-18-965-geometry-of-manifolds"
   title: "MIT 18.965 Geometry of Manifolds (Fall 2004)"
@@ -5894,8 +5951,9 @@
   estHours: 70
   summary: "Graduate smooth manifolds: vector bundles, forms, de Rham cohomology and connections, the language of gauge theory."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.101"
+  quality: 3
 
 - id: "course-mit-18-966-geometry-of-manifolds-ii"
   title: "MIT 18.966 Geometry of Manifolds (Spring 2007)"
@@ -5911,8 +5969,9 @@
   estHours: 60
   summary: "Continues into complex and symplectic geometry, the structures behind Hamiltonian mechanics and modern field theory."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.965"
+  quality: 3
 
 - id: "course-mit-18-755-intro-lie-groups"
   title: "MIT 18.755 Introduction to Lie Groups (Fall 2004)"
@@ -5928,8 +5987,9 @@
   estHours: 60
   summary: "Lie groups, Lie algebras and the exponential map from a classic expert, the mathematics of continuous symmetry in physics."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.701"
+  quality: 3
 
 - id: "course-mit-18-745-lie-groups-algebras-i"
   title: "MIT 18.745 Lie Groups and Lie Algebras I (Fall 2020)"
@@ -5947,6 +6007,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 18.701"
+  quality: 4
 
 - id: "course-mit-18-712-representation-theory"
   title: "MIT 18.712 Introduction to Representation Theory (Fall 2010)"
@@ -5964,6 +6025,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 18.701"
+  quality: 4
 
 - id: "course-mit-18-354j-continuum-systems"
   title: "MIT 18.354J Nonlinear Dynamics II: Continuum Systems (Spring 2015)"
@@ -5981,6 +6043,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 18.385J"
+  quality: 4
 
 - id: "course-mit-18-307-integral-equations"
   title: "MIT 18.307 Integral Equations (Spring 2006)"
@@ -5996,8 +6059,9 @@
   estHours: 45
   summary: "Fredholm and Volterra equations, Green's functions and Wiener-Hopf methods used in scattering and boundary-value problems."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.04"
+  quality: 3
 
 - id: "course-mit-18-155-differential-analysis"
   title: "MIT 18.155 Differential Analysis (Fall 2004)"
@@ -6013,8 +6077,9 @@
   estHours: 60
   summary: "Distributions, Fourier transforms and Sobolev spaces as the rigorous foundation of linear PDE theory."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.102"
+  quality: 3
 
 - id: "course-borcherds-math261-lie-groups"
   title: "Mathematics 261AB: Lie groups (lecture notes)"
@@ -6030,8 +6095,9 @@
   estHours: 40
   summary: "56 lectures of Lie group notes from a Fields medallist, with many concrete examples of matrix groups."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.701"
+  quality: 3
 
 - id: "course-hunter-m204-asymptotic-analysis"
   title: "Math 204: Applied Asymptotic Analysis"
@@ -6047,8 +6113,9 @@
   estHours: 25
   summary: "Chapter notes ending in Prandtl boundary layers and homogenization, showing perturbation methods applied to real physics."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [book-hunter-asymptotics-notes]
+  quality: 3
 
 - id: "course-arovas-ucsd-221a-nonlinear-dynamics"
   title: "UCSD Physics 221A: Nonlinear Dynamics"
@@ -6064,8 +6131,9 @@
   estHours: 30
   summary: "Graduate physics treatment of maps, flows, bifurcations, Hamiltonian chaos and pattern formation with full lecture notes."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "Strogatz"
+  quality: 3
 
 - id: "feynman-ii-31-tensors"
   title: "The Feynman Lectures on Physics Vol. II, Ch. 31: Tensors"
@@ -6083,6 +6151,7 @@
   fromYear: 1
   priority: 2
   doFirst: "Feynman Vol. I"
+  quality: 4
 
 - id: "feynman-ii-38-elasticity"
   title: "The Feynman Lectures on Physics Vol. II, Ch. 38: Elasticity"
@@ -6098,8 +6167,9 @@
   estHours: 2
   summary: "Physical intuition for Young's modulus, shear, torsion and beam bending before the heavy formalism."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [feynman-ii-31-tensors]
+  quality: 3
 
 - id: "feynman-ii-39-elastic-materials"
   title: "The Feynman Lectures on Physics Vol. II, Ch. 39: Elastic Materials"
@@ -6115,8 +6185,9 @@
   estHours: 2
   summary: "The tensor of elasticity, elastic waves and where linear elasticity breaks down, in Feynman's clearest style."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [feynman-ii-38-elasticity]
+  quality: 3
 
 - id: "feynman-ii-40-dry-water"
   title: "The Feynman Lectures on Physics Vol. II, Ch. 40: The Flow of Dry Water"
@@ -6134,6 +6205,7 @@
   fromYear: 1
   priority: 2
   doFirst: "Feynman Vol. I"
+  quality: 4
 
 - id: "feynman-ii-41-wet-water"
   title: "The Feynman Lectures on Physics Vol. II, Ch. 41: The Flow of Wet Water"
@@ -6151,6 +6223,7 @@
   fromYear: 1
   priority: 2
   after: [feynman-ii-40-dry-water]
+  quality: 4
 
 - id: "book-ponce-complex-analysis-visual"
   title: "Complex Analysis: A Visual and Interactive Introduction"
@@ -6166,8 +6239,9 @@
   estHours: 15
   summary: "An interactive web book with live applets for complex mappings, a gentle visual on-ramp before 18.04."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [3b1b-calculus]
+  quality: 3
 
 - id: "book-higham-handbook-writing-math-sciences"
   title: "Handbook of Writing for the Mathematical Sciences (3rd ed.)"
@@ -6186,6 +6260,7 @@
   priority: 2
   note: "Paid"
   after: [notes-knuth-mathematical-writing]
+  quality: 4
 
 - id: "book-teschl-ode-dynamical-systems"
   title: "Ordinary Differential Equations and Dynamical Systems"
@@ -6203,6 +6278,7 @@
   fromYear: 2
   priority: 2
   doFirst: "MIT 18.03"
+  quality: 4
 
 - id: "book-shifrin-differential-geometry"
   title: "Differential Geometry: A First Course in Curves and Surfaces"
@@ -6218,8 +6294,9 @@
   estHours: 25
   summary: "A free, readable undergraduate text on curvature, geodesics and Gauss-Bonnet with well-chosen exercises."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.02"
+  quality: 3
 
 - id: "book-zee-group-theory-nutshell"
   title: "Group Theory in a Nutshell for Physicists"
@@ -6238,6 +6315,7 @@
   priority: 2
   note: "Paid"
   doFirst: "MIT 18.701"
+  quality: 4
 
 - id: "book-olver-intro-pde"
   title: "Introduction to Partial Differential Equations"
@@ -6256,6 +6334,7 @@
   priority: 2
   note: "Paid"
   doFirst: "MIT 18.03"
+  quality: 4
 
 - id: "book-tu-intro-manifolds"
   title: "An Introduction to Manifolds (2nd ed.)"
@@ -6274,6 +6353,7 @@
   priority: 2
   note: "Paid"
   doFirst: "MIT 18.101"
+  quality: 4
 
 - id: "book-landau-fluid-mechanics"
   title: "Fluid Mechanics (Course of Theoretical Physics, Vol. 6, 2nd Edition)"
@@ -6289,9 +6369,10 @@
   estHours: 40
   summary: "Dense physicist's treatment of fluids including shocks, combustion and relativistic flow; repays slow reading for plasma and fusion work."
   fromYear: 3
-  priority: 2
+  priority: 1
   note: "Paid"
   after: [book-kundu-fluid-mechanics]
+  quality: 5
 
 - id: "book-landau-theory-of-elasticity"
   title: "Theory of Elasticity (Course of Theoretical Physics, Vol. 7, 3rd Edition)"
@@ -6310,6 +6391,7 @@
   priority: 2
   note: "Paid"
   after: [kelly-solid-mechanics-part-ii]
+  quality: 4
 
 - id: "book-tinkham-intro-superconductivity"
   title: "Introduction to Superconductivity (2nd ed.)"
@@ -6325,9 +6407,10 @@
   estHours: 30
   summary: "The classic graduate text on Ginzburg-Landau theory, vortices and critical currents, the physics behind magnet conductors."
   fromYear: 3
-  priority: 2
+  priority: 1
   note: "Paid"
   doFirst: "Open Solid State Notes"
+  quality: 5
 
 - id: "book-woit-quantum-groups-representations"
   title: "Quantum Theory, Groups and Representations: An Introduction"
@@ -6345,6 +6428,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 18.701"
+  quality: 4
 
 - id: "book-teschl-math-methods-qm"
   title: "Mathematical Methods in Quantum Mechanics: With Applications to Schrödinger Operators"
@@ -6362,6 +6446,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 18.102"
+  quality: 4
 
 - id: "book-cvitanovic-birdtracks-group-theory"
   title: "Group Theory: Birdtracks, Lie's, and Exceptional Groups"
@@ -6377,8 +6462,9 @@
   estHours: 40
   summary: "A diagrammatic way to compute Casimirs and group-theory weights for gauge theories, freely available from the author."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [book-georgi-lie-algebras-particle-physics]
+  quality: 3
 
 - id: "book-hunter-asymptotics-notes"
   title: "Asymptotics (lecture notes)"
@@ -6394,8 +6480,9 @@
   estHours: 20
   summary: "Clear free notes on asymptotic expansions, Laplace and stationary-phase integrals, matched expansions and multiple scales."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.04"
+  quality: 3
 
 - id: "book-hunter-pde-notes"
   title: "Lecture Notes on PDEs"
@@ -6411,8 +6498,9 @@
   estHours: 30
   summary: "Graduate PDE theory with Sobolev spaces, elliptic, parabolic and hyperbolic equations, a free companion to Evans."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.152"
+  quality: 3
 
 - id: "book-hunter-nachtergaele-applied-analysis"
   title: "Applied Analysis"
@@ -6430,6 +6518,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 18.100A"
+  quality: 4
 
 - id: "book-arovas-group-theory-physics"
   title: "Lecture Notes on Group Theory in Physics"
@@ -6447,6 +6536,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 18.701"
+  quality: 4
 
 - id: "book-kirillov-intro-lie-groups"
   title: "Introduction to Lie Groups and Lie Algebras"
@@ -6462,8 +6552,9 @@
   estHours: 35
   summary: "A concise free graduate text from Lie groups to root systems and highest-weight theory."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.701"
+  quality: 3
 
 - id: "book-gallier-diffgeo-lie-groups"
   title: "Differential Geometry and Lie Groups: A Computational Perspective"
@@ -6481,6 +6572,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 18.06"
+  quality: 4
 
 - id: "book-sternberg-lie-algebras"
   title: "Lie algebras (lecture notes)"
@@ -6496,8 +6588,9 @@
   estHours: 30
   summary: "Harvard notes on semisimple Lie algebras, Dynkin diagrams and Weyl's character formula by a master expositor."
   fromYear: 3
-  priority: 2
+  priority: 3
   doFirst: "MIT 18.745"
+  quality: 3
 
 - id: "book-stein-shakarchi-complex-analysis"
   title: "Complex Analysis (Princeton Lectures in Analysis II)"
@@ -6513,9 +6606,10 @@
   estHours: 30
   summary: "A modern rigorous complex analysis course with applications to Fourier analysis and number theory."
   fromYear: 3
-  priority: 2
+  priority: 1
   note: "Paid"
   doFirst: "MIT 18.04"
+  quality: 5
 
 - id: "book-hall-lie-groups-algebras-reps"
   title: "Lie Groups, Lie Algebras, and Representations: An Elementary Introduction (2nd ed.)"
@@ -6531,9 +6625,10 @@
   estHours: 35
   summary: "Matrix-Lie-group first approach that reaches highest weights without manifold machinery, ideal for physics students."
   fromYear: 3
-  priority: 2
+  priority: 1
   note: "Paid"
   doFirst: "MIT 18.06"
+  quality: 5
 
 - id: "book-georgi-lie-algebras-particle-physics"
   title: "Lie Algebras In Particle Physics: from Isospin To Unified Theories"
@@ -6552,6 +6647,7 @@
   priority: 2
   note: "Paid"
   after: [book-zee-group-theory-nutshell]
+  quality: 4
 
 - id: "book-evans-pde"
   title: "Partial Differential Equations (2nd ed.)"
@@ -6567,9 +6663,10 @@
   estHours: 60
   summary: "The definitive graduate PDE text: representation formulas, Sobolev spaces, elliptic regularity and nonlinear methods."
   fromYear: 3
-  priority: 2
+  priority: 1
   note: "Paid"
   doFirst: "MIT 18.152"
+  quality: 5
 
 - id: "book-bender-orszag-advanced-math-methods"
   title: "Advanced Mathematical Methods for Scientists and Engineers I: Asymptotic Methods and Perturbation Theory"
@@ -6585,9 +6682,10 @@
   estHours: 50
   summary: "The bible of asymptotics, boundary layers, WKB and multiple scales, packed with worked physical problems."
   fromYear: 3
-  priority: 2
+  priority: 1
   note: "Paid"
   doFirst: "MIT 18.04"
+  quality: 5
 
 - id: "book-nakahara-geometry-topology-physics"
   title: "Geometry, Topology and Physics (2nd ed.)"
@@ -6603,9 +6701,10 @@
   estHours: 50
   summary: "Manifolds, fibre bundles, characteristic classes and index theorems explained for physicists working on gauge fields."
   fromYear: 3
-  priority: 2
+  priority: 1
   note: "Paid"
   doFirst: "MIT 18.101"
+  quality: 5
 
 - id: "book-lee-intro-smooth-manifolds"
   title: "Introduction to Smooth Manifolds (2nd ed.)"
@@ -6621,9 +6720,10 @@
   estHours: 60
   summary: "The standard thorough reference on smooth manifolds, forms, Lie groups and flows that all later geometry builds on."
   fromYear: 3
-  priority: 2
+  priority: 1
   note: "Paid"
   after: [book-tu-intro-manifolds]
+  quality: 5
 
 - id: "practice-summer-of-math-exposition"
   title: "Summer of Math Exposition (SoME)"
@@ -6639,8 +6739,9 @@
   estHours: 30
   summary: "An annual contest that gives you a deadline, an audience and peer feedback for a math or physics explainer, plus an archive of strong entries to study."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [article-victor-explorable-explanations]
+  quality: 3
 
 - id: "paper-lamport-21st-century-proof"
   title: "How to Write a 21st Century Proof"
@@ -6656,8 +6757,9 @@
   estHours: 3
   summary: "Introduces hierarchically structured proofs that make every step checkable, a technique that improves the rigor and readability of any theory section."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [book-of-proof]
+  quality: 3
 
 - id: "paper-etingof-intro-representation-theory"
   title: "Introduction to representation theory"
@@ -6675,6 +6777,7 @@
   fromYear: 3
   priority: 2
   doFirst: "MIT 18.701"
+  quality: 4
 
 - id: "article-mermin-writing-physics"
   title: "Writing Physics"
@@ -6691,6 +6794,7 @@
   summary: "A celebrated physicist explains how writing forces understanding and how to write equations and prose that physicists actually enjoy reading."
   fromYear: 1
   priority: 2
+  quality: 4
 
 - id: "article-tao-on-writing"
   title: "On writing (advice on writing papers)"
@@ -6707,6 +6811,7 @@
   summary: "Tao's collection of short essays on structuring mathematical papers, notation, and writing for the reader, directly useful when your ML or physics paper carries proofs or derivations."
   fromYear: 2
   priority: 2
+  quality: 4
 
 - id: "article-milne-mathlish"
   title: "Mathlish"
@@ -6722,8 +6827,9 @@
   estHours: 1
   summary: "A mathematician's notes on precise usage, notation and common slips in mathematical English, handy when polishing the formal parts of a paper."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [notes-knuth-mathematical-writing]
+  quality: 3
 
 - id: "article-bertschinger-tensor-calculus-gr"
   title: "General Relativity Notes (Introduction to Tensor Calculus for General Relativity and more)"
@@ -6743,6 +6849,7 @@
   after: [tong-vector-calculus]
 
 # ---- Electrical and mechanical engineering (180)
+  quality: 4
 
 - id: "docs-ti-analog-engineers-pocket-reference"
   title: "Analog Engineer's Pocket Reference Guide"
@@ -6758,7 +6865,8 @@
   estHours: 4
   summary: "Compact formula sheet for op-amp configurations, data converters, noise, PCB trace and sensor math to keep beside the bench."
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "docs-ti-analog-engineers-circuit-cookbook"
   title: "Analog Engineer's Circuit Cookbook: Amplifiers and Data Converters"
@@ -6774,8 +6882,9 @@
   estHours: 20
   summary: "Over 100 worked sub-circuits (current sense, filters, integrators, ADC drivers, RTD/thermocouple front ends) each with equations and SPICE files."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [docs-ti-analog-engineers-pocket-reference]
+  quality: 4
 
 - id: "docs-adacore-airborne-software"
   title: "AdaCore Technologies for Airborne Software"
@@ -6793,6 +6902,7 @@
   fromYear: 2
   priority: 4
   after: [course-adacore-intro-to-spark]
+  quality: 3
 
 - id: "docs-faa-ac-20-115d"
   title: "AC 20-115D: Airborne Software Development Assurance Using EUROCAE ED-12() and RTCA DO-178()"
@@ -6808,7 +6918,8 @@
   estHours: 2
   summary: "The official FAA circular recognizing DO-178C as the means of compliance for airborne software assurance."
   fromYear: 2
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "docs-nasa-langley-formal-methods"
   title: "NASA Langley Formal Methods Research Program"
@@ -6825,6 +6936,7 @@
   summary: "Portal to NASA's verified avionics tools (PVS library, DAIDALUS, PRECiSA) used in air traffic and autonomy."
   fromYear: 2
   priority: 4
+  quality: 3
 
 - id: "maglab-asc-jc-plots"
   title: "Plots (Applied Superconductivity Center, MagLab)"
@@ -6840,8 +6952,9 @@
   estHours: 1
   summary: "The standard critical-current-versus-field charts for Nb-Ti, Nb3Sn, Bi-2212 and REBCO, with data files to reuse."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "Superconductivity 101"
+  quality: 4
 
 - id: "docs-nist-xcom"
   title: "XCOM: Photon Cross Sections Database"
@@ -6857,8 +6970,9 @@
   estHours: 2
   summary: "Instant photon attenuation coefficients for any material mix, the first numbers you need for gamma shielding estimates."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "MIT 22.01"
+  quality: 4
 
 - id: "docs-icrp-publication-103"
   title: "ICRP Publication 103: The 2007 Recommendations of the ICRP"
@@ -6874,8 +6988,9 @@
   estHours: 6
   summary: "Explains the justification, optimisation and dose-limit system plus tissue weighting factors behind effective dose."
   fromYear: 2
-  priority: 4
+  priority: 1
   doFirst: "MIT 22.55J"
+  quality: 5
 
 - id: "docs-sckcen-myrrha"
   title: "MYRRHA: Multi-purpose hYbrid Research Reactor for High-tech Applications"
@@ -6893,6 +7008,7 @@
   fromYear: 2
   priority: 4
   after: [book-iaea-tecdoc-1766-ads-status]
+  quality: 3
 
 - id: "faa-ac-25-571-1d"
   title: "AC 25.571-1D: Damage Tolerance and Fatigue Evaluation of Structure"
@@ -6908,8 +7024,9 @@
   estHours: 6
   summary: "How certified aerospace structures are shown safe against fatigue cracks: damage tolerance, inspection intervals and residual strength in practice."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "Fracture and Fatigue (3.35)"
+  quality: 4
 
 - id: "nasa-std-5019a-fracture-control"
   title: "NASA-STD-5019A: Fracture Control Requirements for Spaceflight Hardware"
@@ -6925,8 +7042,9 @@
   estHours: 6
   summary: "The binding fracture-control rules for flight hardware (pressure vessels, rotating machinery, fasteners); pairs with the NASA-HDBK-5010 implementation handbook."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "Fracture and Fatigue (3.35)"
+  quality: 4
 
 - id: "docs-copilot-runtime-verification"
   title: "Copilot: Runtime Verification Framework"
@@ -6943,6 +7061,7 @@
   summary: "Stream language that compiles monitors to constant-time C99 for hard real-time flight systems."
   fromYear: 3
   priority: 4
+  quality: 3
 
 - id: "docs-mcnp-manuals"
   title: "MCNP Code Manuals (Los Alamos National Laboratory)"
@@ -6958,8 +7077,9 @@
   estHours: 30
   summary: "Official index of MCNP user and theory manuals, the reference Monte Carlo code used for most licensed shielding and criticality work."
   fromYear: 3
-  priority: 4
+  priority: 1
   after: [book-mcnp-primer-shultis-bahadori]
+  quality: 5
 
 - id: "docs-ornl-scale"
   title: "SCALE Code System (Oak Ridge National Laboratory)"
@@ -6975,8 +7095,9 @@
   estHours: 20
   summary: "Hub for SCALE, the ORNL suite for depletion, criticality and shielding with manuals, primers and validation reports."
   fromYear: 3
-  priority: 4
+  priority: 1
   doFirst: "MIT 22.05"
+  quality: 5
 
 - id: "docs-fluka-cern"
   title: "FLUKA (official CERN FLUKA website)"
@@ -6992,8 +7113,9 @@
   estHours: 20
   summary: "Home of FLUKA with manual, beginner guide and courses; the standard tool for accelerator shielding and activation around beams."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "Geant4 Documentation"
+  quality: 4
 
 - id: "docs-phits-jaea"
   title: "PHITS: Particle and Heavy Ion Transport code System"
@@ -7009,8 +7131,9 @@
   estHours: 20
   summary: "Free general-purpose transport code with manual and tutorials, widely used for accelerator, space-radiation and dosimetry problems."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [book-mcnp-primer-shultis-bahadori]
+  quality: 4
 
 - id: "docs-ukaea-fispact-ii"
   title: "FISPACT-II inventory and activation code (UKAEA service page)"
@@ -7028,6 +7151,7 @@
   fromYear: 3
   priority: 4
   doFirst: "FENDL"
+  quality: 3
 
 - id: "docs-fispact-ii-user-manual"
   title: "The FISPACT-II User Manual (UKAEA-R(18)001)"
@@ -7043,8 +7167,9 @@
   estHours: 15
   summary: "Full manual covering inventory equations, nuclear data handling and output quantities like dpa and activity for irradiated components."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [docs-ukaea-fispact-ii]
+  quality: 4
 
 - id: "docs-dagmc"
   title: "DAGMC: Direct Accelerated Geometry Monte Carlo"
@@ -7062,6 +7187,7 @@
   fromYear: 3
   priority: 4
   after: [docs-openmc]
+  quality: 3
 
 - id: "docs-openmc-theory-methods"
   title: "OpenMC Theory and Methodology"
@@ -7077,8 +7203,9 @@
   estHours: 15
   summary: "Readable derivations of geometry tracking, cross-section sampling, tallies, eigenvalue iteration and depletion as implemented in OpenMC."
   fromYear: 3
-  priority: 4
+  priority: 1
   doFirst: "MIT 22.05"
+  quality: 5
 
 - id: "docs-tendl-2023"
   title: "TENDL-2023: TALYS-based Evaluated Nuclear Data Library"
@@ -7094,8 +7221,9 @@
   estHours: 4
   summary: "Model-based library covering thousands of isotopes up to 200 MeV, the data source for activation and high-energy neutron work."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [docs-endf-b8]
+  quality: 4
 
 - id: "docs-nea-sinbad"
   title: "SINBAD: Shielding Integral Benchmark Archive and Database"
@@ -7111,8 +7239,9 @@
   estHours: 6
   summary: "Curated reactor, fusion and accelerator shielding experiments to validate your transport model against real measurements."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [book-mcnp-primer-shultis-bahadori]
+  quality: 4
 
 - id: "video-holman-electronics-1-vanderbilt"
   title: "YouTube Lectures on Electronics I"
@@ -7130,6 +7259,7 @@
   fromYear: 1
   priority: 4
   after: [book-ulaby-circuit-analysis-design]
+  quality: 3
 
 - id: "video-nptel-analog-circuits-krishnapura"
   title: "NOC: Analog Circuits"
@@ -7145,8 +7275,9 @@
   estHours: 40
   summary: "Krishnapura's lecture series builds analog design from negative feedback and op-amp models down to transistor amplifiers with unusual clarity."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "6.002 Circuits and Electronics"
+  quality: 4
 
 - id: "mitx-3022-1x-statmech"
   title: "Microstructural Evolution of Materials: Statistical Mechanics (MITx 3.022.1x)"
@@ -7162,8 +7293,9 @@
   estHours: 25
   summary: "Connects atomistic statistical mechanics to solid solutions and heat capacity, opening MIT's sophomore microstructure sequence."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "MIT 3.020"
+  quality: 4
 
 - id: "mitx-3022-2x-defects-diffusion"
   title: "Microstructural Evolution of Materials: Defects and Diffusion (MITx 3.022.2x)"
@@ -7181,6 +7313,7 @@
   fromYear: 2
   priority: 4
   doFirst: "MITx 3.022.1x"
+  quality: 3
 
 - id: "mitx-3022-3x-surfaces"
   title: "Microstructural Evolution of Materials: Surfaces & Surface-Driven Reactions (MITx 3.022.3x)"
@@ -7198,6 +7331,7 @@
   fromYear: 2
   priority: 4
   doFirst: "MITx 3.022.2x"
+  quality: 3
 
 - id: "mitx-3022-4x-phase-transformations"
   title: "Microstructural Evolution of Materials: Phase Transformations (MITx 3.022.4x)"
@@ -7213,8 +7347,9 @@
   estHours: 25
   summary: "Nucleation, precipitate growth, interface stability and dendrites, the mechanisms behind superalloy and steel microstructures."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "MITx 3.022.3x"
+  quality: 4
 
 - id: "video-nptel-analog-ic-design-krishnapura"
   title: "Analog IC Design"
@@ -7230,8 +7365,9 @@
   estHours: 40
   summary: "Full video course on CMOS op-amp design, compensation and noise from one of the best analog teachers online."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [video-nptel-analog-circuits-krishnapura]
+  quality: 4
 
 - id: "mit-16-001-materials-structures"
   title: "Unified Engineering: Materials and Structures (MIT 16.001, Fall 2021)"
@@ -7247,8 +7383,9 @@
   estHours: 60
   summary: "Modern aerospace intro to equilibrium, stress, strain, beams and material behaviour, taught the way MIT AeroAstro sophomores learn it."
   fromYear: 1
-  priority: 4
+  priority: 2
   doFirst: "MIT 8.01"
+  quality: 4
 
 - id: "course-mit-6071j-electronics-signals-measurement"
   title: "6.071J Introduction to Electronics, Signals, and Measurement (Spring 2006)"
@@ -7264,7 +7401,8 @@
   estHours: 60
   summary: "Lab-centred electronics course built for physicists and nuclear engineers (Hutchinson is a fusion scientist), covering circuits, amplifiers and measurement practice."
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "course-mit-22-s902-diy-geiger-counters"
   title: "Do-It-Yourself (DIY) Geiger Counters (MIT 22.S902, IAP 2015)"
@@ -7281,6 +7419,7 @@
   summary: "Hands-on build of a working Geiger counter, a cheap way to feel what counting statistics and detection really mean."
   fromYear: 1
   priority: 4
+  quality: 3
 
 - id: "mit-res-12-001-topics-fluid-dynamics"
   title: "Topics in Fluid Dynamics (MIT RES.12-001, Fall 2024)"
@@ -7296,8 +7435,9 @@
   estHours: 15
   summary: "Short, carefully written essays on Lagrangian vs Eulerian views, dimensional analysis/scaling and the Coriolis force, with runnable MATLAB examples."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "MIT 2.06"
+  quality: 4
 
 - id: "mit-1-061-transport-environment"
   title: "Transport Processes in the Environment (MIT 1.061, Fall 2008)"
@@ -7313,8 +7453,9 @@
   estHours: 40
   summary: "Diffusion, advection, dispersion, boundary layers and turbulent mixing taught with clear scaling arguments; excellent grounding for heat and species transport problems."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "MIT 2.06"
+  quality: 4
 
 - id: "mit-2-20-marine-hydrodynamics"
   title: "Marine Hydrodynamics (MIT 2.20, Spring 2005)"
@@ -7330,8 +7471,9 @@
   estHours: 40
   summary: "A clean, well-organized pass through potential flow, added mass, viscous drag and surface waves with complete lecture notes."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "MIT 2.06"
+  quality: 4
 
 - id: "mit-2-080j-structural-mechanics"
   title: "Structural Mechanics (MIT 2.080J, Fall 2013)"
@@ -7347,8 +7489,9 @@
   estHours: 50
   summary: "Beams, plates, buckling, plasticity and energy methods with a design focus; the step from 2.001 to analysing real thin-walled structures."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "MIT 2.001"
+  quality: 4
 
 - id: "mit-1-033-mechanics-material-systems"
   title: "Mechanics of Material Systems: An Energy Approach (MIT 1.033, Fall 2003)"
@@ -7366,6 +7509,7 @@
   fromYear: 2
   priority: 4
   doFirst: "MIT 2.001"
+  quality: 3
 
 - id: "course-mit-6301-solid-state-circuits"
   title: "6.301 Solid-State Circuits (Fall 2010)"
@@ -7381,8 +7525,9 @@
   estHours: 80
   summary: "Roberge's transistor-level analog course with labs, problem sets and exams that drills biasing, gain stages and op-amp internals the way MIT designers learned them."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "6.002 Circuits and Electronics"
+  quality: 4
 
 - id: "course-mit-6007-em-energy-motors-lasers"
   title: "6.007 Electromagnetic Energy: From Motors to Lasers (Spring 2011)"
@@ -7398,7 +7543,8 @@
   estHours: 60
   summary: "Connects Maxwell's equations to motors, solar cells and lasers with lab videos, a good engineering-flavoured second look at EM energy conversion."
   fromYear: 2
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "mit-3044-materials-processing"
   title: "Materials Processing (3.044, Spring 2013)"
@@ -7414,8 +7560,9 @@
   estHours: 30
   summary: "Teaches heat and mass transport scaling laws that decide how fast and how well you can cast, sinter or deposit a material."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "MIT 3.012"
+  quality: 4
 
 - id: "course-mit-22-15-essential-numerical-methods"
   title: "Essential Numerical Methods (MIT 22.15, Fall 2014)"
@@ -7431,8 +7578,9 @@
   estHours: 40
   summary: "Hutchinson's compact notes on ODE, PDE and diffusion solvers written for nuclear engineers who must build their own transport and heat codes."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "MIT 18.03"
+  quality: 4
 
 - id: "course-mit-22-55j-radiation-interactions"
   title: "Principles of Radiation Interactions (MIT 22.55J, Fall 2004)"
@@ -7448,8 +7596,9 @@
   estHours: 40
   summary: "Connects radiation physics to chemistry and biology (DNA damage, dose response), the basis of radiation protection limits."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "MIT 22.01"
+  quality: 4
 
 - id: "course-mit-22-38-reliability-risk"
   title: "Probability and Its Applications to Reliability, Quality Control, and Risk Assessment (MIT 22.38, Fall 2005)"
@@ -7465,8 +7614,9 @@
   estHours: 40
   summary: "Probability, fault trees and event trees applied to nuclear plant risk, the quantitative core of probabilistic safety assessment."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "MIT 6.041"
+  quality: 4
 
 - id: "mit-2-27-turbulent-flow"
   title: "Turbulent Flow and Transport (MIT 2.27, Spring 2002)"
@@ -7484,6 +7634,7 @@
   fromYear: 3
   priority: 4
   doFirst: "MIT 2.25"
+  quality: 3
 
 - id: "mit-12-800-gfd"
   title: "Fluid Dynamics of the Atmosphere and Ocean (MIT 12.800, Fall 2004)"
@@ -7499,8 +7650,9 @@
   estHours: 50
   summary: "Rotating, stratified fluid dynamics (vorticity, potential vorticity, waves, instabilities) taught rigorously; the same tools reappear in plasma and liquid-metal flows."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "MIT 2.25"
+  quality: 4
 
 - id: "mit-12-820-turbulence-ocean-atmosphere"
   title: "Turbulence in the Ocean and Atmosphere (MIT 12.820, Spring 2007)"
@@ -7518,6 +7670,7 @@
   fromYear: 3
   priority: 4
   after: [mit-2-27-turbulent-flow]
+  quality: 3
 
 - id: "mit-1-63-advanced-fluid-environment"
   title: "Advanced Fluid Dynamics of the Environment (MIT 1.63, Fall 2002)"
@@ -7535,6 +7688,7 @@
   fromYear: 3
   priority: 4
   doFirst: "MIT 2.25"
+  quality: 3
 
 - id: "mit-2-26-compressible-fluid-dynamics"
   title: "Compressible Fluid Dynamics (MIT 2.26, Spring 2004)"
@@ -7552,6 +7706,7 @@
   fromYear: 3
   priority: 4
   doFirst: "MIT 2.25"
+  quality: 3
 
 - id: "mit-2-23-hydrofoils-propellers"
   title: "Hydrofoils and Propellers (MIT 2.23, Spring 2007)"
@@ -7569,6 +7724,7 @@
   fromYear: 3
   priority: 4
   after: [mit-2-20-marine-hydrodynamics]
+  quality: 3
 
 - id: "mit-2-062j-wave-propagation"
   title: "Wave Propagation (MIT 2.062J, Spring 2017)"
@@ -7586,6 +7742,7 @@
   fromYear: 3
   priority: 4
   doFirst: "MIT 18.03"
+  quality: 3
 
 - id: "mit-2-341j-macromolecular-hydrodynamics"
   title: "Macromolecular Hydrodynamics (MIT 2.341J, Spring 2016)"
@@ -7603,6 +7760,7 @@
   fromYear: 3
   priority: 4
   doFirst: "MIT 2.25"
+  quality: 3
 
 - id: "mit-18-357-interfacial-phenomena"
   title: "Interfacial Phenomena (MIT 18.357, Fall 2010)"
@@ -7618,8 +7776,9 @@
   estHours: 30
   summary: "Bush's famous notes on surface tension, wetting, capillary flows and Marangoni effects; essential for propellant management and liquid-metal free surfaces."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "MIT 2.06"
+  quality: 4
 
 - id: "mit-2-081j-plates-shells"
   title: "Plates and Shells (MIT 2.081J, Spring 2007)"
@@ -7637,6 +7796,7 @@
   fromYear: 3
   priority: 4
   after: [mit-2-080j-structural-mechanics]
+  quality: 3
 
 - id: "mit-22-314j-structural-mechanics-nuclear"
   title: "Structural Mechanics in Nuclear Power Technology (MIT 22.314J, Fall 2006)"
@@ -7654,6 +7814,7 @@
   fromYear: 3
   priority: 4
   after: [mit-2-080j-structural-mechanics]
+  quality: 3
 
 - id: "course-mit-6331-advanced-circuit-techniques"
   title: "6.331 Advanced Circuit Techniques (Spring 2002)"
@@ -7669,8 +7830,9 @@
   estHours: 70
   summary: "Graduate follow-on to solid-state circuits with design labs on feedback amplifiers, compensation and precision analog building blocks."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [course-mit-6301-solid-state-circuits]
+  quality: 4
 
 - id: "course-mit-6776-high-speed-communication-circuits"
   title: "6.776 High Speed Communication Circuits (Spring 2005)"
@@ -7686,8 +7848,9 @@
   estHours: 70
   summary: "Graduate RF/high-speed IC course covering transmission lines, LNAs, mixers, oscillators and PLLs, the bridge from analog design to GHz systems."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [course-mit-6301-solid-state-circuits]
+  quality: 4
 
 - id: "course-mit-6641-em-fields-forces-motion"
   title: "6.641 Electromagnetic Fields, Forces, and Motion (Spring 2009)"
@@ -7703,8 +7866,9 @@
   estHours: 70
   summary: "Graduate electromechanics: fields, stresses and forces on conductors and dielectrics, directly relevant to magnets, pulsed-power hardware and actuators."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [mit-6-013]
+  quality: 4
 
 - id: "practice-wulff-advanced-integrated-circuits"
   title: "Advanced Integrated Circuits 2025 (aic2025)"
@@ -7720,8 +7884,9 @@
   estHours: 60
   summary: "Open course on modern analog/mixed-signal IC design with markdown lectures, compiled notes and open-PDK exercises, maintained by an industry analog designer."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [video-nptel-analog-ic-design-krishnapura]
+  quality: 4
 
 - id: "practice-murmann-ee628-open-source-ic"
   title: "EE 628: Analysis and Design of Integrated Circuits"
@@ -7737,8 +7902,9 @@
   estHours: 60
   summary: "Learn mixed-signal design end to end with open-source tools by building a voltmeter chip, from a leading ADC researcher."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [practice-wulff-advanced-integrated-circuits]
+  quality: 4
 
 - id: "course-spieler-physics-198-detectors"
   title: "Physics 198 Course Notes (UC Berkeley, Spring 1999)"
@@ -7756,6 +7922,7 @@
   fromYear: 3
   priority: 4
   after: [book-spieler-front-end-electronics-signal-processing]
+  quality: 3
 
 - id: "course-spieler-nss2008-front-end-systems"
   title: "Front-End Electronics Systems for Particle Detection and Imaging (IEEE NSS Short Course, Dresden 2008)"
@@ -7771,8 +7938,9 @@
   estHours: 8
   summary: "System-level short course on readout architectures, from sensors and preamps to digitization and data links, for detector and imaging systems."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [book-spieler-analog-digital-electronics-detectors]
+  quality: 4
 
 - id: "course-spieler-slac-detector-lectures"
   title: "SLAC Lectures on Detector Techniques (Fall 1998)"
@@ -7790,6 +7958,7 @@
   fromYear: 3
   priority: 4
   after: [course-spieler-physics-198-detectors]
+  quality: 3
 
 - id: "mit-360-symmetry-tensor-properties"
   title: "Symmetry, Structure, and Tensor Properties of Materials (3.60, Fall 2005)"
@@ -7805,8 +7974,9 @@
   estHours: 35
   summary: "Builds point and space groups and shows how crystal symmetry constrains tensor properties like elasticity and piezoelectricity."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "Crystallography (DoITPoMS TLP)"
+  quality: 4
 
 - id: "mit-3205-thermo-kinetics-materials"
   title: "Thermodynamics and Kinetics of Materials (3.205, Fall 2006)"
@@ -7822,9 +7992,10 @@
   estHours: 40
   summary: "Graduate core on solution thermodynamics, phase diagrams, diffusion and phase transformations that set alloy microstructure."
   fromYear: 3
-  priority: 4
+  priority: 2
   research: "diffusion"
   doFirst: "MIT 3.020"
+  quality: 4
 
 - id: "mit-321-kinetic-processes"
   title: "Kinetic Processes in Materials (3.21, Spring 2006)"
@@ -7843,6 +8014,7 @@
   priority: 4
   research: "diffusion"
   doFirst: "MIT 3.205"
+  quality: 3
 
 - id: "course-mit-22-106-neutron-interactions"
   title: "Neutron Interactions and Applications (MIT 22.106, Spring 2010)"
@@ -7858,8 +8030,9 @@
   estHours: 45
   summary: "Graduate treatment of neutron cross sections, slowing down and transport that underpins blanket and shielding neutronics."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "MIT 22.05"
+  quality: 4
 
 - id: "course-mit-22-101-applied-nuclear-physics"
   title: "Applied Nuclear Physics (MIT 22.101, Fall 2003)"
@@ -7875,8 +8048,9 @@
   estHours: 50
   summary: "Graduate-level nuclear structure, decay and reaction theory with full lecture notes, the physics behind every cross-section library."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "MIT 22.02"
+  quality: 4
 
 - id: "kelly-solid-mechanics-part-i"
   title: "Solid Mechanics Part I: An Introduction to Solid Mechanics"
@@ -7892,7 +8066,8 @@
   estHours: 30
   summary: "Free, carefully illustrated first course on stress, strain, beams, torsion and pressure vessels with worked examples."
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "book-ulaby-circuit-analysis-design"
   title: "Circuit Analysis and Design (3rd ed.)"
@@ -7909,6 +8084,7 @@
   summary: "A full, modern intro circuits textbook (Berkeley/Michigan/Utah authors) released open access, with op amps, RC/RL/RLC, phasors and frequency response."
   fromYear: 1
   priority: 4
+  quality: 3
 
 - id: "book-ashby-jones-engineering-materials-1"
   title: "Engineering Materials 1: An Introduction to Properties, Applications and Design (5th ed.)"
@@ -7924,8 +8100,9 @@
   estHours: 15
   summary: "Case-study driven intro to stiffness, strength, fracture, creep and corrosion written for engineers, not specialists."
   fromYear: 1
-  priority: 4
+  priority: 2
   note: "Paid"
+  quality: 4
 
 - id: "book-iaea-insag-4-safety-culture"
   title: "Safety Culture (Safety Series No. 75-INSAG-4)"
@@ -7941,7 +8118,8 @@
   estHours: 3
   summary: "The document that defined safety culture after Chernobyl; short, and relevant to any high-consequence engineering team."
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "book-doe-hdbk-1017-v1-material-science"
   title: "DOE Fundamentals Handbook: Material Science, Volume 1 of 2 (DOE-HDBK-1017/1-93)"
@@ -7958,6 +8136,7 @@
   summary: "Plain-language crystal structure, imperfections and material properties written for reactor operators."
   fromYear: 1
   priority: 4
+  quality: 3
 
 - id: "book-doe-hdbk-1017-v2-material-science"
   title: "DOE Fundamentals Handbook: Material Science, Volume 2 of 2 (DOE-HDBK-1017/2-93)"
@@ -7975,6 +8154,7 @@
   fromYear: 1
   priority: 4
   after: [book-doe-hdbk-1017-v1-material-science]
+  quality: 3
 
 - id: "kelly-solid-mechanics-part-ii"
   title: "Solid Mechanics Part II: Engineering Solid Mechanics – small strain"
@@ -7992,6 +8172,7 @@
   fromYear: 2
   priority: 4
   after: [kelly-solid-mechanics-part-i]
+  quality: 3
 
 - id: "brennen-internet-book-fluid-dynamics"
   title: "An Internet Book on Fluid Dynamics"
@@ -8008,6 +8189,7 @@
   summary: "Broad free reference from statics to turbulence, fluid machinery and multiphase flow, handy for quick, trustworthy look-ups."
   fromYear: 2
   priority: 4
+  quality: 3
 
 - id: "book-kundu-fluid-mechanics"
   title: "Fluid Mechanics (6th Edition)"
@@ -8023,9 +8205,10 @@
   estHours: 40
   summary: "The standard graduate-entry fluids text: kinematics, vorticity, boundary layers, instability and turbulence, with clear derivations to work through."
   fromYear: 2
-  priority: 4
+  priority: 1
   note: "Paid"
   doFirst: "MIT 2.06"
+  quality: 5
 
 - id: "book-ashby-materials-selection"
   title: "Materials Selection in Mechanical Design (5th Edition)"
@@ -8041,9 +8224,10 @@
   estHours: 25
   summary: "Teaches the property-chart and performance-index method for choosing materials, invaluable when designing for heat, stress and mass together."
   fromYear: 2
-  priority: 4
+  priority: 1
   note: "Paid"
   doFirst: "MIT 2.001"
+  quality: 5
 
 - id: "book-haus-melcher-em-fields-energy"
   title: "Electromagnetic Fields and Energy (RES.6-001)"
@@ -8059,8 +8243,9 @@
   estHours: 120
   summary: "The classic MIT field-theory text released in full with lecture and demonstration videos; deep treatment of quasistatics, energy and forces in electrical systems."
   fromYear: 2
-  priority: 4
+  priority: 1
   after: [mit-6-013]
+  quality: 5
 
 - id: "book-ulaby-electromagnetics-for-engineers"
   title: "Electromagnetics for Engineers"
@@ -8076,8 +8261,9 @@
   estHours: 80
   summary: "Free PDF of Ulaby's engineering EM text, a clear route through transmission lines, statics and wave propagation for future RF and accelerator work."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [book-ulaby-circuit-analysis-design]
+  quality: 4
 
 - id: "book-ellingson-electromagnetics-vol1"
   title: "Electromagnetics, Volume 1"
@@ -8093,7 +8279,8 @@
   estHours: 60
   summary: "CC-licensed junior-level EM textbook covering transmission lines, electrostatics, magnetostatics and waves with engineering examples."
   fromYear: 2
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "book-ellingson-electromagnetics-vol2"
   title: "Electromagnetics, Volume 2"
@@ -8109,8 +8296,9 @@
   estHours: 50
   summary: "Second open EM volume on reflection, waveguides, antennas and radiation, the material behind RF cavities, feeds and EMC."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [book-ellingson-electromagnetics-vol1]
+  quality: 4
 
 - id: "book-adi-op-amp-applications-handbook"
   title: "Op Amp Applications Handbook"
@@ -8126,8 +8314,9 @@
   estHours: 60
   summary: "Analog Devices' free op-amp bible covering specs, precision and high-speed applications, sensor interfaces, filters and layout."
   fromYear: 2
-  priority: 4
+  priority: 1
   doFirst: "TI Precision Labs: Op Amps"
+  quality: 5
 
 - id: "practice-kuphaldt-socratic-instrumentation"
   title: "Socratic Instrumentation (Lessons In Industrial Instrumentation)"
@@ -8143,8 +8332,9 @@
   estHours: 80
   summary: "CC-licensed instrumentation textbook and worksheets on sensors, signal transmission, control loops and measurement, the plant side of physics-machine engineering."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [book-lessons-in-electric-circuits]
+  quality: 4
 
 - id: "book-ott-electromagnetic-compatibility-engineering"
   title: "Electromagnetic Compatibility Engineering"
@@ -8160,9 +8350,10 @@
   estHours: 28
   summary: "The definitive reference on grounding, shielding, filtering and PCB layout for low noise and emissions, crucial when sensitive electronics sit near pulsed power."
   fromYear: 2
-  priority: 4
+  priority: 1
   note: "Paid"
   after: [docs-learnemc]
+  quality: 5
 
 - id: "book-hull-bacon-dislocations"
   title: "Introduction to Dislocations (5th ed.)"
@@ -8178,9 +8369,10 @@
   estHours: 15
   summary: "Compact standard text on dislocation geometry, motion and interactions that explain strength, creep and radiation hardening."
   fromYear: 2
-  priority: 4
+  priority: 1
   note: "Paid"
   doFirst: "Introduction to Dislocations (DoITPoMS TLP)"
+  quality: 5
 
 - id: "book-ashby-jones-engineering-materials-2"
   title: "Engineering Materials 2: An Introduction to Microstructures and Processing (4th ed.)"
@@ -8196,9 +8388,10 @@
   estHours: 15
   summary: "Follow-on volume linking phase diagrams and processing to the microstructures of metals, ceramics and composites."
   fromYear: 2
-  priority: 4
+  priority: 2
   note: "Paid"
   after: [book-ashby-jones-engineering-materials-1]
+  quality: 4
 
 - id: "book-mcnp-primer-shultis-bahadori"
   title: "An MCNP Primer (2024 edition)"
@@ -8214,8 +8407,9 @@
   estHours: 8
   summary: "The gentlest walk through MCNP input decks, geometry cells, sources and tallies, ideal before touching any production transport model."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "MIT 22.01"
+  quality: 4
 
 - id: "book-iaea-gsr-part-3"
   title: "Radiation Protection and Safety of Radiation Sources: International Basic Safety Standards (IAEA GSR Part 3)"
@@ -8231,8 +8425,9 @@
   estHours: 12
   summary: "The international rulebook for dose limits, exposure situations and protection requirements that every facility design must satisfy."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "ICRP Publication 103"
+  quality: 4
 
 - id: "book-iaea-fukushima-tv1"
   title: "The Fukushima Daiichi Accident, Technical Volume 1/5: Description and Context of the Accident"
@@ -8248,8 +8443,9 @@
   estHours: 10
   summary: "Authoritative timeline of plant state, station blackout and unit-by-unit progression, the factual base for any lessons learned."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [book-nrc-reactor-concepts-r100]
+  quality: 4
 
 - id: "book-iaea-insag-10-defence-in-depth"
   title: "Defence in Depth in Nuclear Safety (INSAG-10)"
@@ -8265,8 +8461,9 @@
   estHours: 3
   summary: "Lays out the five levels of defence in depth and barriers, the design philosophy behind every reactor safety case."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [book-iaea-insag-4-safety-culture]
+  quality: 4
 
 - id: "book-iaea-insag-12-basic-safety-principles"
   title: "Basic Safety Principles for Nuclear Power Plants (75-INSAG-3 Rev.1, INSAG-12)"
@@ -8282,8 +8479,9 @@
   estHours: 6
   summary: "Compact list of the management, technical and siting principles that define a safe plant, with rationale for each."
   fromYear: 2
-  priority: 4
+  priority: 1
   after: [book-iaea-insag-10-defence-in-depth]
+  quality: 5
 
 - id: "book-nrc-nureg-0492-fault-tree-handbook"
   title: "Fault Tree Handbook (NUREG-0492)"
@@ -8299,8 +8497,9 @@
   estHours: 10
   summary: "The original NRC fault-tree text: Boolean algebra, minimal cut sets and quantification as used in reactor PRA."
   fromYear: 2
-  priority: 4
+  priority: 1
   doFirst: "MIT 22.38"
+  quality: 5
 
 - id: "book-iaea-tecdoc-985-ads"
   title: "Accelerator Driven Systems: Energy Generation and Transmutation of Nuclear Waste. Status Report (IAEA-TECDOC-985)"
@@ -8318,6 +8517,7 @@
   fromYear: 2
   priority: 4
   doFirst: "MIT 22.05"
+  quality: 3
 
 - id: "book-essential-candu"
   title: "The Essential CANDU: A Textbook on the CANDU Nuclear Power Plant Technology"
@@ -8333,8 +8533,9 @@
   estHours: 60
   summary: "Free full textbook from neutron physics through thermalhydraulics, safety, materials and fuel cycle, one plant type end to end."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [book-nrc-reactor-concepts-r100]
+  quality: 4
 
 - id: "book-knoll-radiation-detection"
   title: "Radiation Detection and Measurement (4th edition)"
@@ -8350,9 +8551,10 @@
   estHours: 30
   summary: "The standard reference on gas, scintillation and semiconductor detectors and counting statistics for any diagnostic or dosimetry work."
   fromYear: 2
-  priority: 4
+  priority: 1
   note: "Paid"
   doFirst: "MIT 22.01"
+  quality: 5
 
 - id: "book-krane-introductory-nuclear-physics"
   title: "Introductory Nuclear Physics"
@@ -8368,9 +8570,10 @@
   estHours: 30
   summary: "Clear undergraduate nuclear physics covering decay, reactions, fission and fusion with many worked problems."
   fromYear: 2
-  priority: 4
+  priority: 1
   note: "Paid"
   doFirst: "MIT 22.02"
+  quality: 5
 
 - id: "kelly-solid-mechanics-part-iii"
   title: "Solid Mechanics Part III: Foundations of Continuum Mechanics"
@@ -8386,8 +8589,9 @@
   estHours: 40
   summary: "Tensor algebra, kinematics of finite deformation, balance laws and objectivity explained slowly enough for self-study."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [kelly-solid-mechanics-part-ii]
+  quality: 4
 
 - id: "kelly-solid-mechanics-part-iv"
   title: "Solid Mechanics Part IV: Material Models in Continuum Solid Mechanics"
@@ -8405,6 +8609,7 @@
   fromYear: 3
   priority: 4
   after: [kelly-solid-mechanics-part-iii]
+  quality: 3
 
 - id: "bower-applied-mechanics-of-solids"
   title: "Applied Mechanics of Solids"
@@ -8420,8 +8625,9 @@
   estHours: 80
   summary: "A complete graduate solid mechanics text online: finite strain, constitutive laws, FEM implementation with code, fracture and fatigue."
   fromYear: 3
-  priority: 4
+  priority: 1
   doFirst: "MIT 2.001"
+  quality: 5
 
 - id: "brennen-cavitation-bubble-dynamics"
   title: "Cavitation and Bubble Dynamics"
@@ -8437,8 +8643,9 @@
   estHours: 30
   summary: "The standard reference on bubble growth, collapse and cavitation damage, made free by the author; vital for pumps, injectors and liquid-metal loops."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "MIT 2.06"
+  quality: 4
 
 - id: "brennen-fundamentals-multiphase-flow"
   title: "Fundamentals of Multiphase Flow"
@@ -8454,8 +8661,9 @@
   estHours: 40
   summary: "Free graduate text on bubbly, particulate, granular and boiling flows with sound physical modelling of each regime."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "MIT 2.25"
+  quality: 4
 
 - id: "brennen-hydrodynamics-of-pumps"
   title: "Hydrodynamics of Pumps"
@@ -8471,8 +8679,9 @@
   estHours: 30
   summary: "Pump fluid mechanics, cavitation and rotordynamic instabilities, written with rocket turbopumps (SSME) clearly in mind."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [brennen-cavitation-bubble-dynamics]
+  quality: 4
 
 - id: "book-anderson-fracture-mechanics"
   title: "Fracture Mechanics: Fundamentals and Applications (4th Edition)"
@@ -8488,9 +8697,10 @@
   estHours: 35
   summary: "The go-to fracture text: LEFM, J-integral, fatigue crack growth and fitness-for-service assessment for pressure vessels and flight hardware."
   fromYear: 3
-  priority: 4
+  priority: 1
   note: "Paid"
   doFirst: "MIT 2.001"
+  quality: 5
 
 - id: "book-steer-fundamentals-microwave-rf-design"
   title: "Fundamentals of Microwave and RF Design"
@@ -8506,8 +8716,9 @@
   estHours: 100
   summary: "Open-access microwave engineering text on transmission lines, S-parameters, matching and planar circuits, a free alternative to Pozar."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [book-ellingson-electromagnetics-vol2]
+  quality: 4
 
 - id: "book-spieler-analog-digital-electronics-detectors"
   title: "Analog and Digital Electronics for Detectors"
@@ -8523,8 +8734,9 @@
   estHours: 15
   summary: "Spieler's written text on detector signal formation, preamplifiers, shaping, noise and digitization, the core of physics readout electronics."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [article-adi-mt047-op-amp-noise]
+  quality: 4
 
 - id: "book-spieler-front-end-electronics-signal-processing"
   title: "Front-End Electronics and Signal Processing"
@@ -8540,8 +8752,9 @@
   estHours: 10
   summary: "Concise text on charge-sensitive amplifiers, pulse shaping and equivalent noise charge, the design math behind every particle detector front end."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [book-spieler-analog-digital-electronics-detectors]
+  quality: 4
 
 - id: "book-pozar-microwave-engineering"
   title: "Microwave Engineering (4th ed.)"
@@ -8557,9 +8770,10 @@
   estHours: 30
   summary: "The standard microwave text for S-parameters, matching, waveguides and resonators, the foundation for RF cavities and accelerator RF systems."
   fromYear: 3
-  priority: 4
+  priority: 1
   note: "Paid"
   after: [book-ellingson-electromagnetics-vol2]
+  quality: 5
 
 - id: "book-erickson-fundamentals-power-electronics"
   title: "Fundamentals of Power Electronics (3rd ed.)"
@@ -8575,9 +8789,10 @@
   estHours: 35
   summary: "The rigorous standard text on converter modelling, control and magnetics behind the CU Boulder courses; essential for magnet and pulsed supplies."
   fromYear: 3
-  priority: 4
+  priority: 1
   note: "Paid"
   doFirst: "Introduction to Power Electronics"
+  quality: 5
 
 - id: "book-williams-carter-tem"
   title: "Transmission Electron Microscopy: A Textbook for Materials Science (2nd ed.)"
@@ -8593,9 +8808,10 @@
   estHours: 40
   summary: "The standard TEM text covering diffraction, imaging and spectroscopy for characterising defects and phases."
   fromYear: 3
-  priority: 4
+  priority: 1
   note: "Paid"
   after: [doitpoms-diffraction-imaging]
+  quality: 5
 
 - id: "book-iaea-fukushima-tv2"
   title: "The Fukushima Daiichi Accident, Technical Volume 2/5: Safety Assessment"
@@ -8613,6 +8829,7 @@
   fromYear: 3
   priority: 4
   after: [book-iaea-fukushima-tv1]
+  quality: 3
 
 - id: "book-iaea-tecdoc-1766-ads-status"
   title: "Status of Accelerator Driven Systems Research and Technology Development (IAEA-TECDOC-1766)"
@@ -8628,8 +8845,9 @@
   estHours: 12
   summary: "Survey of ADS programmes, spallation targets, subcritical cores and coupling experiments worldwide, the best single ADS reference."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "JUAS ADS lecture"
+  quality: 4
 
 - id: "book-duderstadt-hamilton-reactor-analysis"
   title: "Nuclear Reactor Analysis"
@@ -8645,9 +8863,10 @@
   estHours: 40
   summary: "Classic graduate text on transport, diffusion, multigroup and kinetics, hosted in the University of Michigan repository."
   fromYear: 3
-  priority: 4
+  priority: 1
   research: "diffusion"
   doFirst: "MIT 22.05"
+  quality: 5
 
 - id: "book-was-radiation-materials-science"
   title: "Fundamentals of Radiation Materials Science: Metals and Alloys (2nd edition)"
@@ -8663,9 +8882,10 @@
   estHours: 35
   summary: "The definitive text on displacement damage, segregation, swelling and embrittlement, essential for fusion first-wall and blanket materials."
   fromYear: 3
-  priority: 4
+  priority: 1
   note: "Paid"
   doFirst: "MIT 22.14"
+  quality: 5
 
 - id: "book-stacey-nuclear-reactor-physics"
   title: "Nuclear Reactor Physics (3rd edition)"
@@ -8681,10 +8901,11 @@
   estHours: 35
   summary: "Comprehensive reactor physics from diffusion to transport, perturbation theory and fast and fusion-hybrid systems."
   fromYear: 3
-  priority: 4
+  priority: 2
   research: "diffusion"
   note: "Paid"
   doFirst: "MIT 22.05"
+  quality: 4
 
 - id: "doitpoms-diffraction-imaging"
   title: "Diffraction and Imaging (DoITPoMS TLP)"
@@ -8700,8 +8921,9 @@
   estHours: 2
   summary: "Builds intuition for how diffraction patterns and images relate, the basis of XRD and electron microscopy."
   fromYear: 1
-  priority: 4
+  priority: 2
   doFirst: "Crystallography (DoITPoMS TLP)"
+  quality: 4
 
 - id: "doitpoms-ferromagnetic-materials"
   title: "Ferromagnetic Materials (DoITPoMS TLP)"
@@ -8717,7 +8939,8 @@
   estHours: 2
   summary: "Domains, hysteresis and soft versus hard magnets explained with interactive animations."
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "doitpoms-dielectric-materials"
   title: "Dielectric Materials (DoITPoMS TLP)"
@@ -8733,7 +8956,8 @@
   estHours: 2
   summary: "Polarisation mechanisms, permittivity and breakdown, useful for insulation in magnets and electronics."
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "doitpoms-microstructural-examination"
   title: "Microstructural Examination (DoITPoMS TLP)"
@@ -8750,6 +8974,7 @@
   summary: "How to read grain size, phases and defects from micrographs, the everyday language of metallurgy."
   fromYear: 1
   priority: 4
+  quality: 3
 
 - id: "doitpoms-powder-processing"
   title: "Powder Processing (DoITPoMS TLP)"
@@ -8766,6 +8991,7 @@
   summary: "Sintering and powder routes that produce ceramics and tungsten parts that cannot easily be cast."
   fromYear: 1
   priority: 4
+  quality: 3
 
 - id: "doitpoms-intro-semiconductors"
   title: "Introduction to Semiconductors (DoITPoMS TLP)"
@@ -8781,14 +9007,15 @@
   estHours: 2
   summary: "Band gaps, doping and carrier statistics from a materials perspective before diving into device physics."
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "doitpoms-brillouin-zones"
   title: "Brillouin Zones (DoITPoMS TLP)"
   short: "Brillouin Zones TLP"
   provider: "DoITPoMS, University of Cambridge"
   type: "article"
-  url: "https://eng.libretexts.org/Bookshelves/Materials_Science/TLP_Library_I/08%3A_Brillouin_Zones"
+  url: "https://www.doitpoms.ac.uk/tlplib/brillouin_zones/index.php"
   urlVerified: true
   lastVerified: 2026-10-21
   tracks: [engineering]
@@ -8797,8 +9024,9 @@
   estHours: 2
   summary: "Visual introduction to reciprocal space zones and why they shape band structure in metals and semiconductors."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [doitpoms-reciprocal-space]
+  quality: 4
 
 - id: "doitpoms-crystallographic-texture"
   title: "Crystallographic Texture (DoITPoMS TLP)"
@@ -8816,6 +9044,7 @@
   fromYear: 2
   priority: 4
   doFirst: "Crystallography (DoITPoMS TLP)"
+  quality: 3
 
 - id: "doitpoms-electromigration"
   title: "Electromigration (DoITPoMS TLP)"
@@ -8833,6 +9062,7 @@
   fromYear: 2
   priority: 4
   doFirst: "Diffusion (DoITPoMS TLP)"
+  quality: 3
 
 - id: "doitpoms-epitaxial-growth"
   title: "Epitaxial Growth (DoITPoMS TLP)"
@@ -8850,6 +9080,7 @@
   fromYear: 2
   priority: 4
   doFirst: "Crystallography (DoITPoMS TLP)"
+  quality: 3
 
 - id: "doitpoms-indexing-electron-diffraction"
   title: "Indexing Electron Diffraction Patterns (DoITPoMS TLP)"
@@ -8867,6 +9098,7 @@
   fromYear: 2
   priority: 4
   after: [doitpoms-reciprocal-space]
+  quality: 3
 
 - id: "doitpoms-pvd-thin-films"
   title: "Physical Vapour Deposition of Thin Films (DoITPoMS TLP)"
@@ -8883,6 +9115,7 @@
   summary: "Sputtering and evaporation fundamentals used for coatings, chip metallisation and superconducting tapes."
   fromYear: 2
   priority: 4
+  quality: 3
 
 - id: "doitpoms-reciprocal-space"
   title: "Reciprocal Space (DoITPoMS TLP)"
@@ -8898,8 +9131,9 @@
   estHours: 2
   summary: "Gentle construction of the reciprocal lattice and Ewald sphere needed for diffraction and band theory."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "Lattice Planes and Miller Indices"
+  quality: 4
 
 - id: "tutorial-mcnp-criticality-primer-brewer"
   title: "Criticality Calculations with MCNP5: A Primer (LA-UR-09-00380)"
@@ -8915,8 +9149,9 @@
   estHours: 10
   summary: "Step-by-step k-eigenvalue problems with worked inputs, teaching how criticality safety analysts actually set up and check runs."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [book-mcnp-primer-shultis-bahadori]
+  quality: 4
 
 - id: "practice-nasa-fret"
   title: "FRET: Formal Requirements Elicitation Tool"
@@ -8932,7 +9167,8 @@
   estHours: 6
   summary: "Turns structured English requirements into temporal logic that model checkers and monitors can use."
   fromYear: 2
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "practice-iaea-reactor-simulators"
   title: "Nuclear Reactor Simulators for Education and Training"
@@ -8950,6 +9186,7 @@
   fromYear: 2
   priority: 4
   after: [book-nrc-reactor-concepts-r100]
+  quality: 3
 
 - id: "practice-murmann-adc-survey"
   title: "ADC Performance Survey 1997-2026"
@@ -8965,8 +9202,9 @@
   estHours: 6
   summary: "The standard dataset of published ADC performance plus a short-course deck, showing the real speed/resolution/power trade space for detector and accelerator DAQ."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [article-adi-mt001-adc-snr-formula]
+  quality: 4
 
 - id: "practice-gmid-design-book-code"
   title: "Systematic Design of Analog CMOS Circuits (companion code)"
@@ -8982,8 +9220,9 @@
   estHours: 15
   summary: "Lookup-table scripts and examples for the gm/ID sizing method that makes analog hand analysis agree with SPICE in nanoscale CMOS."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [video-nptel-analog-ic-design-krishnapura]
+  quality: 4
 
 - id: "practice-mosplot-gmid"
   title: "Mosplot: gm/ID analog design framework"
@@ -9001,6 +9240,7 @@
   fromYear: 3
   priority: 4
   after: [practice-gmid-design-book-code]
+  quality: 3
 
 - id: "practice-nasa-pvslib"
   title: "NASA PVS Library"
@@ -9018,6 +9258,7 @@
   fromYear: 3
   priority: 4
   after: [book-concrete-semantics]
+  quality: 3
 
 - id: "practice-nasa-ogma"
   title: "Ogma: NASA tool for generating runtime monitors"
@@ -9035,23 +9276,7 @@
   fromYear: 3
   priority: 4
   after: [docs-copilot-runtime-verification]
-
-- id: "repo-njoy21"
-  title: "NJOY21 nuclear data processing system"
-  short: "NJOY21"
-  provider: "Los Alamos National Laboratory"
-  type: "practice"
-  url: "https://github.com/njoy/NJOY21"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "advanced"
-  cost: "free"
-  estHours: 10
-  summary: "Modern C++ rewrite of NJOY that turns ENDF evaluations into transport-ready libraries; reading it demystifies cross-section processing."
-  fromYear: 3
-  priority: 4
-  after: [docs-endf-b8]
+  quality: 3
 
 - id: "repo-geant4"
   title: "Geant4 source code"
@@ -9067,8 +9292,9 @@
   estHours: 20
   summary: "Source and examples of the CERN particle transport toolkit, useful for detector response and radiation-effects simulations in C++."
   fromYear: 3
-  priority: 4
+  priority: 1
   doFirst: "Geant4 Documentation"
+  quality: 5
 
 - id: "repo-frensie"
   title: "FRENSIE Monte Carlo particle transport framework"
@@ -9086,6 +9312,7 @@
   fromYear: 3
   priority: 4
   after: [docs-openmc-theory-methods]
+  quality: 3
 
 - id: "paper-belleman-analog-electronics-beam-instrumentation"
   title: "Analog electronics for beam instrumentation"
@@ -9101,8 +9328,9 @@
   estHours: 4
   summary: "CERN lecture paper on front ends for beam monitors: bandwidth limiting, low noise, interference rejection and cable matching in radiation zones."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [article-adi-mt047-op-amp-noise]
+  quality: 4
 
 - id: "nasa-aerospace-ceramics-ebc-cmc"
   title: "Aerospace Ceramic Materials: Thermal, Environmental Barrier Coatings and SiC/SiC Ceramic Matrix Composites for Turbine Engine Applications"
@@ -9120,6 +9348,7 @@
   fromYear: 3
   priority: 4
   after: [nasa-cmc-research-overview]
+  quality: 3
 
 - id: "nasa-grcop42-am-chambers"
   title: "GRCop-42 Development and Hot-fire Testing Using Additive Manufacturing Powder Bed Fusion for Channel-Cooled Combustion Chambers"
@@ -9135,8 +9364,9 @@
   estHours: 3
   summary: "Shows how a high-conductivity copper alloy is printed and hot-fired as a regeneratively cooled rocket chamber liner."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "Liquid Rocket Engine Self-Cooled Combustion Chambers"
+  quality: 4
 
 - id: "nasa-grcop42-ded"
   title: "Investigation of Additive Manufactured GRCop-42 Alloy Developed by Directed Energy Deposition Methods"
@@ -9154,6 +9384,7 @@
   fromYear: 3
   priority: 4
   after: [nasa-grcop42-am-chambers]
+  quality: 3
 
 - id: "nasa-superalloys-hybrid-disk"
   title: "The Mechanical Properties of Candidate Superalloys for a Hybrid Turbine Disk"
@@ -9171,6 +9402,7 @@
   fromYear: 3
   priority: 4
   doFirst: "Nickel Based Superalloys"
+  quality: 3
 
 - id: "paper-iter-tungsten-divertor-physics"
   title: "Physics basis for the first ITER tungsten divertor"
@@ -9186,8 +9418,9 @@
   estHours: 6
   summary: "Explains the heat-flux, melting and erosion limits that drove ITER to a full tungsten divertor."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "Plasma-facing materials screening"
+  quality: 4
 
 - id: "paper-pfc-challenges-linke"
   title: "Challenges for plasma-facing components in nuclear fusion"
@@ -9203,7 +9436,8 @@
   estHours: 4
   summary: "Open-access review of thermal shock, fatigue and neutron effects on tungsten and copper armour in fusion reactors."
   fromYear: 3
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "paper-rebco-silver-bullet"
   title: "REBCO -- a silver bullet for our next high-field magnet and collider budget?"
@@ -9221,6 +9455,7 @@
   fromYear: 3
   priority: 4
   doFirst: "Superconductivity for Magnets"
+  quality: 3
 
 - id: "paper-rebco-35t-coil"
   title: "35.4 T field generated using a layer-wound superconducting coil made of (RE)Ba2Cu3O7-x (RE = Rare Earth) coated conductor"
@@ -9236,8 +9471,9 @@
   estHours: 2
   summary: "Early demonstration that REBCO tape could break the field ceiling of low-temperature superconductors."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "Status of HTS magnets"
+  quality: 4
 
 - id: "paper-45-5-tesla-hts"
   title: "45.5-tesla direct-current magnetic field generated with a high-temperature superconducting magnet"
@@ -9253,8 +9489,9 @@
   estHours: 2
   summary: "Record field from a no-insulation REBCO test coil, the same idea behind compact fusion magnets."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [paper-rebco-35t-coil]
+  quality: 4
 
 - id: "paper-rubbia-energy-amplifier"
   title: "Conceptual design of a fast neutron operated high power energy amplifier (CERN/AT/95-44)"
@@ -9270,8 +9507,9 @@
   estHours: 6
   summary: "The founding design study for lead-cooled accelerator-driven thorium systems that led to MYRRHA-style projects."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [book-iaea-tecdoc-985-ads]
+  quality: 4
 
 - id: "paper-nordlund-primary-radiation-damage-review"
   title: "Primary radiation damage: A review of current understanding and models"
@@ -9287,8 +9525,9 @@
   estHours: 5
   summary: "Clear review of displacement cascades, NRT dpa and its limits, the starting point for modelling irradiation damage."
   fromYear: 3
-  priority: 4
+  priority: 1
   doFirst: "MIT 22.14"
+  quality: 5
 
 - id: "paper-gilbert-fusion-dpa-helium"
   title: "Neutron-induced dpa, transmutations, gas production, and helium embrittlement of fusion materials"
@@ -9304,8 +9543,9 @@
   estHours: 4
   summary: "Combines neutronics, inventory calculations and DFT to estimate DEMO first-wall damage, transmutation and helium-limited lifetime."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [docs-ukaea-fispact-ii]
+  quality: 4
 
 - id: "paper-el-guebaly-tritium-breeding-reality"
   title: "The Tritium Breeding Reality and Need for Near-Term Breeding-Related R&D Programs"
@@ -9321,8 +9561,9 @@
   estHours: 2
   summary: "Shows with 3-D neutronics how real blanket structures erode the tritium breeding ratio toward 1, and why margins matter."
   fromYear: 3
-  priority: 4
+  priority: 2
   doFirst: "UWFDM-1273"
+  quality: 4
 
 - id: "article-adi-mt001-adc-snr-formula"
   title: "MT-001 Tutorial: Taking the Mystery out of the Infamous Formula, \"SNR = 6.02N + 1.76dB,\" and Why You Should Care"
@@ -9338,7 +9579,8 @@
   estHours: 1
   summary: "Derives the ideal ADC quantization SNR and shows how bandwidth and process gain change it, the starting point for picking digitizers."
   fromYear: 1
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "article-adi-mt033-vfb-op-amp-gain-bandwidth"
   title: "MT-033 Tutorial: Voltage Feedback Op Amp Gain and Bandwidth"
@@ -9355,6 +9597,7 @@
   summary: "Clarifies open-loop gain, noise gain and gain-bandwidth product so you can predict an amplifier's real closed-loop bandwidth."
   fromYear: 1
   priority: 4
+  quality: 3
 
 - id: "article-tek-abcs-of-probes"
   title: "ABCs of Probes Primer"
@@ -9370,8 +9613,9 @@
   estHours: 3
   summary: "Explains probe loading, bandwidth, grounding and probe types (high-voltage, differential, current) so your scope shows the real signal."
   fromYear: 1
-  priority: 4
+  priority: 2
   doFirst: "How to Use an Oscilloscope"
+  quality: 4
 
 - id: "article-power-of-ten"
   title: "The Power of Ten: Rules for Developing Safety Critical Code"
@@ -9387,7 +9631,8 @@
   estHours: 1
   summary: "Ten checkable C rules from JPL's reliable-software lab that make flight code amenable to static analysis and verification."
   fromYear: 1
-  priority: 4
+  priority: 1
+  quality: 5
 
 - id: "article-nrc-pra-overview"
   title: "Probabilistic Risk Assessment (PRA)"
@@ -9404,6 +9649,7 @@
   summary: "Quick orientation to Level 1/2/3 PRA and core damage frequency before diving into fault trees and event trees."
   fromYear: 1
   priority: 4
+  quality: 3
 
 - id: "article-adi-mt047-op-amp-noise"
   title: "MT-047 Tutorial: Op Amp Noise"
@@ -9419,8 +9665,9 @@
   estHours: 1
   summary: "Explains voltage, current and resistor noise sources in op-amp circuits and how to combine them, essential for low-level sensor and detector front ends."
   fromYear: 2
-  priority: 4
+  priority: 2
   doFirst: "TI Precision Labs: Op Amps"
+  quality: 4
 
 - id: "article-adi-mt048-noise-relationships"
   title: "MT-048 Tutorial: Op Amp Noise Relationships: 1/f Noise, RMS Noise, and Equivalent Noise Bandwidth"
@@ -9436,8 +9683,9 @@
   estHours: 1
   summary: "Short derivation of how spectral density turns into RMS noise, including 1/f corners and noise bandwidth, the math behind every noise budget."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [article-adi-mt047-op-amp-noise]
+  quality: 4
 
 - id: "nasa-cmc-research-overview"
   title: "Overview of CMC (Ceramic Matrix Composite) Research at the NASA Glenn Research Center"
@@ -9455,6 +9703,7 @@
   fromYear: 2
   priority: 4
   doFirst: "Thermal and Environmental Barrier Coatings"
+  quality: 3
 
 - id: "nasa-ablative-tps-state-of-art"
   title: "The State of the Art: Ablative Thermal Protection Systems"
@@ -9470,7 +9719,8 @@
   estHours: 2
   summary: "NASA Ames overview of PICA, Avcoat and woven ablators that protect capsules during entry."
   fromYear: 2
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "article-nasa-std-7009b"
   title: "NASA-STD-7009B: Standard for Models and Simulations"
@@ -9486,8 +9736,9 @@
   estHours: 4
   summary: "NASA's binding rules for documenting, verifying and assessing credibility of simulations used in flight decisions, a template for any serious engineering code."
   fromYear: 2
-  priority: 4
+  priority: 2
   after: [paper-sandia-vv-cfd]
+  quality: 4
 
 - id: "article-jim-williams-an47-high-speed-amplifier"
   title: "AN47: High Speed Amplifier Techniques: A Designer's Companion for Wideband Circuitry"
@@ -9503,8 +9754,9 @@
   estHours: 6
   summary: "Legendary app note on breadboarding, probing, grounding and stabilizing fast amplifiers, full of hard-won bench wisdom for nanosecond signals."
   fromYear: 3
-  priority: 4
+  priority: 1
   after: [article-adi-mt033-vfb-op-amp-gain-bandwidth]
+  quality: 5
 
 - id: "article-spieler-radiation-resistant-devices"
   title: "Introduction to Radiation-Resistant Semiconductor Devices and Circuits"
@@ -9520,7 +9772,8 @@
   estHours: 3
   summary: "Tutorial on how ionizing and displacement damage degrade transistors and how to design circuits that survive radiation near beams and plasmas."
   fromYear: 3
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: "article-spieler-silicon-readout-bugs"
   title: "Silicon Readout - Where The Bugs Can Hide"
@@ -9536,8 +9789,9 @@
   estHours: 2
   summary: "Practical lecture on the grounding, pickup and noise problems that sink real detector systems, and how to find them."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [book-spieler-front-end-electronics-signal-processing]
+  quality: 4
 
 - id: "article-spieler-nss2012-signal-processing"
   title: "Signal Processing and Electronics (IEEE NSS 2012 Photodetector Short Course)"
@@ -9553,8 +9807,9 @@
   estHours: 3
   summary: "Short-course slides on photodetector signal processing, timing and noise for modern readout systems."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [book-spieler-front-end-electronics-signal-processing]
+  quality: 4
 
 - id: "article-cas-radiation-risks-electronic-systems"
   title: "Radiation Risks and Mitigation in Electronic Systems"
@@ -9570,8 +9825,9 @@
   estHours: 2
   summary: "Explains single-event effects and cumulative damage in electronics near accelerators and the design and qualification strategies to mitigate them."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [article-spieler-radiation-resistant-devices]
+  quality: 4
 
 - id: "article-cas-adcs-dacs-review"
   title: "Analogue to Digital and Digital to Analogue Converters (ADCs and DACs): A Review Update"
@@ -9587,8 +9843,9 @@
   estHours: 2
   summary: "Review of converter architectures, error sources and selection for precision control and measurement in accelerator power systems."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [article-adi-mt001-adc-snr-formula]
+  quality: 4
 
 - id: "article-cas-rf-solid-state-amplifiers"
   title: "Radio Frequency Solid State Amplifiers"
@@ -9604,8 +9861,9 @@
   estHours: 2
   summary: "How transistor RF amplifiers are combined to hundreds of kilowatts to replace tubes for accelerator cavities."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [book-steer-fundamentals-microwave-rf-design]
+  quality: 4
 
 - id: "article-cas-long-pulse-modulators"
   title: "Long Pulse Modulators"
@@ -9623,6 +9881,7 @@
   fromYear: 3
   priority: 4
   after: [cas-power-converters-2014]
+  quality: 3
 
 - id: "article-cas-high-precision-current-measurement"
   title: "High Precision Current Measurement for Power Converters"
@@ -9638,8 +9897,9 @@
   estHours: 2
   summary: "How CERN measures magnet currents to parts-per-million using DCCTs and careful metrology, a masterclass in precision instrumentation."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [article-tek-abcs-of-probes]
+  quality: 4
 
 - id: "article-cas-emc-power-converters"
   title: "Electromagnetic Compatibility of Power Converters"
@@ -9655,8 +9915,9 @@
   estHours: 2
   summary: "EMC fundamentals applied to large converters: coupling paths, filtering, shielding and grounding in noisy accelerator halls."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [docs-learnemc]
+  quality: 4
 
 - id: "article-cas-machine-protection-stored-energy"
   title: "Risk and Machine Protection for Stored Magnetic and Beam Energies"
@@ -9672,8 +9933,9 @@
   estHours: 2
   summary: "How to design protection and interlock electronics for systems holding megajoules in magnets or beams, directly relevant to fusion magnet systems."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [cas-power-converters-2014]
+  quality: 4
 
 - id: "article-spieler-advanced-readout-tum2011"
   title: "Advanced Concepts in the Readout and Signal Processing (TUM 2011)"
@@ -9689,8 +9951,9 @@
   estHours: 3
   summary: "Lecture on timing, pile-up, digital shaping and system-level noise trade-offs once the basics of detector front ends are in hand."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [book-spieler-front-end-electronics-signal-processing]
+  quality: 4
 
 - id: "article-spieler-nss2002-pulse-processing"
   title: "Pulse Processing and Analysis (IEEE NSS Short Course, 2002)"
@@ -9706,8 +9969,9 @@
   estHours: 3
   summary: "Focused course notes on pulse shaping, baseline restoration and pulse-height and timing analysis for radiation detectors."
   fromYear: 3
-  priority: 4
+  priority: 2
   after: [book-spieler-front-end-electronics-signal-processing]
+  quality: 4
 
 - id: "article-cas-regulation-theory"
   title: "Regulation Theory"
@@ -9725,6 +9989,7 @@
   fromYear: 3
   priority: 4
   doFirst: "MIT 6.302 Feedback Systems"
+  quality: 3
 
 - id: "blog-howard-johnson-sigcon"
   title: "Signal Consulting: High-Speed Digital Design articles"
@@ -9740,9 +10005,10 @@
   estHours: 15
   summary: "Index of Howard Johnson's free pre-2013 columns on transmission lines, crosstalk, grounding and termination by the author of High-Speed Digital Design."
   fromYear: 2
-  priority: 4
+  priority: 2
   blog: true
   after: [docs-learnemc]
+  quality: 4
 
 - id: "blog-microwaves101"
   title: "Microwaves101"
@@ -9758,9 +10024,10 @@
   estHours: 15
   summary: "Long-running RF/microwave encyclopedia with calculators for microstrip, VSWR and skin depth, handy alongside any microwave text."
   fromYear: 2
-  priority: 4
+  priority: 2
   blog: true
   after: [book-steer-fundamentals-microwave-rf-design]
+  quality: 4
 
 - id: "blog-henry-ott-consultants"
   title: "Henry Ott Consultants: Tech Tips and Articles"
@@ -9776,9 +10043,10 @@
   estHours: 6
   summary: "EMC tech tips and talks from the author of the standard EMC engineering text, on grounding, shielding and PCB layout for low emissions."
   fromYear: 2
-  priority: 4
+  priority: 2
   blog: true
   after: [docs-learnemc]
+  quality: 4
 
 - id: "blog-nasa-formal-methods-symposium"
   title: "NASA Formal Methods Symposium (NFM)"
@@ -9796,3 +10064,4 @@
   fromYear: 3
   priority: 4
   blog: true
+  quality: 3
