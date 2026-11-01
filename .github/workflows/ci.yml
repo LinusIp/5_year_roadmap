@@ -92,19 +92,3 @@ jobs:
           git add screenshots
           git commit -q -m "Screenshots: every baseline redrawn on CI's Linux"
           git push
-
-  # One-off for pull request #50: the quality pass's new rows and corrected URLs, checked from the runner (the container
-  # cannot resolve the hosts). Removed before the merge. 403 and 429 are "check by hand", never broken.
-  links-atlas-15:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run check:links -- --in data/resources/library-atlas-15.yaml | grep -v '^ok ' | grep -v '^        '
-      - run: for id in book-redbook-5th article-mocz-nbody paper-akamai-network ms-hlsl-sm6-features docs-basilisk-astrodynamics book-sundstrom-mathematical-reasoning repo-rust-vmm-kvm-ioctls repo-pyrk docs-cub doitpoms-brillouin-zones; do npm run --silent check:links -- --only "$id" | grep -v '^ok ' | grep -v '^        '; done

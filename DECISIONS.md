@@ -2749,7 +2749,10 @@ does not ask for them, so the tracks are unchanged.
 
 **Links.** The container cannot resolve the hosts, so the pull request's CI ran `npm run check:links -- --in
 data/resources/library-atlas-15.yaml` and the ten corrected URLs in a one-off `links-atlas-15` job, removed before the
-merge: LINKS-RESULT Every URL is the file's; none was changed.
+merge: 16 distinct URLs of the new rows, all 16 ok; of the ten corrected URLs, 9 ok and 1 failed (run 41300552527). The
+failure is the audit's own replacement for CUB (`docs-cub`): `https://nvidia.github.io/cccl/cub/index.html` answered 404
+to the checker, where the old `/cccl/unstable/cub/` link was the one it replaced. Open it in a browser before changing
+anything: nothing here edits the data, and the file's URL stands as given. Every URL is the file's; none was changed.
 
 Tests: `tests/unit/quality-pass.test.ts` (the order, the schema, the grades, the removals, Up next, the paths and
 Research), `tests/unit/security.test.ts` (482 tagged rows remain), `tests/e2e/quality-pass.spec.ts` (progress on a
