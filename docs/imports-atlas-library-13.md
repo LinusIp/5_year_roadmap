@@ -101,4 +101,15 @@ Aerospace 462.
 
 **Links.** The container cannot reach these sites (every request fails to resolve), so the pull request's CI ran
 `npm run check:links -- --in data/resources/library-atlas-13.yaml` in a one-off `links-atlas-13` job; the job was
-removed before the merge. LINKS-RESULT
+removed before the merge. 1,197 distinct URLs: 1,122 ok, 30 failed, 45 to check by hand (run 41266153813). The 45 are 403s and 429s from
+hosts that turn scripts away (LWN's rate limit on seven articles, Cambridge, ACM, W3C, Intel, Khronos, USACO,
+Codeforces, Cloudflare, the Feynman Lectures, MIT Press, Princeton, JHU, CORE, preprints.org, DOAB…), never counted
+as broken. The 30 failures split in two: 17 answered an error from the runner (connection timeouts to UCL, Saarland,
+DIKU, Miami, TU Delft twice, NTRS and the Nearing and Dexter Chua notes; certificate faults at moolenaar.net, PSU
+STAT 503, Kirk McDonald's examples and NASA's orbital debris office; a refused connection at uscibooks.aip.org, a DNS
+miss for Real World Haskell and for CERN's magnets workshop, a redirect loop at Wiley for Stacey's Fusion) and 13
+answered 404, 400 or 500 (the RL theory book PDF, Wainwright and Jordan's monograph, Meta's Llama 4 post, protobuf's
+API best practices, Kohavi's book at Cambridge, both AMD64 APM volumes, Langmead's teaching materials, hecto, Princeton
+TR-498-95, Welch and Bishop's Kalman introduction, Uri Alon's materials, the Apollo descent guidance PDF, NATO's
+turbomachinery notes). Open each in a browser before changing anything: nothing here edits the data, and the file's
+URLs stand as given. Every URL is the file's; none was changed.
