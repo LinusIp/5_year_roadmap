@@ -309,9 +309,10 @@ quality audit removed, in `data/resources/library-atlas-10.yaml` (`docs/imports-
 and its 15,961-row file 587 more, the plan gap fill, in `data/resources/library-atlas-11.yaml`
 (`docs/imports-atlas-library-11.md`), and its 16,076-row file 115 more, build & ship, in `data/resources/library-atlas-12.yaml`
 (`docs/imports-atlas-library-12.md`), and its 17,283-row file 1,197 more, the cracked dev and researcher round and the frontier engineer and scientist round, in `data/resources/library-atlas-13.yaml`
-(`docs/imports-atlas-library-13.md`): 17,257 resources in all, and every track has blogs, so the Blogs shelf filters by track like the others. 337 of them
+(`docs/imports-atlas-library-13.md`), and its 17,848-row file 561 more, engineering-physics foundations and software depth, in `data/resources/library-atlas-14.yaml`
+(`docs/imports-atlas-library-14.md`): 17,818 resources in all, and every track has blogs, so the Blogs shelf filters by track like the others. 380 of them
 are paid (books, certificate exams and one specialization): each wears a **Paid** badge, the Books shelf has a Free / Paid chip, and a
-paid book stays out of "Up next" until **I own this** is on in its sheet. **Quick filters**, one list of eighteen rows under
+paid book stays out of "Up next" until **I own this** is on in its sheet. **Quick filters**, one list of twenty-two rows under
 the shelves, gather resources across every shelf: "Developer essentials" the resources whose title or tags
 name the terminal, Git, Linux, SQL, Postgres or the web (HTML, CSS, JavaScript, TypeScript, React, HTTP) from every
 shelf, with the shelves' chips, and "Compact power & energy conversion" the fusion, direct conversion, superconductor,
@@ -325,8 +326,9 @@ signing, desktop and game builds, GitHub Actions, releases and deploys of the so
 areas; and the thirteenth file's seven: "Build it yourself" (from-scratch interpreters, compilers, kernels, emulators,
 databases, networks and AI, with six area chips), "Low-level & performance" (assembly, the ISA and ABI, microarchitecture,
 debuggers and profilers, the Linux kernel and the wire, five areas), "Research & science" (rigorous mathematics, learning
-theory, physics, how science works and the great lectures, five areas), "GPU & CUDA", "SDK & API design", "Fusion &
-accelerators" (four areas) and "Aerospace" (five areas). The
+theory, physics, how science works, research writing and the great lectures, six areas), "GPU & CUDA", "SDK & API design", "Fusion &
+accelerators" (four areas) and "Aerospace" (five areas); and the fourteenth file's four: "Electronics & EM", "Mechanics &
+materials" (Fluids, Solids, Materials and Nuclear as chips), "Scientific computing" and "Formal methods". The
 Electrical, mechanical & aerospace path has chips for its areas (Mechanics, Materials, Thermo-fluids, Design & CAD, Manufacturing, Electronics
 & PCB, Power & energy, Control, Aerospace, Chemical & nuclear, Practice), read from each row's title and summary.
 About 14,750 of them only ever appear in the Library; they ride in a chunk of their

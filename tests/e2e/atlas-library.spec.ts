@@ -425,7 +425,7 @@ test('Build it yourself gathers the from-scratch rows of the thirteenth file, wi
 test('the other six filters of the thirteenth file open from the home; the four with areas show their chips, the two without show none', async ({ page }) => {
   const withAreas: [string, string, string[]][] = [
     ['lowlevel', 'Low-level & performance', ['Assembly & ISA', 'Microarchitecture', 'Debugging & profiling', 'Linux kernel', 'Networking']],
-    ['science', 'Research & science', ['Rigorous math', 'ML theory', 'Physics', 'How science works', 'Great lectures']],
+    ['science', 'Research & science', ['Rigorous math', 'ML theory', 'Physics', 'How science works', 'Research writing', 'Great lectures']],
     ['fusion', 'Fusion & accelerators', ['Plasma', 'Energy conversion', 'Magnets', 'Accelerators']],
     ['aerospace', 'Aerospace', ['Propulsion', 'Astrodynamics', 'GNC', 'Aero & structures', 'Space systems']],
   ];
@@ -461,11 +461,46 @@ test('the other six filters of the thirteenth file open from the home; the four 
   await expect(page.getByRole('button', { name: /Memory Alloc/ })).toHaveCount(0);
 });
 
+test('the fourteenth file\'s filters: Mechanics & materials has its four chips, the other three none, and Research & science has Research writing', async ({ page }) => {
+  await open(page, './#/library');
+  const row = page.getByRole('button', { name: /^Mechanics & materials [\d,]+$/ });
+  const count = Number((await row.innerText()).replace(/\D/g, ''));
+  expect(count).toBeGreaterThan(800);
+  await row.click();
+  await expect(page).toHaveURL(/pick=mechanics/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Mechanics & materials' })).toBeVisible();
+  const areas = page.getByRole('group', { name: 'Area' });
+  for (const a of ['Fluids', 'Solids', 'Materials', 'Nuclear']) await expect(areas.getByRole('button', { name: new RegExp('^' + a + ' [\\d,]+$') })).toBeVisible();
+  await areas.getByRole('button', { name: /^Nuclear [\d,]+$/ }).click();
+  await expect(page).toHaveURL(/area=nuclear/);
+  const [shown, total] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
+  expect(total).toBe(count);
+  expect(shown).toBeGreaterThan(100);
+  expect(shown).toBeLessThan(count);
+  await page.getByRole('searchbox', { name: 'Search mechanics and materials' }).fill('MCNP Primer');
+  await expect(page.getByRole('button', { name: /MCNP/ }).first()).toBeVisible();
+  for (const [key, label] of [['electronics', 'Electronics & EM'], ['scicomp', 'Scientific computing'], ['formal', 'Formal methods']] as const) {
+    await open(page, './#/library');
+    const r = page.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' [\\d,]+$') });
+    expect(Number((await r.innerText()).replace(/\D/g, '')), label).toBeGreaterThan(120);
+    await r.click();
+    await expect(page).toHaveURL(new RegExp('pick=' + key));
+    await expect(page.getByRole('heading', { level: 1, name: label })).toBeVisible();
+    await expect(page.getByRole('group', { name: 'Area' })).toHaveCount(0);
+  }
+  await page.getByRole('searchbox', { name: 'Search formal methods' }).fill('TLA+');
+  await expect(page.getByRole('button', { name: /TLA\+/ }).first()).toBeVisible();
+  await open(page, './#/library?pick=science&area=writing');
+  await expect(page.getByRole('group', { name: 'Area' }).getByRole('button', { name: /^Research writing [\d,]+$/ })).toHaveAttribute('aria-pressed', 'true');
+  const [w] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
+  expect(w).toBeGreaterThan(40);
+});
+
 test('the quick filters are one list on the home; Certificates wears its badge, Earned persists and Plan › Credentials counts it', async ({ page }) => {
   await open(page, './#/library');
   // The quick filters are the chips under the search (the redesign mockup).
   const list = page.getByRole('group', { name: 'Quick filters' });
-  for (const label of ['Developer essentials', 'Compact power & energy conversion', 'Security & defence', 'Agents & MCP', 'Certificates', 'Career & interviews', 'Research skills', 'Communication', 'Open source', 'Mandarin (the language)', 'Build & ship', 'Build it yourself', 'Low-level & performance', 'Research & science', 'GPU & CUDA', 'SDK & API design', 'Fusion & accelerators', 'Aerospace']) {
+  for (const label of ['Developer essentials', 'Compact power & energy conversion', 'Security & defence', 'Agents & MCP', 'Certificates', 'Career & interviews', 'Research skills', 'Communication', 'Open source', 'Mandarin (the language)', 'Build & ship', 'Build it yourself', 'Low-level & performance', 'Research & science', 'GPU & CUDA', 'SDK & API design', 'Fusion & accelerators', 'Aerospace', 'Electronics & EM', 'Mechanics & materials', 'Scientific computing', 'Formal methods']) {
     // The count carries a thousands separator past a thousand (ATLAS-UI-POLISH): "Agents & MCP 1,023".
     await expect(page.getByRole('button', { name: new RegExp('^' + label.replace(/[()&]/g, '\\$&') + ' [\\d,]+$') })).toBeVisible();
   }

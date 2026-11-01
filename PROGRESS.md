@@ -1342,3 +1342,13 @@ Verified on this machine (Linux, Chromium 140):
 - `src/lib/engineering-topics.ts`: the Engineering path's chips take the round's accelerator, fusion-plant and aerospace words.
 - Tests: `tests/unit/craft.test.ts` (new), `tests/unit/quick-filters.test.ts`, `tests/e2e/atlas-library.spec.ts`.
   Screenshots redrawn on CI.
+
+## Pull request #49: the Atlas Library's fourteenth file, four quick filters and Research writing
+
+- `data/resources/library-atlas-14.yaml`: 561 new resources (43 paid books): engineering-physics foundations and
+  software depth. Resources: 17,257 to 17,818. 4 new merges; no corrections (`docs/imports-atlas-library-14.md`).
+- Four quick filters (`src/lib/foundations.ts`, the registry in `src/lib/quick-filters.ts`): Electronics & EM 394,
+  Mechanics & materials 1,032 (Fluids, Solids, Materials, Nuclear), Scientific computing 393, Formal methods 162;
+  Research & science gains a Research writing area (69 rows).
+- Tests: `tests/unit/foundations.test.ts` (new), `tests/unit/quick-filters.test.ts`, `tests/unit/craft.test.ts`,
+  `tests/e2e/atlas-library.spec.ts`. Screenshots redrawn on CI.

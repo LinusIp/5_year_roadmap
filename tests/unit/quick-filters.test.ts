@@ -3,12 +3,12 @@ import { loadSeedOrThrow } from '../../scripts/lib/load-seed.ts';
 import { shelfOf } from '../../src/lib/library-home.ts';
 import { isCertificate, QUICK_FILTER_KEYS, QUICK_FILTERS, quickFilterOf, quickPicks } from '../../src/lib/quick-filters.ts';
 
-/** The quick filters (ATLAS-LIBRARY): the registry, the six the plan gap fill (15,961 rows) added, Build & ship (16,076 rows) and the seven of the thirteenth file (17,283 rows). */
+/** The quick filters (ATLAS-LIBRARY): the registry, the six the plan gap fill (15,961 rows) added, Build & ship (16,076 rows) the seven of the thirteenth file (17,283 rows) and the four of the fourteenth (17,848 rows). */
 const item = (title: string, summary = '', track = 'ai', id = 'x', shelf = 'article') => ({ id, title, summary, track, shelf });
 
 describe('the registry', () => {
-  it('lists the eighteen filters in the order of the rows, each with a label, an icon and a search name', () => {
-    expect(QUICK_FILTER_KEYS).toEqual(['essentials', 'energy', 'security', 'agents', 'certificates', 'career', 'research', 'communication', 'opensource', 'mandarin', 'buildship', 'buildyourself', 'lowlevel', 'science', 'gpu', 'sdk', 'fusion', 'aerospace']);
+  it('lists the twenty-two filters in the order of the rows, each with a label, an icon and a search name', () => {
+    expect(QUICK_FILTER_KEYS).toEqual(['essentials', 'energy', 'security', 'agents', 'certificates', 'career', 'research', 'communication', 'opensource', 'mandarin', 'buildship', 'buildyourself', 'lowlevel', 'science', 'gpu', 'sdk', 'fusion', 'aerospace', 'electronics', 'mechanics', 'scicomp', 'formal']);
     for (const f of QUICK_FILTERS) {
       expect(f.label.length).toBeGreaterThan(3);
       expect(f.search.startsWith('Search ')).toBe(true);
@@ -34,7 +34,7 @@ describe('the registry', () => {
   });
 
   it('carries the areas of a filter that has them, and the seven of the thirteenth file by their module', () => {
-    expect(QUICK_FILTERS.filter((f) => f.areas).map((f) => f.key)).toEqual(['security', 'agents', 'buildship', 'buildyourself', 'lowlevel', 'science', 'fusion', 'aerospace']);
+    expect(QUICK_FILTERS.filter((f) => f.areas).map((f) => f.key)).toEqual(['security', 'agents', 'buildship', 'buildyourself', 'lowlevel', 'science', 'fusion', 'aerospace', 'mechanics']);
     expect(quickFilterOf('security')?.areas?.map((a) => a.label)).toContain('Hardening');
     expect(quickFilterOf('fusion')?.areas?.map((a) => a.label)).toEqual(['Plasma', 'Energy conversion', 'Magnets', 'Accelerators']);
     expect(quickFilterOf('gpu')?.areas).toBeUndefined();
