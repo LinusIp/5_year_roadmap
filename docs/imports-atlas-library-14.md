@@ -82,4 +82,12 @@ Aerospace 495, Electronics & EM 394, Mechanics & materials 1,032, Scientific com
 
 **Links.** The container cannot reach these sites (every request fails to resolve), so the pull request's CI ran
 `npm run check:links -- --in data/resources/library-atlas-14.yaml` in a one-off `links-atlas-14` job; the job was
-removed before the merge. LINKS-RESULT
+removed before the merge. 561 distinct URLs: 526 ok, 11 failed, 24 to check by hand (run 41289634142). The 24 are 403s from hosts that
+turn scripts away (USENIX four times, the Feynman Lectures five times, Princeton University Press twice, the MIT Press
+bookstore, the AMS bookstore, the NRC twice, the IAEA, ORNL, the OECD NEA, Deep Blue, Harvard's Whitesides group,
+Tektronix, MOOSE's workshop, Boyd's spectral-methods page, Henry Ott's site), never counted as broken. Of the 11
+failures, 6 were runner-side errors (no answer from Isabelle's PDF, a timeout at the HFSP and at Analog Devices, DNS
+misses for TENDL at PSI and for fire.pppl.gov, a certificate fault at researching.cn) and 5 answered 404, 405 or 503
+(PeleC's documentation, the FEniCS book page, Shifrin's differential geometry PDF, Rubbia's energy amplifier record at
+EPFL, and MYRRHA's site, which was down). Open each in a browser before changing anything: nothing here edits the
+data, and the file's URLs stand as given. Every URL is the file's; none was changed.
