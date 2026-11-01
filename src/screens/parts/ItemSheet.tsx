@@ -152,6 +152,7 @@ function ResourceBody({ atlas, resource }: { atlas: Atlas; resource: AppResource
           <div className="flex flex-wrap gap-1.5">
             {path && <span className="pill-tint lane-0 rounded-pill px-2.5 py-1 text-small font-semibold">{path.name}</span>}
             {levelLabel && <span className="pill-neutral rounded-pill px-2.5 py-1 text-small font-semibold">{levelLabel}</span>}
+            {resource.quality === 5 && <span className="pill-tint lane-2 rounded-pill px-2.5 py-1 text-small font-semibold">Canon</span>}
             {isCertificate(resource.id) && <span className="pill-tint lane-4 rounded-pill px-2.5 py-1 text-small font-semibold">Certificate</span>}
             {resource.cost === 'paid' && <span className="pill-neutral rounded-pill px-2.5 py-1 text-small font-semibold">Paid</span>}
           </div>

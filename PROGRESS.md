@@ -1352,3 +1352,13 @@ Verified on this machine (Linux, Chromium 140):
   Research & science gains a Research writing area (69 rows).
 - Tests: `tests/unit/foundations.test.ts` (new), `tests/unit/quick-filters.test.ts`, `tests/unit/craft.test.ts`,
   `tests/e2e/atlas-library.spec.ts`. Screenshots redrawn on CI.
+
+## Pull request #50: the Atlas Library's quality pass
+
+- The 16,448-row file: 1,412 dropped rows removed from `data/` (`30-days-of-python` stays, it is on the plan), 16
+  classics added (`data/resources/library-atlas-15.yaml`), priority and quality from the audit on 12,790 entries, 62
+  catalogue corrections. Resources: 17,818 to 16,422 (`docs/imports-atlas-library-15.md`).
+- `quality` (1 to 5) in the schema; Canon badge and "Canon only" toggle; lists by priority, then quality; "More
+  resources" folds the grade-3 rows in paths and Research; Up next never suggests them. Progress on removed rows is kept.
+- Tests: `tests/unit/quality-pass.test.ts`, `tests/e2e/quality-pass.spec.ts` (new), `tests/unit/security.test.ts`,
+  `tests/e2e/atlas-library.spec.ts`, `tests/e2e/helpers.ts`. Screenshots redrawn on CI.

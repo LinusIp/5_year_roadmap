@@ -2715,6 +2715,48 @@ Research & science areas); `tests/e2e/atlas-library.spec.ts` (Mechanics & materi
 other three without an Area row, Research writing pressed from a link). Screenshots of the Library's home redrawn on
 CI (four more chips).
 
+## The Atlas Library's quality pass: grades, removals and Canon (pull request #50)
+
+**The file is the library, so its dropped rows leave.** The 16,448-row file is the 17,848-row one after the quality
+audit: 1,418 rows dropped, 18 added. An upsert by id never deletes, but the audit's point is that those rows should not
+be offered, and the prompt calls the file "the complete library", so the import removes every row the previous file had,
+the new one lacks and the Library holds: 1,412 (listed in `docs/imports-atlas-library-15-removed.md`). One stays:
+`30-days-of-python`, graded low but on the plan with its units and its certificate; the plan is the user's, and the
+prompt says the fixed schedule stays as it is. Rows that named a removed row as their prerequisite stop naming it.
+
+**Progress on a removed row is kept, not deleted.** The books round asked to "drop any user progress" on its twelve
+removed rows, and version 8 of the database does. This prompt asks no such thing and repeats "never overwrite a user's
+status, notes or progress", and deleting progress cannot be undone, so no migration touches it: a state on a removed row
+stays on the device and in backups, every screen already reads states through the rows that exist, and the row's
+progress returns if it comes back (`tests/e2e/quality-pass.spec.ts` seeds such states and opens every screen).
+
+**The grade overwrites; the names do not.** Priority and quality come from the file on every row it matches, in any
+data file, because the grade is the audit's judgement, not a name the curated files chose more finely. The catalogue
+corrections (title, URL, provider, type, cost, note, and now level and summary, the audit's two most common fixes) apply,
+as before, only to the rows the Library's own import files hold.
+
+**Quality orders after priority.** Every list reads priority, then quality (highest first; a row the pass did not
+re-grade counts as 4, as the prompt says), then year and level. Canon (graded 5) is a badge and a toggle beside Level
+and Roadmap on every shelf, quick filter and search. "More resources" folds the rows graded 3 or lower at the end of a
+path's optional list and of each Research area, so a topic view still covers a niche the audit graded 3 but leads with
+what it graded higher. Up next never suggests such a row; the plan's own steps graded 3 or lower (ML Zoomcamp, the
+three roadmap.sh pages) stay on the plan. The prompt's fourth point, that the plan generator draws from priority 1 and 2
+first, needs no change: the Library never feeds the plan (it is fixed), and Re-plan already defers lower-priority items
+first.
+
+**Not taken from the audit.** It recommends a `physics` track and a career track, "left for you to approve"; the prompt
+does not ask for them, so the tracks are unchanged.
+
+**Links.** The container cannot resolve the hosts, so the pull request's CI ran `npm run check:links -- --in
+data/resources/library-atlas-15.yaml` and the ten corrected URLs in a one-off `links-atlas-15` job, removed before the
+merge: LINKS-RESULT Every URL is the file's; none was changed.
+
+Tests: `tests/unit/quality-pass.test.ts` (the order, the schema, the grades, the removals, Up next, the paths and
+Research), `tests/unit/security.test.ts` (482 tagged rows remain), `tests/e2e/quality-pass.spec.ts` (progress on a
+removed row), `tests/e2e/atlas-library.spec.ts` (Canon only, the Canon badge, More resources; two path checks follow
+rows the pass folded or dropped), `tests/e2e/helpers.ts` (`showMoreUntil` opens More resources). Screenshots redrawn on
+CI.
+
 ## The docked player's check waits for Today to settle (pull request #45)
 
 The CI run on main after pull request #44 failed one e2e test, twice in a row: the Focus session that keeps playing,

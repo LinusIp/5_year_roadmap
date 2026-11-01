@@ -18,7 +18,7 @@ import { Chips } from '../ui/Chips.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
 import { DifficultyDots, IconTile, KindIcon, StatusIcon } from '../ui/glyphs.tsx';
-import { buildPaths, byFit, fitOf, inProgress, PATH_ALIASES, priorityOf, shelfCounts, groupResults, shelfOf, upNext } from '../lib/library-home.ts';
+import { buildPaths, byFit, fitOf, inProgress, isCanon, PATH_ALIASES, priorityOf, shelfCounts, groupResults, shelfOf, upNext } from '../lib/library-home.ts';
 import { isCertificate, QUICK_FILTERS, quickFilterOf, quickPicks } from '../lib/quick-filters.ts';
 import type { QuickInput } from '../lib/quick-filters.ts';
 import type { Fit } from '../lib/library-home.ts';
@@ -75,6 +75,8 @@ interface Entry {
   paid: boolean;
   /** A certificate row (the plan gap fill): a Certificate badge, and Earned in its sheet. */
   certificate: boolean;
+  /** Graded 5 by the quality pass (ATLAS-QUALITY-AUDIT): a Canon badge, and in the "Canon only" list. */
+  canon: boolean;
 }
 
 /** The order of every list but Projects' (ATLAS-LIBRARY): what is in progress, then by fit, done and dropped last. */
@@ -145,7 +147,7 @@ function buildEntries(
       type: shelfOf(r),
       tracks: r.tracks,
       status,
-      meta: [isCertificate(r.id) ? 'Certificate' : null, r.cost === 'paid' ? 'Paid' : null, r.type === 'paper' && r.fromYear ? 'Year ' + r.fromYear : null, r.provider, r.estHours > 0 ? r.estHours + ' h' : null, progressOf(r.id, state?.unitsDone ?? [], units)].filter(Boolean).join(' · '),
+      meta: [isCanon(r.quality) ? 'Canon' : null, isCertificate(r.id) ? 'Certificate' : null, r.cost === 'paid' ? 'Paid' : null, r.type === 'paper' && r.fromYear ? 'Year ' + r.fromYear : null, r.provider, r.estHours > 0 ? r.estHours + ' h' : null, progressOf(r.id, state?.unitsDone ?? [], units)].filter(Boolean).join(' · '),
       trailing: trailingFor(r.id, status),
       sortKey: sortFor(r.id, status, r.title),
       level: r.level,
@@ -155,6 +157,7 @@ function buildEntries(
       quick,
       paid: r.cost === 'paid',
       certificate: isCertificate(r.id),
+      canon: isCanon(r.quality),
     };
   });
   const papers: Entry[] = seed.papers.map((p) => {
@@ -169,7 +172,7 @@ function buildEntries(
       type: 'paper',
       tracks: p.tracks,
       status,
-      meta: [p.fromYear ? 'Year ' + p.fromYear : null, p.authors, p.year].filter(Boolean).join(' · '),
+      meta: [isCanon(p.quality) ? 'Canon' : null, p.fromYear ? 'Year ' + p.fromYear : null, p.authors, p.year].filter(Boolean).join(' · '),
       trailing: PAPER_LABEL[paperStatus],
       sortKey: (status === 'active' ? '0' : status === 'todo' ? '2' : '3') + p.title.toLowerCase(),
       level: p.level,
@@ -179,6 +182,7 @@ function buildEntries(
       quick,
       paid: false,
       certificate: false,
+      canon: isCanon(p.quality),
     };
   });
   // Projects follow everything else in the default order ("5…"), so the list opens as it always has; the Projects
@@ -201,6 +205,7 @@ function buildEntries(
       picks: [],
       paid: false,
       certificate: false,
+      canon: false,
     };
   });
   const fromCatalogue: Entry[] = (catalogue ?? []).map((e) => {
@@ -212,6 +217,7 @@ function buildEntries(
       picks: [],
       paid: false,
       certificate: false,
+      canon: false,
       id: e.id,
       title: e.title,
       body: [e.title, e.kind, e.difficulty, e.group, groupLabel(e.group), e.tracks.join(' ')].join(' '),
@@ -338,6 +344,9 @@ export function Library({ openId }: { openId?: string }) {
   // The Books shelf's Free / Paid chip (the books round); nothing pressed is All.
   const [cost, setCost] = useQueryParam('cost');
   const paidOnly = cost === 'paid' ? true : cost === 'free' ? false : null;
+  // The quality pass (ATLAS-QUALITY-AUDIT): "Canon only" narrows any list to the rows graded 5.
+  const [canon, setCanon] = useQueryParam('canon');
+  const canonOnly = canon === '1';
   // An old link to Electrical and embedded or Mechanical opens Electrical, mechanical & aerospace (ATLAS-LIBRARY).
   const pathId = pathParam ? (PATH_ALIASES[pathParam] ?? pathParam) : pathParam;
   const [draft, setDraft] = useState<string | null>(null);
@@ -405,7 +414,7 @@ export function Library({ openId }: { openId?: string }) {
   const projectFiltersOn = Boolean(kind || difficulty || group || phaseParam || level || hours);
   const matchesProject = (e: Entry): boolean => !projectFiltersOn || (e.project ? matchesFilter(e.project, projectFilter) : false);
   const filtered = matched.filter(
-    (e) => (!type || e.type === type) && (!pick || e.picks.includes(pick)) && (!pickArea || pickArea.get(e.id)?.includes(area!) === true) && (paidOnly === null || e.paid === paidOnly) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
+    (e) => (!type || e.type === type) && (!pick || e.picks.includes(pick)) && (!pickArea || pickArea.get(e.id)?.includes(area!) === true) && (paidOnly === null || e.paid === paidOnly) && (!canonOnly || e.canon) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
   );
   // Every shelf but Projects reads by fit: in progress first, then priority, year and level (ATLAS-LIBRARY). Projects
   // keep their order: the plan's first, then the catalogue.
@@ -419,6 +428,7 @@ export function Library({ openId }: { openId?: string }) {
   };
   const clear = (): void => {
     for (const set of [setQuery, setType, setTrack, setStatus, setKind, setDifficulty, setGroup, setPhase, setLevel, setHours, setPaperLevel, setRoadmap, setPick, setArea]) set(null);
+    setCanon(null);
     setDraft(null);
   };
 
@@ -486,6 +496,7 @@ export function Library({ openId }: { openId?: string }) {
         items={[
           ...LEVEL_CHIPS.map((chip) => ({ key: chip.key, label: chip.label, pressed: paperLevel === chip.key, onClick: () => setPaperLevel(paperLevel === chip.key ? null : chip.key) })),
           { key: 'roadmap', label: roadmapName ?? 'Roadmap', pressed: Boolean(roadmapName), chevron: true, onClick: () => setPickingRoadmap(true) },
+          { key: 'canon', label: 'Canon only', pressed: canonOnly, onClick: () => setCanon(canonOnly ? null : '1') },
         ]}
       />
     </div>

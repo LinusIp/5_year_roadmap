@@ -3,7 +3,7 @@ import type { Atlas } from '../../hooks/useAtlas.ts';
 import { TOPICS, topicsOf } from '../../lib/engineering-topics.ts';
 import { useQueryParam } from '../../router/router.tsx';
 import { Chips } from '../../ui/Chips.tsx';
-import { buildPaths, byFit, fitOf, pathExtras, pathOfTrack, PATHS, roadmapPage, SHELVES, shelfOf } from '../../lib/library-home.ts';
+import { buildPaths, byFit, fitOf, isCanon, isLesser, pathExtras, pathOfTrack, PATHS, roadmapPage, SHELVES, shelfOf } from '../../lib/library-home.ts';
 import { Button } from '../../ui/Button.tsx';
 import { Header } from '../../ui/Header.tsx';
 import { Icon } from '../../ui/Icon.tsx';
@@ -35,7 +35,8 @@ function StepDot({ state }: { state: 'done' | 'current' | 'later' }) {
  * One path: every step in plan order, grouped by phase, with its dot, kind, hours and status; the current step is
  * highlighted. A path that follows roadmap.sh roadmaps opens with their official pages (ATLAS-LIBRARY). Alternatives to
  * its steps, then the Library's other resources of its tracks and roadmaps and the papers of its tracks, by priority,
- * year and level, wait, folded, under "Optional for this path", forty at a time. A path with nothing on the plan
+ * quality, year and level, wait, folded, under "Optional for this path", forty at a time; the ones the quality pass graded 3 or
+ * lower wait under "More resources" at its end, folded too. A path with nothing on the plan
  * (Inference engineering, Software architecture, DevOps) is that list alone, open.
  */
 export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas; pathId: string; onOpen: (refId: string) => void; onOpenPaper: (id: string) => void }) {
@@ -47,6 +48,9 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
   const topics = pathId === 'engineering' ? TOPICS : [];
   const [extras, setExtras] = useState(path?.steps.length === 0 || Boolean(topic));
   const [shownCount, setShownCount] = useState(PAGE);
+  // The quality pass (ATLAS-QUALITY-AUDIT): rows graded 3 or lower wait, folded, under "More resources".
+  const [lesserOpen, setLesserOpen] = useState(false);
+  const [lesserCount, setLesserCount] = useState(PAGE);
   if (!path || !def) {
     return <Header title="Library" back={<Button variant="icon" icon="chevronLeft" label="Back to the Library" to="/library" />} sub="This path has no steps." />;
   }
@@ -74,11 +78,31 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
   const counted = topics.length > 0 ? everything.map((entry) => ({ entry, areas: areasOf(entry) })) : [];
   const topicCount = Object.fromEntries(topics.map((t) => [t.key, counted.filter((c) => c.areas.includes(t.key)).length]));
   const picked = topic && topics.length > 0 ? topic : null;
-  const more = picked ? counted.filter((c) => c.areas.includes(picked)).map((c) => c.entry) : everything;
+  const inArea = picked ? counted.filter((c) => c.areas.includes(picked)).map((c) => c.entry) : everything;
+  const more = inArea.filter((e) => !isLesser(e.item.quality));
+  const lesser = inArea.filter((e) => isLesser(e.item.quality));
   // Under a chip the list is that area alone: the plan's alternatives belong to no area.
   const shownAlternatives = picked ? [] : alternatives;
-  const optional = shownAlternatives.length + more.length;
+  const optional = shownAlternatives.length + more.length + lesser.length;
+  const main = shownAlternatives.length + more.length;
   const visible = more.slice(0, Math.max(0, shownCount - shownAlternatives.length));
+  const lesserVisible = lesser.slice(0, lesserCount);
+  const metaOf = (entry: (typeof everything)[number]): string =>
+    entry.kind === 'paper'
+      ? [isCanon(entry.item.quality) ? 'Canon' : null, entry.item.fromYear ? 'Year ' + entry.item.fromYear : null, 'Paper', entry.item.year].filter(Boolean).join(' · ')
+      : [isCanon(entry.item.quality) ? 'Canon' : null, entry.item.fromYear ? 'Year ' + entry.item.fromYear : null, SHELF_LABEL[shelfOf(entry.item)], entry.item.estHours + ' h'].filter(Boolean).join(' · ');
+  const rowOf = (entry: (typeof everything)[number]) =>
+    entry.kind === 'paper' ? (
+      <Row key={entry.item.id} icon={<IconTile icon="paper" tone="ice" />} title={entry.item.short ?? entry.item.title} meta={metaOf(entry)} truncate onClick={() => onOpenPaper(entry.item.id)} />
+    ) : (
+      <Row
+        key={entry.item.id}
+        icon={<IconTile icon={SHELF_ICON[shelfOf(entry.item)]} tone={shelfOf(entry.item) === 'practice' || shelfOf(entry.item) === 'paper' || shelfOf(entry.item) === 'blog' ? 'ice' : 'blue'} />}
+        title={entry.item.short ?? entry.item.title}
+        meta={metaOf(entry)}
+        onClick={() => onOpen(entry.item.id)}
+      />
+    );
 
   return (
     <>
@@ -142,21 +166,22 @@ export function PathView({ atlas, pathId, onOpen, onOpenPaper }: { atlas: Atlas;
               {shownAlternatives.map((r) => (
                 <Row key={r.id} icon={<IconTile icon={SHELF_ICON[shelfOf(r)]} />} title={r.short ?? r.title} meta={'Alternative · ' + r.estHours + ' h'} onClick={() => onOpen(r.id)} />
               ))}
-              {visible.map(({ kind, item: r }) =>
-                kind === 'paper' ? (
-                  <Row key={r.id} icon={<IconTile icon="paper" tone="ice" />} title={r.short ?? r.title} meta={[r.fromYear ? 'Year ' + r.fromYear : null, 'Paper', r.year].filter(Boolean).join(' · ')} truncate onClick={() => onOpenPaper(r.id)} />
-                ) : (
-                  <Row
-                    key={r.id}
-                    icon={<IconTile icon={SHELF_ICON[shelfOf(r)]} tone={shelfOf(r) === 'practice' || shelfOf(r) === 'paper' || shelfOf(r) === 'blog' ? 'ice' : 'blue'} />}
-                    title={r.short ?? r.title}
-                    meta={[r.fromYear ? 'Year ' + r.fromYear : null, SHELF_LABEL[shelfOf(r)], r.estHours + ' h'].filter(Boolean).join(' · ')}
-                    onClick={() => onOpen(r.id)}
-                  />
-                ),
+              {visible.map(rowOf)}
+              {shownAlternatives.length + visible.length < main && (
+                <Row title={'Show ' + Math.min(PAGE, main - shownAlternatives.length - visible.length) + ' more'} meta={count(main - shownAlternatives.length - visible.length) + ' not shown yet'} chevron height={44} onClick={() => setShownCount(shownCount + PAGE)} />
               )}
-              {shownAlternatives.length + visible.length < optional && (
-                <Row title={'Show ' + Math.min(PAGE, optional - shownAlternatives.length - visible.length) + ' more'} meta={count(optional - shownAlternatives.length - visible.length) + ' not shown yet'} chevron height={44} onClick={() => setShownCount(shownCount + PAGE)} />
+              {lesser.length > 0 && (
+                <li>
+                  <button type="button" aria-expanded={lesserOpen} onClick={() => setLesserOpen(!lesserOpen)} className="flex min-h-11 w-full items-center gap-3 text-left">
+                    <span className="min-w-0 flex-1 text-body font-medium">More resources</span>
+                    <span className="text-meta text-ink2">{count(lesser.length)}</span>
+                    <Icon name={lesserOpen ? 'chevronDown' : 'chevronRight'} size={18} className="text-ink2" />
+                  </button>
+                </li>
+              )}
+              {lesserOpen && lesserVisible.map(rowOf)}
+              {lesserOpen && lesserVisible.length < lesser.length && (
+                <Row title={'Show ' + Math.min(PAGE, lesser.length - lesserVisible.length) + ' more'} meta={count(lesser.length - lesserVisible.length) + ' not shown yet'} chevron height={44} onClick={() => setLesserCount(lesserCount + PAGE)} />
               )}
             </ul>
           )}

@@ -28,6 +28,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-github-flow]
+  quality: 4
 
 - id: "docs-gha-matrix"
   title: "Running variations of jobs in a workflow (matrix)"
@@ -43,9 +44,10 @@
   estHours: 1
   summary: "Shows how one job definition fans out across OS, language-version and config combinations with include/exclude and fail-fast."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-github-actions-workflow-syntax]
+  quality: 3
 
 - id: "docs-gha-dependency-caching"
   title: "Dependency caching reference"
@@ -61,9 +63,10 @@
   estHours: 1
   summary: "Explains cache keys, restore-keys, scope and eviction rules so CI stops re-downloading dependencies every run."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-github-actions-workflow-syntax]
+  quality: 3
 
 - id: "docs-gha-contexts"
   title: "Contexts reference"
@@ -82,6 +85,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-github-actions-workflow-syntax]
+  quality: 4
 
 - id: "docs-gha-expressions"
   title: "Expressions reference"
@@ -100,6 +104,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-gha-contexts]
+  quality: 4
 
 - id: "docs-gha-events"
   title: "Events that trigger workflows"
@@ -118,6 +123,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-gha-understand]
+  quality: 4
 
 - id: "docs-gha-manual-run"
   title: "Manually running a workflow (workflow_dispatch)"
@@ -133,9 +139,10 @@
   estHours: 1
   summary: "How to expose a button, CLI or API trigger with typed inputs for on-demand builds and releases."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-events]
+  quality: 2
 
 - id: "docs-gha-use-secrets"
   title: "Using secrets in GitHub Actions"
@@ -151,9 +158,10 @@
   estHours: 1
   summary: "How to create repo, environment and org secrets and pass them safely into steps."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-understand]
+  quality: 3
 
 - id: "docs-gha-debug-logging"
   title: "Enabling debug logging"
@@ -169,9 +177,10 @@
   estHours: 1
   summary: "Turns on runner and step debug logs, the first move when a workflow fails mysteriously."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-understand]
+  quality: 2
 
 - id: "docs-gh-pages-custom-workflows"
   title: "Using custom workflows with GitHub Pages"
@@ -187,9 +196,10 @@
   estHours: 1
   summary: "Shows the configure-pages, upload-pages-artifact and deploy-pages flow for publishing any static site generator output."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-gha-understand]
+  quality: 3
 
 - id: "docs-gh-about-rulesets"
   title: "About rulesets"
@@ -205,9 +215,10 @@
   estHours: 1
   summary: "Explains rulesets for branches and tags (required checks, reviews, linear history) and how they layer over classic protection."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-github-flow]
+  quality: 2
 
 - id: "docs-gh-protected-branches"
   title: "About protected branches"
@@ -223,9 +234,10 @@
   estHours: 1
   summary: "Lists the classic branch protection options like required status checks and signed commits that gate merges to main."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-github-flow]
+  quality: 3
 
 - id: "docs-gh-projects-quickstart"
   title: "Quickstart for Projects"
@@ -241,8 +253,9 @@
   estHours: 1
   summary: "Gets a board/table project running with custom fields and views to plan solo or team work next to the code."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "docs-gh-cli-manual"
   title: "GitHub CLI manual"
@@ -261,6 +274,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-github-flow]
+  quality: 4
 
 - id: "docs-gh-cli-run"
   title: "gh run (GitHub CLI manual)"
@@ -276,9 +290,10 @@
   estHours: 1
   summary: "List, watch, rerun and download artifacts from workflow runs without opening the browser."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gh-cli-manual]
+  quality: 2
 
 - id: "docs-gh-cli-workflow"
   title: "gh workflow (GitHub CLI manual)"
@@ -294,9 +309,10 @@
   estHours: 1
   summary: "Trigger workflow_dispatch runs with inputs and enable/disable workflows from the command line."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gh-cli-manual]
+  quality: 2
 
 - id: "docs-gh-cli-release"
   title: "gh release (GitHub CLI manual)"
@@ -312,9 +328,10 @@
   estHours: 1
   summary: "Create releases and upload binary assets in one command, handy as a final step of a release workflow."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gh-cli-manual]
+  quality: 2
 
 - id: "docs-msix-overview"
   title: "What is MSIX?"
@@ -330,8 +347,9 @@
   estHours: 1
   summary: "Introduces Windows' modern package format: clean install/uninstall, containerised writes and Store/App Installer delivery."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "docs-inno-setup-help"
   title: "Inno Setup Help"
@@ -347,8 +365,9 @@
   estHours: 2
   summary: "Documentation for the free script-driven Windows installer builder widely used for indie and open-source apps."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "docs-winget-manifest"
   title: "Create your package manifest (WinGet)"
@@ -364,8 +383,9 @@
   estHours: 1
   summary: "How to write the YAML manifest needed to list your app in the Windows Package Manager community repo."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: "docs-homebrew-tap"
   title: "How to Create and Maintain a Tap"
@@ -381,9 +401,10 @@
   estHours: 1
   summary: "Run your own tap repository so users can install your tool before (or instead of) homebrew-core."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-homebrew-formula-cookbook]
+  quality: 3
 
 - id: "docs-gha-reuse-workflows"
   title: "Reuse workflows"
@@ -399,9 +420,10 @@
   estHours: 1
   summary: "Teaches workflow_call with inputs, secrets and outputs so a team can keep one canonical build/deploy pipeline."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-github-actions-workflow-syntax]
+  quality: 3
 
 - id: "docs-gha-metadata-syntax"
   title: "Metadata syntax reference (action.yml)"
@@ -417,9 +439,10 @@
   estHours: 1
   summary: "The reference for inputs, outputs, runs.using and branding when authoring any custom action."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-composite-action]
+  quality: 3
 
 - id: "docs-gha-concurrency"
   title: "Control workflow concurrency"
@@ -435,9 +458,10 @@
   estHours: 1
   summary: "Uses concurrency groups and cancel-in-progress to stop duplicate deploys and wasted CI minutes."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-github-actions-workflow-syntax]
+  quality: 2
 
 - id: "docs-gha-manage-environments"
   title: "Managing environments for deployment"
@@ -453,9 +477,10 @@
   estHours: 1
   summary: "Sets up staging/production environments with required reviewers, wait timers, branch rules and environment secrets."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-github-actions-workflow-syntax]
+  quality: 3
 
 - id: "docs-gha-github-token"
   title: "GITHUB_TOKEN (concepts)"
@@ -471,9 +496,10 @@
   estHours: 1
   summary: "Explains the automatic per-job token and why you should scope its permissions down explicitly."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-use-secrets]
+  quality: 3
 
 - id: "docs-gha-oidc"
   title: "OpenID Connect in GitHub Actions"
@@ -492,6 +518,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-gha-use-secrets]
+  quality: 4
 
 - id: "docs-gha-oidc-aws"
   title: "Configuring OpenID Connect in Amazon Web Services"
@@ -507,9 +534,10 @@
   estHours: 1
   summary: "Step-by-step IAM identity provider and role trust policy setup for keyless AWS deploys from Actions."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-gha-oidc]
+  quality: 3
 
 - id: "docs-gha-oidc-gcp"
   title: "Configuring OpenID Connect in Google Cloud Platform"
@@ -525,9 +553,10 @@
   estHours: 1
   summary: "Sets up Workload Identity Federation so Actions jobs can deploy to GCP without service-account key files."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-gha-oidc]
+  quality: 2
 
 - id: "docs-gha-oidc-azure"
   title: "Configuring OpenID Connect in Azure"
@@ -543,9 +572,10 @@
   estHours: 1
   summary: "Federated credentials setup so workflows log into Azure with azure/login and no stored client secret."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-oidc]
+  quality: 2
 
 - id: "docs-gha-secure-use"
   title: "Secure use reference (security hardening for GitHub Actions)"
@@ -564,6 +594,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-gha-use-secrets]
+  quality: 4
 
 - id: "docs-gha-pull-request-target"
   title: "Securely using pull_request_target"
@@ -582,6 +613,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-gha-secure-use]
+  quality: 4
 
 - id: "docs-gha-script-injections"
   title: "Script injections (concepts)"
@@ -600,6 +632,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-gha-secure-use]
+  quality: 4
 
 - id: "docs-gha-self-hosted-runners"
   title: "Self-hosted runners (concepts)"
@@ -615,9 +648,10 @@
   estHours: 1
   summary: "When to run jobs on your own machines (GPUs, special hardware, private networks) and the security trade-offs involved."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-understand]
+  quality: 3
 
 - id: "docs-gha-larger-runners"
   title: "Larger runners (concepts)"
@@ -633,9 +667,10 @@
   estHours: 1
   summary: "Describes GitHub-managed bigger machines, including GPU-powered runners, with static IPs and runner groups."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-self-hosted-runners]
+  quality: 2
 
 - id: "docs-gha-artifact-attestations"
   title: "Using artifact attestations to establish provenance for builds"
@@ -651,9 +686,10 @@
   estHours: 1
   summary: "Generates signed SLSA build provenance for binaries and images, then verifies it with gh attestation verify."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-secure-use]
+  quality: 3
 
 - id: "docs-gha-workflow-commands"
   title: "Workflow commands reference"
@@ -669,9 +705,10 @@
   estHours: 1
   summary: "How steps set outputs, env vars, masks, annotations and job summaries via GITHUB_OUTPUT and friends."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-github-actions-workflow-syntax]
+  quality: 3
 
 - id: "docs-gh-projects-actions"
   title: "Automating Projects using Actions"
@@ -687,9 +724,10 @@
   estHours: 1
   summary: "Uses the GraphQL API from a workflow to add and update project items automatically."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gh-projects-quickstart]
+  quality: 2
 
 - id: "docs-docker-build-github-actions"
   title: "Docker Build GitHub Actions"
@@ -705,9 +743,10 @@
   estHours: 2
   summary: "Docker's own guide set for Buildx in Actions: multi-platform builds, tags/labels, secrets, attestations and push."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docker-get-started]
+  quality: 3
 
 - id: "docs-docker-gha-cache"
   title: "Cache management with GitHub Actions"
@@ -723,9 +762,10 @@
   estHours: 1
   summary: "Compares gha, registry and inline cache backends so container builds in CI reuse layers."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-docker-build-github-actions]
+  quality: 2
 
 - id: "docs-goreleaser-actions"
   title: "GoReleaser: GitHub Actions"
@@ -741,9 +781,10 @@
   estHours: 1
   summary: "Wires GoReleaser into a tag-triggered workflow to publish releases on every version tag."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-goreleaser-quick-start]
+  quality: 2
 
 - id: "docs-tauri-distribute"
   title: "Tauri: Distribute"
@@ -759,9 +800,10 @@
   estHours: 2
   summary: "Overview of shipping Tauri apps as MSI/NSIS, DMG, AppImage, deb, RPM and store packages, with signing guides."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [rust-book]
+  quality: 3
 
 - id: "docs-tauri-updater"
   title: "Tauri Updater plugin"
@@ -777,9 +819,10 @@
   estHours: 1
   summary: "Adds signed in-app auto-updates driven by a static JSON or update server."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-tauri-distribute]
+  quality: 2
 
 - id: "docs-tauri-github-pipeline"
   title: "Tauri: GitHub pipeline"
@@ -795,9 +838,10 @@
   estHours: 1
   summary: "Uses tauri-action to build all platform bundles in a matrix and publish them to a GitHub release."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-tauri-distribute]
+  quality: 2
 
 - id: "docs-electron-forge-makers"
   title: "Electron Forge: Makers"
@@ -813,9 +857,10 @@
   estHours: 1
   summary: "Reference for each output format (Squirrel.Windows, MSI, DMG, deb, rpm, Flatpak, Snap) Forge can produce."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-electron-packaging-tutorial]
+  quality: 2
 
 - id: "docs-electron-forge-code-signing"
   title: "Electron Forge: Code Signing"
@@ -831,9 +876,10 @@
   estHours: 1
   summary: "Guides for signing and notarizing Electron apps on macOS and signing on Windows."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-electron-packaging-tutorial]
+  quality: 3
 
 - id: "docs-electron-builder"
   title: "electron-builder documentation"
@@ -849,9 +895,10 @@
   estHours: 2
   summary: "Alternative packager with built-in auto-update, code signing and many installer targets."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-electron-packaging-tutorial]
+  quality: 3
 
 - id: "docs-nsis"
   title: "NSIS Users Manual"
@@ -867,8 +914,9 @@
   estHours: 2
   summary: "Manual for the scriptable Nullsoft installer system used by many Windows apps and by Electron/Tauri bundlers."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "docs-signtool"
   title: "SignTool"
@@ -884,8 +932,9 @@
   estHours: 1
   summary: "Reference for Authenticode signing, timestamping and verifying Windows executables and installers."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "docs-apple-notarization"
   title: "Notarizing macOS software before distribution"
@@ -901,8 +950,9 @@
   estHours: 1
   summary: "Apple's guide to submitting signed apps for notarization so Gatekeeper lets users run them."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "docs-homebrew-formula-cookbook"
   title: "Homebrew Formula Cookbook"
@@ -918,8 +968,9 @@
   estHours: 2
   summary: "Write a Homebrew formula to build and install your CLI tool on macOS and Linux."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "docs-homebrew-cask-cookbook"
   title: "Homebrew Cask Cookbook"
@@ -935,9 +986,10 @@
   estHours: 1
   summary: "Describes casks for distributing prebuilt macOS GUI apps through brew install --cask."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-homebrew-formula-cookbook]
+  quality: 2
 
 - id: "docs-appimage-packaging-guide"
   title: "AppImage Packaging Guide"
@@ -953,8 +1005,9 @@
   estHours: 2
   summary: "How to bundle a Linux app into one portable AppImage file, with linuxdeploy and testing advice."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 2
 
 - id: "docs-gha-arc"
   title: "Actions Runner Controller"
@@ -970,9 +1023,10 @@
   estHours: 2
   summary: "Explains autoscaling ephemeral self-hosted runners on Kubernetes with runner scale sets."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-self-hosted-runners]
+  quality: 3
 
 - id: "docs-gha-store-share-data"
   title: "Storing and sharing data from a workflow"
@@ -988,9 +1042,10 @@
   estHours: 1
   summary: "Walks through uploading build outputs as artifacts and passing files between jobs, the basis of any build-then-release pipeline."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-github-actions-workflow-syntax]
+  quality: 2
 
 - id: "docs-gha-build-test-python"
   title: "Building and testing Python"
@@ -1006,9 +1061,10 @@
   estHours: 1
   summary: "A ready CI template for Python: setup-python, pip caching, version matrix and running pytest."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-understand]
+  quality: 3
 
 - id: "docs-gha-build-test-rust"
   title: "Building and testing Rust"
@@ -1024,9 +1080,10 @@
   estHours: 1
   summary: "Template workflow for cargo build/test, caching and publishing Rust binaries as artifacts."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-understand]
+  quality: 3
 
 - id: "docs-goreleaser-quick-start"
   title: "GoReleaser Quick Start"
@@ -1042,9 +1099,10 @@
   estHours: 1
   summary: "Automates cross-compiled builds, archives, checksums and GitHub releases for Go (and Rust/Zig) projects."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-go-compile-install]
+  quality: 3
 
 - id: "docs-electron-packaging-tutorial"
   title: "Packaging Your Application (Electron tutorial)"
@@ -1060,8 +1118,9 @@
   estHours: 1
   summary: "Uses Electron Forge to turn an app into platform installers and explains why code signing matters."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "docs-flatpak-first-build"
   title: "Building your first Flatpak"
@@ -1077,9 +1136,10 @@
   estHours: 1
   summary: "Builds, installs and runs a hello-world Flatpak from a manifest in a few commands."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-flatpak-basic-concepts]
+  quality: 3
 
 - id: "docs-gha-composite-action"
   title: "Creating a composite action"
@@ -1095,9 +1155,10 @@
   estHours: 1
   summary: "Packages repeated shell steps into a versioned action.yml you can call from many repositories."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-reuse-workflows]
+  quality: 3
 
 - id: "docs-gha-javascript-action"
   title: "Creating a JavaScript action"
@@ -1113,9 +1174,10 @@
   estHours: 2
   summary: "Builds a Node-based action with the actions toolkit, inputs/outputs and a bundled dist, the most common custom action type."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-composite-action]
+  quality: 3
 
 - id: "docs-gha-docker-action"
   title: "Creating a Docker container action"
@@ -1131,9 +1193,10 @@
   estHours: 1
   summary: "Shows how to ship an action as a container image so it can use any language or toolchain."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-composite-action]
+  quality: 2
 
 - id: "docs-gha-publish-docker-images"
   title: "Publishing Docker images"
@@ -1149,9 +1212,10 @@
   estHours: 1
   summary: "Builds and pushes images to Docker Hub and GHCR from a workflow with metadata tags and login actions."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docker-get-started]
+  quality: 3
 
 - id: "docs-electron-publishing-updating"
   title: "Publishing and Updating (Electron tutorial)"
@@ -1167,9 +1231,10 @@
   estHours: 1
   summary: "Publishes releases to GitHub and wires up auto-updates with update.electronjs.org."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-electron-packaging-tutorial]
+  quality: 3
 
 - id: "docs-wix-tutorial"
   title: "WiX Toolset tutorial"
@@ -1185,8 +1250,9 @@
   estHours: 3
   summary: "Builds a real MSI step by step with WiX v4+/v5, from project setup through upgrades."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 3
 
 - id: "repo-softprops-action-gh-release"
   title: "action-gh-release"
@@ -1202,9 +1268,10 @@
   estHours: 1
   summary: "Popular action for creating a GitHub Release from a tag and attaching built binaries as assets."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-store-share-data]
+  quality: 2
 
 - id: "repo-actions-deploy-pages"
   title: "actions/deploy-pages"
@@ -1220,9 +1287,10 @@
   estHours: 1
   summary: "The official action that publishes an uploaded Pages artifact; its README documents required permissions and environments."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-gh-pages-custom-workflows]
+  quality: 2
 
 - id: "repo-actions-cache"
   title: "actions/cache"
@@ -1238,9 +1306,10 @@
   estHours: 1
   summary: "The cache action itself; its README has per-language examples for npm, pip, cargo, Gradle and more."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-dependency-caching]
+  quality: 2
 
 - id: "repo-rust-cache"
   title: "Swatinem/rust-cache"
@@ -1256,9 +1325,10 @@
   estHours: 1
   summary: "Smart cargo/target caching for Rust CI that cuts build times with almost no configuration."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-build-test-rust]
+  quality: 2
 
 - id: "repo-docker-build-push-action"
   title: "docker/build-push-action"
@@ -1274,9 +1344,10 @@
   estHours: 1
   summary: "Buildx-based action for multi-platform image builds with GHA cache export, the standard way to ship containers from CI."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-publish-docker-images]
+  quality: 3
 
 - id: "repo-actions-typescript-action"
   title: "actions/typescript-action template"
@@ -1292,9 +1363,10 @@
   estHours: 2
   summary: "Official template repo with tests, bundling and release setup for writing your own TypeScript action."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-javascript-action]
+  quality: 3
 
 - id: "repo-harden-runner"
   title: "harden-runner"
@@ -1310,9 +1382,10 @@
   estHours: 1
   summary: "Adds network egress monitoring and blocking to runners, catching supply-chain exfiltration in CI."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-secure-use]
+  quality: 3
 
 - id: "repo-attest-build-provenance"
   title: "actions/attest-build-provenance"
@@ -1328,9 +1401,10 @@
   estHours: 1
   summary: "Generates signed provenance attestations for release artifacts in a single workflow step."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-gha-artifact-attestations]
+  quality: 2
 
 - id: "article-securitylab-pwn-requests"
   title: "Keeping your GitHub Actions and workflows secure Part 1: Preventing pwn requests"
@@ -1349,6 +1423,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-gha-secure-use]
+  quality: 4
 
 - id: "article-securitylab-untrusted-input"
   title: "Keeping your GitHub Actions and workflows secure Part 2: Untrusted input"
@@ -1367,6 +1442,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [article-securitylab-pwn-requests]
+  quality: 4
 
 - id: "article-securitylab-building-blocks"
   title: "Keeping your GitHub Actions and workflows secure Part 3: How to trust your building blocks"
@@ -1382,9 +1458,10 @@
   estHours: 1
   summary: "Covers third-party action supply-chain risk, SHA pinning and self-hosted runner exposure."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-securitylab-untrusted-input]
+  quality: 3
 
 - id: "article-securitylab-new-patterns"
   title: "Keeping your GitHub Actions and workflows secure Part 4: New vulnerability patterns and mitigation strategies"
@@ -1400,11 +1477,12 @@
   estHours: 1
   summary: "Newer attack patterns found in real workflows (artifact poisoning, TOCTOU on approvals) and how to mitigate them."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-securitylab-building-blocks]
 
 # ---- Languages (34)
+  quality: 3
 
 - id: "docs-pyinstaller-usage"
   title: "Using PyInstaller"
@@ -1420,8 +1498,9 @@
   estHours: 2
   summary: "Command-line options for turning a Python script into a one-folder or one-file executable, including hidden imports and data files."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [pypug-overview]
+  quality: 3
 
 - id: "docs-cx-freeze-overview"
   title: "cx_Freeze documentation overview"
@@ -1437,8 +1516,9 @@
   estHours: 1
   summary: "Cross-platform freezer that also produces MSI, DMG and AppImage outputs from a setup script."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [docs-pyinstaller-usage]
+  quality: 2
 
 - id: "docs-pypi-trusted-publishers"
   title: "PyPI Trusted Publishers"
@@ -1454,8 +1534,9 @@
   estHours: 1
   summary: "Publish to PyPI from CI via OIDC with no API tokens; covers setup and the security model."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [pypug-packaging-projects]
+  quality: 3
 
 - id: "docs-cargo-profiles"
   title: "Profiles (The Cargo Book)"
@@ -1471,8 +1552,9 @@
   estHours: 1
   summary: "Tune release builds with opt-level, LTO, codegen-units, panic and strip for size and speed."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [rust-book]
+  quality: 3
 
 - id: "docs-dotnet-deploying"
   title: ".NET application publishing overview"
@@ -1488,7 +1570,8 @@
   estHours: 1
   summary: "Compares framework-dependent vs self-contained publishing and the main dotnet publish options."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "docs-pyinstaller-spec-files"
   title: "Using Spec Files (PyInstaller)"
@@ -1504,8 +1587,9 @@
   estHours: 1
   summary: "How to edit the generated .spec to add data, binaries, multiple entry points and custom build steps."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-pyinstaller-usage]
+  quality: 2
 
 - id: "docs-pyinstaller-operating-mode"
   title: "What PyInstaller Does and How It Does It"
@@ -1521,8 +1605,9 @@
   estHours: 1
   summary: "Explains dependency analysis and the one-folder vs one-file bootloader trade-offs (start-up time, temp extraction)."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-pyinstaller-usage]
+  quality: 3
 
 - id: "docs-nuitka-user-manual"
   title: "Nuitka User Manual"
@@ -1538,8 +1623,9 @@
   estHours: 3
   summary: "Compiles Python to C for standalone/onefile binaries; the manual covers modes, plugins, data files and platform quirks."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-pyinstaller-usage]
+  quality: 3
 
 - id: "docs-nuitka-common-issues"
   title: "Nuitka: Solutions to the Common Issues"
@@ -1555,8 +1641,9 @@
   estHours: 1
   summary: "Practical fixes for missing data files, DLLs and anti-virus false positives when shipping compiled Python."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-nuitka-user-manual]
+  quality: 2
 
 - id: "docs-cibuildwheel"
   title: "cibuildwheel documentation"
@@ -1572,8 +1659,9 @@
   estHours: 2
   summary: "Builds compiled-extension wheels for every OS, architecture and Python version on CI with one action."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [pypug-overview]
+  quality: 3
 
 - id: "docs-maturin-guide"
   title: "Maturin User Guide"
@@ -1589,8 +1677,9 @@
   estHours: 2
   summary: "Builds and publishes Rust-backed Python packages (PyO3/cffi) as wheels, including CI generation."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [rust-book]
+  quality: 3
 
 - id: "docs-cmake-presets"
   title: "cmake-presets(7)"
@@ -1606,8 +1695,9 @@
   estHours: 1
   summary: "Reference for CMakePresets.json so configure/build/test/package settings are shared across machines and CI."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-cmake-tutorial]
+  quality: 3
 
 - id: "docs-cpack"
   title: "cpack(1) manual"
@@ -1623,8 +1713,9 @@
   estHours: 1
   summary: "How CMake projects produce installers and archives (NSIS, WiX, DEB, RPM, DMG, ZIP) through CPack generators."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-cmake-tutorial]
+  quality: 2
 
 - id: "docs-ninja-manual"
   title: "The Ninja build system manual"
@@ -1642,6 +1733,7 @@
   fromYear: 2
   priority: 2
   after: [docs-cmake-tutorial]
+  quality: 4
 
 - id: "docs-cargo-dist-book"
   title: "dist (cargo-dist) book"
@@ -1657,8 +1749,9 @@
   estHours: 2
   summary: "Generates release CI, archives and shell/PowerShell/MSI/Homebrew installers for Rust binaries."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-cargo-profiles]
+  quality: 3
 
 - id: "docs-go-install-source-goos"
   title: "Installing Go from source (GOOS/GOARCH table)"
@@ -1674,8 +1767,9 @@
   estHours: 1
   summary: "Its environment-variable section lists every valid GOOS/GOARCH pair you can target when cross-compiling."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-go-compile-install]
+  quality: 2
 
 - id: "docs-qt-windows-deployment"
   title: "Qt for Windows - Deployment"
@@ -1691,8 +1785,9 @@
   estHours: 1
   summary: "Explains windeployqt and which Qt DLLs, plugins and runtimes must ship beside your executable."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-cmake-tutorial]
+  quality: 2
 
 - id: "docs-dotnet-single-file"
   title: "Single-file deployment (.NET)"
@@ -1708,8 +1803,9 @@
   estHours: 1
   summary: "Bundles an app and its dependencies into one executable and covers its API caveats."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-dotnet-deploying]
+  quality: 2
 
 - id: "docs-dotnet-trimming"
   title: "Trim self-contained deployments and executables"
@@ -1725,8 +1821,9 @@
   estHours: 1
   summary: "Shrinks self-contained apps by removing unused code, and explains reflection-related trimming warnings."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-dotnet-single-file]
+  quality: 2
 
 - id: "docs-dotnet-native-aot"
   title: "Native AOT deployment"
@@ -1742,8 +1839,9 @@
   estHours: 1
   summary: "Ahead-of-time compiles .NET to a native binary for fast startup and no runtime dependency."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-dotnet-trimming]
+  quality: 3
 
 - id: "book-modern-cmake"
   title: "An Introduction to Modern CMake"
@@ -1761,6 +1859,7 @@
   fromYear: 2
   priority: 2
   after: [docs-cmake-tutorial]
+  quality: 4
 
 - id: "docs-briefcase-tutorial"
   title: "BeeWare Briefcase tutorial"
@@ -1776,8 +1875,9 @@
   estHours: 3
   summary: "Turns a Python app into native installers for Windows, macOS, Linux, iOS and Android with one tool."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [pypug-overview]
+  quality: 3
 
 - id: "docs-pypug-publish-gha"
   title: "Publishing package distribution releases using GitHub Actions CI/CD workflows"
@@ -1793,8 +1893,9 @@
   estHours: 1
   summary: "End-to-end workflow that builds sdists/wheels and uploads to TestPyPI and PyPI using trusted publishing."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [docs-pypi-trusted-publishers]
+  quality: 3
 
 - id: "docs-cmake-tutorial"
   title: "CMake Tutorial (official)"
@@ -1812,6 +1913,7 @@
   fromYear: 1
   priority: 2
   doFirst: "learncpp"
+  quality: 4
 
 - id: "docs-vcpkg-get-started"
   title: "Install and use packages with CMake (vcpkg)"
@@ -1827,8 +1929,9 @@
   estHours: 1
   summary: "Adds third-party C++ libraries to a CMake project via a vcpkg manifest and toolchain file."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [docs-cmake-tutorial]
+  quality: 3
 
 - id: "docs-msbuild-tutorial"
   title: "Tutorial: Use MSBuild"
@@ -1844,7 +1947,8 @@
   estHours: 2
   summary: "Teaches MSBuild project files, targets, tasks, properties and items, the engine behind Visual Studio builds."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 2
 
 - id: "docs-go-compile-install"
   title: "Compile and install the application (Go tutorial)"
@@ -1860,8 +1964,9 @@
   estHours: 1
   summary: "Shows go build and go install and how Go produces single static-ish binaries you can ship."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [tour-of-go]
+  quality: 2
 
 - id: "docs-vcpkg-packaging"
   title: "Package a library with vcpkg"
@@ -1877,8 +1982,9 @@
   estHours: 1
   summary: "Shows how to write a port so your own library can be consumed through vcpkg."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-vcpkg-get-started]
+  quality: 3
 
 - id: "docs-conan-tutorial"
   title: "Conan 2 tutorial"
@@ -1894,8 +2000,9 @@
   estHours: 4
   summary: "Consume, create and cross-build C/C++ packages with Conan 2 profiles and CMake integration."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-cmake-tutorial]
+  quality: 3
 
 - id: "docs-conan-cross-building"
   title: "Cross-building with Conan (host and build contexts)"
@@ -1911,8 +2018,9 @@
   estHours: 1
   summary: "Clear introduction to host vs build profiles when compiling C++ for another OS or architecture."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-conan-tutorial]
+  quality: 3
 
 - id: "repo-gh-action-pypi-publish"
   title: "pypa/gh-action-pypi-publish"
@@ -1928,8 +2036,9 @@
   estHours: 1
   summary: "The official action for uploading wheels to PyPI with trusted publishing and automatic attestations."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [docs-pypi-trusted-publishers]
+  quality: 2
 
 - id: "repo-ccache"
   title: "ccache"
@@ -1945,8 +2054,9 @@
   estHours: 1
   summary: "Compiler cache that makes repeated C/C++ builds, locally and in CI, dramatically faster."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [docs-cmake-tutorial]
+  quality: 3
 
 - id: "repo-cross-rs"
   title: "cross: zero-setup cross compilation for Rust"
@@ -1962,8 +2072,9 @@
   estHours: 1
   summary: "Drop-in cargo replacement that cross-compiles and tests Rust for other targets inside prebuilt containers."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-cargo-profiles]
+  quality: 3
 
 - id: "repo-cargo-wix"
   title: "cargo-wix"
@@ -1979,10 +2090,11 @@
   estHours: 1
   summary: "Cargo subcommand that builds Windows MSI installers for Rust projects using the WiX Toolset."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-cargo-dist-book]
 
 # ---- Game development (3)
+  quality: 2
 
 - id: "docs-godot-exporting-projects"
   title: "Exporting projects (Godot)"

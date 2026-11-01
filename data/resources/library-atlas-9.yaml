@@ -12,42 +12,6 @@
 
 # ---- AI, ML, LLMs and agents (99)
 
-- id: "docs-copilot-autofix"
-  title: "Copilot Autofix for code scanning"
-  short: "Copilot Autofix"
-  provider: "GitHub"
-  type: "article"
-  url: "https://docs.github.com/en/code-security/concepts/code-scanning/copilot-autofix-for-code-scanning"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Documents a production LLM fix-suggestion system on top of CodeQL alerts, with its known limitations."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  tags: [security]
-
-- id: "docs-microsoft-security-copilot"
-  title: "What is Microsoft Security Copilot?"
-  short: "Security Copilot Docs"
-  provider: "Microsoft"
-  type: "article"
-  url: "https://learn.microsoft.com/en-us/copilot/security/microsoft-security-copilot"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Official docs for a deployed LLM SOC assistant: plugins, promptbooks and incident investigation workflows."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  tags: [security]
-
 - id: "docs-mitre-atlas"
   title: "MITRE ATLAS (Adversarial Threat Landscape for AI Systems)"
   short: "MITRE ATLAS"
@@ -62,9 +26,10 @@
   estHours: 4
   summary: "ATT&CK-style knowledge base of tactics, techniques and case studies for attacks on ML systems, used for AI threat modelling."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   tags: [security]
+  quality: 3
 
 - id: "docs-nist-ai-rmf"
   title: "AI Risk Management Framework"
@@ -80,27 +45,10 @@
   estHours: 4
   summary: "The US reference framework (Govern, Map, Measure, Manage) for managing AI risk, with its playbook."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   tags: [security]
-
-- id: "docs-google-saif"
-  title: "Google's Secure AI Framework (SAIF)"
-  short: "Google SAIF"
-  provider: "Google"
-  type: "article"
-  url: "https://safety.google/cybersecurity-advancements/saif"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Google's practitioner framework of security controls across the AI lifecycle, with a risk map of AI components."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  tags: [security]
+  quality: 3
 
 - id: "docs-owasp-llm-pi-cheatsheet"
   title: "LLM Prompt Injection Prevention Cheat Sheet"
@@ -116,47 +64,11 @@
   estHours: 1
   summary: "Concise developer checklist of prompt injection variants and layered mitigations for LLM apps."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   doFirst: "OWASP Top 10 for LLM"
   tags: [security]
-
-- id: "docs-azure-prompt-shields"
-  title: "Prompt Shields in Azure AI Content Safety"
-  short: "Azure Prompt Shields"
-  provider: "Microsoft"
-  type: "article"
-  url: "https://learn.microsoft.com/en-us/azure/ai-services/content-safety/concepts/jailbreak-detection"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Production example of separate user-prompt and document-injection classifiers, plus spotlighting as a setting."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [paper-spotlighting]
-  tags: [security]
-
-- id: "docs-cic-ids2017"
-  title: "Intrusion Detection Evaluation Dataset (CIC-IDS2017)"
-  short: "CIC-IDS2017"
-  provider: "Canadian Institute for Cybersecurity, UNB"
-  type: "article"
-  url: "https://www.unb.ca/cic/datasets/ids-2017.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "Widely used labelled network-flow dataset for practising ML intrusion detection, with known caveats worth learning."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  tags: [security]
+  quality: 3
 
 - id: "docs-nist-ai-600-1"
   title: "Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile (NIST AI 600-1)"
@@ -172,29 +84,11 @@
   estHours: 4
   summary: "Applies the AI RMF to generative AI, listing GenAI-specific risks such as prompt injection and suggested actions."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [docs-nist-ai-rmf]
   tags: [security]
-
-- id: "repo-stringsifter"
-  title: "StringSifter: ML ranking of strings for malware analysis"
-  short: "StringSifter"
-  provider: "Mandiant FLARE"
-  type: "article"
-  url: "https://github.com/mandiant/stringsifter"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "A learning-to-rank model that orders extracted strings by relevance, a compact applied-ML security example."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [repo-flare-floss]
-  tags: [security]
+  quality: 3
 
 - id: "repo-msticpy"
   title: "MSTICPy: CyberSecurity Tools for Jupyter"
@@ -210,46 +104,10 @@
   estHours: 4
   summary: "Python toolkit for threat-intel lookups, log analysis and anomaly detection inside notebooks."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   tags: [security]
-
-- id: "repo-llm-guard"
-  title: "LLM Guard: security toolkit for LLM interactions"
-  short: "LLM Guard"
-  provider: "Protect AI"
-  type: "practice"
-  url: "https://github.com/protectai/llm-guard"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "Drop-in input and output scanners (injection, PII, secrets, toxicity) to see guardrails working in an app."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  tags: [security]
-
-- id: "repo-deepteam"
-  title: "DeepTeam: LLM red teaming framework"
-  short: "DeepTeam"
-  provider: "Confident AI"
-  type: "practice"
-  url: "https://github.com/confident-ai/deepteam"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "Simple Python framework to red-team LLM apps against OWASP-style vulnerability categories."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  doFirst: "OWASP Top 10 for LLM"
-  tags: [security]
+  quality: 3
 
 - id: "repo-vulnhuntr"
   title: "Vulnhuntr: zero-shot vulnerability discovery with LLMs"
@@ -265,9 +123,10 @@
   estHours: 6
   summary: "Small, readable tool that walks Python call chains with an LLM to find remotely exploitable bugs, good for learning the pattern."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   tags: [security]
+  quality: 3
 
 - id: "repo-purplellama"
   title: "PurpleLlama: tools and evals for LLM security"
@@ -287,6 +146,7 @@
   roadmap: "ai-engineer"
   after: [paper-cyberseceval-1]
   tags: [security]
+  quality: 4
 
 - id: "repo-loghub"
   title: "Loghub: a large collection of system log datasets"
@@ -302,10 +162,10 @@
   estHours: 8
   summary: "Free real system logs (HDFS, BGL, Linux, OpenSSH and more) to practise parsing and anomaly detection."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-  after: [paper-log-parsing-benchmarks]
   tags: [security]
+  quality: 3
 
 - id: "repo-atlas-data"
   title: "ATLAS Data"
@@ -321,10 +181,11 @@
   estHours: 3
   summary: "Machine-readable ATLAS tactics, techniques and case studies for building detections or mapping tools."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-mitre-atlas]
   tags: [security]
+  quality: 3
 
 - id: "repo-garak"
   title: "garak: LLM vulnerability scanner"
@@ -344,6 +205,7 @@
   roadmap: "ai-engineer"
   after: [paper-garak]
   tags: [security]
+  quality: 4
 
 - id: "repo-pyrit"
   title: "PyRIT: Python Risk Identification Tool for generative AI"
@@ -359,29 +221,11 @@
   estHours: 8
   summary: "Hands-on toolkit with orchestrators, converters and scorers for red-teaming your own LLM applications."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-pyrit]
   tags: [security]
-
-- id: "repo-cisco-mcp-scanner"
-  title: "MCP Scanner"
-  short: "Cisco MCP Scanner"
-  provider: "Cisco AI Defense"
-  type: "practice"
-  url: "https://github.com/cisco-ai-defense/mcp-scanner"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Scans MCP servers and tools for poisoned descriptions and risky behaviour, a practical agent supply-chain check."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-agents"
-  after: [repo-mcp-scan]
-  tags: [security]
+  quality: 3
 
 - id: "repo-elastic-ember"
   title: "EMBER (Endgame Malware BEnchmark for Research)"
@@ -397,10 +241,11 @@
   estHours: 4
   summary: "Feature extractor and LightGBM baseline to train your first static malware classifier."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-ember-dataset]
   tags: [security]
+  quality: 3
 
 - id: "repo-oss-fuzz-gen"
   title: "oss-fuzz-gen: LLM-powered fuzz target generation for OSS-Fuzz"
@@ -420,6 +265,7 @@
   roadmap: "ai-agents"
   after: [article-oss-fuzz-ai-fuzzing-2023]
   tags: [security]
+  quality: 4
 
 - id: "repo-buttercup"
   title: "Buttercup: Trail of Bits' AIxCC Cyber Reasoning System"
@@ -435,10 +281,11 @@
   estHours: 20
   summary: "Open-sourced finalist system you can deploy locally to study end-to-end automated bug finding and patching."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [article-tob-buttercup-aixcc]
   tags: [security]
+  quality: 3
 
 - id: "repo-atlantis-crs"
   title: "Atlantis: Team Atlanta's AIxCC Final Competition CRS"
@@ -454,10 +301,11 @@
   estHours: 20
   summary: "Source of the AIxCC-winning cyber reasoning system, a large real-world reference for LLM plus fuzzing architectures."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-sok-aixcc]
   tags: [security]
+  quality: 3
 
 - id: "repo-artiphishell"
   title: "ARTIPHISHELL: Shellphish AIxCC CRS"
@@ -473,10 +321,11 @@
   estHours: 20
   summary: "Another finalist CRS with many specialised agents, useful for comparing architectures against Atlantis and Buttercup."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [paper-sok-aixcc]
   tags: [security]
+  quality: 3
 
 - id: "repo-bodmas"
   title: "BODMAS: An Open Dataset for Learning based Temporal Analysis of PE Malware"
@@ -492,48 +341,11 @@
   estHours: 4
   summary: "Timestamped, family-labelled PE dataset and code for studying drift and incremental retraining."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-ember-dataset]
   tags: [security]
-
-- id: "paper-log-parsing-benchmarks"
-  title: "Tools and Benchmarks for Automated Log Parsing"
-  short: "Log Parsing Benchmarks"
-  provider: "Jieming Zhu et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/1811.03509"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Compares classic log parsers on standard datasets, giving the baseline that LLM-based parsers are measured against."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "genai"
-  tags: [security]
-
-- id: "paper-llm-phishing-efficacy"
-  title: "Evaluating the Efficacy of Large Language Models in Identifying Phishing Attempts"
-  short: "LLMs vs Phishing"
-  provider: "Het Patel et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2404.15485"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Approachable study of how well general LLMs classify phishing emails and explain their reasoning."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "genai"
-  tags: [security]
+  quality: 3
 
 - id: "paper-red-teaming-100-products"
   title: "Lessons From Red Teaming 100 Generative AI Products"
@@ -549,48 +361,11 @@
   estHours: 2
   summary: "Practical lessons from Microsoft's AI red team, such as simple attacks beating gradient ones and system-level threat modelling."
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "genai"
   tags: [security]
-
-- id: "paper-llm-vuln-detection-repair-review"
-  title: "Large Language Model for Vulnerability Detection and Repair: Literature Review and the Road Ahead"
-  short: "LLM Vuln Detect+Repair"
-  provider: "Xin Zhou et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2404.02525"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 5
-  summary: "Survey that maps how LLMs are adapted for finding and fixing vulnerabilities and where current methods fall short."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "genai"
-  tags: [security]
-
-- id: "paper-llm4cybersec-slr"
-  title: "Large Language Models for Cyber Security: A Systematic Literature Review"
-  short: "LLM4Security SLR"
-  provider: "Hanxiang Xu et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2405.04760"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "Broad map of where LLMs are applied across security tasks, a good index before diving into specific papers."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "genai"
-  tags: [security]
+  quality: 3
 
 - id: "paper-diversevul"
   title: "DiverseVul: A New Vulnerable Source Code Dataset for Deep Learning Based Vulnerability Detection"
@@ -606,10 +381,11 @@
   estHours: 3
   summary: "Larger vulnerable-function dataset and an honest study of how poorly deep models generalise to unseen projects."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-devign]
   tags: [security]
+  quality: 3
 
 - id: "paper-devign"
   title: "Devign: Effective Vulnerability Identification by Learning Comprehensive Program Semantics via Graph Neural Networks"
@@ -625,10 +401,11 @@
   estHours: 3
   summary: "Classic pre-LLM baseline that runs graph neural networks over code property graphs to flag vulnerable functions."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "genai"
   tags: [security]
+  quality: 3
 
 - id: "paper-cyberseceval-1"
   title: "Purple Llama CyberSecEval: A Secure Coding Benchmark for Language Models"
@@ -644,30 +421,11 @@
   estHours: 3
   summary: "Measures how often code models emit insecure code and comply with cyberattack requests, the start of Meta's eval series."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "genai"
   tags: [security]
-
-- id: "paper-cyberseceval-2"
-  title: "CyberSecEval 2: A Wide-Ranging Cybersecurity Evaluation Suite for Large Language Models"
-  short: "CyberSecEval 2"
-  provider: "Manish Bhatt et al. (Meta)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2404.13161"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Adds prompt injection, interpreter abuse and exploit-generation tests and introduces the safety-utility tradeoff metric."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-agents"
-  research: "genai"
-  after: [paper-cyberseceval-1]
-  tags: [security]
+  quality: 3
 
 - id: "paper-cyberseceval-3"
   title: "CYBERSECEVAL 3: Advancing the Evaluation of Cybersecurity Risks and Capabilities in Large Language Models"
@@ -683,11 +441,11 @@
   estHours: 3
   summary: "Evaluates risks to third parties and to app developers, including automated social engineering and offensive-operation uplift."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "genai"
-  after: [paper-cyberseceval-2]
   tags: [security]
+  quality: 3
 
 - id: "paper-nyu-ctf-bench"
   title: "NYU CTF Bench: A Scalable Open-Source Benchmark Dataset for Evaluating LLMs in Offensive Security"
@@ -703,71 +461,12 @@
   estHours: 3
   summary: "Dockerised CTF challenge set and agent baseline for measuring model security skill in a reproducible way."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   research: "genai"
   after: [paper-cybench]
   tags: [security]
-
-- id: "paper-ctibench"
-  title: "CTIBench: A Benchmark for Evaluating LLMs in Cyber Threat Intelligence"
-  short: "CTIBench"
-  provider: "Md Tanvirul Alam et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2406.07599"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Tests LLMs on real threat-intel tasks such as mapping reports to ATT&CK, CVE-to-CWE and severity scoring."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "genai"
-  after: [docs-mitre-atlas]
-  tags: [security]
-
-- id: "paper-lilac-log-parsing"
-  title: "LILAC: Log Parsing using LLMs with Adaptive Parsing Cache"
-  short: "LILAC Log Parsing"
-  provider: "Zhihan Jiang et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2310.01796"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Practical recipe for accurate, cheap LLM log parsing, the first step of most log-based anomaly detection."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "genai"
-  after: [paper-log-parsing-benchmarks]
-  tags: [security]
-
-- id: "paper-llm-phishing-explainability"
-  title: "Evaluating Large Language Models for Phishing Detection, Self-Consistency, Faithfulness, and Explainability"
-  short: "Phishing LLM Explain"
-  provider: "arXiv authors (2025)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2506.13746"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Looks beyond accuracy at whether LLM explanations for phishing verdicts are consistent and faithful."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "genai"
-  after: [paper-llm-phishing-efficacy]
-  tags: [security]
+  quality: 3
 
 - id: "paper-llamafirewall"
   title: "LlamaFirewall: An open source guardrail system for building secure AI agents"
@@ -783,10 +482,11 @@
   estHours: 3
   summary: "Layered agent guardrail combining a jailbreak classifier, chain-of-thought alignment auditing and static code checks."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [paper-llama-guard]
   tags: [security]
+  quality: 3
 
 - id: "paper-jatmo"
   title: "Jatmo: Prompt Injection Defense by Task-Specific Finetuning"
@@ -802,10 +502,11 @@
   estHours: 3
   summary: "Simple idea: fine-tune a non-instruction-tuned model for one task so injected instructions have nothing to hijack."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [paper-struq]
   tags: [security]
+  quality: 3
 
 - id: "paper-formalizing-prompt-injection"
   title: "Formalizing and Benchmarking Prompt Injection Attacks and Defenses"
@@ -821,10 +522,11 @@
   estHours: 4
   summary: "Gives a clean framework and benchmark for comparing prompt injection attacks and defences systematically."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   doFirst: "Not What You've Signed Up For"
   tags: [security]
+  quality: 3
 
 - id: "paper-injecagent"
   title: "InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated Large Language Model Agents"
@@ -840,11 +542,12 @@
   estHours: 3
   summary: "Benchmark showing how often tool-using agents follow malicious instructions hidden in tool outputs."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   research: "genai"
   after: [paper-formalizing-prompt-injection]
   tags: [security]
+  quality: 3
 
 - id: "paper-baseline-defenses"
   title: "Baseline Defenses for Adversarial Attacks Against Aligned Language Models"
@@ -860,11 +563,12 @@
   estHours: 3
   summary: "Tests perplexity filtering, paraphrasing and retokenisation against jailbreaks, setting baselines every defence should beat."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "genai"
   doFirst: "Universal Adversarial Attacks (GCG)"
   tags: [security]
+  quality: 3
 
 - id: "paper-smoothllm"
   title: "SmoothLLM: Defending Large Language Models Against Jailbreaking Attacks"
@@ -880,50 +584,12 @@
   estHours: 3
   summary: "Randomised-smoothing-style defence that perturbs prompts and aggregates answers to blunt adversarial suffixes."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "genai"
   after: [paper-baseline-defenses]
   tags: [security]
-
-- id: "paper-granite-guardian"
-  title: "Granite Guardian"
-  short: "Granite Guardian"
-  provider: "Inkit Padhi et al. (IBM)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2412.07724"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Open guard models covering harm, jailbreak and RAG hallucination risks, with a clear risk taxonomy."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [paper-llama-guard]
-  tags: [security]
-
-- id: "paper-shieldgemma"
-  title: "ShieldGemma: Generative AI Content Moderation Based on Gemma"
-  short: "ShieldGemma"
-  provider: "Wenjun Zeng et al. (Google)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2407.21772"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Google's open safety classifiers and the synthetic-data pipeline used to train them."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "genai"
-  after: [paper-llama-guard]
-  tags: [security]
+  quality: 3
 
 - id: "paper-wildguard"
   title: "WildGuard: Open One-Stop Moderation Tools for Safety Risks, Jailbreaks, and Refusals of LLMs"
@@ -939,11 +605,12 @@
   estHours: 3
   summary: "One open moderation model for harmful prompts, harmful responses and refusals, with a strong public dataset."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "genai"
   after: [paper-llama-guard]
   tags: [security]
+  quality: 3
 
 - id: "paper-llmail-inject"
   title: "LLMail-Inject: A Dataset from a Realistic Adaptive Prompt Injection Challenge"
@@ -959,11 +626,12 @@
   estHours: 3
   summary: "Analysis of a large public challenge where people attacked defended email agents, plus the resulting attack dataset."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   research: "genai"
   after: [paper-spotlighting]
   tags: [security]
+  quality: 3
 
 - id: "paper-garak"
   title: "garak: A Framework for Security Probing Large Language Models"
@@ -979,10 +647,11 @@
   estHours: 2
   summary: "Explains the probe, detector and harness design of a widely used LLM vulnerability scanner."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   research: "genai"
   tags: [security]
+  quality: 3
 
 - id: "paper-pyrit"
   title: "PyRIT: A Framework for Security Risk Identification and Red Teaming in Generative AI System"
@@ -998,10 +667,11 @@
   estHours: 2
   summary: "Describes Microsoft's open automation framework for multi-turn red teaming of generative AI systems."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "genai"
   tags: [security]
+  quality: 3
 
 - id: "paper-kitsune"
   title: "Kitsune: An Ensemble of Autoencoders for Online Network Intrusion Detection"
@@ -1017,10 +687,10 @@
   estHours: 3
   summary: "Lightweight unsupervised autoencoder ensemble for real-time network anomaly detection, easy to reimplement."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-  after: [docs-cic-ids2017]
   tags: [security]
+  quality: 3
 
 - id: "paper-ember-dataset"
   title: "EMBER: An Open Dataset for Training Static PE Malware Machine Learning Models"
@@ -1036,45 +706,10 @@
   estHours: 4
   summary: "The standard open benchmark of PE features and labels that started reproducible ML malware research."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   tags: [security]
-
-- id: "paper-saxe-dnn-malware"
-  title: "Deep Neural Network Based Malware Detection Using Two Dimensional Binary Program Features"
-  short: "Saxe DNN Malware"
-  provider: "Joshua Saxe, Konstantin Berlin"
-  type: "paper"
-  url: "https://arxiv.org/abs/1508.03096"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Early industrial deep-learning detector showing feature design and low-FPR evaluation."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  tags: [security]
-
-- id: "paper-ucci-ml-malware-survey"
-  title: "Survey of Machine Learning Techniques for Malware Analysis"
-  short: "ML Malware Survey"
-  provider: "Ucci, Aniello, Baldoni"
-  type: "paper"
-  url: "https://arxiv.org/abs/1710.08189"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Organises ML malware work by objective, features and algorithm, a good map before reading papers."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  tags: [security]
+  quality: 3
 
 - id: "paper-dos-donts-ml-security"
   title: "Dos and Don'ts of Machine Learning in Computer Security"
@@ -1093,6 +728,7 @@
   priority: 1
   roadmap: "ai-engineer"
   tags: [security]
+  quality: 4
 
 - id: "paper-sok-aixcc"
   title: "SoK: DARPA's AI Cyber Challenge (AIxCC): Competition Design, Architectures, and Lessons Learned"
@@ -1108,11 +744,11 @@
   estHours: 5
   summary: "Systematizes the finalist cyber reasoning systems and what actually worked when mixing fuzzing, static analysis and LLM agents."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   research: "genai"
-  after: [article-darpa-aixcc-results]
   tags: [security]
+  quality: 3
 
 - id: "paper-fuzzing-brain"
   title: "All You Need Is A Fuzzing Brain: An LLM-Powered System for Automated Vulnerability Detection and Patching"
@@ -1128,11 +764,12 @@
   estHours: 4
   summary: "Paper describing a finalist AIxCC system and its use of LLMs for seed generation, triage and patch synthesis."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "genai"
   after: [paper-sok-aixcc]
   tags: [security]
+  quality: 3
 
 - id: "paper-primevul"
   title: "Vulnerability Detection with Code Language Models: How Far Are We?"
@@ -1148,11 +785,12 @@
   estHours: 4
   summary: "Shows that earlier vulnerability datasets had noisy labels and leakage, and that code LMs score far lower on realistic data."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "genai"
   after: [paper-diversevul]
   tags: [security]
+  quality: 3
 
 - id: "paper-arvo"
   title: "ARVO: Atlas of Reproducible Vulnerabilities for Open-Source Software"
@@ -1168,29 +806,10 @@
   estHours: 3
   summary: "Dataset of thousands of reproducible OSS-Fuzz bugs with fixes, the substrate many AI patching benchmarks build on."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   tags: [security]
-
-- id: "paper-cybersoceval"
-  title: "CyberSOCEval: Benchmarking LLMs Capabilities for Malware Analysis and Threat Intelligence Reasoning"
-  short: "CyberSOCEval"
-  provider: "Meta and CrowdStrike"
-  type: "paper"
-  url: "https://arxiv.org/abs/2509.20166"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Defender-side benchmark asking whether LLMs can actually help SOC analysts with malware reports and threat intel."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-engineer"
-  research: "genai"
-  after: [paper-cyberseceval-3]
-  tags: [security]
+  quality: 3
 
 - id: "paper-sec-bench"
   title: "SEC-bench: Automated Benchmarking of LLM Agents on Real-World Software Security Tasks"
@@ -1206,11 +825,12 @@
   estHours: 3
   summary: "Auto-builds reproducible CVE environments to test agents on proof-of-concept generation and vulnerability patching."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   research: "genai"
   after: [paper-swe-bench]
   tags: [security]
+  quality: 3
 
 - id: "paper-cve-bench"
   title: "CVE-Bench: A Benchmark for AI Agents' Ability to Exploit Real-World Web Application Vulnerabilities"
@@ -1226,10 +846,11 @@
   estHours: 3
   summary: "Sandboxed real-CVE web apps for measuring agent risk, useful for understanding how frontier labs gauge cyber capability."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [paper-cybench]
   tags: [security]
+  quality: 3
 
 - id: "paper-cybergym"
   title: "CyberGym: Evaluating AI Agents' Real-World Cybersecurity Capabilities at Scale"
@@ -1245,10 +866,11 @@
   estHours: 3
   summary: "Large benchmark of reproducing known vulnerabilities from descriptions across many OSS projects, which also surfaced new bugs."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [paper-arvo]
   tags: [security]
+  quality: 3
 
 - id: "paper-bountybench"
   title: "BountyBench: Dollar Impact of AI Agent Attackers and Defenders on Real-World Cybersecurity Systems"
@@ -1264,29 +886,11 @@
   estHours: 3
   summary: "Compares agents as detectors, exploiters and patchers on bug-bounty systems, pricing defensive value in dollars."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [paper-cybench]
   tags: [security]
-
-- id: "paper-cortex-alert-triage"
-  title: "CORTEX: Collaborative LLM Agents for High-Stakes Alert Triage"
-  short: "CORTEX Alert Triage"
-  provider: "Bowen Wei et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2510.00311"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Multi-agent design that splits SOC alert triage into behaviour analysis, evidence gathering and reasoning to cut false positives."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-agents"
-  research: "genai"
-  tags: [security]
+  quality: 3
 
 - id: "paper-agentic-alert-investigation"
   title: "Towards Agentic Investigation of Security Alerts"
@@ -1302,11 +906,11 @@
   estHours: 3
   summary: "Recent work on letting LLM agents gather evidence and reach verdicts on security alerts like a tier-1 analyst."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   research: "genai"
-  after: [paper-cortex-alert-triage]
   tags: [security]
+  quality: 3
 
 - id: "paper-meta-secalign"
   title: "Meta-SecAlign: Training LLMs against Prompt Injection for Robust Agents"
@@ -1322,11 +926,12 @@
   estHours: 4
   summary: "Open model trained with SecAlign-style preference optimisation, showing model-level injection defence at scale."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   research: "genai"
   after: [paper-secalign]
   tags: [security]
+  quality: 3
 
 - id: "paper-adaptive-attacks-ipi"
   title: "Adaptive Attacks Break Defenses Against Indirect Prompt Injection Attacks on LLM Agents"
@@ -1342,11 +947,12 @@
   estHours: 3
   summary: "Important reality check: evaluate defences against attackers who adapt, or you will overestimate their strength."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   research: "genai"
   after: [paper-injecagent]
   tags: [security]
+  quality: 3
 
 - id: "paper-datasentinel"
   title: "DataSentinel: A Game-Theoretic Detection of Prompt Injection Attacks"
@@ -1362,10 +968,11 @@
   estHours: 3
   summary: "Trains an injection detector with a minimax game so it holds up better against adaptive attacks."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [paper-formalizing-prompt-injection]
   tags: [security]
+  quality: 3
 
 - id: "paper-melon"
   title: "MELON: Provable Defense Against Indirect Prompt Injection Attacks in AI Agents"
@@ -1381,10 +988,11 @@
   estHours: 3
   summary: "Detects hijacked agents by re-running with masked user input and comparing tool calls, a clever runtime check."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [paper-agentdojo]
   tags: [security]
+  quality: 3
 
 - id: "paper-progent"
   title: "Progent: Securing AI Agents with Privilege Control"
@@ -1400,10 +1008,11 @@
   estHours: 3
   summary: "Applies least privilege to agents via a policy language that limits which tool calls are allowed and when."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [paper-agentdojo]
   tags: [security]
+  quality: 3
 
 - id: "paper-fides-ifc"
   title: "Securing AI Agents with Information-Flow Control"
@@ -1419,10 +1028,11 @@
   estHours: 4
   summary: "Brings classic confidentiality and integrity labels to agent planners, giving deterministic guarantees against injection."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   doFirst: "Defeating Prompt Injections by Design"
   tags: [security]
+  quality: 3
 
 - id: "paper-get-my-drift"
   title: "Get My Drift? Catching LLM Task Drift with Activation Deltas"
@@ -1438,10 +1048,11 @@
   estHours: 3
   summary: "Detects injections by probing internal activations for a shift away from the user's original task."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "genai"
   tags: [security]
+  quality: 3
 
 - id: "paper-ember2024"
   title: "EMBER2024 -- A Benchmark Dataset for Holistic Evaluation of Malware Classifiers"
@@ -1457,29 +1068,11 @@
   estHours: 4
   summary: "Updated multi-platform benchmark with evasive-sample splits for testing modern classifiers."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-ember-dataset]
   tags: [security]
-
-- id: "paper-sorel-20m"
-  title: "SOREL-20M: A Large Scale Benchmark Dataset for Malicious PE Detection"
-  short: "SOREL-20M"
-  provider: "Richard Harang, Ethan M. Rudd"
-  type: "paper"
-  url: "https://arxiv.org/abs/2012.07634"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Twenty-million-sample dataset with baselines, letting you train detectors at realistic scale."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [paper-ember-dataset]
-  tags: [security]
+  quality: 3
 
 - id: "paper-malconv"
   title: "Malware Detection by Eating a Whole EXE"
@@ -1495,29 +1088,11 @@
   estHours: 4
   summary: "Introduces MalConv, a CNN that learns directly from raw executable bytes without hand-built features."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-ember-dataset]
   tags: [security]
-
-- id: "paper-malconv2-gct"
-  title: "Classifying Sequences of Extreme Length with Constant Memory Applied to Malware Detection"
-  short: "MalConv2"
-  provider: "Raff et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2012.09390"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Makes byte-level models scale to huge binaries with constant memory and attention-style pooling."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [paper-malconv]
-  tags: [security]
+  quality: 3
 
 - id: "paper-tesseract"
   title: "TESSERACT: Eliminating Experimental Bias in Malware Classification across Space and Time"
@@ -1533,29 +1108,11 @@
   estHours: 4
   summary: "Shows how temporal and spatial bias inflate reported detection accuracy and how to evaluate honestly."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-ember-dataset]
   tags: [security]
-
-- id: "paper-transcending-transcend"
-  title: "Transcending Transcend: Revisiting Malware Classification in the Presence of Concept Drift"
-  short: "Transcending Transcend"
-  provider: "Barbero et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2010.03856"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Studies rejecting drifting samples with conformal evaluation so classifiers degrade gracefully."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [paper-tesseract]
-  tags: [security]
+  quality: 3
 
 - id: "paper-grosse-adversarial-malware"
   title: "Adversarial Perturbations Against Deep Neural Networks for Malware Classification"
@@ -1571,10 +1128,11 @@
   estHours: 4
   summary: "Early demonstration that malware classifiers are fragile to small changes and how retraining helps."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-ember-dataset]
   tags: [security]
+  quality: 3
 
 - id: "paper-problem-space-attacks"
   title: "Intriguing Properties of Adversarial ML Attacks in the Problem Space"
@@ -1590,10 +1148,11 @@
   estHours: 4
   summary: "Formalises realistic constraints on adversarial malware, key for judging defences' true robustness."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   after: [paper-grosse-adversarial-malware]
   tags: [security]
+  quality: 3
 
 - id: "paper-gemini-binary-similarity"
   title: "Neural Network-based Graph Embedding for Cross-Platform Binary Code Similarity Detection"
@@ -1609,45 +1168,10 @@
   estHours: 4
   summary: "Graph neural embeddings of control-flow graphs for finding similar functions across architectures."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   tags: [security]
-
-- id: "article-darpa-aixcc-results"
-  title: "AI Cyber Challenge marks pivotal inflection point for cyber defense"
-  short: "AIxCC Final Results"
-  provider: "DARPA"
-  type: "article"
-  url: "https://darpa.mil/news/2025/aixcc-results"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Official summary of the AIxCC finals: how autonomous systems found and patched bugs in real open-source code, and who won."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  tags: [security]
-
-- id: "article-sec-gemini-v1"
-  title: "Google announces Sec-Gemini v1, a new experimental cybersecurity model"
-  short: "Sec-Gemini v1"
-  provider: "Google"
-  type: "article"
-  url: "https://blog.google/security/google-launches-sec-gemini-v1-new/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how a security-specialised model combines Gemini with live threat intel and vulnerability data for SecOps work."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  tags: [security]
+  quality: 3
 
 - id: "article-big-sleep-naptime"
   title: "From Naptime to Big Sleep: Using Large Language Models To Catch Vulnerabilities In Real-World Code"
@@ -1667,6 +1191,7 @@
   roadmap: "ai-agents"
   after: [article-project-naptime]
   tags: [security]
+  quality: 4
 
 - id: "article-project-naptime"
   title: "Project Naptime: Evaluating Offensive Security Capabilities of Large Language Models"
@@ -1685,6 +1210,7 @@
   priority: 1
   roadmap: "ai-engineer"
   tags: [security]
+  quality: 4
 
 - id: "article-oss-fuzz-ai-fuzzing-2023"
   title: "AI-Powered Fuzzing: Breaking the Bug Hunting Barrier"
@@ -1700,10 +1226,11 @@
   estHours: 1
   summary: "Shows how LLMs can write fuzz targets for OSS-Fuzz projects and raise code coverage with little human effort."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   doFirst: "Fuzzing Book"
   tags: [security]
+  quality: 3
 
 - id: "article-oss-fuzz-leveling-up-2024"
   title: "Leveling Up Fuzzing: Finding more vulnerabilities with AI"
@@ -1719,47 +1246,11 @@
   estHours: 1
   summary: "Follow-up reporting the AI-generated harnesses that found 26 new bugs, including an OpenSSL CVE, and the remaining hard problems."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   after: [article-oss-fuzz-ai-fuzzing-2023]
   tags: [security]
-
-- id: "article-codemender"
-  title: "Introducing CodeMender: an AI agent for code security"
-  short: "CodeMender"
-  provider: "Google DeepMind"
-  type: "article"
-  url: "https://deepmind.google/discover/blog/introducing-codemender-an-ai-agent-for-code-security/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Describes an agent that both patches new vulnerabilities and proactively rewrites code to remove whole bug classes, with validation steps."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-agents"
-  after: [article-big-sleep-naptime]
-  tags: [security]
-
-- id: "article-openai-aardvark"
-  title: "Introducing Aardvark: OpenAI's agentic security researcher"
-  short: "OpenAI Aardvark"
-  provider: "OpenAI"
-  type: "article"
-  url: "https://openai.com/index/introducing-aardvark/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Explains a find-validate-patch agent pipeline that scans repositories commit by commit, a template for AI-assisted AppSec."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-agents"
-  tags: [security]
+  quality: 3
 
 - id: "article-tob-buttercup-aixcc"
   title: "Trail of Bits' Buttercup wins 2nd place in AIxCC Challenge"
@@ -1775,10 +1266,10 @@
   estHours: 1
   summary: "Engineering write-up of a cost-efficient CRS that pairs classic fuzzing with LLM-driven patching."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
-  after: [article-darpa-aixcc-results]
   tags: [security]
+  quality: 3
 
 - id: "article-autopatchbench"
   title: "Introducing AutoPatchBench: A Benchmark for AI-Powered Security Fixes"
@@ -1794,9 +1285,10 @@
   estHours: 1
   summary: "Explains how to evaluate AI patches for fuzzer-found crashes, including why compiling and passing tests is not enough."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   tags: [security]
+  quality: 3
 
 - id: "article-anthropic-cyber-defenders"
   title: "Building AI for cyber defenders"
@@ -1812,9 +1304,10 @@
   estHours: 1
   summary: "Anthropic's account of training and evaluating Claude for defensive work such as finding and patching vulnerabilities."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   tags: [security]
+  quality: 3
 
 - id: "article-anthropic-browser-pi"
   title: "Mitigating the risk of prompt injections in browser use"
@@ -1830,28 +1323,10 @@
   estHours: 1
   summary: "How a frontier lab layers training, classifiers and red teaming to defend a browsing agent against injections."
   fromYear: 2
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
   tags: [security]
-
-- id: "cheatsheet-zeltser-ai-assisted-analysis"
-  title: "AI-Assisted Malware Analysis Tips"
-  short: "Zeltser AI Malware Tips"
-  provider: "Lenny Zeltser"
-  type: "article"
-  url: "https://zeltser.com/ai-assisted-malware-analysis-tips"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Guidance on splitting analysis work with an LLM agent while containing samples and verifying its claims."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-agents"
-  after: [cheatsheet-zeltser-malware-analysis]
-  tags: [security]
+  quality: 3
 
 - id: "article-theori-aixcc"
   title: "Theori — DARPA AIxCC (RoboDuck)"
@@ -1867,10 +1342,10 @@
   estHours: 3
   summary: "Hub of write-ups, agent traces and code for an LLM-first CRS, including a practical post on building effective LLM agents."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-agents"
-  after: [article-darpa-aixcc-results]
   tags: [security]
+  quality: 3
 
 - id: "blog-team-atlanta"
   title: "Team Atlanta (AIxCC) blog and artifacts"
@@ -1886,13 +1361,13 @@
   estHours: 10
   summary: "Posts and research artifacts from the AIxCC winners explaining design choices behind Atlantis."
   fromYear: 3
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   blog: true
-  after: [article-darpa-aixcc-results]
   tags: [security]
 
 # ---- Software architecture and system design (115)
+  quality: 3
 
 - id: "docs-cisa-secure-by-design-default"
   title: "Secure by Design and Default: Principles and Approaches (CISA and partners)"
@@ -1908,28 +1383,10 @@
   estHours: 3
   summary: "Argues vendors, not users, should own security outcomes and lists concrete defaults like MFA and memory-safe languages."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
-
-- id: "docs-cisa-secure-by-design-pledge"
-  title: "CISA Secure by Design Pledge"
-  short: "Secure by Design Pledge"
-  provider: "CISA"
-  type: "article"
-  url: "https://cisa.gov/resources-tools/resources/cisa-secure-design-pledge"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Seven measurable goals (MFA, default passwords, vuln classes, CVEs, disclosure) that make secure-by-design concrete."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  after: [docs-cisa-secure-by-design-default]
-  tags: [security]
+  quality: 3
 
 - id: "docs-openssf-concise-guide-secure-software"
   title: "Concise Guide for Developing More Secure Software"
@@ -1948,6 +1405,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "docs-openssf-best-practices-badge"
   title: "OpenSSF Best Practices Badge Program"
@@ -1963,10 +1421,11 @@
   estHours: 2
   summary: "Self-assess your own project against concrete criteria (tests, analysis, disclosure policy) and earn a badge."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-openssf-concise-guide-secure-software]
   tags: [security]
+  quality: 3
 
 - id: "docs-owasp-proactive-controls"
   title: "OWASP Top 10 Proactive Controls"
@@ -1986,6 +1445,7 @@
   roadmap: "software-architect"
   doFirst: "OWASP Top 10"
   tags: [security]
+  quality: 4
 
 - id: "docs-github-code-scanning-codeql"
   title: "Code scanning with CodeQL (GitHub Docs)"
@@ -2001,9 +1461,10 @@
   estHours: 1
   summary: "How to switch on CodeQL code scanning for your repositories and read the resulting alerts."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-zap-getting-started"
   title: "ZAP - Getting Started"
@@ -2019,10 +1480,11 @@
   estHours: 3
   summary: "Intro to the free DAST proxy for scanning web apps you own, such as a local Juice Shop instance."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-owasp-juice-shop]
   tags: [security]
+  quality: 3
 
 - id: "docs-github-secret-scanning"
   title: "Secret scanning (GitHub Docs)"
@@ -2038,9 +1500,10 @@
   estHours: 1
   summary: "How GitHub detects leaked credentials, notifies providers and what to do when an alert fires."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-rfc-9116-security-txt"
   title: "RFC 9116: A File Format to Aid in Security Vulnerability Disclosure"
@@ -2056,28 +1519,10 @@
   estHours: 1
   summary: "The standard for publishing a security contact at /.well-known/security.txt on your own sites."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
-
-- id: "docs-disclose-io"
-  title: "disclose.io: Vulnerability Disclosure Standards & Tools"
-  short: "disclose.io"
-  provider: "disclose.io"
-  type: "article"
-  url: "https://disclose.io/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Safe-harbor policy templates and a policy generator for running a vulnerability disclosure program."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  after: [docs-rfc-9116-security-txt]
-  tags: [security]
+  quality: 3
 
 - id: "docs-github-private-vulnerability-reporting"
   title: "Privately reporting a security vulnerability (GitHub Docs)"
@@ -2093,28 +1538,11 @@
   estHours: 1
   summary: "How reporters and maintainers use GitHub's private reporting and security advisories workflow."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-ossf-oss-vulnerability-guide]
   tags: [security]
-
-- id: "docs-nice-framework"
-  title: "The Workforce Framework for Cybersecurity (NICE Framework)"
-  short: "NICE Framework"
-  provider: "NIST / CISA NICCS"
-  type: "article"
-  url: "https://niccs.cisa.gov/workforce-development/nice-framework"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 3
-  summary: "Maps security work roles to the knowledge and skills each needs, a useful checklist for planning what to learn."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  tags: [security]
+  quality: 3
 
 - id: "docs-nist-csf-2"
   title: "The NIST Cybersecurity Framework (CSF) 2.0 (NIST CSWP 29)"
@@ -2130,9 +1558,10 @@
   estHours: 4
   summary: "The common language of Govern, Identify, Protect, Detect, Respond and Recover used to organise security programmes."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-cis-controls-v8"
   title: "CIS Critical Security Controls Version 8"
@@ -2148,27 +1577,10 @@
   estHours: 4
   summary: "A prioritised list of defensive safeguards that tells a small team what to do first."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
-
-- id: "docs-mitre-attack-get-started"
-  title: "Get Started with MITRE ATT&CK"
-  short: "ATT&CK Get Started"
-  provider: "MITRE"
-  type: "article"
-  url: "https://attack.mitre.org/resources/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Guided entry points for using ATT&CK in detection, threat intelligence and assessment work."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  tags: [security]
+  quality: 3
 
 - id: "docs-cwe-top25-2025"
   title: "2025 CWE Top 25 Most Dangerous Software Weaknesses"
@@ -2184,9 +1596,10 @@
   estHours: 2
   summary: "Data-driven list of the weakness classes behind most real CVEs, a good checklist for code review."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-cisa-secure-by-design"
   title: "Secure by Design, Secure by Default"
@@ -2202,9 +1615,10 @@
   estHours: 2
   summary: "Argues vendors must own customer security outcomes and lists concrete defaults, like MFA at no extra cost."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-microsoft-sdl-practices"
   title: "Microsoft Security Development Lifecycle Practices"
@@ -2220,9 +1634,10 @@
   estHours: 2
   summary: "The long-running SDL practice list: training, requirements, threat modelling, tooling, testing and response."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-mozilla-web-security-guidelines"
   title: "Mozilla Web Security Guidelines"
@@ -2238,9 +1653,10 @@
   estHours: 2
   summary: "A prioritised checklist of HTTPS, HSTS, CSP, cookie and header settings for any web app you ship."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-owasp-devsecops-guideline"
   title: "OWASP DevSecOps Guideline"
@@ -2256,10 +1672,11 @@
   estHours: 4
   summary: "Walks through which security checks (secrets, SAST, SCA, DAST, IaC) belong at each stage of a CI/CD pipeline."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-owasp-devguide]
   tags: [security]
+  quality: 3
 
 - id: "docs-openssf-scm-best-practices"
   title: "Source Code Management Platform Configuration Best Practices"
@@ -2275,10 +1692,11 @@
   estHours: 2
   summary: "Hardening guidance for GitHub/GitLab settings like branch protection, required reviews and token scopes."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-openssf-concise-guide-secure-software]
   tags: [security]
+  quality: 3
 
 - id: "docs-semgrep-writing-rules"
   title: "Semgrep Docs: Write rules"
@@ -2294,10 +1712,11 @@
   estHours: 3
   summary: "Learn to encode your team's own bug patterns as rules, the skill that turns SAST from noise into signal."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-semgrep]
   tags: [security]
+  quality: 3
 
 - id: "docs-semgrep-taint-mode"
   title: "Semgrep Docs: Taint analysis overview"
@@ -2313,10 +1732,11 @@
   estHours: 2
   summary: "Shows how to model sources, sinks and sanitizers to catch injection bugs that simple patterns miss."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-semgrep-writing-rules]
   tags: [security]
+  quality: 3
 
 - id: "docs-codeql-writing-queries"
   title: "CodeQL Docs: Writing CodeQL queries"
@@ -2332,10 +1752,11 @@
   estHours: 6
   summary: "Official path from query basics to path queries and data flow for treating code as a queryable database."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tutorial-codeql-ql-tutorials]
   tags: [security]
+  quality: 3
 
 - id: "docs-libfuzzer"
   title: "libFuzzer: a library for coverage-guided fuzz testing"
@@ -2355,6 +1776,7 @@
   roadmap: "software-architect"
   after: [tutorial-google-libfuzzer]
   tags: [security]
+  quality: 4
 
 - id: "docs-oss-fuzz-ideal-integration"
   title: "Ideal integration with OSS-Fuzz"
@@ -2370,10 +1792,11 @@
   estHours: 1
   summary: "Describes how a project should keep fuzz targets, seed corpora and dictionaries in-tree for continuous fuzzing."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tutorial-google-libfuzzer]
   tags: [security]
+  quality: 3
 
 - id: "docs-nodejs-security-best-practices"
   title: "Node.js Security Best Practices"
@@ -2389,9 +1812,10 @@
   estHours: 2
   summary: "Threat-by-threat guidance for Node apps: DoS timeouts, prototype pollution, timing attacks and dependency hygiene."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-openssf-memory-safety-continuum"
   title: "The Memory Safety Continuum"
@@ -2407,10 +1831,11 @@
   estHours: 2
   summary: "A graded model of how much memory safety a codebase has, useful for planning incremental improvements."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-memory-safe-roadmaps]
   tags: [security]
+  quality: 3
 
 - id: "docs-aws-ddos-resiliency-whitepaper"
   title: "AWS Best Practices for DDoS Resiliency"
@@ -2426,28 +1851,11 @@
   estHours: 4
   summary: "Reference architecture for absorbing attacks: minimising attack surface, scaling at the edge, and protecting origins behind CDNs."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-cloudflare-ddos-mitigation]
   tags: [security]
-
-- id: "docs-sans-posters"
-  title: "SANS Cybersecurity Posters and Cheat Sheets"
-  short: "SANS Posters"
-  provider: "SANS Institute"
-  type: "article"
-  url: "https://www.sans.org/posters/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 5
-  summary: "Free one-page references on incident response, forensics, cloud and AI security to keep beside you while working."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  tags: [security]
+  quality: 3
 
 - id: "docs-nist-ssdf-800-218"
   title: "NIST SP 800-218: Secure Software Development Framework (SSDF) Version 1.1"
@@ -2466,6 +1874,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "docs-mitre-attack"
   title: "MITRE ATT&CK"
@@ -2484,6 +1893,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "docs-mitre-d3fend"
   title: "MITRE D3FEND Matrix"
@@ -2499,10 +1909,11 @@
   estHours: 5
   summary: "A knowledge graph of defensive countermeasures (harden, detect, isolate, deceive, evict) that complements ATT&CK."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-mitre-attack]
   tags: [security]
+  quality: 3
 
 - id: "docs-cvss-v4-spec"
   title: "Common Vulnerability Scoring System version 4.0: Specification Document"
@@ -2518,9 +1929,10 @@
   estHours: 3
   summary: "Defines how vulnerability severity scores are calculated so you can read and challenge them properly."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-chromium-rule-of-2"
   title: "The Rule Of 2 (Chromium Docs)"
@@ -2539,6 +1951,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "docs-google-infrastructure-security-design"
   title: "Google infrastructure security design overview"
@@ -2558,6 +1971,7 @@
   roadmap: "software-architect"
   after: [paper-beyondcorp]
   tags: [security]
+  quality: 4
 
 - id: "docs-nist-sp-800-218a-ssdf-ai"
   title: "NIST SP 800-218A: Secure Software Development Practices for Generative AI and Dual-Use Foundation Models: An SSDF Community Profile"
@@ -2573,10 +1987,11 @@
   estHours: 3
   summary: "Extends the SSDF to model training and AI systems, useful if you ship ML features or inference services."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "NIST SSDF (SP 800-218)"
   tags: [security]
+  quality: 3
 
 - id: "docs-codeql-language-guides"
   title: "CodeQL Docs: CodeQL language guides"
@@ -2592,10 +2007,11 @@
   estHours: 8
   summary: "Per-language guides (C/C++, Go, Java, Python, Rust...) on the AST, data-flow and taint libraries."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-codeql-writing-queries]
   tags: [security]
+  quality: 3
 
 - id: "docs-aflplusplus-fuzzing-in-depth"
   title: "AFL++ Docs: Fuzzing in depth"
@@ -2615,6 +2031,7 @@
   roadmap: "software-architect"
   after: [repo-aflplusplus]
   tags: [security]
+  quality: 4
 
 - id: "docs-nist-sp-800-53r5"
   title: "NIST SP 800-53 Rev. 5: Security and Privacy Controls for Information Systems and Organizations"
@@ -2630,10 +2047,11 @@
   estHours: 10
   summary: "The reference catalogue of security controls that most compliance regimes map to; skim it to see the full control space."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-nist-csf-2]
   tags: [security]
+  quality: 3
 
 - id: "course-berkeley-cs161-fa25"
   title: "CS 161 Fall 2025: Computer Security at UC Berkeley"
@@ -2653,24 +2071,7 @@
   roadmap: "software-architect"
   doFirst: "CS61C"
   tags: [security]
-
-- id: "course-cisa-learning"
-  title: "CISA Learning"
-  short: "CISA Learning"
-  provider: "CISA"
-  type: "course"
-  url: "https://www.cisa.gov/resources-tools/resources/cisa-learning"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 20
-  summary: "The US cyber agency's free learning platform with self-paced courses on cyber and infrastructure defence for the public."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  tags: [security]
+  quality: 4
 
 - id: "repo-fuzzing101"
   title: "Fuzzing101"
@@ -2690,6 +2091,7 @@
   roadmap: "software-architect"
   after: [repo-aflplusplus]
   tags: [security]
+  quality: 4
 
 - id: "course-stanford-cs155"
   title: "Stanford CS155: Computer and Network Security (Spring 2026)"
@@ -2705,10 +2107,11 @@
   estHours: 60
   summary: "Public slides and curated readings spanning memory-safety defenses, OS isolation, web security, HTTPS, network defense and AI-system security."
   fromYear: 2
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   doFirst: "CS161 textbook"
   tags: [security]
+  quality: 5
 
 - id: "book-picoctf-ctf-primer"
   title: "The CTF Primer"
@@ -2724,84 +2127,10 @@
   estHours: 15
   summary: "Free beginner book covering shell, forensics, crypto, web and low-level basics needed to start CTF-style learning."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
-
-- id: "book-security-engineering-3e-ch01"
-  title: "Security Engineering, 3rd ed., Chapter 1: What is Security Engineering?"
-  short: "SE3 Ch1 What is SecEng"
-  provider: "Ross Anderson"
-  type: "book"
-  url: "https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch01.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "Frames security as policy, mechanism, assurance and incentive, the lens used throughout the book."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  after: [book-anderson-security-engineering]
-  tags: [security]
-
-- id: "book-security-engineering-3e-ch02"
-  title: "Security Engineering, 3rd ed., Chapter 2: Who is the Opponent?"
-  short: "SE3 Ch2 Opponents"
-  provider: "Ross Anderson"
-  type: "book"
-  url: "https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch02.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "Surveys real adversaries from spies to crooks so your threat models describe actual attackers."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  after: [book-anderson-security-engineering]
-  tags: [security]
-
-- id: "book-security-engineering-3e-ch06"
-  title: "Security Engineering, 3rd ed., Chapter 6: Access Control"
-  short: "SE3 Ch6 Access Control"
-  provider: "Ross Anderson"
-  type: "book"
-  url: "https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch06.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Covers access control from hardware rings through OS permissions, sandboxes and capabilities."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  after: [book-anderson-security-engineering]
-  tags: [security]
-
-- id: "docs-mitre-getting-started-attack-ebook"
-  title: "Getting Started with ATT&CK (eBook, 2019)"
-  short: "ATT&CK eBook"
-  provider: "MITRE"
-  type: "book"
-  url: "https://www.mitre.org/sites/default/files/publications/mitre-getting-started-with-attack-october-2019.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 3
-  summary: "A short free ebook on applying ATT&CK at increasing levels of maturity."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  tags: [security]
+  quality: 3
 
 - id: "docs-owasp-code-review-guide"
   title: "OWASP Code Review Guide"
@@ -2817,10 +2146,11 @@
   estHours: 10
   summary: "Teaches how to run security-focused code reviews, what to look for per vulnerability class, and how to fit reviews into the SDLC."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-owasp-secure-coding-practices]
   tags: [security]
+  quality: 3
 
 - id: "book-cert-guide-cvd"
   title: "The CERT Guide to Coordinated Vulnerability Disclosure"
@@ -2836,143 +2166,10 @@
   estHours: 8
   summary: "The definitive free guide to roles, phases and pitfalls of coordinating vulnerability reports between finders and vendors."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
-  after: [docs-disclose-io]
   tags: [security]
-
-- id: "book-security-engineering-3e-ch04"
-  title: "Security Engineering, 3rd ed., Chapter 4: Protocols"
-  short: "SE3 Ch4 Protocols"
-  provider: "Ross Anderson"
-  type: "book"
-  url: "https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch04.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Shows through many real cases how authentication protocols fail and how to reason about them."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  after: [book-anderson-security-engineering]
-  tags: [security]
-
-- id: "book-security-engineering-3e-ch07"
-  title: "Security Engineering, 3rd ed., Chapter 7: Distributed Systems"
-  short: "SE3 Ch7 Distributed Sys"
-  provider: "Ross Anderson"
-  type: "book"
-  url: "https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch07.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Links concurrency, fault tolerance and naming to security, which matters for any multi-service design."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  after: [book-anderson-security-engineering]
-  tags: [security]
-
-- id: "book-security-engineering-3e-ch08"
-  title: "Security Engineering, 3rd ed., Chapter 8: Economics"
-  short: "SE3 Ch8 Economics"
-  provider: "Ross Anderson"
-  type: "book"
-  url: "https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch08.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Explains why incentives and externalities often decide security outcomes more than technology does."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  after: [book-anderson-security-engineering]
-  tags: [security]
-
-- id: "book-security-engineering-3e-ch21"
-  title: "Security Engineering, 3rd ed., Chapter 21: Network Attack and Defence"
-  short: "SE3 Ch21 Network Defence"
-  provider: "Ross Anderson"
-  type: "book"
-  url: "https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch21.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "A practical tour of network threats and defences, including firewalls, intrusion detection and malware ecosystems."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  after: [book-anderson-security-engineering]
-  tags: [security]
-
-- id: "book-security-engineering-3e-ch27"
-  title: "Security Engineering, 3rd ed., Chapter 27: Secure Systems Development"
-  short: "SE3 Ch27 Secure Dev"
-  provider: "Ross Anderson"
-  type: "book"
-  url: "https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch27.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Discusses development lifecycles, threat modelling and managing risk while building real systems."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  after: [book-anderson-security-engineering]
-  tags: [security]
-
-- id: "book-security-engineering-3e-ch19"
-  title: "Security Engineering, 3rd ed., Chapter 19: Side Channels"
-  short: "SE3 Ch19 Side Channels"
-  provider: "Ross Anderson"
-  type: "book"
-  url: "https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch19.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Explains timing, power and emission leaks and the defences engineers use against them."
-  fromYear: 3
-  priority: 2
-  roadmap: "software-architect"
-  after: [book-anderson-security-engineering]
-  tags: [security]
-
-- id: "book-security-engineering-3e-ch28"
-  title: "Security Engineering, 3rd ed., Chapter 28: Assurance and Sustainability"
-  short: "SE3 Ch28 Assurance"
-  provider: "Ross Anderson"
-  type: "book"
-  url: "https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch28.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Covers evaluation, certification and long-term patching, i.e. how you know a system stays secure."
-  fromYear: 3
-  priority: 2
-  roadmap: "software-architect"
-  after: [book-anderson-security-engineering]
-  tags: [security]
+  quality: 3
 
 - id: "tutorial-codeql-ql-tutorials"
   title: "CodeQL Docs: QL tutorials (Find the thief, Catch the fire starter, ...)"
@@ -2988,9 +2185,10 @@
   estHours: 4
   summary: "Puzzle-style lessons that teach the QL logic language before you point it at real code."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "tutorial-google-libfuzzer"
   title: "libFuzzer Tutorial (google/fuzzing)"
@@ -3009,6 +2207,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "repo-owasp-secure-coding-practices"
   title: "OWASP Secure Coding Practices Quick Reference Guide"
@@ -3024,10 +2223,11 @@
   estHours: 2
   summary: "A technology-agnostic checklist of secure coding practices you can turn into a code-review checklist."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-owasp-proactive-controls]
   tags: [security]
+  quality: 3
 
 - id: "repo-semgrep"
   title: "Semgrep"
@@ -3046,6 +2246,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "repo-pycqa-bandit"
   title: "Bandit: security linter for Python"
@@ -3061,9 +2262,10 @@
   estHours: 2
   summary: "AST-based checks for common Python security mistakes like shell injection, weak crypto and unsafe deserialization."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-securego-gosec"
   title: "gosec: Go security checker"
@@ -3079,27 +2281,10 @@
   estHours: 2
   summary: "Scans Go code for hard-coded credentials, SQL string building, weak TLS and other risky patterns."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
-
-- id: "repo-microsoft-devskim"
-  title: "DevSkim: security linter and IDE plugin"
-  short: "DevSkim"
-  provider: "Microsoft"
-  type: "practice"
-  url: "https://github.com/microsoft/DevSkim"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Inline IDE security hints across many languages, a gentle way to see insecure patterns as you type."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  tags: [security]
+  quality: 3
 
 - id: "repo-gitleaks"
   title: "Gitleaks"
@@ -3115,9 +2300,10 @@
   estHours: 2
   summary: "Scan git history and pre-commit hooks for leaked keys and tokens in your own repositories."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-yelp-detect-secrets"
   title: "detect-secrets"
@@ -3133,28 +2319,11 @@
   estHours: 1
   summary: "Baseline-driven secret detection that blocks new secrets without drowning you in old findings."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-gitleaks]
   tags: [security]
-
-- id: "repo-owasp-dependency-check"
-  title: "OWASP Dependency-Check"
-  short: "Dependency-Check"
-  provider: "Jeremy Long / OWASP"
-  type: "practice"
-  url: "https://github.com/jeremylong/DependencyCheck"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Long-standing SCA tool that flags known-vulnerable libraries, with Maven, Gradle and CLI integrations."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  tags: [security]
+  quality: 3
 
 - id: "repo-pip-audit"
   title: "pip-audit"
@@ -3170,47 +2339,10 @@
   estHours: 1
   summary: "Audits Python environments and requirements files against the PyPI advisory database."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
-
-- id: "repo-owasp-nodegoat"
-  title: "OWASP NodeGoat"
-  short: "OWASP NodeGoat"
-  provider: "OWASP"
-  type: "practice"
-  url: "https://github.com/OWASP/NodeGoat"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 6
-  summary: "A deliberately vulnerable Node.js app with tutorial pages showing how to fix each Top 10 issue."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  after: [repo-owasp-juice-shop]
-  tags: [security]
-
-- id: "repo-disclose-dioterms"
-  title: "dioterms: disclose.io core terms"
-  short: "dioterms"
-  provider: "disclose.io"
-  type: "practice"
-  url: "https://github.com/disclose/dioterms"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Copy-ready, legally reviewed disclosure policy text you can adapt for your own project or company."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  after: [docs-disclose-io]
-  tags: [security]
+  quality: 3
 
 - id: "repo-ossf-oss-vulnerability-guide"
   title: "Guide to implementing a coordinated vulnerability disclosure process for open source projects"
@@ -3226,10 +2358,11 @@
   estHours: 2
   summary: "Templates and a step-by-step process for maintainers handling vulnerability reports in their own projects."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [book-cert-guide-cvd]
   tags: [security]
+  quality: 3
 
 - id: "repo-github-advisory-database"
   title: "GitHub Advisory Database"
@@ -3245,49 +2378,11 @@
   estHours: 1
   summary: "The open, reviewed advisory dataset behind Dependabot, in OSV format, useful for seeing how advisories are written."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "CWE Top 25"
   tags: [security]
-
-- id: "practice-tryhackme-pre-security"
-  title: "TryHackMe Pre Security learning path"
-  short: "THM Pre Security"
-  provider: "TryHackMe"
-  type: "practice"
-  url: "https://tryhackme.com/path/outline/beginner"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 40
-  summary: "Browser-based labs that teach networking, the web, Linux and basic attack/defence concepts from zero."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  note: "Free tier"
-  tags: [security]
-
-- id: "practice-htb-academy-catalogue"
-  title: "Hack The Box Academy course catalogue (SOC Fundamentals, SIEM 101, Linux for Blue Team)"
-  short: "HTB Academy defensive"
-  provider: "Hack The Box"
-  type: "practice"
-  url: "https://academy.hackthebox.com/catalogue"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 30
-  summary: "Interactive modules including blue-team fundamentals like SOC operations, SIEM basics and Linux defence."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  note: "Free tier"
-  after: [practice-tryhackme-pre-security]
-  tags: [security]
+  quality: 3
 
 - id: "repo-semgrep-rules"
   title: "semgrep-rules: community Semgrep rule registry"
@@ -3303,10 +2398,11 @@
   estHours: 4
   summary: "Hundreds of real rules with tests; reading them is the fastest way to learn idiomatic rule writing."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-semgrep-writing-rules]
   tags: [security]
+  quality: 3
 
 - id: "repo-github-codeql"
   title: "CodeQL: queries and libraries"
@@ -3326,25 +2422,7 @@
   roadmap: "software-architect"
   after: [tutorial-codeql-ql-tutorials]
   tags: [security]
-
-- id: "repo-github-codeql-action"
-  title: "CodeQL Action"
-  short: "CodeQL Action"
-  provider: "GitHub"
-  type: "practice"
-  url: "https://github.com/github/codeql-action"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "The GitHub Action that runs CodeQL in CI; its README and examples show advanced setup options."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  after: [docs-github-code-scanning-codeql]
-  tags: [security]
+  quality: 4
 
 - id: "repo-zizmor"
   title: "zizmor: static analysis for GitHub Actions"
@@ -3360,10 +2438,11 @@
   estHours: 2
   summary: "Finds template injection, over-broad permissions and unpinned actions in your own CI workflows."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-owasp-devsecops-guideline]
   tags: [security]
+  quality: 3
 
 - id: "repo-nuclei"
   title: "Nuclei: template-based vulnerability scanner"
@@ -3379,10 +2458,11 @@
   estHours: 3
   summary: "YAML-template scanner useful for regression-checking your own assets for known misconfigurations; only scan what you own."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-zap-getting-started]
   tags: [security]
+  quality: 3
 
 - id: "repo-clusterfuzzlite"
   title: "ClusterFuzzLite: continuous fuzzing in CI"
@@ -3398,10 +2478,11 @@
   estHours: 3
   summary: "Run fuzzing on every pull request of your own project with GitHub Actions or other CI systems."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-oss-fuzz-ideal-integration]
   tags: [security]
+  quality: 3
 
 - id: "repo-aflplusplus"
   title: "AFL++"
@@ -3417,10 +2498,11 @@
   estHours: 4
   summary: "The community-maintained successor to AFL with many mutators, modes and instrumentation backends."
   fromYear: 2
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   after: [tutorial-google-libfuzzer]
   tags: [security]
+  quality: 5
 
 - id: "repo-jazzer"
   title: "Jazzer: coverage-guided fuzzing for the JVM"
@@ -3436,10 +2518,11 @@
   estHours: 3
   summary: "Brings libFuzzer-style fuzzing to Java and Kotlin with JUnit integration and bug detectors."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tutorial-google-libfuzzer]
   tags: [security]
+  quality: 3
 
 - id: "repo-atheris"
   title: "Atheris: coverage-guided Python fuzzer"
@@ -3455,10 +2538,11 @@
   estHours: 2
   summary: "Fuzz pure Python code and native extensions; a fast way to apply fuzzing to Python services you maintain."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tutorial-google-libfuzzer]
   tags: [security]
+  quality: 3
 
 - id: "repo-trufflehog"
   title: "TruffleHog"
@@ -3474,10 +2558,11 @@
   estHours: 2
   summary: "Finds secrets across git, CI logs and storage and can verify whether a found credential is still live so you can rotate it."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-gitleaks]
   tags: [security]
+  quality: 3
 
 - id: "repo-github-securitylab"
   title: "GitHub Security Lab"
@@ -3493,10 +2578,11 @@
   estHours: 6
   summary: "Security Lab's CodeQL queries, CTF write-ups and research notes showing variant analysis in practice."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-codeql-writing-queries]
   tags: [security]
+  quality: 3
 
 - id: "paper-google-secure-by-design-memory-safety"
   title: "Secure by Design: Google's Perspective on Memory Safety"
@@ -3516,6 +2602,7 @@
   roadmap: "software-architect"
   after: [article-memory-safe-roadmaps]
   tags: [security]
+  quality: 4
 
 - id: "paper-lampson-security-real-world"
   title: "Computer Security in the Real World"
@@ -3534,6 +2621,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "paper-lampson-practical-principles"
   title: "Practical Principles for Computer Security"
@@ -3553,6 +2641,7 @@
   roadmap: "software-architect"
   after: [paper-saltzer-schroeder-protection]
   tags: [security]
+  quality: 4
 
 - id: "paper-sok-ssl-https"
   title: "SoK: SSL and HTTPS: Revisiting past challenges and evaluating certificate trust model enhancements"
@@ -3571,6 +2660,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "paper-sok-secure-messaging"
   title: "SoK: Secure Messaging"
@@ -3589,6 +2679,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "paper-art-science-engineering-fuzzing"
   title: "The Art, Science, and Engineering of Fuzzing: A Survey"
@@ -3608,6 +2699,7 @@
   roadmap: "software-architect"
   after: [book-fuzzing-book]
   tags: [security]
+  quality: 4
 
 - id: "paper-evaluating-fuzz-testing"
   title: "Evaluating Fuzz Testing"
@@ -3623,10 +2715,11 @@
   estHours: 3
   summary: "Shows how weak experimental methods mislead fuzzing claims and what a sound evaluation needs."
   fromYear: 3
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   after: [paper-art-science-engineering-fuzzing]
   tags: [security]
+  quality: 5
 
 - id: "paper-sok-prudent-fuzzing-evaluation"
   title: "SoK: Prudent Evaluation Practices for Fuzzing"
@@ -3646,24 +2739,7 @@
   roadmap: "software-architect"
   after: [paper-evaluating-fuzz-testing]
   tags: [security]
-
-- id: "article-google-tackling-vulns-secure-by-design"
-  title: "Tackling cybersecurity vulnerabilities through Secure by Design"
-  short: "Google: Secure by Design"
-  provider: "Google"
-  type: "article"
-  url: "https://blog.google/technology/safety-security/tackling-cybersecurity-vulnerabilities-through-secure-by-design/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Google's short case for Safe Coding: removing bug classes through APIs and frameworks instead of relying on developer vigilance."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  tags: [security]
+  quality: 4
 
 - id: "article-google-rust-in-android-platform"
   title: "Rust in the Android platform"
@@ -3679,66 +2755,10 @@
   estHours: 1
   summary: "Why Android began adding Rust: the cost of sandboxing and the share of memory-safety bugs in C/C++."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
-
-- id: "article-microsoft-continuous-sdl-2024"
-  title: "Evolving Microsoft Security Development Lifecycle (SDL): How continuous SDL can help you build more secure software"
-  short: "Continuous SDL (2024)"
-  provider: "Microsoft Security Blog"
-  type: "article"
-  url: "https://www.microsoft.com/en-us/security/blog/2024/03/07/evolving-microsoft-security-development-lifecycle-sdl-how-continuous-sdl-can-help-you-build-more-secure-software/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how the SDL moved from release gates to continuous, automated checks wired into modern CI pipelines."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  doFirst: "Microsoft SDL Practices"
-  tags: [security]
-
-- id: "book-bsrs-ch12-writing-code"
-  title: "Building Secure and Reliable Systems, Ch. 12: Writing Code"
-  short: "BSRS Ch12 Writing Code"
-  provider: "Google (Czapiński, Bangert, et al.)"
-  type: "article"
-  url: "https://google.github.io/building-secure-and-reliable-systems/raw/ch12.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "How Google uses hardened frameworks, safe types and language choice so whole bug classes cannot be written in the first place."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  doFirst: "Building Secure and Reliable Systems"
-  tags: [security]
-
-- id: "book-bsrs-ch13-testing-code"
-  title: "Building Secure and Reliable Systems, Ch. 13: Testing Code"
-  short: "BSRS Ch13 Testing Code"
-  provider: "Google"
-  type: "article"
-  url: "https://google.github.io/building-secure-and-reliable-systems/raw/ch13.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Covers unit, integration, fuzz and static analysis testing as Google applies them to security and reliability."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  after: [book-bsrs-ch12-writing-code]
-  tags: [security]
+  quality: 3
 
 - id: "article-google-good-fuzz-target"
   title: "What makes a good fuzz target (google/fuzzing)"
@@ -3754,10 +2774,11 @@
   estHours: 1
   summary: "Practical rules for writing fast, deterministic, high-coverage fuzz targets."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tutorial-google-libfuzzer]
   tags: [security]
+  quality: 3
 
 - id: "article-google-memory-safe-android-13"
   title: "Memory Safe Languages in Android 13"
@@ -3773,10 +2794,11 @@
   estHours: 1
   summary: "Data showing memory-safety vulns fell as the share of new code in memory-safe languages rose."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [article-google-rust-in-android-platform]
   tags: [security]
+  quality: 3
 
 - id: "article-memory-safe-roadmaps"
   title: "The Case for Memory Safe Roadmaps"
@@ -3792,9 +2814,10 @@
   estHours: 2
   summary: "Multi-government guidance on why and how software makers should plan a move to memory-safe languages."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "article-xz-timeline"
   title: "Timeline of the xz open source attack"
@@ -3813,6 +2836,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "article-csrb-microsoft-exchange-2023"
   title: "Cyber Safety Review Board Report on Summer 2023 Microsoft Online Exchange Incident"
@@ -3831,6 +2855,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "article-android-eliminating-memory-safety"
   title: "Eliminating Memory Safety Vulnerabilities at the Source"
@@ -3849,6 +2874,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "article-google-structure-aware-fuzzing"
   title: "Structure-Aware Fuzzing with libFuzzer (google/fuzzing)"
@@ -3868,6 +2894,7 @@
   roadmap: "software-architect"
   after: [article-google-good-fuzz-target]
   tags: [security]
+  quality: 4
 
 - id: "blog-krebs-on-security"
   title: "Krebs on Security"
@@ -3883,10 +2910,11 @@
   estHours: 10
   summary: "Investigative reporting on cybercrime that shows how real attacks and breaches unfold."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   blog: true
   tags: [security]
+  quality: 3
 
 - id: "blog-schneier-on-security"
   title: "Schneier on Security"
@@ -3906,6 +2934,7 @@
   roadmap: "software-architect"
   blog: true
   tags: [security]
+  quality: 4
 
 - id: "blog-troy-hunt"
   title: "Troy Hunt"
@@ -3921,48 +2950,11 @@
   estHours: 10
   summary: "Practical writing on data breaches, passwords and web security from the creator of Have I Been Pwned."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   blog: true
   tags: [security]
-
-- id: "blog-daniel-miessler"
-  title: "Daniel Miessler"
-  short: "Daniel Miessler"
-  provider: "Daniel Miessler"
-  type: "article"
-  url: "https://danielmiessler.com/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 10
-  summary: "Essays and primers on security concepts, careers and the intersection of AI and security."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  blog: true
-  tags: [security]
-
-- id: "blog-darknet-diaries"
-  title: "Darknet Diaries"
-  short: "Darknet Diaries"
-  provider: "Jack Rhysider"
-  type: "article"
-  url: "https://darknetdiaries.com/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 10
-  summary: "Story-driven podcast episodes about real hacks and incidents, an approachable way to absorb lessons."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  blog: true
-  tags: [security]
+  quality: 3
 
 - id: "blog-google-security"
   title: "Google Security Blog"
@@ -3978,10 +2970,11 @@
   estHours: 10
   summary: "Announcements and engineering write-ups on Android, Chrome, open-source and supply-chain security."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   blog: true
   tags: [security]
+  quality: 3
 
 - id: "blog-msrc"
   title: "Microsoft Security Response Center Blog"
@@ -3997,10 +2990,11 @@
   estHours: 10
   summary: "Vendor-side posts on vulnerability response, mitigations and secure engineering at Microsoft scale."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   blog: true
   tags: [security]
+  quality: 3
 
 - id: "blog-risky-business"
   title: "Risky Business"
@@ -4016,10 +3010,11 @@
   estHours: 10
   summary: "Weekly news and analysis podcast for security practitioners, running since 2007."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   blog: true
   tags: [security]
+  quality: 3
 
 - id: "blog-tldr-sec"
   title: "tl;dr sec"
@@ -4035,12 +3030,13 @@
   estHours: 10
   summary: "Free weekly newsletter curating the best new security tools, talks and research."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   blog: true
   tags: [security]
 
 # ---- Systems: low-level programming, OS kernels, algorithms (176)
+  quality: 3
 
 - id: "repo-cutter"
   title: "Cutter: free and open-source reverse engineering platform powered by rizin"
@@ -4082,7 +3078,7 @@
   title: "Detect It Easy"
   short: "Detect It Easy"
   provider: "horsicq"
-  type: "article"
+  type: "practice"
   url: "https://github.com/horsicq/Detect-It-Easy"
   urlVerified: true
   lastVerified: 2026-10-21
@@ -4209,7 +3205,7 @@
   level: "intro"
   cost: "free"
   estHours: 1
-  summary: "Maps WannaCry's worming, encryption and kill-switch behaviour onto ATT&CK techniques."
+  summary: "Maps WannaCry's SMB worming, lateral movement, file encryption and recovery inhibition onto ATT&CK techniques."
   fromYear: 1
   priority: 2
   after: [docs-mitre-attack-groups]
@@ -7163,9 +6159,10 @@
   estHours: 6
   summary: "The current US reference for organising incident response, rewritten around the CSF 2.0 functions instead of the old four-phase lifecycle."
   fromYear: 1
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   tags: [security]
+  quality: 5
 
 - id: "docs-cisa-ir-vuln-playbooks"
   title: "Federal Government Cybersecurity Incident and Vulnerability Response Playbooks"
@@ -7181,10 +6178,11 @@
   estHours: 4
   summary: "Concrete step-by-step checklists for handling incidents and vulnerabilities that show what a mature IR procedure looks like on paper."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-nist-sp-800-61r3]
   tags: [security]
+  quality: 3
 
 - id: "docs-wazuh"
   title: "Wazuh Documentation"
@@ -7200,9 +6198,10 @@
   estHours: 10
   summary: "Docs for a fully open source SIEM/XDR covering agents, decoders, rules and active response you can run in a home lab."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-security-onion"
   title: "Security Onion Documentation (2.4)"
@@ -7218,9 +6217,10 @@
   estHours: 10
   summary: "Guide to a free all-in-one platform for network and host monitoring, alert triage, hunting and case management."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-osquery"
   title: "osquery Documentation"
@@ -7236,9 +6236,10 @@
   estHours: 6
   summary: "Shows how to expose an operating system as SQL tables for fleet-wide host visibility and scheduled detection queries."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-sysmon"
   title: "Sysmon (System Monitor) - Sysinternals"
@@ -7254,9 +6255,10 @@
   estHours: 2
   summary: "Official reference for Sysmon event IDs and filtering, the backbone of most Windows endpoint telemetry."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-suricata-user-guide"
   title: "Suricata User Guide"
@@ -7272,9 +6274,10 @@
   estHours: 10
   summary: "Complete manual for the Suricata IDS/IPS, from installation and performance tuning to outputs and IPS mode."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-elastic-security"
   title: "Elastic Security Documentation"
@@ -7290,9 +6293,10 @@
   estHours: 8
   summary: "Covers SIEM concepts, the detection engine, timelines and endpoint protection in the Elastic stack."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-owasp-logging-cheat-sheet"
   title: "Logging Cheat Sheet"
@@ -7311,6 +6315,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "docs-graylog"
   title: "Graylog Documentation"
@@ -7326,9 +6331,10 @@
   estHours: 6
   summary: "Centralised log management guide covering inputs, pipelines, streams and alert definitions."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-autopsy-user-guide"
   title: "Autopsy User's Guide"
@@ -7344,9 +6350,10 @@
   estHours: 4
   summary: "GUI front-end to The Sleuth Kit for disk forensics, a gentle way to learn file system examination."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-opencanary"
   title: "OpenCanary Documentation"
@@ -7362,10 +6369,10 @@
   estHours: 2
   summary: "Set up a low-interaction honeypot daemon whose alerts are almost always worth looking at."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
-  after: [article-canarytokens-quick-free-detection]
   tags: [security]
+  quality: 3
 
 - id: "docs-sigma-rules"
   title: "Sigma Rules Documentation"
@@ -7381,9 +6388,10 @@
   estHours: 2
   summary: "Introduces the vendor-neutral Sigma format for writing detections once and converting them to any SIEM."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-auditd-man"
   title: "auditd(8) - Linux manual page"
@@ -7399,9 +6407,10 @@
   estHours: 1
   summary: "Reference for the Linux audit daemon that records syscalls and file access for host-level detection."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-sysmon-config"
   title: "sysmon-config: Sysmon configuration file template"
@@ -7417,10 +6426,11 @@
   estHours: 2
   summary: "Heavily commented starter Sysmon config that teaches which events matter and how to cut noise."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-sysmon]
   tags: [security]
+  quality: 3
 
 - id: "repo-irm"
   title: "IRM: Incident Response Methodologies"
@@ -7436,10 +6446,11 @@
   estHours: 3
   summary: "Concise per-scenario response sheets (phishing, ransomware, DDoS) usable as starting playbooks."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [paper-sans-incident-handlers-handbook]
   tags: [security]
+  quality: 3
 
 - id: "repo-lme"
   title: "Logging Made Easy (LME)"
@@ -7455,9 +6466,10 @@
   estHours: 4
   summary: "A free, documented central logging and detection setup aimed at small organisations."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "cis-benchmarks"
   title: "CIS Benchmarks"
@@ -7473,10 +6485,11 @@
   estHours: 10
   summary: "Consensus configuration baselines for Linux, Windows, cloud and Kubernetes that most compliance scanners check against."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Free tier"
   tags: [security]
+  quality: 3
 
 - id: "ms-windows-security-baselines"
   title: "Security baselines guide (Windows)"
@@ -7492,9 +6505,10 @@
   estHours: 3
   summary: "Explains Microsoft's recommended group-policy baselines and how to apply and audit them across a Windows fleet."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "ubuntu-security-guide-usg"
   title: "The Ubuntu Security Guide"
@@ -7510,9 +6524,10 @@
   estHours: 2
   summary: "Shows how Ubuntu automates CIS and DISA-STIG hardening and auditing instead of applying hundreds of settings by hand."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "lynis-usage-guide"
   title: "Lynis Installation and Usage Guide"
@@ -7528,9 +6543,10 @@
   estHours: 1
   summary: "Walks through installing Lynis, running audits and reading its hardening index and suggestions."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "k8s-pod-security-standards"
   title: "Pod Security Standards"
@@ -7549,6 +6565,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "k8s-security-checklist"
   title: "Kubernetes Security Checklist"
@@ -7564,10 +6581,11 @@
   estHours: 2
   summary: "Concise baseline of authn, network, pod, logging and secrets controls to review on any cluster."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [k8s-pod-security-standards]
   tags: [security]
+  quality: 3
 
 - id: "aws-iam-best-practices"
   title: "Security best practices in IAM"
@@ -7586,6 +6604,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "vault-what-is-vault"
   title: "What is Vault?"
@@ -7601,9 +6620,10 @@
   estHours: 3
   summary: "Introduces centralized secrets, dynamic credentials and audit logging, the standard pattern for secrets management."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "sops-docs"
   title: "SOPS: Secrets OPerationS"
@@ -7619,9 +6639,10 @@
   estHours: 2
   summary: "Encrypt secret values inside YAML/JSON files with KMS or age so configs can live safely in git."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "dependabot-version-updates"
   title: "Dependabot version updates"
@@ -7637,9 +6658,10 @@
   estHours: 1
   summary: "How to automate dependency bump PRs so patches land continuously rather than in painful batches."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "osv-introduction"
   title: "Introduction to OSV"
@@ -7655,9 +6677,10 @@
   estHours: 1
   summary: "Explains the open vulnerability database and precise affected-version data used by modern scanners."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-gitlab-security-incident-response"
   title: "Security Incident Response Guide (GitLab Handbook)"
@@ -7673,10 +6696,11 @@
   estHours: 2
   summary: "A real company's public security incident runbook, showing severities, roles, escalation and communication in practice."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-nist-sp-800-61r3]
   tags: [security]
+  quality: 3
 
 - id: "docs-sans-windows-forensic-poster"
   title: "Windows Forensic Analysis Poster"
@@ -7692,9 +6716,10 @@
   estHours: 3
   summary: "The famous evidence-of-execution and artifact map that DFIR analysts keep pinned while investigating Windows hosts."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-falco"
   title: "Falco Documentation"
@@ -7710,9 +6735,10 @@
   estHours: 6
   summary: "Cloud native runtime security using syscall and eBPF events, with a readable rule language for container threats."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-suricata-rules"
   title: "Suricata Rules"
@@ -7728,29 +6754,11 @@
   estHours: 5
   summary: "Detailed reference for writing signature rules, keywords and protocol-aware matching."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-suricata-user-guide]
   tags: [security]
-
-- id: "docs-suricata-eve"
-  title: "Suricata EVE JSON Output"
-  short: "Suricata EVE Output"
-  provider: "OISF"
-  type: "article"
-  url: "https://docs.suricata.io/en/latest/output/eve/index.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Explains the structured JSON event stream that SIEMs ingest from Suricata, alerts plus protocol metadata."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  after: [docs-suricata-user-guide]
-  tags: [security]
+  quality: 3
 
 - id: "docs-snort3-rule-writing"
   title: "Snort 3 Rule Writing Guide"
@@ -7766,9 +6774,10 @@
   estHours: 5
   summary: "The Talos guide to Snort 3 rule headers, payload options and service rules, written by the people who write them daily."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-velociraptor"
   title: "Velociraptor Documentation"
@@ -7784,9 +6793,10 @@
   estHours: 8
   summary: "Docs for an open endpoint DFIR platform that collects artifacts and hunts across a fleet with the VQL query language."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-volatility3"
   title: "Volatility 3 Documentation"
@@ -7802,10 +6812,11 @@
   estHours: 6
   summary: "Explains memory layers, symbol tables and plugins of the standard memory forensics framework."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [ostep]
   tags: [security]
+  quality: 3
 
 - id: "docs-opensearch-security-analytics"
   title: "OpenSearch Security Analytics"
@@ -7821,10 +6832,11 @@
   estHours: 3
   summary: "Open source SIEM features in OpenSearch with Sigma-based detectors, correlation and findings."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-sigma-rules]
   tags: [security]
+  quality: 3
 
 - id: "docs-plaso"
   title: "Plaso (log2timeline) Documentation"
@@ -7840,9 +6852,10 @@
   estHours: 4
   summary: "Teaches super-timeline creation from hundreds of artifact formats, a key technique in forensic investigations."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-microsoft-ir-playbooks"
   title: "Incident response playbooks"
@@ -7858,10 +6871,11 @@
   estHours: 3
   summary: "Phishing, password spray and app consent playbooks with workflows and investigation checklists for cloud identity incidents."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [paper-sans-incident-handlers-handbook]
   tags: [security]
+  quality: 3
 
 - id: "docs-aws-security-ir-guide"
   title: "AWS Security Incident Response Technical Guide"
@@ -7877,10 +6891,11 @@
   estHours: 4
   summary: "How incident response changes in the cloud: preparation, logging sources, isolation and forensics on AWS."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-nist-sp-800-61r3]
   tags: [security]
+  quality: 3
 
 - id: "docs-kubernetes-auditing"
   title: "Kubernetes Auditing"
@@ -7896,9 +6911,10 @@
   estHours: 2
   summary: "How to configure API server audit policies and backends, the primary security log of a Kubernetes cluster."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-sysmon-modular"
   title: "sysmon-modular: A repository of Sysmon configuration modules"
@@ -7914,10 +6930,11 @@
   estHours: 3
   summary: "Modular ATT&CK-mapped Sysmon configuration showing how telemetry coverage is engineered technique by technique."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-sysmon-config]
   tags: [security]
+  quality: 3
 
 - id: "repo-threathunter-playbook"
   title: "ThreatHunter-Playbook"
@@ -7933,10 +6950,11 @@
   estHours: 8
   summary: "Community hunt notebooks that pair hypotheses with data analytics over recorded attack datasets."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-mitre-attack]
   tags: [security]
+  quality: 3
 
 - id: "repo-atomic-red-team"
   title: "Atomic Red Team"
@@ -7956,6 +6974,7 @@
   roadmap: "software-architect"
   after: [docs-mitre-attack]
   tags: [security]
+  quality: 4
 
 - id: "repo-tpotce"
   title: "T-Pot: The All In One Multi Honeypot Platform"
@@ -7971,10 +6990,11 @@
   estHours: 4
   summary: "Deploy many honeypots with dashboards to observe real internet attack traffic safely."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
   after: [docs-opencanary]
   tags: [security]
+  quality: 3
 
 - id: "repo-sigma"
   title: "Sigma: Main Rule Repository"
@@ -7994,6 +7014,7 @@
   roadmap: "software-architect"
   after: [docs-sigma-rules]
   tags: [security]
+  quality: 4
 
 - id: "repo-auditd"
   title: "auditd: Best Practice Auditd Configuration"
@@ -8009,10 +7030,11 @@
   estHours: 2
   summary: "A curated audit.rules baseline that turns Linux auditd into useful security telemetry."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-auditd-man]
   tags: [security]
+  quality: 3
 
 - id: "repo-kapefiles"
   title: "KapeFiles: Targets and Modules for KAPE"
@@ -8028,10 +7050,11 @@
   estHours: 3
   summary: "Community definitions of which Windows artifacts to collect for triage, a map of where evidence lives."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-sans-windows-forensic-poster]
   tags: [security]
+  quality: 3
 
 - id: "repo-car"
   title: "MITRE Cyber Analytics Repository (CAR)"
@@ -8047,10 +7070,11 @@
   estHours: 4
   summary: "Analytics with pseudocode and data model mappings that show how to detect specific ATT&CK techniques."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-mitre-attack]
   tags: [security]
+  quality: 3
 
 - id: "repo-alerting-detection-strategy-framework"
   title: "Alerting and Detection Strategy (ADS) Framework"
@@ -8070,6 +7094,7 @@
   roadmap: "software-architect"
   after: [docs-sigma-rules]
   tags: [security]
+  quality: 4
 
 - id: "repo-event-forwarding-guidance"
   title: "Event Forwarding Guidance"
@@ -8085,10 +7110,11 @@
   estHours: 3
   summary: "NSA configuration guidance on which Windows events to forward and how, for centralized monitoring."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-sysmon]
   tags: [security]
+  quality: 3
 
 - id: "repo-hayabusa"
   title: "Hayabusa: Windows event log fast forensics timeline generator"
@@ -8104,10 +7130,11 @@
   estHours: 3
   summary: "Fast Sigma-powered Windows event log triage and timeline tool for incident responders."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-sigma-rules]
   tags: [security]
+  quality: 3
 
 - id: "repo-chainsaw"
   title: "Chainsaw: Rapidly search and hunt through Windows forensic artefacts"
@@ -8123,10 +7150,11 @@
   estHours: 2
   summary: "First-response tool for hunting through EVTX logs with Sigma rules during an investigation."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-sigma-rules]
   tags: [security]
+  quality: 3
 
 - id: "repo-rita"
   title: "RITA: Real Intelligence Threat Analytics"
@@ -8142,10 +7170,11 @@
   estHours: 3
   summary: "Analyses Zeek logs to find beaconing, long connections and DNS tunnelling, a network hunting technique."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tutorial-zeek-logs]
   tags: [security]
+  quality: 3
 
 - id: "repo-malcolm"
   title: "Malcolm: Network traffic analysis tool suite"
@@ -8161,10 +7190,11 @@
   estHours: 4
   summary: "Packages Zeek, Suricata and Arkime with dashboards for analysing PCAP and network logs."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [book-book-of-zeek]
   tags: [security]
+  quality: 3
 
 - id: "repo-edr-telemetry"
   title: "EDR Telemetry"
@@ -8180,10 +7210,11 @@
   estHours: 2
   summary: "Compares which telemetry categories endpoint security products actually record, to understand visibility gaps."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-sysmon]
   tags: [security]
+  quality: 3
 
 - id: "repo-ocsf-schema"
   title: "Open Cybersecurity Schema Framework (OCSF) Schema"
@@ -8199,28 +7230,10 @@
   estHours: 3
   summary: "A vendor-neutral event schema that explains how security logs are normalised for analytics."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
-
-- id: "repo-awesome-detection-engineering"
-  title: "Awesome Detection Engineering"
-  short: "Awesome Detection Eng"
-  provider: "infosecb"
-  type: "article"
-  url: "https://github.com/infosecb/awesome-detection-engineering"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "Curated reading map for detection engineering topics from data sources to testing and maturity."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  after: [docs-sigma-rules]
-  tags: [security]
+  quality: 3
 
 - id: "nsa-cisa-kubernetes-hardening-guide"
   title: "Kubernetes Hardening Guidance (v1.2)"
@@ -8240,25 +7253,7 @@
   roadmap: "software-architect"
   doFirst: "Kubernetes docs"
   tags: [security]
-
-- id: "ms-defender-asr-rules"
-  title: "ASR rules overview - Microsoft Defender for Endpoint"
-  short: "Defender ASR Rules"
-  provider: "Microsoft"
-  type: "article"
-  url: "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Shows how attack surface reduction rules block common malware behaviors such as Office spawning child processes."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  after: [ms-windows-security-baselines]
-  tags: [security]
+  quality: 4
 
 - id: "openscap-user-manual"
   title: "OpenSCAP User Manual"
@@ -8274,28 +7269,11 @@
   estHours: 4
   summary: "Teaches SCAP-based compliance scanning and remediation, the standard machinery behind automated STIG/CIS audits."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [lynis-usage-guide]
   tags: [security]
-
-- id: "ms-cloud-security-benchmark"
-  title: "Microsoft cloud security benchmark"
-  short: "MS Cloud Security Benchmark"
-  provider: "Microsoft"
-  type: "article"
-  url: "https://learn.microsoft.com/en-us/security/benchmark/azure/overview"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Microsoft's control catalog for Azure and multi-cloud, mapped to CIS and NIST, with implementation guidance."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  tags: [security]
+  quality: 3
 
 - id: "gcp-enterprise-foundations-blueprint"
   title: "Enterprise foundations blueprint"
@@ -8311,10 +7289,11 @@
   estHours: 6
   summary: "Opinionated reference for a secure Google Cloud org: hierarchy, IAM, networking, logging and detective controls."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [aws-iam-best-practices]
   tags: [security]
+  quality: 3
 
 - id: "renovate-docs"
   title: "Renovate Docs"
@@ -8330,10 +7309,11 @@
   estHours: 3
   summary: "Highly configurable dependency-update bot; its docs teach grouping, scheduling and automerge strategies."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [dependabot-version-updates]
   tags: [security]
+  quality: 3
 
 - id: "osv-schema"
   title: "Open Source Vulnerability format"
@@ -8349,10 +7329,11 @@
   estHours: 2
   summary: "The interchange format for describing affected packages and ranges, useful when building vuln tooling."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [osv-introduction]
   tags: [security]
+  quality: 3
 
 - id: "systemd-exec-sandboxing"
   title: "systemd.exec: Execution environment configuration"
@@ -8371,6 +7352,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "docs-kubernetes-network-policies"
   title: "Network Policies (Kubernetes)"
@@ -8390,6 +7372,7 @@
   roadmap: "software-architect"
   doFirst: "Kubernetes basics"
   tags: [security]
+  quality: 4
 
 - id: "docs-cilium-network-policy"
   title: "Overview of Network Policy (Cilium)"
@@ -8405,10 +7388,11 @@
   estHours: 3
   summary: "Identity-based and L7-aware policy enforced in eBPF, showing how microsegmentation works without IP-based rules."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-kubernetes-network-policies]
   tags: [security]
+  quality: 3
 
 - id: "docs-istio-security-concepts"
   title: "Istio Security Concepts"
@@ -8424,10 +7408,11 @@
   estHours: 3
   summary: "Explains mesh-wide mTLS, workload identity, and authentication/authorization policies as a practical zero-trust layer for services."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-istio-concepts]
   tags: [security]
+  quality: 3
 
 - id: "docs-teleport"
   title: "Teleport Documentation"
@@ -8443,9 +7428,10 @@
   estHours: 10
   summary: "Docs for an open-source access plane that replaces static SSH keys and VPNs with short-lived certificates, RBAC and session audit."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "docs-tetragon"
   title: "Tetragon Documentation"
@@ -8461,10 +7447,11 @@
   estHours: 6
   summary: "eBPF-based security observability and in-kernel enforcement; good for learning how kernel hooks become security events."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-falco]
   tags: [security]
+  quality: 3
 
 - id: "docs-tracee"
   title: "Tracee Documentation"
@@ -8480,10 +7467,11 @@
   estHours: 5
   summary: "Another eBPF runtime security tool whose event and signature docs teach Linux behavioural detection."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-falco]
   tags: [security]
+  quality: 3
 
 - id: "docs-mitre-caldera"
   title: "MITRE Caldera Documentation"
@@ -8499,10 +7487,11 @@
   estHours: 5
   summary: "Adversary emulation platform defenders use to replay ATT&CK behaviours in a lab and check that detections fire."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-mitre-attack]
   tags: [security]
+  quality: 3
 
 - id: "docs-arkime"
   title: "Arkime: Full Packet Capture and Indexing"
@@ -8518,29 +7507,11 @@
   estHours: 4
   summary: "Large scale full packet capture and session search; shows how NSM teams keep and query raw traffic."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [book-book-of-zeek]
   tags: [security]
-
-- id: "repo-helk"
-  title: "HELK: The Hunting ELK"
-  short: "HELK"
-  provider: "Roberto Rodriguez"
-  type: "article"
-  url: "https://github.com/Cyb3rWard0g/HELK"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "advanced"
-  cost: "free"
-  estHours: 6
-  summary: "A hunting platform built on ELK with Spark and Jupyter, showing how analytics extend a basic SIEM."
-  fromYear: 3
-  priority: 2
-  roadmap: "software-architect"
-  after: [docs-elastic-security]
-  tags: [security]
+  quality: 3
 
 - id: "repo-dettect"
   title: "DeTT&CT: Detect Tactics, Techniques & Combat Threats"
@@ -8556,10 +7527,11 @@
   estHours: 4
   summary: "Scores your data source quality and detection coverage against ATT&CK to plan where to invest."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-mitre-attack]
   tags: [security]
+  quality: 3
 
 - id: "repo-pysigma"
   title: "pySigma: Python library for Sigma rule processing"
@@ -8575,10 +7547,11 @@
   estHours: 3
   summary: "The converter library behind Sigma backends; shows how detections are compiled into SIEM query languages."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-sigma]
   tags: [security]
+  quality: 3
 
 - id: "repo-windows-event-forwarding"
   title: "Windows Event Forwarding Guidance"
@@ -8594,10 +7567,11 @@
   estHours: 3
   summary: "Practical setup of native Windows Event Forwarding at scale with subscriptions and channel design."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-sysmon]
   tags: [security]
+  quality: 3
 
 - id: "repo-security-content"
   title: "Splunk Security Content"
@@ -8613,10 +7587,11 @@
   estHours: 6
   summary: "Open detections, stories and response playbooks with tests, a good model of detection-as-code."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-sigma]
   tags: [security]
+  quality: 3
 
 - id: "repo-detection-rules"
   title: "Elastic Detection Rules"
@@ -8632,10 +7607,11 @@
   estHours: 6
   summary: "Production rule repository with CI testing and schemas, showing detection engineering as software engineering."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-elastic-security]
   tags: [security]
+  quality: 3
 
 - id: "repo-timesketch"
   title: "Timesketch: Collaborative forensic timeline analysis"
@@ -8651,16 +7627,17 @@
   estHours: 4
   summary: "Collaborative timeline analysis on top of Plaso output, used for team investigations."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-plaso]
   tags: [security]
+  quality: 3
 
 - id: "repo-attack-range"
   title: "Splunk Attack Range"
   short: "Splunk Attack Range"
   provider: "Splunk Threat Research"
-  type: "article"
+  type: "practice"
   url: "https://github.com/splunk/attack_range"
   urlVerified: true
   lastVerified: 2026-10-21
@@ -8670,10 +7647,11 @@
   estHours: 4
   summary: "Builds a lab that runs attack simulations and collects the resulting data for detection development."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-atomic-red-team]
   tags: [security]
+  quality: 3
 
 - id: "repo-grr"
   title: "GRR Rapid Response"
@@ -8689,29 +7667,11 @@
   estHours: 4
   summary: "Google's remote live forensics framework for investigating many machines at once."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-velociraptor]
   tags: [security]
-
-- id: "course-splunk-free-training"
-  title: "Splunk Free Training Courses"
-  short: "Splunk Free Courses"
-  provider: "Splunk"
-  type: "course"
-  url: "https://www.splunk.com/en_us/training/free-courses/overview.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 20
-  summary: "Free self-paced courses on SPL, SOC investigation, threat hunting and detection engineering with Splunk."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  note: "Free tier"
-  tags: [security]
+  quality: 3
 
 - id: "book-book-of-zeek"
   title: "Book of Zeek (Zeek Documentation)"
@@ -8727,9 +7687,10 @@
   estHours: 15
   summary: "The official book for the Zeek network monitor, covering architecture, logs, clusters and the scripting language."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "tutorial-zeek-logs"
   title: "Zeek Tutorial: Logs"
@@ -8745,9 +7706,10 @@
   estHours: 2
   summary: "Explains Zeek's conn, dns, http and other logs plus their formats, which is the core of network security monitoring."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-practical-linux-hardening"
   title: "The Practical Linux Hardening Guide"
@@ -8763,9 +7725,10 @@
   estHours: 6
   summary: "Long-form guide tying Linux hardening steps to the reasoning and standards behind them."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-macos-security-privacy-guide"
   title: "macOS Security and Privacy Guide"
@@ -8781,9 +7744,10 @@
   estHours: 4
   summary: "Practical walkthrough of hardening a Mac: FileVault, firewall, DNS, Gatekeeper and service minimization."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "tutorial-zeek-scripting"
   title: "Zeek Tutorial: Zeek Scripting"
@@ -8799,10 +7763,11 @@
   estHours: 4
   summary: "Learn the event-driven Zeek language to write your own network detections and enrichments."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [tutorial-zeek-logs]
   tags: [security]
+  quality: 3
 
 - id: "repo-hadolint"
   title: "Hadolint: Dockerfile linter"
@@ -8818,9 +7783,10 @@
   estHours: 1
   summary: "Lints Dockerfiles for best-practice and security issues before images are ever built."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-anchore-syft"
   title: "Syft: SBOM generator"
@@ -8836,9 +7802,10 @@
   estHours: 2
   summary: "Generates SBOMs in CycloneDX or SPDX from container images and file systems."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-anchore-grype"
   title: "Grype: vulnerability scanner for images and SBOMs"
@@ -8854,10 +7821,11 @@
   estHours: 2
   summary: "Matches packages in images or SBOMs against vulnerability data; pairs naturally with Syft."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-anchore-syft]
   tags: [security]
+  quality: 3
 
 - id: "practice-letsdefend"
   title: "LetsDefend"
@@ -8873,10 +7841,11 @@
   estHours: 20
   summary: "Simulated SOC with alert queues plus free fundamentals courses for aspiring analysts."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Free tier"
   tags: [security]
+  quality: 3
 
 - id: "repo-lynis"
   title: "Lynis: security auditing tool for Linux, macOS and Unix"
@@ -8892,9 +7861,10 @@
   estHours: 4
   summary: "Run it on your own box to get a prioritized list of hardening suggestions and learn what each check means."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-trivy"
   title: "Trivy"
@@ -8913,6 +7883,7 @@
   priority: 2
   roadmap: "software-architect"
   tags: [security]
+  quality: 4
 
 - id: "repo-checkov"
   title: "Checkov: infrastructure-as-code scanner"
@@ -8928,9 +7899,10 @@
   estHours: 3
   summary: "Policy checks for Terraform, Kubernetes and other IaC so misconfigurations are caught at review time."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-dependency-track"
   title: "OWASP Dependency-Track"
@@ -8946,10 +7918,11 @@
   estHours: 4
   summary: "Ingests SBOMs across many projects and continuously flags newly disclosed vulnerable components."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-anchore-syft]
   tags: [security]
+  quality: 3
 
 - id: "repo-cyclonedx-cdxgen"
   title: "cdxgen: CycloneDX SBOM generator"
@@ -8965,10 +7938,11 @@
   estHours: 2
   summary: "Polyglot SBOM generator from source trees with dependency trees and reachability data."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   doFirst: "CycloneDX Specification"
   tags: [security]
+  quality: 3
 
 - id: "practice-cyberdefenders-blue-team-labs"
   title: "CyberDefenders Blue Team Labs"
@@ -8984,11 +7958,12 @@
   estHours: 20
   summary: "Hands-on DFIR and SOC challenges using real PCAPs, memory images and logs to practise investigations."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Free tier"
   after: [paper-sans-incident-handlers-handbook]
   tags: [security]
+  quality: 3
 
 - id: "practice-blue-team-labs-online"
   title: "Blue Team Labs Online"
@@ -9004,10 +7979,11 @@
   estHours: 20
   summary: "Gamified downloadable defensive challenges in forensics, incident response and threat hunting."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Free tier"
   tags: [security]
+  quality: 3
 
 - id: "repo-botsv3"
   title: "Boss of the SOC (BOTS) Dataset Version 3"
@@ -9023,10 +7999,10 @@
   estHours: 15
   summary: "Large realistic security dataset with questions for practising SOC investigations in Splunk."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
-  after: [course-splunk-free-training]
   tags: [security]
+  quality: 3
 
 - id: "repo-security-datasets"
   title: "Security Datasets"
@@ -9042,10 +8018,11 @@
   estHours: 6
   summary: "Recorded telemetry of simulated attack techniques to practise hunting and test detections offline."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-threathunter-playbook]
   tags: [security]
+  quality: 3
 
 - id: "repo-complianceascode-content"
   title: "ComplianceAsCode content"
@@ -9061,10 +8038,11 @@
   estHours: 10
   summary: "See how security rules are written once and rendered into SCAP, Ansible and Bash remediations for many distros."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [openscap-user-manual]
   tags: [security]
+  quality: 3
 
 - id: "repo-devsec-ansible-hardening"
   title: "DevSec Hardening Framework: Ansible collection"
@@ -9080,9 +8058,10 @@
   estHours: 4
   summary: "Readable Ansible roles that harden OS, SSH, nginx and MySQL, useful as a reference for infrastructure-as-code hardening."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-kicksecure-security-misc"
   title: "security-misc (Kicksecure)"
@@ -9098,10 +8077,11 @@
   estHours: 3
   summary: "Commented sysctl, boot-parameter and module-blacklist settings that show what aggressive kernel hardening looks like in practice."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [kspp-recommended-settings]
   tags: [security]
+  quality: 3
 
 - id: "repo-nist-macos-security"
   title: "macOS Security Compliance Project (mSCP)"
@@ -9117,10 +8097,11 @@
   estHours: 4
   summary: "Shows how baselines like CIS and 800-53 are turned into generated scripts and configuration profiles for macOS."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-macos-security-privacy-guide]
   tags: [security]
+  quality: 3
 
 - id: "repo-linux-audit-userspace"
   title: "Linux audit userspace (auditd)"
@@ -9136,9 +8117,10 @@
   estHours: 3
   summary: "The auditd daemon and tools used to record security-relevant syscalls, required by most hardening baselines."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-kube-bench"
   title: "kube-bench"
@@ -9154,10 +8136,11 @@
   estHours: 2
   summary: "Checks a cluster against the CIS Kubernetes Benchmark so you can see which controls you are missing."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [k8s-pod-security-standards]
   tags: [security]
+  quality: 3
 
 - id: "repo-kubescape"
   title: "Kubescape"
@@ -9173,10 +8156,11 @@
   estHours: 3
   summary: "Scans clusters and manifests against NSA/CISA and MITRE frameworks and explains each failed control."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [nsa-cisa-kubernetes-hardening-guide]
   tags: [security]
+  quality: 3
 
 - id: "repo-kyverno"
   title: "Kyverno"
@@ -9192,10 +8176,11 @@
   estHours: 4
   summary: "Kubernetes-native policy engine for enforcing hardening rules at admission time in plain YAML."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [k8s-pod-security-standards]
   tags: [security]
+  quality: 3
 
 - id: "repo-opa-gatekeeper"
   title: "OPA Gatekeeper"
@@ -9211,10 +8196,11 @@
   estHours: 4
   summary: "Policy-as-code admission controller using Rego, the common alternative to Kyverno for cluster guardrails."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [repo-kyverno]
   tags: [security]
+  quality: 3
 
 - id: "repo-prowler"
   title: "Prowler"
@@ -9230,10 +8216,11 @@
   estHours: 3
   summary: "Open-source cloud posture scanner covering AWS, Azure, GCP and Kubernetes with CIS and other frameworks."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [aws-iam-best-practices]
   tags: [security]
+  quality: 3
 
 - id: "repo-scoutsuite"
   title: "ScoutSuite"
@@ -9249,9 +8236,10 @@
   estHours: 2
   summary: "Multi-cloud auditing tool that produces a browsable report of risky configurations."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
+  quality: 3
 
 - id: "repo-sealed-secrets"
   title: "Sealed Secrets"
@@ -9267,10 +8255,11 @@
   estHours: 2
   summary: "Kubernetes controller that lets you commit encrypted secrets to git and decrypt them only in-cluster."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [sops-docs]
   tags: [security]
+  quality: 3
 
 - id: "repo-evtx-attack-samples"
   title: "EVTX-ATTACK-SAMPLES"
@@ -9286,10 +8275,11 @@
   estHours: 4
   summary: "Windows event logs captured during attack techniques, for testing detections and learning what events look like."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-sysmon]
   tags: [security]
+  quality: 3
 
 - id: "repo-confidential-containers"
   title: "Confidential Containers"
@@ -9305,10 +8295,11 @@
   estHours: 4
   summary: "Project running Kubernetes pods inside TEEs; good for seeing confidential computing applied to real workloads."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [ccc-technical-analysis]
   tags: [security]
+  quality: 3
 
 - id: "paper-sans-incident-handlers-handbook"
   title: "Incident Handler's Handbook"
@@ -9324,27 +8315,10 @@
   estHours: 2
   summary: "Short classic that explains the six-step PICERL incident handling model with practical checklists for each phase."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
-
-- id: "article-canarytokens-quick-free-detection"
-  title: "Canarytokens.org - Quick, Free, Detection for the Masses"
-  short: "Canarytokens Intro"
-  provider: "Thinkst"
-  type: "article"
-  url: "https://blog.thinkst.com/p/canarytokensorg-quick-free-detection.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Introduces honeytokens and why a fake credential or document that phones home is one of the best value detections."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  tags: [security]
+  quality: 3
 
 - id: "article-sqrrl-hunting-archive"
   title: "Sqrrl Threat Hunting Archive (Hunting Loop, Hunting Maturity Model)"
@@ -9360,46 +8334,10 @@
   estHours: 3
   summary: "Preserved copies of the papers that defined the hypothesis-driven hunting loop and hunting maturity model still used by hunt teams."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   tags: [security]
-
-- id: "article-google-modernizing-threat-detection"
-  title: "How Google Does It: Modernizing threat detection"
-  short: "Google Threat Detection"
-  provider: "Google Cloud"
-  type: "article"
-  url: "https://cloud.google.com/transform/how-google-does-it-modernizing-threat-detection/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Describes how Google's detection and response team scales detection with automation and engineering discipline."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  tags: [security]
-
-- id: "article-google-sre-for-cybersecurity"
-  title: "How Google Does It: Applying SRE to cybersecurity"
-  short: "Google SRE for Security"
-  provider: "Google Cloud"
-  type: "article"
-  url: "https://cloud.google.com/transform/how-google-does-it-applying-sre-to-cybersecurity"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Connects SRE practices like toil reduction and SLOs to running a security operations function."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  after: [book-sre-workbook]
-  tags: [security]
+  quality: 3
 
 - id: "article-dfir-report-activemq-lockbit"
   title: "Apache ActiveMQ Exploit Leads to LockBit Ransomware"
@@ -9415,10 +8353,11 @@
   estHours: 1
   summary: "A recent end-to-end ransomware case study that walks from initial access to impact with defensive takeaways."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [blog-the-dfir-report]
   tags: [security]
+  quality: 3
 
 - id: "article-red-canary-threat-detection-report"
   title: "Red Canary Threat Detection Report"
@@ -9434,10 +8373,11 @@
   estHours: 4
   summary: "Yearly analysis of the most common techniques seen in real detections, each with telemetry and detection guidance."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-mitre-attack]
   tags: [security]
+  quality: 3
 
 - id: "article-jpcert-lateral-movement-v2"
   title: "Research Report Released: Detecting Lateral Movement through Tracking Event Logs (Version 2)"
@@ -9453,48 +8393,11 @@
   estHours: 4
   summary: "Maps common attacker tools to the exact Windows and Sysmon events they leave, a model for evidence-based detection."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   after: [docs-sysmon]
   tags: [security]
-
-- id: "article-elastic-debmm"
-  title: "Elastic releases the Detection Engineering Behavior Maturity Model"
-  short: "Elastic DEBMM"
-  provider: "Elastic Security Labs"
-  type: "article"
-  url: "https://www.elastic.co/security-labs/elastic-releases-debmm"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "A framework for measuring and growing a detection engineering practice beyond just writing more rules."
-  fromYear: 3
-  priority: 2
-  roadmap: "software-architect"
-  after: [docs-sigma-rules]
-  tags: [security]
-
-- id: "blog-thinkst-thoughts"
-  title: "Thinkst Thoughts"
-  short: "Thinkst Blog"
-  provider: "Thinkst Canary"
-  type: "article"
-  url: "https://blog.thinkst.com/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "Deception and detection research from the Canary team, full of practical ideas about cheap high-signal tripwires."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  blog: true
-  tags: [security]
+  quality: 3
 
 - id: "blog-the-dfir-report"
   title: "The DFIR Report"
@@ -9510,10 +8413,11 @@
   estHours: 10
   summary: "Detailed intrusion write-ups with timelines, ATT&CK mapping and detection ideas; ideal for learning how real attacks look in logs."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   blog: true
   tags: [security]
+  quality: 3
 
 - id: "blog-elastic-security-labs"
   title: "Elastic Security Labs"
@@ -9529,12 +8433,13 @@
   estHours: 10
   summary: "Threat research paired with published detection logic, useful for seeing how researchers turn findings into rules."
   fromYear: 3
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   blog: true
   tags: [security]
 
 # ---- Languages (19)
+  quality: 3
 
 - id: "docs-rustsec-advisory-db"
   title: "RustSec Advisory Database and cargo-audit"
@@ -9550,9 +8455,10 @@
   estHours: 1
   summary: "The advisory database for crates and the cargo-audit tool that checks your Cargo.lock against it."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [rust-book]
   tags: [security]
+  quality: 3
 
 - id: "docs-go-security-best-practices"
   title: "Security Best Practices for Go Developers"
@@ -9568,8 +8474,9 @@
   estHours: 1
   summary: "The official short list for Go: govulncheck, staying updated, fuzzing, the race detector and vet."
   fromYear: 1
-  priority: 2
+  priority: 3
   tags: [security]
+  quality: 3
 
 - id: "docs-python-security-considerations"
   title: "Python Docs: Security Considerations"
@@ -9585,8 +8492,9 @@
   estHours: 1
   summary: "Index of stdlib modules with security caveats such as pickle, subprocess, tempfile, xml and random."
   fromYear: 1
-  priority: 2
+  priority: 3
   tags: [security]
+  quality: 3
 
 - id: "docs-clippy-lints"
   title: "Clippy Lints"
@@ -9605,6 +8513,7 @@
   priority: 2
   after: [rust-book]
   tags: [security]
+  quality: 4
 
 - id: "docs-clang-addresssanitizer"
   title: "AddressSanitizer (Clang documentation)"
@@ -9622,6 +8531,7 @@
   fromYear: 2
   priority: 2
   tags: [security]
+  quality: 4
 
 - id: "docs-go-fuzzing"
   title: "Go Fuzzing"
@@ -9637,9 +8547,10 @@
   estHours: 2
   summary: "Reference for native Go fuzz tests: corpus format, flags, failure handling and requirements."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "Go fuzz tutorial"
   tags: [security]
+  quality: 3
 
 - id: "docs-sei-cert-c"
   title: "SEI CERT C Coding Standard"
@@ -9658,6 +8569,7 @@
   priority: 2
   doFirst: "K&R or Modern C"
   tags: [security]
+  quality: 4
 
 - id: "docs-sei-cert-cpp"
   title: "SEI CERT C++ Coding Standard (Introduction)"
@@ -9673,9 +8585,10 @@
   estHours: 20
   summary: "C++-specific rules on object lifetime, containers, exceptions and memory management with worked examples."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-sei-cert-c]
   tags: [security]
+  quality: 3
 
 - id: "docs-sei-cert-java"
   title: "SEI CERT Oracle Coding Standard for Java"
@@ -9691,8 +8604,9 @@
   estHours: 15
   summary: "Secure Java rules covering serialization, input validation, concurrency and the security manager era."
   fromYear: 2
-  priority: 2
+  priority: 3
   tags: [security]
+  quality: 3
 
 - id: "docs-openssf-compiler-hardening"
   title: "Compiler Options Hardening Guide for C and C++"
@@ -9711,6 +8625,7 @@
   priority: 2
   after: [docs-sei-cert-c]
   tags: [security]
+  quality: 4
 
 - id: "repo-anssi-rust-guide"
   title: "Secure Rust Guidelines (ANSSI)"
@@ -9729,6 +8644,7 @@
   priority: 2
   after: [rust-book]
   tags: [security]
+  quality: 4
 
 - id: "docs-openssf-secure-coding-python"
   title: "Secure Coding One Stop Shop for Python"
@@ -9744,9 +8660,10 @@
   estHours: 6
   summary: "CWE-organized Python examples of insecure versus fixed code, written as a teaching resource."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-python-security-considerations]
   tags: [security]
+  quality: 3
 
 - id: "book-rust-fuzz-book"
   title: "Rust Fuzz Book"
@@ -9762,26 +8679,10 @@
   estHours: 4
   summary: "Covers cargo-fuzz and afl.rs, structure-aware fuzzing with Arbitrary, coverage and fuzzing in CI."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [rust-book]
   tags: [security]
-
-- id: "tutorial-go-govulncheck"
-  title: "Tutorial: Find and fix vulnerable dependencies with govulncheck"
-  short: "govulncheck Tutorial"
-  provider: "Go team"
-  type: "article"
-  url: "https://go.dev/doc/tutorial/govulncheck"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how call-graph reachability lets govulncheck report only vulnerabilities your code actually uses."
-  fromYear: 1
-  priority: 2
-  tags: [security]
+  quality: 3
 
 - id: "repo-cargo-fuzz"
   title: "cargo-fuzz"
@@ -9800,6 +8701,7 @@
   priority: 2
   after: [book-rust-fuzz-book]
   tags: [security]
+  quality: 4
 
 - id: "repo-cargo-deny"
   title: "cargo-deny"
@@ -9815,9 +8717,10 @@
   estHours: 2
   summary: "Lint a Rust dependency graph for advisories, banned crates, licenses and duplicate versions."
   fromYear: 2
-  priority: 2
+  priority: 3
   after: [docs-rustsec-advisory-db]
   tags: [security]
+  quality: 3
 
 - id: "repo-cargo-vet"
   title: "cargo-vet"
@@ -9833,9 +8736,10 @@
   estHours: 2
   summary: "Mozilla's workflow for recording human audits of third-party crates and sharing them across organizations."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [repo-cargo-deny]
   tags: [security]
+  quality: 3
 
 - id: "repo-rust-safety-dance"
   title: "safety-dance: auditing unsafe Rust in popular crates"
@@ -9851,29 +8755,10 @@
   estHours: 3
   summary: "Community issue tracker of unsafe-code audits that shows how real crates removed or justified unsafe blocks."
   fromYear: 3
-  priority: 2
+  priority: 3
   after: [repo-anssi-rust-guide]
   tags: [security]
-
-- id: "repo-corazawaf-coraza"
-  title: "Coraza WAF"
-  short: "Coraza repo"
-  provider: "OWASP Coraza"
-  type: "practice"
-  url: "https://github.com/corazawaf/coraza"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "advanced"
-  cost: "free"
-  estHours: 6
-  summary: "Readable Go implementation of a ModSecurity-compatible engine; a good codebase for learning how WAF rule evaluation works."
-  fromYear: 3
-  priority: 2
-  after: [docs-coraza-intro]
-  tags: [security]
-
-# ---- Hardware and chip design: CPU, GPU and NPU, RTL to tape-out (20)
+  quality: 3
 
 - id: "apple-platform-security"
   title: "Apple Platform Security"
@@ -9889,8 +8774,9 @@
   estHours: 10
   summary: "End-to-end tour of a vertically integrated security design: Secure Enclave, secure boot chain, data protection and app sandboxing."
   fromYear: 2
-  priority: 3
+  priority: 1
   tags: [security]
+  quality: 5
 
 - id: "repo-nsa-hardware-firmware-guidance"
   title: "Hardware and Firmware Security Guidance"
@@ -9908,6 +8794,7 @@
   fromYear: 2
   priority: 3
   tags: [security]
+  quality: 3
 
 - id: "nsa-uefi-secure-boot-customization"
   title: "UEFI Secure Boot Customization"
@@ -9925,6 +8812,7 @@
   fromYear: 2
   priority: 3
   tags: [security]
+  quality: 3
 
 - id: "android-arm-mte"
   title: "Arm Memory Tagging Extension (Android)"
@@ -9942,6 +8830,7 @@
   fromYear: 2
   priority: 3
   tags: [security]
+  quality: 3
 
 - id: "kernel-tpm-security"
   title: "TPM Security (Linux kernel docs)"
@@ -9960,6 +8849,7 @@
   priority: 3
   after: [book-practical-guide-tpm2]
   tags: [security]
+  quality: 3
 
 - id: "kernel-cet-shadow-stack"
   title: "Control-flow Enforcement Technology (CET) Shadow Stack"
@@ -9978,6 +8868,7 @@
   priority: 3
   after: [clang-cfi]
   tags: [security]
+  quality: 3
 
 - id: "kernel-arm64-pac"
   title: "Pointer authentication in AArch64 Linux"
@@ -9995,6 +8886,7 @@
   fromYear: 3
   priority: 3
   tags: [security]
+  quality: 3
 
 - id: "caliptra-spec-2"
   title: "Caliptra 2.0 specification"
@@ -10013,6 +8905,7 @@
   priority: 3
   after: [book-practical-guide-tpm2]
   tags: [security]
+  quality: 3
 
 - id: "opentitan-security-docs"
   title: "OpenTitan Security Documentation"
@@ -10028,8 +8921,9 @@
   estHours: 6
   summary: "Security model, threat model and secure hardware design guidelines of an open silicon root of trust."
   fromYear: 3
-  priority: 3
+  priority: 2
   tags: [security]
+  quality: 4
 
 - id: "cheri-morello"
   title: "Arm Morello (CHERI)"
@@ -10048,6 +8942,7 @@
   priority: 3
   after: [paper-intro-to-cheri]
   tags: [security]
+  quality: 3
 
 - id: "book-practical-guide-tpm2"
   title: "A Practical Guide to TPM 2.0"
@@ -10063,8 +8958,9 @@
   estHours: 20
   summary: "Open-access book explaining TPM 2.0 keys, hierarchies, PCRs and attestation from people who designed it."
   fromYear: 2
-  priority: 3
+  priority: 2
   tags: [security]
+  quality: 4
 
 - id: "tpm2-software-tutorials"
   title: "tpm2-software tutorials"
@@ -10083,6 +8979,7 @@
   priority: 3
   after: [book-practical-guide-tpm2]
   tags: [security]
+  quality: 3
 
 - id: "arm-mte-learning-path"
   title: "Explore Arm Memory Tagging Extension with an example C program"
@@ -10101,6 +8998,7 @@
   priority: 3
   after: [android-arm-mte]
   tags: [security]
+  quality: 3
 
 - id: "ccc-technical-analysis"
   title: "A Technical Analysis of Confidential Computing"
@@ -10118,6 +9016,7 @@
   fromYear: 2
   priority: 3
   tags: [security]
+  quality: 3
 
 - id: "paper-cheri-ieeesp-2024"
   title: "CHERI: Hardware-Enabled C/C++ Memory Protection at Scale"
@@ -10133,8 +9032,9 @@
   estHours: 2
   summary: "Short recent overview of CHERI results on Morello and porting effort for large codebases."
   fromYear: 2
-  priority: 3
+  priority: 2
   tags: [security]
+  quality: 4
 
 - id: "paper-intel-tdx-demystified"
   title: "Intel TDX Demystified: A Top-Down Approach"
@@ -10150,9 +9050,10 @@
   estHours: 5
   summary: "Clear walkthrough of TDX trust domains, the TDX module, memory encryption and attestation."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [ccc-technical-analysis]
   tags: [security]
+  quality: 4
 
 - id: "amd-sev-snp-whitepaper"
   title: "AMD SEV-SNP: Strengthening VM Isolation with Integrity Protection and More"
@@ -10168,9 +9069,10 @@
   estHours: 3
   summary: "Explains the reverse map table and attestation that protect confidential VMs from a hostile hypervisor."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [ccc-technical-analysis]
   tags: [security]
+  quality: 4
 
 - id: "cheri-isa-v9"
   title: "CHERI Instruction-Set Architecture (Version 9)"
@@ -10186,9 +9088,10 @@
   estHours: 30
   summary: "Full ISA spec for CHERI capabilities across MIPS, RISC-V and Morello."
   fromYear: 3
-  priority: 3
+  priority: 2
   after: [paper-intro-to-cheri]
   tags: [security]
+  quality: 4
 
 - id: "paper-cheri-isca-2014"
   title: "The CHERI capability model: Revisiting RISC in an age of risk"
@@ -10204,9 +9107,10 @@
   estHours: 4
   summary: "The original architecture paper introducing hybrid capability hardware."
   fromYear: 3
-  priority: 3
+  priority: 1
   after: [paper-intro-to-cheri]
   tags: [security]
+  quality: 5
 
 - id: "anssi-confidential-computing"
   title: "Technical Position Paper on Confidential Computing"
@@ -10225,3 +9129,4 @@
   priority: 3
   after: [ccc-technical-analysis]
   tags: [security]
+  quality: 3

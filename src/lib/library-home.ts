@@ -94,21 +94,30 @@ export function priorityOf(item: { priority?: number | undefined; tracks: readon
 
 const LEVEL_RANK: Readonly<Record<string, number>> = { intro: 0, intermediate: 1, advanced: 2 };
 
-/** What the Library sorts by: priority, then the plan year it fits, then level (beginner first). */
+/** What the Library sorts by: priority, then quality (canon first), then the plan year it fits, then level (beginner first). */
 export interface Fit {
   priority: number;
+  /** The quality pass's grade (ATLAS-QUALITY-AUDIT): 5 canon to 1; a row it did not re-grade counts as 4. */
+  quality?: number | undefined;
   year?: number | undefined;
   level?: string | undefined;
 }
 
-/** Priority, then year (none last), then level (none between beginner and advanced). */
+/** A row the quality pass did not re-grade counts as strong (4). */
+export const UNGRADED = 4;
+/** Canon (ATLAS-QUALITY-AUDIT): graded 5, best in class; a Canon badge and the "Canon only" toggle. */
+export const isCanon = (quality: number | undefined): boolean => quality === 5;
+/** Graded 3 or lower: useful but not essential; under "More resources" in a path and never in Up next. */
+export const isLesser = (quality: number | undefined): boolean => (quality ?? UNGRADED) <= 3;
+
+/** Priority, then quality (highest first), then year (none last), then level (none between beginner and advanced). */
 export function byFit(a: Fit, b: Fit): number {
-  return a.priority - b.priority || (a.year ?? 9) - (b.year ?? 9) || (LEVEL_RANK[a.level ?? ''] ?? 1) - (LEVEL_RANK[b.level ?? ''] ?? 1);
+  return a.priority - b.priority || (b.quality ?? UNGRADED) - (a.quality ?? UNGRADED) || (a.year ?? 9) - (b.year ?? 9) || (LEVEL_RANK[a.level ?? ''] ?? 1) - (LEVEL_RANK[b.level ?? ''] ?? 1);
 }
 
-/** A resource's fit: its own priority (or its track's), the year it fits from, its level. */
-export function fitOf(r: { priority?: number | undefined; tracks: readonly string[]; fromYear?: number | undefined; level?: string | undefined }): Fit {
-  return { priority: priorityOf(r), year: r.fromYear, level: r.level };
+/** A resource's fit: its own priority (or its track's), its quality, the year it fits from, its level. */
+export function fitOf(r: { priority?: number | undefined; quality?: number | undefined; tracks: readonly string[]; fromYear?: number | undefined; level?: string | undefined }): Fit {
+  return { priority: priorityOf(r), quality: r.quality, year: r.fromYear, level: r.level };
 }
 
 /** The resource rows of a roadmap.sh roadmap's official page, by the roadmap's id. */
@@ -288,6 +297,8 @@ export function upNext(paths: readonly LibraryPath[], seed: AppSeed, count = 3, 
     path.steps.forEach((step, i) => {
       if (step.status !== 'todo') return;
       if (paid.has(step.refId) && !states?.get(step.refId)?.owned) return;
+      // Graded 3 or lower by the quality pass (ATLAS-QUALITY-AUDIT): kept on the plan, never suggested.
+      if (isLesser(step.fit.quality)) return;
       const before = path.steps[i - 1];
       const item: UpNext = { step, path, start: start.get(step.phaseId) ?? '' };
       if (before && before.status !== 'done') item.after = before.title;

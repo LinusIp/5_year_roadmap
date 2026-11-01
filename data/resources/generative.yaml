@@ -21,6 +21,7 @@
   after: [udl-book]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 - id: mit-6-s978
   title: Deep Generative Models (MIT 6.S978)
   provider: MIT
@@ -42,6 +43,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 4
 - id: lilian-weng-diffusion
   title: What are Diffusion Models?
   provider: Lilian Weng
@@ -63,6 +65,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 5
 - id: annotated-diffusion
   title: The Annotated Diffusion Model
   provider: Hugging Face
@@ -83,6 +86,7 @@
   after: [annotated-transformer]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 - id: yang-song-score
   title: Generative Modeling by Estimating Gradients of the Data Distribution
   provider: Yang Song
@@ -104,6 +108,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 5
 - id: sander-dieleman-blog
   title: Sander Dieleman's blog
   provider: Sander Dieleman
@@ -126,6 +131,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 5
 - id: fastai-part-2
   title: From Deep Learning Foundations to Stable Diffusion
   provider: fast.ai
@@ -146,6 +152,7 @@
   doFirst: "Practical DL (fast.ai)"
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 - id: diffusers-repo
   title: huggingface/diffusers
   provider: Hugging Face
@@ -168,6 +175,7 @@
   after: [hf-diffusion-course]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 - id: denoising-diffusion-pytorch
   title: lucidrains/denoising-diffusion-pytorch
   provider: Phil Wang
@@ -188,6 +196,7 @@
   after: [annotated-diffusion]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 - id: facebookresearch-dit
   title: facebookresearch/DiT
   provider: Meta AI
@@ -209,6 +218,7 @@
   priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
+  quality: 5
 - id: dreamerv3-code
   title: danijar/dreamerv3
   provider: Danijar Hafner
@@ -225,6 +235,13 @@
   prerequisites: []
   subject: deep-learning
   summary: The official DreamerV3 implementation in JAX.
+  short: "DreamerV3 repo"
+  fromYear: 3
+  after: [dreamerv3]
+  priority: 1
+  roadmap: "ai-agents"
+  research: "world-models"
+  quality: 5
 - id: mujoco-playground
   title: google-deepmind/mujoco_playground
   provider: Google DeepMind
@@ -259,6 +276,7 @@
   short: "V-JEPA code"
   fromYear: 3
   doFirst: "V-JEPA paper"
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
   research: "world-models"
+  quality: 3

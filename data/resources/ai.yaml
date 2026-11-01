@@ -15,8 +15,9 @@
   subject: machine-learning
   summary: "In progress when the plan starts. The midterm and capstone are monthly projects 1 and 4."
   after: [30-days-of-python]
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: hf-llm-course
   title: "Hugging Face LLM Course"
@@ -35,6 +36,7 @@
   after: [pytorch-tutorials]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: hf-agents-course
   title: "Hugging Face AI Agents Course"
@@ -52,6 +54,7 @@
   summary: "In progress when the plan starts. Unit 4 is the certified final project (monthly project 4)."
   priority: 1
   roadmap: "ai-agents"
+  quality: 4
 
 - id: hf-deep-rl-course
   title: "Hugging Face Deep Reinforcement Learning Course"
@@ -71,6 +74,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-agents"
+  quality: 4
 
 - id: hf-diffusion-course
   title: "Hugging Face Diffusion Models Course"
@@ -87,8 +91,9 @@
   subject: deep-learning
   summary: "Notebook-driven units take you from training a tiny diffusion model to fine-tuning, guidance and Stable Diffusion with diffusers."
   doFirst: "Practical DL (fast.ai)"
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: hf-mcp-course
   title: "Hugging Face Model Context Protocol (MCP) Course"
@@ -120,6 +125,7 @@
   summary: "Builds backprop, language models and GPT from scratch in code, line by line."
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: fastai-practical-dl
   title: "fast.ai: Practical Deep Learning for Coders"
@@ -139,6 +145,7 @@
   summary: "Top-down, code-first course that gets you training strong models in week one, then explains why."
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: stanford-cs229
   title: "Stanford CS229 Machine Learning"
@@ -160,6 +167,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: stanford-cs231n
   title: "Stanford CS231n Deep Learning for Computer Vision"
@@ -180,6 +188,7 @@
   summary: "Builds CNNs, optimization and vision models from scratch in NumPy and PyTorch assignments."
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: stanford-cs224n
   title: "Stanford CS224n Natural Language Processing with Deep Learning"
@@ -199,6 +208,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: stanford-cs336
   title: "Stanford CS336 Language Modeling from Scratch"
@@ -217,6 +227,7 @@
   summary: "Build tokenizer, transformer, training, scaling and alignment yourself in demanding assignments."
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: stanford-cs25
   title: "Stanford CS25 Transformers United (seminar)"
@@ -237,6 +248,7 @@
   after: [stanford-cs224n]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: mit-6-s191
   title: "MIT 6.S191 Introduction to Deep Learning"
@@ -256,6 +268,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: mit-6-5940
   title: "MIT 6.5940 TinyML and Efficient Deep Learning Computing (Fall 2024)"
@@ -277,6 +290,7 @@
   after: [cmu-10-414]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 
 - id: berkeley-cs285
   title: "UC Berkeley CS 285 Deep Reinforcement Learning"
@@ -295,6 +309,7 @@
   after: [stanford-cs234]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: berkeley-llm-agents
   title: "UC Berkeley Advanced Large Language Model Agents MOOC (Spring 2025)"
@@ -314,6 +329,7 @@
   after: [berkeley-llm-agents-f24]
   priority: 1
   roadmap: "ai-agents"
+  quality: 4
 
 - id: fsdl
   title: "Full Stack Deep Learning (course and LLM bootcamp)"
@@ -332,8 +348,9 @@
   summary: "How to take models to production: data, tooling, deployment, monitoring and teams."
   fromYear: 2
   after: [mit-6-s191]
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: llm-zoomcamp
   title: "DataTalksClub LLM Zoomcamp"
@@ -351,8 +368,9 @@
   short: "LLM Zoomcamp"
   summary: "Builds and evaluates production-style LLM/RAG apps, including monitoring, which bridges ML Zoomcamp to LLMOps."
   fromYear: 2
-  priority: 2
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: mlops-zoomcamp
   title: "DataTalksClub MLOps Zoomcamp"
@@ -372,6 +390,7 @@
   fromYear: 2
   priority: 2
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: deep-learning-book
   title: "Deep Learning (Goodfellow, Bengio, Courville)"
@@ -392,6 +411,7 @@
   after: [d2l]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: udl-book
   title: "Understanding Deep Learning (Simon Prince)"
@@ -412,6 +432,7 @@
   after: [d2l]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: d2l
   title: "Dive into Deep Learning (d2l.ai)"
@@ -430,6 +451,7 @@
   summary: "Interactive book where every concept is runnable PyTorch code, from linear regression to transformers."
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: pmpp-book
   title: "Programming Massively Parallel Processors, 5th edition (Hwu, Kirk)"
@@ -466,6 +488,7 @@
   tags: [inference]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 
 - id: kaggle-learn
   title: "Kaggle Learn: short hands-on courses"
@@ -481,8 +504,9 @@
   summary: "Bite-sized notebook courses: pandas, feature engineering, intro deep learning and more."
   short: "Kaggle Learn"
   fromYear: 1
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: fcc-ml
   title: "freeCodeCamp: Machine Learning with Python"
@@ -525,8 +549,9 @@
   short: "Stanford CS230"
   fromYear: 1
   after: [coursera-deep-learning-specialization]
-  priority: 1
+  priority: 3
   roadmap: "ai-engineer"
+  quality: 3
 
 - id: cs224w
   title: "Stanford CS224W Machine Learning with Graphs"
@@ -545,6 +570,7 @@
   doFirst: "Stanford CS229"
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: cmu-10-714
   title: "CMU 10-414/714 Deep Learning Systems"
@@ -589,6 +615,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: cs50-ai
   title: "CS50's Introduction to Artificial Intelligence with Python"
@@ -607,6 +634,7 @@
   after: [course-harvard-cs50p]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: spinning-up
   title: "Spinning Up in Deep RL"
@@ -625,6 +653,7 @@
   after: [sutton-barto-rl]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: slp3
   title: "Speech and Language Processing, 3rd edition draft (Jurafsky and Martin)"
@@ -643,6 +672,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5
 
 - id: prml
   title: "Pattern Recognition and Machine Learning (Bishop, free PDF)"
@@ -662,3 +692,4 @@
   after: [mml-book]
   priority: 1
   roadmap: "ai-engineer"
+  quality: 5

@@ -270,7 +270,8 @@
   short: "Crafting Interpreters"
   fromYear: 2
   doFirst: "K&R"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: fcc-youtube
   title: "freeCodeCamp full-length courses on YouTube (Git, Linux, Docker, SQL)"
@@ -381,6 +382,7 @@
   doFirst: "MIT 6.006"
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 
 - id: cmu-15-418
   title: "CMU 15-418/618 Parallel Computer Architecture and Programming"
@@ -415,4 +417,5 @@
   short: "SICP"
   fromYear: 2
   after: [book-composing-programs]
-  priority: 2
+  priority: 1
+  quality: 5

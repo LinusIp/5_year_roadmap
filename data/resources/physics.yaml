@@ -17,6 +17,7 @@
   subject: math-physics
   summary: "Self-paced Newtonian mechanics with short concept videos and problem-solving walk-throughs, the base for any physics sim."
   priority: 2
+  quality: 4
 
 - id: mit-8-02
   title: "MIT 8.02 Physics II: Electricity and Magnetism (Spring 2019)"
@@ -33,7 +34,8 @@
   prerequisites: [mit-8-01, mit-18-02]
   subject: math-physics
   summary: "Three modules (electrostatics, magnetic fields and forces, Maxwell's equations) with lecture videos. MITx publishes the same course in three parts on MIT Learn (8.02.1x to 8.02.3x, no certificate)."
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: mit-8-03
   title: "MIT 8.03SC Physics III: Vibrations and Waves (Fall 2016)"
@@ -50,8 +52,9 @@
   prerequisites: [mit-8-02, mit-18-03]
   subject: math-physics
   summary: "Coupled oscillators, normal modes, the wave equation and Fourier analysis, which are the core ideas behind vibration analysis, signals and many simulations."
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: mit-8-04
   title: "MIT 8.04 Quantum Physics I (Barton Zwiebach, Spring 2016)"
@@ -69,6 +72,7 @@
   subject: math-physics
   summary: "Zwiebach's carefully built lectures on wavefunctions, the Schrodinger equation and operators, heavy on linear algebra."
   priority: 2
+  quality: 4
 
 - id: mit-8-04-adams
   title: "MIT 8.04 Quantum Physics I (Allan Adams, Spring 2013)"
@@ -87,7 +91,8 @@
   short: "MIT 8.04 (Adams 2013)"
   fromYear: 1
   doFirst: "MIT 18.03"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: mit-8-05
   title: "MIT 8.05 Quantum Physics II (Fall 2013)"
@@ -105,7 +110,8 @@
   subject: math-physics
   stretch: true
   summary: "Recasts quantum mechanics in the linear-algebra language of Hilbert spaces, Dirac notation, spin and addition of angular momentum."
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: mit-8-06
   title: "MIT 8.06 Quantum Physics III (Spring 2018)"
@@ -125,6 +131,7 @@
   summary: "Covers the approximation toolkit of real quantum physics: perturbation theory, WKB, adiabatic evolution and scattering."
   fromYear: 3
   priority: 2
+  quality: 4
 
 - id: susskind-classical-mechanics
   title: "Leonard Susskind: The Theoretical Minimum, Classical Mechanics (Fall 2011)"
@@ -140,7 +147,8 @@
   estHours: 30
   subject: math-physics
   summary: "Lagrangians and Hamiltonians: the formulation the simulation and robotics work uses later."
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: susskind-quantum-mechanics
   title: "Leonard Susskind: The Theoretical Minimum, Quantum Mechanics (Winter 2012)"
@@ -158,7 +166,8 @@
   summary: "Starts quantum theory from spins, states and operators rather than wavefunctions, building the minimal formal core."
   fromYear: 2
   after: [susskind-classical-mechanics]
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: feynman-lectures
   title: "The Feynman Lectures on Physics (online edition)"
@@ -177,8 +186,9 @@
   short: "Feynman Lectures"
   fromYear: 2
   after: [book-strang-calculus]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: ibm-quantum-learning
   title: "IBM Quantum Learning (Qiskit courses)"
@@ -214,7 +224,8 @@
   fromYear: 3
   note: "Paid"
   after: [book-griffiths-quantum-mechanics-3e]
-  priority: 4
+  priority: 1
+  quality: 5
 
 - id: mitx-8-370
   title: "MITx 8.370.1x Quantum Information Science I, Part 1"
@@ -233,6 +244,7 @@
   stretch: true
   summary: "The archived MITx course (no certificate). Parts 2 and 3 sit next to it in the Open Learning Library."
   priority: 4
+  quality: 3
 
 - id: mit-3-091
   title: "MIT 3.091SC Introduction to Solid State Chemistry (Fall 2010)"
@@ -248,7 +260,8 @@
   estHours: 100
   subject: math-physics
   summary: "The chemistry course of year 4. MIT 5.111 is the alternative: take one."
-  priority: 4
+  priority: 2
+  quality: 4
 
 - id: mit-5-111
   title: "MIT 5.111SC Principles of Chemical Science (Fall 2014)"
@@ -279,4 +292,5 @@
   prerequisites: [mit-18-02]
   subject: math-physics
   summary: "Video lectures on the laws of thermodynamics, free energy, equilibrium and reaction rates, a gentle base before statistical mechanics."
-  priority: 2
+  priority: 3
+  quality: 3

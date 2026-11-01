@@ -159,7 +159,7 @@ test('the DevOps and Simulation paths list their resources under Optional', asyn
   await open(page, './#/library?path=devops');
   await expect(page.getByRole('heading', { level: 1, name: 'DevOps' })).toBeVisible();
   await expect(page.getByRole('button', { name: /^Optional for this path/ })).toHaveAttribute('aria-expanded', 'true');
-  await showMoreUntil(page, page.getByRole('button', { name: /^Containers from Scratch/ }));
+  await showMoreUntil(page, page.getByRole('button', { name: /^Containers from Scratch/ }).first());
 
   await open(page, './#/library?path=simulation');
   await expect(page.getByRole('heading', { level: 1, name: 'Simulation' })).toBeVisible();
@@ -197,7 +197,7 @@ test('the Hardware and Quantum computing paths list their resources under Option
   await expect(page.getByRole('heading', { level: 1, name: 'Quantum computing' })).toBeVisible();
   const quantum = page.getByRole('button', { name: /^Optional for this path/ });
   if ((await quantum.getAttribute('aria-expanded')) === 'false') await quantum.click();
-  await showMoreUntil(page, page.getByRole('button', { name: /^IBM Quantum Composer/ }));
+  await showMoreUntil(page, page.getByRole('button', { name: /^OpenQASM 3 Spec/ }));
 });
 
 test('a blog card opens its sheet with its link, and Write log entry starts the outline with it', async ({ page }) => {
@@ -494,6 +494,34 @@ test('the fourteenth file\'s filters: Mechanics & materials has its four chips, 
   await expect(page.getByRole('group', { name: 'Area' }).getByRole('button', { name: /^Research writing [\d,]+$/ })).toHaveAttribute('aria-pressed', 'true');
   const [w] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
   expect(w).toBeGreaterThan(40);
+});
+
+test('the quality pass: canon rows wear a Canon badge, "Canon only" narrows a shelf, and a path folds the grade-3 rows under "More resources"', async ({ page }) => {
+  await open(page, './#/library?type=course');
+  const heading = page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ });
+  const [all] = (await heading.innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
+  const toggle = page.getByRole('group', { name: 'Level and roadmap' }).getByRole('button', { name: 'Canon only' });
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  await toggle.click();
+  await expect(page).toHaveURL(/canon=1/);
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(async () => {
+    const [shown] = (await heading.innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
+    expect(shown).toBeGreaterThan(20);
+    expect(shown).toBeLessThan(all!);
+  }).toPass();
+  // Every row shown is canon, and says so first.
+  await expect(page.getByRole('list').getByRole('button').first()).toContainText('Canon ·');
+  await page.getByRole('list').getByRole('button').first().click();
+  await expect(page.getByRole('dialog').getByText('Canon', { exact: true })).toBeVisible();
+  // DevOps has nothing on the plan: its optional list is open, and the grade-3 rows wait, folded, at its end.
+  await open(page, './#/library?path=devops');
+  const more = page.getByRole('button', { name: /^More resources [\d,]+$/ });
+  await expect(more).toHaveAttribute('aria-expanded', 'false');
+  const before = await page.locator('ul.rows > li').count();
+  await more.click();
+  await expect(more).toHaveAttribute('aria-expanded', 'true');
+  await expect(async () => expect(await page.locator('ul.rows > li').count()).toBeGreaterThan(before)).toPass();
 });
 
 test('the quick filters are one list on the home; Certificates wears its badge, Earned persists and Plan › Credentials counts it', async ({ page }) => {

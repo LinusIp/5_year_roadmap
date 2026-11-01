@@ -50,8 +50,9 @@
   short: "Backend Roadmap"
   summary: "Maps APIs, databases, caching and deployment skills needed to put any model or service online."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: roadmap-sh-devops
   title: "roadmap.sh: DevOps roadmap"
@@ -68,8 +69,9 @@
   short: "DevOps Roadmap"
   summary: "A map of what to learn in DevOps and in what order, useful for spotting gaps and planning the track."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: roadmap-sh-system-design
   title: "roadmap.sh: System Design roadmap"
@@ -86,8 +88,9 @@
   short: "System Design Roadmap"
   summary: "A topic checklist for caches, queues, load balancers and scaling patterns to pair with system design reading."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
+  quality: 2
 
 - id: roadmap-sh-ai-engineer
   title: "roadmap.sh: AI Engineer roadmap"
@@ -119,6 +122,7 @@
   fromYear: 2
   priority: 1
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: build-your-own-x
   title: "codecrafters-io/build-your-own-x"

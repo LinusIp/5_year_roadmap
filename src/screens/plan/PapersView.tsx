@@ -66,6 +66,7 @@ export function PaperSheet({ paper, state, onClose }: { paper: Paper | null; sta
         <div key={paper.id} className="space-y-5">
           <div>
             <p className="text-meta text-ink2">{[paper.authors, paper.year, GROUP_LABEL[paper.group]].filter(Boolean).join(' · ')}</p>
+            {paper.quality === 5 && <span className="pill-tint lane-2 mt-2 inline-block rounded-pill px-2.5 py-1 text-small font-semibold">Canon</span>}
             {paper.note && <p className="mt-2 text-body text-ink2">{paper.note}</p>}
             {paper.summary && <p className="doc-text mt-2 text-body text-ink2">{paper.summary}</p>}
             <div className="mt-4 flex items-center gap-2">

@@ -31,7 +31,8 @@
   estHours: 40
   subject: python
   summary: "The 'small CLI tools' half of the first phase: every chapter ends in a script worth keeping."
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: fcc-scientific-computing-python
   title: "freeCodeCamp: Scientific Computing with Python (certification course)"
@@ -75,7 +76,8 @@
   estHours: 40
   subject: c-cpp
   summary: "A friendly, humorous C tutorial and library reference that covers pointers and memory without the dread."
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: kr-c
   title: "The C Programming Language, 2nd edition (Kernighan and Ritchie)"
@@ -92,7 +94,8 @@
   subject: c-cpp
   summary: "Do the exercises: they are the point of the book."
   note: "Paid"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: modern-c
   title: "Modern C (Jens Gustedt)"
@@ -109,6 +112,7 @@
   summary: "Up-to-date C23 book covering the language precisely, from basics to threads and atomics."
   doFirst: "K&R"
   priority: 2
+  quality: 4
 
 - id: learncpp
   title: "learncpp.com"
@@ -124,7 +128,8 @@
   subject: c-cpp
   alternatives: [tour-of-cpp]
   summary: "A thorough, up-to-date free course that takes you from zero to modern C++ with clear explanations."
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: tour-of-cpp
   title: "A Tour of C++, 3rd edition (Bjarne Stroustrup)"
@@ -144,6 +149,7 @@
   summary: "A compact overview of C++20 from its creator, including modules, concepts and coroutines, the quickest way to see what modern C++ looks like."
   note: "Paid"
   priority: 2
+  quality: 4
 
 - id: effective-modern-cpp
   title: "Effective Modern C++ (Scott Meyers)"
@@ -161,7 +167,8 @@
   subject: c-cpp
   summary: "Clears up move semantics, perfect forwarding, smart pointers, lambdas and auto, the features that trip up nearly everyone writing modern C++."
   note: "Paid"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: cppcon-back-to-basics
   title: "CppCon: Back to Basics talks"
@@ -177,7 +184,8 @@
   prerequisites: [learncpp]
   subject: c-cpp
   summary: "The channel's playlists page; pick the 'Back to Basics' playlist of the latest year."
-  priority: 2
+  priority: 3
+  quality: 2
 
 - id: cpp-core-guidelines
   title: "C++ Core Guidelines"
@@ -196,7 +204,8 @@
   summary: "Authoritative rules for writing safe, modern C++ with RAII, ownership and resource management."
   fromYear: 2
   doFirst: "learncpp.com"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: rust-book
   title: "The Rust Programming Language ('the book')"
@@ -212,7 +221,8 @@
   estHours: 60
   subject: rust-go
   summary: "The official introduction to Rust, covering ownership, borrowing, traits and error handling step by step."
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: rustlings
   title: "Rustlings"
@@ -228,6 +238,7 @@
   subject: rust-go
   summary: "Small exercises to do chapter by chapter alongside the book."
   priority: 2
+  quality: 4
 
 - id: rust-by-example
   title: "Rust by Example"
@@ -243,6 +254,7 @@
   subject: rust-go
   summary: "Runnable examples for every Rust feature, a fast companion and reference to the Rust Book."
   priority: 2
+  quality: 4
 
 - id: rust-for-rustaceans
   title: "Rust for Rustaceans (Jon Gjengset)"
@@ -260,7 +272,8 @@
   subject: rust-go
   summary: "The step after the Rust Book: memory layout, trait design, unsafe, async internals and API design for crates other people will use."
   note: "Paid"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: crust-of-rust
   title: "Jon Gjengset: Crust of Rust"
@@ -276,7 +289,8 @@
   prerequisites: [rust-book]
   subject: rust-go
   summary: "Live-coded deep dives into lifetimes, iterators, smart pointers, channels and atomics in real Rust."
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: zero2prod
   title: "Zero To Production in Rust (Luca Palmieri)"
@@ -297,6 +311,7 @@
   fromYear: 2
   note: "Paid"
   priority: 2
+  quality: 4
 
 - id: tour-of-go
   title: "A Tour of Go"
@@ -312,6 +327,7 @@
   subject: rust-go
   summary: "Placed first in year 3 because the MIT 6.5840 labs are written in Go."
   priority: 2
+  quality: 4
 
 - id: learn-go-with-tests
   title: "Learn Go with Tests (Chris James)"
@@ -329,6 +345,7 @@
   subject: rust-go
   summary: "Teaches Go and TDD together, chapter by chapter, through small test-first programs."
   priority: 2
+  quality: 4
 
 - id: sqlbolt
   title: "SQLBolt: interactive SQL lessons"
@@ -367,6 +384,7 @@
   after: [pmpp-book]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 
 - id: triton-tutorials
   title: "Triton: official tutorials (GPU kernels in Python)"
@@ -386,3 +404,4 @@
   after: [triton-puzzles]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5

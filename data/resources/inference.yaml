@@ -25,6 +25,7 @@
   after: [llm-inference-handbook]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 - id: sglang-docs
   title: SGLang documentation
   provider: SGLang project
@@ -48,6 +49,7 @@
   after: [sglang-radixattention]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 4
 - id: tensorrt-llm-docs
   title: TensorRT-LLM documentation
   provider: NVIDIA
@@ -71,6 +73,7 @@
   after: [vllm-docs]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 4
 - id: llama-cpp
   title: llama.cpp
   provider: ggml.org
@@ -93,6 +96,7 @@
   after: [visual-guide-quantization]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 - id: onnx-runtime-docs
   title: ONNX Runtime documentation
   provider: Microsoft
@@ -133,6 +137,7 @@
   after: [mooncake]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 4
 - id: nvidia-modelopt
   title: NVIDIA Model Optimizer (ModelOpt)
   provider: NVIDIA
@@ -212,6 +217,7 @@
   after: [scaling-book]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 - id: cmu-10-414
   title: Deep Learning Systems (CMU 10-414/714)
   provider: Carnegie Mellon University
@@ -234,6 +240,7 @@
   after: [minitorch]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 - id: nvidia-dli-cuda
   title: Fundamentals of Accelerated Computing with CUDA C/C++
   provider: NVIDIA Deep Learning Institute
@@ -272,6 +279,7 @@
   after: [gpu-puzzles]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 - id: horace-he-brrr
   title: Making Deep Learning Go Brrrr From First Principles
   provider: Horace He
@@ -295,6 +303,7 @@
   tags: [inference]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 - id: hazy-gpus-go-brrr
   title: GPUs Go Brrr
   provider: Hazy Research (Stanford)
@@ -316,6 +325,7 @@
   after: [horace-he-brrr]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 - id: scaling-book
   title: How to Scale Your Model (the Scaling Book)
   provider: Google DeepMind
@@ -341,6 +351,7 @@
   after: [cmu-10-414]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 - id: databricks-inference-best-practices
   title: "LLM Inference Performance Engineering: Best Practices"
   provider: Databricks
@@ -362,6 +373,7 @@
   doFirst: "Transformer Inference Arithmetic"
   priority: 1
   roadmap: "inference-engineering"
+  quality: 4
 - id: nvidia-inference-optimization
   title: "Mastering LLM Techniques: Inference Optimization"
   provider: NVIDIA Technical Blog
@@ -381,8 +393,9 @@
   fromYear: 2
   tags: [inference]
   after: [docs-nvidia-gpu-performance-background]
-  priority: 1
+  priority: 3
   roadmap: "inference-engineering"
+  quality: 3
 - id: kipply-inference-arithmetic
   title: Transformer Inference Arithmetic
   provider: kipply
@@ -406,6 +419,7 @@
   after: [horace-he-brrr]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5
 - id: batching-effects-gpt
   title: Dissecting Batching Effects in GPT Inference
   provider: Lequn Chen
@@ -442,3 +456,4 @@
   after: [annotated-transformer]
   priority: 1
   roadmap: "inference-engineering"
+  quality: 5

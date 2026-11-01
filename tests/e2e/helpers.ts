@@ -135,12 +135,20 @@ export async function pickStatus(page: Page, pill: Locator, status: string): Pro
   await writesSettled(page);
 }
 
-/** A path's optional list shows forty at a time (ATLAS-LIBRARY): "Show 40 more" until the row is there. */
+/**
+ * A path's optional list shows forty at a time (ATLAS-LIBRARY): "Show 40 more" until the row is there; a row the
+ * quality pass graded 3 or lower (ATLAS-QUALITY-AUDIT) waits under "More resources", which opens when the rest is shown.
+ */
 export async function showMoreUntil(page: Page, row: Locator): Promise<void> {
-  for (let i = 0; i < 60 && !(await row.isVisible()); i++) {
-    const more = page.getByRole('button', { name: /^Show \d+ more/ });
-    if (!(await more.isVisible())) break;
-    await more.click();
+  for (let i = 0; i < 80 && !(await row.isVisible()); i++) {
+    const more = page.getByRole('button', { name: /^Show \d+ more/ }).first();
+    if (await more.isVisible()) {
+      await more.click();
+      continue;
+    }
+    const folded = page.getByRole('button', { name: /^More resources [\d,]+$/ });
+    if ((await folded.isVisible()) && (await folded.getAttribute('aria-expanded')) === 'false') await folded.click();
+    else break;
   }
   await expect(row).toBeVisible();
 }

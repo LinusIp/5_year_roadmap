@@ -120,6 +120,7 @@
   summary: "The official walkthrough of images, containers, Dockerfiles and Compose, which is the base for packaging any model server."
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: kubernetes-tutorials
   title: "Kubernetes: official tutorials"
@@ -151,8 +152,9 @@
   prerequisites: [kubernetes-tutorials]
   subject: containers-iac
   summary: "Bootstrapping every cluster component by hand shows you what managed Kubernetes hides: certs, etcd, kubelet, networking."
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: aws-skill-builder
   title: "AWS Skill Builder (free digital training; the prep for the AWS certifications)"
@@ -191,6 +193,7 @@
   fromYear: 2
   priority: 2
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: lfs101-intro-linux
   title: "Introduction to Linux (LFS101), Linux Foundation"
@@ -225,6 +228,7 @@
   summary: "Continuous integration and delivery: build, test and deploy on every push, as this app's own repository does."
   priority: 2
   roadmap: "ai-engineer"
+  quality: 4
 
 - id: terraform-tutorials
   title: "Terraform: official tutorials"
@@ -242,6 +246,7 @@
   summary: "Infrastructure as code: the Get Started collections (AWS, Docker and others), then the configuration language, modules and state. Leads to the Terraform Associate exam."
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: opentelemetry-docs
   title: "OpenTelemetry: official documentation"
@@ -260,6 +265,7 @@
   after: [prometheus-docs]
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: prometheus-docs
   title: "Prometheus: official documentation and getting-started guide"
@@ -277,3 +283,4 @@
   summary: "Metrics and alerting for the services you run: the monitoring half of observability."
   priority: 2
   roadmap: "software-architect"
+  quality: 4
