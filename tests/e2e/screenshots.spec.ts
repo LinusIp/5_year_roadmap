@@ -227,6 +227,23 @@ for (const theme of ['light', 'dark'] as const) {
 }
 
 for (const theme of ['light', 'dark'] as const) {
+  test('the star rating on a phone (ATLAS-STAR-RATING): the Courses shelf with its filter bar, and a canon course\'s sheet, match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await importDemo(page, theme);
+    await open(page, './#/library?type=course');
+    await expect(page.getByRole('radiogroup', { name: 'Minimum rating' })).toBeVisible();
+    await expect(page.locator('main ul.rows [data-type-tile]').first()).toBeVisible();
+    await expect(page).toHaveScreenshot('library-rating-shelf-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+    await open(page, './#/library/stanford-cs229');
+    await expect(page.getByRole('dialog').getByRole('img', { name: 'Quality 5 of 5: Canon' })).toBeVisible();
+    // The tooltip opens on hover: keep the pointer off the stars.
+    await page.mouse.move(0, 0);
+    await expect(page.getByRole('tooltip')).toHaveCount(0);
+    await expect(page).toHaveScreenshot('library-rating-sheet-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+  });
+}
+
+for (const theme of ['light', 'dark'] as const) {
   test('the Research view on a phone, by area, papers first, matches the committed screenshot, ' + theme + ' theme', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await importDemo(page, theme);

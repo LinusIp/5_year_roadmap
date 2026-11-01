@@ -2790,6 +2790,46 @@ row graded); the count floors of `agents`, `build-ship`, `craft`, `essentials`, 
 `quick-filters` and `security`; `tests/e2e/atlas-library.spec.ts`, `polish.spec.ts` and `resources-add.spec.ts`
 (rows still there). Screenshots redrawn on CI.
 
+## Quality as a star rating (pull request #52)
+
+**One component, three sizes, no new data.** The stars are `quality` drawn, never a field of their own:
+`src/ui/StarRating.tsx` renders five inline SVG stars (filled up to the grade in `--star`, the rest in `--star-empty`,
+the ink at a quarter) at `xs` (8 px cells, five of them exactly the 40 px of a type tile), `sm` (12 px) or `md`
+(16 px), as `role="img"` with "Quality 4 of 5: Strong", and nothing when a row has no grade (89 curated rows: they show
+no stars, and the sort still counts them as 4). A hover, or a touch held for about half a second, opens a tooltip with
+the label and its line from the scale. No half stars, and no personal rating: if one comes, it must look different.
+
+**The stack under the tile is described, not named.** The prompt asks for the tile and its stars to be one accessible
+element labelled "Article, quality 5 of 5: Canon". Inside a row's button that label would join the button's name, ahead
+of the title, and every check that finds a row by its title (there are dozens) would stop finding it; a screen reader
+would also hear the type before the title on every row. The stack is hidden from assistive tech instead, and the row
+carries the same words as its description (`aria-describedby`): read after the title, and the name stays the title,
+meta and trailing text. Where the stars are not inside a row's button (a sheet, Today's Now card, a Plan lane's meta)
+they are the image itself.
+
+**Colours that hold on every card.** `--star` is amber 700 (`#B45309`) in the light theme and a warm gold (`#F2B23C`) in
+the dark: 3.8:1 or more against the light theme's background, raised surface and both tile tints, 5:1 or more against
+the dark theme's (`tests/unit/star-rating.test.ts` computes it from `src/index.css`). The stars under a tile sit on the
+card, not on the tile, so the tile tints were checked as the nearest surface. A scene may set its own `--star`.
+
+**Minimum rating replaces Canon only.** A segmented control (All, ★3+, ★4+, ★5) beside Level and Roadmap, each segment
+with its count over the list as every other filter leaves it, live. A row without a grade counts as 4: it passes ★4+
+and below, never ★5. ★5 is the old toggle, and an address saved with `canon=1` opens as `rating=5`. The Library had no
+sort menu; Sort is now a picker beside Roadmap with the plan order (the default: priority, then quality, then year and
+level) and Rating (high → low), which puts the grade first and the plan order after it.
+
+**The CUB link is a false positive.** The checker's 404 for `https://nvidia.github.io/cccl/cub/index.html` is the
+script's: the page is live and its own canonical link points there. The address joins the checker's list of pages
+opened by hand, and the row is marked `linkCheck: manual-ok`; the URL is unchanged.
+
+Tests: `tests/unit/star-rating.test.ts` (filled stars for 1 to 5 and none without a grade, the labels, the
+minimum-rating logic with ungraded rows, the `canon=1` migration, the rating sort, the token contrast);
+`tests/unit/link-policy.test.ts` (six listed addresses); `tests/e2e/star-rating.spec.ts` (stars on rows and search
+results with the row's description, the sheet with its words, its link and the tooltip on hover and long press, ★4+
+hiding the 3-star rows with live counts, the rating sort, the old link, Today, and 360 px with 44 px targets);
+`tests/e2e/atlas-library.spec.ts` and `helpers.ts` (★5 instead of Canon only, the folded heading's new name); two new
+screenshots at 390 px, light and dark (the Courses shelf with the filter bar, a canon course's sheet).
+
 ## The docked player's check waits for Today to settle (pull request #45)
 
 The CI run on main after pull request #44 failed one e2e test, twice in a row: the Focus session that keeps playing,

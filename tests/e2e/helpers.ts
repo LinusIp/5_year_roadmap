@@ -146,7 +146,7 @@ export async function showMoreUntil(page: Page, row: Locator): Promise<void> {
       await more.click();
       continue;
     }
-    const folded = page.getByRole('button', { name: /^More resources [\d,]+$/ });
+    const folded = page.getByRole('button', { name: /^More resources 3 stars and below [\d,]+$/ });
     if ((await folded.isVisible()) && (await folded.getAttribute('aria-expanded')) === 'false') await folded.click();
     else break;
   }

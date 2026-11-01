@@ -273,11 +273,17 @@ The Library opens on what matters now, not on all of it:
   Practice (exercises, puzzles and problem sets) and Projects, with their real counts. A shelf is the full list
   (windowed, so a few hundred rows stay quick on a phone) with search and the Active, Not started, Done and Track
   filters, and it is where you add a resource of your own. Every shelf but Projects, and search, also filter by Level
-  (Beginner, Intermediate, Advanced) and by roadmap.sh Roadmap, with a **Canon only** toggle, and every list reads in
+  (Beginner, Intermediate, Advanced), by roadmap.sh Roadmap and by Minimum rating, and every list reads in
   the plan's order: priority for years 1 to 3 (1 inference and the AI feeding it, 2 architecture, systems, languages and
   DevOps, 3 graphics, simulation and robotics, 4 game development), then quality (the quality pass's 1 to 5 grade, canon
-  first, an ungraded row as 4), then the year it fits, then level. A row graded 5 wears a **Canon** badge; in a path's
-  optional list and in the Research view the rows graded 3 or lower wait, folded, under **More resources**. A resource's sheet says how it fits
+  first, an ungraded row as 4), then the year it fits, then level. Every graded resource shows its grade as one to five
+  **stars** (filled in amber, outlined after): five tiny ones under the type tile of a row (the Library, search, paths,
+  Research, This week's picks, In progress), small ones at the end of the meta line where a row has no tile (Today's Now
+  card, Plan's lanes, Calendar's blocks), and on its sheet with the word (Canon, Strong, Useful, Limited, Minimal) and a
+  link to **How quality is rated** in Settings. A hover or a long press on the stars says what the grade means. A
+  **Minimum rating** control (All, ★3+, ★4+, ★5, each with its live count) narrows any list, and **Sort** offers Rating
+  (high → low). A row graded 5 also wears a **Canon** badge; in a path's optional list and in the Research view the rows
+  graded 3 or lower wait, folded, under **More resources ★★★ and below**. A resource's sheet says how it fits
   the plan and has **Write log entry**, which opens the day's blog post with the outline started on that resource.
 
 Searching shows the matches grouped by shelf, three of each, with "Show all" to open that shelf on the same search.

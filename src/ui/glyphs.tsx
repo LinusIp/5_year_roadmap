@@ -1,3 +1,4 @@
+import { StarRating } from './StarRating.tsx';
 import type { Difficulty } from '../seed/catalogue.ts';
 import { blockTone } from './colors.ts';
 import { laneSlot } from '../lib/scenes.ts';
@@ -34,6 +35,21 @@ export function IconTile({ icon, tone = 'blue', size = 40, lane }: { icon: IconN
   return (
     <span aria-hidden="true" className={'grid shrink-0 place-items-center ' + (neutral ? 'pill-neutral' : 'lane-tile lane-' + slot)} style={{ width: size, height: size, borderRadius: size >= 36 ? 14 : Math.round(size * 0.35) }}>
       <Icon name={icon} size={size < 36 ? 16 : size >= 44 ? 20 : 18} />
+    </span>
+  );
+}
+
+/**
+ * A resource's type tile with its curated rating under it (ATLAS-STAR-RATING): five tiny stars as wide as the tile,
+ * one stack, hidden from assistive tech (the row describes it instead: "Article, quality 5 of 5: Canon"). Without a
+ * grade, the tile alone.
+ */
+export function TypeTile({ icon, tone = 'blue', lane, quality }: { icon: IconName; tone?: 'blue' | 'ice' | 'neutral'; lane?: number; quality?: number | undefined }) {
+  if (quality === undefined) return <IconTile icon={icon} tone={tone} lane={lane} />;
+  return (
+    <span aria-hidden="true" className="flex shrink-0 flex-col items-center gap-[2px]" data-type-tile>
+      <IconTile icon={icon} tone={tone} lane={lane} />
+      <StarRating value={quality} size="xs" hidden />
     </span>
   );
 }

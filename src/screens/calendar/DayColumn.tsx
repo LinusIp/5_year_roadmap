@@ -1,3 +1,4 @@
+import { StarRating } from '../../ui/StarRating.tsx';
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import type { BusyEvent } from '../../db/types.ts';
@@ -20,6 +21,8 @@ const SHORT: Record<string, string> = { C: 'ML', A: 'GD', H: 'HF', B: 'Code', E:
 export interface ColumnBlock extends PlacedBlock {
   name: string;
   item?: string;
+  /** The item's curated rating (ATLAS-STAR-RATING), when it is a graded resource. */
+  itemQuality?: number;
   logged: number;
   /** The block's lane (ATLAS-DAILY-SCENES), for its colours. */
   lane?: number;
@@ -227,10 +230,15 @@ export function DayColumn({
                 )}
                 <span className={compact ? 'sr-only' : 'truncate'}>
                   {b.name}
-                  <span className="sr-only">{', ' + hm(start) + ' to ' + hm(start + minutes) + (b.item ? ', ' + b.item : '') + (b.logged > 0 ? ', ' + span(b.logged) + ' logged' : '') + '. '}</span>
+                  <span className="sr-only">{', ' + hm(start) + ' to ' + hm(start + minutes) + (b.item ? ', ' + b.item + (b.itemQuality ? ', quality ' + b.itemQuality + ' of 5' : '') : '') + (b.logged > 0 ? ', ' + span(b.logged) + ' logged' : '') + '. '}</span>
                 </span>
               </span>
-              {!compact && minutes >= 45 && <span className="relative truncate text-small font-medium">{sub}</span>}
+              {!compact && minutes >= 45 && (
+                <span className="relative flex min-w-0 items-center gap-1.5 text-small font-medium">
+                  <span className="truncate">{sub}</span>
+                  {b.itemQuality !== undefined && <StarRating value={b.itemQuality} size="sm" hidden />}
+                </span>
+              )}
               {/* A block partly done: a strip along the bottom, its share of the hours. */}
               {!compact && state === 'partly' && filled > 0 && <span aria-hidden="true" className="lane-fill absolute bottom-0 left-0 h-1.5 rounded-tr-[6px]" style={{ width: filled * 100 + '%' }} />}
             </button>

@@ -21,7 +21,8 @@ export function columnFor(date: string, atlas: Atlas, ctx: ScheduleContext, week
     const block = plan.blocks.find((b) => b.id === placed.id);
     const item = itemOf(block);
     const name = blockShort(block?.def.name ?? atlas.settings.core.blocks.find((b) => b.id === placed.id)?.name ?? placed.id);
-    return { ...placed, name, logged: logged[placed.id] ?? 0, ...(item ? { item: nameOf(item) } : {}) };
+    const quality = item?.kind === 'resource' ? atlas.seed.resources.find((r) => r.id === item.refId)?.quality : undefined;
+    return { ...placed, name, logged: logged[placed.id] ?? 0, ...(item ? { item: nameOf(item) } : {}), ...(quality !== undefined ? { itemQuality: quality } : {}) };
   });
 }
 

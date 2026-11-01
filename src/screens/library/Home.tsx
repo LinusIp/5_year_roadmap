@@ -3,7 +3,7 @@ import { setItemStatus } from '../../db/state.ts';
 import type { Atlas } from '../../hooks/useAtlas.ts';
 import { monthName } from '../../lib/dates.ts';
 import { checklistCounts, checklistMeta, isChecklist } from '../../lib/checklist.ts';
-import { buildPaths, inProgress, pathDots, pathExtras, PATHS, researchAreas, SHELVES, startsMuchLater, upNext } from '../../lib/library-home.ts';
+import { buildPaths, inProgress, pathDots, pathExtras, PATHS, researchAreas, shelfOf, SHELVES, startsMuchLater, upNext } from '../../lib/library-home.ts';
 import { laneSlot } from '../../lib/scenes.ts';
 import { Button } from '../../ui/Button.tsx';
 import type { LibraryPath, ShelfKey } from '../../lib/library-home.ts';
@@ -11,12 +11,16 @@ import { minutesForRef } from '../../lib/logs.ts';
 import type { Unit } from '../../seed/schema.ts';
 import { Icon } from '../../ui/Icon.tsx';
 import type { IconName } from '../../ui/Icon.tsx';
-import { IconTile } from '../../ui/glyphs.tsx';
+import { IconTile, TypeTile } from '../../ui/glyphs.tsx';
+import { tileDescription } from '../../ui/StarRating.tsx';
 import { ProgressLine } from '../../ui/ProgressLine.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { ScenePanel } from '../../ui/ScenePanel.tsx';
 import { Sheet } from '../../ui/Sheet.tsx';
 import { count, plural } from '../parts/text.ts';
+
+/** A shelf's name for one item, for a tile's description: "Book", "Practice". */
+const SHELF_NAME: Readonly<Record<string, string>> = Object.fromEntries(SHELVES.map((s) => [s.key, s.key === 'practice' ? 'Practice' : s.label.replace(/s$/, '')]));
 
 /** Each path's icon and tone, the same glyphs Today gives the blocks that teach them. */
 export const PATH_ICON: Record<string, { icon: IconName; tone: 'blue' | 'ice' }> = {
@@ -173,8 +177,11 @@ export function LibraryHome({
               const title = r.short ?? r.title;
               return (
                 <li key={r.id} className="tile relative flex min-h-[156px] flex-col gap-2 p-3.5">
+                  <span id={'rating-' + r.id} hidden>
+                    {tileDescription(SHELF_NAME[shelfOf(r)] ?? 'Resource', r.quality)}
+                  </span>
                   <span className="flex items-start justify-between">
-                    <IconTile icon={icon} lane={lane} />
+                    <TypeTile icon={icon} lane={lane} quality={r.quality} />
                     <button type="button" aria-label={'More for ' + title} aria-haspopup="dialog" onClick={() => setMenu(r.id)} className="relative z-10 -mr-2 -mt-2 grid size-11 place-items-center rounded-pill text-ink2">
                       <Icon name="more" size={20} />
                     </button>
@@ -183,6 +190,7 @@ export function LibraryHome({
                   <button
                     type="button"
                     onClick={() => onOpen(r.id)}
+                    aria-describedby={'rating-' + r.id}
                     onContextMenu={(e) => {
                       e.preventDefault();
                       setMenu(r.id);
@@ -225,8 +233,11 @@ export function LibraryHome({
             const lane = laneOfPath(u.path.id, i);
             return (
               <li key={u.step.refId} className="flex min-h-[60px] items-center gap-3 border-t-[1.5px] border-dashed border-[var(--sd)] py-2 first:border-t-0">
-                <IconTile icon="star" lane={lane} />
-                <button type="button" onClick={() => onOpen(u.step.refId)} className="flex min-h-11 min-w-0 flex-1 flex-col justify-center gap-0.5 text-left">
+                <span id={'pick-rating-' + u.step.refId} hidden>
+                  {tileDescription(type, u.step.fit.quality)}
+                </span>
+                <TypeTile icon="star" lane={lane} quality={u.step.fit.quality} />
+                <button type="button" onClick={() => onOpen(u.step.refId)} aria-describedby={'pick-rating-' + u.step.refId} className="flex min-h-11 min-w-0 flex-1 flex-col justify-center gap-0.5 text-left">
                   <span className="truncate text-chip font-medium leading-tight">{u.step.title}</span>
                   <span className="truncate text-label text-ink2">{u.path.name + ' · ' + type + (u.after ? ' · after ' + u.after : ' · ' + Math.round(u.step.hours) + ' h')}</span>
                 </button>

@@ -17,7 +17,11 @@ import type { Unit } from '../seed/schema.ts';
 import { Chips } from '../ui/Chips.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
-import { DifficultyDots, IconTile, KindIcon, StatusIcon } from '../ui/glyphs.tsx';
+import { DifficultyDots, KindIcon, StatusIcon, TypeTile } from '../ui/glyphs.tsx';
+import { tileDescription } from '../ui/StarRating.tsx';
+import { SegmentedControl } from '../ui/SegmentedControl.tsx';
+import { byRating, passesRating, ratingFrom } from '../lib/rating.ts';
+import type { MinRating } from '../lib/rating.ts';
 import { buildPaths, byFit, fitOf, inProgress, isCanon, PATH_ALIASES, priorityOf, shelfCounts, groupResults, shelfOf, upNext } from '../lib/library-home.ts';
 import { isCertificate, QUICK_FILTERS, quickFilterOf, quickPicks } from '../lib/quick-filters.ts';
 import type { QuickInput } from '../lib/quick-filters.ts';
@@ -77,9 +81,14 @@ interface Entry {
   certificate: boolean;
   /** Graded 5 by the quality pass (ATLAS-QUALITY-AUDIT): a Canon badge, and in the "Canon only" list. */
   canon: boolean;
+  /** The curated rating (ATLAS-STAR-RATING), 1 to 5; none when the row has no grade. */
+  quality?: number | undefined;
 }
 
 /** The order of every list but Projects' (ATLAS-LIBRARY): what is in progress, then by fit, done and dropped last. */
+/** A row's type in one word, for its tile's description (ATLAS-STAR-RATING). */
+const TYPE_NAME: Readonly<Record<string, string>> = { course: 'Course', book: 'Book', paper: 'Paper', article: 'Article', blog: 'Blog', tool: 'Tool', practice: 'Practice' };
+
 const STATUS_RANK: Record<ItemStatus, number> = { active: 0, todo: 1, done: 2, dropped: 3 };
 function byPlanFit(a: Entry, b: Entry): number {
   return STATUS_RANK[a.status] - STATUS_RANK[b.status] || byFit(a.fit, b.fit) || a.title.localeCompare(b.title);
@@ -158,6 +167,7 @@ function buildEntries(
       paid: r.cost === 'paid',
       certificate: isCertificate(r.id),
       canon: isCanon(r.quality),
+      quality: r.quality,
     };
   });
   const papers: Entry[] = seed.papers.map((p) => {
@@ -183,6 +193,7 @@ function buildEntries(
       paid: false,
       certificate: false,
       canon: isCanon(p.quality),
+      quality: p.quality,
     };
   });
   // Projects follow everything else in the default order ("5…"), so the list opens as it always has; the Projects
@@ -344,9 +355,20 @@ export function Library({ openId }: { openId?: string }) {
   // The Books shelf's Free / Paid chip (the books round); nothing pressed is All.
   const [cost, setCost] = useQueryParam('cost');
   const paidOnly = cost === 'paid' ? true : cost === 'free' ? false : null;
-  // The quality pass (ATLAS-QUALITY-AUDIT): "Canon only" narrows any list to the rows graded 5.
+  // The star rating (ATLAS-STAR-RATING): a minimum rating narrows any list (All, ★3+, ★4+, ★5); "Canon only" (canon=1)
+  // was ★5 and an old address becomes it. Sort: the plan's order, or the rating first.
   const [canon, setCanon] = useQueryParam('canon');
-  const canonOnly = canon === '1';
+  const [ratingParam, setRating] = useQueryParam('rating');
+  const minRating = ratingFrom(ratingParam, canon);
+  useEffect(() => {
+    if (canon === '1') {
+      setCanon(null);
+      if (!ratingParam) setRating('5');
+    }
+  }, [canon, ratingParam, setCanon, setRating]);
+  const [sortParam, setSort] = useQueryParam('sort');
+  const sortByRating = sortParam === 'rating';
+  const [pickingSort, setPickingSort] = useState(false);
   // An old link to Electrical and embedded or Mechanical opens Electrical, mechanical & aerospace (ATLAS-LIBRARY).
   const pathId = pathParam ? (PATH_ALIASES[pathParam] ?? pathParam) : pathParam;
   const [draft, setDraft] = useState<string | null>(null);
@@ -413,12 +435,18 @@ export function Library({ openId }: { openId?: string }) {
   };
   const projectFiltersOn = Boolean(kind || difficulty || group || phaseParam || level || hours);
   const matchesProject = (e: Entry): boolean => !projectFiltersOn || (e.project ? matchesFilter(e.project, projectFilter) : false);
-  const filtered = matched.filter(
-    (e) => (!type || e.type === type) && (!pick || e.picks.includes(pick)) && (!pickArea || pickArea.get(e.id)?.includes(area!) === true) && (paidOnly === null || e.paid === paidOnly) && (!canonOnly || e.canon) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
+  const beforeRating = matched.filter(
+    (e) => (!type || e.type === type) && (!pick || e.picks.includes(pick)) && (!pickArea || pickArea.get(e.id)?.includes(area!) === true) && (paidOnly === null || e.paid === paidOnly) && (!track || e.tracks.includes(track)) && (!status || e.status === status) && (!paperLevel || e.level === paperLevel) && (!roadmap || e.roadmap === roadmap) && matchesProject(e),
+  );
+  // Each rating's count, live: what the list would hold at that minimum, with every other filter as it is.
+  const ratingCounts = { all: beforeRating.length, '3': 0, '4': 0, '5': 0 } as Record<'all' | MinRating, number>;
+  for (const e of beforeRating) for (const min of ['3', '4', '5'] as const) if (passesRating(e.quality, min)) ratingCounts[min] += 1;
+  const filtered = beforeRating.filter(
+    (e) => passesRating(e.quality, minRating),
   );
   // Every shelf but Projects reads by fit: in progress first, then priority, year and level (ATLAS-LIBRARY). Projects
   // keep their order: the plan's first, then the catalogue.
-  const results = deferredQuery ? filtered : type === 'project' ? [...filtered].sort((a, b) => a.sortKey.localeCompare(b.sortKey)) : filtered;
+  const results = sortByRating && type !== 'project' ? [...filtered].sort((a, b) => byRating(a.fit, b.fit) || a.title.localeCompare(b.title)) : deferredQuery ? filtered : type === 'project' ? [...filtered].sort((a, b) => a.sortKey.localeCompare(b.sortKey)) : filtered;
   const trackName = seed.tracks.find((t) => t.id === track)?.name;
   const keep = params.toString();
   const open = (entry: Entry): void => {
@@ -429,6 +457,8 @@ export function Library({ openId }: { openId?: string }) {
   const clear = (): void => {
     for (const set of [setQuery, setType, setTrack, setStatus, setKind, setDifficulty, setGroup, setPhase, setLevel, setHours, setPaperLevel, setRoadmap, setPick, setArea]) set(null);
     setCanon(null);
+    setRating(null);
+    setSort(null);
     setDraft(null);
   };
 
@@ -448,9 +478,10 @@ export function Library({ openId }: { openId?: string }) {
         entry.project ? (
           <KindIcon kind={entry.project.kind === 'curriculum' ? (entry.project.group === 'weekly' ? 'build' : 'case') : entry.project.kind} />
         ) : (
-          <IconTile icon={SHELF_ICON[entry.type as ShelfKey] ?? 'course'} tone={entry.kind === 'paper' || entry.type === 'paper' || entry.type === 'blog' || entry.type === 'practice' ? 'ice' : 'blue'} />
+          <TypeTile icon={SHELF_ICON[entry.type as ShelfKey] ?? 'course'} tone={entry.kind === 'paper' || entry.type === 'paper' || entry.type === 'blog' || entry.type === 'practice' ? 'ice' : 'blue'} quality={entry.quality} />
         )
       }
+      describe={entry.project ? undefined : tileDescription(TYPE_NAME[entry.type] ?? 'Resource', entry.quality)}
       title={entry.title}
       meta={
         entry.project?.difficulty ? (
@@ -496,9 +527,23 @@ export function Library({ openId }: { openId?: string }) {
         items={[
           ...LEVEL_CHIPS.map((chip) => ({ key: chip.key, label: chip.label, pressed: paperLevel === chip.key, onClick: () => setPaperLevel(paperLevel === chip.key ? null : chip.key) })),
           { key: 'roadmap', label: roadmapName ?? 'Roadmap', pressed: Boolean(roadmapName), chevron: true, onClick: () => setPickingRoadmap(true) },
-          { key: 'canon', label: 'Canon only', pressed: canonOnly, onClick: () => setCanon(canonOnly ? null : '1') },
+          { key: 'sort', label: sortByRating ? 'Rating, high to low' : 'Sort', pressed: sortByRating, chevron: true, onClick: () => setPickingSort(true) },
         ]}
       />
+      <div className="mt-2">
+        <SegmentedControl
+          label="Minimum rating"
+          lane={2}
+          value={minRating ?? 'all'}
+          onChange={(v) => setRating(v === 'all' ? null : v)}
+          options={[
+            { value: 'all', label: 'All ' + count(ratingCounts.all), name: 'All ratings, ' + count(ratingCounts.all) },
+            { value: '3', label: '★3+ ' + count(ratingCounts['3']), name: '3 stars and up, ' + count(ratingCounts['3']) },
+            { value: '4', label: '★4+ ' + count(ratingCounts['4']), name: '4 stars and up, ' + count(ratingCounts['4']) },
+            { value: '5', label: '★5 ' + count(ratingCounts['5']), name: '5 stars, ' + count(ratingCounts['5']) },
+          ]}
+        />
+      </div>
     </div>
   );
 
@@ -631,6 +676,16 @@ export function Library({ openId }: { openId?: string }) {
         options={seed.roadmaps.map((r) => ({ value: r.id, label: r.title + ' (roadmap.sh)' }))}
         onPick={(v) => setRoadmap(v)}
         onClose={() => setPickingRoadmap(false)}
+      />
+      <PickerSheet
+        open={pickingSort}
+        title="Sort"
+        searchLabel="Search sort orders"
+        value={sortByRating ? 'rating' : null}
+        clearLabel="Plan order: priority, then rating, year and level"
+        options={[{ value: 'rating', label: 'Rating (high → low)' }]}
+        onPick={(v) => setSort(v)}
+        onClose={() => setPickingSort(false)}
       />
       {picking && (
         <PickerSheet

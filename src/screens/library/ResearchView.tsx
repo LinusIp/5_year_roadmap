@@ -4,7 +4,8 @@ import { isCanon, isLesser, researchAreas, SHELVES, shelfOf } from '../../lib/li
 import { Button } from '../../ui/Button.tsx';
 import { count } from '../parts/text.ts';
 import { Header } from '../../ui/Header.tsx';
-import { IconTile } from '../../ui/glyphs.tsx';
+import { TypeTile } from '../../ui/glyphs.tsx';
+import { Stars, tileDescription } from '../../ui/StarRating.tsx';
 import { Row, RowList } from '../../ui/Row.tsx';
 import { SHELF_ICON } from './Home.tsx';
 
@@ -40,7 +41,8 @@ export function ResearchView({ atlas, onOpen, onOpenPaper }: { atlas: Atlas; onO
               return (
                 <Row
                   key={r.id}
-                  icon={<IconTile icon={SHELF_ICON[shelf]} tone={shelf === 'paper' || shelf === 'blog' || shelf === 'practice' ? 'ice' : 'blue'} />}
+                  icon={<TypeTile icon={SHELF_ICON[shelf]} tone={shelf === 'paper' || shelf === 'blog' || shelf === 'practice' ? 'ice' : 'blue'} quality={r.fit.quality} />}
+                  describe={tileDescription(SHELF_LABEL[shelf] ?? 'Resource', r.fit.quality)}
                   title={r.title}
                   meta={[isCanon(r.fit.quality) ? 'Canon' : null, r.fromYear ? 'Year ' + r.fromYear : null, SHELF_LABEL[shelf], r.by].filter(Boolean).join(' · ')}
                   trailing={status === 'active' ? 'Active' : status === 'done' ? 'Done' : undefined}
@@ -51,7 +53,20 @@ export function ResearchView({ atlas, onOpen, onOpenPaper }: { atlas: Atlas; onO
             })}
             {!all && main.length > FIRST && <Row title={'Show all ' + main.length} chevron height={44} onClick={() => setOpen(new Set([...open, area.id]))} />}
             {lesser.length > 0 && !lesserShown && (all || main.length <= FIRST) && (
-              <Row title="More resources" meta={count(lesser.length) + ' graded useful but not essential'} chevron height={44} onClick={() => setLesserOpen(new Set([...lesserOpen, area.id]))} />
+              <Row
+                title="More resources"
+                meta={
+                  <span className="inline-flex items-center gap-1">
+                    {count(lesser.length) + ' · '}
+                    <Stars filled={3} total={3} size="sm" />
+                    <span className="sr-only">3 stars</span>
+                    and below
+                  </span>
+                }
+                chevron
+                height={44}
+                onClick={() => setLesserOpen(new Set([...lesserOpen, area.id]))}
+              />
             )}
           </RowList>
         );

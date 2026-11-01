@@ -69,6 +69,12 @@
   --dak: #111111;
   /* Text on a darkened picture (the Focus cover's badges): light in both themes. */
   --over-image: #FFFFFF;
+  /*
+   * The curated star rating (ATLAS-STAR-RATING): a warm accent for the filled stars, 3:1 or more on every card and tile
+   * tint of the theme (tests/unit/star-tokens.test.ts); the empty ones are the ink at a quarter. A scene may set its own.
+   */
+  --star: #B45309;
+  --star-empty: color-mix(in srgb, var(--ink) 25%, transparent);
   /* The active tab and the pressed chip: a lane tint, or on the dark screen the accent. */
   --tab-on-bg: var(--t0);
   --tab-on-text: var(--x0);
@@ -108,6 +114,8 @@
   --l4: #52638F; --t4: var(--blue-soft); --x4: var(--blue-deep); --d4: var(--deco);
   --paper: var(--bg);
   --sd: var(--lo);
+  --star: #F2B23C;
+  --star-empty: color-mix(in srgb, var(--ink) 25%, transparent);
 }
 
 @theme inline {
