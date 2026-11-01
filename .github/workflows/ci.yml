@@ -92,18 +92,3 @@ jobs:
           git add screenshots
           git commit -q -m "Screenshots: every baseline redrawn on CI's Linux"
           git push
-
-  # One-off for pull request #51: the "four stars and up" file's new rows, checked from the runner (the container cannot
-  # resolve the hosts). Removed before the merge. 403 and 429 are "check by hand", never broken.
-  links-atlas-16:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run check:links -- --in data/resources/library-atlas-16.yaml | grep -v '^ok ' | grep -v '^        '
