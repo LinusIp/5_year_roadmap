@@ -207,7 +207,8 @@
   prerequisites: [mit-18-06, mit-8-01, mit-18-03]
   subject: robotics
   summary: "The free book with its lecture videos and software. The Coursera specialization built on it is the certificate (see Certifications)."
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: mit-6-832-underactuated
   title: "MIT 6.832 Underactuated Robotics (Russ Tedrake): online notes and lectures"
@@ -238,7 +239,8 @@
   subject: robotics
   summary: "Jazzy is a long-term-support release; use whichever LTS is current when you start. The site shows scripts a bot check, so `npm run check:links` reports it as failing; it was verified in a browser."
   after: [roadmap-linux]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: articulated-robotics
   title: "Articulated Robotics: build a mobile robot with ROS 2"
@@ -332,7 +334,6 @@
   estHours: 30
   subject: cad
   summary: "The 'CAD scripting' part of block B in year 5."
-  after: [docs-openscad]
   priority: 2
   quality: 4
 

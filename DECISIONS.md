@@ -2760,6 +2760,35 @@ removed row), `tests/e2e/atlas-library.spec.ts` (Canon only, the Canon badge, Mo
 rows the pass folded or dropped), `tests/e2e/helpers.ts` (`showMoreUntil` opens More resources). Screenshots redrawn on
 CI.
 
+## The Atlas Library's "four stars and up" pass (pull request #51)
+
+**Removed means removed, from every file.** The 7,640-row file keeps only rows rated 4 or 5 or the only coverage of a
+topic; it says to remove the rows absent from it, keep the progress on them and keep any row on the plan. The quality
+pass's removal reached only the Library's import files; this one reaches every data file, since 67 dropped rows sat in
+curated ones. A row the data still names stays, as a plan row does: Kaggle Learn (five projects' references and two
+project docs), build-your-own-x (a project's reference) and two internship steps; removing them would break those
+references or, worse, quietly remove a step. A soft "comes after" is not such a reference: it is dropped with the row,
+in block and flow style alike.
+
+**A title match can be a replacement.** The matcher reads two papers as one when their titles are alike on one shelf.
+Glaser et al.'s 2015 review ("Training Schrödinger's cat: quantum optimal control. Strategic report …") and Koch et al.'s
+2022 report ("Quantum optimal control in quantum technologies. Strategic report …") share a subtitle, and the file
+replaced the second with the first. A merge would have kept the 2022 report's entry under the 2015 review's grade and
+then removed it with the dropped rows; the pair is listed as distinct instead.
+
+**Tests count the library they run on.** Floors written for a 16,000-row library (Agents & MCP above 800, Security &
+defence above 600) say nothing about a 7,650-row one, and e2e checks that searched for a row by name failed when the row
+left. The floors follow the data with a note, and each search names a row the pass kept in the same cluster.
+
+**Links.** The container cannot resolve the hosts, so the pull request's CI ran `npm run check:links -- --in
+data/resources/library-atlas-16.yaml` in a one-off `links-atlas-16` job, removed before the merge: LINKS-RESULT Every
+URL is the file's; none was changed.
+
+Tests: `tests/unit/quality-pass.test.ts` (the kept and referenced rows, the replacements, Glaser apart from Koch, every
+row graded); the count floors of `agents`, `build-ship`, `craft`, `essentials`, `foundations`, `link-policy`,
+`quick-filters` and `security`; `tests/e2e/atlas-library.spec.ts`, `polish.spec.ts` and `resources-add.spec.ts`
+(rows still there). Screenshots redrawn on CI.
+
 ## The docked player's check waits for Today to settle (pull request #45)
 
 The CI run on main after pull request #44 failed one e2e test, twice in a row: the Focus session that keeps playing,

@@ -92,7 +92,7 @@ test('Today\'s numbers agree: blocks under way are counted, the hours sit on the
   expect(await strip.locator('[class*="day-"]').count()).toBe(7);
 
   await open(page, './#/library');
-  await expect(page.getByText(/· 1\d,\d{3} resources/)).toBeVisible();
+  await expect(page.getByText(/· \d{1,2},\d{3} resources/)).toBeVisible();
   await expect(page.getByText(/\d+ h logged · over estimate/)).toBeVisible();
   await expect(page.getByText(/\d+ of \d+ h$/)).toHaveCount(0);
 });

@@ -15,8 +15,9 @@
   subject: simulation
   summary: "Sequential impulses, soft constraints, continuous collision. The theory behind the 2D rigid-body engine of project 15."
   after: [box2d-lite]
-  priority: 4
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: millington-game-physics
   title: "Game Physics Engine Development, 2nd edition (Ian Millington)"
@@ -34,8 +35,9 @@
   summary: "Builds the Cyclone engine from particles to rigid bodies, collision detection and contact resolution, with every step explained."
   note: "Paid"
   after: [box2d-lite]
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: gaffer-on-games
   title: "Gaffer On Games: integration basics, fix your timestep, networked physics"
@@ -70,8 +72,9 @@
   prerequisites: [mit-18-03]
   subject: simulation
   summary: "The classic derivation of particle systems, rigid bodies, constraints, and implicit integration."
-  priority: 4
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: ericson-rtcd
   title: "Real-Time Collision Detection (Christer Ericson)"
@@ -89,8 +92,9 @@
   summary: "Broadphase, GJK, EPA: the theory behind the 3D rigid bodies of project 27."
   note: "Paid"
   after: [book-foundations-game-engine-dev]
-  priority: 4
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: ten-minute-physics
   title: "Ten Minute Physics (Matthias Muller)"
@@ -107,8 +111,9 @@
   subject: simulation
   summary: "Position-based dynamics, XPBD, cloth, soft bodies and fluids in short tutorials with code."
   after: [gaffer-on-games]
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: bridson-fluid-sim
   title: "Fluid Simulation for Computer Graphics, 2nd edition (Robert Bridson)"
@@ -162,7 +167,8 @@
   estHours: 20
   subject: robotics
   summary: "Multi-joint dynamics with contact: the physics engine much of robotics research runs on, and a reference to measure your own engine against."
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: gazebo-docs
   title: "Gazebo: official documentation"

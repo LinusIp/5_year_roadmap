@@ -107,25 +107,26 @@ describe('the six new filters', () => {
     for (const r of seed.resources) for (const key of quickPicks({ id: r.id, title: r.title, summary: r.summary, track: r.tracks[0], tags: r.tags, shelf: shelfOf(r) })) counts.set(key, counts.get(key)! + 1);
     // 53 rows in the file: three are certifications the plan already tracks, one merged into the Library's HF MCP course.
     expect(counts.get('certificates')).toBe(49);
+    // The "four stars and up" pass (7,640 rows) kept a library under half the size: the floors follow it.
     expect(counts.get('career')).toBeGreaterThan(60);
-    expect(counts.get('research')).toBeGreaterThan(100);
+    expect(counts.get('research')).toBeGreaterThan(60);
     expect(counts.get('research')).toBeLessThan(400);
     expect(counts.get('communication')).toBeGreaterThan(80);
     expect(counts.get('communication')).toBeLessThan(400);
     expect(counts.get('opensource')).toBeGreaterThan(25);
     expect(counts.get('mandarin')).toBeGreaterThan(15);
     expect(counts.get('mandarin')).toBeLessThan(40);
-    expect(counts.get('essentials')).toBeGreaterThan(300);
-    expect(counts.get('security')).toBeGreaterThan(600);
-    expect(counts.get('agents')).toBeGreaterThan(800);
+    expect(counts.get('essentials')).toBeGreaterThan(120);
+    expect(counts.get('security')).toBeGreaterThan(150);
+    expect(counts.get('agents')).toBeGreaterThan(200);
     expect(counts.get('buildship')).toBeGreaterThan(120);
     expect(counts.get('buildship')).toBeLessThan(200);
-    expect(counts.get('buildyourself')).toBeGreaterThan(200);
-    expect(counts.get('lowlevel')).toBeGreaterThan(500);
+    expect(counts.get('buildyourself')).toBeGreaterThan(120);
+    expect(counts.get('lowlevel')).toBeGreaterThan(300);
     expect(counts.get('science')).toBeGreaterThan(400);
-    expect(counts.get('gpu')).toBeGreaterThan(500);
-    expect(counts.get('sdk')).toBeGreaterThan(150);
-    expect(counts.get('fusion')).toBeGreaterThan(350);
-    expect(counts.get('aerospace')).toBeGreaterThan(300);
+    expect(counts.get('gpu')).toBeGreaterThan(300);
+    expect(counts.get('sdk')).toBeGreaterThan(60);
+    expect(counts.get('fusion')).toBeGreaterThan(200);
+    expect(counts.get('aerospace')).toBeGreaterThan(180);
   }, 60_000);
 });

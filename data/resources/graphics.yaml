@@ -13,8 +13,9 @@
   estHours: 120
   subject: graphics
   summary: "Started in the last two months of year 1, completed at the start of year 2. Monthly project 10 is its first finished scene. Needs working C++, which block B is teaching at the same time, so it is not listed as a formal prerequisite."
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: rtiow
   title: "Ray Tracing in One Weekend: the book series (Peter Shirley and others)"
@@ -34,8 +35,9 @@
     - { id: the-next-week, title: "Ray Tracing: The Next Week", url: "https://raytracing.github.io/books/RayTracingTheNextWeek.html" }
     - { id: the-rest-of-your-life, title: "Ray Tracing: The Rest of Your Life", url: "https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html" }
   summary: "Three short books that take you from zero to a Monte Carlo path tracer in plain C++."
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: tinyrenderer
   title: "tinyrenderer: a brief computer graphics / rendering course (ssloy)"
@@ -52,8 +54,9 @@
   subject: graphics
   summary: "A software rasterizer from nothing. Monthly project 12 is your own version of it."
   after: [cg-from-scratch]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: scratchapixel
   title: "Scratchapixel"
@@ -72,8 +75,9 @@
   summary: "Long-form lessons deriving rendering math and algorithms in detail, from rays to BRDFs."
   fromYear: 2
   after: [cg-from-scratch]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: cmu-15-462
   title: "CMU 15-462/662 Computer Graphics"
@@ -121,8 +125,9 @@
   short: "Yuksel Intro to Graphics"
   summary: "A complete recorded intro course covering the pipeline, transforms, shading, textures, and animation basics."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: utah-cs6610
   title: "Cem Yuksel: Interactive Computer Graphics (University of Utah CS 5610/6610, lecture videos)"
@@ -139,8 +144,9 @@
   prerequisites: [learnopengl]
   subject: graphics
   summary: "The lecture course behind the OpenGL mini-engine of year 2: shadows, reflections, tessellation, GPU pipelines."
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: vulkan-tutorial
   title: "Vulkan Tutorial (vulkan-tutorial.com)"
@@ -158,8 +164,9 @@
   subject: graphics
   summary: "Begun at the end of year 2 (monthly project 22 is its triangle turned into a model viewer)."
   alternatives: [vkguide]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: vkguide
   title: "Vulkan Guide (vkguide.dev)"
@@ -176,8 +183,9 @@
   subject: graphics
   summary: "Engine-shaped Vulkan, including the compute-shader chapters used for the particle system of project 30."
   alternatives: [vulkan-tutorial]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: khronos-vulkan-samples
   title: "Khronos Vulkan Samples"
@@ -193,8 +201,9 @@
   prerequisites: [vkguide]
   subject: graphics
   summary: "Official, maintained samples covering API features, extensions and performance best practices with explanatory docs per sample."
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: khronos-vulkan-tutorial
   title: "Khronos Vulkan Tutorial (the official one)"
@@ -213,8 +222,9 @@
   short: "Khronos Vulkan Tutorial"
   fromYear: 2
   after: [learnopengl]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: pbr-book
   title: "Physically Based Rendering: From Theory to Implementation (pbr-book.org)"
@@ -233,8 +243,9 @@
   short: "PBRT 4th ed."
   fromYear: 3
   after: [tu-wien-rendering-course]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: rtr4
   title: "Real-Time Rendering, 4th edition (resources page)"
@@ -252,8 +263,9 @@
   summary: "The book's resource page, a standing index of real-time rendering material. The site answers scripts with a bot challenge, so `npm run check:links` reports 403 for it; it was verified in a browser."
   short: "RTR Resources"
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: book-of-shaders
   title: "The Book of Shaders"
@@ -270,8 +282,9 @@
   summary: "GLSL, a chapter at a time. Feeds the shader reel of the graphics portfolio milestone."
   short: "Book of Shaders"
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: iq-articles
   title: "Inigo Quilez: articles"
@@ -291,8 +304,9 @@
   summary: "Dense articles on SDFs, raymarching, noise and procedural modeling from the co-creator of Shadertoy."
   fromYear: 2
   doFirst: "The Book of Shaders"
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: shadertoy
   title: "Shadertoy"
@@ -311,8 +325,9 @@
   short: "Shadertoy"
   fromYear: 1
   doFirst: "The Book of Shaders"
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: game-engine-architecture
   title: "Game Engine Architecture (Jason Gregory)"
@@ -329,8 +344,9 @@
   subject: graphics
   summary: "A Naughty Dog lead's two-volume tour of every engine subsystem, from memory and the game loop to rendering, animation, audio and physics."
   note: "Paid"
-  priority: 4
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: handmade-hero
   title: "Handmade Hero: episode guide (selected episodes)"
@@ -349,8 +365,9 @@
   short: "Handmade Hero"
   fromYear: 3
   after: [game-engine-architecture]
-  priority: 4
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: raylib
   title: "raylib: cheatsheet and examples"

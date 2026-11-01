@@ -11,185 +11,6 @@
 
 # ---- Inference engineering: serving, kernels, GPUs (track ai, tag inference) (123)
 
-- id: "docs-diffusers-accelerate-inference"
-  title: "Accelerate inference (Diffusers docs)"
-  short: "Diffusers: speed up"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/optimization/fp16"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Official checklist of reduced precision, SDPA, torch.compile, fused QKV and dynamic quantization for diffusion pipelines."
-  fromYear: 1
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-hf-diffusers]
-  quality: 3
-
-- id: "docs-diffusers-memory"
-  title: "Reduce memory usage (Diffusers docs)"
-  short: "Diffusers: memory"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/optimization/memory"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Explains CPU/model/group offloading, VAE tiling and layerwise casting so big models fit on small GPUs."
-  fromYear: 1
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-hf-diffusers]
-  quality: 3
-
-- id: "docs-diffusers-distributed-inference"
-  title: "Distributed inference (Diffusers docs)"
-  short: "Diffusers: multi-GPU"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/training/distributed_inference"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Covers data parallel, device_map sharding and Ring/Ulysses context parallel attention for diffusion pipelines."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-hf-diffusers]
-  quality: 3
-
-- id: "docs-trtllm-pytorch-arch-overview"
-  title: "TensorRT-LLM Architecture Overview (PyTorch backend)"
-  short: "TRT-LLM PyTorch arch"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/torch/arch_overview.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Maps how the LLM API, PyExecutor, model engine, scheduler and KV cache manager fit together in the PyTorch-based runtime."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "TRT-LLM docs"
-  quality: 3
-
-- id: "docs-trtllm-kv-cache-manager"
-  title: "TensorRT-LLM KV Cache Manager"
-  short: "TRT-LLM KV cache manager"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/torch/kv_cache_manager.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Explains the C++ block pool behind TensorRT-LLM's paged KV cache and how the Python runtime allocates and frees blocks per request."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "PagedAttention paper"
-  quality: 3
-
-- id: "docs-trtllm-scheduler"
-  title: "TensorRT-LLM Scheduler"
-  short: "TRT-LLM scheduler"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/torch/scheduler.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how capacity and micro-batch scheduling decide which requests enter each in-flight batching iteration."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-trtllm-pytorch-arch-overview]
-  quality: 3
-
-- id: "docs-trtllm-custom-kernels"
-  title: "Integrating Custom Kernels in TensorRT-LLM"
-  short: "TRT-LLM custom kernels"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/torch/adding_custom_kernels.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Walks through registering your own CUDA/Triton kernels as torch custom ops so a production serving runtime can call them."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [tutorial-pytorch-cpp-custom-ops]
-  quality: 3
-
-- id: "docs-trtllm-speculative-decoding"
-  title: "TensorRT-LLM Speculative Decoding"
-  short: "TRT-LLM spec decoding"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/features/speculative-decoding.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Covers how draft-target, EAGLE-3, MTP and n-gram drafting are wired into the runtime and which knobs matter."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "Speculative decoding paper"
-  quality: 3
-
-- id: "docs-trtllm-quantization"
-  title: "TensorRT-LLM Quantization"
-  short: "TRT-LLM quantization"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/features/quantization.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Reference for which FP8, FP4/NVFP4, INT4 AWQ and KV-cache quantization recipes are supported on which GPUs."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  quality: 3
-
 - id: "docs-trtllm-kv-cache-system"
   title: "TensorRT-LLM KV Cache System"
   short: "TRT-LLM KV cache system"
@@ -207,68 +28,7 @@
   priority: 1
   roadmap: "inference-engineering"
   tags: [inference]
-  after: [docs-trtllm-kv-cache-manager]
   quality: 4
-
-- id: "docs-trtllm-torch-compile-cuda-graph"
-  title: "Torch Compile & Prefill CUDA Graph (TensorRT-LLM)"
-  short: "TRT-LLM piecewise graphs"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/features/torch_compile_and_piecewise_cuda_graph.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Shows how a serving stack combines torch.compile with piecewise CUDA graphs to cut CPU launch overhead in prefill and decode."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "CUDA graphs in PyTorch"
-  quality: 3
-
-- id: "docs-trtllm-overlap-scheduler"
-  title: "TensorRT-LLM Overlap Scheduler"
-  short: "TRT-LLM overlap scheduler"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/features/overlap-scheduler.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Short explanation of hiding CPU scheduling work behind the previous GPU step, a key trick for decode throughput."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-trtllm-scheduler]
-  quality: 3
-
-- id: "docs-trtllm-parallelism"
-  title: "Parallelism in TensorRT LLM"
-  short: "TRT-LLM parallelism"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/features/parallel-strategy.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Compares tensor, pipeline, expert and attention data parallelism and when each helps throughput or latency."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "Megatron-LM paper"
-  quality: 3
 
 - id: "docs-trtllm-attention"
   title: "Multi-Head, Multi-Query, and Group-Query Attention (TensorRT-LLM)"
@@ -290,86 +50,6 @@
   doFirst: "FlashAttention paper"
   quality: 4
 
-- id: "docs-trtllm-kv-cache-connector"
-  title: "TensorRT-LLM KV Cache Connector"
-  short: "TRT-LLM KV connector"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/features/kv-cache-connector.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Explains the plug-in interface for moving KV blocks to external stores, the basis for offloading and cross-engine reuse."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-trtllm-kv-cache-system]
-  quality: 3
-
-- id: "docs-trtllm-perf-analysis"
-  title: "TensorRT-LLM Performance Analysis"
-  short: "TRT-LLM perf analysis"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/developer-guide/perf-analysis.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Practical recipe for profiling a serving engine with Nsight Systems and NVTX ranges to find where iterations spend time."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "Nsight Systems"
-  quality: 3
-
-- id: "docs-trtllm-moe-perf-guide"
-  title: "TensorRT-LLM MoE Performance Guide"
-  short: "TRT-LLM MoE perf"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/developer-guide/moe-perf-guide.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Guides tuning MoE backends, expert parallel layout and communication for large mixture-of-experts serving."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [paper-megablocks]
-  quality: 3
-
-- id: "docs-trtllm-autodeploy"
-  title: "AutoDeploy (TensorRT-LLM)"
-  short: "TRT-LLM AutoDeploy"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://nvidia.github.io/TensorRT-LLM/features/auto_deploy/auto-deploy.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Shows a compiler-style path that takes an unmodified Hugging Face PyTorch model, captures it as a graph and rewrites it into an optimized serving model."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "torch.export"
-  quality: 3
-
 - id: "docs-dynamo-architecture"
   title: "NVIDIA Dynamo Architecture"
   short: "Dynamo architecture"
@@ -387,7 +67,6 @@
   priority: 1
   roadmap: "inference-engineering"
   tags: [inference]
-  after: [docs-nvidia-dynamo]
   quality: 4
 
 - id: "docs-triton-server-architecture"
@@ -409,106 +88,6 @@
   tags: [inference]
   doFirst: "Triton Inference Server"
   quality: 4
-
-- id: "docs-triton-server-batchers"
-  title: "Triton Batchers (dynamic and sequence batching)"
-  short: "Triton batchers"
-  provider: "NVIDIA Triton Inference Server team"
-  type: "article"
-  url: "https://github.com/triton-inference-server/server/blob/main/docs/user_guide/batcher.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Covers dynamic batching delays, preferred sizes and sequence batching for stateful models, core serving concepts."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-triton-server-architecture]
-  quality: 3
-
-- id: "docs-triton-server-decoupled"
-  title: "Decoupled Backends and Models (Triton)"
-  short: "Triton decoupled models"
-  provider: "NVIDIA Triton Inference Server team"
-  type: "article"
-  url: "https://github.com/triton-inference-server/server/blob/main/docs/user_guide/decoupled_models.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how a model can stream many responses per request, the mechanism behind token streaming in Triton."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-triton-server-architecture]
-  quality: 3
-
-- id: "docs-triton-server-perf-tuning"
-  title: "Deploying your trained model using Triton (performance tuning)"
-  short: "Triton perf tuning"
-  provider: "NVIDIA Triton Inference Server team"
-  type: "article"
-  url: "https://github.com/triton-inference-server/server/blob/main/docs/user_guide/performance_tuning.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Step-by-step tuning loop with Model Analyzer and Perf Analyzer for instance counts and batching."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-triton-server-batchers]
-  quality: 3
-
-- id: "docs-pytorch-aotinductor"
-  title: "AOTInductor: Ahead-Of-Time Compilation for Torch.Export-ed Models"
-  short: "AOTInductor"
-  provider: "PyTorch"
-  type: "article"
-  url: "https://docs.pytorch.org/docs/main/user_guide/torch_compiler/torch.compiler_aot_inductor.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Shows how to compile an exported model into a self-contained artifact runnable from C++ without Python, the PT2 deployment path."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "torch.export"
-  quality: 3
-
-- id: "docs-pytorch-cudagraph-trees"
-  title: "CUDAGraph Trees"
-  short: "CUDAGraph Trees"
-  provider: "PyTorch"
-  type: "article"
-  url: "https://docs.pytorch.org/docs/main/user_guide/torch_compiler/torch.compiler_cudagraph_trees.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Explains how torch.compile's reduce-overhead mode records and shares memory pools across many CUDA graphs."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "CUDA graphs in PyTorch"
-  quality: 3
 
 - id: "docs-pytorch-dynamic-shapes-concepts"
   title: "Dynamic Shapes Core Concepts (torch.compile)"
@@ -544,31 +123,10 @@
   estHours: 3
   summary: "Official reference for NVIDIA's tile-based Python kernel language, an alternative to Triton for writing GPU kernels."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "inference-engineering"
   tags: [inference]
-  after: [tutorial-triton-server-tutorials]
-  quality: 3
-
-- id: "docs-flashinfer-kv-layout"
-  title: "KV-Cache Layout in FlashInfer"
-  short: "FlashInfer KV layout"
-  provider: "FlashInfer team"
-  type: "article"
-  url: "https://docs.flashinfer.ai/tutorials/kv_layout.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Precise description of ragged and paged KV tensors and index arrays that attention kernels consume in serving engines."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "FlashInfer paper"
-  quality: 3
+  quality: 4
 
 - id: "docs-nsight-compute-profiling-guide"
   title: "Nsight Compute Profiling Guide"
@@ -629,47 +187,6 @@
   tags: [inference]
   after: [docs-llamacpp-contributing]
   quality: 4
-
-- id: "docs-diffusers-lcm-distill"
-  title: "Latent Consistency Distillation (Diffusers docs)"
-  short: "Diffusers: LCD training"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/training/lcm_distill"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "A runnable script for distilling your own few-step LCM, the fastest way to learn distillation by doing."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-latent-consistency-models]
-  quality: 3
-
-- id: "docs-dynamo-router-design"
-  title: "Dynamo KV Router Design"
-  short: "Dynamo router design"
-  provider: "NVIDIA Dynamo team"
-  type: "article"
-  url: "https://github.com/ai-dynamo/dynamo/blob/main/docs/fern/pages/developer-guide/knowledge-base/modular-components/router/router-design.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Internals of KV-aware routing: per-worker block tracking, the overlap-vs-load cost function and KV event handling."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-dynamo-kv-aware-routing]
-  quality: 3
 
 - id: "docs-cutlass-programming-guidelines"
   title: "CUTLASS Programming Guidelines"
@@ -817,25 +334,6 @@
   after: [cert-dli-cuda-cpp]
   quality: 3
 
-- id: "tutorial-triton-server-tutorials"
-  title: "Triton Inference Server Tutorials"
-  short: "Triton tutorials"
-  provider: "NVIDIA Triton Inference Server team"
-  type: "article"
-  url: "https://github.com/triton-inference-server/tutorials"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 6
-  summary: "Hands-on conceptual guide from first deployment through ensembles, batching and LLM serving."
-  fromYear: 1
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  quality: 3
-
 - id: "tutorial-pytorch-cpp-custom-ops"
   title: "Custom C++ and CUDA Operators"
   short: "Custom C++/CUDA ops"
@@ -855,288 +353,6 @@
   tags: [inference]
   doFirst: "Custom C++ and CUDA Extensions"
   quality: 4
-
-- id: "repo-tomesd"
-  title: "tomesd: Token Merging for Stable Diffusion"
-  short: "tomesd"
-  provider: "Daniel Bolya"
-  type: "practice"
-  url: "https://github.com/dbolya/tomesd"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "A tiny, readable patch library you can apply to a pipeline in one line and profile yourself."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [paper-token-merging-sd]
-  quality: 3
-
-- id: "repo-teacache"
-  title: "TeaCache (official code)"
-  short: "TeaCache repo"
-  provider: "Alibaba (ali-vilab)"
-  type: "practice"
-  url: "https://github.com/ali-vilab/TeaCache"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Drop-in timestep-aware caching for FLUX, HunyuanVideo, Wan and others, with ComfyUI nodes, so you can measure speed/quality yourself."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "TeaCache paper"
-  quality: 3
-
-- id: "repo-stable-diffusion-cpp"
-  title: "stable-diffusion.cpp"
-  short: "stable-diffusion.cpp"
-  provider: "leejet"
-  type: "practice"
-  url: "https://github.com/leejet/stable-diffusion.cpp"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "Pure C/C++ ggml inference for SD1.x to FLUX with GGUF quantization; the llama.cpp of image models to read and hack."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [llama-cpp]
-  quality: 3
-
-- id: "repo-paraattention"
-  title: "ParaAttention"
-  short: "ParaAttention"
-  provider: "Cheng Zeyi"
-  type: "practice"
-  url: "https://github.com/chengzeyi/ParaAttention"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "First Block Cache plus context parallelism for FLUX and video DiTs, with clear benchmarks to reproduce."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "torch.compile"
-  quality: 3
-
-- id: "repo-flux-fast"
-  title: "flux-fast"
-  short: "flux-fast"
-  provider: "Hugging Face"
-  type: "practice"
-  url: "https://github.com/huggingface/flux-fast"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "A small recipe repo stacking torch.compile, FA3, fp8 quantization and CUDA graphs to make FLUX ~2.5x faster in pure PyTorch."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "Accelerating GenAI Pt III"
-  quality: 3
-
-- id: "practice-aiperf"
-  title: "AIPerf"
-  short: "AIPerf"
-  provider: "NVIDIA (ai-dynamo)"
-  type: "practice"
-  url: "https://github.com/ai-dynamo/aiperf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Benchmarking tool for generative-AI endpoints that measures TTFT, ITL and throughput the way serving teams report them."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  quality: 3
-
-- id: "practice-triton-backend-api"
-  title: "Triton Inference Server Backend"
-  short: "Triton backend API"
-  provider: "NVIDIA Triton Inference Server team"
-  type: "practice"
-  url: "https://github.com/triton-inference-server/backend"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "C API and examples for writing a custom inference backend, showing exactly how a server hands tensors to your code."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-triton-server-architecture]
-  quality: 3
-
-- id: "practice-triton-python-backend"
-  title: "Triton Python Backend"
-  short: "Triton Python backend"
-  provider: "NVIDIA Triton Inference Server team"
-  type: "practice"
-  url: "https://github.com/triton-inference-server/python_backend"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Lets you serve arbitrary Python models and pre/post-processing; the README explains the IPC and shared-memory design."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-triton-server-architecture]
-  quality: 3
-
-- id: "practice-triton-tensorrtllm-backend"
-  title: "TensorRT-LLM Backend for Triton"
-  short: "Triton TRT-LLM backend"
-  provider: "NVIDIA Triton Inference Server team"
-  type: "practice"
-  url: "https://github.com/triton-inference-server/tensorrtllm_backend"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Shows how an LLM engine with in-flight batching is exposed through Triton's decoupled streaming interface."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-trtllm-pytorch-arch-overview]
-  quality: 3
-
-- id: "practice-tlparse"
-  title: "tlparse: torch.compile structured log parser"
-  short: "tlparse"
-  provider: "PyTorch"
-  type: "practice"
-  url: "https://github.com/pytorch/tlparse"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Turns TORCH_TRACE logs into browsable reports of graph breaks, recompiles and generated code when debugging compilation."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [article-ezyang-ways-to-use-torch-compile]
-  quality: 3
-
-- id: "repo-q-diffusion"
-  title: "Q-Diffusion (official code)"
-  short: "Q-Diffusion repo"
-  provider: "Xiuyu Li"
-  type: "practice"
-  url: "https://github.com/Xiuyu-Li/q-diffusion"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Reference implementation of timestep-aware calibration and shortcut-splitting quantization for U-Nets."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-q-diffusion]
-  quality: 3
-
-- id: "repo-deepcompressor"
-  title: "DeepCompressor: model compression toolbox (SVDQuant)"
-  short: "DeepCompressor"
-  provider: "MIT Han Lab"
-  type: "practice"
-  url: "https://github.com/mit-han-lab/deepcompressor"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 6
-  summary: "The quantization side of SVDQuant/Nunchaku; read it to see how 4-bit diffusion checkpoints are actually produced."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-svdquant]
-  quality: 3
-
-- id: "repo-distrifuser"
-  title: "DistriFuser (DistriFusion code)"
-  short: "DistriFuser repo"
-  provider: "MIT Han Lab"
-  type: "practice"
-  url: "https://github.com/mit-han-lab/distrifuser"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Compact multi-GPU SDXL implementation to study patch parallelism and asynchronous communication."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [paper-distrifusion]
-  quality: 3
-
-- id: "repo-ditfastattn"
-  title: "DiTFastAttn: Attention Compression for Diffusion Transformer Models"
-  short: "DiTFastAttn"
-  provider: "Tsinghua NICS-EFC"
-  type: "practice"
-  url: "https://github.com/thu-nics/DiTFastAttn"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Code for window attention plus step/CFG redundancy sharing in DiT attention, a training-free attention speedup."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-sageattention]
-  quality: 3
 
 - id: "practice-nvidia-nccl"
   title: "NCCL (NVIDIA Collective Communications Library)"
@@ -1158,90 +374,6 @@
   doFirst: "NCCL user guide"
   quality: 5
 
-- id: "paper-lcm-lora"
-  title: "LCM-LoRA: A Universal Stable-Diffusion Acceleration Module"
-  short: "LCM-LoRA"
-  provider: "Luo et al. (Tsinghua / Hugging Face)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2311.05556"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Shows how few-step consistency distillation can be packaged as a plug-in LoRA that speeds up any fine-tuned Stable Diffusion checkpoint."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-latent-consistency-models]
-  quality: 3
-
-- id: "paper-align-your-steps"
-  title: "Align Your Steps: Optimizing Sampling Schedules in Diffusion Models"
-  short: "Align Your Steps"
-  provider: "Sabour, Fidler, Kreis (NVIDIA)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2404.14507"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Treats the timestep schedule itself as something to optimize, giving better few-step samples with any solver for free."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-dpm-solver-pp]
-  quality: 3
-
-- id: "paper-token-merging-sd"
-  title: "Token Merging for Fast Stable Diffusion"
-  short: "ToMe for SD"
-  provider: "Bolya, Hoffman (Georgia Tech)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2303.17604"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "A training-free token-reduction trick for U-Net attention; short paper that teaches where diffusion compute actually goes."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  doFirst: "Stable Diffusion basics"
-  quality: 3
-
-- id: "paper-fora"
-  title: "FORA: Fast-Forward Caching in Diffusion Transformer Acceleration"
-  short: "FORA"
-  provider: "Selvaraju et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2407.01425"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Simple training-free reuse of attention/MLP outputs across DiT steps; a good first caching paper before TeaCache-style methods."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-deepcache]
-  quality: 3
-
 - id: "paper-torchao"
   title: "TorchAO: PyTorch-Native Training-to-Serving Model Optimization"
   short: "TorchAO paper"
@@ -1261,237 +393,6 @@
   research: "inference"
   tags: [inference]
   quality: 4
-
-- id: "paper-instaflow"
-  title: "InstaFlow: One Step is Enough for High-Quality Diffusion-Based Text-to-Image Generation"
-  short: "InstaFlow"
-  provider: "Liu et al. (UT Austin)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2309.06380"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Applies rectified-flow reflow plus distillation to Stable Diffusion, the clearest case study of straightening trajectories for one-step generation."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [rectified-flow]
-  quality: 3
-
-- id: "paper-sdxl-lightning"
-  title: "SDXL-Lightning: Progressive Adversarial Diffusion Distillation"
-  short: "SDXL-Lightning"
-  provider: "Lin, Wang, Yang (ByteDance)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2402.13929"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Combines progressive distillation with an adversarial loss to reach 1-8 step SDXL, and explains why pure MSE distillation blurs."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-progressive-distillation]
-  quality: 3
-
-- id: "paper-ladd"
-  title: "Fast High-Resolution Image Synthesis with Latent Adversarial Diffusion Distillation"
-  short: "LADD"
-  provider: "Sauer et al. (Stability AI)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2403.12015"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "The latent-space successor to ADD used for SD3-Turbo, removing the pixel-space discriminator bottleneck."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  doFirst: "Adversarial Diffusion Distill."
-  quality: 3
-
-- id: "paper-hyper-sd"
-  title: "Hyper-SD: Trajectory Segmented Consistency Model for Efficient Image Synthesis"
-  short: "Hyper-SD"
-  provider: "Ren et al. (ByteDance)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2404.13686"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Segments the ODE trajectory for consistency distillation and adds human feedback, a strong reference for 1-8 step LoRAs."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-lcm-lora]
-  quality: 3
-
-- id: "paper-phased-consistency-model"
-  title: "Phased Consistency Model"
-  short: "Phased Consistency Model"
-  provider: "Wang et al. (CUHK)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2405.18407"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Diagnoses why LCMs degrade with CFG and more steps, and fixes it by splitting the trajectory into phases."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-latent-consistency-models]
-  quality: 3
-
-- id: "paper-sana-sprint"
-  title: "SANA-Sprint: One-Step Diffusion with Continuous-Time Consistency Distillation"
-  short: "SANA-Sprint"
-  provider: "Chen et al. (NVIDIA / MIT)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2503.09641"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "A 2025 recipe mixing continuous-time consistency and adversarial distillation to get sub-second 1024px images."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  doFirst: "sCM (continuous-time CMs)"
-  quality: 3
-
-- id: "paper-learning-to-cache"
-  title: "Learning-to-Cache: Accelerating Diffusion Transformer via Layer Caching"
-  short: "Learning-to-Cache"
-  provider: "Ma et al. (NUS)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2406.01733"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Learns which DiT layers can be skipped and reused per step, contrasting learned with heuristic cache policies."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-fora]
-  quality: 3
-
-- id: "paper-fastercache"
-  title: "FasterCache: Training-Free Video Diffusion Model Acceleration with High Quality"
-  short: "FasterCache"
-  provider: "Lv et al. (Vchitect)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2410.19355"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Extends feature caching to video DiTs and to the CFG branch, now one of the cache modes built into Diffusers."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  doFirst: "TeaCache paper"
-  quality: 3
-
-- id: "paper-q-diffusion"
-  title: "Q-Diffusion: Quantizing Diffusion Models"
-  short: "Q-Diffusion"
-  provider: "Li et al. (UC Berkeley / MIT)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2302.04304"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "The foundational post-training quantization paper for diffusion, explaining why timestep-varying activations break LLM-style PTQ."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  doFirst: "Quantization basics"
-  quality: 3
-
-- id: "paper-ptq4dit"
-  title: "PTQ4DiT: Post-training Quantization for Diffusion Transformers"
-  short: "PTQ4DiT"
-  provider: "Wu et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2405.16005"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Shows how DiT weights and activations differ from U-Nets and how channel balancing makes W8A8 DiTs work."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-q-diffusion]
-  quality: 3
-
-- id: "paper-vidit-q"
-  title: "ViDiT-Q: Efficient and Accurate Quantization of Diffusion Transformers for Image and Video Generation"
-  short: "ViDiT-Q"
-  provider: "Zhao et al. (Tsinghua NICS)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2406.02540"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Covers mixed-precision quantization for image and video DiTs with real kernel speedups, not just simulated accuracy."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-ptq4dit]
-  quality: 3
 
 - id: "paper-distrifusion"
   title: "DistriFusion: Distributed Parallel Inference for High-Resolution Diffusion Models"
@@ -1514,67 +415,6 @@
   doFirst: "DiT paper"
   quality: 4
 
-- id: "paper-pipefusion"
-  title: "PipeFusion: Patch-level Pipeline Parallelism for Diffusion Transformers Inference"
-  short: "PipeFusion"
-  provider: "Fang et al. (xDiT team)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2405.14430"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Pipeline-parallel DiT inference exploiting temporal redundancy between steps; the core idea inside xDiT."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-distrifusion]
-  quality: 3
-
-- id: "paper-asyncdiff"
-  title: "AsyncDiff: Parallelizing Diffusion Models by Asynchronous Denoising"
-  short: "AsyncDiff"
-  provider: "Chen et al. (NUS)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2406.06911"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Splits the denoiser across devices and runs components asynchronously, a different axis from patch parallelism."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  research: "diffusion"
-  tags: [inference]
-  after: [paper-distrifusion]
-  quality: 3
-
-- id: "article-nvidia-intro-speculative-decoding"
-  title: "An Introduction to Speculative Decoding for Reducing Latency in AI Inference"
-  short: "Intro to spec decoding"
-  provider: "NVIDIA Technical Blog"
-  type: "article"
-  url: "https://developer.nvidia.com/blog/an-introduction-to-speculative-decoding-for-reducing-latency-in-ai-inference/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Gentle explainer of draft-and-verify decoding and its variants before diving into engine docs."
-  fromYear: 1
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  quality: 3
-
 - id: "article-nvidia-university-recruiting"
   title: "University Recruiting and Early-Talent Programs | NVIDIA"
   short: "NVIDIA Univ Recruiting"
@@ -1589,10 +429,10 @@
   estHours: 1
   summary: "NVIDIA's official page on internships, the Ignite programme and new-grad tracks, so you know the formats and timing you are preparing for."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "inference-engineering"
   tags: [inference]
-  quality: 2
+  quality: 4
 
 - id: "blog-nvidia-perf-metrics"
   title: "How to Implement Performance Metrics in CUDA C/C++"
@@ -1632,46 +472,6 @@
   roadmap: "inference-engineering"
   tags: [inference]
   doFirst: "Even Easier Intro to CUDA"
-  quality: 3
-
-- id: "article-hanlab-svdquant"
-  title: "SVDQuant: Accurate 4-Bit Quantization Powers 12B FLUX on a 16GB 4090 Laptop with 3x Speedup"
-  short: "SVDQuant blog post"
-  provider: "MIT Han Lab"
-  type: "article"
-  url: "https://hanlab.mit.edu/blog/svdquant"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "An accessible illustrated explanation of the low-rank outlier branch and the Nunchaku kernel fusion behind it."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [paper-svdquant]
-  quality: 3
-
-- id: "article-trtllm-ngram-spec-decoding"
-  title: "N-Gram Speculative Decoding in TensorRT LLM"
-  short: "TRT-LLM n-gram spec"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog07_NGram_performance_Analysis_And_Auto_Enablement.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Data-driven analysis of when draft-free n-gram speculation pays off and how to enable it automatically."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-trtllm-speculative-decoding]
   quality: 3
 
 - id: "article-ezyang-ways-to-use-torch-compile"
@@ -1815,26 +615,6 @@
   after: [article-dieleman-paradox-distillation]
   quality: 4
 
-- id: "article-trtllm-deepseek-r1-mtp"
-  title: "DeepSeek R1 MTP Implementation and Optimization"
-  short: "TRT-LLM DeepSeek MTP"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog02_DeepSeek_R1_MTP_Implementation_and_Optimization.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Concrete look at implementing multi-token prediction as speculative decoding inside a real engine, with acceptance-rate tuning."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-trtllm-speculative-decoding]
-  quality: 3
-
 - id: "article-trtllm-deepseek-r1-throughput-blackwell"
   title: "Optimizing DeepSeek R1 Throughput on NVIDIA Blackwell GPUs: A Deep Dive for Developers"
   short: "DeepSeek R1 on Blackwell"
@@ -1852,306 +632,7 @@
   priority: 1
   roadmap: "inference-engineering"
   tags: [inference]
-  after: [docs-trtllm-parallelism]
   quality: 4
-
-- id: "article-trtllm-guided-plus-spec-decoding"
-  title: "Combining Guided Decoding and Speculative Decoding: Making CPU and GPU Cooperate Seamlessly"
-  short: "Guided + spec decoding"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog12_Combining_Guided_Decoding_and_Speculative_Decoding.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Shows the CPU/GPU synchronization problems that arise when grammar masks meet speculative drafts and how they were solved."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "XGrammar paper"
-  quality: 3
-
-- id: "article-trtllm-skip-softmax-attention"
-  title: "Accelerating Long-Context Inference with Skip Softmax Attention"
-  short: "Skip Softmax Attention"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog16_Accelerating_Long_Context_Inference_with_Skip_Softmax_Attention.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Explains a training-free sparse attention trick that skips negligible blocks inside the attention kernel for long contexts."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "FlashAttention-2 paper"
-  quality: 3
-
-- id: "article-trtllm-sparse-attention"
-  title: "Sparse Attention in TensorRT LLM"
-  short: "TRT-LLM sparse attention"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog17_Sparse_Attention_in_TensorRT-LLM.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Surveys how sparse attention methods are integrated into a production runtime, including KV cache and kernel implications."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-trtllm-attention]
-  quality: 3
-
-- id: "article-trtllm-moe-as-dense-gemm"
-  title: "MoE as Dense GEMM: Optimizing Low-Latency MoE Inference on NVIDIA Blackwell"
-  short: "MoE as Dense GEMM"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog24_MoE_as_Dense_GEMM.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Kernel-level case study of reformulating small-batch MoE as dense GEMMs to win at low-latency decode."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [paper-megablocks]
-  quality: 3
-
-- id: "article-trtllm-kv-cache-compression"
-  title: "KV Cache Compression in TensorRT LLM"
-  short: "TRT-LLM KV compression"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog30_KV_Cache_Compression_in_TensorRT-LLM.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Recent look at compressing KV cache in a production engine and the accuracy/memory trade-offs involved."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-trtllm-kv-cache-system]
-  quality: 3
-
-- id: "article-trtllm-deepseek-v32-blackwell"
-  title: "Optimizing DeepSeek-V3.2 on NVIDIA Blackwell GPUs"
-  short: "DeepSeek-V3.2 on Blackwell"
-  provider: "NVIDIA TensorRT-LLM team"
-  type: "article"
-  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog15_Optimizing_DeepSeek_V32_on_NVIDIA_Blackwell_GPUs.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Shows how a sparse-attention model (DSA indexer plus MLA) is mapped onto Blackwell kernels and the runtime."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [article-trtllm-deepseek-r1-throughput-blackwell]
-  quality: 3
-
-- id: "article-nvidia-low-latency-comm-jax"
-  title: "Optimizing for Low-Latency Communication in Inference Workloads with JAX and XLA"
-  short: "Low-latency TP comm"
-  provider: "NVIDIA Technical Blog"
-  type: "article"
-  url: "https://developer.nvidia.com/blog/optimizing-for-low-latency-communication-in-inference-workloads-with-jax-and-xla"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Shows why decode all-reduces are latency-bound and how custom one-shot collectives beat ring algorithms."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "NCCL user guide"
-  quality: 3
-
-- id: "article-umd-beyond-nccl"
-  title: "Beyond NCCL: Faster Inter-Node All-Reduce for Decode-Heavy LLM Inference"
-  short: "Beyond NCCL all-reduce"
-  provider: "UMD HPC Group"
-  type: "article"
-  url: "https://pssg.cs.umd.edu/blog/2025/beyond-nccl/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Research-group write-up measuring multi-node all-reduce latency in decode and a faster alternative design."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "NCCL user guide"
-  quality: 3
-
-- id: "article-dynamo-flash-indexer"
-  title: "Flash Indexer: A Story of Inter-Galactic KV Routing"
-  short: "Dynamo Flash Indexer"
-  provider: "Rudy Pei, John Thomson, Janelle Cai, Alec Flowers, Ryan Olson, Dan Gil (NVIDIA)"
-  type: "article"
-  url: "https://github.com/ai-dynamo/dynamo/blob/main/docs/fern/pages/blog/2026/flash-indexer.mdx"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Data-structure design story of a concurrent global prefix index that tracks KV blocks across a whole cluster."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-dynamo-router-design]
-  quality: 3
-
-- id: "article-dynamo-agentic-inference"
-  title: "Full-Stack Optimizations for Agentic Inference with Dynamo"
-  short: "Dynamo agentic inference"
-  provider: "Ishan Dhanani, Matej Kosec (NVIDIA)"
-  type: "article"
-  url: "https://github.com/ai-dynamo/dynamo/blob/main/docs/fern/pages/blog/2026/agentic-inference-optimizations.mdx"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how multi-turn agent workloads change caching, routing and offload decisions in a serving stack."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-dynamo-architecture]
-  quality: 3
-
-- id: "article-dynamo-dynosim"
-  title: "DynoSim: Simulating the Pareto Frontier"
-  short: "DynoSim"
-  provider: "Yongming Ding, Rudy Pei, Hongkuan Zhou, Ryan Olson, Dan Gil, Alec Flowers, Vikram Sharma Mailthody (NVIDIA)"
-  type: "article"
-  url: "https://github.com/ai-dynamo/dynamo/blob/main/docs/fern/pages/blog/2026/dynosim-pareto-frontier.mdx"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Explains simulating serving configurations to find throughput-latency Pareto points without burning GPU hours."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-dynamo-architecture]
-  quality: 3
-
-- id: "article-pytorch-triton-moe-grouped-gemm"
-  title: "Accelerating MoE's with a Triton Persistent Cache-Aware Grouped GEMM Kernel"
-  short: "Triton MoE grouped GEMM"
-  provider: "Less Wright, Adnan Hoque, Garrett Goon (PyTorch)"
-  type: "article"
-  url: "https://pytorch.org/blog/accelerating-moes-with-a-triton-persistent-cache-aware-grouped-gemm-kernel/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Walks through writing a persistent grouped GEMM in Triton with cache-aware tile ordering for MoE layers."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [tutorial-triton-server-tutorials]
-  quality: 3
-
-- id: "article-pytorch-accelerating-moe-model"
-  title: "Accelerating MoE model inference with Locality-Aware Kernel Design"
-  short: "MoE locality kernels"
-  provider: "Adnan Hoque, Less Wright, Antoni Virós Martin, Chih-Chieh Yang"
-  type: "article"
-  url: "https://pytorch.org/blog/accelerating-moe-model/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how column-major tile scheduling and SplitK improve a Triton fused MoE kernel at small batch sizes."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [tutorial-triton-server-tutorials]
-
-# ---- AI, ML, LLMs and agents (153)
-  quality: 3
-
-- id: "docs-comfyui"
-  title: "ComfyUI Official Documentation"
-  short: "ComfyUI docs"
-  provider: "Comfy Org"
-  type: "article"
-  url: "https://docs.comfy.org/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 5
-  summary: "Install, interface, built-in node reference and workflow tutorials for image, video and audio models."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
-- id: "docs-overleaf-learn-latex-30-min"
-  title: "Learn LaTeX in 30 minutes"
-  short: "LaTeX in 30 Minutes"
-  provider: "Overleaf"
-  type: "article"
-  url: "https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "The fastest route to writing papers in LaTeX: structure, math, figures, tables and references."
-  fromYear: 1
-  priority: 1
-  roadmap: "ai-engineer"
-  quality: 3
 
 - id: "tool-semantic-scholar"
   title: "Semantic Scholar"
@@ -2169,84 +650,7 @@
   fromYear: 1
   priority: 1
   roadmap: "ai-engineer"
-  quality: 3
-
-- id: "tool-connected-papers"
-  title: "Connected Papers"
-  short: "Connected Papers"
-  provider: "Connected Papers"
-  type: "article"
-  url: "https://www.connectedpapers.com/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Builds a visual similarity graph around a seed paper so you can find prior and derivative work fast."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Free tier"
-  after: [tool-semantic-scholar]
-  quality: 3
-
-- id: "docs-diffusers-video-generation"
-  title: "Video generation (Diffusers guide)"
-  short: "Diffusers video guide"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/using-diffusers/text-img2vid"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Quick practical tour of running Wan, HunyuanVideo, LTX-Video and CogVideoX with offloading, quantization and torch.compile."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [docs-hf-diffusers]
-  quality: 3
-
-- id: "docs-diffusers-train-lora"
-  title: "LoRA training (Diffusers docs)"
-  short: "Diffusers: train LoRA"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/training/lora"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Walks through the text-to-image LoRA script line by line, your first fine-tune on a single GPU."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [docs-hf-diffusers]
-  quality: 3
-
-- id: "docs-diffusers-train-controlnet"
-  title: "ControlNet training (Diffusers docs)"
-  short: "Diffusers: ControlNet"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://huggingface.co/docs/diffusers/training/controlnet"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Shows how to train a ControlNet for a new condition type, including the SDXL variant."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "ControlNet paper"
-  quality: 3
+  quality: 4
 
 - id: "docs-transformers-add-new-model"
   title: "How to add a model to Transformers"
@@ -2304,25 +708,6 @@
   after: [docs-neurips-paper-checklist]
   quality: 4
 
-- id: "docs-iclr-2025-reviewer-guide"
-  title: "ICLR 2025 Reviewer Guide"
-  short: "ICLR Reviewer Guide"
-  provider: "ICLR"
-  type: "article"
-  url: "https://www.iclr.cc/Conferences/2025/ReviewerGuide"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "A step-by-step guide to writing a useful review, and good practice for critically reading any paper."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [keshav-how-to-read]
-  quality: 3
-
 - id: "docs-arxiv-submission-guidelines"
   title: "arXiv Submission Guidelines"
   short: "arXiv Submission Guide"
@@ -2339,7 +724,6 @@
   fromYear: 2
   priority: 3
   roadmap: "ai-engineer"
-  after: [docs-overleaf-learn-latex-30-min]
   quality: 3
 
 - id: "video-spj-great-research-talk"
@@ -2617,43 +1001,6 @@
   after: [cert-aws-ai-practitioner]
   quality: 2
 
-- id: "program-eleutherai-soar"
-  title: "Summer of Open AI Research (SOAR)"
-  short: "EleutherAI SOAR"
-  provider: "EleutherAI"
-  type: "course"
-  url: "https://eleuther.ai/soar"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 100
-  summary: "A fully online summer program pairing beginners, including self-taught researchers, with mentors on publishable open-science projects."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [course-stanford-cs197-cs-research]
-  quality: 3
-
-- id: "program-ml-collective"
-  title: "ML Collective"
-  short: "ML Collective"
-  provider: "ML Collective (nonprofit)"
-  type: "course"
-  url: "https://mlcollective.org/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 20
-  summary: "A free, open research community offering mentorship, reading groups, research jams and compute help for unaffiliated researchers."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
 - id: "cert-nvidia-ncp-aai"
   title: "NVIDIA-Certified Professional: Agentic AI (NCP-AAI)"
   short: "NVIDIA NCP-AAI"
@@ -2709,7 +1056,6 @@
   fromYear: 3
   priority: 1
   roadmap: "ai-engineer"
-  after: [article-nanda-explore-understand-distill]
   quality: 4
 
 - id: "book-good-research-code-handbook"
@@ -2789,24 +1135,6 @@
   doFirst: "Ten simple rules for structuring papers"
   quality: 4
 
-- id: "tutorial-comfyui-custom-node-walkthrough"
-  title: "Creating Custom Nodes in ComfyUI"
-  short: "ComfyUI node walkthrough"
-  provider: "Comfy Org"
-  type: "article"
-  url: "https://docs.comfy.org/custom-nodes/walkthrough"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Step-by-step build of a working custom node, the shortest path to wiring your own research code into a UI."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
 - id: "hi-ml-video-recommendations"
   title: "Video Recommendations (ML System Design Breakdown)"
   short: "HI: ML Video Recs"
@@ -2845,43 +1173,6 @@
   doFirst: "Illustrated Stable Diffusion"
   quality: 4
 
-- id: "repo-comfyui-examples"
-  title: "ComfyUI Examples"
-  short: "ComfyUI examples"
-  provider: "comfyanonymous"
-  type: "practice"
-  url: "https://github.com/comfyanonymous/ComfyUI_examples"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "Drag-and-drop example workflows for LoRA, ControlNet, inpainting, upscaling, SDXL, SD3 and FLUX."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [docs-comfyui]
-  quality: 3
-
-- id: "repo-arxiv-sanity-lite"
-  title: "arxiv-sanity-lite"
-  short: "arxiv-sanity-lite"
-  provider: "Andrej Karpathy"
-  type: "practice"
-  url: "https://github.com/karpathy/arxiv-sanity-lite"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Self-host Karpathy's tool to tag papers and get SVM-ranked arXiv recommendations; also a small, readable codebase."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
 - id: "repo-controlnet"
   title: "ControlNet (official code)"
   short: "ControlNet repo"
@@ -2901,120 +1192,6 @@
   doFirst: "ControlNet paper"
   quality: 4
 
-- id: "repo-kohya-sd-scripts"
-  title: "sd-scripts"
-  short: "kohya sd-scripts"
-  provider: "kohya-ss"
-  type: "practice"
-  url: "https://github.com/kohya-ss/sd-scripts"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 8
-  summary: "The community-standard trainer for LoRA, DreamBooth and full fine-tunes of SD/SDXL/SD3/FLUX."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [docs-diffusers-train-lora]
-  quality: 3
-
-- id: "repo-ai-toolkit"
-  title: "AI Toolkit"
-  short: "ai-toolkit"
-  provider: "Ostris"
-  type: "practice"
-  url: "https://github.com/ostris/ai-toolkit"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "Config-driven LoRA and fine-tuning suite popular for FLUX, Qwen-Image and video models, with a web UI."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [docs-diffusers-train-lora]
-  quality: 3
-
-- id: "repo-black-forest-labs-flux"
-  title: "FLUX.1 (official inference repo)"
-  short: "FLUX.1 repo"
-  provider: "Black Forest Labs"
-  type: "practice"
-  url: "https://github.com/black-forest-labs/flux"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Minimal reference code for the FLUX.1 family; reading the sampling loop clarifies rectified-flow DiT inference."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "Scaling Rectified Flow"
-  quality: 3
-
-- id: "repo-sd3-5"
-  title: "Stable Diffusion 3.5 (reference implementation)"
-  short: "SD3.5 repo"
-  provider: "Stability AI"
-  type: "practice"
-  url: "https://github.com/Stability-AI/sd3.5"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Lean inference reference for SD3.5 MMDiT, including text encoders and sampler code."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "Scaling Rectified Flow"
-  quality: 3
-
-- id: "repo-qwen-image"
-  title: "Qwen-Image"
-  short: "Qwen-Image repo"
-  provider: "Qwen Team (Alibaba)"
-  type: "practice"
-  url: "https://github.com/QwenLM/Qwen-Image"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Open weights and code for the Qwen-Image generation and editing models."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [paper-qwen-image]
-  quality: 3
-
-- id: "repo-geneval"
-  title: "GenEval (benchmark code)"
-  short: "GenEval repo"
-  provider: "Dhruba Ghosh"
-  type: "practice"
-  url: "https://github.com/djghosh13/geneval"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Run the benchmark on your own model or fine-tune to get numbers comparable to published reports."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [paper-geneval]
-  quality: 3
-
 - id: "repo-ml-system-design-case-studies"
   title: "A Curated List of ML System Design Case Studies"
   short: "ML Design Case Studies"
@@ -3033,234 +1210,6 @@
   roadmap: "ai-engineer"
   after: [hi-ml-system-design-intro]
   quality: 2
-
-- id: "repo-releasing-research-code"
-  title: "Tips for Publishing Research Code (ML Code Completeness Checklist)"
-  short: "ML Code Checklist"
-  provider: "Papers with Code"
-  type: "practice"
-  url: "https://github.com/paperswithcode/releasing-research-code"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A checklist and README template for releasing reproducible research code that others will actually use."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "Good Research Code Handbook"
-  quality: 3
-
-- id: "repo-hunyuanvideo-1-5"
-  title: "HunyuanVideo-1.5: lightweight video generation model"
-  short: "HunyuanVideo-1.5 repo"
-  provider: "Tencent Hunyuan"
-  type: "practice"
-  url: "https://github.com/Tencent-Hunyuan/HunyuanVideo-1.5"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "A smaller 8B-class open video model that runs on consumer GPUs, good for hands-on experiments with modern video DiTs."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [repo-hunyuanvideo]
-  quality: 3
-
-- id: "repo-lightricks-ltx-video"
-  title: "LTX-Video (official repository)"
-  short: "LTX-Video repo"
-  provider: "Lightricks"
-  type: "practice"
-  url: "https://github.com/Lightricks/LTX-Video"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "The fastest family of open video DiTs; its configs and distilled checkpoints are a practical way to iterate quickly on a single GPU."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "LTX-Video paper"
-  quality: 3
-
-- id: "repo-cogvideo"
-  title: "CogVideo & CogVideoX (official code)"
-  short: "CogVideoX repo"
-  provider: "Zhipu AI / THUDM"
-  type: "practice"
-  url: "https://github.com/zai-org/CogVideo"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 8
-  summary: "Well-documented open T2V/I2V models with SAT and diffusers training scripts, a common starting point for LoRA fine-tuning."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "CogVideoX paper"
-  quality: 3
-
-- id: "repo-animatediff"
-  title: "AnimateDiff (official code)"
-  short: "AnimateDiff repo"
-  provider: "Yuwei Guo et al."
-  type: "practice"
-  url: "https://github.com/guoyww/AnimateDiff"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 5
-  summary: "Plug a motion module into personalized Stable Diffusion checkpoints and learn how temporal layers are trained separately."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "AnimateDiff paper"
-  quality: 3
-
-- id: "repo-stability-generative-models"
-  title: "Generative Models by Stability AI (SVD, SV3D, SV4D code)"
-  short: "Stability gen-models"
-  provider: "Stability AI"
-  type: "practice"
-  url: "https://github.com/Stability-AI/generative-models"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 8
-  summary: "Official inference and sampling code for Stable Video Diffusion plus the SV3D/SV4D multi-view video models."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "SVD paper"
-  quality: 3
-
-- id: "repo-liveportrait"
-  title: "LivePortrait: Efficient Portrait Animation with Stitching and Retargeting Control"
-  short: "LivePortrait"
-  provider: "Kuaishou (KwaiVGI)"
-  type: "practice"
-  url: "https://github.com/KwaiVGI/LivePortrait"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "A fast, non-diffusion keypoint-based face animation system that is fun to run and shows where implicit-keypoint methods still win."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
-- id: "repo-diffsynth-studio"
-  title: "DiffSynth-Studio"
-  short: "DiffSynth-Studio"
-  provider: "ModelScope"
-  type: "practice"
-  url: "https://github.com/modelscope/DiffSynth-Studio"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 8
-  summary: "Unified engine for inference and full/LoRA training of Wan, HunyuanVideo, CogVideoX and image models with low-VRAM tricks."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [docs-diffusers-video-generation]
-  quality: 3
-
-- id: "repo-finetrainers"
-  title: "finetrainers: training library for video diffusion models"
-  short: "finetrainers"
-  provider: "Hugging Face (a-r-r-o-w)"
-  type: "practice"
-  url: "https://github.com/huggingface/finetrainers"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "Diffusers-based scripts for LoRA and full fine-tuning of LTX-Video, HunyuanVideo, Wan and CogVideoX with parallelism options."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [docs-diffusers-video-generation]
-  quality: 3
-
-- id: "repo-diffusion-pipe"
-  title: "diffusion-pipe: pipeline-parallel training for diffusion models"
-  short: "diffusion-pipe"
-  provider: "tdrussell"
-  type: "practice"
-  url: "https://github.com/tdrussell/diffusion-pipe"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 5
-  summary: "Popular LoRA trainer that shards large video models (Wan, HunyuanVideo, LTX) across GPUs with DeepSpeed pipeline parallelism."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [repo-finetrainers]
-  quality: 3
-
-- id: "repo-latte-video"
-  title: "Latte: Latent Diffusion Transformer for Video Generation (code)"
-  short: "Latte repo"
-  provider: "Vchitect"
-  type: "practice"
-  url: "https://github.com/Vchitect/Latte"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 5
-  summary: "Compact, readable training and sampling code for a video DiT; small enough to study before the giant open models."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "DiT paper"
-  quality: 3
-
-- id: "repo-simpletuner"
-  title: "SimpleTuner"
-  short: "SimpleTuner"
-  provider: "bghira"
-  type: "practice"
-  url: "https://github.com/bghira/SimpleTuner"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 8
-  summary: "A research-friendly trainer with documented recipes for many diffusion architectures, multi-GPU and aspect bucketing."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [repo-kohya-sd-scripts]
-  quality: 3
 
 - id: "repo-wan-video-wan22"
   title: "Wan2.2: Open and Advanced Large-Scale Video Generative Models (code)"
@@ -3300,26 +1249,6 @@
   doFirst: "HunyuanVideo paper"
   quality: 4
 
-- id: "repo-lightricks-ltx-2"
-  title: "LTX-2: joint audio-video generation model (code)"
-  short: "LTX-2 repo"
-  provider: "Lightricks"
-  type: "practice"
-  url: "https://github.com/Lightricks/LTX-2"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "Open audio+video foundation model with training and inference code, useful for seeing how synchronized sound is added to video diffusion."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [repo-lightricks-ltx-video]
-  quality: 3
-
 - id: "repo-open-sora"
   title: "Open-Sora (code)"
   short: "Open-Sora repo"
@@ -3338,46 +1267,6 @@
   roadmap: "ai-engineer"
   doFirst: "Open-Sora paper"
   quality: 4
-
-- id: "repo-open-sora-plan"
-  title: "Open-Sora Plan (code)"
-  short: "Open-Sora Plan repo"
-  provider: "PKU-YuanGroup"
-  type: "practice"
-  url: "https://github.com/PKU-YuanGroup/Open-Sora-Plan"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 8
-  summary: "A second fully open video generation stack with its own wavelet VAE and training recipes to compare against Open-Sora."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  doFirst: "Open-Sora Plan paper"
-  quality: 3
-
-- id: "repo-causvid"
-  title: "CausVid: fast autoregressive video diffusion (code)"
-  short: "CausVid repo"
-  provider: "Tianwei Yin et al."
-  type: "practice"
-  url: "https://github.com/tianweiy/CausVid"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 6
-  summary: "Code for distilling a bidirectional video DiT into a few-step causal generator that streams frames in real time."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  doFirst: "CausVid paper"
-  quality: 3
 
 - id: "repo-self-forcing"
   title: "Self Forcing (official code)"
@@ -3417,163 +1306,6 @@
   research: "world-models"
   doFirst: "Diffusion Forcing paper"
   quality: 4
-
-- id: "repo-cameractrl"
-  title: "CameraCtrl (official code)"
-  short: "CameraCtrl repo"
-  provider: "Hao He et al."
-  type: "practice"
-  url: "https://github.com/hehao13/CameraCtrl"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Shows how Plucker-embedding camera trajectories are injected into a video diffusion model for controllable camera motion."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  doFirst: "CameraCtrl paper"
-  quality: 3
-
-- id: "repo-magi-1"
-  title: "MAGI-1: Autoregressive Video Generation at Scale (code)"
-  short: "MAGI-1 repo"
-  provider: "Sand AI"
-  type: "practice"
-  url: "https://github.com/SandAI-org/MAGI-1"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 6
-  summary: "Open weights and inference for a chunk-wise autoregressive video model, a production-scale example of causal video diffusion."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  doFirst: "MAGI-1 paper"
-  quality: 3
-
-- id: "repo-skyreels-v2"
-  title: "SkyReels V2: Infinite-Length Film Generative Model (code)"
-  short: "SkyReels V2 repo"
-  provider: "Skywork AI"
-  type: "practice"
-  url: "https://github.com/SkyworkAI/SkyReels-V2"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 5
-  summary: "Diffusion-forcing based open model for arbitrarily long videos, with weights and inference code to try extension yourself."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [repo-diffusion-forcing]
-  quality: 3
-
-- id: "repo-matrix-game"
-  title: "Matrix-Game: streaming neural rendering for playable games"
-  short: "Matrix-Game repo"
-  provider: "Skywork AI"
-  type: "practice"
-  url: "https://github.com/SkyworkAI/Matrix-Game"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 5
-  summary: "Open interactive world-model code that turns keyboard and mouse actions into streamed game frames."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [repo-diamond]
-  quality: 3
-
-- id: "repo-hunyuanworld-1"
-  title: "HunyuanWorld 1.0: generating explorable 3D worlds"
-  short: "HunyuanWorld 1.0"
-  provider: "Tencent Hunyuan"
-  type: "practice"
-  url: "https://github.com/Tencent-Hunyuan/HunyuanWorld-1.0"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 5
-  summary: "Generates panoramic, mesh-exportable 3D worlds from text or images, bridging video-style generation and 3D scenes."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
-- id: "repo-cosmos-predict1"
-  title: "Cosmos-Predict1"
-  short: "Cosmos-Predict1"
-  provider: "NVIDIA"
-  type: "practice"
-  url: "https://github.com/nvidia-cosmos/cosmos-predict1"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 6
-  summary: "Diffusion and autoregressive world foundation models with post-training scripts for robotics and driving data."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "world-models"
-  doFirst: "Cosmos paper"
-  quality: 3
-
-- id: "repo-nvlabs-longlive"
-  title: "LongLive: real-time interactive long video generation (code)"
-  short: "LongLive repo"
-  provider: "NVIDIA (NVlabs)"
-  type: "practice"
-  url: "https://github.com/NVlabs/LongLive"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 5
-  summary: "Frame-level autoregressive generator with KV re-caching that lets you switch prompts mid-stream at interactive speed."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [repo-self-forcing]
-  quality: 3
-
-- id: "repo-xdit"
-  title: "xDiT: inference engine for Diffusion Transformers with massive parallelism"
-  short: "xDiT repo"
-  provider: "xDiT project"
-  type: "practice"
-  url: "https://github.com/xdit-project/xDiT"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 5
-  summary: "Hands-on sequence, patch and CFG parallel inference for video DiTs across many GPUs."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [docs-diffusers-video-generation]
-  quality: 3
 
 - id: "paper-clipscore"
   title: "CLIPScore: A Reference-free Evaluation Metric for Image Captioning"
@@ -3690,26 +1422,6 @@
   doFirst: "ControlNet paper"
   quality: 4
 
-- id: "paper-t2i-adapter"
-  title: "T2I-Adapter: Learning Adapters to Dig out More Controllable Ability for Text-to-Image Diffusion Models"
-  short: "T2I-Adapter"
-  provider: "Mou et al. (Tencent ARC)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2302.08453"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "A lighter alternative to ControlNet for spatial conditioning; compare their cost and fidelity."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  doFirst: "ControlNet paper"
-  quality: 3
-
 - id: "paper-maskgit"
   title: "MaskGIT: Masked Generative Image Transformer"
   short: "MaskGIT"
@@ -3729,86 +1441,6 @@
   research: "diffusion"
   doFirst: "Taming Transformers"
   quality: 4
-
-- id: "paper-geneval"
-  title: "GenEval: An Object-Focused Framework for Evaluating Text-to-Image Alignment"
-  short: "GenEval"
-  provider: "Ghosh, Hajishirzi, Schmidt"
-  type: "paper"
-  url: "https://arxiv.org/abs/2310.11513"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Uses object detectors to score counting, colors and positions, now a standard benchmark in model reports."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [paper-clipscore]
-  quality: 3
-
-- id: "paper-imagereward"
-  title: "ImageReward: Learning and Evaluating Human Preferences for Text-to-Image Generation"
-  short: "ImageReward"
-  provider: "Xu et al. (Tsinghua / Zhipu)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2304.05977"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Introduces a human-preference reward model and ReFL fine-tuning for text-to-image."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [paper-clipscore]
-  quality: 3
-
-- id: "paper-hpsv2"
-  title: "Human Preference Score v2: A Solid Benchmark for Evaluating Human Preferences of Text-to-Image Synthesis"
-  short: "HPSv2"
-  provider: "Wu et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2306.09341"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "A large preference dataset and scorer widely used to evaluate and reward-tune image models."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [paper-imagereward]
-  quality: 3
-
-- id: "paper-pick-a-pic"
-  title: "Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation"
-  short: "Pick-a-Pic / PickScore"
-  provider: "Kirstain et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2305.01569"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Real user preference data and the PickScore metric, the dataset behind Diffusion-DPO."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [paper-clipscore]
-  quality: 3
 
 - id: "paper-troubling-trends-ml-scholarship"
   title: "Troubling Trends in Machine Learning Scholarship"
@@ -3847,43 +1479,6 @@
   roadmap: "ai-engineer"
   after: [paper-deep-rl-that-matters]
   quality: 4
-
-- id: "paper-pineau-improving-reproducibility"
-  title: "Improving Reproducibility in Machine Learning Research (A Report from the NeurIPS 2019 Reproducibility Program)"
-  short: "NeurIPS Reproducibility"
-  provider: "Joelle Pineau et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2003.12206"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "The origin story of the ML reproducibility checklist and code-submission policy you will meet at every major venue."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
-- id: "paper-show-your-work-reporting"
-  title: "Show Your Work: Improved Reporting of Experimental Results"
-  short: "Show Your Work (Reporting)"
-  provider: "Dodge, Gururangan, Card, Schwartz, Smith"
-  type: "paper"
-  url: "https://arxiv.org/abs/1909.03004"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Introduces expected validation performance as a function of tuning budget, so comparisons account for how much compute each method got."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "Accounting for Variance"
-  quality: 3
 
 - id: "paper-melis-sota-evaluation-lms"
   title: "On the State of the Art of Evaluation in Neural Language Models"
@@ -3924,118 +1519,6 @@
   research: "genai"
   quality: 4
 
-- id: "paper-reforms-reporting-standards"
-  title: "REFORMS: Reporting Standards for Machine Learning Based Science"
-  short: "REFORMS Checklist"
-  provider: "Kapoor, Narayanan et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2308.07832"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "A consensus checklist for reporting ML-based studies that catches leakage and weak evaluation before reviewers do."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  after: [docs-neurips-paper-checklist]
-  quality: 3
-
-- id: "paper-metric-learning-reality-check"
-  title: "A Metric Learning Reality Check"
-  short: "Metric Learning Check"
-  provider: "Kevin Musgrave, Serge Belongie, Ser-Nam Lim"
-  type: "paper"
-  url: "https://arxiv.org/abs/2003.08505"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Case study in how flawed experimental setups produced years of illusory progress, and how a fair benchmark erased it."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "Accounting for Variance"
-  quality: 3
-
-- id: "paper-reporting-score-distributions"
-  title: "Reporting Score Distributions Makes a Difference: Performance Study of LSTM-networks for Sequence Tagging"
-  short: "Report Score Distributions"
-  provider: "Nils Reimers, Iryna Gurevych"
-  type: "paper"
-  url: "https://arxiv.org/abs/1707.09861"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Demonstrates that seed variance alone can flip conclusions, motivating reporting distributions instead of single best runs."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
-- id: "paper-how-many-random-seeds"
-  title: "How Many Random Seeds? Statistical Power Analysis in Deep Reinforcement Learning Experiments"
-  short: "How Many Random Seeds?"
-  provider: "Cédric Colas, Olivier Sigaud, Pierre-Yves Oudeyer"
-  type: "paper"
-  url: "https://arxiv.org/abs/1806.08295"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "A hands-on guide to choosing the number of seeds and the right statistical test when comparing noisy training runs."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [paper-deep-rl-that-matters]
-  quality: 3
-
-- id: "paper-sources-irreproducibility-ml"
-  title: "Sources of Irreproducibility in Machine Learning: A Review"
-  short: "Irreproducibility Sources"
-  provider: "Gundersen, Coakley, Kirkpatrick, Gil"
-  type: "paper"
-  url: "https://arxiv.org/abs/2204.07610"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Maps every place nondeterminism and undocumented choices creep into ML pipelines, useful when designing your experiment setup."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "PyTorch Reproducibility notes"
-  quality: 3
-
-- id: "paper-neurips-2014-experiment-revisited"
-  title: "Inconsistency in Conference Peer Review: Revisiting the 2014 NeurIPS Experiment"
-  short: "NeurIPS 2014 Review Exp."
-  provider: "Corinna Cortes, Neil D. Lawrence"
-  type: "paper"
-  url: "https://arxiv.org/abs/2109.09774"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "The original duplicate-review experiment revisited, showing reviewers agree poorly and scores barely predict later impact."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
 - id: "paper-hitchhikers-statistical-significance-nlp"
   title: "The Hitchhiker's Guide to Testing Statistical Significance in Natural Language Processing"
   short: "Significance Testing Guide"
@@ -4072,25 +1555,6 @@
   roadmap: "ai-engineer"
   quality: 4
 
-- id: "paper-qwen-image"
-  title: "Qwen-Image Technical Report"
-  short: "Qwen-Image report"
-  provider: "Qwen Team (Alibaba)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2508.02324"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 5
-  summary: "A 2025 open model report notable for text rendering and editing, with data pipeline and training curriculum details."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "SD3 paper"
-  quality: 3
-
 - id: "paper-pixart-alpha"
   title: "PixArt-α: Fast Training of Diffusion Transformer for Photorealistic Text-to-Image Synthesis"
   short: "PixArt-α"
@@ -4110,86 +1574,6 @@
   research: "diffusion"
   doFirst: "DiT paper"
   quality: 4
-
-- id: "paper-pixart-sigma"
-  title: "PixArt-Σ: Weak-to-Strong Training of Diffusion Transformer for 4K Text-to-Image Generation"
-  short: "PixArt-Σ"
-  provider: "Chen et al. (Huawei Noah's Ark)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2403.04692"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Adds KV token compression and weak-to-strong fine-tuning to reach 4K images with a small DiT."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [paper-pixart-alpha]
-  quality: 3
-
-- id: "paper-wuerstchen"
-  title: "Würstchen: An Efficient Architecture for Large-Scale Text-to-Image Diffusion Models"
-  short: "Würstchen"
-  provider: "Pernias et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2306.00637"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Explains extreme latent compression in a three-stage cascade, the basis of Stable Cascade."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  doFirst: "Latent Diffusion"
-  quality: 3
-
-- id: "paper-sana-1-5"
-  title: "SANA 1.5: Efficient Scaling of Training-Time and Inference-Time Compute in Linear Diffusion Transformer"
-  short: "SANA 1.5"
-  provider: "Xie et al. (NVIDIA / MIT)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2501.18427"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Studies depth growing, pruning and inference-time scaling for an efficient linear-attention DiT."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  doFirst: "SANA paper"
-  quality: 3
-
-- id: "paper-null-text-inversion"
-  title: "Null-text Inversion for Editing Real Images using Guided Diffusion Models"
-  short: "Null-text Inversion"
-  provider: "Mokady et al. (Google)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2211.09794"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Shows how to invert a real photo under CFG so attention-based editing works on it, a key editing building block."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [paper-prompt-to-prompt]
-  quality: 3
 
 - id: "paper-diffusion-dpo"
   title: "Diffusion Model Alignment Using Direct Preference Optimization"
@@ -4211,104 +1595,6 @@
   doFirst: "DPO paper"
   quality: 4
 
-- id: "paper-omnigen"
-  title: "OmniGen: Unified Image Generation"
-  short: "OmniGen"
-  provider: "Xiao et al. (BAAI)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2409.11340"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "One model for generation, editing and subject-driven tasks without extra adapters, a sign of where tooling is heading."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [paper-ip-adapter]
-  quality: 3
-
-- id: "paper-dynamicrafter"
-  title: "DynamiCrafter: Animating Open-domain Images with Video Diffusion Priors"
-  short: "DynamiCrafter"
-  provider: "Jinbo Xing et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2310.12190"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Clear recipe for image animation by feeding a context image into a video diffusion prior through dual conditioning."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  doFirst: "SVD paper"
-  quality: 3
-
-- id: "paper-vace"
-  title: "VACE: All-in-One Video Creation and Editing"
-  short: "VACE"
-  provider: "Tongyi Lab (Alibaba)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2503.07598"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Explains a single unit for reference, mask and control signals so one video model handles many editing tasks."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "Wan paper"
-  quality: 3
-
-- id: "paper-streamdiffusionv2"
-  title: "StreamDiffusionV2: A Streaming System for Dynamic and Interactive Video Generation"
-  short: "StreamDiffusionV2"
-  provider: "Tianrui Feng, Chenfeng Xu et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2511.07399"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Systems view of live video generation: SLO-aware batching, rolling KV cache and pipeline parallelism for real-time streams."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  doFirst: "Self Forcing paper"
-  quality: 3
-
-- id: "paper-turbodiffusion"
-  title: "TurboDiffusion: Accelerating Video Diffusion Models by 100-200 Times"
-  short: "TurboDiffusion"
-  provider: "Tsinghua ML group (thu-ml)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2512.16093"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Combines quantized/sparse attention and step distillation to show how far video diffusion latency can be pushed."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  after: [paper-sparse-videogen]
-  quality: 3
-
 - id: "article-illustrated-stable-diffusion"
   title: "The Illustrated Stable Diffusion"
   short: "Illustrated SD"
@@ -4329,78 +1615,6 @@
   doFirst: "The Illustrated Transformer"
   quality: 4
 
-- id: "article-steinhardt-film-study-research"
-  title: "Film Study for Research"
-  short: "Film Study for Research"
-  provider: "Jacob Steinhardt"
-  type: "article"
-  url: "https://bounded-regret.ghost.io/film-study/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Borrows deliberate-practice habits from athletes to show how to learn research skill from others' recorded thinking."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
-- id: "article-eisner-write-paper-first"
-  title: "Write the Paper First"
-  short: "Eisner: Write Paper First"
-  provider: "Jason Eisner"
-  type: "article"
-  url: "https://www.cs.jhu.edu/~jason/advice/write-the-paper-first.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Argues for drafting the paper before the experiments so writing guides what you actually need to run."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
-- id: "article-eisner-find-research-problems"
-  title: "How to Find Research Problems"
-  short: "Eisner: Find Problems"
-  provider: "Jason Eisner"
-  type: "article"
-  url: "https://www.cs.jhu.edu/~jason/advice/how-to-find-research-problems.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Practical tactics for generating research ideas from reading, gaps and dissatisfaction with existing work."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
-- id: "article-eisner-research-with-professor"
-  title: "How to Do Research With a Professor"
-  short: "Eisner: Work with a Prof"
-  provider: "Jason Eisner"
-  type: "article"
-  url: "https://www.cs.jhu.edu/~jason/advice/how-to-work-with-a-professor.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Sets expectations for students starting research under a faculty member: meetings, initiative and communication."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
 - id: "article-eisner-advice-index"
   title: "Advice for Researchers and Would-Be Researchers"
   short: "Eisner: Research Advice"
@@ -4418,42 +1632,6 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
-
-- id: "article-dettmers-ml-phd-applications"
-  title: "Machine Learning PhD Applications — Everything You Need to Know"
-  short: "Dettmers: ML PhD Apps"
-  provider: "Tim Dettmers"
-  type: "article"
-  url: "https://timdettmers.com/2018/11/26/phd-applications/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Explains what ML admissions actually weigh (research, letters, publications), which shapes how you spend undergrad years."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
-- id: "article-vinitsky-cold-emailing"
-  title: "A Guide to Cold Emailing"
-  short: "Cold Emailing Guide"
-  provider: "Eugene Vinitsky"
-  type: "article"
-  url: "https://www.eugenevinitsky.com/posts/coldemails/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A professor's view on writing cold emails that get replies: show you know the work, make a specific ask, attach evidence."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
 
 - id: "article-dieleman-guidance"
   title: "Guidance: a cheat code for diffusion models"
@@ -4552,44 +1730,6 @@
   after: [paper-troubling-trends-ml-scholarship]
   quality: 4
 
-- id: "article-nanda-explore-understand-distill"
-  title: "How I Think About My Research Process: Explore, Understand, Distill"
-  short: "Nanda: Research Process"
-  provider: "Neel Nanda"
-  type: "article"
-  url: "https://www.alignmentforum.org/s/5GT3yoYM9gRmMEKqL/p/hjMy4ZxS5ogA9cTYK"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Breaks a research project into explore, understand and distill stages, with what to optimize in each."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  doFirst: "An Opinionated Guide to ML Research"
-  quality: 3
-
-- id: "article-nanda-key-research-mindsets"
-  title: "My Research Process: Key Mindsets - Truth-Seeking, Prioritisation, Moving Fast"
-  short: "Nanda: Research Mindsets"
-  provider: "Neel Nanda"
-  type: "article"
-  url: "https://www.alignmentforum.org/s/5GT3yoYM9gRmMEKqL/p/cbBwwm4jW6AZctymL"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Mindsets for avoiding self-deception, prioritizing ruthlessly and iterating fast on empirical projects."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [article-nanda-explore-understand-distill]
-  quality: 3
-
 - id: "article-nanda-cultivating-research-taste"
   title: "My Research Process: Understanding and Cultivating Research Taste"
   short: "Nanda: Research Taste"
@@ -4684,63 +1824,6 @@
   roadmap: "software-architect"
   quality: 4
 
-- id: "owasp-forgot-password-cheat-sheet"
-  title: "Forgot Password Cheat Sheet (OWASP)"
-  short: "OWASP Forgot Password CS"
-  provider: "OWASP"
-  type: "article"
-  url: "https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Password reset is a common account-takeover path; this shows how to build reset tokens and flows correctly."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [owasp-authentication-cheat-sheet]
-  quality: 3
-
-- id: "auth0-which-oauth-flow"
-  title: "Which OAuth 2.0 Flow Should I Use? (Auth0 Docs)"
-  short: "Auth0: Which OAuth Flow"
-  provider: "Auth0"
-  type: "article"
-  url: "https://auth0.com/docs/get-started/authentication-and-authorization-flow/which-oauth-2-0-flow-should-i-use"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A decision guide mapping app types (SPA, native, machine-to-machine, server web app) to the right grant."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [article-parecki-oauth2-simplified]
-  quality: 3
-
-- id: "auth0-auth-code-pkce-flow"
-  title: "Authorization Code Flow with Proof Key for Code Exchange (Auth0 Docs)"
-  short: "Auth0: Code Flow + PKCE"
-  provider: "Auth0"
-  type: "article"
-  url: "https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow-with-pkce"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Clear sequence diagram of the flow every SPA and mobile app should use, step by step."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [auth0-which-oauth-flow]
-  quality: 3
-
 - id: "stripe-idempotent-requests-docs"
   title: "Idempotent requests (Stripe API reference)"
   short: "Stripe Idempotent Requests"
@@ -4797,82 +1880,6 @@
   after: [rfc-7519-jwt]
   quality: 4
 
-- id: "rfc-6750-bearer-tokens"
-  title: "The OAuth 2.0 Authorization Framework: Bearer Token Usage (RFC 6750)"
-  short: "RFC 6750 Bearer Tokens"
-  provider: "IETF (Jones, Hardt)"
-  type: "article"
-  url: "https://www.rfc-editor.org/rfc/rfc6750.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Defines how resource servers accept access tokens via the Authorization header and how to signal token errors."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [rfc-6749-oauth2]
-  quality: 3
-
-- id: "rfc-8628-device-grant"
-  title: "OAuth 2.0 Device Authorization Grant (RFC 8628)"
-  short: "RFC 8628 Device Flow"
-  provider: "IETF"
-  type: "article"
-  url: "https://www.rfc-editor.org/rfc/rfc8628.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "The flow behind 'enter this code on your phone' logins for TVs and CLIs, worth knowing when building CLI tools."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [rfc-6749-oauth2]
-  quality: 3
-
-- id: "rfc-8252-oauth-native-apps"
-  title: "OAuth 2.0 for Native Apps (RFC 8252)"
-  short: "RFC 8252 Native Apps"
-  provider: "IETF (Denniss, Bradley)"
-  type: "article"
-  url: "https://www.rfc-editor.org/rfc/rfc8252.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Explains why native and desktop apps must use the system browser plus PKCE instead of embedded webviews."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [article-parecki-oauth2-simplified]
-  quality: 3
-
-- id: "rfc-7662-token-introspection"
-  title: "OAuth 2.0 Token Introspection (RFC 7662)"
-  short: "RFC 7662 Introspection"
-  provider: "IETF (Richer)"
-  type: "article"
-  url: "https://www.rfc-editor.org/rfc/rfc7662.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how APIs check opaque tokens against the authorization server, the main alternative to self-contained JWTs."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [rfc-6749-oauth2]
-  quality: 3
-
 - id: "owasp-authorization-cheat-sheet"
   title: "Authorization Cheat Sheet (OWASP)"
   short: "OWASP Authorization CS"
@@ -4891,44 +1898,6 @@
   roadmap: "software-architect"
   after: [owasp-authentication-cheat-sheet]
   quality: 4
-
-- id: "owasp-mfa-cheat-sheet"
-  title: "Multifactor Authentication Cheat Sheet (OWASP)"
-  short: "OWASP MFA Cheat Sheet"
-  provider: "OWASP"
-  type: "article"
-  url: "https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Compares TOTP, SMS, push and hardware keys and explains how to implement MFA enrollment and recovery safely."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [owasp-authentication-cheat-sheet]
-  quality: 3
-
-- id: "owasp-oauth2-cheat-sheet"
-  title: "OAuth 2.0 Protocol Cheat Sheet (OWASP)"
-  short: "OWASP OAuth2 Cheat Sheet"
-  provider: "OWASP"
-  type: "article"
-  url: "https://cheatsheetseries.owasp.org/cheatsheets/OAuth2_Cheat_Sheet.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Condenses the OAuth security BCP into concrete do and don't items for clients and authorization servers."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [article-parecki-oauth2-simplified]
-  quality: 3
 
 - id: "nist-sp-800-63b"
   title: "NIST SP 800-63B: Authentication and Authenticator Management"
@@ -4949,44 +1918,6 @@
   after: [owasp-authentication-cheat-sheet]
   quality: 4
 
-- id: "google-passkeys-developers"
-  title: "Passkeys (Google for Developers)"
-  short: "Google Passkeys Guide"
-  provider: "Google"
-  type: "article"
-  url: "https://developers.google.com/identity/passkeys"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Developer guides for adding passkey registration and sign-in to web and Android apps, with UX recommendations."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  doFirst: "webauthn.guide"
-  quality: 3
-
-- id: "pact-how-pact-works"
-  title: "How Pact works"
-  short: "How Pact Works"
-  provider: "Pact Foundation"
-  type: "article"
-  url: "https://docs.pact.io/getting_started/how_pact_works"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Walks through consumer tests generating a contract that the provider later verifies, without end-to-end environments."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [fowler-contract-test]
-  quality: 3
-
 - id: "hypothesis-docs"
   title: "Hypothesis documentation"
   short: "Hypothesis Docs"
@@ -5004,6 +1935,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "What is Hypothesis?"
 
 - id: "docs-yc-safe"
   title: "The SAFE: the open standard for startup fundraising"
@@ -5061,82 +1993,6 @@
   roadmap: "software-architect"
   after: [article-wtd-beginners-guide]
   quality: 4
-
-- id: "rfc-9068-jwt-access-tokens"
-  title: "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens (RFC 9068)"
-  short: "RFC 9068 JWT Access Token"
-  provider: "IETF (Bertocci)"
-  type: "article"
-  url: "https://www.rfc-editor.org/rfc/rfc9068.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Standardises the claims and validation steps for JWT-formatted access tokens so APIs verify them consistently."
-  fromYear: 3
-  priority: 3
-  roadmap: "software-architect"
-  after: [rfc-8725-jwt-bcp]
-  quality: 3
-
-- id: "oidc-discovery-spec"
-  title: "OpenID Connect Discovery 1.0"
-  short: "OIDC Discovery 1.0"
-  provider: "OpenID Foundation"
-  type: "article"
-  url: "https://openid.net/specs/openid-connect-discovery-1_0.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Explains the .well-known/openid-configuration document and JWKS lookup that let clients auto-configure against any provider."
-  fromYear: 3
-  priority: 3
-  roadmap: "software-architect"
-  doFirst: "OpenID Connect Core"
-  quality: 3
-
-- id: "ietf-idempotency-key-header"
-  title: "The Idempotency-Key HTTP Header Field (IETF draft)"
-  short: "Idempotency-Key Header"
-  provider: "IETF HTTPAPI WG"
-  type: "article"
-  url: "https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "The emerging standard for idempotency keys in HTTP APIs, including error codes for conflicts and reuse."
-  fromYear: 3
-  priority: 3
-  roadmap: "software-architect"
-  after: [stripe-idempotent-requests-docs]
-  quality: 3
-
-- id: "ietf-ratelimit-headers"
-  title: "RateLimit header fields for HTTP (IETF draft)"
-  short: "RateLimit Headers Draft"
-  provider: "IETF HTTPAPI WG"
-  type: "article"
-  url: "https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Standard headers for telling clients their quota and reset time so they can back off gracefully."
-  fromYear: 3
-  priority: 3
-  roadmap: "software-architect"
-  after: [brandur-rate-limiting-gcra]
-  quality: 3
 
 - id: "video-oauth-oidc-plain-english"
   title: "OAuth 2.0 and OpenID Connect (in plain English)"
@@ -5571,25 +2427,6 @@
   after: [bbg-scale-zero-to-millions]
   quality: 3
 
-- id: "testcontainers-getting-started"
-  title: "Getting started with Testcontainers"
-  short: "Testcontainers Intro"
-  provider: "Testcontainers / Docker"
-  type: "article"
-  url: "https://testcontainers.com/getting-started/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Shows how to spin up real Postgres, Redis or Kafka in Docker for integration tests instead of mocking them."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [article-practical-test-pyramid]
-  quality: 3
-
 - id: "site-speaking-io"
   title: "speaking.io: Tips for Public Speaking"
   short: "speaking.io (Holman)"
@@ -5756,62 +2593,6 @@
   priority: 3
   roadmap: "software-architect"
   quality: 2
-
-- id: "oauth-net-pkce"
-  title: "PKCE: Proof Key for Code Exchange (oauth.net)"
-  short: "PKCE on oauth.net"
-  provider: "oauth.net"
-  type: "article"
-  url: "https://oauth.net/2/pkce/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Short explainer of the code_verifier/code_challenge mechanism with links to the spec and tutorials."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [article-parecki-oauth2-simplified]
-  quality: 3
-
-- id: "okta-what-the-heck-is-oauth"
-  title: "What the Heck is OAuth?"
-  short: "What the Heck is OAuth?"
-  provider: "Matt Raible / Okta Developer"
-  type: "article"
-  url: "https://developer.okta.com/blog/2017/06/21/what-the-heck-is-oauth"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A friendly long-form introduction to OAuth and OIDC terminology, history and flows for newcomers."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "fowler-contract-test"
-  title: "Contract Test"
-  short: "Contract Test (Fowler)"
-  provider: "Martin Fowler"
-  type: "article"
-  url: "https://martinfowler.com/bliki/ContractTest.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Short explanation of how contract tests keep your test doubles honest about external services."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [article-fowler-test-double]
-  quality: 3
 
 - id: "article-speaking-io-cfp"
   title: "Writing the CFP"
@@ -6390,9 +3171,9 @@
   estHours: 2
   summary: "A concrete, section-by-section recipe for a one-page SWE resume that survives recruiter skims and ATS filters."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
-  quality: 2
+  quality: 4
 
 - id: "tih-behavioral-interview"
   title: "Behavioral interview preparation, step-by-step"
@@ -6408,9 +3189,9 @@
   estHours: 2
   summary: "Explains what behavioural rounds score and how to build a bank of reusable stories before the loop."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
-  quality: 2
+  quality: 4
 
 - id: "tih-mock-interviews"
   title: "Mock coding interviews"
@@ -6501,44 +3282,6 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
-  quality: 3
-
-- id: "oauth-net-oauth-2-1"
-  title: "OAuth 2.1 (oauth.net overview)"
-  short: "OAuth 2.1 Overview"
-  provider: "Aaron Parecki / oauth.net"
-  type: "article"
-  url: "https://oauth.net/2.1/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Summarises what OAuth 2.1 drops (implicit, password grant) and makes mandatory (PKCE), so you build to the modern profile."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [article-parecki-oauth2-simplified]
-  quality: 3
-
-- id: "oso-academy-rebac"
-  title: "Relationship-Based Access Control (ReBAC) - Authorization Academy"
-  short: "Oso: ReBAC Chapter"
-  provider: "Oso"
-  type: "article"
-  url: "https://www.osohq.com/academy/relationship-based-access-control-rebac"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how ownership, hierarchy and sharing relationships become permissions, the model behind Zanzibar-style systems."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [oso-authorization-academy]
   quality: 3
 
 - id: "fowler-microservice-testing"
@@ -7091,7 +3834,8 @@
   estHours: 1
   summary: "Shows the correct wait/notify pattern with a predicate, the basis of producer-consumer interview questions."
   fromYear: 2
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "article-sutter-lock-free-cppcon2014"
   title: "CppCon 2014: Lock-Free Programming (or, Juggling Razor Blades), Part I"
@@ -7109,6 +3853,7 @@
   fromYear: 3
   priority: 2
   after: [article-sutter-atomic-weapons]
+  quality: 4
 
 - id: "repo-coding-interview-university"
   title: "Coding Interview University"
@@ -7124,7 +3869,8 @@
   estHours: 200
   summary: "A long, self-paced CS curriculum (data structures, algorithms, systems basics) originally built to land a big-tech SWE job."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "article-bctci-nine-free-chapters"
   title: "Beyond Cracking the Coding Interview: nine free chapters"
@@ -7140,7 +3886,8 @@
   estHours: 8
   summary: "The free part of CtCI's 2025 sequel: how hiring really works, resumes, getting in without referrals, plus sliding windows and binary search."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "book-cracking-the-coding-interview"
   title: "Cracking the Coding Interview (6th Edition)"
@@ -7156,8 +3903,9 @@
   estHours: 30
   summary: "The classic coding-interview book: process, data structure review and a large solved question bank."
   fromYear: 1
-  priority: 2
+  priority: 3
   note: "Paid"
+  quality: 3
 
 - id: "book-little-book-of-semaphores"
   title: "The Little Book of Semaphores"
@@ -7175,6 +3923,7 @@
   fromYear: 2
   priority: 2
   after: [ostep]
+  quality: 4
 
 - id: "book-elements-of-programming-interviews"
   title: "Elements of Programming Interviews: The Insiders' Guide (C++)"
@@ -7190,9 +3939,10 @@
   estHours: 40
   summary: "Harder, C++-centric problems with idiomatic solutions; the site also offers a free PDF sampler and online judge."
   fromYear: 2
-  priority: 2
+  priority: 3
   note: "Paid"
   after: [book-cracking-the-coding-interview]
+  quality: 3
 
 - id: "repo-interactive-coding-challenges"
   title: "Interactive Coding Challenges"
@@ -7208,7 +3958,8 @@
   estHours: 40
   summary: "Notebook-based problems with unit tests and solutions, so you practise writing tested code rather than just reading answers."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 2
 
 - id: "tih-grind-75"
   title: "Grind 75: a better LeetCode 75 study plan"
@@ -7224,8 +3975,9 @@
   estHours: 60
   summary: "A configurable weekly problem schedule that adapts the Blind 75 list to your available hours."
   fromYear: 2
-  priority: 2
+  priority: 3
   doFirst: "NeetCode 150"
+  quality: 3
 
 - id: "tih-coding-interview-cheatsheet"
   title: "Coding interview cheatsheet: best practices before, during and after"
@@ -7241,7 +3993,8 @@
   estHours: 1
   summary: "Lists the behaviours interviewers reward while you code: clarifying, narrating, testing and complexity talk."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 2
 
 - id: "tih-coding-study-plan"
   title: "Coding interview study plan"
@@ -7257,7 +4010,8 @@
   estHours: 1
   summary: "Turns the prep window you have (weeks, not months) into a prioritised topic schedule."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 2
 
 - id: "tih-algorithms-cheatsheets"
   title: "Algorithms study cheatsheets"
@@ -7273,7 +4027,8 @@
   estHours: 6
   summary: "Per-topic corner cases, techniques and must-do problems for arrays, graphs, DP and more for last-week revision."
   fromYear: 1
-  priority: 2
+  priority: 3
+  quality: 3
 
 - id: "tih-coding-techniques"
   title: "Techniques to solve coding interview questions"
@@ -7289,8 +4044,9 @@
   estHours: 1
   summary: "Gives a repeatable approach for when you are stuck: brute force first, then precompute, sort, hash or two-pointer."
   fromYear: 1
-  priority: 2
+  priority: 3
   after: [tih-coding-interview-cheatsheet]
+  quality: 3
 
 - id: "article-yegge-get-that-job-at-google"
   title: "Get that job at Google"
@@ -7306,28 +4062,10 @@
   estHours: 1
   summary: "An old but still sharp list of the CS fundamentals big-tech interviewers expect: algorithms, graphs, OS, maths, coding by hand."
   fromYear: 1
-  priority: 2
+  priority: 3
 
 # ---- DevOps and MLOps (65)
-
-- id: "prometheus-metric-naming"
-  title: "Metric and label naming (Prometheus)"
-  short: "Prometheus Naming"
-  provider: "Prometheus Authors"
-  type: "article"
-  url: "https://prometheus.io/docs/practices/naming/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Conventions for units, suffixes like _total and _seconds, and label design that keep metrics queryable."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [prometheus-metric-types]
-  quality: 3
+  quality: 2
 
 - id: "prometheus-querying-basics"
   title: "Querying Prometheus (PromQL basics)"
@@ -7345,63 +4083,7 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
-  after: [prometheus-getting-started]
   quality: 4
-
-- id: "prometheus-metric-types"
-  title: "Metric types (Prometheus)"
-  short: "Prometheus Metric Types"
-  provider: "Prometheus Authors"
-  type: "article"
-  url: "https://prometheus.io/docs/concepts/metric_types/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Short reference for counters, gauges, histograms and summaries and when each is appropriate."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "otel-concepts-traces"
-  title: "Traces (OpenTelemetry concepts)"
-  short: "OTel Concepts: Traces"
-  provider: "OpenTelemetry"
-  type: "article"
-  url: "https://opentelemetry.io/docs/concepts/signals/traces/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Defines spans, span context, attributes, events and links: the vocabulary for any distributed tracing work."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "structlog-docs"
-  title: "structlog documentation"
-  short: "structlog Docs"
-  provider: "Hynek Schlawack"
-  type: "article"
-  url: "https://www.structlog.org/en/stable/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "The standard Python library for key-value structured logs, with a good intro on why context-rich logs beat strings."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [py-howto-logging]
-  quality: 3
 
 - id: "k6-docs"
   title: "Grafana k6 documentation"
@@ -7417,27 +4099,9 @@
   estHours: 4
   summary: "Script load tests in JavaScript, set thresholds as pass/fail criteria, and run them in CI."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
-  quality: 3
-
-- id: "locust-docs"
-  title: "Locust Documentation"
-  short: "Locust Docs"
-  provider: "Locust contributors"
-  type: "article"
-  url: "https://docs.locust.io/en/stable/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 3
-  summary: "Write load tests as plain Python user classes and scale them across workers; natural for Python backends."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
+  quality: 4
 
 - id: "docs-github-contributing-to-open-source"
   title: "Contributing to open source (GitHub Docs)"
@@ -7719,7 +4383,6 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
-  after: [prometheus-metric-types]
   quality: 4
 
 - id: "prometheus-alerting-practices"
@@ -7741,25 +4404,6 @@
   doFirst: "SRE Book Ch. 6"
   quality: 4
 
-- id: "prometheus-alertmanager-overview"
-  title: "Alerting overview (Prometheus Alertmanager)"
-  short: "Alertmanager Overview"
-  provider: "Prometheus Authors"
-  type: "article"
-  url: "https://prometheus.io/docs/alerting/latest/overview/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Explains how alert rules flow into Alertmanager for grouping, inhibition, silencing and routing to receivers."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [prometheus-alerting-practices]
-  quality: 3
-
 - id: "otel-collector-docs"
   title: "OpenTelemetry Collector"
   short: "OTel Collector"
@@ -7776,46 +4420,7 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
-  after: [otel-concepts-traces]
   quality: 4
-
-- id: "jaeger-docs"
-  title: "Jaeger Documentation"
-  short: "Jaeger Docs"
-  provider: "Jaeger Authors (CNCF)"
-  type: "article"
-  url: "https://www.jaegertracing.io/docs/latest/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "The open-source tracing backend's docs: architecture, deployment and using its UI to find slow spans."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [otel-concepts-traces]
-  quality: 3
-
-- id: "loki-get-started"
-  title: "Get started with Grafana Loki"
-  short: "Loki Get Started"
-  provider: "Grafana Labs"
-  type: "article"
-  url: "https://grafana.com/docs/loki/latest/get-started/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Introduces label-indexed log aggregation and walks through shipping and querying logs with LogQL."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [grafana-fundamentals-tutorial]
-  quality: 3
 
 - id: "docs-pytorch-contributing-md"
   title: "Contributing to PyTorch (CONTRIBUTING.md)"
@@ -8064,24 +4669,6 @@
   after: [docs-github-fork-a-repo]
   quality: 2
 
-- id: "docs-hydra-getting-started"
-  title: "Hydra: Getting started"
-  short: "Hydra Configs"
-  provider: "Meta (Facebook Research)"
-  type: "article"
-  url: "https://hydra.cc/docs/intro/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Composable configs and command-line overrides make sweeps reproducible and keep experiment settings out of your code."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
 - id: "w3c-trace-context"
   title: "Trace Context (W3C Recommendation)"
   short: "W3C Trace Context"
@@ -8098,7 +4685,6 @@
   fromYear: 3
   priority: 2
   roadmap: "software-architect"
-  after: [otel-concepts-traces]
   quality: 4
 
 - id: "cert-lf-kcna"
@@ -8356,80 +4942,6 @@
   after: [cert-coursera-ml-in-production]
   quality: 2
 
-- id: "prometheus-getting-started"
-  title: "Getting started (Prometheus)"
-  short: "Prometheus Getting Started"
-  provider: "Prometheus Authors"
-  type: "article"
-  url: "https://prometheus.io/docs/prometheus/latest/getting_started/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Install Prometheus, scrape itself and sample targets, and run recording rules in under an hour."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "otel-python-getting-started"
-  title: "Getting Started (OpenTelemetry Python)"
-  short: "OTel Python Quickstart"
-  provider: "OpenTelemetry"
-  type: "article"
-  url: "https://opentelemetry.io/docs/languages/python/getting-started/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Instrument a Flask app with traces, metrics and logs, first automatically and then by hand."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "grafana-fundamentals-tutorial"
-  title: "Grafana fundamentals"
-  short: "Grafana Fundamentals"
-  provider: "Grafana Labs"
-  type: "article"
-  url: "https://grafana.com/tutorials/grafana-fundamentals/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Guided lab that connects Prometheus and Loki, builds a dashboard, and sets up an alert end to end."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [prometheus-getting-started]
-  quality: 3
-
-- id: "otel-go-getting-started"
-  title: "Getting Started (OpenTelemetry Go)"
-  short: "OTel Go Quickstart"
-  provider: "OpenTelemetry"
-  type: "article"
-  url: "https://opentelemetry.io/docs/languages/go/getting-started/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Builds a small Go HTTP service and wires up the OTel SDK for traces, metrics and logs explicitly."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  doFirst: "Go Tour"
-  quality: 3
-
 - id: "practice-goodfirstissue-dev"
   title: "Good First Issue"
   short: "goodfirstissue.dev"
@@ -8467,44 +4979,6 @@
   roadmap: "software-architect"
   doFirst: "How to Contribute to OSS"
   quality: 2
-
-- id: "repo-lightning-hydra-template"
-  title: "Lightning-Hydra-Template"
-  short: "Lightning-Hydra Template"
-  provider: "ashleve"
-  type: "practice"
-  url: "https://github.com/ashleve/lightning-hydra-template"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "A ready project skeleton combining PyTorch Lightning, Hydra configs and loggers for clean, repeatable experiments."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [docs-hydra-getting-started]
-  quality: 3
-
-- id: "k6-load-test-types"
-  title: "Load test types (k6 testing guides)"
-  short: "k6: Load Test Types"
-  provider: "Grafana Labs"
-  type: "article"
-  url: "https://grafana.com/docs/k6/latest/testing-guides/test-types/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Defines smoke, average-load, stress, soak, spike and breakpoint tests and when each answers a real question."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [k6-docs]
-  quality: 3
 
 - id: "docs-opensource-guide-code-of-conduct"
   title: "Your Code of Conduct (Open Source Guides)"
@@ -8876,8 +5350,8 @@
   estHours: 20
   summary: "Peking University's intro course on pinyin, tones and survival phrases, taught in English for total beginners."
   fromYear: 1
-  priority: 3
-  quality: 3
+  priority: 2
+  quality: 4
 
 - id: "course-coursera-pku-more-chinese-for-beginners"
   title: "More Chinese for Beginners"
@@ -9234,27 +5708,10 @@
   estHours: 6
   summary: "Install, capture your own data and train NeRFs or splats in a few commands, with the NeRFology pages explaining each method."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-colmap-tutorial]
-
-- id: "docs-nerfstudio-splatfacto"
-  title: "Splatfacto (Nerfstudio Gaussian splatting method)"
-  short: "Splatfacto docs"
-  provider: "Nerfstudio team"
-  type: "article"
-  url: "https://docs.nerf.studio/nerfology/methods/splat.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Explains Nerfstudio's Gaussian splatting implementation, its settings and how to export splats."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  after: [docs-nerfstudio]
+  quality: 4
 
 - id: "docs-gsplat"
   title: "gsplat documentation"
@@ -9270,27 +5727,10 @@
   estHours: 4
   summary: "API docs and examples for a fast CUDA Gaussian rasterizer you can call from PyTorch."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "3DGS paper"
-
-- id: "docs-kaolin"
-  title: "NVIDIA Kaolin Library documentation"
-  short: "Kaolin docs"
-  provider: "NVIDIA"
-  type: "article"
-  url: "https://kaolin.readthedocs.io/en/latest/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "Tutorials on differentiable rendering, representation conversions, splat physics and an in-notebook 3D viewer."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  after: [tutorial-pytorch3d-tutorials]
+  quality: 4
 
 - id: "course-mit-6s980-inverse-graphics"
   title: "Machine Learning for Inverse Graphics (MIT 6.S980, Fall 2022)"
@@ -9306,9 +5746,10 @@
   estHours: 30
   summary: "Graduate course with lecture videos and assignments on neural scene representations, differentiable rendering and 3D learning."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "NeRF paper"
+  quality: 4
 
 - id: "cert-edx-ucsd-computer-graphics"
   title: "UCSanDiegoX: Computer Graphics"
@@ -9324,9 +5765,10 @@
   estHours: 60
   summary: "University graphics course on transforms, OpenGL shading and ray tracing; edX audit is free, and a paid verified certificate is available."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [learnopengl]
+  quality: 4
 
 - id: "cert-dli-omniverse-extensions"
   title: "Develop, Customize, and Publish in Omniverse With Extensions (DLI)"
@@ -9345,6 +5787,7 @@
   priority: 3
   roadmap: "game-developer"
   doFirst: "Python"
+  quality: 2
 
 - id: "course-3dv-2024-3dgs-tutorial"
   title: "3D Gaussian Splatting tutorial (3DV 2024)"
@@ -9360,9 +5803,10 @@
   estHours: 4
   summary: "A half-day tutorial by the 3DGS authors and key follow-up researchers, with slides for all four parts."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "3DGS paper"
+  quality: 4
 
 - id: "cert-nvidia-ncp-ousd"
   title: "NVIDIA-Certified Professional: OpenUSD Development (NCP-OUSD)"
@@ -9382,182 +5826,7 @@
   roadmap: "game-developer"
   note: "Paid"
   doFirst: "DLI Omniverse Extensions"
-
-- id: "course-cvpr2025-volumetric-video"
-  title: "Volumetric Video in the Real World (CVPR 2025 tutorial)"
-  short: "CVPR'25 Volumetric Video"
-  provider: "NVIDIA Research and speakers"
-  type: "course"
-  url: "https://nvlabs.github.io/cvpr2025-volumetric-video-tutorial"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 7
-  summary: "Recorded talks on 4D reconstruction, human capture, splat compression and streaming of dynamic scenes."
-  fromYear: 3
-  priority: 3
-  roadmap: "game-developer"
-  after: [paper-4d-gaussian-splatting]
-
-- id: "tutorial-gsplat-fit-colmap"
-  title: "Fit a COLMAP Capture (gsplat example)"
-  short: "gsplat COLMAP example"
-  provider: "Nerfstudio team"
-  type: "article"
-  url: "https://docs.gsplat.studio/main/examples/colmap.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Walks through training a Gaussian splat scene from your own COLMAP reconstruction end to end."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  after: [docs-colmap-tutorial]
-
-- id: "tutorial-pytorch3d-tutorials"
-  title: "PyTorch3D tutorials"
-  short: "PyTorch3D tutorials"
-  provider: "Meta AI"
-  type: "article"
-  url: "https://pytorch3d.org/tutorials/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 8
-  summary: "Notebooks on mesh fitting, differentiable rendering, camera optimization and volumes with PyTorch3D."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "PyTorch basics"
-
-- id: "tutorial-pytorch3d-simple-nerf"
-  title: "Fit a simplified NeRF via raymarching (PyTorch3D tutorial)"
-  short: "PyTorch3D mini NeRF"
-  provider: "Meta AI"
-  type: "article"
-  url: "https://pytorch3d.org/tutorials/fit_simple_neural_radiance_field"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Build a small NeRF with PyTorch3D's implicit renderer to see ray sampling and volume rendering in code."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "NeRF paper"
-
-- id: "repo-triposr"
-  title: "TripoSR (official code)"
-  short: "TripoSR repo"
-  provider: "Tripo AI / Stability AI"
-  type: "practice"
-  url: "https://github.com/VAST-AI-Research/TripoSR"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intro"
-  cost: "free"
-  estHours: 3
-  summary: "One of the easiest image-to-3D models to run: sub-second mesh reconstruction from a single photo."
-  fromYear: 1
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "TripoSR paper"
-
-- id: "repo-stable-fast-3d"
-  title: "Stable Fast 3D (official code)"
-  short: "Stable Fast 3D repo"
-  provider: "Stability AI"
-  type: "practice"
-  url: "https://github.com/Stability-AI/stable-fast-3d"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intro"
-  cost: "free"
-  estHours: 3
-  summary: "Fast single-image mesh generation with UV unwrapping and material estimation, ready for game engines."
-  fromYear: 1
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "SF3D paper"
-
-- id: "repo-kiri-3dgs-blender-addon"
-  title: "3DGS Render for Blender (KIRI Engine add-on)"
-  short: "KIRI 3DGS Blender"
-  provider: "KIRI Engine"
-  type: "practice"
-  url: "https://github.com/Kiri-Innovation/3dgs-render-blender-addon"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Import, edit, animate and render Gaussian splats inside Blender alongside regular meshes."
-  fromYear: 1
-  priority: 3
-  roadmap: "game-developer"
-
-- id: "repo-reshot-gs-blender-addon"
-  title: "3D Gaussian Splatting Blender Addon"
-  short: "GS Blender Addon"
-  provider: "ReshotAI"
-  type: "practice"
-  url: "https://github.com/ReshotAI/gaussian-splatting-blender-addon"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Open-source Blender add-on to load and render 3DGS .ply scenes, a good look at splats in a DCC tool."
-  fromYear: 1
-  priority: 3
-  roadmap: "game-developer"
-
-- id: "repo-supersplat"
-  title: "SuperSplat Editor"
-  short: "SuperSplat"
-  provider: "PlayCanvas"
-  type: "practice"
-  url: "https://github.com/playcanvas/supersplat"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Browser-based tool to inspect, clean up, optimize and publish Gaussian splat captures."
-  fromYear: 1
-  priority: 3
-  roadmap: "game-developer"
-
-- id: "repo-viser"
-  title: "Viser: 3D visualization for computer vision and robotics in Python"
-  short: "Viser"
-  provider: "Nerfstudio team"
-  type: "practice"
-  url: "https://github.com/nerfstudio-project/viser"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Web-based Python 3D viewer for point clouds, meshes, cameras and splats, ideal for debugging reconstructions."
-  fromYear: 1
-  priority: 3
-  roadmap: "game-developer"
+  quality: 2
 
 - id: "repo-nerfstudio"
   title: "nerfstudio (source repository)"
@@ -9573,9 +5842,10 @@
   estHours: 8
   summary: "Modular codebase for adding your own radiance-field method on top of shared data parsers, viewer and trainers."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-nerfstudio]
+  quality: 4
 
 - id: "repo-gsplat"
   title: "gsplat (source repository)"
@@ -9591,9 +5861,10 @@
   estHours: 6
   summary: "Readable, well-tested CUDA kernels for Gaussian splatting with densification strategies, MCMC and multi-GPU training."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-gsplat]
+  quality: 4
 
 - id: "repo-instant-ngp"
   title: "Instant Neural Graphics Primitives (instant-ngp)"
@@ -9609,9 +5880,10 @@
   estHours: 5
   summary: "Train a NeRF in seconds with the hash-grid encoding and an interactive GUI; the classic hands-on radiance-field demo."
   fromYear: 2
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   doFirst: "Instant-NGP paper"
+  quality: 5
 
 - id: "repo-graphdeco-gaussian-splatting"
   title: "3D Gaussian Splatting for Real-Time Radiance Field Rendering (official code)"
@@ -9627,9 +5899,10 @@
   estHours: 8
   summary: "The original training code, CUDA rasterizer and SIBR viewer; reading it is the best way to understand 3DGS details."
   fromYear: 2
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   doFirst: "3DGS paper"
+  quality: 5
 
 - id: "repo-naver-dust3r"
   title: "DUSt3R (official code)"
@@ -9645,9 +5918,10 @@
   estHours: 4
   summary: "Get dense pointmaps and camera poses from unposed image pairs; handy as a COLMAP alternative for splatting."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "DUSt3R paper"
+  quality: 4
 
 - id: "repo-facebookresearch-vggt"
   title: "VGGT: Visual Geometry Grounded Transformer (code)"
@@ -9663,189 +5937,10 @@
   estHours: 4
   summary: "Feed-forward cameras, depth and point tracks from many views in one pass, with export to COLMAP for splat training."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "VGGT paper"
-
-- id: "repo-instantmesh"
-  title: "InstantMesh (official code)"
-  short: "InstantMesh repo"
-  provider: "Tencent ARC"
-  type: "practice"
-  url: "https://github.com/TencentARC/InstantMesh"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Single image to textured mesh in seconds via multi-view diffusion plus a sparse-view LRM; easy to run locally."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "LRM paper"
-
-- id: "repo-lgm"
-  title: "LGM: Large Multi-View Gaussian Model (code)"
-  short: "LGM repo"
-  provider: "3DTopia"
-  type: "practice"
-  url: "https://github.com/3DTopia/LGM"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Generates Gaussian splats from text or an image via multi-view images and a U-Net, with training code included."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "LGM paper"
-
-- id: "repo-mvdream"
-  title: "MVDream (official code)"
-  short: "MVDream repo"
-  provider: "ByteDance"
-  type: "practice"
-  url: "https://github.com/bytedance/MVDream"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Multi-view diffusion model code; pair it with threestudio to run score-distillation text-to-3D yourself."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "MVDream paper"
-
-- id: "repo-zero123"
-  title: "Zero-1-to-3 (official code)"
-  short: "Zero-1-to-3 repo"
-  provider: "Columbia CV Lab"
-  type: "practice"
-  url: "https://github.com/cvlab-columbia/zero123"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Novel-view synthesis from one image with a fine-tuned diffusion model; the code that started single-image 3D."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "Zero-1-to-3 paper"
-
-- id: "repo-antimatter15-splat"
-  title: "splat: WebGL real-time Gaussian splatting viewer"
-  short: "antimatter15 splat"
-  provider: "Kevin Kwok (antimatter15)"
-  type: "practice"
-  url: "https://github.com/antimatter15/splat"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "A tiny single-file WebGL splat renderer; easy to read to learn sorting and splat rasterization in a browser."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "3DGS paper"
-
-- id: "repo-gaussiansplats3d"
-  title: "GaussianSplats3D: 3D Gaussian splatting for Three.js"
-  short: "GaussianSplats3D"
-  provider: "Mark Kellogg"
-  type: "practice"
-  url: "https://github.com/mkkellogg/GaussianSplats3D"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Three.js renderer for .ply/.splat/.ksplat files to embed splat scenes in web apps."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  after: [repo-antimatter15-splat]
-
-- id: "repo-sparkjs"
-  title: "Spark: advanced 3D Gaussian Splatting renderer for THREE.js"
-  short: "Spark (THREE.js)"
-  provider: "Spark project"
-  type: "practice"
-  url: "https://github.com/sparkjsdev/spark"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Modern web splat renderer that mixes splats with regular Three.js scenes and supports programmable edits."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  after: [repo-gaussiansplats3d]
-
-- id: "repo-brush"
-  title: "Brush: cross-platform Gaussian splatting reconstruction"
-  short: "Brush"
-  provider: "Arthur Brussee"
-  type: "practice"
-  url: "https://github.com/ArthurBrussee/brush"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "A Rust/WebGPU splat trainer that runs on almost any GPU and even in the browser, great for systems-minded learners."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  after: [repo-graphdeco-gaussian-splatting]
-
-- id: "repo-opensplat"
-  title: "OpenSplat"
-  short: "OpenSplat"
-  provider: "Piero Toffanin"
-  type: "practice"
-  url: "https://github.com/pierotofy/OpenSplat"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Lean portable C++ Gaussian splatting trainer that ingests COLMAP, OpenSfM and ODX outputs."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  after: [docs-colmap-tutorial]
-
-- id: "repo-lichtfeld-studio"
-  title: "LichtFeld Studio"
-  short: "LichtFeld Studio"
-  provider: "MrNeRF and contributors"
-  type: "practice"
-  url: "https://github.com/MrNeRF/LichtFeld-Studio"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Native C++ workstation to train, inspect, edit and export 3DGS scenes with Python plugins."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  after: [repo-graphdeco-gaussian-splatting]
+  quality: 4
 
 - id: "repo-unity-gaussian-splatting"
   title: "Gaussian Splatting playground in Unity"
@@ -9861,45 +5956,10 @@
   estHours: 3
   summary: "A game-engine implementation of splat rendering with compression experiments, written by a veteran graphics programmer."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "3DGS paper"
-
-- id: "repo-niantic-spz"
-  title: "spz: compressed 3D Gaussian splat file format"
-  short: "spz format"
-  provider: "Niantic"
-  type: "practice"
-  url: "https://github.com/nianticlabs/spz"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Small C++ library for a splat format about 10x smaller than PLY; shows practical splat quantization."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "3DGS paper"
-
-- id: "repo-nerfacc"
-  title: "NerfAcc: general NeRF acceleration toolbox"
-  short: "NerfAcc"
-  provider: "Nerfstudio team"
-  type: "practice"
-  url: "https://github.com/nerfstudio-project/nerfacc"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Plug-in occupancy grids and proposal sampling that make volumetric rendering fast; good for learning ray-marching efficiency."
-  fromYear: 3
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "NeRF paper"
+  quality: 4
 
 - id: "repo-tiny-cuda-nn"
   title: "tiny-cuda-nn"
@@ -9915,9 +5975,10 @@
   estHours: 5
   summary: "Fully fused MLPs and hash encodings in CUDA; study it to see how neural graphics primitives become fast."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [repo-instant-ngp]
+  quality: 4
 
 - id: "repo-2d-gaussian-splatting"
   title: "2D Gaussian Splatting (official code)"
@@ -9933,27 +5994,10 @@
   estHours: 4
   summary: "Surfel-based splatting code with mesh extraction, useful when you need geometry rather than just novel views."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   doFirst: "2DGS paper"
-
-- id: "repo-hierarchical-3d-gaussians"
-  title: "A Hierarchical 3D Gaussian Representation for Real-Time Rendering of Very Large Datasets"
-  short: "Hierarchical 3DGS"
-  provider: "Inria GraphDeco"
-  type: "practice"
-  url: "https://github.com/graphdeco-inria/hierarchical-3d-gaussians"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Code for city-scale splatting with level-of-detail hierarchies and chunked training."
-  fromYear: 3
-  priority: 3
-  roadmap: "game-developer"
-  after: [repo-graphdeco-gaussian-splatting]
+  quality: 4
 
 - id: "repo-naver-mast3r"
   title: "MASt3R (official code)"
@@ -9969,9 +6013,10 @@
   estHours: 4
   summary: "Adds dense feature matching and sparse global alignment on top of DUSt3R for metric reconstruction."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [repo-naver-dust3r]
+  quality: 4
 
 - id: "repo-nvdiffrec"
   title: "nvdiffrec: joint optimization of topology, materials and lighting"
@@ -9987,173 +6032,10 @@
   estHours: 4
   summary: "Inverse rendering to triangle meshes with PBR materials and environment lighting using nvdiffrast."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   after: [docs-nvdiffrast]
-
-- id: "paper-from-volume-rendering-to-3dgs"
-  title: "From Volume Rendering to 3D Gaussian Splatting: Theory and Applications"
-  short: "Volume rendering to 3DGS"
-  provider: "arXiv tutorial survey"
-  type: "paper"
-  url: "https://arxiv.org/abs/2510.18101"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "A tutorial-style derivation from volume rendering to splatting plus a tour of applications."
-  fromYear: 2
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "NeRF paper"
-
-- id: "paper-sugar"
-  title: "SuGaR: Surface-Aligned Gaussian Splatting for Efficient 3D Mesh Reconstruction and High-Quality Mesh Rendering"
-  short: "SuGaR"
-  provider: "Antoine Guedon, Vincent Lepetit"
-  type: "paper"
-  url: "https://arxiv.org/abs/2311.12775"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Shows how to regularize splats onto surfaces and extract an editable mesh bound to Gaussians."
-  fromYear: 3
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "3DGS paper"
-
-- id: "paper-4d-gaussian-splatting"
-  title: "4D Gaussian Splatting for Real-Time Dynamic Scene Rendering"
-  short: "4D Gaussian Splatting"
-  provider: "Guanjun Wu et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2310.08528"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Extends splatting to dynamic scenes with a HexPlane deformation field while keeping real-time rendering."
-  fromYear: 3
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "3DGS paper"
-
-- id: "paper-deformable-3d-gaussians"
-  title: "Deformable 3D Gaussians for High-Fidelity Monocular Dynamic Scene Reconstruction"
-  short: "Deformable 3DGS"
-  provider: "Ziyi Yang et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2309.13101"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "A simple MLP deformation of canonical Gaussians for monocular dynamic scenes, a strong baseline for 4D work."
-  fromYear: 3
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "3DGS paper"
-
-- id: "paper-scaffold-gs"
-  title: "Scaffold-GS: Structured 3D Gaussians for View-Adaptive Rendering"
-  short: "Scaffold-GS"
-  provider: "Tao Lu et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2312.00109"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Anchor points that spawn neural Gaussians cut memory and redundancy, an influential structured-splatting design."
-  fromYear: 3
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "3DGS paper"
-
-- id: "paper-gaussian-opacity-fields"
-  title: "Gaussian Opacity Fields: Efficient Adaptive Surface Reconstruction in Unbounded Scenes"
-  short: "Gaussian Opacity Fields"
-  provider: "Zehao Yu, Torsten Sattler, Andreas Geiger"
-  type: "paper"
-  url: "https://arxiv.org/abs/2404.10772"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Derives an opacity field from Gaussians for detailed surface extraction in unbounded scenes."
-  fromYear: 3
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "2DGS paper"
-
-- id: "paper-spar3d"
-  title: "SPAR3D: Stable Point-Aware Reconstruction of 3D Objects from Single Images"
-  short: "SPAR3D"
-  provider: "Stability AI"
-  type: "paper"
-  url: "https://arxiv.org/abs/2501.04689"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Two-stage point-diffusion then mesh-regression design that allows interactive point-cloud editing before meshing."
-  fromYear: 3
-  priority: 3
-  roadmap: "game-developer"
-  research: "diffusion"
-  doFirst: "SF3D paper"
-
-- id: "paper-neuralangelo"
-  title: "Neuralangelo: High-Fidelity Neural Surface Reconstruction"
-  short: "Neuralangelo"
-  provider: "NVIDIA / Johns Hopkins"
-  type: "paper"
-  url: "https://arxiv.org/abs/2306.03092"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Combines hash grids with numerical gradients for detailed SDF surface reconstruction from video."
-  fromYear: 3
-  priority: 3
-  roadmap: "game-developer"
-  doFirst: "Instant-NGP paper"
-
-- id: "article-hf-intro-3dgs"
-  title: "Introduction to 3D Gaussian Splatting"
-  short: "HF intro to 3DGS"
-  provider: "Dylan Ebert (Hugging Face)"
-  type: "article"
-  url: "https://huggingface.co/blog/gaussian-splatting"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [graphics]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A gentle explanation of what Gaussian splats are and how training and rasterization work."
-  fromYear: 1
-  priority: 3
-  roadmap: "game-developer"
-
-# ---- Robotics (4)
+  quality: 4
 
 - id: "cert-dli-jetson-nano"
   title: "Getting Started with AI on Jetson Nano (DLI)"
@@ -10171,6 +6053,7 @@
   fromYear: 1
   priority: 3
   doFirst: "Python"
+  quality: 2
 
 - id: "cert-dli-jetson-video-ai"
   title: "Building Video AI Applications at the Edge on Jetson Nano (DLI)"
@@ -10188,6 +6071,7 @@
   fromYear: 2
   priority: 3
   after: [cert-dli-jetson-nano]
+  quality: 2
 
 - id: "cert-edx-duckietown"
   title: "Self-Driving Cars with Duckietown"
@@ -10205,6 +6089,7 @@
   fromYear: 2
   priority: 3
   after: [modern-robotics]
+  quality: 3
 
 - id: "cert-coursera-self-driving-cars"
   title: "Self-Driving Cars Specialization"
@@ -10220,11 +6105,12 @@
   estHours: 125
   summary: "Four-course program on vehicle dynamics, state estimation, perception and motion planning; the certificate shows a full autonomy-stack foundation (financial aid available)."
   fromYear: 2
-  priority: 3
+  priority: 2
   note: "Paid"
   after: [modern-robotics]
 
 # ---- Game development (2)
+  quality: 4
 
 - id: "cert-unity-user-programmer"
   title: "Unity Certified User: Programmer"
@@ -10242,7 +6128,7 @@
   fromYear: 1
   priority: 4
   roadmap: "game-developer"
-  after: [unity-junior-programmer]
+  quality: 2
 
 - id: "cert-epic-game-design-pc"
   title: "Epic Games Game Design Professional Certificate"
@@ -10263,6 +6149,7 @@
   note: "Paid"
 
 # ---- Math and physics (2)
+  quality: 2
 
 - id: "cert-coursera-math-for-ml"
   title: "Mathematics for Machine Learning and Data Science Specialization"

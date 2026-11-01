@@ -174,10 +174,12 @@ export const SAME_AS: Readonly<Record<string, string>> = {
  * and 1M reports are not the Qwen2.5 report; the CP Handbook's LaTeX source is not the PDF; MIT 18.06's 2025 course
  * repo is not OCW's 2010 course; CMU 15-721's Spring 2024 lectures are not its course site. From the 11,389-row file:
  * Callen's plasma physics lectures are not EPFL's course, CRFM's HELM (the evaluation framework) is not Helm (the
- * Kubernetes package manager), NERSC's roofline page is not Berkeley Lab's.
+ * Kubernetes package manager), NERSC's roofline page is not Berkeley Lab's. From the 7,640-row file: Glaser et al.'s 2015
+ * "Training Schrödinger's cat" is not Koch et al.'s 2022 report on quantum optimal control, which it replaced.
  */
 export const NOT_SAME: Readonly<Record<string, readonly string[]>> = {
   'paper-orca': ['orca'],
+  'paper-glaser-training-schrodingers-cat': ['paper-koch-quantum-optimal-control'],
   'dpv-algorithms': ['erickson-algorithms'],
   'article-langchain-context-engineering': ['article-anthropic-context-engineering'],
   'whitepaper-google-agents': ['article-chip-huyen-agents'],

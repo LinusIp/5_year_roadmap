@@ -10,44 +10,6 @@
 
 # ---- Inference engineering: serving, kernels, GPUs (track ai, tag inference) (12)
 
-- id: "docs-llamacpp-gbnf"
-  title: "GBNF Guide (llama.cpp grammars)"
-  short: "llama.cpp GBNF grammars"
-  provider: "ggml-org"
-  type: "article"
-  url: "https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Teaches GBNF grammars and JSON-schema conversion so a local model's output is forced into a parseable tool-call or data shape."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  quality: 3
-
-- id: "book-inference-engineering-kiely"
-  title: "Inference Engineering"
-  short: "Inference Engineering"
-  provider: "Philip Kiely (Baseten, 2026)"
-  type: "book"
-  url: "https://www.baseten.co/inference-engineering/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 7
-  summary: "A free, practitioner-written overview of the serving stack under every agent: GPUs, CUDA, vLLM-style engines, quantization, speculative decoding and production infrastructure."
-  fromYear: 1
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  quality: 3
-
 - id: "book-pmpp-4e"
   title: "Programming Massively Parallel Processors: A Hands-on Approach (4th ed.)"
   short: "PMPP 4th ed"
@@ -69,87 +31,6 @@
   doFirst: "CS:APP"
   quality: 5
 
-- id: "book-ai-systems-performance-engineering"
-  title: "AI Systems Performance Engineering"
-  short: "AI Systems Perf Eng"
-  provider: "Chris Fregly (O'Reilly, 2025)"
-  type: "book"
-  url: "https://www.oreilly.com/library/view/-/9798341627772/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "paid"
-  estHours: 35
-  summary: "A thousand-page reference on co-tuning hardware, CUDA kernels, PyTorch and multinode training/inference, ending in a 175-item optimization checklist, aimed squarely at an aspiring inference engineer."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  note: "Paid"
-  after: [book-inference-engineering-kiely]
-  quality: 3
-
-- id: "repo-mistral-rs"
-  title: "mistral.rs: fast, flexible LLM inference in Rust"
-  short: "mistral.rs"
-  provider: "Eric Buehler"
-  type: "practice"
-  url: "https://github.com/EricLBuehler/mistral.rs"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 20
-  summary: "A full Rust inference engine with OpenAI/Anthropic-compatible servers, tool calling, MCP and sandboxed code execution: a self-hostable agent backend written in Rust."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [rust-book]
-  quality: 3
-
-- id: "repo-llama-cpp-rs"
-  title: "llama-cpp-rs: Rust bindings to llama.cpp"
-  short: "llama-cpp-rs"
-  provider: "Utility AI"
-  type: "practice"
-  url: "https://github.com/utilityai/llama-cpp-rs"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 5
-  summary: "Safe-ish Rust wrappers over llama.cpp so a Rust harness can embed a local GGUF model in-process instead of calling a server."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [llama-cpp]
-  quality: 3
-
-- id: "repo-ort-rust"
-  title: "ort: ONNX Runtime bindings for Rust"
-  short: "ort (ONNX Runtime Rust)"
-  provider: "pyke"
-  type: "practice"
-  url: "https://github.com/pykeio/ort"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 5
-  summary: "Run ONNX models (embedders, rerankers, classifiers) from Rust with hardware acceleration, a common building block inside agent tooling."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [rust-book]
-  quality: 3
-
 - id: "repo-xgrammar"
   title: "XGrammar: fast, flexible structured generation"
   short: "XGrammar repo"
@@ -167,30 +48,7 @@
   priority: 1
   roadmap: "inference-engineering"
   tags: [inference]
-  after: [docs-llamacpp-gbnf]
   quality: 4
-
-- id: "repo-outlines-core"
-  title: "outlines-core: Rust core of Outlines structured generation"
-  short: "outlines-core"
-  provider: "dottxt"
-  type: "practice"
-  url: "https://github.com/dottxt-ai/outlines-core"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 5
-  summary: "The Rust implementation that turns regexes and JSON schemas into token-level automata for guaranteed-valid model output."
-  fromYear: 3
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [docs-llamacpp-gbnf]
-
-# ---- AI, ML, LLMs and agents (95)
-  quality: 3
 
 - id: "docs-rig-agents"
   title: "Rig Agents: High-Level LLM Orchestration"
@@ -209,236 +67,6 @@
   priority: 3
   roadmap: "ai-agents"
   after: [repo-rig-rust]
-  quality: 3
-
-- id: "docs-hf-tokenizers-rust"
-  title: "tokenizers (Rust crate documentation)"
-  short: "HF tokenizers Rust docs"
-  provider: "Hugging Face"
-  type: "article"
-  url: "https://docs.rs/crate/tokenizers/latest"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "API docs for the Rust core of Hugging Face tokenizers, to load any model's tokenizer.json natively in a Rust agent or server."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  after: [repo-tiktoken-rs]
-  quality: 3
-
-- id: "docs-codex-protocol-v1"
-  title: "Codex core protocol overview (protocol_v1)"
-  short: "Codex SQ/EQ protocol"
-  provider: "OpenAI"
-  type: "article"
-  url: "https://github.com/openai/codex/blob/main/codex-rs/docs/protocol_v1.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Defines the session/task/turn vocabulary and the submission-queue/event-queue split between UI and agent core in Codex's Rust engine."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-agents"
-  doFirst: "Unrolling the Codex agent loop"
-  quality: 3
-
-- id: "docs-codex-execpolicy"
-  title: "codex-execpolicy: command approval policy engine"
-  short: "Codex execpolicy"
-  provider: "OpenAI"
-  type: "article"
-  url: "https://github.com/openai/codex/blob/main/codex-rs/execpolicy/README.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how a harness decides allow/prompt/forbid for shell commands with Starlark prefix rules that carry their own test examples."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-agents"
-  after: [docs-codex-linux-sandbox]
-  quality: 3
-
-- id: "book-eureka-machine-socher"
-  title: "The Eureka Machine: Why AI Is the Key to Unlocking a New Era of Scientific Discoveries"
-  short: "The Eureka Machine"
-  provider: "Richard Socher (PublicAffairs, 2026)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/richard-socher/the-eureka-machine/9781541705708/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 8
-  summary: "Argues from inside the field that AI will speed up discovery in physics, materials and biology, the exact overlap of your AI, simulation and fusion interests."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  quality: 3
-
-- id: "book-coming-wave-suleyman"
-  title: "The Coming Wave: Technology, Power, and the Twenty-first Century's Greatest Dilemma"
-  short: "The Coming Wave"
-  provider: "Mustafa Suleyman with Michael Bhaskar (Crown, 2023)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/722674/the-coming-wave-by-mustafa-suleyman-with-michael-bhaskar/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 9
-  summary: "The DeepMind co-founder's case that AI and synthetic biology need containment, the clearest insider statement of the governance problem."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  quality: 3
-
-- id: "book-life-3-tegmark"
-  title: "Life 3.0: Being Human in the Age of Artificial Intelligence"
-  short: "Life 3.0"
-  provider: "Max Tegmark (Knopf, 2017)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/530584/life-30-by-max-tegmark/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 10
-  summary: "A physicist's tour of AI futures from compute limits to cosmic scales, an easy fit for someone coming at AI from physics."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  quality: 3
-
-- id: "book-genius-makers-metz"
-  title: "Genius Makers: The Mavericks Who Brought AI to Google, Facebook, and the World"
-  short: "Genius Makers"
-  provider: "Cade Metz (Dutton, 2021)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/565698/genius-makers-by-cade-metz/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 10
-  summary: "The story of Hinton, LeCun, Bengio, Hassabis and the 2012 to 2020 deep learning boom, the human backstory to the papers you study."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  quality: 3
-
-- id: "book-empire-of-ai-hao"
-  title: "Empire of AI: Dreams and Nightmares in Sam Altman's OpenAI"
-  short: "Empire of AI"
-  provider: "Karen Hao (Penguin Press, 2025)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/743569/empire-of-ai-by-karen-hao/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 13
-  summary: "A deeply reported, critical history of OpenAI and the scaling playbook, including the labour, data and energy costs behind frontier models."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  after: [book-genius-makers-metz]
-  quality: 3
-
-- id: "book-infinity-machine-mallaby"
-  title: "The Infinity Machine: Demis Hassabis, DeepMind, and the Quest for Superintelligence"
-  short: "The Infinity Machine"
-  provider: "Sebastian Mallaby (Penguin Press, 2026)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/752231/the-infinity-machine-by-sebastian-mallaby/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 13
-  summary: "The definitive DeepMind story from AlphaGo to AlphaFold, the best account of AI-for-science as a research strategy."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  after: [book-genius-makers-metz]
-  quality: 3
-
-- id: "book-ai-snake-oil-narayanan"
-  title: "AI Snake Oil: What Artificial Intelligence Can Do, What It Can't, and How to Tell the Difference"
-  short: "AI Snake Oil"
-  provider: "Arvind Narayanan, Sayash Kapoor (Princeton University Press, 2024)"
-  type: "book"
-  url: "https://press.princeton.edu/books/hardcover/9780691249131/ai-snake-oil"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 9
-  summary: "Two Princeton researchers separate working generative AI from failing predictive AI, a calibration tool against both hype and doom."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  quality: 3
-
-- id: "book-ai-guide-thinking-humans-mitchell"
-  title: "Artificial Intelligence: A Guide for Thinking Humans"
-  short: "AI: Guide Thinking Humans"
-  provider: "Melanie Mitchell (Farrar, Straus and Giroux, 2019)"
-  type: "book"
-  url: "https://us.macmillan.com/books/9781250758040/artificialintelligence/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 9
-  summary: "A clear-eyed tour of vision, games and language by a complexity scientist, the best grounded introduction to what AI does and does not understand."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  quality: 3
-
-- id: "book-atomic-human-lawrence"
-  title: "The Atomic Human: What Makes Us Unique in the Age of AI"
-  short: "The Atomic Human"
-  provider: "Neil D. Lawrence (PublicAffairs, 2024)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/neil-d-lawrence/the-atomic-human/9781668644591/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 11
-  summary: "A Cambridge ML professor (ex-Amazon) contrasts human and machine information bandwidth, a thoughtful practitioner's view of AI's limits."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
   quality: 3
 
 - id: "book-hands-on-llms"
@@ -536,102 +164,6 @@
   note: "Paid"
   quality: 4
 
-- id: "book-superintelligence-bostrom"
-  title: "Superintelligence: Paths, Dangers, Strategies"
-  short: "Superintelligence"
-  provider: "Nick Bostrom (Oxford University Press, 2014)"
-  type: "book"
-  url: "https://global.oup.com/academic/product/superintelligence-9780199678112"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 11
-  summary: "The book that set the vocabulary of AI risk (takeoff speeds, orthogonality, instrumental convergence) that today's labs still argue about."
-  fromYear: 2
-  priority: 1
-  roadmap: "ai-engineer"
-  note: "Paid"
-  quality: 3
-
-- id: "book-brief-history-of-intelligence-bennett"
-  title: "A Brief History of Intelligence: Evolution, AI, and the Five Breakthroughs That Made Our Brains"
-  short: "Brief Hist. of Intelligence"
-  provider: "Max S. Bennett (Mariner Books, 2023)"
-  type: "book"
-  url: "https://maxsbennett.com/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 10
-  summary: "Ties RL, world models and language to five evolutionary leaps in the brain, a rich source of intuitions for agent and robot design."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  note: "Paid"
-  quality: 3
-
-- id: "book-scaling-era-patel"
-  title: "The Scaling Era: An Oral History of AI, 2019–2025"
-  short: "The Scaling Era"
-  provider: "Dwarkesh Patel with Gavin Leech (Stripe Press, 2025)"
-  type: "book"
-  url: "https://press.stripe.com/scaling"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 10
-  summary: "Frontier researchers explain scaling laws, compute, RL and alignment in their own words, with annotations, the closest thing to sitting in on lab debates."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  quality: 3
-
-- id: "book-why-machines-learn-ananthaswamy"
-  title: "Why Machines Learn: The Elegant Math Behind Modern AI"
-  short: "Why Machines Learn"
-  provider: "Anil Ananthaswamy (Dutton, 2024)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/677608/why-machines-learn-by-anil-ananthaswamy/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 13
-  summary: "Tells ML's history through its actual math (perceptrons, SVMs, backprop, kernels), a satisfying bridge between story and the equations you study."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  quality: 3
-
-- id: "book-if-anyone-builds-it-yudkowsky"
-  title: "If Anyone Builds It, Everyone Dies: Why Superhuman AI Would Kill Us All"
-  short: "If Anyone Builds It"
-  provider: "Eliezer Yudkowsky, Nate Soares (Little, Brown, 2025)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/eliezer-yudkowsky/if-anyone-builds-it-everyone-dies/9780316595643/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 7
-  summary: "The strongest statement of the AI doom argument from its originators, worth knowing precisely even if you end up disagreeing."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  after: [book-superintelligence-bostrom]
-  quality: 3
-
 - id: "book-book-of-why-pearl"
   title: "The Book of Why: The New Science of Cause and Effect"
   short: "The Book of Why"
@@ -650,62 +182,6 @@
   roadmap: "ai-engineer"
   note: "Paid"
   quality: 4
-
-- id: "book-these-strange-new-minds-summerfield"
-  title: "These Strange New Minds: How AI Learned to Talk and What It Means"
-  short: "These Strange New Minds"
-  provider: "Christopher Summerfield (Viking, 2025)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/750406/these-strange-new-minds-by-christopher-summerfield/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 10
-  summary: "An Oxford and DeepMind neuroscientist explains how LLMs work and whether they think, a careful, technically honest account of the LLM era."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  quality: 3
-
-- id: "book-quest-for-ai-nilsson"
-  title: "The Quest for Artificial Intelligence: A History of Ideas and Achievements"
-  short: "Quest for AI (Nilsson)"
-  provider: "Nils J. Nilsson (Cambridge University Press, 2010)"
-  type: "book"
-  url: "https://ai.stanford.edu/~nilsson/QAI/qai.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 20
-  summary: "A pioneer's detailed history of AI from logic and search to robotics and learning, the free reference for how the field's ideas evolved."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
-- id: "book-emergent-mind-suri-mcclelland"
-  title: "The Emergent Mind: How Intelligence Arises in People and Machines"
-  short: "The Emergent Mind"
-  provider: "Gaurav Suri, Jay McClelland (Basic Books, 2025)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/gaurav-suri/the-emergent-mind/9781668658048/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 9
-  summary: "Co-written by a founder of parallel distributed processing, it shows how minds and neural nets both emerge from simple interacting units."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  quality: 3
 
 - id: "book-dream-machine-waldrop"
   title: "The Dream Machine"
@@ -845,106 +321,6 @@
   doFirst: "Hands-On ML"
   quality: 3
 
-- id: "book-building-applications-with-ai-agents"
-  title: "Building Applications with AI Agents: Designing and Implementing Multiagent Systems"
-  short: "Building Apps w/ AI Agents"
-  provider: "Michael Albada (O'Reilly, 2025)"
-  type: "book"
-  url: "https://www.oreilly.com/library/view/-/9781098176495/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 10
-  summary: "A research-grounded design guide to agent components and their trade-offs, useful for deciding when one agent is enough and when a team of agents earns its complexity."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  note: "Paid"
-  doFirst: "AI Engineering"
-  quality: 3
-
-- id: "book-build-an-ai-agent-from-scratch"
-  title: "Build an AI Agent (From Scratch)"
-  short: "AI Agent from Scratch"
-  provider: "Jungjun Hur, Younghee Song (Manning, 2026)"
-  type: "book"
-  url: "https://www.manning.com/books/build-an-ai-agent-from-scratch"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 12
-  summary: "You write the agent loop, tool calling, memory, MCP, CodeAct sandboxing, A2A orchestration and an eval pipeline yourself in plain Python, so you understand what every harness framework is hiding."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  note: "Paid"
-  doFirst: "Build a LLM (From Scratch)"
-  quality: 3
-
-- id: "book-agentic-design-patterns-gulli"
-  title: "Agentic Design Patterns: A Hands-On Guide to Building Intelligent Systems"
-  short: "Agentic Design Patterns"
-  provider: "Antonio Gulli (Springer, 2025)"
-  type: "book"
-  url: "https://link.springer.com/doi/10.1007/978-3-032-01402-3"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 12
-  summary: "Twenty-one agent patterns from prompt chaining and tool use to reflection and multi-agent collaboration, each with runnable code, giving you a shared vocabulary for designing harnesses."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  note: "Paid"
-  after: [book-hands-on-llms]
-  quality: 3
-
-- id: "book-generative-ai-design-patterns"
-  title: "Generative AI Design Patterns: Solutions to Common Challenges When Building GenAI Agents and Applications"
-  short: "GenAI Design Patterns"
-  provider: "Valliappa Lakshmanan, Hannes Hapke (O'Reilly, 2025)"
-  type: "book"
-  url: "https://www.oreilly.com/library/view/-/9798341622654/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "paid"
-  estHours: 14
-  summary: "Thirty-two named patterns for hallucination, output control, self-correction and tool-using agents, each with code and trade-offs, written by the authors of Machine Learning Design Patterns."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  note: "Paid"
-  doFirst: "AI Engineering"
-  quality: 3
-
-- id: "book-ai-agents-with-mcp"
-  title: "AI Agents with MCP"
-  short: "AI Agents with MCP"
-  provider: "Kyle Stratis (O'Reilly, 2026)"
-  type: "book"
-  url: "https://www.oreilly.com/library/view/-/9798341639546/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 10
-  summary: "The book-length treatment of the Model Context Protocol: building MCP servers and clients with the Python SDK and wiring tools, prompts and data into agent workflows."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  note: "Paid"
-  after: [mcp-docs]
-  quality: 3
-
 - id: "book-evals-for-ai-engineers"
   title: "Evals for AI Engineers"
   short: "Evals for AI Engineers"
@@ -964,86 +340,6 @@
   note: "Paid"
   doFirst: "AI Engineering"
   quality: 4
-
-- id: "book-designing-llm-applications"
-  title: "Designing Large Language Model Applications: A Holistic Approach to LLMs"
-  short: "Designing LLM Applications"
-  provider: "Suhas Pai (O'Reilly, 2025)"
-  type: "book"
-  url: "https://www.oreilly.com/library/view/-/9781098150495"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 10
-  summary: "Connects model internals, fine-tuning, RAG and agents to their failure modes, helping you reason about LLM apps from the model up rather than only from the API down."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  note: "Paid"
-  after: [book-hands-on-llms]
-  quality: 3
-
-- id: "book-llms-in-production"
-  title: "LLMs in Production: From Language Models to Successful Products"
-  short: "LLMs in Production"
-  provider: "Christopher Brousseau, Matthew Sharp (Manning, 2024)"
-  type: "book"
-  url: "https://manning.com/books/llms-in-production"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 13
-  summary: "Takes you through the whole LLM product lifecycle, from data and finetuning to serving, load testing, cost control and edge deployment on a Raspberry Pi."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  after: [book-hands-on-llms]
-  quality: 3
-
-- id: "book-building-genai-services-fastapi"
-  title: "Building Generative AI Services with FastAPI: A Practical Approach to Developing Context-Rich Generative AI Applications"
-  short: "GenAI Services with FastAPI"
-  provider: "Alireza Parandeh (O'Reilly, 2025)"
-  type: "book"
-  url: "https://www.oreilly.com/library/view/-/9781098160296/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 14
-  summary: "The backend-engineering side of AI apps: streaming, concurrency, caching, auth, RAG, testing nondeterministic outputs and Docker deployment of model-backed APIs."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  after: [docs-fastapi-tutorial]
-  quality: 3
-
-- id: "book-developers-playbook-llm-security"
-  title: "The Developer's Playbook for Large Language Model Security: Building Secure AI Applications"
-  short: "LLM Security Playbook"
-  provider: "Steve Wilson (O'Reilly, 2024)"
-  type: "book"
-  url: "https://www.oreilly.com/library/view/the-developers-playbook/9781098162191/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 5
-  summary: "From the lead of the OWASP Top 10 for LLM Applications, a compact map of prompt injection, excessive agency and trust boundaries to secure before giving agents tools."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  note: "Paid"
-  doFirst: "AI Engineering"
-  quality: 3
 
 - id: "book-build-a-reasoning-model-from-scratch"
   title: "Build a Reasoning Model (From Scratch)"
@@ -1065,138 +361,6 @@
   doFirst: "Build a LLM (From Scratch)"
   quality: 4
 
-- id: "tut-rig-flight-agent"
-  title: "Build a Flight Search AI Agent with Rig"
-  short: "Rig flight-search agent"
-  provider: "Rig"
-  type: "article"
-  url: "https://docs.rig.rs/guides/advanced/flight_assistant"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 3
-  summary: "A hands-on build of a tool-using agent in Rust that calls a real external API, good first end-to-end project."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-agents"
-  quality: 3
-
-- id: "tut-shuttle-stdio-mcp-rust"
-  title: "How to Build a stdio MCP Server in Rust"
-  short: "stdio MCP server in Rust"
-  provider: "Shuttle"
-  type: "article"
-  url: "https://www.shuttle.dev/blog/2025/07/18/how-to-build-a-stdio-mcp-server-in-rust"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Step-by-step rmcp server over the stdio transport exposing a DNS lookup tool, a clean first MCP project in Rust."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-agents"
-  doFirst: "MCP spec"
-  quality: 3
-
-- id: "tut-learn-claude-code-rs"
-  title: "learn-claude-code-rs: a progressive agent harness tutorial in Rust"
-  short: "Agent harness in Rust"
-  provider: "wulawulu"
-  type: "article"
-  url: "https://github.com/wulawulu/learn-claude-code-rs"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 25
-  summary: "Twenty runnable Rust crates that grow a coding-agent harness from a bare loop to tools, permissions, compaction, subagents, worktrees and MCP."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  after: [rust-book]
-  quality: 3
-
-- id: "tut-rup12-rmcp-guide"
-  title: "Building MCP Servers in Rust with rmcp: A Complete Guide"
-  short: "rmcp complete guide"
-  provider: "Darko (rup12)"
-  type: "article"
-  url: "https://rup12.net/posts/write-your-mcps-in-rust"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Covers rmcp's tool router and handler macros, typed parameters and testing with MCP Inspector before wiring the server into an agent."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  after: [tut-shuttle-stdio-mcp-rust]
-  quality: 3
-
-- id: "tut-tensorzero-gateway"
-  title: "TensorZero Gateway Tutorial"
-  short: "TensorZero tutorial"
-  provider: "TensorZero"
-  type: "article"
-  url: "https://tensorzero.com/docs/gateway/tutorial"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Walks through routing LLM calls through a gateway with schemas, templates and logged inferences, a pattern worth copying in any harness."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  after: [repo-tensorzero]
-  quality: 3
-
-- id: "repo-async-openai"
-  title: "async-openai: Rust library for OpenAI-compatible APIs"
-  short: "async-openai"
-  provider: "Himanshu Neema"
-  type: "practice"
-  url: "https://github.com/64bit/async-openai"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "The standard async Rust client for OpenAI-style APIs, including streaming and tool calls; the usual base for a hand-rolled Rust agent loop."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-agents"
-  after: [rust-book]
-  quality: 3
-
-- id: "repo-tiktoken-rs"
-  title: "tiktoken-rs: OpenAI tokenizers for Rust"
-  short: "tiktoken-rs"
-  provider: "zurawiki"
-  type: "practice"
-  url: "https://github.com/zurawiki/tiktoken-rs"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Count and split tokens in Rust for context-window budgeting and compaction decisions inside a harness."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-agents"
-  after: [rust-book]
-  quality: 3
-
 - id: "repo-rig-rust"
   title: "Rig: build modular LLM applications in Rust"
   short: "Rig (Rust LLM framework)"
@@ -1211,105 +375,10 @@
   estHours: 15
   summary: "A widely used Rust LLM framework (pre-1.0): agents, tools and RAG pipelines with typed provider abstractions."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "ai-agents"
   after: [rust-book]
-  quality: 3
-
-- id: "repo-swiftide"
-  title: "Swiftide: fast, streaming indexing, query and agentic LLM applications in Rust"
-  short: "Swiftide"
-  provider: "Bosun AI"
-  type: "practice"
-  url: "https://github.com/bosun-ai/swiftide"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 12
-  summary: "A Rust library for streaming RAG pipelines plus an agent framework with tools and hooks, useful to read for async pipeline design."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  after: [rust-book]
-  quality: 3
-
-- id: "repo-kalosm-floneum"
-  title: "Floneum / Kalosm: local-first AI in Rust"
-  short: "Kalosm (Floneum)"
-  provider: "Floneum"
-  type: "practice"
-  url: "https://github.com/floneum/floneum"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 8
-  summary: "Kalosm runs local language, audio and vision models in pure Rust and offers grammar-constrained structured generation into Rust types."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [rust-book]
-  quality: 3
-
-- id: "repo-tabby"
-  title: "Tabby: self-hosted AI coding assistant"
-  short: "Tabby"
-  provider: "TabbyML"
-  type: "practice"
-  url: "https://github.com/TabbyML/tabby"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "A self-hosted Copilot alternative with a Rust server, showing how code completion and chat backends are built and indexed."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [rust-book]
-  quality: 3
-
-- id: "repo-tensorzero"
-  title: "TensorZero: open-source LLMOps stack (gateway, observability, evals)"
-  short: "TensorZero"
-  provider: "TensorZero"
-  type: "practice"
-  url: "https://github.com/tensorzero/tensorzero"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 8
-  summary: "A Rust LLM gateway with structured inference logging, experiments and optimization loops, showing how to wrap model calls in production."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [rust-book]
-  quality: 3
-
-- id: "repo-agentgateway"
-  title: "agentgateway: proxy for agentic AI (MCP, A2A, LLM traffic)"
-  short: "agentgateway"
-  provider: "Linux Foundation / agentgateway"
-  type: "practice"
-  url: "https://github.com/agentgateway/agentgateway"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 10
-  summary: "A Rust data plane that multiplexes, authenticates and observes MCP and A2A traffic, showing what production agent networking needs."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-agents"
-  doFirst: "MCP spec"
-  quality: 3
+  quality: 4
 
 - id: "book-make-it-stick"
   title: "Make It Stick: The Science of Successful Learning"
@@ -2182,245 +1251,6 @@
 # ---- Systems: low-level programming, OS kernels, algorithms (38)
   quality: 4
 
-- id: "docs-codex-utils-pty"
-  title: "codex-utils-pty: spawn processes under a PTY or pipes"
-  short: "Codex PTY helpers"
-  provider: "OpenAI"
-  type: "article"
-  url: "https://github.com/openai/codex/blob/main/codex-rs/utils/pty/README.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "A compact API sketch for running interactive commands from an agent with PTY or pipe backends, resizing, stdin and exit handling."
-  fromYear: 2
-  priority: 2
-  after: [rust-book]
-
-- id: "docs-codex-linux-sandbox"
-  title: "codex-linux-sandbox (README)"
-  short: "Codex Linux sandbox"
-  provider: "OpenAI"
-  type: "article"
-  url: "https://github.com/openai/codex/blob/main/codex-rs/linux-sandbox/README.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "A real production recipe for sandboxing agent shell commands on Linux with bubblewrap namespaces, seccomp and Landlock, including fallbacks."
-  fromYear: 3
-  priority: 2
-  doFirst: "Landlock docs"
-
-- id: "docs-codex-network-proxy"
-  title: "codex-network-proxy: local network policy enforcement"
-  short: "Codex network proxy"
-  provider: "OpenAI"
-  type: "article"
-  url: "https://github.com/openai/codex/blob/main/codex-rs/network-proxy/README.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "How an agent harness restricts outbound network access with a local HTTP/SOCKS5 proxy and allow/deny policy instead of trusting the model."
-  fromYear: 3
-  priority: 2
-  after: [docs-codex-linux-sandbox]
-
-- id: "docs-hyperlight-execution"
-  title: "Hyperlight: How code is run inside a VM"
-  short: "Hyperlight execution model"
-  provider: "Hyperlight (CNCF)"
-  type: "article"
-  url: "https://github.com/hyperlight-dev/hyperlight/blob/main/docs/hyperlight-execution-details.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Details how Hyperlight creates and configures tiny VMs without a guest OS and calls functions in them."
-  fromYear: 3
-  priority: 2
-  after: [repo-hyperlight]
-
-- id: "docs-firecracker-jailer"
-  title: "Firecracker: The Jailer"
-  short: "Firecracker jailer"
-  provider: "Firecracker"
-  type: "article"
-  url: "https://github.com/firecracker-microvm/firecracker/blob/main/docs/jailer.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 1
-  summary: "Shows the second isolation layer around a microVM: chroot, namespaces, cgroups and privilege dropping before the VMM starts."
-  fromYear: 3
-  priority: 2
-  doFirst: "Firecracker Design"
-
-- id: "docs-firecracker-prod-host"
-  title: "Firecracker: Production Host Setup Recommendations"
-  short: "Firecracker prod host setup"
-  provider: "Firecracker"
-  type: "article"
-  url: "https://github.com/firecracker-microvm/firecracker/blob/main/docs/prod-host-setup.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "A hardening checklist for hosts running untrusted microVMs, directly relevant if you host agent sandboxes yourself."
-  fromYear: 3
-  priority: 2
-  after: [docs-firecracker-jailer]
-
-- id: "docs-firecracker-snapshots"
-  title: "Firecracker: Snapshotting support"
-  short: "Firecracker snapshots"
-  provider: "Firecracker"
-  type: "article"
-  url: "https://github.com/firecracker-microvm/firecracker/blob/main/docs/snapshotting/snapshot-support.md"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 2
-  summary: "Explains microVM snapshot and restore, the trick sandbox providers use to start pre-warmed agent environments in milliseconds."
-  fromYear: 3
-  priority: 2
-  after: [docs-firecracker-jailer]
-
-- id: "book-the-innovators"
-  title: "The Innovators: How a Group of Hackers, Geniuses, and Geeks Created the Digital Revolution"
-  short: "The Innovators"
-  provider: "Walter Isaacson (Simon & Schuster, 2014)"
-  type: "book"
-  url: "https://www.simonandschuster.com/books/The-Innovators/Walter-Isaacson/9781476708706"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "paid"
-  estHours: 14
-  summary: "A single readable sweep from Ada Lovelace through transistors, microchips, the internet and the web."
-  fromYear: 1
-  priority: 2
-  note: "Paid"
-
-- id: "book-where-wizards-stay-up-late"
-  title: "Where Wizards Stay Up Late: The Origins of the Internet"
-  short: "Where Wizards Stay Up Late"
-  provider: "Katie Hafner & Matthew Lyon (Simon & Schuster, 1996)"
-  type: "book"
-  url: "https://www.simonandschuster.com/books/Where-Wizards-Stay-Up-Late/Katie-Hafner/9780684832678"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "paid"
-  estHours: 8
-  summary: "How BBN and ARPA engineers built packet switching and the IMPs, giving real history behind the networking stack."
-  fromYear: 1
-  priority: 2
-  note: "Paid"
-
-- id: "book-hackers-levy"
-  title: "Hackers: Heroes of the Computer Revolution (25th Anniversary Edition)"
-  short: "Hackers (Levy)"
-  provider: "Steven Levy (O'Reilly, 2010; orig. 1984)"
-  type: "book"
-  url: "https://www.oreilly.com/library/view/hackers/9781449390259/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "paid"
-  estHours: 13
-  summary: "The culture of MIT's TX-0 hackers, the Homebrew Computer Club and early game coders that shaped how programmers still work."
-  fromYear: 1
-  priority: 2
-  note: "Paid"
-
-- id: "book-turings-cathedral"
-  title: "Turing's Cathedral: The Origins of the Digital Universe"
-  short: "Turing's Cathedral"
-  provider: "George Dyson (Pantheon, 2012)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/44425/turings-cathedral-by-george-dyson/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "paid"
-  estHours: 12
-  summary: "The story of von Neumann's IAS machine and the stored-program architecture every processor still descends from."
-  fromYear: 1
-  priority: 2
-  note: "Paid"
-
-- id: "book-man-from-the-future"
-  title: "The Man from the Future: The Visionary Life of John von Neumann"
-  short: "The Man from the Future"
-  provider: "Ananyo Bhattacharya (W. W. Norton, 2022)"
-  type: "book"
-  url: "https://wwnorton.com/books/the-man-from-the-future"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "paid"
-  estHours: 9
-  summary: "Connects von Neumann's work across quantum mechanics, computer architecture, game theory and self-replicating machines."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  note: "Paid"
-
-- id: "book-the-information-gleick"
-  title: "The Information: A History, a Theory, a Flood"
-  short: "The Information"
-  provider: "James Gleick (Pantheon, 2011)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/60765/the-information-by-james-gleick/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "paid"
-  estHours: 13
-  summary: "Traces information from talking drums to Shannon's entropy and quantum bits, giving intuition for what an information theory of bits really means."
-  fromYear: 1
-  priority: 2
-  note: "Paid"
-
-- id: "book-a-mind-at-play"
-  title: "A Mind at Play: How Claude Shannon Invented the Information Age"
-  short: "A Mind at Play"
-  provider: "Jimmy Soni & Rob Goodman (Simon & Schuster, 2017)"
-  type: "book"
-  url: "https://www.simonandschuster.com/books/A-Mind-at-Play/Jimmy-Soni/9781476766690"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "paid"
-  estHours: 10
-  summary: "Biography of the man who linked Boolean logic to switching circuits and defined channel capacity, foundations under both chips and ML."
-  fromYear: 1
-  priority: 2
-  note: "Paid"
-
 - id: "book-understanding-distributed-systems"
   title: "Understanding Distributed Systems: What Every Developer Should Know About Large Distributed Applications (2nd ed.)"
   short: "Understanding Dist. Sys."
@@ -2438,6 +1268,7 @@
   priority: 2
   roadmap: "software-architect"
   note: "Paid"
+  quality: 4
 
 - id: "book-operating-system-concepts-10e"
   title: "Operating System Concepts (10th ed.)"
@@ -2453,9 +1284,10 @@
   estHours: 35
   summary: "The classic 'dinosaur book' covering processes, scheduling, memory, storage and protection, a thorough companion to university OS courses."
   fromYear: 1
-  priority: 2
+  priority: 3
   roadmap: "software-architect"
   note: "Paid"
+  quality: 3
 
 - id: "book-computer-networking-kurose"
   title: "Computer Networking: A Top-Down Approach (8th ed.)"
@@ -2471,8 +1303,9 @@
   estHours: 30
   summary: "Starts from applications and HTTP and works down to TCP, routing and links, the standard way to learn how networks actually move bytes."
   fromYear: 1
-  priority: 2
+  priority: 1
   note: "Paid"
+  quality: 5
 
 - id: "book-csapp-3e"
   title: "Computer Systems: A Programmer's Perspective (3rd ed.)"
@@ -2488,26 +1321,10 @@
   estHours: 40
   summary: "Teaches data representation, x86-64 assembly, caches, linking, virtual memory and concurrency from a programmer's view, the foundation for performance work at every level."
   fromYear: 1
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   note: "Paid"
-
-- id: "book-alan-turing-the-enigma"
-  title: "Alan Turing: The Enigma"
-  short: "Alan Turing: The Enigma"
-  provider: "Andrew Hodges (Princeton University Press, 2014 ed.; orig. 1983)"
-  type: "book"
-  url: "https://press.princeton.edu/books/paperback/9780691164724/alan-turing-the-enigma"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 20
-  summary: "The definitive Turing biography, explaining computability, codebreaking and his machine-intelligence ideas in technical depth."
-  fromYear: 2
-  priority: 2
-  note: "Paid"
+  quality: 5
 
 - id: "book-database-internals"
   title: "Database Internals: A Deep Dive into How Distributed Data Systems Work"
@@ -2523,10 +1340,11 @@
   estHours: 12
   summary: "Opens up B-trees, LSM trees, buffer management, recovery and consensus, the machinery under every database and vector store you will use."
   fromYear: 2
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   note: "Paid"
   after: [ddia]
+  quality: 5
 
 - id: "book-systems-performance-2e"
   title: "Systems Performance: Enterprise and the Cloud (2nd ed.)"
@@ -2542,9 +1360,10 @@
   estHours: 25
   summary: "Gives a methodology (USE, workload characterization) and Linux tooling for finding CPU, memory, disk and network bottlenecks, directly applicable to profiling inference servers."
   fromYear: 2
-  priority: 2
+  priority: 1
   note: "Paid"
   after: [ostep]
+  quality: 5
 
 - id: "book-linux-programming-interface"
   title: "The Linux Programming Interface: A Linux and UNIX System Programming Handbook"
@@ -2560,9 +1379,10 @@
   estHours: 45
   summary: "The definitive reference for system calls, processes, signals, threads, IPC and sockets, written by the Linux man-pages maintainer."
   fromYear: 2
-  priority: 2
+  priority: 1
   note: "Paid"
   doFirst: "CS:APP"
+  quality: 5
 
 - id: "book-clrs-4e"
   title: "Introduction to Algorithms (4th ed.)"
@@ -2578,9 +1398,10 @@
   estHours: 60
   summary: "The reference algorithms text with rigorous proofs and analysis; keep it beside you for interview prep and whenever you need a correct, well-analysed algorithm."
   fromYear: 2
-  priority: 2
+  priority: 1
   note: "Paid"
   doFirst: "MIT 6.006"
+  quality: 5
 
 - id: "book-bpf-performance-tools"
   title: "BPF Performance Tools: Linux System and Application Observability"
@@ -2599,6 +1420,7 @@
   priority: 2
   note: "Paid"
   after: [book-systems-performance-2e]
+  quality: 4
 
 - id: "book-art-of-multiprocessor-programming-2e"
   title: "The Art of Multiprocessor Programming (2nd ed.)"
@@ -2614,291 +1436,11 @@
   estHours: 25
   summary: "Rigorous treatment of locks, lock-free data structures, memory consistency and transactional memory, essential for writing correct concurrent runtime code."
   fromYear: 3
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   note: "Paid"
   after: [book-cpp-concurrency-in-action-2e]
-
-- id: "repo-portable-pty"
-  title: "portable-pty (WezTerm)"
-  short: "portable-pty"
-  provider: "Wez Furlong"
-  type: "practice"
-  url: "https://github.com/wezterm/wezterm/tree/main/pty"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Cross-platform pseudo-terminal crate from WezTerm, a standard way for a Rust harness to run interactive commands like a real terminal."
-  fromYear: 2
-  priority: 2
-  after: [docs-codex-utils-pty]
-
-- id: "repo-expectrl"
-  title: "expectrl: expect-like automation of interactive programs in Rust"
-  short: "expectrl"
-  provider: "Maxim Zhiburt"
-  type: "practice"
-  url: "https://github.com/zhiburt/expectrl"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Lets a program spawn, wait for patterns and answer prompts in interactive CLIs, the classic technique behind agents driving REPLs."
-  fromYear: 2
-  priority: 2
-  after: [repo-portable-pty]
-
-- id: "repo-vt100-rust"
-  title: "vt100: parse terminal byte streams into a screen"
-  short: "vt100 crate"
-  provider: "Jesse Luehrs"
-  type: "practice"
-  url: "https://github.com/doy/vt100-rust"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Turns raw PTY output with escape codes into a screen grid, so an agent can read what a TUI program actually displays."
-  fromYear: 2
-  priority: 2
-  after: [repo-portable-pty]
-
-- id: "repo-birdcage"
-  title: "Birdcage: cross-platform embeddable sandbox"
-  short: "Birdcage"
-  provider: "Phylum"
-  type: "practice"
-  url: "https://github.com/phylum-dev/birdcage"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "A small Rust crate that sandboxes a child process with Landlock/seccomp on Linux and Seatbelt on macOS, easy to embed in a harness."
-  fromYear: 2
-  priority: 2
-  doFirst: "Landlock docs"
-
-- id: "repo-hyperlight"
-  title: "Hyperlight: lightweight VMM for running untrusted code in micro VMs"
-  short: "Hyperlight"
-  provider: "Hyperlight (CNCF)"
-  type: "practice"
-  url: "https://github.com/hyperlight-dev/hyperlight"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 10
-  summary: "A Rust micro-VM host/guest library designed for embedding hardware-isolated function calls inside an application."
-  fromYear: 3
-  priority: 2
-  after: [article-hyperlight-intro]
-
-- id: "repo-litebox"
-  title: "LiteBox: a security-focused library OS"
-  short: "LiteBox"
-  provider: "Microsoft"
-  type: "practice"
-  url: "https://github.com/microsoft/litebox"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 8
-  summary: "A Rust library OS that shrinks the host interface to cut attack surface, a newer approach to sandboxing untrusted programs."
-  fromYear: 3
-  priority: 2
-  after: [repo-hyperlight]
-
-- id: "repo-seccompiler"
-  title: "seccompiler: seccomp filter compiler (rust-vmm)"
-  short: "seccompiler"
-  provider: "rust-vmm"
-  type: "practice"
-  url: "https://github.com/rust-vmm/seccompiler"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Firecracker's Rust library for building seccomp-BPF filters from rules or JSON; the cleanest way to see syscall filtering in code."
-  fromYear: 3
-  priority: 2
-  doFirst: "Seccomp BPF docs"
-
-- id: "repo-youki"
-  title: "youki: container runtime written in Rust"
-  short: "youki"
-  provider: "containers"
-  type: "practice"
-  url: "https://github.com/containers/youki"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 10
-  summary: "An OCI runtime in Rust showing namespaces, cgroups and seccomp setup end to end, the machinery under container sandboxes."
-  fromYear: 3
-  priority: 2
-  after: [article-jvns-what-even-is-a-container]
-
-- id: "repo-libkrun"
-  title: "libkrun: dynamic library for KVM-based process isolation"
-  short: "libkrun"
-  provider: "containers"
-  type: "practice"
-  url: "https://github.com/containers/libkrun"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 6
-  summary: "A Rust library that runs a process inside a lightweight KVM micro-VM, the base of several microVM sandboxes for agents."
-  fromYear: 3
-  priority: 2
-  after: [paper-firecracker]
-
-- id: "paper-sandlock"
-  title: "Sandlock: Confining AI Agent Code with Unprivileged Linux Primitives"
-  short: "Sandlock"
-  provider: "Cong Wang, Yusheng Zheng"
-  type: "paper"
-  url: "https://arxiv.org/abs/2605.26298"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Research design for confining agent-run code without root or containers by combining kernel-enforced rules with a small supervisor."
-  fromYear: 3
-  priority: 2
-  after: [article-cursor-agent-sandboxing]
-
-- id: "article-cursor-agent-sandboxing"
-  title: "Implementing a secure sandbox for local agents"
-  short: "Cursor agent sandbox"
-  provider: "Cursor"
-  type: "article"
-  url: "https://cursor.com/blog/agent-sandboxing"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "A production write-up of per-OS agent sandboxing: Seatbelt on macOS, Landlock plus seccomp on Linux and WSL2 on Windows."
-  fromYear: 2
-  priority: 2
-  doFirst: "Landlock docs"
-
-- id: "article-ai-jail"
-  title: "ai-jail: Sandbox for AI Agents, From Shell Script to Real Tool"
-  short: "ai-jail sandbox write-up"
-  provider: "Fabio Akita"
-  type: "article"
-  url: "https://akitaonrails.com/en/2026/03/01/ai-jail-sandbox-for-ai-agents-from-shell-script-to-real-tool/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Follows a bubblewrap wrapper for coding agents as it grows into a Rust tool, with the practical trade-offs along the way."
-  fromYear: 2
-  priority: 2
-  after: [article-cursor-agent-sandboxing]
-
-- id: "article-hyperlight-intro"
-  title: "Introducing Hyperlight: Virtual machine-based security for functions at scale"
-  short: "Hyperlight intro"
-  provider: "Microsoft"
-  type: "article"
-  url: "https://opensource.microsoft.com/blog/2024/11/07/introducing-hyperlight-virtual-machine-based-security-for-functions-at-scale/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Explains how a Rust library spins up micro-VMs in about a millisecond, making hardware isolation cheap enough for per-call tool sandboxes."
-  fromYear: 2
-  priority: 2
-  after: [paper-firecracker]
-
-# ---- DevOps and MLOps (3)
-
-- id: "docs-otel-rust-getting-started"
-  title: "OpenTelemetry Rust: Getting Started"
-  short: "OpenTelemetry Rust"
-  provider: "OpenTelemetry"
-  type: "article"
-  url: "https://opentelemetry.io/docs/languages/rust/getting-started/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Instrument a small Rust service with traces, metrics and logs, the starting point for tracing every turn and tool call of an agent."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "repo-opentelemetry-rust"
-  title: "OpenTelemetry Rust"
-  short: "opentelemetry-rust"
-  provider: "OpenTelemetry"
-  type: "practice"
-  url: "https://github.com/open-telemetry/opentelemetry-rust"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "The official Rust OpenTelemetry SDK and exporters to emit GenAI-convention spans from a Rust harness."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [docs-otel-rust-getting-started]
-  quality: 3
-
-- id: "repo-tracing-opentelemetry"
-  title: "tracing-opentelemetry"
-  short: "tracing-opentelemetry"
-  provider: "Tokio"
-  type: "practice"
-  url: "https://github.com/tokio-rs/tracing-opentelemetry"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Bridges the tracing crate to OpenTelemetry so existing spans in an async Rust agent become exportable distributed traces."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [repo-opentelemetry-rust]
-
-# ---- Languages (14)
-  quality: 3
+  quality: 5
 
 - id: "book-programming-rust-2e"
   title: "Programming Rust: Fast, Safe Systems Development (2nd ed.)"
@@ -3013,116 +1555,6 @@
   after: [crafting-interpreters]
   quality: 5
 
-- id: "repo-schemars"
-  title: "Schemars: generate JSON Schema from Rust types"
-  short: "schemars"
-  provider: "Graham Esau"
-  type: "practice"
-  url: "https://github.com/GREsau/schemars"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Derives JSON Schema from serde types, the usual way Rust agents and MCP servers publish typed tool parameters."
-  fromYear: 1
-  priority: 3
-  after: [rust-book]
-  quality: 3
-
-- id: "repo-ratatui"
-  title: "Ratatui: build terminal user interfaces in Rust"
-  short: "Ratatui"
-  provider: "Ratatui"
-  type: "practice"
-  url: "https://github.com/ratatui/ratatui"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 8
-  summary: "The TUI library behind several Rust coding agents (including Codex), for building a chat and diff interface around your harness."
-  fromYear: 1
-  priority: 3
-  after: [rust-book]
-  quality: 3
-
-- id: "repo-jiter"
-  title: "jiter: fast iterable JSON parser (with partial JSON support)"
-  short: "jiter"
-  provider: "Pydantic"
-  type: "practice"
-  url: "https://github.com/pydantic/jiter"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "A Rust JSON parser that can parse incomplete JSON, exactly what you need to show streamed tool-call arguments before they finish."
-  fromYear: 2
-  priority: 3
-  after: [rust-book]
-  quality: 3
-
-- id: "repo-jsonrpsee"
-  title: "jsonrpsee: JSON-RPC client and server in Rust"
-  short: "jsonrpsee"
-  provider: "Parity Technologies"
-  type: "practice"
-  url: "https://github.com/paritytech/jsonrpsee"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "A mature async JSON-RPC 2.0 library to study before writing your own MCP or ACP transport layer."
-  fromYear: 2
-  priority: 3
-  after: [spec-json-rpc-2]
-  quality: 3
-
-- id: "repo-lsp-server-rust-analyzer"
-  title: "lsp-server (rust-analyzer)"
-  short: "lsp-server crate"
-  provider: "rust-analyzer team"
-  type: "practice"
-  url: "https://github.com/rust-lang/rust-analyzer/tree/master/lib/lsp-server"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "A tiny synchronous JSON-RPC-over-stdio framework; a clean model for the stdio message loop every MCP or LSP server needs."
-  fromYear: 2
-  priority: 3
-  after: [spec-json-rpc-2]
-  quality: 3
-
-- id: "repo-ast-grep"
-  title: "ast-grep: structural code search, lint and rewrite"
-  short: "ast-grep"
-  provider: "Herrington Darkholme"
-  type: "practice"
-  url: "https://github.com/ast-grep/ast-grep"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "A Rust tree-sitter tool for syntax-aware search and rewrite, a powerful code-editing tool to expose to a coding agent."
-  fromYear: 2
-  priority: 3
-  doFirst: "tree-sitter"
-
-# ---- Graphics and rendering (1)
-  quality: 3
-
 - id: "book-real-time-rendering-4e"
   title: "Real-Time Rendering (4th ed.)"
   short: "Real-Time Rendering 4e"
@@ -3137,12 +1569,13 @@
   estHours: 50
   summary: "The encyclopedia of real-time graphics: pipeline, shading, PBR, shadows, global illumination and acceleration structures, with references to the papers behind each."
   fromYear: 2
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
   note: "Paid"
   after: [learnopengl]
 
 # ---- Robotics (1)
+  quality: 5
 
 - id: "book-probabilistic-robotics"
   title: "Probabilistic Robotics"
@@ -3158,11 +1591,12 @@
   estHours: 30
   summary: "The classic on Bayes filters, Kalman and particle filters, SLAM and planning under uncertainty, the estimation backbone of every real robot."
   fromYear: 2
-  priority: 3
+  priority: 1
   note: "Paid"
   after: [modern-robotics]
 
 # ---- Game development (1)
+  quality: 5
 
 - id: "book-foundations-game-engine-dev"
   title: "Foundations of Game Engine Development (Vol. 1: Mathematics; Vol. 2: Rendering)"
@@ -3178,11 +1612,12 @@
   estHours: 18
   summary: "Dense, beautifully precise coverage of the vector, matrix, quaternion and Grassmann math plus the rendering techniques an engine programmer actually implements."
   fromYear: 2
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
   note: "Paid"
 
 # ---- Math and physics (16)
+  quality: 4
 
 - id: "book-making-of-the-atomic-bomb"
   title: "The Making of the Atomic Bomb"
@@ -3202,24 +1637,6 @@
   note: "Paid"
   quality: 4
 
-- id: "book-surely-youre-joking"
-  title: "\"Surely You're Joking, Mr. Feynman!\": Adventures of a Curious Character"
-  short: "Surely You're Joking"
-  provider: "Richard P. Feynman & Ralph Leighton (W. W. Norton, 1985)"
-  type: "book"
-  url: "https://wwnorton.com/books/Surely-Youre-Joking-Mr-Feynman/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [math]
-  level: "intro"
-  cost: "paid"
-  estHours: 8
-  summary: "Feynman's stories model a habit of playful, hands-on curiosity that keeps physics and engineering fun."
-  fromYear: 1
-  priority: 3
-  note: "Paid"
-  quality: 3
-
 - id: "book-qed-feynman"
   title: "QED: The Strange Theory of Light and Matter"
   short: "QED (Feynman)"
@@ -3238,119 +1655,6 @@
   note: "Paid"
   quality: 4
 
-- id: "book-chaos-gleick"
-  title: "Chaos: Making a New Science"
-  short: "Chaos (Gleick)"
-  provider: "James Gleick (Viking, 1987)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/60760/chaos-by-james-gleick/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [math]
-  level: "intro"
-  cost: "paid"
-  estHours: 10
-  summary: "How Lorenz, Feigenbaum and Mandelbrot discovered sensitive dependence and strange attractors, crucial intuition for any simulation work."
-  fromYear: 1
-  priority: 3
-  note: "Paid"
-  quality: 3
-
-- id: "book-dark-sun"
-  title: "Dark Sun: The Making of the Hydrogen Bomb"
-  short: "Dark Sun"
-  provider: "Richard Rhodes (Simon & Schuster, 1995)"
-  type: "book"
-  url: "https://www.simonandschuster.com/books/Dark-Sun/Richard-Rhodes/9780684824147"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [math]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 22
-  summary: "Covers the Teller-Ulam design, early Monte Carlo computing and thermonuclear physics, the dark twin of fusion energy."
-  fromYear: 2
-  priority: 3
-  note: "Paid"
-  after: [book-making-of-the-atomic-bomb]
-  quality: 3
-
-- id: "book-genius-gleick"
-  title: "Genius: The Life and Science of Richard Feynman"
-  short: "Genius (Gleick)"
-  provider: "James Gleick (Pantheon, 1992)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/60762/genius-by-james-gleick/9780679747048/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [math]
-  level: "intro"
-  cost: "paid"
-  estHours: 14
-  summary: "A scientific biography that explains Feynman diagrams, Los Alamos computing and the Challenger inquiry alongside the man."
-  fromYear: 2
-  priority: 3
-  note: "Paid"
-  after: [book-surely-youre-joking]
-  quality: 3
-
-- id: "book-theoretical-minimum"
-  title: "The Theoretical Minimum: What You Need to Know to Start Doing Physics"
-  short: "Theoretical Minimum (Book)"
-  provider: "Leonard Susskind & George Hrabovsky (Basic Books, 2013)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/leonard-susskind/the-theoretical-minimum/9780465075683/?lens=basic-books"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [math]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 12
-  summary: "Classical mechanics via Lagrangians and Hamiltonians with real equations, a compact base for simulation and robotics dynamics."
-  fromYear: 2
-  priority: 3
-  note: "Paid"
-  doFirst: "Calculus"
-  quality: 3
-
-- id: "book-theoretical-minimum-quantum"
-  title: "Quantum Mechanics: The Theoretical Minimum"
-  short: "TM: Quantum Mechanics"
-  provider: "Leonard Susskind & Art Friedman (Basic Books, 2014)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/leonard-susskind/quantum-mechanics/9780465080618/?lens=basic-books"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [math]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 12
-  summary: "Spins, states, operators and entanglement taught with linear algebra, the shortest honest path to the math of quantum computing."
-  fromYear: 2
-  priority: 3
-  note: "Paid"
-  after: [book-theoretical-minimum]
-  quality: 3
-
-- id: "book-something-deeply-hidden"
-  title: "Something Deeply Hidden: Quantum Worlds and the Emergence of Spacetime"
-  short: "Something Deeply Hidden"
-  provider: "Sean Carroll (Dutton, 2019)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/566988/something-deeply-hidden-by-sean-carroll/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [math]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 10
-  summary: "A careful case for the many-worlds reading of quantum mechanics that clarifies measurement, decoherence and the wave function."
-  fromYear: 2
-  priority: 3
-  note: "Paid"
-  after: [book-qed-feynman]
-  quality: 3
-
 - id: "book-structure-of-scientific-revolutions"
   title: "The Structure of Scientific Revolutions (50th Anniversary Edition)"
   short: "Structure of Sci Revolutions"
@@ -3368,24 +1672,6 @@
   priority: 2
   note: "Paid"
   quality: 4
-
-- id: "book-beginning-of-infinity"
-  title: "The Beginning of Infinity: Explanations That Transform the World"
-  short: "Beginning of Infinity"
-  provider: "David Deutsch (Viking, 2011)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/293575/the-beginning-of-infinity-by-david-deutsch/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [math]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 14
-  summary: "A quantum-computing pioneer argues that good explanations drive unbounded progress, touching computation, physics and AI."
-  fromYear: 2
-  priority: 3
-  note: "Paid"
-  quality: 3
 
 - id: "book-concrete-mathematics"
   title: "Concrete Mathematics: A Foundation for Computer Science (2nd ed.)"
@@ -3445,79 +1731,6 @@
 # ---- Electrical and mechanical engineering (20)
   quality: 5
 
-- id: "book-apple-in-china"
-  title: "Apple in China: The Capture of the World's Greatest Company"
-  short: "Apple in China"
-  provider: "Patrick McGee (Scribner, 2025)"
-  type: "book"
-  url: "https://www.simonandschuster.com/books/Apple-in-China/Patrick-McGee/9781668053379"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intro"
-  cost: "paid"
-  estHours: 12
-  summary: "Shows how Apple's engineers trained China's precision-manufacturing base, essential context for how hardware actually gets built at scale."
-  fromYear: 1
-  priority: 4
-  note: "Paid"
-  after: [book-chip-war-miller]
-  quality: 3
-
-- id: "book-breakneck"
-  title: "Breakneck: China's Quest to Engineer the Future"
-  short: "Breakneck"
-  provider: "Dan Wang (W. W. Norton, 2025)"
-  type: "book"
-  url: "https://wwnorton.com/books/9781324106036"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intro"
-  cost: "paid"
-  estHours: 8
-  summary: "A sharp 2025 comparison of an engineering-led state and a lawyer-led one, framing why manufacturing and infrastructure capacity matter."
-  fromYear: 1
-  priority: 4
-  note: "Paid"
-  quality: 3
-
-- id: "book-star-builders"
-  title: "The Star Builders: Nuclear Fusion and the Race to Power the Planet"
-  short: "The Star Builders"
-  provider: "Arthur Turrell (Scribner, 2021)"
-  type: "book"
-  url: "https://www.simonandschuster.com/books/The-Star-Builders/Arthur-Turrell/9781982130671"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intro"
-  cost: "paid"
-  estHours: 8
-  summary: "A plasma physicist's tour of tokamaks, laser inertial fusion and private fusion startups, a clear on-ramp to fusion engineering."
-  fromYear: 1
-  priority: 4
-  note: "Paid"
-  quality: 3
-
-- id: "book-a-piece-of-the-sun"
-  title: "A Piece of the Sun: The Quest for Fusion Energy"
-  short: "A Piece of the Sun"
-  provider: "Daniel Clery (Overlook Press, 2013)"
-  type: "book"
-  url: "https://www.abramsbooks.com/product/piece-of-the-sun_9781468310412/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intro"
-  cost: "paid"
-  estHours: 9
-  summary: "The history of ZETA, JET, ITER and NIF, explaining why confining a plasma has been so hard for seventy years."
-  fromYear: 1
-  priority: 4
-  note: "Paid"
-  quality: 3
-
 - id: "book-skunk-works"
   title: "Skunk Works: A Personal Memoir of My Years at Lockheed"
   short: "Skunk Works"
@@ -3535,42 +1748,6 @@
   priority: 2
   note: "Paid"
   quality: 4
-
-- id: "book-reentry-berger"
-  title: "Reentry: SpaceX, Elon Musk, and the Reusable Rockets That Launched a Second Space Age"
-  short: "Reentry"
-  provider: "Eric Berger (BenBella Books, 2024)"
-  type: "book"
-  url: "https://www.benbellabooks.com/shop/reentry/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intro"
-  cost: "paid"
-  estHours: 10
-  summary: "The engineering story of Falcon 9 landings, Dragon and Starship, showing iterative hardware development at work."
-  fromYear: 1
-  priority: 4
-  note: "Paid"
-  quality: 3
-
-- id: "book-pieces-of-the-action"
-  title: "Pieces of the Action"
-  short: "Pieces of the Action"
-  provider: "Vannevar Bush (Stripe Press, 2022; orig. 1970)"
-  type: "book"
-  url: "https://press.stripe.com/pieces-of-the-action"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intro"
-  cost: "paid"
-  estHours: 10
-  summary: "The memoir of the engineer behind the differential analyzer and wartime R&D, on how to organize big technical efforts."
-  fromYear: 1
-  priority: 4
-  note: "Paid"
-  quality: 3
 
 - id: "book-art-of-doing-science-and-engineering"
   title: "The Art of Doing Science and Engineering: Learning to Learn"
@@ -3590,24 +1767,6 @@
   note: "Paid"
   quality: 5
 
-- id: "book-engineering-in-plain-sight"
-  title: "Engineering in Plain Sight: An Illustrated Field Guide to the Constructed Environment"
-  short: "Engineering in Plain Sight"
-  provider: "Grady Hillhouse (No Starch Press, 2022)"
-  type: "book"
-  url: "https://nostarch.com/engineering-plain-sight"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intro"
-  cost: "paid"
-  estHours: 6
-  summary: "An illustrated guide to the grid, water, roads and bridges around you, building engineering intuition from everyday infrastructure."
-  fromYear: 1
-  priority: 4
-  note: "Paid"
-  quality: 3
-
 - id: "book-how-the-world-really-works"
   title: "How the World Really Works: The Science Behind How We Got Here and Where We're Going"
   short: "How the World Really Works"
@@ -3626,24 +1785,6 @@
   note: "Paid"
   quality: 4
 
-- id: "book-electrify-griffith"
-  title: "Electrify: An Optimist's Playbook for Our Clean Energy Future"
-  short: "Electrify"
-  provider: "Saul Griffith (MIT Press, 2021)"
-  type: "book"
-  url: "https://mitpress.mit.edu/9780262545044/electrify/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intro"
-  cost: "paid"
-  estHours: 7
-  summary: "An engineer's back-of-envelope plan for electrifying everything, a model for reasoning about energy systems with numbers."
-  fromYear: 1
-  priority: 4
-  note: "Paid"
-  quality: 3
-
 - id: "book-sustainable-energy-without-hot-air"
   title: "Sustainable Energy - Without the Hot Air"
   short: "Without the Hot Air"
@@ -3660,24 +1801,6 @@
   fromYear: 1
   priority: 1
   quality: 5
-
-- id: "book-material-world"
-  title: "Material World: The Six Raw Materials That Shape Modern Civilization"
-  short: "Material World"
-  provider: "Ed Conway (Knopf, 2023)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/703268/material-world-by-ed-conway/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intro"
-  cost: "paid"
-  estHours: 10
-  summary: "Follows sand to silicon wafers, plus copper, lithium, iron, salt and oil, showing the physical supply chain under chips and batteries."
-  fromYear: 1
-  priority: 4
-  note: "Paid"
-  quality: 3
 
 - id: "book-ignition-clark"
   title: "Ignition!: An Informal History of Liquid Rocket Propellants"
@@ -3714,25 +1837,6 @@
   priority: 2
   note: "Paid"
   quality: 4
-
-- id: "book-where-is-my-flying-car"
-  title: "Where Is My Flying Car?"
-  short: "Where Is My Flying Car?"
-  provider: "J. Storrs Hall (Stripe Press, 2021)"
-  type: "book"
-  url: "https://press.stripe.com/where-is-my-flying-car"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 14
-  summary: "An engineer's argument about energy use, nanotech and nuclear power and why technological progress slowed after 1970."
-  fromYear: 2
-  priority: 4
-  note: "Paid"
-  after: [book-how-the-world-really-works]
-  quality: 3
 
 - id: "book-how-big-things-get-done"
   title: "How Big Things Get Done: The Surprising Factors That Determine the Fate of Every Project, from Home Renovations to Space Exploration"
@@ -3809,42 +1913,6 @@
 # ---- Hardware and chip design: CPU, GPU and NPU, RTL to tape-out (13)
   quality: 5
 
-- id: "book-thinking-machine-witt"
-  title: "The Thinking Machine: Jensen Huang, Nvidia, and the World's Most Coveted Microchip"
-  short: "The Thinking Machine"
-  provider: "Stephen Witt (Viking, 2025)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/757558/the-thinking-machine-by-stephen-witt/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [hardware]
-  level: "intro"
-  cost: "paid"
-  estHours: 9
-  summary: "How CUDA and the GPU became the engine of deep learning, essential context for an inference engineer aiming at NVIDIA."
-  fromYear: 1
-  priority: 3
-  note: "Paid"
-  quality: 3
-
-- id: "book-nvidia-way-kim"
-  title: "The Nvidia Way: Jensen Huang and the Making of a Tech Giant"
-  short: "The Nvidia Way"
-  provider: "Tae Kim (W. W. Norton, 2024)"
-  type: "book"
-  url: "https://wwnorton.com/books/the-nvidia-way"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [hardware]
-  level: "intro"
-  cost: "paid"
-  estHours: 8
-  summary: "Explains Nvidia's culture, product bets and execution from graphics chips to AI accelerators, useful prep for understanding the company from inside."
-  fromYear: 1
-  priority: 3
-  note: "Paid"
-  quality: 3
-
 - id: "book-chip-war-miller"
   title: "Chip War: The Fight for the World's Most Critical Technology"
   short: "Chip War"
@@ -3898,42 +1966,6 @@
   priority: 2
   note: "Paid"
   quality: 4
-
-- id: "book-moores-law-gordon-moore"
-  title: "Moore's Law: The Life of Gordon Moore, Silicon Valley's Quiet Revolutionary"
-  short: "Moore's Law (Thackray)"
-  provider: "Arnold Thackray, David C. Brock & Rachel Jones (Basic Books, 2015)"
-  type: "book"
-  url: "https://www.hachettebookgroup.com/titles/arnold-thackray/moores-law/9780465055647/?lens=basic-books"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [hardware]
-  level: "intro"
-  cost: "paid"
-  estHours: 14
-  summary: "Explains where the scaling curve behind every GPU roadmap came from, through the chemist who founded Fairchild and Intel."
-  fromYear: 1
-  priority: 3
-  note: "Paid"
-  quality: 3
-
-- id: "book-the-big-score"
-  title: "The Big Score: The Billion-Dollar Story of Silicon Valley"
-  short: "The Big Score"
-  provider: "Michael S. Malone (Stripe Press, 2021; orig. 1985)"
-  type: "book"
-  url: "https://press.stripe.com/the-big-score"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [hardware]
-  level: "intro"
-  cost: "paid"
-  estHours: 10
-  summary: "A first-hand chronicle of Shockley, Fairchild, Intel and the chip startups that built the valley's culture."
-  fromYear: 1
-  priority: 3
-  note: "Paid"
-  quality: 3
 
 - id: "book-soul-of-a-new-machine"
   title: "The Soul of a New Machine"
@@ -3989,24 +2021,6 @@
   note: "Paid"
   doFirst: "CS:APP"
   quality: 5
-
-- id: "book-only-the-paranoid-survive"
-  title: "Only the Paranoid Survive: How to Exploit the Crisis Points That Challenge Every Company"
-  short: "Only the Paranoid Survive"
-  provider: "Andrew S. Grove (Currency, 1996)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/72469/only-the-paranoid-survive-by-andrew-grove/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [hardware]
-  level: "intro"
-  cost: "paid"
-  estHours: 6
-  summary: "Intel's CEO on the memory-to-microprocessor pivot and spotting strategic inflection points, useful context for how chip firms make bets."
-  fromYear: 2
-  priority: 3
-  note: "Paid"
-  quality: 3
 
 - id: "book-computer-architecture-quantitative-7e"
   title: "Computer Architecture: A Quantitative Approach (7th ed.)"

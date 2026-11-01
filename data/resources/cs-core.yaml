@@ -16,6 +16,7 @@
   subject: c-cpp
   summary: "Weeks 1 to 5 are the C part of block B; the later weeks (Python, SQL, web) are revision by then."
   priority: 2
+  quality: 4
 
 - id: missing-semester
   title: "MIT: The Missing Semester of Your CS Education"
@@ -32,6 +33,7 @@
   subject: linux-os
   summary: "Shell, editors, Git, debugging, packaging. Also the Bash part of the languages list."
   priority: 2
+  quality: 4
 
 - id: current-dsa-course
   title: "Current algorithms and data structures course (the one already in progress)"
@@ -63,7 +65,8 @@
   subject: algorithms
   summary: "The standard first algorithms course: asymptotics, sorting, hashing, graphs and DP taught with problem sets and full lecture videos."
   doFirst: "MIT 6.042J"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: mit-6-046j
   title: "MIT 6.046J (now 6.1220J) Design and Analysis of Algorithms (Spring 2015)"
@@ -84,6 +87,7 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: skiena-adm
   title: "The Algorithm Design Manual (Steven Skiena)"
@@ -103,7 +107,8 @@
   fromYear: 2
   note: "Paid"
   doFirst: "MIT 6.006"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: neetcode-roadmap
   title: "NeetCode roadmap (practice problems by pattern)"
@@ -121,8 +126,8 @@
   short: "NeetCode Roadmap"
   fromYear: 2
   note: "Free tier"
-  after: [fcc-data-structures-fiset]
   priority: 2
+  quality: 4
 
 - id: cmu-15-213
   title: "CMU 15-213 Introduction to Computer Systems (lectures with the CS:APP book)"
@@ -165,8 +170,9 @@
     - { id: malloclab, title: "Malloc Lab", url: "https://csapp.cs.cmu.edu/3e/malloclab.pdf" }
     - { id: proxylab, title: "Proxy Lab", url: "https://csapp.cs.cmu.edu/3e/proxylab.pdf" }
   summary: "The famous bomb, attack, cache, shell and malloc labs that make machine-level programming concrete."
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: nand2tetris
   title: "Nand2Tetris, parts I and II"
@@ -182,7 +188,8 @@
   subject: fpga
   summary: "From NAND gates to a computer, a compiler and an operating system. Also the warm-up for MIT 6.004 in year 4."
   after: [cs50x]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: mit-6-1810
   title: "MIT 6.1810 (formerly 6.S081) Operating System Engineering (xv6)"
@@ -217,7 +224,8 @@
   short: "OSTEP"
   fromYear: 1
   after: [cs50x]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: cmu-15-445
   title: "CMU 15-445/645 Database Systems (BusTub projects)"
@@ -234,8 +242,9 @@
   prerequisites: [cmu-15-213]
   subject: databases
   summary: "The homework is also the SQL practice of the languages list."
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: stanford-cs144
   title: "Stanford CS144 Introduction to Computer Networking (all labs)"
@@ -252,7 +261,8 @@
   prerequisites: [cmu-15-213]
   subject: networking
   summary: "You implement a TCP stack and IP router in modern C++ through staged labs that make networking concrete."
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: crafting-interpreters
   title: "Crafting Interpreters (Robert Nystrom)"
@@ -305,8 +315,9 @@
   short: "MIT 6.172"
   fromYear: 3
   doFirst: "CS:APP"
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: cs106b
   title: "Stanford CS106B Programming Abstractions (C++)"
@@ -362,7 +373,8 @@
   short: "Berkeley CS162"
   fromYear: 2
   after: [ostep]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: cs149
   title: "Stanford CS149 Parallel Computing (Fall 2025)"
@@ -399,8 +411,9 @@
   short: "CMU 15-418"
   fromYear: 3
   doFirst: "CS:APP"
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: sicp
   title: "Structure and Interpretation of Computer Programs (Abelson and Sussman, full text)"

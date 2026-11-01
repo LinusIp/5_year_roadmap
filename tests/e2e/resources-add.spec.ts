@@ -72,7 +72,7 @@ test('a sheet says how a resource is free and links to it exactly', async ({ pag
 });
 
 test('a free-tier note and a soft prerequisite show in the sheet', async ({ page }) => {
-  await open(page, './#/library/codecrafters');
+  await open(page, './#/library/neetcode-roadmap');
   const sheet = page.getByRole('dialog');
   await expect(sheet.getByText('Free tier', { exact: false }).first()).toBeVisible();
   await open(page, './#/library/coursera-deep-learning-specialization');

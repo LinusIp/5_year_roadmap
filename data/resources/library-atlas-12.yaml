@@ -27,7 +27,6 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
-  after: [docs-github-flow]
   quality: 4
 
 - id: "docs-gha-matrix"
@@ -217,7 +216,6 @@
   fromYear: 1
   priority: 3
   roadmap: "software-architect"
-  after: [docs-github-flow]
   quality: 2
 
 - id: "docs-gh-protected-branches"
@@ -236,7 +234,6 @@
   fromYear: 1
   priority: 3
   roadmap: "software-architect"
-  after: [docs-github-flow]
   quality: 3
 
 - id: "docs-gh-projects-quickstart"
@@ -273,7 +270,6 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
-  after: [docs-github-flow]
   quality: 4
 
 - id: "docs-gh-cli-run"
@@ -1138,7 +1134,6 @@
   fromYear: 1
   priority: 3
   roadmap: "software-architect"
-  after: [docs-flatpak-basic-concepts]
   quality: 3
 
 - id: "docs-gha-composite-action"
@@ -1535,7 +1530,6 @@
   summary: "Publish to PyPI from CI via OIDC with no API tokens; covers setup and the security model."
   fromYear: 1
   priority: 3
-  after: [pypug-packaging-projects]
   quality: 3
 
 - id: "docs-cargo-profiles"
@@ -2113,6 +2107,7 @@
   priority: 4
   roadmap: "game-developer"
   doFirst: "Godot: Your First 2D Game"
+  quality: 3
 
 - id: "docs-unity-build-profiles"
   title: "Introduction to build profiles (Unity 6)"
@@ -2130,6 +2125,7 @@
   fromYear: 1
   priority: 4
   roadmap: "game-developer"
+  quality: 2
 
 - id: "docs-unreal-packaging-cooking"
   title: "Packaging and Cooking Games in Unreal Engine"
@@ -2147,3 +2143,4 @@
   fromYear: 2
   priority: 4
   roadmap: "game-developer"
+  quality: 3

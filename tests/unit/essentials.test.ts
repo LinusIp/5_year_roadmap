@@ -30,7 +30,8 @@ describe('Developer essentials', () => {
   it('finds a few hundred of the Library, mostly systems, DevOps, architecture and languages', () => {
     const seed = loadSeedOrThrow();
     const hits = seed.resources.filter((r) => isEssential(r.title, r.tags));
-    expect(hits.length).toBeGreaterThan(300);
+    // The "four stars and up" pass (7,640 rows) halved the library.
+    expect(hits.length).toBeGreaterThan(120);
     expect(hits.length).toBeLessThan(1000);
     const tracks = new Set<string>(hits.flatMap((r) => r.tracks));
     for (const t of ['systems', 'devops', 'architecture', 'languages']) expect(tracks.has(t)).toBe(true);

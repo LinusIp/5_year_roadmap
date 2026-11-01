@@ -43,8 +43,9 @@ describe('the grades', () => {
     expect(canon.length).toBeGreaterThan(900);
     expect(canon.every((r) => r.priority === 1)).toBe(true);
     const three = graded.filter((r) => r.quality === 3);
-    // The file keeps 62 of its 7,162 grade-3 rows at priority 1 or 2 (a topic asked for, such as LeetGPU).
-    expect(three.filter((r) => (r.priority ?? 4) < 3).length).toBeLessThan(three.length * 0.02);
+    // The "four stars and up" file keeps 23 of its 260 grade-3 rows at priority 1 or 2 (the only coverage of a topic
+    // asked for, such as LeetGPU).
+    expect(three.filter((r) => (r.priority ?? 4) < 3).length).toBeLessThan(30);
     expect(raw.resources.find((r) => r.id === 'stanford-cs229')?.quality).toBe(5);
   });
 });
@@ -52,8 +53,9 @@ describe('the grades', () => {
 describe('the rows the pass dropped', () => {
   it('are gone, except the one on the plan, and nothing comes after one', () => {
     const ids = new Set([...raw.resources, ...raw.papers].map((r) => r.id));
-    expect(raw.resources.length).toBeLessThan(16_500);
-    expect(raw.resources.length).toBeGreaterThan(16_300);
+    // 16,422 after the quality pass, 7,650 after the "four stars and up" pass (7,640 rows).
+    expect(raw.resources.length).toBeLessThan(7_700);
+    expect(raw.resources.length).toBeGreaterThan(7_600);
     // 30 Days of Python was graded 1 or 2, but it is on the plan (phase y1-p0, lane B) with its units and its certificate.
     expect(ids.has('30-days-of-python')).toBe(true);
     for (const id of ['article-kdnuggets-winning-entry', 'repo-competitive-companion']) expect(ids.has(id), id).toBe(false);
@@ -72,5 +74,21 @@ describe('Up next, the paths and Research', () => {
     expect(extras.some((r) => !isLesser(r.quality))).toBe(true);
     const areas = researchAreas(seed, new Map());
     expect(areas.every((a) => a.items.some((i) => !isLesser(i.fit.quality)))).toBe(true);
+  });
+});
+
+describe('the "four stars and up" pass (7,640 rows)', () => {
+  it('keeps the rows the plan or the data still name, adds the replacements and grades every row of the file', () => {
+    const ids = new Set([...raw.resources, ...raw.papers].map((r) => r.id));
+    // On the plan (ML Zoomcamp), or named by a project, a doc or the internships (Kaggle Learn, build-your-own-x, the
+    // CuTe DSL notebooks, the WSL setup): kept although the file dropped them.
+    for (const id of ['ml-zoomcamp', 'kaggle-learn', 'build-your-own-x', 'tutorial-cute-dsl-notebooks', 'tutorial-wsl-dev-environment']) expect(ids.has(id), id).toBe(true);
+    // The replacements came in; Glaser et al.'s 2015 review replaced Koch et al.'s 2022 report and is its own row.
+    for (const id of ['paper-diloco', 'paper-ray-distributed-framework', 'paper-carla-simulator', 'paper-dagger-ross', 'repo-docling', 'paper-glaser-training-schrodingers-cat']) expect(ids.has(id), id).toBe(true);
+    expect(ids.has('paper-koch-quantum-optimal-control')).toBe(false);
+    const fromFile = [...raw.resources, ...raw.papers].filter((r) => r.priority !== undefined);
+    expect(fromFile.filter((r) => r.quality === undefined).length).toBeLessThan(fromFile.length * 0.01);
+    const graded = [...raw.resources, ...raw.papers].filter((r) => r.quality !== undefined);
+    expect(graded.filter((r) => r.quality! >= 4).length / graded.length).toBeGreaterThan(0.9);
   });
 });

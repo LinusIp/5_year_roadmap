@@ -135,7 +135,8 @@ describe('in the data', () => {
     const rows = [...seed.resources.map((r) => ({ id: r.id, title: r.title, summary: r.summary, track: r.tracks[0], tags: r.tags, shelf: shelfOf(r) })), ...seed.papers.map((p) => ({ id: p.id, title: p.title, summary: p.summary, track: p.tracks[0], tags: undefined, shelf: 'paper' }))];
     const picks = rows.map((r) => quickPicks(r));
     const count = (key: string): number => picks.filter((p) => p.includes(key)).length;
-    const bounds: Record<string, [number, number]> = { buildyourself: [200, 450], lowlevel: [600, 1100], science: [600, 1200], gpu: [600, 1100], sdk: [150, 350], fusion: [400, 700], aerospace: [350, 650] };
+    // The "four stars and up" pass (7,640 rows) halved the library: the floors follow it.
+    const bounds: Record<string, [number, number]> = { buildyourself: [120, 450], lowlevel: [300, 1100], science: [400, 1200], gpu: [300, 1100], sdk: [60, 350], fusion: [200, 700], aerospace: [180, 650] };
     for (const [key, [lo, hi]] of Object.entries(bounds)) {
       const n = count(key);
       expect(n, key).toBeGreaterThan(lo);
