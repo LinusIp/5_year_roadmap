@@ -314,7 +314,8 @@ and its 15,961-row file 587 more, the plan gap fill, in `data/resources/library-
 (`docs/imports-atlas-library-12.md`), and its 17,283-row file 1,197 more, the cracked dev and researcher round and the frontier engineer and scientist round, in `data/resources/library-atlas-13.yaml`
 (`docs/imports-atlas-library-13.md`), and its 17,848-row file 561 more, engineering-physics foundations and software depth, in `data/resources/library-atlas-14.yaml`
 (`docs/imports-atlas-library-14.md`); then its 16,448-row quality pass dropped 1,412 of those rows and added 16, in `data/resources/library-atlas-15.yaml`
-(`docs/imports-atlas-library-15.md`): 16,422 resources in all, and every track has blogs, so the Blogs shelf filters by track like the others. 361 of them
+(`docs/imports-atlas-library-15.md`), and its 7,640-row "four stars and up" pass dropped 8,795 more whose topic a stronger row covers and added 23, in `data/resources/library-atlas-16.yaml`
+(`docs/imports-atlas-library-16.md`): 7,650 resources in all, 95% of them rated 4 or 5, and every track has blogs, so the Blogs shelf filters by track like the others. 285 of them
 are paid (books, certificate exams and one specialization): each wears a **Paid** badge, the Books shelf has a Free / Paid chip, and a
 paid book stays out of "Up next" until **I own this** is on in its sheet. **Quick filters**, one list of twenty-two rows under
 the shelves, gather resources across every shelf: "Developer essentials" the resources whose title or tags

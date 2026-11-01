@@ -6,44 +6,6 @@
 
 # ---- AI, ML, LLMs and agents (142)
 
-- id: "course-dlai-evaluating-agents"
-  title: "Evaluating AI Agents"
-  short: "DL.AI Evaluating Agents"
-  provider: "DeepLearning.AI & Arize AI"
-  type: "lectures"
-  url: "https://www.deeplearning.ai/short-courses/evaluating-ai-agents/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "A short hands-on course on tracing agents and scoring their routers, tools and trajectories."
-  fromYear: 1
-  note: "Free tier"
-  doFirst: "Your AI Product Needs Evals"
-  priority: 3
-  roadmap: "ai-agents"
-  quality: 3
-
-- id: "khan-linear-algebra"
-  title: "Khan Academy Linear Algebra"
-  short: "Khan Linear Algebra"
-  provider: "Khan Academy"
-  type: "lectures"
-  url: "https://www.khanacademy.org/math/linear-algebra"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 30
-  summary: "Patient, bite-sized videos covering vectors, matrix transformations and eigenvectors from scratch."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
 - id: "course-3b1b-neural-networks"
   title: "Neural networks (3Blue1Brown series)"
   short: "3B1B Neural Networks"
@@ -80,24 +42,6 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
-
-- id: "immersive-linear-algebra"
-  title: "Immersive Linear Algebra"
-  short: "Immersive Linear Algebra"
-  provider: "J. Strom, K. Astrom, T. Akenine-Moller"
-  type: "book"
-  url: "https://immersivemath.com/ila/index.html"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 20
-  summary: "An interactive online book with manipulable figures that make vectors, matrices and transforms tangible."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
 
 - id: "book-murphy-pml-intro"
   title: "Probabilistic Machine Learning: An Introduction"
@@ -229,25 +173,6 @@
   priority: 1
   roadmap: "ai-agents"
   quality: 4
-
-- id: "docs-langgraph"
-  title: "LangGraph overview"
-  short: "LangGraph"
-  provider: "LangChain"
-  type: "article"
-  url: "https://docs.langchain.com/oss/python/langgraph/overview"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "Model agents as explicit state graphs with persistence and human-in-the-loop, useful for controlled workflows."
-  fromYear: 2
-  after: [anthropic-building-effective-agents]
-  priority: 3
-  roadmap: "ai-agents"
-  quality: 3
 
 - id: "docs-inspect-ai"
   title: "Inspect: An Open-Source Framework for Large Language Model Evaluations"
@@ -453,7 +378,6 @@
   estHours: 2
   summary: "Sampling many reasoning paths and taking a majority vote is a simple, strong baseline every builder should know."
   fromYear: 1
-  after: [article-weng-prompt-engineering]
   priority: 1
   roadmap: "ai-engineer"
   research: "genai"
@@ -853,26 +777,6 @@
   research: "genai"
   quality: 4
 
-- id: "paper-sdxl"
-  title: "SDXL: Improving Latent Diffusion Models for High-Resolution Image Synthesis"
-  short: "SDXL"
-  provider: "Dustin Podell et al. (Stability AI)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2307.01952"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "A practical engineering report on scaling latent diffusion: bigger U-Net, size/crop conditioning and a refiner stage."
-  fromYear: 2
-  after: [latent-diffusion]
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  quality: 3
-
 - id: "paper-controlnet"
   title: "Adding Conditional Control to Text-to-Image Diffusion Models"
   short: "ControlNet"
@@ -932,26 +836,6 @@
   roadmap: "ai-engineer"
   research: "diffusion"
   quality: 4
-
-- id: "paper-audioldm"
-  title: "AudioLDM: Text-to-Audio Generation with Latent Diffusion Models"
-  short: "AudioLDM"
-  provider: "Haohe Liu et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2301.12503"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "Brings the latent diffusion recipe to text-to-audio using CLAP embeddings, showing how image ideas transfer to sound."
-  fromYear: 2
-  after: [latent-diffusion]
-  priority: 3
-  roadmap: "ai-engineer"
-  research: "diffusion"
-  quality: 3
 
 - id: "paper-llava-visual-instruction-tuning"
   title: "Visual Instruction Tuning"
@@ -1367,26 +1251,6 @@
   roadmap: "ai-agents"
   research: "genai"
   quality: 4
-
-- id: "paper-lats"
-  title: "Language Agent Tree Search Unifies Reasoning Acting and Planning in Language Models"
-  short: "LATS"
-  provider: "Zhou et al. (UIUC)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2310.04406"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Combines Monte Carlo tree search with ReAct-style acting and reflection to plan over agent trajectories."
-  fromYear: 3
-  after: [paper-tree-of-thoughts]
-  priority: 3
-  roadmap: "ai-agents"
-  research: "genai"
-  quality: 3
 
 - id: "paper-metr-long-tasks"
   title: "Measuring AI Ability to Complete Long Software Tasks"
@@ -1836,24 +1700,6 @@
   roadmap: "ai-engineer"
   quality: 5
 
-- id: "article-openai-practical-guide-agents"
-  title: "A practical guide to building agents"
-  short: "OpenAI Agents Guide"
-  provider: "OpenAI"
-  type: "article"
-  url: "https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "A compact overview of when to build an agent, how to pick models and tools, orchestration patterns and guardrails."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-agents"
-  quality: 3
-
 - id: "article-hamel-evals"
   title: "Your AI Product Needs Evals"
   short: "AI Product Needs Evals"
@@ -1889,24 +1735,6 @@
   priority: 1
   roadmap: "ai-agents"
   quality: 4
-
-- id: "article-weng-prompt-engineering"
-  title: "Prompt Engineering"
-  short: "Prompt Engineering (Weng)"
-  provider: "Lilian Weng"
-  type: "article"
-  url: "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "A dense, well-cited survey of prompting techniques from few-shot to chain-of-thought and tool augmentation."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
 
 - id: "article-illustrated-transformer"
   title: "The Illustrated Transformer"
@@ -2171,25 +1999,6 @@
   priority: 1
   roadmap: "ai-agents"
   quality: 4
-
-- id: "article-anthropic-swe-bench-sonnet"
-  title: "Raising the bar on SWE-bench Verified with Claude 3.5 Sonnet"
-  short: "SWE-bench with Claude"
-  provider: "Anthropic"
-  type: "article"
-  url: "https://www.anthropic.com/engineering/swe-bench-sonnet"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "A minimal two-tool coding agent scaffold explained in detail, showing how little harness a strong model needs."
-  fromYear: 2
-  after: [article-swe-bench-verified]
-  priority: 3
-  roadmap: "ai-agents"
-  quality: 3
 
 - id: "article-eugene-yan-llm-patterns"
   title: "Patterns for Building LLM-based Systems & Products"
@@ -2514,26 +2323,6 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 5
-
-- id: "blog-tomczak-deep-generative-modeling"
-  title: "J.M. Tomczak: Deep Generative Modeling blog"
-  short: "Tomczak DGM Blog"
-  provider: "Jakub M. Tomczak"
-  type: "article"
-  url: "https://jmtomczak.github.io/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "A companion series to his book with short code-backed posts on ARMs, flows, VAEs, GANs, EBMs, diffusion, score models and flow matching."
-  fromYear: 1
-  blog: true
-  after: [udl-book]
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
 
 - id: "blog-karpathy"
   title: "Andrej Karpathy blog"
@@ -2905,27 +2694,7 @@
   after: [article-nvidia-even-easier-cuda]
   priority: 1
   roadmap: "inference-engineering"
-  quality: 3
-
-- id: "repo-gpu-mode-resource-stream"
-  title: "GPU MODE Resource Stream"
-  short: "GPU MODE Resources"
-  provider: "GPU MODE"
-  type: "practice"
-  url: "https://github.com/gpu-mode/resource-stream"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "A curated, ongoing list of the best GPU programming papers, blogs and code, useful for picking what to study next."
-  fromYear: 2
-  tags: [inference]
-  after: [video-gpu-mode]
-  priority: 3
-  roadmap: "inference-engineering"
-  quality: 3
+  quality: 4
 
 - id: "repo-gpt-fast"
   title: "gpt-fast"
@@ -3299,26 +3068,6 @@
   roadmap: "inference-engineering"
   quality: 5
 
-- id: "article-gordic-eli5-flashattention"
-  title: "ELI5: FlashAttention"
-  short: "ELI5 FlashAttention"
-  provider: "Aleksa Gordić"
-  type: "article"
-  url: "https://gordicaleksa.medium.com/eli5-flash-attention-5c44017022ad"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Breaks the FlashAttention algorithm into intuitive steps with diagrams, making the online-softmax trick click."
-  fromYear: 2
-  tags: [inference]
-  after: [horace-he-brrr]
-  priority: 3
-  roadmap: "inference-engineering"
-  quality: 3
-
 - id: "article-gordic-inside-vllm"
   title: "Inside vLLM: Anatomy of a High-Throughput LLM Inference System"
   short: "Inside vLLM"
@@ -3416,7 +3165,8 @@
   summary: "Sipser himself teaches automata, computability and complexity with full lecture videos."
   fromYear: 2
   doFirst: "MIT 6.042J"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "mit-6851-advanced-data-structures"
   title: "MIT 6.851 Advanced Data Structures (Spring 2012)"
@@ -3434,6 +3184,7 @@
   fromYear: 3
   after: [mit-6-046j]
   priority: 2
+  quality: 4
 
 - id: "stanford-cs103"
   title: "Stanford CS103: Mathematical Foundations of Computing"
@@ -3452,23 +3203,6 @@
   priority: 2
   quality: 4
 
-- id: "mit-6854-advanced-algorithms"
-  title: "MIT 6.854J Advanced Algorithms (Fall 2008)"
-  short: "MIT 6.854 Adv. Algorithms"
-  provider: "MIT OCW / Michel Goemans"
-  type: "course"
-  url: "https://ocw.mit.edu/courses/6-854j-advanced-algorithms-fall-2008/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [systems]
-  level: "advanced"
-  cost: "free"
-  estHours: 50
-  summary: "Graduate algorithms: network flows, linear programming, approximation and randomized methods."
-  fromYear: 3
-  after: [mit-6-046j]
-  priority: 2
-
 - id: "stanford-cs166"
   title: "Stanford CS166: Advanced Data Structures"
   short: "Stanford CS166"
@@ -3484,7 +3218,8 @@
   summary: "Slides and problem sets on RMQ, suffix trees, amortized and randomized structures with great explanations."
   fromYear: 3
   after: [mit-6-046j]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "book-mathematics-for-computer-science"
   title: "Mathematics for Computer Science"
@@ -3500,7 +3235,8 @@
   estHours: 80
   summary: "A free, exercise-rich textbook on discrete math for programmers, from induction to random variables."
   fromYear: 1
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "book-open-data-structures"
   title: "Open Data Structures"
@@ -3517,22 +3253,7 @@
   summary: "An open textbook that implements and analyzes lists, hash tables, trees, heaps and graphs with real code in several languages."
   fromYear: 1
   priority: 2
-
-- id: "book-pythonds"
-  title: "Problem Solving with Algorithms and Data Structures using Python (3rd ed.)"
-  short: "Python DS & Algorithms"
-  provider: "Brad Miller, David Ranum"
-  type: "book"
-  url: "https://runestone.academy/ns/books/published/pythonds3/index.html"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 30
-  summary: "An interactive beginner textbook with runnable Python examples for the core data structures."
-  fromYear: 1
-  priority: 2
+  quality: 4
 
 - id: "book-xv6-riscv"
   title: "xv6: a simple, Unix-like teaching operating system"
@@ -3549,7 +3270,8 @@
   summary: "Walks through a complete small kernel line by line, connecting OS theory to traps, page tables and locks in real code."
   fromYear: 2
   after: [ostep]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "book-analytic-combinatorics"
   title: "Analytic Combinatorics"
@@ -3567,6 +3289,7 @@
   fromYear: 3
   doFirst: "MIT 6.042J"
   priority: 2
+  quality: 4
 
 - id: "book-linux-insides"
   title: "Linux Inside"
@@ -3584,6 +3307,7 @@
   fromYear: 3
   after: [book-xv6-riscv]
   priority: 2
+  quality: 4
 
 - id: "algs4-booksite"
   title: "Algorithms, 4th Edition (booksite)"
@@ -3600,7 +3324,8 @@
   summary: "Free condensed text, Java implementations and exercises for the classic Sedgewick treatment of sorting, searching, graphs and strings."
   fromYear: 1
   after: [princeton-algorithms-part1]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "cp-algorithms"
   title: "Algorithms for Competitive Programming"
@@ -3617,7 +3342,8 @@
   summary: "A deep reference of contest algorithms (number theory, flows, string matching, geometry) with proofs and tested code."
   fromYear: 2
   after: [competitive-programmers-handbook]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "docs-osdev-wiki"
   title: "OSDev Wiki"
@@ -3635,6 +3361,7 @@
   fromYear: 2
   after: [writing-an-os-in-rust]
   priority: 2
+  quality: 4
 
 - id: "docs-linux-kernel"
   title: "The Linux Kernel documentation"
@@ -3651,7 +3378,8 @@
   summary: "The official reference on kernel subsystems, APIs and development process, essential once you start touching kernel code."
   fromYear: 3
   after: [linux-kernel-module-programming-guide]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "docs-agner-fog-optimization"
   title: "Software optimization resources"
@@ -3668,7 +3396,8 @@
   summary: "Measured microarchitecture details and instruction tables for x86 CPUs, the classic guide to low-level optimisation."
   fromYear: 3
   doFirst: "CS:APP"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "docs-intel-sdm"
   title: "Intel 64 and IA-32 Architectures Software Developer Manuals"
@@ -3685,7 +3414,8 @@
   summary: "The authoritative x86 reference for instructions, paging, interrupts and system programming; look things up here."
   fromYear: 3
   doFirst: "CS:APP"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "visualgo"
   title: "VisuAlgo"
@@ -3702,22 +3432,7 @@
   summary: "Animated, step-through visualizations of dozens of data structures and algorithms to build intuition."
   fromYear: 1
   priority: 2
-
-- id: "algorithm-visualizer"
-  title: "Algorithm Visualizer"
-  short: "Algorithm Visualizer"
-  provider: "algorithm-visualizer contributors"
-  type: "article"
-  url: "https://github.com/algorithm-visualizer/algorithm-visualizer"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 5
-  summary: "An open-source platform that turns algorithm code into live visualizations you can edit and replay."
-  fromYear: 1
-  priority: 2
+  quality: 4
 
 - id: "atcoder"
   title: "AtCoder"
@@ -3734,6 +3449,7 @@
   summary: "Weekly contests whose Beginner rounds have clean, well-graded problems ideal for building contest habits."
   fromYear: 1
   priority: 2
+  quality: 4
 
 - id: "project-euler"
   title: "Project Euler"
@@ -3750,6 +3466,7 @@
   summary: "Math-flavored programming puzzles that reward finding a clever algorithm over brute force."
   fromYear: 1
   priority: 2
+  quality: 4
 
 - id: "leetcode"
   title: "LeetCode"
@@ -3768,23 +3485,7 @@
   note: "Free tier"
   after: [neetcode-roadmap]
   priority: 2
-
-- id: "kattis"
-  title: "Kattis Problem Archive"
-  short: "Kattis"
-  provider: "Kattis"
-  type: "practice"
-  url: "https://open.kattis.com/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 50
-  summary: "Thousands of ICPC-style problems sorted by difficulty, great for practicing full problem solving end to end."
-  fromYear: 2
-  doFirst: "CSES Problem Set"
-  priority: 2
+  quality: 4
 
 - id: "practice-mit-6-1810-xv6-labs"
   title: "6.1810: Operating System Engineering (xv6 labs)"
@@ -3801,7 +3502,8 @@
   summary: "Nine labs where you add syscalls, page tables, copy-on-write fork and a network driver to a real kernel."
   fromYear: 2
   after: [book-xv6-riscv]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "practice-linux-from-scratch"
   title: "Linux From Scratch"
@@ -3819,6 +3521,7 @@
   fromYear: 2
   after: [the-linux-command-line]
   priority: 2
+  quality: 4
 
 - id: "practice-pwn-college"
   title: "pwn.college"
@@ -3835,7 +3538,8 @@
   summary: "Free hands-on challenges in binary exploitation and reverse engineering that force you to understand memory and assembly."
   fromYear: 2
   after: [csapp-labs]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "paper-dijkstra-1959"
   title: "A Note on Two Problems in Connexion with Graphs"
@@ -3853,6 +3557,7 @@
   fromYear: 1
   doFirst: "MIT 6.006"
   priority: 2
+  quality: 4
 
 - id: "paper-unix-time-sharing-system"
   title: "The UNIX Time-Sharing System"
@@ -3869,7 +3574,8 @@
   summary: "A short, readable original description of the file system, processes and shell that every Unix-like OS still echoes."
   fromYear: 1
   after: [ostep]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "paper-knuth-goto"
   title: "Structured Programming with go to Statements"
@@ -3886,6 +3592,7 @@
   summary: "The source of the premature-optimization quote, with a nuanced take on efficiency and program structure."
   fromYear: 2
   priority: 2
+  quality: 4
 
 - id: "paper-pugh-skip-lists"
   title: "Skip Lists: A Probabilistic Alternative to Balanced Trees"
@@ -3903,6 +3610,7 @@
   fromYear: 2
   doFirst: "MIT 6.006"
   priority: 2
+  quality: 4
 
 - id: "paper-consistent-hashing"
   title: "Consistent Hashing and Random Trees: Distributed Caching Protocols for Relieving Hot Spots on the World Wide Web"
@@ -3921,6 +3629,7 @@
   doFirst: "MIT 6.006"
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "paper-count-min-sketch"
   title: "An Improved Data Stream Summary: The Count-Min Sketch and its Applications"
@@ -3938,6 +3647,7 @@
   fromYear: 2
   doFirst: "MIT 6.006"
   priority: 2
+  quality: 4
 
 - id: "paper-cuckoo-hashing"
   title: "Cuckoo Hashing"
@@ -3955,6 +3665,7 @@
   fromYear: 2
   doFirst: "MIT 6.006"
   priority: 2
+  quality: 4
 
 - id: "paper-bayer-mccreight-btree"
   title: "Organization and Maintenance of Large Ordered Indices"
@@ -3971,8 +3682,9 @@
   summary: "The original B-tree report that underpins nearly every database and filesystem index."
   fromYear: 2
   doFirst: "MIT 6.006"
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "paper-comer-ubiquitous-btree"
   title: "The Ubiquitous B-Tree"
@@ -3991,6 +3703,7 @@
   doFirst: "MIT 6.006"
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "paper-knuth-dancing-links"
   title: "Dancing Links"
@@ -4008,6 +3721,7 @@
   fromYear: 2
   doFirst: "MIT 6.006"
   priority: 2
+  quality: 4
 
 - id: "paper-sedgewick-llrb"
   title: "Left-leaning Red-Black Trees"
@@ -4025,6 +3739,7 @@
   fromYear: 2
   after: [algs4-booksite]
   priority: 2
+  quality: 4
 
 - id: "paper-cap-twelve-years-later"
   title: "CAP Twelve Years Later: How the \"Rules\" Have Changed"
@@ -4042,6 +3757,7 @@
   fromYear: 2
   after: [kleppmann-distributed-systems]
   priority: 2
+  quality: 4
 
 - id: "paper-harvest-yield"
   title: "Harvest, Yield, and Scalable Tolerant Systems"
@@ -4060,6 +3776,7 @@
   after: [paper-cap-twelve-years-later]
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "paper-architecture-of-a-database-system"
   title: "Architecture of a Database System"
@@ -4076,8 +3793,9 @@
   summary: "A guided tour of how real relational engines are structured: process models, query processing, storage and transactions."
   fromYear: 2
   after: [cmu-15-445]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "paper-borg"
   title: "Large-scale cluster management at Google with Borg"
@@ -4094,7 +3812,8 @@
   summary: "The production predecessor of Kubernetes, with lessons on scheduling, isolation and utilisation at fleet scale."
   fromYear: 2
   after: [ostep]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "paper-tail-at-scale"
   title: "The Tail at Scale"
@@ -4111,7 +3830,8 @@
   summary: "Explains why rare slow responses dominate fan-out services and the hedging tricks that tame p99 latency."
   fromYear: 2
   after: [article-latency-numbers]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "paper-facebook-tao"
   title: "TAO: Facebook's Distributed Data Store for the Social Graph"
@@ -4130,6 +3850,7 @@
   after: [paper-scaling-memcache-facebook]
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "paper-scaling-memcache-facebook"
   title: "Scaling Memcache at Facebook"
@@ -4146,8 +3867,9 @@
   summary: "Practical cache-consistency, thundering-herd and cross-region lessons from one of the largest cache deployments."
   fromYear: 2
   after: [build-your-own-redis]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "paper-drepper-memory"
   title: "What Every Programmer Should Know About Memory"
@@ -4164,8 +3886,9 @@
   summary: "The definitive deep dive into DRAM, caches, TLBs and NUMA, and how each shapes the speed of real code."
   fromYear: 2
   doFirst: "CS:APP"
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "paper-goldberg-floating-point"
   title: "What Every Computer Scientist Should Know About Floating-Point Arithmetic"
@@ -4181,7 +3904,8 @@
   estHours: 5
   summary: "Explains rounding, error and IEEE 754 so you stop being surprised when 0.1 + 0.2 misbehaves."
   fromYear: 2
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "paper-hyperloglog"
   title: "HyperLogLog: the analysis of a near-optimal cardinality estimation algorithm"
@@ -4198,7 +3922,8 @@
   summary: "Counts distinct items in huge streams with tiny memory; a showcase of probabilistic algorithm analysis."
   fromYear: 3
   doFirst: "MIT 6.042J"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "paper-okasaki-purely-functional-ds"
   title: "Purely Functional Data Structures (PhD thesis)"
@@ -4216,6 +3941,7 @@
   fromYear: 3
   after: [mit-6-046j]
   priority: 2
+  quality: 4
 
 - id: "paper-paxos-made-simple"
   title: "Paxos Made Simple"
@@ -4232,8 +3958,9 @@
   summary: "The short, plain-English derivation of Paxos consensus that underpins Chubby, Spanner and many replicated stores."
   fromYear: 3
   after: [paper-time-clocks]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "paper-chubby"
   title: "The Chubby lock service for loosely-coupled distributed systems"
@@ -4250,8 +3977,9 @@
   summary: "An unusually candid account of building and operating a Paxos-backed coordination service that people actually use."
   fromYear: 3
   after: [paper-paxos-made-simple]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "paper-critique-ansi-sql-isolation"
   title: "A Critique of ANSI SQL Isolation Levels"
@@ -4268,7 +3996,8 @@
   summary: "Pins down what isolation levels really permit and introduces snapshot isolation and its write-skew anomaly."
   fromYear: 3
   after: [cmu-15-445]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "paper-calvin"
   title: "Calvin: Fast Distributed Transactions for Partitioned Database Systems"
@@ -4287,6 +4016,7 @@
   after: [paper-spanner]
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "paper-amazon-aurora"
   title: "Amazon Aurora: Design Considerations for High Throughput Cloud-Native Relational Databases"
@@ -4303,8 +4033,9 @@
   summary: "Shows how pushing redo-log processing into a replicated storage tier reshapes a relational database for the cloud."
   fromYear: 3
   after: [paper-architecture-of-a-database-system]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "paper-crdts-shapiro"
   title: "Conflict-free Replicated Data Types"
@@ -4321,8 +4052,9 @@
   summary: "The formal basis for data types that merge concurrent edits without coordination, used in local-first and collaborative apps."
   fromYear: 3
   after: [paper-dynamo]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "paper-zanzibar"
   title: "Zanzibar: Google's Consistent, Global Authorization System"
@@ -4359,8 +4091,9 @@
   summary: "The proof that deterministic consensus can't be guaranteed in an asynchronous system, which explains why every practical protocol relies on timeouts."
   fromYear: 3
   after: [paper-paxos-made-simple]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "paper-linux-scheduler-wasted-cores"
   title: "The Linux Scheduler: a Decade of Wasted Cores"
@@ -4378,6 +4111,7 @@
   fromYear: 3
   after: [book-xv6-riscv]
   priority: 2
+  quality: 4
 
 - id: "paper-sel4-verification"
   title: "seL4: Formal Verification of an OS Kernel"
@@ -4394,7 +4128,8 @@
   summary: "Shows how a whole microkernel was proven correct, and what that effort costs, a milestone in trustworthy systems."
   fromYear: 3
   after: [book-xv6-riscv]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "paper-mimalloc"
   title: "Mimalloc: Free List Sharding in Action"
@@ -4412,6 +4147,7 @@
   fromYear: 3
   doFirst: "CS:APP"
   priority: 2
+  quality: 4
 
 - id: "paper-jemalloc"
   title: "A Scalable Concurrent malloc(3) Implementation for FreeBSD"
@@ -4430,6 +4166,7 @@
   doFirst: "CS:APP"
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "paper-meltdown"
   title: "Meltdown"
@@ -4447,6 +4184,7 @@
   fromYear: 3
   doFirst: "CS:APP"
   priority: 2
+  quality: 4
 
 - id: "paper-spectre"
   title: "Spectre Attacks: Exploiting Speculative Execution"
@@ -4463,7 +4201,8 @@
   summary: "Shows how branch prediction can be trained to leak secrets across security boundaries, a lesson in hardware side channels."
   fromYear: 3
   after: [paper-meltdown]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "paper-mckenney-memory-barriers"
   title: "Memory Barriers: a Hardware View for Software Hackers"
@@ -4480,8 +4219,9 @@
   summary: "Derives why memory barriers exist from store buffers and invalidate queues, so memory ordering finally makes sense."
   fromYear: 3
   after: [rust-atomics-and-locks]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "article-vogels-eventually-consistent"
   title: "Eventually Consistent - Revisited"
@@ -4497,9 +4237,10 @@
   estHours: 1
   summary: "A clear practitioner's explanation of client-side consistency models and quorum (N, R, W) trade-offs."
   fromYear: 1
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
   research: "diffusion"
+  quality: 5
 
 - id: "article-notes-young-bloods"
   title: "Notes on Distributed Systems for Young Bloods"
@@ -4515,8 +4256,9 @@
   estHours: 1
   summary: "Practical lessons for engineers new to distributed systems, such as treating failure as normal and measuring before scaling."
   fromYear: 1
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "article-latency-numbers"
   title: "Latency Numbers Every Programmer Should Know"
@@ -4533,38 +4275,7 @@
   summary: "A cheat sheet of order-of-magnitude costs for memory, disk and network to use in back-of-the-envelope estimates."
   fromYear: 1
   priority: 2
-
-- id: "article-zine-strace"
-  title: "Spying on your programs with strace"
-  short: "strace zine"
-  provider: "Julia Evans"
-  type: "article"
-  url: "https://wizardzines.com/zines/strace/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A free illustrated zine that teaches strace, the tool for seeing every syscall a program makes."
-  fromYear: 1
-  priority: 2
-
-- id: "article-zine-perf"
-  title: "Profiling & tracing with perf"
-  short: "perf zine"
-  provider: "Julia Evans"
-  type: "article"
-  url: "https://wizardzines.com/zines/perf/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A free illustrated zine that gets you profiling programs with Linux perf in minutes."
-  fromYear: 1
-  priority: 2
+  quality: 4
 
 - id: "article-abseil-swiss-tables"
   title: "Swiss Tables Design Notes"
@@ -4582,6 +4293,7 @@
   fromYear: 2
   doFirst: "MIT 6.006"
   priority: 2
+  quality: 4
 
 - id: "article-gregg-linux-performance"
   title: "Linux Performance"
@@ -4597,7 +4309,8 @@
   estHours: 4
   summary: "A curated map of Linux observability tools, talks and methods, including his famous tool diagrams."
   fromYear: 2
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "blog-julia-evans"
   title: "Julia Evans"
@@ -4615,6 +4328,7 @@
   fromYear: 1
   blog: true
   priority: 2
+  quality: 4
 
 - id: "blog-the-morning-paper"
   title: "the morning paper"
@@ -4632,8 +4346,9 @@
   fromYear: 2
   blog: true
   after: [kleppmann-distributed-systems]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "blog-marc-brooker"
   title: "Marc's Blog"
@@ -4650,8 +4365,9 @@
   summary: "Thoughtful posts on latency, metastability, consensus and system design from an AWS distinguished engineer."
   fromYear: 2
   blog: true
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "blog-brendan-gregg"
   title: "Brendan Gregg's Blog"
@@ -4670,6 +4386,7 @@
   blog: true
   after: [article-gregg-linux-performance]
   priority: 2
+  quality: 4
 
 - id: "blog-dan-luu"
   title: "Dan Luu"
@@ -4686,8 +4403,9 @@
   summary: "Data-driven essays on hardware, latency, debugging and software reliability that reward close reading."
   fromYear: 2
   blog: true
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "blog-old-new-thing"
   title: "The Old New Thing"
@@ -4705,6 +4423,7 @@
   fromYear: 2
   blog: true
   priority: 2
+  quality: 4
 
 - id: "blog-daniel-lemire"
   title: "Daniel Lemire's blog"
@@ -4722,6 +4441,7 @@
   fromYear: 2
   blog: true
   priority: 2
+  quality: 4
 
 - id: "blog-computer-enhance"
   title: "Computer, Enhance!"
@@ -4740,6 +4460,7 @@
   blog: true
   note: "Free tier"
   priority: 2
+  quality: 4
 
 - id: "blog-phil-eaton"
   title: "Notes on software development"
@@ -4758,6 +4479,7 @@
   blog: true
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "blog-murat-demirbas"
   title: "Metadata (Murat Demirbas' blog)"
@@ -4777,6 +4499,7 @@
   after: [paper-raft]
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "blog-jepsen-analyses"
   title: "Jepsen Analyses"
@@ -4794,8 +4517,9 @@
   fromYear: 3
   blog: true
   after: [paper-cap-twelve-years-later]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "blog-lwn"
   title: "LWN.net"
@@ -4813,7 +4537,8 @@
   fromYear: 3
   blog: true
   after: [docs-linux-kernel]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "blog-ryg-fgiesen"
   title: "The ryg blog"
@@ -4833,7 +4558,8 @@
   doFirst: "CS:APP"
 
 # ---- Software architecture and system design (28)
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "book-software-engineering-at-google"
   title: "Software Engineering at Google"
@@ -4907,44 +4633,6 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
-
-- id: "docs-azure-architecture-center"
-  title: "Azure Architecture Center"
-  short: "Azure Architecture Center"
-  provider: "Microsoft"
-  type: "article"
-  url: "https://learn.microsoft.com/en-us/azure/architecture/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 20
-  summary: "Vendor-neutral cloud design patterns (retry, circuit breaker, saga, CQRS) plus reference architectures and best practices."
-  fromYear: 2
-  after: [docs-twelve-factor-app]
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "tutorial-refactoring-guru-patterns"
-  title: "Design Patterns (Refactoring.Guru)"
-  short: "Refactoring.Guru Patterns"
-  provider: "Alexander Shvets (Refactoring.Guru)"
-  type: "article"
-  url: "https://refactoring.guru/design-patterns"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 15
-  summary: "Illustrated, example-driven explanations of the GoF patterns in many languages; the web catalog is free."
-  fromYear: 1
-  note: "Free tier"
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
 
 - id: "course-patterns-of-distributed-systems"
   title: "Catalog of Patterns of Distributed Systems"
@@ -5132,24 +4820,6 @@
   roadmap: "software-architect"
   quality: 4
 
-- id: "article-joel-test"
-  title: "The Joel Test: 12 Steps to Better Code"
-  short: "The Joel Test"
-  provider: "Joel Spolsky"
-  type: "article"
-  url: "https://www.joelonsoftware.com/2000/08/09/the-joel-test-12-steps-to-better-code/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A quick checklist of engineering habits, such as source control, one-step builds and bug databases, that still separates healthy teams from struggling ones."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
 - id: "article-design-docs-at-google"
   title: "Design Docs at Google"
   short: "Design Docs at Google"
@@ -5244,26 +4914,6 @@
   roadmap: "software-architect"
   quality: 5
 
-- id: "blog-high-scalability"
-  title: "High Scalability"
-  short: "High Scalability"
-  provider: "Todd Hoff"
-  type: "article"
-  url: "https://highscalability.com/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "A long-running archive of real-world architecture write-ups showing how companies actually scaled."
-  fromYear: 2
-  blog: true
-  after: [system-design-primer]
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
 - id: "blog-all-things-distributed"
   title: "All Things Distributed"
   short: "All Things Distributed"
@@ -5301,25 +4951,6 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
-
-- id: "blog-uber-engineering"
-  title: "Uber Engineering Blog"
-  short: "Uber Engineering"
-  provider: "Uber"
-  type: "article"
-  url: "https://www.uber.com/blog/engineering/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "Detailed accounts of geospatial systems, storage migrations and large-scale microservice operations."
-  fromYear: 2
-  blog: true
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
 
 - id: "blog-cloudflare"
   title: "Cloudflare Blog"
@@ -5375,7 +5006,8 @@
   estHours: 25
   summary: "Classic lecture series on manipulator kinematics, Jacobians, dynamics and operational-space control from the person who invented it."
   fromYear: 1
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "course-cmu-16745-optimal-control"
   title: "CMU 16-745: Optimal Control and Reinforcement Learning"
@@ -5392,7 +5024,8 @@
   summary: "Rigorous, modern treatment of LQR, trajectory optimization, MPC and contact-rich control, the math behind most legged-robot controllers."
   fromYear: 2
   after: [brunton-control-bootcamp]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "course-stachniss-robot-mapping"
   title: "Robot Mapping"
@@ -5408,7 +5041,8 @@
   estHours: 30
   summary: "A complete, well-taught SLAM course covering EKF, particle filter and graph-based SLAM with slides and recorded lectures."
   fromYear: 2
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "course-hf-robotics-course"
   title: "Hugging Face Robotics Course"
@@ -5424,7 +5058,8 @@
   estHours: 15
   summary: "Free hands-on course bridging classical robotics and end-to-end robot learning using the LeRobot library."
   fromYear: 1
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "course-mit-underactuated-robotics"
   title: "Underactuated Robotics"
@@ -5441,7 +5076,8 @@
   summary: "The definitive free text on dynamics, optimal control, trajectory optimization and legged locomotion, with runnable Drake notebooks and lecture videos."
   fromYear: 2
   after: [modern-robotics]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "course-mit-robotic-manipulation"
   title: "Robotic Manipulation: Perception, Planning, and Control"
@@ -5458,7 +5094,8 @@
   summary: "Takes you from kinematics and grasping to perception and learned visuomotor policies, all with simulation exercises you can run."
   fromYear: 2
   after: [modern-robotics]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "book-lavalle-planning-algorithms"
   title: "Planning Algorithms"
@@ -5475,7 +5112,8 @@
   summary: "The standard reference for motion planning, from configuration spaces and sampling-based planners to planning under uncertainty."
   fromYear: 2
   doFirst: "MIT 6.006"
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "docs-gymnasium"
   title: "Gymnasium Documentation"
@@ -5491,7 +5129,8 @@
   estHours: 6
   summary: "Defines the standard RL environment API that most robot-learning code follows, and includes MuJoCo locomotion baselines."
   fromYear: 1
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "docs-dm-control"
   title: "dm_control: DeepMind Control Suite"
@@ -5508,7 +5147,8 @@
   summary: "Benchmark continuous-control tasks plus MJCF composition and locomotion libraries that are great for learning RL on MuJoCo."
   fromYear: 2
   after: [mujoco-docs]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "docs-isaac-lab"
   title: "Isaac Lab Documentation"
@@ -5525,7 +5165,8 @@
   summary: "The successor to Isaac Gym, with ready-made humanoid and quadruped tasks for massively parallel RL and sim-to-real work."
   fromYear: 2
   after: [docs-gymnasium]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "docs-drake"
   title: "Drake"
@@ -5542,7 +5183,8 @@
   summary: "Optimization-centric dynamics and control toolbox used throughout Tedrake's courses for trajectory optimization and contact simulation."
   fromYear: 2
   after: [course-mit-underactuated-robotics]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "docs-pinocchio"
   title: "Pinocchio"
@@ -5559,7 +5201,8 @@
   summary: "Fast rigid-body dynamics with analytical derivatives, the workhorse library behind many humanoid whole-body controllers and MPC stacks."
   fromYear: 2
   after: [modern-robotics]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "practice-mujoco-menagerie"
   title: "MuJoCo Menagerie"
@@ -5576,7 +5219,8 @@
   summary: "Curated, high-quality MJCF robot models including the Unitree G1, so you can start from an accurate model instead of building one."
   fromYear: 1
   after: [mujoco-docs]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "practice-mujoco-playground"
   title: "MuJoCo Playground"
@@ -5593,7 +5237,8 @@
   summary: "GPU-accelerated environments and training scripts for humanoids, quadrupeds and hands that train locomotion policies in minutes and transfer to hardware."
   fromYear: 2
   after: [mujoco-docs]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "practice-legged-gym"
   title: "legged_gym"
@@ -5610,7 +5255,8 @@
   summary: "Compact, readable reference implementation of parallel-env locomotion training with terrain curricula and domain randomization."
   fromYear: 2
   doFirst: "Learning to Walk in Minutes"
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "practice-unitree-rl-gym"
   title: "unitree_rl_gym"
@@ -5627,7 +5273,8 @@
   summary: "Official training pipeline for Unitree G1/H1/Go2 locomotion including a MuJoCo sim2sim deploy step, directly relevant to G1 tasks."
   fromYear: 2
   after: [practice-legged-gym]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "practice-unitree-mujoco"
   title: "unitree_mujoco"
@@ -5644,24 +5291,8 @@
   summary: "Lets you run Unitree SDK2 control code against a MuJoCo simulation of the G1 before touching real hardware."
   fromYear: 2
   after: [mujoco-docs]
-  priority: 3
-
-- id: "practice-genesis"
-  title: "Genesis"
-  short: "Genesis"
-  provider: "Genesis Embodied AI"
-  type: "practice"
-  url: "https://github.com/Genesis-Embodied-AI/Genesis"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [robotics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "A fast multi-physics simulator with a Python API, worth knowing as an alternative to MuJoCo and Isaac for robot learning."
-  fromYear: 2
-  after: [mujoco-docs]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "practice-lerobot"
   title: "LeRobot"
@@ -5678,7 +5309,8 @@
   summary: "Open-source PyTorch library with datasets and implementations of ACT, Diffusion Policy and VLAs, including Unitree G1 support."
   fromYear: 2
   after: [course-hf-robotics-course]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "paper-learning-to-walk-in-minutes"
   title: "Learning to Walk in Minutes Using Massively Parallel Deep Reinforcement Learning"
@@ -5695,7 +5327,8 @@
   summary: "Shows how thousands of GPU-parallel environments plus a terrain curriculum make locomotion training fast, the recipe behind most modern legged RL."
   fromYear: 2
   doFirst: "Sutton & Barto"
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "paper-tobin-domain-randomization"
   title: "Domain Randomization for Transferring Deep Neural Networks from Simulation to the Real World"
@@ -5711,7 +5344,8 @@
   estHours: 2
   summary: "The paper that popularized randomizing simulation so policies trained only in sim survive the real world."
   fromYear: 2
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "paper-deepmimic"
   title: "DeepMimic: Example-Guided Deep Reinforcement Learning of Physics-Based Character Skills"
@@ -5728,24 +5362,8 @@
   summary: "Shows how tracking motion-capture clips with RL yields natural physics-based skills, the foundation of motion imitation for humanoids."
   fromYear: 2
   doFirst: "Sutton & Barto"
-  priority: 3
-
-- id: "paper-humanoid-gym"
-  title: "Humanoid-Gym: Reinforcement Learning for Humanoid Robot with Zero-Shot Sim2Real Transfer"
-  short: "Humanoid-Gym"
-  provider: "Gu, Wang, Chen"
-  type: "paper"
-  url: "https://arxiv.org/abs/2404.05695"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [robotics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "A practical humanoid locomotion framework that validates policies via MuJoCo sim2sim before real deployment, very close to the G1 workflow."
-  fromYear: 2
-  after: [paper-learning-to-walk-in-minutes]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "paper-diffusion-policy"
   title: "Diffusion Policy: Visuomotor Policy Learning via Action Diffusion"
@@ -5762,8 +5380,9 @@
   summary: "Shows that denoising diffusion over action sequences is a strong, stable recipe for imitation-learned manipulation."
   fromYear: 2
   after: [course-mit-robotic-manipulation]
-  priority: 3
+  priority: 1
   research: "diffusion"
+  quality: 5
 
 - id: "paper-act-aloha"
   title: "Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware"
@@ -5779,7 +5398,8 @@
   estHours: 3
   summary: "Introduces ALOHA teleoperation hardware and the Action Chunking Transformer, a simple baseline every manipulation learner should know."
   fromYear: 2
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "paper-mobile-aloha"
   title: "Mobile ALOHA: Learning Bimanual Mobile Manipulation with Low-Cost Whole-Body Teleoperation"
@@ -5796,7 +5416,8 @@
   summary: "Extends ALOHA to a mobile base and shows co-training with static data boosts whole-body imitation."
   fromYear: 2
   after: [paper-act-aloha]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "paper-rt-1"
   title: "RT-1: Robotics Transformer for Real-World Control at Scale"
@@ -5813,7 +5434,8 @@
   summary: "An early demonstration that a single transformer trained on large real robot datasets generalizes across many tasks."
   fromYear: 2
   after: [annotated-transformer]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "paper-hwangbo-agile-legged"
   title: "Learning agile and dynamic motor skills for legged robots"
@@ -5830,7 +5452,8 @@
   summary: "Landmark sim-to-real result that introduced a learned actuator network to close the reality gap on ANYmal."
   fromYear: 3
   after: [paper-learning-to-walk-in-minutes]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "paper-rma-rapid-motor-adaptation"
   title: "RMA: Rapid Motor Adaptation for Legged Robots"
@@ -5847,7 +5470,8 @@
   summary: "Introduces teacher-student training where a policy infers environment parameters online, a key idea for robust real-world locomotion."
   fromYear: 3
   after: [paper-learning-to-walk-in-minutes]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "paper-quadruped-challenging-terrain"
   title: "Learning Quadrupedal Locomotion over Challenging Terrain"
@@ -5864,7 +5488,8 @@
   summary: "Demonstrates privileged-teacher distillation and curricula that let a blind quadruped walk over rough natural terrain."
   fromYear: 3
   after: [paper-hwangbo-agile-legged]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "paper-openai-rubiks-cube"
   title: "Solving Rubik's Cube with a Robot Hand"
@@ -5881,7 +5506,8 @@
   summary: "Pushes domain randomization to the extreme with automatic curricula, a landmark in dexterous sim-to-real manipulation."
   fromYear: 3
   after: [paper-tobin-domain-randomization]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "paper-amp-adversarial-motion-priors"
   title: "AMP: Adversarial Motion Priors for Stylized Physics-Based Character Control"
@@ -5898,7 +5524,8 @@
   summary: "Replaces hand-crafted tracking rewards with a learned style discriminator, widely used to make robot gaits look natural."
   fromYear: 3
   after: [paper-deepmimic]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "paper-real-world-humanoid-locomotion"
   title: "Real-World Humanoid Locomotion with Reinforcement Learning"
@@ -5914,8 +5541,8 @@
   estHours: 3
   summary: "Shows a causal transformer policy trained in simulation walking a full-size humanoid outdoors zero-shot."
   fromYear: 3
-  after: [paper-humanoid-gym]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "paper-humanplus"
   title: "HumanPlus: Humanoid Shadowing and Imitation from Humans"
@@ -5932,24 +5559,8 @@
   summary: "Combines whole-body shadowing of human motion with imitation learning to teach humanoids real tasks."
   fromYear: 3
   after: [paper-deepmimic]
-  priority: 3
-
-- id: "paper-omnih2o"
-  title: "OmniH2O: Universal and Dexterous Human-to-Humanoid Whole-Body Teleoperation and Learning"
-  short: "OmniH2O"
-  provider: "He et al. (CMU)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2406.08858"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [robotics]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "A general whole-body teleoperation and learning system for humanoids, built on a sim-trained motion-tracking policy."
-  fromYear: 3
-  after: [paper-deepmimic]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "paper-asap-humanoid"
   title: "ASAP: Aligning Simulation and Real-World Physics for Learning Agile Humanoid Whole-Body Skills"
@@ -5965,8 +5576,8 @@
   estHours: 4
   summary: "Learns a delta-action model from real data to correct simulator dynamics, enabling agile whole-body skills on the Unitree G1."
   fromYear: 3
-  after: [paper-omnih2o]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "paper-rt-2"
   title: "RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control"
@@ -5983,7 +5594,8 @@
   summary: "Coined the vision-language-action model by fine-tuning a VLM to output robot actions, kicking off the VLA wave."
   fromYear: 3
   after: [paper-rt-1]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "paper-open-x-embodiment"
   title: "Open X-Embodiment: Robotic Learning Datasets and RT-X Models"
@@ -6000,7 +5612,8 @@
   summary: "Pools data from dozens of robots and labs, showing cross-embodiment training improves generalist policies."
   fromYear: 3
   after: [paper-rt-1]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "paper-openvla"
   title: "OpenVLA: An Open-Source Vision-Language-Action Model"
@@ -6017,7 +5630,8 @@
   summary: "A fully open 7B VLA with weights and fine-tuning code, the easiest way to study VLAs hands-on."
   fromYear: 3
   after: [paper-rt-2]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "paper-pi0"
   title: "π0: A Vision-Language-Action Flow Model for General Robot Control"
@@ -6034,7 +5648,8 @@
   summary: "Combines a pretrained VLM with a flow-matching action expert to produce high-frequency dexterous control across many robots."
   fromYear: 3
   after: [paper-openvla]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "paper-gr00t-n1"
   title: "GR00T N1: An Open Foundation Model for Generalist Humanoid Robots"
@@ -6051,7 +5666,8 @@
   summary: "An open humanoid foundation model with a dual-system design, showing how VLAs are being adapted specifically to humanoids."
   fromYear: 3
   after: [paper-pi0]
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "paper-cheetah3-convex-mpc"
   title: "Dynamic Locomotion in the MIT Cheetah 3 Through Convex Model-Predictive Control"
@@ -6068,7 +5684,8 @@
   summary: "The classic model-based baseline: a simplified single-rigid-body model turns legged control into a fast convex MPC problem."
   fromYear: 3
   after: [course-cmu-16745-optimal-control]
-  priority: 3
+  priority: 1
+  quality: 5
 
 - id: "blog-eric-jang"
   title: "Eric Jang's blog"
@@ -6085,24 +5702,8 @@
   summary: "Thoughtful essays on robot learning, generalization and humanoid companies from a researcher who has built them."
   fromYear: 2
   blog: true
-  priority: 3
-
-- id: "blog-it-can-think"
-  title: "It Can Think!"
-  short: "It Can Think! (Paxton)"
-  provider: "Chris Paxton"
-  type: "article"
-  url: "https://itcanthink.substack.com/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [robotics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "Regular, accessible commentary on the state of robotics and embodied AI research and industry."
-  fromYear: 2
-  blog: true
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "blog-physical-intelligence"
   title: "Physical Intelligence Research Blog"
@@ -6122,7 +5723,8 @@
   after: [paper-pi0]
 
 # ---- Graphics and rendering (30)
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: "book-gpu-gems-2"
   title: "GPU Gems 2 (online edition)"
@@ -6138,9 +5740,9 @@
   estHours: 30
   summary: "Free online chapters on geometry, shading, GPGPU and image effects that shaped modern techniques."
   fromYear: 2
-  after: [gpu-gems]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "book-gpu-gems-3"
   title: "GPU Gems 3 (online edition)"
@@ -6157,8 +5759,9 @@
   summary: "Free chapters on shadows, skin, post-processing and GPU computing still cited today."
   fromYear: 2
   after: [book-gpu-gems-2]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "book-ray-tracing-gems"
   title: "Ray Tracing Gems"
@@ -6175,8 +5778,9 @@
   summary: "Open-access collection of practical DXR-era ray tracing techniques from industry experts."
   fromYear: 3
   after: [rtiow]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "book-ray-tracing-gems-ii"
   title: "Ray Tracing Gems II"
@@ -6193,45 +5797,10 @@
   summary: "Open-access follow-up covering ReSTIR, denoising, hybrid rendering and production ray tracing."
   fromYear: 3
   after: [book-ray-tracing-gems]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
   research: "diffusion"
-
-- id: "docs-physically-based-database"
-  title: "Physically Based - The PBR values database"
-  short: "PhysicallyBased.info"
-  provider: "Anton Palmqvist"
-  type: "article"
-  url: "https://physicallybased.info/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Reference values for real materials, lights and cameras so your PBR scenes start from measured data."
-  fromYear: 1
-  after: [learnopengl]
-  priority: 3
-  roadmap: "game-developer"
-
-- id: "docs-amd-gpuopen"
-  title: "AMD GPUOpen Learn"
-  short: "AMD GPUOpen"
-  provider: "AMD"
-  type: "article"
-  url: "https://gpuopen.com/learn/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "Performance guides, samples and talks on GPU architecture, DX12/Vulkan and FidelityFX effects."
-  fromYear: 2
-  after: [vulkan-tutorial]
-  priority: 3
-  roadmap: "game-developer"
+  quality: 4
 
 - id: "paper-whitted-ray-tracing"
   title: "An Improved Illumination Model for Shaded Display"
@@ -6248,8 +5817,9 @@
   summary: "The 1980 paper that introduced recursive ray tracing for reflection, refraction and shadows."
   fromYear: 1
   after: [rtiow]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "paper-marching-cubes"
   title: "Marching Cubes: A High Resolution 3D Surface Construction Algorithm"
@@ -6265,8 +5835,9 @@
   estHours: 2
   summary: "The classic algorithm for turning volumes and implicit fields into triangle meshes; easy and rewarding to implement."
   fromYear: 1
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "paper-kajiya-rendering-equation"
   title: "The Rendering Equation"
@@ -6283,8 +5854,9 @@
   summary: "The integral every physically based renderer approximates; reading the source makes path tracing click."
   fromYear: 2
   doFirst: "Computer Graphics from Scratch"
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "paper-cook-torrance-reflectance"
   title: "A Reflectance Model for Computer Graphics"
@@ -6301,8 +5873,9 @@
   summary: "Origin of the microfacet specular model that still underpins modern PBR shading."
   fromYear: 2
   after: [learnopengl]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "paper-burley-disney-brdf"
   title: "Physically Based Shading at Disney"
@@ -6319,8 +5892,9 @@
   summary: "Shows how measured materials led to an artist-friendly parameter set adopted by nearly every engine."
   fromYear: 2
   after: [paper-cook-torrance-reflectance]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "paper-hart-sphere-tracing"
   title: "Sphere Tracing: A Geometric Method for the Antialiased Ray Tracing of Implicit Surfaces"
@@ -6337,8 +5911,9 @@
   summary: "The foundation of SDF raymarching used across Shadertoy demos and engine distance-field effects."
   fromYear: 2
   doFirst: "The Book of Shaders"
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "paper-perlin-improving-noise"
   title: "Improving Noise"
@@ -6355,8 +5930,9 @@
   summary: "Perlin's own fixes to gradient noise, the building block of procedural textures and terrain."
   fromYear: 2
   doFirst: "The Book of Shaders"
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "paper-williams-shadow-mapping"
   title: "Casting Curved Shadows on Curved Surfaces"
@@ -6373,8 +5949,9 @@
   summary: "The short 1978 paper that introduced depth-buffer shadow mapping, still the default real-time shadow technique."
   fromYear: 2
   after: [learnopengl]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "paper-veach-thesis"
   title: "Robust Monte Carlo Methods for Light Transport Simulation"
@@ -6391,8 +5968,9 @@
   summary: "The definitive treatment of path-space light transport, multiple importance sampling and bidirectional methods."
   fromYear: 3
   doFirst: "PBRT"
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "paper-instant-ngp"
   title: "Instant Neural Graphics Primitives with a Multiresolution Hash Encoding"
@@ -6409,8 +5987,9 @@
   summary: "A hash-grid input encoding that cut neural field training from hours to seconds; key GPU-efficiency ideas."
   fromYear: 3
   after: [paper-nerf]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "paper-restir"
   title: "Spatiotemporal Reservoir Resampling for Real-Time Ray Tracing with Dynamic Direct Lighting"
@@ -6427,8 +6006,9 @@
   summary: "Reservoir resampling that makes millions of dynamic lights tractable in real-time ray tracing."
   fromYear: 3
   after: [paper-veach-thesis]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "paper-neural-radiance-caching"
   title: "Real-time Neural Radiance Caching for Path Tracing"
@@ -6445,8 +6025,9 @@
   summary: "A small network trained online during rendering to cache indirect light, blending ML into real-time path tracing."
   fromYear: 3
   after: [paper-instant-ngp]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "paper-nanite-deep-dive"
   title: "A Deep Dive into Nanite Virtualized Geometry"
@@ -6463,8 +6044,9 @@
   summary: "Explains cluster hierarchies, GPU-driven culling and software rasterization behind UE5's virtualized geometry."
   fromYear: 3
   doFirst: "Real-Time Rendering"
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "paper-lumen-ue5"
   title: "Lumen: Real-time Global Illumination in Unreal Engine 5"
@@ -6481,8 +6063,9 @@
   summary: "A production look at combining screen traces, distance fields and surface caches for dynamic GI."
   fromYear: 3
   after: [paper-nanite-deep-dive]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "article-courreges-gta-v"
   title: "GTA V - Graphics Study"
@@ -6499,8 +6082,9 @@
   summary: "A frame-by-frame breakdown of a AAA deferred renderer, from G-buffer to post effects."
   fromYear: 2
   after: [learnopengl]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "article-courreges-doom-2016"
   title: "DOOM (2016) - Graphics Study"
@@ -6517,8 +6101,9 @@
   summary: "Dissects id Tech 6's clustered forward renderer with megatextures and 60fps-focused tricks."
   fromYear: 2
   after: [learnopengl]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "article-aaltonen-no-graphics-api"
   title: "No Graphics API"
@@ -6535,26 +6120,9 @@
   summary: "A veteran's argument for how a much simpler GPU API could look given modern hardware."
   fromYear: 3
   doFirst: "Vulkan Guide"
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
-
-- id: "blog-graphics-programming-weekly"
-  title: "Graphics Programming weekly"
-  short: "Graphics Prog. Weekly"
-  provider: "Jendrik Illner"
-  type: "article"
-  url: "https://www.jendrikillner.com/tags/weekly/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "A weekly curated digest of new graphics articles, talks and papers; the easiest way to keep up with the field."
-  fromYear: 2
-  blog: true
-  priority: 3
-  roadmap: "game-developer"
+  quality: 4
 
 - id: "blog-aras-p"
   title: "Aras Pranckevičius blog"
@@ -6571,8 +6139,9 @@
   summary: "Practical, measurement-driven posts on shaders, GPU performance and engine work from a Unity and Blender veteran."
   fromYear: 2
   blog: true
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "blog-mjp-danger-zone"
   title: "The Danger Zone"
@@ -6590,27 +6159,9 @@
   fromYear: 2
   blog: true
   after: [learnopengl]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
-
-- id: "blog-alex-tardif"
-  title: "Alex Tardif: Graphics Programmer"
-  short: "Alex Tardif blog"
-  provider: "Alex Tardif"
-  type: "article"
-  url: "https://alextardif.com/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "Clear write-ups on modern rendering architecture and D3D12/Vulkan engine design."
-  fromYear: 2
-  blog: true
-  doFirst: "Vulkan Guide"
-  priority: 3
-  roadmap: "game-developer"
+  quality: 4
 
 - id: "blog-bart-wronski"
   title: "Bart Wronski blog"
@@ -6627,47 +6178,9 @@
   summary: "Deep dives into image and signal processing, filtering and sampling as they apply to rendering."
   fromYear: 3
   blog: true
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
-
-- id: "blog-jeremy-ong"
-  title: "Jeremy's Blog"
-  short: "Jeremy Ong blog"
-  provider: "Jeremy Ong"
-  type: "article"
-  url: "https://www.jeremyong.com/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 10
-  summary: "Technical posts on GPU programming, render graphs and the math behind graphics systems."
-  fromYear: 3
-  blog: true
-  priority: 3
-  roadmap: "game-developer"
-
-- id: "blog-jorge-jimenez"
-  title: "Jorge Jimenez - Game Developer"
-  short: "Jorge Jimenez"
-  provider: "Jorge Jimenez"
-  type: "article"
-  url: "https://www.iryoku.com/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 8
-  summary: "Publications on SMAA, subsurface skin, filmic SSAO and next-gen post effects from Activision's graphics R&D."
-  fromYear: 3
-  blog: true
-  doFirst: "Real-Time Rendering"
-
-# ---- Game development (11)
-  priority: 3
-  roadmap: "game-developer"
+  quality: 4
 
 - id: "video-mike-acton-dod"
   title: "CppCon 2014: Mike Acton \"Data-Oriented Design and C++\""
@@ -6683,8 +6196,9 @@
   estHours: 2
   summary: "The talk that popularized thinking about data and hardware first instead of objects."
   fromYear: 2
-  priority: 4
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "book-game-engine-black-books"
   title: "Game Engine Black Books (Wolfenstein 3D, DOOM)"
@@ -6700,8 +6214,9 @@
   estHours: 20
   summary: "Free PDFs explaining how hardware limits shaped the engines of Wolfenstein 3D and DOOM."
   fromYear: 2
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "book-data-oriented-design"
   title: "Data-Oriented Design"
@@ -6718,44 +6233,9 @@
   summary: "Free online book on structuring data for cache-friendly, table-like game and engine code."
   fromYear: 2
   doFirst: "Game Programming Patterns"
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
-
-- id: "docs-bevy-ecs-quickstart"
-  title: "Bevy Quick Start: ECS"
-  short: "Bevy ECS"
-  provider: "Bevy contributors"
-  type: "article"
-  url: "https://bevy.org/learn/quick-start/getting-started/ecs/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "A short hands-on intro to entities, components and systems in a Rust-native engine."
-  fromYear: 1
-  after: [rust-book]
-  priority: 4
-  roadmap: "game-developer"
-
-- id: "docs-godot-architecture"
-  title: "Godot's architecture overview"
-  short: "Godot Architecture"
-  provider: "Godot Engine contributors"
-  type: "article"
-  url: "https://docs.godotengine.org/en/stable/engine_details/architecture/godot_architecture_diagram.html"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "A map of how servers, scenes and the rendering backend fit together inside an open-source engine."
-  fromYear: 2
-  after: [godot-first-2d-game]
-  priority: 4
-  roadmap: "game-developer"
+  quality: 4
 
 - id: "docs-ecs-faq"
   title: "Entity Component System FAQ"
@@ -6771,9 +6251,9 @@
   estHours: 2
   summary: "Answers what ECS is, how archetype and sparse-set storage work, and lists implementations."
   fromYear: 2
-  after: [docs-bevy-ecs-quickstart]
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "docs-unreal-cpp-programming"
   title: "Programming with C++ in Unreal Engine"
@@ -6789,8 +6269,9 @@
   estHours: 10
   summary: "Official guide to Unreal's gameplay framework, reflection system and containers, the engine's core architecture."
   fromYear: 2
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "article-gaffer-fix-your-timestep"
   title: "Fix Your Timestep!"
@@ -6806,8 +6287,9 @@
   estHours: 1
   summary: "Explains the accumulator game loop that decouples deterministic physics from frame rate."
   fromYear: 1
-  priority: 4
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "article-sanglard-doom3-review"
   title: "Doom3 Source Code Review"
@@ -6824,47 +6306,9 @@
   summary: "A guided tour through a full shipping engine's architecture, renderer and scripting."
   fromYear: 2
   after: [book-game-engine-black-books]
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
-
-- id: "blog-fabien-sanglard"
-  title: "Fabien Sanglard's website"
-  short: "Fabien Sanglard"
-  provider: "Fabien Sanglard"
-  type: "article"
-  url: "https://fabiensanglard.net/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "Famous source code reviews and hardware histories that show how classic game engines really work."
-  fromYear: 2
-  blog: true
-  priority: 4
-  roadmap: "game-developer"
-
-- id: "blog-our-machinery-archive"
-  title: "Our Machinery blog (archive)"
-  short: "Our Machinery archive"
-  provider: "Our Machinery (Tobias Persson, Niklas Gray et al.)"
-  type: "article"
-  url: "https://ruby0x1.github.io/machinery_blog_archive/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "advanced"
-  cost: "free"
-  estHours: 10
-  summary: "Preserved posts on data-oriented engine architecture, plugins and tooling from the Bitsquid/Stingray veterans."
-  fromYear: 3
-  blog: true
-  after: [book-data-oriented-design]
-
-# ---- Languages (17)
-  priority: 4
-  roadmap: "game-developer"
+  quality: 4
 
 - id: "book-rust-performance"
   title: "The Rust Performance Book"
@@ -6919,23 +6363,6 @@
   doFirst: "learncpp"
   priority: 1
   quality: 5
-
-- id: "tutorial-crenshaw-lets-build-a-compiler"
-  title: "Let's Build a Compiler"
-  short: "Let's Build a Compiler"
-  provider: "Jack Crenshaw"
-  type: "article"
-  url: "https://compilers.iecc.com/crenshaw/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 20
-  summary: "A classic hands-on series that builds a single-pass compiler with almost no theory up front."
-  fromYear: 1
-  priority: 3
-  quality: 3
 
 - id: "tutorial-learn-rust-dangerous-way"
   title: "Learn Rust the Dangerous Way"
@@ -7098,24 +6525,6 @@
   priority: 2
   quality: 4
 
-- id: "blog-mitchell-hashimoto"
-  title: "Writing – Mitchell Hashimoto"
-  short: "Mitchell Hashimoto"
-  provider: "Mitchell Hashimoto"
-  type: "article"
-  url: "https://mitchellh.com/writing"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [languages]
-  level: "intermediate"
-  cost: "free"
-  estHours: 10
-  summary: "Posts on Zig, terminal emulator internals and systems engineering from building Ghostty."
-  fromYear: 2
-  blog: true
-  priority: 3
-  quality: 3
-
 - id: "blog-without-boats"
   title: "Without boats, dreams dry up"
   short: "Without Boats"
@@ -7134,25 +6543,6 @@
   after: [rust-async-book]
   priority: 2
   quality: 4
-
-- id: "blog-jon-gjengset"
-  title: "Jon Gjengset"
-  short: "Jon Gjengset"
-  provider: "Jon Gjengset"
-  type: "article"
-  url: "https://thesquareplanet.com/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [languages]
-  level: "advanced"
-  cost: "free"
-  estHours: 10
-  summary: "Writing and links to long-form Rust streams on concurrency, internals and building real systems."
-  fromYear: 3
-  blog: true
-  after: [rust-book]
-  priority: 3
-  quality: 3
 
 - id: "blog-ralf-jung"
   title: "Ralf's Ramblings"

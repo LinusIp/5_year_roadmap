@@ -43,12 +43,13 @@ describe('Agents & MCP', () => {
   it('finds the cluster in the data, each area with dozens', () => {
     const seed = loadSeedOrThrow();
     const rows = seed.resources.filter((r) => isAgents(r.title, r.summary, r.tracks[0]));
-    expect(rows.length).toBeGreaterThan(800);
+    // The "four stars and up" pass (7,640 rows) kept a quarter of the cluster: the floors follow it.
+    expect(rows.length).toBeGreaterThan(200);
     expect(rows.some((r) => r.id === 'repo-mcp-rust-sdk')).toBe(true);
     for (const area of AGENT_AREAS) {
       const count = rows.filter((r) => agentAreasOf(r.title, r.summary, shelfOf(r)).includes(area.key)).length;
-      expect(count, area.label).toBeGreaterThan(10);
+      expect(count, area.label).toBeGreaterThan(3);
     }
-    expect(rows.filter((r) => r.cost === 'paid').length).toBeGreaterThan(10);
+    expect(rows.filter((r) => r.cost === 'paid').length).toBeGreaterThan(5);
   });
 });

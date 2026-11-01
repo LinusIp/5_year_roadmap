@@ -49,7 +49,7 @@ describe('Build & ship', () => {
     const rows = seed.resources.filter((r) => isBuildShip(r.title, r.summary, r.tracks[0]));
     expect(rows.length).toBeGreaterThan(120);
     expect(rows.length).toBeLessThan(200);
-    for (const id of ['docs-pyinstaller-usage', 'docs-gha-matrix', 'docs-wix-tutorial', 'docs-tauri-distribute', 'docs-godot-exporting-projects', 'docs-gh-cli-release', 'docs-github-actions-workflow-syntax', 'repo-nektos-act']) {
+    for (const id of ['docs-pyinstaller-usage', 'docs-gha-matrix', 'docs-wix-tutorial', 'docs-tauri-distribute', 'docs-godot-exporting-projects', 'docs-gh-cli-release', 'docs-github-actions-workflow-syntax']) {
       expect(rows.some((r) => r.id === id), id).toBe(true);
     }
     for (const area of BUILD_AREAS) {

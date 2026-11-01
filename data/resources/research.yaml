@@ -159,7 +159,6 @@
   reference: true
   short: "alphaXiv"
   fromYear: 3
-  after: [practice-hf-daily-papers]
   priority: 3
   roadmap: "ai-engineer"
   quality: 3

@@ -68,6 +68,7 @@
   summary: "Digital design from gates to a pipelined processor. Nand2Tetris is the warm-up; project 43 (a RISC-V subset on an FPGA) is the payoff."
   after: [nand2tetris]
   priority: 2
+  quality: 4
 
 - id: harris-ddca
   title: "Digital Design and Computer Architecture, RISC-V edition (Harris and Harris)"
@@ -347,7 +348,8 @@
   prerequisites: [mit-18-06, mit-18-03]
   subject: signals-control
   summary: "State space, LQR and Kalman filtering: what the inverted pendulum of project 45 needs."
-  priority: 3
+  priority: 2
+  quality: 4
 
 - id: dspguide
   title: "The Scientist and Engineer's Guide to Digital Signal Processing (Steven W. Smith)"
@@ -455,7 +457,6 @@
   summary: "The open-source alternative to LTspice, scriptable from the command line."
   short: "ngspice"
   fromYear: 2
-  after: [xschem]
   priority: 2
   quality: 4
 
@@ -474,4 +475,5 @@
   summary: "The control-theory textbook, free from the authors. A reference beside MIT 2.004 and the Brian Douglas lectures."
   short: "Feedback Systems"
   fromYear: 2
-  priority: 3
+  priority: 1
+  quality: 5

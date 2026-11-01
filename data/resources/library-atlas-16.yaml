@@ -1,0 +1,460 @@
+# The Atlas Library's eleventh file (ATLAS-LIBRARY, 15,961 rows): the rows the first ten files did not have, the plan
+# gap fill: inference-stack depth (TensorRT-LLM, Dynamo, Triton Inference Server, PyTorch internals), interview prep,
+# research skills, diffusion inference and hands-on image generation, video and 3D generation tooling, communication
+# (public speaking, pitching and fundraising, technical writing, blogging), open-source contribution, Mandarin basics,
+# certificates (ids `cert-…`, a Certificate badge and an Earned toggle) and backend auth, observability and testing.
+# Papers, articles, docs, practice, books, blogs and courses, each link checked when it was added (October 2026), each
+# with its priority for years 1 to 3, the roadmap.sh roadmap it serves and its year 3 research area; a paid row says so
+# (`cost: paid`, `note: Paid`). None is on the plan: they sit on their shelves, in search, under "Optional for this path"
+# and in the Research view. Generated from atlas-resources.jsonl by scratch/import-atlas.ts; rows the Library already
+# had only filled in what their entries were missing, or took the file's corrections.
+
+# ---- Inference engineering: serving, kernels, GPUs (track ai, tag inference) (5)
+
+- id: "paper-token-merging-vit"
+  title: "Token Merging: Your ViT But Faster"
+  short: "Token Merging (ToMe)"
+  provider: "Bolya et al. (Meta AI, ICLR 2023)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2210.09461"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Shows how merging similar tokens inside a transformer cuts compute with no retraining, the idea later reused to speed up Stable Diffusion."
+  fromYear: 2
+  priority: 1
+  quality: 4
+  roadmap: "inference-engineering"
+  research: "diffusion"
+  tags: [inference]
+  after: [paper-vit]
+
+- id: "paper-routellm"
+  title: "RouteLLM: Learning to Route LLMs with Preference Data"
+  short: "RouteLLM"
+  provider: "Ong et al. (LMSYS / UC Berkeley)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2406.18665"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Explains how to train a router that sends each query to a cheap or strong model, cutting serving cost while keeping answer quality."
+  fromYear: 2
+  priority: 1
+  quality: 4
+  roadmap: "inference-engineering"
+  research: "inference"
+  tags: [inference]
+
+- id: "paper-diloco"
+  title: "DiLoCo: Distributed Low-Communication Training of Language Models"
+  short: "DiLoCo"
+  provider: "Arthur Douillard, Qixuan Feng, Andrei A. Rusu, et al. (Google DeepMind)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2311.08105"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Shows how inner-outer optimization lets islands of poorly connected GPUs train one LLM while syncing hundreds of times less often, the basis of decentralized runs like INTELLECT."
+  fromYear: 3
+  priority: 1
+  quality: 4
+  roadmap: "inference-engineering"
+  research: "inference"
+  tags: [inference]
+  after: [paper-zero]
+
+- id: "paper-ray-distributed-framework"
+  title: "Ray: A Distributed Framework for Emerging AI Applications"
+  short: "Ray paper"
+  provider: "Moritz, Nishihara, Wang et al. (UC Berkeley RISELab)"
+  type: "paper"
+  url: "https://arxiv.org/abs/1712.05889"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Explains the task/actor model and distributed scheduler behind Ray, the framework many AI training and serving stacks run on."
+  fromYear: 3
+  priority: 1
+  quality: 4
+  roadmap: "inference-engineering"
+  research: "inference"
+  tags: [inference]
+  after: [ddia]
+
+- id: "paper-efficient-diffusion-survey"
+  title: "Efficient Diffusion Models: A Survey"
+  short: "Efficient Diffusion Survey"
+  provider: "Shen et al. (TMLR 2025)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2502.06805"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "Maps the whole toolbox for making diffusion models cheaper to run, from fewer sampling steps and caching to quantization and parallel serving."
+  fromYear: 3
+  priority: 1
+  quality: 4
+  roadmap: "inference-engineering"
+  research: "diffusion"
+  tags: [inference]
+  after: [ddpm]
+
+# ---- AI, ML, LLMs and agents (3)
+
+- id: "repo-docling"
+  title: "Docling: get your documents ready for gen AI"
+  short: "Docling"
+  provider: "IBM Research / docling-project"
+  type: "practice"
+  url: "https://github.com/docling-project/docling"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Open-source toolkit that turns PDFs, Office files and scans into structured Markdown/JSON with layout and table understanding, the practical front end of any RAG or agent document pipeline."
+  fromYear: 2
+  priority: 1
+  quality: 4
+  roadmap: "ai-agents"
+
+- id: "paper-pysr-symbolic-regression"
+  title: "Interpretable Machine Learning for Science with PySR and SymbolicRegression.jl"
+  short: "PySR symbolic regression"
+  provider: "Miles Cranmer"
+  type: "paper"
+  url: "https://arxiv.org/abs/2305.01582"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "The reference paper for PySR, the standard open tool for discovering compact closed-form equations from data, with a benchmark of scientific-discovery tasks."
+  fromYear: 2
+  priority: 1
+  quality: 4
+  roadmap: "ai-engineer"
+
+- id: "paper-phyworld-video-physical-law"
+  title: "How Far is Video Generation from World Model: A Physical Law Perspective"
+  short: "Video gen vs physical law"
+  provider: "Bingyi Kang et al. (ByteDance, Tsinghua)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2411.02385"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "A controlled study showing video diffusion models imitate training cases rather than learn physical laws, which is the key question behind world-model claims."
+  fromYear: 3
+  priority: 1
+  quality: 4
+  roadmap: "ai-engineer"
+  research: "world-models"
+  after: [paper-video-diffusion-models]
+
+# ---- Software architecture and system design (1)
+
+- id: "docs-json-schema-reference"
+  title: "JSON Schema reference (Understanding JSON Schema)"
+  short: "JSON Schema Reference"
+  provider: "JSON Schema project"
+  type: "article"
+  url: "https://json-schema.org/understanding-json-schema"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [architecture]
+  level: "intro"
+  cost: "free"
+  estHours: 4
+  summary: "A readable, example-driven tour of every JSON Schema keyword, the format behind LLM tool definitions and structured outputs."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+
+# ---- DevOps and MLOps (1)
+
+- id: "docs-tauri-v2"
+  title: "Tauri 2.0 Documentation"
+  short: "Tauri v2 docs"
+  provider: "Tauri"
+  type: "article"
+  url: "https://v2.tauri.app/start/"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 12
+  summary: "Official guide to building, signing, updating and shipping cross-platform Rust desktop apps, including Windows installers and CI release pipelines."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  after: [rust-book]
+
+# ---- Simulation (1)
+
+- id: "paper-review-hts-ac-loss-h-formulation"
+  title: "Review of the AC Loss Computation for HTS using the H-formulation"
+  short: "HTS H-formulation review"
+  provider: "Boyang Shen, Francesco Grilli, Tim Coombs"
+  type: "paper"
+  url: "https://arxiv.org/abs/1908.02176"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [simulation]
+  level: "advanced"
+  cost: "free"
+  estHours: 5
+  summary: "Walks through the finite-element H-formulation used to model current and AC loss in HTS tapes, cables and magnet windings, from 2D to 3D and homogenized models."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  after: [tutorial-fenicsx-dokken]
+
+# ---- Robotics (2)
+
+- id: "paper-carla-simulator"
+  title: "CARLA: An Open Urban Driving Simulator"
+  short: "CARLA Simulator"
+  provider: "Dosovitskiy, Ros, Codevilla, Lopez, Koltun"
+  type: "paper"
+  url: "https://arxiv.org/abs/1711.03938"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [robotics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Introduces the open-source urban driving simulator that became the default testbed for comparing modular, imitation and RL driving stacks."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [paper-nuscenes]
+
+- id: "paper-dagger-ross"
+  title: "A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning"
+  short: "DAgger"
+  provider: "Ross, Gordon, Bagnell (CMU)"
+  type: "paper"
+  url: "https://arxiv.org/abs/1011.0686"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [robotics]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Explains why naive behaviour cloning compounds errors and introduces DAgger, the expert-relabelling fix behind most interactive imitation learning."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  after: [paper-gail]
+
+# ---- Math and physics (2)
+
+- id: "paper-auluck-plasma-focus-update-2021"
+  title: "Update on the Scientific Status of the Plasma Focus"
+  short: "Plasma Focus Status 2021"
+  provider: "S. Auluck, P. Kubes, M. Paduch, M. J. Sadowski, V. I. Krauz, S. Lee, L. Soto et al."
+  type: "paper"
+  url: "https://www.mdpi.com/2571-6182/4/3/33"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [math]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Large open-access review by the main dense plasma focus groups covering two decades of devices, diagnostics, neutron scaling and models, the best single entry point to DPF physics."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  doFirst: "Plasma Physics (lecture notes)"
+
+- id: "paper-zhang-sfs-zpinch-neutrons"
+  title: "Sustained neutron production from a sheared-flow stabilized Z-pinch"
+  short: "FuZE Sheared-Flow Z-Pinch"
+  provider: "Y. Zhang, U. Shumlak, B. A. Nelson et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/1806.05894"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [math]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "The landmark FuZE result showing microseconds of steady fusion neutrons from a flow-stabilized Z-pinch, the experimental basis for the Zap Energy approach."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  doFirst: "Plasma Physics (lecture notes)"
+
+# ---- Electrical and mechanical engineering (2)
+
+- id: "paper-handley-delay-not-an-option"
+  title: "Delay is Not an Option: Low Latency Routing in Space"
+  short: "LEO Low-Latency Routing"
+  provider: "Mark Handley (UCL), HotNets 2018"
+  type: "paper"
+  url: "https://discovery.ucl.ac.uk/id/eprint/10062262/"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "The paper that framed how Starlink-style constellations with laser crosslinks can route traffic faster than terrestrial fibre, a foundation for all later LEO network studies."
+  fromYear: 2
+  priority: 2
+  quality: 4
+
+- id: "primer-tek-xyzs-of-oscilloscopes"
+  title: "XYZs of Oscilloscopes Primer"
+  short: "Tek XYZs of Oscilloscopes"
+  provider: "Tektronix"
+  type: "article"
+  url: "https://download.tek.com/document/03W_8605_6.pdf"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 4
+  summary: "The classic vendor-neutral primer on how scopes work: vertical/horizontal/trigger systems, probes, bandwidth, rise time and sample rate, with exercises."
+  fromYear: 1
+  priority: 2
+  quality: 4
+
+# ---- Hardware and chip design: CPU, GPU and NPU, RTL to tape-out (5)
+
+- id: "repo-nvidia-open-gpu-kernel-modules"
+  title: "NVIDIA Linux Open GPU Kernel Module Source"
+  short: "NVIDIA Open GPU Kernel"
+  provider: "NVIDIA"
+  type: "practice"
+  url: "https://github.com/NVIDIA/open-gpu-kernel-modules"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [hardware]
+  level: "advanced"
+  cost: "free"
+  estHours: 20
+  summary: "NVIDIA's own open-source Linux kernel driver, the best public window into how the driver talks to modern GPUs through memory management, channels and the GSP firmware."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  doFirst: "Linux Device Drivers"
+
+- id: "paper-tolpygo-superconductor-digital-electronics"
+  title: "Superconductor Digital Electronics: Scalability and Energy Efficiency Issues"
+  short: "SFQ Digital Electronics"
+  provider: "Sergey K. Tolpygo (MIT Lincoln Laboratory)"
+  type: "paper"
+  url: "https://arxiv.org/abs/1602.03546"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [hardware]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "A review of single-flux-quantum logic that weighs how far Josephson-junction circuits can scale and whether they stay energy efficient once cryocooling is counted."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  after: [book-cmos-vlsi-design-4e]
+
+- id: "paper-sebastian-in-memory-computing"
+  title: "Memory devices and applications for in-memory computing"
+  short: "In-Memory Computing Review"
+  provider: "Abu Sebastian, Manuel Le Gallo, Riduan Khaddam-Aljameh, Evangelos Eleftheriou (IBM Research Zurich)"
+  type: "paper"
+  url: "https://zenodo.org/records/3969876"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [hardware]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Nature Nanotechnology review tying memristive, phase-change and ferroelectric memory devices to analog in-memory computing for AI and the circuit-level challenges they face."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  doFirst: "A Modern Primer on Processing in Memory"
+
+- id: "paper-chiplet-survey-eda"
+  title: "The Survey of Chiplet-based Integrated Architecture: An EDA perspective"
+  short: "Chiplet Architecture Survey"
+  provider: "Shixin Chen, Hengyuan Zhang, Zichao Ling, Jianwang Zhai, Bei Yu"
+  type: "paper"
+  url: "https://arxiv.org/abs/2411.04410"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [hardware]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Surveys how 2.5D/3D chiplet systems are architected, partitioned, placed and checked for reliability, the packaging story behind modern AI accelerators."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  after: [ucie-open-chiplet-ecosystem-whitepaper]
+
+- id: "zipcpu-cdc-solutions"
+  title: "Some Simple Clock-Domain Crossing Solutions"
+  short: "ZipCPU CDC Solutions"
+  provider: "Dan Gisselquist (ZipCPU)"
+  type: "article"
+  url: "https://zipcpu.com/blog/2017/10/20/cdc.html"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [hardware]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Practical walk through metastability, two-flop synchronizers, reset synchronization and handshakes for moving signals safely between clock domains."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [practice-hdlbits]
+
+# ---- Quantum computing and programming (1)
+
+- id: "paper-glaser-training-schrodingers-cat"
+  title: "Training Schrödinger's cat: quantum optimal control"
+  short: "Quantum Optimal Control"
+  provider: "Glaser, Boscain, Calarco, Koch et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/1508.00442"
+  urlVerified: true
+  lastVerified: 2026-11-01
+  tracks: [quantum]
+  level: "advanced"
+  cost: "free"
+  estHours: 5
+  summary: "The standard review of how optimal control theory (GRAPE, Krotov) shapes the pulses that drive qubits and other quantum systems."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  doFirst: "Krantz SC Qubit Guide"

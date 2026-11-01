@@ -99,24 +99,6 @@
   roadmap: "ai-engineer"
   quality: 4
 
-- id: "google-ml-crash-course"
-  title: "Machine Learning Crash Course"
-  short: "Google ML Crash Course"
-  provider: "Google for Developers"
-  type: "course"
-  url: "https://developers.google.com/machine-learning/crash-course"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 15
-  summary: "Fast, interactive refresher on core ML concepts and practical pitfalls like data prep and fairness."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
-
 - id: "isl-python"
   title: "An Introduction to Statistical Learning (with Python)"
   short: "ISL / ISLP"
@@ -261,28 +243,9 @@
   summary: "Drills vectorized NumPy thinking that every ML codebase relies on."
   fromYear: 1
   after: [30-days-of-python]
-  priority: 3
+  priority: 2
   roadmap: "ai-engineer"
-  quality: 3
-
-- id: "deep-ml"
-  title: "Deep-ML"
-  short: "Deep-ML"
-  provider: "Deep-ML"
-  type: "practice"
-  url: "https://www.deep-ml.com/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 30
-  summary: "LeetCode-style problems implementing ML/DL ops and algorithms from scratch."
-  fromYear: 1
-  after: [numpy-100]
-  priority: 3
-  roadmap: "ai-engineer"
-  quality: 3
+  quality: 4
 
 - id: "tensor-puzzles"
   title: "Tensor Puzzles"
@@ -535,26 +498,9 @@
   summary: "The clearest full university intro to rasterization, geometry, and rendering, with superb visual intuition."
   fromYear: 1
   after: [gamemath-3d-primer]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
-
-- id: "cherno-opengl-series"
-  title: "OpenGL Series"
-  short: "Cherno OpenGL"
-  provider: "The Cherno (Yan Chernikov)"
-  type: "lectures"
-  url: "https://www.youtube.com/watch?v=W3gAzLwfIP0"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "intro"
-  cost: "free"
-  estHours: 15
-  summary: "A practical C++ walkthrough of buffers, shaders, and abstractions that complements reading LearnOpenGL."
-  fromYear: 1
-  doFirst: "LearnOpenGL"
-  priority: 3
-  roadmap: "game-developer"
+  quality: 5
 
 - id: "sebastian-lague-coding-adventures"
   title: "Coding Adventures"
@@ -570,25 +516,9 @@
   estHours: 30
   summary: "Shows how to explore ideas like ray marching, fluids, and rasterizers end to end, great project inspiration."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
-
-- id: "javidx9-3d-engine"
-  title: "Code-It-Yourself! 3D Graphics Engine"
-  short: "OLC 3D Engine"
-  provider: "javidx9 (One Lone Coder)"
-  type: "lectures"
-  url: "https://www.youtube.com/watch?v=ih20l3pJoeU"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "Builds a software 3D engine from scratch in C++ (projection, clipping, depth buffer, texturing)."
-  fromYear: 1
-  priority: 3
-  roadmap: "game-developer"
+  quality: 4
 
 - id: "tu-wien-rendering-course"
   title: "TU Wien Rendering / Ray Tracing Course"
@@ -605,8 +535,9 @@
   summary: "Teaches the physics and math of global illumination (radiometry, BRDFs, Monte Carlo) behind path tracers."
   fromYear: 2
   after: [rtiow]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "cg-from-scratch"
   title: "Computer Graphics from Scratch"
@@ -622,26 +553,9 @@
   estHours: 20
   summary: "Builds a raytracer and a rasterizer from pure math with only a put-pixel function."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
-
-- id: "gpu-gems"
-  title: "GPU Gems (online edition)"
-  short: "GPU Gems"
-  provider: "NVIDIA"
-  type: "book"
-  url: "https://developer.nvidia.com/gpugems/gpugems/foreword"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "advanced"
-  cost: "free"
-  estHours: 50
-  summary: "Classic collection of real-time rendering and GPU techniques from industry practitioners."
-  fromYear: 3
-  after: [utah-cs6610]
-  priority: 3
-  roadmap: "game-developer"
+  quality: 4
 
 - id: "advances-real-time-rendering"
   title: "Advances in Real-Time Rendering in Games (SIGGRAPH courses)"
@@ -658,8 +572,9 @@
   summary: "Slides from AAA studios on cutting-edge real-time rendering, for research-level reading."
   fromYear: 3
   after: [trip-through-graphics-pipeline]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "pbs-siggraph-2013"
   title: "SIGGRAPH 2013 Course: Physically Based Shading in Theory and Practice"
@@ -676,8 +591,9 @@
   summary: "The canonical notes on microfacet BRDFs and PBR as used in engines like Unreal."
   fromYear: 3
   doFirst: "LearnOpenGL"
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "webgpu-fundamentals"
   title: "WebGPU Fundamentals"
@@ -693,8 +609,9 @@
   estHours: 25
   summary: "Explains WebGPU and WGSL from first principles with live in-browser examples."
   fromYear: 1
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "learn-webgpu-cpp"
   title: "Learn WebGPU for C++"
@@ -711,8 +628,9 @@
   summary: "A modern native-graphics tutorial using the WebGPU API from C++, a gentler path to explicit APIs."
   fromYear: 2
   doFirst: "LearnOpenGL"
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "learn-wgpu"
   title: "Learn Wgpu"
@@ -729,8 +647,9 @@
   summary: "Teaches GPU rendering in Rust with wgpu, combining the student's Rust and graphics goals."
   fromYear: 2
   doFirst: "Rust basics"
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "trip-through-graphics-pipeline"
   title: "A Trip through the Graphics Pipeline 2011"
@@ -747,26 +666,9 @@
   summary: "Explains what the GPU actually does at each pipeline stage, essential for performance reasoning."
   fromYear: 2
   doFirst: "LearnOpenGL"
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
-
-- id: "lettier-3d-game-shaders"
-  title: "3D Game Shaders For Beginners"
-  short: "3D Game Shaders"
-  provider: "David Lettier"
-  type: "article"
-  url: "https://github.com/lettier/3d-game-shaders-for-beginners"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "intermediate"
-  cost: "free"
-  estHours: 20
-  summary: "Step-by-step implementations of SSAO, normal mapping, bloom, depth of field, and other game effects."
-  fromYear: 2
-  doFirst: "LearnOpenGL"
-  priority: 3
-  roadmap: "game-developer"
+  quality: 5
 
 - id: "tinyraytracer"
   title: "tinyraytracer"
@@ -782,44 +684,9 @@
   estHours: 8
   summary: "Write a ~256-line C++ raytracer with reflections and refraction in a weekend."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
-
-- id: "tinykaboom"
-  title: "tinykaboom"
-  short: "tinykaboom"
-  provider: "Dmitry V. Sokolov (ssloy)"
-  type: "practice"
-  url: "https://github.com/ssloy/tinykaboom"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "Build a ray-marched procedural explosion in ~180 lines, a fun intro to SDFs and noise."
-  fromYear: 1
-  after: [tinyraytracer]
-  priority: 3
-  roadmap: "game-developer"
-
-- id: "shader-school"
-  title: "Shader School"
-  short: "Shader School"
-  provider: "stack.gl"
-  type: "practice"
-  url: "https://github.com/stackgl/shader-school"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [graphics]
-  level: "intro"
-  cost: "free"
-  estHours: 10
-  summary: "Self-guided GLSL exercises that check your shaders against expected output."
-  fromYear: 1
-  after: [book-of-shaders]
-  priority: 3
-  roadmap: "game-developer"
+  quality: 4
 
 - id: "scotty3d"
   title: "Scotty3D (CMU 15-462 assignments)"
@@ -836,8 +703,9 @@
   summary: "Implement a rasterizer, mesh editor, path tracer, and animation system in one C++ codebase."
   fromYear: 2
   after: [cmu-15462-computer-graphics]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "cs184-homework"
   title: "CS 184/284A Homework (Spring 2025)"
@@ -854,8 +722,9 @@
   summary: "Five graded-style projects: rasterizer, MeshEdit, path tracer, and cloth simulation."
   fromYear: 2
   after: [cmu-15462-computer-graphics]
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "sascha-willems-vulkan"
   title: "Vulkan C++ Examples and Demos"
@@ -872,8 +741,9 @@
   summary: "Reference samples from triangle to ray tracing to read, run, and reimplement techniques."
   fromYear: 3
   after: [vulkan-tutorial]
-  priority: 3
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "nvpro-vk-raytracing-tutorial"
   title: "Vulkan Ray Tracing Tutorial (KHR)"
@@ -892,8 +762,9 @@
   after: [vkguide]
 
 # ---- Game engines and game development (19)
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "freya-math-for-game-devs"
   title: "Math for Game Devs (2022 live course) (part 1 of 4)"
@@ -909,112 +780,9 @@
   estHours: 20
   summary: "Builds strong visual intuition for vectors, dot/cross products, spaces, and interpolation in game code."
   fromYear: 1
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
-
-- id: "brackeys-unity-video-game"
-  title: "How to make a Video Game in Unity"
-  short: "Brackeys Unity Game"
-  provider: "Brackeys"
-  type: "lectures"
-  url: "https://www.youtube.com/playlist?list=PLPV2KyIb3jR53Jce9hP7G5xC4O9AgnOuL"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intro"
-  cost: "free"
-  estHours: 3
-  summary: "A short, classic complete-game series that makes Unity's workflow click quickly."
-  fromYear: 1
-  priority: 4
-  roadmap: "game-developer"
-
-- id: "coding-train-nature-of-code"
-  title: "The Nature of Code (video track)"
-  short: "Nature of Code videos"
-  provider: "Daniel Shiffman, The Coding Train"
-  type: "lectures"
-  url: "https://thecodingtrain.com/tracks/the-nature-of-code-2"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intro"
-  cost: "free"
-  estHours: 25
-  summary: "Teaches forces, particles, steering, and physics simulation through friendly creative-coding videos."
-  fromYear: 1
-  priority: 4
-  roadmap: "game-developer"
-
-- id: "gdc-vault-free"
-  title: "GDC Vault Free Talks"
-  short: "GDC Vault (free)"
-  provider: "Game Developers Conference"
-  type: "lectures"
-  url: "https://gdcvault.com/free"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intermediate"
-  cost: "free"
-  estHours: 30
-  summary: "Free industry talks on engine architecture, rendering, physics, and design straight from shipped games."
-  fromYear: 2
-  priority: 4
-  roadmap: "game-developer"
-
-- id: "unity-essentials"
-  title: "Unity Essentials Pathway"
-  short: "Unity Essentials"
-  provider: "Unity Learn"
-  type: "course"
-  url: "https://learn.unity.com/pathway/unity-essentials"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intro"
-  cost: "free"
-  estHours: 15
-  summary: "The official first-steps path to the Unity editor, scenes, assets, and basic scripting."
-  fromYear: 1
-  priority: 4
-  roadmap: "game-developer"
-
-- id: "unity-junior-programmer"
-  title: "Junior Programmer Pathway"
-  short: "Unity Junior Programmer"
-  provider: "Unity Learn"
-  type: "course"
-  url: "https://learn.unity.com/pathway/junior-programmer"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intro"
-  cost: "free"
-  estHours: 50
-  summary: "Project-based C# in Unity covering gameplay, UI, physics, and OOP, with a final portfolio project."
-  fromYear: 1
-  after: [unity-essentials]
-  priority: 4
-  roadmap: "game-developer"
-
-- id: "unity-creative-core"
-  title: "Creative Core Pathway"
-  short: "Unity Creative Core"
-  provider: "Unity Learn"
-  type: "course"
-  url: "https://learn.unity.com/pathway/creative-core"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intro"
-  cost: "free"
-  estHours: 40
-  summary: "Covers Unity's art side: lighting, materials, Shader Graph, particles/VFX, animation, and post-processing."
-  fromYear: 1
-  after: [unity-essentials]
-  priority: 4
-  roadmap: "game-developer"
+  quality: 4
 
 - id: "game-programming-patterns"
   title: "Game Programming Patterns"
@@ -1030,8 +798,9 @@
   estHours: 25
   summary: "Explains the core architecture patterns (game loop, components, update method) used in real engines."
   fromYear: 1
-  priority: 4
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "nature-of-code-book"
   title: "The Nature of Code (book)"
@@ -1047,8 +816,9 @@
   estHours: 30
   summary: "A free book on simulating forces, particles, and autonomous agents in code."
   fromYear: 1
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "bridson-fluid-notes"
   title: "Fluid Simulation (SIGGRAPH 2007 Course Notes)"
@@ -1065,8 +835,9 @@
   summary: "A rigorous intro to grid and particle fluid solvers used in graphics."
   fromYear: 3
   after: [stam-fluids-for-games]
-  priority: 4
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "red-blob-games"
   title: "Red Blob Games"
@@ -1082,25 +853,9 @@
   estHours: 15
   summary: "Interactive explanations of hex grids, A* pathfinding, and procedural generation for games."
   fromYear: 1
-  priority: 4
+  priority: 1
   roadmap: "game-developer"
-
-- id: "godot-first-2d-game"
-  title: "Godot: Your First 2D Game"
-  short: "Godot First 2D Game"
-  provider: "Godot Engine"
-  type: "article"
-  url: "https://docs.godotengine.org/en/stable/getting_started/first_2d_game/index.html"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intro"
-  cost: "free"
-  estHours: 4
-  summary: "Ship a complete small game in an open-source engine to compare against Unity."
-  fromYear: 1
-  priority: 4
-  roadmap: "game-developer"
+  quality: 5
 
 - id: "catlike-coding-unity"
   title: "Catlike Coding Unity Tutorials"
@@ -1116,26 +871,9 @@
   estHours: 80
   summary: "In-depth Unity C# and shader series, including building a custom render pipeline."
   fromYear: 2
-  after: [unity-junior-programmer]
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
-
-- id: "tinyraycaster"
-  title: "tinyraycaster"
-  short: "tinyraycaster"
-  provider: "Dmitry V. Sokolov (ssloy)"
-  type: "practice"
-  url: "https://github.com/ssloy/tinyraycaster"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intro"
-  cost: "free"
-  estHours: 8
-  summary: "Build a Wolfenstein-style raycasting FPS in under 500 lines of C++."
-  fromYear: 1
-  priority: 4
-  roadmap: "game-developer"
+  quality: 4
 
 - id: "lode-raycasting"
   title: "Lode's Computer Graphics Tutorial: Raycasting"
@@ -1151,42 +889,9 @@
   estHours: 6
   summary: "A hands-on raycaster (untextured then textured) to implement yourself step by step."
   fromYear: 1
-  priority: 4
-  roadmap: "game-developer"
-
-- id: "20-games-challenge"
-  title: "The 20 Games Challenge"
-  short: "20 Games Challenge"
-  provider: "20 Games Challenge"
-  type: "practice"
-  url: "https://20_games_challenge.gitlab.io/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intro"
-  cost: "free"
-  estHours: 200
-  summary: "A structured ladder of 20 game clones from Pong upward to build finishing skills."
-  fromYear: 1
-  priority: 4
-  roadmap: "game-developer"
-
-- id: "coding-train-challenges"
-  title: "Coding Train Coding Challenges"
-  short: "Coding Challenges"
-  provider: "Daniel Shiffman, The Coding Train"
-  type: "practice"
-  url: "https://thecodingtrain.com/challenges"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [gamedev]
-  level: "intro"
-  cost: "free"
-  estHours: 40
-  summary: "One-off creative coding projects (physics, fractals, simulations) to code along and extend."
-  fromYear: 1
   priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "box2d-lite"
   title: "Box2D-Lite"
@@ -1203,8 +908,9 @@
   summary: "Study and rebuild a compact rigid-body engine with sequential impulses, the basis of Box2D."
   fromYear: 2
   after: [gaffer-on-games]
-  priority: 4
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 
 - id: "stam-fluids-for-games"
   title: "Real-Time Fluid Dynamics for Games"
@@ -1223,8 +929,9 @@
   after: [nature-of-code-book]
 
 # ---- Systems (23)
-  priority: 4
+  priority: 1
   roadmap: "game-developer"
+  quality: 5
 
 - id: "princeton-algorithms-part1"
   title: "Algorithms, Part I (Princeton, Coursera)"
@@ -1241,7 +948,8 @@
   summary: "Classic data-structures course with rigorous programming assignments and autograder."
   fromYear: 1
   after: [cs50x]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "kurose-ross-lectures"
   title: "Computer Networking: A Top-Down Approach video lectures"
@@ -1259,22 +967,7 @@
   fromYear: 1
   doFirst: "Missing Semester"
   priority: 2
-
-- id: "fcc-data-structures-fiset"
-  title: "Data Structures Easy to Advanced Course - Full Tutorial from a Google Engineer"
-  short: "fCC Data Structures"
-  provider: "freeCodeCamp (William Fiset)"
-  type: "lectures"
-  url: "https://www.youtube.com/watch?v=RBSGKlAvoiM"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 8
-  summary: "Animated walkthrough of every core data structure, from arrays to Fenwick trees and hash tables."
-  fromYear: 1
-  priority: 2
+  quality: 4
 
 - id: "ben-eater-8bit-computer"
   title: "Build an 8-bit computer"
@@ -1290,7 +983,8 @@
   estHours: 20
   summary: "Watch a CPU get built on breadboards, making clocks, buses, registers and microcode tangible."
   fromYear: 1
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "cmu-15721-advanced-databases"
   title: "CMU 15-721 Advanced Database Systems"
@@ -1307,8 +1001,9 @@
   summary: "Research-level tour of modern analytical database internals: columnar storage, vectorized execution, query optimization."
   fromYear: 3
   doFirst: "CMU 15-445"
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "beej-network-programming"
   title: "Beej's Guide to Network Programming: Using Internet Sockets"
@@ -1325,7 +1020,8 @@
   summary: "Practical C sockets programming guide for writing your own TCP/UDP clients and servers."
   fromYear: 1
   after: [beej-c]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "the-linux-command-line"
   title: "The Linux Command Line"
@@ -1343,6 +1039,7 @@
   fromYear: 1
   doFirst: "Missing Semester"
   priority: 2
+  quality: 4
 
 - id: "competitive-programmers-handbook"
   title: "Competitive Programmer's Handbook"
@@ -1360,6 +1057,7 @@
   fromYear: 1
   doFirst: "MIT 6.006"
   priority: 2
+  quality: 4
 
 - id: "erickson-algorithms"
   title: "Algorithms (Jeff Erickson)"
@@ -1376,7 +1074,8 @@
   summary: "Rigorous free textbook on recursion, DP, graphs and NP-hardness with many exercises."
   fromYear: 2
   doFirst: "MIT 6.006"
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "computer-networks-systems-approach"
   title: "Computer Networks: A Systems Approach"
@@ -1394,6 +1093,7 @@
   fromYear: 2
   after: [kurose-ross-lectures]
   priority: 2
+  quality: 4
 
 - id: "van-steen-distributed-systems"
   title: "Distributed Systems (4th edition)"
@@ -1412,6 +1112,7 @@
   after: [ddia]
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "build-your-own-redis"
   title: "Build Your Own Redis with C/C++"
@@ -1429,6 +1130,7 @@
   fromYear: 2
   after: [beej-network-programming]
   priority: 2
+  quality: 4
 
 - id: "perfbook"
   title: "Is Parallel Programming Hard, And, If So, What Can You Do About It?"
@@ -1445,8 +1147,9 @@
   summary: "Linux RCU author's deep treatment of locking, memory barriers and scalable concurrency."
   fromYear: 3
   after: [ostep]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: "linux-kernel-module-programming-guide"
   title: "The Linux Kernel Module Programming Guide"
@@ -1464,6 +1167,7 @@
   fromYear: 3
   doFirst: "xv6 (MIT 6.S081)"
   priority: 2
+  quality: 4
 
 - id: "writing-an-os-in-rust"
   title: "Writing an OS in Rust"
@@ -1480,7 +1184,8 @@
   summary: "Build a bare-metal x86_64 kernel in Rust with paging, interrupts, heap allocation and async tasks."
   fromYear: 2
   after: [ostep]
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: "lets-build-a-simple-database"
   title: "Let's Build a Simple Database"
@@ -1499,6 +1204,7 @@
   after: [beej-c]
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "overthewire-bandit"
   title: "OverTheWire Bandit"
@@ -1516,23 +1222,7 @@
   fromYear: 1
   doFirst: "Missing Semester"
   priority: 2
-
-- id: "linux-upskill-challenge"
-  title: "Linux Upskill Challenge"
-  short: "Linux Upskill"
-  provider: "Linux Upskill Challenge community"
-  type: "practice"
-  url: "https://linuxupskillchallenge.org/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 20
-  summary: "A month of daily tasks running your own Linux server: SSH, firewalls, logs, web server and cron."
-  fromYear: 1
-  after: [the-linux-command-line]
-  priority: 2
+  quality: 4
 
 - id: "protohackers"
   title: "Protohackers"
@@ -1550,25 +1240,7 @@
   fromYear: 2
   after: [beej-network-programming]
   priority: 2
-
-- id: "codecrafters"
-  title: "CodeCrafters"
-  short: "CodeCrafters"
-  provider: "CodeCrafters"
-  type: "practice"
-  url: "https://codecrafters.io/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 40
-  summary: "Guided, test-driven builds of Redis, Git, SQLite, HTTP servers and more in your chosen language."
-  fromYear: 2
-  note: "Free tier"
-  doFirst: "build-your-own-x"
-  priority: 2
-  roadmap: "software-architect"
+  quality: 4
 
 - id: "gossip-glomers"
   title: "Gossip Glomers: Fly.io Distributed Systems Challenge"
@@ -1587,25 +1259,7 @@
   after: [kleppmann-distributed-systems]
   priority: 2
   roadmap: "software-architect"
-
-- id: "sadservers"
-  title: "SadServers"
-  short: "SadServers"
-  provider: "SadServers"
-  type: "practice"
-  url: "https://sadservers.com/"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 20
-  summary: "Troubleshoot broken real Linux servers in the browser, like LeetCode for DevOps/SRE."
-  fromYear: 2
-  note: "Free tier"
-  after: [overthewire-bandit]
-  priority: 2
-  roadmap: "software-architect"
+  quality: 4
 
 - id: "pingcap-talent-plan"
   title: "PingCAP Talent Plan"
@@ -1626,6 +1280,7 @@
 # ---- Rust, C and C++ (9)
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: "stanford-cs110l"
   title: "Stanford CS 110L: Safety in Systems Programming (Spring 2020)"
@@ -1751,39 +1406,3 @@
   after: [rustlings]
   priority: 2
   quality: 4
-
-- id: "exercism-c"
-  title: "Exercism C Track"
-  short: "Exercism C"
-  provider: "Exercism"
-  type: "practice"
-  url: "https://exercism.org/tracks/c"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 30
-  summary: "Test-driven C exercises to practice pointers, strings and memory management."
-  fromYear: 1
-  after: [beej-c]
-  priority: 3
-  quality: 3
-
-- id: "exercism-cpp"
-  title: "Exercism C++ track"
-  short: "Exercism C++"
-  provider: "Exercism"
-  type: "practice"
-  url: "https://exercism.org/tracks/cpp"
-  urlVerified: true
-  lastVerified: 2026-10-19
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 30
-  summary: "Test-driven modern C++ exercises with free mentoring to reinforce learncpp.com."
-  fromYear: 1
-  doFirst: "learncpp.com"
-  priority: 3
-  quality: 3

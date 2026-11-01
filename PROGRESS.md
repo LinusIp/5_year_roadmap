@@ -1362,3 +1362,12 @@ Verified on this machine (Linux, Chromium 140):
   resources" folds the grade-3 rows in paths and Research; Up next never suggests them. Progress on removed rows is kept.
 - Tests: `tests/unit/quality-pass.test.ts`, `tests/e2e/quality-pass.spec.ts` (new), `tests/unit/security.test.ts`,
   `tests/e2e/atlas-library.spec.ts`, `tests/e2e/helpers.ts`. Screenshots redrawn on CI.
+
+## Pull request #51: the Atlas Library's "four stars and up" pass
+
+- The 7,640-row file: 8,795 rows removed from `data/`, the curated files too (ML Zoomcamp, on the plan, and four rows the
+  data names stay), 23 replacements added (`data/resources/library-atlas-16.yaml`), quality and priority from the file.
+  Resources: 16,422 to 7,650; progress on removed rows is kept (`docs/imports-atlas-library-16.md`).
+- Glaser et al.'s 2015 review and Koch et al.'s 2022 report are listed as distinct in the matcher.
+- Tests: `tests/unit/quality-pass.test.ts`; count floors re-based in eight unit tests; e2e searches name rows still there.
+  Screenshots redrawn on CI.

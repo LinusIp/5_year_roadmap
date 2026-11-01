@@ -68,26 +68,25 @@ test('search finds the harness additions: Meta-Harness, the Darwin Gödel Machin
   const search = page.getByRole('searchbox', { name: 'Search the library' });
   await search.fill('Meta-Harness');
   await expect(page.getByRole('button', { name: /^Meta-Harness/ }).first()).toBeVisible();
-  await search.fill('Darwin Gödel');
-  await expect(page.getByRole('button', { name: /^Darwin Gödel Machine/ }).first()).toBeVisible();
+  await search.fill('Darwin G');
+  await expect(page.getByRole('button', { name: /^Darwin G(ö|o)del Machine/ }).first()).toBeVisible();
   // Both serve roadmap.sh's AI Agents roadmap, so its chip keeps them.
   await page.getByRole('group', { name: 'Level and roadmap' }).getByRole('button', { name: /^Roadmap/ }).click();
   await page.getByRole('dialog', { name: 'Roadmap' }).getByRole('button', { name: /^AI Agents/ }).click();
   await expect(page).toHaveURL(/roadmap=ai-agents/);
-  await expect(page.getByRole('button', { name: /^Darwin Gödel Machine/ }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Darwin G(ö|o)del Machine/ }).first()).toBeVisible();
 });
 
 test('search reaches the fourth file, and keeps a title pair the matcher read as one apart', async ({ page }) => {
   await open(page, './#/library');
   const search = page.getByRole('searchbox', { name: 'Search the library' });
-  // A full title finds a row listed by its short one: Gradient Episodic Memory is "GEM" (and not the GEM gym).
-  await search.fill('Gradient Episodic');
-  await expect(page.getByRole('button', { name: /^GEM/ }).first()).toBeVisible();
-  await search.fill('Bullshark');
-  // Bullshark and its partially synchronous version are two papers.
-  await expect(page.getByRole('button', { name: /^Bullshark/ })).toHaveCount(2);
+  // A full title finds a row listed by its short one: "Qwen2.5 Technical Report" is "Qwen2.5 Report". (Gradient
+  // Episodic Memory, Bullshark and the Qwen2.5-Coder report left with the "four stars and up" pass, 7,640 rows.)
+  await search.fill('Qwen2.5 Technical Report');
+  await expect(page.getByRole('button', { name: /^Qwen2\.5 Report/ }).first()).toBeVisible();
+  // The Qwen2.5 report and the Qwen2.5-VL report are two rows.
   await search.fill('Qwen2.5');
-  await expect(page.getByRole('button', { name: /^Qwen2\.5-Coder report/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Qwen2\.5-VL Report/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /^Qwen2\.5 Report/ })).toBeVisible();
 });
 
@@ -120,7 +119,7 @@ test('Developer essentials gathers the terminal, Git, Linux, SQL and web resourc
   const row = page.getByRole('button', { name: /^Developer essentials \d+$/ });
   await expect(row).toBeVisible();
   const count = Number((await row.innerText()).replace(/\D/g, ''));
-  expect(count).toBeGreaterThan(300);
+  expect(count).toBeGreaterThan(120);
   await row.click();
   await expect(page).toHaveURL(/pick=essentials/);
   await expect(page.getByRole('heading', { level: 1, name: 'Developer essentials' })).toBeVisible();
@@ -134,7 +133,7 @@ test('Developer essentials gathers the terminal, Git, Linux, SQL and web resourc
   await expect(page).toHaveURL(/track=devops/);
   const [shown, total] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
   expect(total).toBe(count);
-  expect(shown).toBeGreaterThan(50);
+  expect(shown).toBeGreaterThan(15);
   expect(shown).toBeLessThan(count);
   // A title that only contains one of the words is not an essential.
   await page.getByRole('button', { name: 'DevOps & MLOps' }).click();
@@ -191,7 +190,7 @@ test('the Hardware and Quantum computing paths list their resources under Option
   await expect(page.getByRole('heading', { level: 1, name: 'Hardware and chip design' })).toBeVisible();
   const hardware = page.getByRole('button', { name: /^Optional for this path/ });
   if ((await hardware.getAttribute('aria-expanded')) === 'false') await hardware.click();
-  await showMoreUntil(page, page.getByRole('button', { name: /^Build a RISC-V Core/ }));
+  await showMoreUntil(page, page.getByRole('button', { name: /^RISC-V Emulator in Rust/ }));
 
   await open(page, './#/library?path=quantum');
   await expect(page.getByRole('heading', { level: 1, name: 'Quantum computing' })).toBeVisible();
@@ -255,7 +254,7 @@ test('Compact power & energy conversion gathers fusion, superconductors and plas
   await expect(page.getByRole('heading', { level: 1, name: 'Compact power & energy conversion' })).toBeVisible();
   await expect(page.getByRole('heading', { name: new RegExp('^' + fmt(count) + ' of ' + fmt(count) + '$') })).toBeVisible();
   await page.getByRole('searchbox', { name: 'Search power and energy conversion' }).fill('Tokamak');
-  await expect(page.getByRole('button', { name: /Tokamak/ }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /tokamak/i }).first()).toBeVisible();
   await page.getByRole('searchbox', { name: 'Search power and energy conversion' }).fill('');
   // Kernel fusion is not fusion energy: the AI track stays out.
   await page.getByRole('button', { name: 'Track', exact: true }).click();
@@ -271,7 +270,7 @@ test('Security & defence gathers the cyber defence rows, with area chips over th
   const row = page.getByRole('button', { name: /^Security & defence \d+$/ });
   await expect(row).toBeVisible();
   const count = Number((await row.innerText()).replace(/\D/g, ''));
-  expect(count).toBeGreaterThan(600);
+  expect(count).toBeGreaterThan(150);
   await row.click();
   await expect(page).toHaveURL(/pick=security/);
   await expect(page.getByRole('heading', { level: 1, name: 'Security & defence' })).toBeVisible();
@@ -284,10 +283,11 @@ test('Security & defence gathers the cyber defence rows, with area chips over th
   await expect(page).toHaveURL(/area=malware/);
   const [shown, total] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
   expect(total).toBe(count);
-  expect(shown).toBeGreaterThan(60);
+  expect(shown).toBeGreaterThan(10);
   expect(shown).toBeLessThan(count);
-  await page.getByRole('searchbox', { name: 'Search security and defence' }).fill('YARA');
-  await expect(page.getByRole('button', { name: /YARA/ }).first()).toBeVisible();
+  // Ghidra (the YARA rows left with the "four stars and up" pass, 7,640 rows).
+  await page.getByRole('searchbox', { name: 'Search security and defence' }).fill('Ghidra');
+  await expect(page.getByRole('button', { name: /Ghidra/ }).first()).toBeVisible();
   // Object detection is not security: the AI track's vision papers stay out.
   await page.getByRole('searchbox', { name: 'Search security and defence' }).fill('');
   await areas.getByRole('button', { name: /^Malware \d+$/ }).click();
@@ -312,8 +312,9 @@ test('the Books shelf has a Free / Paid chip, a paid book wears its badge, and "
   // Every row shown is a paid book, and says so first.
   const firstRow = page.getByRole('list').getByRole('button').first();
   await expect(firstRow).toContainText('Paid ·');
-  await page.getByRole('searchbox', { name: 'Search books' }).fill('Eureka Machine');
-  const eureka = page.getByRole('button', { name: /Eureka Machine/ }).first();
+  // Patterson and Hennessy's RISC-V edition (The Eureka Machine left with the "four stars and up" pass).
+  await page.getByRole('searchbox', { name: 'Search books' }).fill('Computer Organization and Design RISC-V');
+  const eureka = page.getByRole('button', { name: /Patterson & Hennessy/ }).first();
   await expect(eureka).toContainText('Paid');
   await eureka.click();
   const sheet = page.getByRole('dialog');
@@ -330,7 +331,7 @@ test('the Books shelf has a Free / Paid chip, a paid book wears its badge, and "
   await open(page, './#/library?type=book&cost=free');
   const freeCount = Number((await page.getByRole('group', { name: 'Cost' }).getByRole('button', { name: /^Free \d+$/ }).innerText()).replace(/\D/g, ''));
   await expect(page.getByRole('heading', { name: new RegExp('^' + freeCount + ' of ' + fmt(freeCount + paidCount) + '$') })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Eureka Machine/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Patterson & Hennessy/ })).toHaveCount(0);
   await open(page, './#/library?type=book');
   await expect(page.getByRole('heading', { name: new RegExp('^' + fmt(freeCount + paidCount) + ' of ' + fmt(freeCount + paidCount) + '$') })).toBeVisible();
 });
@@ -340,7 +341,7 @@ test('Agents & MCP gathers the agents, MCP and harnesses rows, with area chips o
   const row = page.getByRole('button', { name: /^Agents & MCP [\d,]+$/ });
   await expect(row).toBeVisible();
   const count = Number((await row.innerText()).replace(/\D/g, ''));
-  expect(count).toBeGreaterThan(800);
+  expect(count).toBeGreaterThan(200);
   await row.click();
   await expect(page).toHaveURL(/pick=agents/);
   await expect(page.getByRole('heading', { level: 1, name: 'Agents & MCP' })).toBeVisible();
@@ -399,7 +400,7 @@ test('Build it yourself gathers the from-scratch rows of the thirteenth file, wi
   const row = page.getByRole('button', { name: /^Build it yourself [\d,]+$/ });
   await expect(row).toBeVisible();
   const count = Number((await row.innerText()).replace(/\D/g, ''));
-  expect(count).toBeGreaterThan(200);
+  expect(count).toBeGreaterThan(120);
   await row.click();
   await expect(page).toHaveURL(/pick=buildyourself/);
   await expect(page.getByRole('heading', { level: 1, name: 'Build it yourself' })).toBeVisible();
@@ -433,7 +434,7 @@ test('the other six filters of the thirteenth file open from the home; the four 
     await open(page, './#/library');
     const row = page.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' [\\d,]+$') });
     const count = Number((await row.innerText()).replace(/\D/g, ''));
-    expect(count, label).toBeGreaterThan(200);
+    expect(count, label).toBeGreaterThan(80);
     await row.click();
     await expect(page).toHaveURL(new RegExp('pick=' + key));
     await expect(page.getByRole('heading', { level: 1, name: label })).toBeVisible();
@@ -465,7 +466,7 @@ test('the fourteenth file\'s filters: Mechanics & materials has its four chips, 
   await open(page, './#/library');
   const row = page.getByRole('button', { name: /^Mechanics & materials [\d,]+$/ });
   const count = Number((await row.innerText()).replace(/\D/g, ''));
-  expect(count).toBeGreaterThan(800);
+  expect(count).toBeGreaterThan(350);
   await row.click();
   await expect(page).toHaveURL(/pick=mechanics/);
   await expect(page.getByRole('heading', { level: 1, name: 'Mechanics & materials' })).toBeVisible();
@@ -482,7 +483,7 @@ test('the fourteenth file\'s filters: Mechanics & materials has its four chips, 
   for (const [key, label] of [['electronics', 'Electronics & EM'], ['scicomp', 'Scientific computing'], ['formal', 'Formal methods']] as const) {
     await open(page, './#/library');
     const r = page.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' [\\d,]+$') });
-    expect(Number((await r.innerText()).replace(/\D/g, '')), label).toBeGreaterThan(120);
+    expect(Number((await r.innerText()).replace(/\D/g, '')), label).toBeGreaterThan(60);
     await r.click();
     await expect(page).toHaveURL(new RegExp('pick=' + key));
     await expect(page.getByRole('heading', { level: 1, name: label })).toBeVisible();
@@ -493,7 +494,7 @@ test('the fourteenth file\'s filters: Mechanics & materials has its four chips, 
   await open(page, './#/library?pick=science&area=writing');
   await expect(page.getByRole('group', { name: 'Area' }).getByRole('button', { name: /^Research writing [\d,]+$/ })).toHaveAttribute('aria-pressed', 'true');
   const [w] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
-  expect(w).toBeGreaterThan(40);
+  expect(w).toBeGreaterThan(15);
 });
 
 test('the quality pass: canon rows wear a Canon badge, "Canon only" narrows a shelf, and a path folds the grade-3 rows under "More resources"', async ({ page }) => {
@@ -567,8 +568,8 @@ test('Mandarin is its own quick filter, on the languages track, and Research ski
   await open(page, './#/library?pick=research');
   await expect(page.getByRole('heading', { level: 1, name: 'Research skills' })).toBeVisible();
   // The list is virtualised: search for a row rather than scrolling to it.
-  await page.getByRole('searchbox', { name: 'Search research skills' }).fill('Research Problems');
-  await expect(page.getByRole('button', { name: /Eisner: Find Problems/ }).first()).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Search research skills' }).fill('Would-Be Researchers');
+  await expect(page.getByRole('button', { name: /Eisner: Research Advice/ }).first()).toBeVisible();
   await page.getByRole('searchbox', { name: 'Search research skills' }).fill('Attention Is All You Need');
   await expect(page.getByRole('button', { name: /^Attention Is All You Need/ })).toHaveCount(0);
 });

@@ -30,8 +30,9 @@
   prerequisites: [mit-6-1810]
   subject: system-design
   summary: "The units are the labs: MapReduce, key/value server, Raft, KV Raft, sharded KV. The labs are in Go: do A Tour of Go (10 h, block B) first. Most of the systems papers in the reading queue are assigned here."
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: system-design-primer
   title: "The System Design Primer (donnemartin)"
@@ -50,6 +51,7 @@
   after: [ddia]
   priority: 2
   roadmap: "software-architect"
+  quality: 4
 
 - id: kleppmann-distributed-systems
   title: "Martin Kleppmann: Distributed Systems lecture series (Cambridge, Concurrent and Distributed Systems)"
@@ -67,8 +69,9 @@
   short: "Kleppmann Dist. Systems"
   fromYear: 2
   after: [ddia]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: bytebytego
   title: "ByteByteGo / System Design Interview, volumes 1 and 2 (Alex Xu)"
@@ -101,8 +104,9 @@
   summary: "How large systems are operated: SLOs, monitoring, on-call, incident response and release engineering."
   fromYear: 3
   after: [ddia]
-  priority: 2
+  priority: 1
   roadmap: "software-architect"
+  quality: 5
 
 - id: docker-get-started
   title: "Docker: official getting-started guides"

@@ -177,42 +177,6 @@
   estHours: 100
   summary: "A free calculus-based physics text with answers to the odd problems: mechanics, waves, thermodynamics, E&M, optics and modern physics."
 
-- id: hyperphysics
-  title: "HyperPhysics"
-  provider: "Georgia State University"
-  type: tool
-  url: "http://hyperphysics.phy-astr.gsu.edu/hbase/hframe.html"
-  urlVerified: true
-  lastVerified: 2026-10-16
-  tracks: [physics]
-  level: intro
-  cost: free
-  estHours: 0
-  reference: true
-  summary: "A concept map of physics with short worked explanations; a reference, consulted rather than completed."
-  short: "HyperPhysics"
-  fromYear: 1
-  priority: 3
-  quality: 3
-
-- id: physics-libretexts
-  title: "Physics LibreTexts"
-  provider: "LibreTexts"
-  type: book
-  url: "https://phys.libretexts.org/"
-  urlVerified: true
-  lastVerified: 2026-10-16
-  tracks: [physics]
-  level: intro
-  cost: free
-  estHours: 0
-  reference: true
-  summary: "A library of open physics texts; a reference for any physics topic."
-  short: "Physics LibreTexts"
-  fromYear: 1
-  priority: 3
-  quality: 3
-
 - id: morin-mechanics-problems
   title: "Problems and Solutions in Introductory Mechanics"
   short: "Morin problems"
@@ -274,6 +238,7 @@
   short: "Book of Proof"
   fromYear: 1
   priority: 2
+  quality: 4
 
 - id: cses-problem-set
   title: "CSES Problem Set"
@@ -291,6 +256,7 @@
   fromYear: 1
   after: [competitive-programmers-handbook]
   priority: 2
+  quality: 4
 
 - id: codeforces-edu
   title: "Codeforces EDU"
@@ -308,6 +274,7 @@
   fromYear: 2
   after: [competitive-programmers-handbook]
   priority: 2
+  quality: 4
 
 - id: usaco-guide
   title: "USACO Guide"
@@ -323,7 +290,8 @@
   summary: "A curated path from bronze to platinum, every module with practice problems and solutions."
   short: "USACO Guide"
   fromYear: 1
-  priority: 2
+  priority: 1
+  quality: 5
 
 - id: matrix-calculus-dl
   title: "The Matrix Calculus You Need for Deep Learning"

@@ -51,9 +51,10 @@ describe('Security & defence', () => {
     const hits = seed.resources.filter((r) => isSecurity(r.title, r.summary, r.tracks[0], r.tags));
     const tagged = hits.filter((r) => r.tags?.includes('security'));
     // 557 in the ninth file; the quality audit of the tenth (ATLAS-LIBRARY, 15,364 rows) removed the NSA WPA3 report, and
-    // the quality pass (ATLAS-QUALITY-AUDIT, 16,448 rows) dropped 74 more it graded 1 or 2.
-    expect(tagged.length).toBe(482);
-    expect(hits.length).toBeGreaterThan(600);
+    // the quality pass (ATLAS-QUALITY-AUDIT, 16,448 rows) dropped 74 more it graded 1 or 2, and the "four stars and up"
+    // pass (7,640 rows) 390 more whose topic a stronger row covers.
+    expect(tagged.length).toBe(92);
+    expect(hits.length).toBeGreaterThan(150);
     const tracks = new Set<string>(hits.map((r) => r.tracks[0]!));
     for (const t of ['systems', 'devops', 'architecture', 'ai']) expect(tracks.has(t)).toBe(true);
     expect(tracks.has('math')).toBe(false);
@@ -64,7 +65,7 @@ describe('Security & defence', () => {
       if (areas.length === 0) none += 1;
       for (const a of areas) counts.set(a, (counts.get(a) ?? 0) + 1);
     }
-    for (const a of SECURITY_AREAS) expect(counts.get(a.key) ?? 0, a.label).toBeGreaterThan(60);
-    expect(none / hits.length).toBeLessThan(0.08);
+    for (const a of SECURITY_AREAS) expect(counts.get(a.key) ?? 0, a.label).toBeGreaterThan(10);
+    expect(none / hits.length).toBeLessThan(0.1);
   });
 });

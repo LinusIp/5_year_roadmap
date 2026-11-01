@@ -75,9 +75,9 @@
   short: "Inference Eng Roadmap"
   fromYear: 1
   tags: [inference]
-  priority: 3
+  priority: 2
   roadmap: "inference-engineering"
-  quality: 2
+  quality: 4
 - id: roadmap-game-developer
   title: Game Developer roadmap
   provider: roadmap.sh
@@ -99,6 +99,7 @@
   fromYear: 1
   priority: 4
   roadmap: "game-developer"
+  quality: 3
 - id: gamemath-3d-primer
   title: 3D Math Primer for Graphics and Game Development
   short: "3D Math Primer"
@@ -123,8 +124,9 @@
     - game-developer/orientation
     - game-developer/quaternion
     - game-developer/euler-angle
-  priority: 3
+  priority: 2
   roadmap: "game-developer"
+  quality: 4
 - id: boyd-convex-optimization
   title: Convex Optimization
   provider: Stephen Boyd and Lieven Vandenberghe
