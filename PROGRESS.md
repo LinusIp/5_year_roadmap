@@ -1330,3 +1330,15 @@ Verified on this machine (Linux, Chromium 140):
 - `tests/e2e/screenshots.spec.ts`: `serveYouTube` before the phone and desktop screens, and every picture settled
   before a screenshot. Focus baselines redrawn on CI.
 
+## Pull request #48: the Atlas Library's thirteenth file, seven quick filters, areas in the registry
+
+- `data/resources/library-atlas-13.yaml`: 1,197 new resources (78 paid books): the cracked dev and researcher round
+  (800) and the frontier engineer and scientist round (397). Resources: 16,060 to 17,257. 10 new title merges; no
+  corrections (`docs/imports-atlas-library-13.md`).
+- Seven quick filters (`src/lib/craft.ts`, `src/lib/words.ts`, the registry in `src/lib/quick-filters.ts`): Build it
+  yourself 277 (six areas), Low-level & performance 789 (five), Research & science 840 (five), GPU & CUDA 795, SDK &
+  API design 230, Fusion & accelerators 522 (four), Aerospace 462 (five).
+- `src/screens/Library.tsx`: one Area chip row for whichever filter carries areas (the three hard-coded families removed).
+- `src/lib/engineering-topics.ts`: the Engineering path's chips take the round's accelerator, fusion-plant and aerospace words.
+- Tests: `tests/unit/craft.test.ts` (new), `tests/unit/quick-filters.test.ts`, `tests/e2e/atlas-library.spec.ts`.
+  Screenshots redrawn on CI.

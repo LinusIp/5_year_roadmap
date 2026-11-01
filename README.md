@@ -308,9 +308,10 @@ its 15,364-row file 260 more, the books round and the agents, MCP and harnesses 
 quality audit removed, in `data/resources/library-atlas-10.yaml` (`docs/imports-atlas-library-10.md`):
 and its 15,961-row file 587 more, the plan gap fill, in `data/resources/library-atlas-11.yaml`
 (`docs/imports-atlas-library-11.md`), and its 16,076-row file 115 more, build & ship, in `data/resources/library-atlas-12.yaml`
-(`docs/imports-atlas-library-12.md`): 16,060 resources in all, and every track has blogs, so the Blogs shelf filters by track like the others. 259 of them
+(`docs/imports-atlas-library-12.md`), and its 17,283-row file 1,197 more, the cracked dev and researcher round and the frontier engineer and scientist round, in `data/resources/library-atlas-13.yaml`
+(`docs/imports-atlas-library-13.md`): 17,257 resources in all, and every track has blogs, so the Blogs shelf filters by track like the others. 337 of them
 are paid (books, certificate exams and one specialization): each wears a **Paid** badge, the Books shelf has a Free / Paid chip, and a
-paid book stays out of "Up next" until **I own this** is on in its sheet. **Quick filters**, one list of eleven rows under
+paid book stays out of "Up next" until **I own this** is on in its sheet. **Quick filters**, one list of eighteen rows under
 the shelves, gather resources across every shelf: "Developer essentials" the resources whose title or tags
 name the terminal, Git, Linux, SQL, Postgres or the web (HTML, CSS, JavaScript, TypeScript, React, HTTP) from every
 shelf, with the shelves' chips, and "Compact power & energy conversion" the fusion, direct conversion, superconductor,
@@ -321,7 +322,11 @@ for its six areas; "Certificates" the rows whose id starts with `cert-` (a Certi
 sheet with the day and the credential's link, counted on Plan › Credentials); "Career & interviews", "Research
 skills", "Communication", "Open source" and "Mandarin (the language)" by their words; "Build & ship" the executables, installers and
 signing, desktop and game builds, GitHub Actions, releases and deploys of the software tracks, with chips for its six
-areas. The
+areas; and the thirteenth file's seven: "Build it yourself" (from-scratch interpreters, compilers, kernels, emulators,
+databases, networks and AI, with six area chips), "Low-level & performance" (assembly, the ISA and ABI, microarchitecture,
+debuggers and profilers, the Linux kernel and the wire, five areas), "Research & science" (rigorous mathematics, learning
+theory, physics, how science works and the great lectures, five areas), "GPU & CUDA", "SDK & API design", "Fusion &
+accelerators" (four areas) and "Aerospace" (five areas). The
 Electrical, mechanical & aerospace path has chips for its areas (Mechanics, Materials, Thermo-fluids, Design & CAD, Manufacturing, Electronics
 & PCB, Power & energy, Control, Aerospace, Chemical & nuclear, Practice), read from each row's title and summary.
 About 14,750 of them only ever appear in the Library; they ride in a chunk of their

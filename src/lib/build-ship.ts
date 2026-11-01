@@ -15,33 +15,7 @@ export const BUILD_WORDS: readonly string[] = ['build', 'package', 'packaging', 
 /** The tracks the cluster lives in. A single-file RL implementation in AI, a build in robotics or a deploy in simulation is a different thing. */
 export const BUILD_TRACKS: ReadonlySet<string> = new Set(['devops', 'languages', 'gamedev', 'architecture', 'systems', 'swe']);
 
-function escape(word: string): string {
-  return word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-/** An acronym or a proper name is a whole word in its own case; a plain word matches at its start in any case. */
-function isProper(word: string): boolean {
-  return word === word.toUpperCase() || /^[A-Z][A-Za-z]*(\s[A-Z][a-z]+)*$/.test(word);
-}
-
-/** One alternation per case rule, so a list of words costs two tests on an item rather than one per word. */
-interface Matcher {
-  proper: RegExp | null;
-  plain: RegExp | null;
-}
-
-function compile(words: readonly string[]): Matcher {
-  const proper = words.filter(isProper).map(escape);
-  const plain = words.filter((w) => !isProper(w)).map(escape);
-  return {
-    proper: proper.length ? new RegExp('(^|[^A-Za-z])(' + proper.join('|') + ')(?![A-Za-z])') : null,
-    plain: plain.length ? new RegExp('(^|[^a-z])(' + plain.join('|') + ')', 'i') : null,
-  };
-}
-
-function hits(m: Matcher, text: string): boolean {
-  return (m.proper !== null && m.proper.test(text)) || (m.plain !== null && m.plain.test(text));
-}
+import { compile, compilePhrases, escape, hits } from './words.ts';
 
 /** The tools and formats: specific enough to name the cluster on their own. */
 const SPECIFIC: readonly string[] = ['into an executable', 'to an executable', 'as an executable', 'one executable', 'installers for', 'platform installers', 'installer builder', 'installer system', 'installer targets', 'installers and archives', 'Windows MSI', 'MSI installer', 'PyInstaller', 'Nuitka', 'cx_Freeze', 'Briefcase', 'cibuildwheel', 'maturin', 'cmake', 'CPack', 'Ninja build', 'vcpkg', 'Conan', 'MSBuild', 'ccache', 'cargo-dist', 'cargo-wix', 'cross-compil', 'cross compil', 'GoReleaser', 'Tauri', 'Electron', 'WiX', 'MSIX', 'Inno Setup', 'NSIS', 'SignTool', 'Authenticode', 'code signing', 'codesign', 'notariz', 'Homebrew formula', 'Homebrew cask', 'Homebrew tap', 'brew install', 'homebrew-core', 'tap repository', 'AppImage', 'Flatpak', 'Snapcraft', 'winget', 'Windows Package Manager', 'GitHub Actions', 'workflow_dispatch', 'workflow_call', 'pull_request_target', 'composite action', 'JavaScript action', 'TypeScript action', 'Docker container action', 'action.yml', 'actions toolkit', 'actions/', 'GITHUB_TOKEN', 'GITHUB_OUTPUT', 'self-hosted runner', 'larger runners', 'Actions Runner Controller', 'harden-runner', 'rust-cache', 'build-push-action', 'GHA cache', 'GitHub Pages', 'GitHub Release', 'gh release', 'gh run', 'gh workflow', 'GitHub CLI', 'protected branches', 'trusted publish', 'single-file deployment', 'single-file executable', 'Native AOT', 'windeployqt', 'auto-update', 'artifact attestation', 'build provenance', 'provenance attestation', 'Script injection', 'cancel-in-progress', 'CI minutes', 'Federated credentials', 'azure/login', 'Workload Identity Federation', 'OpenID Connect in', 'OIDC token', 'keyless'];
@@ -50,8 +24,7 @@ const PHRASES: readonly string[] = ['go build and go install', 'go install', 'De
 
 
 const SPECIFIC_MATCHER = compile(SPECIFIC);
-/** The phrases are matched at their start in any case, whatever their capitals. */
-const PHRASE_MATCHER: Matcher = { proper: null, plain: new RegExp('(^|[^a-z])(' + PHRASES.map(escape).join('|') + ')', 'i') };
+const PHRASE_MATCHER = compilePhrases(PHRASES);
 
 /** Whether an item belongs to the cluster: in its tracks and named by a tool, a format or a shipping phrase. */
 export function isBuildShip(title: string, summary = '', track = ''): boolean {

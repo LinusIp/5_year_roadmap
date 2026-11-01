@@ -2611,6 +2611,68 @@ Tests: `tests/unit/build-ship.test.ts` (new: the words, the areas, the phrases a
 `tests/unit/quick-filters.test.ts` (the eleventh key); `tests/e2e/atlas-library.spec.ts` (the row on the home, the
 area chips, the search, CleanRL out). Screenshots of the Library's home redrawn on CI (one more chip).
 
+## The Atlas Library's thirteenth file: the cracked dev, the researcher and the frontier engineer (pull request #48)
+
+**Two rounds, one file.** The 16,883-row file (800 new rows, the cracked dev and world-class researcher round) and
+the 17,283-row file that followed it within the hour (400 more, the frontier engineer and scientist round, a strict
+superset) land in one `library-atlas-13.yaml` of 1,197 rows, since the first had not shipped; one pull request, one
+set of counts, one link report. The import's merges, corrections and paid rows are in `docs/imports-atlas-library-13.md`.
+
+**Seven filters from keyword lists, each held to its cluster.** The prompts ask for seven quick filters by keyword.
+Read literally the lists name most of the Library: "kernel" is every GPU kernel, "theory" every game theory and type
+theory, "inference" the whole inference track, "implement" and "write a" every paper and every proposal guide,
+"measure", "analysis" and "optimization" every performance guide, "fusion" every kernel fusion, "beam" every beam
+search, "orbit" a JavaScript library. So each filter (`src/lib/craft.ts`) reads the broad words only in the phrases
+that mean the thing ("from scratch", "Linux kernel", "statistical inference", "write a compiler", "let's build") and
+only on the tracks its cluster lives in: Build it yourself and Low-level & performance in the software tracks,
+Research & science's mathematics and physics on the math track (the user's rule: physics stays under Math, as the data
+has it, and algorithms practice under Systems), its learning theory on the AI track by a list of results and bounds
+rather than by "theory", GPU & CUDA on the tracks that program the GPU with "kernel" alone only on inference, Fusion &
+accelerators and Aerospace on the engineering tracks. The lists were tuned against the data: a script counted, for
+each filter, the new rows it caught and the older rows it pulled in and named the word responsible for each older
+row, and words were dropped or narrowed until the older rows it kept were the cluster too (Karpathy's zero to hero
+under Build it yourself, Brendan Gregg under Low-level, the Theoretical Minimum under Research & science, the energy
+round's fusion rows under Fusion & accelerators, the earlier aerospace rows under Aerospace). Research & science fell
+from 2,157 rows to 840 and Low-level from 1,027 to 789 in the tuning; of the 800 first-round rows, 560 are in one of
+the three filters they were written for, and the 240 that are not are the competitive-programming, craft-essay and
+language-reference rows that belong to no filter.
+
+**Areas are a property of a filter, not three `if`s.** Pull request #44 kept the area chips as three hard-coded
+families on the Library screen because there were three. With eight filters carrying areas, the registry entry
+(`QuickFilter`) gains `areas` (the chips) and `areasOf` (the areas of an item), the Library stores what the quick
+filters read on each entry and renders one Area chip row for whichever filter is open, computing areas only for the
+entries of that pick (once per pick, so a filter's cost is paid when it is opened, not on every visit). Security &
+defence, Agents & MCP and Build & ship moved onto it with the same areas and the same URLs (`area=`). The shared
+matcher (`src/lib/words.ts`: a proper name as a whole word in its own case, a plain word at its start in any case, a
+phrase in any case, one alternation per list) is what Build & ship compiled for itself in #44, now used by the seven.
+
+**The Engineering path's chips learned the round.** Its test holds that fewer than fifteen per cent of the
+engineering track's rows show under no chip; the 164 new engineering rows (accelerators, fusion plants, the aerospace
+programmes) pushed it to fifteen. The chips' word lists took the round's words (accelerator, linac, SRF, tokamak,
+tritium, blanket, Brayton, turbopump, JPL, NACA, Apollo…) under the chips they belong to; 11.7 per cent of the track
+is now under none.
+
+**Links.** The container cannot resolve any of the new rows' hosts, so the pull request's CI ran
+`npm run check:links -- --in data/resources/library-atlas-13.yaml` in a one-off `links-atlas-13` job, removed before
+the merge: 1,197 distinct URLs: 1,122 ok, 30 failed, 45 to check by hand (run 41266153813). The 45 are 403s and 429s from
+hosts that turn scripts away (LWN's rate limit on seven articles, Cambridge, ACM, W3C, Intel, Khronos, USACO,
+Codeforces, Cloudflare, the Feynman Lectures, MIT Press, Princeton, JHU, CORE, preprints.org, DOAB…), never counted
+as broken. The 30 failures split in two: 17 answered an error from the runner (connection timeouts to UCL, Saarland,
+DIKU, Miami, TU Delft twice, NTRS and the Nearing and Dexter Chua notes; certificate faults at moolenaar.net, PSU
+STAT 503, Kirk McDonald's examples and NASA's orbital debris office; a refused connection at uscibooks.aip.org, a DNS
+miss for Real World Haskell and for CERN's magnets workshop, a redirect loop at Wiley for Stacey's Fusion) and 13
+answered 404, 400 or 500 (the RL theory book PDF, Wainwright and Jordan's monograph, Meta's Llama 4 post, protobuf's
+API best practices, Kohavi's book at Cambridge, both AMD64 APM volumes, Langmead's teaching materials, hecto, Princeton
+TR-498-95, Welch and Bishop's Kalman introduction, Uri Alon's materials, the Apollo descent guidance PDF, NATO's
+turbomachinery notes). Open each in a browser before changing anything: nothing here edits the data, and the file's
+URLs stand as given. Every URL is the file's; none was changed.
+
+Tests: `tests/unit/craft.test.ts` (new: the shared matcher, the prompts' words, the areas, each filter's inclusions
+and exclusions, the data's counts); `tests/unit/quick-filters.test.ts` (eighteen keys, the areas in the registry);
+`tests/unit/engineering-topics.test.ts` (unchanged, green again); `tests/e2e/atlas-library.spec.ts` (Build it yourself
+with its chips and search, the other six from the home, two without an Area row). Screenshots of the Library's home
+redrawn on CI (seven more chips).
+
 ## The docked player's check waits for Today to settle (pull request #45)
 
 The CI run on main after pull request #44 failed one e2e test, twice in a row: the Focus session that keeps playing,

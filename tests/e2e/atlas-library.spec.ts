@@ -308,7 +308,7 @@ test('the Books shelf has a Free / Paid chip, a paid book wears its badge, and "
   expect(paidCount).toBeGreaterThan(200);
   await paid.click();
   await expect(page).toHaveURL(/cost=paid/);
-  await expect(page.getByRole('heading', { name: new RegExp('^' + paidCount + ' of \\d+$') })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + paidCount + ' of [\\d,]+$') })).toBeVisible();
   // Every row shown is a paid book, and says so first.
   const firstRow = page.getByRole('list').getByRole('button').first();
   await expect(firstRow).toContainText('Paid ·');
@@ -329,10 +329,10 @@ test('the Books shelf has a Free / Paid chip, a paid book wears its badge, and "
   // Free shows the free books only, as many as its chip says; All (nothing pressed) shows them all.
   await open(page, './#/library?type=book&cost=free');
   const freeCount = Number((await page.getByRole('group', { name: 'Cost' }).getByRole('button', { name: /^Free \d+$/ }).innerText()).replace(/\D/g, ''));
-  await expect(page.getByRole('heading', { name: new RegExp('^' + freeCount + ' of ' + (freeCount + paidCount) + '$') })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + freeCount + ' of ' + fmt(freeCount + paidCount) + '$') })).toBeVisible();
   await expect(page.getByRole('button', { name: /Eureka Machine/ })).toHaveCount(0);
   await open(page, './#/library?type=book');
-  await expect(page.getByRole('heading', { name: new RegExp('^' + (freeCount + paidCount) + ' of ' + (freeCount + paidCount) + '$') })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + fmt(freeCount + paidCount) + ' of ' + fmt(freeCount + paidCount) + '$') })).toBeVisible();
 });
 
 test('Agents & MCP gathers the agents, MCP and harnesses rows, with area chips over the list', async ({ page }) => {
@@ -394,11 +394,78 @@ test('Build & ship gathers the executables, installers and GitHub Actions rows, 
   await expect(page.getByRole('button', { name: /^CleanRL/ })).toHaveCount(0);
 });
 
+test('Build it yourself gathers the from-scratch rows of the thirteenth file, with area chips over the list', async ({ page }) => {
+  await open(page, './#/library');
+  const row = page.getByRole('button', { name: /^Build it yourself [\d,]+$/ });
+  await expect(row).toBeVisible();
+  const count = Number((await row.innerText()).replace(/\D/g, ''));
+  expect(count).toBeGreaterThan(200);
+  await row.click();
+  await expect(page).toHaveURL(/pick=buildyourself/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Build it yourself' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('^' + fmt(count) + ' of ' + fmt(count) + '$') })).toBeVisible();
+  const areas = page.getByRole('group', { name: 'Area' });
+  for (const label of ['Languages & compilers', 'OS & kernels', 'Networking', 'Databases & storage', 'Emulators & graphics', 'AI from scratch']) {
+    await expect(areas.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' [\\d,]+$') })).toBeVisible();
+  }
+  await areas.getByRole('button', { name: /^Languages & compilers [\d,]+$/ }).click();
+  await expect(page).toHaveURL(/area=languages/);
+  const [shown, total] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
+  expect(total).toBe(count);
+  expect(shown).toBeGreaterThan(30);
+  expect(shown).toBeLessThan(count);
+  await page.getByRole('searchbox', { name: 'Search build it yourself' }).fill('Crafting Interpreters');
+  await expect(page.getByRole('button', { name: /Crafting Interpreters/ }).first()).toBeVisible();
+  // A single-file RL implementation is not a thing built from nothing: not the cluster.
+  await areas.getByRole('button', { name: /^Languages & compilers [\d,]+$/ }).click();
+  await page.getByRole('searchbox', { name: 'Search build it yourself' }).fill('CleanRL');
+  await expect(page.getByRole('button', { name: /^CleanRL/ })).toHaveCount(0);
+});
+
+test('the other six filters of the thirteenth file open from the home; the four with areas show their chips, the two without show none', async ({ page }) => {
+  const withAreas: [string, string, string[]][] = [
+    ['lowlevel', 'Low-level & performance', ['Assembly & ISA', 'Microarchitecture', 'Debugging & profiling', 'Linux kernel', 'Networking']],
+    ['science', 'Research & science', ['Rigorous math', 'ML theory', 'Physics', 'How science works', 'Great lectures']],
+    ['fusion', 'Fusion & accelerators', ['Plasma', 'Energy conversion', 'Magnets', 'Accelerators']],
+    ['aerospace', 'Aerospace', ['Propulsion', 'Astrodynamics', 'GNC', 'Aero & structures', 'Space systems']],
+  ];
+  for (const [key, label, areaLabels] of withAreas) {
+    await open(page, './#/library');
+    const row = page.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' [\\d,]+$') });
+    const count = Number((await row.innerText()).replace(/\D/g, ''));
+    expect(count, label).toBeGreaterThan(200);
+    await row.click();
+    await expect(page).toHaveURL(new RegExp('pick=' + key));
+    await expect(page.getByRole('heading', { level: 1, name: label })).toBeVisible();
+    const areas = page.getByRole('group', { name: 'Area' });
+    for (const a of areaLabels) await expect(areas.getByRole('button', { name: new RegExp('^' + a.replace(/[&]/g, '\\$&') + ' [\\d,]+$') })).toBeVisible();
+    await areas.getByRole('button', { name: new RegExp('^' + areaLabels[0]!.replace(/[&]/g, '\\$&') + ' [\\d,]+$') }).click();
+    const [shown, total] = (await page.getByRole('heading', { name: /^[\d,]+ of [\d,]+$/ }).innerText()).split(' of ').map((n) => Number(n.replace(/,/g, '')));
+    expect(total, label).toBe(count);
+    expect(shown, label).toBeGreaterThan(20);
+    expect(shown, label).toBeLessThan(count);
+  }
+  for (const [key, label] of [['gpu', 'GPU & CUDA'], ['sdk', 'SDK & API design']] as const) {
+    await open(page, './#/library');
+    await page.getByRole('button', { name: new RegExp('^' + label.replace(/[&]/g, '\\$&') + ' [\\d,]+$') }).click();
+    await expect(page).toHaveURL(new RegExp('pick=' + key));
+    await expect(page.getByRole('heading', { level: 1, name: label })).toBeVisible();
+    await expect(page.getByRole('group', { name: 'Area' })).toHaveCount(0);
+  }
+  // The GPU & CUDA search field: a CUDA Programming Guide section is in; the kernel's memory allocation guide is not.
+  await open(page, './#/library');
+  await page.getByRole('button', { name: /^GPU & CUDA [\d,]+$/ }).click();
+  await page.getByRole('searchbox', { name: 'Search GPU and CUDA' }).fill('Writing SIMT Kernels');
+  await expect(page.getByRole('button', { name: /SIMT Kernels/ }).first()).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Search GPU and CUDA' }).fill('Memory Allocation Guide');
+  await expect(page.getByRole('button', { name: /Memory Alloc/ })).toHaveCount(0);
+});
+
 test('the quick filters are one list on the home; Certificates wears its badge, Earned persists and Plan › Credentials counts it', async ({ page }) => {
   await open(page, './#/library');
   // The quick filters are the chips under the search (the redesign mockup).
   const list = page.getByRole('group', { name: 'Quick filters' });
-  for (const label of ['Developer essentials', 'Compact power & energy conversion', 'Security & defence', 'Agents & MCP', 'Certificates', 'Career & interviews', 'Research skills', 'Communication', 'Open source', 'Mandarin (the language)', 'Build & ship']) {
+  for (const label of ['Developer essentials', 'Compact power & energy conversion', 'Security & defence', 'Agents & MCP', 'Certificates', 'Career & interviews', 'Research skills', 'Communication', 'Open source', 'Mandarin (the language)', 'Build & ship', 'Build it yourself', 'Low-level & performance', 'Research & science', 'GPU & CUDA', 'SDK & API design', 'Fusion & accelerators', 'Aerospace']) {
     // The count carries a thousands separator past a thousand (ATLAS-UI-POLISH): "Agents & MCP 1,023".
     await expect(page.getByRole('button', { name: new RegExp('^' + label.replace(/[()&]/g, '\\$&') + ' [\\d,]+$') })).toBeVisible();
   }
