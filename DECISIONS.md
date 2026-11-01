@@ -2781,8 +2781,9 @@ defence above 600) say nothing about a 7,650-row one, and e2e checks that search
 left. The floors follow the data with a note, and each search names a row the pass kept in the same cluster.
 
 **Links.** The container cannot resolve the hosts, so the pull request's CI ran `npm run check:links -- --in
-data/resources/library-atlas-16.yaml` in a one-off `links-atlas-16` job, removed before the merge: LINKS-RESULT Every
-URL is the file's; none was changed.
+data/resources/library-atlas-16.yaml` in a one-off `links-atlas-16` job, removed before the merge: 23 distinct URLs of the new rows: 20 ok, 0 failed, 3 to check by hand (run 41315535478): 403s from Tektronix (the
+XYZs of oscilloscopes PDF), MDPI (the plasma focus update) and UCL Discovery (Handley's LEO routing paper), hosts that
+turn scripts away, never counted as broken. Every URL is the file's; none was changed.
 
 Tests: `tests/unit/quality-pass.test.ts` (the kept and referenced rows, the replacements, Glaser apart from Koch, every
 row graded); the count floors of `agents`, `build-ship`, `craft`, `essentials`, `foundations`, `link-policy`,
