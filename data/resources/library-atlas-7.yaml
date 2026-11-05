@@ -198,6 +198,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Cardinal Docs"
 
 - id: "repo-beavrs"
   title: "mit-crpg/BEAVRS"
@@ -256,6 +257,7 @@
 
 # ---- Electrical and mechanical engineering (1016)
   quality: 4
+  doFirst: "FUNdaMENTALs 7 Power"
 
 - id: "docs-ember-electricity-data-explorer"
   title: "Ember Electricity Data Explorer"
@@ -273,6 +275,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "Ember Electricity Review"
 
 - id: "docs-openscad-user-manual"
   title: "OpenSCAD User Manual (Wikibooks)"
@@ -290,6 +293,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "OpenSCAD Cheatsheet"
 
 - id: "docs-gdandtbasics-symbols-chart"
   title: "Free GD&T Chart"
@@ -307,6 +311,7 @@
   fromYear: 1
   priority: 4
   quality: 3
+  doFirst: "What is GD&T"
 
 - id: "docs-roymech-iso-tolerances"
   title: "ISO Hole and Shaft tolerances/limits"
@@ -324,6 +329,7 @@
   fromYear: 1
   priority: 4
   quality: 3
+  doFirst: "ISO 286 Fits How-To"
 
 - id: "online-ethics-center"
   title: "Online Ethics Center for Engineering and Science"
@@ -341,6 +347,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "NSPE Code of Ethics"
 
 - id: "kmoddl-reuleaux-collection"
   title: "Reuleaux Kinematic Mechanisms Collection (KMODDL)"
@@ -358,6 +365,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "507 Mechanical Movements"
 
 - id: "docs-reprap-gcode"
   title: "G-code (RepRap wiki)"
@@ -409,6 +417,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "Sheet Metal Bend Radii"
 
 - id: "docs-xometry-cnc-design-guide"
   title: "Design Guide: CNC Machining"
@@ -479,6 +488,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "WNA Reactor Types"
 
 - id: "docs-kicad9-schematic-editor"
   title: "KiCad 9.0 Schematic Editor Reference Manual"
@@ -567,6 +577,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "PyBaMM Tutorial 1"
 
 - id: "docs-nasa-li-ion-aging-datasets"
   title: "Li-ion Battery Aging Datasets"
@@ -671,6 +682,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "PVWatts"
 
 - id: "docs-nrel-atb"
   title: "NREL Annual Technology Baseline"
@@ -884,6 +896,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Pynite"
 
 - id: "docs-klipper-measuring-resonances"
   title: "Measuring Resonances (Klipper documentation)"
@@ -901,6 +914,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Klipper Input Shaping"
 
 - id: "docs-linuxcnc"
   title: "LinuxCNC Documentation"
@@ -935,6 +949,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Mitutoyo Pocket Guide"
 
 - id: "docs-nist-sematech-process-monitoring"
   title: "Process or Product Monitoring and Control (NIST/SEMATECH e-Handbook, Ch. 6)"
@@ -1169,6 +1184,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "How to Read a Schematic"
 
 - id: "docs-rp2350-hardware-design"
   title: "Hardware design with RP2350"
@@ -1186,6 +1202,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Getting to Blinky"
 
 - id: "docs-esp32-hardware-design-guidelines"
   title: "ESP32 Hardware Design Guidelines"
@@ -1203,6 +1220,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "How to Read a Schematic"
 
 - id: "ngspice-html-manual"
   title: "Ngspice User's Manual (HTML)"
@@ -1238,6 +1256,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "BU-908 BMS"
 
 - id: "docs-openfast"
   title: "OpenFAST Documentation"
@@ -1273,6 +1292,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "OCCT Overview"
 
 - id: "docs-occt-modeling-algorithms"
   title: "Open CASCADE Technology: Modeling Algorithms"
@@ -1326,6 +1346,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Klipper Pressure Adv."
 
 - id: "tool-bilbao-crystallographic-server"
   title: "Bilbao Crystallographic Server"
@@ -1343,6 +1364,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "NPTEL Structure of Mat."
 
 - id: "docs-endf-b8"
   title: "ENDF/B-VIII.0 Evaluated Nuclear Data Library"
@@ -1396,6 +1418,7 @@
   fromYear: 1
   priority: 4
   quality: 3
+  doFirst: "MIT Drawing Handbook"
 
 - id: "learncheme-screencasts-meb"
   title: "LearnChemE Screencasts: Material and Energy Balances"
@@ -1786,6 +1809,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "NPTEL Heat Treatment"
 
 - id: "video-bogatin-lecroy-webinars"
   title: "Eric Bogatin: Teledyne LeCroy webinars"
@@ -1803,6 +1827,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "MT-094 Microstrip/Stripline"
 
 - id: "nptel-power-management-ics"
   title: "NOC: Power Management Integrated Circuits"
@@ -1874,6 +1899,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "NPTEL Mech Vibrations"
 
 - id: "mit-ocw-2-43-advanced-thermo-2024"
   title: "Advanced Thermodynamics (2.43, Spring 2024)"
@@ -1909,6 +1935,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "TU Delft Electric Cars"
 
 - id: "apmonitor-process-dynamics-control"
   title: "Process Dynamics and Control (APMonitor, BYU)"
@@ -3066,6 +3093,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "ASQ FMEA Guide"
 
 - id: "nist-handbook-ch8-reliability"
   title: "NIST/SEMATECH e-Handbook Chapter 8: Assessing Product Reliability"
@@ -3245,6 +3273,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "FUNdaMENTALs 9 Interfaces"
 
 - id: "book-iaea-insag-7-chernobyl"
   title: "INSAG-7: The Chernobyl Accident: Updating of INSAG-1"
@@ -3280,6 +3309,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "WNA Reactor Types"
 
 - id: "ti-power-topologies-handbook"
   title: "Power Topologies Handbook"
@@ -3333,6 +3363,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "NPTEL Mech Vibrations"
 
 - id: "devoe-thermodynamics-and-chemistry"
   title: "Thermodynamics and Chemistry"
@@ -3421,6 +3452,7 @@
   fromYear: 3
   priority: 1
   quality: 5
+  doFirst: "ASQ FMEA Guide"
 
 - id: "osti-hale-precision-machines-thesis"
   title: "Principles and Techniques for Designing Precision Machines"
@@ -3456,6 +3488,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Mitutoyo Pocket Guide"
 
 - id: "ridley-current-mode-control-book"
   title: "Current-Mode Control (Ridley dissertation, free PDF)"
@@ -3735,6 +3768,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Elmer Getting Started"
 
 - id: "docs-ellis-print-tuning-guide"
   title: "Ellis' Print Tuning Guide"
@@ -3788,6 +3822,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "TLP: Mechanical Testing"
 
 - id: "tlp-creep-deformation"
   title: "Creep Deformation of Metals (DoITPoMS TLP)"
@@ -3823,6 +3858,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "TLP: Aqueous Corrosion"
 
 - id: "tlp-ellingham-diagrams"
   title: "Ellingham Diagrams (DoITPoMS TLP)"
@@ -3857,6 +3893,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "TLP: Mechanical Testing"
 
 - id: "docs-openems-python-tutorials"
   title: "openEMS Python Tutorials"
@@ -3874,6 +3911,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "MT-094 Microstrip/Stripline"
 
 - id: "learncheme-simulations"
   title: "LearnChemE Interactive Simulations"
@@ -4121,6 +4159,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "FreeCAD Sketcher Tut"
 
 - id: "practice-trimesh"
   title: "trimesh"
@@ -4138,6 +4177,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "StL Format"
 
 - id: "repo-modelica-standard-library"
   title: "Modelica Standard Library"
@@ -4191,6 +4231,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Eclipse Capella"
 
 - id: "gh-mkraska-calculix-examples"
   title: "Parametric CalculiX-Examples"
@@ -4262,6 +4303,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "LinuxCNC Kinematics"
 
 - id: "repo-ultimaker-cura"
   title: "Ultimaker/Cura"
@@ -4296,6 +4338,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Grbl Wiki"
 
 - id: "repo-pycalphad"
   title: "pycalphad"
@@ -4349,6 +4392,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "pymatgen"
 
 - id: "repo-libsigrok"
   title: "libsigrok (sigrok project)"
@@ -4509,6 +4553,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "libfive"
 
 - id: "practice-freecad-repo"
   title: "FreeCAD (source)"
@@ -4526,6 +4571,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "OCCT Overview"
 
 - id: "repo-reaktoro"
   title: "Reaktoro"
@@ -4579,6 +4625,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "MIT 6.245 Multivariable"
 
 - id: "topopt-new-99-line-top99neo"
   title: "New optimized 99 line topology optimization code written in MATLAB (top99neo)"
@@ -4614,6 +4661,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "OpenTorque Actuator"
 
 - id: "repo-klipper"
   title: "Klipper3d/klipper"
@@ -4721,6 +4769,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "pymatgen"
 
 - id: "repo-phonopy"
   title: "phonopy"
@@ -4828,6 +4877,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "ODrive Docs"
 
 - id: "repo-moteus"
   title: "moteus brushless controller"
@@ -4845,6 +4895,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "moteus Docs"
 
 - id: "repo-princeton-magnet"
   title: "MagNet (Princeton power magnetics data and models)"
@@ -5041,6 +5092,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Ljung SysID Lectures"
 
 - id: "paper-deepc"
   title: "Data-Enabled Predictive Control: In the Shallows of the DeePC"
@@ -5130,6 +5182,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "NAFEMS What is V&V"
 
 - id: "paper-haller-nnm-spectral-submanifolds"
   title: "Nonlinear normal modes and spectral submanifolds: existence, uniqueness and use in model reduction"

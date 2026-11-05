@@ -30,6 +30,7 @@
   roadmap: "ai-engineer"
   tags: [security]
   quality: 4
+  doFirst: "CyberSecEval 1"
 
 - id: "repo-garak"
   title: "garak: LLM vulnerability scanner"
@@ -49,6 +50,7 @@
   roadmap: "ai-engineer"
   tags: [security]
   quality: 4
+  doFirst: "garak (paper)"
 
 - id: "repo-oss-fuzz-gen"
   title: "oss-fuzz-gen: LLM-powered fuzz target generation for OSS-Fuzz"
@@ -68,6 +70,7 @@
   roadmap: "ai-agents"
   tags: [security]
   quality: 4
+  doFirst: "AI-Powered Fuzzing"
 
 - id: "paper-dos-donts-ml-security"
   title: "Dos and Don'ts of Machine Learning in Computer Security"
@@ -399,6 +402,7 @@
   roadmap: "software-architect"
   tags: [security]
   quality: 4
+  doFirst: "CodeQL QL tutorials"
 
 - id: "repo-aflplusplus"
   title: "AFL++"
@@ -438,6 +442,7 @@
   roadmap: "software-architect"
   tags: [security]
   quality: 4
+  doFirst: "Memory Safe Roadmaps"
 
 - id: "paper-lampson-security-real-world"
   title: "Computer Security in the Real World"
@@ -651,6 +656,7 @@
   roadmap: "software-architect"
   tags: [security]
   quality: 4
+  doFirst: "Good Fuzz Target"
 
 - id: "blog-schneier-on-security"
   title: "Schneier on Security"
@@ -707,6 +713,7 @@
   priority: 2
   tags: [security]
   quality: 4
+  doFirst: "MDN XSS Defenses"
 
 - id: "kernel-seccomp-bpf"
   title: "Seccomp BPF (SECure COMPuting with filters)"
@@ -762,6 +769,7 @@
   priority: 2
   tags: [security]
   quality: 4
+  doFirst: "OST2 Intro Ghidra"
 
 - id: "chromium-sandbox-design"
   title: "Sandbox (Chromium design doc)"
@@ -871,9 +879,10 @@
   estHours: 20
   summary: "The deep reference on SELinux concepts, policy language and internals."
   fromYear: 3
-  priority: 3
+  priority: 2
   tags: [security]
-  quality: 3
+  quality: 4
+  doFirst: "Linux LSM Usage"
 
 - id: "cheri-c-programming-guide"
   title: "CHERI C/C++ Programming Guide"
@@ -930,6 +939,7 @@
   priority: 2
   tags: [security]
   quality: 4
+  doFirst: "Scudo Allocator"
 
 - id: "paper-saltzer-schroeder-protection"
   title: "The Protection of Information in Computer Systems"
@@ -1230,6 +1240,7 @@
   priority: 2
   tags: [security]
   quality: 4
+  doFirst: "OST2 SecDev 1001"
 
 - id: "google-miracleptr"
   title: "Use-after-freedom: MiraclePtr"
@@ -1382,6 +1393,7 @@
   roadmap: "software-architect"
   tags: [security]
   quality: 4
+  doFirst: "Sigma Rules Docs"
 
 - id: "repo-alerting-detection-strategy-framework"
   title: "Alerting and Detection Strategy (ADS) Framework"
@@ -1401,6 +1413,7 @@
   roadmap: "software-architect"
   tags: [security]
   quality: 4
+  doFirst: "Sigma Rules Docs"
 
 - id: "nsa-cisa-kubernetes-hardening-guide"
   title: "Kubernetes Hardening Guidance (v1.2)"
@@ -1591,6 +1604,7 @@
   priority: 2
   tags: [security]
   quality: 4
+  doFirst: "Rust Fuzz Book"
 
 - id: "apple-platform-security"
   title: "Apple Platform Security"
@@ -1699,6 +1713,7 @@
   priority: 2
   tags: [security]
   quality: 4
+  doFirst: "CCC Technical Analysis"
 
 - id: "amd-sev-snp-whitepaper"
   title: "AMD SEV-SNP: Strengthening VM Isolation with Integrity Protection and More"
@@ -1717,6 +1732,7 @@
   priority: 2
   tags: [security]
   quality: 4
+  doFirst: "CCC Technical Analysis"
 
 - id: "cheri-isa-v9"
   title: "CHERI Instruction-Set Architecture (Version 9)"

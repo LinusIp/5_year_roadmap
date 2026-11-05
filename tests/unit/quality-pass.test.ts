@@ -53,7 +53,7 @@ describe('the grades', () => {
 describe('the rows the pass dropped', () => {
   it('are gone, except the one on the plan, and nothing comes after one', () => {
     const ids = new Set([...raw.resources, ...raw.papers].map((r) => r.id));
-    // 16,422 after the quality pass, 7,650 after the "four stars and up" pass (7,640 rows).
+    // 16,422 after the quality pass, 7,650 after the "four stars and up" pass (7,640 rows), 7,691 after the upgrade pass.
     expect(raw.resources.length).toBeLessThan(7_700);
     expect(raw.resources.length).toBeGreaterThan(7_600);
     // 30 Days of Python was graded 1 or 2, but it is on the plan (phase y1-p0, lane B) with its units and its certificate.
@@ -90,5 +90,25 @@ describe('the "four stars and up" pass (7,640 rows)', () => {
     expect(fromFile.filter((r) => r.quality === undefined).length).toBeLessThan(fromFile.length * 0.01);
     const graded = [...raw.resources, ...raw.papers].filter((r) => r.quality !== undefined);
     expect(graded.filter((r) => r.quality! >= 4).length / graded.length).toBeGreaterThan(0.9);
+  });
+});
+
+describe('the category refill and the upgrade pass (7,679 rows)', () => {
+  it('brings back the refilled rows under their old ids, adds the new ones and drops the superseded', () => {
+    const byId = new Map([...raw.resources, ...raw.papers].map((r) => [r.id, r]));
+    // Restored under the ids the "four stars and up" pass removed, so a device's kept progress on them reattaches.
+    for (const id of ['repo-swiftide', 'repo-mistral-rs', 'docs-codex-linux-sandbox']) expect(byId.has(id), id).toBe(true);
+    // The new 4–5★ rows: expert blogs for the thin tracks, defensive malware analysis, shipping games, agent books.
+    for (const id of ['blog-flyio', 'blog-bitsquid', 'blog-pennylane', 'book-practical-malware-analysis', 'docs-steamworks', 'book-designing-multi-agent-systems', 'docs-pyinstaller-manual']) expect(byId.has(id), id).toBe(true);
+    // Superseded rows are gone, each by a 4–5★ row on the same topic.
+    for (const id of ['paper-harness-learning', 'article-meta-cicero', 'docs-pyinstaller-usage', 'docs-electron-forge-code-signing']) expect(byId.has(id), id).toBe(false);
+    // Electron's code-signing tutorial replaced Electron Forge's guide: its own row, not merged into the removed one.
+    expect(byId.get('docs-electron-code-signing')?.url).toBe('https://www.electronjs.org/docs/latest/tutorial/code-signing');
+    // CSWP came after CSWA, which the pass removed: the prerequisite stays text.
+    const cswp = raw.resources.find((r) => r.id === 'cert-solidworks-cswp');
+    expect(cswp?.after ?? []).toEqual([]);
+    expect(cswp?.doFirst).toBe('SOLIDWORKS CSWA');
+    const graded = [...raw.resources, ...raw.papers].filter((r) => r.quality !== undefined);
+    expect(graded.filter((r) => r.quality! >= 4).length / graded.length).toBeGreaterThan(0.95);
   });
 });

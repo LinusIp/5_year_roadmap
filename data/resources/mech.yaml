@@ -336,6 +336,7 @@
   summary: "The 'CAD scripting' part of block B in year 5."
   priority: 2
   quality: 4
+  doFirst: "OpenSCAD Docs"
 
 - id: brunton-databook
   title: "Steve Brunton: Data-Driven Science and Engineering (book and lectures)"

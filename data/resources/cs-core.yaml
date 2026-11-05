@@ -128,6 +128,7 @@
   note: "Free tier"
   priority: 2
   quality: 4
+  doFirst: "fCC Data Structures"
 
 - id: cmu-15-213
   title: "CMU 15-213 Introduction to Computer Systems (lectures with the CS:APP book)"

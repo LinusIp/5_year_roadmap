@@ -2830,6 +2830,39 @@ hiding the 3-star rows with live counts, the rating sort, the old link, Today, a
 `tests/e2e/atlas-library.spec.ts` and `helpers.ts` (★5 instead of Canon only, the folded heading's new name); two new
 screenshots at 390 px, light and dark (the Courses shelf with the filter bar, a canon course's sheet).
 
+## The Atlas Library's category refill and upgrade pass (pull request #53)
+
+**Restored rows come back under their ids.** The 7,679-row file restores rows the four-star pass removed, under the ids
+they had. They are added like new rows (in `library-atlas-17.yaml`, in the file's vocabulary), and a device that kept its
+progress on one sees it again: the progress was never deleted.
+
+**A merge into a removed row is refused.** Electron's code-signing tutorial matched Electron Forge's guide by title on
+the same shelf, and the Forge guide is one of the rows this file removes: merged, the new row would have left with it. The
+pair is listed as distinct, and the importer now stops on any match whose target it removes. Likewise a new row's soft
+prerequisite that names a removed row (SOLIDWORKS CSWP after CSWA) stays text.
+
+**The tool names that ship games name the cluster.** The refill's game shipping rows (Steamworks, SteamPipe, butler,
+BuildCookRun) did not say "build", "release" or "deploy" in a shipping phrase, so Build & ship missed them and "Game
+builds" stayed at 4. Their tool names are now specific words of the cluster, as PyInstaller's or WiX's are. "itch.io"
+is not: it also names the game jam calendar.
+
+**The windowed list's row height only grows.** Deep in a long shelf the list measured its row height from the rows in
+view; rows differ by a few pixels, and the new height moved the window onto rows of the other height, which moved it
+back. The page re-rendered without end, and the deferred search never ran: after the AI path's optional list, a search
+for CS234 on Courses showed all 800. The height now grows to the tallest average seen and stops there; a slightly
+generous height costs a little padding at the end of the list, never a missing row in view.
+
+**Every filter is counted.** The prompt asks for each quick filter, area chip and track filter with its count, and any
+at 0. None is at 0; the counts are in `docs/imports-atlas-library-17.md`, from `scratch/filter-counts.ts`.
+
+**Links.** The container cannot resolve the hosts, so the pull request's CI ran `npm run check:links -- --in
+data/resources/library-atlas-17.yaml` in a one-off `links-atlas-17` job, removed before the merge: LINKS-RESULT
+
+Tests: `tests/unit/quality-pass.test.ts` (restored, new and superseded rows, Electron apart from Forge, CSWP's
+prerequisite as text), `build-ship.test.ts` (the game shipping rows in Game builds, the jam calendar out),
+`quick-filters.test.ts` (floors); `tests/e2e/atlas-library.spec.ts` (a deep-scrolled shelf settles and still searches;
+Pro Git the book; Build & ship floors). Screenshots redrawn on CI.
+
 ## The docked player's check waits for Today to settle (pull request #45)
 
 The CI run on main after pull request #44 failed one e2e test, twice in a row: the Focus session that keeps playing,

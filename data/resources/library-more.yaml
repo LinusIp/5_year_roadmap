@@ -382,6 +382,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 5
+  doFirst: "Prompt Engineering (Weng)"
 
 - id: "paper-luo-understanding-diffusion"
   title: "Understanding Diffusion Models: A Unified Perspective"
@@ -5543,6 +5544,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Humanoid-Gym"
 
 - id: "paper-humanplus"
   title: "HumanPlus: Humanoid Shadowing and Imitation from Humans"
@@ -5578,6 +5580,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "OmniH2O"
 
 - id: "paper-rt-2"
   title: "RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control"
@@ -5743,6 +5746,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "GPU Gems"
 
 - id: "book-gpu-gems-3"
   title: "GPU Gems 3 (online edition)"
@@ -6254,6 +6258,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Bevy ECS"
 
 - id: "docs-unreal-cpp-programming"
   title: "Programming with C++ in Unreal Engine"

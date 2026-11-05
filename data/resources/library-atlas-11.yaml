@@ -29,6 +29,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "TRT-LLM KV cache manager"
 
 - id: "docs-trtllm-attention"
   title: "Multi-Head, Multi-Query, and Group-Query Attention (TensorRT-LLM)"
@@ -68,6 +69,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "NVIDIA Dynamo docs"
 
 - id: "docs-triton-server-architecture"
   title: "Triton Architecture"
@@ -127,6 +129,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  after: [tutorial-triton-server-tutorials]
 
 - id: "docs-nsight-compute-profiling-guide"
   title: "Nsight Compute Profiling Guide"
@@ -162,11 +165,11 @@
   estHours: 4
   summary: "The guide to porting a model architecture into vLLM, one of the most common substantial community PRs."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-vllm-contributing]
-  quality: 3
+  quality: 4
 
 - id: "docs-llamacpp-howto-add-model"
   title: "Add a new model architecture to llama.cpp"
@@ -202,11 +205,11 @@
   estHours: 2
   summary: "The naming, layout and template conventions CUTLASS code follows, required reading before proposing a kernel change."
   fromYear: 3
-  priority: 3
+  priority: 2
   roadmap: "inference-engineering"
   tags: [inference]
   after: [docs-cutlass-python-contribute]
-  quality: 3
+  quality: 4
 
 - id: "cert-nvidia-nca-aiio"
   title: "NVIDIA-Certified Associate: AI Infrastructure and Operations (NCA-AIIO)"
@@ -243,12 +246,12 @@
   estHours: 8
   summary: "The self-paced version of DLI's flagship CUDA C/C++ course; passing the coding assessment earns an NVIDIA certificate of competency, listed at US$90."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "inference-engineering"
   tags: [inference]
   note: "Paid"
   doFirst: "An Even Easier Intro to CUDA"
-  quality: 3
+  quality: 4
 
 - id: "cert-dli-cuda-python"
   title: "Fundamentals of Accelerated Computing with CUDA Python (DLI)"
@@ -434,46 +437,6 @@
   tags: [inference]
   quality: 4
 
-- id: "blog-nvidia-perf-metrics"
-  title: "How to Implement Performance Metrics in CUDA C/C++"
-  short: "CUDA: Perf Metrics"
-  provider: "Mark Harris (NVIDIA)"
-  type: "article"
-  url: "https://developer.nvidia.com/blog/how-implement-performance-metrics-cuda-cc/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Timing kernels with CUDA events and computing effective bandwidth and FLOP/s, the basics of any perf discussion."
-  fromYear: 1
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "Even Easier Intro to CUDA"
-  quality: 3
-
-- id: "blog-nvidia-device-properties-errors"
-  title: "How to Query Device Properties and Handle Errors in CUDA C/C++"
-  short: "CUDA: Errors & Props"
-  provider: "Mark Harris (NVIDIA)"
-  type: "article"
-  url: "https://developer.nvidia.com/blog/how-query-device-properties-and-handle-errors-cuda-cc/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Shows proper error checking and device queries, habits interviewers look for in any CUDA code you write."
-  fromYear: 1
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "Even Easier Intro to CUDA"
-  quality: 3
-
 - id: "article-ezyang-ways-to-use-torch-compile"
   title: "Ways to use torch.compile"
   short: "Ways to use torch.compile"
@@ -494,26 +457,6 @@
   doFirst: "torch.compiler docs"
   quality: 4
 
-- id: "blog-nvidia-occupancy-api"
-  title: "CUDA Pro Tip: Occupancy API Simplifies Launch Configuration"
-  short: "CUDA: Occupancy API"
-  provider: "Mark Harris (NVIDIA)"
-  type: "article"
-  url: "https://developer.nvidia.com/blog/cuda-pro-tip-occupancy-api-simplifies-launch-configuration/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Explains occupancy and how to choose block sizes with the runtime API, a standard CUDA interview topic."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  doFirst: "Even Easier Intro to CUDA"
-  quality: 3
-
 - id: "blog-leimao-shared-memory-bank"
   title: "CUDA Shared Memory Bank"
   short: "Lei Mao: Smem Banks"
@@ -533,45 +476,6 @@
   tags: [inference]
   doFirst: "Using Shared Memory"
   quality: 4
-
-- id: "blog-leimao-coalesced-access"
-  title: "CUDA Coalesced Memory Access"
-  short: "Lei Mao: Coalescing"
-  provider: "Lei Mao"
-  type: "article"
-  url: "https://leimao.github.io/blog/CUDA-Coalesced-Memory-Access/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Measures coalesced vs strided global memory access so you can explain the effect with numbers, not slogans."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  quality: 3
-
-- id: "blog-leimao-occupancy-calculation"
-  title: "CUDA Occupancy Calculation"
-  short: "Lei Mao: Occupancy"
-  provider: "Lei Mao"
-  type: "article"
-  url: "https://leimao.github.io/blog/CUDA-Occupancy-Calculation/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Works through computing occupancy by hand from registers, shared memory and block size limits."
-  fromYear: 2
-  priority: 3
-  roadmap: "inference-engineering"
-  tags: [inference]
-  after: [blog-nvidia-occupancy-api]
-  quality: 3
 
 - id: "article-dieleman-paradox-distillation"
   title: "The paradox of diffusion distillation"
@@ -633,6 +537,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  after: [docs-trtllm-parallelism]
 
 - id: "tool-semantic-scholar"
   title: "Semantic Scholar"
@@ -666,10 +571,10 @@
   estHours: 6
   summary: "Hugging Face's full workflow for porting a model, including matching outputs against the original implementation."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "ai-engineer"
   after: [docs-transformers-contributing]
-  quality: 3
+  quality: 4
 
 - id: "docs-neurips-paper-checklist"
   title: "NeurIPS Paper Checklist Guidelines"
@@ -725,6 +630,7 @@
   priority: 3
   roadmap: "ai-engineer"
   quality: 3
+  doFirst: "LaTeX in 30 Minutes"
 
 - id: "video-spj-great-research-talk"
   title: "How to Give a Great Research Talk"
@@ -824,26 +730,6 @@
   doFirst: "HF LLM Course"
   quality: 2
 
-- id: "cert-aws-ai-practitioner"
-  title: "AWS Certified AI Practitioner"
-  short: "AWS AI Practitioner"
-  provider: "Amazon Web Services"
-  type: "course"
-  url: "https://aws.amazon.com/certification/certified-ai-practitioner/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 20
-  summary: "Foundational AWS exam on AI/ML and generative-AI concepts and the AWS services built on them; a light first cloud-AI badge."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  doFirst: "AWS Cloud Practitioner"
-  quality: 2
-
 - id: "course-stanford-cs197-cs-research"
   title: "CS197: Computer Science Research"
   short: "Stanford CS197 Research"
@@ -880,7 +766,7 @@
   roadmap: "ai-engineer"
   note: "Paid"
   after: [cert-nvidia-nca-genl]
-  quality: 3
+  quality: 4
 
 - id: "cert-nvidia-nca-genm"
   title: "NVIDIA-Certified Associate: Generative AI Multimodal (NCA-GENM)"
@@ -936,11 +822,11 @@
   estHours: 17
   summary: "Shareable Coursera certificate showing you understand the LLM lifecycle: pretraining, fine-tuning, RLHF and deployment trade-offs; Coursera subscription required for the certificate."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "ai-engineer"
   note: "Paid"
   doFirst: "Deep Learning Specialization"
-  quality: 3
+  quality: 4
 
 - id: "cert-coursera-pytorch-dl"
   title: "PyTorch for Deep Learning Professional Certificate"
@@ -979,7 +865,7 @@
   priority: 3
   roadmap: "ai-agents"
   doFirst: "Deep Learning Specialization"
-  quality: 2
+  quality: 3
 
 - id: "cert-ms-ai-103"
   title: "Exam AI-103: Developing AI Apps and Agents on Azure"
@@ -998,7 +884,6 @@
   priority: 3
   roadmap: "ai-agents"
   note: "Paid"
-  after: [cert-aws-ai-practitioner]
   quality: 2
 
 - id: "cert-nvidia-ncp-aai"
@@ -1057,6 +942,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Nanda: Research Process"
 
 - id: "book-good-research-code-handbook"
   title: "The Good Research Code Handbook"
@@ -1095,26 +981,6 @@
   note: "Paid"
   quality: 4
 
-- id: "book-ml-system-design-interview"
-  title: "Machine Learning System Design Interview"
-  short: "ML System Design Intvw"
-  provider: "Ali Aminian, Alex Xu (ByteByteGo, 2023)"
-  type: "book"
-  url: "https://bytebytego.com/courses/machine-learning-system-design-interview"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 12
-  summary: "Ten end-to-end ML design case studies (search, recommendations, ads, harmful content) in a consistent interview framework."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  after: [hi-ml-system-design-intro]
-  quality: 3
-
 - id: "book-writing-science-schimel"
   title: "Writing Science: How to Write Papers That Get Cited and Proposals That Get Funded"
   short: "Writing Science (Schimel)"
@@ -1134,25 +1000,6 @@
   note: "Paid"
   doFirst: "Ten simple rules for structuring papers"
   quality: 4
-
-- id: "hi-ml-video-recommendations"
-  title: "Video Recommendations (ML System Design Breakdown)"
-  short: "HI: ML Video Recs"
-  provider: "Hello Interview"
-  type: "article"
-  url: "https://www.hellointerview.com/learn/ml-system-design/problem-breakdowns/video-recommendations"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "A worked recommender-system design answer covering candidate generation, ranking, features and evaluation."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [hi-ml-system-design-intro]
-  quality: 2
 
 - id: "repo-comfyui"
   title: "ComfyUI"
@@ -1191,25 +1038,6 @@
   roadmap: "ai-engineer"
   doFirst: "ControlNet paper"
   quality: 4
-
-- id: "repo-ml-system-design-case-studies"
-  title: "A Curated List of ML System Design Case Studies"
-  short: "ML Design Case Studies"
-  provider: "Engineer1999 (community)"
-  type: "practice"
-  url: "https://github.com/Engineer1999/A-Curated-List-of-ML-System-Design-Case-Studies"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 20
-  summary: "300+ real company write-ups of production ML systems, grouped by domain, to ground ML design answers in reality."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [hi-ml-system-design-intro]
-  quality: 2
 
 - id: "repo-wan-video-wan22"
   title: "Wan2.2: Open and Advanced Large-Scale Video Generative Models (code)"
@@ -1673,25 +1501,6 @@
   doFirst: "What are Diffusion Models?"
   quality: 4
 
-- id: "hi-ml-system-design-intro"
-  title: "ML System Design in a Hurry: Introduction"
-  short: "HI: ML Sys Design"
-  provider: "Hello Interview"
-  type: "article"
-  url: "https://www.hellointerview.com/learn/ml-system-design/in-a-hurry/introduction"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Explains the applied ML system design round and gives a delivery framework from problem framing to monitoring."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  after: [book-designing-ml-systems]
-  quality: 3
-
 - id: "article-olah-research-taste-exercises"
   title: "Research Taste Exercises"
   short: "Olah: Research Taste"
@@ -1843,24 +1652,6 @@
   doFirst: "Stripe Idempotency Post"
   quality: 4
 
-- id: "docs-write-the-docs-guide"
-  title: "Software documentation guide"
-  short: "Write the Docs Guide"
-  provider: "Write the Docs"
-  type: "article"
-  url: "https://www.writethedocs.org/guide/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 6
-  summary: "The community hub for documentation practice: how to start, tools, API docs, docs-as-code and style guides."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
 - id: "rfc-8725-jwt-bcp"
   title: "RFC 8725: JSON Web Token Best Current Practices"
   short: "RFC 8725 JWT BCP"
@@ -1991,7 +1782,6 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
-  after: [article-wtd-beginners-guide]
   quality: 4
 
 - id: "video-oauth-oidc-plain-english"
@@ -2030,79 +1820,6 @@
   roadmap: "software-architect"
   quality: 4
 
-- id: "video-ted-anderson-public-speaking"
-  title: "TED's secret to great public speaking"
-  short: "Anderson: TED Secret"
-  provider: "Chris Anderson (TED, 2016)"
-  type: "lectures"
-  url: "https://www.ted.com/talks/chris_anderson_ted_s_secret_to_great_public_speaking"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "An eight-minute summary of how great talks transfer one idea by building it piece by piece in the listener's mind."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
-
-- id: "video-ted-duarte-structure"
-  title: "The secret structure of great talks"
-  short: "Duarte: Talk Structure"
-  provider: "Nancy Duarte (TEDxEast, 2011)"
-  type: "lectures"
-  url: "https://www.ted.com/talks/nancy_duarte_the_secret_structure_of_great_talks"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Shows the 'what is vs what could be' contour shared by persuasive speeches, a pattern you can reuse in pitches."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
-
-- id: "video-yc-hale-how-to-pitch"
-  title: "How to Pitch Your Startup"
-  short: "YC: Hale on Pitching"
-  provider: "Kevin Hale (Y Combinator)"
-  type: "lectures"
-  url: "https://www.ycombinator.com/library/6q-how-to-pitch-your-company"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A lecture on making a pitch legible and simple, with examples of rewriting confusing startup descriptions."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [article-yc-how-to-pitch-your-company]
-  quality: 2
-
-- id: "video-yc-how-to-talk-to-users"
-  title: "How to talk to users"
-  short: "YC: Talk to Users"
-  provider: "Gustaf Alstromer (Y Combinator)"
-  type: "lectures"
-  url: "https://www.ycombinator.com/library/Iq-how-to-talk-to-users"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Teaches customer interviews that surface real problems, the listening half of founder communication."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
 - id: "oso-authorization-academy"
   title: "Authorization Academy"
   short: "Oso Authorization Academy"
@@ -2136,9 +1853,9 @@
   estHours: 20
   summary: "YC's free online course for founders, covering ideas, users, pitching and fundraising with weekly progress tracking."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
-  quality: 3
+  quality: 4
 
 - id: "course-google-tech-writing-one"
   title: "Technical Writing One"
@@ -2210,11 +1927,11 @@
   estHours: 80
   summary: "The most widely recognised cloud architecture credential; it shows you can design cost- and performance-optimised systems on AWS (65 questions, 130 minutes, US$150)."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
   doFirst: "AWS Cloud Practitioner"
-  quality: 3
+  quality: 4
 
 - id: "cert-coursera-software-design-architecture"
   title: "Software Design and Architecture Specialization"
@@ -2249,10 +1966,10 @@
   estHours: 4
   summary: "Drafting, self-editing, organizing long documents, figures, sample code and tutorials for engineers."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   after: [course-google-tech-writing-one]
-  quality: 3
+  quality: 4
 
 - id: "cert-gcp-pro-cloud-architect"
   title: "Google Cloud Professional Cloud Architect"
@@ -2272,7 +1989,7 @@
   roadmap: "software-architect"
   note: "Paid"
   after: [cert-gcp-associate-cloud-engineer]
-  quality: 2
+  quality: 3
 
 - id: "book-altman-startup-playbook"
   title: "Startup Playbook"
@@ -2292,24 +2009,6 @@
   roadmap: "software-architect"
   quality: 3
 
-- id: "book-strunk-elements-of-style"
-  title: "The Elements of Style"
-  short: "Elements of Style"
-  provider: "William Strunk Jr. (Project Gutenberg)"
-  type: "book"
-  url: "https://www.gutenberg.org/ebooks/37134"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "The original short rulebook on concise English usage, free and readable in one sitting."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
 - id: "book-presentation-zen-3e"
   title: "Presentation Zen: Simple Ideas on Presentation Design and Delivery (3rd Edition)"
   short: "Presentation Zen (book)"
@@ -2324,29 +2023,10 @@
   estHours: 8
   summary: "Teaches restraint and story in slides so your technical and pitch talks feel clear instead of bullet-heavy."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
-  quality: 3
-
-- id: "book-think-faster-talk-smarter"
-  title: "Think Faster, Talk Smarter: How to Speak Successfully When You're Put on the Spot"
-  short: "Think Faster Talk Smarter"
-  provider: "Matt Abrahams (Simon Element, 2023)"
-  type: "book"
-  url: "https://www.simonandschuster.com/books/Think-Faster-Talk-Smarter/Matt-Abrahams/9781668010303"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "paid"
-  estHours: 7
-  summary: "Trains impromptu speaking for interviews, investor Q&A and hallway conversations where you cannot prepare slides."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  note: "Paid"
-  quality: 2
+  quality: 4
 
 - id: "book-resonate"
   title: "Resonate: Present Visual Stories That Transform Audiences"
@@ -2362,10 +2042,10 @@
   estHours: 8
   summary: "Gives you a story structure for persuasive talks, the backbone of a founder pitch or product launch."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
-  quality: 3
+  quality: 4
 
 - id: "book-venture-deals"
   title: "Venture Deals: Be Smarter Than Your Lawyer and Venture Capitalist"
@@ -2381,11 +2061,11 @@
   estHours: 10
   summary: "Explains term sheets, valuation and negotiation so you understand what a raise for localSpace really commits you to."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
   after: [article-yc-seed-fundraising-guide]
-  quality: 3
+  quality: 4
 
 - id: "book-docs-for-developers"
   title: "Docs for Developers: An Engineer's Field Guide to Technical Writing"
@@ -2401,11 +2081,11 @@
   estHours: 8
   summary: "Walks a project from user research to shipped, maintained docs, a full playbook for documenting your own product."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
   after: [course-google-tech-writing-one]
-  quality: 3
+  quality: 4
 
 - id: "book-system-design-interview-xu"
   title: "System Design Interview – An Insider's Guide (Volumes 1 and 2)"
@@ -2421,11 +2101,10 @@
   estHours: 20
   summary: "The most widely used system design interview book pair, with 28 worked designs from rate limiters to stock exchanges."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
-  after: [bbg-scale-zero-to-millions]
-  quality: 3
+  quality: 4
 
 - id: "site-speaking-io"
   title: "speaking.io: Tips for Public Speaking"
@@ -2444,24 +2123,6 @@
   priority: 3
   roadmap: "software-architect"
   quality: 3
-
-- id: "tutorial-garr-reynolds-tips"
-  title: "How do you make a great presentation? (Presentation Tips)"
-  short: "Garr Reynolds: Tips"
-  provider: "Garr Reynolds"
-  type: "article"
-  url: "https://www.garrreynolds.com/tips"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "Concise guidance plus slide makeovers that show how to cut clutter and design slides for clarity."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
 
 - id: "tutorial-make-a-readme"
   title: "Make a README"
@@ -2498,82 +2159,6 @@
   priority: 3
   roadmap: "software-architect"
   after: [tih-swe-interview-resume]
-  quality: 2
-
-- id: "hi-design-bitly"
-  title: "Design a URL Shortener Like Bit.ly"
-  short: "HI: Design Bit.ly"
-  provider: "Hello Interview"
-  type: "article"
-  url: "https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A full worked answer to the classic warm-up design question, with what is expected at each seniority level."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  doFirst: "System Design in a Hurry"
-  quality: 3
-
-- id: "hi-design-ticketmaster"
-  title: "Design a Ticket Booking Site Like Ticketmaster"
-  short: "HI: Ticketmaster"
-  provider: "Hello Interview"
-  type: "article"
-  url: "https://www.hellointerview.com/learn/system-design/problem-breakdowns/ticketmaster"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how to handle seat contention, reservations and surge traffic in one of the most common design prompts."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [hi-design-bitly]
-  quality: 3
-
-- id: "hi-design-rate-limiter"
-  title: "Design a Distributed Rate Limiter"
-  short: "HI: Rate Limiter"
-  provider: "Hello Interview"
-  type: "article"
-  url: "https://www.hellointerview.com/learn/system-design/problem-breakdowns/distributed-rate-limiter"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Walks through token bucket vs sliding window and how to keep counters consistent across many nodes."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [hi-design-bitly]
-  quality: 3
-
-- id: "tih-behavioral-questions"
-  title: "Common behavioral questions to practice"
-  short: "TIH: Behavioral Qs"
-  provider: "Yangshun Tay (Tech Interview Handbook)"
-  type: "practice"
-  url: "https://www.techinterviewhandbook.org/behavioral-interview-questions/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 3
-  summary: "A ready list of the questions big-tech loops actually ask, ideal for rehearsing STAR answers aloud."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [tih-behavioral-interview]
   quality: 2
 
 - id: "repo-awesome-low-level-design"
@@ -2632,98 +2217,6 @@
   after: [site-speaking-io]
   quality: 3
 
-- id: "article-speaking-io-questions"
-  title: "Handling Questions"
-  short: "speaking.io: Questions"
-  provider: "Zach Holman"
-  type: "article"
-  url: "https://speaking.io/react/handling-questions/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Techniques for fielding audience questions calmly, including hostile or off-topic ones."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [site-speaking-io]
-  quality: 3
-
-- id: "article-speaking-io-nervousness"
-  title: "Dealing with Nervousness"
-  short: "speaking.io: Nervousness"
-  provider: "Zach Holman"
-  type: "article"
-  url: "https://speaking.io/deliver/nervousness/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Reassuring, concrete ways to manage stage fright before and during a talk."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [site-speaking-io]
-  quality: 3
-
-- id: "article-toastmasters-write-deliver-speech"
-  title: "How to Write and Deliver a Speech"
-  short: "Toastmasters: Speech"
-  provider: "Toastmasters International"
-  type: "article"
-  url: "https://www.toastmasters.org/resources/public-speaking-tips/How-to-Write-and-Deliver-a-Speech"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A plain starter guide to planning, writing and rehearsing a speech from the world's largest speaking club."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
-
-- id: "article-toastmasters-fear"
-  title: "How to Overcome Your Fear of Public Speaking"
-  short: "Toastmasters: Fear"
-  provider: "Toastmasters International"
-  type: "article"
-  url: "https://www.toastmasters.org/Resources/Public%20Speaking%20Tips/How-to-Overcome-Your-Fear-of-Public-Speaking"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Practical confidence-building habits for anyone who freezes in front of an audience."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
-
-- id: "article-kawasaki-10-20-30"
-  title: "The 10/20/30 Rule of PowerPoint"
-  short: "Kawasaki 10/20/30"
-  provider: "Guy Kawasaki"
-  type: "article"
-  url: "https://guykawasaki.com/the_102030_rule/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "The classic pitch constraint: ten slides, twenty minutes, thirty-point font, which forces you to know your story."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
-
 - id: "article-yc-seed-fundraising-guide"
   title: "A guide to seed fundraising"
   short: "YC: Seed Fundraising"
@@ -2742,25 +2235,6 @@
   roadmap: "software-architect"
   quality: 4
 
-- id: "article-yc-seed-pitch-deck"
-  title: "How to build your seed round pitch deck"
-  short: "YC: Seed Pitch Deck"
-  provider: "Y Combinator"
-  type: "article"
-  url: "https://www.ycombinator.com/library/2u-how-to-build-your-seed-round-pitch-deck"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Slide-by-slide advice on structuring and designing a seed deck that investors can read in minutes."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [article-yc-seed-fundraising-guide]
-  quality: 3
-
 - id: "article-yc-how-to-pitch-your-company"
   title: "How to Pitch Your Company"
   short: "YC: Pitch Your Company"
@@ -2775,27 +2249,9 @@
   estHours: 1
   summary: "How to explain what your company does in two sentences and answer the questions every investor asks."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
-  quality: 3
-
-- id: "article-yc-essential-startup-advice"
-  title: "YC's essential startup advice"
-  short: "YC: Essential Advice"
-  provider: "Y Combinator"
-  type: "article"
-  url: "https://www.ycombinator.com/library/4D-yc-s-essential-startup-advice"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A compact list of YC's core rules for founders, a good frame for what to say in any pitch."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
+  quality: 4
 
 - id: "article-sequoia-business-plan"
   title: "Writing a Business Plan"
@@ -2833,24 +2289,6 @@
   roadmap: "software-architect"
   quality: 4
 
-- id: "article-pg-present-to-investors"
-  title: "How to Present to Investors"
-  short: "PG: Present to Investors"
-  provider: "Paul Graham"
-  type: "article"
-  url: "https://paulgraham.com/investors.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Practical presentation advice for demo-day style pitches: explain what you do first, be concrete, skip the fluff."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
-
 - id: "article-pg-do-things-dont-scale"
   title: "Do Things that Don't Scale"
   short: "PG: Don't Scale"
@@ -2868,132 +2306,6 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
-
-- id: "article-wtd-beginners-guide"
-  title: "How to write software documentation"
-  short: "WTD: Beginner's Guide"
-  provider: "Write the Docs"
-  type: "article"
-  url: "https://www.writethedocs.org/guide/writing/beginners-guide-to-docs/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Why your project needs docs and what a first README and docs set should contain."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-pg-how-to-write-usefully"
-  title: "How to Write Usefully"
-  short: "PG: Write Usefully"
-  provider: "Paul Graham"
-  type: "article"
-  url: "https://paulgraham.com/useful.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Defines useful writing as saying important things correctly, clearly and boldly, a standard for every blog post."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-pg-writing-and-speaking"
-  title: "Writing and Speaking"
-  short: "PG: Writing & Speaking"
-  provider: "Paul Graham"
-  type: "article"
-  url: "https://paulgraham.com/speak.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Contrasts writing and speaking ability and explains which matters for ideas versus persuasion."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-pg-write-simply"
-  title: "Write Simply"
-  short: "PG: Write Simply"
-  provider: "Paul Graham"
-  type: "article"
-  url: "https://paulgraham.com/simply.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A short case for plain words and short sentences, especially when your readers are non-native English speakers."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-pg-putting-ideas-into-words"
-  title: "Putting Ideas into Words"
-  short: "PG: Ideas into Words"
-  provider: "Paul Graham"
-  type: "article"
-  url: "https://paulgraham.com/words.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Argues that writing is how you discover whether you understand something, the core reason to keep a daily blog."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-pg-writing-briefly"
-  title: "Writing, Briefly"
-  short: "PG: Writing, Briefly"
-  provider: "Paul Graham"
-  type: "article"
-  url: "https://paulgraham.com/writing44.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A compressed list of writing rules: cut, rewrite, read aloud, and write for one reader."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-pg-writes-and-write-nots"
-  title: "Writes and Write-Nots"
-  short: "PG: Writes & Write-Nots"
-  provider: "Paul Graham"
-  type: "article"
-  url: "https://paulgraham.com/writes.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Why, with AI drafting text, the ability to write well and therefore think well becomes a sharper divide."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
 
 - id: "article-orwell-politics-english"
   title: "Politics and the English Language"
@@ -3031,132 +2343,6 @@
   roadmap: "software-architect"
   quality: 4
 
-- id: "article-willison-what-to-blog-about"
-  title: "What to blog about"
-  short: "Willison: What to Blog"
-  provider: "Simon Willison"
-  type: "article"
-  url: "https://simonwillison.net/2022/Nov/6/what-to-blog-about/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Two easy post formats, TILs and project write-ups, that keep a technical blog going without pressure."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-jvns-blog-struggled"
-  title: "Blog about what you've struggled with"
-  short: "jvns: Blog Struggles"
-  provider: "Julia Evans"
-  type: "article"
-  url: "https://jvns.ca/blog/2021/05/24/blog-about-what-you-ve-struggled-with/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Your hardest-won lessons make the most useful posts, because others are stuck in the same place."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-jvns-blogging-myths"
-  title: "Some blogging myths"
-  short: "jvns: Blogging Myths"
-  provider: "Julia Evans"
-  type: "article"
-  url: "https://jvns.ca/blog/2023/06/05/some-blogging-myths/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Debunks beliefs like 'you need to be original' or 'you need to be an expert' that stop people from posting."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-jvns-blogging-principles"
-  title: "Blogging principles I use"
-  short: "jvns: Blog Principles"
-  provider: "Julia Evans"
-  type: "article"
-  url: "https://jvns.ca/blog/2017/03/20/blogging-principles/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A short set of principles for honest, specific, enthusiastic technical posts."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-jvns-measuring-blog-success"
-  title: "Measuring a blog's success: focus on conversations, not page views"
-  short: "jvns: Blog Success"
-  provider: "Julia Evans"
-  type: "article"
-  url: "https://jvns.ca/blog/2018/02/20/measuring-blog-success/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Reframes blog success around the conversations and connections posts create, not traffic numbers."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
-
-- id: "article-eugeneyan-writing-online"
-  title: "What I Learned from Writing Online - For Fellow Non-Writers"
-  short: "Eugene Yan: Writing Online"
-  provider: "Eugene Yan"
-  type: "article"
-  url: "https://eugeneyan.com/writing/what-i-learned-from-writing-online/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "An ML engineer's lessons from years of writing: consistency, structure and writing for your past self."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-karlsson-blog-search-query"
-  title: "A blog post is a very long and complex search query to find fascinating people and make them route interesting stuff to your inbox"
-  short: "Karlsson: Blog as Query"
-  provider: "Henrik Karlsson (Escaping Flatland)"
-  type: "article"
-  url: "https://www.henrikkarlsson.xyz/p/search-query"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Explains how publishing your thinking attracts the collaborators and mentors you could not find otherwise."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
 - id: "tih-swe-interview-resume"
   title: "Practical guide to writing FAANG-ready software engineer resumes"
   short: "TIH: SWE Resume"
@@ -3192,42 +2378,6 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
-
-- id: "tih-mock-interviews"
-  title: "Mock coding interviews"
-  short: "TIH: Mock Interviews"
-  provider: "Yangshun Tay (Tech Interview Handbook)"
-  type: "article"
-  url: "https://www.techinterviewhandbook.org/mock-interviews/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Compares free and paid mock-interview options and explains why live practice beats silent grinding."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
-
-- id: "bbg-scale-zero-to-millions"
-  title: "Scale From Zero To Millions Of Users"
-  short: "BBG: Zero to Millions"
-  provider: "Alex Xu (ByteByteGo)"
-  type: "article"
-  url: "https://bytebytego.com/courses/system-design-interview/scale-from-zero-to-millions-of-users"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 2
-  summary: "The free first chapter of the best-known system design interview book, growing one server into a scaled architecture step by step."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
 
 - id: "repo-reverse-interview"
   title: "Reverse interview: questions to ask the company"
@@ -3265,24 +2415,6 @@
   roadmap: "software-architect"
   after: [tih-behavioral-interview]
   quality: 2
-
-- id: "article-dartmouth-star-method"
-  title: "Using the STAR Method for Your Next Behavioral Interview"
-  short: "STAR Method Guide"
-  provider: "Dartmouth Guarini School (adapted from MIT CAPD)"
-  type: "article"
-  url: "https://guarinigrad.dartmouth.edu/resources/using-the-star-method-for-your-next-behavioral-interview/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A short university careers guide to structuring answers as Situation, Task, Action, Result."
-  fromYear: 1
-  priority: 2
-  roadmap: "software-architect"
-  quality: 3
 
 - id: "fowler-microservice-testing"
   title: "Testing Strategies in a Microservice Architecture"
@@ -3341,24 +2473,6 @@
   after: [video-winston-how-to-speak]
   quality: 4
 
-- id: "article-tao-talks-not-papers"
-  title: "Talks are not the same as papers"
-  short: "Tao: Talks vs Papers"
-  provider: "Terence Tao"
-  type: "article"
-  url: "https://terrytao.wordpress.com/career-advice/talks-are-not-the-same-as-papers/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Explains why a talk should convey intuition and motivation rather than reproduce every detail of the written work."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
 - id: "article-a16z-16-startup-metrics"
   title: "16 Startup Metrics"
   short: "a16z: 16 Metrics"
@@ -3391,63 +2505,9 @@
   estHours: 1
   summary: "The definitive essay on how seed fundraising actually unfolds and how founders should run the process."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
-  quality: 3
-
-- id: "article-pg-convince-investors"
-  title: "How to Convince Investors"
-  short: "PG: Convince Investors"
-  provider: "Paul Graham"
-  type: "article"
-  url: "https://paulgraham.com/convince.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Argues that you convince investors by being a formidable founder with a plausible path to a huge market."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-pg-fundraising-survival"
-  title: "A Fundraising Survival Guide"
-  short: "PG: Fundraising Survival"
-  provider: "Paul Graham"
-  type: "article"
-  url: "https://paulgraham.com/fundraising.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Tactics for staying sane and solvent during a fundraise, including how to handle rejection and drawn-out deals."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-pg-investor-herd"
-  title: "Investor Herd Dynamics"
-  short: "PG: Investor Herd"
-  provider: "Paul Graham"
-  type: "article"
-  url: "https://paulgraham.com/herd.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Explains why investors follow each other and how that shapes the sequencing of your meetings."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
+  quality: 4
 
 - id: "article-wtd-docs-as-code"
   title: "Docs as Code"
@@ -3462,61 +2522,6 @@
   cost: "free"
   estHours: 1
   summary: "Treat documentation like source: version control, review, CI and plain-text markup alongside the code."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [article-wtd-beginners-guide]
-  quality: 3
-
-- id: "article-pg-best-essay"
-  title: "The Best Essay"
-  short: "PG: The Best Essay"
-  provider: "Paul Graham"
-  type: "article"
-  url: "https://paulgraham.com/best.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Walks through how a good essay grows from a question by following the most surprising thread."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-pg-persuade-xor-discover"
-  title: "Persuade xor Discover"
-  short: "PG: Persuade xor Discover"
-  provider: "Paul Graham"
-  type: "article"
-  url: "https://paulgraham.com/discover.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Separates writing to persuade from writing to find truth, a useful distinction between pitches and blog posts."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-jvns-tactics-writing-public"
-  title: "Some tactics for writing in public"
-  short: "jvns: Writing in Public"
-  provider: "Julia Evans"
-  type: "article"
-  url: "https://jvns.ca/blog/2023/08/07/tactics-for-writing-in-public/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "How to write posts that attract fewer bad-faith comments by anticipating objections and scoping claims."
   fromYear: 2
   priority: 3
   roadmap: "software-architect"
@@ -3539,117 +2544,6 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
-
-- id: "article-jvns-good-examples"
-  title: "Write good examples by starting with real code"
-  short: "jvns: Good Examples"
-  provider: "Julia Evans"
-  type: "article"
-  url: "https://jvns.ca/blog/2021/07/08/writing-great-examples/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "How to pick realistic, surprising examples that make technical writing click."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "tih-understanding-compensation"
-  title: "Understanding compensation and offer negotiation"
-  short: "TIH: Compensation"
-  provider: "Yangshun Tay (Tech Interview Handbook)"
-  type: "article"
-  url: "https://www.techinterviewhandbook.org/understanding-compensation/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Decodes base, bonus, RSUs and vesting so you can compare intern and new-grad offers properly."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
-
-- id: "tih-negotiation-rules"
-  title: "Negotiation rules"
-  short: "TIH: Negotiation Rules"
-  provider: "Yangshun Tay (Tech Interview Handbook)"
-  type: "article"
-  url: "https://www.techinterviewhandbook.org/negotiation-rules/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A compact checklist of offer-negotiation rules to keep open during recruiter calls."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [tih-understanding-compensation]
-  quality: 2
-
-- id: "tih-system-design-guide"
-  title: "System design interview preparation guide"
-  short: "TIH: System Design"
-  provider: "Yangshun Tay (Tech Interview Handbook)"
-  type: "article"
-  url: "https://www.techinterviewhandbook.org/system-design/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "A short map of what the system design round is, how it is graded and which resources to study in what order."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
-
-- id: "hi-numbers-to-know"
-  title: "Numbers to Know (System Design Core Concepts)"
-  short: "HI: Numbers to Know"
-  provider: "Hello Interview"
-  type: "article"
-  url: "https://www.hellointerview.com/learn/system-design/core-concepts/numbers-to-know"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Updated latency, throughput and capacity figures for modern hardware so your back-of-envelope estimates are credible."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  doFirst: "System Design in a Hurry"
-  quality: 3
-
-- id: "hi-pattern-contention"
-  title: "Dealing with Contention (System Design Pattern)"
-  short: "HI: Contention Pattern"
-  provider: "Hello Interview"
-  type: "article"
-  url: "https://www.hellointerview.com/learn/system-design/patterns/dealing-with-contention"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Collects the locking, optimistic concurrency and queueing options interviewers probe when many users hit one record."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [hi-design-ticketmaster]
-  quality: 3
 
 - id: "hi-low-level-design-intro"
   title: "Low-Level Design in a Hurry: Introduction"
@@ -3687,25 +2581,6 @@
   roadmap: "software-architect"
   quality: 4
 
-- id: "article-haseeb-dont-bomb-negotiation"
-  title: "How Not to Bomb Your Offer Negotiation"
-  short: "Haseeb: Don't Bomb It"
-  provider: "Haseeb Qureshi"
-  type: "article"
-  url: "https://www.freecodecamp.org/news/how-not-to-bomb-your-offer-negotiation-c46bb9bc7dea/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Part two of the negotiation series, with scripts for the recruiter conversations where offers are actually won or lost."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [article-haseeb-ten-rules-negotiation]
-  quality: 3
-
 - id: "article-patio11-salary-negotiation"
   title: "Salary Negotiation: Make More Money, Be More Valued"
   short: "patio11: Salary Neg."
@@ -3723,119 +2598,6 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
-
-- id: "article-orosz-prep-sd-coding"
-  title: "Preparing for the Systems Design and Coding Interview"
-  short: "Orosz: Interview Prep"
-  provider: "Gergely Orosz (The Pragmatic Engineer)"
-  type: "article"
-  url: "https://blog.pragmaticengineer.com/preparing-for-the-systems-design-and-coding-interviews/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A hiring manager's annotated list of what to study and which resources are worth your time for both round types."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  quality: 3
-
-- id: "article-interviewingio-sd-guide"
-  title: "A Senior Engineer's Guide to the System Design Interview"
-  short: "interviewing.io: SD Guide"
-  provider: "interviewing.io"
-  type: "article"
-  url: "https://interviewing.io/guides/system-design-interview"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "A long free guide that teaches a step-by-step design method plus the fundamentals and trade-offs behind it."
-  fromYear: 2
-  priority: 2
-  roadmap: "software-architect"
-  after: [system-design-primer]
-  quality: 3
-
-- id: "podcast-think-fast-talk-smart"
-  title: "Think Fast, Talk Smart: The Podcast"
-  short: "Think Fast Talk Smart"
-  provider: "Matt Abrahams (Stanford GSB)"
-  type: "article"
-  url: "https://www.gsb.stanford.edu/business-podcasts/think-fast-talk-smart"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 10
-  summary: "Short episodes on handling nerves, impromptu speaking, Q&A and persuasive structure, ideal for commute listening."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  blog: true
-  quality: 2
-
-- id: "blog-presentation-zen"
-  title: "Presentation Zen"
-  short: "Presentation Zen blog"
-  provider: "Garr Reynolds"
-  type: "article"
-  url: "https://www.presentationzen.com/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 10
-  summary: "The home of the simplicity-and-story approach to slides that changed how many engineers design presentations."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  blog: true
-  quality: 2
-
-- id: "blog-duarte"
-  title: "Presentation and Communication Blog"
-  short: "Duarte blog"
-  provider: "Duarte, Inc. (Nancy Duarte)"
-  type: "article"
-  url: "https://www.duarte.com/blog/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "free"
-  estHours: 10
-  summary: "Articles on story structure, data storytelling and slide design from the firm behind many famous keynotes."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  blog: true
-
-# ---- Systems: low-level programming, OS kernels, algorithms (14)
-  quality: 2
-
-- id: "cppref-condition-variable"
-  title: "std::condition_variable (cppreference)"
-  short: "cppref: condition_var"
-  provider: "cppreference.com"
-  type: "article"
-  url: "https://en.cppreference.com/w/cpp/thread/condition_variable"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Shows the correct wait/notify pattern with a predicate, the basis of producer-consumer interview questions."
-  fromYear: 2
-  priority: 3
-  quality: 3
 
 - id: "article-sutter-lock-free-cppcon2014"
   title: "CppCon 2014: Lock-Free Programming (or, Juggling Razor Blades), Part I"
@@ -3869,25 +2631,8 @@
   estHours: 200
   summary: "A long, self-paced CS curriculum (data structures, algorithms, systems basics) originally built to land a big-tech SWE job."
   fromYear: 1
-  priority: 3
-  quality: 3
-
-- id: "article-bctci-nine-free-chapters"
-  title: "Beyond Cracking the Coding Interview: nine free chapters"
-  short: "BCtCI Free Chapters"
-  provider: "Aline Lerner, Gayle Laakmann McDowell, Mike Mroczka, Nil Mamano (interviewing.io)"
-  type: "book"
-  url: "https://interviewing.io/blog/nine-free-chapters-of-beyond-cracking-the-coding-interview"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 8
-  summary: "The free part of CtCI's 2025 sequel: how hiring really works, resumes, getting in without referrals, plus sliding windows and binary search."
-  fromYear: 1
-  priority: 3
-  quality: 3
+  priority: 2
+  quality: 4
 
 - id: "book-cracking-the-coding-interview"
   title: "Cracking the Coding Interview (6th Edition)"
@@ -3903,9 +2648,9 @@
   estHours: 30
   summary: "The classic coding-interview book: process, data structure review and a large solved question bank."
   fromYear: 1
-  priority: 3
+  priority: 2
   note: "Paid"
-  quality: 3
+  quality: 4
 
 - id: "book-little-book-of-semaphores"
   title: "The Little Book of Semaphores"
@@ -3939,133 +2684,10 @@
   estHours: 40
   summary: "Harder, C++-centric problems with idiomatic solutions; the site also offers a free PDF sampler and online judge."
   fromYear: 2
-  priority: 3
+  priority: 2
   note: "Paid"
   after: [book-cracking-the-coding-interview]
-  quality: 3
-
-- id: "repo-interactive-coding-challenges"
-  title: "Interactive Coding Challenges"
-  short: "Interactive Challenges"
-  provider: "Donne Martin"
-  type: "practice"
-  url: "https://github.com/donnemartin/interactive-coding-challenges"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 40
-  summary: "Notebook-based problems with unit tests and solutions, so you practise writing tested code rather than just reading answers."
-  fromYear: 1
-  priority: 3
-  quality: 2
-
-- id: "tih-grind-75"
-  title: "Grind 75: a better LeetCode 75 study plan"
-  short: "Grind 75"
-  provider: "Yangshun Tay (Tech Interview Handbook)"
-  type: "practice"
-  url: "https://www.techinterviewhandbook.org/grind75/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intermediate"
-  cost: "free"
-  estHours: 60
-  summary: "A configurable weekly problem schedule that adapts the Blind 75 list to your available hours."
-  fromYear: 2
-  priority: 3
-  doFirst: "NeetCode 150"
-  quality: 3
-
-- id: "tih-coding-interview-cheatsheet"
-  title: "Coding interview cheatsheet: best practices before, during and after"
-  short: "TIH: Coding Cheatsheet"
-  provider: "Yangshun Tay (Tech Interview Handbook)"
-  type: "article"
-  url: "https://www.techinterviewhandbook.org/coding-interview-cheatsheet/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Lists the behaviours interviewers reward while you code: clarifying, narrating, testing and complexity talk."
-  fromYear: 1
-  priority: 3
-  quality: 2
-
-- id: "tih-coding-study-plan"
-  title: "Coding interview study plan"
-  short: "TIH: Study Plan"
-  provider: "Yangshun Tay (Tech Interview Handbook)"
-  type: "article"
-  url: "https://www.techinterviewhandbook.org/coding-interview-study-plan/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Turns the prep window you have (weeks, not months) into a prioritised topic schedule."
-  fromYear: 1
-  priority: 3
-  quality: 2
-
-- id: "tih-algorithms-cheatsheets"
-  title: "Algorithms study cheatsheets"
-  short: "TIH: Algo Cheatsheets"
-  provider: "Yangshun Tay (Tech Interview Handbook)"
-  type: "article"
-  url: "https://www.techinterviewhandbook.org/algorithms/study-cheatsheet/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 6
-  summary: "Per-topic corner cases, techniques and must-do problems for arrays, graphs, DP and more for last-week revision."
-  fromYear: 1
-  priority: 3
-  quality: 3
-
-- id: "tih-coding-techniques"
-  title: "Techniques to solve coding interview questions"
-  short: "TIH: Solving Techniques"
-  provider: "Yangshun Tay (Tech Interview Handbook)"
-  type: "article"
-  url: "https://www.techinterviewhandbook.org/coding-interview-techniques/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Gives a repeatable approach for when you are stuck: brute force first, then precompute, sort, hash or two-pointer."
-  fromYear: 1
-  priority: 3
-  after: [tih-coding-interview-cheatsheet]
-  quality: 3
-
-- id: "article-yegge-get-that-job-at-google"
-  title: "Get that job at Google"
-  short: "Yegge: Google Job"
-  provider: "Steve Yegge"
-  type: "article"
-  url: "https://steve-yegge.blogspot.com/2008/03/get-that-job-at-google.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "An old but still sharp list of the CS fundamentals big-tech interviewers expect: algorithms, graphs, OS, maths, coding by hand."
-  fromYear: 1
-  priority: 3
-
-# ---- DevOps and MLOps (65)
-  quality: 2
+  quality: 4
 
 - id: "prometheus-querying-basics"
   title: "Querying Prometheus (PromQL basics)"
@@ -4084,6 +2706,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Prometheus Getting Started"
 
 - id: "k6-docs"
   title: "Grafana k6 documentation"
@@ -4103,100 +2726,6 @@
   roadmap: "software-architect"
   quality: 4
 
-- id: "docs-github-contributing-to-open-source"
-  title: "Contributing to open source (GitHub Docs)"
-  short: "GitHub: Contributing to OSS"
-  provider: "GitHub"
-  type: "article"
-  url: "https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-open-source"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "GitHub's own walkthrough of finding a project, reading its guidelines and opening your first issue or PR."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  doFirst: "How to Contribute to OSS"
-  quality: 3
-
-- id: "docs-github-fork-a-repo"
-  title: "Fork a repository (GitHub Docs)"
-  short: "GitHub: Fork a repo"
-  provider: "GitHub"
-  type: "article"
-  url: "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "The exact steps to fork, clone and add an upstream remote, the setup every outside PR to PyTorch or vLLM starts from."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  quality: 2
-
-- id: "docs-github-syncing-a-fork"
-  title: "Syncing a fork (GitHub Docs)"
-  short: "GitHub: Syncing a fork"
-  provider: "GitHub"
-  type: "article"
-  url: "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Shows how to keep your fork current with upstream so fast-moving repos don't leave your branch in merge-conflict hell."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [docs-github-fork-a-repo]
-  quality: 2
-
-- id: "docs-github-pr-from-fork"
-  title: "Creating a pull request from a fork (GitHub Docs)"
-  short: "GitHub: PR from a fork"
-  provider: "GitHub"
-  type: "article"
-  url: "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Covers opening a cross-repo PR and letting maintainers push to your branch, which speeds up review on big projects."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [docs-github-fork-a-repo]
-  quality: 2
-
-- id: "docs-github-pull-request-reviews"
-  title: "Pull request reviews (GitHub Docs)"
-  short: "GitHub: PR reviews"
-  provider: "GitHub"
-  type: "article"
-  url: "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/about-pull-request-reviews"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Explains comment, approve and request-changes states plus required reviews, so you can read what reviewers expect from you."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  after: [docs-github-pr-from-fork]
-  quality: 2
-
 - id: "docs-github-commit-signature-verification"
   title: "About commit signature verification (GitHub Docs)"
   short: "GitHub: Signed commits"
@@ -4213,7 +2742,6 @@
   fromYear: 1
   priority: 3
   roadmap: "software-architect"
-  after: [docs-github-fork-a-repo]
   quality: 3
 
 - id: "docs-developer-certificate-of-origin"
@@ -4251,7 +2779,7 @@
   priority: 2
   roadmap: "software-architect"
   doFirst: "How to Contribute to OSS"
-  quality: 3
+  quality: 4
 
 - id: "docs-gsoc-guide-what-is-gsoc"
   title: "What is Google Summer of Code? (GSoC Contributor Guide)"
@@ -4267,10 +2795,10 @@
   estHours: 2
   summary: "Google's guide for applicants on choosing an org, talking to mentors early and what a GSoC summer actually looks like."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   after: [docs-gsoc-home]
-  quality: 3
+  quality: 4
 
 - id: "docs-gsoc-guide-writing-a-proposal"
   title: "Writing a proposal (GSoC Contributor Guide)"
@@ -4308,7 +2836,7 @@
   priority: 2
   roadmap: "software-architect"
   doFirst: "How to Contribute to OSS"
-  quality: 3
+  quality: 4
 
 - id: "docs-lfx-mentorship"
   title: "LFX Mentorship (Linux Foundation docs)"
@@ -4327,7 +2855,7 @@
   priority: 2
   roadmap: "software-architect"
   doFirst: "How to Contribute to OSS"
-  quality: 3
+  quality: 4
 
 - id: "docs-transformers-contributing"
   title: "Contribute to Transformers (CONTRIBUTING.md)"
@@ -4345,7 +2873,6 @@
   fromYear: 1
   priority: 2
   roadmap: "software-architect"
-  after: [docs-github-fork-a-repo]
   quality: 4
 
 - id: "prometheus-instrumentation-practices"
@@ -4384,6 +2911,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Prometheus Metric Types"
 
 - id: "prometheus-alerting-practices"
   title: "Alerting (Prometheus best practices)"
@@ -4421,6 +2949,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "OTel Concepts: Traces"
 
 - id: "docs-pytorch-contributing-md"
   title: "Contributing to PyTorch (CONTRIBUTING.md)"
@@ -4438,7 +2967,6 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
-  after: [docs-github-fork-a-repo]
   quality: 4
 
 - id: "docs-pytorch-wiki-ultimate-guide"
@@ -4460,63 +2988,6 @@
   after: [docs-pytorch-contributing-md]
   quality: 4
 
-- id: "docs-pytorch-wiki-contribution-process"
-  title: "The PyTorch Contribution Process (PyTorch wiki)"
-  short: "PyTorch Contrib Process"
-  provider: "PyTorch"
-  type: "article"
-  url: "https://github.com/pytorch/pytorch/wiki/The-PyTorch-Contribution-Process"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Up-to-date description of how bugs, features and PRs move through triage and review in PyTorch."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [docs-pytorch-contributing-md]
-  quality: 3
-
-- id: "docs-pytorch-wiki-code-review-values"
-  title: "Code review values (PyTorch wiki)"
-  short: "PyTorch Code Review Values"
-  provider: "PyTorch"
-  type: "article"
-  url: "https://github.com/pytorch/pytorch/wiki/Code-review-values"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Lists what PyTorch reviewers check for, so you can pre-empt their comments before you hit submit."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [docs-pytorch-contributing-md]
-  quality: 3
-
-- id: "docs-pytorch-wiki-pr-review-etiquette"
-  title: "Pull request review etiquette (PyTorch wiki)"
-  short: "PyTorch PR Etiquette"
-  provider: "PyTorch"
-  type: "article"
-  url: "https://github.com/pytorch/pytorch/wiki/Pull-request-review-etiquette"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "Short norms on request-changes, re-review SLAs and pinging, which tell an outside author how to keep a PR moving."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [docs-pytorch-contributing-md]
-  quality: 2
-
 - id: "docs-vllm-contributing"
   title: "Contributing to vLLM"
   short: "vLLM Contributing Guide"
@@ -4533,7 +3004,6 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
-  after: [docs-github-fork-a-repo]
   quality: 4
 
 - id: "docs-vllm-incremental-build"
@@ -4571,27 +3041,7 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
-  after: [docs-github-fork-a-repo]
-  quality: 3
-
-- id: "docs-sglang-dev-docker"
-  title: "SGLang Development Guide Using Docker"
-  short: "SGLang Dev with Docker"
-  provider: "SGLang project"
-  type: "article"
-  url: "https://github.com/sgl-project/sglang/blob/main/docs/docs/developer_guide/development_guide_using_docker.mdx"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "The reproducible container plus remote-VSCode setup SGLang maintainers use, handy when you rent a GPU box to test a PR."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  after: [docs-sglang-contribution-guide]
-  quality: 2
+  quality: 4
 
 - id: "docs-llamacpp-contributing"
   title: "llama.cpp CONTRIBUTING.md"
@@ -4609,8 +3059,7 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
-  after: [docs-github-fork-a-repo]
-  quality: 3
+  quality: 4
 
 - id: "docs-triton-contributing"
   title: "Triton CONTRIBUTING.md (governance and contribution rules)"
@@ -4628,7 +3077,6 @@
   fromYear: 2
   priority: 2
   roadmap: "software-architect"
-  after: [docs-github-fork-a-repo]
   quality: 3
 
 - id: "docs-tensorrt-llm-contributing"
@@ -4648,7 +3096,7 @@
   priority: 2
   roadmap: "software-architect"
   after: [docs-developer-certificate-of-origin]
-  quality: 3
+  quality: 4
 
 - id: "docs-cutlass-python-contribute"
   title: "Contributing (CUTLASS Python docs)"
@@ -4666,7 +3114,6 @@
   fromYear: 2
   priority: 3
   roadmap: "software-architect"
-  after: [docs-github-fork-a-repo]
   quality: 2
 
 - id: "w3c-trace-context"
@@ -4686,25 +3133,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
-
-- id: "cert-lf-kcna"
-  title: "Kubernetes and Cloud Native Associate (KCNA)"
-  short: "KCNA"
-  provider: "Linux Foundation / CNCF"
-  type: "course"
-  url: "https://training.linuxfoundation.org/certification/kubernetes-cloud-native-associate/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "audit-free"
-  estHours: 30
-  summary: "Entry-level CNCF credential on Kubernetes and cloud-native basics; you can prepare with the free LFS158 course, and the exam is listed at US$250."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  doFirst: "Intro to Kubernetes (LFS158)"
-  quality: 1
+  doFirst: "OTel Concepts: Traces"
 
 - id: "cert-lf-lfcs"
   title: "Linux Foundation Certified System Administrator (LFCS)"
@@ -4723,7 +3152,7 @@
   priority: 3
   roadmap: "software-architect"
   doFirst: "Intro to Linux (LFS101)"
-  quality: 2
+  quality: 3
 
 - id: "cert-coursera-ml-in-production"
   title: "Machine Learning in Production"
@@ -4739,10 +3168,10 @@
   estHours: 10
   summary: "Andrew Ng's MLOps course; auditing is free, while the paid certificate shows you can scope, deploy and monitor ML systems."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "ai-engineer"
   doFirst: "ML Specialization"
-  quality: 3
+  quality: 4
 
 - id: "cert-lf-cka"
   title: "Certified Kubernetes Administrator (CKA)"
@@ -4758,11 +3187,10 @@
   estHours: 60
   summary: "The best-known hands-on Kubernetes exam, proving you can install, run and troubleshoot clusters from the command line; listed at US$445."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
-  after: [cert-lf-kcna]
-  quality: 3
+  quality: 4
 
 - id: "cert-lf-ckad"
   title: "Certified Kubernetes Application Developer (CKAD)"
@@ -4781,8 +3209,7 @@
   priority: 3
   roadmap: "ai-engineer"
   note: "Paid"
-  after: [cert-lf-kcna]
-  quality: 2
+  quality: 3
 
 - id: "cert-lf-kcsa"
   title: "Kubernetes and Cloud Native Security Associate (KCSA)"
@@ -4801,7 +3228,6 @@
   priority: 3
   roadmap: "software-architect"
   note: "Paid"
-  after: [cert-lf-kcna]
   quality: 1
 
 - id: "cert-lf-pca"
@@ -4821,7 +3247,6 @@
   priority: 3
   roadmap: "software-architect"
   note: "Paid"
-  after: [cert-lf-kcna]
   quality: 2
 
 - id: "cert-aws-ml-engineer-associate"
@@ -4900,7 +3325,7 @@
   priority: 3
   roadmap: "software-architect"
   after: [cert-lf-cka]
-  quality: 2
+  quality: 3
 
 - id: "cert-lf-cks"
   title: "Certified Kubernetes Security Specialist (CKS)"
@@ -4920,7 +3345,7 @@
   roadmap: "software-architect"
   note: "Paid"
   after: [cert-lf-cka]
-  quality: 2
+  quality: 3
 
 - id: "cert-gcp-pro-ml-engineer"
   title: "Google Cloud Professional Machine Learning Engineer"
@@ -4940,7 +3365,7 @@
   roadmap: "ai-engineer"
   note: "Paid"
   after: [cert-coursera-ml-in-production]
-  quality: 2
+  quality: 3
 
 - id: "practice-goodfirstissue-dev"
   title: "Good First Issue"
@@ -4955,44 +3380,6 @@
   cost: "free"
   estHours: 5
   summary: "Curated feed of beginner-labelled issues from popular repos, filterable by language, to find a realistic first PR."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  doFirst: "How to Contribute to OSS"
-  quality: 2
-
-- id: "practice-up-for-grabs"
-  title: "Up For Grabs"
-  short: "Up For Grabs"
-  provider: "Up For Grabs community"
-  type: "practice"
-  url: "https://up-for-grabs.net/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 5
-  summary: "Directory of projects that tag tasks specifically for newcomers, a second source when goodfirstissue.dev comes up dry."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  doFirst: "How to Contribute to OSS"
-  quality: 2
-
-- id: "docs-opensource-guide-code-of-conduct"
-  title: "Your Code of Conduct (Open Source Guides)"
-  short: "OSS Guide: Code of Conduct"
-  provider: "GitHub / Open Source Guides"
-  type: "article"
-  url: "https://opensource.guide/code-of-conduct/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [devops]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Explains why projects adopt codes of conduct and how enforcement works, so you know the norms you're joining."
   fromYear: 1
   priority: 3
   roadmap: "software-architect"
@@ -5038,23 +3425,6 @@
   doFirst: "learncpp"
   quality: 4
 
-- id: "cppref-virtual"
-  title: "virtual function specifier (cppreference)"
-  short: "cppref: virtual"
-  provider: "cppreference.com"
-  type: "article"
-  url: "https://en.cppreference.com/w/cpp/language/virtual"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Rules of dynamic dispatch, override, final and virtual destructors, a staple of C++ interview questions."
-  fromYear: 1
-  priority: 3
-  quality: 3
-
 - id: "docs-chinesetest-hsk"
   title: "HSK (Chinese Tests Service Website)"
   short: "HSK Official Site"
@@ -5070,7 +3440,7 @@
   summary: "Official source on the HSK levels, including the new three-stage nine-level framework, to set a concrete target."
   fromYear: 1
   priority: 2
-  quality: 3
+  quality: 4
 
 - id: "docs-allset-chinese-pronunciation-wiki"
   title: "Chinese Pronunciation Wiki"
@@ -5087,7 +3457,6 @@
   summary: "Free, leveled reference on pinyin sounds, the four tones, tone change rules and all 20 tone pairs, with audio."
   fromYear: 1
   priority: 2
-  after: [tutorial-yoyo-pinyin-chart]
   quality: 4
 
 - id: "docs-allset-chinese-grammar-wiki"
@@ -5107,24 +3476,6 @@
   priority: 2
   after: [course-coursera-pku-chinese-for-beginners]
   quality: 4
-
-- id: "docs-allset-a1-grammar-points"
-  title: "A1 grammar points (Chinese Grammar Wiki)"
-  short: "A1 Chinese Grammar Points"
-  provider: "AllSet Learning"
-  type: "article"
-  url: "https://resources.allsetlearning.com/chinese/grammar/A1_grammar_points"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 8
-  summary: "Checklist of the absolute-beginner grammar patterns to work through alongside a course."
-  fromYear: 1
-  priority: 3
-  after: [docs-allset-chinese-grammar-wiki]
-  quality: 3
 
 - id: "docs-mdbg-cc-cedict"
   title: "CC-CEDICT (MDBG Chinese Dictionary)"
@@ -5265,23 +3616,6 @@
   after: [article-preshing-acquire-release]
   quality: 5
 
-- id: "docs-isocpp-faq-cpp11-language"
-  title: "C++11 Language Extensions: General Features (isocpp FAQ)"
-  short: "isocpp FAQ: C++11"
-  provider: "Standard C++ Foundation (isocpp.org)"
-  type: "article"
-  url: "https://isocpp.org/wiki/faq/cpp11-language"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intermediate"
-  cost: "free"
-  estHours: 3
-  summary: "FAQ-style answers on auto, lambdas, rvalue references, move semantics and other C++11 features written by the committee community."
-  fromYear: 2
-  priority: 3
-  quality: 3
-
 - id: "docs-tensorrt-llm-coding-guidelines"
   title: "TensorRT-LLM Coding Guidelines"
   short: "TensorRT-LLM Coding Guide"
@@ -5298,24 +3632,6 @@
   fromYear: 2
   priority: 3
   after: [docs-tensorrt-llm-contributing]
-  quality: 3
-
-- id: "article-josuttis-b2b-templates"
-  title: "CppCon 2022: Back to Basics: Templates in C++"
-  short: "B2B: Templates"
-  provider: "Nicolai Josuttis (CppCon)"
-  type: "lectures"
-  url: "https://isocpp.org/blog/2023/06/cppcon-2022-back-to-basics-templates-in-cpp-nicolai-josuttis"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "A one-hour introduction to function and class templates from a co-author of the standard C++ templates book."
-  fromYear: 1
-  priority: 3
-  after: [cppref-templates]
   quality: 3
 
 - id: "article-sutter-atomic-weapons"
@@ -5371,59 +3687,6 @@
   after: [course-coursera-pku-chinese-for-beginners]
   quality: 3
 
-- id: "course-mit-ocw-21g101-chinese-i"
-  title: "Chinese I (Regular): A First-Semester Introduction to Mandarin"
-  short: "MIT OCW Chinese I"
-  provider: "MIT OpenCourseWare"
-  type: "course"
-  url: "https://ocw.mit.edu/courses/21g-101-chinese-i-regular-fall-2014/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 40
-  summary: "MIT's first-semester Mandarin materials, a structured university syllabus you can follow on your own."
-  fromYear: 1
-  priority: 3
-  quality: 3
-
-- id: "course-mit-ocw-21g102-chinese-ii"
-  title: "Chinese II (Regular)"
-  short: "MIT OCW Chinese II"
-  provider: "MIT OpenCourseWare"
-  type: "course"
-  url: "https://ocw.mit.edu/courses/21g-102-chinese-ii-regular-spring-2015/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 40
-  summary: "The second-semester MIT course, continuing grammar and conversation once Chinese I is done."
-  fromYear: 2
-  priority: 3
-  after: [course-mit-ocw-21g101-chinese-i]
-  quality: 3
-
-- id: "tutorial-yoyo-pinyin-chart"
-  title: "Yoyo Chinese Interactive Pinyin Chart"
-  short: "Yoyo Pinyin Chart"
-  provider: "Yoyo Chinese"
-  type: "article"
-  url: "https://www.yoyochinese.com/chinese-learning-tools/Mandarin-Chinese-pronunciation-lesson/pinyin-chart-table"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 3
-  summary: "Click-to-hear chart of every pinyin syllable with video for the tricky sounds, a good first week of pronunciation work."
-  fromYear: 1
-  priority: 3
-  note: "Free tier"
-  quality: 1
-
 - id: "practice-sinosplice-tone-pair-drills"
   title: "Mandarin Chinese Tone Pair Drills"
   short: "Sinosplice Tone Pairs"
@@ -5441,24 +3704,6 @@
   priority: 3
   after: [docs-allset-chinese-pronunciation-wiki]
   quality: 3
-
-- id: "practice-duolingo-chinese"
-  title: "Duolingo Chinese course"
-  short: "Duolingo Chinese"
-  provider: "Duolingo"
-  type: "practice"
-  url: "https://www.duolingo.com/course/zh/en/Learn-Chinese"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 30
-  summary: "Short daily gamified lessons that build a habit and basic vocabulary; pair it with a real course for depth."
-  fromYear: 1
-  priority: 3
-  note: "Free tier"
-  quality: 2
 
 - id: "practice-complete-hsk-vocabulary"
   title: "Complete HSK Vocabulary (HSK 2.0/3.0 lists in JSON)"
@@ -5478,77 +3723,6 @@
   after: [docs-chinesetest-hsk]
   quality: 3
 
-- id: "article-hacking-chinese-pronunciation-beginner"
-  title: "Learning pronunciation as a beginner"
-  short: "HC: Beginner Pronunciation"
-  provider: "Olle Linge (Hacking Chinese)"
-  type: "article"
-  url: "https://www.hackingchinese.com/learning-pronunciation-as-a-beginner/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Argues for front-loading pronunciation and gives a practical plan for doing it in the first months."
-  fromYear: 1
-  priority: 2
-  after: [tutorial-yoyo-pinyin-chart]
-  quality: 3
-
-- id: "article-hacking-chinese-tones-not-optional"
-  title: "Learning tones in Mandarin is not optional"
-  short: "HC: Tones Aren't Optional"
-  provider: "Olle Linge (Hacking Chinese)"
-  type: "article"
-  url: "https://www.hackingchinese.com/learning-tones-in-mandarin-is-not-optional/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Explains why tones carry meaning and why skipping them early makes you hard to understand later."
-  fromYear: 1
-  priority: 3
-  quality: 3
-
-- id: "article-hacking-chinese-tone-pairs"
-  title: "Focusing on tone pairs to improve your Mandarin pronunciation"
-  short: "HC: Tone Pairs"
-  provider: "Olle Linge (Hacking Chinese)"
-  type: "article"
-  url: "https://www.hackingchinese.com/focusing-on-tone-pairs-to-improve-your-mandarin-pronunciation/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Shows why practising tones in two-syllable words beats drilling isolated syllables."
-  fromYear: 1
-  priority: 3
-  after: [article-hacking-chinese-tones-not-optional]
-  quality: 3
-
-- id: "article-hacking-chinese-pinyin-traps"
-  title: "A guide to Pinyin traps and pitfalls"
-  short: "HC: Pinyin Traps"
-  provider: "Olle Linge (Hacking Chinese)"
-  type: "article"
-  url: "https://www.hackingchinese.com/a-guide-to-pinyin-traps-and-pitfalls/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Catalogues the spellings that mislead English speakers (ü, -iu, zh/j/z) so you don't learn wrong sounds."
-  fromYear: 1
-  priority: 2
-  after: [tutorial-yoyo-pinyin-chart]
-  quality: 3
-
 - id: "article-hacking-chinese-characters-beginner"
   title: "How to learn Chinese characters as a beginner"
   short: "HC: Characters for Beginners"
@@ -5564,44 +3738,7 @@
   summary: "A component-based approach to characters that avoids rote copying and scales to thousands of characters."
   fromYear: 1
   priority: 2
-  after: [article-hacking-chinese-pronunciation-beginner]
   quality: 4
-
-- id: "article-hacking-chinese-beginner-listening"
-  title: "Beginner Chinese listening practice: What to listen to and how"
-  short: "HC: Beginner Listening"
-  provider: "Olle Linge (Hacking Chinese)"
-  type: "article"
-  url: "https://www.hackingchinese.com/beginner-chinese-listening-practice-what-to-listen-to-and-how/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Practical advice on picking audio at the right level and listening actively instead of as background noise."
-  fromYear: 1
-  priority: 2
-  after: [blog-hacking-chinese]
-  quality: 3
-
-- id: "article-harvard-clp-vocabulary-study"
-  title: "Vocabulary (Harvard Chinese Language Curriculum)"
-  short: "Harvard Chinese Vocab Tools"
-  provider: "Harvard Chinese Language Program"
-  type: "article"
-  url: "https://clp.hsites.harvard.edu/vocabulary-study"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Harvard's Chinese program's own recommendation of Pleco and Anki for vocabulary study, with how to use each."
-  fromYear: 1
-  priority: 3
-  after: [docs-anki-manual]
-  quality: 3
 
 - id: "article-china-briefing-996-work-culture"
   title: "The 996 Work Culture That's Causing a Burnout in China's Tech World"
@@ -6087,9 +4224,9 @@
   estHours: 80
   summary: "Free-to-enroll ETH robotics MOOC where you program real or simulated Duckiebots (ROS, perception, control); an optional paid edX certificate shows you completed it."
   fromYear: 2
-  priority: 3
+  priority: 2
   after: [modern-robotics]
-  quality: 3
+  quality: 4
 
 - id: "cert-coursera-self-driving-cars"
   title: "Self-Driving Cars Specialization"
@@ -6129,6 +4266,7 @@
   priority: 4
   roadmap: "game-developer"
   quality: 2
+  doFirst: "Unity Junior Programmer"
 
 - id: "cert-epic-game-design-pc"
   title: "Epic Games Game Design Professional Certificate"
@@ -6201,24 +4339,6 @@
   cost: "paid"
   estHours: 150
   summary: "Shows core parametric CAD skills in Fusion (sketches, motion, direct modelling, drawings); Autodesk lists it at US$150 and suggests about 150 hours of Fusion use."
-  fromYear: 1
-  priority: 4
-  note: "Paid"
-  quality: 2
-
-- id: "cert-solidworks-cswa"
-  title: "Certified SOLIDWORKS Design Associate (CSWA)"
-  short: "SOLIDWORKS CSWA"
-  provider: "Dassault Systemes SOLIDWORKS"
-  type: "course"
-  url: "https://www.solidworks.com/certifications/mechanical-design-cswa-mechanical-design"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [engineering]
-  level: "intro"
-  cost: "paid"
-  estHours: 40
-  summary: "The standard entry SOLIDWORKS credential: a 3-hour hands-on exam on sketching, features, patterns, mates and drawings."
   fromYear: 1
   priority: 4
   note: "Paid"

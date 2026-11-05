@@ -47,9 +47,16 @@ describe('Build & ship', () => {
   it('finds the cluster in the data: the twelfth file and the older rows it names, each area with a handful or more', () => {
     const seed = loadSeedOrThrow();
     const rows = seed.resources.filter((r) => isBuildShip(r.title, r.summary, r.tracks[0]));
-    expect(rows.length).toBeGreaterThan(120);
+    // The upgrade pass (7,679 rows) replaced the thin build-and-ship rows with fewer, better ones.
+    expect(rows.length).toBeGreaterThan(100);
     expect(rows.length).toBeLessThan(200);
-    for (const id of ['docs-pyinstaller-usage', 'docs-gha-matrix', 'docs-wix-tutorial', 'docs-tauri-distribute', 'docs-godot-exporting-projects', 'docs-gh-cli-release', 'docs-github-actions-workflow-syntax']) {
+    // The category refill ships games: Steamworks and SteamPipe, itch.io's butler, Unreal's BuildCookRun.
+    for (const id of ['docs-steamworks', 'docs-steamworks-uploading', 'docs-itch-butler', 'docs-unreal-build-operations']) {
+      expect(rows.some((r) => r.id === id), id).toBe(true);
+      expect(buildAreasOf(rows.find((r) => r.id === id)!.title, rows.find((r) => r.id === id)!.summary), id).toContain('games');
+    }
+    expect(isBuildShip('itch.io game jams calendar', 'Find jams to enter.', 'gamedev')).toBe(false);
+    for (const id of ['docs-pyinstaller-manual', 'docs-cargo-book', 'docs-wix-tutorial', 'docs-tauri-distribute', 'docs-godot-exporting-projects', 'docs-goreleaser', 'docs-github-actions-workflow-syntax']) {
       expect(rows.some((r) => r.id === id), id).toBe(true);
     }
     for (const area of BUILD_AREAS) {

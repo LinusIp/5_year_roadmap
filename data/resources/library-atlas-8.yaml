@@ -29,6 +29,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "BO for Accelerators"
 
 - id: "docs-xsuite"
   title: "Xsuite documentation"
@@ -47,6 +48,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Xsuite Paper"
 
 - id: "docs-elegant-manual"
   title: "User's Manual for elegant"
@@ -65,6 +67,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Beam Dynamics Synchrotrons"
 
 - id: "docs-bmad-manual"
   title: "Bmad Reference Manual"
@@ -83,6 +86,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Beam Dynamics Synchrotrons"
 
 - id: "docs-iaea-fendl"
   title: "Fusion Evaluated Nuclear Data Library (FENDL-3.2b)"
@@ -101,6 +105,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "IAEA dpa cross sections"
 
 - id: "fd-flash-user-guide"
   title: "FLASH User's Guide"
@@ -137,6 +142,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "PIConGPU repo"
 
 - id: "sim-epoch-site"
   title: "EPOCH (PIC code site)"
@@ -193,6 +199,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Beam Dynamics Synchrotrons"
 
 - id: "repo-ocelot"
   title: "OCELOT: accelerator, radiation and x-ray optics simulation framework"
@@ -211,6 +218,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Beam Dynamics Synchrotrons"
 
 - id: "repo-meep-fdtd"
   title: "Meep: FDTD electromagnetics simulation"
@@ -324,6 +332,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "LAMMPS MSST shock"
 
 - id: "repo-osiris-pic"
   title: "osiris-code/osiris"
@@ -399,6 +408,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Quantum ESPRESSO"
 
 - id: "paper-hooker-laser-plasma-accelerators"
   title: "Developments in laser-driven plasma accelerators"
@@ -417,6 +427,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Electrons in Plasma"
 
 - id: "paper-lindstrom-beam-driven-pwfa"
   title: "Beam-driven plasma-wakefield acceleration"
@@ -473,6 +484,7 @@
   priority: 3
   roadmap: "game-developer"
   quality: 3
+  doFirst: "Gkeyll repo"
 
 - id: "sim-athenapp-paper"
   title: "The Athena++ Adaptive Mesh Refinement Framework: Design and Magnetohydrodynamic Solvers"
@@ -667,6 +679,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "CAS SR and FELs"
 
 - id: "arxiv-1310-2002-labaune-laser-pb"
   title: "Fusion reactions initiated by laser-accelerated particle beams in a laser-produced plasma"
@@ -684,6 +697,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Aneutronic Fusion (wiki)"
 
 - id: "fd-tuszewski-frc-review-1988"
   title: "Field reversed configurations"
@@ -755,6 +769,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "MagLIF Semi-Analytic Model"
 
 - id: "paper-esposito-low-dissipation"
   title: "Efficiency at maximum power of low dissipation Carnot engines"
@@ -772,6 +787,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Chen-Andresen on CA"
 
 - id: "paper-universality-emp"
   title: "Universality of efficiency at maximum power"
@@ -826,6 +842,7 @@
   fromYear: 3
   priority: 1
   quality: 5
+  doFirst: "How NIF Works"
 
 - id: "paper-keimer-cuprates-review"
   title: "High Temperature Superconductivity in the Cuprates"
@@ -861,6 +878,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "MIT 8.512"
 
 - id: "paper-scalapino-common-thread"
   title: "A Common Thread: the pairing interaction for the unconventional superconductors"
@@ -914,6 +932,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Hydride SC Perspective"
 
 - id: "paper-drozdov-lah10-250k"
   title: "Superconductivity at 250 K in lanthanum hydride under high pressures"
@@ -967,6 +986,7 @@
   fromYear: 3
   priority: 1
   quality: 5
+  doFirst: "Feynman III-13"
 
 - id: "docs-eurofusion-roadmap"
   title: "The Road to Fusion Energy: The EUROfusion Roadmap"
@@ -1123,6 +1143,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Grid Battery FAQ"
 
 - id: "docs-femm-manual"
   title: "FEMM User's Manual"
@@ -1140,6 +1161,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "FEMM Electrostatics"
 
 - id: "docs-un-safety-framework-nps"
   title: "Safety Framework for Nuclear Power Source Applications in Outer Space"
@@ -1227,6 +1249,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "NTP Growth Technology"
 
 - id: "course-mit-257-nano-to-macro"
   title: "Nano-to-Macro Transport Processes (MIT 2.57, Spring 2012)"
@@ -1316,6 +1339,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "DOE: Nuclear Power in Space"
 
 - id: "cas-medical-applications-2015"
   title: "CAS - CERN Accelerator School: Accelerators for Medical Applications"
@@ -1441,6 +1465,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Grid Battery FAQ"
 
 - id: "book-atomic-power-in-space-ii"
   title: "Atomic Power in Space II: A History (Chapters 1-2)"
@@ -1494,6 +1519,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "NASA Space Nuclear Prop"
 
 - id: "cas-superconductivity-2013"
   title: "Proceedings of the CAS - CERN Accelerator School: Superconductivity for Accelerators, Erice 2013"
@@ -1655,6 +1681,7 @@
   fromYear: 3
   priority: 1
   quality: 5
+  doFirst: "Nanophotonic Emitters"
 
 - id: "repo-s4-rcwa"
   title: "S4: Stanford Stratified Structure Solver"
@@ -1672,6 +1699,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "tmm Thin-Film Optics"
 
 - id: "paper-banks-leo-atomic-oxygen"
   title: "Low Earth Orbital Atomic Oxygen Interactions With Spacecraft Materials"
@@ -1706,6 +1734,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "NASA RPS Program"
 
 - id: "paper-robbins-finger-nerva-history"
   title: "An Historical Perspective of the NERVA Nuclear Rocket Engine Technology Program"
@@ -1741,6 +1770,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Longitudinal Dynamics"
 
 - id: "paper-cas-particle-sources"
   title: "Particle Sources"
@@ -1812,6 +1842,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "MIT 22.01 L27"
 
 - id: "paper-zhu-miller-tebc-turbine-2005"
   title: "Thermal and Environmental Barrier Coatings for Advanced Turbine Engine Applications"
@@ -1865,6 +1896,7 @@
   fromYear: 2
   priority: 4
   quality: 3
+  doFirst: "PFRC Compact Power Plants"
 
 - id: "arxiv-2408-15206-pulsed-magnetic-fusion"
   title: "Opportunities in Pulsed Magnetic Fusion Energy"
@@ -2061,6 +2093,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "RPS Planning 2016"
 
 - id: "paper-krusty-results-lessons-tm"
   title: "Kilopower Reactor Using Stirling TechnologY (KRUSTY) Nuclear Ground Test Results and Lessons Learned"
@@ -2113,6 +2146,7 @@
   fromYear: 2
   priority: 4
   quality: 3
+  doFirst: "Betavoltaics (Spencer)"
 
 - id: "pp-mcbride-ltd-primer"
   title: "A Primer on Pulsed Power and Linear Transformer Drivers for High Energy Density Physics Applications"
@@ -2166,6 +2200,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "tmm Thin-Film Optics"
 
 - id: "paper-koenig-rover-experience"
   title: "Experience Gained from the Space Nuclear Rocket Program (Rover), LA-10062-H"
@@ -2201,6 +2236,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "NEP Systems Overview"
 
 - id: "paper-fsp-initial-concept-definition"
   title: "Fission Surface Power System Initial Concept Definition"
@@ -2218,6 +2254,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Kilopower Path to Power"
 
 - id: "paper-buzea-mgb2-review"
   title: "Review of superconducting properties of MgB2"
@@ -2289,6 +2326,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Longitudinal Dynamics"
 
 - id: "paper-padamsee-srf-design-topics"
   title: "Design Topics for Superconducting RF Cavities and Ancillaries"
@@ -2342,6 +2380,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Colliders (Schmickler)"
 
 - id: "paper-imcc-interim-report"
   title: "Interim report for the International Muon Collider Collaboration"
@@ -2377,6 +2416,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "PFM screening (DFT)"
 
 - id: "fd-barr-moir-test-results-plasma-direct-converters"
   title: "Test Results on Plasma Direct Converters"
@@ -2448,6 +2488,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "NU Transport Function"
 
 - id: "paper-boltztrap-original"
   title: "BoltzTraP: A code for calculating band-structure dependent quantities"
@@ -2465,6 +2506,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "NU Transport Function"
 
 - id: "paper-amset-scattering-rates"
   title: "Efficient calculation of carrier scattering rates from first principles"
@@ -2518,6 +2560,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Ideal Near-Field TPV"
 
 - id: "paper-mittapally-near-field-tpv"
   title: "Near-field thermophotovoltaics for efficient heat to electricity conversion at high power density"
@@ -2535,6 +2578,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Ideal Near-Field TPV"
 
 - id: "paper-rinnerbauer-ht-photonic-crystals"
   title: "Recent developments in high-temperature photonic crystals for energy conversion"
@@ -2552,6 +2596,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Nanophotonic Emitters"
 
 - id: "paper-fundamentals-vacuum-breakdown"
   title: "Fundamentals of Vacuum Breakdown in High-Field Systems"
@@ -2642,6 +2687,7 @@
   priority: 2
   research: "world-models"
   quality: 4
+  doFirst: "WBG/UWBG Devices Review"
 
 - id: "paper-kaganovich-exb-discharges"
   title: "Perspectives on Physics of ExB Discharges Relevant to Plasma Propulsion and Similar Technologies"
@@ -2713,6 +2759,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Litz Wire Losses"
 
 - id: "paper-natarajan-snspd-physics-applications"
   title: "Superconducting nanowire single-photon detectors: physics and applications"
@@ -2905,6 +2952,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Urieli Stirling Site"
 
 - id: "article-urieli-ideal-adiabatic"
   title: "Chapter 4a - Ideal Adiabatic Analysis"
@@ -2994,6 +3042,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "LEU NTP Systems"
 
 - id: "blog-snyder-thermoelectrics-northwestern"
   title: "Thermoelectrics (Snyder group, Northwestern Materials Science)"
@@ -3032,6 +3081,7 @@
 
 # ---- Hardware and chip design: CPU, GPU and NPU, RTL to tape-out (47)
   quality: 4
+  doFirst: "NTP Technology Overview"
 
 - id: "irds-2024-edition"
   title: "IRDS 2024 Edition"
@@ -3049,6 +3099,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "IRDS Executive Summary"
 
 - id: "nptel-semiconductor-device-modeling-iitm"
   title: "Semiconductor Device Modeling (IIT Madras)"
@@ -3156,6 +3207,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Kwant"
 
 - id: "repo-josim"
   title: "JoSIM: Superconductor Circuit Simulator"
@@ -3173,6 +3225,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "RSFQ Progress (SNF)"
 
 - id: "paper-paulsson-negf-for-dummies"
   title: "Non Equilibrium Green's Functions for Dummies: Introduction to the One Particle NEGF equations"
@@ -3244,3 +3297,4 @@
   fromYear: 3
   priority: 3
   quality: 3
+  doFirst: "RSFQ Progress (SNF)"

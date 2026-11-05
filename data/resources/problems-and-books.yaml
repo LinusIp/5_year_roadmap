@@ -339,9 +339,11 @@
   estHours: 20
   summary: "Free system design guides and worked problems in the interview format."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
-  quality: 3
+  quality: 4
+  note: "Free tier"
+  after: [system-design-primer]
 
 - id: all-about-circuits
   title: "All About Circuits: textbook and worksheets"

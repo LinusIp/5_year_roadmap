@@ -83,6 +83,7 @@
   priority: 1
   roadmap: "game-developer"
   quality: 5
+  doFirst: "MIT 22.05 Reactor Physics"
 
 - id: "docs-geant4"
   title: "Geant4 Documentation"
@@ -326,6 +327,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Intro to Vlasov Solvers"
 
 - id: "docs-moose"
   title: "MOOSE: Multiphysics Object-Oriented Simulation Environment"
@@ -344,6 +346,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "MIT 22.06 Nuclear Systems"
 
 - id: "docs-quantum-espresso"
   title: "Quantum ESPRESSO documentation"
@@ -400,6 +403,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Fitzpatrick: Mechanics"
 
 - id: "book-owen-monte-carlo"
   title: "Monte Carlo theory, methods and examples"
@@ -568,6 +572,7 @@
   priority: 1
   roadmap: "game-developer"
   quality: 5
+  doFirst: "Fitzpatrick: Thermo & SM"
 
 - id: "repo-mocz-latticeboltzmann"
   title: "latticeboltzmann-python: Create Your Own Lattice Boltzmann Simulation"
@@ -586,6 +591,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Mocz: N-body"
 
 - id: "repo-mocz-finitevolume"
   title: "finitevolume-python: Create Your Own Finite Volume Fluid Simulation"
@@ -604,6 +610,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Mocz: Spectral Fluid"
 
 - id: "repo-mdanalysis"
   title: "MDAnalysis"
@@ -850,6 +857,7 @@
   priority: 1
   roadmap: "game-developer"
   quality: 5
+  doFirst: "Fitzpatrick: Thermo & SM"
 
 - id: "paper-torax"
   title: "TORAX: A Fast and Differentiable Tokamak Transport Simulator in JAX"
@@ -906,6 +914,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "ChaNGa Intro Paper"
 
 - id: "paper-brax"
   title: "Brax -- A Differentiable Physics Engine for Large Scale Rigid Body Simulation"
@@ -1209,6 +1218,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Fitzpatrick: E&M and Optics"
 
 - id: "mit-8-321-quantum-theory-i-2017"
   title: "MIT 8.321 Quantum Theory I (Fall 2017)"
@@ -1550,6 +1560,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "ITER: What is Fusion"
 
 - id: "paper-arc-compact-fusion"
   title: "ARC: A compact, high-field, fusion nuclear science facility and demonstration power plant with demountable magnets"
@@ -1639,6 +1650,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "SEP: Decoherence"
 
 - id: "paper-witten-entanglement-qft"
   title: "Notes on Some Entanglement Properties of Quantum Field Theory"
@@ -1692,6 +1704,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "ITER: What is Fusion"
 
 - id: "cocotb-docs"
   title: "cocotb Documentation"
@@ -1781,6 +1794,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Magic VLSI"
 
 - id: "skywater-sky130-pdk-docs"
   title: "SkyWater SKY130 PDK Documentation"
@@ -1798,6 +1812,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Tiny Tapeout Guide"
 
 - id: "librelane"
   title: "LibreLane"
@@ -2390,6 +2405,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Build a RISC-V Core"
 
 - id: "riscv-sodor"
   title: "RISC-V Sodor Educational Processors"
@@ -2785,6 +2801,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "CVA6 docs"
 
 - id: "paper-snitch"
   title: "Snitch: A tiny Pseudo Dual-Issue Processor for Area and Energy Efficient Execution of Floating-Point Intensive Workloads"
@@ -2802,6 +2819,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "CVA6 docs"
 
 - id: "paper-ara-vector"
   title: "Ara: A 1 GHz+ Scalable and Energy-Efficient RISC-V Vector Processor with Multi-Precision Floating Point Support in 22 nm FD-SOI"
@@ -2819,6 +2837,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "CVA6 docs"
 
 - id: "paper-sonicboom"
   title: "SonicBOOM: The 3rd Generation Berkeley Out-of-Order Machine"
@@ -2908,6 +2927,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "FINN docs"
 
 - id: "paper-vta"
   title: "A Hardware-Software Blueprint for Flexible Deep Learning Specialization"
@@ -2925,6 +2945,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "VTA hardware guide"
 
 - id: "paper-chipnemo"
   title: "ChipNeMo: Domain-Adapted LLMs for Chip Design"
@@ -3691,6 +3712,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "Variational Algorithm Design"
 
 - id: "paper-vqe-peruzzo"
   title: "A variational eigenvalue solver on a quantum processor"
@@ -3708,6 +3730,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "Variational Algorithm Design"
 
 - id: "paper-dawson-nielsen-solovay-kitaev"
   title: "The Solovay-Kitaev algorithm"
@@ -3779,6 +3802,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Variational Algorithm Design"
 
 - id: "paper-biamonte-quantum-machine-learning"
   title: "Quantum Machine Learning"

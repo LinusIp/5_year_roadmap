@@ -305,6 +305,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 3
+  doFirst: "Array API standard"
 
 - id: "docs-cuda-pg-async-barriers"
   title: "CUDA Programming Guide 4.10: Asynchronous Barriers"
@@ -385,6 +386,7 @@
   tags: [inference]
   note: "Paid"
   quality: 4
+  doFirst: "Professional CUDA C"
 
 - id: "tutorial-colfax-tma"
   title: "CUTLASS Tutorial: Mastering the NVIDIA Tensor Memory Accelerator (TMA)"
@@ -1852,6 +1854,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Bayesian View of SGD"
 
 - id: "paper-arjovsky-irm"
   title: "Invariant Risk Minimization"
@@ -2429,6 +2432,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Azure SDK guidelines intro"
 
 - id: "aip-180-backwards-compatibility"
   title: "AIP-180: Backwards compatibility"
@@ -2650,6 +2654,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "K8s deprecation policy"
 
 - id: "k8s-api-changes"
   title: "Changing the API (Kubernetes)"
@@ -3026,6 +3031,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Test Double"
 
 - id: "article-danluu-normalization-of-deviance"
   title: "Normalization of deviance"
@@ -3339,6 +3345,7 @@
   priority: 1
   roadmap: "software-architect"
   quality: 5
+  doFirst: "Art of Unix Programming"
 
 - id: "article-bret-victor-magic-ink"
   title: "Magic Ink: Information Software and the Graphical Interface"
@@ -3470,6 +3477,7 @@
 
 # ---- Systems: low-level programming, OS kernels, algorithms (318)
   quality: 4
+  doFirst: "Go: v2 modules"
 
 - id: "ref-felixcloutier-x86"
   title: "x86 and amd64 instruction reference"
@@ -3487,6 +3495,7 @@
   fromYear: 1
   priority: 1
   quality: 5
+  doFirst: "CS107 x86-64 Guide"
 
 - id: "docs-arm-learn-the-architecture"
   title: "Learn the Architecture - A-profile"
@@ -3591,6 +3600,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Beej's GDB Guide"
 
 - id: "docs-rr-debugger"
   title: "rr: lightweight recording & deterministic debugging"
@@ -3627,6 +3637,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "LDD3"
 
 - id: "kdoc-unreliable-guide-locking"
   title: "Unreliable Guide To Locking"
@@ -3895,6 +3906,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Circular Buffers"
 
 - id: "docs-intel-optimization-reference-manual"
   title: "Intel 64 and IA-32 Architectures Optimization Reference Manual"
@@ -3930,6 +3942,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "AMD64 APM Vol. 1"
 
 - id: "repo-riscv-elf-psabi"
   title: "RISC-V ELF psABI specification"
@@ -3947,6 +3960,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "RISC-V Asm Manual"
 
 - id: "repo-arm-abi-aa"
   title: "Application Binary Interface for the Arm Architecture (abi-aa)"
@@ -3982,6 +3996,7 @@
   fromYear: 3
   priority: 1
   quality: 5
+  doFirst: "CS107 x86-64 Guide"
 
 - id: "rfc-4271-bgp4"
   title: "RFC 4271: A Border Gateway Protocol 4 (BGP-4)"
@@ -4349,6 +4364,7 @@
   priority: 2
   note: "Paid"
   quality: 4
+  doFirst: "x86-64 Asm with Ubuntu"
 
 - id: "book-tcpip-illustrated-vol1"
   title: "TCP/IP Illustrated, Volume 1: The Protocols (2nd Edition)"
@@ -4840,6 +4856,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "USACO Intro DP"
 
 - id: "practice-atcoder-library-practice-contest"
   title: "AtCoder Library Practice Contest"
@@ -5000,6 +5017,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Profiling Go Programs"
 
 - id: "practice-library-checker"
   title: "Library Checker"
@@ -5035,6 +5053,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Kattis"
 
 - id: "repo-libuv"
   title: "libuv: cross-platform asynchronous I/O"
@@ -5891,6 +5910,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "What is BGP"
 
 - id: "article-apenwarr-ipv6-good-design"
   title: "The world in which IPv6 was a good design"
@@ -6034,6 +6054,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "futex(2)"
 
 - id: "packagecloud-linux-syscalls-guide"
   title: "The Definitive Guide to Linux System Calls"
@@ -6107,6 +6128,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "tcp(7) man page"
 
 - id: "article-cloudflare-million-packets"
   title: "How to receive a million packets per second"
@@ -6314,6 +6336,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "ShellCheck"
 
 - id: "docs-gnu-make-manual"
   title: "GNU Make Manual"
@@ -6860,6 +6883,7 @@
   fromYear: 3
   priority: 1
   quality: 5
+  doFirst: "libstdc++ ABI policy"
 
 - id: "rust-rfc-1105-api-evolution"
   title: "RFC 1105: API evolution"
@@ -7092,6 +7116,7 @@
   priority: 2
   note: "Paid"
   quality: 4
+  doFirst: "Basics of Compiler Design"
 
 - id: "book-writing-a-c-compiler"
   title: "Writing a C Compiler: Build a Real Programming Language from Scratch"
@@ -7255,6 +7280,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Dafny guide"
 
 - id: "tutorial-matklad-resilient-ll-parsing"
   title: "Resilient LL Parsing Tutorial"
@@ -7483,6 +7509,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "Learn You a Haskell"
 
 - id: "paper-history-of-haskell"
   title: "A History of Haskell: Being Lazy with Class"
@@ -7625,6 +7652,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Instruction selection survey"
 
 - id: "paper-unified-theory-of-gc"
   title: "A Unified Theory of Garbage Collection"
@@ -9568,6 +9596,7 @@
   priority: 2
   note: "Paid"
   quality: 4
+  doFirst: "SEP: Karl Popper"
 
 - id: "book-box-hunter-hunter-statistics-experimenters"
   title: "Statistics for Experimenters: Design, Innovation, and Discovery (2nd ed.)"
@@ -9586,6 +9615,7 @@
   priority: 2
   note: "Paid"
   quality: 4
+  doFirst: "PSU STAT 503 DOE"
 
 - id: "book-dyson-advanced-quantum-mechanics"
   title: "1951 Lectures on Advanced Quantum Mechanics, Second Edition"
@@ -9621,6 +9651,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Nearing Math Tools"
 
 - id: "notes-reall-part3-general-relativity"
   title: "Part III General Relativity lecture notes"
@@ -11900,6 +11931,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "NIFS-252 D-He3 DEC"
 
 - id: "paper-ochs-pb11-alpha-channeling"
   title: "Improving the feasibility of economical proton-boron-11 fusion via alpha channeling with a hybrid fast and thermal proton scheme"
@@ -11917,6 +11949,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Revisiting p-11B Fusion"
 
 - id: "paper-abdou-dt-fuel-cycle-2021"
   title: "Physics and technology considerations for the deuterium–tritium fuel cycle and conditions for tritium fuel self sufficiency"

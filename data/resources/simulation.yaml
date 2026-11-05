@@ -54,8 +54,10 @@
   estHours: 10
   subject: simulation
   summary: "The go-to series on game loops, physics integration and networked multiplayer."
-  priority: 4
+  priority: 1
   roadmap: "game-developer"
+  doFirst: "Fix Your Timestep!"
+  quality: 5
 
 - id: witkin-baraff-pbm
   title: "Witkin and Baraff: Physically Based Modeling (SIGGRAPH course notes)"

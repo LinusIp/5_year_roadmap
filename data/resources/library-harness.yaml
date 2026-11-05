@@ -102,25 +102,6 @@
   after: [paper-agentless]
   quality: 4
 
-- id: "repo-hal-harness"
-  title: "HAL Harness"
-  short: "HAL Harness"
-  provider: "Princeton PLI (SAgE)"
-  type: "practice"
-  url: "https://github.com/princeton-pli/hal-harness"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 6
-  summary: "A unified harness for running agents across many benchmarks with cost tracking, ideal for comparing your own harness designs fairly."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  after: [practice-inspect-evals]
-  quality: 3
-
 - id: "repo-deepmind-funsearch"
   title: "FunSearch"
   short: "FunSearch"
@@ -310,25 +291,6 @@
   roadmap: "ai-agents"
   quality: 4
 
-- id: "paper-harness-learning"
-  title: "Harness Learning Enables Generalizable Test-Time Adaptation"
-  short: "Harness Learning"
-  provider: "Zhang, Liu, Wang, Tajwar, Arora, Salakhutdinov, Khashabi, Song, Zanette"
-  type: "paper"
-  url: "https://arxiv.org/abs/2609.35738"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Treats the agent harness itself as something to learn: a proposer model trained with RL rewrites a solver's harness from execution feedback, adapting to new tasks without touching model weights."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-agents"
-  after: [anthropic-building-effective-agents]
-  quality: 3
-
 - id: "paper-archer"
   title: "ArCHer: Training Language Model Agents via Hierarchical Multi-Turn RL"
   short: "ArCHer"
@@ -484,122 +446,7 @@
   roadmap: "ai-agents"
   research: "genai"
   quality: 3
-
-- id: "paper-harbor-harness-optimization"
-  title: "HARBOR: Automated Harness Optimization"
-  short: "HARBOR"
-  provider: "Biswa Sengupta, Jinhua Wang"
-  type: "paper"
-  url: "https://arxiv.org/abs/2604.20938"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Casts harness configuration of a production coding agent as Bayesian optimization, a useful contrast to LLM-driven harness search."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-agents"
-  research: "genai"
-  after: [paper-meta-harness]
-  quality: 3
-
-- id: "paper-harnessmdp"
-  title: "HarnessMDP: Learning to Control LLM Agent Harnesses with Offline Reinforcement Learning"
-  short: "HarnessMDP"
-  provider: "Haiwen Yi, Xinyuan Song"
-  type: "paper"
-  url: "https://arxiv.org/abs/2607.05458"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 4
-  summary: "Models agent execution as an MDP and learns a harness policy offline from past trajectories, an RL view of harness learning."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-agents"
-  research: "genai"
-  after: [paper-meta-harness]
-  quality: 3
-
-- id: "paper-memoharness"
-  title: "MemoHarness: Agent Harnesses That Learn from Experience"
-  short: "MemoHarness"
-  provider: "Yue Huang, Wenjie Wang, Han Bao et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2607.14159"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Adapts the agent's control layer per test case using lessons distilled from its own earlier runs."
-  fromYear: 3
-  priority: 1
-  roadmap: "ai-agents"
-  quality: 3
-
-- id: "paper-harnessopt-bench"
-  title: "HarnessOpt-Bench: Evaluating LLMs at Harness Optimization"
-  short: "HarnessOpt-Bench"
-  provider: "Varun Ursekar, Apaar Shanker, Yash Maurya et al. (Scale AI)"
-  type: "paper"
-  url: "https://arxiv.org/abs/2608.06301"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "A benchmark for how well models improve an agent's surrounding code and prompts under noisy, costly evaluation with hidden tests."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-agents"
-  research: "genai"
-  after: [paper-meta-harness]
-  quality: 3
-
-- id: "paper-grow-the-harness"
-  title: "Grow the Harness, Not the Context: From Strategy-Free Scaffolds to Reusable Specialist Agents"
-  short: "Grow the Harness"
-  provider: "Laizhen Li, Jiarui Li, Juanjuan Zhao et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2609.26760"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Learns recurring control logic as executable harness code from failures, letting smaller models match bigger ones cheaply."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-agents"
-  after: [paper-meta-harness]
-  quality: 3
-
-- id: "paper-sia-harness-weight-updates"
-  title: "SIA: Self Improving AI with Harness & Weight Updates"
-  short: "SIA"
-  provider: "Prannay Hebbar, Yogendra Manawat, Samuel Verboomen et al."
-  type: "paper"
-  url: "https://arxiv.org/abs/2605.27276"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "advanced"
-  cost: "free"
-  estHours: 3
-  summary: "Has an agent refine both the scaffold and the weights of a task agent, and shows the combination beats scaffold-only iteration."
-  fromYear: 3
-  priority: 3
-  roadmap: "ai-agents"
-  after: [paper-meta-harness]
-  quality: 3
+  doFirst: "ACE context engineering"
 
 - id: "paper-ai-scientist-v1"
   title: "The AI Scientist: Towards Fully Automated Open-Ended Scientific Discovery"
@@ -636,24 +483,6 @@
   priority: 1
   roadmap: "ai-agents"
   quality: 4
-
-- id: "article-osmani-agent-harness-engineering"
-  title: "Agent Harness Engineering"
-  short: "Osmani: Agent Harness"
-  provider: "Addy Osmani"
-  type: "article"
-  url: "https://addyosmani.com/blog/agent-harness-engineering/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "An accessible overview arguing that prompts, tools and feedback loops around a model often matter more than the model itself."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-agents"
-  quality: 3
 
 - id: "article-anthropic-agentic-misalignment"
   title: "Agentic misalignment: How LLMs could be insider threats"
@@ -710,25 +539,6 @@
   roadmap: "ai-agents"
   doFirst: "Effective Context Engineering"
   quality: 4
-
-- id: "article-fowler-are-harnesses-worth-the-cost"
-  title: "Are Harnesses Worth the Cost?"
-  short: "Are Harnesses Worth It?"
-  provider: "Naresh Jain (martinfowler.com)"
-  type: "article"
-  url: "https://martinfowler.com/articles/are-harnesses-worth-the-cost.html"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 1
-  summary: "A paired experiment showing a behavioural harness can let a cheap model beat an unharnessed frontier model on both success rate and cost."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  after: [article-fowler-harness-engineering-coding-agent-users]
-  quality: 3
 
 - id: "article-willison-agentic-engineering-patterns"
   title: "Agentic Engineering Patterns"

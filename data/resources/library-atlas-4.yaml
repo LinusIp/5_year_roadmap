@@ -47,6 +47,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "MI300X inference tips"
 
 - id: "docs-xla-architecture"
   title: "XLA architecture"
@@ -85,6 +86,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "NKI docs"
 
 - id: "docs-gaudi-architecture"
   title: "Gaudi Architecture"
@@ -382,6 +384,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Pallas TPU quickstart"
 
 - id: "docs-xla-gpu-architecture"
   title: "XLA:GPU Architecture Overview"
@@ -421,6 +424,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Tensix matrix engine"
 
 - id: "docs-flashmla-kernel-deep-dive"
   title: "A Deep-Dive Into the New Flash MLA Kernel"
@@ -500,6 +504,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "SGLang HiCache"
 
 - id: "docs-mlir-linalg-rationale"
   title: "Linalg Dialect Rationale: The Case For Compiler-Friendly Custom Operations"
@@ -856,6 +861,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Pallas TPU quickstart"
 
 - id: "docs-pallas-tpu-matmul"
   title: "Matrix Multiplication (Pallas TPU)"
@@ -1154,6 +1160,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Triton grouped GEMM"
 
 - id: "tut-triton-10-block-scaled"
   title: "Triton Tutorial 10: Block Scaled Matrix Multiplication"
@@ -1213,6 +1220,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Gluon layouts tutorial"
 
 - id: "tut-gluon-06-tcgen05"
   title: "Gluon Tutorial 06: tcgen05"
@@ -1232,6 +1240,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Gluon WGMMA tutorial"
 
 - id: "tut-gluon-08-warp-spec"
   title: "Gluon Tutorial 08: Warp Specialization"
@@ -1331,6 +1340,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "TileLang matmul tutorial"
 
 - id: "repo-gaudi-tutorials"
   title: "Intel Gaudi Tutorials"
@@ -1447,6 +1457,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "ROCm Examples"
 
 - id: "repo-xformers"
   title: "xFormers"
@@ -1466,6 +1477,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "PyTorch SDPA tutorial"
 
 - id: "repo-triton-flash-attention-umar"
   title: "triton-flash-attention"
@@ -1704,6 +1716,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Helion intro blog"
 
 - id: "repo-helion-examples"
   title: "Helion examples (attention, matmul, softmax, distributed)"
@@ -1823,6 +1836,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "MLX custom Metal kernels"
 
 - id: "repo-iree"
   title: "IREE"
@@ -1862,6 +1876,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Blockwise Parallel Xformer"
 
 - id: "practice-rust-cuda"
   title: "Rust CUDA"
@@ -1921,6 +1936,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Chakra traces paper"
 
 - id: "repo-mooncake"
   title: "Mooncake"
@@ -2100,6 +2116,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "NIXL architecture"
 
 - id: "repo-pplx-kernels"
   title: "pplx-kernels"
@@ -2139,6 +2156,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 3
+  doFirst: "TileGym"
 
 - id: "repo-mojo-max-kernels"
   title: "MAX kernels (Mojo GPU kernel library)"
@@ -2158,6 +2176,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Modular Blackwell matmul 1"
 
 - id: "paper-nickolls-scalable-cuda"
   title: "Scalable Parallel Programming with CUDA"
@@ -3702,6 +3721,7 @@
   research: "inference"
   tags: [inference]
   quality: 4
+  doFirst: "DepGraph"
 
 - id: "paper-sheared-llama"
   title: "Sheared LLaMA: Accelerating Language Model Pre-training via Structured Pruning"
@@ -3743,6 +3763,7 @@
   research: "inference"
   tags: [inference]
   quality: 4
+  doFirst: "MiniLLM"
 
 - id: "paper-minitron"
   title: "Compact Language Models via Pruning and Knowledge Distillation"
@@ -3784,6 +3805,7 @@
   research: "inference"
   tags: [inference]
   quality: 4
+  doFirst: "KD Survey"
 
 - id: "paper-fp8-lm"
   title: "FP8-LM: Training FP8 Large Language Models"
@@ -4035,6 +4057,7 @@
   research: "inference"
   tags: [inference]
   quality: 4
+  doFirst: "Orca"
 
 - id: "paper-cloudmatrix384-serving"
   title: "Serving Large Language Models on Huawei CloudMatrix384"
@@ -4698,6 +4721,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "NVIDIA FP8 Training Intro"
 
 - id: "article-trtllm-disaggregated-serving"
   title: "Disaggregated Serving in TensorRT LLM"
@@ -5227,6 +5251,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "DeepSpeed MoE Tutorial"
 
 - id: "course-cornell-cs4780-2018"
   title: "CS4780/CS5780: Machine Learning for Intelligent Systems (Fall 2018)"
@@ -5904,6 +5929,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Think Bayes 2"
 
 - id: "book-slambook-en"
   title: "Basic Knowledge on Visual SLAM: From Theory to Practice (slambook-en)"
@@ -6167,6 +6193,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Bayesian Methods Hackers"
 
 - id: "tutorial-pyro-svi-part-1"
   title: "SVI Part I: An Introduction to Stochastic Variational Inference in Pyro"
@@ -6671,6 +6698,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "spaCy Course"
 
 - id: "repo-recommenders"
   title: "recommenders-team/recommenders"
@@ -6896,6 +6924,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "pymatgen"
 
 - id: "repo-chgnet"
   title: "CHGNet: Crystal Hamiltonian Graph Neural Network"
@@ -6914,6 +6943,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "pymatgen"
 
 - id: "repo-matbench-discovery"
   title: "Matbench Discovery"
@@ -7065,6 +7095,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "EEML 2024 Practicals"
 
 - id: "repo-cmu-anlp-fall2025-code"
   title: "Advanced NLP (CMU 11-711) Fall 2025 code"
@@ -7216,6 +7247,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "HF Audio Course"
 
 - id: "repo-speechbrain"
   title: "SpeechBrain"
@@ -7234,6 +7266,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "HF Audio Course"
 
 - id: "repo-sherpa-onnx"
   title: "sherpa-onnx"
@@ -7270,6 +7303,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Fast Conformer"
 
 - id: "repo-pyannote-audio"
   title: "pyannote.audio"
@@ -7702,6 +7736,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Croft Search Engines"
 
 - id: "practice-tantivy"
   title: "Tantivy"
@@ -7815,6 +7850,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "RedPajama"
 
 - id: "repo-sentencepiece"
   title: "SentencePiece"
@@ -7891,25 +7927,6 @@
   roadmap: "ai-engineer"
   after: [paper-helm-holistic-eval]
   quality: 4
-
-- id: "repo-bigcode-evaluation-harness"
-  title: "bigcode-evaluation-harness"
-  short: "BigCode Eval Harness"
-  provider: "BigCode"
-  type: "practice"
-  url: "https://github.com/bigcode-project/bigcode-evaluation-harness"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 4
-  summary: "Reference harness for code benchmarks with sandboxed execution and pass@k computation."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  doFirst: "HumanEval (Codex) paper"
-  quality: 3
 
 - id: "repo-evalplus"
   title: "EvalPlus"
@@ -8306,6 +8323,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "MSR GraphRAG Intro"
 
 - id: "repo-flashrag"
   title: "FlashRAG: A Python Toolkit for Efficient RAG Research"
@@ -8324,6 +8342,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "FlashRAG Paper"
 
 - id: "repo-huggingface-search-and-learn"
   title: "search-and-learn: recipes for scaling test-time compute"
@@ -8361,6 +8380,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "TorchRec Intro"
 
 - id: "repo-dlrm"
   title: "facebookresearch/dlrm"
@@ -8398,6 +8418,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "NCF"
 
 - id: "repo-reward-bench"
   title: "RewardBench (code)"
@@ -8739,6 +8760,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "PatchCore"
 
 - id: "repo-lmms-eval"
   title: "lmms-eval: The Evaluation Suite of Large Multimodal Models"
@@ -8757,6 +8779,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "LMMs-Eval paper"
 
 - id: "repo-open-clip"
   title: "OpenCLIP"
@@ -9217,6 +9240,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Zipformer"
 
 - id: "repo-kaldi"
   title: "Kaldi Speech Recognition Toolkit"
@@ -9542,6 +9566,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Hunyuan3D 2.0"
 
 - id: "practice-nequip-repo"
   title: "NequIP"
@@ -9617,6 +9642,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "EGNN repo"
 
 - id: "practice-graphcast-repo"
   title: "GraphCast code"
@@ -9654,6 +9680,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Learning to Simulate code"
 
 - id: "practice-fairchem"
   title: "FAIR Chemistry (fairchem, ex-Open Catalyst)"
@@ -9937,6 +9964,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "ScatterMoE"
 
 - id: "repo-deepseek-eplb"
   title: "EPLB: Expert Parallelism Load Balancer"
@@ -9955,6 +9983,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "vLLM Expert Parallel"
 
 - id: "practice-schedule-free-repo"
   title: "Schedule-Free Learning (facebookresearch/schedule_free)"
@@ -10011,6 +10040,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Distributed Shampoo"
 
 - id: "practice-moonlight-muon"
   title: "Moonlight (Muon at scale, MoonshotAI)"
@@ -10067,6 +10097,7 @@
   priority: 1
   roadmap: "ai-agents"
   quality: 4
+  doFirst: "rStar-Math"
 
 - id: "repo-open-reasoner-zero"
   title: "Open-Reasoner-Zero"
@@ -10085,6 +10116,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Open-Reasoner-Zero"
 
 - id: "repo-open-thoughts"
   title: "OpenThoughts"
@@ -10546,6 +10578,7 @@
   roadmap: "ai-engineer"
   research: "world-models"
   quality: 4
+  doFirst: "Vista driving WM"
 
 - id: "repo-i-jepa"
   title: "I-JEPA (code)"
@@ -10715,6 +10748,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "HF Audio Course"
 
 - id: "paper-hendrycks-ood-baseline"
   title: "A Baseline for Detecting Misclassified and Out-of-Distribution Examples in Neural Networks"
@@ -10787,6 +10821,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "SORT"
 
 - id: "paper-kinetics"
   title: "The Kinetics Human Action Video Dataset"
@@ -11476,6 +11511,7 @@
   roadmap: "ai-agents"
   research: "genai"
   quality: 4
+  after: [paper-camel-defeating-prompt-injections]
 
 - id: "paper-multiagent-debate-du"
   title: "Improving Factuality and Reasoning in Language Models through Multiagent Debate"
@@ -11782,6 +11818,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "HF Audio Course"
 
 - id: "paper-listen-attend-spell"
   title: "Listen, Attend and Spell"
@@ -11934,6 +11971,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "ODIN"
 
 - id: "paper-outlier-exposure"
   title: "Deep Anomaly Detection with Outlier Exposure"
@@ -12256,6 +12294,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Conv. Pose Machines"
 
 - id: "paper-hrnet-pose"
   title: "Deep High-Resolution Representation Learning for Human Pose Estimation"
@@ -12274,6 +12313,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Simple Pose Baselines"
 
 - id: "paper-superpoint"
   title: "SuperPoint: Self-Supervised Interest Point Detection and Description"
@@ -12808,6 +12848,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "CS276 Learning to Rank"
 
 - id: "paper-ms-marco"
   title: "MS MARCO: A Human Generated MAchine Reading COmprehension Dataset"
@@ -13501,6 +13542,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "Needle in a Haystack"
 
 - id: "paper-longbench"
   title: "LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding"
@@ -14751,6 +14793,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "NCF"
 
 - id: "paper-are-we-really-making-progress"
   title: "Are We Really Making Much Progress? A Worrying Analysis of Recent Neural Recommendation Approaches"
@@ -14769,6 +14812,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "NCF"
 
 - id: "paper-ease"
   title: "Embarrassingly Shallow Autoencoders for Sparse Data"
@@ -14825,6 +14869,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "DeepFM"
 
 - id: "paper-sampling-bias-two-tower"
   title: "Sampling-Bias-Corrected Neural Modeling for Large Corpus Item Recommendations"
@@ -14900,6 +14945,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "NCF"
 
 - id: "paper-sasrec"
   title: "Self-Attentive Sequential Recommendation"
@@ -15116,6 +15162,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "Self-Critiquing Models"
 
 - id: "paper-rest-em-beyond-human-data"
   title: "Beyond Human Data: Scaling Self-Training for Problem-Solving with Language Models"
@@ -15135,6 +15182,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "ReST"
 
 - id: "paper-unpacking-dpo-ppo"
   title: "Unpacking DPO and PPO: Disentangling Best Practices for Learning from Preference Feedback"
@@ -15872,6 +15920,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "Empirical Mamba Study"
 
 - id: "paper-repeat-after-me"
   title: "Repeat After Me: Transformers are Better than State Space Models at Copying"
@@ -16301,6 +16350,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "Informer"
 
 - id: "paper-patchtst"
   title: "A Time Series is Worth 64 Words: Long-term Forecasting with Transformers"
@@ -16418,6 +16468,7 @@
   roadmap: "ai-engineer"
   research: "diffusion"
   quality: 4
+  doFirst: "Make-A-Video"
 
 - id: "paper-animatediff"
   title: "AnimateDiff: Animate Your Personalized Text-to-Image Diffusion Models without Specific Tuning"
@@ -16651,6 +16702,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "DeepSeek-Coder"
 
 - id: "paper-opencoder"
   title: "OpenCoder: The Open Cookbook for Top-Tier Code Large Language Models"
@@ -16907,6 +16959,7 @@
   roadmap: "ai-engineer"
   research: "diffusion"
   quality: 4
+  doFirst: "EGNN repo"
 
 - id: "paper-ferminet"
   title: "Ab-Initio Solution of the Many-Electron Schrödinger Equation with Deep Neural Networks"
@@ -17162,6 +17215,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "Taken Out of Context"
 
 - id: "paper-foundational-challenges-llm-safety"
   title: "Foundational Challenges in Assuring Alignment and Safety of Large Language Models"
@@ -17434,6 +17488,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "SWAG"
 
 - id: "paper-wilson-izmailov-bdl-generalization"
   title: "Bayesian Deep Learning and a Probabilistic Perspective of Generalization"
@@ -17758,6 +17813,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "CPT: how to rewarm"
 
 - id: "paper-loss-of-plasticity"
   title: "Loss of Plasticity in Deep Continual Learning"
@@ -17953,6 +18009,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "PIPs"
 
 - id: "paper-foundationpose"
   title: "FoundationPose: Unified 6D Pose Estimation and Tracking of Novel Objects"
@@ -17971,6 +18028,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "DOPE"
 
 - id: "paper-superglue"
   title: "SuperGlue: Learning Feature Matching with Graph Neural Networks"
@@ -18451,6 +18509,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Tensor Programs II"
 
 - id: "paper-kernel-and-rich-regimes"
   title: "Kernel and Rich Regimes in Overparametrized Models"
@@ -18677,6 +18736,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "LTH at Scale (Rewinding)"
 
 - id: "paper-lrm"
   title: "LRM: Large Reconstruction Model for Single Image to 3D"
@@ -18871,6 +18931,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "RepLLaMA / RankLLaMA"
 
 - id: "paper-llm2vec"
   title: "LLM2Vec: Large Language Models Are Secretly Powerful Text Encoders"
@@ -18890,6 +18951,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "RepLLaMA / RankLLaMA"
 
 - id: "paper-colpali"
   title: "ColPali: Efficient Document Retrieval with Vision Language Models"
@@ -19163,6 +19225,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "Data for 128K Context"
 
 - id: "paper-memorizing-transformers"
   title: "Memorizing Transformers"
@@ -19336,6 +19399,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "NFSP"
 
 - id: "paper-capture-the-flag"
   title: "Human-level performance in first-person multiplayer games with population-based deep reinforcement learning"
@@ -19603,6 +19667,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Gated SAEs"
 
 - id: "paper-sparse-feature-circuits"
   title: "Sparse Feature Circuits: Discovering and Editing Interpretable Causal Graphs in Language Models"
@@ -19855,6 +19920,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "BiLSTM Dep Parsing"
 
 - id: "paper-algoperf-benchmark"
   title: "Benchmarking Neural Network Training Algorithms"
@@ -20109,6 +20175,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "o1 System Card"
 
 - id: "paper-sft-memorizes-rl-generalizes"
   title: "SFT Memorizes, RL Generalizes: A Comparative Study of Foundation Model Post-training"
@@ -20227,6 +20294,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "HRM"
 
 - id: "paper-hstu-generative-recommenders"
   title: "Actions Speak Louder than Words: Trillion-Parameter Sequential Transducers for Generative Recommendations"
@@ -20832,6 +20900,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "MoCo v2"
 
 - id: "paper-swav"
   title: "Unsupervised Learning of Visual Features by Contrasting Cluster Assignments"
@@ -20850,6 +20919,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "DeepCluster"
 
 - id: "paper-coca"
   title: "CoCa: Contrastive Captioners are Image-Text Foundation Models"
@@ -20946,6 +21016,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "RetNet"
 
 - id: "paper-deltanet-parallel"
   title: "Parallelizing Linear Transformers with the Delta Rule over Sequence Length"
@@ -21160,6 +21231,7 @@
   roadmap: "ai-engineer"
   research: "genai"
   quality: 4
+  doFirst: "PET (Cloze Questions)"
 
 - id: "paper-what-can-transformers-learn-icl"
   title: "What Can Transformers Learn In-Context? A Case Study of Simple Function Classes"
@@ -21805,6 +21877,7 @@
   priority: 1
   roadmap: "ai-agents"
   quality: 4
+  doFirst: "Never Give Up"
 
 - id: "paper-ddpg-continuous-control"
   title: "Continuous control with deep reinforcement learning"
@@ -22155,6 +22228,7 @@
   priority: 1
   roadmap: "ai-agents"
   quality: 4
+  doFirst: "Qwen2-VL"
 
 - id: "paper-cambrian-1"
   title: "Cambrian-1: A Fully Open, Vision-Centric Exploration of Multimodal LLMs"
@@ -22213,6 +22287,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "SigLIP 2"
 
 - id: "paper-dinov3"
   title: "DINOv3"
@@ -22381,24 +22456,6 @@
   roadmap: "ai-engineer"
   after: [annotated-transformer]
   quality: 4
-
-- id: "article-meta-cicero"
-  title: "CICERO: An AI agent that negotiates, persuades, and cooperates with people"
-  short: "CICERO blog"
-  provider: "Meta AI"
-  type: "article"
-  url: "https://ai.facebook.com/blog/cicero-ai-negotiates-persuades-and-cooperates-with-people"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "free"
-  estHours: 1
-  summary: "Overview of how CICERO combined a dialogue model with strategic planning to play full-press Diplomacy at a human level."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-agents"
-  quality: 3
 
 - id: "article-intuitive-sae-explanation"
   title: "An Intuitive Explanation of Sparse Autoencoders for LLM Interpretability"
@@ -22938,6 +22995,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Visual Guide to Mamba"
 
 - id: "article-goomba-ssm-transformer-tradeoffs"
   title: "On the Tradeoffs of State Space Models and Transformers"
@@ -23319,6 +23377,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "gRPC core concepts"
 
 - id: "docs-passkeys-dev"
   title: "passkeys.dev - Passkeys Developer Resources"
@@ -23766,6 +23825,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "AWS S3 outage 2017"
 
 - id: "docs-flink-stateful-stream-processing"
   title: "Stateful Stream Processing (Flink concepts)"
@@ -23841,6 +23901,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "gRPC retry"
 
 - id: "docs-webauthn-level-3"
   title: "Web Authentication: An API for accessing Public Key Credentials Level 3"
@@ -23859,6 +23920,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "WebAuthn Guide"
 
 - id: "repo-tuf-specification"
   title: "The Update Framework (TUF) Specification"
@@ -23952,6 +24014,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Announcing Envoy"
 
 - id: "course-confluent-kafka-internals-transactions"
   title: "Kafka Internal Architecture: Transactions"
@@ -23970,6 +24033,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Kafka 101"
 
 - id: "course-openssf-lfd121"
   title: "Developing Secure Software (LFD121)"
@@ -24155,6 +24219,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Automerge docs"
 
 - id: "repo-y-crdt"
   title: "y-crdt (Yrs)"
@@ -24173,6 +24238,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Yjs docs"
 
 - id: "repo-loro"
   title: "Loro"
@@ -24248,6 +24314,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "DDD Lite in Go"
 
 - id: "repo-dddsample-core"
   title: "DDDSample (Cargo tracking)"
@@ -24266,6 +24333,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "DDD Reference"
 
 - id: "practice-netflix-concurrency-limits"
   title: "Netflix concurrency-limits"
@@ -24303,6 +24371,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Shopify BFCM resiliency"
 
 - id: "repo-sigstore-cosign"
   title: "cosign: code signing and transparency for containers and binaries"
@@ -24378,6 +24447,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Practical Crypto (Nakov)"
 
 - id: "repo-libsodium"
   title: "libsodium"
@@ -24396,6 +24466,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Practical Crypto (Nakov)"
 
 - id: "repo-resilience-engineering-papers"
   title: "Resilience engineering papers"
@@ -24490,6 +24561,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "How Workers works"
 
 - id: "repo-josephg-reference-crdts"
   title: "Reference CRDTs"
@@ -24604,6 +24676,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "EventStorming Cheat Sheet"
 
 - id: "repo-eventsourcing-netcore"
   title: "EventSourcing.NetCore"
@@ -24622,6 +24695,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "MSIO: Event Sourcing"
 
 - id: "repo-cloudflare-pingora"
   title: "Pingora: a Rust framework to build fast, reliable and programmable networked systems"
@@ -24678,6 +24752,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "OpenFGA modeling"
 
 - id: "repo-cedar-policy"
   title: "Cedar policy language"
@@ -25017,6 +25092,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Interleaving anomalies"
 
 - id: "paper-eg-walker"
   title: "Collaborative Text Editing with Eg-walker: Better, Faster, Smaller"
@@ -25320,6 +25396,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "MDN HTTP caching"
 
 - id: "article-spiewak-understanding-ot"
   title: "Understanding and Applying Operational Transformation"
@@ -25502,6 +25579,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Threat Modeling Manifesto"
 
 - id: "chapter-sre-workbook-implementing-slos"
   title: "Implementing SLOs (The Site Reliability Workbook, Ch. 2)"
@@ -25781,6 +25859,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Central-server collab arch"
 
 - id: "article-weidner-collab-data-design"
   title: "Designing Data Structures for Collaborative Apps"
@@ -25856,6 +25935,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Yjs docs"
 
 - id: "article-tilkov-dont-start-monolith"
   title: "Don't start with a monolith"
@@ -25931,6 +26011,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "MSIO: Outbox"
 
 - id: "article-vernon-effective-aggregate-design"
   title: "Effective Aggregate Design (Parts I-III)"
@@ -25949,6 +26030,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Fowler: DDD Aggregate"
 
 - id: "article-linkerd-beyond-round-robin"
   title: "Beyond Round Robin: Load Balancing for Latency"
@@ -25985,6 +26067,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "What is Envoy"
 
 - id: "article-cloudflare-durable-objects"
   title: "Durable Objects: Easy, Fast, Correct - Choose three"
@@ -26212,6 +26295,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "AWS us-east-1 Dec 2021"
 
 - id: "chapter-sre-workbook-alerting-on-slos"
   title: "Alerting on SLOs (The Site Reliability Workbook, Ch. 5)"
@@ -26380,6 +26464,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Kafka 101"
 
 - id: "article-confluent-transactions-kafka"
   title: "Transactions in Apache Kafka"
@@ -26532,6 +26617,7 @@
   roadmap: "software-architect"
   blog: true
   quality: 4
+  doFirst: "Crypto 101"
 
 - id: "blog-filippo-valsorda"
   title: "Filippo Valsorda's blog (words.filippo.io)"
@@ -26553,6 +26639,7 @@
 
 # ---- Systems: low-level programming, OS kernels, algorithms (804)
   quality: 4
+  doFirst: "Crypto 101"
 
 - id: "repo-networkx"
   title: "NetworkX"
@@ -26712,6 +26799,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "cp-algo: Dinic Max Flow"
 
 - id: "docs-redis-cluster-spec"
   title: "Redis cluster specification"
@@ -26729,6 +26817,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Redis Explained"
 
 - id: "docs-uops-info"
   title: "uops.info: instruction latency, throughput and port usage tables"
@@ -26764,6 +26853,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "llvm-mca Docs"
 
 - id: "docs-vtune-microarch-exploration"
   title: "Intel VTune Profiler User Guide: Microarchitecture Exploration"
@@ -26891,6 +26981,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "gRPC core concepts"
 
 - id: "docs-envoy-threading-model"
   title: "Envoy threading model"
@@ -26908,6 +26999,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "What is Envoy"
 
 - id: "docs-grpc-protocol-http2"
   title: "gRPC over HTTP/2 protocol specification"
@@ -26925,6 +27017,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "gRPC core concepts"
 
 - id: "rfc-9438-cubic"
   title: "RFC 9438: CUBIC for Fast and Long-Distance Networks"
@@ -27176,6 +27269,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "aho-corasick crate (Rust)"
 
 - id: "docs-lkmm-explanation"
   title: "Explanation of the Linux-Kernel Memory Consistency Model"
@@ -27231,6 +27325,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Postgres B-Tree Docs"
 
 - id: "docs-ietf-ccwg-bbr-draft"
   title: "BBR Congestion Control (draft-ietf-ccwg-bbr)"
@@ -27358,6 +27453,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "ext4 on-disk layout"
 
 - id: "docs-kernel-bpf-verifier"
   title: "eBPF verifier"
@@ -28026,6 +28122,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "DuckDB Internals Overview"
 
 - id: "repo-datafusion"
   title: "Apache DataFusion source"
@@ -28405,6 +28502,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "SIMD Unicode Transcoding"
 
 - id: "repo-base64simd"
   title: "base64simd: Base64 coding and decoding with SIMD instructions"
@@ -28422,6 +28520,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "AVX-512 Base64"
 
 - id: "repo-croaring"
   title: "CRoaring: Roaring bitmaps in C and C++"
@@ -28440,6 +28539,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "SIMD Set Intersection"
 
 - id: "repo-abel-nanobench"
   title: "nanoBench: tool for running small microbenchmarks on x86"
@@ -28457,6 +28557,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "nanoBench paper"
 
 - id: "repo-abel-uica"
   title: "uiCA: The uops.info Code Analyzer (code)"
@@ -28529,6 +28630,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Jolt zkVM paper"
 
 - id: "repo-zcash-halo2"
   title: "halo2 (Zcash)"
@@ -28546,6 +28648,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "halo2 Book"
 
 - id: "repo-arkworks-rs-algebra"
   title: "arkworks algebra"
@@ -28563,6 +28666,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "MoonMath Manual"
 
 - id: "repo-velox"
   title: "Velox source"
@@ -28598,6 +28702,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Apache Calcite Paper"
 
 - id: "repo-db-engine-paradigms"
   title: "db-engine-paradigms (Typer and Tectorwise)"
@@ -28726,6 +28831,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "What is Envoy"
 
 - id: "practice-cilium"
   title: "Cilium: eBPF-based networking, security and observability"
@@ -28926,6 +29032,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "TiDB paper"
 
 - id: "repo-foundationdb"
   title: "FoundationDB"
@@ -29019,6 +29126,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Rust io-uring crate"
 
 - id: "repo-sched-ext-scx"
   title: "scx: sched_ext schedulers and tools"
@@ -29054,6 +29162,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Demikernel (SOSP '21)"
 
 - id: "repo-drgn"
   title: "drgn: programmable debugger"
@@ -29089,6 +29198,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "KASAN kernel docs"
 
 - id: "repo-differential-dataflow"
   title: "Differential Dataflow"
@@ -29748,6 +29858,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "HTTP/3 explained"
 
 - id: "paper-openflow"
   title: "OpenFlow: Enabling Innovation in Campus Networks"
@@ -30218,6 +30329,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Gentle Intro to WCOJ"
 
 - id: "paper-skew-strikes-back"
   title: "Skew Strikes Back: New Developments in the Theory of Join Algorithms"
@@ -30235,6 +30347,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Gentle Intro to WCOJ"
 
 - id: "paper-unnesting-arbitrary-queries"
   title: "Unnesting Arbitrary Queries"
@@ -30748,6 +30861,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "EEVDF kernel docs"
 
 - id: "paper-arrakis"
   title: "Arrakis: The Operating System is the Control Plane"
@@ -31214,6 +31328,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "MoonMath Manual"
 
 - id: "article-duckdb-parallel-grouped-aggregation"
   title: "Parallel Grouped Aggregation in DuckDB"
@@ -31231,6 +31346,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "DuckDB Internals Overview"
 
 - id: "article-duckdb-external-sorting"
   title: "Fastest Table Sort in the West - Redesigning DuckDB's Sort"
@@ -31248,6 +31364,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "DuckDB Internals Overview"
 
 - id: "article-cockroachdb-cost-based-optimizer"
   title: "How We Built a Cost-Based SQL Optimizer"
@@ -31302,6 +31419,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "TiKV: B-Tree vs LSM"
 
 - id: "article-brendan-gregg-perf-examples"
   title: "Linux perf Examples"
@@ -31553,6 +31671,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "CRDB atomic txns"
 
 - id: "article-liburing-networking-2023"
   title: "io_uring and networking in 2023"
@@ -31826,6 +31945,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "B2B: Concepts"
 
 - id: "docs-cppreference-ranges"
   title: "Ranges library (since C++20) - cppreference.com"
@@ -32005,6 +32125,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Crossbeam Epoch RFC"
 
 - id: "docs-folly-hazptr"
   title: "folly Hazptr.h (hazard pointer library and docs)"
@@ -32094,6 +32215,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "cppreference: C++20"
 
 - id: "docs-std-ptr-strict-provenance"
   title: "std::ptr: Strict provenance"
@@ -32219,6 +32341,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "B2B: Move Semantics"
 
 - id: "talk-carruth-tuning-cpp-benchmarks"
   title: "CppCon 2015: Tuning C++: Benchmarks, and CPUs, and Compilers! Oh My!"
@@ -32937,6 +33060,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "std::format from Scratch"
 
 - id: "practice-tracing-repo"
   title: "tracing"
@@ -33062,6 +33186,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "egg tutorials"
 
 - id: "practice-egglog"
   title: "egglog"
@@ -33259,6 +33384,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "PyPy Blog"
 
 - id: "repo-folly"
   title: "folly"
@@ -33582,6 +33708,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "V8 Sparkplug"
 
 - id: "paper-immix"
   title: "Immix: a mark-region garbage collector with space efficiency, fast collection, and mutator performance"
@@ -33653,6 +33780,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "egg tutorials"
 
 - id: "paper-doop-points-to"
   title: "Strictly Declarative Specification of Sophisticated Points-to Analyses"
@@ -33724,6 +33852,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Stacked Borrows spec"
 
 - id: "paper-egg-equality-saturation"
   title: "egg: Fast and Extensible Equality Saturation"
@@ -33939,6 +34068,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "cppreference: C++20"
 
 - id: "docs-eastl-design"
   title: "EASTL Design"
@@ -33956,6 +34086,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "EASTL"
 
 - id: "article-boats-pin"
   title: "Pin"
@@ -34153,6 +34284,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "JEP 439 Generational ZGC"
 
 - id: "article-oldnewthing-coroutine-promise-model"
   title: "C++ coroutines: The mental model for coroutine promises - The Old New Thing"
@@ -34340,6 +34472,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Tour of WGSL"
 
 - id: "vulkan-guide-synchronization"
   title: "Synchronization (Vulkan Guide)"
@@ -34434,6 +34567,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Metal by Example"
 
 - id: "course-intro-to-dxr-siggraph-2018"
   title: "Introduction to DirectX Raytracing (SIGGRAPH 2018 course)"
@@ -34566,6 +34700,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "PBS Course 2016"
 
 - id: "course-restir-gentle-intro-2023"
   title: "A Gentle Introduction to ReSTIR: Path Reuse in Real-time"
@@ -34678,6 +34813,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Naive 2D GI (jason.today)"
 
 - id: "catlike-custom-srp"
   title: "Unity Custom SRP Tutorials"
@@ -34753,6 +34889,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Bikker BVH 5: TLAS/BLAS"
 
 - id: "practice-oidn"
   title: "Intel Open Image Denoise"
@@ -34866,6 +35003,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Tone Mapping (64)"
 
 - id: "repo-glslang"
   title: "glslang: Khronos GLSL/ESSL front end and validator"
@@ -35840,6 +35978,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Tone Mapping (64)"
 
 - id: "talk-pharr-rt-next-frontier-2018"
   title: "Real-Time Rendering's Next Frontier: Adopting Lessons from Offline Ray Tracing"
@@ -35877,6 +36016,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Cascaded Shadow Maps"
 
 - id: "article-mjp-sg-series"
   title: "SG Series Part 1: A Brief (and Incomplete) History of Baked Lighting Representations"
@@ -35914,6 +36054,7 @@
   priority: 1
   roadmap: "game-developer"
   quality: 5
+  doFirst: "Physically Based Bloom"
 
 - id: "talk-frostbite-unified-volumetrics"
   title: "Physically Based and Unified Volumetric Rendering in Frostbite"
@@ -36084,6 +36225,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "LearnOpenGL Compute"
 
 - id: "themaister-vulkan-sync"
   title: "Yet another blog explaining Vulkan synchronization"
@@ -36235,6 +36377,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Jorge Jimenez"
 
 - id: "talk-frostbite-shipping-dynamic-gi-2024"
   title: "Shipping Dynamic Global Illumination in Frostbite"
@@ -36349,6 +36492,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Tone Mapping (64)"
 
 - id: "article-raph-prefix-sum-portable"
   title: "Prefix sum on portable compute shaders"
@@ -36367,6 +36511,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Compute Shader 101"
 
 - id: "tardif-binding-bindlessly"
   title: "Binding Bindlessly"
@@ -36593,6 +36738,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Taichi docs"
 
 - id: "book-fdm-langtangen"
   title: "The Craft of Finite Difference Computing with Partial Differential Equations"
@@ -37624,6 +37770,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Underactuated: TrajOpt"
 
 - id: "repo-python-robotics"
   title: "PythonRobotics"
@@ -37871,6 +38018,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "ORB-SLAM2"
 
 - id: "repo-vins-fusion"
   title: "VINS-Fusion (official code)"
@@ -38101,6 +38249,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "GMR paper"
 
 - id: "practice-act-plus-plus"
   title: "ACT++: ACT, Diffusion Policy and VINN for ALOHA"
@@ -38154,6 +38303,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Underactuated: TrajOpt"
 
 - id: "repo-mujoco-warp"
   title: "MuJoCo Warp (MJWarp) (code)"
@@ -38297,6 +38447,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "MASt3R-SLAM"
 
 - id: "repo-openpcdet"
   title: "OpenPCDet"
@@ -38437,6 +38588,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "Underactuated: Humanoids"
 
 - id: "paper-isaac-gym"
   title: "Isaac Gym: High Performance GPU-Based Physics Simulation For Robot Learning"
@@ -39101,6 +39253,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "FAST-LIO"
 
 - id: "paper-isam2"
   title: "iSAM2: Incremental Smoothing and Mapping Using the Bayes Tree"
@@ -39477,6 +39630,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Flecs Quickstart"
 
 - id: "docs-entt-crash-course-entity"
   title: "Crash Course: entity-component system (EnTT)"
@@ -39495,6 +39649,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "EnTT Wiki"
 
 - id: "docs-unity-entities"
   title: "Entities overview (Unity Entities 1.3)"
@@ -39683,6 +39838,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "ECS Back and Forth 1"
 
 - id: "article-molecular-job-system-1"
   title: "Job System 2.0: Lock-Free Work Stealing - Part 1: Basics"
@@ -39755,6 +39911,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Quake 2 Code Review"
 
 - id: "article-ourmachinery-dll-hot-reload"
   title: "DLL Hot Reloading in Theory and Practice"
@@ -39827,6 +39984,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "Think Bayes 2"
 
 - id: "repo-mitmath-1806-2025"
   title: "MIT 18.06 Linear Algebra (Spring 2025 course repo)"
@@ -39987,6 +40145,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "DoWhy paper"
 
 - id: "repo-cvxpy"
   title: "CVXPY"
@@ -40094,6 +40253,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Think Bayes 2"
 
 - id: "repo-econml"
   title: "EconML"
@@ -40398,6 +40558,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "ADI Electronics Text"
 
 - id: "ees-mit-6-02"
   title: "6.02 Introduction to EECS II: Digital Communication Systems (Fall 2012)"
@@ -40558,6 +40719,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "ADI Electronics Text"
 
 - id: "ees-jos-pasp"
   title: "Physical Audio Signal Processing"
@@ -40611,6 +40773,7 @@
   fromYear: 3
   priority: 1
   quality: 5
+  doFirst: "ADI Electronics Text"
 
 - id: "ees-gnuradio-core-concepts"
   title: "GNU Radio Tutorials: Core Concepts"
@@ -40628,6 +40791,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "GNU Radio First Flowgraph"
 
 - id: "ees-spors-sas-lecture"
   title: "Signals and Systems - Theory and Computational Examples"
@@ -40715,6 +40879,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "pandapower Power Flow"
 
 - id: "ees-matpower"
   title: "MATPOWER"
@@ -40856,6 +41021,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "PySDR Synchronization"
 
 - id: "ees-pysdr-cyclostationary"
   title: "PySDR: Cyclostationary Processing"
@@ -40873,6 +41039,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "PySDR Synchronization"
 
 - id: "ees-ben-yaakov-eepower"
   title: "Sam Ben-Yaakov articles on EEPower"
@@ -41001,6 +41168,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "ChampSim Paper"
 
 - id: "repo-cacti"
   title: "CACTI"
@@ -41035,6 +41203,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Ramulator"
 
 - id: "repo-zsim"
   title: "zsim"
@@ -41070,6 +41239,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  after: [paper-trrespass]
 
 - id: "practice-applegpu"
   title: "Apple GPU (G13) reverse engineering"
@@ -41517,6 +41687,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "RowHammer Retrospective"
 
 - id: "paper-trrespass"
   title: "TRRespass: Exploiting the Many Sides of Target Row Refresh"
@@ -41534,6 +41705,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "RowHammer Retrospective"
 
 - id: "paper-learning-memory-access-patterns"
   title: "Learning Memory Access Patterns"

@@ -49,25 +49,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
-
-- id: "docs-rig-agents"
-  title: "Rig Agents: High-Level LLM Orchestration"
-  short: "Rig docs: Agents"
-  provider: "Rig"
-  type: "article"
-  url: "https://docs.rig.rs/docs/concepts/agent"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Explains how Rig composes a model, preamble, context and tools into an agent and how multi-turn tool calling is driven."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  after: [repo-rig-rust]
-  quality: 3
+  after: [docs-llamacpp-gbnf]
 
 - id: "book-hands-on-llms"
   title: "Hands-On Large Language Models: Language Understanding and Generation"
@@ -106,25 +88,6 @@
   roadmap: "ai-engineer"
   note: "Paid"
   quality: 4
-
-- id: "book-prompt-engineering-for-llms"
-  title: "Prompt Engineering for LLMs: The Art and Science of Building Large Language Model-Based Applications"
-  short: "Prompt Eng. for LLMs"
-  provider: "John Berryman, Albert Ziegler (O'Reilly, 2024)"
-  type: "book"
-  url: "https://www.oreilly.com/library/view/-/9781098156145/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intro"
-  cost: "paid"
-  estHours: 8
-  summary: "Written by the GitHub Copilot engineers, it treats prompts as engineered context and shows how to structure, assemble and evaluate them inside an agent harness."
-  fromYear: 1
-  priority: 3
-  roadmap: "ai-agents"
-  note: "Paid"
-  quality: 3
 
 - id: "book-human-compatible-russell"
   title: "Human Compatible: Artificial Intelligence and the Problem of Control"
@@ -281,46 +244,6 @@
   after: [karpathy-zero-to-hero]
   quality: 5
 
-- id: "book-llm-engineers-handbook"
-  title: "LLM Engineer's Handbook: Master the Art of Engineering Large Language Models from Concept to Production"
-  short: "LLM Engineer's Handbook"
-  provider: "Paul Iusztin, Maxime Labonne (Packt, 2024)"
-  type: "book"
-  url: "https://www.packtpub.com/product/llm-engineers-handbook/9781836200079"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 14
-  summary: "End-to-end project book that builds a full LLM system with data collection, fine-tuning, RAG, deployment and LLMOps, useful as a template for real portfolio projects."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  after: [book-hands-on-llms]
-  quality: 3
-
-- id: "book-generative-deep-learning-2e"
-  title: "Generative Deep Learning: Teaching Machines to Paint, Write, Compose, and Play (2nd ed.)"
-  short: "Generative Deep Learning"
-  provider: "David Foster (O'Reilly, 2023)"
-  type: "book"
-  url: "https://www.oreilly.com/library/view/-/9781098134174/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 14
-  summary: "Builds VAEs, GANs, autoregressive models, normalizing flows, energy-based and diffusion models one by one, giving a clear map of the generative-model family."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-engineer"
-  note: "Paid"
-  doFirst: "Hands-On ML"
-  quality: 3
-
 - id: "book-evals-for-ai-engineers"
   title: "Evals for AI Engineers"
   short: "Evals for AI Engineers"
@@ -433,10 +356,10 @@
   estHours: 8
   summary: "The researcher behind deliberate practice explains how real expertise is built, which helps you design drills for coding, math and kernel work instead of just logging hours."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
-  quality: 3
+  quality: 4
 
 - id: "book-deep-work"
   title: "Deep Work: Rules for Focused Success in a Distracted World"
@@ -475,25 +398,6 @@
   roadmap: "software-architect"
   note: "Paid"
   after: [book-deep-work]
-  quality: 3
-
-- id: "book-a-mind-for-numbers"
-  title: "A Mind for Numbers: How to Excel at Math and Science (Even If You Flunked Algebra)"
-  short: "A Mind for Numbers"
-  provider: "Barbara Oakley (TarcherPerigee, 2014)"
-  type: "book"
-  url: "https://www.penguinrandomhouse.com/books/314056/a-mind-for-numbers-by-barbara-oakley-phd/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "paid"
-  estHours: 8
-  summary: "Practical techniques (focused vs diffuse thinking, chunking, beating procrastination) for grinding through linear algebra, physics and calculus on your own."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  note: "Paid"
   quality: 3
 
 - id: "book-how-to-read-a-book"
@@ -553,25 +457,6 @@
   note: "Paid"
   quality: 4
 
-- id: "book-making-of-a-manager"
-  title: "The Making of a Manager: What to Do When Everyone Looks to You"
-  short: "Making of a Manager"
-  provider: "Julie Zhuo (Portfolio, 2019)"
-  type: "book"
-  url: "https://penguinrandomhouse.com/books/isbn/9780735219564"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "paid"
-  estHours: 7
-  summary: "A warm, practical first-time-manager guide on feedback, one-on-ones, meetings and hiring for when you start leading people."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  note: "Paid"
-  quality: 3
-
 - id: "book-software-engineers-guidebook"
   title: "The Software Engineer's Guidebook: Navigating Senior, Tech Lead, Staff and Principal Positions at Tech Companies and Startups"
   short: "SWE Guidebook (Orosz)"
@@ -586,10 +471,10 @@
   estHours: 14
   summary: "A broad, current field guide to how engineering careers, promotions and practices really work at big tech and startups, ideal before an NVIDIA-style internship."
   fromYear: 1
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
-  quality: 3
+  quality: 4
 
 - id: "book-the-effective-engineer"
   title: "The Effective Engineer: How to Leverage Your Efforts in Software Engineering to Make a Disproportionate and Meaningful Impact"
@@ -604,25 +489,6 @@
   cost: "paid"
   estHours: 7
   summary: "Frames engineering work around leverage (iteration speed, tooling, measurement), a habit that compounds early in a career."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  note: "Paid"
-  quality: 3
-
-- id: "book-the-phoenix-project"
-  title: "The Phoenix Project: A Novel about IT, DevOps, and Helping Your Business Win"
-  short: "The Phoenix Project"
-  provider: "Gene Kim, Kevin Behr, George Spafford (IT Revolution, 2013)"
-  type: "book"
-  url: "https://itrevolution.com/product/the-phoenix-project/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intro"
-  cost: "paid"
-  estHours: 9
-  summary: "A novel that makes flow, bottlenecks and unplanned work intuitive before you meet them for real in a production team."
   fromYear: 1
   priority: 3
   roadmap: "software-architect"
@@ -813,10 +679,10 @@
   estHours: 16
   summary: "The canonical map of cognitive biases, useful for better technical estimates, debugging judgement and founder decisions under uncertainty."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
-  quality: 3
+  quality: 4
 
 - id: "book-sense-of-style"
   title: "The Sense of Style: The Thinking Person's Guide to Writing in the 21st Century"
@@ -851,11 +717,11 @@
   estHours: 10
   summary: "Shows what senior technical leadership looks like day to day (big-picture thinking, executing projects, leveling others up) so you know what to grow toward."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
   doFirst: "Software Engineer's Guidebook"
-  quality: 3
+  quality: 4
 
 - id: "book-staff-engineer-larson"
   title: "Staff Engineer: Leadership Beyond the Management Track"
@@ -911,10 +777,10 @@
   estHours: 7
   summary: "Walks through each rung from mentor to tech lead to CTO, which is exactly the path a technical founder climbs while hiring a first team."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
-  quality: 3
+  quality: 4
 
 - id: "book-mythical-man-month"
   title: "The Mythical Man-Month: Essays on Software Engineering, Anniversary Edition"
@@ -949,11 +815,11 @@
   estHours: 7
   summary: "Argues that software's hardest problems are human ones and shows how environment and team chemistry drive productivity."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
   after: [book-mythical-man-month]
-  quality: 3
+  quality: 4
 
 - id: "book-accelerate"
   title: "Accelerate: The Science of Lean Software and DevOps: Building and Scaling High Performing Technology Organizations"
@@ -972,7 +838,6 @@
   priority: 1
   roadmap: "software-architect"
   note: "Paid"
-  after: [book-the-phoenix-project]
   quality: 5
 
 - id: "book-high-output-management"
@@ -1048,10 +913,10 @@
   estHours: 9
   summary: "Defines strategy as diagnosis, guiding policy and coherent action, a tool for cutting through vague plans in a startup or a research agenda."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   note: "Paid"
-  quality: 3
+  quality: 4
 
 - id: "book-working-in-public"
   title: "Working in Public: The Making and Maintenance of Open Source Software"
@@ -1169,26 +1034,6 @@
   note: "Paid"
   quality: 5
 
-- id: "book-clean-architecture"
-  title: "Clean Architecture: A Craftsman's Guide to Software Structure and Design"
-  short: "Clean Architecture"
-  provider: "Robert C. Martin (Pearson, 2017)"
-  type: "book"
-  url: "https://www.informit.com/store/clean-architecture-a-craftsmans-guide-to-software-structure-9780134494166"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [architecture]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 10
-  summary: "Explains dependency rules, component boundaries and keeping business logic independent of frameworks, ideas worth knowing even where you later disagree."
-  fromYear: 2
-  priority: 3
-  roadmap: "software-architect"
-  note: "Paid"
-  after: [book-philosophy-of-software-design-2e]
-  quality: 3
-
 - id: "book-domain-driven-design-evans"
   title: "Domain-Driven Design: Tackling Complexity in the Heart of Software"
   short: "Domain-Driven Design"
@@ -1269,25 +1114,6 @@
   roadmap: "software-architect"
   note: "Paid"
   quality: 4
-
-- id: "book-operating-system-concepts-10e"
-  title: "Operating System Concepts (10th ed.)"
-  short: "OS Concepts (Dinosaur)"
-  provider: "Abraham Silberschatz, Peter Baer Galvin, Greg Gagne (Wiley, 2018)"
-  type: "book"
-  url: "https://www.os-book.com/OS10/"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [systems]
-  level: "intro"
-  cost: "paid"
-  estHours: 35
-  summary: "The classic 'dinosaur book' covering processes, scheduling, memory, storage and protection, a thorough companion to university OS courses."
-  fromYear: 1
-  priority: 3
-  roadmap: "software-architect"
-  note: "Paid"
-  quality: 3
 
 - id: "book-computer-networking-kurose"
   title: "Computer Networking: A Top-Down Approach (8th ed.)"
@@ -1460,25 +1286,6 @@
   note: "Paid"
   after: [rust-book]
   quality: 4
-
-- id: "book-rust-in-action"
-  title: "Rust in Action: Systems Programming Concepts and Techniques"
-  short: "Rust in Action"
-  provider: "Tim McNamara (Manning, 2021)"
-  type: "book"
-  url: "https://www.manning.com/books/rust-in-action"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [languages]
-  level: "intermediate"
-  cost: "paid"
-  estHours: 14
-  summary: "Learns Rust by building systems pieces (a key-value store, a CPU emulator, networking, a tiny OS kernel), which doubles as a systems-programming primer."
-  fromYear: 2
-  priority: 3
-  note: "Paid"
-  after: [rust-book]
-  quality: 3
 
 - id: "book-cpp-concurrency-in-action-2e"
   title: "C++ Concurrency in Action (2nd ed.)"

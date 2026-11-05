@@ -874,6 +874,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Unity Junior Programmer"
 
 - id: "lode-raycasting"
   title: "Lode's Computer Graphics Tutorial: Raycasting"
