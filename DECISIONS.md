@@ -2856,7 +2856,10 @@ generous height costs a little padding at the end of the list, never a missing r
 at 0. None is at 0; the counts are in `docs/imports-atlas-library-17.md`, from `scratch/filter-counts.ts`.
 
 **Links.** The container cannot resolve the hosts, so the pull request's CI ran `npm run check:links -- --in
-data/resources/library-atlas-17.yaml` in a one-off `links-atlas-17` job, removed before the merge: LINKS-RESULT
+data/resources/library-atlas-17.yaml` in a one-off `links-atlas-17` job, removed before the merge: 191 distinct URLs of the new and restored rows: 185 ok, 2 failed, 4 to check by hand (run
+42109729220). Both failures are timeouts (Nilsson's *Quest for AI* PDF on ai.stanford.edu, SOLIDWORKS's CSWP page), not
+404s, so nothing was changed; the 403s from Princeton University Press, Macmillan, SIAM News and a Substack are hosts that
+turn scripts away, never counted as broken. Every URL is the file's; none was changed.
 
 Tests: `tests/unit/quality-pass.test.ts` (restored, new and superseded rows, Electron apart from Forge, CSWP's
 prerequisite as text), `build-ship.test.ts` (the game shipping rows in Game builds, the jam calendar out),

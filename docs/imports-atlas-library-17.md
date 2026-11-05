@@ -183,4 +183,20 @@ shows 0. The thinnest: Game builds 8, Simulation, DevOps, Quantum and Hardware b
 
 ## Links
 
-LINKS-RESULT
+`npm run check:links -- --in data/resources/library-atlas-17.yaml` ran on the pull request's runner in a one-off
+`links-atlas-17` job (run 42109729220), since the container cannot resolve the hosts; the job is removed before the merge.
+191 distinct URLs of the new and restored rows: 185 ok, 2 failed, 4 to check by hand.
+
+- **Failed, both timeouts** (no answer, not a 404): Nilsson's *The Quest for Artificial Intelligence* PDF on
+  ai.stanford.edu (connect timeout) and SOLIDWORKS's CSWP page (the plan's own CSWP certification has the same URL).
+  Open each in a browser before changing anything; nothing here edits the data.
+- **Check by hand** (403, the site turned the checker away): Princeton University Press (*AI Snake Oil*), Macmillan
+  (Mitchell's *Artificial Intelligence: A Guide for Thinking Humans*), SIAM News and the "It Can Think" Substack.
+
+Every URL is the file's; none was changed.
+
+**A certificate the plan tracks.** The new SOLIDWORKS CSWP row has the URL of the plan's own CSWP certification
+(`data/certs.yaml`, Plan › Credentials), as eight certificate rows of the plan gap fill already do (AWS Solutions
+Architect and ML Engineer Associate, LFCS, CKA, CKAD, Terraform Associate, Google's Professional ML Engineer, MITx
+Statistics and Data Science). The importer leaves out only a row with a certification's id; such a row stays, as those
+eight did, and shows under Certificates with its own Earned toggle.
