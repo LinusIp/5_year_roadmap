@@ -1382,3 +1382,15 @@ Verified on this machine (Linux, Chromium 140):
 - Minimum rating (All, ★3+, ★4+, ★5, with live counts) replaces Canon only (`canon=1` opens ★5); Sort offers Rating
   (high → low); More resources says "★★★ and below". The CUB link is allowlisted as checked by hand.
 - Tests: `tests/unit/star-rating.test.ts`, `tests/e2e/star-rating.spec.ts` (new); two new screenshots.
+
+## Pull request #53: the Atlas Library's category refill and upgrade pass
+
+- The 7,679-row file: 150 rows the file no longer has removed (progress on them kept), 191 added (130 restored under
+  their old ids, 61 new), quality and priority from the file on 93 entries. Resources: 7,650 to 7,691
+  (`docs/imports-atlas-library-17.md`, with every quick filter, area chip and track filter counted; none at 0).
+- Electron's code-signing tutorial and Electron Forge's guide are listed as distinct; the importer refuses a merge into
+  a row it removes, and a new row's prerequisite that left stays text.
+- Build & ship reads Steamworks, SteamPipe, steamcmd, butler and BuildCookRun: Game builds 4 to 8.
+- The Library's windowed list no longer re-renders without end deep in a long shelf (its row height only grows), so a
+  search opened there narrows the list.
+- Tests: quality-pass, build-ship, quick-filters (unit); atlas-library (e2e, a deep-scrolled shelf). Screenshots redrawn on CI.

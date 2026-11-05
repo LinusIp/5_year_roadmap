@@ -241,6 +241,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Pallas GPU Quickstart"
 
 - id: "docs-jax-pallas-design"
   title: "Pallas Design"
@@ -340,6 +341,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "vLLM Production Stack"
 
 - id: "docs-arxiv-cs-dc-new"
   title: "arXiv cs.DC: New Submissions"
@@ -977,6 +979,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "NVIDIA: cuTile matmul"
 
 - id: "repo-ggml"
   title: "ggml"
@@ -1016,6 +1019,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "mistral-inference"
 
 - id: "repo-torchtitan"
   title: "torchtitan"
@@ -1395,6 +1399,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "MLPerf Inference"
 
 - id: "repo-gpgpu-sim"
   title: "GPGPU-Sim"
@@ -1594,6 +1599,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Applied intro to CuTeDSL"
 
 - id: "repo-flash-linear-attention"
   title: "flash-linear-attention"
@@ -2111,6 +2117,7 @@
   research: "inference"
   tags: [inference]
   quality: 5
+  doFirst: "Orca"
 
 - id: "paper-flashinfer"
   title: "FlashInfer: Efficient and Customizable Attention Engine for LLM Inference Serving"
@@ -2425,6 +2432,7 @@
   research: "diffusion"
   tags: [inference]
   quality: 4
+  doFirst: "SDXL"
 
 - id: "paper-scm"
   title: "Simplifying, Stabilizing and Scaling Continuous-Time Consistency Models"
@@ -3344,6 +3352,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Softmax CUDA Worklog"
 
 - id: "article-flash-decoding"
   title: "Flash-Decoding for long-context inference"
@@ -3763,6 +3772,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Modular Blackwell matmul 1"
 
 - id: "article-modular-blackwell-matmul-3"
   title: "Matrix Multiplication on Blackwell: Part 3 - The Optimizations Behind 85% of SOTA Performance"
@@ -3802,6 +3812,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "NVIDIA: CuTe DSL intro"
 
 - id: "blog-christian-mills-gpu-mode-notes"
   title: "GPU MODE Lecture Notes"
@@ -4120,6 +4131,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "NumPy beginners guide"
 
 - id: "docs-opencv"
   title: "OpenCV documentation and tutorials"
@@ -4191,9 +4203,9 @@
   estHours: 4
   summary: "Open-source tracing, prompt management and evals, so you can actually see what your agent did on each step."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "ai-agents"
-  quality: 3
+  quality: 4
 
 - id: "docs-hf-peft"
   title: "PEFT: Parameter-Efficient Fine-Tuning"
@@ -4655,6 +4667,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Instructor"
 
 - id: "repo-micrograd"
   title: "micrograd"
@@ -5012,6 +5025,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 5
+  doFirst: "torchvision docs"
 
 - id: "practice-mteb-repo"
   title: "MTEB (benchmark code)"
@@ -6488,6 +6502,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 5
+  doFirst: "Google RecSys course"
 
 - id: "paper-youtube-dnn-recommendations"
   title: "Deep Neural Networks for YouTube Recommendations"
@@ -6525,6 +6540,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Google RecSys course"
 
 - id: "paper-trees-vs-dl-tabular"
   title: "Why do tree-based models still outperform deep learning on tabular data?"
@@ -9949,6 +9965,7 @@
   priority: 1
   roadmap: "ai-agents"
   quality: 4
+  doFirst: "Claude Agent SDK post"
 
 - id: "article-lucumr-agent-design-still-hard"
   title: "Agent Design Is Still Hard"
@@ -9967,6 +9984,7 @@
   priority: 1
   roadmap: "ai-agents"
   quality: 4
+  doFirst: "Code is all you need"
 
 - id: "article-zechner-pi-coding-agent"
   title: "What I learned building an opinionated and minimal coding agent"
@@ -10175,6 +10193,7 @@
   priority: 1
   roadmap: "ai-agents"
   quality: 4
+  doFirst: "Ralph loop"
 
 - id: "blog-import-ai"
   title: "Import AI"
@@ -10630,6 +10649,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "OpenAPI Learn"
 
 - id: "docs-enterprise-integration-patterns"
   title: "Enterprise Integration Patterns"
@@ -10762,6 +10782,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Netflix Hystrix"
 
 - id: "docs-oss-fuzz"
   title: "OSS-Fuzz"
@@ -11840,6 +11861,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "What is PBT?"
 
 - id: "article-kreps-the-log"
   title: "The Log: What every software engineer should know about real-time data's unifying abstraction"
@@ -12362,6 +12384,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Monolith to Data Mesh"
 
 - id: "article-meta-shard-manager"
   title: "Scaling services with Shard Manager"
@@ -12675,6 +12698,7 @@
   fromYear: 3
   priority: 1
   quality: 5
+  doFirst: "HTTP/3 explained"
 
 - id: "docs-tigerbeetle-vopr"
   title: "TigerBeetle: VOPR (deterministic simulation testing)"
@@ -12728,6 +12752,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "InfiniBand + RDMA Intro"
 
 - id: "roughgarden-algorithms-illuminated"
   title: "Algorithms Illuminated (book series and free lecture videos)"
@@ -12924,6 +12949,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Stanford CS161"
 
 - id: "course-linux-kernel-labs"
   title: "Linux Kernel Teaching (linux-kernel-labs)"
@@ -14472,6 +14498,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Vector Clocks explainer"
 
 - id: "paper-cassandra"
   title: "Cassandra: A Decentralized Structured Storage System"
@@ -15447,6 +15474,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "CFS Design Doc"
 
 - id: "aphyr-jepsen-posts"
   title: "Everything Tagged \"Jepsen\" (aphyr.com)"
@@ -16399,6 +16427,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "HLSL in Vulkan"
 
 - id: "docs-directx-specs"
   title: "DirectX Specs"
@@ -16493,6 +16522,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Diff. Rendering Survey"
 
 - id: "docs-vulkan-spec"
   title: "Vulkan 1.3 Specification"
@@ -16777,6 +16807,7 @@
   roadmap: "game-developer"
   research: "diffusion"
   quality: 4
+  doFirst: "AMD FSR 3"
 
 - id: "repo-zeux-niagara"
   title: "niagara"
@@ -17237,6 +17268,7 @@
   priority: 1
   roadmap: "game-developer"
   quality: 5
+  doFirst: "Taichi Docs"
 
 - id: "docs-jax-jit-compilation"
   title: "Just-in-time compilation (JAX docs)"
@@ -17630,6 +17662,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Taichi Docs"
 
 - id: "paper-graphcast"
   title: "GraphCast: Learning skillful medium-range global weather forecasting"
@@ -18568,6 +18601,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "OmniH2O"
 
 - id: "paper-openvla-oft"
   title: "Fine-Tuning Vision-Language-Action Models: Optimizing Speed and Success"
@@ -18901,6 +18935,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Godot Architecture"
 
 - id: "repo-box2d"
   title: "Box2D v3"

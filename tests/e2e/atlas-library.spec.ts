@@ -126,7 +126,8 @@ test('Developer essentials gathers the terminal, Git, Linux, SQL and web resourc
   await expect(page.getByRole('heading', { name: new RegExp('^' + fmt(count) + ' of ' + fmt(count) + '$') })).toBeVisible();
   // Git and SQL from the sixth file, on different shelves.
   await page.getByRole('searchbox', { name: 'Search developer essentials' }).fill('Pro Git');
-  await expect(page.getByRole('button', { name: /^Pro Git/ })).toBeVisible();
+  // The book, not its chapters (the upgrade pass added "Pro Git: Contributing (6.2)").
+  await expect(page.getByRole('button', { name: /^Pro Git Scott Chacon/ })).toBeVisible();
   await page.getByRole('searchbox', { name: 'Search developer essentials' }).fill('');
   await page.getByRole('button', { name: 'Track', exact: true }).click();
   await page.getByRole('dialog', { name: 'Track' }).getByRole('button', { name: 'DevOps & MLOps' }).click();
@@ -372,7 +373,8 @@ test('Build & ship gathers the executables, installers and GitHub Actions rows, 
   const row = page.getByRole('button', { name: /^Build & ship [\d,]+$/ });
   await expect(row).toBeVisible();
   const count = Number((await row.innerText()).replace(/\D/g, ''));
-  expect(count).toBeGreaterThan(120);
+  // The upgrade pass (7,679 rows) replaced the thin build-and-ship rows with fewer, better ones.
+  expect(count).toBeGreaterThan(100);
   await row.click();
   await expect(page).toHaveURL(/pick=buildship/);
   await expect(page.getByRole('heading', { level: 1, name: 'Build & ship' })).toBeVisible();
@@ -387,8 +389,8 @@ test('Build & ship gathers the executables, installers and GitHub Actions rows, 
   expect(total).toBe(count);
   expect(shown).toBeGreaterThan(40);
   expect(shown).toBeLessThan(count);
-  await page.getByRole('searchbox', { name: 'Search build and ship' }).fill('matrix');
-  await expect(page.getByRole('button', { name: /matrix/i }).first()).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Search build and ship' }).fill('workflow syntax');
+  await expect(page.getByRole('button', { name: /workflow syntax/i }).first()).toBeVisible();
   // A single-file RL implementation is not a single-file deployment: not the cluster.
   await areas.getByRole('button', { name: /^GitHub Actions [\d,]+$/ }).click();
   await page.getByRole('searchbox', { name: 'Search build and ship' }).fill('CleanRL');
@@ -573,4 +575,22 @@ test('Mandarin is its own quick filter, on the languages track, and Research ski
   await expect(page.getByRole('button', { name: /Eisner: Research Advice/ }).first()).toBeVisible();
   await page.getByRole('searchbox', { name: 'Search research skills' }).fill('Attention Is All You Need');
   await expect(page.getByRole('button', { name: /^Attention Is All You Need/ })).toHaveCount(0);
+});
+
+test('a long shelf scrolled deep settles: the window stops re-rendering and a search still narrows it', async ({ page }) => {
+  // Rows differ a little in height (a two-line meta, the stars under a tile): the windowed list once measured each
+  // window anew and could flip between two windows forever, deep in a long list, so a search never applied.
+  await open(page, './#/library?type=course');
+  await page.evaluate(() => window.scrollTo(0, 30_000));
+  await page.waitForTimeout(500);
+  const mutations = await page.evaluate(() => new Promise<number>((resolve) => {
+    let count = 0;
+    const observer = new MutationObserver((list) => { count += list.length; });
+    observer.observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true });
+    setTimeout(() => { observer.disconnect(); resolve(count); }, 1_000);
+  }));
+  expect(mutations).toBeLessThan(20);
+  await open(page, './#/library?type=course&q=CS234');
+  await expect(page.getByRole('heading', { name: /^1 of [\d,]+$/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^CS234 RL/ })).toBeVisible();
 });

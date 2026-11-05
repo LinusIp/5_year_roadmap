@@ -459,6 +459,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Xschem"
 
 - id: feedback-systems
   title: "Feedback Systems (Åström and Murray, free PDF)"

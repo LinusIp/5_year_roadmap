@@ -1,0 +1,3689 @@
+# The Atlas Library's eleventh file (ATLAS-LIBRARY, 15,961 rows): the rows the first ten files did not have, the plan
+# gap fill: inference-stack depth (TensorRT-LLM, Dynamo, Triton Inference Server, PyTorch internals), interview prep,
+# research skills, diffusion inference and hands-on image generation, video and 3D generation tooling, communication
+# (public speaking, pitching and fundraising, technical writing, blogging), open-source contribution, Mandarin basics,
+# certificates (ids `cert-…`, a Certificate badge and an Earned toggle) and backend auth, observability and testing.
+# Papers, articles, docs, practice, books, blogs and courses, each link checked when it was added (October 2026), each
+# with its priority for years 1 to 3, the roadmap.sh roadmap it serves and its year 3 research area; a paid row says so
+# (`cost: paid`, `note: Paid`). None is on the plan: they sit on their shelves, in search, under "Optional for this path"
+# and in the Research view. Generated from atlas-resources.jsonl by scratch/import-atlas.ts; rows the Library already
+# had only filled in what their entries were missing, or took the file's corrections.
+
+# ---- Inference engineering: serving, kernels, GPUs (track ai, tag inference) (41)
+
+- id: "docs-llamacpp-gbnf"
+  title: "GBNF Guide (llama.cpp grammars)"
+  short: "llama.cpp GBNF grammars"
+  provider: "ggml-org"
+  type: "article"
+  url: "https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Teaches GBNF grammars and JSON-schema conversion so a local model's output is forced into a parseable tool-call or data shape."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "llama.cpp function calling"
+
+- id: "docs-trtllm-speculative-decoding"
+  title: "TensorRT-LLM Speculative Decoding"
+  short: "TRT-LLM spec decoding"
+  provider: "NVIDIA TensorRT-LLM team"
+  type: "article"
+  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/features/speculative-decoding.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Covers how draft-target, EAGLE-3, MTP and n-gram drafting are wired into the runtime and which knobs matter."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "Speculative decoding paper"
+
+- id: "docs-trtllm-quantization"
+  title: "TensorRT-LLM Quantization"
+  short: "TRT-LLM quantization"
+  provider: "NVIDIA TensorRT-LLM team"
+  type: "article"
+  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/features/quantization.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "Reference for which FP8, FP4/NVFP4, INT4 AWQ and KV-cache quantization recipes are supported on which GPUs."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "inference-engineering"
+  tags: [inference]
+
+- id: "docs-trtllm-parallelism"
+  title: "Parallelism in TensorRT LLM"
+  short: "TRT-LLM parallelism"
+  provider: "NVIDIA TensorRT-LLM team"
+  type: "article"
+  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/features/parallel-strategy.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Compares tensor, pipeline, expert and attention data parallelism and when each helps throughput or latency."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "Megatron-LM paper"
+
+- id: "docs-trtllm-kv-cache-connector"
+  title: "TensorRT-LLM KV Cache Connector"
+  short: "TRT-LLM KV connector"
+  provider: "NVIDIA TensorRT-LLM team"
+  type: "article"
+  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/features/kv-cache-connector.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Explains the plug-in interface for moving KV blocks to external stores, the basis for offloading and cross-engine reuse."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [docs-trtllm-kv-cache-system]
+
+- id: "docs-trtllm-moe-perf-guide"
+  title: "TensorRT-LLM MoE Performance Guide"
+  short: "TRT-LLM MoE perf"
+  provider: "NVIDIA TensorRT-LLM team"
+  type: "article"
+  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/developer-guide/moe-perf-guide.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Guides tuning MoE backends, expert parallel layout and communication for large mixture-of-experts serving."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [paper-megablocks]
+
+- id: "docs-pytorch-aotinductor"
+  title: "AOTInductor: Ahead-Of-Time Compilation for Torch.Export-ed Models"
+  short: "AOTInductor"
+  provider: "PyTorch"
+  type: "article"
+  url: "https://docs.pytorch.org/docs/main/user_guide/torch_compiler/torch.compiler_aot_inductor.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Shows how to compile an exported model into a self-contained artifact runnable from C++ without Python, the PT2 deployment path."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "torch.export"
+
+- id: "docs-pytorch-cudagraph-trees"
+  title: "CUDAGraph Trees"
+  short: "CUDAGraph Trees"
+  provider: "PyTorch"
+  type: "article"
+  url: "https://docs.pytorch.org/docs/main/user_guide/torch_compiler/torch.compiler_cudagraph_trees.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Explains how torch.compile's reduce-overhead mode records and shares memory pools across many CUDA graphs."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "CUDA graphs in PyTorch"
+
+- id: "docs-flashinfer-kv-layout"
+  title: "KV-Cache Layout in FlashInfer"
+  short: "FlashInfer KV layout"
+  provider: "FlashInfer team"
+  type: "article"
+  url: "https://docs.flashinfer.ai/tutorials/kv_layout.html"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Precise description of ragged and paged KV tensors and index arrays that attention kernels consume in serving engines."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "FlashInfer paper"
+
+- id: "docs-dynamo-router-design"
+  title: "Dynamo KV Router Design"
+  short: "Dynamo router design"
+  provider: "NVIDIA Dynamo team"
+  type: "article"
+  url: "https://github.com/ai-dynamo/dynamo/blob/main/docs/fern/pages/developer-guide/knowledge-base/modular-components/router/router-design.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Internals of KV-aware routing: per-worker block tracking, the overlap-vs-load cost function and KV event handling."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "Dynamo KV-aware routing"
+
+- id: "book-ai-systems-performance-engineering"
+  title: "AI Systems Performance Engineering"
+  short: "AI Systems Perf Eng"
+  provider: "Chris Fregly (O'Reilly, 2025)"
+  type: "book"
+  url: "https://www.oreilly.com/library/view/-/9798341627772/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "paid"
+  estHours: 35
+  summary: "A thousand-page reference on co-tuning hardware, CUDA kernels, PyTorch and multinode training/inference, ending in a 175-item optimization checklist, aimed squarely at an aspiring inference engineer."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  note: "Paid"
+  doFirst: "Inference Engineering"
+
+- id: "tutorial-triton-server-tutorials"
+  title: "Triton Inference Server Tutorials"
+  short: "Triton tutorials"
+  provider: "NVIDIA Triton Inference Server team"
+  type: "article"
+  url: "https://github.com/triton-inference-server/tutorials"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 6
+  summary: "Hands-on conceptual guide from first deployment through ensembles, batching and LLM serving."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "inference-engineering"
+  tags: [inference]
+
+- id: "repo-mistral-rs"
+  title: "mistral.rs: fast, flexible LLM inference in Rust"
+  short: "mistral.rs"
+  provider: "Eric Buehler"
+  type: "practice"
+  url: "https://github.com/EricLBuehler/mistral.rs"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 20
+  summary: "A full Rust inference engine with OpenAI/Anthropic-compatible servers, tool calling, MCP and sandboxed code execution: a self-hostable agent backend written in Rust."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [rust-book]
+
+- id: "repo-llama-cpp-rs"
+  title: "llama-cpp-rs: Rust bindings to llama.cpp"
+  short: "llama-cpp-rs"
+  provider: "Utility AI"
+  type: "practice"
+  url: "https://github.com/utilityai/llama-cpp-rs"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 5
+  summary: "Safe-ish Rust wrappers over llama.cpp so a Rust harness can embed a local GGUF model in-process instead of calling a server."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [llama-cpp]
+
+- id: "repo-ort-rust"
+  title: "ort: ONNX Runtime bindings for Rust"
+  short: "ort (ONNX Runtime Rust)"
+  provider: "pyke"
+  type: "practice"
+  url: "https://github.com/pykeio/ort"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 5
+  summary: "Run ONNX models (embedders, rerankers, classifiers) from Rust with hardware acceleration, a common building block inside agent tooling."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [rust-book]
+
+- id: "repo-stable-diffusion-cpp"
+  title: "stable-diffusion.cpp"
+  short: "stable-diffusion.cpp"
+  provider: "leejet"
+  type: "practice"
+  url: "https://github.com/leejet/stable-diffusion.cpp"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "Pure C/C++ ggml inference for SD1.x to FLUX with GGUF quantization; the llama.cpp of image models to read and hack."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [llama-cpp]
+
+- id: "repo-flux-fast"
+  title: "flux-fast"
+  short: "flux-fast"
+  provider: "Hugging Face"
+  type: "practice"
+  url: "https://github.com/huggingface/flux-fast"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "A small recipe repo stacking torch.compile, FA3, fp8 quantization and CUDA graphs to make FLUX ~2.5x faster in pure PyTorch."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "Accelerating GenAI Pt III"
+
+- id: "practice-aiperf"
+  title: "AIPerf"
+  short: "AIPerf"
+  provider: "NVIDIA (ai-dynamo)"
+  type: "practice"
+  url: "https://github.com/ai-dynamo/aiperf"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Benchmarking tool for generative-AI endpoints that measures TTFT, ITL and throughput the way serving teams report them."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "inference-engineering"
+  tags: [inference]
+
+- id: "practice-triton-backend-api"
+  title: "Triton Inference Server Backend"
+  short: "Triton backend API"
+  provider: "NVIDIA Triton Inference Server team"
+  type: "practice"
+  url: "https://github.com/triton-inference-server/backend"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "C API and examples for writing a custom inference backend, showing exactly how a server hands tensors to your code."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [docs-triton-server-architecture]
+
+- id: "practice-triton-python-backend"
+  title: "Triton Python Backend"
+  short: "Triton Python backend"
+  provider: "NVIDIA Triton Inference Server team"
+  type: "practice"
+  url: "https://github.com/triton-inference-server/python_backend"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Lets you serve arbitrary Python models and pre/post-processing; the README explains the IPC and shared-memory design."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [docs-triton-server-architecture]
+
+- id: "practice-triton-tensorrtllm-backend"
+  title: "TensorRT-LLM Backend for Triton"
+  short: "Triton TRT-LLM backend"
+  provider: "NVIDIA Triton Inference Server team"
+  type: "practice"
+  url: "https://github.com/triton-inference-server/tensorrtllm_backend"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Shows how an LLM engine with in-flight batching is exposed through Triton's decoupled streaming interface."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "TRT-LLM PyTorch arch"
+
+- id: "practice-tlparse"
+  title: "tlparse: torch.compile structured log parser"
+  short: "tlparse"
+  provider: "PyTorch"
+  type: "practice"
+  url: "https://github.com/pytorch/tlparse"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Turns TORCH_TRACE logs into browsable reports of graph breaks, recompiles and generated code when debugging compilation."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [article-ezyang-ways-to-use-torch-compile]
+
+- id: "repo-llguidance"
+  title: "llguidance: super-fast structured outputs for LLMs"
+  short: "llguidance"
+  provider: "Guidance AI / Microsoft"
+  type: "practice"
+  url: "https://github.com/guidance-ai/llguidance"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "A production Rust engine for grammar- and JSON-schema-constrained decoding; reading it shows how token masks are computed fast enough for real serving."
+  fromYear: 3
+  priority: 1
+  quality: 4
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [paper-xgrammar]
+
+- id: "paper-deepcache"
+  title: "DeepCache: Accelerating Diffusion Models for Free"
+  short: "DeepCache"
+  provider: "Xinyin Ma, Gongfan Fang, Xinchao Wang (NUS)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2312.00858"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "The canonical training-free feature-caching method: reuse slowly changing high-level U-Net features across denoising steps for 2-7x speedups."
+  fromYear: 2
+  priority: 1
+  quality: 4
+  roadmap: "inference-engineering"
+  research: "diffusion"
+  tags: [inference]
+  doFirst: "Latent Diffusion"
+
+- id: "paper-speculative-decoding-survey-xia"
+  title: "Unlocking Efficiency in Large Language Model Inference: A Comprehensive Survey of Speculative Decoding"
+  short: "Spec Decoding Survey"
+  provider: "Heming Xia, Zhe Yang, Qingxiu Dong, Peiyi Wang, Yongqi Li, Tao Ge, Tianyu Liu, Wenjie Li, Zhifang Sui (ACL 2024 Findings)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2401.07851"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Organises the whole draft-then-verify family (drafter choice, verification, tree drafting, self-speculation) into one taxonomy, the best map before reading engine-specific spec-decoding docs."
+  fromYear: 2
+  priority: 1
+  quality: 4
+  roadmap: "inference-engineering"
+  research: "inference"
+  tags: [inference]
+  doFirst: "Fast Inference via Speculative Decoding"
+
+- id: "paper-q-diffusion"
+  title: "Q-Diffusion: Quantizing Diffusion Models"
+  short: "Q-Diffusion"
+  provider: "Li et al. (UC Berkeley / MIT)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2302.04304"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "The foundational post-training quantization paper for diffusion, explaining why timestep-varying activations break LLM-style PTQ."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "inference-engineering"
+  research: "diffusion"
+  tags: [inference]
+  doFirst: "Quantization basics"
+
+- id: "paper-teacache"
+  title: "Timestep Embedding Tells: It's Time to Cache for Video Diffusion Model"
+  short: "TeaCache"
+  provider: "Feng Liu et al. (UCAS / Alibaba Tongyi)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2411.19108"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "The CVPR 2025 caching method behind most video-DiT speedups, deciding when to reuse outputs from how much the timestep-modulated input changes."
+  fromYear: 3
+  priority: 1
+  quality: 4
+  roadmap: "inference-engineering"
+  research: "diffusion"
+  tags: [inference]
+  after: [paper-deepcache]
+
+- id: "article-trtllm-deepseek-r1-mtp"
+  title: "DeepSeek R1 MTP Implementation and Optimization"
+  short: "TRT-LLM DeepSeek MTP"
+  provider: "NVIDIA TensorRT-LLM team"
+  type: "article"
+  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog02_DeepSeek_R1_MTP_Implementation_and_Optimization.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Concrete look at implementing multi-token prediction as speculative decoding inside a real engine, with acceptance-rate tuning."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [docs-trtllm-speculative-decoding]
+
+- id: "article-trtllm-guided-plus-spec-decoding"
+  title: "Combining Guided Decoding and Speculative Decoding: Making CPU and GPU Cooperate Seamlessly"
+  short: "Guided + spec decoding"
+  provider: "NVIDIA TensorRT-LLM team"
+  type: "article"
+  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog12_Combining_Guided_Decoding_and_Speculative_Decoding.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Shows the CPU/GPU synchronization problems that arise when grammar masks meet speculative drafts and how they were solved."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "XGrammar paper"
+
+- id: "article-trtllm-skip-softmax-attention"
+  title: "Accelerating Long-Context Inference with Skip Softmax Attention"
+  short: "Skip Softmax Attention"
+  provider: "NVIDIA TensorRT-LLM team"
+  type: "article"
+  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog16_Accelerating_Long_Context_Inference_with_Skip_Softmax_Attention.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Explains a training-free sparse attention trick that skips negligible blocks inside the attention kernel for long contexts."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "FlashAttention-2 paper"
+
+- id: "article-trtllm-sparse-attention"
+  title: "Sparse Attention in TensorRT LLM"
+  short: "TRT-LLM sparse attention"
+  provider: "NVIDIA TensorRT-LLM team"
+  type: "article"
+  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog17_Sparse_Attention_in_TensorRT-LLM.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Surveys how sparse attention methods are integrated into a production runtime, including KV cache and kernel implications."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [docs-trtllm-attention]
+
+- id: "article-trtllm-moe-as-dense-gemm"
+  title: "MoE as Dense GEMM: Optimizing Low-Latency MoE Inference on NVIDIA Blackwell"
+  short: "MoE as Dense GEMM"
+  provider: "NVIDIA TensorRT-LLM team"
+  type: "article"
+  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog24_MoE_as_Dense_GEMM.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Kernel-level case study of reformulating small-batch MoE as dense GEMMs to win at low-latency decode."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [paper-megablocks]
+
+- id: "article-trtllm-kv-cache-compression"
+  title: "KV Cache Compression in TensorRT LLM"
+  short: "TRT-LLM KV compression"
+  provider: "NVIDIA TensorRT-LLM team"
+  type: "article"
+  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog30_KV_Cache_Compression_in_TensorRT-LLM.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Recent look at compressing KV cache in a production engine and the accuracy/memory trade-offs involved."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [docs-trtllm-kv-cache-system]
+
+- id: "article-trtllm-deepseek-v32-blackwell"
+  title: "Optimizing DeepSeek-V3.2 on NVIDIA Blackwell GPUs"
+  short: "DeepSeek-V3.2 on Blackwell"
+  provider: "NVIDIA TensorRT-LLM team"
+  type: "article"
+  url: "https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog15_Optimizing_DeepSeek_V32_on_NVIDIA_Blackwell_GPUs.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Shows how a sparse-attention model (DSA indexer plus MLA) is mapped onto Blackwell kernels and the runtime."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [article-trtllm-deepseek-r1-throughput-blackwell]
+
+- id: "article-nvidia-low-latency-comm-jax"
+  title: "Optimizing for Low-Latency Communication in Inference Workloads with JAX and XLA"
+  short: "Low-latency TP comm"
+  provider: "NVIDIA Technical Blog"
+  type: "article"
+  url: "https://developer.nvidia.com/blog/optimizing-for-low-latency-communication-in-inference-workloads-with-jax-and-xla"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Shows why decode all-reduces are latency-bound and how custom one-shot collectives beat ring algorithms."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "NCCL user guide"
+
+- id: "article-umd-beyond-nccl"
+  title: "Beyond NCCL: Faster Inter-Node All-Reduce for Decode-Heavy LLM Inference"
+  short: "Beyond NCCL all-reduce"
+  provider: "UMD HPC Group"
+  type: "article"
+  url: "https://pssg.cs.umd.edu/blog/2025/beyond-nccl/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Research-group write-up measuring multi-node all-reduce latency in decode and a faster alternative design."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  doFirst: "NCCL user guide"
+
+- id: "article-dynamo-flash-indexer"
+  title: "Flash Indexer: A Story of Inter-Galactic KV Routing"
+  short: "Dynamo Flash Indexer"
+  provider: "Rudy Pei, John Thomson, Janelle Cai, Alec Flowers, Ryan Olson, Dan Gil (NVIDIA)"
+  type: "article"
+  url: "https://github.com/ai-dynamo/dynamo/blob/main/docs/fern/pages/blog/2026/flash-indexer.mdx"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Data-structure design story of a concurrent global prefix index that tracks KV blocks across a whole cluster."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [docs-dynamo-router-design]
+
+- id: "article-dynamo-agentic-inference"
+  title: "Full-Stack Optimizations for Agentic Inference with Dynamo"
+  short: "Dynamo agentic inference"
+  provider: "Ishan Dhanani, Matej Kosec (NVIDIA)"
+  type: "article"
+  url: "https://github.com/ai-dynamo/dynamo/blob/main/docs/fern/pages/blog/2026/agentic-inference-optimizations.mdx"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Shows how multi-turn agent workloads change caching, routing and offload decisions in a serving stack."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [docs-dynamo-architecture]
+
+- id: "article-dynamo-dynosim"
+  title: "DynoSim: Simulating the Pareto Frontier"
+  short: "DynoSim"
+  provider: "Yongming Ding, Rudy Pei, Hongkuan Zhou, Ryan Olson, Dan Gil, Alec Flowers, Vikram Sharma Mailthody (NVIDIA)"
+  type: "article"
+  url: "https://github.com/ai-dynamo/dynamo/blob/main/docs/fern/pages/blog/2026/dynosim-pareto-frontier.mdx"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Explains simulating serving configurations to find throughput-latency Pareto points without burning GPU hours."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [docs-dynamo-architecture]
+
+- id: "article-pytorch-triton-moe-grouped-gemm"
+  title: "Accelerating MoE's with a Triton Persistent Cache-Aware Grouped GEMM Kernel"
+  short: "Triton MoE grouped GEMM"
+  provider: "Less Wright, Adnan Hoque, Garrett Goon (PyTorch)"
+  type: "article"
+  url: "https://pytorch.org/blog/accelerating-moes-with-a-triton-persistent-cache-aware-grouped-gemm-kernel/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Walks through writing a persistent grouped GEMM in Triton with cache-aware tile ordering for MoE layers."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [tutorial-triton-server-tutorials]
+
+- id: "article-pytorch-accelerating-moe-model"
+  title: "Accelerating MoE model inference with Locality-Aware Kernel Design"
+  short: "MoE locality kernels"
+  provider: "Adnan Hoque, Less Wright, Antoni Virós Martin, Chih-Chieh Yang"
+  type: "article"
+  url: "https://pytorch.org/blog/accelerating-moe-model/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Shows how column-major tile scheduling and SplitK improve a Triton fused MoE kernel at small batch sizes."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "inference-engineering"
+  tags: [inference]
+  after: [tutorial-triton-server-tutorials]
+
+# ---- AI, ML, LLMs and agents (52)
+
+- id: "docs-comfyui"
+  title: "ComfyUI Official Documentation"
+  short: "ComfyUI docs"
+  provider: "Comfy Org"
+  type: "article"
+  url: "https://docs.comfy.org/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 5
+  summary: "Install, interface, built-in node reference and workflow tutorials for image, video and audio models."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+
+- id: "docs-codex-protocol-v1"
+  title: "Codex core protocol overview (protocol_v1)"
+  short: "Codex SQ/EQ protocol"
+  provider: "OpenAI"
+  type: "article"
+  url: "https://github.com/openai/codex/blob/main/codex-rs/docs/protocol_v1.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Defines the session/task/turn vocabulary and the submission-queue/event-queue split between UI and agent core in Codex's Rust engine."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "ai-agents"
+  doFirst: "Unrolling the Codex agent loop"
+
+- id: "docs-codex-execpolicy"
+  title: "codex-execpolicy: command approval policy engine"
+  short: "Codex execpolicy"
+  provider: "OpenAI"
+  type: "article"
+  url: "https://github.com/openai/codex/blob/main/codex-rs/execpolicy/README.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Shows how a harness decides allow/prompt/forbid for shell commands with Starlark prefix rules that carry their own test examples."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "ai-agents"
+  after: [docs-codex-linux-sandbox]
+
+- id: "cert-hf-mcp-course"
+  title: "Hugging Face MCP Course Certificate"
+  short: "HF MCP Certificate"
+  provider: "Hugging Face"
+  type: "course"
+  url: "https://huggingface.co/learn/mcp-course/unit3/certificate"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 20
+  summary: "Free certificate after the MCP Course's applied unit and quiz, showing you can build Model Context Protocol servers and clients."
+  fromYear: 2
+  priority: 3
+  quality: 2
+  roadmap: "ai-agents"
+  after: [cert-hf-agents-course]
+
+- id: "cert-aws-genai-developer-pro"
+  title: "AWS Certified Generative AI Developer - Professional"
+  short: "AWS GenAI Dev Pro"
+  provider: "Amazon Web Services"
+  type: "course"
+  url: "https://aws.amazon.com/certification/certified-generative-ai-developer-professional/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [ai]
+  level: "advanced"
+  cost: "paid"
+  estHours: 80
+  summary: "AWS's professional-tier GenAI exam (180 min, 75 questions, US$300) testing production LLM apps, RAG, agents, evaluation and cost control on AWS, a far stronger signal than the AI Practitioner badge."
+  fromYear: 2
+  priority: 1
+  quality: 4
+  roadmap: "ai-agents"
+  note: "Paid"
+  after: [cert-aws-solutions-architect-associate]
+
+- id: "book-eureka-machine-socher"
+  title: "The Eureka Machine: Why AI Is the Key to Unlocking a New Era of Scientific Discoveries"
+  short: "The Eureka Machine"
+  provider: "Richard Socher (PublicAffairs, 2026)"
+  type: "book"
+  url: "https://www.hachettebookgroup.com/titles/richard-socher/the-eureka-machine/9781541705708/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "paid"
+  estHours: 8
+  summary: "Argues from inside the field that AI will speed up discovery in physics, materials and biology, the exact overlap of your AI, simulation and fusion interests."
+  fromYear: 1
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  note: "Paid"
+
+- id: "book-coming-wave-suleyman"
+  title: "The Coming Wave: Technology, Power, and the Twenty-first Century's Greatest Dilemma"
+  short: "The Coming Wave"
+  provider: "Mustafa Suleyman with Michael Bhaskar (Crown, 2023)"
+  type: "book"
+  url: "https://www.penguinrandomhouse.com/books/722674/the-coming-wave-by-mustafa-suleyman-with-michael-bhaskar/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "paid"
+  estHours: 9
+  summary: "The DeepMind co-founder's case that AI and synthetic biology need containment, the clearest insider statement of the governance problem."
+  fromYear: 1
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  note: "Paid"
+
+- id: "book-genius-makers-metz"
+  title: "Genius Makers: The Mavericks Who Brought AI to Google, Facebook, and the World"
+  short: "Genius Makers"
+  provider: "Cade Metz (Dutton, 2021)"
+  type: "book"
+  url: "https://www.penguinrandomhouse.com/books/565698/genius-makers-by-cade-metz/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "paid"
+  estHours: 10
+  summary: "The story of Hinton, LeCun, Bengio, Hassabis and the 2012 to 2020 deep learning boom, the human backstory to the papers you study."
+  fromYear: 1
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  note: "Paid"
+
+- id: "book-empire-of-ai-hao"
+  title: "Empire of AI: Dreams and Nightmares in Sam Altman's OpenAI"
+  short: "Empire of AI"
+  provider: "Karen Hao (Penguin Press, 2025)"
+  type: "book"
+  url: "https://www.penguinrandomhouse.com/books/743569/empire-of-ai-by-karen-hao/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "paid"
+  estHours: 13
+  summary: "A deeply reported, critical history of OpenAI and the scaling playbook, including the labour, data and energy costs behind frontier models."
+  fromYear: 1
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  note: "Paid"
+  after: [book-genius-makers-metz]
+
+- id: "book-infinity-machine-mallaby"
+  title: "The Infinity Machine: Demis Hassabis, DeepMind, and the Quest for Superintelligence"
+  short: "The Infinity Machine"
+  provider: "Sebastian Mallaby (Penguin Press, 2026)"
+  type: "book"
+  url: "https://www.penguinrandomhouse.com/books/752231/the-infinity-machine-by-sebastian-mallaby/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "paid"
+  estHours: 13
+  summary: "The definitive DeepMind story from AlphaGo to AlphaFold, the best account of AI-for-science as a research strategy."
+  fromYear: 1
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  note: "Paid"
+  after: [book-genius-makers-metz]
+
+- id: "book-ai-snake-oil-narayanan"
+  title: "AI Snake Oil: What Artificial Intelligence Can Do, What It Can't, and How to Tell the Difference"
+  short: "AI Snake Oil"
+  provider: "Arvind Narayanan, Sayash Kapoor (Princeton University Press, 2024)"
+  type: "book"
+  url: "https://press.princeton.edu/books/hardcover/9780691249131/ai-snake-oil"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "paid"
+  estHours: 9
+  summary: "Two Princeton researchers separate working generative AI from failing predictive AI, a calibration tool against both hype and doom."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+  note: "Paid"
+
+- id: "book-ai-guide-thinking-humans-mitchell"
+  title: "Artificial Intelligence: A Guide for Thinking Humans"
+  short: "AI: Guide Thinking Humans"
+  provider: "Melanie Mitchell (Farrar, Straus and Giroux, 2019)"
+  type: "book"
+  url: "https://us.macmillan.com/books/9781250758040/artificialintelligence/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "paid"
+  estHours: 9
+  summary: "A clear-eyed tour of vision, games and language by a complexity scientist, the best grounded introduction to what AI does and does not understand."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+  note: "Paid"
+
+- id: "book-atomic-human-lawrence"
+  title: "The Atomic Human: What Makes Us Unique in the Age of AI"
+  short: "The Atomic Human"
+  provider: "Neil D. Lawrence (PublicAffairs, 2024)"
+  type: "book"
+  url: "https://www.hachettebookgroup.com/titles/neil-d-lawrence/the-atomic-human/9781668644591/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "paid"
+  estHours: 11
+  summary: "A Cambridge ML professor (ex-Amazon) contrasts human and machine information bandwidth, a thoughtful practitioner's view of AI's limits."
+  fromYear: 1
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  note: "Paid"
+
+- id: "book-aima-4e"
+  title: "Artificial Intelligence: A Modern Approach (4th ed.)"
+  short: "AIMA 4th ed."
+  provider: "Stuart Russell, Peter Norvig (Pearson, 2020)"
+  type: "book"
+  url: "https://aima.cs.berkeley.edu/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [ai]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 60
+  summary: "The canonical AI textbook, organized around rational agents: search, planning, decision-making under uncertainty and multi-agent reasoning that LLM agent harnesses still borrow from."
+  fromYear: 1
+  priority: 1
+  quality: 5
+  roadmap: "ai-agents"
+  note: "Paid"
+
+- id: "book-build-an-ai-agent-from-scratch"
+  title: "Build an AI Agent (From Scratch)"
+  short: "AI Agent from Scratch"
+  provider: "Jungjun Hur, Younghee Song (Manning, 2026)"
+  type: "book"
+  url: "https://www.manning.com/books/build-an-ai-agent-from-scratch"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 12
+  summary: "You write the agent loop, tool calling, memory, MCP, CodeAct sandboxing, A2A orchestration and an eval pipeline yourself in plain Python, so you understand what every harness framework is hiding."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-agents"
+  note: "Paid"
+  doFirst: "Build a LLM (From Scratch)"
+
+- id: "book-building-genai-services-fastapi"
+  title: "Building Generative AI Services with FastAPI: A Practical Approach to Developing Context-Rich Generative AI Applications"
+  short: "GenAI Services with FastAPI"
+  provider: "Alireza Parandeh (O'Reilly, 2025)"
+  type: "book"
+  url: "https://www.oreilly.com/library/view/-/9781098160296/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 14
+  summary: "The backend-engineering side of AI apps: streaming, concurrency, caching, auth, RAG, testing nondeterministic outputs and Docker deployment of model-backed APIs."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  note: "Paid"
+  after: [docs-fastapi-tutorial]
+
+- id: "book-superintelligence-bostrom"
+  title: "Superintelligence: Paths, Dangers, Strategies"
+  short: "Superintelligence"
+  provider: "Nick Bostrom (Oxford University Press, 2014)"
+  type: "book"
+  url: "https://global.oup.com/academic/product/superintelligence-9780199678112"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 11
+  summary: "The book that set the vocabulary of AI risk (takeoff speeds, orthogonality, instrumental convergence) that today's labs still argue about."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+  note: "Paid"
+
+- id: "book-brief-history-of-intelligence-bennett"
+  title: "A Brief History of Intelligence: Evolution, AI, and the Five Breakthroughs That Made Our Brains"
+  short: "Brief Hist. of Intelligence"
+  provider: "Max S. Bennett (Mariner Books, 2023)"
+  type: "book"
+  url: "https://maxsbennett.com/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 10
+  summary: "Ties RL, world models and language to five evolutionary leaps in the brain, a rich source of intuitions for agent and robot design."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-agents"
+  note: "Paid"
+
+- id: "book-scaling-era-patel"
+  title: "The Scaling Era: An Oral History of AI, 2019–2025"
+  short: "The Scaling Era"
+  provider: "Dwarkesh Patel with Gavin Leech (Stripe Press, 2025)"
+  type: "book"
+  url: "https://press.stripe.com/scaling"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 10
+  summary: "Frontier researchers explain scaling laws, compute, RL and alignment in their own words, with annotations, the closest thing to sitting in on lab debates."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  note: "Paid"
+
+- id: "book-why-machines-learn-ananthaswamy"
+  title: "Why Machines Learn: The Elegant Math Behind Modern AI"
+  short: "Why Machines Learn"
+  provider: "Anil Ananthaswamy (Dutton, 2024)"
+  type: "book"
+  url: "https://www.penguinrandomhouse.com/books/677608/why-machines-learn-by-anil-ananthaswamy/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 13
+  summary: "Tells ML's history through its actual math (perceptrons, SVMs, backprop, kernels), a satisfying bridge between story and the equations you study."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+  note: "Paid"
+
+- id: "book-these-strange-new-minds-summerfield"
+  title: "These Strange New Minds: How AI Learned to Talk and What It Means"
+  short: "These Strange New Minds"
+  provider: "Christopher Summerfield (Viking, 2025)"
+  type: "book"
+  url: "https://www.penguinrandomhouse.com/books/750406/these-strange-new-minds-by-christopher-summerfield/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 10
+  summary: "An Oxford and DeepMind neuroscientist explains how LLMs work and whether they think, a careful, technically honest account of the LLM era."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  note: "Paid"
+
+- id: "book-quest-for-ai-nilsson"
+  title: "The Quest for Artificial Intelligence: A History of Ideas and Achievements"
+  short: "Quest for AI (Nilsson)"
+  provider: "Nils J. Nilsson (Cambridge University Press, 2010)"
+  type: "book"
+  url: "https://ai.stanford.edu/~nilsson/QAI/qai.pdf"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 20
+  summary: "A pioneer's detailed history of AI from logic and search to robotics and learning, the free reference for how the field's ideas evolved."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+
+- id: "book-emergent-mind-suri-mcclelland"
+  title: "The Emergent Mind: How Intelligence Arises in People and Machines"
+  short: "The Emergent Mind"
+  provider: "Gaurav Suri, Jay McClelland (Basic Books, 2025)"
+  type: "book"
+  url: "https://www.hachettebookgroup.com/titles/gaurav-suri/the-emergent-mind/9781668658048/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 9
+  summary: "Co-written by a founder of parallel distributed processing, it shows how minds and neural nets both emerge from simple interacting units."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  note: "Paid"
+
+- id: "book-designing-multi-agent-systems"
+  title: "Designing Multi-Agent Systems: Principles, Patterns and Implementation for AI Agents"
+  short: "Designing Multi-Agent Sys"
+  provider: "Victor Dibia (self-published, 2025)"
+  type: "book"
+  url: "https://multiagentbook.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [ai]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 12
+  summary: "By an AutoGen co-creator at Microsoft Research, it builds an agent library from scratch and covers orchestration patterns, evaluation and failure modes without tying you to one framework."
+  fromYear: 2
+  priority: 1
+  quality: 4
+  roadmap: "ai-agents"
+  note: "Paid"
+  doFirst: "Building Effective AI Agents"
+
+- id: "tut-learn-claude-code-rs"
+  title: "learn-claude-code-rs: a progressive agent harness tutorial in Rust"
+  short: "Agent harness in Rust"
+  provider: "wulawulu"
+  type: "article"
+  url: "https://github.com/wulawulu/learn-claude-code-rs"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 25
+  summary: "Twenty runnable Rust crates that grow a coding-agent harness from a bare loop to tools, permissions, compaction, subagents, worktrees and MCP."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-agents"
+  after: [rust-book]
+
+- id: "tut-tensorzero-gateway"
+  title: "TensorZero Gateway Tutorial"
+  short: "TensorZero tutorial"
+  provider: "TensorZero"
+  type: "article"
+  url: "https://tensorzero.com/docs/gateway/tutorial"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "Walks through routing LLM calls through a gateway with schemas, templates and logged inferences, a pattern worth copying in any harness."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-agents"
+  after: [repo-tensorzero]
+
+- id: "repo-async-openai"
+  title: "async-openai: Rust library for OpenAI-compatible APIs"
+  short: "async-openai"
+  provider: "Himanshu Neema"
+  type: "practice"
+  url: "https://github.com/64bit/async-openai"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 4
+  summary: "The standard async Rust client for OpenAI-style APIs, including streaming and tool calls; the usual base for a hand-rolled Rust agent loop."
+  fromYear: 1
+  priority: 3
+  quality: 3
+  roadmap: "ai-agents"
+  after: [rust-book]
+
+- id: "repo-tiktoken-rs"
+  title: "tiktoken-rs: OpenAI tokenizers for Rust"
+  short: "tiktoken-rs"
+  provider: "zurawiki"
+  type: "practice"
+  url: "https://github.com/zurawiki/tiktoken-rs"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "Count and split tokens in Rust for context-window budgeting and compaction decisions inside a harness."
+  fromYear: 1
+  priority: 3
+  quality: 3
+  roadmap: "ai-agents"
+  after: [rust-book]
+
+- id: "repo-swiftide"
+  title: "Swiftide: fast, streaming indexing, query and agentic LLM applications in Rust"
+  short: "Swiftide"
+  provider: "Bosun AI"
+  type: "practice"
+  url: "https://github.com/bosun-ai/swiftide"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 12
+  summary: "A Rust library for streaming RAG pipelines plus an agent framework with tools and hooks, useful to read for async pipeline design."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-agents"
+  after: [rust-book]
+
+- id: "repo-kalosm-floneum"
+  title: "Floneum / Kalosm: local-first AI in Rust"
+  short: "Kalosm (Floneum)"
+  provider: "Floneum"
+  type: "practice"
+  url: "https://github.com/floneum/floneum"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "Kalosm runs local language, audio and vision models in pure Rust and offers grammar-constrained structured generation into Rust types."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  after: [rust-book]
+
+- id: "repo-tabby"
+  title: "Tabby: self-hosted AI coding assistant"
+  short: "Tabby"
+  provider: "TabbyML"
+  type: "practice"
+  url: "https://github.com/TabbyML/tabby"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "A self-hosted Copilot alternative with a Rust server, showing how code completion and chat backends are built and indexed."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  after: [rust-book]
+
+- id: "repo-tensorzero"
+  title: "TensorZero: open-source LLMOps stack (gateway, observability, evals)"
+  short: "TensorZero"
+  provider: "TensorZero"
+  type: "practice"
+  url: "https://github.com/tensorzero/tensorzero"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "A Rust LLM gateway with structured inference logging, experiments and optimization loops, showing how to wrap model calls in production."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  after: [rust-book]
+
+- id: "repo-kohya-sd-scripts"
+  title: "sd-scripts"
+  short: "kohya sd-scripts"
+  provider: "kohya-ss"
+  type: "practice"
+  url: "https://github.com/kohya-ss/sd-scripts"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "The community-standard trainer for LoRA, DreamBooth and full fine-tunes of SD/SDXL/SD3/FLUX."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  doFirst: "Diffusers: train LoRA"
+
+- id: "repo-black-forest-labs-flux"
+  title: "FLUX.1 (official inference repo)"
+  short: "FLUX.1 repo"
+  provider: "Black Forest Labs"
+  type: "practice"
+  url: "https://github.com/black-forest-labs/flux"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Minimal reference code for the FLUX.1 family; reading the sampling loop clarifies rectified-flow DiT inference."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+  doFirst: "Scaling Rectified Flow"
+
+- id: "repo-liveportrait"
+  title: "LivePortrait: Efficient Portrait Animation with Stitching and Retargeting Control"
+  short: "LivePortrait"
+  provider: "Kuaishou (KwaiVGI)"
+  type: "practice"
+  url: "https://github.com/KwaiVGI/LivePortrait"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "A fast, non-diffusion keypoint-based face animation system that is fun to run and shows where implicit-keypoint methods still win."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+
+- id: "repo-agentgateway"
+  title: "agentgateway: proxy for agentic AI (MCP, A2A, LLM traffic)"
+  short: "agentgateway"
+  provider: "Linux Foundation / agentgateway"
+  type: "practice"
+  url: "https://github.com/agentgateway/agentgateway"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "A Rust data plane that multiplexes, authenticates and observes MCP and A2A traffic, showing what production agent networking needs."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "ai-agents"
+  doFirst: "MCP spec"
+
+- id: "repo-cameractrl"
+  title: "CameraCtrl (official code)"
+  short: "CameraCtrl repo"
+  provider: "Hao He et al."
+  type: "practice"
+  url: "https://github.com/hehao13/CameraCtrl"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Shows how Plucker-embedding camera trajectories are injected into a video diffusion model for controllable camera motion."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  research: "diffusion"
+  doFirst: "CameraCtrl paper"
+
+- id: "repo-hunyuanworld-1"
+  title: "HunyuanWorld 1.0: generating explorable 3D worlds"
+  short: "HunyuanWorld 1.0"
+  provider: "Tencent Hunyuan"
+  type: "practice"
+  url: "https://github.com/Tencent-Hunyuan/HunyuanWorld-1.0"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 5
+  summary: "Generates panoramic, mesh-exportable 3D worlds from text or images, bridging video-style generation and 3D scenes."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+
+- id: "repo-xdit"
+  title: "xDiT: inference engine for Diffusion Transformers with massive parallelism"
+  short: "xDiT repo"
+  provider: "xDiT project"
+  type: "practice"
+  url: "https://github.com/xdit-project/xDiT"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 5
+  summary: "Hands-on sequence, patch and CFG parallel inference for video DiTs across many GPUs."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+  research: "diffusion"
+  doFirst: "Diffusers video guide"
+
+- id: "paper-geneval"
+  title: "GenEval: An Object-Focused Framework for Evaluating Text-to-Image Alignment"
+  short: "GenEval"
+  provider: "Ghosh, Hajishirzi, Schmidt"
+  type: "paper"
+  url: "https://arxiv.org/abs/2310.11513"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Uses object detectors to score counting, colors and positions, now a standard benchmark in model reports."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+  research: "diffusion"
+  after: [paper-clipscore]
+
+- id: "paper-imagereward"
+  title: "ImageReward: Learning and Evaluating Human Preferences for Text-to-Image Generation"
+  short: "ImageReward"
+  provider: "Xu et al. (Tsinghua / Zhipu)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2304.05977"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Introduces a human-preference reward model and ReFL fine-tuning for text-to-image."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  research: "diffusion"
+  after: [paper-clipscore]
+
+- id: "paper-hpsv2"
+  title: "Human Preference Score v2: A Solid Benchmark for Evaluating Human Preferences of Text-to-Image Synthesis"
+  short: "HPSv2"
+  provider: "Wu et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2306.09341"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "A large preference dataset and scorer widely used to evaluate and reward-tune image models."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  research: "diffusion"
+  after: [paper-imagereward]
+
+- id: "paper-pick-a-pic"
+  title: "Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation"
+  short: "Pick-a-Pic / PickScore"
+  provider: "Kirstain et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2305.01569"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Real user preference data and the PickScore metric, the dataset behind Diffusion-DPO."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  research: "diffusion"
+  after: [paper-clipscore]
+
+- id: "paper-fid-ttur"
+  title: "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium"
+  short: "FID (TTUR paper)"
+  provider: "Heusel, Ramsauer, Unterthiner, Nessler, Hochreiter"
+  type: "paper"
+  url: "https://arxiv.org/abs/1706.08500"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Introduces the Frechet Inception Distance, still the default metric reported for every image generator, so you understand what the headline number measures."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+
+- id: "paper-hal-holistic-agent-leaderboard"
+  title: "Holistic Agent Leaderboard: The Missing Infrastructure for AI Agent Evaluation"
+  short: "HAL paper"
+  provider: "Sayash Kapoor, Benedikt Stroebl, Peter Kirgis et al. (Princeton)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2510.11977"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [ai]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Explains why agent evals need a standard harness that tracks cost, reliability and scaffold choice, and how HAL runs thousands of agent rollouts to do it."
+  fromYear: 2
+  priority: 1
+  quality: 4
+  roadmap: "ai-agents"
+  after: [paper-swe-bench]
+
+- id: "paper-qwen-image"
+  title: "Qwen-Image Technical Report"
+  short: "Qwen-Image report"
+  provider: "Qwen Team (Alibaba)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2508.02324"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 5
+  summary: "A 2025 open model report notable for text rendering and editing, with data pipeline and training curriculum details."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+  doFirst: "SD3 paper"
+
+- id: "paper-omnigen"
+  title: "OmniGen: Unified Image Generation"
+  short: "OmniGen"
+  provider: "Xiao et al. (BAAI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2409.11340"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "One model for generation, editing and subject-driven tasks without extra adapters, a sign of where tooling is heading."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  after: [paper-ip-adapter]
+
+- id: "paper-vace"
+  title: "VACE: All-in-One Video Creation and Editing"
+  short: "VACE"
+  provider: "Tongyi Lab (Alibaba)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2503.07598"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Explains a single unit for reference, mask and control signals so one video model handles many editing tasks."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  doFirst: "Wan paper"
+
+- id: "paper-turbodiffusion"
+  title: "TurboDiffusion: Accelerating Video Diffusion Models by 100-200 Times"
+  short: "TurboDiffusion"
+  provider: "Tsinghua ML group (thu-ml)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2512.16093"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Combines quantized/sparse attention and step distillation to show how far video diffusion latency can be pushed."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "ai-engineer"
+  research: "diffusion"
+  doFirst: "Sparse VideoGen"
+
+- id: "paper-aflow"
+  title: "AFlow: Automating Agentic Workflow Generation"
+  short: "AFlow"
+  provider: "Jiayi Zhang, Jinyu Xiang, Zhaoyang Yu et al. (MetaGPT / FoundationAgents)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2410.10762"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Frames an agent's workflow as code and searches over it with Monte Carlo tree search, a clear blueprint for automatically improving harness logic."
+  fromYear: 3
+  priority: 1
+  quality: 4
+  roadmap: "ai-agents"
+  doFirst: "Automated Design of Agentic Systems"
+
+- id: "paper-textgrad"
+  title: "TextGrad: Automatic \"Differentiation\" via Text"
+  short: "TextGrad"
+  provider: "Mert Yuksekgonul, Federico Bianchi, Joseph Boen et al. (Stanford, James Zou)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2406.07496"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Shows how to optimise prompts, code and other parts of a compound LLM system by backpropagating natural-language feedback, a core idea behind learned harnesses."
+  fromYear: 3
+  priority: 1
+  quality: 4
+  roadmap: "ai-agents"
+  research: "genai"
+  after: [docs-dspy]
+
+- id: "paper-cicero-diplomacy-science"
+  title: "Human-level play in the game of Diplomacy by combining language models with strategic reasoning"
+  short: "CICERO (Science 2022)"
+  provider: "Meta FAIR Diplomacy Team (Bakhtin et al.), Science 2022"
+  type: "paper"
+  url: "https://pubmed.ncbi.nlm.nih.gov/36413172/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [ai]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "The primary CICERO paper: how a dialogue model was steered by an intent-planning and search module to negotiate with humans, a key reference for grounded LLM agents."
+  fromYear: 3
+  priority: 1
+  quality: 5
+  roadmap: "ai-agents"
+  research: "genai"
+
+# ---- Software architecture and system design (3)
+
+- id: "course-coursera-learning-how-to-learn"
+  title: "Learning How to Learn: Powerful mental tools to help you master tough subjects"
+  short: "Learning How to Learn"
+  provider: "Barbara Oakley, Terrence Sejnowski (Deep Teaching Solutions / Coursera)"
+  type: "lectures"
+  url: "https://www.coursera.org/learn/learning-how-to-learn"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [architecture]
+  level: "intro"
+  cost: "audit-free"
+  estHours: 15
+  summary: "The most-taken MOOC ever, teaching evidence-based study techniques (chunking, spaced repetition, focused vs diffuse mode) for a self-taught math and CS learner."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+
+- id: "cert-aws-solutions-architect-pro"
+  title: "AWS Certified Solutions Architect - Professional"
+  short: "AWS SA Professional"
+  provider: "Amazon Web Services"
+  type: "course"
+  url: "https://aws.amazon.com/certification/certified-solutions-architect-professional/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [architecture]
+  level: "advanced"
+  cost: "paid"
+  estHours: 120
+  summary: "One of the most respected cloud credentials: a 180-minute, US$300 exam on designing multi-account, resilient, cost-aware architectures for complex organisations, the natural next step after SA Associate."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  note: "Paid"
+  after: [cert-aws-solutions-architect-associate]
+
+- id: "book-ted-talks-official-guide"
+  title: "TED Talks: The Official TED Guide to Public Speaking"
+  short: "TED Guide to Public Speaking"
+  provider: "Chris Anderson (Houghton Mifflin Harcourt, 2016)"
+  type: "book"
+  url: "https://www.ted.com/read/ted-books/ted-talks-the-official-ted-guide-to-public-speaking"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [architecture]
+  level: "intro"
+  cost: "paid"
+  estHours: 8
+  summary: "TED's curator distils how the best talks are built around one idea, plus practical chapters on rehearsal, nerves, visuals and delivery, ideal before demoing localSpace on stage."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  note: "Paid"
+
+# ---- Systems: low-level programming, OS kernels, algorithms (22)
+
+- id: "docs-yara"
+  title: "YARA Documentation"
+  short: "YARA Docs"
+  provider: "VirusTotal (Victor M. Alvarez et al.)"
+  type: "article"
+  url: "https://yara.readthedocs.io/en/stable/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "Learn to write the detection rules defenders use to identify and classify malware families, including the PE and ELF modules."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  after: [book-practical-malware-analysis]
+
+- id: "docs-kernel-landlock"
+  title: "Landlock: unprivileged access control"
+  short: "Landlock kernel docs"
+  provider: "Linux kernel documentation"
+  type: "article"
+  url: "https://docs.kernel.org/userspace-api/landlock.html"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "The official guide to Landlock, the kernel feature that lets an unprivileged process lock down its own file and network access, which agent sandboxes build on."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [docs-man7-namespaces]
+
+- id: "docs-codex-linux-sandbox"
+  title: "codex-linux-sandbox (README)"
+  short: "Codex Linux sandbox"
+  provider: "OpenAI"
+  type: "article"
+  url: "https://github.com/openai/codex/blob/main/codex-rs/linux-sandbox/README.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "A real production recipe for sandboxing agent shell commands on Linux with bubblewrap namespaces, seccomp and Landlock, including fallbacks."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  doFirst: "Landlock docs"
+
+- id: "docs-codex-network-proxy"
+  title: "codex-network-proxy: local network policy enforcement"
+  short: "Codex network proxy"
+  provider: "OpenAI"
+  type: "article"
+  url: "https://github.com/openai/codex/blob/main/codex-rs/network-proxy/README.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "How an agent harness restricts outbound network access with a local HTTP/SOCKS5 proxy and allow/deny policy instead of trusting the model."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  after: [docs-codex-linux-sandbox]
+
+- id: "docs-hyperlight-execution"
+  title: "Hyperlight: How code is run inside a VM"
+  short: "Hyperlight execution model"
+  provider: "Hyperlight (CNCF)"
+  type: "article"
+  url: "https://github.com/hyperlight-dev/hyperlight/blob/main/docs/hyperlight-execution-details.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Details how Hyperlight creates and configures tiny VMs without a guest OS and calls functions in them."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  after: [repo-hyperlight]
+
+- id: "docs-firecracker-jailer"
+  title: "Firecracker: The Jailer"
+  short: "Firecracker jailer"
+  provider: "Firecracker"
+  type: "article"
+  url: "https://github.com/firecracker-microvm/firecracker/blob/main/docs/jailer.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Shows the second isolation layer around a microVM: chroot, namespaces, cgroups and privilege dropping before the VMM starts."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  doFirst: "Firecracker Design"
+
+- id: "docs-firecracker-prod-host"
+  title: "Firecracker: Production Host Setup Recommendations"
+  short: "Firecracker prod host setup"
+  provider: "Firecracker"
+  type: "article"
+  url: "https://github.com/firecracker-microvm/firecracker/blob/main/docs/prod-host-setup.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "A hardening checklist for hosts running untrusted microVMs, directly relevant if you host agent sandboxes yourself."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  after: [docs-firecracker-jailer]
+
+- id: "docs-firecracker-snapshots"
+  title: "Firecracker: Snapshotting support"
+  short: "Firecracker snapshots"
+  provider: "Firecracker"
+  type: "article"
+  url: "https://github.com/firecracker-microvm/firecracker/blob/main/docs/snapshotting/snapshot-support.md"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 2
+  summary: "Explains microVM snapshot and restore, the trick sandbox providers use to start pre-warmed agent environments in milliseconds."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  after: [docs-firecracker-jailer]
+
+- id: "docs-volatility3"
+  title: "Volatility 3 Documentation"
+  short: "Volatility 3 Docs"
+  provider: "The Volatility Foundation"
+  type: "article"
+  url: "https://volatility3.readthedocs.io/en/latest/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "Docs for the standard open-source memory forensics framework, covering memory layers, symbol tables and writing analysis plugins."
+  fromYear: 3
+  priority: 1
+  quality: 5
+  after: [book-practical-malware-analysis]
+
+- id: "course-ghidra-class"
+  title: "GhidraClass: Ghidra training courses (Beginner to Advanced)"
+  short: "GhidraClass Courses"
+  provider: "NSA Research Directorate (Ghidra project)"
+  type: "course"
+  url: "https://github.com/NationalSecurityAgency/ghidra/tree/master/GhidraDocs/GhidraClass"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 20
+  summary: "The official Ghidra training slides and exercises, from first disassembly through scripting, BSim and the debugger."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  after: [repo-ghidra]
+
+- id: "book-practical-malware-analysis"
+  title: "Practical Malware Analysis: The Hands-On Guide to Dissecting Malicious Software"
+  short: "Practical Malware Analysis"
+  provider: "Michael Sikorski, Andrew Honig (No Starch Press, 2012)"
+  type: "book"
+  url: "https://nostarch.com/malware"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [systems]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 30
+  summary: "The standard analyst textbook for triaging samples safely, with static and dynamic analysis, x86 disassembly and labs, written for defenders."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  note: "Paid"
+  doFirst: "Reverse Engineering for Beginners"
+
+- id: "tutorial-malware-unicorn-re101"
+  title: "Reverse Engineering 101 (Malware Unicorn workshop)"
+  short: "Malware Unicorn RE101"
+  provider: "Amanda Rousseau (Malware Unicorn)"
+  type: "article"
+  url: "https://malwareunicorn.org/workshops/re101.html"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [systems]
+  level: "intro"
+  cost: "free"
+  estHours: 8
+  summary: "A free, well-paced workshop on setting up an isolated lab and triaging Windows malware with static and dynamic analysis."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  doFirst: "x86 assembly basics"
+
+- id: "practice-coding-challenges-fyi"
+  title: "Coding Challenges"
+  short: "Coding Challenges"
+  provider: "John Crickett"
+  type: "practice"
+  url: "https://codingchallenges.fyi/challenges/intro"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 60
+  summary: "A free catalogue of 90+ build-your-own projects (wc, Redis, grep, load balancer, rate limiter, Memcached) with staged specs."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+
+- id: "repo-portable-pty"
+  title: "portable-pty (WezTerm)"
+  short: "portable-pty"
+  provider: "Wez Furlong"
+  type: "practice"
+  url: "https://github.com/wezterm/wezterm/tree/main/pty"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Cross-platform pseudo-terminal crate from WezTerm, a standard way for a Rust harness to run interactive commands like a real terminal."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  doFirst: "Codex PTY helpers"
+
+- id: "repo-vt100-rust"
+  title: "vt100: parse terminal byte streams into a screen"
+  short: "vt100 crate"
+  provider: "Jesse Luehrs"
+  type: "practice"
+  url: "https://github.com/doy/vt100-rust"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Turns raw PTY output with escape codes into a screen grid, so an agent can read what a TUI program actually displays."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  after: [repo-portable-pty]
+
+- id: "repo-anthropic-sandbox-runtime"
+  title: "sandbox-runtime: lightweight OS-level sandboxing for agents"
+  short: "Anthropic sandbox-runtime"
+  provider: "Anthropic"
+  type: "practice"
+  url: "https://github.com/anthropic-experimental/sandbox-runtime"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "The open-source sandbox behind Claude Code, a compact reference for wrapping agent commands with filesystem and network restrictions on Linux and macOS."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [article-anthropic-claude-code-sandboxing]
+
+- id: "repo-hyperlight"
+  title: "Hyperlight: lightweight VMM for running untrusted code in micro VMs"
+  short: "Hyperlight"
+  provider: "Hyperlight (CNCF)"
+  type: "practice"
+  url: "https://github.com/hyperlight-dev/hyperlight"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "A Rust micro-VM host/guest library designed for embedding hardware-isolated function calls inside an application."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  doFirst: "Hyperlight intro"
+
+- id: "repo-litebox"
+  title: "LiteBox: a security-focused library OS"
+  short: "LiteBox"
+  provider: "Microsoft"
+  type: "practice"
+  url: "https://github.com/microsoft/litebox"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 8
+  summary: "A Rust library OS that shrinks the host interface to cut attack surface, a newer approach to sandboxing untrusted programs."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  after: [repo-hyperlight]
+
+- id: "repo-seccompiler"
+  title: "seccompiler: seccomp filter compiler (rust-vmm)"
+  short: "seccompiler"
+  provider: "rust-vmm"
+  type: "practice"
+  url: "https://github.com/rust-vmm/seccompiler"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Firecracker's Rust library for building seccomp-BPF filters from rules or JSON; the cleanest way to see syscall filtering in code."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  doFirst: "Seccomp BPF docs"
+
+- id: "repo-youki"
+  title: "youki: container runtime written in Rust"
+  short: "youki"
+  provider: "containers"
+  type: "practice"
+  url: "https://github.com/containers/youki"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "An OCI runtime in Rust showing namespaces, cgroups and seccomp setup end to end, the machinery under container sandboxes."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  after: [article-jvns-what-even-is-a-container]
+
+- id: "repo-libkrun"
+  title: "libkrun: dynamic library for KVM-based process isolation"
+  short: "libkrun"
+  provider: "containers"
+  type: "practice"
+  url: "https://github.com/containers/libkrun"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [systems]
+  level: "advanced"
+  cost: "free"
+  estHours: 6
+  summary: "A Rust library that runs a process inside a lightweight KVM micro-VM, the base of several microVM sandboxes for agents."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  after: [paper-firecracker]
+
+- id: "article-anthropic-claude-code-sandboxing"
+  title: "Beyond permission prompts: making Claude Code more secure and autonomous"
+  short: "Claude Code sandboxing"
+  provider: "Anthropic"
+  type: "article"
+  url: "https://anthropic.com/engineering/claude-code-sandboxing"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [systems]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "A first-party write-up of how a coding agent is confined with filesystem and network isolation (bubblewrap, Seatbelt, a proxy) so it can run without constant approval prompts."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [anthropic-building-effective-agents]
+
+# ---- DevOps and MLOps (21)
+
+- id: "docs-otel-rust-getting-started"
+  title: "OpenTelemetry Rust: Getting Started"
+  short: "OpenTelemetry Rust"
+  provider: "OpenTelemetry"
+  type: "article"
+  url: "https://opentelemetry.io/docs/languages/rust/getting-started/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Instrument a small Rust service with traces, metrics and logs, the starting point for tracing every turn and tool call of an agent."
+  fromYear: 1
+  priority: 3
+  quality: 3
+  roadmap: "software-architect"
+
+- id: "docs-owasp-top10-cicd-risks"
+  title: "OWASP Top 10 CI/CD Security Risks"
+  short: "OWASP CI/CD Top 10"
+  provider: "OWASP Foundation"
+  type: "article"
+  url: "https://owasp.org/www-project-top-10-ci-cd-security-risks/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "A vendor-neutral threat model of build pipelines, from poisoned pipeline execution to artifact integrity, to audit any CI setup against."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  doFirst: "Understanding GitHub Actions"
+
+- id: "docs-pyinstaller-manual"
+  title: "PyInstaller Manual"
+  short: "PyInstaller Manual"
+  provider: "PyInstaller"
+  type: "article"
+  url: "https://pyinstaller.org/en/stable/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "The complete manual for freezing Python apps into executables: how bundling works, spec files, hooks and debugging failed builds."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  doFirst: "Python Packaging User Guide"
+
+- id: "docs-goreleaser"
+  title: "GoReleaser documentation"
+  short: "GoReleaser docs"
+  provider: "GoReleaser"
+  type: "article"
+  url: "https://goreleaser.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 5
+  summary: "Full docs for the standard Go release tool: cross-builds, archives, checksums, signing, Homebrew taps and CI integration."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  doFirst: "Go tutorial"
+
+- id: "docs-electron-code-signing"
+  title: "Code Signing (Electron)"
+  short: "Electron code signing"
+  provider: "Electron"
+  type: "article"
+  url: "https://www.electronjs.org/docs/latest/tutorial/code-signing"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Electron's official guide to signing and notarizing macOS builds and signing Windows builds so users can install without warnings."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  doFirst: "Electron packaging tutorial"
+
+- id: "docs-electron-forge"
+  title: "Electron Forge documentation"
+  short: "Electron Forge docs"
+  provider: "Electron Forge"
+  type: "article"
+  url: "https://www.electronforge.io/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "The official Electron build toolchain docs: scaffolding, makers for each installer format, publishers and plugins."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  doFirst: "Electron packaging tutorial"
+
+- id: "docs-reproducible-builds"
+  title: "Reproducible Builds documentation"
+  short: "Reproducible Builds docs"
+  provider: "Reproducible Builds project"
+  type: "article"
+  url: "https://reproducible-builds.org/docs/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "advanced"
+  cost: "free"
+  estHours: 5
+  summary: "Explains how to remove timestamps, paths and other variance so anyone can rebuild your release bit-for-bit and verify it."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  doFirst: "SLSA Specification v1.0"
+
+- id: "book-continuous-delivery-humble-farley"
+  title: "Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation"
+  short: "Continuous Delivery"
+  provider: "Jez Humble, David Farley (Addison-Wesley, 2010)"
+  type: "book"
+  url: "https://www.informit.com/store/continuous-delivery-reliable-software-releases-through-build-9780321601919"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 14
+  summary: "The founding text on deployment pipelines, artifact promotion and release automation that every CI/CD tool now implements."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+  note: "Paid"
+  doFirst: "Fowler: Continuous Integration"
+
+- id: "repo-opentelemetry-rust"
+  title: "OpenTelemetry Rust"
+  short: "opentelemetry-rust"
+  provider: "OpenTelemetry"
+  type: "practice"
+  url: "https://github.com/open-telemetry/opentelemetry-rust"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "The official Rust OpenTelemetry SDK and exporters to emit GenAI-convention spans from a Rust harness."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "software-architect"
+  after: [docs-otel-rust-getting-started]
+
+- id: "repo-tracing-opentelemetry"
+  title: "tracing-opentelemetry"
+  short: "tracing-opentelemetry"
+  provider: "Tokio"
+  type: "practice"
+  url: "https://github.com/tokio-rs/tracing-opentelemetry"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Bridges the tracing crate to OpenTelemetry so existing spans in an async Rust agent become exportable distributed traces."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "software-architect"
+  after: [repo-opentelemetry-rust]
+
+- id: "repo-zizmor"
+  title: "zizmor: static analysis for GitHub Actions"
+  short: "zizmor"
+  provider: "zizmor project (William Woodruff et al.)"
+  type: "practice"
+  url: "https://github.com/zizmorcore/zizmor"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Lints workflows for template injection, excessive permissions, unpinned actions and credential leaks before they ship."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  doFirst: "Secure use reference"
+
+- id: "repo-ossf-scorecard"
+  title: "OpenSSF Scorecard"
+  short: "OpenSSF Scorecard"
+  provider: "OpenSSF"
+  type: "practice"
+  url: "https://github.com/ossf/scorecard"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Scores a repository's supply-chain hygiene (branch protection, pinned deps, token permissions, signed releases) and runs as a GitHub Action."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  doFirst: "SLSA Specification v1.0"
+
+- id: "repo-aws-configure-credentials"
+  title: "configure-aws-credentials (official AWS action)"
+  short: "AWS creds action"
+  provider: "AWS"
+  type: "practice"
+  url: "https://github.com/aws-actions/configure-aws-credentials"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "AWS's own action for keyless OIDC role assumption from workflows, with the IAM trust policy setup documented in the README."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  doFirst: "OpenID Connect in GitHub Actions"
+
+- id: "repo-google-github-actions-auth"
+  title: "google-github-actions/auth"
+  short: "GCP auth action"
+  provider: "Google"
+  type: "practice"
+  url: "https://github.com/google-github-actions/auth"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Google's official action for Workload Identity Federation from GitHub, the recommended way to deploy to GCP without keys."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+  doFirst: "OpenID Connect in GitHub Actions"
+
+- id: "repo-azure-login"
+  title: "Azure/login"
+  short: "Azure login action"
+  provider: "Microsoft"
+  type: "practice"
+  url: "https://github.com/Azure/login"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Microsoft's official action for signing in to Azure with OIDC federated credentials, including setup for each identity type."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  doFirst: "OpenID Connect in GitHub Actions"
+
+- id: "article-progit-github-contributing"
+  title: "Pro Git 6.2: GitHub - Contributing to a Project"
+  short: "Pro Git: Contributing (6.2)"
+  provider: "Scott Chacon, Ben Straub"
+  type: "article"
+  url: "https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "The canonical walkthrough of the fork, topic-branch, pull-request and sync-with-upstream loop behind every outside PR."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  after: [book-pro-git]
+
+- id: "blog-flyio"
+  title: "The Fly Blog"
+  short: "Fly.io Blog"
+  provider: "Fly.io"
+  type: "article"
+  url: "https://fly.io/blog/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Unusually candid engineering posts on running a global VM platform: Firecracker, networking, storage and the operational mistakes behind them."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "software-architect"
+  blog: true
+  after: [article-flyio-docker-without-docker]
+
+- id: "blog-honeycomb"
+  title: "Honeycomb Blog"
+  short: "Honeycomb Blog"
+  provider: "Honeycomb"
+  type: "article"
+  url: "https://www.honeycomb.io/blog"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Where the modern observability vocabulary (high-cardinality events, SLOs, tracing-first debugging) was largely worked out in public."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  blog: true
+  after: [article-majors-logs-vs-structured-events]
+
+- id: "blog-kubernetes"
+  title: "Kubernetes Blog"
+  short: "Kubernetes Blog"
+  provider: "Kubernetes project (CNCF)"
+  type: "article"
+  url: "https://kubernetes.io/blog/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "The official source for what changes in each Kubernetes release and why, written by the SIG maintainers who build it."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "software-architect"
+  blog: true
+  doFirst: "Kubernetes docs"
+
+- id: "blog-jessfraz"
+  title: "Ramblings from Jessie"
+  short: "Jessie Frazelle's Blog"
+  provider: "Jessie Frazelle"
+  type: "article"
+  url: "https://blog.jessfraz.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "Deep posts from a core container engineer on namespaces, seccomp, sandboxing and hardware, great for seeing what containers really are underneath."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  blog: true
+  after: [article-jvns-what-even-is-a-container]
+
+- id: "blog-last-week-in-aws"
+  title: "Last Week in AWS Blog"
+  short: "Last Week in AWS"
+  provider: "Corey Quinn (Duckbill Group)"
+  type: "article"
+  url: "https://www.lastweekinaws.com/blog/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Sharp, skeptical commentary on AWS services and cloud cost that teaches you to read cloud pricing and launches critically."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  blog: true
+
+# ---- Languages (11)
+
+- id: "docs-cargo-book"
+  title: "The Cargo Book"
+  short: "Cargo Book"
+  provider: "Rust project"
+  type: "article"
+  url: "https://doc.rust-lang.org/cargo/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 8
+  summary: "The official manual for Cargo: workspaces, features, build profiles, build scripts and publishing crates."
+  fromYear: 1
+  priority: 1
+  quality: 5
+  after: [rust-book]
+
+- id: "docs-go-cmd"
+  title: "go command (cmd/go) reference"
+  short: "go command reference"
+  provider: "Go team"
+  type: "article"
+  url: "https://pkg.go.dev/cmd/go"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "The authoritative reference for go build, go install, build constraints and the GOOS/GOARCH environment used for cross-compilation."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  doFirst: "Go tutorial"
+
+- id: "book-integrated-chinese-4e"
+  title: "Integrated Chinese (4th Edition)"
+  short: "Integrated Chinese 4e"
+  provider: "Yuehua Liu, Tao-chung Yao, Nyan-Ping Bi et al. (Cheng & Tsui, 2017)"
+  type: "book"
+  url: "https://www.cheng-tsui.com/browse/integrated-chinese-4th-edition"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [languages]
+  level: "intro"
+  cost: "paid"
+  estHours: 120
+  summary: "The standard college Mandarin textbook series, giving a self-learner the same structured first and second year that university programs teach."
+  fromYear: 1
+  priority: 1
+  quality: 5
+  note: "Paid"
+
+- id: "book-cpp-templates-complete-guide-2e"
+  title: "C++ Templates: The Complete Guide (2nd ed.)"
+  short: "C++ Templates (2nd ed.)"
+  provider: "David Vandevoorde, Nicolai M. Josuttis, Douglas Gregor (Addison-Wesley, 2017)"
+  type: "book"
+  url: "https://www.pearson.com/en-us/subject-catalog/p/c-templates-the-complete-guide/P200000000663/9780134778747"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [languages]
+  level: "advanced"
+  cost: "paid"
+  estHours: 30
+  summary: "The definitive reference on templates through C++17, covering deduction, SFINAE, variadics and metaprogramming that CUTLASS-style kernel libraries lean on."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  note: "Paid"
+  after: [tour-of-cpp]
+
+- id: "repo-schemars"
+  title: "Schemars: generate JSON Schema from Rust types"
+  short: "schemars"
+  provider: "Graham Esau"
+  type: "practice"
+  url: "https://github.com/GREsau/schemars"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "Derives JSON Schema from serde types, the usual way Rust agents and MCP servers publish typed tool parameters."
+  fromYear: 1
+  priority: 3
+  quality: 3
+  after: [rust-book]
+
+- id: "repo-ratatui"
+  title: "Ratatui: build terminal user interfaces in Rust"
+  short: "Ratatui"
+  provider: "Ratatui"
+  type: "practice"
+  url: "https://github.com/ratatui/ratatui"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 8
+  summary: "The TUI library behind several Rust coding agents (including Codex), for building a chat and diff interface around your harness."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  after: [rust-book]
+
+- id: "practice-pleco-dictionary"
+  title: "Pleco Chinese Dictionary"
+  short: "Pleco"
+  provider: "Pleco Software"
+  type: "practice"
+  url: "https://www.pleco.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [languages]
+  level: "intro"
+  cost: "free"
+  estHours: 20
+  summary: "The dictionary app nearly every serious Mandarin learner uses, with handwriting and OCR lookup, audio and flashcards in one place."
+  fromYear: 1
+  priority: 1
+  quality: 5
+  note: "Free tier"
+
+- id: "repo-jiter"
+  title: "jiter: fast iterable JSON parser (with partial JSON support)"
+  short: "jiter"
+  provider: "Pydantic"
+  type: "practice"
+  url: "https://github.com/pydantic/jiter"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "A Rust JSON parser that can parse incomplete JSON, exactly what you need to show streamed tool-call arguments before they finish."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  after: [rust-book]
+
+- id: "repo-jsonrpsee"
+  title: "jsonrpsee: JSON-RPC client and server in Rust"
+  short: "jsonrpsee"
+  provider: "Parity Technologies"
+  type: "practice"
+  url: "https://github.com/paritytech/jsonrpsee"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "A mature async JSON-RPC 2.0 library to study before writing your own MCP or ACP transport layer."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  doFirst: "JSON-RPC 2.0 spec"
+
+- id: "repo-lsp-server-rust-analyzer"
+  title: "lsp-server (rust-analyzer)"
+  short: "lsp-server crate"
+  provider: "rust-analyzer team"
+  type: "practice"
+  url: "https://github.com/rust-lang/rust-analyzer/tree/master/lib/lsp-server"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "A tiny synchronous JSON-RPC-over-stdio framework; a clean model for the stdio message loop every MCP or LSP server needs."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  doFirst: "JSON-RPC 2.0 spec"
+
+- id: "repo-ast-grep"
+  title: "ast-grep: structural code search, lint and rewrite"
+  short: "ast-grep"
+  provider: "Herrington Darkholme"
+  type: "practice"
+  url: "https://github.com/ast-grep/ast-grep"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [languages]
+  level: "intermediate"
+  cost: "free"
+  estHours: 4
+  summary: "A Rust tree-sitter tool for syntax-aware search and rewrite, a powerful code-editing tool to expose to a coding agent."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  doFirst: "tree-sitter"
+
+# ---- Graphics and rendering (9)
+
+- id: "course-cvpr2025-volumetric-video"
+  title: "Volumetric Video in the Real World (CVPR 2025 tutorial)"
+  short: "CVPR'25 Volumetric Video"
+  provider: "NVIDIA Research and speakers"
+  type: "course"
+  url: "https://nvlabs.github.io/cvpr2025-volumetric-video-tutorial"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [graphics]
+  level: "advanced"
+  cost: "free"
+  estHours: 7
+  summary: "Recorded talks on 4D reconstruction, human capture, splat compression and streaming of dynamic scenes."
+  fromYear: 3
+  priority: 3
+  quality: 3
+  roadmap: "game-developer"
+  after: [paper-4d-gaussian-splatting]
+
+- id: "repo-supersplat"
+  title: "SuperSplat Editor"
+  short: "SuperSplat"
+  provider: "PlayCanvas"
+  type: "practice"
+  url: "https://github.com/playcanvas/supersplat"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [graphics]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "Browser-based tool to inspect, clean up, optimize and publish Gaussian splat captures."
+  fromYear: 1
+  priority: 3
+  quality: 3
+  roadmap: "game-developer"
+
+- id: "repo-viser"
+  title: "Viser: 3D visualization for computer vision and robotics in Python"
+  short: "Viser"
+  provider: "Nerfstudio team"
+  type: "practice"
+  url: "https://github.com/nerfstudio-project/viser"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [graphics]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "Web-based Python 3D viewer for point clouds, meshes, cameras and splats, ideal for debugging reconstructions."
+  fromYear: 1
+  priority: 3
+  quality: 3
+  roadmap: "game-developer"
+
+- id: "repo-antimatter15-splat"
+  title: "splat: WebGL real-time Gaussian splatting viewer"
+  short: "antimatter15 splat"
+  provider: "Kevin Kwok (antimatter15)"
+  type: "practice"
+  url: "https://github.com/antimatter15/splat"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [graphics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "A tiny single-file WebGL splat renderer; easy to read to learn sorting and splat rasterization in a browser."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "game-developer"
+  doFirst: "3DGS paper"
+
+- id: "repo-sparkjs"
+  title: "Spark: advanced 3D Gaussian Splatting renderer for THREE.js"
+  short: "Spark (THREE.js)"
+  provider: "Spark project"
+  type: "practice"
+  url: "https://github.com/sparkjsdev/spark"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [graphics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Modern web splat renderer that mixes splats with regular Three.js scenes and supports programmable edits."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "game-developer"
+  doFirst: "GaussianSplats3D"
+
+- id: "repo-niantic-spz"
+  title: "spz: compressed 3D Gaussian splat file format"
+  short: "spz format"
+  provider: "Niantic"
+  type: "practice"
+  url: "https://github.com/nianticlabs/spz"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [graphics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "Small C++ library for a splat format about 10x smaller than PLY; shows practical splat quantization."
+  fromYear: 2
+  priority: 3
+  quality: 3
+  roadmap: "game-developer"
+  doFirst: "3DGS paper"
+
+- id: "repo-hierarchical-3d-gaussians"
+  title: "A Hierarchical 3D Gaussian Representation for Real-Time Rendering of Very Large Datasets"
+  short: "Hierarchical 3DGS"
+  provider: "Inria GraphDeco"
+  type: "practice"
+  url: "https://github.com/graphdeco-inria/hierarchical-3d-gaussians"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [graphics]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "Code for city-scale splatting with level-of-detail hierarchies and chunked training."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  after: [repo-graphdeco-gaussian-splatting]
+
+- id: "paper-4d-gaussian-splatting"
+  title: "4D Gaussian Splatting for Real-Time Dynamic Scene Rendering"
+  short: "4D Gaussian Splatting"
+  provider: "Guanjun Wu et al."
+  type: "paper"
+  url: "https://arxiv.org/abs/2310.08528"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [graphics]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Extends splatting to dynamic scenes with a HexPlane deformation field while keeping real-time rendering."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  doFirst: "3DGS paper"
+
+- id: "paper-neus"
+  title: "NeuS: Learning Neural Implicit Surfaces by Volume Rendering for Multi-view Reconstruction"
+  short: "NeuS"
+  provider: "Peng Wang, Lingjie Liu et al. (HKU / MPI)"
+  type: "paper"
+  url: "https://arxiv.org/abs/2106.10689"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [graphics]
+  level: "advanced"
+  cost: "free"
+  estHours: 4
+  summary: "The foundational bridge from NeRF volume rendering to SDF surfaces, which Neuralangelo and most neural surface reconstruction build on."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  after: [paper-nerf]
+
+# ---- Simulation (5)
+
+- id: "blog-lorena-barba"
+  title: "Lorena A. Barba Group Blog"
+  short: "Lorena Barba Blog"
+  provider: "Lorena A. Barba (GWU)"
+  type: "article"
+  url: "https://lorenabarba.com/blog/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [simulation]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "From the author of CFD Python: essays on computational science education, reproducibility and numerical methods practice."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  blog: true
+  doFirst: "CFD Python 12 steps"
+
+- id: "blog-comsol"
+  title: "COMSOL Blog"
+  short: "COMSOL Blog"
+  provider: "COMSOL"
+  type: "article"
+  url: "https://www.comsol.com/blogs"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [simulation]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Hundreds of worked multiphysics modeling posts (heat, fluids, electromagnetics, structures) that explain the physics behind each FEM setup."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  blog: true
+
+- id: "blog-stochastic-lifestyle"
+  title: "Stochastic Lifestyle"
+  short: "Stochastic Lifestyle"
+  provider: "Christopher Rackauckas"
+  type: "article"
+  url: "https://www.stochasticlifestyle.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [simulation]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "The SciML lead on ODE solvers, stiffness, GPU-parallel simulation and Julia performance, with honest benchmarks against JAX and PyTorch."
+  fromYear: 3
+  priority: 1
+  quality: 5
+  roadmap: "game-developer"
+  blog: true
+  doFirst: "SciML Book"
+
+- id: "blog-sciml-news"
+  title: "SciML Scientific Machine Learning Blog"
+  short: "SciML Blog"
+  provider: "SciML Open Source Organization"
+  type: "article"
+  url: "https://sciml.ai/news/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [simulation]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "Release notes and design write-ups for DifferentialEquations.jl, ModelingToolkit and friends, showing how a modern solver stack evolves."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  blog: true
+  doFirst: "DifferentialEquations.jl docs"
+
+- id: "blog-siam-news"
+  title: "SIAM News"
+  short: "SIAM News"
+  provider: "Society for Industrial and Applied Mathematics"
+  type: "article"
+  url: "https://www.siam.org/publications/siam-news/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [simulation]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "SIAM's news publication tracks research in numerical analysis and computational science written by the field's own researchers."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  blog: true
+  doFirst: "Nick Higham blog"
+
+# ---- Robotics (5)
+
+- id: "blog-boston-dynamics"
+  title: "Boston Dynamics Blog"
+  short: "Boston Dynamics Blog"
+  provider: "Boston Dynamics"
+  type: "article"
+  url: "https://bostondynamics.com/blog/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [robotics]
+  level: "intro"
+  cost: "free"
+  estHours: 10
+  summary: "Behind-the-scenes posts on Atlas and Spot, including manipulation, perception and deployment lessons from industry's best-known robot maker."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-ieee-spectrum-robotics"
+  title: "IEEE Spectrum: Robotics"
+  short: "IEEE Spectrum Robotics"
+  provider: "IEEE Spectrum (Evan Ackerman et al.)"
+  type: "article"
+  url: "https://spectrum.ieee.org/topic/robotics/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [robotics]
+  level: "intro"
+  cost: "free"
+  estHours: 10
+  summary: "The most informed robotics journalism, with researcher interviews and the weekly Video Friday roundup of new robots."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-stephane-caron"
+  title: "Stéphane Caron's Blog"
+  short: "Stéphane Caron Blog"
+  provider: "Stéphane Caron"
+  type: "article"
+  url: "https://scaron.info/category/blog.html"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [robotics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Clear, math-backed posts on legged locomotion, LQR, inverse kinematics and QP solvers from the creator of Upkie and Pink."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  blog: true
+  after: [modern-robotics]
+
+- id: "blog-it-can-think"
+  title: "It Can Think!"
+  short: "It Can Think!"
+  provider: "Chris Paxton"
+  type: "article"
+  url: "https://itcanthink.substack.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [robotics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "A robot-learning researcher's newsletter on foundation models for robots, humanoids and what actually works in embodied AI."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  blog: true
+  doFirst: "Eric Jang's blog"
+
+- id: "blog-bair"
+  title: "The Berkeley Artificial Intelligence Research Blog"
+  short: "BAIR Blog"
+  provider: "Berkeley AI Research (BAIR)"
+  type: "article"
+  url: "https://bair.berkeley.edu/blog/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [robotics]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "Accessible write-ups of Berkeley research, including much of the modern robot-learning and offline RL work from Levine, Abbeel and colleagues."
+  fromYear: 3
+  priority: 1
+  quality: 5
+  blog: true
+  doFirst: "Spinning Up in Deep RL"
+
+# ---- Game development (8)
+
+- id: "docs-itch-butler"
+  title: "butler: itch.io command-line upload tool"
+  short: "itch.io butler"
+  provider: "itch.io"
+  type: "article"
+  url: "https://itch.io/docs/butler/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "The standard way to push and patch indie builds on itch.io from scripts or CI, ideal for shipping jam games and early builds."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  doFirst: "Exporting projects (Godot)"
+
+- id: "docs-steamworks"
+  title: "Steamworks Documentation"
+  short: "Steamworks Docs"
+  provider: "Valve"
+  type: "article"
+  url: "https://partner.steamgames.com/doc/home"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "The official guide to releasing on Steam: store presence, SDK features like achievements and networking, and how payments work."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "game-developer"
+
+- id: "docs-steamworks-uploading"
+  title: "Uploading to Steam (SteamPipe)"
+  short: "Uploading to Steam"
+  provider: "Valve"
+  type: "article"
+  url: "https://partner.steamgames.com/doc/sdk/uploading"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Step-by-step SteamPipe guide to depots, build scripts, steamcmd in CI and branch management for shipping patches."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "game-developer"
+  after: [docs-steamworks]
+
+- id: "docs-unreal-build-operations"
+  title: "Build Operations: Cooking, Packaging, Deploying, and Running Projects in Unreal Engine"
+  short: "Unreal Build Operations"
+  provider: "Epic Games"
+  type: "article"
+  url: "https://dev.epicgames.com/documentation/en-us/unreal-engine/build-operations-cooking-packaging-deploying-and-running-projects-in-unreal-engine"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 3
+  summary: "Explains the BuildCookRun pipeline stages so you can automate Unreal builds beyond the editor's Package button."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "game-developer"
+  doFirst: "Packaging and Cooking Games"
+
+- id: "blog-bitsquid"
+  title: "bitsquid: development blog"
+  short: "Bitsquid Dev Blog"
+  provider: "Niklas Gray, Tobias Persson et al. (Bitsquid / Autodesk Stingray)"
+  type: "article"
+  url: "https://bitsquid.blogspot.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "Engine programmers from the Bitsquid/Stingray engine on data-oriented design, resource systems and rendering; a classic for engine architecture."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  roadmap: "game-developer"
+  blog: true
+  doFirst: "Game Programming Patterns"
+
+- id: "blog-box2d-posts"
+  title: "Box2D Blog"
+  short: "Box2D Blog"
+  provider: "Erin Catto"
+  type: "article"
+  url: "https://box2d.org/posts/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "Erin Catto explains rigid-body solver design, contact handling, determinism and performance as he builds Box2D v3."
+  fromYear: 3
+  priority: 1
+  quality: 5
+  roadmap: "game-developer"
+  blog: true
+  after: [box2d-lite]
+
+- id: "blog-our-machinery-archive"
+  title: "Our Machinery Dev Blog (archive)"
+  short: "Our Machinery Blog"
+  provider: "Our Machinery (Niklas Gray, Tobias Persson et al.)"
+  type: "article"
+  url: "https://ruby0x1.github.io/machinery_blog_archive/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "An archived run of posts on building a modern C engine from scratch: plugins, data models, hot reload and a taxonomy of bugs."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  blog: true
+  after: [blog-bitsquid]
+
+- id: "blog-wicked-engine"
+  title: "Wicked Engine Blog"
+  short: "Wicked Engine Blog"
+  provider: "Turánszki János (Wicked Engine)"
+  type: "article"
+  url: "https://wickedengine.net/blog.html"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "One developer's detailed write-ups of building an open-source engine's renderer and systems, with code you can read alongside."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  blog: true
+  after: [learnopengl]
+
+# ---- Math and physics (1)
+
+- id: "book-arovas-thermo-stat-mech"
+  title: "Thermodynamics and Statistical Mechanics (Arovas)"
+  short: "Arovas Stat Mech"
+  provider: "Daniel Arovas (UC San Diego, LibreTexts)"
+  type: "book"
+  url: "https://phys.libretexts.org/Bookshelves/Thermodynamics_and_Statistical_Mechanics/Book:_Thermodynamics_and_Statistical_Mechanics_(Arovas)"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [math]
+  level: "intermediate"
+  cost: "free"
+  estHours: 40
+  summary: "Arovas's dense, problem-rich UCSD notes cover ensembles, quantum gases, phase transitions and nonequilibrium physics at upper-undergraduate to graduate level."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  doFirst: "MIT 8.044"
+
+# ---- Electrical and mechanical engineering (2)
+
+- id: "cert-solidworks-cswp"
+  title: "SOLIDWORKS Design Professional (CSWP)"
+  short: "SOLIDWORKS CSWP"
+  provider: "Dassault Systemes SOLIDWORKS"
+  type: "course"
+  url: "https://www.solidworks.com/certifications/solidworks-design-professional"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 60
+  summary: "The industry-recognised SOLIDWORKS skill credential: three hands-on segments (parts from drawings, configurations and design tables, assemblies with advanced mates) that prove real CAD competence beyond the CSWA."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  note: "Paid"
+  doFirst: "SOLIDWORKS CSWA"
+
+- id: "book-cas-power-converters-2014"
+  title: "Proceedings of the 2014 CAS-CERN Accelerator School: Power Converters"
+  short: "CAS Power Converters"
+  provider: "CERN Accelerator School (CERN Yellow Reports, 2015)"
+  type: "book"
+  url: "https://e-publishing.cern.ch/index.php/CYR/issue/view/9"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 40
+  summary: "Full school proceedings on how accelerator magnets, RF and pulsed systems are powered, from converter topologies to precision regulation and protection."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  doFirst: "Introduction to Power Electronics"
+
+# ---- Hardware and chip design: CPU, GPU and NPU, RTL to tape-out (6)
+
+- id: "book-thinking-machine-witt"
+  title: "The Thinking Machine: Jensen Huang, Nvidia, and the World's Most Coveted Microchip"
+  short: "The Thinking Machine"
+  provider: "Stephen Witt (Viking, 2025)"
+  type: "book"
+  url: "https://www.penguinrandomhouse.com/books/757558/the-thinking-machine-by-stephen-witt/"
+  urlVerified: true
+  lastVerified: 2026-10-21
+  tracks: [hardware]
+  level: "intro"
+  cost: "paid"
+  estHours: 9
+  summary: "How CUDA and the GPU became the engine of deep learning, essential context for an inference engineer aiming at NVIDIA."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  note: "Paid"
+
+- id: "blog-next-platform"
+  title: "The Next Platform"
+  short: "The Next Platform"
+  provider: "Timothy Prickett Morgan, Nicole Hemsoth et al."
+  type: "article"
+  url: "https://www.nextplatform.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [hardware]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Long-form analysis of datacenter CPUs, GPUs, accelerators and interconnects, useful for understanding where chip design meets the AI market."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-real-world-tech"
+  title: "Real World Tech"
+  short: "Real World Tech"
+  provider: "David Kanter et al."
+  type: "article"
+  url: "https://www.realworldtech.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [hardware]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "David Kanter's microarchitecture deep dives are long-standing references for how real CPUs and GPUs are organized."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  blog: true
+  doFirst: "Computer Organization and Design"
+
+- id: "blog-semiengineering"
+  title: "Semiconductor Engineering"
+  short: "Semiconductor Engineering"
+  provider: "Semiconductor Engineering (Ed Sperling et al.)"
+  type: "article"
+  url: "https://semiengineering.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [hardware]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Industry-insider coverage of EDA, verification, advanced packaging and process nodes, the practical side of taping out chips."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-sigarch-computer-architecture-today"
+  title: "Computer Architecture Today (SIGARCH Blog)"
+  short: "SIGARCH Arch Today"
+  provider: "ACM SIGARCH"
+  type: "article"
+  url: "https://www.sigarch.org/blog/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [hardware]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "Short essays by architecture researchers on memory models, accelerators and research directions, straight from the ISCA/MICRO community."
+  fromYear: 3
+  priority: 1
+  quality: 5
+  blog: true
+  doFirst: "Hennessy & Patterson"
+
+- id: "blog-stuffedcow"
+  title: "Henry Wong's Blog (stuffedcow)"
+  short: "stuffedcow Blog"
+  provider: "Henry Wong"
+  type: "article"
+  url: "https://blog.stuffedcow.net/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [hardware]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "Careful microbenchmark-driven measurements of CPU internals like reorder buffers and caches, a model for empirical microarchitecture work."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  blog: true
+  after: [article-henry-wong-rob-capacity]
+
+# ---- Quantum computing and programming (5)
+
+- id: "blog-quanta-quantum-computing"
+  title: "Quanta Magazine: Quantum Computing"
+  short: "Quanta: Quantum Computing"
+  provider: "Quanta Magazine (Simons Foundation)"
+  type: "article"
+  url: "https://www.quantamagazine.org/tag/quantum-computing/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intro"
+  cost: "free"
+  estHours: 10
+  summary: "Carefully reported explainers on new quantum computing results that give context before you read the papers."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-quantum-frontiers"
+  title: "Quantum Frontiers"
+  short: "Quantum Frontiers"
+  provider: "Institute for Quantum Information and Matter (Caltech)"
+  type: "article"
+  url: "https://quantumfrontiers.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Caltech IQIM researchers, Preskill among them, explain quantum information results and life in the field in readable essays."
+  fromYear: 2
+  priority: 1
+  quality: 5
+  blog: true
+  after: [blog-shtetl-optimized]
+
+- id: "blog-ibm-quantum"
+  title: "IBM Quantum Blog"
+  short: "IBM Quantum Blog"
+  provider: "IBM Quantum"
+  type: "article"
+  url: "https://www.ibm.com/quantum/blog"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Official updates on IBM's processors, error-correction roadmap and Qiskit, showing how a hardware leader frames its progress."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  blog: true
+  doFirst: "Basics of Quantum Information"
+
+- id: "blog-pennylane"
+  title: "PennyLane Blog"
+  short: "PennyLane Blog"
+  provider: "Xanadu (PennyLane team)"
+  type: "article"
+  url: "https://pennylane.ai/blog"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Technical posts on quantum algorithms, QEC decoding and PennyLane features that pair well with the PennyLane demos."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  blog: true
+  after: [course-pennylane-codebook]
+
+- id: "blog-quantum-pontiff"
+  title: "The Quantum Pontiff"
+  short: "Quantum Pontiff"
+  provider: "Dave Bacon, Steve Flammia, Aram Harrow, Charlie Bennett"
+  type: "article"
+  url: "https://dabacon.org/pontiff/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "A long-running blog by well-known quantum information theorists, with an archive full of sharp takes on algorithms and error correction."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  blog: true
+  after: [blog-shtetl-optimized]

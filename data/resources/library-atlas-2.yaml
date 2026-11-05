@@ -85,6 +85,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "PyTorch ONNX Export"
 
 - id: "docs-nvidia-mixed-precision-training"
   title: "Train With Mixed Precision"
@@ -184,6 +185,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Optimizing Conv Layers"
 
 - id: "docs-vllm-design-prefix-caching"
   title: "Automatic Prefix Caching (vLLM design doc)"
@@ -503,6 +505,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "PyTorch Learn the Basics"
 
 - id: "pytorch-profiler-recipe"
   title: "PyTorch Profiler"
@@ -542,6 +545,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "DeepSpeed Getting Started"
 
 - id: "repo-huggingface-picotron-tutorial"
   title: "picotron tutorial"
@@ -641,6 +645,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "Umar: Transformer code"
 
 - id: "repo-llamafile"
   title: "llamafile"
@@ -680,6 +685,7 @@
   roadmap: "inference-engineering"
   tags: [inference]
   quality: 4
+  doFirst: "MLX Examples"
 
 - id: "repo-stanford-cs336-assignment2"
   title: "CS336 Assignment 2: Systems"
@@ -1695,6 +1701,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "PyTorch Learn the Basics"
 
 - id: "spec-mcp-2025-11-25"
   title: "Model Context Protocol Specification (2025-11-25)"
@@ -1789,6 +1796,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "PyTorch Learn the Basics"
 
 - id: "pytorch-notes-cuda-semantics"
   title: "CUDA semantics"
@@ -1864,6 +1872,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "PyTorch Learn the Basics"
 
 - id: "jax-sharp-bits"
   title: "JAX - The Sharp Bits"
@@ -1939,6 +1948,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "JAX 101: Pytrees"
 
 - id: "hf-transformers-docs"
   title: "Transformers documentation"
@@ -2349,6 +2359,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "PyTorch 60-Min Blitz"
 
 - id: "pytorch-what-is-torch-nn-really"
   title: "What is torch.nn really?"
@@ -2367,6 +2378,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 5
+  doFirst: "PyTorch Learn the Basics"
 
 - id: "jax-thinking-in-jax"
   title: "Quickstart: How to think in JAX"
@@ -2518,6 +2530,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "PyTorch Learn the Basics"
 
 - id: "jax-autodiff-cookbook"
   title: "The Autodiff Cookbook"
@@ -2536,6 +2549,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "JAX 101: Transformations"
 
 - id: "repo-handsonllm-hands-on-llms"
   title: "Hands-On Large Language Models - code"
@@ -2572,6 +2586,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "ML for Beginners"
 
 - id: "repo-llama-factory"
   title: "LLaMA-Factory"
@@ -2608,6 +2623,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "PyTorch Learn the Basics"
 
 - id: "repo-karpathy-build-nanogpt"
   title: "build-nanogpt"
@@ -2740,6 +2756,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Umar: Transformer code"
 
 - id: "repo-cloneofsimo-minrf"
   title: "minRF"
@@ -2891,6 +2908,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Zephyr"
 
 - id: "repo-stanford-cs336-assignment3"
   title: "CS336 Assignment 3: Scaling"
@@ -3976,6 +3994,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Intro to LLMs talk"
 
 - id: "article-weng-autoencoder-vae"
   title: "From Autoencoder to Beta-VAE"
@@ -4166,6 +4185,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "MDN HTTP Methods"
 
 - id: "rfc-9457-problem-details"
   title: "RFC 9457: Problem Details for HTTP APIs"
@@ -4184,6 +4204,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "MDN Status Codes"
 
 - id: "spec-mcp-specification"
   title: "Model Context Protocol Specification"
@@ -4202,6 +4223,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "JSON-RPC 2.0 Spec"
 
 - id: "repo-microsoft-api-guidelines"
   title: "Microsoft REST API Guidelines"
@@ -4296,6 +4318,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "JWT Introduction"
 
 - id: "docs-protobuf-proto3-guide"
   title: "Language Guide (proto 3)"
@@ -4333,6 +4356,7 @@
   priority: 1
   roadmap: "software-architect"
   quality: 5
+  doFirst: "How OIDC Works"
 
 - id: "talk-bloch-good-api-design"
   title: "How to Design a Good API & Why it Matters"
@@ -4387,6 +4411,7 @@
   priority: 1
   roadmap: "software-architect"
   quality: 5
+  doFirst: "MDN HTTP Overview"
 
 - id: "paper-bluesky-at-protocol"
   title: "Bluesky and the AT Protocol: Usable Decentralized Social Media"
@@ -4405,6 +4430,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "AT Protocol Docs"
 
 - id: "article-how-tailscale-works"
   title: "How Tailscale works"
@@ -4516,6 +4542,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Python Requests Quickstart"
 
 - id: "sre-managing-critical-state"
   title: "Managing Critical State: Distributed Consensus for Reliability"
@@ -4572,8 +4599,8 @@
   estHours: 1
   summary: "Short, readable spec for the data format nearly every web API speaks, including its interoperability pitfalls."
   fromYear: 1
-  priority: 3
-  quality: 3
+  priority: 2
+  quality: 4
 
 - id: "docs-bittorrent-bep3"
   title: "The BitTorrent Protocol Specification (BEP 3)"
@@ -4608,6 +4635,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "MDN HTTP Overview"
 
 - id: "docs-openmp-examples"
   title: "OpenMP Application Programming Interface Examples (6.0.1)"
@@ -4643,6 +4671,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "SIMD for C++ Devs"
 
 - id: "docs-ispc-users-guide"
   title: "Intel ISPC User's Guide"
@@ -4715,6 +4744,7 @@
   fromYear: 3
   priority: 1
   quality: 5
+  doFirst: "Crypto 101"
 
 - id: "docs-signal-protocol-specs"
   title: "Signal Documentation (X3DH, Double Ratchet, PQXDH)"
@@ -4732,6 +4762,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Crypto 101"
 
 - id: "heidi-howard-consensus-reading-list"
   title: "Distributed Consensus Reading List"
@@ -4968,6 +4999,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "CS50 Web"
 
 - id: "course-stanford-cs251"
   title: "CS 251: Blockchain Technologies"
@@ -5237,6 +5269,7 @@
   fromYear: 3
   priority: 1
   quality: 5
+  doFirst: "Crypto 101"
 
 - id: "book-thaler-proofs-args-zk"
   title: "Proofs, Arguments, and Zero-Knowledge"
@@ -5542,6 +5575,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Crypto 101"
 
 - id: "practice-cryptopals"
   title: "The Cryptopals Crypto Challenges"
@@ -5559,6 +5593,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "Crypto 101"
 
 - id: "practice-exploit-education"
   title: "Exploit Education (Phoenix, Nebula, Fusion)"
@@ -5725,6 +5760,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "6.5840 Lab 4 KV Raft"
 
 - id: "repo-google-highway"
   title: "Highway: Performance-portable SIMD library"
@@ -5742,6 +5778,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "SIMD for C++ Devs"
 
 - id: "repo-likwid"
   title: "LIKWID: Performance monitoring and benchmarking suite"
@@ -6038,6 +6075,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Rail-only Network"
 
 - id: "paper-silent-data-corruptions"
   title: "Silent Data Corruptions at Scale"
@@ -6273,6 +6311,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "6.5840 Notes: Linearizab."
 
 - id: "article-peritext"
   title: "Peritext: A CRDT for Rich-Text Collaboration"
@@ -6310,6 +6349,7 @@
   roadmap: "software-architect"
   blog: true
   quality: 4
+  doFirst: "Ethereum Whitepaper"
 
 - id: "blog-decentralized-thoughts"
   title: "Decentralized Thoughts"
@@ -6524,6 +6564,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Art of Comp. Science"
 
 - id: "qutip"
   title: "QuTiP: Quantum Toolbox in Python"
@@ -7498,6 +7539,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Proofs and Concepts"
 
 - id: "tong-classical-dynamics"
   title: "David Tong: Lectures on Classical Dynamics"
@@ -7732,6 +7774,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "OpenStax Univ Phys 1"
 
 - id: "physics-cup"
   title: "Physics Cup"
@@ -7947,6 +7990,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Arduino Docs"
 
 - id: "docs-embassy-rs"
   title: "Embassy"
@@ -8036,6 +8080,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Tiny Tapeout Guide"
 
 - id: "docs-openlane2"
   title: "OpenLane 2 Documentation"

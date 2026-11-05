@@ -251,7 +251,10 @@ function buildEntries(
 
 /**
  * The long list, windowed: only the rows near the viewport are rendered, the rest are padding of the same height.
- * Row heights are measured from a rendered row, so the scrollbar and the window stay true.
+ * Row heights are measured from the rendered rows, so the scrollbar and the window stay true. Rows differ a little
+ * (a two-line meta, the stars under a tile): the height only ever grows, to the tallest average seen. A height that
+ * followed each window could flip between two windows deep in a long list and never settle, re-rendering without end
+ * (and starving the deferred search of a quiet moment).
  */
 function VirtualList<T>({ items, keyOf, render, label }: { items: T[]; keyOf: (item: T) => string; render: (item: T) => ReactNode; label?: string }) {
   const ref = useRef<HTMLUListElement>(null);
@@ -261,10 +264,10 @@ function VirtualList<T>({ items, keyOf, render, label }: { items: T[]; keyOf: (i
     const update = (): void => {
       const list = ref.current;
       if (!list) return;
-      const first = list.querySelector('li:not(:first-child)');
-      const measured = first ? first.getBoundingClientRect().height : rowHeight;
-      const height = measured > 20 ? measured : rowHeight;
-      if (Math.abs(height - rowHeight) > 0.5) setRowHeight(height);
+      const rows = [...list.querySelectorAll(':scope > li:not(:first-child)')];
+      const measured = rows.length > 0 ? rows.reduce((sum, li) => sum + li.getBoundingClientRect().height, 0) / rows.length : rowHeight;
+      const height = measured > rowHeight + 0.5 ? measured : rowHeight;
+      if (height !== rowHeight) setRowHeight(height);
       const top = list.getBoundingClientRect().top + window.scrollY;
       const start = Math.max(0, Math.floor((window.scrollY - top) / height) - 10);
       const end = Math.min(items.length, start + Math.ceil(window.innerHeight / height) + 30);

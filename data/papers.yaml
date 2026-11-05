@@ -565,10 +565,10 @@
   summary: "Explains why data curation matters as much as architecture when turning an image model into a video model."
   level: "advanced"
   fromYear: 3
-  priority: 3
+  priority: 1
   roadmap: "ai-engineer"
   research: "diffusion"
-  quality: 3
+  quality: 4
 - id: sora-report
   title: Video generation models as world simulators (Sora technical report)
   authors: OpenAI

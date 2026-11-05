@@ -83,6 +83,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "MMDetection docs"
 
 - id: "paper-vgg-very-deep"
   title: "Very Deep Convolutional Networks for Large-Scale Image Recognition"
@@ -713,6 +714,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Spark RDD Guide"
 
 - id: "docs-gitlab-avoiding-downtime-migrations"
   title: "Avoiding downtime in migrations (GitLab)"
@@ -807,6 +809,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "web.dev Learn A11y"
 
 - id: "docs-iceberg-intro"
   title: "Apache Iceberg Documentation"
@@ -993,6 +996,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Odin: Foundations"
 
 - id: "book-copenhagen-book"
   title: "The Copenhagen Book"
@@ -1049,6 +1053,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "dbt Learn"
 
 - id: "article-kent-five-normal-forms"
   title: "A Simple Guide to Five Normal Forms in Relational Database Theory"
@@ -1180,6 +1185,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "MDN: Flexbox Concepts"
 
 - id: "article-comeau-interactive-grid"
   title: "An Interactive Guide to CSS Grid"
@@ -1198,6 +1204,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "MDN: Grid Concepts"
 
 - id: "article-kimball-dimensional-techniques"
   title: "Dimensional Modeling Techniques"
@@ -1252,6 +1259,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Postgres: Locking"
 
 - id: "article-webdev-how-browsers-work"
   title: "How browsers work"
@@ -1270,6 +1278,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "MDN: CSS Layout"
 
 - id: "article-webdev-rendering-on-the-web"
   title: "Rendering on the Web"
@@ -1288,6 +1297,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "web.dev Learn Performance"
 
 - id: "article-webdev-web-vitals"
   title: "Web Vitals"
@@ -1306,6 +1316,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "web.dev Learn Performance"
 
 - id: "article-react-you-might-not-need-an-effect"
   title: "You Might Not Need an Effect"
@@ -1343,6 +1354,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "MDN: CSS Layout"
 
 - id: "article-beauchemin-functional-de"
   title: "Functional Data Engineering: a modern paradigm for batch data processing"
@@ -1361,6 +1373,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Airflow 101 Tutorial"
 
 - id: "article-chrome-renderingng-architecture"
   title: "RenderingNG architecture"
@@ -1508,6 +1521,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "MySQL Optimization"
 
 - id: "docs-parquet-file-format"
   title: "Parquet File Format"
@@ -1669,6 +1683,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Coding for SSDs (series)"
 
 - id: "docs-spdk"
   title: "SPDK: Storage Performance Development Kit documentation"
@@ -1723,6 +1738,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "QEMU Docs"
 
 - id: "stanford-cs276-ir-web-search"
   title: "CS 276 / LING 286: Information Retrieval and Web Search"
@@ -1940,10 +1956,10 @@
   estHours: 8
   summary: "The official 2.0 tutorial covering both Core SQL expression building and the ORM, the standard way to use databases from Python."
   fromYear: 2
-  priority: 3
+  priority: 2
   roadmap: "software-architect"
   after: [sqlbolt]
-  quality: 3
+  quality: 4
 
 - id: "tutorial-write-shell-in-c"
   title: "Tutorial - Write a Shell in C"
@@ -1979,6 +1995,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "OSTEP: VMMs"
 
 - id: "article-5-days-to-virtualization"
   title: "5 Days to Virtualization: A Series on Hypervisor Development"
@@ -2033,6 +2050,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "ES Definitive Guide"
 
 - id: "repo-ann-benchmarks"
   title: "ann-benchmarks"
@@ -2212,6 +2230,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Polars Lazy API"
 
 - id: "repo-big-ann-benchmarks"
   title: "big-ann-benchmarks"
@@ -2229,6 +2248,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Big-ANN NeurIPS'21"
 
 - id: "repo-spdk"
   title: "SPDK"
@@ -2264,6 +2284,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "OpenZFS Docs"
 
 - id: "repo-ceph"
   title: "Ceph"
@@ -2318,6 +2339,7 @@
   fromYear: 1
   priority: 1
   quality: 5
+  doFirst: "IIR Ch21 Link Analysis"
 
 - id: "paper-bitcask"
   title: "Bitcask: A Log-Structured Hash Table for Fast Key/Value Data"
@@ -2390,6 +2412,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "IIR Ch8 Evaluation"
 
 - id: "paper-bm25-and-beyond"
   title: "The Probabilistic Relevance Framework: BM25 and Beyond"
@@ -2407,6 +2430,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "IIR Okapi BM25"
 
 - id: "paper-ann-benchmarks"
   title: "ANN-Benchmarks: A Benchmarking Tool for Approximate Nearest Neighbor Algorithms"
@@ -2461,6 +2485,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "IIR Ch5 Compression"
 
 - id: "paper-wafl-nfs-appliance"
   title: "File System Design for an NFS File Server Appliance"
@@ -2535,6 +2560,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "OSTEP: VMMs"
 
 - id: "paper-snowflake-disaggregated"
   title: "Building An Elastic Query Engine on Disaggregated Storage"
@@ -2571,6 +2597,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "IIR Ch5 Compression"
 
 - id: "paper-billion-scale-gpu-similarity"
   title: "Billion-scale similarity search with GPUs"
@@ -2642,6 +2669,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Coding for SSDs (series)"
 
 - id: "paper-design-tradeoffs-ssd-performance"
   title: "Design Tradeoffs for SSD Performance"
@@ -2696,6 +2724,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "LightNVM Open-Channel"
 
 - id: "paper-all-file-systems-not-equal"
   title: "All File Systems Are Not Created Equal: On the Complexity of Crafting Crash-Consistent Applications"
@@ -2809,6 +2838,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Backblaze Reed-Solomon"
 
 - id: "paper-vmware-esx-memory"
   title: "Memory Resource Management in VMware ESX Server"
@@ -2826,6 +2856,7 @@
   fromYear: 3
   priority: 1
   quality: 5
+  doFirst: "OSTEP: VMMs"
 
 - id: "article-postgres-wiki-dont-do-this"
   title: "Don't Do This (PostgreSQL wiki)"
@@ -2913,6 +2944,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Coding for SSDs pt2"
 
 - id: "codecapsule-coding-for-ssds-part6"
   title: "Coding for SSDs – Part 6: A Summary – What every programmer should know about solid-state drives"
@@ -2949,6 +2981,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "S3 Consistency"
 
 - id: "article-lwn-using-kvm-api"
   title: "Using the KVM API"
@@ -2966,6 +2999,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "OSTEP: VMMs"
 
 - id: "article-lwn-namespaces-overview"
   title: "Namespaces in operation, part 1: namespaces overview"
@@ -3055,6 +3089,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "OSTEP: VMMs"
 
 - id: "article-tty-demystified"
   title: "The TTY demystified"
@@ -3127,6 +3162,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "ProGit: Git Hooks"
 
 - id: "docs-vim-user-manual"
   title: "Vim User Manual (usr_toc)"
@@ -3275,6 +3311,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "GitHub Flow"
 
 - id: "docs-google-code-reviewer-guide"
   title: "How to do a code review (Google Engineering Practices)"
@@ -3369,6 +3406,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "ProGit: Data Recovery"
 
 - id: "docs-neovim-documentation"
   title: "Nvim documentation"
@@ -3425,6 +3463,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "ssh_config man page"
 
 - id: "docs-clig-guidelines"
   title: "Command Line Interface Guidelines"
@@ -3461,6 +3500,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "DO: systemd Units"
 
 - id: "docs-systemd-man-index"
   title: "systemd manual pages (index)"
@@ -3479,6 +3519,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "DO: systemd Units"
 
 - id: "docs-systemd-service-man"
   title: "systemd.service: Service unit configuration"
@@ -3497,6 +3538,7 @@
   priority: 2
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "DO: systemd Units"
 
 - id: "docs-git-gitformat-pack"
   title: "gitformat-pack: Git pack format"
@@ -3571,6 +3613,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "Linux Journey"
 
 - id: "book-git-from-the-bottom-up"
   title: "Git from the Bottom Up"
@@ -3793,6 +3836,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "DO: Initial Server Setup"
 
 - id: "article-jvns-inside-git"
   title: "Inside .git"
@@ -3885,6 +3929,7 @@
   priority: 1
   roadmap: "software-architect"
   quality: 5
+  doFirst: "Linux Journey"
 
 - id: "article-progit-reset-demystified"
   title: "Pro Git 7.7: Reset Demystified"
@@ -3903,6 +3948,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "ProGit: Branches"
 
 - id: "article-progit-git-objects"
   title: "Pro Git 10.2: Git Objects"
@@ -3997,6 +4043,7 @@
   priority: 1
   roadmap: "software-architect"
   quality: 5
+  doFirst: "Comparing Git Workflows"
 
 - id: "article-google-standard-of-code-review"
   title: "The Standard of Code Review"
@@ -4286,6 +4333,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "Packaging Python Projects"
 
 - id: "uv-docs"
   title: "uv documentation"
@@ -4357,6 +4405,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Grymoire Awk"
 
 - id: "docs-mdn-prototype-chain"
   title: "Inheritance and the prototype chain"
@@ -4392,6 +4441,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "MDN: Async JS"
 
 - id: "go-ref-spec"
   title: "The Go Programming Language Specification"
@@ -4913,6 +4963,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Profiling Go Programs"
 
 - id: "book-javascript-info"
   title: "The Modern JavaScript Tutorial"
@@ -4947,6 +4998,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Grymoire Awk"
 
 - id: "book-you-dont-know-js-yet"
   title: "You Don't Know JS Yet (2nd edition)"
@@ -5036,6 +5088,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Python Functional HOWTO"
 
 - id: "practice-axum-repo-examples"
   title: "axum repository and examples"
@@ -5071,6 +5124,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "TS: Conditional Types"
 
 - id: "go-src-context"
   title: "context/context.go (Go standard library source)"
@@ -5268,6 +5322,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "jsinfo: Event Loop"
 
 - id: "go-blog-pipelines"
   title: "Go Concurrency Patterns: Pipelines and cancellation"
@@ -5339,6 +5394,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Go Generics Tutorial"
 
 - id: "go-blog-when-generics"
   title: "When To Use Generics"
@@ -6160,6 +6216,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "RogueBasin: BSP"
 
 - id: "article-kazemi-spelunky-generator"
   title: "Spelunky Generator Lessons"
@@ -6385,6 +6442,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Gaffer: Networked Physics"
 
 - id: "article-gaffer-snapshot-interpolation"
   title: "Snapshot Interpolation"
@@ -6403,6 +6461,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Gaffer: Networked Physics"
 
 - id: "article-gaffer-floating-point-determinism"
   title: "Floating Point Determinism"
@@ -6459,6 +6518,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "IQ: Gradient Noise"
 
 - id: "article-mewo2-fantasy-maps"
   title: "Generating fantasy maps"
@@ -6495,6 +6555,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Imperial Comp. Lin. Alg."
 
 - id: "docs-chebfun-guide"
   title: "Chebfun Guide"
@@ -6619,6 +6680,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Imperial Comp. Lin. Alg."
 
 - id: "book-infinite-descent-newstead"
   title: "An Infinite Descent into Pure Mathematics"
@@ -6688,6 +6750,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Applied Combinatorics"
 
 - id: "book-shoup-computational-number-theory"
   title: "A Computational Introduction to Number Theory and Algebra"
@@ -6795,6 +6858,7 @@
   fromYear: 3
   priority: 1
   quality: 5
+  doFirst: "Applied Combinatorics"
 
 - id: "book-milne-group-theory"
   title: "Group Theory (course notes)"
@@ -7473,6 +7537,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "TI Understanding I2C"
 
 - id: "interrupt-cortex-m-fault-debug"
   title: "How to debug a HardFault on an ARM Cortex-M MCU"
@@ -7562,6 +7627,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Firmware GDB"
 
 - id: "interrupt-rtos-context-switching"
   title: "ARM Cortex-M RTOS Context Switching"
@@ -7597,6 +7663,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Firmware GDB"
 
 - id: "vitis-hls-user-guide"
   title: "Vitis High-Level Synthesis User Guide (UG1399)"
@@ -7704,6 +7771,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Vitis HLS examples"
 
 - id: "litex"
   title: "LiteX: build your hardware, easily"
@@ -7829,6 +7897,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Qualtran Paper"
 
 - id: "notes-girvin-circuit-qed-les-houches"
   title: "Circuit QED: Superconducting Qubits Coupled to Microwave Photons (Les Houches lecture notes)"
@@ -8545,3 +8614,4 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "PyMatching Paper"

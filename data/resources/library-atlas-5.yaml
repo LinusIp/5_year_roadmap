@@ -82,25 +82,6 @@
   after: [paper-swe-agent]
   quality: 4
 
-- id: "docs-swebench-harness"
-  title: "SWE-bench evaluation harness reference"
-  short: "SWE-bench Harness Ref"
-  provider: "SWE-bench team"
-  type: "article"
-  url: "https://swebench.com/SWE-bench/reference/harness"
-  urlVerified: true
-  lastVerified: 2026-10-21
-  tracks: [ai]
-  level: "intermediate"
-  cost: "free"
-  estHours: 2
-  summary: "Explains how predictions are applied and tested in per-instance Docker images, the template for most coding-agent evals."
-  fromYear: 2
-  priority: 3
-  roadmap: "ai-agents"
-  doFirst: "SWE-bench paper"
-  quality: 3
-
 - id: "docs-lm-eval-new-task-guide"
   title: "New Task Guide (lm-evaluation-harness)"
   short: "lm-eval New Task Guide"
@@ -137,6 +118,7 @@
   priority: 1
   roadmap: "ai-agents"
   quality: 4
+  doFirst: "gVisor Docs"
 
 - id: "docs-firecracker-design"
   title: "Firecracker Design"
@@ -155,6 +137,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "gVisor Docs"
 
 - id: "repo-claude-agent-sdk-python"
   title: "Claude Agent SDK for Python"
@@ -192,6 +175,7 @@
   priority: 1
   roadmap: "ai-agents"
   quality: 4
+  doFirst: "OpenAI Agents: Runner"
 
 - id: "repo-langgraph"
   title: "LangGraph"
@@ -285,6 +269,7 @@
   priority: 2
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Cosmos docs"
 
 - id: "repo-firecracker"
   title: "Firecracker"
@@ -360,6 +345,7 @@
   priority: 1
   roadmap: "ai-engineer"
   quality: 4
+  doFirst: "Aider Unified Diffs"
 
 - id: "article-matklad-architecture-md"
   title: "ARCHITECTURE.md"
@@ -800,6 +786,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "ATPESC Archive"
 
 - id: "archer2-training-materials"
   title: "ARCHER2 Past Course Materials"
@@ -817,6 +804,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "HPC Carpentry Intro"
 
 - id: "mit-18337-sciml-book"
   title: "Parallel Computing and Scientific Machine Learning (SciML): Methods and Applications"
@@ -906,6 +894,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "HPC Carpentry Intro"
 
 - id: "repo-kokkos-tutorials"
   title: "Kokkos Tutorials"
@@ -994,6 +983,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "Open MPI Docs"
 
 - id: "practice-nasa-cfe"
   title: "core Flight Executive (cFE)"
@@ -1412,6 +1402,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "VK Guide: Memory Alloc"
 
 - id: "repo-vulkan-validationlayers"
   title: "Vulkan Validation Layers"
@@ -1449,6 +1440,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "VK Guide: TBR Practices"
 
 - id: "vkguide-khr-subgroups"
   title: "Subgroups (Vulkan Guide)"
@@ -1467,6 +1459,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "VK Guide: Compute"
 
 - id: "docs-gpuopen-rdna-performance-guide"
   title: "AMD RDNA Performance Guide"
@@ -1713,6 +1706,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "VK Guide: Compute"
 
 - id: "repo-vulkan-memory-allocator"
   title: "Vulkan Memory Allocator (VMA)"
@@ -1731,6 +1725,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "VK Guide: Memory Alloc"
 
 - id: "repo-vulkan-gltf-pbr"
   title: "Vulkan glTF PBR"
@@ -1825,6 +1820,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "VK Guide: Ray Tracing"
 
 - id: "article-asawicki-vulkan-memory-types"
   title: "Vulkan Memory Types on PC and How to Use Them"
@@ -1843,6 +1839,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "VK Guide: Memory Alloc"
 
 - id: "article-journey-to-nanite"
   title: "Journey to Nanite (HPG 2022 keynote)"
@@ -2011,6 +2008,7 @@
   priority: 3
   roadmap: "game-developer"
   quality: 3
+  doFirst: "OpenRocket Docs"
 
 - id: "tutorial-cantera-python"
   title: "Cantera Python Tutorial"
@@ -2047,6 +2045,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Learn OpenUSD"
 
 - id: "docs-cantera-examples"
   title: "Cantera Examples"
@@ -2121,6 +2120,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "VMEC2000"
 
 - id: "practice-orekit-repo"
   title: "Orekit"
@@ -2139,6 +2139,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Orekit Tutorials"
 
 - id: "practice-nasa-gmat"
   title: "GMAT (General Mission Analysis Tool) source"
@@ -2214,6 +2215,7 @@
   priority: 2
   roadmap: "game-developer"
   quality: 4
+  doFirst: "Laguerre-Hermite GK"
 
 - id: "paper-jorek-mhd-code"
   title: "The JOREK non-linear extended MHD code and applications to large-scale instabilities and their control in magnetically confined fusion plasmas"
@@ -3133,6 +3135,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "CubeSat 101"
 
 - id: "docs-skyfield-earth-satellites"
   title: "Earth Satellites (Skyfield documentation)"
@@ -3701,6 +3704,7 @@
   fromYear: 2
   priority: 1
   quality: 5
+  doFirst: "CubeSat 101"
 
 - id: "report-nasa-sp-194-combustion-instability"
   title: "Liquid Propellant Rocket Combustion Instability (NASA SP-194)"
@@ -3970,6 +3974,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "G-FOLD Python Repo"
 
 - id: "article-embedded-artistry-beginners"
   title: "New to Building Embedded Systems?"
@@ -4021,6 +4026,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "NASA Guide to Rockets"
 
 - id: "article-celestrak-tle-faq"
   title: "Frequently Asked Questions: Two-Line Element Set Format"
@@ -4536,6 +4542,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "Tiny Tapeout Testing"
 
 - id: "repo-cvw-wally"
   title: "CORE-V Wally: configurable RISC-V processor"
@@ -4607,6 +4614,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "LibreLane Timing Closure"
 
 - id: "repo-dreamplace"
   title: "DREAMPlace: GPU-accelerated analytical placement"
@@ -4642,6 +4650,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "ChipVerify UVM"
 
 - id: "repo-google-xls"
   title: "XLS: Accelerated HW Synthesis"
@@ -4677,6 +4686,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "CVA6 docs"
 
 - id: "repo-black-parrot"
   title: "BlackParrot multicore RISC-V"
@@ -4694,6 +4704,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "CVA6 docs"
 
 - id: "repo-pulp-axi"
   title: "PULP AXI SystemVerilog modules"
@@ -4765,6 +4776,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "SemiEng 2.5D"
 
 - id: "paper-mempool"
   title: "MemPool: A Shared-L1 Memory Many-Core Cluster with a Low-Latency Interconnect"
@@ -4782,6 +4794,7 @@
   fromYear: 3
   priority: 2
   quality: 4
+  doFirst: "MemPool"
 
 - id: "paper-assessment-rl-macro-placement"
   title: "Assessment of Reinforcement Learning for Macro Placement"
