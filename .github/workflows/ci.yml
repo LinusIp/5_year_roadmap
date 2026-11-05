@@ -92,4 +92,3 @@ jobs:
           git add screenshots
           git commit -q -m "Screenshots: every baseline redrawn on CI's Linux"
           git push
-
