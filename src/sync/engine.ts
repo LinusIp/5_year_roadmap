@@ -23,13 +23,13 @@ import type { AppSeed } from '../seed/schema.ts';
 import { commitFiles, commitMessage } from './commit.ts';
 import type { FileChange } from './commit.ts';
 import { adoptDeviceId, deviceId } from './device.ts';
-import { parseSleep, parseBlogPost, parseDay, parseItems, parseChallenges, parsePlan, parseReview, parseSettings, planUpdatedAt, renderReadme } from './files.ts';
+import { parseSleep, parsePortfolio, parseBlogPost, parseDay, parseItems, parseChallenges, parsePlan, parseReview, parseSettings, planUpdatedAt, renderReadme } from './files.ts';
 import { GithubClient, GithubError, gitBlobSha } from './github-api.ts';
 import type { Author } from './github-api.ts';
-import { allPaths, itemsOf, planOf, readLocal, renderPath, withCompanions, writeSleep, writeBlogPost, writeDay, writeItems, writeChallenges, writePlan, writeReview, writeSettings } from './local.ts';
+import { allPaths, itemsOf, planOf, readLocal, renderPath, withCompanions, writeSleep, writePortfolio, writeBlogPost, writeDay, writeItems, writeChallenges, writePlan, writeReview, writeSettings } from './local.ts';
 import { lastWriter, mergeDay, mergeItems, mergeRecords } from './merge.ts';
 import { enqueue, onSyncChange, queuedWrites, setSyncVocabulary } from './middleware.ts';
-import { CHALLENGES_PATH, ITEMS_PATH, dateOfBlogPath, dateOfSleepPath, PLAN_PATH, README_PATH, SETTINGS_PATH, dateOfLogPath, isArchivedPath, isPulledPath } from './paths.ts';
+import { CHALLENGES_PATH, ITEMS_PATH, dateOfBlogPath, dateOfSleepPath, idOfPortfolioPath, PLAN_PATH, README_PATH, SETTINGS_PATH, dateOfLogPath, isArchivedPath, isPulledPath } from './paths.ts';
 
 export const URGENT_DELAY_MS = 3_000;
 export const IDLE_DELAY_MS = 60_000;
@@ -392,6 +392,15 @@ export class SyncEngine {
       // One night per date: the newer edit wins.
       const [merged] = mergeRecords(await db.sleep.where('date').equals(sleepDate).toArray(), [parsed.value], (n) => n.date);
       if (merged) await writeSleep(db, merged);
+      return;
+    }
+    const portfolioId = idOfPortfolioPath(path);
+    if (portfolioId) {
+      const parsed = parsePortfolio(text, portfolioId);
+      if (!parsed.ok) return parsed.error;
+      // One record per project: the newer edit wins.
+      const [merged] = mergeRecords(await db.portfolio.where('id').equals(portfolioId).toArray(), [parsed.value], (p) => p.id);
+      if (merged) await writePortfolio(db, merged);
       return;
     }
     const blogDate = dateOfBlogPath(path);

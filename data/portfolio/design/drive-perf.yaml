@@ -1,0 +1,95 @@
+overview: >-
+  A perception pipeline that turns six camera images into 3D boxes around cars and people inside a 33 ms frame. A CNN
+  backbone extracts features from each camera, a bird's-eye-view (BEV) encoder lifts them into one top-down grid
+  around the car, and a detection head turns the grid into boxes with class, score and velocity. All of it runs as one
+  TensorRT engine in INT8 or FP8 with CUDA pre- and post-processing, captured as a single CUDA graph per frame.
+learn:
+  - name: Bird's-eye-view perception from cameras
+    ref: paper-bevformer
+  - name: Unified BEV fusion
+    ref: paper-bevfusion
+  - name: The nuScenes benchmark
+    ref: paper-nuscenes
+  - name: TensorRT engines and plugins
+    ref: repo-tensorrt
+  - name: Post-training quantisation
+    ref: repo-tensorrt-model-optimizer
+stats:
+  - value: "< 33 ms"
+    label: end to end at p99 for six cameras
+  - value: "< 1"
+    label: mAP point lost to quantisation
+components:
+  - id: cameras
+    name: Cameras
+    role: Deliver six synchronised images with their intrinsics and extrinsics.
+    tech: nuScenes · CARLA
+    talksTo: [preprocess]
+    kind: external
+  - id: preprocess
+    name: Preprocess
+    role: Resizes, normalises and packs the images on the GPU.
+    tech: CUDA kernels
+    talksTo: [backbone]
+    kind: core
+  - id: backbone
+    name: Image backbone
+    role: Extracts features from each camera image.
+    tech: TensorRT · INT8
+    talksTo: [bev]
+    kind: core
+  - id: bev
+    name: BEV encoder
+    role: Lifts the camera features into one top-down grid.
+    tech: TensorRT · custom plugin
+    talksTo: [head]
+    kind: core
+  - id: head
+    name: Head and post-processing
+    role: Produces 3D boxes with class, score and velocity, then applies top-k and NMS.
+    tech: TensorRT · CUDA kernels
+    talksTo: [planner]
+    kind: core
+  - id: planner
+    name: Planner
+    role: Reacts to the boxes in the CARLA closed loop.
+    tech: Python · CARLA API
+    talksTo: []
+    kind: external
+  - id: quant
+    name: Quantisation and checks
+    role: Calibrates INT8, sets per-layer precision and compares layers against ONNX Runtime.
+    tech: Model Optimizer · Polygraphy
+    talksTo: [backbone, bev]
+    kind: offline
+flow:
+  - component: preprocess
+    text: "Six images are resized and normalised on the GPU within **3 ms**."
+  - component: backbone
+    text: "The backbone extracts each camera's features within **12 ms**."
+  - component: bev
+    text: "The BEV encoder lifts them into one top-down grid within **10 ms**; its custom op runs as a TensorRT plugin."
+  - component: head
+    text: "The head and NMS produce the 3D boxes within **4 ms**, leaving 4 ms of slack in the 33 ms frame."
+interface:
+  lang: cpp
+  code: |-
+    class Pipeline {
+     public:
+      explicit Pipeline(const PipelineConfig& cfg);            // loads the engines, allocates buffers once
+      std::vector<Box3D> run(const Frame& f, cudaStream_t s);  // no allocation on this path
+      StageTimes last_times() const;                           // per stage, from CUDA events
+    };
+decisions:
+  - choice: Pre- and post-processing as CUDA kernels on the same stream
+    instead: OpenCV on the CPU
+    why: CPU resizing and copies for six images take a large share of a 33 ms budget.
+  - choice: INT8 with the sensitive layers left in FP16
+    instead: INT8 everywhere
+    why: Some layers lose too much accuracy in INT8.
+  - choice: The whole frame as one CUDA graph
+    instead: Launching each stage separately
+    why: It removes per-launch CPU overhead and jitter.
+watchOut: >-
+  A detector trained on nuScenes sees CARLA's rendered images as a new domain and misses objects. Fine-tune on CARLA
+  data, or use the closed loop for latency and integration only, and say which.

@@ -10,6 +10,7 @@ import { TimerSchema } from './types.ts';
 import type { RunningTimer } from './types.ts';
 import { setItemStatus } from './state.ts';
 import { addEntry, editLog } from '../lib/logs.ts';
+import { isPortfolioRef } from '../lib/portfolio.ts';
 import { forgottenTimer, settleTimer } from '../lib/timer.ts';
 import type { ForgottenTimer, TimerCarry } from '../lib/timer.ts';
 
@@ -56,7 +57,7 @@ export async function stopTimer(stopAt: number = Date.now(), database: AtlasDB =
     let total = 0;
     for (const { date, minutes } of entries) {
       total += minutes;
-      await editLog(date, (log) => addEntry(log, { block: timer.block, track: timer.track, ...(timer.refId ? { refId: timer.refId } : {}), minutes }), database);
+      await editLog(date, (log) => addEntry(log, { block: timer.block, track: timer.track, ...(timer.refId ? { refId: timer.refId } : {}), ...(timer.note ? { note: timer.note } : {}), minutes }), database);
     }
     await database.meta.put({ key: CARRY_KEY, value: carry });
     await database.meta.delete(TIMER_KEY);
@@ -65,7 +66,8 @@ export async function stopTimer(stopAt: number = Date.now(), database: AtlasDB =
   if (!stopped) return 0;
   // Time on an item not started yet starts it; a finished one stays finished.
   const { timer, total } = stopped;
-  if (total > 0 && timer.refId && ((await database.itemStates.get(timer.refId))?.status ?? 'todo') === 'todo') await setItemStatus(timer.refId, 'active', database);
+  // A portfolio project's time (ATLAS-PORTFOLIO) is not a plan item's: its status is the portfolio's own.
+  if (total > 0 && timer.refId && !isPortfolioRef(timer.refId) && ((await database.itemStates.get(timer.refId))?.status ?? 'todo') === 'todo') await setItemStatus(timer.refId, 'active', database);
   return total;
 }
 

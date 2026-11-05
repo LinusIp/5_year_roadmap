@@ -1,0 +1,1357 @@
+{
+  "version": 1,
+  "updated": "2026-11-06",
+  "source_doc": {
+    "title": "Portfolio Projects 2027",
+    "url": "https://claude.ai/artifact/7t6dnEC5uk6GgxQY2NgVqQ",
+    "note": "Private to the owner's claude.ai account. The doc is the source of truth; this file is a structured copy of its Overview tab."
+  },
+  "intro": "Nine projects, built in order, that add up to the profile NVIDIA's AI Computing, GPU Computing, Autonomous Driving and AI Agent roles hire for: you can make a model run fast on a GPU, scale it, serve it, wrap it in a reliable agent, and prove it with numbers.",
+  "focus_note": "Projects 1, 2 and 5 matter most for the AI Computing, Kernel Libraries and AI Agent internships. If time runs short, finish those three to a high standard before starting the others.",
+  "rules": [
+    {
+      "id": "rule-1",
+      "title": "README with a results table first",
+      "detail": "Numbers against a named baseline (llama.cpp, cuBLAS, vLLM, etcd), the hardware and how to reproduce them."
+    },
+    {
+      "id": "rule-2",
+      "title": "Design doc",
+      "detail": "docs/DESIGN.md, 2–4 pages: goal, non-goals, architecture diagram, key decisions with the alternatives rejected, known limits."
+    },
+    {
+      "id": "rule-3",
+      "title": "Benchmarks as code",
+      "detail": "One command reruns them; results are committed as CSV so the charts in the README can be regenerated."
+    },
+    {
+      "id": "rule-4",
+      "title": "Tests and CI",
+      "detail": "Correctness tests against a reference implementation (PyTorch, a spec, a model checker), run in GitHub Actions on every push."
+    },
+    {
+      "id": "rule-5",
+      "title": "Write-up",
+      "detail": "One long blog post per project on your site, explaining what was hard and what the profiler showed. Recruiters and referrers read these."
+    },
+    {
+      "id": "rule-6",
+      "title": "Demo video",
+      "detail": "A 2-minute demo video, linked from the README."
+    }
+  ],
+  "habits": "Two habits make the portfolio stand out. First, always report a number against a strong baseline, even when you lose. Second, upstream something: a bug fix or small feature merged into vLLM, SGLang, llama.cpp, CUTLASS or Triton is worth more on a CV than another solo project.",
+  "overrun_rule": "If a project runs 50% over its estimate, cut its stretch goals rather than the next project.",
+  "time_note": "Estimates are full-time weeks at about 8 h a day; estHours counts a week as 7 days (56 h), and milestone hours are rough splits of it. The plan keeps about 4 of the 8 daily hours on projects and the rest on courses.",
+  "events": [
+    {
+      "id": "apply-2027",
+      "date": "2027-06",
+      "title": "Apply with the referral, using Projects 1, 2 and 5 as the portfolio"
+    }
+  ],
+  "roles": [
+    {
+      "req": "JR2026307",
+      "title": "Software Engineer Intern, AI and DL Kernel Libraries – 2027",
+      "projects": [
+        1,
+        2
+      ],
+      "url": "https://nvidia.wd5.myworkdayjobs.com/en-US/NVIDIAExternalCareerSite/job/Software-Engineer-Intern--AI-and-DL-Kernel-Libraries---2027_JR2026307"
+    },
+    {
+      "req": "JR2027942",
+      "title": "Software Engineering Intern, AI Agents & Backend Infrastructure – 2027 (Germany remote)",
+      "projects": [
+        4,
+        5
+      ],
+      "url": "https://nvidia.wd5.myworkdayjobs.com/nvidiaexternalcareersite/job/germany-remote/software-engineering-intern--ai-agents---backend-infrastructure---2027_jr2027942"
+    },
+    {
+      "req": "JR2024002",
+      "title": "AI Developer Technology Engineer Intern – 2027 (MS/PhD only)",
+      "projects": [
+        1,
+        2,
+        9
+      ],
+      "url": "https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite/job/China-Beijing/AI-Developer-Technology-Engineer-Intern--AI---2027_JR2024002"
+    },
+    {
+      "req": "JR2026170",
+      "title": "GPU Kernel Libraries",
+      "projects": [
+        2,
+        3,
+        8
+      ],
+      "url": null,
+      "note": "2027 intern posting seen on jobs.nvidia.com; the doc maps these three postings to Projects 2, 3 and 8 together."
+    },
+    {
+      "req": "JR2026171",
+      "title": "Deep Learning Libraries performance",
+      "projects": [
+        2,
+        3,
+        8
+      ],
+      "url": null,
+      "note": "2027 intern posting seen on jobs.nvidia.com; the doc maps these three postings to Projects 2, 3 and 8 together."
+    },
+    {
+      "req": "JR2026546",
+      "title": "GPU Computing for Autonomous Driving",
+      "projects": [
+        2,
+        3,
+        8
+      ],
+      "url": null,
+      "note": "2027 intern posting seen on jobs.nvidia.com; the doc maps these three postings to Projects 2, 3 and 8 together."
+    }
+  ],
+  "projects": [
+    {
+      "id": "nanoserve",
+      "number": 1,
+      "code": "nanoserve",
+      "title": "nanoserve: an LLM inference engine from scratch",
+      "table_title": "nanoserve: LLM inference engine from scratch",
+      "summary": "A single-GPU engine that loads a real open model (Llama 3.2 1B/3B or Qwen3 1.7B/4B) and serves it through an OpenAI-compatible API, with every hot path written by you.",
+      "proves": "You understand every layer of LLM inference",
+      "why": "Inference is the largest GPU workload in 2027, and teams hire people who know where the milliseconds go. Wrappers around vLLM are common; an engine whose paged KV cache, scheduler and kernels you wrote yourself, benchmarked against llama.cpp and vLLM, is rare at intern level.",
+      "stack": [
+        "C++20",
+        "CUDA",
+        "Python bindings"
+      ],
+      "weeks": 6,
+      "estHours": 336,
+      "core": true,
+      "track": "inference",
+      "areas": [
+        "AI inference",
+        "LLMs",
+        "GPU"
+      ],
+      "schedule": [
+        {
+          "from": "2026-11",
+          "to": "2027-01",
+          "what": "Milestones 1–2 (correct forward pass, KV cache and decode loop), alongside Project 2"
+        },
+        {
+          "from": "2027-01",
+          "to": "2027-03",
+          "what": "Finish: continuous batching and fast kernels, bringing over the Project 2 kernels"
+        },
+        {
+          "from": "2027-05",
+          "to": "2027-06",
+          "what": "Polish, write-up and demo video before applying"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "nanoserve-m1",
+          "title": "Correct forward pass",
+          "detail": "Load safetensors weights, run the model in C++/CUDA with naive kernels, and match PyTorch logits to 1e-3.",
+          "hours": 56,
+          "stretch": false
+        },
+        {
+          "id": "nanoserve-m2",
+          "title": "KV cache and decode loop",
+          "detail": "Add a paged KV cache with a block table, as in the PagedAttention paper, plus greedy and top-p sampling and streaming output.",
+          "hours": 56,
+          "stretch": false
+        },
+        {
+          "id": "nanoserve-m3",
+          "title": "Continuous batching",
+          "detail": "A scheduler that admits and evicts requests per step, with chunked prefill and an OpenAI-compatible HTTP server.",
+          "hours": 64,
+          "stretch": false
+        },
+        {
+          "id": "nanoserve-m4",
+          "title": "Fast kernels",
+          "detail": "FlashAttention-2-style decode and prefill attention, a fused RMSNorm and RoPE kernel, and W4A16 or FP8 GEMM. Bring the better kernels over from Project 2.",
+          "hours": 96,
+          "stretch": false
+        },
+        {
+          "id": "nanoserve-m5",
+          "title": "Stretch",
+          "detail": "Speculative decoding with a draft model or EAGLE, prefix caching with a radix tree, CUDA graphs for decode, and Python bindings via nanobind.",
+          "hours": 64,
+          "stretch": true
+        }
+      ],
+      "done_when": [
+        {
+          "id": "nanoserve-d1",
+          "text": "Decode throughput is within 80% of llama.cpp on the same GPU and model, for batch 1 and batch 32."
+        },
+        {
+          "id": "nanoserve-d2",
+          "text": "Time to first token and inter-token latency are reported at p50 and p99 under a load generator."
+        },
+        {
+          "id": "nanoserve-d3",
+          "text": "Output matches the PyTorch reference on a fixed prompt set."
+        }
+      ],
+      "hardware_note": null,
+      "read_first": [
+        {
+          "title": "PagedAttention (vLLM)",
+          "url": "https://arxiv.org/abs/2309.06180",
+          "library_id": "paper-pagedattention-vllm"
+        },
+        {
+          "title": "Orca: continuous batching",
+          "url": "https://www.usenix.org/conference/osdi22/presentation/yu",
+          "library_id": "paper-orca-continuous-batching"
+        },
+        {
+          "title": "FlashAttention-2",
+          "url": "https://arxiv.org/abs/2307.08691",
+          "library_id": "paper-flashattention-2"
+        },
+        {
+          "title": "llm.c",
+          "url": "https://github.com/karpathy/llm.c",
+          "library_id": "repo-llm-c"
+        },
+        {
+          "title": "Nano-vLLM",
+          "url": "https://github.com/GeeeekExplorer/nano-vllm",
+          "library_id": "nano-vllm"
+        },
+        {
+          "title": "EAGLE",
+          "url": "https://arxiv.org/abs/2401.15077",
+          "library_id": "paper-eagle"
+        }
+      ],
+      "tech_doc": {
+        "url": "https://claude.ai/artifact/7t6dnEC5uk6GgxQY2NgVqQ",
+        "tab": "Tech docs › 1 · nanoserve"
+      },
+      "related": [
+        {
+          "where": "internships",
+          "id": "proj-4",
+          "title": "Mini inference engine (flagship)"
+        },
+        {
+          "where": "plan",
+          "id": "cap-inference",
+          "title": "Inference capstone: your own serving stack, end to end, benchmarked against vLLM"
+        }
+      ],
+      "roles": [
+        "JR2026307",
+        "JR2024002"
+      ]
+    },
+    {
+      "id": "kernel-lab",
+      "number": 2,
+      "code": "kernel-lab",
+      "title": "Kernel lab: beat the baseline",
+      "table_title": "Kernel lab: beat the baseline",
+      "summary": "A repo of GPU kernels, each written three ways (plain CUDA, Triton, CuTe/CUTLASS), profiled with Nsight Compute and placed on a roofline chart. It is the project closest to NVIDIA's Kernel Libraries and Deep Learning Performance internships.",
+      "proves": "You can write and profile fast GPU kernels",
+      "why": "Kernel engineers are judged on numbers and on how they explain them. A public log that shows a GEMM going from 1% to 90%+ of cuBLAS, with the profiler evidence at each step, is exactly what a performance team screens for.",
+      "stack": [
+        "CUDA",
+        "CuTe/CUTLASS",
+        "Triton",
+        "Nsight Compute"
+      ],
+      "weeks": 5,
+      "estHours": 280,
+      "core": true,
+      "track": "inference",
+      "areas": [
+        "GPU",
+        "CUDA kernels"
+      ],
+      "schedule": [
+        {
+          "from": "2026-11",
+          "to": "2027-01",
+          "what": "Milestones 1–3: the SGEMM ladder, tensor cores, memory-bound kernels"
+        },
+        {
+          "from": "2027-01",
+          "to": "2027-03",
+          "what": "Add the Triton and CuTe versions"
+        },
+        {
+          "from": "2027-05",
+          "to": "2027-06",
+          "what": "Polish, write-up, demo video and one upstream PR before applying"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "kernel-lab-m1",
+          "title": "SGEMM ladder",
+          "detail": "Naive → coalesced → shared-memory tiling → 2D register tiling → vectorised loads → warp tiling. Report GFLOP/s and % of cuBLAS at each step.",
+          "hours": 64,
+          "stretch": false
+        },
+        {
+          "id": "kernel-lab-m2",
+          "title": "Tensor cores",
+          "detail": "An FP16/BF16 GEMM with WMMA/MMA, then the same in CuTe. On Hopper, use TMA and wgmma; on datacenter Blackwell (B200), tcgen05. The DGX Spark's GB10 has neither wgmma nor tcgen05, so check its compute capability and use the CUTLASS examples written for it.",
+          "hours": 72,
+          "stretch": false
+        },
+        {
+          "id": "kernel-lab-m3",
+          "title": "Memory-bound kernels",
+          "detail": "Softmax, LayerNorm/RMSNorm, and a fused attention forward, each at 85%+ of peak DRAM bandwidth.",
+          "hours": 56,
+          "stretch": false
+        },
+        {
+          "id": "kernel-lab-m4",
+          "title": "Triton versions",
+          "detail": "Of the same kernels, with the generated PTX compared against your CUDA.",
+          "hours": 40,
+          "stretch": false
+        },
+        {
+          "id": "kernel-lab-m5",
+          "title": "Stretch",
+          "detail": "A FlashAttention-style forward that beats torch.nn.functional.scaled_dot_product_attention on one shape, or an FP8 block-scaled GEMM. Submit a fix or kernel upstream to CUTLASS, Triton or FlashInfer.",
+          "hours": 48,
+          "stretch": true
+        }
+      ],
+      "done_when": [
+        {
+          "id": "kernel-lab-d1",
+          "text": "FP16 GEMM reaches ≥ 80% of cuBLAS at 4096³."
+        },
+        {
+          "id": "kernel-lab-d2",
+          "text": "The memory-bound kernels reach ≥ 85% of measured bandwidth."
+        },
+        {
+          "id": "kernel-lab-d3",
+          "text": "Every kernel has a correctness test against PyTorch and an Nsight Compute report committed."
+        }
+      ],
+      "hardware_note": null,
+      "read_first": [
+        {
+          "title": "How to Optimize a CUDA Matmul (Boehm)",
+          "url": "https://siboehm.com/articles/22/CUDA-MMM",
+          "library_id": "siboehm-cuda-matmul"
+        },
+        {
+          "title": "Programming Massively Parallel Processors",
+          "url": "https://shop.elsevier.com/books/programming-massively-parallel-processors/hwu/978-0-323-91231-0",
+          "library_id": "book-pmpp-4e"
+        },
+        {
+          "title": "CuTe docs",
+          "url": "https://docs.nvidia.com/cutlass/4.7.0/media/docs/cpp/cute/index.html",
+          "library_id": "docs-cute-cpp"
+        },
+        {
+          "title": "Colfax WGMMA tutorial",
+          "url": "https://research.colfax-intl.com/cutlass-tutorial-wgmma-hopper/",
+          "library_id": "article-colfax-cutlass-wgmma"
+        },
+        {
+          "title": "Triton tutorials",
+          "url": "https://triton-lang.org/main/getting-started/tutorials/index.html",
+          "library_id": "triton-tutorials"
+        },
+        {
+          "title": "Roofline model",
+          "url": "https://www2.eecs.berkeley.edu/Pubs/TechRpts/2008/EECS-2008-134.html",
+          "library_id": "paper-roofline"
+        },
+        {
+          "title": "GPU MODE lectures",
+          "url": "https://www.youtube.com/@GPUMODE",
+          "library_id": "video-gpu-mode"
+        }
+      ],
+      "tech_doc": {
+        "url": "https://claude.ai/artifact/7t6dnEC5uk6GgxQY2NgVqQ",
+        "tab": "Tech docs › 2 · Kernel lab"
+      },
+      "related": [
+        {
+          "where": "internships",
+          "id": "proj-2",
+          "title": "CUDA kernel ladder"
+        },
+        {
+          "where": "internships",
+          "id": "proj-3",
+          "title": "CuTe DSL kernels: GEMM and fused attention"
+        }
+      ],
+      "roles": [
+        "JR2026307",
+        "JR2024002",
+        "JR2026170",
+        "JR2026171",
+        "JR2026546"
+      ]
+    },
+    {
+      "id": "minitrain",
+      "number": 3,
+      "code": "minitrain",
+      "title": "minitrain: a distributed training framework",
+      "table_title": "minitrain: distributed training framework",
+      "summary": "A small framework on top of PyTorch that trains a GPT (125M to 1B parameters) across several GPUs and nodes with data, tensor and pipeline parallelism, written by you rather than imported.",
+      "proves": "You can scale training across GPUs and nodes",
+      "why": "Most students have trained a model on one GPU. Few can explain why an all-reduce stalls, how FSDP shards optimiser state, or what pipeline bubbles cost. Measured scaling curves on real multi-node hardware are strong proof.",
+      "stack": [
+        "PyTorch",
+        "NCCL",
+        "FSDP-style sharding"
+      ],
+      "weeks": 5,
+      "estHours": 280,
+      "core": false,
+      "track": "ai",
+      "areas": [
+        "Distributed training",
+        "GPU",
+        "Systems"
+      ],
+      "schedule": [
+        {
+          "from": "2027-07",
+          "to": "2027-09",
+          "what": "On the DGX Spark cluster: training at scale"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "minitrain-m1",
+          "title": "Single-GPU baseline",
+          "detail": "A nanoGPT-style model with mixed precision, gradient accumulation and a reproducible loss curve.",
+          "hours": 32,
+          "stretch": false
+        },
+        {
+          "id": "minitrain-m2",
+          "title": "Data parallel",
+          "detail": "Your own DDP with bucketed all-reduce over NCCL that overlaps with backward, checked against torch.nn.parallel.DistributedDataParallel.",
+          "hours": 56,
+          "stretch": false
+        },
+        {
+          "id": "minitrain-m3",
+          "title": "Sharding",
+          "detail": "ZeRO-1/2/3-style sharding of optimiser state, gradients and parameters, with a memory-per-GPU chart.",
+          "hours": 64,
+          "stretch": false
+        },
+        {
+          "id": "minitrain-m4",
+          "title": "Tensor and pipeline parallel",
+          "detail": "Megatron-style column- and row-parallel linears, then a 1F1B pipeline schedule.",
+          "hours": 80,
+          "stretch": false
+        },
+        {
+          "id": "minitrain-m5",
+          "title": "Stretch",
+          "detail": "Fault-tolerant checkpointing with resume, activation checkpointing, an FP8 training path, and a write-up comparing your numbers with torchtitan.",
+          "hours": 48,
+          "stretch": true
+        }
+      ],
+      "done_when": [
+        {
+          "id": "minitrain-d1",
+          "text": "Weak scaling to 8 GPUs is ≥ 85% efficient for data parallel."
+        },
+        {
+          "id": "minitrain-d2",
+          "text": "A 1B model fits and trains with sharding where plain DDP runs out of memory."
+        },
+        {
+          "id": "minitrain-d3",
+          "text": "Loss curves match the single-GPU baseline."
+        }
+      ],
+      "hardware_note": "The 12-node DGX Spark setup is ideal for the multi-node part. Otherwise, rent 2× 8-GPU nodes for a few days only after everything works on 2 GPUs.",
+      "read_first": [
+        {
+          "title": "The Ultra-Scale Playbook",
+          "url": "https://huggingface.co/spaces/nanotron/ultrascale-playbook",
+          "library_id": "ultrascale-playbook"
+        },
+        {
+          "title": "How to Scale Your Model",
+          "url": "https://jax-ml.github.io/scaling-book/",
+          "library_id": "scaling-book"
+        },
+        {
+          "title": "ZeRO",
+          "url": "https://arxiv.org/abs/1910.02054",
+          "library_id": "paper-zero"
+        },
+        {
+          "title": "Megatron-LM",
+          "url": "https://arxiv.org/abs/1909.08053",
+          "library_id": "paper-megatron-lm"
+        },
+        {
+          "title": "PyTorch FSDP",
+          "url": "https://arxiv.org/abs/2304.11277",
+          "library_id": "paper-pytorch-fsdp"
+        },
+        {
+          "title": "torchtitan",
+          "url": "https://github.com/pytorch/torchtitan",
+          "library_id": "repo-torchtitan"
+        },
+        {
+          "title": "NCCL docs",
+          "url": "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs",
+          "library_id": "docs-nccl"
+        }
+      ],
+      "tech_doc": {
+        "url": "https://claude.ai/artifact/7t6dnEC5uk6GgxQY2NgVqQ",
+        "tab": "Tech docs › 3 · minitrain"
+      },
+      "related": [],
+      "roles": [
+        "JR2026170",
+        "JR2026171",
+        "JR2026546"
+      ]
+    },
+    {
+      "id": "kvroute",
+      "number": 4,
+      "code": "kvroute",
+      "title": "Cluster serving router",
+      "table_title": "Cluster serving router",
+      "summary": "A control plane that sits in front of many inference workers (nanoserve, vLLM or SGLang) and routes requests by KV-cache locality, with prefill and decode optionally split onto different machines.",
+      "proves": "You can design a production serving system",
+      "why": "In 2026–27 the frontier of serving moved from one engine to many: disaggregated prefill/decode, KV-cache-aware routing, shared KV stores (NVIDIA Dynamo, llm-d, Mooncake). A working, measured version of this is system-design proof that matches real production work.",
+      "stack": [
+        "Rust or Go",
+        "gRPC",
+        "Kubernetes",
+        "Prometheus"
+      ],
+      "weeks": 4,
+      "estHours": 224,
+      "core": false,
+      "track": "inference",
+      "areas": [
+        "AI inference",
+        "Systems",
+        "Network"
+      ],
+      "schedule": [
+        {
+          "from": "2027-07",
+          "to": "2027-09",
+          "what": "On the DGX Spark cluster: serving at scale"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "kvroute-m1",
+          "title": "Router",
+          "detail": "Round-robin and least-load routing over N workers via gRPC or HTTP, with health checks, retries and Prometheus metrics.",
+          "hours": 40,
+          "stretch": false
+        },
+        {
+          "id": "kvroute-m2",
+          "title": "Prefix-aware routing",
+          "detail": "Keep a radix index of which worker holds which prefix, and route to maximise cache hits. Measure the hit rate and time-to-first-token change on a chat workload with shared system prompts.",
+          "hours": 56,
+          "stretch": false
+        },
+        {
+          "id": "kvroute-m3",
+          "title": "Disaggregation",
+          "detail": "Separate prefill and decode pools, with KV transfer between them (start with TCP, then RDMA/NIXL if hardware allows), and compare goodput against co-located serving.",
+          "hours": 64,
+          "stretch": false
+        },
+        {
+          "id": "kvroute-m4",
+          "title": "Operations",
+          "detail": "A Kubernetes deployment, autoscaling on queue depth, k6 load tests, and an SLO dashboard (TTFT, TPOT, error rate).",
+          "hours": 40,
+          "stretch": false
+        },
+        {
+          "id": "kvroute-m5",
+          "title": "Stretch",
+          "detail": "Admission control under overload, multi-model and LoRA routing, and a chaos test that kills a worker mid-stream.",
+          "hours": 24,
+          "stretch": true
+        }
+      ],
+      "done_when": [
+        {
+          "id": "kvroute-d1",
+          "text": "Prefix-aware routing cuts p50 TTFT by a measured amount against round-robin on the same cluster."
+        },
+        {
+          "id": "kvroute-d2",
+          "text": "The system survives a worker kill with no dropped non-streaming requests."
+        },
+        {
+          "id": "kvroute-d3",
+          "text": "A one-page capacity model is written and matches the load tests."
+        }
+      ],
+      "hardware_note": null,
+      "read_first": [
+        {
+          "title": "DistServe",
+          "url": "https://arxiv.org/abs/2401.09670",
+          "library_id": "paper-distserve"
+        },
+        {
+          "title": "Splitwise",
+          "url": "https://arxiv.org/abs/2311.18677",
+          "library_id": "paper-splitwise"
+        },
+        {
+          "title": "Mooncake",
+          "url": "https://arxiv.org/abs/2407.00079",
+          "library_id": "paper-mooncake"
+        },
+        {
+          "title": "SGLang / RadixAttention",
+          "url": "https://arxiv.org/abs/2312.07104",
+          "library_id": "paper-sglang-radixattention"
+        },
+        {
+          "title": "llm-d",
+          "url": "https://llm-d.ai/",
+          "library_id": "docs-llm-d"
+        },
+        {
+          "title": "vLLM docs",
+          "url": "https://docs.vllm.ai/",
+          "library_id": "vllm-docs"
+        }
+      ],
+      "tech_doc": {
+        "url": "https://claude.ai/artifact/7t6dnEC5uk6GgxQY2NgVqQ",
+        "tab": "Tech docs › 4 · kvroute"
+      },
+      "related": [
+        {
+          "where": "plan",
+          "id": "cap-inference",
+          "title": "Inference capstone: your own serving stack, end to end, benchmarked against vLLM"
+        }
+      ],
+      "roles": [
+        "JR2027942"
+      ]
+    },
+    {
+      "id": "forge",
+      "number": 5,
+      "code": "forge",
+      "title": "forge: an agent harness in Rust",
+      "table_title": "forge: agent harness in Rust",
+      "summary": "A coding-agent harness written in Rust: the tool loop, context management, a real sandbox, MCP on both sides, and an evaluation suite. It runs against any model, including your own nanoserve. It is also the core of localSpace's harness layer.",
+      "proves": "You can build reliable, safe agents and measure them",
+      "why": "Agent roles in 2027 want engineers who treat the harness as a system: safe execution, context budgets, retries, observability and measured success rates. Few portfolios show a harness with a sandbox and a SWE-bench number.",
+      "stack": [
+        "Rust",
+        "MCP",
+        "Landlock/bubblewrap",
+        "SWE-bench"
+      ],
+      "weeks": 6,
+      "estHours": 336,
+      "core": true,
+      "track": "ai",
+      "areas": [
+        "Agents",
+        "Harnesses",
+        "Systems"
+      ],
+      "schedule": [
+        {
+          "from": "2027-03",
+          "to": "2027-05",
+          "what": "Build the harness; run its evals on nanoserve as well as hosted models"
+        },
+        {
+          "from": "2027-05",
+          "to": "2027-06",
+          "what": "Polish, write-up and demo video before applying"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "forge-m1",
+          "title": "Core loop",
+          "detail": "A streaming chat client for OpenAI-compatible and Anthropic APIs, typed tool calls with JSON-schema validation, and a read/edit/run-shell toolset.",
+          "hours": 48,
+          "stretch": false
+        },
+        {
+          "id": "forge-m2",
+          "title": "Sandbox",
+          "detail": "Run every tool in a locked-down process using Landlock, seccomp and bubblewrap (or a Firecracker microVM), with no network unless granted, and log every syscall denial.",
+          "hours": 64,
+          "stretch": false
+        },
+        {
+          "id": "forge-m3",
+          "title": "Context engineering",
+          "detail": "File and repo summarisation, a compaction step when the window fills, a persistent task plan, and token accounting per turn.",
+          "hours": 48,
+          "stretch": false
+        },
+        {
+          "id": "forge-m4",
+          "title": "MCP",
+          "detail": "Act as an MCP client (use any server) and expose your tools as an MCP server, with a permission prompt model.",
+          "hours": 40,
+          "stretch": false
+        },
+        {
+          "id": "forge-m5",
+          "title": "Evals",
+          "detail": "Run SWE-bench Verified (a 50-task subset first) and Terminal-Bench with fixed seeds. Report the pass rate, cost and tokens per solved task, and the failure categories.",
+          "hours": 88,
+          "stretch": false
+        },
+        {
+          "id": "forge-m6",
+          "title": "Stretch",
+          "detail": "Parallel sub-agents with a shared plan, OpenTelemetry traces of every step, and grammar-constrained tool calls for local models via llguidance.",
+          "hours": 48,
+          "stretch": true
+        }
+      ],
+      "done_when": [
+        {
+          "id": "forge-d1",
+          "text": "A published SWE-bench Verified subset score with the exact model, prompt and cost."
+        },
+        {
+          "id": "forge-d2",
+          "text": "A sandbox test suite shows writes outside the workspace and network calls are blocked."
+        },
+        {
+          "id": "forge-d3",
+          "text": "One external MCP server and your own server both work end to end."
+        }
+      ],
+      "hardware_note": null,
+      "read_first": [
+        {
+          "title": "SWE-bench",
+          "url": "https://arxiv.org/abs/2310.06770",
+          "library_id": "paper-swe-bench"
+        },
+        {
+          "title": "SWE-agent",
+          "url": "https://arxiv.org/abs/2405.15793",
+          "library_id": "paper-swe-agent"
+        },
+        {
+          "title": "mini-swe-agent",
+          "url": "https://github.com/SWE-agent/mini-swe-agent",
+          "library_id": "mini-swe-agent"
+        },
+        {
+          "title": "Claude Agent SDK: the agent loop",
+          "url": "https://code.claude.com/docs/en/agent-sdk/agent-loop",
+          "library_id": "docs-claude-agent-sdk-agent-loop"
+        },
+        {
+          "title": "MCP docs",
+          "url": "https://modelcontextprotocol.io/",
+          "library_id": "mcp-docs"
+        },
+        {
+          "title": "Landlock",
+          "url": "https://docs.kernel.org/userspace-api/landlock.html",
+          "library_id": "docs-kernel-landlock"
+        },
+        {
+          "title": "bubblewrap",
+          "url": "https://github.com/containers/bubblewrap",
+          "library_id": "repo-bubblewrap"
+        },
+        {
+          "title": "Terminal-Bench",
+          "url": "https://www.tbench.ai/",
+          "library_id": "practice-terminal-bench"
+        },
+        {
+          "title": "Inspect",
+          "url": "https://inspect.aisi.org.uk/",
+          "library_id": "docs-inspect-ai"
+        }
+      ],
+      "tech_doc": {
+        "url": "https://claude.ai/artifact/7t6dnEC5uk6GgxQY2NgVqQ",
+        "tab": "Tech docs › 5 · forge"
+      },
+      "related": [],
+      "roles": [
+        "JR2027942"
+      ]
+    },
+    {
+      "id": "raftkv",
+      "number": 6,
+      "code": "raftkv",
+      "title": "raftkv: a replicated key-value store",
+      "table_title": "raftkv: replicated KV store",
+      "summary": "A Raft-replicated key-value store in Rust with an LSM storage engine, a custom binary network protocol, and deterministic simulation testing that finds its own bugs.",
+      "proves": "You can build correct distributed systems",
+      "why": "Correctness under failure is the hardest systems skill to fake. Deterministic simulation (the FoundationDB and TigerBeetle approach), where one seed replays a whole crash-and-partition scenario, impresses senior engineers far more than another CRUD service.",
+      "stack": [
+        "Rust",
+        "Raft",
+        "io_uring",
+        "deterministic simulation"
+      ],
+      "weeks": 4,
+      "estHours": 224,
+      "core": false,
+      "track": "systems",
+      "areas": [
+        "Systems",
+        "Distributed systems",
+        "Network"
+      ],
+      "schedule": [
+        {
+          "from": "2027-10",
+          "to": "2027-12",
+          "what": "The Raft store"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "raftkv-m1",
+          "title": "Gossip Glomers warm-up",
+          "detail": "Pass Fly.io's distributed-systems challenges in Maelstrom (broadcast, counters, a replicated log).",
+          "hours": 24,
+          "stretch": false
+        },
+        {
+          "id": "raftkv-m2",
+          "title": "Raft",
+          "detail": "Leader election, log replication, snapshots and membership changes, following the paper and the Students' Guide.",
+          "hours": 64,
+          "stretch": false
+        },
+        {
+          "id": "raftkv-m3",
+          "title": "Storage",
+          "detail": "A WAL, memtable and SSTables with compaction, using io_uring for disk I/O on Linux.",
+          "hours": 48,
+          "stretch": false
+        },
+        {
+          "id": "raftkv-m4",
+          "title": "Simulation testing",
+          "detail": "Run the whole cluster in one process with fake time, network and disk. Inject crashes, partitions, message reordering and disk faults from a seed, and check linearizability on every run.",
+          "hours": 64,
+          "stretch": false
+        },
+        {
+          "id": "raftkv-m5",
+          "title": "Stretch",
+          "detail": "Jepsen-style tests against the real binary, read leases, and a benchmark against etcd.",
+          "hours": 24,
+          "stretch": true
+        }
+      ],
+      "done_when": [
+        {
+          "id": "raftkv-d1",
+          "text": "100,000 simulated runs pass the linearizability checker."
+        },
+        {
+          "id": "raftkv-d2",
+          "text": "At least three real bugs found by the simulator are written up."
+        },
+        {
+          "id": "raftkv-d3",
+          "text": "Throughput and p99 latency are reported against etcd on the same three machines."
+        }
+      ],
+      "hardware_note": null,
+      "read_first": [
+        {
+          "title": "Students' Guide to Raft",
+          "url": "https://thesquareplanet.com/blog/students-guide-to-raft/",
+          "library_id": "students-guide-to-raft"
+        },
+        {
+          "title": "etcd raft",
+          "url": "https://github.com/etcd-io/raft",
+          "library_id": "repo-etcd-raft"
+        },
+        {
+          "title": "Gossip Glomers",
+          "url": "https://fly.io/dist-sys/",
+          "library_id": "gossip-glomers"
+        },
+        {
+          "title": "Maelstrom",
+          "url": "https://github.com/jepsen-io/maelstrom",
+          "library_id": "repo-maelstrom"
+        },
+        {
+          "title": "FoundationDB paper",
+          "url": "https://www.foundationdb.org/files/fdb-paper.pdf",
+          "library_id": "foundationdb-sigmod21"
+        },
+        {
+          "title": "TigerBeetle VOPR",
+          "url": "https://docs.tigerbeetle.com/about/vopr",
+          "library_id": "docs-tigerbeetle-vopr"
+        },
+        {
+          "title": "Jepsen analyses",
+          "url": "https://jepsen.io/analyses",
+          "library_id": "blog-jepsen-analyses"
+        },
+        {
+          "title": "Lord of the io_uring",
+          "url": "https://unixism.net/loti/",
+          "library_id": "tutorial-lord-of-the-io-uring"
+        }
+      ],
+      "tech_doc": {
+        "url": "https://claude.ai/artifact/7t6dnEC5uk6GgxQY2NgVqQ",
+        "tab": "Tech docs › 6 · raftkv"
+      },
+      "related": [],
+      "roles": []
+    },
+    {
+      "id": "splat",
+      "number": 7,
+      "code": "splat",
+      "title": "splat: a real-time Gaussian splatting renderer",
+      "table_title": "splat: real-time Gaussian splatting renderer",
+      "summary": "A renderer that loads trained 3D Gaussian Splatting scenes and draws them in real time. It has a CUDA tile rasteriser of your own, a Vulkan viewer, and a training loop that reconstructs a scene from your own phone photos.",
+      "proves": "You can do graphics and CUDA together",
+      "why": "It joins the three things NVIDIA cares about most (graphics, CUDA and AI) in one demo you can show in a video. Neural rendering and world simulation are where graphics is heading.",
+      "stack": [
+        "CUDA",
+        "Vulkan",
+        "C++"
+      ],
+      "weeks": 5,
+      "estHours": 280,
+      "core": false,
+      "track": "graphics",
+      "areas": [
+        "Graphics",
+        "GPU"
+      ],
+      "schedule": [
+        {
+          "from": "2027-10",
+          "to": "2027-12",
+          "what": "The splatting renderer"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "splat-m1",
+          "title": "Vulkan foundations",
+          "detail": "A Vulkan renderer with a camera, a mesh pipeline and a compute pass, following vkguide.",
+          "hours": 48,
+          "stretch": false
+        },
+        {
+          "id": "splat-m2",
+          "title": "Splat loader and sorter",
+          "detail": "Load .ply scenes, project the Gaussians to 2D, and do a GPU radix sort by depth per tile.",
+          "hours": 40,
+          "stretch": false
+        },
+        {
+          "id": "splat-m3",
+          "title": "CUDA rasteriser",
+          "detail": "A tile-based forward rasteriser with alpha blending, matching the reference renderer's images to a PSNR above 40 dB.",
+          "hours": 64,
+          "stretch": false
+        },
+        {
+          "id": "splat-m4",
+          "title": "Training",
+          "detail": "The differentiable backward pass, then train on your own photos (COLMAP for camera poses) and compare quality and speed against gsplat.",
+          "hours": 88,
+          "stretch": false
+        },
+        {
+          "id": "splat-m5",
+          "title": "Stretch",
+          "detail": "Vulkan and CUDA interop so CUDA writes straight into the swapchain, anti-aliasing from Mip-Splatting, and a WebGPU viewer.",
+          "hours": 40,
+          "stretch": true
+        }
+      ],
+      "done_when": [
+        {
+          "id": "splat-d1",
+          "text": "A 1M-Gaussian scene renders at ≥ 60 FPS at 1080p on a consumer GPU."
+        },
+        {
+          "id": "splat-d2",
+          "text": "Training on your own scene reaches PSNR within 1 dB of gsplat."
+        },
+        {
+          "id": "splat-d3",
+          "text": "A demo video of the result is published."
+        }
+      ],
+      "hardware_note": null,
+      "read_first": [
+        {
+          "title": "3D Gaussian Splatting paper",
+          "url": "https://arxiv.org/abs/2308.04079",
+          "library_id": "paper-3d-gaussian-splatting"
+        },
+        {
+          "title": "3DGS reference code",
+          "url": "https://github.com/graphdeco-inria/gaussian-splatting",
+          "library_id": "repo-graphdeco-gaussian-splatting"
+        },
+        {
+          "title": "gsplat",
+          "url": "https://github.com/nerfstudio-project/gsplat",
+          "library_id": "repo-gsplat"
+        },
+        {
+          "title": "3DGS tutorial (3DV 2024)",
+          "url": "https://3dgstutorial.github.io/",
+          "library_id": "course-3dv-2024-3dgs-tutorial"
+        },
+        {
+          "title": "vkguide",
+          "url": "https://vkguide.dev/",
+          "library_id": "vkguide"
+        },
+        {
+          "title": "Khronos Vulkan tutorial",
+          "url": "https://docs.vulkan.org/tutorial/latest/00_Introduction.html",
+          "library_id": "khronos-vulkan-tutorial-docs"
+        },
+        {
+          "title": "Mip-Splatting",
+          "url": "https://arxiv.org/abs/2311.16493",
+          "library_id": "paper-mip-splatting"
+        }
+      ],
+      "tech_doc": {
+        "url": "https://claude.ai/artifact/7t6dnEC5uk6GgxQY2NgVqQ",
+        "tab": "Tech docs › 7 · splat"
+      },
+      "related": [],
+      "roles": []
+    },
+    {
+      "id": "drive-perf",
+      "number": 8,
+      "code": "drive-perf",
+      "title": "drive-perf: a TensorRT perception pipeline",
+      "table_title": "drive-perf: TensorRT perception pipeline",
+      "summary": "A camera-to-bird's-eye-view perception pipeline for driving, trained on nuScenes and taken to a fixed latency budget with TensorRT, INT8/FP8 quantisation and custom CUDA pre- and post-processing.",
+      "proves": "You can hit a real-time latency budget for driving",
+      "why": "NVIDIA's Autonomous Driving GPU teams care about one thing above all: a model that runs inside a hard real-time budget on embedded hardware. Showing you can take a research model and make it hit 30 FPS, with an accuracy-versus-latency table, is directly on target.",
+      "stack": [
+        "TensorRT",
+        "CUDA",
+        "ONNX",
+        "CARLA"
+      ],
+      "weeks": 4,
+      "estHours": 224,
+      "core": false,
+      "track": "inference",
+      "areas": [
+        "AI inference",
+        "GPU",
+        "Autonomous driving"
+      ],
+      "schedule": [
+        {
+          "from": "2028-01",
+          "to": "2028-03",
+          "what": "The driving perception pipeline, aimed at the Autonomous Driving GPU team"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "drive-perf-m1",
+          "title": "Baseline",
+          "detail": "Train or fine-tune a BEV detector (BEVFormer-tiny or a Lift-Splat-Shoot model) on nuScenes mini, and report mAP and NDS.",
+          "hours": 40,
+          "stretch": false
+        },
+        {
+          "id": "drive-perf-m2",
+          "title": "Export",
+          "detail": "Get the model to ONNX and then a TensorRT engine, writing a plugin for any unsupported op.",
+          "hours": 48,
+          "stretch": false
+        },
+        {
+          "id": "drive-perf-m3",
+          "title": "Quantisation",
+          "detail": "INT8 post-training quantisation with calibration, then FP8 where supported, with an accuracy-loss table.",
+          "hours": 40,
+          "stretch": false
+        },
+        {
+          "id": "drive-perf-m4",
+          "title": "CUDA pre and post",
+          "detail": "Image resize and normalise, voxel pooling and NMS as CUDA kernels, with the whole pipeline in one CUDA stream graph.",
+          "hours": 40,
+          "stretch": false
+        },
+        {
+          "id": "drive-perf-m5",
+          "title": "Closed loop",
+          "detail": "Run the pipeline live in CARLA to drive a simple planner, recording frame times.",
+          "hours": 32,
+          "stretch": false
+        },
+        {
+          "id": "drive-perf-m6",
+          "title": "Stretch",
+          "detail": "Deploy on a Jetson Orin (if available) with DLA offload.",
+          "hours": 24,
+          "stretch": true
+        }
+      ],
+      "done_when": [
+        {
+          "id": "drive-perf-d1",
+          "text": "End-to-end latency stays below 33 ms at p99 on the target GPU."
+        },
+        {
+          "id": "drive-perf-d2",
+          "text": "The accuracy loss from quantisation is under 1 mAP point, or is explained."
+        },
+        {
+          "id": "drive-perf-d3",
+          "text": "The CARLA run is recorded."
+        }
+      ],
+      "hardware_note": null,
+      "read_first": [
+        {
+          "title": "BEVFormer",
+          "url": "https://arxiv.org/abs/2203.17270",
+          "library_id": "paper-bevformer"
+        },
+        {
+          "title": "BEVFusion",
+          "url": "https://arxiv.org/abs/2205.13542",
+          "library_id": "paper-bevfusion"
+        },
+        {
+          "title": "nuScenes",
+          "url": "https://arxiv.org/abs/1903.11027",
+          "library_id": "paper-nuscenes"
+        },
+        {
+          "title": "nuScenes devkit",
+          "url": "https://github.com/nutonomy/nuscenes-devkit",
+          "library_id": "repo-nuscenes-devkit"
+        },
+        {
+          "title": "TensorRT",
+          "url": "https://github.com/NVIDIA/TensorRT",
+          "library_id": "repo-tensorrt"
+        },
+        {
+          "title": "CARLA",
+          "url": "https://arxiv.org/abs/1711.03938",
+          "library_id": "paper-carla-simulator"
+        }
+      ],
+      "tech_doc": {
+        "url": "https://claude.ai/artifact/7t6dnEC5uk6GgxQY2NgVqQ",
+        "tab": "Tech docs › 8 · drive-perf"
+      },
+      "related": [],
+      "roles": [
+        "JR2026170",
+        "JR2026171",
+        "JR2026546"
+      ]
+    },
+    {
+      "id": "world-model-capstone",
+      "number": 9,
+      "code": "capstone",
+      "title": "Research capstone: a small world model with an original result",
+      "table_title": "Research capstone: small world model",
+      "summary": "Train an action-conditioned diffusion world model on a small environment (an Atari game, a 2D racing game, or CARLA at low resolution). Then answer one research question nobody has published an answer to, and write it up as a 6–8 page workshop paper.",
+      "proves": "You can do original research and write it up",
+      "why": "It turns you from \"built things\" into \"found something\". A short arXiv paper or workshop acceptance on world models, which is your stated research direction, is the strongest single item a 2nd/3rd-year student can have. The inference skills from Projects 1 and 2 also make your model run in real time, which most research code does not.",
+      "stack": [
+        "PyTorch",
+        "JAX",
+        "diffusion",
+        "CARLA or a game env"
+      ],
+      "weeks": 8,
+      "estHours": 448,
+      "core": false,
+      "track": "ai",
+      "areas": [
+        "Research",
+        "World models",
+        "Diffusion"
+      ],
+      "schedule": [
+        {
+          "from": "2028-03",
+          "to": "2028-09",
+          "what": "The research capstone, timed to a NeurIPS 2028 workshop deadline (usually late summer)"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "world-model-capstone-m1",
+          "title": "Reproduce",
+          "detail": "Retrain DIAMOND on one Atari game and match the paper's reported numbers within noise.",
+          "hours": 96,
+          "stretch": false
+        },
+        {
+          "id": "world-model-capstone-m2",
+          "title": "Pick a question",
+          "detail": "Some examples:",
+          "hours": 24,
+          "stretch": false,
+          "examples": [
+            "How does sampling-step count trade off against long-horizon consistency?",
+            "Does a learned latent beat pixel space at equal compute?",
+            "Can diffusion forcing remove compounding error in 1,000-step rollouts?"
+          ]
+        },
+        {
+          "id": "world-model-capstone-m3",
+          "title": "Experiment properly",
+          "detail": "Three or more seeds, a fixed compute budget, ablations, and every run logged to Weights & Biases.",
+          "hours": 160,
+          "stretch": false
+        },
+        {
+          "id": "world-model-capstone-m4",
+          "title": "Make it fast",
+          "detail": "Distil the sampler to 1–4 steps and serve the world model interactively at ≥ 20 FPS, using your own kernels where they help.",
+          "hours": 72,
+          "stretch": false
+        },
+        {
+          "id": "world-model-capstone-m5",
+          "title": "Write it up",
+          "detail": "A LaTeX paper with figures, a public repo and an arXiv preprint. Submit to a NeurIPS or ICLR workshop.",
+          "hours": 96,
+          "stretch": false
+        }
+      ],
+      "done_when": [
+        {
+          "id": "world-model-capstone-d1",
+          "text": "The paper is on arXiv with code that reproduces every figure."
+        },
+        {
+          "id": "world-model-capstone-d2",
+          "text": "A playable real-time demo exists."
+        },
+        {
+          "id": "world-model-capstone-d3",
+          "text": "One researcher outside your university has read it and given feedback."
+        }
+      ],
+      "hardware_note": null,
+      "read_first": [
+        {
+          "title": "World Models",
+          "url": "https://arxiv.org/abs/1803.10122",
+          "library_id": "paper-world-models-ha"
+        },
+        {
+          "title": "DIAMOND",
+          "url": "https://arxiv.org/abs/2405.12399",
+          "library_id": "paper-diamond"
+        },
+        {
+          "title": "DIAMOND code",
+          "url": "https://github.com/eloialonso/diamond",
+          "library_id": "repo-diamond"
+        },
+        {
+          "title": "GameNGen",
+          "url": "https://arxiv.org/abs/2408.14837",
+          "library_id": "paper-gamengen"
+        },
+        {
+          "title": "Diffusion Forcing",
+          "url": "https://arxiv.org/abs/2407.01392",
+          "library_id": "paper-diffusion-forcing"
+        },
+        {
+          "title": "Genie",
+          "url": "https://arxiv.org/abs/2402.15391",
+          "library_id": "paper-genie"
+        },
+        {
+          "title": "DreamerV3",
+          "url": "https://github.com/danijar/dreamerv3",
+          "library_id": "repo-dreamerv3-official"
+        }
+      ],
+      "tech_doc": {
+        "url": "https://claude.ai/artifact/7t6dnEC5uk6GgxQY2NgVqQ",
+        "tab": "Tech docs › 9 · World model capstone"
+      },
+      "related": [
+        {
+          "where": "plan",
+          "id": "cap-research",
+          "title": "Research capstone: a world model trained on your engine's data, served by your stack, written up as a workshop paper"
+        }
+      ],
+      "roles": [
+        "JR2024002"
+      ]
+    }
+  ]
+}

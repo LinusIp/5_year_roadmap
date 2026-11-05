@@ -155,7 +155,7 @@ function Bullets({ items }: { items: string[] }) {
 }
 
 /** Milestones as clay checkbox rows with their hours; the first one not ticked says "Now". */
-function StepRows({ refId, units, done }: { refId: string; units: DocStep[]; done: string[] }) {
+function StepRows({ refId, units, done, onToggle }: { refId: string; units: DocStep[]; done: string[]; onToggle?: (unitId: string) => void }) {
   const ticks = useOptimisticSet(done);
   const now = units.find((u) => !ticks.has(u.id))?.id;
   return (
@@ -170,7 +170,8 @@ function StepRows({ refId, units, done }: { refId: string; units: DocStep[]; don
             checked: ticks.has(unit.id),
             onChange: () => {
               ticks.flip(unit.id);
-              void toggleUnit(refId, unit.id);
+              if (onToggle) onToggle(unit.id);
+              else void toggleUnit(refId, unit.id);
             },
             label: i + 1 + '. ' + unit.title,
           }}
@@ -187,8 +188,16 @@ function useJumpBar(ready: boolean): { refs: Record<DocPart, (el: HTMLElement | 
   const [part, setPart] = useState<DocPart>('overview');
   const jumping = useRef(0);
 
+  // The doc scrolls in a sheet (the plan's) or with the page (the portfolio's, ATLAS-PORTFOLIO).
+  const scrollerOf = (): { target: HTMLElement | Window; top: () => number; base: () => number; height: () => number; scrollHeight: () => number } | null => {
+    if (!bar.current) return null;
+    const sheet = bar.current.closest<HTMLElement>('.overflow-y-auto');
+    if (sheet) return { target: sheet, top: () => sheet.scrollTop, base: () => sheet.getBoundingClientRect().top - sheet.scrollTop, height: () => sheet.clientHeight, scrollHeight: () => sheet.scrollHeight };
+    return { target: window, top: () => window.scrollY, base: () => -window.scrollY, height: () => window.innerHeight, scrollHeight: () => document.documentElement.scrollHeight };
+  };
+
   useEffect(() => {
-    const scroller = bar.current?.closest<HTMLElement>('.overflow-y-auto');
+    const scroller = scrollerOf();
     if (!scroller) return undefined;
     let settle = 0;
     const onScroll = (): void => {
@@ -200,29 +209,29 @@ function useJumpBar(ready: boolean): { refs: Record<DocPart, (el: HTMLElement | 
         settle = window.setTimeout(onScroll, wait + 16);
         return;
       }
-      const base = scroller.getBoundingClientRect().top - scroller.scrollTop;
+      const base = scroller.base();
       const tops = DOC_PARTS.flatMap(({ value }) => {
         const el = els.current[value];
         return el ? [{ part: value, top: el.getBoundingClientRect().top - base }] : [];
       });
-      setPart(currentPart(tops, { top: scroller.scrollTop, height: scroller.clientHeight, scrollHeight: scroller.scrollHeight }, (bar.current?.offsetHeight ?? 56) + 24));
+      setPart(currentPart(tops, { top: scroller.top(), height: scroller.height(), scrollHeight: scroller.scrollHeight() }, (bar.current?.offsetHeight ?? 56) + 24));
     };
-    scroller.addEventListener('scroll', onScroll, { passive: true });
+    scroller.target.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       window.clearTimeout(settle);
-      scroller.removeEventListener('scroll', onScroll);
+      scroller.target.removeEventListener('scroll', onScroll);
     };
   }, [ready]);
 
   const jump = (p: DocPart): void => {
     const el = els.current[p];
-    const scroller = bar.current?.closest<HTMLElement>('.overflow-y-auto');
+    const scroller = scrollerOf();
     if (!el || !scroller) return;
     setPart(p);
     // The bar shows the chosen part while the scroll settles, even when the last part is too short to reach the line.
     jumping.current = Date.now() + 600;
-    const top = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - (bar.current?.offsetHeight ?? 56) - 12;
-    scroller.scrollTo({ top: Math.max(0, top), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    const top = el.getBoundingClientRect().top - scroller.base() - (bar.current?.offsetHeight ?? 56) - 12;
+    scroller.target.scrollTo({ top: Math.max(0, top), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   };
   const ref = (p: DocPart) => (el: HTMLElement | null) => {
     if (el) els.current[p] = el;
@@ -236,7 +245,25 @@ function useJumpBar(ready: boolean): { refs: Record<DocPart, (el: HTMLElement | 
  * generated from the structured design: the diagram, one request step by step, the components, the interface and
  * the decisions. A weekly build's doc is the same sheet with fewer parts.
  */
-export function TechDoc({ atlas, model, design, done, actions }: { atlas: Atlas; model: TechDocModel; design: Design | null | undefined; done: string[]; actions?: ReactNode }) {
+export function TechDoc({
+  atlas,
+  model,
+  design,
+  done,
+  actions,
+  onToggle,
+  onOpen,
+}: {
+  atlas: Atlas;
+  model: TechDocModel;
+  design: Design | null | undefined;
+  done: string[];
+  actions?: ReactNode;
+  /** Where a tick goes: the plan's item store by default; the portfolio's own store (ATLAS-PORTFOLIO) when given. */
+  onToggle?: (unitId: string) => void;
+  /** Opens a learn chip's resource or reading-queue paper on the page, instead of going to the Library. */
+  onOpen?: (ref: { kind: 'resource' | 'paper'; id: string }) => void;
+}) {
   const { refs, part, jump, bar } = useJumpBar(design !== undefined);
   const [stretch, setStretch] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
@@ -254,6 +281,7 @@ export function TechDoc({ atlas, model, design, done, actions }: { atlas: Atlas;
   const nameOf = (id: string): string => design?.components.find((c) => c.id === id)?.name ?? id;
   const kindOf = (id: string): string => design?.components.find((c) => c.id === id)?.kind ?? 'core';
   const resource = (ref: string | undefined) => (ref ? atlas.seed.resources.find((r) => r.id === ref) : undefined);
+  const paper = (ref: string | undefined) => (ref && onOpen ? atlas.seed.papers.find((p) => p.id === ref) : undefined);
   const stats = model.light ? [] : (design?.stats ?? []);
 
   // The whole doc waits for its design, so nothing is inserted above the place a reopened doc scrolls back to.
@@ -309,10 +337,19 @@ export function TechDoc({ atlas, model, design, done, actions }: { atlas: Atlas;
             <ul className="flex flex-wrap gap-2">
               {design.learn.map((l) => {
                 const r = resource(l.ref);
+                const p = r ? undefined : paper(l.ref);
                 return (
                   <li key={l.name}>
-                    {r ? (
+                    {r && onOpen ? (
+                      <Button size="sm" icon="book" onClick={() => onOpen({ kind: 'resource', id: r.id })}>
+                        {l.name}
+                      </Button>
+                    ) : r ? (
                       <Button size="sm" to={'/library/' + r.id} icon="book">
+                        {l.name}
+                      </Button>
+                    ) : p && onOpen ? (
+                      <Button size="sm" icon="paper" onClick={() => onOpen({ kind: 'paper', id: p.id })}>
                         {l.name}
                       </Button>
                     ) : (
@@ -408,7 +445,7 @@ export function TechDoc({ atlas, model, design, done, actions }: { atlas: Atlas;
           <div className="mb-1">
             <ProgressLine value={model.steps.units.length ? ticked.length / model.steps.units.length : 0} label={model.steps.label + ' of ' + model.title} />
           </div>
-          <StepRows refId={model.id} units={model.steps.units} done={done} />
+          <StepRows refId={model.id} units={model.steps.units} done={done} {...(onToggle ? { onToggle } : {})} />
         </Tile>
         {design && (
           <section className="tile well-ice flex gap-3 px-[18px] py-4">
@@ -431,7 +468,7 @@ export function TechDoc({ atlas, model, design, done, actions }: { atlas: Atlas;
         <h3 id={'doc-checks-' + model.id} className="sr-only">
           Checks
         </h3>
-        {model.doneWhen.length > 0 && <Checklist label="Done when" refId={model.id} units={model.doneWhen} done={done} />}
+        {model.doneWhen.length > 0 && <Checklist label="Done when" refId={model.id} units={model.doneWhen} done={done} {...(onToggle ? { onToggle } : {})} />}
         {model.checksMore?.map((m) => (
           <Extra key={m.title} extra={m} />
         ))}

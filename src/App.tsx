@@ -33,6 +33,7 @@ const PhaseMap = lazy(() => import('./screens/PhaseMap.tsx').then((m) => ({ defa
 const PickProject = lazy(() => import('./screens/PickProject.tsx').then((m) => ({ default: m.PickProject })));
 const Challenge = lazy(() => import('./screens/Challenge.tsx').then((m) => ({ default: m.Challenge })));
 const Internships = lazy(() => import('./screens/Internships.tsx').then((m) => ({ default: m.Internships })));
+const Portfolio = lazy(() => import('./screens/Portfolio.tsx').then((m) => ({ default: m.Portfolio })));
 const Sleep = lazy(() => import('./screens/Sleep.tsx').then((m) => ({ default: m.Sleep })));
 const BlogPost = lazy(() => import('./screens/BlogPost.tsx').then((m) => ({ default: m.BlogPost })));
 const Calendar = lazy(() => import('./screens/Calendar.tsx').then((m) => ({ default: m.Calendar })));
@@ -61,6 +62,8 @@ const ROUTES: RouteDef[] = [
   { pattern: '/blog', render: () => <BlogPost /> },
   { pattern: '/sleep', render: () => <Sleep /> },
   { pattern: '/internships', render: () => <Internships /> },
+  { pattern: '/portfolio', render: () => <Portfolio /> },
+  { pattern: '/portfolio/:id', render: (p) => <Portfolio id={p.id!} /> },
   { pattern: '/dev/components', render: () => <DevComponents /> },
 ];
 

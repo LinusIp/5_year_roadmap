@@ -101,6 +101,7 @@ const TABLE_SUMMARY: Partial<Record<SyncedTable, string>> = {
   challenges: 'solve a challenge',
   blogPosts: "mark the day's blog post",
   sleep: 'log sleep',
+  portfolio: 'update the portfolio',
   settings: 'update settings',
 };
 

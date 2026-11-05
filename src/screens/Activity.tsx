@@ -12,6 +12,7 @@ import { useCurrentScene } from '../hooks/useScenes.ts';
 import { buildGrid, monthlyTotals, planYears } from '../lib/heatmap.ts';
 import type { HeatCell } from '../lib/heatmap.ts';
 import { isBlockDone, totalMinutes } from '../lib/logs.ts';
+import { isPortfolioRef, portfolioTime } from '../lib/portfolio.ts';
 import { plannedFor, resolveDay } from '../lib/day-plan.ts';
 import { freezesSpentInMonth, streak } from '../lib/streaks.ts';
 import { useQueryParam } from '../router/router.tsx';
@@ -221,7 +222,10 @@ export function Activity() {
   const recentLabel = monthName(Number(recentFrom.slice(5, 7)) - 1, true) + ' → ' + monthName(Number(now.slice(5, 7)) - 1, true);
   // Hours by lane this phase (the mockup's): each block's minutes in the phase, the day's order first.
   const phase = activePhase(now, seed.phases);
-  const phaseMinutes = phase ? minutesPerBlock(logs, phase.start, phase.end) : minutesPerBlock(logs);
+  // A lane's hours leave out time logged to a portfolio project (ATLAS-PORTFOLIO), which has its own tile below.
+  const laneLogs = logs.map((l) => (l.entries.some((e) => isPortfolioRef(e.refId)) ? { ...l, entries: l.entries.filter((e) => !isPortfolioRef(e.refId)) } : l));
+  const phaseMinutes = phase ? minutesPerBlock(laneLogs, phase.start, phase.end) : minutesPerBlock(laneLogs);
+  const portfolioMinutes = portfolioTime(phase ? logs.filter((l) => l.date >= phase.start && l.date <= phase.end) : logs);
   const laneOrder = [...dayLayout(now, settings).map((p) => p.id), ...settings.core.blocks.map((b) => b.id)].filter((id, i, all) => all.indexOf(id) === i);
   const laneMax = Math.max(1, ...laneOrder.map((id) => phaseMinutes[id] ?? 0));
 
@@ -350,6 +354,14 @@ export function Activity() {
               );
             })}
           </section>
+
+          {portfolioMinutes.length > 0 && (
+            <RowList label={'Portfolio time · ' + (phase ? 'this phase' : 'all time')} className="mt-[18px]">
+              {portfolioMinutes.map((p) => (
+                <Row key={p.label} title={p.label} icon={<IconTile icon="trophy" lane={2} />} trailing={span(p.minutes)} to="/portfolio" />
+              ))}
+            </RowList>
+          )}
 
           <div className="mt-[18px]">
             <Chips

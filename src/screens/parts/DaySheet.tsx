@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { editLog, isBlockDone, readLog, removeEntry, toggleBlockDone } from '../../lib/logs.ts';
 import { weekday } from '../../lib/dates.ts';
+import { isPortfolioRef } from '../../lib/portfolio.ts';
 import { RETIRED_BLOCKS, retiredRefTitle } from '../../lib/retired.ts';
 import type { AppSeed, SettingsDefaults } from '../../seed/schema.ts';
 import { Button } from '../../ui/Button.tsx';
@@ -35,7 +36,8 @@ export function DaySheet({ date, title, onClose, seed, blocks, editable = false 
             <RowList label="Logged" flat>
               {(log?.entries ?? []).length === 0 && <li className="py-2.5 text-meta text-ink2">Nothing logged.</li>}
               {(log?.entries ?? []).map((entry, index) => {
-                const name = entry.refId ? shortTitle(titleOf(entry.refId, seed)) : (entry.note ?? 'Time logged');
+                // Time on a portfolio project (ATLAS-PORTFOLIO) names itself: "Portfolio · nanoserve".
+                const name = isPortfolioRef(entry.refId) ? (entry.note ?? 'Portfolio') : entry.refId ? shortTitle(titleOf(entry.refId, seed)) : (entry.note ?? 'Time logged');
                 return (
                   <Row
                     key={index}

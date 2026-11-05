@@ -18,6 +18,7 @@
  *   virtual:atlas-catalogue-index  one small entry per catalogue item, for Today, the Deck and the Library list
  *   virtual:atlas-designs    a loader per bucket; virtual:atlas-designs/<n> holds the designs of bucket n
  *   virtual:atlas-internships  the internship goals (data/internships*.json, INTERNSHIPS)
+ *   virtual:atlas-portfolio    the nine portfolio projects with their docs and designs (data/portfolio/, ATLAS-PORTFOLIO)
  *
  * A schema error or a duplicate id in /data fails `vite build` (and shows the overlay in dev).
  */
@@ -27,6 +28,7 @@ import { loadCatalogue } from './load-catalogue.ts';
 import { loadDesigns } from './load-designs.ts';
 import { loadDocs } from './load-docs.ts';
 import { loadInternships } from './load-internships.ts';
+import { loadPortfolio } from './load-portfolio.ts';
 import { DESIGN_BUCKETS, designBucket } from '../../src/seed/design.ts';
 import { entryOf } from '../../src/seed/catalogue.ts';
 import { parseDoc } from '../../src/lib/project-doc.ts';
@@ -42,8 +44,9 @@ const CATALOGUE_ID = 'virtual:atlas-catalogue';
 const CATALOGUE_INDEX_ID = 'virtual:atlas-catalogue-index';
 const DESIGNS_ID = 'virtual:atlas-designs';
 const INTERNSHIPS_ID = 'virtual:atlas-internships';
+const PORTFOLIO_ID = 'virtual:atlas-portfolio';
 const BUCKET_IDS = Array.from({ length: DESIGN_BUCKETS }, (_, n) => DESIGNS_ID + '/' + n);
-const RESOLVED = new Map([SEED_ID, UNITS_ID, LIBRARY_ID, DOCS_ID, CATALOGUE_ID, CATALOGUE_INDEX_ID, DESIGNS_ID, INTERNSHIPS_ID, ...BUCKET_IDS].map((id) => [id, '\0' + id]));
+const RESOLVED = new Map([SEED_ID, UNITS_ID, LIBRARY_ID, DOCS_ID, CATALOGUE_ID, CATALOGUE_INDEX_ID, DESIGNS_ID, INTERNSHIPS_ID, PORTFOLIO_ID, ...BUCKET_IDS].map((id) => [id, '\0' + id]));
 
 /** JSON.parse of a string literal starts up markedly faster than a large object literal. */
 function asModule(value: unknown): string {
@@ -77,6 +80,11 @@ export function atlasSeed(): Plugin {
         const { goals, errors } = loadInternships(seed);
         if (errors.length > 0) throw new Error('The internship goals in data/internships*.json are invalid:\n  - ' + errors.join('\n  - '));
         return asModule(goals);
+      }
+      if (id === RESOLVED.get(PORTFOLIO_ID)) {
+        const { portfolio, errors } = loadPortfolio({ seed, internships: loadInternships(seed).goals });
+        if (errors.length > 0) throw new Error('The portfolio in data/portfolio/ is invalid:\n  - ' + errors.join('\n  - '));
+        return asModule(portfolio);
       }
       if (id === RESOLVED.get(CATALOGUE_ID) || id === RESOLVED.get(CATALOGUE_INDEX_ID)) {
         const { items, errors } = loadCatalogue(seed);

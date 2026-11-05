@@ -7,6 +7,7 @@ import { loadCatalogue } from './lib/load-catalogue.ts';
 import { loadDesigns } from './lib/load-designs.ts';
 import { loadDocs } from './lib/load-docs.ts';
 import { loadInternships } from './lib/load-internships.ts';
+import { loadAliases, loadPortfolio } from './lib/load-portfolio.ts';
 import { loadSeed } from './lib/load-seed.ts';
 import { loadArtManifest } from './lib/load-art.ts';
 import { loadScenes } from './lib/load-scenes.ts';
@@ -34,6 +35,16 @@ if (designs) errors.push(...designs.errors);
 // The internship goals (data/internships*.json): unique ids, every named resource in the library, dates in order.
 const internships = seed ? loadInternships(seed) : null;
 if (internships) errors.push(...internships.errors);
+// The Library file's ids for rows the Library holds under older ids (data/library-aliases.json), and the portfolio
+// (data/portfolio/, ATLAS-PORTFOLIO): its schema, unique ids, milestone hours, months, library ids, a doc and a full
+// design per project, ids apart from the plan's and Internships' projects. A `related` id that left is a warning.
+const aliases = seed ? loadAliases(seed) : null;
+if (aliases) errors.push(...aliases.errors);
+const portfolio = seed && aliases ? loadPortfolio({ seed, internships: internships?.goals ?? [], aliases: aliases.aliases }) : null;
+if (portfolio) {
+  errors.push(...portfolio.errors);
+  warnings.push(...portfolio.warnings);
+}
 // The illustrations' manifest (public/art/art.json, ATLAS-ART): its shape, one image per slot and theme, every
 // file present.
 const art = loadArtManifest();
@@ -69,6 +80,7 @@ const lines: [string, string | number][] = [
   ['project catalogue', catalogueSummary()],
   ['designs', designSummary()],
   ['internship goals', (internships?.goals ?? []).map((g) => g.goal.title + ' (' + g.targets.length + ' targets, ' + g.phases.length + ' phases)').join('; ') || 'none'],
+  ['portfolio', portfolio?.portfolio ? portfolio.portfolio.projects.length + ' projects, ' + portfolio.portfolio.projects.reduce((n, p) => n + p.milestones.length, 0) + ' milestones (' + portfolio.resolved.length + ' library ids through data/library-aliases.json)' : 'none'],
   ['focus sessions', (focus.sessions ?? []).length + ' (oEmbed re-checked by CI)'],
   ['daily scenes', (scenes.scenes ?? []).length + ' (every contrast check passed)'],
   ['roadmap.sh roadmaps', seed.roadmaps.length + ' (' + seed.roadmaps.reduce((n, r) => n + r.sections.reduce((m, s) => m + s.nodes.length, 0), 0) + ' nodes)'],

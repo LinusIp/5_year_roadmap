@@ -2866,6 +2866,50 @@ prerequisite as text), `build-ship.test.ts` (the game shipping rows in Game buil
 `quick-filters.test.ts` (floors); `tests/e2e/atlas-library.spec.ts` (a deep-scrolled shelf settles and still searches;
 Pro Git the book; Build & ship floors). Screenshots redrawn on CI.
 
+## The portfolio, a section of its own (pull request #54)
+
+**Its own data, chunk and table.** `data/portfolio/` is read by `scripts/lib/load-portfolio.ts` alone and reaches the
+app as `virtual:atlas-portfolio`, its own lazy chunk: the plan's `loadDocs` and `loadDesigns` still read only
+`data/projects/`, and none of the nine enter `seed.projects`, the plan's lanes, pace or forecast, the Library's
+Projects shelf or its counts, `needsDoc` warnings or the Internships screen. Progress is the Dexie table
+`portfolio` (version 9), one row per project: milestone, done-when and ship-checklist ticks, the status, the
+repository and notes. Internships keeps its progress in `meta`, which backups carry but sync does not; the prompt
+asks for synced and backed up, so the portfolio's table is synced as `portfolio/<id>.json` (the newer edit wins,
+as for a night of sleep) and listed with the exported tables.
+
+**The Library file's ids resolve; no id changes.** The attached files name 17 rows by the 7,679-row file's ids, which
+the last import merged into older Library entries (`paper-pagedattention-vllm` is the Library's `pagedattention`,
+`cuda-programming-guide` its `cuda-guide`, and so on). Rather than rename a Library row or edit the attached files,
+`data/library-aliases.json` keeps the import's 233 merges (file id → Library id), checked by `validate:data` (no key
+is a Library id, every target is), and the loader resolves read_first, the docs' References and the designs' learn
+refs through it; the chunk carries the Library's ids. Thirteen of the 17 are papers of the reading queue, so a
+portfolio design's learn chip may name a queue paper (the plan's designs still name resources only); the chip and
+the Read first row open the paper's sheet on the page.
+
+**Time on a portfolio project is study time, not a lane's.** An entry carries `refId: portfolio:<id>` and the note
+"Portfolio · <code>" (from the log sheet or a timer, which now carries the note through to the entry); entries for
+one project merge as unnoted ones do. `laneBalance` and `paceForBlock` skip them, so no lane's balance, pace or
+forecast moves, and Stats' "Hours by lane" leaves them out and lists them under **Portfolio time**; the day's hours,
+the heatmap and the streak count them. A stopped timer never gives a portfolio ref a plan item's status. The time
+goes on block D by default (the sheet offers every block). A device still on an older build would count these
+entries toward the block's lane until it updates.
+
+**The plan's tech doc, reused.** `TechDoc` and `Checklist` take an optional tick handler, so the doc's milestone
+and done-when checkboxes write to the portfolio's table: one set of ticks shows in the doc and on Overview. A learn
+chip can open its resource or paper on the page, and the doc's jump bar follows the window when no sheet scrolls
+it. The doc's milestones take the file's ids, which `validate:data` holds title for title and hour for hour.
+
+**Not built.** Atlas reads GitHub's contribution calendar only; a repository's last push would be a new API call per
+project, so the Ship section shows the repository link without it. Every `related` id exists (Internships' proj-2,
+proj-3 and proj-4, the plan's cap-inference and cap-research); one that leaves is a warning and drops from "Also in
+Atlas".
+
+Tests: `tests/unit/portfolio.test.ts` (the files, the checks, the default status, the overrun rule, progress by
+hours, the doc's milestones, lanes untouched by portfolio time, the table in sync and backups);
+`tests/e2e/portfolio.spec.ts` (Plan's row and the nine cards, isolation, a tick across reload and doc, nine docs with
+diagrams, roles, read first, ship and repository, 30 minutes against every lane's forecast, 360 px, 44 px targets
+and axe). Screenshots at 390 px in both themes: the screen, a project on Overview and Tech doc, Plan's row.
+
 ## The docked player's check waits for Today to settle (pull request #45)
 
 The CI run on main after pull request #44 failed one e2e test, twice in a row: the Focus session that keeps playing,

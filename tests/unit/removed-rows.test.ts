@@ -15,7 +15,7 @@ describe('the rows the audit removed', () => {
     for (const r of seed.resources) for (const after of r.after ?? []) expect(REMOVED_RESOURCE_IDS.includes(after), r.id + ' after ' + after).toBe(false);
   });
 
-  it('lose their item states and overrides on the upgrade to version 8, and nothing else does', async () => {
+  it('lose their item states and overrides on the upgrade past version 8, and nothing else does', async () => {
     const name = 'removed-rows-' + Date.now();
     const old = new Dexie(name);
     old.version(7).stores({
@@ -37,7 +37,8 @@ describe('the rows the audit removed', () => {
 
     const db = new AtlasDB(name);
     await db.open();
-    expect(db.verno).toBe(8);
+    // Version 9 added the portfolio table (ATLAS-PORTFOLIO).
+    expect(db.verno).toBe(9);
     expect((await db.itemStates.toArray()).map((s) => s.refId)).toEqual(['ostep']);
     expect((await db.overrides.toArray()).map((o) => o.id)).toEqual(['ostep']);
     db.close();

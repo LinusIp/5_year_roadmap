@@ -1394,3 +1394,17 @@ Verified on this machine (Linux, Chromium 140):
 - The Library's windowed list no longer re-renders without end deep in a long shelf (its row height only grows), so a
   search opened there narrows the list.
 - Tests: quality-pass, build-ship, quick-filters (unit); atlas-library (e2e, a deep-scrolled shelf). Screenshots redrawn on CI.
+
+## Pull request #54: the portfolio
+
+- `data/portfolio/` (nine projects, their docs and designs) with its schema (`src/seed/portfolio.ts`), loader and
+  checks (`scripts/lib/load-portfolio.ts`, in `validate:data`) and its own chunk (`virtual:atlas-portfolio`);
+  `data/library-aliases.json` resolves the Library file's ids for 17 merged rows.
+- `#/portfolio` (focus and countdown, timeline, cards) and `#/portfolio/<id>` (Overview · Tech doc · Ship); Plan's
+  row, the Library's tile and a Portfolio group in search.
+- Progress in the `portfolio` table (Dexie version 9), synced as `portfolio/<id>.json` and in backups.
+- Time logged to a portfolio project: the day's hours and the streak, "Portfolio · <code>" in the day's log and
+  Stats; never a lane's pace or forecast.
+- Tests: `tests/unit/portfolio.test.ts`, `tests/e2e/portfolio.spec.ts`; screenshots of the screen, a project and
+  Plan's row.
+

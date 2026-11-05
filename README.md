@@ -174,6 +174,39 @@ queue), ISO dates, a fit of strong, medium or stretch.
 - Ticks, ratings and statuses stay on this device, by the file's ids, and go into every backup; the file is never
   written. They do not sync between devices yet.
 
+## Portfolio
+
+The nine flagship projects for the 2027–28 internship applications (nanoserve, Kernel lab, minitrain, kvroute,
+forge, raftkv, splat, drive-perf and the world-model research capstone) live in a section of their own and never mix
+with the plan's projects, the Internships screen's or the Library's project shelves. The data is `data/portfolio/`:
+`projects.json` (the projects, their schedule windows, milestones, done-when checks, read-first list, roles, and
+the six things every project ships), a tech doc per project in `docs/<id>.md` (the plan's template) and a full
+design in `design/<id>.yaml`. It loads as its own chunk; the plan's doc and design loaders never read it. The file is
+written against the Atlas Library file's ids, and `data/library-aliases.json` maps the 233 of them the Library holds
+under older ids. `npm run validate:data` checks it all: unique ids, 3–6 milestones adding up to `estHours`, months in
+order, https URLs, every library id resolving, a doc of 300–700 words whose milestones match the file title for
+title and hour for hour, a design that passes the full weight's checks, and ids apart from every other project's.
+
+- **Plan › Next** has a **Portfolio** row: "9 projects · building nanoserve" (or the next one). **Library › Browse
+  all** has a Portfolio tile beside Projects, and a search lists matching projects in a **Portfolio** group.
+- **`#/portfolio`**: the milestones done and the projects building; the focus note and the days to the application
+  date; a timeline from the first window to the last, a row per project (a tap on a bar says what the window is
+  for; a line marks today, a diamond the application date); a card per project with its number, title, what it
+  proves, stack, window, status (a tap moves it on: later, next, building, done), progress by milestone hours and
+  **Core for 2027** on Projects 1, 2 and 5. A project past its last window by more than half of it shows the
+  overrun rule.
+- **`#/portfolio/<id>`**: **Log time** and **Start timer**, and three sections. **Overview**: the summary, why it
+  stands out, the stack and window, the hardware note, the roles (the posting linked where there is one), the
+  milestones and done-when checks (all ticked offers **Mark done**), Read first as Library rows that open their
+  sheet, and "Also in Atlas" links. **Tech doc**: the doc and its diagram, the milestone checkboxes the same ticks as
+  Overview's, and the full doc in Claude. **Ship**: the six things to ship, the habits, the GitHub repository and
+  notes.
+- Time logged to a portfolio project counts toward the day's hours and the streak like any study time, shows as
+  "Portfolio · <code>" in the day's log and under **Portfolio time** in Stats, and never moves a lane's pace,
+  balance or forecast.
+- Progress is the `portfolio` table, by the file's ids: in every backup, and synced as `portfolio/<id>.json`; the
+  file is never written.
+
 ## Illustrations
 
 Calm ink-wash landscapes sit in a few places and nowhere else: Today's header (the picture follows the hour, or

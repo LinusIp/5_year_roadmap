@@ -11,6 +11,9 @@ import { daysBetween, monthName } from '../../lib/dates.ts';
 import type { Goal, Unit } from '../../seed/schema.ts';
 import { goalStatus } from '../../lib/goals.ts';
 import { useInternSummaries } from '../../hooks/useInternships.ts';
+import { usePortfolio } from '../../hooks/usePortfolio.ts';
+import { usePortfolioStates } from '../../db/portfolio.ts';
+import { planRowMeta } from '../../lib/portfolio.ts';
 import { daysToApply, roleName } from '../../lib/internships.ts';
 import { today } from '../../lib/dates.ts';
 import { longDate, plural } from '../parts/text.ts';
@@ -248,6 +251,9 @@ export function Timeline({
     </div>
   );
   const internships = useInternSummaries(today()) ?? [];
+  // The portfolio (ATLAS-PORTFOLIO): one row next to Internships, its own section; nothing of it joins the lanes.
+  const portfolio = usePortfolio();
+  const portfolioStates = usePortfolioStates();
   const index = model.findIndex((m) => m.phase.id === currentId);
   const current = index >= 0 ? model[index] : undefined;
   const earlier = index >= 0 ? model.slice(0, index) : model.filter((m) => m.phase.end < (atlas.seed.phases[0]?.start ?? ''));
@@ -315,7 +321,7 @@ export function Timeline({
           {phaseRows(earlier)}
         </RowList>
       )}
-      {(later.length > 0 || internships.length > 0) && (
+      {(later.length > 0 || internships.length > 0 || portfolio) && (
         <RowList flat label="Next">
           {/* Internships (INTERNSHIPS): a row per goal, with the next application and its gate. */}
           {internships.map((g) => (
@@ -328,6 +334,16 @@ export function Timeline({
               to={'/internships?goal=' + g.goal.goal.id}
             />
           ))}
+          {portfolio && portfolioStates && (
+            <Row
+              key="portfolio"
+              title="Portfolio"
+              meta={planRowMeta(portfolio.projects, portfolioStates, today())}
+              icon={<IconTile icon="trophy" tone="ice" />}
+              chevron
+              to="/portfolio"
+            />
+          )}
           {phaseRows(later)}
         </RowList>
       )}

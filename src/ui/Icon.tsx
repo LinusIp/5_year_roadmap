@@ -5,6 +5,7 @@ import {
   Image,
   Pin,
   Star,
+  Trophy,
   ArrowDown,
   ArrowUp,
   BookOpen,
@@ -156,6 +157,7 @@ const LUCIDE = {
   headphones: Headphones,
   pin: Pin,
   star: Star,
+  trophy: Trophy,
 } satisfies Record<string, Glyph>;
 
 export type IconName = keyof typeof LUCIDE;

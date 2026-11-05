@@ -1,0 +1,97 @@
+overview: >-
+  A benchmark repo where every kernel exists in three versions, plain CUDA, Triton and CuTe, and every claim is a row
+  in one results file. One harness checks each kernel against PyTorch, times it with CUDA events after a warm-up and
+  an L2 flush, and records its speed next to a baseline: cuBLAS for GEMMs, PyTorch SDPA for attention and a plain copy
+  kernel for memory-bound work. Nsight Compute explains each optimisation step, and the README is rebuilt from the
+  results.
+learn:
+  - name: Tiling and memory coalescing
+    ref: siboehm-cuda-matmul
+  - name: The CUDA memory hierarchy
+    ref: book-pmpp-4e
+  - name: CuTe layouts and MMA atoms
+    ref: docs-cute-cpp
+  - name: Triton block programming
+    ref: triton-tutorials
+  - name: The roofline model
+    ref: paper-roofline
+  - name: Reading Nsight Compute reports
+    ref: docs-nsight-compute-profiling-guide
+stats:
+  - value: "≥ 80%"
+    label: of cuBLAS for FP16 GEMM at 4096³
+  - value: "≥ 85%"
+    label: of copy-kernel bandwidth for memory-bound kernels
+components:
+  - id: kernels
+    name: Kernel sources
+    role: Keeps every optimisation step as its own file in CUDA, Triton and CuTe.
+    tech: CUDA C++ · Triton · CuTe
+    talksTo: [build]
+    kind: core
+  - id: build
+    name: Build
+    role: Compiles the CUDA and CuTe kernels for each architecture and exposes them to Python.
+    tech: CMake · nvcc · nanobind
+    talksTo: [harness]
+    kind: core
+  - id: baselines
+    name: Baselines
+    role: Give the reference outputs and the times to beat.
+    tech: PyTorch · cuBLAS · SDPA
+    talksTo: [harness]
+    kind: external
+  - id: harness
+    name: Harness
+    role: Checks each kernel against PyTorch, flushes L2, warms up and times it with CUDA events.
+    tech: Python · PyTorch
+    talksTo: [results, nsight]
+    kind: core
+  - id: results
+    name: Results CSV
+    role: Holds one row per kernel, shape and run, with the GPU and its clock.
+    tech: CSV
+    talksTo: [report]
+    kind: core
+  - id: nsight
+    name: Nsight Compute
+    role: Profiles one shape on demand to explain what a step changed.
+    tech: ncu · NVTX
+    talksTo: [report]
+    kind: offline
+  - id: report
+    name: Charts and README
+    role: Rebuilds the tables, the roofline chart and the percentages from the CSV.
+    tech: pandas · matplotlib
+    talksTo: []
+    kind: core
+flow:
+  - component: kernels
+    text: "A new optimisation step lands as its own file, for example `06_warptile.cu`."
+  - component: build
+    text: "The build compiles it for each target GPU into the **nanobind** module."
+  - component: harness
+    text: "The harness checks it against PyTorch on random and odd shapes, then times it after a warm-up and an **L2 flush**."
+  - component: results
+    text: "Each run becomes one row with its time, `tflops`, `gbps` and its **percentage of the baseline**."
+  - component: report
+    text: "The README tables and the roofline chart are regenerated from the CSV, never typed by hand."
+interface:
+  lang: python
+  code: |-
+    @register("gemm_fp16", impl="cute_pipelined", ref=torch.matmul, baseline="cublas")
+    def gemm_fp16_cute(a: Tensor, b: Tensor) -> Tensor:
+        return kl.gemm_fp16_cute(a, b)   # the nanobind binding
+decisions:
+  - choice: CUDA events, warm-up runs and an L2 flush, median of 100 runs
+    instead: Wall-clock time around one call
+    why: Launches are asynchronous, and a warm L2 flatters small shapes.
+  - choice: Every step kept as its own file and row
+    instead: One kernel overwritten as it improves
+    why: The step-by-step table is the portfolio piece.
+  - choice: Separate tensor-core paths per architecture
+    instead: One kernel for every GPU
+    why: TMA and wgmma exist only on Hopper and tcgen05 only on B200, and GB10 has neither.
+watchOut: >-
+  Nsight Compute locks the GPU clocks to base by default, so its durations never match the harness. Use it to explain
+  a step, and take every number in the README from the harness.

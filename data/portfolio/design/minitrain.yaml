@@ -1,0 +1,105 @@
+overview: >-
+  A training framework that splits a GPT model across GPUs three ways at once. Data parallel gives each replica its
+  own share of every batch and averages the gradients; tensor parallel splits each layer's weight matrices between
+  GPUs that all-reduce inside the layer; pipeline parallel gives each stage a block of layers and passes activations
+  forward and gradients back between stages. ZeRO adds sharding: the replicas split the optimiser state, then the
+  gradients and finally the parameters, so memory per GPU falls as GPUs are added.
+learn:
+  - name: Data, tensor and pipeline parallelism
+    ref: ultrascale-playbook
+  - name: ZeRO sharding
+    ref: paper-zero
+  - name: Megatron tensor parallelism
+    ref: paper-megatron-lm
+  - name: Pipeline schedules
+    ref: paper-gpipe
+  - name: Collectives and NCCL
+    ref: docs-nccl
+  - name: Scaling arithmetic
+    ref: scaling-book
+stats:
+  - value: "≥ 85%"
+    label: data-parallel weak scaling from 1 to 8 GPUs
+  - value: "125M–1B"
+    label: GPT sizes trained
+  - value: "11%"
+    label: pipeline bubble at 2 stages and 8 micro-batches
+components:
+  - id: launcher
+    name: Launcher
+    role: Starts one process per GPU across the nodes with the same parallel plan.
+    tech: torchrun
+    talksTo: [mesh]
+    kind: core
+  - id: mesh
+    name: Mesh
+    role: Maps each rank to its pipeline stage, replica and tensor rank, and builds the process groups.
+    tech: torch.distributed
+    talksTo: [pipeline]
+    kind: core
+  - id: data
+    name: Data shards
+    role: Serves pre-tokenised shards with a deterministic sampler per replica.
+    tech: NumPy memmap
+    talksTo: [pipeline]
+    kind: external
+  - id: pipeline
+    name: Pipeline schedule
+    role: Runs micro-batches through the stages in 1F1B order, sending activations forward and gradients back.
+    tech: NCCL send and recv
+    talksTo: [tp]
+    kind: core
+  - id: tp
+    name: Tensor-parallel layers
+    role: Split each layer's weights and all-reduce inside attention and the MLP.
+    tech: autograd Functions · NCCL
+    talksTo: [dp]
+    kind: core
+  - id: dp
+    name: Data parallel and ZeRO
+    role: All-reduces gradient buckets during backward and shards the optimiser state, gradients and parameters.
+    tech: all_reduce · reduce_scatter · all_gather
+    talksTo: [ckpt]
+    kind: core
+  - id: ckpt
+    name: Checkpoints
+    role: Saves and restores the sharded state, the RNG state and the data position.
+    tech: torch.distributed.checkpoint
+    talksTo: []
+    kind: offline
+flow:
+  - component: launcher
+    text: "torchrun starts **8 processes**, one per GPU, each with the same `ParallelPlan`."
+  - component: mesh
+    text: "Each process learns its coordinates: GPU 5, for example, is stage 1, replica 0, tensor rank 1."
+  - component: pipeline
+    text: "Micro-batches enter stage 0 and move forward in **1F1B** order while earlier ones flow back."
+  - component: tp
+    text: "Inside every layer, the two tensor-parallel ranks multiply their halves of the weights and **all-reduce** the result."
+  - component: dp
+    text: "As backward finishes each bucket of gradients, the replicas average it while the rest of backward runs."
+  - component: dp
+    text: "The optimiser steps on each rank's **shard** of the state under ZeRO."
+interface:
+  lang: python
+  code: |-
+    @dataclass(frozen=True)
+    class ParallelPlan:
+        dp: int = 2              # data-parallel replicas
+        tp: int = 2              # tensor-parallel GPUs per stage
+        pp: int = 2              # pipeline stages
+        zero: int = 1            # 0 = plain data parallel, 1-3 = ZeRO stage
+        micro_batches: int = 8
+decisions:
+  - choice: Raw collectives written by hand
+    instead: DDP, FSDP or DeepSpeed wrappers
+    why: Writing what they do is the project; they stay as references for correctness and speed.
+  - choice: A 1F1B pipeline schedule
+    instead: GPipe, with all forwards before all backwards
+    why: Same bubble, but each stage holds at most p micro-batches of activations instead of all m.
+  - choice: Tensor parallel inside one NVLink node
+    instead: Tensor parallel across the network
+    why: It all-reduces twice per layer in each direction and needs NVLink bandwidth.
+watchOut: >-
+  A missing all-reduce in a tensor-parallel backward still trains, only worse. Test every parallel layer against the
+  unsplit layer on the same inputs before trusting any loss curve.

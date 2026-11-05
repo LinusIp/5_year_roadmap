@@ -1,0 +1,100 @@
+overview: >-
+  A router in front of many LLM workers that sends each prompt to the worker most likely to hold its prefix in the KV
+  cache, the attention state a worker keeps for tokens it has already processed. The router hashes the prompt in
+  16-token blocks, looks the hashes up in an index that the workers keep current by publishing which blocks they store
+  and evict, and weighs cache hits against each worker's load. Prefill (reading the prompt) and decode (generating
+  tokens) can run on separate pools with the KV cache moved between them, and an autoscaler adds workers when queues
+  grow.
+learn:
+  - name: Disaggregated prefill and decode
+    ref: paper-distserve
+  - name: Prefix caching with a radix tree
+    ref: paper-sglang-radixattention
+  - name: KV-cache-centric serving
+    ref: paper-mooncake
+  - name: KV-aware routing in practice
+    ref: docs-dynamo-router-design
+  - name: Async Rust services
+    ref: docs-tokio-guide
+stats:
+  - value: "≥ 2×"
+    label: prefix-cache hit rate against round-robin
+  - value: "< 1 ms"
+    label: added latency at p99
+components:
+  - id: client
+    name: Client
+    role: Sends OpenAI-compatible chat requests.
+    tech: HTTP · SSE
+    talksTo: [gateway]
+    kind: external
+  - id: gateway
+    name: Gateway
+    role: Accepts requests, assigns ids, applies admission control and streams the replies back.
+    tech: Rust · axum · tokio
+    talksTo: [router]
+    kind: core
+  - id: router
+    name: Router
+    role: Tokenises and hashes the prompt, scores every worker and retries before the first token.
+    tech: Rust · tokenizers
+    talksTo: [index, prefill]
+    kind: core
+  - id: index
+    name: Prefix index
+    role: Keeps a radix tree of block hashes and the workers that hold each one.
+    tech: Rust
+    talksTo: []
+    kind: core
+  - id: prefill
+    name: Prefill pool
+    role: Reads the prompt and builds its KV cache.
+    tech: vLLM · nanoserve
+    talksTo: [decode, index]
+    kind: core
+  - id: decode
+    name: Decode pool
+    role: Generates and streams tokens from the transferred KV cache.
+    tech: vLLM · nanoserve
+    talksTo: [gateway, index]
+    kind: core
+  - id: autoscaler
+    name: Autoscaler
+    role: Adds or removes workers in each pool from queue-depth metrics.
+    tech: KEDA · Prometheus
+    talksTo: [prefill, decode]
+    kind: offline
+flow:
+  - component: gateway
+    text: "A chat request arrives and gets an id and a **deadline**."
+  - component: router
+    text: "The router tokenises the prompt and computes the chained hash of each full **16-token block**."
+  - component: index
+    text: "The index returns, for each worker, how many leading blocks it already holds (`overlap`)."
+  - component: router
+    text: "Each worker is scored on the **blocks still to prefill** plus its decode load, and the lowest score wins."
+  - component: prefill
+    text: "The prefill worker builds the KV cache and hands it to a decode worker over **TCP or NIXL**."
+  - component: decode
+    text: "The decode worker streams the tokens back through the gateway and publishes `Stored` events to the index."
+interface:
+  lang: rust
+  code: |-
+    pub trait RoutingPolicy: Send + Sync {
+        /// `blocks`: the chained hashes of the prompt's full 16-token blocks.
+        fn pick(&self, blocks: &[BlockHash], workers: &[WorkerState], index: &PrefixIndex)
+            -> Option<WorkerId>;
+    }
+decisions:
+  - choice: The router's own chained hash over each block's token ids
+    instead: The engine's internal block hashes
+    why: Engine hashes can change between versions and may be seeded per process.
+  - choice: Cache hits weighed against load
+    instead: Pure cache affinity
+    why: Pure affinity piles every request with a hot prefix onto one worker.
+  - choice: Retries only before the first token
+    instead: Retrying any failed request
+    why: Retrying a half-streamed reply sends duplicate text.
+watchOut: >-
+  The index lags behind the workers, so treat it as a hint. A stale entry must only cost a slower prefill, never a
+  wrong answer or a stuck request.
