@@ -5101,7 +5101,7 @@
   url: "https://git-scm.com/book/en/v2"
   urlVerified: true
   lastVerified: 2026-10-20
-  tracks: [systems]
+  tracks: [devops]
   level: "intro"
   cost: "free"
   estHours: 20
@@ -5109,6 +5109,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  roadmap: "software-architect"
 
 - id: "book-princeton-bitcoin-crypto-tech"
   title: "Bitcoin and Cryptocurrency Technologies"
@@ -6821,7 +6822,7 @@
   url: "https://quantum.cloud.ibm.com/docs/en/guides"
   urlVerified: true
   lastVerified: 2026-10-20
-  tracks: [math]
+  tracks: [quantum]
   level: "intermediate"
   cost: "free"
   estHours: 10
@@ -7125,7 +7126,7 @@
   url: "https://quantum.cloud.ibm.com/learning/en/courses/basics-of-quantum-information"
   urlVerified: true
   lastVerified: 2026-10-20
-  tracks: [math]
+  tracks: [quantum]
   level: "intro"
   cost: "free"
   estHours: 15
@@ -7179,7 +7180,7 @@
   url: "https://quantum.cloud.ibm.com/learning/en/courses/fundamentals-of-quantum-algorithms"
   urlVerified: true
   lastVerified: 2026-10-20
-  tracks: [math]
+  tracks: [quantum]
   level: "intermediate"
   cost: "free"
   estHours: 15
@@ -7197,7 +7198,7 @@
   url: "https://people.eecs.berkeley.edu/~vazirani/cs191.html"
   urlVerified: true
   lastVerified: 2026-10-20
-  tracks: [math]
+  tracks: [quantum]
   level: "intermediate"
   cost: "free"
   estHours: 40
@@ -7640,7 +7641,7 @@
   urlVerified: true
   lastVerified: 2026-10-20
   linkCheck: "manual-ok"
-  tracks: [math]
+  tracks: [quantum]
   level: "advanced"
   cost: "free"
   estHours: 50
@@ -7730,7 +7731,7 @@
   url: "http://theory.caltech.edu/~preskill/ph219/"
   urlVerified: true
   lastVerified: 2026-10-20
-  tracks: [math]
+  tracks: [quantum]
   level: "advanced"
   cost: "free"
   estHours: 60
@@ -7802,7 +7803,7 @@
   url: "https://arxiv.org/abs/1907.09415"
   urlVerified: true
   lastVerified: 2026-10-20
-  tracks: [math]
+  tracks: [quantum]
   level: "intermediate"
   cost: "free"
   estHours: 40
@@ -7838,7 +7839,7 @@
   url: "https://quantum.country/"
   urlVerified: true
   lastVerified: 2026-10-20
-  tracks: [math]
+  tracks: [quantum]
   level: "intro"
   cost: "free"
   estHours: 10

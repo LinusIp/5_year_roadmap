@@ -53,8 +53,9 @@ describe('the grades', () => {
 describe('the rows the pass dropped', () => {
   it('are gone, except the one on the plan, and nothing comes after one', () => {
     const ids = new Set([...raw.resources, ...raw.papers].map((r) => r.id));
-    // 16,422 after the quality pass, 7,650 after the "four stars and up" pass (7,640 rows), 7,691 after the upgrade pass.
-    expect(raw.resources.length).toBeLessThan(7_700);
+    // 16,422 after the quality pass, 7,650 after the "four stars and up" pass (7,640 rows), 7,691 after the upgrade pass,
+    // 7,751 after the coverage pass.
+    expect(raw.resources.length).toBeLessThan(7_800);
     expect(raw.resources.length).toBeGreaterThan(7_600);
     // 30 Days of Python was graded 1 or 2, but it is on the plan (phase y1-p0, lane B) with its units and its certificate.
     expect(ids.has('30-days-of-python')).toBe(true);
@@ -110,5 +111,23 @@ describe('the category refill and the upgrade pass (7,679 rows)', () => {
     expect(cswp?.doFirst).toBe('SOLIDWORKS CSWA');
     const graded = [...raw.resources, ...raw.papers].filter((r) => r.quality !== undefined);
     expect(graded.filter((r) => r.quality! >= 4).length / graded.length).toBeGreaterThan(0.95);
+  });
+});
+
+describe('the coverage pass (7,740 rows)', () => {
+  it('adds the thin cells’ rows, moves rows to their track and type in place, and leaves the curated rows as they are', () => {
+    const byId = new Map(raw.resources.map((r) => [r.id, r]));
+    for (const id of ['course-cs50-2d-game-development', 'blog-factorio-friday-facts', 'book-kubernetes-up-and-running-3e', 'video-tudelft-building-blocks-quantum-computer-1', 'blog-everyday-astronaut', 'blog-cern-courier', 'tutorial-mujoco-python-colab', 'book-immersive-linear-algebra']) expect(byId.has(id), id).toBe(true);
+    // Seeing Theory was in the Library already, by its URL: no second row.
+    expect(byId.has('tutorial-seeing-theory')).toBe(false);
+    expect(byId.has('seeing-theory')).toBe(true);
+    // Nine quantum-computing rows to quantum, MIT 22.01 to engineering, Pro Git and Accelerate to DevOps.
+    for (const id of ['quantum-country', 'docs-qiskit', 'preskill-ph219-quantum-computation', 'notes-aaronson-democritus']) expect(byId.get(id)?.tracks, id).toEqual(['quantum']);
+    expect(byId.get('course-mit-22-01-nuclear-eng')?.tracks).toEqual(['engineering']);
+    expect(byId.get('book-pro-git')?.tracks).toEqual(['devops']);
+    expect(byId.get('book-accelerate')?.tracks).toEqual(['devops']);
+    expect(byId.get('paper-cg-without-agonizing-pain')?.type).toBe('article');
+    // The plan's own Missing Semester keeps its curated track: the file's DevOps row merged into it.
+    expect(byId.get('missing-semester')?.tracks).toEqual(['swe']);
   });
 });

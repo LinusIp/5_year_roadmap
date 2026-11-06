@@ -160,8 +160,8 @@
   summary: "Interactive visual introduction to probability and statistics."
   short: "Seeing Theory"
   fromYear: 1
-  priority: 3
-  quality: 3
+  priority: 2
+  quality: 4
 
 - id: openstax-university-physics
   title: "OpenStax University Physics, volumes 1-3"

@@ -829,7 +829,7 @@
   url: "https://itrevolution.com/product/accelerate/"
   urlVerified: true
   lastVerified: 2026-10-21
-  tracks: [architecture]
+  tracks: [devops]
   level: "intermediate"
   cost: "paid"
   estHours: 7
@@ -839,6 +839,7 @@
   roadmap: "software-architect"
   note: "Paid"
   quality: 5
+  doFirst: "The Phoenix Project"
 
 - id: "book-high-output-management"
   title: "High Output Management"

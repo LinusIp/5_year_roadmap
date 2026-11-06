@@ -885,6 +885,7 @@
   roadmap: "ai-agents"
   note: "Paid"
   quality: 2
+  doFirst: "AWS AI Practitioner"
 
 - id: "cert-nvidia-ncp-aai"
   title: "NVIDIA-Certified Professional: Agentic AI (NCP-AAI)"
@@ -1783,6 +1784,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "WTD: Beginner's Guide"
 
 - id: "video-oauth-oidc-plain-english"
   title: "OAuth 2.0 and OpenID Connect (in plain English)"
@@ -2105,6 +2107,7 @@
   roadmap: "software-architect"
   note: "Paid"
   quality: 4
+  doFirst: "BBG: Zero to Millions"
 
 - id: "site-speaking-io"
   title: "speaking.io: Tips for Public Speaking"
@@ -2526,6 +2529,7 @@
   priority: 3
   roadmap: "software-architect"
   quality: 3
+  doFirst: "WTD: Beginner's Guide"
 
 - id: "article-jvns-confusing-explanations"
   title: "Patterns in confusing explanations"
@@ -2743,6 +2747,7 @@
   priority: 3
   roadmap: "software-architect"
   quality: 3
+  doFirst: "GitHub: Fork a repo"
 
 - id: "docs-developer-certificate-of-origin"
   title: "Developer Certificate of Origin"
@@ -2874,6 +2879,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "GitHub: Fork a repo"
 
 - id: "prometheus-instrumentation-practices"
   title: "Instrumentation (Prometheus best practices)"
@@ -2968,6 +2974,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "GitHub: Fork a repo"
 
 - id: "docs-pytorch-wiki-ultimate-guide"
   title: "The Ultimate Guide to PyTorch Contributions (PyTorch wiki)"
@@ -3005,6 +3012,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "GitHub: Fork a repo"
 
 - id: "docs-vllm-incremental-build"
   title: "vLLM Incremental Compilation Workflow"
@@ -3042,6 +3050,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "GitHub: Fork a repo"
 
 - id: "docs-llamacpp-contributing"
   title: "llama.cpp CONTRIBUTING.md"
@@ -3060,6 +3069,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 4
+  doFirst: "GitHub: Fork a repo"
 
 - id: "docs-triton-contributing"
   title: "Triton CONTRIBUTING.md (governance and contribution rules)"
@@ -3078,6 +3088,7 @@
   priority: 2
   roadmap: "software-architect"
   quality: 3
+  doFirst: "GitHub: Fork a repo"
 
 - id: "docs-tensorrt-llm-contributing"
   title: "TensorRT-LLM Contribution Rules"
@@ -3115,6 +3126,7 @@
   priority: 3
   roadmap: "software-architect"
   quality: 2
+  doFirst: "GitHub: Fork a repo"
 
 - id: "w3c-trace-context"
   title: "Trace Context (W3C Recommendation)"
@@ -3191,6 +3203,7 @@
   roadmap: "software-architect"
   note: "Paid"
   quality: 4
+  doFirst: "KCNA"
 
 - id: "cert-lf-ckad"
   title: "Certified Kubernetes Application Developer (CKAD)"
@@ -3210,6 +3223,7 @@
   roadmap: "ai-engineer"
   note: "Paid"
   quality: 3
+  doFirst: "KCNA"
 
 - id: "cert-lf-kcsa"
   title: "Kubernetes and Cloud Native Security Associate (KCSA)"
@@ -3229,6 +3243,7 @@
   roadmap: "software-architect"
   note: "Paid"
   quality: 1
+  doFirst: "KCNA"
 
 - id: "cert-lf-pca"
   title: "Prometheus Certified Associate (PCA)"
@@ -3248,6 +3263,7 @@
   roadmap: "software-architect"
   note: "Paid"
   quality: 2
+  doFirst: "KCNA"
 
 - id: "cert-aws-ml-engineer-associate"
   title: "AWS Certified Machine Learning Engineer - Associate"
@@ -3458,6 +3474,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "Yoyo Pinyin Chart"
 
 - id: "docs-allset-chinese-grammar-wiki"
   title: "Chinese Grammar Wiki"
@@ -3739,6 +3756,7 @@
   fromYear: 1
   priority: 2
   quality: 4
+  doFirst: "HC: Beginner Pronunciation"
 
 - id: "article-china-briefing-996-work-culture"
   title: "The 996 Work Culture That's Causing a Burnout in China's Tech World"

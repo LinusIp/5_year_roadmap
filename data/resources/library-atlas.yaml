@@ -13232,7 +13232,7 @@
   url: "https://www.scottaaronson.com/democritus/"
   urlVerified: true
   lastVerified: 2026-10-19
-  tracks: [systems]
+  tracks: [quantum]
   level: "intermediate"
   cost: "free"
   estHours: 30
@@ -17554,7 +17554,7 @@
   title: "An Introduction to the Conjugate Gradient Method Without the Agonizing Pain"
   short: "Painless CG"
   provider: "Jonathan Richard Shewchuk"
-  type: "paper"
+  type: "article"
   url: "https://pages.stat.wisc.edu/~bwu62/771/shewchuk1994.pdf"
   urlVerified: true
   lastVerified: 2026-10-19

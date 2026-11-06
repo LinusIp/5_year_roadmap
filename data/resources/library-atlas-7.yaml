@@ -1589,7 +1589,7 @@
   level: "intermediate"
   cost: "free"
   estHours: 40
-  summary: "De Weck's full lecture course on stakeholder analysis, requirements, concept generation, tradespace exploration, V&V and lifecycle management, with videos and design assignments."
+  summary: "De Weck's full MIT Aero/Astro lecture course on aerospace systems engineering: stakeholder analysis, requirements, concept generation, tradespace exploration, V&V and lifecycle management, with videos and design assignments."
   fromYear: 2
   priority: 2
   after: [book-nasa-systems-engineering-handbook]
@@ -3572,7 +3572,7 @@
   level: "intro"
   cost: "free"
   estHours: 20
-  summary: "Step-by-step Ansys tutorials (beams, plates, trusses, thermal) each paired with hand calculations to check the answer."
+  summary: "Step-by-step Ansys finite element tutorials (beams, plates, trusses, thermal), each paired with hand calculations to check the answer."
   fromYear: 1
   priority: 2
   quality: 4
@@ -3589,7 +3589,7 @@
   level: "intro"
   cost: "free"
   estHours: 6
-  summary: "Opening lesson of BYU's free compliant mechanism design series on flexures, pseudo-rigid-body models and more."
+  summary: "Opening lesson of BYU's free compliant mechanism design series: mechanical design with flexures, pseudo-rigid-body models and more."
   fromYear: 1
   priority: 2
   quality: 4
@@ -3764,7 +3764,7 @@
   level: "intermediate"
   cost: "free"
   estHours: 15
-  summary: "Worked ElmerGUI cases from heat conduction and linear elasticity to coupled thermal-structural and electrostatics."
+  summary: "Worked ElmerGUI finite element cases, from heat conduction and linear elasticity to coupled thermal-structural and electrostatics."
   fromYear: 2
   priority: 2
   quality: 4
@@ -3782,7 +3782,7 @@
   level: "intermediate"
   cost: "free"
   estHours: 8
-  summary: "Community-standard calibration sequence for FDM printers that also debunks common tuning myths."
+  summary: "Community-standard calibration sequence for FDM 3D printers that also debunks common tuning myths."
   fromYear: 2
   priority: 2
   after: [docs-prusa-knowledge-base]
@@ -5458,7 +5458,7 @@
   level: "intro"
   cost: "free"
   estHours: 2
-  summary: "Interactive essay that makes the torque-speed trade and the involute tooth profile click visually."
+  summary: "Interactive essay that makes the mechanical torque-speed trade and the involute tooth profile click visually."
   fromYear: 1
   priority: 1
   quality: 5
@@ -5725,7 +5725,7 @@
   level: "advanced"
   cost: "free"
   estHours: 8
-  summary: "Hutchinson's lecture notes on delamination and cracking in coatings and multilayers, a standard reference."
+  summary: "Hutchinson's lecture notes on the fracture mechanics of thin films and multilayers: delamination and cracking in coatings and other layered materials, a standard reference."
   fromYear: 3
   priority: 2
   doFirst: "MIT 3.35"
@@ -5761,7 +5761,7 @@
   level: "intermediate"
   cost: "free"
   estHours: 30
-  summary: "Over 100 short Q&A articles answering practical experimental modal analysis questions in plain language."
+  summary: "Over 100 short Q&A articles answering practical experimental modal analysis and vibration questions in plain language."
   fromYear: 2
   priority: 2
   blog: true

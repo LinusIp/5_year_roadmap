@@ -1408,3 +1408,11 @@ Verified on this machine (Linux, Chromium 140):
 - Tests: `tests/unit/portfolio.test.ts`, `tests/e2e/portfolio.spec.ts`; screenshots of the screen, a project and
   Plan's row.
 
+## Pull request #55: the Atlas Library's coverage pass
+
+- The 7,740-row file: 60 rows added (`library-atlas-18.yaml`), Seeing Theory merged into the Library's row, 22 rows
+  moved to their track or type or reworded in place (the Missing Semester, curated, kept its track); 7 regraded.
+  Resources: 7,691 to 7,751 (`docs/imports-atlas-library-18.md`, with the coverage table: every track has at least
+  three 4–5★ rows of every type; four Engineering chips have fewer than three blogs).
+- Tests: `tests/unit/quality-pass.test.ts`. Screenshots redrawn on CI.
+

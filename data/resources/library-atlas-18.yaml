@@ -1,0 +1,1121 @@
+# The Atlas Library's eleventh file (ATLAS-LIBRARY, 15,961 rows): the rows the first ten files did not have, the plan
+# gap fill: inference-stack depth (TensorRT-LLM, Dynamo, Triton Inference Server, PyTorch internals), interview prep,
+# research skills, diffusion inference and hands-on image generation, video and 3D generation tooling, communication
+# (public speaking, pitching and fundraising, technical writing, blogging), open-source contribution, Mandarin basics,
+# certificates (ids `cert-…`, a Certificate badge and an Earned toggle) and backend auth, observability and testing.
+# Papers, articles, docs, practice, books, blogs and courses, each link checked when it was added (October 2026), each
+# with its priority for years 1 to 3, the roadmap.sh roadmap it serves and its year 3 research area; a paid row says so
+# (`cost: paid`, `note: Paid`). None is on the plan: they sit on their shelves, in search, under "Optional for this path"
+# and in the Research view. Generated from atlas-resources.jsonl by scratch/import-atlas.ts; rows the Library already
+# had only filled in what their entries were missing, or took the file's corrections.
+
+# ---- DevOps and MLOps (8)
+
+- id: "video-google-sre-measuring-managing-reliability"
+  title: "Site Reliability Engineering: Measuring and Managing Reliability"
+  short: "SRE: Measuring Reliability"
+  provider: "Google Cloud Training"
+  type: "lectures"
+  url: "https://www.cloudskillsboost.google/course_templates/59"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "Google's own video course on choosing SLIs, setting SLOs and running error budgets through a worked example, giving you a repeatable way to set reliability targets for any service you operate."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  after: [google-sre-book]
+
+- id: "video-geerling-ansible-101"
+  title: "Ansible 101 with Jeff Geerling"
+  short: "Ansible 101"
+  provider: "Jeff Geerling"
+  type: "lectures"
+  url: "https://www.jeffgeerling.com/blog/2020/ansible-101-jeff-geerling-youtube-streaming-series/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 16
+  summary: "Fifteen hour-long episodes by the author of Ansible for DevOps that go from ad-hoc commands and inventories to roles, Vault, Molecule tests and CI, a practical way to learn configuration management on real servers."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  after: [the-linux-command-line]
+
+- id: "course-helsinki-devops-with-docker"
+  title: "DevOps with Docker"
+  short: "DevOps with Docker"
+  provider: "University of Helsinki (MOOC.fi)"
+  type: "course"
+  url: "https://devopswithdocker.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intro"
+  cost: "free"
+  estHours: 40
+  summary: "A free university MOOC in which you containerize real projects, wire multi-service apps with Compose, then shrink and harden images and automate deployment, with exercises at every step."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+  after: [missing-semester]
+
+- id: "course-helsinki-devops-with-kubernetes"
+  title: "DevOps with Kubernetes"
+  short: "DevOps with Kubernetes"
+  provider: "University of Helsinki (MOOC.fi)"
+  type: "course"
+  url: "https://devopswithkubernetes.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "free"
+  estHours: 100
+  summary: "You build and run a microservice app on k3s and then Google Kubernetes Engine, covering networking, storage, monitoring, GitOps, service meshes and custom resources, so Kubernetes becomes something you have operated rather than read about."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  after: [course-helsinki-devops-with-docker]
+
+- id: "book-kubernetes-up-and-running-3e"
+  title: "Kubernetes: Up and Running: Dive into the Future of Infrastructure (3rd ed.)"
+  short: "Kubernetes: Up & Running"
+  provider: "Brendan Burns, Joe Beda, Kelsey Hightower, Lachlan Evenson (O'Reilly, 2022)"
+  type: "book"
+  url: "https://www.oreilly.com/library/view/kubernetes-up-and/9781098110192/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intro"
+  cost: "paid"
+  estHours: 10
+  summary: "Kubernetes' co-creators take you from container images to Pods, Deployments, Services, storage and access control, the working base you need before running model servers on a cluster."
+  fromYear: 1
+  priority: 1
+  quality: 5
+  roadmap: "ai-engineer"
+  note: "Paid"
+  after: [course-helsinki-devops-with-docker]
+
+- id: "book-devops-handbook-2e"
+  title: "The DevOps Handbook: How to Create World-Class Agility, Reliability, & Security in Technology Organizations (2nd ed.)"
+  short: "The DevOps Handbook"
+  provider: "Gene Kim, Jez Humble, Patrick Debois, John Willis, Nicole Forsgren (IT Revolution, 2021)"
+  type: "book"
+  url: "https://itrevolution.com/product/the-devops-handbook-second-edition/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 14
+  summary: "Turns the ideas behind Continuous Delivery into concrete practices (deployment pipelines, telemetry, small batches, blameless post-incident learning) backed by case studies from teams that adopted them."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "ai-engineer"
+  note: "Paid"
+  after: [book-continuous-delivery-humble-farley]
+
+- id: "book-infrastructure-as-code-3e"
+  title: "Infrastructure as Code: Designing and Delivering Dynamic Systems for the Cloud Age (3rd ed.)"
+  short: "Infrastructure as Code"
+  provider: "Kief Morris (O'Reilly, 2025)"
+  type: "book"
+  url: "https://www.oreilly.com/library/view/-/9781098150341/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 13
+  summary: "Tool-agnostic patterns for structuring, testing and delivering infrastructure code as stacks, environments and pipelines, so your Terraform or Pulumi setup stays maintainable as the system grows."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  note: "Paid"
+  after: [terraform-tutorials]
+
+- id: "book-observability-engineering"
+  title: "Observability Engineering: Achieving Production Excellence"
+  short: "Observability Engineering"
+  provider: "Charity Majors, Liz Fong-Jones, George Miranda (O'Reilly, 2022)"
+  type: "book"
+  url: "https://www.oreilly.com/library/view/observability-engineering/9781492076438/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [devops]
+  level: "intermediate"
+  cost: "paid"
+  estHours: 10
+  summary: "Shows how wide structured events, distributed tracing and SLO-based alerting let you debug production by asking new questions, which is how you track down tail-latency problems in an inference service."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "software-architect"
+  note: "Paid"
+  after: [article-majors-logs-vs-structured-events]
+
+# ---- Simulation (3)
+
+- id: "article-trefethen-numerical-analysis"
+  title: "Numerical Analysis (The Princeton Companion to Mathematics, IV.21)"
+  short: "Trefethen's NA essay"
+  provider: "Lloyd N. Trefethen"
+  type: "article"
+  url: "https://people.maths.ox.ac.uk/trefethen/NAessay.pdf"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [simulation]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "In about eleven pages Trefethen maps the whole field (rounding and floating point, numerical linear algebra and Krylov methods, ODE and PDE discretization with stability, convergence and the Lax equivalence theorem, and optimization), so you can see where each solver in a simulation stack comes from."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+
+- id: "article-moler-stiff-differential-equations"
+  title: "Stiff Differential Equations"
+  short: "Moler: Stiff ODEs"
+  provider: "Cleve Moler (MathWorks, 2003)"
+  type: "article"
+  url: "https://www.mathworks.com/company/technical-articles/stiff-differential-equations.html"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [simulation]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "MATLAB's creator uses a one-line flame-propagation model to show what stiffness is, why an explicit solver like ode45 needs thousands of steps near steady state, and why an implicit stiff solver such as ode23s gets by with about a hundred."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  after: [mit-18-03]
+
+- id: "article-johnson-notes-on-pml"
+  title: "Notes on Perfectly Matched Layers (PMLs)"
+  short: "Johnson: PML Notes"
+  provider: "Steven G. Johnson (MIT)"
+  type: "article"
+  url: "https://arxiv.org/abs/2108.05348"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [simulation]
+  level: "advanced"
+  cost: "free"
+  estHours: 3
+  summary: "Johnson's notes from MIT 18.369 and 18.336 derive perfectly matched layers by complex coordinate stretching and are candid about their limits, which is what you need to stop artificial reflections at the edges of a wave-equation simulation."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  after: [mit-18-085]
+
+# ---- Robotics (5)
+
+- id: "tutorial-mujoco-python-colab"
+  title: "MuJoCo Python tutorial notebook"
+  short: "MuJoCo Python Tutorial"
+  provider: "Google DeepMind (MuJoCo)"
+  type: "article"
+  url: "https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [robotics]
+  level: "intro"
+  cost: "free"
+  estHours: 3
+  summary: "The official runnable notebook for MJCF models, stepping, rendering, contacts, actuators and sensors in the browser, the fastest hands-on route into the simulator behind much of today's robot-learning research."
+  fromYear: 1
+  priority: 1
+  quality: 5
+
+- id: "tutorial-gazebo-simulation-tutorials"
+  title: "Gazebo Simulation Tutorials"
+  short: "Gazebo Tutorials"
+  provider: "Open Robotics (Gazebo)"
+  type: "article"
+  url: "https://gazebosim.org/docs/latest/tutorials/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [robotics]
+  level: "intro"
+  cost: "free"
+  estHours: 6
+  summary: "Official step-by-step guides for the standard ROS simulator: build a robot in SDF, drive it, add sensors and actors, and spawn URDF models, the groundwork for testing a ROS 2 stack before touching hardware."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  after: [ros2-tutorials]
+
+- id: "article-brooks-humanoids-wont-learn-dexterity"
+  title: "Why Today's Humanoids Won't Learn Dexterity"
+  short: "Brooks: Humanoid Dexterity"
+  provider: "Rodney Brooks"
+  type: "article"
+  url: "https://rodneybrooks.com/why-todays-humanoids-wont-learn-dexterity/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [robotics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "The iRobot and Rethink co-founder argues that video and teleoperation data leave out the touch and force sensing that hands depend on, a sharp reality check on what humanoid manipulation research still needs."
+  fromYear: 2
+  priority: 2
+  quality: 4
+
+- id: "article-levine-understanding-world-through-action"
+  title: "Understanding the World Through Action: RL as a Foundation for Scalable Self-Supervised Learning"
+  short: "Levine: World Through Action"
+  provider: "Sergey Levine"
+  type: "article"
+  url: "https://sergeylevine.substack.com/p/understanding-the-world-through-action-rl-as-a-foundation-for-scalable-self-supervised-learning-636e4e243001"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [robotics]
+  level: "advanced"
+  cost: "free"
+  estHours: 1
+  summary: "Levine's short case that agents trained with offline RL on large logs of their own actions, such as robot data, can learn the causal, general models that passive prediction misses, a research agenda for robot foundation models."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  after: [berkeley-cs285]
+
+- id: "blog-opticontrols-control-notes"
+  title: "Control Notes: Reflections of a Process Control Practitioner"
+  short: "Control Notes (Smuts)"
+  provider: "Jacques Smuts (OptiControls)"
+  type: "article"
+  url: "https://blog.opticontrols.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [robotics]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "A practising control engineer's long-running blog on PID forms, tuning rules, cascade and level loops and the field problems behind them, tuning sense that carries over to any feedback loop you build."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  blog: true
+  after: [wescott-pid-without-a-phd]
+
+# ---- Game development (8)
+
+- id: "course-cs50-2d-game-development"
+  title: "CS50's Introduction to 2D Game Development"
+  short: "CS50 2D Game Dev"
+  provider: "Harvard CS50 (Colton Ogden, David J. Malan)"
+  type: "course"
+  url: "https://cs50.harvard.edu/games/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 60
+  summary: "Harvard's project-a-week course has you rebuild Pong, Flappy Bird, Breakout, Match 3, Super Mario Bros., Zelda, Angry Birds and Pokémon in Lua with LÖVE, practising 2D graphics, animation, sound and collision detection before a final project of your own."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  after: [cs50x]
+
+- id: "course-mit-cms611j-creating-video-games"
+  title: "Creating Video Games (MIT CMS.611J / 6.073, Fall 2014)"
+  short: "MIT Creating Video Games"
+  provider: "MIT OpenCourseWare (Philip B. Tan, Richard Eberhardt, Sara Verrilli, Andrew Grant)"
+  type: "course"
+  url: "https://ocw.mit.edu/courses/cms-611j-creating-video-games-fall-2014/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 50
+  summary: "MIT's studio course on designing, building and testing original games in small multidisciplinary teams, with lecture videos, slides, readings and student projects that teach iteration, focus testing and data-backed design decisions."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  after: [course-cs50-2d-game-development]
+
+- id: "course-cmu-15466-computer-game-programming"
+  title: "Computer Game Programming (CMU 15-466, Fall 2024)"
+  short: "CMU 15-466 Game Prog"
+  provider: "Carnegie Mellon University (Jim McCann)"
+  type: "course"
+  url: "https://graphics.cs.cmu.edu/courses/15-466-f24/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 90
+  summary: "Jim McCann's course has you build a string of small games from (nearly) the ground up in C++ and OpenGL, with a reading schedule and example code centred on runtime systems, asset pipelines and thrifty code."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  after: [learnopengl]
+
+- id: "course-ucsd-cse169-computer-animation"
+  title: "CSE 169: Computer Animation (UC San Diego, Winter 2020)"
+  short: "UCSD CSE 169 Animation"
+  provider: "UC San Diego (Steve Rotenberg)"
+  type: "course"
+  url: "https://cseweb.ucsd.edu/classes/wi20/cse169-a/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 50
+  summary: "Steve Rotenberg's lecture slides and build-it-yourself projects walk through the character-animation core of a game engine: skeletons, skinning, inverse kinematics and cloth simulation."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  after: [learnopengl]
+
+- id: "tutorial-lazyfoo-sdl"
+  title: "Lazy Foo' Productions: Beginning Game Programming v2.0 (SDL2 tutorials)"
+  short: "Lazy Foo' SDL Tutorials"
+  provider: "Lazy Foo' Productions"
+  type: "article"
+  url: "https://lazyfoo.net/tutorials/SDL/index.php"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "intro"
+  cost: "free"
+  estHours: 40
+  summary: "The long-running 55-lesson C++ and SDL2 series that goes from opening a window to textures, sprite sheets, input, timing and frame rate, collision, scrolling, tiling, particles, threading and OpenGL, with an SDL3 rewrite (v3.0) under way."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  doFirst: "Learn C++"
+
+- id: "tutorial-looman-unreal-cpp-guide"
+  title: "Unreal Engine C++ Complete Guide"
+  short: "Unreal C++ Guide (Looman)"
+  provider: "Tom Looman"
+  type: "article"
+  url: "https://www.tomlooman.com/unreal-engine-cpp-guide/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 6
+  summary: "A long, regularly updated guide to writing C++ the Unreal way (UPROPERTY/UFUNCTION reflection, TObjectPtr, casting, interfaces, delegates, modules and garbage collection) that works as the practical companion to Epic's reference docs."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  doFirst: "Learn C++"
+
+- id: "blog-factorio-friday-facts"
+  title: "Factorio Friday Facts (dev blog)"
+  short: "Factorio Friday Facts"
+  provider: "Wube Software"
+  type: "article"
+  url: "https://factorio.com/blog/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Wube's weekly developer blog, now past 440 posts, where the engineers explain how they keep a huge deterministic simulation fast and in sync: belts, fluids, pathfinding, multiplayer determinism and performance rewrites."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  blog: true
+
+- id: "blog-mas-bandwidth"
+  title: "Más Bandwidth"
+  short: "Más Bandwidth (Fiedler)"
+  provider: "Glenn Fiedler"
+  type: "article"
+  url: "https://mas-bandwidth.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [gamedev]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "Glenn Fiedler's follow-up to Gaffer On Games, with modern multiplayer articles on choosing a network model, what lag really is, matchmaking, server placement and sending millions of UDP packets per second with AF_XDP (a few posts also promote his Network Next service)."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  roadmap: "game-developer"
+  blog: true
+  after: [gaffer-on-games]
+
+# ---- Math and physics (1)
+
+- id: "book-immersive-linear-algebra"
+  title: "Immersive Linear Algebra"
+  short: "Immersive Linear Algebra"
+  provider: "J. Ström, K. Åström, T. Akenine-Möller"
+  type: "book"
+  url: "http://immersivemath.com/ila/index.html"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [math]
+  level: "intro"
+  cost: "free"
+  estHours: 12
+  summary: "A linear algebra book whose figures are all interactive, so vectors, dot products, determinants and eigenvectors can be dragged and seen rather than only computed."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  after: [3b1b-linear-algebra]
+
+# ---- Electrical and mechanical engineering (24)
+
+- id: "nptel-fundamentals-nuclear-power-generation"
+  title: "Fundamentals of Nuclear Power Generation (NPTEL, IIT Guwahati)"
+  short: "NPTEL Nuclear Power Gen"
+  provider: "Dipankar N. Basu / IIT Guwahati (NPTEL)"
+  type: "lectures"
+  url: "https://nptel.ac.in/courses/112103243"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 30
+  summary: "A 12-week engineering lecture course on nuclear power: radioactivity and fission, the chain reaction, reactor thermal-hydraulics and power regulation, thermal and breeder reactor designs, radiation effects, safety, waste and economics."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  after: [course-mit-22-01-nuclear-eng]
+
+- id: "course-mit-16-885j-aircraft-systems-engineering"
+  title: "Aircraft Systems Engineering (MIT 16.885J, Fall 2005)"
+  short: "MIT 16.885J Shuttle Systems"
+  provider: "Jeffrey Hoffman / MIT OCW"
+  type: "lectures"
+  url: "https://ocw.mit.edu/courses/16-885j-aircraft-systems-engineering-fall-2005/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 35
+  summary: "Twenty-two recorded lectures that take the Space Shuttle apart system by system (main engines, thermal protection, aerothermodynamics, OMS/RCS and fuel cells, GNC, ground and flight operations, the accidents), many given by outside experts, for an end-to-end view of how a crewed spacecraft is engineered."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [ocw-16-842-fundamentals-systems-engineering]
+
+- id: "nptel-space-flight-mechanics-sinha"
+  title: "Space Flight Mechanics (NPTEL, IIT Kharagpur)"
+  short: "NPTEL Space Flight Mech"
+  provider: "Manoranjan Sinha / IIT Kharagpur (NPTEL)"
+  type: "lectures"
+  url: "https://nptel.ac.in/courses/101105083"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 30
+  summary: "A 12-week lecture course on astrodynamics proper: the two-body problem and orbital elements, Kepler's equation, the restricted three-body problem and Lagrange points, perturbation theory, preliminary orbit determination, and Hohmann, patched-conic and rendezvous transfers."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [mit-ocw-16-07-dynamics]
+
+- id: "tutorial-freecad-basic-part-design-019"
+  title: "Basic Part Design Tutorial 019"
+  short: "FreeCAD Part Design tutorial"
+  provider: "FreeCAD wiki (Carlo Dormeletti, Ed Williams, Roy_043)"
+  type: "article"
+  url: "https://wiki.freecad.org/Basic_Part_Design_Tutorial_019"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 2
+  summary: "FreeCAD's official step-by-step CAD tutorial models a mechanical part from a dimensioned drawing with a master sketch and named constraints, teaching the habits that keep parametric models from breaking when edited."
+  fromYear: 1
+  priority: 2
+  quality: 4
+
+- id: "tutorial-adi-adalm2000-lab-activities"
+  title: "ADALM2000 Based Lab Activities, Electronics I and II"
+  short: "ADALM2000 Lab Activities"
+  provider: "Analog Devices University Program"
+  type: "article"
+  url: "https://wiki.analog.com/university/courses/electronics/labs"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 80
+  summary: "About 100 free hands-on electronics labs, from Ohm's law and RC transients through BJT and MOSFET amplifiers, op amps, data converters and PLLs, each with LTspice files and built around the low-cost ADALM2000 instrument."
+  fromYear: 1
+  priority: 2
+  quality: 4
+
+- id: "tutorial-orekit-tutorials"
+  title: "Orekit Tutorials"
+  short: "Orekit Tutorials"
+  provider: "Orekit team / CS GROUP"
+  type: "article"
+  url: "https://orekit.org/doc-tutorials.html"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 15
+  summary: "The Orekit team's official runnable Java examples for its open-source astrodynamics library, used by space agencies and satellite operators, covering time scales, frames, orbit propagation, event detection, attitude and orbit determination."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [book-curtis-orbital-mechanics-engineering-students]
+
+- id: "tutorial-plasmapy-example-notebooks"
+  title: "PlasmaPy Example Notebooks"
+  short: "PlasmaPy Notebooks"
+  provider: "PlasmaPy community"
+  type: "article"
+  url: "https://docs.plasmapy.org/en/stable/examples.html"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 8
+  summary: "Worked Jupyter notebooks that compute plasma physics in Python, from plasma parameters for ITER, Coulomb logarithms and E×B drift to dispersion solvers, Thomson-scattering fits, Langmuir-probe analysis and particle tracing, so formulary equations become code you can test."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [course-epfl-plasma-physics-intro]
+
+- id: "tutorial-openfoam-com-tutorial-guide"
+  title: "OpenFOAM Tutorial Guide"
+  short: "OpenFOAM Tutorial Guide"
+  provider: "OpenCFD Ltd (openfoam.com)"
+  type: "article"
+  url: "https://www.openfoam.com/documentation/tutorial-guide"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "Official step-by-step OpenFOAM cases (lid-driven cavity, cylinder wake, backward- and forward-facing steps, dam break and a plate-with-a-hole stress analysis) that teach the full CFD workflow on classic fluid mechanics problems."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [course-cfd-python-12-steps]
+
+- id: "article-wna-physics-of-nuclear-energy"
+  title: "Physics of Uranium and Nuclear Energy"
+  short: "WNA Physics of Nuclear"
+  provider: "World Nuclear Association"
+  type: "article"
+  url: "https://world-nuclear.org/information-library/nuclear-fuel-cycle/introduction/physics-of-nuclear-energy"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "A compact, regularly updated explainer of the neutron physics behind power reactors: fission energy release, moderation, criticality, why delayed neutrons let operators steer power, burnup, plutonium breeding and fast-neutron designs."
+  fromYear: 1
+  priority: 2
+  quality: 4
+
+- id: "article-jom-titanic-metallurgy"
+  title: "The Royal Mail Ship Titanic: Did a Metallurgical Failure Cause a Night to Remember?"
+  short: "Titanic Steel (JOM)"
+  provider: "Katherine Felkins, H. P. Leighly Jr. and A. Jankovic (JOM, 1998)"
+  type: "article"
+  url: "https://www.tms.org/pubs/journals/JOM/9801/Felkins-9801.html"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Charpy tests on recovered hull plate show how high sulfur, manganese sulfide stringers and icy seawater left the Titanic's steel below its ductile-to-brittle transition, a memorable case study in why metallurgy decides failure."
+  fromYear: 1
+  priority: 2
+  quality: 4
+
+- id: "article-bhadeshia-steel-microstructure"
+  title: "Interpretation of the Microstructure of Steels"
+  short: "Steel Microstructure"
+  provider: "H. K. D. H. Bhadeshia (University of Cambridge)"
+  type: "article"
+  url: "https://www.phase-trans.msm.cam.ac.uk/2008/Steel_Microstructure/SM.html"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 2
+  summary: "A leading steel metallurgist's richly illustrated guide to reading ferrite, pearlite, bainite and martensite by how each grows from austenite, which explains why the same alloy can be soft or hard depending on heat treatment."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [tlp-phase-diagrams-solidification]
+
+- id: "blog-everyday-astronaut"
+  title: "Everyday Astronaut"
+  short: "Everyday Astronaut"
+  provider: "Tim Dodd / Everyday Astronaut"
+  type: "article"
+  url: "https://everydayastronaut.com/featured-posts-and-video-articles/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 10
+  summary: "Tim Dodd's long-form rocket explainers, from engine cycles and engine cooling to aerospikes, Starship versus N1 and why launch sites sit where they do, turn launch-vehicle design trade-offs into clear, well-illustrated engineering."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-symmetry-magazine"
+  title: "symmetry magazine"
+  short: "symmetry magazine"
+  provider: "Fermilab and SLAC National Accelerator Laboratory"
+  type: "article"
+  url: "https://www.symmetrymagazine.org/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 10
+  summary: "Fermilab and SLAC's jointly published magazine of accessible explainers on particle accelerators, detectors and the experiments they enable, a gentle on-ramp before the CERN Accelerator School lectures."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-iter-newsline"
+  title: "ITER Newsline"
+  short: "ITER Newsline"
+  provider: "ITER Organization"
+  type: "article"
+  url: "https://www.iter.org/news-media/iter-newsline"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 10
+  summary: "The ITER Organization's weekly newsletter from the world's largest tokamak build, reporting magnet tests, component repairs and assembly progress, a running case study in fusion engineering at industrial scale."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-what-is-nuclear"
+  title: "What is Nuclear?"
+  short: "What is Nuclear?"
+  provider: "Nick Touran / What is Nuclear"
+  type: "article"
+  url: "https://whatisnuclear.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 10
+  summary: "Nuclear engineer Nick Touran's explainer site and blog on how reactors work, covering moderators, reactor types and microreactors, risk assessment, waste and recycling, Chernobyl and Fukushima, plus posts on nuclear history, regulation and a neutronics scoping tool."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-fyfd-nicole-sharp"
+  title: "FYFD"
+  short: "FYFD (fluid dynamics)"
+  provider: "Nicole Sharp"
+  type: "article"
+  url: "https://fyfluiddynamics.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 10
+  summary: "A PhD fluid dynamicist explains a real fluid dynamics phenomenon five times a week from photos, videos and new research, which steadily builds the physical intuition behind thermo-fluids work."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-asme-mechanical-engineering-magazine"
+  title: "Mechanical Engineering magazine (ASME)"
+  short: "ASME ME Magazine"
+  provider: "American Society of Mechanical Engineers (ASME)"
+  type: "article"
+  url: "https://magazine.asme.org"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 10
+  summary: "ASME's long-running society magazine, now digital with a free archive, whose features on robotics, energy, 3D printing and engineering landmarks show where mechanical engineering practice is heading."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-iom3-materials-world"
+  title: "Materials World (IOM3)"
+  short: "Materials World (IOM3)"
+  provider: "Institute of Materials, Minerals and Mining (IOM3)"
+  type: "article"
+  url: "https://www.iom3.org/materials-world-magazine"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intro"
+  cost: "free"
+  estHours: 10
+  summary: "The UK materials institute's flagship magazine follows metals, polymers, composites, ceramics and glass from extraction and processing to recycling, a readable way to track materials engineering beyond the lab; some articles are member-only."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  blog: true
+  note: "Free tier"
+
+- id: "blog-casey-handmer"
+  title: "Casey Handmer's blog"
+  short: "Casey Handmer's Blog"
+  provider: "Casey Handmer"
+  type: "article"
+  url: "https://caseyhandmer.wordpress.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "First-principles, numbers-first essays by a Caltech-trained physicist and former JPL engineer on rocket and Starship-era launch economics, Mars and lunar industry, mass drivers and solar-made synthetic fuel, a model of quantitative aerospace thinking."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-aiaa-aerospace-america"
+  title: "Aerospace America"
+  short: "Aerospace America (AIAA)"
+  provider: "AIAA (American Institute of Aeronautics and Astronautics)"
+  type: "article"
+  url: "https://aerospaceamerica.aiaa.org/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "The AIAA's flagship magazine, published since 1984, whose in-depth engineering articles on aircraft design, propulsion, spacecraft integration and flight test show what working aerospace engineers are building and struggling with now."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-cern-courier"
+  title: "CERN Courier"
+  short: "CERN Courier"
+  provider: "CERN / IOP Publishing"
+  type: "article"
+  url: "https://cerncourier.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "CERN's magazine of international high-energy physics, whose accelerator reporting, from HL-LHC magnet milestones to future-collider studies, is the best running record of how frontier accelerators are designed and built."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-ans-nuclear-newswire"
+  title: "Nuclear Newswire"
+  short: "ANS Nuclear Newswire"
+  provider: "American Nuclear Society"
+  type: "article"
+  url: "https://www.ans.org/news/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "The American Nuclear Society's daily news site on advanced-reactor licensing, fuel and enrichment supply, research awards and policy, the quickest way to see where nuclear engineering work is heading."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-natelson-nanoscale-views"
+  title: "nanoscale views"
+  short: "nanoscale views (Natelson)"
+  provider: "Douglas Natelson (Rice University)"
+  type: "article"
+  url: "https://nanoscale.blogspot.com/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "intermediate"
+  cost: "free"
+  estHours: 10
+  summary: "A Rice physics professor's active blog explaining condensed-matter and nanoscale materials physics in accessible terms, with candid posts on peer review, research careers and science funding for a would-be researcher."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  blog: true
+
+- id: "blog-imechanica"
+  title: "iMechanica: Web of Mechanics and Mechanicians"
+  short: "iMechanica"
+  provider: "iMechanica community (Harvard SEAS / University of Houston)"
+  type: "article"
+  url: "https://imechanica.org/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [engineering]
+  level: "advanced"
+  cost: "free"
+  estHours: 10
+  summary: "The solid-mechanics research community's shared blog, whose Journal Club threads introduce active topics in fracture and computational mechanics alongside paper announcements and PhD and postdoc openings."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  blog: true
+  after: [book-libretexts-mechanics-materials-roylance]
+
+# ---- Quantum computing and programming (11)
+
+- id: "video-odonnell-quantum-programming-100-lessons"
+  title: "Quantum Computer Programming in 100 Easy Lessons"
+  short: "O'Donnell: 100 QC Lessons"
+  provider: "Ryan O'Donnell (CMU)"
+  type: "lectures"
+  url: "https://www.youtube.com/playlist?list=PLm3J0oaFux3bF48kurxGR6jrmPaQf6lkN"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intro"
+  cost: "free"
+  estHours: 25
+  summary: "Ryan O'Donnell's short, carefully paced video lessons, the backbone of CMU's undergraduate 15-459, build qubits, circuits and the core algorithms from basic programming and probability, a gentler on-ramp than his graduate 15-859BB."
+  fromYear: 1
+  priority: 2
+  quality: 4
+
+- id: "video-tudelft-building-blocks-quantum-computer-1"
+  title: "The Building Blocks of a Quantum Computer: Part 1"
+  short: "TU Delft QC Building Blocks"
+  provider: "TU Delft / QuTech (Vandersypen, DiCarlo, Veldhorst, Wehner)"
+  type: "lectures"
+  url: "https://ocw.tudelft.nl/courses/building-blocks-quantum-computer-part-1/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intermediate"
+  cost: "free"
+  estHours: 56
+  summary: "QuTech researchers explain how spin, NV-centre, superconducting and topological qubits are actually built, controlled and measured, the hardware layer that theory courses leave out."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [course-ibm-basics-quantum-information]
+
+- id: "video-simons-quantum-wave-boot-camp-2020"
+  title: "The Quantum Wave in Computing Boot Camp"
+  short: "Simons Quantum Boot Camp"
+  provider: "Simons Institute, UC Berkeley (Gilyén, Tang, Yuen, Irani, Mahadev et al.)"
+  type: "lectures"
+  url: "https://simons.berkeley.edu/workshops/quantum-wave-computing-boot-camp/videos"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "advanced"
+  cost: "free"
+  estHours: 20
+  summary: "Research-level tutorials from the people behind the results (Gilyén on quantum singular value transformation, Ewin Tang on dequantization, Yuen on multiprover protocols, plus Hamiltonian complexity and quantum chemistry) to carry you from coursework into current papers."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  after: [video-cmu-15-859bb-odonnell]
+
+- id: "course-mit-6-845-quantum-complexity-theory"
+  title: "6.845 Quantum Complexity Theory (Fall 2010)"
+  short: "MIT 6.845 Quantum Complexity"
+  provider: "Scott Aaronson (MIT OpenCourseWare)"
+  type: "course"
+  url: "https://ocw.mit.edu/courses/6-845-quantum-complexity-theory-fall-2010/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "advanced"
+  cost: "free"
+  estHours: 60
+  summary: "Aaronson's graduate course on what quantum computers provably can and cannot do (BQP, query lower bounds, QMA, quantum advice, interactive proofs), with notes, problem sets and project ideas that lead straight into open research questions."
+  fromYear: 3
+  priority: 2
+  quality: 4
+  after: [notes-aaronson-democritus]
+
+- id: "tutorial-cuda-q-applications"
+  title: "CUDA-Q Applications"
+  short: "CUDA-Q Applications"
+  provider: "NVIDIA"
+  type: "article"
+  url: "https://nvidia.github.io/cuda-quantum/latest/using/applications.html"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intermediate"
+  cost: "free"
+  estHours: 12
+  summary: "NVIDIA's gallery of runnable notebooks for GPU-accelerated quantum workloads (Krylov and QSCI chemistry, Shor's algorithm, readout-error mitigation, noisy trajectory sampling, multi-GPU runs), the natural crossover for an engineer who already writes CUDA."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [docs-cuda-q]
+
+- id: "tutorial-cirq-experiments"
+  title: "Experiments using quantum circuits"
+  short: "Cirq Experiments"
+  provider: "Google Quantum AI (Cirq / ReCirq)"
+  type: "article"
+  url: "https://quantumai.google/cirq/experiments"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intermediate"
+  cost: "free"
+  estHours: 15
+  summary: "Cirq and ReCirq notebooks that pair textbook algorithms with code reproductions of Google Quantum AI's published hardware experiments (surface-code memory, Fermi-Hubbard, OTOC scrambling, random circuit sampling), showing how a real paper becomes circuits."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [docs-cirq]
+
+- id: "article-aaronson-quanta-hard-to-explain"
+  title: "What Makes Quantum Computing So Hard to Explain?"
+  short: "Aaronson: Hard to Explain"
+  provider: "Scott Aaronson (Quanta Magazine)"
+  type: "article"
+  url: "https://www.quantamagazine.org/why-is-quantum-computing-so-hard-to-explain-20210608/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "Clears up the most common misconception before you start: a quantum computer does not try every answer at once, it arranges complex amplitudes so wrong answers cancel and right ones reinforce."
+  fromYear: 1
+  priority: 2
+  quality: 4
+
+- id: "article-aaronson-shor-ill-do-it"
+  title: "Shor, I'll do it"
+  short: "Aaronson: Shor, I'll Do It"
+  provider: "Scott Aaronson (Shtetl-Optimized)"
+  type: "article"
+  url: "https://scottaaronson.blog/?p=208"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "The classic formula-free walk-through of Shor's algorithm, reducing factoring to period finding and showing how the quantum Fourier transform makes the period stand out through interference."
+  fromYear: 1
+  priority: 2
+  quality: 4
+  after: [article-aaronson-quanta-hard-to-explain]
+
+- id: "article-quanta-error-threshold-willow"
+  title: "Quantum Computers Cross Critical Error Threshold"
+  short: "Quanta: Below Threshold"
+  provider: "Ben Brubaker (Quanta Magazine)"
+  type: "article"
+  url: "https://www.quantamagazine.org/quantum-computers-cross-critical-error-threshold-20241209/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intro"
+  cost: "free"
+  estHours: 1
+  summary: "A clear account of why Google's Willow result is a milestone: below the threshold, each step up in surface-code size roughly halved the logical error rate, the scaling every fault-tolerant roadmap depends on."
+  fromYear: 1
+  priority: 2
+  quality: 4
+
+- id: "article-aaronson-quantum-supremacy-faq"
+  title: "Scott's Supreme Quantum Supremacy FAQ!"
+  short: "Aaronson: Supremacy FAQ"
+  provider: "Scott Aaronson (Shtetl-Optimized)"
+  type: "article"
+  url: "https://scottaaronson.blog/?p=4317"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "A leading complexity theorist explains what Google's 2019 random-circuit-sampling experiment did and did not show, including how its output is verified, so you can judge quantum-advantage claims for yourself."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [article-aaronson-quanta-hard-to-explain]
+
+- id: "article-google-making-qec-work"
+  title: "Making quantum error correction work"
+  short: "Google: Making QEC Work"
+  provider: "Michael Newman, Kevin Satzinger (Google Quantum AI)"
+  type: "article"
+  url: "https://research.google/blog/making-quantum-error-correction-work/"
+  urlVerified: true
+  lastVerified: 2026-11-06
+  tracks: [quantum]
+  level: "intermediate"
+  cost: "free"
+  estHours: 1
+  summary: "The Willow team's own technical summary of surface-code lattices, the threshold, exponential error suppression from distance 3 to 7, repetition-code error floors and real-time decoder latency, a good bridge into the Nature paper."
+  fromYear: 2
+  priority: 2
+  quality: 4
+  after: [article-quanta-error-threshold-willow]
