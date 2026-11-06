@@ -2910,6 +2910,31 @@ hours, the doc's milestones, lanes untouched by portfolio time, the table in syn
 diagrams, roles, read first, ship and repository, 30 minutes against every lane's forecast, 360 px, 44 px targets
 and axe). Screenshots at 390 px in both themes: the screen, a project on Overview and Tech doc, Plan's row.
 
+## The Atlas Library's coverage pass (pull request #55)
+
+**Rows that moved take the file's fields; curated rows keep theirs.** The 7,740-row file changed 23 rows in place
+(track, type, why, and for Pro Git and the Missing Semester the roadmap). The importer already takes a row's
+catalogue fields from the file when the row lives in the Library's own import files; `roadmap` joins those fields,
+so Pro Git moves to DevOps with its roadmap. The Missing Semester is the plan's curated row (`cs-core.yaml`, on the
+plan in Block B), which the file's row merged into by URL: as in every import, a curated row keeps its finer track
+(`swe`) and only gains what it lacked, here the roadmap.
+
+**The coverage table counts the file's own vocabulary.** The pass promises at least three 4–5★ rows of every type on
+every track, in the file's tracks and types (inference is a track there, a tag here); the table in
+`docs/imports-atlas-library-18.md` counts them that way, and every cell holds. The Engineering path's eleven chips are
+the Library's own words, not the pass's six sub-areas: counted on 4–5★ engineering rows, every chip has dozens of
+rows, and four have fewer than three blogs (Thermo-fluids, Design & CAD, Manufacturing, Control), reported for the
+data to fill rather than met by moving rows.
+
+**Links.** The container cannot resolve the hosts, so the pull request's CI ran `npm run check:links -- --in
+data/resources/library-atlas-18.yaml` in a one-off `links-atlas-18` job, removed before the merge: 60 distinct URLs of the new rows: 53 ok, 1 failed, 6 to check by hand (run 42187018201).
+The failure is a certificate the runner could not verify (CMU 15-466's course page), not a missing page; the 403s
+(MathWorks, a Substack, OpenFOAM, TMS, symmetry magazine, FYFD) are hosts that turn scripts away, never counted as
+broken. Every URL is the file's; none was changed.
+
+Tests: `tests/unit/quality-pass.test.ts` (the new rows, Seeing Theory merged, the moved and retyped rows, the
+Missing Semester as it was; the resource count's ceiling). Screenshots redrawn on CI.
+
 ## The docked player's check waits for Today to settle (pull request #45)
 
 The CI run on main after pull request #44 failed one e2e test, twice in a row: the Focus session that keeps playing,

@@ -34,6 +34,7 @@
   summary: "Shell, editors, Git, debugging, packaging. Also the Bash part of the languages list."
   priority: 2
   quality: 4
+  roadmap: "software-architect"
 
 - id: current-dsa-course
   title: "Current algorithms and data structures course (the one already in progress)"

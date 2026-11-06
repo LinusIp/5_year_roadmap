@@ -948,6 +948,7 @@
   priority: 3
   roadmap: "software-architect"
   quality: 3
+  doFirst: "Actions Artifacts"
 
 - id: "repo-actions-deploy-pages"
   title: "actions/deploy-pages"
@@ -1176,6 +1177,7 @@
   fromYear: 1
   priority: 3
   quality: 2
+  doFirst: "PyInstaller Usage"
 
 - id: "docs-pypi-trusted-publishers"
   title: "PyPI Trusted Publishers"
@@ -1228,6 +1230,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "PyInstaller Usage"
 
 - id: "docs-cibuildwheel"
   title: "cibuildwheel documentation"
@@ -1317,6 +1320,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Cargo Profiles"
 
 - id: "docs-go-install-source-goos"
   title: "Installing Go from source (GOOS/GOARCH table)"
@@ -1334,6 +1338,7 @@
   fromYear: 2
   priority: 3
   quality: 2
+  doFirst: "Go: Compile and Install"
 
 - id: "docs-qt-windows-deployment"
   title: "Qt for Windows - Deployment"
@@ -1620,6 +1625,7 @@
   fromYear: 2
   priority: 2
   quality: 4
+  doFirst: "Cargo Profiles"
 
 - id: "repo-cargo-wix"
   title: "cargo-wix"
