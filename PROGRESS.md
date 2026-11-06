@@ -1416,3 +1416,11 @@ Verified on this machine (Linux, Chromium 140):
   three 4–5★ rows of every type; four Engineering chips have fewer than three blogs).
 - Tests: `tests/unit/quality-pass.test.ts`. Screenshots redrawn on CI.
 
+## Pull request #56: keeping the data
+
+- Atlas asks the browser to keep its storage at start-up (`src/lib/storage-guard.ts`); Settings › Export and import says
+  whether it is kept, with **Ask to keep it**.
+- Today's **Keep a copy of your progress** card: after three days of history the browser may clear (a month when
+  kept), never with Sync on; Export a backup, Set up Sync, Not now (a week).
+- Tests: `tests/unit/storage-guard.test.ts`, `tests/e2e/storage-guard.spec.ts`.
+

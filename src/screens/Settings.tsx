@@ -34,6 +34,7 @@ import { ProjectSettings } from './settings/ProjectSettings.tsx';
 import { About, QualityNote } from './settings/About.tsx';
 import { Problem, Section, saveCore } from './settings/shared.tsx';
 import { exportBackup } from './parts/backupActions.ts';
+import { useStorageState } from '../hooks/useStorageState.ts';
 import { ShortcutRows } from './Shortcuts.tsx';
 
 function HeatAndStreak({ settings }: { settings: StoredSettings }) {
@@ -112,6 +113,33 @@ function Keyboard() {
   );
 }
 
+/**
+ * Whether the browser keeps this data (src/lib/storage-guard.ts): kept, or it may clear it when space runs low, with a
+ * button to ask; some browsers cannot say.
+ */
+function StorageLine() {
+  const { state, ask } = useStorageState();
+  const [asked, setAsked] = useState(false);
+  if (state === undefined) return null;
+  return (
+    <div className="mt-2" data-storage-state={state}>
+      <p className="text-meta text-ink2">
+        {state === 'kept'
+          ? 'Storage: kept. This browser will not clear Atlas’s data on its own.'
+          : state === 'not-kept'
+            ? 'Storage: not protected. This browser may clear Atlas’s data on its own when the device runs low on space.' + (asked ? ' It said no for now; installing Atlas to the home screen usually earns it.' : '')
+            : 'Storage: this browser does not say whether it keeps Atlas’s data.'}
+        {state !== 'kept' && ' A backup or GitHub Sync keeps a copy either way.'}
+      </p>
+      {state === 'not-kept' && (
+        <Button size="sm" className="mt-2" onClick={() => void ask().then(() => setAsked(true))}>
+          Ask to keep it
+        </Button>
+      )}
+    </div>
+  );
+}
+
 function Backup({ settings }: { settings: StoredSettings }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -132,6 +160,7 @@ function Backup({ settings }: { settings: StoredSettings }) {
         {counts ? counts.logs + ' days logged, ' + counts.states + ' items with progress · ' : ''}
         {settings.backup.lastBackupAt ? 'last exported ' + settings.backup.lastBackupAt : 'never exported'}
       </p>
+      <StorageLine />
       <div className="mt-3 flex flex-wrap gap-2">
         <Button onClick={() => void exportBackup().then((name) => setMessage('Saved ' + name + '. Keep it somewhere that is not this browser.'))}>Export everything</Button>
         <Button onClick={() => fileRef.current?.click()}>Import a file</Button>

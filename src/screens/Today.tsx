@@ -49,6 +49,7 @@ import { blogReminderDue } from '../lib/blog.ts';
 import { useSleep } from '../db/sleep.ts';
 import { useInternSummaries } from '../hooks/useInternships.ts';
 import { roleName } from '../lib/internships.ts';
+import { BackupNudge } from './parts/BackupNudge.tsx';
 import { lengthText, timeOf } from '../lib/sleep.ts';
 import { ProgressLine } from '../ui/ProgressLine.tsx';
 import { Row, RowList } from '../ui/Row.tsx';
@@ -1202,6 +1203,9 @@ export function Today() {
           </div>
         </section>
       )}
+
+      {/* No copy of the user's history anywhere but this browser: ask for one (a backup or Sync). */}
+      {isToday && <BackupNudge atlas={atlas} />}
 
       {/* Blocks whose window has passed and that are not done: still there to start, but no longer "later". */}
       {!nothingPlanned && layout.later && groups.earlier.length > 0 && (

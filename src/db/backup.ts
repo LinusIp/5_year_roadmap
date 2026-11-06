@@ -124,7 +124,14 @@ export function daysSinceBackup(lastBackupAt: string | undefined, asOf: string):
   return Math.round((b.getTime() - a.getTime()) / 86_400_000);
 }
 
-/** Whether to show the backup reminder: never backed up with data worth keeping, or older than the interval. */
+/** A first backup is asked for after this many days of history when the browser has not promised to keep the data. */
+export const FIRST_BACKUP_DAYS_UNKEPT = 3;
+
+/**
+ * Whether to show the backup reminder: never backed up with data worth keeping, or older than the interval. With
+ * GitHub Sync connected the repository is the copy, so it stays quiet. When the browser may clear the data on its own
+ * (`storageKept` false), the first ask comes after three days of history instead of a month.
+ */
 export function backupDue(opts: {
   lastBackupAt: string | undefined;
   snoozedUntil: string | undefined;
@@ -132,14 +139,16 @@ export function backupDue(opts: {
   asOf: string;
   hasData: boolean;
   firstLogDate: string | undefined;
+  synced?: boolean;
+  storageKept?: boolean;
 }): boolean {
-  if (!opts.hasData) return false;
+  if (!opts.hasData || opts.synced) return false;
   if (opts.snoozedUntil && opts.asOf < opts.snoozedUntil) return false;
   const since = daysSinceBackup(opts.lastBackupAt, opts.asOf);
   if (since === null) {
-    // Never backed up: ask once there is a month of history to lose.
+    // Never backed up: ask once there is a month of history to lose, or three days when nothing protects it.
     const firstLog = opts.firstLogDate ? daysSinceBackup(opts.firstLogDate, opts.asOf) : null;
-    return firstLog !== null && firstLog >= opts.intervalDays;
+    return firstLog !== null && firstLog >= (opts.storageKept === false ? FIRST_BACKUP_DAYS_UNKEPT : opts.intervalDays);
   }
   return since >= opts.intervalDays;
 }
