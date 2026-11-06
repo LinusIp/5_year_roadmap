@@ -107,4 +107,14 @@ to 16, robotics 8 to 9; the Quantum path's list 121 to 141, DevOps' 245 to 255.
 
 ## Links
 
-LINKS-RESULT
+`npm run check:links -- --in data/resources/library-atlas-18.yaml` ran on the pull request's runner in a one-off
+`links-atlas-18` job (run 42187018201), since the container cannot resolve the hosts; the job is removed before the merge.
+60 distinct URLs of the new rows: 53 ok, 1 failed, 6 to check by hand.
+
+- **Failed**: CMU 15-466's course page on graphics.cs.cmu.edu, a TLS error (the runner could not verify the site's
+  certificate chain), not a missing page. Open it in a browser before changing anything; nothing here edits the data.
+- **Check by hand** (403, the site turned the checker away): MathWorks (Moler's "Stiff Differential Equations"),
+  Sergey Levine's Substack essay, OpenFOAM's tutorial guide, TMS (the JOM article on the Titanic's steel), symmetry
+  magazine and FYFD.
+
+Every URL is the file's; none was changed.

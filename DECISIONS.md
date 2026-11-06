@@ -2927,7 +2927,10 @@ rows, and four have fewer than three blogs (Thermo-fluids, Design & CAD, Manufac
 data to fill rather than met by moving rows.
 
 **Links.** The container cannot resolve the hosts, so the pull request's CI ran `npm run check:links -- --in
-data/resources/library-atlas-18.yaml` in a one-off `links-atlas-18` job, removed before the merge: LINKS-RESULT
+data/resources/library-atlas-18.yaml` in a one-off `links-atlas-18` job, removed before the merge: 60 distinct URLs of the new rows: 53 ok, 1 failed, 6 to check by hand (run 42187018201).
+The failure is a certificate the runner could not verify (CMU 15-466's course page), not a missing page; the 403s
+(MathWorks, a Substack, OpenFOAM, TMS, symmetry magazine, FYFD) are hosts that turn scripts away, never counted as
+broken. Every URL is the file's; none was changed.
 
 Tests: `tests/unit/quality-pass.test.ts` (the new rows, Seeing Theory merged, the moved and retyped rows, the
 Missing Semester as it was; the resource count's ceiling). Screenshots redrawn on CI.
