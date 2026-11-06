@@ -610,8 +610,13 @@ ATLAS_SYNC_TOKEN=github_pat_... npm run test:sync -- --repo your-name/atlas-sync
 Use a throwaway repository with at least one commit, and a token for that repository only. `--fake` runs the
 same cycle against the in-memory GitHub of the tests, and `--keep` leaves the branch for a look at its commits.
 
-**Without Sync**, Settings says "Not backed up", once, and nowhere else. Export a file now and then (Settings >
-Export everything). `npm run log:export` still turns a backup into a public Markdown learning log
+**Without Sync**, everything you have done lives only in this browser. Atlas asks the browser at start-up to keep
+its storage (Chrome grants it to an installed app; Firefox asks you, so there it waits for **Ask to keep it** in
+Settings), and Settings › Export and import says whether it is kept. A browser that has not promised may clear the
+data on its own when the device runs low on space, so Today shows **Keep a copy of your progress** once there are
+three days of history and no backup (a month when the storage is kept, and again a month after each export):
+**Export a backup**, **Set up Sync** or **Not now** (a week). With Sync on it never shows: the repository is the copy.
+Export a file now and then (Settings > Export everything). `npm run log:export` still turns a backup into a public Markdown learning log
 (`learning-log/YYYY/MM/DD.md`, reflections left out unless you add `--reflections`).
 
 ## Editing the curriculum

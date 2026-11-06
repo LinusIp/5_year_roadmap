@@ -5,6 +5,7 @@ import { db } from './db/db.ts';
 import { persistDailySchedule } from './db/settings.ts';
 import { seedChecklistProgress } from './db/checklist.ts';
 import { registerServiceWorker } from './pwa/register.ts';
+import { keepStorageOnStart } from './lib/storage-guard.ts';
 import { peekUnits, seed } from './seed/index.ts';
 import { startSync } from './sync/engine.ts';
 import '@fontsource/nunito/latin-600.css';
@@ -18,6 +19,8 @@ import '@fontsource/nunito/latin-ext-900.css';
 import './index.css';
 
 registerServiceWorker();
+// Everything the user has done lives in this browser: ask it, quietly, to keep the data (src/lib/storage-guard.ts).
+void keepStorageOnStart().catch(() => undefined);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

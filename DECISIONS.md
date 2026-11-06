@@ -2935,6 +2935,28 @@ broken. Every URL is the file's; none was changed.
 Tests: `tests/unit/quality-pass.test.ts` (the new rows, Seeing Theory merged, the moved and retyped rows, the
 Missing Semester as it was; the resource count's ceiling). Screenshots redrawn on CI.
 
+## Keeping the data: persistent storage and a backup reminder that shows (pull request #56)
+
+**What happened.** On 6 November a phone's Atlas lost its whole history: Today and Stats showed no logged days and
+no streak, and nothing in the app had deleted it (only Settings' typed RESET and a backup's Replace clear the logs, and
+the version 9 upgrade only adds a table). The browser's site data was cleared, by a site-settings reset, a cleared
+browser, a reinstall or the browser itself when space ran low. Atlas had never asked the browser to keep its
+storage, and the 30-day backup reminder (`backupDue`) had a rule but nothing showed it.
+
+**Ask to keep the storage.** At start-up Atlas calls `navigator.storage.persist()` when the data is not kept yet and
+the answer comes without a prompt (Chromium decides by itself and grants it to an installed app; Firefox would show
+a permission prompt, so there the call waits for a tap on **Ask to keep it** in Settings). Settings › Export and import
+says which it is: kept, not protected, or a browser that cannot say.
+
+**The reminder shows, on Today.** `backupDue` gains two inputs: with GitHub Sync connected it stays quiet (the
+repository is the copy), and when the browser has not promised to keep the data the first ask comes after three days
+of history instead of a month. Today's card offers **Export a backup**, **Set up Sync** and **Not now** (snoozed a
+week, in the settings' `backup.snoozedUntil`, which already existed). No filled button: Today keeps its one.
+
+Tests: `tests/unit/storage-guard.test.ts` (kept, not kept, unknown; start-up asks once and never in Firefox; the
+reminder's Sync and three-day rules), `tests/e2e/storage-guard.spec.ts` (the card after three days with storage not
+kept, Not now, Export, Settings' line and button, kept storage waits the month).
+
 ## The docked player's check waits for Today to settle (pull request #45)
 
 The CI run on main after pull request #44 failed one e2e test, twice in a row: the Focus session that keeps playing,
