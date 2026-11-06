@@ -5,7 +5,7 @@
 import Dexie from 'dexie';
 import type { EntityTable, Table } from 'dexie';
 import type {
-  BlogPost, SleepNight, CertState, CustomEntity, DayLog, EntityKind, Meta, MilestoneState, OutboxEntry, Override, PaperState, PlanPatch, PracticeAnswer, ChallengeEvent,
+  BlogPost, SleepNight, PortfolioState, CertState, CustomEntity, DayLog, EntityKind, Meta, MilestoneState, OutboxEntry, Override, PaperState, PlanPatch, PracticeAnswer, ChallengeEvent,
   ReplanRecord, Review, Secret, StoredSettingsInput, SyncRow, UserItemState, WeekPick,
 } from './types.ts';
 import { legacyPlanPatches } from '../lib/plan.ts';
@@ -45,6 +45,8 @@ export class AtlasDB extends Dexie {
   blogPosts!: EntityTable<BlogPost, 'date'>;
   /** Nights of sleep, by wake-up date (sleep log brief). */
   sleep!: EntityTable<SleepNight, 'date'>;
+  /** The portfolio's progress, one row per project (ATLAS-PORTFOLIO). */
+  portfolio!: EntityTable<PortfolioState, 'id'>;
   /** Version 1 or 2 as stored; read through readSettings, which upgrades. */
   settings!: EntityTable<StoredSettingsInput, 'id'>;
   meta!: EntityTable<Meta, 'key'>;
@@ -109,6 +111,8 @@ export class AtlasDB extends Dexie {
       await tx.table('itemStates').bulkDelete([...REMOVED_RESOURCE_IDS]);
       await tx.table('overrides').bulkDelete(REMOVED_RESOURCE_IDS.map((id) => ['resource', id] as [EntityKind, string]));
     });
+    // Version 9, the portfolio (ATLAS-PORTFOLIO): the nine projects' progress in a table of its own.
+    this.version(9).stores({ portfolio: 'id' });
     this.use(syncMiddleware(this));
   }
 }
@@ -119,7 +123,7 @@ export class AtlasDB extends Dexie {
  */
 export const EXPORTED_TABLES = [
   'dayLogs', 'itemStates', 'paperStates', 'certStates', 'milestoneStates', 'customEntities',
-  'overrides', 'reviews', 'weekPicks', 'replans', 'planPatches', 'practice', 'challenges', 'blogPosts', 'sleep', 'settings', 'meta',
+  'overrides', 'reviews', 'weekPicks', 'replans', 'planPatches', 'practice', 'challenges', 'blogPosts', 'sleep', 'portfolio', 'settings', 'meta',
 ] as const;
 export type ExportedTable = (typeof EXPORTED_TABLES)[number];
 

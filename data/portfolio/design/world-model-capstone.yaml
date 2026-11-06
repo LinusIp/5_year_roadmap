@@ -1,0 +1,94 @@
+overview: >-
+  A world model is a network that predicts what a game shows next, given what it showed before and the player's
+  actions. This one is a diffusion model in the style of DIAMOND: it learns to remove noise from the next frame, so a
+  few denoising steps turn random noise into a plausible next frame, one frame at a time. Experiments compare the
+  reproduced baseline with one new idea under a pre-registered design, and the model is distilled to run fast enough
+  to play.
+learn:
+  - name: World models
+    ref: paper-world-models-ha
+  - name: Diffusion world models
+    ref: paper-diamond
+  - name: EDM training and sampling
+    ref: paper-edm
+  - name: Long rollouts without compounding error
+    ref: paper-diffusion-forcing
+  - name: Honest statistics over few seeds
+    ref: paper-rliable
+stats:
+  - value: "≥ 20 FPS"
+    label: interactive play with a 1–4 step sampler
+  - value: "≥ 3"
+    label: seeds per experimental arm
+components:
+  - id: env
+    name: Game environment
+    role: Produces the real frames, actions and rewards to learn from and to score agents in.
+    tech: Gymnasium · ale-py
+    talksTo: [episodes]
+    kind: external
+  - id: episodes
+    name: Episode store
+    role: Stores frames, actions and episode ends, and serves random training windows.
+    tech: NumPy memmap
+    talksTo: [denoiser]
+    kind: core
+  - id: denoiser
+    name: Denoiser
+    role: Learns to predict the clean next frame from a noisy one, the past frames and the actions.
+    tech: PyTorch · EDM U-Net
+    talksTo: [sampler]
+    kind: core
+  - id: sampler
+    name: Sampler
+    role: Generates the next frame in a few denoising steps and feeds it back in as context.
+    tech: PyTorch · distillation
+    talksTo: [demo, experiments]
+    kind: core
+  - id: experiments
+    name: Experiment runner
+    role: Runs every pre-registered arm and seed under the same budget and logs each run.
+    tech: Hydra · Weights & Biases
+    talksTo: [paper]
+    kind: core
+  - id: demo
+    name: Interactive demo
+    role: Lets a person play the world model with the keyboard in real time.
+    tech: pygame
+    talksTo: []
+    kind: offline
+  - id: paper
+    name: Paper
+    role: Builds every figure with one script from the logged runs.
+    tech: LaTeX · rliable
+    talksTo: []
+    kind: offline
+flow:
+  - component: episodes
+    text: "Episodes recorded from the real game are stored as frames with their **actions**."
+  - component: denoiser
+    text: "The denoiser learns to predict frame t + 1 from noise, the last frames and the action taken."
+  - component: sampler
+    text: "A few denoising steps produce each next frame, which is fed back in as context for **rollouts**."
+  - component: experiments
+    text: "Each arm of the **pre-registered** question runs with at least three seeds under the same budget."
+interface:
+  lang: python
+  code: |-
+    class WorldModel(nn.Module):
+        def denoise(self, noisy_next, sigma, past_frames, past_actions): ...
+        @torch.no_grad()
+        def rollout(self, first_frames, actions, steps: int = 3): ...
+decisions:
+  - choice: Reproduce DIAMOND before trying any new idea
+    instead: Starting with the new idea
+    why: A result only means something next to a baseline you can reproduce.
+  - choice: Pre-register the question, metric, arms, seeds and budget
+    instead: Choosing what to report after the runs
+    why: It stops fishing for a result and makes a null result publishable.
+  - choice: Equal GPU-hours for every arm
+    instead: Extra tuning for the new idea
+    why: Otherwise the comparison measures tuning effort, not the idea.
+watchOut: >-
+  An off-by-one between frames and actions trains a model that looks fine and predicts the wrong future. Test that
+  frame t + 1 follows action t before any training run.

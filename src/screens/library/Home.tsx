@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { setItemStatus } from '../../db/state.ts';
 import type { Atlas } from '../../hooks/useAtlas.ts';
+import { usePortfolio } from '../../hooks/usePortfolio.ts';
+import { Link } from '../../router/router.tsx';
 import { monthName } from '../../lib/dates.ts';
 import { checklistCounts, checklistMeta, isChecklist } from '../../lib/checklist.ts';
 import { buildPaths, inProgress, pathDots, pathExtras, PATHS, researchAreas, shelfOf, SHELVES, startsMuchLater, upNext } from '../../lib/library-home.ts';
@@ -122,6 +124,8 @@ export function LibraryHome({
   const [menu, setMenu] = useState<string | null>(null);
   const [showLater, setShowLater] = useState(false);
   const [browsing, setBrowsing] = useState(false);
+  // The portfolio's chunk loads once Browse all opens: its tile is the only thing here that needs it.
+  const portfolio = usePortfolio(browsing);
   const [swaps, setSwaps] = useState([0, 0, 0]);
   // Over thousands of resources (ATLAS-LIBRARY): worked out once per change to the curriculum or the user's progress,
   // not on every render (a keystroke in search renders the home until the results take over).
@@ -305,7 +309,7 @@ export function LibraryHome({
             <h2 id="browse" className="text-chip font-medium leading-tight">
               Browse all
             </h2>
-            <span className="truncate text-label text-ink2">Courses, books, papers, blogs, practice, projects</span>
+            <span className="truncate text-label text-ink2">Courses, books, papers, blogs, practice, projects, portfolio</span>
           </span>
           <Icon name={browsing ? 'chevronDown' : 'chevronRight'} size={16} className="text-[var(--x0)]" />
         </button>
@@ -320,6 +324,16 @@ export function LibraryHome({
                 </button>
               </li>
             ))}
+            {/* The portfolio (ATLAS-PORTFOLIO): a tile of its own, apart from Projects; its nine never count there. */}
+            {portfolio && (
+              <li>
+                <Link to="/portfolio" className="lane-tile lane-2 flex min-h-[72px] w-full flex-col items-center justify-center gap-0.5 rounded-[14px] px-2 py-2" aria-label={'Portfolio, ' + plural(portfolio.projects.length, 'project')}>
+                  <Icon name="trophy" size={18} />
+                  <span className="text-chip font-semibold leading-tight">{count(portfolio.projects.length)}</span>
+                  <span className="text-[11px] font-semibold">Portfolio</span>
+                </Link>
+              </li>
+            )}
           </ul>
         )}
       </section>

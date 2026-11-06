@@ -1,0 +1,97 @@
+overview: >-
+  A renderer for scenes made of millions of 3D Gaussians, soft coloured ellipsoids whose colour changes with the
+  viewing direction. Each frame, every Gaussian is projected to a 2D ellipse, sorted by tile and depth with one radix
+  sort, and blended front to back in 16 × 16 pixel tiles until each pixel is nearly opaque. Because every step is
+  differentiable, the same pipeline run backwards trains a scene from photos: the rendered image is compared with the
+  photo, and the gradients adjust every Gaussian.
+learn:
+  - name: 3D Gaussian Splatting
+    ref: paper-3d-gaussian-splatting
+  - name: The reference rasteriser
+    ref: repo-graphdeco-gaussian-splatting
+  - name: GPU radix sort
+    ref: docs-cub
+  - name: Vulkan fundamentals
+    ref: vkguide
+  - name: Camera poses from photos
+    ref: docs-colmap
+stats:
+  - value: "≥ 60 FPS"
+    label: at 1080p for a 1M-Gaussian scene
+  - value: "< 1 dB"
+    label: PSNR gap to gsplat on your own scene
+  - value: "> 40 dB"
+    label: image match with the reference renderer
+components:
+  - id: scene
+    name: Scene
+    role: Holds every Gaussian's position, scale, rotation, opacity and colour coefficients.
+    tech: .ply · CUDA buffers
+    talksTo: [preprocess]
+    kind: core
+  - id: preprocess
+    name: Preprocess
+    role: Projects each Gaussian to a 2D ellipse, works out its colour for this view and culls it if off-screen.
+    tech: CUDA
+    talksTo: [binning]
+    kind: core
+  - id: binning
+    name: Bin and sort
+    role: Emits a tile-and-depth key for every tile a Gaussian touches and sorts them all at once.
+    tech: CUDA · CUB radix sort
+    talksTo: [raster]
+    kind: core
+  - id: raster
+    name: Tile rasteriser
+    role: Blends each 16 × 16 tile's Gaussians front to back, stopping early once pixels are opaque.
+    tech: CUDA · shared memory
+    talksTo: [viewer, trainer]
+    kind: core
+  - id: viewer
+    name: Vulkan viewer
+    role: Shows the frames with camera controls.
+    tech: Vulkan · GLFW
+    talksTo: []
+    kind: core
+  - id: trainer
+    name: Trainer
+    role: Compares the image with the photo, runs the backward pass and steps Adam with densification.
+    tech: PyTorch · CUDA backward
+    talksTo: [scene]
+    kind: offline
+  - id: colmap
+    name: COLMAP
+    role: Estimates the camera poses of your photos.
+    tech: structure from motion
+    talksTo: [trainer]
+    kind: external
+flow:
+  - component: scene
+    text: "The renderer reads the scene's Gaussians, **59 floats** each."
+  - component: preprocess
+    text: "Each Gaussian becomes a 2D ellipse with a colour for this view, or is culled if it is off-screen."
+  - component: binning
+    text: "Every Gaussian-and-tile pair gets a 64-bit key, `tile << 32 | depth`, and one **radix sort** orders them."
+  - component: raster
+    text: "Each tile's thread block blends its list front to back and stops when **transmittance** drops below 1e-4."
+  - component: viewer
+    text: "The finished frame appears in the Vulkan window."
+interface:
+  lang: cpp
+  code: |-
+    ForwardState render_forward(const Gaussians& g, const Camera& cam, float* rgb_out);
+    void render_backward(const Gaussians& g, const Camera& cam, const ForwardState& fs,
+                         const float* dL_drgb, Gaussians& grads);
+decisions:
+  - choice: One global radix sort of tile-and-depth keys
+    instead: Sorting each tile separately
+    why: One CUB call sorts everything, as the reference renderer does.
+  - choice: A hand-written CUDA backward pass
+    instead: PyTorch autograd through a dense renderer
+    why: Autograd would store every pixel and Gaussian pair.
+  - choice: A host-copy viewer first, interop later
+    instead: CUDA and Vulkan interop from day one
+    why: A working viewer arrives early, and interop is the stretch goal.
+watchOut: >-
+  A wrong gradient still trains, only worse. Check the backward pass against FP64 finite differences on scenes of a
+  few Gaussians before any real training run.

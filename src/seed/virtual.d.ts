@@ -44,6 +44,12 @@ declare module 'virtual:atlas-internships' {
   export default goals;
 }
 
+declare module 'virtual:atlas-portfolio' {
+  /** The portfolio (ATLAS-PORTFOLIO, data/portfolio/): the nine projects, their docs and designs; null without the file. */
+  const portfolio: import('./portfolio.ts').PortfolioSeed | null;
+  export default portfolio;
+}
+
 declare module 'virtual:atlas-designs' {
   const loaders: (() => Promise<{ default: Record<string, import('./design.ts').Design> }>)[];
   export default loaders;

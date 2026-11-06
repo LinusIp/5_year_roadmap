@@ -10,6 +10,7 @@
  */
 import seed from 'virtual:atlas-seed';
 import type { InternshipGoal } from './internships.ts';
+import type { PortfolioSeed } from './portfolio.ts';
 import type { AppResource, Unit } from './schema.ts';
 
 export { seed };
@@ -61,6 +62,33 @@ export function peekInternships(): InternshipGoal[] | null {
 export function subscribeInternships(listener: () => void): () => void {
   internshipListeners.add(listener);
   return () => internshipListeners.delete(listener);
+}
+
+let portfolio: PortfolioSeed | null | undefined;
+let portfolioLoad: Promise<PortfolioSeed | null> | null = null;
+const portfolioListeners = new Set<() => void>();
+
+/**
+ * The portfolio (ATLAS-PORTFOLIO), its own chunk: the nine projects with their docs and designs, never part of the
+ * curriculum, the plan's design buckets or the Library. Loaded on first use; everyone subscribed hears when it arrives.
+ */
+export function loadPortfolio(): Promise<PortfolioSeed | null> {
+  portfolioLoad ??= import('virtual:atlas-portfolio').then((m) => {
+    portfolio = m.default;
+    for (const listener of portfolioListeners) listener();
+    return portfolio;
+  });
+  return portfolioLoad;
+}
+
+/** The portfolio once loaded (null without the file), undefined before. */
+export function peekPortfolio(): PortfolioSeed | null | undefined {
+  return portfolio;
+}
+
+export function subscribePortfolio(listener: () => void): () => void {
+  portfolioListeners.add(listener);
+  return () => portfolioListeners.delete(listener);
 }
 
 let cache: Record<string, Unit[]> | null = null;

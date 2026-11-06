@@ -9,6 +9,7 @@ import type { DayLog, StoredSettings } from '../db/types.ts';
 import type { AppSeed, BlockId, Phase } from '../seed/schema.ts';
 import { addDays, daysBetween } from './dates.ts';
 import { plannedOver } from './day-plan.ts';
+import { isPortfolioRef } from './portfolio.ts';
 
 export interface LaneBalance {
   block: BlockId;
@@ -27,7 +28,8 @@ export function laneBalance(settings: StoredSettings, logs: DayLog[], block: Blo
   let logged = 0;
   for (const log of logs) {
     if (log.date < from || log.date > to) continue;
-    for (const e of log.entries) if (e.block === block) logged += e.minutes;
+    // Time logged to a portfolio project (ATLAS-PORTFOLIO) counts for the day, never for a lane.
+    for (const e of log.entries) if (e.block === block && !isPortfolioRef(e.refId)) logged += e.minutes;
   }
   const behind = planned - logged;
   const days = to < from ? 0 : daysBetween(from, to) + 1;

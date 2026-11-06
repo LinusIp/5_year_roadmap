@@ -110,14 +110,15 @@ async function restoreSnapshot(name: string, snapshot: IdbSnapshot): Promise<voi
 }
 
 describe('the live IndexedDB (Dexie version 2) on this build', () => {
-  it('upgrades to version 8 and keeps every record', async () => {
+  it('upgrades to the current version (9, the portfolio table) and keeps every record', async () => {
     const snapshot = json<IdbSnapshot>('indexeddb.json');
     expect(snapshot.version).toBe(20);
     await restoreSnapshot('live-upgrade', snapshot);
     const db = new AtlasDB('live-upgrade');
     databases.push(db);
     await db.open();
-    expect(db.verno).toBe(8);
+    // Version 9 added the portfolio table (ATLAS-PORTFOLIO).
+    expect(db.verno).toBe(9);
 
     // Logs, with the removed entry's tombstone; item states; the paper; the review; the week's pick; the outbox.
     const logs = await db.dayLogs.toArray();

@@ -1,0 +1,109 @@
+overview: >-
+  A harness that runs a coding agent: it sends the conversation to a model, receives tool calls, runs them and feeds
+  the results back until the task is done or the budget runs out. Every tool call runs inside a sandbox built from
+  Landlock (unprivileged file and network rules), seccomp (a system-call allowlist) and Linux namespaces, so only the
+  task's workspace is writable and the network is off unless granted. A context manager compacts old tool output when
+  the window fills, and every step goes into a trace that the evals score and replay.
+learn:
+  - name: Agent-computer interfaces
+    ref: paper-swe-agent
+  - name: The agent loop
+    ref: docs-claude-agent-sdk-agent-loop
+  - name: Landlock sandboxing
+    ref: docs-kernel-landlock
+  - name: Seccomp filters
+    ref: kernel-seccomp-bpf
+  - name: Model Context Protocol
+    ref: mcp-docs
+  - name: Evaluating agents on real issues
+    ref: paper-swe-bench
+stats:
+  - value: "50"
+    label: SWE-bench Verified tasks in the fixed first subset
+  - value: "0"
+    label: escapes allowed by the sandbox suite
+components:
+  - id: loop
+    name: Agent loop
+    role: Plans, calls tools and observes until the task is done or the budget runs out.
+    tech: Rust · tokio
+    talksTo: [model, tools, context]
+    kind: core
+  - id: model
+    name: Model client
+    role: Streams chat completions from OpenAI-compatible or Anthropic APIs and counts tokens and cost.
+    tech: Rust · reqwest
+    talksTo: [loop]
+    kind: core
+  - id: tools
+    name: Tool registry
+    role: Validates each call against its JSON Schema and checks its permissions.
+    tech: serde · jsonschema
+    talksTo: [sandbox, mcp]
+    kind: core
+  - id: sandbox
+    name: Sandbox
+    role: Runs the command with Landlock path rules, a seccomp allowlist and no network unless granted.
+    tech: landlock · seccompiler · bubblewrap
+    talksTo: [workspace]
+    kind: core
+  - id: workspace
+    name: Task workspace
+    role: Holds the repository under test, the only writable directory.
+    tech: Linux filesystem
+    talksTo: []
+    kind: external
+  - id: context
+    name: Context manager
+    role: Keeps the conversation inside the token budget by compacting old tool output.
+    tech: Rust
+    talksTo: []
+    kind: core
+  - id: mcp
+    name: MCP servers
+    role: Add tools from outside forge, and receive forge's own tools when it acts as a server.
+    tech: rmcp
+    talksTo: []
+    kind: external
+  - id: evals
+    name: Eval runner
+    role: Runs SWE-bench Verified and Terminal-Bench, then scores and replays the traces.
+    tech: Rust CLI · benchmark harnesses
+    talksTo: [loop]
+    kind: offline
+flow:
+  - component: loop
+    text: "The loop sends the task and the conversation so far to the model client."
+  - component: model
+    text: "The model answers with a **tool call**, for example `run` with `cargo test`."
+  - component: tools
+    text: "The registry validates the arguments against the tool's schema and checks its **permissions**."
+  - component: sandbox
+    text: "The sandbox runs the command with only the workspace writable and the **network off**."
+  - component: context
+    text: "The output joins the conversation; near the limit, older tool output is **compacted** into a summary."
+  - component: loop
+    text: "The loop repeats until the task is done or the `Budget` runs out, writing every step to the trace."
+interface:
+  lang: rust
+  code: |-
+    #[async_trait]
+    pub trait Tool: Send + Sync {
+        fn name(&self) -> &str;
+        fn schema(&self) -> &serde_json::Value;   // JSON Schema for the arguments
+        fn permissions(&self) -> Permissions;     // read, write, exec, net
+        async fn call(&self, args: serde_json::Value, ctx: &ToolCtx) -> Result<ToolOutput, ToolError>;
+    }
+decisions:
+  - choice: Landlock, seccomp and namespaces for every tool call
+    instead: Docker only
+    why: It works without root and starts in milliseconds; Firecracker microVMs cover untrusted eval tasks.
+  - choice: A seccomp allowlist recorded in log-only mode, then enforced
+    instead: A hand-written denylist
+    why: A denylist misses the system calls nobody thought of.
+  - choice: Old tool output compacted into summaries
+    instead: Dropping the oldest messages
+    why: Dropping messages loses task details the agent still needs.
+watchOut: >-
+  Landlock's network rules need ABI 4 (Linux 6.7 or later). Read the ABI version at startup and refuse network-off
+  mode rather than silently running a sandbox that cannot block the network.

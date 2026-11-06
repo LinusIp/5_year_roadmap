@@ -307,6 +307,25 @@ export const SleepNightSchema = z.strictObject({
 });
 export type SleepNight = z.infer<typeof SleepNightSchema>;
 
+/**
+ * A portfolio project's progress (ATLAS-PORTFOLIO), keyed by the project's id in data/portfolio/projects.json: the
+ * milestones, done-when items and ship-checklist rules ticked (by the file's ids), the status the user set (absent:
+ * Atlas derives one from the schedule), the repository and notes. Its own table, synced as portfolio/<id>.json; never
+ * shared with a plan or Internships project and never written back into the file.
+ */
+export const PortfolioStateSchema = z.strictObject({
+  id: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
+  status: z.enum(['later', 'next', 'building', 'done']).optional(),
+  milestones: z.array(z.string().min(1)).default([]),
+  doneWhen: z.array(z.string().min(1)).default([]),
+  ship: z.array(z.string().min(1)).default([]),
+  /** https://github.com/<owner>/<repo>. */
+  repo: z.string().regex(/^https:\/\/github\.com\/[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/).optional(),
+  notes: z.string().optional(),
+  ...Stamp,
+});
+export type PortfolioState = z.infer<typeof PortfolioStateSchema>;
+
 const MinutesByBlock = z.record(BlockIdSchema, z.number());
 
 export const ReviewSchema = z.strictObject({
@@ -647,6 +666,8 @@ export const TimerSchema = z.strictObject({
   block: BlockIdSchema,
   track: TrackIdSchema,
   refId: z.string().optional(),
+  /** Carried into the logged entry: a portfolio project's name, "Portfolio · nanoserve" (ATLAS-PORTFOLIO). */
+  note: z.string().optional(),
   startedAt: z.number(),
   /** When "Keep" last answered the forgotten-timer question. */
   keptAt: z.number().optional(),
@@ -676,6 +697,7 @@ export const BackupDataSchema = z.strictObject({
   blogPosts: z.array(BlogPostSchema).default([]),
   /** Nights of sleep (sleep log brief). Absent from backups made before it. */
   sleep: z.array(SleepNightSchema).default([]),
+  portfolio: z.array(PortfolioStateSchema).default([]),
   settings: z.array(StoredSettingsSchema),
   meta: z.array(MetaSchema),
 });

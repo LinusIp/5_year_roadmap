@@ -7,6 +7,7 @@ import type { AtlasDB } from '../db/db.ts';
 import type { BlockId, TrackId } from '../seed/schema.ts';
 import type { DayLog, DayLogEntry } from '../db/types.ts';
 import { monthKey, today } from './dates.ts';
+import { isPortfolioRef } from './portfolio.ts';
 import { withSyncBookkeeping } from '../sync/daylog.ts';
 
 export function emptyLog(date: string): DayLog {
@@ -68,7 +69,8 @@ export function addEntry(log: DayLog, input: AddEntryInput): DayLog {
   if (input.minutes === 0) return log;
   const entries = [...log.entries];
   const mergeable = entries.findIndex(
-    (e) => e.block === input.block && e.track === input.track && e.refId === input.refId && !e.note && !input.note,
+    // A portfolio project's note is its name, the same on every entry: those merge too.
+    (e) => e.block === input.block && e.track === input.track && e.refId === input.refId && ((!e.note && !input.note) || (isPortfolioRef(input.refId) && e.note === input.note)),
   );
   if (mergeable >= 0) {
     const existing = entries[mergeable]!;

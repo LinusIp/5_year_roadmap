@@ -9,10 +9,10 @@ import { z } from 'zod';
 import { canonical } from '../db/backup-file.ts';
 import {
   CertStateSchema, CustomEntitySchema, DayLogSchema, MilestoneStateSchema, OverrideSchema, PaperStateSchema,
-  PlanPatchSchema, BlogPostSchema, SleepNightSchema, ChallengeEventSchema, ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
+  PlanPatchSchema, BlogPostSchema, SleepNightSchema, PortfolioStateSchema, ChallengeEventSchema, ReplanRecordSchema, ReviewSchema, StoredSettingsSchema, UserItemStateSchema, WeekPickSchema,
 } from '../db/types.ts';
 import { legacyPlanPatches } from '../lib/plan.ts';
-import type { BlogPost, SleepNight, ChallengeEvent, DayLog, Review, StoredSettingsInput, UserItemState } from '../db/types.ts';
+import type { BlogPost, SleepNight, PortfolioState, ChallengeEvent, DayLog, Review, StoredSettingsInput, UserItemState } from '../db/types.ts';
 import { formatRange, monthName } from '../lib/dates.ts';
 import type { Project } from '../seed/schema.ts';
 
@@ -172,6 +172,21 @@ export function renderSleep(night: SleepNight): string {
 export function parseSleep(text: string, date: string): ParseResult<SleepNight> {
   const result = parseJson(text, SleepFileSchema, 'sleep/' + date + '.json');
   return result.ok ? { ok: true, value: { date, ...result.value } } : result;
+}
+
+/* ------------------------------------------------------------------ portfolio/<id>.json */
+
+/** A portfolio project's progress as its file holds it: the project id is the file's name. */
+export const PortfolioFileSchema = PortfolioStateSchema.omit({ id: true });
+
+export function renderPortfolio(state: PortfolioState): string {
+  const { id: _id, ...rest } = state;
+  return toJson(rest);
+}
+
+export function parsePortfolio(text: string, id: string): ParseResult<PortfolioState> {
+  const result = parseJson(text, PortfolioFileSchema, 'portfolio/' + id + '.json');
+  return result.ok ? { ok: true, value: { id, ...result.value } } : result;
 }
 
 /* ------------------------------------------------------------------ state/settings.json */

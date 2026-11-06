@@ -6,6 +6,7 @@
 import type { CertState, DayLog, PaperState, UserItemState } from '../db/types.ts';
 import type { AppSeed, BlockId, SettingsDefaults } from '../seed/schema.ts';
 import { daysBetween, formatLong, formatMinutes, weekday } from './dates.ts';
+import { isPortfolioRef } from './portfolio.ts';
 import { RETIRED_BLOCKS, retiredRefTitle } from './retired.ts';
 
 export interface DayMarkdownOptions {
@@ -63,15 +64,18 @@ export function renderDayMarkdown(
     const minutes = entries.reduce((sum, e) => sum + e.minutes, 0);
     lines.push('## ' + blockHeading(core, block, log.date) + ' (' + formatMinutes(minutes) + ')', '');
     const items = new Map<string, { minutes: number; notes: string[] }>();
+    const portfolioNames = new Map<string, string>();
     for (const entry of entries) {
       const key = entry.refId ?? '';
       const item = items.get(key) ?? { minutes: 0, notes: [] };
       item.minutes += entry.minutes;
-      if (entry.note?.trim()) item.notes.push(inline(entry.note));
+      // A portfolio project's note is its name ("Portfolio · nanoserve"), the line's title rather than a note under it.
+      if (isPortfolioRef(entry.refId)) portfolioNames.set(key, entry.note ?? 'Portfolio');
+      else if (entry.note?.trim()) item.notes.push(inline(entry.note));
       items.set(key, item);
     }
     for (const [refId, item] of items) {
-      lines.push('- ' + (refId ? inline(titles.title(refId)) : 'Something not on the plan') + ': ' + formatMinutes(item.minutes));
+      lines.push('- ' + (portfolioNames.has(refId) ? inline(portfolioNames.get(refId)!) : refId ? inline(titles.title(refId)) : 'Something not on the plan') + ': ' + formatMinutes(item.minutes));
       for (const note of item.notes) lines.push('  - ' + note);
     }
     lines.push('');

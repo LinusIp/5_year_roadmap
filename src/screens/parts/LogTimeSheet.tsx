@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { setItemStatus } from '../../db/state.ts';
 import { parseDuration } from '../../lib/dates.ts';
 import { addEntry, editLog } from '../../lib/logs.ts';
+import { portfolioLabel, portfolioRef } from '../../lib/portfolio.ts';
 import type { ScheduledItem } from '../../lib/schedule.ts';
 import { seed } from '../../seed/index.ts';
 import type { BlockId, TrackId } from '../../seed/schema.ts';
@@ -26,6 +27,7 @@ export function LogTimeSheet({
   date,
   block,
   item,
+  portfolio,
 }: {
   open: boolean;
   onClose: () => void;
@@ -33,6 +35,11 @@ export function LogTimeSheet({
   /** The block and item the time belongs to by default; without them the sheet logs "something else". */
   block?: BlockId;
   item?: ScheduledItem;
+  /**
+   * A portfolio project (ATLAS-PORTFOLIO): the time is logged to it, on the block chosen here, named "Portfolio ·
+   * <code>". It counts for the day and the streak like any study time and never for a lane's pace or forecast.
+   */
+  portfolio?: { id: string; code: string; track: TrackId };
 }) {
   const [mode, setMode] = useState<Mode>(item ? 'item' : 'other');
   const [minutes, setMinutes] = useState('');
@@ -51,7 +58,9 @@ export function LogTimeSheet({
   };
 
   const log = (amount: number): void => {
-    if (effective === 'item' && item && block) {
+    if (portfolio) {
+      void editLog(date, (current) => addEntry(current, { block: otherBlock, track: portfolio.track, refId: portfolioRef(portfolio.id), note: portfolioLabel(portfolio.code), minutes: amount }));
+    } else if (effective === 'item' && item && block) {
       void editLog(date, (current) => addEntry(current, { block, track: item.track, refId: item.refId, minutes: amount }));
       if (item.status === 'todo') void setItemStatus(item.refId, 'active');
     } else {
@@ -86,7 +95,17 @@ export function LogTimeSheet({
         </Button>
       }
     >
-      {item && (
+      {portfolio && (
+        <div className="mb-4 space-y-3">
+          <p className="text-meta text-ink2">{portfolioLabel(portfolio.code) + ': counts toward today\u2019s hours and the streak, never a lane\u2019s pace.'}</p>
+          <Chips
+            label="Block"
+            items={seed.settings.blocks.map((b) => ({ key: b.id, label: 'Block ' + b.id, pressed: otherBlock === b.id, onClick: () => setOtherBlock(b.id) }))}
+          />
+        </div>
+      )}
+
+      {item && !portfolio && (
         <div className="mb-4">
           <SegmentedControl
             label="What the time was for"
@@ -100,7 +119,7 @@ export function LogTimeSheet({
         </div>
       )}
 
-      {effective === 'other' && (
+      {effective === 'other' && !portfolio && (
         <div className="mb-4 space-y-3">
           <TextField label="What did you do?" value={what} onChange={(v) => { setWhat(v); setError(null); }} autoFocus />
           <RowList>

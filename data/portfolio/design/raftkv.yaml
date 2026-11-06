@@ -1,0 +1,99 @@
+overview: >-
+  A key-value store that stays correct when machines crash and messages are lost, because every write goes through
+  Raft: the leader appends it to its log, copies it to the followers and commits it once a majority has it on disk.
+  The Raft core is a pure state machine that takes inputs (clock ticks, messages, client proposals, finished disk
+  writes) and returns outputs (messages to send, entries to persist, commands to apply), so the same code runs on real
+  sockets and disks in production and inside a deterministic simulator in tests. One seed in the simulator reproduces
+  a whole run of crashes, partitions and disk faults.
+learn:
+  - name: Raft consensus
+    ref: paper-raft
+  - name: Implementing Raft without the classic bugs
+    ref: students-guide-to-raft
+  - name: Linearizability
+    ref: paper-linearizability
+  - name: Deterministic simulation testing
+    ref: docs-tigerbeetle-vopr
+  - name: LSM-tree storage
+    ref: repo-mini-lsm
+  - name: io_uring
+    ref: tutorial-lord-of-the-io-uring
+stats:
+  - value: "100,000"
+    label: simulated runs with no linearizability violation
+  - value: "3"
+    label: real bugs found by the simulator and written up
+components:
+  - id: client
+    name: Client
+    role: Sends put, get, delete and compare-and-swap, following redirects to the leader.
+    tech: binary protocol
+    talksTo: [core]
+    kind: external
+  - id: core
+    name: Raft core
+    role: Runs elections, replication, commit and membership changes as a pure state machine.
+    tech: Rust · sans-I/O
+    talksTo: [wal, followers, store]
+    kind: core
+  - id: wal
+    name: Write-ahead log
+    role: Makes entries and the term and vote durable with batched fsyncs.
+    tech: io_uring
+    talksTo: [core]
+    kind: core
+  - id: followers
+    name: Followers
+    role: Append the leader's entries to their own logs and acknowledge them.
+    tech: Rust · tokio
+    talksTo: [core]
+    kind: core
+  - id: store
+    name: LSM state machine
+    role: Applies committed commands to a memtable and SSTables and serves reads.
+    tech: Rust
+    talksTo: []
+    kind: core
+  - id: sim
+    name: Simulator
+    role: Runs every node in one thread with a fake clock, network and disk, driven by one seed.
+    tech: Rust
+    talksTo: [core]
+    kind: offline
+  - id: checker
+    name: Linearizability checker
+    role: Checks every recorded history, and the Raft invariants after each step.
+    tech: Porcupine-style search
+    talksTo: [sim]
+    kind: offline
+flow:
+  - component: core
+    text: "The leader's core receives a `Propose` with the client's write and appends it to its log."
+  - component: wal
+    text: "The write-ahead log makes the entry **durable**, and the core learns this through `Persisted`."
+  - component: followers
+    text: "Both followers append the entry, persist it and **acknowledge** it."
+  - component: core
+    text: "With a **majority** on disk, the core advances the commit index and emits `Apply`."
+  - component: store
+    text: "The state machine applies the command, and the leader replies to the client."
+interface:
+  lang: rust
+  code: |-
+    impl Node {
+        /// Pure: no I/O, no clock, no OS randomness. Same inputs, same outputs.
+        pub fn step(&mut self, input: Input, out: &mut Vec<Output>);
+    }
+decisions:
+  - choice: A sans-I/O Raft core
+    instead: Raft logic mixed with async I/O
+    why: The same code runs in production and in the deterministic simulator.
+  - choice: ReadIndex reads
+    instead: Leader leases
+    why: Leases rely on bounded clock drift, while ReadIndex only needs one heartbeat round.
+  - choice: Single-server membership changes
+    instead: Joint consensus
+    why: Simpler, and safe while only one change is in flight.
+watchOut: >-
+  Any hidden non-determinism, such as HashMap iteration order, a call to the real clock or thread scheduling, breaks
+  replay. Run every seed twice and treat any difference between the two traces as a bug.

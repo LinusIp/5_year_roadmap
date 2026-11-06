@@ -244,6 +244,28 @@ for (const theme of ['light', 'dark'] as const) {
 }
 
 for (const theme of ['light', 'dark'] as const) {
+  test('the portfolio on a phone (ATLAS-PORTFOLIO): the screen, a project on Overview and Tech doc, and Plan\'s row, match the committed screenshots, ' + theme + ' theme', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await importDemo(page, theme);
+    await open(page, './#/portfolio');
+    await expect(page.locator('[data-portfolio-card]')).toHaveCount(9);
+    await expect(page).toHaveScreenshot('portfolio-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+    await open(page, './#/portfolio/nanoserve');
+    await expect(page.getByRole('checkbox', { name: '1. Correct forward pass' })).toBeChecked();
+    await expect(page).toHaveScreenshot('portfolio-project-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+    await open(page, './#/portfolio/nanoserve?tab=doc');
+    await expect(page.getByRole('img', { name: /^Diagram of nanoserve/ })).toBeVisible();
+    await expect(page).toHaveScreenshot('portfolio-doc-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+    await open(page, './#/plan');
+    const row = page.getByRole('link', { name: /^Portfolio 9 projects/ });
+    await row.scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollBy(0, 120));
+    await expect(row).toBeInViewport();
+    await expect(page).toHaveScreenshot('plan-portfolio-row-' + theme + '.png', { animations: 'disabled', maxDiffPixelRatio: 0.002 });
+  });
+}
+
+for (const theme of ['light', 'dark'] as const) {
   test('the Research view on a phone, by area, papers first, matches the committed screenshot, ' + theme + ' theme', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await importDemo(page, theme);

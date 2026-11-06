@@ -16,7 +16,9 @@ import type { DayLog, StoredSettings } from '../db/types.ts';
 import type { BlockId, Phase, SettingsDefaults } from '../seed/schema.ts';
 import { addDays, clampDate, daysBetween, monthName } from './dates.ts';
 import { plannedForBlock, plannedOver } from './day-plan.ts';
+import { isPortfolioRef } from './portfolio.ts';
 import type { LaneProgress } from './progress.ts';
+
 
 export type Verdict = 'ahead' | 'on-track' | 'behind' | 'stalled' | 'done' | 'not-started' | 'early' | 'over-planned';
 
@@ -103,7 +105,8 @@ export function paceForBlock(logs: DayLog[], block: BlockId, asOf: string, windo
   for (const log of logs) {
     if (log.date < from || log.date > asOf) continue;
     for (const entry of log.entries) {
-      if (entry.block === block) minutes += entry.minutes;
+      // Time logged to a portfolio project (ATLAS-PORTFOLIO) never moves a lane's pace or forecast.
+      if (entry.block === block && !isPortfolioRef(entry.refId)) minutes += entry.minutes;
     }
   }
   return minutes / 60 / days;

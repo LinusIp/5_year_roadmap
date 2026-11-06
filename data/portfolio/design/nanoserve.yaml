@@ -1,0 +1,100 @@
+overview: >-
+  A single-GPU LLM server built from the HTTP layer down to the kernels. Requests wait in a scheduler that, every
+  step, packs prompt chunks and one-token decodes into one GPU batch under a token budget (continuous batching). The
+  KV cache, the attention keys and values kept for every token, lives in fixed 16-token pages tracked by a block
+  table, so memory never fragments and requests with the same prefix can share pages.
+learn:
+  - name: Paged KV cache
+    ref: paper-pagedattention-vllm
+  - name: Continuous batching
+    ref: paper-orca-continuous-batching
+  - name: FlashAttention-style attention
+    ref: paper-flashattention-2
+  - name: An LLM forward pass in plain C and CUDA
+    ref: repo-llm-c
+  - name: Speculative decoding
+    ref: paper-eagle
+stats:
+  - value: "≥ 80%"
+    label: of llama.cpp decode throughput at batch 1 and 32
+  - value: "16"
+    label: tokens per KV-cache page
+  - value: "1e-3"
+    label: logit match with PyTorch in FP32
+components:
+  - id: client
+    name: Client
+    role: Sends OpenAI-style chat requests and reads the streamed tokens.
+    tech: HTTP · SSE
+    talksTo: [server]
+    kind: external
+  - id: server
+    name: HTTP server
+    role: Validates requests, applies the chat template and streams tokens back.
+    tech: C++20 · cpp-httplib
+    talksTo: [scheduler]
+    kind: core
+  - id: scheduler
+    name: Scheduler
+    role: Admits, chunks, preempts and batches requests so that each step fills the token budget.
+    tech: C++20
+    talksTo: [blocks, runner]
+    kind: core
+  - id: blocks
+    name: Block manager
+    role: Owns the KV pages, each request's block table and the free list.
+    tech: C++20
+    talksTo: []
+    kind: core
+  - id: runner
+    name: Model runner
+    role: Runs the forward pass over the batch with the attention, norm and GEMM kernels.
+    tech: CUDA · cuBLASLt
+    talksTo: [sampler]
+    kind: core
+  - id: sampler
+    name: Sampler
+    role: Turns logits into tokens with temperature, top-p and stop sequences.
+    tech: CUDA
+    talksTo: [scheduler, server]
+    kind: core
+  - id: bench
+    name: Benchmarks and golden tests
+    role: Replays fixed prompts against PyTorch and load traces against llama.cpp and vLLM.
+    tech: Python · nanobind
+    talksTo: [server]
+    kind: offline
+flow:
+  - component: server
+    text: "A chat request arrives; the server tokenises it and queues it as **waiting**."
+  - component: scheduler
+    text: "At the next step the scheduler admits it while the batch stays under the **token budget**, chunking a long prompt."
+  - component: blocks
+    text: "The block manager reserves enough 16-token **pages** and appends their ids to the request's `block_table`."
+  - component: runner
+    text: "The model runner runs one forward pass for the whole mixed **prefill and decode** batch."
+  - component: sampler
+    text: "The sampler picks each request's next token from its `logits`."
+  - component: server
+    text: "The token streams to the client over **SSE**, and the request returns to the scheduler until it stops."
+interface:
+  lang: cpp
+  code: |-
+    class Scheduler {
+     public:
+      Batch next_step(int token_budget);   // prefill chunks plus one decode token per running request
+      void on_step_done(const Batch& b, std::span<const int32_t> sampled);
+    };
+decisions:
+  - choice: Paged KV blocks of 16 tokens
+    instead: One contiguous KV buffer per request
+    why: No fragmentation, and requests with the same prefix can share pages.
+  - choice: Continuous batching with chunked prefill
+    instead: Static batches
+    why: Short requests stop waiting behind long ones, and token latency stays steady.
+  - choice: cuBLASLt and FlashInfer first, your own kernels swapped in behind a flag
+    instead: Your own kernels for everything from day one
+    why: The engine works end to end early, and each kernel swap is measured on its own.
+watchOut: >-
+  Leaked or double-owned KV pages corrupt other requests' output without crashing. In debug builds, check after every
+  step that each page has exactly one owner and that every page returns to the free list.

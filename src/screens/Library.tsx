@@ -1,4 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { usePortfolio } from '../hooks/usePortfolio.ts';
+import { matchesSearch } from '../lib/portfolio.ts';
 import type { ReactNode } from 'react';
 import { useCertStates } from '../db/credentials.ts';
 import { usePaperStates } from '../db/state.ts';
@@ -17,7 +19,7 @@ import type { Unit } from '../seed/schema.ts';
 import { Chips } from '../ui/Chips.tsx';
 import { EmptyState } from '../ui/EmptyState.tsx';
 import { Header } from '../ui/Header.tsx';
-import { DifficultyDots, KindIcon, StatusIcon, TypeTile } from '../ui/glyphs.tsx';
+import { DifficultyDots, IconTile, KindIcon, StatusIcon, TypeTile } from '../ui/glyphs.tsx';
 import { tileDescription } from '../ui/StarRating.tsx';
 import { SegmentedControl } from '../ui/SegmentedControl.tsx';
 import { byRating, passesRating, ratingFrom } from '../lib/rating.ts';
@@ -398,6 +400,9 @@ export function Library({ openId }: { openId?: string }) {
   // A few thousand entries (ATLAS-LIBRARY): the search runs on a deferred query, so typing never waits for the results.
   const deferredQuery = useDeferredValue(query ?? '');
   const matched = useMemo(() => search(index, deferredQuery), [index, deferredQuery]);
+  // The portfolio (ATLAS-PORTFOLIO) answers a search in a group of its own; its chunk loads with the first search.
+  const portfolio = usePortfolio(Boolean(deferredQuery));
+  const portfolioHits = useMemo(() => (portfolio && deferredQuery ? [...portfolio.projects].sort((a, b) => a.number - b.number).filter((p) => matchesSearch(p, deferredQuery)) : []), [portfolio, deferredQuery]);
   // The home's counts and line, once per change to the curriculum or the user's progress.
   const summary = useMemo(() => {
     if (!atlas) return null;
@@ -581,15 +586,24 @@ export function Library({ openId }: { openId?: string }) {
               onPath={(id) => navigate('/library?path=' + id, { replace: false })}
               onShelf={goShelf}
             />
-          ) : results.length === 0 ? (
+          ) : results.length === 0 && portfolioHits.length === 0 ? (
             <EmptyState action={<Button onClick={clear}>Clear filters</Button>}>No matches. Clear filters.</EmptyState>
           ) : (
-            groupResults(results.map((e) => ({ ...e, shelf: e.type as ShelfKey }))).map((g) => (
+            <>
+            {portfolioHits.length > 0 && (
+              <RowList label={'Portfolio · ' + portfolioHits.length} className="mt-[18px]">
+                {portfolioHits.map((p) => (
+                  <Row key={p.id} icon={<IconTile icon="trophy" lane={2} />} title={p.title} meta={'Portfolio · project ' + p.number + ' · ' + p.stack.join(', ')} truncate to={'/portfolio/' + p.id} chevron />
+                ))}
+              </RowList>
+            )}
+            {groupResults(results.map((e) => ({ ...e, shelf: e.type as ShelfKey }))).map((g) => (
               <RowList key={g.shelf} label={SHELF_TITLE[g.shelf] + ' · ' + g.total} className="mt-[18px]">
                 {g.items.map((e) => row(e))}
                 {g.total > g.items.length && <Row title={'Show all ' + g.total} chevron height={44} onClick={() => goShelf(g.shelf)} />}
               </RowList>
-            ))
+            ))}
+            </>
           )}
         </>
       )}

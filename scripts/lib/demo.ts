@@ -95,6 +95,8 @@ export function demoBackup(theme: 'light' | 'dark' = 'light'): BackupFile {
       replans: [],
       planPatches: [],
       practice: [], // the archived practice answers: none in the demo
+      // The portfolio (ATLAS-PORTFOLIO): nanoserve under way, its first milestone ticked.
+      portfolio: [{ id: 'nanoserve', status: 'building', milestones: ['nanoserve-m1'], doneWhen: [], ship: [] }],
       challenges: [],
       // A blog post every evening for the last twelve days: the writing streak the blog screen shows.
       blogPosts: Array.from({ length: 12 }, (_, i) => {
